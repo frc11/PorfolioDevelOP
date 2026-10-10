@@ -1,0 +1,318 @@
+{
+ "ancho": 1440,
+ "alto": 900,
+ "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "fecha": "2026-10-10T08:19:46.416Z",
+ "paso": 60,
+ "seccion": {
+  "arriba": 900,
+  "alto": 2733
+ },
+ "paradas": [
+  {
+   "relativo": -630,
+   "solapes": []
+  },
+  {
+   "relativo": -570,
+   "solapes": []
+  },
+  {
+   "relativo": -510,
+   "solapes": []
+  },
+  {
+   "relativo": -450,
+   "solapes": []
+  },
+  {
+   "relativo": -390,
+   "solapes": []
+  },
+  {
+   "relativo": -330,
+   "solapes": []
+  },
+  {
+   "relativo": -270,
+   "solapes": []
+  },
+  {
+   "relativo": -210,
+   "solapes": []
+  },
+  {
+   "relativo": -150,
+   "solapes": []
+  },
+  {
+   "relativo": -90,
+   "solapes": []
+  },
+  {
+   "relativo": -30,
+   "solapes": []
+  },
+  {
+   "relativo": 30,
+   "solapes": []
+  },
+  {
+   "relativo": 90,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 192
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 128
+    }
+   ]
+  },
+  {
+   "relativo": 150,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 1600
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 64
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 640
+    }
+   ]
+  },
+  {
+   "relativo": 210,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 960
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: plantar bandera en el marco ",
+     "b": "logo",
+     "area": 512
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 576
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 768
+    }
+   ]
+  },
+  {
+   "relativo": 270,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Franco",
+     "b": "texto: Enfocado, creativo,",
+     "area": 234
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 1920
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: plantar bandera en el marco ",
+     "b": "logo",
+     "area": 576
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 704
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 1792
+    }
+   ]
+  },
+  {
+   "relativo": 330,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Franco",
+     "b": "texto: Enfocado, creativo,",
+     "area": 537
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 960
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: plantar bandera en el marco ",
+     "b": "logo",
+     "area": 576
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 704
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 960
+    }
+   ]
+  },
+  {
+   "relativo": 390,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 1792
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: plantar bandera en el marco ",
+     "b": "logo",
+     "area": 512
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 704
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 1920
+    }
+   ]
+  },
+  {
+   "relativo": 450,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 512
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: plantar bandera en el marco ",
+     "b": "logo",
+     "area": 448
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 640
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 640
+    }
+   ]
+  },
+  {
+   "relativo": 510,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 448
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 1088
+    }
+   ]
+  },
+  {
+   "relativo": 570,
+   "solapes": []
+  },
+  {
+   "relativo": 630,
+   "solapes": []
+  },
+  {
+   "relativo": 690,
+   "solapes": []
+  },
+  {
+   "relativo": 750,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Valentino",
+     "b": "texto: Obsesivo, curioso,",
+     "area": 783
+    }
+   ]
+  },
+  {
+   "relativo": 810,
+   "solapes": []
+  },
+  {
+   "relativo": 870,
+   "solapes": []
+  },
+  {
+   "relativo": 930,
+   "solapes": []
+  },
+  {
+   "relativo": 990,
+   "solapes": []
+  }
+ ],
+ "reposoDelViaje": {
+  "y": 900,
+  "solapes": []
+ }
+}

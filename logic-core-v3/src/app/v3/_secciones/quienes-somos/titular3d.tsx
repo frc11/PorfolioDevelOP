@@ -34,12 +34,13 @@ const FUENTE_DE_LO_MARCADO: Readonly<Record<TipoDeTrazo, FuenteDelTitulo>> = { s
 type Renglon = (typeof TRAMOS_DEL_TITULAR)[number]
 
 /** Un renglón del reparto de dos (desde la banda de tablet): lo de siempre y lo marcado, cada uno con su título de volumen. */
+// [PULIDO 11] A2 · los dos títulos del renglón esquivan el logo mientras la sección entra (lo cruzaban al subir).
 export function RenglonDeVolumen({ renglon, indice, entrada, trazo }: { readonly renglon: Renglon; readonly indice: number; readonly entrada: Progreso; readonly trazo: Progreso }): React.JSX.Element {
   const avance = useTransform(trazo ?? DIBUJADO, (p) => avanceDelTrazo(renglon.tipo, p))
   // [PASADA FINAL] D2 · el tachado despinta lo tachado con su avance, como el DOM (de la tinta a la tinta media).
   const trazos = useMemo<readonly TrazoDelTitulo[]>(() => [{ medir: rayaDelTrazo, nace: 'punta', avance, despinta: renglon.tipo === 'tachado' }], [avance, renglon.tipo])
-  const { lugar: lugarDeAntes, listo: antesListo } = useTextoDeVolumen<HTMLSpanElement>({ id: `agencia-${String(indice + 1)}-antes`, texto: renglon.antes, fuente: 'chivo-400', gesto: 'levanta', llegada: entrada, queda: false })
-  const { lugar: lugarDeLoMarcado, listo: marcadoListo } = useTextoDeVolumen<HTMLSpanElement>({ id: `agencia-${String(indice + 1)}-marcado`, texto: `${renglon.marcado}${renglon.cierre}`, fuente: FUENTE_DE_LO_MARCADO[renglon.tipo], gesto: 'levanta', llegada: entrada, queda: false, trazos })
+  const { lugar: lugarDeAntes, listo: antesListo } = useTextoDeVolumen<HTMLSpanElement>({ id: `agencia-${String(indice + 1)}-antes`, texto: renglon.antes, fuente: 'chivo-400', gesto: 'levanta', llegada: entrada, queda: false, esquivaElLogo: true })
+  const { lugar: lugarDeLoMarcado, listo: marcadoListo } = useTextoDeVolumen<HTMLSpanElement>({ id: `agencia-${String(indice + 1)}-marcado`, texto: `${renglon.marcado}${renglon.cierre}`, fuente: FUENTE_DE_LO_MARCADO[renglon.tipo], gesto: 'levanta', llegada: entrada, queda: false, trazos, esquivaElLogo: true })
   return (
     <CanalDePieza progreso={entrada} patron="P1" cantidad={TRAMOS_DEL_TITULAR.length} indice={indice} como="span" className="block">
       <span ref={lugarDeAntes} className={cn(antesListo && TEXTO_REEMPLAZADO)}>

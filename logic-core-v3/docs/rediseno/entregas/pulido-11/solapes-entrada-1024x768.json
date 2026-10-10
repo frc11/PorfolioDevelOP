@@ -1,0 +1,352 @@
+{
+ "ancho": 1024,
+ "alto": 768,
+ "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "fecha": "2026-10-10T08:17:04.938Z",
+ "paso": 48,
+ "seccion": {
+  "arriba": 768,
+  "alto": 2304
+ },
+ "paradas": [
+  {
+   "relativo": -538,
+   "solapes": []
+  },
+  {
+   "relativo": -490,
+   "solapes": []
+  },
+  {
+   "relativo": -442,
+   "solapes": []
+  },
+  {
+   "relativo": -394,
+   "solapes": []
+  },
+  {
+   "relativo": -346,
+   "solapes": []
+  },
+  {
+   "relativo": -298,
+   "solapes": []
+  },
+  {
+   "relativo": -250,
+   "solapes": []
+  },
+  {
+   "relativo": -202,
+   "solapes": []
+  },
+  {
+   "relativo": -154,
+   "solapes": []
+  },
+  {
+   "relativo": -106,
+   "solapes": []
+  },
+  {
+   "relativo": -58,
+   "solapes": []
+  },
+  {
+   "relativo": -10,
+   "solapes": []
+  },
+  {
+   "relativo": 38,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 896
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: que viene a plantar bandera ",
+     "b": "logo",
+     "area": 128
+    }
+   ]
+  },
+  {
+   "relativo": 86,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 1920
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: que viene a plantar bandera ",
+     "b": "logo",
+     "area": 384
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: innovación. Estamos cansados",
+     "b": "logo",
+     "area": 384
+    }
+   ]
+  },
+  {
+   "relativo": 134,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 2304
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: que viene a plantar bandera ",
+     "b": "logo",
+     "area": 1152
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: innovación. Estamos cansados",
+     "b": "logo",
+     "area": 704
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: páginas de siempre, los mism",
+     "b": "logo",
+     "area": 384
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: sencillos. Nuestro estándar ",
+     "b": "logo",
+     "area": 384
+    }
+   ]
+  },
+  {
+   "relativo": 182,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 2048
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: que viene a plantar bandera ",
+     "b": "logo",
+     "area": 1088
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: innovación. Estamos cansados",
+     "b": "logo",
+     "area": 1152
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: páginas de siempre, los mism",
+     "b": "logo",
+     "area": 1024
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: sencillos. Nuestro estándar ",
+     "b": "logo",
+     "area": 576
+    }
+   ]
+  },
+  {
+   "relativo": 230,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 1920
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: que viene a plantar bandera ",
+     "b": "logo",
+     "area": 960
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: innovación. Estamos cansados",
+     "b": "logo",
+     "area": 1024
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: páginas de siempre, los mism",
+     "b": "logo",
+     "area": 960
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: sencillos. Nuestro estándar ",
+     "b": "logo",
+     "area": 960
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: la perfección de un producto",
+     "b": "logo",
+     "area": 256
+    }
+   ]
+  },
+  {
+   "relativo": 278,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 768
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: que viene a plantar bandera ",
+     "b": "logo",
+     "area": 768
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: innovación. Estamos cansados",
+     "b": "logo",
+     "area": 832
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: páginas de siempre, los mism",
+     "b": "logo",
+     "area": 896
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: sencillos. Nuestro estándar ",
+     "b": "logo",
+     "area": 896
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: la perfección de un producto",
+     "b": "logo",
+     "area": 512
+    }
+   ]
+  },
+  {
+   "relativo": 326,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: innovación. Estamos cansados",
+     "b": "logo",
+     "area": 384
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: páginas de siempre, los mism",
+     "b": "logo",
+     "area": 704
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: sencillos. Nuestro estándar ",
+     "b": "logo",
+     "area": 704
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: la perfección de un producto",
+     "b": "logo",
+     "area": 512
+    }
+   ]
+  },
+  {
+   "relativo": 374,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: páginas de siempre, los mism",
+     "b": "logo",
+     "area": 256
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: sencillos. Nuestro estándar ",
+     "b": "logo",
+     "area": 384
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: la perfección de un producto",
+     "b": "logo",
+     "area": 512
+    }
+   ]
+  },
+  {
+   "relativo": 422,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: la perfección de un producto",
+     "b": "logo",
+     "area": 384
+    }
+   ]
+  },
+  {
+   "relativo": 470,
+   "solapes": []
+  },
+  {
+   "relativo": 518,
+   "solapes": []
+  },
+  {
+   "relativo": 566,
+   "solapes": []
+  },
+  {
+   "relativo": 614,
+   "solapes": []
+  },
+  {
+   "relativo": 662,
+   "solapes": []
+  },
+  {
+   "relativo": 710,
+   "solapes": []
+  },
+  {
+   "relativo": 758,
+   "solapes": []
+  },
+  {
+   "relativo": 806,
+   "solapes": []
+  }
+ ],
+ "reposoDelViaje": {
+  "y": 768,
+  "solapes": []
+ }
+}

@@ -1,12 +1,16 @@
 'use client'
 
+import { motionValue, useTransform } from 'motion/react'
+import { useEffect, useRef, type RefObject } from 'react'
+
 import { cn } from '@/lib/utils'
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
-import { Bloque } from '../_contrato/coreografia'
+import { DESCANSO_ANTES_DE_SALIR_PX, ENTRADA_EN_CUADRO_PX } from '../_contrato/asentamiento'
+import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDePieza, CanalDeTexto, ConInercia, Trazo } from '../_contrato/canales'
 import { Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
@@ -16,7 +20,7 @@ import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 import { CONTENIDO, TRAMOS_DEL_TITULAR, TRAMOS_DEL_TITULAR_EN_LA_BANDA } from './contenido'
 import { ElEquipo, LaFoto } from './equipo'
 import { Pantalla } from './pantalla'
-import { CLASES_DEL_REPARTO, GEOMETRIA } from './geometria'
+import { CLASES_DEL_REPARTO, GEOMETRIA, llegadaHastaElPie } from './geometria'
 import { RenglonDeVolumen, SignoDeVolumen } from './titular3d'
 
 /** Se re-exportan para que quien ya las importaba de acá —los instrumentos— no cambie de puerta. */
@@ -98,6 +102,7 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
                       ].map((reparto) => (
                         <div
                           key={reparto.clase}
+                          data-esquiva-del-logo=""
                           aria-hidden="true"
                           className={cn('flex flex-col', reparto.clase, MEZCLA_SOBRE_LA_ESCENA)}
                         >
@@ -168,18 +173,39 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
             className={cn(GEOMETRIA.reparto.bajada, GEOMETRIA.medidaAgencia)}
             style={GEOMETRIA.estilos.bajada}
           >
-            {(progreso) => (
-              <div ref={enElPlano}>
-                <CanalDeTexto progreso={progreso} tipo="parrafo" texto={CONTENIDO.bajada}>
-                  {(contenido) => <p className={GEOMETRIA.cuerpoDeLaBajada}>{contenido}</p>}
-                </CanalDeTexto>
-              </div>
-            )}
+            {(progreso) => <CuerpoDeLaAgencia progreso={progreso} enElPlano={enElPlano} />}
           </Bloque>
 
         </div>
       </Grilla>
     </Pantalla>
+  )
+}
+
+/** El progreso quieto (sin coreografía): el gancho no es condicional. */
+const CERO = motionValue(0)
+
+/** [PULIDO 11] A2 · el cuerpo de la agencia: su llegada por renglón termina cuando su pie toca el borde de abajo (`llegadaHastaElPie`). */
+function CuerpoDeLaAgencia({ progreso, enElPlano }: { readonly progreso: Progreso; readonly enElPlano: RefObject<HTMLDivElement | null> }): React.JSX.Element {
+  const alto = useRef(0)
+  useEffect(() => {
+    const el = enElPlano.current
+    if (el === null) return undefined
+    const medir = (): void => {
+      alto.current = el.offsetHeight
+    }
+    medir()
+    const observador = new ResizeObserver(medir)
+    observador.observe(el)
+    return () => observador.disconnect()
+  }, [enElPlano])
+  const hastaElPie = useTransform(progreso ?? CERO, (p) => llegadaHastaElPie(p, alto.current, ENTRADA_EN_CUADRO_PX, DESCANSO_ANTES_DE_SALIR_PX))
+  return (
+    <div ref={enElPlano}>
+      <CanalDeTexto progreso={progreso === null ? null : hastaElPie} tipo="parrafo" texto={CONTENIDO.bajada}>
+        {(contenido) => <p className={GEOMETRIA.cuerpoDeLaBajada}>{contenido}</p>}
+      </CanalDeTexto>
+    </div>
   )
 }
 

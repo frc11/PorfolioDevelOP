@@ -21,6 +21,7 @@ import { IDS_DEL_TITULAR_DEL_HERO, TITULAR_EN_VIVO } from '../../titulos3d/titul
 import { llevarLosAcompanantes } from './acompanantes'
 import { sincronizar, soltarTodos } from './sincronia'
 import { SombraDeLosTitulos } from './SombraDeLosTitulos'
+import { cajaDelLogo, llegadaQueEsquiva, remedir, type Caja } from './esquivaDelLogo'
 
 /**
  * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN EN LA ESCENA — [3D Y SONIDO] T1: en el producto, el negro (`titulos=blanco`
@@ -57,11 +58,13 @@ interface Props {
   readonly logoMaterialRef: RefObject<THREE.MeshStandardMaterial | null>
   readonly stats: ProbeStatsStore
   readonly rig: ProbeRigStore
+  /** [PULIDO 11] A2 · el logo, para los títulos que lo esquivan mientras su sección entra (`esquivaDelLogo.ts`). */
+  readonly logoGroupRef?: RefObject<THREE.Group | null>
 }
 
 type VentanaDelBanco = Window & { __titulosDelBanco?: { titulos: () => unknown; camara: () => unknown; progreso: () => number } }
 
-export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, rig }: Props) {
+export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, rig, logoGroupRef }: Props) {
   const variante: Variante = entornoDeLaEscena().titulos === 'blanco' ? 'blanco' : 'negro'
   const version = useSyncExternalStore(suscribirALosTitulos, versionDeLosTitulos, versionDeLosTitulos)
   const gl = useThree((s) => s.gl)
@@ -70,7 +73,8 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
   // [RONDA 2] F2 · `scroll`: dónde estaba la página y desde cuándo (el asiento, con el scroll quieto).
-  const m = useRef({ armados: [] as Armado[], quieto: false, nudo: new THREE.PerspectiveCamera(), scroll: { y: Number.NaN, cuando: 0 }, ultimoCuadro: 0 })
+  // [PULIDO 11] A2 · `logo` y el cuadro: para los títulos que esquivan el logo (se escriben en cada cuadro).
+  const m = useRef({ armados: [] as Armado[], quieto: false, nudo: new THREE.PerspectiveCamera(), scroll: { y: Number.NaN, cuando: 0 }, ultimoCuadro: 0, logo: null as THREE.Object3D | null, cuadro: { ancho: 0, alto: 0 } })
 
   // Movimiento reducido: sin llegada (se disuelven en su lugar). Se lee al cambiar, no por cuadro.
   useEffect(() => {
@@ -159,6 +163,9 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
   // deja ver la perspectiva y los costados (con la viva, mouse incluido, acompañaban a la cámara). [NOCTURNO] A1: y su texto
   // 2D (la bajada, los CTA, los valores), en el plano de cada uno con la cámara viva (`acompanantes.ts`).
   useFrame((state, delta) => {
+    m.current.logo = logoGroupRef?.current ?? null
+    m.current.cuadro.ancho = tam.width
+    m.current.cuadro.alto = tam.height
     alCuadro(m.current, logoMaterialRef.current, keyLightRef.current, tam.width / Math.max(1, tam.height), stats, Math.min(delta, 0.1), CAMARA_SIN_EL_MOUSE)
     llevarLosAcompanantes(m.current.armados, state.camera, { ancho: tam.width, alto: tam.height }, stats.current)
   })
@@ -176,6 +183,7 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
 function descolocar(armados: readonly Armado[], ancho: number): void {
   void ancho
   for (const a of armados) a.colocado = false
+  remedir()
 }
 
 /**
@@ -190,7 +198,7 @@ const PAUSA_DEL_LAZO_MS = 250
 const DEL_QUE_QUEDA = { enCamino: false }
 
 /** Un cuadro: la llegada y la salida de cada título (perseguidas), si se dibuja, dónde va (al empezar a llegar) y su luz. */
-function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boolean; readonly nudo: THREE.PerspectiveCamera; readonly scroll: { y: number; cuando: number }; ultimoCuadro: number }, logo: THREE.MeshStandardMaterial | null, principal: THREE.DirectionalLight | null, aspecto: number, stats: ProbeStatsStore, dt: number, viva: THREE.Camera): void {
+function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boolean; readonly nudo: THREE.PerspectiveCamera; readonly scroll: { y: number; cuando: number }; ultimoCuadro: number; readonly logo: THREE.Object3D | null; readonly cuadro: { readonly ancho: number; readonly alto: number } }, logo: THREE.MeshStandardMaterial | null, principal: THREE.DirectionalLight | null, aspecto: number, stats: ProbeStatsStore, dt: number, viva: THREE.Camera): void {
   // [PULIDO 1] P6 · lo que se muestra del titular del hero, para el logo del intro (que lo sigue): el menor de sus registros.
   let llegadaDelTitular = 1
   let registrosDelTitular = 0
@@ -213,6 +221,12 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
   const asentar = !enViaje && REPETICIONES.activas === 0 && ahora - s.scroll.cuando > ASIENTO.quietoMs
   const reanudado = s.ultimoCuadro > 0 && ahora - s.ultimoCuadro > PAUSA_DEL_LAZO_MS
   s.ultimoCuadro = ahora
+  // [PULIDO 11] A2 · la caja del logo en el cuadro, proyectada a lo sumo una vez por cuadro (sólo si alguno la pide).
+  let cajaDeAhora: Caja | null | undefined
+  const logoEnElCuadro = (): Caja | null => {
+    if (cajaDeAhora === undefined) cajaDeAhora = s.logo === null ? null : cajaDelLogo(s.logo, viva, s.cuadro.ancho, s.cuadro.alto)
+    return cajaDeAhora
+  }
   for (const a of s.armados) {
     if (a.titulo.queda) {
       if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, viva)
@@ -233,7 +247,9 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
       a.mostrado.llegada = acotar01(enViaje ? 0 : a.titulo.llegada)
       a.mostrado.salida = acotar01(a.titulo.salida)
     }
-    a.mostrado.llegada = mostradoDelScroll(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt, enViaje ? null : a.titulo.minimoS, a.titulo.asiento)
+    // [PULIDO 11] A2 · el que esquiva el logo (fuera de un viaje): lo pedido es 0 mientras lo cruza; se va rápido y llega con su mínimo.
+    if (a.titulo.esquivaElLogo && !enViaje) a.mostrado.llegada = llegadaQueEsquiva(a.titulo, a.mostrado.llegada, y, logoEnElCuadro, asentar, reanudado, dt)
+    else a.mostrado.llegada = mostradoDelScroll(a.mostrado.llegada, enViaje ? 0 : a.titulo.llegada, asentar, dt, enViaje ? null : a.titulo.minimoS, a.titulo.asiento)
     a.mostrado.salida = mostradoDelScroll(a.mostrado.salida, a.titulo.salida, asentar, dt, a.titulo.salidaMinimaS)
     const { llegada, salida } = a.mostrado
     a.uniforms.uLlegada.value = llegada

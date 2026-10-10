@@ -1,0 +1,205 @@
+{
+ "ancho": 1920,
+ "alto": 1080,
+ "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "fecha": "2026-10-10T08:20:36.537Z",
+ "paso": 60,
+ "seccion": {
+  "arriba": 1080,
+  "alto": 3387
+ },
+ "paradas": [
+  {
+   "relativo": -756,
+   "solapes": []
+  },
+  {
+   "relativo": -696,
+   "solapes": []
+  },
+  {
+   "relativo": -636,
+   "solapes": []
+  },
+  {
+   "relativo": -576,
+   "solapes": []
+  },
+  {
+   "relativo": -516,
+   "solapes": []
+  },
+  {
+   "relativo": -456,
+   "solapes": []
+  },
+  {
+   "relativo": -396,
+   "solapes": []
+  },
+  {
+   "relativo": -336,
+   "solapes": []
+  },
+  {
+   "relativo": -276,
+   "solapes": []
+  },
+  {
+   "relativo": -216,
+   "solapes": []
+  },
+  {
+   "relativo": -156,
+   "solapes": []
+  },
+  {
+   "relativo": -96,
+   "solapes": []
+  },
+  {
+   "relativo": -36,
+   "solapes": []
+  },
+  {
+   "relativo": 24,
+   "solapes": []
+  },
+  {
+   "relativo": 84,
+   "solapes": []
+  },
+  {
+   "relativo": 144,
+   "solapes": []
+  },
+  {
+   "relativo": 204,
+   "solapes": []
+  },
+  {
+   "relativo": 264,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Franco",
+     "b": "texto: Enfocado, creativo,",
+     "area": 348
+    }
+   ]
+  },
+  {
+   "relativo": 324,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Franco",
+     "b": "texto: Enfocado, creativo,",
+     "area": 1595
+    }
+   ]
+  },
+  {
+   "relativo": 384,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Franco",
+     "b": "texto: Enfocado, creativo,",
+     "area": 1595
+    }
+   ]
+  },
+  {
+   "relativo": 444,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Franco",
+     "b": "texto: Enfocado, creativo,",
+     "area": 796
+    }
+   ]
+  },
+  {
+   "relativo": 504,
+   "solapes": []
+  },
+  {
+   "relativo": 564,
+   "solapes": []
+  },
+  {
+   "relativo": 624,
+   "solapes": []
+  },
+  {
+   "relativo": 684,
+   "solapes": []
+  },
+  {
+   "relativo": 744,
+   "solapes": []
+  },
+  {
+   "relativo": 804,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Valentino",
+     "b": "texto: Obsesivo, curioso,",
+     "area": 353
+    }
+   ]
+  },
+  {
+   "relativo": 864,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Valentino",
+     "b": "texto: Obsesivo, curioso,",
+     "area": 1078
+    }
+   ]
+  },
+  {
+   "relativo": 924,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Valentino",
+     "b": "texto: Obsesivo, curioso,",
+     "area": 1616
+    }
+   ]
+  },
+  {
+   "relativo": 984,
+   "solapes": [
+    {
+     "tipo": "texto",
+     "a": "titular: Valentino",
+     "b": "texto: Obsesivo, curioso,",
+     "area": 1438
+    }
+   ]
+  },
+  {
+   "relativo": 1044,
+   "solapes": []
+  },
+  {
+   "relativo": 1104,
+   "solapes": []
+  },
+  {
+   "relativo": 1164,
+   "solapes": []
+  }
+ ],
+ "reposoDelViaje": {
+  "y": 1080,
+  "solapes": []
+ }
+}

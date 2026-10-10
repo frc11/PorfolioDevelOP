@@ -28,6 +28,8 @@ export interface TextoDeVolumen {
   readonly minimoS?: number | null
   /** [RETOQUE PANEL] T4 · sus rayas (memorizadas: cambiarlas lo vuelve a armar). */
   readonly trazos?: readonly TrazoDelTitulo[]
+  /** [PULIDO 11] A2 · no llega encima del logo mientras su sección entra. */
+  readonly esquivaElLogo?: boolean
 }
 
 /** El texto del DOM, apagado desde 1024 con el título armado (sigue en el árbol accesible y en su lugar). */
@@ -52,6 +54,7 @@ export function useTextoDeVolumen<T extends HTMLElement>(t: TextoDeVolumen): { r
     rearma: t.rearma ?? true,
     minimoS: t.minimoS ?? null,
     trazos: t.trazos,
+    esquivaElLogo: t.esquivaElLogo,
     activo: material !== 'no' && escritorio,
   })
   return { lugar, listo }

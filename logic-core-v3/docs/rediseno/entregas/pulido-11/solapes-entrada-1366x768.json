@@ -1,0 +1,271 @@
+{
+ "ancho": 1366,
+ "alto": 768,
+ "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "fecha": "2026-10-10T08:19:01.020Z",
+ "paso": 60,
+ "seccion": {
+  "arriba": 768,
+  "alto": 2424
+ },
+ "paradas": [
+  {
+   "relativo": -538,
+   "solapes": []
+  },
+  {
+   "relativo": -478,
+   "solapes": []
+  },
+  {
+   "relativo": -418,
+   "solapes": []
+  },
+  {
+   "relativo": -358,
+   "solapes": []
+  },
+  {
+   "relativo": -298,
+   "solapes": []
+  },
+  {
+   "relativo": -238,
+   "solapes": []
+  },
+  {
+   "relativo": -178,
+   "solapes": []
+  },
+  {
+   "relativo": -118,
+   "solapes": []
+  },
+  {
+   "relativo": -58,
+   "solapes": []
+  },
+  {
+   "relativo": 2,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 192
+    }
+   ]
+  },
+  {
+   "relativo": 62,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 384
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 128
+    }
+   ]
+  },
+  {
+   "relativo": 122,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 1024
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: plantar bandera en el marco ",
+     "b": "logo",
+     "area": 448
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 320
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 1024
+    }
+   ]
+  },
+  {
+   "relativo": 182,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 1088
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: plantar bandera en el marco ",
+     "b": "logo",
+     "area": 768
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 832
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 1024
+    }
+   ]
+  },
+  {
+   "relativo": 242,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 1088
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: plantar bandera en el marco ",
+     "b": "logo",
+     "area": 768
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 896
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 2176
+    }
+   ]
+  },
+  {
+   "relativo": 302,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 768
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: plantar bandera en el marco ",
+     "b": "logo",
+     "area": 768
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 832
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 832
+    }
+   ]
+  },
+  {
+   "relativo": 362,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: develOP es una agencia de so",
+     "b": "logo",
+     "area": 448
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: plantar bandera en el marco ",
+     "b": "logo",
+     "area": 512
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 576
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 1152
+    }
+   ]
+  },
+  {
+   "relativo": 422,
+   "solapes": [
+    {
+     "tipo": "logo",
+     "a": "grilla: cansados de las mismas págin",
+     "b": "logo",
+     "area": 384
+    },
+    {
+     "tipo": "logo",
+     "a": "grilla: productos sencillos. Nuestro",
+     "b": "logo",
+     "area": 384
+    }
+   ]
+  },
+  {
+   "relativo": 482,
+   "solapes": []
+  },
+  {
+   "relativo": 542,
+   "solapes": []
+  },
+  {
+   "relativo": 602,
+   "solapes": []
+  },
+  {
+   "relativo": 662,
+   "solapes": []
+  },
+  {
+   "relativo": 722,
+   "solapes": []
+  },
+  {
+   "relativo": 782,
+   "solapes": []
+  },
+  {
+   "relativo": 842,
+   "solapes": []
+  }
+ ],
+ "reposoDelViaje": {
+  "y": 768,
+  "solapes": []
+ }
+}

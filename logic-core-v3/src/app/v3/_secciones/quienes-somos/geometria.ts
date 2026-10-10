@@ -348,3 +348,15 @@ export const CLASE_DE_ENCUADRE = {
 
 /** RECURSOS · La proporción de cada marco como clase: las fotos llegaron verticales y el marco la impone. */
 export const CLASE_DE_RELACION = { retrato: 'aspect-4/3', foto: 'aspect-3/2' } as const
+
+/**
+ * [PULIDO 11] A2 · EL CUERPO DE LA AGENCIA LLEGA ENTERO AL REPOSO. Su bloque usa la ventana visible (arranca cuando asoma
+ * `ENTRADA_EN_CUADRO_PX` y termina cuando su pie sube `DESCANSO_ANTES_DE_SALIR_PX` sobre el borde de abajo), pero en el
+ * reposo de la sección su pie queda a ~35 px del borde: llegaba con ~48 % de la ventana y el último renglón quedaba a media
+ * máscara (a 1024 y a 1280, medido). La ventana no se toca (el viaje del menú la lee para su reposo); lo que llega al canal
+ * del texto termina cuando el pie del bloque toca el borde de abajo: `(alto − E) / (alto + D − E)` de la ventana.
+ */
+export function llegadaHastaElPie(progreso: number, alto: number, entrada: number, descanso: number): number {
+  const conElPieAbajo = Math.max(0.2, (alto - entrada) / (alto + descanso - entrada))
+  return Math.min(1, Math.max(0, progreso) / conElPieAbajo)
+}

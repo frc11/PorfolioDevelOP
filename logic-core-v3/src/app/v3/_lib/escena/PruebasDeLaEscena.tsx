@@ -27,6 +27,8 @@ interface Props {
   readonly logoMaterialRef: RefObject<THREE.MeshStandardMaterial | null>
   readonly stats: ProbeStatsStore
   readonly rig: ProbeRigStore
+  /** [PULIDO 11] A2 · el logo: los títulos que lo esquivan mientras su sección entra. */
+  readonly logoGroupRef?: RefObject<THREE.Group | null>
 }
 
 export function PruebasDeLaEscena(props: Props) {

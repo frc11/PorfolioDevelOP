@@ -303,7 +303,7 @@ export default function ProbeStage({
         <MotorDeLaEscena logoMaterialRef={logoMaterialRef} dpr={ajustes.dpr} />
         {/* [ESCENA 10] T1 · los reflejos del satinado y la sombra del logo; T3 · los títulos de volumen, con su bandera. */}
         <LuzDelLogo keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} logoGroupRef={logoGroupRef} compacta={calidad === 'compacta'} />
-        <PruebasDeLaEscena keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} stats={stats} rig={rig} />
+        <PruebasDeLaEscena keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} stats={stats} rig={rig} logoGroupRef={logoGroupRef} />
       </Suspense>
     </Canvas>
   )

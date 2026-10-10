@@ -20,8 +20,22 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   caras están desde el montaje (el espesor de s49) pero ocultas hasta que el viaje terminó (`llego`). Después: 0 cuadros con
   una cara a la vista en el viaje (antes, 2 y 1); con el mouse a un costado el espesor se ve. A 390 la placa está apagada (sin
   caras). `s62` A1
-- PENDIENTE: A2 · Quiénes somos a 1024 (la frase se solapa con el logo; el invariante de J1 no lo vio) y el último renglón del
-  cuerpo cortado a 1024 y 1280
+- HECHO: A2 · Quiénes somos: el titular sobre el logo y el último renglón del cuerpo — VISTO sí.
+  - Por qué J1 no lo vio: su instrumento medía sólo el REPOSO (el destino del viaje de la barra). Barriendo la ENTRADA
+    (`a2-quienes.ts`, cada 48–60 px, el mismo detector) el titular 3D cruzaba el logo entre ~330 y ~90 px antes del reposo, a
+    1024 × 768, 1280 × 800, 1366 × 768, 1440 × 900 y 1920 × 1080 (no sólo a 1024): sube desde abajo del cuadro hasta arriba del
+    logo, que en la entrada ya está en el medio. El tramo libre (arriba del logo) es corto: 30–90 px antes del reposo.
+  - Arreglo (`esquivaDelLogo.ts`): mientras la sección entra, un título con `esquivaElLogo` pide 0 si su caja cruza la del logo
+    proyectado (muestras de sus vértices); libre, llega con un mínimo de 0,9 s (la llegada se ve entera aunque el tramo sea
+    corto). Las cuatro partes del titular esquivan con la caja del bloque (con la de cada una, «Queremos hacer» y «no» llegaban
+    solos: visto en el banco y corregido). En el reposo no esquiva nada (lo que la composición deja ahí es lo que se ve).
+  - El cuerpo: su bloque usa la ventana visible, que termina cuando su pie sube 240 px sobre el borde; en el reposo su pie queda
+    a ~36 px y llegaba con el 48 % de la ventana: el último renglón a media máscara (a 1024 y 1280, y en todos los anchos de
+    escritorio). Lo que llega al canal termina cuando el pie toca el borde (`llegadaHastaElPie`); la ventana no se tocó (el viaje
+    del menú la lee para su reposo).
+  - Recibos: `docs/rediseno/entregas/pulido-11/solapes-entrada-*.json` (cinco cuadros, NVIDIA): cero solapes de que la sección
+    asoma al reposo. `s62` A2.
+  - Fuera de alcance, anotado: en la SALIDA (camino a «El equipo», de +38 a +422 px a 1024) el logo de canto cruza el cuerpo.
 - PENDIENTE: A3 · mobile, el cartel de Portfolio corrido y cortado (J7 a 375 y 390: por scroll, por menú, desde el CTA)
 - PENDIENTE: A4 · J9 b (el velo de noche en Quiénes somos, medido), g (WhatsApp a 375), e (el CTA abajo de 1024 en 3D,
   función del scroll) y «Seis razones» punteado en mobile
