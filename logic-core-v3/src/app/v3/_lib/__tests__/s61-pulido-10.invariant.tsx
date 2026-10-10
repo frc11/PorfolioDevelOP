@@ -342,7 +342,7 @@ controlPositivo('C · el detector VE los enlaces de texto afuera del viaje', SEL
 const CIERRE = leer('_secciones/cierre/Cierre.tsx')
 const ARRIBA_FIJO = leer('_secciones/cierre/useArribaFijo.ts')
 const cierreBien = (c: string, a: string): boolean =>
-  c.includes("const anchoDeLaColumna = volumen ? 'escritorio:w-[max(25%,min(calc(var(--spacing-20)*3.3),calc(50%-var(--hueco-del-pie))))]' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'") &&
+  c.includes("const anchoDeLaColumna = volumen ? 'escritorio:w-[max(calc(50%/2),min(calc(var(--spacing-20)*3.3),calc(50%-var(--hueco-del-pie))))]' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'") &&
   c.includes("{volumen && disposicion === 'producto' && <RecorridoDelPie") && c.includes("{volumen && disposicion === 'columna2' && (") &&
   c.includes("{volumen && disposicion === 'menu-abajo' && (") && c.includes('<ColumnasDelPie progreso={p} sinRecorrido={volumen} />') &&
   c.includes('useArribaFijo(columnaDelFormulario, volumen)') &&

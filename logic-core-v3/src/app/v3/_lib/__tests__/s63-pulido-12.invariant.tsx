@@ -64,7 +64,7 @@ const simetrico = (r: Record<string, Distancias>): boolean => ANCHOS_C1.every((w
 const CIERRE = leer('_secciones/cierre/Cierre.tsx')
 const RECORRIDO = leer('_secciones/cierre/RecorridoDelPie.tsx')
 const geometriaBien = (c: string, r: string): boolean =>
-  c.includes("const anchoDeLaColumna = volumen ? 'escritorio:w-[max(25%,min(calc(var(--spacing-20)*3.3),calc(50%-var(--hueco-del-pie))))]'") &&
+  c.includes("const anchoDeLaColumna = volumen ? 'escritorio:w-[max(calc(50%/2),min(calc(var(--spacing-20)*3.3),calc(50%-var(--hueco-del-pie))))]'") &&
   c.includes("{volumen && disposicion === 'producto' && <RecorridoDelPie repartido ") && r.includes("!enFila && repartido && 'justify-between gap-x-[var(--spacing-3)]'")
 afirmar(simetrico(C1.despues) && geometriaBien(CIERRE, RECORRIDO), `C1 · a ${ANCHOS_C1.join(', ')}: columna izquierda–logo = logo–formulario (${ANCHOS_C1.map((w) => `${String(C1.despues[w]?.columnaIzquierdaLogo)}/${String(C1.despues[w]?.logoFormulario)}`).join(' · ')}) y el logo centrado`)
 controlPositivo('C1 · el detector VE el pie de antes (de −7 a +117 px)', C1.antes, simetrico)

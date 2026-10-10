@@ -68,7 +68,7 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
   // [PULIDO 10] J8 · con el pie de volumen, 25/50/25 (o lo que pida `?pie=`: `_lib/pie3d/disposicion.ts`).
   // [PULIDO 12] C1 · con un mínimo para las dos (264 px, si el hueco lo deja): a 1024 un cuarto no alcanzaba para la izquierda.
   const disposicion = useDisposicionDelPie()
-  const anchoDeLaColumna = volumen ? 'escritorio:w-[max(25%,min(calc(var(--spacing-20)*3.3),calc(50%-var(--hueco-del-pie))))]' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'
+  const anchoDeLaColumna = volumen ? 'escritorio:w-[max(calc(50%/2),min(calc(var(--spacing-20)*3.3),calc(50%-var(--hueco-del-pie))))]' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'
   const columnaDelFormulario = useRef<HTMLDivElement>(null)
   useArribaFijo(columnaDelFormulario, volumen)
   const progreso = volumen ? null : deLaSeccion
