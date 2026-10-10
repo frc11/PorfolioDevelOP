@@ -15,7 +15,7 @@ const ROTULO_DEL_RECORRIDO = COLUMNAS.find((c) => c.clase === 'recorrido')?.titu
  * texto con el subrayado del sitio (`EnlaceDeTexto`), en dos columnas —cuatro y tres— o, con `?pie=menu-abajo`, en una fila.
  * Sigue siendo una lista de verdad y viaja como el menú (`data-pieza="destinos-del-pie"`: `SELECTOR_DE_LOS_VIAJES`).
  */
-export function RecorridoDelPie({ enFila = false, className }: { readonly enFila?: boolean; readonly className?: string }): React.JSX.Element {
+export function RecorridoDelPie({ enFila = false, repartido = false, className }: { readonly enFila?: boolean; readonly repartido?: boolean; readonly className?: string }): React.JSX.Element {
   return (
     <div className={cn('flex flex-col gap-[var(--spacing-3)]', className)}>
       <TextoDelPie>
@@ -28,6 +28,8 @@ export function RecorridoDelPie({ enFila = false, className }: { readonly enFila
         className={cn(
           'text-cuerpo leading-texto tracking-texto font-semi',
           enFila ? 'flex flex-wrap justify-center gap-x-[var(--spacing-8)] gap-y-[var(--spacing-2)]' : 'grid grid-flow-col auto-cols-max grid-rows-4 justify-start gap-x-[var(--spacing-6)] gap-y-[var(--spacing-1)]',
+          // [PULIDO 12] C1 · en la columna izquierda, las dos columnas a lo ancho: la segunda termina en el borde (el pie simétrico).
+          !enFila && repartido && 'justify-between gap-x-[var(--spacing-3)]',
         )}
       >
         {DESTINOS_DE_LA_RUTA.map((destino) => (
