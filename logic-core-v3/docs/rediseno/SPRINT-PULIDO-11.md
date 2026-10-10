@@ -321,6 +321,12 @@ develOP» contra su columna; C1 se diseña con esos números). Para C2, `a4-movi
 375, 390, 414, 768 y 820, día y noche (con `?progreso=abajo` también), y a 900 y 1000 (la barra en modo pastilla: ¿choca su esquina
 con el progreso?).
 
+**Fase G (la matriz).** `for w in "320 568" "375 667" "390 844" "414 896" "768 1024" "820 1180" "1024 768" "1280 800" "1366 768"
+"1440 900" "1920 1080" "2560 1440"; do npx tsx g-matriz.ts $w; done` — cada sección en su reposo, llegando por su viaje, bajando (día
+hasta Portfolio, noche después) y subiendo (la otra luz), con los solapes de J1 y el desborde horizontal en cada parada, y una hoja
+por ancho (MIRARLAS TODAS). Las entradas (G2) con el barrido de `a2-quienes.ts` llevado a cada sección; los viajes (G3) desde y hacia
+cada sección a 1440 y 390 salen de las mismas paradas (el `ms` de cada viaje en el recibo).
+
 **Fase E (los hilos).** `npx tsx e-hilos.ts 1440 900 si ; npx tsx e-hilos.ts 1440 900 no ; npx tsx e-hilos.ts 390 844 si ; npx tsx
 e-hilos.ts 390 844 no` — la hoja de 6 + 6 cuadros (día y noche), la de 3 con el mouse y los ms por cuadro (media, p95, de más de 20
 ms) con y sin los hilos: el costo es la diferencia. Mirar también que no tapen textos (el titular del hero, Quiénes somos).
