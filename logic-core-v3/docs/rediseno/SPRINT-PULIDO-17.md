@@ -36,7 +36,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   suites que leen lo tocado, en verde.
 
 ### O2 · Investigar y proponer (REFERENCIAS-PLASMA.md, tres direcciones)
-- HECHO · `docs/rediseno/REFERENCIAS-PLASMA.md`: 18 referencias (Bridson y el curl noise; el ruido con gradiente analítico de
+- HECHO (`adec1792`) · `docs/rediseno/REFERENCIAS-PLASMA.md`: 18 referencias (Bridson y el curl noise; el ruido con gradiente analítico de
   Gustavson y McEwan; The Spirit y Particle Love; Maxime Heckel y Codrops para las partículas en la GPU con R3F; partículas suaves;
   Quílez; la profundidad de campo por tamaño; el «stretched billboard»; Kim y Lin y «Lo-fi Lightning» para los arcos; Niagara; la
   bola de plasma; Igloo Inc, BlueYard y Dracarys; las mezclas sobre fondo claro), cada una con qué se toma y por qué, y cómo se leyó
@@ -45,7 +45,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   motas en la GPU alrededor de unos núcleos) y C · Corrientes (estelas). En el banco, C no levantó y se reemplazó (O4).
 
 ### O3 · Borrar el plasma de PULIDO 16 y construir las tres direcciones (`?plasma=a|b|c`)
-- HECHO · VISTO sí (O4). El modelo entero, con sus constantes, en `docs/rediseno/PLASMA.md`.
+- HECHO (`592f8760`, con O4 y O5) · VISTO sí (O4). El modelo entero, con sus constantes, en `docs/rediseno/PLASMA.md`.
 - BORRADO: los átomos (`especies.ts`, `fisica/`, `render/`, el búfer de tramos, las líneas de campo) y sus experimentos con su
   código: `?plasma-color=`, `?plasma-campo=`, `?plasma-sonido=` y la chispa del sprite (el sonido volvió a ser el de PULIDO 13: los
   mismos archivos, recuperados con `git show`; `SONIDO.md` y s40 sin la chispa). s66 y s67 dejan una nota que apunta a s68 (como hizo
@@ -67,14 +67,14 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   ancho 0; sin efectos, uno nulo): el precompilado de la escena los arma al cargar.
 
 ### O4 · Mirar, criticar, iterar (el banco de secuencias)
-- HECHO · VISTO sí. Bancos: `~/.cache/b4-medicion/pulido-17/_scripts/` (`o3-mirar.ts`, `o3-ajustar.ts`, `o3-cerca.ts`,
+- HECHO (`592f8760`) · VISTO sí. Bancos: `~/.cache/b4-medicion/pulido-17/_scripts/` (`o3-mirar.ts`, `o3-ajustar.ts`, `o3-cerca.ts`,
   `o4-secuencias.ts`, `o4-dedo.ts`). Las hojas finales, en `~/.cache/b4-medicion/pulido-17/o4/final-<a|b|c>-<1440|390>/`: a 1440
   `1-calma-noche`, `3-puntero`, `4-clic`, `5-mantener-soltar` (de noche, donde se lee la energía), `2-calma-dia`, `4b-clic-dia` y
   `6-pie`; a 390 la resumida con el dedo (sin el puntero). 8 cuadros del compositor cada ~0,15 s, elegidos por tiempo; recibo de
   los tiempos: `entregas/pulido-17/o4-secuencias.json`. Lo que se criticó y se cambió, abajo («Crítica»).
 
 ### O5 · Elegir, medir (en frío y en caliente), el modelo y el invariante
-- HECHO · VISTO sí. RECOMENDADA: **A · Chispas** (`DIRECCION_RECOMENDADA`; el porqué, en «Recomendación»).
+- HECHO (`592f8760`) · VISTO sí. RECOMENDADA: **A · Chispas** (`DIRECCION_RECOMENDADA`; el porqué, en «Recomendación»).
 - MEDIDO en la NVIDIA (`o5-medir.ts`, `o5-tanda.sh`; recibo `entregas/pulido-17/o5-medido.json`; la tabla, en `PLASMA.md`): con
   vsync, al máximo y de noche, ningún cuadro de más de 20 ms en ninguna dirección ni ancho (máx. 14,1 ms). Sin vsync (el costo de
   verdad), lo que cada una suma al polvo por cuadro al máximo: A +2,04 ms a 1440 (las 600 brasas en la CPU) y +0,42 a 390; B +0,48
@@ -84,13 +84,24 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   el polvo con física, montado siempre) y con las secciones que se montan al llegar. Un cuadro largo en la calma (334 ms en el
   polvo solo) es el mismo campo. Lo del plasma está armado desde el primer cuadro; el pico de 533 ms de una corrida de B se cerró
   dibujando siempre el efecto nulo.
+- CON EL CÓDIGO FINAL (las seis candidatas del arco del logo llegaron después de la tanda, por el invariante): A a 1440 en caliente,
+  máximo 14,2 ms; los arcos del logo, vistos de día y de noche. B, C y 390 no se volvieron a medir (el arreglo es del programador de
+  la CPU, el mismo para las tres; el tope de arcos no cambió).
 - Invariante: s68 (O3: lo borrado no vuelve; la bandera; las tres; el campo sin divergencia y el mismo azar; la física de PULIDO 15;
   el puntero que ordena y energiza; la temperatura; los arcos, su tope, sus golpes, el largo mínimo del logo, el clic contenido,
   nunca sobre el texto; la cinta; el dibujo; el pie; el movimiento reducido; los módulos; sin reservas por cuadro. O4: las hojas.
   O5: lo medido, con la deuda declarada del frío del sitio). Cada cosa con su control positivo.
 
 ### Final · verificar
-- PENDIENTE.
+- HECHO · `npm run verificar` completo, con el servidor de medición y el Chrome del banco apagados, `.next-probe` borrado y tsc al
+  día justo antes (con el heap de 4096: exit 0). **75 pasos, 8 con falla: exactamente los de la base (s1, s17, s2, s3, s4, s5, s7,
+  s8)**; adentro, las mismas 105 afirmaciones en falla que en PULIDO 15 y 16 (s1-bundle 12, s17-revelado 1, s2-bundle 16, s2-css 2,
+  s3-peso 13, s4-cobertura 1, s4-heredado 4, s5-compacto 1, s5-peso 8, s7-compuerta 18, s8-montaje 2, s8-tres 11, s8-chrome 2,
+  s8-peso 14). Sólo cambian dos contadores de sus mensajes (73 suites, 321 archivos); la lista de s4-cobertura (s23–s36 y s39) y la
+  de los archivos largos de s8 (los mismos seis; ninguno del plasma) no cambian. tsc adentro de `verificar`: 11,1 s. s68: 60
+  afirmaciones, 34 controles positivos, 0 fallas, 1 deuda declarada (el frío del sitio).
+- Limpieza: `scripts/limpiar.ps1 -Profundo` sin nada que matar (quedan el Chrome propio y los `node` de `chrome-devtools-mcp`, que
+  no se tocan). Sin builds de medición al terminar.
 
 ## Disco y memoria por tanda
 
@@ -99,6 +110,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 | Arranque | 80,5 GB | 6753 MB | 936 MB | |
 | O3–O4 (doce builds de medición, de 117 a 208 s cada uno; las miradas, los ajustes y las secuencias) | 80,5 → 77,8 GB | 5950–6778 MB al relanzar | 921–995 MB | caché del banco 1,1 → 1,2 GB; los cuadros crudos, borrados apenas se arma cada hoja |
 | O5 (tres tandas: con vsync en frío y en caliente, sin vsync, y las repeticiones en frío) | 77,8 GB | 6156 → 5209 MB (con vsync), 5487 MB (sin vsync) | 943–947 MB | cada corrida con el Chrome relanzado y el perfil sin cachés |
+| Cierre (servidor y Chrome del banco apagados, `.next-probe` borrado: 3,5 GB) | 81,1 GB | 6786 MB antes de `verificar`, 5840 MB durante | 948 MB | caché del banco sin cuadros crudos; sin builds de medición |
 
 ## Crítica (lo que el banco mostró y qué se hizo)
 
@@ -143,4 +155,15 @@ URLs: `/v3?plasma=a` (o `?energia=plasma`), `/v3?plasma=b`, `/v3?plasma=c`; con 
 
 ## Lo que no quedó bien
 
-(se completa al final)
+- **El frío del sitio**: el primer scroll rápido después de cargar tiene tirones de 0,2 a 1,2 s CON Y SIN plasma (el campo del logo
+  que hornea el polvo y las secciones que se montan al llegar). Es la escena de base, fuera del alcance: deuda declarada en s68.
+- **A suma ~2 ms de CPU por cuadro a 1440** (las 600 brasas). No se midió en una placa integrada ni en un teléfono real: 390 es
+  emulado en la NVIDIA, con la CPU de escritorio.
+- **Lo medido de B, C y de 390 es de antes del último arreglo** (las seis candidatas del arco del logo); con el código final se
+  volvió a medir sólo A a 1440.
+- **B** brilla como purpurina y de día casi no muestra nada. **C** cambia la marca (el logo electrificado) y de día, tras el clic,
+  raya el logo.
+- **De día la energía es tenue** a propósito (para no ensuciar); de lejos, los arcos de día pueden leerse como líneas finas.
+- **Los gestos se grabaron de noche** (puntero, clic, mantener-soltar), donde se lee la energía; de día, la calma y el clic.
+- **Las referencias**: Codrops y Awwwards se leyeron por el resumen del buscador (403 al leerlos directo); el Plasma Globe de
+  nimitz (Shadertoy) quedó sin confirmar.
