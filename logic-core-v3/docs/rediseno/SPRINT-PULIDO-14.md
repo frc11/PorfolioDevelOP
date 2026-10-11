@@ -143,7 +143,17 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   `/v3?destellos=galaxia`, `/v3?destellos=lente`; con `&destellos-color=si`, en azul frío.
 
 ### L4 · Diagnóstico del build de producción
-- PENDIENTE (informe en `docs/rediseno/BUILD-PRODUCCION.md`).
+- HECHO (informe: `docs/rediseno/BUILD-PRODUCCION.md`; sólo leer, correr y escribir: nada compartido ni de configuración se tocó).
+- Con el dev server apagado y el banco cerrado (7,2 GB), `CIRCLE_NODE_TOTAL=2 NODE_OPTIONS=--max-old-space-size=6144 npm run build`:
+  salida 0 en 190 s, una sola corrida, sin errores ni avisos (el `prebuild` pasa: la llave del contenido inventado está en `false`;
+  TypeScript 42 s; 44 páginas estáticas). Lo que se sube: 11 MB de estáticos y 125 MB de servidor.
+- Para un preview en Netlify: las variables críticas (con las `NEXT_PUBLIC_*` antes de buildear), la memoria del build (4096 en
+  `netlify.toml`), el límite de 10 s de las funciones (no afecta a /v3, que es estática; sí al chat de 30 s y a dos crons de 300 s)
+  y el formulario de /v3, que valida pero no envía a ningún lado (bloquea producción, no el preview).
+- Los 8 rojos con el build: s1 se pone verde entero (y s2-css, s4-heredado y s8-chrome adentro de sus agregados); los otros siete
+  siguen: cuatro por cosas que no son del build (s4-cobertura, s5-compacto, s8-montaje, s17-revelado) y el resto por el peso y la
+  carga inicial de /v3 (three.js y tres curvas en el archivo inicial; los techos de peso). Todo de /v3; nada del sitio compartido ni
+  de Franco. El plan, en siete pasos con sus riesgos, en el informe.
 
 ### Final · verificar
 - PENDIENTE.
