@@ -6,7 +6,7 @@ import * as THREE from 'three'
  * del texto a la vista (los títulos 3D también: su lugar lo marca el DOM transparente), con su aire, las más grandes primero, en NDC
  * (x0, y0, x1, y1).
  */
-export const TEXTO_EN_PANTALLA = { cajas: 8, margenPx: 14, cadaMs: 200 } as const
+export const TEXTO_EN_PANTALLA = { cajas: 8, margenPx: 14, cadaMs: 200, conScrollMs: 50 } as const
 
 const SELECTOR_DEL_TEXTO = '[data-v3] :is(h1, h2, h3, p, li, a, button, blockquote, figcaption)'
 

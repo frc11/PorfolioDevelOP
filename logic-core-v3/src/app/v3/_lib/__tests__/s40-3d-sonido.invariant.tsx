@@ -173,8 +173,9 @@ const nombres = Object.keys(CORTES_DEL_SPRITE)
 // [RETOQUE 3D] Se fueron el túnel, el amanecer y los ambientes (el ambiente es uno, en su archivo); llegaron los candidatos.
 // [CIERRE RETOQUE 3D] S1: el clic de la barra y de los CTA, el pestillo (los otros candidatos se borraron).
 // [PULIDO 4] C2: el golpe del encastre, en sus dos variantes (`?golpe=a|b`). [PULIDO 5] D2: uno solo (`golpe`, el de la sala).
-// [PULIDO 13] K3: el éxito y el error de los formularios. [PULIDO 16] N2: la chispa del plasma (`?plasma-sonido=si`).
-afirmarIgual(nombres.sort(), ['abre', 'chispa', 'cierra', 'clic', 'encendido', 'error', 'exito', 'foto', 'golpe', 'pestillo', 'pulso', 'tic'], '  los del pedido, en el mismo archivo')
+// [PULIDO 13] K3: el éxito y el error de los formularios. [PULIDO 16] N2: la chispa del plasma (`?plasma-sonido=si`). [PULIDO 17]
+// O3: la chispa se borró (descartada): el sprite es el de PULIDO 13.
+afirmarIgual(nombres.sort(), ['abre', 'cierra', 'clic', 'encendido', 'error', 'exito', 'foto', 'golpe', 'pestillo', 'pulso', 'tic'], '  los del pedido, en el mismo archivo')
 afirmar(Object.values(CORTES_DEL_SPRITE).every((c) => (c.length as number) === 2 && c[1] <= 6000), '  ninguno es un bucle (el ambiente va aparte); ninguno pasa de 6 s')
 afirmar(VOLUMEN_GENERAL <= 0.7 && Object.values(SONIDOS).every((s) => s.volumen <= 1), '  bajo: el general 0,7 (cada uno con el volumen que eligió Valentino)')
 const doc = readFileSync('docs/rediseno/SONIDO.md', 'utf8')

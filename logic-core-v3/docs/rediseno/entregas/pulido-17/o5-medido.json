@@ -1,0 +1,660 @@
+{
+ "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "vsync": {
+  "polvo-1440": {
+   "frio": {
+    "media": 18.95,
+    "p95": 26.7,
+    "maximo": 533.9,
+    "mayoresDe20": 12,
+    "cuadros": 195
+   },
+   "calma": {
+    "media": 14.25,
+    "p95": 13.7,
+    "maximo": 333.5,
+    "mayoresDe20": 1,
+    "cuadros": 350
+   },
+   "maxima": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 13.9,
+    "mayoresDe20": 0,
+    "cuadros": 990
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.8,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 373
+   },
+   "gpuSimulacion": null,
+   "tareasLargas": 5,
+   "tareaMasLarga": 312,
+   "estadoMaxima": null,
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+   ]
+  },
+  "polvo-390": {
+   "frio": {
+    "media": 32.8,
+    "p95": 106.7,
+    "maximo": 814.2,
+    "mayoresDe20": 8,
+    "cuadros": 98
+   },
+   "calma": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 13.9,
+    "mayoresDe20": 0,
+    "cuadros": 373
+   },
+   "maxima": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 13.9,
+    "mayoresDe20": 0,
+    "cuadros": 906
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.8,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 374
+   },
+   "gpuSimulacion": null,
+   "tareasLargas": 4,
+   "tareaMasLarga": 538,
+   "estadoMaxima": null,
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+   ]
+  },
+  "a-1440": {
+   "frio": {
+    "media": 23.8,
+    "p95": 40,
+    "maximo": 586.9,
+    "mayoresDe20": 12,
+    "cuadros": 153
+   },
+   "calma": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 375
+   },
+   "maxima": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14.1,
+    "mayoresDe20": 0,
+    "cuadros": 1030
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 374
+   },
+   "gpuSimulacion": null,
+   "tareasLargas": 4,
+   "tareaMasLarga": 158,
+   "estadoMaxima": {
+    "direccion": "a",
+    "brasas": 600,
+    "enjambre": 0,
+    "enlaces": 112,
+    "arcos": 5,
+    "contados": {
+     "par": 41,
+     "logo": 6,
+     "cursor": 26,
+     "pulso": 8,
+     "descarga": 5
+    },
+    "maximoALaVez": 5,
+    "temperatura": 0.9588286422053048,
+    "energiaMedia": 0.6683780835072199,
+    "cursor": true,
+    "carga": 0,
+    "velocidad": 0.0006285783170497353
+   },
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+   ]
+  },
+  "a-390": {
+   "frio": {
+    "media": 32.29,
+    "p95": 146.7,
+    "maximo": 400.2,
+    "mayoresDe20": 19,
+    "cuadros": 114
+   },
+   "calma": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 374
+   },
+   "maxima": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 449
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.8,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 374
+   },
+   "gpuSimulacion": null,
+   "tareasLargas": 7,
+   "tareaMasLarga": 388,
+   "estadoMaxima": {
+    "direccion": "a",
+    "brasas": 300,
+    "enjambre": 0,
+    "enlaces": 47,
+    "arcos": 3,
+    "contados": {
+     "par": 21,
+     "logo": 3,
+     "cursor": 9,
+     "pulso": 4,
+     "descarga": 2
+    },
+    "maximoALaVez": 4,
+    "temperatura": 0.9979598289400486,
+    "energiaMedia": 0.6151908336083094,
+    "cursor": false,
+    "carga": 0,
+    "velocidad": 0.0005321973478238808
+   },
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+   ]
+  },
+  "b-1440": {
+   "frio": {
+    "media": 48.25,
+    "p95": 120.1,
+    "maximo": 1200.4,
+    "mayoresDe20": 11,
+    "cuadros": 102
+   },
+   "calma": {
+    "media": 14.76,
+    "p95": 13.7,
+    "maximo": 493.6,
+    "mayoresDe20": 1,
+    "cuadros": 339
+   },
+   "maxima": {
+    "media": 13.34,
+    "p95": 13.8,
+    "maximo": 14.1,
+    "mayoresDe20": 0,
+    "cuadros": 1018
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 374
+   },
+   "gpuSimulacion": {
+    "ms": 0.12115157333333333,
+    "como": "consulta de tiempo de la GPU"
+   },
+   "tareasLargas": 4,
+   "tareaMasLarga": 1197,
+   "estadoMaxima": {
+    "direccion": "b",
+    "brasas": 40,
+    "enjambre": 16384,
+    "enlaces": 0,
+    "arcos": 1,
+    "contados": {
+     "par": 16,
+     "logo": 8,
+     "cursor": 14,
+     "pulso": 8,
+     "descarga": 5
+    },
+    "maximoALaVez": 5,
+    "temperatura": 0.95862692598735,
+    "energiaMedia": 0.6620401188731193,
+    "cursor": true,
+    "carga": 0,
+    "velocidad": 0.0005951381193468873
+   },
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+   ]
+  },
+  "b-390": {
+   "frio": {
+    "media": 21.73,
+    "p95": 66.7,
+    "maximo": 346.8,
+    "mayoresDe20": 12,
+    "cuadros": 132
+   },
+   "calma": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 13.9,
+    "mayoresDe20": 0,
+    "cuadros": 373
+   },
+   "maxima": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 900
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14.1,
+    "mayoresDe20": 0,
+    "cuadros": 374
+   },
+   "gpuSimulacion": {
+    "ms": 0.024607573333333334,
+    "como": "consulta de tiempo de la GPU"
+   },
+   "tareasLargas": 5,
+   "tareaMasLarga": 141,
+   "estadoMaxima": {
+    "direccion": "b",
+    "brasas": 28,
+    "enjambre": 6400,
+    "enlaces": 2,
+    "arcos": 3,
+    "contados": {
+     "par": 4,
+     "logo": 3,
+     "cursor": 9,
+     "pulso": 4,
+     "descarga": 2
+    },
+    "maximoALaVez": 4,
+    "temperatura": 0.9987512830937931,
+    "energiaMedia": 0.6461961929287229,
+    "cursor": false,
+    "carga": 0,
+    "velocidad": 0.0004039605751296245
+   },
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+   ]
+  },
+  "c-1440": {
+   "frio": {
+    "media": 20.53,
+    "p95": 26.5,
+    "maximo": 693.6,
+    "mayoresDe20": 10,
+    "cuadros": 191
+   },
+   "calma": {
+    "media": 14.34,
+    "p95": 13.7,
+    "maximo": 360.2,
+    "mayoresDe20": 1,
+    "cuadros": 348
+   },
+   "maxima": {
+    "media": 13.34,
+    "p95": 13.6,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 1006
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14.1,
+    "mayoresDe20": 0,
+    "cuadros": 373
+   },
+   "gpuSimulacion": {
+    "ms": 0.11252650666666666,
+    "como": "consulta de tiempo de la GPU"
+   },
+   "tareasLargas": 4,
+   "tareaMasLarga": 167,
+   "estadoMaxima": {
+    "direccion": "c",
+    "brasas": 40,
+    "enjambre": 3136,
+    "enlaces": 2,
+    "arcos": 4,
+    "contados": {
+     "par": 24,
+     "logo": 8,
+     "cursor": 16,
+     "pulso": 8,
+     "descarga": 5
+    },
+    "maximoALaVez": 5,
+    "temperatura": 0.9587037508918509,
+    "energiaMedia": 0.675522692501545,
+    "cursor": true,
+    "carga": 0,
+    "velocidad": 0.0006617634578749646
+   },
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+   ]
+  },
+  "c-390": {
+   "frio": {
+    "media": 17.19,
+    "p95": 27,
+    "maximo": 186.7,
+    "mayoresDe20": 10,
+    "cuadros": 187
+   },
+   "calma": {
+    "media": 13.34,
+    "p95": 13.8,
+    "maximo": 14.1,
+    "mayoresDe20": 0,
+    "cuadros": 373
+   },
+   "maxima": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 904
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "maximo": 14,
+    "mayoresDe20": 0,
+    "cuadros": 373
+   },
+   "gpuSimulacion": {
+    "ms": 0.02580501333333333,
+    "como": "consulta de tiempo de la GPU"
+   },
+   "tareasLargas": 6,
+   "tareaMasLarga": 188,
+   "estadoMaxima": {
+    "direccion": "c",
+    "brasas": 28,
+    "enjambre": 1600,
+    "enlaces": 0,
+    "arcos": 2,
+    "contados": {
+     "par": 0,
+     "logo": 3,
+     "cursor": 1,
+     "pulso": 4,
+     "descarga": 2
+    },
+    "maximoALaVez": 2,
+    "temperatura": 0.9987499896765311,
+    "energiaMedia": 0.6137882598808834,
+    "cursor": false,
+    "carga": 0,
+    "velocidad": 0.00025060102189711355
+   },
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+   ]
+  }
+ },
+ "libre": {
+  "polvo-1440": {
+   "calma": {
+    "media": 1.59,
+    "p95": 2.6,
+    "maximo": 4.3,
+    "mayoresDe20": 0,
+    "cuadros": 3144
+   },
+   "maxima": {
+    "media": 2.28,
+    "p95": 3.4,
+    "maximo": 12,
+    "mayoresDe20": 0,
+    "cuadros": 2905
+   },
+   "noche": {
+    "media": 1.32,
+    "p95": 1.9,
+    "maximo": 7.8,
+    "mayoresDe20": 0,
+    "cuadros": 3776
+   },
+   "gpuSimulacion": null
+  },
+  "polvo-390": {
+   "calma": {
+    "media": 1.63,
+    "p95": 2.2,
+    "maximo": 3.6,
+    "mayoresDe20": 0,
+    "cuadros": 3080
+   },
+   "maxima": {
+    "media": 2.01,
+    "p95": 2.6,
+    "maximo": 7,
+    "mayoresDe20": 0,
+    "cuadros": 3457
+   },
+   "noche": {
+    "media": 1.62,
+    "p95": 2,
+    "maximo": 7,
+    "mayoresDe20": 0,
+    "cuadros": 3098
+   },
+   "gpuSimulacion": null
+  },
+  "a-1440": {
+   "calma": {
+    "media": 3.56,
+    "p95": 4.2,
+    "maximo": 8.5,
+    "mayoresDe20": 0,
+    "cuadros": 1405
+   },
+   "maxima": {
+    "media": 4.32,
+    "p95": 5.8,
+    "maximo": 15.5,
+    "mayoresDe20": 0,
+    "cuadros": 1389
+   },
+   "noche": {
+    "media": 3.36,
+    "p95": 3.8,
+    "maximo": 8.2,
+    "mayoresDe20": 0,
+    "cuadros": 1490
+   },
+   "gpuSimulacion": null
+  },
+  "a-390": {
+   "calma": {
+    "media": 2.04,
+    "p95": 2.5,
+    "maximo": 14.4,
+    "mayoresDe20": 0,
+    "cuadros": 2456
+   },
+   "maxima": {
+    "media": 2.43,
+    "p95": 3.2,
+    "maximo": 6.8,
+    "mayoresDe20": 0,
+    "cuadros": 2522
+   },
+   "noche": {
+    "media": 1.99,
+    "p95": 2.4,
+    "maximo": 7.2,
+    "mayoresDe20": 0,
+    "cuadros": 2517
+   },
+   "gpuSimulacion": null
+  },
+  "b-1440": {
+   "calma": {
+    "media": 1.71,
+    "p95": 2.1,
+    "maximo": 66.2,
+    "mayoresDe20": 17,
+    "cuadros": 2918
+   },
+   "maxima": {
+    "media": 2.76,
+    "p95": 4.4,
+    "maximo": 16.1,
+    "mayoresDe20": 0,
+    "cuadros": 2180
+   },
+   "noche": {
+    "media": 1.65,
+    "p95": 2.2,
+    "maximo": 13.6,
+    "mayoresDe20": 0,
+    "cuadros": 3033
+   },
+   "gpuSimulacion": {
+    "ms": 0.053914666666666666,
+    "como": "consulta de tiempo de la GPU"
+   }
+  },
+  "b-390": {
+   "calma": {
+    "media": 1.62,
+    "p95": 2.1,
+    "maximo": 10.2,
+    "mayoresDe20": 0,
+    "cuadros": 3089
+   },
+   "maxima": {
+    "media": 2.15,
+    "p95": 3.1,
+    "maximo": 6.8,
+    "mayoresDe20": 0,
+    "cuadros": 2820
+   },
+   "noche": {
+    "media": 1.77,
+    "p95": 2.3,
+    "maximo": 7,
+    "mayoresDe20": 0,
+    "cuadros": 2832
+   },
+   "gpuSimulacion": {
+    "ms": 0.11138773333333334,
+    "como": "consulta de tiempo de la GPU"
+   }
+  },
+  "c-1440": {
+   "calma": {
+    "media": 1.67,
+    "p95": 2.4,
+    "maximo": 11.4,
+    "mayoresDe20": 0,
+    "cuadros": 3003
+   },
+   "maxima": {
+    "media": 2.74,
+    "p95": 3.9,
+    "maximo": 16.4,
+    "mayoresDe20": 0,
+    "cuadros": 2214
+   },
+   "noche": {
+    "media": 1.92,
+    "p95": 2.5,
+    "maximo": 9.4,
+    "mayoresDe20": 0,
+    "cuadros": 2598
+   },
+   "gpuSimulacion": {
+    "ms": 0.07174890666666667,
+    "como": "consulta de tiempo de la GPU"
+   }
+  },
+  "c-390": {
+   "calma": {
+    "media": 1.65,
+    "p95": 2.1,
+    "maximo": 5.9,
+    "mayoresDe20": 0,
+    "cuadros": 3041
+   },
+   "maxima": {
+    "media": 2.17,
+    "p95": 3.1,
+    "maximo": 7.6,
+    "mayoresDe20": 0,
+    "cuadros": 2817
+   },
+   "noche": {
+    "media": 1.73,
+    "p95": 2.1,
+    "maximo": 7.2,
+    "mayoresDe20": 0,
+    "cuadros": 2887
+   },
+   "gpuSimulacion": {
+    "ms": 0.0961504,
+    "como": "consulta de tiempo de la GPU"
+   }
+  }
+ },
+ "frioRepetido": {
+  "polvo-1440": [
+   533.9,
+   747,
+   547
+  ],
+  "b-1440": [
+   1200.4,
+   480.2,
+   720.3
+  ]
+ },
+ "campoDelLogo": {
+  "nota": "cuadro largo justo antes de que el campo del logo (el del polvo con fisica, montado siempre) quede publicado; igual sin plasma",
+  "polvo-1440": {
+   "cuadroLargoMs": 267,
+   "publicadoEnMs": 3818
+  },
+  "b-1440": {
+   "cuadroLargoMs": 387,
+   "publicadoEnMs": 3404
+  },
+  "a-1440": {
+   "cuadroLargoMs": 281,
+   "publicadoEnMs": 2722
+  }
+ }
+}

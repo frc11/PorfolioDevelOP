@@ -1,9 +1,9 @@
 /**
  * [PULIDO 16] N2 · LA INTERACCIÓN CON EL PLASMA (`docs/rediseno/PLASMA.md`), la máquina pura del gesto (los oyentes del DOM,
  * `puntero.ts`). El puntero es una carga, siempre (el mouse sobre la página; el dedo mientras toca). Además:
- *   · CLIC o TOQUE corto: un pulso de descarga radial que ioniza lo cercano y le tira arcos.
- *   · MANTENER apretado: el puntero se CARGA (un halo que crece y su carga, más fuerte) y al SOLTAR dispara un arco grande al
- *     grupo de cargas más cercano o al logo.
+ *   · CLIC o TOQUE corto: un pulso (una onda que empuja y calienta) con arcos cortos alrededor.
+ *   · MANTENER apretado: el puntero se CARGA (su carga, más fuerte: junta y calienta lo que tiene cerca) y al SOLTAR dispara un
+ *     arco grande al grupo más denso a su alcance o al logo.
  *   · En el teléfono el arrastre es el scroll: un dedo que se mueve más de `mueveCancela` px cancela el gesto (no pelea con la
  *     página); el gesto es el toque (pulso) o mantener quieto (cargar y soltar).
  *   · Sobre un texto o algo que se cliquea, nada: el gesto es de la página.
@@ -17,8 +17,6 @@ export const INTERACCION = {
   cargaMaxima: 3,
   /** Un dedo que se mueve más que esto (px) está desplazando la página: se cancela. */
   mueveCancela: 10,
-  /** Las líneas de campo (`?plasma-campo=si`): en cuánto aparecen y se van (s). */
-  campo: { aparece: 0.3, seVa: 0.5 },
 } as const
 
 export interface EstadoDelPuntero {
@@ -40,12 +38,10 @@ export interface EstadoDelPuntero {
   pulso: boolean
   descarga: boolean
   fuerza: number
-  /** Las líneas de campo: cuánto se ven (0 a 1). */
-  campo: number
 }
 
 export function crearPuntero(): EstadoDelPuntero {
-  return { x: 9, y: 9, mouse: false, dedo: false, fuera: true, apretado: false, desde: 0, x0: 0, y0: 0, sobreTexto: false, cargando: false, carga: 0, pulso: false, descarga: false, fuerza: 0, campo: 0 }
+  return { x: 9, y: 9, mouse: false, dedo: false, fuera: true, apretado: false, desde: 0, x0: 0, y0: 0, sobreTexto: false, cargando: false, carga: 0, pulso: false, descarga: false, fuerza: 0 }
 }
 
 /** Aprieta (el botón del mouse o el dedo) en (px, py) a los `ahora` ms; sobre un texto o algo que se cliquea no cuenta. */
@@ -83,13 +79,11 @@ export function soltar(e: EstadoDelPuntero, ahora: number): void {
   cancelar(e)
 }
 
-/** Un cuadro: apretado más de `mantener`, carga (hasta 1); las líneas de campo siguen al botón. Devuelve la carga del puntero (veces la suya). */
+/** Un cuadro: apretado más de `mantener`, carga (hasta 1). Devuelve la carga del puntero (veces la suya). */
 export function avanzar(e: EstadoDelPuntero, ahora: number, dt: number): number {
   if (e.apretado && !e.sobreTexto && ahora - e.desde >= INTERACCION.mantener * 1000) {
     e.cargando = true
     e.carga = Math.min(1, e.carga + dt / INTERACCION.carga)
   }
-  const C = INTERACCION.campo
-  e.campo = e.apretado && !e.sobreTexto ? Math.min(1, e.campo + dt / C.aparece) : Math.max(0, e.campo - dt / C.seVa)
   return 1 + (INTERACCION.cargaMaxima - 1) * e.carga
 }

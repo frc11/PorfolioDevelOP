@@ -1,0 +1,599 @@
+{
+ "a-1440": {
+  "momentos": {
+   "noche": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-1440/1-calma-noche.png",
+    "tiempos": [
+     303,
+     450,
+     597,
+     743,
+     903,
+     1050,
+     1196,
+     1343
+    ]
+   },
+   "puntero": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-1440/3-puntero.png",
+    "tiempos": [
+     495,
+     655,
+     801,
+     948,
+     1095,
+     1256,
+     1402,
+     1549
+    ]
+   },
+   "clic": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-1440/4-clic.png",
+    "tiempos": [
+     199,
+     346,
+     505,
+     651,
+     797,
+     946,
+     1102,
+     1251
+    ]
+   },
+   "carga": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-1440/5-mantener-soltar.png",
+    "tiempos": [
+     1255,
+     1401,
+     1563,
+     1708,
+     1855,
+     2003,
+     2162,
+     2308
+    ]
+   },
+   "dia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-1440/2-calma-dia.png",
+    "tiempos": [
+     295,
+     455,
+     602,
+     747,
+     897,
+     1054,
+     1201,
+     1347
+    ]
+   },
+   "clicdia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-1440/4b-clic-dia.png",
+    "tiempos": [
+     203,
+     350,
+     497,
+     657,
+     804,
+     951,
+     1097,
+     1257
+    ]
+   },
+   "pie": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-1440/6-pie.png",
+    "tiempos": [
+     6707,
+     6853,
+     6998,
+     7158,
+     7306,
+     7454,
+     7601,
+     7748
+    ]
+   }
+  },
+  "golpeMs": 7154,
+  "contados": {
+   "par": 100,
+   "logo": 18,
+   "cursor": 63,
+   "pulso": 4,
+   "descarga": 1
+  },
+  "consola": [],
+  "errores": [],
+  "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+ },
+ "a-390": {
+  "momentos": {
+   "noche": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-390/1-calma-noche.png",
+    "tiempos": [
+     295,
+     450,
+     599,
+     754,
+     896,
+     1043,
+     1198,
+     1345
+    ]
+   },
+   "clic": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-390/4-clic.png",
+    "tiempos": [
+     208,
+     360,
+     507,
+     645,
+     800,
+     949,
+     1099,
+     1243
+    ]
+   },
+   "carga": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-390/5-mantener-soltar.png",
+    "tiempos": [
+     1284,
+     1438,
+     1578,
+     1736,
+     1874,
+     2031,
+     2187,
+     2325
+    ]
+   },
+   "dia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-390/2-calma-dia.png",
+    "tiempos": [
+     299,
+     445,
+     606,
+     752,
+     899,
+     1046,
+     1200,
+     1352
+    ]
+   },
+   "clicdia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-390/4b-clic-dia.png",
+    "tiempos": [
+     205,
+     352,
+     499,
+     646,
+     795,
+     954,
+     1099,
+     1247
+    ]
+   },
+   "pie": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-a-390/6-pie.png",
+    "tiempos": [
+     4885,
+     5034,
+     5190,
+     5336,
+     5489,
+     5644,
+     5790,
+     5938
+    ]
+   }
+  },
+  "golpeMs": 5336,
+  "contados": {
+   "par": 74,
+   "logo": 13,
+   "cursor": 3,
+   "pulso": 3,
+   "descarga": 1
+  },
+  "consola": [],
+  "errores": [],
+  "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+ },
+ "b-1440": {
+  "momentos": {
+   "noche": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-1440/1-calma-noche.png",
+    "tiempos": [
+     293,
+     449,
+     594,
+     752,
+     905,
+     1050,
+     1195,
+     1354
+    ]
+   },
+   "puntero": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-1440/3-puntero.png",
+    "tiempos": [
+     502,
+     652,
+     806,
+     948,
+     1099,
+     1245,
+     1400,
+     1556
+    ]
+   },
+   "clic": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-1440/4-clic.png",
+    "tiempos": [
+     208,
+     353,
+     511,
+     654,
+     809,
+     946,
+     1109,
+     1249
+    ]
+   },
+   "carga": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-1440/5-mantener-soltar.png",
+    "tiempos": [
+     1266,
+     1408,
+     1563,
+     1709,
+     1852,
+     2010,
+     2164,
+     2300
+    ]
+   },
+   "dia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-1440/2-calma-dia.png",
+    "tiempos": [
+     296,
+     450,
+     605,
+     747,
+     899,
+     1056,
+     1199,
+     1352
+    ]
+   },
+   "clicdia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-1440/4b-clic-dia.png",
+    "tiempos": [
+     211,
+     359,
+     508,
+     652,
+     812,
+     954,
+     1108,
+     1254
+    ]
+   },
+   "pie": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-1440/6-pie.png",
+    "tiempos": [
+     6637,
+     6781,
+     6942,
+     7089,
+     7237,
+     7384,
+     7533,
+     7694
+    ]
+   }
+  },
+  "golpeMs": 7089,
+  "contados": {
+   "par": 60,
+   "logo": 21,
+   "cursor": 69,
+   "pulso": 2,
+   "descarga": 1
+  },
+  "consola": [],
+  "errores": [],
+  "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+ },
+ "b-390": {
+  "momentos": {
+   "noche": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-390/1-calma-noche.png",
+    "tiempos": [
+     305,
+     450,
+     606,
+     748,
+     904,
+     1043,
+     1198,
+     1356
+    ]
+   },
+   "clic": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-390/4-clic.png",
+    "tiempos": [
+     211,
+     361,
+     507,
+     655,
+     814,
+     954,
+     1109,
+     1254
+    ]
+   },
+   "carga": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-390/5-mantener-soltar.png",
+    "tiempos": [
+     1285,
+     1430,
+     1584,
+     1739,
+     1885,
+     2042,
+     2193,
+     2338
+    ]
+   },
+   "dia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-390/2-calma-dia.png",
+    "tiempos": [
+     298,
+     448,
+     593,
+     749,
+     902,
+     1047,
+     1195,
+     1355
+    ]
+   },
+   "clicdia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-390/4b-clic-dia.png",
+    "tiempos": [
+     205,
+     348,
+     512,
+     646,
+     795,
+     952,
+     1099,
+     1252
+    ]
+   },
+   "pie": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-b-390/6-pie.png",
+    "tiempos": [
+     4501,
+     4656,
+     4800,
+     4955,
+     5109,
+     5254,
+     5394,
+     5560
+    ]
+   }
+  },
+  "golpeMs": 4956,
+  "contados": {
+   "par": 1,
+   "logo": 13,
+   "cursor": 7,
+   "pulso": 2,
+   "descarga": 1
+  },
+  "consola": [],
+  "errores": [],
+  "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+ },
+ "c-1440": {
+  "momentos": {
+   "noche": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-1440/1-calma-noche.png",
+    "tiempos": [
+     293,
+     448,
+     595,
+     753,
+     901,
+     1046,
+     1201,
+     1345
+    ]
+   },
+   "puntero": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-1440/3-puntero.png",
+    "tiempos": [
+     493,
+     654,
+     800,
+     947,
+     1093,
+     1253,
+     1401,
+     1547
+    ]
+   },
+   "clic": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-1440/4-clic.png",
+    "tiempos": [
+     211,
+     353,
+     508,
+     654,
+     801,
+     956,
+     1096,
+     1254
+    ]
+   },
+   "carga": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-1440/5-mantener-soltar.png",
+    "tiempos": [
+     1260,
+     1403,
+     1558,
+     1715,
+     1856,
+     2005,
+     2163,
+     2314
+    ]
+   },
+   "dia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-1440/2-calma-dia.png",
+    "tiempos": [
+     302,
+     455,
+     599,
+     749,
+     895,
+     1050,
+     1203,
+     1347
+    ]
+   },
+   "clicdia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-1440/4b-clic-dia.png",
+    "tiempos": [
+     214,
+     351,
+     510,
+     645,
+     805,
+     954,
+     1110,
+     1259
+    ]
+   },
+   "pie": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-1440/6-pie.png",
+    "tiempos": [
+     6600,
+     6751,
+     6897,
+     7044,
+     7191,
+     7339,
+     7488,
+     7646
+    ]
+   }
+  },
+  "golpeMs": 7045,
+  "contados": {
+   "par": 42,
+   "logo": 19,
+   "cursor": 55,
+   "pulso": 2,
+   "descarga": 1
+  },
+  "consola": [],
+  "errores": [],
+  "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+ },
+ "c-390": {
+  "momentos": {
+   "noche": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-390/1-calma-noche.png",
+    "tiempos": [
+     299,
+     456,
+     597,
+     756,
+     907,
+     1052,
+     1195,
+     1354
+    ]
+   },
+   "clic": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-390/4-clic.png",
+    "tiempos": [
+     204,
+     359,
+     502,
+     658,
+     801,
+     952,
+     1110,
+     1251
+    ]
+   },
+   "carga": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-390/5-mantener-soltar.png",
+    "tiempos": [
+     1282,
+     1428,
+     1584,
+     1735,
+     1881,
+     2037,
+     2189,
+     2334
+    ]
+   },
+   "dia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-390/2-calma-dia.png",
+    "tiempos": [
+     300,
+     446,
+     593,
+     753,
+     900,
+     1046,
+     1206,
+     1353
+    ]
+   },
+   "clicdia": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-390/4b-clic-dia.png",
+    "tiempos": [
+     206,
+     349,
+     504,
+     646,
+     805,
+     944,
+     1099,
+     1256
+    ]
+   },
+   "pie": {
+    "hoja": "~/.cache/b4-medicion/pulido-17/o4/final-c-390/6-pie.png",
+    "tiempos": [
+     4553,
+     4694,
+     4846,
+     4994,
+     5140,
+     5287,
+     5449,
+     5595
+    ]
+   }
+  },
+  "golpeMs": 4994,
+  "contados": {
+   "par": 12,
+   "logo": 15,
+   "cursor": 4,
+   "pulso": 2,
+   "descarga": 1
+  },
+  "consola": [],
+  "errores": [],
+  "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+ }
+}

@@ -1,294 +1,217 @@
-import { ARCOS, activos, entero, entre, extremo, type Arco, type ClaseDeArco, type Entorno, type EstadoDeLosArcos } from './arcos'
-import { CAMINO, PUNTOS_DEL_CAMINO, PUNTOS_DE_RAMA, camino, rama, temblarElCanal } from './camino'
-import { ESPECIE, ESPECIES, cargaDe, ionizar, type Particulas } from '../especies'
-import { LADO, celda, distanciaAlRayo, type Gas, type RayoDelPuntero } from '../fisica/fisica'
+import { distanciaAlRayo, type Brasas, type RayoDelPuntero } from '../brasas'
+import { vecinasDe } from '../vecinas'
+import { encender, entre, lugarLibre, type ClaseDeArco, type EstadoDeLosArcos } from './arcos'
 
 /**
- * [PULIDO 16] N2 · EL PROGRAMADOR DE LOS ARCOS (`arcos.ts`: qué es un arco). Por cuadro: cada arco envejece y da sus golpes (el
- * primero ioniza lo que toca; el re-golpe tiembla un poco el canal); nacen los nuevos —la descarga al soltar el botón, el pulso
- * del clic, al puntero, entre los pares ligados y del logo— bajo el tope, con tasas que suben con la temperatura (saturada).
- * Puro: sin reservas (los puntos de trabajo son fijos).
+ * [PULIDO 17] O3 · QUIÉN NACE Y CUÁNDO (`arcos.ts`: el modelo). Como en PULIDO 15: el puntero recibe arcos de las brasas a su
+ * alcance; los pares enlazados descargan cada tanto (y a veces vuelven a saltar enseguida: el parpadeo); el logo, cada pocos
+ * segundos (más seguido cuando está activo: después de su pulso, cerca del encastre y en el golpe del pie). Del gesto: el clic
+ * tira 2–4 arcos cortos alrededor y la descarga, uno grande al grupo más denso a su alcance (o al logo). Nunca sobre un texto ni
+ * fuera del cuadro (`seVe`); si el clic no encuentra a quién, los arcos mueren en el aire. Puro (Node).
  */
+export const PROGRAMA = {
+  /** Por segundo: los pares y al puntero; cada cuánto el logo (s). Por la temperatura: `× (1 + calor · T)`; el logo activo, `× (1 + logoActivo · actividad)`. */
+  tasas: { pares: 1.1, cursor: 2.6, logo: [2.4, 4.8], calor: 1.2, logoActivo: 2.5 },
+  /** Hasta dónde (u): un par, el logo (desde su centro), al puntero (desde su rayo), el pulso, la descarga, y el largo de un arco al aire. */
+  alcances: { par: 3.2, logo: 6.8, cursor: [0.9, 3.4], pulso: 3, descarga: 9, alAire: [1.4, 2.6] },
+  /** El largo mínimo de un arco del logo (u desde su borde): más corto, el canal es una mancha. Entre cuántas brasas se elige. */
+  logoMinimo: 1.6,
+  candidatasDelLogo: 6,
+  /** Los arcos de un clic y cuánto pesa el grupo al elegir el blanco de la descarga (radio en u). */
+  pulso: { arcos: [1, 2] },
+  grupo: 1.8,
+} as const
 
-/** Un lugar libre; si no hay (o se llegó al tope) y `desplaza`, el del más viejo que no sea del puntero. */
-function lugarLibre(e: EstadoDeLosArcos, maximo: number, desplaza: boolean): Arco | null {
-  if (activos(e) < maximo) {
-    for (const a of e.arcos) if (!a.activo) return a
-  }
-  if (!desplaza) return null
-  let viejo: Arco | null = null
-  for (const a of e.arcos) if (a.activo && a.clase !== 'cursor' && a.clase !== 'descarga' && (viejo === null || a.edad / a.vida > viejo.edad / viejo.vida)) viejo = a
-  if (viejo !== null) viejo.activo = false
-  return viejo
+/** Lo que el programador pregunta afuera (lo arma `dibujo/armado.ts`; en la prueba, a mano). */
+export interface EntornoDeLosArcos {
+  /** La cámara, relativa al centro (de dónde se ven los arcos). */
+  readonly camara: Float32Array
+  readonly rayo: RayoDelPuntero | null
+  readonly maximo: number
+  temperatura: number
+  actividadDelLogo: number
+  /** ¿Se ve este punto (relativo al centro) y no cae sobre un texto? */
+  readonly seVe: (x: number, y: number, z: number) => boolean
+  /** El punto del borde del logo más cercano a (x, y, z), en `destino`; falso si el logo no está. */
+  readonly bordeDelLogo: (x: number, y: number, z: number, destino: Float32Array) => boolean
 }
 
-const A = new Float32Array(3)
-const B = new Float32Array(3)
-const P = new Float32Array(3)
+const PUNTO = new Float32Array(3)
+const BORDE = new Float32Array(3)
+const ELEGIDAS = new Int32Array(4)
 
-/** Enciende `arco`: su camino (el líder), sus ramas, sus golpes; el primero ya da (ioniza y deja brillo). */
-function encender(e: EstadoDeLosArcos, arco: Arco, clase: ClaseDeArco, a: number, b: number, g: Gas, en: Entorno, azar: () => number, fuerza = 1): void {
-  const de = ARCOS.clases[clase]
-  arco.activo = true
-  arco.clase = clase
-  arco.a = a
-  arco.b = b
-  extremo(arco, g.p, true, A)
-  extremo(arco, g.p, false, B)
-  arco.a0.set(A)
-  arco.b0.set(B)
-  arco.alineacion = camino(arco.canal, A[0], A[1], A[2], B[0], B[1], B[2], en.campo, azar, clase === 'logo')
-  arco.ramas = entero(azar, de.ramas)
-  for (let r = 0; r < arco.ramas; r += 1) {
-    const k = Math.round((PUNTOS_DEL_CAMINO - 1) * entre(azar, CAMINO.ramas.desde))
-    arco.ramaDesde[r] = k
-    arco.ramaHalla[r] = rama(arco.ramaPuntos, r * PUNTOS_DE_RAMA * 3, arco.canal[k * 3], arco.canal[k * 3 + 1], arco.canal[k * 3 + 2], en.campo, en.buscarCarga, azar) ? 1 : 0
-  }
-  arco.golpes = entero(azar, de.golpes)
-  arco.tiempos[0] = 0
-  for (let k = 1; k < arco.golpes; k += 1) arco.tiempos[k] = entre(azar, ARCOS.golpes.ventana) * (k / (arco.golpes - 1))
-  arco.dados = 0
-  arco.edad = 0
-  arco.vida = arco.tiempos[arco.golpes - 1] + ARCOS.golpes.residual * 2.6
-  arco.brillo = de.brillo * (clase === 'descarga' ? 0.6 + 0.6 * fuerza : 1)
-  arco.ancho = de.ancho * (clase === 'descarga' ? 0.7 + 0.5 * fuerza : 1)
-  arco.ionizados = 0
-  e.contados[clase] += 1
-  e.nacidos += 1
-  e.maximoALaVez = Math.max(e.maximoALaVez, activos(e))
-  golpear(arco, g, azar, en.temperatura)
+const seVeLaBrasa = (b: Brasas, i: number, en: EntornoDeLosArcos): boolean => en.seVe(b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+
+/** ¿Se ve el par (los dos extremos y el medio) y es corto? */
+function parQueSeVe(b: Brasas, i: number, j: number, en: EntornoDeLosArcos): boolean {
+  const L = b.lugar
+  const d = Math.hypot(L[j * 3] - L[i * 3], L[j * 3 + 1] - L[i * 3 + 1], L[j * 3 + 2] - L[i * 3 + 2])
+  return d < PROGRAMA.alcances.par && seVeLaBrasa(b, i, en) && seVeLaBrasa(b, j, en) && en.seVe((L[i * 3] + L[j * 3]) / 2, (L[i * 3 + 1] + L[j * 3 + 1]) / 2, (L[i * 3 + 2] + L[j * 3 + 2]) / 2)
 }
 
-/**
- * Un golpe: el re-golpe tiembla un poco el canal; todos dejan brillo en sus extremos; el primero ioniza (el átomo donde pega y los
- * que toca su camino; los re-golpes, menos), con más chance cuanto más caliente está el gas.
- */
-function golpear(arco: Arco, g: Gas, azar: () => number, temperatura: number): void {
-  if (arco.dados > 0) temblarElCanal(arco.canal, azar, ARCOS.golpes.temblor)
-  const p = g.p
-  if (arco.a >= 0) p.brillo[arco.a] = Math.min(2, p.brillo[arco.a] + ESPECIES.brillo.arco)
-  if (arco.b >= 0) p.brillo[arco.b] = Math.min(2, p.brillo[arco.b] + ESPECIES.brillo.arco)
-  const de = ARCOS.clases[arco.clase].ioniza
-  const chance = Math.min(1, (arco.dados === 0 ? de.chance : de.chance * 0.35) * (1 + 0.6 * temperatura))
-  // El átomo donde pega el arco.
-  if (arco.b >= 0 && p.especie[arco.b] === ESPECIE.atomo && arco.ionizados < de.maximo && azar() < chance) {
-    const k = PUNTOS_DEL_CAMINO - 2
-    const salida = ionizar(p, arco.b, p.lugar[arco.b * 3] - arco.canal[k * 3], p.lugar[arco.b * 3 + 1] - arco.canal[k * 3 + 1], p.lugar[arco.b * 3 + 2] - arco.canal[k * 3 + 2], entre(azar, ARCOS.eyeccion), azar)
-    if (salida >= 0) arco.ionizados += 1
-  }
-  if (arco.ionizados < de.maximo) ionizarElCamino(arco, g, de.radio, chance, de.maximo, azar)
-  arco.dados += 1
-}
-
-/** Los átomos cerca del canal se ionizan (con su chance, hasta el máximo): el electrón sale disparado, alejándose del canal. */
-function ionizarElCamino(arco: Arco, g: Gas, radio: number, chance: number, maximo: number, azar: () => number): void {
-  const p = g.p
-  for (let k = 1; k < PUNTOS_DEL_CAMINO - 1 && arco.ionizados < maximo; k += 2) {
-    const x = arco.canal[k * 3]
-    const y = arco.canal[k * 3 + 1]
-    const z = arco.canal[k * 3 + 2]
-    const cx = celda(x)
-    const cy = celda(y)
-    const cz = celda(z)
-    for (let ax = Math.max(0, cx - 1); ax <= Math.min(LADO - 1, cx + 1) && arco.ionizados < maximo; ax += 1)
-      for (let ay = Math.max(0, cy - 1); ay <= Math.min(LADO - 1, cy + 1) && arco.ionizados < maximo; ay += 1)
-        for (let az = Math.max(0, cz - 1); az <= Math.min(LADO - 1, cz + 1) && arco.ionizados < maximo; az += 1)
-          for (let i = g.cabeza[(ax * LADO + ay) * LADO + az]; i >= 0; i = g.siguiente[i]) {
-            if (p.especie[i] !== ESPECIE.atomo || i === arco.a || i === arco.b) continue
-            const dx = p.lugar[i * 3] - x
-            const dy = p.lugar[i * 3 + 1] - y
-            const dz = p.lugar[i * 3 + 2] - z
-            if (dx * dx + dy * dy + dz * dz > radio * radio || azar() > chance) continue
-            if (ionizar(p, i, dx + (azar() - 0.5) * 0.2, dy + (azar() - 0.5) * 0.2, dz + (azar() - 0.5) * 0.2, entre(azar, ARCOS.eyeccion), azar) >= 0) {
-              arco.ionizados += 1
-              if (arco.ionizados >= maximo) break
-            }
-          }
-  }
-}
-
-/**
- * Una partícula al azar (pareja entre todas) de las que se ven a menos de `radio` de `centro`: el muestreo de un reservorio, mirando
- * todas una vez (en el teléfono casi todas quedan fuera del cuadro, y unos intentos al azar no encontraban ninguna). −1 si no hay.
- */
-function alAlcance(p: Particulas, centro: Float32Array, radio: number, en: Entorno, azar: () => number): number {
-  let elegida = -1
+/** Hasta `cuantas` brasas al azar a menos de `alcance` de `p` que se vean (muestreo de reservorio, sin reservas), en `ELEGIDAS`. */
+function alAlcance(b: Brasas, p: Float32Array, alcance: number, cuantas: number, en: EntornoDeLosArcos, azar: () => number): number {
   let vistas = 0
-  for (let i = 0; i < p.n; i += 1) {
-    if (p.especie[i] === ESPECIE.vacio || p.alfa[i] <= 0.5) continue
-    const x = p.lugar[i * 3]
-    const y = p.lugar[i * 3 + 1]
-    const z = p.lugar[i * 3 + 2]
-    if (Math.hypot(x - centro[0], y - centro[1], z - centro[2]) >= radio || !en.seVe(x, y, z)) continue
+  for (let i = 0; i < b.n; i += 1) {
+    const d = Math.hypot(b.lugar[i * 3] - p[0], b.lugar[i * 3 + 1] - p[1], b.lugar[i * 3 + 2] - p[2])
+    if (d > alcance || d < 0.4 || !seVeLaBrasa(b, i, en)) continue
     vistas += 1
-    if (azar() * vistas < 1) elegida = i
-  }
-  return elegida
-}
-
-const enLugar = (p: Particulas, i: number, destino: Float32Array): Float32Array => {
-  destino[0] = p.lugar[i * 3]
-  destino[1] = p.lugar[i * 3 + 1]
-  destino[2] = p.lugar[i * 3 + 2]
-  return destino
-}
-
-/** Una carga (ion o electrón) al azar, mirando a lo sumo `intentos`, que se vea, a su alcance desde el rayo (su punto, a la vista). */
-function cargaAlAzar(p: Particulas, intentos: number, azar: () => number, en: Entorno, rayo: RayoDelPuntero): number {
-  for (let k = 0; k < intentos; k += 1) {
-    const i = Math.floor(azar() * p.n)
-    if (cargaDe(p, i) === 0 || p.alfa[i] <= 0.5) continue
-    const x = p.lugar[i * 3]
-    const y = p.lugar[i * 3 + 1]
-    const z = p.lugar[i * 3 + 2]
-    if (!en.seVe(x, y, z)) continue
-    const d = distanciaAlRayo(x, y, z, rayo, P)
-    if (d >= ARCOS.alcances.cursor[0] && d < ARCOS.alcances.cursor[1] && en.seVe(P[0], P[1], P[2])) return i
-  }
-  return -1
-}
-
-/**
- * El paso de los arcos: envejecen, dan sus golpes y se apagan; nacen los nuevos (el puntero, los pedidos del pulso y la descarga,
- * los pares ligados, el logo) bajo el tope. `g` trae la grilla del último subpaso.
- */
-export function programarArcos(e: EstadoDeLosArcos, g: Gas, dt: number, en: Entorno, azar: () => number): void {
-  const p = g.p
-  e.nacidos = 0
-  for (const arco of e.arcos) {
-    if (!arco.activo) continue
-    arco.edad += dt
-    if (arco.edad >= arco.vida || (arco.a >= 0 && p.especie[arco.a] === ESPECIE.vacio) || (arco.b >= 0 && p.especie[arco.b] === ESPECIE.vacio)) {
-      arco.activo = false
-      continue
+    if (vistas <= cuantas) ELEGIDAS[vistas - 1] = i
+    else {
+      const k = Math.floor(azar() * vistas)
+      if (k < cuantas) ELEGIDAS[k] = i
     }
-    while (arco.dados < arco.golpes && arco.edad >= arco.tiempos[arco.dados]) golpear(arco, g, azar, en.temperatura)
-    if (arco.clase === 'cursor' && en.rayo !== null && arco.a >= 0) distanciaAlRayo(p.lugar[arco.a * 3], p.lugar[arco.a * 3 + 1], p.lugar[arco.a * 3 + 2], en.rayo, arco.puntoB)
   }
+  return Math.min(vistas, cuantas)
+}
+
+/** Un arco del clic que muere en el aire: hacia un punto al azar a su alrededor que se vea. */
+function alAire(e: EstadoDeLosArcos, b: Brasas, desde: Float32Array, clase: ClaseDeArco, en: EntornoDeLosArcos, azar: () => number): void {
+  for (let intento = 0; intento < 8; intento += 1) {
+    const z = azar() * 2 - 1
+    const fi = azar() * Math.PI * 2
+    const s = Math.sqrt(1 - z * z)
+    const r = entre(azar, PROGRAMA.alcances.alAire)
+    const x = desde[0] + Math.cos(fi) * s * r
+    const y = desde[1] + z * r
+    const w = desde[2] + Math.sin(fi) * s * r
+    if (!en.seVe(x, y, w)) continue
+    const arco = lugarLibre(e, en.maximo, true)
+    if (arco === null) return
+    arco.puntoA.set(desde)
+    arco.puntoB[0] = x
+    arco.puntoB[1] = y
+    arco.puntoB[2] = w
+    encender(e, arco, clase, -1, -1, b, en.camara, azar)
+    return
+  }
+}
+
+/** El pulso del clic: 2–4 arcos a las brasas cercanas (las que falten, al aire). */
+function pulso(e: EstadoDeLosArcos, b: Brasas, en: EntornoDeLosArcos, azar: () => number): void {
+  const donde = e.pedidos.donde
+  const cuantos = Math.floor(entre(azar, [PROGRAMA.pulso.arcos[0], PROGRAMA.pulso.arcos[1] + 0.999]))
+  const halladas = alAlcance(b, donde, PROGRAMA.alcances.pulso, cuantos, en, azar)
+  for (let k = 0; k < halladas; k += 1) {
+    const arco = lugarLibre(e, en.maximo, true)
+    if (arco === null) return
+    arco.puntoA.set(donde)
+    encender(e, arco, 'pulso', -1, ELEGIDAS[k], b, en.camara, azar)
+  }
+  for (let k = halladas; k < Math.min(cuantos, 1); k += 1) alAire(e, b, donde, 'pulso', en, azar)
+}
+
+/** La descarga al soltar: un arco grande al grupo más denso a su alcance (o al logo, si queda más cerca), o al aire. */
+function descarga(e: EstadoDeLosArcos, b: Brasas, en: EntornoDeLosArcos, azar: () => number): void {
+  const donde = e.pedidos.donde
+  let mejor = -1
+  let densidad = -1
+  for (let k = 0; k < 48; k += 1) {
+    const i = Math.floor(azar() * b.n)
+    const d = Math.hypot(b.lugar[i * 3] - donde[0], b.lugar[i * 3 + 1] - donde[1], b.lugar[i * 3 + 2] - donde[2])
+    if (d > PROGRAMA.alcances.descarga || d < 1 || !seVeLaBrasa(b, i, en)) continue
+    const v = vecinasDe(b, i, PROGRAMA.grupo) - d * 0.15
+    if (v > densidad) {
+      mejor = i
+      densidad = v
+    }
+  }
+  const alLogo = en.bordeDelLogo(donde[0], donde[1], donde[2], PUNTO) && en.seVe(PUNTO[0], PUNTO[1], PUNTO[2]) && Math.hypot(PUNTO[0] - donde[0], PUNTO[1] - donde[1], PUNTO[2] - donde[2]) < PROGRAMA.alcances.descarga * 0.6
+  const arco = lugarLibre(e, en.maximo, true)
+  if (arco === null) return
+  arco.puntoA.set(donde)
+  if (mejor >= 0 && !(alLogo && azar() < 0.4)) encender(e, arco, 'descarga', -1, mejor, b, en.camara, azar)
+  else if (alLogo) {
+    arco.puntoB.set(PUNTO)
+    encender(e, arco, 'descarga', -1, -1, b, en.camara, azar)
+  } else {
+    arco.activo = false
+    alAire(e, b, donde, 'descarga', en, azar)
+  }
+}
+
+/** El paso del programa (los arcos ya envejecidos): el puntero, los re-saltos, los pedidos del gesto, los pares y el logo. */
+export function programarArcos(e: EstadoDeLosArcos, b: Brasas, dt: number, en: EntornoDeLosArcos, azar: () => number): void {
+  e.nacidos = 0
+  const calor = 1 + PROGRAMA.tasas.calor * en.temperatura
   const forzado = e.forzado
   e.forzado = null
-  const calor = 1 + ARCOS.tasas.calor * en.temperatura
-  // La descarga al soltar el botón: al grupo de cargas más cercano o, si no hay, al logo.
-  if (e.pedidos.descarga) {
-    e.pedidos.descarga = false
-    descargar(e, g, en, azar)
+  // Los del puntero siguen al rayo; sin puntero, se apagan.
+  for (const arco of e.arcos) {
+    if (!arco.activo || arco.clase !== 'cursor') continue
+    if (en.rayo === null) arco.activo = false
+    else distanciaAlRayo(b.lugar[arco.a * 3], b.lugar[arco.a * 3 + 1], b.lugar[arco.a * 3 + 2], en.rayo, arco.puntoB)
   }
-  // El pulso del clic: empuja, ioniza lo cercano y le tira arcos.
-  if (e.pedidos.pulso) {
-    e.pedidos.pulso = false
-    pulsar(e, g, en, azar)
-  }
-  // El puntero: si hay cargas a su alcance, un arco le salta.
-  if (en.rayo !== null && (forzado === 'cursor' || azar() < ARCOS.tasas.cursor * calor * dt)) {
-    const rayo = en.rayo
-    const i = cargaAlAzar(p, 60, azar, en, rayo)
-    const arco = i >= 0 ? lugarLibre(e, en.maximo, true) : null
-    if (arco !== null) {
-      distanciaAlRayo(p.lugar[i * 3], p.lugar[i * 3 + 1], p.lugar[i * 3 + 2], rayo, arco.puntoB)
-      encender(e, arco, 'cursor', i, -1, g, en, azar)
-    }
-  }
-  // Los pares ligados (un ion y su electrón) descargan entre sí.
-  if (forzado === 'par' || azar() < ARCOS.tasas.par * calor * dt) {
-    const inicio = Math.floor(azar() * p.n)
-    for (let k = 0; k < p.n; k += 1) {
-      const i = (inicio + k) % p.n
-      const j = g.pareja[i]
-      if (j < 0 || cargaDe(p, i) === 0 || cargaDe(p, j) === 0) continue
-      enLugar(p, i, A)
-      enLugar(p, j, B)
-      if (Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]) > ARCOS.alcances.par || !en.seVe(A[0], A[1], A[2]) || !en.seVe(B[0], B[1], B[2])) continue
-      const arco = lugarLibre(e, en.maximo, forzado === 'par')
-      if (arco !== null) encender(e, arco, 'par', i, j, g, en, azar)
+  if (en.rayo !== null && (forzado === 'cursor' || azar() < PROGRAMA.tasas.cursor * dt)) {
+    const inicio = Math.floor(azar() * b.n)
+    for (let k = 0; k < b.n; k += 1) {
+      const i = (inicio + k) % b.n
+      const d = distanciaAlRayo(b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2], en.rayo, PUNTO)
+      if (d < PROGRAMA.alcances.cursor[0] || d >= PROGRAMA.alcances.cursor[1] || !seVeLaBrasa(b, i, en) || !en.seVe(PUNTO[0], PUNTO[1], PUNTO[2])) continue
+      const arco = lugarLibre(e, en.maximo, true)
+      if (arco !== null) {
+        arco.puntoB.set(PUNTO)
+        encender(e, arco, 'cursor', i, -1, b, en.camara, azar)
+      }
       break
     }
   }
-  // El logo, el generador: cada tanto (más seguido con su actividad), hacia una partícula cercana que se vea. De cuatro al azar, el
-  // átomo más cercano (lo ioniza: alimenta el ciclo); si no hay átomo, la más cercana (el logo, positivo, junta electrones cerca).
-  e.proximoDelLogo -= dt * calor * (1 + 2 * en.actividadDelLogo)
+  // Los re-saltos pendientes de un par que sigue enlazado.
+  for (let k = e.cuantosPendientes - 1; k >= 0; k -= 1) {
+    e.pendientes[k * 3 + 2] -= dt
+    if (e.pendientes[k * 3 + 2] > 0) continue
+    const i = e.pendientes[k * 3]
+    const j = e.pendientes[k * 3 + 1]
+    e.cuantosPendientes -= 1
+    e.pendientes.copyWithin(k * 3, e.cuantosPendientes * 3, e.cuantosPendientes * 3 + 3)
+    if (b.pareja[i] !== j || !parQueSeVe(b, i, j, en)) continue
+    const arco = lugarLibre(e, en.maximo, false)
+    if (arco !== null) encender(e, arco, 'par', i, j, b, en.camara, azar)
+  }
+  if (e.pedidos.pulso || forzado === 'pulso') {
+    e.pedidos.pulso = false
+    pulso(e, b, en, azar)
+  }
+  if (e.pedidos.descarga || forzado === 'descarga') {
+    e.pedidos.descarga = false
+    descarga(e, b, en, azar)
+  }
+  if (forzado === 'par' || azar() < PROGRAMA.tasas.pares * calor * dt) {
+    const inicio = Math.floor(azar() * b.n)
+    for (let k = 0; k < b.n; k += 1) {
+      const i = (inicio + k) % b.n
+      const j = b.pareja[i]
+      if (j < 0 || !parQueSeVe(b, i, j, en)) continue
+      const arco = lugarLibre(e, en.maximo, forzado === 'par')
+      if (arco !== null) encender(e, arco, 'par', i, j, b, en.camara, azar)
+      break
+    }
+  }
+  e.proximoDelLogo -= dt * calor * (1 + PROGRAMA.tasas.logoActivo * en.actividadDelLogo)
   if (forzado === 'logo' || e.proximoDelLogo <= 0) {
-    e.proximoDelLogo = entre(azar, ARCOS.tasas.logo)
+    e.proximoDelLogo = entre(azar, PROGRAMA.tasas.logo)
+    // Entre varias brasas a su alcance que se vean, la más corta que pase el largo mínimo (más corto, el canal es una mancha).
     let mejor = -1
-    let distancia = Number.POSITIVE_INFINITY
-    let atomo = false
-    for (let intento = 0, vistos = 0; intento < p.n * 2 && vistos < 4; intento += 1) {
-      const i = Math.floor(azar() * p.n)
-      if (p.especie[i] === ESPECIE.vacio || p.alfa[i] < 0.6) continue
-      const d = Math.hypot(p.lugar[i * 3], p.lugar[i * 3 + 1], p.lugar[i * 3 + 2])
-      if (d > ARCOS.alcances.logo || !en.seVe(p.lugar[i * 3], p.lugar[i * 3 + 1], p.lugar[i * 3 + 2])) continue
-      vistos += 1
-      const esAtomo = p.especie[i] === ESPECIE.atomo
-      if ((esAtomo && !atomo) || (esAtomo === atomo && d < distancia)) {
+    let largo = Number.POSITIVE_INFINITY
+    for (let intento = 0, vistas = 0; intento < b.n * 2 && vistas < PROGRAMA.candidatasDelLogo; intento += 1) {
+      const i = Math.floor(azar() * b.n)
+      const d = Math.hypot(b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+      if (d > PROGRAMA.alcances.logo || !seVeLaBrasa(b, i, en)) continue
+      vistas += 1
+      if (!en.bordeDelLogo(b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2], BORDE) || !en.seVe(BORDE[0], BORDE[1], BORDE[2])) continue
+      const l = Math.hypot(b.lugar[i * 3] - BORDE[0], b.lugar[i * 3 + 1] - BORDE[1], b.lugar[i * 3 + 2] - BORDE[2])
+      if (l >= PROGRAMA.logoMinimo && l < largo) {
         mejor = i
-        distancia = d
-        atomo = esAtomo
+        largo = l
+        PUNTO.set(BORDE)
       }
     }
-    if (mejor >= 0 && en.bordeDelLogo(p.lugar[mejor * 3], p.lugar[mejor * 3 + 1], p.lugar[mejor * 3 + 2], P) && en.seVe(P[0], P[1], P[2])) {
+    if (mejor >= 0) {
       const arco = lugarLibre(e, en.maximo, true)
       if (arco !== null) {
-        arco.puntoA.set(P)
-        encender(e, arco, 'logo', -1, mejor, g, en, azar)
+        arco.puntoA.set(PUNTO)
+        encender(e, arco, 'logo', -1, mejor, b, en.camara, azar)
       }
     }
   }
-}
-
-/** El pulso del clic, en `pedidos.donde`: empuja todo hacia afuera, ioniza algunos átomos y tira arcos a las cargas cercanas. */
-function pulsar(e: EstadoDeLosArcos, g: Gas, en: Entorno, azar: () => number): void {
-  const p = g.p
-  const c = e.pedidos.donde
-  const radio = ARCOS.alcances.pulso
-  let ionizados = 0
-  for (let i = 0; i < p.n; i += 1) {
-    if (p.especie[i] === ESPECIE.vacio) continue
-    const dx = p.lugar[i * 3] - c[0]
-    const dy = p.lugar[i * 3 + 1] - c[1]
-    const dz = p.lugar[i * 3 + 2] - c[2]
-    const d = Math.hypot(dx, dy, dz)
-    if (d > radio || d < 1e-4) continue
-    const u = 1 - d / radio
-    p.velocidad[i * 3] += (ARCOS.pulso.empuje * u * dx) / d
-    p.velocidad[i * 3 + 1] += (ARCOS.pulso.empuje * u * dy) / d
-    p.velocidad[i * 3 + 2] += (ARCOS.pulso.empuje * u * dz) / d
-    if (p.especie[i] === ESPECIE.atomo && ionizados < ARCOS.pulso.ioniza && azar() < u * 0.8 && ionizar(p, i, dx, dy, dz, entre(azar, ARCOS.eyeccion), azar) >= 0) ionizados += 1
-  }
-  const cuantos = entero(azar, ARCOS.pulso.arcos)
-  for (let k = 0; k < cuantos; k += 1) {
-    // A las partículas cercanas (las cargas o los átomos, que el arco ioniza).
-    const i = alAlcance(p, c, radio, en, azar)
-    const arco = i >= 0 ? lugarLibre(e, en.maximo, true) : null
-    if (arco === null) break
-    arco.puntoA.set(c)
-    encender(e, arco, 'pulso', -1, i, g, en, azar)
-  }
-}
-
-/** La descarga al soltar: un arco grande desde el puntero al grupo de cargas más denso cerca (o al logo). */
-function descargar(e: EstadoDeLosArcos, g: Gas, en: Entorno, azar: () => number): void {
-  const p = g.p
-  const c = e.pedidos.donde
-  let mejor = -1
-  let vecinos = 0
-  for (let i = 0; i < p.n; i += 1) {
-    if (cargaDe(p, i) === 0 || p.alfa[i] < 0.5) continue
-    const d = Math.hypot(p.lugar[i * 3] - c[0], p.lugar[i * 3 + 1] - c[1], p.lugar[i * 3 + 2] - c[2])
-    if (d > ARCOS.alcances.descarga || d < 1 || !en.seVe(p.lugar[i * 3], p.lugar[i * 3 + 1], p.lugar[i * 3 + 2])) continue
-    let k = 0
-    for (let j = 0; j < p.n; j += 1) if (j !== i && cargaDe(p, j) !== 0 && Math.hypot(p.lugar[j * 3] - p.lugar[i * 3], p.lugar[j * 3 + 1] - p.lugar[i * 3 + 1], p.lugar[j * 3 + 2] - p.lugar[i * 3 + 2]) < 1.6) k += 1
-    // El más denso; a igual densidad, el más cerca.
-    if (k > vecinos || (k === vecinos && mejor >= 0 && d < Math.hypot(p.lugar[mejor * 3] - c[0], p.lugar[mejor * 3 + 1] - c[1], p.lugar[mejor * 3 + 2] - c[2]))) {
-      mejor = i
-      vecinos = k
-    }
-  }
-  const arco = lugarLibre(e, en.maximo, true)
-  if (arco === null) return
-  arco.puntoA.set(c)
-  if (mejor >= 0 && vecinos >= 1) {
-    encender(e, arco, 'descarga', -1, mejor, g, en, azar, e.pedidos.fuerza)
-    return
-  }
-  // Sin grupo: al logo.
-  if (en.bordeDelLogo(c[0], c[1], c[2], arco.puntoB)) encender(e, arco, 'descarga', -1, -1, g, en, azar, e.pedidos.fuerza)
 }

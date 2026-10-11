@@ -1,159 +1,136 @@
 /**
- * [PULIDO 16] N2 · EL CAMINO DE UN ARCO: UN LÍDER ESCALONADO (`docs/rediseno/PLASMA.md`). Como un rayo de verdad, el arco avanza
- * de a pasos desde su origen y cada paso elige su dirección mezclando tres cosas: hacia dónde está el blanco (pesa cada vez más al
- * acercarse), el CAMPO ELÉCTRICO en ese punto (pesa al principio: el arco sigue las líneas de campo) y un poco de azar (el
- * quiebre). El último punto es el blanco. Después, cada tramo se parte en dos con el medio corrido un poco (el detalle fino). Las
- * ramas salen de algunos pasos y BUSCAN UNA CARGA CERCANA (si no hay, una rama corta que muere a lo largo del campo).
- * Escribe en búferes fijos (sin reservas): puro (la prueba lo corre en Node).
+ * [PULIDO 17] O3 · EL CAMINO DE UN ARCO (`docs/rediseno/PLASMA.md`): el de PULIDO 15, que gustó. El desplazamiento de punto medio:
+ * cada nivel corre el medio de cada tramo hacia un costado (sobre todo de costado en la pantalla; un poco en profundidad), cada vez
+ * menos (la aspereza); con una o dos ramas cortas. Lo que cambia: un camino más suave (menos desvío y menos aspereza: un canal, no un
+ * zigzag dibujado) y, en cada re-golpe, el canal TIEMBLA un poco (no se rehace entero: es el mismo canal que se vuelve a encender).
+ * Los desvíos se guardan respecto de la recta entre los extremos de ahora, así el arco sigue a lo que une. Puro (Node).
  */
 export const CAMINO = {
-  /** Los pasos del líder y en cuántos se parte cada uno (el detalle): 24 × 2 = 48 tramos. */
-  pasos: 24,
-  detalle: 2,
-  /** Cuánto pesa el campo (al principio), el azar y el blanco (de `desde` a `hasta` a lo largo del camino). */
-  campo: 0.62,
-  azar: 0.34,
-  blanco: [0.25, 1],
-  /** El largo de cada paso: el que falta repartido en los pasos que quedan, por un azar en el tramo. */
-  paso: [0.75, 1.25],
-  /** El desvío del medio de cada tramo (parte del tramo). */
-  quiebre: 0.14,
-  /** Las ramas: cuántas como mucho, sus pasos, dónde pueden salir (parte del camino), hasta dónde buscan una carga (u) y el largo de la que muere (u). */
-  ramas: { maximo: 3, pasos: 8, desde: [0.15, 0.8], busca: 1.9, muere: [0.35, 0.8] },
+  /** Los niveles del punto medio (2^niveles tramos), el desvío del primero (parte del largo) y cuánto se achica por nivel. */
+  niveles: 5,
+  desvio: 0.12,
+  aspereza: 0.45,
+  /** Cuánto de profundidad tiene el desvío (respecto del de costado). */
+  profundidad: 0.35,
+  /** Las ramas: cuántas como mucho, sus niveles, su largo (parte del arco) y su ángulo (rad). */
+  ramas: { maximo: 2, niveles: 3, largo: [0.2, 0.4], angulo: [0.35, 0.85] },
 } as const
 
-/** Los puntos del camino (con el detalle) y de cada rama. */
-export const PUNTOS_DEL_CAMINO = CAMINO.pasos * CAMINO.detalle + 1
-export const PUNTOS_DE_RAMA = CAMINO.ramas.pasos + 1
+export const TRAMOS_DEL_CAMINO = 2 ** CAMINO.niveles
+export const TRAMOS_DE_RAMA = 2 ** CAMINO.ramas.niveles
 
-/** El campo en (x, y, z), en `destino` (lo arma `fisica.ts`: `campoEn`). */
-export type Campo = (x: number, y: number, z: number, destino: Float32Array) => void
+/** La forma de un arco: los desvíos de su camino y de sus ramas (todo en arreglos fijos). */
+export interface Forma {
+  readonly desvios: Float32Array
+  ramas: number
+  readonly ramaDesde: Int32Array
+  readonly ramaDir: Float32Array
+  readonly ramaLargo: Float32Array
+  readonly ramaDesvios: Float32Array
+}
 
-const E = new Float32Array(3)
-const LIDER = new Float32Array((CAMINO.pasos + 1) * 3)
+export function crearForma(): Forma {
+  const R = CAMINO.ramas.maximo
+  return {
+    desvios: new Float32Array((TRAMOS_DEL_CAMINO + 1) * 3),
+    ramas: 0,
+    ramaDesde: new Int32Array(R),
+    ramaDir: new Float32Array(R * 3),
+    ramaLargo: new Float32Array(R),
+    ramaDesvios: new Float32Array(R * (TRAMOS_DE_RAMA + 1) * 3),
+  }
+}
 
-/**
- * El líder de `a` a `b` (relativos al centro) en `salida` desde `desde` (3 por punto, `pasos + 1` puntos). `limpio` (el del logo)
- * se quiebra la mitad. Devuelve la alineación media de sus pasos con el campo (|cos|, 0 a 1: para la prueba).
- */
-export function lider(salida: Float32Array, desde: number, pasos: number, ax: number, ay: number, az: number, bx: number, by: number, bz: number, campo: Campo, azar: () => number, limpio: boolean): number {
-  salida[desde] = ax
-  salida[desde + 1] = ay
-  salida[desde + 2] = az
-  let px = ax
-  let py = ay
-  let pz = az
-  let alineacion = 0
-  for (let k = 1; k < pasos; k += 1) {
-    let tx = bx - px
-    let ty = by - py
-    let tz = bz - pz
-    const falta = Math.hypot(tx, ty, tz) || 1e-4
-    tx /= falta
-    ty /= falta
-    tz /= falta
-    campo(px, py, pz, E)
-    const en = Math.hypot(E[0], E[1], E[2])
-    const hay = en > 1e-6
-    let ex = hay ? E[0] / en : 0
-    let ey = hay ? E[1] / en : 0
-    let ez = hay ? E[2] / en : 0
-    // Sigue la línea de campo en el sentido que va hacia el blanco.
-    if (ex * tx + ey * ty + ez * tz < 0) {
-      ex = -ex
-      ey = -ey
-      ez = -ez
+const entre = (azar: () => number, t: readonly number[]): number => t[0] + azar() * (t[1] - t[0])
+
+const P1 = new Float32Array(3)
+const P2 = new Float32Array(3)
+const S1 = new Float32Array(3)
+const S2 = new Float32Array(3)
+const EJE = new Float32Array(3)
+const VISTA = new Float32Array(3)
+
+function normalizar(v: Float32Array): void {
+  const l = Math.hypot(v[0], v[1], v[2]) || 1
+  v[0] /= l
+  v[1] /= l
+  v[2] /= l
+}
+/** `destino` = u × w. */
+function cruz(u: Float32Array, w: Float32Array, destino: Float32Array): void {
+  const x = u[1] * w[2] - u[2] * w[1]
+  const y = u[2] * w[0] - u[0] * w[2]
+  const z = u[0] * w[1] - u[1] * w[0]
+  destino[0] = x
+  destino[1] = y
+  destino[2] = z
+}
+
+/** Las dos direcciones de costado de un eje visto desde `VISTA`: `P1` de costado en la pantalla, `P2` en profundidad. */
+function costados(eje: Float32Array): void {
+  cruz(eje, VISTA, P1)
+  normalizar(P1)
+  cruz(eje, P1, P2)
+  normalizar(P2)
+}
+
+/** El punto medio en `salida` desde `desde` (`tramos + 1` puntos, los extremos en cero). */
+function puntoMedio(salida: Float32Array, desde: number, tramos: number, largo: number, azar: () => number): void {
+  for (let k = 0; k <= tramos * 3; k += 1) salida[desde + k] = 0
+  let amplitud = largo * CAMINO.desvio
+  for (let paso = tramos; paso > 1; paso /= 2) {
+    const medio = paso / 2
+    for (let k = medio; k < tramos; k += paso) {
+      const u = (azar() * 2 - 1) * amplitud
+      const w = (azar() * 2 - 1) * amplitud * CAMINO.profundidad
+      for (let e = 0; e < 3; e += 1) salida[desde + k * 3 + e] = (salida[desde + (k - medio) * 3 + e] + salida[desde + (k + medio) * 3 + e]) / 2 + P1[e] * u + P2[e] * w
     }
-    const s = k / pasos
-    const wB = CAMINO.blanco[0] + (CAMINO.blanco[1] - CAMINO.blanco[0]) * s * s
-    const wE = CAMINO.campo * (1 - s)
-    const wA = CAMINO.azar * (1 - 0.5 * s) * (limpio ? 0.5 : 1)
-    let dx = wB * tx + wE * ex + wA * (azar() * 2 - 1)
-    let dy = wB * ty + wE * ey + wA * (azar() * 2 - 1)
-    let dz = wB * tz + wE * ez + wA * (azar() * 2 - 1)
-    const l = Math.hypot(dx, dy, dz) || 1
-    dx /= l
-    dy /= l
-    dz /= l
-    if (hay) alineacion += Math.abs(dx * ex + dy * ey + dz * ez)
-    const largo = (falta / (pasos - k + 1)) * (CAMINO.paso[0] + azar() * (CAMINO.paso[1] - CAMINO.paso[0]))
-    px += dx * largo
-    py += dy * largo
-    pz += dz * largo
-    salida[desde + k * 3] = px
-    salida[desde + k * 3 + 1] = py
-    salida[desde + k * 3 + 2] = pz
-  }
-  salida[desde + pasos * 3] = bx
-  salida[desde + pasos * 3 + 1] = by
-  salida[desde + pasos * 3 + 2] = bz
-  return alineacion / Math.max(1, pasos - 1)
-}
-
-/** El detalle: entre cada dos puntos del líder (en `LIDER`), el medio corrido de costado. Escribe `pasos · 2 + 1` puntos. */
-function detallar(salida: Float32Array, pasos: number, azar: () => number, limpio: boolean): void {
-  const q = CAMINO.quiebre * (limpio ? 0.5 : 1)
-  for (let k = 0; k < pasos; k += 1) {
-    const x0 = LIDER[k * 3]
-    const y0 = LIDER[k * 3 + 1]
-    const z0 = LIDER[k * 3 + 2]
-    const x1 = LIDER[k * 3 + 3]
-    const y1 = LIDER[k * 3 + 4]
-    const z1 = LIDER[k * 3 + 5]
-    const l = Math.hypot(x1 - x0, y1 - y0, z1 - z0)
-    salida[k * 6] = x0
-    salida[k * 6 + 1] = y0
-    salida[k * 6 + 2] = z0
-    salida[k * 6 + 3] = (x0 + x1) / 2 + (azar() * 2 - 1) * q * l
-    salida[k * 6 + 4] = (y0 + y1) / 2 + (azar() * 2 - 1) * q * l
-    salida[k * 6 + 5] = (z0 + z1) / 2 + (azar() * 2 - 1) * q * l
-  }
-  salida[pasos * 6] = LIDER[pasos * 3]
-  salida[pasos * 6 + 1] = LIDER[pasos * 3 + 1]
-  salida[pasos * 6 + 2] = LIDER[pasos * 3 + 2]
-}
-
-/** El camino entero de `a` a `b` en `salida` (`PUNTOS_DEL_CAMINO` puntos). Devuelve la alineación con el campo. */
-export function camino(salida: Float32Array, ax: number, ay: number, az: number, bx: number, by: number, bz: number, campo: Campo, azar: () => number, limpio: boolean): number {
-  const alineacion = lider(LIDER, 0, CAMINO.pasos, ax, ay, az, bx, by, bz, campo, azar, limpio)
-  detallar(salida, CAMINO.pasos, azar, limpio)
-  return alineacion
-}
-
-/** El re-golpe: el mismo canal con un temblor chico (un rayo vuelve a golpear por el canal que ya abrió). */
-export function temblarElCanal(canal: Float32Array, azar: () => number, cuanto: number): void {
-  const ultimo = PUNTOS_DEL_CAMINO - 1
-  for (let k = 1; k < ultimo; k += 1) {
-    const dx = canal[(k + 1) * 3] - canal[(k - 1) * 3]
-    const dy = canal[(k + 1) * 3 + 1] - canal[(k - 1) * 3 + 1]
-    const dz = canal[(k + 1) * 3 + 2] - canal[(k - 1) * 3 + 2]
-    const l = Math.hypot(dx, dy, dz)
-    canal[k * 3] += (azar() * 2 - 1) * cuanto * l
-    canal[k * 3 + 1] += (azar() * 2 - 1) * cuanto * l
-    canal[k * 3 + 2] += (azar() * 2 - 1) * cuanto * l
+    amplitud *= CAMINO.aspereza
   }
 }
 
 /**
- * Una rama desde el punto `k` del canal: busca una carga cercana (`buscar` devuelve su lugar en `destino` o false) y va hacia ella
- * por un líder corto; si no hay, una rama corta a lo largo del campo, que muere. Escribe `PUNTOS_DE_RAMA` puntos en `salida` desde
- * `desde`. Devuelve si encontró una carga.
+ * Traza la forma entre `a` y `b` (relativos al centro), vista desde `camara`: el camino y sus ramas (`ramas`: cuántas como mucho).
  */
-export function rama(salida: Float32Array, desde: number, x: number, y: number, z: number, campo: Campo, buscar: (x: number, y: number, z: number, destino: Float32Array) => boolean, azar: () => number): boolean {
-  const R = CAMINO.ramas
-  const encontro = buscar(x, y, z, E)
-  let bx = E[0]
-  let by = E[1]
-  let bz = E[2]
-  if (!encontro) {
-    campo(x, y, z, E)
-    const en = Math.hypot(E[0], E[1], E[2]) || 1
-    const largo = R.muere[0] + azar() * (R.muere[1] - R.muere[0])
-    const signo = azar() < 0.5 ? -1 : 1
-    bx = x + (signo * E[0] / en + (azar() - 0.5) * 0.8) * largo
-    by = y + (signo * E[1] / en + (azar() - 0.5) * 0.8) * largo
-    bz = z + (signo * E[2] / en + (azar() - 0.5) * 0.8) * largo
+export function trazar(f: Forma, a: ArrayLike<number>, b: ArrayLike<number>, camara: ArrayLike<number>, ramas: number, azar: () => number): void {
+  for (let e = 0; e < 3; e += 1) {
+    EJE[e] = b[e] - a[e]
+    VISTA[e] = (a[e] + b[e]) / 2 - camara[e]
   }
-  lider(salida, desde, R.pasos, x, y, z, bx, by, bz, campo, azar, false)
-  return encontro
+  const largo = Math.hypot(EJE[0], EJE[1], EJE[2]) || 1e-3
+  costados(EJE)
+  puntoMedio(f.desvios, 0, TRAMOS_DEL_CAMINO, largo, azar)
+  f.ramas = Math.min(ramas, CAMINO.ramas.maximo)
+  for (let r = 0; r < f.ramas; r += 1) {
+    const angulo = entre(azar, CAMINO.ramas.angulo) * (azar() < 0.5 ? -1 : 1)
+    const cs = Math.cos(angulo)
+    const sn = Math.sin(angulo)
+    for (let e = 0; e < 3; e += 1) f.ramaDir[r * 3 + e] = (EJE[e] / largo) * cs + P1[e] * sn + P2[e] * (azar() - 0.5) * 0.4
+    const dir = f.ramaDir.subarray(r * 3, r * 3 + 3)
+    normalizar(dir)
+    f.ramaDesde[r] = Math.round(TRAMOS_DEL_CAMINO * entre(azar, [0.25, 0.7]))
+    f.ramaLargo[r] = largo * entre(azar, CAMINO.ramas.largo)
+    S1.set(P1)
+    S2.set(P2)
+    costados(dir)
+    puntoMedio(f.ramaDesvios, r * (TRAMOS_DE_RAMA + 1) * 3, TRAMOS_DE_RAMA, f.ramaLargo[r], azar)
+    P1.set(S1)
+    P2.set(S2)
+  }
+}
+
+/** El re-golpe: el mismo canal con un temblor chico (parte del largo de cada tramo), y las ramas igual. */
+export function temblar(f: Forma, largo: number, cuanto: number, azar: () => number): void {
+  const paso = (largo / TRAMOS_DEL_CAMINO) * cuanto
+  for (let k = 1; k < TRAMOS_DEL_CAMINO; k += 1) for (let e = 0; e < 3; e += 1) f.desvios[k * 3 + e] += (azar() * 2 - 1) * paso
+  for (let r = 0; r < f.ramas; r += 1) {
+    const o = r * (TRAMOS_DE_RAMA + 1) * 3
+    const p = (f.ramaLargo[r] / TRAMOS_DE_RAMA) * cuanto
+    for (let k = 1; k <= TRAMOS_DE_RAMA; k += 1) for (let e = 0; e < 3; e += 1) f.ramaDesvios[o + k * 3 + e] += (azar() * 2 - 1) * p
+  }
+}
+
+/** El punto `k` del camino entre `a` y `b` de ahora, en `destino`. */
+export function puntoDelCamino(f: Forma, a: ArrayLike<number>, b: ArrayLike<number>, k: number, destino: Float32Array): void {
+  for (let e = 0; e < 3; e += 1) destino[e] = a[e] + ((b[e] - a[e]) * k) / TRAMOS_DEL_CAMINO + f.desvios[k * 3 + e]
 }

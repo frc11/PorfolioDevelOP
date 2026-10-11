@@ -37,8 +37,6 @@ export const SONIDOS: Readonly<Record<Sonido, DelSonido>> = {
   // [PULIDO 13] K3 · el resultado de los formularios, en el contacto de la pieza: ~7 dB debajo del pulso y ~11 del golpe (LUFS).
   exito: { que: 'El envío llegó (la pieza encaja): dos notas claras que suben, cortas', volumen: 0.3, separacionMs: 800, exclusivo: false },
   error: { que: 'El envío falló (la pieza no entra): dos notas graves y suaves que bajan', volumen: 0.3, separacionMs: 800, exclusivo: false },
-  // [PULIDO 16] N2 · los arcos del plasma (sólo con `?plasma-sonido=si`): muy bajo, y no ametralla.
-  chispa: { que: 'Un arco del plasma: un chisporroteo corto y muy bajo', volumen: 0.05, separacionMs: 110, exclusivo: false },
 }
 
 /** Lo que pide el sitio: un sonido del sprite. */

@@ -1,212 +1,166 @@
 # EL PLASMA — el modelo, para afinarlo
 
-`?energia=plasma` (en lugar del polvo) o `?energia=plasma-y-polvo` (con el polvo). El producto sigue siendo el polvo hasta que el
-humano diga. Experimentos, apagados: `?plasma-color=si` (azul eléctrico), `?plasma-campo=si` (las líneas de campo con el botón
-apretado) y `?plasma-sonido=si` (un chisporroteo muy bajo en los arcos, con el sonido prendido).
+`?energia=plasma` (en lugar del polvo) o `?energia=plasma-y-polvo` (con el polvo), en una de tres direcciones: `?plasma=a|b|c`
+(pedida sola, `?plasma=b` también monta el plasma). Sin `?plasma=`, la recomendada: **A**. El producto sigue siendo el polvo hasta
+que el humano diga.
 
-Hecho en PULIDO 15 (cargas y arcos) y rehecho en PULIDO 16 · N2 («mejorá TODO, más profesional, metele magia»). La idea que lo une:
-**las partículas y los arcos se afectan entre sí**. Los arcos ionizan lo que tocan; las cargas guían el camino de los arcos; la
-temperatura, que sube con lo que hace el usuario, rompe moléculas, ioniza y dispara más arcos; en calma todo se recompone.
+Historia: PULIDO 15 (cargas sueltas + arcos: gustó), PULIDO 16 (átomos, iones, electrones, moléculas: «tiene una forma muy definida,
+tampoco para tanto»; se borró con sus experimentos de color, campo y sonido) y PULIDO 17 (este): el espíritu de PULIDO 15 llevado a
+otro nivel, «algo un poco menos nítido, menos formado; partículas de energía que brillan, vibran, se mueven». Monocromo, sin sonido.
+Referencias y por qué: `docs/rediseno/REFERENCIAS-PLASMA.md`.
 
-Invariante: `npm run test:s67-pulido-16` (sección N2). Banco: `~/.cache/b4-medicion/pulido-16/_scripts/n2-plasma.ts`. Recibo:
-`docs/rediseno/entregas/pulido-16/n2-plasma.json`.
+Invariante: `npm run test:s68-pulido-17` (O3 y O5). Bancos: `~/.cache/b4-medicion/pulido-17/_scripts/` (`o4-secuencias.ts`,
+`o5-medir.ts`, `o5-tanda.sh`). Recibos: `docs/rediseno/entregas/pulido-17/`.
+
+## Las tres direcciones
+
+| | Qué es | La partícula | Dónde vive |
+|---|---|---|---|
+| **A · Chispas** (recomendada) | Las cargas de PULIDO 15 hechas luz: 600 (300 en el teléfono) | Núcleo gaussiano y halo, de tamaños muy distintos | CPU (`brasas.ts`) |
+| **B · Enjambre** | Un medio: 16.384 motas (6.400 en el teléfono) alrededor de 40 núcleos | Mota finísima | GPU (`enjambre/`) |
+| **C · Corrientes sobre el logo** | La energía corre pegada a la superficie del logo: 3.136 (1.600) | Estela corta (por la velocidad) | GPU, con el campo de distancia del logo |
+
+Comparten todo lo demás: los arcos, la temperatura, el gesto, los textos, el tono, el movimiento reducido y el pie.
 
 ## Dónde está cada cosa (`src/app/v3/_lib/escena/energia/`)
 
 | Módulo | Qué |
 |---|---|
-| `especies.ts` | Las tres especies, ionizar, recombinar, los fundidos, los ecos. Puro. |
-| `fisica/fisica.ts` | Las constantes de la física, el estado del gas, la grilla, el campo eléctrico en un punto. |
-| `fisica/integracion.ts` | Las fuerzas por subpaso y la integración semi-implícita; el cuadro de la física. |
-| `fisica/reacciones.ts` | Los enlaces que se rompen, la recombinación, la ionización térmica. |
-| `fisica/temperatura.ts` | La temperatura del gas: lo que la sube, lo que la baja, el autolímite. |
-| `arcos/camino.ts` | El líder escalonado (el camino que sigue al campo), el detalle, las ramas, el re-golpe. |
-| `arcos/arcos.ts` | Qué es un arco, sus clases, sus golpes y su resplandor, sus luces. |
-| `arcos/programador.ts` | Quién nace y cuándo, los golpes, la ionización por el camino, el pulso y la descarga. |
-| `arcos/bufer.ts` | El búfer fijo de tramos (arcos, enlaces, líneas de campo). |
-| `interaccion/interaccion.ts` | La máquina del gesto (clic, mantener, soltar, el dedo que hace scroll). Pura. |
-| `interaccion/puntero.ts` | Los oyentes del DOM (pasivos). |
-| `interaccion/lineasDeCampo.ts` | El experimento de las líneas de campo. |
-| `render/comun.ts` | Lo común de los sombreadores: textos, luces de los arcos, la salida por el tono de la escena. |
-| `render/particulas.ts` | El sombreador de las partículas (LOD, órbitas, estelas, profundidad de campo, día y noche). |
-| `render/arcosYEfectos.ts` | Los sombreadores de los arcos (dos pasadas) y de los efectos (piso, logo, anillo, halo). |
-| `render/armado.ts` | Las mallas, las uniformes, la paleta, lo que el programador pregunta afuera; la subida a la GPU. |
-| `cuadro.ts` | Un cuadro: la temperatura, el gesto, la física, los arcos, el dibujo. Sin reservas. |
-| `PlasmaYCargas.tsx` | El componente: arma, escucha, publica el banco y llama al cuadro. |
-| `banco.ts` | Lo que el banco lee y pide (sólo con banco). |
-| `textoEnPantalla.ts` | Las cajas de los textos a la vista (lo que ocupan sus letras; sólo lo que se ve). |
+| `direcciones.ts` | Las tres direcciones, lo que cambia cada una (cantidades, aspecto, simulación) y la recomendada. |
+| `ruido.ts` | El campo: curl noise con gradiente analítico; el mismo hash de 32 bits en JS y en GLSL. Puro. |
+| `brasas.ts` | Las brasas (las chispas de A, los núcleos de B y C): la física de PULIDO 15, el campo, la energía, el puntero, las ondas, el piso, el brillo por densidad. Puro. |
+| `calor.ts` | La temperatura de la escena (lo que la sube y la baja, el autolímite) y la lectura de la escena (scroll, pulso del logo, golpe del pie). Puro. |
+| `arcos/camino.ts` | El camino de un arco: punto medio con ramas (el de PULIDO 15, más suave) y el temblor del re-golpe. Puro. |
+| `arcos/arcos.ts` | Qué es un arco: clases, golpes, resplandor, el re-salto de los pares. Puro. |
+| `arcos/programador.ts` | Quién nace y cuándo: pares, logo, puntero, clic, descarga; nunca donde no se ve. Puro. |
+| `arcos/cinta.ts` | La cinta: una tira continua por camino y por rama, en un búfer fijo. Puro. |
+| `enjambre/simulacion.ts`, `enjambre/enjambre.ts` | La simulación de B y C en la GPU (el ping-pong de la escena) y su paso. |
+| `dibujo/comun.ts` | Lo común: textos (borde suave), luces de los arcos, el final, el tono y la salida premultiplicada. |
+| `dibujo/particulas.ts` | El sombreador de las partículas (los tres estilos) y su aspecto (en uniformes que el banco ajusta en vivo). |
+| `dibujo/arcos.ts`, `dibujo/efectos.ts` | El canal de luz de los arcos (dos pasadas) y los efectos (el piso de noche, el toque del logo). |
+| `dibujo/armado.ts` | Las mallas, los materiales, qué se ve y el borde del logo. |
+| `interaccion/` | La máquina del gesto (pura) y sus oyentes. |
+| `cuadro.ts`, `PlasmaYCargas.tsx`, `banco.ts`, `textoEnPantalla.ts` | El cuadro, el componente, los ganchos del banco y las cajas del texto. |
 
-## Las especies (`ESPECIES`, `especies.ts`)
+## El campo
 
-| Especie | Carga | Masa | Cómo se ve |
+`ruido.ts`: la velocidad es el rotor de un potencial de tres canales de ruido de gradiente (Bridson y otros, 2007): sin divergencia
+(medido: 4·10⁻⁵ relativa), se arremolina sin juntar ni vaciar. Escala 0,17 (un remolino ~6 u), deriva (0,021; 0,034; 0,027) por
+segundo. En la CPU, cada brasa lo recalcula en cuadros alternos.
+
+## A · Las brasas (`brasas.ts`)
+
+- Las de PULIDO 15, sin cambios: cáscara de radio 13 y hueco 4,2; alcance 3,6; atraen 0,42 (opuestas) y repelen 0,55 (iguales); el
+  rechazo de cerca (0,55, choque 6); amortiguación 1,1; tope 3 u/s; la cáscara 1,6. Enlaces: se forman a 1,2, reposo 0,95, resorte
+  2,2, viven 2,5–7 s, empujón 0,9, enfriado 3–7 s.
+- Nuevo: el campo (rapidez 0,42 u/s, ×1,9 caliente; se sigue a 0,8/s), el piso (nada pasa por debajo: un arco a una brasa bajo el
+  piso se leía como grieta) y la ENERGÍA de cada una (0 a 1): reposo 0,1 + 0,45 × la temperatura, se enfría en 0,8 s; la calientan
+  el puntero (1,6/s), las ondas de los pulsos (0,85 al pasar), las del logo (0,9/s en la cresta) y los arcos (0,6 en los extremos,
+  0,35 alrededor). Caliente, tiembla (2,2 u/s²).
+- El puntero (desde su rayo): alcance 4,6; atrae 2 (las negativas) y empuja (las positivas); rechazo de cerca 1,1; las hace GIRAR
+  alrededor del rayo (2,6): ORDENA en vez de apilarlas (con 4,2 de atracción y 0,6 de rechazo se juntaban en un grumo blanco).
+- El brillo por densidad: con n vecinas a menos de 1 u, ×1/(1 + 0,09 n) (un grupo no se satura: «flashero pero con límite»).
+
+## B y C · El enjambre (`enjambre/`)
+
+Posición y energía en una textura, velocidad y edad en otra (32 bits, el ping-pong de la escena). Todas las fuerzas son campos: el
+curl noise (que cerca del logo sólo corre de costado: su campo de distancia), los núcleos (las brasas: los positivos atraen, los
+negativos repelen, hacen girar; su fuerza respira), el puntero (atrae, hace girar, energiza; la carga crece más despacio que en las
+brasas: miles de motas), las ondas, los arcos (energizan lo que pasa cerca) y el temblor. Cada mota vive 6–14 s y renace.
+
+| Ajuste (uniforme) | B · enjambre | C · corrientes |
+|---|---|---|
+| `uFlujo` (rapidez, caliente, sigue, rampa) | 0,5 · 1,2 · 1,1 · 1,2 | 1,1 · 1 · 1,6 · 1,6 |
+| `uNucleosAjuste` (fuerza, suavizado, giro, calienta) | 1,6 · 0,6 · 1,4 · 0,4 | 0,4 · 0,7 · 0,6 · 0,5 |
+| `uReparto` (hueco, radio, reparto, contiene) | 3,4 · 11 · 2,4 · 1,6 | 3,6 · 11 · 2 · 1,6 |
+| `uEnergiaAjuste` (reposo, por temperatura, enfría s, tiembla) | 0,08 · 0,35 · 0,9 · 3 | 0,06 · 0,4 · 0,8 · 2 |
+| `uCursorAjuste` (alcance, atrae, giro, calienta) | 4,6 · 0,5 · 2,4 · 0,9 | 4,6 · 0,5 · 2,4 · 1,2 |
+| `uSuperficie` (banda u, fuerza, se suelta desde, nace en ella) | — | 0,18 · 7 · 0,72 · sí |
+
+C: un resorte a la banda de 0,18 u de la superficie del logo y el campo de costado; las que pasan 0,72 de energía se sueltan y se
+alejan; nacen en la superficie (un punto de la caja del campo llevado a la banda en tres pasos).
+
+## Los arcos (`arcos/`)
+
+- Los de PULIDO 15 (cortos, quebrados, pocos; el logo es la fuente): como mucho 5 a la vez (4 en el teléfono). Clases: entre los
+  pares enlazados (1,1/s, a veces vuelven a saltar enseguida: 40 % en 0,04–0,2 s), del logo (cada 2,4–4,8 s, más seguido activo;
+  largo mínimo 1,6 u: más corto era una mancha), al puntero (2,6/s), el clic (1 o 2 arcos cortos: contenido) y la descarga al
+  soltar (uno grande, al grupo más denso o al logo). Nunca donde no se ve (un texto o fuera del cuadro).
+- MÁS LUMINOSOS Y MENOS DIBUJADOS: 2–3 golpes por el mismo canal en ~150 ms (en cada uno el canal tiembla un poco), el destello de
+  cada golpe (0,03 s) y el resplandor residual (0,15 s). El camino: punto medio de 5 niveles, desvío 0,12, aspereza 0,45 (un
+  canal, no un zigzag). La cinta es una tira continua (sin tramos superpuestos: de noche sumaban dos veces en cada junta).
+- El canal: núcleo de 0,85 px, halo de 11 px (por el ancho de la clase), resplandor más ancho; las puntas se afinan; la luz CORRE
+  por el canal. De noche: halo 0,16, resplandor 0,18, núcleo 1,7. De día: el halo es energía oscura (0,22; resplandor 0,1) que
+  enmarca un núcleo más blanco que el papel.
+- Los efectos: el piso se ilumina debajo de un arco, de noche (0,09); un destello chico donde un arco toca el logo (0,16 u). La
+  luz de la «carga» del puntero se borró (era un disco blanco sobre el logo): la carga se ve en cómo se juntan y se calientan.
+
+## El dibujo (`dibujo/particulas.ts`)
+
+Ninguna figura: núcleo gaussiano y halo (otra gaussiana), en un cuadrado que se estira con la velocidad en la pantalla (en C; en A
+y B, casi nada). BRILLA: titila con su ritmo (las positivas lento, las negativas rápido), destella (más seguido caliente) y RESPIRA
+con su región (un ruido lento: zonas que se encienden). VIBRA: caliente, tiembla en la pantalla (30 veces por segundo). Viene de la
+FUENTE (lejos del logo se apaga) y deja libre la CARA DEL LOGO (lo que queda entre la cámara y el logo, cerca del eje, se apaga).
+Profundidad de campo con el mismo brillo total. Un tope de brillo por partícula.
+
+DE DÍA, energía oscura: un velo de grafito translúcido del tamaño de la partícula, sin borde, y un destello más blanco que el papel
+SÓLO en las calientes (con el destello en reposo, la energía oscura se leía como ojos y, sobre el logo, como rayones).
+
+| Uniforme | A · chispa | B · mota | C · estela |
 |---|---|---|---|
-| Átomo | 0 | 1 | Un núcleo y, de cerca, uno o dos electrones en micro-órbita (una elipse inclinada). De lejos, un punto con halo. |
-| Ion + | +1 | 1 | Un átomo que perdió un electrón: el núcleo con un halo más grande y más caliente (se enfría solo), sin órbita. |
-| Electrón − | −1 | 0,14 | Chico y rápido, con una estela corta alineada a su velocidad. |
+| `uTamano` (radio u mín. · máx., px mín. · máx.) | 0,02 · 0,07 · 0,8 · 5,5 | 0,015 · 0,05 · 0,7 · 4,5 | 0,014 · 0,045 · 0,65 · 4 |
+| `uLuz` (brillo, reposo, halo, ancho del halo) | 1 · 0,2 · 0,3 · 3 | 0,32 · 0,12 · 0,45 · 3 | 0,5 · 0,16 · 0,3 · 2,5 |
+| `uDia` (energía oscura, —, destello, desde) | 0,2 · — · 0,9 · 0,6 | 0 · — · 0,7 · 0,55 | 0,03 · — · 0,35 · 0,7 |
+| `uMovida` (estela s, temblor px, desenfoque, tope) | 0 · 1,6 · 0,3 · 6 | 0,02 · 1 · 0,4 · 7 | 0,2 · 0,8 · 0,4 · 7 |
+| `uFuente` (radio, se apaga, respira, escala) | 6,5 · 0,75 · 0,55 · 0,22 | 5 · 0,9 · 0,6 · 0,25 | 6 · 0,8 · 0,6 · 0,22 |
+| `uDelante` (cara del logo, radio, tope) | 0,3 · 3,6 · 1,6 | 0,7 · 3,6 · 0,6 | 0 · 4 · 1,1 |
 
-- Cuántos: 260 átomos y 64 lugares de electrón libre en escritorio (324 partículas); 140 y 36 en el teléfono (176).
-- Dónde: una cáscara alrededor del centro del logo, de radio 13 u y con un hueco de 4,2 u (el logo mide 6,9 de ancho). Más afuera de
-  1,35 veces el radio se van con un fundido y renacen adentro, con su especie.
-- Al empezar, el 12 % de los átomos ya está ionizado (con su electrón al lado).
-- **La reserva de electrones es el primer autolímite**: sin lugar libre no hay ionización (el gas nunca tiene más de 64 iones).
-- **Fundidos, nunca un pop** (s): nacer 0,9; irse 0,7; el electrón que sale disparado 0,06 (4 cuadros); el que se captura 0,12.
-- Brillo de un evento (se suma y se apaga en 0,35 s): ionizar 1,2; recombinar 1,6 (el destello); cada golpe de arco 0,5. Calor del
-  ion recién hecho 1, que se enfría en 2,4 s.
-- El eco de una recombinación: un anillo chico que crece en 0,4 s (de día en tinta, de noche en luz), hasta 4 a la vez.
+Los textos: pasan por detrás (90 %), con un borde suave de 56 px (en un campo denso, un borde de 24 px dejaba un rectángulo vacío).
+El tono: el ACES compensado de la escena, el día y la noche cada uno por su lado; la salida premultiplicada (de día tapa, de noche
+suma). Sin bloom.
 
-## Las fuerzas (`FISICA`, `fisica/fisica.ts` e `integracion.ts`)
+## La temperatura (`calor.ts`)
 
-- **Coulomb suavizado** entre cargas: `k · qi · qj · r / (r² + ε²)^(3/2)`, k = 1,1, ε = 0,32 u, con un **corte suave** a cero en el
-  alcance (3 u): `(1 − r²/alcance²)²`. Las opuestas se atraen; las iguales se repelen; encima de una carga el campo es finito.
-- **Polarización**: un átomo neutro cerca de una carga, una atracción débil (0,12, con el mismo corte).
-- **Repulsión de corto alcance** entre todas (como Lennard-Jones, acotada): debajo de σ = 0,42 u, `8 · (1 − r/σ)² · σ / max(r, 0,1)`.
-  No colapsan (medido: nunca a menos de ~0,1 u en dos minutos).
-- **El logo**: una carga positiva suavizada en su centro (2,4; suavizado 3,4 u, porque no es un punto) que **late**: sube hasta
-  un 60 % con su pulso principal (el latido decae en 0,55 s).
-- **El puntero**: una carga sobre su rayo (alcance 4,6 u, carga 4,2; pegado al rayo rechaza, 0,6 u). Atrae a los electrones,
-  empuja a los iones y polariza a los átomos. Cargándose, hasta 3 veces más fuerte. Rompe los enlaces a menos de 2,6 u.
-- **Los anillos del pulso del logo**: su frente (la misma cuenta que el piso, `entorno/Pulso.tsx`) empuja el gas hacia afuera, en
-  el plano del piso (2,6).
-- **Agitación térmica**: un empujón al azar de `(0,3 + 1,4 · T) · 1,7` u/s² (los electrones, 2,4 veces más).
-- **Contención**: un resorte (1,6) devuelve a la cáscara lo que sale del radio o entra al hueco.
-- **Amortiguación** (1/s) y **tope de rapidez** (u/s), por especie: átomo 1,15 y 2,4; ion 1 y 2,4; electrón 2,1 y 6,5.
-- **Integración**: semi-implícita (primero la velocidad, después el lugar con la velocidad nueva), a paso fijo de 1/120 s, con
-  subpasos (a lo sumo 4 por cuadro). **La grilla**: celdas del alcance (3 u); cada partícula mira las 27 celdas vecinas: ~2.600 pares
-  por subpaso de los 52.326 de todos contra todos.
+0 a 1. Sube con la velocidad del scroll (0,55 por pantalla por segundo, hasta 4), los anillos del pulso del logo (0,06 × amplitud),
+el principal (0,12), el clic (0,35), la descarga (0,45), el golpe del pie (0,45) y cada arco (0,012); vuelve a 0,14 en 2,6 s
+(más rápido caliente); se satura con una tangente hiperbólica (nunca pasa el techo).
 
-## Las moléculas (`FISICA.enlace`, `integracion.ts` y `reacciones.ts`)
+## El gesto (`interaccion/`)
 
-| | Se forma a | Más lento que (u/s, × (1 − 0,7 T)) | Reposo | Resorte | Amortiguación | Latido | Energía (Arrhenius) | Se rompe estirado a |
-|---|---|---|---|---|---|---|---|---|
-| Molécula (dos átomos) | 0,62 u | 0,9 | 0,55 u | 110 | 1,2 | 1,4 Hz, ±13 % | 0,55 | 1,9 × reposo |
-| Par ligado (ion y electrón) | 0,85 u | 2,4 | 0,62 u | 40 | 0,5 | 1,9 Hz, ±11 % | 0,42 | 2,1 × reposo |
+Clic (menos de 0,26 s): un pulso (una onda que empuja y calienta, y 1–2 arcos). Mantener: la carga (completa en 1,4 s; hasta 3 veces
+la del puntero). Soltar: la descarga. En el teléfono, tocar y mantener quieto (el dedo que se mueve más de 10 px hace scroll y
+cancela). Sobre un texto, nada.
 
-- **Vibran**: su largo de reposo late y el resorte (rígido: su frecuencia propia, arriba del latido) lo sigue (medido: el largo
-  varía ~0,07 u).
-- **Se rompen** solos con la **temperatura local**: la del gas más `0,12 · v²`, con v la rapidez relativa del par DE COSTADO (a lo
-  largo del enlace es su propia vibración). Por cuadro, `1 − exp(−2,5 · exp(−energía / (local + 0,02)) · dt)`. También estirados
-  de más o tocados por el puntero. Después, un rato sin enlazarse (1,5 a 4 s).
-- **El par ligado recombina** en calma: `0,16 · (1 − T)²` por segundo. El ion captura su electrón (un destello y un eco).
-- **Ionización térmica**, sólo muy caliente: por segundo y por átomo, `0,12 · (T − 0,45)²`.
+## El pie
 
-## La temperatura (`TEMPERATURA`, `fisica/temperatura.ts`): el puente con el usuario
+Hacia el golpe del encastre, la energía cerca del logo baja hasta un 85 %; el golpe es una ONDA desde el logo (sin arco: competía
+con la descarga del filo); después se apaga con la cámara que sube.
 
-Un número de 0 a 1. La calma es 0,14.
+## Movimiento reducido
 
-| Sube con | Cuánto |
-|---|---|
-| El scroll | 0,55 por segundo por cada pantalla por segundo (hasta 4 pantallas/s). Rápido sostenido: ~0,6–0,7. |
-| Cada anillo del pulso del logo (por su amplitud) | 0,06 |
-| El pulso principal del logo | 0,12 |
-| El clic (el pulso) | 0,35 |
-| La descarga (soltar lo cargado) | 0,45 · (0,5 + 0,5 · fuerza) |
-| El golpe del pie | 0,45 |
-| Cada arco | 0,012 |
+Quietas (sin titilar: el reloj del dibujo clavado), sin física, sin arcos ni pulsos.
 
-- **Baja** sola hacia la calma, con `τ = 2,6 / (1 + T)` s: más rápido cuanto más caliente.
-- **El autolímite**: lo acumulado se satura con una tangente hiperbólica (nunca pasa de 1); calentar cuesta más cuanto más caliente
-  está (`· (1 − T)`); se enfría más rápido caliente; y la reserva de electrones limita la ionización.
-- **Qué cambia**: la agitación, la ruptura de enlaces (Arrhenius), la ionización térmica, la chance de que un arco ionice
-  (`× (1 + 0,6 T)`), las tasas de los arcos (`× (1 + 1,4 T)`) y cuánto vibra todo. En calma se forman moléculas y los iones
-  recapturan; caliente, todo se rompe y se ioniza.
+## Lo medido
 
-## El ciclo de la ionización
+En la NVIDIA (RTX 5050; la pantalla del banco va a 75 Hz: 13,34 ms por cuadro). Recibo: `entregas/pulido-17/o5-medido.json`.
 
-1. Un **arco** pasa cerca de un átomo (o le pega): el átomo se vuelve **ion +** y suelta un **electrón** que sale disparado (2,6 a 4,4
-   u/s, lejos del canal) con su estela.
-2. El electrón se frena (su amortiguación) y la **atracción de Coulomb** lo lleva hacia un ion.
-3. Lento y cerca, forman un **par ligado** que vibra. Mientras dura, **descarga arcos** entre los dos (que ionizan a los vecinos).
-4. En calma, el par **recombina**: el ion captura su electrón, con un destello y un eco, y vuelve a ser átomo.
-5. Caliente, los pares se rompen antes de recombinar: hay más iones y más arcos. Como mucho tantos iones como lugares de electrón.
+| | Con vsync, al máximo (media / máx.) | De noche (máx.) | Cuadros de más de 20 ms en caliente | Sin vsync, al máximo (lo que suma al polvo) | La simulación en la GPU |
+|---|---|---|---|---|---|
+| A · 1440 | 13,34 / 14,1 | 14,0 | 0 | 4,32 ms (+2,04) | — |
+| A · 390 | 13,34 / 14,0 | 14,0 | 0 | 2,43 ms (+0,42) | — |
+| B · 1440 | 13,34 / 14,1 | 14,0 | 0 | 2,76 ms (+0,48) | 0,121 ms |
+| B · 390 | 13,34 / 14,0 | 14,1 | 0 | 2,15 ms (+0,14) | 0,025 ms |
+| C · 1440 | 13,34 / 14,0 | 14,1 | 0 | 2,74 ms (+0,46) | 0,113 ms |
+| C · 390 | 13,34 / 14,0 | 14,0 | 0 | 2,17 ms (+0,16) | 0,026 ms |
+| el polvo (la base) · 1440 | 13,34 / 13,9 | 14,0 | 0 | 2,28 ms | — |
+| el polvo · 390 | 13,34 / 13,9 | 14,0 | 0 | 2,01 ms | — |
 
-Medido en Node (dos minutos: 40 s en calma, 40 s con scroll rápido, 40 s en calma): unas 110 ionizaciones y 110 recombinaciones; en
-calma ~15–20 iones y ~4 moléculas a la vez; caliente ~50 iones (hasta los 64 del tope) y casi ninguna molécula; vuelve a ordenarse.
+«Al máximo»: 6 s con la temperatura al tope, scroll rápido de ida y vuelta, pulsos y cargas. «Sin vsync»: el Chrome sin sincronía ni
+tope de cuadros (el rAF mide lo que tarda el cuadro). A es la que más suma (las 600 brasas en la CPU: la física, ~0,9 ms en Node, y
+lo demás del cuadro); B y C, casi nada (la simulación vive en la GPU).
 
-## Los arcos (`ARCOS`, `CAMINO`, `arcos/`)
-
-- **El camino es un líder escalonado** (`camino.ts`): 24 pasos desde el origen; cada paso mezcla la dirección al blanco (pesa de
-  0,25 a 1 a lo largo del camino), **el campo eléctrico en ese punto** (pesa 0,62 al principio, nada al final: sigue las líneas de
-  campo) y un poco de azar (0,34; la mitad en los del logo). Cada paso se parte en dos con el medio corrido un 14 % (el detalle).
-  Medido contra el campo de verdad: 0,75 de alineación, contra 0,63 de un camino guiado al azar.
-- **Las ramas** (hasta 3, de 8 pasos) salen entre el 15 % y el 80 % del camino y **buscan una carga a menos de 1,9 u**; si no hay,
-  mueren a lo largo del campo (0,35 a 0,8 u).
-- **Los golpes**: 2 o 3 en una ventana de 40 a 150 ms, por el mismo canal (el re-golpe lo tiembla un 10 %). Cada golpe, un destello
-  del núcleo que se apaga en 28 ms; el **resplandor residual del canal** decae en 140 ms. El arco vive su último golpe más ~360 ms.
-- **La ionización**: el primer golpe ioniza el átomo donde pega y los que su camino toca (a menos del radio de su clase), con su
-  chance; los re-golpes, con un tercio de esa chance.
-- **La luz**: cada arco ilumina un instante lo que tiene cerca (las partículas a ~1,7 u, en el sombreador), el piso debajo (un disco
-  de luz, de noche) y, el del logo, donde toca el logo (un destello). Sin bloom.
-- Las clases:
-
-| Clase | Golpes | Brillo | Ancho | Ramas | Ioniza (radio, chance, máximo) | Cuándo |
-|---|---|---|---|---|---|---|
-| `par` (ion y electrón ligados) | 2–3 | 0,8 | 1 | 0–1 | 0,35 u, 0,35, 1 | 0,9 por segundo × calor |
-| `logo` (el generador) | 3 | 1,35 | 1,35 | 0–1 (los más limpios) | 0,45 u, 0,75, 3 | cada 2–4 s; más seguido con su latido, cerca del encastre y en el golpe del pie |
-| `cursor` (al puntero) | 2 | 1 | 0,9 | 0–1 | 0,3 u, 0,3, 1 | 2,2 por segundo × calor, desde cargas a 0,9–3,2 u de su rayo |
-| `pulso` (el clic) | 2 | 1,1 | 1 | 1–2 | 0,45 u, 0,6, 2 | 2 a 4 arcos al clic, a partículas a menos de 4 u |
-| `descarga` (soltar lo cargado) | 3 | 1,8 × fuerza | 1,8 × fuerza | 1–3 | 0,6 u, 0,85, 4 | al grupo de cargas más denso a menos de 9 u; sin grupo, al logo |
-
-- **Como mucho 5 a la vez** (4 en el teléfono); los re-golpes no suman. Si no hay lugar, el del puntero y la descarga desplazan al
-  arco más viejo.
-- **Nunca sobre un texto**: un arco no nace si un extremo cae sobre un texto (las cajas de lo que ocupan sus letras, con 14 px de
-  aire; sólo lo que se ve) y se apaga detrás de él (pasa por detrás, en el sombreador).
-
-## La interacción (`INTERACCION`, `interaccion/`)
-
-- El puntero es una carga, siempre (el mouse sobre la página; el dedo mientras toca).
-- **Clic o toque corto** (menos de 260 ms): **el pulso**, un frente radial que empuja todo hacia afuera (3,2 u/s), ioniza hasta 3
-  átomos y tira 2 a 4 arcos; un anillo que crece en 0,45 s (2,8 u).
-- **Mantener apretado**: desde los 260 ms **se carga** (del todo en 1,4 s): un halo que crece y late, y su carga, hasta 3 veces más
-  fuerte. **Al soltar**: la descarga, con la fuerza de la carga.
-- **En el teléfono** el arrastre es el scroll: un dedo que se mueve más de 10 px cancela el gesto. El gesto es tocar (pulso) o
-  mantener quieto (cargar y soltar). El dedo que se levanta todavía cuenta en ese cuadro (su último punto).
-- **Sobre un texto o algo que se cliquea, nada**: el gesto es de la página. Los oyentes son pasivos (no frenan el scroll ni el clic).
-- El punto del puntero en el volumen: donde su rayo entra a una esfera de 5,4 u alrededor del logo (sobre el logo, no cae en su hueco).
-
-## El dibujo (`render/`)
-
-- **Las partículas**, instanciadas (una llamada): el tamaño del mundo a su distancia (núcleo de 0,045 a 0,095 u; el electrón, 0,028),
-  con topes de 1,3 a 8 px.
-  - **LOD**: con el núcleo de 2,2 px aparecen las órbitas; desde 3,8 px se ven enteras (un fundido entre los dos).
-  - **La estela** del electrón: lo que recorrió en 0,075 s, en la pantalla (hasta 70 px), que se apaga hacia la cola.
-  - **Profundidad de campo barata**: lejos del foco (el logo), de 3,5 a 14 u, más blando y hasta un 70 % más tenue.
-- **De día, objetos**: el núcleo es una esfera de grafito sombreada con un **borde especular fino y claro** del lado de la luz (y un
-  brillito); alrededor, un anillo del papel (sobre el papel no se ve; sobre el logo negro lo separa). **De noche, luz**: el núcleo
-  blanco que se va al halo; el del ion, más grande y apenas más cálido.
-- **Los arcos**, en **dos pasadas** con la misma geometría: primero la tinta y el resplandor de todos los tramos, después los
-  núcleos (si no, de día la tinta de un tramo tapaba el núcleo del anterior en cada junta). De día, **tinta con un núcleo blanco**;
-  de noche, luz (el núcleo, fuerte: el tono lo lleva al blanco).
-- **Los efectos** (instanciados): el piso iluminado bajo cada arco (de noche), el destello en el logo, el anillo del pulso, el eco de
-  la recombinación y el halo del puntero que se carga.
-- **El tono**: todo se calcula en lineal y pasa por el tono de la escena (el ACES compensado, `tono.ts`) y su espacio de color, de
-  día y de noche por su lado. Premultiplicado: de noche suma luz (alfa 0); de día tapa con su alfa.
-- **Detrás de los textos**: cada partícula, arco y efecto se apaga un 95 % sobre una caja de texto.
-- **Movimiento reducido**: quietas (a la vista, sin fundido), sin arcos, ni pulsos, ni efectos.
-- **El final del pie**: se apaga con la cámara que sube, recién después del golpe (antes, cerca del encastre, el logo está más
-  activo; en el golpe, descarga).
-- **La paleta** (lineal, antes del tono): monocromo (de día grafito 0,075 con borde y halo del papel 0,82–0,86; de noche blanco, el
-  halo 0,70/0,75/0,86, el del ion caliente 0,98/0,90/0,82, los arcos 0,74/0,80/1) o azul eléctrico (`?plasma-color=si`).
-
-## Los límites («flashero, pero con un límite»)
-
-- Cientos de partículas: 324 en escritorio, 176 en el teléfono.
-- Como mucho 5 arcos a la vez (4 en el teléfono), más sus re-golpes.
-- La escena no se satura: la temperatura no pasa de 1 y se enfría más rápido caliente; la ionización tiene la reserva de electrones;
-  las tasas suben, pero con el tope de arcos.
-
-## El rendimiento
-
-- La física en la CPU, con la grilla (unos 0,3 ms por cuadro en Node). Las partículas instanciadas; los arcos, los enlaces y las
-  líneas de campo desde un búfer fijo de 752 tramos (una llamada por pasada). **Sin reservas por cuadro**: los búferes son fijos y
-  suben enteros (con los rangos de subida, three ordena con un comparador nuevo en cada subida). Las cajas de los textos se leen
-  cada 200 ms o con el scroll (eso sí lee el DOM).
-- Medido en la NVIDIA (RTX 5050; la pantalla del banco va a 75 Hz: 13,34 ms por cuadro): ver el recibo y el log de PULIDO 16.
-
-## Para afinar
-
-- Más o menos arcos: `ARCOS.tasas` (pares, cursor, cada cuánto el logo) y `ARCOS.tasas.calor`.
-- Más o menos ionización: `ARCOS.clases.*.ioniza`, `FISICA.ionizacionTermica`, `ESPECIES.electrones` (la reserva).
-- Más orden en calma: `FISICA.enlace.ligado.recombina`, `FISICA.enlace.*.energia` (más alta, más duran).
-- Más reacción al scroll: `TEMPERATURA.scroll.porPantalla`; volver antes a la calma: `TEMPERATURA.baja`.
-- Arcos más pegados al campo: `CAMINO.campo` (más alto) y `CAMINO.azar` (más bajo).
-- El aspecto: `PARTICULAS` (tamaños, LOD, estela, foco), `TRAZO` (anchos de los arcos), `PALETAS` (`render/armado.ts`).
+EN FRÍO (la primera visita: las cachés de shaders, de código y HTTP borradas; el primer scroll rápido hasta el fondo y de vuelta):
+el polvo solo tironea igual (534, 747 y 547 ms a 1440 en tres corridas; 814 a 390); con el plasma, A 587 y 400, B 1200, 480 y 720
+y 347, C 694 y 187. Son del sitio: el cuadro largo cae con el campo del logo que se publica (lo hornea el polvo con física, montado
+siempre: `o5-campo.ts`) y con las secciones que se montan al llegar. Lo del plasma está armado desde el primer cuadro (las
+partículas, la cinta de los arcos y los efectos se dibujan siempre: el precompilado de la escena los arma).

@@ -15,7 +15,6 @@
  *     siete candidatos se borraron. S2 · los ambientes ya no son archivos: el ambiente es generativo, en el navegador
  *     (`src/app/v3/_lib/sonido/ambienteGenerativo.ts`); los bucles de antes se borraron (código y archivos).
  *     [PULIDO 13] K3 · y el resultado de los formularios: `exito` (la pieza encaja) y `error` (no entra).
- *     [PULIDO 16] N2 · y la chispa del plasma (`?plasma-sonido=si`): al final, así los cortes de los demás no se mueven.
  *   · Los cortes (`src/app/v3/_lib/sonido/sprite.ts`).
  */
 import { execFileSync } from 'node:child_process'
@@ -305,18 +304,6 @@ function error(): Float32Array {
   return bordes(pico(filtrar(sumar([primera, 0.9], [segunda, 1]), 'pasabajos', () => 1400, 0.7), -4), 0.001, 0.1)
 }
 
-// ── [PULIDO 16] N2 · La chispa del plasma ───────────────────────────────────
-
-/** Un chisporroteo corto y bajo: unas pocas descargas secas, cada una más chica, y un zumbido apenas (los arcos del plasma). */
-function chispa(): Float32Array {
-  const n = muestras(0.22)
-  const crujido = filtrar(filtrar(ruido(n, 311), 'pasaaltos', () => 3200, 0.7), 'pasabanda', () => 6200, 0.8)
-  const golpes: readonly (readonly [number, number])[] = [[0, 1], [0.011, 0.6], [0.026, 0.8], [0.048, 0.45], [0.071, 0.55], [0.103, 0.3], [0.142, 0.22]]
-  const descargas = por(crujido, (t) => golpes.reduce((s, [desde, a]) => s + (t < desde ? 0 : a * exp(t - desde, 0.0035)), 0))
-  const zumbido = por(filtrar(ruido(n, 317), 'pasabanda', () => 1400, 3), (t) => exp(t, 0.03))
-  return bordes(pico(sumar([descargas, 1], [zumbido, 0.12]), -9), 0.0005, 0.03)
-}
-
 // ── Los archivos ────────────────────────────────────────────────────────────
 
 const HUECO_S = 0.3
@@ -369,7 +356,6 @@ function principal(): void {
     ['golpe', golpeConSala()],
     ['exito', exito()],
     ['error', error()],
-    ['chispa', chispa()],
   ]
   const trozos: Float32Array[] = []
   const cortes: Record<string, readonly [number, number]> = {}

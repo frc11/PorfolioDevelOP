@@ -107,16 +107,17 @@ controlPositivo('  el detector VE el papel sobre la sala ya de día (la letra at
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('M2 · La energía nueva: plasma + cargas (`?energia=plasma`)')
 // Los destellos se borraron con su código y sus banderas; entra la energía: el polvo de siempre sin la bandera, el plasma EN LUGAR
-// del polvo con `energia=plasma` (con `plasma-y-polvo`, además del polvo), en azul con `plasma-color=si`.
+// del polvo con `energia=plasma` (con `plasma-y-polvo`, además del polvo), en azul con `plasma-color=si`. [PULIDO 17] O3 · el color
+// se borró («sin sonido ni color, descartado»): la bandera ya no existe (s68).
 const STAGE = leer('_lib/escena/ProbeStage.tsx')
 const banderas = (stage: string): boolean =>
   !existsSync(`${V3}/_lib/escena/destellos`) && !(PRUEBAS_SUELTAS as readonly string[]).some((k) => k.startsWith('destellos')) &&
-  !('destellos' in entornoPedido('producto,destellos=chispas').pruebas) && PRUEBAS_SUELTAS.includes('energia') && PRUEBAS_SUELTAS.includes('plasma-color') &&
+  !('destellos' in entornoPedido('producto,destellos=chispas').pruebas) && PRUEBAS_SUELTAS.includes('energia') && !(PRUEBAS_SUELTAS as readonly string[]).includes('plasma-color') &&
   entornoPedido('producto').pruebas.energia === 'no' && entornoPedido('producto,energia=plasma').pruebas.energia === 'plasma' &&
-  entornoPedido('producto,energia=plasma-y-polvo').pruebas.energia === 'plasma-y-polvo' && entornoPedido('producto,energia=plasma,plasma-color=si').pruebas['plasma-color'] === 'si' &&
+  entornoPedido('producto,energia=plasma-y-polvo').pruebas.energia === 'plasma-y-polvo' && !('plasma-color' in entornoPedido('producto,energia=plasma,plasma-color=si').pruebas) &&
   stage.includes("const sinPolvo = energia === 'plasma'") && stage.includes('{!sinPolvo && <DepthParticles store={store} />}') &&
   stage.includes("{energia !== 'no' && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion}") && !/Destellos/.test(stage)
-afirmar(banderas(STAGE), 'M2 · sin `?destellos=` (borrados con su código); `?energia=plasma` en lugar del polvo (o `plasma-y-polvo`), `?plasma-color=si`; sin bandera, el polvo')
+afirmar(banderas(STAGE), 'M2 · sin `?destellos=` (borrados con su código); `?energia=plasma` en lugar del polvo (o `plasma-y-polvo`; `?plasma-color=si` se borró en PULIDO 17); sin bandera, el polvo')
 controlPositivo('M2 · el detector VE los destellos todavía montados', `${STAGE}\n{destellos !== 'no' && <DestellosDeEnergia />}`, banderas)
 
 // [PULIDO 16] N2 · EL PLASMA SE REHIZO a pedido («mejorá TODO»): átomos, iones y electrones, Coulomb suavizado con su repulsión de
@@ -125,6 +126,8 @@ controlPositivo('M2 · el detector VE los destellos todavía montados', `${STAGE
 // Lo que acá se afirmaba del modelo de PULIDO 15 (las cargas de dos signos, la grilla, los enlaces, el tope y las clases de arcos,
 // ninguno sobre el texto, el camino quebrado, los sombreadores detrás del texto, el movimiento reducido) se borró con ese código
 // (`cargas.ts`, `arcos.ts`, `sombreadores.ts`, `armado.ts`); s67 lo afirma sobre el modelo nuevo, con sus controles positivos.
+// [PULIDO 17] O3 · el de PULIDO 16 no gustó y se borró; el plasma volvió al espíritu de este (las cargas sueltas y sus arcos), en tres
+// direcciones (`?plasma=a|b|c`): s68.
 
 // Medido (`m2-plasma.ts`, el banco de producción): en la NVIDIA, a 1440 (el mouse) y a 390 (el dedo), monocromo y en color: los ms
 // por cuadro de día, con el puntero y de noche dentro del cuadro (la pantalla del banco va a 75 Hz: 13,3 ms), como la base del

@@ -16,6 +16,7 @@ import { Entorno } from './entorno/Entorno'
 import { Rebote } from './entorno/Rebote'
 import { Amanecer } from './amanecer/Amanecer'
 import { DepthParticles } from './DepthParticles'
+import { direccionDe } from './energia/direcciones'
 import { PlasmaYCargas } from './energia/PlasmaYCargas'
 import { FinalDelPie } from './final/FinalDelPie'
 import { CaidaDelLogo } from './intro/CaidaDelLogo'
@@ -161,8 +162,9 @@ export default function ProbeStage({
   const moireRef = useRef<MoireHandle>(null)
   // [PULIDO 15] M2 · `?energia=plasma`: la energía nueva (plasma + cargas) en lugar del polvo y del bokeh (sus grupos quedan: el rig
   // los deriva); `plasma-y-polvo`, con el polvo además; `?plasma-color=si`, en azul eléctrico. Los destellos (`?destellos=`) se borraron.
-  // [PULIDO 16] N2 · y sus experimentos: `?plasma-campo=si` (las líneas de campo) y `?plasma-sonido=si` (el chisporroteo).
-  const { energia, 'plasma-color': plasmaColor, 'plasma-campo': plasmaCampo, 'plasma-sonido': plasmaSonido } = entornoDeLaEscena().pruebas
+  // [PULIDO 16] N2 · y sus experimentos. [PULIDO 17] O3 · los experimentos y el color se borraron; `?plasma=a|b|c`, la dirección
+  // (sin la bandera, la recomendada: `energia/direcciones.ts`).
+  const { energia, plasma } = entornoDeLaEscena().pruebas
   const sinPolvo = energia === 'plasma'
 
   return (
@@ -258,7 +260,7 @@ export default function ProbeStage({
         <group ref={bokehGroupRef} name="bokeh">
           {!sinPolvo && <BokehParticles />}
         </group>
-        {energia !== 'no' && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} color={plasmaColor === 'si'} campo={plasmaCampo === 'si'} sonido={plasmaSonido === 'si'} />}
+        {energia !== 'no' && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} direccion={direccionDe(plasma)} />}
 
         <OrbitRig
           store={store}
