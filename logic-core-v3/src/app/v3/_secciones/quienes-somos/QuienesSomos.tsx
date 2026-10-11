@@ -15,10 +15,10 @@ import { CanalDePieza, CanalDeTexto, ConInercia, Trazo } from '../_contrato/cana
 import { Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
-import { nocheEfectiva } from '../../_lib/escena/nocheDisparada'
+import { NOCHE_DISPARADA, nocheEfectiva } from '../../_lib/escena/nocheDisparada'
 import { BRILLO_DE_LA_NOCHE } from '../../_lib/escena/particleGlow'
 import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
-import { entornoDeLaEscena } from '../../_lib/escena/entorno'
+import { hayBanco } from '../../_lib/escena/entorno'
 
 import { CONTENIDO, TRAMOS_DEL_TITULAR, TRAMOS_DEL_TITULAR_EN_LA_BANDA } from './contenido'
 import { ElEquipo, LaFoto } from './equipo'
@@ -202,17 +202,10 @@ function CuerpoDeLaAgencia({ progreso, enElPlano }: { readonly progreso: Progres
     observador.observe(el)
     return () => observador.disconnect()
   }, [enElPlano])
-  // [PULIDO 14] L1 · `?cuerpo=izquierda`: la columna de antes (para comparar), con la regla de `banda.css`.
-  useEffect(() => {
-    const columna = enElPlano.current?.parentElement ?? null
-    if (columna === null || entornoDeLaEscena().pruebas.cuerpo !== 'izquierda') return undefined
-    columna.setAttribute('data-columna', 'izquierda')
-    return () => columna.removeAttribute('data-columna')
-  }, [enElPlano])
   const hastaElPie = useTransform(progreso ?? CERO, (p) => llegadaHastaElPie(p, alto.current, ENTRADA_EN_CUADRO_PX, DESCANSO_ANTES_DE_SALIR_PX))
   return (
-    // [PULIDO 14] L1 · siempre delante y entero; donde el logo pasa por detrás, su velo de día y de noche (`banda.css`).
-    <div ref={enElPlano} data-velo-del-cuerpo="">
+    // [PULIDO 15] M1 · siempre delante y entero, sin velo: donde el logo pasa por detrás, el halo corto pegado a las letras (`banda.css`).
+    <div ref={enElPlano} data-halo-del-cuerpo="">
       <CanalDeTexto progreso={progreso === null ? null : hastaElPie} tipo="parrafo" texto={CONTENIDO.bajada}>
         {(contenido) => <p className={GEOMETRIA.cuerpoDeLaBajada}>{contenido}</p>}
       </CanalDeTexto>
@@ -223,7 +216,9 @@ function CuerpoDeLaAgencia({ progreso, enElPlano }: { readonly progreso: Progres
 /**
  * [PULIDO 11] A4 · J9 b · QUIÉNES SOMOS DE NOCHE: mientras la sección está a la vista, la noche que se ve (la de la gota o la
  * del arco, la mayor) va a `--noche-de-la-sala` en la sección. Abajo de 1024 la lee el velo de los textos que cruzan el logo
- * (`banda.css`); arriba no la lee nadie. Sólo escribe cuando cambia.
+ * (`banda.css`). [PULIDO 15] M1 · y la del arco sola (la luz que se ve en ese cuadro) va a `--noche-del-arco`: desde 1024 la lee
+ * el halo del cuerpo (de noche, el papel con el halo de la tinta); la de la gota no sirve ahí, porque en un salto sigue alta con la
+ * sala ya de día. Sólo escriben cuando cambian. Con banco, `__nocheDelBanco(c)` pone la gota (para medir el cuerpo de noche).
  */
 function useNocheEnLaSeccion(id: string): void {
   useEffect(() => {
@@ -231,11 +226,16 @@ function useNocheEnLaSeccion(id: string): void {
     if (el === null) return undefined
     let cuadro = 0
     let escrita = -1
+    let delArco = -1
     const leer = (): void => {
       const noche = Math.max(nocheEfectiva(), BRILLO_DE_LA_NOCHE.uNoche.value)
       if (Math.abs(noche - escrita) > 0.004) {
         el.style.setProperty('--noche-de-la-sala', noche.toFixed(3))
         escrita = noche
+      }
+      if (Math.abs(BRILLO_DE_LA_NOCHE.uNoche.value - delArco) > 0.004) {
+        delArco = BRILLO_DE_LA_NOCHE.uNoche.value
+        el.style.setProperty('--noche-del-arco', delArco.toFixed(3))
       }
       cuadro = requestAnimationFrame(leer)
     }
@@ -244,10 +244,18 @@ function useNocheEnLaSeccion(id: string): void {
       if (e?.isIntersecting === true) cuadro = requestAnimationFrame(leer)
     })
     observador.observe(el)
+    const ventana = window as Window & { __nocheDelBanco?: (c: number) => void }
+    if (hayBanco()) {
+      ventana.__nocheDelBanco = (c) => {
+        NOCHE_DISPARADA.cantidad = c
+      }
+    }
     return () => {
       observador.disconnect()
       cancelAnimationFrame(cuadro)
       el.style.removeProperty('--noche-de-la-sala')
+      el.style.removeProperty('--noche-del-arco')
+      delete ventana.__nocheDelBanco
     }
   }, [id])
 }

@@ -1,0 +1,860 @@
+{
+ "que": "M1 · el cuerpo de Quiénes somos a la izquierda, delante del logo, con su halo (sin velo). Por ancho: el porcentaje de las letras visibles cuyo centro cae en la silueta del logo (__siluetaDelBanco, celdas de 4 px) en el reposo del viaje, en la entrada (desde una pantalla antes, de a 48 px) y en la salida (de a 48 px hasta que se va); y en el reposo y en la parada con más cruce, el contraste como WCAG (la letra contra el fondo típico, por tramos de 40 px de cada renglón: el peor tramo), del cuerpo entero y de los renglones sobre el logo. De día y con la noche puesta (__nocheDelBanco(1): la gota en 1, la sala de noche; la letra pasa al papel con el halo de la tinta). nocheReal: de Portfolio a la salida con la rueda rápida (a 1440). Banco de producción (.next-probe), Chrome por CDP, la NVIDIA.",
+ "anchos": {
+  "1024x768": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 41.1
+   },
+   "entrada": [
+    [
+     -192,
+     0
+    ],
+    [
+     -144,
+     0
+    ],
+    [
+     -96,
+     0
+    ],
+    [
+     -48,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "salida": [
+    [
+     48,
+     6.1
+    ],
+    [
+     96,
+     17.3
+    ],
+    [
+     144,
+     25.2
+    ],
+    [
+     192,
+     29.4
+    ],
+    [
+     240,
+     41.1
+    ],
+    [
+     288,
+     34.1
+    ],
+    [
+     336,
+     24.8
+    ],
+    [
+     384,
+     7.9
+    ],
+    [
+     432,
+     0
+    ],
+    [
+     480,
+     0
+    ],
+    [
+     528,
+     0
+    ],
+    [
+     576,
+     0
+    ],
+    [
+     624,
+     0
+    ]
+   ],
+   "dia": {
+    "reposo": {
+     "por": 0,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 9.99,
+     "sobreElLogo": null
+    },
+    "salida": {
+     "por": 42.1,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 6.97,
+     "sobreElLogo": 6.28
+    }
+   },
+   "noche": {
+    "reposo": {
+     "por": 0,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 10.14,
+     "sobreElLogo": null
+    },
+    "salida": {
+     "por": 41.1,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 4.31,
+     "sobreElLogo": 4.31
+    }
+   }
+  },
+  "1280x800": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 39.3
+   },
+   "entrada": [
+    [
+     -176,
+     0
+    ],
+    [
+     -128,
+     0
+    ],
+    [
+     -80,
+     0
+    ],
+    [
+     -32,
+     0
+    ]
+   ],
+   "salida": [
+    [
+     48,
+     5.1
+    ],
+    [
+     96,
+     13.1
+    ],
+    [
+     144,
+     23.4
+    ],
+    [
+     192,
+     32.2
+    ],
+    [
+     240,
+     29
+    ],
+    [
+     288,
+     33.2
+    ],
+    [
+     336,
+     39.3
+    ],
+    [
+     384,
+     26.6
+    ],
+    [
+     432,
+     5.6
+    ],
+    [
+     480,
+     0
+    ],
+    [
+     528,
+     0
+    ],
+    [
+     576,
+     0
+    ],
+    [
+     624,
+     0
+    ],
+    [
+     672,
+     0
+    ]
+   ],
+   "dia": {
+    "reposo": {
+     "por": 0,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 9.91,
+     "sobreElLogo": null
+    },
+    "salida": {
+     "por": 41.6,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 6.27,
+     "sobreElLogo": 6.13
+    }
+   },
+   "noche": {
+    "reposo": {
+     "por": 0,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 10.18,
+     "sobreElLogo": null
+    },
+    "salida": {
+     "por": 39.7,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 4.3,
+     "sobreElLogo": 4.34
+    }
+   }
+  },
+  "1366x768": {
+   "maximo": {
+    "reposo": 0.5,
+    "entrada": 0,
+    "salida": 30.4
+   },
+   "entrada": [
+    [
+     -144,
+     0
+    ],
+    [
+     -96,
+     0
+    ],
+    [
+     -48,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "salida": [
+    [
+     48,
+     1.4
+    ],
+    [
+     96,
+     7.5
+    ],
+    [
+     144,
+     22
+    ],
+    [
+     192,
+     29.9
+    ],
+    [
+     240,
+     26.6
+    ],
+    [
+     288,
+     29.9
+    ],
+    [
+     336,
+     30.4
+    ],
+    [
+     384,
+     20.1
+    ],
+    [
+     432,
+     5.6
+    ],
+    [
+     480,
+     0
+    ],
+    [
+     528,
+     0
+    ],
+    [
+     576,
+     0
+    ],
+    [
+     624,
+     0
+    ]
+   ],
+   "dia": {
+    "reposo": {
+     "por": 0.5,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 9.91,
+     "sobreElLogo": 18.52
+    },
+    "salida": {
+     "por": 29.9,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 6.08,
+     "sobreElLogo": 7.01
+    }
+   },
+   "noche": {
+    "reposo": {
+     "por": 0.5,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 10.5,
+     "sobreElLogo": 6.52
+    },
+    "salida": {
+     "por": 30.4,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 4.29,
+     "sobreElLogo": 4.52
+    }
+   }
+  },
+  "1440x900": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 31.8
+   },
+   "entrada": [
+    [
+     -180,
+     0
+    ],
+    [
+     -132,
+     0
+    ],
+    [
+     -84,
+     0
+    ],
+    [
+     -36,
+     0
+    ]
+   ],
+   "salida": [
+    [
+     48,
+     0
+    ],
+    [
+     96,
+     0.9
+    ],
+    [
+     144,
+     7.9
+    ],
+    [
+     192,
+     22.9
+    ],
+    [
+     240,
+     30.8
+    ],
+    [
+     288,
+     28
+    ],
+    [
+     336,
+     29.4
+    ],
+    [
+     384,
+     31.8
+    ],
+    [
+     432,
+     27.1
+    ],
+    [
+     480,
+     11.7
+    ],
+    [
+     528,
+     4.2
+    ],
+    [
+     576,
+     0
+    ],
+    [
+     624,
+     0
+    ],
+    [
+     672,
+     0
+    ],
+    [
+     720,
+     0
+    ]
+   ],
+   "dia": {
+    "reposo": {
+     "por": 0,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 9.12,
+     "sobreElLogo": null
+    },
+    "salida": {
+     "por": 33.6,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 7.4,
+     "sobreElLogo": 7.4
+    }
+   },
+   "noche": {
+    "reposo": {
+     "por": 0,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 10.57,
+     "sobreElLogo": null
+    },
+    "salida": {
+     "por": 31.8,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 4.3,
+     "sobreElLogo": 4.3
+    }
+   }
+  },
+  "1920x1080": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 6.5
+   },
+   "entrada": [
+    [
+     -168,
+     0
+    ],
+    [
+     -120,
+     0
+    ],
+    [
+     -72,
+     0
+    ],
+    [
+     -24,
+     0
+    ]
+   ],
+   "salida": [
+    [
+     48,
+     0
+    ],
+    [
+     96,
+     0
+    ],
+    [
+     144,
+     0
+    ],
+    [
+     192,
+     0
+    ],
+    [
+     240,
+     0.5
+    ],
+    [
+     288,
+     1.9
+    ],
+    [
+     336,
+     4.7
+    ],
+    [
+     384,
+     6.1
+    ],
+    [
+     432,
+     6.5
+    ],
+    [
+     480,
+     4.7
+    ],
+    [
+     528,
+     2.8
+    ],
+    [
+     576,
+     1.4
+    ],
+    [
+     624,
+     0
+    ],
+    [
+     672,
+     0
+    ],
+    [
+     720,
+     0
+    ],
+    [
+     768,
+     0
+    ],
+    [
+     816,
+     0
+    ],
+    [
+     864,
+     0
+    ]
+   ],
+   "dia": {
+    "reposo": {
+     "por": 0,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 10.13,
+     "sobreElLogo": null
+    },
+    "salida": {
+     "por": 5.1,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 6.18,
+     "sobreElLogo": 8.57
+    }
+   },
+   "noche": {
+    "reposo": {
+     "por": 0,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 11.55,
+     "sobreElLogo": null
+    },
+    "salida": {
+     "por": 6.5,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 5.12,
+     "sobreElLogo": 4.66
+    }
+   }
+  },
+  "2560x1440": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 20.6
+   },
+   "entrada": [
+    [
+     -192,
+     0
+    ],
+    [
+     -144,
+     0
+    ],
+    [
+     -96,
+     0
+    ],
+    [
+     -48,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "salida": [
+    [
+     48,
+     0
+    ],
+    [
+     96,
+     0
+    ],
+    [
+     144,
+     0
+    ],
+    [
+     192,
+     0
+    ],
+    [
+     240,
+     0
+    ],
+    [
+     288,
+     0.5
+    ],
+    [
+     336,
+     4.7
+    ],
+    [
+     384,
+     13.1
+    ],
+    [
+     432,
+     17.3
+    ],
+    [
+     480,
+     19.6
+    ],
+    [
+     528,
+     20.1
+    ],
+    [
+     576,
+     19.6
+    ],
+    [
+     624,
+     20.6
+    ],
+    [
+     672,
+     20.1
+    ],
+    [
+     720,
+     18.2
+    ],
+    [
+     768,
+     10.7
+    ],
+    [
+     816,
+     4.7
+    ],
+    [
+     864,
+     0
+    ],
+    [
+     912,
+     0
+    ],
+    [
+     960,
+     0
+    ],
+    [
+     1008,
+     0
+    ],
+    [
+     1056,
+     0
+    ],
+    [
+     1104,
+     0
+    ],
+    [
+     1152,
+     0
+    ],
+    [
+     1200,
+     0
+    ]
+   ],
+   "dia": {
+    "reposo": {
+     "por": 0,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 10.2,
+     "sobreElLogo": null
+    },
+    "salida": {
+     "por": 20.6,
+     "letras": 214,
+     "noche": "0.000",
+     "delArco": "0.000",
+     "textoClaro": false,
+     "cuerpo": 6.95,
+     "sobreElLogo": 7.38
+    }
+   },
+   "noche": {
+    "reposo": {
+     "por": 0,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 11.02,
+     "sobreElLogo": null
+    },
+    "salida": {
+     "por": 19.2,
+     "letras": 214,
+     "noche": "1.000",
+     "delArco": "1.000",
+     "textoClaro": true,
+     "cuerpo": 4.46,
+     "sobreElLogo": 4.76
+    }
+   }
+  }
+ },
+ "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "nocheReal": [
+  {
+   "ms": 120,
+   "por": 44.9,
+   "letras": 214,
+   "noche": "1.000",
+   "delArco": "1.000",
+   "textoClaro": true,
+   "cuerpo": 4.47,
+   "sobreElLogo": 4.47
+  },
+  {
+   "ms": 350,
+   "por": 29.4,
+   "letras": 214,
+   "noche": "0.000",
+   "delArco": "0.000",
+   "textoClaro": false,
+   "cuerpo": 7.18,
+   "sobreElLogo": 7.23
+  },
+  {
+   "ms": 700,
+   "por": 31.8,
+   "letras": 214,
+   "noche": "0.000",
+   "delArco": "0.000",
+   "textoClaro": false,
+   "cuerpo": 6.65,
+   "sobreElLogo": 6.93
+  },
+  {
+   "ms": 1200,
+   "por": 32.2,
+   "letras": 214,
+   "noche": "0.000",
+   "delArco": "0.000",
+   "textoClaro": false,
+   "cuerpo": 7.42,
+   "sobreElLogo": 6.96
+  },
+  {
+   "ms": 2000,
+   "por": 32.2,
+   "letras": 214,
+   "noche": "0.000",
+   "delArco": "0.000",
+   "textoClaro": false,
+   "cuerpo": 7.42,
+   "sobreElLogo": 7.1
+  }
+ ]
+}

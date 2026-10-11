@@ -97,8 +97,6 @@ export interface Pruebas {
   readonly destellos: VarianteDeDestellos | 'no'
   /** [PULIDO 14] L3 · `destellos-color=si`: los destellos en un azul frío (cian de noche). */
   readonly 'destellos-color': 'si' | 'no'
-  /** [PULIDO 14] L1 · `cuerpo=izquierda`: el cuerpo de Quiénes somos en su columna de antes (el producto: a la derecha del logo). */
-  readonly cuerpo: 'izquierda' | 'no'
 }
 
 /**
@@ -123,11 +121,12 @@ export interface Pruebas {
  * (la caída del logo en el final: la lenta, como una ficha de dominó, es el producto). E · entra `hilos=si` (los hilos de energía).
  * [PULIDO 13] · `caida=angulo` se borró (la lenta es el producto). K6 · entra `hilos=color` (los hilos en azul frío). [PULIDO 14]
  * L3 · `hilos=` se borró (no gustaron); entran `destellos=<variante>` y `destellos-color=si`. L1 · entra `cuerpo=izquierda`.
+ * [PULIDO 15] M1 · `cuerpo=` se borró (el cuerpo a la izquierda es el producto).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', destellos: 'no', 'destellos-color': 'no', cuerpo: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', destellos: 'no', 'destellos-color': 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'destellos', 'destellos-color', 'cuerpo'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'destellos', 'destellos-color'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -142,7 +141,6 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
     destellos: unoDe<VarianteDeDestellos>(VARIANTES_DE_DESTELLOS, valor('destellos')),
     'destellos-color': unoDe<'si'>(['si'], valor('destellos-color')),
-    cuerpo: unoDe<'izquierda'>(['izquierda'], valor('cuerpo')),
   }
 }
 

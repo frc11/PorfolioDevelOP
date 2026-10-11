@@ -271,39 +271,23 @@
   }
 }
 
-/* ── [PULIDO 14] L1 · QUIÉNES SOMOS: EL CUERPO SIEMPRE DELANTE, CON SU VELO (desde 1024) ──
- * El recorte de PULIDO 13 (K1: el logo tapaba el cuerpo donde estaba delante) cortaba el párrafo al medio («innovad… siemp…»). El
- * texto va siempre delante y entero; donde el logo pasa por detrás, la receta de legibilidad de Portfolio: un velo elíptico detrás
- * del texto (un degradé radial, sin caja), del papel: sobre el papel no se ve; sobre la tinta del logo, la aclara detrás de las
- * letras. Con la noche que se ve (`--noche-de-la-sala`, la escribe la sección) se espesa: el cuerpo es de tinta también de noche.
- * Su caja (1,8 veces el ancho del bloque y 2,4 su alto) deja todas las letras adentro de la parte entera del degradé (el 70 %).
- * Medido con AA sobre el logo, de día y de noche: `entregas/pulido-14/l1-cuerpo.json`. */
+/* ── [PULIDO 15] M1 · QUIÉNES SOMOS: EL CUERPO DELANTE, CON SU HALO (desde 1024) ──
+ * El cuerpo va en su columna de siempre, a la izquierda, siempre delante del logo y entero (sin recorte). Al salir, el logo le pasa
+ * por detrás: la legibilidad la da un halo corto y denso pegado al trazo de las letras (la sombra corta apilada de P12 y D2, sin
+ * las colas largas, que en un párrafo se juntan en una mancha), del color contrario a la letra: de día la tinta con el halo del
+ * papel; de noche (la que se ve: la del arco, `--noche-del-arco`, la escribe la sección) el papel con el halo de la tinta. El velo elíptico de
+ * PULIDO 14 se borró. AA medido sobre el logo, de día y de noche: `entregas/pulido-15/m1-cuerpo.json`. */
 @media (width >= 1024px) {
   [data-v3] [data-panel='quienes-somos'] {
-    --alcance-del-cuerpo: -70% -40%;
-    --velo-del-cuerpo: color-mix(in srgb, var(--color-fondo) calc(82% + var(--noche-de-la-sala, 0) * 14%), transparent);
-    --degrade-del-cuerpo: radial-gradient(closest-side, var(--velo-del-cuerpo) 70%, transparent);
-    --agencia-medida-de-antes: min(30rem, 42vw);
+    --de-noche-del-cuerpo: clamp(0, (var(--noche-del-arco, 0) - 0.5) * 1000, 1);
+    --letra-del-cuerpo: color-mix(in srgb, var(--color-fondo) calc(var(--de-noche-del-cuerpo) * 100%), var(--color-tinta));
+    --borde-del-cuerpo: color-mix(in srgb, var(--color-tinta) calc(var(--de-noche-del-cuerpo) * 100%), var(--color-fondo));
+    --halo-del-cuerpo: 0 0 0.1em var(--borde-del-cuerpo), 0 0 0.1em var(--borde-del-cuerpo), 0 0 0.1em var(--borde-del-cuerpo), 0 0 0.2em var(--borde-del-cuerpo), 0 0 0.2em var(--borde-del-cuerpo), 0 0 0.2em var(--borde-del-cuerpo);
   }
 
-  [data-v3] [data-panel='quienes-somos'] [data-velo-del-cuerpo] {
-    position: relative;
-  }
-
-  [data-v3] [data-panel='quienes-somos'] [data-velo-del-cuerpo]::before {
-    content: '';
-    position: absolute;
-    inset: var(--alcance-del-cuerpo);
-    z-index: -1;
-    pointer-events: none;
-    background: var(--degrade-del-cuerpo);
-  }
-
-  /* `?cuerpo=izquierda`: la columna de antes (sin capa: le gana a las utilidades del reparto). */
-  [data-v3] [data-panel='quienes-somos'] [data-columna='izquierda'] {
-    grid-column: 1 / span 6;
-    justify-self: start;
-    max-width: var(--agencia-medida-de-antes);
+  [data-v3] [data-panel='quienes-somos'] [data-halo-del-cuerpo] p {
+    color: var(--letra-del-cuerpo);
+    text-shadow: var(--halo-del-cuerpo);
   }
 }
 
