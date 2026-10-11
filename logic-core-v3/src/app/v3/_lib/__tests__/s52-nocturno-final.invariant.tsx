@@ -722,8 +722,8 @@ const comoLasDelEquipo = (f: string): boolean => {
   const [titulo, plano, llegada, marco] = [foto.indexOf('<TituloDeLaFoto progreso={progreso} />'), foto.indexOf('<div ref={enElPlano}'), foto.indexOf('<Bloque patron="P2" rango="llegada-de-la-foto"'), foto.indexOf('<MarcoDeDosTomas')]
   return (
     // [PULIDO 16] N1 · los dos, con el plano de Nosotros (alejado): lo demás, igual.
-    f.includes("useTextoDeVolumen<HTMLHeadingElement>({ id: 'nosotros', texto: CONTENIDO.equipo.titulo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false, ...planoDeNosotros() })") &&
-    f.includes("useTextoDeVolumen<HTMLHeadingElement>({ id: 'equipo', texto: CONTENIDO.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false, ...planoDeNosotros() })") &&
+    f.includes("useTextoDeVolumen<HTMLHeadingElement>({ id: 'nosotros', texto: CONTENIDO.equipo.titulo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false, ...PLANO_DE_NOSOTROS })") &&
+    f.includes("useTextoDeVolumen<HTMLHeadingElement>({ id: 'equipo', texto: CONTENIDO.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false, ...PLANO_DE_NOSOTROS })") &&
     foto.includes("useAcompananteDelTitulo<HTMLDivElement>('nosotros')") &&
     titulo > 0 && titulo < plano && plano < llegada && llegada < marco &&
     /<ProgresoAmortiguado progreso=\{progreso\}>\s*\{\(perseguido\) => \(\s*<LlegadaEnCurva progreso=\{perseguido\} sentido="desde-la-derecha"/.test(foto) &&

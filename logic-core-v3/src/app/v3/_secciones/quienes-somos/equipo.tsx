@@ -9,7 +9,6 @@ import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDePieza, CanalDeTexto, LlegadaEnCurva, ProgresoAmortiguado } from '../_contrato/canales'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
-import { entornoDeLaEscena } from '../../_lib/escena/entorno'
 
 import { CONTENIDO } from './contenido'
 import { CLASES_DEL_REPARTO, CLASE_DE_RELACION, GEOMETRIA, PLANO_DE_NOSOTROS, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
@@ -49,11 +48,6 @@ import { CalleDerecha, Pantalla } from './pantalla'
  * `overflow-hidden` afuera y P2 adentro, que sube la pieza desde su media altura con
  * su opacidad. Ni una duración ni una curva nuevas: el patrón las trae.
  */
-/** [PULIDO 16] N1 · los planos de Nosotros, alejados (`PLANO_DE_NOSOTROS`); con `?nosotros=fijo`, la otra lectura. Sólo va al registro (un efecto). */
-function planoDeNosotros(): (typeof PLANO_DE_NOSOTROS)[keyof typeof PLANO_DE_NOSOTROS] {
-  return entornoDeLaEscena().pruebas.nosotros === 'fijo' ? PLANO_DE_NOSOTROS.fijo : PLANO_DE_NOSOTROS.seguido
-}
-
 /**
  * [RETOQUE 3D] 3C · «EL EQUIPO» EN VOLUMEN: con el progreso de su máscara se levanta en su lugar, de acostado a parado
  * (visto de costado, de _ a |); acostado, su línea lo tapa y aparece de la nada recién cuando se levanta. Con el scroll
@@ -61,7 +55,7 @@ function planoDeNosotros(): (typeof PLANO_DE_NOSOTROS)[keyof typeof PLANO_DE_NOS
  */
 function TituloDelEquipo({ progreso }: { readonly progreso: Progreso }): React.JSX.Element {
   // [PULIDO 16] N1 · su plano (con las personas), alejado: entra entero con la órbita del mouse.
-  const { lugar, listo } = useTextoDeVolumen<HTMLHeadingElement>({ id: 'equipo', texto: CONTENIDO.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false, ...planoDeNosotros() })
+  const { lugar, listo } = useTextoDeVolumen<HTMLHeadingElement>({ id: 'equipo', texto: CONTENIDO.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false, ...PLANO_DE_NOSOTROS })
   return (
     <CanalDeTexto progreso={progreso} tipo="titulo" texto={CONTENIDO.tituloDelEquipo}>
       {(contenido) => (
@@ -78,7 +72,7 @@ function TituloDelEquipo({ progreso }: { readonly progreso: Progreso }): React.J
  * con el scroll para atrás se vuelve a acostar). Es el plano de la foto: la foto va en él (`LaFoto`).
  */
 function TituloDeLaFoto({ progreso }: { readonly progreso: Progreso }): React.JSX.Element {
-  const { lugar, listo } = useTextoDeVolumen<HTMLHeadingElement>({ id: 'nosotros', texto: CONTENIDO.equipo.titulo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false, ...planoDeNosotros() })
+  const { lugar, listo } = useTextoDeVolumen<HTMLHeadingElement>({ id: 'nosotros', texto: CONTENIDO.equipo.titulo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false, ...PLANO_DE_NOSOTROS })
   return (
     <h3 ref={lugar} data-pieza="titular" data-nivel="titulo-m" className={cn(GEOMETRIA.tituloDeLaFoto, MEZCLA_SOBRE_LA_ESCENA, listo && TEXTO_REEMPLAZADO)}>
       {CONTENIDO.equipo.titulo}

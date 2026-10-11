@@ -6,7 +6,8 @@
  *   N1 · Nosotros siempre a la vista: los planos de «El equipo» (el título y las dos personas) y de «Nosotros» (el título y la
  *        foto), alejados (más chicos hacia el centro del cuadro) y siguiendo una parte de la órbita del mouse: en todo el
  *        recorrido, la foto, el nombre y la bio de cada uno (y los títulos y la foto del equipo) quedan dentro del cuadro con 24 px
- *        de margen en el peor caso del mouse, a 1024, 1280, 1366, 1440, 1920 y 2560. `?nosotros=fijo`: la otra lectura.
+ *        de margen en el peor caso del mouse, a 1024, 1280, 1366, 1440, 1920 y 2560. (`?nosotros=fijo`, la otra lectura, se
+ *        borró en PULIDO 17: s68.)
  *   N2 · el plasma llevado a otro nivel (`?energia=plasma`; el modelo, `docs/rediseno/PLASMA.md`): átomos, iones y electrones con
  *        Coulomb suavizado y repulsión de corto alcance, moléculas que vibran, la temperatura (el puente con el usuario) con su
  *        autolímite, arcos que siguen al campo con sus re-golpes y su resplandor, la ionización y la recombinación, el logo como
@@ -53,7 +54,7 @@ type Medida = readonly [number, number, number, number, number]
 interface PiezaDelRecibo { readonly id: string; readonly dom: Caja4 }
 interface MuestraDelRecibo { readonly scroll: number; readonly progreso: number; readonly piezas: readonly PiezaDelRecibo[]; readonly medido: Readonly<Record<string, Readonly<Record<string, Medida>>>> }
 interface AnchoDelRecibo { readonly placa: string; readonly logo: readonly [number, number]; readonly fov: number; readonly muestras: readonly MuestraDelRecibo[] }
-const N1 = recibo<{ anchos: Readonly<Record<string, AnchoDelRecibo>>; fijo: Readonly<Record<string, AnchoDelRecibo>> }>('n1-nosotros.json')
+const N1 = recibo<{ anchos: Readonly<Record<string, AnchoDelRecibo>> }>('n1-nosotros.json')
 const ANCHOS = ['1024x768', '1280x800', '1366x768', '1440x900', '1920x1080', '2560x1440'] as const
 const MARGEN = 24
 // Las piezas: la foto, el nombre y la bio de cada uno; los dos títulos (sus planos) y la foto del equipo.
@@ -143,7 +144,7 @@ const identidad = (r: Readonly<Record<string, AnchoDelRecibo>>, plano: Plano, k:
   })
 })
 afirmar(identidad(N1.anchos, ANTES, 1), '  el modelo es la colocación de la escena: sin alejar y con el mouse quieto, cada caja queda donde el DOM la puso (A1, la identidad)')
-const SEGUIDO = PLANO_DE_NOSOTROS.seguido
+const SEGUIDO = PLANO_DE_NOSOTROS
 afirmar(identidad(N1.anchos, SEGUIDO, SEGUIDO.alejamiento), `  alejado: con el mouse quieto, cada caja se ve ${String(SEGUIDO.alejamiento)} veces más chica hacia el centro del cuadro (el mismo plano, a la profundidad del logo)`)
 controlPositivo('  el detector VE un alejamiento que no es el declarado', 0.9, (k: number) => identidad(N1.anchos, { ...SEGUIDO, alejamiento: k }, SEGUIDO.alejamiento))
 
@@ -153,9 +154,6 @@ const deAntes = todosLosAnchos(N1.anchos, ANTES, ['1920x1080'])
 controlPositivo('  el detector VE el corte de antes (a 1920, sin alejar y fijo en el mundo: Valentino y la foto de Franco afuera)', ANTES, (p: Plano) => conMargen(todosLosAnchos(N1.anchos, p, ['1920x1080'])))
 afirmar(deAntes['1920x1080'].margen < -150, '  (antes, a 1920: el peor caso se iba más de 150 px de la pantalla)', `${deAntes['1920x1080'].margen.toFixed(0)} px: ${deAntes['1920x1080'].donde}`)
 controlPositivo('  el detector VE sólo alejar, sin seguir nada del mouse (hace falta mucho más chico)', { alejamiento: SEGUIDO.alejamiento, parteDelMouse: 0 }, (p: Plano) => conMargen(todosLosAnchos(N1.anchos, p, ANCHOS)))
-const FIJO = PLANO_DE_NOSOTROS.fijo
-const delFijo = todosLosAnchos(N1.anchos, FIJO, ANCHOS)
-afirmar(FIJO.parteDelMouse === 0 && conMargen(delFijo), `  la otra lectura (\`?nosotros=fijo\`): fijo en el mundo y alejado ${String(FIJO.alejamiento)}, también entra con ${String(MARGEN)} px`, resumen(delFijo))
 // Lo legible: el plano no se achica de más (la bio, de 15 px en el DOM, se ve de 12 px o más).
 afirmar(SEGUIDO.alejamiento >= 0.8 && SEGUIDO.parteDelMouse <= 0.7, '  lo legible: el plano no se achica de más (la bio de 15 px se ve de 12 o más) y sigue a lo sumo el 70 % de la órbita (se sigue viendo en perspectiva)')
 
@@ -181,7 +179,6 @@ const empujada = (r: Readonly<Record<string, AnchoDelRecibo>>): Readonly<Record<
   return { ...r, '1920x1080': { ...a, muestras } }
 }
 controlPositivo('  el detector VE la bio de Valentino cortada a la derecha (como en el pedido)', N1.anchos, (r: Readonly<Record<string, AnchoDelRecibo>>) => medidoBien(empujada(r), ANCHOS))
-afirmar(medidoBien(N1.fijo, ['1920x1080']), '  y con `?nosotros=fijo`, a 1920', N1.fijo['1920x1080'] === undefined ? 'falta' : `${peorMedido('1920x1080', N1.fijo['1920x1080']).margen.toFixed(0)} px`)
 // El modelo es lo que se ve: en cada muestra y esquina, la caja del modelo y la medida difieren en pocos px (donde el plano tenía
 // su matriz: fuera del cuadro la pieza queda en su lugar del DOM, sin dibujarse).
 const DIFERENCIA_PX = 8
@@ -202,15 +199,14 @@ afirmar(diferencia <= DIFERENCIA_PX, `  el modelo es lo que se ve: en cada muest
 controlPositivo('  el detector VE un modelo con otro plano (el de antes) contra lo medido', ANTES, (p: Plano) => coteja(N1.anchos, p) <= DIFERENCIA_PX)
 
 // EL CÓDIGO: el título y su texto 2D se colocan con la MISMA cámara (la de su parte del mouse) y el mismo alejamiento (A1: en el
-// mismo plano); lo que entra y sale del cuadro se mide donde se ve; la sección pide los dos planos (o la otra lectura).
+// mismo plano); lo que entra y sale del cuadro se mide donde se ve; la sección pide los dos planos.
 const EQUIPO = leer('_secciones/quienes-somos/equipo.tsx')
 const TITULOS = leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx')
 const ACOMP = leer('_lib/escena/titulos3d/acompanantes.ts')
 const RIG = leer('_lib/escena/OrbitRig.tsx')
 const COLOC = leer('_lib/escena/titulos3d/colocacion.ts')
 const cableado = (equipo: string, titulos: string, acomp: string, rig: string, coloc: string): boolean =>
-  /id: 'equipo',[^\n]*queda: false, \.\.\.planoDeNosotros\(\) \}\)/.test(equipo) && /id: 'nosotros',[^\n]*queda: false, \.\.\.planoDeNosotros\(\) \}\)/.test(equipo) &&
-  /return entornoDeLaEscena\(\)\.pruebas\.nosotros === 'fijo' \? PLANO_DE_NOSOTROS\.fijo : PLANO_DE_NOSOTROS\.seguido/.test(equipo) &&
+  /id: 'equipo',[^\n]*queda: false, \.\.\.PLANO_DE_NOSOTROS \}\)/.test(equipo) && /id: 'nosotros',[^\n]*queda: false, \.\.\.PLANO_DE_NOSOTROS \}\)/.test(equipo) &&
   /const deColocar = \(a\.titulo\.parteDelMouse \?\? 0\) > 0 \? camaraConParteDelMouse\(a\.titulo\.parteDelMouse \?\? 0\) : viva/.test(titulos) &&
   titulos.includes('colocarElArmado(a, s.nudo, aspecto, stats, deColocar)') && titulos.includes('ubicar(a, d, deColocar)') &&
   titulos.includes('colocar(a.grupo, viva, a.ahora, a.fuente.data, a.titulo.alejamiento)') && titulos.includes('colocar(a.grupo, nudo, lugar, a.fuente.data, a.titulo.alejamiento)') &&
@@ -219,14 +215,11 @@ const cableado = (equipo: string, titulos: string, acomp: string, rig: string, c
   /alturaAlejada\(y, cuadro\.alto, k\) > cuadro\.alto \|\| alturaAlejada\(y \+ alto, cuadro\.alto, k\) < 0/.test(acomp) &&
   /posarLaCamaraSinElMouse\(state\.camera, sinElMouse, [^\n]+\n[^\n]*\n\s*anotarLaPoseDelCuadro\(state\.camera, sinElMouse, desplazamiento, /.test(rig) &&
   /const x = alejamiento \* \(\(2 \* lugar\.izquierda\) \/ lugar\.ancho - 1\)/.test(coloc) && /const mundoPorPx = \(alejamiento \* 2 \* profundidad/.test(coloc)
-afirmar(cableado(EQUIPO, TITULOS, ACOMP, RIG, COLOC), '  en el código: los dos títulos piden su plano (`?nosotros=fijo`, la otra lectura); el título y su texto 2D se colocan con la misma cámara (su parte del mouse) y el mismo alejamiento; lo que sale del cuadro, donde se ve; el rig anota la pose de cada cuadro')
+afirmar(cableado(EQUIPO, TITULOS, ACOMP, RIG, COLOC), '  en el código: los dos títulos piden su plano; el título y su texto 2D se colocan con la misma cámara (su parte del mouse) y el mismo alejamiento; lo que sale del cuadro, donde se ve; el rig anota la pose de cada cuadro')
 controlPositivo('  el detector VE el texto 2D colocado con la cámara sin el mouse y el título con la suya (fuera de su plano)', ACOMP.replace('colocar(PLANO, camaraConParteDelMouse(t.parteDelMouse ?? 0), AHORA, a.fuente.data, k)', 'colocar(PLANO, CAMARA_SIN_EL_MOUSE, AHORA, a.fuente.data, k)'), (c: string) => cableado(EQUIPO, TITULOS, c, RIG, COLOC))
-controlPositivo('  y el título que deja el plano de Nosotros (sin alejar)', EQUIPO.replace("id: 'equipo', texto: CONTENIDO.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false, ...planoDeNosotros() })", "id: 'equipo', texto: CONTENIDO.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })"), (c: string) => cableado(c, TITULOS, ACOMP, RIG, COLOC))
+controlPositivo('  y el título que deja el plano de Nosotros (sin alejar)', EQUIPO.replace("id: 'equipo', texto: CONTENIDO.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false, ...PLANO_DE_NOSOTROS })", "id: 'equipo', texto: CONTENIDO.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false })"), (c: string) => cableado(c, TITULOS, ACOMP, RIG, COLOC))
 controlPositivo('  y lo que sale del cuadro medido en el DOM (el salto al salir)', ACOMP.replace('alturaAlejada(y, cuadro.alto, k) > cuadro.alto || alturaAlejada(y + alto, cuadro.alto, k) < 0', 'y > cuadro.alto || y + alto < 0'), (c: string) => cableado(EQUIPO, TITULOS, c, RIG, COLOC))
-// La bandera: `nosotros=fijo` es su único valor; apagada en el producto.
-const banderaBien = (f: typeof entornoPedido): boolean => (PRUEBAS_SUELTAS as readonly string[]).includes('nosotros') && ENTORNO.pruebas.nosotros === 'no' && f('producto').pruebas.nosotros === 'no' && f('producto,nosotros=fijo').pruebas.nosotros === 'fijo' && f('producto,nosotros=seguido').pruebas.nosotros === 'no'
-afirmar(banderaBien(entornoPedido), '  `?nosotros=fijo` se pide por su nombre (suelta en la URL), vale sólo `fijo` y en el producto está apagada')
-controlPositivo('  el detector VE una bandera que acepta cualquier valor', ((p: string) => { const e = entornoPedido(p); return p.includes('nosotros=') ? { ...e, pruebas: { ...e.pruebas, nosotros: 'fijo' as const } } : e }) as typeof entornoPedido, banderaBien)
+// [PULIDO 17] O1 · la bandera (`nosotros=fijo`) se borró: s68 afirma que no vuelve.
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('N2 · El plasma: átomos, iones y electrones; arcos que obedecen a la física')

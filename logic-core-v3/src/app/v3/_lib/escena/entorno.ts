@@ -96,11 +96,6 @@ export interface Pruebas {
   readonly energia: 'plasma' | 'plasma-y-polvo' | 'no'
   /** [PULIDO 15] M2 · `plasma-color=si`: la energía en un azul eléctrico frío (para comparar con el monocromo). */
   readonly 'plasma-color': 'si' | 'no'
-  /**
-   * [PULIDO 16] N1 · `nosotros=fijo`: la otra lectura de «alejalo»: los planos de Nosotros fijos en el mundo (sin seguir nada
-   * del mouse) y más chicos, lo que hace falta para que la órbita no los saque de cuadro (`PLANO_DE_NOSOTROS`).
-   */
-  readonly nosotros: 'fijo' | 'no'
   /** [PULIDO 16] N2 · `plasma-campo=si` (experimento): con el botón apretado, las líneas del campo alrededor del puntero y del logo. */
   readonly 'plasma-campo': 'si' | 'no'
   /** [PULIDO 16] N2 · `plasma-sonido=si` (experimento): un chisporroteo muy bajo en los arcos (con el sonido prendido). */
@@ -131,12 +126,13 @@ export interface Pruebas {
  * L3 · `hilos=` se borró (no gustaron); entran `destellos=<variante>` y `destellos-color=si`. L1 · entra `cuerpo=izquierda`.
  * [PULIDO 15] M1 · `cuerpo=` se borró (el cuerpo a la izquierda es el producto). M2 · `destellos=` y `destellos-color=` se borraron
  * (no gustó ninguna); entran `energia=plasma|plasma-y-polvo` y `plasma-color=si`. [PULIDO 16] N1 · entra `nosotros=fijo`. N2 · entran
- * `plasma-campo=si` y `plasma-sonido=si` (los experimentos del plasma).
+ * `plasma-campo=si` y `plasma-sonido=si` (los experimentos del plasma). [PULIDO 17] O1 · `nosotros=fijo` se borró (Nosotros queda
+ * alejado y siguiendo el 70 % del giro).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', 'plasma-color': 'no', nosotros: 'no', 'plasma-campo': 'no', 'plasma-sonido': 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', 'plasma-color': 'no', 'plasma-campo': 'no', 'plasma-sonido': 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'plasma-color', 'nosotros', 'plasma-campo', 'plasma-sonido'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'plasma-color', 'plasma-campo', 'plasma-sonido'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -151,7 +147,6 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
     energia: unoDe<'plasma' | 'plasma-y-polvo'>(['plasma', 'plasma-y-polvo'], valor('energia')),
     'plasma-color': unoDe<'si'>(['si'], valor('plasma-color')),
-    nosotros: unoDe<'fijo'>(['fijo'], valor('nosotros')),
     'plasma-campo': unoDe<'si'>(['si'], valor('plasma-campo')),
     'plasma-sonido': unoDe<'si'>(['si'], valor('plasma-sonido')),
   }
