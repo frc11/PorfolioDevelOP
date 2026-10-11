@@ -156,7 +156,13 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   de Franco. El plan, en siete pasos con sus riesgos, en el informe.
 
 ### Final · verificar
-- PENDIENTE.
+- Una primera corrida, con el build de producción de L4 todavía en `.next`, dio 10 rojos: los 7 de base que el build no pone verdes
+  (s1 sí), `tsc` (sin memoria: el build deja `.next/types`, que el `tsconfig` incluye; 0 errores de tipos), s10 (con el build mide
+  el peso de verdad: three.js en la carga inicial y 324,5 KiB contra 300, lo mismo que s8) y **s50**, un rojo mío: su sección 2H
+  fijaba la llamada de antes de la cámara viva y el gate de L2 había corrido s53 a s65. Se adaptó a la cámara nueva (la misma
+  propiedad: las dos cámaras con el mismo blanco, giro y alejamiento; commit fae4b223) y s36 a s52 están verdes.
+- Se borró lo que el build de L4 dejó en `.next` (menos `.next/dev`, el del dev server) para volver al estado de la base, y
+  `verificar` completo: 72 pasos, 8 rojos: los de la base (s1, s17, s2, s3, s4, s5, s7, s8) y ni uno más; `tsc` en verde.
 
 ## Disco y memoria (antes de cada tanda: disco libre, memoria disponible y no paginado)
 
@@ -164,6 +170,15 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 |---|---|---|---|---|
 | arranque (dev server del humano prendido) | 88,8 GB | 3020 MB | 897 MB | |
 | dev server apagado | 88,8 GB | 5886 MB | — | |
+| tanda A (bases de L2) | 80,2 GB | 6639 → 5383 MB | 909 → 919 MB | el disco bajó 8,6 GB antes del banco: los builds de medición (`.next-probe`, 5,1 GB de caché de webpack) |
+| Fase 0 (la matriz) | 80,0 GB | 6525 → 5010 MB | 927 → 942 MB | |
+| tanda B (L2 después, L1 antes, L3 ronda 1) | 79,8 GB | 7292 → 5255 MB | 918 → 928 MB | la primera tanda B se tiró: medía el build viejo |
+| pruebas de L1 | — | 6725 → 5539 MB | 930 → 898 MB | |
+| tanda C (L1, L3 ronda 2, cantidad, viajes) | 79,6 GB | 7171 → 5926 MB | 913 → 894 MB | |
+| tanda D (L1 con WCAG, L3 ronda 3, traza) | 79,5 GB | 7284 → 5784 MB | 879 → 928 MB | |
+| tanda E (la noche de L1, L3 final, polvo) | 79,5 GB | 7309 → 5926 MB | 918 → 933 MB | |
+| build de producción (L4) | 79,6 → 76,5 GB | 7232 MB | 933 MB | el build dejó 4,2 GB en `.next` (2,9 de caché); se borraron al final |
+| al terminar | 79,6 GB | — | — | `~/.cache/b4-medicion`: 0,95 GB (los cuadros crudos se borraron; quedan las hojas y los recibos) |
 
 ## VERIFICAR TRAS REINICIO
 
@@ -171,4 +186,26 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 
 ## Lo que no quedó bien
 
-(se completa al final)
+- **L2 a, la lectura**: la caída es un solo movimiento desde que el logo empieza a volcar; antes de eso la cámara del recorrido
+  llega y espera quieta mientras el logo baja parado (K4 a, aprobado). Si «entre la llegada al pie y el golpe» quería decir que la
+  cámara no se detenga NUNCA desde que llega, eso pide arrancar la caída con el recorrido todavía en movimiento: no se hizo.
+- **L2 c**: el DOM de los campos se enciende en el último tramo de la llegada de la placa (desde el 90 %): en 2 cuadros por vuelta se
+  ve a medias con la placa al 93–96 %. Sin esa rampa, el texto aparecería de golpe.
+- **L1, la composición**: el cuerpo de Quiénes somos pasó a la DERECHA del logo desde 1024 (el cruce, de 42 % a 0): es un cambio de
+  composición grande que hay que mirar. Queda arriba de la sombra del logo en el piso (medido: 8,7–10,4:1). La columna de antes
+  sigue con `?cuerpo=izquierda`, con el velo.
+- **L1, la noche**: el velo de noche está medido con la variable de la noche en 1 (8,26:1), pero en la captura la sala ya es de día:
+  al volver de Portfolio la noche visible se retira antes de que el cuerpo entre. La versión de noche casi no se ve en uso.
+- **L3**: la integrada AMD no se midió (el banco pide la placa de alto rendimiento); 96 000 entran holgados en la NVIDIA, en placas
+  débiles no se sabe. De día, con el mouse sobre el logo negro, los destellos (tinta) no se ven: el efecto del puntero sólo se lee
+  sobre el cielo y el piso. La `lente` es la más sutil. Una corrida de `infinito` (de noche, 1440) tuvo 2 cuadros de más de 20 ms
+  que no se repitieron en dos repeticiones.
+- **Fase 0**: «el viaje lento bajando a Servicios» (un cuadro de 80–93 ms a 1024, 1280 y 1366) sigue sin K1, así que no era el
+  recorte. Aislado (la traza del viaje de Demos a Servicios a 1366) no aparece: queda sin atribuir.
+- **El banco**: los scripts base se rehicieron desde los transcripts (la limpieza del disco los había borrado); `png11.ts` había
+  quedado truncado (el contraste de la primera tanda C falló) y se rehízo. La primera tanda B midió el build viejo (el build no
+  había corrido; leí el log del anterior): se tiró y se repitió. Las corridas «en color» de la tanda C salieron monocromas (`npx`
+  pisa `COLOR`).
+- **Un rojo mío que se escapó del gate**: s50 (2H) fijaba la llamada de antes de la cámara; el gate de L2 corría s53 a s65. Se
+  arregló (fae4b223); desde ahí el gate debería incluir las suites que leen los archivos tocados (s49–s52 leen el final del pie).
+- **L4**: el build pasa en esta máquina con `.env.local`; sin variables, en Netlify, no está probado.
