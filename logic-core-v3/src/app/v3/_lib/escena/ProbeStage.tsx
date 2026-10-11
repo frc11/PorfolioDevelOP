@@ -16,7 +16,7 @@ import { Entorno } from './entorno/Entorno'
 import { Rebote } from './entorno/Rebote'
 import { Amanecer } from './amanecer/Amanecer'
 import { DepthParticles } from './DepthParticles'
-import { HilosDeEnergia } from './hilos/HilosDeEnergia'
+import { DestellosDeEnergia } from './destellos/DestellosDeEnergia'
 import { FinalDelPie } from './final/FinalDelPie'
 import { CaidaDelLogo } from './intro/CaidaDelLogo'
 import { Formacion, pisoConFormacion } from './formacion/Formacion'
@@ -159,10 +159,10 @@ export default function ProbeStage({
   const bokehGroupRef = useRef<THREE.Group>(null)
   /** La envolvente de rendijas: el loop le desplaza la capa gruesa hacia abajo. */
   const moireRef = useRef<MoireHandle>(null)
-  // [PULIDO 11] E · `?hilos=si`: los hilos de energía en lugar del polvo y del bokeh (sus grupos quedan: el rig los deriva).
-  // [PULIDO 13] K6 · `?hilos=color`: los mismos, en azul frío.
-  const pedidoDeHilos = entornoDeLaEscena().pruebas.hilos
-  const hilos = pedidoDeHilos !== 'no'
+  // [PULIDO 14] L3 · `?destellos=<variante>`: los destellos de energía en lugar del polvo y del bokeh (sus grupos quedan: el rig los
+  // deriva); `?destellos-color=si`, en azul frío. Los hilos (`?hilos=`) se borraron.
+  const { destellos, 'destellos-color': destellosColor } = entornoDeLaEscena().pruebas
+  const conDestellos = destellos !== 'no'
 
   return (
     <Canvas
@@ -252,12 +252,12 @@ export default function ProbeStage({
           `choreographyPhysics.ts`.
         */}
         <group ref={dustGroupRef} name="polvo">
-          {!hilos && <DepthParticles store={store} />}
+          {!conDestellos && <DepthParticles store={store} />}
         </group>
         <group ref={bokehGroupRef} name="bokeh">
-          {!hilos && <BokehParticles />}
+          {!conDestellos && <BokehParticles />}
         </group>
-        {hilos && <HilosDeEnergia logoGroupRef={logoGroupRef} quieto={reducedMotion} color={pedidoDeHilos === 'color'} />}
+        {destellos !== 'no' && <DestellosDeEnergia logoGroupRef={logoGroupRef} variante={destellos} quieto={reducedMotion} compacto={calidad === 'compacta'} color={destellosColor === 'si'} />}
 
         <OrbitRig
           store={store}

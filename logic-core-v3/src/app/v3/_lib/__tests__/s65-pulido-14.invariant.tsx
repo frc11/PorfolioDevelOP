@@ -12,11 +12,17 @@
  *   L1 · Quiénes somos: el cuerpo SIEMPRE delante y entero (se borró el recorte de K1, que lo cortaba al medio); donde el logo pasa
  *        por detrás, el velo elíptico del papel (de día y, más espeso, de noche) con AA medido; y la composición que lo evita: desde
  *        1024 el cuerpo va a la derecha del logo (al salir, a la izquierda, el logo le cruzaba hasta el 42 % de las letras).
+ *   L3 · los destellos de energía (`?destellos=chispas|agujero|infinito|estallido|galaxia|lente`, exploración; sin la bandera, el
+ *        polvo): decenas de miles en la GPU (una nube de puntos que calcula el sombreador), con profundidad, por detrás del texto,
+ *        monocromos (`?destellos-color=si`, el azul frío), con el mouse o el dedo; dentro del cuadro. Los hilos se borraron.
  */
 import { existsSync, readFileSync } from 'node:fs'
 
 import { VUELTA_SOLA_MS } from '../../_secciones/cierre/FormularioDelPie'
 import { DOM_CON_LA_PIEZA, opacidadDelDom } from '../escena/pie3d/armadas'
+import { DESTELLOS, VARIANTES_DE_DESTELLOS, VERTICES_DE_LOS_DESTELLOS, FRAGMENTOS_DE_LOS_DESTELLOS, VERTICES_DE_LA_CONSTELACION } from '../escena/destellos/destellos'
+import { PARTICLES_MAX } from '../escena/probeParticles'
+import { PRUEBAS_SUELTAS, entornoPedido } from '../escena/entorno'
 import { CAMARA_DE_LA_CAIDA, LOGO_DE_SIEMPRE, RELOJ_DEL_FINAL, acercamiento, alturaDeLaCaida, haciaElAzimutSinElMouse, subida, ventanaDelAcercamiento } from '../escena/final/recorridoDelFinal'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { pasoDeHoy, pasoDeK4, recorrerLaCaida, type PasoDeLaCamara } from './camaraDeLaCaida'
@@ -166,5 +172,49 @@ const deNoche = (r: typeof NOCHE_L1): boolean =>
   [r.derecha, r.izquierda].every((t) => t.length > 0 && Number(t[0].noche) > 0.9 && t.every((x) => (x.contrasteDelCuerpo ?? 0) >= 4.5 && (x.sobreElLogo === null || x.sobreElLogo >= 4.5)))
 afirmar(deNoche(NOCHE_L1), `  y de noche (la variable en 1): el cuerpo en ${String(NOCHE_L1.derecha[0].contrasteDelCuerpo)}:1 (con la columna de antes, ${String(NOCHE_L1.izquierda[0].contrasteDelCuerpo)} y sobre el logo ${String(NOCHE_L1.izquierda[0].sobreElLogo)})`)
 controlPositivo('  el detector VE un cuerpo de noche sin AA', { ...NOCHE_L1, derecha: [{ ...NOCHE_L1.derecha[0], contrasteDelCuerpo: 2.1 }] }, deNoche)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('L3 · Los destellos de energía (`?destellos=`)')
+// Los hilos se borraron con su código y su bandera; entran los destellos: el polvo de siempre sin la bandera, los destellos EN LUGAR
+// del polvo con ella.
+const STAGE = leer('_lib/escena/ProbeStage.tsx')
+const banderas = (stage: string): boolean =>
+  !existsSync(`${V3}/_lib/escena/hilos`) && !/hilos/.test(stage.replace(/\/\/.*$/gm, '')) && !(PRUEBAS_SUELTAS as readonly string[]).includes('hilos') &&
+  PRUEBAS_SUELTAS.includes('destellos') && PRUEBAS_SUELTAS.includes('destellos-color') && entornoPedido('producto').pruebas.destellos === 'no' &&
+  VARIANTES_DE_DESTELLOS.every((v) => entornoPedido(`producto,destellos=${v}`).pruebas.destellos === v) && entornoPedido('producto,destellos=chispas,destellos-color=si').pruebas['destellos-color'] === 'si' &&
+  stage.includes('{!conDestellos && <DepthParticles store={store} />}') && stage.includes("{destellos !== 'no' && <DestellosDeEnergia logoGroupRef={logoGroupRef} variante={destellos}")
+afirmar(banderas(STAGE), `L3 · sin \`?hilos=\` (borrados con su código); \`?destellos=\` con ${String(VARIANTES_DE_DESTELLOS.length)} variantes (${VARIANTES_DE_DESTELLOS.join(', ')}) en lugar del polvo, y \`?destellos-color=si\``)
+controlPositivo('L3 · el detector VE los hilos todavía montados', `${STAGE}\n{hilos && <HilosDeEnergia />}`, banderas)
+// En la GPU y muchos: cada variante con su rama del sombreador; la cantidad, diez veces el polvo o más; el tamaño con la distancia
+// (lejos, chicos) y la lejanía que apaga; detrás del texto, apagados; el brillo en cruz; los trazos de la constelación.
+const gpuBien = (v: string, fr: string, c: string): boolean =>
+  VARIANTES_DE_DESTELLOS.length >= 5 && VARIANTES_DE_DESTELLOS.every((_, i) => i === 0 || v.includes(`#elif VARIANTE == ${String(i)}`)) && v.includes('#if VARIANTE == 0') &&
+  DESTELLOS.cantidad >= 10 * PARTICLES_MAX && v.includes('tam = clamp( uEscalaPx * mundoTam / c.w * ( 1.0 + 0.6 * cerca ),') && v.includes('lejos = clamp( ( c.w -') &&
+  v.includes('texto = adentroDelTexto( s );') && fr.includes(`( 1.0 - ${String(DESTELLOS.texto.apaga)} * vTexto )`) && fr.includes('float cruz = vCruz *') && c.includes('vec4 o = destelloEnElCuadro( aOtroA, aOtroB')
+afirmar(gpuBien(VERTICES_DE_LOS_DESTELLOS, FRAGMENTOS_DE_LOS_DESTELLOS, VERTICES_DE_LA_CONSTELACION), `  en la GPU: ${String(DESTELLOS.cantidad)} destellos (el polvo, ${String(PARTICLES_MAX)}), una rama del sombreador por variante; la distancia y la lejanía; detrás del texto, apagados; la cruz; la constelación`)
+controlPositivo('  el detector VE destellos que cruzan el texto', FRAGMENTOS_DE_LOS_DESTELLOS.replace(`( 1.0 - ${String(DESTELLOS.texto.apaga)} * vTexto )`, '1.0'), (fr: string) => gpuBien(VERTICES_DE_LOS_DESTELLOS, fr, VERTICES_DE_LA_CONSTELACION))
+// El componente: sin posiciones en la CPU (ningún atributo se reescribe por cuadro); el dedo como el mouse; monocromo de fábrica y
+// el color hecho de tono, saturación y luz (sin hex).
+const DESTELLOS_TSX = leer('_lib/escena/destellos/DestellosDeEnergia.tsx')
+const componenteBien = (t: string): boolean =>
+  !t.includes('needsUpdate') && t.includes("if (e.type === 'pointerdown' && e.pointerType !== 'mouse') p.dedo = true") && t.includes('uColorDia: { value: enSrgb(INK_COLOR) }') &&
+  t.includes('new THREE.Color().setHSL(') && !/#[0-9a-fA-F]{6}/.test(t) && t.includes('new THREE.Points(') && t.includes('u.uApagado.value = EN_VIVO.camara')
+afirmar(componenteBien(DESTELLOS_TSX), '  el componente: las posiciones las calcula el sombreador (nada por cuadro en la CPU); el dedo como el mouse; tinta y papel de fábrica, el azul frío sin hex; en el final del pie se apagan')
+controlPositivo('  el detector VE posiciones escritas por cuadro', DESTELLOS_TSX.replace('p.pedia = pide', 'p.pedia = pide; armado.puntos.geometry.attributes.position.needsUpdate = true'), componenteBien)
+// Medido (NVIDIA; la pantalla del banco a 75 Hz: 13,33 ms es el tope de la sincronía): las seis, con 96 000 a 1440 y 48 000 a 390, de
+// día, con el mouse, de noche y en color: el p95 dentro del cuadro de 60 Hz y, en las 24 corridas, a lo sumo los 2 cuadros de más
+// de 20 ms de una corrida que no se repitió (las dos repeticiones, ninguno). Y el barrido: con 160 000, igual.
+type Ms = { readonly media: number; readonly p95: number; readonly mayoresDe20: number }
+type Corrida = Partial<Record<'dia' | 'conMouse' | 'noche', Ms>> | null
+const L3_MEDIDO = recibo<{ variantes: Record<string, Record<string, Corrida>>; barrido: Record<string, Record<string, Corrida>>; repeticiones: { 'infinito-1440-noche': Ms[] } }>('l3-destellos.json')
+const enElCuadro = (r: typeof L3_MEDIDO): boolean => {
+  const corridas = VARIANTES_DE_DESTELLOS.flatMap((v) => ['1440', '390', 'color-1440'].map((k) => r.variantes[v]?.[k] ?? null))
+  const medidas = corridas.flatMap((c) => (c === null ? [] : [c.dia, c.conMouse, c.noche].filter((m): m is Ms => m !== undefined)))
+  return corridas.every((c) => c !== null && c.noche !== undefined) && medidas.length >= 6 * 5 && medidas.every((m) => m.p95 < 16.7) &&
+    medidas.reduce((n, m) => n + m.mayoresDe20, 0) <= 2 && r.repeticiones['infinito-1440-noche'].every((m) => m.mayoresDe20 === 0) &&
+    ['1440', '390'].every((k) => (r.barrido['160000']?.[k]?.noche?.mayoresDe20 ?? 1) === 0)
+}
+afirmar(enElCuadro(L3_MEDIDO), '  medido: las seis variantes a 1440 y a 390 (y en color) dentro del cuadro; con 160 000, también')
+controlPositivo('  el detector VE una variante con cuadros largos', { ...L3_MEDIDO, variantes: { ...L3_MEDIDO.variantes, galaxia: { ...L3_MEDIDO.variantes.galaxia, '390': { noche: { media: 22, p95: 31, mayoresDe20: 120 } } } } }, enElCuadro)
 
 cerrar('s65-pulido-14')

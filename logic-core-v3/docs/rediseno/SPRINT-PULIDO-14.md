@@ -106,7 +106,41 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   invariante de PULIDO 1 que ata el velo de Portfolio a la banda de abajo de 1024 (decía `degrade-del-velo`).
 
 ### L3 · Destellos de energía (`?destellos=`)
-- PENDIENTE.
+- HECHO · VISTO sí (banco `l3-destellos.ts`, una corrida por variante; hoja comparativa `pulido-14/l3/hoja-final.png`, recibo
+  `l3-destellos.json`). El polvo sigue siendo el producto: sin la bandera nada cambia.
+- Los hilos se borraron con su código y su bandera (`_lib/escena/hilos/`, `?hilos=`; sus secciones en s62 y s64, con nota).
+- Los destellos (`_lib/escena/destellos/`): una nube de puntos (`gl.POINTS`) sin posiciones guardadas: cada vértice es una semilla y
+  el sombreador calcula dónde está en el cuadro (una llamada de dibujo, nada por cuadro en la CPU). 96 000 en escritorio y 48 000
+  en el teléfono (el polvo: 3000). Profundidad de verdad: el tamaño es el del mundo a esa distancia y la lejanía los apaga. Titilan;
+  los más brillantes, con un brillo en cruz chico. Detrás de una caja de texto se apagan (con el borde ancho: un campo denso no deja
+  un rectángulo). En el final del pie se apagan con la cámara que sube. Monocromos: de noche, blanco que suma luz; de día, tinta con
+  un halo claro. `?destellos-color=si`: un azul frío (cian de noche), hecho de tono, saturación y luz. El dedo hace lo del mouse.
+- Las variantes (`?destellos=`):
+  - `chispas`: a la deriva y titilando; con el puntero se juntan sueltos hacia él, brillan y aparecen trazos tenues entre vecinos (la
+    constelación: 12 000 de los destellos, a sus 3 vecinos); al irse, se sueltan.
+  - `agujero`: el puntero es un pozo: los cercanos entran en órbita (más rápida adentro), se aprietan en un disco y se estiran en
+    estelas; al irse siguen girando, frenando, y se dispersan con inercia hacia afuera.
+  - `infinito`: cerca del puntero se alinean en corrientes que dibujan un ∞ alrededor de él, en movimiento; sin puntero, cada 9 s un
+    ∞ se insinúa en el campo y se deshace.
+  - `estallido`: cada tanto, en puntos al azar, un estallido radial que se frena y queda flotando; con el puntero se condensan en un
+    núcleo brillante y al irse lo liberan en un estallido.
+  - `galaxia`: el campo gira lento en espiral alrededor del logo (dos brazos, rotación diferencial) y un halo; con el puntero, un
+    brazo local se curva hacia él.
+  - `lente` (propuesta): estrellas a tres profundidades, con estrellas fugaces; el puntero es una lente gravitatoria: la luz de atrás
+    se curva a su alrededor y se apila en un anillo, que brilla más.
+- Las rondas (el banco de cada una, mirado en su hoja): la 1 (48 000) se veía bien de noche y muy sutil con el mouse y de día, y la
+  galaxia saturaba; la 2 subió el alcance y el brillo del puntero, la presencia de día y bajó el núcleo de la galaxia; la 3 hizo que
+  el ∞ y la lente se lean (los que el puntero toma se comprometen con la forma, más grandes) y la cantidad pasó a 96 000. El banco
+  movía el mouse sobre el logo negro (de día, tinta sobre tinta: no se veía nada): las capturas ahora lo mueven en el cielo.
+- Medido (NVIDIA RTX 5050, la pantalla del banco a 75 Hz): las seis variantes, con 96 000 a 1440 y 48 000 a 390, de día, con el
+  mouse, de noche y en color: 13,34 ms de media (el tope de la sincronía), p95 13,4–13,8 y ningún cuadro de más de 20 ms. El
+  barrido de la cantidad (chispas): con 160 000 a 1440 y a 390, igual. Se dejó 96 000 / 48 000 con margen para placas más débiles
+  (la integrada AMD no se midió: la bandera del banco pide la de alto rendimiento).
+- Dos tropiezos del banco: `npx` pisa la variable de entorno `COLOR` (npm la pone en 0 cuando la salida no es una terminal): las
+  corridas «en color» de la tanda C salieron monocromas; la variable pasó a `DESTELLOS_COLOR`. Y el compilador del sombreador
+  avisaba una división por cero en una rama que no se usa (la estela, cero en las demás variantes): se sacó la división.
+- URLs: `/v3?destellos=chispas`, `/v3?destellos=agujero`, `/v3?destellos=infinito`, `/v3?destellos=estallido`,
+  `/v3?destellos=galaxia`, `/v3?destellos=lente`; con `&destellos-color=si`, en azul frío.
 
 ### L4 · Diagnóstico del build de producción
 - PENDIENTE (informe en `docs/rediseno/BUILD-PRODUCCION.md`).

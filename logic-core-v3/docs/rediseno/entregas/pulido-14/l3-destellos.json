@@ -1,0 +1,440 @@
+{
+ "que": "L3 · los destellos (?destellos=<variante>): ms por cuadro (rAF, 5 s; media, p95 y los de más de 20 ms) en el hero de día, con el mouse dando vueltas y en Portfolio de noche; la pantalla del banco va a 75 Hz (13,33 ms: el tope por la sincronía vertical). Cantidad: 96 000 en escritorio y 48 000 en el teléfono (calidad compacta)",
+ "variantes": {
+  "chispas": {
+   "1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "conMouse": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 221
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   },
+   "390": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "errores": []
+   },
+   "color-1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "noche": {
+     "media": 13.34,
+     "p95": 13.4,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "errores": []
+   }
+  },
+  "agujero": {
+   "1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.5,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "conMouse": {
+     "media": 13.34,
+     "p95": 13.4,
+     "mayoresDe20": 0,
+     "cuadros": 222
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.5,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "errores": []
+   },
+   "390": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.6,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "errores": []
+   },
+   "color-1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "noche": {
+     "media": 13.34,
+     "p95": 13.4,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   }
+  },
+  "infinito": {
+   "1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "conMouse": {
+     "media": 13.34,
+     "p95": 13.4,
+     "mayoresDe20": 0,
+     "cuadros": 222
+    },
+    "noche": {
+     "media": 13.41,
+     "p95": 13.5,
+     "mayoresDe20": 2,
+     "cuadros": 369
+    },
+    "errores": []
+   },
+   "390": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   },
+   "color-1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   }
+  },
+  "estallido": {
+   "1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "conMouse": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 222
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   },
+   "390": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   },
+   "color-1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   }
+  },
+  "galaxia": {
+   "1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "conMouse": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 220
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   },
+   "390": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   },
+   "color-1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "errores": []
+   }
+  },
+  "lente": {
+   "1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "conMouse": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 221
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "errores": []
+   },
+   "390": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   },
+   "color-1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "errores": []
+   }
+  }
+ },
+ "barrido": {
+  "96000": {
+   "1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "conMouse": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 220
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "errores": []
+   },
+   "390": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 371
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   }
+  },
+  "160000": {
+   "1440": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "conMouse": {
+     "media": 13.34,
+     "p95": 13.8,
+     "mayoresDe20": 0,
+     "cuadros": 221
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   },
+   "390": {
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "dia": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 370
+    },
+    "errores": []
+   }
+  }
+ },
+ "polvo": {
+  "1440": {
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "dia": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0,
+    "cuadros": 370
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0,
+    "cuadros": 370
+   },
+   "errores": []
+  },
+  "390": {
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "dia": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "errores": []
+  }
+ },
+ "repeticiones": {
+  "que": "infinito a 1440 de noche dio 2 cuadros de más de 20 ms en la tanda E (13,41 de media); repetido dos veces: ninguno",
+  "infinito-1440-noche": [
+   {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0
+   },
+   {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0
+   }
+  ]
+ },
+ "hojas": {
+  "comparativa": "~/.cache/b4-medicion/pulido-14/l3/hoja-final.png (una fila por variante: día, noche, con el mouse, después del mouse a 1440 y la noche a 390)",
+  "color": "~/.cache/b4-medicion/pulido-14/l3/hoja-final-color.png (?destellos-color=si, de noche a 1440)"
+ }
+}

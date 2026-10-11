@@ -62,6 +62,8 @@
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
  */
 
+import { VARIANTES_DE_DESTELLOS, type VarianteDeDestellos } from './destellos/variantes'
+
 export const IDEAS_DEL_ENTORNO = ['E1', 'E4', 'E6', 'E7'] as const
 
 export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
@@ -88,9 +90,13 @@ export interface Pruebas {
   readonly rebobinado: 'minimo' | 'no'
   /** [PULIDO 1] P6 · `angel=asentado`: el logo del intro se asienta en sus últimos ~120 ms (el producto: lineal puro). */
   readonly angel: 'asentado' | 'no'
-  /** [PULIDO 11] E · `hilos=si`: hilos de energía en lugar del polvo (exploración; el producto, el polvo). [PULIDO 13] K6 · y
-   * `hilos=color`: los mismos, en un azul frío (para comparar con el monocromo). */
-  readonly hilos: 'si' | 'color' | 'no'
+  /**
+   * [PULIDO 14] L3 · `destellos=<variante>`: los destellos de energía en lugar del polvo (exploración; el producto, el polvo). Los
+   * hilos de PULIDO 11–13 (`hilos=si|color`) se borraron con su código.
+   */
+  readonly destellos: VarianteDeDestellos | 'no'
+  /** [PULIDO 14] L3 · `destellos-color=si`: los destellos en un azul frío (cian de noche). */
+  readonly 'destellos-color': 'si' | 'no'
   /** [PULIDO 14] L1 · `cuerpo=izquierda`: el cuerpo de Quiénes somos en su columna de antes (el producto: a la derecha del logo). */
   readonly cuerpo: 'izquierda' | 'no'
 }
@@ -116,12 +122,12 @@ export interface Pruebas {
  * con las placas a la vez es el producto (`contorno` y la cascada se fueron con su código). [PULIDO 11] D · entra `caida=angulo`
  * (la caída del logo en el final: la lenta, como una ficha de dominó, es el producto). E · entra `hilos=si` (los hilos de energía).
  * [PULIDO 13] · `caida=angulo` se borró (la lenta es el producto). K6 · entra `hilos=color` (los hilos en azul frío). [PULIDO 14]
- * L1 · entra `cuerpo=izquierda`.
+ * L3 · `hilos=` se borró (no gustaron); entran `destellos=<variante>` y `destellos-color=si`. L1 · entra `cuerpo=izquierda`.
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', hilos: 'no', cuerpo: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', destellos: 'no', 'destellos-color': 'no', cuerpo: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'hilos', 'cuerpo'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'destellos', 'destellos-color', 'cuerpo'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -134,7 +140,8 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     pie: unoDe<'antes'>(['antes'], valor('pie')),
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
-    hilos: unoDe<'si' | 'color'>(['si', 'color'], valor('hilos')),
+    destellos: unoDe<VarianteDeDestellos>(VARIANTES_DE_DESTELLOS, valor('destellos')),
+    'destellos-color': unoDe<'si'>(['si'], valor('destellos-color')),
     cuerpo: unoDe<'izquierda'>(['izquierda'], valor('cuerpo')),
   }
 }
