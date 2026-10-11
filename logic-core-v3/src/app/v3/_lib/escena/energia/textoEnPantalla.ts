@@ -2,8 +2,9 @@ import * as THREE from 'three'
 
 /**
  * [PULIDO 13] K6 · LO QUE ES TEXTO EN LA PANTALLA, para que lo que vuela por la escena pase por detrás (era de los hilos; [PULIDO 14]
- * L3 · lo usan los destellos). Las cajas del texto a la vista (los títulos 3D también: su lugar lo marca el DOM transparente), con su
- * aire, las más grandes primero, en NDC (x0, y0, x1, y1).
+ * L3 · de los destellos; [PULIDO 15] M2 · lo usan las cargas y los arcos, en el sombreador y al elegir dónde salta un arco). Las cajas
+ * del texto a la vista (los títulos 3D también: su lugar lo marca el DOM transparente), con su aire, las más grandes primero, en NDC
+ * (x0, y0, x1, y1).
  */
 export const TEXTO_EN_PANTALLA = { cajas: 8, margenPx: 14, cadaMs: 200 } as const
 

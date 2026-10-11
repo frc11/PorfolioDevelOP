@@ -18,7 +18,7 @@
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 
-import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido } from '../escena/entorno'
+import { ENTORNO, entornoPedido } from '../escena/entorno'
 import { conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import {
   ALTO_DEL_PLANO,
@@ -239,14 +239,18 @@ controlPositivo('  el detector VE una franja corrida (hasta 1025)', vidrioA2.rep
 titulo('B0 · La energía, versión final: una sola, viva, con corrientes y pistones, y el logo que brilla')
 
 // UNA VERSIÓN: sin las variantes del 3A (ni sus defines, ni su código, ni las chispas). [PULIDO 4] C2 · cambió por pedido:
-// `?energia=intensa` (más brillo y más velocidad, para comparar) se borró: la energía de B0 es la del producto.
+// `?energia=intensa` (más brillo y más velocidad, para comparar) se borró: la energía de B0 es la del producto. [PULIDO 15] M2 · la
+// clave `energia` volvió para otra cosa (`?energia=plasma`, la energía nueva en lugar del polvo): lo borrado sigue siendo `intensa`,
+// que no es un valor de la clave (pedida, da `no`) ni existe en el código del final; y en el producto, la clave está apagada.
+const sinIntensa = (pruebas: object): boolean => (pruebas as { energia?: string }).energia === undefined || (pruebas as { energia?: string }).energia === 'no'
 const finalDir = `${V3}/_lib/escena/final`
 const delFinal = readdirSync(finalDir).filter((a) => /\.tsx?$/.test(a)).map((a) => sinComentarios(readFileSync(`${finalDir}/${a}`, 'utf8'))).join('\n')
 const unaBien = (fuentes: string, c: string): boolean => !/ENERGIA_RED|ENERGIA_INESTABLE|redDeLaLuz|RED_DE_LA_LUZ|INESTABLE\b|crearLasChispas|VarianteDeLaEnergia/.test(fuentes) && !existsSync(`${finalDir}/chispasDeLaLuz.ts`) &&
-  !('energia' in ENTORNO.pruebas) && !('energia' in entornoPedido('producto,energia=intensa').pruebas) && !PRUEBAS_SUELTAS.some((k: string) => k === 'energia') && !/INTENSA|intensa/.test(fuentes) &&
+  sinIntensa(ENTORNO.pruebas) && sinIntensa(entornoPedido('producto,energia=intensa').pruebas) && !/INTENSA|intensa/.test(fuentes) &&
   c.includes('LUZ_DE_ABAJO_EN_VIVO.uRelojDeLaLuz.value = s.estatico ? CAMPO_QUIETO_EN : t')
 afirmar(unaBien(delFinal, cuadro), 'una sola versión (las variantes del 3A y las chispas se borraron); [PULIDO 4] `?energia=intensa` también')
 controlPositivo('el detector VE la variante `red` de vuelta', `${delFinal}\n#define ENERGIA_RED`, (f: string) => unaBien(f, cuadro))
+controlPositivo('  y `?energia=intensa` aceptada de vuelta (la clave con ese valor)', { energia: 'intensa' }, sinIntensa)
 
 // MÁS MOVIMIENTO Y MÁS BRILLO: el fondo de la energía cambia de un cuadro al otro casi nada (continuo) pero en medio segundo ya
 // es otro (no un mapa que cambia lento: en el 3A, medio segundo daba casi lo mismo); la luz, más fuerte que la del 3A (plano

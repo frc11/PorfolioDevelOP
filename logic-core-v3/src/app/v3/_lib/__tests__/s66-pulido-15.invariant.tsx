@@ -7,9 +7,17 @@
  *        siempre delante del logo y entero, SIN el velo elíptico; la legibilidad, un halo corto y denso pegado al trazo de las
  *        letras (la sombra corta apilada, sin colas), del color contrario a la letra (de día la tinta con el halo del papel; de
  *        noche el papel con el halo de la tinta). AA medido donde el texto cruza el logo, de día y de noche, de 1024 a 2560.
+ *   M2 · la energía nueva, plasma + cargas (`?energia=plasma`, exploración; sin la bandera, el polvo): cientos de cargas en el
+ *        volumen (las opuestas se atraen, las iguales se repelen, con rechazo de corto alcance, amortiguación y agitación; las
+ *        fuerzas por una grilla), enlaces que descargan en arcos de plasma cortos y quebrados (punto medio, con ramas, ~0,3 s), el
+ *        logo que suelta arcos, el puntero como carga fuerte (los arcos le saltan); como mucho 5 arcos a la vez (4 en el teléfono);
+ *        detrás de los textos; monocromo (`?plasma-color=si`, el azul eléctrico). Los destellos de PULIDO 14 se borraron.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
+import { ARCOS, TRAMOS_DEL_BUFER, crearArcos, crearBuferDeLosArcos, envolvente, programarArcos, puntoMedio, rellenarArcos, type Entorno } from '../escena/energia/arcos'
+import { PLASMA, azarConSemilla, crearCargas, cuantosEnlaces, pasoDeLasCargas, type Cargas, type RayoDelPuntero } from '../escena/energia/cargas'
+import { FRAGMENTOS_DE_LAS_CARGAS, FRAGMENTOS_DE_LOS_ARCOS, VERTICES_DE_LAS_CARGAS, VERTICES_DE_LOS_ARCOS } from '../escena/energia/sombreadores'
 import { PRUEBAS_SUELTAS, entornoPedido } from '../escena/entorno'
 import { afirmar, cerrar, controlPositivo, deudaDeclarada, titulo } from './afirmar'
 
@@ -98,5 +106,180 @@ const retiraBien = (t: readonly (Parada & { ms: number })[]): boolean =>
   t.length >= 4 && t.every((x) => x.textoClaro === Number(x.delArco) > 0.5 && (x.cuerpo ?? 0) >= 4) && t.some((x) => x.textoClaro) && t.some((x) => !x.textoClaro)
 afirmar(retiraBien(M1.nocheReal), `  la noche que se retira: la letra sigue a la luz que se ve (${M1.nocheReal.map((x) => `${String(x.ms)} ms ${x.textoClaro ? 'papel' : 'tinta'}`).join(', ')})`)
 controlPositivo('  el detector VE el papel sobre la sala ya de día (la letra atada a la gota)', M1.nocheReal.map((x, k) => (k === 1 ? { ...x, textoClaro: true } : x)), retiraBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('M2 · La energía nueva: plasma + cargas (`?energia=plasma`)')
+// Los destellos se borraron con su código y sus banderas; entra la energía: el polvo de siempre sin la bandera, el plasma EN LUGAR
+// del polvo con `energia=plasma` (con `plasma-y-polvo`, además del polvo), en azul con `plasma-color=si`.
+const STAGE = leer('_lib/escena/ProbeStage.tsx')
+const banderas = (stage: string): boolean =>
+  !existsSync(`${V3}/_lib/escena/destellos`) && !(PRUEBAS_SUELTAS as readonly string[]).some((k) => k.startsWith('destellos')) &&
+  !('destellos' in entornoPedido('producto,destellos=chispas').pruebas) && PRUEBAS_SUELTAS.includes('energia') && PRUEBAS_SUELTAS.includes('plasma-color') &&
+  entornoPedido('producto').pruebas.energia === 'no' && entornoPedido('producto,energia=plasma').pruebas.energia === 'plasma' &&
+  entornoPedido('producto,energia=plasma-y-polvo').pruebas.energia === 'plasma-y-polvo' && entornoPedido('producto,energia=plasma,plasma-color=si').pruebas['plasma-color'] === 'si' &&
+  stage.includes("const sinPolvo = energia === 'plasma'") && stage.includes('{!sinPolvo && <DepthParticles store={store} />}') &&
+  stage.includes("{energia !== 'no' && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion}") && !/Destellos/.test(stage)
+afirmar(banderas(STAGE), 'M2 · sin `?destellos=` (borrados con su código); `?energia=plasma` en lugar del polvo (o `plasma-y-polvo`), `?plasma-color=si`; sin bandera, el polvo')
+controlPositivo('M2 · el detector VE los destellos todavía montados', `${STAGE}\n{destellos !== 'no' && <DestellosDeEnergia />}`, banderas)
+
+// La física, sin navegador: dos cargas con la misma agitación (así sólo cuenta lo que se hacen entre ellas).
+const par = (signos: readonly [number, number], d: number): Cargas => {
+  const c = crearCargas(2, azarConSemilla(3))
+  c.lugar.set([6 - d / 2, 0, 0, 6 + d / 2, 0, 0])
+  c.velocidad.fill(0)
+  c.signo.set(signos)
+  for (let k = 1; k < 4; k += 1) c.semilla[4 + k] = c.semilla[k]
+  c.enfriado.fill(99)
+  return c
+}
+const separacion = (c: Cargas): number => Math.hypot(c.lugar[3] - c.lugar[0], c.lugar[4] - c.lugar[1], c.lugar[5] - c.lugar[2])
+const correrCon = (paso: typeof pasoDeLasCargas, c: Cargas, segundos: number, rayo: RayoDelPuntero | null = null): Cargas => {
+  const azar = azarConSemilla(9)
+  for (let t = 0; t < segundos; t += 1 / 60) paso(c, 1 / 60, t, rayo, azar)
+  return c
+}
+const fuerzasBien = (paso: typeof pasoDeLasCargas): boolean =>
+  separacion(correrCon(paso, par([1, -1], 2.4), 1.5)) < 2.25 && separacion(correrCon(paso, par([1, 1], 2.4), 1.5)) > 2.55 &&
+  separacion(correrCon(paso, par([-1, -1], 2.4), 1.5)) > 2.55 && separacion(correrCon(paso, par([1, -1], 0.15), 1)) > PLASMA.fuerzas.cerca * 0.7
+const medidas = [separacion(correrCon(pasoDeLasCargas, par([1, -1], 2.4), 1.5)), separacion(correrCon(pasoDeLasCargas, par([1, 1], 2.4), 1.5)), separacion(correrCon(pasoDeLasCargas, par([1, -1], 0.15), 1))].map((x) => x.toFixed(2))
+afirmar(fuerzasBien(pasoDeLasCargas), `  la física: las opuestas se acercan (2,4 → ${medidas[0]} u en 1,5 s), las iguales se alejan (→ ${medidas[1]}) y el rechazo de corto alcance no las deja juntarse (0,15 → ${medidas[2]})`)
+const TODAS_SE_ATRAEN: typeof pasoDeLasCargas = (c, dt, t, r, a) => {
+  if (c.n === 2) c.signo.set([1, -1])
+  pasoDeLasCargas(c, dt, t, r, a)
+}
+controlPositivo('  el detector VE una física en la que todas se atraen', TODAS_SE_ATRAEN, fuerzasBien)
+// La cáscara (una carga lejos vuelve) y el puntero, una carga fuerte sobre su rayo: atrae a las negativas, empuja a las positivas.
+const sola = (signo: number, x: number): Cargas => {
+  const c = crearCargas(1, azarConSemilla(4))
+  c.lugar.set([x, 0, 0])
+  c.velocidad.fill(0)
+  c.signo[0] = signo
+  return c
+}
+const RAYO: RayoDelPuntero = { ox: 8, oy: 0, oz: 30, dx: 0, dy: 0, dz: -1 }
+const punteroBien = (r: RayoDelPuntero): boolean => {
+  const negativa = correrCon(pasoDeLasCargas, sola(-1, 6.5), 1, r).lugar[0]
+  const positiva = correrCon(pasoDeLasCargas, sola(1, 6.5), 1, r).lugar[0]
+  const lejos = correrCon(pasoDeLasCargas, sola(1, 22), 6).lugar
+  return Math.abs(negativa - 8) < 1.2 && Math.abs(positiva - 8) > 1.8 && Math.hypot(lejos[0], lejos[1], lejos[2]) < PLASMA.volumen.radio + 1
+}
+afirmar(punteroBien(RAYO), '  el puntero: la negativa va hacia su rayo, la positiva se aleja; y una carga afuera de la cáscara vuelve')
+controlPositivo('  el detector VE un puntero que no hace nada', { ...RAYO, ox: 900 }, punteroBien)
+// La grilla: con las cargas del escritorio, los pares que mira son una fracción de todos (lineal en la cantidad, no O(n²)); los
+// enlaces se forman y se sueltan solos.
+const MUCHAS = crearCargas(PLASMA.cargas.escritorio, azarConSemilla(15))
+const ENLACES = { maximo: 0, cambios: 0 }
+{
+  const azar = azarConSemilla(16)
+  let antes = MUCHAS.pareja.slice()
+  for (let k = 0; k < 60 * 40; k += 1) {
+    pasoDeLasCargas(MUCHAS, 1 / 60, k / 60, null, azar)
+    ENLACES.maximo = Math.max(ENLACES.maximo, cuantosEnlaces(MUCHAS))
+    for (let i = 0; i < MUCHAS.n; i += 1) if (MUCHAS.pareja[i] !== antes[i]) ENLACES.cambios += 1
+    antes = MUCHAS.pareja.slice()
+  }
+}
+const TODOS = (MUCHAS.n * (MUCHAS.n - 1)) / 2
+const grillaBien = (mirados: number): boolean => mirados < TODOS * 0.2 && ENLACES.maximo > 0 && ENLACES.cambios > 4 * ENLACES.maximo
+afirmar(grillaBien(MUCHAS.paresMirados), `  la grilla: ${String(MUCHAS.paresMirados)} pares mirados por cuadro de ${String(TODOS)} (${String(PLASMA.cargas.escritorio)} cargas); hasta ${String(ENLACES.maximo)} enlaces a la vez, que se forman y se sueltan solos en 40 s`)
+controlPositivo('  el detector VE la cuenta de todos contra todos', TODOS, grillaBien)
+
+// Los arcos, sin navegador: dos minutos con el puntero la mitad del tiempo; «se ve» todo menos la mitad izquierda (un texto).
+interface CorridaDeArcos { maximo: number; porSegundo: Record<string, number>; enElTexto: number; bufer: boolean; vidas: number[] }
+const correrArcos = (maximo: number, programar: typeof programarArcos): CorridaDeArcos => {
+  const azar = azarConSemilla(21)
+  const c = crearCargas(maximo === ARCOS.maximoCompacto ? PLASMA.cargas.compacta : PLASMA.cargas.escritorio, azar)
+  const e = crearArcos(azar)
+  const bufer = crearBuferDeLosArcos()
+  const [a0, d0] = [bufer.a, e.arcos[0].desvios]
+  const estado = { rayo: null as RayoDelPuntero | null }
+  const en: Entorno = {
+    camara: new Float32Array([0, 1, 19]),
+    get rayo(): RayoDelPuntero | null {
+      return estado.rayo
+    },
+    maximo,
+    seVe: (x, y, z) => x > 0.3 && z < 17 && Math.abs(x / (19 - z)) < 0.5 && Math.abs((y - 1) / (19 - z)) < 0.32,
+    bordeDelLogo: (x, y, z, d) => {
+      const l = Math.hypot(x, y, z) || 1
+      d.set([(x / l) * 3.4, (y / l) * 1.6, (z / l) * 0.5])
+      return true
+    },
+  }
+  const r: CorridaDeArcos = { maximo: 0, porSegundo: {}, enElTexto: 0, bufer: true, vidas: [] }
+  const dt = 1 / 60
+  for (let k = 0; k < 60 * 120; k += 1) {
+    estado.rayo = k % (60 * 20) < 60 * 10 ? { ox: 2, oy: 1, oz: 19, dx: 0.12, dy: 0, dz: -0.99 } : null
+    pasoDeLasCargas(c, dt, k * dt, estado.rayo, azar)
+    programar(e, c, dt, en, azar)
+    r.maximo = Math.max(r.maximo, e.arcos.filter((x) => x.activo).length)
+    for (const x of e.arcos) {
+      if (!x.activo || x.edad > 1e-9) continue
+      r.vidas.push(x.vida)
+      const xa = x.a >= 0 ? c.lugar[x.a * 3] : x.punto[0]
+      const xb = x.b >= 0 ? c.lugar[x.b * 3] : x.punto[0]
+      if (xa <= 0.3 || xb <= 0.3) r.enElTexto += 1
+    }
+    if (rellenarArcos(e, c, bufer) > TRAMOS_DEL_BUFER) r.bufer = false
+  }
+  r.bufer = r.bufer && bufer.a === a0 && e.arcos[0].desvios === d0
+  r.porSegundo = Object.fromEntries(Object.entries(e.contados).map(([k, v]) => [k, Math.round((v / 120) * 100) / 100]))
+  return r
+}
+const ESCRITORIO = correrArcos(ARCOS.maximo, programarArcos)
+const TELEFONO = correrArcos(ARCOS.maximoCompacto, programarArcos)
+const arcosBien = (r: CorridaDeArcos, maximo: number): boolean =>
+  r.maximo <= maximo && r.maximo >= 3 && r.enElTexto === 0 && r.bufer && r.vidas.length > 100 && r.vidas.every((v) => v >= ARCOS.vida[0] && v <= ARCOS.vida[1]) &&
+  (r.porSegundo.par ?? 0) > 0.5 && (r.porSegundo.par ?? 0) < 4 && (r.porSegundo.logo ?? 0) > 1 / ARCOS.delLogo[1] - 0.06 && (r.porSegundo.logo ?? 0) < 1 / ARCOS.delLogo[0] + 0.06 &&
+  (r.porSegundo.cursor ?? 0) > 0.3
+afirmar(arcosBien(ESCRITORIO, ARCOS.maximo) && arcosBien(TELEFONO, ARCOS.maximoCompacto), `  los arcos en 2 min: como mucho ${String(ESCRITORIO.maximo)} a la vez (${String(TELEFONO.maximo)} en el teléfono); por segundo, ${JSON.stringify(ESCRITORIO.porSegundo)}; ninguno nace sobre el texto; vidas de ${String(ARCOS.vida[0])} a ${String(ARCOS.vida[1])} s; el búfer es siempre el mismo`)
+controlPositivo('  el detector VE arcos sin tope (los seis lugares, uno pedido en cada cuadro)', correrArcos(ARCOS.lugares, (e, c, dt, en, azar) => {
+  e.forzado = 'par'
+  programarArcos(e, c, dt, en, azar)
+}), (r: CorridaDeArcos) => arcosBien(r, ARCOS.maximo))
+controlPositivo('  y arcos que nacen sobre el texto', correrArcos(ARCOS.maximo, (e, c, dt, en, azar) => programarArcos(e, c, dt, { camara: en.camara, rayo: en.rayo, maximo: en.maximo, bordeDelLogo: en.bordeDelLogo, seVe: () => true }, azar)), (r: CorridaDeArcos) => arcosBien(r, ARCOS.maximo))
+// El camino: desplazamiento de punto medio (los extremos quietos, el medio corrido, cada nivel su propio corrimiento); el brillo
+// entra rápido y se apaga.
+const CAMINO = new Float32Array(33 * 3)
+puntoMedio(CAMINO, 0, 32, 2, [0, 1, 0], [0, 0, 1], azarConSemilla(5))
+const quebrado = (p: Float32Array): boolean =>
+  p[1] === 0 && p[32 * 3 + 1] === 0 && Math.abs(p[16 * 3 + 1]) > 0.01 && [1, 3, 5, 7].some((k) => Math.abs(p[k * 3 + 1] - (p[(k - 1) * 3 + 1] + p[(k + 1) * 3 + 1]) / 2) > 1e-4)
+afirmar(quebrado(CAMINO) && envolvente(0.02, 0.3, 1) > 0.2 && envolvente(0.29, 0.3, 1) < 0.05, '  el camino de cada arco: quebrado por punto medio (los extremos en su lugar); el brillo entra en centésimas y se apaga al final')
+controlPositivo('  el detector VE una línea recta', new Float32Array(33 * 3), quebrado)
+// Los sombreadores: las cargas instanciadas con su tamaño del mundo (lejos, chicas) y la lejanía (lejos, tenues); la positiva llena
+// y la negativa un anillo; las cargas y los arcos se apagan detrás de los textos; de noche suman luz (alfa 0), de día tapan.
+const sombreadoresBien = (vc: string, fc: string, va: string, fa: string): boolean =>
+  vc.includes('uEscalaPx * mundo / distancia') && vc.includes('vTexto = adentroDelTexto( clip.xy / clip.w );') && va.includes('vTexto = adentroDelTexto( c.xy / c.w );') &&
+  fc.includes('if ( vSigno > 0.0 ) {') && fc.includes('exp( - pow( ( r - 1.0 ) / grosor, 2.0 ) )') && fc.includes('* vLejos )') &&
+  [fc, fa].every((f) => f.includes('( 1.0 - 0.94 * vTexto )') && f.includes('gl_FragColor = vec4( color * a, a * ( 1.0 - uNoche ) );'))
+afirmar(sombreadoresBien(VERTICES_DE_LAS_CARGAS, FRAGMENTOS_DE_LAS_CARGAS, VERTICES_DE_LOS_ARCOS, FRAGMENTOS_DE_LOS_ARCOS), '  en la GPU: las cargas con profundidad (lejos, chicas y tenues), llenas y anillos; las cargas y los arcos, detrás de los textos; de noche suman luz')
+controlPositivo('  el detector VE arcos que cruzan el texto', FRAGMENTOS_DE_LOS_ARCOS.replace('( 1.0 - 0.94 * vTexto )', '1.0'), (f: string) => sombreadoresBien(VERTICES_DE_LAS_CARGAS, FRAGMENTOS_DE_LAS_CARGAS, VERTICES_DE_LOS_ARCOS, f))
+// Con movimiento reducido: quietas y sin arcos (el cuadro sale antes de la física y de los arcos).
+const PLASMA_TSX = leer('_lib/escena/energia/PlasmaYCargas.tsx')
+const quietoBien = (f: string): boolean => /if \(quieto\) return\n[\s\S]*pasoDeLasCargas\([\s\S]*programarArcos\(/.test(f)
+afirmar(quietoBien(PLASMA_TSX), '  con movimiento reducido, las cargas quietas y sin arcos')
+controlPositivo('  el detector VE el plasma moviéndose con movimiento reducido', PLASMA_TSX.replace('if (quieto) return\n', ''), quietoBien)
+
+// Medido (`m2-plasma.ts`, el banco de producción): en la NVIDIA, a 1440 (el mouse) y a 390 (el dedo), monocromo y en color: los ms
+// por cuadro de día, con el puntero y de noche dentro del cuadro (la pantalla del banco va a 75 Hz: 13,3 ms), como la base del
+// polvo; las cantidades (320 y 180 cargas) y el tope de arcos a la vez; los arcos de las tres clases (enlace, logo, puntero o dedo).
+interface Cuadros { readonly media: number; readonly p95: number; readonly mayoresDe20: number }
+interface EstadoMedido { readonly cargas: number; readonly maximoALaVez: number; readonly contados: Record<string, number> }
+interface CorridaMedida { readonly placa: string; readonly dia: Cuadros; readonly noche: Cuadros; readonly conPuntero?: Cuadros; readonly estadoDeDia: EstadoMedido | null; readonly estadoDeNoche: EstadoMedido | null; readonly arcoDelLogo?: EstadoMedido | null; readonly arcoAlPuntero?: EstadoMedido | null }
+const M2 = recibo<{ corridas: Record<string, CorridaMedida> }>('m2-plasma.json').corridas
+const enElCuadro = (c: Cuadros | undefined): boolean => c !== undefined && c.media <= 16.7 && c.mayoresDe20 <= 2
+const medidoBien = (r: Record<string, CorridaMedida>): boolean =>
+  ['plasma-1440', 'plasma-color-1440', 'plasma-390', 'plasma-color-390', 'polvo-1440', 'polvo-390'].every((k) => r[k] !== undefined && r[k].placa.includes('NVIDIA') && enElCuadro(r[k].dia) && enElCuadro(r[k].noche) && (r[k].conPuntero === undefined || enElCuadro(r[k].conPuntero))) &&
+  ['1440', '390'].every((w) => {
+    const [c, maximo] = w === '1440' ? [PLASMA.cargas.escritorio, ARCOS.maximo] : [PLASMA.cargas.compacta, ARCOS.maximoCompacto]
+    const plasma = r[`plasma-${w}`]
+    const estados = [plasma.estadoDeDia, plasma.estadoDeNoche, plasma.arcoDelLogo ?? null, plasma.arcoAlPuntero ?? null].filter((e): e is EstadoMedido => e !== null)
+    const final = plasma.estadoDeNoche
+    return estados.length >= 3 && estados.every((e) => e.cargas === c && e.maximoALaVez <= maximo) && final !== null && (final.contados.par ?? 0) > 0 && (final.contados.logo ?? 0) > 0 && (final.contados.cursor ?? 0) > 0 && (plasma.arcoDelLogo ?? null) !== null && (plasma.arcoAlPuntero ?? null) !== null
+  })
+const ms = (k: string): string => `${M2[k].dia.media.toFixed(2)}/${M2[k].noche.media.toFixed(2)}`
+afirmar(medidoBien(M2), `  medido en la NVIDIA (ms por cuadro de día/de noche): a 1440 ${ms('plasma-1440')}, en color ${ms('plasma-color-1440')}; a 390 ${ms('plasma-390')}; el polvo ${ms('polvo-1440')}; ninguno de más de 20 ms; ${String(PLASMA.cargas.escritorio)} y ${String(PLASMA.cargas.compacta)} cargas, como mucho ${String(M2['plasma-1440'].estadoDeNoche?.maximoALaVez)} arcos a la vez; las tres clases de arco, con el mouse y con el dedo`)
+controlPositivo('  el detector VE una corrida fuera del cuadro', { ...M2, 'plasma-390': { ...M2['plasma-390'], noche: { media: 22, p95: 31, mayoresDe20: 90 } } }, medidoBien)
+controlPositivo('  y el dedo que no hace saltar arcos', { ...M2, 'plasma-390': { ...M2['plasma-390'], arcoAlPuntero: null } }, medidoBien)
 
 cerrar('s66-pulido-15')

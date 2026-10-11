@@ -62,8 +62,6 @@
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
  */
 
-import { VARIANTES_DE_DESTELLOS, type VarianteDeDestellos } from './destellos/variantes'
-
 export const IDEAS_DEL_ENTORNO = ['E1', 'E4', 'E6', 'E7'] as const
 
 export type IdeaDelEntorno = (typeof IDEAS_DEL_ENTORNO)[number]
@@ -91,12 +89,13 @@ export interface Pruebas {
   /** [PULIDO 1] P6 · `angel=asentado`: el logo del intro se asienta en sus últimos ~120 ms (el producto: lineal puro). */
   readonly angel: 'asentado' | 'no'
   /**
-   * [PULIDO 14] L3 · `destellos=<variante>`: los destellos de energía en lugar del polvo (exploración; el producto, el polvo). Los
-   * hilos de PULIDO 11–13 (`hilos=si|color`) se borraron con su código.
+   * [PULIDO 15] M2 · `energia=plasma`: la energía nueva, plasma + cargas, en lugar del polvo (exploración; el producto, el polvo);
+   * `energia=plasma-y-polvo`, con el polvo además (la otra lectura de «no reemplaza al polvo todavía»). Los destellos de PULIDO 14
+   * (`destellos=`, `destellos-color=`) se borraron con su código.
    */
-  readonly destellos: VarianteDeDestellos | 'no'
-  /** [PULIDO 14] L3 · `destellos-color=si`: los destellos en un azul frío (cian de noche). */
-  readonly 'destellos-color': 'si' | 'no'
+  readonly energia: 'plasma' | 'plasma-y-polvo' | 'no'
+  /** [PULIDO 15] M2 · `plasma-color=si`: la energía en un azul eléctrico frío (para comparar con el monocromo). */
+  readonly 'plasma-color': 'si' | 'no'
 }
 
 /**
@@ -121,12 +120,13 @@ export interface Pruebas {
  * (la caída del logo en el final: la lenta, como una ficha de dominó, es el producto). E · entra `hilos=si` (los hilos de energía).
  * [PULIDO 13] · `caida=angulo` se borró (la lenta es el producto). K6 · entra `hilos=color` (los hilos en azul frío). [PULIDO 14]
  * L3 · `hilos=` se borró (no gustaron); entran `destellos=<variante>` y `destellos-color=si`. L1 · entra `cuerpo=izquierda`.
- * [PULIDO 15] M1 · `cuerpo=` se borró (el cuerpo a la izquierda es el producto).
+ * [PULIDO 15] M1 · `cuerpo=` se borró (el cuerpo a la izquierda es el producto). M2 · `destellos=` y `destellos-color=` se borraron
+ * (no gustó ninguna); entran `energia=plasma|plasma-y-polvo` y `plasma-color=si`.
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', destellos: 'no', 'destellos-color': 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', 'plasma-color': 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'destellos', 'destellos-color'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'plasma-color'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -139,8 +139,8 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     pie: unoDe<'antes'>(['antes'], valor('pie')),
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
-    destellos: unoDe<VarianteDeDestellos>(VARIANTES_DE_DESTELLOS, valor('destellos')),
-    'destellos-color': unoDe<'si'>(['si'], valor('destellos-color')),
+    energia: unoDe<'plasma' | 'plasma-y-polvo'>(['plasma', 'plasma-y-polvo'], valor('energia')),
+    'plasma-color': unoDe<'si'>(['si'], valor('plasma-color')),
   }
 }
 

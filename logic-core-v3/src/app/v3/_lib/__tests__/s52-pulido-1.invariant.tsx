@@ -22,7 +22,6 @@ import * as THREE from 'three'
 
 import { aimWithFraming } from '../escena/cameraFraming'
 import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
-import { VARIANTES_DE_DESTELLOS } from '../escena/destellos/variantes'
 import { estadoQuieto, poderSuave } from '../escena/final/cuadroDelFinal'
 import { ANCLAS_DEL_HUECO, conElFinalEnElPiso } from '../escena/final/enElPiso'
 import { CAMPO_QUIETO_EN, ENERGIA_EN_LA_SIMULACION_GLSL, LUZ_DE_ABAJO, campoDeLaLuz, energiaDelCampo } from '../escena/final/luzDeAbajo'
@@ -130,7 +129,7 @@ titulo('Banderas del sprint: apagadas en el producto; con banco en el pedido; si
 // es el producto. PULIDO 4 · C1 agrega `meta=fusion|contorno`; C2, `golpe=a|b`, y borra `energia=intensa`. PULIDO 5 · D1 agrega
 // `ancho=normal|expandido`; D2 borra `golpe=a|b` (el de la sala es el producto) y agrega `anillo=tubo|disco|filo|tubo+filo`. PULIDO 6 · E1 borra `meta=` y `ancho=`; E2 borra `anillo=` y agrega
 // `filo=corriente|pulso|descarga`. PULIDO 7 · F1 borra `filo=`; F2 agrega `meta=contorno` y `volteo=juntos`. PULIDO 8 · G1 borra las dos.)
-const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], destellos: [...VARIANTES_DE_DESTELLOS], 'destellos-color': ['si'] } /* [PULIDO 11] D · y la caída en arco; E · y los hilos. [PULIDO 14] L3 · los hilos se borraron: los destellos y su color; L1 · el cuerpo a la izquierda. [PULIDO 15] M1 · `cuerpo=` se borró */
+const PEDIDAS: Readonly<Record<(typeof PRUEBAS_SUELTAS)[number], readonly string[]>> = { rebobinado: ['minimo'], angel: ['asentado'], energia: ['plasma', 'plasma-y-polvo'], 'plasma-color': ['si'] } /* [PULIDO 11] D · y la caída en arco; E · y los hilos. [PULIDO 14] L3 · los hilos se borraron: los destellos y su color; L1 · el cuerpo a la izquierda. [PULIDO 15] M1 · `cuerpo=` se borró; M2 · los destellos se borraron: la energía (plasma + cargas) y su color */
 type Traductor = typeof entornoPedido
 const banderasBien = (f: Traductor): boolean => {
   const apagadas = PRUEBAS_SUELTAS.every((k) => f('producto').pruebas[k] === 'no' && ENTORNO.pruebas[k] === 'no')

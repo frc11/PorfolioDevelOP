@@ -16,7 +16,7 @@ import { Entorno } from './entorno/Entorno'
 import { Rebote } from './entorno/Rebote'
 import { Amanecer } from './amanecer/Amanecer'
 import { DepthParticles } from './DepthParticles'
-import { DestellosDeEnergia } from './destellos/DestellosDeEnergia'
+import { PlasmaYCargas } from './energia/PlasmaYCargas'
 import { FinalDelPie } from './final/FinalDelPie'
 import { CaidaDelLogo } from './intro/CaidaDelLogo'
 import { Formacion, pisoConFormacion } from './formacion/Formacion'
@@ -159,10 +159,10 @@ export default function ProbeStage({
   const bokehGroupRef = useRef<THREE.Group>(null)
   /** La envolvente de rendijas: el loop le desplaza la capa gruesa hacia abajo. */
   const moireRef = useRef<MoireHandle>(null)
-  // [PULIDO 14] L3 · `?destellos=<variante>`: los destellos de energía en lugar del polvo y del bokeh (sus grupos quedan: el rig los
-  // deriva); `?destellos-color=si`, en azul frío. Los hilos (`?hilos=`) se borraron.
-  const { destellos, 'destellos-color': destellosColor } = entornoDeLaEscena().pruebas
-  const conDestellos = destellos !== 'no'
+  // [PULIDO 15] M2 · `?energia=plasma`: la energía nueva (plasma + cargas) en lugar del polvo y del bokeh (sus grupos quedan: el rig
+  // los deriva); `plasma-y-polvo`, con el polvo además; `?plasma-color=si`, en azul eléctrico. Los destellos (`?destellos=`) se borraron.
+  const { energia, 'plasma-color': plasmaColor } = entornoDeLaEscena().pruebas
+  const sinPolvo = energia === 'plasma'
 
   return (
     <Canvas
@@ -252,12 +252,12 @@ export default function ProbeStage({
           `choreographyPhysics.ts`.
         */}
         <group ref={dustGroupRef} name="polvo">
-          {!conDestellos && <DepthParticles store={store} />}
+          {!sinPolvo && <DepthParticles store={store} />}
         </group>
         <group ref={bokehGroupRef} name="bokeh">
-          {!conDestellos && <BokehParticles />}
+          {!sinPolvo && <BokehParticles />}
         </group>
-        {destellos !== 'no' && <DestellosDeEnergia logoGroupRef={logoGroupRef} variante={destellos} quieto={reducedMotion} compacto={calidad === 'compacta'} color={destellosColor === 'si'} />}
+        {energia !== 'no' && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} color={plasmaColor === 'si'} />}
 
         <OrbitRig
           store={store}

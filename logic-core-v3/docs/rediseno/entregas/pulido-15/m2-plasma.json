@@ -1,0 +1,397 @@
+{
+ "que": "M2 · la energía nueva (?energia=plasma): por corrida (una carga de la página), los ms por cuadro (rAF, 5 s en el hero de día sin puntero; 3 s con el puntero dando vueltas cerca del logo; 5 s de noche en Portfolio): media, p95 y los de más de 20 ms; el estado (__energiaDelBanco: cargas, enlaces, arcos vivos, contados por clase, el máximo a la vez); los arcos pedidos para las capturas (del logo, al puntero). A 390, el dedo (touch). La base: el polvo (sin bandera). Banco de producción (.next-probe), Chrome por CDP, la NVIDIA.",
+ "corridas": {
+  "plasma-1440": {
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "entorno": "producto,energia=plasma",
+   "dia": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "conPuntero": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0,
+    "cuadros": 220
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0,
+    "cuadros": 370
+   },
+   "estadoDeDia": {
+    "cargas": 320,
+    "enlaces": 26,
+    "arcos": 2,
+    "contados": {
+     "par": 16,
+     "logo": 3,
+     "cursor": 0
+    },
+    "maximoALaVez": 3,
+    "cursor": false
+   },
+   "estadoConPuntero": {
+    "cargas": 320,
+    "enlaces": 47,
+    "arcos": 1,
+    "contados": {
+     "par": 39,
+     "logo": 7,
+     "cursor": 32
+    },
+    "maximoALaVez": 5,
+    "cursor": true
+   },
+   "estadoQuieto": {
+    "cargas": 320,
+    "enlaces": 44,
+    "arcos": 3,
+    "contados": {
+     "par": 40,
+     "logo": 8,
+     "cursor": 43
+    },
+    "maximoALaVez": 5,
+    "cursor": true
+   },
+   "estadoDeNoche": {
+    "cargas": 320,
+    "enlaces": 44,
+    "arcos": 0,
+    "contados": {
+     "par": 73,
+     "logo": 10,
+     "cursor": 43
+    },
+    "maximoALaVez": 5,
+    "cursor": true
+   },
+   "arcoDelLogo": {
+    "cargas": 320,
+    "enlaces": 64,
+    "arcos": 1,
+    "contados": {
+     "par": 25,
+     "logo": 5,
+     "cursor": 0
+    },
+    "maximoALaVez": 3,
+    "cursor": false
+   },
+   "arcoConPuntero": {
+    "cargas": 320,
+    "enlaces": 37,
+    "arcos": 2,
+    "contados": {
+     "par": 34,
+     "logo": 6,
+     "cursor": 18
+    },
+    "maximoALaVez": 4,
+    "cursor": true
+   },
+   "arcoAlPuntero": {
+    "cargas": 320,
+    "enlaces": 44,
+    "arcos": 3,
+    "contados": {
+     "par": 40,
+     "logo": 8,
+     "cursor": 40
+    },
+    "maximoALaVez": 5,
+    "cursor": true
+   },
+   "arcoDelLogoDeNoche": {
+    "cargas": 320,
+    "enlaces": 44,
+    "arcos": 1,
+    "contados": {
+     "par": 74,
+     "logo": 12,
+     "cursor": 43
+    },
+    "maximoALaVez": 5,
+    "cursor": true
+   },
+   "grupo": [
+    855,
+    405
+   ],
+   "errores": []
+  },
+  "plasma-color-1440": {
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "entorno": "producto,energia=plasma,plasma-color=si",
+   "dia": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0,
+    "cuadros": 370
+   },
+   "estadoDeDia": {
+    "cargas": 320,
+    "enlaces": 25,
+    "arcos": 1,
+    "contados": {
+     "par": 11,
+     "logo": 3,
+     "cursor": 0
+    },
+    "maximoALaVez": 3,
+    "cursor": false
+   },
+   "estadoDeNoche": {
+    "cargas": 320,
+    "enlaces": 49,
+    "arcos": 0,
+    "contados": {
+     "par": 20,
+     "logo": 6,
+     "cursor": 0
+    },
+    "maximoALaVez": 3,
+    "cursor": false
+   },
+   "arcoDelLogo": {
+    "cargas": 320,
+    "enlaces": 34,
+    "arcos": 1,
+    "contados": {
+     "par": 13,
+     "logo": 4,
+     "cursor": 0
+    },
+    "maximoALaVez": 3,
+    "cursor": false
+   },
+   "arcoDelLogoDeNoche": {
+    "cargas": 320,
+    "enlaces": 51,
+    "arcos": 1,
+    "contados": {
+     "par": 20,
+     "logo": 7,
+     "cursor": 0
+    },
+    "maximoALaVez": 3,
+    "cursor": false
+   },
+   "errores": []
+  },
+  "plasma-390": {
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "entorno": "producto,energia=plasma",
+   "dia": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "conPuntero": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0,
+    "cuadros": 222
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "estadoDeDia": {
+    "cargas": 180,
+    "enlaces": 17,
+    "arcos": 0,
+    "contados": {
+     "par": 3,
+     "logo": 0,
+     "cursor": 0
+    },
+    "maximoALaVez": 2,
+    "cursor": false
+   },
+   "estadoConPuntero": {
+    "cargas": 180,
+    "enlaces": 16,
+    "arcos": 1,
+    "contados": {
+     "par": 29,
+     "logo": 1,
+     "cursor": 5
+    },
+    "maximoALaVez": 3,
+    "cursor": true
+   },
+   "estadoQuieto": {
+    "cargas": 180,
+    "enlaces": 22,
+    "arcos": 1,
+    "contados": {
+     "par": 36,
+     "logo": 2,
+     "cursor": 10
+    },
+    "maximoALaVez": 4,
+    "cursor": true
+   },
+   "estadoDeNoche": {
+    "cargas": 180,
+    "enlaces": 26,
+    "arcos": 0,
+    "contados": {
+     "par": 45,
+     "logo": 2,
+     "cursor": 10
+    },
+    "maximoALaVez": 4,
+    "cursor": false
+   },
+   "arcoDelLogo": {
+    "cargas": 180,
+    "enlaces": 28,
+    "arcos": 1,
+    "contados": {
+     "par": 4,
+     "logo": 1,
+     "cursor": 0
+    },
+    "maximoALaVez": 2,
+    "cursor": false
+   },
+   "arcoConPuntero": null,
+   "arcoAlPuntero": {
+    "cargas": 180,
+    "enlaces": 21,
+    "arcos": 2,
+    "contados": {
+     "par": 36,
+     "logo": 2,
+     "cursor": 10
+    },
+    "maximoALaVez": 4,
+    "cursor": true
+   },
+   "arcoDelLogoDeNoche": null,
+   "grupo": [
+    45,
+    135
+   ],
+   "errores": []
+  },
+  "plasma-color-390": {
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "entorno": "producto,energia=plasma,plasma-color=si",
+   "dia": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "estadoDeDia": {
+    "cargas": 180,
+    "enlaces": 17,
+    "arcos": 0,
+    "contados": {
+     "par": 5,
+     "logo": 0,
+     "cursor": 0
+    },
+    "maximoALaVez": 2,
+    "cursor": false
+   },
+   "estadoDeNoche": {
+    "cargas": 180,
+    "enlaces": 32,
+    "arcos": 0,
+    "contados": {
+     "par": 26,
+     "logo": 3,
+     "cursor": 0
+    },
+    "maximoALaVez": 3,
+    "cursor": false
+   },
+   "arcoDelLogo": {
+    "cargas": 180,
+    "enlaces": 25,
+    "arcos": 1,
+    "contados": {
+     "par": 5,
+     "logo": 1,
+     "cursor": 0
+    },
+    "maximoALaVez": 2,
+    "cursor": false
+   },
+   "arcoDelLogoDeNoche": {
+    "cargas": 180,
+    "enlaces": 30,
+    "arcos": 1,
+    "contados": {
+     "par": 31,
+     "logo": 4,
+     "cursor": 0
+    },
+    "maximoALaVez": 3,
+    "cursor": false
+   },
+   "errores": []
+  },
+  "polvo-1440": {
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "entorno": "producto",
+   "dia": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "estadoDeDia": null,
+   "estadoDeNoche": null,
+   "errores": []
+  },
+  "polvo-390": {
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "entorno": "producto",
+   "dia": {
+    "media": 13.34,
+    "p95": 13.8,
+    "mayoresDe20": 0,
+    "cuadros": 371
+   },
+   "noche": {
+    "media": 13.34,
+    "p95": 13.7,
+    "mayoresDe20": 0,
+    "cuadros": 370
+   },
+   "estadoDeDia": null,
+   "estadoDeNoche": null,
+   "errores": []
+  }
+ }
+}
