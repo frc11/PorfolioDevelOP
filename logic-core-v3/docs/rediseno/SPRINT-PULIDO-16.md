@@ -124,7 +124,9 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   a s67; quedan sus banderas y lo medido entonces, con sus cantidades. s52 pide las dos banderas nuevas.
 
 ### Final · verificar
-- PENDIENTE.
+- Verificar: 74 pasos, 8 con falla, exactamente los de la base (s1, s17, s2, s3, s4, s5, s7, s8; adentro, las mismas 105 afirmaciones en falla que en PULIDO 15: sólo cambian dos contadores de sus mensajes —72 suites, 319 archivos— y la lista de archivos largos de s8 tiene uno menos, el `arcos.ts` de PULIDO 15). tsc en verde. La primera corrida dio 9: tsc se quedó sin memoria (el estado incremental, viejo por dos ediciones de los invariantes, obligó a una comprobación completa, que pide 2,3 GB, más que el tope por defecto de Node); con el estado al día pasa en 13 s, y se repitió entero. Fragilidad anotada: la comprobación completa de tsc ya no entra en el tope por defecto.
+- Limpieza: `.next-probe` (el build de medición de este sprint) borrado; el servidor de medición y el Chrome del banco, apagados; el
+  caché del banco, 1,1 GB. `scripts/limpiar.ps1 -Profundo`. Al final: 80,5 GB libres; 1,9 GB de memoria disponible y 956 MB de no paginado (el Chrome del usuario, abierto, ocupa ~5 GB).
 
 ## Disco y memoria por tanda
 
@@ -139,4 +141,23 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 
 ## Lo que no quedó bien
 
-(se completa al final)
+- **N1, el tamaño**: Nosotros se ve un 20 % más chico (la bio, de 15 a 12 px). Es lo mínimo que entra con 24 px de margen siguiendo el
+  70 % de la órbita; la otra lectura (`?nosotros=fijo`, fijo en el mundo como antes) pide 0,57 (la bio, 8,6 px).
+- **N1, la perspectiva**: el plano de las personas gira un 30 % de lo que gira la sala con el mouse (antes, todo: fijo en el mundo, lo
+  que se aprobó en CIERRE RETOQUE 3D). Se sigue viendo en perspectiva, pero menos: a juzgar.
+- **N1, el criterio**: «siempre se ve todo» se midió donde la página tiene la pieza entera en el cuadro (y por los costados, en todo el
+  recorrido). Una pieza que entra o sale por arriba o por abajo con el scroll se corta, como cualquier contenido que se desplaza.
+- **N2, de día**: el plasma es sutil a 1440: esferitas de grafito chicas (las órbitas, sólo en los átomos más cercanos) y arcos en
+  tinta con un núcleo blanco que, sobre el papel, se leen como un hilo oscuro. Hay que mirarlo en movimiento.
+- **N2, la luz sobre el logo**: es un destello donde el arco lo toca y un disco de luz en el piso (de noche), no una luz de la escena
+  sobre su material (sumar una luz de three recompila todos los materiales de la escena: un tirón al montar el plasma).
+- **N2, la chispa**: fabricada y en el sprite, pero el banco corre con el audio apagado: no se escuchó.
+- **N2, las líneas de campo**: de día se ven tenues (un experimento: se dejaron así).
+- **N2, la medición**: la pantalla del banco va a 75 Hz y todo da 13,34 ms: el costo del plasma queda debajo del cuadro y el banco no
+  muestra cuánto margen deja (en Node, la física y los arcos, ~0,3 ms). La placa integrada AMD no se midió. La primera corrida después
+  de un build tuvo un cuadro de 307 ms en frío (las mediciones del recibo son en caliente, después de una visita).
+- **N2, el final del pie**: el plasma ahora sigue visible hasta el golpe (antes se apagaba con la cámara que sube) y en el golpe el logo
+  descarga; se vio en el banco (la hoja del final) pero chico: a juzgar.
+- **El banco**: varios errores míos los mostró el banco y se arreglaron antes de la tanda final (la temperatura en calma, el pulso
+  sobre el logo, el teléfono sin arcos, el toque perdido, el núcleo punteado, el enlace que no vibraba; ver N2). La tanda final se
+  frenó una vez por memoria (un punto de restauración de Windows) y se repitió.
