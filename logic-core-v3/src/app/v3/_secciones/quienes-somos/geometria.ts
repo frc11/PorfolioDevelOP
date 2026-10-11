@@ -194,7 +194,8 @@ export const GEOMETRIA = {
     /** [PULIDO 10] J1 · los bordes de la primera pantalla desde 1024 (`repartoDeLaAgencia`). */
     agencia: { '--agencia-arriba': '13svh', '--agencia-abajo': '12svh' } as React.CSSProperties,
     bajada: {
-      '--agencia-medida': 'min(30rem, 42vw)',
+      // [PULIDO 14] L1 · a la derecha del logo entra un poco menos (era min(30rem, 42vw)).
+      '--agencia-medida': 'min(26rem, 30vw)',
       '--cuerpo-tamano': '1.0625rem',
       '--cuerpo-interlineado': '1.6',
     } as React.CSSProperties,
@@ -273,7 +274,10 @@ export const GEOMETRIA = {
     /** El ≠ en su PROPIA fila: `content-evenly` le da el mismo aire arriba y abajo, que es el centrado vertical pedido. */
     // [PULIDO 10] J1 · desde 1024 su fila es la que crece (`repartoDeLaAgencia`) y el ≠ va centrado en ella.
     signo: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3 escritorio:self-center',
-    bajada: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-4',
+    // [PULIDO 14] L1 · desde 1024 el cuerpo va a la DERECHA (abajo, contra el borde): a la izquierda, al salir, el logo (que gira de
+    // canto camino al equipo) le cruzaba hasta el 42 % de las letras; a la derecha, ninguna (medido de 1024 a 2560). La columna de
+    // antes, con `?cuerpo=izquierda` (`banda.css`).
+    bajada: 'escritorio:col-start-7 escritorio:col-span-6 escritorio:row-start-4 escritorio:justify-self-end',
   },
   /**
    * LA PROPORCIÓN DE LA FOTO DEL EQUIPO EN LA BANDA MÁS ANGOSTA. [medido]

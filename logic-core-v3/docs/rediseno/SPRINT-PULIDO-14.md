@@ -79,7 +79,31 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
     el foco suelto al volver.
 
 ### L1 · Quiénes somos: el texto siempre delante y legible
-- PENDIENTE.
+- HECHO · VISTO sí (banco `pulido-14/_scripts/l1-cruce.ts`: en el reposo del viaje, en la entrada y en la salida de a 48 px, por
+  cada letra visible del cuerpo, si su centro cae en la silueta del logo; el contraste como WCAG; recibo `l1-cuerpo.json`).
+- El recorte de K1 se borró con su código (`detrasDelLogo.ts`, el recorte en `acompanantes.ts`, el gancho del rayo del banco): el
+  cuerpo va SIEMPRE delante y entero.
+- El velo (`banda.css`, desde 1024): la receta de Portfolio, un degradé radial del papel detrás del cuerpo, sin caja; sobre el papel
+  no se ve y sobre la tinta del logo la aclara detrás de las letras. Su caja (1,8 × el ancho del bloque, 2,4 × su alto) deja todas
+  las letras en la parte entera del degradé (el 70 %). De noche se espesa con `--noche-de-la-sala` (de 82 % a 96 % del papel: el
+  cuerpo es de tinta también de noche).
+- La composición: el cruce estaba todo en la SALIDA (antes, en reposo y entrando, 0 %): el párrafo sube con la página por la parte
+  de abajo a la izquierda del logo, que gira de canto camino a la pantalla del equipo. Se probaron, inyectando CSS en el banco, la
+  columna angosta (22rem: a 1440 bajaba del 32 % al 13 %, a 1024 del 42 % al 30 %) y el cuerpo a la DERECHA del logo (0 % en los
+  tres anchos probados). Quedó a la derecha: columnas 7 a 12, contra el borde, `min(26rem, 30vw)` (`geometria.ts`): el titular
+  arriba a la izquierda, el ≠ a la izquierda, el cuerpo abajo a la derecha. LECTURA ANOTADA: el pedido deja elegir posición o
+  ancho; el ancho solo no alcanzaba a 1024–1440. La columna de antes queda con `?cuerpo=izquierda` (con el velo).
+- Medido (1024, 1280, 1366, 1440, 1920, 2560): el porcentaje del cuerpo que cruza la silueta, antes → después: salida 42,1 → 0;
+  29,9 → 0; 29,9 → 0 (reposo 0,5 → 0); 32,2 → 0; 7,0 → 0; 21,0 → 0 (reposo y entrada, 0 en los dos). El contraste del cuerpo,
+  8,7 a 10,4:1. Con `?cuerpo=izquierda` el cruce sigue (42 % y 32 % a 1024 y 1440) y el velo deja los renglones de encima del logo
+  en 8,1 y 7,7:1 (sin velo, tinta sobre tinta: ~1:1). La noche: al volver de Portfolio con el menú la noche ya se retiró en el
+  reposo (`--noche-de-la-sala` 0, el cuerpo 9,3:1); con la noche todavía puesta (de Portfolio a Quiénes somos con la rueda
+  rápida): la variable de la noche en 1 (el velo en su versión más espesa) y el cuerpo en 8,26:1 (a la izquierda, 9,52 y los renglones sobre el logo 12,85:1). En la captura la sala ya es de día: la noche visible se retira antes de que el cuerpo entre (a los 0,9 s la variable ya está en 0).
+- El instrumento de contraste se corrigió en el camino: el de PULIDO 11 tomaba de fondo los píxeles suavizados del borde de las
+  letras (daba 2,6–3,3:1 sobre el papel); el nuevo es el de WCAG (la tinta contra el fondo típico, por tramos de 40 px, el peor).
+- Los invariantes: s64 pierde la sección de K1 (su recorte se borró, nota en su lugar); s65, L1 (el recorte borrado, el velo con la
+  geometría de su caja, la composición y lo medido), con controles positivos. Dos nombres del velo se cambiaron para no disparar el
+  invariante de PULIDO 1 que ata el velo de Portfolio a la banda de abajo de 1024 (decía `degrade-del-velo`).
 
 ### L3 · Destellos de energía (`?destellos=`)
 - PENDIENTE.

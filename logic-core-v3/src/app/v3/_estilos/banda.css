@@ -271,6 +271,42 @@
   }
 }
 
+/* ── [PULIDO 14] L1 · QUIÉNES SOMOS: EL CUERPO SIEMPRE DELANTE, CON SU VELO (desde 1024) ──
+ * El recorte de PULIDO 13 (K1: el logo tapaba el cuerpo donde estaba delante) cortaba el párrafo al medio («innovad… siemp…»). El
+ * texto va siempre delante y entero; donde el logo pasa por detrás, la receta de legibilidad de Portfolio: un velo elíptico detrás
+ * del texto (un degradé radial, sin caja), del papel: sobre el papel no se ve; sobre la tinta del logo, la aclara detrás de las
+ * letras. Con la noche que se ve (`--noche-de-la-sala`, la escribe la sección) se espesa: el cuerpo es de tinta también de noche.
+ * Su caja (1,8 veces el ancho del bloque y 2,4 su alto) deja todas las letras adentro de la parte entera del degradé (el 70 %).
+ * Medido con AA sobre el logo, de día y de noche: `entregas/pulido-14/l1-cuerpo.json`. */
+@media (width >= 1024px) {
+  [data-v3] [data-panel='quienes-somos'] {
+    --alcance-del-cuerpo: -70% -40%;
+    --velo-del-cuerpo: color-mix(in srgb, var(--color-fondo) calc(82% + var(--noche-de-la-sala, 0) * 14%), transparent);
+    --degrade-del-cuerpo: radial-gradient(closest-side, var(--velo-del-cuerpo) 70%, transparent);
+    --agencia-medida-de-antes: min(30rem, 42vw);
+  }
+
+  [data-v3] [data-panel='quienes-somos'] [data-velo-del-cuerpo] {
+    position: relative;
+  }
+
+  [data-v3] [data-panel='quienes-somos'] [data-velo-del-cuerpo]::before {
+    content: '';
+    position: absolute;
+    inset: var(--alcance-del-cuerpo);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--degrade-del-cuerpo);
+  }
+
+  /* `?cuerpo=izquierda`: la columna de antes (sin capa: le gana a las utilidades del reparto). */
+  [data-v3] [data-panel='quienes-somos'] [data-columna='izquierda'] {
+    grid-column: 1 / span 6;
+    justify-self: start;
+    max-width: var(--agencia-medida-de-antes);
+  }
+}
+
 /* ── EL ≠ A LA IZQUIERDA, EXACTO EN LA BANDA DE TABLET ─────────────────────
  * `trazo.css` lo centra con `margin-inline: auto`, y centrado le cae encima al
  * logo: medido, a 768 arrancaba en x=303 con el margen del texto en 32. Pegado al

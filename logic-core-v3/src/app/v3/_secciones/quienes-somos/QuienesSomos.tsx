@@ -18,6 +18,7 @@ import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 import { nocheEfectiva } from '../../_lib/escena/nocheDisparada'
 import { BRILLO_DE_LA_NOCHE } from '../../_lib/escena/particleGlow'
 import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
+import { entornoDeLaEscena } from '../../_lib/escena/entorno'
 
 import { CONTENIDO, TRAMOS_DEL_TITULAR, TRAMOS_DEL_TITULAR_EN_LA_BANDA } from './contenido'
 import { ElEquipo, LaFoto } from './equipo'
@@ -201,10 +202,17 @@ function CuerpoDeLaAgencia({ progreso, enElPlano }: { readonly progreso: Progres
     observador.observe(el)
     return () => observador.disconnect()
   }, [enElPlano])
+  // [PULIDO 14] L1 · `?cuerpo=izquierda`: la columna de antes (para comparar), con la regla de `banda.css`.
+  useEffect(() => {
+    const columna = enElPlano.current?.parentElement ?? null
+    if (columna === null || entornoDeLaEscena().pruebas.cuerpo !== 'izquierda') return undefined
+    columna.setAttribute('data-columna', 'izquierda')
+    return () => columna.removeAttribute('data-columna')
+  }, [enElPlano])
   const hastaElPie = useTransform(progreso ?? CERO, (p) => llegadaHastaElPie(p, alto.current, ENTRADA_EN_CUADRO_PX, DESCANSO_ANTES_DE_SALIR_PX))
   return (
-    // [PULIDO 13] K1 · siempre a la vista; está en el plano del centro del logo: el logo, delante, lo tapa (`detrasDelLogo.ts`).
-    <div ref={enElPlano} data-detras-del-logo="">
+    // [PULIDO 14] L1 · siempre delante y entero; donde el logo pasa por detrás, su velo de día y de noche (`banda.css`).
+    <div ref={enElPlano} data-velo-del-cuerpo="">
       <CanalDeTexto progreso={progreso === null ? null : hastaElPie} tipo="parrafo" texto={CONTENIDO.bajada}>
         {(contenido) => <p className={GEOMETRIA.cuerpoDeLaBajada}>{contenido}</p>}
       </CanalDeTexto>

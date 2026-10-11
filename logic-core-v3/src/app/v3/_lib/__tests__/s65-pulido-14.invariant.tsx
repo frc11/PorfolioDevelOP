@@ -9,8 +9,11 @@
  *          mensaje» sigue antes.
  *   L2 c · los campos del pie no se despegan de la placa: el DOM se enciende con la placa ya en su lugar (lo escrito a mano y el
  *          foco se veían volando aparte) y, al irse del pie, el campo con el foco lo suelta. Lo escrito a mano se conserva.
+ *   L1 · Quiénes somos: el cuerpo SIEMPRE delante y entero (se borró el recorte de K1, que lo cortaba al medio); donde el logo pasa
+ *        por detrás, el velo elíptico del papel (de día y, más espeso, de noche) con AA medido; y la composición que lo evita: desde
+ *        1024 el cuerpo va a la derecha del logo (al salir, a la izquierda, el logo le cruzaba hasta el 42 % de las letras).
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 import { VUELTA_SOLA_MS } from '../../_secciones/cierre/FormularioDelPie'
 import { DOM_CON_LA_PIEZA, opacidadDelDom } from '../escena/pie3d/armadas'
@@ -107,5 +110,61 @@ const pegados = (r: Record<string, Caso>): boolean =>
   r.mano.valores[0] === 'Ana Prueba' && r.foco.valores[0] === 'Ana Prueba' && r.foco.foco !== 'contacto-nombre' && r.auto.valores.every((v) => v === '')
 afirmar(pegados(CAMPOS.despues), `  medido, los tres casos: el DOM sólo con la placa en el último tramo (antes ${String(CAMPOS.antes.mano.despegados)} y ${String(CAMPOS.antes.foco.despegados)} cuadros volando aparte); lo escrito a mano queda; el foco se soltó al irse; lo autocompletado, vacío`)
 controlPositivo('  el detector VE los campos de antes (despegados con la placa en 0, el foco que se quedaba)', CAMPOS.antes, pegados)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('L1 · Quiénes somos: el texto siempre delante y legible')
+// El recorte de K1 se fue con su código: el cuerpo no se recorta (ni su módulo, ni el gancho del banco que medía su rayo).
+const QUIENES = leer('_secciones/quienes-somos/QuienesSomos.tsx')
+const ACOMPANANTES = leer('_lib/escena/titulos3d/acompanantes.ts')
+const SILUETA = leer('_lib/escena/SiluetaDelBanco.tsx')
+const sinRecorte = (q: string, a: string, si: string): boolean =>
+  q.includes('<div ref={enElPlano} data-velo-del-cuerpo="">') && !q.includes('data-detras-del-logo') && !/clipPath|recorteDetrasDelLogo|DETRAS_DEL_LOGO/.test(a) &&
+  !si.includes('__delanteDelLogoDelBanco') && !existsSync(`${V3}/_lib/escena/titulos3d/detrasDelLogo.ts`)
+afirmar(sinRecorte(QUIENES, ACOMPANANTES, SILUETA), 'L1 · el cuerpo no se recorta: el recorte de K1 (y su módulo) se borró; el cuerpo pide su velo')
+controlPositivo('L1 · el detector VE el recorte de antes', ACOMPANANTES.replace('if (css === ac.css) continue', 'el.style.clipPath = recorteDetrasDelLogo()\n    if (css === ac.css) continue'), (a: string) => sinRecorte(QUIENES, a, SILUETA))
+// El velo: desde 1024, el degradé radial del papel detrás del cuerpo (más espeso con la noche); su caja deja todas las letras en
+// la parte entera del degradé: la esquina del bloque, en la elipse de la caja, cae adentro de la parte entera.
+const BANDA = leer('_estilos/banda.css')
+const veloBien = (css: string): boolean => {
+  const i = css.indexOf("[data-v3] [data-panel='quienes-somos'] {\n    --alcance-del-cuerpo:")
+  const bloque = i < 0 ? '' : css.slice(i, css.indexOf('}', i))
+  const alcance = /--alcance-del-cuerpo: -(\d+)% -(\d+)%;/.exec(bloque)
+  const entera = /--degrade-del-cuerpo: radial-gradient\(closest-side, var\(--velo-del-cuerpo\) (\d+)%, transparent\);/.exec(bloque)
+  if (alcance === null || entera === null) return false
+  const [vertical, horizontal, parte] = [Number(alcance[1]) / 100, Number(alcance[2]) / 100, Number(entera[1]) / 100]
+  const esquina = Math.hypot(1 / (1 + 2 * horizontal), 1 / (1 + 2 * vertical))
+  return esquina <= parte && bloque.includes('--velo-del-cuerpo: color-mix(in srgb, var(--color-fondo) calc(') && bloque.includes('var(--noche-de-la-sala, 0)') &&
+    css.indexOf('@media (width >= 1024px) {') < i && css.includes("[data-v3] [data-panel='quienes-somos'] [data-velo-del-cuerpo]::before {")
+}
+afirmar(veloBien(BANDA), '  el velo elíptico del papel detrás del cuerpo (desde 1024), más espeso con la noche; todas las letras en la parte entera del degradé')
+controlPositivo('  el detector VE un velo chico (las esquinas del bloque en el borde que se desvanece)', BANDA.replace('--alcance-del-cuerpo: -70% -40%;', '--alcance-del-cuerpo: -30% -14%;'), veloBien)
+// La composición: desde 1024, a la derecha del logo (abajo, contra el borde); `?cuerpo=izquierda`, la columna de antes.
+const GEOMETRIA_QS = leer('_secciones/quienes-somos/geometria.ts')
+const aLaDerecha = (g: string, css: string): boolean =>
+  g.includes("bajada: 'escritorio:col-start-7 escritorio:col-span-6 escritorio:row-start-4 escritorio:justify-self-end'") && g.includes("'--agencia-medida': 'min(26rem, 30vw)'") &&
+  css.includes("[data-v3] [data-panel='quienes-somos'] [data-columna='izquierda'] {") && QUIENES.includes("entornoDeLaEscena().pruebas.cuerpo !== 'izquierda'")
+afirmar(aLaDerecha(GEOMETRIA_QS, BANDA), '  la composición: el cuerpo a la derecha del logo desde 1024; la columna de antes, con `?cuerpo=izquierda`')
+controlPositivo('  el detector VE la columna de antes', GEOMETRIA_QS.replace("bajada: 'escritorio:col-start-7 escritorio:col-span-6 escritorio:row-start-4 escritorio:justify-self-end'", "bajada: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-4'"), (g: string) => aLaDerecha(g, BANDA))
+// Medido (1024, 1280, 1366, 1440, 1920 y 2560; en el reposo del viaje, en la entrada y en la salida): las letras del cuerpo sobre la
+// silueta del logo. Antes, en la salida, hasta el 42 %; ahora ninguna. El contraste del cuerpo (como WCAG), AA en todos; y con la
+// columna de antes (`?cuerpo=izquierda`), donde el logo sí pasa por detrás, el velo deja los renglones de encima en AA.
+type Maximo = { readonly reposo: number; readonly entrada: number; readonly salida: number } | null
+const CUERPO = recibo<{ antes: Record<string, { maximo: Maximo }>; despues: Record<string, { maximo: Maximo; contrasteDelCuerpo: number | null }>; izquierdaConVelo: Record<string, { maximo: Maximo; contrasteSobreElLogo: number | null }> }>('l1-cuerpo.json')
+const ANCHOS_L1 = ['1024x768', '1280x800', '1366x768', '1440x900', '1920x1080', '2560x1440']
+const sinCruce = (r: typeof CUERPO.despues): boolean =>
+  ANCHOS_L1.every((w) => { const m = r[w]?.maximo; return m !== null && m !== undefined && m.reposo === 0 && m.entrada === 0 && m.salida === 0 && (r[w].contrasteDelCuerpo ?? 0) >= 4.5 })
+afirmar(sinCruce(CUERPO.despues), `  medido: en los seis anchos ninguna letra del cuerpo cruza el logo (antes, al salir, hasta ${String(Math.max(...ANCHOS_L1.map((w) => CUERPO.antes[w]?.maximo?.salida ?? 0)))} %); el cuerpo, de ${String(Math.min(...ANCHOS_L1.map((w) => CUERPO.despues[w].contrasteDelCuerpo ?? 0)))}:1 para arriba`)
+controlPositivo('  el detector VE la columna de antes (cruzaba al salir)', Object.fromEntries(ANCHOS_L1.map((w) => [w, { maximo: CUERPO.antes[w].maximo, contrasteDelCuerpo: 9 }])), sinCruce)
+const conVelo = (r: typeof CUERPO.izquierdaConVelo): boolean => ['1024x768', '1440x900'].every((w) => (r[w]?.maximo?.salida ?? 0) > 20 && (r[w]?.contrasteSobreElLogo ?? 0) >= 4.5)
+afirmar(conVelo(CUERPO.izquierdaConVelo), `  y con la columna de antes, el velo: los renglones sobre el logo en ${String(CUERPO.izquierdaConVelo['1024x768'].contrasteSobreElLogo)} y ${String(CUERPO.izquierdaConVelo['1440x900'].contrasteSobreElLogo)}:1 (1024 y 1440, en la parada que más cruza)`)
+controlPositivo('  el detector VE el cuerpo sobre la tinta del logo sin velo (~1:1)', { ...CUERPO.izquierdaConVelo, '1440x900': { ...CUERPO.izquierdaConVelo['1440x900'], contrasteSobreElLogo: 1.1 } }, conVelo)
+// La noche (de Portfolio al reposo con la rueda rápida): con la variable de la noche en 1, el velo en su versión más espesa y el
+// cuerpo en AA (a la derecha y con la columna de antes, también los renglones sobre el logo).
+interface TramoDeNoche { readonly noche: string; readonly contrasteDelCuerpo: number | null; readonly sobreElLogo: number | null }
+const NOCHE_L1 = recibo<{ nocheQueSeVa: { derecha: TramoDeNoche[]; izquierda: TramoDeNoche[] } }>('l1-cuerpo.json').nocheQueSeVa
+const deNoche = (r: typeof NOCHE_L1): boolean =>
+  [r.derecha, r.izquierda].every((t) => t.length > 0 && Number(t[0].noche) > 0.9 && t.every((x) => (x.contrasteDelCuerpo ?? 0) >= 4.5 && (x.sobreElLogo === null || x.sobreElLogo >= 4.5)))
+afirmar(deNoche(NOCHE_L1), `  y de noche (la variable en 1): el cuerpo en ${String(NOCHE_L1.derecha[0].contrasteDelCuerpo)}:1 (con la columna de antes, ${String(NOCHE_L1.izquierda[0].contrasteDelCuerpo)} y sobre el logo ${String(NOCHE_L1.izquierda[0].sobreElLogo)})`)
+controlPositivo('  el detector VE un cuerpo de noche sin AA', { ...NOCHE_L1, derecha: [{ ...NOCHE_L1.derecha[0], contrasteDelCuerpo: 2.1 }] }, deNoche)
 
 cerrar('s65-pulido-14')

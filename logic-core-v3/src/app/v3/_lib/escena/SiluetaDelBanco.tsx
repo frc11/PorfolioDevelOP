@@ -5,7 +5,6 @@ import { useEffect, type RefObject } from 'react'
 import * as THREE from 'three'
 
 import { hayBanco } from './entorno'
-import { PLANO_DEL_RECORTE } from './titulos3d/detrasDelLogo'
 
 /**
  * [PULIDO 10] J1 · SÓLO CON BANCO: LA SILUETA DEL LOGO EN EL CUADRO, para el instrumento de solapes (`solapes.ts` del banco y
@@ -13,7 +12,7 @@ import { PLANO_DEL_RECORTE } from './titulos3d/detrasDelLogo'
  * `celda` px: devuelve las celdas cuyo centro cae adentro de algún triángulo. Se calcula al pedirla (nunca por cuadro).
  */
 type Silueta = { readonly celda: number; readonly cols: number; readonly filas: number; readonly ocupadas: number[] }
-type VentanaDelBanco = Window & { __siluetaDelBanco?: (celda?: number) => Silueta | null; __crucesDelBanco?: (muestras?: number) => Cruce[]; __delanteDelLogoDelBanco?: (puntos: readonly (readonly [number, number])[]) => boolean[] | null }
+type VentanaDelBanco = Window & { __siluetaDelBanco?: (celda?: number) => Silueta | null; __crucesDelBanco?: (muestras?: number) => Cruce[] }
 /** [PULIDO 12] 1 · cuántos puntos de la superficie del logo caen adentro de la caja de una pieza del pie de volumen. */
 type Cruce = { readonly pieza: string; readonly dentro: number; readonly total: number; readonly cerca: number }
 
@@ -115,28 +114,9 @@ export function SiluetaDelBanco({ logoGroupRef }: { readonly logoGroupRef: RefOb
       })
       return cruces
     }
-    // [PULIDO 13] K1 · para cada punto del cuadro (px), si lo que se ve ahí del logo está DELANTE del plano del texto que va detrás
-    // de él (el último con que se recortó; sin él, el del centro del logo de frente a la cámara): un rayo y su primer choque.
-    const rayo = new THREE.Raycaster()
-    const ndc = new THREE.Vector2()
-    ventana.__delanteDelLogoDelBanco = (puntos) => {
-      const grupo = logoGroupRef.current
-      if (grupo === null) return null
-      grupo.updateMatrixWorld(true)
-      camara.updateMatrixWorld()
-      const centro = grupo.getWorldPosition(new THREE.Vector3())
-      const origen = PLANO_DEL_RECORTE.hay ? PLANO_DEL_RECORTE.origen : centro
-      const normal = PLANO_DEL_RECORTE.hay ? PLANO_DEL_RECORTE.normal : camara.getWorldPosition(new THREE.Vector3()).sub(centro).normalize()
-      return puntos.map(([x, y]) => {
-        rayo.setFromCamera(ndc.set((x / tam.width) * 2 - 1, 1 - (y / tam.height) * 2), camara)
-        const choque = rayo.intersectObject(grupo, true).find((h) => h.object.visible)
-        return choque !== undefined && choque.point.clone().sub(origen).dot(normal) > 0
-      })
-    }
     return () => {
       delete ventana.__siluetaDelBanco
       delete ventana.__crucesDelBanco
-      delete ventana.__delanteDelLogoDelBanco
     }
   }, [camara, escena, tam.width, tam.height, logoGroupRef])
   return null

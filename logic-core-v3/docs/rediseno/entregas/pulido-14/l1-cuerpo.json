@@ -1,0 +1,322 @@
+{
+ "que": "L1 · el cuerpo de Quiénes somos y la silueta del logo (__siluetaDelBanco, celdas de 4 px): el porcentaje de las letras visibles del cuerpo cuyo centro cae en la silueta, en el reposo del viaje, en la entrada (desde una pantalla antes) y en la salida (de a 48 px hasta que se va). contraste: como WCAG, la tinta (lo más oscuro) contra el fondo típico, por tramos de 40 px de cada renglón (el peor tramo); sobreElLogo: sólo los renglones que cruzan el logo",
+ "antes": {
+  "1024x768": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 42.1
+   },
+   "caja": [
+    177,
+    501,
+    585,
+    732
+   ],
+   "silueta": [
+    356,
+    260,
+    664,
+    512
+   ]
+  },
+  "1280x800": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 29.9
+   },
+   "caja": [
+    166,
+    559,
+    674,
+    771
+   ],
+   "silueta": [
+    432,
+    240,
+    820,
+    572
+   ]
+  },
+  "1366x768": {
+   "maximo": {
+    "reposo": 0.5,
+    "entrada": 0,
+    "salida": 29.9
+   },
+   "caja": [
+    157,
+    536,
+    679,
+    749
+   ],
+   "silueta": [
+    468,
+    220,
+    868,
+    556
+   ]
+  },
+  "1440x900": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 32.2
+   },
+   "caja": [
+    169,
+    655,
+    683,
+    866
+   ],
+   "silueta": [
+    464,
+    244,
+    956,
+    664
+   ]
+  },
+  "1920x1080": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 7
+   },
+   "caja": [
+    134,
+    840,
+    693,
+    1064
+   ],
+   "silueta": [
+    648,
+    296,
+    1236,
+    796
+   ]
+  },
+  "2560x1440": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 21
+   },
+   "caja": [
+    460,
+    1157,
+    990,
+    1374
+   ],
+   "silueta": [
+    860,
+    392,
+    1648,
+    1064
+   ]
+  }
+ },
+ "despues": {
+  "1024x768": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 0
+   },
+   "caja": [
+    663,
+    419,
+    883,
+    636
+   ],
+   "silueta": [
+    356,
+    260,
+    664,
+    512
+   ],
+   "contrasteDelCuerpo": 10.2
+  },
+  "1280x800": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 0
+   },
+   "caja": [
+    834,
+    485,
+    1106,
+    661
+   ],
+   "silueta": [
+    432,
+    240,
+    820,
+    568
+   ],
+   "contrasteDelCuerpo": 10.28
+  },
+  "1366x768": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 0
+   },
+   "caja": [
+    902,
+    456,
+    1178,
+    630
+   ],
+   "silueta": [
+    468,
+    220,
+    868,
+    556
+   ],
+   "contrasteDelCuerpo": 8.72
+  },
+  "1440x900": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 0
+   },
+   "caja": [
+    956,
+    564,
+    1258,
+    745
+   ],
+   "silueta": [
+    464,
+    244,
+    956,
+    664
+   ],
+   "contrasteDelCuerpo": 9.71
+  },
+  "1920x1080": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 0
+   },
+   "caja": [
+    1385,
+    695,
+    1670,
+    871
+   ],
+   "silueta": [
+    648,
+    296,
+    1236,
+    796
+   ],
+   "contrasteDelCuerpo": 10.44
+  },
+  "2560x1440": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 0
+   },
+   "caja": [
+    1743,
+    995,
+    2045,
+    1177
+   ],
+   "silueta": [
+    860,
+    392,
+    1648,
+    1064
+   ],
+   "contrasteDelCuerpo": 9.13
+  }
+ },
+ "izquierdaConVelo": {
+  "1024x768": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 42.1
+   },
+   "contrasteSobreElLogo": 8.1,
+   "contrasteDelCuerpo": [
+    10.3,
+    7.66
+   ],
+   "peor": {
+    "dy": 240,
+    "por": 42.1
+   }
+  },
+  "1440x900": {
+   "maximo": {
+    "reposo": 0,
+    "entrada": 0,
+    "salida": 31.8
+   },
+   "contrasteSobreElLogo": 7.71,
+   "contrasteDelCuerpo": [
+    9.39,
+    8.21
+   ],
+   "peor": {
+    "dy": 384,
+    "por": 33.2
+   }
+  }
+ },
+ "noche": {
+  "nocheDeLaSala": "0.000",
+  "contrasteDelCuerpo": 9.33
+ },
+ "nocheQueSeVa": {
+  "que": "de Portfolio (la noche disparada) al reposo de Quiénes somos con la rueda rápida: a los 0,3, 0,9 y 1,8 s, la variable de la noche en la sección y el contraste del cuerpo (en la captura la sala ya es de día: la noche visible se retira antes de que el cuerpo entre; con la variable en 1, el velo es el más espeso)",
+  "derecha": [
+   {
+    "noche": "1.000",
+    "por": 0,
+    "contrasteDelCuerpo": 8.26,
+    "sobreElLogo": null
+   },
+   {
+    "noche": "0.000",
+    "por": 0,
+    "contrasteDelCuerpo": 9.71,
+    "sobreElLogo": null
+   },
+   {
+    "noche": "0.000",
+    "por": 0,
+    "contrasteDelCuerpo": 9.28,
+    "sobreElLogo": null
+   }
+  ],
+  "izquierda": [
+   {
+    "noche": "1.000",
+    "por": 1.4,
+    "contrasteDelCuerpo": 9.52,
+    "sobreElLogo": 12.85
+   },
+   {
+    "noche": "0.000",
+    "por": 0,
+    "contrasteDelCuerpo": 9.47,
+    "sobreElLogo": null
+   },
+   {
+    "noche": "0.000",
+    "por": 0,
+    "contrasteDelCuerpo": 9.39,
+    "sobreElLogo": null
+   }
+  ]
+ }
+}

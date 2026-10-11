@@ -167,8 +167,7 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
     m.current.cuadro.ancho = tam.width
     m.current.cuadro.alto = tam.height
     alCuadro(m.current, logoMaterialRef.current, keyLightRef.current, tam.width / Math.max(1, tam.height), stats, Math.min(delta, 0.1), CAMARA_SIN_EL_MOUSE)
-    // [PULIDO 13] K1 · con el logo: el que va detrás de él, recortado por su silueta (se fue el esquive al salir de PULIDO 12).
-    llevarLosAcompanantes(m.current.armados, state.camera, { ancho: tam.width, alto: tam.height }, stats.current, m.current.logo)
+    llevarLosAcompanantes(m.current.armados, state.camera, { ancho: tam.width, alto: tam.height }, stats.current)
   })
 
   // [AJUSTES FINALES] A2 · su sombra en el piso vivo (`sombra/deLosTitulos.ts`; era la prueba de PASADA FINAL C3).
