@@ -45,6 +45,20 @@ export const SUBRAYADO_DEL_PIE = { s: 0.7, curva: [0.77, 0, 0.175, 1] } as const
 /** Lo que se dibuja fuera del cuadro (px): una pieza que entra ya está. */
 const MARGEN = 120
 
+/**
+ * [PULIDO 14] L2 c · EL DOM DE UNA PIEZA, SÓLO CON LA PIEZA EN SU LUGAR. El DOM va donde la pieza va a quedar (el viaje en cero) y la
+ * placa llega volando (o se va, al subir): lo que el DOM muestra (lo escrito en un campo, a mano o autocompletado, y el foco) quedaba
+ * a la vista, despegado de la placa que todavía volaba. Mientras llega, el DOM se apaga y se enciende en el último tramo de la
+ * llegada (`desde`: la placa ya casi apoyada), sin pisar el apagado del volteo (la transformación lo maneja ella).
+ */
+export const DOM_CON_LA_PIEZA = { desde: 0.9 } as const
+
+/** [PULIDO 14] L2 c · la opacidad del DOM de una pieza por cuánto llegó (vacía con la pieza en su lugar: el DOM como lo deja su dueño). */
+export function opacidadDelDom(llego: number): string {
+  if (llego >= 0.999) return ''
+  return String(Math.round(Math.min(1, Math.max(0, (llego - DOM_CON_LA_PIEZA.desde) / (1 - DOM_CON_LA_PIEZA.desde))) * 100) / 100)
+}
+
 export interface Armada {
   readonly pieza: PiezaDelPie
   medida: MedidaDeLaPieza
@@ -76,6 +90,8 @@ export interface Armada {
   transformacion: TransformacionEnCurso | null
   /** [PULIDO 11] B4 · el botón de la tecla: ocupado (`aria-busy`), su rótulo en relieve no se dibuja (la carga del DOM va en su lugar). */
   readonly boton: Element | null
+  /** [PULIDO 14] L2 c · la opacidad que la llegada le escribió al DOM (vacía: la pieza en su lugar, el DOM como lo deja su dueño). */
+  opacidadDeLlegada: string
 }
 
 /** [PULIDO 9] H2 · la placa que estaba (sus mallas, en el grupo de la nueva) y cuánto va (0 a 1). */
@@ -200,7 +216,16 @@ function llegar(a: Armada, s: EstadoDelPie): void {
   a.uniformes.uApareceDelPie.value = apareceDeLaPieza(a.pieza.llegada, e, porLetras)
   a.uniformes.uQuietoDelPie.value = s.quieto ? 1 : 0
   const tocable = e >= 0.999
-  if (a.pieza.forma === 'texto' || tocable === a.tocable) return
+  if (a.pieza.forma === 'texto') return
+  // [PULIDO 14] L2 c · el DOM, con la pieza: apagado mientras vuela; sólo escribe al cambiar (en su lugar, no lo toca).
+  if (a.transformacion === null) {
+    const opacidad = opacidadDelDom(e)
+    if (opacidad !== a.opacidadDeLlegada) {
+      a.opacidadDeLlegada = opacidad
+      a.pieza.elemento.style.opacity = opacidad
+    }
+  }
+  if (tocable === a.tocable) return
   a.tocable = tocable
   a.pieza.elemento.style.pointerEvents = tocable ? '' : 'none'
 }
@@ -307,7 +332,7 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
   }
   const delHundido = pieza.forma === 'placa' || pieza.forma === 'enlace' ? pieza.elemento : pieza.forma === 'formulario' ? pieza.elemento.querySelector('[data-forma="principal"]') : null
   const boton = pieza.forma === 'formulario' ? (delHundido?.querySelector('button') ?? null) : null
-  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja, estado, transformacion: null, boton }
+  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja, estado, transformacion: null, boton, opacidadDeLlegada: '' }
 }
 
 export function soltar(a: Armada): void {

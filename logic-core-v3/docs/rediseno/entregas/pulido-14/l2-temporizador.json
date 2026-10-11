@@ -1,0 +1,39 @@
+{
+ "que": "L2 b · el form del pie con temporizador (el banco contesta {ok:true} a los 2,5 s): ms desde que se envía; cuentaArranca: la línea de la cuenta empieza a consumirse (en 390 la mide de más el volteo del DOM); vuelta: el formulario de nuevo",
+ "1440": {
+  "envio": {
+   "resultadoMs": 2535,
+   "cuentaArrancaMs": 4638,
+   "ultimaConLineaMs": 8588,
+   "vueltaMs": 8640,
+   "anchoDeLaLinea": 256
+  },
+  "camposDeVuelta": "||",
+  "foco": "contacto",
+  "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+ },
+ "1440-otro": {
+  "envio": {
+   "resultadoMs": 2572,
+   "cuentaArrancaMs": 4653,
+   "ultimaConLineaMs": 7213,
+   "vueltaMs": 7283,
+   "anchoDeLaLinea": 256
+  },
+  "camposDeVuelta": "||",
+  "foco": "contacto-nombre",
+  "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+ },
+ "390": {
+  "envio": {
+   "resultadoMs": 2541,
+   "cuentaArrancaMs": 3020,
+   "ultimaConLineaMs": 8943,
+   "vueltaMs": 8516,
+   "anchoDeLaLinea": 254
+  },
+  "camposDeVuelta": "||",
+  "foco": "contacto",
+  "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+ }
+}

@@ -40,6 +40,8 @@ interface Props {
   readonly alTerminar?: () => void
   /** [PULIDO 13] K2 · la copia de precalentar (`PrecalentarElResultado`): el texto a la vista y el encastre mudo. */
   readonly precalentar?: boolean
+  /** [PULIDO 14] L2 b · el éxito del pie vuelve solo: su cuenta (ms), una línea que se consume desde que el texto está. */
+  readonly cuentaMs?: number
 }
 
 /** Una ref de afuera (función u objeto) y la propia, en el mismo elemento. */
@@ -51,7 +53,7 @@ function lasDos(de: Ref<HTMLDivElement> | undefined, propia: { current: HTMLDivE
   }
 }
 
-export function TarjetaDeResultado({ tipo, mensaje, alto, empieza, enVolumen = false, compacto = false, foco, alReintentar, alOtro, alTerminar, precalentar = false }: Props): React.JSX.Element {
+export function TarjetaDeResultado({ tipo, mensaje, alto, empieza, enVolumen = false, compacto = false, foco, alReintentar, alOtro, alTerminar, precalentar = false, cuentaMs }: Props): React.JSX.Element {
   const reducido = useMovimientoReducido()
   const [listo, setListo] = useState(false)
   const raiz = useRef<HTMLDivElement | null>(null)
@@ -78,6 +80,7 @@ export function TarjetaDeResultado({ tipo, mensaje, alto, empieza, enVolumen = f
         'flex w-full flex-col items-center justify-center text-center text-[var(--resultado-tinta)]',
         compacto ? 'gap-[var(--spacing-4)] px-[var(--spacing-4)] py-[var(--spacing-6)]' : 'gap-[var(--spacing-6)] px-[var(--spacing-6)] py-[var(--spacing-8)]',
         enVolumen ? 'bg-transparent' : 'rounded-[var(--radius-medio)] bg-[var(--resultado-fondo)]',
+        cuentaMs !== undefined && 'relative',
       )}
       style={alto === undefined ? undefined : { height: alto }}
     >
@@ -102,6 +105,12 @@ export function TarjetaDeResultado({ tipo, mensaje, alto, empieza, enVolumen = f
           </button>
         )}
       </motion.div>
+      {/* [PULIDO 14] L2 b · la cuenta de la vuelta sola: una línea fina que se consume (con movimiento reducido también corre). */}
+      {exito && cuentaMs !== undefined && (
+        <div aria-hidden="true" data-cuenta="" className="absolute inset-x-[var(--spacing-6)] bottom-[var(--spacing-4)] h-px bg-current/20">
+          <motion.div className="h-px bg-current" initial={{ width: '100%' }} animate={{ width: listo ? '0%' : '100%' }} transition={{ duration: listo ? cuentaMs / 1000 : 0, ease: 'linear' }} />
+        </div>
+      )}
     </div>
   )
 }

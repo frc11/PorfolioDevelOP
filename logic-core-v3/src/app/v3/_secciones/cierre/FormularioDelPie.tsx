@@ -84,6 +84,9 @@ const MEMORIA = 'formulario-del-pie'
 /** [PULIDO 11] B1 · cuánto más que el volteo espera el respaldo antes de mostrar lo nuevo igual (s: la placa compila y se rearma). */
 const RESPALDO_DEL_VOLTEO_S = 2.5
 
+/** [PULIDO 14] L2 b · como el panel: a los cuántos ms de que el texto del éxito está, la tarjeta vuelve sola al formulario vacío. */
+export const VUELTA_SOLA_MS = 4000
+
 export function FormularioDelPie(): React.JSX.Element {
   const c = CONTACTO_DEL_FORMULARIO
   // [PULIDO 12] 3 · si se vuelve a montar (al girar una tablet el pie cruza 1024 y su árbol cambia), arranca donde estaba.
@@ -101,6 +104,8 @@ export function FormularioDelPie(): React.JSX.Element {
   const [alto, setAlto] = useAltoGuardado()
   // [PULIDO 11] B2 · la tarjeta ya se ve (terminó de entrar, o la escena terminó de voltear): arranca el encastre.
   const [seVe, setSeVe] = useState(antes?.estado.fase === 'exito' || antes?.estado.fase === 'error')
+  // [PULIDO 14] L2 b · el texto de la tarjeta ya está: arranca la cuenta de la vuelta sola.
+  const [textoListo, setTextoListo] = useState(false)
   const campos = useRef<HTMLDivElement | null>(null)
   const enviando = estado.fase === 'enviando'
   const resultado = estado.fase === 'exito' || estado.fase === 'error'
@@ -155,6 +160,17 @@ export function FormularioDelPie(): React.JSX.Element {
     mirar.observe(el)
     return () => mirar.disconnect()
   }, [fase])
+  // [PULIDO 14] L2 c · al irse del pie, el campo con el foco lo suelta: el navegador no lo vuelve a traer a la vista (lo escrito queda).
+  useEffect(() => {
+    const el = placa.current
+    if (el === null) return undefined
+    const mirar = new IntersectionObserver(([e]) => {
+      const activo = document.activeElement
+      if (e !== undefined && !e.isIntersecting && activo instanceof HTMLElement && el.contains(activo)) activo.blur()
+    })
+    mirar.observe(el)
+    return () => mirar.disconnect()
+  }, [])
   // Adónde va el foco cuando lo nuevo aparece (la tarjeta, el nombre o el botón de vuelta): lo toma el elemento al montarse.
   const pedirFoco = useRef<'tarjeta' | 'nombre' | 'enviar' | null>(null)
   const tomarElFoco = (quien: 'tarjeta' | 'nombre' | 'enviar') => (el: HTMLElement | null): void => {
@@ -193,6 +209,7 @@ export function FormularioDelPie(): React.JSX.Element {
   const llego = (r: ResultadoDelEnvio): void => {
     pedirFoco.current = 'tarjeta'
     setSeVe(false)
+    setTextoListo(false)
     setHuboCambio(true)
     if (r.ok) {
       // [PULIDO 11] B6 · el éxito: lo escrito se va (y los campos se vuelven a montar al volver: sin autocompletado viejo).
@@ -212,8 +229,22 @@ export function FormularioDelPie(): React.JSX.Element {
 
   const otroMensaje = (): void => {
     pedirFoco.current = 'nombre'
+    setTextoListo(false)
     setEstado({ fase: 'quieto' })
   }
+  // [PULIDO 14] L2 b · la vuelta sola, con el volteo inverso: el foco, si estaba en la tarjeta, al formulario (no a un campo: en el
+  // teléfono abriría el teclado).
+  useEffect(() => {
+    if (fase !== 'exito' || !textoListo) return undefined
+    const reloj = window.setTimeout(() => {
+      const conFoco = placa.current?.contains(document.activeElement) === true
+      pedirFoco.current = null
+      setTextoListo(false)
+      setEstado({ fase: 'quieto' })
+      if (conFoco) requestAnimationFrame(() => placa.current?.focus({ preventScroll: true }))
+    }, VUELTA_SOLA_MS)
+    return () => window.clearTimeout(reloj)
+  }, [fase, textoListo])
   // [PULIDO 11] B3 · Reintentar: de vuelta al formulario, con todo lo escrito; el foco, en Enviar.
   const reintentar = (): void => {
     pedirFoco.current = 'enviar'
@@ -245,6 +276,8 @@ export function FormularioDelPie(): React.JSX.Element {
               foco={tomarElFoco('tarjeta')}
               alReintentar={reintentar}
               alOtro={otroMensaje}
+              alTerminar={() => setTextoListo(true)}
+              cuentaMs={estado.fase === 'exito' ? VUELTA_SOLA_MS : undefined}
             />
           </motion.div>
         ) : (

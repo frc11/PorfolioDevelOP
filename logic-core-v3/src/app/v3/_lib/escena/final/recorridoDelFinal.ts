@@ -380,14 +380,73 @@ export function subida(fin: number, t: TamanoDelLogo = LOGO_DE_SIEMPRE, e0 = 0):
 }
 
 /**
- * [PULIDO 13] K4 · cuánto se fue el paralaje del mouse del recorrido de la cámara viva (0 a 1): mientras el logo se inclina hasta la
- * elevación de la cámara (`e0`); desde ahí, la cámara sube sin él (con el mouse a un costado torcía la mirada ~5°). Antes de que
- * el logo se incline, nada.
+ * [PULIDO 14] L2 a · LA CÁMARA DE LA CAÍDA, UN SOLO MOVIMIENTO. En K4 eran dos: mientras el logo se inclinaba hasta la altura de la
+ * cámara, la cámara se acomodaba (el paralaje del mouse se iba, atado al ángulo) y frenaba en seco ahí; después lo seguía de frente,
+ * y el logo, que duda en su equilibrio (la física arranca del reposo), la dejaba casi quieta. Ahora el desvío del arranque se corrige
+ * con el TIEMPO, de a poco, entre que el logo empieza a volcar y llega a `manoGrados` (`acercamiento`, con la curva suave: arranca y
+ * llega quieta), y la elevación de la cámara es la suya más lo que el logo la pasó (`suavidadGrados`: sin quiebre al pasarla), por
+ * el acercamiento (`alturaDeLaCaida`): sube siempre, nunca frena ni vuelve, y desde `manoGrados` va de frente. El paralaje de costado
+ * se va con el mismo acercamiento (`haciaElAzimutSinElMouse`). Todo es función de `fin`: el rebobinado hace el mismo camino.
  */
-export function sinElParalaje(fin: number, t: TamanoDelLogo = LOGO_DE_SIEMPRE, e0 = 0): number {
+export const CAMARA_DE_LA_CAIDA = { manoGrados: 20, suavidadGrados: 1 } as const
+
+const VENTANA = { caida: null as ReturnType<typeof caidaIntegrada> | null, desde: 0, hasta: 1 }
+/** [PULIDO 14] L2 a · la ventana del acercamiento (s del reloj): del arranque del vuelco a `manoGrados` (de la caída integrada). */
+export function ventanaDelAcercamiento(t: TamanoDelLogo = LOGO_DE_SIEMPRE): { readonly desde: number; readonly hasta: number } {
+  const caida = caidaIntegrada(t)
+  if (VENTANA.caida === caida) return VENTANA
+  const arranque = arranqueDeLaCaida(t)
+  const mano = THREE.MathUtils.degToRad(CAMARA_DE_LA_CAIDA.manoGrados)
+  const i = caida.angulos.findIndex((a) => a >= mano)
+  VENTANA.caida = caida
+  VENTANA.desde = arranque - CAIDA_AL_HUECO.inclinaS
+  VENTANA.hasta = Math.max(VENTANA.desde + 0.2, arranque + (i < 0 ? caida.contactoS : i * CAIDA_AL_HUECO.paso))
+  return VENTANA
+}
+
+/** [PULIDO 14] L2 a · cuánto va del acercamiento (0 a 1): función de `fin` (el rebobinado lo deshace por el mismo camino). */
+export function acercamiento(fin: number, t: TamanoDelLogo = LOGO_DE_SIEMPRE): number {
+  if (fin <= 0) return 0
+  const v = ventanaDelAcercamiento(t)
+  return suave((segundosDelFinal(fin) - v.desde) / (v.hasta - v.desde))
+}
+
+/**
+ * [PULIDO 14] L2 a · cuánto subió la cámara (0 a 1, como `subida`) desde su elevación `e` (radianes): lo que el logo la pasó (una
+ * rampa suavizada), por el acercamiento. Sube siempre; desde `manoGrados`, la de `subida` (de frente); tocado el hueco, arriba.
+ */
+export function alturaDeLaCaida(fin: number, t: TamanoDelLogo = LOGO_DE_SIEMPRE, e = 0): number {
   if (fin <= 0) return 0
   const { a, toco } = anguloEnElReloj(t, segundosDelFinal(fin))
-  return toco ? 1 : acotar01(a / Math.max(1e-3, e0))
+  if (toco) return 1
+  const tope = THREE.MathUtils.degToRad(FINAL_DEL_PIE.camara.elevacion)
+  const desde = Math.min(Math.max(0, e), tope - 0.01)
+  const d = THREE.MathUtils.degToRad(CAMARA_DE_LA_CAIDA.suavidadGrados)
+  const x = (a - desde) / d
+  return acotar01((acercamiento(fin, t) * d * (x > 30 ? x : Math.log1p(Math.exp(x)))) / (tope - desde))
+}
+
+const GIRO_DEL_AZIMUT = new THREE.Quaternion()
+const EJE_VERTICAL = new THREE.Vector3(0, 1, 0)
+const DESDE_EL_CENTRO = new THREE.Vector3()
+/**
+ * [PULIDO 14] L2 a · la cámara viva hacia el azimut y la distancia de la cámara sin el mouse, por `w` (el acercamiento): gira
+ * alrededor del eje vertical de la órbita con su mirada (el encuadre no cambia) y su elevación queda (la lleva `alturaDeLaCaida`:
+ * así el paralaje de altura no la hace bajar antes de subir).
+ */
+export function haciaElAzimutSinElMouse(viva: THREE.Camera, sinMouse: THREE.Camera, w: number): void {
+  if (w <= 0) return
+  const az = Math.atan2(viva.position.x, viva.position.z)
+  const az0 = Math.atan2(sinMouse.position.x, sinMouse.position.z)
+  const giro = (((((az0 - az + Math.PI) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)) - Math.PI) * Math.min(1, w)
+  GIRO_DEL_AZIMUT.setFromAxisAngle(EJE_VERTICAL, giro)
+  DESDE_EL_CENTRO.copy(viva.position).sub(CENTRO_DE_LA_ORBITA).applyQuaternion(GIRO_DEL_AZIMUT)
+  const r = DESDE_EL_CENTRO.length()
+  const r0 = sinMouse.position.distanceTo(CENTRO_DE_LA_ORBITA)
+  if (r > 1e-6) DESDE_EL_CENTRO.multiplyScalar((r + (r0 - r) * Math.min(1, w)) / r)
+  viva.position.copy(CENTRO_DE_LA_ORBITA).add(DESDE_EL_CENTRO)
+  viva.quaternion.premultiply(GIRO_DEL_AZIMUT)
+  viva.updateMatrixWorld()
 }
 
 /**

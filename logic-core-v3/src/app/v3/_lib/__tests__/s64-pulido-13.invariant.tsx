@@ -241,6 +241,7 @@ const recorrer = (sube: (fin: number) => number): Recorrida => {
   return { quietaHastaLaAltura: quieta, peorDesdeLaAltura: peor, peorAntes: antes }
 }
 const deFrente = (r: Recorrida): boolean => r.quietaHastaLaAltura && r.peorDesdeLaAltura < 1 && r.peorAntes <= THREE.MathUtils.radToDeg(e0) + 0.1
+// [PULIDO 14] L2 a · `subida` es la referencia de frente; la cámara la alcanza a los 20° de vuelco (`alturaDeLaCaida`, s65).
 const conLaCaida = recorrer((fin) => subida(fin, LOGO_DE_SIEMPRE, e0))
 afirmar(deFrente(conLaCaida), `K4 a · el modelo: la cámara quieta hasta que el logo se inclina a su altura (${THREE.MathUtils.radToDeg(e0).toFixed(1)}°) y desde ahí hasta el golpe, de frente (peor ${conLaCaida.peorDesdeLaAltura.toFixed(2)}°)`)
 // La subida de antes: un reloj propio desde el arranque (el 80 % con el logo todavía de pie y el resto hasta 0,4 s después del golpe).
@@ -253,7 +254,8 @@ const CUADRO_FINAL = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const alRebobinar = (queda: (fin: number, desde: number) => number, orbita: (fin: number) => number, c: string): boolean =>
   queda(FIN_DEL_GOLPE, 1) === 0 && queda(1, 1) === 1 && queda(0.9, 1) > 0 && orbita(FIN_DEL_GOLPE) === 0 && orbita(1) === 1 &&
   c.includes('quietoRebobinado(alRebobinar, quedaDelQuieto(fin, s.reloj.rebobinado.desde), EN_VIVO)') && c.includes('ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * orbita, s.orbita.v * orbita)') &&
-  c.includes('const sinMouse = sinElParalaje(fin, tamano, elevacion)') && c.includes('const sube = subida(fin, tamano, elevacion)')
+  // [PULIDO 14] L2 a · la cámara viva deja el paralaje con el acercamiento y sube con `alturaDeLaCaida` (de frente desde los 20°: s65).
+  c.includes('haciaElAzimutSinElMouse(state.camera, CAMARA_SIN_EL_MOUSE, acercamiento(fin, tamano))') && c.includes('const sube = alturaDeLaCaida(fin, tamano, elevacion)')
 afirmar(alRebobinar(quedaDelQuieto, orbitaDelFinal, CUADRO_FINAL), '  y al rebobinar: el giro del quieto y la órbita se van del todo antes de que el logo se levante; la cámara viva, sin el paralaje del recorrido mientras sube')
 controlPositivo('  el detector VE el quieto que volvía con el rebobinado entero', (fin: number, desde: number) => fin / desde, (q: (fin: number, desde: number) => number) => alRebobinar(q, orbitaDelFinal, CUADRO_FINAL))
 

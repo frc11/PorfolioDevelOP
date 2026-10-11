@@ -1,0 +1,205 @@
+{
+ "que": "L2 c · los campos del pie mientras el pie se va y vuelve (1440): por cuadro, cuánto llegó la placa del formulario (llego) y la opacidad efectiva del DOM de un campo con algo a la vista (un valor o el foco). despegados: cuadros con el formulario en pantalla, la placa sin llegar (llego < 0,98) y el DOM visible (> 0,05)",
+ "antes": {
+  "mano": {
+   "despegados": 77,
+   "llegando": 77,
+   "ejemplo": [
+    [
+     5205,
+     0,
+     1,
+     1,
+     1,
+     1
+    ],
+    [
+     5217,
+     0,
+     1,
+     1,
+     1,
+     1
+    ],
+    [
+     6259,
+     0,
+     1,
+     1,
+     1,
+     1
+    ],
+    [
+     9571,
+     0,
+     1,
+     1,
+     1,
+     1
+    ],
+    [
+     9593,
+     0,
+     1,
+     1,
+     1,
+     1
+    ],
+    [
+     9604,
+     0,
+     1,
+     1,
+     1,
+     1
+    ]
+   ],
+   "foco": "BODY",
+   "valores": [
+    "Ana Prueba",
+    "",
+    ""
+   ]
+  },
+  "foco": {
+   "despegados": 84,
+   "llegando": 84,
+   "ejemplo": [
+    [
+     4706,
+     0,
+     1,
+     1,
+     1,
+     1
+    ],
+    [
+     4718,
+     0,
+     1,
+     1,
+     1,
+     1
+    ],
+    [
+     6117,
+     0,
+     1,
+     1,
+     1,
+     1
+    ],
+    [
+     6129,
+     0,
+     1,
+     1,
+     1,
+     1
+    ],
+    [
+     6137,
+     0,
+     1,
+     1,
+     1,
+     1
+    ],
+    [
+     6151,
+     0,
+     1,
+     1,
+     1,
+     1
+    ]
+   ],
+   "foco": "contacto-nombre",
+   "valores": [
+    "Ana Prueba",
+    "",
+    ""
+   ]
+  },
+  "auto": {
+   "despegados": 0,
+   "llegando": 90,
+   "ejemplo": [],
+   "foco": "BODY",
+   "valores": [
+    "",
+    "",
+    ""
+   ]
+  }
+ },
+ "despues": {
+  "mano": {
+   "despegados": 2,
+   "llegando": 90,
+   "ejemplo": [
+    [
+     10951,
+     0.931,
+     1,
+     0.31,
+     1,
+     1
+    ],
+    [
+     10964,
+     0.965,
+     1,
+     0.65,
+     1,
+     1
+    ]
+   ],
+   "foco": "BODY",
+   "valores": [
+    "Ana Prueba",
+    "",
+    ""
+   ]
+  },
+  "foco": {
+   "despegados": 2,
+   "llegando": 90,
+   "ejemplo": [
+    [
+     5949,
+     0.93,
+     1,
+     0.3,
+     1,
+     1
+    ],
+    [
+     5962,
+     0.963,
+     1,
+     0.63,
+     1,
+     1
+    ]
+   ],
+   "foco": "BODY",
+   "valores": [
+    "Ana Prueba",
+    "",
+    ""
+   ]
+  },
+  "auto": {
+   "despegados": 0,
+   "llegando": 90,
+   "ejemplo": [],
+   "foco": "BODY",
+   "valores": [
+    "",
+    "",
+    ""
+   ]
+  }
+ }
+}
