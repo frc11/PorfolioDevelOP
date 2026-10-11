@@ -30,6 +30,9 @@ export interface TextoDeVolumen {
   readonly trazos?: readonly TrazoDelTitulo[]
   /** [PULIDO 11] A2 · no llega encima del logo mientras su sección entra. */
   readonly esquivaElLogo?: boolean
+  /** [PULIDO 16] N1 · su plano, más chico hacia el centro del cuadro (`colocar`), y qué parte del mouse sigue. */
+  readonly alejamiento?: number
+  readonly parteDelMouse?: number
 }
 
 /** El texto del DOM, apagado desde 1024 con el título armado (sigue en el árbol accesible y en su lugar). */
@@ -55,6 +58,8 @@ export function useTextoDeVolumen<T extends HTMLElement>(t: TextoDeVolumen): { r
     minimoS: t.minimoS ?? null,
     trazos: t.trazos,
     esquivaElLogo: t.esquivaElLogo,
+    alejamiento: t.alejamiento,
+    parteDelMouse: t.parteDelMouse,
     activo: material !== 'no' && escritorio,
   })
   return { lugar, listo }

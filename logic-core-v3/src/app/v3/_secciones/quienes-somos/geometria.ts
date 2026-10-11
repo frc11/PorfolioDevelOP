@@ -352,6 +352,23 @@ export const CLASE_DE_ENCUADRE = {
 export const CLASE_DE_RELACION = { retrato: 'aspect-4/3', foto: 'aspect-3/2' } as const
 
 /**
+ * [PULIDO 16] N1 · NOSOTROS, ALEJADO. El plano de «El equipo» (el título y las dos personas) y el de «Nosotros» (el título y la
+ * foto) van a la profundidad del logo, de frente a la cámara. Con la órbita del mouse (hasta 22° en esta sección; la cámara,
+ * además, mira 12° para arriba) el plano gira y lo de la derecha se agranda y se tuerce: a 1920 la foto de Franco, «Valentino» y
+ * su bio y la foto del equipo se iban hasta ~250 px de la pantalla (medido). `alejamiento`: el plano se ve así de más chico,
+ * hacia el centro del cuadro (`colocar`); `parteDelMouse`: qué parte de la órbita sigue (`camaraConParteDelMouse`; se sigue
+ * viendo en perspectiva con el resto). Medido con el modelo de s67 (las cajas del DOM del banco, la pose del recorrido y el mouse
+ * en las esquinas): sólo achicando, fijo en el mundo, hacía falta 0,57 (la bio, de 15 a 8,6 px); más atrás, el mouse lo barre
+ * MÁS (la profundidad del logo es la que menos se mueve). Con estos dos, foto, nombre y bio de cada uno entran enteros con 24
+ * px de margen en el peor caso (el mouse en una esquina) a 1024, 1280, 1366, 1440, 1920 y 2560. `?nosotros=fijo`: la otra
+ * lectura (fijo en el mundo, más chico).
+ */
+export const PLANO_DE_NOSOTROS = {
+  seguido: { alejamiento: 0.8, parteDelMouse: 0.7 },
+  fijo: { alejamiento: 0.57, parteDelMouse: 0 },
+} as const
+
+/**
  * [PULIDO 11] A2 · EL CUERPO DE LA AGENCIA LLEGA ENTERO AL REPOSO. Su bloque usa la ventana visible (arranca cuando asoma
  * `ENTRADA_EN_CUADRO_PX` y termina cuando su pie sube `DESCANSO_ANTES_DE_SALIR_PX` sobre el borde de abajo), pero en el
  * reposo de la sección su pie queda a ~35 px del borde: llegaba con ~48 % de la ventana y el último renglón quedaba a media

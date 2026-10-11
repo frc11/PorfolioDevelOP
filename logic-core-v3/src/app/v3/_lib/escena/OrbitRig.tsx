@@ -57,7 +57,7 @@ import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, viajeEnCurso } from './viaje'
 
 /** [PULIDO 2] 2 · un cuadro que llega después de esto (s) viene de la escena suspendida (no de un tirón: esos duran décimas). */
 const REANUDA_S = 0.5
-import { crearPoseSinElMouse, posarLaCamaraSinElMouse, type PoseSinElMouse } from './sinElMouse'
+import { anotarLaPoseDelCuadro, crearPoseSinElMouse, posarLaCamaraSinElMouse, type PoseSinElMouse } from './sinElMouse'
 import {
   applyLightRig,
   createLightRigCache,
@@ -519,6 +519,8 @@ export function OrbitRig({
     sinElMouse.logoW = logoWidth
     sinElMouse.logoH = logoHeight
     posarLaCamaraSinElMouse(state.camera, sinElMouse, state.size.width / Math.max(1, state.size.height))
+    // [PULIDO 16] N1 · y la pose con lo que el mouse le suma: los planos de Nosotros siguen una parte (`camaraConParteDelMouse`).
+    anotarLaPoseDelCuadro(state.camera, sinElMouse, desplazamiento, state.size.width / Math.max(1, state.size.height))
     publicarLaMirada(desplazamiento.angleDeg, THREE.MathUtils.radToDeg(Math.atan(desplazamiento.height / Math.max(1e-6, distance))))
 
     // 4 · El rig de luz entero: las tres luces, el hemisférico, la niebla y el

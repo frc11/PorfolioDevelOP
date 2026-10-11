@@ -125,20 +125,29 @@ const CENTRO = new THREE.Vector3()
  * Pone el título (su grupo, con la geometría en em y el origen en el comienzo de la línea de base) donde la cámara del
  * nudo lo ve en su lugar del DOM: a la profundidad del centro del logo, de frente y del cuerpo del DOM. Devuelve cuánto
  * mundo es un píxel a esa profundidad.
+ *
+ * [PULIDO 16] N1 · `alejamiento` (k, 1 = en su lugar): el plano entero (el título y su texto 2D, que se colocan con la misma
+ * cuenta) se ve k veces más chico hacia el centro del cuadro, a la MISMA profundidad (más chico en su plano, no más atrás: más
+ * atrás, el mouse lo barre más; medido con el modelo de s67).
  */
-export function colocar(grupo: THREE.Object3D, camara: THREE.PerspectiveCamera, lugar: LugarEnElCuadro, fuente: MedidasDeLaFuente): number {
+export function colocar(grupo: THREE.Object3D, camara: THREE.PerspectiveCamera, lugar: LugarEnElCuadro, fuente: MedidasDeLaFuente, alejamiento = 1): number {
   camara.getWorldDirection(ADELANTE)
   CENTRO.set(0, ORBIT_TARGET_Y, 0).sub(camara.position)
   const profundidad = CENTRO.dot(ADELANTE)
-  const x = (2 * lugar.izquierda) / lugar.ancho - 1
-  const y = 1 - (2 * lineaDeBase(lugar, fuente)) / lugar.alto
+  const x = alejamiento * ((2 * lugar.izquierda) / lugar.ancho - 1)
+  const y = alejamiento * (1 - (2 * lineaDeBase(lugar, fuente)) / lugar.alto)
   RAYO.set(x, y, 0.5).unproject(camara).sub(camara.position).normalize()
   grupo.position.copy(camara.position).addScaledVector(RAYO, profundidad / RAYO.dot(ADELANTE))
   grupo.quaternion.copy(camara.quaternion)
-  const mundoPorPx = (2 * profundidad * Math.tan(THREE.MathUtils.degToRad(camara.fov) / 2)) / lugar.alto
+  const mundoPorPx = (alejamiento * 2 * profundidad * Math.tan(THREE.MathUtils.degToRad(camara.fov) / 2)) / lugar.alto
   grupo.scale.setScalar(lugar.cuerpo * mundoPorPx)
   grupo.updateMatrixWorld(true)
   return mundoPorPx
+}
+
+/** [PULIDO 16] N1 · dónde se ve una altura del DOM (px) con el plano alejado `k` (hacia el centro del cuadro). */
+export function alturaAlejada(y: number, alto: number, k: number): number {
+  return alto / 2 + k * (y - alto / 2)
 }
 
 /**

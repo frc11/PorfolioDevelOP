@@ -162,7 +162,8 @@ afirmar(enFila.getX(0) === 0 && enFila.getZ(0) < 0, '  y los títulos de siempre
 titulo('3C · «El equipo» se levanta en su lugar; acostado, su línea lo tapa')
 
 const equipo = sinComentarios(leer('_secciones/quienes-somos/equipo.tsx'))
-const seLevantaConLaMascara = (c: string): boolean => /useTextoDeVolumen<HTMLHeadingElement>\(\{ id: 'equipo', texto: CONTENIDO\.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false \}\)/.test(c)
+// [PULIDO 16] N1 · con el plano de Nosotros (alejado, `...planoDeNosotros()`): lo demás, igual.
+const seLevantaConLaMascara = (c: string): boolean => /useTextoDeVolumen<HTMLHeadingElement>\(\{ id: 'equipo', texto: CONTENIDO\.tituloDelEquipo, fuente: 'chivo-400', gesto: 'levanta', llegada: progreso, queda: false(, \.\.\.planoDeNosotros\(\))? \}\)/.test(c)
 afirmar(seLevantaConLaMascara(equipo) && CONTENIDO_DE_QUIENES.tituloDelEquipo === 'El equipo', 'con el progreso de su máscara (y se acuesta con el scroll para atrás: no se queda), con la Chivo del DOM')
 controlPositivo('el detector VE el que se queda', equipo.replace('queda: false', 'queda: true'), seLevantaConLaMascara)
 afirmar(/<CanalDeTexto progreso=\{progreso\} tipo="titulo" texto=\{CONTENIDO\.tituloDelEquipo\}>/.test(equipo) && /listo && TEXTO_REEMPLAZADO/.test(equipo), '  el canal del texto sigue (sin WebGL o hasta que se arma, el de siempre); armado, el DOM se apaga')

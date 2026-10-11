@@ -96,6 +96,11 @@ export interface Pruebas {
   readonly energia: 'plasma' | 'plasma-y-polvo' | 'no'
   /** [PULIDO 15] M2 · `plasma-color=si`: la energía en un azul eléctrico frío (para comparar con el monocromo). */
   readonly 'plasma-color': 'si' | 'no'
+  /**
+   * [PULIDO 16] N1 · `nosotros=fijo`: la otra lectura de «alejalo»: los planos de Nosotros fijos en el mundo (sin seguir nada
+   * del mouse) y más chicos, lo que hace falta para que la órbita no los saque de cuadro (`PLANO_DE_NOSOTROS`).
+   */
+  readonly nosotros: 'fijo' | 'no'
 }
 
 /**
@@ -121,12 +126,12 @@ export interface Pruebas {
  * [PULIDO 13] · `caida=angulo` se borró (la lenta es el producto). K6 · entra `hilos=color` (los hilos en azul frío). [PULIDO 14]
  * L3 · `hilos=` se borró (no gustaron); entran `destellos=<variante>` y `destellos-color=si`. L1 · entra `cuerpo=izquierda`.
  * [PULIDO 15] M1 · `cuerpo=` se borró (el cuerpo a la izquierda es el producto). M2 · `destellos=` y `destellos-color=` se borraron
- * (no gustó ninguna); entran `energia=plasma|plasma-y-polvo` y `plasma-color=si`.
+ * (no gustó ninguna); entran `energia=plasma|plasma-y-polvo` y `plasma-color=si`. [PULIDO 16] N1 · entra `nosotros=fijo`.
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', 'plasma-color': 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', 'plasma-color': 'no', nosotros: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'plasma-color'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'plasma-color', 'nosotros'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -141,6 +146,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
     energia: unoDe<'plasma' | 'plasma-y-polvo'>(['plasma', 'plasma-y-polvo'], valor('energia')),
     'plasma-color': unoDe<'si'>(['si'], valor('plasma-color')),
+    nosotros: unoDe<'fijo'>(['fijo'], valor('nosotros')),
   }
 }
 

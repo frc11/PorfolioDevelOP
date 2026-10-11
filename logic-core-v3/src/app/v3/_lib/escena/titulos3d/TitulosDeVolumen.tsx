@@ -11,9 +11,9 @@ import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
 import { KEY_INTENSITY } from '../probeLighting'
 import type { ProbeRigStore, ProbeStatsStore } from '../probeStore'
-import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
+import { CAMARA_SIN_EL_MOUSE, camaraConParteDelMouse } from '../sinElMouse'
 import { viajeEnCurso } from '../viaje'
-import { camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar } from './colocacion'
+import { alturaAlejada, camaraDeLaLectura, colocar, corrimiento, lugarDeLectura, pinDelLugar } from './colocacion'
 import { avancesDeLasRayas, despinteDelTitulo, ponerElEstudio, type Armado, type Variante } from './armado'
 import { ASIENTO, mostradoDelScroll, persigue } from './llegada'
 import { REPETICIONES } from '../../titulos3d/repeticiones'
@@ -150,7 +150,8 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
       // La cámara viva y la que la colocación calcula para el mismo progreso (sin el mouse ni la inercia).
       camara: () => {
         const calculada = camaraDeLaLectura(rig.current.progress, tam.width / Math.max(1, tam.height), stats.current.logoW, stats.current.logoH, new THREE.PerspectiveCamera()) // banco
-        return { viva: [...camara.position.toArray(), ...camara.quaternion.toArray()], calculada: [...calculada.position.toArray(), ...calculada.quaternion.toArray()] }
+        // [PULIDO 16] N1 · y el logo y el campo de visión (el modelo de s67 rearma las cámaras con el mouse).
+        return { viva: [...camara.position.toArray(), ...camara.quaternion.toArray()], calculada: [...calculada.position.toArray(), ...calculada.quaternion.toArray()], logo: [stats.current.logoW, stats.current.logoH], fov: camara instanceof THREE.PerspectiveCamera ? camara.fov : null }
       },
       progreso: () => rig.current.progress,
     }
@@ -269,14 +270,16 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
       if (llegada <= 0) a.colocado = false
       continue
     }
-    if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, viva)
+    // [PULIDO 16] N1 · el plano que sigue una parte del mouse (Nosotros) se coloca con esa cámara (su texto 2D, igual).
+    const deColocar = (a.titulo.parteDelMouse ?? 0) > 0 ? camaraConParteDelMouse(a.titulo.parteDelMouse ?? 0) : viva
+    if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, deColocar)
     // [RETOQUE 3D] El de `pantalla` (3C) va con la página: fuera del cuadro no se dibuja.
     const d = a.titulo.colocacion === 'pantalla' ? corrimiento(a.pin, y) : 0
     if (fueraDelCuadro(a, d)) {
       a.malla.visible = false
       continue
     }
-    ubicar(a, d, viva)
+    ubicar(a, d, deColocar)
     iluminar(a, logo, nivel)
   }
   TITULAR_EN_VIVO.armado = registrosDelTitular === IDS_DEL_TITULAR_DEL_HERO.length
@@ -284,10 +287,11 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
   TITULAR_EN_VIVO.enCamino = TITULAR_EN_VIVO.armado && titularEnCamino
 }
 
-/** [RETOQUE 3D] ¿Su renglón, corrido `d` px, quedó entero fuera del cuadro? */
+/** [RETOQUE 3D] ¿Su renglón, corrido `d` px, quedó entero fuera del cuadro? [PULIDO 16] N1 · donde se ve (alejado). */
 function fueraDelCuadro(a: Armado, d: number): boolean {
   const l = a.lugar
-  return l !== null && (l.arriba + d > l.alto || l.arriba + l.linea + d < 0)
+  const k = a.titulo.alejamiento ?? 1
+  return l !== null && (alturaAlejada(l.arriba + d, l.alto, k) > l.alto || alturaAlejada(l.arriba + l.linea + d, l.alto, k) < 0)
 }
 
 /**
@@ -298,7 +302,7 @@ function ubicar(a: Armado, d: number, viva: THREE.Camera): void {
   const l = a.lugar
   if (a.titulo.colocacion === 'pantalla' && l !== null && viva instanceof THREE.PerspectiveCamera) {
     a.ahora.arriba = l.arriba + d + a.titulo.corrida * l.alto
-    colocar(a.grupo, viva, a.ahora, a.fuente.data)
+    colocar(a.grupo, viva, a.ahora, a.fuente.data, a.titulo.alejamiento)
     return
   }
   correr(a, d)
@@ -317,7 +321,7 @@ function correr(a: Armado, d: number): void {
 function colocarElArmado(a: Armado, camara: THREE.PerspectiveCamera, aspecto: number, stats: ProbeStatsStore, viva: THREE.Camera): void {
   const nudo = a.titulo.colocacion === 'pantalla' && viva instanceof THREE.PerspectiveCamera ? viva : camaraDeLaLectura(a.titulo.lectura, aspecto, stats.current.logoW, stats.current.logoH, camara)
   const lugar = lugarDeLectura(a.titulo.lugar, a.titulo.subida, a.renglones)
-  a.mundoPorPx = colocar(a.grupo, nudo, lugar, a.fuente.data) // una vez por llegada
+  a.mundoPorPx = colocar(a.grupo, nudo, lugar, a.fuente.data, a.titulo.alejamiento) // una vez por llegada
   a.lugar = lugar
   Object.assign(a.ahora, lugar)
   a.base.copy(a.grupo.position)

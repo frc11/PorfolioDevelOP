@@ -3,8 +3,8 @@ import * as THREE from 'three'
 import { homografia, matrix3dCss } from '../../pie3d/homografia'
 import { ACOMPANANTES, type Acompanante } from '../../titulos3d/acompanantes'
 import type { TituloDeVolumen } from '../../titulos3d/registro'
-import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
-import { camaraDeLaLectura, colocar, corrimiento, lineaDeBase, lugarDeLectura, pinDelLugar, type LugarEnElCuadro, type MedidasDeLaFuente, type PinDelLugar } from './colocacion'
+import { camaraConParteDelMouse } from '../sinElMouse'
+import { alturaAlejada, camaraDeLaLectura, colocar, corrimiento, lineaDeBase, lugarDeLectura, pinDelLugar, type LugarEnElCuadro, type MedidasDeLaFuente, type PinDelLugar } from './colocacion'
 
 /**
  * [NOCTURNO] A1 · EL TEXTO 2D EN EL PLANO DE SU TÍTULO, en la escena — cada acompañante (`titulos3d/acompanantes.ts`, del
@@ -100,11 +100,13 @@ function enSuPlano(el: HTMLElement, ac: Acompanante, a: TituloConPlano, viva: TH
   const d = (t.queda || t.colocacion === 'pantalla' ? corrimiento(p.pin, scrollY) : 0) + t.corrida * cuadro.alto
   const { x, ancho, alto } = p.caja
   const y = p.caja.y + d
-  if (ancho <= 0 || alto <= 0 || y > cuadro.alto || y + alto < 0) return ''
+  // [PULIDO 16] N1 · fuera del cuadro donde se VE (con el plano alejado, entra y sale antes que su caja del DOM).
+  const k = t.alejamiento ?? 1
+  if (ancho <= 0 || alto <= 0 || alturaAlejada(y, cuadro.alto, k) > cuadro.alto || alturaAlejada(y + alto, cuadro.alto, k) < 0) return ''
   if (t.colocacion === 'pantalla') {
     Object.assign(AHORA, p.lugar)
     AHORA.arriba = p.lugar.arriba + d
-    colocar(PLANO, CAMARA_SIN_EL_MOUSE, AHORA, a.fuente.data)
+    colocar(PLANO, camaraConParteDelMouse(t.parteDelMouse ?? 0), AHORA, a.fuente.data, k)
   } else {
     PLANO.position.copy(p.base).addScaledVector(p.arriba, -d * p.mpp)
     PLANO.quaternion.copy(p.giro)
@@ -154,7 +156,7 @@ function planoDe(el: HTMLElement, ac: Acompanante, a: TituloConPlano, cuadro: { 
   const arriba = new THREE.Vector3(0, 1, 0)
   if (t.colocacion === 'lectura') {
     const camara = camaraDeLaLectura(t.lectura, cuadro.ancho / Math.max(1, cuadro.alto), logo.logoW, logo.logoH, DE_LA_LECTURA)
-    mpp = colocar(PLANO, camara, lugar, a.fuente.data)
+    mpp = colocar(PLANO, camara, lugar, a.fuente.data, t.alejamiento)
     escala = PLANO.scale.x
     arriba.applyQuaternion(camara.quaternion)
   }

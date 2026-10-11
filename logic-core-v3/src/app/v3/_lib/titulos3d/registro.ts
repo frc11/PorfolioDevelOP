@@ -88,6 +88,10 @@ export interface TituloDeVolumen {
   readonly forma: FormaDeLaLlegada | null
   /** [PULIDO 11] A2 · mientras su sección entra, no llega con su caja encima del logo (`esquivaDelLogo.ts`). */
   readonly esquivaElLogo?: boolean
+  /** [PULIDO 16] N1 · su plano (él y su texto 2D), más chico hacia el centro del cuadro (`colocar`): 1, en su lugar. */
+  readonly alejamiento?: number
+  /** [PULIDO 16] N1 · qué parte de la órbita del mouse sigue su plano (`camaraConParteDelMouse`): 0, fijo en el mundo. */
+  readonly parteDelMouse?: number
 }
 
 export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
@@ -158,24 +162,26 @@ interface Anotacion {
   readonly trazos?: readonly TrazoDelTitulo[]
   readonly forma?: FormaDeLaLlegada | null
   readonly esquivaElLogo?: boolean
+  readonly alejamiento?: number
+  readonly parteDelMouse?: number
   /** Sólo con la prueba prendida. */
   readonly activo: boolean
 }
 
 const SIN_TRAZOS: readonly TrazoDelTitulo[] = []
 
-export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, asiento = 'cercano', trazos = SIN_TRAZOS, forma = null, esquivaElLogo = false, activo }: Anotacion): void {
+export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, asiento = 'cercano', trazos = SIN_TRAZOS, forma = null, esquivaElLogo = false, alejamiento = 1, parteDelMouse = 0, activo }: Anotacion): void {
   const llegada = pedida ?? LLEGADO
   useEffect(() => {
     const el = lugar.current
     if (!activo || el === null) return undefined
-    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, forma, esquivaElLogo, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos })
+    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, forma, esquivaElLogo, alejamiento, parteDelMouse, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos })
     avisar()
     return () => {
       TITULOS_DE_VOLUMEN.delete(id)
       avisar()
     }
-  }, [id, texto, lugar, forma, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos, esquivaElLogo, activo])
+  }, [id, texto, lugar, forma, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos, esquivaElLogo, alejamiento, parteDelMouse, activo])
   useMotionValueEvent(llegada, 'change', (p) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
     if (t !== undefined) t.llegada = p
