@@ -111,7 +111,17 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   del GPU dentro del cuadro: no se ve por diferencia).
 
 ### Final · la matriz y verificar
-- PENDIENTE.
+- La matriz de PULIDO 12 (reposo por viaje bajando y subiendo, y las entradas; `pulido-13/tanda-final.sh`, comparada con la de
+  PULIDO 12 guardada en `pulido-13/base-p12/`): corrió entera de 320 a 1280 y la matriz de 1440; la memoria (2,5–3 GB: el Chrome
+  y el WSL de la máquina ocupan ~4,5 GB) cortó el resto por el portero (ver abajo). En lo que corrió, nada nuevo atribuible al
+  sprint: los viajes del teléfono con cuadros largos de la primera pasada (93, 440 ms) no se repiten con memoria (320 de nuevo:
+  el patrón de PULIDO 12, 27–53 ms al arrancar y al llegar); el detector del fondo de K5 se hizo más barato igual (no lee el
+  layout en cada cuadro de scroll; commit 851ee09b) y K5 se volvió a medir (24 paradas, cero cruces). El texto × logo nuevo en la
+  entrada de Quiénes somos a 1024 y 1280 es el texto RECORTADO por el logo (el instrumento de solapes no entiende el `clip-path`):
+  medido con el rayo a 1024, 499 letras tapadas, visibles con el logo delante a lo sumo 3, de más a lo sumo 1. El texto × texto de
+  375 subiendo (la frase del CTA contra Demos, 8 paradas iguales seguidas) se midió con la página quieta por la memoria: en la
+  primera pasada, con el mismo código, dio menos que PULIDO 12 (11 contra 16).
+- `npm run verificar`: NO completado: Claude Code lo cortó por memoria baja del sistema (llegó al paso 3; package.json y tsc, limpios); no se relanza solo. Corridas una por una a lo largo del sprint, en verde: s3-tokens, s3-foco, s3-layout, s3-navegacion, s6-cierre, s7-mezcla, s8-escena, s10e, s25-contacto, s26-menu y de s36 a s64 (s64: 52 afirmaciones, 27 controles). Queda en VERIFICAR TRAS REINICIO.
 
 ## Memoria (antes de cada tanda: disponible y no paginado)
 
@@ -128,7 +138,15 @@ del disco (corridas de nuevo: verdes).
 
 ## VERIFICAR TRAS REINICIO
 
-(vacío por ahora)
+Con la memoria por debajo de 3 GB el portero no deja usar el banco (el Chrome y el WSL de la máquina ocupan ~4,5 GB). Después de
+reiniciar, con `~/.cache/b4-medicion/pulido-13/tanda-final.sh` (editando la lista de anchos):
+- la matriz y las entradas de 1366, 1920 y 2560, y las entradas de 1440;
+- las entradas de 375 otra vez (la segunda pasada dio la página quieta) y la matriz de 390, 1024 y 1280 (viajes con cuadros largos
+  medidos con 2,9 GB);
+- K1 en la entrada a 1280 (`DESDE=700 TRAMO=600 npx tsx pulido-13/_scripts/k1-detras.ts 1280 800 entrada 24`).
+- `npm run verificar` entero (lo cortó la memoria en el paso 3): los 8 rojos de la base (s1, s2, s3, s4, s5, s7, s8, s17) y ni uno más.
+- El servidor de desarrollo del humano se paró al empezar el banco (ocupaba 3,9 GB) y NO se volvió a levantar: con la memoria al
+  límite (el reaper de Claude Code cortó `verificar`), se levanta a mano con `npm run dev`.
 
 ## Lo que no quedó bien
 
