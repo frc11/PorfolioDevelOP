@@ -4,138 +4,109 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useRef, type RefObject } from 'react'
 import * as THREE from 'three'
 
+import { sonar } from '../../sonido/bus'
 import { hayBanco } from '../entorno'
-import { VIVO } from '../entorno/vivo'
-import { EN_VIVO } from '../final/recorridoDelFinal'
-import { programarArcos, rellenarArcos, type ClaseDeArco } from './arcos'
-import { armar, grupoEnPantalla, pintarLaPaleta, soltar, subir, type Armado, type Vista } from './armado'
-import { PLASMA, cuantosEnlaces, pasoDeLasCargas } from './cargas'
+import { NACE_EN } from '../entorno/Pulso'
+import { PULSO_VIVO, VIVO } from '../entorno/vivo'
+import { EN_VIVO, FIN_DEL_GOLPE } from '../final/recorridoDelFinal'
+import { FLOOR_Y } from '../probeScene'
+import { energiaDelBanco, type EnergiaDelBanco } from './banco'
+import { crearAfuera, crearMemoria, cuadro, cuadroQuieto, type Afuera, type Memoria } from './cuadro'
+import { escucharElPuntero } from './interaccion/puntero'
+import { armar, soltar, type Armado, type Vista } from './render/armado'
 import { TEXTO_EN_PANTALLA, cajasDelTexto } from './textoEnPantalla'
 
 /**
- * [PULIDO 15] M2 · PLASMA + CARGAS, montado con `?energia=plasma` (`cargas.ts`: qué es y por qué así). La física y los arcos corren
- * acá, en el cuadro (unos cientos de cargas: la grilla las resuelve en una fracción de ms); la GPU dibuja las cargas instanciadas
- * (una llamada) y los arcos desde un búfer fijo (otra llamada). Lo que cambia en cada cuadro vive en refs (`armado.ts` arma las
- * mallas y se cuelgan de un grupo). El puntero lo lee de la ventana: el mouse mientras está sobre la página, el dedo mientras toca.
+ * [PULIDO 16] N2 · EL PLASMA, montado con `?energia=plasma` (o `plasma-y-polvo`): átomos, iones y electrones con su física, arcos que
+ * obedecen al campo, el logo como generador y el puntero como carga (`docs/rediseno/PLASMA.md`: el modelo). La física y los arcos
+ * corren acá, en el cuadro (unos cientos de partículas: la grilla los resuelve en una fracción de ms; `cuadro.ts`); la GPU dibuja
+ * las partículas instanciadas, los tramos desde un búfer fijo y los efectos (tres llamadas; `render/`). Lo que cambia en cada cuadro
+ * vive en refs; el puntero lo escuchan `interaccion/puntero.ts` (el mouse sobre la página, el dedo mientras toca).
+ * Experimentos (apagados): `?plasma-campo=si`, las líneas de campo con el botón apretado; `?plasma-sonido=si`, el chisporroteo.
  */
 interface Props {
   readonly logoGroupRef: RefObject<THREE.Group | null>
   readonly quieto: boolean
   readonly compacto: boolean
   readonly color?: boolean
+  readonly campo?: boolean
+  readonly sonido?: boolean
 }
 
-/** El banco: qué hay (para medir y capturar), un arco ya, y dónde hay un grupo de cargas en la pantalla. */
-interface EnergiaDelBanco {
-  estado: () => { cargas: number; enlaces: number; arcos: number; contados: Record<ClaseDeArco, number>; maximoALaVez: number; cursor: boolean }
-  forzar: (clase: ClaseDeArco) => void
-  grupo: () => [number, number] | null
-}
 type VentanaDelBanco = Window & { __energiaDelBanco?: EnergiaDelBanco }
 
-export function PlasmaYCargas({ logoGroupRef, quieto, compacto, color = false }: Props): React.JSX.Element {
-  const n = compacto ? PLASMA.cargas.compacta : PLASMA.cargas.escritorio
+/** Después del golpe del final se apaga con la cámara que sube (antes no: cerca del encastre el logo está más activo). */
+const DESPUES_DEL_GOLPE = 0.15
+
+export function PlasmaYCargas({ logoGroupRef, quieto, compacto, color = false, campo = false, sonido = false }: Props): React.JSX.Element {
   const grupo = useRef<THREE.Group>(null)
   const armado = useRef<Armado | null>(null)
+  const memoria = useRef<Memoria>(crearMemoria())
+  const afuera = useRef<Afuera>(crearAfuera())
   const vista = useRef<Vista>({ camara: null, ancho: 1, alto: 1 })
   useEffect(() => {
     const g = grupo.current
     if (g === null) return undefined
-    const a = armar(n, compacto, vista, () => logoGroupRef.current)
-    pintarLaPaleta(a.uniformes, color)
+    const a = armar(compacto, color, vista, () => logoGroupRef.current)
     g.add(...a.mallas)
     armado.current = a
+    memoria.current = crearMemoria()
+    const dejarDeEscuchar = escucharElPuntero(a.puntero)
     const ventana = window as VentanaDelBanco
-    if (hayBanco()) {
-      ventana.__energiaDelBanco = {
-        estado: () => ({ cargas: a.cargas.n, enlaces: cuantosEnlaces(a.cargas), arcos: a.arcos.arcos.filter((x) => x.activo).length, contados: { ...a.arcos.contados }, maximoALaVez: a.arcos.maximoALaVez, cursor: a.rayo.activo }),
-        forzar: (clase) => {
-          a.arcos.forzado = clase
-        },
-        grupo: () => grupoEnPantalla(a, vista.current),
-      }
-    }
+    if (hayBanco()) ventana.__energiaDelBanco = energiaDelBanco(a, vista, memoria)
     return () => {
+      dejarDeEscuchar()
       g.remove(...a.mallas)
       soltar(a)
       armado.current = null
       delete ventana.__energiaDelBanco
     }
-  }, [n, compacto, color, logoGroupRef])
-  // El puntero: dónde (NDC), si es un mouse sobre la página o un dedo que toca. El dedo, por los eventos táctiles: los del puntero
-  // se cancelan apenas el dedo desplaza la página, y el dedo sigue siendo una carga mientras toca.
-  const puntero = useRef({ x: 9, y: 9, dedo: false, mouse: false, fuera: true })
-  useEffect(() => {
-    const p = puntero.current
-    const enNdc = (x: number, y: number): void => {
-      p.x = (x / Math.max(1, window.innerWidth)) * 2 - 1
-      p.y = 1 - (y / Math.max(1, window.innerHeight)) * 2
-      p.fuera = false
-    }
-    const mover = (e: PointerEvent): void => {
-      if (e.pointerType !== 'mouse') return
-      enNdc(e.clientX, e.clientY)
-      p.mouse = true
-    }
-    const tocar = (e: TouchEvent): void => {
-      const t = e.touches[0]
-      p.dedo = t !== undefined
-      p.mouse = false
-      if (t !== undefined) enNdc(t.clientX, t.clientY)
-    }
-    const salir = (e: MouseEvent): void => {
-      if (e.relatedTarget === null) p.fuera = true
-    }
-    window.addEventListener('pointermove', mover, { passive: true })
-    window.addEventListener('pointerdown', mover, { passive: true })
-    for (const tipo of ['touchstart', 'touchmove', 'touchend', 'touchcancel'] as const) window.addEventListener(tipo, tocar, { passive: true })
-    document.addEventListener('mouseout', salir)
-    return () => {
-      window.removeEventListener('pointermove', mover)
-      window.removeEventListener('pointerdown', mover)
-      for (const tipo of ['touchstart', 'touchmove', 'touchend', 'touchcancel'] as const) window.removeEventListener(tipo, tocar)
-      document.removeEventListener('mouseout', salir)
-    }
-  }, [])
+  }, [compacto, color, logoGroupRef])
   useFrame((state, delta) => {
     const a = armado.current
     if (a === null) return
-    const dt = Math.min(Math.max(delta, 0), 0.05)
     const u = a.uniformes
-    const p = puntero.current
     vista.current.camara = state.camera
     vista.current.ancho = state.size.width
     vista.current.alto = state.size.height
     logoGroupRef.current?.getWorldPosition(a.centro)
     u.uCentro.value.copy(a.centro)
-    a.camara[0] = state.camera.position.x - a.centro.x
-    a.camara[1] = state.camera.position.y - a.centro.y
-    a.camara[2] = state.camera.position.z - a.centro.z
-    const resolucion = u.uResolucion.value
-    state.gl.getDrawingBufferSize(resolucion)
+    state.gl.getDrawingBufferSize(u.uResolucion.value)
     u.uPixel.value = state.gl.getPixelRatio()
-    if (state.camera instanceof THREE.PerspectiveCamera) u.uEscalaPx.value = resolucion.y / (2 * Math.tan(THREE.MathUtils.degToRad(state.camera.fov) / 2))
+    if (state.camera instanceof THREE.PerspectiveCamera) u.uEscalaPx.value = u.uResolucion.value.y / (2 * Math.tan(THREE.MathUtils.degToRad(state.camera.fov) / 2))
     u.uNoche.value = VIVO.uNoche.value
-    // En el final del pie se apagan con la cámara que sube: la energía del piso es la que manda.
-    u.uApagado.value = EN_VIVO.camara
+    u.uTiempo.value = VIVO.uTiempo.value
+    u.uFoco.value = state.camera.position.distanceTo(a.centro)
+    const despues = Math.min(1, Math.max(0, (EN_VIVO.fin - FIN_DEL_GOLPE) / DESPUES_DEL_GOLPE))
+    u.uApagado.value = EN_VIVO.camara * despues * despues * (3 - 2 * despues)
+    // Las cajas del texto (los textos tapan: pasan por detrás), cada tanto o con el scroll.
     const ahora = performance.now()
     if (ahora - a.texto.leidoEn > TEXTO_EN_PANTALLA.cadaMs || Math.abs(window.scrollY - a.texto.scroll) > 1) {
       a.texto.leidoEn = ahora
       a.texto.scroll = window.scrollY
       u.uCuantosTextos.value = cajasDelTexto(u.uTextos.value, state.size.width, state.size.height)
     }
-    // Con movimiento reducido, quietas y sin arcos.
-    if (quieto) return
-    u.uTiempo.value = VIVO.uTiempo.value
-    // El puntero, una carga sobre su rayo: el mouse mientras está sobre la página; el dedo mientras toca.
-    a.rayo.activo = p.x < 2 && (p.mouse ? !p.fuera : p.dedo)
-    if (a.rayo.activo) {
-      a.v.set(p.x, p.y, 0.5).unproject(state.camera).sub(state.camera.position).normalize()
-      Object.assign(a.rayo.r, { ox: a.camara[0], oy: a.camara[1], oz: a.camara[2], dx: a.v.x, dy: a.v.y, dz: a.v.z })
+    // Con movimiento reducido: quietas, sin arcos ni pulsos.
+    if (quieto) {
+      cuadroQuieto(a, memoria.current)
+      return
     }
-    pasoDeLasCargas(a.cargas, dt, u.uTiempo.value, a.rayo.activo ? a.rayo.r : null, a.azar)
-    programarArcos(a.arcos, a.cargas, dt, a.entorno, a.azar)
-    subir(a, rellenarArcos(a.arcos, a.cargas, a.bufer))
+    const f = afuera.current
+    f.dt = Math.min(Math.max(delta, 0), 0.05)
+    f.ahora = ahora
+    f.tiempo = VIVO.uTiempo.value
+    f.scroll = window.scrollY
+    f.alto = window.innerHeight
+    f.anillos = VIVO.uAnillos.value
+    f.naceEn = NACE_EN
+    f.ultimoPrincipal = PULSO_VIVO.ultimoPrincipal
+    f.fin = EN_VIVO.fin
+    f.golpe = FIN_DEL_GOLPE
+    f.piso = FLOOR_Y - a.centro.y + 0.02
+    f.campo = campo
+    f.camara = state.camera
+    const nacidos = cuadro(a, memoria.current, f)
+    if (sonido && nacidos > 0) sonar('chispa')
   })
   return <group ref={grupo} name="energia" />
 }

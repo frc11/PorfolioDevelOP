@@ -40,7 +40,7 @@ una reverb de Schroeder. Escribe:
 - **El sprite**, mono a 48 kHz, en Opus (32 kbit/s, WebM: Chrome, Firefox, Edge) y en AAC (40 kbit/s, M4A: Safari):
   **46 KB** y **45 KB** (9,9 s: los siete de siempre y el pestillo). [PULIDO 4] C2 · con el golpe del encastre (sus dos
   variantes): **64 KB** y **67 KB** (14,4 s). [PULIDO 5] D2 · con un solo golpe (el de la sala): **56 KB** y **59 KB** (12,6 s). [PULIDO 13] K3 · con el éxito y el error
-  de los formularios: **67 KB** y **69 KB** (14,9 s).
+  de los formularios: **67 KB** y **69 KB** (14,9 s). [PULIDO 16] N2 · con la chispa del plasma: **68 KB** y **73 KB** (15,4 s).
 - Los cortes, en `src/app/v3/_lib/sonido/sprite.ts`.
 - [CIERRE RETOQUE 3D] Ya no escribe ambientes: el ambiente es generativo, en el navegador.
 
@@ -60,6 +60,7 @@ Volver a correrlo da los mismos archivos.
 | `golpe` | [PULIDO 4] C2 · **El golpe del encastre**: en el instante en que el logo conecta y nace la súper onda (el mismo evento del código, `cuadroDelFinal.ts`); otra vez en el reinicio automático, nunca en el rebobinado. [PULIDO 5] D2 · el de la sala (era `golpe-b`; el seco, `golpe-a`, «se escucha saturado», se borró) | El pulso más grave (un seno que cae de 62 a 34 Hz, más largo), un sub-golpe de 27 Hz debajo y el «toc» del contacto (ruido grave muy corto), con una saturación suave, y una cola corta de la sala (una reverb de Schroeder: cuatro peines amortiguados y dos pasatodos, 0,9 s, húmeda al 30 %): ~3 dB más que el pulso (RMS), pico a −0,5 dB (−0,4 dB después de codificar: no satura) | 2,4 s | 1 |
 | `exito` | [PULIDO 13] K3 · **El envío llegó**: en el contacto de la pieza que encaja en su ranura (la tarjeta del resultado, en el panel de Contacto y en el pie) | Dos notas claras que suben una quinta (Si 5 y Fa♯ 6, la segunda a 95 ms y más larga), cada una un seno con su octava y una parcial inarmónica (×2,9) que se apaga antes —una campana chica—, con un poco de sala (0,5 s, húmeda al 16 %). Obra de este repo: no imita ningún sonido de marca (ni las notas, ni el intervalo, ni el timbre) | 700 ms | 0,3 |
 | `error` | [PULIDO 13] K3 · **El envío falló**: en el choque de la pieza que no entra (la misma tarjeta) | Dos notas cortas y graves que bajan una tercera menor (Re 4 y Si 3, la segunda a 150 ms), con un pasabajos a 1,4 kHz: suaves, sin nada agudo | 550 ms | 0,3 |
+| `chispa` | [PULIDO 16] N2 · **Los arcos del plasma**, sólo con `?plasma-sonido=si` (un experimento, apagado) y el sonido prendido: un arco que nace (como mucho uno cada 110 ms) | Un chisporroteo corto: siete descargas secas de ruido agudo (pasaaltos en 3,2 kHz y pasabanda en 6,2 kHz), cada una más chica (a los 0, 11, 26, 48, 71, 103 y 142 ms, de 3,5 ms), sobre un zumbido apenas (ruido en 1,4 kHz que se apaga en 30 ms), pico a −9 dB. Al final del sprite: los cortes de los demás no se movieron | 260 ms | 0,05 |
 
 Se borraron: `tunel` (el soplido del túnel), `amanecer` (el crescendo), `dia` · `noche` (los dos ambientes) y
 [CIERRE RETOQUE 3D] los otros siete candidatos de clic (`barra-a` a `barra-c`, `cta-a` a `cta-d`).

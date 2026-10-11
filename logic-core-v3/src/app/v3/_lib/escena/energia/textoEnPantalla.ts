@@ -10,12 +10,25 @@ export const TEXTO_EN_PANTALLA = { cajas: 8, margenPx: 14, cadaMs: 200 } as cons
 
 const SELECTOR_DEL_TEXTO = '[data-v3] :is(h1, h2, h3, p, li, a, button, blockquote, figcaption)'
 
-/** Escribe las cajas en `destino` y devuelve cuántas. */
+let rango: Range | null = null
+
+/**
+ * Escribe las cajas en `destino` y devuelve cuántas. [PULIDO 16] N2 · la caja de un texto es la de lo que ocupa su texto (un rango
+ * sobre su contenido): la del bloque (un `h1` o un `p` ocupan todo el ancho de su columna) tapaba media pantalla en el teléfono y
+ * dejaba sin arcos ni pulsos a lo que no tiene letras encima. Los enlaces y los botones, su caja entera (su fondo, su borde). Y sólo
+ * lo que se ve: el menú del teléfono, cerrado (transparente), tenía sus enlaces en el medio de la pantalla y la vedaba entera.
+ */
 export function cajasDelTexto(destino: readonly THREE.Vector4[], ancho: number, alto: number): number {
   const m = TEXTO_EN_PANTALLA.margenPx
   const cajas: [number, number, number, number, number][] = []
+  rango ??= document.createRange()
   for (const el of document.querySelectorAll(SELECTOR_DEL_TEXTO)) {
-    const r = el.getBoundingClientRect()
+    if (typeof el.checkVisibility === 'function' && !el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue
+    let r = el.getBoundingClientRect()
+    if (!el.matches('a, button')) {
+      rango.selectNodeContents(el)
+      r = rango.getBoundingClientRect()
+    }
     if (r.width < 4 || r.height < 4 || r.bottom < 0 || r.top > alto || r.right < 0 || r.left > ancho) continue
     cajas.push([r.left - m, r.top - m, r.right + m, r.bottom + m, r.width * r.height])
   }

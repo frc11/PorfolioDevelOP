@@ -101,6 +101,10 @@ export interface Pruebas {
    * del mouse) y más chicos, lo que hace falta para que la órbita no los saque de cuadro (`PLANO_DE_NOSOTROS`).
    */
   readonly nosotros: 'fijo' | 'no'
+  /** [PULIDO 16] N2 · `plasma-campo=si` (experimento): con el botón apretado, las líneas del campo alrededor del puntero y del logo. */
+  readonly 'plasma-campo': 'si' | 'no'
+  /** [PULIDO 16] N2 · `plasma-sonido=si` (experimento): un chisporroteo muy bajo en los arcos (con el sonido prendido). */
+  readonly 'plasma-sonido': 'si' | 'no'
 }
 
 /**
@@ -126,12 +130,13 @@ export interface Pruebas {
  * [PULIDO 13] · `caida=angulo` se borró (la lenta es el producto). K6 · entra `hilos=color` (los hilos en azul frío). [PULIDO 14]
  * L3 · `hilos=` se borró (no gustaron); entran `destellos=<variante>` y `destellos-color=si`. L1 · entra `cuerpo=izquierda`.
  * [PULIDO 15] M1 · `cuerpo=` se borró (el cuerpo a la izquierda es el producto). M2 · `destellos=` y `destellos-color=` se borraron
- * (no gustó ninguna); entran `energia=plasma|plasma-y-polvo` y `plasma-color=si`. [PULIDO 16] N1 · entra `nosotros=fijo`.
+ * (no gustó ninguna); entran `energia=plasma|plasma-y-polvo` y `plasma-color=si`. [PULIDO 16] N1 · entra `nosotros=fijo`. N2 · entran
+ * `plasma-campo=si` y `plasma-sonido=si` (los experimentos del plasma).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', 'plasma-color': 'no', nosotros: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', 'plasma-color': 'no', nosotros: 'no', 'plasma-campo': 'no', 'plasma-sonido': 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'plasma-color', 'nosotros'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'plasma-color', 'nosotros', 'plasma-campo', 'plasma-sonido'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -147,6 +152,8 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     energia: unoDe<'plasma' | 'plasma-y-polvo'>(['plasma', 'plasma-y-polvo'], valor('energia')),
     'plasma-color': unoDe<'si'>(['si'], valor('plasma-color')),
     nosotros: unoDe<'fijo'>(['fijo'], valor('nosotros')),
+    'plasma-campo': unoDe<'si'>(['si'], valor('plasma-campo')),
+    'plasma-sonido': unoDe<'si'>(['si'], valor('plasma-sonido')),
   }
 }
 
