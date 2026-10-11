@@ -25,20 +25,32 @@ export function useCabeceraAlFondo(activa: boolean): void {
       return undefined
     }
     let cuadro = 0
+    // El alto de la página, guardado (leerlo en cada cuadro de scroll forzaba un layout en los viajes): lo actualiza el tamaño del
+    // contenido (la raíz de /v3) y, a menos de una pantalla del final, se vuelve a leer.
+    let total = document.documentElement.scrollHeight
     const medir = (): void => {
       cuadro = 0
-      const pie = document.querySelector('[data-pieza="pie"]')
-      const retirada = pie !== null && retiradaAlFondo(window.scrollY, window.innerHeight, document.documentElement.scrollHeight, pie.getBoundingClientRect().top)
+      // Lejos del fondo, sin leer el layout (el scroll y el alto guardado); cerca, el alto de verdad y la caja del pie.
+      if (window.scrollY + 2 * window.innerHeight >= total) total = document.documentElement.scrollHeight
+      const cerca = window.scrollY + window.innerHeight >= total - CABECERA_AL_FONDO.toleranciaPx
+      const pie = cerca ? document.querySelector('[data-pieza="pie"]') : null
+      const retirada = pie !== null && retiradaAlFondo(window.scrollY, window.innerHeight, total, pie.getBoundingClientRect().top)
       // Sólo al cambiar: un atributo de la raíz recalcula la página.
       if (raiz.hasAttribute(CABECERA_AL_FONDO.atributo) !== retirada) raiz.toggleAttribute(CABECERA_AL_FONDO.atributo, retirada)
     }
     const pedir = (): void => {
       if (cuadro === 0) cuadro = window.requestAnimationFrame(medir)
     }
+    const tamanos = new ResizeObserver(() => {
+      total = document.documentElement.scrollHeight
+      pedir()
+    })
+    tamanos.observe(raiz)
     medir()
     window.addEventListener('scroll', pedir, { passive: true })
     window.addEventListener('resize', pedir, { passive: true })
     return () => {
+      tamanos.disconnect()
       window.cancelAnimationFrame(cuadro)
       window.removeEventListener('scroll', pedir)
       window.removeEventListener('resize', pedir)
