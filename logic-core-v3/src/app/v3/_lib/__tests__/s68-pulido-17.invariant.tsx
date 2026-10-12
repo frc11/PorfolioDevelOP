@@ -22,7 +22,8 @@ import { ENTORNO, PRUEBAS_SUELTAS, entornoPedido } from '../escena/entorno'
 import { ARCOS, crearArcos, envejecer, golpeEn, residualEn } from '../escena/energia/arcos/arcos'
 import { PUNTOS_POR_ARCO, VERTICES_DE_LA_CINTA, crearCinta, rellenarCinta } from '../escena/energia/arcos/cinta'
 import { PROGRAMA, programarArcos, type EntornoDeLosArcos } from '../escena/energia/arcos/programador'
-import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas, pasoDeLasBrasas } from '../escena/energia/brasas'
+import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas } from '../escena/energia/brasas'
+import { pasoDeLasBrasas } from '../escena/energia/paso'
 import { TEMPERATURA, calentar, crearTemperatura, pasoDeLaTemperatura } from '../escena/energia/calor'
 import { DIRECCIONES, DIRECCION_RECOMENDADA, direccionDe } from '../escena/energia/direcciones'
 import { RUIDO, RUIDO_GLSL, mezclar, rotor, ruidoConGradiente } from '../escena/energia/ruido'
@@ -217,8 +218,10 @@ controlPositivo('  el detector VE una temperatura que pasa el techo', 1.2, (x: n
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('O3 · Los arcos: los de PULIDO 15, más luminosos y menos dibujados (re-golpes, resplandor), el logo como fuente, pocos')
 
+// [PULIDO 18] P1.b · todo en el mundo: el entorno dice dónde está el logo (acá, en el origen, como antes el centro).
 const entornoDePrueba = (seVe: (x: number, y: number, z: number) => boolean): EntornoDeLosArcos => ({
   camara: new Float32Array([0, 2, 26]),
+  logo: new Float32Array(3),
   rayo: null,
   maximo: ARCOS.maximo,
   temperatura: 0.25,
@@ -332,12 +335,14 @@ titulo('O3 · El cuadro: el golpe del pie sin arco (una onda), cerca del encastr
 
 const CUADRO_TS = leer('_lib/escena/energia/cuadro.ts')
 const PLASMA_TSX = leer('_lib/escena/energia/PlasmaYCargas.tsx')
+// [PULIDO 18] P1.b · ANTES la onda salía de (0, 0, 0), el centro del logo en sus coordenadas; AHORA, del logo en el mundo (el plasma ya
+// no lo sigue). POR QUÉ: las partículas viven en el mundo (pedido del humano); la onda sigue saliendo del logo.
 const pieBien = (cuadro: string, plasma: string): boolean =>
-  cuadro.includes('if (a.lectura.golpeAhora) ondaDesde(a, 0, 0, 0, f.ahora)') && !cuadro.includes("forzado = 'logo'") &&
+  cuadro.includes('if (a.lectura.golpeAhora) ondaDesde(a, a.centro.x, a.centro.y, a.centro.z, f.ahora)') && !cuadro.includes("forzado = 'logo'") &&
   plasma.includes('const CERCA_DEL_FINAL = 0.85') && plasma.includes('u.uCercaDelFinal.value = CERCA_DEL_FINAL * Math.min(1, Math.max(0, EN_VIVO.fin / Math.max(1e-3, FIN_DEL_GOLPE)))') &&
   plasma.includes('u.uApagado.value = EN_VIVO.camara * despues * despues * (3 - 2 * despues)')
 afirmar(pieBien(CUADRO_TS, PLASMA_TSX), '  el pie: el golpe del encastre es una onda desde el logo (sin arco: competía con la descarga del filo); hacia el golpe la energía cerca del logo baja hasta un 85 %; después se apaga con la cámara que sube')
-controlPositivo('  el detector VE el arco del golpe de PULIDO 16', CUADRO_TS.replace('if (a.lectura.golpeAhora) ondaDesde(a, 0, 0, 0, f.ahora)', "if (a.lectura.golpeAhora) a.arcos.forzado = 'logo'"), (c: string) => pieBien(c, PLASMA_TSX))
+controlPositivo('  el detector VE el arco del golpe de PULIDO 16', CUADRO_TS.replace('if (a.lectura.golpeAhora) ondaDesde(a, a.centro.x, a.centro.y, a.centro.z, f.ahora)', "if (a.lectura.golpeAhora) a.arcos.forzado = 'logo'"), (c: string) => pieBien(c, PLASMA_TSX))
 const quietoBien = (plasma: string): boolean => /if \(quieto\) \{\n\s*u\.uTiempo\.value = 0\n\s*cuadroQuieto\(a, state\.gl, quietas\.current\)\n\s*return\n\s*\}/.test(plasma)
 afirmar(quietoBien(PLASMA_TSX), '  con movimiento reducido: quietas (sin titilar: el reloj del dibujo clavado), sin física, sin arcos ni pulsos')
 controlPositivo('  el detector VE el plasma que sigue corriendo con movimiento reducido', PLASMA_TSX.replace('      cuadroQuieto(a, state.gl, quietas.current)\n      return\n', '      cuadroQuieto(a, state.gl, quietas.current)\n'), quietoBien)
@@ -358,7 +363,9 @@ const cuerpo = (texto: string, nombre: string): string => {
   }
   return ''
 }
-const MODULOS = ['PlasmaYCargas.tsx', 'banco.ts', 'brasas.ts', 'vecinas.ts', 'calor.ts', 'cuadro.ts', 'direcciones.ts', 'ruido.ts', 'textoEnPantalla.ts', 'arcos/arcos.ts', 'arcos/camino.ts', 'arcos/cinta.ts', 'arcos/programador.ts', 'dibujo/arcos.ts', 'dibujo/armado.ts', 'dibujo/comun.ts', 'dibujo/efectos.ts', 'dibujo/particulas.ts', 'enjambre/enjambre.ts', 'enjambre/simulacion.ts', 'interaccion/interaccion.ts', 'interaccion/puntero.ts'] as const
+// [PULIDO 18] P1.b · `brasas.ts` se partió (pasaba las 300 líneas): el paso, en `paso.ts`; lo de afuera de cada una, en `afuera.ts`. Los dos
+// entran a los módulos y a las funciones de cada cuadro (las mismas comprobaciones, en su lugar nuevo).
+const MODULOS = ['PlasmaYCargas.tsx', 'banco.ts', 'brasas.ts', 'paso.ts', 'afuera.ts', 'vecinas.ts', 'calor.ts', 'cuadro.ts', 'direcciones.ts', 'ruido.ts', 'textoEnPantalla.ts', 'arcos/arcos.ts', 'arcos/camino.ts', 'arcos/cinta.ts', 'arcos/programador.ts', 'dibujo/arcos.ts', 'dibujo/armado.ts', 'dibujo/comun.ts', 'dibujo/efectos.ts', 'dibujo/particulas.ts', 'enjambre/enjambre.ts', 'enjambre/simulacion.ts', 'interaccion/interaccion.ts', 'interaccion/puntero.ts'] as const
 const ARCHIVOS: Record<string, string | undefined> = Object.fromEntries(MODULOS.map((m) => [m, existsSync(`${ENERGIA}/${m}`) ? readFileSync(`${ENERGIA}/${m}`, 'utf8').replace(/\r\n/g, '\n') : undefined]))
 const deCodigo = (t: string): number => t.split('\n').filter((l) => l.trim() !== '' && !/^\s*(\/\/|\*|\/\*)/.test(l)).length
 const modulosBien = (a: Record<string, string | undefined>): boolean => MODULOS.every((m) => a[m] !== undefined && deCodigo(a[m] ?? '') <= 300)
@@ -366,7 +373,9 @@ afirmar(modulosBien(ARCHIVOS), `  en módulos (${String(MODULOS.length)}), ningu
 controlPositivo('  el detector VE un módulo de 301 líneas', { ...ARCHIVOS, 'cuadro.ts': 'x\n'.repeat(301) }, modulosBien)
 const POR_CUADRO: readonly (readonly [string, readonly string[]])[] = [
   ['cuadro.ts', ['cuadro', 'elPuntero', 'elGesto', 'onda', 'ondaDesde', 'alGolpe', 'lucesYEfectos', 'efecto', 'elEnjambre', 'sobreUnTexto']],
-  ['brasas.ts', ['pasoDeLasBrasas', 'entreEllas', 'distanciaAlRayo']],
+  ['brasas.ts', ['entreEllas', 'distanciaAlRayo']],
+  ['paso.ts', ['pasoDeLasBrasas']],
+  ['afuera.ts', ['deAfuera']],
   ['vecinas.ts', ['brilloPorDensidad', 'vecinasDe', 'calentarBrasa']],
   ['calor.ts', ['leerLaEscena', 'pasoDeLaTemperatura', 'calentar', 'frentesDelLogo']],
   ['ruido.ts', ['rotor', 'ruidoConGradiente', 'mezclar', 'esquina']],

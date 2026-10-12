@@ -112,19 +112,20 @@ ${desdeTextura
 	// Respira con su región (un ruido lento: zonas que se encienden) y se apaga lejos de la fuente.
 	float region = ruidoConGradiente( p * uFuente.w + vec3( 0.0, uTiempo * 0.09, uTiempo * 0.05 ), 5u ).x;
 	float respira = max( 0.0, 1.0 + uFuente.z * region * 1.6 );
-	float lejos = length( p ) / uFuente.x;
+	float lejos = length( p - uCentro ) / uFuente.x;
 	float fuente = mix( 1.0, exp( - lejos * lejos ), uFuente.y );
 	// La cara del logo libre: lo que queda entre la cámara y el logo, cerca del eje de la mirada, se apaga.
 	vec3 eje = uCentro - cameraPosition;
 	float hastaElLogo = length( eje );
 	eje /= max( 1e-4, hastaElLogo );
-	vec3 desdeLaCamara = uCentro + p - cameraPosition;
+	vec3 desdeLaCamara = p - cameraPosition;
 	float enElEje = dot( desdeLaCamara, eje );
 	float alCostado = length( desdeLaCamara - eje * enElEje );
 	fuente *= 1.0 - uDelante.x * ( 1.0 - smoothstep( 0.6 * uDelante.y, uDelante.y, alCostado ) ) * smoothstep( 0.0, 0.12 * hastaElLogo, hastaElLogo - enElEje );
 	// El tamaño: muchas chicas, pocas grandes; calientes y al destellar, un poco más.
 	float radioMundo = mix( uTamano.x, uTamano.y, pow( azar01( id, 20u ), 2.6 ) ) * ( 1.0 + 0.35 * e + 0.4 * destello );
-	vec4 mv = viewMatrix * vec4( uCentro + p, 1.0 );
+	// [PULIDO 18] P1.b · la partícula vive en el mundo (no se suma el centro del logo: no lo sigue).
+	vec4 mv = viewMatrix * vec4( p, 1.0 );
 	float distancia = max( 0.5, - mv.z );
 	float nitido = uEscalaPx * radioMundo / distancia;
 	float desenfoque = min( abs( distancia - uFoco ) * uMovida.z, uMovida.w );
@@ -133,7 +134,7 @@ ${desdeTextura
 	float conserva = mix( min( 1.0, ( nitido * nitido ) / max( 1e-4, radio * radio ) ), 1.0, 0.2 );
 	float radioPx = radio * uPixel;
 	vec4 cP = projectionMatrix * mv;
-	vec4 cQ = projectionMatrix * viewMatrix * vec4( uCentro + p - vel * uMovida.x, 1.0 );
+	vec4 cQ = projectionMatrix * viewMatrix * vec4( p - vel * uMovida.x, 1.0 );
 	if ( cP.w <= 0.05 || cQ.w <= 0.05 ) {
 		gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 );
 		vBrillo = 0.0;
@@ -169,7 +170,7 @@ ${desdeTextura
 	float vivo = uLuz.y + ( 1.0 - uLuz.y ) * e;
 	// La estela reparte su luz a lo largo: más larga, más tenue por punto.
 	float reparte = 1.0 / ( 1.0 + 0.35 * largo / radioPx );
-	vBrillo = min( uDelante.z, uIntensidad * vivo * titila * respira * fuente * ( 1.0 + uDestello.z * destello ) * luz * conserva * reparte * fundido * enElFinal( p ) );
+	vBrillo = min( uDelante.z, uIntensidad * vivo * titila * respira * fuente * ( 1.0 + uDestello.z * destello ) * luz * conserva * reparte * fundido * enElFinal( p - uCentro ) );
 	// El destello blanco de día: tenue en reposo (sobre el logo negro se ve; sobre el papel, no), entero en las calientes.
 	vClaro = mix( uClaroEnReposo, 1.0, smoothstep( uDia.w, uDia.w + 0.35, e + 0.5 * destello ) ) * fuente * fundido * titila;
 }

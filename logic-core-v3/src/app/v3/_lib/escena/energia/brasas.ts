@@ -1,5 +1,3 @@
-import { rotor } from './ruido'
-
 /**
  * [PULIDO 17] O3 · LAS BRASAS: LAS CARGAS DE PULIDO 15, HECHAS LUZ (`docs/rediseno/PLASMA.md`). Lo que gustó, igual: cargas
  * positivas y negativas en el volumen alrededor del logo, las opuestas se atraen y las iguales se repelen (con un rechazo de corto
@@ -8,9 +6,13 @@ import { rotor } from './ruido'
  * no un vaivén senoidal), cada una tiene su ENERGÍA (de 0 a 1: la calienta el puntero, un pulso, una onda del logo, un arco; se
  * enfría sola) y la energía las hace TEMBLAR (la agitación térmica). El puntero además ORDENA (las cercanas giran alrededor de su
  * rayo). En la dirección A son las partículas; en B, los núcleos calientes del enjambre. Puro (la prueba lo corre en Node).
+ * [PULIDO 18] P1.b · el paso salió a `paso.ts` y lo de afuera de cada una a `afuera.ts` (este archivo pasaba las 300 líneas).
  */
 export const BRASAS = {
-  /** Dónde viven: una cáscara alrededor del centro del logo (u): el radio y el hueco del medio (el logo mide 6,9 de ancho). */
+  /**
+   * Dónde viven: una cáscara (u) y el hueco del logo (el logo mide 6,9 de ancho). [PULIDO 18] P1.b · la cáscara es del MUNDO: alrededor
+   * del origen (el lugar de reposo del logo), quieta; el hueco va con el logo (un obstáculo donde esté: si baja, las aparta al pasar).
+   */
   volumen: { radio: 13, hueco: 4.2, sobreElPiso: 0.3 },
   /** Entre ellas (u, s; masa 1), las de PULIDO 15: el alcance, atraer y repeler, el rechazo de cerca, la amortiguación, el tope y la cáscara. */
   fuerzas: { alcance: 3.6, atrae: 0.42, repele: 0.55, cerca: 0.55, choque: 6, amortigua: 1.1, tope: 3, contiene: 1.6 },
@@ -52,10 +54,10 @@ export interface Brasas {
   turno: number
 }
 
-/** El rayo del puntero, relativo al centro del logo: el origen (la cámara) y la dirección (unitaria). */
+/** El rayo del puntero, en el mundo: el origen (la cámara) y la dirección (unitaria). */
 export interface RayoDelPuntero { readonly ox: number; readonly oy: number; readonly oz: number; readonly dx: number; readonly dy: number; readonly dz: number }
 
-/** Lo que entra de afuera en cada paso (un solo objeto reescrito: sin reservas). */
+/** Lo que entra de afuera en cada paso (un solo objeto reescrito: sin reservas). [PULIDO 18] P1.b · todo en el mundo. */
 export interface EntradaDeLasBrasas {
   /** La hora del campo (s) y la temperatura de la escena (0 a 1). */
   tiempo: number
@@ -67,12 +69,14 @@ export interface EntradaDeLasBrasas {
   readonly pulsos: Float32Array
   /** Los frentes de las ondas del logo (u desde su centro) y su fuerza, × 4 (fuerza 0: ninguna). */
   readonly anillos: Float32Array
-  /** El piso, relativo al centro del logo (y): nada pasa por debajo (un arco a una brasa bajo el piso se ve como una grieta). */
+  /** Dónde está el logo ahora (su centro): el hueco y las ondas salen de ahí. */
+  readonly logo: Float32Array
+  /** El piso (y): nada pasa por debajo (un arco a una brasa bajo el piso se ve como una grieta). */
   piso: number
 }
 
 export function crearEntradaDeLasBrasas(): EntradaDeLasBrasas {
-  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), piso: -100 }
+  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), piso: -100 }
 }
 
 /** Un azar con semilla (mulberry32): las mismas brasas y los mismos arcos en cada carga de la página (y en el banco). */
@@ -166,7 +170,7 @@ export function distanciaAlRayo(x: number, y: number, z: number, r: RayoDelPunte
 }
 
 /** Las fuerzas entre ellas por la grilla (cada par una vez) y los enlaces que se forman. */
-function entreEllas(b: Brasas, azar: () => number): void {
+export function entreEllas(b: Brasas, azar: () => number): void {
   const { lugar, fuerza, signo, pareja } = b
   const E = BRASAS.enlace
   b.cabeza.fill(-1)
@@ -211,143 +215,4 @@ function entreEllas(b: Brasas, azar: () => number): void {
     }
   }
   b.paresMirados = mirados
-}
-
-const PUNTO = new Float32Array(3)
-
-/** Un paso (`dt` en s, a lo sumo 1/60: el cuadro lo parte): las fuerzas, el campo, el puntero, las ondas, la energía y la integración. */
-export function pasoDeLasBrasas(b: Brasas, dt: number, en: EntradaDeLasBrasas, azar: () => number): void {
-  const { lugar, velocidad: v, fuerza, pareja, energia } = b
-  const E = BRASAS.enlace
-  const P = BRASAS.cursor
-  const K = BRASAS.energia
-  const O = BRASAS.onda
-  fuerza.fill(0)
-  entreEllas(b, azar)
-  for (let i = 0; i < b.n; i += 1) {
-    const j = pareja[i]
-    if (j > i) {
-      b.vidaDelEnlace[i] -= dt
-      if (b.vidaDelEnlace[i] <= 0) soltarEnlace(b, i, azar)
-      else {
-        const dx = lugar[j * 3] - lugar[i * 3]
-        const dy = lugar[j * 3 + 1] - lugar[i * 3 + 1]
-        const dz = lugar[j * 3 + 2] - lugar[i * 3 + 2]
-        const d = Math.max(1e-4, Math.hypot(dx, dy, dz))
-        const f = (E.resorte * (d - E.reposo)) / d
-        fuerza[i * 3] += f * dx
-        fuerza[i * 3 + 1] += f * dy
-        fuerza[i * 3 + 2] += f * dz
-        fuerza[j * 3] -= f * dx
-        fuerza[j * 3 + 1] -= f * dy
-        fuerza[j * 3 + 2] -= f * dz
-      }
-    }
-    b.enfriado[i] = Math.max(0, b.enfriado[i] - dt)
-  }
-  // El campo, en la mitad de las brasas por cuadro (las otras usan el de recién).
-  b.turno ^= 1
-  const rapidez = BRASAS.flujo.rapidez * (1 + BRASAS.flujo.caliente * en.temperatura)
-  for (let i = b.turno; i < b.n; i += 2) {
-    rotor(lugar[i * 3], lugar[i * 3 + 1], lugar[i * 3 + 2], en.tiempo, b.flujo, i * 3)
-    b.flujo[i * 3] *= rapidez
-    b.flujo[i * 3 + 1] *= rapidez
-    b.flujo[i * 3 + 2] *= rapidez
-  }
-  const { radio, hueco } = BRASAS.volumen
-  const frena = Math.exp(-F.amortigua * dt)
-  const enfria = Math.exp(-dt / K.apagaS)
-  const reposo = K.base + K.porTemperatura * en.temperatura
-  for (let i = 0; i < b.n; i += 1) {
-    const x = lugar[i * 3]
-    const y = lugar[i * 3 + 1]
-    const z = lugar[i * 3 + 2]
-    let fx = fuerza[i * 3] + (b.flujo[i * 3] - v[i * 3]) * BRASAS.flujo.sigue
-    let fy = fuerza[i * 3 + 1] + (b.flujo[i * 3 + 1] - v[i * 3 + 1]) * BRASAS.flujo.sigue
-    let fz = fuerza[i * 3 + 2] + (b.flujo[i * 3 + 2] - v[i * 3 + 2]) * BRASAS.flujo.sigue
-    let gana = 0
-    // El puntero: atrae a las negativas hacia su rayo y empuja a las positivas, las hace girar alrededor del rayo (ordena), las
-    // calienta y rompe los enlaces que toca.
-    const r = en.rayo
-    if (r !== null) {
-      const d = distanciaAlRayo(x, y, z, r, PUNTO)
-      if (d < P.alcance && d > 1e-4) {
-        const u = 1 - d / P.alcance
-        const carga = en.cargaDelPuntero
-        let f = (b.signo[i] < 0 ? P.fuerza : -P.fuerza) * u * carga
-        if (d < P.cerca) f -= F.choque * (1 - d / P.cerca) ** 2
-        const ux = (PUNTO[0] - x) / d
-        const uy = (PUNTO[1] - y) / d
-        const uz = (PUNTO[2] - z) / d
-        // El giro: alrededor del rayo (rayo × hacia el rayo).
-        const g = P.gira * u * carga
-        fx += f * ux + g * (r.dy * uz - r.dz * uy)
-        fy += f * uy + g * (r.dz * ux - r.dx * uz)
-        fz += f * uz + g * (r.dx * uy - r.dy * ux)
-        gana += P.calienta * u * u * carga * dt
-        if (d < P.rompe && pareja[i] >= 0) soltarEnlace(b, i, azar)
-      }
-    }
-    // Las ondas de los pulsos: el frente empuja hacia afuera y calienta.
-    for (let k = 0; k < 2; k += 1) {
-      const edad = en.pulsos[k * 4 + 3]
-      if (edad < 0) continue
-      const dx = x - en.pulsos[k * 4]
-      const dy = y - en.pulsos[k * 4 + 1]
-      const dz = z - en.pulsos[k * 4 + 2]
-      const d = Math.max(1e-4, Math.hypot(dx, dy, dz))
-      const w = 1 - Math.abs(d - O.rapidez * edad) / O.ancho
-      if (w <= 0) continue
-      // El frente tarda `ancho / rapidez` en pasar: en ese rato deja `empuje` de velocidad y `calienta` de energía.
-      const fuerte = w * Math.max(0, 1 - (O.rapidez * edad) / O.llega)
-      const porPaso = O.rapidez / O.ancho
-      const empuja = (O.empuje * fuerte * porPaso) / d
-      fx += empuja * dx
-      fy += empuja * dy
-      fz += empuja * dz
-      gana += O.calienta * fuerte * porPaso * dt
-    }
-    // Las ondas del logo: calientan al pasar (por segundo, en la cresta).
-    const lejos = Math.hypot(x, y, z)
-    for (let k = 0; k < 4; k += 1) {
-      const fuerte = en.anillos[k * 2 + 1]
-      if (fuerte <= 0) continue
-      const w = (lejos - en.anillos[k * 2]) / BRASAS.anillo.ancho
-      gana += BRASAS.anillo.calienta * fuerte * Math.exp(-w * w) * dt
-    }
-    // Calientes, tiemblan (la agitación térmica).
-    const tiembla = K.tiembla * energia[i]
-    fx += tiembla * (azar() * 2 - 1)
-    fy += tiembla * (azar() * 2 - 1)
-    fz += tiembla * (azar() * 2 - 1)
-    // La cáscara: afuera del radio vuelven; adentro del hueco (el logo), salen.
-    const sobra = lejos > radio ? -(lejos - radio) : lejos < hueco ? hueco - lejos : 0
-    if (sobra !== 0 && lejos > 1e-4) {
-      fx += (F.contiene * sobra * x) / lejos
-      fy += (F.contiene * sobra * y) / lejos
-      fz += (F.contiene * sobra * z) / lejos
-    }
-    // El piso: nada pasa por debajo.
-    const sobrePiso = en.piso + BRASAS.volumen.sobreElPiso
-    if (y < sobrePiso) {
-      fy += (sobrePiso - y) * 8
-      if (v[i * 3 + 1] < 0) v[i * 3 + 1] = 0
-    }
-    let vx = (v[i * 3] + fx * dt) * frena
-    let vy = (v[i * 3 + 1] + fy * dt) * frena
-    let vz = (v[i * 3 + 2] + fz * dt) * frena
-    const rap = Math.hypot(vx, vy, vz)
-    if (rap > F.tope) {
-      vx *= F.tope / rap
-      vy *= F.tope / rap
-      vz *= F.tope / rap
-    }
-    v[i * 3] = vx
-    v[i * 3 + 1] = vy
-    v[i * 3 + 2] = vz
-    lugar[i * 3] = x + vx * dt
-    lugar[i * 3 + 1] = y + vy * dt
-    lugar[i * 3 + 2] = z + vz * dt
-    energia[i] = Math.min(1, reposo + (energia[i] - reposo) * enfria + gana)
-  }
 }

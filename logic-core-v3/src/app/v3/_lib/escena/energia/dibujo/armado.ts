@@ -44,7 +44,7 @@ export interface Armado {
   readonly geometriaDeLaCinta: THREE.BufferGeometry
   readonly efectos: { readonly lugar: THREE.InstancedBufferAttribute; readonly efecto: THREE.InstancedBufferAttribute; readonly geometria: THREE.InstancedBufferGeometry }
   readonly mallas: readonly THREE.Mesh[]
-  /** El centro del logo en el mundo, un vector de trabajo, las luces de los arcos (x, y, z, intensidad) y el punto del puntero. */
+  /** El centro del logo en el mundo (todo lo demás también va en el mundo), un vector de trabajo, las luces de los arcos y el punto del puntero. */
   readonly centro: THREE.Vector3
   readonly v: THREE.Vector3
   readonly luces: Float32Array
@@ -143,7 +143,7 @@ export function armar(direccion: Direccion, compacto: boolean, vista: { readonly
   const seVe = (x: number, y: number, z: number): boolean => {
     const cam = vista.current.camara
     if (cam === null) return false
-    v.set(x + centro.x, y + centro.y, z + centro.z).project(cam)
+    v.set(x, y, z).project(cam)
     if (Math.abs(v.x) > 0.97 || Math.abs(v.y) > 0.97 || v.z <= -1 || v.z >= 1) return false
     for (let k = 0; k < uniformes.uCuantosTextos.value; k += 1) {
       const c = uniformes.uTextos.value[k]
@@ -159,7 +159,7 @@ export function armar(direccion: Direccion, compacto: boolean, vista: { readonly
       const malla = mallasDelLogo[Math.floor(azar() * mallasDelLogo.length)]
       const pos = malla.geometry.getAttribute('position')
       if (!(pos instanceof THREE.BufferAttribute) || pos.count === 0) continue
-      v.fromBufferAttribute(pos, Math.floor(azar() * pos.count)).applyMatrix4(malla.matrixWorld).sub(centro)
+      v.fromBufferAttribute(pos, Math.floor(azar() * pos.count)).applyMatrix4(malla.matrixWorld)
       const dd = Math.hypot(v.x - x, v.y - y, v.z - z)
       if (dd < mejor) {
         mejor = dd
@@ -172,6 +172,7 @@ export function armar(direccion: Direccion, compacto: boolean, vista: { readonly
   }
   const entorno: EntornoDeLosArcos = {
     camara: new Float32Array(3),
+    logo: new Float32Array(3),
     get rayo(): RayoDelPuntero | null {
       return rayo.activo ? rayo.r : null
     },

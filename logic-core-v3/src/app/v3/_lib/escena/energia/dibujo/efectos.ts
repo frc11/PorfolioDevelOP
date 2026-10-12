@@ -20,7 +20,7 @@ varying float vTexto;
 ${COMUN}
 void main() {
 	float tipo = aEfecto.x;
-	vec3 mundo = uCentro + aLugar;
+	vec3 mundo = aLugar;
 	vec4 clip;
 	if ( tipo < 0.5 ) {
 		// En el piso: un disco acostado.

@@ -50,7 +50,20 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   base: los seis archivos largos de siempre).
 
 ### P1.b · Independientes del logo (viven en el mundo)
-- PENDIENTE.
+- HECHO · VISTO no (sin banco por la memoria: VERIFICAR la secuencia «logo bajando» con el banco).
+- Todo en el MUNDO: las brasas, el enjambre de B, los arcos, sus luces, los efectos, el puntero y el piso (`FLOOR_Y`, no relativo al
+  logo). Los sombreadores ya no le suman el centro del logo a ninguna posición.
+- La cáscara (radio 13) es del mundo, quieta alrededor del origen (el lugar de reposo del logo). El logo sólo influye: su HUECO
+  (4,2) es un obstáculo donde esté (si baja, las aparta al pasar; no se las lleva), sus ONDAS (el pulso) y su golpe salen de donde
+  está, sus ARCOS nacen en su borde y la FUENTE (el brillo cae lejos del logo) y la cara libre se miden desde él. Al cargar, el logo
+  cae desde 14 u: la nube lo espera abajo, tenue (lejos de la fuente), y se enciende cuando el logo llega.
+- `brasas.ts` pasaba las 300 líneas: se partió (`paso.ts`, el paso y la integración; `afuera.ts`, el puntero, las ondas, la
+  agitación, la cáscara y el hueco). s68 mira los dos en su lugar nuevo (módulos y funciones de cada cuadro).
+- s69 · P1.b: el logo baja 3 u y el centro de la nube se mueve 0,02 u (el control, la nube que baja con el logo); donde queda el
+  logo, ninguna brasa adentro de su hueco; la onda del logo calienta a 2 u del LOGO y su hueco empuja desde donde está (el control,
+  medido desde el origen); los sombreadores y el cuadro en el mundo (el control, el de antes). s68: el golpe del pie, una onda desde
+  el logo en el mundo (antes, desde el origen de sus coordenadas).
+- Compuerta: tsc y lint en verde; las 50 suites, en verde (s8-montaje con sus 2 de la base).
 
 ### P1.a · El piso (límite real), partículas blandas (profundidad) y el reflejo en el piso
 - PENDIENTE.

@@ -131,7 +131,7 @@ void main() {
 	}
 	float gana = 0.0;
 	// El campo, que cerca del logo sólo corre de costado (no lo atraviesa).
-	vec3 q = ( uLogoInverso * vec4( uCentro + p, 1.0 ) ).xyz;
+	vec3 q = ( uLogoInverso * vec4( p, 1.0 ) ).xyz;
 	float dl = campoDelLogo( q );
 	vec3 nl = vec3( 0.0 );
 	if ( dl < 2.5 ) nl = normalize( transpose( mat3( uLogoInverso ) ) * normalDelCampo( q ) );
@@ -184,12 +184,13 @@ void main() {
 		a += d / r * ${f(E.onda.empuje * E.onda.rapidez / E.onda.ancho)} * w;
 		gana += ${f(E.onda.calienta * E.onda.rapidez / E.onda.ancho)} * w * dt;
 	}
-	// Las ondas del logo: calientan al pasar.
-	float lejos = length( p );
+	// Las ondas del logo: calientan al pasar (desde donde está el logo).
+	vec3 dlogo = p - uCentro;
+	float delLogo = length( dlogo );
 	for ( int k = 0; k < 2; k ++ ) {
 		vec4 o = uFrentes[ k ];
-		float w0 = ( lejos - o.x ) / ${f(E.anillo.ancho)};
-		float w1 = ( lejos - o.z ) / ${f(E.anillo.ancho)};
+		float w0 = ( delLogo - o.x ) / ${f(E.anillo.ancho)};
+		float w1 = ( delLogo - o.z ) / ${f(E.anillo.ancho)};
 		gana += ${f(E.anillo.calienta)} * ( o.y * exp( - w0 * w0 ) + o.w * exp( - w1 * w1 ) ) * dt;
 	}
 	// Los arcos: calientan lo que tienen cerca (el medio se enciende a su paso).
@@ -201,9 +202,10 @@ void main() {
 	// Calientes, tiemblan.
 	vec3 azar = vec3( azar01( id ^ generacion, 1u ), azar01( id ^ generacion, 2u ), azar01( id ^ generacion, 3u ) ) * 2.0 - 1.0;
 	a += azar * uEnergiaAjuste.w * e;
-	// La cáscara: afuera vuelven; el hueco del medio, suave.
+	// [PULIDO 18] P1.b · la cáscara es del mundo (alrededor del origen: no sigue al logo): afuera vuelven; el hueco, suave, va con el logo.
+	float lejos = length( p );
 	if ( lejos > uReparto.y ) a -= p / lejos * ( lejos - uReparto.y ) * uReparto.w;
-	if ( lejos < uReparto.x && lejos > 1e-4 ) a += p / lejos * ( uReparto.x - lejos ) * uReparto.w * 0.5;
+	if ( delLogo < uReparto.x && delLogo > 1e-4 ) a += dlogo / delLogo * ( uReparto.x - delLogo ) * uReparto.w * 0.5;
 	// El piso: nada pasa por debajo.
 	if ( p.y < uPiso + 0.25 ) {
 		a.y += ( uPiso + 0.25 - p.y ) * 8.0;

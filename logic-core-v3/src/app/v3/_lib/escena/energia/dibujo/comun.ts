@@ -59,7 +59,7 @@ float adentroDelTexto( vec2 s ) {
 	}
 	return m;
 }
-// La luz de los arcos en un punto (relativo al centro): cada una cae con la distancia.
+// La luz de los arcos en un punto (del mundo): cada una cae con la distancia.
 float luzDeLosArcos( vec3 p ) {
 	float l = 0.0;
 	for ( int k = 0; k < ${String(DIBUJO.luces)}; k ++ ) {
@@ -69,7 +69,7 @@ float luzDeLosArcos( vec3 p ) {
 	}
 	return l;
 }
-// Cerca del logo en el final del pie (el encastre): la energía baja para no competir.
+// Cerca del logo en el final del pie (el encastre): la energía baja para no competir (p: desde el centro del logo).
 float enElFinal( vec3 p ) {
 	return 1.0 - uCercaDelFinal * exp( - dot( p, p ) / 30.0 );
 }

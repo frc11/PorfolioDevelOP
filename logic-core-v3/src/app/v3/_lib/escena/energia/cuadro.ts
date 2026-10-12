@@ -4,12 +4,13 @@ import { envejecer, golpeEn, residualEn, extremo, type Arco } from './arcos/arco
 import { rellenarCinta } from './arcos/cinta'
 import { puntoDelCamino, TRAMOS_DEL_CAMINO } from './arcos/camino'
 import { programarArcos } from './arcos/programador'
-import { BRASAS, pasoDeLasBrasas } from './brasas'
+import { BRASAS } from './brasas'
 import { TEMPERATURA, calentar, frentesDelLogo, leerLaEscena, type DeLaEscena } from './calor'
 import { EFECTO, EFECTOS } from './dibujo/efectos'
 import { DIBUJO } from './dibujo/comun'
 import { subir, type Armado } from './dibujo/armado'
 import { pasoDelEnjambre } from './enjambre/enjambre'
+import { pasoDeLasBrasas } from './paso'
 import { brilloPorDensidad, calentarBrasa } from './vecinas'
 import { avanzar } from './interaccion/interaccion'
 
@@ -19,7 +20,7 @@ import { avanzar } from './interaccion/interaccion'
  * arcos (sus golpes calientan lo que tocan), sus luces y los efectos; el enjambre (B) y todo sube a la GPU. Sin reservas por cuadro.
  */
 export const CUADRO = {
-  /** El punto del puntero: donde su rayo entra a una esfera de este radio alrededor del centro (más afuera que el logo). */
+  /** El punto del puntero: donde su rayo entra a una esfera de este radio alrededor del origen (el lugar del plasma; más afuera que el logo). */
   entraALaNube: BRASAS.volumen.hueco + 1.2,
   /** El paso más largo de la física (s): un cuadro más largo se parte. */
   pasoMaximo: 1 / 60,
@@ -37,7 +38,7 @@ export const CUADRO = {
 export interface Afuera extends DeLaEscena {
   /** El reloj de la página (ms). */
   ahora: number
-  /** El piso, relativo al centro del logo (y). */
+  /** El piso (y del mundo). [PULIDO 18] P1.b · todo en el mundo: el plasma no sigue al logo. */
   piso: number
   camara: THREE.Camera
   gl: THREE.WebGLRenderer | null
@@ -64,7 +65,7 @@ function sobreUnTexto(a: Armado, x: number, y: number): boolean {
   return false
 }
 
-/** Un efecto en el lugar `k`: dónde (relativo al centro) y (tipo, radio, intensidad, 0). */
+/** Un efecto en el lugar `k`: dónde (en el mundo) y (tipo, radio, intensidad, 0). */
 function efecto(a: Armado, k: number, x: number, y: number, z: number, tipo: number, radio: number, intensidad: number): number {
   if (k >= EFECTOS.cuantos) return k
   const l = a.efectos.lugar.array as Float32Array
@@ -79,16 +80,16 @@ function efecto(a: Armado, k: number, x: number, y: number, z: number, tipo: num
   return k + 1
 }
 
-/** El rayo del puntero (relativo al centro) y su punto a la altura de la nube. El dedo que soltó en este cuadro todavía cuenta. */
+/** El rayo del puntero (en el mundo) y su punto a la altura de la nube. El dedo que soltó en este cuadro todavía cuenta. */
 function elPuntero(a: Armado, camara: THREE.Camera): void {
   const pt = a.puntero
   a.rayo.activo = pt.x < 2 && (pt.mouse ? !pt.fuera : pt.dedo || pt.pulso || pt.descarga)
   if (!a.rayo.activo) return
   V.set(pt.x, pt.y, 0.5).unproject(camara).sub(camara.position).normalize()
   const r = a.rayo.r
-  r.ox = camara.position.x - a.centro.x
-  r.oy = camara.position.y - a.centro.y
-  r.oz = camara.position.z - a.centro.z
+  r.ox = camara.position.x
+  r.oy = camara.position.y
+  r.oz = camara.position.z
   r.dx = V.x
   r.dy = V.y
   r.dz = V.z
@@ -101,7 +102,7 @@ function elPuntero(a: Armado, camara: THREE.Camera): void {
   a.puntoDelPuntero[2] = r.oz + r.dz * t
 }
 
-/** Una onda nueva desde (x, y, z) relativo al centro (en el lugar de la más vieja). */
+/** Una onda nueva desde (x, y, z) del mundo (en el lugar de la más vieja). */
 function ondaDesde(a: Armado, x: number, y: number, z: number, ahora: number): void {
   const k = a.ondas[3] <= a.ondas[7] ? 0 : 1
   a.ondas[k * 4] = x
@@ -231,7 +232,7 @@ function elEnjambre(a: Armado, f: Afuera, gl: THREE.WebGLRenderer): void {
 /** Un cuadro (no con movimiento reducido): la escena, el puntero, el gesto, las brasas, los arcos, el dibujo y el enjambre. */
 export function cuadro(a: Armado, f: Afuera): void {
   leerLaEscena(a.temperatura, a.lectura, f)
-  if (a.lectura.golpeAhora) ondaDesde(a, 0, 0, 0, f.ahora)
+  if (a.lectura.golpeAhora) ondaDesde(a, a.centro.x, a.centro.y, a.centro.z, f.ahora)
   elPuntero(a, f.camara)
   elGesto(a, f)
   const en = a.entrada
@@ -239,14 +240,20 @@ export function cuadro(a: Armado, f: Afuera): void {
   en.temperatura = a.temperatura.valor
   en.rayo = a.rayo.activo ? a.rayo.r : null
   en.piso = f.piso
+  en.logo[0] = a.centro.x
+  en.logo[1] = a.centro.y
+  en.logo[2] = a.centro.z
   frentesDelLogo(f.anillos, f.tiempo, f.naceEn, en.anillos)
   const pasos = Math.max(1, Math.ceil(f.dt / CUADRO.pasoMaximo))
   for (let k = 0; k < pasos; k += 1) pasoDeLasBrasas(a.brasas, f.dt / pasos, en, a.azar)
   brilloPorDensidad(a.brasas)
   const entorno = a.entorno
-  entorno.camara[0] = f.camara.position.x - a.centro.x
-  entorno.camara[1] = f.camara.position.y - a.centro.y
-  entorno.camara[2] = f.camara.position.z - a.centro.z
+  entorno.camara[0] = f.camara.position.x
+  entorno.camara[1] = f.camara.position.y
+  entorno.camara[2] = f.camara.position.z
+  entorno.logo[0] = a.centro.x
+  entorno.logo[1] = a.centro.y
+  entorno.logo[2] = a.centro.z
   entorno.temperatura = a.temperatura.valor
   entorno.actividadDelLogo = a.lectura.actividadDelLogo
   envejecer(a.arcos, a.brasas, f.dt, a.azar)

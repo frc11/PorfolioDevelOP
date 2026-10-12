@@ -104,7 +104,7 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto, direccion }: Pro
     f.ultimoPrincipal = PULSO_VIVO.ultimoPrincipal
     f.fin = EN_VIVO.fin
     f.golpe = FIN_DEL_GOLPE
-    f.piso = FLOOR_Y - a.centro.y + 0.02
+    f.piso = FLOOR_Y + 0.02
     f.camara = state.camera
     f.gl = state.gl
     f.logo = logoGroupRef.current

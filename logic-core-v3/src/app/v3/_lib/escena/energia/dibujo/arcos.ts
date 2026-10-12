@@ -54,9 +54,9 @@ vec2 enPantalla( vec4 c ) {
 	return c.xy / c.w * uResolucion * 0.5;
 }
 void main() {
-	vec4 c = projectionMatrix * viewMatrix * vec4( uCentro + aPunto, 1.0 );
-	vec4 cA = projectionMatrix * viewMatrix * vec4( uCentro + aAntes, 1.0 );
-	vec4 cD = projectionMatrix * viewMatrix * vec4( uCentro + aDespues, 1.0 );
+	vec4 c = projectionMatrix * viewMatrix * vec4( aPunto, 1.0 );
+	vec4 cA = projectionMatrix * viewMatrix * vec4( aAntes, 1.0 );
+	vec4 cD = projectionMatrix * viewMatrix * vec4( aDespues, 1.0 );
 	vLado = aForma.x;
 	vGolpe = aForma.z;
 	vResidual = aForma.w;

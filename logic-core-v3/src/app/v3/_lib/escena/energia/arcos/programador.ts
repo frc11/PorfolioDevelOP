@@ -22,15 +22,16 @@ export const PROGRAMA = {
   grupo: 1.8,
 } as const
 
-/** Lo que el programador pregunta afuera (lo arma `dibujo/armado.ts`; en la prueba, a mano). */
+/** Lo que el programador pregunta afuera (lo arma `dibujo/armado.ts`; en la prueba, a mano). [PULIDO 18] P1.b · todo en el mundo. */
 export interface EntornoDeLosArcos {
-  /** La cámara, relativa al centro (de dónde se ven los arcos). */
+  /** La cámara (de dónde se ven los arcos) y dónde está el logo ahora (de ahí salen los suyos). */
   readonly camara: Float32Array
+  readonly logo: Float32Array
   readonly rayo: RayoDelPuntero | null
   readonly maximo: number
   temperatura: number
   actividadDelLogo: number
-  /** ¿Se ve este punto (relativo al centro) y no cae sobre un texto? */
+  /** ¿Se ve este punto y no cae sobre un texto? */
   readonly seVe: (x: number, y: number, z: number) => boolean
   /** El punto del borde del logo más cercano a (x, y, z), en `destino`; falso si el logo no está. */
   readonly bordeDelLogo: (x: number, y: number, z: number, destino: Float32Array) => boolean
@@ -195,7 +196,7 @@ export function programarArcos(e: EstadoDeLosArcos, b: Brasas, dt: number, en: E
     let largo = Number.POSITIVE_INFINITY
     for (let intento = 0, vistas = 0; intento < b.n * 2 && vistas < PROGRAMA.candidatasDelLogo; intento += 1) {
       const i = Math.floor(azar() * b.n)
-      const d = Math.hypot(b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+      const d = Math.hypot(b.lugar[i * 3] - en.logo[0], b.lugar[i * 3 + 1] - en.logo[1], b.lugar[i * 3 + 2] - en.logo[2])
       if (d > PROGRAMA.alcances.logo || !seVeLaBrasa(b, i, en)) continue
       vistas += 1
       if (!en.bordeDelLogo(b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2], BORDE) || !en.seVe(BORDE[0], BORDE[1], BORDE[2])) continue

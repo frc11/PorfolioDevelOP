@@ -61,7 +61,7 @@ function grupoEnPantalla(a: Armado, vista: Vista, v: THREE.Vector3): [number, nu
   const L = a.brasas.lugar
   for (let i = 0; i < a.brasas.n; i += 1) {
     if (!a.entorno.seVe(L[i * 3], L[i * 3 + 1], L[i * 3 + 2])) continue
-    v.set(L[i * 3] + a.centro.x, L[i * 3 + 1] + a.centro.y, L[i * 3 + 2] + a.centro.z).project(cam)
+    v.set(L[i * 3], L[i * 3 + 1], L[i * 3 + 2]).project(cam)
     const x = ((v.x + 1) / 2) * vista.ancho
     const y = ((1 - v.y) / 2) * vista.alto
     const cx = Math.floor(x / 90)
@@ -123,7 +123,7 @@ export function energiaDelBanco(a: Armado, vista: { readonly current: Vista }): 
       const B = new Float32Array(3)
       const M = new Float32Array(3)
       const enPx = (p: Float32Array): [number, number] => {
-        a.v.set(p[0] + a.centro.x, p[1] + a.centro.y, p[2] + a.centro.z).project(cam)
+        a.v.set(p[0], p[1], p[2]).project(cam)
         return [Math.round(((a.v.x + 1) / 2) * vista.current.ancho), Math.round(((1 - a.v.y) / 2) * vista.current.alto)]
       }
       return a.arcos.arcos.filter((x) => x.activo).map((x) => {
