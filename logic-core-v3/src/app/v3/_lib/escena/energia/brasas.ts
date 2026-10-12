@@ -1,3 +1,5 @@
+import { largo3 } from './largo'
+
 /**
  * [PULIDO 17] O3 · LAS BRASAS: LAS CARGAS DE PULIDO 15, HECHAS LUZ (`docs/rediseno/PLASMA.md`). Lo que gustó, igual: cargas
  * positivas y negativas en el volumen alrededor del logo, las opuestas se atraen y las iguales se repelen (con un rechazo de corto
@@ -178,7 +180,7 @@ export function soltarEnlace(b: Brasas, i: number, azar: () => number): void {
   const dx = b.lugar[j * 3] - b.lugar[i * 3]
   const dy = b.lugar[j * 3 + 1] - b.lugar[i * 3 + 1]
   const dz = b.lugar[j * 3 + 2] - b.lugar[i * 3 + 2]
-  const d = Math.max(1e-4, Math.hypot(dx, dy, dz))
+  const d = Math.max(1e-4, largo3(dx, dy, dz))
   for (let lado = 0; lado < 2; lado += 1) {
     const k = lado === 0 ? i : j
     const s = lado === 0 ? -1 : 1
@@ -196,7 +198,7 @@ export function distanciaAlRayo(x: number, y: number, z: number, r: RayoDelPunte
   punto[0] = r.ox + r.dx * t
   punto[1] = r.oy + r.dy * t
   punto[2] = r.oz + r.dz * t
-  return Math.hypot(x - punto[0], y - punto[1], z - punto[2])
+  return largo3(x - punto[0], y - punto[1], z - punto[2])
 }
 
 /** Las fuerzas entre ellas por la grilla (cada par una vez) y los enlaces que se forman. */
@@ -221,8 +223,10 @@ export function entreEllas(b: Brasas, azar: () => number): void {
         const dx = lugar[j * 3] - lugar[i * 3]
         const dy = lugar[j * 3 + 1] - lugar[i * 3 + 1]
         const dz = lugar[j * 3 + 2] - lugar[i * 3 + 2]
-        const d = Math.hypot(dx, dy, dz)
-        if (d >= F.alcance || d < 1e-5) continue
+        // [PULIDO 18] Sin `Math.hypot` (asigna en cada llamada): el cuadrado primero; la raíz, sólo de las que están al alcance.
+        const d2 = dx * dx + dy * dy + dz * dz
+        if (d2 >= F.alcance * F.alcance || d2 < 1e-10) continue
+        const d = Math.sqrt(d2)
         const opuestas = signo[i] !== signo[j]
         const u = 1 - d / F.alcance
         let f = opuestas ? F.atrae * u : -F.repele * u

@@ -138,6 +138,19 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 - La cáscara, más que lineal con lo que se pasan: con todo a la vez (la mitad caliente, dos arcos, el puntero, el viento al tope
   sostenido 20 s) alguna se escapaba; ahora ninguna (s69), ningún NaN, la rapidez con su tope.
 
+### P1 · La basura de cada cuadro (la encontró la medición del mini-banco)
+- HECHO · MEDIDO en el mini-banco (la NVIDIA, sin vsync).
+- Midiendo el costo (ver «Medido») aparecieron cuadros sueltos de 100 a 300 ms con la GPU quieta, siempre después de unos 700 cuadros.
+  El heap de JS por cuadro (con la memoria precisa del Chrome) lo explicó: el plasma asignaba unos 400 KB por cuadro (la escena sola,
+  1,4) y en 5 s había más de 1700 recolecciones; el perfil de asignaciones (el muestreo del heap por CDP, contando lo ya recolectado)
+  señaló `Math.hypot`: en V8 asigna un arreglo por llamada (TurboFan no la reduce) y el bucle de las vecinas la llamaba decenas de
+  miles de veces por cuadro (las fuerzas entre ellas, el brillo por la densidad, lo de afuera, el movimiento).
+- Ahora `largo3` (`energia/largo.ts`: la raíz de la suma de los cuadrados) en los diez módulos del plasma, y en los dos bucles más
+  calientes, el cuadrado directo (la raíz sólo de las que están al alcance). Medido: de 378 a 16 KB por cuadro, de 1756 a 48
+  recolecciones en 5 s, y el cuadro sin vsync de 2,19 a 1,02 ms a 1440 (`Math.hypot` era además la mitad del costo de CPU del plasma).
+  s69 lo vigila (con su control positivo: el `Math.hypot` de vuelta en el bucle de las vecinas). Lo que queda (unos 9 KB por cuadro
+  del paso, un número por brasa, y lo de three) no vale la pena.
+
 ### P1 · Secuencias (noche, día, piso de cerca, logo bajando, puntero, clic, mantener-soltar; 1440 y 390)
 - PENDIENTE.
 

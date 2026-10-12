@@ -12,9 +12,14 @@ export function vecinasDe(b: Brasas, i: number, radio: number): number {
   const cy = celda(L[i * 3 + 1])
   const cz = celda(L[i * 3 + 2])
   let n = 0
+  const r2 = radio * radio
   for (let ax = Math.max(0, cx - 1); ax <= Math.min(LADO - 1, cx + 1); ax += 1) for (let ay = Math.max(0, cy - 1); ay <= Math.min(LADO - 1, cy + 1); ay += 1) for (let az = Math.max(0, cz - 1); az <= Math.min(LADO - 1, cz + 1); az += 1) {
     for (let j = b.cabeza[(ax * LADO + ay) * LADO + az]; j >= 0; j = b.siguiente[j]) {
-      if (j !== i && Math.hypot(L[j * 3] - L[i * 3], L[j * 3 + 1] - L[i * 3 + 1], L[j * 3 + 2] - L[i * 3 + 2]) < radio) n += 1
+      // [PULIDO 18] Por el cuadrado (sin `Math.hypot`, que asigna en cada llamada).
+      const dx = L[j * 3] - L[i * 3]
+      const dy = L[j * 3 + 1] - L[i * 3 + 1]
+      const dz = L[j * 3 + 2] - L[i * 3 + 2]
+      if (j !== i && dx * dx + dy * dy + dz * dz < r2) n += 1
     }
   }
   return n

@@ -1,4 +1,5 @@
 import { BRASAS, distanciaAlRayo, type Brasas, type EntradaDeLasBrasas } from './brasas'
+import { largo3 } from './largo'
 
 /**
  * [PULIDO 18] P1.e · EL MOVIMIENTO NUEVO DE CADA BRASA (`paso.ts` lo suma; todo estable y contenido, sin figuras):
@@ -38,7 +39,7 @@ export function delMovimiento(b: Brasas, i: number, en: EntradaDeLasBrasas, dt: 
     const qx = en.arcos[o] + abx * t - x
     const qy = en.arcos[o + 1] + aby * t - y
     const qz = en.arcos[o + 2] + abz * t - z
-    const d = Math.hypot(qx, qy, qz)
+    const d = largo3(qx, qy, qz)
     if (d >= P.radio || d < 1e-4) continue
     const w = (1 - d / P.radio) ** 2 * fuerza
     fx += (P.fuerza * w * qx) / d
@@ -48,7 +49,7 @@ export function delMovimiento(b: Brasas, i: number, en: EntradaDeLasBrasas, dt: 
   }
   // La estela del puntero: cerca de su rayo, la arrastra hacia la velocidad del puntero (sólo lo que el puntero se mueve).
   const r = en.rayo
-  const mueve = Math.min(1, Math.hypot(en.estela[0], en.estela[1], en.estela[2]) / S.desde)
+  const mueve = Math.min(1, largo3(en.estela[0], en.estela[1], en.estela[2]) / S.desde)
   if (r !== null && mueve > 0.01) {
     const d = distanciaAlRayo(x, y, z, r, PUNTO)
     if (d < S.radio) {

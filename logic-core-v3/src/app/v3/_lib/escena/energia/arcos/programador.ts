@@ -1,4 +1,5 @@
 import { distanciaAlRayo, type Brasas, type RayoDelPuntero } from '../brasas'
+import { largo3 } from '../largo'
 import { vecinasDe } from '../vecinas'
 import { encender, entre, lugarLibre, type ClaseDeArco, type EstadoDeLosArcos } from './arcos'
 
@@ -46,7 +47,7 @@ const seVeLaBrasa = (b: Brasas, i: number, en: EntornoDeLosArcos): boolean => en
 /** ¿Se ve el par (los dos extremos y el medio) y es corto? */
 function parQueSeVe(b: Brasas, i: number, j: number, en: EntornoDeLosArcos): boolean {
   const L = b.lugar
-  const d = Math.hypot(L[j * 3] - L[i * 3], L[j * 3 + 1] - L[i * 3 + 1], L[j * 3 + 2] - L[i * 3 + 2])
+  const d = largo3(L[j * 3] - L[i * 3], L[j * 3 + 1] - L[i * 3 + 1], L[j * 3 + 2] - L[i * 3 + 2])
   return d < PROGRAMA.alcances.par && seVeLaBrasa(b, i, en) && seVeLaBrasa(b, j, en) && en.seVe((L[i * 3] + L[j * 3]) / 2, (L[i * 3 + 1] + L[j * 3 + 1]) / 2, (L[i * 3 + 2] + L[j * 3 + 2]) / 2)
 }
 
@@ -54,7 +55,7 @@ function parQueSeVe(b: Brasas, i: number, j: number, en: EntornoDeLosArcos): boo
 function alAlcance(b: Brasas, p: Float32Array, alcance: number, cuantas: number, en: EntornoDeLosArcos, azar: () => number): number {
   let vistas = 0
   for (let i = 0; i < b.n; i += 1) {
-    const d = Math.hypot(b.lugar[i * 3] - p[0], b.lugar[i * 3 + 1] - p[1], b.lugar[i * 3 + 2] - p[2])
+    const d = largo3(b.lugar[i * 3] - p[0], b.lugar[i * 3 + 1] - p[1], b.lugar[i * 3 + 2] - p[2])
     if (d > alcance || d < 0.4 || !seVeLaBrasa(b, i, en)) continue
     vistas += 1
     if (vistas <= cuantas) ELEGIDAS[vistas - 1] = i
@@ -109,7 +110,7 @@ function descarga(e: EstadoDeLosArcos, b: Brasas, en: EntornoDeLosArcos, azar: (
   let densidad = -1
   for (let k = 0; k < 48; k += 1) {
     const i = Math.floor(azar() * b.n)
-    const d = Math.hypot(b.lugar[i * 3] - donde[0], b.lugar[i * 3 + 1] - donde[1], b.lugar[i * 3 + 2] - donde[2])
+    const d = largo3(b.lugar[i * 3] - donde[0], b.lugar[i * 3 + 1] - donde[1], b.lugar[i * 3 + 2] - donde[2])
     if (d > PROGRAMA.alcances.descarga || d < 1 || !seVeLaBrasa(b, i, en)) continue
     const v = vecinasDe(b, i, PROGRAMA.grupo) - d * 0.15
     if (v > densidad) {
@@ -117,7 +118,7 @@ function descarga(e: EstadoDeLosArcos, b: Brasas, en: EntornoDeLosArcos, azar: (
       densidad = v
     }
   }
-  const alLogo = en.bordeDelLogo(donde[0], donde[1], donde[2], PUNTO) && en.seVe(PUNTO[0], PUNTO[1], PUNTO[2]) && Math.hypot(PUNTO[0] - donde[0], PUNTO[1] - donde[1], PUNTO[2] - donde[2]) < PROGRAMA.alcances.descarga * 0.6
+  const alLogo = en.bordeDelLogo(donde[0], donde[1], donde[2], PUNTO) && en.seVe(PUNTO[0], PUNTO[1], PUNTO[2]) && largo3(PUNTO[0] - donde[0], PUNTO[1] - donde[1], PUNTO[2] - donde[2]) < PROGRAMA.alcances.descarga * 0.6
   const arco = lugarLibre(e, en.maximo, true)
   if (arco === null) return
   arco.puntoA.set(donde)
@@ -196,11 +197,11 @@ export function programarArcos(e: EstadoDeLosArcos, b: Brasas, dt: number, en: E
     let largo = Number.POSITIVE_INFINITY
     for (let intento = 0, vistas = 0; intento < b.n * 2 && vistas < PROGRAMA.candidatasDelLogo; intento += 1) {
       const i = Math.floor(azar() * b.n)
-      const d = Math.hypot(b.lugar[i * 3] - en.logo[0], b.lugar[i * 3 + 1] - en.logo[1], b.lugar[i * 3 + 2] - en.logo[2])
+      const d = largo3(b.lugar[i * 3] - en.logo[0], b.lugar[i * 3 + 1] - en.logo[1], b.lugar[i * 3 + 2] - en.logo[2])
       if (d > PROGRAMA.alcances.logo || !seVeLaBrasa(b, i, en)) continue
       vistas += 1
       if (!en.bordeDelLogo(b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2], BORDE) || !en.seVe(BORDE[0], BORDE[1], BORDE[2])) continue
-      const l = Math.hypot(b.lugar[i * 3] - BORDE[0], b.lugar[i * 3 + 1] - BORDE[1], b.lugar[i * 3 + 2] - BORDE[2])
+      const l = largo3(b.lugar[i * 3] - BORDE[0], b.lugar[i * 3 + 1] - BORDE[1], b.lugar[i * 3 + 2] - BORDE[2])
       if (l >= PROGRAMA.logoMinimo && l < largo) {
         mejor = i
         largo = l

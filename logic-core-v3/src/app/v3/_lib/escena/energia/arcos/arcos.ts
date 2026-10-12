@@ -1,4 +1,5 @@
 import type { Brasas } from '../brasas'
+import { largo3 } from '../largo'
 import { CAMINO, crearForma, temblar, trazar, type Forma } from './camino'
 
 /**
@@ -186,7 +187,7 @@ export function envejecer(e: EstadoDeLosArcos, brasas: Brasas, dt: number, azar:
       if (arco.dados > 0) {
         extremo(arco, brasas, true, A)
         extremo(arco, brasas, false, B)
-        temblar(arco.forma, Math.hypot(B[0] - A[0], B[1] - A[1], B[2] - A[2]), ARCOS.golpes.temblor, azar)
+        temblar(arco.forma, largo3(B[0] - A[0], B[1] - A[1], B[2] - A[2]), ARCOS.golpes.temblor, azar)
       }
       arco.dados += 1
       arco.nuevos += 1

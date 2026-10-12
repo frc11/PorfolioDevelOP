@@ -1,6 +1,7 @@
 import { DE_AFUERA, deAfuera } from './afuera'
 import { DEL_MOVIMIENTO, delMovimiento } from './movimiento'
 import { BRASAS, entreEllas, soltarEnlace, type Brasas, type EntradaDeLasBrasas } from './brasas'
+import { largo3 } from './largo'
 import { rotor } from './ruido'
 
 /**
@@ -26,7 +27,7 @@ export function pasoDeLasBrasas(b: Brasas, dt: number, en: EntradaDeLasBrasas, a
         const dx = lugar[j * 3] - lugar[i * 3]
         const dy = lugar[j * 3 + 1] - lugar[i * 3 + 1]
         const dz = lugar[j * 3 + 2] - lugar[i * 3 + 2]
-        const d = Math.max(1e-4, Math.hypot(dx, dy, dz))
+        const d = Math.max(1e-4, largo3(dx, dy, dz))
         const f = (E.resorte * (d - E.reposo)) / d
         fuerza[i * 3] += f * dx
         fuerza[i * 3 + 1] += f * dy
@@ -74,7 +75,7 @@ export function pasoDeLasBrasas(b: Brasas, dt: number, en: EntradaDeLasBrasas, a
     let vx = (v[i * 3] + fx * dt) * frena * roza
     let vy = (v[i * 3 + 1] + fy * dt) * frena
     let vz = (v[i * 3 + 2] + fz * dt) * frena * roza
-    const rap = Math.hypot(vx, vy, vz)
+    const rap = largo3(vx, vy, vz)
     if (rap > F.tope) {
       vx *= F.tope / rap
       vy *= F.tope / rap

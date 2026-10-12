@@ -13,6 +13,7 @@ import { pasoDelEnjambre } from './enjambre/enjambre'
 import { pasoDeLasBrasas } from './paso'
 import { brilloPorDensidad, calentarBrasa } from './vecinas'
 import { avanzar } from './interaccion/interaccion'
+import { largo3 } from './largo'
 
 /**
  * [PULIDO 17] O3 · UN CUADRO DE LA ENERGÍA (`docs/rediseno/PLASMA.md`). Lo que pasa afuera entra como temperatura (el scroll, las
@@ -161,7 +162,7 @@ function vientoEstelaYCanales(a: Armado, f: Afuera): void {
   const asienta = 1 - Math.exp(-f.dt / W.asienta)
   const cam = f.camara.position
   const k = a.camaraAntes
-  const corre = Math.hypot(cam.x - k.x, cam.y - k.y, cam.z - k.z)
+  const corre = largo3(cam.x - k.x, cam.y - k.y, cam.z - k.z)
   const fuerza = Math.min(W.tope, W.escala * Math.abs(a.lectura.velocidad) * (1 + W.caliente * a.temperatura.valor))
   for (let e = 0; e < 3; e += 1) {
     const hacia = Number.isFinite(corre) && corre > 1e-5 ? -(cam.getComponent(e) - k.getComponent(e)) / corre : 0

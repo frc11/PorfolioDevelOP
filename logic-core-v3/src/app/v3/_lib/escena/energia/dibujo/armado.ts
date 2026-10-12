@@ -9,6 +9,7 @@ import { crearLectura, crearTemperatura, type Lectura, type Temperatura } from '
 import { DIRECCIONES, type Direccion } from '../direcciones'
 import { crearEnjambre, soltarEnjambre, type Enjambre } from '../enjambre/enjambre'
 import { crearPuntero, type EstadoDelPuntero } from '../interaccion/interaccion'
+import { largo3 } from '../largo'
 import { FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, VERTICES_DEL_HALO_DEL_ARCO, VERTICES_DE_LOS_ARCOS, uniformesDelTrazo } from './arcos'
 import { DIBUJO, materialDeEnergia, uniformesComunes, type UniformesComunes } from './comun'
 import { EFECTOS, FRAGMENTOS_DE_LOS_EFECTOS, VERTICES_DE_LOS_EFECTOS } from './efectos'
@@ -180,7 +181,7 @@ export function armar(direccion: Direccion, compacto: boolean, vista: { readonly
       const pos = malla.geometry.getAttribute('position')
       if (!(pos instanceof THREE.BufferAttribute) || pos.count === 0) continue
       v.fromBufferAttribute(pos, Math.floor(azar() * pos.count)).applyMatrix4(malla.matrixWorld)
-      const dd = Math.hypot(v.x - x, v.y - y, v.z - z)
+      const dd = largo3(v.x - x, v.y - y, v.z - z)
       if (dd < mejor) {
         mejor = dd
         destino[0] = v.x

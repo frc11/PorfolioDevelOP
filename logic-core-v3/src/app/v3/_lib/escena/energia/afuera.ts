@@ -1,4 +1,5 @@
 import { BRASAS, distanciaAlRayo, soltarEnlace, type Brasas, type EntradaDeLasBrasas } from './brasas'
+import { largo3 } from './largo'
 
 /**
  * [PULIDO 18] P1.b · LO DE AFUERA DE CADA BRASA (salió de `brasas.ts`, que pasaba las 300 líneas; `paso.ts` lo suma): el puntero (atrae
@@ -53,7 +54,7 @@ export function deAfuera(b: Brasas, i: number, en: EntradaDeLasBrasas, dt: numbe
     const dx = x - en.pulsos[k * 4]
     const dy = y - en.pulsos[k * 4 + 1]
     const dz = z - en.pulsos[k * 4 + 2]
-    const d = Math.max(1e-4, Math.hypot(dx, dy, dz))
+    const d = Math.max(1e-4, largo3(dx, dy, dz))
     const w = 1 - Math.abs(d - O.rapidez * edad) / O.ancho
     if (w <= 0) continue
     // El frente tarda `ancho / rapidez` en pasar: en ese rato deja `empuje` de velocidad y `calienta` de energía.
@@ -69,7 +70,7 @@ export function deAfuera(b: Brasas, i: number, en: EntradaDeLasBrasas, dt: numbe
   const lx = x - en.logo[0]
   const ly = y - en.logo[1]
   const lz = z - en.logo[2]
-  const delLogo = Math.hypot(lx, ly, lz)
+  const delLogo = largo3(lx, ly, lz)
   for (let k = 0; k < 4; k += 1) {
     const fuerte = en.anillos[k * 2 + 1]
     if (fuerte <= 0) continue
@@ -83,7 +84,7 @@ export function deAfuera(b: Brasas, i: number, en: EntradaDeLasBrasas, dt: numbe
   fz += tiembla * (azar() * 2 - 1)
   // La cáscara (del mundo, alrededor del origen: no sigue al logo): afuera del radio vuelven. [PULIDO 18] P1.e · más que lineal con lo
   // que se pasan (con el viento al tope sostenido y todo a la vez, alguna se escapaba): contenida siempre.
-  const lejos = Math.hypot(x, y, z)
+  const lejos = largo3(x, y, z)
   if (lejos > radio) {
     const vuelve = F.contiene * (lejos - radio) * (1 + (lejos - radio))
     fx -= (vuelve * x) / lejos

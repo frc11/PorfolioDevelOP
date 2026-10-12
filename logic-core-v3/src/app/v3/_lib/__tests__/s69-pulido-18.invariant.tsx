@@ -26,6 +26,7 @@ import { TRAZO } from '../escena/energia/dibujo/arcos'
 import { ORDEN_DE_LA_ENERGIA } from '../escena/energia/dibujo/armado'
 import { ASPECTO } from '../escena/energia/dibujo/particulas'
 import { DIRECCIONES, DIRECCION_RECOMENDADA, direccionDe } from '../escena/energia/direcciones'
+import { largo3 } from '../escena/energia/largo'
 import { AJUSTES_DEL_ENJAMBRE, SIMULACION_DEL_ENJAMBRE_GLSL } from '../escena/energia/enjambre/simulacion'
 import { DEL_MOVIMIENTO, delMovimiento } from '../escena/energia/movimiento'
 import { pasoDeLasBrasas } from '../escena/energia/paso'
@@ -280,6 +281,15 @@ const POR_CUADRO_P1: readonly (readonly [string, string])[] = [['energia/movimie
 const reservasBien = (f: Record<string, string>): boolean => POR_CUADRO_P1.every(([m, fn]) => sinReservasEn(f[m] ?? '', fn))
 afirmar(reservasBien(fuentes), `  ${String(POR_CUADRO_P1.length)} funciones de cada cuadro sin crear objetos, arreglos ni funciones`, POR_CUADRO_P1.filter(([m, fn]) => !sinReservasEn(fuentes[m] ?? '', fn)).map(([m, fn]) => `${m}:${fn}`).join(' · '))
 controlPositivo('  el detector VE una reserva en el movimiento', { ...fuentes, 'energia/movimiento.ts': (fuentes['energia/movimiento.ts'] ?? '').replace('  let fx = 0\n', '  const tmp = new Float32Array(3)\n  let fx = tmp[0]\n') }, reservasBien)
+// La reserva escondida: `Math.hypot` asigna en V8 (un arreglo por llamada; TurboFan no la reduce). En el bucle de las vecinas era casi
+// toda la basura del plasma (unos 400 KB por cuadro, recolecciones de hasta 300 ms en el mini-banco); ahora `largo3` (energia/largo.ts).
+const CALIENTES = ['brasas.ts', 'vecinas.ts', 'paso.ts', 'afuera.ts', 'movimiento.ts', 'cuadro.ts', 'arcos/arcos.ts', 'arcos/camino.ts', 'arcos/programador.ts', 'dibujo/armado.ts'] as const
+const delPlasma = Object.fromEntries(CALIENTES.map((m) => [m, leer(`_lib/escena/energia/${m}`)])) as Record<string, string>
+const codigoSolo = (t: string): string => t.split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n')
+const sinHypotBien = (f: Record<string, string>): boolean => CALIENTES.every((m) => !codigoSolo(f[m] ?? 'Math.hypot(').includes('Math.hypot(')) &&
+  sinReservasEn(f['brasas.ts'] ?? '', 'entreEllas') && sinReservasEn(f['vecinas.ts'] ?? '', 'vecinasDe') && Math.abs(largo3(3, 4, 12) - 13) < 1e-12
+afirmar(sinHypotBien(delPlasma), `  sin Math.hypot en lo de cada cuadro del plasma (${String(CALIENTES.length)} módulos; la basura por cuadro bajó de ~400 KB a ~16 KB en el mini-banco)`)
+controlPositivo('  el detector VE el Math.hypot de vuelta en el bucle de las vecinas', { ...delPlasma, 'brasas.ts': (delPlasma['brasas.ts'] ?? '').replace('const d = Math.sqrt(d2)', 'const d = Math.hypot(dx, dy, dz)') }, sinHypotBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('P2 · La dimensión espejo: `?espejo=`, sus disparos y el prisma; en el fondo, nunca sobre el logo ni los textos; se cura')

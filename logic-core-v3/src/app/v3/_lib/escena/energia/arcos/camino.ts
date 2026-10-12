@@ -1,3 +1,5 @@
+import { largo3 } from '../largo'
+
 /**
  * [PULIDO 17] O3 · EL CAMINO DE UN ARCO (`docs/rediseno/PLASMA.md`): el de PULIDO 15, que gustó. El desplazamiento de punto medio:
  * cada nivel corre el medio de cada tramo hacia un costado (sobre todo de costado en la pantalla; un poco en profundidad), cada vez
@@ -51,7 +53,7 @@ const EJE = new Float32Array(3)
 const VISTA = new Float32Array(3)
 
 function normalizar(v: Float32Array): void {
-  const l = Math.hypot(v[0], v[1], v[2]) || 1
+  const l = largo3(v[0], v[1], v[2]) || 1
   v[0] /= l
   v[1] /= l
   v[2] /= l
@@ -97,7 +99,7 @@ export function trazar(f: Forma, a: ArrayLike<number>, b: ArrayLike<number>, cam
     EJE[e] = b[e] - a[e]
     VISTA[e] = (a[e] + b[e]) / 2 - camara[e]
   }
-  const largo = Math.hypot(EJE[0], EJE[1], EJE[2]) || 1e-3
+  const largo = largo3(EJE[0], EJE[1], EJE[2]) || 1e-3
   costados(EJE)
   puntoMedio(f.desvios, 0, TRAMOS_DEL_CAMINO, largo, azar)
   f.ramas = Math.min(ramas, CAMINO.ramas.maximo)
