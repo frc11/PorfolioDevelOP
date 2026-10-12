@@ -1,9 +1,8 @@
 import * as THREE from 'three'
 
 import { COLOR_DE_LA_ESCENA_GLSL, PROFUNDIDAD_GLSL } from '../../pase/pase'
-import { ENJAMBRE } from '../enjambre/simulacion'
 import { RUIDO_GLSL } from '../ruido'
-import { AL_TONO, COMUN, f } from './comun'
+import { AL_TONO, COMUN } from './comun'
 
 /**
  * [PULIDO 17] O3 · CÓMO SE VE UNA PARTÍCULA DE ENERGÍA (`docs/rediseno/PLASMA.md`). Ninguna figura: un núcleo con caída gaussiana y
@@ -15,8 +14,8 @@ import { AL_TONO, COMUN, f } from './comun'
  * grafito muy translúcido y ancho (no una mota) y, sólo en las calientes, un destello blanco de un punto. Todo lo que se ajusta va en
  * uniformes (el banco las cambia en vivo: `banco.ts`, `ajustar`); `ASPECTO` son los valores de cada estilo.
  */
-// [PULIDO 18] P1.0 · el estilo `estela` se borró con C (la estela por la velocidad sigue: `uMovida.x`).
-export type Estilo = 'chispa' | 'mota'
+// [PULIDO 18] P1.0 · el estilo `estela` se borró con C (la estela por la velocidad sigue: `uMovida.x`). [PULIDO 19] Q0 · y `mota` con B.
+export type Estilo = 'chispa'
 export type NombreDelAspecto = 'uTamano' | 'uLuz' | 'uDia' | 'uDiaForma' | 'uMovida' | 'uFuente' | 'uDestello' | 'uDelante' | 'uChispa' | 'uCalorDia' | 'uNucleo'
 export const NOMBRES_DEL_ASPECTO: readonly NombreDelAspecto[] = ['uTamano', 'uLuz', 'uDia', 'uDiaForma', 'uMovida', 'uFuente', 'uDestello', 'uDelante', 'uChispa', 'uCalorDia', 'uNucleo']
 
@@ -50,19 +49,6 @@ export const ASPECTO: Readonly<Record<Estilo, Readonly<Record<NombreDelAspecto, 
     // [PULIDO 18] P1.d · el tope del radio del núcleo (px): chico y nítido siempre; el tamaño de la chispa lo lleva su halo corto.
     uNucleo: [1.3, 0, 0, 0],
   },
-  mota: {
-    uTamano: [0.012, 0.04, 0.6, 4],
-    uLuz: [0.7, 0.08, 0.3, 2.5],
-    uDia: [0.03, 0, 0.08, 0.55],
-    uDiaForma: [2.2, 3, 0, 0],
-    uMovida: [0.02, 1, 0.4, 7],
-    uFuente: [5.5, 0.85, 0.75, 0.25],
-    uDestello: [0.04, 0.6, 2.6, 0.12],
-    uDelante: [0.7, 3.6, 1.1, 0],
-    uChispa: [1.4, 1, 0, 0],
-    uCalorDia: [0, 0, 0, 2],
-    uNucleo: [99, 0, 0, 0],
-  },
 }
 
 /** Las uniformes del aspecto de un estilo (objetos propios de su malla: el banco las ajusta). */
@@ -73,7 +59,7 @@ export function uniformesDelAspecto(estilo: Estilo): Record<NombreDelAspecto, { 
 }
 
 /** De día, el destello blanco en reposo: ninguna (con el punto claro en reposo, la energía oscura se leía como ojos; sobre el logo, como rayones). Sólo calientes. */
-export const CLARO_EN_REPOSO: Readonly<Record<Estilo, number>> = { chispa: 0, mota: 0 }
+export const CLARO_EN_REPOSO: Readonly<Record<Estilo, number>> = { chispa: 0 }
 
 export const ASPECTO_GLSL = /* glsl */ `
 uniform vec4 uNucleo;
@@ -115,13 +101,16 @@ float brilloPropio( uint id ) {
 }
 `
 
-function vertices(desdeTextura: boolean, idDesde: number): string {
+function vertices(): string {
   return /* glsl */ `
 ${COMUN}
 ${RUIDO_GLSL}
 ${ASPECTO_GLSL}
 ${CHISPA_GLSL}
-${desdeTextura ? 'uniform sampler2D uLugares;\nuniform sampler2D uVelocidades;\nuniform float uLado;' : 'attribute vec3 aLugar;\nattribute vec3 aVelocidad;\nattribute float aEnergia;\nattribute float aBrillo;'}
+attribute vec3 aLugar;
+attribute vec3 aVelocidad;
+attribute float aEnergia;
+attribute float aBrillo;
 varying vec2 vLocal;
 varying float vLargo;
 varying float vRadioPx;
@@ -133,20 +122,11 @@ varying float vSuave;
 varying float vCruz;
 varying float vCalor;
 void main() {
-	uint id = uint( gl_InstanceID ) + ${String(idDesde)}u;
-${desdeTextura
-    ? `	ivec2 t = ivec2( gl_InstanceID % int( uLado ), gl_InstanceID / int( uLado ) );
-	vec4 L = texelFetch( uLugares, t, 0 );
-	vec4 V = texelFetch( uVelocidades, t, 0 );
-	vec3 p = L.xyz;
-	float e = L.w;
-	vec3 vel = V.xyz;
-	float vida = ${f(ENJAMBRE.vida[0])} + ${f(ENJAMBRE.vida[1] - ENJAMBRE.vida[0])} * azar01( uint( gl_InstanceID ), 7u );
-	float fundido = smoothstep( 0.0, 0.8, V.w ) * smoothstep( vida, vida - 1.2, V.w );`
-    : `	vec3 p = aLugar;
+	uint id = uint( gl_InstanceID );
+	vec3 p = aLugar;
 	float e = aEnergia;
 	vec3 vel = aVelocidad;
-	float fundido = aBrillo;`}
+	float fundido = aBrillo;
 	float signo = gl_InstanceID % 2 == 0 ? 1.0 : - 1.0;
 	// El titileo y los destellos (lo propio de cada chispa: brillar).
 	vec2 suyo = brillar( id, e, signo );
@@ -295,7 +275,7 @@ void main() {
 }
 `
 
-/** Los sombreadores de las partículas, leídas de atributos (las brasas, en la CPU) o de la textura del enjambre. */
-export function sombreadoresDeParticulas(desdeTextura: boolean, idDesde = 0): { readonly vertexShader: string; readonly fragmentShader: string } {
-  return { vertexShader: vertices(desdeTextura, idDesde), fragmentShader: FRAGMENTOS }
+/** Los sombreadores de las partículas, leídas de atributos (las brasas, en la CPU). [PULIDO 19] Q0 · la textura del enjambre se fue con B. */
+export function sombreadoresDeParticulas(): { readonly vertexShader: string; readonly fragmentShader: string } {
+  return { vertexShader: vertices(), fragmentShader: FRAGMENTOS }
 }

@@ -4,7 +4,7 @@
  * Cada cosa con su control positivo (el detector ve el estado de antes). Los recibos medidos, en `docs/rediseno/entregas/pulido-18/`;
  * el log, `docs/rediseno/SPRINT-PULIDO-18.md`.
  *   P1.0 · el plasma A es el producto (sin bandera); `?energia=polvo`, el polvo de antes en su lugar; `?energia=plasma-y-polvo`, los
- *          dos; C se borró con su código y no vuelve; B se queda en su bandera (`?plasma=b`).
+ *          dos; C se borró con su código y no vuelve; B se quedó en su bandera (`?plasma=b`) hasta PULIDO 19, que la borró (Q0).
  *   P1.b · independientes del logo: viven en el MUNDO (la cáscara, quieta alrededor del lugar de reposo del logo); el logo es un
  *          obstáculo donde esté (su hueco), la fuente de sus ondas y de sus arcos.
  *   P1.a · el piso, un límite real (un mínimo, un colchón, el roce); las partículas y los arcos blandos (la profundidad del pase
@@ -16,7 +16,7 @@
  *   P2 · la dimensión espejo (`?espejo=`): las banderas, los disparos (raro y lento; mantener después del gesto del plasma), sólo el
  *        fondo (nunca el logo, los títulos ni los textos), se cura, el pliegue es la identidad en cero, los ecos no tocan el logo.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import * as THREE from 'three'
 
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
@@ -25,9 +25,8 @@ import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas } from '..
 import { TRAZO } from '../escena/energia/dibujo/arcos'
 import { ORDEN_DE_LA_ENERGIA } from '../escena/energia/dibujo/armado'
 import { ASPECTO } from '../escena/energia/dibujo/particulas'
-import { DIRECCIONES, DIRECCION_RECOMENDADA, direccionDe } from '../escena/energia/direcciones'
+import { DIRECCIONES, DIRECCION_RECOMENDADA } from '../escena/energia/direcciones'
 import { largo3 } from '../escena/energia/largo'
-import { AJUSTES_DEL_ENJAMBRE, SIMULACION_DEL_ENJAMBRE_GLSL } from '../escena/energia/enjambre/simulacion'
 import { DEL_MOVIMIENTO, delMovimiento } from '../escena/energia/movimiento'
 import { pasoDeLasBrasas } from '../escena/energia/paso'
 import { ECOS } from '../escena/espejo/ecos'
@@ -46,38 +45,39 @@ titulo('P1.0 · El plasma A es el producto; `?energia=polvo`, el polvo de antes;
 type Traductor = typeof entornoPedido
 const STAGE = leer('_lib/escena/ProbeStage.tsx')
 /** Lo que el escenario monta con un pedido: las dos condiciones, tal como están escritas en el escenario. */
-interface Montado { readonly polvo: boolean; readonly plasma: boolean; readonly direccion: string }
-const LAS_CONDICIONES = ["const conPolvo = energia !== 'no'", "const conPlasma = energia !== 'polvo'", '{conPolvo && <DepthParticles store={store} />}', '{conPolvo && <BokehParticles />}', "{conPlasma && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} direccion={direccionDe(plasma)} />}"] as const
+interface Montado { readonly polvo: boolean; readonly plasma: boolean }
+const LAS_CONDICIONES = ["const conPolvo = energia !== 'no'", "const conPlasma = energia !== 'polvo'", '{conPolvo && <DepthParticles store={store} />}', '{conPolvo && <BokehParticles />}', "{conPlasma && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} />}"] as const
 const montado = (f: Traductor, pedido: string): Montado => {
-  const { energia, plasma } = f(pedido).pruebas
-  return { polvo: energia !== 'no', plasma: energia !== 'polvo', direccion: direccionDe(plasma) }
+  const { energia } = f(pedido).pruebas
+  return { polvo: energia !== 'no', plasma: energia !== 'polvo' }
 }
 const desdeLaUrl = (f: Traductor, url: string): Montado => montado(f, pedidoDeLaUrl(url) ?? 'producto')
 const productoBien = (f: Traductor, stage: string): boolean => {
-  const igual = (m: Montado, polvo: boolean, plasma: boolean, direccion: string): boolean => m.polvo === polvo && m.plasma === plasma && m.direccion === direccion
-  return LAS_CONDICIONES.every((c) => stage.includes(c)) && !stage.includes('sinPolvo') &&
-    igual(montado(f, 'producto'), false, true, 'a') && ENTORNO.pruebas.energia === 'no' && BASE_LIMPIA.pruebas.energia === 'no' &&
-    igual(desdeLaUrl(f, '?energia=polvo'), true, false, 'a') && igual(desdeLaUrl(f, '?energia=plasma-y-polvo'), true, true, 'a') &&
-    igual(desdeLaUrl(f, '?energia=plasma'), false, true, 'a') && igual(desdeLaUrl(f, '?plasma=b'), false, true, 'b') &&
-    igual(desdeLaUrl(f, '?energia=plasma-y-polvo&plasma=b'), true, true, 'b') && igual(desdeLaUrl(f, '?plasma=c'), false, true, 'a') &&
-    igual(desdeLaUrl(f, '?energia=cualquiera'), false, true, 'a') && PRUEBAS_SUELTAS.includes('energia') && PRUEBAS_SUELTAS.includes('plasma')
+  // [PULIDO 19] Q0 · `?plasma=b` elegía B; ahora `?plasma=` no es una prueba (se ignora: el producto). POR QUÉ: B se borró (la decisión del humano).
+  const igual = (m: Montado, polvo: boolean, plasma: boolean): boolean => m.polvo === polvo && m.plasma === plasma
+  return LAS_CONDICIONES.every((c) => stage.includes(c)) && !stage.includes('sinPolvo') && !stage.includes('direccionDe(') &&
+    igual(montado(f, 'producto'), false, true) && ENTORNO.pruebas.energia === 'no' && BASE_LIMPIA.pruebas.energia === 'no' &&
+    igual(desdeLaUrl(f, '?energia=polvo'), true, false) && igual(desdeLaUrl(f, '?energia=plasma-y-polvo'), true, true) &&
+    igual(desdeLaUrl(f, '?energia=plasma'), false, true) && igual(desdeLaUrl(f, '?plasma=b'), false, true) && !('plasma' in f(pedidoDeLaUrl('?plasma=b') ?? 'producto').pruebas) &&
+    igual(desdeLaUrl(f, '?energia=plasma-y-polvo&plasma=b'), true, true) && igual(desdeLaUrl(f, '?plasma=c'), false, true) &&
+    igual(desdeLaUrl(f, '?energia=cualquiera'), false, true) && PRUEBAS_SUELTAS.includes('energia') && !(PRUEBAS_SUELTAS as readonly string[]).includes('plasma')
 }
-afirmar(productoBien(entornoPedido, STAGE), '  sin pedir nada, el plasma A (y nada del polvo); `?energia=polvo`, sólo el polvo de antes; `?energia=plasma-y-polvo`, los dos; `?energia=plasma` (la de antes), el producto; `?plasma=b`, B; `?plasma=c`, A (C no existe)')
+afirmar(productoBien(entornoPedido, STAGE), '  sin pedir nada, el plasma A (y nada del polvo); `?energia=polvo`, sólo el polvo de antes; `?energia=plasma-y-polvo`, los dos; `?energia=plasma` (la de antes), el producto; `?plasma=b` o `=c`, el producto (ni B ni C existen)')
 controlPositivo('  el detector VE el escenario de PULIDO 17 (sin bandera, el polvo)', STAGE.replace("const conPolvo = energia !== 'no'", "const sinPolvo = energia === 'plasma'"), (s: string) => productoBien(entornoPedido, s))
 controlPositivo('  y un traductor que todavía conoce `energia=plasma` (el plasma pedido, no el producto)', ((p: string) => {
   const e = entornoPedido(p)
   return p.includes('energia=plasma') && !p.includes('plasma-y-polvo') ? { ...e, pruebas: { ...e.pruebas, energia: 'polvo' as const } } : e
 }) as Traductor, (f: Traductor) => productoBien(f, STAGE))
 
-// C se borró con su código: ni la dirección, ni su estilo de partícula, ni la superficie del logo en la simulación del enjambre.
-const SIMULACION = leer('_lib/escena/energia/enjambre/simulacion.ts')
-const sinC = (direcciones: Readonly<Record<string, unknown>>, aspecto: Readonly<Record<string, unknown>>, ajustes: Readonly<Record<string, unknown>>, glsl: string): boolean =>
-  !('c' in direcciones) && !('estela' in aspecto) && !('uSuperficie' in ajustes) && !/uSuperficie|nacerEnElLogo|nacerDonde|uniform mat4 uLogo;/.test(glsl) &&
-  DIRECCION_RECOMENDADA === 'a' && 'b' in direcciones
-afirmar(sinC(DIRECCIONES, ASPECTO, AJUSTES_DEL_ENJAMBRE, SIMULACION_DEL_ENJAMBRE_GLSL + SIMULACION), '  C no existe: ni la dirección, ni la estela como estilo, ni la superficie del logo ni el nacer en ella; queda B (su bandera) y A es la del producto')
-controlPositivo('  el detector VE a C de vuelta (la dirección)', { ...DIRECCIONES, c: DIRECCIONES.b }, (d: Readonly<Record<string, unknown>>) => sinC(d, ASPECTO, AJUSTES_DEL_ENJAMBRE, SIMULACION_DEL_ENJAMBRE_GLSL))
-controlPositivo('  y su superficie en la simulación', `${SIMULACION_DEL_ENJAMBRE_GLSL}\nuniform vec4 uSuperficie;`, (g: string) => sinC(DIRECCIONES, ASPECTO, AJUSTES_DEL_ENJAMBRE, g))
-controlPositivo('  y su estilo', { ...ASPECTO, estela: ASPECTO.mota }, (a: Readonly<Record<string, unknown>>) => sinC(DIRECCIONES, a, AJUSTES_DEL_ENJAMBRE, SIMULACION_DEL_ENJAMBRE_GLSL))
+// C se borró con su código (PULIDO 18); [PULIDO 19] Q0 · B también (el enjambre en la GPU, su simulación y su estilo `mota`): ANTES «queda B
+// (su bandera)»; AHORA ni B ni C, sólo A; POR QUÉ: la decisión del humano (el cristal la reemplaza).
+const HAY_ENJAMBRE = existsSync(`${V3}/_lib/escena/energia/enjambre`)
+const sinBNiC = (direcciones: Readonly<Record<string, unknown>>, aspecto: Readonly<Record<string, unknown>>, hayEnjambre: boolean): boolean =>
+  !('b' in direcciones) && !('c' in direcciones) && !('estela' in aspecto) && !('mota' in aspecto) && !hayEnjambre && DIRECCION_RECOMENDADA === 'a' && 'a' in direcciones
+afirmar(sinBNiC(DIRECCIONES, ASPECTO, HAY_ENJAMBRE), '  ni B ni C existen: sólo A (la del producto); ni la estela ni la mota como estilos; sin la carpeta del enjambre')
+controlPositivo('  el detector VE a B de vuelta (la dirección)', { ...DIRECCIONES, b: DIRECCIONES.a }, (d: Readonly<Record<string, unknown>>) => sinBNiC(d, ASPECTO, HAY_ENJAMBRE))
+controlPositivo('  y la carpeta del enjambre', true, (h: boolean) => sinBNiC(DIRECCIONES, ASPECTO, h))
+controlPositivo('  y su estilo', { ...ASPECTO, mota: ASPECTO.chispa }, (a: Readonly<Record<string, unknown>>) => sinBNiC(DIRECCIONES, a, HAY_ENJAMBRE))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('P1.b · Independientes del logo: viven en el MUNDO; el logo es un obstáculo, una fuente y el origen de sus arcos')
@@ -141,12 +141,12 @@ afirmar(desdeElLogo(uno), '  la cresta de la onda del logo calienta a 2 u del LO
 controlPositivo('  el detector VE las ondas y el hueco medidos desde el origen (el de antes)', (_logoY: number, y: number) => uno(0, y), desdeElLogo)
 
 // Los sombreadores y el cuadro, en el mundo: ninguno le suma el centro del logo a una posición; el piso es el del mundo.
-const ENERGIA_SRC = ['dibujo/particulas.ts', 'dibujo/arcos.ts', 'dibujo/efectos.ts', 'enjambre/simulacion.ts', 'cuadro.ts', 'PlasmaYCargas.tsx', 'dibujo/armado.ts', 'banco.ts'].map((m) => leer(`_lib/escena/energia/${m}`)).join('\n')
+const ENERGIA_SRC = ['dibujo/particulas.ts', 'dibujo/arcos.ts', 'dibujo/efectos.ts', 'cuadro.ts', 'PlasmaYCargas.tsx', 'dibujo/armado.ts', 'banco.ts'].map((m) => leer(`_lib/escena/energia/${m}`)).join('\n')
 const enElMundo = (src: string): boolean =>
   !/uCentro \+ (p|aPunto|aAntes|aDespues|aLugar)\b/.test(src) && !/centro\.[xyz]\)?\.project|- a\.centro\.[xyz]|\+ a\.centro\.[xyz]|\.sub\(centro\)/.test(src) &&
   src.includes('vec4 mv = viewMatrix * vec4( p, 1.0 );') && src.includes('f.piso = FLOOR_Y + 0.02') && src.includes('r.ox = camara.position.x') &&
-  src.includes('float lejos = length( p - uCentro ) / uFuente.x;') && src.includes('vec3 q = ( uLogoInverso * vec4( p, 1.0 ) ).xyz;')
-afirmar(enElMundo(ENERGIA_SRC), '  las partículas, los arcos, los efectos y el enjambre se dibujan donde están (sin sumarles el logo); la fuente y la cara del logo se miden desde el logo')
+  src.includes('float lejos = length( p - uCentro ) / uFuente.x;')
+afirmar(enElMundo(ENERGIA_SRC), '  las partículas, los arcos y los efectos se dibujan donde están (sin sumarles el logo); la fuente y la cara del logo se miden desde el logo')
 controlPositivo('  el detector VE el sombreador de antes (la partícula en las coordenadas del logo)', ENERGIA_SRC.replace('vec4 mv = viewMatrix * vec4( p, 1.0 );', 'vec4 mv = viewMatrix * vec4( uCentro + p, 1.0 );'), enElMundo)
 controlPositivo('  y el piso relativo al logo', ENERGIA_SRC.replace('f.piso = FLOOR_Y + 0.02', 'f.piso = FLOOR_Y - a.centro.y + 0.02'), enElMundo)
 

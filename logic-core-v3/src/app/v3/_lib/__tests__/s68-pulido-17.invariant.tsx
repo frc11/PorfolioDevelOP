@@ -25,7 +25,7 @@ import { PROGRAMA, programarArcos, type EntornoDeLosArcos } from '../escena/ener
 import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas } from '../escena/energia/brasas'
 import { pasoDeLasBrasas } from '../escena/energia/paso'
 import { TEMPERATURA, calentar, crearTemperatura, pasoDeLaTemperatura } from '../escena/energia/calor'
-import { DIRECCIONES, DIRECCION_RECOMENDADA, direccionDe } from '../escena/energia/direcciones'
+import { DIRECCIONES, DIRECCION_RECOMENDADA } from '../escena/energia/direcciones'
 import { RUIDO, RUIDO_GLSL, mezclar, rotor, ruidoConGradiente } from '../escena/energia/ruido'
 import { brilloPorDensidad, cuantosEnlaces } from '../escena/energia/vecinas'
 import { SONIDOS } from '../sonido/catalogo'
@@ -70,27 +70,24 @@ controlPositivo('  y la chispa en el sprite', { ...CORTES_DEL_SPRITE, chispa: [1
 controlPositivo('  y el color de vuelta (la bandera)', [...PRUEBAS_SUELTAS, 'plasma-color'], (s: readonly string[]) => sinLoDe16(existsSync, entornoPedido, s, CORTES_DEL_SPRITE, SONIDOS))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('O3 · Las direcciones (`?plasma=a|b`; C se borró en PULIDO 18); [PULIDO 18] el producto, A')
+titulo('O3 · Las direcciones: [PULIDO 18] el producto, A; C se borró; [PULIDO 19] B se borró con su código y `?plasma=` con ella')
 
-// [PULIDO 18] P1.0 · ANTES: tres direcciones (`plasma=a|b|c`) sobre `energia=plasma` (pedida sola, montaba el plasma en lugar del
-// polvo); en el producto, el polvo. AHORA: el plasma A es el producto (sin bandera); `plasma=b` elige B; C se borró con su código
-// (`plasma=c` se lee como sin bandera); `energia=polvo`, el polvo de antes; `plasma-y-polvo`, los dos. POR QUÉ: la decisión del humano
-// («A gana; C se borra»). Lo demás se afirma igual (el escenario le pasa la dirección; el producto no trae la prueba). s69 lo sigue.
+// [PULIDO 18] P1.0 · ANTES: tres direcciones (`plasma=a|b|c`) sobre `energia=plasma`; en el producto, el polvo. DESPUÉS: el plasma A es
+// el producto (sin bandera); `plasma=b` elegía B; C se borró. [PULIDO 19] Q0 · AHORA: sólo A (B se borró con su enjambre, su simulación y
+// su estilo; `?plasma=` ya no es una prueba: se ignora). POR QUÉ: la decisión del humano (el cristal de la dimensión espejo reemplaza a
+// B). Lo demás se afirma igual (el escenario monta el plasma sin pedir nada y el polvo con `energia=`). s69 lo sigue.
 const STAGE = leer('_lib/escena/ProbeStage.tsx')
 const direccionesBien = (f: Traductor, stage: string): boolean =>
-  f('producto').pruebas.plasma === 'no' && f('producto').pruebas.energia === 'no' && ENTORNO.pruebas.plasma === 'no' &&
-  (['a', 'b'] as const).every((d) => f(`producto,plasma=${d}`).pruebas.plasma === d && f(`producto,plasma=${d}`).pruebas.energia === 'no' && f(`producto,energia=plasma-y-polvo,plasma=${d}`).pruebas.energia === 'plasma-y-polvo') &&
-  f('producto,plasma=c').pruebas.plasma === 'no' && f('producto,plasma=d').pruebas.plasma === 'no' && f('producto,plasma=d').pruebas.energia === 'no' && PRUEBAS_SUELTAS.includes('plasma') &&
-  stage.includes('{conPlasma && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === \'compacta\'} direccion={direccionDe(plasma)} />}') &&
+  f('producto').pruebas.energia === 'no' && !('plasma' in f('producto').pruebas) && !('plasma' in ENTORNO.pruebas) && !(PRUEBAS_SUELTAS as readonly string[]).includes('plasma') &&
+  f('producto,plasma=b').pruebas.energia === 'no' && f('producto,energia=plasma-y-polvo,plasma=b').pruebas.energia === 'plasma-y-polvo' && !('plasma' in f('producto,plasma=b').pruebas) &&
+  stage.includes("{conPlasma && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} />}") && !stage.includes('direccionDe(') &&
   stage.includes("const conPlasma = energia !== 'polvo'") && stage.includes("const conPolvo = energia !== 'no'") && stage.includes('{conPolvo && <DepthParticles store={store} />}')
-afirmar(direccionesBien(entornoPedido, STAGE), '  `?plasma=a|b` elige la dirección; sin la bandera, A (el producto: el plasma sin pedir nada); con `energia=plasma-y-polvo`, además del polvo; `plasma=c` u otro valor, el producto')
+afirmar(direccionesBien(entornoPedido, STAGE), '  sin bandera, A (el producto: el plasma sin pedir nada); `?plasma=` ya no existe (se ignora); con `energia=plasma-y-polvo`, además del polvo')
 controlPositivo('  el detector VE el escenario de PULIDO 17 (sin bandera, el polvo)', STAGE.replace("const conPlasma = energia !== 'polvo'", "const conPlasma = energia === 'plasma-y-polvo'"), (s: string) => direccionesBien(entornoPedido, s))
-controlPositivo('  y el escenario que no le pasa la dirección', STAGE.replace(' direccion={direccionDe(plasma)} />', ' direccion="a" />'), (s: string) => direccionesBien(entornoPedido, s))
-const cadaUna = (d: typeof DIRECCIONES): boolean =>
-  d.a.enjambre === null && d.a.brasas[0] >= 400 && d.b.enjambre !== null && d.b.enjambre.lado[0] ** 2 >= 10000 && !('c' in d) &&
-  !('uSuperficie' in d.b.enjambre.simulacion) && DIRECCION_RECOMENDADA === 'a' && direccionDe('no') === DIRECCION_RECOMENDADA && direccionDe('b') === 'b'
-afirmar(cadaUna(DIRECCIONES), `  A, chispas (${String(DIRECCIONES.a.brasas[0])} en la CPU); B, enjambre (${String((DIRECCIONES.b.enjambre?.lado[0] ?? 0) ** 2)} motas en la GPU y sus núcleos); C ya no existe (ni su superficie); sin la bandera, A`)
-controlPositivo('  el detector VE a C de vuelta', Object.assign({ c: DIRECCIONES.b }, DIRECCIONES), cadaUna)
+controlPositivo('  y el escenario que todavía elige una dirección', STAGE.replace("compacto={calidad === 'compacta'} />}", "compacto={calidad === 'compacta'} direccion={direccionDe(plasma)} />}"), (s: string) => direccionesBien(entornoPedido, s))
+const cadaUna = (d: typeof DIRECCIONES): boolean => d.a.brasas[0] >= 400 && !('b' in d) && !('c' in d) && DIRECCION_RECOMENDADA === 'a' && !existsSync('src/app/v3/_lib/escena/energia/enjambre')
+afirmar(cadaUna(DIRECCIONES), `  A, chispas (${String(DIRECCIONES.a.brasas[0])} en la CPU); B y C ya no existen (ni la carpeta del enjambre); sin la bandera, A`)
+controlPositivo('  el detector VE a B de vuelta', Object.assign({ b: DIRECCIONES.a }, DIRECCIONES), cadaUna)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('O3 · El campo (curl noise): sin divergencia, el mismo azar en la CPU y en la GPU')
@@ -319,8 +316,8 @@ const dibujoBien = (particulas: string, arcos: string, efectos: string, comun: s
   // La cara del logo libre y el tope del brillo (flashero con límite).
   particulas.includes('vBrillo = min( uDelante.z,') &&
   // De día: la energía oscura del tamaño de la partícula y el destello claro sólo en las calientes (en reposo, ninguno).
-  // [PULIDO 18] P1.0 · sin el estilo de C (`estela`): `{ chispa: 0, mota: 0 }`.
-  particulas.includes('float sigma = max( uDiaForma.y * uPixel, vRadioPx * uDiaForma.x );') && /CLARO_EN_REPOSO[^=]*= \{ chispa: 0, mota: 0 \}/.test(particulas) &&
+  // [PULIDO 18] P1.0 · sin el estilo de C (`estela`); [PULIDO 19] Q0 · ni el de B (`mota`): `{ chispa: 0 }`.
+  particulas.includes('float sigma = max( uDiaForma.y * uPixel, vRadioPx * uDiaForma.x );') && /CLARO_EN_REPOSO[^=]*= \{ chispa: 0 \}/.test(particulas) &&
   // Los arcos: dos pasadas (lo oscuro, después el núcleo), una tira en inglete con las puntas afinadas y la luz que corre.
   arcos.includes('uniform float uCapa;') && arcos.includes('float inglete =') && arcos.includes('float afina =') && arcos.includes('float corre =') &&
   // Los efectos: el piso (de noche) y el toque del logo; sin el disco de la carga.
@@ -329,7 +326,7 @@ const dibujoBien = (particulas: string, arcos: string, efectos: string, comun: s
   comun.includes('c = toneMapping( c );') && comun.includes('cubre * ( 1.0 - uNoche )') && comun.includes('textoBorde: 56,') && comun.includes('vec2 borde = uTextoBorde / uResolucion * uPixel;') && !/EffectComposer|UnrealBloom/.test(particulas + arcos + efectos + comun)
 afirmar(dibujoBien(PARTICULAS, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO), '  núcleo y halo gaussianos (sin disco ni anillo), titila, destella, respira, vibra, viene de la fuente, desenfoque con el brillo conservado, la cara del logo libre y un tope; de día energía oscura translúcida y el destello sólo caliente; arcos en dos pasadas y en tira; sin la luz de la carga; el tono ACES, sin bloom')
 controlPositivo('  el detector VE el disco con borde de PULIDO 15', PARTICULAS.replace('float nucleo = exp( - 0.5 * d2 / ( rNucleo * rNucleo ) ) * cola;', 'float nucleo = 1.0 - smoothstep( 1.0 - px, 1.0 + px, r2 );'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
-controlPositivo('  y el destello claro en reposo (los «ojos» de día)', PARTICULAS.replace('{ chispa: 0, mota: 0 }', '{ chispa: 0.3, mota: 0 }'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
+controlPositivo('  y el destello claro en reposo (los «ojos» de día)', PARTICULAS.replace('{ chispa: 0 }', '{ chispa: 0.3 }'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
 controlPositivo('  y la luz de la carga de vuelta', EFECTOS_DIBUJO.replace('export const EFECTO = { piso: 0, logo: 1 } as const', 'export const EFECTO = { piso: 0, logo: 1, carga: 2 } as const'), (e: string) => dibujoBien(PARTICULAS, ARCOS_DIBUJO, e, COMUN_DIBUJO))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -345,9 +342,9 @@ const pieBien = (cuadro: string, plasma: string): boolean =>
   plasma.includes('u.uApagado.value = EN_VIVO.camara * despues * despues * (3 - 2 * despues)')
 afirmar(pieBien(CUADRO_TS, PLASMA_TSX), '  el pie: el golpe del encastre es una onda desde el logo (sin arco: competía con la descarga del filo); hacia el golpe la energía cerca del logo baja hasta un 85 %; después se apaga con la cámara que sube')
 controlPositivo('  el detector VE el arco del golpe de PULIDO 16', CUADRO_TS.replace('if (a.lectura.golpeAhora) ondaDesde(a, a.centro.x, a.centro.y, a.centro.z, f.ahora)', "if (a.lectura.golpeAhora) a.arcos.forzado = 'logo'"), (c: string) => pieBien(c, PLASMA_TSX))
-const quietoBien = (plasma: string): boolean => /if \(quieto\) \{\n\s*u\.uTiempo\.value = 0\n\s*cuadroQuieto\(a, state\.gl, quietas\.current\)\n\s*return\n\s*\}/.test(plasma)
+const quietoBien = (plasma: string): boolean => /if \(quieto\) \{\n\s*u\.uTiempo\.value = 0\n\s*cuadroQuieto\(a, quietas\.current\)\n\s*return\n\s*\}/.test(plasma)
 afirmar(quietoBien(PLASMA_TSX), '  con movimiento reducido: quietas (sin titilar: el reloj del dibujo clavado), sin física, sin arcos ni pulsos')
-controlPositivo('  el detector VE el plasma que sigue corriendo con movimiento reducido', PLASMA_TSX.replace('      cuadroQuieto(a, state.gl, quietas.current)\n      return\n', '      cuadroQuieto(a, state.gl, quietas.current)\n'), quietoBien)
+controlPositivo('  el detector VE el plasma que sigue corriendo con movimiento reducido', PLASMA_TSX.replace('      cuadroQuieto(a, quietas.current)\n      return\n', '      cuadroQuieto(a, quietas.current)\n'), quietoBien)
 
 /** El cuerpo de la función `nombre` en `texto` (de la llave que abre su renglón a la que la cierra), o '' si no está. */
 const cuerpo = (texto: string, nombre: string): string => {
@@ -367,14 +364,14 @@ const cuerpo = (texto: string, nombre: string): string => {
 }
 // [PULIDO 18] P1.b · `brasas.ts` se partió (pasaba las 300 líneas): el paso, en `paso.ts`; lo de afuera de cada una, en `afuera.ts`. Los dos
 // entran a los módulos y a las funciones de cada cuadro (las mismas comprobaciones, en su lugar nuevo).
-const MODULOS = ['PlasmaYCargas.tsx', 'banco.ts', 'brasas.ts', 'paso.ts', 'afuera.ts', 'vecinas.ts', 'calor.ts', 'cuadro.ts', 'direcciones.ts', 'ruido.ts', 'textoEnPantalla.ts', 'arcos/arcos.ts', 'arcos/camino.ts', 'arcos/cinta.ts', 'arcos/programador.ts', 'dibujo/arcos.ts', 'dibujo/armado.ts', 'dibujo/comun.ts', 'dibujo/efectos.ts', 'dibujo/particulas.ts', 'enjambre/enjambre.ts', 'enjambre/simulacion.ts', 'interaccion/interaccion.ts', 'interaccion/puntero.ts'] as const
+const MODULOS = ['PlasmaYCargas.tsx', 'banco.ts', 'brasas.ts', 'paso.ts', 'afuera.ts', 'vecinas.ts', 'calor.ts', 'cuadro.ts', 'direcciones.ts', 'ruido.ts', 'textoEnPantalla.ts', 'arcos/arcos.ts', 'arcos/camino.ts', 'arcos/cinta.ts', 'arcos/programador.ts', 'dibujo/arcos.ts', 'dibujo/armado.ts', 'dibujo/comun.ts', 'dibujo/efectos.ts', 'dibujo/particulas.ts', 'interaccion/interaccion.ts', 'interaccion/puntero.ts'] as const
 const ARCHIVOS: Record<string, string | undefined> = Object.fromEntries(MODULOS.map((m) => [m, existsSync(`${ENERGIA}/${m}`) ? readFileSync(`${ENERGIA}/${m}`, 'utf8').replace(/\r\n/g, '\n') : undefined]))
 const deCodigo = (t: string): number => t.split('\n').filter((l) => l.trim() !== '' && !/^\s*(\/\/|\*|\/\*)/.test(l)).length
 const modulosBien = (a: Record<string, string | undefined>): boolean => MODULOS.every((m) => a[m] !== undefined && deCodigo(a[m] ?? '') <= 300)
 afirmar(modulosBien(ARCHIVOS), `  en módulos (${String(MODULOS.length)}), ninguno de más de 300 líneas de código`, MODULOS.map((m) => `${m} ${String(deCodigo(ARCHIVOS[m] ?? ''))}`).filter((x) => Number(x.split(' ')[1]) > 230).join(' · '))
 controlPositivo('  el detector VE un módulo de 301 líneas', { ...ARCHIVOS, 'cuadro.ts': 'x\n'.repeat(301) }, modulosBien)
 const POR_CUADRO: readonly (readonly [string, readonly string[]])[] = [
-  ['cuadro.ts', ['cuadro', 'elPuntero', 'elGesto', 'onda', 'ondaDesde', 'alGolpe', 'lucesYEfectos', 'efecto', 'elEnjambre', 'sobreUnTexto']],
+  ['cuadro.ts', ['cuadro', 'elPuntero', 'elGesto', 'onda', 'ondaDesde', 'alGolpe', 'lucesYEfectos', 'efecto', 'sobreUnTexto']],
   ['brasas.ts', ['entreEllas', 'distanciaAlRayo']],
   ['paso.ts', ['pasoDeLasBrasas']],
   ['afuera.ts', ['deAfuera']],
@@ -385,7 +382,6 @@ const POR_CUADRO: readonly (readonly [string, readonly string[]])[] = [
   ['arcos/programador.ts', ['programarArcos', 'parQueSeVe']],
   ['arcos/cinta.ts', ['rellenarCinta', 'lugar', 'escribir']],
   ['arcos/camino.ts', ['puntoDelCamino']],
-  ['enjambre/enjambre.ts', ['pasoDelEnjambre']],
   ['dibujo/armado.ts', ['subir']],
 ]
 const RESERVA = /\bnew\s+[A-Z]|=>|(?:[=(,:?]|\breturn)\s*\[|(?:[=(,:?]|\breturn)\s*\{(?!\s*$)|addUpdateRange|\.slice\(|\.map\(|\.filter\(/

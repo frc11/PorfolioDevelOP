@@ -20,15 +20,15 @@ en un Chrome sin ventana, para cuando no hay memoria para el banco del sitio). R
 | | Qué es | La partícula | Dónde vive |
 |---|---|---|---|
 | **A · Chispas** (el producto) | Las cargas de PULIDO 15 hechas luz: 600 (300 en el teléfono) | Un núcleo chico y nítido con un halo corto; tamaños por una ley de potencia | CPU (`brasas.ts`, `paso.ts`) |
-| **B · Enjambre** | Un medio: 16.384 motas (6.400 en el teléfono) alrededor de 40 núcleos | Mota finísima | GPU (`enjambre/`) |
 
-Comparten todo lo demás: el mundo, el piso, los arcos, la temperatura, el gesto, los textos, el tono, el movimiento reducido y el pie.
+[PULIDO 19] Q0 · B (el enjambre: 16.384 motas en la GPU alrededor de 40 núcleos) se borró con su código, su simulación y su estilo: la
+decisión del humano (el cristal de la dimensión espejo la reemplaza). Con ella se fue `?plasma=`. Queda A, el producto.
 
 ## Dónde está cada cosa (`src/app/v3/_lib/escena/energia/` y `escena/pase/`)
 
 | Módulo | Qué |
 |---|---|
-| `direcciones.ts` | Las direcciones (A y B), lo que cambia cada una (cantidades, aspecto, simulación) y la del producto. |
+| `direcciones.ts` | La dirección (A, la única desde PULIDO 19): sus cantidades y su aspecto. |
 | `ruido.ts` | El campo: curl noise con gradiente analítico; el mismo hash de 32 bits en JS y en GLSL. Puro. |
 | `brasas.ts` | Las constantes, la creación (arriba del piso), la grilla y la física entre ellas de PULIDO 15 (atraer, repeler, enlazarse). Puro. |
 | `paso.ts` | El paso: los enlaces, el campo (y el viento), lo de afuera, el movimiento nuevo, el piso, la energía y la integración. Puro. |
@@ -37,7 +37,6 @@ Comparten todo lo demás: el mundo, el piso, los arcos, la temperatura, el gesto
 | `vecinas.ts` | Las vecinas: el brillo por densidad, calentar una, contar enlaces. Puro. |
 | `calor.ts` | La temperatura de la escena y la lectura de la escena (scroll, pulso del logo, golpe del pie). Puro. |
 | `arcos/` | El camino (`camino.ts`), qué es un arco (`arcos.ts`), quién nace y cuándo (`programador.ts`) y la cinta (`cinta.ts`). Puros. |
-| `enjambre/` | La simulación de B en la GPU (el ping-pong de la escena) y su paso. |
 | `dibujo/comun.ts` | Lo común: la máscara de los textos (`TEXTOS_GLSL`, compartida con el espejo), las luces de los arcos, el final, el tono y la salida. |
 | `dibujo/particulas.ts` | El sombreador de las partículas: lo propio de cada chispa (`CHISPA_GLSL`), blanda, la cruz, el día con su calor. |
 | `dibujo/arcos.ts` | El canal de los arcos: el halo con PUNTOS a lo largo del camino y el núcleo en la cinta fina; blandos. |
@@ -84,19 +83,10 @@ segundo. En la CPU, cada brasa lo recalcula en cuadros alternos. [PULIDO 18] El 
   vecinas eran unos 400 KB por cuadro, con recolecciones de hasta 300 ms en el mini-banco): `largo3` (`largo.ts`) y, en los dos bucles
   más calientes, el cuadrado directo. De 378 a 16 KB por cuadro; el cuadro del plasma sin vsync, de 2,19 a 1,02 ms (mini-banco, 1440).
 
-## B · El enjambre (`enjambre/`)
+## B · El enjambre
 
-Posición y energía en una textura, velocidad y edad en otra (32 bits, el ping-pong de la escena). Todas las fuerzas son campos: el
-curl noise (que cerca del logo sólo corre de costado: su campo de distancia), los núcleos (las brasas), el puntero, las ondas, los
-arcos y el temblor. Cada mota vive 6–14 s y renace. [PULIDO 18] En el mundo y con el piso de las brasas.
-
-| Ajuste (uniforme) | B · enjambre |
-|---|---|
-| `uFlujo` (rapidez, caliente, sigue, rampa) | 0,5 · 1,2 · 1,1 · 1,2 |
-| `uNucleosAjuste` (fuerza, suavizado, giro, calienta) | 1,6 · 0,6 · 1,4 · 0,4 |
-| `uReparto` (hueco, radio, reparto, contiene) | 3,4 · 11 · 2,4 · 1,6 |
-| `uEnergiaAjuste` (reposo, por temperatura, enfría s, tiembla) | 0,08 · 0,35 · 0,9 · 3 |
-| `uCursorAjuste` (alcance, atrae, giro, calienta) | 4,6 · 0,5 · 2,4 · 0,9 |
+[PULIDO 19] Q0 · se borró con su código (`enjambre/`, su estilo `mota`, sus uniformes y `?plasma=`): la decisión del humano. Lo medido de
+B en PULIDO 17 queda en su recibo (`entregas/pulido-17/o5-medido.json`) como historia.
 
 ## Los arcos (`arcos/`, `dibujo/arcos.ts`)
 

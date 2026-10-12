@@ -1,29 +1,22 @@
-import type { Estilo, NombreDelAspecto } from './dibujo/particulas'
-import type { AjustesDelEnjambre } from './enjambre/simulacion'
+import type { NombreDelAspecto } from './dibujo/particulas'
 
 /**
- * [PULIDO 17] O3 · LAS DIRECCIONES (`docs/rediseno/REFERENCIAS-PLASMA.md`: qué es cada una y por qué). Comparten los arcos, la
- * temperatura, el gesto, los textos, el tono y el pie; cambia la partícula:
+ * [PULIDO 17] O3 · LAS DIRECCIONES (`docs/rediseno/REFERENCIAS-PLASMA.md`: qué era cada una y por qué). Quedó UNA:
  *   · A · CHISPAS: las cargas de PULIDO 15 hechas luz (en la CPU; los arcos salen de ellas). [PULIDO 18] El producto.
- *   · B · ENJAMBRE: miles de motas finísimas en la GPU, un medio que se enciende donde pasa la energía, alrededor de unos núcleos.
- *     [PULIDO 18] Se queda en su bandera hasta que exista el efecto de cristal de la dimensión espejo (de ahí sale).
- * [PULIDO 18] P1.0 · C (las corrientes sobre el logo) se borró con su código. `?plasma=a|b` elige; sin la bandera, A.
+ * [PULIDO 18] P1.0 · C (las corrientes sobre el logo) se borró con su código. [PULIDO 19] Q0 · B (el enjambre de motas en la GPU) se
+ * borró con su código, su simulación y su estilo (la decisión del humano: el cristal de la dimensión espejo la reemplaza); con ella se
+ * fue `?plasma=`: no hay qué elegir. La estructura queda (una dirección con nombre): el plasma A es el producto.
  */
-export type Direccion = 'a' | 'b'
+export type Direccion = 'a'
 
 export interface DeLaDireccion {
   readonly nombre: string
-  /** Las brasas (CPU): en escritorio y en el teléfono. En A son las partículas; en B, los núcleos del enjambre. */
+  /** Las brasas (CPU): en escritorio y en el teléfono. */
   readonly brasas: readonly [number, number]
-  /** Cuánto brillan las brasas (1: las de A; los núcleos, menos: son parte del medio). */
+  /** Cuánto brillan las brasas. */
   readonly intensidadDeLasBrasas: number
-  /** Lo que la dirección cambia del aspecto de sus brasas y de su enjambre (sobre el de su estilo, `dibujo/particulas.ts`). */
-  readonly aspecto?: { readonly brasas?: Partial<Record<NombreDelAspecto, readonly [number, number, number, number]>>; readonly enjambre?: Partial<Record<NombreDelAspecto, readonly [number, number, number, number]>> }
-  /**
-   * El enjambre (GPU): el lado de la textura (lado² partículas) en escritorio y en el teléfono, su estilo, su intensidad y los ajustes
-   * de su simulación (el flujo, los núcleos, el reparto, la energía, el puntero); sin enjambre, null.
-   */
-  readonly enjambre: { readonly lado: readonly [number, number]; readonly estilo: Estilo; readonly intensidad: number; readonly simulacion: AjustesDelEnjambre } | null
+  /** Lo que la dirección cambia del aspecto de sus brasas (sobre el de su estilo, `dibujo/particulas.ts`). */
+  readonly aspecto?: { readonly brasas?: Partial<Record<NombreDelAspecto, readonly [number, number, number, number]>> }
 }
 
 export const DIRECCIONES: Readonly<Record<Direccion, DeLaDireccion>> = {
@@ -38,28 +31,8 @@ export const DIRECCIONES: Readonly<Record<Direccion, DeLaDireccion>> = {
     // P1.c · de día, su propia ganancia: un alfa chico sobre el papel no se ve (la noche suma luz sobre negro, que sí): el cuerpo, 2,6
     // y la mitad visible en reposo; el velo, angosto (con tope en el sombreador).
     aspecto: { brasas: { uLuz: [2.8, 0.26, 0.2, 2.5], uTamano: [0.012, 0.08, 0.7, 3.2], uMovida: [0, 1.2, 0.06, 1.5], uChispa: [2.3, 0.5, 0.55, 7], uNucleo: [1.5, 0, 0, 0], uDia: [2.6, 0.55, 0.5, 0.6], uDiaForma: [1.6, 1.2, 0.45, 0] } },
-    enjambre: null,
-  },
-  b: {
-    nombre: 'enjambre',
-    brasas: [40, 28],
-    intensidadDeLasBrasas: 0.35,
-    // Los núcleos, tenues y sin humo de día (si no, manchas); el medio, motas suaves, casi sin humo de día. [PULIDO 18] P1.c · con el
-    // día nuevo, el de B como en PULIDO 17: sin velo y, en las calientes, el brillo claro (el especular hace del punto de entonces).
-    aspecto: { brasas: { uDia: [0, 0.6, 0.22, 0.5], uDiaForma: [1.6, 1.2, 0, 0] }, enjambre: { uTamano: [0.015, 0.05, 0.7, 4.5], uLuz: [0.32, 0.12, 0.45, 3], uFuente: [5, 0.9, 0.6, 0.25], uDia: [0, 0.7, 0.12, 0.55], uDelante: [0.7, 3.6, 0.6, 0] } },
-    enjambre: {
-      lado: [128, 80],
-      estilo: 'mota',
-      intensidad: 1,
-      // Más adentro (cerca del logo), núcleos fuertes (nubes y filamentos que se forman y se deshacen), en reposo casi apagadas.
-      simulacion: { uFlujo: [0.5, 1.2, 1.1, 1.2], uNucleosAjuste: [1.6, 0.6, 1.4, 0.4], uReparto: [3.4, 11, 2.4, 1.6], uEnergiaAjuste: [0.08, 0.35, 0.9, 3], uCursorAjuste: [4.6, 0.5, 2.4, 0.9] },
-    },
   },
 }
 
-/** La del producto (sin `?plasma=`; la justificación, en `docs/rediseno/PLASMA.md`). */
+/** La del producto (la justificación, en `docs/rediseno/PLASMA.md`). */
 export const DIRECCION_RECOMENDADA: Direccion = 'a'
-
-export function direccionDe(pedida: Direccion | 'no'): Direccion {
-  return pedida === 'no' ? DIRECCION_RECOMENDADA : pedida
-}

@@ -6,8 +6,7 @@ import { crearCinta, type Cinta } from '../arcos/cinta'
 import type { EntornoDeLosArcos } from '../arcos/programador'
 import { azarConSemilla, crearBrasas, crearEntradaDeLasBrasas, type Brasas, type EntradaDeLasBrasas, type RayoDelPuntero } from '../brasas'
 import { crearLectura, crearTemperatura, type Lectura, type Temperatura } from '../calor'
-import { DIRECCIONES, type Direccion } from '../direcciones'
-import { crearEnjambre, soltarEnjambre, type Enjambre } from '../enjambre/enjambre'
+import { DIRECCIONES } from '../direcciones'
 import { crearPuntero, type EstadoDelPuntero } from '../interaccion/interaccion'
 import { largo3 } from '../largo'
 import { FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, VERTICES_DEL_HALO_DEL_ARCO, VERTICES_DE_LOS_ARCOS, uniformesDelTrazo } from './arcos'
@@ -17,10 +16,10 @@ import { sombreadoresDeParticulas, uniformesDelAspecto, type NombreDelAspecto } 
 import { FRAGMENTOS_DE_LOS_REFLEJOS, REFLEJO, VERTICES_DE_LOS_REFLEJOS } from './reflejos'
 
 /**
- * [PULIDO 17] O3 · EL ARMADO DE LA ENERGÍA (`docs/rediseno/PLASMA.md`). Según la dirección: las brasas (CPU) y, en B, el enjambre
- * (GPU); las mallas (el enjambre y las brasas instanciados, la cinta de los arcos en dos pasadas, los efectos), las uniformes que
- * comparten y lo que el programador de los arcos pregunta afuera: qué se ve (adentro del cuadro y no sobre un texto) y el borde del
- * logo (esos cierres se arman una vez, no por cuadro).
+ * [PULIDO 17] O3 · EL ARMADO DE LA ENERGÍA (`docs/rediseno/PLASMA.md`): las brasas (CPU), las mallas (las brasas instanciadas, la cinta
+ * de los arcos en dos pasadas, los efectos), las uniformes que comparten y lo que el programador de los arcos pregunta afuera: qué se
+ * ve (adentro del cuadro y no sobre un texto) y el borde del logo (esos cierres se arman una vez, no por cuadro). [PULIDO 19] Q0 · el
+ * enjambre de B (GPU) se borró con B.
  */
 
 /** Lo que el cuadro sabe de la vista (lo escribe en cada cuadro). */
@@ -31,7 +30,6 @@ export interface Vista {
 }
 
 export interface Armado {
-  readonly direccion: Direccion
   readonly azar: () => number
   readonly brasas: Brasas
   readonly entrada: EntradaDeLasBrasas
@@ -40,7 +38,6 @@ export interface Armado {
   readonly arcos: EstadoDeLosArcos
   readonly puntero: EstadoDelPuntero
   readonly cinta: Cinta
-  readonly enjambre: Enjambre | null
   readonly uniformes: UniformesComunes
   readonly atributosDeLasBrasas: readonly THREE.InstancedBufferAttribute[]
   readonly atributosDeLaCinta: readonly THREE.BufferAttribute[]
@@ -62,7 +59,7 @@ export interface Armado {
   halo: number
   readonly ondas: Float32Array
   /** Las uniformes que el banco ajusta en vivo, por grupo (`banco.ts`, `ajustar`). */
-  readonly ajustables: Readonly<Record<'brasas' | 'enjambre' | 'arcos' | 'simulacion' | 'comun' | 'reflejo', Readonly<Record<string, THREE.IUniform>>>>
+  readonly ajustables: Readonly<Record<'brasas' | 'arcos' | 'comun' | 'reflejo', Readonly<Record<string, THREE.IUniform>>>>
 }
 
 const CUADRADO = new Float32Array([-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0])
@@ -87,30 +84,20 @@ function cuadrados(cuantos: number): THREE.InstancedBufferGeometry {
   return g
 }
 
-/** Arma todo para la dirección pedida. */
-export function armar(direccion: Direccion, compacto: boolean, vista: { readonly current: Vista }, logo: () => THREE.Object3D | null): Armado {
-  const d = DIRECCIONES[direccion]
+/** Arma todo (el plasma A, el producto). */
+export function armar(compacto: boolean, vista: { readonly current: Vista }, logo: () => THREE.Object3D | null): Armado {
+  const d = DIRECCIONES.a
   const azar = azarConSemilla(17)
   const brasas = crearBrasas(compacto ? d.brasas[1] : d.brasas[0], azar, FLOOR_Y)
   const uniformes = uniformesComunes()
   const mallas: (THREE.Mesh | THREE.Points)[] = []
-  let enjambre: Enjambre | null = null
-  let delEnjambre: Record<string, THREE.IUniform> = {}
-  if (d.enjambre !== null) {
-    enjambre = crearEnjambre(compacto ? d.enjambre.lado[1] : d.enjambre.lado[0], d.enjambre.simulacion)
-    const s = sombreadoresDeParticulas(true, 100000)
-    delEnjambre = { ...conLoDeLaDireccion(uniformesDelAspecto(d.enjambre.estilo), d.aspecto?.enjambre), uIntensidad: { value: d.enjambre.intensidad } }
-    const malla = new THREE.Mesh(cuadrados(enjambre.cuantas), materialDeEnergia(s.vertexShader, s.fragmentShader, { ...uniformes, ...delEnjambre, uLugares: enjambre.lugares, uVelocidades: enjambre.velocidades, uLado: { value: enjambre.lado } }))
-    malla.name = 'enjambre'
-    mallas.push(malla)
-  }
   const gb = cuadrados(brasas.n)
   const atributosDeLasBrasas = [new THREE.InstancedBufferAttribute(brasas.lugar, 3), new THREE.InstancedBufferAttribute(brasas.velocidad, 3), new THREE.InstancedBufferAttribute(brasas.energia, 1), new THREE.InstancedBufferAttribute(brasas.brillo, 1)].map((x) => x.setUsage(THREE.DynamicDrawUsage))
   gb.setAttribute('aLugar', atributosDeLasBrasas[0])
   gb.setAttribute('aVelocidad', atributosDeLasBrasas[1])
   gb.setAttribute('aEnergia', atributosDeLasBrasas[2])
   gb.setAttribute('aBrillo', atributosDeLasBrasas[3])
-  const sb = sombreadoresDeParticulas(false)
+  const sb = sombreadoresDeParticulas()
   const deLasBrasas = { ...conLoDeLaDireccion(uniformesDelAspecto('chispa'), d.aspecto?.brasas), uIntensidad: { value: d.intensidadDeLasBrasas } }
   const mallaDeBrasas = new THREE.Mesh(gb, materialDeEnergia(sb.vertexShader, sb.fragmentShader, { ...uniformes, ...deLasBrasas }))
   mallaDeBrasas.name = 'brasas'
@@ -204,10 +191,10 @@ export function armar(direccion: Direccion, compacto: boolean, vista: { readonly
     bordeDelLogo,
   }
   return {
-    direccion, azar, brasas, entrada: crearEntradaDeLasBrasas(), temperatura: crearTemperatura(), lectura: crearLectura(), arcos: crearArcos(azar), puntero: crearPuntero(), cinta, enjambre, uniformes,
+    azar, brasas, entrada: crearEntradaDeLasBrasas(), temperatura: crearTemperatura(), lectura: crearLectura(), arcos: crearArcos(azar), puntero: crearPuntero(), cinta, uniformes,
     atributosDeLasBrasas, atributosDeLaCinta, geometriaDeLaCinta: gt, efectos: { lugar: lugarDeLosEfectos, efecto, geometria: ge }, mallas, centro, v, luces: new Float32Array(DIBUJO.luces * 4),
     puntoDelPuntero: new Float32Array(3), camaraAntes: new THREE.Vector3(Number.NaN, Number.NaN, Number.NaN), puntoAntes: new Float32Array(3).fill(Number.NaN), rayo, entorno, texto: { leidoEn: Number.NEGATIVE_INFINITY, scroll: Number.NaN }, halo: 0, ondas: new Float32Array(8).fill(Number.NEGATIVE_INFINITY),
-    ajustables: { brasas: deLasBrasas, enjambre: delEnjambre, arcos: trazo, simulacion: enjambre === null ? {} : enjambre.u, comun: uniformes, reflejo: delReflejo },
+    ajustables: { brasas: deLasBrasas, arcos: trazo, comun: uniformes, reflejo: delReflejo },
   }
 }
 
@@ -235,5 +222,4 @@ export function soltar(a: Armado): void {
     if (m.material instanceof THREE.Material) vistos.add(m.material)
   }
   for (const x of vistos) x.dispose()
-  if (a.enjambre !== null) soltarEnjambre(a.enjambre)
 }

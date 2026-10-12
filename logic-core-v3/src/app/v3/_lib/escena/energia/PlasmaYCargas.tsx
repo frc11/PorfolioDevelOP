@@ -13,22 +13,20 @@ import { FLOOR_Y } from '../probeScene'
 import { energiaDelBanco, type EnergiaDelBanco } from './banco'
 import { crearAfuera, cuadro, cuadroQuieto, type Afuera } from './cuadro'
 import { armar, soltar, type Armado, type Vista } from './dibujo/armado'
-import type { Direccion } from './direcciones'
 import { escucharElPuntero } from './interaccion/puntero'
 import { TEXTO_EN_PANTALLA, cajasDelTexto } from './textoEnPantalla'
 
 /**
- * [PULIDO 17] O3 · LA ENERGÍA, montada con `?energia=plasma` (o `plasma-y-polvo`) en una de sus tres direcciones (`?plasma=a|b|c`;
- * sin la bandera, la recomendada: `direcciones.ts`). Partículas de energía que brillan, vibran y se mueven, y los arcos de PULIDO 15
- * hechos luz (`docs/rediseno/PLASMA.md`: el modelo; `REFERENCIAS-PLASMA.md`: de dónde sale). Las brasas y los arcos corren acá, en
- * el cuadro (`cuadro.ts`); el enjambre de B, en la GPU (`enjambre/`); lo que cambia en cada cuadro vive en refs. El puntero lo
+ * [PULIDO 17] O3 · LA ENERGÍA: el plasma A ([PULIDO 18] el producto, sin pedir nada; [PULIDO 19] Q0 · la única dirección: B se borró
+ * con su enjambre y `?plasma=` con ella). Partículas de energía que brillan, vibran y se mueven, y los arcos de PULIDO 15 hechos luz
+ * (`docs/rediseno/PLASMA.md`: el modelo; `REFERENCIAS-PLASMA.md`: de dónde sale). Las brasas y los arcos corren acá, en el cuadro
+ * (`cuadro.ts`); lo que cambia en cada cuadro vive en refs. El puntero lo
  * escuchan `interaccion/puntero.ts` (el mouse sobre la página, el dedo mientras toca).
  */
 interface Props {
   readonly logoGroupRef: RefObject<THREE.Group | null>
   readonly quieto: boolean
   readonly compacto: boolean
-  readonly direccion: Direccion
 }
 
 type VentanaDelBanco = Window & { __energiaDelBanco?: EnergiaDelBanco }
@@ -37,7 +35,7 @@ type VentanaDelBanco = Window & { __energiaDelBanco?: EnergiaDelBanco }
 const DESPUES_DEL_GOLPE = 0.15
 const CERCA_DEL_FINAL = 0.85
 
-export function PlasmaYCargas({ logoGroupRef, quieto, compacto, direccion }: Props): React.JSX.Element {
+export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.JSX.Element {
   const grupo = useRef<THREE.Group>(null)
   const armado = useRef<Armado | null>(null)
   const afuera = useRef<Afuera>(crearAfuera())
@@ -53,7 +51,7 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto, direccion }: Pro
   useEffect(() => {
     const g = grupo.current
     if (g === null) return undefined
-    const a = armar(direccion, compacto, vista, () => logoGroupRef.current)
+    const a = armar(compacto, vista, () => logoGroupRef.current)
     g.add(...a.mallas)
     armado.current = a
     quietas.current.listo = false
@@ -67,7 +65,7 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto, direccion }: Pro
       armado.current = null
       delete ventana.__energiaDelBanco
     }
-  }, [direccion, compacto, logoGroupRef])
+  }, [compacto, logoGroupRef])
   useFrame((state, delta) => {
     const a = armado.current
     if (a === null) return
@@ -99,7 +97,7 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto, direccion }: Pro
     // Con movimiento reducido: quietas (sin titilar, sin arcos ni pulsos).
     if (quieto) {
       u.uTiempo.value = 0
-      cuadroQuieto(a, state.gl, quietas.current)
+      cuadroQuieto(a, quietas.current)
       return
     }
     u.uTiempo.value = VIVO.uTiempo.value
@@ -116,8 +114,6 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto, direccion }: Pro
     f.golpe = FIN_DEL_GOLPE
     f.piso = FLOOR_Y + 0.02
     f.camara = state.camera
-    f.gl = state.gl
-    f.logo = logoGroupRef.current
     cuadro(a, f)
   })
   return <group ref={grupo} name="energia" />

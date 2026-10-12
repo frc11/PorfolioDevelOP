@@ -9,7 +9,6 @@ import { TEMPERATURA, calentar, frentesDelLogo, leerLaEscena, type DeLaEscena } 
 import { EFECTO, EFECTOS } from './dibujo/efectos'
 import { DIBUJO } from './dibujo/comun'
 import { subir, type Armado } from './dibujo/armado'
-import { pasoDelEnjambre } from './enjambre/enjambre'
 import { pasoDeLasBrasas } from './paso'
 import { brilloPorDensidad, calentarBrasa } from './vecinas'
 import { avanzar } from './interaccion/interaccion'
@@ -18,7 +17,8 @@ import { largo3 } from './largo'
 /**
  * [PULIDO 17] O3 · UN CUADRO DE LA ENERGÍA (`docs/rediseno/PLASMA.md`). Lo que pasa afuera entra como temperatura (el scroll, las
  * ondas del logo, el golpe del pie) y como el latido del logo; el gesto del puntero pide pulsos y descargas; después las brasas, los
- * arcos (sus golpes calientan lo que tocan), sus luces y los efectos; el enjambre (B) y todo sube a la GPU. Sin reservas por cuadro.
+ * arcos (sus golpes calientan lo que tocan), sus luces y los efectos, y todo sube a la GPU. Sin reservas por cuadro. [PULIDO 19] Q0 · el
+ * paso del enjambre (B) se fue con B.
  */
 export const CUADRO = {
   /** El punto del puntero: donde su rayo entra a una esfera de este radio alrededor del origen (el lugar del plasma; más afuera que el logo). */
@@ -42,13 +42,10 @@ export interface Afuera extends DeLaEscena {
   /** El piso (y del mundo). [PULIDO 18] P1.b · todo en el mundo: el plasma no sigue al logo. */
   piso: number
   camara: THREE.Camera
-  gl: THREE.WebGLRenderer | null
-  /** El grupo del logo (el campo de distancia del enjambre se lee en su espacio). */
-  logo: THREE.Object3D | null
 }
 
 export function crearAfuera(): Afuera {
-  return { dt: 0, ahora: 0, tiempo: 0, scroll: 0, alto: 1, anillos: [], naceEn: 3.6, ultimoPrincipal: Number.NEGATIVE_INFINITY, fin: 0, golpe: 1, piso: -4, camara: new THREE.PerspectiveCamera(), gl: null, logo: null }
+  return { dt: 0, ahora: 0, tiempo: 0, scroll: 0, alto: 1, anillos: [], naceEn: 3.6, ultimoPrincipal: Number.NEGATIVE_INFINITY, fin: 0, golpe: 1, piso: -4, camara: new THREE.PerspectiveCamera() }
 }
 
 const V = new THREE.Vector3()
@@ -209,10 +206,9 @@ function alGolpe(a: Armado, arco: Arco): void {
   calentar(a.temperatura, TEMPERATURA.arco)
 }
 
-/** Las luces de los arcos (el medio del canal), sus segmentos para el enjambre y los efectos (el piso, el logo, la carga). */
+/** Las luces de los arcos (el medio del canal) y los efectos (el piso, el logo, la carga). */
 function lucesYEfectos(a: Armado, f: Afuera): number {
   const u = a.uniformes
-  const ej = a.enjambre
   let luces = 0
   let n = 0
   for (const arco of a.arcos.arcos) {
@@ -223,10 +219,6 @@ function lucesYEfectos(a: Armado, f: Afuera): number {
     const brillo = (golpeEn(arco, arco.edad) + 0.4 * residualEn(arco, arco.edad)) * arco.brillo
     if (luces < DIBUJO.luces) {
       u.uLuces.value[luces].set(M[0], M[1], M[2], brillo)
-      if (ej !== null) {
-        ej.u.uArcosA.value[luces].set(A[0], A[1], A[2], brillo)
-        ej.u.uArcosB.value[luces].set(B[0], B[1], B[2], 0)
-      }
       luces += 1
     }
     const i = Math.min(1.4, brillo)
@@ -238,40 +230,10 @@ function lucesYEfectos(a: Armado, f: Afuera): number {
     }
   }
   u.uCuantasLuces.value = luces
-  if (ej !== null) ej.u.uCuantosArcos.value = luces
   return n
 }
 
-/** El enjambre (B): las uniformes del cuadro y un paso. Los núcleos son las brasas: su signo y su fuerza, que respira. */
-function elEnjambre(a: Armado, f: Afuera, gl: THREE.WebGLRenderer): void {
-  const ej = a.enjambre
-  if (ej === null) return
-  const u = ej.u
-  const b = a.brasas
-  const cuantos = Math.min(b.n, u.uNucleos.value.length)
-  for (let k = 0; k < cuantos; k += 1) {
-    const respira = 0.6 + 0.4 * Math.sin(f.tiempo * (0.4 + 0.6 * b.semilla[k * 4 + 3]) + b.semilla[k * 4 + 1])
-    u.uNucleos.value[k].set(b.lugar[k * 3], b.lugar[k * 3 + 1], b.lugar[k * 3 + 2], b.signo[k] * respira * (0.6 + b.energia[k]))
-  }
-  u.uCuantosNucleos.value = cuantos
-  u.uTiempo.value = f.tiempo
-  u.uTemperatura.value = a.temperatura.valor
-  const r = a.rayo.r
-  u.uRayoO.value.set(r.ox, r.oy, r.oz)
-  u.uRayoD.value.set(r.dx, r.dy, r.dz)
-  u.uPuntero.value.set(a.rayo.activo ? 1 : 0, a.entrada.cargaDelPuntero)
-  for (let k = 0; k < 2; k += 1) u.uPulsos.value[k].set(a.entrada.pulsos[k * 4], a.entrada.pulsos[k * 4 + 1], a.entrada.pulsos[k * 4 + 2], a.entrada.pulsos[k * 4 + 3])
-  const fr = a.entrada.anillos
-  u.uFrentes.value[0].set(fr[0], fr[1], fr[2], fr[3])
-  u.uFrentes.value[1].set(fr[4], fr[5], fr[6], fr[7])
-  u.uCentro.value.copy(a.centro)
-  if (f.logo !== null) u.uLogoInverso.value.copy(f.logo.matrixWorld).invert()
-  u.uPiso.value = f.piso
-  u.uActividadDelLogo.value = a.lectura.actividadDelLogo
-  pasoDelEnjambre(ej, gl, f.dt)
-}
-
-/** Un cuadro (no con movimiento reducido): la escena, el puntero, el gesto, las brasas, los arcos, el dibujo y el enjambre. */
+/** Un cuadro (no con movimiento reducido): la escena, el puntero, el gesto, las brasas, los arcos y el dibujo. */
 export function cuadro(a: Armado, f: Afuera): void {
   leerLaEscena(a.temperatura, a.lectura, f)
   if (a.lectura.golpeAhora) ondaDesde(a, a.centro.x, a.centro.y, a.centro.z, f.ahora)
@@ -303,17 +265,15 @@ export function cuadro(a: Armado, f: Afuera): void {
   for (const arco of a.arcos.arcos) for (let k = 0; k < arco.nuevos; k += 1) alGolpe(a, arco)
   programarArcos(a.arcos, a.brasas, f.dt, entorno, a.azar)
   const efectos = lucesYEfectos(a, f)
-  if (f.gl !== null) elEnjambre(a, f, f.gl)
   rellenarCinta(a.arcos, a.brasas, a.cinta)
   subir(a, efectos)
 }
 
-/** Con movimiento reducido: quietas (ya a la vista, en reposo), sin arcos ni pulsos ni efectos; el enjambre nace y se queda. */
-export function cuadroQuieto(a: Armado, gl: THREE.WebGLRenderer, hecho: { listo: boolean }): void {
+/** Con movimiento reducido: quietas (ya a la vista, en reposo), sin arcos ni pulsos ni efectos. */
+export function cuadroQuieto(a: Armado, hecho: { listo: boolean }): void {
   if (hecho.listo) return
   a.brasas.energia.fill(BRASAS.energia.base)
   a.uniformes.uCuantasLuces.value = 0
-  if (a.enjambre !== null) pasoDelEnjambre(a.enjambre, gl, 0)
   subir(a, 0)
   hecho.listo = true
 }

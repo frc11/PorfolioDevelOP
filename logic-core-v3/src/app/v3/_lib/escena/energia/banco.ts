@@ -5,19 +5,14 @@ import { TRAMOS_DEL_CAMINO, puntoDelCamino } from './arcos/camino'
 import { cuantosEnlaces } from './vecinas'
 import { ponerTemperatura } from './calor'
 import type { Armado, Vista } from './dibujo/armado'
-import type { Direccion } from './direcciones'
-import type { Medida } from '../gpu/cronometro'
 
 /**
  * [PULIDO 17] O3 · LA ENERGÍA PARA EL BANCO (sólo con banco: `hayBanco()`). Qué hay (para medir y capturar), un arco ya, la
  * temperatura puesta (la escena caliente) y dónde hay un grupo de brasas en la pantalla (para dejar el puntero quieto sobre él).
  */
 export interface EnergiaDelBanco {
-  readonly direccion: Direccion
   estado: () => {
-    direccion: Direccion
     brasas: number
-    enjambre: number
     enlaces: number
     arcos: number
     contados: Record<ClaseDeArco, number>
@@ -31,12 +26,10 @@ export interface EnergiaDelBanco {
   forzar: (que: ClaseDeArco) => boolean
   calor: (valor: number) => void
   grupo: () => [number, number] | null
-  /** Ajusta en vivo una uniforme de un grupo (`brasas`, `enjambre`, `arcos`, `simulacion`, `comun`): sus números en orden. */
+  /** Ajusta en vivo una uniforme de un grupo (`brasas`, `arcos`, `comun`, `reflejo`): sus números en orden. */
   ajustar: (grupo: string, nombre: string, valores: readonly number[]) => boolean
   /** Lee las uniformes ajustables de un grupo. */
   ajustes: (grupo: string) => Record<string, number[]>
-  /** Cuánto tarda en la GPU la simulación del enjambre (B), en las próximas `pasos` pasadas; sin enjambre, null. */
-  gpu: (pasos: number) => Promise<Medida> | null
   /** Los arcos vivos en la pantalla (px de CSS): sus dos extremos y su medio, y su clase. */
   arcosEnPantalla: () => { clase: string; a: [number, number]; b: [number, number]; medio: [number, number] }[]
 }
@@ -78,11 +71,8 @@ function grupoEnPantalla(a: Armado, vista: Vista, v: THREE.Vector3): [number, nu
 
 export function energiaDelBanco(a: Armado, vista: { readonly current: Vista }): EnergiaDelBanco {
   return {
-    direccion: a.direccion,
     estado: () => ({
-      direccion: a.direccion,
       brasas: a.brasas.n,
-      enjambre: a.enjambre === null ? 0 : a.enjambre.cuantas,
       enlaces: cuantosEnlaces(a.brasas),
       arcos: a.arcos.arcos.filter((x) => x.activo).length,
       contados: { ...a.arcos.contados },
@@ -115,7 +105,6 @@ export function energiaDelBanco(a: Armado, vista: { readonly current: Vista }): 
       else return false
       return true
     },
-    gpu: (pasos) => (a.enjambre === null ? null : a.enjambre.cronometro.pedir(pasos)),
     arcosEnPantalla: () => {
       const cam = vista.current.camara
       if (cam === null) return []

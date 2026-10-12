@@ -16,7 +16,6 @@ import { Entorno } from './entorno/Entorno'
 import { Rebote } from './entorno/Rebote'
 import { Amanecer } from './amanecer/Amanecer'
 import { DepthParticles } from './DepthParticles'
-import { direccionDe } from './energia/direcciones'
 import { PlasmaYCargas } from './energia/PlasmaYCargas'
 import { FinalDelPie } from './final/FinalDelPie'
 import { CaidaDelLogo } from './intro/CaidaDelLogo'
@@ -166,8 +165,8 @@ export default function ProbeStage({
   // los deriva); `plasma-y-polvo`, con el polvo además; `?plasma-color=si`, en azul eléctrico. Los destellos (`?destellos=`) se borraron.
   // [PULIDO 16] N2 · y sus experimentos. [PULIDO 17] O3 · los experimentos y el color se borraron; `?plasma=a|b|c`, la dirección
   // (sin la bandera, la recomendada: `energia/direcciones.ts`). [PULIDO 18] P1.0 · el plasma A es el producto; `?energia=polvo`, el
-  // polvo de antes en su lugar; `?energia=plasma-y-polvo`, los dos.
-  const { energia, plasma } = entornoDeLaEscena().pruebas
+  // polvo de antes en su lugar; `?energia=plasma-y-polvo`, los dos. [PULIDO 19] Q0 · B se borró con su código y `?plasma=` con ella.
+  const { energia } = entornoDeLaEscena().pruebas
   const conPolvo = energia !== 'no'
   const conPlasma = energia !== 'polvo'
 
@@ -264,7 +263,7 @@ export default function ProbeStage({
         <group ref={bokehGroupRef} name="bokeh">
           {conPolvo && <BokehParticles />}
         </group>
-        {conPlasma && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} direccion={direccionDe(plasma)} />}
+        {conPlasma && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} />}
 
         <OrbitRig
           store={store}
@@ -298,7 +297,8 @@ export default function ProbeStage({
         {/* [ESCENA 5] El moiré vivo (encendido) y las pruebas, apagadas salvo en el banco (`entorno.ts`, `Pruebas`). */}
         <MoireVivo rig={rig} moireRef={moireRef} quieto={reducedMotion} />
         <Aire rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
-        <Fisica rig={rig} quieto={reducedMotion} dustGroupRef={dustGroupRef} logoGroupRef={logoGroupRef} />
+        {/* [PULIDO 19] Q0 · la física del polvo (su simulación en la GPU y el campo del logo) sólo si el polvo se dibuja: sin él corría igual. */}
+        {conPolvo && <Fisica rig={rig} quieto={reducedMotion} dustGroupRef={dustGroupRef} logoGroupRef={logoGroupRef} />}
         {/* [PULIDO 10] J1 · sólo con banco: la silueta del logo en el cuadro (el instrumento de solapes). */}
         <SiluetaDelBanco logoGroupRef={logoGroupRef} />
         <Formacion rig={rig} calidad={calidad} logoGroupRef={logoGroupRef} />
