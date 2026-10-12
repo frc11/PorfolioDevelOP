@@ -1,0 +1,783 @@
+{
+ "que": "PULIDO 18 · lo medido en el banco del SITIO (la NVIDIA RTX 5050): por configuración (polvo = ?energia=polvo, el de antes; producto = el plasma A; espejo-<efecto> = el producto con ese efecto activo todo el rato) y ancho; en frío (cachés borradas: el primer scroll rápido hasta el fondo y de vuelta), la calma, al máximo (la temperatura al tope, scroll, pulsos y cargas), la noche y, con un efecto, el efecto de día y de noche. libre: sin vsync ni tope de cuadros (el costo de verdad); vsync: con la sincronía de la pantalla. avisos: lo que el compilador de D3D dejó en la consola.",
+ "medido": {
+  "libre": {
+   "espejo-caleidoscopio-1440": {
+    "frio": {
+     "media": 8.16,
+     "p95": 12.2,
+     "maximo": 867.6,
+     "mayoresDe20": 20,
+     "cuadros": 867
+    },
+    "calma": {
+     "media": 3.06,
+     "p95": 3.7,
+     "maximo": 8.6,
+     "mayoresDe20": 0,
+     "cuadros": 1635
+    },
+    "maxima": {
+     "media": 3.9,
+     "p95": 7.4,
+     "maximo": 14.4,
+     "mayoresDe20": 0,
+     "cuadros": 1553
+    },
+    "noche": {
+     "media": 3.11,
+     "p95": 3.7,
+     "maximo": 10.1,
+     "mayoresDe20": 0,
+     "cuadros": 1607
+    },
+    "efectoDeDia": {
+     "media": 3.09,
+     "p95": 3.8,
+     "maximo": 8.9,
+     "mayoresDe20": 0,
+     "cuadros": 2597
+    },
+    "efectoDeNoche": {
+     "media": 3.13,
+     "p95": 3.7,
+     "maximo": 13.2,
+     "mayoresDe20": 0,
+     "cuadros": 2555
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 ",
+     "warn: THREE.WebGLProgram: Program Info Log: (143,1): warning X4000: use of potentially uninitialized variable (f_leerConPrisma)"
+    ],
+    "tareasLargas": 11
+   },
+   "espejo-caleidoscopio-390": {
+    "frio": {
+     "media": 6.69,
+     "p95": 10.8,
+     "maximo": 423.8,
+     "mayoresDe20": 11,
+     "cuadros": 658
+    },
+    "calma": {
+     "media": 2.13,
+     "p95": 2.5,
+     "maximo": 9.3,
+     "mayoresDe20": 0,
+     "cuadros": 2343
+    },
+    "maxima": {
+     "media": 2.59,
+     "p95": 3.7,
+     "maximo": 7.7,
+     "mayoresDe20": 0,
+     "cuadros": 2357
+    },
+    "noche": {
+     "media": 2.21,
+     "p95": 2.8,
+     "maximo": 8.2,
+     "mayoresDe20": 0,
+     "cuadros": 2268
+    },
+    "efectoDeDia": {
+     "media": 2.11,
+     "p95": 2.5,
+     "maximo": 9.1,
+     "mayoresDe20": 0,
+     "cuadros": 3826
+    },
+    "efectoDeNoche": {
+     "media": 2.13,
+     "p95": 2.5,
+     "maximo": 7.5,
+     "mayoresDe20": 0,
+     "cuadros": 3780
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 ",
+     "warn: THREE.WebGLProgram: Program Info Log: (143,1): warning X4000: use of potentially uninitialized variable (f_leerConPrisma)"
+    ],
+    "tareasLargas": 7
+   },
+   "espejo-cristal-1440": {
+    "frio": {
+     "media": 5.97,
+     "p95": 11.4,
+     "maximo": 543.6,
+     "mayoresDe20": 10,
+     "cuadros": 913
+    },
+    "calma": {
+     "media": 3.03,
+     "p95": 3.6,
+     "maximo": 11.3,
+     "mayoresDe20": 0,
+     "cuadros": 1648
+    },
+    "maxima": {
+     "media": 3.98,
+     "p95": 7.3,
+     "maximo": 16.2,
+     "mayoresDe20": 0,
+     "cuadros": 1530
+    },
+    "noche": {
+     "media": 3.2,
+     "p95": 3.6,
+     "maximo": 7.9,
+     "mayoresDe20": 0,
+     "cuadros": 1566
+    },
+    "efectoDeDia": {
+     "media": 3.1,
+     "p95": 3.7,
+     "maximo": 9.7,
+     "mayoresDe20": 0,
+     "cuadros": 2595
+    },
+    "efectoDeNoche": {
+     "media": 3.22,
+     "p95": 3.7,
+     "maximo": 12.6,
+     "mayoresDe20": 0,
+     "cuadros": 2496
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 ",
+     "warn: THREE.WebGLProgram: Program Info Log: (162,1): warning X4000: use of potentially uninitialized variable (f_leerConPrisma)"
+    ],
+    "tareasLargas": 5
+   },
+   "espejo-cristal-390": {
+    "frio": {
+     "media": 6.28,
+     "p95": 10.5,
+     "maximo": 441.3,
+     "mayoresDe20": 9,
+     "cuadros": 641
+    },
+    "calma": {
+     "media": 2.07,
+     "p95": 2.4,
+     "maximo": 13.3,
+     "mayoresDe20": 0,
+     "cuadros": 2417
+    },
+    "maxima": {
+     "media": 2.47,
+     "p95": 3.4,
+     "maximo": 9.5,
+     "mayoresDe20": 0,
+     "cuadros": 2459
+    },
+    "noche": {
+     "media": 2.04,
+     "p95": 2.4,
+     "maximo": 5.8,
+     "mayoresDe20": 0,
+     "cuadros": 2454
+    },
+    "efectoDeDia": {
+     "media": 2.06,
+     "p95": 2.5,
+     "maximo": 7.5,
+     "mayoresDe20": 0,
+     "cuadros": 3899
+    },
+    "efectoDeNoche": {
+     "media": 2.06,
+     "p95": 2.4,
+     "maximo": 10.5,
+     "mayoresDe20": 0,
+     "cuadros": 3897
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 ",
+     "warn: THREE.WebGLProgram: Program Info Log: (162,1): warning X4000: use of potentially uninitialized variable (f_leerConPrisma)"
+    ],
+    "tareasLargas": 6
+   },
+   "espejo-ecos-1440": {
+    "frio": {
+     "media": 7.48,
+     "p95": 13.2,
+     "maximo": 637.7,
+     "mayoresDe20": 19,
+     "cuadros": 846
+    },
+    "calma": {
+     "media": 3.07,
+     "p95": 3.9,
+     "maximo": 13.1,
+     "mayoresDe20": 0,
+     "cuadros": 1631
+    },
+    "maxima": {
+     "media": 3.94,
+     "p95": 7.3,
+     "maximo": 13.7,
+     "mayoresDe20": 0,
+     "cuadros": 1541
+    },
+    "noche": {
+     "media": 3.14,
+     "p95": 3.8,
+     "maximo": 9.2,
+     "mayoresDe20": 0,
+     "cuadros": 1594
+    },
+    "efectoDeDia": {
+     "media": 3.13,
+     "p95": 3.8,
+     "maximo": 10.5,
+     "mayoresDe20": 0,
+     "cuadros": 2557
+    },
+    "efectoDeNoche": {
+     "media": 3.18,
+     "p95": 3.6,
+     "maximo": 11.9,
+     "mayoresDe20": 0,
+     "cuadros": 2525
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 8
+   },
+   "espejo-ecos-390": {
+    "frio": {
+     "media": 7.17,
+     "p95": 11.1,
+     "maximo": 1106,
+     "mayoresDe20": 7,
+     "cuadros": 637
+    },
+    "calma": {
+     "media": 2.38,
+     "p95": 3.4,
+     "maximo": 10.8,
+     "mayoresDe20": 0,
+     "cuadros": 2102
+    },
+    "maxima": {
+     "media": 2.57,
+     "p95": 3.5,
+     "maximo": 10.2,
+     "mayoresDe20": 0,
+     "cuadros": 2389
+    },
+    "noche": {
+     "media": 2.19,
+     "p95": 2.7,
+     "maximo": 10.4,
+     "mayoresDe20": 0,
+     "cuadros": 2290
+    },
+    "efectoDeDia": {
+     "media": 2.26,
+     "p95": 3.1,
+     "maximo": 10.6,
+     "mayoresDe20": 0,
+     "cuadros": 3566
+    },
+    "efectoDeNoche": {
+     "media": 2.16,
+     "p95": 2.7,
+     "maximo": 9.8,
+     "mayoresDe20": 0,
+     "cuadros": 3725
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 5
+   },
+   "espejo-espiral-1440": {
+    "frio": {
+     "media": 4.75,
+     "p95": 10.6,
+     "maximo": 296.5,
+     "mayoresDe20": 8,
+     "cuadros": 1011
+    },
+    "calma": {
+     "media": 2.89,
+     "p95": 3.8,
+     "maximo": 8.4,
+     "mayoresDe20": 0,
+     "cuadros": 1732
+    },
+    "maxima": {
+     "media": 3.78,
+     "p95": 6.6,
+     "maximo": 15.7,
+     "mayoresDe20": 0,
+     "cuadros": 1613
+    },
+    "noche": {
+     "media": 3.05,
+     "p95": 3.5,
+     "maximo": 15.6,
+     "mayoresDe20": 0,
+     "cuadros": 1640
+    },
+    "efectoDeDia": {
+     "media": 2.96,
+     "p95": 3.8,
+     "maximo": 12,
+     "mayoresDe20": 0,
+     "cuadros": 2706
+    },
+    "efectoDeNoche": {
+     "media": 2.96,
+     "p95": 3.4,
+     "maximo": 11.9,
+     "mayoresDe20": 0,
+     "cuadros": 2711
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 4
+   },
+   "espejo-espiral-390": {
+    "frio": {
+     "media": 6.68,
+     "p95": 10.9,
+     "maximo": 399.9,
+     "mayoresDe20": 9,
+     "cuadros": 641
+    },
+    "calma": {
+     "media": 2.2,
+     "p95": 2.7,
+     "maximo": 6.5,
+     "mayoresDe20": 0,
+     "cuadros": 2276
+    },
+    "maxima": {
+     "media": 2.64,
+     "p95": 3.8,
+     "maximo": 8.6,
+     "mayoresDe20": 0,
+     "cuadros": 2358
+    },
+    "noche": {
+     "media": 2.2,
+     "p95": 2.6,
+     "maximo": 6.5,
+     "mayoresDe20": 0,
+     "cuadros": 2282
+    },
+    "efectoDeDia": {
+     "media": 2.14,
+     "p95": 2.6,
+     "maximo": 8.8,
+     "mayoresDe20": 0,
+     "cuadros": 3756
+    },
+    "efectoDeNoche": {
+     "media": 2.21,
+     "p95": 2.6,
+     "maximo": 7.4,
+     "mayoresDe20": 0,
+     "cuadros": 3633
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 6
+   },
+   "espejo-pliegue-1440": {
+    "frio": {
+     "media": 6.79,
+     "p95": 11.8,
+     "maximo": 611.9,
+     "mayoresDe20": 14,
+     "cuadros": 861
+    },
+    "calma": {
+     "media": 3.06,
+     "p95": 3.8,
+     "maximo": 10.6,
+     "mayoresDe20": 0,
+     "cuadros": 1635
+    },
+    "maxima": {
+     "media": 3.89,
+     "p95": 7.2,
+     "maximo": 18.9,
+     "mayoresDe20": 0,
+     "cuadros": 1552
+    },
+    "noche": {
+     "media": 3.12,
+     "p95": 3.5,
+     "maximo": 8.1,
+     "mayoresDe20": 0,
+     "cuadros": 1607
+    },
+    "efectoDeDia": {
+     "media": 3.1,
+     "p95": 3.8,
+     "maximo": 9.8,
+     "mayoresDe20": 0,
+     "cuadros": 2582
+    },
+    "efectoDeNoche": {
+     "media": 3.36,
+     "p95": 4.5,
+     "maximo": 12,
+     "mayoresDe20": 0,
+     "cuadros": 2391
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 6
+   },
+   "espejo-pliegue-390": {
+    "frio": {
+     "media": 6.84,
+     "p95": 10.9,
+     "maximo": 884,
+     "mayoresDe20": 8,
+     "cuadros": 626
+    },
+    "calma": {
+     "media": 2.13,
+     "p95": 2.7,
+     "maximo": 12.3,
+     "mayoresDe20": 0,
+     "cuadros": 2344
+    },
+    "maxima": {
+     "media": 2.6,
+     "p95": 3.7,
+     "maximo": 8.1,
+     "mayoresDe20": 0,
+     "cuadros": 2388
+    },
+    "noche": {
+     "media": 2.17,
+     "p95": 2.7,
+     "maximo": 7.5,
+     "mayoresDe20": 0,
+     "cuadros": 2300
+    },
+    "efectoDeDia": {
+     "media": 2.47,
+     "p95": 3.9,
+     "maximo": 11.7,
+     "mayoresDe20": 0,
+     "cuadros": 3249
+    },
+    "efectoDeNoche": {
+     "media": 2.14,
+     "p95": 2.5,
+     "maximo": 7.4,
+     "mayoresDe20": 0,
+     "cuadros": 3755
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 5
+   },
+   "polvo-1440": {
+    "frio": {
+     "media": 6.01,
+     "p95": 10.5,
+     "maximo": 662.5,
+     "mayoresDe20": 9,
+     "cuadros": 999
+    },
+    "calma": {
+     "media": 1.44,
+     "p95": 2.6,
+     "maximo": 8.3,
+     "mayoresDe20": 0,
+     "cuadros": 3473
+    },
+    "maxima": {
+     "media": 2.21,
+     "p95": 3.3,
+     "maximo": 10,
+     "mayoresDe20": 0,
+     "cuadros": 3036
+    },
+    "noche": {
+     "media": 1.28,
+     "p95": 1.9,
+     "maximo": 7.4,
+     "mayoresDe20": 0,
+     "cuadros": 3907
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 6
+   },
+   "polvo-390": {
+    "frio": {
+     "media": 5.16,
+     "p95": 10.2,
+     "maximo": 149.4,
+     "mayoresDe20": 8,
+     "cuadros": 669
+    },
+    "calma": {
+     "media": 1.64,
+     "p95": 2,
+     "maximo": 9.7,
+     "mayoresDe20": 0,
+     "cuadros": 3063
+    },
+    "maxima": {
+     "media": 2.05,
+     "p95": 2.8,
+     "maximo": 7.2,
+     "mayoresDe20": 0,
+     "cuadros": 3374
+    },
+    "noche": {
+     "media": 1.65,
+     "p95": 2,
+     "maximo": 6.9,
+     "mayoresDe20": 0,
+     "cuadros": 3041
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 6
+   },
+   "producto-1440": {
+    "frio": {
+     "media": 5.7,
+     "p95": 11.9,
+     "maximo": 266.3,
+     "mayoresDe20": 10,
+     "cuadros": 902
+    },
+    "calma": {
+     "media": 2.76,
+     "p95": 3.5,
+     "maximo": 10.8,
+     "mayoresDe20": 0,
+     "cuadros": 1810
+    },
+    "maxima": {
+     "media": 3.67,
+     "p95": 5.1,
+     "maximo": 12.5,
+     "mayoresDe20": 0,
+     "cuadros": 1672
+    },
+    "noche": {
+     "media": 2.91,
+     "p95": 3.4,
+     "maximo": 9.7,
+     "mayoresDe20": 0,
+     "cuadros": 1721
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 7
+   },
+   "producto-390": {
+    "frio": {
+     "media": 8.61,
+     "p95": 11.1,
+     "maximo": 1150.6,
+     "mayoresDe20": 10,
+     "cuadros": 640
+    },
+    "calma": {
+     "media": 2.08,
+     "p95": 2.5,
+     "maximo": 8.9,
+     "mayoresDe20": 0,
+     "cuadros": 2401
+    },
+    "maxima": {
+     "media": 2.48,
+     "p95": 3.4,
+     "maximo": 7.3,
+     "mayoresDe20": 0,
+     "cuadros": 2497
+    },
+    "noche": {
+     "media": 2.09,
+     "p95": 2.5,
+     "maximo": 7.2,
+     "mayoresDe20": 0,
+     "cuadros": 2403
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 7
+   }
+  },
+  "vsync": {
+   "polvo-1440": {
+    "frio": {
+     "media": 18.42,
+     "p95": 13.6,
+     "maximo": 680.3,
+     "mayoresDe20": 8,
+     "cuadros": 210
+    },
+    "calma": {
+     "media": 14.38,
+     "p95": 13.7,
+     "maximo": 373.8,
+     "mayoresDe20": 1,
+     "cuadros": 347
+    },
+    "maxima": {
+     "media": 13.34,
+     "p95": 13.8,
+     "maximo": 14,
+     "mayoresDe20": 0,
+     "cuadros": 998
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "maximo": 14.1,
+     "mayoresDe20": 0,
+     "cuadros": 374
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 5
+   },
+   "polvo-390": {
+    "frio": {
+     "media": 28.53,
+     "p95": 146.6,
+     "maximo": 320.2,
+     "mayoresDe20": 17,
+     "cuadros": 101
+    },
+    "calma": {
+     "media": 13.34,
+     "p95": 13.7,
+     "maximo": 14,
+     "mayoresDe20": 0,
+     "cuadros": 374
+    },
+    "maxima": {
+     "media": 13.34,
+     "p95": 13.7,
+     "maximo": 14,
+     "mayoresDe20": 0,
+     "cuadros": 902
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "maximo": 13.9,
+     "mayoresDe20": 0,
+     "cuadros": 374
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 3
+   },
+   "producto-1440": {
+    "frio": {
+     "media": 23.48,
+     "p95": 40.1,
+     "maximo": 493.5,
+     "mayoresDe20": 12,
+     "cuadros": 167
+    },
+    "calma": {
+     "media": 14.42,
+     "p95": 13.8,
+     "maximo": 386.9,
+     "mayoresDe20": 1,
+     "cuadros": 346
+    },
+    "maxima": {
+     "media": 13.34,
+     "p95": 13.7,
+     "maximo": 14.1,
+     "mayoresDe20": 0,
+     "cuadros": 1028
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.8,
+     "maximo": 13.9,
+     "mayoresDe20": 0,
+     "cuadros": 374
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 4
+   },
+   "producto-390": {
+    "frio": {
+     "media": 25.91,
+     "p95": 120,
+     "maximo": 373.4,
+     "mayoresDe20": 15,
+     "cuadros": 122
+    },
+    "calma": {
+     "media": 13.34,
+     "p95": 13.7,
+     "maximo": 14.2,
+     "mayoresDe20": 0,
+     "cuadros": 374
+    },
+    "maxima": {
+     "media": 13.34,
+     "p95": 13.7,
+     "maximo": 14.1,
+     "mayoresDe20": 0,
+     "cuadros": 900
+    },
+    "noche": {
+     "media": 13.34,
+     "p95": 13.7,
+     "maximo": 14,
+     "mayoresDe20": 0,
+     "cuadros": 374
+    },
+    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "avisos": [
+     "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+    ],
+    "tareasLargas": 3
+   }
+  }
+ }
+}

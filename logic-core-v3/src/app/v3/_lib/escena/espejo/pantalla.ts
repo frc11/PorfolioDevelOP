@@ -63,9 +63,13 @@ vec3 leerFondo( vec2 aqui, vec2 desde ) {
 }
 // Con el prisma: los tres canales corridos apenas a lo largo de «n» (px).
 vec3 leerConPrisma( vec2 aqui, vec2 desde, vec2 n ) {
-	if ( uPrisma < 0.5 ) return leerFondo( aqui, desde );
-	vec2 corre = n / uResolucion;
-	return vec3( leerFondo( aqui, desde + corre ).r, leerFondo( aqui, desde ).g, leerFondo( aqui, desde - corre ).b );
+	// Sin un retorno temprano: el compilador de D3D avisaba de una variable sin inicializar (visto en la consola del banco).
+	vec3 color = leerFondo( aqui, desde );
+	if ( uPrisma >= 0.5 ) {
+		vec2 corre = n / uResolucion;
+		color = vec3( leerFondo( aqui, desde + corre ).r, color.g, leerFondo( aqui, desde - corre ).b );
+	}
+	return color;
 }
 `
 

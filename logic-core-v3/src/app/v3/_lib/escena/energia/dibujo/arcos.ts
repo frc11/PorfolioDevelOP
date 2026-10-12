@@ -168,24 +168,29 @@ void main() {
 	vTexto = 0.0;
 	vPeso = 0.0;
 	vDistancia = 0.0;
-	vec4 c = projectionMatrix * viewMatrix * vec4( aPunto, 1.0 );
-	if ( aForma.y <= 0.0 || aForma.x < 0.0 || c.w <= 0.05 ) {
+	// [PULIDO 18] El vértice del otro lado de la cinta (que el halo no usaba) va al medio del tramo: el doble de puntos, sin engordar el
+	// halo (con el radio por el paso, una descarga larga y cercana quedaba como una columna blanca gruesa).
+	vec3 punto = aForma.x < 0.0 ? mix( aPunto, aDespues, 0.5 ) : aPunto;
+	vec4 c = projectionMatrix * viewMatrix * vec4( punto, 1.0 );
+	vec4 cP = projectionMatrix * viewMatrix * vec4( aPunto, 1.0 );
+	if ( aForma.y <= 0.0 || c.w <= 0.05 || cP.w <= 0.05 ) {
 		gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 );
 		gl_PointSize = 0.0;
 		return;
 	}
 	vec4 cD = projectionMatrix * viewMatrix * vec4( aDespues, 1.0 );
-	vec2 s = c.xy / c.w * uResolucion * 0.5;
+	vec2 s = cP.xy / cP.w * uResolucion * 0.5;
 	vec2 d = cD.w > 0.05 ? cD.xy / cD.w * uResolucion * 0.5 : s;
 	float largo = aExtra.x;
 	float rama = aExtra.z;
 	float afina = rama > 0.5 ? mix( 1.0, 0.15, largo ) : 0.12 + 0.88 * smoothstep( 0.0, 0.16, largo ) * smoothstep( 1.0, 0.84, largo );
 	afina = mix( 1.0, afina, uArcoForma.w );
-	// El radio, al menos lo que avanza hasta el siguiente punto: en un arco largo los puntos quedaban separados (un collar de cuentas);
-	// un arco largo tiene así un halo más ancho, parejo.
-	float paso = length( d - s );
-	float radio = max( max( 0.75, uArcoForma.x * aForma.y * uPixel * afina * ${f(HALO_DEL_ARCO.radio)} ), 1.1 * paso * afina );
-	vPeso = clamp( paso / ( 2.2 * radio ), 0.05, 0.85 ) * ( rama > 0.5 ? 0.6 : 1.0 );
+	// El radio, al menos lo que hay hasta el punto que sigue (la mitad del tramo: hay uno en el medio): en un arco largo los puntos
+	// quedaban separados (un collar de cuentas). Lo que crece por el paso no suma luz: más ancho, más tenue (base / radio).
+	float paso = 0.5 * length( d - s );
+	float base = max( 0.75, uArcoForma.x * aForma.y * uPixel * afina * ${f(HALO_DEL_ARCO.radio)} );
+	float radio = max( base, 1.1 * paso * afina );
+	vPeso = clamp( paso / ( 2.2 * radio ), 0.05, 0.85 ) * ( base / radio ) * ( rama > 0.5 ? 0.6 : 1.0 );
 	gl_PointSize = 2.0 * radio * ${f(HALO_DEL_ARCO.llega)};
 	gl_Position = c;
 	vTexto = adentroDelTexto( c.xy / c.w );

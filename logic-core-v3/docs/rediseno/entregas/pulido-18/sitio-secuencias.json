@@ -1,0 +1,887 @@
+{
+ "que": "PULIDO 18 · las secuencias del banco del SITIO (el build de medición en .next-probe, el Chrome del banco en la NVIDIA): P1 (el plasma A: noche en Portfolio, día en el hero, el piso en Números, el logo bajando en el encastre del pie, puntero, clic, mantener-soltar; a 390 la resumida con el dedo) y P2 (cada efecto del espejo, de día en el hero y de noche en Números; los ecos también con el logo bajando; el cristal con el prisma). 8 cuadros del compositor cada ~0,15 s (en P2, repartidos en el ciclo del efecto).",
+ "secuencias": {
+  "p1-1440": {
+   "entorno": "producto",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-1440/1-noche.png",
+     "tiempos": [
+      299,
+      446,
+      606,
+      753,
+      900,
+      1046,
+      1194,
+      1353
+     ]
+    },
+    "dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-1440/2-dia.png",
+     "tiempos": [
+      300,
+      447,
+      593,
+      754,
+      900,
+      1047,
+      1207,
+      1349
+     ]
+    },
+    "piso": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-1440/3-piso.png",
+     "tiempos": [
+      302,
+      454,
+      601,
+      757,
+      895,
+      1055,
+      1201,
+      1348
+     ]
+    },
+    "logo": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-1440/4-logo-bajando.png",
+     "tiempos": [
+      5926,
+      6126,
+      6325,
+      6530,
+      6727,
+      6927,
+      7125,
+      7328
+     ]
+    },
+    "puntero": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-1440/5-puntero.png",
+     "tiempos": [
+      505,
+      648,
+      801,
+      948,
+      1097,
+      1257,
+      1411,
+      1548
+     ]
+    },
+    "clic": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-1440/6-clic.png",
+     "tiempos": [
+      200,
+      357,
+      494,
+      643,
+      800,
+      947,
+      1093,
+      1254
+     ]
+    },
+    "carga": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-1440/7-mantener-soltar.png",
+     "tiempos": [
+      1266,
+      1412,
+      1565,
+      1723,
+      1865,
+      2023,
+      2158,
+      2308
+     ]
+    }
+   },
+   "golpeMs": 7324,
+   "contados": {
+    "par": 116,
+    "logo": 24,
+    "cursor": 96,
+    "pulso": 2,
+    "descarga": 1
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p1-390": {
+   "entorno": "producto",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-390/1-noche.png",
+     "tiempos": [
+      301,
+      456,
+      599,
+      755,
+      895,
+      1055,
+      1202,
+      1347
+     ]
+    },
+    "dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-390/2-dia.png",
+     "tiempos": [
+      301,
+      456,
+      598,
+      749,
+      893,
+      1048,
+      1202,
+      1343
+     ]
+    },
+    "piso": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-390/3-piso.png",
+     "tiempos": [
+      302,
+      454,
+      598,
+      756,
+      894,
+      1050,
+      1201,
+      1345
+     ]
+    },
+    "clic": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-390/6-clic.png",
+     "tiempos": [
+      206,
+      342,
+      499,
+      659,
+      800,
+      958,
+      1113,
+      1249
+     ]
+    },
+    "carga": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-390/7-mantener-soltar.png",
+     "tiempos": [
+      1293,
+      1439,
+      1589,
+      1746,
+      1893,
+      2038,
+      2193,
+      2346
+     ]
+    },
+    "logo": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1-390/4-logo-bajando.png",
+     "tiempos": [
+      3301,
+      3487,
+      3697,
+      3897,
+      4098,
+      4287,
+      4488,
+      4698
+     ]
+    }
+   },
+   "golpeMs": 4695,
+   "contados": {
+    "par": 106,
+    "logo": 21,
+    "cursor": 5,
+    "pulso": 1,
+    "descarga": 1
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p1b-1440": {
+   "entorno": "producto",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "piso": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1b-1440/3-piso.png",
+     "tiempos": [
+      294,
+      453,
+      594,
+      748,
+      906,
+      1047,
+      1201,
+      1357
+     ]
+    },
+    "clic": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1b-1440/6-clic.png",
+     "tiempos": [
+      201,
+      348,
+      494,
+      655,
+      798,
+      944,
+      1094,
+      1255
+     ]
+    },
+    "carga": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p1b-1440/7-mantener-soltar.png",
+     "tiempos": [
+      1254,
+      1413,
+      1558,
+      1706,
+      1855,
+      2002,
+      2149,
+      2306
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 66,
+    "logo": 11,
+    "cursor": 42,
+    "pulso": 2,
+    "descarga": 1
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2-caleidoscopio-1440": {
+   "entorno": "producto,espejo=caleidoscopio",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-caleidoscopio-1440/e1-dia.png",
+     "tiempos": [
+      3,
+      858,
+      1712,
+      2575,
+      3431,
+      4283,
+      5151,
+      6006
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-caleidoscopio-1440/e2-noche.png",
+     "tiempos": [
+      2,
+      859,
+      1711,
+      2569,
+      3422,
+      4289,
+      5140,
+      6004
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 31,
+    "logo": 11,
+    "cursor": 56,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [
+    "THREE.WebGLProgram: Program Info Log: (143,1): warning X4000: use of potentially uninitialized variable (f_leerConPrisma)"
+   ],
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (143,1): warning X4000: use of potentially uninitialized variable (f_leerConPrisma)"
+   ]
+  },
+  "p2-caleidoscopio-390": {
+   "entorno": "producto,espejo=caleidoscopio",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-caleidoscopio-390/e1-dia.png",
+     "tiempos": [
+      1,
+      859,
+      1713,
+      2580,
+      3434,
+      4287,
+      5140,
+      6009
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-caleidoscopio-390/e2-noche.png",
+     "tiempos": [
+      1,
+      859,
+      1715,
+      2571,
+      3428,
+      4282,
+      5141,
+      6002
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 72,
+    "logo": 10,
+    "cursor": 0,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2-cristal-1440": {
+   "entorno": "producto,espejo=cristal",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-cristal-1440/e1-dia.png",
+     "tiempos": [
+      1,
+      577,
+      1148,
+      1722,
+      2282,
+      2866,
+      3429,
+      4009
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-cristal-1440/e2-noche.png",
+     "tiempos": [
+      10,
+      575,
+      1136,
+      1709,
+      2287,
+      2853,
+      3432,
+      3995
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 53,
+    "logo": 9,
+    "cursor": 52,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [
+    "THREE.WebGLProgram: Program Info Log: (162,1): warning X4000: use of potentially uninitialized variable (f_leerConPrisma)"
+   ],
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (162,1): warning X4000: use of potentially uninitialized variable (f_leerConPrisma)"
+   ]
+  },
+  "p2-cristal-390": {
+   "entorno": "producto,espejo=cristal",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-cristal-390/e1-dia.png",
+     "tiempos": [
+      0,
+      573,
+      1145,
+      1713,
+      2292,
+      2859,
+      3431,
+      4001
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-cristal-390/e2-noche.png",
+     "tiempos": [
+      0,
+      574,
+      1148,
+      1708,
+      2288,
+      2850,
+      3430,
+      4003
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 50,
+    "logo": 8,
+    "cursor": 0,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2-ecos-1440": {
+   "entorno": "producto,espejo=ecos",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-ecos-1440/e1-dia.png",
+     "tiempos": [
+      5,
+      285,
+      552,
+      833,
+      1113,
+      1392,
+      1673,
+      1953
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-ecos-1440/e2-noche.png",
+     "tiempos": [
+      1,
+      281,
+      561,
+      831,
+      1111,
+      1389,
+      1675,
+      1943
+     ]
+    },
+    "logo": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-ecos-1440/4-logo-bajando.png",
+     "tiempos": [
+      5518,
+      5728,
+      5921,
+      6118,
+      6318,
+      6519,
+      6717,
+      6917
+     ]
+    }
+   },
+   "golpeMs": 6917,
+   "contados": {
+    "par": 56,
+    "logo": 12,
+    "cursor": 29,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2-ecos-390": {
+   "entorno": "producto,espejo=ecos",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-ecos-390/e1-dia.png",
+     "tiempos": [
+      1,
+      278,
+      552,
+      843,
+      1116,
+      1400,
+      1669,
+      1950
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-ecos-390/e2-noche.png",
+     "tiempos": [
+      4,
+      287,
+      552,
+      837,
+      1118,
+      1398,
+      1678,
+      1958
+     ]
+    },
+    "logo": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-ecos-390/4-logo-bajando.png",
+     "tiempos": [
+      3550,
+      3750,
+      3950,
+      4139,
+      4349,
+      4539,
+      4750,
+      4950
+     ]
+    }
+   },
+   "golpeMs": 4950,
+   "contados": {
+    "par": 47,
+    "logo": 11,
+    "cursor": 0,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2-espiral-1440": {
+   "entorno": "producto,espejo=espiral",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-espiral-1440/e1-dia.png",
+     "tiempos": [
+      1,
+      948,
+      1881,
+      2840,
+      3762,
+      4709,
+      5656,
+      6603
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-espiral-1440/e2-noche.png",
+     "tiempos": [
+      1,
+      938,
+      1890,
+      2832,
+      3775,
+      4717,
+      5670,
+      6592
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 62,
+    "logo": 10,
+    "cursor": 72,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2-espiral-390": {
+   "entorno": "producto,espejo=espiral",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-espiral-390/e1-dia.png",
+     "tiempos": [
+      1,
+      949,
+      1882,
+      2822,
+      3772,
+      4711,
+      5658,
+      6604
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-espiral-390/e2-noche.png",
+     "tiempos": [
+      0,
+      944,
+      1894,
+      2827,
+      3763,
+      4708,
+      5663,
+      6602
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 58,
+    "logo": 11,
+    "cursor": 0,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2-pliegue-1440": {
+   "entorno": "producto,espejo=pliegue",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-pliegue-1440/e1-dia.png",
+     "tiempos": [
+      459,
+      1313,
+      2630,
+      3945,
+      5247,
+      6579,
+      7888,
+      9208
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-pliegue-1440/e2-noche.png",
+     "tiempos": [
+      464,
+      1323,
+      2636,
+      3941,
+      5251,
+      6573,
+      7890,
+      9196
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 73,
+    "logo": 13,
+    "cursor": 73,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2-pliegue-390": {
+   "entorno": "producto,espejo=pliegue",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-pliegue-390/e1-dia.png",
+     "tiempos": [
+      468,
+      1318,
+      2625,
+      3950,
+      5256,
+      6567,
+      7894,
+      9205
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2-pliegue-390/e2-noche.png",
+     "tiempos": [
+      468,
+      1323,
+      2634,
+      3944,
+      5254,
+      6577,
+      7889,
+      9196
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 69,
+    "logo": 12,
+    "cursor": 0,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2b-caleidoscopio-1440": {
+   "entorno": "producto,espejo=caleidoscopio",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2b-caleidoscopio-1440/e1-dia.png",
+     "tiempos": [
+      1,
+      858,
+      1711,
+      2575,
+      3435,
+      4285,
+      5149,
+      6004
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2b-caleidoscopio-1440/e2-noche.png",
+     "tiempos": [
+      10,
+      864,
+      1711,
+      2577,
+      3431,
+      4292,
+      5152,
+      6006
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 53,
+    "logo": 10,
+    "cursor": 54,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2b-cristal-1440": {
+   "entorno": "producto,espejo=cristal",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2b-cristal-1440/e1-dia.png",
+     "tiempos": [
+      7,
+      571,
+      1145,
+      1718,
+      2292,
+      2862,
+      3436,
+      4009
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2b-cristal-1440/e2-noche.png",
+     "tiempos": [
+      1,
+      570,
+      1134,
+      1710,
+      2285,
+      2852,
+      3425,
+      3991
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 45,
+    "logo": 9,
+    "cursor": 54,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  },
+  "p2c-cristal-1440": {
+   "entorno": "producto,espejo=cristal",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2c-cristal-1440/e1-dia.png",
+     "tiempos": [
+      9,
+      585,
+      1157,
+      1719,
+      2299,
+      2859,
+      3449,
+      4015
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2c-cristal-1440/e2-noche.png",
+     "tiempos": [
+      1,
+      571,
+      1134,
+      1718,
+      2292,
+      2865,
+      3428,
+      3998
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 26,
+    "logo": 8,
+    "cursor": 45,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [
+    "THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: s"
+   ],
+   "errores": [
+    "warn: THREE.WebGLProgram: Program Info Log: (221,81-129): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(220,37-61): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(221,82-106): warning X4122: sum of 1 "
+   ]
+  },
+  "p2prisma-cristal-1440": {
+   "entorno": "producto,espejo=cristal,espejo-prisma=si",
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "momentos": {
+    "espejo-dia": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2prisma-cristal-1440/e1-dia.png",
+     "tiempos": [
+      1,
+      574,
+      1147,
+      1708,
+      2281,
+      2854,
+      3428,
+      4001
+     ]
+    },
+    "espejo-noche": {
+     "hoja": "~/.cache/b4-medicion/pulido-18/p2prisma-cristal-1440/e2-noche.png",
+     "tiempos": [
+      6,
+      570,
+      1150,
+      1723,
+      2286,
+      2859,
+      3433,
+      4017
+     ]
+    }
+   },
+   "golpeMs": null,
+   "contados": {
+    "par": 40,
+    "logo": 9,
+    "cursor": 52,
+    "pulso": 0,
+    "descarga": 0
+   },
+   "consola": [],
+   "errores": []
+  }
+ }
+}

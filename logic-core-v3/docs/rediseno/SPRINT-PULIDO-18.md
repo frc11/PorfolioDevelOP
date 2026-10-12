@@ -245,10 +245,55 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 | + espiral activa · de día | 0,82 / 1,1 / 4,7 | 0,25 / 1,07 | 0,59 / 0,8 / 3,4 | 0,08 / 0,52 | 16,2 / 9,8 |
 | + espiral activa · de noche | 0,84 / 1,2 / 4,3 | 0,27 / 1,08 | 0,58 / 0,8 / 4,9 | 0,1 / 0,77 | 16,2 / 9,7 |
 
+### El banco del sitio (la memoria volvió al final del sprint)
+- HECHO · A las 00:30 la memoria disponible pasó de ~1,1 a 6,5 GB (el Chrome del humano bajó de 8 a 1 GB). El build de medición en
+  `.next-probe` (206 s), el servidor y el Chrome del banco (la NVIDIA RTX 5050, D3D11: la placa leída en cada página medida), en
+  cadena (`_scripts/p-todo.sh`, ~25 min): P1 a 1440 y 390, P2 por efecto a 1440 y 390, el prisma, la tanda sin vsync (7
+  configuraciones × 2 anchos, cada una con las cachés borradas) y una con vsync. Recibos: `entregas/pulido-18/sitio-secuencias.json`
+  y `sitio-medido.json` (s69 los lee). Las hojas, en `~/.cache/b4-medicion/pulido-18/` (`p1-*`, `p2-*`, `p2prisma-*` y, después de los
+  arreglos, `p1b-*`, `p2b-*`, `p2c-*`).
+- LO VISTO (P1): de noche (Portfolio y Números) el plasma A es un campo de chispas nítidas con halo corto, sin la niebla de PULIDO 17,
+  con sus arcos (un rayo con núcleo y halo); de día (el hero) el negativo: motas oscuras chicas y algún rayo de tinta; en el piso,
+  nada atraviesa el papel; el logo baja al pie y el plasma se queda; el clic: el rayo sube en V desde el logo, con su destello; a 390,
+  lo mismo con el dedo, con los textos limpios.
+- LO VISTO (P2): el CRISTAL raja la cúpula del moiré detrás del logo (de día) y arma una red de grietas claras sobre la retícula de
+  Números (de noche); el CALEIDOSCOPIO, un rosetón; la ESPIRAL, un vórtice que retuerce la cúpula (el más vistoso); el PLIEGUE se nota
+  de noche sobre la retícula de Números (se dobla y vuelve) y de día en el hero apenas; los ECOS, copias tenues del logo detrás al bajar
+  al pie (de día, apenas). El prisma, un fleco de color apenas visible.
+- LO QUE EL SITIO MOSTRÓ Y SE ARREGLÓ: (1) al soltar (la descarga), a 1440, una columna blanca gruesa y saturada hasta el piso: el halo
+  de puntos crecía con el paso (el arreglo del collar) y además sumaba luz. Ahora el vértice del otro lado de la cinta va al medio del
+  tramo (el doble de puntos) y lo que crece por el paso no suma luz (más ancho, más tenue). Vuelto a grabar en el sitio: rayos finos
+  (`p1b-1440`). (2) La consola: un aviso del compilador de D3D, «variable posiblemente sin inicializar» en `leerConPrisma` (el retorno
+  temprano). Reescrita sin retorno temprano: con las cachés de programas borradas queda sólo el aviso de la base (X4122, que también
+  sale con el polvo solo) (`p2c-cristal-1440`). (3) El disparo `scroll`, con un recorrido entero de la página (`_scripts/p-scroll.ts`):
+  enciende al cruzar Quiénes somos → Números (y 2760 a 3600) y al llegar a Por qué develOP (25680 a 26560); Servicios → Tu panel nunca
+  (los dos son papel opaco y ahí la escena está en pausa: la temperatura no cambia en 0,8 s). Ese borde se sacó de la lista.
+- LO MEDIDO (la NVIDIA): sin vsync y en caliente, ningún cuadro de más de 20 ms en ninguna configuración (el peor, 18,9 ms: el pliegue
+  al máximo a 1440). El plasma A le suma al polvo +1,46 ms por cuadro al máximo a 1440 (en PULIDO 17, +2,04: era la basura de
+  `Math.hypot`) y +0,43 a 390; cada efecto, ~+0,3 ms a 1440 y casi nada a 390. Con vsync, todo en los 13,34 ms de la pantalla
+  (máx. 14,2), salvo el cuadro largo de la calma a 1440 que también tiene el polvo solo (el campo del logo que se publica: s68). En frío
+  (la primera visita), los tirones del primer scroll son del sitio (el polvo solo, hasta 662 ms); con el plasma, uno de 1,15 s a 390
+  en una sola corrida (ver «Lo que no quedó bien»).
+
+| (sin vsync; media / máx., ms) | 1440 · calma | 1440 · al máximo | 1440 · noche | 1440 · el efecto (día · noche) | 1440 · frío (máx.) | 390 · calma | 390 · al máximo | 390 · noche | 390 · el efecto (día · noche) | 390 · frío (máx.) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| el polvo (la base) | 1,44 / 8,3 | 2,21 / 10 | 1,28 / 7,4 | — | 662,5 | 1,64 / 9,7 | 2,05 / 7,2 | 1,65 / 6,9 | — | 149,4 |
+| el plasma A (el producto) | 2,76 / 10,8 | 3,67 / 12,5 | 2,91 / 9,7 | — | 266,3 | 2,08 / 8,9 | 2,48 / 7,3 | 2,09 / 7,2 | — | 1150,6 |
+| + cristal | 3,03 / 11,3 | 3,98 / 16,2 | 3,2 / 7,9 | 3,1 / 9,7 · 3,22 / 12,6 | 543,6 | 2,07 / 13,3 | 2,47 / 9,5 | 2,04 / 5,8 | 2,06 / 7,5 · 2,06 / 10,5 | 441,3 |
+| + pliegue | 3,06 / 10,6 | 3,89 / 18,9 | 3,12 / 8,1 | 3,1 / 9,8 · 3,36 / 12 | 611,9 | 2,13 / 12,3 | 2,6 / 8,1 | 2,17 / 7,5 | 2,47 / 11,7 · 2,14 / 7,4 | 884 |
+| + caleidoscopio | 3,06 / 8,6 | 3,9 / 14,4 | 3,11 / 10,1 | 3,09 / 8,9 · 3,13 / 13,2 | 867,6 | 2,13 / 9,3 | 2,59 / 7,7 | 2,21 / 8,2 | 2,11 / 9,1 · 2,13 / 7,5 | 423,8 |
+| + ecos | 3,07 / 13,1 | 3,94 / 13,7 | 3,14 / 9,2 | 3,13 / 10,5 · 3,18 / 11,9 | 637,7 | 2,38 / 10,8 | 2,57 / 10,2 | 2,19 / 10,4 | 2,26 / 10,6 · 2,16 / 9,8 | 1106 |
+| + espiral | 2,89 / 8,4 | 3,78 / 15,7 | 3,05 / 15,6 | 2,96 / 12 · 2,96 / 11,9 | 296,5 | 2,2 / 6,5 | 2,64 / 8,6 | 2,2 / 6,5 | 2,14 / 8,8 · 2,21 / 7,4 | 399,9 |
+
+| (con vsync, la pantalla a 75 Hz: 13,34 ms) | 1440 · calma | 1440 · al máximo | 1440 · noche | 390 · calma | 390 · al máximo | 390 · noche |
+|---|---|---|---|---|---|---|
+| el polvo (la base) | 14,38 / 373,8 | 13,34 / 14 | 13,34 / 14,1 | 13,34 / 14 | 13,34 / 14 | 13,34 / 13,9 |
+| el plasma A (el producto) | 14,42 / 386,9 | 13,34 / 14,1 | 13,34 / 13,9 | 13,34 / 14,2 | 13,34 / 14,1 | 13,34 / 14 |
+
 ### Final · verificar
 - PENDIENTE.
 
-## VERIFICAR TRAS REINICIO (el banco del sitio, cuando haya 3 GB libres) — ver «El banco del sitio» si llegó a correr
+## VERIFICAR TRAS REINICIO (el banco del sitio, cuando haya 3 GB libres) — HECHO al final (ver «El banco del sitio»); los comandos quedan para volver a correrlo
 
 La memoria disponible nunca llegó a 3 GB en todo el sprint (de 0,86 a 2,4 GB; el Chrome del humano, 6 a 8 GB en ~50 procesos): el
 portero del banco (`banco11.ts conectar`) se niega por debajo de 3000 MB y la regla del sprint dice «sin banco». Todo lo visto y medido
@@ -273,6 +318,8 @@ es del MINI-BANCO (el plasma real y el espejo en una escena chica). Lo pendiente
 | Arranque | 81 GB | 1089 MB | 934 MB | el Chrome del humano abierto; sin banco |
 | Mini-banco: las hojas (33, regeneradas con el aspecto nuevo) | 78 GB | 1121 MB | 982 MB | un Chrome sin ventana (~250 MB); 7,8 MB de hojas |
 | Mini-banco: lo medido (t1, t2, t3 y las repetidas; ~70 corridas de un Chrome sin ventana) | 71–79 GB | 1121 → 6483 MB | 982 → 931 MB | a mitad de la tanda t3 el humano cerró su Chrome (quedó en 1 GB) |
+| Banco del sitio: el build, P1 y P2, la medición sin vsync y con vsync (~45 min) | 79 GB | 6483 → 5570 MB | 931 → 964 MB | un solo Chrome del banco por tanda; `.next-probe` borrado al terminar |
+| Banco del sitio: después de los arreglos (otro build, p1b, p2b, p2c, el recorrido del scroll) | 79 GB | 6028 → 7289 MB | 933 MB | servidor y Chrome cerrados; `limpiar.ps1 -Profundo` |
 
 ## Invariantes que fijaban el polvo como default (antes / ahora / por qué)
 
@@ -295,6 +342,8 @@ Lo medido de C en PULIDO 17 queda en su recibo (`entregas/pulido-17/o5-medido.js
   segunda vuelta: el núcleo brillante, el reposo visible). De día casi no se veía ninguna, y los arcos de día eran una banda de humo
   gris (P1.c, segunda vuelta: el reposo y la ganancia del día, el velo con tope, el arco de tinta). La vista `sitio` del mini-banco
   (35 grados, el logo a 17 u, un 36 % del ancho) se sumó para esto: la vista ancha (30 grados, a 26 u) achicaba todo.
+- Banco del sitio · la descarga como una columna gruesa (el halo), un aviso de D3D en `leerConPrisma` y un borde del scroll que nunca
+  enciende (Servicios → Tu panel): ver «El banco del sitio».
 
 ## Recomendación
 

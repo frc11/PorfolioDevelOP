@@ -60,7 +60,9 @@ lo tapa solo; y lee la PROFUNDIDAD del pase compartido para no tomar nunca un p�
 
 - `ambiente`: raro y lento: cada 18 a 30 s, uno, en un lugar del fondo libre (lejos del logo y de los textos).
 - `scroll`: atado al scroll en ciertos tramos: entre secciones (al cruzar el borde de una, el efecto crece y se cura con el avance),
-  nunca en el túnel de Trabajos (aprobado).
+  nunca en el túnel de Trabajos (aprobado). Los bordes: Quiénes somos → Números y Tu panel → Por qué develOP (visto en el banco del
+  sitio: encienden de y 2760 a 3600 y de 25680 a 26560 a 1440). Servicios → Tu panel se sacó: los dos son papel opaco y ahí la escena
+  está en pausa.
 - `mantener`: interactivo: mantener apretado sobre el fondo (no sobre un texto) hace crecer el efecto donde está el puntero; al soltar
   se cura. Convive con el gesto del plasma (cargar y descargar): el espejo empieza después de un rato apretado.
 - Sin la bandera, `?espejo=…` usa `ambiente` (el banco los dispara a mano).

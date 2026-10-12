@@ -17,8 +17,11 @@ export const ESPEJO = {
   ciclo: { cristal: [0.6, 1.8, 1.6], pliegue: [3.2, 2.4, 3.6], caleidoscopio: [1.6, 2.4, 2], ecos: [0.25, 0.5, 1.2], espiral: [2, 2.2, 2.4] },
   /** El ambiente: cada cuánto (s, al azar entre los dos) y el primero (s después de montar). */
   ambiente: { cada: [18, 30], primero: 7 },
-  /** El scroll: los bordes de sección que lo disparan (la de arriba, la de abajo) y el ancho del tramo alrededor del borde (pantallas). */
-  scroll: { bordes: [['quienes-somos', 'numeros'], ['servicios', 'tu-panel'], ['tu-panel', 'por-que-develop']], ancho: 0.5 },
+  /**
+   * El scroll: los bordes de sección que lo disparan (la de arriba, la de abajo) y el ancho del tramo alrededor del borde (pantallas).
+   * Servicios → Tu panel se sacó: los dos son papel opaco y ahí la escena está en pausa (en el banco del sitio no encendía nunca).
+   */
+  scroll: { bordes: [['quienes-somos', 'numeros'], ['tu-panel', 'por-que-develop']], ancho: 0.5 },
   /** Mantener: cuánto apretado antes de empezar (s: el plasma carga primero), en cuánto crece (s) y en cuánto se cura al soltar (s). */
   mantener: { espera: 0.7, crece: 1.6, cura: 1.2 },
   /** La zona en la pantalla: el radio (fracción del lado menor), lo que se aleja del centro del logo (en sus radios) y dónde puede ir (NDC). */

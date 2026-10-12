@@ -106,8 +106,10 @@ arcos y el temblor. Cada mota vive 6–14 s y renace. [PULIDO 18] En el mundo y 
   (uno grande, al grupo más denso o al logo). Nunca donde no se ve (un texto o fuera del cuadro).
 - 2–3 golpes por el mismo canal en ~150 ms, el destello de cada golpe (0,03 s) y el resplandor residual (0,15 s). El camino: punto
   medio de 5 niveles, desvío 0,12, aspereza 0,45.
-- [PULIDO 18] EL HALO CON PUNTOS: un punto suave por punto del camino (0,55 del medio ancho del canal, hasta 2,6 radios), con su peso
-  por lo que avanza hasta el siguiente punto en la pantalla (un tubo parejo). Como cinta, en un quiebre cerrado el halo ancho se
+- [PULIDO 18] EL HALO CON PUNTOS: un punto suave por punto del camino y otro en el medio de cada tramo (el vértice del otro lado de la
+  cinta), de 0,55 del medio ancho del canal, hasta 2,6 radios, con su peso por lo que avanza hasta el siguiente (un tubo parejo). El
+  radio, al menos lo que avanza (si no, un collar de cuentas), y lo que crece así no suma luz (más ancho, más tenue): con el radio por
+  el paso y sin conservar la luz, una descarga larga y cercana era una columna blanca gruesa (visto en el banco del sitio). Como cinta, en un quiebre cerrado el halo ancho se
   plegaba en esquirlas blancas (de cerca); y la luz que corre dibujaba rayas de través en el halo (una espina de pescado): ahora corre
   sólo en el NÚCLEO, la cinta fina (que no se pliega). El inglete, con tope 1/0,85. Blandos contra lo opaco en 0,15 u.
 - De noche: halo 0,16, resplandor 0,18, núcleo 1,7. [PULIDO 18] De día, un rayo de TINTA: el núcleo oscuro (0,95) con un halo tenue
@@ -192,8 +194,11 @@ Quietas (sin titilar: el reloj del dibujo clavado), sin física, sin arcos ni pu
 
 ## Lo medido
 
-PULIDO 18: pendiente del banco del sitio (sin memoria para el banco durante el sprint; el mini-banco compila y dibuja todo sin
-errores). Lo de PULIDO 17 queda como historia (con C, que se borró en PULIDO 18). En la NVIDIA (RTX 5050; la pantalla del banco va a
+PULIDO 18 (el banco del sitio, la NVIDIA, sin vsync; recibo `entregas/pulido-18/sitio-medido.json`): en caliente ningún cuadro de
+más de 20 ms con el plasma A ni con cada efecto, a 1440 y 390 (el peor, 18,9 ms); el plasma A le suma al polvo +1,46 ms por cuadro al
+máximo a 1440 (2,21 → 3,67) y +0,43 a 390 (2,05 → 2,48); cada efecto, ~+0,3 ms a 1440. Con vsync, 13,34 ms (máx. 14,2) salvo el
+cuadro largo de la calma que también tiene el polvo solo. En el mini-banco (`mini-medido.json`): el plasma solo, ~0,8 ms por cuadro
+a 1440, la GPU a lo sumo 1,44 ms, ~16 KB de basura por cuadro. Lo de PULIDO 17 queda como historia (con C, que se borró en PULIDO 18). En la NVIDIA (RTX 5050; la pantalla del banco va a
 75 Hz: 13,34 ms por cuadro). Recibo: `entregas/pulido-17/o5-medido.json`.
 
 | | Con vsync, al máximo (media / máx.) | De noche (máx.) | Cuadros de más de 20 ms en caliente | Sin vsync, al máximo (lo que suma al polvo) | La simulación en la GPU |

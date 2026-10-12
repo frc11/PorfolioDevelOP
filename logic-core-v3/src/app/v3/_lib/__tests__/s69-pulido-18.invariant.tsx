@@ -343,9 +343,10 @@ controlPositivo('  el detector VE un espejo que empieza con el clic (pisaría el
 const PANTALLA_SRC = leer('_lib/escena/espejo/pantalla.ts')
 const pantallaBien = (src: string): boolean =>
   src.includes('return colorDeAtras( mix( aqui, desde, esFondo( desde ) ) );') && src.includes('float mascara = zona * esFondo( aqui ) * ( 1.0 - uTextoFuerza * adentroDelTexto( aqui * 2.0 - 1.0 ) );') &&
-  src.includes('float radio = uZona.w > 0.002 ? uZona.z * uPixel : 0.0;') && src.includes('if ( uPrisma < 0.5 ) return leerFondo( aqui, desde );') && src.includes('if ( mascara * amp < 0.002 || uHayColor < 0.5 ) discard;')
+  src.includes('float radio = uZona.w > 0.002 ? uZona.z * uPixel : 0.0;') && src.includes('vec3 color = leerFondo( aqui, desde );\n\tif ( uPrisma >= 0.5 ) {') && src.includes('if ( mascara * amp < 0.002 || uHayColor < 0.5 ) discard;')
 afirmar(pantallaBien(PANTALLA_SRC), '  el cristal, el caleidoscopio y la espiral sólo pintan fondo y sólo leen fondo (la profundidad del pase: nunca un píxel del logo ni de un título), nunca sobre un texto, nada sin amplitud; el prisma, sólo con la bandera')
 controlPositivo('  el detector VE una refracción que lee cualquier píxel (el logo corrido)', PANTALLA_SRC.replace('return colorDeAtras( mix( aqui, desde, esFondo( desde ) ) );', 'return colorDeAtras( desde );'), pantallaBien)
+controlPositivo('  y el prisma prendido sin la bandera', PANTALLA_SRC.replace('if ( uPrisma >= 0.5 ) {', 'if ( uPrisma >= 0.0 ) {'), pantallaBien)
 const cicloBien = (amp: (t: number, c: readonly number[]) => number): boolean => EFECTOS_DEL_ESPEJO.every((e) => {
   const c = ESPEJO.ciclo[e]
   return amp(0, c) === 0 && Math.abs(amp(c[0] + c[1] / 2, c) - 1) < 1e-9 && amp(c[0] + c[1] + c[2], c) === 0 && amp(c[0] + c[1] + c[2] * 0.5, c) > 0.2
@@ -416,5 +417,57 @@ controlPositivo('  el detector VE un cuadro de 22 ms con un efecto', { ...MEDIDO
 controlPositivo('  y un cuadro largo que al repetirlo vuelve', { ...MEDIDO18, medidas: { ...MEDIDO18.medidas, '390': { ...MEDIDO18.medidas['390'], 'cristal-dia': { ...MEDIDO18.medidas['390']['cristal-dia'], repetidas: [{ cuadro: { ...MEDIDO18.medidas['390']['cristal-dia'].cuadro, mayoresDe20: 1, maximo: 70 } }, { cuadro: MEDIDO18.medidas['390']['cristal-dia'].cuadro }] } } } }, medidoBien)
 controlPositivo('  y la basura de antes (378 KB por cuadro)', { ...MEDIDO18, medidas: { ...MEDIDO18.medidas, '390': { ...MEDIDO18.medidas['390'], 'calma-noche': { ...MEDIDO18.medidas['390']['calma-noche'], heap: { kbPorCuadro: 378, recolecciones: 1756 } } } } }, medidoBien)
 controlPositivo('  y un programa que se compila en medio', { ...MEDIDO18, medidas: { ...MEDIDO18.medidas, '390': { ...MEDIDO18.medidas['390'], 'espiral-noche': { ...MEDIDO18.medidas['390']['espiral-noche'], programas: (MEDIDO18.medidas['390']['espiral-noche']?.programasAntes ?? 0) + 1 } } } }, medidoBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('El banco del SITIO (la memoria volvió al final del sprint): las secuencias de P1 y P2 y lo medido en la NVIDIA')
+
+interface MomentoSitio { readonly hoja: string; readonly tiempos: readonly number[] }
+interface SecuenciaSitio { readonly placa: string; readonly momentos: Readonly<Record<string, MomentoSitio>>; readonly consola: readonly string[]; readonly contados: Readonly<Record<string, number>> | null }
+const SITIO = recibo<{ readonly secuencias: Readonly<Record<string, SecuenciaSitio>> }>('sitio-secuencias.json').secuencias
+const MOMENTOS_SITIO: Readonly<Record<string, readonly string[]>> = {
+  'p1-1440': ['noche', 'dia', 'piso', 'logo', 'puntero', 'clic', 'carga'],
+  'p1-390': ['noche', 'dia', 'piso', 'clic', 'carga', 'logo'],
+  ...Object.fromEntries(EFECTOS18.flatMap((e) => ['1440', '390'].map((w) => [`p2-${e}-${w}`, e === 'ecos' ? ['espejo-dia', 'espejo-noche', 'logo'] : ['espejo-dia', 'espejo-noche']]))),
+}
+// El aviso de la base (el compilador de D3D, en un programa del sitio: también con el polvo solo).
+const DE_LA_BASE = 'warning X4122'
+const sitioBien = (s: typeof SITIO): boolean => Object.entries(MOMENTOS_SITIO).every(([k, ms]) => {
+  const q = s[k]
+  return q !== undefined && q.placa.includes('NVIDIA') && ms.every((m) => { const t = q.momentos[m]?.tiempos ?? []; return t.length === 8 && t.slice(1).every((x, i) => x > t[i]) })
+}) && (s['p1-1440']?.contados?.descarga ?? 0) >= 1 && (s['p1-1440']?.contados?.pulso ?? 0) >= 1 &&
+  // Después del arreglo del prisma (y del halo de los arcos), con las cachés de programas borradas: en la consola, sólo el de la base.
+  (s['p2c-cristal-1440']?.consola ?? ['falta']).every((c) => c.includes(DE_LA_BASE)) && (s['p1b-1440']?.momentos.carga?.tiempos ?? []).length === 8
+afirmar(sitioBien(SITIO), '  las hojas del sitio: P1 a 1440 (noche, día, piso, el logo bajando, puntero, clic, mantener y soltar) y a 390 (la resumida con el dedo), con su pulso y su descarga; P2, cada efecto de día y de noche a 1440 y 390 (los ecos, también con el logo bajando); 8 cuadros del compositor en orden; después de los arreglos, la consola sólo con el aviso de la base')
+controlPositivo('  el detector VE una hoja de P2 que falta (el pliegue a 390)', Object.fromEntries(Object.entries(SITIO).filter(([k]) => k !== 'p2-pliegue-390')), sitioBien)
+controlPositivo('  y el aviso del prisma en la consola (el de antes del arreglo)', { ...SITIO, 'p2c-cristal-1440': { ...SITIO['p2c-cristal-1440'], consola: [...(SITIO['p2c-cristal-1440']?.consola ?? []), 'warning X4000: use of potentially uninitialized variable (f_leerConPrisma)'] } }, sitioBien)
+
+interface EstSitio { readonly media: number; readonly p95: number; readonly maximo: number; readonly mayoresDe20: number; readonly cuadros: number }
+type Tramo = 'frio' | 'calma' | 'maxima' | 'noche' | 'efectoDeDia' | 'efectoDeNoche'
+type MedidaSitio = Readonly<Partial<Record<Tramo, EstSitio>>> & { readonly placa: string }
+interface MedidoSitio { readonly libre: Readonly<Record<string, MedidaSitio>>; readonly vsync: Readonly<Record<string, MedidaSitio>> }
+const MEDIDO_SITIO = recibo<{ readonly medido: MedidoSitio }>('sitio-medido.json').medido
+const QUIENES = ['polvo', 'producto', ...EFECTOS18.map((e) => `espejo-${e}`)]
+// En caliente (la calma, al máximo, la noche y, con un efecto, el efecto de día y de noche), sin vsync: ningún cuadro de más de 20 ms a
+// 1440 ni a 390, en la NVIDIA. Con vsync, al máximo y de noche, ninguno; en la calma, a lo sumo los de la base (el campo del logo que se
+// publica, el de s68: el polvo solo también lo tiene).
+const enCalienteSitio = (m: MedidoSitio): boolean => QUIENES.every((q) => (['1440', '390'] as const).every((w) => {
+  const r = m.libre[`${q}-${w}`]
+  if (r === undefined || !r.placa.includes('NVIDIA')) return false
+  const tramos: readonly Tramo[] = q.startsWith('espejo-') ? ['calma', 'maxima', 'noche', 'efectoDeDia', 'efectoDeNoche'] : ['calma', 'maxima', 'noche']
+  return tramos.every((t) => { const e = r[t]; return e !== undefined && e.mayoresDe20 === 0 && e.maximo <= 20 && e.cuadros > 200 })
+})) && ['polvo-1440', 'polvo-390', 'producto-1440', 'producto-390'].every((k) => {
+  const r = m.vsync[k]
+  return r !== undefined && r.maxima?.mayoresDe20 === 0 && r.noche?.mayoresDe20 === 0 && (r.calma?.mayoresDe20 ?? 9) <= 1
+}) && ['1440', '390'].every((w) => (m.vsync[`producto-${w}`]?.calma?.mayoresDe20 ?? 9) <= (m.vsync[`polvo-${w}`]?.calma?.mayoresDe20 ?? 0))
+const sumaSitio = (w: string): number => (MEDIDO_SITIO.libre[`producto-${w}`]?.maxima?.media ?? 99) - (MEDIDO_SITIO.libre[`polvo-${w}`]?.maxima?.media ?? 0)
+const peorEnCaliente = Math.max(...QUIENES.flatMap((q) => ['1440', '390'].flatMap((w) => (['calma', 'maxima', 'noche', 'efectoDeDia', 'efectoDeNoche'] as const).map((t) => MEDIDO_SITIO.libre[`${q}-${w}`]?.[t]?.maximo ?? 0))))
+afirmar(enCalienteSitio(MEDIDO_SITIO) && sumaSitio('1440') <= 2.04, `  en caliente, sin vsync, ningún cuadro de más de 20 ms a 1440 ni a 390 (el peor, ${String(peorEnCaliente)} ms); con vsync, en la calma sólo el de la base (${String(MEDIDO_SITIO.vsync['polvo-1440']?.calma?.maximo ?? 0)} ms el polvo solo, ${String(MEDIDO_SITIO.vsync['producto-1440']?.calma?.maximo ?? 0)} con el plasma); el plasma A le suma al polvo +${sumaSitio('1440').toFixed(2)} ms por cuadro al máximo a 1440 (en PULIDO 17, +2,04) y +${sumaSitio('390').toFixed(2)} a 390`)
+controlPositivo('  el detector VE una calma con vsync con un tirón que la base no tiene', { ...MEDIDO_SITIO, vsync: { ...MEDIDO_SITIO.vsync, 'producto-390': { ...MEDIDO_SITIO.vsync['producto-390'], calma: { media: 14, p95: 14, maximo: 300, mayoresDe20: 1, cuadros: 370 } } } }, enCalienteSitio)
+controlPositivo('  y un cuadro de 22 ms con el pliegue al máximo', { ...MEDIDO_SITIO, libre: { ...MEDIDO_SITIO.libre, 'espejo-pliegue-1440': { ...MEDIDO_SITIO.libre['espejo-pliegue-1440'], maxima: { media: 3.9, p95: 7, maximo: 22, mayoresDe20: 1, cuadros: 1500 } } } }, enCalienteSitio)
+// En frío (la primera visita: cachés borradas, el primer scroll rápido), los tirones son del sitio: el polvo solo también los tiene.
+const peorDelPolvoEnFrio = Math.max(MEDIDO_SITIO.libre['polvo-1440']?.frio?.maximo ?? 0, MEDIDO_SITIO.libre['polvo-390']?.frio?.maximo ?? 0)
+const frioComoElSitio = (m: MedidoSitio): boolean => (m.libre['polvo-1440']?.frio?.mayoresDe20 ?? 0) >= 1 && QUIENES.every((q) => (['1440', '390'] as const).every((w) => (m.libre[`${q}-${w}`]?.frio?.maximo ?? 9e9) <= Math.max(1300, peorDelPolvoEnFrio * 1.6)))
+afirmar(frioComoElSitio(MEDIDO_SITIO), `  en frío, los tirones del primer scroll también los tiene el polvo solo (hasta ${String(peorDelPolvoEnFrio)} ms); con el plasma y los efectos, a lo sumo ${String(Math.max(...QUIENES.flatMap((q) => ['1440', '390'].map((w) => MEDIDO_SITIO.libre[`${q}-${w}`]?.frio?.maximo ?? 0))))} ms (la deuda de s68)`)
+controlPositivo('  el detector VE un efecto que duplica el tirón en frío', { ...MEDIDO_SITIO, libre: { ...MEDIDO_SITIO.libre, 'espejo-cristal-1440': { ...MEDIDO_SITIO.libre['espejo-cristal-1440'], frio: { media: 9, p95: 20, maximo: 2400, mayoresDe20: 30, cuadros: 300 } } } }, frioComoElSitio)
 
 cerrar('s69-pulido-18')
