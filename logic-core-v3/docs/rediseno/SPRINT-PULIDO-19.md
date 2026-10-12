@@ -262,7 +262,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
      estaba apagada desde NOCTURNO FINAL A4 (de pie en la pared eran sombras raras); acostadas, la oclusión de contacto es lo que
      les falta para pesar. HECHO (Q4.2, 1).
   2. Filtrado anisotrópico de la trama del moiré y de las siluetas de la formación, 4 → el máximo de la placa (I2 C1): las líneas
-     finas de la trama en ángulo rasante se emborronan a gris antes de lo necesario con 4. EN CURSO (Q4.2, 2).
+     finas de la trama en ángulo rasante se emborronan a gris antes de lo necesario con 4. HECHO (Q4.2, 2).
   3. Oclusión bajo el logo en su hueco (I2 C2): el pozo ya se sombrea (`HUECO.sombra`), la mancha de contacto y la sombra proyectada
      existen; falta ver si el labio del pozo pide un oscurecimiento de contacto cuando el logo está al ras. PENDIENTE (sitio).
   4. Microrrugosidad del satinado del logo (I2 C2): un grano fino de rugosidad por `onBeforeCompile` en el material del logo (hoy
@@ -318,7 +318,16 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
   el tope, el piso las pinta, los módulos de menos de 300 líneas, sin reservas; controles: en los ejes del mundo, también de pie,
   una reserva). s47 y s52 cambian de sentido (la tabla). s44 sigue igual (la forma al ras, a media altura y lejos; la maquinaria en el
   piso). tsc y lint limpios.
-- **2 · Anisotropía al máximo de la placa** — EN CURSO.
+- **2 · Anisotropía al máximo de la placa** — HECHO · NO VISTO (el mini-banco no tiene la trama del moiré ni las siluetas de la
+  formación; el cambio es de filtrado en la GPU): VERIFICAR TRAS REINICIO en el sitio, a 1440 y 1920 de día, el horizonte de la cúpula
+  y el pie del zócalo (las líneas rasantes siguen siendo líneas más lejos; antes se emborronaban a gris) y, con el banco, que el
+  cuadro no cambie (lo paga la GPU en los texels rasantes nada más).
+- QUÉ ES: `gpu/anisotropia.ts` (nuevo): `ANISOTROPIA_DE_LAS_TRAMAS = 16`, lo que piden la trama del moiré (`MoireScreen.tsx`, las dos
+  capas y el zócalo) y las siluetas de las copias de la formación (`formacion/copia.ts`); eran 4 en los dos lugares (ESCENA 2). No hace
+  falta leer la placa: three acota al subir la textura (`WebGLTextures.js`: `min( texture.anisotropy, capabilities.getMaxAnisotropy() )`),
+  16 en casi todas.
+- Invariantes (s70, Q4): la constante entre 8 y 16, usada en los dos lugares sin el 4 literal, y el three instalado acota a la placa
+  (controles: el 4 de antes en la trama; un three que no acota). Ningún test fijaba el 4. tsc y lint limpios.
 
 ### Medido (sin vsync; 1440 y 390; la NVIDIA)
 - Q1 · el mini-banco (recibo `entregas/pulido-19/mini-medido.json`; s70 lo lee, con sus controles positivos): la placa ANGLE D3D11 sobre la

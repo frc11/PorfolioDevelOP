@@ -24,6 +24,7 @@ import { pasoDeLasBrasas } from '../escena/energia/paso'
 import { REPOSO, crearMemoriaDelGesto, crearRed, leerElGesto, pasoDeLaRed, type Red } from '../escena/energia/reposo'
 import { FRAGMENTOS_DE_LA_RED, VERTICES_DE_LA_RED } from '../escena/energia/dibujo/red'
 import { brilloPorDensidad } from '../escena/energia/vecinas'
+import { ANISOTROPIA_DE_LAS_TRAMAS } from '../escena/gpu/anisotropia'
 import { CAIDA_AL_HUECO, caidaIntegrada } from '../escena/final/caidaAlHueco'
 import { CAIDA_DEL_PIE, crearLugar, distanciaParaElPie, huellaDelPie, lugaresEnElPiso, poseDeLaPiezaQueCae, type BaseDelPie, type LugarEnElPiso, type PiezaDePie } from '../escena/final/caidaDelPie'
 import { sombraDeLaPiezaQueCae } from '../escena/final/sombraDeLaPieza'
@@ -562,6 +563,15 @@ afirmar(sombrasCableadas(DE_LAS_SOMBRAS), '  el cableado: las sombras sólo con 
 controlPositivo('  el detector VE sombras en los ejes del mundo', { ...DE_LAS_SOMBRAS, 'pie3d/caida.ts': (DE_LAS_SOMBRAS['pie3d/caida.ts'] ?? '').replace('uBaseDeLasSombrasDelPie.value.set(b.derechaX, b.derechaZ, b.atrasX, b.atrasZ)', '') }, sombrasCableadas)
 controlPositivo('  y sombras también de pie en la pared', { ...DE_LAS_SOMBRAS, 'pie3d/armadas.ts': (DE_LAS_SOMBRAS['pie3d/armadas.ts'] ?? '').replace(' = enElFinal ? sombrasDeLaCaida(s.caida, segundos) : 0', ' = sombrasDeLaCaida(s.caida, segundos)') }, sombrasCableadas)
 controlPositivo('  y una reserva en la sombra de cada cuadro', { ...DE_LAS_SOMBRAS, 'final/sombraDeLaPieza.ts': (DE_LAS_SOMBRAS['final/sombraDeLaPieza.ts'] ?? '').replace('  const S = SOMBRA_DE_LA_PIEZA\n', '  const S = SOMBRA_DE_LA_PIEZA\n  const tmp = [p.x]\n  if (tmp.length < 0) return S\n') }, sombrasCableadas)
+
+// 2 · La anisotropía de las texturas que se miran de canto (la trama del moiré, las siluetas de la formación): al máximo de la placa
+// (16 pedidas; three las acota a lo que hay al subir la textura), en los dos lugares, sin el 4 de antes.
+const ANISOTROPIA = { constante: ANISOTROPIA_DE_LAS_TRAMAS, moire: leer('_lib/escena/MoireScreen.tsx'), copia: leer('_lib/escena/formacion/copia.ts'), three: readFileSync('node_modules/three/src/renderers/webgl/WebGLTextures.js', 'utf8') }
+const anisotropiaBien = (a: typeof ANISOTROPIA): boolean => a.constante >= 8 && a.constante <= 16 && a.moire.includes('texture.anisotropy = ANISOTROPIA_DE_LAS_TRAMAS') && a.copia.includes('textura.anisotropy = ANISOTROPIA_DE_LAS_TRAMAS') &&
+  !/anisotropy = \d/.test(a.moire) && !/anisotropy = \d/.test(a.copia) && a.three.includes('Math.min( texture.anisotropy, capabilities.getMaxAnisotropy() )')
+afirmar(anisotropiaBien(ANISOTROPIA), `  la anisotropía de la trama del moiré y de las siluetas de la formación: ${String(ANISOTROPIA_DE_LAS_TRAMAS)} pedidas en los dos lugares (eran 4); three las acota al máximo de la placa al subir la textura`)
+controlPositivo('  el detector VE el 4 de antes en la trama', { ...ANISOTROPIA, moire: ANISOTROPIA.moire.replace('texture.anisotropy = ANISOTROPIA_DE_LAS_TRAMAS', 'texture.anisotropy = 4') }, anisotropiaBien)
+controlPositivo('  y un three que no acota a la placa', { ...ANISOTROPIA, three: ANISOTROPIA.three.replace('Math.min( texture.anisotropy, capabilities.getMaxAnisotropy() )', 'texture.anisotropy') }, anisotropiaBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Q1 · Los módulos nuevos, de menos de 300 líneas; lo de cada cuadro, sin reservas')

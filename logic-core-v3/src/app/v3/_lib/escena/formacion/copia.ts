@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 
+import { ANISOTROPIA_DE_LAS_TRAMAS } from '../gpu/anisotropia'
 import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
 
 /**
@@ -107,7 +108,8 @@ function rasterizar(tapa: THREE.BufferGeometry, caja: CopiaHorneada['caja']): TH
   textura.generateMipmaps = true
   textura.minFilter = THREE.LinearMipmapLinearFilter
   textura.magFilter = THREE.LinearFilter
-  textura.anisotropy = 4
+  // [PULIDO 19] Q4 · la anisotropía al máximo de la placa (`gpu/anisotropia.ts`; era 4): las siluetas se miran rasantes desde el piso.
+  textura.anisotropy = ANISOTROPIA_DE_LAS_TRAMAS
   textura.needsUpdate = true
   return textura
 }

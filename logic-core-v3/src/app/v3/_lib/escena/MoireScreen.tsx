@@ -4,6 +4,7 @@ import { forwardRef, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
 import { entornoDeLaEscena } from './entorno'
+import { ANISOTROPIA_DE_LAS_TRAMAS } from './gpu/anisotropia'
 import { conDesajusteVivo } from './moire/parche'
 import { conElAmanecer } from './amanecer/luz'
 import { conPliegue } from './espejo/pliegue'
@@ -142,10 +143,11 @@ function buildTexture(data: Uint8Array): THREE.DataTexture {
   // Mipmaps + anisotropía: el seguro contra ventanas chicas y DPR alto. En el
   // caso medido sobran 26 veces, pero no cuestan nada en el caso normal — y son
   // lo que hace que la línea rasante degrade a gris en vez de titilar.
+  // [PULIDO 19] Q4 · la anisotropía al máximo de la placa (`gpu/anisotropia.ts`; era 4).
   texture.generateMipmaps = true
   texture.minFilter = THREE.LinearMipmapLinearFilter
   texture.magFilter = THREE.LinearFilter
-  texture.anisotropy = 4
+  texture.anisotropy = ANISOTROPIA_DE_LAS_TRAMAS
   texture.needsUpdate = true
   return texture
 }
