@@ -1,5 +1,6 @@
 import { CAMPO_DEL_LOGO_GLSL } from '../../polvo/campoDelLogo'
 import { ARCOS } from '../arcos/arcos'
+import { BRASAS } from '../brasas'
 import { RUIDO_GLSL } from '../ruido'
 
 /**
@@ -206,16 +207,25 @@ void main() {
 	float lejos = length( p );
 	if ( lejos > uReparto.y ) a -= p / lejos * ( lejos - uReparto.y ) * uReparto.w;
 	if ( delLogo < uReparto.x && delLogo > 1e-4 ) a += dlogo / delLogo * ( uReparto.x - delLogo ) * uReparto.w * 0.5;
-	// El piso: nada pasa por debajo.
-	if ( p.y < uPiso + 0.25 ) {
-		a.y += ( uPiso + 0.25 - p.y ) * 8.0;
-		v.y = max( v.y, 0.0 );
+	// [PULIDO 18] P1.a · el piso, un límite real (el de las brasas): el colchón levanta, lo que baja se frena, lo de costado roza.
+	float sobre = p.y - uPiso - ${f(BRASAS.piso.minimo)};
+	float roza = 1.0;
+	if ( sobre < ${f(BRASAS.piso.banda)} ) {
+		float s = 1.0 - max( 0.0, sobre ) / ${f(BRASAS.piso.banda)};
+		a.y += ${f(BRASAS.piso.empuje)} * s * s;
+		if ( v.y < 0.0 ) v.y *= exp( - ${f(BRASAS.piso.frena)} * s * dt );
+		roza = exp( - ${f(BRASAS.piso.roce)} * s * dt );
 	}
 	v = ( v + a * dt ) * exp( - ${f(E.arrastre)} * dt );
+	v.xz *= roza;
 	float tope = ${f(E.tope)} * ( 1.0 + uTemperatura );
 	float rapidez = length( v );
 	if ( rapidez > tope ) v *= tope / rapidez;
 	p += v * dt;
+	if ( p.y < uPiso + ${f(BRASAS.piso.minimo)} ) {
+		p.y = uPiso + ${f(BRASAS.piso.minimo)};
+		v.y = max( v.y, 0.0 );
+	}
 	e = clamp( reposo + ( e - reposo ) * exp( - dt / uEnergiaAjuste.z ) + gana, 0.0, 1.0 );
 	salidaLugar = vec4( p, e );
 	salidaVelocidad = vec4( v, edad + dt );

@@ -5,6 +5,7 @@ import { useEffect, useRef, type RefObject } from 'react'
 import * as THREE from 'three'
 
 import { hayBanco } from '../entorno'
+import { PEDIDOS_DEL_PASE } from '../pase/pase'
 import { NACE_EN } from '../entorno/Pulso'
 import { PULSO_VIVO, VIVO } from '../entorno/vivo'
 import { EN_VIVO, FIN_DEL_GOLPE } from '../final/recorridoDelFinal'
@@ -42,6 +43,13 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto, direccion }: Pro
   const afuera = useRef<Afuera>(crearAfuera())
   const vista = useRef<Vista>({ camara: null, ancho: 1, alto: 1 })
   const quietas = useRef({ listo: false })
+  // [PULIDO 18] P1.a · las partículas y los arcos blandos leen la profundidad del pase compartido (`pase/`).
+  useEffect(() => {
+    PEDIDOS_DEL_PASE.profundidad += 1
+    return () => {
+      PEDIDOS_DEL_PASE.profundidad -= 1
+    }
+  }, [])
   useEffect(() => {
     const g = grupo.current
     if (g === null) return undefined
@@ -73,6 +81,8 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto, direccion }: Pro
     u.uPixel.value = state.gl.getPixelRatio()
     if (state.camera instanceof THREE.PerspectiveCamera) u.uEscalaPx.value = u.uResolucion.value.y / (2 * Math.tan(THREE.MathUtils.degToRad(state.camera.fov) / 2))
     u.uNoche.value = VIVO.uNoche.value
+    // [PULIDO 18] P1.c · de día, el calor refracta lo de atrás: la copia del cuadro (el pase compartido).
+    if (u.uNoche.value < 0.97) PEDIDOS_DEL_PASE.colorEsteCuadro = true
     u.uFoco.value = state.camera.position.distanceTo(a.centro)
     const despues = Math.min(1, Math.max(0, (EN_VIVO.fin - FIN_DEL_GOLPE) / DESPUES_DEL_GOLPE))
     u.uApagado.value = EN_VIVO.camara * despues * despues * (3 - 2 * despues)

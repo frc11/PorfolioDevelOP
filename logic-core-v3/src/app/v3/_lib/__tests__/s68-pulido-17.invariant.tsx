@@ -309,8 +309,10 @@ const ARCOS_DIBUJO = leer('_lib/escena/energia/dibujo/arcos.ts')
 const EFECTOS_DIBUJO = leer('_lib/escena/energia/dibujo/efectos.ts')
 const COMUN_DIBUJO = leer('_lib/escena/energia/dibujo/comun.ts')
 const dibujoBien = (particulas: string, arcos: string, efectos: string, comun: string): boolean =>
-  // La partícula: un núcleo gaussiano y su halo (ninguna figura: ni el disco con borde ni el anillo de PULIDO 15).
-  particulas.includes('float nucleo = exp( - 0.5 * r2 ) * cola;') && particulas.includes('float halo = uLuz.z * exp( - 0.5 * r2 / ( uLuz.w * uLuz.w ) ) * cola;') &&
+  // La partícula: un núcleo gaussiano y su halo (ninguna figura: ni el disco con borde ni el anillo de PULIDO 15). [PULIDO 18] P1.d ·
+  // ANTES el núcleo crecía con la partícula (`exp( - 0.5 * r2 )`); AHORA su radio tiene un tope en px (chico y nítido; el tamaño lo lleva
+  // el halo corto). POR QUÉ: «más partícula, menos nube» (los núcleos grandes eran el bokeh). Sigue siendo una gaussiana; s69 lo sigue.
+  particulas.includes('float nucleo = exp( - 0.5 * d2 / ( rNucleo * rNucleo ) ) * cola;') && particulas.includes('float halo = uLuz.z * exp( - 0.5 * r2 / ( uLuz.w * uLuz.w ) ) * cola;') &&
   !/smoothstep\(\s*1\.0\s*-\s*px/.test(particulas) && !/\(\s*r\s*-\s*1\.0\s*\)\s*\/\s*grosor/.test(particulas) &&
   // Brilla (titila con su ritmo, destella), respira por regiones, vibra con la energía, viene de la fuente, profundidad de campo con el brillo conservado.
   particulas.includes('float titila =') && particulas.includes('float destello =') && particulas.includes('float respira =') && particulas.includes('vec2 tiembla =') && particulas.includes('float fuente =') && particulas.includes('float conserva =') &&
@@ -326,7 +328,7 @@ const dibujoBien = (particulas: string, arcos: string, efectos: string, comun: s
   // El tono de la escena (ACES compensado), la salida premultiplicada y los textos con borde suave.
   comun.includes('c = toneMapping( c );') && comun.includes('cubre * ( 1.0 - uNoche )') && comun.includes('textoBorde: 56,') && comun.includes('vec2 borde = uTextoBorde / uResolucion * uPixel;') && !/EffectComposer|UnrealBloom/.test(particulas + arcos + efectos + comun)
 afirmar(dibujoBien(PARTICULAS, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO), '  núcleo y halo gaussianos (sin disco ni anillo), titila, destella, respira, vibra, viene de la fuente, desenfoque con el brillo conservado, la cara del logo libre y un tope; de día energía oscura translúcida y el destello sólo caliente; arcos en dos pasadas y en tira; sin la luz de la carga; el tono ACES, sin bloom')
-controlPositivo('  el detector VE el disco con borde de PULIDO 15', PARTICULAS.replace('float nucleo = exp( - 0.5 * r2 ) * cola;', 'float nucleo = 1.0 - smoothstep( 1.0 - px, 1.0 + px, r2 );'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
+controlPositivo('  el detector VE el disco con borde de PULIDO 15', PARTICULAS.replace('float nucleo = exp( - 0.5 * d2 / ( rNucleo * rNucleo ) ) * cola;', 'float nucleo = 1.0 - smoothstep( 1.0 - px, 1.0 + px, r2 );'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
 controlPositivo('  y el destello claro en reposo (los «ojos» de día)', PARTICULAS.replace('{ chispa: 0, mota: 0 }', '{ chispa: 0.3, mota: 0 }'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
 controlPositivo('  y la luz de la carga de vuelta', EFECTOS_DIBUJO.replace('export const EFECTO = { piso: 0, logo: 1 } as const', 'export const EFECTO = { piso: 0, logo: 1, carga: 2 } as const'), (e: string) => dibujoBien(PARTICULAS, ARCOS_DIBUJO, e, COMUN_DIBUJO))
 

@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 
+import { PROFUNDIDAD_GLSL } from '../../pase/pase'
 import { AL_TONO, COMUN, SALIDA, f } from './comun'
 
 /**
@@ -19,6 +20,9 @@ export const TRAZO = {
   /** De noche: la luz del halo, la del resplandor y la del núcleo. */
   uArcoNoche: [0.16, 0.18, 1.7, 0],
 } as const
+
+/** [PULIDO 18] P1.a · en cuánto se desvanece el canal contra lo opaco (u): corto (donde toca el logo, casi hasta el borde). */
+export const ARCO_BLANDO = 0.15
 
 export type NombreDelTrazo = keyof typeof TRAZO
 
@@ -48,6 +52,7 @@ varying float vTexto;
 varying float vLargo;
 varying float vSemilla;
 varying float vRama;
+varying float vDistancia;
 ${COMUN}
 ${TRAZO_GLSL}
 vec2 enPantalla( vec4 c ) {
@@ -65,6 +70,7 @@ void main() {
 	vRama = aExtra.z;
 	vTexto = 0.0;
 	vAncho = 1.0;
+	vDistancia = c.w;
 	if ( aForma.y <= 0.0 || c.w <= 0.05 || cA.w <= 0.05 || cD.w <= 0.05 ) {
 		gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 );
 		return;
@@ -81,7 +87,8 @@ void main() {
 	t = length( t ) > 1e-3 ? normalize( t ) : ( length( t1 ) > 0.0 ? t1 : vec2( 1.0, 0.0 ) );
 	vec2 normal = vec2( - t.y, t.x );
 	vec2 n1 = length( t1 ) > 0.0 ? vec2( - t1.y, t1.x ) : normal;
-	float inglete = 1.0 / max( 0.5, dot( normal, n1 ) );
+	// [PULIDO 18] P1.d · el inglete, con un tope bajo: en un quiebre cerrado el halo ancho se plegaba en esquirlas blancas (de cerca).
+	float inglete = 1.0 / max( 0.85, dot( normal, n1 ) );
 	// Las puntas se afinan (el canal hacia sus dos puntas; cada rama hacia la suya).
 	float afina = vRama > 0.5 ? mix( 1.0, 0.15, vLargo ) : 0.12 + 0.88 * smoothstep( 0.0, 0.16, vLargo ) * smoothstep( 1.0, 0.84, vLargo );
 	afina = mix( 1.0, afina, uArcoForma.w );
@@ -101,16 +108,19 @@ varying float vTexto;
 varying float vLargo;
 varying float vSemilla;
 varying float vRama;
+varying float vDistancia;
 ${COMUN}
 ${AL_TONO}
 ${TRAZO_GLSL}
+${PROFUNDIDAD_GLSL}
 void main() {
 	float x = abs( vLado ) * vAncho;
 	// La luz que corre por el canal: una ondulación a lo largo que se mueve rápido (no un brillo parejo de trazo).
 	float corre = 1.0 - uArcoForma.z + uArcoForma.z * ( 0.5 + 0.5 * sin( vLargo * 23.0 - uTiempo * 41.0 + vSemilla ) * sin( vLargo * 9.0 + uTiempo * 17.0 + vSemilla * 1.3 ) );
 	float rama = vRama > 0.5 ? 0.6 : 1.0;
 	float nucleo = exp( - pow( x / ( uArcoForma.y * uPixel ), 2.0 ) ) * vGolpe * corre * rama;
-	float halo = exp( - pow( x / ( vAncho * 0.45 ), 2.0 ) ) * vGolpe * corre * rama;
+	// [PULIDO 18] P1.d · la luz que corre, sólo en el núcleo: en el halo ancho dibujaba rayas de través (una espina de pescado).
+	float halo = exp( - pow( x / ( vAncho * 0.45 ), 2.0 ) ) * vGolpe * rama;
 	float resplandor = exp( - pow( x / ( vAncho * 0.85 ), 2.0 ) ) * vResidual * rama;
 	// La capa 0: la energía oscura (de día) y la luz del halo y del resplandor (de noche). La capa 1: el núcleo.
 	float oscuro = min( 1.0, halo * uArcoDia.x + resplandor * uArcoDia.y );
@@ -118,7 +128,86 @@ void main() {
 	float aDia = uCapa < 0.5 ? oscuro : blanco;
 	vec3 colorDia = uCapa < 0.5 ? uTintaDia : mix( uClaroDia, uTintaDia, uArcoDia.w );
 	vec3 luzNoche = uCapa < 0.5 ? uLuzNoche * ( halo * uArcoNoche.x + resplandor * uArcoNoche.y ) : uLuzNoche * nucleo * uArcoNoche.z;
-	float vis = ( 1.0 - ${f(0.95)} * vTexto ) * ( 1.0 - uApagado );
+	// [PULIDO 18] P1.a · blando contra lo opaco en una distancia corta (ningún brillo corta una superficie).
+	float blando = smoothstep( 0.0, ${f(ARCO_BLANDO)}, distanciaALoOpaco( gl_FragCoord.xy / uResolucion ) - vDistancia );
+	float vis = ( 1.0 - ${f(0.95)} * vTexto ) * ( 1.0 - uApagado ) * blando;
+	${SALIDA}
+}
+`
+
+/**
+ * [PULIDO 18] P1.d · EL HALO DEL CANAL, CON PUNTOS (la pasada 0): un punto suave por punto del camino, del ancho del halo, aditivo de
+ * noche y energía oscura de día; su peso, por lo que avanza hasta el siguiente punto en la pantalla (un tubo parejo, sin cuentas). Como
+ * cinta, en un quiebre cerrado el halo ancho se plegaba en esquirlas blancas (visto de cerca); los puntos no se pliegan. El núcleo
+ * sigue siendo la cinta fina (la pasada 1). Los mismos atributos de la cinta: sólo cuenta un lado (el otro no llega a dibujarse).
+ */
+export const HALO_DEL_ARCO = {
+  /** El radio del punto (en medios anchos del canal) y hasta dónde llega (en radios). */
+  radio: 0.55,
+  llega: 2.6,
+} as const
+
+export const VERTICES_DEL_HALO_DEL_ARCO = /* glsl */ `
+attribute vec3 aPunto;
+attribute vec3 aDespues;
+attribute vec4 aForma;
+attribute vec4 aExtra;
+varying float vGolpe;
+varying float vResidual;
+varying float vTexto;
+varying float vPeso;
+varying float vDistancia;
+${COMUN}
+${TRAZO_GLSL}
+void main() {
+	vGolpe = aForma.z;
+	vResidual = aForma.w;
+	vTexto = 0.0;
+	vPeso = 0.0;
+	vDistancia = 0.0;
+	vec4 c = projectionMatrix * viewMatrix * vec4( aPunto, 1.0 );
+	if ( aForma.y <= 0.0 || aForma.x < 0.0 || c.w <= 0.05 ) {
+		gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 );
+		gl_PointSize = 0.0;
+		return;
+	}
+	vec4 cD = projectionMatrix * viewMatrix * vec4( aDespues, 1.0 );
+	vec2 s = c.xy / c.w * uResolucion * 0.5;
+	vec2 d = cD.w > 0.05 ? cD.xy / cD.w * uResolucion * 0.5 : s;
+	float largo = aExtra.x;
+	float rama = aExtra.z;
+	float afina = rama > 0.5 ? mix( 1.0, 0.15, largo ) : 0.12 + 0.88 * smoothstep( 0.0, 0.16, largo ) * smoothstep( 1.0, 0.84, largo );
+	afina = mix( 1.0, afina, uArcoForma.w );
+	float radio = max( 0.75, uArcoForma.x * aForma.y * uPixel * afina * ${f(HALO_DEL_ARCO.radio)} );
+	vPeso = clamp( length( d - s ) / ( 2.2 * radio ), 0.05, 0.85 ) * ( rama > 0.5 ? 0.6 : 1.0 );
+	gl_PointSize = 2.0 * radio * ${f(HALO_DEL_ARCO.llega)};
+	gl_Position = c;
+	vTexto = adentroDelTexto( c.xy / c.w );
+	vDistancia = c.w;
+}
+`
+
+export const FRAGMENTOS_DEL_HALO_DEL_ARCO = /* glsl */ `
+varying float vGolpe;
+varying float vResidual;
+varying float vTexto;
+varying float vPeso;
+varying float vDistancia;
+${COMUN}
+${AL_TONO}
+${TRAZO_GLSL}
+${PROFUNDIDAD_GLSL}
+void main() {
+	vec2 q = ( gl_PointCoord - 0.5 ) * ${f(2 * HALO_DEL_ARCO.llega)};
+	float r2 = dot( q, q );
+	float borde = 1.0 - smoothstep( ${f((HALO_DEL_ARCO.llega - 0.6) ** 2)}, ${f(HALO_DEL_ARCO.llega ** 2)}, r2 );
+	float halo = exp( - r2 ) * vGolpe * vPeso * borde;
+	float resplandor = exp( - r2 * 0.28 ) * vResidual * vPeso * borde;
+	float aDia = min( 1.0, halo * uArcoDia.x + resplandor * uArcoDia.y );
+	vec3 colorDia = uTintaDia;
+	vec3 luzNoche = uLuzNoche * ( halo * uArcoNoche.x + resplandor * uArcoNoche.y );
+	float blando = smoothstep( 0.0, ${f(ARCO_BLANDO)}, distanciaALoOpaco( gl_FragCoord.xy / uResolucion ) - vDistancia );
+	float vis = ( 1.0 - ${f(0.95)} * vTexto ) * ( 1.0 - uApagado ) * blando;
 	${SALIDA}
 }
 `

@@ -1,8 +1,9 @@
 import * as THREE from 'three'
 
+import { COLOR_DE_LA_ESCENA_GLSL, PROFUNDIDAD_GLSL } from '../../pase/pase'
 import { ENJAMBRE } from '../enjambre/simulacion'
 import { RUIDO_GLSL } from '../ruido'
-import { AL_TONO, COMUN, SALIDA, f } from './comun'
+import { AL_TONO, COMUN, f } from './comun'
 
 /**
  * [PULIDO 17] O3 · CÓMO SE VE UNA PARTÍCULA DE ENERGÍA (`docs/rediseno/PLASMA.md`). Ninguna figura: un núcleo con caída gaussiana y
@@ -16,8 +17,8 @@ import { AL_TONO, COMUN, SALIDA, f } from './comun'
  */
 // [PULIDO 18] P1.0 · el estilo `estela` se borró con C (la estela por la velocidad sigue: `uMovida.x`).
 export type Estilo = 'chispa' | 'mota'
-export type NombreDelAspecto = 'uTamano' | 'uLuz' | 'uDia' | 'uDiaForma' | 'uMovida' | 'uFuente' | 'uDestello' | 'uDelante'
-export const NOMBRES_DEL_ASPECTO: readonly NombreDelAspecto[] = ['uTamano', 'uLuz', 'uDia', 'uDiaForma', 'uMovida', 'uFuente', 'uDestello', 'uDelante']
+export type NombreDelAspecto = 'uTamano' | 'uLuz' | 'uDia' | 'uDiaForma' | 'uMovida' | 'uFuente' | 'uDestello' | 'uDelante' | 'uChispa' | 'uCalorDia' | 'uNucleo'
+export const NOMBRES_DEL_ASPECTO: readonly NombreDelAspecto[] = ['uTamano', 'uLuz', 'uDia', 'uDiaForma', 'uMovida', 'uFuente', 'uDestello', 'uDelante', 'uChispa', 'uCalorDia', 'uNucleo']
 
 /** Por estilo, las seis uniformes del aspecto (cada una, cuatro números). */
 export const ASPECTO: Readonly<Record<Estilo, Readonly<Record<NombreDelAspecto, readonly [number, number, number, number]>>>> = {
@@ -26,10 +27,12 @@ export const ASPECTO: Readonly<Record<Estilo, Readonly<Record<NombreDelAspecto, 
     uTamano: [0.022, 0.075, 0.8, 6],
     // De noche: el brillo, la parte que brilla en reposo, el peso del halo y su ancho (en radios del núcleo).
     uLuz: [1.1, 0.22, 0.22, 3],
-    // De día: el alfa de la energía oscura, (sin uso), el alfa del destello blanco y desde qué energía aparece entero.
-    uDia: [0.2, 0, 0.9, 0.6],
-    // De día, la forma de la energía oscura: su ancho (radios de la partícula) y su mínimo (px).
-    uDiaForma: [1.5, 1.6, 0, 0],
+    // De día: el alfa del cuerpo oscuro, el brillo especular (corrido hacia la luz), (sin uso) y desde qué energía el especular está
+    // entero. [PULIDO 18] P1.c · un cuerpo oscuro y nítido (el núcleo), un velo tenue alrededor y el especular mínimo: sin el punto
+    // blanco al centro (con él, las calientes se leían como ojos o burbujas).
+    uDia: [0.6, 0.55, 0, 0.6],
+    // De día, el velo alrededor del cuerpo: su ancho (radios de la partícula), su mínimo (px) y su alfa.
+    uDiaForma: [1.6, 1.2, 0.22, 0],
     // La estela (s de recorrido), el temblor caliente (px), el desenfoque (px por unidad fuera del plano del logo) y su tope.
     uMovida: [0, 1.6, 0.5, 10],
     // La fuente: el radio desde el logo en que se mantiene (u), cuánto se apaga lejos (0 a 1), cuánto respira y su escala (1/u).
@@ -38,6 +41,14 @@ export const ASPECTO: Readonly<Record<Estilo, Readonly<Record<NombreDelAspecto, 
     uDestello: [0.1, 0.8, 2.2, 0.14],
     // La cara del logo libre: cuánto se apaga lo que queda entre la cámara y el logo, el radio de ese cilindro (u) y el tope del brillo.
     uDelante: [0.3, 3.6, 1.6, 0],
+    // [PULIDO 18] P1.d · el exponente de la ley de potencia de los tamaños (más alto, más chicas), el brillo propio más bajo (las
+    // intensidades varían: muchas tenues, pocas fuertes), cuánto se ve la cruz de las más calientes y su largo (px).
+    uChispa: [2.3, 0.35, 0.55, 7],
+    // [PULIDO 18] P1.c · de día, el calor de las calientes: cuánto refracta lo de atrás (px), cuánto le sube el contraste, su radio (px)
+    // y desde qué energía.
+    uCalorDia: [2.2, 0.6, 7, 0.35],
+    // [PULIDO 18] P1.d · el tope del radio del núcleo (px): chico y nítido siempre; el tamaño de la chispa lo lleva su halo corto.
+    uNucleo: [1.3, 0, 0, 0],
   },
   mota: {
     uTamano: [0.012, 0.04, 0.6, 4],
@@ -48,6 +59,9 @@ export const ASPECTO: Readonly<Record<Estilo, Readonly<Record<NombreDelAspecto, 
     uFuente: [5.5, 0.85, 0.75, 0.25],
     uDestello: [0.04, 0.6, 2.6, 0.12],
     uDelante: [0.7, 3.6, 1.1, 0],
+    uChispa: [1.4, 1, 0, 0],
+    uCalorDia: [0, 0, 0, 2],
+    uNucleo: [99, 0, 0, 0],
   },
 }
 
@@ -55,13 +69,16 @@ export const ASPECTO: Readonly<Record<Estilo, Readonly<Record<NombreDelAspecto, 
 export function uniformesDelAspecto(estilo: Estilo): Record<NombreDelAspecto, { value: THREE.Vector4 }> & { uClaroEnReposo: { value: number } } {
   const a = ASPECTO[estilo]
   const v = (n: NombreDelAspecto): { value: THREE.Vector4 } => ({ value: new THREE.Vector4(a[n][0], a[n][1], a[n][2], a[n][3]) })
-  return { uTamano: v('uTamano'), uLuz: v('uLuz'), uDia: v('uDia'), uDiaForma: v('uDiaForma'), uMovida: v('uMovida'), uFuente: v('uFuente'), uDestello: v('uDestello'), uDelante: v('uDelante'), uClaroEnReposo: { value: CLARO_EN_REPOSO[estilo] } }
+  return { uTamano: v('uTamano'), uLuz: v('uLuz'), uDia: v('uDia'), uDiaForma: v('uDiaForma'), uMovida: v('uMovida'), uFuente: v('uFuente'), uDestello: v('uDestello'), uDelante: v('uDelante'), uChispa: v('uChispa'), uCalorDia: v('uCalorDia'), uNucleo: v('uNucleo'), uClaroEnReposo: { value: CLARO_EN_REPOSO[estilo] } }
 }
 
 /** De día, el destello blanco en reposo: ninguna (con el punto claro en reposo, la energía oscura se leía como ojos; sobre el logo, como rayones). Sólo calientes. */
 export const CLARO_EN_REPOSO: Readonly<Record<Estilo, number>> = { chispa: 0, mota: 0 }
 
-const ASPECTO_GLSL = /* glsl */ `
+export const ASPECTO_GLSL = /* glsl */ `
+uniform vec4 uNucleo;
+uniform vec4 uChispa;
+uniform vec4 uCalorDia;
 uniform vec4 uTamano;
 uniform vec4 uLuz;
 uniform vec4 uDia;
@@ -74,11 +91,36 @@ uniform float uIntensidad;
 uniform float uClaroEnReposo;
 `
 
+/**
+ * Lo propio de cada chispa (lo comparten la partícula y su reflejo en el piso, `reflejos.ts`): el titileo (dos ritmos; el de las
+ * negativas, más rápido) y los destellos (más seguidos con energía); [PULIDO 18] P1.d · el tamaño por una LEY DE POTENCIA (una Pareto
+ * truncada entre el mínimo y el máximo: muchas chicas, pocas grandes) y su brillo propio (muchas tenues, pocas fuertes).
+ */
+export const CHISPA_GLSL = /* glsl */ `
+vec2 brillar( uint id, float e, float signo ) {
+	float ritmo = mix( 0.5, 2.2, azar01( id, 21u ) ) * ( signo > 0.0 ? 0.75 : 1.35 );
+	float fase = azar01( id, 22u ) * 6.2831853;
+	float titila = ( 0.76 + 0.24 * sin( uTiempo * ritmo * 6.2831853 + fase ) ) * ( 0.86 + 0.14 * sin( uTiempo * ritmo * 0.31 + fase * 1.7 ) );
+	float ventana = uTiempo * 1.7 + azar01( id, 23u );
+	float chance = ( uDestello.x + uDestello.y * e ) / 1.7;
+	float destello = azar01( id ^ ( uint( floor( ventana ) ) * 0x632be5abu ), 24u ) < chance ? exp( - fract( ventana ) / ( uDestello.w * 1.7 ) ) : 0.0;
+	return vec2( titila, destello );
+}
+float tamanoDeLaChispa( uint id ) {
+	float alfa = max( 0.2, uChispa.x );
+	return uTamano.x * pow( 1.0 - azar01( id, 20u ) * ( 1.0 - pow( uTamano.x / uTamano.y, alfa ) ), - 1.0 / alfa );
+}
+float brilloPropio( uint id ) {
+	return mix( uChispa.y, 1.0, pow( azar01( id, 27u ), 1.8 ) );
+}
+`
+
 function vertices(desdeTextura: boolean, idDesde: number): string {
   return /* glsl */ `
 ${COMUN}
 ${RUIDO_GLSL}
 ${ASPECTO_GLSL}
+${CHISPA_GLSL}
 ${desdeTextura ? 'uniform sampler2D uLugares;\nuniform sampler2D uVelocidades;\nuniform float uLado;' : 'attribute vec3 aLugar;\nattribute vec3 aVelocidad;\nattribute float aEnergia;\nattribute float aBrillo;'}
 varying vec2 vLocal;
 varying float vLargo;
@@ -86,6 +128,10 @@ varying float vRadioPx;
 varying float vBrillo;
 varying float vClaro;
 varying float vTexto;
+varying float vDistancia;
+varying float vSuave;
+varying float vCruz;
+varying float vCalor;
 void main() {
 	uint id = uint( gl_InstanceID ) + ${String(idDesde)}u;
 ${desdeTextura
@@ -102,13 +148,10 @@ ${desdeTextura
 	vec3 vel = aVelocidad;
 	float fundido = aBrillo;`}
 	float signo = gl_InstanceID % 2 == 0 ? 1.0 : - 1.0;
-	// El titileo (dos ritmos; el de las negativas, más rápido) y los destellos (más seguidos con energía).
-	float ritmo = mix( 0.5, 2.2, azar01( id, 21u ) ) * ( signo > 0.0 ? 0.75 : 1.35 );
-	float fase = azar01( id, 22u ) * 6.2831853;
-	float titila = ( 0.76 + 0.24 * sin( uTiempo * ritmo * 6.2831853 + fase ) ) * ( 0.86 + 0.14 * sin( uTiempo * ritmo * 0.31 + fase * 1.7 ) );
-	float ventana = uTiempo * 1.7 + azar01( id, 23u );
-	float chance = ( uDestello.x + uDestello.y * e ) / 1.7;
-	float destello = azar01( id ^ ( uint( floor( ventana ) ) * 0x632be5abu ), 24u ) < chance ? exp( - fract( ventana ) / ( uDestello.w * 1.7 ) ) : 0.0;
+	// El titileo y los destellos (lo propio de cada chispa: brillar).
+	vec2 suyo = brillar( id, e, signo );
+	float titila = suyo.x;
+	float destello = suyo.y;
 	// Respira con su región (un ruido lento: zonas que se encienden) y se apaga lejos de la fuente.
 	float region = ruidoConGradiente( p * uFuente.w + vec3( 0.0, uTiempo * 0.09, uTiempo * 0.05 ), 5u ).x;
 	float respira = max( 0.0, 1.0 + uFuente.z * region * 1.6 );
@@ -122,8 +165,8 @@ ${desdeTextura
 	float enElEje = dot( desdeLaCamara, eje );
 	float alCostado = length( desdeLaCamara - eje * enElEje );
 	fuente *= 1.0 - uDelante.x * ( 1.0 - smoothstep( 0.6 * uDelante.y, uDelante.y, alCostado ) ) * smoothstep( 0.0, 0.12 * hastaElLogo, hastaElLogo - enElEje );
-	// El tamaño: muchas chicas, pocas grandes; calientes y al destellar, un poco más.
-	float radioMundo = mix( uTamano.x, uTamano.y, pow( azar01( id, 20u ), 2.6 ) ) * ( 1.0 + 0.35 * e + 0.4 * destello );
+	// El tamaño: muchas chicas, pocas grandes (la ley de potencia); calientes y al destellar, un poco más.
+	float radioMundo = tamanoDeLaChispa( id ) * ( 1.0 + 0.35 * e + 0.4 * destello );
 	// [PULIDO 18] P1.b · la partícula vive en el mundo (no se suma el centro del logo: no lo sigue).
 	vec4 mv = viewMatrix * vec4( p, 1.0 );
 	float distancia = max( 0.5, - mv.z );
@@ -143,6 +186,10 @@ ${desdeTextura
 		vLocal = vec2( 0.0 );
 		vLargo = 0.0;
 		vRadioPx = 1.0;
+		vDistancia = 0.0;
+		vSuave = 1.0;
+		vCruz = 0.0;
+		vCalor = 0.0;
 		return;
 	}
 	vec2 mitad = uResolucion * 0.5;
@@ -157,20 +204,29 @@ ${desdeTextura
 	float largo = length( d );
 	vec2 dir = largo > 1e-3 ? d / largo : vec2( 1.0, 0.0 );
 	vec2 normal = vec2( - dir.y, dir.x );
-	// El cuadrado cubre el halo de noche y el humo de día (en px).
-	float ancho = max( radioPx * 3.0 * max( 1.0, uLuz.w ), 3.0 * max( uDiaForma.y * uPixel, radioPx * uDiaForma.x ) * ( 1.0 - uNoche ) );
+	// [PULIDO 18] P1.d · la cruz MUY chica de las más calientes (y al destellar fuerte).
+	float cruz = uChispa.z * max( smoothstep( 0.72, 0.95, e ), 0.6 * destello );
+	// El cuadrado cubre el halo de noche, el humo de día y la cruz (en px).
+	// [PULIDO 18] P1.c · de día, el calor de las calientes (refracta lo de atrás): su cuadrado lo cubre.
+	float calor = uCalorDia.x > 0.0 ? smoothstep( uCalorDia.w, uCalorDia.w + 0.4, e + 0.5 * destello ) * ( 1.0 - uNoche ) : 0.0;
+	float ancho = max( max( radioPx * 3.0 * max( 1.0, uLuz.w ), 3.0 * max( uDiaForma.y * uPixel, radioPx * uDiaForma.x ) * ( 1.0 - uNoche ) ), max( cruz > 0.001 ? uChispa.w * uPixel : 0.0, calor > 0.001 ? 2.2 * uCalorDia.z * uPixel : 0.0 ) );
 	float k = position.x * 0.5 + 0.5;
 	vec2 s = mix( sQ - dir * ancho, sP + dir * ancho, k ) + normal * position.y * ancho;
 	gl_Position = vec4( s / mitad * cP.w, cP.z, cP.w );
 	vLocal = vec2( k * ( largo + 2.0 * ancho ) - ancho, position.y * ancho );
 	vLargo = largo;
 	vRadioPx = radioPx;
+	// [PULIDO 18] P1.a · blanda: el halo se desvanece contra lo opaco (el piso, el logo, el pie) en su propio ancho del mundo.
+	vDistancia = - mv.z;
+	vCruz = cruz;
+	vCalor = calor * fuente * fundido;
+	vSuave = max( 0.12, 0.6 * ancho * distancia / max( 1.0, uEscalaPx ) );
 	vTexto = adentroDelTexto( cP.xy / cP.w );
 	float luz = 1.0 + 1.6 * luzDeLosArcos( p );
 	float vivo = uLuz.y + ( 1.0 - uLuz.y ) * e;
 	// La estela reparte su luz a lo largo: más larga, más tenue por punto.
 	float reparte = 1.0 / ( 1.0 + 0.35 * largo / radioPx );
-	vBrillo = min( uDelante.z, uIntensidad * vivo * titila * respira * fuente * ( 1.0 + uDestello.z * destello ) * luz * conserva * reparte * fundido * enElFinal( p - uCentro ) );
+	vBrillo = min( uDelante.z, uIntensidad * brilloPropio( id ) * vivo * titila * respira * fuente * ( 1.0 + uDestello.z * destello ) * luz * conserva * reparte * fundido * enElFinal( p - uCentro ) );
 	// El destello blanco de día: tenue en reposo (sobre el logo negro se ve; sobre el papel, no), entero en las calientes.
 	vClaro = mix( uClaroEnReposo, 1.0, smoothstep( uDia.w, uDia.w + 0.35, e + 0.5 * destello ) ) * fuente * fundido * titila;
 }
@@ -181,29 +237,59 @@ const FRAGMENTOS = /* glsl */ `
 ${COMUN}
 ${AL_TONO}
 ${ASPECTO_GLSL}
+${PROFUNDIDAD_GLSL}
+${COLOR_DE_LA_ESCENA_GLSL}
 varying vec2 vLocal;
 varying float vLargo;
 varying float vRadioPx;
 varying float vBrillo;
 varying float vClaro;
 varying float vTexto;
+varying float vDistancia;
+varying float vSuave;
+varying float vCruz;
+varying float vCalor;
 void main() {
 	// La distancia (px) al tramo de la estela (de la cola, 0, a la cabeza, vLargo); la cola más tenue.
 	float x = vLocal.x < 0.0 ? vLocal.x : max( 0.0, vLocal.x - vLargo );
 	float d2 = x * x + vLocal.y * vLocal.y;
 	float r2 = d2 / ( vRadioPx * vRadioPx );
 	float cola = vLargo > 0.01 ? mix( 0.3, 1.0, clamp( vLocal.x / vLargo, 0.0, 1.0 ) ) : 1.0;
-	float nucleo = exp( - 0.5 * r2 ) * cola;
+	// [PULIDO 18] P1.d · el núcleo, chico y nítido: su radio tiene un tope (px); el tamaño de la chispa lo lleva el halo (corto).
+	float rNucleo = min( vRadioPx, uNucleo.x * uPixel );
+	float nucleo = exp( - 0.5 * d2 / ( rNucleo * rNucleo ) ) * cola;
 	float halo = uLuz.z * exp( - 0.5 * r2 / ( uLuz.w * uLuz.w ) ) * cola;
-	vec3 luzNoche = uLuzNoche * ( nucleo + halo ) * vBrillo * uLuz.x;
+	// [PULIDO 18] P1.d · la cruz: dos rayos finos (en la pantalla), cortos.
+	float largoDeLaCruz = uChispa.w * uPixel;
+	float rayos = vCruz > 0.001 ? exp( - abs( vLocal.y ) / ( 0.45 * uPixel ) - abs( vLocal.x ) / ( 0.3 * largoDeLaCruz ) ) + exp( - abs( vLocal.x ) / ( 0.45 * uPixel ) - abs( vLocal.y ) / ( 0.3 * largoDeLaCruz ) ) : 0.0;
+	vec3 luzNoche = uLuzNoche * ( ( nucleo + halo ) * uLuz.x + rayos * vCruz ) * vBrillo;
 	// De día: la energía oscura (translúcida, sin borde, del tamaño de la partícula) y el destello blanco (un punto) de las calientes.
+	// [PULIDO 18] P1.c · el cuerpo, nítido y del tamaño del núcleo; un brillo especular mínimo corrido hacia la luz (arriba a la
+	// izquierda, la principal), sólo en los cuerpos que se ven grandes (en uno chico sería un ojo).
 	float sigma = max( uDiaForma.y * uPixel, vRadioPx * uDiaForma.x );
 	float humo = exp( - 0.5 * d2 / ( sigma * sigma ) ) * cola;
-	float punto = exp( - 0.5 * d2 / ( 0.64 * uPixel * uPixel ) ) * vClaro * uDia.z;
-	float aDia = min( 0.9, humo * uDia.x * vBrillo * 2.0 + punto );
-	vec3 colorDia = mix( uTintaDia, uClaroDia, punto / max( 1e-4, aDia ) );
-	float vis = ( 1.0 - uTextoFuerza * vTexto ) * ( 1.0 - uApagado );
-	${SALIDA}
+	float cuerpo = exp( - 0.5 * d2 / ( rNucleo * rNucleo ) ) * cola;
+	vec2 alBrillo = vLocal - vec2( - 0.5, 0.5 ) * sigma;
+	float especular = exp( - 0.5 * dot( alBrillo, alBrillo ) / ( 0.25 * uPixel * uPixel ) ) * uDia.y * smoothstep( 1.6 * uPixel, 3.0 * uPixel, sigma ) * vBrillo * ( 0.3 + 0.7 * vClaro );
+	float aDia = min( 0.92, ( cuerpo * uDia.x + humo * uDiaForma.z ) * vBrillo * 2.0 + especular );
+	vec3 colorDia = mix( uTintaDia, uClaroDia, especular / max( 1e-4, aDia ) );
+	// El calor (de día, las calientes): lo de atrás (la copia del cuadro), corrido como en el aire que tiembla y con más contraste.
+	float radioDelCalor = uCalorDia.z * uPixel;
+	float qc = dot( vLocal, vLocal ) / ( radioDelCalor * radioDelCalor );
+	float perfil = vCalor > 0.001 && uHayColor > 0.5 ? exp( - qc ) * vCalor : 0.0;
+	float tiembla = sin( uTiempo * 23.0 + vLocal.x * 0.9 ) * sin( uTiempo * 17.0 - vLocal.y * 1.1 );
+	vec2 corrido = ( vLocal / max( 1e-3, radioDelCalor ) * ( 1.0 - qc ) + vec2( tiembla, - tiembla ) * 0.5 ) * perfil * uCalorDia.x * uPixel;
+	// El contraste sólo oscurece los tonos medios (el papel blanco queda blanco: subirlo dibujaba aros claros).
+	vec3 corridoAtras = perfil > 0.0 ? colorDeAtras( ( gl_FragCoord.xy + corrido ) / uResolucion ) : vec3( 0.0 );
+	vec3 atras = mix( corridoAtras, corridoAtras * corridoAtras, min( 1.0, uCalorDia.y * perfil ) );
+	float blanda = clamp( ( distanciaALoOpaco( gl_FragCoord.xy / uResolucion ) - vDistancia ) / vSuave, 0.0, 1.0 );
+	float vis = ( 1.0 - uTextoFuerza * vTexto ) * ( 1.0 - uApagado ) * blanda * blanda * ( 3.0 - 2.0 * blanda );
+	// La salida (la de SALIDA, con el calor debajo del cuerpo): de día tapa con su alfa; de noche suma.
+	float cubre = clamp( aDia * vis, 0.0, 1.0 );
+	float velo = clamp( perfil * vis, 0.0, 1.0 ) * ( 1.0 - cubre );
+	vec3 noche = luzNoche * vis;
+	if ( ( cubre + velo ) * ( 1.0 - uNoche ) < 0.002 && max( noche.r, max( noche.g, noche.b ) ) * uNoche < 0.002 ) discard;
+	gl_FragColor = vec4( mix( alTono( colorDia ) * cubre + atras * velo, alTono( noche ), uNoche ), ( cubre + velo ) * ( 1.0 - uNoche ) );
 }
 `
 

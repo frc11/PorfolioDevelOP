@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 
+import { PASE_EN_VIVO } from '../../pase/pase'
 import { TEXTO_EN_PANTALLA } from '../textoEnPantalla'
 
 /**
@@ -117,6 +118,10 @@ export function uniformesComunes() {
     uTintaDia: v3(p.tintaDia),
     uClaroDia: v3(p.claroDia),
     uLuzNoche: v3(p.luzNoche),
+    // [PULIDO 18] P1.a · la profundidad de lo opaco (el pase compartido): las partículas y los arcos blandos.
+    uProfundidad: PASE_EN_VIVO.uProfundidad,
+    uHayProfundidad: PASE_EN_VIVO.uHayProfundidad,
+    uCercaLejos: PASE_EN_VIVO.uCercaLejos,
   }
 }
 export type UniformesComunes = ReturnType<typeof uniformesComunes>

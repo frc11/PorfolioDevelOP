@@ -32,7 +32,9 @@ export const DIRECCIONES: Readonly<Record<Direccion, DeLaDireccion>> = {
     brasas: [600, 300],
     intensidadDeLasBrasas: 1,
     // Chispas suaves de tamaños muy distintos (no bokeh: poco desenfoque); de día, energía oscura translúcida con su destello blanco.
-    aspecto: { brasas: { uLuz: [1, 0.2, 0.3, 3], uTamano: [0.02, 0.07, 0.8, 5.5], uMovida: [0, 1.6, 0.3, 6] } },
+    // [PULIDO 18] P1.d · más partícula, menos nube: núcleos chicos y nítidos con un halo corto (el doble del núcleo, tenue), tamaños
+    // por una ley de potencia (de 0,012 a 0,08 u), casi sin desenfoque (era el bokeh: 0,3 px por u y hasta 6 px), un tope de 3,2 px.
+    aspecto: { brasas: { uLuz: [1.3, 0.18, 0.14, 2], uTamano: [0.012, 0.08, 0.7, 3.2], uMovida: [0, 1.2, 0.06, 1.5] } },
     enjambre: null,
   },
   b: {

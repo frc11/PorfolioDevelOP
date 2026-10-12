@@ -4,7 +4,7 @@ import { envejecer, golpeEn, residualEn, extremo, type Arco } from './arcos/arco
 import { rellenarCinta } from './arcos/cinta'
 import { puntoDelCamino, TRAMOS_DEL_CAMINO } from './arcos/camino'
 import { programarArcos } from './arcos/programador'
-import { BRASAS } from './brasas'
+import { ARCOS_EN_LA_ENTRADA, BRASAS } from './brasas'
 import { TEMPERATURA, calentar, frentesDelLogo, leerLaEscena, type DeLaEscena } from './calor'
 import { EFECTO, EFECTOS } from './dibujo/efectos'
 import { DIBUJO } from './dibujo/comun'
@@ -149,6 +149,47 @@ function elGesto(a: Armado, f: Afuera): void {
   }
 }
 
+/**
+ * [PULIDO 18] P1.e · lo que el movimiento nuevo lee del cuadro: el VIENTO del scroll (en contra de la cámara que pasa, tan fuerte como el
+ * scroll y más caliente, con tope, asentándose), la ESTELA del puntero (lo que se mueve su punto en la nube, suavizado) y los CANALES
+ * de los arcos que golpean (para el pinch).
+ */
+function vientoEstelaYCanales(a: Armado, f: Afuera): void {
+  const W = BRASAS.viento
+  const en = a.entrada
+  const dt = Math.max(1e-3, f.dt)
+  const asienta = 1 - Math.exp(-f.dt / W.asienta)
+  const cam = f.camara.position
+  const k = a.camaraAntes
+  const corre = Math.hypot(cam.x - k.x, cam.y - k.y, cam.z - k.z)
+  const fuerza = Math.min(W.tope, W.escala * Math.abs(a.lectura.velocidad) * (1 + W.caliente * a.temperatura.valor))
+  for (let e = 0; e < 3; e += 1) {
+    const hacia = Number.isFinite(corre) && corre > 1e-5 ? -(cam.getComponent(e) - k.getComponent(e)) / corre : 0
+    en.viento[e] += (hacia * fuerza - en.viento[e]) * asienta
+  }
+  k.copy(cam)
+  const p = a.puntoDelPuntero
+  const q = a.puntoAntes
+  const sigue = 1 - Math.exp(-f.dt / 0.08)
+  for (let e = 0; e < 3; e += 1) {
+    const v = a.rayo.activo && Number.isFinite(q[e]) ? Math.max(-4, Math.min(4, (p[e] - q[e]) / dt)) : 0
+    en.estela[e] += (v - en.estela[e]) * sigue
+    q[e] = a.rayo.activo ? p[e] : Number.NaN
+  }
+  let n = 0
+  for (const arco of a.arcos.arcos) {
+    if (!arco.activo || n >= ARCOS_EN_LA_ENTRADA) continue
+    extremo(arco, a.brasas, true, A)
+    extremo(arco, a.brasas, false, B)
+    const o = n * 7
+    en.arcos.set(A, o)
+    en.arcos.set(B, o + 3)
+    en.arcos[o + 6] = golpeEn(arco, arco.edad) + 0.3 * residualEn(arco, arco.edad)
+    n += 1
+  }
+  en.cuantosArcos = n
+}
+
 /** Un golpe de arco: calienta sus extremos (brasas) y las brasas cerca de su medio, y la escena. */
 function alGolpe(a: Armado, arco: Arco): void {
   const b = a.brasas
@@ -244,6 +285,7 @@ export function cuadro(a: Armado, f: Afuera): void {
   en.logo[1] = a.centro.y
   en.logo[2] = a.centro.z
   frentesDelLogo(f.anillos, f.tiempo, f.naceEn, en.anillos)
+  vientoEstelaYCanales(a, f)
   const pasos = Math.max(1, Math.ceil(f.dt / CUADRO.pasoMaximo))
   for (let k = 0; k < pasos; k += 1) pasoDeLasBrasas(a.brasas, f.dt / pasos, en, a.azar)
   brilloPorDensidad(a.brasas)

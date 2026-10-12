@@ -81,12 +81,14 @@ export function deAfuera(b: Brasas, i: number, en: EntradaDeLasBrasas, dt: numbe
   fx += tiembla * (azar() * 2 - 1)
   fy += tiembla * (azar() * 2 - 1)
   fz += tiembla * (azar() * 2 - 1)
-  // La cáscara (del mundo, alrededor del origen: no sigue al logo): afuera del radio vuelven.
+  // La cáscara (del mundo, alrededor del origen: no sigue al logo): afuera del radio vuelven. [PULIDO 18] P1.e · más que lineal con lo
+  // que se pasan (con el viento al tope sostenido y todo a la vez, alguna se escapaba): contenida siempre.
   const lejos = Math.hypot(x, y, z)
   if (lejos > radio) {
-    fx -= (F.contiene * (lejos - radio) * x) / lejos
-    fy -= (F.contiene * (lejos - radio) * y) / lejos
-    fz -= (F.contiene * (lejos - radio) * z) / lejos
+    const vuelve = F.contiene * (lejos - radio) * (1 + (lejos - radio))
+    fx -= (vuelve * x) / lejos
+    fy -= (vuelve * y) / lejos
+    fz -= (vuelve * z) / lejos
   }
   // El hueco del logo, donde esté (un obstáculo: si baja, las aparta al pasar; no se las lleva): adentro, salen.
   if (delLogo < hueco && delLogo > 1e-4) {

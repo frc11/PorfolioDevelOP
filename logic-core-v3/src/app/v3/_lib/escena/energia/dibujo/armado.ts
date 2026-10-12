@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 
+import { FLOOR_Y } from '../../probeScene'
 import { ARCOS, crearArcos, type EstadoDeLosArcos } from '../arcos/arcos'
 import { crearCinta, type Cinta } from '../arcos/cinta'
 import type { EntornoDeLosArcos } from '../arcos/programador'
@@ -8,10 +9,11 @@ import { crearLectura, crearTemperatura, type Lectura, type Temperatura } from '
 import { DIRECCIONES, type Direccion } from '../direcciones'
 import { crearEnjambre, soltarEnjambre, type Enjambre } from '../enjambre/enjambre'
 import { crearPuntero, type EstadoDelPuntero } from '../interaccion/interaccion'
-import { FRAGMENTOS_DE_LOS_ARCOS, VERTICES_DE_LOS_ARCOS, uniformesDelTrazo } from './arcos'
+import { FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, VERTICES_DEL_HALO_DEL_ARCO, VERTICES_DE_LOS_ARCOS, uniformesDelTrazo } from './arcos'
 import { DIBUJO, materialDeEnergia, uniformesComunes, type UniformesComunes } from './comun'
 import { EFECTOS, FRAGMENTOS_DE_LOS_EFECTOS, VERTICES_DE_LOS_EFECTOS } from './efectos'
 import { sombreadoresDeParticulas, uniformesDelAspecto, type NombreDelAspecto } from './particulas'
+import { FRAGMENTOS_DE_LOS_REFLEJOS, REFLEJO, VERTICES_DE_LOS_REFLEJOS } from './reflejos'
 
 /**
  * [PULIDO 17] O3 · EL ARMADO DE LA ENERGÍA (`docs/rediseno/PLASMA.md`). Según la dirección: las brasas (CPU) y, en B, el enjambre
@@ -43,12 +45,15 @@ export interface Armado {
   readonly atributosDeLaCinta: readonly THREE.BufferAttribute[]
   readonly geometriaDeLaCinta: THREE.BufferGeometry
   readonly efectos: { readonly lugar: THREE.InstancedBufferAttribute; readonly efecto: THREE.InstancedBufferAttribute; readonly geometria: THREE.InstancedBufferGeometry }
-  readonly mallas: readonly THREE.Mesh[]
+  readonly mallas: readonly (THREE.Mesh | THREE.Points)[]
   /** El centro del logo en el mundo (todo lo demás también va en el mundo), un vector de trabajo, las luces de los arcos y el punto del puntero. */
   readonly centro: THREE.Vector3
   readonly v: THREE.Vector3
   readonly luces: Float32Array
   readonly puntoDelPuntero: Float32Array
+  /** [PULIDO 18] P1.e · la cámara y el punto del puntero del cuadro anterior (el viento y la estela). */
+  readonly camaraAntes: THREE.Vector3
+  readonly puntoAntes: Float32Array
   readonly rayo: { activo: boolean; readonly r: { ox: number; oy: number; oz: number; dx: number; dy: number; dz: number } }
   readonly entorno: EntornoDeLosArcos
   readonly texto: { leidoEn: number; scroll: number }
@@ -56,10 +61,12 @@ export interface Armado {
   halo: number
   readonly ondas: Float32Array
   /** Las uniformes que el banco ajusta en vivo, por grupo (`banco.ts`, `ajustar`). */
-  readonly ajustables: Readonly<Record<'brasas' | 'enjambre' | 'arcos' | 'simulacion' | 'comun', Readonly<Record<string, THREE.IUniform>>>>
+  readonly ajustables: Readonly<Record<'brasas' | 'enjambre' | 'arcos' | 'simulacion' | 'comun' | 'reflejo', Readonly<Record<string, THREE.IUniform>>>>
 }
 
 const CUADRADO = new Float32Array([-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0])
+/** Desde dónde se dibuja la energía (el orden de los transparentes; ver `mallas`). */
+export const ORDEN_DE_LA_ENERGIA = -10
 
 /** Pisa el aspecto de un estilo con lo que cambia la dirección. */
 function conLoDeLaDireccion<T extends Record<string, THREE.IUniform>>(u: T, cambios: Partial<Record<NombreDelAspecto, readonly [number, number, number, number]>> | undefined): T {
@@ -83,9 +90,9 @@ function cuadrados(cuantos: number): THREE.InstancedBufferGeometry {
 export function armar(direccion: Direccion, compacto: boolean, vista: { readonly current: Vista }, logo: () => THREE.Object3D | null): Armado {
   const d = DIRECCIONES[direccion]
   const azar = azarConSemilla(17)
-  const brasas = crearBrasas(compacto ? d.brasas[1] : d.brasas[0], azar)
+  const brasas = crearBrasas(compacto ? d.brasas[1] : d.brasas[0], azar, FLOOR_Y)
   const uniformes = uniformesComunes()
-  const mallas: THREE.Mesh[] = []
+  const mallas: (THREE.Mesh | THREE.Points)[] = []
   let enjambre: Enjambre | null = null
   let delEnjambre: Record<string, THREE.IUniform> = {}
   if (d.enjambre !== null) {
@@ -106,7 +113,14 @@ export function armar(direccion: Direccion, compacto: boolean, vista: { readonly
   const deLasBrasas = { ...conLoDeLaDireccion(uniformesDelAspecto('chispa'), d.aspecto?.brasas), uIntensidad: { value: d.intensidadDeLasBrasas } }
   const mallaDeBrasas = new THREE.Mesh(gb, materialDeEnergia(sb.vertexShader, sb.fragmentShader, { ...uniformes, ...deLasBrasas }))
   mallaDeBrasas.name = 'brasas'
-  mallas.push(mallaDeBrasas)
+  // [PULIDO 18] P1.a · el reflejo tenue en el piso: las mismas brasas, espejadas (sin la prueba de profundidad: está debajo del piso;
+  // lo que tapa lo decide la profundidad del pase). Antes que las brasas.
+  const delReflejo = { uReflejo: { value: new THREE.Vector4(...REFLEJO.uReflejo) }, uPiso: { value: REFLEJO.piso } }
+  const materialDelReflejo = materialDeEnergia(VERTICES_DE_LOS_REFLEJOS, FRAGMENTOS_DE_LOS_REFLEJOS, { ...uniformes, ...deLasBrasas, ...delReflejo })
+  materialDelReflejo.depthTest = false
+  const mallaDeReflejos = new THREE.Mesh(gb, materialDelReflejo)
+  mallaDeReflejos.name = 'reflejos en el piso'
+  mallas.push(mallaDeReflejos, mallaDeBrasas)
   // La cinta de los arcos: la misma geometría en dos pasadas (lo oscuro y el halo; después los núcleos). Se dibuja siempre (los
   // lugares sin arco tienen ancho 0): el programa se arma al cargar, no con el primer arco.
   const cinta = crearCinta()
@@ -120,11 +134,15 @@ export function armar(direccion: Direccion, compacto: boolean, vista: { readonly
   gt.setAttribute('aExtra', atributosDeLaCinta[4])
   gt.setIndex(new THREE.BufferAttribute(cinta.indices, 1))
   const trazo = uniformesDelTrazo()
-  for (const capa of [0, 1]) {
-    const m = new THREE.Mesh(gt, materialDeEnergia(VERTICES_DE_LOS_ARCOS, FRAGMENTOS_DE_LOS_ARCOS, { ...uniformes, ...trazo, uCapa: { value: capa } }))
-    m.name = capa === 0 ? 'arcos' : 'nucleos de los arcos'
-    mallas.push(m)
-  }
+  // [PULIDO 18] P1.d · la pasada 0 (el halo y lo oscuro), con puntos a lo largo del camino (los mismos atributos, sin los índices: como
+  // cinta se plegaba en los quiebres); la pasada 1 (el núcleo), la cinta fina.
+  const gh = new THREE.BufferGeometry()
+  for (const nombre of ['position', 'aPunto', 'aAntes', 'aDespues', 'aForma', 'aExtra']) gh.setAttribute(nombre, gt.getAttribute(nombre))
+  const halo = new THREE.Points(gh, materialDeEnergia(VERTICES_DEL_HALO_DEL_ARCO, FRAGMENTOS_DEL_HALO_DEL_ARCO, { ...uniformes, ...trazo }))
+  halo.name = 'arcos'
+  const nucleos = new THREE.Mesh(gt, materialDeEnergia(VERTICES_DE_LOS_ARCOS, FRAGMENTOS_DE_LOS_ARCOS, { ...uniformes, ...trazo, uCapa: { value: 1 } }))
+  nucleos.name = 'nucleos de los arcos'
+  mallas.push(halo, nucleos)
   const ge = cuadrados(1)
   const lugarDeLosEfectos = new THREE.InstancedBufferAttribute(new Float32Array(EFECTOS.cuantos * 3), 3).setUsage(THREE.DynamicDrawUsage)
   const efecto = new THREE.InstancedBufferAttribute(new Float32Array(EFECTOS.cuantos * 4), 4).setUsage(THREE.DynamicDrawUsage)
@@ -133,9 +151,11 @@ export function armar(direccion: Direccion, compacto: boolean, vista: { readonly
   const mallaDeEfectos = new THREE.Mesh(ge, materialDeEnergia(VERTICES_DE_LOS_EFECTOS, FRAGMENTOS_DE_LOS_EFECTOS, { ...uniformes }))
   mallaDeEfectos.name = 'efectos'
   mallas.unshift(mallaDeEfectos)
+  // [PULIDO 18] P1.c · después de la trama y de la copia del cuadro (−18), antes del haz y del amanecer (1 a 3): el calor refracta lo de
+  // atrás y lo que se dibuja después (el haz) queda encima. De noche suman: el orden no cambia nada.
   mallas.forEach((m, k) => {
     m.frustumCulled = false
-    m.renderOrder = k
+    m.renderOrder = ORDEN_DE_LA_ENERGIA + k
   })
   const centro = new THREE.Vector3()
   const v = new THREE.Vector3()
@@ -185,8 +205,8 @@ export function armar(direccion: Direccion, compacto: boolean, vista: { readonly
   return {
     direccion, azar, brasas, entrada: crearEntradaDeLasBrasas(), temperatura: crearTemperatura(), lectura: crearLectura(), arcos: crearArcos(azar), puntero: crearPuntero(), cinta, enjambre, uniformes,
     atributosDeLasBrasas, atributosDeLaCinta, geometriaDeLaCinta: gt, efectos: { lugar: lugarDeLosEfectos, efecto, geometria: ge }, mallas, centro, v, luces: new Float32Array(DIBUJO.luces * 4),
-    puntoDelPuntero: new Float32Array(3), rayo, entorno, texto: { leidoEn: Number.NEGATIVE_INFINITY, scroll: Number.NaN }, halo: 0, ondas: new Float32Array(8).fill(Number.NEGATIVE_INFINITY),
-    ajustables: { brasas: deLasBrasas, enjambre: delEnjambre, arcos: trazo, simulacion: enjambre === null ? {} : enjambre.u, comun: uniformes },
+    puntoDelPuntero: new Float32Array(3), camaraAntes: new THREE.Vector3(Number.NaN, Number.NaN, Number.NaN), puntoAntes: new Float32Array(3).fill(Number.NaN), rayo, entorno, texto: { leidoEn: Number.NEGATIVE_INFINITY, scroll: Number.NaN }, halo: 0, ondas: new Float32Array(8).fill(Number.NEGATIVE_INFINITY),
+    ajustables: { brasas: deLasBrasas, enjambre: delEnjambre, arcos: trazo, simulacion: enjambre === null ? {} : enjambre.u, comun: uniformes, reflejo: delReflejo },
   }
 }
 

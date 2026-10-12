@@ -65,17 +65,65 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   el logo en el mundo (antes, desde el origen de sus coordenadas).
 - Compuerta: tsc y lint en verde; las 50 suites, en verde (s8-montaje con sus 2 de la base).
 
+### El mini-banco (mientras no hay memoria para el banco del sitio)
+- Sin 3 GB libres no hay build de medición ni banco. Para no avanzar a ciegas: un MINI-BANCO fuera del repo
+  (`scratchpad/p18/sombreadores/`): el plasma real (su armado, su cuadro, su física, sus sombreadores y el pase) empaquetado con
+  esbuild en una escena chica (un piso de papel con juntas, un logo de reemplazo, la luz del estudio, el tono ACES compensado) y
+  dibujado en un Chrome sin ventana con su propio perfil (~250 MB). Saca la captura y junta los errores del compilador. Vistas:
+  ancho (26 u), cerca (9 u), piso; noche y día; calor forzado; un arco forzado. NO es el sitio (sin la trama, el cielo, el piso
+  vivo, los títulos): lo de la escena real queda para el banco.
+
 ### P1.a · El piso (límite real), partículas blandas (profundidad) y el reflejo en el piso
-- PENDIENTE.
+- HECHO · VISTO en el mini-banco (el sitio, pendiente).
+- EL PISO, UN LÍMITE REAL (`BRASAS.piso`): ninguna baja de 0,85 u sobre el piso (por encima de la cresta más alta del mar y del
+  bloque que levanta el cursor); en la banda de 1,6 u sobre ese mínimo un colchón las levanta (2,4 u/s², creciente hacia abajo), lo
+  que bajan se frena (5/s) y lo de costado roza (0,9/s): se deslizan y casi no se acercan. Nacen arriba. El enjambre de B, igual.
+  Medido (s69): 8 s con el campo y un pulso desde arriba cada 2 s, ninguna debajo del mínimo y ninguna pegada a la banda.
+- PARTÍCULAS BLANDAS con el búfer de profundidad: EL PASE COMPARTIDO (`escena/pase/`): una pasada a media resolución de lo opaco
+  (las capas: lo que escribe profundidad, más las luces), con la cámara del cuadro, montada ÚLTIMA en el escenario (su cuadro corre
+  después de todos y antes de que r3f dibuje). El destino se declara «como la pantalla» (`isXRRenderTarget`: el mismo tono y espacio
+  de color) y lleva las mismas luces: ningún programa nuevo. Primero la probé anidada (en el `onBeforeRender` de una malla): el estado
+  de las luces de la pasada anidada es otro y three rearmaba los parámetros de cada material en cada cuadro; fuera del cuadro no. La
+  partícula se desvanece contra lo opaco en su propio ancho del mundo (`vSuave`); los arcos, en 0,15 u.
+- EL REFLEJO TENUE (`dibujo/reflejos.ts`): de noche, las chispas a menos de 2,6 u del piso se ven espejadas debajo, más anchas y
+  tenues (el papel es mate), titilando con su chispa; sólo donde lo que se ve es el piso (la profundidad: el logo o el pie delante lo
+  tapan) y no sobre un texto. Un dibujo más con los mismos atributos, sin física.
 
 ### P1.d · Más partícula, menos nube
-- PENDIENTE.
+- HECHO · VISTO en el mini-banco (el sitio, pendiente).
+- EL NÚCLEO, CHICO Y NÍTIDO: su radio tiene un tope (1,3 px, `uNucleo`); el tamaño de la chispa lo lleva el halo, corto (2 núcleos,
+  0,14). Casi sin desenfoque (0,06 px por u, hasta 1,5: era el bokeh de 0,3 y 6) y un tope de 3,2 px.
+- LOS TAMAÑOS, por una LEY DE POTENCIA (una Pareto truncada entre 0,012 y 0,08 u, exponente 2,3): la mediana, 1,35 veces la más
+  chica; más de 3 veces, el 7 % (antes un tercio). Las intensidades varían (de 0,35 a 1, muchas tenues y pocas fuertes).
+- LA CRUZ MUY CHICA (7 px, dos rayos finos en la pantalla) sólo en las más calientes y al destellar fuerte.
+- LOS ARCOS: en el mini-banco se vio que la cinta del halo se plegaba en los quiebres del camino (de cerca, esquirlas blancas) y que
+  la luz que corre dibujaba rayas de través en el halo (una espina de pescado). El halo pasó a PUNTOS suaves a lo largo del camino
+  (el patrón del repo para el brillo: sprites aditivos), con su peso por lo que avanza hasta el siguiente punto; la luz que corre,
+  sólo en el núcleo (la cinta fina, que no se pliega). A distancia normal: un rayo de verdad (núcleo nítido, halo, rama, el toque).
 
 ### P1.c · De día
-- PENDIENTE.
+- HECHO · VISTO en el mini-banco (el sitio, pendiente; la elección final entre las tres opciones, con el banco).
+- LAS TRES OPCIONES, juntas y en uniformes (cada una se apaga sola para comparar): un CUERPO OSCURO nítido (el núcleo, 0,6) con un
+  VELO tenue alrededor (0,22) y un ESPECULAR mínimo corrido hacia la luz principal (arriba a la izquierda), sólo en los cuerpos que se
+  ven grandes; el CALOR de las calientes: refracta lo de atrás (la copia del cuadro, 2,2 px, un temblor) y le sube el contraste
+  OSCURECIENDO los medios (el papel blanco queda blanco).
+- En el mini-banco: con el punto blanco al centro (el de PULIDO 17) las calientes se leían como ojos o burbujas y el contraste
+  simétrico aclaraba el papel (aros claros): se fueron los dos. Ahora, puntos de grafito nítidos con un velo y algún brillo mínimo.
+- EL COLOR DE LA ESCENA, en el pase compartido: un disparador (un triángulo que no pinta) dibujado después de la trama copia el
+  cuadro a una textura (`copyFramebufferToTexture`), sólo si alguien lo pidió en ese cuadro (el plasma, de día). La energía se dibuja
+  después (orden −10 en adelante) y antes del haz y del amanecer (1 a 3): lo que se dibuja después queda encima del calor.
+- s32 (ESCENA 7) prohíbe volver al «aire caliente» que se borró allá (un componente con su pasada); el calor de ahora es el pedido
+  del humano, en la partícula y con el pase compartido; los nombres que s32 vigila no se usan.
 
 ### P1.e · Física mejor
-- PENDIENTE.
+- HECHO · VISTO no (la física se ve en movimiento: con el banco del sitio).
+- `movimiento.ts`: la CONVECCIÓN (las calientes suben por su energía sobre la de reposo, 0,7 u/s² por unidad; las frías bajan, 0,05),
+  el PINCH (un arco que golpea tira hacia su canal a las que tiene a menos de 1,3 u, 3,2 u/s², y las calienta: al apagarse las suelta
+  encendidas y la convección se las lleva), la ESTELA del puntero (al moverse arrastra a las que tiene a menos de 2,6 u de su rayo
+  hacia su velocidad, 1,8/s; quieto, nada). El VIENTO del scroll (`cuadro.ts`): en contra de la cámara que pasa, 0,35 u/s por
+  pantalla por segundo, ×(1 + 1,5 T), con tope 1,6 y asentándose en 0,35 s; lo lleva el campo.
+- La cáscara, más que lineal con lo que se pasan: con todo a la vez (la mitad caliente, dos arcos, el puntero, el viento al tope
+  sostenido 20 s) alguna se escapaba; ahora ninguna (s69), ningún NaN, la rapidez con su tope.
 
 ### P1 · Secuencias (noche, día, piso de cerca, logo bajando, puntero, clic, mantener-soltar; 1440 y 390)
 - PENDIENTE.

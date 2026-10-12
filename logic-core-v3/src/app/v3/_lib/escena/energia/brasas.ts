@@ -13,7 +13,14 @@ export const BRASAS = {
    * Dónde viven: una cáscara (u) y el hueco del logo (el logo mide 6,9 de ancho). [PULIDO 18] P1.b · la cáscara es del MUNDO: alrededor
    * del origen (el lugar de reposo del logo), quieta; el hueco va con el logo (un obstáculo donde esté: si baja, las aparta al pasar).
    */
-  volumen: { radio: 13, hueco: 4.2, sobreElPiso: 0.3 },
+  volumen: { radio: 13, hueco: 4.2 },
+  /**
+   * [PULIDO 18] P1.a · EL PISO ES UN LÍMITE REAL (el brillo lo atravesaba): ninguna baja de `minimo` (u sobre el piso: por encima de la
+   * cresta más alta del mar y del bloque que levanta el cursor); en la `banda` de arriba de ese mínimo un colchón las levanta
+   * (`empuje`, u/s², creciente hacia abajo), lo que bajan se frena (`frena`, 1/s) y lo que corren de costado roza (`roce`, 1/s): se
+   * deslizan y casi no se acercan. Nacen arriba del mínimo.
+   */
+  piso: { minimo: 0.85, banda: 1.6, empuje: 2.4, frena: 5, roce: 0.9 },
   /** Entre ellas (u, s; masa 1), las de PULIDO 15: el alcance, atraer y repeler, el rechazo de cerca, la amortiguación, el tope y la cáscara. */
   fuerzas: { alcance: 3.6, atrae: 0.42, repele: 0.55, cerca: 0.55, choque: 6, amortigua: 1.1, tope: 3, contiene: 1.6 },
   /** El campo: la rapidez que les da (u/s, más con la temperatura) y en cuánto lo siguen (1/s). */
@@ -30,6 +37,17 @@ export const BRASAS = {
   onda: { rapidez: 10, ancho: 1.1, empuje: 2.4, calienta: 0.85, llega: 11 },
   /** Las ondas del logo (su pulso): cuánto calientan por segundo en la cresta (por su amplitud) y el ancho de la cresta (u). */
   anillo: { calienta: 0.9, ancho: 1.2 },
+  /**
+   * [PULIDO 18] P1.e · el movimiento nuevo (`movimiento.ts`). La CONVECCIÓN: cuánto sube una brasa por su energía sobre la de reposo
+   * (u/s² por unidad) y cuánto baja fría. El PINCH de un arco: su alcance (u), la fuerza hacia el canal en el golpe (u/s²) y cuánto
+   * calienta (1/s). La ESTELA del puntero: su alcance (u desde el rayo), cuánto arrastra (1/s) y desde qué rapidez del puntero arrastra
+   * entera (u/s). El VIENTO del scroll: cuánto viento por pantalla por segundo de scroll (u/s), en contra de la cámara que pasa (el
+   * aire), su tope (u/s), cuánto más con la temperatura y en cuánto se asienta (s).
+   */
+  conveccion: { sube: 0.7, baja: 0.05 },
+  pinch: { radio: 1.3, fuerza: 3.2, calienta: 0.5 },
+  estela: { radio: 2.6, arrastra: 1.8, desde: 0.6 },
+  viento: { escala: 0.35, tope: 1.6, caliente: 1.5, asienta: 0.35 },
 } as const
 
 export interface Brasas {
@@ -71,12 +89,20 @@ export interface EntradaDeLasBrasas {
   readonly anillos: Float32Array
   /** Dónde está el logo ahora (su centro): el hueco y las ondas salen de ahí. */
   readonly logo: Float32Array
+  /** [PULIDO 18] P1.e · el viento del scroll (u/s), la velocidad del puntero en la nube (u/s) y los canales de los arcos que golpean: (a, b, fuerza) × `cuantosArcos`. */
+  readonly viento: Float32Array
+  readonly estela: Float32Array
+  readonly arcos: Float32Array
+  cuantosArcos: number
   /** El piso (y): nada pasa por debajo (un arco a una brasa bajo el piso se ve como una grieta). */
   piso: number
 }
 
+/** Cuántos arcos entran al paso como mucho (los lugares de los arcos, `arcos/arcos.ts`). */
+export const ARCOS_EN_LA_ENTRADA = 6
+
 export function crearEntradaDeLasBrasas(): EntradaDeLasBrasas {
-  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), piso: -100 }
+  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), viento: new Float32Array(3), estela: new Float32Array(3), arcos: new Float32Array(ARCOS_EN_LA_ENTRADA * 7), cuantosArcos: 0, piso: -100 }
 }
 
 /** Un azar con semilla (mulberry32): las mismas brasas y los mismos arcos en cada carga de la página (y en el banco). */
@@ -109,7 +135,8 @@ export function enLaCascara(azar: () => number, destino: Float32Array, o: number
   destino[o + 2] = Math.sin(fi) * s * r
 }
 
-export function crearBrasas(n: number, azar: () => number): Brasas {
+/** Las brasas, en la cáscara y arriba del piso (`piso`: su altura; sin piso, en toda la cáscara). */
+export function crearBrasas(n: number, azar: () => number, piso = Number.NEGATIVE_INFINITY): Brasas {
   const b: Brasas = {
     n,
     lugar: new Float32Array(n * 3),
@@ -128,8 +155,11 @@ export function crearBrasas(n: number, azar: () => number): Brasas {
     paresMirados: 0,
     turno: 0,
   }
+  const arriba = piso + BRASAS.piso.minimo + BRASAS.piso.banda * 0.5
   for (let i = 0; i < n; i += 1) {
     enLaCascara(azar, b.lugar, i * 3)
+    for (let intento = 0; intento < 32 && b.lugar[i * 3 + 1] < arriba; intento += 1) enLaCascara(azar, b.lugar, i * 3)
+    b.lugar[i * 3 + 1] = Math.max(b.lugar[i * 3 + 1], arriba)
     b.signo[i] = i % 2 === 0 ? 1 : -1
     b.semilla[i * 4] = azar() ** 2.2
     b.semilla[i * 4 + 1] = azar() * Math.PI * 2
