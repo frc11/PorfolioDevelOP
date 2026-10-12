@@ -192,7 +192,10 @@ Lo medido de C en PULIDO 17 queda en su recibo (`entregas/pulido-17/o5-medido.js
 
 ## Crítica (lo que el banco mostró y qué se hizo)
 
-(se completa con el banco)
+- Mini-banco · el halo de un arco largo era un collar de cuentas: los puntos del halo quedaban más separados que su radio. Ahora el
+  radio de cada punto es al menos 1,1 veces lo que avanza hasta el siguiente; el halo de un arco largo sale parejo (y algo más ancho).
+- Mini-banco · la zona del espejo a 390: el radio salía del alto de la pantalla (0,27 de 844 px) y tapaba media pantalla. Ahora sale
+  del lado menor.
 
 ## Recomendación
 

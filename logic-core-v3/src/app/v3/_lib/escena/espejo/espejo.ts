@@ -21,7 +21,7 @@ export const ESPEJO = {
   scroll: { bordes: [['quienes-somos', 'numeros'], ['servicios', 'tu-panel'], ['tu-panel', 'por-que-develop']], ancho: 0.5 },
   /** Mantener: cuánto apretado antes de empezar (s: el plasma carga primero), en cuánto crece (s) y en cuánto se cura al soltar (s). */
   mantener: { espera: 0.7, crece: 1.6, cura: 1.2 },
-  /** La zona en la pantalla: el radio (fracción del alto), lo que se aleja del centro del logo (en sus radios) y dónde puede ir (NDC). */
+  /** La zona en la pantalla: el radio (fracción del lado menor), lo que se aleja del centro del logo (en sus radios) y dónde puede ir (NDC). */
   zona: {
     radio: 0.27,
     lejosDelLogo: 1.3,

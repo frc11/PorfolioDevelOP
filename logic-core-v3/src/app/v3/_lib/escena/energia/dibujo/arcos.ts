@@ -178,8 +178,11 @@ void main() {
 	float rama = aExtra.z;
 	float afina = rama > 0.5 ? mix( 1.0, 0.15, largo ) : 0.12 + 0.88 * smoothstep( 0.0, 0.16, largo ) * smoothstep( 1.0, 0.84, largo );
 	afina = mix( 1.0, afina, uArcoForma.w );
-	float radio = max( 0.75, uArcoForma.x * aForma.y * uPixel * afina * ${f(HALO_DEL_ARCO.radio)} );
-	vPeso = clamp( length( d - s ) / ( 2.2 * radio ), 0.05, 0.85 ) * ( rama > 0.5 ? 0.6 : 1.0 );
+	// El radio, al menos lo que avanza hasta el siguiente punto: en un arco largo los puntos quedaban separados (un collar de cuentas);
+	// un arco largo tiene así un halo más ancho, parejo.
+	float paso = length( d - s );
+	float radio = max( max( 0.75, uArcoForma.x * aForma.y * uPixel * afina * ${f(HALO_DEL_ARCO.radio)} ), 1.1 * paso * afina );
+	vPeso = clamp( paso / ( 2.2 * radio ), 0.05, 0.85 ) * ( rama > 0.5 ? 0.6 : 1.0 );
 	gl_PointSize = 2.0 * radio * ${f(HALO_DEL_ARCO.llega)};
 	gl_Position = c;
 	vTexto = adentroDelTexto( c.xy / c.w );

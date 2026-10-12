@@ -75,7 +75,8 @@ export function cuadroDelEspejo(a: ArmadoDelEspejo, f: DeLaEscenaAlEspejo): void
   pasoDelDisparador(d, a.entrada)
   const u = a.uniformes
   if (a.zona !== null) {
-    u.uZona.value.set(d.zonaX, d.zonaY, d.zonaRadio * f.alto, d.amplitud)
+    // El radio, una fracción del lado menor (en el teléfono, el alto es el doble del ancho: con el alto tapaba media pantalla).
+    u.uZona.value.set(d.zonaX, d.zonaY, d.zonaRadio * Math.min(f.alto, f.resolucion.x / Math.max(1e-3, f.pixel)), d.amplitud)
     u.uResolucion.value.copy(f.resolucion)
     u.uPixel.value = f.pixel
     u.uTiempo.value = a.entrada.tiempo
