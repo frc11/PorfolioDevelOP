@@ -33,7 +33,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   No paginado 934 MB. Sin dev server, sin servidor de medición, sin Chrome del banco.
 
 ### P1.0 · El default: el plasma A; `?energia=polvo`; C se borra
-- HECHO · VISTO no (memoria disponible 1,2–1,5 GB: sin banco; VERIFICAR con el banco en cuanto haya 3 GB o TRAS REINICIO).
+- HECHO · VISTO sí, en el banco del sitio al final (sin bandera, el plasma A; ver «El banco del sitio»).
 - `entorno.ts`: `energia` pasa a ser `'polvo' | 'plasma-y-polvo' | 'no'` (sin la bandera, el producto: el plasma; `energia=plasma`, la
   de antes, se lee igual); `plasma` pasa a `'a' | 'b' | 'no'` (`plasma=c` se lee como sin bandera). Sigue siendo una prueba suelta
   (`?energia=polvo` en la URL). La base limpia también monta el plasma: no es una idea del entorno (como el final del pie o los
@@ -50,7 +50,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   base: los seis archivos largos de siempre).
 
 ### P1.b · Independientes del logo (viven en el mundo)
-- HECHO · VISTO no (sin banco por la memoria: VERIFICAR la secuencia «logo bajando» con el banco).
+- HECHO · VISTO sí, en el mini-banco y en el sitio (el logo baja al pie y el plasma se queda: `p1-1440/4-logo-bajando`).
 - Todo en el MUNDO: las brasas, el enjambre de B, los arcos, sus luces, los efectos, el puntero y el piso (`FLOOR_Y`, no relativo al
   logo). Los sombreadores ya no le suman el centro del logo a ninguna posición.
 - La cáscara (radio 13) es del mundo, quieta alrededor del origen (el lugar de reposo del logo). El logo sólo influye: su HUECO
@@ -74,7 +74,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   vivo, los títulos): lo de la escena real queda para el banco.
 
 ### P1.a · El piso (límite real), partículas blandas (profundidad) y el reflejo en el piso
-- HECHO · VISTO en el mini-banco (el sitio, pendiente).
+- HECHO · VISTO en el mini-banco y en el sitio (`p1-1440/3-piso`: nada atraviesa el papel).
 - EL PISO, UN LÍMITE REAL (`BRASAS.piso`): ninguna baja de 0,85 u sobre el piso (por encima de la cresta más alta del mar y del
   bloque que levanta el cursor); en la banda de 1,6 u sobre ese mínimo un colchón las levanta (2,4 u/s², creciente hacia abajo), lo
   que bajan se frena (5/s) y lo de costado roza (0,9/s): se deslizan y casi no se acercan. Nacen arriba. El enjambre de B, igual.
@@ -90,7 +90,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   tapan) y no sobre un texto. Un dibujo más con los mismos atributos, sin física.
 
 ### P1.d · Más partícula, menos nube
-- HECHO · VISTO en el mini-banco (el sitio, pendiente).
+- HECHO · VISTO en el mini-banco y en el sitio (`p1-1440/1-noche`: chispas nítidas con halo corto, sin la niebla de PULIDO 17).
 - EL NÚCLEO, CHICO Y NÍTIDO: su radio tiene un tope (1,3 px, `uNucleo`); el tamaño de la chispa lo lleva el halo, corto (2 núcleos,
   0,14). Casi sin desenfoque (0,06 px por u, hasta 1,5: era el bokeh de 0,3 y 6) y un tope de 3,2 px.
 - LOS TAMAÑOS, por una LEY DE POTENCIA (una Pareto truncada entre 0,012 y 0,08 u, exponente 2,3): la mediana, 1,35 veces la más
@@ -107,7 +107,8 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   partícula, no niebla (la variante de halo más ancho volvía a la nube).
 
 ### P1.c · De día
-- HECHO · VISTO en el mini-banco (el sitio, pendiente; la elección final entre las tres opciones, con el banco).
+- HECHO · VISTO en el mini-banco y en el sitio (`p1-1440/2-dia`). Las tres opciones quedan juntas (elegidas mirando en el mini-banco;
+  el sitio lo confirmó: motas oscuras nítidas y rayos de tinta, sin manchas).
 - LAS TRES OPCIONES, juntas y en uniformes (cada una se apaga sola para comparar): un CUERPO OSCURO nítido (el núcleo, 0,6) con un
   VELO tenue alrededor (0,22) y un ESPECULAR mínimo corrido hacia la luz principal (arriba a la izquierda), sólo en los cuerpos que se
   ven grandes; el CALOR de las calientes: refracta lo de atrás (la copia del cuadro, 2,2 px, un temblor) y le sube el contraste
@@ -129,7 +130,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   del humano, en la partícula y con el pase compartido; los nombres que s32 vigila no se usan.
 
 ### P1.e · Física mejor
-- HECHO · VISTO no (la física se ve en movimiento: con el banco del sitio).
+- HECHO · VISTO en el sitio en hojas de 8 cuadros (en movimiento se ve más que en hojas); verificado por s69.
 - `movimiento.ts`: la CONVECCIÓN (las calientes suben por su energía sobre la de reposo, 0,7 u/s² por unidad; las frías bajan, 0,05),
   el PINCH (un arco que golpea tira hacia su canal a las que tiene a menos de 1,3 u, 3,2 u/s², y las calienta: al apagarse las suelta
   encendidas y la convección se las lleva), la ESTELA del puntero (al moverse arrastra a las que tiene a menos de 2,6 u de su rayo
@@ -174,7 +175,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   una propuesta de dónde va cada uno en el recorrido.
 
 ### P2.2 · Los efectos (`?espejo=`), los disparos y el color
-- HECHO · VISTO en el mini-banco (con una trama de reemplazo; la escena real, con el banco).
+- HECHO · VISTO en el mini-banco (con una trama de reemplazo) y en el sitio (ver «El banco del sitio»).
 - `escena/espejo/`: lo puro (`espejo.ts`: los ciclos, el disparador de los tres modos, la zona lejos del logo y de los textos), los
   efectos de la pantalla (`pantalla.ts`), los ecos (`ecos.ts`), el pliegue (`pliegue.ts`), el armado y el componente. Banderas:
   `?espejo=cristal|pliegue|caleidoscopio|ecos|espiral`, `?espejo-disparo=ambiente|scroll|mantener` (sin ella, el ambiente) y
@@ -291,7 +292,10 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 | el plasma A (el producto) | 14,42 / 386,9 | 13,34 / 14,1 | 13,34 / 13,9 | 13,34 / 14,2 | 13,34 / 14,1 | 13,34 / 14 |
 
 ### Final · verificar
-- PENDIENTE.
+- HECHO · `tsc` (con 4096 de heap) limpio; el lint de lo tocado, limpio. `npm run verificar`: 76 pasos, 8 con falla, que son los 8 rojos
+  de la base (s1, s17, s2, s3, s4, s5, s7, s8), con 105 afirmaciones en falla adentro, las mismas de la base: ni una más. s69 en
+  verde: 81 afirmaciones, 50 controles positivos. `npm run test:frontera`: 0 fallas. Sin build de medición al terminar
+  (`.next-probe` borrado), sin servidor ni Chrome del banco, `limpiar.ps1 -Profundo` corrido.
 
 ## VERIFICAR TRAS REINICIO (el banco del sitio, cuando haya 3 GB libres) — HECHO al final (ver «El banco del sitio»); los comandos quedan para volver a correrlo
 
@@ -347,8 +351,33 @@ Lo medido de C en PULIDO 17 queda en su recibo (`entregas/pulido-17/o5-medido.js
 
 ## Recomendación
 
-(al final)
+- EL PLASMA A es el producto (ya es el default): de noche, chispas nítidas de tamaños e intensidades distintas con un halo corto, y
+  rayos con núcleo y halo; de día, el negativo: gotas de tinta nítidas y rayos de tinta. Medido en el sitio: en caliente, ningún cuadro
+  de más de 20 ms; +1,46 ms por cuadro sobre el polvo a 1440 (+0,43 a 390).
+- LA DIMENSIÓN ESPEJO, cuál y dónde (visto en el sitio):
+  - 02 → 03 (Quiénes somos → Números): el CRISTAL atado al scroll. Es el de la gema de la realidad (el pedido): en el sitio raja la
+    cúpula del moiré y de noche arma grietas claras. El disparo `scroll` ya enciende en ese borde.
+  - 07 · Por qué develOP: la ESPIRAL atada al scroll. Es la más vistosa: un vórtice que retuerce la cúpula. El borde Tu panel → Por qué
+    develOP ya enciende.
+  - 01 · Hero: los ECOS en la caída del logo al cargar. Sutiles de día; no necesitan la copia del cuadro.
+  - El CALEIDOSCOPIO, el interactivo (mantener apretado sobre el fondo).
+  - El PLIEGUE, sólo de noche sobre una retícula (Números). De día, en el hero, apenas se nota: si no va ahí, se descarta.
+  - Fuera: 04 · Trabajos (el túnel aprobado), 06 · Tu panel (papel opaco: ahí la escena está en pausa), 08 · Cierre y el pie.
+  - Si hay que quedarse con dos: el cristal (Quiénes somos → Números) y la espiral (Por qué develOP). El prisma, apagado.
+- Para llevarlo al producto falta un paso (no hecho, a decidir): hoy `?espejo=` elige UN efecto para todos los disparos. La
+  recomendación (el cristal en un borde y la espiral en otro) pide un efecto por borde.
 
 ## Lo que no quedó bien
 
-(al final)
+- El banco del sitio llegó recién al final: casi todo el sprint la memoria estuvo entre 0,86 y 2,4 GB. Las iteraciones se miraron en
+  el mini-banco (el código real en una escena chica) y el sitio confirmó después, en hojas de 8 cuadros (JPEG a 0,6), no en video.
+- B sigue en `?plasma=b`. Con el cristal ya construido, «de ahí sale» puede querer decir que se borra: no la borré sin confirmarlo.
+- En frío, a 390, el producto tuvo un tirón de 1,15 s en una sola corrida (el polvo solo: 149 ms a 390 y 662 a 1440). No lo repetí ni
+  lo investigué; la deuda del frío de s68 sigue abierta.
+- El pliegue de día en el hero casi no se ve; los ecos de día, apenas.
+- De cerca, el núcleo del rayo satura un poco en su punta más cercana.
+- La física del polvo (`polvo/Fisica.tsx`) sigue montada aunque el producto ya no dibuja el polvo (hornea el campo del logo que usa B):
+  GPU de más. No se apagó.
+- El día se eligió mirando (las tres opciones juntas: el cuerpo, el especular y el calor). El calor (la refracción) casi no se
+  distingue en hojas a 0,6.
+- La física nueva (convección, pinch, estela, viento) está verificada por invariante (s69) y en hojas, pero en 8 cuadros se ve poco.
