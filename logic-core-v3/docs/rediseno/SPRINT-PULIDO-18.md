@@ -100,6 +100,11 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   la luz que corre dibujaba rayas de través en el halo (una espina de pescado). El halo pasó a PUNTOS suaves a lo largo del camino
   (el patrón del repo para el brillo: sprites aditivos), con su peso por lo que avanza hasta el siguiente punto; la luz que corre,
   sólo en el núcleo (la cinta fina, que no se pliega). A distancia normal: un rayo de verdad (núcleo nítido, halo, rama, el toque).
+- LA PRESENCIA (segunda vuelta, comparada con el A de PULIDO 17 en el mini-banco con el encuadre del sitio: 35 grados, el logo a
+  17 u): con el núcleo en 1,3 y el reposo en 0,18 la noche eran puntitos tenues y el plasma perdía la presencia que el humano eligió.
+  Cuatro variantes lado a lado; quedó el núcleo en 2,8, el reposo en 0,26, el halo de 2,5 núcleos con peso 0,2 (el tope de s69, sin
+  aflojarlo), el tope del núcleo en 1,5 px y las intensidades desde 0,5. Visto: núcleos nítidos, halos cortos, unas pocas grandes;
+  partícula, no niebla (la variante de halo más ancho volvía a la nube).
 
 ### P1.c · De día
 - HECHO · VISTO en el mini-banco (el sitio, pendiente; la elección final entre las tres opciones, con el banco).
@@ -109,6 +114,14 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   OSCURECIENDO los medios (el papel blanco queda blanco).
 - En el mini-banco: con el punto blanco al centro (el de PULIDO 17) las calientes se leían como ojos o burbujas y el contraste
   simétrico aclaraba el papel (aros claros): se fueron los dos. Ahora, puntos de grafito nítidos con un velo y algún brillo mínimo.
+- LA ELECCIÓN (segunda vuelta, en el mini-banco): de día casi no se veía ninguna. La asimetría: de noche una luz chica sumada sobre
+  negro se ve; de día un alfa de 0,1 sobre el papel no (y el reposo del día colgaba del de la noche, 0,18). El día tiene ahora su
+  propio reposo (`uDia.z`, 0,5) y su ganancia (el cuerpo en 2,6, translúcido con tope 0,85); el velo, angosto y con tope (0,25: una
+  cercana y caliente no se vuelve una mancha, el lunar que el humano no quiere: las manchas grises anchas de PULIDO 17). Quedan las
+  tres opciones juntas: el cuerpo oscuro y nítido con su velo corto, el especular en las grandes y el calor en las calientes. Visto:
+  gotas de tinta nítidas de tamaños variados, el negativo de la noche. LOS ARCOS DE DÍA: el núcleo era blanco (invisible sobre el
+  papel) y quedaba una banda de humo gris; ahora el núcleo es de tinta (0,95) y el halo tenue (0,08): un rayo de tinta.
+- B, de día, como en PULIDO 17 (sin velo; el brillo claro en las calientes, ahora el especular): P1.c le había cambiado el día.
 - EL COLOR DE LA ESCENA, en el pase compartido: un disparador (un triángulo que no pinta) dibujado después de la trama copia el
   cuadro a una textura (`copyFramebufferToTexture`), sólo si alguien lo pidió en ese cuadro (el plasma, de día). La energía se dibuja
   después (orden −10 en adelante) y antes del haz y del amanecer (1 a 3): lo que se dibuja después queda encima del calor.
@@ -196,6 +209,10 @@ Lo medido de C en PULIDO 17 queda en su recibo (`entregas/pulido-17/o5-medido.js
   radio de cada punto es al menos 1,1 veces lo que avanza hasta el siguiente; el halo de un arco largo sale parejo (y algo más ancho).
 - Mini-banco · la zona del espejo a 390: el radio salía del alto de la pantalla (0,27 de 844 px) y tapaba media pantalla. Ahora sale
   del lado menor.
+- Mini-banco, con el encuadre del sitio · de noche, puntitos tenues: el plasma había perdido la presencia del A elegido (P1.d,
+  segunda vuelta: el núcleo brillante, el reposo visible). De día casi no se veía ninguna, y los arcos de día eran una banda de humo
+  gris (P1.c, segunda vuelta: el reposo y la ganancia del día, el velo con tope, el arco de tinta). La vista `sitio` del mini-banco
+  (35 grados, el logo a 17 u, un 36 % del ancho) se sumó para esto: la vista ancha (30 grados, a 26 u) achicaba todo.
 
 ## Recomendación
 

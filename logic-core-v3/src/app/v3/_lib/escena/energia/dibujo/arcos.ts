@@ -15,8 +15,11 @@ import { AL_TONO, COMUN, SALIDA, f } from './comun'
 export const TRAZO = {
   /** El medio ancho del canal (px de CSS, por el ancho de su clase), el del núcleo (px), cuánto corre la luz y cuánto se afinan las puntas. */
   uArcoForma: [11, 0.85, 0.3, 1],
-  /** De día: cuánto tapa el halo oscuro, el resplandor oscuro, el núcleo y su color (0 blanco, 1 tinta). */
-  uArcoDia: [0.22, 0.1, 1, 0],
+  /**
+   * De día: cuánto tapa el halo oscuro, el resplandor oscuro, el núcleo y su color (0 blanco, 1 tinta). [PULIDO 18] P1.c · el núcleo de
+   * tinta y el halo tenue: con el núcleo blanco (invisible sobre el papel) quedaba una banda de humo gris; ahora, un rayo de tinta.
+   */
+  uArcoDia: [0.08, 0.04, 0.95, 1],
   /** De noche: la luz del halo, la del resplandor y la del núcleo. */
   uArcoNoche: [0.16, 0.18, 1.7, 0],
 } as const

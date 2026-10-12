@@ -22,6 +22,7 @@ import * as THREE from 'three'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
 import { DE_AFUERA, deAfuera } from '../escena/energia/afuera'
 import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas } from '../escena/energia/brasas'
+import { TRAZO } from '../escena/energia/dibujo/arcos'
 import { ORDEN_DE_LA_ENERGIA } from '../escena/energia/dibujo/armado'
 import { ASPECTO } from '../escena/energia/dibujo/particulas'
 import { DIRECCIONES, DIRECCION_RECOMENDADA, direccionDe } from '../escena/energia/direcciones'
@@ -220,6 +221,16 @@ const diaBien = (particula: string, plasma: string, armado: string): boolean =>
 afirmar(diaBien(PARTICULA, PLASMA, ARMADO), '  de día: el cuerpo oscuro nítido (el núcleo), el especular corrido hacia la luz (sin el punto blanco al centro: los ojos), el calor de las calientes refracta la copia del cuadro y oscurece los medios (el papel queda blanco); la energía se dibuja después de la copia y antes del haz')
 controlPositivo('  el detector VE el punto blanco al centro (los ojos)', PARTICULA.replace('float cuerpo =', 'float punto = 1.0;\n\tfloat cuerpo ='), (p: string) => diaBien(p, PLASMA, ARMADO))
 controlPositivo('  y el contraste que aclara el papel (los aros)', PARTICULA.replace('corridoAtras * corridoAtras', 'clamp( ( corridoAtras - 0.5 ) * 1.6 + 0.5, 0.0, 1.0 )'), (p: string) => diaBien(p, PLASMA, ARMADO))
+// Lo que mostró el mini-banco: de noche, puntitos tenues (el plasma sin presencia); de día, un alfa chico que no se ve sobre el papel
+// (colgaba del reposo de la noche), y el arco de día, una banda de humo con el núcleo blanco (invisible sobre el papel).
+const VIVO = 'float vivo = mix( uDia.z + ( 1.0 - uDia.z ) * e, uLuz.y + ( 1.0 - uLuz.y ) * e, uNoche );'
+const presenciaBien = (a: Aspecto, particula: string, trazoDia: readonly number[]): boolean =>
+  a.uLuz[0] >= 2 && a.uLuz[1] >= 0.25 && a.uDia[0] >= 2 && a.uDia[2] >= 0.4 && particula.includes(VIVO) &&
+  particula.includes('min( 0.25, humo * uDiaForma.z * vBrillo * 2.0 )') && trazoDia[0] <= 0.12 && trazoDia[2] >= 0.8 && trazoDia[3] === 1
+afirmar(presenciaBien(A_ASPECTO, PARTICULA, TRAZO.uArcoDia), `  la presencia: de noche el núcleo en ${String(A_ASPECTO.uLuz[0])} y el reposo en ${String(A_ASPECTO.uLuz[1])}; de día su propio reposo (${String(A_ASPECTO.uDia[2])}), el cuerpo en ${String(A_ASPECTO.uDia[0])}, el velo con tope (no un lunar) y el arco de tinta`)
+controlPositivo('  el detector VE los puntitos tenues de la noche (el núcleo en 1,3, el reposo en 0,18)', { ...A_ASPECTO, uLuz: [1.3, 0.18, 0.14, 2] as const }, (a: Aspecto) => presenciaBien(a, PARTICULA, TRAZO.uArcoDia))
+controlPositivo('  y el día colgado del reposo de la noche', PARTICULA.replace(VIVO, 'float vivo = uLuz.y + ( 1.0 - uLuz.y ) * e;'), (p: string) => presenciaBien(A_ASPECTO, p, TRAZO.uArcoDia))
+controlPositivo('  y el arco de día con el núcleo blanco (la banda de humo)', [0.22, 0.1, 1, 0] as const, (t: readonly number[]) => presenciaBien(A_ASPECTO, PARTICULA, t))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('P1.e · La física nueva: convección, el pinch de los arcos, la estela del puntero, el viento del scroll; estable y contenida')

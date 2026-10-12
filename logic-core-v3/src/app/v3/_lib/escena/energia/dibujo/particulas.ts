@@ -27,10 +27,10 @@ export const ASPECTO: Readonly<Record<Estilo, Readonly<Record<NombreDelAspecto, 
     uTamano: [0.022, 0.075, 0.8, 6],
     // De noche: el brillo, la parte que brilla en reposo, el peso del halo y su ancho (en radios del núcleo).
     uLuz: [1.1, 0.22, 0.22, 3],
-    // De día: el alfa del cuerpo oscuro, el brillo especular (corrido hacia la luz), (sin uso) y desde qué energía el especular está
-    // entero. [PULIDO 18] P1.c · un cuerpo oscuro y nítido (el núcleo), un velo tenue alrededor y el especular mínimo: sin el punto
+    // De día: el alfa del cuerpo oscuro, el brillo especular (corrido hacia la luz), la parte que se ve en reposo y desde qué energía
+    // el especular está entero. [PULIDO 18] P1.c · un cuerpo oscuro y nítido (el núcleo), un velo tenue alrededor y el especular mínimo: sin el punto
     // blanco al centro (con él, las calientes se leían como ojos o burbujas).
-    uDia: [0.6, 0.55, 0, 0.6],
+    uDia: [0.6, 0.55, 0.18, 0.6],
     // De día, el velo alrededor del cuerpo: su ancho (radios de la partícula), su mínimo (px) y su alfa.
     uDiaForma: [1.6, 1.2, 0.22, 0],
     // La estela (s de recorrido), el temblor caliente (px), el desenfoque (px por unidad fuera del plano del logo) y su tope.
@@ -53,7 +53,7 @@ export const ASPECTO: Readonly<Record<Estilo, Readonly<Record<NombreDelAspecto, 
   mota: {
     uTamano: [0.012, 0.04, 0.6, 4],
     uLuz: [0.7, 0.08, 0.3, 2.5],
-    uDia: [0.03, 0, 0.7, 0.55],
+    uDia: [0.03, 0, 0.08, 0.55],
     uDiaForma: [2.2, 3, 0, 0],
     uMovida: [0.02, 1, 0.4, 7],
     uFuente: [5.5, 0.85, 0.75, 0.25],
@@ -223,7 +223,8 @@ ${desdeTextura
 	vSuave = max( 0.12, 0.6 * ancho * distancia / max( 1.0, uEscalaPx ) );
 	vTexto = adentroDelTexto( cP.xy / cP.w );
 	float luz = 1.0 + 1.6 * luzDeLosArcos( p );
-	float vivo = uLuz.y + ( 1.0 - uLuz.y ) * e;
+	// [PULIDO 18] P1.c · de día, lo que se ve en reposo es lo suyo (uDia.z): la energía oscura se ve también quieta.
+	float vivo = mix( uDia.z + ( 1.0 - uDia.z ) * e, uLuz.y + ( 1.0 - uLuz.y ) * e, uNoche );
 	// La estela reparte su luz a lo largo: más larga, más tenue por punto.
 	float reparte = 1.0 / ( 1.0 + 0.35 * largo / radioPx );
 	vBrillo = min( uDelante.z, uIntensidad * brilloPropio( id ) * vivo * titila * respira * fuente * ( 1.0 + uDestello.z * destello ) * luz * conserva * reparte * fundido * enElFinal( p - uCentro ) );
@@ -271,7 +272,8 @@ void main() {
 	float cuerpo = exp( - 0.5 * d2 / ( rNucleo * rNucleo ) ) * cola;
 	vec2 alBrillo = vLocal - vec2( - 0.5, 0.5 ) * sigma;
 	float especular = exp( - 0.5 * dot( alBrillo, alBrillo ) / ( 0.25 * uPixel * uPixel ) ) * uDia.y * smoothstep( 1.6 * uPixel, 3.0 * uPixel, sigma ) * vBrillo * ( 0.3 + 0.7 * vClaro );
-	float aDia = min( 0.92, ( cuerpo * uDia.x + humo * uDiaForma.z ) * vBrillo * 2.0 + especular );
+	// El velo, con tope: una cercana y caliente no se vuelve una mancha (un lunar); el cuerpo, translúcido.
+	float aDia = min( 0.85, cuerpo * uDia.x * vBrillo * 2.0 + min( 0.25, humo * uDiaForma.z * vBrillo * 2.0 ) + especular );
 	vec3 colorDia = mix( uTintaDia, uClaroDia, especular / max( 1e-4, aDia ) );
 	// El calor (de día, las calientes): lo de atrás (la copia del cuadro), corrido como en el aire que tiembla y con más contraste.
 	float radioDelCalor = uCalorDia.z * uPixel;
