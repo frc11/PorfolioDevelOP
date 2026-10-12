@@ -152,7 +152,15 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   del paso, un número por brasa, y lo de three) no vale la pena.
 
 ### P1 · Secuencias (noche, día, piso de cerca, logo bajando, puntero, clic, mantener-soltar; 1440 y 390)
-- PENDIENTE.
+- HECHO EN EL MINI-BANCO · VERIFICAR TRAS REINICIO en el sitio (la memoria nunca llegó a 3 GB: el banco del sitio no se usó).
+- Las hojas (8 cuadros cada ~0,15 s): `~/.cache/b4-medicion/pulido-18/mini/<ancho>/` (P1: `1-noche`, `2-dia`, `3-piso-de-cerca`,
+  `3b-piso-de-cerca-dia`, `4-logo-bajando`, `5-puntero`, `6-clic`, `7-mantener-soltar`, `8-clic-dia`). A 1440 la noche, el día y el
+  logo bajando con el encuadre del sitio (35 grados, el logo a 17 u); a 390, la vista ancha. El recibo: `entregas/pulido-18/mini-secuencias.json`.
+- Lo que se ve: de noche, un campo de chispas nítidas de tamaños e intensidades distintas (unas pocas grandes con su halo corto),
+  presentes en todo el cuadro y más alrededor del logo; de día, el negativo (gotas de tinta nítidas con un velo corto, el especular
+  en las grandes); el piso de cerca, ninguna partícula ni brillo atraviesa el papel (el mínimo de 0,85 u y lo blando); el logo baja
+  3 u y la nube se queda; el puntero, el clic (un rayo con núcleo, halo parejo y su rama), mantener y soltar (la descarga con su
+  bola de carga); de día, el rayo de tinta.
 
 ### P2.1 · Investigar (`DIMENSION-ESPEJO.md`)
 - HECHO · `docs/rediseno/DIMENSION-ESPEJO.md`: 15 referencias (Framestore y el «Mandelbrotting» de *Doctor Strange*; ILM y la Nueva
@@ -191,19 +199,80 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   cero, el pliegue es la identidad en cero, los ecos no tocan el logo, los módulos y lo de cada cuadro sin reservas.
 
 ### P2 · Secuencias y recomendación
-- PENDIENTE.
+- HECHO EN EL MINI-BANCO (una trama de reemplazo, no el moiré real) · VERIFICAR TRAS REINICIO en el sitio.
+- Las hojas: `mini/<ancho>/e-*.png` (cristal de día, de noche y con prisma; caleidoscopio; espiral; pliegue de día y de noche; ecos
+  de noche y de día; a 390, sin prisma, ecos de día ni pliegue de noche). Lo que se ve: el CRISTAL raja la zona en esquirlas (de día,
+  facetas grises con su filo de tinta; de noche, una red de grietas claras) y se cura; el CALEIDOSCOPIO arma un rosetón que gira; la
+  ESPIRAL, un vórtice que entra; el PLIEGUE enrolla la pared de la trama detrás del logo como una ola y la devuelve; los ECOS, copias
+  del logo (con el de reemplazo, una caja: se leen como láminas apiladas; con el logo real, su contorno) detrás, al moverse.
+- LA RECOMENDACIÓN (cuál y dónde), la de `DIMENSION-ESPEJO.md`, confirmada en el mini-banco y pendiente del sitio:
+  - 01 · Hero: los ECOS en la caída del logo al cargar (como el pliegue, no necesita la copia del cuadro).
+  - 02 → 03 (Quiénes somos → Números): el CRISTAL atado al scroll, en el cielo detrás (es el de la gema de la realidad: el que más
+    se parece al pedido).
+  - 05 · Servicios: el PLIEGUE de la cúpula, lento, una vez.
+  - 07 · Por qué develOP: la ESPIRAL, atada al scroll.
+  - El CALEIDOSCOPIO, el interactivo (mantener apretado sobre el fondo).
+  - Fuera: 04 · Trabajos (el túnel aprobado), 06 · Tu panel (el papel opaco), 08 · Cierre y el pie (el encastre).
+  - Si hay que quedarse con dos: el cristal (scroll) y los ecos (hero). El prisma: en el mini-banco es un fleco de color apenas
+    visible en los filos (saturación de 25 sobre 255, contra 7 sin él); queda apagado por defecto, como se pidió.
 
 ### Medido (sin vsync: el plasma A y cada efecto, a 1440 y 390)
-- PENDIENTE.
+- HECHO EN EL MINI-BANCO (la NVIDIA RTX 5050, D3D11, sin vsync) · el sitio entero, con su banco: ver abajo. Recibo:
+  `entregas/pulido-18/mini-medido.json`.
+- Cómo: un Chrome sin ventana por medición (`--disable-gpu-vsync --disable-frame-rate-limit --force_high_performance_gpu`), la escena
+  compilada antes (como `gpu/Precompilar.tsx`), 4 s de física para el estado estable y 6 s medidos. EL CUADRO, sin el reloj de la GPU
+  (sus consultas traban un cuadro hacia el 775: 3 de 3 corridas con el reloj, 0 de 3 sin él); LA GPU, con su reloj, en otra tanda.
+  Con un efecto, se vuelve a disparar apenas se cura (activo todo el rato). Nada se compila durante la medición.
+- Ningún cuadro de más de 20 ms en calma, al máximo ni con cada efecto activo, a 1440 y 390 (uno suelto de 68,9 ms a 390 con el
+  cristal de día no volvió en dos corridas más: era la máquina). La GPU, a lo sumo 1,44 ms. El plasma A suma ~0,7 ms al cuadro a 1440
+  y ~0,2 a 390 (la escena sola, 0,12 y 0,23); cada efecto, casi nada (la GPU, +0,06 el cristal de día).
+
+| | 1440 · cuadro (media / p95 / máx., ms) | 1440 · GPU (media / máx.) | 390 · cuadro | 390 · GPU | basura por cuadro (KB, 1440 / 390) |
+|---|---|---|---|---|---|
+| la escena sola (sin el plasma) | 0,12 / 0,2 / 6,9 | 0,07 / 0,55 | 0,23 / 0,3 / 3,2 | 0,03 / 0,32 | 1,2 / 1,5 |
+| plasma A · calma de noche | 0,84 / 1,2 / 4,2 | 0,19 / 0,81 | 0,38 / 0,5 / 3,2 | 0,06 / 1,44 | 15,5 / 8,9 |
+| plasma A · calma de día | 0,81 / 1,1 / 4 | 0,25 / 1,23 | 0,38 / 0,6 / 3,7 | 0,08 / 1,11 | 15,6 / 8,9 |
+| plasma A · al máximo de noche | 0,88 / 1,2 / 4,2 | 0,2 / 0,86 | 0,42 / 0,6 / 3,5 | 0,09 / 0,89 | 16,4 / 9,4 |
+| plasma A · al máximo de día | 0,92 / 1,3 / 4,5 | 0,25 / 1,17 | 0,41 / 0,6 / 3,4 | 0,11 / 0,83 | 16,2 / 9,3 |
+| + cristal activo · de día | 0,86 / 1,1 / 3,8 | 0,31 / 1,41 | 0,39 / 0,5 / 68,9 (un 68,9 suelto: no volvió en 2 corridas más, con máx. 3,6) | 0,11 / 1,14 | 16,5 / 9,2 |
+| + cristal activo · de noche | 0,84 / 1,1 / 4,2 | 0,32 / 1,16 | 0,59 / 0,7 / 3,4 | 0,11 / 0,8 | 16,2 / 9,8 |
+| + pliegue activo · de día | 0,83 / 1,1 / 4 | 0,25 / 0,99 | 0,57 / 0,8 / 3,5 | 0,08 / 0,9 | 15,8 / 9,6 |
+| + pliegue activo · de noche | 0,82 / 1,1 / 5,2 | 0,18 / 1,26 | 0,37 / 0,5 / 3,4 | 0,06 / 0,44 | 16 / 9,1 |
+| + caleidoscopio activo · de día | 0,82 / 1,1 / 4 | 0,26 / 1,07 | 0,39 / 0,6 / 3,9 | 0,1 / 0,63 | 16 / 9,3 |
+| + caleidoscopio activo · de noche | 0,83 / 1,1 / 4 | 0,26 / 1,3 | 0,39 / 0,5 / 18,1 | 0,08 / 1,28 | 16,1 / 9,3 |
+| + ecos activos · de día | 0,84 / 1,1 / 3,9 | 0,25 / 1,14 | 0,59 / 0,8 / 3,3 | 0,09 / 1,18 | 16,6 / 10,6 |
+| + ecos activos · de noche | 0,87 / 1,2 / 4,5 | 0,2 / 0,96 | 0,4 / 0,6 / 3,3 | 0,07 / 1,24 | 16,3 / 9,9 |
+| + espiral activa · de día | 0,82 / 1,1 / 4,7 | 0,25 / 1,07 | 0,59 / 0,8 / 3,4 | 0,08 / 0,52 | 16,2 / 9,8 |
+| + espiral activa · de noche | 0,84 / 1,2 / 4,3 | 0,27 / 1,08 | 0,58 / 0,8 / 4,9 | 0,1 / 0,77 | 16,2 / 9,7 |
 
 ### Final · verificar
 - PENDIENTE.
+
+## VERIFICAR TRAS REINICIO (el banco del sitio, cuando haya 3 GB libres) — ver «El banco del sitio» si llegó a correr
+
+La memoria disponible nunca llegó a 3 GB en todo el sprint (de 0,86 a 2,4 GB; el Chrome del humano, 6 a 8 GB en ~50 procesos): el
+portero del banco (`banco11.ts conectar`) se niega por debajo de 3000 MB y la regla del sprint dice «sin banco». Todo lo visto y medido
+es del MINI-BANCO (el plasma real y el espejo en una escena chica). Lo pendiente en el sitio, con los scripts ya escritos (en
+`~/.cache/b4-medicion/pulido-18/_scripts/`; los del mini-banco en `_mini/`):
+1. `bash _scripts/reconstruir.sh` (el build de medición en `.next-probe` + `next start -p 3000` + el Chrome del banco).
+2. P1: `npx tsx _scripts/p-secuencias.ts 1440 900 p1` y `npx tsx _scripts/p-secuencias.ts 390 844 p1` (noche, día, piso, logo
+   bajando, puntero, clic, mantener-soltar; a 390 la resumida).
+3. P2, por efecto: `ESPEJO=cristal npx tsx _scripts/p-secuencias.ts 1440 900 p2` (y `pliegue`, `caleidoscopio`, `ecos`, `espiral`;
+   `PRISMA=1` para el prisma; a 390 los que apliquen).
+4. Lo medido: `SIN_VSYNC=1 bash _scripts/p-tanda.sh p18 "polvo producto espejo-cristal espejo-pliegue espejo-caleidoscopio espejo-ecos espejo-espiral" "1440 390"`
+   (y una con vsync: `bash _scripts/p-tanda.sh p18v "polvo producto" "1440 390"`).
+5. Mirar en el sitio: el día (las tres opciones juntas, elegidas en el mini-banco), el disparo `scroll` en sus bordes, que
+   `copyFramebufferToTexture` no dé el error de formato de Chromium (la consola del banco), y los ecos con el logo real.
+6. Recibos en `docs/rediseno/entregas/pulido-18/`, apagar el servidor y el Chrome, borrar `.next-probe` y
+   `scripts/limpiar.ps1 -Profundo`.
 
 ## Disco y memoria por tanda
 
 | Tanda | Disco libre | Memoria disponible (antes → después) | No paginado (antes → después) | Nota |
 |---|---|---|---|---|
 | Arranque | 81 GB | 1089 MB | 934 MB | el Chrome del humano abierto; sin banco |
+| Mini-banco: las hojas (33, regeneradas con el aspecto nuevo) | 78 GB | 1121 MB | 982 MB | un Chrome sin ventana (~250 MB); 7,8 MB de hojas |
+| Mini-banco: lo medido (t1, t2, t3 y las repetidas; ~70 corridas de un Chrome sin ventana) | 71–79 GB | 1121 → 6483 MB | 982 → 931 MB | a mitad de la tanda t3 el humano cerró su Chrome (quedó en 1 GB) |
 
 ## Invariantes que fijaban el polvo como default (antes / ahora / por qué)
 

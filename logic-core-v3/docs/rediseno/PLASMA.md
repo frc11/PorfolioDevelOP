@@ -80,6 +80,9 @@ segundo. En la CPU, cada brasa lo recalcula en cuadros alternos. [PULIDO 18] El 
   calienta, 0,5/s: al apagarse las suelta encendidas y la convección se las lleva), la ESTELA del puntero (al moverse arrastra a las
   que tiene a menos de 2,6 u de su rayo hacia su velocidad, 1,8/s, entera desde 0,6 u/s; quieto, nada) y el VIENTO del scroll (en
   contra de la cámara que pasa, 0,35 u/s por pantalla por segundo, ×(1 + 1,5 T), tope 1,6, se asienta en 0,35 s).
+- [PULIDO 18] SIN BASURA POR CUADRO: ningún `Math.hypot` en lo de cada cuadro (en V8 asigna un arreglo por llamada; en el bucle de las
+  vecinas eran unos 400 KB por cuadro, con recolecciones de hasta 300 ms en el mini-banco): `largo3` (`largo.ts`) y, en los dos bucles
+  más calientes, el cuadrado directo. De 378 a 16 KB por cuadro; el cuadro del plasma sin vsync, de 2,19 a 1,02 ms (mini-banco, 1440).
 
 ## B · El enjambre (`enjambre/`)
 
@@ -107,8 +110,8 @@ arcos y el temblor. Cada mota vive 6–14 s y renace. [PULIDO 18] En el mundo y 
   por lo que avanza hasta el siguiente punto en la pantalla (un tubo parejo). Como cinta, en un quiebre cerrado el halo ancho se
   plegaba en esquirlas blancas (de cerca); y la luz que corre dibujaba rayas de través en el halo (una espina de pescado): ahora corre
   sólo en el NÚCLEO, la cinta fina (que no se pliega). El inglete, con tope 1/0,85. Blandos contra lo opaco en 0,15 u.
-- De noche: halo 0,16, resplandor 0,18, núcleo 1,7. De día: el halo es energía oscura (0,22; resplandor 0,1) que enmarca un núcleo más
-  blanco que el papel. Los efectos: el piso se ilumina debajo de un arco, de noche (0,09); un destello chico donde un arco toca el logo.
+- De noche: halo 0,16, resplandor 0,18, núcleo 1,7. [PULIDO 18] De día, un rayo de TINTA: el núcleo oscuro (0,95) con un halo tenue
+  (0,08; resplandor 0,04). Con el núcleo blanco (invisible sobre el papel) quedaba una banda de humo gris. Los efectos: el piso se ilumina debajo de un arco, de noche (0,09); un destello chico donde un arco toca el logo.
 
 ## El dibujo (`dibujo/particulas.ts`)
 
@@ -116,29 +119,32 @@ Ninguna figura. BRILLA: titila con su ritmo (las positivas lento, las negativas 
 su región (un ruido lento: zonas que se encienden). VIBRA: caliente, tiembla en la pantalla. Viene de la FUENTE (lejos del logo se
 apaga) y deja libre la CARA DEL LOGO. Un tope de brillo por partícula.
 
-[PULIDO 18] MÁS PARTÍCULA, MENOS NUBE: el NÚCLEO tiene un tope de radio (1,3 px: chico y nítido siempre; el tamaño de la chispa lo
-lleva el HALO, corto: 2 núcleos, 0,14); los TAMAÑOS van por una LEY DE POTENCIA (una Pareto truncada entre 0,012 y 0,08 u, exponente
-2,3: la mediana, 1,35 veces la más chica; más de 3 veces, el 7 %); las INTENSIDADES varían (de 0,35 a 1: muchas tenues, pocas
-fuertes); casi sin desenfoque (0,06 px por u, hasta 1,5: era el bokeh); y una CRUZ MUY CHICA (dos rayos de 7 px en la pantalla) sólo
+[PULIDO 18] MÁS PARTÍCULA, MENOS NUBE: el NÚCLEO tiene un tope de radio (1,5 px: chico y nítido siempre; el tamaño de la chispa lo
+lleva el HALO, corto: 2,5 núcleos, 0,2); los TAMAÑOS van por una LEY DE POTENCIA (una Pareto truncada entre 0,012 y 0,08 u, exponente
+2,3: la mediana, 1,35 veces la más chica; más de 3 veces, el 7 %); las INTENSIDADES varían (de 0,5 a 1: muchas tenues, pocas
+fuertes); la PRESENCIA: el núcleo brilla 2,8 y en reposo se ve 0,26 (con 1,3 y 0,18, de noche eran puntitos tenues y el plasma
+perdía la presencia del A elegido); casi sin desenfoque (0,06 px por u, hasta 1,5: era el bokeh); y una CRUZ MUY CHICA (dos rayos de 7 px en la pantalla) sólo
 en las más calientes y al destellar fuerte.
 
 [PULIDO 18] BLANDAS: el halo se desvanece contra lo opaco (el piso, el logo, el pie, los títulos) en su propio ancho del mundo, con la
 profundidad del pase compartido: ningún brillo corta una superficie.
 
 [PULIDO 18] DE DÍA (las tres opciones juntas, en uniformes; cada una se apaga sola para comparar): un CUERPO oscuro nítido (el núcleo,
-0,6), un VELO tenue alrededor (0,22), un ESPECULAR mínimo corrido hacia la luz principal (arriba a la izquierda, sólo en los cuerpos que
+2,6, translúcido con tope 0,85), un VELO corto alrededor (0,45, con tope 0,25: una cercana y caliente no se vuelve una mancha), un ESPECULAR mínimo corrido hacia la luz principal (arriba a la izquierda, sólo en los cuerpos que
 se ven grandes) y, en las calientes, el CALOR: refracta lo de atrás (la copia del cuadro: 2,2 px con un temblor, en un radio de 7 px) y
 le sube el contraste oscureciendo los medios (el papel blanco queda blanco). Sin el punto blanco al centro de PULIDO 17: las calientes
-se leían como ojos o burbujas.
+se leían como ojos o burbujas. EL REPOSO DEL DÍA ES SUYO (0,5): un alfa chico sobre el papel no se ve (la noche suma luz sobre negro,
+que sí) y colgado del reposo de la noche casi no se veía ninguna. Visto: gotas de tinta nítidas de tamaños variados, el negativo de
+la noche.
 
 | Uniforme | A · chispa | B · mota |
 |---|---|---|
 | `uTamano` (radio u mín. · máx., px mín. · máx.) | 0,012 · 0,08 · 0,7 · 3,2 | 0,012 · 0,04 · 0,6 · 4 |
-| `uNucleo` (el tope del radio del núcleo, px) | 1,3 | sin tope |
-| `uChispa` (la ley de potencia, el brillo propio más bajo, la cruz, su largo px) | 2,3 · 0,35 · 0,55 · 7 | 1,4 · 1 · 0 · 0 |
-| `uLuz` (brillo, reposo, halo, ancho del halo) | 1,3 · 0,18 · 0,14 · 2 | 0,7 · 0,08 · 0,3 · 2,5 (B, en su dirección: 0,32 · 0,12 · 0,45 · 3) |
-| `uDia` (el cuerpo, el especular, —, desde) | 0,6 · 0,55 · — · 0,6 | 0,03 · 0 · 0,7 · 0,55 |
-| `uDiaForma` (el velo: ancho en radios, mínimo px, alfa) | 1,6 · 1,2 · 0,22 | 2,2 · 3 · 0 |
+| `uNucleo` (el tope del radio del núcleo, px) | 1,5 | sin tope |
+| `uChispa` (la ley de potencia, el brillo propio más bajo, la cruz, su largo px) | 2,3 · 0,5 · 0,55 · 7 | 1,4 · 1 · 0 · 0 |
+| `uLuz` (brillo, reposo, halo, ancho del halo) | 2,8 · 0,26 · 0,2 · 2,5 | 0,7 · 0,08 · 0,3 · 2,5 (B, en su dirección: 0,32 · 0,12 · 0,45 · 3) |
+| `uDia` (el cuerpo, el especular, el reposo de día, desde) | 2,6 · 0,55 · 0,5 · 0,6 | 0,03 · 0 · 0,08 · 0,55 (B: 0 · 0,7 · 0,12 · 0,55; sus núcleos, 0 · 0,6 · 0,22 · 0,5, como en PULIDO 17) |
+| `uDiaForma` (el velo: ancho en radios, mínimo px, alfa) | 1,6 · 1,2 · 0,45 | 2,2 · 3 · 0 (los núcleos de B, sin velo) |
 | `uCalorDia` (refracta px, contraste, radio px, desde) | 2,2 · 0,6 · 7 · 0,35 | sin calor |
 | `uMovida` (estela s, temblor px, desenfoque, tope) | 0 · 1,2 · 0,06 · 1,5 | 0,02 · 1 · 0,4 · 7 |
 | `uFuente` (radio, se apaga, respira, escala) | 6,5 · 0,75 · 0,55 · 0,22 | 5,5 · 0,85 · 0,75 · 0,25 |

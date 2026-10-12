@@ -1,0 +1,1339 @@
+{
+ "que": "PULIDO 18 · lo medido en el MINI-BANCO (no es el sitio: la memoria nunca llegó a 3 GB y el banco del sitio no se pudo usar). El plasma real (su armado, su cuadro, su física, el pase de profundidad y la copia del color) y el espejo, en una escena chica (piso con juntas, un logo de reemplazo de 6,9 × 1,6 × 0,8, la trama en un cilindro, luces y el tono de la escena), en tiempo real.",
+ "como": "Un Chrome sin ventana por medición (--headless=new --use-angle=d3d11 --force_high_performance_gpu --disable-gpu-vsync --disable-frame-rate-limit --enable-precise-memory-info), la escena compilada antes (compileAsync, como gpu/Precompilar.tsx), 4 s de física de una para el estado estable y 6 s medidos; la primera consulta por CDP, después de la medición. EL CUADRO: el intervalo entre cuadros (rAF sin vsync: lo que cuesta de verdad, CPU y GPU), en una tanda SIN el reloj de la GPU. LA GPU: el reloj de la GPU (EXT_disjoint_timer_query_webgl2: la pasada de profundidad, la escena, el plasma y el efecto), en otra tanda CON el reloj. Sus consultas traban un cuadro hacia el 775 (instrumento: 3 de 3 corridas con el reloj, 0 de 3 sin él): por eso el cuadro sale de la tanda sin reloj. caliente: la temperatura al tope, el puntero que da vueltas y un arco cada 1,5 s. Con un efecto, se vuelve a disparar apenas se cura (activo todo el rato). heap: la basura de JS por cuadro (KB) y las recolecciones.",
+ "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "anchos": {
+  "1440": [
+   1440,
+   900
+  ],
+  "390": [
+   390,
+   844
+  ]
+ },
+ "medidas": {
+  "1440": {
+   "caleidoscopio-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0&espejo=caleidoscopio&zona=0.55,0.45",
+    "cuadro": {
+     "media": 0.82,
+     "p50": 0.8,
+     "p95": 1.1,
+     "maximo": 4,
+     "mayoresDe20": 0,
+     "cuadros": 7330
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.26,
+     "p50": 0.22,
+     "p95": 0.5,
+     "maximo": 1.07,
+     "mayoresDe20": 0,
+     "cuadros": 6935
+    },
+    "cuadroConReloj": {
+     "media": 0.86,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 4.1,
+     "mayoresDe20": 0,
+     "cuadros": 6938
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 6544235,
+     "despues": 8925903,
+     "recolecciones": 74,
+     "kbPorCuadro": 16
+    },
+    "errores": 0
+   },
+   "caleidoscopio-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&espejo=caleidoscopio&zona=0.55,0.45",
+    "cuadro": {
+     "media": 0.83,
+     "p50": 0.8,
+     "p95": 1.1,
+     "maximo": 4,
+     "mayoresDe20": 0,
+     "cuadros": 7238
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.26,
+     "p50": 0.23,
+     "p95": 0.51,
+     "maximo": 1.3,
+     "mayoresDe20": 0,
+     "cuadros": 6675
+    },
+    "cuadroConReloj": {
+     "media": 0.9,
+     "p50": 0.8,
+     "p95": 1.3,
+     "maximo": 4.4,
+     "mayoresDe20": 0,
+     "cuadros": 6678
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 6936767,
+     "despues": 8994355,
+     "recolecciones": 77,
+     "kbPorCuadro": 16.1
+    },
+    "errores": 0
+   },
+   "calma-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0",
+    "cuadro": {
+     "media": 0.81,
+     "p50": 0.8,
+     "p95": 1.1,
+     "maximo": 4,
+     "mayoresDe20": 0,
+     "cuadros": 7391
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.25,
+     "p50": 0.21,
+     "p95": 0.5,
+     "maximo": 1.23,
+     "mayoresDe20": 0,
+     "cuadros": 6936
+    },
+    "cuadroConReloj": {
+     "media": 0.86,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 4,
+     "mayoresDe20": 0,
+     "cuadros": 6939
+    },
+    "largosConReloj": [
+     [
+      241,
+      34,
+      2,
+      9,
+      0
+     ]
+    ],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 7432858,
+     "despues": 7563034,
+     "recolecciones": 71,
+     "kbPorCuadro": 15.6
+    },
+    "errores": 0
+   },
+   "calma-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1",
+    "cuadro": {
+     "media": 0.84,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 4.2,
+     "mayoresDe20": 0,
+     "cuadros": 7160
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.19,
+     "p50": 0.17,
+     "p95": 0.38,
+     "maximo": 0.81,
+     "mayoresDe20": 0,
+     "cuadros": 6791
+    },
+    "cuadroConReloj": {
+     "media": 0.88,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 4.2,
+     "mayoresDe20": 0,
+     "cuadros": 6793
+    },
+    "largosConReloj": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 5694822,
+     "despues": 8321650,
+     "recolecciones": 71,
+     "kbPorCuadro": 15.5
+    },
+    "errores": 0
+   },
+   "cristal-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0&espejo=cristal&zona=0.55,0.45",
+    "cuadro": {
+     "media": 0.86,
+     "p50": 0.8,
+     "p95": 1.1,
+     "maximo": 3.8,
+     "mayoresDe20": 0,
+     "cuadros": 6961
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.31,
+     "p50": 0.26,
+     "p95": 0.58,
+     "maximo": 1.41,
+     "mayoresDe20": 0,
+     "cuadros": 6012
+    },
+    "cuadroConReloj": {
+     "media": 1,
+     "p50": 0.9,
+     "p95": 1.4,
+     "maximo": 4.3,
+     "mayoresDe20": 0,
+     "cuadros": 6016
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 5932519,
+     "despues": 8928163,
+     "recolecciones": 73,
+     "kbPorCuadro": 16.5
+    },
+    "errores": 0
+   },
+   "cristal-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&espejo=cristal&zona=0.55,0.45",
+    "cuadro": {
+     "media": 0.84,
+     "p50": 0.8,
+     "p95": 1.1,
+     "maximo": 4.2,
+     "mayoresDe20": 0,
+     "cuadros": 7101
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.32,
+     "p50": 0.27,
+     "p95": 0.57,
+     "maximo": 1.16,
+     "mayoresDe20": 0,
+     "cuadros": 6822
+    },
+    "cuadroConReloj": {
+     "media": 0.88,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 68.9,
+     "mayoresDe20": 1,
+     "cuadros": 6826
+    },
+    "largosConReloj": [
+     [
+      678,
+      69,
+      489,
+      10,
+      0
+     ]
+    ],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 6550211,
+     "despues": 8714195,
+     "recolecciones": 77,
+     "kbPorCuadro": 16.2
+    },
+    "errores": 0
+   },
+   "ecos-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0&espejo=ecos&oscila=1",
+    "cuadro": {
+     "media": 0.84,
+     "p50": 0.8,
+     "p95": 1.1,
+     "maximo": 3.9,
+     "mayoresDe20": 0,
+     "cuadros": 7137
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.25,
+     "p50": 0.21,
+     "p95": 0.49,
+     "maximo": 1.14,
+     "mayoresDe20": 0,
+     "cuadros": 6725
+    },
+    "cuadroConReloj": {
+     "media": 0.89,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 3.9,
+     "mayoresDe20": 0,
+     "cuadros": 6728
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 6871322,
+     "despues": 8955094,
+     "recolecciones": 73,
+     "kbPorCuadro": 16.6
+    },
+    "errores": 0
+   },
+   "ecos-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&espejo=ecos&oscila=1",
+    "cuadro": {
+     "media": 0.87,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 4.5,
+     "mayoresDe20": 0,
+     "cuadros": 6926
+    },
+    "largos": [
+     [
+      241,
+      35,
+      -5,
+      10,
+      0
+     ]
+    ],
+    "gpu": {
+     "media": 0.2,
+     "p50": 0.17,
+     "p95": 0.43,
+     "maximo": 0.96,
+     "mayoresDe20": 0,
+     "cuadros": 6556
+    },
+    "cuadroConReloj": {
+     "media": 0.91,
+     "p50": 0.9,
+     "p95": 1.3,
+     "maximo": 4.1,
+     "mayoresDe20": 0,
+     "cuadros": 6559
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 5943721,
+     "despues": 7361997,
+     "recolecciones": 72,
+     "kbPorCuadro": 16.3
+    },
+    "errores": 0
+   },
+   "escena": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&plasma=no",
+    "cuadro": {
+     "media": 0.12,
+     "p50": 0.1,
+     "p95": 0.2,
+     "maximo": 6.9,
+     "mayoresDe20": 0,
+     "cuadros": 48622
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.07,
+     "p50": 0.06,
+     "p95": 0.08,
+     "maximo": 0.55,
+     "mayoresDe20": 0,
+     "cuadros": 46830
+    },
+    "cuadroConReloj": {
+     "media": 0.13,
+     "p50": 0.1,
+     "p95": 0.3,
+     "maximo": 5,
+     "mayoresDe20": 0,
+     "cuadros": 47186
+    },
+    "largosConReloj": [],
+    "programasAntes": 4,
+    "programas": 4,
+    "heap": {
+     "antes": 5355950,
+     "despues": 8195566,
+     "recolecciones": 40,
+     "kbPorCuadro": 1.2
+    },
+    "errores": 0
+   },
+   "espiral-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0&espejo=espiral&zona=0.55,0.45",
+    "cuadro": {
+     "media": 0.82,
+     "p50": 0.8,
+     "p95": 1.1,
+     "maximo": 4.7,
+     "mayoresDe20": 0,
+     "cuadros": 7285
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.25,
+     "p50": 0.22,
+     "p95": 0.49,
+     "maximo": 1.07,
+     "mayoresDe20": 0,
+     "cuadros": 6781
+    },
+    "cuadroConReloj": {
+     "media": 0.88,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 18.4,
+     "mayoresDe20": 0,
+     "cuadros": 6785
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 7066342,
+     "despues": 7490626,
+     "recolecciones": 74,
+     "kbPorCuadro": 16.2
+    },
+    "errores": 0
+   },
+   "espiral-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&espejo=espiral&zona=0.55,0.45",
+    "cuadro": {
+     "media": 0.84,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 4.3,
+     "mayoresDe20": 0,
+     "cuadros": 7138
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.27,
+     "p50": 0.22,
+     "p95": 0.53,
+     "maximo": 1.08,
+     "mayoresDe20": 0,
+     "cuadros": 6812
+    },
+    "cuadroConReloj": {
+     "media": 0.88,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 4.4,
+     "mayoresDe20": 0,
+     "cuadros": 6815
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 5887694,
+     "despues": 7359926,
+     "recolecciones": 80,
+     "kbPorCuadro": 16.2
+    },
+    "errores": 0
+   },
+   "maxima-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0&caliente=1",
+    "cuadro": {
+     "media": 0.92,
+     "p50": 0.9,
+     "p95": 1.3,
+     "maximo": 4.5,
+     "mayoresDe20": 0,
+     "cuadros": 6544
+    },
+    "largos": [
+     [
+      241,
+      34,
+      2,
+      9,
+      0
+     ]
+    ],
+    "gpu": {
+     "media": 0.25,
+     "p50": 0.22,
+     "p95": 0.5,
+     "maximo": 1.17,
+     "mayoresDe20": 0,
+     "cuadros": 6191
+    },
+    "cuadroConReloj": {
+     "media": 0.97,
+     "p50": 0.9,
+     "p95": 1.3,
+     "maximo": 4.5,
+     "mayoresDe20": 0,
+     "cuadros": 6195
+    },
+    "largosConReloj": [
+     [
+      241,
+      36,
+      -12,
+      9,
+      0
+     ]
+    ],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 5957802,
+     "despues": 7805594,
+     "recolecciones": 65,
+     "kbPorCuadro": 16.2
+    },
+    "errores": 0
+   },
+   "maxima-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&caliente=1",
+    "cuadro": {
+     "media": 0.88,
+     "p50": 0.8,
+     "p95": 1.2,
+     "maximo": 4.2,
+     "mayoresDe20": 0,
+     "cuadros": 6839
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.2,
+     "p50": 0.18,
+     "p95": 0.45,
+     "maximo": 0.86,
+     "mayoresDe20": 0,
+     "cuadros": 5875
+    },
+    "cuadroConReloj": {
+     "media": 1.02,
+     "p50": 1,
+     "p95": 1.4,
+     "maximo": 4.2,
+     "mayoresDe20": 0,
+     "cuadros": 5878
+    },
+    "largosConReloj": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 7512249,
+     "despues": 8708741,
+     "recolecciones": 70,
+     "kbPorCuadro": 16.4
+    },
+    "errores": 0
+   },
+   "pliegue-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0&espejo=pliegue&zona=0.55,0.45",
+    "cuadro": {
+     "media": 0.83,
+     "p50": 0.8,
+     "p95": 1.1,
+     "maximo": 4,
+     "mayoresDe20": 0,
+     "cuadros": 7231
+    },
+    "largos": [
+     [
+      241,
+      35,
+      -4,
+      9,
+      1
+     ]
+    ],
+    "gpu": {
+     "media": 0.25,
+     "p50": 0.21,
+     "p95": 0.5,
+     "maximo": 0.99,
+     "mayoresDe20": 0,
+     "cuadros": 6759
+    },
+    "cuadroConReloj": {
+     "media": 0.89,
+     "p50": 0.8,
+     "p95": 1.3,
+     "maximo": 4.1,
+     "mayoresDe20": 0,
+     "cuadros": 6763
+    },
+    "largosConReloj": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 7477638,
+     "despues": 8190194,
+     "recolecciones": 75,
+     "kbPorCuadro": 15.8
+    },
+    "errores": 0
+   },
+   "pliegue-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&espejo=pliegue&zona=0.55,0.45",
+    "cuadro": {
+     "media": 0.82,
+     "p50": 0.8,
+     "p95": 1.1,
+     "maximo": 5.2,
+     "mayoresDe20": 0,
+     "cuadros": 7324
+    },
+    "largos": [
+     [
+      241,
+      34,
+      -7,
+      9,
+      1
+     ]
+    ],
+    "gpu": {
+     "media": 0.18,
+     "p50": 0.16,
+     "p95": 0.4,
+     "maximo": 1.26,
+     "mayoresDe20": 0,
+     "cuadros": 6199
+    },
+    "cuadroConReloj": {
+     "media": 0.97,
+     "p50": 0.9,
+     "p95": 1.3,
+     "maximo": 4.2,
+     "mayoresDe20": 0,
+     "cuadros": 6202
+    },
+    "largosConReloj": [
+     [
+      241,
+      35,
+      -2,
+      9,
+      1
+     ]
+    ],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 7482590,
+     "despues": 7728518,
+     "recolecciones": 76,
+     "kbPorCuadro": 16
+    },
+    "errores": 0
+   }
+  },
+  "390": {
+   "caleidoscopio-dia": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=0&espejo=caleidoscopio&zona=0.3,0.55",
+    "cuadro": {
+     "media": 0.39,
+     "p50": 0.4,
+     "p95": 0.6,
+     "maximo": 3.9,
+     "mayoresDe20": 0,
+     "cuadros": 15579
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.1,
+     "p50": 0.09,
+     "p95": 0.19,
+     "maximo": 0.63,
+     "mayoresDe20": 0,
+     "cuadros": 13663
+    },
+    "cuadroConReloj": {
+     "media": 0.44,
+     "p50": 0.4,
+     "p95": 0.6,
+     "maximo": 3.5,
+     "mayoresDe20": 0,
+     "cuadros": 13667
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 7630863,
+     "despues": 9844679,
+     "recolecciones": 83,
+     "kbPorCuadro": 9.3
+    },
+    "errores": 0
+   },
+   "caleidoscopio-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&espejo=caleidoscopio&zona=0.3,0.55",
+    "cuadro": {
+     "media": 0.39,
+     "p50": 0.4,
+     "p95": 0.5,
+     "maximo": 18.1,
+     "mayoresDe20": 0,
+     "cuadros": 15278
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.08,
+     "p50": 0.07,
+     "p95": 0.18,
+     "maximo": 1.28,
+     "mayoresDe20": 0,
+     "cuadros": 13155
+    },
+    "cuadroConReloj": {
+     "media": 0.46,
+     "p50": 0.4,
+     "p95": 0.7,
+     "maximo": 105,
+     "mayoresDe20": 1,
+     "cuadros": 13158
+    },
+    "largosConReloj": [
+     [
+      747,
+      105,
+      526,
+      10,
+      0
+     ]
+    ],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 6489859,
+     "despues": 9411783,
+     "recolecciones": 94,
+     "kbPorCuadro": 9.3
+    },
+    "errores": 0
+   },
+   "calma-dia": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=0",
+    "cuadro": {
+     "media": 0.38,
+     "p50": 0.4,
+     "p95": 0.6,
+     "maximo": 3.7,
+     "mayoresDe20": 0,
+     "cuadros": 15638
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.08,
+     "p50": 0.07,
+     "p95": 0.16,
+     "maximo": 1.11,
+     "mayoresDe20": 0,
+     "cuadros": 14259
+    },
+    "cuadroConReloj": {
+     "media": 0.42,
+     "p50": 0.4,
+     "p95": 0.6,
+     "maximo": 3.8,
+     "mayoresDe20": 0,
+     "cuadros": 14262
+    },
+    "largosConReloj": [
+     [
+      241,
+      34,
+      1,
+      9,
+      0
+     ]
+    ],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 5771492,
+     "despues": 10554436,
+     "recolecciones": 74,
+     "kbPorCuadro": 8.9
+    },
+    "errores": 0
+   },
+   "calma-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1",
+    "cuadro": {
+     "media": 0.38,
+     "p50": 0.4,
+     "p95": 0.5,
+     "maximo": 3.2,
+     "mayoresDe20": 0,
+     "cuadros": 15920
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.06,
+     "p50": 0.07,
+     "p95": 0.12,
+     "maximo": 1.44,
+     "mayoresDe20": 0,
+     "cuadros": 14460
+    },
+    "cuadroConReloj": {
+     "media": 0.41,
+     "p50": 0.4,
+     "p95": 0.6,
+     "maximo": 3.5,
+     "mayoresDe20": 0,
+     "cuadros": 14462
+    },
+    "largosConReloj": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 7233012,
+     "despues": 8914236,
+     "recolecciones": 89,
+     "kbPorCuadro": 8.9
+    },
+    "errores": 0
+   },
+   "cristal-dia": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=0&espejo=cristal&zona=0.3,0.55",
+    "cuadro": {
+     "media": 0.39,
+     "p50": 0.4,
+     "p95": 0.5,
+     "maximo": 68.9,
+     "mayoresDe20": 1,
+     "cuadros": 15474
+    },
+    "largos": [
+     [
+      768,
+      69,
+      352,
+      10,
+      0
+     ]
+    ],
+    "gpu": {
+     "media": 0.11,
+     "p50": 0.1,
+     "p95": 0.21,
+     "maximo": 1.14,
+     "mayoresDe20": 0,
+     "cuadros": 13170
+    },
+    "cuadroConReloj": {
+     "media": 0.46,
+     "p50": 0.4,
+     "p95": 0.7,
+     "maximo": 17.7,
+     "mayoresDe20": 0,
+     "cuadros": 13172
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 5988863,
+     "despues": 8260527,
+     "recolecciones": 90,
+     "kbPorCuadro": 9.2
+    },
+    "errores": 0,
+    "repetidas": [
+     {
+      "cuadro": {
+       "media": 0.39,
+       "p50": 0.4,
+       "p95": 0.5,
+       "maximo": 3.6,
+       "mayoresDe20": 0,
+       "cuadros": 15451
+      },
+      "largos": []
+     },
+     {
+      "cuadro": {
+       "media": 0.57,
+       "p50": 0.6,
+       "p95": 0.7,
+       "maximo": 3.4,
+       "mayoresDe20": 0,
+       "cuadros": 10546
+      },
+      "largos": []
+     }
+    ]
+   },
+   "cristal-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&espejo=cristal&zona=0.3,0.55",
+    "cuadro": {
+     "media": 0.59,
+     "p50": 0.6,
+     "p95": 0.7,
+     "maximo": 3.4,
+     "mayoresDe20": 0,
+     "cuadros": 10209
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.11,
+     "p50": 0.1,
+     "p95": 0.19,
+     "maximo": 0.8,
+     "mayoresDe20": 0,
+     "cuadros": 14101
+    },
+    "cuadroConReloj": {
+     "media": 0.43,
+     "p50": 0.4,
+     "p95": 0.6,
+     "maximo": 4.3,
+     "mayoresDe20": 0,
+     "cuadros": 14104
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 6767411,
+     "despues": 8388315,
+     "recolecciones": 65,
+     "kbPorCuadro": 9.8
+    },
+    "errores": 0
+   },
+   "ecos-dia": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=0&espejo=ecos&oscila=1",
+    "cuadro": {
+     "media": 0.59,
+     "p50": 0.6,
+     "p95": 0.8,
+     "maximo": 3.3,
+     "mayoresDe20": 0,
+     "cuadros": 10128
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.09,
+     "p50": 0.08,
+     "p95": 0.19,
+     "maximo": 1.18,
+     "mayoresDe20": 0,
+     "cuadros": 12782
+    },
+    "cuadroConReloj": {
+     "media": 0.47,
+     "p50": 0.4,
+     "p95": 0.7,
+     "maximo": 3.7,
+     "mayoresDe20": 0,
+     "cuadros": 12785
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 6513328,
+     "despues": 8665556,
+     "recolecciones": 71,
+     "kbPorCuadro": 10.6
+    },
+    "errores": 0
+   },
+   "ecos-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&espejo=ecos&oscila=1",
+    "cuadro": {
+     "media": 0.4,
+     "p50": 0.4,
+     "p95": 0.6,
+     "maximo": 3.3,
+     "mayoresDe20": 0,
+     "cuadros": 14958
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.07,
+     "p50": 0.07,
+     "p95": 0.11,
+     "maximo": 1.24,
+     "mayoresDe20": 0,
+     "cuadros": 12855
+    },
+    "cuadroConReloj": {
+     "media": 0.47,
+     "p50": 0.4,
+     "p95": 0.7,
+     "maximo": 3.4,
+     "mayoresDe20": 0,
+     "cuadros": 12859
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 7438239,
+     "despues": 8141663,
+     "recolecciones": 84,
+     "kbPorCuadro": 9.9
+    },
+    "errores": 0
+   },
+   "escena": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&plasma=no",
+    "cuadro": {
+     "media": 0.23,
+     "p50": 0.2,
+     "p95": 0.3,
+     "maximo": 3.2,
+     "mayoresDe20": 0,
+     "cuadros": 25560
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.03,
+     "p50": 0.02,
+     "p95": 0.07,
+     "maximo": 0.32,
+     "mayoresDe20": 0,
+     "cuadros": 21906
+    },
+    "cuadroConReloj": {
+     "media": 0.27,
+     "p50": 0.3,
+     "p95": 0.4,
+     "maximo": 3.3,
+     "mayoresDe20": 0,
+     "cuadros": 21910
+    },
+    "largosConReloj": [],
+    "programasAntes": 4,
+    "programas": 4,
+    "heap": {
+     "antes": 4786672,
+     "despues": 8846244,
+     "recolecciones": 28,
+     "kbPorCuadro": 1.5
+    },
+    "errores": 0
+   },
+   "espiral-dia": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=0&espejo=espiral&zona=0.3,0.55",
+    "cuadro": {
+     "media": 0.59,
+     "p50": 0.6,
+     "p95": 0.8,
+     "maximo": 3.4,
+     "mayoresDe20": 0,
+     "cuadros": 10222
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.08,
+     "p50": 0.08,
+     "p95": 0.1,
+     "maximo": 0.52,
+     "mayoresDe20": 0,
+     "cuadros": 9715
+    },
+    "cuadroConReloj": {
+     "media": 0.62,
+     "p50": 0.6,
+     "p95": 0.8,
+     "maximo": 3.6,
+     "mayoresDe20": 0,
+     "cuadros": 9717
+    },
+    "largosConReloj": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 7515678,
+     "despues": 9030250,
+     "recolecciones": 68,
+     "kbPorCuadro": 9.8
+    },
+    "errores": 0
+   },
+   "espiral-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&espejo=espiral&zona=0.3,0.55",
+    "cuadro": {
+     "media": 0.58,
+     "p50": 0.6,
+     "p95": 0.8,
+     "maximo": 4.9,
+     "mayoresDe20": 0,
+     "cuadros": 10303
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.1,
+     "p50": 0.09,
+     "p95": 0.2,
+     "maximo": 0.77,
+     "mayoresDe20": 0,
+     "cuadros": 13082
+    },
+    "cuadroConReloj": {
+     "media": 0.46,
+     "p50": 0.4,
+     "p95": 0.7,
+     "maximo": 86.9,
+     "mayoresDe20": 1,
+     "cuadros": 13085
+    },
+    "largosConReloj": [
+     [
+      777,
+      87,
+      481,
+      10,
+      0
+     ]
+    ],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 5786374,
+     "despues": 10842542,
+     "recolecciones": 66,
+     "kbPorCuadro": 9.7
+    },
+    "errores": 0
+   },
+   "maxima-dia": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=0&caliente=1",
+    "cuadro": {
+     "media": 0.41,
+     "p50": 0.4,
+     "p95": 0.6,
+     "maximo": 3.4,
+     "mayoresDe20": 0,
+     "cuadros": 14732
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.11,
+     "p50": 0.1,
+     "p95": 0.19,
+     "maximo": 0.83,
+     "mayoresDe20": 0,
+     "cuadros": 12939
+    },
+    "cuadroConReloj": {
+     "media": 0.46,
+     "p50": 0.4,
+     "p95": 0.7,
+     "maximo": 3.6,
+     "mayoresDe20": 0,
+     "cuadros": 12943
+    },
+    "largosConReloj": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 6637100,
+     "despues": 8071828,
+     "recolecciones": 86,
+     "kbPorCuadro": 9.3
+    },
+    "errores": 0
+   },
+   "maxima-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&caliente=1",
+    "cuadro": {
+     "media": 0.42,
+     "p50": 0.4,
+     "p95": 0.6,
+     "maximo": 3.5,
+     "mayoresDe20": 0,
+     "cuadros": 14129
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.09,
+     "p50": 0.08,
+     "p95": 0.12,
+     "maximo": 0.89,
+     "mayoresDe20": 0,
+     "cuadros": 12797
+    },
+    "cuadroConReloj": {
+     "media": 0.47,
+     "p50": 0.4,
+     "p95": 0.7,
+     "maximo": 3.6,
+     "mayoresDe20": 0,
+     "cuadros": 12800
+    },
+    "largosConReloj": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 5858663,
+     "despues": 8043359,
+     "recolecciones": 83,
+     "kbPorCuadro": 9.4
+    },
+    "errores": 0
+   },
+   "pliegue-dia": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=0&espejo=pliegue&zona=0.3,0.55",
+    "cuadro": {
+     "media": 0.57,
+     "p50": 0.6,
+     "p95": 0.8,
+     "maximo": 3.5,
+     "mayoresDe20": 0,
+     "cuadros": 10474
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.08,
+     "p50": 0.08,
+     "p95": 0.17,
+     "maximo": 0.9,
+     "mayoresDe20": 0,
+     "cuadros": 14395
+    },
+    "cuadroConReloj": {
+     "media": 0.42,
+     "p50": 0.4,
+     "p95": 0.6,
+     "maximo": 3.5,
+     "mayoresDe20": 0,
+     "cuadros": 14399
+    },
+    "largosConReloj": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 6475030,
+     "despues": 8835674,
+     "recolecciones": 70,
+     "kbPorCuadro": 9.6
+    },
+    "errores": 0
+   },
+   "pliegue-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&espejo=pliegue&zona=0.3,0.55",
+    "cuadro": {
+     "media": 0.37,
+     "p50": 0.4,
+     "p95": 0.5,
+     "maximo": 3.4,
+     "mayoresDe20": 0,
+     "cuadros": 16125
+    },
+    "largos": [],
+    "gpu": {
+     "media": 0.06,
+     "p50": 0.07,
+     "p95": 0.08,
+     "maximo": 0.44,
+     "mayoresDe20": 0,
+     "cuadros": 9650
+    },
+    "cuadroConReloj": {
+     "media": 0.62,
+     "p50": 0.6,
+     "p95": 0.8,
+     "maximo": 14,
+     "mayoresDe20": 0,
+     "cuadros": 9652
+    },
+    "largosConReloj": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 6437998,
+     "despues": 10259406,
+     "recolecciones": 90,
+     "kbPorCuadro": 9.1
+    },
+    "errores": 0
+   }
+  }
+ },
+ "instrumento": {
+  "no-1": {
+   "mayoresDe20": 0,
+   "maximo": 3.3,
+   "largos": []
+  },
+  "no-2": {
+   "mayoresDe20": 0,
+   "maximo": 3.5,
+   "largos": []
+  },
+  "no-3": {
+   "mayoresDe20": 0,
+   "maximo": 3.8,
+   "largos": []
+  },
+  "si-1": {
+   "mayoresDe20": 1,
+   "maximo": 1085.4,
+   "largos": [
+    [
+     780,
+     1085,
+     1469,
+     10,
+     0
+    ]
+   ]
+  },
+  "si-2": {
+   "mayoresDe20": 1,
+   "maximo": 155.5,
+   "largos": [
+    [
+     771,
+     156,
+     553,
+     10,
+     0
+    ]
+   ]
+  },
+  "si-3": {
+   "mayoresDe20": 1,
+   "maximo": 139.7,
+   "largos": [
+    [
+     777,
+     140,
+     518,
+     10,
+     0
+    ]
+   ]
+  }
+ },
+ "antesDelArreglo": "Con Math.hypot en el bucle de las vecinas (el commit 8173ab44 lo saca): el plasma asignaba 378 KB por cuadro con 1756 recolecciones en 5 s y el cuadro sin vsync era de 2,19 ms a 1440 (ahora ~16 KB y ~0,9 ms).",
+ "scripts": "~/.cache/b4-medicion/pulido-18/_mini/ (medir.ts, medir-cdp.ts, medir-tanda.sh, recibos.py); fuera del repo"
+}

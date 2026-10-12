@@ -376,4 +376,45 @@ const espejoLivianoBien = (f: Record<string, string>): boolean => Object.values(
 afirmar(espejoLivianoBien(ESPEJO_SRC), `  los módulos del espejo, de menos de 300 líneas; ${String(DEL_CUADRO_P2.length)} funciones de cada cuadro sin reservas`, DEL_CUADRO_P2.filter(([m, fn]) => !sinReservasEn(ESPEJO_SRC[m] ?? '', fn)).map(([m, fn]) => `${m}:${fn}`).join(' · '))
 controlPositivo('  el detector VE una reserva en el cuadro de los ecos', { ...ESPEJO_SRC, 'ecos.ts': (ESPEJO_SRC['ecos.ts'] ?? '').replace('  logo.updateMatrixWorld()\n', '  const tmp = new THREE.Matrix4()\n  logo.updateMatrixWorld()\n') }, espejoLivianoBien)
 
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('Lo mirado y lo medido en el MINI-BANCO (no el sitio: sin memoria para su banco): las hojas, el costo del plasma y de cada efecto')
+
+const recibo = <T,>(nombre: string): T => JSON.parse(readFileSync(`docs/rediseno/entregas/pulido-18/${nombre}`, 'utf8')) as T
+interface Hoja { readonly tiempos: readonly number[] | null; readonly errores: number }
+const HOJAS = recibo<{ readonly hojas: Readonly<Record<string, Readonly<Record<string, Hoja>>>> }>('mini-secuencias.json').hojas
+const P1_HOJAS = ['1-noche', '2-dia', '3-piso-de-cerca', '3b-piso-de-cerca-dia', '4-logo-bajando', '5-puntero', '6-clic', '7-mantener-soltar', '8-clic-dia'] as const
+const P2_1440 = ['e-cristal-dia', 'e-cristal-noche', 'e-cristal-prisma', 'e-caleidoscopio-dia', 'e-espiral-dia', 'e-pliegue-dia', 'e-pliegue-noche', 'e-ecos-noche', 'e-ecos-dia'] as const
+const P2_390 = ['e-cristal-dia', 'e-cristal-noche', 'e-caleidoscopio-dia', 'e-espiral-dia', 'e-pliegue-dia', 'e-ecos-noche'] as const
+const hojasBien = (h: typeof HOJAS): boolean => ([['1440', [...P1_HOJAS, ...P2_1440]], ['390', [...P1_HOJAS, ...P2_390]]] as const).every(([w, nombres]) =>
+  nombres.every((n) => { const q = h[w]?.[n]; return q !== undefined && q.errores === 0 && (q.tiempos ?? []).length === 8 }))
+afirmar(hojasBien(HOJAS), '  las hojas del mini-banco: P1 (noche, día, piso de cerca de noche y de día, el logo bajando, puntero, clic, mantener y soltar, el clic de día) a 1440 y 390; P2, cada efecto (a 1440 también el prisma, los ecos de día y el pliegue de noche); 8 cuadros cada una, sin errores del compilador')
+controlPositivo('  el detector VE una hoja que falta (la del pliegue a 390)', { ...HOJAS, '390': Object.fromEntries(Object.entries(HOJAS['390'] ?? {}).filter(([n]) => n !== 'e-pliegue-dia')) }, hojasBien)
+
+interface Est18 { readonly media: number; readonly p95: number; readonly maximo: number; readonly mayoresDe20: number; readonly cuadros: number }
+interface Medida18 { readonly cuadro: Est18; readonly gpu: Est18; readonly errores: number; readonly programasAntes: number; readonly programas: number; readonly heap: { readonly kbPorCuadro: number; readonly recolecciones: number }; readonly repetidas?: readonly { readonly cuadro: Est18 }[] }
+interface DelInstrumento { readonly mayoresDe20: number }
+interface Medido18 { readonly placa: string; readonly medidas: Readonly<Record<string, Readonly<Record<string, Medida18>>>>; readonly instrumento: Readonly<Record<string, DelInstrumento>> }
+const MEDIDO18 = recibo<Medido18>('mini-medido.json')
+const EFECTOS18 = ['cristal', 'pliegue', 'caleidoscopio', 'ecos', 'espiral'] as const
+const CONFIGS18 = ['escena', 'calma-noche', 'calma-dia', 'maxima-noche', 'maxima-dia', ...EFECTOS18.flatMap((e) => [`${e}-dia`, `${e}-noche`])]
+// Ningún cuadro de más de 20 ms (sin vsync, sin el reloj de la GPU) ni de la GPU (con su reloj), en calma, al máximo y con cada efecto
+// activo, a 1440 y 390 (un cuadro largo vale sólo si, medido dos veces más, no vuelve: era la máquina); nada se compila durante la
+// medición (la escena precompilada, como el sitio); la basura por cuadro, chica (antes del arreglo de `Math.hypot`, 378 KB). Y la
+// prueba del instrumento: con el reloj de la GPU se traba un cuadro; sin él, ninguno.
+const sinLargos = (e: Est18): boolean => e.mayoresDe20 === 0 && e.maximo <= 20
+const medidoBien = (m: Medido18): boolean => m.placa.includes('NVIDIA') && (['1440', '390'] as const).every((w) => CONFIGS18.every((c) => {
+  const r = m.medidas[w]?.[c]
+  return r !== undefined && r.errores === 0 && r.cuadro.cuadros > 300 && (sinLargos(r.cuadro) || ((r.repetidas ?? []).length >= 2 && (r.repetidas ?? []).every((x) => sinLargos(x.cuadro)))) && r.gpu.cuadros > 300 &&
+    r.gpu.maximo <= 20 && r.gpu.p95 <= 2 && r.programas === r.programasAntes && r.heap.kbPorCuadro <= 64
+})) && ['si-1', 'si-2', 'si-3'].some((k) => (m.instrumento[k]?.mayoresDe20 ?? 0) > 0) && ['no-1', 'no-2', 'no-3'].every((k) => m.instrumento[k]?.mayoresDe20 === 0)
+const de = (w: string, c: string): Medida18 | undefined => MEDIDO18.medidas[w]?.[c]
+const maximoDe = (r: Medida18 | undefined): number => (r === undefined ? 99 : !sinLargos(r.cuadro) && (r.repetidas ?? []).length > 0 ? Math.max(...(r.repetidas ?? []).map((x) => x.cuadro.maximo)) : r.cuadro.maximo)
+const peor = (w: string): number => Math.max(...CONFIGS18.map((c) => maximoDe(de(w, c))))
+const sueltos = (['1440', '390'] as const).flatMap((w) => CONFIGS18.filter((c) => de(w, c) !== undefined && !sinLargos(de(w, c)?.cuadro ?? { mayoresDe20: 1, maximo: 99, media: 0, p95: 0, cuadros: 0 })).map((c) => `${c} a ${w} (${String(de(w, c)?.cuadro.maximo)} ms)`))
+afirmar(medidoBien(MEDIDO18), `  la NVIDIA, sin vsync: el plasma A al máximo ${String(de('1440', 'maxima-noche')?.cuadro.media)} ms por cuadro a 1440 (la escena sola ${String(de('1440', 'escena')?.cuadro.media)}) y ${String(de('390', 'maxima-noche')?.cuadro.media)} a 390; el peor cuadro, ${String(peor('1440'))} y ${String(peor('390'))} ms con cada efecto activo (${sueltos.length === 0 ? 'ninguno suelto' : `suelto, sin volver en dos corridas más: ${sueltos.join(', ')}`}); la GPU, a lo sumo ${String(Math.max(...CONFIGS18.map((c) => Math.max(de('1440', c)?.gpu.maximo ?? 99, de('390', c)?.gpu.maximo ?? 99))))} ms; ${String(de('1440', 'maxima-noche')?.heap.kbPorCuadro)} KB de basura por cuadro`)
+controlPositivo('  el detector VE un cuadro de 22 ms con un efecto', { ...MEDIDO18, medidas: { ...MEDIDO18.medidas, '1440': { ...MEDIDO18.medidas['1440'], 'cristal-dia': { ...MEDIDO18.medidas['1440']['cristal-dia'], cuadro: { ...MEDIDO18.medidas['1440']['cristal-dia'].cuadro, maximo: 22, mayoresDe20: 1 } } } } }, medidoBien)
+controlPositivo('  y un cuadro largo que al repetirlo vuelve', { ...MEDIDO18, medidas: { ...MEDIDO18.medidas, '390': { ...MEDIDO18.medidas['390'], 'cristal-dia': { ...MEDIDO18.medidas['390']['cristal-dia'], repetidas: [{ cuadro: { ...MEDIDO18.medidas['390']['cristal-dia'].cuadro, mayoresDe20: 1, maximo: 70 } }, { cuadro: MEDIDO18.medidas['390']['cristal-dia'].cuadro }] } } } }, medidoBien)
+controlPositivo('  y la basura de antes (378 KB por cuadro)', { ...MEDIDO18, medidas: { ...MEDIDO18.medidas, '390': { ...MEDIDO18.medidas['390'], 'calma-noche': { ...MEDIDO18.medidas['390']['calma-noche'], heap: { kbPorCuadro: 378, recolecciones: 1756 } } } } }, medidoBien)
+controlPositivo('  y un programa que se compila en medio', { ...MEDIDO18, medidas: { ...MEDIDO18.medidas, '390': { ...MEDIDO18.medidas['390'], 'espiral-noche': { ...MEDIDO18.medidas['390']['espiral-noche'], programas: (MEDIDO18.medidas['390']['espiral-noche']?.programasAntes ?? 0) + 1 } } } }, medidoBien)
+
 cerrar('s69-pulido-18')

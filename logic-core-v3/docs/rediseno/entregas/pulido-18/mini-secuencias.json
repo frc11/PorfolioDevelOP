@@ -1,0 +1,471 @@
+{
+ "que": "PULIDO 18 · las secuencias del MINI-BANCO (8 cuadros cada una; la escena chica del mini-banco, no el sitio). P1: noche, día, piso de cerca (noche y día), logo bajando con el plasma quieto, puntero, clic, mantener-soltar, clic de día. P2: cada efecto del espejo (cristal de día, de noche y con prisma; caleidoscopio; espiral; pliegue de día y de noche; ecos de noche y de día). A 1440 la noche, el día y el logo bajando con el encuadre del sitio (35 grados, el logo a 17 u); a 390, la vista ancha.",
+ "hojas": {
+  "1440": {
+   "1-noche": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/1-noche.png"
+   },
+   "2-dia": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/2-dia.png"
+   },
+   "3-piso-de-cerca": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/3-piso-de-cerca.png"
+   },
+   "3b-piso-de-cerca-dia": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/3b-piso-de-cerca-dia.png"
+   },
+   "4-logo-bajando": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/4-logo-bajando.png"
+   },
+   "5-puntero": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/5-puntero.png"
+   },
+   "6-clic": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/6-clic.png"
+   },
+   "7-mantener-soltar": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/7-mantener-soltar.png"
+   },
+   "8-clic-dia": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/8-clic-dia.png"
+   },
+   "e-caleidoscopio-dia": {
+    "tiempos": [
+     0,
+     850,
+     1700,
+     2550,
+     3400,
+     4250,
+     5100,
+     5950
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/e-caleidoscopio-dia.png"
+   },
+   "e-cristal-dia": {
+    "tiempos": [
+     0,
+     567,
+     1133,
+     1700,
+     2267,
+     2833,
+     3400,
+     3967
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/e-cristal-dia.png"
+   },
+   "e-cristal-noche": {
+    "tiempos": [
+     0,
+     567,
+     1133,
+     1700,
+     2267,
+     2833,
+     3400,
+     3967
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/e-cristal-noche.png"
+   },
+   "e-cristal-prisma": {
+    "tiempos": [
+     0,
+     567,
+     1133,
+     1700,
+     2267,
+     2833,
+     3400,
+     3967
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/e-cristal-prisma.png"
+   },
+   "e-ecos-dia": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/e-ecos-dia.png"
+   },
+   "e-ecos-noche": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/e-ecos-noche.png"
+   },
+   "e-espiral-dia": {
+    "tiempos": [
+     0,
+     950,
+     1900,
+     2850,
+     3800,
+     4750,
+     5700,
+     6650
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/e-espiral-dia.png"
+   },
+   "e-pliegue-dia": {
+    "tiempos": [
+     0,
+     1317,
+     2633,
+     3950,
+     5267,
+     6583,
+     7900,
+     9217
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/e-pliegue-dia.png"
+   },
+   "e-pliegue-noche": {
+    "tiempos": [
+     0,
+     1317,
+     2633,
+     3950,
+     5267,
+     6583,
+     7900,
+     9217
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/1440/e-pliegue-noche.png"
+   }
+  },
+  "390": {
+   "1-noche": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/1-noche.png"
+   },
+   "2-dia": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/2-dia.png"
+   },
+   "3-piso-de-cerca": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/3-piso-de-cerca.png"
+   },
+   "3b-piso-de-cerca-dia": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/3b-piso-de-cerca-dia.png"
+   },
+   "4-logo-bajando": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/4-logo-bajando.png"
+   },
+   "5-puntero": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/5-puntero.png"
+   },
+   "6-clic": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/6-clic.png"
+   },
+   "7-mantener-soltar": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/7-mantener-soltar.png"
+   },
+   "8-clic-dia": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/8-clic-dia.png"
+   },
+   "e-caleidoscopio-dia": {
+    "tiempos": [
+     0,
+     850,
+     1700,
+     2550,
+     3400,
+     4250,
+     5100,
+     5950
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/e-caleidoscopio-dia.png"
+   },
+   "e-cristal-dia": {
+    "tiempos": [
+     0,
+     567,
+     1133,
+     1700,
+     2267,
+     2833,
+     3400,
+     3967
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/e-cristal-dia.png"
+   },
+   "e-cristal-noche": {
+    "tiempos": [
+     0,
+     567,
+     1133,
+     1700,
+     2267,
+     2833,
+     3400,
+     3967
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/e-cristal-noche.png"
+   },
+   "e-ecos-noche": {
+    "tiempos": [
+     0,
+     150,
+     300,
+     450,
+     600,
+     750,
+     900,
+     1050
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/e-ecos-noche.png"
+   },
+   "e-espiral-dia": {
+    "tiempos": [
+     0,
+     950,
+     1900,
+     2850,
+     3800,
+     4750,
+     5700,
+     6650
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/e-espiral-dia.png"
+   },
+   "e-pliegue-dia": {
+    "tiempos": [
+     0,
+     1317,
+     2633,
+     3950,
+     5267,
+     6583,
+     7900,
+     9217
+    ],
+    "errores": 0,
+    "hoja": "~/.cache/b4-medicion/pulido-18/mini/390/e-pliegue-dia.png"
+   }
+  }
+ }
+}
