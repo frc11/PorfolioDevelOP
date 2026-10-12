@@ -19,8 +19,6 @@ export function uniformesDelEnjambre(ajustes: AjustesDelEnjambre = AJUSTES_DEL_E
     uReparto: v(ajustes.uReparto),
     uEnergiaAjuste: v(ajustes.uEnergiaAjuste),
     uCursorAjuste: v(ajustes.uCursorAjuste),
-    uSuperficie: v(ajustes.uSuperficie),
-    uLogo: { value: new THREE.Matrix4() },
     uPiso: { value: -100 },
     uDt: { value: 0 },
     uTiempo: { value: 0 },

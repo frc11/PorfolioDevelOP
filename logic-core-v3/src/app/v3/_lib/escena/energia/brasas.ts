@@ -7,7 +7,7 @@ import { rotor } from './ruido'
  * enlace es lo que descarga los arcos) y el puntero es una carga fuerte. Lo nuevo: derivan por el campo del curl noise (`ruido.ts`,
  * no un vaivén senoidal), cada una tiene su ENERGÍA (de 0 a 1: la calienta el puntero, un pulso, una onda del logo, un arco; se
  * enfría sola) y la energía las hace TEMBLAR (la agitación térmica). El puntero además ORDENA (las cercanas giran alrededor de su
- * rayo). En la dirección A son las partículas; en B y C, los núcleos calientes del enjambre. Puro (la prueba lo corre en Node).
+ * rayo). En la dirección A son las partículas; en B, los núcleos calientes del enjambre. Puro (la prueba lo corre en Node).
  */
 export const BRASAS = {
   /** Dónde viven: una cáscara alrededor del centro del logo (u): el radio y el hueco del medio (el logo mide 6,9 de ancho). */

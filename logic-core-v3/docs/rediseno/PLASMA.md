@@ -1,40 +1,42 @@
 # EL PLASMA — el modelo, para afinarlo
 
-`?energia=plasma` (en lugar del polvo) o `?energia=plasma-y-polvo` (con el polvo), en una de tres direcciones: `?plasma=a|b|c`
-(pedida sola, `?plasma=b` también monta el plasma). Sin `?plasma=`, la recomendada: **A**. El producto sigue siendo el polvo hasta
-que el humano diga.
+**[PULIDO 18] El plasma A es el producto** (sin pedir nada). `?energia=polvo`: el polvo de antes en su lugar; `?energia=plasma-y-polvo`:
+los dos; `?plasma=b`: la dirección B (se queda en su bandera hasta que exista el efecto de cristal de la dimensión espejo). C (las
+corrientes sobre el logo) se borró con su código. `?energia=plasma` (la de antes) se lee como el producto.
 
 Historia: PULIDO 15 (cargas sueltas + arcos: gustó), PULIDO 16 (átomos, iones, electrones, moléculas: «tiene una forma muy definida,
 tampoco para tanto»; se borró con sus experimentos de color, campo y sonido) y PULIDO 17 (este): el espíritu de PULIDO 15 llevado a
 otro nivel, «algo un poco menos nítido, menos formado; partículas de energía que brillan, vibran, se mueven». Monocromo, sin sonido.
-Referencias y por qué: `docs/rediseno/REFERENCIAS-PLASMA.md`.
+PULIDO 18: A gana y pasa al producto; se lleva a producto (P1: el piso, el mundo, el día, la partícula, la física). Referencias y por
+qué: `docs/rediseno/REFERENCIAS-PLASMA.md`.
 
 Invariante: `npm run test:s68-pulido-17` (O3 y O5). Bancos: `~/.cache/b4-medicion/pulido-17/_scripts/` (`o4-secuencias.ts`,
 `o5-medir.ts`, `o5-tanda.sh`). Recibos: `docs/rediseno/entregas/pulido-17/`.
 
-## Las tres direcciones
+## Las direcciones
 
 | | Qué es | La partícula | Dónde vive |
 |---|---|---|---|
-| **A · Chispas** (recomendada) | Las cargas de PULIDO 15 hechas luz: 600 (300 en el teléfono) | Núcleo gaussiano y halo, de tamaños muy distintos | CPU (`brasas.ts`) |
+| **A · Chispas** (el producto) | Las cargas de PULIDO 15 hechas luz: 600 (300 en el teléfono) | Núcleo gaussiano y halo, de tamaños muy distintos | CPU (`brasas.ts`) |
 | **B · Enjambre** | Un medio: 16.384 motas (6.400 en el teléfono) alrededor de 40 núcleos | Mota finísima | GPU (`enjambre/`) |
-| **C · Corrientes sobre el logo** | La energía corre pegada a la superficie del logo: 3.136 (1.600) | Estela corta (por la velocidad) | GPU, con el campo de distancia del logo |
 
-Comparten todo lo demás: los arcos, la temperatura, el gesto, los textos, el tono, el movimiento reducido y el pie.
+Comparten todo lo demás: los arcos, la temperatura, el gesto, los textos, el tono, el movimiento reducido y el pie. [PULIDO 18] C
+(las corrientes pegadas a la superficie del logo, estelas cortas en la GPU) se borró con su código: su estilo (`estela`), la superficie
+de la simulación (`uSuperficie`) y su bandera (`?plasma=c` se lee como sin bandera).
 
 ## Dónde está cada cosa (`src/app/v3/_lib/escena/energia/`)
 
 | Módulo | Qué |
 |---|---|
-| `direcciones.ts` | Las tres direcciones, lo que cambia cada una (cantidades, aspecto, simulación) y la recomendada. |
+| `direcciones.ts` | Las direcciones (A y B), lo que cambia cada una (cantidades, aspecto, simulación) y la del producto. |
 | `ruido.ts` | El campo: curl noise con gradiente analítico; el mismo hash de 32 bits en JS y en GLSL. Puro. |
-| `brasas.ts` | Las brasas (las chispas de A, los núcleos de B y C): la física de PULIDO 15, el campo, la energía, el puntero, las ondas, el piso, el brillo por densidad. Puro. |
+| `brasas.ts` | Las brasas (las chispas de A, los núcleos de B): la física de PULIDO 15, el campo, la energía, el puntero, las ondas, el piso, el brillo por densidad. Puro. |
 | `calor.ts` | La temperatura de la escena (lo que la sube y la baja, el autolímite) y la lectura de la escena (scroll, pulso del logo, golpe del pie). Puro. |
 | `arcos/camino.ts` | El camino de un arco: punto medio con ramas (el de PULIDO 15, más suave) y el temblor del re-golpe. Puro. |
 | `arcos/arcos.ts` | Qué es un arco: clases, golpes, resplandor, el re-salto de los pares. Puro. |
 | `arcos/programador.ts` | Quién nace y cuándo: pares, logo, puntero, clic, descarga; nunca donde no se ve. Puro. |
 | `arcos/cinta.ts` | La cinta: una tira continua por camino y por rama, en un búfer fijo. Puro. |
-| `enjambre/simulacion.ts`, `enjambre/enjambre.ts` | La simulación de B y C en la GPU (el ping-pong de la escena) y su paso. |
+| `enjambre/simulacion.ts`, `enjambre/enjambre.ts` | La simulación de B en la GPU (el ping-pong de la escena) y su paso. |
 | `dibujo/comun.ts` | Lo común: textos (borde suave), luces de los arcos, el final, el tono y la salida premultiplicada. |
 | `dibujo/particulas.ts` | El sombreador de las partículas (los tres estilos) y su aspecto (en uniformes que el banco ajusta en vivo). |
 | `dibujo/arcos.ts`, `dibujo/efectos.ts` | El canal de luz de los arcos (dos pasadas) y los efectos (el piso de noche, el toque del logo). |
@@ -61,24 +63,20 @@ segundo. En la CPU, cada brasa lo recalcula en cuadros alternos.
   alrededor del rayo (2,6): ORDENA en vez de apilarlas (con 4,2 de atracción y 0,6 de rechazo se juntaban en un grumo blanco).
 - El brillo por densidad: con n vecinas a menos de 1 u, ×1/(1 + 0,09 n) (un grupo no se satura: «flashero pero con límite»).
 
-## B y C · El enjambre (`enjambre/`)
+## B · El enjambre (`enjambre/`)
 
 Posición y energía en una textura, velocidad y edad en otra (32 bits, el ping-pong de la escena). Todas las fuerzas son campos: el
 curl noise (que cerca del logo sólo corre de costado: su campo de distancia), los núcleos (las brasas: los positivos atraen, los
 negativos repelen, hacen girar; su fuerza respira), el puntero (atrae, hace girar, energiza; la carga crece más despacio que en las
 brasas: miles de motas), las ondas, los arcos (energizan lo que pasa cerca) y el temblor. Cada mota vive 6–14 s y renace.
 
-| Ajuste (uniforme) | B · enjambre | C · corrientes |
-|---|---|---|
-| `uFlujo` (rapidez, caliente, sigue, rampa) | 0,5 · 1,2 · 1,1 · 1,2 | 1,1 · 1 · 1,6 · 1,6 |
-| `uNucleosAjuste` (fuerza, suavizado, giro, calienta) | 1,6 · 0,6 · 1,4 · 0,4 | 0,4 · 0,7 · 0,6 · 0,5 |
-| `uReparto` (hueco, radio, reparto, contiene) | 3,4 · 11 · 2,4 · 1,6 | 3,6 · 11 · 2 · 1,6 |
-| `uEnergiaAjuste` (reposo, por temperatura, enfría s, tiembla) | 0,08 · 0,35 · 0,9 · 3 | 0,06 · 0,4 · 0,8 · 2 |
-| `uCursorAjuste` (alcance, atrae, giro, calienta) | 4,6 · 0,5 · 2,4 · 0,9 | 4,6 · 0,5 · 2,4 · 1,2 |
-| `uSuperficie` (banda u, fuerza, se suelta desde, nace en ella) | — | 0,18 · 7 · 0,72 · sí |
-
-C: un resorte a la banda de 0,18 u de la superficie del logo y el campo de costado; las que pasan 0,72 de energía se sueltan y se
-alejan; nacen en la superficie (un punto de la caja del campo llevado a la banda en tres pasos).
+| Ajuste (uniforme) | B · enjambre |
+|---|---|
+| `uFlujo` (rapidez, caliente, sigue, rampa) | 0,5 · 1,2 · 1,1 · 1,2 |
+| `uNucleosAjuste` (fuerza, suavizado, giro, calienta) | 1,6 · 0,6 · 1,4 · 0,4 |
+| `uReparto` (hueco, radio, reparto, contiene) | 3,4 · 11 · 2,4 · 1,6 |
+| `uEnergiaAjuste` (reposo, por temperatura, enfría s, tiembla) | 0,08 · 0,35 · 0,9 · 3 |
+| `uCursorAjuste` (alcance, atrae, giro, calienta) | 4,6 · 0,5 · 2,4 · 0,9 |
 
 ## Los arcos (`arcos/`)
 
@@ -106,14 +104,14 @@ Profundidad de campo con el mismo brillo total. Un tope de brillo por partícula
 DE DÍA, energía oscura: un velo de grafito translúcido del tamaño de la partícula, sin borde, y un destello más blanco que el papel
 SÓLO en las calientes (con el destello en reposo, la energía oscura se leía como ojos y, sobre el logo, como rayones).
 
-| Uniforme | A · chispa | B · mota | C · estela |
-|---|---|---|---|
-| `uTamano` (radio u mín. · máx., px mín. · máx.) | 0,02 · 0,07 · 0,8 · 5,5 | 0,015 · 0,05 · 0,7 · 4,5 | 0,014 · 0,045 · 0,65 · 4 |
-| `uLuz` (brillo, reposo, halo, ancho del halo) | 1 · 0,2 · 0,3 · 3 | 0,32 · 0,12 · 0,45 · 3 | 0,5 · 0,16 · 0,3 · 2,5 |
-| `uDia` (energía oscura, —, destello, desde) | 0,2 · — · 0,9 · 0,6 | 0 · — · 0,7 · 0,55 | 0,03 · — · 0,35 · 0,7 |
-| `uMovida` (estela s, temblor px, desenfoque, tope) | 0 · 1,6 · 0,3 · 6 | 0,02 · 1 · 0,4 · 7 | 0,2 · 0,8 · 0,4 · 7 |
-| `uFuente` (radio, se apaga, respira, escala) | 6,5 · 0,75 · 0,55 · 0,22 | 5 · 0,9 · 0,6 · 0,25 | 6 · 0,8 · 0,6 · 0,22 |
-| `uDelante` (cara del logo, radio, tope) | 0,3 · 3,6 · 1,6 | 0,7 · 3,6 · 0,6 | 0 · 4 · 1,1 |
+| Uniforme | A · chispa | B · mota |
+|---|---|---|
+| `uTamano` (radio u mín. · máx., px mín. · máx.) | 0,02 · 0,07 · 0,8 · 5,5 | 0,015 · 0,05 · 0,7 · 4,5 |
+| `uLuz` (brillo, reposo, halo, ancho del halo) | 1 · 0,2 · 0,3 · 3 | 0,32 · 0,12 · 0,45 · 3 |
+| `uDia` (energía oscura, —, destello, desde) | 0,2 · — · 0,9 · 0,6 | 0 · — · 0,7 · 0,55 |
+| `uMovida` (estela s, temblor px, desenfoque, tope) | 0 · 1,6 · 0,3 · 6 | 0,02 · 1 · 0,4 · 7 |
+| `uFuente` (radio, se apaga, respira, escala) | 6,5 · 0,75 · 0,55 · 0,22 | 5 · 0,9 · 0,6 · 0,25 |
+| `uDelante` (cara del logo, radio, tope) | 0,3 · 3,6 · 1,6 | 0,7 · 3,6 · 0,6 |
 
 Los textos: pasan por detrás (90 %), con un borde suave de 56 px (en un campo denso, un borde de 24 px dejaba un rectángulo vacío).
 El tono: el ACES compensado de la escena, el día y la noche cada uno por su lado; la salida premultiplicada (de día tapa, de noche
@@ -142,7 +140,8 @@ Quietas (sin titilar: el reloj del dibujo clavado), sin física, sin arcos ni pu
 
 ## Lo medido
 
-En la NVIDIA (RTX 5050; la pantalla del banco va a 75 Hz: 13,34 ms por cuadro). Recibo: `entregas/pulido-17/o5-medido.json`.
+En la NVIDIA (RTX 5050; la pantalla del banco va a 75 Hz: 13,34 ms por cuadro). Recibo: `entregas/pulido-17/o5-medido.json`. Lo de
+PULIDO 17 (con C, que se borró en PULIDO 18: sus filas quedan como historia).
 
 | | Con vsync, al máximo (media / máx.) | De noche (máx.) | Cuadros de más de 20 ms en caliente | Sin vsync, al máximo (lo que suma al polvo) | La simulación en la GPU |
 |---|---|---|---|---|---|

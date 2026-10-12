@@ -92,13 +92,15 @@ export interface Pruebas {
    * [PULIDO 15] M2 · `energia=plasma`: la energía nueva, plasma + cargas, en lugar del polvo (exploración; el producto, el polvo);
    * `energia=plasma-y-polvo`, con el polvo además (la otra lectura de «no reemplaza al polvo todavía»). Los destellos de PULIDO 14
    * (`destellos=`, `destellos-color=`) se borraron con su código.
+   * [PULIDO 18] P1.0 · el plasma A pasó al producto (lo eligió el humano): sin la bandera, el plasma; `energia=polvo`, el polvo de
+   * antes en su lugar; `energia=plasma-y-polvo`, los dos. `energia=plasma` (la de antes) es el producto: se lee como sin bandera.
    */
-  readonly energia: 'plasma' | 'plasma-y-polvo' | 'no'
+  readonly energia: 'polvo' | 'plasma-y-polvo' | 'no'
   /**
-   * [PULIDO 17] O3 · `plasma=a|b|c`: la dirección del plasma (A, chispas; B, enjambre; C, corrientes: `energia/direcciones.ts`); sin
-   * la bandera, la recomendada. Pedida sola (sin `energia=`), monta el plasma en lugar del polvo (`energia=plasma`).
+   * [PULIDO 17] O3 · `plasma=a|b|c`: la dirección del plasma (A, chispas; B, enjambre: `energia/direcciones.ts`); sin la bandera, la
+   * recomendada. [PULIDO 18] P1.0 · C (las corrientes sobre el logo) se borró con su código: `plasma=a|b` (sin la bandera, A).
    */
-  readonly plasma: 'a' | 'b' | 'c' | 'no'
+  readonly plasma: 'a' | 'b' | 'no'
 }
 
 /**
@@ -127,7 +129,9 @@ export interface Pruebas {
  * (no gustó ninguna); entran `energia=plasma|plasma-y-polvo` y `plasma-color=si`. [PULIDO 16] N1 · entra `nosotros=fijo`. N2 · entran
  * `plasma-campo=si` y `plasma-sonido=si` (los experimentos del plasma). [PULIDO 17] O1 · `nosotros=fijo` se borró (Nosotros queda
  * alejado y siguiendo el 70 % del giro). O3 · `plasma-color=`, `plasma-campo=` y `plasma-sonido=` se borraron con su código (el
- * plasma de PULIDO 16 no gustó: «sin sonido ni color, descartado»); entra `plasma=a|b|c` (las tres direcciones).
+ * plasma de PULIDO 16 no gustó: «sin sonido ni color, descartado»); entra `plasma=a|b|c` (las tres direcciones). [PULIDO 18] P1.0 ·
+ * `energia=` cambia de sentido (el plasma A es el producto; entra `energia=polvo`, el de antes; `plasma-y-polvo` sigue) y `plasma=c`
+ * se borró con C.
  */
 export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', plasma: 'no' }
 
@@ -141,14 +145,12 @@ function unoDe<T extends string>(opciones: readonly T[], v: string | undefined):
 
 /** Las pruebas de un pedido (con cualquier base: van aparte del producto). */
 function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
-  const energia = unoDe<'plasma' | 'plasma-y-polvo'>(['plasma', 'plasma-y-polvo'], valor('energia'))
-  const plasma = unoDe<'a' | 'b' | 'c'>(['a', 'b', 'c'], valor('plasma'))
   return {
     pie: unoDe<'antes'>(['antes'], valor('pie')),
     rebobinado: unoDe<'minimo'>(['minimo'], valor('rebobinado')),
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
-    energia: energia === 'no' && plasma !== 'no' ? 'plasma' : energia,
-    plasma,
+    energia: unoDe<'polvo' | 'plasma-y-polvo'>(['polvo', 'plasma-y-polvo'], valor('energia')),
+    plasma: unoDe<'a' | 'b'>(['a', 'b'], valor('plasma')),
   }
 }
 

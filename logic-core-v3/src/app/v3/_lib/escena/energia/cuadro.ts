@@ -16,7 +16,7 @@ import { avanzar } from './interaccion/interaccion'
 /**
  * [PULIDO 17] O3 · UN CUADRO DE LA ENERGÍA (`docs/rediseno/PLASMA.md`). Lo que pasa afuera entra como temperatura (el scroll, las
  * ondas del logo, el golpe del pie) y como el latido del logo; el gesto del puntero pide pulsos y descargas; después las brasas, los
- * arcos (sus golpes calientan lo que tocan), sus luces y los efectos; el enjambre (B y C) y todo sube a la GPU. Sin reservas por cuadro.
+ * arcos (sus golpes calientan lo que tocan), sus luces y los efectos; el enjambre (B) y todo sube a la GPU. Sin reservas por cuadro.
  */
 export const CUADRO = {
   /** El punto del puntero: donde su rayo entra a una esfera de este radio alrededor del centro (más afuera que el logo). */
@@ -199,7 +199,7 @@ function lucesYEfectos(a: Armado, f: Afuera): number {
   return n
 }
 
-/** El enjambre (B y C): las uniformes del cuadro y un paso. Los núcleos son las brasas: su signo y su fuerza, que respira. */
+/** El enjambre (B): las uniformes del cuadro y un paso. Los núcleos son las brasas: su signo y su fuerza, que respira. */
 function elEnjambre(a: Armado, f: Afuera, gl: THREE.WebGLRenderer): void {
   const ej = a.enjambre
   if (ej === null) return
@@ -222,10 +222,7 @@ function elEnjambre(a: Armado, f: Afuera, gl: THREE.WebGLRenderer): void {
   u.uFrentes.value[0].set(fr[0], fr[1], fr[2], fr[3])
   u.uFrentes.value[1].set(fr[4], fr[5], fr[6], fr[7])
   u.uCentro.value.copy(a.centro)
-  if (f.logo !== null) {
-    u.uLogo.value.copy(f.logo.matrixWorld)
-    u.uLogoInverso.value.copy(f.logo.matrixWorld).invert()
-  }
+  if (f.logo !== null) u.uLogoInverso.value.copy(f.logo.matrixWorld).invert()
   u.uPiso.value = f.piso
   u.uActividadDelLogo.value = a.lectura.actividadDelLogo
   pasoDelEnjambre(ej, gl, f.dt)

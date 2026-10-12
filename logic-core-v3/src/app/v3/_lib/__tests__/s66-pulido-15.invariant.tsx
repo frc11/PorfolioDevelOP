@@ -108,16 +108,19 @@ controlPositivo('  el detector VE el papel sobre la sala ya de día (la letra at
 titulo('M2 · La energía nueva: plasma + cargas (`?energia=plasma`)')
 // Los destellos se borraron con su código y sus banderas; entra la energía: el polvo de siempre sin la bandera, el plasma EN LUGAR
 // del polvo con `energia=plasma` (con `plasma-y-polvo`, además del polvo), en azul con `plasma-color=si`. [PULIDO 17] O3 · el color
-// se borró («sin sonido ni color, descartado»): la bandera ya no existe (s68).
+// se borró («sin sonido ni color, descartado»): la bandera ya no existe (s68). [PULIDO 18] P1.0 · el plasma A pasó al producto (lo
+// eligió el humano). ANTES: sin bandera el polvo, `energia=plasma` el plasma en su lugar. AHORA: sin bandera el plasma (y `energia=plasma`
+// se lee igual), `energia=polvo` el polvo de antes en su lugar, `plasma-y-polvo` los dos. POR QUÉ: la decisión del humano; lo demás que
+// se afirma (los destellos borrados, sin el color) no cambia. s69 lo afirma con sus controles positivos.
 const STAGE = leer('_lib/escena/ProbeStage.tsx')
 const banderas = (stage: string): boolean =>
   !existsSync(`${V3}/_lib/escena/destellos`) && !(PRUEBAS_SUELTAS as readonly string[]).some((k) => k.startsWith('destellos')) &&
   !('destellos' in entornoPedido('producto,destellos=chispas').pruebas) && PRUEBAS_SUELTAS.includes('energia') && !(PRUEBAS_SUELTAS as readonly string[]).includes('plasma-color') &&
-  entornoPedido('producto').pruebas.energia === 'no' && entornoPedido('producto,energia=plasma').pruebas.energia === 'plasma' &&
-  entornoPedido('producto,energia=plasma-y-polvo').pruebas.energia === 'plasma-y-polvo' && !('plasma-color' in entornoPedido('producto,energia=plasma,plasma-color=si').pruebas) &&
-  stage.includes("const sinPolvo = energia === 'plasma'") && stage.includes('{!sinPolvo && <DepthParticles store={store} />}') &&
-  stage.includes("{energia !== 'no' && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion}") && !/Destellos/.test(stage)
-afirmar(banderas(STAGE), 'M2 · sin `?destellos=` (borrados con su código); `?energia=plasma` en lugar del polvo (o `plasma-y-polvo`; `?plasma-color=si` se borró en PULIDO 17); sin bandera, el polvo')
+  entornoPedido('producto').pruebas.energia === 'no' && entornoPedido('producto,energia=plasma').pruebas.energia === 'no' && entornoPedido('producto,energia=polvo').pruebas.energia === 'polvo' &&
+  entornoPedido('producto,energia=plasma-y-polvo').pruebas.energia === 'plasma-y-polvo' && !('plasma-color' in entornoPedido('producto,plasma-color=si').pruebas) &&
+  stage.includes("const conPolvo = energia !== 'no'") && stage.includes("const conPlasma = energia !== 'polvo'") && stage.includes('{conPolvo && <DepthParticles store={store} />}') &&
+  stage.includes('{conPlasma && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion}') && !/Destellos/.test(stage)
+afirmar(banderas(STAGE), 'M2 · sin `?destellos=` (borrados con su código); `?plasma-color=si` se borró en PULIDO 17; [PULIDO 18] el plasma es el producto: `?energia=polvo`, el polvo de antes en su lugar; `plasma-y-polvo`, los dos')
 controlPositivo('M2 · el detector VE los destellos todavía montados', `${STAGE}\n{destellos !== 'no' && <DestellosDeEnergia />}`, banderas)
 
 // [PULIDO 16] N2 · EL PLASMA SE REHIZO a pedido («mejorá TODO»): átomos, iones y electrones, Coulomb suavizado con su repulsión de

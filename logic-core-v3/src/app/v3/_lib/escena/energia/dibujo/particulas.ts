@@ -14,7 +14,8 @@ import { AL_TONO, COMUN, SALIDA, f } from './comun'
  * grafito muy translúcido y ancho (no una mota) y, sólo en las calientes, un destello blanco de un punto. Todo lo que se ajusta va en
  * uniformes (el banco las cambia en vivo: `banco.ts`, `ajustar`); `ASPECTO` son los valores de cada estilo.
  */
-export type Estilo = 'chispa' | 'mota' | 'estela'
+// [PULIDO 18] P1.0 · el estilo `estela` se borró con C (la estela por la velocidad sigue: `uMovida.x`).
+export type Estilo = 'chispa' | 'mota'
 export type NombreDelAspecto = 'uTamano' | 'uLuz' | 'uDia' | 'uDiaForma' | 'uMovida' | 'uFuente' | 'uDestello' | 'uDelante'
 export const NOMBRES_DEL_ASPECTO: readonly NombreDelAspecto[] = ['uTamano', 'uLuz', 'uDia', 'uDiaForma', 'uMovida', 'uFuente', 'uDestello', 'uDelante']
 
@@ -48,16 +49,6 @@ export const ASPECTO: Readonly<Record<Estilo, Readonly<Record<NombreDelAspecto, 
     uDestello: [0.04, 0.6, 2.6, 0.12],
     uDelante: [0.7, 3.6, 1.1, 0],
   },
-  estela: {
-    uTamano: [0.014, 0.045, 0.65, 4],
-    uLuz: [0.9, 0.12, 0.25, 2.5],
-    uDia: [0.04, 0, 0.75, 0.55],
-    uDiaForma: [2.2, 3, 0, 0],
-    uMovida: [0.2, 0.8, 0.4, 7],
-    uFuente: [6, 0.8, 0.6, 0.22],
-    uDestello: [0.04, 0.5, 2, 0.12],
-    uDelante: [0, 4, 1.1, 0],
-  },
 }
 
 /** Las uniformes del aspecto de un estilo (objetos propios de su malla: el banco las ajusta). */
@@ -68,7 +59,7 @@ export function uniformesDelAspecto(estilo: Estilo): Record<NombreDelAspecto, { 
 }
 
 /** De día, el destello blanco en reposo: ninguna (con el punto claro en reposo, la energía oscura se leía como ojos; sobre el logo, como rayones). Sólo calientes. */
-export const CLARO_EN_REPOSO: Readonly<Record<Estilo, number>> = { chispa: 0, mota: 0, estela: 0 }
+export const CLARO_EN_REPOSO: Readonly<Record<Estilo, number>> = { chispa: 0, mota: 0 }
 
 const ASPECTO_GLSL = /* glsl */ `
 uniform vec4 uTamano;

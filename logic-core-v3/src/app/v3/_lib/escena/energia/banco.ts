@@ -35,7 +35,7 @@ export interface EnergiaDelBanco {
   ajustar: (grupo: string, nombre: string, valores: readonly number[]) => boolean
   /** Lee las uniformes ajustables de un grupo. */
   ajustes: (grupo: string) => Record<string, number[]>
-  /** Cuánto tarda en la GPU la simulación del enjambre (B y C), en las próximas `pasos` pasadas; sin enjambre, null. */
+  /** Cuánto tarda en la GPU la simulación del enjambre (B), en las próximas `pasos` pasadas; sin enjambre, null. */
   gpu: (pasos: number) => Promise<Medida> | null
   /** Los arcos vivos en la pantalla (px de CSS): sus dos extremos y su medio, y su clase. */
   arcosEnPantalla: () => { clase: string; a: [number, number]; b: [number, number]; medio: [number, number] }[]

@@ -12,6 +12,8 @@
  *        reducido; sin reservas por cuadro.
  *   O4 · lo mirado: las secuencias de cada dirección a 1440 y a 390 (el recibo de sus tiempos).
  *   O5 · lo medido en la NVIDIA: en caliente, ningún cuadro de más de 20 ms; en frío, los tirones son del sitio; el costo de verdad.
+ * [PULIDO 18] P1.0 · el plasma A pasó al producto y C se borró con su código (decisión del humano): lo que acá fijaba el polvo como
+ * producto y la existencia de C se actualizó con su antes / ahora / por qué al lado; lo medido de C queda en su recibo (historia). s69.
  */
 import { existsSync, readFileSync } from 'node:fs'
 
@@ -67,23 +69,27 @@ controlPositivo('  y la chispa en el sprite', { ...CORTES_DEL_SPRITE, chispa: [1
 controlPositivo('  y el color de vuelta (la bandera)', [...PRUEBAS_SUELTAS, 'plasma-color'], (s: readonly string[]) => sinLoDe16(existsSync, entornoPedido, s, CORTES_DEL_SPRITE, SONIDOS))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('O3 · Tres direcciones (`?plasma=a|b|c`), sobre `?energia=plasma` (y `plasma-y-polvo`); el producto, el polvo')
+titulo('O3 · Las direcciones (`?plasma=a|b`; C se borró en PULIDO 18); [PULIDO 18] el producto, A')
 
+// [PULIDO 18] P1.0 · ANTES: tres direcciones (`plasma=a|b|c`) sobre `energia=plasma` (pedida sola, montaba el plasma en lugar del
+// polvo); en el producto, el polvo. AHORA: el plasma A es el producto (sin bandera); `plasma=b` elige B; C se borró con su código
+// (`plasma=c` se lee como sin bandera); `energia=polvo`, el polvo de antes; `plasma-y-polvo`, los dos. POR QUÉ: la decisión del humano
+// («A gana; C se borra»). Lo demás se afirma igual (el escenario le pasa la dirección; el producto no trae la prueba). s69 lo sigue.
 const STAGE = leer('_lib/escena/ProbeStage.tsx')
 const direccionesBien = (f: Traductor, stage: string): boolean =>
   f('producto').pruebas.plasma === 'no' && f('producto').pruebas.energia === 'no' && ENTORNO.pruebas.plasma === 'no' &&
-  (['a', 'b', 'c'] as const).every((d) => f(`producto,plasma=${d}`).pruebas.plasma === d && f(`producto,plasma=${d}`).pruebas.energia === 'plasma' && f(`producto,energia=plasma-y-polvo,plasma=${d}`).pruebas.energia === 'plasma-y-polvo') &&
-  f('producto,plasma=d').pruebas.plasma === 'no' && f('producto,plasma=d').pruebas.energia === 'no' && PRUEBAS_SUELTAS.includes('plasma') &&
-  stage.includes("{energia !== 'no' && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} direccion={direccionDe(plasma)} />}") &&
-  stage.includes("const sinPolvo = energia === 'plasma'") && stage.includes('{!sinPolvo && <DepthParticles store={store} />}')
-afirmar(direccionesBien(entornoPedido, STAGE), '  `?plasma=a|b|c` elige la dirección (pedida sola, monta el plasma en lugar del polvo); con `energia=plasma-y-polvo`, además del polvo; otro valor, nada; en el producto, apagada')
-controlPositivo('  el detector VE una dirección pedida sola que no monta nada', ((p: string) => { const e = entornoPedido(p); return p.includes('energia=') ? e : { ...e, pruebas: { ...e.pruebas, energia: 'no' as const } } }) as Traductor, (f: Traductor) => direccionesBien(f, STAGE))
+  (['a', 'b'] as const).every((d) => f(`producto,plasma=${d}`).pruebas.plasma === d && f(`producto,plasma=${d}`).pruebas.energia === 'no' && f(`producto,energia=plasma-y-polvo,plasma=${d}`).pruebas.energia === 'plasma-y-polvo') &&
+  f('producto,plasma=c').pruebas.plasma === 'no' && f('producto,plasma=d').pruebas.plasma === 'no' && f('producto,plasma=d').pruebas.energia === 'no' && PRUEBAS_SUELTAS.includes('plasma') &&
+  stage.includes('{conPlasma && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === \'compacta\'} direccion={direccionDe(plasma)} />}') &&
+  stage.includes("const conPlasma = energia !== 'polvo'") && stage.includes("const conPolvo = energia !== 'no'") && stage.includes('{conPolvo && <DepthParticles store={store} />}')
+afirmar(direccionesBien(entornoPedido, STAGE), '  `?plasma=a|b` elige la dirección; sin la bandera, A (el producto: el plasma sin pedir nada); con `energia=plasma-y-polvo`, además del polvo; `plasma=c` u otro valor, el producto')
+controlPositivo('  el detector VE el escenario de PULIDO 17 (sin bandera, el polvo)', STAGE.replace("const conPlasma = energia !== 'polvo'", "const conPlasma = energia === 'plasma-y-polvo'"), (s: string) => direccionesBien(entornoPedido, s))
 controlPositivo('  y el escenario que no le pasa la dirección', STAGE.replace(' direccion={direccionDe(plasma)} />', ' direccion="a" />'), (s: string) => direccionesBien(entornoPedido, s))
 const cadaUna = (d: typeof DIRECCIONES): boolean =>
-  d.a.enjambre === null && d.a.brasas[0] >= 400 && d.b.enjambre !== null && d.b.enjambre.lado[0] ** 2 >= 10000 && d.b.enjambre.simulacion.uSuperficie[3] === 0 &&
-  d.c.enjambre !== null && d.c.enjambre.simulacion.uSuperficie[3] === 1 && d.c.enjambre.estilo === 'estela' && direccionDe('no') === DIRECCION_RECOMENDADA && direccionDe('b') === 'b'
-afirmar(cadaUna(DIRECCIONES), `  A, chispas (${String(DIRECCIONES.a.brasas[0])} en la CPU); B, enjambre (${String((DIRECCIONES.b.enjambre?.lado[0] ?? 0) ** 2)} motas en la GPU y sus núcleos); C, corrientes sobre el logo (${String((DIRECCIONES.c.enjambre?.lado[0] ?? 0) ** 2)}, pegadas a su superficie); sin la bandera, la recomendada (${DIRECCION_RECOMENDADA})`)
-controlPositivo('  el detector VE una C que no se pega al logo', { ...DIRECCIONES, c: { ...DIRECCIONES.c, enjambre: DIRECCIONES.b.enjambre } }, cadaUna)
+  d.a.enjambre === null && d.a.brasas[0] >= 400 && d.b.enjambre !== null && d.b.enjambre.lado[0] ** 2 >= 10000 && !('c' in d) &&
+  !('uSuperficie' in d.b.enjambre.simulacion) && DIRECCION_RECOMENDADA === 'a' && direccionDe('no') === DIRECCION_RECOMENDADA && direccionDe('b') === 'b'
+afirmar(cadaUna(DIRECCIONES), `  A, chispas (${String(DIRECCIONES.a.brasas[0])} en la CPU); B, enjambre (${String((DIRECCIONES.b.enjambre?.lado[0] ?? 0) ** 2)} motas en la GPU y sus núcleos); C ya no existe (ni su superficie); sin la bandera, A`)
+controlPositivo('  el detector VE a C de vuelta', Object.assign({ c: DIRECCIONES.b }, DIRECCIONES), cadaUna)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('O3 · El campo (curl noise): sin divergencia, el mismo azar en la CPU y en la GPU')
@@ -308,7 +314,8 @@ const dibujoBien = (particulas: string, arcos: string, efectos: string, comun: s
   // La cara del logo libre y el tope del brillo (flashero con límite).
   particulas.includes('vBrillo = min( uDelante.z,') &&
   // De día: la energía oscura del tamaño de la partícula y el destello claro sólo en las calientes (en reposo, ninguno).
-  particulas.includes('float sigma = max( uDiaForma.y * uPixel, vRadioPx * uDiaForma.x );') && /CLARO_EN_REPOSO[^=]*= \{ chispa: 0, mota: 0, estela: 0 \}/.test(particulas) &&
+  // [PULIDO 18] P1.0 · sin el estilo de C (`estela`): `{ chispa: 0, mota: 0 }`.
+  particulas.includes('float sigma = max( uDiaForma.y * uPixel, vRadioPx * uDiaForma.x );') && /CLARO_EN_REPOSO[^=]*= \{ chispa: 0, mota: 0 \}/.test(particulas) &&
   // Los arcos: dos pasadas (lo oscuro, después el núcleo), una tira en inglete con las puntas afinadas y la luz que corre.
   arcos.includes('uniform float uCapa;') && arcos.includes('float inglete =') && arcos.includes('float afina =') && arcos.includes('float corre =') &&
   // Los efectos: el piso (de noche) y el toque del logo; sin el disco de la carga.
@@ -317,7 +324,7 @@ const dibujoBien = (particulas: string, arcos: string, efectos: string, comun: s
   comun.includes('c = toneMapping( c );') && comun.includes('cubre * ( 1.0 - uNoche )') && comun.includes('textoBorde: 56,') && comun.includes('vec2 borde = uTextoBorde / uResolucion * uPixel;') && !/EffectComposer|UnrealBloom/.test(particulas + arcos + efectos + comun)
 afirmar(dibujoBien(PARTICULAS, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO), '  núcleo y halo gaussianos (sin disco ni anillo), titila, destella, respira, vibra, viene de la fuente, desenfoque con el brillo conservado, la cara del logo libre y un tope; de día energía oscura translúcida y el destello sólo caliente; arcos en dos pasadas y en tira; sin la luz de la carga; el tono ACES, sin bloom')
 controlPositivo('  el detector VE el disco con borde de PULIDO 15', PARTICULAS.replace('float nucleo = exp( - 0.5 * r2 ) * cola;', 'float nucleo = 1.0 - smoothstep( 1.0 - px, 1.0 + px, r2 );'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
-controlPositivo('  y el destello claro en reposo (los «ojos» de día)', PARTICULAS.replace('{ chispa: 0, mota: 0, estela: 0 }', '{ chispa: 0.3, mota: 0, estela: 0 }'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
+controlPositivo('  y el destello claro en reposo (los «ojos» de día)', PARTICULAS.replace('{ chispa: 0, mota: 0 }', '{ chispa: 0.3, mota: 0 }'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
 controlPositivo('  y la luz de la carga de vuelta', EFECTOS_DIBUJO.replace('export const EFECTO = { piso: 0, logo: 1 } as const', 'export const EFECTO = { piso: 0, logo: 1, carga: 2 } as const'), (e: string) => dibujoBien(PARTICULAS, ARCOS_DIBUJO, e, COMUN_DIBUJO))
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -163,9 +163,11 @@ export default function ProbeStage({
   // [PULIDO 15] M2 · `?energia=plasma`: la energía nueva (plasma + cargas) en lugar del polvo y del bokeh (sus grupos quedan: el rig
   // los deriva); `plasma-y-polvo`, con el polvo además; `?plasma-color=si`, en azul eléctrico. Los destellos (`?destellos=`) se borraron.
   // [PULIDO 16] N2 · y sus experimentos. [PULIDO 17] O3 · los experimentos y el color se borraron; `?plasma=a|b|c`, la dirección
-  // (sin la bandera, la recomendada: `energia/direcciones.ts`).
+  // (sin la bandera, la recomendada: `energia/direcciones.ts`). [PULIDO 18] P1.0 · el plasma A es el producto; `?energia=polvo`, el
+  // polvo de antes en su lugar; `?energia=plasma-y-polvo`, los dos.
   const { energia, plasma } = entornoDeLaEscena().pruebas
-  const sinPolvo = energia === 'plasma'
+  const conPolvo = energia !== 'no'
+  const conPlasma = energia !== 'polvo'
 
   return (
     <Canvas
@@ -255,12 +257,12 @@ export default function ProbeStage({
           `choreographyPhysics.ts`.
         */}
         <group ref={dustGroupRef} name="polvo">
-          {!sinPolvo && <DepthParticles store={store} />}
+          {conPolvo && <DepthParticles store={store} />}
         </group>
         <group ref={bokehGroupRef} name="bokeh">
-          {!sinPolvo && <BokehParticles />}
+          {conPolvo && <BokehParticles />}
         </group>
-        {energia !== 'no' && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} direccion={direccionDe(plasma)} />}
+        {conPlasma && <PlasmaYCargas logoGroupRef={logoGroupRef} quieto={reducedMotion} compacto={calidad === 'compacta'} direccion={direccionDe(plasma)} />}
 
         <OrbitRig
           store={store}

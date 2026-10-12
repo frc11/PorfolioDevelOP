@@ -14,7 +14,7 @@ import { EFECTOS, FRAGMENTOS_DE_LOS_EFECTOS, VERTICES_DE_LOS_EFECTOS } from './e
 import { sombreadoresDeParticulas, uniformesDelAspecto, type NombreDelAspecto } from './particulas'
 
 /**
- * [PULIDO 17] O3 · EL ARMADO DE LA ENERGÍA (`docs/rediseno/PLASMA.md`). Según la dirección: las brasas (CPU) y, en B y C, el enjambre
+ * [PULIDO 17] O3 · EL ARMADO DE LA ENERGÍA (`docs/rediseno/PLASMA.md`). Según la dirección: las brasas (CPU) y, en B, el enjambre
  * (GPU); las mallas (el enjambre y las brasas instanciados, la cinta de los arcos en dos pasadas, los efectos), las uniformes que
  * comparten y lo que el programador de los arcos pregunta afuera: qué se ve (adentro del cuadro y no sobre un texto) y el borde del
  * logo (esos cierres se arman una vez, no por cuadro).

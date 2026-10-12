@@ -3,7 +3,7 @@ import { ARCOS } from '../arcos/arcos'
 import { RUIDO_GLSL } from '../ruido'
 
 /**
- * [PULIDO 17] O3 · EL ENJAMBRE EN LA GPU (direcciones B y C; `docs/rediseno/PLASMA.md`). Miles de motas en una textura (el ping-pong
+ * [PULIDO 17] O3 · EL ENJAMBRE EN LA GPU (la dirección B; C se borró en PULIDO 18; `docs/rediseno/PLASMA.md`). Miles de motas en una textura (el ping-pong
  * de la escena, `gpu/pingPong.ts`: posición y energía en una salida, velocidad y edad en la otra). Todas las fuerzas son CAMPOS, no
  * pares: el curl noise (`ruido.ts`) que rodea al logo sin atravesarlo (su campo de distancia, el del polvo: cerca de la superficie
  * el flujo sólo puede correr de costado), los núcleos calientes (brasas de la CPU: los positivos atraen, los negativos repelen, y
@@ -38,16 +38,14 @@ export const ENJAMBRE = {
   contiene: 1.6,
 } as const
 
-/** Los ajustes de la simulación que van en uniformes (cada dirección los cambia; el banco, en vivo). */
-export type AjustesDelEnjambre = Readonly<Record<'uFlujo' | 'uNucleosAjuste' | 'uReparto' | 'uEnergiaAjuste' | 'uCursorAjuste' | 'uSuperficie', readonly [number, number, number, number]>>
+/** Los ajustes de la simulación que van en uniformes (cada dirección los cambia; el banco, en vivo). [PULIDO 18] P1.0 · sin la superficie de C. */
+export type AjustesDelEnjambre = Readonly<Record<'uFlujo' | 'uNucleosAjuste' | 'uReparto' | 'uEnergiaAjuste' | 'uCursorAjuste', readonly [number, number, number, number]>>
 export const AJUSTES_DEL_ENJAMBRE: AjustesDelEnjambre = {
   uFlujo: [ENJAMBRE.flujo.rapidez, ENJAMBRE.flujo.caliente, ENJAMBRE.flujo.sigue, ENJAMBRE.flujo.rampa],
   uNucleosAjuste: [ENJAMBRE.nucleos.fuerza, ENJAMBRE.nucleos.suave, ENJAMBRE.nucleos.gira, ENJAMBRE.nucleos.calienta],
   uReparto: [ENJAMBRE.hueco, ENJAMBRE.radio, ENJAMBRE.reparto, ENJAMBRE.contiene],
   uEnergiaAjuste: [ENJAMBRE.energia.base, ENJAMBRE.energia.porTemperatura, ENJAMBRE.energia.apagaS, ENJAMBRE.energia.tiembla],
   uCursorAjuste: [ENJAMBRE.cursor.alcance, ENJAMBRE.cursor.atrae, ENJAMBRE.cursor.gira, ENJAMBRE.cursor.calienta],
-  // La superficie del logo (C): la distancia de la banda (u), la fuerza que las pega, desde qué energía se sueltan y si nacen en ella.
-  uSuperficie: [0, 0, 1, 0],
 }
 
 const f = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
@@ -83,8 +81,6 @@ uniform vec4 uNucleosAjuste;
 uniform vec4 uReparto;
 uniform vec4 uEnergiaAjuste;
 uniform vec4 uCursorAjuste;
-uniform vec4 uSuperficie;
-uniform mat4 uLogo;
 uniform float uPiso;
 in vec2 vUv;
 layout( location = 0 ) out vec4 salidaLugar;
@@ -96,17 +92,6 @@ vec3 nacer( uint id ) {
 	float s = sqrt( max( 0.0, 1.0 - z * z ) );
 	float r = mix( uReparto.x, uReparto.y, pow( azar01( id, 13u ), uReparto.z ) );
 	return vec3( cos( fi ) * s, z, sin( fi ) * s ) * r;
-}
-
-// En la superficie del logo (C): un punto al azar de la caja de su campo, llevado a la banda (tres pasos por el campo).
-vec3 nacerEnElLogo( uint id ) {
-	vec3 q = uCampoMin + uCampoTam * vec3( azar01( id, 31u ), azar01( id, 32u ), azar01( id, 33u ) );
-	for ( int k = 0; k < 3; k ++ ) q -= normalDelCampo( q ) * ( campoDelLogo( q ) - uSuperficie.x );
-	return ( uLogo * vec4( q, 1.0 ) ).xyz - uCentro;
-}
-
-vec3 nacerDonde( uint id ) {
-	return uSuperficie.w > 0.5 && uHayCampo > 0.5 ? nacerEnElLogo( id ) : nacer( id );
 }
 
 float alSegmento( vec3 p, vec3 a, vec3 b ) {
@@ -134,12 +119,12 @@ void main() {
 	uint generacion = uint( uCuadro ) * 0x27d4eb2du;
 	float reposo = uEnergiaAjuste.x + uEnergiaAjuste.y * uTemperatura;
 	if ( uNacer > 0.5 ) {
-		p = nacerDonde( id ^ generacion );
+		p = nacer( id ^ generacion );
 		v = vec3( 0.0 );
 		e = reposo;
 		edad = vida * azar01( id, 8u );
-	} else if ( edad > vida || dot( p, p ) > 1.6 * uReparto.y * uReparto.y || !( dot( p, p ) < 1e8 ) || !( dot( v, v ) < 1e8 ) || ( uSuperficie.w > 0.5 && uHayCampo > 0.5 && campoDelLogo( ( uLogoInverso * vec4( uCentro + p, 1.0 ) ).xyz ) > 3.5 ) ) {
-		p = nacerDonde( id ^ generacion );
+	} else if ( edad > vida || dot( p, p ) > 1.6 * uReparto.y * uReparto.y || !( dot( p, p ) < 1e8 ) || !( dot( v, v ) < 1e8 ) ) {
+		p = nacer( id ^ generacion );
 		v = vec3( 0.0 );
 		e = reposo;
 		edad = 0.0;
@@ -161,13 +146,6 @@ void main() {
 	if ( dl < 2.2 && uActividadDelLogo > 0.0 ) {
 		a -= nl * ( dl - 0.45 ) * ${f(E.logo.corona)} * uActividadDelLogo * smoothstep( 2.2, 1.0, dl );
 		gana += uActividadDelLogo * exp( - dl * dl * 2.0 ) * ${f(E.logo.calienta)} * dt;
-	}
-	// C · pegadas a la superficie: un resorte a la banda y el campo de costado; las calientes se sueltan y se alejan.
-	if ( uSuperficie.y > 0.0 && uHayCampo > 0.5 && dl < 2.5 ) {
-		float pega = 1.0 - smoothstep( uSuperficie.z - 0.1, uSuperficie.z + 0.1, e );
-		a -= nl * ( dl - uSuperficie.x ) * uSuperficie.y * pega;
-		a += nl * ( 1.0 - pega ) * 1.4;
-		v -= nl * dot( v, nl ) * pega * 0.12;
 	}
 	// Los núcleos: atraen (positivos) o repelen (negativos), hacen girar y calientan lo que tienen al lado.
 	for ( int k = 0; k < ${String(E.nucleos.maximo)}; k ++ ) {

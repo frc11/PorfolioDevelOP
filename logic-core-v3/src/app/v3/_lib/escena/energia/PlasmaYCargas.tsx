@@ -20,7 +20,7 @@ import { TEXTO_EN_PANTALLA, cajasDelTexto } from './textoEnPantalla'
  * [PULIDO 17] O3 · LA ENERGÍA, montada con `?energia=plasma` (o `plasma-y-polvo`) en una de sus tres direcciones (`?plasma=a|b|c`;
  * sin la bandera, la recomendada: `direcciones.ts`). Partículas de energía que brillan, vibran y se mueven, y los arcos de PULIDO 15
  * hechos luz (`docs/rediseno/PLASMA.md`: el modelo; `REFERENCIAS-PLASMA.md`: de dónde sale). Las brasas y los arcos corren acá, en
- * el cuadro (`cuadro.ts`); el enjambre de B y C, en la GPU (`enjambre/`); lo que cambia en cada cuadro vive en refs. El puntero lo
+ * el cuadro (`cuadro.ts`); el enjambre de B, en la GPU (`enjambre/`); lo que cambia en cada cuadro vive en refs. El puntero lo
  * escuchan `interaccion/puntero.ts` (el mouse sobre la página, el dedo mientras toca).
  */
 interface Props {

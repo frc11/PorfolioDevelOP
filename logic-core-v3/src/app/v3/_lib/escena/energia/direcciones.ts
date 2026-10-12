@@ -2,19 +2,18 @@ import type { Estilo, NombreDelAspecto } from './dibujo/particulas'
 import type { AjustesDelEnjambre } from './enjambre/simulacion'
 
 /**
- * [PULIDO 17] O3 · LAS TRES DIRECCIONES (`docs/rediseno/REFERENCIAS-PLASMA.md`: qué es cada una y por qué). Comparten los arcos, la
+ * [PULIDO 17] O3 · LAS DIRECCIONES (`docs/rediseno/REFERENCIAS-PLASMA.md`: qué es cada una y por qué). Comparten los arcos, la
  * temperatura, el gesto, los textos, el tono y el pie; cambia la partícula:
- *   · A · CHISPAS: las cargas de PULIDO 15 hechas luz (en la CPU; los arcos salen de ellas).
+ *   · A · CHISPAS: las cargas de PULIDO 15 hechas luz (en la CPU; los arcos salen de ellas). [PULIDO 18] El producto.
  *   · B · ENJAMBRE: miles de motas finísimas en la GPU, un medio que se enciende donde pasa la energía, alrededor de unos núcleos.
- *   · C · CORRIENTES SOBRE EL LOGO: la energía corre pegada a la superficie del logo (su campo de distancia), dibujada como estelas
- *     cortas; las calientes se sueltan y se van al aire. [O4] reemplazó a «estelas sueltas en el volumen» (se leía como lluvia).
- * `?plasma=a|b|c` elige; sin la bandera, la recomendada (`DIRECCION_RECOMENDADA`).
+ *     [PULIDO 18] Se queda en su bandera hasta que exista el efecto de cristal de la dimensión espejo (de ahí sale).
+ * [PULIDO 18] P1.0 · C (las corrientes sobre el logo) se borró con su código. `?plasma=a|b` elige; sin la bandera, A.
  */
-export type Direccion = 'a' | 'b' | 'c'
+export type Direccion = 'a' | 'b'
 
 export interface DeLaDireccion {
   readonly nombre: string
-  /** Las brasas (CPU): en escritorio y en el teléfono. En A son las partículas; en B y C, los núcleos del enjambre. */
+  /** Las brasas (CPU): en escritorio y en el teléfono. En A son las partículas; en B, los núcleos del enjambre. */
   readonly brasas: readonly [number, number]
   /** Cuánto brillan las brasas (1: las de A; los núcleos, menos: son parte del medio). */
   readonly intensidadDeLasBrasas: number
@@ -47,27 +46,12 @@ export const DIRECCIONES: Readonly<Record<Direccion, DeLaDireccion>> = {
       estilo: 'mota',
       intensidad: 1,
       // Más adentro (cerca del logo), núcleos fuertes (nubes y filamentos que se forman y se deshacen), en reposo casi apagadas.
-      simulacion: { uFlujo: [0.5, 1.2, 1.1, 1.2], uNucleosAjuste: [1.6, 0.6, 1.4, 0.4], uReparto: [3.4, 11, 2.4, 1.6], uEnergiaAjuste: [0.08, 0.35, 0.9, 3], uCursorAjuste: [4.6, 0.5, 2.4, 0.9], uSuperficie: [0, 0, 1, 0] },
-    },
-  },
-  c: {
-    nombre: 'corrientes',
-    brasas: [40, 28],
-    intensidadDeLasBrasas: 0.35,
-    // Los núcleos, tenues y sin humo de día; las corrientes con tope de brillo (sin grumos) y de día un aura oscura en el borde del logo.
-    aspecto: { brasas: { uDia: [0, 0, 0.6, 0.5] }, enjambre: { uLuz: [0.5, 0.16, 0.3, 2.5], uDia: [0.03, 0, 0.35, 0.7], uDiaForma: [2.2, 4, 0, 0] } },
-    enjambre: {
-      lado: [56, 40],
-      estilo: 'estela',
-      intensidad: 1,
-      // Pegadas a la superficie del logo (la banda a 0,18 u), un campo rápido que corre de costado; las calientes (desde 0,72) se
-      // sueltan; los núcleos apenas tiran (son los que descargan los arcos).
-      simulacion: { uFlujo: [1.1, 1, 1.6, 1.6], uNucleosAjuste: [0.4, 0.7, 0.6, 0.5], uReparto: [3.6, 11, 2, 1.6], uEnergiaAjuste: [0.06, 0.4, 0.8, 2], uCursorAjuste: [4.6, 0.5, 2.4, 1.2], uSuperficie: [0.18, 7, 0.72, 1] },
+      simulacion: { uFlujo: [0.5, 1.2, 1.1, 1.2], uNucleosAjuste: [1.6, 0.6, 1.4, 0.4], uReparto: [3.4, 11, 2.4, 1.6], uEnergiaAjuste: [0.08, 0.35, 0.9, 3], uCursorAjuste: [4.6, 0.5, 2.4, 0.9] },
     },
   },
 }
 
-/** La que queda como default de `?energia=plasma` (la justificación, en `docs/rediseno/PLASMA.md`). */
+/** La del producto (sin `?plasma=`; la justificación, en `docs/rediseno/PLASMA.md`). */
 export const DIRECCION_RECOMENDADA: Direccion = 'a'
 
 export function direccionDe(pedida: Direccion | 'no'): Direccion {
