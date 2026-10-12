@@ -211,7 +211,47 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
   s44, s49, s50, s52 y s57 con el cableado y el reloj nuevos (tabla de invariantes).
 
 ### Q3 · El cristal: capa fija de fondo, pegada al moiré
-- PENDIENTE.
+- HECHO · VISTO en el mini-banco (capturas `q3b-cristal-dia`, `q3b-cristal-noche`, `q3b-cristal-tel`, `q3-cristal-lejos` y la referencia
+  `q3-sin-dia`): de día el vidrio facetado sobre la trama, cada faceta con su corrimiento del fondo (las líneas de la trama saltan en
+  cada borde), los biseles con un filo claro y su talla; de noche sólo los biseles que miran la luz toman el brillo (cortes de luz) y
+  el resto apenas se adivina; de lejos las facetas más chicas, estables (viven en la cúpula). NO VISTO en el sitio (sin banco): el
+  cristal detrás de los textos y de las secciones, el fundido en el túnel y en Tu panel, el amanecer: VERIFICAR TRAS REINICIO.
+- QUÉ ES (`escena/cristal/`: `cristal.ts` lo puro, `vidrio.ts` el GLSL y la malla, `CristalDeLaEscena.tsx` el componente; en el
+  producto siempre, `?cristal=no` lo apaga para medir por diferencia): una PASADA DE PANTALLA ENTERA (un cuadrado en clip, orden −16:
+  después de la copia del cuadro y antes del espejo y la energía; sin profundidad) que en cada píxel que es FONDO (lo opaco más lejos
+  que el vidrio, por la profundidad del pase) encuentra el punto del cilindro del cristal (radio 37,4 u, apenas adentro de la trama
+  cercana, entre el piso y 34 u) que cruza el rayo de la vista; su FACETA: celdas de Voronoi en las coordenadas del cilindro (el arco
+  alrededor y el alto; alrededor entran las que entran justas: 45 facetas de 5,22 u, sin costura; en alto crecen y se achican ±14 % en
+  170 s) con la distancia exacta al borde por las bisectrices (5 × 5) y semillas que derivan muy lento (95 s, hasta un 16 % de la
+  celda); su NORMAL: la del cilindro hacia adentro, inclinada por faceta (±0,09 rad) y girada hacia el borde en el BISEL (0,32 u, hasta
+  0,4 rad, con un perfil suave antialiasado con `fwidth`); la REFRACCIÓN: Snell con índice 1,5, el rayo transmitido cae a 9 u detrás
+  del vidrio y ahí se lee la copia del cuadro (la transmisión barata en pantalla; con tope de 56 px de corrimiento; nunca se lee un
+  píxel de lo que no es fondo: donde cae el rayo también se mira la profundidad); el FRESNEL de Schlick (F0 0,04); el BRILLO especular
+  (Blinn-Phong, dureza 56) con la luz principal de la sala (sigue el azimut de la cámara con su corrimiento) y la cámara, más fuerte
+  en el bisel y con el Fresnel; el REFLEJO tenue del entorno (el cielo por la altura del reflejo: 0,07 de día, 0,2 de noche); de día
+  la TALLA oscurece apenas el bisel (0,07; sin eso el vidrio no se lee sobre el papel) y de noche el bisel toma la luz (especular 1,3;
+  de día 0,15). Con el prisma, una dispersión mínima por canal (0,012 del índice). DÓNDE: 1 en todo el recorrido salvo el túnel de
+  Trabajos y Tu panel (0 con el medio de la pantalla adentro, un fundido de 0,35 pantallas), y se va con la cámara del final; sobre
+  un texto, 0,25 del corrimiento y del brillo (el DOM no se toca: el antialias de los textos es del navegador). Con movimiento
+  reducido no se monta. Pide la profundidad al montarse y el color por cuadro mientras se ve: UN solo pase compartido.
+- Lo investigado, en `DIMENSION-ESPEJO.md` («El cristal de fondo»): la transmisión en espacio de pantalla de luma.gl (Snell proyectado,
+  el espesor por el dorso, Schlick, la dispersión como `KHR_materials_dispersion`, Beer-Lambert), la refracción por dos caras de
+  Codrops, `MeshTransmissionMaterial` (otra pasada de la escena por material: descartado) y el vidrio facetado armado a mano
+  (Voronoi con la distancia exacta al borde, la normal por faceta y el bisel).
+- Medido (mini-banco, la NVIDIA, sin vsync; recibo `entregas/pulido-19/mini-medido.json`, sección `cristal`; s70 lo lee): 1440 calma de
+  día con el cristal 1,76 ms por cuadro (sin él, en la misma tanda, 1,64 ms; con el cristal, 1,49: la diferencia es ruido), de noche 1,96 (sin él 1,84 en Q1.d); 390 de noche
+  1,01 (sin él 0,91); de lejos de día 1,26 ms. Ningún cuadro de más de 20 ms; la basura por cuadro no cambia (6,5–6,9 KB). El cuadro
+  está mandado por la CPU (la física del plasma y la red): la pasada del cristal cabe en la GPU sin asomar.
+- Invariantes (s70): las facetas justas alrededor (sin costura; control: una vuelta que no cierra); dónde (1 lejos de las apagadas, 0
+  adentro, el fundido monótono, se va con el final; controles: uno que no se apaga en el túnel, uno que se queda en el final); el
+  vidrio (el cilindro, Voronoi con la distancia exacta, el bisel con fwidth, Snell, la copia sólo en el fondo también al leer, Schlick,
+  el brillo con la luz y la cámara, el tope, los textos; montado siempre con movimiento, `cristal=no`, los pedidos al pase, el orden;
+  controles: uno que lee sin mirar la profundidad de donde lee, uno montado con movimiento reducido); el recibo (ningún cuadro de
+  más de 20 ms con el cristal, costo ≤ 1,5 ms; control: uno que cuesta 3 ms).
+- La clave de `Pruebas` es `'sin-cristal'` (por defecto `'no'`, como todas las pruebas; `?cristal=no` la pone en `'si'`). La primera
+  versión tenía `cristal: 'si'` por defecto y s38 y s31 se pusieron rojas (afirman que sin URL ninguna prueba pide nada: la lección de
+  PULIDO 7, «claves nuevas de `Pruebas` rompen tests de ausencia»); la salida fue nombrar la prueba por lo que pide (apagarlo), sin
+  tocar ningún test. tsc y lint limpios; la compuerta (51 suites) en verde salvo s8-montaje con sus 2 de la base.
 
 ### Q4.1 · La auditoría
 - PENDIENTE.
@@ -248,6 +288,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 | Q1 (mini-banco) | 78,5 GB | 2012 → 2516 MB | 957 → 984 MB | sin banco del sitio; mini-banco a 1440 y 390 (un Chrome por medición); cuadros crudos borrados al armar cada hoja |
 | Q1.d (mini-banco) | 78,5 GB | 2516 → 2453 MB | 984 → 991 MB | ídem; la red con y sin (`red=no`) |
 | Q2 (mini-banco del pie) | 70,9 GB | 2453 → 1402 MB | 991 → 992 MB | sin banco del sitio; `pie.sh` (Chrome por captura); el Chrome del humano con muchas pestañas se lleva la memoria |
+| Q3 (mini-banco) | 74,1 GB | 1402 → 1561 MB | 992 → 1001 MB | sin banco del sitio; el cristal con y sin (`cristal=si`) |
 
 ## Invariantes que cambian de sentido (antes / ahora / por qué)
 

@@ -38,6 +38,7 @@ import { MotorDeLaEscena } from './gpu/MotorDeLaEscena'
 import { LuzDelLogo } from './LuzDelLogo'
 import { PruebasDeLaEscena } from './PruebasDeLaEscena'
 import { PaseDeLaEscena } from './pase/PaseDeLaEscena'
+import { CristalDeLaEscena } from './cristal/CristalDeLaEscena'
 import { EspejoDeLaEscena } from './espejo/EspejoDeLaEscena'
 import { type ProbeMode, type ProbeParamsStore, type ProbeRigStore, type ProbeStatsStore } from './probeStore'
 
@@ -318,6 +319,8 @@ export default function ProbeStage({
         <LuzDelLogo keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} logoGroupRef={logoGroupRef} compacta={calidad === 'compacta'} />
         <PruebasDeLaEscena keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} stats={stats} rig={rig} logoGroupRef={logoGroupRef} />
         {/* [PULIDO 18] P2 · la dimensión espejo (`?espejo=`; apagada salvo con la bandera). */}
+        {/* [PULIDO 19] Q3 · el cristal de fondo, siempre (pegado a la trama; lee la copia del cuadro: `cristal/`). */}
+        <CristalDeLaEscena quieto={reducedMotion} />
         <EspejoDeLaEscena logoGroupRef={logoGroupRef} quieto={reducedMotion} />
         {/* [PULIDO 18] P1.a · el pase compartido (la profundidad de lo opaco): ÚLTIMO, su cuadro corre después de todos. */}
         <PaseDeLaEscena />

@@ -105,6 +105,8 @@ export interface Pruebas {
   readonly espejo: 'cristal' | 'pliegue' | 'caleidoscopio' | 'ecos' | 'espiral' | 'no'
   readonly 'espejo-disparo': 'ambiente' | 'scroll' | 'mantener' | 'no'
   readonly 'espejo-prisma': 'si' | 'no'
+  /** [PULIDO 19] Q3 · EL CRISTAL de fondo (`escena/cristal/`) está siempre en el producto; la prueba es apagarlo: `cristal=no` (el banco lo mide por diferencia). */
+  readonly 'sin-cristal': 'si' | 'no'
 }
 
 /**
@@ -138,7 +140,7 @@ export interface Pruebas {
  * se borró con C. P2 · entran `espejo=cristal|pliegue|caleidoscopio|ecos|espiral`, `espejo-disparo=ambiente|scroll|mantener` y
  * `espejo-prisma=si` (la dimensión espejo). [PULIDO 19] Q0 · `plasma=` se borró con B (el plasma A es el único; el cristal reemplaza a B).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', espejo: 'no', 'espejo-disparo': 'no', 'espejo-prisma': 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', espejo: 'no', 'espejo-disparo': 'no', 'espejo-prisma': 'no', 'sin-cristal': 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
 export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'espejo', 'espejo-disparo', 'espejo-prisma'] as const
@@ -158,6 +160,8 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     espejo: unoDe<'cristal' | 'pliegue' | 'caleidoscopio' | 'ecos' | 'espiral'>(['cristal', 'pliegue', 'caleidoscopio', 'ecos', 'espiral'], valor('espejo')),
     'espejo-disparo': unoDe<'ambiente' | 'scroll' | 'mantener'>(['ambiente', 'scroll', 'mantener'], valor('espejo-disparo')),
     'espejo-prisma': unoDe<'si'>(['si'], valor('espejo-prisma')),
+    // [PULIDO 19] Q3 · el cristal está siempre: la prueba es apagarlo (`cristal=no`).
+    'sin-cristal': valor('cristal') === 'no' ? 'si' : 'no',
   }
 }
 

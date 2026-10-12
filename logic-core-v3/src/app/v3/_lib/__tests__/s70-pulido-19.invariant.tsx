@@ -8,11 +8,16 @@
  *          frena a las brasas, se corta en cascada con un gesto (en `corteS`, con el chasquido) y nunca se arma en el final del pie.
  *   Q2 · las piezas del pie caen después del logo (`caidaDelPie.ts`): sus lugares en el piso no se solapan ni pisan el logo, caen en
  *        una onda desde el logo con la física del logo, sin saltos, y la cámara desde arriba las deja enteras en pantalla.
+ *   Q3 · el cristal de fondo (`cristal/`): siempre, pegado a la cúpula (las facetas justas alrededor), refracta la copia del cuadro
+ *        sólo en el fondo, con Fresnel, brillo en los biseles y bordes antialiasados; apagado en el túnel y en Tu panel, se va con el
+ *        final; sobre un texto, apenas; con movimiento reducido no se monta; lo medido en el mini-banco.
  */
 import { readFileSync } from 'node:fs'
 
 import * as THREE from 'three'
 
+import { CRISTAL, amplitudDelCristal, amplitudPorDonde, facetasAlrededor } from '../escena/cristal/cristal'
+import { FRAGMENTOS_DEL_CRISTAL, ORDEN_DEL_CRISTAL, uniformesDelCristal } from '../escena/cristal/vidrio'
 import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas, type Brasas } from '../escena/energia/brasas'
 import { CELDAS_DEL_REPARTO, DOMINIO, alfaDelDominio, armarElDominio, coordenadas, crearDominio, objetivosDelReparto, poblar, repartir, type Dominio } from '../escena/energia/dominio'
 import { pasoDeLasBrasas } from '../escena/energia/paso'
@@ -456,6 +461,53 @@ controlPositivo('  el detector VE la copia de la cámara después de subirla', {
 controlPositivo('  y una reserva en la caída de cada cuadro', { ...DEL_PIE, 'pie3d/caida.ts': (DEL_PIE['pie3d/caida.ts'] ?? '').replace('  if (i >= c.n) return\n', '  const tmp = [i]\n  if (i >= c.n || tmp.length < 0) return\n') }, cableadoBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
+titulo('Q3 · El cristal de fondo: pegado a la cúpula, refracta sólo el fondo, con Fresnel y biseles antialiasados; dónde se ve')
+
+// Las facetas justas alrededor del cilindro: sin costura (el lado que resulta, cerca del pedido).
+const FACETAS = facetasAlrededor()
+const facetasBien = (f: { readonly cuantas: number; readonly lado: number }): boolean => Number.isInteger(f.cuantas) && f.cuantas >= 8 && Math.abs(f.cuantas * f.lado - 2 * Math.PI * CRISTAL.radio) < 1e-9 && Math.abs(f.lado - CRISTAL.faceta.lado) < CRISTAL.faceta.lado * 0.1
+afirmar(facetasBien(FACETAS), `  ${String(FACETAS.cuantas)} facetas justas alrededor del cilindro de ${String(CRISTAL.radio)} u (lado ${FACETAS.lado.toFixed(2)} u; pedido ${String(CRISTAL.faceta.lado)}): sin costura`)
+controlPositivo('  el detector VE una vuelta que no cierra', { cuantas: FACETAS.cuantas, lado: FACETAS.lado * 1.01 }, facetasBien)
+
+// Dónde se ve: 1 lejos de las secciones apagadas, 0 con el medio de la pantalla adentro de una, el fundido entre medio; y se va con el final.
+const BANDAS = Float32Array.from([10000, 14000, 30000, 31000])
+const dondeBien = (f: typeof amplitudPorDonde, g: typeof amplitudDelCristal): boolean => {
+  const alto = 900
+  const lejos = f(5000, alto, BANDAS, 2)
+  const adentro = f(12000, alto, BANDAS, 2)
+  const borde = f(14000 + CRISTAL.donde.fundido * alto * 0.5, alto, BANDAS, 2)
+  const casi = f(14000 + CRISTAL.donde.fundido * alto + 1, alto, BANDAS, 2)
+  const otra = f(30500, alto, BANDAS, 2)
+  let monotona = true
+  let antes = 0
+  for (let y = 14000; y <= 14000 + CRISTAL.donde.fundido * alto; y += 10) {
+    const v = f(y, alto, BANDAS, 2)
+    if (v < antes - 1e-9) monotona = false
+    antes = v
+  }
+  return lejos === 1 && adentro === 0 && borde > 0.3 && borde < 0.7 && casi === 1 && otra === 0 && monotona && g(1, 0) === 1 && g(1, 1) === 0 && g(0.5, 0.5) > 0 && g(0.5, 0.5) < 0.5 && g(1, 0.5) === 0.5
+}
+afirmar(dondeBien(amplitudPorDonde, amplitudDelCristal), `  dónde: 1 lejos de ${CRISTAL.donde.apagadas.join(' y ')}, 0 adentro, el fundido de ${String(CRISTAL.donde.fundido)} pantallas monótono entre medio; y se va con la cámara del final`)
+controlPositivo('  el detector VE un cristal que no se apaga en el túnel', ((c: number, alto: number, b: ArrayLike<number>, n: number) => Math.max(0.2, amplitudPorDonde(c, alto, b, n))) as typeof amplitudPorDonde, (f: typeof amplitudPorDonde) => dondeBien(f, amplitudDelCristal))
+controlPositivo('  y uno que se queda en el final', ((p: number) => p) as typeof amplitudDelCristal, (g: typeof amplitudDelCristal) => dondeBien(amplitudPorDonde, g))
+
+// El sombreador: el cilindro, las facetas de Voronoi con la distancia exacta al borde, la normal inclinada y el bisel con `fwidth`, Snell,
+// la copia del cuadro sólo donde es fondo (la profundidad del pase), el Fresnel de Schlick, el brillo con la luz y la cámara, el tope
+// del corrimiento, los textos. El componente: siempre salvo `cristal=no` y movimiento reducido; pide la profundidad y el color.
+const CRISTAL_TSX = leer('_lib/escena/cristal/CristalDeLaEscena.tsx')
+const VIDRIO = leer('_lib/escena/cristal/vidrio.ts')
+const ESCENARIO = leer('_lib/escena/ProbeStage.tsx')
+const ENTORNO_TS = leer('_lib/escena/entorno.ts')
+const vidrioBien = (f: string, tsx: string, esc: string, ent: string): boolean => f.includes('float hastaElCilindro( vec3 o, vec3 d, float radio )') && f.includes('semillaDeLaCelda( g, cuantas ) - q') && f.includes('float d = dot( 0.5 * ( mr + r ), entre / largo );') &&
+  f.includes('fwidth( bordeU )') && f.includes('refract( dir, n, 1.0 / uVidrio.x )') && f.includes('distanciaALoOpaco( uv )') && f.includes('distanciaALoOpaco( desde )') && f.includes('pow( 1.0 - cosV, 5.0 )') && f.includes('normalize( uLuz - dir )') && f.includes('uTopePx') &&
+  f.includes('adentroDelTexto( uv * 2.0 - 1.0 )') && f.includes('discard') && f.includes('colorDeAtras(') &&
+  tsx.includes("pruebas['sin-cristal'] === 'si' || quieto) return null") && tsx.includes('PEDIDOS_DEL_PASE.profundidad += 1') && tsx.includes('PEDIDOS_DEL_PASE.colorEsteCuadro = true') && tsx.includes('amplitudDelCristal(m.porDonde, EN_VIVO.camara)') &&
+  esc.includes('<CristalDeLaEscena quieto={reducedMotion} />') && ent.includes("'sin-cristal': valor('cristal') === 'no' ? 'si' : 'no'") && ORDEN_DEL_CRISTAL > -18 && ORDEN_DEL_CRISTAL < -10 && lineasDeCodigo(VIDRIO) <= 300 && lineasDeCodigo(CRISTAL_TSX) <= 300 && uniformesDelCristal().uCilindro.value.w === FACETAS.cuantas
+afirmar(vidrioBien(FRAGMENTOS_DEL_CRISTAL, CRISTAL_TSX, ESCENARIO, ENTORNO_TS), '  el vidrio: el cilindro, Voronoi con la distancia exacta al borde, el bisel con fwidth, Snell, la copia sólo en el fondo (la profundidad del pase, también al leer), Schlick, el brillo con la luz y la cámara, el tope, los textos; montado siempre con movimiento (cristal=no lo apaga), pide la profundidad y el color; entre la copia y la energía')
+controlPositivo('  el detector VE un vidrio que lee sin mirar la profundidad de donde lee', FRAGMENTOS_DEL_CRISTAL.replace('distanciaALoOpaco( desde )', 'distanciaALoOpaco( uv )'), (f: string) => vidrioBien(f, CRISTAL_TSX, ESCENARIO, ENTORNO_TS))
+controlPositivo('  y un cristal montado con movimiento reducido', FRAGMENTOS_DEL_CRISTAL, (f: string) => vidrioBien(f, CRISTAL_TSX.replace("pruebas['sin-cristal'] === 'si' || quieto) return null", "pruebas['sin-cristal'] === 'si') return null"), ESCENARIO, ENTORNO_TS))
+
+// ═══════════════════════════════════════════════════════════════════════════
 titulo('Q1 · Los módulos nuevos, de menos de 300 líneas; lo de cada cuadro, sin reservas')
 
 const FUENTES: Record<string, string> = Object.fromEntries(['energia/dominio.ts', 'energia/grilla.ts', 'energia/paso.ts', 'energia/cuadro.ts', 'energia/brasas.ts', 'energia/vecinas.ts', 'energia/ruido.ts', 'energia/reposo.ts', 'energia/dibujo/red.ts'].map((m) => [m, leer(`_lib/escena/${m}`)]))
@@ -473,7 +525,7 @@ titulo('Q1 · Lo medido en el mini-banco (el recibo): ningún cuadro de más de 
 // llamada como número (`en.dt`, `d.piso`, el rotor en lote, `coordenadasDe`, `alfaDe`, `celdaDe`, `alRayoDesde`).
 interface Medida { readonly cuadro: { readonly mayoresDe20: number; readonly media: number; readonly maximo: number } | null; readonly heap: { readonly kbPorCuadro: number } | null; readonly errores: number }
 type Medidas = Readonly<Record<string, Readonly<Record<string, Medida>>>>
-const RECIBO = JSON.parse(readFileSync('docs/rediseno/entregas/pulido-19/mini-medido.json', 'utf8')) as { readonly medidas: Medidas; readonly antes: Medidas; readonly red: Medidas }
+const RECIBO = JSON.parse(readFileSync('docs/rediseno/entregas/pulido-19/mini-medido.json', 'utf8')) as { readonly medidas: Medidas; readonly antes: Medidas; readonly red: Medidas; readonly cristal: Medidas }
 const CONFIGS = { '1440': ['calma-noche', 'calma-dia', 'maxima-noche', 'lejos-noche', 'escena'], '390': ['calma-noche', 'maxima-noche'] } as const
 const TOPE_KB = 12
 const medidoBien = (m: Medidas): boolean => Object.entries(CONFIGS).every(([w, cs]) => cs.every((c) => {
@@ -497,6 +549,18 @@ const redMedidaBien = (m: Medidas): boolean => Object.entries(CON_RED).every(([w
 })) && costoDeLaRed(m, '1440') <= COSTO_MS && costoDeLaRed(m, '390') <= COSTO_MS
 afirmar(redMedidaBien(RECIBO.red), `  con la red en reposo, ningún cuadro de más de 20 ms ni basura nueva; la red cuesta ${costoDeLaRed(RECIBO.red, '1440').toFixed(2)} ms por cuadro a 1440 y ${costoDeLaRed(RECIBO.red, '390').toFixed(2)} a 390 (≤ ${String(COSTO_MS)})`)
 controlPositivo('  el detector VE una red que cuesta 2 ms', { ...RECIBO.red, '1440': { ...RECIBO.red['1440'], 'calma-noche': { ...(RECIBO.red['1440']?.['calma-noche'] as Medida), cuadro: { mayoresDe20: 0, media: (RECIBO.red['1440']?.['calma-noche-sinred']?.cuadro?.media ?? 0) + 2, maximo: 5 } } } }, redMedidaBien)
+
+// Q3 · el cristal medido (la sección `cristal` del recibo): con el cristal ningún cuadro de más de 20 ms, y lo que cuesta (con menos sin,
+// en calma de día a 1440, la misma tanda) acotado.
+const CON_CRISTAL = { '1440': ['calma-noche-cristal', 'calma-dia-cristal', 'calma-dia', 'lejos-dia-cristal'], '390': ['calma-noche-cristal'] } as const
+const COSTO_DEL_CRISTAL_MS = 1.5
+const costoDelCristal = (m: Medidas): number => (m['1440']?.['calma-dia-cristal']?.cuadro?.media ?? 99) - (m['1440']?.['calma-dia']?.cuadro?.media ?? 0)
+const cristalMedidoBien = (m: Medidas): boolean => Object.entries(CON_CRISTAL).every(([w, cs]) => cs.every((c) => {
+  const x = m[w]?.[c]
+  return x !== undefined && x.cuadro !== null && x.heap !== null && x.cuadro.mayoresDe20 === 0 && x.errores === 0 && x.heap.kbPorCuadro <= TOPE_KB
+})) && costoDelCristal(m) <= COSTO_DEL_CRISTAL_MS
+afirmar(cristalMedidoBien(RECIBO.cristal), `  con el cristal, ningún cuadro de más de 20 ms ni basura nueva; el cristal cuesta ${costoDelCristal(RECIBO.cristal).toFixed(2)} ms por cuadro de día a 1440 (≤ ${String(COSTO_DEL_CRISTAL_MS)}; de noche ${String(RECIBO.cristal['1440']?.['calma-noche-cristal']?.cuadro?.media)} ms, a 390 ${String(RECIBO.cristal['390']?.['calma-noche-cristal']?.cuadro?.media)})`)
+controlPositivo('  el detector VE un cristal que cuesta 3 ms', { ...RECIBO.cristal, '1440': { ...RECIBO.cristal['1440'], 'calma-dia-cristal': { ...(RECIBO.cristal['1440']?.['calma-dia-cristal'] as Medida), cuadro: { mayoresDe20: 0, media: (RECIBO.cristal['1440']?.['calma-dia']?.cuadro?.media ?? 0) + 3, maximo: 5 } } } }, cristalMedidoBien)
 
 const bajoBien = (m: Medidas, a: Medidas): boolean => (m['1440']?.['calma-noche']?.heap?.kbPorCuadro ?? 99) * 4 < (a['1440']?.['calma-noche']?.heap?.kbPorCuadro ?? 0)
 afirmar(bajoBien(RECIBO.medidas, RECIBO.antes), '  la basura por cuadro bajó al menos cuatro veces respecto de antes del arreglo')

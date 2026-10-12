@@ -450,5 +450,133 @@
     "errores": 0
    }
   }
+ },
+ "queCristal": "Q3 · EL CRISTAL DE FONDO: las mismas mediciones con el cristal (cristal=si en el banco: la pasada de pantalla entera pegada a la trama, con la red en reposo armada en calma) y, sin el sufijo -cristal, la referencia sin él (la misma tanda).",
+ "cristal": {
+  "1440": {
+   "calma-dia-cristal": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0&cristal=si",
+    "cuadro": {
+     "media": 1.49,
+     "p50": 1.5,
+     "p95": 1.8,
+     "maximo": 6,
+     "mayoresDe20": 0,
+     "cuadros": 4025
+    },
+    "largos": [
+     [
+      241,
+      34,
+      4,
+      11,
+      0
+     ]
+    ],
+    "programasAntes": 11,
+    "programas": 11,
+    "heap": {
+     "antes": 7668834,
+     "despues": 8361714,
+     "recolecciones": 24,
+     "kbPorCuadro": 6.2
+    },
+    "errores": 0
+   },
+   "calma-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0",
+    "cuadro": {
+     "media": 1.64,
+     "p50": 1.5,
+     "p95": 2.3,
+     "maximo": 6,
+     "mayoresDe20": 0,
+     "cuadros": 3654
+    },
+    "largos": [
+     [
+      241,
+      34,
+      -2,
+      10,
+      0
+     ]
+    ],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 8122555,
+     "despues": 8175503,
+     "recolecciones": 18,
+     "kbPorCuadro": 6.8
+    },
+    "errores": 0
+   },
+   "calma-noche-cristal": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&cristal=si",
+    "cuadro": {
+     "media": 1.96,
+     "p50": 1.9,
+     "p95": 2.5,
+     "maximo": 5.8,
+     "mayoresDe20": 0,
+     "cuadros": 3067
+    },
+    "largos": [],
+    "programasAntes": 11,
+    "programas": 11,
+    "heap": {
+     "antes": 6698902,
+     "despues": 9335570,
+     "recolecciones": 17,
+     "kbPorCuadro": 6.9
+    },
+    "errores": 0
+   },
+   "lejos-dia-cristal": {
+    "hash": "ancho=1440&alto=900&vista=lejos&duracion=6&reloj=no&noche=0&cristal=si",
+    "cuadro": {
+     "media": 1.26,
+     "p50": 1.2,
+     "p95": 1.7,
+     "maximo": 4.9,
+     "mayoresDe20": 0,
+     "cuadros": 4751
+    },
+    "largos": [],
+    "programasAntes": 11,
+    "programas": 11,
+    "heap": {
+     "antes": 8206810,
+     "despues": 9764326,
+     "recolecciones": 23,
+     "kbPorCuadro": 5.7
+    },
+    "errores": 0
+   }
+  },
+  "390": {
+   "calma-noche-cristal": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&cristal=si",
+    "cuadro": {
+     "media": 1.01,
+     "p50": 1,
+     "p95": 1.4,
+     "maximo": 5.9,
+     "mayoresDe20": 0,
+     "cuadros": 5919
+    },
+    "largos": [],
+    "programasAntes": 11,
+    "programas": 11,
+    "heap": {
+     "antes": 6617856,
+     "despues": 7714676,
+     "recolecciones": 25,
+     "kbPorCuadro": 5.6
+    },
+    "errores": 0
+   }
+  }
  }
 }

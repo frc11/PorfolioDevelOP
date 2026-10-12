@@ -75,3 +75,32 @@ lo tapa solo; y lee la PROFUNDIDAD del pase compartido para no tomar nunca un p�
 - 07 · Por qué develOP: la ESPIRAL en el fondo, atada al scroll (el porqué que se enrolla).
 - El CALEIDOSCOPIO, el interactivo (mantener sobre el fondo).
 - Fuera: 04 · Trabajos (el túnel), 06 · Tu panel (papel opaco), 08 · Cierre y el pie (el encastre).
+
+## El cristal de fondo (PULIDO 19 · Q3)
+
+El efecto `cristal` gustó y pasó a ser una CAPA FIJA del fondo (`escena/cristal/`): vidrio facetado siempre presente, solidario a la
+cúpula del moiré, que refracta todo lo de atrás (el cielo, la fábrica de logos, el piso lejano). Lo que se investigó y de dónde sale
+cada decisión:
+
+- LA TRANSMISIÓN EN ESPACIO DE PANTALLA (luma.gl, «Glass effects»: https://luma.gl/docs/api-guide/shaders/glass-effects): el rayo
+  refractado por Snell se proyecta en la base de la cámara y se lee una COPIA del color de la escena (nunca el destino que se está
+  escribiendo); el espesor como profundidad del camino óptico; el Fresnel de Schlick derivado del índice; la dispersión como en
+  `KHR_materials_dispersion` (20 / número de Abbe: el rojo con el índice más bajo, el azul con el más alto; el vidrio crown ~0,33);
+  la absorción de Beer-Lambert por el color y el espesor. Nuestro cristal toma la transmisión barata: el rayo transmitido cae a
+  `fondo` u detrás del vidrio y ahí se lee la copia compartida del cuadro (una por cuadro, la del pase: `escena/pase/`), con tope de
+  corrimiento; la dispersión queda en el prisma (`?espejo-prisma=si`) y la absorción no hace falta (el vidrio es incoloro).
+- EL VIDRIO FACETADO: no hay una fuente que combine facetas de Voronoi con normales por faceta y bisel; se arma a mano: las celdas en
+  las coordenadas del cilindro (alrededor y en alto; justas alrededor: sin costura), la distancia EXACTA al borde por las bisectrices
+  (Quílez, como el `cristal` de P2), la normal del cilindro inclinada por faceta y GIRADA hacia el borde en el bisel (ahí el brillo
+  especular corre con la luz y la cámara), y los bordes suavizados con `fwidth` (sin parpadeo ni temblor; el patrón vive en la cúpula
+  y las semillas derivan muy lento).
+- EL REFLEJO Y EL BRILLO: Schlick (`F0 + (1 − F0)(1 − cos θ)^5`) para el reflejo tenue del entorno (el cielo por la altura del
+  reflejo: no hay mapa de entorno) y Blinn-Phong con la luz principal de la sala (la que sigue el azimut de la cámara) para los
+  cantos; de día la talla oscurece apenas el bisel (sobre el papel un brillo blanco no se ve).
+- LO QUE SE DESCARTÓ: `MeshTransmissionMaterial` (drei) y los materiales de transmisión de three (https://drei.docs.pmnd.rs/shaders/mesh-transmission-material):
+  piden OTRA pasada de la escena por material (con rugosidad, a baja resolución) y una geometría de vidrio; acá el vidrio es una
+  pasada de pantalla sobre la copia que ya existe. La refracción por dos caras (Codrops, «Real-time multiside refraction»:
+  https://tympanus.net/codrops/?p=44326, las normales del dorso en otra pasada) sobra para una capa delgada pegada a la cúpula.
+- DÓNDE: todo el recorrido salvo el túnel de Trabajos y Tu panel (papel opaco), con un fundido; se va con la cámara del final.
+  Sólo el FONDO (lo opaco más lejos que el vidrio, por la profundidad del pase, también al leer) y sobre un texto, apenas: el DOM
+  nunca se toca (el antialias de los textos es del navegador).
