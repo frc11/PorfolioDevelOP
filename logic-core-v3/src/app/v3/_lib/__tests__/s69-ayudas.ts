@@ -4,6 +4,7 @@
  */
 import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas } from '../escena/energia/brasas'
 import { pasoDeLasBrasas } from '../escena/energia/paso'
+import { crearDisparador, crearEntradaDelDisparador, pasoDelDisparador, type Disparo, type Efecto, type EntradaDelDisparador } from '../escena/espejo/espejo'
 import { FLOOR_Y } from '../escena/probeScene'
 
 /** 8 s con el campo, el piso de verdad y un pulso que empuja desde arriba: quién bajó del mínimo, quién nació abajo, cuántas en la banda. */
@@ -96,4 +97,35 @@ const RESERVA = /\bnew\s+[A-Z]|=>|(?:[=(,:?]|\breturn)\s*\[|(?:[=(,:?]|\breturn)
 export function sinReservasEn(texto: string, nombre: string): boolean {
   const c = cuerpo(texto.replace(/\r\n/g, '\n'), nombre)
   return c !== '' && !RESERVA.test(c)
+}
+
+/** Un disparador corriendo `segundos` a 60 cuadros por segundo con lo que `mover` le pone a la entrada en cada cuadro: sus amplitudes y sus zonas. */
+export function correrDisparador(efecto: Efecto, modo: Disparo, segundos: number, mover: (en: EntradaDelDisparador, t: number) => void): { amplitudes: number[]; zonas: [number, number][] } {
+  const d = crearDisparador(efecto, modo)
+  const en = crearEntradaDelDisparador()
+  en.logoX = 0
+  en.logoY = -0.1
+  en.logoRadio = 0.25
+  en.textos.set([-0.95, -0.95, -0.2, -0.55])
+  en.cuantosTextos = 1
+  const amplitudes: number[] = []
+  const zonas: [number, number][] = []
+  for (let k = 0; k < segundos * 60; k += 1) {
+    en.tiempo = k / 60
+    mover(en, en.tiempo)
+    pasoDelDisparador(d, en)
+    amplitudes.push(d.amplitud)
+    if (d.amplitud > 0.5) zonas.push([d.zonaX, d.zonaY])
+  }
+  return { amplitudes, zonas }
+}
+
+/** El doblez del pliegue, la misma cuenta que el sombreador (un punto del mundo del cilindro, con su altura y su amplitud). */
+export function doblar(x: number, y: number, z: number, amplitud: number, desde: number, radio: number, tramoAlCentro: number): [number, number, number] {
+  const curva = (amplitud * tramoAlCentro) / Math.max(1e-3, radio)
+  const th = Math.max(0, y - desde) * curva
+  if (th <= 0) return [x, y, z]
+  const r = Math.hypot(x, z)
+  const nuevo = r - (1 - Math.cos(th)) / curva
+  return [(x / r) * nuevo, desde + Math.sin(th) / curva, (z / r) * nuevo]
 }

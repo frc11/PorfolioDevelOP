@@ -140,7 +140,29 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
   una propuesta de dónde va cada uno en el recorrido.
 
 ### P2.2 · Los efectos (`?espejo=`), los disparos y el color
-- PENDIENTE.
+- HECHO · VISTO en el mini-banco (con una trama de reemplazo; la escena real, con el banco).
+- `escena/espejo/`: lo puro (`espejo.ts`: los ciclos, el disparador de los tres modos, la zona lejos del logo y de los textos), los
+  efectos de la pantalla (`pantalla.ts`), los ecos (`ecos.ts`), el pliegue (`pliegue.ts`), el armado y el componente. Banderas:
+  `?espejo=cristal|pliegue|caleidoscopio|ecos|espiral`, `?espejo-disparo=ambiente|scroll|mantener` (sin ella, el ambiente) y
+  `?espejo-prisma=si`. Con movimiento reducido, nada. El producto, apagado.
+- CRISTALIZAR: la copia del cuadro leída por celdas de Voronoi en la pantalla (78 px), cada esquirla con su desfase (hasta 10 px), su
+  giro (hasta 0,07 rad) y su retardo (se rompe del centro hacia afuera); el filo, con la distancia exacta al borde (1,1 px, del mismo
+  ancho en todas: claro de noche, tinta de día) y una talla adentro. Visto: un vidrio que se raja y se cura; de día, facetas grises.
+- EL CALEIDOSCOPIO: seis cuñas espejadas que giran (0,12 rad/s), con sus costuras finas. Visto de día sobre la trama: un rosetón.
+- LA ESPIRAL (la propia, Escher): el logaritmo de la zona, repetido cada 3,2 veces y girado 1,6 rad por vuelta, que entra despacio.
+- EL PLIEGUE: un doblez circular por vértices de los dos cilindros de la trama desde 3 u, radio 7, en un tramo de ±1,1 rad frente a la
+  cámara, con la caída suave a lo ancho (con una caída corta se desgarraba a los costados) y la normal girada. Visto: la pared de
+  detrás del logo se enrolla como la cresta de una ola y deja ver el fondo; vuelve. El primer intento (desde 6 u, radio 10) casi no se
+  notaba: lo que se enrollaba quedaba arriba del cuadro.
+- LOS ECOS: cinco copias del logo (su geometría, su propio material, sin tocar el logo) con la pose de 5, 10, 15… cuadros atrás, en
+  abanico y espejadas, detrás; las despierta el movimiento del logo (desde 0,25 u/s o 0,15 rad/s). Visto con el logo bajando.
+- Lo que no es fondo NO se toca: el píxel y lo que lee tienen que estar más lejos que el logo (la profundidad del pase: nunca se
+  refracta un píxel del logo, del piso cercano ni de un título); sobre un texto se apaga (las mismas cajas que el plasma: la máscara
+  del texto salió a `TEXTOS_GLSL`, compartida).
+- El color: la copia del cuadro del pase compartido, pedida por cuadro sólo con un efecto de pantalla vivo.
+- s69 · P2: las banderas (con el control del pliegue puesto siempre y del espejo con movimiento reducido), el ambiente raro y lento
+  que se cura y elige lejos del logo, mantener después del gesto del plasma y nada sobre un texto, sólo el fondo, cada ciclo vuelve a
+  cero, el pliegue es la identidad en cero, los ecos no tocan el logo, los módulos y lo de cada cuadro sin reservas.
 
 ### P2 · Secuencias y recomendación
 - PENDIENTE.

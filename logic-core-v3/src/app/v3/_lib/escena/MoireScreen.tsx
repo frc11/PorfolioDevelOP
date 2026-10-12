@@ -6,6 +6,7 @@ import * as THREE from 'three'
 import { entornoDeLaEscena } from './entorno'
 import { conDesajusteVivo } from './moire/parche'
 import { conElAmanecer } from './amanecer/luz'
+import { conPliegue } from './espejo/pliegue'
 import { bandEnvelope, createDottedGridCellData, createGridCellData } from './moireTextures'
 import {
   MOIRE_BASE_ALPHA,
@@ -227,6 +228,11 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
     // [ESCENA 7] T11: con la bandera, el amanecer (no hace nada sin ella).
     conElAmanecer(capas.coarse.material)
     conElAmanecer(capas.fine.material)
+    // [PULIDO 18] P2 · el pliegue de la cúpula (la dimensión espejo), sólo con `?espejo=pliegue`.
+    if (entornoDeLaEscena().pruebas.espejo === 'pliegue') {
+      conPliegue(capas.coarse.material)
+      conPliegue(capas.fine.material)
+    }
     return capas
   }, [store, hastaElPiso, anclada])
 

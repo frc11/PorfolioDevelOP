@@ -13,6 +13,8 @@
  *          los arcos con puntos (sin esquirlas).
  *   P1.c · de día: el cuerpo oscuro, el velo, el especular mínimo; el calor de las calientes refracta la copia del cuadro.
  *   P1.e · la física nueva: la convección, el pinch, la estela del puntero, el viento del scroll; estable y contenida.
+ *   P2 · la dimensión espejo (`?espejo=`): las banderas, los disparos (raro y lento; mantener después del gesto del plasma), sólo el
+ *        fondo (nunca el logo, los títulos ni los textos), se cura, el pliegue es la identidad en cero, los ecos no tocan el logo.
  */
 import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
@@ -26,9 +28,12 @@ import { DIRECCIONES, DIRECCION_RECOMENDADA, direccionDe } from '../escena/energ
 import { AJUSTES_DEL_ENJAMBRE, SIMULACION_DEL_ENJAMBRE_GLSL } from '../escena/energia/enjambre/simulacion'
 import { DEL_MOVIMIENTO, delMovimiento } from '../escena/energia/movimiento'
 import { pasoDeLasBrasas } from '../escena/energia/paso'
+import { ECOS } from '../escena/espejo/ecos'
+import { EFECTOS_DEL_ESPEJO, ESPEJO, amplitudDelCiclo } from '../escena/espejo/espejo'
+import { PLIEGUE } from '../escena/espejo/pliegue'
 import { PASE, entraALaPasada } from '../escena/pase/pase'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
-import { lineasDeCodigo, pisoDeLasBrasas, sinReservasEn, todoJunto } from './s69-ayudas'
+import { correrDisparador, doblar, lineasDeCodigo, pisoDeLasBrasas, sinReservasEn, todoJunto } from './s69-ayudas'
 
 const V3 = 'src/app/v3'
 const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8').replace(/\r\n/g, '\n')
@@ -264,5 +269,90 @@ const POR_CUADRO_P1: readonly (readonly [string, string])[] = [['energia/movimie
 const reservasBien = (f: Record<string, string>): boolean => POR_CUADRO_P1.every(([m, fn]) => sinReservasEn(f[m] ?? '', fn))
 afirmar(reservasBien(fuentes), `  ${String(POR_CUADRO_P1.length)} funciones de cada cuadro sin crear objetos, arreglos ni funciones`, POR_CUADRO_P1.filter(([m, fn]) => !sinReservasEn(fuentes[m] ?? '', fn)).map(([m, fn]) => `${m}:${fn}`).join(' · '))
 controlPositivo('  el detector VE una reserva en el movimiento', { ...fuentes, 'energia/movimiento.ts': (fuentes['energia/movimiento.ts'] ?? '').replace('  let fx = 0\n', '  const tmp = new Float32Array(3)\n  let fx = tmp[0]\n') }, reservasBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('P2 · La dimensión espejo: `?espejo=`, sus disparos y el prisma; en el fondo, nunca sobre el logo ni los textos; se cura')
+
+const banderasDelEspejo = (f: Traductor, stage: string, moire: string, componente: string): boolean =>
+  EFECTOS_DEL_ESPEJO.every((e) => f(`producto,espejo=${e}`).pruebas.espejo === e) && f('producto').pruebas.espejo === 'no' && f('producto,espejo=otro').pruebas.espejo === 'no' &&
+  (['ambiente', 'scroll', 'mantener'] as const).every((d) => f(`producto,espejo-disparo=${d}`).pruebas['espejo-disparo'] === d) && f('producto,espejo-prisma=si').pruebas['espejo-prisma'] === 'si' &&
+  ENTORNO.pruebas.espejo === 'no' && ENTORNO.pruebas['espejo-prisma'] === 'no' && PRUEBAS_SUELTAS.includes('espejo') &&
+  stage.includes('<EspejoDeLaEscena logoGroupRef={logoGroupRef} quieto={reducedMotion} />') && componente.includes("if (espejo === 'no' || quieto) return null") &&
+  /if \(entornoDeLaEscena\(\)\.pruebas\.espejo === 'pliegue'\) \{\n\s*conPliegue\(capas\.coarse\.material\)\n\s*conPliegue\(capas\.fine\.material\)/.test(moire)
+const MOIRE = leer('_lib/escena/MoireScreen.tsx')
+const COMPONENTE = leer('_lib/escena/espejo/EspejoDeLaEscena.tsx')
+afirmar(banderasDelEspejo(entornoPedido, STAGE, MOIRE, COMPONENTE), `  \`?espejo=${EFECTOS_DEL_ESPEJO.join('|')}\`, \`?espejo-disparo=ambiente|scroll|mantener\`, \`?espejo-prisma=si\`; en el producto, apagado; con movimiento reducido, nada; el pliegue sólo parchea la trama con su bandera`)
+controlPositivo('  el detector VE el pliegue puesto siempre en la trama', MOIRE.replace("if (entornoDeLaEscena().pruebas.espejo === 'pliegue') {", 'if (true) {'), (m: string) => banderasDelEspejo(entornoPedido, STAGE, m, COMPONENTE))
+controlPositivo('  y el espejo con movimiento reducido', COMPONENTE.replace("if (espejo === 'no' || quieto) return null", "if (espejo === 'no') return null"), (c: string) => banderasDelEspejo(entornoPedido, STAGE, MOIRE, c))
+
+// El ambiente: raro y lento; cada ciclo llega entero y se cura (vuelve a cero); la zona, lejos del logo y fuera de los textos.
+interface Corrida2 { readonly amplitudes: readonly number[]; readonly zonas: readonly (readonly [number, number])[] }
+const ciclos = (r: Corrida2): number => r.amplitudes.reduce((n, a, k) => n + (a > 0.99 && (r.amplitudes[k - 1] ?? 0) <= 0.99 ? 1 : 0), 0)
+const ambiente = correrDisparador('cristal', 'ambiente', 120, () => undefined)
+const ambienteBien = (r: Corrida2): boolean => {
+  const n = ciclos(r)
+  const curado = r.amplitudes[r.amplitudes.length - 1] < 0.001 || r.amplitudes.slice(-60).some((a) => a < 0.001)
+  const lejos = r.zonas.every(([x, y]) => Math.hypot(x - 0, (y + 0.1) * 0.6) > 0.25 * (ESPEJO.zona.lejosDelLogo + 1) - 1e-6 && !(x > -0.95 && x < -0.2 && y > -0.95 && y < -0.55))
+  return n >= 3 && n <= 5 && curado && lejos && r.amplitudes.filter((a) => a > 0.002).length / r.amplitudes.length < 0.35
+}
+afirmar(ambienteBien(ambiente), `  el ambiente: ${String(ciclos(ambiente))} ciclos en 2 minutos (raro y lento: cada uno llega entero y se cura), activo el ${(100 * ambiente.amplitudes.filter((a) => a > 0.002).length / ambiente.amplitudes.length).toFixed(0)} % del tiempo; las zonas, lejos del logo y fuera del texto`)
+controlPositivo('  el detector VE un efecto que no se cura (queda roto)', { ...ambiente, amplitudes: ambiente.amplitudes.map((a, k) => (k > 600 ? Math.max(a, 1) : a)) }, ambienteBien)
+controlPositivo('  y una zona encima del logo', { ...ambiente, zonas: [...ambiente.zonas, [0, -0.1] as const] }, ambienteBien)
+// Mantener: después de la espera (el clic y la carga del plasma van primero) crece donde está el puntero; al soltar se cura; sobre un texto, nada.
+const mantener = correrDisparador('caleidoscopio', 'mantener', 6, (en, t) => {
+  en.apretado = t >= 1 && t < 4
+  en.apretadoDesde = 1
+  en.x = 0.5
+  en.y = 0.4
+})
+const sobreTexto = correrDisparador('caleidoscopio', 'mantener', 6, (en, t) => {
+  en.apretado = t >= 1 && t < 4
+  en.apretadoDesde = 1
+  en.sobreTexto = true
+})
+const mantenerBien = (r: Corrida2, texto: Corrida2): boolean => {
+  const a = (t: number): number => r.amplitudes[Math.round(t * 60)] ?? 0
+  return a(1 + ESPEJO.mantener.espera - 0.05) === 0 && a(1 + ESPEJO.mantener.espera + ESPEJO.mantener.crece + 0.1) > 0.99 && a(4 + ESPEJO.mantener.cura + 0.1) === 0 &&
+    r.zonas.every(([x, y]) => x === 0.5 && y === 0.4) && texto.amplitudes.every((x) => x === 0)
+}
+afirmar(mantenerBien(mantener, sobreTexto), `  mantener: nada en los primeros ${String(ESPEJO.mantener.espera)} s (el clic y la carga del plasma), crece en ${String(ESPEJO.mantener.crece)} s donde está el puntero, al soltar se cura en ${String(ESPEJO.mantener.cura)} s; sobre un texto, nada`)
+controlPositivo('  el detector VE un espejo que empieza con el clic (pisaría el pulso del plasma)', correrDisparador('caleidoscopio', 'ambiente', 6, () => undefined), (r: Corrida2) => mantenerBien(r, sobreTexto))
+
+// Los efectos de pantalla: el pixel y lo que leen tienen que ser fondo (más lejos que el logo); sin amplitud, nada; monocromo sin el prisma.
+const PANTALLA_SRC = leer('_lib/escena/espejo/pantalla.ts')
+const pantallaBien = (src: string): boolean =>
+  src.includes('return colorDeAtras( mix( aqui, desde, esFondo( desde ) ) );') && src.includes('float mascara = zona * esFondo( aqui ) * ( 1.0 - uTextoFuerza * adentroDelTexto( aqui * 2.0 - 1.0 ) );') &&
+  src.includes('float radio = uZona.w > 0.002 ? uZona.z * uPixel : 0.0;') && src.includes('if ( uPrisma < 0.5 ) return leerFondo( aqui, desde );') && src.includes('if ( mascara * amp < 0.002 || uHayColor < 0.5 ) discard;')
+afirmar(pantallaBien(PANTALLA_SRC), '  el cristal, el caleidoscopio y la espiral sólo pintan fondo y sólo leen fondo (la profundidad del pase: nunca un píxel del logo ni de un título), nunca sobre un texto, nada sin amplitud; el prisma, sólo con la bandera')
+controlPositivo('  el detector VE una refracción que lee cualquier píxel (el logo corrido)', PANTALLA_SRC.replace('return colorDeAtras( mix( aqui, desde, esFondo( desde ) ) );', 'return colorDeAtras( desde );'), pantallaBien)
+const cicloBien = (amp: (t: number, c: readonly number[]) => number): boolean => EFECTOS_DEL_ESPEJO.every((e) => {
+  const c = ESPEJO.ciclo[e]
+  return amp(0, c) === 0 && Math.abs(amp(c[0] + c[1] / 2, c) - 1) < 1e-9 && amp(c[0] + c[1] + c[2], c) === 0 && amp(c[0] + c[1] + c[2] * 0.5, c) > 0.2
+})
+afirmar(cicloBien(amplitudDelCiclo), '  cada efecto crece, se sostiene y se cura: es una ilusión, nada queda roto')
+controlPositivo('  el detector VE un ciclo que no vuelve a cero', ((t: number, c: readonly number[]) => (t > c[0] ? 1 : amplitudDelCiclo(t, c))) as typeof amplitudDelCiclo, cicloBien)
+// El pliegue: con amplitud cero la cuenta es la identidad; entero, lo de arriba se enrolla hacia adentro y lo de abajo de la línea no se mueve.
+type Doblez = typeof doblar
+const pliegueBien = (d: Doblez): boolean => {
+  const quieto = d(0, 18, -40, 0, PLIEGUE.desde, PLIEGUE.radio, 1)
+  const arriba = d(0, 18, -40, 1, PLIEGUE.desde, PLIEGUE.radio, 1)
+  const abajo = d(0, PLIEGUE.desde - 1, -40, 1, PLIEGUE.desde, PLIEGUE.radio, 1)
+  return quieto[1] === 18 && quieto[2] === -40 && arriba[2] > -36 && arriba[1] < 18 && abajo[1] === PLIEGUE.desde - 1 && abajo[2] === -40 && leer('_lib/escena/espejo/pliegue.ts').includes('transformed.xz = dir * ( r - ( 1.0 - cos( th ) ) / curva );')
+}
+afirmar(pliegueBien(doblar), `  el pliegue (la misma cuenta que el sombreador): en cero, la trama como está; entero, desde ${String(PLIEGUE.desde)} u se enrolla hacia adentro (radio ${String(PLIEGUE.radio)}); lo de abajo, quieto`)
+controlPositivo('  el detector VE un pliegue que no vuelve (no depende de la amplitud)', ((x: number, y: number, z: number, _a: number, desde: number, radio: number, t: number) => doblar(x, y, z, 1, desde, radio, t)) as Doblez, pliegueBien)
+// Los ecos: mallas aparte con la geometría del logo; el logo y su material no se tocan; van detrás (lejos de la cámara).
+const ECOS_SRC = leer('_lib/escena/espejo/ecos.ts')
+const ecosBien = (src: string): boolean =>
+  src.includes('const m = new THREE.Mesh(d.malla.geometry, c.material)') && !/\.material\s*=|d\.malla\.(geometry|matrix|position|rotation|scale)\s*=/.test(src) &&
+  src.includes('ATRAS.copy(CENTRO).sub(camara.position).normalize()') && ECOS.copias <= 6
+afirmar(ecosBien(ECOS_SRC), `  los ecos: ${String(ECOS.copias)} copias con la geometría del logo y su propio material, detrás (lejos de la cámara), en abanico y espejadas; el logo no se toca`)
+controlPositivo('  el detector VE un eco que le cambia el material al logo', `${ECOS_SRC}\nd.malla.material = c.material`, ecosBien)
+
+const ESPEJO_SRC = Object.fromEntries(['espejo.ts', 'armado.ts', 'ecos.ts', 'pantalla.ts', 'pliegue.ts', 'EspejoDeLaEscena.tsx'].map((m) => [m, leer(`_lib/escena/espejo/${m}`)])) as Record<string, string>
+const DEL_CUADRO_P2: readonly (readonly [string, string])[] = [['espejo.ts', 'pasoDelDisparador'], ['espejo.ts', 'elegirLaZona'], ['espejo.ts', 'amplitudDelCiclo'], ['armado.ts', 'cuadroDelEspejo'], ['armado.ts', 'elLogoEnLaPantalla'], ['ecos.ts', 'cuadroDeLosEcos'], ['EspejoDeLaEscena.tsx', 'tramoDelScroll']]
+const espejoLivianoBien = (f: Record<string, string>): boolean => Object.values(f).every((t) => lineasDeCodigo(t) <= 300) && DEL_CUADRO_P2.every(([m, fn]) => sinReservasEn(f[m] ?? '', fn))
+afirmar(espejoLivianoBien(ESPEJO_SRC), `  los módulos del espejo, de menos de 300 líneas; ${String(DEL_CUADRO_P2.length)} funciones de cada cuadro sin reservas`, DEL_CUADRO_P2.filter(([m, fn]) => !sinReservasEn(ESPEJO_SRC[m] ?? '', fn)).map(([m, fn]) => `${m}:${fn}`).join(' · '))
+controlPositivo('  el detector VE una reserva en el cuadro de los ecos', { ...ESPEJO_SRC, 'ecos.ts': (ESPEJO_SRC['ecos.ts'] ?? '').replace('  logo.updateMatrixWorld()\n', '  const tmp = new THREE.Matrix4()\n  logo.updateMatrixWorld()\n') }, espejoLivianoBien)
 
 cerrar('s69-pulido-18')

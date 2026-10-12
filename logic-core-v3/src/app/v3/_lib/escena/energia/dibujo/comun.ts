@@ -29,25 +29,15 @@ export const DIBUJO = {
 
 export const f = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
 
-export const COMUN = /* glsl */ `
-uniform vec3 uCentro;
-uniform vec2 uResolucion;
-uniform float uPixel;
-uniform float uEscalaPx;
-uniform float uTiempo;
-uniform float uNoche;
-uniform float uApagado;
-uniform float uFoco;
-uniform float uCercaDelFinal;
+/**
+ * Cuánto adentro de una caja de texto está un punto de la pantalla (NDC), con el borde suave; lo comparten la energía y el espejo
+ * ([PULIDO 18] P2). Necesita `uResolucion` y `uPixel` declaradas antes.
+ */
+export const TEXTOS_GLSL = /* glsl */ `
 uniform vec4 uTextos[ ${String(TEXTO_EN_PANTALLA.cajas)} ];
 uniform float uCuantosTextos;
 uniform float uTextoBorde;
 uniform float uTextoFuerza;
-uniform vec4 uLuces[ ${String(DIBUJO.luces)} ];
-uniform float uCuantasLuces;
-uniform vec3 uTintaDia;
-uniform vec3 uClaroDia;
-uniform vec3 uLuzNoche;
 float adentroDelTexto( vec2 s ) {
 	float m = 0.0;
 	vec2 borde = uTextoBorde / uResolucion * uPixel;
@@ -60,6 +50,24 @@ float adentroDelTexto( vec2 s ) {
 	}
 	return m;
 }
+`
+
+export const COMUN = /* glsl */ `
+uniform vec3 uCentro;
+uniform vec2 uResolucion;
+uniform float uPixel;
+uniform float uEscalaPx;
+uniform float uTiempo;
+uniform float uNoche;
+uniform float uApagado;
+uniform float uFoco;
+uniform float uCercaDelFinal;
+uniform vec4 uLuces[ ${String(DIBUJO.luces)} ];
+uniform float uCuantasLuces;
+uniform vec3 uTintaDia;
+uniform vec3 uClaroDia;
+uniform vec3 uLuzNoche;
+${TEXTOS_GLSL}
 // La luz de los arcos en un punto (del mundo): cada una cae con la distancia.
 float luzDeLosArcos( vec3 p ) {
 	float l = 0.0;

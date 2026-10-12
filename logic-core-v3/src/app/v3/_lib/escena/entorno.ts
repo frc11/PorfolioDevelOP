@@ -101,6 +101,15 @@ export interface Pruebas {
    * recomendada. [PULIDO 18] P1.0 · C (las corrientes sobre el logo) se borró con su código: `plasma=a|b` (sin la bandera, A).
    */
   readonly plasma: 'a' | 'b' | 'no'
+  /**
+   * [PULIDO 18] P2 · LA DIMENSIÓN ESPEJO (`escena/espejo/`, `docs/rediseno/DIMENSION-ESPEJO.md`): efectos de cristal en el FONDO. `espejo=`
+   * elige uno (cristalizar, el pliegue de la cúpula, el caleidoscopio, los ecos del logo, la espiral de Escher); `espejo-disparo=` cómo se
+   * dispara (raro y lento, atado al scroll, o manteniendo apretado sobre el fondo; sin la bandera, el ambiente); `espejo-prisma=si`, el
+   * borde prismático (muy sutil; sin la bandera, monocromo).
+   */
+  readonly espejo: 'cristal' | 'pliegue' | 'caleidoscopio' | 'ecos' | 'espiral' | 'no'
+  readonly 'espejo-disparo': 'ambiente' | 'scroll' | 'mantener' | 'no'
+  readonly 'espejo-prisma': 'si' | 'no'
 }
 
 /**
@@ -131,12 +140,13 @@ export interface Pruebas {
  * alejado y siguiendo el 70 % del giro). O3 · `plasma-color=`, `plasma-campo=` y `plasma-sonido=` se borraron con su código (el
  * plasma de PULIDO 16 no gustó: «sin sonido ni color, descartado»); entra `plasma=a|b|c` (las tres direcciones). [PULIDO 18] P1.0 ·
  * `energia=` cambia de sentido (el plasma A es el producto; entra `energia=polvo`, el de antes; `plasma-y-polvo` sigue) y `plasma=c`
- * se borró con C.
+ * se borró con C. P2 · entran `espejo=cristal|pliegue|caleidoscopio|ecos|espiral`, `espejo-disparo=ambiente|scroll|mantener` y
+ * `espejo-prisma=si` (la dimensión espejo).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', plasma: 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', plasma: 'no', espejo: 'no', 'espejo-disparo': 'no', 'espejo-prisma': 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'plasma'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'plasma', 'espejo', 'espejo-disparo', 'espejo-prisma'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -151,6 +161,9 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     angel: unoDe<'asentado'>(['asentado'], valor('angel')),
     energia: unoDe<'polvo' | 'plasma-y-polvo'>(['polvo', 'plasma-y-polvo'], valor('energia')),
     plasma: unoDe<'a' | 'b'>(['a', 'b'], valor('plasma')),
+    espejo: unoDe<'cristal' | 'pliegue' | 'caleidoscopio' | 'ecos' | 'espiral'>(['cristal', 'pliegue', 'caleidoscopio', 'ecos', 'espiral'], valor('espejo')),
+    'espejo-disparo': unoDe<'ambiente' | 'scroll' | 'mantener'>(['ambiente', 'scroll', 'mantener'], valor('espejo-disparo')),
+    'espejo-prisma': unoDe<'si'>(['si'], valor('espejo-prisma')),
   }
 }
 
