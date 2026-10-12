@@ -26,8 +26,10 @@ import { FRAGMENTOS_DE_LA_RED, VERTICES_DE_LA_RED } from '../escena/energia/dibu
 import { brilloPorDensidad } from '../escena/energia/vecinas'
 import { CAIDA_AL_HUECO, caidaIntegrada } from '../escena/final/caidaAlHueco'
 import { CAIDA_DEL_PIE, crearLugar, distanciaParaElPie, huellaDelPie, lugaresEnElPiso, poseDeLaPiezaQueCae, type BaseDelPie, type LugarEnElPiso, type PiezaDePie } from '../escena/final/caidaDelPie'
+import { sombraDeLaPiezaQueCae } from '../escena/final/sombraDeLaPieza'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, alturaDeLaCaida, blancoDelFinal, camaraDelFinal, elevacionDe } from '../escena/final/recorridoDelFinal'
 import { colocarLaPieza, profundidadDeLaPieza } from '../escena/pie3d/colocacion'
+import { SOMBRA_DEL_PIE, alfaDeLaSombra, blandaDeLaSombra } from '../escena/pie3d/sombras'
 import { FLOOR_Y, ORBIT_TARGET_Y } from '../escena/probeScene'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { lineasDeCodigo, sinReservasEn } from './s69-ayudas'
@@ -506,6 +508,60 @@ const vidrioBien = (f: string, tsx: string, esc: string, ent: string): boolean =
 afirmar(vidrioBien(FRAGMENTOS_DEL_CRISTAL, CRISTAL_TSX, ESCENARIO, ENTORNO_TS), '  el vidrio: el cilindro, Voronoi con la distancia exacta al borde, el bisel con fwidth, Snell, la copia sólo en el fondo (la profundidad del pase, también al leer), Schlick, el brillo con la luz y la cámara, el tope, los textos; montado siempre con movimiento (cristal=no lo apaga), pide la profundidad y el color; entre la copia y la energía')
 controlPositivo('  el detector VE un vidrio que lee sin mirar la profundidad de donde lee', FRAGMENTOS_DEL_CRISTAL.replace('distanciaALoOpaco( desde )', 'distanciaALoOpaco( uv )'), (f: string) => vidrioBien(f, CRISTAL_TSX, ESCENARIO, ENTORNO_TS))
 controlPositivo('  y un cristal montado con movimiento reducido', FRAGMENTOS_DEL_CRISTAL, (f: string) => vidrioBien(f, CRISTAL_TSX.replace("pruebas['sin-cristal'] === 'si' || quieto) return null", "pruebas['sin-cristal'] === 'si') return null"), ESCENARIO, ENTORNO_TS))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('Q4 · Las piezas que caen tienen sombra de contacto: nada de pie en la pared, la placa con su ribete acostadas, nunca sobre el logo')
+
+// Con el pie de 1440 de Q2: antes de arrancar, ninguna; a mitad de la bajada, más tenue que al ras; a mitad del vuelco, la huella entre
+// el canto y la placa; acostada, la placa entera más lo que sobra, con el alfa y la blandura del ras; y ninguna cruza el logo.
+interface DeLasSombras { readonly dePie: number; readonly bajando: number; readonly volcando: number; readonly acostadas: number; readonly sobreElLogo: number }
+type Caja = readonly [number, number, number, number]
+function medirLasSombras(piezas: readonly PiezaDePie[], lugares: readonly LugarEnElPiso[], base: BaseDelPie, ultima: number): DeLasSombras {
+  let dePie = 0
+  let bajando = 0
+  let volcando = 0
+  let acostadas = 0
+  let sobreElLogo = 0
+  const logo: Caja = [-LOGO.ancho / 2, LOGO.ancho / 2, -LOGO.fondo / 2, LOGO.fondo / 2]
+  const cajaDe = (s: ReturnType<typeof sombraDeLaPiezaQueCae>): Caja => [s.x - s.medioAncho, s.x + s.medioAncho, s.z - s.medioFondo, s.z + s.medioFondo]
+  const igual = (a: Caja, b: Caja): boolean => a.every((v, k) => Math.abs(v - b[k]) < 1e-6)
+  for (let i = 0; i < piezas.length; i += 1) {
+    const p = piezas[i]
+    const l = lugares[i]
+    if (sombraDeLaPiezaQueCae(p, poseDeLaPiezaQueCae(p, l, l.arranque - 0.01), base).alfa > 0) dePie += 1
+    const fin = sombraDeLaPiezaQueCae(p, poseDeLaPiezaQueCae(p, l, ultima + 0.5), base)
+    const finAlfa = fin.alfa
+    const finCaja = cajaDe(fin)
+    const acostada = cajaAcostada(p, l)
+    const justa: Caja = [acostada[0] - SOMBRA_DEL_PIE.sobra, acostada[1] + SOMBRA_DEL_PIE.sobra, acostada[2] - SOMBRA_DEL_PIE.sobra, acostada[3] + SOMBRA_DEL_PIE.sobra]
+    if (igual(finCaja, justa) && Math.abs(finAlfa - alfaDeLaSombra(0)) < 1e-9 && Math.abs(fin.blanda - blandaDeLaSombra(0)) < 1e-9) acostadas += 1
+    if (seCruzan(finCaja, logo)) sobreElLogo += 1
+    const mitad = sombraDeLaPiezaQueCae(p, poseDeLaPiezaQueCae(p, l, l.arranque + l.bajaS / 2), base)
+    if (mitad.alfa > 0 && mitad.alfa < finAlfa) bajando += 1
+    const vuelco = sombraDeLaPiezaQueCae(p, poseDeLaPiezaQueCae(p, l, (l.arranque + l.bajaS + l.toca) / 2), base)
+    if (vuelco.medioFondo > p.espesor / 2 + SOMBRA_DEL_PIE.sobra && vuelco.medioFondo < p.alto / 2 + SOMBRA_DEL_PIE.sobra) volcando += 1
+  }
+  return { dePie, bajando, volcando, acostadas, sobreElLogo }
+}
+const SOMBRAS = medirLasSombras(PIE.piezas, PIE.lugares, PIE.base, PIE.ultima)
+const sombrasBien = (m: DeLasSombras): boolean => m.dePie === 0 && m.bajando === PIE.piezas.length && m.volcando === PIE.piezas.length && m.acostadas === PIE.piezas.length && m.sobreElLogo === 0
+afirmar(sombrasBien(SOMBRAS), `  las sombras de contacto de las ${String(PIE.piezas.length)} piezas: ninguna de pie en la pared, más tenues a mitad de la bajada, la huella entre el canto y la placa a mitad del vuelco, acostadas la placa entera con ${String(SOMBRA_DEL_PIE.sobra)} u de más y el alfa del ras (${alfaDeLaSombra(0).toFixed(2)}), ninguna sobre el logo`)
+controlPositivo('  el detector VE una sombra bajo una pieza de pie en la pared', { ...SOMBRAS, dePie: 1 }, sombrasBien)
+controlPositivo('  y una sombra acostada que no es la placa', { ...SOMBRAS, acostadas: PIE.piezas.length - 1 }, sombrasBien)
+controlPositivo('  y una sombra sobre el logo', { ...SOMBRAS, sobreElLogo: 1 }, sombrasBien)
+controlPositivo('  y una huella que no crece con el vuelco', { ...SOMBRAS, volcando: 0 }, sombrasBien)
+
+// El cableado: sólo en el final (de pie en la pared, ninguna: NOCTURNO FINAL A4 sigue), el rectángulo en la base del pie (no en los
+// ejes del mundo), el piso vivo las pinta; los módulos de menos de 300 líneas y lo de cada cuadro sin reservas.
+const DE_LAS_SOMBRAS = Object.fromEntries(['pie3d/armadas.ts', 'pie3d/caida.ts', 'pie3d/sombras.ts', 'final/sombraDeLaPieza.ts', 'piso/bloques.ts'].map((m) => [m, leer(`_lib/escena/${m}`)])) as Record<string, string>
+const sombrasCableadas = (f: Record<string, string>): boolean => (f['pie3d/armadas.ts'] ?? '').includes('SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = enElFinal ? sombrasDeLaCaida(s.caida, segundos) : 0') &&
+  (f['pie3d/caida.ts'] ?? '').includes('uBaseDeLasSombrasDelPie.value.set(b.derechaX, b.derechaZ, b.atrasX, b.atrasZ)') && (f['pie3d/caida.ts'] ?? '').includes('k < MAXIMO_DE_SOMBRAS_DEL_PIE') &&
+  (f['pie3d/sombras.ts'] ?? '').includes('dot( r, uBaseDeLasSombrasDelPie.xy ), dot( r, uBaseDeLasSombrasDelPie.zw )') && (f['piso/bloques.ts'] ?? '').includes('${APLICAR_LAS_SOMBRAS_DEL_PIE_GLSL}') &&
+  lineasDeCodigo(f['final/sombraDeLaPieza.ts'] ?? '') <= 300 && lineasDeCodigo(f['pie3d/caida.ts'] ?? '') <= 300 && sinReservasEn(f['pie3d/caida.ts'] ?? '', 'sombrasDeLaCaida') && sinReservasEn(f['final/sombraDeLaPieza.ts'] ?? '', 'sombraDeLaPiezaQueCae')
+afirmar(sombrasCableadas(DE_LAS_SOMBRAS), '  el cableado: las sombras sólo con el final en marcha, el rectángulo en la base del pie, con tope, el piso vivo las pinta; los módulos de menos de 300 líneas y lo de cada cuadro sin reservas')
+controlPositivo('  el detector VE sombras en los ejes del mundo', { ...DE_LAS_SOMBRAS, 'pie3d/caida.ts': (DE_LAS_SOMBRAS['pie3d/caida.ts'] ?? '').replace('uBaseDeLasSombrasDelPie.value.set(b.derechaX, b.derechaZ, b.atrasX, b.atrasZ)', '') }, sombrasCableadas)
+controlPositivo('  y sombras también de pie en la pared', { ...DE_LAS_SOMBRAS, 'pie3d/armadas.ts': (DE_LAS_SOMBRAS['pie3d/armadas.ts'] ?? '').replace(' = enElFinal ? sombrasDeLaCaida(s.caida, segundos) : 0', ' = sombrasDeLaCaida(s.caida, segundos)') }, sombrasCableadas)
+controlPositivo('  y una reserva en la sombra de cada cuadro', { ...DE_LAS_SOMBRAS, 'final/sombraDeLaPieza.ts': (DE_LAS_SOMBRAS['final/sombraDeLaPieza.ts'] ?? '').replace('  const S = SOMBRA_DE_LA_PIEZA\n', '  const S = SOMBRA_DE_LA_PIEZA\n  const tmp = [p.x]\n  if (tmp.length < 0) return S\n') }, sombrasCableadas)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Q1 · Los módulos nuevos, de menos de 300 líneas; lo de cada cuadro, sin reservas')

@@ -254,10 +254,71 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
   tocar ningún test. tsc y lint limpios; la compuerta (51 suites) en verde salvo s8-montaje con sus 2 de la base.
 
 ### Q4.1 · La auditoría
-- PENDIENTE.
+- HECHA con lo que había: SIN banco del sitio (la memoria no llegó a 3 GB en ninguna bisagra hasta acá: el Chrome del humano con
+  muchas pestañas se queda con ella), el recorrido entero a 1440, 1920 y 390 de día y de noche NO se pudo mirar; la auditoría sale
+  del código, del mini-banco (el plasma, la red, el cristal, el pie con cajas) y de lo medido en PULIDO 17 y 18 en el sitio. Cada
+  ítem con su impacto (I) y su costo (C), de 1 a 3, y su estado. Lo que pide el sitio queda marcado VERIFICAR TRAS REINICIO.
+  1. Sombras de contacto bajo las piezas del pie que CAEN (I3 C1): la maquinaria de P2 (`pie3d/sombras.ts`, el piso vivo la pinta)
+     estaba apagada desde NOCTURNO FINAL A4 (de pie en la pared eran sombras raras); acostadas, la oclusión de contacto es lo que
+     les falta para pesar. HECHO (Q4.2, 1).
+  2. Filtrado anisotrópico de la trama del moiré y de las siluetas de la formación, 4 → el máximo de la placa (I2 C1): las líneas
+     finas de la trama en ángulo rasante se emborronan a gris antes de lo necesario con 4. EN CURSO (Q4.2, 2).
+  3. Oclusión bajo el logo en su hueco (I2 C2): el pozo ya se sombrea (`HUECO.sombra`), la mancha de contacto y la sombra proyectada
+     existen; falta ver si el labio del pozo pide un oscurecimiento de contacto cuando el logo está al ras. PENDIENTE (sitio).
+  4. Microrrugosidad del satinado del logo (I2 C2): un grano fino de rugosidad por `onBeforeCompile` en el material del logo (hoy
+     lisa, el estudio se refleja limpio). PENDIENTE: sin verlo no se ajusta.
+  5. El filo del encastre (I2 C2): las juntas saturadas piden derrame (lección de PULIDO 6); el filo al ras del logo puede escalonarse
+     a 390. PENDIENTE (sitio).
+  6. Perspectiva aérea (I2 C1): la niebla (42–110 u) ya cubre la cúpula; una niebla DE ALTURA (más densa abajo, el piso lejano que se
+     pierde) daría más profundidad al piso. PENDIENTE (sitio: hay que ver el piso lejano).
+  7. El moiré, aliasing (I2 C1): mipmaps ✓ y la anisotropía (2); el patrón de interferencia es a propósito (vivo). Con 2.
+  8. El piso: el reflejo del logo (I2 C3): un reflejo planar es otra pasada de la escena. DESCARTADO por costo; el reflejo de las brasas
+     ya existe (P1.a).
+  9. Política de DPR (I2 C1): `[1, 1.5]` con la calidad adaptativa (escalones hasta 0,7 con las motas); coherente con el repo. OK.
+  10. Coherencia del tonemapping (I2 C1): ACES compensado (`tono.ts`) en los materiales, la energía, el espejo y el cristal (el cristal
+      escribe sobre la copia ya mapeada: su brillo se suma en espacio de salida; aceptable, anotado). OK.
+  11. Tirones en frío (I3 C2): precompilar + calentar existen (CALIDAD 1 B1); lo nuevo de este sprint se compila con la escena y se dibuja
+      desde el primer cuadro (la red: un enlace nulo; el cristal: en el hero; la caída del pie: los mismos programas). El primer scroll
+      (0,5–1,2 s) y los 1,15 s a 390 son del sitio (el campo del logo que se publica, las secciones que se montan al llegar: PULIDO 17).
+      PENDIENTE: medir en frío con `p-scroll` y montar progresivo (VERIFICAR TRAS REINICIO).
+  12. Montar progresivo de las secciones (I3 C3): repartir el montaje de las secciones pesadas en cuadros sucesivos (hoy, al llegar).
+      PENDIENTE (sitio).
+  13. La física del polvo sin dibujarse (I2 C1): apagada. HECHO (Q0).
+  14. La basura por cuadro del plasma (I3 C2): de 61 a 6 KB. HECHO (Q1).
+  15. El pase de color cada cuadro también de noche (I1 C1): lo pide el cristal (+0,12 ms medidos); a media resolución bajaría, pero el
+      cristal refracta líneas finas: se queda entero. OK.
+  16. La luz del cristal (I2 C3): un mapa de entorno real (el estudio del pie) en vez del cielo por altura. PENDIENTE (caro de ver).
+  17. El amanecer sobre el cristal (I1 C2): el brillo con el sol del amanecer. PENDIENTE.
+  18. El AA del canvas (I2 C1): antialias en `plena` (los cantos del logo negro contra el papel), apagado en el hero; `compacta` lo decide
+      `ajustes.ts` con su medición. OK.
+  19. La red en reposo sobre textos (I2 C1): la máscara por píxel; en el sitio hay que ver que no roce los títulos 3D. PENDIENTE (sitio).
+  20. Las piezas del pie acostadas y el mouse (I2 C2): la órbita del mouse (±22°) con el pie acostado: que ninguna esquina salga del cuadro
+      en los extremos. PENDIENTE (sitio): el invariante cubre la vista cenital quieta.
 
 ### Q4.2 · Las mejoras (una por commit)
-- PENDIENTE.
+- **1 · Sombras de contacto bajo las piezas del pie que caen** — HECHO · VISTO en el mini-banco del pie (capturas `q4b-sombras-5.6`,
+  `-6.0`, `-6.4`, `-8.0`, `q4-sombras-noche-8.0` y la referencia `q4-sin-sombras-8.0`; el piso del mini pinta con el GLSL real y la
+  cuenta real, `sombras=0` las apaga): acostadas, un ribete blando alrededor de cada placa que la asienta (sin él flotan sobre la
+  grilla); volcando, una sombra tenue y ancha que se condensa al apoyarse; de noche apenas se adivina. NO VISTO en el sitio (sin
+  banco): el piso vivo con las 12 sombras en el final y su costo (12 rectángulos por píxel del piso durante 8 s; en la NVIDIA no
+  debería asomar): VERIFICAR TRAS REINICIO.
+- QUÉ ES: la maquinaria de P2 (`pie3d/sombras.ts`: el piso vivo pinta rectángulos blandos con `sombraDelPie`), apagada en NOCTURNO
+  FINAL A4 (de pie en la pared eran sombras raras: ahí sigue apagada), prendida sólo con el final en marcha (`armadas.ts`:
+  `enElFinal ? sombrasDeLaCaida(s.caida, segundos) : 0`). `final/sombraDeLaPieza.ts` (puro, nuevo): la huella de cada pieza según su
+  pose — de pie en la pared, nada (entra con la bajada); bajando, el filo del canto; volcando, desde el canto hacia atrás
+  `alto · sen a + espesor · cos a`; acostada, la placa entera más `sobra` (0,08 u) — con el alfa y la blandura de P2 por la ALTURA
+  MEDIA de la placa sobre su huella (`h = canto + alto² · sen a · cos a / (2 · fondo)`: 0 de pie y acostada, lo más alta a mitad
+  del vuelco: una placa levantada tapa poco, la sombra se aclara —0,34 → 0,06 para el formulario— y se ablanda —0,12 → 1,3 u— y se
+  condensa al apoyarse; con el rebote respira). `pie3d/caida.ts` (`sombrasDeLaCaida`): escribe los rectángulos (hasta 24; las más
+  tenues que 0,002, no) y la base del pie; el GLSL rota cada rectángulo a esa base (`uBaseDeLasSombrasDelPie`: `derecha` y `atras`
+  de la cámara de antes del final, no los ejes del mundo). Todo función del reloj: el rebobinado las levanta.
+- Invariantes (s70, Q4): con el pie de 1440 de Q2, ninguna sombra de pie en la pared, más tenues a mitad de la bajada, la huella entre
+  el canto y la placa a mitad del vuelco, acostadas la placa entera con su sobra y el alfa del ras, ninguna sobre el logo (controles:
+  una de pie, una acostada que no es la placa, una sobre el logo, una huella que no crece); el cableado (sólo en el final, la base,
+  el tope, el piso las pinta, los módulos de menos de 300 líneas, sin reservas; controles: en los ejes del mundo, también de pie,
+  una reserva). s47 y s52 cambian de sentido (la tabla). s44 sigue igual (la forma al ras, a media altura y lejos; la maquinaria en el
+  piso). tsc y lint limpios.
+- **2 · Anisotropía al máximo de la placa** — EN CURSO.
 
 ### Medido (sin vsync; 1440 y 390; la NVIDIA)
 - Q1 · el mini-banco (recibo `entregas/pulido-19/mini-medido.json`; s70 lo lee, con sus controles positivos): la placa ANGLE D3D11 sobre la
@@ -289,6 +350,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 | Q1.d (mini-banco) | 78,5 GB | 2516 → 2453 MB | 984 → 991 MB | ídem; la red con y sin (`red=no`) |
 | Q2 (mini-banco del pie) | 70,9 GB | 2453 → 1402 MB | 991 → 992 MB | sin banco del sitio; `pie.sh` (Chrome por captura); el Chrome del humano con muchas pestañas se lleva la memoria |
 | Q3 (mini-banco) | 74,1 GB | 1402 → 1561 MB | 992 → 1001 MB | sin banco del sitio; el cristal con y sin (`cristal=si`) |
+| Q4.2 (1) (mini-banco del pie) | 74,4 GB | 1561 → 3308 MB | 1001 → 1003 MB | `pie.sh` con las sombras (`sombras=0` las apaga); al cerrar la tanda hay 3308 MB libres: el banco del sitio se intenta en la medición final |
 
 ## Invariantes que cambian de sentido (antes / ahora / por qué)
 
@@ -314,6 +376,8 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 | s52 · la salida del fondo | la cámara de punta a punta en 1,2 s | en 0,95 s, mirando 0,13 adelante (el mensaje lee las constantes) | Q2 (el reloj más largo hace la subida más empinada en `fin`) |
 | s57 · sin el círculo liso | `distanciaAlLogo( xz ) ) );` | `distanciaAlLogo( xz ) ) ) );` (la misma distancia, adentro del `max`) | Q2 |
 | s62 · la secuencia (D) | `D_DUR` = golpe + 1,7 | `RELOJ_DEL_FINAL.duracionS` | Q2 |
+| s47 · lo interactivo espera (A4) | `uCuantasSombrasDelPie.value = 0` («sombra del pie, ninguna») | `= enElFinal ? sombrasDeLaCaida(s.caida, segundos) : 0` | Q4.2 (1): de pie en la pared sigue sin sombra; las que caen en el final, con su sombra de contacto |
+| s52 · sin sombras del pie (A4) | `uCuantasSombrasDelPie.value = 0`, sin `sombraDe(` ni `uSombrasDelPie.value[` en `armadas.ts` | la misma línea con `enElFinal ? … : 0`; dos controles (las sombras de antes; también de pie) | Q4.2 (1) |
 
 ## Crítica (lo que el banco mostró y qué se hizo)
 
@@ -328,6 +392,8 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
   salida del fondo que pasaba los 3 s: en Q2, cada uno con su arreglo. Lo que NO se pudo ver: el sitio real (VERIFICAR TRAS REINICIO:
   `reconstruir.sh`, bajar al pie a 1440 y 1920, dejar correr 9 s, mirar el DOM acostado sobre cada pieza, escribir en el formulario
   acostado, clic en un enlace acostado, un scroll hacia arriba (el rebobinado levanta todo) y el reinicio).
+- Q4.2 (1) · el rectángulo salía pleno apenas arrancaba el vuelco (una placa casi de pie con una sombra nítida de 4 u detrás, en
+  `q4-sombras-5.6`): la altura media de la placa sobre su huella (`q4b-sombras-5.6`).
 
 ## Lo que no quedó bien
 

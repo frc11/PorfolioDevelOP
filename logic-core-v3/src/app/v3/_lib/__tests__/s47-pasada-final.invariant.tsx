@@ -429,12 +429,13 @@ const porColumnas = (ci: string): boolean => /<LlegadaDelPie value="atras">\s*<d
 afirmar(porColumnas(cierreC2), 'las columnas: el titular, el mail y WhatsApp, atrás; el formulario, tapa; lo demás, fundido (el que no dice nada); la escena lee el progreso de la última pantalla')
 controlPositivo('el detector VE el mail fuera de su columna', cierreC2.replace('<ContactoDelPie />\n          </LlegadaDelPie>', '</LlegadaDelPie>\n          <ContactoDelPie />'), porColumnas)
 afirmar(/const progreso = volumen \? null : deLaSeccion/.test(cierreC2) && /export const LLEGADAS_DEL_PIE = \{\s*izquierda: \[0\.3, 0\.6\],\s*derecha: \[0\.4, 0\.75\],\s*abajo: \[0\.55, 0\.9\],\s*\} as const/.test(cierreC2), '  abajo de 1025 (el pie plano) no cambia nada: las mismas ventanas del DOM')
-// [NOCTURNO FINAL] A4 · el pie ya no proyecta sombra en el piso (lo pide el ticket): lo que va en el piso con la pieza en camino es su caja para el polvo (B4).
+// [NOCTURNO FINAL] A4 · el pie de pie en la pared ya no proyecta sombra en el piso (lo pide el ticket): lo que va en el piso con la pieza en camino es su caja para el polvo (B4).
+// [PULIDO 19] Q4 · las piezas que caen en el final sí tienen su sombra de contacto (`pie3d/caida.ts`; s70 la mide): sólo con el final en marcha.
 const elDomEspera = (c: string): boolean => {
   const [i, s, l] = [c.indexOf('a.viaje.matrix.identity()'), c.indexOf('seguirLaPieza(a, viva, cuadro, izquierda, arriba, s)'), c.indexOf('llegar(a, s)\n')]
-  return i > 0 && i < s && s < l && /const tocable = e >= 0\.999/.test(c) && /a\.pieza\.elemento\.style\.pointerEvents = tocable \? '' : 'none'/.test(c) && /escribirLaCaja\(cajas, a\.viaje\.matrixWorld, a\.caja\)/.test(c) && /SOMBRAS_DEL_PIE\.uCuantasSombrasDelPie\.value = 0/.test(c)
+  return i > 0 && i < s && s < l && /const tocable = e >= 0\.999/.test(c) && /a\.pieza\.elemento\.style\.pointerEvents = tocable \? '' : 'none'/.test(c) && /escribirLaCaja\(cajas, a\.viaje\.matrixWorld, a\.caja\)/.test(c) && /SOMBRAS_DEL_PIE\.uCuantasSombrasDelPie\.value = enElFinal \? sombrasDeLaCaida\(s\.caida, segundos\) : 0/.test(c)
 }
-afirmar(elDomEspera(armadasFuente), '  lo interactivo va donde la pieza va a quedar (con el viaje en cero) y no recibe clics hasta que llegó; la caja del polvo va con la pieza en camino (sombra del pie, ninguna)')
+afirmar(elDomEspera(armadasFuente), '  lo interactivo va donde la pieza va a quedar (con el viaje en cero) y no recibe clics hasta que llegó; la caja del polvo va con la pieza en camino (sombra del pie de pie en la pared, ninguna; sólo las que caen en el final)')
 controlPositivo('el detector VE el DOM que viaja con la pieza', armadasFuente.replace('a.viaje.matrix.identity()', '').replace('llegar(a, s)\n', 'llegar(a, s)\n    a.viaje.matrix.identity()\n'), elDomEspera)
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -3,10 +3,12 @@ import * as THREE from 'three'
 import { CAIDA_DEL_PIE, crearLugar, distanciaParaElPie, huellaDelPie, lugaresEnElPiso, poseDeLaPiezaQueCae, type LugarEnElPiso } from '../final/caidaDelPie'
 import { caidaIntegrada, type CaidaIntegrada } from '../final/caidaAlHueco'
 import { EN_VIVO, segundosDelFinal } from '../final/recorridoDelFinal'
+import { sombraDeLaPiezaQueCae } from '../final/sombraDeLaPieza'
 import { pedirLaOnda } from '../interfaz/pedidos'
 import { FLOOR_Y } from '../probeScene'
 import type { Armada } from './armadas'
 import { colocarLaPieza } from './colocacion'
+import { MAXIMO_DE_SOMBRAS_DEL_PIE, SOMBRAS_DEL_PIE } from './sombras'
 
 /**
  * [PULIDO 19] Q2 · LA CAÍDA DE LAS PIEZAS DEL PIE EN LA ESCENA (`final/caidaDelPie.ts`: la física y los lugares, puros; acá, lo de
@@ -14,8 +16,11 @@ import { colocarLaPieza } from './colocacion'
  * quieta, donde estaba), les calcula su lugar en el piso y su reloj, escribe para el final la distancia de la cámara desde arriba y
  * la calma del piso bajo el pie acostado (`EN_VIVO`), pide un pulso chico del piso en cada impacto, y a cada grupo le aplica su
  * pose: el canto que baja y la placa que vuelca sobre él. Sin reservas por cuadro: los registros se arman una vez (hasta `MAXIMO`).
+ * [PULIDO 19] Q4 · y escribe para el piso vivo la sombra de contacto de cada pieza que bajó (`sombrasDeLaCaida`).
  */
 const MAXIMO = 64
+/** Una sombra más tenue que esto no se escribe. */
+const SOMBRA_MINIMA = 0.002
 
 interface PiezaMutable {
   ancho: number
@@ -174,4 +179,24 @@ export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number):
   const caja = a.medida.caja
   OFFSET.set(caja.ancho / 2, -caja.alto, -a.espesor).multiplyScalar(grupo.scale.x).applyQuaternion(grupo.quaternion)
   grupo.position.set(pose.x, pose.y, pose.z).sub(OFFSET)
+}
+
+/**
+ * [PULIDO 19] Q4 · Las sombras de contacto de este cuadro (`sombras.ts`, hasta `MAXIMO_DE_SOMBRAS_DEL_PIE`): la huella de cada
+ * pieza que ya bajó (`final/sombraDeLaPieza.ts`), en la base del pie; devuelve cuántas escribió (lo que el piso vivo pinta).
+ */
+export function sombrasDeLaCaida(c: CaidaDelPie, s: number): number {
+  const b = c.base
+  SOMBRAS_DEL_PIE.uBaseDeLasSombrasDelPie.value.set(b.derechaX, b.derechaZ, b.atrasX, b.atrasZ)
+  const cajas = SOMBRAS_DEL_PIE.uSombrasDelPie.value
+  const formas = SOMBRAS_DEL_PIE.uFormaDeLasSombrasDelPie.value
+  let k = 0
+  for (let i = 0; i < c.n && k < MAXIMO_DE_SOMBRAS_DEL_PIE; i += 1) {
+    const sombra = sombraDeLaPiezaQueCae(c.piezas[i], poseDeLaPiezaQueCae(c.piezas[i], c.lugares[i], s), b)
+    if (sombra.alfa < SOMBRA_MINIMA) continue
+    cajas[k].set(sombra.x, sombra.z, sombra.medioAncho, sombra.medioFondo)
+    formas[k].set(sombra.blanda, sombra.alfa, 0, 0)
+    k += 1
+  }
+  return k
 }

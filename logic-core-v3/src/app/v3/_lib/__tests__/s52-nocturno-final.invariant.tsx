@@ -418,11 +418,14 @@ const alturaDelViaje = (c: string): boolean => {
 const largoDeLaSombra = (grados: number): number => 1 / Math.tan(THREE.MathUtils.degToRad(grados))
 afirmar(alturaDelViaje(orbit) && elevacionDe(1) === 36 && largoDeLaSombra(elevacionDe(1)) < 1.4 && largoDeLaSombra(elevacionDe(0.1)) > 15, 'en un viaje del menú la altura del sol es la de su nivel (de día, 36°: la sombra del logo mide 1,4 veces su alto), no la del recorrido (en la noche de Trabajos, 3°: 17 veces, por todo el piso)', `de día ${largoDeLaSombra(elevacionDe(1)).toFixed(2)}× · con la del recorrido ${largoDeLaSombra(elevacionDe(0.1)).toFixed(1)}×`)
 controlPositivo('el detector VE la altura del recorrido en un viaje', orbit.replace('if (viajeEnCurso() !== null) arc.elevationDeg = elevacionDe(arc.level)', ''), alturaDelViaje)
-// Las piezas del pie no proyectan sombra sobre la escena (sus sombras de contacto en el piso vivo, apagadas).
+// Las piezas del pie, de pie en la pared, no proyectan sombra sobre la escena (sus sombras de contacto en el piso vivo, apagadas);
+// [PULIDO 19] Q4 · las que caen en el final sí: su sombra de contacto, acostadas (`pie3d/caida.ts`; s70 la mide).
 const armadasDelPie = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
-const sinSombrasDelPie = (c: string): boolean => c.includes('SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0') && !c.includes('sombraDe(') && !c.includes('uSombrasDelPie.value[')
-afirmar(sinSombrasDelPie(armadasDelPie), '  las placas y piezas del pie no proyectan sombra sobre la escena (ninguna sombra de contacto en el piso vivo); fuera de su sección no se dibujan (ya: sólo con su caja a la vista)')
-controlPositivo('  el detector VE las sombras de contacto de antes', armadasDelPie.replace('SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0', 'if (sombras < MAXIMO_DE_SOMBRAS_DEL_PIE) sombras = sombraDe(a, sombras)'), sinSombrasDelPie)
+const SOMBRAS_SOLO_EN_EL_FINAL = 'SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = enElFinal ? sombrasDeLaCaida(s.caida, segundos) : 0'
+const sinSombrasDelPie = (c: string): boolean => c.includes(SOMBRAS_SOLO_EN_EL_FINAL) && !c.includes('sombraDe(') && !c.includes('uSombrasDelPie.value[')
+afirmar(sinSombrasDelPie(armadasDelPie), '  de pie en la pared, las placas y piezas del pie no proyectan sombra sobre la escena (ninguna sombra de contacto en el piso vivo; sólo las que caen en el final, acostadas); fuera de su sección no se dibujan (ya: sólo con su caja a la vista)')
+controlPositivo('  el detector VE las sombras de contacto de antes', armadasDelPie.replace(SOMBRAS_SOLO_EN_EL_FINAL, 'if (sombras < MAXIMO_DE_SOMBRAS_DEL_PIE) sombras = sombraDe(a, sombras)'), sinSombrasDelPie)
+controlPositivo('  y sombras también de pie en la pared', armadasDelPie.replace(SOMBRAS_SOLO_EN_EL_FINAL, 'SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = sombrasDeLaCaida(s.caida, segundos)'), sinSombrasDelPie)
 afirmar(/a\.grupo\.visible = arriba \+ c\.abajo > -MARGEN && arriba \+ c\.arriba < cuadro\.alto \+ MARGEN/.test(armadasDelPie), '  y una pieza del pie se dibuja sólo con su caja del DOM a la vista (con el margen)')
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -198,6 +198,7 @@ export const POSE_DE_LA_PIEZA = {
   a: 0,
   toco: false,
 }
+export type PoseDeLaPieza = typeof POSE_DE_LA_PIEZA
 
 /**
  * La pose de la pieza a los `s` del reloj del final: antes de su arranque, de pie en la pared; en la bajada, el canto va de su lugar

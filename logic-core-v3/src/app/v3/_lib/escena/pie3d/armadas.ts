@@ -19,7 +19,7 @@ import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocaci
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
-import { aplicarLaCaida, armarLaCaida, type CaidaDelPie } from './caida'
+import { aplicarLaCaida, armarLaCaida, sombrasDeLaCaida, type CaidaDelPie } from './caida'
 import { CAJAS_DEL_PIE, escribirLaCaja } from './cajasDelPolvo'
 import { SOMBRAS_DEL_PIE } from './sombras'
 import { duracionDeLaTransformacion, poseDeLaTransformacion } from './transformacionDelPie'
@@ -177,8 +177,9 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
     if (a.transformacion !== null) transformar(a, a.transformacion, s.quieto, dt)
     a.viaje.updateMatrixWorld(true)
   }
-  // [NOCTURNO FINAL] A4 · las piezas del pie no proyectan sombra sobre la escena (eran sombras de contacto en el piso vivo).
-  SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0
+  // [NOCTURNO FINAL] A4 · de pie en la pared, las piezas no proyectan sombra (eran sombras raras en el piso vivo); [PULIDO 19] Q4 · las
+  // que caen en el final sí: su sombra de contacto, que crece al volcar y las asienta acostadas (`caida.ts`).
+  SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = enElFinal ? sombrasDeLaCaida(s.caida, segundos) : 0
   // [NOCTURNO FINAL] B4 · y el polvo que cae no las atraviesa: sus cajas, para la simulación (`cajasDelPolvo.ts`).
   let cajas = 0
   // [PULIDO 10] J8 · lo que son letras sueltas (el texto y los enlaces de texto) no frena el polvo: sólo las placas.
