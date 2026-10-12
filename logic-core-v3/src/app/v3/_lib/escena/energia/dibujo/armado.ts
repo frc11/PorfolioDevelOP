@@ -9,11 +9,13 @@ import { crearLectura, crearTemperatura, type Lectura, type Temperatura } from '
 import { DIRECCIONES } from '../direcciones'
 import { crearDominio, type Dominio } from '../dominio'
 import { crearPuntero, type EstadoDelPuntero } from '../interaccion/interaccion'
+import { REPOSO, crearMemoriaDelGesto, crearRed, type MemoriaDelGesto, type Red } from '../reposo'
 import { largo3 } from '../largo'
 import { FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, VERTICES_DEL_HALO_DEL_ARCO, VERTICES_DE_LOS_ARCOS, uniformesDelTrazo } from './arcos'
 import { DIBUJO, materialDeEnergia, uniformesComunes, type UniformesComunes } from './comun'
 import { EFECTOS, FRAGMENTOS_DE_LOS_EFECTOS, VERTICES_DE_LOS_EFECTOS } from './efectos'
 import { sombreadoresDeParticulas, uniformesDelAspecto, type NombreDelAspecto } from './particulas'
+import { armarLaRed, type DibujoDeLaRed } from './red'
 import { FRAGMENTOS_DE_LOS_REFLEJOS, REFLEJO, VERTICES_DE_LOS_REFLEJOS } from './reflejos'
 
 /**
@@ -42,6 +44,10 @@ export interface Armado {
   /** [PULIDO 19] Q1.b · el dominio de la vista (`dominio.ts`) y si las brasas ya se sembraron en él (el primer cuadro con cámara). */
   readonly dominio: Dominio
   poblado: boolean
+  /** [PULIDO 19] Q1.d · la red en reposo (`reposo.ts`), lo que el gesto recuerda y su dibujo (`dibujo/red.ts`). */
+  readonly red: Red
+  readonly gesto: MemoriaDelGesto
+  readonly dibujoDeLaRed: DibujoDeLaRed
   readonly uniformes: UniformesComunes
   readonly atributosDeLasBrasas: readonly THREE.InstancedBufferAttribute[]
   readonly atributosDeLaCinta: readonly THREE.BufferAttribute[]
@@ -63,7 +69,7 @@ export interface Armado {
   halo: number
   readonly ondas: Float32Array
   /** Las uniformes que el banco ajusta en vivo, por grupo (`banco.ts`, `ajustar`). */
-  readonly ajustables: Readonly<Record<'brasas' | 'arcos' | 'comun' | 'reflejo', Readonly<Record<string, THREE.IUniform>>>>
+  readonly ajustables: Readonly<Record<'brasas' | 'arcos' | 'comun' | 'reflejo' | 'red', Readonly<Record<string, THREE.IUniform>>>>
 }
 
 const CUADRADO = new Float32Array([-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0])
@@ -113,6 +119,9 @@ export function armar(compacto: boolean, vista: { readonly current: Vista }, log
   const mallaDeReflejos = new THREE.Mesh(gb, materialDelReflejo)
   mallaDeReflejos.name = 'reflejos en el piso'
   mallas.push(mallaDeReflejos, mallaDeBrasas)
+  // [PULIDO 19] Q1.d · la red en reposo, después de las brasas.
+  const dibujoDeLaRed = armarLaRed(Math.ceil(brasas.n * REPOSO.porBrasaEnTotal), uniformes)
+  mallas.push(dibujoDeLaRed.malla)
   // La cinta de los arcos: la misma geometría en dos pasadas (lo oscuro y el halo; después los núcleos). Se dibuja siempre (los
   // lugares sin arco tienen ancho 0): el programa se arma al cargar, no con el primer arco.
   const cinta = crearCinta()
@@ -195,10 +204,10 @@ export function armar(compacto: boolean, vista: { readonly current: Vista }, log
     bordeDelLogo,
   }
   return {
-    azar, brasas, entrada: crearEntradaDeLasBrasas(), temperatura: crearTemperatura(), lectura: crearLectura(), arcos: crearArcos(azar), puntero: crearPuntero(), cinta, dominio: crearDominio(), poblado: false, uniformes,
+    azar, brasas, entrada: crearEntradaDeLasBrasas(), temperatura: crearTemperatura(), lectura: crearLectura(), arcos: crearArcos(azar), puntero: crearPuntero(), cinta, dominio: crearDominio(), poblado: false, red: crearRed(brasas.n), gesto: crearMemoriaDelGesto(), dibujoDeLaRed, uniformes,
     atributosDeLasBrasas, atributosDeLaCinta, geometriaDeLaCinta: gt, efectos: { lugar: lugarDeLosEfectos, efecto, geometria: ge }, mallas, centro, v, luces: new Float32Array(DIBUJO.luces * 4),
     puntoDelPuntero: new Float32Array(3), camaraAntes: new THREE.Vector3(Number.NaN, Number.NaN, Number.NaN), puntoAntes: new Float32Array(3).fill(Number.NaN), rayo, entorno, texto: { leidoEn: Number.NEGATIVE_INFINITY, scroll: Number.NaN }, halo: 0, ondas: new Float32Array(8).fill(Number.NEGATIVE_INFINITY),
-    ajustables: { brasas: deLasBrasas, arcos: trazo, comun: uniformes, reflejo: delReflejo },
+    ajustables: { brasas: deLasBrasas, arcos: trazo, comun: uniformes, reflejo: delReflejo, red: dibujoDeLaRed.uniformes },
   }
 }
 

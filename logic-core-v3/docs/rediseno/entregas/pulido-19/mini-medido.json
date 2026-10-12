@@ -296,5 +296,159 @@
     "errores": 0
    }
   }
+ },
+ "queRed": "Q1.d · LA RED EN REPOSO: las mismas mediciones con la red (calma: a los 3,5 s se arma y queda armada durante los 6 s medidos; maxima: el puntero que da vueltas no la deja armarse) y, con el sufijo -sinred, con la red apagada (red=no en el banco: su costo por diferencia).",
+ "red": {
+  "1440": {
+   "calma-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0",
+    "cuadro": {
+     "media": 1.86,
+     "p50": 1.8,
+     "p95": 2.4,
+     "maximo": 4.5,
+     "mayoresDe20": 0,
+     "cuadros": 3222
+    },
+    "largos": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 7470844,
+     "despues": 9296992,
+     "recolecciones": 17,
+     "kbPorCuadro": 6.6
+    },
+    "errores": 0
+   },
+   "calma-noche-sinred": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&red=no",
+    "cuadro": {
+     "media": 1.36,
+     "p50": 1.3,
+     "p95": 1.7,
+     "maximo": 4.9,
+     "mayoresDe20": 0,
+     "cuadros": 4409
+    },
+    "largos": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 7202867,
+     "despues": 8218623,
+     "recolecciones": 21,
+     "kbPorCuadro": 6.4
+    },
+    "errores": 0
+   },
+   "calma-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1",
+    "cuadro": {
+     "media": 1.84,
+     "p50": 1.8,
+     "p95": 2.3,
+     "maximo": 6.4,
+     "mayoresDe20": 0,
+     "cuadros": 3265
+    },
+    "largos": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 6570468,
+     "despues": 8382052,
+     "recolecciones": 17,
+     "kbPorCuadro": 6.7
+    },
+    "errores": 0
+   },
+   "maxima-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&caliente=1",
+    "cuadro": {
+     "media": 1.4,
+     "p50": 1.4,
+     "p95": 1.6,
+     "maximo": 5.1,
+     "mayoresDe20": 0,
+     "cuadros": 4299
+    },
+    "largos": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 8262336,
+     "despues": 8787648,
+     "recolecciones": 25,
+     "kbPorCuadro": 7.8
+    },
+    "errores": 0
+   }
+  },
+  "390": {
+   "calma-noche-sinred": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&red=no",
+    "cuadro": {
+     "media": 0.95,
+     "p50": 0.9,
+     "p95": 1.5,
+     "maximo": 3.7,
+     "mayoresDe20": 0,
+     "cuadros": 6294
+    },
+    "largos": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 7870321,
+     "despues": 7776997,
+     "recolecciones": 26,
+     "kbPorCuadro": 5.4
+    },
+    "errores": 0
+   },
+   "calma-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1",
+    "cuadro": {
+     "media": 0.91,
+     "p50": 0.9,
+     "p95": 1.2,
+     "maximo": 3.9,
+     "mayoresDe20": 0,
+     "cuadros": 6591
+    },
+    "largos": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 7782814,
+     "despues": 8313574,
+     "recolecciones": 24,
+     "kbPorCuadro": 5.2
+    },
+    "errores": 0
+   },
+   "maxima-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&caliente=1",
+    "cuadro": {
+     "media": 0.92,
+     "p50": 0.9,
+     "p95": 1.2,
+     "maximo": 3.9,
+     "mayoresDe20": 0,
+     "cuadros": 6515
+    },
+    "largos": [],
+    "programasAntes": 10,
+    "programas": 10,
+    "heap": {
+     "antes": 7013654,
+     "despues": 8552482,
+     "recolecciones": 30,
+     "kbPorCuadro": 6.4
+    },
+    "errores": 0
+   }
+  }
  }
 }

@@ -22,8 +22,12 @@ export interface EnergiaDelBanco {
     cursor: boolean
     carga: number
     velocidad: number
+    /** [PULIDO 19] Q1.d · la red en reposo: su fase, cuántos enlaces, cuántas veces se formó y se cortó. */
+    red: { fase: string; enlaces: number; formadas: number; cortes: number }
   }
   forzar: (que: ClaseDeArco) => boolean
+  /** [PULIDO 19] Q1.d · la red en reposo apagada (para medir sin ella) o no. */
+  red: (activa: boolean) => void
   calor: (valor: number) => void
   grupo: () => [number, number] | null
   /** Ajusta en vivo una uniforme de un grupo (`brasas`, `arcos`, `comun`, `reflejo`): sus números en orden. */
@@ -82,7 +86,11 @@ export function energiaDelBanco(a: Armado, vista: { readonly current: Vista }): 
       cursor: a.rayo.activo,
       carga: a.puntero.carga,
       velocidad: a.lectura.velocidad,
+      red: { fase: a.red.fase, enlaces: a.red.n, formadas: a.red.formadas, cortes: a.red.cortes },
     }),
+    red: (activa) => {
+      a.red.apagada = !activa
+    },
     forzar: (que) => {
       if (!(CLASES_DE_ARCOS as readonly string[]).includes(que)) return false
       if (que === 'pulso' || que === 'descarga') {

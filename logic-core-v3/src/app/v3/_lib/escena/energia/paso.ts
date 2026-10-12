@@ -1,9 +1,10 @@
 import { DE_AFUERA, deAfuera } from './afuera'
 import { DEL_MOVIMIENTO, delMovimiento } from './movimiento'
-import { BRASAS, soltarEnlace, type Brasas, type EntradaDeLasBrasas } from './brasas'
+import { BRASAS, desenlazar, soltarEnlace, type Brasas, type EntradaDeLasBrasas } from './brasas'
 import { DOMINIO, EN_EL_DOMINIO, alfaDe, envolver } from './dominio'
 import { ajustarLaGrilla, entreEllas } from './grilla'
 import { largo3 } from './largo'
+import { REPOSO } from './reposo'
 import { rotorEnLote } from './ruido'
 
 /**
@@ -59,7 +60,8 @@ export function pasoDeLasBrasas(b: Brasas, dt: number, en: EntradaDeLasBrasas, a
     b.flujo[i * 3 + 1] *= rapidez
     b.flujo[i * 3 + 2] *= rapidez
   }
-  const frena = Math.exp(-F.amortigua * dt)
+  // [PULIDO 19] Q1.d · con la red en reposo las brasas se frenan (`en.freno`, de `reposo.ts`).
+  const frena = Math.exp(-(F.amortigua + REPOSO.frena * en.freno) * dt)
   const enfria = Math.exp(-dt / K.apagaS)
   const reposo = K.base + K.porTemperatura * en.temperatura
   for (let i = 0; i < b.n; i += 1) {
@@ -114,6 +116,8 @@ function envolverYVivir(b: Brasas, en: EntradaDeLasBrasas, dt: number, azar: () 
     if (envolver(d, b, i, azar)) {
       b.eventos[i] = 1
       b.vida[i] = 0
+      // Su pareja quedó del otro lado del dominio: sin el enlace (el resorte la arrastraría por toda la pantalla).
+      desenlazar(b, i)
       continue
     }
     // Mudándose (el reparto), se apaga: su alfa es 0 hasta que nace en su celda nueva. El alfa se lee de `EN_EL_DOMINIO` (una llamada

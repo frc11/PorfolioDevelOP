@@ -126,7 +126,43 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
   390 calma-noche 0,90 (p95 1,1). Ningún cuadro de más de 20 ms. Las otras vistas, en «Medido».
 
 ### Q1.d · La red en reposo
-- PENDIENTE.
+- HECHO · VISTO en el mini-banco (capturas `q1d5-red-noche/dia/tel` y `q1d5-corte-noche`: la red armada de noche y de día a 1440 y en
+  el teléfono, y a 0,15 s del gesto: los enlaces cerca del puntero ya muertos con sus brasas encendidas por el chasquido).
+- LA MÁQUINA (`energia/reposo.ts`, pura, 300 líneas): quieta la página 3,5 s (sin scroll, sin un mouse que se mueva más de ~3 px
+  desde su última referencia —a cualquier cadencia de cuadros—, sin dedo) se FORMA: cada brasa a la vista (vida ≥ 0,6) se enlaza con
+  sus hasta tres vecinas más cercanas con lugar, por la grilla del último paso, a menos de 2,2 u en el mundo y de 0,2 del cuadro (las
+  cercanas a la cámara no cruzan media pantalla), cada par una vez, hasta 1,5 enlaces por brasa en total (el búfer). Sin ordenar: cada
+  enlace nace con un retardo por su distancia al centro del cuadro (0,8) y un poco de azar (0,2) en `formaS` 1,8 s y se enciende en
+  0,25 s: la red crece del centro hacia afuera. ARMADA, quieta y viva (el titileo, dos ritmos por enlace, en el sombreador). Las
+  brasas se FRENAN desde un segundo antes de formarse (quietas primero, enlazadas después; `en.freno` se suma a la amortiguación:
+  12/s) y mientras está armándose o armada no hay reparto. Con UN gesto (`leerElGesto`: el scroll, el puntero, el dedo, un pulso o
+  descarga, o el final del pie, que cuenta como gesto) se CORTA en cascada desde el origen del gesto (el puntero si está; si no, el
+  centro) en `corteS` 0,3 s: cada enlace muere con un destello (alfa 2,2 en 0,1 s) y un golpe de energía (0,4) a sus dos brasas (el
+  chasquido: se encienden y tiemblan), y el freno se suelta en 0,6 s. Nunca con movimiento reducido (el cuadro quieto no la llama).
+- EL DIBUJO (`dibujo/red.ts`): un solo búfer de cuadriláteros de pantalla (4 vértices y 2 triángulos por enlace) que el sombreador
+  abre a los dos lados del segmento con el ancho en px del dispositivo (0,45 px de medio ancho y un píxel blando); por vértice los
+  dos extremos (siguen a sus brasas), el lado y la punta, el alfa (por la vida de las dos brasas) y la semilla. De día tinta
+  translúcida (0,42), de noche luz (0,34); la máscara de los textos por píxel (`gl_FragCoord`), el final del pie y `uApagado`.
+  Siempre al menos un enlace nulo dibujado (el programa se arma al cargar con el precompilado). Después de las brasas en el orden.
+- Lo que el banco mostró y se arregló: (1) rayos que cruzaban la pantalla entera: una brasa enlazada que reaparecía por una cara del
+  dominio (o se mudaba por el reparto) dejaba su rayo estirado de lado a lado → `podar`: una brasa que salta pierde sus enlaces, y un
+  enlace estirado más de 1,5 veces también; sin reparto con la red; (2) seguían apareciendo rayos de 3,6 u: la PAREJA (el enlace de
+  la física de PULIDO 15) de una brasa que cruzó el dominio quedaba del otro lado y el resorte la arrastraba por toda la pantalla
+  (un defecto de Q1.b que se veía como una brasa que cruza volando) → `desenlazar` al reaparecer y al mudarse; (3) las brasas
+  seguían derivando los primeros 0,3 s de la red (el freno subía recién al formarse) → el freno un segundo antes; (4) un puntero que
+  deriva despacio no cortaba (el umbral era por cuadro: a 500 cuadros por segundo no llegaba) → el umbral desde la última referencia.
+- Invariantes (s70, 29 afirmaciones y 19 controles positivos): quieta, la red se arma entre 3,5 y 5,6 s con ≥ 40 % de enlaces por
+  brasa, ≤ 3 por brasa, ninguno más largo que 1,5 veces el alcance (en el mundo y en el cuadro) y el freno entero; el gesto a los 7 s la
+  corta (todos los enlaces mueren en ≤ `corteS`), con el chasquido (la energía media sube ≥ 0,1) y suelta el freno; en el final del
+  pie, quieta 10 s, no se arma; el lector del gesto (scroll, puntero, dedo, final; quieto, nada); el dibujo con los dos extremos por
+  vértice, el ancho en px, la máscara de los textos por píxel, el final y el titileo. Controles: una red antes de tiempo, cuatro
+  enlaces por brasa, un enlace que cruza media pantalla, un corte que no termina, sin chasquido, un freno que no se suelta, una red
+  sorda al gesto, una armada en el final, un lector ciego al scroll, un dibujo sin la máscara. s68: `reposo.ts` y `dibujo/red.ts` en
+  los módulos (≤ 300 líneas) y en lo de cada cuadro sin reservas (tabla de invariantes).
+- El costo (mini-banco, la NVIDIA, sin vsync; recibo `entregas/pulido-19/mini-medido.json`, sección `red`; s70 lo lee): 1440 calma de
+  noche con la red armada (618 enlaces) 1,84 ms por cuadro, sin ella 1,36 (+0,48 ms: el relleno de ~2.500 vértices y su subida, y el
+  dibujo); 390 (181 enlaces) 0,91 contra 0,95 (nada); de día 1,86; al máximo (el puntero que da vueltas: la red no se arma) 1,40 ms a
+  1440 y 0,92 ms a 390. La basura por cuadro no cambia (6,7 KB). Ningún cuadro de más de 20 ms.
 
 ### Q2 · El pie: todo cae y queda incrustado
 - PENDIENTE.
@@ -167,6 +203,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 |---|---|---|---|---|
 | Arranque | 79,6 GB | 2735 MB | 957 MB | sin banco del sitio (pide 3000 MB); el mini-banco sí |
 | Q1 (mini-banco) | 78,5 GB | 2012 → 2516 MB | 957 → 984 MB | sin banco del sitio; mini-banco a 1440 y 390 (un Chrome por medición); cuadros crudos borrados al armar cada hoja |
+| Q1.d (mini-banco) | 78,5 GB | 2516 → 2453 MB | 984 → 991 MB | ídem; la red con y sin (`red=no`) |
 
 ## Invariantes que cambian de sentido (antes / ahora / por qué)
 
@@ -179,6 +216,9 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 | s68 · POR_CUADRO, MODULOS | la grilla y las fuerzas entre ellas en `brasas.ts`; sin `dominio.ts` ni `grilla.ts` | `grilla.ts` (entreEllas, ajustarLaGrilla, celdaDe) y `dominio.ts` en las listas; `ruido.ts` con el rotor en lote; `brasas.ts` con `alRayoDesde` | Q1.b sacó la grilla de `brasas.ts` (pasaba las 300 líneas) y el dominio es nuevo; lo de cada cuadro sin reservas se sigue exigiendo |
 | s69 · CALIENTES, firmas | `brilloPorDensidad(brasas)`; `deAfuera(b, i, en, dt, azar)`, `delMovimiento(b, i, en, dt)` | `brilloPorDensidad(brasas, dt)` (la inercia); `en.dt` antes de llamar (sin `dt` por parámetro) | Q1.c (la densidad con inercia) y la basura por cuadro (los números no cruzan llamadas por brasa) |
 | s70 · el piso del dominio | `poblar(d, b, piso, …)`, `repartir(d, b, piso, …)`, `objetivosDelReparto(d, piso, …)`, `armarElDominio(d, fov, aspecto, foco)` | el piso vive en el dominio: `armarElDominio(…, foco, piso)` y las demás sin `piso` | ídem (la basura por cuadro) |
+| s68 · MODULOS, POR_CUADRO | 24 módulos; sin `reposo.ts` ni `dibujo/red.ts` | 26 módulos; `reposo.ts` (pasoDeLaRed, leerElGesto, formar, cortar, enlazar, chasquear, soltar) y `dibujo/red.ts` (rellenarRed) sin reservas | Q1.d (la red en reposo) |
+| s70 · control «una reaparición adentro del cuadro» | la brasa 3 a los 200 cuadros | la más encendida a los 200 cuadros | con `desenlazar` las trayectorias cambiaron y la brasa 3 ya no estaba adentro del cuadro en ese momento (el control era frágil: dependía de dónde cayera una brasa) |
+| s70 · Q1.c (la corrida) | `repartir` en cada cuadro | `repartir` sólo con la red suelta (como el producto) | Q1.d |
 
 ## Crítica (lo que el banco mostró y qué se hizo)
 
@@ -187,6 +227,8 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 - Q1 · 61 KB de basura por cuadro (de 16): en Q1.b («sin basura por cuadro»). El perfil del heap atribuía todo a `pasoDeLasBrasas`
   y Node no lo reproducía: el discriminador fue correr la misma medición dentro del Chrome del banco con los objetos vivos.
 - Q1 · el reparto no mudaba nada con el encuadre que cambia (la cuenta por celda nunca superaba 1,6× con un desnivel suave): 1,2×.
+- Q1.d · rayos de lado a lado (brasas que saltan con su enlace puesto; la pareja de la física del otro lado del dominio, un defecto
+  de Q1.b que ya estaba), brasas que derivaban mientras se formaba, un puntero lento que no cortaba: en Q1.d, cada uno con su arreglo.
 
 ## Lo que no quedó bien
 

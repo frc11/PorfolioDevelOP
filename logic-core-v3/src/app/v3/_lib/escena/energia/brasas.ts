@@ -152,13 +152,15 @@ export interface EntradaDeLasBrasas {
    * cuadro): medido en Chrome, 51 KB de basura por cuadro que eran de `dt`, `piso`, `x, y, z` y `t` cruzando llamadas.
    */
   dt: number
+  /** [PULIDO 19] Q1.d · el freno de la red en reposo (0 a 1; se suma a la amortiguación: `REPOSO.frena`). */
+  freno: number
 }
 
 /** Cuántos arcos entran al paso como mucho (los lugares de los arcos, `arcos/arcos.ts`). */
 export const ARCOS_EN_LA_ENTRADA = 6
 
 export function crearEntradaDeLasBrasas(): EntradaDeLasBrasas {
-  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), viento: new Float32Array(3), estela: new Float32Array(3), arcos: new Float32Array(ARCOS_EN_LA_ENTRADA * 7), cuantosArcos: 0, piso: -100, dominio: null, dt: 1 / 60 }
+  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), viento: new Float32Array(3), estela: new Float32Array(3), arcos: new Float32Array(ARCOS_EN_LA_ENTRADA * 7), cuantosArcos: 0, piso: -100, dominio: null, dt: 1 / 60, freno: 0 }
 }
 
 /** Un azar con semilla (mulberry32): las mismas brasas y los mismos arcos en cada carga de la página (y en el banco). */
@@ -229,6 +231,14 @@ export function crearBrasas(n: number, azar: () => number, piso = Number.NEGATIV
     b.ruido[i] = Math.max(1, Math.floor(azar() * 4294967295))
   }
   return b
+}
+
+/** [PULIDO 19] Deshace el enlace de `i` sin empujón: la brasa saltó (reapareció por una cara del dominio, se mudó) y su pareja quedó del otro lado; el resorte la arrastraría por toda la pantalla. */
+export function desenlazar(b: Brasas, i: number): void {
+  const j = b.pareja[i]
+  if (j < 0) return
+  b.pareja[i] = -1
+  b.pareja[j] = -1
 }
 
 /** Suelta el enlace de `i` (y de su pareja): un empujón para separarlos y un rato sin enlazarse. */

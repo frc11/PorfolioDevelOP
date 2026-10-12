@@ -1,4 +1,4 @@
-import { BRASAS, type Brasas } from './brasas'
+import { BRASAS, desenlazar, type Brasas } from './brasas'
 
 /**
  * [PULIDO 19] Q1.b · EL DOMINIO DE LA VISTA — el plasma vive en el MUNDO (no sigue a la cámara ni al logo) pero su dominio cubre lo que se
@@ -324,6 +324,7 @@ export function repartir(d: Dominio, b: Brasas, azar: () => number): number {
     b.vida[i] = 0
     b.eventos[i] = 1
     b.migra[i] = 0
+    desenlazar(b, i)
     cuenta[vacia] += 1
     vacia = masVacia(cuenta, objetivo)
     mudadas += 1

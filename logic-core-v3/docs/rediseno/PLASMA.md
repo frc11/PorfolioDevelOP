@@ -77,6 +77,21 @@ Q1.a · MÁS DENSIDAD: 800 brasas en escritorio y 400 en el teléfono (eran 600 
 fuera del cuadro y la fuente las apagaba lejos del logo). Medido en el mini-banco con el encuadre del sitio contra PULIDO 18: la luz del
 plasma sobre el fondo de noche ×1,9 (en el centro y en la periferia) y de día +20 %.
 
+Q1.d · LA RED EN REPOSO (`reposo.ts`, la máquina; `dibujo/red.ts`, el dibujo). Quieta la página (sin scroll, sin un mouse que se
+mueva, sin dedo) 3,5 s, las brasas se FRENAN (desde un segundo antes: quietas primero, enlazadas después; el freno se suma a la
+amortiguación, 12/s) y se ENLAZAN con rayos finos de vecina en vecina: hasta tres por brasa, las más cercanas, a menos de 2,2 u en el
+mundo y de 0,2 del cuadro (las cercanas a la cámara no cruzan media pantalla), por la grilla del último paso; la red crece del centro
+del cuadro hacia afuera en 1,8 s (cada enlace nace con un retardo por su distancia al centro y se enciende en 0,25 s; nada se
+ordena) y queda ARMADA: quieta y viva (el titileo leve, dos ritmos por enlace, lo pone el sombreador). Con UN gesto (un scroll, el
+puntero que se mueve más de ~1,5 px, el dedo, un pulso, el final del pie) se CORTA en cascada desde el origen del gesto (el puntero
+si está; si no, el centro) en 0,3 s: cada enlace muere con un destello y un golpe de energía a sus dos brasas (el chasquido: se
+encienden y tiemblan), y el freno se suelta en 0,6 s. Mientras está armándose o armada no hay reparto, y una brasa que salta
+(reaparece por una cara, se muda) o un enlace que se estiró más de 1,5 veces pierde su enlace: ningún rayo cruza la pantalla. Nunca
+en el final del pie (cuenta como gesto) ni con movimiento reducido (el cuadro quieto no la llama). EL DIBUJO: un solo búfer de
+cuadriláteros de pantalla (cuatro vértices y dos triángulos por enlace, 1,5 por brasa como mucho), el ancho en px del dispositivo
+(0,45 px de medio ancho más un píxel blando), de día tinta translúcida y de noche luz, la máscara de los textos por píxel y el final;
+siempre al menos un enlace nulo dibujado (el programa se arma al cargar). El banco: `estado().red` y `red(false)` para medir sin ella.
+
 ## El campo
 
 `ruido.ts`: la velocidad es el rotor de un potencial de tres canales de ruido de gradiente (Bridson y otros, 2007): sin divergencia
@@ -85,6 +100,8 @@ segundo. En la CPU, cada brasa lo recalcula en cuadros alternos. [PULIDO 18] El 
 
 ## A · Las brasas
 
+- [PULIDO 19] Q1.d · una brasa que salta (reaparece por una cara del dominio, se muda) pierde su enlace sin empujón (`desenlazar`): el
+  resorte la arrastraba por toda la pantalla hacia su pareja, que quedó del otro lado del dominio.
 - Las de PULIDO 15, sin cambios: alcance 3,6; atraen 0,42 (opuestas) y repelen 0,55 (iguales); el rechazo de cerca (0,55, choque 6);
   amortiguación 1,1; tope 3 u/s; la cáscara 1,6. Enlaces: se forman a 1,2, reposo 0,95, resorte 2,2, viven 2,5–7 s, empujón 0,9,
   enfriado 3–7 s.
@@ -224,7 +241,8 @@ PULIDO 19 · Q1 (el mini-banco, la NVIDIA, sin vsync, sin el reloj de la GPU; re
 dominio de la vista (600 en la cáscara antes), el plasma en calma de noche a 1440 cuesta 1,38 ms por cuadro (p95 1,6; antes del
 dominio, 1,02 con 600) y 0,90 a 390 (400 brasas); 6,4 KB de basura por cuadro a 1440 y 5,2 a 390 (eran 16). Ningún cuadro de más
 de 20 ms. La presencia de día y de noche en el encuadre del sitio, contra PULIDO 18: la luz del plasma sobre el fondo ×1,9 de noche
-(centro y periferia) y +20 % de día. Lo de PULIDO 17 queda como historia (con C, que se borró en PULIDO 18). En la NVIDIA (RTX 5050; la pantalla del banco va a
+(centro y periferia) y +20 % de día. Q1.d · la red en reposo armada (618 enlaces a 1440) suma +0,48 ms por cuadro de noche a 1440
+(1,36 → 1,84) y nada a 390 (181 enlaces); sin basura nueva. Lo de PULIDO 17 queda como historia (con C, que se borró en PULIDO 18). En la NVIDIA (RTX 5050; la pantalla del banco va a
 75 Hz: 13,34 ms por cuadro). Recibo: `entregas/pulido-17/o5-medido.json`.
 
 | | Con vsync, al máximo (media / máx.) | De noche (máx.) | Cuadros de más de 20 ms en caliente | Sin vsync, al máximo (lo que suma al polvo) | La simulación en la GPU |

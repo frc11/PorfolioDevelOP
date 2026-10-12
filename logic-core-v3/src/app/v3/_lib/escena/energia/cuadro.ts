@@ -11,6 +11,8 @@ import { DIBUJO } from './dibujo/comun'
 import { subir, type Armado } from './dibujo/armado'
 import { alfaDelDominio, armarElDominio, poblar, repartir } from './dominio'
 import { pasoDeLasBrasas } from './paso'
+import { rellenarRed } from './dibujo/red'
+import { leerElGesto, pasoDeLaRed } from './reposo'
 import { brilloPorDensidad, calentarBrasa } from './vecinas'
 import { avanzar } from './interaccion/interaccion'
 import { largo3 } from './largo'
@@ -273,8 +275,13 @@ export function cuadro(a: Armado, f: Afuera): void {
   if (a.lectura.golpeAhora) ondaDesde(a, a.centro.x, a.centro.y, a.centro.z, f.ahora)
   elDominio(a, f)
   elPuntero(a, f.camara)
-  elGesto(a, f)
   const en = a.entrada
+  // [PULIDO 19] Q1.d · la red en reposo: el gesto se lee antes de que `elGesto` consuma el pulso y la descarga; el origen de la cascada
+  // del corte es el puntero si está (si no, el centro).
+  const pt = a.puntero
+  const gesto = leerElGesto(a.gesto, f.scroll, pt.x, pt.y, a.rayo.activo, pt.dedo || pt.apretado || pt.pulso || pt.descarga, f.fin)
+  pasoDeLaRed(a.red, a.brasas, a.dominio, en, f.dt, gesto, a.rayo.activo ? pt.x : 0, a.rayo.activo ? pt.y : 0, a.azar)
+  elGesto(a, f)
   en.tiempo = f.tiempo
   en.temperatura = a.temperatura.valor
   en.rayo = a.rayo.activo ? a.rayo.r : null
@@ -286,8 +293,10 @@ export function cuadro(a: Armado, f: Afuera): void {
   vientoEstelaYCanales(a, f)
   const pasos = Math.max(1, Math.ceil(f.dt / CUADRO.pasoMaximo))
   for (let k = 0; k < pasos; k += 1) pasoDeLasBrasas(a.brasas, f.dt / pasos, en, a.azar)
-  repartir(a.dominio, a.brasas, a.azar)
+  // [PULIDO 19] Q1.d · con la red armándose o armada no hay reparto (una brasa enlazada que se muda arrastraría su rayo por la pantalla).
+  if (a.red.fase === 'suelta') repartir(a.dominio, a.brasas, a.azar)
   brilloPorDensidad(a.brasas, f.dt)
+  rellenarRed(a.red, a.brasas, a.dibujoDeLaRed)
   const entorno = a.entorno
   entorno.camara[0] = f.camara.position.x
   entorno.camara[1] = f.camara.position.y
