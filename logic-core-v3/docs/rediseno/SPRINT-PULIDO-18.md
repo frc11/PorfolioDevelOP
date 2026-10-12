@@ -129,7 +129,15 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no.
 - PENDIENTE.
 
 ### P2.1 · Investigar (`DIMENSION-ESPEJO.md`)
-- PENDIENTE.
+- HECHO · `docs/rediseno/DIMENSION-ESPEJO.md`: 15 referencias (Framestore y el «Mandelbrotting» de *Doctor Strange*; ILM y la Nueva
+  York que se dobla; Method y el «Magical Mystery Tour»; Framestore y Before & Afters sobre el mirror-verse de *No Way Home*: el
+  caleidoscopio encima de la ciudad, el arte matemático, el pliegue «donut», la medida; la gema de la realidad en Knowhere: una
+  ilusión que se rompe; el mundo de vidrio de *Multiverse of Madness*; el París de *Inception*; Barr 84; Worley y *The Book of
+  Shaders*; Quílez y la distancia exacta al borde; el plegado polar; Escher y el Droste de Leiden; la copia del cuadro de three.js;
+  la refracción en pantalla). Cada una con qué se toma y cómo se leyó; ningún código copiado. Lo que NO apareció: un desglose del
+  efecto de cristal de la gema de la realidad (anotado).
+- Los cinco efectos, cómo se traducen (cristal, pliegue, caleidoscopio, ecos y la propia: la espiral de Escher), los tres disparos y
+  una propuesta de dónde va cada uno en el recorrido.
 
 ### P2.2 · Los efectos (`?espejo=`), los disparos y el color
 - PENDIENTE.
