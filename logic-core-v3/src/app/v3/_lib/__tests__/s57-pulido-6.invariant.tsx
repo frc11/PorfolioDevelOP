@@ -139,14 +139,15 @@ const manhattan = (dentro: Uint8Array, lado: number): Float32Array => Float32Arr
 const simE2 = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
 const cuadroE2 = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const sinCirculoBien = (sim: string, energia: string): boolean => !('radio' in CALMA_EN_EL_PISO) && CALMA_EN_EL_PISO.margen >= FILO.desde + ANCHO_ENTERO &&
-  sim.includes('distanciaAlLogo( xz ) ) );') && !/length\( xz \) \) \);/.test(sim.slice(sim.indexOf('float calmaDelFinal('))) &&
+  // [PULIDO 19] Q2 · la calma del logo queda adentro de un `max` con la calma bajo el pie acostado (un paréntesis más; la distancia, la misma).
+  sim.includes('distanciaAlLogo( xz ) ) ) );') && !/length\( xz \) \) \) \);/.test(sim.slice(sim.indexOf('float calmaDelFinal('))) &&
   sim.includes('float desde = uCalmaDelFinal > 0.0 ? distanciaAlLogo( xz ) + 1.5 : length( xz - uGolpe.yz );') &&
   sim.includes('azarDeLaLuz( celda + 0.37 ) ) * ( 1.0 - calmaDelFinal( xz ) );') &&
   energia.includes('float r = distanciaAlLogo( xz );') && energia.includes('return min( 1.8, e ) * uEnergiaDeLaLuz;') && energia.includes('float d = ( r - 58.0 * ( 1.0 - pow( 1.0 - t, 2.2 ) ) )') &&
   LUZ_DE_ABAJO.ondas.desde === 0 && cuadroE2.includes('radioDeLaExpansion(expansion, 0)') && radioDeLaExpansion(0, 0) === 0 && HUECO.campo.margen >= 8
 afirmar(transformadaBien(distanciaAfuera) && sinCirculoBien(simE2, ENERGIA_EN_LA_SIMULACION_GLSL), '2 · sin el círculo liso: la calma es un margen pegado al hueco (con la distancia al logo, exacta), los bloques que tocan el filo al ras; la luz llega hasta el borde; la energía, el golpe y las ondas nacen en el filo', `al ras hasta ${(0.7072 * 0.8 + CALMA_EN_EL_PISO.margen).toFixed(2)} u del logo · campo de ${String(HUECO.campo.margen)} u alrededor`)
 controlPositivo('2 · el detector VE una distancia de a cuadras (no la exacta)', manhattan, transformadaBien)
-controlPositivo('2 · y el círculo de antes (la calma medida con el radio)', simE2.replace('distanciaAlLogo( xz ) ) );', 'length( xz ) ) );'), (sim: string) => sinCirculoBien(sim, ENERGIA_EN_LA_SIMULACION_GLSL))
+controlPositivo('2 · y el círculo de antes (la calma medida con el radio)', simE2.replace('distanciaAlLogo( xz ) ) ) );', 'length( xz ) ) ) );'), (sim: string) => sinCirculoBien(sim, ENERGIA_EN_LA_SIMULACION_GLSL))
 controlPositivo('2 · y la luz que se apaga contra la calma', ENERGIA_EN_LA_SIMULACION_GLSL.replace('return min( 1.8, e ) * uEnergiaDeLaLuz;', 'return min( 1.8, e ) * uEnergiaDeLaLuz * ( 1.0 - calmaDelFinal( xz ) );'), (e: string) => sinCirculoBien(simE2, e))
 
 // 3 · LAS TRES MANERAS (`?filo=`; sin bandera, `corriente`) y EL GOLPE. [PULIDO 7] F1 · ganó la descarga: la corriente, el pulso y

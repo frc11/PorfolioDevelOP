@@ -12,6 +12,27 @@ import { ORBIT_TARGET_Y } from './probeScene'
  */
 export const CAMARA_SIN_EL_MOUSE = new THREE.PerspectiveCamera()
 
+/**
+ * [PULIDO 19] Q2 · LA CÁMARA DE ANTES DEL FINAL: la de sin el mouse como la deja el rig, antes de que el final la suba (el final la
+ * copia al empezar su cuadro). Con ella se arma la pared del pie mientras las piezas caen: quieta donde estaba.
+ */
+export const CAMARA_ANTES_DEL_FINAL = new THREE.PerspectiveCamera()
+
+/** Copia la pose y la proyección de una cámara en otra (sin reservas). */
+export function copiarLaCamara(destino: THREE.PerspectiveCamera, origen: THREE.PerspectiveCamera): void {
+  destino.fov = origen.fov
+  destino.aspect = origen.aspect
+  destino.near = origen.near
+  destino.far = origen.far
+  destino.zoom = origen.zoom
+  destino.projectionMatrix.copy(origen.projectionMatrix)
+  destino.projectionMatrixInverse.copy(origen.projectionMatrixInverse)
+  destino.position.copy(origen.position)
+  destino.quaternion.copy(origen.quaternion)
+  destino.scale.copy(origen.scale)
+  destino.updateMatrixWorld(true)
+}
+
 /** La pose de la cámara sin el mouse: una sola, escribible (cero reservas por cuadro). */
 export interface PoseSinElMouse {
   angleDeg: number

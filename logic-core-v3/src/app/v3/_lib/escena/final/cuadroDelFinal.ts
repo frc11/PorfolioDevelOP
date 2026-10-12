@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { VIVO } from '../entorno/vivo'
 import { FLOOR_Y } from '../probeScene'
 import type { GestoDeScroll } from '../../gestosDelScroll'
-import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
+import { CAMARA_ANTES_DEL_FINAL, CAMARA_SIN_EL_MOUSE, copiarLaCamara } from '../sinElMouse'
 import { relojDelCuadro, segundosDelViaje, viajeEnCurso } from '../viaje'
 import { FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
 import { CAMPO_QUIETO_EN, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, desdeLaUltimaOnda, radioDeLaExpansion } from './luzDeAbajo'
@@ -169,6 +169,9 @@ export function soltarElFinal(s: EstadoDelFinal, logo: THREE.Object3D | null): v
   p.uSinMancha.value = 0
   p.uPoder.value = 0
   s.poder = 0
+  p.uCalmaDelPieFuerza.value = 0
+  EN_VIVO.distanciaDelPie = 0
+  EN_VIVO.calmaDelPieFuerza = 0
   p.uOscuroDelBrillo.value = 0
   LUZ_DE_ABAJO_EN_VIVO.uEnergiaDeLaLuz.value = 0
   LUZ_DE_ABAJO_EN_VIVO.uExpansionDeLaLuz.value.set(0, 0)
@@ -248,10 +251,19 @@ export function gestoDelFinal(s: EstadoDelFinal, g: GestoDeScroll): boolean {
   return d.retiene
 }
 
+/** [PULIDO 19] Q2 · en escritorio, la distancia desde arriba que deja entero el pie acostado (la escribe el pie); sin piezas, la de siempre. */
+function distanciaDelPieEnEscritorio(): number | null {
+  return EN_VIVO.distanciaDelPie > 0 ? EN_VIVO.distanciaDelPie : null
+}
+
 /** Un cuadro del final: el reloj, el quieto, el logo, el hueco, el golpe, la cámara y el piso. */
 export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, delta: number, logo: THREE.Group | null, tamano: TamanoDelLogo): void {
   const dt = Math.min(Math.max(delta, 0), 0.1)
   const t = VIVO.uTiempo.value
+  // [PULIDO 19] Q2 · la cámara sin el mouse como la dejó el rig, antes de que el final la suba: con ella se arma la pared del pie
+  // mientras las piezas caen (`pie3d/caida.ts`); y la huella del logo acostado, para sus lugares en el piso.
+  copiarLaCamara(CAMARA_ANTES_DEL_FINAL, CAMARA_SIN_EL_MOUSE)
+  EN_VIVO.huellaDelLogo.set(tamano.ancho ?? ANCHO_DEL_LOGO, tamano.alto)
   // 1 · [RETOQUE DEL ENCASTRE] 1D · el reloj: al fondo, arranca solo cuando el pie llegó entero y corre a su ritmo (el
   // scroll hacia abajo no lo adelanta). [NOCTURNO FINAL] A1 · un gesto hacia arriba lo rebobina entero, solo; parado,
   // vuelve a empezar a los 2,5 s sin gestos. A2 · fuera del fondo o en un viaje, se deshace con tope.
@@ -340,6 +352,10 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // [PULIDO 11] D · y con el logo que deja su lugar (la lenta baja parada adelante del hueco: la mancha no se queda atrás).
   piso.uSinMancha.value = Math.max(EN_VIVO.camara, fueraDeSuLugar(tamano, segundosDelFinal(fin)))
   s.pozo.grupo.visible = piso.uApertura.value > 0
+  // [PULIDO 19] Q2 · el mar se calma bajo el pie acostado (lo escribe el pie: `pie3d/caida.ts`).
+  piso.uCalmaDelPie.value.copy(EN_VIVO.calmaDelPie)
+  piso.uBaseDelPie.value.copy(EN_VIVO.baseDelPie)
+  piso.uCalmaDelPieFuerza.value = s.estatico ? (fin > 0 ? 1 : 0) : EN_VIVO.calmaDelPieFuerza
 
   // 3 · [EL ENCASTRE] 2E · El golpe: al quedar al ras (una vez por bajada) se libera el poder: su pulso corre por el piso,
   // centrado en el logo, y las juntas de alrededor se encienden. [PULIDO 11] D · el golpe ES el contacto de la caída (el mismo
@@ -395,7 +411,8 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // [PULIDO 2] 1 · y, detrás del pie, en el hueco más grande entre sus elementos (`encuadreDelPie.ts`): ahí y de ese ancho.
   const encuadre = s.angosto ? ENCUADRE_EN_VIVO.valor : null
   const vista = ENCUADRE_EN_VIVO.vista
-  const distancia = !s.angosto || !(state.camera instanceof THREE.PerspectiveCamera) ? null : encuadre === null ? distanciaDelFinalAngosto(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, tamano.alto) : distanciaParaElAncho(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, encuadre.ancho / vista.ancho)
+  // [PULIDO 19] Q2 · en escritorio, desde arriba a la distancia que deja entero el pie acostado.
+  const distancia = !(state.camera instanceof THREE.PerspectiveCamera) ? null : !s.angosto ? distanciaDelPieEnEscritorio() : encuadre === null ? distanciaDelFinalAngosto(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, tamano.alto) : distanciaParaElAncho(state.camera.fov, state.camera.aspect, tamano.ancho ?? ANCHO_DEL_LOGO, encuadre.ancho / vista.ancho)
   const corrimiento = encuadre === null ? null : { x: (2 * encuadre.cx) / vista.ancho - 1, y: 1 - (2 * encuadre.cy) / vista.alto }
   // [PULIDO 13] K4 · sin el paralaje del mouse del recorrido (torcía la mirada ~5° con el mouse a un costado). [PULIDO 14] L2 a · se
   // va con el acercamiento: el de costado, girando hacia el azimut sin el mouse; el de altura, en la subida de la viva (nunca baja).

@@ -368,10 +368,14 @@ afirmar(quieta.matrixWorld.equals(antesDeTocar) && adelante.y < -0.99 && adelant
 // Quieto en el pie: gira sin fin y se aleja con tope; al moverse, todo vuelve rápido.
 // [NOCTURNO FINAL] A1/A2 · cambió por pedido: la vuelta va con tope de velocidad (media vuelta salía a 400°/s, un
 // coletazo, y la cola de la exponencial duraba segundos): a los 3 s, cero (aun desde media vuelta), sin pasar el tope.
+// [PULIDO 19] Q2 · cambió por pedido: SIN el giro en espiral ni el alejamiento (`giroGradosS` y `alejaHasta` en 0): quieto, la cámara se
+// queda desde arriba, cerca, con el pie acostado entero. La vuelta con tope sigue (desde un giro forzado), por si vuelven.
 const quieto = { giro: 0, aleja: 0, giroV: 0, alejaV: 0 }
 let tQuieto = 0
 for (let i = 0; i < 6000; i += 1) tQuieto = relojDelQuieto(tQuieto, true, 99, 0.1, quieto)
-const conTope = quieto.aleja <= FINAL_DEL_PIE.quieto.alejaHasta && quieto.aleja > 0.99 * FINAL_DEL_PIE.quieto.alejaHasta && quieto.giro > 2500
+const conTope = FINAL_DEL_PIE.quieto.giroGradosS === 0 && FINAL_DEL_PIE.quieto.alejaHasta === 0 && quieto.giro === 0 && quieto.aleja === 0 && tQuieto > 599
+quieto.giro = 180
+quieto.aleja = 17
 let vueltaMasRapida = 0
 let alejaMasRapida = 0
 for (let i = 0; i < 60; i += 1) {
@@ -380,7 +384,7 @@ for (let i = 0; i < 60; i += 1) {
   alejaMasRapida = Math.max(alejaMasRapida, Math.abs(quieto.alejaV))
 }
 const V = FINAL_DEL_PIE.quieto.vuelta
-afirmar(conTope && quieto.giro === 0 && quieto.aleja === 0 && vueltaMasRapida <= V.giroS + 1e-9 && vueltaMasRapida > 0.5 * V.giroS && alejaMasRapida <= V.alejaS + 1e-9 && relojDelQuieto(0, true, 0.5, 0.1, { giro: 0, aleja: 0, giroV: 0, alejaV: 0 }) === 0, 'quieto en el pie (el final entero y sin scroll hace 1,4 s): la cámara gira sin fin y se aleja hacia un tope que nunca pasa (sin perder el logo); al volver a scrollear, el giro (por el camino corto) y el alejamiento vuelven con tope de velocidad: a los 3 s, cero, aun desde media vuelta', `${FINAL_DEL_PIE.quieto.giroGradosS}°/s · tope ${String(FINAL_DEL_PIE.quieto.alejaHasta)} u · vuelta a lo sumo ${vueltaMasRapida.toFixed(1)}°/s`)
+afirmar(conTope && quieto.giro === 0 && quieto.aleja === 0 && vueltaMasRapida <= V.giroS + 1e-9 && vueltaMasRapida > 0.5 * V.giroS && alejaMasRapida <= V.alejaS + 1e-9 && relojDelQuieto(0, true, 0.5, 0.1, { giro: 0, aleja: 0, giroV: 0, alejaV: 0 }) === 0, 'quieto en el pie (el final entero y sin scroll hace 1,4 s): [PULIDO 19] Q2 · la cámara se queda (sin el giro en espiral ni el alejamiento: el pie acostado entero, desde arriba, cerca); desde un giro y un alejamiento forzados, vuelven con tope de velocidad: a los 3 s, cero, aun desde media vuelta', `${FINAL_DEL_PIE.quieto.giroGradosS}°/s · tope ${String(FINAL_DEL_PIE.quieto.alejaHasta)} u · vuelta a lo sumo ${vueltaMasRapida.toFixed(1)}°/s`)
 
 // El golpe: el piso (la onda del golpe y la vibración), inyectado sin tocar la onda.
 // [EL ENCASTRE] 2C · cambió por pedido: la explosión del golpe se fue; las partículas eran el vapor al acostarse.
@@ -398,8 +402,8 @@ const cableadoDelFinal = (mo: string): boolean =>
   // con movimiento reducido sigue sin montarse.
   mo.includes("{(!reducedMotion || calidad === 'compacta') && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} calidad={calidad} estatico={reducedMotion} />}") &&
   mo.indexOf('<FinalDelPie') > mo.indexOf('<OrbitRig') && mo.indexOf('<FinalDelPie') < mo.indexOf('<Entorno') &&
-  pisoVivo.includes('conElFinalEnElPiso(material)') && armadas.includes('d = Math.min(d, profundidadDelFinal(CAMARA_SIN_EL_MOUSE))') && armadas.includes('const sy = scrollDelPie(scrollY)')
-afirmar(cableadoDelFinal(montaje), '  el cableado: el final va justo después del rig (le suma el final a su cámara y al logo antes que nadie lo lea), con movimiento ([PULIDO 1] P22: también abajo de 1024, y ahí quieto con movimiento reducido); las piezas del pie se colocan con la cámara del final, adelante del piso, con el scroll en que el pie se pegó')
+  pisoVivo.includes('conElFinalEnElPiso(material)') && armadas.includes('const camara = enElFinal ? CAMARA_ANTES_DEL_FINAL : CAMARA_SIN_EL_MOUSE') && armadas.includes('if (enElFinal) aplicarLaCaida(s.caida, k, a, segundos)') && armadas.includes('const sy = scrollDelPie(scrollY)')
+afirmar(cableadoDelFinal(montaje), '  el cableado: el final va justo después del rig (le suma el final a su cámara y al logo antes que nadie lo lea), con movimiento ([PULIDO 1] P22: también abajo de 1024, y ahí quieto con movimiento reducido); [PULIDO 19] Q2 · las piezas del pie se colocan con la cámara de ANTES del final y caen (`pie3d/caida.ts`), con el scroll en que el pie se pegó')
 controlPositivo('el detector VE el final montado también con movimiento reducido en escritorio', montaje.replace("{(!reducedMotion || calidad === 'compacta') && <FinalDelPie", "{<FinalDelPie"), cableadoDelFinal)
 
 cerrar('s49-cierre-final')

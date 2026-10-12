@@ -48,6 +48,7 @@ import { ENCAJE } from '../../_componentes/formularios/EncajeDelLogo'
 import { TarjetaDeResultado } from '../../_componentes/formularios/TarjetaDeResultado'
 import { EJE_DEL_PALITO, PALITO_DE_LA_P } from '../../_componentes/carga/Carga'
 import { CAIDA_AL_HUECO, anguloEnElReloj, aperturaDelHueco, arranqueDeLaCaida, bajadaDe, caidaIntegrada, contactoDeLaCaida, fueraDeSuLugar, poseDeLaCaida, sombraDeLaCaida, type PlacaDelLogo } from '../escena/final/caidaAlHueco'
+import { CAIDA_DEL_PIE } from '../escena/final/caidaDelPie'
 import { FINAL_DEL_PIE, calma as calmaDelFinal, golpeDelFinal, segundosDelFinal } from '../escena/final/recorridoDelFinal'
 import { PRUEBAS_SUELTAS, entornoPedido } from '../escena/entorno'
 import { FLOOR_Y } from '../escena/probeScene'
@@ -674,7 +675,8 @@ const piso = (x: number): number => {
   for (const yl of [-TAM_D.alto / 2, TAM_D.alto / 2]) for (const zl of [-TAM_D.espesor / 2, TAM_D.espesor / 2]) menor = Math.min(menor, p.centro.y + yl * Math.cos(a) + zl * Math.sin(a))
   return menor - FLOOR_Y
 }
-const D_DUR = golpeDelFinal() + 1.7
+// [PULIDO 19] Q2 · después del golpe caen las piezas del pie: el reloj sigue `hastaS` (era 1,7).
+const D_DUR = golpeDelFinal() + CAIDA_DEL_PIE.hastaS
 // El techo del piso alcanza 0,69 u y el mar se mueve ±0,35 u: el techo se apaga con el logo a más de 0,99 u, y lo que queda del mar
 // ((1 − calma) × 0,35) nunca llega a lo más bajo del logo mientras está arriba del piso.
 const calmaBien = (calma: (fin: number) => number): boolean => {

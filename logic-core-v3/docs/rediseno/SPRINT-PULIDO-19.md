@@ -165,7 +165,50 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
   1440 y 0,92 ms a 390. La basura por cuadro no cambia (6,7 KB). Ningún cuadro de más de 20 ms.
 
 ### Q2 · El pie: todo cae y queda incrustado
-- PENDIENTE.
+- HECHO · VISTO en el mini-banco del pie (`p18/sombreadores/pie.ts` + `pie.sh`: el piso, el logo de reemplazo que cae a su hueco con
+  `poseDeLaCaida`, las doce piezas del pie de 1440 como cajas con las medidas del DOM, la cámara del final; capturas `pie-a.png` (3,4 s),
+  `pie-4.3`, `pie-4.9`, `pie-5.6`, `pie-6.4` y `pie-8.0`): a los 4,9 s las piezas ya paradas en sus lugares del piso, a los 6,4 s el
+  titular y el formulario volcando, a los 8 s todo acostado alrededor del logo, compacto y entero en el cuadro. NO VISTO en el sitio
+  (sin banco: memoria < 3 GB): el DOM acostado, el foco y el autocompletado en el formulario acostado, los clics: VERIFICAR TRAS REINICIO.
+- LA FÍSICA Y LOS LUGARES (`final/caidaDelPie.ts`, puro): después del golpe cada pieza arranca con una onda desde el logo (`ondaUs`
+  18 u/s por la distancia de su lugar al centro), BAJA de su lugar en la pared del pie a su lugar en el piso enderezándose (el
+  trayecto de mínimo tirón; `bajaS` al menos 0,45 s y a lo sumo 24 u/s de media: las que vienen de lejos tardan más) y ahí VUELCA
+  hacia atrás sobre su canto de abajo y de atrás con la física del logo (`caidaAlHueco.ts`: la inclinación hasta pasar su equilibrio,
+  θ'' = κ·sen(θ − α) con RK4, el rebote por restitución, asentada) con su κ (su alto y su espesor en u); las placas más altas que el
+  logo caen con el tiempo comprimido por la raíz de la razón de altos (la gravedad por la razón: el formulario, de 11 u, tardaría 2,7 s
+  en tocar). DÓNDE: dos pilas a los lados del logo (el lado por el canto de pie); cada pila apila sus FILAS hacia atrás en el orden en
+  que estaban de pie (lo que estaba arriba queda más lejos; las que estaban a la misma altura, en la misma fila, una al lado de la otra),
+  con `aire` 0,5 u entre filas, centrada en el logo a lo largo, y pegada a su lado del logo: la pieza que más se acercaba al logo de pie
+  queda a `aire` de su huella y las demás con su mismo corrimiento (la alineación de la columna, como de pie). Vista desde arriba, la
+  composición es la del pie, compacta: el pie de 1440 ocupa 28 × 12 u alrededor del logo. Queda al ras del piso con la cara arriba.
+- EN LA ESCENA (`pie3d/caida.ts`): con el final en marcha la pared del pie se arma con la cámara de ANTES del final
+  (`CAMARA_ANTES_DEL_FINAL`, la de sin el mouse como la deja el rig: `cuadroDelFinal` la copia al empezar su cuadro, antes de subirla),
+  quieta donde estaba (`profundidadDelFinal` ya no lleva las piezas con la cámara que sube); cada cuadro arma las piezas como números
+  (el canto en el mundo, las medidas en u), sus lugares y su reloj, y a cada grupo le aplica su pose (el canto que baja, la orientación
+  que va de la de la cámara a la vertical de frente y el vuelco sobre su eje x). El DOM sigue a cada pieza por la homografía de siempre
+  (`seguirLaPieza` lee la matriz del grupo, caída incluida): usable acostado. El piso se CALMA bajo el pie acostado (`uCalmaDelPie`:
+  una caja en la base horizontal de la cámara de antes del final, con el borde suave de la calma del logo, desde el primer impacto) y
+  PULSA en cada impacto (`pedirLaOnda` donde cae cada pieza, como lo ve la cámara viva; el golpe grande y su sonido siguen siendo del
+  logo). LA CÁMARA: sin el giro en espiral ni el alejamiento del quieto (`giroGradosS` y `alejaHasta` en 0; la vuelta con tope queda) y,
+  desde arriba, a la distancia que deja entero el pie acostado y el logo con margen (`distanciaParaElPie` de la huella, 0,86 del
+  cuadro; el pie de 1440 pide 32 u: era 43 al golpe y 60 con el alejamiento). Todo es función de `fin`: el rebobinado levanta todo por
+  el mismo camino y el reinicio lo vuelve a tirar. Nada abajo de 1024 (el pie plano no tiene piezas). Con movimiento reducido el estado
+  final quieto (acostadas). EL RELOJ: `duracionS` = golpe + `hastaS` 4,5 s (era + 1,7): la última pieza del pie de 1440 se asienta a los
+  6,8 s y el destello y la expansión de siempre corren después; con el reloj más largo la subida de la cámara es más empinada en `fin`,
+  así que la SALIDA del fondo la deja bajar de punta a punta en 0,95 s (era 1,2) y mira 0,13 adelante (era 0,12): sale en 2,93 s sin
+  pasar su tope (s52 A2).
+- Lo que el banco sintético mostró y se arregló: (1) la pieza más cercana al logo se alineaba por el borde equivocado (el signo del
+  lado) y el formulario y un enlace caían sobre el logo; (2) tres enlaces a la misma altura se apilaban uno detrás de otro → las filas;
+  (3) con la bajada fija en 0,5 s las piezas de lejos cruzaban 1,4 u por cuadro → la bajada por lo que viaja; (4) el formulario (11 u)
+  tardaba 2,7 s en tocar → el tiempo comprimido de las placas altas; (5) la salida del fondo pasaba los 3 s y después el tope de la
+  cámara → `camaraS` 0,95 y `mira` 0,13.
+- Invariantes (s70, 44 afirmaciones y 30 controles): el pie de 1440 acostado sin solapes entre piezas ni con el logo (a ≥ 0,5 u de él), la
+  primera arranca después del golpe y la última se asienta antes de que el reloj termine menos `despuesS`, y desde arriba todas las
+  esquinas y el logo adentro del cuadro con margen (controles: dos en el mismo lugar, una sobre el logo, una antes del golpe, un reloj
+  corto, una esquina fuera); cada pieza baja sin saltos (el canto ≤ 1 u por cuadro, el ángulo ≤ 0,3 rad), vuelca y queda acostada en su
+  lugar, en una onda desde el logo (controles: un salto, una que no llega, una onda al revés); el cableado (la cámara quieta se queda,
+  la copia antes de subir, la calma del pie en el GLSL, el pulso del impacto, la caída aplicada; módulos ≤ 300 líneas y sin reservas).
+  s44, s49, s50, s52 y s57 con el cableado y el reloj nuevos (tabla de invariantes).
 
 ### Q3 · El cristal: capa fija de fondo, pegada al moiré
 - PENDIENTE.
@@ -204,6 +247,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 | Arranque | 79,6 GB | 2735 MB | 957 MB | sin banco del sitio (pide 3000 MB); el mini-banco sí |
 | Q1 (mini-banco) | 78,5 GB | 2012 → 2516 MB | 957 → 984 MB | sin banco del sitio; mini-banco a 1440 y 390 (un Chrome por medición); cuadros crudos borrados al armar cada hoja |
 | Q1.d (mini-banco) | 78,5 GB | 2516 → 2453 MB | 984 → 991 MB | ídem; la red con y sin (`red=no`) |
+| Q2 (mini-banco del pie) | 70,9 GB | 2453 → 1402 MB | 991 → 992 MB | sin banco del sitio; `pie.sh` (Chrome por captura); el Chrome del humano con muchas pestañas se lleva la memoria |
 
 ## Invariantes que cambian de sentido (antes / ahora / por qué)
 
@@ -219,6 +263,16 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 | s68 · MODULOS, POR_CUADRO | 24 módulos; sin `reposo.ts` ni `dibujo/red.ts` | 26 módulos; `reposo.ts` (pasoDeLaRed, leerElGesto, formar, cortar, enlazar, chasquear, soltar) y `dibujo/red.ts` (rellenarRed) sin reservas | Q1.d (la red en reposo) |
 | s70 · control «una reaparición adentro del cuadro» | la brasa 3 a los 200 cuadros | la más encendida a los 200 cuadros | con `desenlazar` las trayectorias cambiaron y la brasa 3 ya no estaba adentro del cuadro en ese momento (el control era frágil: dependía de dónde cayera una brasa) |
 | s70 · Q1.c (la corrida) | `repartir` en cada cuadro | `repartir` sólo con la red suelta (como el producto) | Q1.d |
+| s49 · quieto en el pie | gira sin fin (4,5°/s) y se aleja hasta 17 u | se queda (`giroGradosS` y `alejaHasta` en 0); la vuelta con tope se prueba desde un giro y un alejamiento forzados | Q2 (el pedido: sin el giro en espiral ni el alejamiento; cerca, desde arriba, el pie entero) |
+| s49 · el cableado del final | `d = Math.min(d, profundidadDelFinal(CAMARA_SIN_EL_MOUSE))` (las piezas van con la cámara que sube) | `const camara = enElFinal ? CAMARA_ANTES_DEL_FINAL : CAMARA_SIN_EL_MOUSE` y `aplicarLaCaida` | Q2 (las piezas caen desde la pared quieta) |
+| s50 · la secuencia dura | `golpeS + 1.7` | `golpeS + CAIDA_DEL_PIE.hastaS` (4,5) | Q2 (las piezas caen después del logo) |
+| s50 · de frente | `colocarLaPieza(a.grupo, CAMARA_SIN_EL_MOUSE,` | `colocarLaPieza(a.grupo, camara,` con la cámara de antes del final en el final | Q2 |
+| s44 · fija en el mundo | `colocarLaPieza`/`profundidadDeLaPieza` con `CAMARA_SIN_EL_MOUSE` | con `camara` (la de sin el mouse, o la de antes del final) | Q2 |
+| s52 · la vuelta del quieto | desde `alejaHasta` | desde 17 u (el alejamiento que tenía) | Q2 (`alejaHasta` es 0) |
+| s52 · la calma del piso | `return uCalmaDelFinal * ( 1.0 - smoothstep( … distanciaAlLogo( xz ) ) );` (y su control) | `return max( delPie, … )`: también bajo el pie acostado | Q2 |
+| s52 · la salida del fondo | la cámara de punta a punta en 1,2 s | en 0,95 s, mirando 0,13 adelante (el mensaje lee las constantes) | Q2 (el reloj más largo hace la subida más empinada en `fin`) |
+| s57 · sin el círculo liso | `distanciaAlLogo( xz ) ) );` | `distanciaAlLogo( xz ) ) ) );` (la misma distancia, adentro del `max`) | Q2 |
+| s62 · la secuencia (D) | `D_DUR` = golpe + 1,7 | `RELOJ_DEL_FINAL.duracionS` | Q2 |
 
 ## Crítica (lo que el banco mostró y qué se hizo)
 
@@ -229,6 +283,10 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 - Q1 · el reparto no mudaba nada con el encuadre que cambia (la cuenta por celda nunca superaba 1,6× con un desnivel suave): 1,2×.
 - Q1.d · rayos de lado a lado (brasas que saltan con su enlace puesto; la pareja de la física del otro lado del dominio, un defecto
   de Q1.b que ya estaba), brasas que derivaban mientras se formaba, un puntero lento que no cortaba: en Q1.d, cada uno con su arreglo.
+- Q2 · el borde equivocado (piezas sobre el logo), los enlaces apilados, la bajada de 1,4 u por cuadro, el formulario lento y la
+  salida del fondo que pasaba los 3 s: en Q2, cada uno con su arreglo. Lo que NO se pudo ver: el sitio real (VERIFICAR TRAS REINICIO:
+  `reconstruir.sh`, bajar al pie a 1440 y 1920, dejar correr 9 s, mirar el DOM acostado sobre cada pieza, escribir en el formulario
+  acostado, clic en un enlace acostado, un scroll hacia arriba (el rebobinado levanta todo) y el reinicio).
 
 ## Lo que no quedó bien
 

@@ -34,6 +34,7 @@ import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPu
 import { validarElPie } from '../formularios/validar'
 import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, apertura as aperturaDelHueco, blancoDelFinal, poder as poderDelFinal, poseDelLogo, segundosDelFinal, subida } from '../escena/final/recorridoDelFinal'
 import { CAIDA_AL_HUECO } from '../escena/final/caidaAlHueco'
+import { CAIDA_DEL_PIE } from '../escena/final/caidaDelPie'
 import { FLOOR_Y } from '../escena/probeScene'
 import { HUECO, crearElPozo } from '../escena/final/hueco'
 import { RASTRO_EN_EL_PISO, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
@@ -258,7 +259,9 @@ titulo('2A · El final del pie arranca solo al llegar al pie; el scroll lo adela
 const finalTsx = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 // [PULIDO 11] D · cambió por pedido: el golpe es el contacto de la caída, a los 3,5 s (era el ras de la presión, a los 4,7); lo de
 // después del golpe dura lo mismo (1,7 s): la secuencia, 5,2 s (era 6,4).
-afirmar(RELOJ_DEL_FINAL.duracionS === CAIDA_AL_HUECO.golpeS + 1.7 && finalTsx.includes('EN_VIVO.fin = s.reloj.fin') && finalTsx.includes('pasoDelReloj(s.reloj, {'), `la secuencia dura ${String(RELOJ_DEL_FINAL.duracionS)} s a su ritmo (el golpe y 1,7 s después) y \`fin\` es el de su reloj (cómo arranca, se rebobina y se deshace: s51 1D)`)
+// [PULIDO 19] Q2 · cambió por pedido: después del golpe caen las piezas del pie (`caidaDelPie.ts`): el reloj sigue `hastaS` (4,5 s: la última
+// pieza asentada y el destello y la expansión de siempre), no 1,7.
+afirmar(RELOJ_DEL_FINAL.duracionS === CAIDA_AL_HUECO.golpeS + CAIDA_DEL_PIE.hastaS && finalTsx.includes('EN_VIVO.fin = s.reloj.fin') && finalTsx.includes('pasoDelReloj(s.reloj, {'), `la secuencia dura ${String(RELOJ_DEL_FINAL.duracionS)} s a su ritmo (el golpe, las piezas del pie que caen y ${String(CAIDA_DEL_PIE.despuesS)} s después) y \`fin\` es el de su reloj (cómo arranca, se rebobina y se deshace: s51 1D)`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2B · El logo se acuesta en su lugar (sobre su centro), cae derecho al piso; la cámara sube en paralelo, centrada en el logo')
@@ -424,8 +427,10 @@ titulo('2H · Las piezas del pie de frente y usables; sólo desde 1024 (abajo y 
 // elevación (`alturaDeLaCaida`), con el mismo blanco, giro, alejamiento, distancia y corrimiento que la de las piezas.
 const colocacion = sinComentarios(leer('_lib/escena/pie3d/colocacion.ts'))
 const armadasTs = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
-const deFrente = (c: string, ar: string, fi: string): boolean => c.includes('grupo.quaternion.copy(camara.quaternion)') && ar.includes('colocarLaPieza(a.grupo, CAMARA_SIN_EL_MOUSE,') && fi.includes('camaraDelFinal(state.camera, alturaDeLaCaida(fin, tamano, elevacionDe(state.camera.position)), EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null, distancia, corrimiento)') && fi.includes('camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null, distancia, corrimiento)')
-afirmar(deFrente(colocacion, armadasTs, finalTsx), 'las piezas del pie miran siempre a la cámara sin el mouse, que el final lleva con la viva (sube, gira en el quieto): de frente durante toda la secuencia; su DOM va por la homografía (usable donde se ve)')
+const deFrente = (c: string, ar: string, fi: string): boolean => c.includes('grupo.quaternion.copy(camara.quaternion)') && ar.includes('colocarLaPieza(a.grupo, camara,') && ar.includes('const camara = enElFinal ? CAMARA_ANTES_DEL_FINAL : CAMARA_SIN_EL_MOUSE') && fi.includes('camaraDelFinal(state.camera, alturaDeLaCaida(fin, tamano, elevacionDe(state.camera.position)), EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, s.sacudon.lengthSq() > 0 ? s.sacudon : null, distancia, corrimiento)') && fi.includes('camaraDelFinal(CAMARA_SIN_EL_MOUSE, sube, EN_VIVO.blanco, EN_VIVO.giro, EN_VIVO.aleja, null, distancia, corrimiento)')
+// [PULIDO 19] Q2 · cambió por pedido: con el final en marcha las piezas se arman con la cámara de ANTES del final (la pared quieta) y caen
+// al piso (`pie3d/caida.ts`); el DOM sigue a cada una por la homografía, acostada también.
+afirmar(deFrente(colocacion, armadasTs, finalTsx), 'las piezas del pie miran a la cámara sin el mouse (de pie) y, con el final en marcha, se arman con la de antes del final y caen; su DOM va por la homografía (usable donde se ve, acostado también)')
 controlPositivo('el detector VE un final que mueve sólo la cámara viva (las piezas se quedarían mirando al costado)', finalTsx.replace('camaraDelFinal(CAMARA_SIN_EL_MOUSE,', 'camaraDelFinal(null,'), (fi: string) => deFrente(colocacion, armadasTs, fi))
 // Costo: el final suma como mucho dos dibujos (las paredes y el fondo del pozo), invisibles fuera del final; el resplandor,
 // el hueco y el rastro van adentro del shader del piso (cero dibujos), con lazos acotados. [RETOQUE DEL ENCASTRE] 1A · eran

@@ -111,7 +111,8 @@ const escenaEntera = ['_lib/escena/pie3d/PieDeVolumen.tsx', '_lib/escena/pie3d/a
 const escena = escenaEntera
 const giroDeLaTecla = ''
 afirmar(!escenaEntera.includes('girarLaTecla') && !/puntero|mirada|mouse/i.test(giroDeLaTecla), '  [PULIDO 10] J5 · la tecla de Reintentar gira por tiempo (desde canto hasta de frente) y no lee el mouse')
-const fijaEnElMundo = (c: string): boolean => /colocarLaPieza\(a\.grupo, CAMARA_SIN_EL_MOUSE, /.test(c) && /profundidadDeLaPieza\(CAMARA_SIN_EL_MOUSE, /.test(c) && !/suscribirALaMirada|puntero|rotation\.|rotate[XYZ]\(/.test(c)
+// [PULIDO 19] Q2 · con el final en marcha, la cámara es la de ANTES del final (la pared quieta mientras las piezas caen): `camara` es una u otra.
+const fijaEnElMundo = (c: string): boolean => /colocarLaPieza\(a\.grupo, camara, /.test(c) && /profundidadDeLaPieza\(camara, /.test(c) && c.includes('const camara = enElFinal ? CAMARA_ANTES_DEL_FINAL : CAMARA_SIN_EL_MOUSE') && !/suscribirALaMirada|puntero|rotation\.|rotate[XYZ]\(/.test(c)
 afirmar(fijaEnElMundo(escena), '  fija en el mundo: se coloca con la cámara SIN el mouse (lo único que se mueve es la cámara); ninguna pieza gira con el mouse ni lo lee ([PASADA FINAL] C2: su llegada por columnas va aparte, en `coreografia.ts`)')
 controlPositivo('el detector VE una pieza que gira con el mouse', `${escena}\na.grupo.rotation.y = puntero.x`, fijaEnElMundo)
 // [PASADA FINAL] C2 · la llegada (lo único que gira, y sólo mientras llega) tampoco lee el mouse: es función del scroll.

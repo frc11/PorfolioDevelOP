@@ -11,6 +11,7 @@ import { calentar } from '../gpu/Precompilar'
 import { EN_VIVO } from '../final/recorridoDelFinal'
 import { ONDA_PEDIDA } from '../interfaz/pedidos'
 import { alCuadro, prepararLasTransformaciones, rearmar, soltar, type EstadoDelPie } from './armadas'
+import { crearLaCaidaDelPie } from './caida'
 import { CAJAS_DEL_PIE } from './cajasDelPolvo'
 import { SOMBRAS_DEL_PIE } from './sombras'
 
@@ -47,7 +48,7 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
   const camara = useThree((s) => s.camera)
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
-  const m = useRef<EstadoDelPie>({ armadas: [], estudio: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, cuadrilatero: [], matriz: [], coreografia: { mostrado: 0, y: -1, cuando: 0 } })
+  const m = useRef<EstadoDelPie>({ armadas: [], estudio: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, cuadrilatero: [], matriz: [], coreografia: { mostrado: 0, y: -1, cuando: 0 }, caida: crearLaCaidaDelPie() })
 
   useEffect(() => {
     const q = matchMedia('(prefers-reduced-motion: reduce)')

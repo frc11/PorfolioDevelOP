@@ -4,6 +4,7 @@ import { CURVAS, type NombreDeCurva } from '../../motion/curvas'
 import { entornoDeLaEscena } from '../entorno'
 import { FLOOR_Y, ORBIT_TARGET_Y, PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
 import { CAIDA_AL_HUECO, anguloEnElReloj, aperturaDelHueco, arranqueDeLaCaida, caidaIntegrada, poseDeLaCaida, sombraDeLaCaida } from './caidaAlHueco'
+import { CAIDA_DEL_PIE } from './caidaDelPie'
 
 /**
  * [CIERRE] 3 · EL FINAL DEL PIE (la idea de Franco) — al llegar al pie, una secuencia de cámara y logo, toda en función del
@@ -62,7 +63,9 @@ export const FINAL_DEL_PIE = {
    * (°/s) y frenando con `giroFreno` (°/s²), el alejamiento igual (u/s, u/s²). Llega a cero en un tiempo finito, sin el
    * coletazo de antes (media vuelta salía a 400°/s) ni su cola de segundos (la cámara seguía mirando al centro del logo).
    */
-  quieto: { desdeS: 1.4, giroGradosS: 4.5, alejaHasta: 17, alejaS: 38, vuelta: { giroS: 90, giroFreno: 140, alejaS: 9, alejaFreno: 14 } },
+  // [PULIDO 19] Q2 · sin el giro en espiral ni el alejamiento (eran 4,5°/s y hasta 17 u en 38 s): la cámara termina desde arriba, cerca,
+  // con el pie acostado entero en pantalla (`EN_VIVO.distanciaDelPie`), y se queda. La vuelta con tope queda por si vuelven.
+  quieto: { desdeS: 1.4, giroGradosS: 0, alejaHasta: 0, alejaS: 38, vuelta: { giroS: 90, giroFreno: 140, alejaS: 9, alejaFreno: 14 } },
   /** Cuánto adelante del blanco quedan las piezas del pie al final (u): las olas del piso no las tocan. */
   aireDelPie: 7,
   /** El golpe en la cámara: cuánto la sacude (u) y en cuánto se apaga (s). */
@@ -90,7 +93,10 @@ export const FINAL_DEL_PIE = {
  * del fondo; en un viaje del menú el final vuelve en paralelo con el recorrido (`VIAJE_DEL_FINAL`).
  */
 // [PULIDO 11] D · `duracionS`: el golpe y lo que viene después de él (el destello, la expansión: 1,7 s, como antes del 4,7 al 6,4).
-export const RELOJ_DEL_FINAL = { duracionS: CAIDA_AL_HUECO.golpeS + 1.7, vuelveAEmpezarS: 2.5, topeDelGestoS: 0.8, colaDelGesto: 0.5, cambioDeSentidoS: 0.3, salida: { finS: 1.2, camaraS: 1.2, mira: 0.12 }, inerciaS: 0.12 } as const
+// [PULIDO 19] Q2 · y las piezas del pie que caen después del logo (`caidaDelPie.ts`: `hastaS`, con el destello y la expansión al final).
+// Con el reloj más largo la subida de la cámara es más empinada en `fin`: la salida la deja bajar de punta a punta en 0,95 s (era 1,2)
+// y mira un poco más adelante (0,13): sale en menos de 3 s sin pasar el tope (s52 A2).
+export const RELOJ_DEL_FINAL = { duracionS: CAIDA_AL_HUECO.golpeS + CAIDA_DEL_PIE.hastaS, vuelveAEmpezarS: 2.5, topeDelGestoS: 0.8, colaDelGesto: 0.5, cambioDeSentidoS: 0.3, salida: { finS: 1.2, camaraS: 0.95, mira: 0.13 }, inerciaS: 0.12 } as const
 
 /** [PULIDO 13] K4 · `fin` del golpe: de ahí para arriba el logo está acostado y la cámara en el cenit. */
 export const FIN_DEL_GOLPE = CAIDA_AL_HUECO.golpeS / RELOJ_DEL_FINAL.duracionS
@@ -334,6 +340,17 @@ export const EN_VIVO = {
    * la de antes del final; sin final, ninguno). Con eso el pie ve la luz como antes de la cinemática (`pie3d/material.ts`).
    */
   giroDelPie: new THREE.Quaternion(),
+  /**
+   * [PULIDO 19] Q2 · lo que el pie de volumen le escribe al final en cada cuadro (`pie3d/caida.ts`): la distancia desde arriba que deja
+   * entero el pie acostado (0: sin piezas, la de siempre), la calma del piso bajo él (el centro y las medias extensiones, u) en la
+   * base horizontal de la cámara de antes del final (derecha, atrás) y cuánto vale (0 a 1, con el primer impacto); y lo que el final
+   * le escribe al pie: la huella del logo acostado (ancho, fondo: u).
+   */
+  distanciaDelPie: 0,
+  calmaDelPie: new THREE.Vector4(0, 0, 0, 0),
+  baseDelPie: new THREE.Vector4(1, 0, 0, -1),
+  calmaDelPieFuerza: 0,
+  huellaDelLogo: new THREE.Vector2(6.9, 4.78),
 }
 
 /** El scroll con el que se colocan las piezas del pie: el de la página hasta que el pie se pega; después, ése. */

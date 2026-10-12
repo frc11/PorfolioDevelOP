@@ -95,6 +95,13 @@ export const FINAL_EN_EL_PISO = {
   /** 0 a 1: cuánto se calmó el mar alrededor del logo; la media caja del logo en su plano (u). */
   uCalmaDelFinal: { value: 0 },
   uCajaDelLogo: { value: new THREE.Vector2(2.7, 2.4) },
+  /**
+   * [PULIDO 19] Q2 · la calma bajo el pie acostado: una caja alrededor del logo (el centro x, z y las medias extensiones, u) en la base
+   * horizontal de la cámara de antes del final (derecha x, z; atrás x, z), y cuánto vale (0 a 1, con el primer impacto).
+   */
+  uCalmaDelPie: { value: new THREE.Vector4(0, 0, 0, 0) },
+  uBaseDelPie: { value: new THREE.Vector4(1, 0, 0, -1) },
+  uCalmaDelPieFuerza: { value: 0 },
   /** 0 a 1: cuánto se fue la mancha de contacto (con la cámara que sube). */
   uSinMancha: { value: 0 },
   /** [EL ENCASTRE] 2E · el poder liberado: 0 sin poder, 1 entero (con un destello al liberarse, un poco más). */
@@ -124,6 +131,9 @@ uniform vec4 uGolpe;
 uniform vec4 uRastro[ ${String(RASTRO_EN_EL_PISO.puntos)} ];
 uniform float uCalmaDelFinal;
 uniform vec2 uCajaDelLogo;
+uniform vec4 uCalmaDelPie;
+uniform vec4 uBaseDelPie;
+uniform float uCalmaDelPieFuerza;
 // [PULIDO 6] E2 · la distancia al logo, para medir desde el filo (\`hueco.ts\`).
 ${DISTANCIA_AL_LOGO_GLSL}
 // [NOCTURNO FINAL] B1 · el tope del dibujo de la onda, más alto mientras dura la súper onda.
@@ -157,10 +167,18 @@ float empujeDelRastro( vec2 p, float h ) {
 }
 // [EL ENCASTRE] 2D · el mar calmo alrededor de la caja del logo acostado (en su plano: x, −z). [PULIDO 6] E2 · un margen pegado
 // al hueco (la distancia al logo desde el centro del bloque: media diagonal y el margen, al ras; en el borde, al caos).
+// [PULIDO 19] Q2 · y bajo el pie acostado: una caja en la base de la cámara de antes del final, con el mismo borde suave.
+float calmaDelPie( vec2 xz ) {
+	if ( uCalmaDelPieFuerza <= 0.0 ) return 0.0;
+	vec2 d = xz - uCalmaDelPie.xy;
+	float afuera = max( abs( dot( d, uBaseDelPie.xy ) ) - uCalmaDelPie.z, abs( dot( d, uBaseDelPie.zw ) ) - uCalmaDelPie.w );
+	return uCalmaDelPieFuerza * ( 1.0 - smoothstep( 0.0, ${f(CALMA_EN_EL_PISO.borde)}, afuera ) );
+}
 float calmaDelFinal( vec2 xz ) {
-	if ( uCalmaDelFinal <= 0.0 ) return 0.0;
+	float delPie = calmaDelPie( xz );
+	if ( uCalmaDelFinal <= 0.0 ) return delPie;
 	float alRas = 0.7072 * uLado + ${CALMA_EN_EL_PISO.margen.toFixed(3)};
-	return uCalmaDelFinal * ( 1.0 - smoothstep( alRas, alRas + ${f(CALMA_EN_EL_PISO.borde)}, distanciaAlLogo( xz ) ) );
+	return max( delPie, uCalmaDelFinal * ( 1.0 - smoothstep( alRas, alRas + ${f(CALMA_EN_EL_PISO.borde)}, distanciaAlLogo( xz ) ) ) );
 }
 // [PULIDO 2] 4 · con energía cada bloque queda a su alto (un azar por bloque entre \`alturas\`): el piso se desordena.
 // [PULIDO 3] A1 · la energía es la del campo (\`luzDeAbajo.ts\`). [PULIDO 3B] B0 · y los pistones suben su racimo (lo suma

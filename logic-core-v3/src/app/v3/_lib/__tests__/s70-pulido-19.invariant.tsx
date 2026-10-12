@@ -6,8 +6,12 @@
  *          que reaparece por una cara del dominio o nace en su celda nueva), que sólo pasa fuera del cuadro o ya apagada.
  *   Q1.d · la red en reposo: quieta se arma (hasta tres enlaces por brasa, cortos en el mundo y en el cuadro, del centro hacia afuera),
  *          frena a las brasas, se corta en cascada con un gesto (en `corteS`, con el chasquido) y nunca se arma en el final del pie.
+ *   Q2 · las piezas del pie caen después del logo (`caidaDelPie.ts`): sus lugares en el piso no se solapan ni pisan el logo, caen en
+ *        una onda desde el logo con la física del logo, sin saltos, y la cámara desde arriba las deja enteras en pantalla.
  */
 import { readFileSync } from 'node:fs'
+
+import * as THREE from 'three'
 
 import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas, type Brasas } from '../escena/energia/brasas'
 import { CELDAS_DEL_REPARTO, DOMINIO, alfaDelDominio, armarElDominio, coordenadas, crearDominio, objetivosDelReparto, poblar, repartir, type Dominio } from '../escena/energia/dominio'
@@ -15,7 +19,11 @@ import { pasoDeLasBrasas } from '../escena/energia/paso'
 import { REPOSO, crearMemoriaDelGesto, crearRed, leerElGesto, pasoDeLaRed, type Red } from '../escena/energia/reposo'
 import { FRAGMENTOS_DE_LA_RED, VERTICES_DE_LA_RED } from '../escena/energia/dibujo/red'
 import { brilloPorDensidad } from '../escena/energia/vecinas'
-import { FLOOR_Y } from '../escena/probeScene'
+import { CAIDA_AL_HUECO, caidaIntegrada } from '../escena/final/caidaAlHueco'
+import { CAIDA_DEL_PIE, crearLugar, distanciaParaElPie, huellaDelPie, lugaresEnElPiso, poseDeLaPiezaQueCae, type BaseDelPie, type LugarEnElPiso, type PiezaDePie } from '../escena/final/caidaDelPie'
+import { FINAL_DEL_PIE, RELOJ_DEL_FINAL, alturaDeLaCaida, blancoDelFinal, camaraDelFinal, elevacionDe } from '../escena/final/recorridoDelFinal'
+import { colocarLaPieza, profundidadDeLaPieza } from '../escena/pie3d/colocacion'
+import { FLOOR_Y, ORBIT_TARGET_Y } from '../escena/probeScene'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { lineasDeCodigo, sinReservasEn } from './s69-ayudas'
 
@@ -306,6 +314,146 @@ controlPositivo('  el detector VE un lector que no ve el scroll', (m, _s, x, y, 
 const dibujoBien = (v: string, f: string): boolean => v.includes('attribute vec3 aA') && v.includes('attribute vec3 aB') && v.includes('attribute vec2 aLado') && v.includes('enElFinal(') && f.includes('adentroDelTexto( gl_FragCoord.xy') && f.includes('uTiempo') && v.includes('uPixel')
 afirmar(dibujoBien(VERTICES_DE_LA_RED, FRAGMENTOS_DE_LA_RED), '  el dibujo de la red: los dos extremos por vértice (un solo búfer), el ancho en px del dispositivo, la máscara de los textos por píxel, el final y el titileo')
 controlPositivo('  el detector VE un dibujo sin la máscara de los textos', VERTICES_DE_LA_RED, (v: string) => dibujoBien(v, FRAGMENTOS_DE_LA_RED.replace('adentroDelTexto( gl_FragCoord.xy', 'float( 0.0 ) * ( gl_FragCoord.xy')))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('Q2 · Las piezas del pie caen después del logo y quedan acostadas a su alrededor, enteras en pantalla')
+
+// El pie de 1440 × 900 de pie, como lo coloca la escena en la pose E (la cámara en (0, 5, 40) mirando al origen): las cajas del DOM
+// (px) de la columna izquierda y del formulario, cada una con su canto de abajo y de atrás en el mundo (`pie3d/caida.ts` hace lo mismo).
+const CAJAS_DEL_PIE = [
+  { id: 'logotipo', x: 60, y: 160, ancho: 180, alto: 36, espesor: 6 },
+  { id: 'titular', x: 60, y: 220, ancho: 540, alto: 160, espesor: 8 },
+  { id: 'mail', x: 60, y: 410, ancho: 300, alto: 48, espesor: 22 },
+  { id: 'whatsapp', x: 60, y: 470, ancho: 260, alto: 48, espesor: 22 },
+  { id: 'recorrido-1', x: 60, y: 560, ancho: 120, alto: 24, espesor: 4 },
+  { id: 'recorrido-2', x: 200, y: 560, ancho: 120, alto: 24, espesor: 4 },
+  { id: 'recorrido-3', x: 340, y: 560, ancho: 120, alto: 24, espesor: 4 },
+  { id: 'redes-1', x: 60, y: 620, ancho: 48, alto: 48, espesor: 22 },
+  { id: 'redes-2', x: 120, y: 620, ancho: 48, alto: 48, espesor: 22 },
+  { id: 'legal', x: 60, y: 700, ancho: 400, alto: 18, espesor: 3 },
+  { id: 'formulario', x: 827, y: 150, ancho: 553, alto: 600, espesor: 30 },
+  { id: 'rotulo', x: 827, y: 110, ancho: 200, alto: 24, espesor: 4 },
+] as const
+const LOGO = { ancho: 6.9, fondo: 4.78, alto: 4.78, espesor: 0.4 }
+function elPieDePie(): { readonly piezas: PiezaDePie[]; readonly lugares: LugarEnElPiso[]; readonly base: BaseDelPie; readonly ultima: number; readonly camara: THREE.PerspectiveCamera } {
+  const camara = new THREE.PerspectiveCamera(35, 1440 / 900, 0.1, 500)
+  camara.position.set(0, 5, 40)
+  camara.lookAt(0, ORBIT_TARGET_Y, 0)
+  camara.updateMatrixWorld(true)
+  const cuadro = { ancho: 1440, alto: 900 }
+  let d = Number.POSITIVE_INFINITY
+  for (const c of CAJAS_DEL_PIE) d = Math.min(d, profundidadDeLaPieza(camara, c.x + c.ancho / 2, c.y + c.alto, cuadro.ancho, cuadro.alto))
+  const temp = new THREE.Object3D()
+  const canto = new THREE.Vector3()
+  const piezas = CAJAS_DEL_PIE.map((c) => {
+    const mpp = colocarLaPieza(temp, camara, c.x, c.y, cuadro.ancho, cuadro.alto, d)
+    temp.updateMatrixWorld(true)
+    canto.set(c.ancho / 2, -c.alto, -c.espesor).applyMatrix4(temp.matrixWorld)
+    return { ancho: c.ancho * mpp, alto: c.alto * mpp, espesor: Math.max(0.02, c.espesor * mpp), x: canto.x, y: Math.max(FLOOR_Y, canto.y), z: canto.z }
+  })
+  const base: BaseDelPie = { derechaX: 1, derechaZ: 0, atrasX: 0, atrasZ: -1, logoX: 0, logoZ: 0, logoAncho: LOGO.ancho, logoFondo: LOGO.fondo }
+  const lugares = piezas.map(() => crearLugar())
+  const ultima = lugaresEnElPiso(piezas, piezas.length, piezas.map((p) => caidaIntegrada({ alto: p.alto, espesor: p.espesor })), base, lugares)
+  return { piezas, lugares, base, ultima, camara }
+}
+const PIE = elPieDePie()
+/** La caja acostada de una pieza en el piso (x0, x1, z0, z1): el canto al frente y la cabeza hacia atrás. */
+const cajaAcostada = (p: PiezaDePie, l: LugarEnElPiso): readonly [number, number, number, number] => [l.x - p.ancho / 2, l.x + p.ancho / 2, l.z - p.alto, l.z]
+const seCruzan = (a: readonly [number, number, number, number], b: readonly [number, number, number, number]): boolean => a[0] < b[1] && b[0] < a[1] && a[2] < b[3] && b[2] < a[3]
+interface DelPie { readonly solapes: number; readonly conElLogo: number; readonly primera: number; readonly ultima: number; readonly fuera: number; readonly aire: number }
+function medirElPie(piezas: readonly PiezaDePie[], lugares: readonly LugarEnElPiso[], base: BaseDelPie, ultima: number): DelPie {
+  let solapes = 0
+  let conElLogo = 0
+  let primera = Number.POSITIVE_INFINITY
+  let aire = Number.POSITIVE_INFINITY
+  const logo: readonly [number, number, number, number] = [-LOGO.ancho / 2, LOGO.ancho / 2, -LOGO.fondo / 2, LOGO.fondo / 2]
+  for (let i = 0; i < piezas.length; i += 1) {
+    const ci = cajaAcostada(piezas[i], lugares[i])
+    for (let j = i + 1; j < piezas.length; j += 1) if (seCruzan(ci, cajaAcostada(piezas[j], lugares[j]))) solapes += 1
+    if (seCruzan(ci, logo)) conElLogo += 1
+    primera = Math.min(primera, lugares[i].arranque)
+    aire = Math.min(aire, Math.max(logo[0] - ci[1], ci[0] - logo[1]))
+  }
+  // Desde arriba, a la distancia del pie acostado: las cuatro esquinas de cada pieza acostada y del logo adentro del cuadro con margen.
+  const huella = new Float64Array(2)
+  huellaDelPie(piezas, piezas.length, lugares, base, huella)
+  const camara = new THREE.PerspectiveCamera(35, 1440 / 900, 0.1, 500)
+  camara.position.set(0, 5, 40)
+  camara.lookAt(0, ORBIT_TARGET_Y, 0)
+  camara.updateMatrixWorld(true)
+  const blanco = new THREE.Vector3()
+  blancoDelFinal(1, blanco)
+  camaraDelFinal(camara, alturaDeLaCaida(1, LOGO, elevacionDe(camara.position)), blanco, 0, 0, null, distanciaParaElPie(camara.fov, camara.aspect, huella[0] + CAIDA_DEL_PIE.aire, huella[1] + CAIDA_DEL_PIE.aire))
+  const v = new THREE.Vector3()
+  let fuera = 0
+  const esquinas = [...piezas.map((p, i) => cajaAcostada(p, lugares[i])), logo]
+  for (const c of esquinas) for (const [x, z] of [[c[0], c[2]], [c[1], c[2]], [c[0], c[3]], [c[1], c[3]]] as const) {
+    v.set(x, FLOOR_Y, z).project(camara)
+    if (Math.abs(v.x) > 0.92 || Math.abs(v.y) > 0.92) fuera += 1
+  }
+  return { solapes, conElLogo, primera, ultima, fuera, aire }
+}
+const MEDIDO = medirElPie(PIE.piezas, PIE.lugares, PIE.base, PIE.ultima)
+const pieBien = (m: DelPie): boolean => m.solapes === 0 && m.conElLogo === 0 && m.aire >= CAIDA_DEL_PIE.aire - 1e-6 && m.primera > CAIDA_AL_HUECO.golpeS && m.ultima + CAIDA_DEL_PIE.despuesS <= RELOJ_DEL_FINAL.duracionS + 1e-6 && m.fuera === 0
+afirmar(pieBien(MEDIDO), `  el pie de 1440 acostado: ${String(PIE.piezas.length)} piezas sin solaparse entre sí ni con el logo (a ≥ ${MEDIDO.aire.toFixed(2)} u de él), la primera arranca a los ${MEDIDO.primera.toFixed(2)} s (después del golpe, ${String(CAIDA_AL_HUECO.golpeS)}) y la última se asienta a los ${MEDIDO.ultima.toFixed(2)} s (el reloj dura ${String(RELOJ_DEL_FINAL.duracionS)}); desde arriba, todas las esquinas y el logo adentro del cuadro con margen`)
+controlPositivo('  el detector VE dos piezas en el mismo lugar', { ...MEDIDO, solapes: 1 }, pieBien)
+controlPositivo('  y una pieza sobre el logo', { ...MEDIDO, conElLogo: 1 }, pieBien)
+controlPositivo('  y una pieza que arranca antes del golpe', { ...MEDIDO, primera: CAIDA_AL_HUECO.golpeS - 0.1 }, pieBien)
+controlPositivo('  y un reloj que termina antes de que se asiente la última', { ...MEDIDO, ultima: RELOJ_DEL_FINAL.duracionS }, pieBien)
+controlPositivo('  y una esquina fuera del cuadro', { ...MEDIDO, fuera: 1 }, pieBien)
+
+// La caída de cada pieza es continua en el tiempo (el canto y el ángulo, sin saltos entre cuadros a 60 cps: la bajada es rápida pero
+// suave), arranca de pie en la pared y termina acostada en su lugar, en una onda desde el logo (las más cercanas al logo antes).
+interface DeLaCaida { readonly saltoMaximo: number; readonly anguloMaximo: number; readonly enSuLugar: number; readonly ordenRoto: number; readonly acostadas: number }
+function medirLaCaida(piezas: readonly PiezaDePie[], lugares: readonly LugarEnElPiso[], ultima: number): DeLaCaida {
+  let saltoMaximo = 0
+  let anguloMaximo = 0
+  let enSuLugar = 0
+  let acostadas = 0
+  let ordenRoto = 0
+  for (let i = 0; i < piezas.length; i += 1) {
+    const p = piezas[i]
+    const l = lugares[i]
+    let [px, py, pz, pa] = [Number.NaN, 0, 0, 0]
+    for (let k = 0; k <= Math.ceil(ultima * 60) + 30; k += 1) {
+      const q = poseDeLaPiezaQueCae(p, l, k / 60)
+      if (Number.isFinite(px)) {
+        saltoMaximo = Math.max(saltoMaximo, Math.hypot(q.x - px, q.y - py, q.z - pz))
+        anguloMaximo = Math.max(anguloMaximo, Math.abs(q.a - pa))
+      }
+      ;[px, py, pz, pa] = [q.x, q.y, q.z, q.a]
+    }
+    const final = poseDeLaPiezaQueCae(p, l, ultima + 0.5)
+    if (Math.abs(final.x - l.x) < 1e-6 && Math.abs(final.z - l.z) < 1e-6 && Math.abs(final.y - FLOOR_Y) < 1e-6) enSuLugar += 1
+    if (Math.abs(final.a - Math.PI / 2) < 1e-6 && final.toco) acostadas += 1
+    const antes = poseDeLaPiezaQueCae(p, l, l.arranque - 0.01)
+    if (antes.x !== p.x || antes.y !== p.y || antes.z !== p.z || antes.a !== 0) ordenRoto += 1
+    for (let j = 0; j < piezas.length; j += 1) {
+      const di = Math.hypot(lugares[i].x, lugares[i].z - piezas[i].alto / 2)
+      const dj = Math.hypot(lugares[j].x, lugares[j].z - piezas[j].alto / 2)
+      if (di < dj - 1e-6 && lugares[i].arranque > lugares[j].arranque + 1e-6) ordenRoto += 1
+    }
+  }
+  return { saltoMaximo, anguloMaximo, enSuLugar, ordenRoto, acostadas }
+}
+const LA_CAIDA = medirLaCaida(PIE.piezas, PIE.lugares, PIE.ultima)
+const caidaBien = (c: DeLaCaida): boolean => c.saltoMaximo < 1 && c.anguloMaximo < 0.3 && c.enSuLugar === PIE.piezas.length && c.acostadas === PIE.piezas.length && c.ordenRoto === 0
+afirmar(caidaBien(LA_CAIDA), `  cada pieza baja de la pared a su lugar sin saltos (el canto a lo sumo ${LA_CAIDA.saltoMaximo.toFixed(2)} u por cuadro, el ángulo ${(LA_CAIDA.anguloMaximo * 180 / Math.PI).toFixed(1)}°), vuelca sobre su canto y queda acostada ahí (${String(LA_CAIDA.acostadas)} de ${String(PIE.piezas.length)}), en una onda desde el logo`)
+controlPositivo('  el detector VE un salto', { ...LA_CAIDA, saltoMaximo: 3 }, caidaBien)
+controlPositivo('  y una pieza que no llega a su lugar', { ...LA_CAIDA, enSuLugar: PIE.piezas.length - 1 }, caidaBien)
+controlPositivo('  y una onda al revés', { ...LA_CAIDA, ordenRoto: 1 }, caidaBien)
+
+// El cableado: la cámara quieta (sin giro ni alejamiento), la copia de la cámara antes de que el final la suba, la calma del piso
+// bajo el pie y el pulso en cada impacto, y los módulos nuevos de menos de 300 líneas sin reservas en lo de cada cuadro.
+const DEL_PIE = Object.fromEntries(['final/caidaDelPie.ts', 'pie3d/caida.ts', 'final/cuadroDelFinal.ts', 'final/enElPiso.ts', 'pie3d/armadas.ts'].map((m) => [m, leer(`_lib/escena/${m}`)])) as Record<string, string>
+const cableadoBien = (f: Record<string, string>): boolean => FINAL_DEL_PIE.quieto.giroGradosS === 0 && FINAL_DEL_PIE.quieto.alejaHasta === 0 &&
+  (f['final/cuadroDelFinal.ts'] ?? '').includes('copiarLaCamara(CAMARA_ANTES_DEL_FINAL, CAMARA_SIN_EL_MOUSE)') && (f['final/cuadroDelFinal.ts'] ?? '').indexOf('copiarLaCamara(CAMARA_ANTES_DEL_FINAL') < (f['final/cuadroDelFinal.ts'] ?? '').indexOf('camaraDelFinal(CAMARA_SIN_EL_MOUSE') &&
+  (f['final/enElPiso.ts'] ?? '').includes('float calmaDelPie( vec2 xz )') && (f['pie3d/caida.ts'] ?? '').includes('pedirLaOnda(PUNTO.x, PUNTO.y, performance.now())') &&
+  (f['pie3d/armadas.ts'] ?? '').includes('if (enElFinal) aplicarLaCaida(s.caida, k, a, segundos)') &&
+  lineasDeCodigo(f['final/caidaDelPie.ts'] ?? '') <= 300 && lineasDeCodigo(f['pie3d/caida.ts'] ?? '') <= 300 && sinReservasEn(f['pie3d/caida.ts'] ?? '', 'armarLaCaida') && sinReservasEn(f['pie3d/caida.ts'] ?? '', 'aplicarLaCaida') && sinReservasEn(f['final/caidaDelPie.ts'] ?? '', 'poseDeLaPiezaQueCae') && sinReservasEn(f['final/caidaDelPie.ts'] ?? '', 'lugaresEnElPiso')
+afirmar(cableadoBien(DEL_PIE), '  el cableado: la cámara quieta se queda (sin giro ni alejamiento), el final copia la cámara sin el mouse antes de subirla, el piso se calma bajo el pie y pulsa en cada impacto, la caída se aplica a cada pieza; los módulos nuevos de menos de 300 líneas y lo de cada cuadro sin reservas')
+controlPositivo('  el detector VE la copia de la cámara después de subirla', { ...DEL_PIE, 'final/cuadroDelFinal.ts': (DEL_PIE['final/cuadroDelFinal.ts'] ?? '').replace('copiarLaCamara(CAMARA_ANTES_DEL_FINAL, CAMARA_SIN_EL_MOUSE)', '') + '\ncopiarLaCamara(CAMARA_ANTES_DEL_FINAL, CAMARA_SIN_EL_MOUSE)' }, cableadoBien)
+controlPositivo('  y una reserva en la caída de cada cuadro', { ...DEL_PIE, 'pie3d/caida.ts': (DEL_PIE['pie3d/caida.ts'] ?? '').replace('  if (i >= c.n) return\n', '  const tmp = [i]\n  if (i >= c.n || tmp.length < 0) return\n') }, cableadoBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Q1 · Los módulos nuevos, de menos de 300 líneas; lo de cada cuadro, sin reservas')

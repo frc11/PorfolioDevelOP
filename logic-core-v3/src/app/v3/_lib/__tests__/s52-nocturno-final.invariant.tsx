@@ -214,7 +214,9 @@ const salida = (paso: PasoDelReloj): Salida => {
 }
 const salidaBien = (x: Salida): boolean => x.s < 3 && x.camaraPorCuadro <= (1.25 * DT) / R.salida.camaraS && x.finPorCuadro <= (1.05 * DT) / R.salida.finS
 const sa = salida(pasoDelReloj)
-afirmar(salidaBien(sa), 'salir del fondo (y antes, un viaje del menú: [PULIDO 1] P5) deshace la cinemática con tope: la cámara (su subida) a lo sumo de punta a punta en 1,2 s, `fin` en 1,2 s; vuelve a cero en menos de 3 s, sin saltos', `${sa.s.toFixed(2)} s · cámara ${(sa.camaraPorCuadro * 60).toFixed(2)}/s como mucho`)
+// [PULIDO 19] Q2 · con el reloj más largo (las piezas del pie caen después del logo) la subida es más empinada en `fin`: la cámara a lo sumo de
+// punta a punta en 1 s (era 1,2) y la mirada 0,13 adelante; sigue saliendo en menos de 3 s sin pasar el tope.
+afirmar(salidaBien(sa), `salir del fondo (y antes, un viaje del menú: [PULIDO 1] P5) deshace la cinemática con tope: la cámara (su subida) a lo sumo de punta a punta en ${String(R.salida.camaraS)} s, \`fin\` en ${String(R.salida.finS)} s; vuelve a cero en menos de 3 s, sin saltos`, `${sa.s.toFixed(2)} s · cámara ${(sa.camaraPorCuadro * 60).toFixed(2)}/s como mucho`)
 const comoAntes: PasoDelReloj = (r, e, dt) => {
   pasoDelReloj(r, e, dt)
   if (!e.alFondo && r.fin > 0) r.fin = Math.max(0, r.fin - dt / 0.35)
@@ -236,7 +238,8 @@ const vuelta = (paso: typeof haciaCero, desde: number, maxima: number, freno: nu
 const Q = FINAL_DEL_PIE.quieto.vuelta
 const vueltaBien = (f: typeof haciaCero): boolean => {
   const giro = vuelta(f, -180, Q.giroS, Q.giroFreno)
-  const aleja = vuelta(f, FINAL_DEL_PIE.quieto.alejaHasta, Q.alejaS, Q.alejaFreno)
+  // [PULIDO 19] Q2 · el quieto ya no se aleja (`alejaHasta` 0): la vuelta con tope se prueba desde el alejamiento que tenía (17 u).
+  const aleja = vuelta(f, 17, Q.alejaS, Q.alejaFreno)
   return giro.s < 3 && giro.maxima <= Q.giroS + 1e-9 && !giro.cruzo && aleja.s < 3 && aleja.maxima <= Q.alejaS + 1e-9 && !aleja.cruzo
 }
 afirmar(vueltaBien(haciaCero), '  el giro del quieto (aun media vuelta) y su alejamiento vuelven a cero con tope (90°/s, 9 u/s) y frenando, sin pasarse, en menos de 3 s (antes: 400°/s al arrancar y una cola de segundos)')
@@ -554,13 +557,13 @@ const C = CALMA_EN_EL_PISO
 const simB3 = conElFinalEnLaSimulacion(conOndaDirigida(SIMULACION_GLSL))
 type Calma = { readonly margen: number; readonly borde: number; readonly amortigua: number }
 const margenBien = (sim: string, dib: string, c: Calma): boolean =>
-  sim.includes(`float alRas = 0.7072 * uLado + ${c.margen.toFixed(3)};`) && sim.includes(`return uCalmaDelFinal * ( 1.0 - smoothstep( alRas, alRas + ${c.borde.toFixed(1)}, distanciaAlLogo( xz ) ) );`) &&
+  sim.includes(`float alRas = 0.7072 * uLado + ${c.margen.toFixed(3)};`) && sim.includes(`return max( delPie, uCalmaDelFinal * ( 1.0 - smoothstep( alRas, alRas + ${c.borde.toFixed(1)}, distanciaAlLogo( xz ) ) ) );`) &&
   /float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/.test(sim) && sim.includes('dibujo *= 1.0 - calmaDelFinal( xz );') &&
   dib.includes('piston = pistonDeLaLuz( xz ) * llego * ( 1.0 - calmaDelFinal( xz ) ) * uEnergiaDeLaLuz;') && dib.includes('return min( 1.8, e ) * uEnergiaDeLaLuz;') &&
   c.margen >= FILO.desde + FILO.ancho * (1 + FILO.crece) && 0.7072 * 0.8 + c.margen + c.borde < 2.5 && c.borde >= 0.8 && c.amortigua >= 10
 afirmar(margenBien(simB3, ENERGIA_EN_LA_SIMULACION_GLSL, C), 'una vez encastrado, alrededor del logo un MARGEN al ras pegado al hueco (no el círculo de antes: la energía llega hasta el logo): los bloques que tocan el filo quedan al ras y quietos (los empujes del mouse, del pulso, del golpe y de las ondas se apagan); la luz sale por sus juntas hasta el borde', `al ras hasta ${(0.7072 * 0.8 + C.margen).toFixed(2)} u del logo (desde el centro del bloque) · borde ${String(C.borde)} u · ${String(C.amortigua)}/s más de amortiguación`)
 controlPositivo('el detector VE la calma de antes (sólo ocultaba el dibujo: las olas seguían debajo)', [simB3.replace(/float calmaAqui = calmaDelFinal\( p \* uLado \);\s*fuerza \*= 1\.0 - calmaAqui;\s*amortigua \+= [0-9.]+ \* calmaAqui;/, ''), ENERGIA_EN_LA_SIMULACION_GLSL, C] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => margenBien(si, di, c))
-controlPositivo('  y el círculo liso de antes (medido con el radio)', [simB3.replace('distanciaAlLogo( xz ) ) );', 'length( xz ) ) );'), ENERGIA_EN_LA_SIMULACION_GLSL, C] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => margenBien(si, di, c))
+controlPositivo('  y el círculo liso de antes (medido con el radio)', [simB3.replace('distanciaAlLogo( xz ) ) ) );', 'length( xz ) ) ) );'), ENERGIA_EN_LA_SIMULACION_GLSL, C] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => margenBien(si, di, c))
 controlPositivo('  y un margen que no cubre el filo (un bloque pegado lo taparía)', [simB3.replace(`+ ${C.margen.toFixed(3)};`, '+ 0.050;'), ENERGIA_EN_LA_SIMULACION_GLSL, { ...C, margen: 0.05 }] as readonly [string, string, Calma], ([si, di, c]: readonly [string, string, Calma]) => margenBien(si, di, c))
 const entornoB3 = sinComentarios(leer('_lib/escena/entorno/Entorno.tsx'))
 // [PULIDO 6] E2 · la regla se revisó: el círculo ya no existe; los anillos del pulso siguen apagados en el final porque sus ondas

@@ -9,8 +9,8 @@ import { firmaDeLaForma, medirLaPieza, type MedidaDeLaPieza } from '../../pie3d/
 import { HUNDIDOS, PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, cuantoSeHunde, type PiezaDelPie } from '../../pie3d/registro'
 import { ASIENTO } from '../../titulos3d/repeticiones'
 import { KEY_INTENSITY } from '../probeLighting'
-import { EN_VIVO, profundidadDelFinal, scrollDelPie } from '../final/recorridoDelFinal'
-import { CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
+import { EN_VIVO, scrollDelPie } from '../final/recorridoDelFinal'
+import { CAMARA_ANTES_DEL_FINAL, CAMARA_SIN_EL_MOUSE } from '../sinElMouse'
 import { VOLTEO_TERMINADO } from '../../formularios/volteo'
 import { viajeEnCurso } from '../viaje'
 import { FUENTES_DEL_CTA } from '../ctaDelFinal/fuentesDelCta'
@@ -19,6 +19,7 @@ import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocaci
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
+import { aplicarLaCaida, armarLaCaida, type CaidaDelPie } from './caida'
 import { CAJAS_DEL_PIE, escribirLaCaja } from './cajasDelPolvo'
 import { SOMBRAS_DEL_PIE } from './sombras'
 import { duracionDeLaTransformacion, poseDeLaTransformacion } from './transformacionDelPie'
@@ -118,6 +119,8 @@ export interface EstadoDelPie {
   readonly matriz: number[]
   /** [PASADA FINAL] C2 · lo mostrado de la coreografía (0 a 1) y el último movimiento del scroll (para el asiento). */
   readonly coreografia: { mostrado: number; y: number; cuando: number }
+  /** [PULIDO 19] Q2 · la caída de las piezas en el final del pie (`caida.ts`). */
+  readonly caida: CaidaDelPie
 }
 
 /** Un cuadro: cada pieza a la vista, en su lugar del mundo; su llegada; su hundido; lo interactivo sobre ella. */
@@ -138,21 +141,26 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
   let d = Number.POSITIVE_INFINITY
   // [CIERRE] 3 · en la cola del final el pie queda pegado arriba: sus piezas, con el scroll en que se pegó.
   const sy = scrollDelPie(scrollY)
+  // [PULIDO 19] Q2 · con el final en marcha la pared del pie se arma con la cámara de ANTES del final (quieta donde estaba) y las
+  // piezas CAEN (`caida.ts`); ya no van con la cámara que sube (`profundidadDelFinal` se fue).
+  const enElFinal = EN_VIVO.fin > 0
+  const camara = enElFinal ? CAMARA_ANTES_DEL_FINAL : CAMARA_SIN_EL_MOUSE
   for (const a of s.armadas) {
     const arriba = a.medida.caja.y - sy
     const c = a.contenido
     a.grupo.visible = arriba + c.abajo > -MARGEN && arriba + c.arriba < cuadro.alto + MARGEN
-    if (a.grupo.visible) d = Math.min(d, profundidadDeLaPieza(CAMARA_SIN_EL_MOUSE, a.medida.caja.x - scrollX + (c.izquierda + c.derecha) / 2, arriba + c.abajo, cuadro.ancho, cuadro.alto))
+    if (a.grupo.visible) d = Math.min(d, profundidadDeLaPieza(camara, a.medida.caja.x - scrollX + (c.izquierda + c.derecha) / 2, arriba + c.abajo, cuadro.ancho, cuadro.alto))
   }
-  // [CIERRE] 3 · en el final del pie van con la cámara (que sube a mirar el logo desde arriba): adelante del piso, con aire.
-  d = Math.min(d, profundidadDelFinal(CAMARA_SIN_EL_MOUSE))
-  for (const a of s.armadas) {
+  const segundos = enElFinal ? armarLaCaida(s.caida, s.armadas, scrollX, sy, camara, viva, cuadro, d) : 0
+  for (let k = 0; k < s.armadas.length; k += 1) {
+    const a = s.armadas[k]
     if (!a.grupo.visible) continue
     a.material.envMapIntensity = nivel
     const izquierda = a.medida.caja.x - scrollX
     const arriba = a.medida.caja.y - sy
     a.d = d
-    a.mundoPorPx = colocarLaPieza(a.grupo, CAMARA_SIN_EL_MOUSE, izquierda, arriba, cuadro.ancho, cuadro.alto, d)
+    a.mundoPorPx = colocarLaPieza(a.grupo, camara, izquierda, arriba, cuadro.ancho, cuadro.alto, d)
+    if (enElFinal) aplicarLaCaida(s.caida, k, a, segundos)
     if (a.pieza.forma === 'enlace') dibujarElSubrayado(a, s.quieto, dt)
     else {
       const pedido = cuantoSeHunde(a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido), HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada
