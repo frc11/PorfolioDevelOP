@@ -9,6 +9,7 @@ import { TEMPERATURA, calentar, frentesDelLogo, leerLaEscena, type DeLaEscena } 
 import { EFECTO, EFECTOS } from './dibujo/efectos'
 import { DIBUJO } from './dibujo/comun'
 import { subir, type Armado } from './dibujo/armado'
+import { alfaDelDominio, armarElDominio, poblar, repartir } from './dominio'
 import { pasoDeLasBrasas } from './paso'
 import { brilloPorDensidad, calentarBrasa } from './vecinas'
 import { avanzar } from './interaccion/interaccion'
@@ -21,7 +22,10 @@ import { largo3 } from './largo'
  * paso del enjambre (B) se fue con B.
  */
 export const CUADRO = {
-  /** El punto del puntero: donde su rayo entra a una esfera de este radio alrededor del origen (el lugar del plasma; más afuera que el logo). */
+  /**
+   * El punto del puntero: donde su rayo entra a una esfera de este radio alrededor del origen (el lugar del plasma; más afuera que el
+   * logo); [PULIDO 19] Q1.b · lejos del logo, a la profundidad del foco (el plasma está en toda la vista).
+   */
   entraALaNube: BRASAS.volumen.hueco + 1.2,
   /** El paso más largo de la física (s): un cuadro más largo se parte. */
   pasoMaximo: 1 / 60,
@@ -78,7 +82,7 @@ function efecto(a: Armado, k: number, x: number, y: number, z: number, tipo: num
   return k + 1
 }
 
-/** El rayo del puntero (en el mundo) y su punto a la altura de la nube. El dedo que soltó en este cuadro todavía cuenta. */
+/** El rayo del puntero (en el mundo) y su punto a la altura de la nube (o del foco). El dedo que soltó en este cuadro todavía cuenta. */
 function elPuntero(a: Armado, camara: THREE.Camera): void {
   const pt = a.puntero
   a.rayo.activo = pt.x < 2 && (pt.mouse ? !pt.fuera : pt.dedo || pt.pulso || pt.descarga)
@@ -94,10 +98,40 @@ function elPuntero(a: Armado, camara: THREE.Camera): void {
   const cerca = -(r.ox * r.dx + r.oy * r.dy + r.oz * r.dz)
   const lejos2 = r.ox * r.ox + r.oy * r.oy + r.oz * r.oz - cerca * cerca
   const R2 = CUADRO.entraALaNube * CUADRO.entraALaNube
-  const t = Math.max(2, lejos2 < R2 ? cerca - Math.sqrt(R2 - lejos2) : cerca)
+  const f = a.dominio.f
+  const enEje = r.dx * f[0] + r.dy * f[1] + r.dz * f[2]
+  const alFoco = enEje > 0.05 ? a.dominio.D / enEje : a.dominio.D
+  const t = Math.max(2, lejos2 < R2 ? Math.min(alFoco, cerca - Math.sqrt(R2 - lejos2)) : alFoco)
   a.puntoDelPuntero[0] = r.ox + r.dx * t
   a.puntoDelPuntero[1] = r.oy + r.dy * t
   a.puntoDelPuntero[2] = r.oz + r.dz * t
+}
+
+/** [PULIDO 19] Q1.b · el dominio de la vista desde la cámara (su base y su campo; el foco, la distancia al logo) y, la primera vez, la siembra. */
+function elDominio(a: Armado, f: Afuera): void {
+  const d = a.dominio
+  const cam = f.camara
+  d.o[0] = cam.position.x
+  d.o[1] = cam.position.y
+  d.o[2] = cam.position.z
+  for (let k = 0; k < d.ejes.length; k += 1) {
+    const eje = d.ejes[k]
+    V.set(eje[1], eje[2], eje[3]).applyQuaternion(cam.quaternion)
+    eje[0][0] = V.x
+    eje[0][1] = V.y
+    eje[0][2] = V.z
+  }
+  const fov = cam instanceof THREE.PerspectiveCamera ? cam.fov : 35
+  const aspecto = cam instanceof THREE.PerspectiveCamera ? cam.aspect : 1.6
+  armarElDominio(d, fov, aspecto, cam.position.distanceTo(a.centro), f.piso)
+  a.entrada.dominio = d
+  // La siembra (el primer cuadro con cámara): todas en el dominio de la vista, ya encendidas (la página arranca con el plasma puesto).
+  if (!a.poblado) {
+    const b = a.brasas
+    poblar(d, b, a.azar, true)
+    for (let i = 0; i < b.n; i += 1) b.vida[i] = alfaDelDominio(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+    a.poblado = true
+  }
 }
 
 /** Una onda nueva desde (x, y, z) del mundo (en el lugar de la más vieja). */
@@ -237,6 +271,7 @@ function lucesYEfectos(a: Armado, f: Afuera): number {
 export function cuadro(a: Armado, f: Afuera): void {
   leerLaEscena(a.temperatura, a.lectura, f)
   if (a.lectura.golpeAhora) ondaDesde(a, a.centro.x, a.centro.y, a.centro.z, f.ahora)
+  elDominio(a, f)
   elPuntero(a, f.camara)
   elGesto(a, f)
   const en = a.entrada
@@ -251,7 +286,8 @@ export function cuadro(a: Armado, f: Afuera): void {
   vientoEstelaYCanales(a, f)
   const pasos = Math.max(1, Math.ceil(f.dt / CUADRO.pasoMaximo))
   for (let k = 0; k < pasos; k += 1) pasoDeLasBrasas(a.brasas, f.dt / pasos, en, a.azar)
-  brilloPorDensidad(a.brasas)
+  repartir(a.dominio, a.brasas, a.azar)
+  brilloPorDensidad(a.brasas, f.dt)
   const entorno = a.entorno
   entorno.camara[0] = f.camara.position.x
   entorno.camara[1] = f.camara.position.y

@@ -1,3 +1,4 @@
+import { CELDAS_DEL_REPARTO, type Dominio } from './dominio'
 import { largo3 } from './largo'
 
 /**
@@ -9,11 +10,16 @@ import { largo3 } from './largo'
  * enfría sola) y la energía las hace TEMBLAR (la agitación térmica). El puntero además ORDENA (las cercanas giran alrededor de su
  * rayo). En la dirección A son las partículas; en B, los núcleos calientes del enjambre. Puro (la prueba lo corre en Node).
  * [PULIDO 18] P1.b · el paso salió a `paso.ts` y lo de afuera de cada una a `afuera.ts` (este archivo pasaba las 300 líneas).
+ * [PULIDO 19] Q1.b · la grilla y las fuerzas entre ellas salieron a `grilla.ts` (la grilla es relativa a la caja del dominio de la vista,
+ * `dominio.ts`); Q1.c · cada brasa tiene su VIDA (el alfa del dominio, con tope de cambio por cuadro) y su DENSIDAD suavizada: el
+ * brillo que se dibuja es el producto. Nada aparece ni desaparece de golpe.
  */
 export const BRASAS = {
   /**
    * Dónde viven: una cáscara (u) y el hueco del logo (el logo mide 6,9 de ancho). [PULIDO 18] P1.b · la cáscara es del MUNDO: alrededor
    * del origen (el lugar de reposo del logo), quieta; el hueco va con el logo (un obstáculo donde esté: si baja, las aparta al pasar).
+   * [PULIDO 19] Q1.b · con el dominio de la vista (`dominio.ts`) la cáscara es sólo la siembra (antes del primer cuadro con cámara) y el
+   * límite sin dominio (las pruebas): en el sitio, el dominio periódico las contiene.
    */
   volumen: { radio: 13, hueco: 4.2 },
   /**
@@ -31,8 +37,11 @@ export const BRASAS = {
   enlace: { forma: 1.2, reposo: 0.95, resorte: 2.2, vida: [2.5, 7], empujon: 0.9, enfria: [3, 7] },
   /** El puntero (desde su rayo, u): alcance, fuerza, rechazo pegado, hasta dónde rompe enlaces, el giro alrededor del rayo y cuánto calienta (1/s). */
   cursor: { alcance: 4.6, fuerza: 2, cerca: 1.1, rompe: 3, gira: 2.6, calienta: 1.6 },
-  /** El límite del brillo por densidad: con `vecinas` brasas a menos de `radio` (u), el brillo se divide por (1 + baja · vecinas). */
-  densidad: { radio: 1, baja: 0.09 },
+  /**
+   * El límite del brillo por densidad: con `vecinas` brasas a menos de `radio` (u), el brillo se divide por (1 + baja · vecinas).
+   * [PULIDO 19] Q1.c · y se persigue con inercia (`suavizaS`, s): antes saltaba de golpe cada cuatro cuadros (un pop).
+   */
+  densidad: { radio: 1, baja: 0.09, suavizaS: 0.8 },
   /** La energía: la de reposo (más con la temperatura), en cuánto se enfría (s) y cuánto tiembla una brasa caliente (u/s²). */
   energia: { base: 0.1, porTemperatura: 0.45, apagaS: 0.8, tiembla: 2.2 },
   /** La onda de un pulso (el clic, la descarga): rapidez del frente (u/s), su ancho (u), el empuje (u/s) y cuánto calienta; dura hasta `llega`. */
@@ -62,16 +71,53 @@ export interface Brasas {
   /** Por brasa: el tamaño (0–1, muchas chicas), dos fases y el ritmo del titileo. */
   readonly semilla: Float32Array
   readonly energia: Float32Array
-  /** El brillo por la densidad local (1: sola; menos, amontonada: un grupo no se satura). */
+  /**
+   * [PULIDO 19] Q1 · la semilla del temblor de cada una (un xorshift propio, inline en `afuera.ts`): llamar a `azar()` tres veces por brasa
+   * encajaba un número por llamada (Chrome no inlinea el cierre: un HeapNumber de 16 bytes por retorno, ~40 KB de basura por cuadro).
+   */
+  readonly ruido: Uint32Array
+  /**
+   * El brillo que se dibuja: la densidad por la vida. [PULIDO 19] Q1.c · `densidad`, el brillo por la densidad local (1: sola; menos,
+   * amontonada: un grupo no se satura), perseguido con inercia; `vida`, el alfa del dominio (0 al reaparecer por una cara, 1 adentro
+   * del cuadro), con tope de cambio por cuadro; `eventos`, qué brasas reaparecieron en este paso (el único salto permitido).
+   */
   readonly brillo: Float32Array
+  readonly densidad: Float32Array
+  readonly vida: Float32Array
+  readonly eventos: Uint8Array
+  /** [PULIDO 19] Q1.b · el reparto (`dominio.ts`): quién se está apagando para mudarse, cuántas hay por celda del cuadro y por dónde va la ronda. */
+  readonly migra: Uint8Array
+  readonly celdasDeLaVista: Int32Array
+  readonly objetivoDeLasCeldas: Float32Array
+  turnoDelReparto: number
   readonly pareja: Int32Array
   readonly vidaDelEnlace: Float32Array
   readonly enfriado: Float32Array
   readonly fuerza: Float32Array
   readonly cabeza: Int32Array
   readonly siguiente: Int32Array
+  /** [PULIDO 19] Q1.b · la grilla de este paso (`grilla.ts`). */
+  readonly grilla: Grilla
   paresMirados: number
   turno: number
+}
+
+/** [PULIDO 19] Q1.b · cuántas celdas por eje tiene la grilla como mucho (`cabeza` es su cubo). */
+export const GRILLA = { celdas: 32 } as const
+
+/** Lo que la grilla recuerda del paso: el origen de la caja, el lado de la celda y cuántas celdas por eje. */
+export interface Grilla {
+  ox: number
+  oy: number
+  oz: number
+  lado: number
+  nx: number
+  ny: number
+  nz: number
+}
+
+export function crearGrilla(): Grilla {
+  return { ox: 0, oy: 0, oz: 0, lado: BRASAS.fuerzas.alcance, nx: 1, ny: 1, nz: 1 }
 }
 
 /** El rayo del puntero, en el mundo: el origen (la cámara) y la dirección (unitaria). */
@@ -98,13 +144,21 @@ export interface EntradaDeLasBrasas {
   cuantosArcos: number
   /** El piso (y): nada pasa por debajo (un arco a una brasa bajo el piso se ve como una grieta). */
   piso: number
+  /** [PULIDO 19] Q1.b · el dominio de la vista (`dominio.ts`); sin él (las pruebas), la cáscara de siempre. */
+  dominio: Dominio | null
+  /**
+   * [PULIDO 19] El paso (s): lo escribe `pasoDeLasBrasas`; `afuera.ts` y `movimiento.ts` lo leen de acá y no por parámetro. En el bucle
+   * de cada brasa, un número no entero que cruza una función que V8 no inlineó se encaja en un HeapNumber (16 bytes por brasa y
+   * cuadro): medido en Chrome, 51 KB de basura por cuadro que eran de `dt`, `piso`, `x, y, z` y `t` cruzando llamadas.
+   */
+  dt: number
 }
 
 /** Cuántos arcos entran al paso como mucho (los lugares de los arcos, `arcos/arcos.ts`). */
 export const ARCOS_EN_LA_ENTRADA = 6
 
 export function crearEntradaDeLasBrasas(): EntradaDeLasBrasas {
-  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), viento: new Float32Array(3), estela: new Float32Array(3), arcos: new Float32Array(ARCOS_EN_LA_ENTRADA * 7), cuantosArcos: 0, piso: -100 }
+  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), viento: new Float32Array(3), estela: new Float32Array(3), arcos: new Float32Array(ARCOS_EN_LA_ENTRADA * 7), cuantosArcos: 0, piso: -100, dominio: null, dt: 1 / 60 }
 }
 
 /** Un azar con semilla (mulberry32): las mismas brasas y los mismos arcos en cada carga de la página (y en el banco). */
@@ -118,12 +172,6 @@ export function azarConSemilla(semilla: number): () => number {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
 }
-
-const F = BRASAS.fuerzas
-/** La grilla: celdas del alcance de las fuerzas (cada brasa mira sólo las vecinas); `vecinas.ts` la usa también. */
-export const LADO = Math.ceil((2 * (BRASAS.volumen.radio + F.alcance)) / F.alcance)
-const MITAD = (LADO * F.alcance) / 2
-export const celda = (v: number): number => Math.min(LADO - 1, Math.max(0, Math.floor((v + MITAD) / F.alcance)))
 
 /** Un punto al azar en la cáscara (la dirección uniforme, el radio por la raíz cúbica: parejas en el volumen), en `destino` desde `o`. */
 export function enLaCascara(azar: () => number, destino: Float32Array, o: number): void {
@@ -147,13 +195,23 @@ export function crearBrasas(n: number, azar: () => number, piso = Number.NEGATIV
     signo: new Int8Array(n),
     semilla: new Float32Array(n * 4),
     energia: new Float32Array(n).fill(BRASAS.energia.base),
+    ruido: new Uint32Array(n),
     brillo: new Float32Array(n).fill(1),
+    densidad: new Float32Array(n).fill(1),
+    vida: new Float32Array(n).fill(1),
+    eventos: new Uint8Array(n),
+    migra: new Uint8Array(n),
+    celdasDeLaVista: new Int32Array(CELDAS_DEL_REPARTO),
+    objetivoDeLasCeldas: new Float32Array(CELDAS_DEL_REPARTO),
+    turnoDelReparto: 0,
     pareja: new Int32Array(n).fill(-1),
     vidaDelEnlace: new Float32Array(n),
     enfriado: new Float32Array(n),
     fuerza: new Float32Array(n * 3),
-    cabeza: new Int32Array(LADO * LADO * LADO),
-    siguiente: new Int32Array(n),
+    // Vacías (−1): quien recorra una cadena antes del primer paso no gira para siempre en el índice 0.
+    cabeza: new Int32Array(GRILLA.celdas * GRILLA.celdas * GRILLA.celdas).fill(-1),
+    siguiente: new Int32Array(n).fill(-1),
+    grilla: crearGrilla(),
     paresMirados: 0,
     turno: 0,
   }
@@ -168,6 +226,7 @@ export function crearBrasas(n: number, azar: () => number, piso = Number.NEGATIV
     b.semilla[i * 4 + 2] = azar() * Math.PI * 2
     b.semilla[i * 4 + 3] = 0.6 + azar() * 1.8
     b.enfriado[i] = azar() * 2
+    b.ruido[i] = Math.max(1, Math.floor(azar() * 4294967295))
   }
   return b
 }
@@ -192,61 +251,36 @@ export function soltarEnlace(b: Brasas, i: number, azar: () => number): void {
   }
 }
 
-/** La distancia de (x, y, z) al rayo del puntero (u) y el punto del rayo más cercano, en `punto`. */
-export function distanciaAlRayo(x: number, y: number, z: number, r: RayoDelPuntero, punto: Float32Array): number {
+/**
+ * [PULIDO 19] El punto del rayo del puntero más cercano a la brasa en `L[o..o+2]` (en `punto[0..2]`) y la distancia (u, en `punto[3]`):
+ * sin números por parámetro ni retorno (en el bucle de cada brasa se encajan: `EntradaDeLasBrasas.dt`).
+ */
+export function alRayoDesde(L: Float32Array, o: number, r: RayoDelPuntero, punto: Float32Array): void {
+  const x = L[o]
+  const y = L[o + 1]
+  const z = L[o + 2]
   const t = Math.max(0, (x - r.ox) * r.dx + (y - r.oy) * r.dy + (z - r.oz) * r.dz)
   punto[0] = r.ox + r.dx * t
   punto[1] = r.oy + r.dy * t
   punto[2] = r.oz + r.dz * t
-  return largo3(x - punto[0], y - punto[1], z - punto[2])
+  const dx = x - punto[0]
+  const dy = y - punto[1]
+  const dz = z - punto[2]
+  punto[3] = Math.sqrt(dx * dx + dy * dy + dz * dz)
 }
 
-/** Las fuerzas entre ellas por la grilla (cada par una vez) y los enlaces que se forman. */
-export function entreEllas(b: Brasas, azar: () => number): void {
-  const { lugar, fuerza, signo, pareja } = b
-  const E = BRASAS.enlace
-  b.cabeza.fill(-1)
-  for (let i = 0; i < b.n; i += 1) {
-    const k = (celda(lugar[i * 3]) * LADO + celda(lugar[i * 3 + 1])) * LADO + celda(lugar[i * 3 + 2])
-    b.siguiente[i] = b.cabeza[k]
-    b.cabeza[k] = i
-  }
-  let mirados = 0
-  for (let i = 0; i < b.n; i += 1) {
-    const cx = celda(lugar[i * 3])
-    const cy = celda(lugar[i * 3 + 1])
-    const cz = celda(lugar[i * 3 + 2])
-    for (let ax = Math.max(0, cx - 1); ax <= Math.min(LADO - 1, cx + 1); ax += 1) for (let ay = Math.max(0, cy - 1); ay <= Math.min(LADO - 1, cy + 1); ay += 1) for (let az = Math.max(0, cz - 1); az <= Math.min(LADO - 1, cz + 1); az += 1) {
-      for (let j = b.cabeza[(ax * LADO + ay) * LADO + az]; j >= 0; j = b.siguiente[j]) {
-        if (j <= i) continue
-        mirados += 1
-        const dx = lugar[j * 3] - lugar[i * 3]
-        const dy = lugar[j * 3 + 1] - lugar[i * 3 + 1]
-        const dz = lugar[j * 3 + 2] - lugar[i * 3 + 2]
-        // [PULIDO 18] Sin `Math.hypot` (asigna en cada llamada): el cuadrado primero; la raíz, sólo de las que están al alcance.
-        const d2 = dx * dx + dy * dy + dz * dz
-        if (d2 >= F.alcance * F.alcance || d2 < 1e-10) continue
-        const d = Math.sqrt(d2)
-        const opuestas = signo[i] !== signo[j]
-        const u = 1 - d / F.alcance
-        let f = opuestas ? F.atrae * u : -F.repele * u
-        if (d < F.cerca) f -= F.choque * (1 - d / F.cerca) ** 2
-        const fx = (f * dx) / d
-        const fy = (f * dy) / d
-        const fz = (f * dz) / d
-        fuerza[i * 3] += fx
-        fuerza[i * 3 + 1] += fy
-        fuerza[i * 3 + 2] += fz
-        fuerza[j * 3] -= fx
-        fuerza[j * 3 + 1] -= fy
-        fuerza[j * 3 + 2] -= fz
-        if (opuestas && d < E.forma && pareja[i] < 0 && pareja[j] < 0 && b.enfriado[i] <= 0 && b.enfriado[j] <= 0) {
-          pareja[i] = j
-          pareja[j] = i
-          b.vidaDelEnlace[i] = E.vida[0] + azar() * (E.vida[1] - E.vida[0])
-        }
-      }
-    }
-  }
-  b.paresMirados = mirados
+const XYZ = new Float32Array(3)
+const CERCA = new Float32Array(4)
+
+/** La distancia de (x, y, z) al rayo del puntero (u) y el punto del rayo más cercano, en `punto` (fuera del bucle de cada brasa: los arcos). */
+export function distanciaAlRayo(x: number, y: number, z: number, r: RayoDelPuntero, punto: Float32Array): number {
+  XYZ[0] = x
+  XYZ[1] = y
+  XYZ[2] = z
+  alRayoDesde(XYZ, 0, r, CERCA)
+  punto[0] = CERCA[0]
+  punto[1] = CERCA[1]
+  punto[2] = CERCA[2]
+  return CERCA[3]
 }
+

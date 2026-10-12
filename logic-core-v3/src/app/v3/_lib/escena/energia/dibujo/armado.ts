@@ -7,6 +7,7 @@ import type { EntornoDeLosArcos } from '../arcos/programador'
 import { azarConSemilla, crearBrasas, crearEntradaDeLasBrasas, type Brasas, type EntradaDeLasBrasas, type RayoDelPuntero } from '../brasas'
 import { crearLectura, crearTemperatura, type Lectura, type Temperatura } from '../calor'
 import { DIRECCIONES } from '../direcciones'
+import { crearDominio, type Dominio } from '../dominio'
 import { crearPuntero, type EstadoDelPuntero } from '../interaccion/interaccion'
 import { largo3 } from '../largo'
 import { FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, VERTICES_DEL_HALO_DEL_ARCO, VERTICES_DE_LOS_ARCOS, uniformesDelTrazo } from './arcos'
@@ -38,6 +39,9 @@ export interface Armado {
   readonly arcos: EstadoDeLosArcos
   readonly puntero: EstadoDelPuntero
   readonly cinta: Cinta
+  /** [PULIDO 19] Q1.b · el dominio de la vista (`dominio.ts`) y si las brasas ya se sembraron en él (el primer cuadro con cámara). */
+  readonly dominio: Dominio
+  poblado: boolean
   readonly uniformes: UniformesComunes
   readonly atributosDeLasBrasas: readonly THREE.InstancedBufferAttribute[]
   readonly atributosDeLaCinta: readonly THREE.BufferAttribute[]
@@ -191,7 +195,7 @@ export function armar(compacto: boolean, vista: { readonly current: Vista }, log
     bordeDelLogo,
   }
   return {
-    azar, brasas, entrada: crearEntradaDeLasBrasas(), temperatura: crearTemperatura(), lectura: crearLectura(), arcos: crearArcos(azar), puntero: crearPuntero(), cinta, uniformes,
+    azar, brasas, entrada: crearEntradaDeLasBrasas(), temperatura: crearTemperatura(), lectura: crearLectura(), arcos: crearArcos(azar), puntero: crearPuntero(), cinta, dominio: crearDominio(), poblado: false, uniformes,
     atributosDeLasBrasas, atributosDeLaCinta, geometriaDeLaCinta: gt, efectos: { lugar: lugarDeLosEfectos, efecto, geometria: ge }, mallas, centro, v, luces: new Float32Array(DIBUJO.luces * 4),
     puntoDelPuntero: new Float32Array(3), camaraAntes: new THREE.Vector3(Number.NaN, Number.NaN, Number.NaN), puntoAntes: new Float32Array(3).fill(Number.NaN), rayo, entorno, texto: { leidoEn: Number.NEGATIVE_INFINITY, scroll: Number.NaN }, halo: 0, ondas: new Float32Array(8).fill(Number.NEGATIVE_INFINITY),
     ajustables: { brasas: deLasBrasas, arcos: trazo, comun: uniformes, reflejo: delReflejo },

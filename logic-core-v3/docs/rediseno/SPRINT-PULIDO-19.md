@@ -75,10 +75,55 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
   antes/ahora/por qué en la tabla. tsc y lint limpios; la compuerta (50 suites) en verde salvo s8-montaje con sus 2 de la base.
 
 ### Q1.b + Q1.c · El dominio que cubre lo visible y el ciclo de vida sin pops
-- PENDIENTE.
+- HECHO · VISTO en el mini-banco (hojas `hoja-d5.png`: el encuadre del sitio de noche y de día, el cierre de lejos, el teléfono):
+  cobertura pareja en las cuatro vistas, partículas nítidas, sin banda rala ni discos borrosos cerca de la cámara.
+- EL DOMINIO DE LA VISTA (`energia/dominio.ts`, nuevo): la pirámide de la vista con un margen del 20 % afuera del cuadro, entre 0,4 y
+  1,8 veces el foco (la distancia cámara → logo, entre 8 y 60 u), PERIÓDICO (la que sale por una cara reaparece por la opuesta) y
+  relativo a la cámara en tamaño, no en posición: las brasas siguen en el MUNDO (al mover la cámara pasan de largo). La SIEMBRA, en el
+  primer cuadro con cámara: parejas en el cuadro, en profundidad con densidad ∝ w^1,7 (pocas cerca y grandes; muchas lejos y chicas),
+  lo que cae bajo el piso se sortea de nuevo. El REPARTO (`repartir`): cuenta por celda del cuadro (8 × 5) contra lo que le toca a cada
+  una por el aire que mira (`hastaElPiso` por rayo: una celda que mira el piso de cerca pide menos); las que sobran en una celda llena
+  (1,2×) se apagan, se mudan a la más vacía (< 0,45×; si ahí no hay lugar, a cualquier lado: nunca quedan apagadas esperando) y se
+  encienden. De a 8 candidatas por cuadro. La GRILLA de las fuerzas (`energia/grilla.ts`, nuevo; salió de `brasas.ts`) es relativa a
+  la caja del dominio (32 celdas por eje como mucho, de al menos el alcance): antes era fija alrededor del origen y una caja grande
+  caía entera en las celdas del borde. El puntero entra a la nube a la profundidad del foco (o a la esfera del logo si la toca).
+- EL CICLO DE VIDA: cada brasa tiene `vida` (el alfa del dominio: 1 adentro del cuadro, 0 en el margen de los lados y en las bandas de
+  profundidad, 0,3 y 0,45 del foco; 0 al reaparecer o al nacer en su celda nueva) perseguida con tope `dt / 0,25 s`, y `densidad` (el
+  brillo por las vecinas) perseguida con inercia (0,8 s; antes saltaba de golpe cada cuatro cuadros). Lo que se dibuja es el producto.
+  `eventos` marca el único salto permitido (la reaparición). La cáscara de radio 13 queda como siembra antes del primer cuadro y como
+  límite sin dominio (las pruebas). La fuente del logo, apenas (0,2 en 9 u): antes apagaba lo lejano del logo.
+- Lo que el banco mostró y se corrigió en el camino: (1) la siembra en la esfera quedaba concentrada en el centro en las vistas
+  lejanas → siembra en todo el dominio + reparto; (2) las muestras bajo el piso subidas al mínimo se apilaban en el horizonte y el
+  reparto las mudaba en un ciclo sin fin → profundidad hasta el piso por rayo y celdas con peso por el aire que miran; (3) las mudadas
+  sin lugar quedaban apagadas para siempre → a cualquier lugar; (4) `llena` 1,6 nunca se cumplía con un desnivel suave → 1,2; (5) la
+  densidad ∝ w amontonaba cerca de la cámara (discos borrosos de día) → exponente 1,7 y el frente a 0,4 del foco.
+- Invariante s70 (nuevo, `s70-pulido-19`; `npm run test:s70`): la siembra + 1 s de reparto cubre las 40 celdas del cuadro (≥ 35 % de lo
+  que le toca a cada una; las de objetivo < 2 no cuentan) en el hero, el cierre, el teléfono y Números (control: la esfera de antes en
+  el cierre deja celdas vacías); en 10 s de órbita (0 → 170°) y viaje a 40 u con 900 brasas: ~7.400 eventos, todos fuera del cuadro o
+  ya apagadas, y fuera de ellos ningún salto de brillo mayor que el tope (0,076 contra 0,115; controles: un pop de la más encendida, una
+  reaparición adentro del cuadro, la densidad sin inercia); quieta 6 s, no recicla (264 eventos < 540); módulos ≤ 300 líneas y las
+  funciones de cada cuadro sin reservas (control: una reserva en el envoltorio). s68 y s69 ajustados (tabla de invariantes).
+- SIN BASURA POR CUADRO (la crítica del banco: 61 KB por cuadro, de 16 en PULIDO 18). El perfil del heap señalaba a `pasoDeLasBrasas`
+  pero en Node asignaba 1 KB; con el estado vivo de la página en Chrome, 51 KB; con una entrada sintética en el mismo Chrome, 1 KB.
+  La causa: un número no entero que cruza una función que TurboFan no inlineó se encaja en un HeapNumber (16 bytes) a la ida y a la
+  vuelta, y qué se inlinea cambia con cada reoptimización (los deopts por «insufficient type feedback» de los caminos fríos). Ahora
+  nada de cada brasa cruza una llamada como número: `en.dt`, `d.piso`, el rotor en lote con la hora en un arreglo del módulo, y
+  `coordenadasDe`, `alfaDe`, `celdaDe`, `alRayoDesde` por brasa (arreglo + índice). La agitación térmica: un xorshift por brasa
+  (`b.ruido`), inline (eran tres `azar()` por brasa). Medido en el mini-banco (1440, calma, noche): de 61,5 a 6,4 KB por cuadro,
+  de 116 a 20 recolecciones en 6 s, el cuadro de 2,06 a 1,38 ms; a 390, de 33,5 a 5,2 KB y de 1,23 a 0,90 ms. Verificado con el
+  estado vivo de la página: `cuadro(a, f)` 1,7 KB, el dibujo 2,6 KB, el paso 0,2 KB.
+- Bancos del sprint (scratchpad `p19/`): `basura.ts` (Node, por función), `basura-cdp.ts` (el mismo en el Chrome del mini-banco con
+  los objetos vivos y `gc()` antes de cada ventana), `tier-cdp.ts` (el nivel de V8 de cada función: en V8 15, bit 16 = Maglev y
+  32 = TurboFan), el registro de deopts de V8 (`--js-flags=--log-deopt --logfile=…` con `--no-sandbox`: el stdout del renderer no
+  llega al del navegador).
 
 ### Q1.a · Más densidad (+50 % de presencia), medido
-- PENDIENTE.
+- HECHO · VISTO en el mini-banco. 800 brasas en escritorio y 400 en el teléfono (eran 600 y 300) y todas a la vista (antes la cáscara
+  dejaba muchas fuera del cuadro y la fuente las apagaba lejos del logo). La presencia en el encuadre del sitio (el exceso medio de
+  luminancia sobre el fondo, contra la hoja de PULIDO 18): de noche 2,82 → 5,30 en el centro (×1,9) y 2,43 → 4,54 en la periferia; de
+  día 5,97 → 7,18 (+20 %) y 6,27 → 7,38. Se lee como «más plasma», no como nube (hojas `hoja-d5.png`).
+- El costo (mini-banco, la NVIDIA, sin vsync, sin el reloj de la GPU): 1440 calma-noche 1,38 ms por cuadro (p95 1,6; máx. 6,4),
+  390 calma-noche 0,90 (p95 1,1). Ningún cuadro de más de 20 ms. Las otras vistas, en «Medido».
 
 ### Q1.d · La red en reposo
 - PENDIENTE.
@@ -96,7 +141,22 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 - PENDIENTE.
 
 ### Medido (sin vsync; 1440 y 390; la NVIDIA)
-- PENDIENTE.
+- Q1 · el mini-banco (recibo `entregas/pulido-19/mini-medido.json`; s70 lo lee, con sus controles positivos): la placa ANGLE D3D11 sobre la
+  RTX 5050; sin el reloj de la GPU; 6 s medidos tras 4 s de física. Ningún cuadro de más de 20 ms; ningún error.
+
+| Medición (ms por cuadro: media / p95 / máx.) | Q1 final | basura KB/cuadro (recolecciones en 6 s) | antes del arreglo de la basura |
+|---|---|---|---|
+| 1440 · calma · noche | 1,38 / 1,6 / 6,4 | 6,4 (20) | 2,06 ms · 61,5 KB (116) |
+| 1440 · calma · día | 1,97 / 2,5 / 4,8 | 6,8 (16) | 2,01 · 61,6 (119) |
+| 1440 · máximo · noche | 2,07 / 2,7 / 5,8 | 7,7 (16) | 2,17 · 63,1 (114) |
+| 1440 · lejos (el cierre) · noche | 1,44 / 1,8 / 4,4 | 6,0 (19) | 1,61 · 61,3 (149) |
+| 1440 · la escena sola | 0,14 / 0,3 / 3,4 | 1,3 (43) | — |
+| 390 · calma · noche | 0,90 / 1,1 / 3,8 | 5,2 (25) | 1,23 · 33,5 (106) |
+| 390 · máximo · noche | 0,93 / 1,2 / 3,8 | 5,9 (25) | 1,24 · 35,2 (109) |
+
+- Referencia de PULIDO 18 (600 brasas en la cáscara): ~1,0 ms en calma a 1440 y ~16 KB por cuadro. Lo que suma Q1 son los 200
+  brasas más y el dominio (el reparto y el envoltorio: ~0,1 ms); la basura quedó por debajo de PULIDO 18.
+- El banco del sitio (`p-tanda.sh`) sigue sin poder correr (memoria disponible < 3000 MB en cada bisagra): VERIFICAR TRAS REINICIO.
 
 ### Final · la matriz de 12 anchos y verificar
 - PENDIENTE.
@@ -106,6 +166,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 | Tanda | Disco libre | Memoria disponible (antes → después) | No paginado (antes → después) | Nota |
 |---|---|---|---|---|
 | Arranque | 79,6 GB | 2735 MB | 957 MB | sin banco del sitio (pide 3000 MB); el mini-banco sí |
+| Q1 (mini-banco) | 78,5 GB | 2012 → 2516 MB | 957 → 984 MB | sin banco del sitio; mini-banco a 1440 y 390 (un Chrome por medición); cuadros crudos borrados al armar cada hoja |
 
 ## Invariantes que cambian de sentido (antes / ahora / por qué)
 
@@ -115,10 +176,17 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 | s68 · O3 (las direcciones) | `plasma=a|b` elige; B con su enjambre (≥ 10.000 motas); el escenario le pasa la dirección | sólo A; ni `b` ni `c`; sin la carpeta del enjambre; el escenario no elige | ídem (el cristal reemplaza a B) |
 | s68 · O3 (el dibujo, el quieto, los módulos) | `CLARO_EN_REPOSO = { chispa: 0, mota: 0 }`; `cuadroQuieto(a, state.gl, …)`; 24 módulos con `enjambre/` | `{ chispa: 0 }`; `cuadroQuieto(a, …)`; 22 módulos | el estilo `mota` y el paso del enjambre eran de B |
 | s69 · P1.0 | `?plasma=b` monta B; «queda B (su bandera)» y la simulación sin la superficie de C | `?plasma=` se ignora (el producto); ni B ni C; sin `enjambre/` | ídem |
+| s68 · POR_CUADRO, MODULOS | la grilla y las fuerzas entre ellas en `brasas.ts`; sin `dominio.ts` ni `grilla.ts` | `grilla.ts` (entreEllas, ajustarLaGrilla, celdaDe) y `dominio.ts` en las listas; `ruido.ts` con el rotor en lote; `brasas.ts` con `alRayoDesde` | Q1.b sacó la grilla de `brasas.ts` (pasaba las 300 líneas) y el dominio es nuevo; lo de cada cuadro sin reservas se sigue exigiendo |
+| s69 · CALIENTES, firmas | `brilloPorDensidad(brasas)`; `deAfuera(b, i, en, dt, azar)`, `delMovimiento(b, i, en, dt)` | `brilloPorDensidad(brasas, dt)` (la inercia); `en.dt` antes de llamar (sin `dt` por parámetro) | Q1.c (la densidad con inercia) y la basura por cuadro (los números no cruzan llamadas por brasa) |
+| s70 · el piso del dominio | `poblar(d, b, piso, …)`, `repartir(d, b, piso, …)`, `objetivosDelReparto(d, piso, …)`, `armarElDominio(d, fov, aspecto, foco)` | el piso vive en el dominio: `armarElDominio(…, foco, piso)` y las demás sin `piso` | ídem (la basura por cuadro) |
 
 ## Crítica (lo que el banco mostró y qué se hizo)
 
-(se completa con el banco)
+- Q1 · la siembra en la esfera, el piso en el horizonte, las mudadas apagadas, `llena` inalcanzable y los discos borrosos de día: en
+  Q1.b (cada uno con su arreglo).
+- Q1 · 61 KB de basura por cuadro (de 16): en Q1.b («sin basura por cuadro»). El perfil del heap atribuía todo a `pasoDeLasBrasas`
+  y Node no lo reproducía: el discriminador fue correr la misma medición dentro del Chrome del banco con los objetos vivos.
+- Q1 · el reparto no mudaba nada con el encuadre que cambia (la cuenta por celda nunca superaba 1,6× con un desnivel suave): 1,2×.
 
 ## Lo que no quedó bien
 

@@ -1,0 +1,300 @@
+{
+ "que": "PULIDO 19 · Q1 · lo medido en el MINI-BANCO (la memoria no llegó a 3 GB: sin banco del sitio). El plasma real (800 brasas en escritorio, 400 en el teléfono, en el dominio de la vista) con su cuadro, su física, el pase de profundidad y la copia del color, en la escena chica del banco (piso con juntas, un logo de reemplazo, la trama, luces y el tono), en tiempo real.",
+ "como": "Un Chrome sin ventana por medición (--headless=new --use-angle=d3d11 --force_high_performance_gpu --disable-gpu-vsync --disable-frame-rate-limit --enable-precise-memory-info), la escena compilada antes, 4 s de física de una para el estado estable y 6 s medidos sin el reloj de la GPU (reloj=no); la primera consulta por CDP, después de la medición. EL CUADRO: el intervalo entre cuadros (rAF sin vsync: CPU y GPU). heap: la basura de JS por cuadro (KB) y las recolecciones en los 6 s. calma: nadie toca nada; maxima: la temperatura al tope, el puntero que da vueltas y un arco cada 1,5 s; lejos: la cámara del cierre (0, 5, 40); escena: la escena sola, sin el plasma. \"antes\": el mismo código de Q1 antes del arreglo de la basura por cuadro (los números que cruzaban las llamadas de cada brasa se encajaban en HeapNumbers).",
+ "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "anchos": {
+  "1440": [
+   1440,
+   900
+  ],
+  "390": [
+   390,
+   844
+  ]
+ },
+ "medidas": {
+  "1440": {
+   "calma-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0",
+    "cuadro": {
+     "media": 1.97,
+     "p50": 1.9,
+     "p95": 2.5,
+     "maximo": 4.8,
+     "mayoresDe20": 0,
+     "cuadros": 3038
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 6268293,
+     "despues": 8777161,
+     "recolecciones": 16,
+     "kbPorCuadro": 6.8
+    },
+    "errores": 0
+   },
+   "calma-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1",
+    "cuadro": {
+     "media": 1.38,
+     "p50": 1.4,
+     "p95": 1.6,
+     "maximo": 6.4,
+     "mayoresDe20": 0,
+     "cuadros": 4356
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 6239817,
+     "despues": 8379017,
+     "recolecciones": 20,
+     "kbPorCuadro": 6.4
+    },
+    "errores": 0
+   },
+   "escena": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&plasma=no",
+    "cuadro": {
+     "media": 0.14,
+     "p50": 0.1,
+     "p95": 0.3,
+     "maximo": 3.4,
+     "mayoresDe20": 0,
+     "cuadros": 43459
+    },
+    "largos": [],
+    "programasAntes": 4,
+    "programas": 4,
+    "heap": {
+     "antes": 5378045,
+     "despues": 8388685,
+     "recolecciones": 43,
+     "kbPorCuadro": 1.3
+    },
+    "errores": 0
+   },
+   "lejos-noche": {
+    "hash": "ancho=1440&alto=900&vista=lejos&duracion=6&reloj=no&noche=1",
+    "cuadro": {
+     "media": 1.44,
+     "p50": 1.4,
+     "p95": 1.8,
+     "maximo": 4.4,
+     "mayoresDe20": 0,
+     "cuadros": 4171
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 7068849,
+     "despues": 8220049,
+     "recolecciones": 19,
+     "kbPorCuadro": 6
+    },
+    "errores": 0
+   },
+   "maxima-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&caliente=1",
+    "cuadro": {
+     "media": 2.07,
+     "p50": 2,
+     "p95": 2.7,
+     "maximo": 5.8,
+     "mayoresDe20": 0,
+     "cuadros": 2895
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 7112132,
+     "despues": 8824872,
+     "recolecciones": 16,
+     "kbPorCuadro": 7.7
+    },
+    "errores": 0
+   }
+  },
+  "390": {
+   "calma-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1",
+    "cuadro": {
+     "media": 0.9,
+     "p50": 0.9,
+     "p95": 1.1,
+     "maximo": 3.8,
+     "mayoresDe20": 0,
+     "cuadros": 6694
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 6597607,
+     "despues": 8266699,
+     "recolecciones": 25,
+     "kbPorCuadro": 5.2
+    },
+    "errores": 0
+   },
+   "maxima-noche": {
+    "hash": "ancho=390&alto=844&vista=ancho&duracion=6&reloj=no&noche=1&caliente=1",
+    "cuadro": {
+     "media": 0.93,
+     "p50": 0.9,
+     "p95": 1.2,
+     "maximo": 3.8,
+     "mayoresDe20": 0,
+     "cuadros": 6457
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 6126014,
+     "despues": 8769058,
+     "recolecciones": 25,
+     "kbPorCuadro": 5.9
+    },
+    "errores": 0
+   }
+  }
+ },
+ "antes": {
+  "1440": {
+   "calma-dia": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=0",
+    "cuadro": {
+     "media": 2.01,
+     "p50": 2,
+     "p95": 2.5,
+     "maximo": 5.1,
+     "mayoresDe20": 0,
+     "cuadros": 2981
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 6146979,
+     "despues": 8919243,
+     "recolecciones": 119,
+     "kbPorCuadro": 61.6
+    },
+    "errores": 0
+   },
+   "calma-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1",
+    "cuadro": {
+     "media": 2.06,
+     "p50": 2,
+     "p95": 2.6,
+     "maximo": 6.6,
+     "mayoresDe20": 0,
+     "cuadros": 2905
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 7483691,
+     "despues": 9098071,
+     "recolecciones": 116,
+     "kbPorCuadro": 61.5
+    },
+    "errores": 0
+   },
+   "lejos-noche": {
+    "hash": "ancho=1440&alto=900&vista=lejos&duracion=6&reloj=no&noche=1",
+    "cuadro": {
+     "media": 1.61,
+     "p50": 1.6,
+     "p95": 2.1,
+     "maximo": 4.8,
+     "mayoresDe20": 0,
+     "cuadros": 3725
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 6326279,
+     "despues": 7790415,
+     "recolecciones": 149,
+     "kbPorCuadro": 61.3
+    },
+    "errores": 0
+   },
+   "maxima-noche": {
+    "hash": "ancho=1440&alto=900&vista=sitio&duracion=6&reloj=no&noche=1&caliente=1",
+    "cuadro": {
+     "media": 2.17,
+     "p50": 2.2,
+     "p95": 2.8,
+     "maximo": 4.8,
+     "mayoresDe20": 0,
+     "cuadros": 2757
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 7955174,
+     "despues": 7956506,
+     "recolecciones": 114,
+     "kbPorCuadro": 63.1
+    },
+    "errores": 0
+   }
+  },
+  "390": {
+   "calma-noche": {
+    "hash": "ancho=390&alto=844&vista=sitio&duracion=6&reloj=no&noche=1",
+    "cuadro": {
+     "media": 1.23,
+     "p50": 1.2,
+     "p95": 1.5,
+     "maximo": 4.3,
+     "mayoresDe20": 0,
+     "cuadros": 4886
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 7483057,
+     "despues": 8780733,
+     "recolecciones": 106,
+     "kbPorCuadro": 33.5
+    },
+    "errores": 0
+   },
+   "maxima-noche": {
+    "hash": "ancho=390&alto=844&vista=sitio&duracion=6&reloj=no&noche=1&caliente=1",
+    "cuadro": {
+     "media": 1.24,
+     "p50": 1.2,
+     "p95": 1.6,
+     "maximo": 3.9,
+     "mayoresDe20": 0,
+     "cuadros": 4854
+    },
+    "largos": [],
+    "programasAntes": 9,
+    "programas": 9,
+    "heap": {
+     "antes": 6195220,
+     "despues": 8814272,
+     "recolecciones": 109,
+     "kbPorCuadro": 35.2
+    },
+    "errores": 0
+   }
+  }
+ }
+}

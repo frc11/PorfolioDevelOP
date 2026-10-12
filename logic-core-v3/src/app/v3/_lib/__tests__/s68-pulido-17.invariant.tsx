@@ -165,7 +165,7 @@ for (let k = 0; k < 420; k += 1) {
   entrada.temperatura = 0.25
   entrada.rayo = k >= 240 ? RAYO : null
   pasoDeLasBrasas(brasas, PASO, entrada, azar)
-  brilloPorDensidad(brasas)
+  brilloPorDensidad(brasas, 1 / 60)
   for (let i = 0; i < brasas.n * 3; i += 1) if (!Number.isFinite(brasas.lugar[i]) || !Number.isFinite(brasas.velocidad[i])) roto = true
 }
 interface Corrida { readonly roto: boolean; readonly afuera: number; readonly bajoElPiso: number; readonly enlaces: number; readonly energia: readonly [number, number]; readonly cerca: number; readonly lejos: number; readonly giro: number; readonly hacia: number; readonly brilloMinimo: number }
@@ -364,7 +364,7 @@ const cuerpo = (texto: string, nombre: string): string => {
 }
 // [PULIDO 18] P1.b · `brasas.ts` se partió (pasaba las 300 líneas): el paso, en `paso.ts`; lo de afuera de cada una, en `afuera.ts`. Los dos
 // entran a los módulos y a las funciones de cada cuadro (las mismas comprobaciones, en su lugar nuevo).
-const MODULOS = ['PlasmaYCargas.tsx', 'banco.ts', 'brasas.ts', 'paso.ts', 'afuera.ts', 'vecinas.ts', 'calor.ts', 'cuadro.ts', 'direcciones.ts', 'ruido.ts', 'textoEnPantalla.ts', 'arcos/arcos.ts', 'arcos/camino.ts', 'arcos/cinta.ts', 'arcos/programador.ts', 'dibujo/arcos.ts', 'dibujo/armado.ts', 'dibujo/comun.ts', 'dibujo/efectos.ts', 'dibujo/particulas.ts', 'interaccion/interaccion.ts', 'interaccion/puntero.ts'] as const
+const MODULOS = ['PlasmaYCargas.tsx', 'banco.ts', 'brasas.ts', 'grilla.ts', 'dominio.ts', 'paso.ts', 'afuera.ts', 'vecinas.ts', 'calor.ts', 'cuadro.ts', 'direcciones.ts', 'ruido.ts', 'textoEnPantalla.ts', 'arcos/arcos.ts', 'arcos/camino.ts', 'arcos/cinta.ts', 'arcos/programador.ts', 'dibujo/arcos.ts', 'dibujo/armado.ts', 'dibujo/comun.ts', 'dibujo/efectos.ts', 'dibujo/particulas.ts', 'interaccion/interaccion.ts', 'interaccion/puntero.ts'] as const
 const ARCHIVOS: Record<string, string | undefined> = Object.fromEntries(MODULOS.map((m) => [m, existsSync(`${ENERGIA}/${m}`) ? readFileSync(`${ENERGIA}/${m}`, 'utf8').replace(/\r\n/g, '\n') : undefined]))
 const deCodigo = (t: string): number => t.split('\n').filter((l) => l.trim() !== '' && !/^\s*(\/\/|\*|\/\*)/.test(l)).length
 const modulosBien = (a: Record<string, string | undefined>): boolean => MODULOS.every((m) => a[m] !== undefined && deCodigo(a[m] ?? '') <= 300)
@@ -372,12 +372,14 @@ afirmar(modulosBien(ARCHIVOS), `  en módulos (${String(MODULOS.length)}), ningu
 controlPositivo('  el detector VE un módulo de 301 líneas', { ...ARCHIVOS, 'cuadro.ts': 'x\n'.repeat(301) }, modulosBien)
 const POR_CUADRO: readonly (readonly [string, readonly string[]])[] = [
   ['cuadro.ts', ['cuadro', 'elPuntero', 'elGesto', 'onda', 'ondaDesde', 'alGolpe', 'lucesYEfectos', 'efecto', 'sobreUnTexto']],
-  ['brasas.ts', ['entreEllas', 'distanciaAlRayo']],
+  ['brasas.ts', ['distanciaAlRayo', 'alRayoDesde']],
+  // [PULIDO 19] Q1.b · la grilla y las fuerzas entre ellas, en `grilla.ts` (relativa a la caja del dominio).
+  ['grilla.ts', ['entreEllas', 'ajustarLaGrilla', 'celdaDe']],
   ['paso.ts', ['pasoDeLasBrasas']],
   ['afuera.ts', ['deAfuera']],
   ['vecinas.ts', ['brilloPorDensidad', 'vecinasDe', 'calentarBrasa']],
   ['calor.ts', ['leerLaEscena', 'pasoDeLaTemperatura', 'calentar', 'frentesDelLogo']],
-  ['ruido.ts', ['rotor', 'ruidoConGradiente', 'mezclar', 'esquina']],
+  ['ruido.ts', ['rotor', 'rotorEnLote', 'rotorDeLaBrasa', 'rotorDelPunto', 'ruidoConGradiente', 'ruidoConGradienteEn', 'mezclar', 'esquina']],
   ['arcos/arcos.ts', ['envejecer', 'golpeEn', 'residualEn', 'extremo', 'activos']],
   ['arcos/programador.ts', ['programarArcos', 'parQueSeVe']],
   ['arcos/cinta.ts', ['rellenarCinta', 'lugar', 'escribir']],

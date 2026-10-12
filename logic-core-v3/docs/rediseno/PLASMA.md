@@ -48,12 +48,34 @@ decisión del humano (el cristal de la dimensión espejo la reemplaza). Con ella
 
 ## El mundo (PULIDO 18 · P1.b)
 
-Todo vive en coordenadas del MUNDO: las brasas, las motas de B, los arcos y sus luces, los efectos, el puntero y el piso. Antes vivían
-en las coordenadas del logo (si el logo bajaba, bajaban con él). La CÁSCARA (radio 13) es del mundo, quieta alrededor del origen (el
-lugar de reposo del logo); afuera de ella vuelven, más que lineal con lo que se pasan (contenidas siempre). El logo sólo influye: su
-HUECO (4,2) es un obstáculo donde esté (si baja, las aparta al pasar; no se las lleva), sus ONDAS (el pulso) y su golpe salen de donde
-está, sus ARCOS nacen en su borde, y la FUENTE (el brillo cae lejos del logo) y la cara libre se miden desde él. Al cargar, el logo cae
-desde 14 u: la nube lo espera abajo, tenue, y se enciende cuando el logo llega.
+Todo vive en coordenadas del MUNDO: las brasas, los arcos y sus luces, los efectos, el puntero y el piso. Antes vivían en las
+coordenadas del logo (si el logo bajaba, bajaban con él). El logo sólo influye: su HUECO (4,2) es un obstáculo donde esté (si baja, las
+aparta al pasar; no se las lleva), sus ONDAS (el pulso) y su golpe salen de donde está, sus ARCOS nacen en su borde, y la FUENTE (el
+brillo cae lejos del logo: [PULIDO 19] apenas, 0,2 en 9 u) y la cara libre se miden desde él. Al cargar, el logo cae desde 14 u: la nube
+lo espera abajo, tenue, y se enciende cuando el logo llega.
+
+[PULIDO 19] Q1.b · EL DOMINIO DE LA VISTA (`dominio.ts`) reemplaza a la cáscara (la cáscara de radio 13 queda como siembra antes del
+primer cuadro y como límite sin dominio: las pruebas). El dominio es la pirámide de la vista con un margen del 20 % afuera del cuadro,
+entre 0,4 y 1,8 veces el foco (la distancia de la cámara al logo), y es PERIÓDICO: la que sale por una cara reaparece por la opuesta
+(a los lados a la misma profundidad; por el frente y el fondo a la misma altura del cuadro). En los planos lejanos es grande y en los
+cercanos chico: la pantalla siempre está cubierta con la misma cantidad, y las brasas siguen en el mundo (al mover la cámara pasan de
+largo; no la acompañan). La SIEMBRA (el primer cuadro con cámara) las pone parejas en el aire de la vista (la profundidad con densidad
+∝ w^1,7: pocas cerca y grandes, muchas lejos y chicas; lo que cae bajo el piso se sortea de nuevo) y el REPARTO (`repartir`) corrige
+el encuadre que cambia: cuenta las brasas por celda del cuadro (8 × 5) contra lo que le toca a cada celda por el aire que mira (una que
+mira el piso de cerca pide menos), y las que sobran en una celda llena (1,2×) se apagan, se mudan a la más vacía (< 0,45×) y se
+encienden ahí: de a 8 candidatas por cuadro. La grilla de las fuerzas (`grilla.ts`) es relativa a la caja del dominio (32 celdas por eje
+como mucho, de al menos el alcance). El puntero entra a la nube a la profundidad del foco (o a la esfera del logo si su rayo la toca).
+
+Q1.c · NADA APARECE NI DESAPARECE DE GOLPE: cada brasa tiene su VIDA (el alfa del dominio: 1 adentro del cuadro, 0 en el margen de los
+lados —que no se ve— y en las bandas de profundidad: 0,3 del foco desde el frente, 0,45 hasta el fondo; al reaparecer por una cara o
+nacer en su celda nueva vale 0) perseguida con un tope de cambio por cuadro (`fundidoS` 0,25 s), y su DENSIDAD (el brillo por las
+vecinas) perseguida con inercia (0,8 s; antes saltaba cada cuatro cuadros). El brillo que se dibuja es el producto. s70 lo mide: en 10 s
+de órbita y viaje al cierre con 900 brasas, ~7.000 eventos todos fuera del cuadro o ya apagadas, y fuera de ellos ningún salto mayor
+que el tope; quieta, no recicla.
+
+Q1.a · MÁS DENSIDAD: 800 brasas en escritorio y 400 en el teléfono (eran 600 y 300) y todas a la vista (antes la cáscara dejaba muchas
+fuera del cuadro y la fuente las apagaba lejos del logo). Medido en el mini-banco con el encuadre del sitio contra PULIDO 18: la luz del
+plasma sobre el fondo de noche ×1,9 (en el centro y en la periferia) y de día +20 %.
 
 ## El campo
 
@@ -82,6 +104,14 @@ segundo. En la CPU, cada brasa lo recalcula en cuadros alternos. [PULIDO 18] El 
 - [PULIDO 18] SIN BASURA POR CUADRO: ningún `Math.hypot` en lo de cada cuadro (en V8 asigna un arreglo por llamada; en el bucle de las
   vecinas eran unos 400 KB por cuadro, con recolecciones de hasta 300 ms en el mini-banco): `largo3` (`largo.ts`) y, en los dos bucles
   más calientes, el cuadrado directo. De 378 a 16 KB por cuadro; el cuadro del plasma sin vsync, de 2,19 a 1,02 ms (mini-banco, 1440).
+  [PULIDO 19] Y SIN NÚMEROS POR PARÁMETRO EN LO DE CADA BRASA: en Chrome (V8 15), un número no entero que cruza una función que
+  TurboFan no inlineó se encaja en un HeapNumber (16 bytes) a la ida y a la vuelta, y qué se inlinea cambia con cada reoptimización:
+  con el estado vivo de la página, `pasoDeLasBrasas` asignaba 51 KB por cuadro (`dt` a `deAfuera` y `delMovimiento`, `x, y, z, t` al
+  rotor, `piso` al envoltorio, `x, y, z` al alfa) y con una entrada sintética, 1 KB. Ahora `dt` va en la entrada (`en.dt`), el piso en
+  el dominio (`d.piso`), el rotor en lote (`rotorEnLote`: la hora y el punto en arreglos del módulo), y las coordenadas, el alfa, la
+  celda de la grilla y el punto del rayo se piden POR BRASA (`coordenadasDe`, `alfaDe`, `celdaDe`, `alRayoDesde`: el arreglo y el
+  índice, que son enteros). Medido en el mini-banco: de 61 a 6 KB por cuadro a 1440 (de 116 a 20 recolecciones en 6 s) y de 34 a 5 a
+  390; el cuadro sin vsync de 2,06 a 1,38 ms a 1440. La agitación térmica es un xorshift propio de cada brasa (`b.ruido`), inline.
 
 ## B · El enjambre
 
@@ -188,7 +218,13 @@ PULIDO 18 (el banco del sitio, la NVIDIA, sin vsync; recibo `entregas/pulido-18/
 más de 20 ms con el plasma A ni con cada efecto, a 1440 y 390 (el peor, 18,9 ms); el plasma A le suma al polvo +1,46 ms por cuadro al
 máximo a 1440 (2,21 → 3,67) y +0,43 a 390 (2,05 → 2,48); cada efecto, ~+0,3 ms a 1440. Con vsync, 13,34 ms (máx. 14,2) salvo el
 cuadro largo de la calma que también tiene el polvo solo. En el mini-banco (`mini-medido.json`): el plasma solo, ~0,8 ms por cuadro
-a 1440, la GPU a lo sumo 1,44 ms, ~16 KB de basura por cuadro. Lo de PULIDO 17 queda como historia (con C, que se borró en PULIDO 18). En la NVIDIA (RTX 5050; la pantalla del banco va a
+a 1440, la GPU a lo sumo 1,44 ms, ~16 KB de basura por cuadro.
+
+PULIDO 19 · Q1 (el mini-banco, la NVIDIA, sin vsync, sin el reloj de la GPU; recibos `entregas/pulido-19/`): con 800 brasas en el
+dominio de la vista (600 en la cáscara antes), el plasma en calma de noche a 1440 cuesta 1,38 ms por cuadro (p95 1,6; antes del
+dominio, 1,02 con 600) y 0,90 a 390 (400 brasas); 6,4 KB de basura por cuadro a 1440 y 5,2 a 390 (eran 16). Ningún cuadro de más
+de 20 ms. La presencia de día y de noche en el encuadre del sitio, contra PULIDO 18: la luz del plasma sobre el fondo ×1,9 de noche
+(centro y periferia) y +20 % de día. Lo de PULIDO 17 queda como historia (con C, que se borró en PULIDO 18). En la NVIDIA (RTX 5050; la pantalla del banco va a
 75 Hz: 13,34 ms por cuadro). Recibo: `entregas/pulido-17/o5-medido.json`.
 
 | | Con vsync, al máximo (media / máx.) | De noche (máx.) | Cuadros de más de 20 ms en caliente | Sin vsync, al máximo (lo que suma al polvo) | La simulación en la GPU |

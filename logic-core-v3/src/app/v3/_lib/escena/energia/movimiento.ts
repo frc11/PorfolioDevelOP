@@ -1,5 +1,4 @@
-import { BRASAS, distanciaAlRayo, type Brasas, type EntradaDeLasBrasas } from './brasas'
-import { largo3 } from './largo'
+import { BRASAS, alRayoDesde, type Brasas, type EntradaDeLasBrasas } from './brasas'
 
 /**
  * [PULIDO 18] P1.e · EL MOVIMIENTO NUEVO DE CADA BRASA (`paso.ts` lo suma; todo estable y contenido, sin figuras):
@@ -11,10 +10,11 @@ import { largo3 } from './largo'
  * Escribe en `DEL_MOVIMIENTO` la fuerza (x, y, z) y la energía que gana en este paso (sin reservas). Puro (Node).
  */
 export const DEL_MOVIMIENTO = new Float32Array(4)
-const PUNTO = new Float32Array(3)
+const PUNTO = new Float32Array(4)
 
-/** El movimiento nuevo de la brasa `i` en este paso, en `DEL_MOVIMIENTO` (fuerza x, y, z; energía ganada). */
-export function delMovimiento(b: Brasas, i: number, en: EntradaDeLasBrasas, dt: number): void {
+/** El movimiento nuevo de la brasa `i` en este paso (`en.dt`), en `DEL_MOVIMIENTO` (fuerza x, y, z; energía ganada). */
+export function delMovimiento(b: Brasas, i: number, en: EntradaDeLasBrasas): void {
+  const dt = en.dt
   const C = BRASAS.conveccion
   const P = BRASAS.pinch
   const S = BRASAS.estela
@@ -39,7 +39,7 @@ export function delMovimiento(b: Brasas, i: number, en: EntradaDeLasBrasas, dt: 
     const qx = en.arcos[o] + abx * t - x
     const qy = en.arcos[o + 1] + aby * t - y
     const qz = en.arcos[o + 2] + abz * t - z
-    const d = largo3(qx, qy, qz)
+    const d = Math.sqrt(qx * qx + qy * qy + qz * qz)
     if (d >= P.radio || d < 1e-4) continue
     const w = (1 - d / P.radio) ** 2 * fuerza
     fx += (P.fuerza * w * qx) / d
@@ -49,9 +49,11 @@ export function delMovimiento(b: Brasas, i: number, en: EntradaDeLasBrasas, dt: 
   }
   // La estela del puntero: cerca de su rayo, la arrastra hacia la velocidad del puntero (sólo lo que el puntero se mueve).
   const r = en.rayo
-  const mueve = Math.min(1, largo3(en.estela[0], en.estela[1], en.estela[2]) / S.desde)
+  // [PULIDO 19] Inline (no `largo3`): en el bucle de cada brasa, una llamada que devuelve un número encaja un HeapNumber si no se inlinea.
+  const mueve = Math.min(1, Math.sqrt(en.estela[0] * en.estela[0] + en.estela[1] * en.estela[1] + en.estela[2] * en.estela[2]) / S.desde)
   if (r !== null && mueve > 0.01) {
-    const d = distanciaAlRayo(x, y, z, r, PUNTO)
+    alRayoDesde(b.lugar, i * 3, r, PUNTO)
+    const d = PUNTO[3]
     if (d < S.radio) {
       const w = (1 - d / S.radio) ** 2 * S.arrastra * mueve
       fx += (en.estela[0] - b.velocidad[i * 3]) * w

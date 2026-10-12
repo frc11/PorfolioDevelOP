@@ -31,8 +31,22 @@ function esquina(x: number, y: number, z: number, c: number): number {
 
 const G = GRADIENTES
 
+/** [PULIDO 19] El punto del ruido: `ruidoConGradienteEn` lo lee de acá (sin números por parámetro en el bucle de cada brasa: se encajan). */
+const PUNTO_DEL_RUIDO = new Float64Array(3)
+
 /** El ruido de gradiente en (x, y, z) del canal `c` y su gradiente: (valor, ∂x, ∂y, ∂z) en `s` desde `o`. */
 export function ruidoConGradiente(x: number, y: number, z: number, c: number, s: Float32Array, o: number): void {
+  PUNTO_DEL_RUIDO[0] = x
+  PUNTO_DEL_RUIDO[1] = y
+  PUNTO_DEL_RUIDO[2] = z
+  ruidoConGradienteEn(c, s, o)
+}
+
+/** El ruido de gradiente en `PUNTO_DEL_RUIDO` del canal `c` y su gradiente: (valor, ∂x, ∂y, ∂z) en `s` desde `o`. */
+export function ruidoConGradienteEn(c: number, s: Float32Array, o: number): void {
+  const x = PUNTO_DEL_RUIDO[0]
+  const y = PUNTO_DEL_RUIDO[1]
+  const z = PUNTO_DEL_RUIDO[2]
   const ix = Math.floor(x)
   const iy = Math.floor(y)
   const iz = Math.floor(z)
@@ -81,20 +95,45 @@ export function ruidoConGradiente(x: number, y: number, z: number, c: number, s:
 }
 
 const N = new Float32Array(12)
+const HORA = new Float64Array(1)
 
-/** El rotor del potencial (tres canales del ruido) en (x, y, z) relativos al centro, a la hora `t` (s), en `destino` desde `o`. */
-export function rotor(x: number, y: number, z: number, t: number, destino: Float32Array, o: number): void {
-  const e = RUIDO.escala
-  const px = x * e + t * RUIDO.deriva[0]
-  const py = y * e + t * RUIDO.deriva[1]
-  const pz = z * e + t * RUIDO.deriva[2]
-  ruidoConGradiente(px, py, pz, 0, N, 0)
-  ruidoConGradiente(px, py, pz, 1, N, 4)
-  ruidoConGradiente(px, py, pz, 2, N, 8)
+/** El rotor del potencial (tres canales del ruido) en el punto del ruido ya escrito, en `destino` desde `o`. */
+function rotorDelPunto(destino: Float32Array, o: number): void {
+  ruidoConGradienteEn(0, N, 0)
+  ruidoConGradienteEn(1, N, 4)
+  ruidoConGradienteEn(2, N, 8)
   // (∂ψz/∂y − ∂ψy/∂z, ∂ψx/∂z − ∂ψz/∂x, ∂ψy/∂x − ∂ψx/∂y)
   destino[o] = N[10] - N[7]
   destino[o + 1] = N[3] - N[9]
   destino[o + 2] = N[5] - N[2]
+}
+
+/**
+ * [PULIDO 19] El rotor en la brasa `L[o..o+2]` a la hora `HORA[0]`, en `destino` desde `od`: sin números por parámetro (en el bucle de
+ * cada brasa, un número no entero que cruza una función que V8 no inlineó se encaja en un HeapNumber: 16 bytes por brasa y cuadro).
+ */
+export function rotorDeLaBrasa(L: Float32Array, o: number, destino: Float32Array, od: number): void {
+  const e = RUIDO.escala
+  const t = HORA[0]
+  PUNTO_DEL_RUIDO[0] = L[o] * e + t * RUIDO.deriva[0]
+  PUNTO_DEL_RUIDO[1] = L[o + 1] * e + t * RUIDO.deriva[1]
+  PUNTO_DEL_RUIDO[2] = L[o + 2] * e + t * RUIDO.deriva[2]
+  rotorDelPunto(destino, od)
+}
+
+/** El rotor en las brasas `desde`, `desde + paso`, … (< `n`) de `L` a la hora `t` (s), en `destino` (el mismo índice × 3). */
+export function rotorEnLote(L: Float32Array, destino: Float32Array, desde: number, paso: number, n: number, t: number): void {
+  HORA[0] = t
+  for (let i = desde; i < n; i += paso) rotorDeLaBrasa(L, i * 3, destino, i * 3)
+}
+
+/** El rotor del potencial (tres canales del ruido) en (x, y, z) relativos al centro, a la hora `t` (s), en `destino` desde `o`. */
+export function rotor(x: number, y: number, z: number, t: number, destino: Float32Array, o: number): void {
+  const e = RUIDO.escala
+  PUNTO_DEL_RUIDO[0] = x * e + t * RUIDO.deriva[0]
+  PUNTO_DEL_RUIDO[1] = y * e + t * RUIDO.deriva[1]
+  PUNTO_DEL_RUIDO[2] = z * e + t * RUIDO.deriva[2]
+  rotorDelPunto(destino, o)
 }
 
 const fl = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
