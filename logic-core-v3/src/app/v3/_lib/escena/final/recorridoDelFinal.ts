@@ -59,8 +59,9 @@ export const FINAL_DEL_PIE = {
    * La cámara: la altura final (grados de elevación) y cuánto más lejos que en la pose E. [PULIDO 20] R1 · en escritorio con el pie, de
    * costado y lejos (el humano: «que se vea gran parte de la escena»): hasta `escritorio.elevacion` y a la distancia en que el pie acostado
    * y el logo ocupan `escritorio.ocupa` del cuadro (`pie3d/encuadre.ts`); abajo de 1024, desde arriba como siempre.
+   * [PULIDO 21] S3 · el humano: «a 28° y al 62 % todo queda chico»: desde arriba y cerca, el conjunto acostado en el 88 % del ancho.
    */
-  camara: { elevacion: 89.2, lejos: 1.06, escritorio: { elevacion: 28, ocupa: 0.62 } },
+  camara: { elevacion: 89.2, lejos: 1.06, escritorio: { elevacion: 89.2, ocupa: 0.88 } },
   /**
    * Quieto en el pie: a los cuántos segundos sin scroll arranca, el giro (°/s), el tope del alejamiento (u) y su tiempo (s).
    * [NOCTURNO FINAL] A1/A2 · la VUELTA (al rebobinar, al salir, en un viaje) va con tope: el giro a lo sumo a `giroS`
