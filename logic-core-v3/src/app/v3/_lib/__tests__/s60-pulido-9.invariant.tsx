@@ -18,7 +18,7 @@ import { CIERRE_MS } from '../../_chrome/contacto/FormularioDeContacto'
 import { ENVIO_SIMULADO, envioSimulado } from '../formularios/enviar'
 import { ANUNCIO_DE_EXITO, RESULTADO } from '../formularios/gracias'
 import { VOLTEO } from '../formularios/volteo'
-import { poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
+import { HUNDIMIENTO_DEL_PIE, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { FLOOR_Y } from '../escena/probeScene'
 import { NUNCA, POSARSE, frenteInicial, polvoInicial, quietoConHisteresis, tomarElFrente, type EstadoDelPolvoVivo } from '../escena/polvo/posarse'
 import { FISICA, SIMULACION_DEL_POLVO_GLSL } from '../escena/polvo/simulacion'
@@ -127,15 +127,18 @@ const pose: Pose = (t, entrante, quieto = false) => {
 const normal = (m: THREE.Matrix4): THREE.Vector3 => new THREE.Vector3(0, 0, 1).transformDirection(m)
 const esquina = (m: THREE.Matrix4): THREE.Vector3 => new THREE.Vector3(0, 0, 0).applyMatrix4(m)
 const MITAD = 0.5 - 1e-4
+// [PULIDO 22] T2 c · el sentido cambió por pedido: en el pie la placa ya no voltea, se HUNDE por su hueco y la otra sale del mismo
+// hueco: de cara siempre (sin girar), en su lugar en x e y, se cambian en el fondo (a `espesores` espesores) a la mitad del tiempo.
+const HONDO = ESPESOR * HUNDIMIENTO_DEL_PIE.espesores
 const volteoBien = (p: Pose): boolean => {
   const [s0, sMitad, eMitad, e1] = [p(0, false), p(MITAD, false), p(0.5, true), p(1, true)]
   const enSuLugar = esquina(s0.m).distanceTo(new THREE.Vector3(DESDE.dx, -DESDE.dy, 0)) < 1e-6 && normal(s0.m).z > 0.999
-  const deCanto = Math.abs(normal(sMitad.m).z) < 0.01 && Math.abs(normal(eMitad.m).z) < 0.01
-  const cambia = s0.visible && sMitad.visible && !p(0.5, false).visible && eMitad.visible && !p(MITAD, true).visible
-  return enSuLugar && deCanto && cambia && e1.m.equals(new THREE.Matrix4()) && e1.visible
+  const enElFondo = [sMitad, eMitad].every((x) => normal(x.m).z > 0.999 && esquina(x.m).z < -HONDO * 0.999) && Math.abs(esquina(sMitad.m).x - DESDE.dx) < 1e-6 && Math.abs(esquina(eMitad.m).x) < 1e-6
+  const cambia = s0.visible && sMitad.visible && !p(0.5, false).visible && eMitad.visible && !p(MITAD, true).visible && sMitad.aparece < 0.01 && eMitad.aparece < 0.01
+  return enSuLugar && enElFondo && cambia && e1.m.equals(new THREE.Matrix4()) && e1.visible && e1.aparece === 1
 }
-afirmar(volteoBien(pose), '2 · volteo: la placa gira sobre X desde su lugar; a los 90° (de canto) la entrante sigue el giro con el mensaje y termina en su lugar exacto', `${String(VOLTEO.centrado.s)} s`)
-controlPositivo('2 · el detector VE un cambio de placa que no es de canto (a los 45°)', ((t, e, q) => pose(e ? Math.max(t, 0.75) : Math.min(t, 0.25), e, q)) as Pose, volteoBien)
+afirmar(volteoBien(pose), '2 · se hunde: la placa baja por su hueco desde su lugar (de cara, sin girar); en el fondo la entrante sale del mismo hueco con el mensaje y termina en su lugar exacto', `${String(VOLTEO.centrado.s)} s`)
+controlPositivo('2 · el detector VE un cambio de placa a ras (sin hundirse)', ((t, e, q) => ({ ...pose(t, e, q), m: e ? new THREE.Matrix4() : new THREE.Matrix4().makeTranslation(DESDE.dx, -DESDE.dy, 0) })) as Pose, volteoBien)
 // [PULIDO 11] B1 · el hundido se borró (el humano eligió el volteo para los dos formularios).
 const fundidoBien = (p: Pose): boolean => [0, 0.3, 0.7, 1].every((t) => Math.abs(p(t, true, true).aparece + p(t, false, true).aparece - 1) < 1e-9) && p(0.5, true, true).m.equals(new THREE.Matrix4()) && p(1, false, true).aparece === 0
 afirmar(fundidoBien(pose), '  con movimiento reducido, un fundido: la saliente se va y la entrante aparece, quietas')

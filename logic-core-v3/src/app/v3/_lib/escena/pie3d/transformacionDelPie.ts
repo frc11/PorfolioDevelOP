@@ -13,7 +13,13 @@ import { duracionDelVolteo } from '../../formularios/volteo'
  * se borró. El hundido se borró. Con movimiento reducido, un fundido (el disuelto de la llegada del pie): la saliente se va y
  * la entrante aparece, quietas. Las poses van en px de la pieza (origen arriba a la izquierda, y hacia arriba, la cara en z = 0 y el dorso en
  * −espesor).
+ *
+ * [PULIDO 22] T2 c · EN EL PIE, SE HUNDE: en vez del volteo, la placa se hunde por su hueco (hacia atrás de su cara: en el piso,
+ * acostada) `espesores` espesores y se disuelve al llegar al fondo; la otra sale del mismo hueco (la misma caja, en el mismo lugar).
+ * Se cambian en el fondo, a la mitad del tiempo. De vuelta al formulario, lo mismo. El DOM de abajo de 1025 y el panel de Contacto
+ * siguen con el volteo (`formularios/volteo.ts`).
  */
+export const HUNDIMIENTO_DEL_PIE = { espesores: 4, fundido: 0.14 } as const
 export function duracionDeLaTransformacion(quieto: boolean): number {
   return duracionDelVolteo(quieto)
 }
@@ -40,8 +46,7 @@ export interface VistaDeLaTransformacion {
   readonly aparece: number
 }
 
-const PIVOTE = new THREE.Matrix4()
-const GIRO = new THREE.Matrix4()
+const BAJA = new THREE.Matrix4()
 
 /**
  * La pose en `t` (0 a 1) de la placa saliente (`entrante` falso: con sus medidas, `desde`) o de la entrante (con las suyas,
@@ -52,10 +57,9 @@ export function poseDeLaTransformacion(quieto: boolean, t: number, entrante: boo
   if (entrante) m.identity()
   else m.makeTranslation(desde.dx, -desde.dy, 0)
   if (quieto) return { visible: entrante ? t > 0 : t < 1, aparece: entrante ? suave(t) : 1 - suave(t) }
-  const c = entrante ? caja : desde
-  // [PULIDO 10] J4 · 180° en UN movimiento: una sola curva para todo el giro (a los 90° no se frena).
-  const giro = Math.PI * suave(t)
-  PIVOTE.makeTranslation(c.ancho / 2, -c.alto / 2, -espesor / 2)
-  m.multiply(PIVOTE).multiply(GIRO.makeRotationX(entrante ? giro - Math.PI : giro)).multiply(PIVOTE.invert())
-  return { visible: entrante ? t >= 0.5 : t < 0.5, aparece: 1 }
+  const H = HUNDIMIENTO_DEL_PIE
+  const hondo = espesor * H.espesores
+  m.multiply(BAJA.makeTranslation(0, 0, entrante ? -hondo * (1 - suave((t - 0.5) * 2)) : -hondo * suave(t * 2)))
+  const aparece = entrante ? suave((t - 0.5) / H.fundido) : 1 - suave((t - 0.5 + H.fundido) / H.fundido)
+  return { visible: entrante ? t >= 0.5 : t < 0.5, aparece }
 }
