@@ -105,8 +105,13 @@ export interface Pruebas {
   readonly espejo: 'cristal' | 'pliegue' | 'caleidoscopio' | 'ecos' | 'espiral' | 'no'
   readonly 'espejo-disparo': 'ambiente' | 'scroll' | 'mantener' | 'no'
   readonly 'espejo-prisma': 'si' | 'no'
-  /** [PULIDO 19] Q3 · EL CRISTAL de fondo (`escena/cristal/`) está siempre en el producto; la prueba es apagarlo: `cristal=no` (el banco lo mide por diferencia). */
+  /**
+   * [PULIDO 19] Q3 · EL CRISTAL de fondo (`escena/cristal/`) está siempre en el producto; la prueba es apagarlo: `cristal=no` (el banco lo
+   * mide por diferencia). [PULIDO 20] R2 · las variantes del fondo: `fondo=moire` (el moiré solo: sin el cristal), `fondo=espejo` (el
+   * cristal solo: sin la trama del domo) y `fondo=ambos` (lo de siempre). Se nombran por lo que piden (sin URL, ninguna pide nada).
+   */
   readonly 'sin-cristal': 'si' | 'no'
+  readonly 'sin-moire': 'si' | 'no'
 }
 
 /**
@@ -140,10 +145,17 @@ export interface Pruebas {
  * se borró con C. P2 · entran `espejo=cristal|pliegue|caleidoscopio|ecos|espiral`, `espejo-disparo=ambiente|scroll|mantener` y
  * `espejo-prisma=si` (la dimensión espejo). [PULIDO 19] Q0 · `plasma=` se borró con B (el plasma A es el único; el cristal reemplaza a B).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', espejo: 'no', 'espejo-disparo': 'no', 'espejo-prisma': 'no', 'sin-cristal': 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', espejo: 'no', 'espejo-disparo': 'no', 'espejo-prisma': 'no', 'sin-cristal': 'no', 'sin-moire': 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
 export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'espejo', 'espejo-disparo', 'espejo-prisma'] as const
+
+/**
+ * [PULIDO 20] R2 · lo que pide el fondo, también suelto en la URL: `?cristal=no` (PULIDO 19 lo documentó, pero sólo andaba con el banco)
+ * y `?fondo=moire|espejo|ambos`. No son pruebas con su nombre: piden `sin-cristal` y `sin-moire` (nombradas por lo que piden: sin URL,
+ * ninguna pide nada).
+ */
+export const PEDIDOS_DEL_FONDO = ['cristal', 'fondo'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -161,7 +173,8 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     'espejo-disparo': unoDe<'ambiente' | 'scroll' | 'mantener'>(['ambiente', 'scroll', 'mantener'], valor('espejo-disparo')),
     'espejo-prisma': unoDe<'si'>(['si'], valor('espejo-prisma')),
     // [PULIDO 19] Q3 · el cristal está siempre: la prueba es apagarlo (`cristal=no`).
-    'sin-cristal': valor('cristal') === 'no' ? 'si' : 'no',
+    'sin-cristal': valor('cristal') === 'no' || valor('fondo') === 'moire' ? 'si' : 'no',
+    'sin-moire': valor('fondo') === 'espejo' ? 'si' : 'no',
   }
 }
 
@@ -357,7 +370,7 @@ let resuelto: Entorno | null = null
  */
 export function pedidoDeLaUrl(busqueda: string): string | null {
   const consulta = new URLSearchParams(busqueda)
-  const sueltas = PRUEBAS_SUELTAS.map((k) => {
+  const sueltas = [...PRUEBAS_SUELTAS, ...PEDIDOS_DEL_FONDO].map((k) => {
     const v = consulta.get(k)
     return v === null ? null : `${k}=${v}`
   })

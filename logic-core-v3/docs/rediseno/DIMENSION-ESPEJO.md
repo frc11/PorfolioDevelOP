@@ -104,3 +104,24 @@ cada decisión:
 - DÓNDE: todo el recorrido salvo el túnel de Trabajos y Tu panel (papel opaco), con un fundido; se va con la cámara del final.
   Sólo el FONDO (lo opaco más lejos que el vidrio, por la profundidad del pase, también al leer) y sobre un texto, apenas: el DOM
   nunca se toca (el antialias de los textos es del navegador).
+
+## Las esquirlas (PULIDO 20 · R2)
+
+El cristal de celdas de PULIDO 19 se borró (no gustó: plano y parejo; y tenía cuatro defectos: el log de PULIDO 20). En su lugar, la foto de
+Dr. Strange: grandes esquirlas de vidrio facetado a distintas profundidades, con cantos filosos que atrapan la luz, que refractan lo de
+atrás y con un filo de dispersión. Cómo se hizo, en una línea por idea:
+- **Geometría real, pocos polígonos:** cada esquirla es el casco convexo de un contorno filoso (el canto), el mismo contorno metido hacia
+  adentro arriba y abajo (los biseles) y una cresta que quiebra cada cara en facetas: normales planas (un vidrio tallado, no liso).
+- **Refracción de sólo el fondo:** como `MeshTransmissionMaterial` de drei (que dibuja la escena sin el objeto en un búfer y lo lee
+  desviado), pero el búfer tiene SÓLO lo de atrás (una capa: el cielo, la trama, la fábrica de logos, las estrellas): nada de lo de adelante
+  puede aparecer doblado. A media resolución (la refracción ablanda igual). La desviación, en espacio de pantalla: dónde cae el rayo
+  refractado (Snell, índice 1,5) a 14 u detrás contra dónde caería derecho.
+- **Nunca estira:** si la lectura cae fuera del búfer, la esquirla se desvanece ahí (no se acota la coordenada: eso repetía el borde).
+- **Fresnel de Schlick** (F0 0,04) con un reflejo tenue del cielo por la altura del rayo reflejado; **brillo especular** Blinn-Phong de la luz
+  principal de la sala en las facetas (centellea al moverse la cámara); **el canto**: de día se oscurece (la reflexión total en el borde
+  de un vidrio sobre papel), de noche toma la luz.
+- **Dispersión** (`?espejo-prisma=si`): cada canal con su índice (±0,03, el doble en los cantos): el filo de arcoíris.
+- **Dónde:** en un anillo contra el domo y sólo en el borde del cuadro (fuera de una elipse central, lejos de la cámara, de las cajas de la
+  barra y los textos y del logo): paralaje de verdad, nunca detrás de un texto.
+- **Sin temblor:** la cámara de este cuadro (al día antes de leerla) y el giro y la respiración de cada esquirla, función del reloj.
+

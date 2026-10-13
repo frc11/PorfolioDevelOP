@@ -1,0 +1,155 @@
+{
+ "que": "PULIDO 20 · R2 · el cristal de esquirlas medido en el sitio (el build de medición, el Chrome del banco sin vsync, la NVIDIA; p20-r2med.ts): en el hero en calma 5 s con el cristal y sin él (apagar: el mismo estado de la escena, alternados dos veces) y un recorrido del hero a Números con la cámara moviéndose, con y sin, dos veces; por tanda los ms por cuadro (rAF: media, p95, máximo, cuántos de más de 20 ms), el salto mayor de la cámara entre cuadros (u) y el heap por cuadro (KB, ruidoso: el recolector).",
+ "medido": {
+  "1440": {
+   "calma-con-1": {
+    "media": 2.51,
+    "p95": 3.1,
+    "maximo": 5.3,
+    "mayoresDe20": 0,
+    "cuadros": 1993,
+    "camaraSalto": 0,
+    "heapKbPorCuadro": 14.3
+   },
+   "calma-sin-1": {
+    "media": 2.3,
+    "p95": 2.8,
+    "maximo": 4.2,
+    "mayoresDe20": 0,
+    "cuadros": 2170,
+    "camaraSalto": 0,
+    "heapKbPorCuadro": 3.1
+   },
+   "calma-con-2": {
+    "media": 2.43,
+    "p95": 3,
+    "maximo": 4.6,
+    "mayoresDe20": 0,
+    "cuadros": 2062,
+    "camaraSalto": 0,
+    "heapKbPorCuadro": 14.3
+   },
+   "calma-sin-2": {
+    "media": 2.32,
+    "p95": 2.8,
+    "maximo": 4.4,
+    "mayoresDe20": 0,
+    "cuadros": 2157,
+    "camaraSalto": 0,
+    "heapKbPorCuadro": 11.1
+   },
+   "recorrido-con-1": {
+    "media": 3.4,
+    "p95": 5,
+    "maximo": 9.9,
+    "mayoresDe20": 0,
+    "cuadros": 1763,
+    "camaraSalto": 0.236021,
+    "heapKbPorCuadro": 19
+   },
+   "recorrido-sin-1": {
+    "media": 3.28,
+    "p95": 5.1,
+    "maximo": 10.6,
+    "mayoresDe20": 0,
+    "cuadros": 1832,
+    "camaraSalto": 0.205562,
+    "heapKbPorCuadro": 8.5
+   },
+   "recorrido-con-2": {
+    "media": 3.35,
+    "p95": 5.1,
+    "maximo": 11.2,
+    "mayoresDe20": 0,
+    "cuadros": 1792,
+    "camaraSalto": 0.219429,
+    "heapKbPorCuadro": 13.8
+   },
+   "recorrido-sin-2": {
+    "media": 3.1,
+    "p95": 4.8,
+    "maximo": 7.4,
+    "mayoresDe20": 0,
+    "cuadros": 1939,
+    "camaraSalto": 0.225929,
+    "heapKbPorCuadro": 6.8
+   },
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+  },
+  "390": {
+   "calma-con-1": {
+    "media": 1.97,
+    "p95": 2.3,
+    "maximo": 3.9,
+    "mayoresDe20": 0,
+    "cuadros": 2542,
+    "camaraSalto": 0,
+    "heapKbPorCuadro": 3.1
+   },
+   "calma-sin-1": {
+    "media": 1.92,
+    "p95": 2.2,
+    "maximo": 5.9,
+    "mayoresDe20": 0,
+    "cuadros": 2604,
+    "camaraSalto": 0,
+    "heapKbPorCuadro": 7.4
+   },
+   "calma-con-2": {
+    "media": 1.96,
+    "p95": 2.4,
+    "maximo": 3.8,
+    "mayoresDe20": 0,
+    "cuadros": 2550,
+    "camaraSalto": 0,
+    "heapKbPorCuadro": 0.7
+   },
+   "calma-sin-2": {
+    "media": 2.05,
+    "p95": 2.7,
+    "maximo": 8.2,
+    "mayoresDe20": 0,
+    "cuadros": 2442,
+    "camaraSalto": 0,
+    "heapKbPorCuadro": 6.7
+   },
+   "recorrido-con-1": {
+    "media": 2.47,
+    "p95": 3.8,
+    "maximo": 7.8,
+    "mayoresDe20": 0,
+    "cuadros": 2427,
+    "camaraSalto": 0.204101,
+    "heapKbPorCuadro": 11.8
+   },
+   "recorrido-sin-1": {
+    "media": 2.33,
+    "p95": 3.5,
+    "maximo": 19.2,
+    "mayoresDe20": 0,
+    "cuadros": 2577,
+    "camaraSalto": 0.667567,
+    "heapKbPorCuadro": 10.4
+   },
+   "recorrido-con-2": {
+    "media": 2.4,
+    "p95": 3.6,
+    "maximo": 8.3,
+    "mayoresDe20": 0,
+    "cuadros": 2498,
+    "camaraSalto": 0.200948,
+    "heapKbPorCuadro": 2.5
+   },
+   "recorrido-sin-2": {
+    "media": 2.44,
+    "p95": 3.5,
+    "maximo": 7.2,
+    "mayoresDe20": 0,
+    "cuadros": 2462,
+    "camaraSalto": 0.208688,
+    "heapKbPorCuadro": 7.6
+   },
+   "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+  }
+ }
+}

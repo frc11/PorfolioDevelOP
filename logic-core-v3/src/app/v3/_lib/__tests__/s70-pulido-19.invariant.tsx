@@ -16,8 +16,7 @@ import { readFileSync } from 'node:fs'
 
 import * as THREE from 'three'
 
-import { CRISTAL, amplitudDelCristal, amplitudPorDonde, facetasAlrededor } from '../escena/cristal/cristal'
-import { FRAGMENTOS_DEL_CRISTAL, ORDEN_DEL_CRISTAL, uniformesDelCristal } from '../escena/cristal/vidrio'
+import { CRISTAL, amplitudDelCristal, amplitudPorDonde } from '../escena/cristal/cristal'
 import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas, type Brasas } from '../escena/energia/brasas'
 import { CELDAS_DEL_REPARTO, DOMINIO, alfaDelDominio, armarElDominio, coordenadas, crearDominio, objetivosDelReparto, poblar, repartir, type Dominio } from '../escena/energia/dominio'
 import { pasoDeLasBrasas } from '../escena/energia/paso'
@@ -463,14 +462,12 @@ controlPositivo('  el detector VE la copia de la cámara después de subirla', {
 controlPositivo('  y una reserva en la caída de cada cuadro', { ...DEL_PIE, 'pie3d/caida.ts': (DEL_PIE['pie3d/caida.ts'] ?? '').replace('  if (i >= c.n || s <= 0) return\n', '  const tmp = [i]\n  if (i >= c.n || s <= 0 || tmp.length < 0) return\n') }, cableadoBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('Q3 · El cristal de fondo: pegado a la cúpula, refracta sólo el fondo, con Fresnel y biseles antialiasados; dónde se ve')
+titulo('Q3 · El cristal de fondo: dónde se ve; [PULIDO 20] R2 · la malla de celdas se borró (el cristal nuevo, en s71)')
 
-// Las facetas justas alrededor del cilindro: sin costura (el lado que resulta, cerca del pedido).
-const FACETAS = facetasAlrededor()
-const facetasBien = (f: { readonly cuantas: number; readonly lado: number }): boolean => Number.isInteger(f.cuantas) && f.cuantas >= 8 && Math.abs(f.cuantas * f.lado - 2 * Math.PI * CRISTAL.radio) < 1e-9 && Math.abs(f.lado - CRISTAL.faceta.lado) < CRISTAL.faceta.lado * 0.1
-afirmar(facetasBien(FACETAS), `  ${String(FACETAS.cuantas)} facetas justas alrededor del cilindro de ${String(CRISTAL.radio)} u (lado ${FACETAS.lado.toFixed(2)} u; pedido ${String(CRISTAL.faceta.lado)}): sin costura`)
-controlPositivo('  el detector VE una vuelta que no cierra', { cuantas: FACETAS.cuantas, lado: FACETAS.lado * 1.01 }, facetasBien)
-
+// [PULIDO 20] R2 · el humano: «el de ahora no gustó: una malla de celdas pegada al domo, plana y pareja»; se borra y en su lugar van las
+// esquirlas en el borde (s71-pulido-20). Antes acá: las facetas justas alrededor del cilindro y el sombreador de pantalla entera (el
+// cilindro, Voronoi, la copia del cuadro sólo en el fondo); ahora: que esa malla ya no está y que el cristal nuevo se monta como el de
+// antes (siempre con movimiento; `cristal=no` y `fondo=moire` lo apagan). «Dónde se ve» sigue igual.
 // Dónde se ve: 1 lejos de las secciones apagadas, 0 con el medio de la pantalla adentro de una, el fundido entre medio; y se va con el final.
 const BANDAS = Float32Array.from([10000, 14000, 30000, 31000])
 const dondeBien = (f: typeof amplitudPorDonde, g: typeof amplitudDelCristal): boolean => {
@@ -493,21 +490,15 @@ afirmar(dondeBien(amplitudPorDonde, amplitudDelCristal), `  dónde: 1 lejos de $
 controlPositivo('  el detector VE un cristal que no se apaga en el túnel', ((c: number, alto: number, b: ArrayLike<number>, n: number) => Math.max(0.2, amplitudPorDonde(c, alto, b, n))) as typeof amplitudPorDonde, (f: typeof amplitudPorDonde) => dondeBien(f, amplitudDelCristal))
 controlPositivo('  y uno que se queda en el final', ((p: number) => p) as typeof amplitudDelCristal, (g: typeof amplitudDelCristal) => dondeBien(amplitudPorDonde, g))
 
-// El sombreador: el cilindro, las facetas de Voronoi con la distancia exacta al borde, la normal inclinada y el bisel con `fwidth`, Snell,
-// la copia del cuadro sólo donde es fondo (la profundidad del pase), el Fresnel de Schlick, el brillo con la luz y la cámara, el tope
-// del corrimiento, los textos. El componente: siempre salvo `cristal=no` y movimiento reducido; pide la profundidad y el color.
+const VIDRIO_NUEVO = leer('_lib/escena/cristal/vidrio.ts')
 const CRISTAL_TSX = leer('_lib/escena/cristal/CristalDeLaEscena.tsx')
-const VIDRIO = leer('_lib/escena/cristal/vidrio.ts')
 const ESCENARIO = leer('_lib/escena/ProbeStage.tsx')
 const ENTORNO_TS = leer('_lib/escena/entorno.ts')
-const vidrioBien = (f: string, tsx: string, esc: string, ent: string): boolean => f.includes('float hastaElCilindro( vec3 o, vec3 d, float radio )') && f.includes('semillaDeLaCelda( g, cuantas ) - q') && f.includes('float d = dot( 0.5 * ( mr + r ), entre / largo );') &&
-  f.includes('fwidth( bordeU )') && f.includes('refract( dir, n, 1.0 / uVidrio.x )') && f.includes('distanciaALoOpaco( uv )') && f.includes('distanciaALoOpaco( desde )') && f.includes('pow( 1.0 - cosV, 5.0 )') && f.includes('normalize( uLuz - dir )') && f.includes('uTopePx') &&
-  f.includes('adentroDelTexto( uv * 2.0 - 1.0 )') && f.includes('discard') && f.includes('colorDeAtras(') &&
-  tsx.includes("pruebas['sin-cristal'] === 'si' || quieto) return null") && tsx.includes('PEDIDOS_DEL_PASE.profundidad += 1') && tsx.includes('PEDIDOS_DEL_PASE.colorEsteCuadro = true') && tsx.includes('amplitudDelCristal(m.porDonde, EN_VIVO.camara)') &&
-  esc.includes('<CristalDeLaEscena quieto={reducedMotion} />') && ent.includes("'sin-cristal': valor('cristal') === 'no' ? 'si' : 'no'") && ORDEN_DEL_CRISTAL > -18 && ORDEN_DEL_CRISTAL < -10 && lineasDeCodigo(VIDRIO) <= 300 && lineasDeCodigo(CRISTAL_TSX) <= 300 && uniformesDelCristal().uCilindro.value.w === FACETAS.cuantas
-afirmar(vidrioBien(FRAGMENTOS_DEL_CRISTAL, CRISTAL_TSX, ESCENARIO, ENTORNO_TS), '  el vidrio: el cilindro, Voronoi con la distancia exacta al borde, el bisel con fwidth, Snell, la copia sólo en el fondo (la profundidad del pase, también al leer), Schlick, el brillo con la luz y la cámara, el tope, los textos; montado siempre con movimiento (cristal=no lo apaga), pide la profundidad y el color; entre la copia y la energía')
-controlPositivo('  el detector VE un vidrio que lee sin mirar la profundidad de donde lee', FRAGMENTOS_DEL_CRISTAL.replace('distanciaALoOpaco( desde )', 'distanciaALoOpaco( uv )'), (f: string) => vidrioBien(f, CRISTAL_TSX, ESCENARIO, ENTORNO_TS))
-controlPositivo('  y un cristal montado con movimiento reducido', FRAGMENTOS_DEL_CRISTAL, (f: string) => vidrioBien(f, CRISTAL_TSX.replace("pruebas['sin-cristal'] === 'si' || quieto) return null", "pruebas['sin-cristal'] === 'si') return null"), ESCENARIO, ENTORNO_TS))
+const sinCeldasBien = (f: string, tsx: string, esc: string, ent: string): boolean => !f.includes('hastaElCilindro') && !f.includes('semillaDeLaCelda') && !tsx.includes('PEDIDOS_DEL_PASE.colorEsteCuadro') &&
+  tsx.includes("pruebas['sin-cristal'] === 'si' || quieto) return null") && esc.includes('<CristalDeLaEscena quieto={reducedMotion} logoGroupRef={logoGroupRef} />') && ent.includes("'sin-cristal': valor('cristal') === 'no' || valor('fondo') === 'moire' ? 'si' : 'no'") && lineasDeCodigo(f) <= 300 && lineasDeCodigo(tsx) <= 300
+afirmar(sinCeldasBien(VIDRIO_NUEVO, CRISTAL_TSX, ESCENARIO, ENTORNO_TS), '  la malla de celdas (el cilindro con Voronoi en una pasada de pantalla entera, que leía la copia del cuadro) ya no está; el cristal se monta siempre con movimiento (cristal=no y fondo=moire lo apagan)')
+controlPositivo('  el detector VE la malla de celdas de PULIDO 19', `${VIDRIO_NUEVO}\nfloat hastaElCilindro( vec3 o, vec3 d, float radio ) { return 0.0; }`, (f: string) => sinCeldasBien(f, CRISTAL_TSX, ESCENARIO, ENTORNO_TS))
+controlPositivo('  y un cristal montado con movimiento reducido', CRISTAL_TSX.replace("pruebas['sin-cristal'] === 'si' || quieto) return null", "pruebas['sin-cristal'] === 'si') return null"), (t: string) => sinCeldasBien(VIDRIO_NUEVO, t, ESCENARIO, ENTORNO_TS))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Q4 · Las piezas que caen tienen sombra de contacto: nada de pie en la pared, la placa con su ribete acostadas, nunca sobre el logo')

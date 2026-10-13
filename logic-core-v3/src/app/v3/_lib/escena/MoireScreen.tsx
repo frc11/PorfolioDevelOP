@@ -172,6 +172,8 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
 ) {
   // [ESCENA 8] T2: con la formación y la bandera, las dos capas bajan a pleno hasta debajo del piso.
   const anclada = hastaElPiso && entornoDeLaEscena().limite
+  // [PULIDO 20] R2 · `fondo=espejo`: el cristal solo, sin la trama (las capas y el zócalo no se dibujan; sus texturas siguen).
+  const conTrama = entornoDeLaEscena().pruebas['sin-moire'] !== 'si'
   const layers = useMemo(() => {
     const abajo = anclada ? TRAMA_ANCLADA.abajo : TRAMA_HASTA_EL_PISO.abajo
     const fundido = anclada ? 0 : TRAMA_HASTA_EL_PISO.fundido
@@ -312,9 +314,10 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
           material={layer.material}
           renderOrder={layer.spec.order}
           position={[0, layer.spec.bottom + (layer.spec.top - layer.spec.bottom) / 2, 0]}
+          visible={conTrama}
         />
       ))}
-      {zocalo !== null && <mesh name="zócalo" geometry={zocalo.geometry} material={zocalo.material} renderOrder={MOIRE_FAR_ORDER} position={[0, zocalo.y, 0]} />}
+      {zocalo !== null && <mesh name="zócalo" geometry={zocalo.geometry} material={zocalo.material} renderOrder={MOIRE_FAR_ORDER} position={[0, zocalo.y, 0]} visible={conTrama} />}
     </>
   )
 })

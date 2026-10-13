@@ -320,7 +320,7 @@ export default function ProbeStage({
         <PruebasDeLaEscena keyLightRef={keyLightRef} logoMaterialRef={logoMaterialRef} stats={stats} rig={rig} logoGroupRef={logoGroupRef} />
         {/* [PULIDO 18] P2 · la dimensión espejo (`?espejo=`; apagada salvo con la bandera). */}
         {/* [PULIDO 19] Q3 · el cristal de fondo, siempre (pegado a la trama; lee la copia del cuadro: `cristal/`). */}
-        <CristalDeLaEscena quieto={reducedMotion} />
+        <CristalDeLaEscena quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         <EspejoDeLaEscena logoGroupRef={logoGroupRef} quieto={reducedMotion} />
         {/* [PULIDO 18] P1.a · el pase compartido (la profundidad de lo opaco): ÚLTIMO, su cuadro corre después de todos. */}
         <PaseDeLaEscena />

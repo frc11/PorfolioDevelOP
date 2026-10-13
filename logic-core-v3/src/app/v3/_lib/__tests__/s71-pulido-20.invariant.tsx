@@ -8,6 +8,11 @@
  *        ninguna se interpenetra con otra ni con el logo en ningún cuadro; el DOM sólo con la columna quieta; el piso se calma bajo el pie
  *        (la simulación recibe la calma); las sombras, sólo de las placas y se van al incrustarse; la cámara del final en escritorio, de
  *        costado y lejos (el humano: «que se vea gran parte de la escena»): todo el pie acostado y el logo adentro del cuadro, sin llenarlo.
+ *   R2 · el cristal de esquirlas: dónde se ve (nunca en una caja del texto, en la barra, en el logo ni en el centro; sí en el borde), las
+ *        esquirlas (en el anillo contra el domo, facetadas), que nunca tapa una partícula (va antes que todo lo transparente que no es fondo
+ *        y no escribe profundidad), que refracta sólo el fondo (su render target, sin logo, títulos, partículas ni pie) con la cámara de ESTE
+ *        cuadro (la de antes vibraba), que se desvanece donde mira fuera del fondo, las variantes (`fondo=moire|espejo|ambos`, también
+ *        sueltas en la URL) y lo medido en el sitio (ningún cuadro de más de 20 ms con él, lo que cuesta, la cámara quieta en calma).
  */
 import { readFileSync } from 'node:fs'
 
@@ -20,6 +25,14 @@ import type { Armada } from '../escena/pie3d/armadas'
 import { aplicarLaCaida, armarLaCaida, crearLaCaidaDelPie, sombrasDeLaCaida, type CaidaDelPie } from '../escena/pie3d/caida'
 import { colocarLaPieza } from '../escena/pie3d/colocacion'
 import { FLOOR_Y } from '../escena/probeScene'
+import { CRISTAL, esquirlasDelCristal, zonaDelCristal } from '../escena/cristal/cristal'
+import { armarLasEsquirlas } from '../escena/cristal/esquirlas'
+import { CAPA_DEL_FONDO, NOMBRES_DEL_FONDO } from '../escena/cristal/fondo'
+import { FRAGMENTOS_DEL_VIDRIO, VERTICES_DEL_VIDRIO, armarElVidrio, uniformesDelVidrio } from '../escena/cristal/vidrio'
+import { ORDEN_DE_LA_ENERGIA } from '../escena/energia/dibujo/armado'
+import { PEDIDOS_DEL_FONDO, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
+import { ORDEN_DEL_ESPEJO } from '../escena/espejo/pantalla'
+import { PASE } from '../escena/pase/pase'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { lineasDeCodigo, sinReservasEn } from './s69-ayudas'
 
@@ -369,5 +382,117 @@ const PLACAS = DATOS.piezas.filter((p) => p.forma === 'placa' || p.forma === 'fo
 const sombrasBien = (m: { readonly mitad: number; readonly alFinal: number }): boolean => m.mitad === PLACAS && m.alFinal === 0
 afirmar(sombrasBien(SOMBRAS), `  las sombras de contacto: ${String(SOMBRAS.mitad)} a mitad de la caída (las ${String(PLACAS)} placas; las letras no son una placa) y ninguna con todo incrustado`)
 controlPositivo('  el detector VE sombras que se quedan al terminar', { ...SOMBRAS, alFinal: 1 }, sombrasBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('R2 · El cristal de esquirlas: sólo en el borde, nunca sobre un texto ni el logo, nunca tapa una partícula, refracta sólo el fondo')
+
+// Dónde se ve (lo mismo que el sombreador): adentro de una caja del texto, en el rectángulo del logo y en el centro, cero; en el borde
+// del cuadro lejos de todo, entero; el fundido, entre medio.
+const CAJAS = [-0.95, 0.55, -0.3, 0.8, 0.2, -0.95, 0.6, -0.85]
+const LOGO_EN_EL_CUADRO = [-0.1, -0.4, 0.5, 0.4]
+type Zona = typeof zonaDelCristal
+const zonaBien = (z: Zona): boolean => {
+  let enCajas = 0
+  for (let k = 0; k < 2; k += 1) for (let i = 0; i <= 10; i += 1) for (let j = 0; j <= 10; j += 1) {
+    const x = CAJAS[k * 4] + ((CAJAS[k * 4 + 2] - CAJAS[k * 4]) * i) / 10
+    const y = CAJAS[k * 4 + 1] + ((CAJAS[k * 4 + 3] - CAJAS[k * 4 + 1]) * j) / 10
+    enCajas = Math.max(enCajas, z(x, y, 1.6, CAJAS, 2, LOGO_EN_EL_CUADRO))
+  }
+  let enElLogo = 0
+  for (let i = 0; i <= 10; i += 1) for (let j = 0; j <= 10; j += 1) enElLogo = Math.max(enElLogo, z(-0.1 + 0.06 * i, -0.4 + 0.08 * j, 1.6, CAJAS, 2, LOGO_EN_EL_CUADRO))
+  return enCajas === 0 && enElLogo === 0 && z(0, 0, 1.6, [], 0, null) === 0 && z(0.97, -0.95, 1.6, CAJAS, 2, LOGO_EN_EL_CUADRO) === 1 && z(-0.97, -0.2, 1.6, CAJAS, 2, LOGO_EN_EL_CUADRO) === 1
+}
+afirmar(zonaBien(zonaDelCristal), '  dónde se ve: cero en cada caja del texto, en el rectángulo del logo y en el centro (la elipse segura); entero en el borde, lejos de todo')
+controlPositivo('  el detector VE un cristal que no mira los textos', ((x: number, y: number, a: number, _t: ArrayLike<number>, _n: number, l: ArrayLike<number> | null) => zonaDelCristal(x, y, a, [], 0, l)) as Zona, zonaBien)
+controlPositivo('  y uno que no mira el logo', ((x: number, y: number, a: number, t: ArrayLike<number>, n: number) => zonaDelCristal(x, y, a, t, n, null)) as Zona, zonaBien)
+
+// Las esquirlas: en el anillo contra el domo (lejos del centro), a alturas y tamaños distintos, facetadas (cascos convexos con canto,
+// caras y cresta: cada vértice sabe cuánto es canto), en un solo búfer.
+const ESQUIRLAS = esquirlasDelCristal()
+const GEOMETRIA = armarLasEsquirlas(ESQUIRLAS)
+const FILOS = new Set(Array.from(GEOMETRIA.getAttribute('aFilo').array as Float32Array, (v) => Math.round(v * 100) / 100))
+const E = CRISTAL.esquirlas
+const esquirlasBien = (es: typeof ESQUIRLAS, triangulos: number, filos: ReadonlySet<number>): boolean => es.length === E.cuantas && es.every((e) => {
+  const r = Math.hypot(e.x, e.z)
+  return r >= E.radio[0] - 1e-9 && r <= E.radio[1] + 1e-9 && e.y >= FLOOR_Y + E.alto[0] - 1e-9 && e.y <= FLOOR_Y + E.alto[1] + 1e-9 && e.largo >= E.largo[0] && e.largo <= E.largo[1] && Math.abs(e.velocidad) > 0
+}) && triangulos >= es.length * 12 && [0, 0.35, 1].every((f) => filos.has(f)) && filos.size === 3
+afirmar(esquirlasBien(ESQUIRLAS, GEOMETRIA.getAttribute('position').count / 3, FILOS), `  ${String(ESQUIRLAS.length)} esquirlas en el anillo de ${String(E.radio[0])} a ${String(E.radio[1])} u (contra el domo), de ${String(E.largo[0])} a ${String(E.largo[1])} u, facetadas: ${String(GEOMETRIA.getAttribute('position').count / 3)} triángulos en un búfer, cada vértice canto, cara o cresta`)
+controlPositivo('  el detector VE una esquirla en el centro de la sala', [...ESQUIRLAS.slice(1), { ...ESQUIRLAS[0], x: 2, z: 2 }], (es: typeof ESQUIRLAS) => esquirlasBien(es, GEOMETRIA.getAttribute('position').count / 3, FILOS))
+GEOMETRIA.dispose()
+
+// Nunca tapa una partícula ni dobla un texto o el logo: va ANTES que todo lo transparente que no es fondo (las partículas en 0, la energía
+// desde −10, el espejo en −14), no escribe profundidad (sí la lee: lo de adelante la tapa), sólo las caras de adelante; el sombreador
+// refracta SÓLO el fondo (`uFondo`: ni la copia del cuadro ni la profundidad del pase, lo de PULIDO 19), se desvanece donde la refracción
+// mira fuera del fondo, y no se dibuja en las cajas (la barra y los textos) ni en el logo; el fondo es una capa propia con lo de atrás nada
+// más; y la cámara es la de ESTE cuadro (su matriz, al día antes de leerla: con la del cuadro anterior el cristal de PULIDO 19 vibraba).
+const DEPTH = leer('_lib/escena/DepthParticles.tsx')
+const BOKEH = leer('_lib/escena/BokehParticles.tsx')
+const CRISTAL_TSX = ESCENA('cristal/CristalDeLaEscena.tsx')
+const FONDO_TS = ESCENA('cristal/fondo.ts')
+const MALLA = armarElVidrio(new THREE.BufferGeometry(), uniformesDelVidrio(ESQUIRLAS), ESQUIRLAS.length)
+interface DelVidrio {
+  readonly orden: number
+  readonly particulasSinOrden: boolean
+  readonly material: THREE.Material
+  readonly fragmentos: string
+  readonly vertices: string
+  readonly componente: string
+  readonly fondo: readonly string[]
+  readonly pase: string
+}
+const DEL_VIDRIO: DelVidrio = { orden: MALLA.renderOrder, particulasSinOrden: !/renderOrder/.test(DEPTH) && !/renderOrder/.test(BOKEH), material: MALLA.material as THREE.Material, fragmentos: FRAGMENTOS_DEL_VIDRIO, vertices: VERTICES_DEL_VIDRIO(ESQUIRLAS.length), componente: CRISTAL_TSX, fondo: NOMBRES_DEL_FONDO, pase: FONDO_TS }
+const vidrioBien = (v: DelVidrio): boolean => v.orden < ORDEN_DEL_ESPEJO && v.orden < ORDEN_DE_LA_ENERGIA && v.orden < 0 && v.particulasSinOrden &&
+  v.material.transparent && !v.material.depthWrite && v.material.depthTest && v.material.side === THREE.FrontSide &&
+  v.fragmentos.includes('texture2D( uFondo,') && !v.fragmentos.includes('uColorDeLaEscena') && !v.fragmentos.includes('distanciaALoOpaco') && v.fragmentos.includes('amp *= adentro;') && v.fragmentos.includes('zona *= 1.0 - adentroDeLasCajas( ndc );') && v.fragmentos.includes('fueraDeLaCaja( ndc, uLogo )') &&
+  v.vertices.includes('float a = G.w * uTiempo + V.y;') && !/random|Math\.random/.test(v.vertices) &&
+  /cam\.updateMatrixWorld\(\)[\s\S]*uVista\.value\.multiplyMatrices\(cam\.projectionMatrix, cam\.matrixWorldInverse\)/.test(v.componente) && v.componente.includes('cajasDeLaBarra(u.uCajas.value') &&
+  !v.fondo.some((n) => /polvo|bokeh|logo|t[ií]tulo|pie|energ|plasma/i.test(n)) && v.pase.includes('camara.layers.set(CAPA_DEL_FONDO)') && v.pase.includes('o instanceof THREE.Light') && Number(CAPA_DEL_FONDO) !== Number(PASE.capa)
+afirmar(vidrioBien(DEL_VIDRIO), `  nunca tapa una partícula (orden ${String(DEL_VIDRIO.orden)}: antes que el espejo, la energía y las partículas; sin escribir profundidad), refracta sólo el fondo (${NOMBRES_DEL_FONDO.join(', ')}), se desvanece donde mira afuera, nunca en las cajas ni el logo, con la cámara de este cuadro; las esquirlas giran con el reloj (sin temblor)`)
+controlPositivo('  el detector VE el cristal después de las partículas', { ...DEL_VIDRIO, orden: 1 }, vidrioBien)
+controlPositivo('  y uno que escribe profundidad', { ...DEL_VIDRIO, material: new THREE.MeshBasicMaterial({ transparent: true, depthWrite: true }) }, vidrioBien)
+controlPositivo('  y uno que lee la copia del cuadro (PULIDO 19: doblaba los textos)', { ...DEL_VIDRIO, fragmentos: `${FRAGMENTOS_DEL_VIDRIO}\nuniform sampler2D uColorDeLaEscena;` }, vidrioBien)
+controlPositivo('  y la cámara del cuadro anterior (PULIDO 19: vibraba)', { ...DEL_VIDRIO, componente: CRISTAL_TSX.replace('cam.updateMatrixWorld()', '') }, vidrioBien)
+controlPositivo('  y un fondo con el logo adentro', { ...DEL_VIDRIO, fondo: [...NOMBRES_DEL_FONDO, 'logo'] }, vidrioBien)
+controlPositivo('  y uno que estira en el borde (sin desvanecerse)', { ...DEL_VIDRIO, fragmentos: FRAGMENTOS_DEL_VIDRIO.replace('amp *= adentro;', '') }, vidrioBien)
+MALLA.geometry.dispose()
+;(MALLA.material as THREE.Material).dispose()
+
+// Las variantes del fondo: `fondo=moire` (sin el cristal), `fondo=espejo` (sin la trama), `fondo=ambos` y nada (los dos); `cristal=no`
+// apaga el cristal; también sueltas en la URL (sin el banco): la trama se esconde con `sin-moire`.
+const MOIRE_SCREEN = ESCENA('MoireScreen.tsx')
+type Pedido = typeof entornoPedido
+const variantesBien = (f: Pedido, url: typeof pedidoDeLaUrl, moire: string): boolean => {
+  const p = (q: string): { readonly c: string; readonly m: string } => ({ c: f(q).pruebas['sin-cristal'], m: f(q).pruebas['sin-moire'] })
+  const [nada, moireSolo, espejoSolo, ambos, sinCristal] = [p('producto'), p('producto,fondo=moire'), p('producto,fondo=espejo'), p('producto,fondo=ambos'), p('producto,cristal=no')]
+  return nada.c === 'no' && nada.m === 'no' && moireSolo.c === 'si' && moireSolo.m === 'no' && espejoSolo.c === 'no' && espejoSolo.m === 'si' && ambos.c === 'no' && ambos.m === 'no' && sinCristal.c === 'si' &&
+    url('?fondo=espejo') === 'producto,fondo=espejo' && url('?cristal=no') === 'producto,cristal=no' && PEDIDOS_DEL_FONDO.length === 2 &&
+    moire.includes("const conTrama = entornoDeLaEscena().pruebas['sin-moire'] !== 'si'") && (moire.match(/visible=\{conTrama\}/g) ?? []).length === 2
+}
+afirmar(variantesBien(entornoPedido, pedidoDeLaUrl, MOIRE_SCREEN), '  las variantes: fondo=moire (el moiré solo), fondo=espejo (el cristal solo: la trama y el zócalo no se dibujan), fondo=ambos y nada (los dos); cristal=no; también sueltas en la URL')
+controlPositivo('  el detector VE una URL que no deja pasar el fondo (PULIDO 19: `?cristal=no` sólo andaba con el banco)', ((b: string) => {
+  const v = new URLSearchParams(b).get('pruebas')
+  return v === null ? null : `producto,${v}`
+}) as typeof pedidoDeLaUrl, (u: typeof pedidoDeLaUrl) => variantesBien(entornoPedido, u, MOIRE_SCREEN))
+
+// Lo medido en el sitio (el build de medición, sin vsync, la NVIDIA; `entregas/pulido-20/sitio-medido.json`): con el cristal ningún cuadro
+// de más de 20 ms a 1440 y 390, en calma y en el recorrido; lo que cuesta (con menos sin, en calma) acotado; en calma la cámara quieta.
+interface Tanda { readonly media: number; readonly maximo: number; readonly mayoresDe20: number; readonly camaraSalto: number }
+type Medido = Readonly<Record<string, Readonly<Record<string, Tanda | string>>>>
+const MEDIDO = (JSON.parse(readFileSync('docs/rediseno/entregas/pulido-20/sitio-medido.json', 'utf8')) as { readonly medido: Medido }).medido
+const tanda = (m: Medido, w: string, k: string): Tanda | null => {
+  const t = m[w]?.[k]
+  return typeof t === 'object' && t !== null ? t : null
+}
+const costo = (m: Medido, w: string): number => ((tanda(m, w, 'calma-con-1')?.media ?? 99) + (tanda(m, w, 'calma-con-2')?.media ?? 99)) / 2 - ((tanda(m, w, 'calma-sin-1')?.media ?? 0) + (tanda(m, w, 'calma-sin-2')?.media ?? 0)) / 2
+const COSTO_MAXIMO_MS = 0.5
+const medidoBien = (m: Medido): boolean => ['1440', '390'].every((w) => ['calma-con-1', 'calma-con-2', 'recorrido-con-1', 'recorrido-con-2'].every((k) => {
+  const t = tanda(m, w, k)
+  return t !== null && t.mayoresDe20 === 0
+}) && costo(m, w) <= COSTO_MAXIMO_MS && (tanda(m, w, 'calma-con-1')?.camaraSalto ?? 1) === 0)
+afirmar(medidoBien(MEDIDO), `  en el sitio, con el cristal ningún cuadro de más de 20 ms a 1440 y 390 (calma y recorrido); cuesta ${costo(MEDIDO, '1440').toFixed(2)} ms por cuadro a 1440 y ${costo(MEDIDO, '390').toFixed(2)} a 390 (≤ ${String(COSTO_MAXIMO_MS)}); en calma la cámara no se mueve entre cuadros`)
+controlPositivo('  el detector VE un cuadro de 25 ms en el recorrido', { ...MEDIDO, '1440': { ...MEDIDO['1440'], 'recorrido-con-1': { ...(tanda(MEDIDO, '1440', 'recorrido-con-1') as Tanda), mayoresDe20: 1, maximo: 25 } } }, medidoBien)
+
+const MODULOS = ['cristal/cristal.ts', 'cristal/esquirlas.ts', 'cristal/vidrio.ts', 'cristal/fondo.ts', 'cristal/CristalDeLaEscena.tsx'].map((m) => [m, ESCENA(m)] as const)
+afirmar(MODULOS.every(([, t]) => lineasDeCodigo(t) <= 300) && sinReservasEn(ESCENA('cristal/cristal.ts'), 'zonaDelCristal'), '  los módulos del cristal, de menos de 300 líneas; la zona, sin reservas')
 
 cerrar('s71-pulido-20')

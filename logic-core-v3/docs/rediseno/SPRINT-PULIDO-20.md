@@ -46,7 +46,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
   El Chrome del humano sigue vivo en segundo plano (12 procesos, ~0,9 GB: la ventana se cerró, el proceso no); no se toca.
 
 ### R1 · El pie que se traba
-- HECHO (commit de R1). VISTO EN EL SITIO: sí (1440, 1920 y 390; el build de medición).
+- HECHO (`e81e3dd9`). VISTO EN EL SITIO: sí (1440, 1920 y 390; el build de medición).
 - **La causa (reproducida en el sitio, 1440 × 900, `p20-r1.ts` y `p20-sonda2.ts`):** el final se queda clavado en `fin ≈ 0,347`
   (2,8 s del reloj: la cámara subió un 13 %, el logo todavía no tocó), alternando cuadro a cuadro entre `corre` y `espera`, para
   siempre. El reloj sólo corre «al fondo» (`cuadroDelFinal.ts`: `scrollY >= fondo − AL_FONDO_PX`, con `AL_FONDO_PX = 2` y `fondo =
@@ -109,7 +109,63 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
   van al incrustarse).
 
 ### R2 · El cristal: esquirlas en el borde
-- PENDIENTE.
+- HECHO (commit de R2). VISTO EN EL SITIO: sí (1440 y 390; el build de medición; las variantes a 1440).
+- **Las causas de los bugs del cristal de PULIDO 19** (en el sitio, con el cristal viejo todavía en el build: `p20-r2diag.ts`, el mismo
+  instante con el cristal y sin él, `__cristalDelBanco.apagar`, sin desmontar; y el código):
+  - **Vibraba:** el cristal armaba su rayo de cada píxel (`uInversa`, `uProyeccion`, `uAdelante`) en su `useFrame` con la `matrixWorld` de la
+    cámara, que el rig NO actualiza al moverla (`OrbitRig`: `position.set` + `lookAt`; three la pone al día recién adentro de `render()`):
+    usaba la del cuadro ANTERIOR con la posición de éste. Con la cámara en movimiento (el scroll, el paralaje del mouse: casi siempre) cada
+    rayo salía corrido y la refracción temblaba; y no coincidía con la pasada de profundidad (dibujada con la cámara de este cuadro): el
+    borde entre «fondo» y lo opaco titilaba. El pase de color NO se realimentaba: la copia es del mismo cuadro, hasta la trama (orden −18),
+    y el cristal va después (−16).
+  - **Las partículas que desaparecen:** no se reprodujo. En siete paradas (el hero, Quiénes somos, Números, Servicios ×2, Por qué develOP
+    ×2), en el mismo instante con el cristal y sin él, las partículas son las mismas (380/381, 831/835, 274/280, 126/125, 200/199): el
+    cristal viejo iba antes que ellas (−16 contra 0) y no escribía profundidad, así que no las tapaba; la pasada de profundidad (las
+    partículas blandas se apagan contra lo opaco) ya la pedía el plasma, con o sin cristal. El nuevo, igual que el viejo en esto, nunca
+    puede taparlas (s71).
+  - **Doblaba los textos:** era una pasada de PANTALLA ENTERA que refractaba todo lo que la profundidad a media resolución daba por
+    «fondo»: lo transparente que no escribe profundidad (el plasma, los títulos mientras se funden) también; y detrás de un texto la máscara
+    sólo bajaba el corrimiento al 25 %: el fondo detrás del título del hero (la trama, las celdas) quedaba deformado. En la comparación del
+    hero, el título en sí es igual con y sin cristal (lo «doble» es el volumen del título 3D): lo roto era lo de atrás.
+  - **Las líneas en la silueta del logo:** la profundidad a media resolución: en el borde del logo, píxeles del logo daban «fondo» y leían
+    la copia refractada (que tiene al logo): un ribete claro alrededor de la silueta (Por qué develOP, con y sin).
+  - **Estiraba los bordes:** `colorDeAtras` acotaba la lectura a [0,001; 0,999]: una refracción que miraba fuera de la pantalla repetía la
+    última fila de píxeles (rayas).
+- **Lo nuevo (se borró la malla de celdas; `escena/cristal/`):** `cristal.ts` (lo puro: las constantes, las 22 esquirlas con su semilla, la
+  zona donde se ven), `esquirlas.ts` (la geometría: cada una el casco convexo de tres anillos de puntos —el canto filoso, las caras metidas
+  hacia adentro con los biseles entre medio, la cresta que quiebra las caras en facetas—, 540 triángulos en un solo búfer, cada vértice sabe
+  cuánto es canto), `fondo.ts` (el render target a media resolución con SÓLO el fondo: el cielo, la trama y su zócalo, la fábrica de logos,
+  las estrellas y la fugaz, en una capa propia más las luces, limpio con el color de la niebla), `vidrio.ts` (el sombreador: la faceta
+  plana girada con la esquirla, la refracción por Snell del rayo leída en el fondo a 14 u detrás, que se DESVANECE donde mira fuera del
+  fondo; el Fresnel de Schlick con un reflejo tenue del cielo; el brillo de la luz de la sala en las facetas, que centellea al moverse la
+  cámara; el canto: de día la reflexión total lo oscurece, de noche toma la luz; con el prisma, cada canal con su índice, el doble en los
+  cantos: el filo de arcoíris) y `CristalDeLaEscena.tsx` (la cámara de ESTE cuadro —`updateMatrixWorld` antes de leerla—, las cajas de la
+  barra y de los textos, el rectángulo del logo en la pantalla, la luz, el fondo sólo si se ve). Las esquirlas viven en un anillo contra el
+  domo (30 a 36 u del centro, de 3 a 28 u de alto, de 9 a 20 u de largo): paralaje de verdad; se ven sólo en el BORDE del cuadro (fuera de
+  una elipse central, lejos de la cámara, nunca en las cajas de la barra y los textos ni en el logo); no escriben profundidad y van antes
+  que todo lo transparente que no es fondo (orden −17): una partícula nunca queda tapada; cristalizan (aparecen creciendo en 2,5 s y crecen
+  con la amplitud) y giran y respiran muy lento, con el reloj (sin temblor). Apagadas en el túnel y en Tu panel y con la cámara del final.
+- **Las variantes:** `?fondo=moire` (el moiré solo), `?fondo=espejo` (el cristal solo: la trama y el zócalo no se dibujan), `?fondo=ambos`
+  (lo de siempre), `?espejo-prisma=si` (el filo de arcoíris). Y un defecto de PULIDO 19: `?cristal=no` sólo andaba con el banco (la URL
+  sólo deja pasar `?pruebas=` y las «sueltas»): ahora `pedidoDeLaUrl` deja pasar `cristal` y `fondo` (`PEDIDOS_DEL_FONDO`; no son pruebas
+  con su nombre: piden `sin-cristal` y `sin-moire`, y sin URL ninguna pide nada).
+- **Visto en el sitio** (`p20-r2v.ts`, capturas en `pulido-20/r2v3-1440`): en el hero, Quiénes somos, Números (de noche), Por qué develOP
+  ×2; esquirlas de vidrio en los bordes que quiebran la trama y los logos del domo; la de arriba a la derecha se desvanece al llegar a
+  «Contacto / Login» (la primera versión pasaba por detrás: la barra no está en `[data-v3]`; ahora sus cajas van primero); de noche, la
+  refracción de las estrellas y el canto encendido; las variantes, cada una como debe. Las partículas: de día las mismas con y sin (403/348,
+  551/552, 116/111, 191/173: con el cristal, algún fragmento oscuro de más en los cantos); de noche la cuenta de puntos claros baja (373
+  contra 518) porque las ESTRELLAS del fondo, refractadas a media resolución, se ablandan: son fondo, no partículas.
+- **Medido en el sitio** (sin vsync, la NVIDIA, `p20-r2med.ts`; recibo `entregas/pulido-20/sitio-medido.json`): en calma 5 s en el hero con
+  y sin, alternados dos veces, y el recorrido del hero a Números con y sin, dos veces: ningún cuadro de más de 20 ms en ninguna tanda; a
+  1440 en calma 2,47–2,53 ms con el cristal contra 2,30–2,40 sin (+0,1 a 0,2 ms), en el recorrido 3,35–3,42 contra 3,10–3,28; a 390 en
+  calma 1,87–1,97 contra 1,83–2,05, en el recorrido 2,40–2,47 contra 2,33–2,44. En calma la cámara no se mueve ni un poco entre cuadros
+  (salto 0): la vibración se fue con la cámara de este cuadro. (Una primera tanda a 390 tuvo un cuadro de 35,7 ms en el recorrido que no se
+  repitió en las cuatro siguientes, con y sin cristal.)
+- s71 (R2): la zona (cero en las cajas, en el logo y en el centro, entera en el borde; controles: sin los textos, sin el logo); las
+  esquirlas (en el anillo, facetadas; control: una en el centro de la sala); el vidrio (antes que el espejo, la energía y las partículas, sin
+  escribir profundidad, sólo el fondo, se desvanece donde mira afuera, la cámara de este cuadro, el fondo sin logo ni partículas; controles:
+  después de las partículas, escribiendo profundidad, leyendo la copia del cuadro, la cámara del cuadro anterior, el logo en el fondo, sin
+  desvanecerse); las variantes (control: la URL de PULIDO 19); lo medido (control: un cuadro de 25 ms). s70 Q3 con el sentido nuevo.
 
 ### R3 · La red de rayos congelados
 - PENDIENTE.
@@ -138,6 +194,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
 | s47 «lo interactivo va donde la pieza va a quedar» | el orden termina en `llegar(a, s)` | en `llegar(a, s, …` (con lo que el final deja ver) | el mismo orden; `llegar` recibe la visibilidad del final |
 | s51 «el cableado del reloj» | `fondo = scrollHeight − innerHeight` | `fondo = offsetHeight − innerHeight` | R1: la causa de la traba (s71 tiene el control con el de antes) |
 | s65 «la llegada lo escribe» | `opacidadDelDom(e)` | `opacidadDelDom(e, final)` | la misma opacidad de la llegada, más el final |
+| s70 Q3 «el cristal de fondo» | las facetas justas del cilindro; el sombreador de pantalla entera (Voronoi, la copia del cuadro sólo en el fondo) | la malla de celdas ya no está y el cristal se monta igual (siempre con movimiento; `cristal=no` y `fondo=moire` lo apagan); «dónde se ve», igual | R2: «se borra la malla de celdas actual del domo» (el cristal nuevo, en s71) |
 
 ## Crítica (lo que el banco mostró y qué se hizo)
 
@@ -147,6 +204,10 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
 - R1 · el invariante de cruces encontró dos defectos que las capturas no mostraban (el rótulo que atravesaba el formulario, el salto al
   empezar a bajar): las cajas orientadas en cada cuadro, con el pie del sitio, valen más que mirar.
 - R1 · el dev server para iterar se comió la memoria (4,5 GB con las recompilaciones): el sitio se ve con el build de medición.
+- R2 · la primera versión de las esquirlas casi no se veía (de 3,5 a 9 u, a 65–75 u de la cámara: chiquitas, y una refracción pareja sobre
+  el gris del día apenas se nota): se agrandaron (de 9 a 20 u), la cresta subió (las facetas quiebran la trama) y la refracción se duplicó.
+- R2 · `?cristal=no`, que PULIDO 19 dio como URL, sólo andaba con el banco; y con el banco la URL no cuenta (las variantes se piden en el
+  entorno). Lo encontró mirar las variantes en el sitio.
 
 ## Lo que no quedó bien
 
