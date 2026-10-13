@@ -13,6 +13,7 @@ import { ONDA_PEDIDA } from '../interfaz/pedidos'
 import { alCuadro, prepararLasTransformaciones, rearmar, soltar, type EstadoDelPie } from './armadas'
 import { crearLaCaidaDelPie } from './caida'
 import { CAJAS_DEL_PIE } from './cajasDelPolvo'
+import { HUECOS_DEL_PIE } from './huecos'
 import { SOMBRAS_DEL_PIE } from './sombras'
 
 /**
@@ -73,6 +74,7 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       s.armadas = []
       s.estudio = null
       SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0
+      HUECOS_DEL_PIE.uCuantosHuecosDelPie.value = 0
       CAJAS_DEL_PIE.uCuantasCajasDelPie.value = 0
       // [RETOQUE DEL ENCASTRE] 1D · sin pie de volumen, el final no espera nada.
       EN_VIVO.pieEntero = true
