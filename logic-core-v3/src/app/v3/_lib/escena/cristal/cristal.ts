@@ -15,7 +15,8 @@ export const CRISTAL = {
    * Las esquirlas: cuántas, el anillo donde viven (radio u: adentro de la trama cercana, contra el domo), entre qué alturas sobre el piso
    * (u), su largo (u), su ancho (parte del largo), su espesor (parte del ancho), lo que se mete el bisel (parte) y la semilla.
    */
-  esquirlas: { cuantas: 22, radio: [30, 36], alto: [3, 28], largo: [9, 20], ancho: [0.26, 0.5], espesor: [0.06, 0.12], bisel: 0.12, semilla: 20 },
+  // [PULIDO 21] S4 · toda la escena rodeada, pareja en los 360° del domo: tres filas (por altura) de 32, cada una con el azimut parejo.
+  esquirlas: { cuantas: 96, radio: [30, 36], alto: [2, 30], largo: [8, 16], ancho: [0.34, 0.6], espesor: [0.06, 0.12], bisel: 0.12, semilla: 20, filas: 3 },
   /** El vidrio: el índice, a qué distancia detrás se lee el fondo (u), el F0 de Schlick y la dispersión del prisma (en los cantos, el doble). */
   vidrio: { indice: 1.5, fondo: 14, f0: 0.04, dispersion: 0.03 },
   /**
@@ -101,10 +102,14 @@ export function esquirlasDelCristal(n: number = CRISTAL.esquirlas.cuantas, semil
   const E = CRISTAL.esquirlas
   const azar = azarDelCristal(semilla)
   const salida: Esquirla[] = []
+  const porFila = Math.ceil(n / E.filas)
+  const franja = (E.alto[1] - E.alto[0]) / E.filas
   for (let k = 0; k < n; k += 1) {
-    const az = ((k + 0.15 + azar() * 0.7) / n) * 2 * Math.PI
+    // [PULIDO 21] S4 · su fila (la franja de alturas) y su lugar en ella: el azimut parejo, cada fila corrida media esquirla.
+    const fila = Math.floor(k / porFila)
+    const az = (((k % porFila) + 0.5 * (fila % 2) + 0.2 + azar() * 0.6) / porFila) * 2 * Math.PI
     const radio = entre(azar, E.radio)
-    const y = FLOOR_Y + entre(azar, E.alto)
+    const y = FLOOR_Y + E.alto[0] + franja * (fila + azar())
     const largo = entre(azar, E.largo)
     const ancho = largo * entre(azar, E.ancho)
     const espesor = ancho * entre(azar, E.espesor)

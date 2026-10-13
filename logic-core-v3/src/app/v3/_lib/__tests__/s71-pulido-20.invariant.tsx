@@ -439,7 +439,7 @@ const DEPTH = leer('_lib/escena/DepthParticles.tsx')
 const BOKEH = leer('_lib/escena/BokehParticles.tsx')
 const CRISTAL_TSX = ESCENA('cristal/CristalDeLaEscena.tsx')
 const FONDO_TS = ESCENA('cristal/fondo.ts')
-const MALLA = armarElVidrio(new THREE.BufferGeometry(), uniformesDelVidrio(ESQUIRLAS), ESQUIRLAS.length)
+const MALLA = armarElVidrio(new THREE.BufferGeometry(), uniformesDelVidrio(), ESQUIRLAS.length)
 interface DelVidrio {
   readonly orden: number
   readonly particulasSinOrden: boolean
@@ -473,12 +473,12 @@ const MOIRE_SCREEN = ESCENA('MoireScreen.tsx')
 type Pedido = typeof entornoPedido
 const variantesBien = (f: Pedido, url: typeof pedidoDeLaUrl, moire: string): boolean => {
   const p = (q: string): { readonly c: string; readonly m: string } => ({ c: f(q).pruebas['sin-cristal'], m: f(q).pruebas['sin-moire'] })
-  const [nada, moireSolo, espejoSolo, ambos, sinCristal] = [p('producto'), p('producto,fondo=moire'), p('producto,fondo=espejo'), p('producto,fondo=ambos'), p('producto,cristal=no')]
+  const [nada, moireSolo, espejoSolo, ambos, sinCristal] = [p('producto'), p('producto,fondo=moire'), p('producto,fondo=cristal'), p('producto,fondo=ambos'), p('producto,cristal=no')]
   return nada.c === 'no' && nada.m === 'no' && moireSolo.c === 'si' && moireSolo.m === 'no' && espejoSolo.c === 'no' && espejoSolo.m === 'si' && ambos.c === 'no' && ambos.m === 'no' && sinCristal.c === 'si' &&
-    url('?fondo=espejo') === 'producto,fondo=espejo' && url('?cristal=no') === 'producto,cristal=no' && PEDIDOS_DEL_FONDO.length === 2 &&
+    url('?fondo=cristal') === 'producto,fondo=cristal' && entornoPedido('producto,fondo=espejo').pruebas['sin-moire'] === 'si' && url('?cristal=no') === 'producto,cristal=no' && PEDIDOS_DEL_FONDO.length === 2 &&
     moire.includes("const conTrama = entornoDeLaEscena().pruebas['sin-moire'] !== 'si'") && (moire.match(/visible=\{conTrama\}/g) ?? []).length === 2
 }
-afirmar(variantesBien(entornoPedido, pedidoDeLaUrl, MOIRE_SCREEN), '  las variantes: fondo=moire (el moiré solo), fondo=espejo (el cristal solo: la trama y el zócalo no se dibujan), fondo=ambos y nada (los dos); cristal=no; también sueltas en la URL')
+afirmar(variantesBien(entornoPedido, pedidoDeLaUrl, MOIRE_SCREEN), '  las variantes: fondo=moire (el moiré solo), fondo=cristal ([PULIDO 21] S4; espejo, su nombre de antes: el cristal solo: la trama y el zócalo no se dibujan), fondo=ambos y nada (los dos); cristal=no; también sueltas en la URL')
 controlPositivo('  el detector VE una URL que no deja pasar el fondo (PULIDO 19: `?cristal=no` sólo andaba con el banco)', ((b: string) => {
   const v = new URLSearchParams(b).get('pruebas')
   return v === null ? null : `producto,${v}`

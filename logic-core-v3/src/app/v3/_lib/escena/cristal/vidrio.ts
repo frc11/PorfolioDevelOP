@@ -32,11 +32,12 @@ float adentroDeLasCajas( vec2 s ) {
  * cajas del texto y del logo y de la cámara (`zonaDelCristal`). No escribe profundidad (las partículas, que van después, nunca se tapan).
  */
 export const VERTICES_DEL_VIDRIO = (n: number): string => /* glsl */ `
-attribute float aEsquirla;
+// [PULIDO 21] S4 · ${String(n)} esquirlas: lo de cada una (su centro, su giro, su vida) viaja en sus vértices (un búfer, una llamada; sin
+// el tope de uniformes de los teléfonos).
 attribute float aFilo;
-uniform vec4 uCentro[ ${String(n)} ];
-uniform vec4 uGiro[ ${String(n)} ];
-uniform vec4 uVida[ ${String(n)} ];
+attribute vec4 aCentro;
+attribute vec4 aGiro;
+attribute vec4 aVida;
 uniform float uTiempo;
 uniform float uCrece;
 varying vec3 vMundo;
@@ -48,10 +49,9 @@ vec3 girar( vec3 v, vec3 eje, float a ) {
 	return v * c + cross( eje, v ) * s + eje * dot( eje, v ) * ( 1.0 - c );
 }
 void main() {
-	int k = int( aEsquirla + 0.5 );
-	vec4 C = uCentro[ k ];
-	vec4 G = uGiro[ k ];
-	vec4 V = uVida[ k ];
+	vec4 C = aCentro;
+	vec4 G = aGiro;
+	vec4 V = aVida;
 	// El giro lento (su eje, su velocidad) y la respiración (su fase): con el reloj, sin temblor; crece al aparecer.
 	float a = G.w * uTiempo + V.y;
 	float escala = uCrece * ( 1.0 + V.z * sin( 6.2831853 * uTiempo / V.w + V.x ) );
@@ -147,14 +147,16 @@ void main() {
 }
 `
 
-/** Las uniformes del vidrio para `n` esquirlas (las de cada una, armadas una vez desde `cristal.ts`). */
-export function uniformesDelVidrio(esquirlas: readonly Esquirla[]) {
+/** Lo de cada esquirla en sus vértices (`armarLasEsquirlas`): su centro, su eje y velocidad de giro, sus fases y su respiración. */
+export function datosDeLaEsquirla(e: Esquirla): readonly [readonly number[], readonly number[], readonly number[]] {
+  const M = CRISTAL.movimiento
+  return [[e.x, e.y, e.z, 1], [e.eje[0], e.eje[1], e.eje[2], e.velocidad], [e.fase, e.faseDelGiro, M.crece, M.periodoS]]
+}
+
+/** Las uniformes del vidrio (lo de cada esquirla va en sus vértices). [PULIDO 21] S4 · el prisma, por defecto. */
+export function uniformesDelVidrio() {
   const C = CRISTAL
-  const M = C.movimiento
   return {
-    uCentro: { value: esquirlas.map((e) => new THREE.Vector4(e.x, e.y, e.z, 1)) },
-    uGiro: { value: esquirlas.map((e) => new THREE.Vector4(e.eje[0], e.eje[1], e.eje[2], e.velocidad)) },
-    uVida: { value: esquirlas.map((e) => new THREE.Vector4(e.fase, e.faseDelGiro, M.crece, M.periodoS)) },
     uTiempo: { value: 0 },
     uCrece: { value: 1 },
     uFondo: { value: null as THREE.Texture | null },
@@ -163,7 +165,7 @@ export function uniformesDelVidrio(esquirlas: readonly Esquirla[]) {
     uAspecto: { value: 1 },
     uAmplitud: { value: 0 },
     uNoche: { value: 0 },
-    uPrisma: { value: 0 },
+    uPrisma: { value: 1 },
     uCamara: { value: new THREE.Vector3() },
     uVista: { value: new THREE.Matrix4() },
     uLuz: { value: new THREE.Vector3(0, 1, 0) },

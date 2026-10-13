@@ -174,7 +174,8 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     'espejo-prisma': unoDe<'si'>(['si'], valor('espejo-prisma')),
     // [PULIDO 19] Q3 · el cristal está siempre: la prueba es apagarlo (`cristal=no`).
     'sin-cristal': valor('cristal') === 'no' || valor('fondo') === 'moire' ? 'si' : 'no',
-    'sin-moire': valor('fondo') === 'espejo' ? 'si' : 'no',
+    // [PULIDO 21] S4 · `fondo=cristal` (el cristal solo); `espejo`, su nombre de PULIDO 20.
+    'sin-moire': valor('fondo') === 'cristal' || valor('fondo') === 'espejo' ? 'si' : 'no',
   }
 }
 

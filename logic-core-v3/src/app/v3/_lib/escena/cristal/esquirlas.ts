@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry.js'
 
 import { CRISTAL, type Esquirla } from './cristal'
+import { datosDeLaEsquirla } from './vidrio'
 
 /**
  * [PULIDO 20] R2 · LAS ESQUIRLAS, SU GEOMETRÍA (`cristal.ts`: dónde va cada una). Cada esquirla es el casco convexo de tres anillos de puntos:
@@ -56,7 +57,9 @@ export function armarLasEsquirlas(esquirlas: readonly Esquirla[]): THREE.BufferG
   const normal: number[] = []
   const indice: number[] = []
   const filo: number[] = []
+  const deCadaUna: number[][] = [[], [], []]
   esquirlas.forEach((e, k) => {
+    const datos = datosDeLaEsquirla(e)
     const { puntos, filo: deCada } = puntosDe(e)
     const casco = new ConvexGeometry(puntos)
     const p = casco.getAttribute('position')
@@ -67,6 +70,7 @@ export function armarLasEsquirlas(esquirlas: readonly Esquirla[]): THREE.BufferG
       normal.push(nn.getX(i), nn.getY(i), nn.getZ(i))
       indice.push(k)
       filo.push(deCada.get(clave(PUNTO)) ?? 0)
+      for (let d = 0; d < 3; d += 1) deCadaUna[d].push(...datos[d])
     }
     casco.dispose()
   })
@@ -75,5 +79,8 @@ export function armarLasEsquirlas(esquirlas: readonly Esquirla[]): THREE.BufferG
   g.setAttribute('normal', new THREE.Float32BufferAttribute(normal, 3))
   g.setAttribute('aEsquirla', new THREE.Float32BufferAttribute(indice, 1))
   g.setAttribute('aFilo', new THREE.Float32BufferAttribute(filo, 1))
+  g.setAttribute('aCentro', new THREE.Float32BufferAttribute(deCadaUna[0], 4))
+  g.setAttribute('aGiro', new THREE.Float32BufferAttribute(deCadaUna[1], 4))
+  g.setAttribute('aVida', new THREE.Float32BufferAttribute(deCadaUna[2], 4))
   return g
 }

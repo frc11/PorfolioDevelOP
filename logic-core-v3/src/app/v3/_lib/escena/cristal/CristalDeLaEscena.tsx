@@ -106,19 +106,18 @@ function rectanguloDelLogo(logo: THREE.Object3D | null, camara: THREE.Camera, de
 export function CristalDeLaEscena({ quieto, logoGroupRef }: Props): React.JSX.Element | null {
   const pruebas = entornoDeLaEscena().pruebas
   if (pruebas['sin-cristal'] === 'si' || quieto) return null
-  return <CristalPrendido prisma={pruebas['espejo-prisma'] === 'si'} logoGroupRef={logoGroupRef} />
+  return <CristalPrendido logoGroupRef={logoGroupRef} />
 }
 
-function CristalPrendido({ prisma, logoGroupRef }: { readonly prisma: boolean; readonly logoGroupRef: React.RefObject<THREE.Group | null> }): React.JSX.Element {
+function CristalPrendido({ logoGroupRef }: { readonly logoGroupRef: React.RefObject<THREE.Group | null> }): React.JSX.Element {
   const grupo = useRef<THREE.Group>(null)
-  const uniformes = useRef(uniformesDelVidrio(ESQUIRLAS))
+  const uniformes = useRef(uniformesDelVidrio())
   const armado = useRef<{ readonly malla: THREE.Mesh; readonly fondo: FondoDelCristal } | null>(null)
   const memoria = useRef<Memoria>({ bandas: new Float32Array(CRISTAL.donde.apagadas.length * 2).fill(Number.NaN), bandasEn: Number.NEGATIVE_INFINITY, textosEn: Number.NEGATIVE_INFINITY, porDonde: 1, apagado: false, aparece: 0 })
   useEffect(() => {
     const g = grupo.current
     if (g === null) return undefined
     const u = uniformes.current
-    u.uPrisma.value = prisma ? 1 : 0
     const malla = armarElVidrio(armarLasEsquirlas(ESQUIRLAS), u, ESQUIRLAS.length)
     const fondo = crearElFondo()
     armado.current = { malla, fondo }
@@ -140,7 +139,7 @@ function CristalPrendido({ prisma, logoGroupRef }: { readonly prisma: boolean; r
       soltarElFondo(fondo)
       delete ventana.__cristalDelBanco
     }
-  }, [prisma])
+  }, [])
   useFrame((state, delta) => {
     const a = armado.current
     if (a === null) return
