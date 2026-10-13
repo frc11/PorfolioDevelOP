@@ -35,6 +35,7 @@ import { DOLLY_DEL_CTA, POSES_DEL_FINAL, TIEMPOS_DEL_FINAL, dollyDelCta, enElSos
 import { MOIRE_FAR_RADIUS } from '../escena/probeMoire'
 import {
   FINAL_DEL_PIE,
+  LOGO_DE_SIEMPRE,
   REBOBINADO,
   RELOJ_DEL_FINAL,
   VIAJE_DEL_FINAL,
@@ -51,11 +52,14 @@ import {
   quedaDelRebobinado,
   quietoRebobinado,
   relojQuieto,
+  segundosDelFinal,
   subida,
   duracionDeLaVuelta,
   type EntradaDelReloj,
   type RelojDelFinal,
 } from '../escena/final/recorridoDelFinal'
+import { anguloEnElReloj } from '../escena/final/caidaAlHueco'
+import { visibleHasta } from '../escena/final/rebobinadoVisible'
 import { CAIDA_DEL_LOGO, altoDesdeElBorde, alturaDeLaCaida, pasoDeLaBajada } from '../escena/intro/caida'
 import { persigue } from '../escena/titulos3d/llegada'
 import { LLEGADA_DEL_TITULAR_S } from '../titulos3d/titular'
@@ -187,10 +191,11 @@ const rebobinadoBien = (paso: PasoDelReloj): boolean =>
   DESDES.every((d) => {
     const x = rebobinarDesde(paso, d)
     // Proporcional (± dos cuadros), nunca más de 2 s, quieto al salir y al llegar (in-out), siempre hacia atrás, y parada.
-    return Math.abs(x.dura - REBOBINADO.topeS * d) <= 2 * DT + 1e-6 && x.dura <= 2 && (d < 0.5 || (x.primerPaso < 0.25 * x.pico && x.ultimoPaso < 0.25 * x.pico)) && x.monotono && x.fase === 'parada'
+    // [PULIDO 22] T4 · proporcional a lo VISIBLE que avanzó (`rebobinadoVisible.ts`), no a `fin`.
+    return Math.abs(x.dura - REBOBINADO.topeS * visibleHasta(d, LOGO_DE_SIEMPRE)) <= 2 * DT + 1e-6 && x.dura <= 2 && (d < 0.5 || (x.primerPaso < 0.25 * x.pico && x.ultimoPaso < 0.25 * x.pico)) && x.monotono && x.fase === 'parada'
   })
 const desdeUno = rebobinarDesde(pasoDelReloj, 1)
-afirmar(rebobinadoBien(pasoDelReloj), 'UN gesto rebobina en un tiempo proporcional a lo avanzado (desde el final entero, 1,6 s; desde la mitad, 0,8 s), nunca más de 2 s, con una curva in-out suave (arranca y llega quieto) y termina parada', `desde 1: ${desdeUno.dura.toFixed(2)} s · tope ${String(REBOBINADO.topeS)} s`)
+afirmar(rebobinadoBien(pasoDelReloj), 'UN gesto rebobina en un tiempo proporcional a lo avanzado ([PULIDO 22] T4: en lo visible; desde el final entero, `topeS`), nunca más de 2 s, con una curva in-out suave (arranca y llega quieto) y termina parada', `desde 1: ${desdeUno.dura.toFixed(2)} s · tope ${String(REBOBINADO.topeS)} s`)
 const comoAntes: PasoDelReloj = (r, e, dt) => {
   // El de NOCTURNO FINAL A1: hacia atrás a la velocidad de la cinemática.
   if (r.fase === 'rebobina') {
@@ -204,6 +209,33 @@ const comoAntes: PasoDelReloj = (r, e, dt) => {
   pasoDelReloj(r, e, dt)
 }
 controlPositivo('el detector VE el rebobinado de antes (a la velocidad de la cinemática: 6,4 s desde el final)', comoAntes, rebobinadoBien)
+// [PULIDO 22] T4 · lo visible vuelve despacio: desde el final entero, el vuelco del logo (de 85° a 5°) dura ~0,55 s (antes, con la curva
+// pareja en `fin`, ~0,1 s: «todo vuelve volando»).
+const vuelcoAlRebobinar = (paso: PasoDelReloj): number => {
+  const r = relojQuieto()
+  for (let i = 0; i < 1200 && r.fin < 1; i += 1) paso(r, AL_FONDO, DT)
+  r.fin = 1
+  paso(r, { ...AL_FONDO, rebobinar: true }, DT)
+  let s = 0
+  for (let i = 0; i < 1200 && r.fin > 0; i += 1) {
+    paso(r, { ...AL_FONDO, sinGestoS: (i + 1) * DT }, DT)
+    const a = THREE.MathUtils.radToDeg(anguloEnElReloj(LOGO_DE_SIEMPRE, segundosDelFinal(r.fin)).a)
+    if (a > 5 && a < 85) s += DT
+  }
+  return s
+}
+const VUELCO = vuelcoAlRebobinar(pasoDelReloj)
+afirmar(VUELCO >= 0.45 && VUELCO <= 0.7, `  [PULIDO 22] T4 · rebobinando desde el final, el vuelco del logo vuelve en ${VUELCO.toFixed(2)} s (entre 0,45 y 0,7: no vuela)`)
+const parejoComoP2: PasoDelReloj = (r, e, dt) => {
+  if (r.fase === 'rebobina') {
+    r.rebobinado.s += dt
+    r.fin = Math.max(0, r.rebobinado.desde * quedaDelRebobinado(r.rebobinado.s, 1.6 * r.rebobinado.desde))
+    if (r.fin === 0) [r.fase, r.paradaS] = ['parada', 0]
+    return
+  }
+  pasoDelReloj(r, e, dt)
+}
+controlPositivo('  el detector VE el rebobinado de antes (parejo en fin, 1,6 s: el vuelco en ~0,1 s)', vuelcoAlRebobinar(parejoComoP2), (v: number) => v >= 0.45 && v <= 0.7)
 const lineal: PasoDelReloj = (r, e, dt) => {
   if (r.fase === 'rebobina') {
     r.fin = Math.max(0, r.fin - dt / REBOBINADO.topeS)
@@ -578,18 +610,17 @@ const vueltaDelViaje = (paso: PasoDelReloj, desde: number, viajeS: number): Vuel
   return { ...p, s: Number.POSITIVE_INFINITY, monotona }
 }
 // La vara: el rebobinado de P2 (lo que se pidió como «rápido»), medido igual, desde el final entero y desde la mitad: lo más
-// rápido que cambia cada cosa en alguno de los dos.
+// rápido que cambia cada cosa en alguno de los dos. [PULIDO 22] T4 · la curva pareja en `fin` de P2 (la que el viaje comprime: el viaje
+// no cambió); el rebobinado de un gesto ahora corre en lo visible (`rebobinadoVisible.ts`).
 const delRebobinado = ((): PorCuadro => {
   const p: PorCuadro = { grados: 0, logo: 0, oscuro: 0, energia: 0 }
   for (const desde of [1, 0.5]) {
-    const r: RelojDelFinal = { ...relojQuieto(), fin: desde, fase: 'corre' }
-    pasoDelReloj(r, { ...AL_FONDO, rebobinar: true }, DT)
-    let [antes, camara] = [r.fin, camaraEnP5(r.fin)]
-    for (let i = 0; i < 300 && r.fin > 0; i += 1) {
-      pasoDelReloj(r, { ...AL_FONDO, sinGestoS: (i + 1) * DT }, DT)
-      const ahora = camaraEnP5(r.fin)
-      anotar(p, antes, r.fin, camara, ahora)
-      ;[antes, camara] = [r.fin, ahora]
+    let [antes, camara] = [desde, camaraEnP5(desde)]
+    for (let i = 0; i < 300 && antes > 0; i += 1) {
+      const fin = desde * quedaDelRebobinado((i + 1) * DT, duracionDelRebobinado(desde))
+      const ahora = camaraEnP5(fin)
+      anotar(p, antes, fin, camara, ahora)
+      ;[antes, camara] = [fin, ahora]
     }
   }
   return p

@@ -36,7 +36,8 @@ import { SIMULACION_GLSL } from '../escena/piso/bloques'
 import { ANCLAS_DEL_DIBUJO, conOndaDirigida } from '../escena/piso/ondaDirigida'
 import { elevacionDe } from '../escena/lightArc'
 import { ENERGIA_EN_LA_SIMULACION_GLSL } from '../escena/final/luzDeAbajo'
-import { FINAL_DEL_PIE, REBOBINADO, RELOJ_DEL_FINAL, camaraDelFinal, expansionDeLaLuz, decidirElGesto, golpeDelFinal, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { visibleHasta } from '../escena/final/rebobinadoVisible'
+import { FINAL_DEL_PIE, LOGO_DE_SIEMPRE, REBOBINADO, RELOJ_DEL_FINAL, camaraDelFinal, expansionDeLaLuz, decidirElGesto, golpeDelFinal, haciaCero, pasoDelReloj, relojDelQuieto, relojQuieto, subida, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { bloqueTapaElCuadro } from '../escena/nocheDisparada'
 import { CAJAS_DEL_PIE_GLSL, POLVO_EN_EL_PIE } from '../escena/pie3d/cajasDelPolvo'
 import { ORBIT_TARGET_Y } from '../escena/probeScene'
@@ -90,7 +91,8 @@ const unGesto = (paso: PasoDelReloj): UnGesto => {
   for (let i = 0; i < 1200; i += 1) {
     paso(r, { ...AL_FONDO, sinGestoS: t }, DT)
     t += DT
-    velocidadMaxima = Math.max(velocidadMaxima, Math.abs(r.fin - antes) / DT)
+    // [PULIDO 22] T4 · la velocidad, en lo visible (el rebobinado corre ahí con su curva: `rebobinadoVisible.ts`).
+    velocidadMaxima = Math.max(velocidadMaxima, Math.abs(visibleHasta(r.fin, LOGO_DE_SIEMPRE) - visibleHasta(antes, LOGO_DE_SIEMPRE)) / DT)
     antes = r.fin
     if (r.fin === 0) {
       rebobinaS = t
@@ -111,7 +113,7 @@ const unGesto = (paso: PasoDelReloj): UnGesto => {
 // detalle, en `s52-pulido-1`): desde el final entero entre 1 y 2 s, sin pasar el pico de su curva (2/`topeS` por segundo).
 const unGestoBien = (g: UnGesto): boolean => g.rebobinaS >= 1 && g.rebobinaS <= 2 && Math.abs(g.rebobinaS - REBOBINADO.topeS) < 0.1 && g.velocidadMaxima <= (2 / REBOBINADO.topeS) * 1.001 && g.fase === 'parada' && Math.abs(g.paradaS - R.vuelveAEmpezarS) < 0.05
 const g1 = unGesto(pasoDelReloj)
-afirmar(unGestoBien(g1), 'UN gesto hacia arriba (un solo cuadro con el pedido) rebobina la cinemática ENTERA, sola, en lo de P2 de PULIDO 1 (1,6 s desde el final entero, nunca más de 2) hasta el logo parado; parada, vuelve a empezar sola a los 2,5 s sin gestos', `rebobina en ${g1.rebobinaS.toFixed(2)} s · a lo sumo ${g1.velocidadMaxima.toFixed(4)}/s · parada ${g1.paradaS.toFixed(2)} s`)
+afirmar(unGestoBien(g1), 'UN gesto hacia arriba (un solo cuadro con el pedido) rebobina la cinemática ENTERA, sola, en lo de P2 de PULIDO 1 ([PULIDO 22] T4: `topeS` desde el final entero, en lo visible; nunca más de 2) hasta el logo parado; parada, vuelve a empezar sola a los 2,5 s sin gestos', `rebobina en ${g1.rebobinaS.toFixed(2)} s · a lo sumo ${g1.velocidadMaxima.toFixed(4)}/s · parada ${g1.paradaS.toFixed(2)} s`)
 const mientrasSiga: PasoDelReloj = (r, e, dt) => {
   if (r.fase === 'rebobina' && !e.rebobinar) r.fase = 'corre'
   pasoDelReloj(r, e, dt)

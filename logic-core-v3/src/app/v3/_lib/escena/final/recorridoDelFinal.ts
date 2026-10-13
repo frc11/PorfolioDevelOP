@@ -5,6 +5,7 @@ import { entornoDeLaEscena } from '../entorno'
 import { FLOOR_Y, ORBIT_TARGET_Y, PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
 import { CAIDA_AL_HUECO, anguloEnElReloj, aperturaDelHueco, arranqueDeLaCaida, caidaIntegrada, poseDeLaCaida, sombraDeLaCaida } from './caidaAlHueco'
 import { CAIDA_DEL_PIE } from './caidaDelPie'
+import { finDeLoVisible, visibleHasta } from './rebobinadoVisible'
 
 /**
  * [CIERRE] 3 · EL FINAL DEL PIE (la idea de Franco) — al llegar al pie, una secuencia de cámara y logo, toda en función del
@@ -113,7 +114,8 @@ export const FIN_DEL_GOLPE = CAIDA_AL_HUECO.golpeS / RELOJ_DEL_FINAL.duracionS
  * vocabulario (arranca y llega quieto). El giro y el alejamiento del quieto vuelven con el mismo reloj y la misma curva
  * (`quietoRebobinado`): desde cualquier punto, todo vuelve en a lo sumo `topeS`.
  */
-export const REBOBINADO = { topeS: 1.6, curva: 'simetrica', minimoS: 1 } as const satisfies { readonly topeS: number; readonly curva: NombreDeCurva; readonly minimoS: number }
+// [PULIDO 22] T4 · `topeS` desde el final entero, en lo visible (`rebobinadoVisible.ts`): el vuelco vuelve en ~0,55 s (antes, en ~0,1 s).
+export const REBOBINADO = { topeS: 1.4, curva: 'simetrica', minimoS: 1 } as const satisfies { readonly topeS: number; readonly curva: NombreDeCurva; readonly minimoS: number }
 
 /**
  * [PULIDO 1] P2 · cuánto dura el rebobinado desde `desde` (lo avanzado, 0 a 1). Con `minimo` (la prueba
@@ -122,6 +124,12 @@ export const REBOBINADO = { topeS: 1.6, curva: 'simetrica', minimoS: 1 } as cons
 export function duracionDelRebobinado(desde: number, minimo = 0): number {
   const d = Math.min(1, Math.max(0, desde))
   return d <= 0 ? 0 : Math.max(minimo, REBOBINADO.topeS * d)
+}
+
+/** [PULIDO 22] T4 · el rebobinado de un gesto dura lo visible que avanzó por `topeS` (`rebobinadoVisible.ts`), con el mínimo de la prueba. */
+export function duracionDelRebobinadoVisible(desde: number, minimo = 0): number {
+  const d = Math.min(1, Math.max(0, desde))
+  return d <= 0 ? 0 : Math.max(minimo, REBOBINADO.topeS * visibleHasta(d, LOGO_DE_SIEMPRE))
 }
 
 /** [PULIDO 1] P2 · el mínimo de la prueba, leído una vez. */
@@ -264,7 +272,7 @@ export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): 
       r.fase = 'rebobina'
       r.rebobinado.desde = r.fin
       r.rebobinado.s = 0
-      r.rebobinado.dura = duracionDelRebobinado(r.fin, minimoPedido())
+      r.rebobinado.dura = duracionDelRebobinadoVisible(r.fin, minimoPedido())
     } else if (r.fase === 'rebobina' && e.haciaAbajo) r.fase = 'corre'
     else if (r.fase === 'parada') {
       r.paradaS += paso
@@ -275,7 +283,7 @@ export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): 
     if (r.fase === 'rebobina') {
       const b = r.rebobinado
       b.s += paso
-      const fin = b.desde * quedaDelRebobinado(b.s, b.dura)
+      const fin = finDeLoVisible(visibleHasta(b.desde, LOGO_DE_SIEMPRE) * quedaDelRebobinado(b.s, b.dura), LOGO_DE_SIEMPRE)
       r.velocidad = paso > 0 ? (fin - r.fin) / paso : 0
       r.fin = fin
       if (r.fin <= 0) {
