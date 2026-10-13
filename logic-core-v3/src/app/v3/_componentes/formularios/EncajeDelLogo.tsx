@@ -31,7 +31,8 @@ export const ENCAJE = {
   error: { s: 1.35, contacto: 0.5, choca: -96, rebota: -300, queda: -170, corre: 130, torcida: -13, tumbada: -24, termina: 1.45 },
   /**
    * [PULIDO 13] K2 · la luz de la pieza con el éxito, dicha por lo que la apaga (el pozo encima, en opacidad): cae `apagada`, al
-   * encajar sube hasta 0 (el claro entero) y se asienta en `queda`; cuánto tarda (s).
+   * encajar sube hasta 0 (el claro entero) y se asienta en `queda`; cuánto tarda (s). [PULIDO 22] T2 d · se enciende UNA vez hasta `queda`
+   * y queda fijo (subir al claro entero y volver se veía como una luz que falla).
    */
   luz: { apagada: 0.5, queda: 0.1, s: 0.8 },
 } as const
@@ -136,7 +137,7 @@ export function EncajeDelLogo({ resultado, empieza, quieto, alTerminar, precalen
       <motion.g initial={false} animate={pieza} transition={quieto || !empieza ? { duration: 0 } : { duration: T.s, times: tiempos, ease: [...curvas] }}>
         <path d={LOGO_PATH_D} fill="var(--resultado-tinta)" />
         {exito && (
-          <motion.path d={LOGO_PATH_D} fill="var(--resultado-pozo)" data-luz-de-la-pieza="" initial={false} animate={{ opacity: !contacto ? ENCAJE.luz.apagada : quieto ? ENCAJE.luz.queda : [ENCAJE.luz.apagada, 0, ENCAJE.luz.queda] }} transition={{ duration: quieto ? 0 : ENCAJE.luz.s, times: [0, 0.3, 1], ease: 'easeOut' }} />
+          <motion.path d={LOGO_PATH_D} fill="var(--resultado-pozo)" data-luz-de-la-pieza="" initial={false} animate={{ opacity: !contacto ? ENCAJE.luz.apagada : ENCAJE.luz.queda }} transition={{ duration: quieto ? 0 : ENCAJE.luz.s, ease: 'easeOut' }} />
         )}
         <path d={LOGO_PATH_D} fill="none" stroke="var(--resultado-filo)" strokeWidth={6} />
       </motion.g>

@@ -47,6 +47,23 @@ export function homografia(ancho: number, alto: number, q: Cuadrilatero | ArrayL
   return true
 }
 
+/**
+ * [PULIDO 22] T2 b · NÍTIDO: con la cara casi de frente (el cuadrilátero, un paralelogramo a menos de `tope` px), una transformada 2D
+ * (`matrix`, el promedio de los lados, el centro en su lugar, la traslación redondeada): Chrome rasteriza el texto a su escala (con
+ * `matrix3d` lo rasterizaba chico y lo estiraba: los campos se veían borrosos). Si no, `null` (la homografía de siempre).
+ */
+export function transformadaNitida(ancho: number, alto: number, q: ArrayLike<number>, tope = 3): string | null {
+  if (ancho <= 0 || alto <= 0 || q.length < 8) return null
+  if (Math.abs(q[0] - q[2] + q[4] - q[6]) > tope || Math.abs(q[1] - q[3] + q[5] - q[7]) > tope) return null
+  const a = (q[2] - q[0] + q[4] - q[6]) / (2 * ancho)
+  const b = (q[3] - q[1] + q[5] - q[7]) / (2 * ancho)
+  const c = (q[6] - q[0] + q[4] - q[2]) / (2 * alto)
+  const d = (q[7] - q[1] + q[5] - q[3]) / (2 * alto)
+  const e = Math.round((q[0] + q[2] + q[4] + q[6]) / 4 - (a * ancho + c * alto) / 2)
+  const f = Math.round((q[1] + q[3] + q[5] + q[7]) / 4 - (b * ancho + d * alto) / 2)
+  return `matrix(${[a, b, c, d].map((v) => v.toFixed(5)).join(',')},${String(e)},${String(f)})`
+}
+
 /** La `matrix3d` en CSS (con pocos decimales: lo que se escribe por cuadro es corto y se compara barato). */
 export function matrix3dCss(m: readonly number[]): string {
   return `matrix3d(${m.map((v, k) => (k === 3 || k === 7 ? v.toExponential(4) : v.toFixed(4))).join(',')})`

@@ -19,6 +19,9 @@ export function giroDeLaLuzDelPie(viva: THREE.Quaternion, giro: THREE.Quaternion
   return destino.setFromMatrix4(GIRO.makeRotationFromQuaternion(MUNDO))
 }
 
+/** [PULIDO 22] T2 a · el gris al que va la cara oscura con el hover (lo claro, el relieve y las letras, no cambia). */
+const ENCIMA_DEL_PIE = 0.22
+
 const VISTA = 'vec3 geometryViewDir = ( isOrthographic ) ? vec3( 0, 0, 1 ) : normalize( vViewPosition );'
 /** Las luces del pie: las de three, con la dirección de vista girada como la normal (s51 1G lo afirma sobre el sombreador de three). */
 export const LUCES_DEL_PIE_GLSL = THREE.ShaderChunk.lights_fragment_begin.replace(VISTA, `${VISTA}\n\tgeometryViewDir = normalize( uGiroDeLaLuz * geometryViewDir );`)
@@ -49,11 +52,11 @@ export function materialDelPie(uniformes: UniformesDelPie = uniformesDelPie()): 
       .replace('#include <beginnormal_vertex>', `#include <beginnormal_vertex>\n\tvTapaDelPie = step( 0.999, abs( objectNormal.z ) );\n${LETRAS_DEL_PIE_NORMAL_GLSL}`)
       .replace('#include <begin_vertex>', `#include <begin_vertex>\n${LETRAS_DEL_PIE_POSICION_GLSL}`)
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', `#include <common>\nvarying float vTapaDelPie;\nuniform mat3 uGiroDeLaLuz;\n${DISOLVER_DEL_PIE_PARS_GLSL}`)
+      .replace('#include <common>', `#include <common>\nvarying float vTapaDelPie;\nuniform mat3 uGiroDeLaLuz;\nuniform float uEncimaDelPie;\n${DISOLVER_DEL_PIE_PARS_GLSL}`)
       .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n\tnormal = normalize( uGiroDeLaLuz * normal );')
       .replace('#include <lights_fragment_begin>', LUCES_DEL_PIE_GLSL)
       .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>\n${DISOLVER_DEL_PIE_GLSL}`)
-      .replace('#include <color_fragment>', `#include <color_fragment>\n\tdiffuseColor.rgb = mix( vec3( ${COSTADO_DE_DIA.toFixed(3)} ), diffuseColor.rgb, vTapaDelPie );`)
+      .replace('#include <color_fragment>', `#include <color_fragment>\n\tdiffuseColor.rgb = mix( vec3( ${COSTADO_DE_DIA.toFixed(3)} ), diffuseColor.rgb, vTapaDelPie );\n\tdiffuseColor.rgb = mix( diffuseColor.rgb, vec3( ${ENCIMA_DEL_PIE.toFixed(2)} ), uEncimaDelPie * vTapaDelPie * ( 1.0 - step( 0.5, dot( diffuseColor.rgb, vec3( 0.333 ) ) ) ) );`)
   }
   m.customProgramCacheKey = () => 'pie-de-volumen'
   return m

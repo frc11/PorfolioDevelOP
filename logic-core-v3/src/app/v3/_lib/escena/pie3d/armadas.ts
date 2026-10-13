@@ -4,7 +4,7 @@ import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 import datos400 from '../../../_fuentes/chivo-400-pie.json'
 import datos500 from '../../../_fuentes/chivo-500-pie.json'
 import datos600 from '../../../_fuentes/chivo-600-pie.json'
-import { homografia, matrix3dCss } from '../../pie3d/homografia'
+import { homografia, matrix3dCss, transformadaNitida } from '../../pie3d/homografia'
 import { firmaDeLaForma, medirLaPieza, type MedidaDeLaPieza } from '../../pie3d/medida'
 import { HUNDIDOS, PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, cuantoSeHunde, type PiezaDelPie } from '../../pie3d/registro'
 import { ASIENTO } from '../../titulos3d/repeticiones'
@@ -169,6 +169,10 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
       const pedido = cuantoSeHunde(a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido), HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada
       a.hundido = s.quieto ? pedido : pedido + (a.hundido - pedido) * Math.exp(-dt / HUNDIDA_DEL_PIE.tau)
       a.cuerpo.position.z = -a.hundido
+      // [PULIDO 22] T2 a · con el mouse encima o el foco, la cara se aclara (el hundido solo no se veía, menos acostada desde arriba).
+      const h = a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido)
+      const encima = h !== undefined && (h.encima || h.foco || h.apretada) ? 1 : 0
+      a.uniformes.uEncimaDelPie.value = s.quieto ? encima : encima + (a.uniformes.uEncimaDelPie.value - encima) * Math.exp(-dt / HUNDIDA_DEL_PIE.tau)
       // [PULIDO 11] B4 · con el botón ocupado, el rótulo en relieve se apaga en el mismo cuadro en que aparece la carga (sin rearmar).
       a.uniformes.uSinRotuloDelPie.value = a.boton?.getAttribute('aria-busy') === 'true' ? 1 : 0
     }
@@ -433,8 +437,9 @@ function avisarQueTermino(a: Armada): void {
 function seguirLaPieza(a: Armada, viva: THREE.Camera, cuadro: { readonly ancho: number; readonly alto: number }, izquierda: number, arriba: number, s: EstadoDelPie): void {
   const { ancho, alto } = a.medida.caja
   caraEnElCuadro(a.pieza.forma === 'placa' ? a.cuerpo : a.grupo, viva, ancho, alto, 0, cuadro, { x: izquierda, y: arriba }, s.cuadrilatero)
-  if (!homografia(ancho, alto, s.cuadrilatero, s.matriz)) return
-  const css = matrix3dCss(s.matriz)
+  const nitida = transformadaNitida(ancho, alto, s.cuadrilatero)
+  if (nitida === null && !homografia(ancho, alto, s.cuadrilatero, s.matriz)) return
+  const css = nitida ?? matrix3dCss(s.matriz)
   if (css === a.css) return
   a.css = css
   a.pieza.elemento.style.transform = css

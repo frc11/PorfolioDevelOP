@@ -248,8 +248,10 @@ export interface UniformesDelPie {
   readonly uQuietoDelPie: { value: number }
   /** [PULIDO 11] B4 · 1: el rótulo de la tecla no se dibuja (el botón está ocupado). */
   readonly uSinRotuloDelPie: { value: number }
+  /** [PULIDO 22] T2 a · el hover (0 a 1): la cara se aclara. */
+  readonly uEncimaDelPie: { value: number }
 }
 
 export function uniformesDelPie(): UniformesDelPie {
-  return { uLetrasDelPie: { value: -1 }, uCuerpoDelPie: { value: 0 }, uApareceDelPie: { value: 1 }, uQuietoDelPie: { value: 0 }, uSinRotuloDelPie: { value: 0 } }
+  return { uLetrasDelPie: { value: -1 }, uCuerpoDelPie: { value: 0 }, uApareceDelPie: { value: 1 }, uQuietoDelPie: { value: 0 }, uSinRotuloDelPie: { value: 0 }, uEncimaDelPie: { value: 0 } }
 }
