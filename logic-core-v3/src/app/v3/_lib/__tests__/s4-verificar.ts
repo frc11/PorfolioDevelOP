@@ -104,9 +104,11 @@ function paso1bConflictos(): Paso {
 function paso2Tsc(): Paso {
   console.log('\n═══ PASO 2 — tsc --noEmit')
   const desde = Date.now()
+  // [PULIDO 20] el chequeo entero ya no entra en el heap por defecto de node (2240 MB: «heap out of memory» con 0 errores de tipos);
+  // el mismo chequeo, con el heap con que se corre a mano (`NODE_OPTIONS=--max-old-space-size=4096`).
   const proceso = spawnSync(
     process.execPath,
-    [path.join(RAIZ, 'node_modules/typescript/bin/tsc'), '--noEmit'],
+    ['--max-old-space-size=4096', path.join(RAIZ, 'node_modules/typescript/bin/tsc'), '--noEmit'],
     { cwd: RAIZ, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, windowsHide: true },
   )
   const segundos = ((Date.now() - desde) / 1000).toFixed(1)

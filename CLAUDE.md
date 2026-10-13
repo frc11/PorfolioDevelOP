@@ -252,6 +252,9 @@ En INTERFAZ 1 dos componentes nuevos (`DosCopias`, el cursor de la sala) importa
 **Un `git add` con una ruta ya borrada no agrega NADA [Oct 2026]**
 En el cierre de INTERFAZ 1 el archivo borrado se había marcado con `git rm` y después se lo volvió a nombrar en el `git add` de la lista: git respondió `fatal: pathspec ... did not match any files` y no agregó ninguna de las otras rutas. El commit salió sólo con el borrado y se pusheó un árbol que no compilaba (los que importaban el archivo quedaron afuera); hubo que completarlo con otro commit. Regla: después de cada `git add` por ruta, mirar `git status --short` ANTES de commitear (que no quede ningún ` M` de lo que iba en ese commit); un archivo borrado entra con `git rm` y no se repite en el `git add`.
 
+**Un DOM transformado agranda el desborde del documento [Oct 2026]**
+En PULIDO 19 el final del pie decidía «al fondo» con `scrollHeight − innerHeight`, y el DOM del pie seguía a sus piezas 3D con un `matrix3d`. Al subir la cámara, ese DOM pasaba 3 px del fin del documento: el `scrollHeight` crecía, la página dejaba de estar al fondo, el final volvía, el DOM subía, y otra vez. La cinemática quedó clavada en `fin` 0,347 para siempre, sin un error. El mini-banco (sin DOM) no podía verlo y el sprint lo dio por bueno (PULIDO 20 lo encontró en el sitio). Regla: una condición sobre el documento (al fondo, el fin) se mide en el LAYOUT (`document.documentElement.offsetHeight`), nunca en `scrollHeight` si algo transforma DOM para seguir al 3D; y un DOM que sigue a una pieza que viaja se apaga y se deja quieto mientras viaja. Corolario: lo que mueve DOM se verifica en el sitio, no en un mini-banco.
+
 ---
 
 *Update this file when Claude makes a correctable mistake. Add the rule that prevents it. Prune entries that no longer apply.*

@@ -168,7 +168,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
   desvanecerse); las variantes (control: la URL de PULIDO 19); lo medido (control: un cuadro de 25 ms). s70 Q3 con el sentido nuevo.
 
 ### R3 · La red de rayos congelados
-- HECHO (commit de R3). VISTO EN EL SITIO: sí (1440 de día y de noche, 390; el build de medición).
+- HECHO (`a5d74036`). VISTO EN EL SITIO: sí (1440 de día y de noche, 390; el build de medición).
 - `energia/dibujo/red.ts`, rehecho: cada enlace es un ARCO como los del plasma (los parámetros de `arcos/camino.ts`: el desvío, la aspereza
   por nivel, la profundidad; cuatro niveles de un ruido de valor que se achica a la mitad, las puntas fijas en sus brasas; una rama corta que
   sale de un punto del medio con el largo y el ángulo de las ramas del plasma, libre en la punta), en la base del MUNDO (no de la cámara):
@@ -191,7 +191,15 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
   una línea recta); lo medido. s70 Q1.d «el dibujo de la red» con el sentido nuevo (tabla).
 
 ### Final · verificar
-- PENDIENTE.
+- `npm run verificar`: 78 pasos, 8 con falla: los agregados de la base s1, s17, s2, s3, s4, s5, s7 y s8, con 105 afirmaciones en falla, las mismas de PULIDO 19 (s1-bundle 12, s17-revelado 1, s2-bundle 16, s2-css 2, s3-peso 13, s4-cobertura 1, s4-heredado 4, s5-compacto 1, s5-peso 8, s7-compuerta 18, s8-montaje 2, s8-tres 11, s8-chrome 2, s8-peso 14), ni una más. s71-pulido-20: 52 afirmaciones, 32 controles positivos, 0 fallas.
+- El paso 2 (`tsc --noEmit`) de `verificar` se cayó en la primera corrida: «JavaScript heap out of memory», con 0 errores de tipos. El
+  chequeo entero ya no entra en el heap por defecto de node (2240 MB): `tsc --extendedDiagnostics` usa 2,47 GB (2,43 sin s71: lo nuevo del
+  sprint lo empujó por encima de un borde en el que ya estaba). `s4-verificar.ts` lanza ahora ese paso con `--max-old-space-size=4096`,
+  como se corre a mano: el mismo chequeo, con memoria (fila en la tabla).
+- `npm run test:frontera`: en verde (2 invariantes, 23 afirmaciones, 10 controles positivos, 12 fuera de ventana, 0 con falla).
+- En frío (las cachés de sombreadores del perfil del banco borradas, `p20-frio`): el final a 1440 sin ningún cuadro de más de 20 ms (el de
+  1000 ms de la primera corrida sobre el build recién servido no se repitió).
+- Al terminar: el Chrome del banco cerrado, el servidor del build apagado, `.next-probe` borrado (3,5 GB), `limpiar.ps1 -Profundo`.
 
 ## Disco y memoria por tanda
 
@@ -201,6 +209,9 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
 | R1 · reproducir (dev server propio + el Chrome del banco) | 74,4 GB | 3440 → 1864 MB | 987 MB | `p20-r1.ts` 1440 (dos veces) y `p20-sonda2.ts` |
 | R1 · iterar con el dev server | 74,3 GB | 2500 → 278 MB | 978 → 1021 MB | el Chrome del humano seguía vivo en segundo plano (0,9 GB: con su permiso se cerró); el dev server crece con cada recompilación (2,6 → 4,5 GB): se apagó y se pasó al build de medición |
 | R1 · el build de medición (`reconstruir.sh`, 192 s) y el sitio | 74,2 GB | 6636 → 5462 MB | 1004 → 1013 MB | `p20-r1v.ts` 1440 (dos), 1920, 390; `p20-r2diag.ts` |
+| R2 · cinco builds (118–190 s) y el sitio | 74,0 GB | 6627 → 5133 MB | 1016 → 1021 MB | `p20-r2v.ts` (1440, 390, las variantes), `p20-r2med.ts` sin vsync (1440 y 390, dos veces) |
+| R3 · dos builds y el sitio | 74,0 GB | 6056 → 5884 MB | 981 → 1020 MB | `p20-r3.ts` 1440 de día, de noche y 390 (sin vsync) |
+| Final (frío, verificar, frontera) | 75,7 GB | 6409 MB | 1026 MB | `.next-probe` borrado; el caché de bancos en 1,4 GB (tope 5) |
 
 ## Invariantes que cambian de sentido (antes / ahora / por qué)
 
@@ -214,6 +225,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
 | s47 «lo interactivo va donde la pieza va a quedar» | el orden termina en `llegar(a, s)` | en `llegar(a, s, …` (con lo que el final deja ver) | el mismo orden; `llegar` recibe la visibilidad del final |
 | s51 «el cableado del reloj» | `fondo = scrollHeight − innerHeight` | `fondo = offsetHeight − innerHeight` | R1: la causa de la traba (s71 tiene el control con el de antes) |
 | s65 «la llegada lo escribe» | `opacidadDelDom(e)` | `opacidadDelDom(e, final)` | la misma opacidad de la llegada, más el final |
+| s4-verificar · paso 2 | `tsc --noEmit` con el heap por defecto de node | con `--max-old-space-size=4096` | el chequeo entero ya no entra en 2240 MB (se caía sin errores de tipos); el mismo chequeo, con memoria |
 | s70 Q1.d «el dibujo de la red» | los dos extremos por vértice (`aA`, `aB`, `aLado`) en un búfer reescrito cada cuadro | un búfer estático; los extremos de cada enlace en una textura; el camino en el sombreador (`puntoDe`) | R3: cada enlace es un arco congelado (el mismo control: un dibujo sin la máscara de los textos) |
 | s70 Q3 «el cristal de fondo» | las facetas justas del cilindro; el sombreador de pantalla entera (Voronoi, la copia del cuadro sólo en el fondo) | la malla de celdas ya no está y el cristal se monta igual (siempre con movimiento; `cristal=no` y `fondo=moire` lo apagan); «dónde se ve», igual | R2: «se borra la malla de celdas actual del domo» (el cristal nuevo, en s71) |
 
@@ -232,4 +244,20 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
 
 ## Lo que no quedó bien
 
-(al final)
+1. **R1, el formulario acostado se ve más chico:** con la cámara lejos y de costado (28°, lo que eligió el humano) el pie acostado ocupa el
+   centro del cuadro y el formulario queda en perspectiva: se usa (el foco, escribir, los clics: verificado), pero se lee peor que desde
+   arriba. El autocompletado del navegador no se puede disparar desde el banco: verificados el foco y el valor escrito.
+2. **R1, la primera versión se rehízo dos veces** (piezas sueltas → columnas invisibles → la cámara lejos): lo de piezas sueltas quedó en
+   el código como la base pura (`lugaresEnElPiso` apila cuerpos; ahora son dos columnas).
+3. **R2, «las partículas desaparecen» no se reprodujo** con el cristal viejo (las mismas con y sin en siete paradas): se escribió lo que
+   se midió; el nuevo no puede taparlas por construcción, pero si era otra cosa, sigue. De noche la refracción ablanda las estrellas del
+   fondo (media resolución): en el recibo, la cuenta de puntos claros baja adentro de las esquirlas.
+4. **R2, la máscara del texto toma las 24 cajas más grandes** (la barra primero): un texto chico fuera de esas 24, en el borde del cuadro,
+   podría tener una esquirla detrás. A 390 casi no se ven esquirlas: los textos ocupan la pantalla.
+5. **R2 y R3 a 1920** no se midieron sin vsync (se pidió 1440 y 390); R1 a 1920 sí se verificó en el sitio.
+6. **El corte de la red** (R3) no se alcanzó a capturar a mitad de la cascada (a los 110 ms ya estaba cortada).
+7. **Un cuadro de 1000 ms** en la primera corrida del final sobre el build recién servido: no se repitió en caliente ni en frío con las
+   cachés borradas; queda la sospecha de la primera visita contra el servidor recién levantado.
+8. Una advertencia de precisión de D3D (X4122, «sum of … cannot be represented accurately in double precision») de un sombreador que ya
+   estaba antes de este sprint sigue en la consola del banco.
+9. **Lo de la base:** s8-montaje con sus 2 rojos y los 8 rojos de `verificar` (s1, s17, s2, s3, s4, s5, s7, s8).
