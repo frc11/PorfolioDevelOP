@@ -345,10 +345,33 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 
 - Referencia de PULIDO 18 (600 brasas en la cáscara): ~1,0 ms en calma a 1440 y ~16 KB por cuadro. Lo que suma Q1 son los 200
   brasas más y el dominio (el reparto y el envoltorio: ~0,1 ms); la basura quedó por debajo de PULIDO 18.
-- El banco del sitio (`p-tanda.sh`) sigue sin poder correr (memoria disponible < 3000 MB en cada bisagra): VERIFICAR TRAS REINICIO.
+- Q1.d · la red armada (618 enlaces a 1440): +0,48 ms por cuadro (1,36 → 1,84); a 390 nada (recibo, sección `red`). Q3 · el cristal:
+  1440 de día 1,49 ms con él contra 1,64 sin (la misma tanda: ruido, el cuadro lo manda la CPU), de noche 1,96 (1,84), 390 de noche
+  1,01 (0,91), de lejos 1,26 (sección `cristal`). Q2 y Q4 · la caída del pie y sus sombras: SIN medición de cuadros (el mini-banco
+  del pie es una captura por instante; el sitio no corrió): `p19-sitio.ts` los mide durante la caída (VERIFICAR TRAS REINICIO).
+- El banco del sitio NO corrió en todo el sprint. En cada bisagra la memoria disponible estuvo por debajo de 3000 MB; al cierre, con
+  3308–3585 MB libres, se lanzó `reconstruir.sh` (el build de medición en `.next-probe`): el `next build` (~2,5 GB) bajó la memoria a
+  870 MB y el reaper de Claude Code cortó la tarea de fondo «por memoria crítica». Quedaron huérfanos `bash reconstruir.sh`, `bash
+  compilar.sh` y `cmd next build --webpack` (la lección de ESCENA 10): matados por línea de comando con `taskkill /T /F`, la memoria
+  volvió a 4615 MB y `.next-probe` parcial (113 MB) se borró. No se relanzó por cuenta propia (lo pide el aviso del reaper).
+  Lo que hay que correr, en orden, con ≥ 3 GB libres y el Chrome del humano liviano (`~/.cache/b4-medicion/pulido-18/_scripts/`):
+  `bash reconstruir.sh` → `SIN_VSYNC=1 bash p-tanda.sh p19 producto "1440 390"` (ms por cuadro en frío, calma, máxima y noche; comparar
+  con `entregas/pulido-18/sitio-medido.json`, `medido.libre.producto-*`: 5,7 / 2,76 / 3,67 / 2,91 a 1440) → `npx tsx p-lanzar.ts` +
+  `npx tsx p19-sitio.ts 1440 900`, `1920 1080` y `390 844` (NUEVO: el cristal por el recorrido con su estado, la red en reposo quieta
+  5,5 s y su corte con un scroll, el golpe, los cuadros durante la caída del pie —ninguno de más de 20 ms—, las piezas acostadas con sus
+  sombras, el DOM sobre cada pieza —cajas, pointer-events, opacidad—, escribir en el formulario acostado, el rebobinado y el reinicio;
+  capturas e `informe.json` en `pulido-18/p19-<ancho>/`) → `python p19-recibo.py docs/rediseno/entregas/pulido-19` (NUEVO:
+  `sitio-medido.json` y `sitio-verificado.json`) → la matriz (abajo). Después, mirar las capturas y anotar acá.
 
 ### Final · la matriz de 12 anchos y verificar
-- PENDIENTE.
+- `npm run verificar`: 77 pasos, 8 con falla: los agregados s1, s17, s2, s3, s4, s5, s7 y s8 de la base con sus 105 afirmaciones en falla (s1-bundle 12, s17-revelado 1, s2-bundle 16, s2-css 2, s3-peso 13, s4-cobertura 1, s4-heredado 4, s5-compacto 1, s5-peso 8, s7-compuerta 18, s8-montaje 2, s8-tres 11, s8-chrome 2, s8-peso 14), ni una más; s70 en verde con 66 afirmaciones y 45 controles positivos (log en el scratchpad, `verificar-final.log`).
+- `npm run test:frontera`: en verde: 2 invariantes, 23 afirmaciones, 10 controles positivos, 12 fuera de ventana, 0 con falla.
+- La matriz de 12 anchos (`pulido-11/_scripts/g-matriz.ts`, `for w in "320 568" "375 667" "390 844" "414 896" "768 1024" "820 1180"
+  "1024 768" "1280 800" "1366 768" "1440 900" "1920 1080" "2560 1440"`): NO corrió (pide el banco del sitio): VERIFICAR TRAS REINICIO,
+  después de `reconstruir.sh` y con `banco11.ts lanzar` (con vsync, como en PULIDO 11); cada ancho imprime los solapes, los desbordes y
+  los cuadros largos de cada parada.
+- `scripts/limpiar.ps1 -Profundo` al cierre. Los perfiles de Chrome del mini-banco en el scratchpad (224 MB), borrados; `.next-probe`
+  parcial, borrado; el caché de bancos en 1,2 GB (tope 5).
 
 ## Disco y memoria por tanda
 
@@ -360,6 +383,8 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
 | Q2 (mini-banco del pie) | 70,9 GB | 2453 → 1402 MB | 991 → 992 MB | sin banco del sitio; `pie.sh` (Chrome por captura); el Chrome del humano con muchas pestañas se lleva la memoria |
 | Q3 (mini-banco) | 74,1 GB | 1402 → 1561 MB | 992 → 1001 MB | sin banco del sitio; el cristal con y sin (`cristal=si`) |
 | Q4.2 (1) (mini-banco del pie) | 74,4 GB | 1561 → 3308 MB | 1001 → 1003 MB | `pie.sh` con las sombras (`sombras=0` las apaga); al cerrar la tanda hay 3308 MB libres: el banco del sitio se intenta en la medición final |
+| Q4.2 (2) + el intento del sitio | 74,4 GB | 3585 → 870 → 4615 MB | 1002 → 999 MB | `reconstruir.sh` cortado por el reaper en el `next build`; los huérfanos matados; sin banco del sitio |
+| Final (verificar + frontera) | 74,6 GB | 4615 → 3739 MB | 999 → 1006 MB | sin banco del sitio; `limpiar.ps1 -Profundo` al cierre |
 
 ## Invariantes que cambian de sentido (antes / ahora / por qué)
 
@@ -403,7 +428,31 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO sí/no (mini-banco / s
   acostado, clic en un enlace acostado, un scroll hacia arriba (el rebobinado levanta todo) y el reinicio).
 - Q4.2 (1) · el rectángulo salía pleno apenas arrancaba el vuelco (una placa casi de pie con una sombra nítida de 4 u detrás, en
   `q4-sombras-5.6`): la altura media de la placa sobre su huella (`q4b-sombras-5.6`).
+- Q3 · la clave `cristal: 'si'` por defecto puso rojas s38 y s31 (los tests de ausencia): la prueba se nombra por lo que pide
+  (`sin-cristal`), sin tocar tests.
+- Final · el build de medición con 3,5 GB libres disparó el reaper de Claude Code (870 MB) y dejó huérfanos: matados por línea de
+  comando antes de seguir; el banco del sitio queda para después del reinicio.
 
 ## Lo que no quedó bien
 
-(al final)
+1. **El sitio real no se vio en todo el sprint.** Todo lo nuevo se vio en el mini-banco (el plasma, la red, el cristal, el pie con
+   cajas) y nada en `/v3`: la red en reposo sobre los títulos 3D y entre los textos, el DOM acostado sobre cada pieza del pie (el foco,
+   el autocompletado, los clics, el rebobinado con un scroll, el reinicio), el cristal detrás de los textos y en el fundido del túnel y
+   de Tu panel, el amanecer sobre el cristal, las 12 sombras en el piso vivo del final y su costo, la anisotropía en el horizonte de la
+   cúpula. El procedimiento exacto está en «Medido» (reconstruir → p-tanda → p19-sitio → p19-recibo → la matriz).
+2. **Sin medición del sitio:** ni los ms por cuadro en frío/calma/máxima/noche (PULIDO 18 dejó 5,7 / 2,76 / 3,67 / 2,91 a 1440 y
+   `frio.mayoresDe20 = 10`), ni los tirones en frío antes/después (el ítem 11 de la auditoría quedó en PENDIENTE: no se tocó el primer
+   scroll), ni los cuadros durante la caída del pie con las sombras. Lo medido es el mini-banco: ningún cuadro de más de 20 ms en calma,
+   al máximo, de día, de lejos, en el teléfono, con la red armada y con el cristal.
+3. **La matriz de 12 anchos no corrió** (pide el banco del sitio).
+4. **De la auditoría (Q4.1), 2 de 20 hechas** (las sombras del pie acostado y la anisotropía) más 2 que ya traía el sprint (la física
+   del polvo apagada, la basura del plasma); 4 OK sin tocar; 1 descartada (el reflejo planar); 11 PENDIENTES, casi todas porque piden
+   ver el sitio (la oclusión del labio del hueco, el satinado del logo, el filo del encastre a 390, la niebla de altura, el montaje
+   progresivo y los tirones en frío, el mapa de entorno del cristal, el amanecer sobre el cristal, la red sobre los títulos 3D, el pie
+   acostado con la órbita del mouse).
+5. **El cristal** refleja un cielo por altura (no un mapa de entorno real) y su brillo se suma sobre la copia ya mapeada a tono (en
+   espacio de salida); la dispersión sólo con `?espejo-prisma=si`. Es lo que se pudo hacer sin verlo en el sitio.
+6. **La sombra de una placa que vuelca** es un rectángulo con un alfa y una blandura (los de su altura media), no un degradé a lo largo
+   de la placa: a mitad del vuelco es una mancha pareja y tenue. Se ve bien en el mini; en el sitio, a confirmar.
+7. **Lo que sigue igual que la base:** s8-montaje con sus 2 rojos y los 8 rojos de `verificar` (s1, s17, s2, s3, s4, s5, s7, s8) con
+   sus 105 afirmaciones en falla, ni una más.
