@@ -8,7 +8,9 @@ import * as THREE from 'three'
  */
 export const TEXTO_EN_PANTALLA = { cajas: 8, margenPx: 14, cadaMs: 200, conScrollMs: 50 } as const
 
-const SELECTOR_DEL_TEXTO = '[data-v3] :is(h1, h2, h3, p, li, a, button, blockquote, figcaption)'
+// [PULIDO 21] S2 · las tarjetas de las demos, por su estante y su carrusel enteros (una caja: no gastan los lugares de a una).
+const ENTERAS = 'a, button, [data-pieza="estante"], [data-pieza="carrusel"]'
+const SELECTOR_DEL_TEXTO = `[data-v3] :is(h1, h2, h3, p, li, blockquote, figcaption, ${ENTERAS}):not([data-pieza="libro"], [data-parte="portada"])`
 
 let rango: Range | null = null
 
@@ -25,11 +27,14 @@ export function cajasDelTexto(destino: readonly THREE.Vector4[], ancho: number, 
   for (const el of document.querySelectorAll(SELECTOR_DEL_TEXTO)) {
     if (typeof el.checkVisibility === 'function' && !el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue
     let r = el.getBoundingClientRect()
-    if (!el.matches('a, button')) {
+    if (!el.matches(ENTERAS)) {
       rango.selectNodeContents(el)
       r = rango.getBoundingClientRect()
     }
     if (r.width < 4 || r.height < 4 || r.bottom < 0 || r.top > alto || r.right < 0 || r.left > ancho) continue
+    // [PULIDO 21] S2 · una caja que envuelve la pantalla entera no es un texto: en Demos, los enlaces de las tarjetas del túnel que ya
+    // pasaron (escalados más allá de la cámara) la tapaban toda y no quedaba un arco ni la red.
+    if (r.left <= 0 && r.top <= 0 && r.right >= ancho && r.bottom >= alto) continue
     cajas.push([r.left - m, r.top - m, r.right + m, r.bottom + m, r.width * r.height])
   }
   cajas.sort((a, b) => b[4] - a[4])
