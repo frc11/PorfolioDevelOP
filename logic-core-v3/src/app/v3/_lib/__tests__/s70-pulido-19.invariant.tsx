@@ -318,8 +318,10 @@ afirmar(gestoBien(leerElGesto), '  el gesto: el scroll que cambia, el puntero qu
 controlPositivo('  el detector VE un lector que no ve el scroll', (m, _s, x, y, activo, toca, fin) => leerElGesto(m, 0, x, y, activo, toca, fin), gestoBien)
 
 // El dibujo: un solo búfer de segmentos en lote (cuatro vértices por enlace), la máscara de los textos por píxel y el final en el sombreador.
-const dibujoBien = (v: string, f: string): boolean => v.includes('attribute vec3 aA') && v.includes('attribute vec3 aB') && v.includes('attribute vec2 aLado') && v.includes('enElFinal(') && f.includes('adentroDelTexto( gl_FragCoord.xy') && f.includes('uTiempo') && v.includes('uPixel')
-afirmar(dibujoBien(VERTICES_DE_LA_RED, FRAGMENTOS_DE_LA_RED), '  el dibujo de la red: los dos extremos por vértice (un solo búfer), el ancho en px del dispositivo, la máscara de los textos por píxel, el final y el titileo')
+// [PULIDO 20] R3 · los enlaces son rayos congelados: la geometría es estática (un solo búfer) y los extremos de cada enlace viajan en una
+// textura (antes: los dos extremos por vértice, reescritos cada cuadro); el camino quebrado lo arma el sombreador (`puntoDe`).
+const dibujoBien = (v: string, f: string): boolean => v.includes('uniform sampler2D uEnlaces') && v.includes('vec3 puntoDe(') && v.includes('enElFinal(') && f.includes('adentroDelTexto( gl_FragCoord.xy') && f.includes('uTiempo') && v.includes('uPixel')
+afirmar(dibujoBien(VERTICES_DE_LA_RED, FRAGMENTOS_DE_LA_RED), '  el dibujo de la red: un solo búfer (estático: [PULIDO 20] R3) con los extremos de cada enlace en una textura y su camino en el sombreador, el ancho en px del dispositivo, la máscara de los textos por píxel, el final y el titileo')
 controlPositivo('  el detector VE un dibujo sin la máscara de los textos', VERTICES_DE_LA_RED, (v: string) => dibujoBien(v, FRAGMENTOS_DE_LA_RED.replace('adentroDelTexto( gl_FragCoord.xy', 'float( 0.0 ) * ( gl_FragCoord.xy')))
 
 // ═══════════════════════════════════════════════════════════════════════════

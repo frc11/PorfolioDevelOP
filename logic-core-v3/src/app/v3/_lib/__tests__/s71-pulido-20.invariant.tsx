@@ -13,6 +13,9 @@
  *        y no escribe profundidad), que refracta sólo el fondo (su render target, sin logo, títulos, partículas ni pie) con la cámara de ESTE
  *        cuadro (la de antes vibraba), que se desvanece donde mira fuera del fondo, las variantes (`fondo=moire|espejo|ambos`, también
  *        sueltas en la URL) y lo medido en el sitio (ningún cuadro de más de 20 ms con él, lo que cuesta, la cámara quieta en calma).
+ *   R3 · la red en reposo con rayos congelados: cada enlace un arco quebrado con su rama (los parámetros del camino del plasma), su forma de
+ *        su semilla y sin el reloj (congelada), la geometría estática en un búfer y lo que cambia en una textura (`rellenarRed` no toca un
+ *        vértice), el corte que abre el arco desde el medio.
  */
 import { readFileSync } from 'node:fs'
 
@@ -29,7 +32,11 @@ import { CRISTAL, esquirlasDelCristal, zonaDelCristal } from '../escena/cristal/
 import { armarLasEsquirlas } from '../escena/cristal/esquirlas'
 import { CAPA_DEL_FONDO, NOMBRES_DEL_FONDO } from '../escena/cristal/fondo'
 import { FRAGMENTOS_DEL_VIDRIO, VERTICES_DEL_VIDRIO, armarElVidrio, uniformesDelVidrio } from '../escena/cristal/vidrio'
+import { CAMINO } from '../escena/energia/arcos/camino'
+import { azarConSemilla, crearBrasas } from '../escena/energia/brasas'
 import { ORDEN_DE_LA_ENERGIA } from '../escena/energia/dibujo/armado'
+import { DIBUJO_DE_LA_RED, FRAGMENTOS_DE_LA_RED, VERTICES_DE_LA_RED, armarLaRed, rellenarRed } from '../escena/energia/dibujo/red'
+import { REPOSO, crearRed } from '../escena/energia/reposo'
 import { PEDIDOS_DEL_FONDO, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
 import { ORDEN_DEL_ESPEJO } from '../escena/espejo/pantalla'
 import { PASE } from '../escena/pase/pase'
@@ -494,5 +501,84 @@ controlPositivo('  el detector VE un cuadro de 25 ms en el recorrido', { ...MEDI
 
 const MODULOS = ['cristal/cristal.ts', 'cristal/esquirlas.ts', 'cristal/vidrio.ts', 'cristal/fondo.ts', 'cristal/CristalDeLaEscena.tsx'].map((m) => [m, ESCENA(m)] as const)
 afirmar(MODULOS.every(([, t]) => lineasDeCodigo(t) <= 300) && sinReservasEn(ESCENA('cristal/cristal.ts'), 'zonaDelCristal'), '  los módulos del cristal, de menos de 300 líneas; la zona, sin reservas')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('R3 · La red en reposo: rayos congelados (el arco del plasma, quebrado y con su rama), en un búfer estático; el corte abre desde el medio')
+
+// Lo que cambia por cuadro viaja en la textura de los enlaces (los extremos con el alfa, el otro extremo con la semilla, el corte): la
+// geometría (los tramos de cada enlace: el camino y la rama) se arma una vez y no se toca.
+interface DeLaRed {
+  readonly vertices: number
+  readonly indices: number
+  readonly tocados: number
+  readonly filas: boolean
+  readonly rango: number
+}
+function rellenarUnaRed(rellenar: typeof rellenarRed): DeLaRed {
+  const azar = azarConSemilla(11)
+  const b = crearBrasas(40, azar, FLOOR_Y)
+  const r = crearRed(40)
+  const dib = armarLaRed(r.maximo, {})
+  const versiones = (): number => ['position', 'aDato'].map((n) => (dib.geometria.getAttribute(n) as THREE.BufferAttribute).version).reduce((x, y) => x + y, 0) + (dib.geometria.index?.version ?? 0)
+  const antes = versiones()
+  r.n = 3
+  r.a.set([0, 2, 4])
+  r.b.set([1, 3, 5])
+  r.alfa.set([1, 0.5, 2])
+  r.semilla.set([0.25, 0.5, 0.75])
+  r.muere.set([0.1, 0.25, 0.5])
+  r.fase = 'cortando'
+  r.faseS = 0.2
+  b.vida.fill(1)
+  rellenar(r, b, dib)
+  const W = r.maximo * 4
+  const D = dib.datos
+  const L = b.lugar
+  const filas = [0, 1, 2].every((k) => D[k * 4] === Math.fround(L[r.a[k] * 3]) && D[W + k * 4 + 2] === Math.fround(L[r.b[k] * 3 + 2]) && D[k * 4 + 3] === Math.fround(r.alfa[k]) && D[W + k * 4 + 3] === Math.fround(r.semilla[k])) &&
+    D[2 * W] === 1 && D[2 * W + 4] === 0 && D[2 * W + 8] === 0 && dib.enlaces.version > 0
+  const resultado = { vertices: dib.geometria.getAttribute('position').count, indices: dib.geometria.index?.count ?? 0, tocados: versiones() - antes, filas, rango: dib.geometria.drawRange.count }
+  dib.geometria.dispose()
+  dib.enlaces.dispose()
+  ;(dib.malla.material as THREE.Material).dispose()
+  return resultado
+}
+const TRAMOS_DE_LA_RED = DIBUJO_DE_LA_RED.tramos + DIBUJO_DE_LA_RED.tramosDeRama
+const MAXIMO_DE_LA_RED = crearRed(40).maximo
+const LA_RED = rellenarUnaRed(rellenarRed)
+const redBien = (m: DeLaRed): boolean => m.vertices === MAXIMO_DE_LA_RED * TRAMOS_DE_LA_RED * 4 && m.indices === MAXIMO_DE_LA_RED * TRAMOS_DE_LA_RED * 6 && m.tocados === 0 && m.filas && m.rango === 3 * TRAMOS_DE_LA_RED * 6
+afirmar(redBien(LA_RED), `  un búfer estático (por enlace ${String(DIBUJO_DE_LA_RED.tramos)} tramos de camino y ${String(DIBUJO_DE_LA_RED.tramosDeRama)} de rama); por cuadro sólo la textura de los enlaces (los extremos, el alfa por la vida, la semilla, el corte desde que muere: ${String(REPOSO.destelloS)} s); ningún vértice tocado`)
+controlPositivo('  el detector VE un relleno que reescribe los vértices (como la red de líneas de PULIDO 19)', rellenarUnaRed(((r, b, dib) => {
+  rellenarRed(r, b, dib)
+  dib.geometria.getAttribute('position').needsUpdate = true
+}) as typeof rellenarRed), redBien)
+
+// El arco: el canal quebrado con los parámetros del camino del plasma (el desvío, la aspereza por nivel, la profundidad; cuatro niveles),
+// con su rama (su largo y su ángulo, los del plasma); su forma sale de la semilla del enlace y NO del reloj (congelado: sólo titila); el
+// ancho en px del dispositivo, afinado en las puntas; el corte lo abre desde el medio, con el destello.
+const cuerpoDe = (v: string, nombre: string): string => {
+  const i = v.indexOf(nombre)
+  const j = v.indexOf('\n}\n', i)
+  return i < 0 || j < 0 ? '' : v.slice(i, j)
+}
+const uniformesDeLaRed = (armarLaRed(4, {}).malla.material as THREE.ShaderMaterial).uniforms
+const arcoBien = (v: string, f: string, u: Record<string, THREE.IUniform>): boolean => {
+  const camino = u.uCamino?.value as THREE.Vector4 | undefined
+  const rama = u.uRama?.value as THREE.Vector4 | undefined
+  const forma = cuerpoDe(v, 'vec2 desvioDe(') + cuerpoDe(v, 'vec3 puntoDe(')
+  return forma.length > 0 && !forma.includes('uTiempo') && forma.includes('for ( int n = 0; n < 4; n ++ )') && forma.includes('amplitud *= uCamino.y;') && forma.includes('float lr = largo * mix( uRama.x, uRama.y,') &&
+    camino !== undefined && camino.x === CAMINO.desvio && camino.y === CAMINO.aspereza && camino.z === CAMINO.profundidad && rama !== undefined && rama.x === CAMINO.ramas.largo[0] && rama.w === CAMINO.ramas.angulo[1] &&
+    v.includes('vec3 pA = puntoDe( a.xyz, b.xyz, b.w, rama, aDato.y );') && v.includes('uRed.x * uPixel * punta') && f.includes('abs( vT - 0.5 ) * 2.0') && f.includes('float destello = max( vAlfa - 1.0, 0.0 );') && f.includes('uTiempo * ( 4.0 + vSemilla * 5.0 )')
+}
+afirmar(arcoBien(VERTICES_DE_LA_RED, FRAGMENTOS_DE_LA_RED, uniformesDeLaRed), '  cada enlace, un arco del plasma: quebrado en cuatro niveles con su aspereza y su profundidad, con su rama; la forma, de la semilla y sin el reloj (congelada; sólo titila); afinado en las puntas; el corte lo abre desde el medio, con el destello')
+controlPositivo('  el detector VE un arco que se mueve con el reloj (no congelado)', VERTICES_DE_LA_RED.replace('float x = t * exp2( float( n ) + 1.0 );', 'float x = t * exp2( float( n ) + 1.0 ) + uTiempo;'), (v: string) => arcoBien(v, FRAGMENTOS_DE_LA_RED, uniformesDeLaRed))
+controlPositivo('  y una línea recta (sin el desvío)', VERTICES_DE_LA_RED.replace('vec3 p = A + eje * t + p1 * d.x + p2 * d.y * uCamino.z;', 'vec3 p = A + eje * t;').replace('amplitud *= uCamino.y;', ''), (v: string) => arcoBien(v, FRAGMENTOS_DE_LA_RED, uniformesDeLaRed))
+// Lo medido en el sitio (la sección `red` del recibo): con la red armada ningún cuadro de más de 20 ms, de día y de noche a 1440 y a 390.
+interface Cuadros { readonly mayoresDe20: number; readonly media: number }
+const RED_MEDIDA = (JSON.parse(readFileSync('docs/rediseno/entregas/pulido-20/sitio-medido.json', 'utf8')) as { readonly red: { readonly medido: Readonly<Record<string, Readonly<Record<string, Cuadros>>>> } }).red.medido
+const redMedidaBien = (m: typeof RED_MEDIDA): boolean => ['1440', '1440-noche', '390'].every((w) => ['con-1', 'con-2'].every((k) => m[w]?.[k]?.mayoresDe20 === 0))
+afirmar(redMedidaBien(RED_MEDIDA), `  en el sitio, con la red de rayos armada ningún cuadro de más de 20 ms (1440 de día ${String(RED_MEDIDA['1440']?.['con-1']?.media)} ms, de noche ${String(RED_MEDIDA['1440-noche']?.['con-1']?.media)}, 390 ${String(RED_MEDIDA['390']?.['con-1']?.media)})`)
+controlPositivo('  el detector VE un cuadro largo con la red', { ...RED_MEDIDA, '390': { ...RED_MEDIDA['390'], 'con-2': { mayoresDe20: 1, media: 2 } } }, redMedidaBien)
+const RED_TS = ESCENA('energia/dibujo/red.ts')
+afirmar(lineasDeCodigo(RED_TS) <= 300 && sinReservasEn(RED_TS, 'rellenarRed') && REPOSO.corteS === 0.3, `  el módulo de menos de 300 líneas; el relleno de cada cuadro sin reservas; el corte en cascada en ${String(REPOSO.corteS)} s, como antes`)
 
 cerrar('s71-pulido-20')

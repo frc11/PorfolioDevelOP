@@ -109,7 +109,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
   van al incrustarse).
 
 ### R2 · El cristal: esquirlas en el borde
-- HECHO (commit de R2). VISTO EN EL SITIO: sí (1440 y 390; el build de medición; las variantes a 1440).
+- HECHO (`09927500`). VISTO EN EL SITIO: sí (1440 y 390; el build de medición; las variantes a 1440).
 - **Las causas de los bugs del cristal de PULIDO 19** (en el sitio, con el cristal viejo todavía en el build: `p20-r2diag.ts`, el mismo
   instante con el cristal y sin él, `__cristalDelBanco.apagar`, sin desmontar; y el código):
   - **Vibraba:** el cristal armaba su rayo de cada píxel (`uInversa`, `uProyeccion`, `uAdelante`) en su `useFrame` con la `matrixWorld` de la
@@ -168,7 +168,27 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
   desvanecerse); las variantes (control: la URL de PULIDO 19); lo medido (control: un cuadro de 25 ms). s70 Q3 con el sentido nuevo.
 
 ### R3 · La red de rayos congelados
-- PENDIENTE.
+- HECHO (commit de R3). VISTO EN EL SITIO: sí (1440 de día y de noche, 390; el build de medición).
+- `energia/dibujo/red.ts`, rehecho: cada enlace es un ARCO como los del plasma (los parámetros de `arcos/camino.ts`: el desvío, la aspereza
+  por nivel, la profundidad; cuatro niveles de un ruido de valor que se achica a la mitad, las puntas fijas en sus brasas; una rama corta que
+  sale de un punto del medio con el largo y el ángulo de las ramas del plasma, libre en la punta), en la base del MUNDO (no de la cámara):
+  congelado en el aire; su forma sale de la SEMILLA del enlace (nace al formarse y no cambia mientras dura) y nunca del reloj; titila leve
+  (lo de antes); al cortarse, el arco se ABRE DESDE EL MEDIO (se desconecta) con el destello y el chasquido de siempre (`reposo.ts` no
+  cambió: la cascada en 0,3 s, el golpe de energía a sus dos brasas). Barato: la geometría es ESTÁTICA (un búfer armado una vez: por enlace
+  8 tramos de camino y 4 de rama, cuadriláteros de pantalla con el ancho en px del dispositivo, afinados en las puntas) y lo que cambia
+  viaja en una textura de `máximo × 3` (los extremos con el alfa por la vida, la semilla, el corte): `rellenarRed` no toca un vértice (la
+  red de líneas de PULIDO 19 reescribía los cuatro vértices de cada enlace en cada cuadro).
+- **Visto en el sitio** (`p20-r3.ts`, capturas en `pulido-20/r3-1440`, `r3-1440-noche`, `r3b-1440`): quieta en el hero se arma (551
+  enlaces a 1440 de día, 380–430 de noche, 116–171 a 390); de noche, rayos blancos quebrados con sus ramas entre las brasas encendidas; de
+  día, trazos de tinta finos y quebrados (la tinta bajó a la de la red de líneas, 0,42: con el arco hay más trazo); un scroll la corta y en
+  ~0,4 s no queda nada (la captura a los 110 ms ya la encontró cortada). Una advertencia de ANGLE (una variable «quizás sin inicializar» en
+  `puntoDe`, por sus dos `return`) se fue con un solo `return`.
+- **Medido** (sin vsync; recibo `entregas/pulido-20/sitio-medido.json`, sección `red`): armada contra apagada, la diferencia está en el ruido
+  (1440 de día 2,56–2,80 contra 2,56–2,74 ms; de noche 2,62–2,67 contra 2,54–2,64; 390 1,71–1,88 contra 1,74–1,79); ningún cuadro de más
+  de 20 ms. (La de líneas de PULIDO 19 costaba +0,48 ms a 1440: reescribía 618 × 4 vértices por cuadro.)
+- s71 (R3): el búfer estático y sólo la textura por cuadro (control: un relleno que reescribe vértices); el arco (cuatro niveles con la
+  aspereza y la profundidad del plasma, la rama, la forma sin el reloj, el corte desde el medio; controles: un arco que se mueve con el reloj,
+  una línea recta); lo medido. s70 Q1.d «el dibujo de la red» con el sentido nuevo (tabla).
 
 ### Final · verificar
 - PENDIENTE.
@@ -194,6 +214,7 @@ Leyenda: PENDIENTE · EN CURSO · HECHO (commit) · VISTO EN EL SITIO sí/no.
 | s47 «lo interactivo va donde la pieza va a quedar» | el orden termina en `llegar(a, s)` | en `llegar(a, s, …` (con lo que el final deja ver) | el mismo orden; `llegar` recibe la visibilidad del final |
 | s51 «el cableado del reloj» | `fondo = scrollHeight − innerHeight` | `fondo = offsetHeight − innerHeight` | R1: la causa de la traba (s71 tiene el control con el de antes) |
 | s65 «la llegada lo escribe» | `opacidadDelDom(e)` | `opacidadDelDom(e, final)` | la misma opacidad de la llegada, más el final |
+| s70 Q1.d «el dibujo de la red» | los dos extremos por vértice (`aA`, `aB`, `aLado`) en un búfer reescrito cada cuadro | un búfer estático; los extremos de cada enlace en una textura; el camino en el sombreador (`puntoDe`) | R3: cada enlace es un arco congelado (el mismo control: un dibujo sin la máscara de los textos) |
 | s70 Q3 «el cristal de fondo» | las facetas justas del cilindro; el sombreador de pantalla entera (Voronoi, la copia del cuadro sólo en el fondo) | la malla de celdas ya no está y el cristal se monta igual (siempre con movimiento; `cristal=no` y `fondo=moire` lo apagan); «dónde se ve», igual | R2: «se borra la malla de celdas actual del domo» (el cristal nuevo, en s71) |
 
 ## Crítica (lo que el banco mostró y qué se hizo)

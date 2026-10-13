@@ -151,5 +151,136 @@
    },
    "placa": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)"
   }
+ },
+ "red": {
+  "que": "PULIDO 20 · R3 · la red de rayos congelados en el sitio (p20-r3.ts, sin vsync): quieta en el hero (de noche, en el final de Números) hasta que se arma; 4 s armada contra 4 s apagada (__energiaDelBanco.red), alternadas dos veces; el corte con un scroll.",
+  "medido": {
+   "1440": {
+    "armada": {
+     "fase": "armada",
+     "enlaces": 551,
+     "formadas": 1,
+     "cortes": 0
+    },
+    "con-1": {
+     "media": 2.56,
+     "p95": 3.5,
+     "maximo": 6.3,
+     "mayoresDe20": 0,
+     "cuadros": 1562
+    },
+    "sin-1": {
+     "media": 2.74,
+     "p95": 3.9,
+     "maximo": 7,
+     "mayoresDe20": 0,
+     "cuadros": 1458
+    },
+    "con-2": {
+     "media": 2.8,
+     "p95": 3.9,
+     "maximo": 10.1,
+     "mayoresDe20": 0,
+     "cuadros": 1429
+    },
+    "sin-2": {
+     "media": 2.56,
+     "p95": 3.5,
+     "maximo": 9.3,
+     "mayoresDe20": 0,
+     "cuadros": 1561
+    },
+    "cortada": {
+     "fase": "suelta",
+     "enlaces": 0,
+     "formadas": 3,
+     "cortes": 3
+    }
+   },
+   "1440-noche": {
+    "armada": {
+     "fase": "armada",
+     "enlaces": 380,
+     "formadas": 2,
+     "cortes": 1
+    },
+    "con-1": {
+     "media": 2.67,
+     "p95": 3.2,
+     "maximo": 4.6,
+     "mayoresDe20": 0,
+     "cuadros": 1496
+    },
+    "sin-1": {
+     "media": 2.64,
+     "p95": 3.2,
+     "maximo": 11.5,
+     "mayoresDe20": 0,
+     "cuadros": 1518
+    },
+    "con-2": {
+     "media": 2.62,
+     "p95": 3.2,
+     "maximo": 7.9,
+     "mayoresDe20": 0,
+     "cuadros": 1525
+    },
+    "sin-2": {
+     "media": 2.54,
+     "p95": 3,
+     "maximo": 4.3,
+     "mayoresDe20": 0,
+     "cuadros": 1573
+    },
+    "cortada": {
+     "fase": "suelta",
+     "enlaces": 0,
+     "formadas": 4,
+     "cortes": 4
+    }
+   },
+   "390": {
+    "armada": {
+     "fase": "armada",
+     "enlaces": 171,
+     "formadas": 1,
+     "cortes": 0
+    },
+    "con-1": {
+     "media": 1.71,
+     "p95": 2.2,
+     "maximo": 4.2,
+     "mayoresDe20": 0,
+     "cuadros": 2343
+    },
+    "sin-1": {
+     "media": 1.74,
+     "p95": 2.1,
+     "maximo": 7.3,
+     "mayoresDe20": 0,
+     "cuadros": 2304
+    },
+    "con-2": {
+     "media": 1.88,
+     "p95": 2.3,
+     "maximo": 6,
+     "mayoresDe20": 0,
+     "cuadros": 2131
+    },
+    "sin-2": {
+     "media": 1.79,
+     "p95": 2.4,
+     "maximo": 7,
+     "mayoresDe20": 0,
+     "cuadros": 2236
+    },
+    "cortada": {
+     "fase": "suelta",
+     "enlaces": 0,
+     "formadas": 3,
+     "cortes": 3
+    }
+   }
+  }
  }
 }
