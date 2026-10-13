@@ -175,9 +175,10 @@ void main() {
 	vec2 mitad = uResolucion * 0.5;
 	vec2 sP = cP.xy / cP.w * mitad;
 	vec2 sQ = cQ.xy / cQ.w * mitad;
-	// Con energía, tiembla (30 veces por segundo, una vuelta al azar de hasta «tiembla» px).
-	uint cuadro = uint( floor( uTiempo * 30.0 ) );
-	vec2 tiembla = ( vec2( azar01( id ^ cuadro * 0x165667b1u, 25u ), azar01( id ^ cuadro * 0x165667b1u, 26u ) ) * 2.0 - 1.0 ) * uMovida.y * e * e * uPixel;
+	// Con energía, tiembla. [PULIDO 21] S5 · suave y leve (cada una a su ritmo): saltar a un lugar al azar 30 veces por segundo era el
+	// jitter del cúmulo del cursor (ahí todas están calientes).
+	vec2 ritmo = 7.0 + 6.0 * vec2( azar01( id, 25u ), azar01( id, 26u ) );
+	vec2 tiembla = sin( uTiempo * ritmo + 6.2831853 * vec2( azar01( id, 27u ), azar01( id, 28u ) ) ) * 0.4 * uMovida.y * e * e * uPixel;
 	sP += tiembla;
 	sQ += tiembla;
 	vec2 d = sP - sQ;

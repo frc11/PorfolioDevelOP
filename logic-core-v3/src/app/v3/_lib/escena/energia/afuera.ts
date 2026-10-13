@@ -25,6 +25,7 @@ export function deAfuera(b: Brasas, i: number, en: EntradaDeLasBrasas, azar: () 
   let fy = 0
   let fz = 0
   let gana = 0
+  let calma = 0
   // El puntero: atrae a las negativas hacia su rayo y empuja a las positivas, las hace girar alrededor del rayo (ordena), las
   // calienta y rompe los enlaces que toca.
   const r = en.rayo
@@ -34,6 +35,12 @@ export function deAfuera(b: Brasas, i: number, en: EntradaDeLasBrasas, azar: () 
     if (d < P.alcance && d > 1e-4) {
       const u = 1 - d / P.alcance
       const carga = en.cargaDelPuntero
+      // [PULIDO 21] S5 · el cúmulo, calmo: menos agitación y un freno viscoso cerca del rayo (se mueve suave, sin sacudirse).
+      calma = u
+      const frena = P.viscosidad * u
+      fx -= frena * b.velocidad[i * 3]
+      fy -= frena * b.velocidad[i * 3 + 1]
+      fz -= frena * b.velocidad[i * 3 + 2]
       let f = (b.signo[i] < 0 ? P.fuerza : -P.fuerza) * u * carga
       if (d < P.cerca) f -= F.choque * (1 - d / P.cerca) ** 2
       const ux = (PUNTO[0] - x) / d
@@ -81,7 +88,7 @@ export function deAfuera(b: Brasas, i: number, en: EntradaDeLasBrasas, azar: () 
   }
   // Calientes, tiemblan (la agitación térmica). [PULIDO 19] Tres azares de un xorshift propio de la brasa, inline: `azar()` tres veces
   // por brasa encajaba un número por llamada (el cierre no se inlinea en Chrome: ~40 KB de basura por cuadro).
-  const tiembla = K.tiembla * energia[i]
+  const tiembla = K.tiembla * energia[i] * (1 - P.calma * calma)
   let h = b.ruido[i]
   h ^= h << 13
   h ^= h >>> 17

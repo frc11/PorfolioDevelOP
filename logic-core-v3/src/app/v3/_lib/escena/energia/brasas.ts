@@ -35,8 +35,11 @@ export const BRASAS = {
   flujo: { rapidez: 0.42, caliente: 0.9, sigue: 0.8 },
   /** Los enlaces de PULIDO 15: a qué distancia se forman, su largo y su resorte, cuánto duran (s), el empujón al soltarse y el rato sin volver. */
   enlace: { forma: 1.2, reposo: 0.95, resorte: 2.2, vida: [2.5, 7], empujon: 0.9, enfria: [3, 7] },
-  /** El puntero (desde su rayo, u): alcance, fuerza, rechazo pegado, hasta dónde rompe enlaces, el giro alrededor del rayo y cuánto calienta (1/s). */
-  cursor: { alcance: 4.6, fuerza: 2, cerca: 1.1, rompe: 3, gira: 2.6, calienta: 1.6 },
+  /**
+   * El puntero (desde su rayo, u): alcance, fuerza, rechazo pegado, hasta dónde rompe enlaces, el giro alrededor del rayo y cuánto calienta
+   * (1/s). [PULIDO 21] S5 · el cúmulo, calmo: cerca del rayo la agitación térmica baja (`calma`, en el centro) y se frenan (`viscosidad`, 1/s).
+   */
+  cursor: { alcance: 4.6, fuerza: 2, cerca: 1.1, rompe: 3, gira: 2.6, calienta: 1.6, calma: 0.85, viscosidad: 3.5 },
   /**
    * El límite del brillo por densidad: con `vecinas` brasas a menos de `radio` (u), el brillo se divide por (1 + baja · vecinas).
    * [PULIDO 19] Q1.c · y se persigue con inercia (`suavizaS`, s): antes saltaba de golpe cada cuatro cuadros (un pop).
