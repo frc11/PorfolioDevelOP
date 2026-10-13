@@ -34,19 +34,18 @@ export function uniformesDelTrazo(): Record<NombreDelTrazo, { value: THREE.Vecto
   return { uArcoForma: v('uArcoForma'), uArcoDia: v('uArcoDia'), uArcoNoche: v('uArcoNoche') }
 }
 
-const TRAZO_GLSL = /* glsl */ `
+export const TRAZO_GLSL = /* glsl */ `
 uniform vec4 uArcoForma;
 uniform vec4 uArcoDia;
 uniform vec4 uArcoNoche;
 uniform float uCapa;
 `
 
-export const VERTICES_DE_LOS_ARCOS = /* glsl */ `
-attribute vec3 aPunto;
-attribute vec3 aAntes;
-attribute vec3 aDespues;
-attribute vec4 aForma;
-attribute vec4 aExtra;
+/**
+ * [PULIDO 21] S1 · el canal en la pantalla, como función: lo usan los arcos (con sus atributos) y la red en reposo (con los puntos que
+ * arma su sombreador). Necesita `COMUN` y `TRAZO_GLSL` antes.
+ */
+export const CANAL_DEL_ARCO = /* glsl */ `
 varying float vLado;
 varying float vAncho;
 varying float vGolpe;
@@ -56,12 +55,10 @@ varying float vLargo;
 varying float vSemilla;
 varying float vRama;
 varying float vDistancia;
-${COMUN}
-${TRAZO_GLSL}
 vec2 enPantalla( vec4 c ) {
 	return c.xy / c.w * uResolucion * 0.5;
 }
-void main() {
+void canalDelArco( vec3 aPunto, vec3 aAntes, vec3 aDespues, vec4 aForma, vec4 aExtra ) {
 	vec4 c = projectionMatrix * viewMatrix * vec4( aPunto, 1.0 );
 	vec4 cA = projectionMatrix * viewMatrix * vec4( aAntes, 1.0 );
 	vec4 cD = projectionMatrix * viewMatrix * vec4( aDespues, 1.0 );
@@ -102,6 +99,31 @@ void main() {
 }
 `
 
+export const VERTICES_DE_LOS_ARCOS = /* glsl */ `
+attribute vec3 aPunto;
+attribute vec3 aAntes;
+attribute vec3 aDespues;
+attribute vec4 aForma;
+attribute vec4 aExtra;
+${COMUN}
+${TRAZO_GLSL}
+${CANAL_DEL_ARCO}
+void main() {
+	canalDelArco( aPunto, aAntes, aDespues, aForma, aExtra );
+}
+`
+
+/** [PULIDO 21] S1 · detrás de un texto: por vértice (los arcos, cortos) o, con `TEXTO_POR_PIXEL`, también por píxel (la red, enlaces largos). */
+const TEXTO_DEL_ARCO = /* glsl */ `
+float textoDelArco( float porVertice ) {
+#ifdef TEXTO_POR_PIXEL
+	return max( porVertice, adentroDelTexto( gl_FragCoord.xy / uResolucion * 2.0 - 1.0 ) );
+#else
+	return porVertice;
+#endif
+}
+`
+
 export const FRAGMENTOS_DE_LOS_ARCOS = /* glsl */ `
 varying float vLado;
 varying float vAncho;
@@ -116,6 +138,7 @@ ${COMUN}
 ${AL_TONO}
 ${TRAZO_GLSL}
 ${PROFUNDIDAD_GLSL}
+${TEXTO_DEL_ARCO}
 void main() {
 	float x = abs( vLado ) * vAncho;
 	// La luz que corre por el canal: una ondulación a lo largo que se mueve rápido (no un brillo parejo de trazo).
@@ -133,7 +156,7 @@ void main() {
 	vec3 luzNoche = uCapa < 0.5 ? uLuzNoche * ( halo * uArcoNoche.x + resplandor * uArcoNoche.y ) : uLuzNoche * nucleo * uArcoNoche.z;
 	// [PULIDO 18] P1.a · blando contra lo opaco en una distancia corta (ningún brillo corta una superficie).
 	float blando = smoothstep( 0.0, ${f(ARCO_BLANDO)}, distanciaALoOpaco( gl_FragCoord.xy / uResolucion ) - vDistancia );
-	float vis = ( 1.0 - ${f(0.95)} * vTexto ) * ( 1.0 - uApagado ) * blando;
+	float vis = ( 1.0 - ${f(0.95)} * textoDelArco( vTexto ) ) * ( 1.0 - uApagado ) * blando;
 	${SALIDA}
 }
 `
@@ -150,19 +173,14 @@ export const HALO_DEL_ARCO = {
   llega: 2.6,
 } as const
 
-export const VERTICES_DEL_HALO_DEL_ARCO = /* glsl */ `
-attribute vec3 aPunto;
-attribute vec3 aDespues;
-attribute vec4 aForma;
-attribute vec4 aExtra;
+/** [PULIDO 21] S1 · el halo de un punto del canal, como función (los arcos y la red). Necesita `COMUN` y `TRAZO_GLSL` antes. */
+export const HALO_DEL_CANAL = /* glsl */ `
 varying float vGolpe;
 varying float vResidual;
 varying float vTexto;
 varying float vPeso;
 varying float vDistancia;
-${COMUN}
-${TRAZO_GLSL}
-void main() {
+void haloDelArco( vec3 aPunto, vec3 aDespues, vec4 aForma, vec4 aExtra ) {
 	vGolpe = aForma.z;
 	vResidual = aForma.w;
 	vTexto = 0.0;
@@ -198,6 +216,19 @@ void main() {
 }
 `
 
+export const VERTICES_DEL_HALO_DEL_ARCO = /* glsl */ `
+attribute vec3 aPunto;
+attribute vec3 aDespues;
+attribute vec4 aForma;
+attribute vec4 aExtra;
+${COMUN}
+${TRAZO_GLSL}
+${HALO_DEL_CANAL}
+void main() {
+	haloDelArco( aPunto, aDespues, aForma, aExtra );
+}
+`
+
 export const FRAGMENTOS_DEL_HALO_DEL_ARCO = /* glsl */ `
 varying float vGolpe;
 varying float vResidual;
@@ -208,6 +239,7 @@ ${COMUN}
 ${AL_TONO}
 ${TRAZO_GLSL}
 ${PROFUNDIDAD_GLSL}
+${TEXTO_DEL_ARCO}
 void main() {
 	vec2 q = ( gl_PointCoord - 0.5 ) * ${f(2 * HALO_DEL_ARCO.llega)};
 	float r2 = dot( q, q );
@@ -218,7 +250,7 @@ void main() {
 	vec3 colorDia = uTintaDia;
 	vec3 luzNoche = uLuzNoche * ( halo * uArcoNoche.x + resplandor * uArcoNoche.y );
 	float blando = smoothstep( 0.0, ${f(ARCO_BLANDO)}, distanciaALoOpaco( gl_FragCoord.xy / uResolucion ) - vDistancia );
-	float vis = ( 1.0 - ${f(0.95)} * vTexto ) * ( 1.0 - uApagado ) * blando;
+	float vis = ( 1.0 - ${f(0.95)} * textoDelArco( vTexto ) ) * ( 1.0 - uApagado ) * blando;
 	${SALIDA}
 }
 `

@@ -120,8 +120,10 @@ export function armar(compacto: boolean, vista: { readonly current: Vista }, log
   mallaDeReflejos.name = 'reflejos en el piso'
   mallas.push(mallaDeReflejos, mallaDeBrasas)
   // [PULIDO 19] Q1.d · la red en reposo, después de las brasas.
-  const dibujoDeLaRed = armarLaRed(Math.ceil(brasas.n * REPOSO.porBrasaEnTotal), uniformes)
-  mallas.push(dibujoDeLaRed.malla)
+  // [PULIDO 21] S1 · con el trazo de los arcos (el mismo rayo): su halo y después su núcleo.
+  const trazo = uniformesDelTrazo()
+  const dibujoDeLaRed = armarLaRed(Math.ceil(brasas.n * REPOSO.porBrasaEnTotal), uniformes, trazo)
+  mallas.push(dibujoDeLaRed.halo, dibujoDeLaRed.malla)
   // La cinta de los arcos: la misma geometría en dos pasadas (lo oscuro y el halo; después los núcleos). Se dibuja siempre (los
   // lugares sin arco tienen ancho 0): el programa se arma al cargar, no con el primer arco.
   const cinta = crearCinta()
@@ -134,7 +136,6 @@ export function armar(compacto: boolean, vista: { readonly current: Vista }, log
   gt.setAttribute('aForma', atributosDeLaCinta[3])
   gt.setAttribute('aExtra', atributosDeLaCinta[4])
   gt.setIndex(new THREE.BufferAttribute(cinta.indices, 1))
-  const trazo = uniformesDelTrazo()
   // [PULIDO 18] P1.d · la pasada 0 (el halo y lo oscuro), con puntos a lo largo del camino (los mismos atributos, sin los índices: como
   // cinta se plegaba en los quiebres); la pasada 1 (el núcleo), la cinta fina.
   const gh = new THREE.BufferGeometry()

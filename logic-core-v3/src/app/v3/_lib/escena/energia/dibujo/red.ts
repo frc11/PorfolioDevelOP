@@ -3,7 +3,8 @@ import * as THREE from 'three'
 import { CAMINO } from '../arcos/camino'
 import type { Brasas } from '../brasas'
 import { REPOSO, type Red } from '../reposo'
-import { AL_TONO, COMUN, SALIDA, materialDeEnergia } from './comun'
+import { CANAL_DEL_ARCO, FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, HALO_DEL_CANAL, TRAZO_GLSL, uniformesDelTrazo, type NombreDelTrazo } from './arcos'
+import { COMUN, materialDeEnergia } from './comun'
 
 /**
  * [PULIDO 19] Q1.d · EL DIBUJO DE LA RED EN REPOSO (`reposo.ts`: la máquina; `docs/rediseno/PLASMA.md`). De día tinta translúcida, de noche
@@ -18,10 +19,13 @@ import { AL_TONO, COMUN, SALIDA, materialDeEnergia } from './comun'
  * como cuadriláteros de pantalla; cada vértice sabe su enlace, su punto, su punta del tramo, su lado y si es de la rama) y lo que cambia
  * viaja en una textura chica (por enlace: sus dos extremos, su alfa, su semilla y cuánto se cortó): el sombreador arma el camino. Al
  * cortarse, el arco se abre desde el medio (se desconecta) con el destello de siempre.
+ *
+ * [PULIDO 21] S1 · EL RAYO DE VERDAD: el mismo dibujo que los arcos del plasma (`dibujo/arcos.ts`: el canal con su núcleo, su halo de
+ * puntos y su resplandor, el mismo trazo), quieto como la captura de un rayo, y cada uno tiembla leve (sus puntos) y titila a su ritmo.
  */
 export const DIBUJO_DE_LA_RED = {
-  /** El medio ancho del canal (px de CSS), la luz de noche, cuánto tapa de día y el titileo (cuánto baja). */
-  uRed: [0.75, 0.42, 0.42, 0.12],
+  /** El golpe (el núcleo y el halo) y el resplandor del rayo quieto, el titileo (cuánto baja) y el temblor (parte de su largo). */
+  uRed: [1, 0.5, 0.3, 0.012],
   /** Los tramos del camino y los de la rama; la rama, más fina (parte del ancho). */
   tramos: 8,
   tramosDeRama: 4,
@@ -38,25 +42,21 @@ export interface DibujoDeLaRed {
   readonly datos: Float32Array
   readonly maximo: number
   readonly malla: THREE.Mesh
+  /** [PULIDO 21] S1 · el halo (la pasada 0 de los arcos): los mismos atributos, como puntos (sin índices). */
+  readonly halo: THREE.Points
+  readonly geometriaDelHalo: THREE.BufferGeometry
   readonly uniformes: { readonly uRed: { value: THREE.Vector4 } }
   /** Si el último relleno escribió algo (al quedar vacía, uno más para apagar). */
   escrita: boolean
 }
 
-export const VERTICES_DE_LA_RED = /* glsl */ `
+const ARMA_LA_RED = /* glsl */ `
 attribute vec2 aDato;
 uniform sampler2D uEnlaces;
 uniform vec2 uTamEnlaces;
 uniform vec4 uRed;
 uniform vec4 uCamino;
 uniform vec4 uRama;
-varying float vLado;
-varying float vAlfa;
-varying float vSemilla;
-varying float vFinal;
-varying float vCorte;
-varying float vT;
-${COMUN}
 float azarDe( float s, float k ) {
 	return fract( sin( s * 127.1 + k * 311.7 ) * 43758.5453 );
 }
@@ -105,75 +105,90 @@ vec3 puntoDe( vec3 A, vec3 B, float s, float rama, float j ) {
 vec4 enlace( float k, float fila ) {
 	return texture2D( uEnlaces, vec2( ( k + 0.5 ) / uTamEnlaces.x, ( fila + 0.5 ) / uTamEnlaces.y ) );
 }
-void main() {
+// El temblor de la carga inestable: cada punto a su ritmo (de la semilla), leve y nada en las puntas (siguen en sus brasas).
+vec3 tiembla( float s, float k ) {
+	float w = 19.0 + 14.0 * azarDe( s, 60.0 + k );
+	return vec3( sin( uTiempo * w + k * 1.7 + s * 40.0 ), sin( uTiempo * w * 1.31 + k * 2.3 + s * 13.0 ), sin( uTiempo * w * 0.77 + k * 0.9 + s * 7.0 ) );
+}
+vec3 puntoQueTiembla( vec3 A, vec3 B, float s, float rama, float j ) {
+	float n = rama < 0.5 ? ${DIBUJO_DE_LA_RED.tramos.toFixed(1)} : ${DIBUJO_DE_LA_RED.tramosDeRama.toFixed(1)};
+	float i = clamp( j, 0.0, n );
+	float desde = floor( 2.0 + azarDe( s, 91.0 ) * ${(DIBUJO_DE_LA_RED.tramos - 4).toFixed(1)} );
+	float k = rama < 0.5 ? i : desde;
+	vec3 d = tiembla( s, k ) * sin( 3.14159265 * k / ${DIBUJO_DE_LA_RED.tramos.toFixed(1)} );
+	d += rama < 0.5 ? vec3( 0.0 ) : tiembla( s + 5.3, i ) * i / n;
+	return puntoDe( A, B, s, rama, i ) + d * uRed.w * length( B - A );
+}
+// Lo de cada vértice: su punto, el de antes y el de después (los de su tira, como la cinta de los arcos) y la forma del canal: el golpe y
+// el resplandor del rayo quieto por su alfa y el titileo, el destello del corte, abierto desde el medio y bajo cerca del final.
+struct Rayo { vec3 punto; vec3 antes; vec3 despues; vec4 forma; vec4 extra; float nulo; };
+Rayo rayoDelVertice() {
+	Rayo r;
 	vec4 a = enlace( aDato.x, 0.0 );
 	vec4 b = enlace( aDato.x, 1.0 );
 	vec4 c = enlace( aDato.x, 2.0 );
 	float rama = position.z;
-	if ( a.w <= 0.001 ) {
-		gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 );
-		return;
-	}
-	vec3 pA = puntoDe( a.xyz, b.xyz, b.w, rama, aDato.y );
-	vec3 pB = puntoDe( a.xyz, b.xyz, b.w, rama, aDato.y + 1.0 );
-	vec4 cA = projectionMatrix * viewMatrix * vec4( pA, 1.0 );
-	vec4 cB = projectionMatrix * viewMatrix * vec4( pB, 1.0 );
-	if ( cA.w <= 0.05 || cB.w <= 0.05 ) {
-		gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 );
-		return;
-	}
-	vec2 medio = uResolucion * 0.5;
-	vec2 sA = cA.xy / cA.w * medio;
-	vec2 sB = cB.xy / cB.w * medio;
-	vec2 dir = sB - sA;
-	float largo = max( length( dir ), 1e-3 );
-	vec2 normal = vec2( - dir.y, dir.x ) / largo;
-	// El ancho: el del canal (la rama, más fina), afinándose en las puntas; un píxel de borde blando.
-	float t = ( aDato.y + position.y ) / ( rama < 0.5 ? ${DIBUJO_DE_LA_RED.tramos.toFixed(1)} : ${DIBUJO_DE_LA_RED.tramosDeRama.toFixed(1)} );
-	float punta = rama < 0.5 ? 1.0 - pow( abs( 2.0 * t - 1.0 ), 6.0 ) * 0.6 : ( 1.0 - t * 0.8 ) * ${DIBUJO_DE_LA_RED.rama.toFixed(2)};
-	float nucleo = max( uRed.x * uPixel * punta, 0.45 );
-	float ancho = nucleo + 1.0;
-	vec4 cc = position.y < 0.5 ? cA : cB;
-	vec2 sc = ( position.y < 0.5 ? sA : sB ) + normal * position.x * ancho;
-	gl_Position = vec4( sc / medio * cc.w, cc.z, cc.w );
-	vLado = position.x * ancho / nucleo;
-	vAlfa = a.w;
-	vSemilla = b.w;
-	vCorte = c.x;
-	// Dónde está a lo largo del camino (la rama, donde sale): el corte abre desde el medio.
-	vT = rama < 0.5 ? t : floor( 2.0 + azarDe( b.w, 91.0 ) * ${(DIBUJO_DE_LA_RED.tramos - 4).toFixed(1)} ) / ${DIBUJO_DE_LA_RED.tramos.toFixed(1)};
-	vFinal = enElFinal( ( position.y < 0.5 ? pA : pB ) - uCentro );
+	float n = rama < 0.5 ? ${DIBUJO_DE_LA_RED.tramos.toFixed(1)} : ${DIBUJO_DE_LA_RED.tramosDeRama.toFixed(1)};
+	vec3 pA = puntoQueTiembla( a.xyz, b.xyz, b.w, rama, aDato.y );
+	vec3 pB = puntoQueTiembla( a.xyz, b.xyz, b.w, rama, aDato.y + 1.0 );
+	float fin = step( 0.5, position.y );
+	vec3 pX = puntoQueTiembla( a.xyz, b.xyz, b.w, rama, fin > 0.5 ? aDato.y + 2.0 : aDato.y - 1.0 );
+	r.punto = mix( pA, pB, fin );
+	r.antes = mix( pX, pA, fin );
+	r.despues = mix( pB, pX, fin );
+	float t = ( aDato.y + position.y ) / n;
+	float vT = rama < 0.5 ? t : floor( 2.0 + azarDe( b.w, 91.0 ) * ${(DIBUJO_DE_LA_RED.tramos - 4).toFixed(1)} ) / ${DIBUJO_DE_LA_RED.tramos.toFixed(1)};
+	float abierto = c.x <= 0.0 ? 1.0 : smoothstep( c.x - 0.06, c.x + 0.02, abs( vT - 0.5 ) * 2.0 );
+	float titila = 1.0 - uRed.z * ( 0.5 + 0.5 * sin( uTiempo * ( 4.0 + b.w * 5.0 ) + b.w * 40.0 ) );
+	float destello = max( a.w - 1.0, 0.0 );
+	float k = ( min( a.w, 1.0 ) * titila + destello * 1.5 ) * abierto * enElFinal( r.punto - uCentro );
+	r.forma = vec4( position.x, rama < 0.5 ? 1.0 : ${DIBUJO_DE_LA_RED.rama.toFixed(2)}, uRed.x * k, uRed.y * k );
+	r.extra = vec4( t, b.w * 40.0, rama, 0.0 );
+	r.nulo = a.w <= 0.001 ? 1.0 : 0.0;
+	return r;
 }
 `
 
-export const FRAGMENTOS_DE_LA_RED = /* glsl */ `
-varying float vLado;
-varying float vAlfa;
-varying float vSemilla;
-varying float vFinal;
-varying float vCorte;
-varying float vT;
+/** El núcleo (la pasada 1 de los arcos): cada tramo, un cuadrilátero de la tira del canal (los vecinos dan el inglete). */
+export const VERTICES_DE_LA_RED = /* glsl */ `
 ${COMUN}
-${AL_TONO}
-uniform vec4 uRed;
+${TRAZO_GLSL}
+${ARMA_LA_RED}
+${CANAL_DEL_ARCO}
 void main() {
-	float perfil = exp( - vLado * vLado * 1.8 );
-	// El titileo leve (su ritmo y su fase propios) y el destello del corte (el alfa por encima de 1); al cortarse, el arco se abre desde el medio.
-	float titila = 1.0 - uRed.w * ( 0.5 + 0.5 * sin( uTiempo * ( 4.0 + vSemilla * 5.0 ) + vSemilla * 40.0 ) );
-	float destello = max( vAlfa - 1.0, 0.0 );
-	float abierto = vCorte <= 0.0 ? 1.0 : smoothstep( vCorte - 0.06, vCorte + 0.02, abs( vT - 0.5 ) * 2.0 );
-	float k = perfil * ( min( vAlfa, 1.0 ) * titila + destello * 1.5 ) * abierto;
-	float texto = adentroDelTexto( gl_FragCoord.xy / uResolucion * 2.0 - 1.0 );
-	float vis = ( 1.0 - uTextoFuerza * texto ) * ( 1.0 - uApagado ) * vFinal;
-	vec3 colorDia = mix( uTintaDia, uClaroDia, min( destello, 1.0 ) );
-	float aDia = k * uRed.z;
-	vec3 luzNoche = uLuzNoche * k * uRed.y;
-	${SALIDA}
+	Rayo r = rayoDelVertice();
+	if ( r.nulo > 0.5 ) {
+		gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 );
+		return;
+	}
+	canalDelArco( r.punto, r.antes, r.despues, r.forma, r.extra );
 }
 `
+
+/** El halo (la pasada 0): un punto por punto del camino y uno en el medio de cada tramo (la punta de cada tramo, sólo en el último). */
+export const VERTICES_DEL_HALO_DE_LA_RED = /* glsl */ `
+${COMUN}
+${TRAZO_GLSL}
+${ARMA_LA_RED}
+${HALO_DEL_CANAL}
+void main() {
+	Rayo r = rayoDelVertice();
+	float n = position.z < 0.5 ? ${DIBUJO_DE_LA_RED.tramos.toFixed(1)} : ${DIBUJO_DE_LA_RED.tramosDeRama.toFixed(1)};
+	if ( r.nulo > 0.5 || ( position.y > 0.5 && aDato.y < n - 1.0 ) ) {
+		gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 );
+		gl_PointSize = 0.0;
+		return;
+	}
+	haloDelArco( r.punto, r.despues, r.forma, r.extra );
+}
+`
+
+/** Los fragmentos, los de los arcos (el mismo canal), con la máscara de los textos también por píxel (los enlaces son largos). */
+export const FRAGMENTOS_DE_LA_RED = `#define TEXTO_POR_PIXEL\n${FRAGMENTOS_DE_LOS_ARCOS}`
+export const FRAGMENTOS_DEL_HALO_DE_LA_RED = `#define TEXTO_POR_PIXEL\n${FRAGMENTOS_DEL_HALO_DEL_ARCO}`
 
 /** Arma la malla de la red para `maximo` enlaces: la geometría estática (los tramos de cada uno) y la textura de los enlaces. */
-export function armarLaRed(maximo: number, comunes: Record<string, THREE.IUniform>): DibujoDeLaRed {
+export function armarLaRed(maximo: number, comunes: Record<string, THREE.IUniform>, trazo: Record<NombreDelTrazo, THREE.IUniform> = uniformesDelTrazo()): DibujoDeLaRed {
   const v = maximo * TRAMOS * 4
   // `position`: el lado (−1, 1), la punta del tramo (0 su punto, 1 el siguiente) y si es de la rama; `aDato`: el enlace y su punto.
   const lado = new Float32Array(v * 3)
@@ -213,10 +228,16 @@ export function armarLaRed(maximo: number, comunes: Record<string, THREE.IUnifor
     uCamino: { value: new THREE.Vector4(CAMINO.desvio, CAMINO.aspereza, CAMINO.profundidad, 0) },
     uRama: { value: new THREE.Vector4(CAMINO.ramas.largo[0], CAMINO.ramas.largo[1], CAMINO.ramas.angulo[0], CAMINO.ramas.angulo[1]) },
   }
-  const malla = new THREE.Mesh(g, materialDeEnergia(VERTICES_DE_LA_RED, FRAGMENTOS_DE_LA_RED, { ...comunes, ...propias }))
+  const malla = new THREE.Mesh(g, materialDeEnergia(VERTICES_DE_LA_RED, FRAGMENTOS_DE_LA_RED, { ...comunes, ...trazo, ...propias, uCapa: { value: 1 } }))
   malla.name = 'red en reposo'
   malla.frustumCulled = false
-  return { geometria: g, enlaces, datos, maximo, malla, uniformes, escrita: true }
+  const gh = new THREE.BufferGeometry()
+  for (const nombre of ['position', 'aDato']) gh.setAttribute(nombre, g.getAttribute(nombre))
+  gh.setDrawRange(0, TRAMOS * 4)
+  const halo = new THREE.Points(gh, materialDeEnergia(VERTICES_DEL_HALO_DE_LA_RED, FRAGMENTOS_DEL_HALO_DE_LA_RED, { ...comunes, ...trazo, ...propias }))
+  halo.name = 'halo de la red en reposo'
+  halo.frustumCulled = false
+  return { geometria: g, geometriaDelHalo: gh, enlaces, datos, maximo, malla, halo, uniformes, escrita: true }
 }
 
 /**
@@ -245,6 +266,7 @@ export function rellenarRed(r: Red, b: Brasas, dib: DibujoDeLaRed): void {
   // Vacía, el primer lugar queda nulo (alfa 0: no pinta) y sigue siendo el que arma el programa.
   if (n === 0) D[3] = 0
   dib.geometria.setDrawRange(0, Math.max(1, n) * TRAMOS * 6)
+  dib.geometriaDelHalo.setDrawRange(0, Math.max(1, n) * TRAMOS * 4)
   if (n > 0 || dib.escrita) dib.enlaces.needsUpdate = true
   dib.escrita = n > 0
 }

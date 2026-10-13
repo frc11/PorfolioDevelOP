@@ -36,6 +36,7 @@ import { CAMINO } from '../escena/energia/arcos/camino'
 import { azarConSemilla, crearBrasas } from '../escena/energia/brasas'
 import { ORDEN_DE_LA_ENERGIA } from '../escena/energia/dibujo/armado'
 import { DIBUJO_DE_LA_RED, FRAGMENTOS_DE_LA_RED, VERTICES_DE_LA_RED, armarLaRed, rellenarRed } from '../escena/energia/dibujo/red'
+import { FRAGMENTOS_DE_LOS_ARCOS } from '../escena/energia/dibujo/arcos'
 import { REPOSO, crearRed } from '../escena/energia/reposo'
 import { PEDIDOS_DEL_FONDO, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
 import { ORDEN_DEL_ESPEJO } from '../escena/espejo/pantalla'
@@ -567,7 +568,9 @@ const arcoBien = (v: string, f: string, u: Record<string, THREE.IUniform>): bool
   const forma = cuerpoDe(v, 'vec2 desvioDe(') + cuerpoDe(v, 'vec3 puntoDe(')
   return forma.length > 0 && !forma.includes('uTiempo') && forma.includes('for ( int n = 0; n < 4; n ++ )') && forma.includes('amplitud *= uCamino.y;') && forma.includes('float lr = largo * mix( uRama.x, uRama.y,') &&
     camino !== undefined && camino.x === CAMINO.desvio && camino.y === CAMINO.aspereza && camino.z === CAMINO.profundidad && rama !== undefined && rama.x === CAMINO.ramas.largo[0] && rama.w === CAMINO.ramas.angulo[1] &&
-    v.includes('vec3 pA = puntoDe( a.xyz, b.xyz, b.w, rama, aDato.y );') && v.includes('uRed.x * uPixel * punta') && f.includes('abs( vT - 0.5 ) * 2.0') && f.includes('float destello = max( vAlfa - 1.0, 0.0 );') && f.includes('uTiempo * ( 4.0 + vSemilla * 5.0 )')
+    // [PULIDO 21] S1 · el mismo dibujo que los arcos (su canal y sus fragmentos), con el titileo, el destello y el corte en el vértice.
+    v.includes('vec3 pA = puntoQueTiembla( a.xyz, b.xyz, b.w, rama, aDato.y );') && v.includes('canalDelArco( r.punto, r.antes, r.despues, r.forma, r.extra );') && f.endsWith(FRAGMENTOS_DE_LOS_ARCOS) &&
+    v.includes('abs( vT - 0.5 ) * 2.0') && v.includes('float destello = max( a.w - 1.0, 0.0 );') && v.includes('uTiempo * ( 4.0 + b.w * 5.0 )')
 }
 afirmar(arcoBien(VERTICES_DE_LA_RED, FRAGMENTOS_DE_LA_RED, uniformesDeLaRed), '  cada enlace, un arco del plasma: quebrado en cuatro niveles con su aspereza y su profundidad, con su rama; la forma, de la semilla y sin el reloj (congelada; sólo titila); afinado en las puntas; el corte lo abre desde el medio, con el destello')
 controlPositivo('  el detector VE un arco que se mueve con el reloj (no congelado)', VERTICES_DE_LA_RED.replace('float x = t * exp2( float( n ) + 1.0 );', 'float x = t * exp2( float( n ) + 1.0 ) + uTiempo;'), (v: string) => arcoBien(v, FRAGMENTOS_DE_LA_RED, uniformesDeLaRed))
