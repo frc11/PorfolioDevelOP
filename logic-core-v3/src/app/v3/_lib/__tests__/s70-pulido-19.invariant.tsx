@@ -240,7 +240,9 @@ function correrLaRed(gestoEn: number, finDesde: number, paso: (r: Red, b: Brasas
   let energiaAntes = 0
   let energiaDespues = 0
   let conFinal = 0
-  for (let k = 1; k <= 600; k += 1) {
+  // [PULIDO 22] T1 · la red se forma en ~30 s: la corrida dura hasta 3 s después del gesto (al menos 10 s).
+  const cuadros = Math.max(600, gestoEn < 1e6 ? Math.round((gestoEn + 3) / DT) : 0)
+  for (let k = 1; k <= cuadros; k += 1) {
     const t = k * DT
     en.tiempo = t
     en.temperatura = 0.2
@@ -280,12 +282,14 @@ function correrLaRed(gestoEn: number, finDesde: number, paso: (r: Red, b: Brasas
 }
 
 const sinTocar = (): void => undefined
-const LA_RED = correrLaRed(7, 1e9, sinTocar)
+// [PULIDO 22] T1 · el gesto, 2 s después de armada (antes a los 7 s: se armaba en 1,8 s; ahora en ~30).
+const GESTO = Math.ceil(REPOSO.esperaS + REPOSO.formaS + REPOSO.enciendeS + 2)
+const LA_RED = correrLaRed(GESTO, 1e9, sinTocar)
 // Ningún enlace más largo que el alcance (en el mundo ni en el cuadro) al armarse: una brasa que salta (el envoltorio, una mudanza) pierde sus enlaces.
 const redBien = (x: DeLaRed): boolean => x.antesDeTiempo === 0 && x.armadaEn > REPOSO.esperaS && x.armadaEn < REPOSO.esperaS + REPOSO.formaS + REPOSO.enciendeS + 0.1 &&
   x.enlaces >= N * 0.4 && x.gradoMaximo <= REPOSO.porBrasa && x.largoMaximo <= REPOSO.alcance * REPOSO.estirado && x.enElCuadroMaximo <= REPOSO.alcanceEnElCuadro * REPOSO.estirado * Math.SQRT2 + 1e-3 && x.frenoArmada > 0.95 &&
-  x.cortadaEn > 7 - DT && x.cortadaEn < 7 + 2 * DT && x.muereMaximo <= REPOSO.corteS + 1e-6 && x.frenoSuelta < 0.05 && x.energiaDespues > x.energiaAntes + 0.1 && x.formadas === 1
-afirmar(redBien(LA_RED), `  quieta, la red se arma a los ${LA_RED.armadaEn.toFixed(2)} s (${String(LA_RED.enlaces)} enlaces para ${String(N)} brasas, ≤ ${String(LA_RED.gradoMaximo)} por brasa, ≤ ${LA_RED.largoMaximo.toFixed(2)} u y ≤ ${LA_RED.enElCuadroMaximo.toFixed(3)} del cuadro) y frena (${LA_RED.frenoArmada.toFixed(2)}); el gesto a los 7 s la corta (todos los enlaces mueren en ≤ ${LA_RED.muereMaximo.toFixed(2)} s) con el chasquido (la energía media ${LA_RED.energiaAntes.toFixed(3)} → ${LA_RED.energiaDespues.toFixed(3)}) y suelta el freno (${LA_RED.frenoSuelta.toFixed(3)})`)
+  x.cortadaEn > GESTO - DT && x.cortadaEn < GESTO + 2 * DT && x.muereMaximo <= REPOSO.corteS + 1e-6 && x.frenoSuelta < 0.05 && x.energiaDespues > x.energiaAntes + 0.1 && x.formadas === 1
+afirmar(redBien(LA_RED), `  quieta, la red se arma a los ${LA_RED.armadaEn.toFixed(2)} s (${String(LA_RED.enlaces)} enlaces para ${String(N)} brasas, ≤ ${String(LA_RED.gradoMaximo)} por brasa, ≤ ${LA_RED.largoMaximo.toFixed(2)} u y ≤ ${LA_RED.enElCuadroMaximo.toFixed(3)} del cuadro) y frena (${LA_RED.frenoArmada.toFixed(2)}); el gesto a los ${String(GESTO)} s la corta (todos los enlaces mueren en ≤ ${LA_RED.muereMaximo.toFixed(2)} s) con el chasquido (la energía media ${LA_RED.energiaAntes.toFixed(3)} → ${LA_RED.energiaDespues.toFixed(3)}) y suelta el freno (${LA_RED.frenoSuelta.toFixed(3)})`)
 controlPositivo('  el detector VE una red que se arma antes de tiempo', { ...LA_RED, antesDeTiempo: 3 }, redBien)
 controlPositivo('  y una brasa con cuatro enlaces', { ...LA_RED, gradoMaximo: 4 }, redBien)
 controlPositivo('  y un enlace que cruza media pantalla', { ...LA_RED, enElCuadroMaximo: 0.6 }, redBien)
@@ -293,7 +297,7 @@ controlPositivo('  y un corte que no termina en corteS', { ...LA_RED, muereMaxim
 controlPositivo('  y un corte sin chasquido', { ...LA_RED, energiaDespues: LA_RED.energiaAntes }, redBien)
 controlPositivo('  y un freno que no se suelta', { ...LA_RED, frenoSuelta: 0.5 }, redBien)
 // Y la red que ignora el gesto (la de antes de existir el corte): una corrida con el gesto a los 7 s pero la máquina sorda.
-const SORDA = correrLaRed(7, 1e9, (r, _b, k) => { if (k === 7 * 60) r.quietaS = 99 })
+const SORDA = correrLaRed(GESTO, 1e9, (r, _b, k) => { if (k === GESTO * 60) r.quietaS = 99 })
 controlPositivo('  y una red sorda al gesto (no se corta)', { ...SORDA, cortadaEn: -1 }, redBien)
 
 // En el final del pie no se arma (el final cuenta como gesto): quieta 10 s con `fin` desde el segundo 1.

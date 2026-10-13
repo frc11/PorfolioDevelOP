@@ -15,8 +15,9 @@ import { CELDA, celdaDe, indice } from './grilla'
 export const REPOSO = {
   /** Cuánto hay que estar quieto (s) para que se arme, cuánto tarda en armarse del centro hacia afuera (s) y en cuánto se enciende cada enlace (s). */
   esperaS: 3.5,
-  formaS: 1.8,
-  enciendeS: 0.25,
+  // [PULIDO 22] T1 · gradual: de a uno a lo largo de ~30 s (pocos al principio: la cuenta crece con el cuadrado del tiempo).
+  formaS: 30,
+  enciendeS: 0.6,
   /** El corte: la cascada desde el origen del gesto (s), el destello de cada enlace al morir (s, y cuánto brilla: alfa por encima de 1) y el golpe de energía a sus brasas. */
   corteS: 0.3,
   destelloS: 0.1,
@@ -77,12 +78,7 @@ export function crearRed(brasas: number): Red {
 }
 
 /** Lo que el gesto recuerda: el scroll y el puntero (NDC) de la última referencia (la del último gesto, o la primera lectura). */
-export interface MemoriaDelGesto {
-  scroll: number
-  x: number
-  y: number
-  activo: boolean
-}
+export interface MemoriaDelGesto { scroll: number; x: number; y: number; activo: boolean }
 
 export function crearMemoriaDelGesto(): MemoriaDelGesto {
   return { scroll: Number.NaN, x: Number.NaN, y: Number.NaN, activo: false }
@@ -119,7 +115,7 @@ function enlazar(r: Red, b: Brasas, d: Dominio, i: number, j: number, azar: () =
   r.grado[j] += 1
   const c = coordenadasDe(d, b.lugar, i * 3)
   const lejos = Math.min(1, Math.sqrt(c.u * c.u + c.v * c.v) / 1.4)
-  r.nace[k] = (0.8 * lejos + 0.2 * azar()) * REPOSO.formaS
+  r.nace[k] = Math.sqrt(0.5 * lejos + 0.5 * azar()) * REPOSO.formaS
   r.semilla[k] = azar()
   r.alfa[k] = 0
   r.n = k + 1
@@ -215,6 +211,7 @@ function chasquear(b: Brasas, i: number, j: number): void {
 }
 
 /** Poda los enlaces de una brasa que saltó (reapareció por una cara del dominio, se está mudando) o que se estiró en el cuadro: un enlace no cruza la pantalla. */
+const LARGO_TOPE2 = (REPOSO.alcance * REPOSO.estirado) ** 2
 function podar(r: Red, b: Brasas, d: Dominio): void {
   const tope = REPOSO.alcanceEnElCuadro * REPOSO.estirado
   for (let k = r.n - 1; k >= 0; k -= 1) {
@@ -227,6 +224,9 @@ function podar(r: Red, b: Brasas, d: Dominio): void {
       const vi = ci.v
       const cj = coordenadasDe(d, b.lugar, j * 3)
       fuera = Math.abs(cj.u - ui) > tope || Math.abs(cj.v - vi) > tope
+      // [PULIDO 22] T1 · y en el mundo: en ~30 s de formación una brasa deriva (siempre vecinas cercanas).
+      const L = b.lugar
+      fuera ||= (L[j * 3] - L[i * 3]) ** 2 + (L[j * 3 + 1] - L[i * 3 + 1]) ** 2 + (L[j * 3 + 2] - L[i * 3 + 2]) ** 2 > LARGO_TOPE2
     }
     if (!fuera) continue
     r.grado[i] -= 1

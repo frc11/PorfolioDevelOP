@@ -27,9 +27,13 @@ export const DIBUJO_DE_LA_RED = {
   /** El golpe (el núcleo y el halo) y el resplandor del rayo quieto, el titileo (cuánto baja) y el temblor (parte de su largo). */
   uRed: [1, 0.5, 0.3, 0.012],
   /** Los tramos del camino y los de la rama; la rama, más fina (parte del ancho). */
-  tramos: 8,
+  tramos: 16,
   tramosDeRama: 4,
   rama: 0.6,
+  /** [PULIDO 22] T1 · casi rígido: cuánto del desvío del plasma se queda (un filamento tenso, no un arco que se comba). */
+  rigidez: 0.55,
+  /** [PULIDO 22] T1 · de noche, el brillo de la red acotado: su brillo y como mucho el de `tope` enlaces enteros (con más, cada uno baja). */
+  noche: { brillo: 0.6, tope: 140 },
 } as const
 
 const TRAMOS = DIBUJO_DE_LA_RED.tramos + DIBUJO_DE_LA_RED.tramosDeRama
@@ -46,6 +50,8 @@ export interface DibujoDeLaRed {
   readonly halo: THREE.Points
   readonly geometriaDelHalo: THREE.BufferGeometry
   readonly uniformes: { readonly uRed: { value: THREE.Vector4 } }
+  /** [PULIDO 22] T1 · el tope del brillo de noche (lo escribe el relleno). */
+  readonly tope: { value: number }
   /** Si el último relleno escribió algo (al quedar vacía, uno más para apagar). */
   escrita: boolean
 }
@@ -57,11 +63,13 @@ uniform vec2 uTamEnlaces;
 uniform vec4 uRed;
 uniform vec4 uCamino;
 uniform vec4 uRama;
+uniform float uTopeDeLaRed;
 float azarDe( float s, float k ) {
 	return fract( sin( s * 127.1 + k * 311.7 ) * 43758.5453 );
 }
 // El desvío en «t» (0 a 1): niveles de ruido de valor, cada uno de la mitad de largo y menos desviado (la aspereza); de costado y en
-// profundidad. Con la semilla del enlace: siempre el mismo (congelado).
+// profundidad. Con la semilla del enlace: siempre el mismo (congelado). [PULIDO 22] T1 · lineal entre sus puntos (el quiebre del rayo,
+// el punto medio): suavizado dibujaba curvas de cuerda.
 vec2 desvioDe( float s, float t ) {
 	vec2 d = vec2( 0.0 );
 	float amplitud = 1.0;
@@ -69,7 +77,6 @@ vec2 desvioDe( float s, float t ) {
 		float x = t * exp2( float( n ) + 1.0 );
 		float i = floor( x );
 		float u = x - i;
-		u = u * u * ( 3.0 - 2.0 * u );
 		float o = 17.0 * float( n );
 		vec2 a = vec2( azarDe( s, i + o ), azarDe( s + 3.1, i + o ) ) * 2.0 - 1.0;
 		vec2 b = vec2( azarDe( s, i + 1.0 + o ), azarDe( s + 3.1, i + 1.0 + o ) ) * 2.0 - 1.0;
@@ -78,26 +85,33 @@ vec2 desvioDe( float s, float t ) {
 	}
 	return d;
 }
+// [PULIDO 22] T1 · el quiebre: el desvío menos la recta entre sus puntas (el punto medio puro, con las puntas fijas; sin la envolvente).
+vec2 quiebre( float s, float t ) {
+	return desvioDe( s, t ) - mix( desvioDe( s, 0.0 ), desvioDe( s, 1.0 ), t );
+}
 // El punto «j» del camino (de A a B, las puntas fijas) o de la rama (sale de su punto del camino, la punta libre), en el mundo.
 vec3 puntoDe( vec3 A, vec3 B, float s, float rama, float j ) {
 	vec3 eje = B - A;
 	float largo = max( length( eje ), 1e-4 );
 	vec3 e = eje / largo;
-	vec3 p1 = cross( e, vec3( 0.0, 1.0, 0.0 ) );
+	// [PULIDO 22] T1 · el quiebre, de costado en la pantalla (perpendicular al enlace y a la vista) y un poco en profundidad: sin un lado
+	// preferido (nada de comba hacia abajo).
+	vec3 p1 = cross( e, normalize( cameraPosition - 0.5 * ( A + B ) ) );
+	p1 = dot( p1, p1 ) < 1e-4 ? cross( e, vec3( 0.0, 1.0, 0.0 ) ) : p1;
 	p1 = dot( p1, p1 ) < 1e-4 ? cross( e, vec3( 1.0, 0.0, 0.0 ) ) : p1;
 	p1 = normalize( p1 );
 	vec3 p2 = cross( e, p1 );
 	// El camino (o, en la rama, el punto del medio del camino de donde sale: con su ángulo, su largo y su desvío, libre en la punta).
 	float desde = floor( 2.0 + azarDe( s, 91.0 ) * ${(DIBUJO_DE_LA_RED.tramos - 4).toFixed(1)} );
 	float t = rama < 0.5 ? j / ${DIBUJO_DE_LA_RED.tramos.toFixed(1)} : desde / ${DIBUJO_DE_LA_RED.tramos.toFixed(1)};
-	vec2 d = desvioDe( s, t ) * sin( 3.14159265 * t ) * uCamino.x * largo;
+	vec2 d = quiebre( s, t ) * uCamino.x * ${String(DIBUJO_DE_LA_RED.rigidez)} * largo;
 	vec3 p = A + eje * t + p1 * d.x + p2 * d.y * uCamino.z;
 	if ( rama >= 0.5 ) {
 		float angulo = mix( uRama.z, uRama.w, azarDe( s, 92.0 ) ) * ( azarDe( s, 93.0 ) < 0.5 ? - 1.0 : 1.0 );
 		vec3 dir = normalize( e * cos( angulo ) + p1 * sin( angulo ) + p2 * ( azarDe( s, 95.0 ) - 0.5 ) * 0.4 );
 		float lr = largo * mix( uRama.x, uRama.y, azarDe( s, 94.0 ) );
 		float u = j / ${DIBUJO_DE_LA_RED.tramosDeRama.toFixed(1)};
-		vec2 dr = desvioDe( s + 7.7, u ) * sin( 1.5707963 * u ) * uCamino.x * lr;
+		vec2 dr = ( desvioDe( s + 7.7, u ) - desvioDe( s + 7.7, 0.0 ) ) * uCamino.x * lr;
 		p += dir * lr * u + p1 * dr.x + p2 * dr.y * uCamino.z;
 	}
 	return p;
@@ -141,7 +155,7 @@ Rayo rayoDelVertice() {
 	float abierto = c.x <= 0.0 ? 1.0 : smoothstep( c.x - 0.06, c.x + 0.02, abs( vT - 0.5 ) * 2.0 );
 	float titila = 1.0 - uRed.z * ( 0.5 + 0.5 * sin( uTiempo * ( 4.0 + b.w * 5.0 ) + b.w * 40.0 ) );
 	float destello = max( a.w - 1.0, 0.0 );
-	float k = ( min( a.w, 1.0 ) * titila + destello * 1.5 ) * abierto * enElFinal( r.punto - uCentro );
+	float k = ( min( a.w, 1.0 ) * titila + destello * 1.5 ) * abierto * enElFinal( r.punto - uCentro ) * mix( 1.0, uTopeDeLaRed, uNoche );
 	r.forma = vec4( position.x, rama < 0.5 ? 1.0 : ${DIBUJO_DE_LA_RED.rama.toFixed(2)}, uRed.x * k, uRed.y * k );
 	r.extra = vec4( t, b.w * 40.0, rama, 0.0 );
 	r.nulo = a.w <= 0.001 ? 1.0 : 0.0;
@@ -220,12 +234,14 @@ export function armarLaRed(maximo: number, comunes: Record<string, THREE.IUnifor
   enlaces.minFilter = THREE.NearestFilter
   enlaces.magFilter = THREE.NearestFilter
   enlaces.needsUpdate = true
+  const tope = { value: 1 }
   const uniformes = { uRed: { value: new THREE.Vector4(DIBUJO_DE_LA_RED.uRed[0], DIBUJO_DE_LA_RED.uRed[1], DIBUJO_DE_LA_RED.uRed[2], DIBUJO_DE_LA_RED.uRed[3]) } }
   const propias = {
     ...uniformes,
     uEnlaces: { value: enlaces },
     uTamEnlaces: { value: new THREE.Vector2(maximo, FILAS) },
     uCamino: { value: new THREE.Vector4(CAMINO.desvio, CAMINO.aspereza, CAMINO.profundidad, 0) },
+    uTopeDeLaRed: tope,
     uRama: { value: new THREE.Vector4(CAMINO.ramas.largo[0], CAMINO.ramas.largo[1], CAMINO.ramas.angulo[0], CAMINO.ramas.angulo[1]) },
   }
   const malla = new THREE.Mesh(g, materialDeEnergia(VERTICES_DE_LA_RED, FRAGMENTOS_DE_LA_RED, { ...comunes, ...trazo, ...propias, uCapa: { value: 1 } }))
@@ -237,7 +253,7 @@ export function armarLaRed(maximo: number, comunes: Record<string, THREE.IUnifor
   const halo = new THREE.Points(gh, materialDeEnergia(VERTICES_DEL_HALO_DE_LA_RED, FRAGMENTOS_DEL_HALO_DE_LA_RED, { ...comunes, ...trazo, ...propias }))
   halo.name = 'halo de la red en reposo'
   halo.frustumCulled = false
-  return { geometria: g, geometriaDelHalo: gh, enlaces, datos, maximo, malla, halo, uniformes, escrita: true }
+  return { geometria: g, geometriaDelHalo: gh, enlaces, datos, maximo, malla, halo, uniformes, tope, escrita: true }
 }
 
 /**
@@ -249,6 +265,7 @@ export function rellenarRed(r: Red, b: Brasas, dib: DibujoDeLaRed): void {
   const L = b.lugar
   const W = dib.maximo * 4
   const n = Math.min(r.n, dib.maximo)
+  let suma = 0
   for (let k = 0; k < n; k += 1) {
     const i = r.a[k]
     const j = r.b[k]
@@ -257,6 +274,7 @@ export function rellenarRed(r: Red, b: Brasas, dib: DibujoDeLaRed): void {
     D[o + 1] = L[i * 3 + 1]
     D[o + 2] = L[i * 3 + 2]
     D[o + 3] = r.alfa[k] * Math.min(b.vida[i], b.vida[j])
+    suma += Math.min(1, D[o + 3])
     D[W + o] = L[j * 3]
     D[W + o + 1] = L[j * 3 + 1]
     D[W + o + 2] = L[j * 3 + 2]
@@ -265,6 +283,7 @@ export function rellenarRed(r: Red, b: Brasas, dib: DibujoDeLaRed): void {
   }
   // Vacía, el primer lugar queda nulo (alfa 0: no pinta) y sigue siendo el que arma el programa.
   if (n === 0) D[3] = 0
+  dib.tope.value = DIBUJO_DE_LA_RED.noche.brillo * Math.min(1, DIBUJO_DE_LA_RED.noche.tope / Math.max(1, suma))
   dib.geometria.setDrawRange(0, Math.max(1, n) * TRAMOS * 6)
   dib.geometriaDelHalo.setDrawRange(0, Math.max(1, n) * TRAMOS * 4)
   if (n > 0 || dib.escrita) dib.enlaces.needsUpdate = true
