@@ -55,8 +55,12 @@ export const FINAL_DEL_PIE = {
    * cuando vuelve a tocar después del primer rebote.
    */
   poder: { destello: 1.45, subeS: 0.12, asientaS: 0.9, golpecito: 0.03 },
-  /** La cámara: la altura final (grados de elevación) y cuánto más lejos que en la pose E. */
-  camara: { elevacion: 89.2, lejos: 1.06 },
+  /**
+   * La cámara: la altura final (grados de elevación) y cuánto más lejos que en la pose E. [PULIDO 20] R1 · en escritorio con el pie, de
+   * costado y lejos (el humano: «que se vea gran parte de la escena»): hasta `escritorio.elevacion` y a la distancia en que el pie acostado
+   * y el logo ocupan `escritorio.ocupa` del cuadro (`pie3d/encuadre.ts`); abajo de 1024, desde arriba como siempre.
+   */
+  camara: { elevacion: 89.2, lejos: 1.06, escritorio: { elevacion: 28, ocupa: 0.62 } },
   /**
    * Quieto en el pie: a los cuántos segundos sin scroll arranca, el giro (°/s), el tope del alejamiento (u) y su tiempo (s).
    * [NOCTURNO FINAL] A1/A2 · la VUELTA (al rebobinar, al salir, en un viaje) va con tope: el giro a lo sumo a `giroS`
@@ -313,6 +317,13 @@ export function decidirElGesto(r: RelojDelFinal, alFondo: boolean, sentido: -1 |
   return retenido && (duraS < RELOJ_DEL_FINAL.topeDelGestoS || enLaCola) ? SIGUE : NADA
 }
 
+/**
+ * [PULIDO 20] R1 · hasta qué elevación sube la cámara del final (grados): la de siempre (desde arriba) salvo en escritorio con el pie
+ * (`camara.escritorio.elevacion`); la escribe `cuadroDelFinal` antes de mover la cámara y la leen `subida`, `alturaDeLaCaida` y
+ * `camaraDelFinal`.
+ */
+export const ELEVACION_DEL_FINAL: { grados: number } = { grados: 89.2 }
+
 /** Lo que el final tiene en vivo: lo escribe `FinalDelPie` en cada cuadro y lo leen las piezas del pie y el piso. */
 export const EN_VIVO = {
   fin: 0,
@@ -391,7 +402,7 @@ export const LOGO_DE_SIEMPRE: TamanoDelLogo = { alto: 4.78, espesor: (PROBE_EXTR
 export function subida(fin: number, t: TamanoDelLogo = LOGO_DE_SIEMPRE, e0 = 0): number {
   if (fin <= 0) return 0
   const { a, toco } = anguloEnElReloj(t, segundosDelFinal(fin))
-  const tope = THREE.MathUtils.degToRad(FINAL_DEL_PIE.camara.elevacion)
+  const tope = THREE.MathUtils.degToRad(ELEVACION_DEL_FINAL.grados)
   const desde = Math.min(Math.max(0, e0), tope - 0.01)
   return toco ? 1 : acotar01((a - desde) / (tope - desde))
 }
@@ -436,7 +447,7 @@ export function alturaDeLaCaida(fin: number, t: TamanoDelLogo = LOGO_DE_SIEMPRE,
   if (fin <= 0) return 0
   const { a, toco } = anguloEnElReloj(t, segundosDelFinal(fin))
   if (toco) return 1
-  const tope = THREE.MathUtils.degToRad(FINAL_DEL_PIE.camara.elevacion)
+  const tope = THREE.MathUtils.degToRad(ELEVACION_DEL_FINAL.grados)
   const desde = Math.min(Math.max(0, e), tope - 0.01)
   const d = THREE.MathUtils.degToRad(CAMARA_DE_LA_CAIDA.suavidadGrados)
   const x = (a - desde) / d
@@ -589,7 +600,7 @@ export function camaraDelFinal(c: THREE.Camera, k: number, blanco: THREE.Vector3
   const az0 = Math.atan2(dx, dz)
   const r0 = Math.hypot(dx, dy, dz)
   const e0 = Math.atan2(dy, Math.hypot(dx, dz))
-  const e = e0 + (THREE.MathUtils.degToRad(FINAL_DEL_PIE.camara.elevacion) - e0) * k
+  const e = e0 + (THREE.MathUtils.degToRad(ELEVACION_DEL_FINAL.grados) - e0) * k
   // [PULIDO 1] P22 · arriba, a `distancia` si la hay (el encuadre del teléfono); si no, un poco más lejos que en la pose E.
   const r = r0 + ((distancia ?? r0 * FINAL_DEL_PIE.camara.lejos) - r0) * k + aleja
   const az = az0 + THREE.MathUtils.degToRad(giro)

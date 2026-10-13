@@ -1,38 +1,75 @@
 import * as THREE from 'three'
 
-import { CAIDA_DEL_PIE, crearLugar, distanciaParaElPie, huellaDelPie, lugaresEnElPiso, poseDeLaPiezaQueCae, type LugarEnElPiso } from '../final/caidaDelPie'
-import { caidaIntegrada, type CaidaIntegrada } from '../final/caidaAlHueco'
-import { EN_VIVO, segundosDelFinal } from '../final/recorridoDelFinal'
+import { CAIDA_DEL_PIE, POSE_DE_LA_PIEZA, crearLugar, domDeLaPieza, domSigueALaPieza, huellaDelPie, lugaresEnElPiso, poseDeLaPiezaQueCae, type LugarEnElPiso, type PoseDeLaPieza } from '../final/caidaDelPie'
+import { CAIDA_AL_HUECO, caidaIntegrada, type CaidaIntegrada } from '../final/caidaAlHueco'
+import { EN_VIVO, FINAL_DEL_PIE, segundosDelFinal } from '../final/recorridoDelFinal'
 import { sombraDeLaPiezaQueCae } from '../final/sombraDeLaPieza'
-import { pedirLaOnda } from '../interfaz/pedidos'
 import { FLOOR_Y } from '../probeScene'
 import type { Armada } from './armadas'
 import { colocarLaPieza } from './colocacion'
+import { distanciaDeLaVista } from './encuadre'
+import { VOLUMEN_DEL_PIE } from './geometria'
 import { MAXIMO_DE_SOMBRAS_DEL_PIE, SOMBRAS_DEL_PIE } from './sombras'
 
 /**
- * [PULIDO 19] Q2 · LA CAÍDA DE LAS PIEZAS DEL PIE EN LA ESCENA (`final/caidaDelPie.ts`: la física y los lugares, puros; acá, lo de
- * three): con el final en marcha, cada cuadro arma las piezas de pie como las deja la cámara de ANTES del final (la pared del pie
- * quieta, donde estaba), les calcula su lugar en el piso y su reloj, escribe para el final la distancia de la cámara desde arriba y
- * la calma del piso bajo el pie acostado (`EN_VIVO`), pide un pulso chico del piso en cada impacto, y a cada grupo le aplica su
- * pose: el canto que baja y la placa que vuelca sobre él. Sin reservas por cuadro: los registros se arman una vez (hasta `MAXIMO`).
- * [PULIDO 19] Q4 · y escribe para el piso vivo la sombra de contacto de cada pieza que bajó (`sombrasDeLaCaida`).
+ * [PULIDO 19] Q2 · LA CAÍDA DEL PIE EN LA ESCENA (`final/caidaDelPie.ts`: la física y los lugares, puros; acá, lo de three): con el final
+ * en marcha, cada cuadro arma el pie como lo deja la cámara de ANTES del final (la pared del pie quieta, donde estaba), calcula los lugares
+ * en el piso y el reloj, escribe para el final la distancia de la cámara desde arriba y la calma del piso bajo el pie acostado (`EN_VIVO`) y
+ * a cada grupo le aplica su pose. Sin reservas por cuadro: los registros se arman una vez (hasta `MAXIMO`). [PULIDO 19] Q4 · y escribe para
+ * el piso vivo la sombra de contacto de cada placa (`sombrasDeLaCaida`).
+ *
+ * [PULIDO 20] R1 · CAEN LAS COLUMNAS. Lo de cada lado del logo (la columna de la izquierda: el logotipo, el titular, el contacto, el
+ * recorrido, las redes, la legal; la de la derecha: el rótulo y el formulario) es UNA columna invisible: la caja que contiene sus piezas
+ * en la pared (su ancho, su alto y el espesor de la más gruesa). Esa columna es el cuerpo que cae: baja parada con el logo (llega al piso
+ * cuando él llega), vuelca hacia atrás sobre el canto de su base con la física de su alto (apurada lo justo para tocar en el golpe) y se
+ * incrusta. Las piezas son objetos separados pero van PEGADAS en su lugar de la columna (el mismo giro y su lugar relativo de la pared):
+ * acostadas, desde arriba, el pie como era. Todas tocan en el golpe (su impacto es el del logo: sin pulsos sueltos); el DOM de cada pieza se
+ * ve y la sigue sólo con su columna quieta (`domDeLaCaida`, `domSigueEnLaCaida`).
  */
 const MAXIMO = 64
+const COLUMNAS = 4
 /** Una sombra más tenue que esto no se escribe. */
 const SOMBRA_MINIMA = 0.002
 
 interface PiezaMutable {
+  /** Sus medidas (u) y las de su caja (px), su columna y su esquina de arriba a la izquierda en la columna (px). */
   ancho: number
   alto: number
   espesor: number
+  anchoPx: number
+  altoPx: number
+  espesorPx: number
+  columna: number
+  dx: number
+  dy: number
+  /** Si tiene sombra de contacto (las placas: las letras no son una placa). */
+  conSombra: boolean
+}
+
+/** Una columna: el cuerpo invisible que cae (`PiezaDePie`: su canto de abajo y de atrás en el mundo y sus medidas, u). */
+interface ColumnaMutable {
+  ancho: number
+  alto: number
+  espesor: number
+  hondo: number
   x: number
   y: number
   z: number
+  /** Su caja en la pared (px del cuadro) y el espesor de su pieza más gruesa (px). */
+  x0: number
+  y0: number
+  x1: number
+  y1: number
+  e: number
+  lado: number
   /** La caída integrada de su tamaño (memorizada: se recalcula sólo si cambia). */
   caida: CaidaIntegrada
   caidaAlto: number
   caidaEspesor: number
+  /** Su giro y su esquina de arriba a la izquierda en el mundo, en este cuadro (lo que sus piezas siguen). */
+  readonly q: THREE.Quaternion
+  readonly o: THREE.Vector3
+  quieta: boolean
 }
 
 interface BaseMutable {
@@ -48,29 +85,35 @@ interface BaseMutable {
 
 export interface CaidaDelPie {
   readonly piezas: PiezaMutable[]
+  readonly columnas: ColumnaMutable[]
   readonly lugares: LugarEnElPiso[]
   readonly caidas: CaidaIntegrada[]
   readonly base: BaseMutable
   readonly huella: Float64Array
+  /** Cuántas piezas y cuántas columnas. */
   n: number
-  /** Los segundos del reloj del cuadro anterior (los impactos), cuándo toca la primera y cuándo se asienta la última (s del reloj). */
-  antesS: number
+  m: number
+  /** Cuándo tocan (el golpe) y cuándo aparece el DOM de la última columna (s del reloj). */
   primeraS: number
   ultimaS: number
+  /** La escala de la pared (u por px). */
+  mundoPorPx: number
 }
 
 const CAIDA_NULA = caidaIntegrada({ alto: 1, espesor: 0.1 })
 
 export function crearLaCaidaDelPie(): CaidaDelPie {
   const piezas: PiezaMutable[] = []
+  for (let k = 0; k < MAXIMO; k += 1) piezas.push({ ancho: 1, alto: 1, espesor: 0.1, anchoPx: 1, altoPx: 1, espesorPx: 1, columna: 0, dx: 0, dy: 0, conSombra: false })
+  const columnas: ColumnaMutable[] = []
   const lugares: LugarEnElPiso[] = []
   const caidas: CaidaIntegrada[] = []
-  for (let k = 0; k < MAXIMO; k += 1) {
-    piezas.push({ ancho: 1, alto: 1, espesor: 0.1, x: 0, y: 0, z: 0, caida: CAIDA_NULA, caidaAlto: 1, caidaEspesor: 0.1 })
+  for (let k = 0; k < COLUMNAS; k += 1) {
+    columnas.push({ ancho: 1, alto: 1, espesor: 0.1, hondo: 0, x: 0, y: 0, z: 0, x0: 0, y0: 0, x1: 0, y1: 0, e: 0, lado: 0, caida: CAIDA_NULA, caidaAlto: 1, caidaEspesor: 0.1, q: new THREE.Quaternion(), o: new THREE.Vector3(), quieta: false })
     lugares.push(crearLugar())
     caidas.push(CAIDA_NULA)
   }
-  return { piezas, lugares, caidas, base: { derechaX: 1, derechaZ: 0, atrasX: 0, atrasZ: -1, logoX: 0, logoZ: 0, logoAncho: 6.9, logoFondo: 4.78 }, huella: new Float64Array(2), n: 0, antesS: 0, primeraS: Number.POSITIVE_INFINITY, ultimaS: 0 }
+  return { piezas, columnas, lugares, caidas, base: { derechaX: 1, derechaZ: 0, atrasX: 0, atrasZ: -1, logoX: 0, logoZ: 0, logoAncho: 6.9, logoFondo: 4.78 }, huella: new Float64Array(2), n: 0, m: 0, primeraS: Number.POSITIVE_INFINITY, ultimaS: 0, mundoPorPx: 1 }
 }
 
 const TEMP = new THREE.Object3D()
@@ -84,7 +127,6 @@ const Q_UP = new THREE.Quaternion()
 const Q_TIP = new THREE.Quaternion()
 const EJE_X = new THREE.Vector3(1, 0, 0)
 const OFFSET = new THREE.Vector3()
-const PUNTO = new THREE.Vector3()
 
 const suave = (x: number): number => {
   const u = Math.min(1, Math.max(0, x))
@@ -99,12 +141,21 @@ function horizontal(destino: THREE.Vector3, x: number, z: number, camara: THREE.
   return destino.normalize()
 }
 
+/** El lado del logo (−1, 1) de la pieza `i` y su escala: su canto en el mundo, con la cámara de la pared. */
+function ladoDeLaPieza(a: Armada, b: BaseMutable, camara: THREE.PerspectiveCamera, x: number, y: number, cuadro: { readonly ancho: number; readonly alto: number }, d: number): number {
+  const caja = a.medida.caja
+  colocarLaPieza(TEMP, camara, x, y, cuadro.ancho, cuadro.alto, d)
+  TEMP.updateMatrixWorld(true)
+  CANTO.set(caja.ancho / 2, -caja.alto, -a.espesor).applyMatrix4(TEMP.matrixWorld)
+  return (CANTO.x - b.logoX) * b.derechaX + (CANTO.z - b.logoZ) * b.derechaZ < 0 ? -1 : 1
+}
+
 /**
- * Arma la caída de este cuadro: las piezas de pie con la cámara de antes del final (`camara`, a la profundidad `d` de la pared, con el
- * scroll del pie), sus lugares, la distancia de la cámara desde arriba y la calma (en `EN_VIVO`), y los impactos (el pulso chico del
- * piso, donde cae cada una como lo ve la cámara viva). Devuelve los segundos del reloj.
+ * Arma la caída de este cuadro: las piezas y sus columnas con la cámara de antes del final (`camara`, a la profundidad `d` de la pared, con
+ * el scroll del pie), los lugares de las columnas, la distancia de la cámara desde arriba y la calma (en `EN_VIVO`), y la pose de cada
+ * columna a los segundos del reloj (lo que sus piezas siguen). Devuelve los segundos del reloj.
  */
-export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX: number, sy: number, camara: THREE.PerspectiveCamera, viva: THREE.Camera, cuadro: { readonly ancho: number; readonly alto: number }, d: number): number {
+export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX: number, sy: number, camara: THREE.PerspectiveCamera, cuadro: { readonly ancho: number; readonly alto: number }, d: number): number {
   const s = segundosDelFinal(EN_VIVO.fin)
   horizontal(DERECHA, 1, 0, camara, 1, 0)
   horizontal(ATRAS, 0, -1, camara, 0, -1)
@@ -119,71 +170,129 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
   b.logoFondo = EN_VIVO.huellaDelLogo.y
   const n = Math.min(armadas.length, MAXIMO)
   c.n = n
+  c.m = 0
+  // Las columnas: una por lado del logo, la caja de sus piezas en la pared (px) y su pieza más gruesa.
   for (let i = 0; i < n; i += 1) {
     const a = armadas[i]
-    const q = c.piezas[i]
     const caja = a.medida.caja
-    const mundoPorPx = colocarLaPieza(TEMP, camara, caja.x - scrollX, caja.y - sy, cuadro.ancho, cuadro.alto, d)
-    TEMP.updateMatrixWorld(true)
-    CANTO.set(caja.ancho / 2, -caja.alto, -a.espesor).applyMatrix4(TEMP.matrixWorld)
-    q.ancho = caja.ancho * mundoPorPx
-    q.alto = caja.alto * mundoPorPx
-    q.espesor = Math.max(0.02, a.espesor * mundoPorPx)
-    q.x = CANTO.x
-    q.y = Math.max(FLOOR_Y, CANTO.y)
-    q.z = CANTO.z
-    if (q.caidaAlto !== q.alto || q.caidaEspesor !== q.espesor) {
-      q.caida = caidaIntegrada(q)
-      q.caidaAlto = q.alto
-      q.caidaEspesor = q.espesor
+    const x = caja.x - scrollX
+    const y = caja.y - sy
+    const lado = ladoDeLaPieza(a, b, camara, x, y, cuadro, d)
+    let k = 0
+    while (k < c.m && c.columnas[k].lado !== lado) k += 1
+    const col = c.columnas[k]
+    if (k === c.m && c.m < COLUMNAS) {
+      c.m += 1
+      col.lado = lado
+      col.x0 = x
+      col.y0 = y
+      col.x1 = x + caja.ancho
+      col.y1 = y + caja.alto
+      col.e = a.espesor
+      col.hondo = 0
+    } else {
+      col.x0 = Math.min(col.x0, x)
+      col.y0 = Math.min(col.y0, y)
+      col.x1 = Math.max(col.x1, x + caja.ancho)
+      col.y1 = Math.max(col.y1, y + caja.alto)
+      col.e = Math.max(col.e, a.espesor)
     }
-    c.caidas[i] = q.caida
+    // Lo hondo de su cara (los pozos del formulario) queda sobre el piso al incrustarse.
+    if (a.pieza.forma === 'formulario') col.hondo = Math.max(col.hondo, VOLUMEN_DEL_PIE.pozo + 1)
+    const p = c.piezas[i]
+    p.columna = k
+    p.anchoPx = caja.ancho
+    p.altoPx = caja.alto
+    p.espesorPx = a.espesor
+    p.conSombra = a.pieza.forma === 'placa' || a.pieza.forma === 'formulario'
   }
-  c.ultimaS = lugaresEnElPiso(c.piezas, n, c.caidas, b, c.lugares)
-  huellaDelPie(c.piezas, n, c.lugares, b, c.huella)
-  let primera = Number.POSITIVE_INFINITY
-  for (let i = 0; i < n; i += 1) primera = Math.min(primera, c.lugares[i].toca)
-  c.primeraS = primera
-  EN_VIVO.distanciaDelPie = n === 0 ? 0 : distanciaParaElPie(camara.fov, camara.aspect, c.huella[0], c.huella[1])
+  // Cada columna en el mundo: su canto (el medio de abajo y de atrás) y sus medidas (u); la caída de su tamaño.
+  for (let k = 0; k < c.m; k += 1) {
+    const col = c.columnas[k]
+    const mpp = colocarLaPieza(TEMP, camara, col.x0, col.y0, cuadro.ancho, cuadro.alto, d)
+    TEMP.updateMatrixWorld(true)
+    CANTO.set((col.x1 - col.x0) / 2, -(col.y1 - col.y0), -col.e).applyMatrix4(TEMP.matrixWorld)
+    c.mundoPorPx = mpp
+    col.ancho = (col.x1 - col.x0) * mpp
+    col.alto = (col.y1 - col.y0) * mpp
+    col.espesor = Math.max(0.02, col.e * mpp)
+    col.hondo *= mpp
+    col.x = CANTO.x
+    col.y = Math.max(FLOOR_Y, CANTO.y)
+    col.z = CANTO.z
+    if (col.caidaAlto !== col.alto || col.caidaEspesor !== col.espesor) {
+      col.caida = caidaIntegrada(col)
+      col.caidaAlto = col.alto
+      col.caidaEspesor = col.espesor
+    }
+    c.caidas[k] = col.caida
+  }
+  for (let i = 0; i < n; i += 1) {
+    const p = c.piezas[i]
+    const col = c.columnas[p.columna]
+    const caja = armadas[i].medida.caja
+    p.dx = caja.x - scrollX - col.x0
+    p.dy = caja.y - sy - col.y0
+    p.ancho = p.anchoPx * c.mundoPorPx
+    p.alto = p.altoPx * c.mundoPorPx
+    p.espesor = Math.max(0.02, p.espesorPx * c.mundoPorPx)
+  }
+  c.ultimaS = lugaresEnElPiso(c.columnas, c.m, c.caidas, b, c.lugares)
+  huellaDelPie(c.columnas, c.m, c.lugares, b, c.huella)
+  // Todas tocan en el golpe: el piso se calma desde un poco antes (el impacto es el del logo, con su onda).
+  c.primeraS = c.m === 0 ? Number.POSITIVE_INFINITY : CAIDA_AL_HUECO.golpeS
+  // [PULIDO 20] R1 · la cámara del final de costado y lejos: el pie acostado y el logo en `ocupa` del cuadro (`encuadre.ts`).
+  const V = FINAL_DEL_PIE.camara.escritorio
+  EN_VIVO.distanciaDelPie = c.m === 0 ? 0 : distanciaDeLaVista(camara.fov, camara.aspect, V.elevacion, V.ocupa, b.logoX, b.logoZ, b.derechaX, b.derechaZ, b.atrasX, b.atrasZ, c.huella[0], c.huella[1])
   EN_VIVO.calmaDelPie.set(b.logoX, b.logoZ, c.huella[0] + CAIDA_DEL_PIE.aire, c.huella[1] + CAIDA_DEL_PIE.aire)
   EN_VIVO.baseDelPie.set(b.derechaX, b.derechaZ, b.atrasX, b.atrasZ)
-  EN_VIVO.calmaDelPieFuerza = n === 0 ? 0 : suave((s - primera + 0.4) / 0.8)
-  // Los impactos: un pulso chico del piso donde cae cada pieza (sólo hacia adelante: al rebobinar no hay impactos).
-  for (let i = 0; i < n; i += 1) {
-    const l = c.lugares[i]
-    if (c.antesS < l.toca && s >= l.toca) {
-      PUNTO.set(l.x, FLOOR_Y, l.z).project(viva)
-      if (Math.abs(PUNTO.x) <= 1.2 && Math.abs(PUNTO.y) <= 1.2) pedirLaOnda(PUNTO.x, PUNTO.y, performance.now())
-    }
-  }
-  c.antesS = s
-  return s
-}
-
-/** La pose de la pieza `i` a los `s` del reloj, sobre el grupo ya colocado de pie en la pared: el canto que baja y la placa que vuelca. */
-export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number): void {
-  if (i >= c.n) return
-  const p = c.piezas[i]
-  const pose = poseDeLaPiezaQueCae(p, c.lugares[i], s)
-  if (pose.bajada <= 0) return
-  const b = c.base
-  const grupo = a.grupo
-  // De la orientación de la cámara a la vertical, de frente (la base de la cámara horizontal), y el vuelco sobre el canto (su eje x).
+  EN_VIVO.calmaDelPieFuerza = c.m === 0 ? 0 : suave((s - c.primeraS + 0.4) / 0.8)
+  // La pose de cada columna: de la orientación de la pared a la vertical, de frente (la base de la cámara horizontal), y el vuelco sobre
+  // su canto (su eje x); su esquina de arriba a la izquierda, desde el canto.
   DERECHA.set(b.derechaX, 0, b.derechaZ)
   FRENTE.set(-b.atrasX, 0, -b.atrasZ)
   BASE.makeBasis(DERECHA, ARRIBA, FRENTE)
   Q_UP.setFromRotationMatrix(BASE)
-  grupo.quaternion.slerp(Q_UP, pose.bajada)
-  if (pose.a > 0) grupo.quaternion.multiply(Q_TIP.setFromAxisAngle(EJE_X, -pose.a))
-  // El origen del grupo (la esquina de arriba a la izquierda, en px) desde el canto, con la escala y la orientación de ahora.
-  const caja = a.medida.caja
-  OFFSET.set(caja.ancho / 2, -caja.alto, -a.espesor).multiplyScalar(grupo.scale.x).applyQuaternion(grupo.quaternion)
-  grupo.position.set(pose.x, pose.y, pose.z).sub(OFFSET)
+  for (let k = 0; k < c.m; k += 1) {
+    const col = c.columnas[k]
+    const pose = poseDeLaPiezaQueCae(col, c.lugares[k], s)
+    col.q.copy(camara.quaternion).slerp(Q_UP, pose.bajada)
+    if (pose.a > 0) col.q.multiply(Q_TIP.setFromAxisAngle(EJE_X, -pose.a))
+    OFFSET.set((col.x1 - col.x0) / 2, -(col.y1 - col.y0), -col.e).multiplyScalar(c.mundoPorPx).applyQuaternion(col.q)
+    col.o.set(pose.x, pose.y, pose.z).sub(OFFSET)
+    col.quieta = pose.quieta
+  }
+  return s
 }
 
+/** [PULIDO 20] R1 · cuánto se ve el DOM de la pieza `i` a los `s` del reloj (0 a 1; sin caída, entero): el de su columna. */
+export function domDeLaCaida(c: CaidaDelPie, i: number, s: number): number {
+  return i >= c.n ? 1 : domDeLaPieza(c.lugares[c.piezas[i].columna], s)
+}
+
+/** [PULIDO 20] R1 · si el DOM de la pieza `i` sigue a la pieza a los `s` del reloj (en camino, se queda donde estaba, apagado). */
+export function domSigueEnLaCaida(c: CaidaDelPie, i: number, s: number): boolean {
+  return i >= c.n || domSigueALaPieza(c.lugares[c.piezas[i].columna], s)
+}
+
+/** La pose de la pieza `i` a los `s` del reloj, sobre el grupo ya colocado en la pared: pegada a su columna (su giro y su lugar en ella). */
+export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number): void {
+  if (i >= c.n || s <= 0) return
+  const p = c.piezas[i]
+  const col = c.columnas[p.columna]
+  const grupo = a.grupo
+  grupo.quaternion.copy(col.q)
+  OFFSET.set(p.dx, -p.dy, 0).multiplyScalar(c.mundoPorPx).applyQuaternion(col.q)
+  grupo.position.copy(col.o).add(OFFSET)
+}
+
+/** La pose de la sombra de una pieza pegada a su columna: su canto de abajo y de atrás en el mundo, con el ángulo y el reloj de la columna. */
+const POSE_DE_LA_SOMBRA: PoseDeLaPieza = { ...POSE_DE_LA_PIEZA }
+
 /**
- * [PULIDO 19] Q4 · Las sombras de contacto de este cuadro (`sombras.ts`, hasta `MAXIMO_DE_SOMBRAS_DEL_PIE`): la huella de cada
- * pieza que ya bajó (`final/sombraDeLaPieza.ts`), en la base del pie; devuelve cuántas escribió (lo que el piso vivo pinta).
+ * [PULIDO 19] Q4 · Las sombras de contacto de este cuadro (`sombras.ts`, hasta `MAXIMO_DE_SOMBRAS_DEL_PIE`): la huella de cada placa que
+ * ya bajó (`final/sombraDeLaPieza.ts`), en la base del pie; devuelve cuántas escribió (lo que el piso vivo pinta). Va después de
+ * `armarLaCaida` (la pose de las columnas de este cuadro).
  */
 export function sombrasDeLaCaida(c: CaidaDelPie, s: number): number {
   const b = c.base
@@ -192,7 +301,19 @@ export function sombrasDeLaCaida(c: CaidaDelPie, s: number): number {
   const formas = SOMBRAS_DEL_PIE.uFormaDeLasSombrasDelPie.value
   let k = 0
   for (let i = 0; i < c.n && k < MAXIMO_DE_SOMBRAS_DEL_PIE; i += 1) {
-    const sombra = sombraDeLaPiezaQueCae(c.piezas[i], poseDeLaPiezaQueCae(c.piezas[i], c.lugares[i], s), b)
+    const p = c.piezas[i]
+    if (!p.conSombra) continue
+    const col = c.columnas[p.columna]
+    const pose = poseDeLaPiezaQueCae(col, c.lugares[p.columna], s)
+    const P = POSE_DE_LA_SOMBRA
+    P.bajada = pose.bajada
+    P.a = pose.a
+    P.hundido = pose.hundido
+    OFFSET.set(p.dx + p.anchoPx / 2, -(p.dy + p.altoPx), -p.espesorPx).multiplyScalar(c.mundoPorPx).applyQuaternion(col.q).add(col.o)
+    P.x = OFFSET.x
+    P.y = OFFSET.y
+    P.z = OFFSET.z
+    const sombra = sombraDeLaPiezaQueCae(p, P, b)
     if (sombra.alfa < SOMBRA_MINIMA) continue
     cajas[k].set(sombra.x, sombra.z, sombra.medioAncho, sombra.medioFondo)
     formas[k].set(sombra.blanda, sombra.alfa, 0, 0)

@@ -1,54 +1,61 @@
 import { FLOOR_Y } from '../probeScene'
-import { CAIDA_AL_HUECO, anguloEnElReloj, arranqueDeLaCaida, caidaIntegrada, type CaidaIntegrada } from './caidaAlHueco'
+import { CAIDA_AL_HUECO, anguloDeLaCaida, caidaIntegrada, type CaidaIntegrada } from './caidaAlHueco'
 
 /**
- * [PULIDO 19] Q2 · LAS PIEZAS DEL PIE TAMBIÉN CAEN — después del logo, cada pieza del pie de volumen (los textos extruidos, las placas
- * del mail, WhatsApp y las redes, los enlaces del recorrido, la placa del formulario) baja de su lugar en la pared del pie hasta su
- * lugar en el piso y VUELCA hacia atrás sobre su canto de abajo y de atrás con la misma física que el logo (`caidaAlHueco.ts`: la
- * inclinación hasta pasar su equilibrio, θ'' = κ·sen(θ − α) con RK4, el rebote por restitución, asentada), con su propio κ (su alto y
- * su espesor en u). Queda al ras del piso, con la cara arriba. Todo es función de los segundos del reloj del final: el rebobinado la
- * deshace por el mismo camino. Puro (Node): la escena le da las piezas como números y lee poses como números.
+ * [PULIDO 19] Q2 · LAS PIEZAS DEL PIE TAMBIÉN CAEN — cada pieza del pie de volumen (los textos extruidos, las placas del mail, WhatsApp
+ * y las redes, los enlaces del recorrido, la placa del formulario) termina acostada en el piso, con la cara arriba, alrededor del logo.
+ * Todo es función de los segundos del reloj del final: el rebobinado la deshace por el mismo camino. Puro (Node): la escena le da las
+ * piezas como números y lee poses como números.
  *
- * DÓNDE CAE CADA UNA (`lugaresEnElPiso`): la pared del pie son dos columnas a los lados del logo (la izquierda: el logotipo, el
- * titular, el contacto, el recorrido, las redes, la legal; la derecha: el formulario). Acostadas, cada columna se apila hacia atrás
- * en el orden en que estaba de pie (lo que estaba arriba queda más lejos), con `aire` entre piezas, centrada en el logo a lo largo
- * (la pila lo flanquea) y pegada a su lado del logo (con `aire`): vista desde arriba, la composición es la del pie, compacta; nada
- * cae sobre el logo ni sobre otra pieza. EL ORDEN: una onda desde el logo (`ondaUs`): cada pieza arranca al golpe más la distancia de
- * su lugar al centro, sobre la velocidad de la onda. LA BAJADA (`bajaS`): de su lugar en la pared (inclinada como la cámara) a su
- * lugar en el piso, enderezándose, con el trayecto de mínimo tirón (el de una mano que apoya algo), y ahí la física.
+ * [PULIDO 20] R1 · CON EL LOGO. Lo que cae es un CUERPO RÍGIDO (`pie3d/caida.ts`: cada columna del pie, la caja invisible que contiene sus
+ * piezas, que van pegadas a ella): su escala no cambia, sólo se mueve y gira. BAJA PARADO de la pared del pie a su lugar en el piso en lo
+ * que baja el logo (`bajaS`: llega al piso con él), con la BASE en el piso, y ahí VUELCA hacia atrás sobre el canto de su base con la
+ * física del logo (`caidaAlHueco.ts`: la inclinación hasta pasar su equilibrio, θ'' = κ·sen(θ − α) con RK4, el rebote, asentada) y su
+ * propio κ. Arranca cuando le toca para TOCAR EL PISO EN EL GOLPE: cae lo que le pide su alto y, si no entra entre la bajada y el golpe
+ * (una columna más alta que el logo), su reloj se apura lo justo: cae junto con el logo. Asentado, se INCRUSTA: baja su espesor hasta
+ * dejar la cara al ras del piso (`sobra` arriba). Su DOM sólo se ve con el cuerpo quieto (`domDeLaPieza`).
  *
- * Coordenadas: el mundo, con la base de la cámara de antes del final sin el mouse: `derecha` (horizontal), arriba (0, 1, 0) y
- * `atras` (horizontal, alejándose de la cámara). Una pieza de pie es su canto de abajo y de atrás (el medio) en el mundo y sus
- * medidas; acostada, su cara mira arriba y su cabeza apunta hacia `atras`. Lo que entra y sale son arreglos ya reservados.
+ * DÓNDE (`lugaresEnElPiso`): a los lados del logo. Acostados, los de cada lado se apilan hacia atrás en el orden en que estaban de pie (lo
+ * de arriba más lejos), con `aire` entre ellos, centrados en el logo a lo largo y pegados a su lado del logo (con `aire`).
+ *
+ * Coordenadas: el mundo, con la base de la cámara de antes del final sin el mouse: `derecha` (horizontal), arriba (0, 1, 0) y `atras`
+ * (horizontal, alejándose de la cámara). Una pieza de pie es su canto de abajo y de atrás (el medio) en el mundo y sus medidas;
+ * acostada, su cara mira arriba y su cabeza apunta hacia `atras`. Lo que entra y sale son arreglos ya reservados.
  */
 export const CAIDA_DEL_PIE = {
-  /** La onda desde el logo (u/s): cuánto después del golpe arranca cada pieza, por la distancia de su lugar al centro del logo. */
-  ondaUs: 18,
-  /** La bajada hasta su lugar en el piso, enderezándose: el trayecto de mínimo tirón, al menos `bajaS` (s) y a lo sumo `bajaUs` (u/s de media). */
-  bajaS: 0.45,
-  bajaUs: 24,
+  /** La bajada parada hasta su lugar en el piso (s): la del logo (llega al piso con él). */
+  bajaS: CAIDA_AL_HUECO.lenta.bajaS,
+  /**
+   * Los dos tramos de la bajada (partes de `bajaS`): primero va hacia su lugar a la altura que tenía (hasta `hacia`) y después baja y se
+   * endereza (el último `abaja`): cuando bajan, las de una columna ya están en filas distintas (con un solo tramo, el rótulo que va arriba
+   * del formulario lo atravesaba: bajaba 7,8 u en lo que el borde del formulario bajaba 0,6).
+   */
+  tramos: { hacia: 0.6, abaja: 0.55 },
   /** Entre piezas acostadas y hasta el logo (u). */
   aire: 0.5,
   /** Del cuadro que ocupa el pie acostado con el logo (la cámara desde arriba se queda a la distancia que lo deja entero). */
   margenDelCuadro: 0.86,
-  /** Lo que el reloj sigue corriendo después de que la última pieza se asienta (s): el destello y la expansión de siempre. */
-  despuesS: 1.2,
-  /** Cuánto dura el final después del golpe (s): lo que tardan las piezas del pie de 1440 en asentarse y `despuesS` (era 1,7 sin ellas). */
-  hastaS: 4.5,
+  /** Asentada, se incrusta en esto (s) y queda `sobra` (u) por encima del piso. */
+  incrustaS: 0.3,
+  sobra: 0.012,
+  /** El DOM: se apaga al arrancar el final (s) y aparece con la pieza incrustada (s). */
+  domFueraS: 0.15,
+  domS: 0.2,
+  /** Lo que el reloj sigue corriendo después de que el DOM de la última apareció (s): el destello y la expansión de siempre. */
+  despuesS: 0.6,
+  /** Cuánto dura el final después del golpe (s): el rebote, el incrustado, el DOM y `despuesS` (era 4,5 con las piezas en onda). */
+  hastaS: 2.5,
   /** Un lugar inalcanzable (sin piezas): la distancia de la cámara es la de siempre. */
   sinPiezas: 0,
-  /** Dos piezas a menos de esto de alto (u, de pie) están en la misma fila: acostadas van una al lado de la otra, no una detrás de otra. */
+  /**
+   * Dos piezas cuyos cantos están a menos de esto (u, de pie) están en la misma fila: acostadas van una al lado de la otra, no una detrás
+   * de otra. [PULIDO 20] R1 · y a menos de la mitad del alto de la más baja (a 1920 los enlaces del recorrido, uno arriba del otro a 0,5
+   * u, quedaban en una fila: acostados, encimados).
+   */
   mismaFila: 0.5,
-  /** El alto del logo (u): una placa más alta cae con el tiempo comprimido por la raíz de la razón (la gravedad, por la razón): el formulario tardaría 2,7 s en tocar. */
-  altoDelLogo: 4.78,
 } as const
 
-/** Cuánto más rápido corre el reloj de la caída de una pieza (1: como el logo; las más altas que el logo, más). */
-export function rapidezDeLaCaida(p: PiezaDePie): number {
-  return Math.max(1, Math.sqrt(p.alto / CAIDA_DEL_PIE.altoDelLogo))
-}
-
-/** Una pieza de pie: sus medidas (u) y el medio de su canto de abajo y de atrás en el mundo. */
+/** Una pieza de pie: sus medidas (u) y el medio de su canto de abajo y de atrás en el mundo (en la pared). */
 export interface PiezaDePie {
   readonly ancho: number
   readonly alto: number
@@ -56,6 +63,8 @@ export interface PiezaDePie {
   readonly x: number
   readonly y: number
   readonly z: number
+  /** Lo hondo de lo que se ve en su cara (u: los pozos del formulario), que al incrustarse queda sobre el piso; sin nada, 0. */
+  readonly hondo?: number
 }
 
 /** La base de la cámara de antes del final sin el mouse, horizontal: `derecha` y `atras` (unitarios, en el plano xz) y el centro del logo. */
@@ -71,47 +80,60 @@ export interface BaseDelPie {
   readonly logoFondo: number
 }
 
-/** Su lugar en el piso: el medio del canto (x, z), cuándo arranca (s del reloj) y cuándo toca y se asienta (s del reloj). */
+/** Su lugar en el piso (el medio del canto: x, z) y su reloj (s del final). */
 export interface LugarEnElPiso {
   x: number
   z: number
-  /** Cuánto dura su bajada (s): por lo que viaja. */
+  /** La bajada parada (s, la misma para todas) y cuánto se apura su caída (1: la de su alto). */
   bajaS: number
-  arranque: number
+  rapidez: number
+  /** Cuándo empieza a inclinarse, cuándo arranca la física, cuándo toca (el golpe), cuándo se asienta y cuándo queda incrustada. */
+  inclina: number
+  cae: number
   toca: number
   asentada: number
+  incrustada: number
+  /** Su caída integrada (la de su tamaño: `caidaAlHueco.ts`). */
+  caida: CaidaIntegrada
   /** A qué lado (−1 izquierda, 1 derecha) y en qué puesto de su pila (0 el más cercano a la cámara). */
   lado: number
   puesto: number
 }
 
+const CAIDA_NULA = caidaIntegrada({ alto: 1, espesor: 0.1 })
+
 export function crearLugar(): LugarEnElPiso {
-  return { x: 0, z: 0, bajaS: CAIDA_DEL_PIE.bajaS, arranque: 0, toca: 0, asentada: 0, lado: 0, puesto: 0 }
+  return { x: 0, z: 0, bajaS: CAIDA_DEL_PIE.bajaS, rapidez: 1, inclina: 0, cae: 0, toca: 0, asentada: 0, incrustada: 0, caida: CAIDA_NULA, lado: 0, puesto: 0 }
 }
 
 const ORDEN = new Int32Array(64)
 const ALTURA = new Float64Array(64)
 
-/** A qué lado del logo está la pieza (por su canto, a lo largo de `derecha`). */
-function ladoDe(p: PiezaDePie, b: BaseDelPie): number {
-  return (p.x - b.logoX) * b.derechaX + (p.z - b.logoZ) * b.derechaZ < 0 ? -1 : 1
+/** Si la pieza `k` de la pila (por altura) arranca otra fila: su canto está más arriba que el de la anterior (`mismaFila`, o la mitad del alto de la más baja). */
+function otraFila(piezas: readonly PiezaDePie[], k: number): boolean {
+  return ALTURA[k] - ALTURA[k - 1] > Math.min(CAIDA_DEL_PIE.mismaFila, 0.5 * Math.min(piezas[ORDEN[k]].alto, piezas[ORDEN[k - 1]].alto))
 }
 
-/** Cuánto hacia la derecha está el canto de la pieza respecto del logo (u), y cuánto hacia atrás. */
+/** Cuánto hacia la derecha está el canto de la pieza respecto del logo (u). */
 const aLaDerecha = (p: PiezaDePie, b: BaseDelPie): number => (p.x - b.logoX) * b.derechaX + (p.z - b.logoZ) * b.derechaZ
 
 /**
- * Los lugares en el piso de todas las piezas (en `destino`, ya reservado, uno por pieza): las dos pilas, el orden y la onda. Devuelve
- * cuándo se asienta la última (s del reloj), o el golpe si no hay piezas. `caidas`: la caída integrada de cada pieza (por su tamaño).
+ * Los lugares en el piso de todas las piezas (en `destino`, ya reservado, uno por pieza): las dos pilas y el reloj de cada una. Devuelve
+ * cuándo aparece el DOM de la última (s del reloj), o el golpe si no hay piezas. `caidas`: la caída integrada de cada pieza (por su tamaño).
  */
 export function lugaresEnElPiso(piezas: readonly PiezaDePie[], cuantas: number, caidas: readonly CaidaIntegrada[], b: BaseDelPie, destino: readonly LugarEnElPiso[]): number {
   const n = Math.min(cuantas, piezas.length, destino.length, ORDEN.length)
-  let ultima: number = CAIDA_AL_HUECO.golpeS
+  const G = CAIDA_AL_HUECO.golpeS
+  const I = CAIDA_AL_HUECO.inclinaS
+  // La bajada de todos: la del logo; lo que queda hasta el golpe, para inclinarse y caer.
+  const baja: number = CAIDA_DEL_PIE.bajaS
+  const disponible = G - I - baja
+  let ultima: number = G
   for (let lado = -1; lado <= 1; lado += 2) {
     // Las de este lado, de abajo (de pie) hacia arriba: ordenadas por la altura de su canto (inserción: son pocas).
     let m = 0
     for (let i = 0; i < n; i += 1) {
-      if (ladoDe(piezas[i], b) !== lado) continue
+      if ((aLaDerecha(piezas[i], b) < 0 ? -1 : 1) !== lado) continue
       const h = piezas[i].y
       let k = m
       while (k > 0 && ALTURA[k - 1] > h) {
@@ -124,20 +146,19 @@ export function lugaresEnElPiso(piezas: readonly PiezaDePie[], cuantas: number, 
       m += 1
     }
     if (m === 0) continue
-    // Las filas (las que estaban a la misma altura van una al lado de la otra) y el fondo total de la pila (el alto de cada fila y
-    // el aire entre filas), centrada en el logo a lo largo de `atras`.
+    // Las filas (las que estaban a la misma altura van una al lado de la otra) y el fondo total de la pila, centrada en el logo.
     let fondo = 0
     let filaAlto = 0
     for (let k = 0; k < m; k += 1) {
-      if (k > 0 && ALTURA[k] - ALTURA[k - 1] > CAIDA_DEL_PIE.mismaFila) {
+      if (k > 0 && otraFila(piezas, k)) {
         fondo += filaAlto + CAIDA_DEL_PIE.aire
         filaAlto = 0
       }
       filaAlto = Math.max(filaAlto, piezas[ORDEN[k]].alto)
     }
     fondo += filaAlto
-    // El borde de la pila pegado al logo: la pieza que más se acerca al logo (de pie) queda a `aire` de su huella; las demás, con
-    // su mismo corrimiento (la alineación de la columna, como de pie).
+    // El borde de la pila pegado al logo: la pieza que más se acerca al logo queda a `aire` de su huella; las demás, con su mismo
+    // corrimiento (la alineación de la columna, como de pie).
     let masCerca = lado < 0 ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY
     for (let k = 0; k < m; k += 1) {
       const p = piezas[ORDEN[k]]
@@ -151,7 +172,7 @@ export function lugaresEnElPiso(piezas: readonly PiezaDePie[], cuantas: number, 
       const i = ORDEN[k]
       const p = piezas[i]
       const l = destino[i]
-      if (k > 0 && ALTURA[k] - ALTURA[k - 1] > CAIDA_DEL_PIE.mismaFila) {
+      if (k > 0 && otraFila(piezas, k)) {
         atras += filaAlto + CAIDA_DEL_PIE.aire
         filaAlto = 0
       }
@@ -162,23 +183,20 @@ export function lugaresEnElPiso(piezas: readonly PiezaDePie[], cuantas: number, 
       l.z = b.logoZ + b.derechaZ * derecha + b.atrasZ * atras
       l.lado = lado
       l.puesto = k
-      const distancia = Math.hypot(derecha, atras + p.alto / 2)
-      l.arranque = CAIDA_AL_HUECO.golpeS + distancia / CAIDA_DEL_PIE.ondaUs
+      // El reloj: toca en el golpe; su física arranca lo que tarda en caer antes (apurada lo justo si no entra después de la bajada).
       const c = caidas[i]
-      const rapidez = rapidezDeLaCaida(p)
-      l.bajaS = Math.max(CAIDA_DEL_PIE.bajaS, Math.hypot(l.x - p.x, FLOOR_Y - p.y, l.z - p.z) / CAIDA_DEL_PIE.bajaUs)
-      const vuelca = l.arranque + l.bajaS
-      l.toca = vuelca + (CAIDA_AL_HUECO.inclinaS + c.contactoS) / rapidez
-      l.asentada = vuelca + (CAIDA_AL_HUECO.inclinaS + (Number.isFinite(c.asentadaS) ? c.asentadaS : c.contactoS)) / rapidez
-      ultima = Math.max(ultima, l.asentada)
+      l.caida = c
+      l.bajaS = baja
+      l.rapidez = Math.max(1, c.contactoS / disponible)
+      l.cae = G - c.contactoS / l.rapidez
+      l.inclina = l.cae - I / l.rapidez
+      l.toca = G
+      l.asentada = l.cae + (Number.isFinite(c.asentadaS) ? c.asentadaS : c.contactoS) / l.rapidez
+      l.incrustada = l.asentada + CAIDA_DEL_PIE.incrustaS
+      ultima = Math.max(ultima, l.incrustada + CAIDA_DEL_PIE.domS)
     }
   }
   return ultima
-}
-
-/** La caída integrada de una pieza (memorizada por tamaño en `caidaAlHueco.ts`). */
-export function caidaDeLaPieza(p: PiezaDePie): CaidaIntegrada {
-  return caidaIntegrada(p)
 }
 
 const suave = (x: number): number => {
@@ -188,53 +206,63 @@ const suave = (x: number): number => {
 
 /** Lo que devuelve `poseDeLaPiezaQueCae` (el mismo objeto cada vez: sin reservas por cuadro). */
 export const POSE_DE_LA_PIEZA = {
-  /** Cuánto bajó de su lugar en la pared a su lugar en el piso (0 de pie en la pared, 1 en el piso, enderezada). */
+  /** Cuánto bajó de su lugar en la pared a su lugar en el piso (0 en la pared, 1 parada en el piso, derecha). */
   bajada: 0,
   /** El medio del canto en el mundo. */
   x: 0,
   y: 0,
   z: 0,
-  /** El ángulo del cuerpo (0 de pie, π/2 acostada) y si ya tocó. */
+  /** El ángulo del cuerpo (0 de pie, π/2 acostada), si ya tocó, cuánto se incrustó (0 a 1) y si quedó quieta (incrustada). */
   a: 0,
   toco: false,
+  hundido: 0,
+  quieta: false,
 }
 export type PoseDeLaPieza = typeof POSE_DE_LA_PIEZA
 
 /**
- * La pose de la pieza a los `s` del reloj del final: antes de su arranque, de pie en la pared; en la bajada, el canto va de su lugar
- * en la pared a su lugar en el piso con el trayecto de mínimo tirón (y `bajada` dice cuánto se enderezó); después, la física del
- * vuelco sobre el canto, que no se mueve más.
+ * La pose de la pieza a los `s` del reloj del final: en cero, de pie en la pared; en la bajada, el canto va hacia su lugar en el piso y
+ * después baja (`tramos`), cada tramo con el trayecto de mínimo tirón (y `bajada` dice cuánto bajó y se enderezó); parada en el piso, se
+ * inclina y vuelca sobre el canto, que no se mueve más; asentada, se incrusta.
  */
 export function poseDeLaPiezaQueCae(p: PiezaDePie, l: LugarEnElPiso, s: number): typeof POSE_DE_LA_PIEZA {
   const P = POSE_DE_LA_PIEZA
-  const u = s - l.arranque
-  if (u <= 0) {
-    P.bajada = 0
-    P.x = p.x
-    P.y = p.y
-    P.z = p.z
-    P.a = 0
-    P.toco = false
-    return P
-  }
-  const b = suave(u / l.bajaS)
+  const T = CAIDA_DEL_PIE.tramos
+  const h = s <= 0 ? 0 : suave(s / (l.bajaS * T.hacia))
+  const b = s <= 0 ? 0 : suave((s - l.bajaS * (1 - T.abaja)) / (l.bajaS * T.abaja))
   P.bajada = b
-  P.x = p.x + (l.x - p.x) * b
+  P.x = p.x + (l.x - p.x) * h
   P.y = p.y + (FLOOR_Y - p.y) * b
-  P.z = p.z + (l.z - p.z) * b
-  if (u <= l.bajaS) {
-    P.a = 0
-    P.toco = false
-    return P
-  }
-  // El vuelco, con el reloj del logo corrido (y comprimido en las placas altas): la inclinación arranca al terminar la bajada
-  // (`anguloEnElReloj` la pone `inclinaS` antes de su arranque).
-  const c = caidaIntegrada(p)
-  const reloj = (u - l.bajaS) * rapidezDeLaCaida(p) + arranqueDeLaCaida(p) - CAIDA_AL_HUECO.inclinaS
-  const r = anguloEnElReloj(p, reloj)
-  P.a = r.a
-  P.toco = r.toco || reloj - arranqueDeLaCaida(p) >= c.contactoS
+  P.z = p.z + (l.z - p.z) * h
+  P.a = 0
+  P.toco = false
+  P.hundido = 0
+  P.quieta = false
+  if (s <= l.inclina) return P
+  // La inclinación hasta pasar su equilibrio (el trayecto de mínimo tirón) y después la física, en el reloj de la pieza.
+  const c = l.caida
+  const u = (s - l.cae) * l.rapidez
+  P.a = u <= 0 ? c.desde * suave((u + CAIDA_AL_HUECO.inclinaS) / CAIDA_AL_HUECO.inclinaS) : anguloDeLaCaida(c, u)
+  P.toco = u >= c.contactoS
+  // Asentada, se incrusta: baja su espesor hasta dejar la cara (y lo hondo de ella) `sobra` por encima del piso.
+  P.hundido = suave((s - l.asentada) / CAIDA_DEL_PIE.incrustaS)
+  P.y -= Math.max(0, p.espesor - (p.hondo ?? 0) - CAIDA_DEL_PIE.sobra) * P.hundido
+  P.quieta = s >= l.incrustada
   return P
+}
+
+/**
+ * Cuánto se ve el DOM de la pieza a los `s` del reloj (0 a 1): entero en cero (la pared), se apaga al arrancar el final (`domFueraS`) y
+ * vuelve con la pieza incrustada (`domS`): mientras baja, vuelca o se levanta, nada (ni clics ni su homografía de canto).
+ */
+export function domDeLaPieza(l: LugarEnElPiso, s: number): number {
+  if (s <= CAIDA_DEL_PIE.domFueraS) return 1 - suave(s / CAIDA_DEL_PIE.domFueraS)
+  return suave((s - l.incrustada) / CAIDA_DEL_PIE.domS)
+}
+
+/** Si el DOM de la pieza sigue a la pieza a los `s` del reloj: en la pared (mientras se apaga) y quieta en el piso; en camino, no. */
+export function domSigueALaPieza(l: LugarEnElPiso, s: number): boolean {
+  return s <= CAIDA_DEL_PIE.domFueraS || s >= l.incrustada
 }
 
 /**

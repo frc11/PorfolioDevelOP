@@ -10,6 +10,7 @@ import type { BaseDelPie, PiezaDePie, PoseDeLaPieza } from './caidaDelPie'
  * canto por el coseno) hasta la placa entera, y la sombra se aclara y se ablanda con la ALTURA MEDIA de la placa sobre su huella
  * (una placa levantada tapa poco); al apoyarse se condensa: acostada, el ribete blando alrededor de la placa, al ras, lo que la
  * asienta. La huella sale en la base del pie (`derecha`, `atras`), como los lugares. Sin reservas por cuadro: el mismo registro.
+ * [PULIDO 20] R1 · y se va al incrustarse (la cara al ras no tapa nada).
  */
 export const SOMBRA_DE_LA_PIEZA = {
   /** El medio de la huella en el mundo. */
@@ -23,12 +24,12 @@ export const SOMBRA_DE_LA_PIEZA = {
   alfa: 0,
 }
 
-/** La sombra de la pieza `p` en la pose `pose` (`poseDeLaPiezaQueCae`), en la base `b` del pie. */
-export function sombraDeLaPiezaQueCae(p: PiezaDePie, pose: PoseDeLaPieza, b: BaseDelPie): typeof SOMBRA_DE_LA_PIEZA {
+/** La sombra de la pieza `p` (sus medidas) en la pose `pose` (`poseDeLaPiezaQueCae`: su canto en el mundo), en la base `b` del pie. */
+export function sombraDeLaPiezaQueCae(p: Pick<PiezaDePie, 'ancho' | 'alto' | 'espesor'>, pose: PoseDeLaPieza, b: BaseDelPie): typeof SOMBRA_DE_LA_PIEZA {
   const S = SOMBRA_DE_LA_PIEZA
   if (pose.bajada <= 0) {
-    S.x = p.x
-    S.z = p.z
+    S.x = pose.x
+    S.z = pose.z
     S.medioAncho = 0
     S.medioFondo = 0
     S.blanda = 0
@@ -46,6 +47,6 @@ export function sombraDeLaPiezaQueCae(p: PiezaDePie, pose: PoseDeLaPieza, b: Bas
   // La altura media de la placa sobre su huella (0 de pie, 0 acostada, lo más alta a mitad del vuelco), sobre la del canto.
   const h = pose.y - FLOOR_Y + (p.alto * p.alto * seno * coseno) / (2 * fondo)
   S.blanda = blandaDeLaSombra(h)
-  S.alfa = alfaDeLaSombra(h) * pose.bajada
+  S.alfa = alfaDeLaSombra(h) * pose.bajada * (1 - pose.hundido)
   return S
 }

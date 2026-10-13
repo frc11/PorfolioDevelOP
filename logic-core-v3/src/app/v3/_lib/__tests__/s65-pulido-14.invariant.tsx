@@ -97,7 +97,7 @@ afirmar(rampa(opacidadDelDom), `L2 c · la causa: el DOM de la pieza, apagado mi
 controlPositivo('L2 c · el detector VE el DOM de antes (siempre a la vista)', () => '', rampa)
 const ARMADAS = leer('_lib/escena/pie3d/armadas.ts')
 const conLaPlaca = (a: string, p: string): boolean =>
-  a.includes('const opacidad = opacidadDelDom(e)') && a.includes('if (a.transformacion === null) {') && a.includes('a.pieza.elemento.style.opacity = opacidad') &&
+  a.includes('const opacidad = opacidadDelDom(e, final)') && a.includes('if (a.transformacion === null) {') && a.includes('a.pieza.elemento.style.opacity = opacidad') &&
   p.includes('if (e !== undefined && !e.isIntersecting && activo instanceof HTMLElement && el.contains(activo)) activo.blur()')
 afirmar(conLaPlaca(ARMADAS, PIE_TSX), '  la llegada lo escribe (sin pisar el volteo) y, al irse del pie, el campo con el foco lo suelta')
 controlPositivo('  el detector VE el foco que se quedaba', PIE_TSX.replace('activo.blur()', 'void activo'), (p: string) => conLaPlaca(ARMADAS, p))

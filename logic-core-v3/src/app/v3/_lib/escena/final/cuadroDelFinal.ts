@@ -19,6 +19,7 @@ import { ENCUADRE_EN_VIVO } from './encuadreDelPie'
 import { escribiendoEnUnCampo, pasoDelTeclado, sinTeclado, tecladoQuieto, type EstadoDelTeclado } from './teclado'
 import { fueraDeSuLugar, sinElRig } from './caidaAlHueco'
 import {
+  ELEVACION_DEL_FINAL,
   EN_VIVO,
   FINAL_DEL_PIE,
   RELOJ_DEL_FINAL,
@@ -267,7 +268,9 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // 1 · [RETOQUE DEL ENCASTRE] 1D · el reloj: al fondo, arranca solo cuando el pie llegó entero y corre a su ritmo (el
   // scroll hacia abajo no lo adelanta). [NOCTURNO FINAL] A1 · un gesto hacia arriba lo rebobina entero, solo; parado,
   // vuelve a empezar a los 2,5 s sin gestos. A2 · fuera del fondo o en un viaje, se deshace con tope.
-  s.fondo = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+  // [PULIDO 20] R1 · el fondo del LAYOUT (`offsetHeight`), no el desborde (`scrollHeight`): un DOM transformado (la homografía de una pieza
+  // del pie que sigue a la cámara que sube) agrandaba el desborde, la página dejaba de estar «al fondo», el final volvía y se trababa.
+  s.fondo = Math.max(0, document.documentElement.offsetHeight - window.innerHeight)
   EN_VIVO.pegadoDesde = s.fondo
   const ahora = ahoraS()
   const haciaAbajo = s.gestos.abajo > s.gestos.leido
@@ -394,6 +397,8 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // desde arriba, centrada en el logo (su blanco baja al piso con la caída). [PULIDO 11] D · sin la presión, sin sus sacudones.
   // [PULIDO 13] K4 · atada al ángulo de la caída (el logo la mira de frente). [PULIDO 14] L2 a · un solo movimiento: cada cámara
   // sube desde su elevación (la viva, con el mouse; la de las piezas, sin él) con el acercamiento, y de frente desde los 20°.
+  // [PULIDO 20] R1 · en escritorio con el pie, la cámara sube de costado y se queda lejos (se ve gran parte de la escena).
+  ELEVACION_DEL_FINAL.grados = !s.angosto && EN_VIVO.distanciaDelPie > 0 ? FINAL_DEL_PIE.camara.escritorio.elevacion : FINAL_DEL_PIE.camara.elevacion
   const elevacion = elevacionDe(CAMARA_SIN_EL_MOUSE.position)
   const sube = alturaDeLaCaida(fin, tamano, elevacion)
   EN_VIVO.camara = sube

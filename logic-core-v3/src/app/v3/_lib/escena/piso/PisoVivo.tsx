@@ -230,6 +230,10 @@ function armar(grilla: Grilla, conContacto: boolean) {
     // [EL ENCASTRE] 2D · el mar calmo alrededor del logo que se encastra (y sin el techo que lo esquivaba).
     uCalmaDelFinal: FINAL_EN_EL_PISO.uCalmaDelFinal,
     uCajaDelLogo: FINAL_EN_EL_PISO.uCajaDelLogo,
+    // [PULIDO 20] R1 · y bajo el pie acostado (PULIDO 19 Q2 la escribía, pero la simulación no la recibía: WebGL la dejaba en cero).
+    uCalmaDelPie: FINAL_EN_EL_PISO.uCalmaDelPie,
+    uBaseDelPie: FINAL_EN_EL_PISO.uBaseDelPie,
+    uCalmaDelPieFuerza: FINAL_EN_EL_PISO.uCalmaDelPieFuerza,
     // [PULIDO 6] E2 · la distancia al logo: la calma, la energía y el golpe se miden desde el filo. [PULIDO 7] F1 · el latido se borró.
     uDistanciaAlLogo: FINAL_EN_EL_PISO.uDistanciaAlLogo,
     uMarcoDeLaDistancia: FINAL_EN_EL_PISO.uMarcoDeLaDistancia,

@@ -19,7 +19,7 @@ import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocaci
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
-import { aplicarLaCaida, armarLaCaida, sombrasDeLaCaida, type CaidaDelPie } from './caida'
+import { aplicarLaCaida, armarLaCaida, domDeLaCaida, domSigueEnLaCaida, sombrasDeLaCaida, type CaidaDelPie } from './caida'
 import { CAJAS_DEL_PIE, escribirLaCaja } from './cajasDelPolvo'
 import { SOMBRAS_DEL_PIE } from './sombras'
 import { duracionDeLaTransformacion, poseDeLaTransformacion } from './transformacionDelPie'
@@ -54,10 +54,13 @@ const MARGEN = 120
  */
 export const DOM_CON_LA_PIEZA = { desde: 0.9 } as const
 
-/** [PULIDO 14] L2 c · la opacidad del DOM de una pieza por cuánto llegó (vacía con la pieza en su lugar: el DOM como lo deja su dueño). */
-export function opacidadDelDom(llego: number): string {
-  if (llego >= 0.999) return ''
-  return String(Math.round(Math.min(1, Math.max(0, (llego - DOM_CON_LA_PIEZA.desde) / (1 - DOM_CON_LA_PIEZA.desde))) * 100) / 100)
+/**
+ * [PULIDO 14] L2 c · la opacidad del DOM de una pieza por cuánto llegó (vacía con la pieza en su lugar: el DOM como lo deja su dueño).
+ * [PULIDO 20] R1 · y por el final (`final`, 0 a 1: en camino al piso, apagado).
+ */
+export function opacidadDelDom(llego: number, final = 1): string {
+  if (llego >= 0.999 && final >= 0.999) return ''
+  return String(Math.round(Math.min(1, Math.max(0, (llego - DOM_CON_LA_PIEZA.desde) / (1 - DOM_CON_LA_PIEZA.desde)), Math.max(0, final)) * 100) / 100)
 }
 
 export interface Armada {
@@ -151,7 +154,7 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
     a.grupo.visible = arriba + c.abajo > -MARGEN && arriba + c.arriba < cuadro.alto + MARGEN
     if (a.grupo.visible) d = Math.min(d, profundidadDeLaPieza(camara, a.medida.caja.x - scrollX + (c.izquierda + c.derecha) / 2, arriba + c.abajo, cuadro.ancho, cuadro.alto))
   }
-  const segundos = enElFinal ? armarLaCaida(s.caida, s.armadas, scrollX, sy, camara, viva, cuadro, d) : 0
+  const segundos = enElFinal ? armarLaCaida(s.caida, s.armadas, scrollX, sy, camara, cuadro, d) : 0
   for (let k = 0; k < s.armadas.length; k += 1) {
     const a = s.armadas[k]
     if (!a.grupo.visible) continue
@@ -169,11 +172,13 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
       // [PULIDO 11] B4 · con el botón ocupado, el rótulo en relieve se apaga en el mismo cuadro en que aparece la carga (sin rearmar).
       a.uniformes.uSinRotuloDelPie.value = a.boton?.getAttribute('aria-busy') === 'true' ? 1 : 0
     }
-    // El DOM, donde la pieza va a quedar (el viaje en cero); después, la pieza en camino.
+    // El DOM, donde la pieza va a quedar (el viaje en cero); después, la pieza en camino. [PULIDO 20] R1 · en el final, sólo en la pared
+    // y con la pieza quieta en el piso: en camino se queda donde estaba, apagado (su homografía de canto agrandaba el documento y el
+    // final dejaba de estar al fondo: se trababa).
     a.viaje.matrix.identity()
     a.grupo.updateMatrixWorld(true)
-    if (a.pieza.forma !== 'texto') seguirLaPieza(a, viva, cuadro, izquierda, arriba, s)
-    llegar(a, s)
+    if (a.pieza.forma !== 'texto' && (!enElFinal || domSigueEnLaCaida(s.caida, k, segundos))) seguirLaPieza(a, viva, cuadro, izquierda, arriba, s)
+    llegar(a, s, enElFinal ? domDeLaCaida(s.caida, k, segundos) : 1)
     if (a.transformacion !== null) transformar(a, a.transformacion, s.quieto, dt)
     a.viaje.updateMatrixWorld(true)
   }
@@ -214,8 +219,8 @@ function avanzarLaCoreografia(c: EstadoDelPie['coreografia'], dt: number): void 
   c.mostrado = avanceDelPie(c.mostrado, pedido, !enViaje && ahora - c.cuando > ASIENTO.quietoMs, dt, enViaje)
 }
 
-/** La pieza en su tramo: su pose, cuánto se ve (y sus letras, el titular) y si su DOM ya recibe clics. */
-function llegar(a: Armada, s: EstadoDelPie): void {
+/** La pieza en su tramo: su pose, cuánto se ve (y sus letras, el titular) y si su DOM ya recibe clics ([PULIDO 20] R1 · y el final: `final`). */
+function llegar(a: Armada, s: EstadoDelPie, final: number): void {
   const tramo = tramoDe(a.pieza.llegada)
   const e = deLaPieza(progresoDelTramo(tramo, s.coreografia.mostrado), a.orden, tramo.dura)
   const porLetras = a.pieza.forma === 'texto' && a.pieza.llegada === 'atras'
@@ -224,11 +229,11 @@ function llegar(a: Armada, s: EstadoDelPie): void {
   a.uniformes.uLetrasDelPie.value = porLetras ? e : -1
   a.uniformes.uApareceDelPie.value = apareceDeLaPieza(a.pieza.llegada, e, porLetras)
   a.uniformes.uQuietoDelPie.value = s.quieto ? 1 : 0
-  const tocable = e >= 0.999
+  const tocable = e >= 0.999 && final >= 0.999
   if (a.pieza.forma === 'texto') return
   // [PULIDO 14] L2 c · el DOM, con la pieza: apagado mientras vuela; sólo escribe al cambiar (en su lugar, no lo toca).
   if (a.transformacion === null) {
-    const opacidad = opacidadDelDom(e)
+    const opacidad = opacidadDelDom(e, final)
     if (opacidad !== a.opacidadDeLlegada) {
       a.opacidadDeLlegada = opacidad
       a.pieza.elemento.style.opacity = opacidad

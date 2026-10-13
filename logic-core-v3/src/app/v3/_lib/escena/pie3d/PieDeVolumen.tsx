@@ -134,7 +134,7 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       piezas: () =>
         m.current.armadas.map((a) => {
           const r = a.pieza.elemento.getBoundingClientRect()
-          return { id: a.pieza.id, forma: a.pieza.forma, llegada: a.pieza.llegada, orden: a.orden, llego: a.llego, aparece: a.uniformes.uApareceDelPie.value, tocable: a.tocable, visible: a.grupo.visible, d: a.d, mundoPorPx: a.mundoPorPx, hundido: a.hundido, css: a.css, dom: [r.left, r.top, r.right, r.bottom].map(Math.round), caja: [a.medida.caja.x, a.medida.caja.y - scrollY, a.medida.caja.ancho, a.medida.caja.alto].map(Math.round), letras: a.medida.letras.length, trazos: a.medida.trazos.length, pozos: a.medida.pozos.length }
+          return { id: a.pieza.id, forma: a.pieza.forma, llegada: a.pieza.llegada, espesor: a.espesor, orden: a.orden, llego: a.llego, aparece: a.uniformes.uApareceDelPie.value, tocable: a.tocable, visible: a.grupo.visible, d: a.d, mundoPorPx: a.mundoPorPx, hundido: a.hundido, css: a.css, dom: [r.left, r.top, r.right, r.bottom].map(Math.round), caja: [a.medida.caja.x, a.medida.caja.y - scrollY, a.medida.caja.ancho, a.medida.caja.alto].map(Math.round), letras: a.medida.letras.length, trazos: a.medida.trazos.length, pozos: a.medida.pozos.length }
         }),
       // [RETOQUE DEL PIE] P3 · cuántas ondas pidió el piso ([NOCTURNO] A2: la onda, en el producto).
       ondas: () => ONDA_PEDIDA.n,

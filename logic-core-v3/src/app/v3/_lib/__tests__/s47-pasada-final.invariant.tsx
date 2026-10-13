@@ -432,7 +432,7 @@ afirmar(/const progreso = volumen \? null : deLaSeccion/.test(cierreC2) && /expo
 // [NOCTURNO FINAL] A4 · el pie de pie en la pared ya no proyecta sombra en el piso (lo pide el ticket): lo que va en el piso con la pieza en camino es su caja para el polvo (B4).
 // [PULIDO 19] Q4 · las piezas que caen en el final sí tienen su sombra de contacto (`pie3d/caida.ts`; s70 la mide): sólo con el final en marcha.
 const elDomEspera = (c: string): boolean => {
-  const [i, s, l] = [c.indexOf('a.viaje.matrix.identity()'), c.indexOf('seguirLaPieza(a, viva, cuadro, izquierda, arriba, s)'), c.indexOf('llegar(a, s)\n')]
+  const [i, s, l] = [c.indexOf('a.viaje.matrix.identity()'), c.indexOf('seguirLaPieza(a, viva, cuadro, izquierda, arriba, s)'), c.indexOf('llegar(a, s, ')]
   return i > 0 && i < s && s < l && /const tocable = e >= 0\.999/.test(c) && /a\.pieza\.elemento\.style\.pointerEvents = tocable \? '' : 'none'/.test(c) && /escribirLaCaja\(cajas, a\.viaje\.matrixWorld, a\.caja\)/.test(c) && /SOMBRAS_DEL_PIE\.uCuantasSombrasDelPie\.value = enElFinal \? sombrasDeLaCaida\(s\.caida, segundos\) : 0/.test(c)
 }
 afirmar(elDomEspera(armadasFuente), '  lo interactivo va donde la pieza va a quedar (con el viaje en cero) y no recibe clics hasta que llegó; la caja del polvo va con la pieza en camino (sombra del pie de pie en la pared, ninguna; sólo las que caen en el final)')

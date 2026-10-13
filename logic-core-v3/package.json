@@ -327,6 +327,8 @@
     "test:s69": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s69",
     "test:s70-pulido-19": "npx tsx src/app/v3/_lib/__tests__/s70-pulido-19.invariant.tsx",
     "test:s70": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s70",
+    "test:s71-pulido-20": "npx tsx src/app/v3/_lib/__tests__/s71-pulido-20.invariant.tsx",
+    "test:s71": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s71",
     "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",
