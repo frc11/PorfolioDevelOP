@@ -15,8 +15,10 @@ export const CRISTAL = {
    * Las esquirlas: cuántas, el anillo donde viven (radio u: adentro de la trama cercana, contra el domo), entre qué alturas sobre el piso
    * (u), su largo (u), su ancho (parte del largo), su espesor (parte del ancho), lo que se mete el bisel (parte) y la semilla.
    */
-  // [PULIDO 21] S4 · toda la escena rodeada, pareja en los 360° del domo: tres filas (por altura) de 32, cada una con el azimut parejo.
-  esquirlas: { cuantas: 96, radio: [30, 36], alto: [2, 30], largo: [8, 16], ancho: [0.34, 0.6], espesor: [0.06, 0.12], bisel: 0.12, semilla: 20, filas: 3 },
+  // [PULIDO 21] S4 · toda la escena rodeada, pareja en los 360° del domo. [PULIDO 22] T5 · una PARED continua de facetas: 4 filas de 40
+  // celdas a 27 u (adentro de la trama, en 38, y de la fábrica, en 45: nada del fondo la tapa), del piso a 36 u; el largo es el alto de
+  // la celda y el ancho, partes de su paso en el azimut (más de una: se solapan, sin huecos).
+  esquirlas: { cuantas: 160, radio: [26.7, 27.3], alto: [0, 36], largo: [9.5, 9.8], ancho: [1.06, 1.1], espesor: [0.03, 0.05], bisel: 0.12, semilla: 20, filas: 4 },
   /** El vidrio: el índice, a qué distancia detrás se lee el fondo (u), el F0 de Schlick y la dispersión del prisma (en los cantos, el doble). */
   vidrio: { indice: 1.5, fondo: 14, f0: 0.04, dispersion: 0.03 },
   /**
@@ -25,7 +27,7 @@ export const CRISTAL = {
    */
   luz: { especular: [0.9, 1.6], dureza: 60, reflejo: [0.15, 0.22], filo: [0.65, 0.8], tinta: 0.06 },
   /** Cristalizan: aparecen creciendo (s), respiran muy lento (periodo s, cuánto) y giran muy lento (grados por segundo, entre). */
-  movimiento: { aparecenS: 2.5, periodoS: 140, crece: 0.05, giroGradosS: [0.35, 1.1], crecenDesde: 0.55 },
+  movimiento: { aparecenS: 2.5, periodoS: 140, crece: 0.02, giroGradosS: [0.01, 0.03], crecenDesde: 0.55 },
   /**
    * Dónde se ven en el cuadro (NDC): fuera de la zona central segura (una elipse: sus semiejes, y el fundido hacia afuera, en veces del
    * semieje), lejos de la cámara (u: de nada a entera), lejos de las cajas del texto (el fundido: NDC en lo puro; px de más en el
@@ -104,31 +106,31 @@ export function esquirlasDelCristal(n: number = CRISTAL.esquirlas.cuantas, semil
   const salida: Esquirla[] = []
   const porFila = Math.ceil(n / E.filas)
   const franja = (E.alto[1] - E.alto[0]) / E.filas
+  const j = (k: number): number => (azar() - 0.5) * 2 * k
   for (let k = 0; k < n; k += 1) {
-    // [PULIDO 21] S4 · su fila (la franja de alturas) y su lugar en ella: el azimut parejo, cada fila corrida media esquirla.
+    // [PULIDO 22] T5 · una pared: cada esquirla es una celda (su columna en el azimut, su fila en la altura, las filas corridas media
+    // celda como ladrillos), de cara al centro con un desvío chico (las facetas), y un poco más grande que su celda (sin huecos).
     const fila = Math.floor(k / porFila)
-    const az = (((k % porFila) + 0.5 * (fila % 2) + 0.2 + azar() * 0.6) / porFila) * 2 * Math.PI
+    const az = (((k % porFila) + 0.5 * (fila % 2) + 0.5) / porFila) * 2 * Math.PI
     const radio = entre(azar, E.radio)
-    const y = FLOOR_Y + E.alto[0] + franja * (fila + azar())
+    const y = FLOOR_Y + E.alto[0] + franja * (fila + 0.5)
     const largo = entre(azar, E.largo)
-    const ancho = largo * entre(azar, E.ancho)
+    const ancho = ((2 * Math.PI * radio) / porFila) * entre(azar, E.ancho)
     const espesor = ancho * entre(azar, E.espesor)
     const x = Math.sin(az) * radio
     const z = Math.cos(az) * radio
-    // Mira hacia el centro de la sala (con un desvío y algo hacia abajo o arriba): la cara se ve.
-    const dx = -Math.sin(az + (azar() - 0.5) * 0.9)
-    const dz = -Math.cos(az + (azar() - 0.5) * 0.9)
-    const dy = (azar() - 0.5) * 0.7
+    const dx = -Math.sin(az + j(0.12))
+    const dz = -Math.cos(az + j(0.12))
+    const dy = j(0.1)
     const l = Math.hypot(dx, dy, dz)
-    const giro = mirando(dx / l, dy / l, dz / l, azar() * 2 * Math.PI)
+    const giro = mirando(dx / l, dy / l, dz / l, j(0.05))
     const ex = azar() - 0.5
     const ey = azar() - 0.5
     const ez = azar() - 0.5
     const le = Math.hypot(ex, ey, ez) || 1
     const velocidad = ((entre(azar, CRISTAL.movimiento.giroGradosS) * Math.PI) / 180) * (azar() < 0.5 ? -1 : 1)
-    // El contorno: la punta arriba, la base irregular abajo, uno o dos quiebres en los costados (convexo: los ángulos crecen).
-    const puntaX = (azar() - 0.5) * 0.3
-    const contorno = [puntaX, 0.5, 0.5, -0.05 + azar() * 0.3, 0.35 + azar() * 0.15, -0.5, -0.3 - azar() * 0.2, -0.5, -0.5, -0.1 + azar() * 0.25]
+    // El contorno: la celda con las esquinas apenas corridas (el vidrio cortado a mano).
+    const contorno = [-0.5 + j(0.04), -0.5 + j(0.04), 0.5 + j(0.04), -0.5 + j(0.04), 0.5 + j(0.04), 0.5 + j(0.04), -0.5 + j(0.04), 0.5 + j(0.04)]
     salida.push({ x, y, z, largo, ancho, espesor, giro, eje: [ex / le, ey / le, ez / le], velocidad, fase: azar() * 2 * Math.PI, faseDelGiro: azar() * 2 * Math.PI, contorno })
   }
   return salida
