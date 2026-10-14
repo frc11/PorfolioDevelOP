@@ -201,7 +201,8 @@ function correrLaCaida(datos: DatosDelPie, mover?: (c: CaidaDelPie) => void): De
       if (antes[i] !== undefined) salto = Math.max(salto, antes[i].distanceTo(cajas[i].c))
       antes[i] = cajas[i].c.clone()
       for (let j = i + 1; j < cajas.length; j += 1) {
-        if (c.piezas[i].columna !== c.piezas[j].columna) continue
+        // [PULIDO 23] U3 · un texto sube su espesor al incrustarse su columna (se apoya sobre el piso): el despegue, entre las placas.
+        if (c.piezas[i].columna !== c.piezas[j].columna || c.piezas[i].esTexto || c.piezas[j].esTexto) continue
         const clave = `${String(i)}-${String(j)}`
         const dij = cajas[i].c.distanceTo(cajas[j].c)
         const d0 = distancias.get(clave)
@@ -372,7 +373,7 @@ const CABLEADO: Cableado = { armadas: ARMADAS_TS, caida: CAIDA_TS, caidaDelPie: 
 const cableadoBien = (f: Cableado): boolean =>
   f.armadas.includes("if (a.pieza.forma !== 'texto' && (!enElFinal || domSigueEnLaCaida(s.caida, k, segundos))) seguirLaPieza(") && f.armadas.includes('llegar(a, s, enElFinal ? domDeLaCaida(s.caida, k, segundos) : 1)') && f.armadas.includes('const tocable = e >= 0.999 && final >= 0.999') &&
   ['uCalmaDelPie: FINAL_EN_EL_PISO.uCalmaDelPie', 'uBaseDelPie: FINAL_EN_EL_PISO.uBaseDelPie', 'uCalmaDelPieFuerza: FINAL_EN_EL_PISO.uCalmaDelPieFuerza'].every((u) => f.piso.slice(f.piso.indexOf('const sim = crearPingPong(')).split('...LUZ_DE_ABAJO_EN_VIVO')[0].includes(u)) &&
-  f.sombra.includes('* pose.bajada * (1 - pose.hundido)') && f.caida.includes('if (!p.conSombra) continue') && f.caida.includes("p.conSombra = a.pieza.forma === 'placa' || a.pieza.forma === 'formulario'") && !f.caida.includes('pedirLaOnda') &&
+  f.sombra.includes('* pose.bajada * (1 - pose.hundido)') && f.caida.includes('if (!p.conSombra && !p.esTexto) continue') && f.caida.includes("p.conSombra = a.pieza.forma === 'placa' || a.pieza.forma === 'formulario'") && !f.caida.includes('pedirLaOnda') &&
   lineasDeCodigo(f.caidaDelPie) <= 300 && lineasDeCodigo(f.caida) <= 300 &&
   ['poseDeLaPiezaQueCae', 'lugaresEnElPiso', 'domDeLaPieza', 'domSigueALaPieza'].every((n) => sinReservasEn(f.caidaDelPie, n)) && ['armarLaCaida', 'aplicarLaCaida', 'domDeLaCaida', 'domSigueEnLaCaida', 'sombrasDeLaCaida'].every((n) => sinReservasEn(f.caida, n))
 afirmar(cableadoBien(CABLEADO), '  el cableado: el DOM sigue a la pieza y recibe clics sólo quieta; la simulación del piso recibe la calma bajo el pie (PULIDO 19 la escribía y no llegaba); sombras sólo de las placas, que se van al incrustarse; sin pulsos sueltos; módulos de menos de 300 líneas y lo de cada cuadro sin reservas')
@@ -389,9 +390,11 @@ function sombrasEnElTiempo(): { readonly mitad: number; readonly alFinal: number
 }
 const SOMBRAS = sombrasEnElTiempo()
 const PLACAS = DATOS.piezas.filter((p) => p.forma === 'placa' || p.forma === 'formulario').length
-const sombrasBien = (m: { readonly mitad: number; readonly alFinal: number }): boolean => m.mitad === PLACAS && m.alFinal === 0
-afirmar(sombrasBien(SOMBRAS), `  las sombras de contacto: ${String(SOMBRAS.mitad)} a mitad de la caída (las ${String(PLACAS)} placas; las letras no son una placa) y ninguna con todo incrustado`)
-controlPositivo('  el detector VE sombras que se quedan al terminar', { ...SOMBRAS, alFinal: 1 }, sombrasBien)
+// [PULIDO 23] U3 · los textos se apoyan sobre el piso (sin hueco) con su sombra suave, que se queda: al terminar, sólo las de los textos.
+const TEXTOS = DATOS.piezas.filter((p) => p.forma === 'texto' || p.forma === 'enlace').length
+const sombrasBien = (m: { readonly mitad: number; readonly alFinal: number }): boolean => m.mitad >= PLACAS && m.mitad <= PLACAS + TEXTOS && m.alFinal > 0 && m.alFinal <= TEXTOS
+afirmar(sombrasBien(SOMBRAS), `  las sombras de contacto: ${String(SOMBRAS.mitad)} a mitad de la caída (las ${String(PLACAS)} placas y los textos) y al terminar sólo las de los textos apoyados (${String(SOMBRAS.alFinal)} de ${String(TEXTOS)}): las placas, incrustadas, ninguna`)
+controlPositivo('  el detector VE sombras de placas que se quedan al terminar', { ...SOMBRAS, alFinal: TEXTOS + 1 }, sombrasBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('R2 · El cristal: [PULIDO 23] U1 · un muro continuo (un vitral roto) sin máscaras, nunca de espaldas, nunca tapa una partícula, refracta sólo el fondo')

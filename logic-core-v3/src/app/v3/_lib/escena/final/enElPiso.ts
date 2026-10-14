@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
-import { HUECOS_DEL_PIE_GLSL, HUECO_DEL_PIE } from '../pie3d/huecos'
+import { HUECOS_DEL_PIE, HUECOS_DEL_PIE_GLSL } from '../pie3d/huecos'
 import { DISTANCIA_AL_LOGO_GLSL, HUECO } from './hueco'
 import { CORRIENTES_DE_LA_LUZ_GLSL, ENERGIA_EN_LA_SIMULACION_GLSL, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, RUIDO_DE_LA_LUZ_GLSL } from './luzDeAbajo'
 import { ABRE_LA_JUNTA_GLSL, DESCARGA_DEL_FILO_GLSL, FILO, FILO_EN_VIVO } from './filoConPoder'
@@ -135,8 +135,6 @@ uniform vec2 uCajaDelLogo;
 uniform vec4 uCalmaDelPie;
 uniform vec4 uBaseDelPie;
 uniform float uCalmaDelPieFuerza;
-// [PULIDO 22] T3 · el hueco de cada pieza del pie (\`pie3d/huecos.ts\`).
-${HUECOS_DEL_PIE_GLSL}
 // [PULIDO 6] E2 · la distancia al logo, para medir desde el filo (\`hueco.ts\`).
 ${DISTANCIA_AL_LOGO_GLSL}
 // [NOCTURNO FINAL] B1 · el tope del dibujo de la onda, más alto mientras dura la súper onda.
@@ -205,7 +203,7 @@ export function conElFinalEnLaSimulacion(glsl: string): string {
       ANCLAS_DEL_FINAL.empuje,
       `${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );\n\tfloat calmaAqui = calmaDelFinal( p * uLado );\n\tfuerza *= 1.0 - calmaAqui;\n\tamortigua += ${f(CALMA_EN_EL_PISO.amortigua)} * calmaAqui;`,
     )
-    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat pistonAqui;\n\tfloat energiaAqui = energiaDeLaLuz( xz, pistonAqui );\n\tdibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );\n\tdibujo -= ${f(HUECO_DEL_PIE.hondo)} * huecoDelPie( xz );`)
+    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat pistonAqui;\n\tfloat energiaAqui = energiaDeLaLuz( xz, pistonAqui );\n\tdibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );`)
     .replace(ANCLAS_DEL_FINAL.salida, 'salida = vec4( nueva, h, dibujo, energiaAqui );')
     .replace(ANCLAS_DEL_FINAL.techo, 'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {')
     .replace(ONDA_CON_TOPE, 'float topeDeLaOnda = topeConElGolpe( $1 );\n\tfloat onda = topeDeLaOnda * tanh( nueva / topeDeLaOnda );')
@@ -235,6 +233,8 @@ ${RUIDO_DE_LA_LUZ_GLSL}
 ${CORRIENTES_DE_LA_LUZ_GLSL}
 ${DISTANCIA_AL_LOGO_GLSL}
 ${DESCARGA_DEL_FILO_GLSL}
+// [PULIDO 23] U3 · el hueco de cada placa del pie, su silueta (\`pie3d/huecos.ts\`): se recorta como el del logo.
+${HUECOS_DEL_PIE_GLSL}
 vec3 conLasJuntas( vec3 color, vec2 xz ) {
 	float s = vEnergiaDelBloque;
 	if ( s <= 0.0 ) return color;
@@ -296,7 +296,7 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
     if (anclas.some((ancla) => !shader.fragmentShader.includes(ancla))) {
       throw new Error('[CIERRE] 3 · el dibujo del piso cambió: el final no encuentra dónde entrar')
     }
-    Object.assign(shader.uniforms, FINAL_EN_EL_PISO, LUZ_DE_ABAJO_EN_VIVO, FILO_EN_VIVO)
+    Object.assign(shader.uniforms, FINAL_EN_EL_PISO, LUZ_DE_ABAJO_EN_VIVO, FILO_EN_VIVO, HUECOS_DEL_PIE)
     // [PULIDO 2] 4 · con energía los bloques se separan un poco (se achican sobre su centro): se abren las rendijas. [PULIDO 3]
     // A1 · la energía del bloque es la de la simulación (el canal libre de su textura), más con las ondas.
     if (shader.vertexShader.includes(ANCLA_DEL_BLOQUE)) {
@@ -306,9 +306,9 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
     }
     shader.fragmentShader = shader.fragmentShader
       .replace(ANCLAS_DEL_DIBUJO.funcion, `${DIBUJO_GLSL}${ANCLAS_DEL_DIBUJO.funcion}`)
-      .replace(ANCLAS_DEL_HUECO.descarte, `${ANCLAS_DEL_HUECO.descarte}\n\tif ( enElHueco( vPiso.xz ) ) discard;`)
+      .replace(ANCLAS_DEL_HUECO.descarte, `${ANCLAS_DEL_HUECO.descarte}\n\tif ( enElHueco( vPiso.xz ) ) discard;\n\tfloat alHuecoDelPie = huecoDelPie( vPiso.xz );\n\tif ( alHuecoDelPie < 0.0 ) discard;`)
       .replace(ANCLAS_DEL_HUECO.mancha, 'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );')
-      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
+      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - labioDelHuecoDelPie( alHuecoDelPie );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
   }
   return material
 }

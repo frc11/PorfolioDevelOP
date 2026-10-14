@@ -30,6 +30,8 @@ const MAXIMO = 64
 const COLUMNAS = 4
 /** Una sombra más tenue que esto no se escribe. */
 const SOMBRA_MINIMA = 0.002
+/** [PULIDO 23] U3 · la sombra de contacto de un texto apoyado, más tenue que la de una placa. */
+const SOMBRA_DEL_TEXTO = 0.45
 
 interface PiezaMutable {
   /** Sus medidas (u) y las de su caja (px), su columna y su esquina de arriba a la izquierda en la columna (px). */
@@ -44,6 +46,9 @@ interface PiezaMutable {
   dy: number
   /** Si tiene sombra de contacto (las placas: las letras no son una placa). */
   conSombra: boolean
+  /** [PULIDO 23] U3 · el radio de sus esquinas (px: el hueco con su silueta) y si es texto (sin hueco: se apoya sobre el piso). */
+  radioPx: number
+  esTexto: boolean
 }
 
 /** Una columna: el cuerpo invisible que cae (`PiezaDePie`: su canto de abajo y de atrás en el mundo y sus medidas, u). */
@@ -104,7 +109,7 @@ const CAIDA_NULA = caidaIntegrada({ alto: 1, espesor: 0.1 })
 
 export function crearLaCaidaDelPie(): CaidaDelPie {
   const piezas: PiezaMutable[] = []
-  for (let k = 0; k < MAXIMO; k += 1) piezas.push({ ancho: 1, alto: 1, espesor: 0.1, anchoPx: 1, altoPx: 1, espesorPx: 1, columna: 0, dx: 0, dy: 0, conSombra: false })
+  for (let k = 0; k < MAXIMO; k += 1) piezas.push({ ancho: 1, alto: 1, espesor: 0.1, anchoPx: 1, altoPx: 1, espesorPx: 1, columna: 0, dx: 0, dy: 0, conSombra: false, radioPx: 0, esTexto: false })
   const columnas: ColumnaMutable[] = []
   const lugares: LugarEnElPiso[] = []
   const caidas: CaidaIntegrada[] = []
@@ -205,6 +210,8 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
     p.altoPx = caja.alto
     p.espesorPx = a.espesor
     p.conSombra = a.pieza.forma === 'placa' || a.pieza.forma === 'formulario'
+    p.radioPx = caja.radio
+    p.esTexto = a.pieza.forma === 'texto' || a.pieza.forma === 'enlace'
   }
   // Cada columna en el mundo: su canto (el medio de abajo y de atrás) y sus medidas (u); la caída de su tamaño.
   for (let k = 0; k < c.m; k += 1) {
@@ -282,7 +289,9 @@ export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number):
   const col = c.columnas[p.columna]
   const grupo = a.grupo
   grupo.quaternion.copy(col.q)
-  OFFSET.set(p.dx, -p.dy, 0).multiplyScalar(c.mundoPorPx).applyQuaternion(col.q)
+  // [PULIDO 23] U3 · un texto no se incrusta: al hundirse su columna, sube su espesor (queda apoyado sobre el piso, sin hueco).
+  const sube = p.esTexto ? p.espesorPx * poseDeLaPiezaQueCae(col, c.lugares[p.columna], s).hundido : 0
+  OFFSET.set(p.dx, -p.dy, sube).multiplyScalar(c.mundoPorPx).applyQuaternion(col.q)
   grupo.position.copy(col.o).add(OFFSET)
 }
 
@@ -302,18 +311,20 @@ export function sombrasDeLaCaida(c: CaidaDelPie, s: number): number {
   let k = 0
   for (let i = 0; i < c.n && k < MAXIMO_DE_SOMBRAS_DEL_PIE; i += 1) {
     const p = c.piezas[i]
-    if (!p.conSombra) continue
+    if (!p.conSombra && !p.esTexto) continue
     const col = c.columnas[p.columna]
     const pose = poseDeLaPiezaQueCae(col, c.lugares[p.columna], s)
     const P = POSE_DE_LA_SOMBRA
     P.bajada = pose.bajada
     P.a = pose.a
-    P.hundido = pose.hundido
+    // [PULIDO 23] U3 · la de un texto se queda acostado (se apoya sobre el piso) y es suave; la de una placa se va al incrustarse.
+    P.hundido = p.esTexto ? 0 : pose.hundido
     OFFSET.set(p.dx + p.anchoPx / 2, -(p.dy + p.altoPx), -p.espesorPx).multiplyScalar(c.mundoPorPx).applyQuaternion(col.q).add(col.o)
     P.x = OFFSET.x
     P.y = OFFSET.y
     P.z = OFFSET.z
     const sombra = sombraDeLaPiezaQueCae(p, P, b)
+    if (p.esTexto) sombra.alfa *= SOMBRA_DEL_TEXTO
     if (sombra.alfa < SOMBRA_MINIMA) continue
     cajas[k].set(sombra.x, sombra.z, sombra.medioAncho, sombra.medioFondo)
     formas[k].set(sombra.blanda, sombra.alfa, 0, 0)
