@@ -97,6 +97,55 @@
    "patron": "Config de NextAuth duplicada entre auth.ts y auth.config.ts que diverge (maxAge, callbacks)",
    "como_buscarlo": "Comparar src/auth.ts:76-272 con src/auth.config.ts:9-41 (session, cookies, callbacks)",
    "donde_aparecio": "session.maxAge solo en auth.ts:81; jwt callback solo en auth.ts:205"
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "patron": "Página de servidor que lee la base confiando en el guard del layout, sin auth()/require* propio. El render parcial de RSC no re-ejecuta el layout y el proxy decide con claims viejos del JWT",
+   "como_buscarlo": "for f in $(git ls-tree -r --name-only origin/main -- 'logic-core-v3/src/app/(protected)' | grep -E '/page\\.tsx$'); do echo \"$(git show \"origin/main:$f\" | grep -c -E 'auth\\(\\)|require(SuperAdmin|Setter)|resolveOrgId|getClientChatbotSession') $f\"; done | sort -n ; en las que dan 0, buscar prisma.* directo o loaders sin guard",
+   "donde_aparecio": "15 páginas de /admin (admin/page.tsx:182, team/page.tsx:19, referrals/page.tsx:9, projects/page.tsx:9, leads/page.tsx:23, leados/page.tsx:34, ...). Control: /setter lo resuelve en _data.ts con requireSetter. Lo cruzan D4 y D5 (admin/leados y fg2-lab son ZONA-FRANCO)."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "patron": "IP de cliente tomada del primer valor de X-Forwarded-For",
+   "como_buscarlo": "git grep -n 'x-forwarded-for' origin/main -- logic-core-v3/src",
+   "donde_aparecio": "lib/security/auth-rate-limit.ts:39 (forgot, reset, contacto), lib/audit-log.ts:21, app/login/actions.ts:53 (SEC-007) y modules/chatbot/server/chat/requestSchema.ts:110 (rate limit del chatbot, costo de Vertex: lo cruza D3)."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "patron": "Resolución de la org de sesión paralela a resolveOrgId: orgMember.findFirst sin orderBy, sin mirar el rol y sin honrar la impersonación",
+   "como_buscarlo": "git grep -n 'getClientChatbotSession' origin/main -- logic-core-v3/src ; git grep -n -E 'orgMember\\.findFirst' origin/main -- logic-core-v3/src",
+   "donde_aparecio": "modules/chatbot/server/admin/getClientSession.ts:5-33. La usan dashboard/chatbot/* y api/dashboard/chatbot/leads/export. Puede discrepar de session.user.organizationId (mismo patrón que BUG-005) y deja la vista previa del admin sin chatbot (D3/D5)."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "patron": "Header de request que nadie setea, leído como si lo pusiera el servidor (x-pathname)",
+   "como_buscarlo": "git grep -n 'x-pathname' origin/main -- logic-core-v3/src",
+   "donde_aparecio": "(protected)/dashboard/layout.tsx:124: el gate de onboarding se saltea mandando el header. dashboard/modules/email-marketing/layout.tsx:24: la tab activa nunca se marca. El proxy no lo setea (D2)."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "patron": "Interpolación sin escapar en el HTML de emails (la variable 'safeName' no escapa)",
+   "como_buscarlo": "git grep -n -E '\\$\\{(safe[A-Z][a-zA-Z]*|input\\.[a-zA-Z]+|data\\.[a-zA-Z]+)\\}' origin/main -- logic-core-v3/src/lib/email/templates",
+   "donde_aparecio": "lib/email/templates/password-reset.ts:12 y el h1. Es el nombre propio del destinatario, así que el riesgo es bajo. Revisar welcome-client.ts, bot-activated.ts y weekly-report.ts. Control: lib/client-notifications/templates.ts:49 sí escapa."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "patron": "Servidores de desarrollo y QA escuchando en todas las interfaces (sin -H) con flags de QA encendidos",
+   "como_buscarlo": "git grep -n -E 'next (dev|start)' origin/main -- logic-core-v3/package.json 'logic-core-v3/playwright*.ts'",
+   "donde_aparecio": "package.json:7-13 (dev, dev:qa, start, start:qa, start:setter, start:galeria). QA_ALLOW_LOCALHOST también abre los escapes de validate-origin.ts (D3)."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "patron": "Server action exportada que escribe estado o auditoría sin chequear rol",
+   "como_buscarlo": "en archivos con 'use server', listar las export async function y verificar que exista auth()/require* antes de la primera escritura (prisma.*.create|update|delete o logAdminAction)",
+   "donde_aparecio": "lib/actions/impersonation.ts:50 (stopImpersonationAction) y su wrapper admin/clients/_actions/client.actions.ts:12."
   }
  ]
 }

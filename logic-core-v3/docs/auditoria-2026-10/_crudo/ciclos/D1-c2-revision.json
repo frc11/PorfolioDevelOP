@@ -1,0 +1,454 @@
+{
+ "dominio": "D1",
+ "ciclo": "D1-c2",
+ "modo": "cazador",
+ "run": "wf_2c219439-2fe",
+ "fecha": "2026-10-14T03:24:43.868Z",
+ "lotes": [
+  {
+   "lote": "D1-T1",
+   "estado": "leido",
+   "archivos_leidos": 76,
+   "completos": 53,
+   "entradas": 0,
+   "funcionalidades": 0,
+   "planeado_cruzado": 0,
+   "alertas": 0,
+   "previas": 0,
+   "poda": 0,
+   "casos": 4,
+   "ausencias": 11,
+   "patrones": 7,
+   "verificador": "2 veredictos"
+  }
+ ],
+ "hallazgos": [
+  {
+   "decision": "aceptar",
+   "nota_padre": "Leído: admin/layout.tsx:41-49 es la única guarda de rol de las páginas; 22 page.tsx de /admin no llaman auth()/requireSuperAdmin (barrido git show por archivo; p. ej. team/page.tsx:18-22 y referrals/page.tsx:8-14 leen Prisma directo); el proxy decide con el rol del JWT sin sessionVersion (authConfig sin callback jwt). Los layouts no se re-ejecutan en la navegación parcial (comportamiento documentado de Next; el verificador lo trazó en app-render.js y walk-tree-with-flight-router-state.js de next 16.2.9). ALTA: precondición fuerte (cookie SUPER_ADMIN válida).",
+   "titulo": "Las páginas de /admin exigen SUPER_ADMIN solo en el layout y en el proxy: un token invalidado, degradado o de un admin borrado sigue leyendo datos de todos los clientes por navegación RSC",
+   "prefijo": "SEC",
+   "severidad": "ALTA",
+   "tipo": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 148,
+     "fragmento": "if (isAdminRoute && role !== ADMIN_ROLE) {"
+    },
+    {
+     "ruta": "src/auth.config.ts",
+     "linea": 24,
+     "fragmento": "callbacks: {\n    authorized({ auth }) {\n      return true // Route protection is handled in middleware logic"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/layout.tsx",
+     "linea": 47,
+     "fragmento": "if (session.user.role !== 'SUPER_ADMIN') {\n    redirect('/dashboard')"
+    },
+    {
+     "ruta": "node_modules/next/dist/server/app-render/app-render.js",
+     "linea": 164,
+     "fragmento": "const flightRouterState = shouldProvideFlightRouterState ? (0, _parseandvalidateflightrouterstate.parseAndValidateFlightRouterState)(headers[_approuterheaders.NEXT_ROUTER_STATE_TREE_HEADER]) : undefined;"
+    },
+    {
+     "ruta": "node_modules/next/dist/server/app-render/walk-tree-with-flight-router-state.js",
+     "linea": 53,
+     "fragmento": "const renderComponentsOnThisLevel = // No further router state available\n    !flightRouterState || // Segment in router state does not match current segment\n    !(0, _matchsegments.matchSegment)(actualSegment, flightRouterState[0]) || // Explicit refresh"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/page.tsx",
+     "linea": 19,
+     "fragmento": "const users = await prisma.user.findMany({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/referrals/page.tsx",
+     "linea": 9,
+     "fragmento": "const referrals = await prisma.referral.findMany({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/page.tsx",
+     "linea": 182,
+     "fragmento": "prisma.agencySettings.findFirst({"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real. Escenario: se filtra la cookie del SUPER_ADMIN (PC compartida, malware, extensión) y develOP reacciona cambiando la contraseña. El corte por sessionVersion no llega al panel. El proxy decide /admin con el rol del JWT (auth.config.ts no tiene callback jwt ni mira sessionVersion) y re-firma la cookie por 30 días (SEC-010). En un pedido RSC con el árbol del layout ya montado, Next no ejecuta admin/layout.tsx y renderiza solo la página. Es lo que manda el router en cada clic, o un curl con Next-Router-State-Tree. Hay 15 páginas de /admin que consultan Prisma sin auth() propio:\n- admin (KPIs y cobros)\n- team (usuarios admin)\n- referrals (emails de referidos de todos los clientes)\n- projects, projects/[id]/payments y projects/[id]/tasks\n- leads y leads/[leadId]\n- messages/[orgId] (nombre de la org)\n- announcements\n- chatbot/activity\n- leados, leados/[leadId] y leados/setter/[setterId]\n- fg2-lab\nLo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de otro dispositivo que sigue navegando por clics después del cambio de contraseña. Las mutaciones sí fallan porque las actions llaman requireSuperAdmin. Contraste: /setter carga sus datos con requireSetter en _data.ts y el portal con resolveOrgId, que releen la base.",
+   "propuesta": "Zona libre, salvo admin/leados/* y fg2-lab, que son ZONA-FRANCO (coordinar con Franco). Mover la autorización al lado del dato: un helper cacheado requireSuperAdminPage() (auth() fresco + rol, y si no pasa redirect/notFound) que se llame al inicio de cada page.tsx de /admin o dentro de sus funciones de datos, como ya hace /setter. Sumar un invariante que falle si una page de /admin no lo llama. El layout queda como UX, no como frontera.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-shell",
+    "h4.adm-dashboard",
+    "h4.adm-equipo",
+    "h4.adm-referidos",
+    "h4.adm-proyectos",
+    "h4.adm-leads",
+    "h4.adm-mensajes",
+    "h4.adm-novedades",
+    "h3.adm-actividad",
+    "h5.adm-revision-demos",
+    "h5.adm-fg2lab",
+    "lib.proxy",
+    "lib.auth"
+   ],
+   "relacionados": "SEC-006, SEC-010, SEC-017, BUG-001, DEU-002; advisory GHSA-6gpp-xcg3-4w24 (hoy no aplica: build --webpack)",
+   "requiere_verificacion_humana": true,
+   "tmp": "D1-c2/D1-T1/H01",
+   "lote": "D1-T1",
+   "verificador": {
+    "titulo": "Las páginas de /admin exigen SUPER_ADMIN solo en el layout y en el proxy: un token invalidado, degradado o de un admin borrado sigue leyendo datos de todos los clientes por navegación RSC",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "La cadena cierra leyendo origin/main @57c421bc, que es idéntico a HEAD en src y package.json.\n(1) src/proxy.ts:148 decide /admin con el role del JWT. El proxy usa NextAuth(authConfig) (proxy.ts:5). src/auth.config.ts:24-40 solo define authorized y session: no tiene callback jwt, no toca la base y no compara sessionVersion. El chequeo SEC-AUTH-03 vive solo en src/auth.ts:215-223.\n(2) El proxy reescribe la cookie en cada pasada: node_modules/next-auth/lib/index.js:168-169 agrega el set-cookie de la respuesta de sesión. @auth/core lib/actions/session.js:33-48 vuelve a codificar con newExpires, y authConfig no fija maxAge, así que rige el default de 30 días (lib/init.js:38,83). auth() en RSC solo devuelve JSON y no limpia cookies (next-auth/lib/index.js:89-91). Nadie consulta /api/auth/session: git grep de SessionProvider/useSession da 0. El token viejo sigue vivo mientras se use.\n(3) Next 16.2.9 toma el árbol que manda el cliente en Next-Router-State-Tree (app-render.js:164). walk-tree-with-flight-router-state.js:53-57 no renderiza un segmento que coincide con ese árbol y baja directo a los hijos (líneas 159-185). admin/layout.tsx:41-49 no se ejecuta en navegación blanda ni con el header armado a mano. Si el hash _rsc no coincide, base-server.js:1215-1236 responde 307 y no 403: no es barrera.\n(4) Las páginas leen Prisma sin guarda propia: team/page.tsx:19, referrals/page.tsx:9 (email del referido y empresa del cliente que refiere), admin/page.tsx:182, announcements, chatbot/activity (sin guarda también en modules/chatbot/server/admin/queries.ts:36), leados, leados/[leadId], leados/setter/[setterId], fg2-lab, leads/[leadId], projects/[projectId]/payments y tasks (también saltean el layout anidado [projectId]/layout.tsx). Hay fugas parciales: leads/page.tsx expone getLeads() en caché sin guarda; projects/page.tsx y messages/[orgId] exponen nombres de organizaciones porque sus actions devuelven ActionResult en vez de lanzar.\n(5) Las mutaciones sí fallan: requireSuperAdmin (auth-guards.ts:3-11) pasa por el jwt de auth.ts, que relee la base.\nEl contraste es cierto: resolveOrgId (preview.ts:6-20) y setter/.../manual/_data.ts (requireSetter) llaman auth() en la propia página.\nQueda en ALTA y no CRITICA: hace falta haber tenido una cookie SUPER_ADMIN válida (robada, o de un admin degradado o borrado). Precondición fuerte, pero la lectura entre tenants después de revocar es real.\nPara el primer cliente real, esto es bloqueante: cambiar la contraseña no corta la lectura del panel.",
+    "evidencia_contra": [
+     "Exige haber tenido una cookie SUPER_ADMIN válida: no la explota un anónimo ni un usuario de cliente.",
+     "Rotar AUTH_SECRET invalida todos los JWT. Es un workaround operativo, aunque no está documentado como vía de revocación.",
+     "Los datos por tenant más sensibles sí tienen guarda: clients, clients/[clientId], chatbots/*, audit-log, settings/alerts y reports, y projects/[projectId] page y hours llaman auth(). messages y tickets pasan por actions con requireSuperAdmin. Lo que se filtra es sobre todo el pipeline propio de develOP (leads, leados, fg2-lab), el equipo, los KPIs y cobros, los referidos y nombres de organizaciones. payments y tasks exigen conocer el projectId.",
+     "Una navegación dura (F5) sí ejecuta el layout, que redirige. La fuga ocurre solo en navegación blanda o con un pedido RSC armado.",
+     "La extensión a 30 días por el proxy ya está registrada aparte (SEC-010), igual que el caso del admin degradado (DEU-002): este hallazgo no debe contar dos veces ese componente."
+    ]
+   },
+   "verificado_padre": true,
+   "id_asignado": "SEC-023",
+   "vh_asignado": "VH-013"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Leído: route.ts:50-70 (tres guardas: flag, Host del cliente, NETLIFY/VERCEL_ENV) y package.json:8-13 (dev:qa, start:qa, start:setter y start:galeria encienden el flag y no pasan -H). Severidad ajustada a MEDIA con el verificador: solo en la máquina del dev, en la misma red y con el firewall abierto; la base es la de dev.",
+   "titulo": "/api/qa/login confía en el header Host y los scripts QA escuchan en toda la red: cualquiera en la misma LAN obtiene una sesión SUPER_ADMIN",
+   "prefijo": "SEC",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/qa/login/route.ts",
+     "linea": 54,
+     "fragmento": "const host = request.headers.get('host') ?? ''"
+    },
+    {
+     "ruta": "src/app/api/qa/login/route.ts",
+     "linea": 61,
+     "fragmento": "if (!isLocalhost) {\n    return { allowed: false, reason: 'host_not_localhost' }"
+    },
+    {
+     "ruta": "package.json",
+     "linea": 8,
+     "fragmento": "\"dev:qa\": \"cross-env QA_ALLOW_LOCALHOST=1 next dev --webpack -p 3002\","
+    },
+    {
+     "ruta": "package.json",
+     "linea": 11,
+     "fragmento": "\"start:qa\": \"npm run build && cross-env QA_ALLOW_LOCALHOST=1 next start -p 3001\","
+    },
+    {
+     "ruta": "node_modules/next/dist/cli/next-start.js",
+     "linea": 72,
+     "fragmento": "const hostname = options.hostname;"
+    },
+    {
+     "ruta": "node_modules/next/dist/server/lib/start-server.js",
+     "linea": 267,
+     "fragmento": "server.listen(port, hostname);"
+    }
+   ],
+   "impacto": "La 'triple guarda' (route.ts:14-23) queda reducida a la variable QA_ALLOW_LOCALHOST, que los cuatro scripts QA encienden: el Host lo escribe el cliente y la guarda de hosting no aplica en una PC. dev:qa, start:qa, start:setter y start:galeria no pasan -H, así que Next llama server.listen(port, undefined), escucha en todas las interfaces e imprime la URL 'Network'. Un tercero en la misma red (cowork, bar, oficina) hace POST http://<IP>:3002/api/qa/login con 'Host: localhost' y {persona:'super-admin'}. Recibe un JWT de SUPER_ADMIN firmado con el AUTH_SECRET local y válido 8 h, que usa contra ese servidor: panel admin completo y escritura sobre la base del .env local, que según el PROMPT §3 es la Neon compartida. Además, ese servidor expuesto corre en Windows con next 16.2.9, que tiene un advisory crítico de RCE para servidores Windows (la versión la evalúa D8).",
+   "propuesta": "Coordinar con Franco (ZONA-FRANCO):\n1. Agregar -H 127.0.0.1 a dev:qa, start:qa, start:setter y start:galeria, y evaluar lo mismo para dev.\n2. En la route, no usar Host como guarda: exigir además un secreto por corrida (header con un QA_LOGIN_TOKEN aleatorio que solo conoce el runner de visual-qa).\n3. Responder 404 genérico sin reason (SEC-021).",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h1.auth-login",
+    "h1.auth-login.qa-login",
+    "lib.auth"
+   ],
+   "relacionados": "SEC-021, SEC-002, PLAN-1014, PLAN-1001",
+   "requiere_verificacion_humana": true,
+   "tmp": "D1-c2/D1-T1/H02",
+   "lote": "D1-T1",
+   "verificador": {
+    "titulo": "/api/qa/login confía en el header Host y los scripts QA escuchan en toda la red: cualquiera en la misma LAN obtiene una sesión SUPER_ADMIN",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "El mecanismo se verifica leyendo.\n(1) src/app/api/qa/login/route.ts:50 exige QA_ALLOW_LOCALHOST=1, que encienden los cuatro scripts: package.json:8 (dev:qa, puerto 3002), :11 (start:qa, 3001), :12 (start:setter, 3003) y :13 (start:galeria, 3004).\n(2) La segunda guarda (route.ts:54-63) lee request.headers.get('host'), que escribe el cliente. Un POST a la IP de la LAN con 'Host: localhost' la pasa. Frena el DNS rebinding pero no un pedido directo con el Host falsificado.\n(3) La tercera guarda (route.ts:65-70) solo mira NETLIFY y VERCEL_ENV, que en una PC nunca se cumplen. En la máquina del dev queda una sola guarda efectiva.\n(4) Ningún script pasa -H. next-start.js:72 toma hostname = options.hostname (undefined) y start-server.js:431 hace server.listen(port, undefined), que escucha en todas las interfaces. La línea :267 citada es la rama de reintento por EADDRINUSE, solo en dev; next-dev.js:196 hace lo mismo.\n(5) La protección cross-site de dev (block-cross-site-dev.js) solo cubre /_next y /__nextjs, no /api. El proxy no matchea /api (proxy.ts:172).\n(6) route.ts:111-188 mintea un JWT de admin@develop.com con su rol de la base, por 8 h y con el AUTH_SECRET local. La sesión vale contra ese servidor: el chequeo de Origin contra Host de las server actions también lo controla el atacante. Lee y escribe sobre la base del .env local. PROMPT.md:65 la describe como 'Neon compartida con Franco' y 00-PLAN-Y-LOG.md:368 la llama 'la Neon de dev'.\nEl eslabón inferido es ambiental: el Firewall de Windows tiene que permitir entrada a node.exe en el perfil de red del momento. Lo corrobora la memoria del usuario (project_cierre_final_del_pie.md:16: 'Probar SIEMPRE por la IP', con un teléfono entrando por la IP de la red a next dev).\nBaja de ALTA a MEDIA por tres motivos. Producción queda fuera: el flag no está en netlify.toml y existe la guarda NETLIFY. El impacto cae sobre la base de dev y una persona seed: la rúbrica deja en BAJA las credenciales seed y QA, pero esto es un acceso SUPER_ADMIN sin contraseña, alcanzable por red, con escritura en una base compartida y acciones con efectos (Brevo), así que es más que BAJA. Y las precondiciones son fuertes: estar en la misma LAN mientras corre un script QA, con el firewall abierto.\nEl advisory crítico de RCE para servidores Windows existe en _crudo/npm-audit.json (GHSA-p293-qw3h-jr36, next >=16.0.0 <16.3.3). Afecta a cualquier next dev o start expuesto en la LAN, con o sin QA: es de D8, no agrava este hallazgo.\nHIPÓTESIS sin verificar: si el AUTH_SECRET local coincidiera con el de producción, el token de start:qa (salt __Secure-authjs.session-token) pasaría el proxy de producción con role SUPER_ADMIN. Va a verificación humana.",
+    "evidencia_contra": [
+     "Solo aplica mientras el dev corre dev:qa, start:qa, start:setter o start:galeria. Es una ventana acotada en el tiempo.",
+     "El acceso desde la LAN depende del Firewall de Windows para node.exe y del perfil de red. En redes públicas (bar, cowork) el diálogo por defecto solo habilita redes privadas, así que ahí probablemente esté bloqueado.",
+     "Producción no queda expuesta: QA_ALLOW_LOCALHOST no figura en netlify.toml ni en workflows, y está la guarda NETLIFY==='true'.",
+     "La base afectada es la Neon de dev compartida con Franco (00-PLAN-Y-LOG.md:368), con datos de prueba. No hay evidencia de que sea la base de producción.",
+     "La persona admin@develop.com es una cuenta seed. La rúbrica deja en BAJA las credenciales de prueba conocidas, y su contraseña seed ya figura entre los secretos de prueba triados (DEC-14).",
+     "La cita start-server.js:267 es la rama de reintento por EADDRINUSE. El listen principal está en :431."
+    ]
+   },
+   "verificado_padre": true,
+   "id_asignado": "SEC-024",
+   "vh_asignado": "VH-014"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Muestreo DEC-37: se sostiene (auth-rate-limit.ts:37-43 toma el primer X-Forwarded-For; x-nf-client-connection-ip solo se usa en scrub-pii.ts:37). El eslabón de la plataforma queda PROBABLE.",
+   "titulo": "Los límites por IP de forgot-password, reset-password y el formulario de contacto se esquivan rotando X-Forwarded-For: getClientIpHash toma el primer valor del header",
+   "prefijo": "SEC",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/security/auth-rate-limit.ts",
+     "linea": 39,
+     "fragmento": "const fwd = headersList.get('x-forwarded-for')?.split(',')[0]?.trim()"
+    },
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 43,
+     "fragmento": "const ipHash = await getClientIpHash()\n  const ipLimit = await applyAuthRateLimit({ scope: 'forgotPasswordPerIp', identifier: ipHash })"
+    },
+    {
+     "ruta": "src/app/reset-password/actions.ts",
+     "linea": 19,
+     "fragmento": "const ipHash = await getClientIpHash()\n  const ipLimit = await applyAuthRateLimit({ scope: 'resetPasswordPerIp', identifier: ipHash })"
+    },
+    {
+     "ruta": "src/lib/actions/contact.ts",
+     "linea": 22,
+     "fragmento": "// Clave no controlable por el atacante: IP hasheada, no un campo del FormData.\n  const ipHash = await getClientIpHash()"
+    }
+   ],
+   "impacto": "En Netlify, el primer valor de X-Forwarded-For puede venir del cliente. La IP que pone la plataforma está en x-nf-client-connection-ip, y el repo solo la usa para limpiar Sentry. Un anónimo que manda un X-Forwarded-For distinto en cada pedido estrena un bucket cada vez:\n- El formulario público de contacto queda sin freno: por cada envío, una fila en ContactSubmission, el webhook de alertas y n8n. Esto contradice el comentario de contact.ts:22.\n- forgot-password pierde su tope por IP y queda solo el de 3/h por email, multiplicable por cada cuenta registrada en envíos por Brevo.\n- reset-password pierde su freno por IP.\nEs el mismo patrón que SEC-007 cita solo para loginAction.",
+   "propuesta": "Zona libre. Crear un helper único getClientIp() que lea la IP confiable de la plataforma (x-nf-client-connection-ip en Netlify, con fallback local) en vez del primer XFF. Usarlo en getClientIpHash, en login/actions.ts y en el extractor del chatbot (requestSchema.ts:110). Sumar un invariante con XFF falsificado.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.rate-limit",
+    "lib.security",
+    "h1.auth-recupero",
+    "h6.vis-contacto"
+   ],
+   "relacionados": "SEC-007, SEC-022, SEC-005",
+   "requiere_verificacion_humana": true,
+   "tmp": "D1-c2/D1-T1/H03",
+   "lote": "D1-T1",
+   "verificador": null,
+   "verificado_padre": true,
+   "id_asignado": "SEC-025",
+   "vh_asignado": "VH-015"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "El registro de auditoría guarda como IP el primer X-Forwarded-For, un dato que escribe el cliente",
+   "prefijo": "SEC",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/audit-log.ts",
+     "linea": 20,
+     "fragmento": "const ipAddress =\n      headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null"
+    }
+   ],
+   "impacto": "La IP de cada evento de AdminAuditLog (cambios de contraseña, impersonación, acciones del admin) es la que el cliente declare. Quien opere con una cuenta comprometida deja rastros con la IP que quiera, y una investigación posterior no puede confiar en ese campo.",
+   "propuesta": "Decisión para Valentino (audit-log.ts es FROZEN-inferido): usar la misma IP confiable del helper getClientIp() propuesto para los rate limits.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "lib.audit-log",
+    "h4.adm-audit",
+    "modelo.AdminAuditLog"
+   ],
+   "relacionados": "SEC-022; mismo patrón que el hallazgo de X-Forwarded-For en los rate limits (este ciclo)",
+   "requiere_verificacion_humana": true,
+   "tmp": "D1-c2/D1-T1/H04",
+   "lote": "D1-T1",
+   "verificador": null,
+   "id_asignado": "SEC-026",
+   "vh_asignado": "VH-015"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Las páginas de auth y /bienvenida se pueden embeber en un iframe ajeno: X-Frame-Options solo cubre admin|dashboard|setter y la CSP global es Report-Only",
+   "prefijo": "SEC",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "next.config.ts",
+     "linea": 94,
+     "fragmento": "source: '/(admin|dashboard|setter)(.*)',\n        headers: [\n          { key: 'X-Frame-Options', value: 'DENY' },"
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 72,
+     "fragmento": "key: 'Content-Security-Policy-Report-Only',"
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 80,
+     "fragmento": "\"frame-ancestors 'none'\","
+    }
+   ],
+   "impacto": "/login, /forgot-password, /reset-password, /accept-invite, /cambiar-password y /bienvenida (wizard con sesión) se renderizan dentro de cualquier sitio. Eso habilita clickjacking o UI redress con el dominio legítimo. El riesgo es acotado porque esas pantallas piden tipear datos, pero contradice la política del propio config, que tiene frame-ancestors 'none' solo en modo reporte. No hay public/_headers ni [[headers]] en netlify.toml que lo compensen.",
+   "propuesta": "Zona libre. Extender el bloque X-Frame-Options: DENY / frame-ancestors 'none' a esas rutas (o aplicarlo global salvo /embed/* y /widget.js) y pasar la CSP a enforce (PLAN-1025).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login",
+    "h1.auth-recupero",
+    "h1.auth-cambio",
+    "h1.auth-invite",
+    "h2.cli-bienvenida"
+   ],
+   "relacionados": "PLAN-1024, PLAN-1025",
+   "requiere_verificacion_humana": true,
+   "tmp": "D1-c2/D1-T1/H05",
+   "lote": "D1-T1",
+   "verificador": null,
+   "id_asignado": "SEC-027",
+   "vh_asignado": "VH-016"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "stopImpersonationAction no exige SUPER_ADMIN: cualquier sesión puede escribir eventos IMPERSONATION_ENDED en la auditoría",
+   "prefijo": "SEC",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/impersonation.ts",
+     "linea": 50,
+     "fragmento": "export async function stopImpersonationAction() {\n  const session = await auth()"
+    },
+    {
+     "ruta": "src/lib/actions/impersonation.ts",
+     "linea": 66,
+     "fragmento": "if (session?.user?.id) {\n    await logAdminAction({"
+    },
+    {
+     "ruta": "src/lib/actions/impersonation.ts",
+     "linea": 13,
+     "fragmento": "if (session?.user?.role !== 'SUPER_ADMIN' || !session.user.id) {"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_actions/client.actions.ts",
+     "linea": 12,
+     "fragmento": "export async function stopImpersonationAction() {\n  return stopImpersonationActionBase()"
+    }
+   ],
+   "impacto": "Es una server action sin control de rol, contra la regla del repo de verificar sesión y rol en toda action (startImpersonationAction sí lo hace, :13). Un ORG_MEMBER o SETTER que consiga su id (por ejemplo con el advisory de divulgación de Server Functions de next <16.2.11) agrega entradas 'Finalizó impersonation' a su nombre en el registro de auditoría del admin. No da acceso a datos, pero ensucia la traza de impersonación.",
+   "propuesta": "Zona libre. Registrar el evento solo si getImpersonationSession() devuelve una impersonación válida del mismo admin (o si el rol es SUPER_ADMIN). Borrar la cookie siempre. Mismo criterio en el wrapper de client.actions.ts.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-impersonacion",
+    "h4.adm-audit",
+    "modelo.AdminAuditLog"
+   ],
+   "relacionados": "SEC-020",
+   "requiere_verificacion_humana": false,
+   "tmp": "D1-c2/D1-T1/H06",
+   "lote": "D1-T1",
+   "verificador": null,
+   "id_asignado": "SEC-028",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Los inicios de sesión no dejan rastro: no hay events en auth.ts ni tipo LOGIN en AuditActionType",
+   "prefijo": "FAL",
+   "severidad": "BAJA",
+   "tipo": "faltante",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 173,
+     "fragmento": "callbacks: {"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 190,
+     "fragmento": "enum AuditActionType {"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 211,
+     "fragmento": "PASSWORD_CHANGED"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 113,
+     "fragmento": "if (error instanceof AuthError) {\n      recordFailedAttempt(ip)"
+    }
+   ],
+   "impacto": "Una toma de la cuenta SUPER_ADMIN (fuerza bruta de SEC-007, magic link a un buzón comprometido) o de un cliente no deja registro de cuándo ni desde dónde se entró. Los fallos solo suman a un Map en memoria y los éxitos no se guardan en ningún lado. develOP no puede detectar ni reconstruir un acceso indebido. Además, el 'registro de accesos' que se le muestra al cliente en la Bóveda es inventado (PLAN-032).",
+   "propuesta": "Decisión para Valentino (auth.ts es FROZEN + ZONA-FRANCO; el schema es FROZEN, migración sin reset). Opción: events.signIn/signOut en auth.ts que escriban en AdminAuditLog con tipos nuevos (LOGIN_SUCCEEDED/LOGIN_FAILED) o en una tabla propia. Como mínimo para SUPER_ADMIN y con la IP confiable.",
+   "esfuerzo": "M",
+   "zona": "FROZEN + ZONA-FRANCO",
+   "nodos": [
+    "h1.auth-login",
+    "lib.auth",
+    "h4.adm-audit",
+    "modelo.AdminAuditLog"
+   ],
+   "relacionados": "SEC-007, SEC-005, PLAN-032",
+   "requiere_verificacion_humana": false,
+   "tmp": "D1-c2/D1-T1/H07",
+   "lote": "D1-T1",
+   "verificador": null,
+   "id_asignado": "FAL-001",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Muestreo DEC-37: se sostiene (git grep de sendTransactionalEmail en los cuatro flujos de contraseña: solo forgot-password/actions.ts:96 manda email).",
+   "titulo": "Cambiar o restablecer la contraseña no le avisa al titular por email",
+   "prefijo": "FAL",
+   "severidad": "BAJA",
+   "tipo": "faltante",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/cambiar-password/actions.ts",
+     "linea": 73,
+     "fragmento": "await unstable_update({ user: { passwordResetRequired: false } })\n\n  return { ok: true }"
+    },
+    {
+     "ruta": "src/app/reset-password/actions.ts",
+     "linea": 86,
+     "fragmento": "// 5) Audit log — sin password, sin token. Solo el evento.\n  await logAdminAction({"
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 239,
+     "fragmento": "await unstable_update({ user: { passwordResetRequired: false } })\n\n    return { success: true }"
+    }
+   ],
+   "impacto": "Si alguien con una sesión robada adivina la contraseña actual y la cambia (SEC-015), o usa un token de reset filtrado (SEC-013), el cliente no recibe ningún 'tu contraseña cambió'. Se entera recién cuando no puede entrar, así que no hay reacción temprana ni pedido de soporte.",
+   "propuesta": "Zona libre. Mandar un email transaccional por Brevo 'tu contraseña cambió' con fecha y link a /forgot-password en las tres actions (cambiar-password, reset-password y updatePasswordAction de profile.ts). Fire-and-forget con captura en Sentry y sin datos sensibles.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-cambio",
+    "h1.auth-recupero",
+    "h2.cli-cuenta",
+    "int.brevo"
+   ],
+   "relacionados": "SEC-015, SEC-013, SEC-006",
+   "requiere_verificacion_humana": false,
+   "tmp": "D1-c2/D1-T1/H08",
+   "lote": "D1-T1",
+   "verificador": null,
+   "verificado_padre": true,
+   "id_asignado": "FAL-002",
+   "vh_asignado": null
+  }
+ ]
+}

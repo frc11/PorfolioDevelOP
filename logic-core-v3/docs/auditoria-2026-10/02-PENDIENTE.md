@@ -6,7 +6,7 @@
 
 | Área | Herramientas medidas | Funcionalidades | En L3 o más | Faltantes de L3 más comunes | FAL |
 |---|---:|---:|---:|---|---:|
-| h1 · Acceso | 5 / 5 | 14 | 0 | Sentry (11), autonomía (9), errores (8) | 0 |
+| h1 · Acceso | 5 / 5 | 14 | 0 | Sentry (11), autonomía (9), errores (8) | 2 |
 | h2 · Portal del cliente | 1 / 16 | 1 | 0 | Sentry (1) | 0 |
 | h3 · Chatbot centralizado | 0 / 8 | 0 | 0 | — | 0 |
 | h4 · Panel de admin | 0 / 13 | 0 | 0 | — | 0 |
@@ -47,6 +47,16 @@
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h1.auth-cambio.cambio-forzado` Cambio obligatorio de contrasena temporal | L2 | Sentry, sin mocks ni TODO, autonomía | auth.ts:168 -> proxy.ts:84-90 -> page.tsx:6-27 -> CambiarPasswordForm.tsx:116-131 -> actions.ts:25-75 (update :51-61, unstable_update :73) -> router.push :126 |
+
+### [FAL-002] Cambiar o restablecer la contraseña no le avisa al titular por email
+- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: faltante
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/cambiar-password/actions.ts:73` — «await unstable_update({ user: { passwordResetRequired: false } }) return { ok: true }»; `src/app/reset-password/actions.ts:86` — «// 5) Audit log — sin password, sin token. Solo el evento. await logAdminAction({»; `src/lib/actions/profile.ts:239` — «await unstable_update({ user: { passwordResetRequired: false } }) return { success: true }»
+- Impacto: Si alguien con una sesión robada adivina la contraseña actual y la cambia (SEC-015), o usa un token de reset filtrado (SEC-013), el cliente no recibe ningún 'tu contraseña cambió'. Se entera recién cuando no puede entrar, así que no hay reacción temprana ni pedido de soporte.
+- Propuesta: Zona libre. Mandar un email transaccional por Brevo 'tu contraseña cambió' con fecha y link a /forgot-password en las tres actions (cambiar-password, reset-password y updatePasswordAction de profile.ts). Fire-and-forget con captura en Sentry y sin datos sensibles.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h1.auth-cambio, h1.auth-recupero, h2.cli-cuenta, int.brevo
 
 ### h1.auth-invite — Aceptar invitación
 
@@ -91,3 +101,13 @@
 ## ZONA-FRANCO
 
 > Faltantes en herramientas de Franco; se repiten en `09-PARA-FRANCO.md`.
+
+### [FAL-001] Los inicios de sesión no dejan rastro: no hay events en auth.ts ni tipo LOGIN en AuditActionType
+- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/auth.ts:173` — «callbacks: {»; `prisma/schema.prisma:190` — «enum AuditActionType {»; `prisma/schema.prisma:211` — «PASSWORD_CHANGED»; `src/app/login/actions.ts:113` — «if (error instanceof AuthError) { recordFailedAttempt(ip)»
+- Impacto: Una toma de la cuenta SUPER_ADMIN (fuerza bruta de SEC-007, magic link a un buzón comprometido) o de un cliente no deja registro de cuándo ni desde dónde se entró. Los fallos solo suman a un Map en memoria y los éxitos no se guardan en ningún lado. develOP no puede detectar ni reconstruir un acceso indebido. Además, el 'registro de accesos' que se le muestra al cliente en la Bóveda es inventado (PLAN-032).
+- Propuesta: Decisión para Valentino (auth.ts es FROZEN + ZONA-FRANCO; el schema es FROZEN, migración sin reset). Opción: events.signIn/signOut en auth.ts que escriban en AdminAuditLog con tipos nuevos (LOGIN_SUCCEEDED/LOGIN_FAILED) o en una tabla propia. Como mínimo para SUPER_ADMIN y con la IP confiable.
+- Esfuerzo: M  ·  Zona: FROZEN + ZONA-FRANCO
+- Relacionado: —
+- Nodo(s): h1.auth-login, lib.auth, h4.adm-audit, modelo.AdminAuditLog

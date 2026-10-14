@@ -48,6 +48,16 @@ const previas = leer('previas.json', { items: [] }).items
 const planeado = leer('planeado-extraido.json', { items: [] }).items
 const alertas = (leer('alertas-planeado.json', { dominios: {} }).dominios[DOM] ?? []).map((a, i) => `[${DOM}-A${i + 1}] ${a}`)
 const cruces = leer('planeado-cruces.json', {})
+// patrones defectuosos que dejaron los dominios anteriores (DEC-20): cada lector los busca en su lote
+const patronesPrevios = (() => {
+  const vistos = new Set()
+  return leer('patrones.json', { items: [] }).items
+    .filter((p) => !String(p.ciclo).startsWith(`${DOM}-`))
+    .filter((p) => { const k = String(p.patron).toLowerCase().slice(0, 80); if (vistos.has(k)) return false; vistos.add(k); return true })
+    .slice(0, 30)
+    .map((p) => `[${p.ciclo}] ${p.patron} (visto en: ${String(p.donde_aparecio).slice(0, 160)})`)
+})()
+const textoPatrones = patronesPrevios.length ? `\nPATRONES DEFECTUOSOS QUE YA APARECIERON EN OTROS DOMINIOS (buscalos en tu lote; cada aparicion es un hallazgo con su propia evidencia, o se suma al hallazgo del mismo patron si es la misma causa raiz):\n- ${patronesPrevios.join('\n- ')}` : ''
 
 // clave «fuente:línea[#sub]» → PLAN-NNN
 const idPlan = new Map()
@@ -167,7 +177,7 @@ const salida = {
   ciclo: CICLO,
   lente: LENTE,
   foco: FOCO[DOM],
-  contexto: alertas.length ? `ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas, empezando el campo 'alerta' con su id entre corchetes; si se confirma, tambien va como hallazgo):\n- ${alertas.join('\n- ')}` : '',
+  contexto: `${alertas.length ? `ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas, empezando el campo 'alerta' con su id entre corchetes; si se confirma, tambien va como hallazgo):\n- ${alertas.join('\n- ')}` : ''}${textoPatrones}`,
   lotes: info.filter((x) => lotes.includes(x.l)).map((x) => {
     const prev = previas.filter((p) => (p.archivos_citados ?? []).some((c) => x.set.has(c.replace(/:\d+(-\d+)?$/, '').replace(/^logic-core-v3\//, ''))))
     const plan = asignados.get(x.l.id).sort((a, b) => Number(b.cita) - Number(a.cita) || (ORDEN_TIPO[a.p.tipo] ?? 9) - (ORDEN_TIPO[b.p.tipo] ?? 9))

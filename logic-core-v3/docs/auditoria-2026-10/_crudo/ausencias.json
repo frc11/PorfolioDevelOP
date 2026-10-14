@@ -146,6 +146,83 @@
    "afirmacion": "AUTH_GOOGLE_ID/AUTH_GOOGLE_SECRET y AUTH_URL no estan documentadas en .env.example",
    "comando": "git show origin/main:logic-core-v3/.env.example | grep -n \"AUTH_GOOGLE\\|^AUTH_URL\"",
    "control_positivo": "git show origin/main:logic-core-v3/.env.example | grep -n \"^AUTH_SECRET\" -> :55"
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "15 páginas de /admin leen Prisma sin llamar a auth(), requireSuperAdmin ni comparar el rol (22 de 34 no tienen ningún chequeo en el archivo)",
+   "comando": "for f in $(git ls-tree -r --name-only origin/main -- 'logic-core-v3/src/app/(protected)/admin' | grep -E '/page\\.tsx$'); do git show \"origin/main:$f\" | grep -c -E \"auth\\(\\)|requireSuperAdmin|requireAdmin|role !== 'SUPER_ADMIN'|role === 'SUPER_ADMIN'\"; done  (y para las que dan 0: grep -n -m1 -E 'prisma\\.[a-zA-Z]+\\.(find|count|aggregate|groupBy)')",
+   "control_positivo": "El mismo patrón da >0 en 12 páginas (admin/clients/page.tsx, admin/audit-log/page.tsx, admin/chatbots/page.tsx, admin/projects/[projectId]/page.tsx...)."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "El proxy y authConfig no verifican sessionVersion ni tienen callback jwt",
+   "comando": "git grep -n sessionVersion origin/main -- logic-core-v3/src/proxy.ts logic-core-v3/src/auth.config.ts  -> 0 ; git grep -n -E 'async jwt|jwt\\s*\\(' origin/main -- logic-core-v3/src/auth.config.ts -> 0",
+   "control_positivo": "git grep -n sessionVersion origin/main -- logic-core-v3/src/auth.ts -> :25, :52, :60...; 'async jwt' en auth.ts:205."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "Ningún script de package.json fija el hostname (-H/--hostname) al levantar next dev/start",
+   "comando": "git grep -n -E 'next (dev|start)[^\"]*(-H |--hostname)' origin/main -- logic-core-v3/package.json  -> 0",
+   "control_positivo": "git grep -n -E 'next (dev|start)[^\"]* -p [0-9]+' origin/main -- logic-core-v3/package.json -> 4 líneas (8, 11, 12, 13)."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "Ningún rate limit ni la auditoría usan la IP confiable de Netlify (x-nf-client-connection-ip)",
+   "comando": "git grep -n 'x-nf-client-connection-ip' origin/main -- logic-core-v3/src | grep -v -E '__tests__|sentry'  -> 0",
+   "control_positivo": "git grep -n 'x-forwarded-for' origin/main -- logic-core-v3/src/lib/security/auth-rate-limit.ts logic-core-v3/src/lib/audit-log.ts -> auth-rate-limit.ts:39 y audit-log.ts:21."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "No hay X-Frame-Options ni frame-ancestors en enforce para /login, /forgot-password, /reset-password, /accept-invite, /cambiar-password y /bienvenida",
+   "comando": "git grep -n -E 'X-Frame-Options|frame-ancestors|\\[\\[headers\\]\\]' origin/main -- logic-core-v3/next.config.ts logic-core-v3/src/proxy.ts logic-core-v3/netlify.toml logic-core-v3/public ; git ls-tree -r --name-only origin/main -- logic-core-v3/public | grep -i _headers -> vacío",
+   "control_positivo": "El mismo grep encuentra :96 (XFO para admin|dashboard|setter), :113 (/setter enforce), :131 (/embed *) y :80 (Report-Only)."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "stopImpersonationAction no chequea el rol",
+   "comando": "git show origin/main:logic-core-v3/src/lib/actions/impersonation.ts | sed -n '50,80p' | grep -c SUPER_ADMIN  -> 0",
+   "control_positivo": "git show origin/main:logic-core-v3/src/lib/actions/impersonation.ts | grep -n SUPER_ADMIN -> :13 (startImpersonationAction)."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "Los inicios de sesión no se registran: auth.ts no tiene events y el enum de auditoría no tiene tipo de login",
+   "comando": "git grep -n -E '^\\s*events\\s*:|\\bLOGIN(_SUCCESS|_FAILED)?\\b|USER_LOGGED_IN' origin/main -- logic-core-v3/src/auth.ts logic-core-v3/prisma/schema.prisma  -> 0",
+   "control_positivo": "git grep -n PASSWORD_CHANGED origin/main -- logic-core-v3/prisma/schema.prisma logic-core-v3/src/app/cambiar-password/actions.ts -> schema.prisma:211 y actions.ts:65."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "Cambiar o restablecer la contraseña no envía ningún email",
+   "comando": "git grep -n -E 'sendTransactionalEmail|sendEmail|brevo' origin/main -- logic-core-v3/src/app/cambiar-password logic-core-v3/src/app/reset-password logic-core-v3/src/lib/actions/profile.ts  -> 0",
+   "control_positivo": "git grep -n sendTransactionalEmail origin/main -- logic-core-v3/src/app/forgot-password/actions.ts -> :7 y :96."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "La app no usa getToken de Auth.js (advisory GHSA-xmf8)",
+   "comando": "git grep -n -E '\\bgetToken\\b' origin/main -- logic-core-v3/src logic-core-v3/scripts  -> solo google-business-profile.ts:51 (oauth2Client.getToken de googleapis, otra librería)",
+   "control_positivo": "git grep -n \"from 'next-auth/jwt'\" origin/main -- logic-core-v3/src -> qa/login/route.ts:27 (encode)."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "Ningún auth() crudo se chequea solo por existencia (advisory GHSA-8fpg, fail-open)",
+   "comando": "for f in $(git grep -l -E 'if \\(!session\\)' origin/main -- logic-core-v3/src | sed 's#^origin/main:##'); do git show \"origin/main:$f\" | grep -q -E 'session = await auth\\(\\)' && echo $f; done  -> vacío",
+   "control_positivo": "git grep -n -E 'if \\(!session\\)' origin/main -- logic-core-v3/src -> 11 coincidencias, todas sobre helpers como getClientChatbotSession, que adentro exigen session?.user?.id."
+  },
+  {
+   "ciclo": "D1-c2",
+   "lote": "D1-T1",
+   "afirmacion": "El build de producción no usa Turbopack (advisory GHSA-6gpp)",
+   "comando": "git grep -n -i turbo origin/main -- logic-core-v3/package.json logic-core-v3/next.config.ts logic-core-v3/netlify.toml  -> 0",
+   "control_positivo": "git grep -n 'next build --webpack' origin/main -- logic-core-v3/package.json -> :9 (netlify.toml:2 corre npm run build)."
   }
  ]
 }

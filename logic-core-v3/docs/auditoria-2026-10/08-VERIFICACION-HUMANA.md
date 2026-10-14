@@ -109,3 +109,39 @@
 - Resultado esperado: Definir: si archivar es baja, el login se rechaza con mensaje
 - Señal de falla: Portal completo operativo
 - ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-013] Una sesión SUPER_ADMIN invalidada sigue leyendo páginas de /admin por navegación parcial (RSC)
+- Verifica: [SEC-023] · Prioridad: alta
+- Entorno: Local: npm run dev:qa (puerto 3002) contra la base del .env, con dos navegadores o perfiles (A y B)
+- Precondiciones: Cuenta SUPER_ADMIN de prueba (seed) con la contraseña conocida y forma de restaurarla al final. No usar /api/qa/login para A: su token no trae sessionVersion.
+- Pasos: 1) En A, entrar por /login con la cuenta SUPER_ADMIN, abrir /admin y después /admin/team. 2) En A, abrir DevTools > Network, hacer clic en 'Referidos' del menú lateral y copiar como cURL la request a /admin/referrals que lleva los headers 'RSC: 1' y 'Next-Router-State-Tree'. 3) En B, entrar con la misma cuenta y cambiar la contraseña en /cambiar-password (sube sessionVersion). 4) En A, sin recargar, hacer clic en 'Equipo', 'Proyectos', 'Referidos' y 'Leads'. 5) Ejecutar en una terminal el cURL copiado en el paso 2 (lleva la cookie vieja de A) y buscar en la respuesta emails de referidos o nombres de organizaciones. 6) Control: recargar A con F5. Debería terminar en /login o en el bucle de BUG-001. 7) Restaurar la contraseña de la cuenta de prueba.
+- Resultado esperado: Después del paso 3, A deja de ver datos de /admin: los clics y el cURL devuelven redirección a /login o error, nunca datos.
+- Señal de falla: En el paso 4 A sigue mostrando las listas, o el cURL del paso 5 devuelve 200 con el payload RSC que contiene emails de referidos, organizaciones o usuarios.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-014] /api/qa/login alcanzable desde la LAN con 'Host: localhost'
+- Verifica: [SEC-024] · Prioridad: media
+- Entorno: PC de desarrollo con npm run dev:qa corriendo, más otro dispositivo en la misma red (o la misma PC usando su IP de LAN)
+- Precondiciones: Persona super-admin sembrada (seed). No hace falta ninguna credencial.
+- Pasos: 1) Correr npm run dev:qa y anotar la URL 'Network' que imprime Next (http://<IP-LAN>:3002). 2) Desde otro dispositivo de la red: curl -i -X POST http://<IP-LAN>:3002/api/qa/login -H "Host: localhost:3002" -H "Content-Type: application/json" -d "{\"persona\":\"super-admin\"}" 3) Si responde 200, copiar el valor de la cookie authjs.session-token del Set-Cookie y pedir: curl -i http://<IP-LAN>:3002/admin -H "Cookie: authjs.session-token=<valor>" 4) Control: repetir el paso 2 sin el header Host. Debe dar 403 host_not_localhost.
+- Resultado esperado: El paso 2 responde 403, o la conexión se rechaza porque el servidor solo escucha en 127.0.0.1.
+- Señal de falla: El paso 2 responde 200 con la cookie y el paso 3 devuelve el HTML del panel admin.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-015] El rate limit por IP (y la IP de auditoría) se esquiva rotando X-Forwarded-For en Netlify
+- Verifica: [SEC-025], [SEC-026] · Prioridad: media
+- Entorno: Producción en Netlify (develop.com.ar) o un deploy preview con la misma configuración
+- Precondiciones: Ninguna cuenta para los pasos 1 a 3 (token inventado). Solo escribe filas en la tabla rate_limit. El paso 4 usa una cuenta de prueba.
+- Pasos: 1) Abrir https://develop.com.ar/reset-password?token=<64 caracteres hex inventados> con DevTools > Network abierto. 2) Enviar el formulario 11 veces con contraseñas iguales de 8+ caracteres. La 11ª respuesta debe decir 'Demasiados intentos'. 3) Copiar como cURL el último POST y repetirlo 11 veces agregando -H "X-Forwarded-For: 203.0.113.N" con N distinto en cada intento. 4) Opcional, para la auditoría: con una cuenta de prueba, cambiar la contraseña desde una request con X-Forwarded-For: 203.0.113.99 y revisar la IP en /admin/audit-log.
+- Resultado esperado: Con cualquier X-Forwarded-For el límite sigue vigente ('Demasiados intentos' durante 15 min), y la auditoría guarda la IP real.
+- Señal de falla: Con un X-Forwarded-For nuevo por intento vuelve 'Este enlace no es válido o ya expiró' (el límite no corta), o el audit-log muestra 203.0.113.99.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-016] Las páginas de auth cargan dentro de un iframe ajeno
+- Verifica: [SEC-027] · Prioridad: baja
+- Entorno: Producción (develop.com.ar) desde Chrome
+- Precondiciones: Ninguna
+- Pasos: 1) Crear un archivo local prueba-iframe.html con <iframe src="https://develop.com.ar/login" width="800" height="600"></iframe> y otro iframe a https://develop.com.ar/forgot-password. 2) Abrirlo con doble clic en Chrome. 3) Control: cambiar un iframe a https://develop.com.ar/dashboard. Debe quedar en blanco o rechazado por X-Frame-Options: DENY.
+- Resultado esperado: Los iframes de /login y /forgot-password quedan rechazados, igual que /dashboard.
+- Señal de falla: La pantalla de login se ve y se puede usar dentro del iframe.
+- ¿Escribe en la base o manda emails?: no

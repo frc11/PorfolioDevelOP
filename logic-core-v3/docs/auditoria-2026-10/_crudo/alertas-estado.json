@@ -3,7 +3,7 @@
   {
    "ciclo": "D1-c1",
    "lote": "D1-L1",
-   "alerta": "Proxy/middleware: bitacora-roadmap :6334 y :7936 dicen que no hay middleware y que protegen los layouts; :7682/:7687 reportan 307 'middleware'; :7830/:7898 modifican src/proxy.ts; :8138 (SEC-AUTH-04) pide middleware global",
+   "alerta": "[D1-A1] Proxy/middleware: bitacora-roadmap :6334 y :7936 dicen que no hay middleware y que protegen los layouts; :7682/:7687 reportan 307 'middleware'; :7830/:7898 modifican src/proxy.ts; :8138 (SEC-AUTH-04) pide middleware global",
    "resultado": "parcial",
    "evidencia": "Si hay middleware: src/proxy.ts (convencion de Next 16) con matcher ['/admin/:path*','/dashboard/:path*','/setter/:path*','/login','/bienvenida','/cambiar-password'] (proxy.ts:172); los docs :6334/:7936 estan desactualizados. El 307 a /login de B12.6 es proxy.ts:104-108; la rama SETTER de B1 esta en :117-122. ALWAYS_ALLOWED (:68) conserva '/logout' (ruta inexistente) y '/api/auth/', '/api/' que el matcher nunca deja pasar. No es global (SEC-AUTH-04 abierto): /api/* queda fuera y cada handler se protege solo. No hay ruta de portal protegida solo por layout que falte en el proxy ni viceversa (admin/layout.tsx:43-49, setter/layout.tsx:28-34, dashboard/layout.tsx:90-92, bienvenida/layout.tsx:9-10, cambiar-password/page.tsx:6-7). Lo unico que depende solo del proxy es el forzado de passwordResetRequired (proxy.ts:84-90).",
    "hallazgo_titulo": "passwordResetRequired solo se impone en el proxy; ALWAYS_ALLOWED tiene entradas muertas y getLegacyAdminRedirectPath nunca redirige"
@@ -11,7 +11,7 @@
   {
    "ciclo": "D1-c1",
    "lote": "D1-L1",
-   "alerta": "Regla de contrasena 8+mayuscula+numero declarada 'hecho (sin mergear)' para /cambiar-password: ¿esta en main y aplica en reset-password y en el alta?",
+   "alerta": "[D1-A2] Regla de contrasena 8+mayuscula+numero declarada 'hecho (sin mergear)' para /cambiar-password: ¿esta en main y aplica en reset-password y en el alta?",
    "resultado": "parcial",
    "evidencia": "En origin/main si para /cambiar-password (CambiarPasswordForm.tsx:19-25, :95, :203; actions.ts:12-19) y Mi Cuenta (schemas.ts:22-35). No en reset-password (schemas.ts:94-97 solo min 8; ResetPasswordForm.tsx:190-202 sin chequeo) ni en accept-invite (actions.ts:26-31, manual y sin Zod). En las altas vivas la contrasena es temporal (generate-temp-password.ts:15-21, sin mayuscula garantizada) con passwordResetRequired=true, asi que la regla recien aplica en el cambio forzado.",
    "hallazgo_titulo": "La regla unica de contrasena (8+mayuscula+numero) no se aplica en reset-password ni en accept-invite"
@@ -19,7 +19,7 @@
   {
    "ciclo": "D1-c1",
    "lote": "D1-L1",
-   "alerta": "sessionVersion: las acciones que lo tocan se llaman directo (startTransition), nunca con <form action>; ¿funciona la invalidacion en cambio de contrasena, reset, baja de miembro y cambio de rol?",
+   "alerta": "[D1-A3] sessionVersion: las acciones que lo tocan se llaman directo (startTransition), nunca con <form action>; ¿funciona la invalidacion en cambio de contrasena, reset, baja de miembro y cambio de rol?",
    "resultado": "parcial",
    "evidencia": "Patron cumplido (CambiarPasswordForm.tsx:116-131, ProfileForms.tsx:374-394). Incrementos en cambiar-password/actions.ts:59, profile.ts:230, reset-password/actions.ts:76, resend-credentials/route.ts:71. No existen flujos de baja de miembro ni de cambio de rol (git grep orgMember.delete y role en user.update -> vacios); hardDeleteClient.ts:141 borra la org sin tocar sessionVersion y archivar (archiveClient.ts:34) no corta acceso. La invalidacion solo vale en Node: trigger 'update' saltea el chequeo (auth.ts:215-217) y el proxy no la ve (auth.config.ts:24-40) -> bucle de redirecciones.",
    "hallazgo_titulo": "La invalidacion por sessionVersion se revive con POST /api/auth/session (trigger 'update' saltea el chequeo)"

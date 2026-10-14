@@ -25,6 +25,28 @@
 - Nodo(s): h1.auth-login.login-password, lib.rate-limit, lib.auth, modelo.User
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-007
 
+### [SEC-023] Las páginas de /admin exigen SUPER_ADMIN solo en el layout y en el proxy: un token invalidado, degradado o de un admin borrado sigue leyendo datos de todos los clientes por navegación RSC
+- Dominio: D1  ·  Severidad: ALTA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/proxy.ts:148` — «if (isAdminRoute && role !== ADMIN_ROLE) {»; `src/auth.config.ts:24` — «callbacks: { authorized({ auth }) { return true // Route protection is handled in middleware logic»; `src/app/(protected)/admin/layout.tsx:47` — «if (session.user.role !== 'SUPER_ADMIN') { redirect('/dashboard')»; librería next@16.2.9, dist/server/app-render/app-render.js línea 164 — «const flightRouterState = shouldProvideFlightRouterState ? (0, _parseandvalidateflightrouterstate.parseAndValidateFlightRouterState)(headers[_approuterheaders.NEXT_ROUTER_STATE_TREE_HEADER]) : undefined;»; librería next@16.2.9, dist/server/app-render/walk-tree-with-flight-router-state.js línea 53 — «const renderComponentsOnThisLevel = // No further router state available !flightRouterState || // Segment in router state does not match current segment !(0, _matchsegments.matchSegment)(actualSegment, flightRouterState[»; `src/app/(protected)/admin/team/page.tsx:19` — «const users = await prisma.user.findMany({»; `src/app/(protected)/admin/referrals/page.tsx:9` — «const referrals = await prisma.referral.findMany({»; `src/app/(protected)/admin/page.tsx:182` — «prisma.agencySettings.findFirst({»
+- Impacto: Bloqueante para el primer cliente real. Escenario: se filtra la cookie del SUPER_ADMIN (PC compartida, malware, extensión) y develOP reacciona cambiando la contraseña. El corte por sessionVersion no llega al panel. El proxy decide /admin con el rol del JWT (auth.config.ts no tiene callback jwt ni mira sessionVersion) y re-firma la cookie por 30 días (SEC-010). En un pedido RSC con el árbol del layout ya montado, Next no ejecuta admin/layout.tsx y renderiza solo la página. Es lo que manda el router en cada clic, o un curl con Next-Router-State-Tree. Hay 15 páginas de /admin que consultan Prisma sin auth() propio:
+- admin (KPIs y cobros)
+- team (usuarios admin)
+- referrals (emails de referidos de todos los clientes)
+- projects, projects/[id]/payments y projects/[id]/tasks
+- leads y leads/[leadId]
+- messages/[orgId] (nombre de la org)
+- announcements
+- chatbot/activity
+- leados, leados/[leadId] y leados/setter/[setterId]
+- fg2-lab
+Lo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de otro dispositivo que sigue navegando por clics después del cambio de contraseña. Las mutaciones sí fallan porque las actions llaman requireSuperAdmin. Contraste: /setter carga sus datos con requireSetter en _data.ts y el portal con resolveOrgId, que releen la base.
+- Propuesta: Zona libre, salvo admin/leados/* y fg2-lab, que son ZONA-FRANCO (coordinar con Franco). Mover la autorización al lado del dato: un helper cacheado requireSuperAdminPage() (auth() fresco + rol, y si no pasa redirect/notFound) que se llame al inicio de cada page.tsx de /admin o dentro de sus funciones de datos, como ya hace /setter. Sumar un invariante que falle si una page de /admin no lo llama. El layout queda como UX, no como frontera.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-shell, h4.adm-dashboard, h4.adm-equipo, h4.adm-referidos, h4.adm-proyectos, h4.adm-leads, h4.adm-mensajes, h4.adm-novedades, h3.adm-actividad, h5.adm-revision-demos, h5.adm-fg2lab, lib.proxy, lib.auth
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-013
+
 ### [SEC-009] Enumeracion de usuarios: el magic link responde distinto si el email existe (y el login/forgot delatan por tiempo y por 'error inesperado')
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -107,6 +129,21 @@
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h2.cli-cuenta, lib.actions
+
+### [SEC-025] Los límites por IP de forgot-password, reset-password y el formulario de contacto se esquivan rotando X-Forwarded-For: getClientIpHash toma el primer valor del header
+- Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/security/auth-rate-limit.ts:39` — «const fwd = headersList.get('x-forwarded-for')?.split(',')[0]?.trim()»; `src/app/forgot-password/actions.ts:43` — «const ipHash = await getClientIpHash() const ipLimit = await applyAuthRateLimit({ scope: 'forgotPasswordPerIp', identifier: ipHash })»; `src/app/reset-password/actions.ts:19` — «const ipHash = await getClientIpHash() const ipLimit = await applyAuthRateLimit({ scope: 'resetPasswordPerIp', identifier: ipHash })»; `src/lib/actions/contact.ts:22` — «// Clave no controlable por el atacante: IP hasheada, no un campo del FormData. const ipHash = await getClientIpHash()»
+- Impacto: En Netlify, el primer valor de X-Forwarded-For puede venir del cliente. La IP que pone la plataforma está en x-nf-client-connection-ip, y el repo solo la usa para limpiar Sentry. Un anónimo que manda un X-Forwarded-For distinto en cada pedido estrena un bucket cada vez:
+- El formulario público de contacto queda sin freno: por cada envío, una fila en ContactSubmission, el webhook de alertas y n8n. Esto contradice el comentario de contact.ts:22.
+- forgot-password pierde su tope por IP y queda solo el de 3/h por email, multiplicable por cada cuenta registrada en envíos por Brevo.
+- reset-password pierde su freno por IP.
+Es el mismo patrón que SEC-007 cita solo para loginAction.
+- Propuesta: Zona libre. Crear un helper único getClientIp() que lea la IP confiable de la plataforma (x-nf-client-connection-ip en Netlify, con fallback local) en vez del primer XFF. Usarlo en getClientIpHash, en login/actions.ts y en el extractor del chatbot (requestSchema.ts:110). Sumar un invariante con XFF falsificado.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.rate-limit, lib.security, h1.auth-recupero, h6.vis-contacto
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-015
 
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
@@ -212,6 +249,38 @@
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): lib.rate-limit, lib.security
+
+### [SEC-026] El registro de auditoría guarda como IP el primer X-Forwarded-For, un dato que escribe el cliente
+- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/audit-log.ts:20` — «const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null»
+- Impacto: La IP de cada evento de AdminAuditLog (cambios de contraseña, impersonación, acciones del admin) es la que el cliente declare. Quien opere con una cuenta comprometida deja rastros con la IP que quiera, y una investigación posterior no puede confiar en ese campo.
+- Propuesta: Decisión para Valentino (audit-log.ts es FROZEN-inferido): usar la misma IP confiable del helper getClientIp() propuesto para los rate limits.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.audit-log, h4.adm-audit, modelo.AdminAuditLog
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-015
+
+### [SEC-027] Las páginas de auth y /bienvenida se pueden embeber en un iframe ajeno: X-Frame-Options solo cubre admin|dashboard|setter y la CSP global es Report-Only
+- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `next.config.ts:94` — «source: '/(admin|dashboard|setter)(.*)', headers: [ { key: 'X-Frame-Options', value: 'DENY' },»; `next.config.ts:72` — «key: 'Content-Security-Policy-Report-Only',»; `next.config.ts:80` — «"frame-ancestors 'none'",»
+- Impacto: /login, /forgot-password, /reset-password, /accept-invite, /cambiar-password y /bienvenida (wizard con sesión) se renderizan dentro de cualquier sitio. Eso habilita clickjacking o UI redress con el dominio legítimo. El riesgo es acotado porque esas pantallas piden tipear datos, pero contradice la política del propio config, que tiene frame-ancestors 'none' solo en modo reporte. No hay public/_headers ni [[headers]] en netlify.toml que lo compensen.
+- Propuesta: Zona libre. Extender el bloque X-Frame-Options: DENY / frame-ancestors 'none' a esas rutas (o aplicarlo global salvo /embed/* y /widget.js) y pasar la CSP a enforce (PLAN-1025).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h1.auth-login, h1.auth-recupero, h1.auth-cambio, h1.auth-invite, h2.cli-bienvenida
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-016
+
+### [SEC-028] stopImpersonationAction no exige SUPER_ADMIN: cualquier sesión puede escribir eventos IMPERSONATION_ENDED en la auditoría
+- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/actions/impersonation.ts:50` — «export async function stopImpersonationAction() { const session = await auth()»; `src/lib/actions/impersonation.ts:66` — «if (session?.user?.id) { await logAdminAction({»; `src/lib/actions/impersonation.ts:13` — «if (session?.user?.role !== 'SUPER_ADMIN' || !session.user.id) {»; `src/app/(protected)/admin/clients/_actions/client.actions.ts:12` — «export async function stopImpersonationAction() { return stopImpersonationActionBase()»
+- Impacto: Es una server action sin control de rol, contra la regla del repo de verificar sesión y rol en toda action (startImpersonationAction sí lo hace, :13). Un ORG_MEMBER o SETTER que consiga su id (por ejemplo con el advisory de divulgación de Server Functions de next <16.2.11) agrega entradas 'Finalizó impersonation' a su nombre en el registro de auditoría del admin. No da acceso a datos, pero ensucia la traza de impersonación.
+- Propuesta: Zona libre. Registrar el evento solo si getImpersonationSession() devuelve una impersonación válida del mismo admin (o si el rol es SUPER_ADMIN). Borrar la cookie siempre. Mismo criterio en el wrapper de client.actions.ts.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h1.auth-impersonacion, h4.adm-audit, modelo.AdminAuditLog
 
 ## Bugs latentes
 
@@ -353,6 +422,20 @@
 - Esfuerzo: S  ·  Zona: FROZEN + ZONA-FRANCO
 - Relacionado: —
 - Nodo(s): h1.auth-login.magic-link, int.brevo, int.sentry, lib.auth
+
+### [SEC-024] /api/qa/login confía en el header Host y los scripts QA escuchan en toda la red: cualquiera en la misma LAN obtiene una sesión SUPER_ADMIN
+- Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/api/qa/login/route.ts:54` — «const host = request.headers.get('host') ?? ''»; `src/app/api/qa/login/route.ts:61` — «if (!isLocalhost) { return { allowed: false, reason: 'host_not_localhost' }»; `package.json:8` — «"dev:qa": "cross-env QA_ALLOW_LOCALHOST=1 next dev --webpack -p 3002",»; `package.json:11` — «"start:qa": "npm run build && cross-env QA_ALLOW_LOCALHOST=1 next start -p 3001",»; librería next@16.2.9, dist/cli/next-start.js línea 72 — «const hostname = options.hostname;»; librería next@16.2.9, dist/server/lib/start-server.js línea 267 — «server.listen(port, hostname);»
+- Impacto: La 'triple guarda' (route.ts:14-23) queda reducida a la variable QA_ALLOW_LOCALHOST, que los cuatro scripts QA encienden: el Host lo escribe el cliente y la guarda de hosting no aplica en una PC. dev:qa, start:qa, start:setter y start:galeria no pasan -H, así que Next llama server.listen(port, undefined), escucha en todas las interfaces e imprime la URL 'Network'. Un tercero en la misma red (cowork, bar, oficina) hace POST http://<IP>:3002/api/qa/login con 'Host: localhost' y {persona:'super-admin'}. Recibe un JWT de SUPER_ADMIN firmado con el AUTH_SECRET local y válido 8 h, que usa contra ese servidor: panel admin completo y escritura sobre la base del .env local, que según el PROMPT §3 es la Neon compartida. Además, ese servidor expuesto corre en Windows con next 16.2.9, que tiene un advisory crítico de RCE para servidores Windows (la versión la evalúa D8).
+- Propuesta: Coordinar con Franco (ZONA-FRANCO):
+1. Agregar -H 127.0.0.1 a dev:qa, start:qa, start:setter y start:galeria, y evaluar lo mismo para dev.
+2. En la route, no usar Host como guarda: exigir además un secreto por corrida (header con un QA_LOGIN_TOKEN aleatorio que solo conoce el runner de visual-qa).
+3. Responder 404 genérico sin reason (SEC-021).
+- Esfuerzo: S  ·  Zona: ZONA-FRANCO
+- Relacionado: —
+- Nodo(s): h1.auth-login, h1.auth-login.qa-login, lib.auth
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-014
 
 ### [BUG-005] Org primaria no deterministica: orgMemberships take:1 sin orderBy en cada auth()
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug

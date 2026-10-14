@@ -8,8 +8,8 @@
 |---|---|
 | Fase | **F2 — D1** (F1 cerrada en C01) |
 | Base auditada | `origin/main` @ `57c421bc` (último commit 2026-09-06; refs traídas el 2026-10-13 16:23) |
-| Último ciclo registrado | C02 · D1-c1 |
-| Próximo paso | D1-c2: `f2-args.mjs D1 D1-c2 _crudo/ciclos/D1-c2.args.json --cazadores --lente "seguridad y aislamiento"` → `f2-construir.mjs` con `f2-cazadores.plantilla.js` → workflow → `f2-procesar.mjs` → decisiones del padre → `f2-escribir.mjs` |
+| Último ciclo registrado | C03 · D1-c2 |
+| Próximo paso | D1-c3 (último de D1): `f2-args.mjs D1 D1-c3 docs/auditoria-2026-10/_crudo/ciclos/D1-c3.args.json --cazadores --lente "ERRORES, CARRERAS Y LIMITES DE PLAN…"` → `f2-construir.mjs` con `f2-cazadores.plantilla.js` → workflow → `f2-procesar.mjs` → decisiones del padre → `f2-escribir.mjs` → cierre de D1 (con `[DOMINIO-ABIERTO]` si c3 trae MEDIA o más) → D6 |
 | Cobertura profunda | 32 / 1.298 archivos (2,5 %) · 31 `PODA-ALTA` fuera de lotes · superficial hecho 405 / 691 (DOC 266, PUB 138, D1 1) |
 | Hallazgos escritos | 35 (C 1 · A 3 · M 13 · B 18) · VH 12 · POD 285 · PLAN 1.351 (21 cruzados) · pendiente: el vencimiento de Vertex (DEC-43, en D7) |
 | Push | al cierre de cada fase, con `[skip ci]` (DEC-04), **solo si `gh` confirma el repo `PRIVATE`** (DEC-48; a 2026-10-13 22:48 sigue `PUBLIC`: commits locales) · último push: `04ecc0db` (F1) |
@@ -18,7 +18,7 @@
 
 | Dominio | Ciclo (máx.) | Profundo leído / total (PODA-ALTA fuera de lotes) | Superficial hecho / total | Nuevos C / A / M / B | Lentes usadas | Estado |
 |---|---|---|---|---|---|---|
-| D1 Auth | 1 (3) | 32 / 33 (1) | 1 / 1 | 1 / 3 / 13 / 14 | lectores | abierto · cobertura 100 % · sigue c2 (seguridad y aislamiento) |
+| D1 Auth | 2 (3) | 32 / 33 (1) | 1 / 1 | 1 / 4 / 15 / 19 | lectores · seguridad y aislamiento | abierto · cobertura 100 % · sigue c3 (errores, carreras y límites de plan) |
 | D2 Dashboard | — (3) | 0 / 219 (8) | 0 / 13 | — | — | abierto · 5 lotes · 151 PLAN |
 | D3 Admin | — (2) | 0 / 221 (6) | 0 / 0 | — | — | abierto · 6 lotes · 102 PLAN |
 | D4 Setter | — (2) | 0 / 171 (0) | 0 / 34 | — | — | abierto · 6 lotes · 361 PLAN |
@@ -427,6 +427,13 @@ Corrido el 2026-10-13, uno por vez, desde `logic-core-v3` (detalle en `01-INVENT
 - Volcado con las herramientas nuevas: `f2-procesar.mjs` (crudo + revisión con decisiones DEC-37), `f2-escribir.mjs` (IDs, registro `_crudo/hallazgos.json`, VH, cruces de PLAN, acumulados, ledger) y `hallazgos-md.mjs` (03, 02 y 09 desde el registro; el código de librerías se cita como `paquete@versión`, fuera de backticks). SEC-001…SEC-004 se importaron al registro sin cambios. `poda-md.mjs` suma los candidatos de F2.
 - VH-005…VH-012. PLAN cruzados 21/21 (hecho 8 · parcial 4 · no empezado 9). Alertas de D1: las 3 «parcial». Las advisories de npm se evaluaron contra el código: bypass del proxy acotado porque los layouts re-chequean rol y org; `getToken` y el normalizador de email descartados. Previas: 21 re-verificadas (5 abiertas, 9 parciales, 7 cerradas); siguen abiertas S2b-01 (email marketing, D2) y S4-01 (`validate-origin`, D5), que se re-verifican en sus dominios. Poda: POD-282…POD-285 y un refuerzo a POD-046. Test superficial mapeado: `idor-tokens.invariant.ts` cubre el token firmado del opt-out (dato para la alerta D7-A1) y `resolveScopedOrgId`.
 - Funcionalidades: 15 en 6 herramientas (h1 completo: login L1 por Google, recupero L2, cambio L2, invitación huérfana). Ninguna en L3: faltan sobre todo Sentry, autonomía y errores.
+- Commit `62b262c5` (local, sin push por DEC-48).
+
+### C03 · D1-c2 — 2026-10-14 — auth, ciclo 2 (cazador, lente seguridad y aislamiento)
+- `D1-c2 · tramo D1-T1 (32 archivos; run wf_2c219439-2fe: cazador + verificador, 0,57 M tokens, 43 min; _crudo/ciclos/D1-c2-D1-T1.json) · CRÍTICA/ALTA leídas por el padre 2 (1 ajustada a MEDIA) · muestreados 2 de 6 (fallaron 0) · nuevos 0/1/2/5 · sigue D1-c3 (último ciclo: errores, carreras y límites de plan)`.
+- **SEC-023 (ALTA)**: 22 páginas de `/admin` leen Prisma sin `auth()` propio; la única guarda de rol es `admin/layout.tsx:41-49`, que no corre en la navegación parcial, y el proxy decide con el rol del JWT sin `sessionVersion`. Un token SUPER_ADMIN revocado sigue leyendo el panel. SEC-024 (MEDIA, ZONA-FRANCO): `/api/qa/login` confía en `Host` y los scripts QA escuchan en toda la red. SEC-025 (MEDIA): los límites por IP toman el primer `X-Forwarded-For`. Más SEC-026…SEC-028, FAL-001 y FAL-002 (BAJA). VH-013…VH-016.
+- Las 3 alertas de D1 se etiquetaron `[D1-A1..A3]` en `alertas-estado.json` (c1 corrió antes de los IDs de alerta). `f2-args.mjs` ahora pasa a cada dominio los patrones defectuosos de los dominios anteriores.
+- Pre-verificación para D2 (leída por el padre): el Inicio del cliente cuenta como «sus leads» todos los `ContactSubmission` de la agencia (`src/lib/dashboard/week-results.ts:43-51`, `src/lib/health-score.ts:311-333`, sin `organizationId`; llega a `dashboard/page.tsx:183` y al brief ejecutivo). Se clasifica en D2-c1.
 
 ## 14. Autorrevisión §10 por commit
 

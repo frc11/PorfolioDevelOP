@@ -22,6 +22,18 @@
 - Coordinación: una parte del arreglo cae fuera de la zona (ver Propuesta, «libre»): coordinar con Valentino quién la hace
 - Ficha completa: BUG-003 en 03-MEJORAS.md
 
+### SEC-024 · /api/qa/login confía en el header Host y los scripts QA escuchan en toda la red: cualquiera en la misma LAN obtiene una sesión SUPER_ADMIN
+- Contexto: D1 · h1.auth-login, h1.auth-login.qa-login, lib.auth. MEDIA, VERIFICADO-POR-LECTURA.
+- Evidencia: `src/app/api/qa/login/route.ts:54` — «const host = request.headers.get('host') ?? ''»; `src/app/api/qa/login/route.ts:61` — «if (!isLocalhost) { return { allowed: false, reason: 'host_not_localhost' }»; `package.json:8` — «"dev:qa": "cross-env QA_ALLOW_LOCALHOST=1 next dev --webpack -p 3002",»; `package.json:11` — «"start:qa": "npm run build && cross-env QA_ALLOW_LOCALHOST=1 next start -p 3001",»; librería next@16.2.9, dist/cli/next-start.js línea 72 — «const hostname = options.hostname;»; librería next@16.2.9, dist/server/lib/start-server.js línea 267 — «server.listen(port, hostname);»
+- Impacto: La 'triple guarda' (route.ts:14-23) queda reducida a la variable QA_ALLOW_LOCALHOST, que los cuatro scripts QA encienden: el Host lo escribe el cliente y la guarda de hosting no aplica en una PC. dev:qa, start:qa, start:setter y start:galeria no pasan -H, así que Next llama server.listen(port, undefined), escucha en todas las interfaces e imprime la URL 'Network'. Un tercero en la misma red (cowork, bar, oficina) hace POST http://<IP>:3002/api/qa/login con 'Host: localhost' y {persona:'super-admin'}. Recibe un JWT de SUPER_ADMIN firmado con el AUTH_SECRET local y válido 8 h, que usa contra ese servidor: panel admin completo y escritura sobre la base del .env local, que según el PROMPT §3 es la Neon compartida. Además, ese servidor expuesto corre en Windows con next 16.2.9, que tiene un advisory crítico de RCE para servidores Windows (la versión la evalúa D8).
+- Propuesta: Coordinar con Franco (ZONA-FRANCO):
+1. Agregar -H 127.0.0.1 a dev:qa, start:qa, start:setter y start:galeria, y evaluar lo mismo para dev.
+2. En la route, no usar Host como guarda: exigir además un secreto por corrida (header con un QA_LOGIN_TOKEN aleatorio que solo conoce el runner de visual-qa).
+3. Responder 404 genérico sin reason (SEC-021).
+- Cómo verificar: VH-014 en 08-VERIFICACION-HUMANA.md
+- Coordinación: ninguna fuera de la zona
+- Ficha completa: SEC-024 en 03-MEJORAS.md
+
 ### BUG-005 · Org primaria no deterministica: orgMemberships take:1 sin orderBy en cada auth()
 - Contexto: D1 · lib.auth, modelo.OrgMember. BAJA, PROBABLE.
 - Evidencia: `src/auth.ts:37` — «take: 1,»; `src/app/login/actions.ts:94` — «take: 1,»; `prisma/schema.prisma:530` — «@@unique([userId, organizationId])»
@@ -39,6 +51,15 @@
 - Cómo verificar: leer las líneas citadas en origin/main
 - Coordinación: ninguna fuera de la zona
 - Ficha completa: DEU-002 en 03-MEJORAS.md
+
+### FAL-001 · Los inicios de sesión no dejan rastro: no hay events en auth.ts ni tipo LOGIN en AuditActionType
+- Contexto: D1 · h1.auth-login, lib.auth, h4.adm-audit, modelo.AdminAuditLog. BAJA, PROBABLE.
+- Evidencia: `src/auth.ts:173` — «callbacks: {»; `prisma/schema.prisma:190` — «enum AuditActionType {»; `prisma/schema.prisma:211` — «PASSWORD_CHANGED»; `src/app/login/actions.ts:113` — «if (error instanceof AuthError) { recordFailedAttempt(ip)»
+- Impacto: Una toma de la cuenta SUPER_ADMIN (fuerza bruta de SEC-007, magic link a un buzón comprometido) o de un cliente no deja registro de cuándo ni desde dónde se entró. Los fallos solo suman a un Map en memoria y los éxitos no se guardan en ningún lado. develOP no puede detectar ni reconstruir un acceso indebido. Además, el 'registro de accesos' que se le muestra al cliente en la Bóveda es inventado (PLAN-032).
+- Propuesta: Decisión para Valentino (auth.ts es FROZEN + ZONA-FRANCO; el schema es FROZEN, migración sin reset). Opción: events.signIn/signOut en auth.ts que escriban en AdminAuditLog con tipos nuevos (LOGIN_SUCCEEDED/LOGIN_FAILED) o en una tabla propia. Como mínimo para SUPER_ADMIN y con la IP confiable.
+- Cómo verificar: leer las líneas citadas en origin/main
+- Coordinación: ninguna fuera de la zona
+- Ficha completa: FAL-001 en 02-PENDIENTE.md
 
 ### SEC-021 · /api/qa/login revela en el 403 cual guarda fallo
 - Contexto: D1 · h1.auth-login, lib.auth. BAJA, VERIFICADO-POR-LECTURA.
