@@ -30,8 +30,6 @@ const MAXIMO = 64
 const COLUMNAS = 4
 /** Una sombra más tenue que esto no se escribe. */
 const SOMBRA_MINIMA = 0.002
-/** [PULIDO 23] U3 · la sombra de contacto de un texto apoyado, más tenue que la de una placa. */
-const SOMBRA_DEL_TEXTO = 0.45
 
 interface PiezaMutable {
   /** Sus medidas (u) y las de su caja (px), su columna y su esquina de arriba a la izquierda en la columna (px). */
@@ -334,20 +332,19 @@ export function sombrasDeLaCaida(c: CaidaDelPie, s: number): number {
   let k = 0
   for (let i = 0; i < c.n && k < MAXIMO_DE_SOMBRAS_DEL_PIE; i += 1) {
     const p = c.piezas[i]
-    if (!p.conSombra && !p.esTexto) continue
+    // [PULIDO 25] W2 b · los textos, sin sombra (era un rectángulo oscuro detrás de cada bloque): limpios sobre el piso.
+    if (!p.conSombra) continue
     const col = c.columnas[p.columna]
     const pose = poseDeLaPiezaQueCae(col, c.lugares[p.columna], s)
     const P = POSE_DE_LA_SOMBRA
     P.bajada = pose.bajada
     P.a = pose.a
-    // [PULIDO 23] U3 · la de un texto se queda acostado (se apoya sobre el piso) y es suave; la de una placa se va al incrustarse.
-    P.hundido = p.esTexto ? 0 : pose.hundido
+    P.hundido = pose.hundido
     OFFSET.set(p.dx + p.anchoPx / 2, -(p.dy + p.altoPx), -p.espesorPx).multiplyScalar(col.mpp).applyQuaternion(col.q).add(col.o)
     P.x = OFFSET.x
     P.y = OFFSET.y
     P.z = OFFSET.z
     const sombra = sombraDeLaPiezaQueCae(p, P, b)
-    if (p.esTexto) sombra.alfa *= SOMBRA_DEL_TEXTO
     if (sombra.alfa < SOMBRA_MINIMA) continue
     cajas[k].set(sombra.x, sombra.z, sombra.medioAncho, sombra.medioFondo)
     formas[k].set(sombra.blanda, sombra.alfa, 0, 0)

@@ -21,7 +21,7 @@ import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
 import { aplicarLaCaida, armarLaCaida, domDeLaCaida, domSigueEnLaCaida, sombrasDeLaCaida, type CaidaDelPie } from './caida'
 import { CAJAS_DEL_PIE, escribirLaCaja } from './cajasDelPolvo'
-import { HUECOS_DEL_PIE } from './huecos'
+import { HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
 import { huecosDeLaCaida } from './huecosDeLaCaida'
 import { SOMBRAS_DEL_PIE } from './sombras'
 import { duracionDeLaTransformacion, poseDeLaTransformacion } from './transformacionDelPie'
@@ -199,6 +199,7 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
   SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = enElFinal ? sombrasDeLaCaida(s.caida, segundos) : 0
   // [PULIDO 22] T3 · y el hueco de cada una en el piso, que se abre mientras cae (`huecos.ts`).
   HUECOS_DEL_PIE.uCuantosHuecosDelPie.value = enElFinal ? huecosDeLaCaida(s.caida, segundos) : 0
+  if (!enElFinal) QUIETUD_DEL_PIE.uCuantasQuietudes.value = 0
   // [NOCTURNO FINAL] B4 · y el polvo que cae no las atraviesa: sus cajas, para la simulación (`cajasDelPolvo.ts`).
   let cajas = 0
   // [PULIDO 10] J8 · lo que son letras sueltas (el texto y los enlaces de texto) no frena el polvo: sólo las placas.

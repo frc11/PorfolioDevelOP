@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { POSE_DE_LA_PIEZA, poseDeLaPiezaQueCae, type PoseDeLaPieza } from '../final/caidaDelPie'
 import { sombraDeLaPiezaQueCae } from '../final/sombraDeLaPieza'
 import type { CaidaDelPie } from './caida'
-import { HUECOS_DEL_PIE, HUECO_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE } from './huecos'
+import { HUECOS_DEL_PIE, HUECO_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
 import { SOMBRA_DEL_PIE } from './sombras'
 
 /**
@@ -20,10 +20,12 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
   const formas = HUECOS_DEL_PIE.uFormaDeLosHuecosDelPie.value
   const b = c.base
   const sobra = 1 + HUECO_DEL_PIE.margen
+  const quietudes = QUIETUD_DEL_PIE.uQuietudDelPie.value
+  const fuerzas = QUIETUD_DEL_PIE.uFuerzaDeLaQuietud.value
   let k = 0
+  let q = 0
   for (let i = 0; i < c.n && k < MAXIMO_DE_HUECOS_DEL_PIE; i += 1) {
     const p = c.piezas[i]
-    if (!p.conSombra) continue
     const col = c.columnas[p.columna]
     const pose = poseDeLaPiezaQueCae(col, c.lugares[p.columna], s)
     if (pose.bajada <= 0) continue
@@ -36,9 +38,17 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     POSE.z = OFFSET.z
     const huella = sombraDeLaPiezaQueCae(p, POSE, b)
     const u = Math.min(1, Math.max(0, pose.a / (Math.PI / 2)))
+    // [PULIDO 25] W2 a · la quietud de la energía del piso debajo de toda pieza acostada (placas y textos).
+    if (q < MAXIMO_DE_HUECOS_DEL_PIE) {
+      quietudes[q].set(huella.x, huella.z, huella.medioAncho - SOMBRA_DEL_PIE.sobra, huella.medioFondo - SOMBRA_DEL_PIE.sobra)
+      fuerzas[q] = pose.bajada * u * u * (3 - 2 * u)
+      q += 1
+    }
+    if (!p.conSombra) continue
     huecos[k].set(huella.x, huella.z, (huella.medioAncho - SOMBRA_DEL_PIE.sobra) * sobra, (huella.medioFondo - SOMBRA_DEL_PIE.sobra) * sobra)
     formas[k].set(pose.bajada * u * u * (3 - 2 * u), p.radioPx * col.mpp * sobra, 0, 0)
     k += 1
   }
+  QUIETUD_DEL_PIE.uCuantasQuietudes.value = q
   return k
 }

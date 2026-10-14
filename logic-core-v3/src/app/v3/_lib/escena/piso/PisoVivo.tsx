@@ -17,6 +17,7 @@ import { MANCHA_EN_EL_PISO } from '../sombra/enElPiso'
 import { SOMBRA_EN_VIVO } from '../sombra/delLogo'
 import { SOMBRA_DE_LOS_TITULOS_EN_VIVO } from '../sombra/deLosTitulos'
 import { FINAL_EN_EL_PISO, conElFinalEnElPiso, conElFinalEnLaSimulacion } from '../final/enElPiso'
+import { QUIETUD_DEL_PIE } from '../pie3d/huecos'
 import { LUZ_DE_ABAJO_EN_VIVO } from '../final/luzDeAbajo'
 import { PISO_EN_VIVO } from './enVivo'
 import { ONDA_EN_VIVO, atenderLaOnda, conLaOndaEnElPiso, conOndaDirigida } from './ondaDirigida'
@@ -234,6 +235,8 @@ function armar(grilla: Grilla, conContacto: boolean) {
     uCalmaDelPie: FINAL_EN_EL_PISO.uCalmaDelPie,
     uBaseDelPie: FINAL_EN_EL_PISO.uBaseDelPie,
     uCalmaDelPieFuerza: FINAL_EN_EL_PISO.uCalmaDelPieFuerza,
+    // [PULIDO 25] W2 a · la quietud de la energía debajo de las piezas acostadas (`pie3d/huecos.ts`).
+    ...QUIETUD_DEL_PIE,
     // [PULIDO 6] E2 · la distancia al logo: la calma, la energía y el golpe se miden desde el filo. [PULIDO 7] F1 · el latido se borró.
     uDistanciaAlLogo: FINAL_EN_EL_PISO.uDistanciaAlLogo,
     uMarcoDeLaDistancia: FINAL_EN_EL_PISO.uMarcoDeLaDistancia,
