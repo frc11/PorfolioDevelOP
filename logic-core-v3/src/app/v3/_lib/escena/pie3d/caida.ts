@@ -9,6 +9,7 @@ import type { Armada } from './armadas'
 import { colocarLaPieza } from './colocacion'
 import { cajaDelPieAcostado, distanciaDeLaVista } from './encuadre'
 import { VOLUMEN_DEL_PIE } from './geometria'
+import { TECHO_DE_LOS_TEXTOS } from './huecos'
 import { MAXIMO_DE_SOMBRAS_DEL_PIE, SOMBRAS_DEL_PIE } from './sombras'
 
 /**
@@ -311,7 +312,8 @@ export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number):
   const grupo = a.grupo
   grupo.quaternion.copy(col.q)
   // [PULIDO 23] U3 · un texto no se incrusta: al hundirse su columna, sube su espesor (queda apoyado sobre el piso, sin hueco).
-  const sube = p.esTexto ? p.espesorPx * poseDeLaPiezaQueCae(col, c.lugares[p.columna], s).hundido : 0
+  // [PULIDO 26] X2 · y un poco más (`TECHO_DE_LOS_TEXTOS.sube`, u): por encima del techo de los bloques de abajo (el piso no se aplana).
+  const sube = p.esTexto ? (p.espesorPx + TECHO_DE_LOS_TEXTOS.sube / col.mpp) * poseDeLaPiezaQueCae(col, c.lugares[p.columna], s).hundido : 0
   OFFSET.set(p.dx, -p.dy, sube).multiplyScalar(col.mpp).applyQuaternion(col.q)
   grupo.position.copy(col.o).add(OFFSET)
 }

@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 import { ANCLAS_DEL_DIBUJO } from '../piso/ondaDirigida'
-import { HUECOS_DEL_PIE, HUECOS_DEL_PIE_GLSL, QUIETUD_DEL_PIE, QUIETUD_DEL_PIE_GLSL } from '../pie3d/huecos'
+import { HUECOS_DEL_PIE, HUECOS_DEL_PIE_GLSL, QUIETUD, QUIETUD_DEL_PIE, QUIETUD_DEL_PIE_GLSL } from '../pie3d/huecos'
 import { DISTANCIA_AL_LOGO_GLSL, HUECO } from './hueco'
 import { CORRIENTES_DE_LA_LUZ_GLSL, ENERGIA_EN_LA_SIMULACION_GLSL, LUZ_DE_ABAJO, LUZ_DE_ABAJO_EN_VIVO, RUIDO_DE_LA_LUZ_GLSL } from './luzDeAbajo'
 import { ABRE_LA_JUNTA_GLSL, DESCARGA_DEL_FILO_GLSL, FILO, FILO_EN_VIVO } from './filoConPoder'
@@ -171,11 +171,10 @@ float empujeDelRastro( vec2 p, float h ) {
 // [EL ENCASTRE] 2D · el mar calmo alrededor de la caja del logo acostado (en su plano: x, −z). [PULIDO 6] E2 · un margen pegado
 // al hueco (la distancia al logo desde el centro del bloque: media diagonal y el margen, al ras; en el borde, al caos).
 // [PULIDO 19] Q2 · y bajo el pie acostado: una caja en la base de la cámara de antes del final, con el mismo borde suave.
+// [PULIDO 26] X2 · ya no la caja entera del pie (un rectángulo llano que se notaba): el núcleo debajo de cada pieza (lo que tapa).
 float calmaDelPie( vec2 xz ) {
 	if ( uCalmaDelPieFuerza <= 0.0 ) return 0.0;
-	vec2 d = xz - uCalmaDelPie.xy;
-	float afuera = max( abs( dot( d, uBaseDelPie.xy ) ) - uCalmaDelPie.z, abs( dot( d, uBaseDelPie.zw ) ) - uCalmaDelPie.w );
-	return uCalmaDelPieFuerza * ( 1.0 - smoothstep( 0.0, ${f(CALMA_EN_EL_PISO.borde)}, afuera ) );
+	return uCalmaDelPieFuerza * nucleoDeLaQuietud( xz );
 }
 float calmaDelFinal( vec2 xz ) {
 	float delPie = calmaDelPie( xz );
@@ -205,7 +204,7 @@ export function conElFinalEnLaSimulacion(glsl: string): string {
       ANCLAS_DEL_FINAL.empuje,
       `${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );\n\tfloat calmaAqui = calmaDelFinal( p * uLado );\n\tfuerza *= 1.0 - calmaAqui;\n\tamortigua += ${f(CALMA_EN_EL_PISO.amortigua)} * calmaAqui;`,
     )
-    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat pistonAqui;\n\tfloat energiaAqui = energiaDeLaLuz( xz, pistonAqui );\n\tfloat quietoAqui = 1.0 - quietudDelPie( xz );\n\tenergiaAqui *= quietoAqui;\n\tpistonAqui *= quietoAqui;\n\tdibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );`)
+    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat pistonAqui;\n\tfloat energiaAqui = energiaDeLaLuz( xz, pistonAqui );\n\tfloat quietaAqui = quietudDelPie( xz );\n\tfloat pistonQuieto = ${f(QUIETUD.piston)} * azarDeLaQuietud( floor( floor( xz / uLado ) / 3.0 ) ) * min( 1.0, energiaAqui );\n\tpistonAqui = mix( pistonAqui, pistonQuieto, quietaAqui );\n\tdibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );\n\tdibujo = min( dibujo, techoDeLosTextos( xz ) );\n\tenergiaAqui *= mix( 1.0, ${f(QUIETUD.brillo)}, quietaAqui );`)
     .replace(ANCLAS_DEL_FINAL.salida, 'salida = vec4( nueva, h, dibujo, energiaAqui );')
     .replace(ANCLAS_DEL_FINAL.techo, 'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {')
     .replace(ONDA_CON_TOPE, 'float topeDeLaOnda = topeConElGolpe( $1 );\n\tfloat onda = topeDeLaOnda * tanh( nueva / topeDeLaOnda );')
@@ -256,7 +255,7 @@ vec3 conLasJuntas( vec3 color, vec2 xz ) {
 	float junta = brilloDeLaJunta( vPiso.xz, uRelojDeLaLuz ) * s + corrientesDeLaLuz( vPiso.xz, uLado ) * ( 0.4 + min( s, 1.0 ) );
 	junta += descarga * ( 0.4 + min( s, 1.0 ) );
 	// [PULIDO 25] W2 a · debajo de lo que se lee, las juntas en calma.
-	junta *= 1.0 - quietudDelPie( vPiso.xz );
+	junta *= mix( 1.0, ${f(QUIETUD.juntas)}, quietudDelPie( vPiso.xz ) );
 	return color + vec3( luz * junta * uBrilloDeLaLuz );
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho; [PULIDO 7] B, las contraformas.

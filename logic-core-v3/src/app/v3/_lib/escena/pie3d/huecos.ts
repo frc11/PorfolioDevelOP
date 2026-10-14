@@ -28,15 +28,29 @@ export const HUECOS_DEL_PIE = {
 
 /**
  * [PULIDO 25] W2 a · LA QUIETUD DEBAJO DE LO QUE SE LEE: acostadas, la energía del piso (el brillo de las juntas, los pistones) pasaba por
- * debajo de los textos, los botones, los enlaces y el form. Por pieza acostada (todas: placas y textos), su huella más `margen` (u): ahí la
- * energía queda en calma, con un borde difuminado de `borde` (u). Alrededor y cerca del logo, igual. Las escribe `huecosDeLaCaida.ts`.
+ * debajo de los textos, los botones, los enlaces y el form. Por pieza acostada (todas: placas y textos), su huella. Las escribe
+ * `huecosDeLaCaida.ts`. [PULIDO 26] X2 · DISIMULADA: en W2 la zona quedaba como un rectángulo llano y apagado (se veía el límite). Ahora
+ * el piso NO se aplana (sólo el núcleo debajo de cada placa, que queda en su hueco): alrededor los bloques conservan su relieve (sigue la
+ * energía), los pistones se FRENAN en una altura quieta por racimo (`piston`, u: no bajan a cero ni se mueven), la energía se ATENÚA
+ * (`brillo` en la simulación, `juntas` en el dibujo: un brillo mínimo vivo) y el borde es IRREGULAR y ancho: por bloque (la celda de la
+ * grilla), con `margen` y `borde` (u) movidos por un ruido de baja frecuencia (`escala` bloques por onda, `irregular` u de más o de menos):
+ * sin forma de rectángulo.
  */
-export const QUIETUD = { margen: 0.3, borde: 0.6 } as const
+export const QUIETUD = { margen: 0.4, borde: 3.5, irregular: 2.4, escala: 4, brillo: 0.4, juntas: 0.75, nucleo: 0.2, piston: 0.35 } as const
+
+/**
+ * [PULIDO 26] X2 · debajo de un TEXTO acostado (sólo sus letras tapan el piso: entre ellas se ve) el piso no se aplana: los bloques tienen
+ * un TECHO bajo (`bajo`, u: pueden quedar más abajo, con su variación) que sube hasta dejar de contar en `ancho` u por afuera de la huella
+ * (más `margen`), con el borde irregular de la quietud: ninguna letra queda tapada y no se ve un rectángulo llano.
+ */
+export const TECHO_DE_LOS_TEXTOS = { bajo: 0.22, alto: 9, margen: 0.25, ancho: 3, sube: 0.25 } as const
 
 export const QUIETUD_DEL_PIE = {
   /** (centro x, centro z, medio ancho, medio fondo) en la base del pie y cuánto vale (0 a 1, con el vuelco). */
   uQuietudDelPie: { value: Array.from({ length: MAXIMO_DE_HUECOS_DEL_PIE }, () => new THREE.Vector4()) },
   uFuerzaDeLaQuietud: { value: new Float32Array(MAXIMO_DE_HUECOS_DEL_PIE) },
+  /** [PULIDO 26] X2 · si es un texto (1: el techo bajo) o una placa (0: el núcleo, adentro de su hueco). */
+  uEsTextoLaQuietud: { value: new Float32Array(MAXIMO_DE_HUECOS_DEL_PIE) },
   uCuantasQuietudes: { value: 0 },
 }
 
@@ -72,20 +86,65 @@ float labioDelHuecoDelPie( float sd ) {
 }
 `
 
-/** [PULIDO 25] W2 a · `quietudDelPie( xz )`: cuánto se calma la energía del piso ahí (0 a 1). Necesita `uBaseDelPie` declarada antes. */
+/**
+ * [PULIDO 25] W2 a · `quietudDelPie( xz )`: cuánto se calma la energía del piso ahí (0 a 1), por bloque y con el borde irregular;
+ * [PULIDO 26] X2 · `nucleoDeLaQuietud( xz )`: la huella misma (lo que la pieza tapa: ahí sí se aplana). Necesitan `uBaseDelPie` y `uLado`.
+ */
 export const QUIETUD_DEL_PIE_GLSL = /* glsl */ `
 uniform vec4 uQuietudDelPie[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
 uniform float uFuerzaDeLaQuietud[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
+uniform float uEsTextoLaQuietud[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
 uniform int uCuantasQuietudes;
+float azarDeLaQuietud( vec2 c ) {
+	return fract( sin( dot( c, vec2( 127.1, 311.7 ) ) ) * 43758.5453 );
+}
+// Un ruido de valor de baja frecuencia sobre las celdas de la grilla (una onda cada \`escala\` bloques).
+float ruidoDeLaQuietud( vec2 celda ) {
+	vec2 q = celda / ${f(QUIETUD.escala)};
+	vec2 i = floor( q );
+	vec2 u = q - i;
+	u = u * u * ( 3.0 - 2.0 * u );
+	float lento = mix( mix( azarDeLaQuietud( i ), azarDeLaQuietud( i + vec2( 1.0, 0.0 ) ), u.x ), mix( azarDeLaQuietud( i + vec2( 0.0, 1.0 ) ), azarDeLaQuietud( i + 1.0 ), u.x ), u.y );
+	// Y una octava más corta (bloque a bloque, a veces sí y a veces no): el borde no sigue la forma de la huella.
+	return 0.65 * lento + 0.35 * azarDeLaQuietud( celda + 31.0 );
+}
+float afueraDeLaHuella( vec2 xz, vec4 h ) {
+	vec2 d = xz - h.xy;
+	return max( abs( dot( d, uBaseDelPie.xy ) ) - h.z, abs( dot( d, uBaseDelPie.zw ) ) - h.w );
+}
 float quietudDelPie( vec2 xz ) {
+	vec2 celda = floor( xz / uLado );
+	vec2 centro = ( celda + 0.5 ) * uLado;
+	float r = ruidoDeLaQuietud( celda );
 	float m = 0.0;
 	for ( int k = 0; k < ${String(MAXIMO_DE_HUECOS_DEL_PIE)}; k ++ ) {
 		if ( k >= uCuantasQuietudes ) break;
-		vec4 h = uQuietudDelPie[ k ];
-		vec2 d = xz - h.xy;
-		float afuera = max( abs( dot( d, uBaseDelPie.xy ) ) - h.z, abs( dot( d, uBaseDelPie.zw ) ) - h.w ) - ${f(QUIETUD.margen)};
-		m = max( m, uFuerzaDeLaQuietud[ k ] * ( 1.0 - smoothstep( 0.0, ${f(QUIETUD.borde)}, afuera ) ) );
+		float afuera = afueraDeLaHuella( centro, uQuietudDelPie[ k ] ) - ${f(QUIETUD.margen)} - ( r - 0.5 ) * ${f(QUIETUD.irregular)};
+		m = max( m, uFuerzaDeLaQuietud[ k ] * ( 1.0 - smoothstep( 0.0, ${f(QUIETUD.borde)} * ( 0.6 + 0.8 * r ), afuera ) ) );
 	}
 	return m;
+}
+float nucleoDeLaQuietud( vec2 xz ) {
+	float m = 0.0;
+	for ( int k = 0; k < ${String(MAXIMO_DE_HUECOS_DEL_PIE)}; k ++ ) {
+		if ( k >= uCuantasQuietudes ) break;
+		m = max( m, uFuerzaDeLaQuietud[ k ] * ( 1.0 - uEsTextoLaQuietud[ k ] ) * ( 1.0 - smoothstep( 0.0, ${f(QUIETUD.nucleo)}, afueraDeLaHuella( xz, uQuietudDelPie[ k ] ) ) ) );
+	}
+	return m;
+}
+// [PULIDO 26] X2 · el techo de los bloques debajo y cerca de los textos acostados (por bloque, con el borde irregular).
+float techoDeLosTextos( vec2 xz ) {
+	vec2 celda = floor( xz / uLado );
+	vec2 centro = ( celda + 0.5 ) * uLado;
+	float r = ruidoDeLaQuietud( celda + 17.0 );
+	float techo = ${f(TECHO_DE_LOS_TEXTOS.alto)};
+	for ( int k = 0; k < ${String(MAXIMO_DE_HUECOS_DEL_PIE)}; k ++ ) {
+		if ( k >= uCuantasQuietudes ) break;
+		if ( uEsTextoLaQuietud[ k ] < 0.5 ) continue;
+		float afuera = afueraDeLaHuella( centro, uQuietudDelPie[ k ] ) - ${f(TECHO_DE_LOS_TEXTOS.margen)} - r * 0.5;
+		float bajo = mix( ${f(TECHO_DE_LOS_TEXTOS.alto)}, ${f(TECHO_DE_LOS_TEXTOS.bajo)}, uFuerzaDeLaQuietud[ k ] );
+		techo = min( techo, mix( bajo, ${f(TECHO_DE_LOS_TEXTOS.alto)}, smoothstep( 0.0, ${f(TECHO_DE_LOS_TEXTOS.ancho)} * ( 0.6 + 0.8 * r ), afuera ) ) );
+	}
+	return techo;
 }
 `

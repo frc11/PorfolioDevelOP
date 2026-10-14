@@ -42,6 +42,7 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     if (q < MAXIMO_DE_HUECOS_DEL_PIE) {
       quietudes[q].set(huella.x, huella.z, huella.medioAncho - SOMBRA_DEL_PIE.sobra, huella.medioFondo - SOMBRA_DEL_PIE.sobra)
       fuerzas[q] = pose.bajada * u * u * (3 - 2 * u)
+      QUIETUD_DEL_PIE.uEsTextoLaQuietud.value[q] = p.conSombra ? 0 : 1
       q += 1
     }
     if (!p.conSombra) continue
