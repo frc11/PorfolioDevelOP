@@ -145,3 +145,93 @@
 - Resultado esperado: Los iframes de /login y /forgot-password quedan rechazados, igual que /dashboard.
 - Señal de falla: La pantalla de login se ve y se puede usar dentro del iframe.
 - ¿Escribe en la base o manda emails?: no
+
+### [VH-017] Impersonación en dos pestañas escribe en el cliente equivocado
+- Verifica: [SEC-029] · Prioridad: media
+- Entorno: local (npm run dev) con la base del .env (Neon compartida): usar solo orgs de prueba
+- Precondiciones: Cuenta SUPER_ADMIN; dos orgs de prueba X e Y con valores distintos de 'ticket promedio' en el inicio del portal
+- Pasos: 1) Pestaña A: /admin/clients -> 'Ver como cliente' en X; queda en /dashboard con el banner de X. 2) Pestaña B: /admin/clients -> 'Ver como cliente' en Y. 3) Volver a la pestaña A sin recargar, editar el ticket promedio en el inicio y guardar. 4) Recargar ambas pestañas y comparar el ticket promedio de X y de Y (o en /admin/clients/<id>).
+- Resultado esperado: La acción de la pestaña A se rechaza o pide recargar, o el valor queda en X.
+- Señal de falla: El valor guardado desde la pestaña de X aparece en Y y X queda igual.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-018] Base caída durante la sesión: rebote en vez de pantalla de error
+- Verifica: [BUG-006] · Prioridad: media
+- Entorno: local (npm run dev)
+- Precondiciones: Poder reiniciar el server cambiando DATABASE_URL en .env.local a un host inexistente, con el mismo AUTH_SECRET
+- Pasos: 1) Iniciar sesión como cliente de prueba y abrir /dashboard. 2) Parar el server, poner un host inválido en DATABASE_URL y volver a levantarlo. 3) Abrir /dashboard con la misma cookie y mirar la pestaña Network. 4) Mirar la terminal y el proyecto de Sentry. 5) Restaurar DATABASE_URL.
+- Resultado esperado: Pantalla de error (error.tsx) con 'Reintentar' y un evento en Sentry.
+- Señal de falla: Cadena /dashboard -> /login -> /dashboard hasta ERR_TOO_MANY_REDIRECTS; en la terminal '[auth][error] JWTSessionError'; nada en Sentry.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-019] Filas viejas en rate_limit
+- Verifica: [SEC-031] · Prioridad: media
+- Entorno: consola SQL de Neon, solo lectura
+- Precondiciones: Acceso de lectura a la base de producción o de dev
+- Pasos: 1) SELECT count(*) AS total, count(*) FILTER (WHERE "expiresAt" < now() - interval '1 day') AS vencidas, min("createdAt") FROM rate_limit; 2) SELECT split_part(key, ':', 1) AS scope, count(*) FROM rate_limit GROUP BY 1 ORDER BY 2 DESC;
+- Resultado esperado: vencidas cerca de 0 (hay purga).
+- Señal de falla: vencidas mayor a 0 y creciendo con el tiempo; scopes con miles de claves de un solo uso.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-020] Nombre de empresa gigante
+- Verifica: [SEC-032] · Prioridad: media
+- Entorno: local o QA, solo con un cliente de prueba (nunca producción)
+- Precondiciones: Cliente de prueba con bot; Vertex activo solo si se quiere medir tokens
+- Pasos: 1) Mi Cuenta -> Perfil: pegar un nombre de empresa de 20.000 caracteres y guardar. 2) Ver /admin/clients y el detalle del cliente. 3) Si Vertex está activo, mandar un mensaje al bot de ese cliente y mirar tokensIn en el log chat.llm_request_finished. 4) Restaurar el nombre.
+- Resultado esperado: El servidor rechaza nombres largos (p. ej. más de 100).
+- Señal de falla: Se guarda; tokensIn del turno crece del orden de 7 x 20.000 / 4 tokens.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-021] Magic link abierto antes por un escáner
+- Verifica: [BUG-007] · Prioridad: media
+- Entorno: QA o local con Brevo y una casilla de prueba
+- Precondiciones: Usuario de prueba registrado
+- Pasos: 1) Pedir un magic link desde /login. 2) Copiar la URL del botón del mail sin abrirla y hacer un GET (curl -s -o /dev/null "<url>") para simular el escáner. 3) Hacer clic en el botón del mail en el navegador. 4) Opcional: repetir con una casilla de Microsoft 365 con Safe Links.
+- Resultado esperado: El cliente entra al portal.
+- Señal de falla: Página de error de Auth.js (Verification) en inglés.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-022] Pedir recuperación varias veces
+- Verifica: [UX-004] · Prioridad: media
+- Entorno: local o QA con Brevo configurado y una casilla propia de prueba
+- Precondiciones: Usuario de prueba con esa casilla
+- Pasos: 1) /forgot-password con el email de prueba. 2) Repetir el pedido enseguida. 3) Abrir el PRIMER mail e intentar restablecer. 4) Pedir dos veces más dentro de la misma hora y contar los mails que llegan.
+- Resultado esperado: El sistema avisa que solo vale el último enlace y el error ofrece pedir otro; o los enlaces previos siguen válidos hasta vencer.
+- Señal de falla: El primer link dice 'no es válido o ya expiró' sin link para pedir otro; el cuarto pedido muestra 'te mandamos un mail' y no llega nada.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-023] Errores de auth ausentes en Sentry
+- Verifica: [FAL-003] · Prioridad: media
+- Entorno: producción o preview: solo lectura de Sentry y de los logs de funciones de Netlify
+- Precondiciones: Acceso a Sentry y a Netlify
+- Pasos: 1) En Netlify -> Functions -> logs, buscar líneas '[auth][error]'. 2) En Sentry, buscar eventos 'CallbackRouteError', 'JWTSessionError', 'AdapterError' o '[auth]' en el mismo período.
+- Resultado esperado: Cada error de auth de los logs tiene su evento en Sentry.
+- Señal de falla: Hay líneas '[auth][error]' en Netlify y ningún evento en Sentry.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-024] Contraseña de más de 128 caracteres
+- Verifica: [BUG-009] · Prioridad: baja
+- Entorno: local o QA
+- Precondiciones: Cliente de prueba con contraseña conocida
+- Pasos: 1) Mi Cuenta -> contraseña (o /cambiar-password): definir una nueva de 130 caracteres con mayúscula y número. 2) Cerrar sesión. 3) Entrar con esa contraseña.
+- Resultado esperado: O se rechaza al definirla, o el login la acepta.
+- Señal de falla: Se guarda y el login responde 'La contraseña debe tener entre 8 y 128 caracteres.'
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-025] Link de email con la sesión vencida
+- Verifica: [UX-005] · Prioridad: baja
+- Entorno: local o QA
+- Precondiciones: Cliente de prueba con un ticket
+- Pasos: 1) Cerrar sesión. 2) Abrir /dashboard/soporte/<id> (como lo haría el link del email de ticket). 3) Confirmar que la URL es /login?callbackUrl=... 4) Entrar con contraseña.
+- Resultado esperado: Aterriza en el ticket pedido.
+- Señal de falla: Aterriza en /dashboard.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-026] Copia de la cookie después de cerrar sesión
+- Verifica: [SEC-033] · Prioridad: baja
+- Entorno: local o QA
+- Precondiciones: Cliente de prueba
+- Pasos: 1) Entrar como cliente de prueba. 2) DevTools -> Application -> Cookies: copiar el valor de authjs.session-token (o __Secure-authjs.session-token). 3) Cerrar sesión desde el portal. 4) En una ventana privada, crear esa cookie con el valor copiado y abrir /dashboard.
+- Resultado esperado: Redirige a /login.
+- Señal de falla: Entra al dashboard con la sesión cerrada.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción

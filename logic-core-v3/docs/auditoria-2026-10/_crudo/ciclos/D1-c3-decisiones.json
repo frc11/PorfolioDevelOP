@@ -1,0 +1,24 @@
+{
+ "H01": {
+  "decision": "aceptar", "verificado_padre": true, "severidad": "MEDIA", "caso_indice": 0,
+  "nota_padre": "Leído: impersonation.ts (actions):32-33 pisa la cookie sin mirar si había otra; lib/impersonation.ts:82-89 cookie única con path '/'; preview.ts:14-16 resuelve la org desde la cookie en cada request. Severidad ajustada a MEDIA con el verificador: el actor es SUPER_ADMIN (error de operación con dos impersonaciones simultáneas en el mismo navegador), no un anónimo ni un cliente."
+ },
+ "H02": {
+  "decision": "aceptar", "verificado_padre": true, "caso_indice": 1,
+  "nota_padre": "Muestreo DEC-37: se sostiene. auth.ts:209-210 llama getUserAccessState sin try/catch; @auth/core 0.41.2 lib/actions/session.js:56-62 atrapa el error, lo loguea como JWTSessionError y limpia la cookie (que el auth() de RSC descarta); los layouts redirigen a /login y el proxy, sin base, rebota."
+ },
+ "H04": { "decision": "aceptar", "caso_indice": 9 },
+ "H05": { "decision": "aceptar", "caso_indice": 8 },
+ "H06": { "decision": "aceptar", "caso_indice": 4 },
+ "H07": {
+  "decision": "aceptar", "verificado_padre": true, "caso_indice": 3,
+  "nota_padre": "Muestreo DEC-37: se sostiene. forgot-password/actions.ts:76-79 borra los tokens previos sin usar al pedir uno nuevo; :51-57 con el límite por email agotado responde el mismo mensaje de éxito sin enviar."
+ },
+ "H08": { "decision": "aceptar", "caso_indice": 2 },
+ "H10": { "decision": "aceptar", "caso_indice": 5 },
+ "H11": { "decision": "aceptar", "caso_indice": 6 },
+ "H12": {
+  "decision": "aceptar", "verificado_padre": true, "caso_indice": 7,
+  "nota_padre": "Muestreo DEC-37: se sostiene. src/actions/auth-actions.ts:5-7 solo llama signOut (borra la cookie de ese navegador); no sube sessionVersion, así que una copia del JWT sigue valiendo."
+ }
+}

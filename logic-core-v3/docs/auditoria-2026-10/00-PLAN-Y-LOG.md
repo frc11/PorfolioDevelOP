@@ -6,19 +6,19 @@
 
 | Campo | Valor |
 |---|---|
-| Fase | **F2 — D1** (F1 cerrada en C01) |
+| Fase | **F2 — D6** (F1 cerrada en C01; D1 cerrado `[DOMINIO-ABIERTO]` en C04) |
 | Base auditada | `origin/main` @ `57c421bc` (último commit 2026-09-06; refs traídas el 2026-10-13 16:23) |
-| Último ciclo registrado | C03 · D1-c2 |
-| Próximo paso | D1-c3 (último de D1): `f2-args.mjs D1 D1-c3 docs/auditoria-2026-10/_crudo/ciclos/D1-c3.args.json --cazadores --lente "ERRORES, CARRERAS Y LIMITES DE PLAN…"` → `f2-construir.mjs` con `f2-cazadores.plantilla.js` → workflow → `f2-procesar.mjs` → decisiones del padre → `f2-escribir.mjs` → cierre de D1 (con `[DOMINIO-ABIERTO]` si c3 trae MEDIA o más) → D6 |
+| Último ciclo registrado | C04 · D1-c3 (cierre de D1) |
+| Próximo paso | D6-c1: revisar `_insumos/` → `f2-args.mjs D6 D6-c1 docs/auditoria-2026-10/_crudo/ciclos/D6-c1.args.json` (incluye las 14 DML de `drift.json` y los patrones de D1) → `f2-construir.mjs` con `f2-lectores.plantilla.js` → workflow (2 lectores) → `f2-procesar.mjs` → `<ciclo>-decisiones.json` + `f2-decidir.mjs` → `f2-escribir.mjs` |
 | Cobertura profunda | 32 / 1.298 archivos (2,5 %) · 31 `PODA-ALTA` fuera de lotes · superficial hecho 405 / 691 (DOC 266, PUB 138, D1 1) |
-| Hallazgos escritos | 35 (C 1 · A 3 · M 13 · B 18) · VH 12 · POD 285 · PLAN 1.351 (21 cruzados) · pendiente: el vencimiento de Vertex (DEC-43, en D7) |
+| Hallazgos escritos | 55 (C 1 · A 4 · M 23 · B 27) · VH 26 · POD 285 · PLAN 1.351 (21 cruzados) · pendiente: el vencimiento de Vertex (DEC-43, en D7) |
 | Push | al cierre de cada fase, con `[skip ci]` (DEC-04), **solo si `gh` confirma el repo `PRIVATE`** (DEC-48; a 2026-10-13 22:48 sigue `PUBLIC`: commits locales) · último push: `04ecc0db` (F1) |
 
 ### Estado por dominio
 
 | Dominio | Ciclo (máx.) | Profundo leído / total (PODA-ALTA fuera de lotes) | Superficial hecho / total | Nuevos C / A / M / B | Lentes usadas | Estado |
 |---|---|---|---|---|---|---|
-| D1 Auth | 2 (3) | 32 / 33 (1) | 1 / 1 | 1 / 4 / 15 / 19 | lectores · seguridad y aislamiento | abierto · cobertura 100 % · sigue c3 (errores, carreras y límites de plan) |
+| D1 Auth | 3 (3) | 32 / 33 (1) | 1 / 1 | 1 / 4 / 23 / 24 | lectores · seguridad y aislamiento · errores, carreras y límites | **cerrado `[DOMINIO-ABIERTO]`** (C04): cobertura 100 %, el c3 trajo 8 MEDIA |
 | D2 Dashboard | — (3) | 0 / 219 (8) | 0 / 13 | — | — | abierto · 5 lotes · 151 PLAN |
 | D3 Admin | — (2) | 0 / 221 (6) | 0 / 0 | — | — | abierto · 6 lotes · 102 PLAN |
 | D4 Setter | — (2) | 0 / 171 (0) | 0 / 34 | — | — | abierto · 6 lotes · 361 PLAN |
@@ -434,6 +434,15 @@ Corrido el 2026-10-13, uno por vez, desde `logic-core-v3` (detalle en `01-INVENT
 - **SEC-023 (ALTA)**: 22 páginas de `/admin` leen Prisma sin `auth()` propio; la única guarda de rol es `admin/layout.tsx:41-49`, que no corre en la navegación parcial, y el proxy decide con el rol del JWT sin `sessionVersion`. Un token SUPER_ADMIN revocado sigue leyendo el panel. SEC-024 (MEDIA, ZONA-FRANCO): `/api/qa/login` confía en `Host` y los scripts QA escuchan en toda la red. SEC-025 (MEDIA): los límites por IP toman el primer `X-Forwarded-For`. Más SEC-026…SEC-028, FAL-001 y FAL-002 (BAJA). VH-013…VH-016.
 - Las 3 alertas de D1 se etiquetaron `[D1-A1..A3]` en `alertas-estado.json` (c1 corrió antes de los IDs de alerta). `f2-args.mjs` ahora pasa a cada dominio los patrones defectuosos de los dominios anteriores.
 - Pre-verificación para D2 (leída por el padre): el Inicio del cliente cuenta como «sus leads» todos los `ContactSubmission` de la agencia (`src/lib/dashboard/week-results.ts:43-51`, `src/lib/health-score.ts:311-333`, sin `organizationId`; llega a `dashboard/page.tsx:183` y al brief ejecutivo). Se clasifica en D2-c1.
+- Commit `055dfeeb` (local, sin push por DEC-48).
+
+### C04 · D1-c3 — 2026-10-14 — auth, ciclo 3 (cazador, lente errores, carreras y límites)
+- **Corte de sesión**: el primer lanzamiento (`wf_159a41e1-db7`, 00:51) quedó sin resultado. El cazador hizo 127 llamadas en ~30 min y su respuesta final se cortó a mitad del envío (04:21 UTC, límite de uso); la sesión terminó antes del reintento. El journal no tiene ningún agente completado y el reanudado no cruza sesiones, así que se relanzó desde cero el mismo script (`wf_f8c0a54a-c96`): **reintento 1 de DEC-27** para el tramo D1-T1.
+- `_insumos/drive/` revisado de nuevo (45 archivos, sin contenido nuevo). Herramienta nueva: `f2-decidir.mjs`. Las decisiones del padre pasan a ser datos (`_crudo/ciclos/<ciclo>-decisiones.json`, commiteados como registro de la verificación) en vez de scripts sueltos.
+- `D1-c3 · tramo D1-T1 (32 archivos; run wf_f8c0a54a-c96: cazador + verificador, 0,57 M tokens, 40 min; _crudo/ciclos/D1-c3-D1-T1.json) · CRÍTICA/ALTA leídas por el padre 1 (ajustada a MEDIA) · muestreados 3 de 11 (fallaron 0) · nuevos 0/0/8/4 (SEC-029…SEC-033, BUG-006…BUG-009, UX-004, UX-005, FAL-003) · VH-017…VH-026 · cierre de D1`.
+- Lo nuevo: **SEC-029** la impersonación es una sola cookie por navegador, así que con dos clientes abiertos lo que se guarda en la pestaña de X se escribe en Y (ALTA → MEDIA: el actor es SUPER_ADMIN). **BUG-006** una caída de Neon en el callback `jwt` se trata como «sin sesión»: rebote `/login` ↔ portal y borrado de la cookie tras cambiar la contraseña. **SEC-030** la auditoría se pierde en silencio. **SEC-031** la tabla `rate_limit` no se purga y el webhook del motor inserta una fila por cada token inventado. **SEC-032** nombre de empresa sin tope de largo infla el prompt del chatbot. **BUG-007** escáneres de enlaces gastan el magic link. **UX-004** el reintento de recupero invalida el link anterior. **FAL-003** los errores de auth no llegan a Sentry.
+- **Cierre de D1 — `[DOMINIO-ABIERTO]`** (DEC-26: tope de 3 ciclos). Cobertura 100 % (32 leídos + 1 PODA-ALTA; superficial 1/1). El ciclo 3 todavía trajo 8 MEDIA, así que no se cumple «un ciclo sin MEDIA o más». Queda sin agotar: (a) qué actions del portal toman la org de la cookie de impersonación y no de la pantalla (SEC-029: se barren en D2); (b) diseño y purga de `rate_limit` (D6); (c) captura de errores y Sentry en los handlers (D7 y D9); (d) el comportamiento runtime de las VH-005…VH-026, que solo se cierra a mano. Totales de D1: **52 hallazgos (C 1 · A 4 · M 23 · B 24)**, VH-005…VH-026, 21 PLAN cruzados, 15 funcionalidades en h1 (ninguna en L3).
+- Push: `gh` sigue diciendo `PUBLIC` → sin push (DEC-48).
 
 ## 14. Autorrevisión §10 por commit
 
@@ -443,3 +452,5 @@ Corrido el 2026-10-13, uno por vez, desde `logic-core-v3` (detalle en `01-INVENT
 | C00b | No: sigue sin haber hallazgos escritos | No: el «ningún `.docx`» cita el conteo por extensión de `find` | No (mismo grep) | No hay propuestas | No: lo único fuera de las dos carpetas es `docs/_insumos/`, que puso Valentino y no se stagea | n/a |
 | C01-F1 | No: SEC-001…004 y VH-001…004 citan `ruta:línea`; cada ficha POD trae su señal; los PLAN traen `fuente:línea` | No: los «sin uso» de `10-PODA.md` citan la búsqueda (`git grep`, depcruise) y knip figura como no disponible; los PLAN quedan «por cruzar», sin afirmar estado | No: `secrets-salida.mjs` = 0 coincidencias en 48 archivos (control positivo 22/22); los secrets de la extracción se citan solo por línea | No: SEC-001 deja la purga del historial como decisión; ninguna propuesta edita FROZEN ni ZONA-FRANCO | No: `git status` muestra solo las dos carpetas más `docs/_insumos/` (no se stagea) | 0 errores · 0 avisos |
 | C02-D1c1 | No: los 31 nuevos citan `ruta:línea` del repo (validar.mjs comprueba que existan y que la línea no pase el largo); el código de librerías va como `paquete@versión` | No: las 6 CRÍTICA/ALTA y las 5 muestreadas se leyeron; las ausencias del lector traen su `git grep` con control positivo (`_crudo/ausencias.json`) | No: `secrets-salida.mjs` = 0 coincidencias en 71 archivos; los fragmentos pasan por los 22 patrones al renderizar | No: lo que se arregla en `auth.ts` va como «Decisión para Valentino» con Zona FROZEN + ZONA-FRANCO; ZONA-FRANCO repetido en 09 | No (solo las dos carpetas; `_insumos/` sin stagear) | 0 errores · 36 avisos (citas de `auth.ts`/`schema.prisma` como contexto en hallazgos con arreglo libre) |
+| C03-D1c2 | No: los 8 nuevos citan `ruta:línea` del repo (librerías como `paquete@versión`) | No: las 2 ALTA y las 2 muestreadas se leyeron; la ausencia de aviso por email se probó con `git grep sendTransactionalEmail` sobre los cuatro flujos (control: aparece en forgot-password) | No: `secrets-salida.mjs` = 0 coincidencias en 76 archivos | No: SEC-024 (qa/login) va como coordinación con Franco; SEC-023 marca las páginas `leados`/`fg2-lab` como ZONA-FRANCO | No (solo las dos carpetas) | 0 errores · 36 avisos |
+| C04-D1c3 | No: los 12 nuevos citan `ruta:línea` del repo | No: la ALTA y las 3 muestreadas se leyeron (`impersonation.ts`, `session.js`, `forgot-password/actions.ts`, `auth-actions.ts`); las ausencias del cazador traen su `git grep` | No: `secrets-salida.mjs` = 0 coincidencias en 84 archivos | No: BUG-006 (callback `jwt`) va como «Decisión para Valentino», FROZEN + ZONA-FRANCO | No (solo las dos carpetas) | 0 errores · 38 avisos (citas de `auth.ts`/`schema.prisma` como contexto) |

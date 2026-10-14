@@ -2257,6 +2257,847 @@
     "verificador": null
    },
    "estado": "vigente"
+  },
+  {
+   "id": "SEC-029",
+   "prefijo": "SEC",
+   "titulo": "Impersonación global por navegador: con dos clientes abiertos en pestañas distintas, lo que soporte guarda en la pestaña de X se escribe en Y",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/impersonation.ts",
+     "linea": 33,
+     "fragmento": "const jar = await cookies()\n  jar.set(IMPERSONATION_COOKIE, token, getImpersonationCookieOptions())"
+    },
+    {
+     "ruta": "src/lib/impersonation.ts",
+     "linea": 82,
+     "fragmento": "export function getImpersonationCookieOptions() {\n  return {\n    path: '/',"
+    },
+    {
+     "ruta": "src/lib/preview.ts",
+     "linea": 14,
+     "fragmento": "if (role === 'SUPER_ADMIN') {\n    const impersonation = await getImpersonationSession()\n    return impersonation?.orgId ?? null"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/_actions/business-profile.actions.ts",
+     "linea": 25,
+     "fragmento": "const organizationId = await resolveOrgId()"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/_actions/business-profile.actions.ts",
+     "linea": 33,
+     "fragmento": "await prisma.organization.update({\n    where: { id: organizationId },"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 158,
+     "fragmento": "const campaign = await prisma.emailCampaign.create({\n    data: {\n      organizationId: org.id,"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 177,
+     "fragmento": "const campaign = await prisma.emailCampaign.findFirst({\n    where: { id: campaignId, organizationId: org.id },"
+    }
+   ],
+   "impacto": "Bloqueante para operar con el primer cliente real junto a otros. La impersonación vive en una sola cookie por navegador (path '/') y startImpersonationAction la pisa sin mirar si ya había otra activa. Cada acción del portal resuelve la org en el momento del envío (resolveOrgId lee esa cookie), no la de la pantalla que se está viendo. Escenario: soporte abre 'Ver como cliente' de X en una pestaña y de Y en otra (o vuelve con el botón Atrás). La pestaña de X sigue mostrando X, pero lo que se guarda ahí se escribe en Y: ticket promedio, preferencias del reporte, onboarding, tickets, importación de contactos, campañas de email. Una campaña creada 'para X' queda en Y y, si se envía desde esa pestaña, sale a los contactos de Y (el chequeo id + org pasa porque ambos son de Y). Es escritura entre tenants por error de operación, sin aviso, y la auditoría no deja ver la intención.",
+   "propuesta": "Zona libre. Atar la org a la pantalla: durante el preview, mandar en cada acción del portal el orgId que se renderizó (firmado o como token por pestaña) y rechazar si no coincide con la cookie ('Cambiaste de cliente en otra pestaña: recargá'). Como mínimo, que startImpersonationAction no pise una impersonación activa sin terminarla. Decidir junto con la política de escritura del preview de SEC-020: si el preview pasa a solo lectura, desaparece la mitad de escritura.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-impersonacion",
+    "lib.preview",
+    "h2.cli-inicio",
+    "h2.cli-email-mkt",
+    "h2.cli-soporte",
+    "h4.adm-clientes"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-020, SEC-028",
+   "vh": "VH-017",
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H01",
+    "verificado_padre": true,
+    "nota_padre": "Leído: impersonation.ts (actions):32-33 pisa la cookie sin mirar si había otra; lib/impersonation.ts:82-89 cookie única con path '/'; preview.ts:14-16 resuelve la org desde la cookie en cada request. Severidad ajustada a MEDIA con el verificador: el actor es SUPER_ADMIN (error de operación con dos impersonaciones simultáneas en el mismo navegador), no un anónimo ni un cliente.",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "MEDIA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-006",
+   "prefijo": "BUG",
+   "titulo": "Una falla de la base en el callback jwt se trata como 'sin sesión': rebote /login <-> portal en vez de pantalla de error, y unstable_update borra la cookie",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 207,
+     "fragmento": "const shouldRefreshFromDb = Boolean(userId) && (trigger === 'update' || trigger === 'signIn' || !user)"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 209,
+     "fragmento": "if (userId && shouldRefreshFromDb) {\n        const accessState = await getUserAccessState(userId)"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/session.js",
+     "linea": 58,
+     "fragmento": "catch (e) {\n            logger.error(new JWTSessionError(e));"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/session.js",
+     "linea": 61,
+     "fragmento": "response.cookies?.push(...sessionStore.clean());"
+    },
+    {
+     "ruta": "node_modules/next-auth/lib/index.js",
+     "linea": 48,
+     "fragmento": "return getSession(_headers, _config).then((r) => r.json());"
+    },
+    {
+     "ruta": "node_modules/next-auth/lib/actions.js",
+     "linea": 83,
+     "fragmento": "for (const c of res?.cookies ?? [])\n        cookieJar.set(c.name, c.value, c.options);"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/layout.tsx",
+     "linea": 90,
+     "fragmento": "if (!organizationId) {\n    redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/layout.tsx",
+     "linea": 43,
+     "fragmento": "if (!session?.user) {\n    redirect('/login')"
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 143,
+     "fragmento": "return NextResponse.redirect(\n      new URL(onboardingCompleted ? DASHBOARD_PATH : ONBOARDING_PATH, nextUrl)"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/_actions/business-profile.actions.ts",
+     "linea": 26,
+     "fragmento": "if (!organizationId) return { ok: false, error: 'Tu sesión expiró. Volvé a entrar.' }"
+    },
+    {
+     "ruta": "src/app/cambiar-password/actions.ts",
+     "linea": 73,
+     "fragmento": "await unstable_update({ user: { passwordResetRequired: false } })"
+    }
+   ],
+   "impacto": "Bloqueante para L3 del portal ante cualquier hipo de Neon (despertar en frío, timeout del pool). Cada auth() en Node consulta la base (getUserAccessState) y el callback no distingue 'base caída' de 'sesión inválida': Auth.js atrapa el error, lo imprime en consola y devuelve sesión nula. Los layouts de dashboard, admin y setter mandan a /login; el proxy, que no consulta la base, ve la cookie válida y devuelve al portal. Resultado: rebotes mientras dure la falla y ERR_TOO_MANY_REDIRECTS si persiste, en vez de error.tsx con 'Reintentar'. Las server actions responden 'Tu sesión expiró', 'Sesión inválida' o 'No autenticado' sin que la sesión haya vencido. Si la falla cae en el unstable_update posterior a cambiar la contraseña (cambiar-password y Mi Cuenta), Auth.js borra la cookie: el cliente queda deslogueado justo después de un cambio exitoso. Nada llega a Sentry: develOP no ve la caída ni su efecto.",
+   "propuesta": "Decisión para Valentino (auth.ts es FROZEN + ZONA-FRANCO): envolver getUserAccessState del callback jwt en try/catch; ante error de infraestructura, capturar en Sentry y devolver el token marcado (p. ej. token.error = 'db_unavailable') en vez de dejar que Auth.js lo convierta en sesión nula. Exponer la marca en la sesión y que los layouts (zona libre) lancen un error real (error.tsx con reintento) en vez de redirect('/login'). Alternativa: conservar los claims del token durante la caída (sin chequeo de sessionVersion) con alerta. Configurar logger.error de NextAuth hacia Sentry (ver el FAL de este ciclo).",
+   "esfuerzo": "M",
+   "zona": "FROZEN + ZONA-FRANCO",
+   "nodos": [
+    "lib.auth",
+    "lib.proxy",
+    "h2.cli-shell",
+    "h4.adm-shell",
+    "h1.auth-cambio",
+    "lib.prisma",
+    "int.sentry"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "BUG-001, DEU-002, SEC-006",
+   "vh": "VH-018",
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H02",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene. auth.ts:209-210 llama getUserAccessState sin try/catch; @auth/core 0.41.2 lib/actions/session.js:56-62 atrapa el error, lo loguea como JWTSessionError y limpia la cookie (que el auth() de RSC descarta); los layouts redirigen a /login y el proxy, sin base, rebota.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-030",
+   "prefijo": "SEC",
+   "titulo": "La auditoría se pierde en silencio: logAdminAction traga el error sin Sentry y corre después del cambio (contraseña, impersonación), y el vencimiento de la impersonación no se registra",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/audit-log.ts",
+     "linea": 39,
+     "fragmento": "} catch (error) {\n    console.error('[audit-log] Failed to log action:', error)\n  }"
+    },
+    {
+     "ruta": "src/app/reset-password/actions.ts",
+     "linea": 68,
+     "fragmento": "const [updatedUser] = await prisma.$transaction(["
+    },
+    {
+     "ruta": "src/app/reset-password/actions.ts",
+     "linea": 87,
+     "fragmento": "await logAdminAction({"
+    },
+    {
+     "ruta": "src/app/cambiar-password/actions.ts",
+     "linea": 51,
+     "fragmento": "await prisma.user.update({"
+    },
+    {
+     "ruta": "src/app/cambiar-password/actions.ts",
+     "linea": 63,
+     "fragmento": "await logAdminAction({"
+    },
+    {
+     "ruta": "src/lib/actions/impersonation.ts",
+     "linea": 34,
+     "fragmento": "jar.set(IMPERSONATION_COOKIE, token, getImpersonationCookieOptions())"
+    },
+    {
+     "ruta": "src/lib/actions/impersonation.ts",
+     "linea": 36,
+     "fragmento": "await logAdminAction({"
+    },
+    {
+     "ruta": "src/components/dashboard/ImpersonationTimer.tsx",
+     "linea": 29,
+     "fragmento": "if (nextRemaining <= 0) {\n        router.replace('/admin/clients')"
+    }
+   ],
+   "impacto": "Si el insert en admin_audit_log falla (hipo de Neon, pool agotado), el restablecimiento o cambio de contraseña y la impersonación del portal de un cliente ocurren igual y sin rastro. El error queda solo en la consola de la función: el helper no llama a Sentry y no hay captureConsoleIntegration. La impersonación ni siquiera falla cerrada, porque la cookie se emite antes de auditar. Además, una impersonación que vence sola (30 min) termina con router.replace en el navegador sin registrar IMPERSONATION_ENDED; solo el botón de salir lo registra. Para el primer cliente real: justo cuando hay un incidente, el historial de quién entró a su cuenta y qué se cambió tiene huecos que nadie detecta. El helper lo usan 43 llamadas en 31 archivos, incluidas bajas definitivas de clientes.",
+   "propuesta": "Decisión para Valentino (audit-log.ts es FROZEN-inferido): Sentry.captureException en el catch y una variante que reciba el cliente de transacción, para que el registro viaje en el mismo $transaction que el cambio. Zona libre en los llamadores: en startImpersonationAction, auditar antes de emitir la cookie y abortar si falla (acción privilegiada, falla cerrada); registrar el fin por vencimiento (al detectar el token vencido o desde el timer vía stopImpersonationAction).",
+   "esfuerzo": "M",
+   "zona": "FROZEN",
+   "nodos": [
+    "lib.audit-log",
+    "h1.auth-recupero",
+    "h1.auth-cambio",
+    "h1.auth-impersonacion",
+    "h4.adm-audit",
+    "modelo.AdminAuditLog",
+    "int.sentry"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-026, SEC-028, FAL-001",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H03",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-031",
+   "prefijo": "SEC",
+   "titulo": "rate_limit no se purga nunca y varias claves las elige quien llama: el webhook del motor inserta una fila por cada token inventado en la Neon compartida",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/rate-limit/limiter.ts",
+     "linea": 29,
+     "fragmento": "// UPSERT resetea count=1 y muda la ventana. No hay job de limpieza — la tabla\n// no acumula buckets \"muertos\" dentro de la misma ventana porque la siguiente"
+    },
+    {
+     "ruta": "src/lib/rate-limit/limiter.ts",
+     "linea": 46,
+     "fragmento": "INSERT INTO rate_limit (id, key, count, \"windowStart\", \"expiresAt\", \"createdAt\", \"updatedAt\")\n    VALUES ($1, $2, 1, $3, $4, $3, $3)\n    ON CONFLICT (key) DO UPDATE SET"
+    },
+    {
+     "ruta": "src/app/api/motor/webhook/[channelToken]/route.ts",
+     "linea": 33,
+     "fragmento": "const rate = await checkRateLimit({\n    key: `motorWebhookPerChannel:${tokenHash}`,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 185,
+     "fragmento": "key: `chatbotPerBotSession:${slug}:${body.sessionId}`,"
+    },
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 51,
+     "fragmento": "const emailLimit = await applyAuthRateLimit({\n    scope: 'forgotPasswordPerEmail',\n    identifier: email,"
+    },
+    {
+     "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
+     "linea": 77,
+     "fragmento": "// se resetean UNA vez en el deploy (ventana de 60s; las filas viejas las\n  // barre el cleanup perezoso del limiter)."
+    },
+    {
+     "ruta": "src/lib/rate-limit/limiter.ts",
+     "linea": 65,
+     "fragmento": "if (!row) {\n    // El UPSERT con RETURNING siempre devuelve una fila. Si no la hay,\n    // hay un problema de conexión o de schema — fail closed (rechazar)"
+    }
+   ],
+   "impacto": "La 'limpieza perezosa' solo reusa una fila cuando la MISMA clave vuelve; una clave que no vuelve queda para siempre (git grep sin ningún DELETE sobre rate_limit). Varias claves las elige el visitante: el token de la URL del webhook del motor (POST anónimo; se limita ANTES de validar el canal y sin límite por IP delante), el sessionId del chatbot (1 a 200 caracteres libres), el email de forgot-password y la IP vía X-Forwarded-For (SEC-025). Un script anónimo contra /api/motor/webhook/<aleatorio> suma una fila por pedido: a 50 pedidos/s son unas 180.000 filas por hora, con sus tres índices, en la Neon que comparten la app y Franco, y no se van al terminar el ataque. Para el primer cliente real: el almacenamiento del proyecto puede llenarse y cortar las escrituras de todos. Además la rama 'fail closed' de limiter.ts:65 es inalcanzable: una falla de conexión lanza una excepción que los llamadores de auth no atrapan.",
+   "propuesta": "Zona libre. Cron diario que borre filas con expiresAt vencido hace más de un día (el índice en expiresAt ya existe), registrado como los demás crons. En el webhook del motor, validar el formato del channelToken y poner un límite por IP antes del límite por canal (o limitar después de confirmar que el canal existe). Corregir los comentarios de limiter.ts:28-33 y chat/route.ts:76-78. Definir y documentar la política ante error de base (fail-closed real con try/catch en checkRateLimit).",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "lib.rate-limit",
+    "modelo.RateLimit",
+    "h3.vis-whatsapp",
+    "h3.vis-api-chatbot",
+    "h1.auth-recupero",
+    "h6.vis-contacto"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-025, SEC-022, SEC-005",
+   "vh": "VH-019",
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H04",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-032",
+   "prefijo": "SEC",
+   "titulo": "Nombre de empresa sin tope de largo: el cliente puede inflar el prompt de su propio chatbot decenas de veces y el costo de Vertex lo paga develOP",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 15,
+     "fragmento": "name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres.'),\n  companyName: z.string().trim().min(2, 'La empresa debe tener al menos 2 caracteres.'),"
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 55,
+     "fragmento": "prisma.organization.update({\n        where: { id: organizationId },\n        data: {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 650,
+     "fragmento": "companyName: bot.organization.companyName,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/prompts/sections.ts",
+     "linea": 24,
+     "fragmento": "Sos ${botConfig.botName}, parte del equipo de ${context.companyName}. Primer punto de contacto con visitantes del sitio."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/saveKnowledgeBase.ts",
+     "linea": 12,
+     "fragmento": "businessInfo: z.string().max(50_000),"
+    },
+    {
+     "ruta": "src/app/bienvenida/_actions/complete-onboarding.ts",
+     "linea": 10,
+     "fragmento": "companyName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),"
+    },
+    {
+     "ruta": "scripts/_b13-dev.log",
+     "linea": 42,
+     "fragmento": "\"tokensIn\":5579"
+    }
+   ],
+   "impacto": "UpdateProfileSchema (Mi Cuenta -> Perfil) y el wizard de /bienvenida aceptan cualquier largo de nombre de empresa; el input tampoco tiene maxLength y solo frena el límite por defecto de 1 MB del body de una server action. Ese nombre entra al system prompt del bot de la org 7 veces (git grep de context.companyName en sections.ts), mientras que cada campo de la base de conocimiento sí tiene tope (50.000). Con 200.000 caracteres, cada turno pasa de unos 5.600 tokens de entrada medidos a unos 250.000 (cerca de 45x), hasta agotar la cuota mensual; con un nombre más largo el prompt excede el contexto del modelo y el bot deja de responder. También rompe listas del admin y emails que muestran el nombre. Hoy no cuesta porque la credencial de Vertex está vencida; con el primer cliente real, un cliente malintencionado o una cuenta comprometida multiplica el gasto de develOP. El alta del admin sí limita a 100 (createClientOnly.ts:20).",
+   "propuesta": "Zona libre. .max() razonable (100, como el alta del admin) en UpdateProfileSchema.name/companyName, CompleteOnboardingSchema y onboarding-actions.ts:20, más maxLength en los inputs. Defensa en profundidad: truncar context.companyName al armar el prompt. Script de datos (sin migrate reset) que detecte nombres existentes fuera de rango.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-cuenta",
+    "h2.cli-bienvenida",
+    "h3.vis-api-chatbot",
+    "int.vertex",
+    "modelo.Organization",
+    "lib.actions"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-016",
+   "vh": "VH-020",
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-007",
+   "prefijo": "BUG",
+   "titulo": "El magic link se gasta en el primer GET: un escáner de enlaces del correo lo consume antes que el cliente",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/signin/send-token.js",
+     "linea": 52,
+     "fragmento": "url: `${baseUrl}/callback/${provider.id}?${new URLSearchParams({"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/callback/index.js",
+     "linea": 141,
+     "fragmento": "const invite = await adapter.useVerificationToken({"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/callback/index.js",
+     "linea": 153,
+     "fragmento": "if (invalidInvite)\n                throw new Verification({ hasInvite, expired });"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 95,
+     "fragmento": "pages: { signIn: LOGIN_PATH },"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 113,
+     "fragmento": "<a href=\"${url}\""
+    },
+    {
+     "ruta": "src/app/reset-password/actions.ts",
+     "linea": 80,
+     "fragmento": "prisma.passwordResetToken.update({\n      where: { id: record.id },\n      data: { usedAt: new Date() },"
+    }
+   ],
+   "impacto": "El enlace del email apunta directo a GET /api/auth/callback/resend, que borra el token de un solo uso en el primer pedido (useVerificationToken), sin interacción. Los filtros de correo que abren los links para analizarlos (Microsoft 365 Safe Links/Defender, Mimecast, Proofpoint, algunos antivirus) lo consumen antes que la persona. Cuando el cliente hace clic, Auth.js lanza Verification y muestra su página de error en inglés (UX-002). Para un primer cliente con correo corporativo el magic link no funciona nunca y no hay explicación. El reset de contraseña no tiene el problema: /reset-password solo consume el token al enviar el formulario (POST). Eslabón inferido: el comportamiento del escáner del proveedor de correo.",
+   "propuesta": "Decisión para Valentino (auth.ts es FROZEN + ZONA-FRANCO): que sendVerificationRequest mande un link a una página propia de confirmación (zona libre, p. ej. /login/confirmar) con un botón que recién ahí siga al callback, o reemplazar el link por un código de un solo uso. Configurar pages.error/verifyRequest con texto en español (ver UX-002).",
+   "esfuerzo": "M",
+   "zona": "FROZEN + ZONA-FRANCO",
+   "nodos": [
+    "h1.auth-login",
+    "h1.auth-login.magic-link",
+    "lib.auth",
+    "modelo.VerificationToken",
+    "int.brevo"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "UX-002, SEC-005, BUG-003",
+   "vh": "VH-021",
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H06",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-004",
+   "prefijo": "UX",
+   "titulo": "Recuperar la contraseña castiga el reintento: cada pedido anula el link anterior y, desde el cuarto en la hora, la pantalla dice 'te mandamos un mail' sin mandar nada",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 76,
+     "fragmento": "await prisma.$transaction([\n    prisma.passwordResetToken.deleteMany({\n      where: { userId: user.id, usedAt: null },"
+    },
+    {
+     "ruta": "src/lib/rate-limit/presets.ts",
+     "linea": 12,
+     "fragmento": "forgotPasswordPerEmail: { limit: 3, windowMs: 60 * 60_000 },"
+    },
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 55,
+     "fragmento": "if (!emailLimit.allowed) {\n    return { type: 'success', message: ANTI_ENUM_MESSAGE }"
+    },
+    {
+     "ruta": "src/app/reset-password/actions.ts",
+     "linea": 61,
+     "fragmento": "message: 'Este enlace no es válido o ya expiró. Solicitá uno nuevo.',"
+    },
+    {
+     "ruta": "src/app/reset-password/ResetPasswordForm.tsx",
+     "linea": 264,
+     "fragmento": "<Link\n                href=\"/login\""
+    },
+    {
+     "ruta": "src/lib/email/templates/password-reset.ts",
+     "linea": 48,
+     "fragmento": "El enlace vence en ${minutes} minutos</strong> y solo se puede usar una vez."
+    }
+   ],
+   "impacto": "Escenario típico del primer cliente: el mail tarda (Brevo puede demorar o colgar el envío, BUG-003), aprieta 'Enviar enlace' de nuevo o lo pide desde el celular, y abre el primer mail: 'Este enlace no es válido o ya expiró', porque el segundo pedido lo borró. Ni el mail ni la pantalla avisan que solo vale el último. El error de /reset-password no ofrece pedir otro: solo 'Volver al inicio de sesión'; el link a /forgot-password aparece únicamente si falta el token. Si reintenta, desde el cuarto pedido en la hora el límite por email responde el mismo 'te mandamos un mail' sin enviar nada (anti-enumeración). Queda hasta una hora sin link válido, sin saber por qué, y llama a develOP: falla el criterio de autonomía de L3.",
+   "propuesta": "Zona libre. Texto en el email y en la pantalla de éxito: 'si pediste más de uno, usá el último'. En el estado de error de ResetPasswordForm, link a /forgot-password. Evaluar no invalidar los tokens previos al pedir uno nuevo: que venzan solos a los 45 min y se borren todos al usar uno, como propone SEC-013, para que cualquiera de los mails funcione.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-recupero",
+    "h1.auth-recupero.forgot",
+    "h1.auth-recupero.reset",
+    "lib.rate-limit",
+    "int.brevo"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-013, SEC-009, BUG-003",
+   "vh": "VH-022",
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H07",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene. forgot-password/actions.ts:76-79 borra los tokens previos sin usar al pedir uno nuevo; :51-57 con el límite por email agotado responde el mismo mensaje de éxito sin enviar.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "FAL-003",
+   "prefijo": "FAL",
+   "titulo": "Los errores de autenticación no llegan a Sentry: NextAuth sin logger y loginAction convierte todo AuthError en 'error inesperado' (y lo cuenta como intento fallido)",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 76,
+     "fragmento": "const nextAuthResult = NextAuth({\n  adapter: PrismaAdapter(prisma) as Adapter,\n  trustHost: true,"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/utils/logger.js",
+     "linea": 7,
+     "fragmento": "error(error) {\n        const name = error instanceof AuthError ? error.type : error.name;\n        console.error(`${red}[auth][error]${reset} ${name}: ${error.message}`);"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/callback/index.js",
+     "linea": 388,
+     "fragmento": "const error = new CallbackRouteError(e, { provider: provider.id });"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 113,
+     "fragmento": "if (error instanceof AuthError) {\n      recordFailedAttempt(ip)"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 122,
+     "fragmento": "return 'Ocurrió un error inesperado. Intentá de nuevo.'"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 153,
+     "fragmento": "if (error instanceof AuthError) {\n      return 'No se pudo generar el Magic Link. Intentá de nuevo.'"
+    },
+    {
+     "ruta": "src/instrumentation.ts",
+     "linea": 49,
+     "fragmento": "export const onRequestError = Sentry.captureRequestError"
+    }
+   ],
+   "impacto": "Auth.js atrapa sus errores internos (base caída en authorize o en los callbacks, que llegan como CallbackRouteError o AccessDenied; AdapterError al crear el token del magic link; JWTSessionError; errores de OAuth) y solo los imprime con console.error. La config no define logger ni events y no hay captureConsoleIntegration. Lo que sí llega a las actions se devuelve como texto, y onRequestError solo ve errores que se lanzan. Para el primer cliente real: si el login se rompe por la plataforma, cada intento dice 'Ocurrió un error inesperado' o 'No se pudo generar el Magic Link' y develOP se entera cuando el cliente llama. Además loginAction cuenta esas fallas del servidor como intentos fallidos: con 5 seguidas el cliente queda bloqueado 5 minutos ('Demasiados intentos fallidos') aunque nunca se equivocó.",
+   "propuesta": "Zona libre en login/actions.ts: capturar en Sentry los AuthError que no sean CredentialsSignin (ni el AccessDenied esperado del magic link) y no llamar a recordFailedAttempt para ellos. Decisión para Valentino (auth.ts es FROZEN + ZONA-FRANCO): logger.error de NextAuth que envíe a Sentry (el scrub de PII ya corre en beforeSend).",
+   "esfuerzo": "S",
+   "zona": "FROZEN + ZONA-FRANCO",
+   "nodos": [
+    "h1.auth-login",
+    "h1.auth-login.password",
+    "h1.auth-login.magic-link",
+    "lib.auth",
+    "int.sentry"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "BUG-003, SEC-009, SEC-007",
+   "vh": "VH-023",
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H08",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-008",
+   "prefijo": "BUG",
+   "titulo": "magicLinkAction declara éxito sin mirar la URL que devuelve signIn: el 'throw on fail' previsto para BUG-003 con un Error común seguiría mostrando 'Link generado'",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 146,
+     "fragmento": "await signIn('resend', {\n      email,\n      redirectTo: '/dashboard',"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 151,
+     "fragmento": "return 'SUCCESS'"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/signin/send-token.js",
+     "linea": 66,
+     "fragmento": "await Promise.all([sendRequest, createToken]);"
+    },
+    {
+     "ruta": "node_modules/@auth/core/index.js",
+     "linea": 124,
+     "fragmento": "if (isAuthError && isRaw && !isRedirect)\n            throw error;"
+    },
+    {
+     "ruta": "node_modules/@auth/core/index.js",
+     "linea": 140,
+     "fragmento": "return Response.redirect(url);"
+    },
+    {
+     "ruta": "node_modules/next-auth/lib/actions.js",
+     "linea": 48,
+     "fragmento": "const responseUrl = res instanceof Response ? res.headers.get(\"Location\") : res.redirect;"
+    },
+    {
+     "ruta": "node_modules/@auth/core/errors.js",
+     "linea": 333,
+     "fragmento": "export class EmailSignInError extends SignInError {"
+    }
+   ],
+   "impacto": "Con redirect:false, signIn no lanza ante errores que no son AuthError: Auth.js los convierte en una redirección a /api/auth/error?error=Configuration, next-auth devuelve esa URL y magicLinkAction la ignora y responde 'SUCCESS'. Hoy no se dispara en el uso normal: sendVerificationRequest nunca lanza y los errores del adapter llegan como AdapterError. Pero el arreglo planeado para BUG-003 (PLAN-017, 'throw on fail'), hecho con un Error común, dejaría al cliente viendo 'Link generado' igual y sin email. Además, como el envío corre en paralelo con la creación del token (Promise.all), si falla la base el mail puede salir igual con un link muerto mientras la pantalla dice que falló.",
+   "propuesta": "Zona libre en login/actions.ts: considerar éxito solo si la URL devuelta es /api/auth/verify-request; si no, devolver error y capturarlo. Para BUG-003 (auth.ts, decisión para Valentino): lanzar EmailSignInError, subclase de AuthError que Auth.js re-lanza en modo raw, en vez de Error.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.magic-link",
+    "lib.auth",
+    "int.brevo"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "BUG-003, PLAN-017, UX-001",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H09",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-009",
+   "prefijo": "BUG",
+   "titulo": "Topes de largo de contraseña distintos: /cambiar-password y Mi Cuenta aceptan más de 128 caracteres y el login los rechaza",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/cambiar-password/actions.ts",
+     "linea": 14,
+     "fragmento": "newPassword: z\n    .string()\n    .min(8, 'La nueva contraseña debe tener al menos 8 caracteres.')"
+    },
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 25,
+     "fragmento": "newPassword: z\n      .string()\n      .min(8, 'La nueva contraseña debe tener al menos 8 caracteres.')"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 72,
+     "fragmento": "if (password.length < 8 || password.length > 128) {\n    return 'La contraseña debe tener entre 8 y 128 caracteres.'"
+    },
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 97,
+     "fragmento": ".max(128, 'Contraseña demasiado larga.'),"
+    },
+    {
+     "ruta": "node_modules/bcryptjs/index.js",
+     "linea": 322,
+     "fragmento": "export function truncates(password) {"
+    }
+   ],
+   "impacto": "Un cliente que define desde /cambiar-password o Mi Cuenta una contraseña de más de 128 caracteres (frase larga o gestor configurado al máximo) no puede volver a entrar con contraseña: el login responde 'debe tener entre 8 y 128 caracteres' antes de compararla, y solo le queda el magic link o recuperar. Además bcryptjs usa solo los primeros 72 bytes y trunca en silencio: con acentos (2 bytes en UTF-8) el tope real es menor, y dos contraseñas largas con el mismo comienzo valen lo mismo.",
+   "propuesta": "Zona libre. Un passwordSchema compartido (el mismo que pide SEC-012) con un .max único (128 caracteres o 72 bytes) en login, reset, accept-invite, cambiar-password y Mi Cuenta, con aviso en el formulario.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-cambio",
+    "h2.cli-cuenta",
+    "h1.auth-login.password"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-012",
+   "vh": "VH-024",
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H10",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-005",
+   "prefijo": "UX",
+   "titulo": "Después de iniciar sesión se pierde el destino: los links de los emails (lead caliente, ticket, mensajes) terminan en el inicio del portal",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 105,
+     "fragmento": "const loginUrl = new URL(LOGIN_PATH, nextUrl)\n    loginUrl.searchParams.set('callbackUrl', `${pathname}${nextUrl.search}`)"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 102,
+     "fragmento": "const redirectTo = isSuperAdmin\n    ? '/admin'\n    : isSetter"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 111,
+     "fragmento": "await signIn('credentials', { email, password, redirectTo })"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 148,
+     "fragmento": "redirectTo: '/dashboard',"
+    },
+    {
+     "ruta": "src/lib/client-notifications/notify.ts",
+     "linea": 169,
+     "fragmento": "leadUrl: `${appUrl}/dashboard/chatbot/leads/${input.leadId}`,"
+    },
+    {
+     "ruta": "src/lib/tickets/actions.ts",
+     "linea": 164,
+     "fragmento": "ticketUrl: `${baseUrl}/dashboard/soporte/${ticketInfo.id}`,"
+    }
+   ],
+   "impacto": "El proxy guarda el destino en ?callbackUrl=, pero /login no lo lee (git grep vacío) y loginAction/magicLinkAction fijan el destino por rol. El caso más común es el celular sin sesión: el cliente toca 'ver lead' en el email de lead caliente, entra y aterriza en /dashboard, y tiene que buscar el lead a mano justo en el flujo donde importa la rapidez. Lo mismo con respuestas de tickets y mensajes.",
+   "propuesta": "Zona libre. Pasar callbackUrl como campo oculto del formulario de /login y usarlo como redirectTo cuando sea una ruta interna válida para el rol, validada por mismo origen (ver SEC-011 para no abrir un open redirect); mismo criterio en magicLinkAction.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login",
+    "lib.proxy",
+    "h3.cli-chatbot",
+    "h2.cli-soporte",
+    "h2.cli-mensajes"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-011, UX-002",
+   "vh": "VH-025",
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H11",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-033",
+   "prefijo": "SEC",
+   "titulo": "Cerrar sesión no revoca el token: una copia de la cookie sigue sirviendo y no existe 'cerrar sesión en todos los dispositivos'",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/actions/auth-actions.ts",
+     "linea": 5,
+     "fragmento": "export async function signOutAction() {\n  await signOut({ redirectTo: '/login' })"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/signout.js",
+     "linea": 15,
+     "fragmento": "if (session.strategy === \"jwt\") {"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/signout.js",
+     "linea": 28,
+     "fragmento": "cookies.push(...sessionStore.clean());"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 218,
+     "fragmento": "typeof token.sessionVersion === 'number' &&\n          accessState.sessionVersion !== undefined &&\n          token.sessionVersion !== accessState.sessionVersion"
+    }
+   ],
+   "impacto": "Con sesiones JWT, salir solo borra la cookie de ese navegador; el token sigue siendo válido hasta que vence (30 días deslizantes por SEC-010), porque el logout no sube User.sessionVersion. Si un cliente sospecha que alguien copió su sesión (PC compartida, extensión), 'Cerrar sesión' no lo protege, y la única revocación disponible es cambiar la contraseña, que SEC-006 permite revivir. Precondición fuerte: copia previa de la cookie.",
+   "propuesta": "Decidir (PLAN-004 lo tiene como idea sin estado). Zona libre: agregar 'Cerrar sesión en todos los dispositivos' en Mi Cuenta que incremente sessionVersion (el mecanismo ya existe) y, opcionalmente, incrementarlo también en el logout explícito, aceptando que desloguea los demás dispositivos.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login",
+    "lib.auth",
+    "h2.cli-cuenta"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-010, SEC-006, PLAN-004",
+   "vh": "VH-026",
+   "origen": {
+    "ciclo": "D1-c3",
+    "lote": "D1-T1",
+    "tmp": "D1-c3/D1-T1/H12",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene. src/actions/auth-actions.ts:5-7 solo llama signOut (borra la cookie de ese navegador); no sube sessionVersion, así que una copia del JWT sigue valiendo.",
+    "verificador": null
+   },
+   "estado": "vigente"
   }
  ]
 }

@@ -145,6 +145,49 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): lib.rate-limit, lib.security, h1.auth-recupero, h6.vis-contacto
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-015
 
+### [SEC-029] Impersonación global por navegador: con dos clientes abiertos en pestañas distintas, lo que soporte guarda en la pestaña de X se escribe en Y
+- Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/actions/impersonation.ts:33` — «const jar = await cookies() jar.set(IMPERSONATION_COOKIE, token, getImpersonationCookieOptions())»; `src/lib/impersonation.ts:82` — «export function getImpersonationCookieOptions() { return { path: '/',»; `src/lib/preview.ts:14` — «if (role === 'SUPER_ADMIN') { const impersonation = await getImpersonationSession() return impersonation?.orgId ?? null»; `src/app/(protected)/dashboard/_actions/business-profile.actions.ts:25` — «const organizationId = await resolveOrgId()»; `src/app/(protected)/dashboard/_actions/business-profile.actions.ts:33` — «await prisma.organization.update({ where: { id: organizationId },»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:158` — «const campaign = await prisma.emailCampaign.create({ data: { organizationId: org.id,»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:177` — «const campaign = await prisma.emailCampaign.findFirst({ where: { id: campaignId, organizationId: org.id },»
+- Impacto: Bloqueante para operar con el primer cliente real junto a otros. La impersonación vive en una sola cookie por navegador (path '/') y startImpersonationAction la pisa sin mirar si ya había otra activa. Cada acción del portal resuelve la org en el momento del envío (resolveOrgId lee esa cookie), no la de la pantalla que se está viendo. Escenario: soporte abre 'Ver como cliente' de X en una pestaña y de Y en otra (o vuelve con el botón Atrás). La pestaña de X sigue mostrando X, pero lo que se guarda ahí se escribe en Y: ticket promedio, preferencias del reporte, onboarding, tickets, importación de contactos, campañas de email. Una campaña creada 'para X' queda en Y y, si se envía desde esa pestaña, sale a los contactos de Y (el chequeo id + org pasa porque ambos son de Y). Es escritura entre tenants por error de operación, sin aviso, y la auditoría no deja ver la intención.
+- Propuesta: Zona libre. Atar la org a la pantalla: durante el preview, mandar en cada acción del portal el orgId que se renderizó (firmado o como token por pestaña) y rechazar si no coincide con la cookie ('Cambiaste de cliente en otra pestaña: recargá'). Como mínimo, que startImpersonationAction no pise una impersonación activa sin terminarla. Decidir junto con la política de escritura del preview de SEC-020: si el preview pasa a solo lectura, desaparece la mitad de escritura.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h1.auth-impersonacion, lib.preview, h2.cli-inicio, h2.cli-email-mkt, h2.cli-soporte, h4.adm-clientes
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-017
+
+### [SEC-030] La auditoría se pierde en silencio: logAdminAction traga el error sin Sentry y corre después del cambio (contraseña, impersonación), y el vencimiento de la impersonación no se registra
+- Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/audit-log.ts:39` — «} catch (error) { console.error('[audit-log] Failed to log action:', error) }»; `src/app/reset-password/actions.ts:68` — «const [updatedUser] = await prisma.$transaction([»; `src/app/reset-password/actions.ts:87` — «await logAdminAction({»; `src/app/cambiar-password/actions.ts:51` — «await prisma.user.update({»; `src/app/cambiar-password/actions.ts:63` — «await logAdminAction({»; `src/lib/actions/impersonation.ts:34` — «jar.set(IMPERSONATION_COOKIE, token, getImpersonationCookieOptions())»; `src/lib/actions/impersonation.ts:36` — «await logAdminAction({»; `src/components/dashboard/ImpersonationTimer.tsx:29` — «if (nextRemaining <= 0) { router.replace('/admin/clients')»
+- Impacto: Si el insert en admin_audit_log falla (hipo de Neon, pool agotado), el restablecimiento o cambio de contraseña y la impersonación del portal de un cliente ocurren igual y sin rastro. El error queda solo en la consola de la función: el helper no llama a Sentry y no hay captureConsoleIntegration. La impersonación ni siquiera falla cerrada, porque la cookie se emite antes de auditar. Además, una impersonación que vence sola (30 min) termina con router.replace en el navegador sin registrar IMPERSONATION_ENDED; solo el botón de salir lo registra. Para el primer cliente real: justo cuando hay un incidente, el historial de quién entró a su cuenta y qué se cambió tiene huecos que nadie detecta. El helper lo usan 43 llamadas en 31 archivos, incluidas bajas definitivas de clientes.
+- Propuesta: Decisión para Valentino (audit-log.ts es FROZEN-inferido): Sentry.captureException en el catch y una variante que reciba el cliente de transacción, para que el registro viaje en el mismo $transaction que el cambio. Zona libre en los llamadores: en startImpersonationAction, auditar antes de emitir la cookie y abortar si falla (acción privilegiada, falla cerrada); registrar el fin por vencimiento (al detectar el token vencido o desde el timer vía stopImpersonationAction).
+- Esfuerzo: M  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.audit-log, h1.auth-recupero, h1.auth-cambio, h1.auth-impersonacion, h4.adm-audit, modelo.AdminAuditLog, int.sentry
+
+### [SEC-031] rate_limit no se purga nunca y varias claves las elige quien llama: el webhook del motor inserta una fila por cada token inventado en la Neon compartida
+- Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/rate-limit/limiter.ts:29` — «// UPSERT resetea count=1 y muda la ventana. No hay job de limpieza — la tabla // no acumula buckets "muertos" dentro de la misma ventana porque la siguiente»; `src/lib/rate-limit/limiter.ts:46` — «INSERT INTO rate_limit (id, key, count, "windowStart", "expiresAt", "createdAt", "updatedAt") VALUES ($1, $2, 1, $3, $4, $3, $3) ON CONFLICT (key) DO UPDATE SET»; `src/app/api/motor/webhook/[channelToken]/route.ts:33` — «const rate = await checkRateLimit({ key: 'motorWebhookPerChannel:${tokenHash}',»; `src/modules/chatbot/server/chat/handleChatRequest.ts:185` — «key: 'chatbotPerBotSession:${slug}:${body.sessionId}',»; `src/app/forgot-password/actions.ts:51` — «const emailLimit = await applyAuthRateLimit({ scope: 'forgotPasswordPerEmail', identifier: email,»; `src/app/api/chatbot/[slug]/chat/route.ts:77` — «// se resetean UNA vez en el deploy (ventana de 60s; las filas viejas las // barre el cleanup perezoso del limiter).»; `src/lib/rate-limit/limiter.ts:65` — «if (!row) { // El UPSERT con RETURNING siempre devuelve una fila. Si no la hay, // hay un problema de conexión o de schema — fail closed (rechazar)»
+- Impacto: La 'limpieza perezosa' solo reusa una fila cuando la MISMA clave vuelve; una clave que no vuelve queda para siempre (git grep sin ningún DELETE sobre rate_limit). Varias claves las elige el visitante: el token de la URL del webhook del motor (POST anónimo; se limita ANTES de validar el canal y sin límite por IP delante), el sessionId del chatbot (1 a 200 caracteres libres), el email de forgot-password y la IP vía X-Forwarded-For (SEC-025). Un script anónimo contra /api/motor/webhook/<aleatorio> suma una fila por pedido: a 50 pedidos/s son unas 180.000 filas por hora, con sus tres índices, en la Neon que comparten la app y Franco, y no se van al terminar el ataque. Para el primer cliente real: el almacenamiento del proyecto puede llenarse y cortar las escrituras de todos. Además la rama 'fail closed' de limiter.ts:65 es inalcanzable: una falla de conexión lanza una excepción que los llamadores de auth no atrapan.
+- Propuesta: Zona libre. Cron diario que borre filas con expiresAt vencido hace más de un día (el índice en expiresAt ya existe), registrado como los demás crons. En el webhook del motor, validar el formato del channelToken y poner un límite por IP antes del límite por canal (o limitar después de confirmar que el canal existe). Corregir los comentarios de limiter.ts:28-33 y chat/route.ts:76-78. Definir y documentar la política ante error de base (fail-closed real con try/catch en checkRateLimit).
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.rate-limit, modelo.RateLimit, h3.vis-whatsapp, h3.vis-api-chatbot, h1.auth-recupero, h6.vis-contacto
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-019
+
+### [SEC-032] Nombre de empresa sin tope de largo: el cliente puede inflar el prompt de su propio chatbot decenas de veces y el costo de Vertex lo paga develOP
+- Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/actions/schemas.ts:15` — «name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres.'), companyName: z.string().trim().min(2, 'La empresa debe tener al menos 2 caracteres.'),»; `src/lib/actions/profile.ts:55` — «prisma.organization.update({ where: { id: organizationId }, data: {»; `src/modules/chatbot/server/chat/handleChatRequest.ts:650` — «companyName: bot.organization.companyName,»; `src/modules/chatbot/server/prompts/sections.ts:24` — «Sos ${botConfig.botName}, parte del equipo de ${context.companyName}. Primer punto de contacto con visitantes del sitio.»; `src/modules/chatbot/server/admin/saveKnowledgeBase.ts:12` — «businessInfo: z.string().max(50_000),»; `src/app/bienvenida/_actions/complete-onboarding.ts:10` — «companyName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),»; `scripts/_b13-dev.log:42` — «"tokensIn":5579»
+- Impacto: UpdateProfileSchema (Mi Cuenta -> Perfil) y el wizard de /bienvenida aceptan cualquier largo de nombre de empresa; el input tampoco tiene maxLength y solo frena el límite por defecto de 1 MB del body de una server action. Ese nombre entra al system prompt del bot de la org 7 veces (git grep de context.companyName en sections.ts), mientras que cada campo de la base de conocimiento sí tiene tope (50.000). Con 200.000 caracteres, cada turno pasa de unos 5.600 tokens de entrada medidos a unos 250.000 (cerca de 45x), hasta agotar la cuota mensual; con un nombre más largo el prompt excede el contexto del modelo y el bot deja de responder. También rompe listas del admin y emails que muestran el nombre. Hoy no cuesta porque la credencial de Vertex está vencida; con el primer cliente real, un cliente malintencionado o una cuenta comprometida multiplica el gasto de develOP. El alta del admin sí limita a 100 (createClientOnly.ts:20).
+- Propuesta: Zona libre. .max() razonable (100, como el alta del admin) en UpdateProfileSchema.name/companyName, CompleteOnboardingSchema y onboarding-actions.ts:20, más maxLength en los inputs. Defensa en profundidad: truncar context.companyName al armar el prompt. Script de datos (sin migrate reset) que detecte nombres existentes fuera de rango.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-cuenta, h2.cli-bienvenida, h3.vis-api-chatbot, int.vertex, modelo.Organization, lib.actions
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-020
+
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -282,6 +325,17 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h1.auth-impersonacion, h4.adm-audit, modelo.AdminAuditLog
 
+### [SEC-033] Cerrar sesión no revoca el token: una copia de la cookie sigue sirviendo y no existe 'cerrar sesión en todos los dispositivos'
+- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/actions/auth-actions.ts:5` — «export async function signOutAction() { await signOut({ redirectTo: '/login' })»; librería @auth/core@0.41.2, lib/actions/signout.js línea 15 — «if (session.strategy === "jwt") {»; librería @auth/core@0.41.2, lib/actions/signout.js línea 28 — «cookies.push(...sessionStore.clean());»; `src/auth.ts:218` — «typeof token.sessionVersion === 'number' && accessState.sessionVersion !== undefined && token.sessionVersion !== accessState.sessionVersion»
+- Impacto: Con sesiones JWT, salir solo borra la cookie de ese navegador; el token sigue siendo válido hasta que vence (30 días deslizantes por SEC-010), porque el logout no sube User.sessionVersion. Si un cliente sospecha que alguien copió su sesión (PC compartida, extensión), 'Cerrar sesión' no lo protege, y la única revocación disponible es cambiar la contraseña, que SEC-006 permite revivir. Precondición fuerte: copia previa de la cookie.
+- Propuesta: Decidir (PLAN-004 lo tiene como idea sin estado). Zona libre: agregar 'Cerrar sesión en todos los dispositivos' en Mi Cuenta que incremente sessionVersion (el mecanismo ya existe) y, opcionalmente, incrementarlo también en el logout explícito, aceptando que desloguea los demás dispositivos.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h1.auth-login, lib.auth, h2.cli-cuenta
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-026
+
 ## Bugs latentes
 
 ### [BUG-002] El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo
@@ -314,6 +368,27 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h1.auth-login.ruteo-por-rol, lib.proxy, lib.auth
+
+### [BUG-008] magicLinkAction declara éxito sin mirar la URL que devuelve signIn: el 'throw on fail' previsto para BUG-003 con un Error común seguiría mostrando 'Link generado'
+- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/login/actions.ts:146` — «await signIn('resend', { email, redirectTo: '/dashboard',»; `src/app/login/actions.ts:151` — «return 'SUCCESS'»; librería @auth/core@0.41.2, lib/actions/signin/send-token.js línea 66 — «await Promise.all([sendRequest, createToken]);»; librería @auth/core@0.41.2, index.js línea 124 — «if (isAuthError && isRaw && !isRedirect) throw error;»; librería @auth/core@0.41.2, index.js línea 140 — «return Response.redirect(url);»; librería next-auth@5.0.0-beta.31, lib/actions.js línea 48 — «const responseUrl = res instanceof Response ? res.headers.get("Location") : res.redirect;»; librería @auth/core@0.41.2, errors.js línea 333 — «export class EmailSignInError extends SignInError {»
+- Impacto: Con redirect:false, signIn no lanza ante errores que no son AuthError: Auth.js los convierte en una redirección a /api/auth/error?error=Configuration, next-auth devuelve esa URL y magicLinkAction la ignora y responde 'SUCCESS'. Hoy no se dispara en el uso normal: sendVerificationRequest nunca lanza y los errores del adapter llegan como AdapterError. Pero el arreglo planeado para BUG-003 (PLAN-017, 'throw on fail'), hecho con un Error común, dejaría al cliente viendo 'Link generado' igual y sin email. Además, como el envío corre en paralelo con la creación del token (Promise.all), si falla la base el mail puede salir igual con un link muerto mientras la pantalla dice que falló.
+- Propuesta: Zona libre en login/actions.ts: considerar éxito solo si la URL devuelta es /api/auth/verify-request; si no, devolver error y capturarlo. Para BUG-003 (auth.ts, decisión para Valentino): lanzar EmailSignInError, subclase de AuthError que Auth.js re-lanza en modo raw, en vez de Error.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h1.auth-login.magic-link, lib.auth, int.brevo
+
+### [BUG-009] Topes de largo de contraseña distintos: /cambiar-password y Mi Cuenta aceptan más de 128 caracteres y el login los rechaza
+- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/cambiar-password/actions.ts:14` — «newPassword: z .string() .min(8, 'La nueva contraseña debe tener al menos 8 caracteres.')»; `src/lib/actions/schemas.ts:25` — «newPassword: z .string() .min(8, 'La nueva contraseña debe tener al menos 8 caracteres.')»; `src/app/login/actions.ts:72` — «if (password.length < 8 || password.length > 128) { return 'La contraseña debe tener entre 8 y 128 caracteres.'»; `src/lib/actions/schemas.ts:97` — «.max(128, 'Contraseña demasiado larga.'),»; librería bcryptjs@3.0.3, index.js línea 322 — «export function truncates(password) {»
+- Impacto: Un cliente que define desde /cambiar-password o Mi Cuenta una contraseña de más de 128 caracteres (frase larga o gestor configurado al máximo) no puede volver a entrar con contraseña: el login responde 'debe tener entre 8 y 128 caracteres' antes de compararla, y solo le queda el magic link o recuperar. Además bcryptjs usa solo los primeros 72 bytes y trunca en silencio: con acentos (2 bytes en UTF-8) el tope real es menor, y dos contraseñas largas con el mismo comienzo valen lo mismo.
+- Propuesta: Zona libre. Un passwordSchema compartido (el mismo que pide SEC-012) con un .max único (128 caracteres o 72 bytes) en login, reset, accept-invite, cambiar-password y Mi Cuenta, con aviso en el formulario.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h1.auth-cambio, h2.cli-cuenta, h1.auth-login.password
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-024
 
 ## Tecnología vieja
 
@@ -374,6 +449,17 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h1.auth-login.google-oauth, h1.auth-login.magic-link, lib.auth
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-010
 
+### [UX-004] Recuperar la contraseña castiga el reintento: cada pedido anula el link anterior y, desde el cuarto en la hora, la pantalla dice 'te mandamos un mail' sin mandar nada
+- Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/forgot-password/actions.ts:76` — «await prisma.$transaction([ prisma.passwordResetToken.deleteMany({ where: { userId: user.id, usedAt: null },»; `src/lib/rate-limit/presets.ts:12` — «forgotPasswordPerEmail: { limit: 3, windowMs: 60 * 60_000 },»; `src/app/forgot-password/actions.ts:55` — «if (!emailLimit.allowed) { return { type: 'success', message: ANTI_ENUM_MESSAGE }»; `src/app/reset-password/actions.ts:61` — «message: 'Este enlace no es válido o ya expiró. Solicitá uno nuevo.',»; `src/app/reset-password/ResetPasswordForm.tsx:264` — «<Link href="/login"»; `src/lib/email/templates/password-reset.ts:48` — «El enlace vence en ${minutes} minutos</strong> y solo se puede usar una vez.»
+- Impacto: Escenario típico del primer cliente: el mail tarda (Brevo puede demorar o colgar el envío, BUG-003), aprieta 'Enviar enlace' de nuevo o lo pide desde el celular, y abre el primer mail: 'Este enlace no es válido o ya expiró', porque el segundo pedido lo borró. Ni el mail ni la pantalla avisan que solo vale el último. El error de /reset-password no ofrece pedir otro: solo 'Volver al inicio de sesión'; el link a /forgot-password aparece únicamente si falta el token. Si reintenta, desde el cuarto pedido en la hora el límite por email responde el mismo 'te mandamos un mail' sin enviar nada (anti-enumeración). Queda hasta una hora sin link válido, sin saber por qué, y llama a develOP: falla el criterio de autonomía de L3.
+- Propuesta: Zona libre. Texto en el email y en la pantalla de éxito: 'si pediste más de uno, usá el último'. En el estado de error de ResetPasswordForm, link a /forgot-password. Evaluar no invalidar los tokens previos al pedir uno nuevo: que venzan solos a los 45 min y se borren todos al usar uno, como propone SEC-013, para que cualquiera de los mails funcione.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h1.auth-recupero, h1.auth-recupero.forgot, h1.auth-recupero.reset, lib.rate-limit, int.brevo
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-022
+
 ### [UX-003] Cambio forzado sin salida si el cliente no tiene la temporal, y copy de 'forzado' tambien en cambio voluntario
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: ux
 - Confianza: PROBABLE
@@ -383,6 +469,17 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h1.auth-cambio.cambio-forzado
+
+### [UX-005] Después de iniciar sesión se pierde el destino: los links de los emails (lead caliente, ticket, mensajes) terminan en el inicio del portal
+- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/proxy.ts:105` — «const loginUrl = new URL(LOGIN_PATH, nextUrl) loginUrl.searchParams.set('callbackUrl', '${pathname}${nextUrl.search}')»; `src/app/login/actions.ts:102` — «const redirectTo = isSuperAdmin ? '/admin' : isSetter»; `src/app/login/actions.ts:111` — «await signIn('credentials', { email, password, redirectTo })»; `src/app/login/actions.ts:148` — «redirectTo: '/dashboard',»; `src/lib/client-notifications/notify.ts:169` — «leadUrl: '${appUrl}/dashboard/chatbot/leads/${input.leadId}',»; `src/lib/tickets/actions.ts:164` — «ticketUrl: '${baseUrl}/dashboard/soporte/${ticketInfo.id}',»
+- Impacto: El proxy guarda el destino en ?callbackUrl=, pero /login no lo lee (git grep vacío) y loginAction/magicLinkAction fijan el destino por rol. El caso más común es el celular sin sesión: el cliente toca 'ver lead' en el email de lead caliente, entra y aterriza en /dashboard, y tiene que buscar el lead a mano justo en el flujo donde importa la rapidez. Lo mismo con respuestas de tickets y mensajes.
+- Propuesta: Zona libre. Pasar callbackUrl como campo oculto del formulario de /login y usarlo como redirectTo cuando sea una ruta interna válida para el rol, validada por mismo origen (ver SEC-011 para no abrir un open redirect); mismo criterio en magicLinkAction.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h1.auth-login, lib.proxy, h3.cli-chatbot, h2.cli-soporte, h2.cli-mensajes
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-025
 
 ## Observabilidad
 
@@ -422,6 +519,28 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: FROZEN + ZONA-FRANCO
 - Relacionado: —
 - Nodo(s): h1.auth-login.magic-link, int.brevo, int.sentry, lib.auth
+
+### [BUG-006] Una falla de la base en el callback jwt se trata como 'sin sesión': rebote /login <-> portal en vez de pantalla de error, y unstable_update borra la cookie
+- Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/auth.ts:207` — «const shouldRefreshFromDb = Boolean(userId) && (trigger === 'update' || trigger === 'signIn' || !user)»; `src/auth.ts:209` — «if (userId && shouldRefreshFromDb) { const accessState = await getUserAccessState(userId)»; librería @auth/core@0.41.2, lib/actions/session.js línea 58 — «catch (e) { logger.error(new JWTSessionError(e));»; librería @auth/core@0.41.2, lib/actions/session.js línea 61 — «response.cookies?.push(...sessionStore.clean());»; librería next-auth@5.0.0-beta.31, lib/index.js línea 48 — «return getSession(_headers, _config).then((r) => r.json());»; librería next-auth@5.0.0-beta.31, lib/actions.js línea 83 — «for (const c of res?.cookies ?? []) cookieJar.set(c.name, c.value, c.options);»; `src/app/(protected)/dashboard/layout.tsx:90` — «if (!organizationId) { redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')»; `src/app/(protected)/admin/layout.tsx:43` — «if (!session?.user) { redirect('/login')»; `src/proxy.ts:143` — «return NextResponse.redirect( new URL(onboardingCompleted ? DASHBOARD_PATH : ONBOARDING_PATH, nextUrl)»; `src/app/(protected)/dashboard/_actions/business-profile.actions.ts:26` — «if (!organizationId) return { ok: false, error: 'Tu sesión expiró. Volvé a entrar.' }»; `src/app/cambiar-password/actions.ts:73` — «await unstable_update({ user: { passwordResetRequired: false } })»
+- Impacto: Bloqueante para L3 del portal ante cualquier hipo de Neon (despertar en frío, timeout del pool). Cada auth() en Node consulta la base (getUserAccessState) y el callback no distingue 'base caída' de 'sesión inválida': Auth.js atrapa el error, lo imprime en consola y devuelve sesión nula. Los layouts de dashboard, admin y setter mandan a /login; el proxy, que no consulta la base, ve la cookie válida y devuelve al portal. Resultado: rebotes mientras dure la falla y ERR_TOO_MANY_REDIRECTS si persiste, en vez de error.tsx con 'Reintentar'. Las server actions responden 'Tu sesión expiró', 'Sesión inválida' o 'No autenticado' sin que la sesión haya vencido. Si la falla cae en el unstable_update posterior a cambiar la contraseña (cambiar-password y Mi Cuenta), Auth.js borra la cookie: el cliente queda deslogueado justo después de un cambio exitoso. Nada llega a Sentry: develOP no ve la caída ni su efecto.
+- Propuesta: Decisión para Valentino (auth.ts es FROZEN + ZONA-FRANCO): envolver getUserAccessState del callback jwt en try/catch; ante error de infraestructura, capturar en Sentry y devolver el token marcado (p. ej. token.error = 'db_unavailable') en vez de dejar que Auth.js lo convierta en sesión nula. Exponer la marca en la sesión y que los layouts (zona libre) lancen un error real (error.tsx con reintento) en vez de redirect('/login'). Alternativa: conservar los claims del token durante la caída (sin chequeo de sessionVersion) con alerta. Configurar logger.error de NextAuth hacia Sentry (ver el FAL de este ciclo).
+- Esfuerzo: M  ·  Zona: FROZEN + ZONA-FRANCO
+- Relacionado: —
+- Nodo(s): lib.auth, lib.proxy, h2.cli-shell, h4.adm-shell, h1.auth-cambio, lib.prisma, int.sentry
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-018
+
+### [BUG-007] El magic link se gasta en el primer GET: un escáner de enlaces del correo lo consume antes que el cliente
+- Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: librería @auth/core@0.41.2, lib/actions/signin/send-token.js línea 52 — «url: '${baseUrl}/callback/${provider.id}?${new URLSearchParams({»; librería @auth/core@0.41.2, lib/actions/callback/index.js línea 141 — «const invite = await adapter.useVerificationToken({»; librería @auth/core@0.41.2, lib/actions/callback/index.js línea 153 — «if (invalidInvite) throw new Verification({ hasInvite, expired });»; `src/auth.ts:95` — «pages: { signIn: LOGIN_PATH },»; `src/auth.ts:113` — «<a href="${url}"»; `src/app/reset-password/actions.ts:80` — «prisma.passwordResetToken.update({ where: { id: record.id }, data: { usedAt: new Date() },»
+- Impacto: El enlace del email apunta directo a GET /api/auth/callback/resend, que borra el token de un solo uso en el primer pedido (useVerificationToken), sin interacción. Los filtros de correo que abren los links para analizarlos (Microsoft 365 Safe Links/Defender, Mimecast, Proofpoint, algunos antivirus) lo consumen antes que la persona. Cuando el cliente hace clic, Auth.js lanza Verification y muestra su página de error en inglés (UX-002). Para un primer cliente con correo corporativo el magic link no funciona nunca y no hay explicación. El reset de contraseña no tiene el problema: /reset-password solo consume el token al enviar el formulario (POST). Eslabón inferido: el comportamiento del escáner del proveedor de correo.
+- Propuesta: Decisión para Valentino (auth.ts es FROZEN + ZONA-FRANCO): que sendVerificationRequest mande un link a una página propia de confirmación (zona libre, p. ej. /login/confirmar) con un botón que recién ahí siga al callback, o reemplazar el link por un código de un solo uso. Configurar pages.error/verifyRequest con texto en español (ver UX-002).
+- Esfuerzo: M  ·  Zona: FROZEN + ZONA-FRANCO
+- Relacionado: —
+- Nodo(s): h1.auth-login, h1.auth-login.magic-link, lib.auth, modelo.VerificationToken, int.brevo
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-021
 
 ### [SEC-024] /api/qa/login confía en el header Host y los scripts QA escuchan en toda la red: cualquiera en la misma LAN obtiene una sesión SUPER_ADMIN
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad

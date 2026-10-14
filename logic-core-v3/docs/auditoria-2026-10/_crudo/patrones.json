@@ -146,6 +146,76 @@
    "patron": "Server action exportada que escribe estado o auditoría sin chequear rol",
    "como_buscarlo": "en archivos con 'use server', listar las export async function y verificar que exista auth()/require* antes de la primera escritura (prisma.*.create|update|delete o logAdminAction)",
    "donde_aparecio": "lib/actions/impersonation.ts:50 (stopImpersonationAction) y su wrapper admin/clients/_actions/client.actions.ts:12."
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "patron": "Org de la impersonación resuelta al momento de la acción desde una cookie global (resolveOrgId en server actions que escriben)",
+   "como_buscarlo": "git grep -n \"await resolveOrgId()\" origin/main -- logic-core-v3/src y filtrar archivos 'use server' que hacen update/create/delete/send",
+   "donde_aparecio": "(protected)/dashboard/_actions/business-profile.actions.ts:25, dashboard/modules/email-marketing/_actions.ts:18, lib/tickets/actions.ts, executive-report-prefs.actions.ts, bienvenida/_actions/complete-onboarding.ts, components/dashboard/modules/motor-resenas/_actions.ts"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "patron": "Claves de rate limit armadas con datos del pedido sin validar: cada valor nuevo es una fila nueva en rate_limit, que no se purga",
+   "como_buscarlo": "git grep -n -A2 \"checkRateLimit({\" origin/main -- logic-core-v3/src y revisar de dónde sale la key",
+   "donde_aparecio": "api/motor/webhook/[channelToken]/route.ts:34 (token de la URL), modules/chatbot/server/chat/handleChatRequest.ts:185 (sessionId del body), forgot-password/actions.ts:53 (email)"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "patron": "Texto libre sin .max() que termina en el prompt del chatbot o en emails",
+   "como_buscarlo": "git grep -n -E \"z\\.string\\(\\)(\\.trim\\(\\))?\\.min\\(\" origin/main -- logic-core-v3/src | grep -v \"max(\" y cruzar con PromptContext (prompts/types.ts) y templates de email",
+   "donde_aparecio": "lib/actions/schemas.ts:15-16, bienvenida/_actions/complete-onboarding.ts:10, actions/onboarding-actions.ts:20, lib/actions/clients.ts:26"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "patron": "Mutación en la base y después envío por Brevo dentro de la respuesta (SDK con 60 s x 3 intentos): si la función expira, se pierde lo que solo se devolvía al final",
+   "como_buscarlo": "git grep -n \"await sendTransactionalEmail\" origin/main -- logic-core-v3/src y mirar qué se escribió antes y qué se devuelve después",
+   "donde_aparecio": "modules/chatbot/server/admin/createClientOnly.ts:142 (tempPassword solo en la respuesta), api/admin/users/[userId]/resend-credentials/route.ts:85, forgot-password/actions.ts:96"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "patron": "Auditoría escrita después del efecto con un helper que traga el error sin Sentry",
+   "como_buscarlo": "git grep -n \"logAdminAction(\" origin/main -- logic-core-v3/src y comparar con la mutación principal y su $transaction",
+   "donde_aparecio": "43 llamadas en 31 archivos; p. ej. modules/chatbot/server/admin/hardDeleteClient.ts:166, archiveClient.ts:37, reset-password/actions.ts:87"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "patron": "Guards que lanzan Error('Unauthorized') genérico sin try/catch: sesión vencida o invalidada a mitad de una acción lleva a error.tsx y a un evento en Sentry en vez de a /login",
+   "como_buscarlo": "git grep -n -E \"await require(SuperAdmin|Setter)\\(\\)\" origin/main -- logic-core-v3/src y verificar el try que lo envuelve",
+   "donde_aparecio": "lib/actions/projects.ts:109, :159, :178; (protected)/setter/page.tsx:29"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "patron": "Fallback de URL base a http://localhost:3000 en links de emails: link roto si falta la variable en producción (check-env.js no corre en el build)",
+   "como_buscarlo": "git grep -n -E \"\\?\\? ['\\\"]http://localhost:3000\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "forgot-password/actions.ts:87 y 11 sitios más (lib/tickets/actions.ts:156, lib/alerts.ts:50, lib/email/unsubscribe-token.ts:58 y :118, lib/reports/executive-weekly/build.ts:187, entre otros)"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "patron": "Tokens de un solo uso en el query string que pueden ir a Sentry: scrub-pii no cubre tokens hex y no hay beforeSendTransaction (tracesSampleRate 0.1 y replays on error en el cliente)",
+   "como_buscarlo": "git grep -n \"beforeSendTransaction\" origin/main -- logic-core-v3 y revisar PATTERNS de src/lib/sentry/scrub-pii.ts:53-67 contra /reset-password?token=, /accept-invite?token= y /api/email/optout/...?token=",
+   "donde_aparecio": "lib/sentry/scrub-pii.ts:53-67, instrumentation-client.ts:6-11"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "patron": "Escritura fire-and-forget en cada navegación a una columna sin lectores, que durante la impersonación marca al SUPER_ADMIN",
+   "como_buscarlo": "git grep -n \"lastDashboardVisit\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "(protected)/dashboard/layout.tsx:80-87"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "patron": "Límite por IP con la dirección exacta: con IPv6 se rota dentro de un /64 aun usando la IP confiable de la plataforma",
+   "como_buscarlo": "git grep -n -E \"getClientIpHash\\(|hashIp\\(|extractClientIp\\(\" origin/main -- logic-core-v3/src y verificar normalización a /64",
+   "donde_aparecio": "lib/security/auth-rate-limit.ts:37-42, api/chatbot/[slug]/chat/route.ts:79"
   }
  ]
 }

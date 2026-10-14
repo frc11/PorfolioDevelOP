@@ -1,0 +1,75 @@
+{
+  "migraciones": 86,
+  "schema": {
+    "tablas": 63,
+    "enums": 62,
+    "indices": 136,
+    "fks": 80
+  },
+  "aplicado": {
+    "tablas": 63,
+    "enums": 62,
+    "indices": 136,
+    "fks": 80
+  },
+  "resumen": {},
+  "diferencias": [],
+  "sentencias_no_reconocidas": [
+    {
+      "donde": "prisma/migrations/20260320200000_multi_tenancy_organizations/migration.sql:24",
+      "texto": "INSERT INTO \"OrgMember\" (\"id\", \"userId\", \"organizationId\", \"role\", \"joinedAt\") SELECT gen_random_uuid()::text, o.\"userId\", o.\"id\", 'ADMIN'::\"OrgRole\", CURRENT_T"
+    },
+    {
+      "donde": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:29",
+      "texto": "WITH organization_matches AS ( SELECT op.\"id\" AS \"osProjectId\", org.\"id\" AS \"organizationId\", ROW_NUMBER() OVER ( PARTITION BY op.\"id\" ORDER BY CASE WHEN lower("
+    },
+    {
+      "donde": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:77",
+      "texto": "WITH organization_matches AS ( SELECT op.\"id\" AS \"osProjectId\", org.\"id\" AS \"organizationId\", ROW_NUMBER() OVER ( PARTITION BY op.\"id\" ORDER BY CASE WHEN lower("
+    },
+    {
+      "donde": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:114",
+      "texto": "INSERT INTO \"Project\" ( \"id\", \"name\", \"description\", \"status\", \"agreedAmount\", \"monthlyRate\", \"maintenanceStartDate\", \"deliveredAt\", \"estimatedEndDate\", \"osLead"
+    },
+    {
+      "donde": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:153",
+      "texto": "INSERT INTO \"Task\" ( \"id\", \"title\", \"description\", \"status\", \"estimatedHours\", \"position\", \"projectId\" ) SELECT ot.\"id\", ot.\"title\", ot.\"description\", CASE ot.\""
+    },
+    {
+      "donde": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:182",
+      "texto": "UPDATE \"OsTimeEntry\" ote SET \"projectId\" = ot.\"projectId\" FROM \"OsTask\" ot WHERE ot.\"id\" = ote.\"taskId\" AND ote.\"projectId\" IS DISTINCT FROM ot.\"projectId\""
+    },
+    {
+      "donde": "prisma/migrations/20260406113000_allow_internal_projects_without_organization/migration.sql:6",
+      "texto": "UPDATE \"Project\" SET \"organizationId\" = NULL WHERE \"organizationId\" IN ( SELECT \"id\" FROM \"Organization\" WHERE \"slug\" = 'agency-os-internal' )"
+    },
+    {
+      "donde": "prisma/migrations/20260406113000_allow_internal_projects_without_organization/migration.sql:14",
+      "texto": "DELETE FROM \"Service\" WHERE \"organizationId\" IN ( SELECT \"id\" FROM \"Organization\" WHERE \"slug\" = 'agency-os-internal' )"
+    },
+    {
+      "donde": "prisma/migrations/20260406113000_allow_internal_projects_without_organization/migration.sql:21",
+      "texto": "DELETE FROM \"Organization\" WHERE \"slug\" = 'agency-os-internal' AND NOT EXISTS ( SELECT 1 FROM \"Project\" WHERE \"Project\".\"organizationId\" = \"Organization\".\"id\" )"
+    },
+    {
+      "donde": "prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql:16",
+      "texto": "UPDATE \"chatbot_message\" SET \"role\" = UPPER(\"role\") WHERE \"role\" <> UPPER(\"role\")"
+    },
+    {
+      "donde": "prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql:17",
+      "texto": "UPDATE \"chatbot_lead\" SET \"intent\" = UPPER(\"intent\") WHERE \"intent\" IS NOT NULL AND \"intent\" <> UPPER(\"intent\")"
+    },
+    {
+      "donde": "prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql:18",
+      "texto": "UPDATE \"chatbot_events\" SET \"level\" = UPPER(\"level\") WHERE \"level\" <> UPPER(\"level\")"
+    },
+    {
+      "donde": "prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql:19",
+      "texto": "UPDATE \"chatbot_bot_config\" SET \"intensityLevel\" = UPPER(\"intensityLevel\") WHERE \"intensityLevel\" <> UPPER(\"intensityLevel\")"
+    },
+    {
+      "donde": "prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql:20",
+      "texto": "UPDATE \"chatbot_bot_config\" SET \"llmProvider\" = UPPER(\"llmProvider\") WHERE \"llmProvider\" <> UPPER(\"llmProvider\")"
+    }
+  ]
+}

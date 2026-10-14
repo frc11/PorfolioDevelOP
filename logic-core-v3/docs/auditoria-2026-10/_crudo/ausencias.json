@@ -223,6 +223,90 @@
    "afirmacion": "El build de producción no usa Turbopack (advisory GHSA-6gpp)",
    "comando": "git grep -n -i turbo origin/main -- logic-core-v3/package.json logic-core-v3/next.config.ts logic-core-v3/netlify.toml  -> 0",
    "control_positivo": "git grep -n 'next build --webpack' origin/main -- logic-core-v3/package.json -> :9 (netlify.toml:2 corre npm run build)."
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "No hay purga de la tabla rate_limit en src, netlify ni scripts",
+   "comando": "git grep -n -i -E \"rateLimit\\.(deleteMany|delete)\\b|DELETE FROM \\\"?rate_limit|from rate_limit\" origin/main -- logic-core-v3/src logic-core-v3/netlify logic-core-v3/scripts -> vacío",
+   "control_positivo": "git grep -n \"INSERT INTO rate_limit\" origin/main -- logic-core-v3/src -> src/lib/rate-limit/limiter.ts:46"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "La config de NextAuth (auth.ts y auth.config.ts) no define logger ni events",
+   "comando": "git grep -n -E \"^\\s*(logger|events)\\s*:\" origin/main -- logic-core-v3/src/auth.ts logic-core-v3/src/auth.config.ts -> vacío",
+   "control_positivo": "git grep -n -E \"^\\s*callbacks\\s*:\" origin/main -- logic-core-v3/src/auth.ts logic-core-v3/src/auth.config.ts -> auth.ts:173, auth.config.ts:24"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "Ningún flujo de auth, audit-log, impersonación ni rate limit llama a Sentry",
+   "comando": "git grep -n -E \"Sentry|captureException\" origin/main -- logic-core-v3/src/app/login logic-core-v3/src/auth.ts logic-core-v3/src/auth.config.ts logic-core-v3/src/lib/audit-log.ts logic-core-v3/src/app/forgot-password logic-core-v3/src/app/reset-password logic-core-v3/src/app/cambiar-password logic-core-v3/src/lib/actions/impersonation.ts logic-core-v3/src/lib/rate-limit -> vacío",
+   "control_positivo": "git grep -n \"Sentry.captureException\" origin/main -- logic-core-v3/src/app/error.tsx -> :27"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "No hay captureConsoleIntegration: console.error no llega a Sentry",
+   "comando": "git grep -n \"captureConsoleIntegration\" origin/main -- logic-core-v3 -> vacío",
+   "control_positivo": "git grep -n \"Sentry.init\" origin/main -- logic-core-v3/src/instrumentation.ts logic-core-v3/src/instrumentation-client.ts -> instrumentation-client.ts:4, instrumentation.ts:6 y :33"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "/login no lee ni reenvía callbackUrl",
+   "comando": "git grep -n \"callbackUrl\" origin/main -- logic-core-v3/src/app/login -> vacío",
+   "control_positivo": "git grep -n \"callbackUrl\" origin/main -- logic-core-v3/src/proxy.ts -> :80, :106, :135, :136"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "No hay página intermedia de confirmación del magic link ni pages.verifyRequest/error",
+   "comando": "git grep -n -i -E \"verifyRequest|verify-request\" origin/main -- logic-core-v3/src -> vacío",
+   "control_positivo": "git grep -n \"pages: {\" origin/main -- logic-core-v3/src/auth.ts logic-core-v3/src/auth.config.ts -> auth.ts:95, auth.config.ts:11"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "No existe 'cerrar sesión en todos los dispositivos' ni revocación al salir",
+   "comando": "git grep -n -i -E \"todas las sesiones|todos los dispositivos|signOutAll|revokeSessions|logout-all|logoutAll|revokeAll|signOutEverywhere\" origin/main -- logic-core-v3/src -> vacío",
+   "control_positivo": "git grep -n \"signOutAction\" origin/main -- logic-core-v3/src -> auth-actions.ts:5, admin-topbar.tsx:5 y :85, setter/layout.tsx:6 y :76, DashboardLayoutClient.tsx:10 y :150"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "No hay beforeSendTransaction: las transacciones de Sentry no pasan por scrubPii",
+   "comando": "git grep -n \"beforeSendTransaction\" origin/main -- logic-core-v3/src logic-core-v3/sentry.server.config.ts logic-core-v3/sentry.edge.config.ts logic-core-v3/instrumentation.ts -> solo el comentario scrub-pii.ts:115",
+   "control_positivo": "git grep -n \"beforeSend(\" origin/main -- logic-core-v3/src/instrumentation.ts logic-core-v3/src/instrumentation-client.ts logic-core-v3/sentry.server.config.ts -> instrumentation.ts:11 y :38, instrumentation-client.ts:16, sentry.server.config.ts:13"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "El portal del cliente no hace polling de red (la carrera de re-firma del proxy queda en hipótesis)",
+   "comando": "git grep -n -E \"setInterval|refreshInterval|usePolling|useInterval\" origin/main -- logic-core-v3/src/components/dashboard \"logic-core-v3/src/app/(protected)/dashboard\" -> solo timers locales",
+   "control_positivo": "El mismo comando devuelve ImpersonationTimer.tsx:35 y VaultRevealButton.tsx:33, que prueban que el grep ve esas carpetas"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "Ningún esquema de companyName tiene .max(); solo el alta y la edición del admin limitan orgName",
+   "comando": "git grep -n -E \"companyName:\\s*z\\.\" origin/main -- logic-core-v3/src | grep \"max(\" -> vacío (los 5 esquemas: schemas.ts:16, complete-onboarding.ts:10, onboarding-actions.ts:20, clients.ts:26, test-prompt/route.ts:24)",
+   "control_positivo": "git grep -n -E \"orgName: z.string\\(\\).min\\(2\\).max\\(100\\)\" origin/main -- logic-core-v3/src -> createClientOnly.ts:20, createClientWithBot.ts:24, updateClient.ts:16"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "lastDashboardVisit no tiene lectores en src (solo se escribe)",
+   "comando": "git grep -n \"lastDashboardVisit\" origin/main -- logic-core-v3/src -> solo (protected)/dashboard/layout.tsx:83 y :86",
+   "control_positivo": "git grep -n \"lastDashboardVisit\" origin/main -- logic-core-v3/prisma/schema.prisma -> :299"
+  },
+  {
+   "ciclo": "D1-c3",
+   "lote": "D1-T1",
+   "afirmacion": "getToken de next-auth no se usa (advisory GHSA-xmf8 no aplica al código)",
+   "comando": "git grep -n \"getToken\" origin/main -- logic-core-v3/src -> solo oauth2Client.getToken de googleapis en lib/integrations/google-business-profile.ts:51",
+   "control_positivo": "git grep -n \"from 'next-auth/jwt'\" origin/main -- logic-core-v3/src -> api/qa/login/route.ts:27"
   }
  ]
 }

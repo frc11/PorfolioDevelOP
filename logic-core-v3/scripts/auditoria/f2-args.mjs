@@ -57,6 +57,9 @@ const patronesPrevios = (() => {
     .slice(0, 30)
     .map((p) => `[${p.ciclo}] ${p.patron} (visto en: ${String(p.donde_aparecio).slice(0, 160)})`)
 })()
+// D6: las sentencias DML que drift.mjs no reconoce y hay que leer a mano (DEC-08)
+const dml = DOM === 'D6' ? (leer('drift.json', { sentencias_no_reconocidas: [] }).sentencias_no_reconocidas ?? []).map((s) => s.donde) : []
+const textoDml = dml.length ? `\nDRIFT (scripts/auditoria/drift.mjs sobre origin/main): 0 diferencias entre schema.prisma y las 86 migraciones (63 tablas, 62 enums, 136 indices, 80 FKs). Estas ${dml.length} sentencias DML no se pueden reproducir por script: leelas a mano y reporta si alguna pierde, mezcla o corrompe datos entre tenants:\n- ${dml.join('\n- ')}` : ''
 const textoPatrones = patronesPrevios.length ? `\nPATRONES DEFECTUOSOS QUE YA APARECIERON EN OTROS DOMINIOS (buscalos en tu lote; cada aparicion es un hallazgo con su propia evidencia, o se suma al hallazgo del mismo patron si es la misma causa raiz):\n- ${patronesPrevios.join('\n- ')}` : ''
 
 // clave «fuente:línea[#sub]» → PLAN-NNN
@@ -177,7 +180,7 @@ const salida = {
   ciclo: CICLO,
   lente: LENTE,
   foco: FOCO[DOM],
-  contexto: `${alertas.length ? `ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas, empezando el campo 'alerta' con su id entre corchetes; si se confirma, tambien va como hallazgo):\n- ${alertas.join('\n- ')}` : ''}${textoPatrones}`,
+  contexto: `${alertas.length ? `ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas, empezando el campo 'alerta' con su id entre corchetes; si se confirma, tambien va como hallazgo):\n- ${alertas.join('\n- ')}` : ''}${textoDml}${textoPatrones}`,
   lotes: info.filter((x) => lotes.includes(x.l)).map((x) => {
     const prev = previas.filter((p) => (p.archivos_citados ?? []).some((c) => x.set.has(c.replace(/:\d+(-\d+)?$/, '').replace(/^logic-core-v3\//, ''))))
     const plan = asignados.get(x.l.id).sort((a, b) => Number(b.cita) - Number(a.cita) || (ORDEN_TIPO[a.p.tipo] ?? 9) - (ORDEN_TIPO[b.p.tipo] ?? 9))
