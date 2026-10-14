@@ -9,13 +9,14 @@ import { hayBanco } from '../entorno'
 import { nocheDeLaEnergia } from '../entorno/nocheDelLogo'
 import { PEDIDOS_DEL_PASE } from '../pase/pase'
 import { NACE_EN } from '../entorno/Pulso'
-import { PULSO_VIVO, VIVO } from '../entorno/vivo'
+import { LUCES_VIVAS, PULSO_VIVO, VIVO } from '../entorno/vivo'
 import { EN_VIVO, FIN_DEL_GOLPE } from '../final/recorridoDelFinal'
 import { FLOOR_Y } from '../probeScene'
 import { energiaDelBanco, type EnergiaDelBanco } from './banco'
 import { crearAfuera, cuadro, cuadroQuieto, type Afuera } from './cuadro'
 import { armar, soltar, type Armado, type Vista } from './dibujo/armado'
 import { escucharElPuntero } from './interaccion/puntero'
+import { juntarLasLucesVivas } from './lucesVivas'
 import { TEXTO_EN_PANTALLA, cajasDelTexto } from './textoEnPantalla'
 
 /**
@@ -65,6 +66,7 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
       g.remove(...a.mallas)
       soltar(a)
       armado.current = null
+      LUCES_VIVAS.uCuantas.value = 0
       delete ventana.__energiaDelBanco
     }
   }, [compacto, logoGroupRef])
@@ -118,6 +120,8 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
     f.piso = FLOOR_Y + 0.02
     f.camara = state.camera
     cuadro(a, f)
+    // [PULIDO 26] X4 · las luces que el cristal refleja de noche (los arcos de este cuadro y unas brasas fijas).
+    juntarLasLucesVivas(u.uLuces.value, u.uCuantasLuces.value, a.brasas)
   })
   return <group ref={grupo} name="energia" />
 }

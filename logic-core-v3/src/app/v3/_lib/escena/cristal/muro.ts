@@ -19,6 +19,8 @@ export interface Celda {
   readonly giro: readonly [number, number]
   /** [PULIDO 24] V1 · su hondura: a cuántas veces de `vidrio.fondo` lee el fondo (unas más hundidas que otras: lo de atrás se desfasa). */
   readonly hondura: number
+  /** [PULIDO 26] X4 · cuánto se esmerila (0: limpia) y el giro de sus tomas (rad). */
+  readonly esmerilado: readonly [number, number]
 }
 
 type P = [number, number]
@@ -54,6 +56,9 @@ export function celdasDelMuro(): Celda[] {
   const M = CRISTAL.muro
   const { ancho, alto } = medidasDelMuro()
   const azar = azarDelCristal(M.semilla)
+  // [PULIDO 26] X4 · el esmerilado con su propio azar: las celdas, sus inclinaciones y sus honduras quedan las de antes.
+  const azarDelEsmerilado = azarDelCristal(M.semilla + 7)
+  const E = CRISTAL.esmerilado
   const cw = ancho / M.columnas
   const ch = alto / M.filas
   const semillas: P[] = []
@@ -75,7 +80,9 @@ export function celdasDelMuro(): Celda[] {
         p = recortar(p, s, b)
       }
     }
-    return { poligono: p.flat(), giro: [(azar() - 0.5) * 2 * inclina, (azar() - 0.5) * 2 * inclina], hondura: M.hondura[0] + azar() * (M.hondura[1] - M.hondura[0]) }
+    const esmerilada = azarDelEsmerilado() < E.parte
+    const cuanto = E.cuanto[0] + azarDelEsmerilado() * (E.cuanto[1] - E.cuanto[0])
+    return { poligono: p.flat(), giro: [(azar() - 0.5) * 2 * inclina, (azar() - 0.5) * 2 * inclina], hondura: M.hondura[0] + azar() * (M.hondura[1] - M.hondura[0]), esmerilado: [esmerilada ? cuanto : 0, azarDelEsmerilado() * 2 * Math.PI] }
   })
 }
 
@@ -83,6 +90,8 @@ const N = new THREE.Vector3()
 const T = new THREE.Vector3()
 const Q = new THREE.Quaternion()
 const EJE_Y = new THREE.Vector3(0, 1, 0)
+const AB = new THREE.Vector3()
+const PIE = new THREE.Vector3()
 
 /** Un punto del cilindro desenrollado (u, v) en el mundo. */
 function enElMundo(u: number, v: number, destino: THREE.Vector3): THREE.Vector3 {
@@ -90,12 +99,18 @@ function enElMundo(u: number, v: number, destino: THREE.Vector3): THREE.Vector3 
   return destino.set(Math.sin(a) * CRISTAL.muro.radio, FLOOR_Y + v, Math.cos(a) * CRISTAL.muro.radio)
 }
 
-/** El muro en un búfer: por celda, un abanico desde su centro, mirando hacia adentro; la normal (inclinada, plana por celda) y `aInterior`. */
+/**
+ * El muro en un búfer: por celda, un abanico desde su centro, mirando hacia adentro; la normal (inclinada, plana por celda) y `aInterior`.
+ * [PULIDO 26] X4 · por triángulo, `aBorde`: la dirección del centro hacia su borde (en su plano) y la distancia del centro a ese borde (u:
+ * con `aInterior`, a cuánto del borde está cada punto: el bisel); por celda, `aCelda`: su esmerilado y el giro de sus tomas.
+ */
 export function armarElMuro(celdas: readonly Celda[]): THREE.BufferGeometry {
   const posicion: number[] = []
   const normal: number[] = []
   const interior: number[] = []
   const hondura: number[] = []
+  const borde: number[] = []
+  const deLaCelda: number[] = []
   const c = new THREE.Vector3()
   const a = new THREE.Vector3()
   const b = new THREE.Vector3()
@@ -124,6 +139,14 @@ export function armarElMuro(celdas: readonly Celda[]): THREE.BufferGeometry {
       for (let q = 0; q < 3; q += 1) normal.push(N.x, N.y, N.z)
       interior.push(1, 0, 0)
       hondura.push(celda.hondura, celda.hondura, celda.hondura)
+      AB.subVectors(y, x)
+      PIE.copy(x).addScaledVector(AB, new THREE.Vector3().subVectors(c, x).dot(AB) / Math.max(1e-9, AB.lengthSq())).sub(c)
+      const hastaElBorde = PIE.length()
+      PIE.divideScalar(Math.max(1e-9, hastaElBorde))
+      for (let q = 0; q < 3; q += 1) {
+        borde.push(PIE.x, PIE.y, PIE.z, hastaElBorde)
+        deLaCelda.push(celda.esmerilado[0], celda.esmerilado[1])
+      }
     }
   }
   const g = new THREE.BufferGeometry()
@@ -131,5 +154,7 @@ export function armarElMuro(celdas: readonly Celda[]): THREE.BufferGeometry {
   g.setAttribute('normal', new THREE.Float32BufferAttribute(normal, 3))
   g.setAttribute('aInterior', new THREE.Float32BufferAttribute(interior, 1))
   g.setAttribute('aHondura', new THREE.Float32BufferAttribute(hondura, 1))
+  g.setAttribute('aBorde', new THREE.Float32BufferAttribute(borde, 4))
+  g.setAttribute('aCelda', new THREE.Float32BufferAttribute(deLaCelda, 2))
   return g
 }

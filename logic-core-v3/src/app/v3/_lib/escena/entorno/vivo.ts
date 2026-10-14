@@ -43,6 +43,16 @@ export const VIVO = {
   uAnillos: { value: Array.from({ length: ANILLOS_EN_EL_SHADER }, () => new THREE.Vector4()) },
 }
 
+/**
+ * [PULIDO 26] X4 · las luces de la energía que el cristal refleja de noche (brillos en sus biseles): las de los arcos de este cuadro y
+ * unas brasas fijas, (x, y, z, brillo) en el mundo. Las junta `energia/lucesVivas.ts` en cada cuadro.
+ */
+export const LUCES_VIVAS_MAXIMO = 8
+export const LUCES_VIVAS = {
+  uLuces: { value: Array.from({ length: LUCES_VIVAS_MAXIMO }, () => new THREE.Vector4()) },
+  uCuantas: { value: 0 },
+}
+
 /** Lo que no es uniform pero también se comparte: cuándo nació el último principal (la sombra, el piso vivo). */
 export const PULSO_VIVO = { ultimoPrincipal: -Infinity }
 

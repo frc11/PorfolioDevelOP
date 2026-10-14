@@ -12,13 +12,23 @@ export const CRISTAL = {
    */
   // [PULIDO 24] V1 · más inclinadas y con su hondura (de cuánto más cerca o más lejos se lee el fondo, en veces de `vidrio.fondo`).
   muro: { radio: 37, alto: 44, columnas: 34, filas: 6, desorden: 0.85, inclinacionGrados: 9, hondura: [0.45, 1.6], semilla: 20 },
-  /** El vidrio: el índice, a qué distancia detrás se lee el fondo (u), el F0 de Schlick y la dispersión del prisma (en los cantos, el doble). */
-  vidrio: { indice: 1.5, fondo: 14, f0: 0.04, dispersion: 0.03 },
+  /** El vidrio: el índice, a qué distancia detrás se lee el fondo (u), el F0 de Schlick y la dispersión del prisma ([PULIDO 26] X4 · sólo en el bisel). */
+  vidrio: { indice: 1.5, fondo: 14, f0: 0.04, dispersion: 0.02 },
   /**
-   * La luz: el brillo especular (día, noche) y su dureza; el reflejo del entorno (día, noche); el filo (cuánto se aclara el canto de
-   * noche y se oscurece de día: la reflexión total en el borde) y la tinta del cuerpo de día.
+   * [PULIDO 26] X4 · el cuerpo: el grosor (u: la luz entra por la cara de la celda y sale por la del cilindro, así el corrimiento crece
+   * con el ángulo), el bisel (su ancho, u, y cuánto se curva la cara en el filo, grados) y la absorción (por u de vidrio: rojo, verde,
+   * azul, un frío muy leve; en el bisel, `enElBisel` veces más denso).
    */
-  luz: { especular: [0.9, 1.6], dureza: 60, reflejo: [0.15, 0.22], filo: [0.65, 0.8], tinta: 0.06 },
+  cuerpo: { grosor: 1.8, bisel: 0.4, biselGrados: 12, absorcion: [0.022, 0.011, 0.006], enElBisel: 1.2 },
+  /** [PULIDO 26] X4 · algunas celdas esmeriladas: qué parte, cuánto (desde, hasta) y el radio del desenfoque (téxeles del fondo). */
+  esmerilado: { parte: 0.35, cuanto: [0.35, 1], texeles: 3.5 },
+  /** [PULIDO 26] X4 · de noche el bisel atrapa las luces: el haz (cuánto y su radio, u) y las de la energía (cuánto y su dureza). */
+  noche: { haz: 0.35, radioDelHaz: 2.4, luces: 1, dureza: 300 },
+  /**
+   * La luz: el brillo especular (día, noche) y su dureza; el reflejo del entorno (día, noche; [PULIDO 26] X4 · más marcado) y el lóbulo
+   * de la luz de la sala en él; el filo (cuánto se aclara el canto de noche y se oscurece de día) y la tinta del cuerpo de día.
+   */
+  luz: { especular: [0.9, 1.6], dureza: 60, reflejo: [0.3, 0.38], lobulo: 0.08, filo: [0.65, 0.8], tinta: 0.06 },
   /** [PULIDO 24] V1 · sin línea de quiebre: con `?vitral-filo=si`, un filo oscuro muy fino y tenue (cuánto oscurece, su ancho en px). */
   filo: { oscurece: 0.22, anchoPx: 0.8 },
   /** Aparece en (s). [PULIDO 23] U1 · quieto: sin giro ni respiración (sin temblor). */

@@ -126,10 +126,13 @@ function CristalPrendido(): React.JSX.Element {
     const el = THREE.MathUtils.degToRad(KEY_ELEVATION_DEG)
     u.uLuz.value.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az))
     u.uNoche.value = VIVO.uNoche.value
+    // [PULIDO 26] X4 · el haz que atrapa el vidrio de noche (prendido y con la noche en el logo).
+    u.uDeNoche.value.x = CRISTAL.noche.haz * VIVO.uHaz.value * VIVO.uNocheDelLogo.value
     // El fondo que refracta: sólo lo de atrás (el cielo, el domo, la trama, la fábrica), con la cámara de este cuadro y su margen
     // ([PULIDO 24] V1): el vidrio lo lee con esa vista.
     u.uFondo.value = dibujarElFondo(fondo, state.gl, state.scene, cam, state.scene.fog?.color ?? NEGRO)
     u.uVista.value.copy(fondo.vista)
+    u.uFondoTam.value.set(fondo.destino.width, fondo.destino.height)
   })
   return <group ref={grupo} name="cristal" />
 }
