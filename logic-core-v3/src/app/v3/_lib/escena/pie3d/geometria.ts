@@ -109,6 +109,20 @@ function deRotulo(g: THREE.BufferGeometry): THREE.BufferGeometry {
   return g
 }
 
+/**
+ * [PULIDO 27] Y1 b · la tecla de Enviar a lo ancho: en cada vértice de lo que se hunde, x = dónde está entre su borde izquierdo (0) y el
+ * derecho (1), para el relleno del hover; su cuerpo, w = −2 (el rótulo sigue en −1).
+ */
+function aLoAnchoDeLaTecla(g: THREE.BufferGeometry, tecla: Pick<CajaDelPie, 'x' | 'ancho'>): THREE.BufferGeometry {
+  const p = g.getAttribute('position')
+  const l = g.getAttribute('aLetraDelPie')
+  for (let k = 0; k < p.count; k += 1) {
+    l.setX(k, (p.getX(k) - tecla.x) / Math.max(1, tecla.ancho))
+    if (l.getW(k) === 0) l.setW(k, -2)
+  }
+  return g
+}
+
 /** Lo que llega entero: sin letra (el atributo en cero, para que todas las piezas compartan el programa). */
 function sinLetra(g: THREE.BufferGeometry): THREE.BufferGeometry {
   g.setAttribute('aLetraDelPie', new THREE.BufferAttribute(new Float32Array(g.getAttribute('position').count * 4), 4))
@@ -304,7 +318,7 @@ export function armarLaPieza(forma: FormaDeLaPieza, m: MedidaDeLaPieza, fuentes:
   if (m.tecla === null) return { fija, hundible: null, espesor: v.formulario }
   // La tecla: sale `tecla` px de la cara (y entra 4 en la placa, para que hundida no deje luz); su texto, en su cara.
   const tecla = pintar(solido(rectanguloRedondeado(new THREE.Shape(), m.tecla, m.tecla.radio > 0 ? m.tecla.radio : v.radio), v.tecla + 4, v.bisel, v.tecla), COLORES_DEL_PIE.negro)
-  return { fija, hundible: unir([sinLetra(tecla), ...relieveDe(m, fuentes, true, v.tecla).map(deRotulo)]), espesor: v.formulario }
+  return { fija, hundible: aLoAnchoDeLaTecla(unir([sinLetra(tecla), ...relieveDe(m, fuentes, true, v.tecla).map(deRotulo)]), m.tecla), espesor: v.formulario }
 }
 
 /** La caja de lo que se ve de una pieza (px, y hacia abajo, relativa a su caja): para el texto suelto, sus letras. */

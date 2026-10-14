@@ -200,6 +200,7 @@ uniform float uApareceDelPie;
 uniform float uQuietoDelPie;
 varying float vApareceDelPie;
 varying float vRotuloDelPie;
+varying vec2 vTeclaDelPie;
 float llegadaDeLaLetraDelPie( float p, float orden ) {
 	float u = clamp( ( p - orden * ${f(1 - DURA_DE_LAS_LETRAS)} ) / ${f(DURA_DE_LAS_LETRAS)}, 0.0, 1.0 );
 	return 1.0 - pow( 1.0 - u, 3.0 );
@@ -221,7 +222,9 @@ export const LETRAS_DEL_PIE_NORMAL_GLSL = /* glsl */ `
 	objectNormal = giroDelPie * objectNormal;
 	vApareceDelPie = uApareceDelPie * smoothstep( 0.0, ${f(GESTOS_DEL_PIE.atras.aparece)}, eDeLaLetraDelPie );
 	// [PULIDO 11] B4 · el rótulo de la tecla (sus letras llevan w = −1: \`geometria.ts\`).
-	vRotuloDelPie = step( aLetraDelPie.w, -0.5 );
+	vRotuloDelPie = step( aLetraDelPie.w, -0.5 ) * step( -1.5, aLetraDelPie.w );
+	// [PULIDO 27] Y1 b · la tecla entera (su cuerpo, w = −2, y su rótulo) y dónde está a lo ancho (x, de 0 a 1).
+	vTeclaDelPie = vec2( aLetraDelPie.x, step( aLetraDelPie.w, -0.5 ) );
 `
 
 /** Después de `begin_vertex`: la letra en camino, girada sobre su centro y corrida lo que le falta. */
@@ -232,7 +235,9 @@ export const LETRAS_DEL_PIE_POSICION_GLSL = /* glsl */ `
 export const DISOLVER_DEL_PIE_PARS_GLSL = /* glsl */ `
 varying float vApareceDelPie;
 varying float vRotuloDelPie;
+varying vec2 vTeclaDelPie;
 uniform float uSinRotuloDelPie;
+uniform float uBarridoDelPie;
 `
 export const DISOLVER_DEL_PIE_GLSL = /* glsl */ `
 	if ( vApareceDelPie < 0.999 && fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) ) >= vApareceDelPie ) discard;
@@ -250,8 +255,10 @@ export interface UniformesDelPie {
   readonly uSinRotuloDelPie: { value: number }
   /** [PULIDO 22] T2 a · el hover (0 a 1): la cara se aclara. */
   readonly uEncimaDelPie: { value: number }
+  /** [PULIDO 27] Y1 b · el hover de Enviar (0 a 1): cuánto avanzó el relleno de la tecla desde la izquierda. */
+  readonly uBarridoDelPie: { value: number }
 }
 
 export function uniformesDelPie(): UniformesDelPie {
-  return { uLetrasDelPie: { value: -1 }, uCuerpoDelPie: { value: 0 }, uApareceDelPie: { value: 1 }, uQuietoDelPie: { value: 0 }, uSinRotuloDelPie: { value: 0 }, uEncimaDelPie: { value: 0 } }
+  return { uLetrasDelPie: { value: -1 }, uCuerpoDelPie: { value: 0 }, uApareceDelPie: { value: 1 }, uQuietoDelPie: { value: 0 }, uSinRotuloDelPie: { value: 0 }, uEncimaDelPie: { value: 0 }, uBarridoDelPie: { value: 0 } }
 }

@@ -16,6 +16,7 @@ import { FUENTES_DEL_CTA } from '../ctaDelFinal/fuentesDelCta'
 import { cubicBezierEase } from '../bezier'
 import { colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { capaPropia, seguirLaPieza } from './domQueSigue'
+import { encimaDeLaPieza } from './encimaDelPie'
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
@@ -179,10 +180,8 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
       const pedido = cuantoSeHunde(a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido), HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada
       a.hundido = s.quieto ? pedido : pedido + (a.hundido - pedido) * Math.exp(-dt / HUNDIDA_DEL_PIE.tau)
       a.cuerpo.position.z = -a.hundido
-      // [PULIDO 22] T2 a · con el mouse encima o el foco, la cara se aclara (el hundido solo no se veía, menos acostada desde arriba).
-      const h = a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido)
-      const encima = h !== undefined && (h.encima || h.foco || h.apretada) ? 1 : 0
-      a.uniformes.uEncimaDelPie.value = s.quieto ? encima : encima + (a.uniformes.uEncimaDelPie.value - encima) * Math.exp(-dt / HUNDIDA_DEL_PIE.tau)
+      // [PULIDO 22] T2 a · con el mouse encima o el foco, la cara se aclara; [PULIDO 27] Y1 b · en el form, sólo Enviar (`encimaDelPie.ts`).
+      encimaDeLaPieza(a, s.quieto, dt, HUNDIDA_DEL_PIE.tau)
       // [PULIDO 11] B4 · con el botón ocupado, el rótulo en relieve se apaga en el mismo cuadro en que aparece la carga (sin rearmar).
       a.uniformes.uSinRotuloDelPie.value = a.boton?.getAttribute('aria-busy') === 'true' ? 1 : 0
     }

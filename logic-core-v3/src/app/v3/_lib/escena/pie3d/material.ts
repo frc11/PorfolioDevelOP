@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { SATINADO } from '../estudio'
 import { COSTADO_DE_DIA } from '../titulos3d/filo'
 import { DISOLVER_DEL_PIE_GLSL, DISOLVER_DEL_PIE_PARS_GLSL, LETRAS_DEL_PIE_NORMAL_GLSL, LETRAS_DEL_PIE_PARS_GLSL, LETRAS_DEL_PIE_POSICION_GLSL, uniformesDelPie, type UniformesDelPie } from './coreografia'
+import { RELLENO_DE_LA_TECLA_GLSL } from './encimaDelPie'
 
 /** [RETOQUE DEL ENCASTRE] 1G · el giro de la luz del pie (uno para todas las piezas: lo escribe `armadas.ts` en cada cuadro). */
 export const LUZ_DEL_PIE = { uGiroDeLaLuz: { value: new THREE.Matrix3() } }
@@ -56,7 +57,8 @@ export function materialDelPie(uniformes: UniformesDelPie = uniformesDelPie()): 
       .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n\tnormal = normalize( uGiroDeLaLuz * normal );')
       .replace('#include <lights_fragment_begin>', LUCES_DEL_PIE_GLSL)
       .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>\n${DISOLVER_DEL_PIE_GLSL}`)
-      .replace('#include <color_fragment>', `#include <color_fragment>\n\tdiffuseColor.rgb = mix( vec3( ${COSTADO_DE_DIA.toFixed(3)} ), diffuseColor.rgb, vTapaDelPie );\n\tdiffuseColor.rgb = mix( diffuseColor.rgb, vec3( ${ENCIMA_DEL_PIE.toFixed(2)} ), uEncimaDelPie * vTapaDelPie * ( 1.0 - step( 0.5, dot( diffuseColor.rgb, vec3( 0.333 ) ) ) ) );`)
+      .replace('#include <color_fragment>', `#include <color_fragment>\n\tdiffuseColor.rgb = mix( vec3( ${COSTADO_DE_DIA.toFixed(3)} ), diffuseColor.rgb, vTapaDelPie );\n\tdiffuseColor.rgb = mix( diffuseColor.rgb, vec3( ${ENCIMA_DEL_PIE.toFixed(2)} ), uEncimaDelPie * vTapaDelPie * ( 1.0 - step( 0.5, dot( diffuseColor.rgb, vec3( 0.333 ) ) ) ) );
+${RELLENO_DE_LA_TECLA_GLSL}`)
   }
   m.customProgramCacheKey = () => 'pie-de-volumen'
   return m
