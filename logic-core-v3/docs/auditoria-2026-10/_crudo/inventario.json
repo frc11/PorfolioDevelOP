@@ -1,0 +1,2656 @@
+{
+ "ref": "origin/main",
+ "paginas": [
+  {
+   "url": "/admin/alerts",
+   "archivo": "src/app/(protected)/admin/alerts/page.tsx",
+   "nodo": "h4.adm-alertas"
+  },
+  {
+   "url": "/admin/announcements",
+   "archivo": "src/app/(protected)/admin/announcements/page.tsx",
+   "nodo": "h4.adm-novedades"
+  },
+  {
+   "url": "/admin/audit-log",
+   "archivo": "src/app/(protected)/admin/audit-log/page.tsx",
+   "nodo": "h4.adm-audit"
+  },
+  {
+   "url": "/admin/chatbot/activity",
+   "archivo": "src/app/(protected)/admin/chatbot/activity/page.tsx",
+   "nodo": "h3.adm-actividad"
+  },
+  {
+   "url": "/admin/chatbot/health",
+   "archivo": "src/app/(protected)/admin/chatbot/health/page.tsx",
+   "nodo": "h3.adm-health"
+  },
+  {
+   "url": "/admin/chatbots/[botId]",
+   "archivo": "src/app/(protected)/admin/chatbots/[botId]/page.tsx",
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "url": "/admin/chatbots/new",
+   "archivo": "src/app/(protected)/admin/chatbots/new/page.tsx",
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "url": "/admin/chatbots",
+   "archivo": "src/app/(protected)/admin/chatbots/page.tsx",
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "url": "/admin/clients/[clientId]/chatbot/[[...tab]]",
+   "archivo": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "url": "/admin/clients/[clientId]/edit",
+   "archivo": "src/app/(protected)/admin/clients/[clientId]/edit/page.tsx",
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "url": "/admin/clients/[clientId]",
+   "archivo": "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "url": "/admin/clients/new",
+   "archivo": "src/app/(protected)/admin/clients/new/page.tsx",
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "url": "/admin/clients",
+   "archivo": "src/app/(protected)/admin/clients/page.tsx",
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "url": "/admin/fg2-lab",
+   "archivo": "src/app/(protected)/admin/fg2-lab/page.tsx",
+   "nodo": "h5.adm-fg2lab"
+  },
+  {
+   "url": "/admin/leados/[leadId]",
+   "archivo": "src/app/(protected)/admin/leados/[leadId]/page.tsx",
+   "nodo": "h5.adm-revision-demos"
+  },
+  {
+   "url": "/admin/leados",
+   "archivo": "src/app/(protected)/admin/leados/page.tsx",
+   "nodo": "h5.adm-revision-demos"
+  },
+  {
+   "url": "/admin/leados/setter/[setterId]",
+   "archivo": "src/app/(protected)/admin/leados/setter/[setterId]/page.tsx",
+   "nodo": "h5.adm-revision-demos"
+  },
+  {
+   "url": "/admin/leads/[leadId]",
+   "archivo": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+   "nodo": "h4.adm-leads"
+  },
+  {
+   "url": "/admin/leads",
+   "archivo": "src/app/(protected)/admin/leads/page.tsx",
+   "nodo": "h4.adm-leads"
+  },
+  {
+   "url": "/admin/messages/[orgId]",
+   "archivo": "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+   "nodo": "h4.adm-mensajes"
+  },
+  {
+   "url": "/admin/messages",
+   "archivo": "src/app/(protected)/admin/messages/page.tsx",
+   "nodo": "h4.adm-mensajes"
+  },
+  {
+   "url": "/admin",
+   "archivo": "src/app/(protected)/admin/page.tsx",
+   "nodo": "h4.adm-dashboard"
+  },
+  {
+   "url": "/admin/projects/[projectId]/hours",
+   "archivo": "src/app/(protected)/admin/projects/[projectId]/hours/page.tsx",
+   "nodo": "h4.adm-proyectos"
+  },
+  {
+   "url": "/admin/projects/[projectId]",
+   "archivo": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+   "nodo": "h4.adm-proyectos"
+  },
+  {
+   "url": "/admin/projects/[projectId]/payments",
+   "archivo": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+   "nodo": "h4.adm-proyectos"
+  },
+  {
+   "url": "/admin/projects/[projectId]/tasks",
+   "archivo": "src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx",
+   "nodo": "h4.adm-proyectos"
+  },
+  {
+   "url": "/admin/projects",
+   "archivo": "src/app/(protected)/admin/projects/page.tsx",
+   "nodo": "h4.adm-proyectos"
+  },
+  {
+   "url": "/admin/referrals",
+   "archivo": "src/app/(protected)/admin/referrals/page.tsx",
+   "nodo": "h4.adm-referidos"
+  },
+  {
+   "url": "/admin/settings/alerts",
+   "archivo": "src/app/(protected)/admin/settings/alerts/page.tsx",
+   "nodo": "h4.adm-config"
+  },
+  {
+   "url": "/admin/settings",
+   "archivo": "src/app/(protected)/admin/settings/page.tsx",
+   "nodo": "h4.adm-config"
+  },
+  {
+   "url": "/admin/settings/reports",
+   "archivo": "src/app/(protected)/admin/settings/reports/page.tsx",
+   "nodo": "h4.adm-config"
+  },
+  {
+   "url": "/admin/team",
+   "archivo": "src/app/(protected)/admin/team/page.tsx",
+   "nodo": "h4.adm-equipo"
+  },
+  {
+   "url": "/admin/tickets/[ticketId]",
+   "archivo": "src/app/(protected)/admin/tickets/[ticketId]/page.tsx",
+   "nodo": "h4.adm-tickets"
+  },
+  {
+   "url": "/admin/tickets",
+   "archivo": "src/app/(protected)/admin/tickets/page.tsx",
+   "nodo": "h4.adm-tickets"
+  },
+  {
+   "url": "/dashboard/chatbot/conversations",
+   "archivo": "src/app/(protected)/dashboard/chatbot/conversations/page.tsx",
+   "nodo": "h3.cli-chatbot"
+  },
+  {
+   "url": "/dashboard/chatbot/install",
+   "archivo": "src/app/(protected)/dashboard/chatbot/install/page.tsx",
+   "nodo": "h3.cli-chatbot"
+  },
+  {
+   "url": "/dashboard/chatbot/knowledge",
+   "archivo": "src/app/(protected)/dashboard/chatbot/knowledge/page.tsx",
+   "nodo": "h3.cli-chatbot"
+  },
+  {
+   "url": "/dashboard/chatbot/leads/[id]",
+   "archivo": "src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx",
+   "nodo": "h3.cli-chatbot"
+  },
+  {
+   "url": "/dashboard/chatbot/leads",
+   "archivo": "src/app/(protected)/dashboard/chatbot/leads/page.tsx",
+   "nodo": "h3.cli-chatbot"
+  },
+  {
+   "url": "/dashboard/chatbot",
+   "archivo": "src/app/(protected)/dashboard/chatbot/page.tsx",
+   "nodo": "h3.cli-chatbot"
+  },
+  {
+   "url": "/dashboard/chatbot/settings",
+   "archivo": "src/app/(protected)/dashboard/chatbot/settings/page.tsx",
+   "nodo": "h3.cli-chatbot"
+  },
+  {
+   "url": "/dashboard/cuenta/boveda",
+   "archivo": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+   "nodo": "h2.cli-cuenta"
+  },
+  {
+   "url": "/dashboard/cuenta/facturacion",
+   "archivo": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+   "nodo": "h2.cli-cuenta"
+  },
+  {
+   "url": "/dashboard/cuenta",
+   "archivo": "src/app/(protected)/dashboard/cuenta/page.tsx",
+   "nodo": "h2.cli-cuenta"
+  },
+  {
+   "url": "/dashboard/cuenta/perfil",
+   "archivo": "src/app/(protected)/dashboard/cuenta/perfil/page.tsx",
+   "nodo": "h2.cli-cuenta"
+  },
+  {
+   "url": "/dashboard/messages",
+   "archivo": "src/app/(protected)/dashboard/messages/page.tsx",
+   "nodo": "h2.cli-mensajes"
+  },
+  {
+   "url": "/dashboard/modules/agenda-inteligente",
+   "archivo": "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
+   "nodo": "h2.cli-agenda"
+  },
+  {
+   "url": "/dashboard/modules/email-marketing/campaigns/[id]/send",
+   "archivo": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/send/page.tsx",
+   "nodo": "h2.cli-email-mkt"
+  },
+  {
+   "url": "/dashboard/modules/email-marketing/campaigns/new",
+   "archivo": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx",
+   "nodo": "h2.cli-email-mkt"
+  },
+  {
+   "url": "/dashboard/modules/email-marketing/campaigns",
+   "archivo": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
+   "nodo": "h2.cli-email-mkt"
+  },
+  {
+   "url": "/dashboard/modules/email-marketing/contactos",
+   "archivo": "src/app/(protected)/dashboard/modules/email-marketing/contactos/page.tsx",
+   "nodo": "h2.cli-email-mkt"
+  },
+  {
+   "url": "/dashboard/modules/email-marketing",
+   "archivo": "src/app/(protected)/dashboard/modules/email-marketing/page.tsx",
+   "nodo": "h2.cli-email-mkt"
+  },
+  {
+   "url": "/dashboard/modules/motor-resenas",
+   "archivo": "src/app/(protected)/dashboard/modules/motor-resenas/page.tsx",
+   "nodo": "h2.cli-resenas"
+  },
+  {
+   "url": "/dashboard/modules/tienda-conectada",
+   "archivo": "src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx",
+   "nodo": "h2.cli-tienda"
+  },
+  {
+   "url": "/dashboard",
+   "archivo": "src/app/(protected)/dashboard/page.tsx",
+   "nodo": "h2.cli-inicio"
+  },
+  {
+   "url": "/dashboard/plan",
+   "archivo": "src/app/(protected)/dashboard/plan/page.tsx",
+   "nodo": "h2.cli-plan"
+  },
+  {
+   "url": "/dashboard/project",
+   "archivo": "src/app/(protected)/dashboard/project/page.tsx",
+   "nodo": "h2.cli-proyecto"
+  },
+  {
+   "url": "/dashboard/referidos",
+   "archivo": "src/app/(protected)/dashboard/referidos/page.tsx",
+   "nodo": "h2.cli-referidos"
+  },
+  {
+   "url": "/dashboard/resultados/analisis",
+   "archivo": "src/app/(protected)/dashboard/resultados/analisis/page.tsx",
+   "nodo": "h2.cli-resultados"
+  },
+  {
+   "url": "/dashboard/resultados",
+   "archivo": "src/app/(protected)/dashboard/resultados/page.tsx",
+   "nodo": "h2.cli-resultados"
+  },
+  {
+   "url": "/dashboard/resultados/reputacion",
+   "archivo": "src/app/(protected)/dashboard/resultados/reputacion/page.tsx",
+   "nodo": "h2.cli-resultados"
+  },
+  {
+   "url": "/dashboard/resultados/seo",
+   "archivo": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+   "nodo": "h2.cli-resultados"
+  },
+  {
+   "url": "/dashboard/resultados/trafico",
+   "archivo": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+   "nodo": "h2.cli-resultados"
+  },
+  {
+   "url": "/dashboard/services",
+   "archivo": "src/app/(protected)/dashboard/services/page.tsx",
+   "nodo": "h2.cli-servicios"
+  },
+  {
+   "url": "/dashboard/soporte/[ticketId]",
+   "archivo": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+   "nodo": "h2.cli-soporte"
+  },
+  {
+   "url": "/dashboard/soporte",
+   "archivo": "src/app/(protected)/dashboard/soporte/page.tsx",
+   "nodo": "h2.cli-soporte"
+  },
+  {
+   "url": "/setter/leads/[leadId]/manual/[paso]",
+   "archivo": "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx",
+   "nodo": "h5.set-manual"
+  },
+  {
+   "url": "/setter/leads/[leadId]/manual",
+   "archivo": "src/app/(protected)/setter/leads/[leadId]/manual/page.tsx",
+   "nodo": "h5.set-manual"
+  },
+  {
+   "url": "/setter/leads/[leadId]",
+   "archivo": "src/app/(protected)/setter/leads/[leadId]/page.tsx",
+   "nodo": "h5.set-lead"
+  },
+  {
+   "url": "/setter/nuevo/importar",
+   "archivo": "src/app/(protected)/setter/nuevo/importar/page.tsx",
+   "nodo": "h5.set-importar"
+  },
+  {
+   "url": "/setter/nuevo",
+   "archivo": "src/app/(protected)/setter/nuevo/page.tsx",
+   "nodo": "h5.set-nuevo"
+  },
+  {
+   "url": "/setter",
+   "archivo": "src/app/(protected)/setter/page.tsx",
+   "nodo": "h5.set-dia"
+  },
+  {
+   "url": "/accept-invite",
+   "archivo": "src/app/accept-invite/page.tsx",
+   "nodo": "h1.auth-invite"
+  },
+  {
+   "url": "/ai-implementations",
+   "archivo": "src/app/ai-implementations/page.tsx",
+   "nodo": "lib.sitio-publico"
+  },
+  {
+   "url": "/bienvenida",
+   "archivo": "src/app/bienvenida/page.tsx",
+   "nodo": "h2.cli-bienvenida"
+  },
+  {
+   "url": "/cambiar-password",
+   "archivo": "src/app/cambiar-password/page.tsx",
+   "nodo": "h1.auth-cambio"
+  },
+  {
+   "url": "/contact",
+   "archivo": "src/app/contact/page.tsx",
+   "nodo": "h6.vis-contacto"
+  },
+  {
+   "url": "/embed/[slug]",
+   "archivo": "src/app/embed/[slug]/page.tsx",
+   "nodo": "h3.vis-widget-cliente"
+  },
+  {
+   "url": "/forgot-password",
+   "archivo": "src/app/forgot-password/page.tsx",
+   "nodo": "h1.auth-recupero"
+  },
+  {
+   "url": "/login",
+   "archivo": "src/app/login/page.tsx",
+   "nodo": "h1.auth-login"
+  },
+  {
+   "url": "/",
+   "archivo": "src/app/page.tsx",
+   "nodo": "lib.sitio-publico"
+  },
+  {
+   "url": "/process-automation",
+   "archivo": "src/app/process-automation/page.tsx",
+   "nodo": "lib.sitio-publico"
+  },
+  {
+   "url": "/reset-password",
+   "archivo": "src/app/reset-password/page.tsx",
+   "nodo": "h1.auth-recupero"
+  },
+  {
+   "url": "/software-development",
+   "archivo": "src/app/software-development/page.tsx",
+   "nodo": "lib.sitio-publico"
+  },
+  {
+   "url": "/styleguide",
+   "archivo": "src/app/styleguide/page.tsx",
+   "nodo": "lib.sitio-publico"
+  },
+  {
+   "url": "/web-development",
+   "archivo": "src/app/web-development/page.tsx",
+   "nodo": "lib.sitio-publico"
+  }
+ ],
+ "handlers": [
+  {
+   "url": "/api/admin/alerts/trigger-detector",
+   "archivo": "src/app/api/admin/alerts/trigger-detector/route.ts",
+   "metodos": [
+    "POST"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h4.adm-config"
+  },
+  {
+   "url": "/api/admin/chatbot/demo-chat/[slug]",
+   "archivo": "src/app/api/admin/chatbot/demo-chat/[slug]/route.ts",
+   "metodos": [
+    "POST"
+   ],
+   "runtime": "nodejs",
+   "maxDuration": 30,
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "url": "/api/admin/chatbot/events",
+   "archivo": "src/app/api/admin/chatbot/events/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "url": "/api/admin/chatbot/insights/generate",
+   "archivo": "src/app/api/admin/chatbot/insights/generate/route.ts",
+   "metodos": [
+    "POST"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "url": "/api/admin/chatbot/test-prompt",
+   "archivo": "src/app/api/admin/chatbot/test-prompt/route.ts",
+   "metodos": [
+    "POST"
+   ],
+   "runtime": "nodejs",
+   "maxDuration": 30,
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "url": "/api/admin/clients/[organizationId]/send-executive-report",
+   "archivo": "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts",
+   "metodos": [
+    "POST"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "url": "/api/admin/reports/send-now",
+   "archivo": "src/app/api/admin/reports/send-now/route.ts",
+   "metodos": [
+    "POST"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h4.adm-config"
+  },
+  {
+   "url": "/api/admin/users/[userId]/resend-credentials",
+   "archivo": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+   "metodos": [
+    "POST"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "url": "/api/auth/[...nextauth]",
+   "archivo": "src/app/api/auth/[...nextauth]/route.ts",
+   "metodos": [
+    "GET",
+    "POST"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h1.auth-login"
+  },
+  {
+   "url": "/api/auth/google-business/callback",
+   "archivo": "src/app/api/auth/google-business/callback/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.gbp"
+  },
+  {
+   "url": "/api/auth/google-business/start",
+   "archivo": "src/app/api/auth/google-business/start/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.gbp"
+  },
+  {
+   "url": "/api/auth/tiendanube/callback",
+   "archivo": "src/app/api/auth/tiendanube/callback/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.tiendanube"
+  },
+  {
+   "url": "/api/auth/tiendanube/start",
+   "archivo": "src/app/api/auth/tiendanube/start/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.tiendanube"
+  },
+  {
+   "url": "/api/chatbot/[slug]/chat",
+   "archivo": "src/app/api/chatbot/[slug]/chat/route.ts",
+   "metodos": [
+    "OPTIONS",
+    "POST"
+   ],
+   "runtime": "nodejs",
+   "maxDuration": 30,
+   "nodo": "h3.vis-api-chatbot"
+  },
+  {
+   "url": "/api/chatbot/[slug]/config",
+   "archivo": "src/app/api/chatbot/[slug]/config/route.ts",
+   "metodos": [
+    "OPTIONS",
+    "GET"
+   ],
+   "runtime": "nodejs",
+   "maxDuration": null,
+   "nodo": "h3.vis-api-chatbot"
+  },
+  {
+   "url": "/api/chatbot/[slug]/health",
+   "archivo": "src/app/api/chatbot/[slug]/health/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": "nodejs",
+   "maxDuration": null,
+   "nodo": "h3.vis-api-chatbot"
+  },
+  {
+   "url": "/api/cron/alerts",
+   "archivo": "src/app/api/cron/alerts/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.cron.alerts"
+  },
+  {
+   "url": "/api/cron/cleanup-old-events",
+   "archivo": "src/app/api/cron/cleanup-old-events/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.cron.cleanup-old-events"
+  },
+  {
+   "url": "/api/cron/detect-bot-issues",
+   "archivo": "src/app/api/cron/detect-bot-issues/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.cron.detect-bot-issues"
+  },
+  {
+   "url": "/api/cron/generate-insights",
+   "archivo": "src/app/api/cron/generate-insights/route.ts",
+   "metodos": [
+    "POST"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.cron.generate-insights"
+  },
+  {
+   "url": "/api/cron/os-follow-up",
+   "archivo": "src/app/api/cron/os-follow-up/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "lib.leados"
+  },
+  {
+   "url": "/api/cron/regenerate-briefs",
+   "archivo": "src/app/api/cron/regenerate-briefs/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": 300,
+   "nodo": "int.cron.regenerate-briefs"
+  },
+  {
+   "url": "/api/cron/send-executive-reports",
+   "archivo": "src/app/api/cron/send-executive-reports/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": 300,
+   "nodo": "int.cron.send-executive-reports"
+  },
+  {
+   "url": "/api/cron/send-weekly-reports",
+   "archivo": "src/app/api/cron/send-weekly-reports/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.cron.send-weekly-reports"
+  },
+  {
+   "url": "/api/dashboard/chatbot/leads/export",
+   "archivo": "src/app/api/dashboard/chatbot/leads/export/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h3.cli-chatbot"
+  },
+  {
+   "url": "/api/dashboard/leads/recent",
+   "archivo": "src/app/api/dashboard/leads/recent/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h2.cli-inicio"
+  },
+  {
+   "url": "/api/dev/email-preview/executive-weekly",
+   "archivo": "src/app/api/dev/email-preview/executive-weekly/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.sentry"
+  },
+  {
+   "url": "/api/email/optout/[contactId]",
+   "archivo": "src/app/api/email/optout/[contactId]/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h6.vis-optout"
+  },
+  {
+   "url": "/api/email/unsubscribe-executive",
+   "archivo": "src/app/api/email/unsubscribe-executive/route.ts",
+   "metodos": [
+    "GET",
+    "POST"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "h2.cli-reportes-email"
+  },
+  {
+   "url": "/api/motor/webhook/[channelToken]",
+   "archivo": "src/app/api/motor/webhook/[channelToken]/route.ts",
+   "metodos": [
+    "POST"
+   ],
+   "runtime": "nodejs",
+   "maxDuration": 15,
+   "nodo": "h3.vis-whatsapp"
+  },
+  {
+   "url": "/api/qa/login",
+   "archivo": "src/app/api/qa/login/route.ts",
+   "metodos": [
+    "POST",
+    "GET",
+    "DELETE"
+   ],
+   "runtime": "nodejs",
+   "maxDuration": null,
+   "nodo": "h1.auth-login"
+  },
+  {
+   "url": "/api/reports/client-monthly",
+   "archivo": "src/app/api/reports/client-monthly/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": "nodejs",
+   "maxDuration": null,
+   "nodo": "h2.cli-resultados"
+  },
+  {
+   "url": "/api/reports/monthly",
+   "archivo": "src/app/api/reports/monthly/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": "nodejs",
+   "maxDuration": null,
+   "nodo": "h2.cli-resultados"
+  },
+  {
+   "url": "/api/test-sentry",
+   "archivo": "src/app/api/test-sentry/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.sentry"
+  },
+  {
+   "url": "/api/track",
+   "archivo": "src/app/api/track/route.ts",
+   "metodos": [
+    "OPTIONS",
+    "POST"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "int.tracking"
+  },
+  {
+   "url": "/api/version",
+   "archivo": "src/app/api/version/route.ts",
+   "metodos": [
+    "GET"
+   ],
+   "runtime": null,
+   "maxDuration": null,
+   "nodo": "lib.plataforma.version"
+  }
+ ],
+ "acciones": [
+  {
+   "archivo": "src/actions/admin/onboarding-tasks.ts",
+   "funciones": [
+    "updateTaskStatus",
+    "updateTaskNotes"
+   ],
+   "nodo": "lib.actions"
+  },
+  {
+   "archivo": "src/actions/agency-actions.ts",
+   "funciones": [
+    "createTaskForClientAction",
+    "createClientAssetAction"
+   ],
+   "nodo": "lib.actions"
+  },
+  {
+   "archivo": "src/actions/auth-actions.ts",
+   "funciones": [
+    "signOutAction"
+   ],
+   "nodo": "lib.actions"
+  },
+  {
+   "archivo": "src/actions/dashboard-actions.ts",
+   "funciones": [
+    "approveTaskAction",
+    "rejectTaskAction",
+    "markNotificationAsRead"
+   ],
+   "nodo": "lib.actions"
+  },
+  {
+   "archivo": "src/actions/metrics-actions.ts",
+   "funciones": [
+    "upsertBusinessMetrics"
+   ],
+   "nodo": "lib.actions"
+  },
+  {
+   "archivo": "src/actions/onboarding-actions.ts",
+   "funciones": [
+    "saveOnboardingProfile",
+    "completeOnboardingAction"
+   ],
+   "nodo": "lib.actions"
+  },
+  {
+   "archivo": "src/actions/task-approvals.ts",
+   "funciones": [
+    "requestTaskApproval",
+    "approveTask",
+    "rejectTask"
+   ],
+   "nodo": "lib.actions"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
+   "funciones": [
+    "createAnnouncementAction",
+    "deleteAnnouncementAction"
+   ],
+   "nodo": "h4.adm-novedades"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/chatbots/[botId]/actions.ts",
+   "funciones": [
+    "toggleBotActiveAction",
+    "deleteBotAction"
+   ],
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/chatbots/[botId]/transcript-action.ts",
+   "funciones": [
+    "getConversationTranscriptAction"
+   ],
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/chatbots/_actions/convert-chatbot-lead.actions.ts",
+   "funciones": [
+    "convertChatbotLeadToOsLead"
+   ],
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/chatbots/bulk-actions.ts",
+   "funciones": [
+    "bulkPauseBotsAction",
+    "bulkActivateBotsAction",
+    "exportLeadsBulkAction",
+    "bulkDeleteBotsAction"
+   ],
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/chatbots/new/actions.ts",
+   "funciones": [
+    "createBotAction"
+   ],
+   "nodo": "h3.adm-chatbots"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/clients/_actions/client.actions.ts",
+   "funciones": [
+    "startImpersonationAction",
+    "stopImpersonationAction"
+   ],
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+   "funciones": [
+    "assignPlanToOrg",
+    "setBillingOverride",
+    "clearBillingOverride"
+   ],
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/leados/_actions/revision.actions.ts",
+   "funciones": [
+    "aprobarRevision",
+    "rechazarRevision"
+   ],
+   "nodo": "h5.adm-revision-demos"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/leads/_actions/activity.actions.ts",
+   "funciones": [
+    "createActivity"
+   ],
+   "nodo": "h4.adm-leads"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/leads/_actions/demo.actions.ts",
+   "funciones": [
+    "createDemo",
+    "markDemoViewed"
+   ],
+   "nodo": "h4.adm-leads"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/leads/_actions/inbound.actions.ts",
+   "funciones": [
+    "listInboundLeads",
+    "convertInboundToLead"
+   ],
+   "nodo": "h4.adm-leads"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+   "funciones": [
+    "createLead",
+    "updateLead",
+    "updateLeadStatus",
+    "assignLeadSetter",
+    "deleteLead",
+    "listLeads",
+    "getLeadById"
+   ],
+   "nodo": "h4.adm-leads"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/leads/_actions/module-demand.actions.ts",
+   "funciones": [
+    "listModuleDemand"
+   ],
+   "nodo": "h4.adm-leads"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/leads/_actions/reunion.actions.ts",
+   "funciones": [
+    "marcarReunionRealizada",
+    "registrarResultadoReunion"
+   ],
+   "nodo": "h4.adm-leads"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+   "funciones": [
+    "listConversations",
+    "getConversation",
+    "sendMessage",
+    "markAsRead"
+   ],
+   "nodo": "h4.adm-mensajes"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+   "funciones": [],
+   "nodo": "h4.adm-proyectos"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+   "funciones": [
+    "createMaintenancePayment",
+    "markMaintenancePaid",
+    "generatePendingMaintenance"
+   ],
+   "nodo": "h4.adm-proyectos"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_actions/milestone.actions.ts",
+   "funciones": [
+    "markMilestonePaid",
+    "unmarkMilestonePaid"
+   ],
+   "nodo": "h4.adm-proyectos"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+   "funciones": [
+    "createProject",
+    "updateProject",
+    "updateProjectStatus",
+    "deleteProject",
+    "convertLeadToProject",
+    "listProjects",
+    "getProjectById"
+   ],
+   "nodo": "h4.adm-proyectos"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts",
+   "funciones": [
+    "markReferralConvertedAction",
+    "markReferralRewardedAction"
+   ],
+   "nodo": "h4.adm-referidos"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+   "funciones": [
+    "getSettings",
+    "updateSettings",
+    "updateModulePricing",
+    "listTeamMembers"
+   ],
+   "nodo": "h4.adm-config"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+   "funciones": [
+    "createTask",
+    "updateTask",
+    "deleteTask",
+    "reorderTasks",
+    "listTasksByProject",
+    "listTasksByUser"
+   ],
+   "nodo": "h4.adm-equipo"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+   "funciones": [
+    "createTimeEntry",
+    "updateTimeEntry",
+    "deleteTimeEntry",
+    "listTimeEntriesByProject",
+    "listTimeEntriesByUser"
+   ],
+   "nodo": "h4.adm-equipo"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
+   "funciones": [
+    "listTickets",
+    "getTicketById"
+   ],
+   "nodo": "h4.adm-tickets"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/_actions/business-profile.actions.ts",
+   "funciones": [
+    "saveAverageTicket"
+   ],
+   "nodo": "h2.cli-inicio"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts",
+   "funciones": [
+    "saveExecutiveReportPrefs"
+   ],
+   "nodo": "h2.cli-inicio"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/_actions/regenerate-brief.ts",
+   "funciones": [
+    "regenerateBriefAction"
+   ],
+   "nodo": "h2.cli-inicio"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/chatbot/conversations/transcript-action.ts",
+   "funciones": [
+    "getClientConversationTranscriptAction"
+   ],
+   "nodo": "h3.cli-chatbot"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/messages/_actions/mark-read.ts",
+   "funciones": [
+    "markClientMessagesRead"
+   ],
+   "nodo": "h2.cli-mensajes"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+   "funciones": [
+    "importContactsAction",
+    "createCampaignAction",
+    "sendCampaignAction"
+   ],
+   "nodo": "h2.cli-email-mkt"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+   "funciones": [],
+   "nodo": "h2.cli-resultados"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+   "funciones": [
+    "ofrecerHorarios",
+    "confirmarReunion"
+   ],
+   "nodo": "h5.set-dia"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_actions/cartera.actions.ts",
+   "funciones": [
+    "fijarLead",
+    "pausarLead",
+    "reanudarLead",
+    "guardarNota"
+   ],
+   "nodo": "h5.set-dia"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_actions/dossier.actions.ts",
+   "funciones": [
+    "guardarFicha",
+    "registrarEvaluacion",
+    "guardarBrief",
+    "iniciarConstruccion",
+    "reabrirConstruccion",
+    "guardarProgreso",
+    "guardarDraftUrl",
+    "guardarSelfCheck",
+    "enviarARevision",
+    "escalarConstruccion"
+   ],
+   "nodo": "h5.set-dia"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_actions/foco.actions.ts",
+   "funciones": [
+    "anclarFoco",
+    "soltarFoco"
+   ],
+   "nodo": "h5.set-dia"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_actions/novedades.actions.ts",
+   "funciones": [
+    "marcarNovedadesVistasAction"
+   ],
+   "nodo": "h5.set-dia"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_actions/outreach.actions.ts",
+   "funciones": [
+    "registrarOpener",
+    "registrarResultado",
+    "enviarDemoAprobada"
+   ],
+   "nodo": "h5.set-dia"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts",
+   "funciones": [
+    "importarProspectos"
+   ],
+   "nodo": "h5.set-dia"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_actions/prospecto.actions.ts",
+   "funciones": [
+    "cargarProspecto"
+   ],
+   "nodo": "h5.set-dia"
+  },
+  {
+   "archivo": "src/app/accept-invite/actions.ts",
+   "funciones": [
+    "acceptInviteAction"
+   ],
+   "nodo": "h1.auth-invite"
+  },
+  {
+   "archivo": "src/app/bienvenida/_actions/complete-onboarding.ts",
+   "funciones": [
+    "completeOnboardingAction"
+   ],
+   "nodo": "h2.cli-bienvenida"
+  },
+  {
+   "archivo": "src/app/cambiar-password/actions.ts",
+   "funciones": [
+    "cambiarPasswordAction"
+   ],
+   "nodo": "h1.auth-cambio"
+  },
+  {
+   "archivo": "src/app/forgot-password/actions.ts",
+   "funciones": [
+    "forgotPasswordAction"
+   ],
+   "nodo": "h1.auth-recupero"
+  },
+  {
+   "archivo": "src/app/login/actions.ts",
+   "funciones": [
+    "loginAction",
+    "magicLinkAction",
+    "googleSignInAction"
+   ],
+   "nodo": "h1.auth-login"
+  },
+  {
+   "archivo": "src/app/reset-password/actions.ts",
+   "funciones": [
+    "resetPasswordAction"
+   ],
+   "nodo": "h1.auth-recupero"
+  },
+  {
+   "archivo": "src/components/dashboard/modules/motor-resenas/_actions.ts",
+   "funciones": [
+    "generateDraft",
+    "replyAction"
+   ],
+   "nodo": "h2.cli-resenas"
+  },
+  {
+   "archivo": "src/lib/actions/announcements.ts",
+   "funciones": [
+    "markAnnouncementsSeenAction"
+   ],
+   "nodo": "h2.cli-shell"
+  },
+  {
+   "archivo": "src/lib/actions/clients.ts",
+   "funciones": [
+    "createClientAction",
+    "updateClientAction"
+   ],
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "archivo": "src/lib/actions/contact.ts",
+   "funciones": [
+    "contactFormAction",
+    "submitContactForm",
+    "markLeadAsRead"
+   ],
+   "nodo": "h6.vis-contacto"
+  },
+  {
+   "archivo": "src/lib/actions/gbp-connection.ts",
+   "funciones": [
+    "listAvailableLocations",
+    "setActiveLocation"
+   ],
+   "nodo": "h2.cli-resenas"
+  },
+  {
+   "archivo": "src/lib/actions/impersonation.ts",
+   "funciones": [
+    "startImpersonationAction",
+    "stopImpersonationAction"
+   ],
+   "nodo": "h1.auth-impersonacion"
+  },
+  {
+   "archivo": "src/lib/actions/invitations.ts",
+   "funciones": [
+    "inviteClientAction"
+   ],
+   "nodo": "h1.auth-invite"
+  },
+  {
+   "archivo": "src/lib/actions/leads.ts",
+   "funciones": [
+    "updateLeadStatusAction",
+    "updateLeadNotesAction"
+   ],
+   "nodo": "h4.adm-leads"
+  },
+  {
+   "archivo": "src/lib/actions/messages.ts",
+   "funciones": [
+    "sendMessageAction",
+    "markAdminMessagesAsReadAction",
+    "markMessagesAsReadAction",
+    "sendClientMessageAction"
+   ],
+   "nodo": "h2.cli-mensajes"
+  },
+  {
+   "archivo": "src/lib/actions/notifications.ts",
+   "funciones": [
+    "markNotificationReadAction",
+    "markAllNotificationsReadAction",
+    "getMyNotificationsAction"
+   ],
+   "nodo": "h2.cli-shell"
+  },
+  {
+   "archivo": "src/lib/actions/profile.ts",
+   "funciones": [
+    "updateProfileAction",
+    "updateContactAction",
+    "updateNotificationPrefsAction",
+    "requestAccountDeletionAction",
+    "updatePasswordAction"
+   ],
+   "nodo": "h2.cli-cuenta"
+  },
+  {
+   "archivo": "src/lib/actions/projects.ts",
+   "funciones": [
+    "createProjectAction",
+    "updateProjectAction",
+    "deleteProjectAction",
+    "createTaskAction",
+    "updateTaskStatusAction",
+    "sendTaskForApprovalAction",
+    "deleteTaskAction"
+   ],
+   "nodo": "h4.adm-proyectos"
+  },
+  {
+   "archivo": "src/lib/actions/referrals.ts",
+   "funciones": [
+    "generateMyReferralCodeAction"
+   ],
+   "nodo": "h2.cli-referidos"
+  },
+  {
+   "archivo": "src/lib/actions/services.ts",
+   "funciones": [
+    "createServiceAction",
+    "updateServiceStatusAction",
+    "deleteServiceAction"
+   ],
+   "nodo": "h4.adm-config"
+  },
+  {
+   "archivo": "src/lib/actions/settings.ts",
+   "funciones": [
+    "saveAgencySettingsAction",
+    "updateModulePricingAction",
+    "inviteTeamMemberAction",
+    "testN8nConnectionAction",
+    "verifyGooglePermissionsAction",
+    "testWebhookAction"
+   ],
+   "nodo": "h4.adm-config"
+  },
+  {
+   "archivo": "src/lib/actions/upsell.ts",
+   "funciones": [
+    "requestUpsellAction"
+   ],
+   "nodo": "h2.cli-servicios"
+  },
+  {
+   "archivo": "src/lib/audit-log-queries.ts",
+   "funciones": [
+    "listAuditLog",
+    "getAuditLogStats"
+   ],
+   "nodo": "lib.audit-log-queries"
+  },
+  {
+   "archivo": "src/lib/bulk-actions.ts",
+   "funciones": [
+    "bulkPauseBots",
+    "bulkExportLeads"
+   ],
+   "nodo": "lib.bulk-actions"
+  },
+  {
+   "archivo": "src/lib/tickets/actions.ts",
+   "funciones": [
+    "createTicketAction",
+    "replyToTicketAction",
+    "updateTicketStatusAction",
+    "resolveTicketClientAction"
+   ],
+   "nodo": "h2.cli-soporte"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/archiveClient.ts",
+   "funciones": [
+    "archiveClient",
+    "unarchiveClient"
+   ],
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/createClientOnly.ts",
+   "funciones": [
+    "createClientOnly"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+   "funciones": [
+    "createClientWithBot"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+   "funciones": [
+    "getClientDeletionSummary",
+    "hardDeleteClient"
+   ],
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+   "funciones": [
+    "retryCrmSync"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts",
+   "funciones": [
+    "saveCrmIntegration"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/integrations/testCrmConnection.ts",
+   "funciones": [
+    "testCrmConnection"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/manageAlerts.ts",
+   "funciones": [
+    "listAlerts",
+    "acknowledgeAlert",
+    "resolveAlert"
+   ],
+   "nodo": "h4.adm-alertas"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/preflightChecks.ts",
+   "funciones": [
+    "runPreflightChecks",
+    "canActivate"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+   "funciones": [
+    "saveBotConfig"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+   "funciones": [
+    "saveBotConfigByOrgSlug"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/saveClientSettings.ts",
+   "funciones": [
+    "saveClientSettings"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/saveKnowledgeBase.ts",
+   "funciones": [
+    "saveKnowledgeBase"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts",
+   "funciones": [
+    "saveKnowledgeBaseByOrgSlug"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/sendTestNotification.ts",
+   "funciones": [
+    "sendTestNotification"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/updateClient.ts",
+   "funciones": [
+    "updateClient"
+   ],
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/updateClientInternalNotes.ts",
+   "funciones": [
+    "updateClientInternalNotes"
+   ],
+   "nodo": "h4.adm-clientes"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+   "funciones": [
+    "updateLeadStatus"
+   ],
+   "nodo": "lib.chatbot.admin"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
+   "funciones": [
+    "updateBotAppearance"
+   ],
+   "nodo": "lib.chatbot.dashboard"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/insights/manageInsight.ts",
+   "funciones": [
+    "actOnInsight"
+   ],
+   "nodo": "lib.chatbot.insights"
+  }
+ ],
+ "modelos": [
+  {
+   "modelo": "Account",
+   "tabla": "Account",
+   "campos": 13,
+   "organizationId": false
+  },
+  {
+   "modelo": "Session",
+   "tabla": "Session",
+   "campos": 5,
+   "organizationId": false
+  },
+  {
+   "modelo": "VerificationToken",
+   "tabla": "VerificationToken",
+   "campos": 3,
+   "organizationId": false
+  },
+  {
+   "modelo": "User",
+   "tabla": "User",
+   "campos": 27,
+   "organizationId": false
+  },
+  {
+   "modelo": "PasswordResetToken",
+   "tabla": "PasswordResetToken",
+   "campos": 7,
+   "organizationId": false
+  },
+  {
+   "modelo": "Organization",
+   "tabla": "Organization",
+   "campos": 76,
+   "organizationId": false
+  },
+  {
+   "modelo": "ExecutiveBriefSnapshot",
+   "tabla": "ExecutiveBriefSnapshot",
+   "campos": 8,
+   "organizationId": true
+  },
+  {
+   "modelo": "WeeklyReportLog",
+   "tabla": "WeeklyReportLog",
+   "campos": 12,
+   "organizationId": true
+  },
+  {
+   "modelo": "OrgMember",
+   "tabla": "OrgMember",
+   "campos": 8,
+   "organizationId": true
+  },
+  {
+   "modelo": "Service",
+   "tabla": "Service",
+   "campos": 6,
+   "organizationId": true
+  },
+  {
+   "modelo": "Project",
+   "tabla": "Project",
+   "campos": 17,
+   "organizationId": true
+  },
+  {
+   "modelo": "Task",
+   "tabla": "Task",
+   "campos": 17,
+   "organizationId": false
+  },
+  {
+   "modelo": "Message",
+   "tabla": "Message",
+   "campos": 7,
+   "organizationId": true
+  },
+  {
+   "modelo": "Plan",
+   "tabla": "plan",
+   "campos": 19,
+   "organizationId": false
+  },
+  {
+   "modelo": "Subscription",
+   "tabla": "Subscription",
+   "campos": 18,
+   "organizationId": true
+  },
+  {
+   "modelo": "Invoice",
+   "tabla": "Invoice",
+   "campos": 12,
+   "organizationId": true
+  },
+  {
+   "modelo": "ContactSubmission",
+   "tabla": "ContactSubmission",
+   "campos": 12,
+   "organizationId": false
+  },
+  {
+   "modelo": "Notification",
+   "tabla": "Notification",
+   "campos": 13,
+   "organizationId": true
+  },
+  {
+   "modelo": "ClientAsset",
+   "tabla": "ClientAsset",
+   "campos": 9,
+   "organizationId": true
+  },
+  {
+   "modelo": "ClientBrandProfile",
+   "tabla": "ClientBrandProfile",
+   "campos": 9,
+   "organizationId": true
+  },
+  {
+   "modelo": "Ticket",
+   "tabla": "Ticket",
+   "campos": 12,
+   "organizationId": true
+  },
+  {
+   "modelo": "TicketMessage",
+   "tabla": "TicketMessage",
+   "campos": 8,
+   "organizationId": false
+  },
+  {
+   "modelo": "BusinessMetric",
+   "tabla": "BusinessMetric",
+   "campos": 8,
+   "organizationId": true
+  },
+  {
+   "modelo": "PageView",
+   "tabla": "PageView",
+   "campos": 6,
+   "organizationId": true
+  },
+  {
+   "modelo": "AgencySettings",
+   "tabla": "AgencySettings",
+   "campos": 16,
+   "organizationId": false
+  },
+  {
+   "modelo": "OnboardingTask",
+   "tabla": "OnboardingTask",
+   "campos": 13,
+   "organizationId": true
+  },
+  {
+   "modelo": "OsLead",
+   "tabla": "OsLead",
+   "campos": 27,
+   "organizationId": false
+  },
+  {
+   "modelo": "OsLeadSetterMeta",
+   "tabla": "OsLeadSetterMeta",
+   "campos": 10,
+   "organizationId": false
+  },
+  {
+   "modelo": "OsSetterNotice",
+   "tabla": "OsSetterNotice",
+   "campos": 10,
+   "organizationId": false
+  },
+  {
+   "modelo": "OsLeadActivity",
+   "tabla": "OsLeadActivity",
+   "campos": 9,
+   "organizationId": false
+  },
+  {
+   "modelo": "OsDemo",
+   "tabla": "OsDemo",
+   "campos": 10,
+   "organizationId": false
+  },
+  {
+   "modelo": "OsLeadDossier",
+   "tabla": "OsLeadDossier",
+   "campos": 19,
+   "organizationId": false
+  },
+  {
+   "modelo": "OsPaymentMilestone",
+   "tabla": "OsPaymentMilestone",
+   "campos": 8,
+   "organizationId": false
+  },
+  {
+   "modelo": "OsMaintenancePayment",
+   "tabla": "OsMaintenancePayment",
+   "campos": 8,
+   "organizationId": false
+  },
+  {
+   "modelo": "OsTimeEntry",
+   "tabla": "OsTimeEntry",
+   "campos": 13,
+   "organizationId": false
+  },
+  {
+   "modelo": "PremiumModule",
+   "tabla": "premium_module",
+   "campos": 15,
+   "organizationId": false
+  },
+  {
+   "modelo": "OrganizationModule",
+   "tabla": "organization_module",
+   "campos": 12,
+   "organizationId": true
+  },
+  {
+   "modelo": "EmailContact",
+   "tabla": "EmailContact",
+   "campos": 13,
+   "organizationId": true
+  },
+  {
+   "modelo": "EmailCampaign",
+   "tabla": "EmailCampaign",
+   "campos": 20,
+   "organizationId": true
+  },
+  {
+   "modelo": "BotConfig",
+   "tabla": "chatbot_bot_config",
+   "campos": 42,
+   "organizationId": true
+  },
+  {
+   "modelo": "KnowledgeBase",
+   "tabla": "chatbot_knowledge_base",
+   "campos": 12,
+   "organizationId": false
+  },
+  {
+   "modelo": "Conversation",
+   "tabla": "chatbot_conversation",
+   "campos": 22,
+   "organizationId": false
+  },
+  {
+   "modelo": "ChatMessage",
+   "tabla": "chatbot_message",
+   "campos": 9,
+   "organizationId": false
+  },
+  {
+   "modelo": "ChatbotLead",
+   "tabla": "chatbot_lead",
+   "campos": 35,
+   "organizationId": false
+  },
+  {
+   "modelo": "ChatbotInsight",
+   "tabla": "chatbot_insights",
+   "campos": 12,
+   "organizationId": false
+  },
+  {
+   "modelo": "QuotaUsage",
+   "tabla": "chatbot_quota_usage",
+   "campos": 14,
+   "organizationId": false
+  },
+  {
+   "modelo": "ChatbotEvent",
+   "tabla": "chatbot_events",
+   "campos": 10,
+   "organizationId": false
+  },
+  {
+   "modelo": "BotAlert",
+   "tabla": "chatbot_bot_alert",
+   "campos": 17,
+   "organizationId": false
+  },
+  {
+   "modelo": "AdminAuditLog",
+   "tabla": "admin_audit_log",
+   "campos": 13,
+   "organizationId": false
+  },
+  {
+   "modelo": "CrmIntegration",
+   "tabla": "crm_integration",
+   "campos": 16,
+   "organizationId": true
+  },
+  {
+   "modelo": "CrmSyncAttempt",
+   "tabla": "crm_sync_attempt",
+   "campos": 13,
+   "organizationId": true
+  },
+  {
+   "modelo": "RateLimit",
+   "tabla": "rate_limit",
+   "campos": 7,
+   "organizationId": false
+  },
+  {
+   "modelo": "PanelAnnouncement",
+   "tabla": "PanelAnnouncement",
+   "campos": 10,
+   "organizationId": true
+  },
+  {
+   "modelo": "PanelAnnouncementRead",
+   "tabla": "PanelAnnouncementRead",
+   "campos": 6,
+   "organizationId": false
+  },
+  {
+   "modelo": "ReferralCode",
+   "tabla": "ReferralCode",
+   "campos": 5,
+   "organizationId": true
+  },
+  {
+   "modelo": "Referral",
+   "tabla": "Referral",
+   "campos": 9,
+   "organizationId": false
+  },
+  {
+   "modelo": "WabaChannel",
+   "tabla": "motor_waba_channel",
+   "campos": 21,
+   "organizationId": true
+  },
+  {
+   "modelo": "ContactIdentity",
+   "tabla": "motor_contact_identity",
+   "campos": 11,
+   "organizationId": true
+  },
+  {
+   "modelo": "MotorConversation",
+   "tabla": "motor_conversation",
+   "campos": 12,
+   "organizationId": true
+  },
+  {
+   "modelo": "MotorMessage",
+   "tabla": "motor_message",
+   "campos": 14,
+   "organizationId": true
+  },
+  {
+   "modelo": "ContactIdentityTransition",
+   "tabla": "motor_contact_identity_transition",
+   "campos": 10,
+   "organizationId": true
+  },
+  {
+   "modelo": "MotorTemplate",
+   "tabla": "motor_template",
+   "campos": 13,
+   "organizationId": true
+  },
+  {
+   "modelo": "MotorAlert",
+   "tabla": "motor_alert",
+   "campos": 11,
+   "organizationId": true
+  }
+ ],
+ "enums": [
+  {
+   "enum": "Role",
+   "valores": 4
+  },
+  {
+   "enum": "OrgRole",
+   "valores": 3
+  },
+  {
+   "enum": "ServiceType",
+   "valores": 4
+  },
+  {
+   "enum": "ServiceStatus",
+   "valores": 3
+  },
+  {
+   "enum": "ProjectStatus",
+   "valores": 4
+  },
+  {
+   "enum": "TaskStatus",
+   "valores": 3
+  },
+  {
+   "enum": "ApprovalStatus",
+   "valores": 3
+  },
+  {
+   "enum": "NotificationType",
+   "valores": 4
+  },
+  {
+   "enum": "SubscriptionStatus",
+   "valores": 3
+  },
+  {
+   "enum": "InvoiceStatus",
+   "valores": 3
+  },
+  {
+   "enum": "TicketStatus",
+   "valores": 3
+  },
+  {
+   "enum": "TicketPriority",
+   "valores": 4
+  },
+  {
+   "enum": "TicketCategory",
+   "valores": 4
+  },
+  {
+   "enum": "AssetType",
+   "valores": 6
+  },
+  {
+   "enum": "OnboardingTaskCategory",
+   "valores": 5
+  },
+  {
+   "enum": "OnboardingTaskStatus",
+   "valores": 4
+  },
+  {
+   "enum": "NotificationMode",
+   "valores": 3
+  },
+  {
+   "enum": "BotAlertSeverity",
+   "valores": 4
+  },
+  {
+   "enum": "BotAlertStatus",
+   "valores": 3
+  },
+  {
+   "enum": "BotAlertType",
+   "valores": 9
+  },
+  {
+   "enum": "ChatMessageRole",
+   "valores": 3
+  },
+  {
+   "enum": "ChatbotLeadIntent",
+   "valores": 9
+  },
+  {
+   "enum": "ChatbotEventLevel",
+   "valores": 4
+  },
+  {
+   "enum": "BotIntensityLevel",
+   "valores": 3
+  },
+  {
+   "enum": "LlmProvider",
+   "valores": 3
+  },
+  {
+   "enum": "AuditActionType",
+   "valores": 26
+  },
+  {
+   "enum": "InsightStatus",
+   "valores": 4
+  },
+  {
+   "enum": "InsightCategory",
+   "valores": 5
+  },
+  {
+   "enum": "PlanKey",
+   "valores": 3
+  },
+  {
+   "enum": "SupportTier",
+   "valores": 3
+  },
+  {
+   "enum": "WeeklyReportStatus",
+   "valores": 7
+  },
+  {
+   "enum": "ExecutiveReportFrequency",
+   "valores": 3
+  },
+  {
+   "enum": "LeadStatus",
+   "valores": 8
+  },
+  {
+   "enum": "OsServiceType",
+   "valores": 4
+  },
+  {
+   "enum": "ActivityChannel",
+   "valores": 7
+  },
+  {
+   "enum": "ActivityResult",
+   "valores": 5
+  },
+  {
+   "enum": "MilestoneType",
+   "valores": 2
+  },
+  {
+   "enum": "DossierStage",
+   "valores": 8
+  },
+  {
+   "enum": "OsSetterNoticeKind",
+   "valores": 4
+  },
+  {
+   "enum": "EmailCampaignStatus",
+   "valores": 5
+  },
+  {
+   "enum": "PremiumModuleTier",
+   "valores": 3
+  },
+  {
+   "enum": "PremiumModuleStatus",
+   "valores": 3
+  },
+  {
+   "enum": "OrganizationModuleStatus",
+   "valores": 4
+  },
+  {
+   "enum": "ChatbotLeadStatus",
+   "valores": 5
+  },
+  {
+   "enum": "LeadCategory",
+   "valores": 6
+  },
+  {
+   "enum": "LeadClassification",
+   "valores": 4
+  },
+  {
+   "enum": "CrmProvider",
+   "valores": 1
+  },
+  {
+   "enum": "CrmSyncStatus",
+   "valores": 4
+  },
+  {
+   "enum": "PanelAnnouncementAudience",
+   "valores": 2
+  },
+  {
+   "enum": "ReferralStatus",
+   "valores": 3
+  },
+  {
+   "enum": "MotorChannelType",
+   "valores": 1
+  },
+  {
+   "enum": "WabaChannelStatus",
+   "valores": 3
+  },
+  {
+   "enum": "MotorConversationStatus",
+   "valores": 2
+  },
+  {
+   "enum": "MotorMessageDirection",
+   "valores": 2
+  },
+  {
+   "enum": "MotorMessageStatus",
+   "valores": 6
+  },
+  {
+   "enum": "MotorTemplateCategory",
+   "valores": 2
+  },
+  {
+   "enum": "MotorTemplateStatus",
+   "valores": 4
+  },
+  {
+   "enum": "MotorPhoneQuality",
+   "valores": 4
+  },
+  {
+   "enum": "MotorMessagingLimitTier",
+   "valores": 8
+  },
+  {
+   "enum": "MotorPhoneStatus",
+   "valores": 5
+  },
+  {
+   "enum": "MotorAlertType",
+   "valores": 2
+  },
+  {
+   "enum": "MotorAlertSeverity",
+   "valores": 4
+  }
+ ],
+ "env": [
+  {
+   "variable": "ALLOW_PROD_SEED",
+   "archivos": 1,
+   "ejemplo": "prisma/seed-guard.ts",
+   "documentada": false
+  },
+  {
+   "variable": "ANTHROPIC_API_KEY",
+   "archivos": 3,
+   "ejemplo": "src/lib/ai/results-insights.ts",
+   "documentada": true
+  },
+  {
+   "variable": "AUTH_SECRET",
+   "archivos": 4,
+   "ejemplo": "src/app/api/qa/login/route.ts",
+   "documentada": true
+  },
+  {
+   "variable": "BREVO_API_KEY",
+   "archivos": 2,
+   "ejemplo": "src/lib/email/brevo-service.ts",
+   "documentada": true
+  },
+  {
+   "variable": "BREVO_FROM_EMAIL",
+   "archivos": 2,
+   "ejemplo": "src/lib/email/brevo-service.ts",
+   "documentada": true
+  },
+  {
+   "variable": "BREVO_FROM_NAME",
+   "archivos": 1,
+   "ejemplo": "src/lib/email/brevo-service.ts",
+   "documentada": true
+  },
+  {
+   "variable": "CHATBOT_GCP_LOCATION",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/server/llm/providers/google.ts",
+   "documentada": true
+  },
+  {
+   "variable": "CHATBOT_GCP_PROJECT_ID",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/server/llm/providers/google.ts",
+   "documentada": true
+  },
+  {
+   "variable": "CHATBOT_IP_HASH_SALT",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/server/safety/ipHash.ts",
+   "documentada": true
+  },
+  {
+   "variable": "CHATBOT_LLM_PROVIDER",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/server/llm/factory.ts",
+   "documentada": true
+  },
+  {
+   "variable": "CHATBOT_STREAM_PROBE",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/server/chat/streamProbe.ts",
+   "documentada": false
+  },
+  {
+   "variable": "CI",
+   "archivos": 9,
+   "ejemplo": "next.config.ts",
+   "documentada": false
+  },
+  {
+   "variable": "CRM_SECRET_KEY",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/server/crm/encryptSecret.ts",
+   "documentada": true
+  },
+  {
+   "variable": "CRON_SECRET",
+   "archivos": 8,
+   "ejemplo": "netlify/functions/cleanup-old-events-cron.ts",
+   "documentada": true
+  },
+  {
+   "variable": "DATABASE_URL",
+   "archivos": 2,
+   "ejemplo": "prisma/seed-guard.ts",
+   "documentada": true
+  },
+  {
+   "variable": "DEVELOP_ALERTS_EMAIL",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+   "documentada": true
+  },
+  {
+   "variable": "DRY_RUN",
+   "archivos": 1,
+   "ejemplo": "prisma/seeds/backfill-vertical-pack.ts",
+   "documentada": false
+  },
+  {
+   "variable": "E2E_DIST_DIR",
+   "archivos": 1,
+   "ejemplo": "next.config.ts",
+   "documentada": false
+  },
+  {
+   "variable": "EMAIL_UNSUBSCRIBE_SECRET",
+   "archivos": 1,
+   "ejemplo": "src/lib/email/unsubscribe-token.ts",
+   "documentada": true
+  },
+  {
+   "variable": "EVALS_BASE_URL",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/evals/shared.ts",
+   "documentada": false
+  },
+  {
+   "variable": "EVALS_JUDGE_MODEL",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/evals/scoring/judge.ts",
+   "documentada": false
+  },
+  {
+   "variable": "EVALS_ORIGIN",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/evals/shared.ts",
+   "documentada": false
+  },
+  {
+   "variable": "GALERIA_PORT",
+   "archivos": 1,
+   "ejemplo": "playwright.galeria.config.ts",
+   "documentada": false
+  },
+  {
+   "variable": "GOOGLE_APPLICATION_CREDENTIALS",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/server/llm/providers/google.ts",
+   "documentada": true
+  },
+  {
+   "variable": "GOOGLE_BUSINESS_PROFILE_CLIENT_ID",
+   "archivos": 1,
+   "ejemplo": "src/lib/integrations/google-business-profile.ts",
+   "documentada": true
+  },
+  {
+   "variable": "GOOGLE_BUSINESS_PROFILE_CLIENT_SECRET",
+   "archivos": 1,
+   "ejemplo": "src/lib/integrations/google-business-profile.ts",
+   "documentada": true
+  },
+  {
+   "variable": "GOOGLE_BUSINESS_PROFILE_REDIRECT_URI",
+   "archivos": 1,
+   "ejemplo": "src/lib/integrations/google-business-profile.ts",
+   "documentada": true
+  },
+  {
+   "variable": "GOOGLE_PAGESPEED_API_KEY",
+   "archivos": 1,
+   "ejemplo": "src/lib/integrations/pagespeed.ts",
+   "documentada": true
+  },
+  {
+   "variable": "GOOGLE_SERVICE_ACCOUNT_KEY",
+   "archivos": 3,
+   "ejemplo": "src/lib/actions/settings.ts",
+   "documentada": true
+  },
+  {
+   "variable": "GOOGLE_VERTEX_CREDENTIALS_JSON",
+   "archivos": 1,
+   "ejemplo": "src/modules/chatbot/server/llm/providers/google.ts",
+   "documentada": true
+  },
+  {
+   "variable": "IMPERSONATION_SECRET",
+   "archivos": 1,
+   "ejemplo": "src/lib/impersonation.ts",
+   "documentada": true
+  },
+  {
+   "variable": "MOTOR_D360_BASE_URL",
+   "archivos": 1,
+   "ejemplo": "src/modules/motor/adapters/whatsapp/outbound/client.ts",
+   "documentada": true
+  },
+  {
+   "variable": "N8N_API_KEY",
+   "archivos": 2,
+   "ejemplo": "src/lib/actions/settings.ts",
+   "documentada": true
+  },
+  {
+   "variable": "N8N_API_URL",
+   "archivos": 2,
+   "ejemplo": "src/lib/actions/settings.ts",
+   "documentada": true
+  },
+  {
+   "variable": "N8N_CONTACT_WEBHOOK_URL",
+   "archivos": 1,
+   "ejemplo": "src/lib/n8n.ts",
+   "documentada": true
+  },
+  {
+   "variable": "NETLIFY",
+   "archivos": 1,
+   "ejemplo": "src/app/api/qa/login/route.ts",
+   "documentada": false
+  },
+  {
+   "variable": "NEXT_PUBLIC_APP_URL",
+   "archivos": 20,
+   "ejemplo": "src/actions/agency-actions.ts",
+   "documentada": true
+  },
+  {
+   "variable": "NEXT_PUBLIC_BUILD_TIME",
+   "archivos": 1,
+   "ejemplo": "src/app/api/version/route.ts",
+   "documentada": true
+  },
+  {
+   "variable": "NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL",
+   "archivos": 1,
+   "ejemplo": "src/components/sections/home/Footer.tsx",
+   "documentada": true
+  },
+  {
+   "variable": "NEXT_PUBLIC_SENTRY_DSN",
+   "archivos": 2,
+   "ejemplo": "src/instrumentation-client.ts",
+   "documentada": true
+  },
+  {
+   "variable": "NEXT_PUBLIC_WHATSAPP_NUMBER",
+   "archivos": 4,
+   "ejemplo": "src/components/sections/home/Footer.tsx",
+   "documentada": true
+  },
+  {
+   "variable": "NEXT_RUNTIME",
+   "archivos": 2,
+   "ejemplo": "instrumentation.ts",
+   "documentada": false
+  },
+  {
+   "variable": "NEXTAUTH_SECRET",
+   "archivos": 1,
+   "ejemplo": "src/lib/impersonation.ts",
+   "documentada": true
+  },
+  {
+   "variable": "NEXTAUTH_URL",
+   "archivos": 4,
+   "ejemplo": "src/app/forgot-password/actions.ts",
+   "documentada": true
+  },
+  {
+   "variable": "NODE_ENV",
+   "archivos": 19,
+   "ejemplo": "prisma/seed-guard.ts",
+   "documentada": false
+  },
+  {
+   "variable": "OAUTH_STATE_SECRET",
+   "archivos": 1,
+   "ejemplo": "src/lib/security/oauth-state.ts",
+   "documentada": false
+  },
+  {
+   "variable": "ONBOARDING_SECRET_KEY",
+   "archivos": 1,
+   "ejemplo": "src/lib/crypto/credential-cipher.ts",
+   "documentada": true
+  },
+  {
+   "variable": "QA_ALLOW_LOCALHOST",
+   "archivos": 3,
+   "ejemplo": "src/app/api/chatbot/[slug]/config/same-origin.ts",
+   "documentada": true
+  },
+  {
+   "variable": "RESEND_API_KEY",
+   "archivos": 2,
+   "ejemplo": "src/lib/email.ts",
+   "documentada": true
+  },
+  {
+   "variable": "SENTRY_DSN",
+   "archivos": 2,
+   "ejemplo": "sentry.edge.config.ts",
+   "documentada": false
+  },
+  {
+   "variable": "SETTER_EXTERNAL_SERVER",
+   "archivos": 4,
+   "ejemplo": "playwright.galeria.config.ts",
+   "documentada": false
+  },
+  {
+   "variable": "SETTER_PORT",
+   "archivos": 4,
+   "ejemplo": "playwright.galeria.config.ts",
+   "documentada": false
+  },
+  {
+   "variable": "TELEGRAM_BOT_TOKEN",
+   "archivos": 1,
+   "ejemplo": "src/lib/notifications/telegram.ts",
+   "documentada": true
+  },
+  {
+   "variable": "TELEGRAM_CHAT_ID",
+   "archivos": 1,
+   "ejemplo": "src/lib/notifications/telegram.ts",
+   "documentada": true
+  },
+  {
+   "variable": "TIENDANUBE_CLIENT_ID",
+   "archivos": 1,
+   "ejemplo": "src/lib/integrations/tiendanube.ts",
+   "documentada": true
+  },
+  {
+   "variable": "TIENDANUBE_CLIENT_SECRET",
+   "archivos": 1,
+   "ejemplo": "src/lib/integrations/tiendanube.ts",
+   "documentada": true
+  },
+  {
+   "variable": "URL",
+   "archivos": 3,
+   "ejemplo": "netlify/functions/cleanup-old-events-cron.ts",
+   "documentada": false
+  },
+  {
+   "variable": "VERCEL_ENV",
+   "archivos": 1,
+   "ejemplo": "src/app/api/qa/login/route.ts",
+   "documentada": false
+  }
+ ],
+ "env_solo_documentadas": [
+  "CHATBOT_GOOGLE_API_KEY",
+  "DIRECT_DATABASE_URL",
+  "MOTOR_CHANNEL_SECRET_KEY",
+  "RESEND_FROM_EMAIL",
+  "SEED_ADMIN_PASSWORD",
+  "SEED_CLIENT_B_PASSWORD",
+  "SEED_CLIENT_PASSWORD",
+  "SEED_SETTER_PASSWORD",
+  "SENTRY_AUTH_TOKEN",
+  "SENTRY_ORG",
+  "SENTRY_PROJECT"
+ ],
+ "scripts_package": {
+  "total": 115,
+  "familias": {
+   "check-env": 1,
+   "dev": 2,
+   "build": 1,
+   "start": 4,
+   "lint": 1,
+   "check": 58,
+   "postinstall": 1,
+   "seed": 4,
+   "migrate": 1,
+   "test": 35,
+   "evals": 4,
+   "galeria": 3
+  }
+ },
+ "tests": {
+  "total": 185,
+  "por_carpeta": {
+   "src/app/(protected)": 3,
+   "src/app/api": 3,
+   "src/lib/ai": 1,
+   "src/lib/announcements": 1,
+   "src/lib/client-notifications": 1,
+   "src/lib/cron": 1,
+   "src/lib/crypto": 1,
+   "src/lib/dashboard": 1,
+   "src/lib/dates-ar.invariant.ts": 1,
+   "src/lib/integrations": 1,
+   "src/lib/leados": 32,
+   "src/lib/mask-secret.invariant.ts": 1,
+   "src/lib/modules": 2,
+   "src/lib/plan": 1,
+   "src/lib/recommendations": 1,
+   "src/lib/referrals": 1,
+   "src/lib/reports": 3,
+   "src/lib/security": 1,
+   "src/lib/upsell": 1,
+   "src/modules/chatbot": 31,
+   "tests/e2e": 35,
+   "tests/full-run.log": 1,
+   "tests/galeria": 1,
+   "tests/helpers-probe": 2,
+   "tests/helpers": 6,
+   "tests/integration": 12,
+   "tests/leados": 7,
+   "tests/perf-budget.json": 1,
+   "tests/qa-persona": 1,
+   "tests/qa-walkthrough": 1,
+   "tests/setter": 30
+  },
+  "invariantes_en_src": 85
+ },
+ "crons": {
+  "netlify": [
+   {
+    "funcion": "generate-insights-cron",
+    "schedule": "0 9 * * *",
+    "archivo_existe": true
+   },
+   {
+    "funcion": "send-weekly-reports-cron",
+    "schedule": "0 12 * * MON",
+    "archivo_existe": true
+   },
+   {
+    "funcion": "cleanup-old-events-cron",
+    "schedule": "0 6 * * *",
+    "archivo_existe": true
+   }
+  ],
+  "vercel": [
+   {
+    "path": "/api/cron/os-follow-up",
+    "schedule": "0 12 * * *"
+   },
+   {
+    "path": "/api/cron/regenerate-briefs",
+    "schedule": "0 10 * * 1"
+   },
+   {
+    "path": "/api/cron/send-executive-reports",
+    "schedule": "0 12 * * 1"
+   }
+  ],
+  "github_actions": [
+   {
+    "workflow": "db-backup.yml",
+    "schedule": "0 6 * * *"
+   }
+  ],
+  "rutas_cron": [
+   "/api/cron/alerts",
+   "/api/cron/cleanup-old-events",
+   "/api/cron/detect-bot-issues",
+   "/api/cron/generate-insights",
+   "/api/cron/os-follow-up",
+   "/api/cron/regenerate-briefs",
+   "/api/cron/send-executive-reports",
+   "/api/cron/send-weekly-reports"
+  ]
+ },
+ "dependencias": {
+  "dependencies": 48,
+  "devDependencies": 19
+ }
+}

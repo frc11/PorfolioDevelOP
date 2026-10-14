@@ -1,0 +1,357 @@
+{
+ "ref": "origin/main",
+ "comando": "git grep -n -I -E '\b(TODO|FIXME|HACK|XXX)\b' origin/main -- logic-core-v3/src logic-core-v3/prisma/*.ts logic-core-v3/prisma/seeds logic-core-v3/netlify ':!*.md'",
+ "total": 70,
+ "items": [
+  {
+   "archivo": "prisma/seed-agency-os.ts",
+   "linea": 1163,
+   "texto": "status  TaskStatus.TODO,"
+  },
+  {
+   "archivo": "prisma/seed-agency-os.ts",
+   "linea": 1260,
+   "texto": "status  TaskStatus.TODO,"
+  },
+  {
+   "archivo": "prisma/seed-agency-os.ts",
+   "linea": 1343,
+   "texto": "status  TaskStatus.TODO,"
+  },
+  {
+   "archivo": "prisma/seed.ts",
+   "linea": 332,
+   "texto": "status  TaskStatus.TODO,"
+  },
+  {
+   "archivo": "prisma/seed.ts",
+   "linea": 339,
+   "texto": "status  TaskStatus.TODO,"
+  },
+  {
+   "archivo": "prisma/seed.ts",
+   "linea": 346,
+   "texto": "status  TaskStatus.TODO,"
+  },
+  {
+   "archivo": "src/actions/agency-actions.ts",
+   "linea": 44,
+   "texto": "status  'TODO',"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/_components/AdminErrorBoundary.tsx",
+   "linea": 15,
+   "texto": "// digna sin error.message crudo + TODO Sentry) vive en el base compartido."
+  },
+  {
+   "archivo": "src/app/(protected)/admin/chatbots/[botId]/actions.ts",
+   "linea": 101,
+   "texto": "// Borra un bot y TODO su subárbol de datos. Todas las relaciones hijas de"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx",
+   "linea": 159,
+   "texto": "hint=\"Llena TODO el formulario (estilo, secciones, CTA, diferencial, WhatsApp incluidos) para correr el 5-vs-5 sin tipear. Ver docs/experimentos/fg2-brief-experimento.md."
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+   "linea": 171,
+   "texto": "const todoTasks = project.tasks.filter((task) => task.status === TaskStatus.TODO).length"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_components/task-form.tsx",
+   "linea": 249,
+   "texto": "<option value=\"TODO\">Pendiente</option>"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+   "linea": 74,
+   "texto": "{ status  'TODO', label  'Pendiente' },"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+   "linea": 81,
+   "texto": "case 'TODO' "
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+   "linea": 92,
+   "texto": "case 'TODO' "
+  },
+  {
+   "archivo": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+   "linea": 173,
+   "texto": "status  parsed.status ?? TaskStatus.TODO,"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/team/_components/member-workload.tsx",
+   "linea": 54,
+   "texto": "case 'TODO' "
+  },
+  {
+   "archivo": "src/app/(protected)/admin/team/_components/member-workload.tsx",
+   "linea": 65,
+   "texto": "case 'TODO' "
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/project/page.tsx",
+   "linea": 40,
+   "texto": "status  'TODO' | 'IN_PROGRESS' | 'DONE'"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/project/page.tsx",
+   "linea": 211,
+   "texto": "todo        tasks.filter((t) => t.status === 'TODO').map(serializeTask),"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+   "linea": 234,
+   "texto": "FIXME(data-truth)  los `trend` son deltas hardcodeados (no salen de Search"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+   "linea": 113,
+   "texto": "{/* FIXME(data-truth)  \"ACTIVAR AHORA\" no tiene handler (CTA muerto). Se"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts",
+   "linea": 127,
+   "texto": "* Devuelve el conjunto de nombres (normalizados) que existen EN TODO el sistema,"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_components/cartera-view.tsx",
+   "linea": 25,
+   "texto": "* trabajar y 35 que no— es TODO LO DEMÁS, y era una lista plana donde un lead"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_components/cola-del-dia.tsx",
+   "linea": 43,
+   "texto": "{/* Mismo acento que la cartera  cyan = hacé esto ahora. Acá TODO es"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_components/novedades-panel.tsx",
+   "linea": 152,
+   "texto": "{/* \"Marcar vistas\" marca TODO lo sin leer → se ata a `totalSinLeer`, no a"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/leads/[leadId]/_components/guia-retrabajo.tsx",
+   "linea": 37,
+   "texto": "* F2 — Acompaña TODO el retrabajo (aterrizaje, construcción, borrador y chequeo"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.tsx",
+   "linea": 56,
+   "texto": "* Memoria del lead  la cronología de TODO lo que pasó — contactos comerciales y"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/leads/[leadId]/manual/_components/pantalla-manual.tsx",
+   "linea": 137,
+   "texto": "// P18 — el proveedor envuelve TODO el contenido de la pantalla  la barra"
+  },
+  {
+   "archivo": "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts",
+   "linea": 36,
+   "texto": "/** Último rechazo de Franco — la nota al frente de TODO el retrabajo (F2). */"
+  },
+  {
+   "archivo": "src/app/ai-implementations/page.tsx",
+   "linea": 217,
+   "texto": "{/* TODO S16  Reintegrar chatbot nuevo en esta sección. "
+  },
+  {
+   "archivo": "src/app/bienvenida/_actions/complete-onboarding.ts",
+   "linea": 39,
+   "texto": "// TODO  Agregar contactEmail a Organization en próximos sprints"
+  },
+  {
+   "archivo": "src/app/bienvenida/_actions/complete-onboarding.ts",
+   "linea": 40,
+   "texto": "// TODO  Agregar rubro a Organization en próximos sprints"
+  },
+  {
+   "archivo": "src/app/globals.css",
+   "linea": 205,
+   "texto": "(42 < 65) y el orden renderizado (≈612px < ≈732px) coinciden a TODO"
+  },
+  {
+   "archivo": "src/components/dashboard/ProjectTaskTabs.tsx",
+   "linea": 13,
+   "texto": "type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE'"
+  },
+  {
+   "archivo": "src/components/dashboard/ProjectTaskTabs.tsx",
+   "linea": 52,
+   "texto": "{ value  'TODO',        label  'Pendientes' },"
+  },
+  {
+   "archivo": "src/components/dashboard/ProjectTaskTabs.tsx",
+   "linea": 182,
+   "texto": "TODO  todo,"
+  },
+  {
+   "archivo": "src/components/dashboard/ProjectTaskTabs.tsx",
+   "linea": 192,
+   "texto": "(['DONE', 'IN_PROGRESS', 'TODO'] as TaskStatus[]).find((status) =>"
+  },
+  {
+   "archivo": "src/components/dashboard/results/GBPMetricsCard.tsx",
+   "linea": 39,
+   "texto": "// FIXME(data-truth)  performance.* viene stubbeado a 0 desde getGBPMetrics"
+  },
+  {
+   "archivo": "src/components/ia/VaultIA.tsx",
+   "linea": 331,
+   "texto": "¿SEGUÍS MANEJANDO TODO A MANO?"
+  },
+  {
+   "archivo": "src/components/sections/home/OurServices.tsx",
+   "linea": 6530,
+   "texto": "// en TODO instante (nunca 6 → sin overflow), 5 oleadas con destinos distintos por oleada (sin"
+  },
+  {
+   "archivo": "src/components/sections/todo-incluido/TodoIncluido.tsx",
+   "linea": 289,
+   "texto": "TODO ESTO VIENE INCLUIDO EN TU PLAN"
+  },
+  {
+   "archivo": "src/lib/actions/projects.ts",
+   "linea": 138,
+   "texto": "const status  TaskStatus = isTaskStatus(statusRaw) ? statusRaw   'TODO'"
+  },
+  {
+   "archivo": "src/lib/health-score.ts",
+   "linea": 396,
+   "texto": "status  { in  ['TODO', 'IN_PROGRESS'] },"
+  },
+  {
+   "archivo": "src/lib/leados/cola.ts",
+   "linea": 8,
+   "texto": "* por la cartera, que es la lista de TODO (84) y no discrimina trabajo de espera."
+  },
+  {
+   "archivo": "src/lib/leados/contracts.ts",
+   "linea": 68,
+   "texto": "* TODO opcional, y el grupo entero también  una ficha guardada ANTES de P5-A"
+  },
+  {
+   "archivo": "src/lib/leados/enlaces-manual.invariant.ts",
+   "linea": 14,
+   "texto": "*   · `siempre`     — el destino está en la posición derivada en TODO estado"
+  },
+  {
+   "archivo": "src/lib/leados/foco.invariant.ts",
+   "linea": 17,
+   "texto": "*   - \"TODO EN ESPERA\" (semilla de 2.1b)  cola vacía → foco null (la pantalla"
+  },
+  {
+   "archivo": "src/lib/leados/gate-envio-demo.invariant.ts",
+   "linea": 74,
+   "texto": "// Para APROBADA + finalUrl, el envío sigue 1 1 al gate del brief en TODO status."
+  },
+  {
+   "archivo": "src/lib/leados/herramientas.ts",
+   "linea": 48,
+   "texto": "* El registro. Las URLs marcadas `null` (// TODO  URL) esperan el link real de"
+  },
+  {
+   "archivo": "src/lib/leados/herramientas.ts",
+   "linea": 63,
+   "texto": "url  null, // TODO  URL — chat de evaluación en Sonnet (pedir a Franco)"
+  },
+  {
+   "archivo": "src/lib/leados/herramientas.ts",
+   "linea": 78,
+   "texto": "url  null, // TODO  URL — Gem privado de diseño/brief (pedir a Franco)"
+  },
+  {
+   "archivo": "src/lib/leados/herramientas.ts",
+   "linea": 90,
+   "texto": "url  null, // TODO  URL — acceso a Claude Design que usa el equipo (pedir a Franco)"
+  },
+  {
+   "archivo": "src/lib/leados/herramientas.ts",
+   "linea": 117,
+   "texto": "url  null, // TODO  URL — Gem privado de outreach (pedir a Franco)"
+  },
+  {
+   "archivo": "src/lib/leados/mis-numeros.invariant.ts",
+   "linea": 82,
+   "texto": "// 2b. La MISMA cartera, leída como B, atribuye TODO a B — la atribución sigue a"
+  },
+  {
+   "archivo": "src/lib/leados/novedades.ts",
+   "linea": 248,
+   "texto": "// Sin `estados` no hay contra qué contrastar  TODO queda vigente (el"
+  },
+  {
+   "archivo": "src/lib/leados/particion.invariant.ts",
+   "linea": 161,
+   "texto": "// forma más cara de perder el día. Se barre TODO el eje de un lead sin dossier."
+  },
+  {
+   "archivo": "src/lib/leados/pipeline.ts",
+   "linea": 131,
+   "texto": "* Las demos atascadas de TODO el input (incluye RECHAZADA  una demo que Franco"
+  },
+  {
+   "archivo": "src/lib/leados/progreso-isolation.invariant.ts",
+   "linea": 150,
+   "texto": "// queda con cero. Es TODO-O-NADA — no se pierde la fase renombrada, se pierde el"
+  },
+  {
+   "archivo": "src/lib/leados/self-check-gate.invariant.ts",
+   "linea": 12,
+   "texto": "*     selfCheckAprobado(sc)  ⇔  TODO hard-block vigente aparece en sc.itemsDuros con ok true"
+  },
+  {
+   "archivo": "src/lib/modules/motor-resenas-view.ts",
+   "linea": 31,
+   "texto": "* 1. Sin módulo → `locked` gana a TODO  el gating comercial manda sobre el técnico"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/chat/StreamingMarkdown.tsx",
+   "linea": 73,
+   "texto": "// refs para no reiniciarse en cada chunk; corre hasta revelar TODO el buffer"
+  },
+  {
+   "archivo": "src/modules/chatbot/evals/cleanup.ts",
+   "linea": 4,
+   "texto": "* Borra TODO lo que tenga `sessionId` con prefijo `evals-` (marca de cleanup) "
+  },
+  {
+   "archivo": "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
+   "linea": 4,
+   "texto": "* Org-scoping  TODO se resuelve org → botConfig (relación 1 1) y de ahí por"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/chat/__tests__/stream-watchdog.invariant.ts",
+   "linea": 765,
+   "texto": "// ── Cero unhandled rejections en TODO el archivo (9-25 incluidos) ───────────"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/chat/persistTurn.ts",
+   "linea": 215,
+   "texto": "// Por eso TODO await que toque la DB va con deadline, y el conjunto con un"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/chat/reconcile.ts",
+   "linea": 451,
+   "texto": "* inequívocamente el final de TODO el run, no de un step intermedio. Si no hubo"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/chat/reconcile.ts",
+   "linea": 540,
+   "texto": "* TODO(INFRA.3)  parámetros del retry/backoff CONTRA LA CONEXIÓN (lib/prisma.ts"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/scoring/dqFilter.ts",
+   "linea": 9,
+   "texto": "* Listados admin de auditoría / soporte / debugging deben mostrar TODO,"
+  },
+  {
+   "archivo": "src/modules/motor/adapters/whatsapp/inbound/resolve-channel.ts",
+   "linea": 8,
+   "texto": "* TODO lo que sigue a esta llamada corre scoped con forOrg(organizationId)."
+  }
+ ]
+}

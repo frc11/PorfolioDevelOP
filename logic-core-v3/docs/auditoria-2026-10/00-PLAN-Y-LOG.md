@@ -6,28 +6,28 @@
 
 | Campo | Valor |
 |---|---|
-| Fase | **F1 — en curso** (la ENMIENDA-01 es el `Aceptar`) |
+| Fase | **F2 — D1** (F1 cerrada en C01) |
 | Base auditada | `origin/main` @ `57c421bc` (último commit 2026-09-06; refs traídas el 2026-10-13 16:23) |
-| Último ciclo registrado | C00b · enmienda 01 |
-| Próximo paso | F1.0 — revisión de `_insumos/` y memoria libre; después F1.1 `tsc` (§7.1) |
-| Cobertura profunda | 0 / 1.298 archivos (0 %) · superficial hecho 0 / 691 |
-| Hallazgos escritos | 0 · pendientes de registrar: 4 credenciales de prueba como BAJA (§11 P1) y el vencimiento de Vertex (DEC-43) |
+| Último ciclo registrado | C01 · F1 |
+| Próximo paso | D1-c1: revisar `_insumos/` y memoria → `node scripts/auditoria/f2-args.mjs D1 D1-c1 <args>` → `build-f2.mjs` → workflow de lectores (1 lote: 32 archivos, 21 previas, 21 PLAN, 3 alertas) → §7.2 |
+| Cobertura profunda | 0 / 1.298 archivos (0 %) · 31 `PODA-ALTA` fuera de lotes · superficial hecho 404 / 691 (DOC 266, PUB 138) |
+| Hallazgos escritos | 4 (SEC-001…SEC-004, BAJA) · VH 4 · POD 281 · PLAN 1.351 «por cruzar» · pendiente: el vencimiento de Vertex (DEC-43, en D7) |
 | Push | al cierre de cada fase, con `[skip ci]` (DEC-04) |
 
 ### Estado por dominio
 
-| Dominio | Ciclo (máx.) | Profundo leído / total | Superficial hecho / total | Nuevos C / A / M / B | Lentes usadas | Estado |
+| Dominio | Ciclo (máx.) | Profundo leído / total (PODA-ALTA fuera de lotes) | Superficial hecho / total | Nuevos C / A / M / B | Lentes usadas | Estado |
 |---|---|---|---|---|---|---|
-| D1 Auth | — (3) | 0 / 33 | 0 / 1 | — | — | abierto |
-| D2 Dashboard | — (3) | 0 / 219 | 0 / 13 | — | — | abierto |
-| D3 Admin | — (2) | 0 / 221 | 0 / 0 | — | — | abierto |
-| D4 Setter | — (2) | 0 / 171 | 0 / 34 | — | — | abierto |
-| D5 Chatbot e IA | — (3) | 0 / 372 | 0 / 52 | — | — | abierto |
-| D6 Datos | — (2) | 0 / 104 | 0 / 7 | — | — | abierto |
-| D7 Integraciones | — (2) | 0 / 59 | 0 / 4 | — | — | abierto |
-| D8 Plataforma | — (2) | 0 / 20 | 0 / 7 | — | — | abierto |
-| D9 Transversal | — (2) | 0 / 99 | 0 / 169 | — | — | abierto |
-| PUB / DOC | — | — | 0 / 138 · 0 / 266 | — | — | pendiente F1 |
+| D1 Auth | — (3) | 0 / 33 (1) | 0 / 1 | — | — | abierto · 1 lote · 21 PLAN |
+| D2 Dashboard | — (3) | 0 / 219 (8) | 0 / 13 | — | — | abierto · 5 lotes · 151 PLAN |
+| D3 Admin | — (2) | 0 / 221 (6) | 0 / 0 | — | — | abierto · 6 lotes · 102 PLAN |
+| D4 Setter | — (2) | 0 / 171 (0) | 0 / 34 | — | — | abierto · 6 lotes · 361 PLAN |
+| D5 Chatbot e IA | — (3) | 0 / 372 (1) | 0 / 52 | — | — | abierto · 9 lotes · 368 PLAN |
+| D6 Datos | — (2) | 0 / 104 (0) | 0 / 7 | — | — | abierto · 2 lotes · 72 PLAN |
+| D7 Integraciones | — (2) | 0 / 59 (0) | 0 / 4 | — | — | abierto · 1 lote · 53 PLAN |
+| D8 Plataforma | — (2) | 0 / 20 (0) | 0 / 7 | — | — | abierto · 1 lote · 94 PLAN (14 al ciclo 2) |
+| D9 Transversal | — (2) | 0 / 99 (15) | 0 / 169 | — | — | abierto · 2 lotes · 72 PLAN |
+| PUB / DOC | — | — | 138 / 138 · 266 / 266 | — | — | superficial hecho (F1.10); 57 PLAN del sitio público van a F3 |
 
 ---
 
@@ -275,7 +275,24 @@ F6.1: un agente nuevo recibe solo la lista de archivos de D1, D2 y D5 (sacada co
 | **Total** | **≈ 80–110** | **≈ 21–29 h** |
 
 ### 8.2 Re-estimación al cierre de F1
-Pendiente (con la poda real).
+Con la poda real (DEC-46), 2026-10-13 22:40:
+
+- **Lectura profunda**: 1.267 archivos / 157.990 LOC en **33 lotes** (D1 1 · D2 5 · D3 6 · D4 6 · D5 9 · D6 2 · D7 1 · D8 1 · D9 2). La poda ALTA sacó 31 archivos y 4.648 LOC (−2,9 %) y un lote de D9. knip no corrió (memoria): la poda MEDIA y BAJA no tiene esa señal y puede sacar más en F2.
+- **Carga nueva por lector**: 1.294 ítems `PLAN` a cruzar (≈ 39 por lote; tope 80, solo D8-L1 deja 14 para el ciclo 2; los 57 del sitio público van a F3), 290 previas a re-verificar y las alertas del dominio (`_crudo/alertas-planeado.json`). Cada lector cuesta ≈ 20–30 % más que lo estimado en §8.1.
+- **Gastado en F1**: un workflow de 10 agentes (3 de previas, 7 de extracción; 3,9 M tokens de subagentes; 93 min de reloj) y ≈ 2 h de reloj en total desde el `Aceptar` (20:43 → 22:40), dentro de lo estimado (4–6 agentes, 2–3 h).
+- **Restricción**: la sesión paralela de `rediseno/home` tiene la memoria libre por debajo de 4 GB buena parte del tiempo (DEC-42); los workflows de F2 corren de a 3 agentes y pueden esperar.
+
+| Fase | Agentes | Tiempo |
+|---|---|---|
+| F2 ciclo 1 (33 lotes) + verificadores solo de CRÍTICA/ALTA | 33 + 10–20 | 7–10 h |
+| F2 ciclos 2–3 (D1/D2/D5: 2 ciclos más; resto: 1) + verificadores | 20 + 5–10 | 3–5 h |
+| `11-CONGELADOS` | 1–2 | 1 h |
+| F3 | 3–4 | 1,5–2 h |
+| F4 | 1–2 | 1 h |
+| F5 | 2–3 | 2–3 h |
+| F6 | 4–6 | 3–4 h |
+| F7 | 0–1 | 1 h |
+| **Total restante** | **≈ 75–100** | **≈ 20–27 h** |
 
 ## 9. Riesgos de la corrida y mitigación
 
@@ -356,7 +373,18 @@ Lo que se había preguntado, para referencia:
 
 ## 12. Baseline (F1)
 
-Pendiente (§7.1). Errores conocidos a ignorar: `@googleapis/webmasters` faltante · `react-hooks/set-state-in-effect` en `PreloaderContext` · `searchconsole.ts:119`.
+Corrido el 2026-10-13, uno por vez, desde `logic-core-v3` (detalle en `01-INVENTARIO.md` §9). Errores conocidos a ignorar: `@googleapis/webmasters` faltante (no apareció) · `react-hooks/set-state-in-effect` en `PreloaderContext` (aparece, junto con otros 30 archivos) · `searchconsole.ts:119` (no apareció).
+
+| Paso | Resultado | Crudo (commiteado salvo que diga local) |
+|---|---|---|
+| F1.1 `tsc --noEmit --incremental false` | **0 errores**, exit 0, 33 s; no se creó `tsconfig.tsbuildinfo` | `_crudo/tsc.txt` (vacío) |
+| F1.2 eslint | 1.604 archivos · 116 con problemas · **102 errores / 111 warnings** (13 `no-explicit-any`); exit 1 | `_crudo/eslint.json` (sin `source`), `_crudo/eslint-resumen.md`; el raw se borró |
+| F1.3 `npm outdated` | 48 desactualizados, 20 a una major; exit 1 | `_crudo/npm-outdated.json` |
+| F1.4 `npm ls --depth=0` | 48 + 19 directas; exit 0 | `_crudo/npm-ls.txt` |
+| F1.5 `npm audit` | **30 vulnerabilidades: 4 críticas** (`next`, `next-auth`, `@auth/core`, `@auth/prisma-adapter`), 18 altas, 8 moderadas; exit 1 | `_crudo/npm-audit.json` |
+| F1.6 `prisma migrate status` | **no disponible**: `P1012 Environment variable not found: DATABASE_URL` (Prisma CLI 6.19.3) → `VH-004` | `_crudo/prisma-migrate-status.txt` |
+| F1.7 depcruise | 1.402 módulos · 22 ciclos · 63 huérfanos candidatos; 7 s | `_crudo/depcruise.json` (2,5 MB → **local**), `_crudo/depcruise-resumen.json` |
+| F1.7b knip | **no disponible por memoria `[TIMEBOX]`** (DEC-42): 3,89 GB (20:46), 3,998 GB (20:57), 1,88 GB (21:08) libres, siempre bajo 4 GB | — |
 
 ## 13. Log de ciclos
 
@@ -372,6 +400,23 @@ Pendiente (§7.1). Errores conocidos a ignorar: `@googleapis/webmasters` faltant
 - Valentino respondió `Revisar…` con `ENMIENDA-01.md` (gana sobre PROMPT y plan) más instrucciones sobre `_insumos/drive/`. Integrado: contexto §1.0; DEC-04e (push por fase), DEC-15 (knip sí), DEC-23 (impacto «bloqueante para el primer cliente real»), DEC-24 (`Nodo(s)` + prefijos POD/CNG/PLAN/B), DEC-25 (funcionalidad como unidad), DEC-26 (ciclos 3/2), DEC-33 (reemplazado), DEC-34 (sin efecto), DEC-35 a DEC-47 (insumos, poda, verificación por riesgo, congelados, planeado, Atlas como datos, CLAUDE.md propuesto, memoria y sesión paralela, credenciales y Vertex, docs consolidados, entregables y backlog, re-estimación, `DATABASE_URL_TEST`); §5, §6, §7, §8.1 (re-estimación: ≈ 80–110 agentes, ≈ 21–29 h), §9 (R15 cerrado, R18–R20), §10 (#26–#28), §11 resuelto.
 - Insumos: 45 `.md` en `docs/_insumos/drive/`, ningún `.docx`; sin seguimiento y no ignorados → nunca se stagean.
 - Sigue: commit + push de C00b y **F1 sin parada**.
+- Commit `cd56c828` (`ENMIENDA-01.md` + plan), pusheado.
+
+### C01 · F1 — 2026-10-13 — baseline, inventario, poda, previas, planeado
+- F1.0: `_insumos/drive/` revisado al inicio (45 `.md`, ningún `.docx`).
+- F1.1–F1.7: ver §12. **Incidente**: depcruise (F1.7) se lanzó con 3,90 GB libres, por debajo del umbral de 4 GB de DEC-42, porque el chequeo informó la memoria pero no cortó; terminó en 7 s sin efectos. Desde F1.7b el chequeo corta antes de lanzar. **knip quedó `[TIMEBOX]`** tras 3 intentos (memoria tomada por la sesión paralela).
+- F1.8 ramas: `_crudo/ramas.json` (89: 45 mergeadas, 10 vivas, 21 dormidas, 13 abandonadas).
+- F1.10: DOC (266) y PUB (138) marcados `superficial` (ciclo F1) con `inventario-superficial.mjs` + `cobertura.mjs --marcar`.
+- F1.11 poda: `10-PODA.md` (281 fichas POD-001…POD-281; sin knip: señales de depcruise, `git grep` con resolución de imports, rutas sin link, marcadores, ramas, enums). **PODA-ALTA: 31 archivos profundos / 4.648 LOC pasan a superficial** (D1 1 · D2 8 · D3 6 · D5 1 · D9 15).
+- F1.9 previas: `_crudo/previas.json` — **290 hallazgos CRÍTICA/ALTA/P0/P1 de 35 documentos** leídos completos (84 declarados cerrados).
+- Entregables iniciados: `01-INVENTARIO.md`, `02`, `03` (SEC-001…SEC-004, credenciales de prueba, BAJA), `08` (VH-001…VH-004), `09`. Herramientas nuevas: `inventario.mjs`, `inventario-superficial.mjs`, `poda.mjs`, `poda-md.mjs`, `planeado-md.mjs`, `validar.mjs` (control positivo: detecta los 10 errores de un hallazgo sembrado), `atlas/nodos.mjs`, `eslint-resumen.mjs`.
+- F1.12 planeado: workflow `wf_2638c35d-8e4` (10 agentes: 3 de previas y 7 de extracción; 3,9 M tokens; 93 min; 0 errores). `planeado-extraer.mjs` → `_crudo/planeado-extraido.json` → `planeado-md.mjs` → **`12-PLANEADO.md`: 1.351 ítems PLAN-001…PLAN-1351** (pendiente 556 · hecho declarado 443 · decisión 212 · bloque 78 · idea 56 · promesa 6; ZONA-FRANCO 361), todos «por cruzar». Fuentes leídas completas: las cinco bitácoras (`roadmap` 17.161 líneas y `beta-3` 10.981 en dos mitades cada una), `docs/sprints/` (21), `STATUS.md`, `roadmap-pendientes.md`, `raíz:{PRODUCT,DESIGN,lane-*}.md` y los 30 `.md` de `_insumos/drive/` (Olme y los bloques de Franco). Las auditorías previas no se duplican: viven en `previas.json`. Falta en los insumos el paquete de Drive de Franco que cita `HANDOFF-cierre-sesion-evolucion.md:19-26` (LEEME-PRIMERO, roadmap-macro, 11 hojas de bloque): esos bloques salen solo de menciones.
+- Secrets de la extracción: solo contraseñas de cuentas seed, QA y dev (BAJA, ENMIENDA P1); sumadas sin valor a SEC-002 (`docs/bitacora-roadmap.md:6377`) y SEC-004 (`:3001`); el resto ya estaba en SEC-001…SEC-003. Ninguna frena la corrida. El id del endpoint de Neon (no es credencial) se recorta en el crudo y en el anexo.
+- Observaciones de los extractores → anexo de `12-PLANEADO.md` y **`_crudo/alertas-planeado.json`** (51 alertas curadas por dominio, que cada lector recibe en `contexto`). Para verificar primero: **posible lectura entre tenants en Inicio** (conteo de leads y `computeLeadsScore` sobre `ContactSubmission` sin `organizationId`, según `_insumos/drive/Olme/Cliente - Registro de cambios/Inicio_ registro de cambios.md:97`) → D2; el opt-out `/api/email/optout/[contactId]` dado por firmado con el token de otra ruta → D7; la migración `20260619140100` registrada con `resolve --applied` sin ejecutar el SQL → D6; Sentry sin DSN en Netlify a 2026-08 → D7; promesas vencidas a la vista del cliente («Próximamente Q3 2026») → D2.
+- `f2-args.mjs` rehecho: cada ítem PLAN va a un solo lote (el dominio dueño de su herramienta; dentro, el lote que más lo cita o el de menor carga; plataforma/transversal por palabras clave a D6–D9; ZONA-FRANCO a D4), con su `PLAN-NNN`, las alertas en `contexto` y los omitidos por tope listados. Control: 1.294 asignados una sola vez + 57 del sitio público para F3 = 1.351.
+- Herramientas nuevas: `planeado-extraer.mjs` (un solo uso), `secrets-salida.mjs` (los 22 patrones sobre lo que escribe la corrida; control positivo 22/22) y `README.md` de `scripts/auditoria/` (permanentes vs de esta corrida). `01-INVENTARIO.md`: fila de knip corregida (no disponible).
+- §8.2: re-estimación con la poda real (≈ 75–100 agentes, ≈ 20–27 h restantes).
+- Sigue: commit archivo por archivo + push de F1 (sin `_crudo/depcruise.json`, local) → **D1 ciclo 1**.
 
 ## 14. Autorrevisión §10 por commit
 
@@ -379,3 +424,4 @@ Pendiente (§7.1). Errores conocidos a ignorar: `@googleapis/webmasters` faltant
 |---|---|---|---|---|---|---|
 | C00-F0 | No: no hay hallazgos escritos; las alertas de P1 citan `ruta:línea` | No: los «no existe» de §1 y §10 citan comando o búsqueda | No: grep de los 22 patrones sobre `docs/auditoria-2026-10` = 0 | No hay propuestas | No (`git status`: solo `docs/auditoria-2026-10/` y `scripts/auditoria/`) | n/a (se escribe en F1) |
 | C00b | No: sigue sin haber hallazgos escritos | No: el «ningún `.docx`» cita el conteo por extensión de `find` | No (mismo grep) | No hay propuestas | No: lo único fuera de las dos carpetas es `docs/_insumos/`, que puso Valentino y no se stagea | n/a |
+| C01-F1 | No: SEC-001…004 y VH-001…004 citan `ruta:línea`; cada ficha POD trae su señal; los PLAN traen `fuente:línea` | No: los «sin uso» de `10-PODA.md` citan la búsqueda (`git grep`, depcruise) y knip figura como no disponible; los PLAN quedan «por cruzar», sin afirmar estado | No: `secrets-salida.mjs` = 0 coincidencias en 48 archivos (control positivo 22/22); los secrets de la extracción se citan solo por línea | No: SEC-001 deja la purga del historial como decisión; ninguna propuesta edita FROZEN ni ZONA-FRANCO | No: `git status` muestra solo las dos carpetas más `docs/_insumos/` (no se stagea) | 0 errores · 0 avisos |

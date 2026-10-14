@@ -1,0 +1,74 @@
+{
+ "fuente": "Observaciones de los 7 extractores de F1.12 (workflow wf_2638c35d-8e4), curadas por el padre y repartidas por dominio. Son contradicciones entre docs o afirmaciones de docs: NO son evidencia del estado del código. Cada lector de F2 recibe las de su dominio en `contexto` y las confirma o descarta contra el código (con ruta:linea o la busqueda que prueba la ausencia).",
+ "dominios": {
+  "D1": [
+   "Proxy/middleware: docs/bitacora-roadmap.md:6334 (MS-8) y :7936 (B-SEC.2) dicen que no hay middleware y que la proteccion es por layouts; :7682/:7687 (B12.6) reportan un 307 'middleware'; :7830/:7898 (B1 LeadOS) modifican src/proxy.ts (matcher /setter, ALWAYS_ALLOWED); :8138 (SEC-AUTH-04) pide un middleware global. Confirmar que cubre hoy src/proxy.ts (matcher, rutas siempre permitidas) y que no hay rutas protegidas solo por layout que deberian estar en el proxy o viceversa.",
+   "Regla de contrasena: _insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:60 declara 8+mayuscula+numero en cliente y en Zod en /cambiar-password, 'hecho (sin mergear)'. Confirmar si esta en origin/main y si la misma regla aplica en reset-password y en el alta de usuarios.",
+   "sessionVersion: el registro Mi Cuenta (_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:398) fija que las acciones que tocan sessionVersion se llaman directo (startTransition), nunca con <form action>. Ver si la invalidacion de sesion funciona en todos los caminos (cambio de contrasena, reset, baja de miembro, cambio de rol)."
+  ],
+  "D2": [
+   "POSIBLE FUGA ENTRE TENANTS: _insumos/drive/Olme/Cliente - Registro de cambios/Inicio_ registro de cambios.md:97 registra que el conteo de leads de Inicio y computeLeadsScore usan ContactSubmission sin filtrar por organizationId (datos de otros tenants mostrados al cliente). Choca con la Auditoria III que declara 0 rojos de aislamiento (_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:28). Verificar por lectura con prioridad maxima.",
+   "IDs internos en URL: docs/bitacora-roadmap.md:3919 (B5.6) crea /dashboard/chatbot/leads/[id] con el id del lead; :5259 (B6.3) dice que los IDs de lead no van en URLs; CLAUDE.md lo prohibe. Barrer las rutas dinamicas del portal y ver si el id se resuelve contra la org de la sesion (IDOR).",
+   "Promesas visibles al cliente: 'Proximamente Q3 2026' en los modulos coming-soon (_insumos/drive/Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:175), vencida al 2026-10-13; 'Respondemos en < 4 hs, Lun-Vie 9-18' (Mensajes_ registro de cambios.md:30). Buscar los literales en el codigo.",
+   "Lanes del portal declaradas cerradas pero 'sin mergear a main' (inicio, plan, project, services, resultados, cuenta y Bloques A/B de portal-pulido; tambien la rama b0-isolation-motor-chatbot, registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:81). Para cada 'hecho (sin mergear)' del planeado de tu lote: esta o no en origin/main.",
+   "Credenciales de onboarding: el previo PD-1 (docs/audit-repo-20260707.md:113) dice texto plano con etiqueta ENCRIPTADO; el registro de Valentino menciona ONBOARDING_SECRET_KEY (registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:15). Confirmar si el cifrado existe en origin/main.",
+   "Navegacion post-exito con window.location.assign() en el flujo de venta (docs/sprints/p3-a-2-venta.md:190-192), patron que CLAUDE.md no lista para portales.",
+   "Avatar: base64 en la base sin infra externa (_insumos/drive/Olme/Chatbot_ registro de cambios.md:97,119) contra storage externo abierto (Cliente - Registro de cambios/Chatbot_ registro de cambios.md:89): ver tamano maximo validado en servidor."
+  ],
+  "D3": [
+   "Identificador en /admin/clients/[clientId]: docs/bitacora-roadmap.md:6013 (B9.1) dice que es el orgSlug; :7163 (B11.6) dice que se pasa Organization.id. /admin/chatbots/[botId] usa cuid (:8544). Confirmar que se usa y si cada action re-valida el recurso.",
+   "Checklist B-SEC.3c (docs/bitacora-roadmap.md:8398-8400) renumera los fixes: F2 'IDOR projects.ts', F4 'agency-actions cross-projectId', y en B11.0 F2 era trust-the-layout de projects.ts, F4 la pagina de payments y F5 agency-actions. Verificar cada uno en el codigo, no por el checklist.",
+   "Ruta propuesta /admin/clients/[clientId]/chatbot/install (B8.5, :5887) que el catch-all de B9.1 (:6011-6016) redirige a overview; rutas /admin/clients/[orgSlug]/chatbot/* deprecadas a favor de /admin/chatbots (STATUS.md:216) mientras docs/roadmap-pendientes.md:26 propone una vista nueva ahi.",
+   "Fuga de ZodError en updateSettings (_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:113) declarada resuelta en 5e33733: verificar que el mensaje que vuelve al cliente no expone el error interno."
+  ],
+  "D4": [
+   "Maquina de estados: QUINTA (docs/bitacora-beta-3.md:7400) dice que una APROBADA con gate cerrado y toque vencido cae en 'trabajar' (flow.ts:433); P23 (:10769-10771) dice que grupoPara la manda a seguimiento. Confirmar el comportamiento actual.",
+   "Herramientas sin URL (docs/bitacora-beta-3.md:7034, :8479): tras D15-bis el evaluador no tiene pantalla pero sigue en herramientas.ts y en el rail (:8779, :9177). Candidato de poda o pendiente de Franco.",
+   "Navegacion del setter: docs/bitacora-beta.md:92 y setter-nav.tsx:38 la fijan por triggerTransition() como 'decision cerrada'; CLAUDE.md pide <Link> en portales y no clasifica /setter.",
+   "Drift: docs/bitacora-beta.md:470-511 da por cerrado el drop de convertedToOsLeadId; :1252 lo vuelve a listar; :1271 dice que la migracion 20260619140100 se registro con migrate resolve --applied sin ejecutar el SQL (cruza con D6).",
+   "OSLEAD (_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin titulo.md): la tabla :885-899 recoge 11 contradicciones entre docs/decisiones-oslead-vii/ y el codigo; H-04 (:737) marca falso verde el gate del self-check que PROMPT 2 (:298-318) da por correcto.",
+   "Main: EL TRONCO (docs/bitacora-beta-3.md:10975) le deja el push a main a Franco, pero origin/main @ 57c421bc ya es 'docs(tronco): EL TRONCO'. Registrar como dato para 09 (quien y cuando movio main)."
+  ],
+  "D5": [
+   "onFinish: RB.3 (_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:38) lo quiere en $transaction (mensaje, conversacion, cuota); C3.4 (DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:72) quiere paralelizar esos 3 writes. Ver que hace hoy y que pasa si uno falla.",
+   "/smoke: el roadmap de evolucion lo pone en T0.1 inmediato (ROADMAP-MEJORA:13; HANDOFF-cierre:28) y los bloques C lo mandan al carril de seguridad de Franco (ROADMAP-CHATBOT-bloques-C:21). El previo RT-2 (docs/audit-repo-20260707.md:22) dice GET publico sin auth ni rate limit que quema tokens.",
+   "Stream: DEADLOCK-FINISH-STEP (docs/bitacora-roadmap.md:15120-15130) prueba que el cuelgue no era de Gemini sino del transform propio de ONF-1 (commit 644b2b7); verificar que el transform actual no puede colgar el stream ni pasar el maxDuration de 30 s.",
+   "Vertex: docs/bitacora-roadmap.md:15604, :15785, :16508, :16678 dicen 'key de Vertex expuesta en logs, pendiente de rotacion' (sin valor). La credencial esta vencida: es el control positivo de E10 (que ve el visitante, que ve el cliente, como se entera el sistema).",
+   "'Protocolo de consultoria': B13.5 (docs/bitacora-roadmap.md:8905) dice que el literal no existia; BLOQUE VOZ (:16584) lo encuentra en ChatWindow.tsx.",
+   "EV.5 se cerro (docs/bitacora-roadmap.md:11465) con los smokes sin correr aunque EV.4 (:10858) exigia que Franco leyera los transcripts; el backfill de verticalPack cambia de bot segun la fuente (:11541 sanmiguel, :12896 matsu, :15656 ambos).",
+   "Docstring 'GDPR-friendly' que el propio handoff declara falsa (_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:58).",
+   "getLatencyHistory asignado al panel (DERIVACION-chat-panel.md:24) y tambien al runtime (MH.1, ROADMAP-MEJORA:23)."
+  ],
+  "D6": [
+   "Migracion 20260619140100 registrada con 'migrate resolve --applied' sin ejecutar el SQL (docs/bitacora-beta.md:1271): el drift por lectura (schema vs migraciones) no lo ve; si el SQL no corrio, la base difiere del historial. Va a 08 como verificacion humana si no se puede cerrar por lectura.",
+   "Columnas Organization.avatar*/city/deletedAt/internalNotes, AgencySettings.singleton y chatbot_lead.convertedToOsLeadId: Franco aprobo DROP (docs/bitacora-beta.md:1274-1279) y despues se propone adoptarlas con migracion aditiva (:1746). Ver que dice hoy el schema y quien las usa.",
+   "Drift de 7 columnas fisicas que el schema no declara (docs/bitacora-beta-3.md:528), contradicho como cliente stale (:554) y vuelto a marcar (:560).",
+   "Orden de migraciones: la de B4.4 (20260522214201_drop_user_unlocked_features, docs/bitacora-roadmap.md:2557) tiene timestamp anterior a las de B4.1 (20260522234313) y B4.3 (20260523001750) aunque se creo despues.",
+   "Cerrar lead -> cliente: FK OsLead->Organization propuesta (_insumos/drive/Olme/Ideas de nuevas features.md:18) contra ChatbotLead.convertedToOsLeadId como string suelto por decision (Admin - Registro de cambios/Clientes_ registro de cambios.md:60).",
+   "Base de test dedicada pendiente: las suites corren contra Neon dev desde P3 (docs/bitacora-beta-3.md:8082). Cruza con VH-003 (DATABASE_URL_TEST).",
+   "Runner de seeds: tsx (Inicio_ registro de cambios.md:88) contra ts-node --transpile-only (Resultados_ registro de cambios.md:31)."
+  ],
+  "D7": [
+   "Opt-out sin firma: B11.3 (docs/bitacora-roadmap.md:7241) deja /api/email/optout/[contactId] pendiente de HMAC; el checklist B-SEC.3c (:8401) lo marca cerrado citando unsubscribe-token.ts, que es del reporte ejecutivo (/api/email/unsubscribe-executive, B6.2 :5095). Verificar si /api/email/optout/[contactId] valida firma.",
+   "OAuth de Google Business: el state-swap (F1) quedo sin tocar en B11.2 (:6822), contado como cerrado en B11.3 con solo un curl anonimo (:7210, :7257) y cerrado recien en B-SEC.3b (:8145). El probe vive fuera del repo (C:/tmp/probe-oauth-state.mjs, :8241, :8350). Verificar state firmado/atado a la sesion en Google Business y Tiendanube.",
+   "Hosting ambiguo: Netlify aplica migrate deploy (:2080, :2563) pero el cron del reporte semanal se registra en vercel.json (:5036, :5146): cron posiblemente sin disparador (ya visto en F0).",
+   "Sentry inactivo en prod a 2026-08: sin DSN en Netlify (INFRA.1 :13036; PRIVACIDAD :16738). Nombre del DSN inconsistente: SENTRY_DSN (docs/sprints/alpha-0-7-baseline-observability.md:16) vs NEXT_PUBLIC_SENTRY_DSN (docs/sprints/infra-1-observabilidad.md:18). Ver que variable lee el codigo y que pasa si falta.",
+   "Credenciales por worktree: el registro General (_insumos/drive/Olme/Cliente - Registro de cambios/General_ registro de cambios.md:75) indica copiar .env.local y vertex-credentials.json a cada worktree: insumo para la tabla E10 (donde se lee cada credencial).",
+   "Token de Vercel Blob quitado del .env (_insumos/drive/Olme/Chatbot_ registro de cambios.md:97): confirmar que no quedan lecturas de BLOB_READ_WRITE_TOKEN."
+  ],
+  "D8": [
+   "Build: BP.4 (docs/bitacora-roadmap.md:9240-9242) dice que entra en el heap por defecto; P1.A (:11110), P5.3 (:11762), UTM.1 (:12746) y PRIVACIDAD (:16845) dicen OOM sin 6-8 GB; varios sprints excluyen el build rojo como gate. Cruza con el previo CO-1 (ignoreBuildErrors/ignoreDuringBuilds).",
+   "Script dev: --turbopack (B1.2 :313) contra webpack por defecto (B3.3 :1369) y 'next dev --webpack' (MS-7 :5369).",
+   "CI: el comentario de C1 sobre 'type-stripping nativo' en ci.yml es incorrecto segun C1b (docs/bitacora-beta-3.md:5413).",
+   "Repo: B14.3 (docs/bitacora-roadmap.md:9452-9456) y PRIVACIDAD (:16772) se apoyan en que el repo es publico; pasa a privado (DEC-34 cerrado): contexto historico."
+  ],
+  "D9": [
+   "design-tokens.ts: el rediseno planea eliminarlo por desconectado (docs/bitacora-rediseno.md:133-135) y limpiar --color-void (:141), pero el Modal (zIndex.modal) y el shell del setter lo consumen por style inline (docs/bitacora-beta.md:52, :221-222) y dossier-stepper usa var(--color-void) (:230). Riesgo cruzado con rediseno/home (que modifica utils.ts y globals.css).",
+   "Convenciones contradichas: glassmorphism prohibido en el sitio publico (raiz:DESIGN.md:92/:211/:291) y dado como convencion en CLAUDE.md; reveals de ~0.9 s (raiz:DESIGN.md:271) contra 0.6 s de CLAUDE.md; acento de Software indigo (raiz:PRODUCT.md:54) contra violeta #8b5cf6.",
+   "Congelados extra que declaran los lanes (components/ui/*, lib/plan/*, upsell.ts, lib/hover.ts, LatencyChart.tsx; raiz:lane-dashboard-log.md:12, raiz:lane-plan-log.md:15, raiz:lane-resultados-redesign-log.md:21, raiz:lane-LOG.md:33) y LegacyNeuroAvatar tratado como FROZEN (docs/bitacora-roadmap.md:8526): insumo de 11-CONGELADOS.",
+   "Contra CLAUDE.md: B13.0 (docs/bitacora-roadmap.md:8562) no usa IntersectionObserver en el Canvas 3D del preview; MS-7 (:5370) diagnostica dpr [1,2]; MS-6 (:4815) edito PreloaderContext (frozen).",
+   "'Cero any' declarado (docs/sprints/alpha-RESUMEN-FINAL.md:41) contra any encontrados despues (alpha-1-reaudit.md:229; raiz:lane-resultados-redesign-log.md:82); el baseline de F1 tiene 13 no-explicit-any.",
+   "Numeros de WhatsApp hardcodeados citados en docs/bitacora-rediseno.md:1628-1630 y :1817: ver si estan en codigo y si deberian venir de configuracion."
+  ]
+ }
+}

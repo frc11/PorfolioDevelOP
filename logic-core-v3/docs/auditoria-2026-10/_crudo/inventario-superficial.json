@@ -1,0 +1,4690 @@
+{
+ "ref": "origin/main",
+ "total": 404,
+ "items": [
+  {
+   "ruta": "AUDITORIA-VS-BRIEF-2026-07.md",
+   "dominio": "DOC",
+   "lineas": 393,
+   "bytes": 54371,
+   "ultimo_commit": {
+    "fecha": "2026-07-02T18:40:37-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "AUDITORÍA READ-ONLY — LeadOS (`logic-core-v3`) vs Brief de Visión v2"
+  },
+  {
+   "ruta": "CLAUDE.md",
+   "dominio": "DOC",
+   "lineas": 196,
+   "bytes": 9863,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "CLAUDE.md — develOP / Logic Core v3"
+  },
+  {
+   "ruta": "DESIGN.md",
+   "dominio": "DOC",
+   "lineas": 300,
+   "bytes": 22018,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T16:44:25-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Design System: develOP — sitio público"
+  },
+  {
+   "ruta": "PRODUCT.md",
+   "dominio": "DOC",
+   "lineas": 87,
+   "bytes": 5605,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T18:48:06-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Product"
+  },
+  {
+   "ruta": "lane-LOG.md",
+   "dominio": "DOC",
+   "lineas": 191,
+   "bytes": 24431,
+   "ultimo_commit": {
+    "fecha": "2026-06-17T10:55:26-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "lane/chatbots — LOG (lote de 4 features)"
+  },
+  {
+   "ruta": "lane-dashboard-log.md",
+   "dominio": "DOC",
+   "lineas": 271,
+   "bytes": 20808,
+   "ultimo_commit": {
+    "fecha": "2026-06-15T15:08:39-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "lane/dashboard — Log de trabajo"
+  },
+  {
+   "ruta": "lane-plan-log.md",
+   "dominio": "DOC",
+   "lineas": 102,
+   "bytes": 10231,
+   "ultimo_commit": {
+    "fecha": "2026-06-25T06:09:14-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "lane/plan — Log de trabajo"
+  },
+  {
+   "ruta": "lane-resultados-redesign-log.md",
+   "dominio": "DOC",
+   "lineas": 316,
+   "bytes": 48967,
+   "ultimo_commit": {
+    "fecha": "2026-06-25T06:49:58-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Lane Resultados — Rediseño visual (Portal Cliente) · Relevamiento + Plan"
+  },
+  {
+   "ruta": "logic-core-v3/AGENTS.md",
+   "dominio": "DOC",
+   "lineas": 187,
+   "bytes": 6601,
+   "ultimo_commit": {
+    "fecha": "2026-05-04T15:51:19-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "develOP — Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/CHANGELOG-cuenta.md",
+   "dominio": "DOC",
+   "lineas": 438,
+   "bytes": 31772,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T11:51:14-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "CHANGELOG — lane/cuenta"
+  },
+  {
+   "ruta": "logic-core-v3/CHANGELOG.md",
+   "dominio": "DOC",
+   "lineas": 97,
+   "bytes": 4235,
+   "ultimo_commit": {
+    "fecha": "2026-05-20T19:14:21-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Changelog develOP"
+  },
+  {
+   "ruta": "logic-core-v3/DEPLOY.md",
+   "dominio": "DOC",
+   "lineas": 65,
+   "bytes": 2311,
+   "ultimo_commit": {
+    "fecha": "2026-03-25T13:51:14-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Guía de Despliegue en Vercel - DevelOP SaaS"
+  },
+  {
+   "ruta": "logic-core-v3/README.md",
+   "dominio": "DOC",
+   "lineas": 76,
+   "bytes": 1817,
+   "ultimo_commit": {
+    "fecha": "2026-05-20T19:14:21-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "develOP — Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/STATUS.md",
+   "dominio": "DOC",
+   "lineas": 333,
+   "bytes": 18008,
+   "ultimo_commit": {
+    "fecha": "2026-05-22T01:45:19-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Estado del Proyecto — develOP / Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/_CHANGELOG-lane-project.md",
+   "dominio": "DOC",
+   "lineas": 103,
+   "bytes": 6186,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T12:14:43-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Changelog — Lane Project (Portal Cliente `/dashboard/project`)"
+  },
+  {
+   "ruta": "logic-core-v3/__dev_task.md",
+   "dominio": "DOC",
+   "lineas": 81,
+   "bytes": 3171,
+   "ultimo_commit": {
+    "fecha": "2026-03-18T22:48:24-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "TAREA: Pulida Premium v2 — Process Automation"
+  },
+  {
+   "ruta": "logic-core-v3/_lane-config-settings-log.md",
+   "dominio": "DOC",
+   "lineas": 118,
+   "bytes": 9560,
+   "ultimo_commit": {
+    "fecha": "2026-06-18T21:05:53-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Lane config-settings — Sprint Log (fuente de verdad)"
+  },
+  {
+   "ruta": "logic-core-v3/_lane-cuenta-plan.md",
+   "dominio": "DOC",
+   "lineas": 410,
+   "bytes": 55118,
+   "ultimo_commit": {
+    "fecha": "2026-06-26T20:41:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Lane `lane/cuenta` — Rediseño visual de \"Mi Cuenta\" (Portal Cliente)"
+  },
+  {
+   "ruta": "logic-core-v3/_lane-demos-log.md",
+   "dominio": "DOC",
+   "lineas": 298,
+   "bytes": 31016,
+   "ultimo_commit": {
+    "fecha": "2026-06-17T11:03:26-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Lane Revisión Demos — Log de trabajo"
+  },
+  {
+   "ruta": "logic-core-v3/_lane-intel-alertas-cierre.md",
+   "dominio": "DOC",
+   "lineas": 154,
+   "bytes": 10854,
+   "ultimo_commit": {
+    "fecha": "2026-06-19T06:47:26-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Cierre — Lane `intel-alertas`"
+  },
+  {
+   "ruta": "logic-core-v3/_lane-intel-alertas-log.md",
+   "dominio": "DOC",
+   "lineas": 146,
+   "bytes": 18828,
+   "ultimo_commit": {
+    "fecha": "2026-06-18T22:33:53-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "lane/intel-alertas — LOG (Inteligencia · sección Alertas)"
+  },
+  {
+   "ruta": "logic-core-v3/_lane-project-log.md",
+   "dominio": "DOC",
+   "lineas": 474,
+   "bytes": 30695,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T11:52:16-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Lane Proyectos (Portal Cliente) — Log fuente de verdad"
+  },
+  {
+   "ruta": "logic-core-v3/_lane-proyectos-log.md",
+   "dominio": "DOC",
+   "lineas": 252,
+   "bytes": 35953,
+   "ultimo_commit": {
+    "fecha": "2026-06-15T23:31:12-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Lane Proyectos + Equipo — Log de trabajo"
+  },
+  {
+   "ruta": "logic-core-v3/_lane-services-log.md",
+   "dominio": "DOC",
+   "lineas": 249,
+   "bytes": 30500,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T11:39:26-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Rediseño visual — `/dashboard/services` (Portal Cliente) — fuente de verdad de la lane"
+  },
+  {
+   "ruta": "logic-core-v3/docs/BRIEF-VISION-FLUJO-SETTER-v3.md",
+   "dominio": "DOC",
+   "lineas": 193,
+   "bytes": 14959,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T01:41:28-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "BRIEF DE VISIÓN — EL FLUJO DEL SETTER · v3"
+  },
+  {
+   "ruta": "logic-core-v3/docs/HANDOFF-LEADOS-CIERRE.md",
+   "dominio": "DOC",
+   "lineas": 146,
+   "bytes": 11466,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T01:41:28-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "HANDOFF — LeadOS / Panel del Setter"
+  },
+  {
+   "ruta": "logic-core-v3/docs/MUNICION-PROMPTS-Y-SKILL.md",
+   "dominio": "DOC",
+   "lineas": 341,
+   "bytes": 25317,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T01:41:28-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "LA MUNICIÓN DEL PROCESO — cadena completa de prompts"
+  },
+  {
+   "ruta": "logic-core-v3/docs/PILOTO-DEMO-FIRST.md",
+   "dominio": "DOC",
+   "lineas": 80,
+   "bytes": 6584,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T01:41:28-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "PILOTO DEMO-FIRST — una demo real, hoy, sin tocar código"
+  },
+  {
+   "ruta": "logic-core-v3/docs/SPRINT-M1-MANUAL-v2.md",
+   "dominio": "DOC",
+   "lineas": 132,
+   "bytes": 12251,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T01:41:28-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "SPRINT M1 v2 — EL MANUAL DEL SETTER, SOBRE EL PRODUCTO PODADO"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Admin Completo rdc.md",
+   "dominio": "DOC",
+   "lineas": 78,
+   "bytes": 6019,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "develOP — Cierre del panel admin (panorama de las 4 áreas)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Admin Operaciones rdc.md",
+   "dominio": "DOC",
+   "lineas": 84,
+   "bytes": 6788,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "develOP — Dashboard (admin): registro de cambios (cierre de etapa)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Chatbot rdc.md",
+   "dominio": "DOC",
+   "lineas": 191,
+   "bytes": 20494,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "develOP — Dashboard (sección Chatbot): registro de cambios (cierre de etapa)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Clientes rdc.md",
+   "dominio": "DOC",
+   "lineas": 79,
+   "bytes": 7917,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "develOP — Clientes: registro de cambios (cierre de etapa)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Configuracion rdc.md",
+   "dominio": "DOC",
+   "lineas": 124,
+   "bytes": 7356,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Registro de cambios — Sector CONFIGURACIÓN (`/admin/settings` + `/admin/audit-log`)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Dashboard rdc.md",
+   "dominio": "DOC",
+   "lineas": 84,
+   "bytes": 6788,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "develOP — Dashboard (admin): registro de cambios (cierre de etapa)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Equipo rdc.md",
+   "dominio": "DOC",
+   "lineas": 69,
+   "bytes": 5906,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "develOP — Equipo: registro de cambios (cierre de etapa)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Inteligencia rdc.md",
+   "dominio": "DOC",
+   "lineas": 132,
+   "bytes": 7318,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Registro de cambios — Sector INTELIGENCIA (admin)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Leads rdc.md",
+   "dominio": "DOC",
+   "lineas": 73,
+   "bytes": 7942,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "develOP — Leads (admin): registro de cambios (cierre de etapa)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Operaciones rdc.md",
+   "dominio": "DOC",
+   "lineas": 105,
+   "bytes": 9761,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": ""
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Proyectos rdc.md",
+   "dominio": "DOC",
+   "lineas": 85,
+   "bytes": 9277,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "develOP — Proyectos + Equipo (admin): registro de cambios (cierre de etapa)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-changelog/Revision demos rdc.md",
+   "dominio": "DOC",
+   "lineas": 84,
+   "bytes": 7902,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "develOP — Revisión Demos: registro de cambios (cierre de etapa)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/admin-design-system-audit.md",
+   "dominio": "DOC",
+   "lineas": 78,
+   "bytes": 4524,
+   "ultimo_commit": {
+    "fecha": "2026-06-28T20:47:16-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Auditoría — \"Design system\" del admin (read-only)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/audit-chatbot-runtime.md",
+   "dominio": "DOC",
+   "lineas": 220,
+   "bytes": 33445,
+   "ultimo_commit": {
+    "fecha": "2026-07-15T14:28:07-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Auditoría de diagnóstico — Runtime del chatbot"
+  },
+  {
+   "ruta": "logic-core-v3/docs/audit-repo-20260707.md",
+   "dominio": "DOC",
+   "lineas": 342,
+   "bytes": 42494,
+   "ultimo_commit": {
+    "fecha": "2026-07-09T11:41:00-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Auditoría integral read-only del repo — 2026-07-07"
+  },
+  {
+   "ruta": "logic-core-v3/docs/audit/2026-04-dashboard-cleanup-audit.md",
+   "dominio": "DOC",
+   "lineas": 133,
+   "bytes": 12499,
+   "ultimo_commit": {
+    "fecha": "2026-04-27T21:34:23-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Dashboard Cleanup Audit — Abril 2026"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditoria-consistencia-setter.md",
+   "dominio": "DOC",
+   "lineas": 233,
+   "bytes": 25061,
+   "ultimo_commit": {
+    "fecha": "2026-06-29T14:42:30-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Auditoría 2 — Consistencia de diseño y organización del código · Zona del setter"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditoria-recorrido-completo-novato.md",
+   "dominio": "DOC",
+   "lineas": 110,
+   "bytes": 13831,
+   "ultimo_commit": {
+    "fecha": "2026-07-02T18:40:37-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Auditoría perceptual — Recorrido completo del setter novato (lead asignado → reunión agendada)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditoria-seguridad-2026-05.md",
+   "dominio": "DOC",
+   "lineas": 441,
+   "bytes": 38523,
+   "ultimo_commit": {
+    "fecha": "2026-05-26T10:20:27-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Auditoría de seguridad — Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditoria-total-pre-deploy.md",
+   "dominio": "DOC",
+   "lineas": 108,
+   "bytes": 19301,
+   "ultimo_commit": {
+    "fecha": "2026-06-02T23:49:10-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Auditoría total pre-deploy — Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditoria-ux-setter.md",
+   "dominio": "DOC",
+   "lineas": 322,
+   "bytes": 28549,
+   "ultimo_commit": {
+    "fecha": "2026-06-29T14:42:30-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Auditoría estructural — Zona del setter de LeadOS"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md",
+   "dominio": "DOC",
+   "lineas": 285,
+   "bytes": 20533,
+   "ultimo_commit": {
+    "fecha": "2026-08-18T15:28:06-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "A1 — Censo de superficies: qué es interno y qué es de cliente"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditorias/A2-SETTER-DOCS-VIABILIDAD-2026-08.md",
+   "dominio": "DOC",
+   "lineas": 252,
+   "bytes": 19475,
+   "ultimo_commit": {
+    "fecha": "2026-08-18T15:28:06-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "A2 — Superficie `/setter`: viabilidad de una sección de documentación"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditorias/A3-ESTADO-ECC-SKILLS-2026-08.md",
+   "dominio": "DOC",
+   "lineas": 291,
+   "bytes": 18608,
+   "ultimo_commit": {
+    "fecha": "2026-08-18T15:28:06-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "A3 — Estado de ECC, skills y comandos"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md",
+   "dominio": "DOC",
+   "lineas": 1293,
+   "bytes": 84204,
+   "ultimo_commit": {
+    "fecha": "2026-08-24T22:30:03-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "A3-BIS · LOS OCHO FRENTES SIN DICTAMEN, Y CINCO PREGUNTAS NUEVAS"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md",
+   "dominio": "DOC",
+   "lineas": 1233,
+   "bytes": 75137,
+   "ultimo_commit": {
+    "fecha": "2026-08-24T11:32:42-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "A3 · VIABILIDAD DE LAS DECISIONES DE OSLead VII CONTRA EL CÓDIGO"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditorias/AUDITORIA-CIERRE-2026-07.md",
+   "dominio": "DOC",
+   "lineas": 332,
+   "bytes": 58628,
+   "ultimo_commit": {
+    "fecha": "2026-07-09T11:41:00-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "AUDITORÍA DE CIERRE — LeadOS / Panel del Setter vs Brief de Visión · 2026-07-07"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md",
+   "dominio": "DOC",
+   "lineas": 819,
+   "bytes": 39176,
+   "ultimo_commit": {
+    "fecha": "2026-08-25T00:23:37-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "C0 · La red de verificación, sometida a sabotaje — 2026-08-25"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditorias/REGRESION-FINAL-2026-07.md",
+   "dominio": "DOC",
+   "lineas": 136,
+   "bytes": 15647,
+   "ultimo_commit": {
+    "fecha": "2026-07-06T11:17:03-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Regresión final — el sello del cierre del rediseño de experiencia (Bloques 5–7) · 2026-07-04"
+  },
+  {
+   "ruta": "logic-core-v3/docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md",
+   "dominio": "DOC",
+   "lineas": 161,
+   "bytes": 25353,
+   "ultimo_commit": {
+    "fecha": "2026-07-04T18:41:27-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Smoke-test exhaustivo del manual — Sprint 7.0 · 2026-07-04"
+  },
+  {
+   "ruta": "logic-core-v3/docs/audits/2026-05-auditoria-db.md",
+   "dominio": "DOC",
+   "lineas": 476,
+   "bytes": 36139,
+   "ultimo_commit": {
+    "fecha": "2026-05-22T01:45:19-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Auditoría de DB / Schema — Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/docs/audits/2026-05-auditoria-profunda.md",
+   "dominio": "DOC",
+   "lineas": 617,
+   "bytes": 42932,
+   "ultimo_commit": {
+    "fecha": "2026-05-22T01:45:19-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Auditoría profunda — Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/docs/audits/2026-05-bfg-leak-cleanup.md",
+   "dominio": "DOC",
+   "lineas": 285,
+   "bytes": 11129,
+   "ultimo_commit": {
+    "fecha": "2026-05-22T01:45:19-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Runbook — BFG cleanup del leak de `enviroment.env`"
+  },
+  {
+   "ruta": "logic-core-v3/docs/audits/2026-05-cleanup-db-dev.md",
+   "dominio": "DOC",
+   "lineas": 309,
+   "bytes": 12672,
+   "ultimo_commit": {
+    "fecha": "2026-05-22T01:45:19-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Cleanup DB — limpieza de basura semántica en dev"
+  },
+  {
+   "ruta": "logic-core-v3/docs/audits/2026-06-revalidacion-dashboard-chatbot.md",
+   "dominio": "DOC",
+   "lineas": 230,
+   "bytes": 23969,
+   "ultimo_commit": {
+    "fecha": "2026-06-05T14:23:27-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Revalidación dashboard + chatbot — Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/docs/audits/2026-06-revalidacion.md",
+   "dominio": "DOC",
+   "lineas": 145,
+   "bytes": 14275,
+   "ultimo_commit": {
+    "fecha": "2026-06-05T14:23:27-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Revalidación 2026-06 — estado real vs auditorías de mayo"
+  },
+  {
+   "ruta": "logic-core-v3/docs/b7-probe-cal-com.md",
+   "dominio": "DOC",
+   "lineas": 105,
+   "bytes": 7644,
+   "ultimo_commit": {
+    "fecha": "2026-06-12T19:22:48-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "B7-PROBE — API de Cal.com: slots libres + creación de bookings"
+  },
+  {
+   "ruta": "logic-core-v3/docs/b8a-auditoria.md",
+   "dominio": "DOC",
+   "lineas": 96,
+   "bytes": 13735,
+   "ultimo_commit": {
+    "fecha": "2026-06-13T15:36:36-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "B8A — Auditoría de LeadOS (hallazgos priorizados)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/b8a-changelog.md",
+   "dominio": "DOC",
+   "lineas": 81,
+   "bytes": 9835,
+   "ultimo_commit": {
+    "fecha": "2026-06-13T15:36:36-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "B8A — Changelog de ejecución"
+  },
+  {
+   "ruta": "logic-core-v3/docs/b8a-ii-auditoria.md",
+   "dominio": "DOC",
+   "lineas": 79,
+   "bytes": 9485,
+   "ultimo_commit": {
+    "fecha": "2026-06-13T16:08:21-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "B8A-II — Segunda auditoría de LeadOS (hallazgos NUEVOS)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/b8a-ii-changelog.md",
+   "dominio": "DOC",
+   "lineas": 60,
+   "bytes": 4715,
+   "ultimo_commit": {
+    "fecha": "2026-06-13T16:08:21-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "B8A-II — Changelog de ejecución"
+  },
+  {
+   "ruta": "logic-core-v3/docs/b9-changelog.md",
+   "dominio": "DOC",
+   "lineas": 104,
+   "bytes": 12388,
+   "ultimo_commit": {
+    "fecha": "2026-06-16T20:28:14-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "B9 — Changelog del refresh visual de LeadOS"
+  },
+  {
+   "ruta": "logic-core-v3/docs/b9-plan-visual.md",
+   "dominio": "DOC",
+   "lineas": 196,
+   "bytes": 17551,
+   "ultimo_commit": {
+    "fecha": "2026-06-16T20:28:13-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "B9 — Plan de refresh visual de LeadOS"
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/2026-05-admin-performance.md",
+   "dominio": "DOC",
+   "lineas": 108,
+   "bytes": 5318,
+   "ultimo_commit": {
+    "fecha": "2026-05-19T18:09:50-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline Admin Performance — Mayo 2026"
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/2026-05-chatbot-runtime.md",
+   "dominio": "DOC",
+   "lineas": 80,
+   "bytes": 4048,
+   "ultimo_commit": {
+    "fecha": "2026-05-19T18:09:50-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline Chatbot Runtime — Mayo 2026"
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/2026-07-auditoria-seguridad.md",
+   "dominio": "DOC",
+   "lineas": 3832,
+   "bytes": 630602,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T04:14:38-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Auditoría de seguridad dedicada — logic-core-v3"
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p17-pliegue-antes.json",
+   "dominio": "DOC",
+   "lineas": 941,
+   "bytes": 22637,
+   "ultimo_commit": {
+    "fecha": "2026-09-01T21:58:18-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p17-pliegue-despues.json",
+   "dominio": "DOC",
+   "lineas": 991,
+   "bytes": 24029,
+   "ultimo_commit": {
+    "fecha": "2026-09-01T21:58:18-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p18-pliegue-antes.json",
+   "dominio": "DOC",
+   "lineas": 1187,
+   "bytes": 30138,
+   "ultimo_commit": {
+    "fecha": "2026-09-02T09:24:52-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p18-pliegue-despues.json",
+   "dominio": "DOC",
+   "lineas": 1205,
+   "bytes": 30622,
+   "ultimo_commit": {
+    "fecha": "2026-09-02T09:24:52-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p19-barrido-antes.json",
+   "dominio": "DOC",
+   "lineas": 580,
+   "bytes": 15245,
+   "ultimo_commit": {
+    "fecha": "2026-09-02T15:38:05-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p19-barrido-despues.json",
+   "dominio": "DOC",
+   "lineas": 196,
+   "bytes": 4765,
+   "ultimo_commit": {
+    "fecha": "2026-09-02T15:38:05-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p19-pliegue-antes.json",
+   "dominio": "DOC",
+   "lineas": 1205,
+   "bytes": 30622,
+   "ultimo_commit": {
+    "fecha": "2026-09-02T15:38:05-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p19-pliegue-despues.json",
+   "dominio": "DOC",
+   "lineas": 1203,
+   "bytes": 30580,
+   "ultimo_commit": {
+    "fecha": "2026-09-02T15:38:05-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p20-destinos-antes.json",
+   "dominio": "DOC",
+   "lineas": 401,
+   "bytes": 7622,
+   "ultimo_commit": {
+    "fecha": "2026-09-03T11:13:37-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p20-destinos-despues-v2.json",
+   "dominio": "DOC",
+   "lineas": 421,
+   "bytes": 10008,
+   "ultimo_commit": {
+    "fecha": "2026-09-03T11:13:37-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p20-destinos-despues.json",
+   "dominio": "DOC",
+   "lineas": 421,
+   "bytes": 10023,
+   "ultimo_commit": {
+    "fecha": "2026-09-02T19:31:59-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p20-pliegue-antes.json",
+   "dominio": "DOC",
+   "lineas": 1203,
+   "bytes": 30580,
+   "ultimo_commit": {
+    "fecha": "2026-09-02T19:31:59-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p20-pliegue-despues.json",
+   "dominio": "DOC",
+   "lineas": 1235,
+   "bytes": 31337,
+   "ultimo_commit": {
+    "fecha": "2026-09-02T19:31:59-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p21-franja-antes.json",
+   "dominio": "DOC",
+   "lineas": 421,
+   "bytes": 10008,
+   "ultimo_commit": {
+    "fecha": "2026-09-03T15:44:26-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p21-franja-despues.json",
+   "dominio": "DOC",
+   "lineas": 421,
+   "bytes": 10008,
+   "ultimo_commit": {
+    "fecha": "2026-09-03T15:44:26-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p21-panel-antes.json",
+   "dominio": "DOC",
+   "lineas": 164,
+   "bytes": 2929,
+   "ultimo_commit": {
+    "fecha": "2026-09-03T15:44:26-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p21-panel-despues.json",
+   "dominio": "DOC",
+   "lineas": 158,
+   "bytes": 2776,
+   "ultimo_commit": {
+    "fecha": "2026-09-03T15:44:26-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p21-pliegue-antes.json",
+   "dominio": "DOC",
+   "lineas": 1235,
+   "bytes": 31337,
+   "ultimo_commit": {
+    "fecha": "2026-09-03T15:44:26-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p21-pliegue-despues.json",
+   "dominio": "DOC",
+   "lineas": 1235,
+   "bytes": 31337,
+   "ultimo_commit": {
+    "fecha": "2026-09-03T15:44:26-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p22-cartera-antes.json",
+   "dominio": "DOC",
+   "lineas": 116,
+   "bytes": 2606,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T12:37:04-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p22-cartera-despues.json",
+   "dominio": "DOC",
+   "lineas": 114,
+   "bytes": 2574,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T12:37:04-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p22-destinos-antes.json",
+   "dominio": "DOC",
+   "lineas": 421,
+   "bytes": 10008,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T12:37:04-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p22-destinos-despues.json",
+   "dominio": "DOC",
+   "lineas": 421,
+   "bytes": 10008,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T12:37:04-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p22-pliegue-antes.json",
+   "dominio": "DOC",
+   "lineas": 1235,
+   "bytes": 31337,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T12:37:04-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p22-pliegue-despues.json",
+   "dominio": "DOC",
+   "lineas": 1235,
+   "bytes": 31337,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T12:37:04-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p23-panel-antes.json",
+   "dominio": "DOC",
+   "lineas": 162,
+   "bytes": 2852,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T20:04:32-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p23-panel-despues.json",
+   "dominio": "DOC",
+   "lineas": 162,
+   "bytes": 2857,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T20:04:32-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p23-pliegue-antes.json",
+   "dominio": "DOC",
+   "lineas": 1235,
+   "bytes": 31337,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T20:04:32-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p23-pliegue-despues.json",
+   "dominio": "DOC",
+   "lineas": 1235,
+   "bytes": 31337,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T20:04:32-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p23-ubicaciones-antes.json",
+   "dominio": "DOC",
+   "lineas": 135,
+   "bytes": 5173,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T20:04:32-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/baselines/p23-ubicaciones-despues.json",
+   "dominio": "DOC",
+   "lineas": 15,
+   "bytes": 630,
+   "ultimo_commit": {
+    "fecha": "2026-09-04T20:04:32-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/bitacora-beta-2.md",
+   "dominio": "DOC",
+   "lineas": 561,
+   "bytes": 82714,
+   "ultimo_commit": {
+    "fecha": "2026-06-29T14:42:30-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Bitácora Beta 2 — Ejecución del rediseño del flujo del setter (LeadOS)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/bitacora-beta-3.md",
+   "dominio": "DOC",
+   "lineas": 10981,
+   "bytes": 966320,
+   "ultimo_commit": {
+    "fecha": "2026-09-06T03:13:00-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Bitácora Beta 3 — Bloque 3: el wizard del lead (trabajar el lead que el foco entrega)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/bitacora-beta.md",
+   "dominio": "DOC",
+   "lineas": 1750,
+   "bytes": 247188,
+   "ultimo_commit": {
+    "fecha": "2026-06-29T14:42:30-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Bitácora — Fase Beta de LeadOS"
+  },
+  {
+   "ruta": "logic-core-v3/docs/bitacora-rediseno.md",
+   "dominio": "DOC",
+   "lineas": 3736,
+   "bytes": 211508,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Bitácora del rediseño — sitio público develOP"
+  },
+  {
+   "ruta": "logic-core-v3/docs/bitacora-roadmap.md",
+   "dominio": "DOC",
+   "lineas": 17161,
+   "bytes": 1470147,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T23:16:38-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Bitácora del roadmap — Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/docs/chatbot-deploy.md",
+   "dominio": "DOC",
+   "lineas": 144,
+   "bytes": 4744,
+   "ultimo_commit": {
+    "fecha": "2026-05-15T00:13:32-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Chatbot — Procedure de Deploy a Netlify"
+  },
+  {
+   "ruta": "logic-core-v3/docs/chatbot-qa-checklist.md",
+   "dominio": "DOC",
+   "lineas": 102,
+   "bytes": 4478,
+   "ultimo_commit": {
+    "fecha": "2026-05-13T20:17:59-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Chatbot QA Checklist — Pre-deploy"
+  },
+  {
+   "ruta": "logic-core-v3/docs/chatbot-sprints.md",
+   "dominio": "DOC",
+   "lineas": 84,
+   "bytes": 2917,
+   "ultimo_commit": {
+    "fecha": "2026-05-15T00:13:32-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Chatbot — Sprint Tracking"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/changelog/chatbot.md",
+   "dominio": "DOC",
+   "lineas": 128,
+   "bytes": 6140,
+   "ultimo_commit": {
+    "fecha": "2026-06-24T19:41:09-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Changelog — Chatbot / Mi Chatbot (Portal Cliente)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/changelog/cuenta.md",
+   "dominio": "DOC",
+   "lineas": 484,
+   "bytes": 32118,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T16:49:33-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "CHANGELOG — lane/cuenta"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/changelog/general.md",
+   "dominio": "DOC",
+   "lineas": 135,
+   "bytes": 6297,
+   "ultimo_commit": {
+    "fecha": "2026-06-24T19:41:09-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Changelog — General (Portal Cliente)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/changelog/inicio.md",
+   "dominio": "DOC",
+   "lineas": 205,
+   "bytes": 11160,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T16:49:33-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Changelog — Inicio (Portal Cliente)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/changelog/mensajes.md",
+   "dominio": "DOC",
+   "lineas": 91,
+   "bytes": 4348,
+   "ultimo_commit": {
+    "fecha": "2026-06-24T19:41:09-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Changelog — Mensajes (Portal Cliente)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/changelog/plan.md",
+   "dominio": "DOC",
+   "lineas": 118,
+   "bytes": 8738,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T16:49:33-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Changelog — Mi plan (Portal Cliente)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/changelog/proyecto.md",
+   "dominio": "DOC",
+   "lineas": 56,
+   "bytes": 6178,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T16:49:33-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Changelog — Lane Project (Portal Cliente `/dashboard/project`)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/changelog/resultados.md",
+   "dominio": "DOC",
+   "lineas": 177,
+   "bytes": 20023,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T16:49:33-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Changelog — Resultados (Portal Cliente)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/changelog/servicios.md",
+   "dominio": "DOC",
+   "lineas": 266,
+   "bytes": 30836,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T16:49:33-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Rediseño visual — `/dashboard/services` (Portal Cliente) — fuente de verdad de la lane"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/changelog/soporte.md",
+   "dominio": "DOC",
+   "lineas": 122,
+   "bytes": 5837,
+   "ultimo_commit": {
+    "fecha": "2026-06-24T19:41:09-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Changelog — Soporte (Portal Cliente) + Chat Compartido"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/lane-inicio-explore.md",
+   "dominio": "DOC",
+   "lineas": 528,
+   "bytes": 20942,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T14:30:10-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Explore: lane/inicio — Dashboard Inicio (Cliente)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/lane-inicio-sprint-log.md",
+   "dominio": "DOC",
+   "lineas": 219,
+   "bytes": 12325,
+   "ultimo_commit": {
+    "fecha": "2026-06-27T16:21:34-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Lane Inicio — Log de sprints"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/lane-portal-pulido-log.md",
+   "dominio": "DOC",
+   "lineas": 274,
+   "bytes": 21798,
+   "ultimo_commit": {
+    "fecha": "2026-06-28T20:37:07-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Lane `portal-pulido` — log (fuente de verdad)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/relevamiento-6-secciones.md",
+   "dominio": "DOC",
+   "lineas": 153,
+   "bytes": 18633,
+   "ultimo_commit": {
+    "fecha": "2026-06-24T19:41:09-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Relevamiento READ-ONLY — 6 secciones del Portal Cliente"
+  },
+  {
+   "ruta": "logic-core-v3/docs/client-portal/relevamiento-global.md",
+   "dominio": "DOC",
+   "lineas": 755,
+   "bytes": 98706,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T20:12:13-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Relevamiento global — Portal cliente"
+  },
+  {
+   "ruta": "logic-core-v3/docs/consolidacion-planoA-runtime.md",
+   "dominio": "DOC",
+   "lineas": 129,
+   "bytes": 10952,
+   "ultimo_commit": {
+    "fecha": "2026-07-09T11:41:00-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Consolidación Plano A — Mejoras del runtime del chatbot"
+  },
+  {
+   "ruta": "logic-core-v3/docs/corrida-recorrido-2026-08-31/.gitignore",
+   "dominio": "DOC",
+   "lineas": 1,
+   "bytes": 6,
+   "ultimo_commit": {
+    "fecha": "2026-08-31T14:12:15-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/corrida-recorrido-2026-08-31/MANIFIESTO.md",
+   "dominio": "DOC",
+   "lineas": 122,
+   "bytes": 9617,
+   "ultimo_commit": {
+    "fecha": "2026-08-31T14:12:15-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Manifiesto de capturas — corrida de recorrido (31/08/2026)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/corrida-recorrido-2026-08-31/REPORTE.md",
+   "dominio": "DOC",
+   "lineas": 394,
+   "bytes": 21575,
+   "ultimo_commit": {
+    "fecha": "2026-08-31T14:12:15-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Corrida de recorrido — el camino entero, de punta a punta"
+  },
+  {
+   "ruta": "logic-core-v3/docs/demo-guion.md",
+   "dominio": "DOC",
+   "lineas": 68,
+   "bytes": 2308,
+   "ultimo_commit": {
+    "fecha": "2026-05-19T00:21:42-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Demo develOP v1.0 — Guion"
+  },
+  {
+   "ruta": "logic-core-v3/docs/design-system-audit.md",
+   "dominio": "DOC",
+   "lineas": 97,
+   "bytes": 3232,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T22:32:11-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Audit de inconsistencias visuales"
+  },
+  {
+   "ruta": "logic-core-v3/docs/design-system.md",
+   "dominio": "DOC",
+   "lineas": 247,
+   "bytes": 4824,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T22:39:49-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "develOP Design System"
+  },
+  {
+   "ruta": "logic-core-v3/docs/diagnostico-visual-2026-08/.gitignore",
+   "dominio": "DOC",
+   "lineas": 9,
+   "bytes": 371,
+   "ultimo_commit": {
+    "fecha": "2026-08-20T20:39:10-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/diagnostico-visual-2026-08/MANIFIESTO.md",
+   "dominio": "DOC",
+   "lineas": 625,
+   "bytes": 43440,
+   "ultimo_commit": {
+    "fecha": "2026-08-20T20:39:10-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Manifiesto — Diagnóstico visual del Panel del Setter (LeadOS)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/diagnostico-visual-2026-08/REPORTE.md",
+   "dominio": "DOC",
+   "lineas": 223,
+   "bytes": 11991,
+   "ultimo_commit": {
+    "fecha": "2026-08-20T20:39:10-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Corrida de experiencia — reporte"
+  },
+  {
+   "ruta": "logic-core-v3/docs/diagnostico-visual-admin-2026-08/.gitignore",
+   "dominio": "DOC",
+   "lineas": 11,
+   "bytes": 451,
+   "ultimo_commit": {
+    "fecha": "2026-08-22T02:05:33-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/diagnostico-visual-admin-2026-08/MANIFIESTO.md",
+   "dominio": "DOC",
+   "lineas": 473,
+   "bytes": 51354,
+   "ultimo_commit": {
+    "fecha": "2026-08-22T02:05:33-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Manifiesto — Diagnóstico visual del ADMIN (el lado de Franco)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/diagnostico-visual-admin-2026-08/REPORTE.md",
+   "dominio": "DOC",
+   "lineas": 391,
+   "bytes": 21418,
+   "ultimo_commit": {
+    "fecha": "2026-08-22T02:05:33-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Corrida de experiencia — el lado de Franco"
+  },
+  {
+   "ruta": "logic-core-v3/docs/env-vars.md",
+   "dominio": "DOC",
+   "lineas": 162,
+   "bytes": 10084,
+   "ultimo_commit": {
+    "fecha": "2026-05-22T01:45:19-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Variables de entorno — develOP / Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/docs/ev4-transcripts/README.md",
+   "dominio": "DOC",
+   "lineas": 41,
+   "bytes": 2050,
+   "ultimo_commit": {
+    "fecha": "2026-06-30T20:42:31-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "EV.4 — Transcripts del smoke conversacional"
+  },
+  {
+   "ruta": "logic-core-v3/docs/ev4-transcripts/agencia-1-web.md",
+   "dominio": "DOC",
+   "lineas": 34,
+   "bytes": 1748,
+   "ultimo_commit": {
+    "fecha": "2026-06-30T20:42:31-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Agencia — interesado en sitio web"
+  },
+  {
+   "ruta": "logic-core-v3/docs/ev4-transcripts/agencia-2-chatbot-ia.md",
+   "dominio": "DOC",
+   "lineas": 35,
+   "bytes": 1718,
+   "ultimo_commit": {
+    "fecha": "2026-06-30T20:42:31-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Agencia — interesado en chatbot IA"
+  },
+  {
+   "ruta": "logic-core-v3/docs/ev4-transcripts/agencia-3-vago.md",
+   "dominio": "DOC",
+   "lineas": 33,
+   "bytes": 1195,
+   "ultimo_commit": {
+    "fecha": "2026-06-30T20:42:31-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Agencia — visitante vago"
+  },
+  {
+   "ruta": "logic-core-v3/docs/ev4-transcripts/usados-1-comprador-caliente.md",
+   "dominio": "DOC",
+   "lineas": 37,
+   "bytes": 1229,
+   "ultimo_commit": {
+    "fecha": "2026-06-30T20:42:31-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Usados — comprador caliente (modelo + financiación + visita)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/ev4-transcripts/usados-2-permuta.md",
+   "dominio": "DOC",
+   "lineas": 31,
+   "bytes": 958,
+   "ultimo_commit": {
+    "fecha": "2026-06-30T20:42:31-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Usados — permuta"
+  },
+  {
+   "ruta": "logic-core-v3/docs/ev4-transcripts/usados-3-precio-frio.md",
+   "dominio": "DOC",
+   "lineas": 31,
+   "bytes": 896,
+   "ultimo_commit": {
+    "fecha": "2026-06-30T20:42:31-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Usados — consulta de precio fría"
+  },
+  {
+   "ruta": "logic-core-v3/docs/ev4-transcripts/usados-4-humano.md",
+   "dominio": "DOC",
+   "lineas": 25,
+   "bytes": 751,
+   "ultimo_commit": {
+    "fecha": "2026-06-30T20:42:31-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Usados — pide hablar con humano"
+  },
+  {
+   "ruta": "logic-core-v3/docs/ev5-transcripts/README.md",
+   "dominio": "DOC",
+   "lineas": 22,
+   "bytes": 853,
+   "ultimo_commit": {
+    "fecha": "2026-06-30T22:23:45-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "EV.5 — Transcripts del smoke de cierre de bloque"
+  },
+  {
+   "ruta": "logic-core-v3/docs/ev5-transcripts/agencia-captura.md",
+   "dominio": "DOC",
+   "lineas": 34,
+   "bytes": 2445,
+   "ultimo_commit": {
+    "fecha": "2026-06-30T22:23:45-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Agencia — captura de lead (cierre EV.5)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/experimentos/fg2-brief-experimento.md",
+   "dominio": "DOC",
+   "lineas": 201,
+   "bytes": 10570,
+   "ultimo_commit": {
+    "fecha": "2026-06-29T14:42:30-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "FG-2.0 — Experimento: ¿el formulario estructurado mejora las demos?"
+  },
+  {
+   "ruta": "logic-core-v3/docs/experimentos/fg2-prompts-listos.md",
+   "dominio": "DOC",
+   "lineas": 303,
+   "bytes": 16998,
+   "ultimo_commit": {
+    "fecha": "2026-06-29T14:42:30-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "FG-2.0 — Los 10 prompts del experimento, listos para pegar"
+  },
+  {
+   "ruta": "logic-core-v3/docs/impeccable-baseline.json",
+   "dominio": "DOC",
+   "lineas": 1313,
+   "bytes": 59748,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T18:48:06-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/impeccable-baseline.md",
+   "dominio": "DOC",
+   "lineas": 522,
+   "bytes": 19095,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T18:48:06-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Impeccable — baseline del detector (pre-rediseño)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/leados-alta-setter.md",
+   "dominio": "DOC",
+   "lineas": 66,
+   "bytes": 2380,
+   "ultimo_commit": {
+    "fecha": "2026-06-12T19:22:48-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "LeadOS — Alta de un setter (B1)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/00-INDICE.md",
+   "dominio": "DOC",
+   "lineas": 210,
+   "bytes": 10946,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:44:18-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Manual del Panel del Setter"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/01-tu-dia.md",
+   "dominio": "DOC",
+   "lineas": 170,
+   "bytes": 7102,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:21:47-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "01 · Tu día"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/02-la-ficha.md",
+   "dominio": "DOC",
+   "lineas": 166,
+   "bytes": 7544,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:24:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "02 · Un negocio nuevo: la ficha"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/03-la-evaluacion.md",
+   "dominio": "DOC",
+   "lineas": 149,
+   "bytes": 5960,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:25:03-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "03 · ¿Vale la pena? La evaluación"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/04-el-primer-mensaje.md",
+   "dominio": "DOC",
+   "lineas": 149,
+   "bytes": 5221,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:26:21-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "04 · El primer mensaje"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/05-los-toques.md",
+   "dominio": "DOC",
+   "lineas": 189,
+   "bytes": 7652,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:27:41-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "05 · Los toques y la espera"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/06-decidir-la-demo.md",
+   "dominio": "DOC",
+   "lineas": 137,
+   "bytes": 5571,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:28:30-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "06 · Decidir cómo va a ser la demo"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/07-construir-la-demo.md",
+   "dominio": "DOC",
+   "lineas": 227,
+   "bytes": 9237,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:29:45-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "07 · Construir la demo"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/08-publicar-el-borrador.md",
+   "dominio": "DOC",
+   "lineas": 116,
+   "bytes": 3915,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:32:01-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "08 · Publicar el borrador"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/09-el-chequeo-final.md",
+   "dominio": "DOC",
+   "lineas": 213,
+   "bytes": 10171,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:33:18-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "09 · El chequeo final y mandarla a revisión"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/10-correcciones-de-franco.md",
+   "dominio": "DOC",
+   "lineas": 134,
+   "bytes": 5255,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:34:42-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "10 · Cuando Franco pide correcciones"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/11-mandar-el-link.md",
+   "dominio": "DOC",
+   "lineas": 141,
+   "bytes": 4889,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:34:42-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "11 · Mandarle el link al negocio"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/12-agendar-la-reunion.md",
+   "dominio": "DOC",
+   "lineas": 184,
+   "bytes": 6806,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:36:16-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "12 · Agendar la reunión"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/13-cierres.md",
+   "dominio": "DOC",
+   "lineas": 120,
+   "bytes": 4148,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:36:16-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "13 · Cuando un negocio se cierra"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md",
+   "dominio": "DOC",
+   "lineas": 1210,
+   "bytes": 70431,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T11:54:52-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "BACHES — corrida de experiencia del Panel del Setter"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/BACHES-RE-VERIFICADOS.md",
+   "dominio": "DOC",
+   "lineas": 275,
+   "bytes": 18527,
+   "ultimo_commit": {
+    "fecha": "2026-08-18T15:28:06-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "BACHES RE-VERIFICADOS — sobre el producto podado"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/CORRIDA-M1-v3-FRENADA.md",
+   "dominio": "DOC",
+   "lineas": 197,
+   "bytes": 8672,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T12:15:22-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Corrida M1 v3 — FRENADA en Fase 0 (terreno)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/HALLAZGOS-MANUAL-v3.md",
+   "dominio": "DOC",
+   "lineas": 597,
+   "bytes": 28240,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:44:18-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "HALLAZGOS — byproducto de escribir el manual (corrida M1 v3, sobre el producto podado)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/HALLAZGOS-MANUAL.md",
+   "dominio": "DOC",
+   "lineas": 603,
+   "bytes": 30658,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:44:18-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "HALLAZGOS — byproducto de escribir el manual (corrida M1)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/PROGRESO-M1.md",
+   "dominio": "DOC",
+   "lineas": 55,
+   "bytes": 2133,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:41:15-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Progreso — corrida M1 v3 (manual sobre el producto podado)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/VALIDACION-PODA.md",
+   "dominio": "DOC",
+   "lineas": 352,
+   "bytes": 22073,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T13:41:15-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "VALIDACIÓN DE LA PODA — lo que la bitácora dice contra lo que la aplicación hace"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/galeria/.gitignore",
+   "dominio": "DOC",
+   "lineas": 8,
+   "bytes": 376,
+   "ultimo_commit": {
+    "fecha": "2026-07-23T06:03:22-03:00",
+    "autor": "Franco"
+   }
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/galeria/INDICE.md",
+   "dominio": "DOC",
+   "lineas": 190,
+   "bytes": 14303,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T15:58:13-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Galería de estados — Panel del Setter (corrida M0/G)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/galeria/PROGRESO.md",
+   "dominio": "DOC",
+   "lineas": 89,
+   "bytes": 5426,
+   "ultimo_commit": {
+    "fecha": "2026-07-23T06:24:06-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "PROGRESO — corrida M0 (galería de estados del Panel del Setter)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/manual-usuario/metodo-creacion-md-capacitacion.md",
+   "dominio": "DOC",
+   "lineas": 88,
+   "bytes": 6383,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T12:05:45-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Estándar de documentos del manual — Guía de estilo"
+  },
+  {
+   "ruta": "logic-core-v3/docs/metodo/LECCIONES-LEADOS.md",
+   "dominio": "DOC",
+   "lineas": 649,
+   "bytes": 44398,
+   "ultimo_commit": {
+    "fecha": "2026-07-23T06:02:11-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "LECCIONES DE LA REMEDIACIÓN DE LeadOS"
+  },
+  {
+   "ruta": "logic-core-v3/docs/metodo/MAPA-LEADOS.md",
+   "dominio": "DOC",
+   "lineas": 431,
+   "bytes": 28707,
+   "ultimo_commit": {
+    "fecha": "2026-07-23T06:11:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "MAPA DEL SISTEMA — LeadOS / Panel del Setter"
+  },
+  {
+   "ruta": "logic-core-v3/docs/metodo/PROGRESO-D1.md",
+   "dominio": "DOC",
+   "lineas": 109,
+   "bytes": 7377,
+   "ultimo_commit": {
+    "fecha": "2026-07-23T06:14:06-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "PROGRESO — Corrida D1 (destilar el método real de develOP)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/metodo/PROPUESTA-CIMIENTO.md",
+   "dominio": "DOC",
+   "lineas": 752,
+   "bytes": 43719,
+   "ultimo_commit": {
+    "fecha": "2026-07-23T06:07:09-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "PROPUESTA DE CAMBIOS AL MÉTODO — destilada de la remediación de LeadOS"
+  },
+  {
+   "ruta": "logic-core-v3/docs/microaudit-frozen-frontera-CO.md",
+   "dominio": "DOC",
+   "lineas": 419,
+   "bytes": 26525,
+   "ultimo_commit": {
+    "fecha": "2026-07-09T11:22:11-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Microauditoría dirigida — frozen, frontera y precondiciones CO-* (READ-ONLY)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/motor-whatsapp/bitacora.md",
+   "dominio": "DOC",
+   "lineas": 705,
+   "bytes": 47257,
+   "ultimo_commit": {
+    "fecha": "2026-07-10T03:40:47-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Bitácora — Motor WhatsApp"
+  },
+  {
+   "ruta": "logic-core-v3/docs/netlify-env-vars.md",
+   "dominio": "DOC",
+   "lineas": 38,
+   "bytes": 1428,
+   "ultimo_commit": {
+    "fecha": "2026-05-16T15:28:50-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Variables de entorno en Netlify"
+  },
+  {
+   "ruta": "logic-core-v3/docs/onboarding-data-connections.md",
+   "dominio": "DOC",
+   "lineas": 112,
+   "bytes": 4048,
+   "ultimo_commit": {
+    "fecha": "2026-05-04T21:33:29-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Onboarding de conexiones de datos para nuevos clientes"
+  },
+  {
+   "ruta": "logic-core-v3/docs/onboarding-flow.md",
+   "dominio": "DOC",
+   "lineas": 327,
+   "bytes": 13602,
+   "ultimo_commit": {
+    "fecha": "2026-04-27T21:34:23-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Flow de Onboarding — develOP"
+  },
+  {
+   "ruta": "logic-core-v3/docs/onboarding-modulo-agenda.md",
+   "dominio": "DOC",
+   "lineas": 98,
+   "bytes": 2866,
+   "ultimo_commit": {
+    "fecha": "2026-05-04T21:33:29-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Onboarding: Módulo Agenda Inteligente"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/00-entornos.md",
+   "dominio": "DOC",
+   "lineas": 152,
+   "bytes": 8637,
+   "ultimo_commit": {
+    "fecha": "2026-05-22T01:45:19-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Entornos dev / prod — Aislamiento con Neon branching"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/01-onboarding-cliente.md",
+   "dominio": "DOC",
+   "lineas": 139,
+   "bytes": 5374,
+   "ultimo_commit": {
+    "fecha": "2026-05-20T19:14:21-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "01 — Onboardear un cliente nuevo"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/02-activar-bot.md",
+   "dominio": "DOC",
+   "lineas": 82,
+   "bytes": 2137,
+   "ultimo_commit": {
+    "fecha": "2026-05-19T00:16:48-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "02 — Activar un bot"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/03-editar-kb.md",
+   "dominio": "DOC",
+   "lineas": 112,
+   "bytes": 3539,
+   "ultimo_commit": {
+    "fecha": "2026-05-19T00:16:48-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "03 — Editar la Knowledge Base de un cliente"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/04-responder-alerta.md",
+   "dominio": "DOC",
+   "lineas": 113,
+   "bytes": 3457,
+   "ultimo_commit": {
+    "fecha": "2026-05-19T00:16:48-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "04 — Responder a una alerta del sistema"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/05-cliente-no-anda.md",
+   "dominio": "DOC",
+   "lineas": 123,
+   "bytes": 3506,
+   "ultimo_commit": {
+    "fecha": "2026-05-19T00:16:48-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "05 — Cliente reporta \"el bot no anda\""
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/06-instalar-widget.md",
+   "dominio": "DOC",
+   "lineas": 100,
+   "bytes": 3488,
+   "ultimo_commit": {
+    "fecha": "2026-05-20T19:14:21-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "06 — Instalar widget en sitio del cliente"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/README.md",
+   "dominio": "DOC",
+   "lineas": 35,
+   "bytes": 1307,
+   "ultimo_commit": {
+    "fecha": "2026-05-20T19:14:21-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Workflows Operativos — develOP"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/alerts-types.md",
+   "dominio": "DOC",
+   "lineas": 60,
+   "bytes": 2678,
+   "ultimo_commit": {
+    "fecha": "2026-05-20T19:14:21-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Tipos de Alertas del Sistema — develOP Chatbot"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/b14-deploy-checklist.md",
+   "dominio": "DOC",
+   "lineas": 336,
+   "bytes": 12071,
+   "ultimo_commit": {
+    "fecha": "2026-05-27T10:31:36-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Checklist de salida — B14 → prod"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/cron-jobs.md",
+   "dominio": "DOC",
+   "lineas": 27,
+   "bytes": 929,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T19:39:51-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Cron Jobs - develOP"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/neon-backups.md",
+   "dominio": "DOC",
+   "lineas": 236,
+   "bytes": 7568,
+   "ultimo_commit": {
+    "fecha": "2026-05-27T10:31:36-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Backups — Neon PostgreSQL"
+  },
+  {
+   "ruta": "logic-core-v3/docs/operations/sentry-setup.md",
+   "dominio": "DOC",
+   "lineas": 39,
+   "bytes": 1088,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T16:19:51-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Setup de Sentry — Steps manuales"
+  },
+  {
+   "ruta": "logic-core-v3/docs/privacidad-afirmaciones-cliente.md",
+   "dominio": "DOC",
+   "lineas": 107,
+   "bytes": 6033,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T22:25:36-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Privacidad de los datos de visitantes — qué se puede afirmar a un cliente"
+  },
+  {
+   "ruta": "logic-core-v3/docs/probe-b2-hero-nav.md",
+   "dominio": "DOC",
+   "lineas": 555,
+   "bytes": 53953,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T01:54:37-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "PROBE — Hero, intro y navegación para B2"
+  },
+  {
+   "ruta": "logic-core-v3/docs/probe-bundle-inicial.md",
+   "dominio": "DOC",
+   "lineas": 375,
+   "bytes": 30954,
+   "ultimo_commit": {
+    "fecha": "2026-08-10T12:31:03-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "PROBE — El bundle inicial del sitio público"
+  },
+  {
+   "ruta": "logic-core-v3/docs/probe-construccion-p6.md",
+   "dominio": "DOC",
+   "lineas": 631,
+   "bytes": 56576,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T16:18:38-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "PROBE — las seis pantallas de Construcción (previo a P6)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/probe-monolito-censo.md",
+   "dominio": "DOC",
+   "lineas": 995,
+   "bytes": 89150,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T04:14:38-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "PROBE — Censo del monolito y del home que muere"
+  },
+  {
+   "ruta": "logic-core-v3/docs/probe-motion-sitio.md",
+   "dominio": "DOC",
+   "lineas": 499,
+   "bytes": 69256,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T04:14:38-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "PROBE — Motion del sitio público"
+  },
+  {
+   "ruta": "logic-core-v3/docs/probe-poda-terreno.md",
+   "dominio": "DOC",
+   "lineas": 1186,
+   "bytes": 96139,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T02:26:39-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "PROBE · Terreno para la poda del Panel del Setter (LeadOS)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-22T22-00-07-164Z.md",
+   "dominio": "DOC",
+   "lineas": 242,
+   "bytes": 6846,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-22T22-19-20-185Z.md",
+   "dominio": "DOC",
+   "lineas": 236,
+   "bytes": 6541,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-22T22-38-03-073Z.md",
+   "dominio": "DOC",
+   "lineas": 281,
+   "bytes": 7998,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-22T22-49-06-262Z.md",
+   "dominio": "DOC",
+   "lineas": 366,
+   "bytes": 10959,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-22T23-12-16-181Z.md",
+   "dominio": "DOC",
+   "lineas": 375,
+   "bytes": 11024,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-22T23-18-15-111Z.md",
+   "dominio": "DOC",
+   "lineas": 427,
+   "bytes": 12726,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T00-03-05-733Z.md",
+   "dominio": "DOC",
+   "lineas": 403,
+   "bytes": 12684,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T00-07-29-708Z.md",
+   "dominio": "DOC",
+   "lineas": 427,
+   "bytes": 12694,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T00-25-44-169Z.md",
+   "dominio": "DOC",
+   "lineas": 419,
+   "bytes": 12267,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T00-44-37-258Z.md",
+   "dominio": "DOC",
+   "lineas": 424,
+   "bytes": 12629,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T00-59-24-888Z.md",
+   "dominio": "DOC",
+   "lineas": 572,
+   "bytes": 17068,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T01-03-11-882Z.md",
+   "dominio": "DOC",
+   "lineas": 662,
+   "bytes": 21376,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T13:00:34-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T18-33-48-648Z.md",
+   "dominio": "DOC",
+   "lineas": 609,
+   "bytes": 19011,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T21:53:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T19-05-38-809Z.md",
+   "dominio": "DOC",
+   "lineas": 634,
+   "bytes": 19355,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T21:53:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T19-42-43-822Z.md",
+   "dominio": "DOC",
+   "lineas": 666,
+   "bytes": 19972,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T21:53:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T20-17-46-942Z.md",
+   "dominio": "DOC",
+   "lineas": 740,
+   "bytes": 21374,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T21:53:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T20-55-17-414Z.md",
+   "dominio": "DOC",
+   "lineas": 787,
+   "bytes": 23191,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T21:53:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T21-20-32-446Z.md",
+   "dominio": "DOC",
+   "lineas": 734,
+   "bytes": 23274,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T21:53:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/baseline-2026-05-23T21-33-39-011Z.md",
+   "dominio": "DOC",
+   "lineas": 931,
+   "bytes": 27804,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T21:53:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Baseline de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/smoke-2026-05-23T21-19-30-029Z.md",
+   "dominio": "DOC",
+   "lineas": 176,
+   "bytes": 5299,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T21:53:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Smoke de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/regression/smoke-2026-05-23T21-46-53-107Z.md",
+   "dominio": "DOC",
+   "lineas": 174,
+   "bytes": 5532,
+   "ultimo_commit": {
+    "fecha": "2026-05-23T21:53:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Smoke de regresión — bot Matsu"
+  },
+  {
+   "ruta": "logic-core-v3/docs/releases/v1.0.0.md",
+   "dominio": "DOC",
+   "lineas": 120,
+   "bytes": 4169,
+   "ultimo_commit": {
+    "fecha": "2026-05-20T19:31:24-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Release v1.0.0 — develOP Logic Core v3"
+  },
+  {
+   "ruta": "logic-core-v3/docs/research/2026-04-entrega-2-pre-research.md",
+   "dominio": "DOC",
+   "lineas": 182,
+   "bytes": 9361,
+   "ultimo_commit": {
+    "fecha": "2026-04-27T21:34:23-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Entrega 2 — Pre-Research Técnico"
+  },
+  {
+   "ruta": "logic-core-v3/docs/roadmap-pendientes.md",
+   "dominio": "DOC",
+   "lineas": 181,
+   "bytes": 20387,
+   "ultimo_commit": {
+    "fecha": "2026-07-10T20:35:32-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Roadmap pendientes"
+  },
+  {
+   "ruta": "logic-core-v3/docs/smoke-report.md",
+   "dominio": "DOC",
+   "lineas": 203,
+   "bytes": 19897,
+   "ultimo_commit": {
+    "fecha": "2026-06-22T07:17:47-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Smoke report — Setter / LeadOS"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprint-alpha-3-kb-editor.md",
+   "dominio": "DOC",
+   "lineas": 37,
+   "bytes": 1159,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T19:14:43-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Sprint Alpha.3 - Knowledge Base Editor"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-0-5-cleanup.md",
+   "dominio": "DOC",
+   "lineas": 34,
+   "bytes": 1352,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T16:19:51-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Sprint Alpha.0.5 — Fixes post test manual"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-0-6-cleanup-extended.md",
+   "dominio": "DOC",
+   "lineas": 24,
+   "bytes": 944,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T16:19:51-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Sprint Alpha.0.6 — Limpieza legacy + audit env vars"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-0-7-baseline-observability.md",
+   "dominio": "DOC",
+   "lineas": 25,
+   "bytes": 651,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T16:19:51-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Sprint Alpha.0.7 — Baseline + Observability"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-0-8-tests-e2e.md",
+   "dominio": "DOC",
+   "lineas": 55,
+   "bytes": 2542,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T16:19:51-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Sprint Alpha.0.8 — Tests E2E ampliados"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-0-9-status-verificacion.md",
+   "dominio": "DOC",
+   "lineas": 46,
+   "bytes": 1416,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T16:19:51-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Sprint Alpha.0.9 — STATUS + Verificación final"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-0-cleanup.md",
+   "dominio": "DOC",
+   "lineas": 49,
+   "bytes": 4147,
+   "ultimo_commit": {
+    "fecha": "2026-05-16T20:22:14-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Alpha.0 Cleanup Sprint"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-1-reaudit.md",
+   "dominio": "DOC",
+   "lineas": 266,
+   "bytes": 10823,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T16:31:02-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Sprint Alpha.1 — Re-auditoría funcional + Gap Analysis"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-2-onboarding.md",
+   "dominio": "DOC",
+   "lineas": 70,
+   "bytes": 3461,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T16:38:22-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Sprint Alpha.2 — Onboarding Wizard Profesionalizado"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-RESUMEN-FINAL.md",
+   "dominio": "DOC",
+   "lineas": 92,
+   "bytes": 2979,
+   "ultimo_commit": {
+    "fecha": "2026-05-19T00:21:42-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "RESUMEN FINAL — Fase Alpha completada (v1.0)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-bloque-C-RESUMEN.md",
+   "dominio": "DOC",
+   "lineas": 40,
+   "bytes": 1453,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T23:14:49-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Bloque C - Design System unificado (Alpha.10-12)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/alpha-pre-cierre-RESUMEN.md",
+   "dominio": "DOC",
+   "lineas": 113,
+   "bytes": 5720,
+   "ultimo_commit": {
+    "fecha": "2026-05-17T16:19:51-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Resumen del bloque Pre-Alpha (Alpha.0.5 → Alpha.0.9)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/infra-1-observabilidad.md",
+   "dominio": "DOC",
+   "lineas": 76,
+   "bytes": 6621,
+   "ultimo_commit": {
+    "fecha": "2026-07-05T22:10:47-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "INFRA.1 — Rastro off-Neon de toda falla de persistencia + `onError` + `.code`/`.cause`"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/infra-2-cold-start-retry.md",
+   "dominio": "DOC",
+   "lineas": 138,
+   "bytes": 9914,
+   "ultimo_commit": {
+    "fecha": "2026-07-06T21:06:20-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "INFRA.2 — Idempotencia del user message + retry del widget para el cold-start"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/p3-a-1-gbp-connection.md",
+   "dominio": "DOC",
+   "lineas": 151,
+   "bytes": 10589,
+   "ultimo_commit": {
+    "fecha": "2026-07-04T15:13:10-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "P3-A.1 — Eslabón backend de la conexión Google Business Profile"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/p3-a-2-venta.md",
+   "dominio": "DOC",
+   "lineas": 229,
+   "bytes": 15326,
+   "ultimo_commit": {
+    "fecha": "2026-07-04T20:56:31-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "P3-A.2 — Superficie de venta del módulo de reseñas + estados honestos"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/p4-1-render-utm.md",
+   "dominio": "DOC",
+   "lineas": 124,
+   "bytes": 7718,
+   "ultimo_commit": {
+    "fecha": "2026-07-04T22:10:00-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "P4.1 — Render de atribución por campaña (UTM) en el panel"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/q1-1-harness.md",
+   "dominio": "DOC",
+   "lineas": 186,
+   "bytes": 12088,
+   "ultimo_commit": {
+    "fecha": "2026-07-05T17:52:04-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Q1.1 — Corredor de conversaciones doradas (ejecuta y captura, NO evalúa)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/q1-2-scoring.md",
+   "dominio": "DOC",
+   "lineas": 101,
+   "bytes": 6424,
+   "ultimo_commit": {
+    "fecha": "2026-07-05T14:52:03-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Q1.2 — Evaluación de la batería: asserts duros + juez LLM"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/sprint-b0-bis-cierre.md",
+   "dominio": "DOC",
+   "lineas": 60,
+   "bytes": 6892,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T04:14:38-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "SPRINT B0-bis — Cierre de B0: three fuera del bundle inicial"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/sprint-b05-sanidad-sitio.md",
+   "dominio": "DOC",
+   "lineas": 84,
+   "bytes": 7900,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T04:14:38-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "SPRINT B0.5 — Sanidad del sitio público + SEO base"
+  },
+  {
+   "ruta": "logic-core-v3/docs/sprints/utm-1-captura.md",
+   "dominio": "DOC",
+   "lineas": 261,
+   "bytes": 16312,
+   "ultimo_commit": {
+    "fecha": "2026-07-04T21:22:29-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "UTM.1 — Captura de atribución first-touch (widget → conversación → lead)"
+  },
+  {
+   "ruta": "logic-core-v3/docs/testing-strategy.md",
+   "dominio": "DOC",
+   "lineas": 136,
+   "bytes": 4592,
+   "ultimo_commit": {
+    "fecha": "2026-05-18T17:29:14-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Testing Strategy - develOP"
+  },
+  {
+   "ruta": "logic-core-v3/docs/v1.0-smoke-test-checklist.md",
+   "dominio": "DOC",
+   "lineas": 108,
+   "bytes": 5374,
+   "ultimo_commit": {
+    "fecha": "2026-05-20T19:31:24-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "v1.0 Smoke Test Checklist"
+  },
+  {
+   "ruta": "logic-core-v3/docs/verificacion-arranque-oslead-vii.md",
+   "dominio": "DOC",
+   "lineas": 696,
+   "bytes": 42807,
+   "ultimo_commit": {
+    "fecha": "2026-08-18T15:28:05-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Verificación de arranque — OSLead VII"
+  },
+  {
+   "ruta": "logic-core-v3/src/app/ai-implementations/layout.tsx",
+   "dominio": "PUB",
+   "lineas": 50,
+   "bytes": 2047,
+   "ultimo_commit": {
+    "fecha": "2026-03-21T07:02:08-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "layout",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/app/ai-implementations/page.tsx",
+   "dominio": "PUB",
+   "lineas": 282,
+   "bytes": 12384,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "page",
+   "client": true,
+   "imports": 11
+  },
+  {
+   "ruta": "logic-core-v3/src/app/contact/layout.tsx",
+   "dominio": "PUB",
+   "lineas": 34,
+   "bytes": 1455,
+   "ultimo_commit": {
+    "fecha": "2026-07-28T19:17:25-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "layout",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/app/page.tsx",
+   "dominio": "PUB",
+   "lineas": 46,
+   "bytes": 2537,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "page",
+   "client": false,
+   "imports": 6
+  },
+  {
+   "ruta": "logic-core-v3/src/app/process-automation/layout.tsx",
+   "dominio": "PUB",
+   "lineas": 50,
+   "bytes": 2098,
+   "ultimo_commit": {
+    "fecha": "2026-03-21T07:02:08-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "layout",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/app/process-automation/page.tsx",
+   "dominio": "PUB",
+   "lineas": 136,
+   "bytes": 4350,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "page",
+   "client": true,
+   "imports": 13
+  },
+  {
+   "ruta": "logic-core-v3/src/app/robots.ts",
+   "dominio": "PUB",
+   "lineas": 38,
+   "bytes": 961,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T20:12:50-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/app/sitemap.ts",
+   "dominio": "PUB",
+   "lineas": 32,
+   "bytes": 1316,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/app/software-development/layout.tsx",
+   "dominio": "PUB",
+   "lineas": 49,
+   "bytes": 2016,
+   "ultimo_commit": {
+    "fecha": "2026-03-21T07:02:08-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "layout",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/app/software-development/page.tsx",
+   "dominio": "PUB",
+   "lineas": 155,
+   "bytes": 5143,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "page",
+   "client": true,
+   "imports": 13
+  },
+  {
+   "ruta": "logic-core-v3/src/app/styleguide/_components/AccentPermutations.tsx",
+   "dominio": "PUB",
+   "lineas": 121,
+   "bytes": 3531,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T05:30:34-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/app/styleguide/_components/ComponentStates.tsx",
+   "dominio": "PUB",
+   "lineas": 309,
+   "bytes": 13034,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/app/styleguide/_components/HomeSkeletonBottom.tsx",
+   "dominio": "PUB",
+   "lineas": 162,
+   "bytes": 5789,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/app/styleguide/_components/HomeSkeletonTop.tsx",
+   "dominio": "PUB",
+   "lineas": 120,
+   "bytes": 3876,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/app/styleguide/_components/PaletteBlock.tsx",
+   "dominio": "PUB",
+   "lineas": 131,
+   "bytes": 5226,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T05:30:34-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/app/styleguide/_components/ProductPlate.tsx",
+   "dominio": "PUB",
+   "lineas": 82,
+   "bytes": 3415,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T05:30:34-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/app/styleguide/_components/ServiceRow.tsx",
+   "dominio": "PUB",
+   "lineas": 62,
+   "bytes": 2608,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/app/styleguide/_components/SgBlock.tsx",
+   "dominio": "PUB",
+   "lineas": 50,
+   "bytes": 1662,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T05:30:34-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/app/styleguide/_components/TypographyBlock.tsx",
+   "dominio": "PUB",
+   "lineas": 182,
+   "bytes": 8418,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/app/styleguide/page.tsx",
+   "dominio": "PUB",
+   "lineas": 147,
+   "bytes": 6518,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "page",
+   "client": false,
+   "imports": 9
+  },
+  {
+   "ruta": "logic-core-v3/src/app/web-development/layout.tsx",
+   "dominio": "PUB",
+   "lineas": 50,
+   "bytes": 2020,
+   "ultimo_commit": {
+    "fecha": "2026-03-21T07:02:08-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "layout",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/app/web-development/page.tsx",
+   "dominio": "PUB",
+   "lineas": 311,
+   "bytes": 15287,
+   "ultimo_commit": {
+    "fecha": "2026-08-07T13:13:14-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "page",
+   "client": true,
+   "imports": 16
+  },
+  {
+   "ruta": "logic-core-v3/src/components/3d/HeroArtifact.tsx",
+   "dominio": "PUB",
+   "lineas": 161,
+   "bytes": 5666,
+   "ultimo_commit": {
+    "fecha": "2026-03-30T01:17:33-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 5
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/BentoAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 1082,
+   "bytes": 37778,
+   "ultimo_commit": {
+    "fecha": "2026-05-01T20:38:22-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/CalculadoraAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 993,
+   "bytes": 38228,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T17:40:58-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 5
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/ComparativaAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 316,
+   "bytes": 12670,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T17:40:58-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/CtaAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 537,
+   "bytes": 33159,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/DataPacketsCanvas.tsx",
+   "dominio": "PUB",
+   "lineas": 149,
+   "bytes": 4397,
+   "ultimo_commit": {
+    "fecha": "2026-03-14T22:44:26-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/FaqAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 390,
+   "bytes": 22262,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T11:17:41-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/FlujoAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 1238,
+   "bytes": 47031,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T17:40:58-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/HeroAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 1557,
+   "bytes": 54288,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T11:17:41-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/IntegracionesAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 761,
+   "bytes": 36674,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/ProcesoAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 890,
+   "bytes": 39444,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T11:17:41-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/RubrosAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 1440,
+   "bytes": 51445,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/SocialProofAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 500,
+   "bytes": 20126,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T17:40:58-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/automation/VaultAutomation.tsx",
+   "dominio": "PUB",
+   "lineas": 536,
+   "bytes": 20492,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/canvas/AuroraBackground.tsx",
+   "dominio": "PUB",
+   "lineas": 29,
+   "bytes": 1236,
+   "ultimo_commit": {
+    "fecha": "2026-03-06T17:21:26-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 0
+  },
+  {
+   "ruta": "logic-core-v3/src/components/canvas/HeroBackground.tsx",
+   "dominio": "PUB",
+   "lineas": 319,
+   "bytes": 11577,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/canvas/Interactive3DNetwork.tsx",
+   "dominio": "PUB",
+   "lineas": 623,
+   "bytes": 26798,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 6
+  },
+  {
+   "ruta": "logic-core-v3/src/components/canvas/LiquidProject.tsx",
+   "dominio": "PUB",
+   "lineas": 62,
+   "bytes": 2517,
+   "ultimo_commit": {
+    "fecha": "2026-02-03T17:48:47-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/canvas/NeuralNetwork.tsx",
+   "dominio": "PUB",
+   "lineas": 98,
+   "bytes": 3034,
+   "ultimo_commit": {
+    "fecha": "2026-03-05T20:06:43-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/canvas/ReactiveBackground.tsx",
+   "dominio": "PUB",
+   "lineas": 145,
+   "bytes": 4556,
+   "ultimo_commit": {
+    "fecha": "2026-03-05T14:35:37-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/ChapterLabel.tsx",
+   "dominio": "PUB",
+   "lineas": 43,
+   "bytes": 1608,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/CtaButton.tsx",
+   "dominio": "PUB",
+   "lineas": 123,
+   "bytes": 4506,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/DataStat.tsx",
+   "dominio": "PUB",
+   "lineas": 32,
+   "bytes": 914,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T05:30:34-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/DisplayHeading.tsx",
+   "dominio": "PUB",
+   "lineas": 41,
+   "bytes": 934,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T05:30:34-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/Eyebrow.tsx",
+   "dominio": "PUB",
+   "lineas": 34,
+   "bytes": 830,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T05:30:34-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/Lead.tsx",
+   "dominio": "PUB",
+   "lineas": 18,
+   "bytes": 507,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T05:01:09-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/MonoLabel.tsx",
+   "dominio": "PUB",
+   "lineas": 49,
+   "bytes": 1874,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/RuleDivider.tsx",
+   "dominio": "PUB",
+   "lineas": 15,
+   "bytes": 458,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T05:01:09-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/SectionShell.tsx",
+   "dominio": "PUB",
+   "lineas": 101,
+   "bytes": 3827,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/Subhead.tsx",
+   "dominio": "PUB",
+   "lineas": 47,
+   "bytes": 1554,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/Surface.tsx",
+   "dominio": "PUB",
+   "lineas": 41,
+   "bytes": 983,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T05:01:09-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/accent.ts",
+   "dominio": "PUB",
+   "lineas": 42,
+   "bytes": 1366,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T16:44:25-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 0
+  },
+  {
+   "ruta": "logic-core-v3/src/components/design-system/index.ts",
+   "dominio": "PUB",
+   "lineas": 30,
+   "bytes": 1081,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T19:48:07-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 0
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/BentoIA.tsx",
+   "dominio": "PUB",
+   "lineas": 719,
+   "bytes": 29180,
+   "ultimo_commit": {
+    "fecha": "2026-04-04T15:40:22-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/CalculadorIA.tsx",
+   "dominio": "PUB",
+   "lineas": 341,
+   "bytes": 14426,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/ComparadorIA.tsx",
+   "dominio": "PUB",
+   "lineas": 971,
+   "bytes": 42336,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/CtaIA.tsx",
+   "dominio": "PUB",
+   "lineas": 544,
+   "bytes": 33803,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/DemoIA.tsx",
+   "dominio": "PUB",
+   "lineas": 770,
+   "bytes": 26232,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/FaqIA.tsx",
+   "dominio": "PUB",
+   "lineas": 398,
+   "bytes": 20623,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T11:17:41-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/GarantiaIA.tsx",
+   "dominio": "PUB",
+   "lineas": 1131,
+   "bytes": 31437,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/HeroIA.tsx",
+   "dominio": "PUB",
+   "lineas": 809,
+   "bytes": 31990,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T11:17:41-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/PipelineIA.tsx",
+   "dominio": "PUB",
+   "lineas": 1732,
+   "bytes": 57464,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T11:17:41-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/RubrosIA.tsx",
+   "dominio": "PUB",
+   "lineas": 1161,
+   "bytes": 52729,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/TestimoniosIA.tsx",
+   "dominio": "PUB",
+   "lineas": 236,
+   "bytes": 8857,
+   "ultimo_commit": {
+    "fecha": "2026-04-04T15:40:22-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/ia/VaultIA.tsx",
+   "dominio": "PUB",
+   "lineas": 490,
+   "bytes": 16187,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/layout/DynamicDock.tsx",
+   "dominio": "PUB",
+   "lineas": 629,
+   "bytes": 26311,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 9
+  },
+  {
+   "ruta": "logic-core-v3/src/components/layout/Hero.tsx",
+   "dominio": "PUB",
+   "lineas": 826,
+   "bytes": 40181,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 15
+  },
+  {
+   "ruta": "logic-core-v3/src/components/layout/HeroArtifactLayer.tsx",
+   "dominio": "PUB",
+   "lineas": 172,
+   "bytes": 7343,
+   "ultimo_commit": {
+    "fecha": "2026-08-03T17:40:55-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/layout/HeroCanvas.tsx",
+   "dominio": "PUB",
+   "lineas": 215,
+   "bytes": 8542,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T16:44:25-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 5
+  },
+  {
+   "ruta": "logic-core-v3/src/components/layout/HomeWrapper.tsx",
+   "dominio": "PUB",
+   "lineas": 22,
+   "bytes": 633,
+   "ultimo_commit": {
+    "fecha": "2026-05-15T00:13:32-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/layout/SectionWrapper.tsx",
+   "dominio": "PUB",
+   "lineas": 18,
+   "bytes": 508,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/AILargeCta.tsx",
+   "dominio": "PUB",
+   "lineas": 61,
+   "bytes": 3386,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/AIPipelineSection.tsx",
+   "dominio": "PUB",
+   "lineas": 151,
+   "bytes": 9248,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/AITechMarquee.tsx",
+   "dominio": "PUB",
+   "lineas": 81,
+   "bytes": 2849,
+   "ultimo_commit": {
+    "fecha": "2026-04-21T19:32:10-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/EnterpriseStandards.tsx",
+   "dominio": "PUB",
+   "lineas": 75,
+   "bytes": 3744,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/FeedbackLoop.tsx",
+   "dominio": "PUB",
+   "lineas": 60,
+   "bytes": 2761,
+   "ultimo_commit": {
+    "fecha": "2026-05-27T10:31:36-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/ProcessAutomationCta.tsx",
+   "dominio": "PUB",
+   "lineas": 41,
+   "bytes": 2311,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/ProcessAutomationMetrics.tsx",
+   "dominio": "PUB",
+   "lineas": 75,
+   "bytes": 4869,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/ROICalculator.tsx",
+   "dominio": "PUB",
+   "lineas": 424,
+   "bytes": 22526,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/SoftwareArchitecture.tsx",
+   "dominio": "PUB",
+   "lineas": 83,
+   "bytes": 4351,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/TeamSection.tsx",
+   "dominio": "PUB",
+   "lineas": 65,
+   "bytes": 3042,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/TemplateWarehouse.tsx",
+   "dominio": "PUB",
+   "lineas": 70,
+   "bytes": 4488,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/cierre/Cierre.tsx",
+   "dominio": "PUB",
+   "lineas": 87,
+   "bytes": 3365,
+   "ultimo_commit": {
+    "fecha": "2026-08-05T16:22:08-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/cierre/ContactoCta.tsx",
+   "dominio": "PUB",
+   "lineas": 23,
+   "bytes": 844,
+   "ultimo_commit": {
+    "fecha": "2026-08-05T16:22:08-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/home/About.tsx",
+   "dominio": "PUB",
+   "lineas": 527,
+   "bytes": 23837,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 5
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/home/InfiniteReviews.tsx",
+   "dominio": "PUB",
+   "lineas": 492,
+   "bytes": 19537,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/home/OurServices.tsx",
+   "dominio": "PUB",
+   "lineas": 9898,
+   "bytes": 344883,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 6
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/home/Portfolio.tsx",
+   "dominio": "PUB",
+   "lineas": 734,
+   "bytes": 38206,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/home/WhyDevelOP.tsx",
+   "dominio": "PUB",
+   "lineas": 1725,
+   "bytes": 74029,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 5
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/modulos-opcionales/ModuloActiveCard.tsx",
+   "dominio": "PUB",
+   "lineas": 256,
+   "bytes": 8798,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/modulos-opcionales/ModuloComingSoonCard.tsx",
+   "dominio": "PUB",
+   "lineas": 178,
+   "bytes": 6000,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/modulos-opcionales/ModulosOpcionales.tsx",
+   "dominio": "PUB",
+   "lineas": 505,
+   "bytes": 14395,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/nosotros/Nosotros.tsx",
+   "dominio": "PUB",
+   "lineas": 162,
+   "bytes": 6420,
+   "ultimo_commit": {
+    "fecha": "2026-08-05T15:56:18-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/nosotros/data.ts",
+   "dominio": "PUB",
+   "lineas": 78,
+   "bytes": 2625,
+   "ultimo_commit": {
+    "fecha": "2026-08-05T15:56:18-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 0
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/portal-demo-cta/PortalDemoCTA.tsx",
+   "dominio": "PUB",
+   "lineas": 394,
+   "bytes": 14998,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/portal-demo/PortalDemo.tsx",
+   "dominio": "PUB",
+   "lineas": 292,
+   "bytes": 11300,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/portal-demo/PortalDemoHeader.tsx",
+   "dominio": "PUB",
+   "lineas": 44,
+   "bytes": 1433,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/portal-demo/StoryArcLunes.tsx",
+   "dominio": "PUB",
+   "lineas": 59,
+   "bytes": 2025,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/portal-demo/StoryMomentCard.tsx",
+   "dominio": "PUB",
+   "lineas": 381,
+   "bytes": 15880,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/portal-demo/data.ts",
+   "dominio": "PUB",
+   "lineas": 66,
+   "bytes": 2669,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 0
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/portal-demo/useEscenaCycle.ts",
+   "dominio": "PUB",
+   "lineas": 85,
+   "bytes": 3310,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T19:01:57-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/servicios/Servicios.tsx",
+   "dominio": "PUB",
+   "lineas": 119,
+   "bytes": 5060,
+   "ultimo_commit": {
+    "fecha": "2026-08-05T00:22:21-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/servicios/data.ts",
+   "dominio": "PUB",
+   "lineas": 68,
+   "bytes": 2496,
+   "ultimo_commit": {
+    "fecha": "2026-08-05T00:22:21-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/software-development/SoftwareDevelopmentCta.tsx",
+   "dominio": "PUB",
+   "lineas": 544,
+   "bytes": 33942,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/todo-incluido/TodoIncluido.tsx",
+   "dominio": "PUB",
+   "lineas": 336,
+   "bytes": 11729,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/todo-incluido/TodoIncluidoFeatureCard.tsx",
+   "dominio": "PUB",
+   "lineas": 184,
+   "bytes": 6010,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/todo-incluido/data.ts",
+   "dominio": "PUB",
+   "lineas": 56,
+   "bytes": 2032,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T20:13:28-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": false,
+   "imports": 0
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/AiSection.tsx",
+   "dominio": "PUB",
+   "lineas": 564,
+   "bytes": 29985,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/ComparadorSection.tsx",
+   "dominio": "PUB",
+   "lineas": 599,
+   "bytes": 34514,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/PortfolioWebCases.tsx",
+   "dominio": "PUB",
+   "lineas": 370,
+   "bytes": 17629,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T17:40:58-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/PricingSection.tsx",
+   "dominio": "PUB",
+   "lineas": 486,
+   "bytes": 20702,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/ShowcaseSection.tsx",
+   "dominio": "PUB",
+   "lineas": 602,
+   "bytes": 27058,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/StatementSection.tsx",
+   "dominio": "PUB",
+   "lineas": 356,
+   "bytes": 13015,
+   "ultimo_commit": {
+    "fecha": "2026-04-14T12:03:42-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/WebDevelopmentBento.tsx",
+   "dominio": "PUB",
+   "lineas": 604,
+   "bytes": 31508,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/WebDevelopmentByRubro.tsx",
+   "dominio": "PUB",
+   "lineas": 914,
+   "bytes": 46256,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/WebDevelopmentCta.tsx",
+   "dominio": "PUB",
+   "lineas": 543,
+   "bytes": 33717,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/WebDevelopmentFaq.tsx",
+   "dominio": "PUB",
+   "lineas": 397,
+   "bytes": 20723,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T11:17:41-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/WebDevelopmentObjections.tsx",
+   "dominio": "PUB",
+   "lineas": 172,
+   "bytes": 9221,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/WebDevelopmentSensory.tsx",
+   "dominio": "PUB",
+   "lineas": 178,
+   "bytes": 10105,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/WebDevelopmentSeo.tsx",
+   "dominio": "PUB",
+   "lineas": 746,
+   "bytes": 41133,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/WebDevelopmentTimeline.tsx",
+   "dominio": "PUB",
+   "lineas": 993,
+   "bytes": 54747,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/sections/web-development/WebTemplatesImmersive.tsx",
+   "dominio": "PUB",
+   "lineas": 610,
+   "bytes": 27209,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/ArchitectureSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 906,
+   "bytes": 40303,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/DashboardMockupSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 1441,
+   "bytes": 57563,
+   "ultimo_commit": {
+    "fecha": "2026-07-30T18:44:04-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/DiagnosticoSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 877,
+   "bytes": 41041,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 4
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/FaqSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 374,
+   "bytes": 18653,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T11:17:41-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/HeroSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 596,
+   "bytes": 19232,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T11:17:41-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/PainBentoSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 713,
+   "bytes": 30097,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T17:40:58-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/PipelineSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 698,
+   "bytes": 39481,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/ProcesoSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 594,
+   "bytes": 25532,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T17:40:58-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 3
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/RoiSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 590,
+   "bytes": 22915,
+   "ultimo_commit": {
+    "fecha": "2026-04-28T12:59:09-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/ShowcaseSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 851,
+   "bytes": 33867,
+   "ultimo_commit": {
+    "fecha": "2026-08-04T17:40:58-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 5
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/SocialProofSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 592,
+   "bytes": 19486,
+   "ultimo_commit": {
+    "fecha": "2026-04-28T12:59:09-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/StatementSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 372,
+   "bytes": 12246,
+   "ultimo_commit": {
+    "fecha": "2026-04-28T12:59:09-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/components/software/VaultSoftware.tsx",
+   "dominio": "PUB",
+   "lineas": 348,
+   "bytes": 16311,
+   "ultimo_commit": {
+    "fecha": "2026-05-12T15:52:35-03:00",
+    "autor": "Franco"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 2
+  },
+  {
+   "ruta": "logic-core-v3/src/hooks/useThemeObserver.tsx",
+   "dominio": "PUB",
+   "lineas": 70,
+   "bytes": 2171,
+   "ultimo_commit": {
+    "fecha": "2026-07-31T20:08:18-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "tipo": "modulo",
+   "client": true,
+   "imports": 1
+  },
+  {
+   "ruta": "logic-core-v3/src/modules/chatbot/README.md",
+   "dominio": "DOC",
+   "lineas": 181,
+   "bytes": 6436,
+   "ultimo_commit": {
+    "fecha": "2026-08-12T22:55:43-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Chatbot Module"
+  },
+  {
+   "ruta": "logic-core-v3/src/modules/chatbot/evals/README.md",
+   "dominio": "DOC",
+   "lineas": 99,
+   "bytes": 4154,
+   "ultimo_commit": {
+    "fecha": "2026-07-05T04:34:12-03:00",
+    "autor": "Valentino Olmedo"
+   },
+   "titulo": "Evals — corredor de conversaciones doradas (Q1.1)"
+  },
+  {
+   "ruta": "logic-core-v3/src/modules/motor/README.md",
+   "dominio": "DOC",
+   "lineas": 63,
+   "bytes": 3032,
+   "ultimo_commit": {
+    "fecha": "2026-07-10T03:40:47-03:00",
+    "autor": "Franco"
+   },
+   "titulo": "Motor WhatsApp"
+  }
+ ]
+}

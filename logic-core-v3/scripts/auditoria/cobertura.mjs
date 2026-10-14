@@ -32,6 +32,55 @@ const appRoot = process.cwd()
 const repoRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim()
 const OUT = path.resolve(appRoot, opt('--out', 'docs/auditoria-2026-10/_cobertura.csv'))
 
+// ── Modo marcar (DEC-21): actualiza estado/ciclo/nota de una lista de rutas sin
+// reclasificar nada.
+//   node scripts/auditoria/cobertura.mjs --marcar leído --ciclo D1-c1 --lista <archivo> [--nota "texto"]
+//   (la lista: una ruta por línea, relativa a la raíz del repo o a logic-core-v3/)
+if (args.includes('--marcar')) {
+  const ESTADOS = ['pendiente', 'leído', 'superficial', 'excluido-generado']
+  const estado = opt('--marcar', null)
+  const ciclo = opt('--ciclo', '')
+  const nota = opt('--nota', '')
+  const lista = opt('--lista', null)
+  if (!ESTADOS.includes(estado) || !lista) {
+    console.error(`uso: --marcar <${ESTADOS.join('|')}> --lista <archivo> [--ciclo <id>] [--nota <texto>]`)
+    process.exit(1)
+  }
+  const pedidas = readFileSync(path.resolve(appRoot, lista), 'utf8').replace(/^﻿/, '').split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
+  const normal = (r) => (r.startsWith('logic-core-v3/') || r.startsWith('.') || !existsSync(path.join(repoRoot, 'logic-core-v3', r)) ? r : `logic-core-v3/${r}`)
+  const objetivo = new Set(pedidas.map((r) => normal(r.replace(/\\/g, '/'))))
+  const texto = readFileSync(OUT, 'utf8')
+  const lineasCsv = texto.replace(/\r\n/g, '\n').split('\n')
+  const cabecera = lineasCsv.shift()
+  const cel = (v) => { const s = String(v ?? ''); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s }
+  const parsearFila = (l) => { const f = []; let a = '', q = false; for (let i = 0; i < l.length; i++) { const c = l[i]; if (q) { if (c === '"' && l[i + 1] === '"') { a += '"'; i++ } else if (c === '"') q = false; else a += c } else if (c === '"') q = true; else if (c === ',') { f.push(a); a = '' } else a += c } f.push(a); return f }
+  let tocadas = 0
+  const encontradas = new Set()
+  const salidaCsv = [cabecera]
+  for (const l of lineasCsv) {
+    if (!l) continue
+    const f = parsearFila(l)
+    if (objetivo.has(f[0])) {
+      encontradas.add(f[0])
+      f[3] = estado
+      if (ciclo) f[4] = ciclo
+      if (nota) {
+        const [auto, manual = ''] = f[5].includes(' | ') ? [f[5].slice(0, f[5].indexOf(' | ')), f[5].slice(f[5].indexOf(' | ') + 3)] : [f[5], '']
+        const notas = new Set(manual ? manual.split('; ') : [])
+        notas.add(nota)
+        f[5] = `${auto} | ${[...notas].join('; ')}`
+      }
+      tocadas++
+    }
+    salidaCsv.push(f.map(cel).join(','))
+  }
+  writeFileSync(OUT, salidaCsv.join('\n') + '\n', 'utf8')
+  const faltan = [...objetivo].filter((r) => !encontradas.has(r))
+  console.log(`marcadas ${tocadas} filas como «${estado}»${ciclo ? ` (ciclo ${ciclo})` : ''}${nota ? ` con nota «${nota}»` : ''}; ${faltan.length} rutas pedidas no están en el ledger`)
+  for (const r of faltan.slice(0, 20)) console.log(`  no encontrada: ${r}`)
+  process.exit(faltan.length ? 3 : 0)
+}
+
 const A = 'logic-core-v3/'
 
 // ── Etiquetas de zona ────────────────────────────────────────────────────────
@@ -434,18 +483,21 @@ const ORDEN = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'PUB', 'DOC
 const tabla = new Map()
 for (const f of filas) {
   const k = f.dominio
-  if (!tabla.has(k)) tabla.set(k, { profundo: 0, superficial: 0, fuera: 0, leido: 0, superf_hecho: 0 })
+  if (!tabla.has(k)) tabla.set(k, { profundo: 0, superficial: 0, fuera: 0, leido: 0, superf_hecho: 0, poda: 0 })
   const t = tabla.get(k)
   t[f.alcance]++
   if (f.estado === 'leído') t.leido++
-  if (f.estado === 'superficial') t.superf_hecho++
+  // Un profundo que la poda pasó a superficial (nota PODA-ALTA) se cuenta aparte:
+  // no es cobertura profunda, pero tampoco es una fila superficial del alcance.
+  if (f.estado === 'superficial' && f.alcance === 'profundo') t.poda++
+  if (f.estado === 'superficial' && f.alcance === 'superficial') t.superf_hecho++
 }
 console.log(`ref=${REF}  archivos=${filas.length}`)
-console.log('dominio  profundo  superficial  fuera  | leído/profundo  superficial-hecho/superficial')
+console.log('dominio  profundo  superficial  fuera  | leído/profundo (PODA-ALTA)  superficial-hecho/superficial')
 for (const k of ORDEN.filter((k) => tabla.has(k)).concat([...tabla.keys()].filter((k) => !ORDEN.includes(k)))) {
   const t = tabla.get(k)
   console.log(
-    `${k.padEnd(7)} ${String(t.profundo).padStart(9)} ${String(t.superficial).padStart(12)} ${String(t.fuera).padStart(6)}  | ${String(t.leido).padStart(5)}/${t.profundo}  ${String(t.superf_hecho).padStart(5)}/${t.superficial}`,
+    `${k.padEnd(7)} ${String(t.profundo).padStart(9)} ${String(t.superficial).padStart(12)} ${String(t.fuera).padStart(6)}  | ${String(t.leido).padStart(5)}/${t.profundo} (${t.poda})  ${String(t.superf_hecho).padStart(5)}/${t.superficial}`,
   )
 }
 const sinClasificar = filas.filter((f) => f.notas.includes('SIN-CLASIFICAR'))

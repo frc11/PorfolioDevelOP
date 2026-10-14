@@ -1,0 +1,4557 @@
+{
+ "ref": "origin/main",
+ "rediseno": "origin/rediseno/home",
+ "hoy": "2026-10-13",
+ "knip_disponible": false,
+ "total": 281,
+ "loc_alta_libre": 14485,
+ "resumen": {
+  "archivo|ALTA": 19,
+  "archivo|BAJA": 15,
+  "archivo|esperar-rediseno": 34,
+  "archivo|MEDIA": 1,
+  "server-action-sin-llamador|MEDIA": 10,
+  "ruta|MEDIA": 3,
+  "script-one-off|ALTA": 73,
+  "script-one-off|MEDIA": 15,
+  "salida-generada|ALTA": 30,
+  "config-muerta|MEDIA": 2,
+  "rama|BAJA": 9,
+  "rama|MEDIA": 5,
+  "rama|ALTA": 43,
+  "rama|esperar-rediseno": 20,
+  "enum-sin-uso|BAJA": 2
+ },
+ "candidatos": [
+  {
+   "categoria": "archivo",
+   "titulo": "src/actions/admin/onboarding-tasks.ts",
+   "archivos": [
+    "logic-core-v3/src/actions/admin/onboarding-tasks.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 161 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «onboarding-tasks» y specifier «@/actions/admin/onboarding-tasks» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 64,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/actions/metrics-actions.ts",
+   "archivos": [
+    "logic-core-v3/src/actions/metrics-actions.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 140 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «metrics-actions» y specifier «@/actions/metrics-actions» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 54,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/actions/task-approvals.ts",
+   "archivos": [
+    "logic-core-v3/src/actions/task-approvals.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 151 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «task-approvals» y specifier «@/actions/task-approvals» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 136,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/app/(protected)/admin/clients/_actions/client.schemas.ts",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/clients/_actions/client.schemas.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 151 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «client.schemas» y specifier «@/app/(protected)/admin/clients/_actions/client.schemas» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 19,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx"
+   ],
+   "senales": [
+    "marcado en el código (« * 🧪 EXPERIMENTAL / DESCARTABLE»)"
+   ],
+   "que_rompe": "referencias: src/app/(protected)/admin/fg2-lab/page.tsx (nombre base «fg2-lab-client» y specifier «@/app/(protected)/admin/fg2-lab/_components/fg2-lab-client» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 305,
+   "zona": "ZONA-FRANCO",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx"
+   ],
+   "senales": [
+    "marcado en el código (« * 🧪 EXPERIMENTAL / DESCARTABLE»)"
+   ],
+   "que_rompe": "referencias: src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx (nombre base «medicion-panel» y specifier «@/app/(protected)/admin/fg2-lab/_components/medicion-panel» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 195,
+   "zona": "ZONA-FRANCO",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/app/(protected)/admin/projects/_components/convert-lead-dialog.tsx",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/projects/_components/convert-lead-dialog.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 139 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «convert-lead-dialog» y specifier «@/app/(protected)/admin/projects/_components/convert-lead-dialog» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 279,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx"
+   ],
+   "senales": [
+    "marcado en el código (« * Si alguien lo saca de `BriefFormState`/`aPayloadBrief` \"porque no se usa»)"
+   ],
+   "que_rompe": "referencias: src/app/(protected)/setter/leads/[leadId]/manual/_components/brief-sanity.tsx, src/app/(protected)/setter/leads/[leadId]/manual/_components/m13-borrador.tsx, src/app/(protected)/setter/leads/[leadId]/manual/_components/m14-chequeo.tsx, src/app/(protected)/setter/leads/[leadId]/manual/_components/m6-brief.tsx (nombre base «brief-form» y specifier «@/app/(protected)/setter/leads/[leadId]/_components/brief-form» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 284,
+   "zona": "ZONA-FRANCO",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/automation/ComparativaAutomation.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/automation/ComparativaAutomation.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «ComparativaAutomation» y specifier «@/components/automation/ComparativaAutomation» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 316,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/automation/SocialProofAutomation.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/automation/SocialProofAutomation.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «SocialProofAutomation» y specifier «@/components/automation/SocialProofAutomation» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 500,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/canvas/AuroraBackground.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/canvas/AuroraBackground.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 221 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «AuroraBackground» y specifier «@/components/canvas/AuroraBackground» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 29,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/canvas/Interactive3DNetwork.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/canvas/Interactive3DNetwork.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «Interactive3DNetwork» y specifier «@/components/canvas/Interactive3DNetwork» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 623,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/canvas/LiquidProject.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/canvas/LiquidProject.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 252 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «LiquidProject» y specifier «@/components/canvas/LiquidProject» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 62,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/canvas/NeuralNetwork.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/canvas/NeuralNetwork.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 222 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «NeuralNetwork» y specifier «@/components/canvas/NeuralNetwork» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 98,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/canvas/ReactiveBackground.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/canvas/ReactiveBackground.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 222 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «ReactiveBackground» y specifier «@/components/canvas/ReactiveBackground» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 145,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/dashboard/AnalyticsPeriodSelector.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/dashboard/AnalyticsPeriodSelector.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 200 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «AnalyticsPeriodSelector» y specifier «@/components/dashboard/AnalyticsPeriodSelector» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 27,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/dashboard/AnimatedTaskList.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/dashboard/AnimatedTaskList.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «AnimatedTaskList» y specifier «@/components/dashboard/AnimatedTaskList» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 28,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/dashboard/CurrentMilestone.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/dashboard/CurrentMilestone.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «CurrentMilestone» y specifier «@/components/dashboard/CurrentMilestone» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 79,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/dashboard/DownloadReportButton.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/dashboard/DownloadReportButton.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 204 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «DownloadReportButton» y specifier «@/components/dashboard/DownloadReportButton» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 139,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/dashboard/LeakMeter.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/dashboard/LeakMeter.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 140 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «LeakMeter» y specifier «@/components/dashboard/LeakMeter» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 116,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/dashboard/TicketStatusSelector.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/dashboard/TicketStatusSelector.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 112 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «TicketStatusSelector» y specifier «@/components/dashboard/TicketStatusSelector» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 78,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/dashboard/UpsellCard.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/dashboard/UpsellCard.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «UpsellCard» y specifier «@/components/dashboard/UpsellCard» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 180,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/design-system/SectionShell.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/design-system/SectionShell.tsx"
+   ],
+   "senales": [
+    "marcado en el código (« * tercero, `SectionTransition.tsx`, era código muerto»)"
+   ],
+   "que_rompe": "referencias: src/components/design-system/index.ts (nombre base «SectionShell» y specifier «@/components/design-system/SectionShell» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 101,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/ia/BentoIA.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/ia/BentoIA.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 192 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «BentoIA» y specifier «@/components/ia/BentoIA» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 719,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/ia/CalculadorIA.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/ia/CalculadorIA.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise"
+   ],
+   "que_rompe": "referencias: src/lib/whatsapp.ts (nombre base «CalculadorIA» y specifier «@/components/ia/CalculadorIA» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 341,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/ia/VaultIA.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/ia/VaultIA.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «VaultIA» y specifier «@/components/ia/VaultIA» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 490,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/layout/HeroArtifactLayer.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/layout/HeroArtifactLayer.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «HeroArtifactLayer» y specifier «@/components/layout/HeroArtifactLayer» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 172,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/onboarding/OnboardingWizard.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/onboarding/OnboardingWizard.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «OnboardingWizard» y specifier «@/components/onboarding/OnboardingWizard» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 500,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/AILargeCta.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/AILargeCta.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «AILargeCta» y specifier «@/components/sections/AILargeCta» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 61,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/AIPipelineSection.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/AIPipelineSection.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «AIPipelineSection» y specifier «@/components/sections/AIPipelineSection» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 151,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/AITechMarquee.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/AITechMarquee.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 175 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «AITechMarquee» y specifier «@/components/sections/AITechMarquee» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 81,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/EnterpriseStandards.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/EnterpriseStandards.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «EnterpriseStandards» y specifier «@/components/sections/EnterpriseStandards» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 75,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/FeedbackLoop.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/FeedbackLoop.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 139 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «FeedbackLoop» y specifier «@/components/sections/FeedbackLoop» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 60,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/ProcessAutomationCta.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/ProcessAutomationCta.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «ProcessAutomationCta» y specifier «@/components/sections/ProcessAutomationCta» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 41,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/ProcessAutomationMetrics.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/ProcessAutomationMetrics.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «ProcessAutomationMetrics» y specifier «@/components/sections/ProcessAutomationMetrics» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 75,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/ROICalculator.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/ROICalculator.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «ROICalculator» y specifier «@/components/sections/ROICalculator» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 424,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/SoftwareArchitecture.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/SoftwareArchitecture.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «SoftwareArchitecture» y specifier «@/components/sections/SoftwareArchitecture» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 83,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/TeamSection.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/TeamSection.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «TeamSection» y specifier «@/components/sections/TeamSection» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 65,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/TemplateWarehouse.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/TemplateWarehouse.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «TemplateWarehouse» y specifier «@/components/sections/TemplateWarehouse» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 70,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/cierre/Cierre.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/cierre/Cierre.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «Cierre» y specifier «@/components/sections/cierre/Cierre» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 87,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/nosotros/Nosotros.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/nosotros/Nosotros.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «Nosotros» y specifier «@/components/sections/nosotros/Nosotros» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 162,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/portal-demo/useEscenaCycle.ts",
+   "archivos": [
+    "logic-core-v3/src/components/sections/portal-demo/useEscenaCycle.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «useEscenaCycle» y specifier «@/components/sections/portal-demo/useEscenaCycle» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 85,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/servicios/Servicios.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/servicios/Servicios.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «Servicios» y specifier «@/components/sections/servicios/Servicios» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 119,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/web-development/PortfolioWebCases.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/web-development/PortfolioWebCases.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise"
+   ],
+   "que_rompe": "referencias: src/app/web-development/page.tsx (nombre base «PortfolioWebCases» y specifier «@/components/sections/web-development/PortfolioWebCases» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 370,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/web-development/ShowcaseSection.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/web-development/ShowcaseSection.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «ShowcaseSection» y specifier «@/components/sections/web-development/ShowcaseSection» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 602,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/web-development/WebDevelopmentObjections.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/web-development/WebDevelopmentObjections.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «WebDevelopmentObjections» y specifier «@/components/sections/web-development/WebDevelopmentObjections» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 172,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/sections/web-development/WebDevelopmentSensory.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/sections/web-development/WebDevelopmentSensory.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «WebDevelopmentSensory» y specifier «@/components/sections/web-development/WebDevelopmentSensory» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 178,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/software/ProcesoSoftware.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/software/ProcesoSoftware.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «ProcesoSoftware» y specifier «@/components/software/ProcesoSoftware» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 594,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/software/ShowcaseSoftware.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/software/ShowcaseSoftware.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre"
+   ],
+   "que_rompe": "nada encontrado (nombre base «ShowcaseSoftware» y specifier «@/components/software/ShowcaseSoftware» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 851,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/software/VaultSoftware.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/software/VaultSoftware.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «VaultSoftware» y specifier «@/components/software/VaultSoftware» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 348,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/components/ui/HeroTitle.tsx",
+   "archivos": [
+    "logic-core-v3/src/components/ui/HeroTitle.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 154 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «HeroTitle» y specifier «@/components/ui/HeroTitle» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 150,
+   "zona": "congelado",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/actions/clients.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/actions/clients.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "último commit hace 115 días y sin importadores"
+   ],
+   "que_rompe": "referencias: src/actions/admin/onboarding-tasks.ts, src/actions/agency-actions.ts, src/app/(protected)/admin/_components/AdminErrorBoundary.tsx, src/app/(protected)/admin/_components/admin-sidebar.tsx, src/app/(protected)/admin/clients/[clientId]/_components/ClientHeader.tsx, src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx +33 (nombre base «clients» y specifier «@/lib/actions/clients» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 227,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/actions/gbp-connection.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/actions/gbp-connection.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "último commit hace 101 días y sin importadores"
+   ],
+   "que_rompe": "referencias: package.json (nombre base «gbp-connection» y specifier «@/lib/actions/gbp-connection» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 58,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/actions/invitations.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/actions/invitations.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 161 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «invitations» y specifier «@/lib/actions/invitations» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 118,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/actions/leads.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/actions/leads.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "último commit hace 200 días y sin importadores"
+   ],
+   "que_rompe": "referencias: next.config.ts, prisma/seeds/backfill-vertical-pack.ts, scripts/b7-qa-agenda.ts, scripts/qa-corridas/_p21-corrida.ts, scripts/qa-corridas/_p23/capturas.ts, scripts/qa-corridas/_p23/censo-ubicaciones.ts +84 (nombre base «leads» y specifier «@/lib/actions/leads» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 68,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/actions/services.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/actions/services.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "último commit hace 130 días y sin importadores"
+   ],
+   "que_rompe": "referencias: next.config.ts, src/app/(protected)/admin/settings/_actions/settings.actions.ts, src/components/dashboard/CurrentPlanCard.tsx, src/components/dashboard/LeakMeter.tsx, src/components/dashboard/SidebarNav.tsx, src/lib/actions/settings.ts (nombre base «services» y specifier «@/lib/actions/services» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 91,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/actions/settings.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/actions/settings.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "último commit hace 139 días y sin importadores"
+   ],
+   "que_rompe": "referencias: src/app/(protected)/admin/_components/admin-sidebar.tsx, src/app/(protected)/admin/leados/page.tsx, src/app/(protected)/admin/settings/_actions/settings.actions.ts, src/lib/alerts.ts, src/modules/chatbot/components/dashboard/ClientDashboardTabs.tsx, src/modules/chatbot/components/preview/types.ts +5 (nombre base «settings» y specifier «@/lib/actions/settings» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 364,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/client-health.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/client-health.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 200 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «client-health» y specifier «@/lib/client-health» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 36,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/cn.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/cn.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 200 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «cn» y specifier «@/lib/cn» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 6,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/design-patterns.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/design-patterns.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 148 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «design-patterns» y specifier «@/lib/design-patterns» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 70,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/leados/_experimental/fg2-brief-lab.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/leados/_experimental/fg2-brief-lab.ts"
+   ],
+   "senales": [
+    "marcado en el código (« * 🧪 EXPERIMENTAL / DESCARTABLE»)"
+   ],
+   "que_rompe": "referencias: scripts/_experimental/fg2-gen-prompts.ts, src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx, src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx, src/app/(protected)/admin/fg2-lab/page.tsx, src/lib/leados/_experimental/fg2-casos-gastro.ts (nombre base «fg2-brief-lab» y specifier «@/lib/leados/_experimental/fg2-brief-lab» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 375,
+   "zona": "ZONA-FRANCO",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/lib/leados/_experimental/fg2-casos-gastro.ts",
+   "archivos": [
+    "logic-core-v3/src/lib/leados/_experimental/fg2-casos-gastro.ts"
+   ],
+   "senales": [
+    "marcado en el código (« * 🧪 EXPERIMENTAL / DESCARTABLE»)"
+   ],
+   "que_rompe": "referencias: scripts/_experimental/fg2-gen-prompts.ts, src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx (nombre base «fg2-casos-gastro» y specifier «@/lib/leados/_experimental/fg2-casos-gastro» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 210,
+   "zona": "ZONA-FRANCO",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/modules/chatbot/components/admin/config/Toggle.tsx",
+   "archivos": [
+    "logic-core-v3/src/modules/chatbot/components/admin/config/Toggle.tsx"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 149 días y sin importadores"
+   ],
+   "que_rompe": "nada encontrado (nombre base «Toggle» y specifier «@/modules/chatbot/components/admin/config/Toggle» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "ALTA",
+   "loc": 34,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/modules/chatbot/evals/runner.ts",
+   "archivos": [
+    "logic-core-v3/src/modules/chatbot/evals/runner.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "último commit hace 96 días y sin importadores",
+    "entrada de CLI (package.json o carpeta de scripts/evals/seeds)"
+   ],
+   "que_rompe": "referencias: package.json, prisma/seeds/backfill-vertical-pack.ts (nombre base «runner» y specifier «@/modules/chatbot/evals/runner» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 366,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/modules/chatbot/evals/scoring/evaluate.ts",
+   "archivos": [
+    "logic-core-v3/src/modules/chatbot/evals/scoring/evaluate.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "último commit hace 100 días y sin importadores",
+    "entrada de CLI (package.json o carpeta de scripts/evals/seeds)"
+   ],
+   "que_rompe": "referencias: package.json, scripts/qa-corridas/_p23/censo-ubicaciones.ts (nombre base «evaluate» y specifier «@/modules/chatbot/evals/scoring/evaluate» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 92,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/modules/chatbot/evals/seed-eval-bots.ts",
+   "archivos": [
+    "logic-core-v3/src/modules/chatbot/evals/seed-eval-bots.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "último commit hace 96 días y sin importadores",
+    "entrada de CLI (package.json o carpeta de scripts/evals/seeds)"
+   ],
+   "que_rompe": "referencias: package.json (nombre base «seed-eval-bots» y specifier «@/modules/chatbot/evals/seed-eval-bots» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 223,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/modules/chatbot/prisma/seed.ts",
+   "archivos": [
+    "logic-core-v3/src/modules/chatbot/prisma/seed.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "último commit hace 96 días y sin importadores",
+    "entrada de CLI (package.json o carpeta de scripts/evals/seeds)"
+   ],
+   "que_rompe": "referencias: prisma.config.ts, prisma/seeds/backfill-vertical-pack.ts, scripts/b3-qa-assign-leads.ts, scripts/b4-qa-construccion.ts, scripts/b5-qa-review-queue.ts, scripts/b6-qa-outreach.ts +7 (nombre base «seed» y specifier «@/modules/chatbot/prisma/seed» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 378,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/modules/chatbot/prisma/update-proactive-prompts.ts",
+   "archivos": [
+    "logic-core-v3/src/modules/chatbot/prisma/update-proactive-prompts.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "sin referencias por nombre",
+    "último commit hace 96 días y sin importadores",
+    "entrada de CLI (package.json o carpeta de scripts/evals/seeds)"
+   ],
+   "que_rompe": "nada encontrado (nombre base «update-proactive-prompts» y specifier «@/modules/chatbot/prisma/update-proactive-prompts» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "MEDIA",
+   "loc": 60,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "archivo",
+   "titulo": "src/modules/motor/services/sendMessage.ts",
+   "archivos": [
+    "logic-core-v3/src/modules/motor/services/sendMessage.ts"
+   ],
+   "senales": [
+    "huérfano de depcruise",
+    "último commit hace 95 días y sin importadores"
+   ],
+   "que_rompe": "referencias: src/lib/notifications/telegram.ts, src/modules/motor/domain/window.ts, tests/integration/motor-outbound.spec.ts (nombre base «sendMessage» y specifier «@/modules/motor/services/sendMessage» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs))",
+   "confianza": "BAJA",
+   "loc": 256,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "server-action-sin-llamador",
+   "titulo": "src/app/(protected)/admin/leads/_actions/lead.actions.ts: listLeads, getLeadById",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/leads/_actions/lead.actions.ts"
+   ],
+   "senales": [
+    "export sin ninguna mención por nombre fuera de su archivo"
+   ],
+   "que_rompe": "nada encontrado (git grep de cada nombre en 1624 archivos)",
+   "confianza": "MEDIA",
+   "detalle": [
+    "listLeads",
+    "getLeadById"
+   ],
+   "loc": 0,
+   "zona": "ZONA-FRANCO",
+   "rediseno": false
+  },
+  {
+   "categoria": "server-action-sin-llamador",
+   "titulo": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts: createMaintenancePayment",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/projects/_actions/maintenance.actions.ts"
+   ],
+   "senales": [
+    "export sin ninguna mención por nombre fuera de su archivo"
+   ],
+   "que_rompe": "nada encontrado (git grep de cada nombre en 1624 archivos)",
+   "confianza": "MEDIA",
+   "detalle": [
+    "createMaintenancePayment"
+   ],
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "server-action-sin-llamador",
+   "titulo": "src/app/(protected)/admin/projects/_actions/milestone.actions.ts: unmarkMilestonePaid",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/projects/_actions/milestone.actions.ts"
+   ],
+   "senales": [
+    "export sin ninguna mención por nombre fuera de su archivo"
+   ],
+   "que_rompe": "nada encontrado (git grep de cada nombre en 1624 archivos)",
+   "confianza": "MEDIA",
+   "detalle": [
+    "unmarkMilestonePaid"
+   ],
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "server-action-sin-llamador",
+   "titulo": "src/app/(protected)/admin/projects/_actions/project.actions.ts: getProjectById",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/projects/_actions/project.actions.ts"
+   ],
+   "senales": [
+    "export sin ninguna mención por nombre fuera de su archivo"
+   ],
+   "que_rompe": "nada encontrado (git grep de cada nombre en 1624 archivos)",
+   "confianza": "MEDIA",
+   "detalle": [
+    "getProjectById"
+   ],
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "server-action-sin-llamador",
+   "titulo": "src/app/(protected)/admin/team/_actions/task.actions.ts: reorderTasks, listTasksByUser",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/team/_actions/task.actions.ts"
+   ],
+   "senales": [
+    "export sin ninguna mención por nombre fuera de su archivo"
+   ],
+   "que_rompe": "nada encontrado (git grep de cada nombre en 1624 archivos)",
+   "confianza": "MEDIA",
+   "detalle": [
+    "reorderTasks",
+    "listTasksByUser"
+   ],
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "server-action-sin-llamador",
+   "titulo": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts: updateTimeEntry, listTimeEntriesByUser",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/team/_actions/time-entry.actions.ts"
+   ],
+   "senales": [
+    "export sin ninguna mención por nombre fuera de su archivo"
+   ],
+   "que_rompe": "nada encontrado (git grep de cada nombre en 1624 archivos)",
+   "confianza": "MEDIA",
+   "detalle": [
+    "updateTimeEntry",
+    "listTimeEntriesByUser"
+   ],
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "server-action-sin-llamador",
+   "titulo": "src/lib/actions/contact.ts: contactFormAction, markLeadAsRead",
+   "archivos": [
+    "logic-core-v3/src/lib/actions/contact.ts"
+   ],
+   "senales": [
+    "export sin ninguna mención por nombre fuera de su archivo"
+   ],
+   "que_rompe": "nada encontrado (git grep de cada nombre en 1624 archivos)",
+   "confianza": "MEDIA",
+   "detalle": [
+    "contactFormAction",
+    "markLeadAsRead"
+   ],
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "server-action-sin-llamador",
+   "titulo": "src/lib/actions/messages.ts: sendMessageAction, markAdminMessagesAsReadAction, markMessagesAsReadAction",
+   "archivos": [
+    "logic-core-v3/src/lib/actions/messages.ts"
+   ],
+   "senales": [
+    "export sin ninguna mención por nombre fuera de su archivo"
+   ],
+   "que_rompe": "nada encontrado (git grep de cada nombre en 1624 archivos)",
+   "confianza": "MEDIA",
+   "detalle": [
+    "sendMessageAction",
+    "markAdminMessagesAsReadAction",
+    "markMessagesAsReadAction"
+   ],
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "server-action-sin-llamador",
+   "titulo": "src/lib/actions/notifications.ts: markNotificationReadAction",
+   "archivos": [
+    "logic-core-v3/src/lib/actions/notifications.ts"
+   ],
+   "senales": [
+    "export sin ninguna mención por nombre fuera de su archivo"
+   ],
+   "que_rompe": "nada encontrado (git grep de cada nombre en 1624 archivos)",
+   "confianza": "MEDIA",
+   "detalle": [
+    "markNotificationReadAction"
+   ],
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "server-action-sin-llamador",
+   "titulo": "src/lib/actions/projects.ts: createProjectAction, updateProjectAction, createTaskAction, updateTaskStatusAction, deleteTaskAction",
+   "archivos": [
+    "logic-core-v3/src/lib/actions/projects.ts"
+   ],
+   "senales": [
+    "export sin ninguna mención por nombre fuera de su archivo"
+   ],
+   "que_rompe": "nada encontrado (git grep de cada nombre en 1624 archivos)",
+   "confianza": "MEDIA",
+   "detalle": [
+    "createProjectAction",
+    "updateProjectAction",
+    "createTaskAction",
+    "updateTaskStatusAction",
+    "deleteTaskAction"
+   ],
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "ruta",
+   "titulo": "/admin/fg2-lab (src/app/(protected)/admin/fg2-lab/page.tsx)",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/fg2-lab/page.tsx"
+   ],
+   "senales": [
+    "ruta sin link, redirect, href ni push que la nombre"
+   ],
+   "que_rompe": "nada encontrado (literal «/admin/fg2-lab» en 1624 archivos; las URL armadas con constantes no se ven)",
+   "confianza": "MEDIA",
+   "loc": 92,
+   "zona": "ZONA-FRANCO",
+   "rediseno": false
+  },
+  {
+   "categoria": "ruta",
+   "titulo": "/admin/settings/alerts (src/app/(protected)/admin/settings/alerts/page.tsx)",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/settings/alerts/page.tsx"
+   ],
+   "senales": [
+    "ruta sin link, redirect, href ni push que la nombre"
+   ],
+   "que_rompe": "nada encontrado (literal «/admin/settings/alerts» en 1624 archivos; las URL armadas con constantes no se ven)",
+   "confianza": "MEDIA",
+   "loc": 42,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "ruta",
+   "titulo": "/admin/settings/reports (src/app/(protected)/admin/settings/reports/page.tsx)",
+   "archivos": [
+    "logic-core-v3/src/app/(protected)/admin/settings/reports/page.tsx"
+   ],
+   "senales": [
+    "ruta sin link, redirect, href ni push que la nombre"
+   ],
+   "que_rompe": "nada encontrado (literal «/admin/settings/reports» en 1624 archivos; las URL armadas con constantes no se ven)",
+   "confianza": "MEDIA",
+   "loc": 55,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "find_unused.js",
+   "archivos": [
+    "logic-core-v3/find_unused.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 222 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «find_unused» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 65,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "replace_analytics.js",
+   "archivos": [
+    "logic-core-v3/replace_analytics.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 193 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «replace_analytics» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 274,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "script.js",
+   "archivos": [
+    "logic-core-v3/script.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 193 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «script» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 40,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "script2.js",
+   "archivos": [
+    "logic-core-v3/script2.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 193 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «script2» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 226,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "script3.js",
+   "archivos": [
+    "logic-core-v3/script3.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 193 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «script3» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 216,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "script_aiscene.js",
+   "archivos": [
+    "logic-core-v3/script_aiscene.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 193 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «script_aiscene» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 331,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "script_analytics.js",
+   "archivos": [
+    "logic-core-v3/script_analytics.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 193 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «script_analytics» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 141,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "script_leads.js",
+   "archivos": [
+    "logic-core-v3/script_leads.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 193 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «script_leads» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 250,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "script_magnetic.js",
+   "archivos": [
+    "logic-core-v3/script_magnetic.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 193 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «script_magnetic» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 89,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "script_maps.js",
+   "archivos": [
+    "logic-core-v3/script_maps.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 193 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «script_maps» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 328,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b13-2-fix-demo-bots.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_b13-2-fix-demo-bots.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 139 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b13-2-fix-demo-bots» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 62,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b13-2-list-bots.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_b13-2-list-bots.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 139 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b13-2-list-bots» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 16,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b13-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b13-dev.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 144 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b13-dev.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b13-latency-analyze.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_b13-latency-analyze.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 144 días"
+   ],
+   "que_rompe": "referencias: scripts/_b13-latency-test.mjs",
+   "confianza": "MEDIA",
+   "loc": 197,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b13-latency-b13-1779420902364.json",
+   "archivos": [
+    "logic-core-v3/scripts/_b13-latency-b13-1779420902364.json"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 144 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b13-latency-b13-1779420902364.json» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 398,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b13-latency-stdout.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b13-latency-stdout.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 144 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b13-latency-stdout.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b13-latency-test.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_b13-latency-test.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 144 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b13-latency-test» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 219,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b14-2-cleanup-bench-prod.ts",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-2-cleanup-bench-prod.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 139 días"
+   ],
+   "que_rompe": "referencias: scripts/_b14-2-seed-bench-prod.ts",
+   "confianza": "MEDIA",
+   "loc": 143,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b14-2-pages-b14-2-pages-1779840621756.json",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-2-pages-b14-2-pages-1779840621756.json"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 139 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b14-2-pages-b14-2-pages-1779840621756.json» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 419,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b14-2-prod-bot-latency.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-2-prod-bot-latency.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 139 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b14-2-prod-bot-latency» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 216,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b14-2-prod-coldstart.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-2-prod-coldstart.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 139 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b14-2-prod-coldstart» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 169,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b14-2-prod-pages-ttfb.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-2-prod-pages-ttfb.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 139 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b14-2-prod-pages-ttfb» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 164,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b14-2-seed-bench-prod.ts",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-2-seed-bench-prod.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 139 días"
+   ],
+   "que_rompe": "referencias: scripts/_b14-4-smoke-prod.mjs",
+   "confianza": "MEDIA",
+   "loc": 216,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b14-4-smoke-prod.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-4-smoke-prod.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 139 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b14-4-smoke-prod» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 267,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b14-5-scrub-smoke.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-5-scrub-smoke.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 139 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b14-5-scrub-smoke» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 186,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b14-analyze.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-analyze.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 144 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b14-analyze» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 112,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b14-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-dev.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 144 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b14-dev.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b32-baseline-run.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b32-baseline-run.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b32-baseline-run.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b32-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b32-dev.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b32-dev.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b33-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b33-dev.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b33-dev.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b35-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b35-dev.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b35-dev.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b36-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b36-dev.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b36-dev.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b52-test-scoring.ts",
+   "archivos": [
+    "logic-core-v3/scripts/_b52-test-scoring.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b52-test-scoring» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 180,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b53-baseline-run.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b53-baseline-run.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b53-baseline-run.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b53-baseline-run2.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b53-baseline-run2.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b53-baseline-run2.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b53-test-scoring.ts",
+   "archivos": [
+    "logic-core-v3/scripts/_b53-test-scoring.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b53-test-scoring» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 262,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_b54-test-scoring.ts",
+   "archivos": [
+    "logic-core-v3/scripts/_b54-test-scoring.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_b54-test-scoring» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 365,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_db-cleanup-execute.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_db-cleanup-execute.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 144 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_db-cleanup-execute» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 170,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_db-cleanup-inspect.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_db-cleanup-inspect.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 144 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_db-cleanup-inspect» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 160,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_db-cleanup-inspect2.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/_db-cleanup-inspect2.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 144 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_db-cleanup-inspect2» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 91,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_ms1-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms1-dev.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_ms1-dev.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_ms4-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms4-dev.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_ms4-dev.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_ms4-full-run.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms4-full-run.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_ms4-full-run.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_ms4-full-run2.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms4-full-run2.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_ms4-full-run2.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_ms4-smoke-run.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms4-smoke-run.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_ms4-smoke-run.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/_ms4-smoke-run2.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms4-smoke-run2.log"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_ms4-smoke-run2.log» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b1-verify-setter-ownership.ts",
+   "archivos": [
+    "logic-core-v3/scripts/b1-verify-setter-ownership.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 123 días"
+   ],
+   "que_rompe": "referencias: scripts/b3-qa-assign-leads.ts, scripts/v1-qa-wizard-states.ts",
+   "confianza": "MEDIA",
+   "loc": 121,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b2-verify-dossier.ts",
+   "archivos": [
+    "logic-core-v3/scripts/b2-verify-dossier.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 104 días"
+   ],
+   "que_rompe": "referencias: playwright.leados.config.ts, tests/leados/dossier-gates.spec.ts",
+   "confianza": "MEDIA",
+   "loc": 307,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b3-qa-assign-leads.ts",
+   "archivos": [
+    "logic-core-v3/scripts/b3-qa-assign-leads.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 123 días"
+   ],
+   "que_rompe": "referencias: scripts/b5-qa-review-queue.ts, src/lib/leados/_experimental/fg2-casos-gastro.ts",
+   "confianza": "MEDIA",
+   "loc": 111,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b4-qa-construccion.ts",
+   "archivos": [
+    "logic-core-v3/scripts/b4-qa-construccion.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 123 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «b4-qa-construccion» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 153,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b5-qa-review-queue.ts",
+   "archivos": [
+    "logic-core-v3/scripts/b5-qa-review-queue.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 123 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «b5-qa-review-queue» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 202,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b58-smoke.ts",
+   "archivos": [
+    "logic-core-v3/scripts/b58-smoke.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 141 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «b58-smoke» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 246,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b59-smoke.ts",
+   "archivos": [
+    "logic-core-v3/scripts/b59-smoke.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 141 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «b59-smoke» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 228,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b6-qa-outreach.ts",
+   "archivos": [
+    "logic-core-v3/scripts/b6-qa-outreach.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 123 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «b6-qa-outreach» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 203,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b7-qa-agenda.ts",
+   "archivos": [
+    "logic-core-v3/scripts/b7-qa-agenda.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 123 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «b7-qa-agenda» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 210,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b7-smoke-calcom.ts",
+   "archivos": [
+    "logic-core-v3/scripts/b7-smoke-calcom.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 123 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «b7-smoke-calcom» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 106,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/b9-4-dedupe-kb-develop.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/b9-4-dedupe-kb-develop.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 141 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «b9-4-dedupe-kb-develop» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 252,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/cleanup-messages-demo.ts",
+   "archivos": [
+    "logic-core-v3/scripts/cleanup-messages-demo.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 116 días"
+   ],
+   "que_rompe": "referencias: scripts/seed-messages-demo.ts",
+   "confianza": "MEDIA",
+   "loc": 64,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/encode-vertex-creds.js",
+   "archivos": [
+    "logic-core-v3/scripts/encode-vertex-creds.js"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 150 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «encode-vertex-creds» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 12,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/p41-inject-campaigns.ts",
+   "archivos": [
+    "logic-core-v3/scripts/p41-inject-campaigns.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 100 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «p41-inject-campaigns» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 47,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/_p21-corrida.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/_p21-corrida.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 40 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_p21-corrida» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 353,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/_p23/capturas.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/_p23/capturas.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 39 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «capturas» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 122,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/_p23/censo-ubicaciones.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/_p23/censo-ubicaciones.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 39 días"
+   ],
+   "que_rompe": "referencias: src/lib/leados/copy-sin-ubicacion.invariant.ts",
+   "confianza": "MEDIA",
+   "loc": 234,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/_verify-b61.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/_verify-b61.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 103 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_verify-b61» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 192,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/_verify-home-aviso.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/_verify-home-aviso.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 103 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_verify-home-aviso» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 104,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/_verify-scroll-gap.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/_verify-scroll-gap.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 103 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «_verify-scroll-gap» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 100,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/barrido-derivacion.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/barrido-derivacion.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 41 días"
+   ],
+   "que_rompe": "referencias: src/lib/leados/paso-admitido.invariant.ts, tests/setter/24-paso-que-corresponde.spec.ts",
+   "confianza": "MEDIA",
+   "loc": 477,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/capturar-franja.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/capturar-franja.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 41 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «capturar-franja» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 280,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/corrida-1-import-csv.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/corrida-1-import-csv.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 103 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «corrida-1-import-csv» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 253,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/medir-cartera.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/medir-cartera.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 39 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «medir-cartera» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 532,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/medir-panel-setter.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/medir-panel-setter.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 40 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «medir-panel-setter» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 288,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/medir-pliegue-manual.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/medir-pliegue-manual.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 41 días"
+   ],
+   "que_rompe": "referencias: src/app/(protected)/setter/leads/[leadId]/manual/_components/pantalla-manual.tsx, tests/setter/22-cromo-primer-pliegue.spec.ts, tests/setter/23-accion-a-la-vista.spec.ts, tests/setter/25-franja-recorrido.spec.ts",
+   "confianza": "MEDIA",
+   "loc": 738,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/p19-capturas.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/p19-capturas.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 41 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «p19-capturas» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 201,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/qa-corridas/rejection-reloop.ts",
+   "archivos": [
+    "logic-core-v3/scripts/qa-corridas/rejection-reloop.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 103 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «rejection-reloop» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 260,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/regression/cases.ts",
+   "archivos": [
+    "logic-core-v3/scripts/regression/cases.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 130 días"
+   ],
+   "que_rompe": "referencias: scripts/regression/run-baseline.ts",
+   "confianza": "MEDIA",
+   "loc": 373,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/regression/diag-timings.ts",
+   "archivos": [
+    "logic-core-v3/scripts/regression/diag-timings.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 142 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «diag-timings» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 150,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/regression/purge.ts",
+   "archivos": [
+    "logic-core-v3/scripts/regression/purge.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 143 días"
+   ],
+   "que_rompe": "referencias: scripts/regression/run-baseline.ts, src/modules/chatbot/evals/cleanup.ts, src/modules/chatbot/evals/shared.ts",
+   "confianza": "MEDIA",
+   "loc": 115,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/regression/run-baseline.ts",
+   "archivos": [
+    "logic-core-v3/scripts/regression/run-baseline.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 130 días"
+   ],
+   "que_rompe": "referencias: src/modules/chatbot/evals/capture.ts, src/modules/chatbot/evals/client.ts",
+   "confianza": "MEDIA",
+   "loc": 620,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/seed-matsu-chatbot.ts",
+   "archivos": [
+    "logic-core-v3/scripts/seed-matsu-chatbot.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 112 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «seed-matsu-chatbot» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 552,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/seed-matsu-notifications.ts",
+   "archivos": [
+    "logic-core-v3/scripts/seed-matsu-notifications.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 111 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «seed-matsu-notifications» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 329,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/seed-matsu-onboarding.ts",
+   "archivos": [
+    "logic-core-v3/scripts/seed-matsu-onboarding.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 108 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «seed-matsu-onboarding» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 218,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/seed-matsu-week-results.ts",
+   "archivos": [
+    "logic-core-v3/scripts/seed-matsu-week-results.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 108 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «seed-matsu-week-results» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 190,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/seed-matsu.ts",
+   "archivos": [
+    "logic-core-v3/scripts/seed-matsu.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 143 días"
+   ],
+   "que_rompe": "referencias: prisma/seed-guard.ts, prisma/seeds/backfill-vertical-pack.ts, scripts/seed-matsu-chatbot.ts, scripts/seed-matsu-notifications.ts",
+   "confianza": "MEDIA",
+   "loc": 198,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/seed-messages-demo.ts",
+   "archivos": [
+    "logic-core-v3/scripts/seed-messages-demo.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 116 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «seed-messages-demo» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 190,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/set-matsu-password.ts",
+   "archivos": [
+    "logic-core-v3/scripts/set-matsu-password.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 140 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «set-matsu-password» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 48,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/utm1-smoke.mjs",
+   "archivos": [
+    "logic-core-v3/scripts/utm1-smoke.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 100 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «utm1-smoke» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 224,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "scripts/v1-qa-wizard-states.ts",
+   "archivos": [
+    "logic-core-v3/scripts/v1-qa-wizard-states.ts"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "último commit hace 41 días"
+   ],
+   "que_rompe": "referencias: scripts/qa-corridas/medir-pliegue-manual.ts, scripts/qa-corridas/rejection-reloop.ts",
+   "confianza": "MEDIA",
+   "loc": 482,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "script-one-off",
+   "titulo": "test-chat.mjs",
+   "archivos": [
+    "logic-core-v3/test-chat.mjs"
+   ],
+   "senales": [
+    "script de un sprint o suelto en la raíz",
+    "sin referencias por nombre ni en package.json",
+    "último commit hace 151 días"
+   ],
+   "que_rompe": "nada encontrado (nombre base «test-chat» entre comillas (descartando imports que resuelven a otro archivo) en 1624 archivos de código, config, tests y scripts de origin/main (sin docs); package.json scripts)",
+   "confianza": "ALTA",
+   "loc": 26,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "_tmp_footer_component.html",
+   "archivos": [
+    "_tmp_footer_component.html"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 9,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "_tmp_grid_feature_cards.html",
+   "archivos": [
+    "_tmp_grid_feature_cards.html"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 9,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/.eslint_output.txt",
+   "archivos": [
+    "logic-core-v3/.eslint_output.txt"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/audit.txt",
+   "archivos": [
+    "logic-core-v3/audit.txt"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/prisma/migrations/__diff_check.sql",
+   "archivos": [
+    "logic-core-v3/prisma/migrations/__diff_check.sql"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/prisma_err.txt",
+   "archivos": [
+    "logic-core-v3/prisma_err.txt"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b13-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b13-dev.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b13-latency-b13-1779420902364.json",
+   "archivos": [
+    "logic-core-v3/scripts/_b13-latency-b13-1779420902364.json"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 398,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b13-latency-stdout.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b13-latency-stdout.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b14-2-pages-b14-2-pages-1779840621756.json",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-2-pages-b14-2-pages-1779840621756.json"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 419,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b14-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b14-dev.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b32-baseline-run.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b32-baseline-run.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b32-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b32-dev.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b33-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b33-dev.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b35-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b35-dev.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b36-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b36-dev.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b53-baseline-run.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b53-baseline-run.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_b53-baseline-run2.log",
+   "archivos": [
+    "logic-core-v3/scripts/_b53-baseline-run2.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_ms1-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms1-dev.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_ms4-dev.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms4-dev.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_ms4-full-run.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms4-full-run.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_ms4-full-run2.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms4-full-run2.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_ms4-smoke-run.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms4-smoke-run.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/scripts/_ms4-smoke-run2.log",
+   "archivos": [
+    "logic-core-v3/scripts/_ms4-smoke-run2.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/tests/full-run.log",
+   "archivos": [
+    "logic-core-v3/tests/full-run.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/ts_errors.log",
+   "archivos": [
+    "logic-core-v3/ts_errors.log"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/ts_errors.txt",
+   "archivos": [
+    "logic-core-v3/ts_errors.txt"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/ts_prune_output.txt",
+   "archivos": [
+    "logic-core-v3/ts_prune_output.txt"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/unused_report.txt",
+   "archivos": [
+    "logic-core-v3/unused_report.txt"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "salida-generada",
+   "titulo": "logic-core-v3/unused_report_utf8.txt",
+   "archivos": [
+    "logic-core-v3/unused_report_utf8.txt"
+   ],
+   "senales": [
+    "salida generada o temporal commiteada (clasificación del ledger)"
+   ],
+   "que_rompe": "nada: no es código que se importe",
+   "confianza": "ALTA",
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "config-muerta",
+   "titulo": "vercel.json",
+   "archivos": [
+    "logic-core-v3/vercel.json"
+   ],
+   "senales": [
+    "declara 3 crons de Vercel en un deploy de Netlify (netlify.toml); hay que mover los crons antes de borrarlo"
+   ],
+   "que_rompe": "se pierde la única declaración de os-follow-up, regenerate-briefs y send-executive-reports",
+   "confianza": "MEDIA",
+   "loc": 16,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "config-muerta",
+   "titulo": "DEPLOY.md",
+   "archivos": [
+    "logic-core-v3/DEPLOY.md"
+   ],
+   "senales": [
+    "describe un deploy en Vercel con Resend y n8n; la configuración viva es Netlify"
+   ],
+   "que_rompe": "nada en runtime",
+   "confianza": "MEDIA",
+   "loc": 65,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "b0-isolation-motor-chatbot (+8/-211, último commit propio 2026-07-16)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 89 días sin commits propios"
+   ],
+   "que_rompe": "9 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "BAJA",
+   "rama": "b0-isolation-motor-chatbot",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "b1-s1-bsp-inbound (+1/-231, último commit propio 2026-07-09)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 95 días sin commits propios"
+   ],
+   "que_rompe": "0 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "MEDIA",
+   "rama": "b1-s1-bsp-inbound",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "b1-s2-bsp-outbound (mergeada, último commit 2026-07-15)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "b1-s2-bsp-outbound",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "b2-s1-bot-sync-surface (+1/-213, último commit propio 2026-07-17)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 88 días sin commits propios"
+   ],
+   "que_rompe": "7 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "BAJA",
+   "rama": "b2-s1-bot-sync-surface",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "chore/auditoria-maestra (+1/-235, último commit propio 2026-07-10)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 94 días sin commits propios"
+   ],
+   "que_rompe": "1 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "BAJA",
+   "rama": "chore/auditoria-maestra",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "chore/auditoria-seguridad (+2/-208, último commit propio 2026-07-29)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 76 días sin commits propios"
+   ],
+   "que_rompe": "0 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "MEDIA",
+   "rama": "chore/auditoria-seguridad",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "chore/dead-code-sweep (mergeada, último commit 2026-06-11)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "chore/dead-code-sweep",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "chore/gs-aislamiento (+2/-235, último commit propio 2026-07-11)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 94 días sin commits propios"
+   ],
+   "que_rompe": "6 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "BAJA",
+   "rama": "chore/gs-aislamiento",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "chore/security-quick-wins (+3/-208, último commit propio 2026-07-22)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 83 días sin commits propios"
+   ],
+   "que_rompe": "2 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "BAJA",
+   "rama": "chore/security-quick-wins",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "chore/wf-home (+1/-904, último commit propio 2026-06-08)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 127 días sin commits propios"
+   ],
+   "que_rompe": "2 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "BAJA",
+   "rama": "chore/wf-home",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "claude/festive-ptolemy-d98e1c (mergeada, último commit 2026-07-06)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "claude/festive-ptolemy-d98e1c",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "claude/funny-williams-001d41 (mergeada, último commit 2026-06-21)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "claude/funny-williams-001d41",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "claude/peaceful-swirles-a97e56 (mergeada, último commit 2026-08-18)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "claude/peaceful-swirles-a97e56",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "claude/priceless-nobel-ed8d02 (+1/-324, último commit propio 2026-08-12)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 62 días sin commits propios"
+   ],
+   "que_rompe": "0 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "MEDIA",
+   "rama": "claude/priceless-nobel-ed8d02",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "claude/sad-burnell-2f5e2d (+1/-323, último commit propio 2026-08-12)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 62 días sin commits propios"
+   ],
+   "que_rompe": "0 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "MEDIA",
+   "rama": "claude/sad-burnell-2f5e2d",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "corrida/recorrido-2 (mergeada, último commit 2026-09-04)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "corrida/recorrido-2",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "corrida/recorrido-completo (mergeada, último commit 2026-08-31)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "corrida/recorrido-completo",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "experimento/estetica-goal (+15/-904, último commit propio 2026-06-02)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 133 días sin commits propios"
+   ],
+   "que_rompe": "1 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "BAJA",
+   "rama": "experimento/estetica-goal",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "f0/reconciliacion (mergeada, último commit 2026-08-12)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "f0/reconciliacion",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "f1/datos-fecha-contador (mergeada, último commit 2026-08-12)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "f1/datos-fecha-contador",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "f2/motivo-rechazo (mergeada, último commit 2026-08-12)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "f2/motivo-rechazo",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "f3/acuse-recibo (mergeada, último commit 2026-08-18)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "f3/acuse-recibo",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/accion-a-la-vista (mergeada, último commit 2026-09-02)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/accion-a-la-vista",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/callejones (mergeada, último commit 2026-08-26)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/callejones",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/cartera-para-que (mergeada, último commit 2026-09-04)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/cartera-para-que",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/cola-de-trabajo (mergeada, último commit 2026-09-03)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/cola-de-trabajo",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/config-faltante (mergeada, último commit 2026-08-31)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/config-faltante",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/cromo-primer-pliegue (mergeada, último commit 2026-09-01)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/cromo-primer-pliegue",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/datos-viajan (mergeada, último commit 2026-08-27)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/datos-viajan",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/destinos-alcanzables (mergeada, último commit 2026-08-30)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/destinos-alcanzables",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/ficha-por-fuentes (mergeada, último commit 2026-09-01)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/ficha-por-fuentes",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/fonts-geist-scope (mergeada, último commit 2026-07-30)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/fonts-geist-scope",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/franja-recorrido (mergeada, último commit 2026-09-03)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/franja-recorrido",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/fusion-m1-m2 (mergeada, último commit 2026-09-01)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/fusion-m1-m2",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/helpers-que-prueban (mergeada, último commit 2026-08-31)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/helpers-que-prueban",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/home-sanidad (mergeada, último commit 2026-07-29)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/home-sanidad",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/motion-sanidad-mobile (mergeada, último commit 2026-07-30)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/motion-sanidad-mobile",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/municiones (mergeada, último commit 2026-08-26)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/municiones",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/paso-que-corresponde (mergeada, último commit 2026-09-02)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/paso-que-corresponde",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/quinta-superficie (mergeada, último commit 2026-08-27)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/quinta-superficie",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/una-sola-fuente (mergeada, último commit 2026-08-29)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/una-sola-fuente",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/veredicto-y-ciclo (mergeada, último commit 2026-09-04)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/veredicto-y-ciclo",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "fix/vocabulario (mergeada, último commit 2026-08-27)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "fix/vocabulario",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "home-clasico-referencia (mergeada, último commit 2026-07-31)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "home-clasico-referencia",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "leados/b8a-hardening (mergeada, último commit 2026-06-13)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "leados/b8a-hardening",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "leados/b8a-ii (mergeada, último commit 2026-06-13)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "leados/b8a-ii",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "leados/b8a-iii (+3/-867, último commit propio 2026-06-13)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 122 días sin commits propios"
+   ],
+   "que_rompe": "2 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "BAJA",
+   "rama": "leados/b8a-iii",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "leados/p11-turno (mergeada, último commit 2026-08-12)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "leados/p11-turno",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "leados/v1-a-main (mergeada, último commit 2026-08-26)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "leados/v1-a-main",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "leados/v1-integracion (mergeada, último commit 2026-08-26)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "leados/v1-integracion",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "leados/v2-a-main (mergeada, último commit 2026-09-06)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "leados/v2-a-main",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "main-backup-pre-b8a (mergeada, último commit 2026-06-11)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "main-backup-pre-b8a",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "recon-origin-main (mergeada, último commit 2026-06-05)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "recon-origin-main",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "redesign/home (mergeada, último commit 2026-08-10)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "tiene worktree en C:/PorfolioDevelOP",
+   "confianza": "MEDIA",
+   "rama": "redesign/home",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "rediseno/chrome (dormida, +23/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "263 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "rediseno/chrome",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "rediseno/cimientos (dormida, +18/-52)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "197 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "rediseno/cimientos",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "rediseno/motion (dormida, +23/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "249 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "rediseno/motion",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "rediseno/secciones-a (dormida, +29/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "369 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "rediseno/secciones-a",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "rediseno/secciones-b (dormida, +29/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "374 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "rediseno/secciones-b",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "redisign/home (mergeada, último commit 2026-08-03)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "redisign/home",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "revert-home-abortado (+3/-95, último commit propio 2026-08-12)",
+   "archivos": [],
+   "senales": [
+    "abandonada: 62 días sin commits propios"
+   ],
+   "que_rompe": "3 archivos solo existen ahí (revisar antes de borrar)",
+   "confianza": "BAJA",
+   "rama": "revert-home-abortado",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "runtime/mejoras (mergeada, último commit 2026-07-11)",
+   "archivos": [],
+   "senales": [
+    "sin commits propios fuera de origin/main"
+   ],
+   "que_rompe": "nada: todo su contenido está en main",
+   "confianza": "ALTA",
+   "rama": "runtime/mejoras",
+   "rediseno_rama": false,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": false
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/acomodamiento (dormida, +68/-0)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "1266 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/acomodamiento",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/cierre-etapa (dormida, +70/-0)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "1363 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/cierre-etapa",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/contenido (dormida, +40/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "528 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/contenido",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/costura (dormida, +52/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "669 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/costura",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/defectos (dormida, +57/-0)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "894 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/defectos",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/emite (dormida, +71/-0)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "1466 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/emite",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/escena (dormida, +40/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "533 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/escena",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/escena-premium (dormida, +49/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "621 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/escena-premium",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/escena-viva (dormida, +57/-0)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "907 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/escena-viva",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/luz (dormida, +62/-0)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "1072 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/luz",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/medicion (dormida, +52/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "780 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/medicion",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/momentos (dormida, +49/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "641 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/momentos",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/preloader (dormida, +40/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "533 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/preloader",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/sincronia (dormida, +58/-0)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "941 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/sincronia",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "rama",
+   "titulo": "v3/tipo (dormida, +40/-50)",
+   "archivos": [],
+   "senales": [
+    "rama intermedia del rediseño del home"
+   ],
+   "que_rompe": "529 archivos solo existen ahí",
+   "confianza": "BAJA",
+   "rama": "v3/tipo",
+   "rediseno_rama": true,
+   "loc": 0,
+   "zona": "libre",
+   "rediseno": true
+  },
+  {
+   "categoria": "enum-sin-uso",
+   "titulo": "enum ChatbotEventLevel: DEBUG",
+   "archivos": [
+    "logic-core-v3/prisma/schema.prisma"
+   ],
+   "senales": [
+    "ninguna mención de la palabra en src/"
+   ],
+   "que_rompe": "borrarlo exige migración (y schema.prisma es congelado en esta corrida)",
+   "confianza": "BAJA",
+   "detalle": [
+    "DEBUG"
+   ],
+   "loc": 0,
+   "zona": "congelado",
+   "rediseno": false
+  },
+  {
+   "categoria": "enum-sin-uso",
+   "titulo": "enum AuditActionType: QUOTA_CHANGED, USER_INVITED, USER_REMOVED",
+   "archivos": [
+    "logic-core-v3/prisma/schema.prisma"
+   ],
+   "senales": [
+    "ninguna mención de la palabra en src/"
+   ],
+   "que_rompe": "borrarlo exige migración (y schema.prisma es congelado en esta corrida)",
+   "confianza": "BAJA",
+   "detalle": [
+    "QUOTA_CHANGED",
+    "USER_INVITED",
+    "USER_REMOVED"
+   ],
+   "loc": 0,
+   "zona": "congelado",
+   "rediseno": false
+  }
+ ]
+}

@@ -1,0 +1,1715 @@
+{
+ "nota": "Sin source ni output: solo ubicación, regla y mensaje.",
+ "totales": {
+  "archivos_lintados": 1604,
+  "archivos_con_problemas": 116,
+  "errores": 102,
+  "warnings": 111
+ },
+ "mensajes": [
+  {
+   "archivo": "find_unused.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "find_unused.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 2,
+   "columna": 14,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "next.config.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 1,
+   "columna": 15,
+   "mensaje": "'NextConfig' is defined but never used."
+  },
+  {
+   "archivo": "prisma/backups/backup.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 26,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "prisma/backups/backup.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 2,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "prisma/seed-agency-os.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 22,
+   "columna": 8,
+   "mensaje": "'Organization' is defined but never used."
+  },
+  {
+   "archivo": "prisma/seed-agency-os.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 48,
+   "columna": 7,
+   "mensaje": "'PREMIUM_FEATURE_CATALOG' is assigned a value but never used."
+  },
+  {
+   "archivo": "prisma/seed-agency-os.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 332,
+   "columna": 10,
+   "mensaje": "'mapOsServiceTypeToPortal' is defined but never used."
+  },
+  {
+   "archivo": "prisma/seeds/init-data-connections.ts",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 18,
+   "columna": 49,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "public/widget.js",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 24,
+   "columna": 12,
+   "mensaje": "'_' is defined but never used."
+  },
+  {
+   "archivo": "replace_analytics.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "script.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "script2.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "script3.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "script_aiscene.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "script_analytics.js",
+   "regla": "(parse)",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 0,
+   "mensaje": "Parsing error: File appears to be binary."
+  },
+  {
+   "archivo": "script_leads.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "script_magnetic.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "script_maps.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "scripts/_b52-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 27,
+   "columna": 3,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b52-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 52,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b52-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 58,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b52-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 81,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b52-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 100,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b52-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 109,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b52-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 155,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b52-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 170,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b52-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 173,
+   "columna": 3,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b52-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 177,
+   "columna": 3,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 24,
+   "columna": 3,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 44,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 49,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 70,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 95,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 126,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 162,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 197,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 213,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 227,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 249,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 252,
+   "columna": 3,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b53-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 256,
+   "columna": 3,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 24,
+   "columna": 3,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 45,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 59,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 82,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 101,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 124,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 135,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 152,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 170,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 198,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 223,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 235,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 251,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 267,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 313,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 323,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 341,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 355,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 358,
+   "columna": 3,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_b54-test-scoring.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 362,
+   "columna": 3,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/_db-cleanup-execute.mjs",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 88,
+   "columna": 9,
+   "mensaje": "'result' is assigned a value but never used."
+  },
+  {
+   "archivo": "scripts/b58-smoke.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 12,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/b59-smoke.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 16,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-console')."
+  },
+  {
+   "archivo": "scripts/check-env.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 10,
+   "columna": 1,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "scripts/check-env.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 11,
+   "columna": 1,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "scripts/dev/_vseed.ts",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 22,
+   "columna": 121,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "scripts/dev/_vseed.ts",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 22,
+   "columna": 348,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "scripts/dev/_vseed.ts",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 22,
+   "columna": 373,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "scripts/encode-vertex-creds.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 1,
+   "columna": 12,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "scripts/encode-vertex-creds.js",
+   "regla": "@typescript-eslint/no-require-imports",
+   "severidad": "error",
+   "linea": 2,
+   "columna": 14,
+   "mensaje": "A `require()` style import is forbidden."
+  },
+  {
+   "archivo": "scripts/p41-inject-campaigns.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 10,
+   "columna": 7,
+   "mensaje": "'TAG' is assigned a value but never used."
+  },
+  {
+   "archivo": "scripts/p41-inject-campaigns.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 34,
+   "columna": 13,
+   "mensaje": "'id' is assigned a value but never used."
+  },
+  {
+   "archivo": "scripts/p41-inject-campaigns.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 34,
+   "columna": 17,
+   "mensaje": "'createdAt' is assigned a value but never used."
+  },
+  {
+   "archivo": "scripts/p41-inject-campaigns.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 34,
+   "columna": 28,
+   "mensaje": "'updatedAt' is assigned a value but never used."
+  },
+  {
+   "archivo": "scripts/p41-inject-campaigns.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 34,
+   "columna": 39,
+   "mensaje": "'capturedAt' is assigned a value but never used."
+  },
+  {
+   "archivo": "scripts/p41-inject-campaigns.ts",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 37,
+   "columna": 21,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "scripts/qa-corridas/_verify-scroll-gap.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 9,
+   "columna": 8,
+   "mensaje": "'fs' is defined but never used."
+  },
+  {
+   "archivo": "scripts/regression/run-baseline.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 300,
+   "columna": 11,
+   "mensaje": "Unused eslint-disable directive (no problems were reported from 'no-constant-condition')."
+  },
+  {
+   "archivo": "src/actions/onboarding-actions.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 80,
+   "columna": 9,
+   "mensaje": "'session' is assigned a value but never used."
+  },
+  {
+   "archivo": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 25,
+   "columna": 63,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-mus"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 74,
+   "columna": 7,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 81,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 254,
+   "columna": 12,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+   "regla": "react-hooks/preserve-manual-memoization",
+   "severidad": "error",
+   "linea": 258,
+   "columna": 20,
+   "mensaje": "Compilation Skipped: Existing memoization could not be preserved\n\nReact Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This value was memoized in source but not in compilation output.\n\nC:\\auditoria-2026-10\\logic-core-v3\\src\\app\\(protect"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 43,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 56,
+   "columna": 55,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-mus"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/leads/_components/lead-form.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 107,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/messages/_components/conversation-list.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 57,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/messages/_components/emoji-popover.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 56,
+   "columna": 19,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/page.tsx",
+   "regla": "react-hooks/immutability",
+   "severidad": "error",
+   "linea": 500,
+   "columna": 5,
+   "mensaje": "Error: Cannot reassign variable after render completes\n\nReassigning `cumulativeRevenue` after render has completed can cause inconsistent behavior on subsequent renders. Consider using state instead.\n\nC:\\auditoria-2026-10\\logic-core-v3\\src\\app\\(protected)\\admin\\page.tsx:500:5\n  498 |   const revenue"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/[projectId]/_components/project-status-control.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 40,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 1012,
+   "columna": 15,
+   "mensaje": "'sortTimestamp' is defined but never used."
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 134,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_components/projects-board.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 76,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_components/task-form.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 90,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 175,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 123,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 127,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/settings/alerts/page.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 16,
+   "columna": 43,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-mus"
+  },
+  {
+   "archivo": "src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 97,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 34,
+   "columna": 17,
+   "mensaje": "'formAction' is assigned a value but never used."
+  },
+  {
+   "archivo": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 56,
+   "columna": 3,
+   "mensaje": "'snoozedUntil' is defined but never used."
+  },
+  {
+   "archivo": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 63,
+   "columna": 51,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-mus"
+  },
+  {
+   "archivo": "src/app/api/admin/chatbot/demo-chat/[slug]/__tests__/demo-chat-model-resolution.invariant.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 79,
+   "columna": 14,
+   "mensaje": "'_modelId' is defined but never used."
+  },
+  {
+   "archivo": "src/app/api/test-sentry/route.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 1,
+   "columna": 10,
+   "mensaje": "'NextResponse' is defined but never used."
+  },
+  {
+   "archivo": "src/app/bienvenida/_components/BienvenidaWizard.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 24,
+   "columna": 36,
+   "mensaje": "'organizationId' is defined but never used."
+  },
+  {
+   "archivo": "src/app/bienvenida/_components/Step1Empresa.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 3,
+   "columna": 22,
+   "mensaje": "'Building2' is defined but never used."
+  },
+  {
+   "archivo": "src/app/contact/page.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 74,
+   "columna": 14,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/app/error.tsx",
+   "regla": "@next/next/no-html-link-for-pages",
+   "severidad": "error",
+   "linea": 57,
+   "columna": 21,
+   "mensaje": "Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages"
+  },
+  {
+   "archivo": "src/auth.config.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 25,
+   "columna": 18,
+   "mensaje": "'auth' is defined but never used."
+  },
+  {
+   "archivo": "src/auth.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 65,
+   "columna": 10,
+   "mensaje": "'getPostLoginPath' is defined but never used."
+  },
+  {
+   "archivo": "src/components/canvas/Interactive3DNetwork.tsx",
+   "regla": "react-hooks/immutability",
+   "severidad": "error",
+   "linea": 45,
+   "columna": 13,
+   "mensaje": "Error: Cannot access variable before it is declared\n\n`resetPosition` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.\n\nC:\\auditoria-2026-10\\logic-core-v3\\src\\components\\canvas\\Interactive3DNetwork.tsx:45:13\n  43 |         timeoutRe"
+  },
+  {
+   "archivo": "src/components/canvas/Interactive3DNetwork.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 114,
+   "columna": 28,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-"
+  },
+  {
+   "archivo": "src/components/canvas/Interactive3DNetwork.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 115,
+   "columna": 41,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-"
+  },
+  {
+   "archivo": "src/components/canvas/Interactive3DNetwork.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 116,
+   "columna": 39,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-"
+  },
+  {
+   "archivo": "src/components/canvas/Interactive3DNetwork.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 149,
+   "columna": 38,
+   "mensaje": "'color' is defined but never used."
+  },
+  {
+   "archivo": "src/components/canvas/Interactive3DNetwork.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 389,
+   "columna": 47,
+   "mensaje": "'activeNode' is defined but never used."
+  },
+  {
+   "archivo": "src/components/canvas/Interactive3DNetwork.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 389,
+   "columna": 59,
+   "mensaje": "'setActiveNode' is defined but never used."
+  },
+  {
+   "archivo": "src/components/canvas/LiquidProject.tsx",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 8,
+   "columna": 32,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "src/components/canvas/LiquidProject.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 44,
+   "columna": 57,
+   "mensaje": "'imageUrl' is defined but never used."
+  },
+  {
+   "archivo": "src/components/canvas/NeuralNetwork.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 17,
+   "columna": 37,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-"
+  },
+  {
+   "archivo": "src/components/canvas/NeuralNetwork.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 18,
+   "columna": 27,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-"
+  },
+  {
+   "archivo": "src/components/canvas/NeuralNetwork.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 19,
+   "columna": 39,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-"
+  },
+  {
+   "archivo": "src/components/dashboard/AnimatedProgressBar.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 26,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/dashboard/AnnouncementsFeed.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 51,
+   "columna": 19,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/dashboard/AnnouncementsFeed.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 52,
+   "columna": 19,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/dashboard/EmojiPopover.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 54,
+   "columna": 19,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/dashboard/ExecutiveReportTemplate.tsx",
+   "regla": "react/no-unescaped-entities",
+   "severidad": "error",
+   "linea": 103,
+   "columna": 15,
+   "mensaje": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+   "archivo": "src/components/dashboard/ExecutiveReportTemplate.tsx",
+   "regla": "react/no-unescaped-entities",
+   "severidad": "error",
+   "linea": 103,
+   "columna": 30,
+   "mensaje": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+   "archivo": "src/components/dashboard/LeakMeter.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 2,
+   "columna": 10,
+   "mensaje": "'AlertTriangle' is defined but never used."
+  },
+  {
+   "archivo": "src/components/dashboard/MessageThread.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 84,
+   "columna": 7,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/dashboard/NotificationCenter.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 56,
+   "columna": 19,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/dashboard/NotificationCenter.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 59,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/dashboard/TicketStatusSelector.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 29,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/dashboard/UpsellCard.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 6,
+   "columna": 8,
+   "mensaje": "'Link' is defined but never used."
+  },
+  {
+   "archivo": "src/components/dashboard/UpsellCard.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 34,
+   "columna": 3,
+   "mensaje": "'href' is defined but never used."
+  },
+  {
+   "archivo": "src/components/dashboard/plan/PlansShowcase.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 191,
+   "columna": 37,
+   "mensaje": "'isUpgrade' is defined but never used."
+  },
+  {
+   "archivo": "src/components/ia/BentoIA.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 3,
+   "columna": 46,
+   "mensaje": "'useMemo' is defined but never used."
+  },
+  {
+   "archivo": "src/components/layout/DynamicDock.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 460,
+   "columna": 9,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/layout/Navbar.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 183,
+   "columna": 9,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/onboarding/OnboardingWizard.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 7,
+   "columna": 10,
+   "mensaje": "'Handshake' is defined but never used."
+  },
+  {
+   "archivo": "src/components/sections/AILargeCta.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 4,
+   "columna": 22,
+   "mensaje": "'Sparkles' is defined but never used."
+  },
+  {
+   "archivo": "src/components/sections/AILargeCta.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 7,
+   "columna": 12,
+   "mensaje": "'isHovered' is assigned a value but never used."
+  },
+  {
+   "archivo": "src/components/sections/AILargeCta.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 7,
+   "columna": 23,
+   "mensaje": "'setIsHovered' is assigned a value but never used."
+  },
+  {
+   "archivo": "src/components/sections/AIPipelineSection.tsx",
+   "regla": "react/jsx-no-comment-textnodes",
+   "severidad": "error",
+   "linea": 18,
+   "columna": 97,
+   "mensaje": "Comments inside children section of tag should be placed inside braces"
+  },
+  {
+   "archivo": "src/components/sections/FeedbackLoop.tsx",
+   "regla": "react/no-unescaped-entities",
+   "severidad": "error",
+   "linea": 47,
+   "columna": 37,
+   "mensaje": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+   "archivo": "src/components/sections/FeedbackLoop.tsx",
+   "regla": "react/no-unescaped-entities",
+   "severidad": "error",
+   "linea": 47,
+   "columna": 51,
+   "mensaje": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+   "archivo": "src/components/sections/TemplateWarehouse.tsx",
+   "regla": "react/jsx-no-comment-textnodes",
+   "severidad": "error",
+   "linea": 17,
+   "columna": 87,
+   "mensaje": "Comments inside children section of tag should be placed inside braces"
+  },
+  {
+   "archivo": "src/components/software/DiagnosticoSoftware.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 521,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/software/ProcesoSoftware.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 5,
+   "columna": 10,
+   "mensaje": "'Diamond' is defined but never used."
+  },
+  {
+   "archivo": "src/components/software/ShowcaseSoftware.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 9,
+   "columna": 10,
+   "mensaje": "'YAxis' is defined but never used."
+  },
+  {
+   "archivo": "src/components/software/ShowcaseSoftware.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 12,
+   "columna": 10,
+   "mensaje": "'ArrowDown' is defined but never used."
+  },
+  {
+   "archivo": "src/components/software/ShowcaseSoftware.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 238,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/ui/HyperText.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 46,
+   "columna": 13,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/ui/HyperText.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 70,
+   "columna": 9,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/components/ui/HyperText.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 74,
+   "columna": 33,
+   "mensaje": "'prev' is defined but never used."
+  },
+  {
+   "archivo": "src/components/ui/Modal.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 54,
+   "columna": 19,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/context/PreloaderContext.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 126,
+   "columna": 13,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/emails/ActionRequiredEmail.tsx",
+   "regla": "react/no-unescaped-entities",
+   "severidad": "error",
+   "linea": 41,
+   "columna": 109,
+   "mensaje": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+   "archivo": "src/emails/ActionRequiredEmail.tsx",
+   "regla": "react/no-unescaped-entities",
+   "severidad": "error",
+   "linea": 41,
+   "columna": 120,
+   "mensaje": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+   "archivo": "src/emails/TicketReplyEmail.tsx",
+   "regla": "react/no-unescaped-entities",
+   "severidad": "error",
+   "linea": 44,
+   "columna": 84,
+   "mensaje": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+   "archivo": "src/emails/TicketReplyEmail.tsx",
+   "regla": "react/no-unescaped-entities",
+   "severidad": "error",
+   "linea": 44,
+   "columna": 98,
+   "mensaje": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`."
+  },
+  {
+   "archivo": "src/lib/actions/invitations.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 110,
+   "columna": 9,
+   "mensaje": "'inviteUrl' is assigned a value but never used."
+  },
+  {
+   "archivo": "src/lib/actions/upsell.ts",
+   "regla": "@next/next/no-assign-module-variable",
+   "severidad": "error",
+   "linea": 45,
+   "columna": 5,
+   "mensaje": "Do not assign to the variable `module`. See: https://nextjs.org/docs/messages/no-assign-module-variable"
+  },
+  {
+   "archivo": "src/lib/ai/results-insights.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 90,
+   "columna": 11,
+   "mensaje": "'startedAt' is assigned a value but never used."
+  },
+  {
+   "archivo": "src/lib/ai/results-insights.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 144,
+   "columna": 11,
+   "mensaje": "'startedAt' is assigned a value but never used."
+  },
+  {
+   "archivo": "src/lib/audit-log.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 64,
+   "columna": 11,
+   "mensaje": "'createdAt' is assigned a value but never used."
+  },
+  {
+   "archivo": "src/lib/audit-log.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 64,
+   "columna": 22,
+   "mensaje": "'updatedAt' is assigned a value but never used."
+  },
+  {
+   "archivo": "src/lib/integrations/pagespeed.ts",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 77,
+   "columna": 9,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "src/lib/integrations/pagespeed.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 129,
+   "columna": 15,
+   "mensaje": "'_' is defined but never used."
+  },
+  {
+   "archivo": "src/lib/integrations/pagespeed.ts",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 129,
+   "columna": 35,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "src/lib/integrations/pagespeed.ts",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 132,
+   "columna": 33,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "src/lib/premium-modules.ts",
+   "regla": "@next/next/no-assign-module-variable",
+   "severidad": "error",
+   "linea": 107,
+   "columna": 3,
+   "mensaje": "Do not assign to the variable `module`. See: https://nextjs.org/docs/messages/no-assign-module-variable"
+  },
+  {
+   "archivo": "src/lib/premium-modules.ts",
+   "regla": "@next/next/no-assign-module-variable",
+   "severidad": "error",
+   "linea": 144,
+   "columna": 3,
+   "mensaje": "Do not assign to the variable `module`. See: https://nextjs.org/docs/messages/no-assign-module-variable"
+  },
+  {
+   "archivo": "src/lib/sentry/scrub-pii.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 118,
+   "columna": 3,
+   "mensaje": "'_hint' is defined but never used."
+  },
+  {
+   "archivo": "src/lib/use-autosave.ts",
+   "regla": "react-hooks/refs",
+   "severidad": "error",
+   "linea": 82,
+   "columna": 34,
+   "mensaje": "Error: Cannot access refs during render\n\nReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (htt"
+  },
+  {
+   "archivo": "src/lib/use-reduced-motion.ts",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 10,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 317,
+   "columna": 37,
+   "mensaje": "'_state' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx",
+   "regla": "react-hooks/exhaustive-deps",
+   "severidad": "warning",
+   "linea": 23,
+   "columna": 6,
+   "mensaje": "React Hook useEffect has missing dependencies: 'state.businessInfo' and 'update'. Either include them or remove the dependency array. If 'update' changes too often, find the parent component that defines it and wrap that definition in useCallback."
+  },
+  {
+   "archivo": "src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 49,
+   "columna": 7,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts",
+   "regla": "react-hooks/exhaustive-deps",
+   "severidad": "warning",
+   "linea": 56,
+   "columna": 6,
+   "mensaje": "React Hook useEffect has a missing dependency: 'initialState'. Either include it or remove the dependency array. If 'setState' needs the current value of 'initialState', you can also switch to useReducer instead of useState and read 'initialState' in the reducer."
+  },
+  {
+   "archivo": "src/modules/chatbot/components/avatar/AvatarPicker.tsx",
+   "regla": "@next/next/no-img-element",
+   "severidad": "warning",
+   "linea": 107,
+   "columna": 15,
+   "mensaje": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/avatar/AvatarRenderer.tsx",
+   "regla": "@next/next/no-img-element",
+   "severidad": "warning",
+   "linea": 53,
+   "columna": 7,
+   "mensaje": "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 523,
+   "columna": 30,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 525,
+   "columna": 26,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 532,
+   "columna": 32,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 601,
+   "columna": 47,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+   "regla": "react-hooks/refs",
+   "severidad": "error",
+   "linea": 603,
+   "columna": 32,
+   "mensaje": "Error: Cannot access refs during render\n\nReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (htt"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+   "regla": "react-hooks/refs",
+   "severidad": "error",
+   "linea": 603,
+   "columna": 32,
+   "mensaje": "Error: Cannot access refs during render\n\nReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (htt"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx",
+   "regla": "react-hooks/exhaustive-deps",
+   "severidad": "warning",
+   "linea": 186,
+   "columna": 41,
+   "mensaje": "React Hook useMemo has an unnecessary dependency: 'leads'. Either exclude it or remove the dependency array."
+  },
+  {
+   "archivo": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 26,
+   "columna": 26,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 36,
+   "columna": 37,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+   "regla": "@typescript-eslint/no-explicit-any",
+   "severidad": "error",
+   "linea": 37,
+   "columna": 31,
+   "mensaje": "Unexpected any. Specify a different type."
+  },
+  {
+   "archivo": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 51,
+   "columna": 14,
+   "mensaje": "'e' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+   "regla": "react-hooks/refs",
+   "severidad": "error",
+   "linea": 317,
+   "columna": 34,
+   "mensaje": "Error: Cannot access refs during render\n\nReact refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (htt"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 79,
+   "columna": 5,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/modules/chatbot/components/tooltip/useTooltipTriggers.ts",
+   "regla": "react-hooks/purity",
+   "severidad": "error",
+   "linea": 31,
+   "columna": 42,
+   "mensaje": "Error: Cannot call impure function during render\n\n`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-mus"
+  },
+  {
+   "archivo": "src/modules/chatbot/hooks/useChatbot.ts",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 496,
+   "columna": 7,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/modules/chatbot/hooks/useChatbotSounds.ts",
+   "regla": "react-hooks/set-state-in-effect",
+   "severidad": "error",
+   "linea": 68,
+   "columna": 27,
+   "mensaje": "Error: Calling setState synchronously within an effect can trigger cascading renders\n\nEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or"
+  },
+  {
+   "archivo": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 49,
+   "columna": 11,
+   "mensaje": "'botConfig' is assigned a value but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/server/llm/__tests__/resolve-effective-model.invariant.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 75,
+   "columna": 14,
+   "mensaje": "'_modelId' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/server/llm/providers/anthropic.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 17,
+   "columna": 12,
+   "mensaje": "'_modelId' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/server/llm/providers/google.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 109,
+   "columna": 60,
+   "mensaje": "'_omit' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/server/llm/providers/openai.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 11,
+   "columna": 12,
+   "mensaje": "'_modelId' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/server/prompts/sections.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 77,
+   "columna": 36,
+   "mensaje": "'_input' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/server/prompts/sections.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 160,
+   "columna": 31,
+   "mensaje": "'_input' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/server/prompts/sections.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 215,
+   "columna": 35,
+   "mensaje": "'_input' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/server/tools/getTools.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 15,
+   "columna": 27,
+   "mensaje": "'_ctx' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/server/tools/getTools.ts",
+   "regla": "@typescript-eslint/no-unused-vars",
+   "severidad": "warning",
+   "linea": 17,
+   "columna": 22,
+   "mensaje": "'_ctx' is defined but never used."
+  },
+  {
+   "archivo": "src/modules/chatbot/server/verticals/__tests__/ev3.golden-fixture.ts",
+   "regla": "(parse)",
+   "severidad": "warning",
+   "linea": 10,
+   "columna": 1,
+   "mensaje": "Unused eslint-disable directive (no problems were reported)."
+  },
+  {
+   "archivo": "tailwind.config.ts",
+   "regla": "import/no-anonymous-default-export",
+   "severidad": "warning",
+   "linea": 19,
+   "columna": 1,
+   "mensaje": "Assign object to a variable before exporting as module default"
+  }
+ ]
+}

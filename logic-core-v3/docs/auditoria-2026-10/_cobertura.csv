@@ -150,278 +150,278 @@ ruta,dominio,alcance,estado,ciclo,notas
 .github/workflows/db-backup.yml,D8,profundo,pendiente,,ci
 .gitignore,D8,superficial,pendiente,,config-repo
 .impeccable/design.json,D8,superficial,pendiente,,tooling: config de skill impeccable
-AUDITORIA-VS-BRIEF-2026-07.md,DOC,superficial,pendiente,,doc-raiz-repo
-CLAUDE.md,DOC,superficial,pendiente,,doc-raiz-repo
-DESIGN.md,DOC,superficial,pendiente,,doc-raiz-repo
-PRODUCT.md,DOC,superficial,pendiente,,doc-raiz-repo
+AUDITORIA-VS-BRIEF-2026-07.md,DOC,superficial,superficial,F1,doc-raiz-repo
+CLAUDE.md,DOC,superficial,superficial,F1,doc-raiz-repo
+DESIGN.md,DOC,superficial,superficial,F1,doc-raiz-repo
+PRODUCT.md,DOC,superficial,superficial,F1,doc-raiz-repo
 _tmp_footer_component.html,-,fuera,excluido-generado,,temporal-suelto-en-raiz
 _tmp_grid_feature_cards.html,-,fuera,excluido-generado,,temporal-suelto-en-raiz
-lane-LOG.md,DOC,superficial,pendiente,,doc-raiz-repo
-lane-dashboard-log.md,DOC,superficial,pendiente,,doc-raiz-repo
-lane-plan-log.md,DOC,superficial,pendiente,,doc-raiz-repo
-lane-resultados-redesign-log.md,DOC,superficial,pendiente,,doc-raiz-repo
+lane-LOG.md,DOC,superficial,superficial,F1,doc-raiz-repo
+lane-dashboard-log.md,DOC,superficial,superficial,F1,doc-raiz-repo
+lane-plan-log.md,DOC,superficial,superficial,F1,doc-raiz-repo
+lane-resultados-redesign-log.md,DOC,superficial,superficial,F1,doc-raiz-repo
 logic-core-v3/.claude/launch.json,D8,superficial,pendiente,,tooling-agentes
 logic-core-v3/.dependency-cruiser.cjs,D8,profundo,pendiente,,config
 logic-core-v3/.env.example,D8,profundo,pendiente,,config
 logic-core-v3/.eslint_output.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
 logic-core-v3/.gitattributes,D8,profundo,pendiente,,config
 logic-core-v3/.gitignore,D8,profundo,pendiente,,config
-logic-core-v3/AGENTS.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/CHANGELOG-cuenta.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/CHANGELOG.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/DEPLOY.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/README.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/STATUS.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/_CHANGELOG-lane-project.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/__dev_task.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/_lane-config-settings-log.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/_lane-cuenta-plan.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/_lane-demos-log.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/_lane-intel-alertas-cierre.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/_lane-intel-alertas-log.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/_lane-project-log.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/_lane-proyectos-log.md,DOC,superficial,pendiente,,doc-raiz-app
-logic-core-v3/_lane-services-log.md,DOC,superficial,pendiente,,doc-raiz-app
+logic-core-v3/AGENTS.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/CHANGELOG-cuenta.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/CHANGELOG.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/DEPLOY.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/README.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/STATUS.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/_CHANGELOG-lane-project.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/__dev_task.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/_lane-config-settings-log.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/_lane-cuenta-plan.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/_lane-demos-log.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/_lane-intel-alertas-cierre.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/_lane-intel-alertas-log.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/_lane-project-log.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/_lane-proyectos-log.md,DOC,superficial,superficial,F1,doc-raiz-app
+logic-core-v3/_lane-services-log.md,DOC,superficial,superficial,F1,doc-raiz-app
 logic-core-v3/audit.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
-logic-core-v3/docs/BRIEF-VISION-FLUJO-SETTER-v3.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/HANDOFF-LEADOS-CIERRE.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/MUNICION-PROMPTS-Y-SKILL.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/PILOTO-DEMO-FIRST.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/SPRINT-M1-MANUAL-v2.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Admin Completo rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Admin Operaciones rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Chatbot rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Clientes rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Configuracion rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Dashboard rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Equipo rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Inteligencia rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Leads rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Operaciones rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Proyectos rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-changelog/Revision demos rdc.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/admin-design-system-audit.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/audit-chatbot-runtime.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/audit-repo-20260707.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/audit/2026-04-dashboard-cleanup-audit.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditoria-consistencia-setter.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditoria-recorrido-completo-novato.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditoria-seguridad-2026-05.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditoria-total-pre-deploy.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditoria-ux-setter.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditorias/A2-SETTER-DOCS-VIABILIDAD-2026-08.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditorias/A3-ESTADO-ECC-SKILLS-2026-08.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditorias/AUDITORIA-CIERRE-2026-07.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditorias/REGRESION-FINAL-2026-07.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/audits/2026-05-auditoria-db.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/audits/2026-05-auditoria-profunda.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/audits/2026-05-bfg-leak-cleanup.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/audits/2026-05-cleanup-db-dev.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/audits/2026-06-revalidacion-dashboard-chatbot.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/audits/2026-06-revalidacion.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/b7-probe-cal-com.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/b8a-auditoria.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/b8a-changelog.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/b8a-ii-auditoria.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/b8a-ii-changelog.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/b9-changelog.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/b9-plan-visual.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/2026-05-admin-performance.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/2026-05-chatbot-runtime.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/2026-07-auditoria-seguridad.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p17-pliegue-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p17-pliegue-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p18-pliegue-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p18-pliegue-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p19-barrido-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p19-barrido-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p19-pliegue-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p19-pliegue-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p20-destinos-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p20-destinos-despues-v2.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p20-destinos-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p20-pliegue-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p20-pliegue-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p21-franja-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p21-franja-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p21-panel-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p21-panel-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p21-pliegue-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p21-pliegue-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p22-cartera-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p22-cartera-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p22-destinos-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p22-destinos-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p22-pliegue-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p22-pliegue-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p23-panel-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p23-panel-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p23-pliegue-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p23-pliegue-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p23-ubicaciones-antes.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/baselines/p23-ubicaciones-despues.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/bitacora-beta-2.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/bitacora-beta-3.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/bitacora-beta.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/bitacora-rediseno.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/bitacora-roadmap.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/chatbot-deploy.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/chatbot-qa-checklist.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/chatbot-sprints.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/changelog/chatbot.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/changelog/cuenta.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/changelog/general.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/changelog/inicio.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/changelog/mensajes.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/changelog/plan.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/changelog/proyecto.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/changelog/resultados.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/changelog/servicios.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/changelog/soporte.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/lane-inicio-explore.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/lane-inicio-sprint-log.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/lane-portal-pulido-log.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/relevamiento-6-secciones.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/client-portal/relevamiento-global.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/consolidacion-planoA-runtime.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/corrida-recorrido-2026-08-31/.gitignore,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/corrida-recorrido-2026-08-31/MANIFIESTO.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/corrida-recorrido-2026-08-31/REPORTE.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/demo-guion.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/design-system-audit.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/design-system.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/diagnostico-visual-2026-08/.gitignore,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/diagnostico-visual-2026-08/MANIFIESTO.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/diagnostico-visual-2026-08/REPORTE.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/diagnostico-visual-admin-2026-08/.gitignore,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/diagnostico-visual-admin-2026-08/MANIFIESTO.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/diagnostico-visual-admin-2026-08/REPORTE.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/env-vars.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/ev4-transcripts/README.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/ev4-transcripts/agencia-1-web.md,DOC,superficial,pendiente,,transcripts (revisar PII)
-logic-core-v3/docs/ev4-transcripts/agencia-2-chatbot-ia.md,DOC,superficial,pendiente,,transcripts (revisar PII)
-logic-core-v3/docs/ev4-transcripts/agencia-3-vago.md,DOC,superficial,pendiente,,transcripts (revisar PII)
-logic-core-v3/docs/ev4-transcripts/usados-1-comprador-caliente.md,DOC,superficial,pendiente,,transcripts (revisar PII)
-logic-core-v3/docs/ev4-transcripts/usados-2-permuta.md,DOC,superficial,pendiente,,transcripts (revisar PII)
-logic-core-v3/docs/ev4-transcripts/usados-3-precio-frio.md,DOC,superficial,pendiente,,transcripts (revisar PII)
-logic-core-v3/docs/ev4-transcripts/usados-4-humano.md,DOC,superficial,pendiente,,transcripts (revisar PII)
-logic-core-v3/docs/ev5-transcripts/README.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/ev5-transcripts/agencia-captura.md,DOC,superficial,pendiente,,transcripts (revisar PII)
-logic-core-v3/docs/experimentos/fg2-brief-experimento.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/experimentos/fg2-prompts-listos.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/impeccable-baseline.json,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/impeccable-baseline.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/leados-alta-setter.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/00-INDICE.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/01-tu-dia.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/02-la-ficha.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/03-la-evaluacion.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/04-el-primer-mensaje.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/05-los-toques.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/06-decidir-la-demo.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/07-construir-la-demo.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/08-publicar-el-borrador.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/09-el-chequeo-final.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/10-correcciones-de-franco.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/11-mandar-el-link.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/12-agendar-la-reunion.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/13-cierres.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/BACHES-RE-VERIFICADOS.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/CORRIDA-M1-v3-FRENADA.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/HALLAZGOS-MANUAL-v3.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/HALLAZGOS-MANUAL.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/PROGRESO-M1.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/VALIDACION-PODA.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/galeria/.gitignore,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/galeria/INDICE.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/galeria/PROGRESO.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/manual-usuario/metodo-creacion-md-capacitacion.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/metodo/LECCIONES-LEADOS.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/metodo/MAPA-LEADOS.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/metodo/PROGRESO-D1.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/metodo/PROPUESTA-CIMIENTO.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/microaudit-frozen-frontera-CO.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/motor-whatsapp/bitacora.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/netlify-env-vars.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/onboarding-data-connections.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/onboarding-flow.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/onboarding-modulo-agenda.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/00-entornos.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/01-onboarding-cliente.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/02-activar-bot.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/03-editar-kb.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/04-responder-alerta.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/05-cliente-no-anda.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/06-instalar-widget.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/README.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/alerts-types.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/b14-deploy-checklist.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/cron-jobs.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/neon-backups.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/operations/sentry-setup.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/privacidad-afirmaciones-cliente.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/probe-b2-hero-nav.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/probe-bundle-inicial.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/probe-construccion-p6.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/probe-monolito-censo.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/probe-motion-sitio.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/probe-poda-terreno.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-22T22-00-07-164Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-22T22-19-20-185Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-22T22-38-03-073Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-22T22-49-06-262Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-22T23-12-16-181Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-22T23-18-15-111Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T00-03-05-733Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T00-07-29-708Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T00-25-44-169Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T00-44-37-258Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T00-59-24-888Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T01-03-11-882Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T18-33-48-648Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T19-05-38-809Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T19-42-43-822Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T20-17-46-942Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T20-55-17-414Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T21-20-32-446Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/baseline-2026-05-23T21-33-39-011Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/smoke-2026-05-23T21-19-30-029Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/regression/smoke-2026-05-23T21-46-53-107Z.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/releases/v1.0.0.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/research/2026-04-entrega-2-pre-research.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/roadmap-pendientes.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/smoke-report.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprint-alpha-3-kb-editor.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-0-5-cleanup.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-0-6-cleanup-extended.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-0-7-baseline-observability.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-0-8-tests-e2e.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-0-9-status-verificacion.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-0-cleanup.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-1-reaudit.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-2-onboarding.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-RESUMEN-FINAL.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-bloque-C-RESUMEN.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/alpha-pre-cierre-RESUMEN.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/infra-1-observabilidad.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/infra-2-cold-start-retry.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/p3-a-1-gbp-connection.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/p3-a-2-venta.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/p4-1-render-utm.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/q1-1-harness.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/q1-2-scoring.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/sprint-b0-bis-cierre.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/sprint-b05-sanidad-sitio.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/sprints/utm-1-captura.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/testing-strategy.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/v1.0-smoke-test-checklist.md,DOC,superficial,pendiente,,doc
-logic-core-v3/docs/verificacion-arranque-oslead-vii.md,DOC,superficial,pendiente,,doc
+logic-core-v3/docs/BRIEF-VISION-FLUJO-SETTER-v3.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/HANDOFF-LEADOS-CIERRE.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/MUNICION-PROMPTS-Y-SKILL.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/PILOTO-DEMO-FIRST.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/SPRINT-M1-MANUAL-v2.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Admin Completo rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Admin Operaciones rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Chatbot rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Clientes rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Configuracion rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Dashboard rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Equipo rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Inteligencia rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Leads rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Operaciones rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Proyectos rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-changelog/Revision demos rdc.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/admin-design-system-audit.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/audit-chatbot-runtime.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/audit-repo-20260707.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/audit/2026-04-dashboard-cleanup-audit.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditoria-consistencia-setter.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditoria-recorrido-completo-novato.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditoria-seguridad-2026-05.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditoria-total-pre-deploy.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditoria-ux-setter.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditorias/A2-SETTER-DOCS-VIABILIDAD-2026-08.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditorias/A3-ESTADO-ECC-SKILLS-2026-08.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditorias/AUDITORIA-CIERRE-2026-07.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditorias/REGRESION-FINAL-2026-07.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/audits/2026-05-auditoria-db.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/audits/2026-05-auditoria-profunda.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/audits/2026-05-bfg-leak-cleanup.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/audits/2026-05-cleanup-db-dev.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/audits/2026-06-revalidacion-dashboard-chatbot.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/audits/2026-06-revalidacion.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/b7-probe-cal-com.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/b8a-auditoria.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/b8a-changelog.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/b8a-ii-auditoria.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/b8a-ii-changelog.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/b9-changelog.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/b9-plan-visual.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/2026-05-admin-performance.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/2026-05-chatbot-runtime.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/2026-07-auditoria-seguridad.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p17-pliegue-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p17-pliegue-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p18-pliegue-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p18-pliegue-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p19-barrido-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p19-barrido-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p19-pliegue-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p19-pliegue-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p20-destinos-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p20-destinos-despues-v2.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p20-destinos-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p20-pliegue-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p20-pliegue-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p21-franja-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p21-franja-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p21-panel-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p21-panel-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p21-pliegue-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p21-pliegue-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p22-cartera-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p22-cartera-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p22-destinos-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p22-destinos-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p22-pliegue-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p22-pliegue-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p23-panel-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p23-panel-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p23-pliegue-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p23-pliegue-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p23-ubicaciones-antes.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/baselines/p23-ubicaciones-despues.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/bitacora-beta-2.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/bitacora-beta-3.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/bitacora-beta.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/bitacora-rediseno.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/bitacora-roadmap.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/chatbot-deploy.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/chatbot-qa-checklist.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/chatbot-sprints.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/changelog/chatbot.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/changelog/cuenta.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/changelog/general.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/changelog/inicio.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/changelog/mensajes.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/changelog/plan.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/changelog/proyecto.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/changelog/resultados.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/changelog/servicios.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/changelog/soporte.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/lane-inicio-explore.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/lane-inicio-sprint-log.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/lane-portal-pulido-log.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/relevamiento-6-secciones.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/client-portal/relevamiento-global.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/consolidacion-planoA-runtime.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/corrida-recorrido-2026-08-31/.gitignore,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/corrida-recorrido-2026-08-31/MANIFIESTO.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/corrida-recorrido-2026-08-31/REPORTE.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/demo-guion.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/design-system-audit.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/design-system.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/diagnostico-visual-2026-08/.gitignore,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/diagnostico-visual-2026-08/MANIFIESTO.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/diagnostico-visual-2026-08/REPORTE.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/diagnostico-visual-admin-2026-08/.gitignore,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/diagnostico-visual-admin-2026-08/MANIFIESTO.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/diagnostico-visual-admin-2026-08/REPORTE.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/env-vars.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/ev4-transcripts/README.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/ev4-transcripts/agencia-1-web.md,DOC,superficial,superficial,F1,transcripts (revisar PII)
+logic-core-v3/docs/ev4-transcripts/agencia-2-chatbot-ia.md,DOC,superficial,superficial,F1,transcripts (revisar PII)
+logic-core-v3/docs/ev4-transcripts/agencia-3-vago.md,DOC,superficial,superficial,F1,transcripts (revisar PII)
+logic-core-v3/docs/ev4-transcripts/usados-1-comprador-caliente.md,DOC,superficial,superficial,F1,transcripts (revisar PII)
+logic-core-v3/docs/ev4-transcripts/usados-2-permuta.md,DOC,superficial,superficial,F1,transcripts (revisar PII)
+logic-core-v3/docs/ev4-transcripts/usados-3-precio-frio.md,DOC,superficial,superficial,F1,transcripts (revisar PII)
+logic-core-v3/docs/ev4-transcripts/usados-4-humano.md,DOC,superficial,superficial,F1,transcripts (revisar PII)
+logic-core-v3/docs/ev5-transcripts/README.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/ev5-transcripts/agencia-captura.md,DOC,superficial,superficial,F1,transcripts (revisar PII)
+logic-core-v3/docs/experimentos/fg2-brief-experimento.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/experimentos/fg2-prompts-listos.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/impeccable-baseline.json,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/impeccable-baseline.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/leados-alta-setter.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/00-INDICE.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/01-tu-dia.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/02-la-ficha.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/03-la-evaluacion.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/04-el-primer-mensaje.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/05-los-toques.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/06-decidir-la-demo.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/07-construir-la-demo.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/08-publicar-el-borrador.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/09-el-chequeo-final.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/10-correcciones-de-franco.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/11-mandar-el-link.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/12-agendar-la-reunion.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/13-cierres.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/BACHES-RE-VERIFICADOS.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/CORRIDA-M1-v3-FRENADA.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/HALLAZGOS-MANUAL-v3.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/HALLAZGOS-MANUAL.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/PROGRESO-M1.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/VALIDACION-PODA.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/galeria/.gitignore,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/galeria/INDICE.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/galeria/PROGRESO.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/manual-usuario/metodo-creacion-md-capacitacion.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/metodo/LECCIONES-LEADOS.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/metodo/MAPA-LEADOS.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/metodo/PROGRESO-D1.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/metodo/PROPUESTA-CIMIENTO.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/microaudit-frozen-frontera-CO.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/motor-whatsapp/bitacora.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/netlify-env-vars.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/onboarding-data-connections.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/onboarding-flow.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/onboarding-modulo-agenda.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/00-entornos.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/01-onboarding-cliente.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/02-activar-bot.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/03-editar-kb.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/04-responder-alerta.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/05-cliente-no-anda.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/06-instalar-widget.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/README.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/alerts-types.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/b14-deploy-checklist.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/cron-jobs.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/neon-backups.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/operations/sentry-setup.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/privacidad-afirmaciones-cliente.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/probe-b2-hero-nav.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/probe-bundle-inicial.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/probe-construccion-p6.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/probe-monolito-censo.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/probe-motion-sitio.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/probe-poda-terreno.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-22T22-00-07-164Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-22T22-19-20-185Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-22T22-38-03-073Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-22T22-49-06-262Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-22T23-12-16-181Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-22T23-18-15-111Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T00-03-05-733Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T00-07-29-708Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T00-25-44-169Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T00-44-37-258Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T00-59-24-888Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T01-03-11-882Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T18-33-48-648Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T19-05-38-809Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T19-42-43-822Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T20-17-46-942Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T20-55-17-414Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T21-20-32-446Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/baseline-2026-05-23T21-33-39-011Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/smoke-2026-05-23T21-19-30-029Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/regression/smoke-2026-05-23T21-46-53-107Z.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/releases/v1.0.0.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/research/2026-04-entrega-2-pre-research.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/roadmap-pendientes.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/smoke-report.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprint-alpha-3-kb-editor.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-0-5-cleanup.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-0-6-cleanup-extended.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-0-7-baseline-observability.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-0-8-tests-e2e.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-0-9-status-verificacion.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-0-cleanup.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-1-reaudit.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-2-onboarding.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-RESUMEN-FINAL.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-bloque-C-RESUMEN.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/alpha-pre-cierre-RESUMEN.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/infra-1-observabilidad.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/infra-2-cold-start-retry.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/p3-a-1-gbp-connection.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/p3-a-2-venta.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/p4-1-render-utm.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/q1-1-harness.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/q1-2-scoring.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/sprint-b0-bis-cierre.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/sprint-b05-sanidad-sitio.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/sprints/utm-1-captura.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/testing-strategy.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/v1.0-smoke-test-checklist.md,DOC,superficial,superficial,F1,doc
+logic-core-v3/docs/verificacion-arranque-oslead-vii.md,DOC,superficial,superficial,F1,doc
 logic-core-v3/eslint.config.mjs,D8,profundo,pendiente,,config
 logic-core-v3/find_unused.js,D9,superficial,pendiente,,script-suelto-raiz-app
 logic-core-v3/instrumentation.ts,D7,profundo,pendiente,,sentry
@@ -582,7 +582,7 @@ logic-core-v3/script_analytics.js,D9,superficial,pendiente,,script-suelto-raiz-a
 logic-core-v3/script_leads.js,D9,superficial,pendiente,,script-suelto-raiz-app
 logic-core-v3/script_magnetic.js,D9,superficial,pendiente,,script-suelto-raiz-app
 logic-core-v3/script_maps.js,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/scripts/_b13-2-fix-demo-bots.mjs,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/_b13-2-fix-demo-bots.mjs,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/_b13-2-list-bots.mjs,D9,superficial,pendiente,,script-operativo; toca-db
 logic-core-v3/scripts/_b13-dev.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_b13-latency-analyze.mjs,D9,superficial,pendiente,,script-operativo; toca-db
@@ -609,7 +609,7 @@ logic-core-v3/scripts/_b53-baseline-run.log,D9,fuera,excluido-generado,,log-comm
 logic-core-v3/scripts/_b53-baseline-run2.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_b53-test-scoring.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/_b54-test-scoring.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/_db-cleanup-execute.mjs,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/_db-cleanup-execute.mjs,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/_db-cleanup-inspect.mjs,D9,superficial,pendiente,,script-operativo; toca-db
 logic-core-v3/scripts/_db-cleanup-inspect2.mjs,D9,superficial,pendiente,,script-operativo; toca-db
 logic-core-v3/scripts/_experimental/fg2-gen-prompts.ts,D9,superficial,pendiente,,script-operativo
@@ -630,7 +630,7 @@ logic-core-v3/scripts/b59-smoke.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/b6-qa-outreach.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/b7-qa-agenda.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/b7-smoke-calcom.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/b9-4-dedupe-kb-develop.mjs,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/b9-4-dedupe-kb-develop.mjs,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/check-env.js,D9,superficial,pendiente,,script-operativo; guard-indirecto
 logic-core-v3/scripts/cleanup-messages-demo.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
 logic-core-v3/scripts/db-backup-local.sh,D9,superficial,pendiente,,script-operativo
@@ -651,7 +651,7 @@ logic-core-v3/scripts/encode-vertex-creds.js,D9,superficial,pendiente,,script-op
 logic-core-v3/scripts/ev4-smoke.mjs,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/ev5-smoke.mjs,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/load-test/chatbot-baseline.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/p41-inject-campaigns.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/p41-inject-campaigns.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/qa-corridas/_p21-corrida.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/qa-corridas/_p23/capturas.ts,D9,superficial,pendiente,,script-operativo; toca-db
 logic-core-v3/scripts/qa-corridas/_p23/censo-ubicaciones.ts,D9,superficial,pendiente,,script-operativo; toca-db
@@ -660,7 +660,7 @@ logic-core-v3/scripts/qa-corridas/_verify-home-aviso.ts,D9,superficial,pendiente
 logic-core-v3/scripts/qa-corridas/_verify-scroll-gap.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/qa-corridas/barrido-derivacion.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/qa-corridas/capturar-franja.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/qa-corridas/corrida-1-import-csv.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/qa-corridas/corrida-1-import-csv.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/qa-corridas/medir-cartera.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/qa-corridas/medir-panel-setter.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/qa-corridas/medir-pliegue-manual.ts,D9,superficial,pendiente,,script-operativo
@@ -671,25 +671,25 @@ logic-core-v3/scripts/regression/diag-timings.ts,D9,superficial,pendiente,,scrip
 logic-core-v3/scripts/regression/purge.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
 logic-core-v3/scripts/regression/run-baseline.ts,D9,superficial,pendiente,,script-operativo; toca-db
 logic-core-v3/scripts/run-invariants.mjs,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/seed-matsu-chatbot.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/seed-matsu-notifications.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/seed-matsu-onboarding.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/seed-matsu-week-results.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/seed-matsu-chatbot.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
+logic-core-v3/scripts/seed-matsu-notifications.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
+logic-core-v3/scripts/seed-matsu-onboarding.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
+logic-core-v3/scripts/seed-matsu-week-results.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/seed-matsu.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/seed-messages-demo.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/set-matsu-password.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/utm1-smoke.mjs,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/seed-messages-demo.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
+logic-core-v3/scripts/set-matsu-password.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
+logic-core-v3/scripts/utm1-smoke.mjs,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/utm1-verify-attribution.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/v1-qa-wizard-states.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/sentry.edge.config.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/sentry.server.config.ts,D7,profundo,pendiente,,sentry
-logic-core-v3/src/actions/admin/onboarding-tasks.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/actions/admin/onboarding-tasks.ts,D3,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/actions/agency-actions.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/actions/auth-actions.ts,D1,profundo,pendiente,,server-actions; server-action; usa-auth
 logic-core-v3/src/actions/dashboard-actions.ts,D2,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db; FROZEN
-logic-core-v3/src/actions/metrics-actions.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/actions/metrics-actions.ts,D3,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/actions/onboarding-actions.ts,D2,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
-logic-core-v3/src/actions/task-approvals.ts,D2,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/actions/task-approvals.ts,D2,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/app/(protected)/admin/_components/AdminBackButton.tsx,D3,profundo,pendiente,,admin; client-component
 logic-core-v3/src/app/(protected)/admin/_components/AdminBreadcrumbs.tsx,D3,profundo,pendiente,,admin; client-component
 logic-core-v3/src/app/(protected)/admin/_components/AdminErrorBoundary.tsx,D3,profundo,pendiente,,admin; client-component
@@ -780,7 +780,7 @@ logic-core-v3/src/app/(protected)/admin/clients/[clientId]/error.tsx,D3,profundo
 logic-core-v3/src/app/(protected)/admin/clients/[clientId]/loading.tsx,D3,profundo,pendiente,,admin
 logic-core-v3/src/app/(protected)/admin/clients/[clientId]/page.tsx,D3,profundo,pendiente,,admin; toca-db; usa-auth
 logic-core-v3/src/app/(protected)/admin/clients/_actions/client.actions.ts,D3,profundo,pendiente,,admin; server-action
-logic-core-v3/src/app/(protected)/admin/clients/_actions/client.schemas.ts,D3,profundo,pendiente,,admin
+logic-core-v3/src/app/(protected)/admin/clients/_actions/client.schemas.ts,D3,profundo,superficial,F1.11,admin | PODA-ALTA
 logic-core-v3/src/app/(protected)/admin/clients/_actions/plan.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/app/(protected)/admin/clients/_actions/plan.schemas.ts,D3,profundo,pendiente,,admin
 logic-core-v3/src/app/(protected)/admin/clients/_components/ClientsListClient.tsx,D3,profundo,pendiente,,admin; client-component
@@ -883,7 +883,7 @@ logic-core-v3/src/app/(protected)/admin/projects/_actions/milestone.actions.ts,D
 logic-core-v3/src/app/(protected)/admin/projects/_actions/milestone.schemas.ts,D3,profundo,pendiente,,admin
 logic-core-v3/src/app/(protected)/admin/projects/_actions/project.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/app/(protected)/admin/projects/_actions/project.schemas.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/projects/_components/convert-lead-dialog.tsx,D3,profundo,pendiente,,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/convert-lead-dialog.tsx,D3,profundo,superficial,F1.11,admin; client-component | PODA-ALTA
 logic-core-v3/src/app/(protected)/admin/projects/_components/draggable-project-card.tsx,D3,profundo,pendiente,,admin; client-component
 logic-core-v3/src/app/(protected)/admin/projects/_components/droppable-project-column.tsx,D3,profundo,pendiente,,admin; client-component
 logic-core-v3/src/app/(protected)/admin/projects/_components/overlay-modal.tsx,D3,profundo,pendiente,,admin; client-component
@@ -1128,8 +1128,8 @@ logic-core-v3/src/app/accept-invite/AcceptInviteForm.tsx,D1,profundo,pendiente,,
 logic-core-v3/src/app/accept-invite/InviteBackground.tsx,D1,profundo,pendiente,,auth-ui; client-component
 logic-core-v3/src/app/accept-invite/actions.ts,D1,profundo,pendiente,,auth-ui; toca-db; server-action; escribe-db
 logic-core-v3/src/app/accept-invite/page.tsx,D1,profundo,pendiente,,auth-ui
-logic-core-v3/src/app/ai-implementations/layout.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/ai-implementations/page.tsx,PUB,superficial,pendiente,,sitio-publico; client-component
+logic-core-v3/src/app/ai-implementations/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/ai-implementations/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
 logic-core-v3/src/app/api/admin/alerts/trigger-detector/route.ts,D3,profundo,pendiente,,api-admin; usa-auth; route-handler
 logic-core-v3/src/app/api/admin/chatbot/demo-chat/[slug]/__tests__/demo-chat-model-resolution.invariant.ts,D5,superficial,pendiente,,api-admin-chatbot; test
 logic-core-v3/src/app/api/admin/chatbot/demo-chat/[slug]/route.ts,D5,profundo,pendiente,,api-admin-chatbot; toca-db; guard-indirecto; route-handler
@@ -1180,7 +1180,7 @@ logic-core-v3/src/app/bienvenida/page.tsx,D2,profundo,pendiente,,onboarding-clie
 logic-core-v3/src/app/cambiar-password/CambiarPasswordForm.tsx,D1,profundo,pendiente,,auth-ui; client-component
 logic-core-v3/src/app/cambiar-password/actions.ts,D1,profundo,pendiente,,auth-ui; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/app/cambiar-password/page.tsx,D1,profundo,pendiente,,auth-ui; usa-auth
-logic-core-v3/src/app/contact/layout.tsx,PUB,superficial,pendiente,,sitio-publico
+logic-core-v3/src/app/contact/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/contact/page.tsx,D3,profundo,pendiente,,UI del endpoint publico submitContactForm; captura ?ref=; client-component
 logic-core-v3/src/app/embed/[slug]/page.tsx,D5,profundo,pendiente,,embed; toca-db
 logic-core-v3/src/app/embed/layout.tsx,D5,profundo,pendiente,,embed
@@ -1194,65 +1194,65 @@ logic-core-v3/src/app/layout.tsx,D8,profundo,pendiente,,raiz-app
 logic-core-v3/src/app/login/actions.ts,D1,profundo,pendiente,,auth-ui; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/app/login/page.tsx,D1,profundo,pendiente,,auth-ui; client-component
 logic-core-v3/src/app/not-found.tsx,D8,profundo,pendiente,,raiz-app; client-component
-logic-core-v3/src/app/page.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/process-automation/layout.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/process-automation/page.tsx,PUB,superficial,pendiente,,sitio-publico; client-component
+logic-core-v3/src/app/page.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/process-automation/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/process-automation/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
 logic-core-v3/src/app/reset-password/ResetPasswordForm.tsx,D1,profundo,pendiente,,auth-ui; client-component
 logic-core-v3/src/app/reset-password/actions.ts,D1,profundo,pendiente,,auth-ui; toca-db; server-action; escribe-db
 logic-core-v3/src/app/reset-password/page.tsx,D1,profundo,pendiente,,auth-ui
-logic-core-v3/src/app/robots.ts,PUB,superficial,pendiente,,seo
-logic-core-v3/src/app/sitemap.ts,PUB,superficial,pendiente,,seo
-logic-core-v3/src/app/software-development/layout.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/software-development/page.tsx,PUB,superficial,pendiente,,sitio-publico; client-component
-logic-core-v3/src/app/styleguide/_components/AccentPermutations.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/styleguide/_components/ComponentStates.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/styleguide/_components/HomeSkeletonBottom.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/styleguide/_components/HomeSkeletonTop.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/styleguide/_components/PaletteBlock.tsx,PUB,superficial,pendiente,,sitio-publico; client-component
-logic-core-v3/src/app/styleguide/_components/ProductPlate.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/styleguide/_components/ServiceRow.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/styleguide/_components/SgBlock.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/styleguide/_components/TypographyBlock.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/styleguide/page.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/web-development/layout.tsx,PUB,superficial,pendiente,,sitio-publico
-logic-core-v3/src/app/web-development/page.tsx,PUB,superficial,pendiente,,sitio-publico; client-component
+logic-core-v3/src/app/robots.ts,PUB,superficial,superficial,F1,seo
+logic-core-v3/src/app/sitemap.ts,PUB,superficial,superficial,F1,seo
+logic-core-v3/src/app/software-development/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/software-development/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
+logic-core-v3/src/app/styleguide/_components/AccentPermutations.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/styleguide/_components/ComponentStates.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/styleguide/_components/HomeSkeletonBottom.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/styleguide/_components/HomeSkeletonTop.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/styleguide/_components/PaletteBlock.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
+logic-core-v3/src/app/styleguide/_components/ProductPlate.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/styleguide/_components/ServiceRow.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/styleguide/_components/SgBlock.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/styleguide/_components/TypographyBlock.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/styleguide/page.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/web-development/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
+logic-core-v3/src/app/web-development/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
 logic-core-v3/src/auth.config.ts,D1,profundo,pendiente,,auth
 logic-core-v3/src/auth.ts,D1,profundo,pendiente,,auth; toca-db; FROZEN; ZONA-FRANCO
 logic-core-v3/src/components/3d/BrandedLogoWhite.tsx,D9,profundo,pendiente,,compartido: lo importa components/ui (FROZEN) (src/components/ui/BrandedIntroCanvas.tsx); componentes-sitio-publico; client-component
-logic-core-v3/src/components/3d/HeroArtifact.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component; FROZEN
+logic-core-v3/src/components/3d/HeroArtifact.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component; FROZEN
 logic-core-v3/src/components/admin/MessagesScrollAnchor.tsx,D3,profundo,pendiente,,componentes-admin; client-component
 logic-core-v3/src/components/admin/managers/ChatbotManager.tsx,D3,profundo,pendiente,,componentes-admin; client-component
 logic-core-v3/src/components/admin/managers/ProjectManager.tsx,D3,profundo,pendiente,,componentes-admin; client-component
 logic-core-v3/src/components/admin/managers/VaultManager.tsx,D3,profundo,pendiente,,componentes-admin; client-component
-logic-core-v3/src/components/automation/BentoAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/CalculadoraAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/ComparativaAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/CtaAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/DataPacketsCanvas.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/FaqAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/FlujoAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/HeroAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/IntegracionesAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/ProcesoAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/RubrosAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/SocialProofAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/automation/VaultAutomation.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/BentoAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/CalculadoraAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/ComparativaAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/CtaAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/DataPacketsCanvas.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/FaqAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/FlujoAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/HeroAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/IntegracionesAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/ProcesoAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/RubrosAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/SocialProofAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/automation/VaultAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/brand/BrandMark.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/admin-sidebar.tsx, src/components/dashboard/SidebarNav.tsx); componentes-sitio-publico"
-logic-core-v3/src/components/canvas/AuroraBackground.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
+logic-core-v3/src/components/canvas/AuroraBackground.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/canvas/DotMatrix.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/accept-invite/InviteBackground.tsx, src/app/forgot-password/page.tsx +2); componentes-sitio-publico; client-component"
-logic-core-v3/src/components/canvas/HeroBackground.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/canvas/Interactive3DNetwork.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/canvas/LiquidProject.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/canvas/NeuralNetwork.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/canvas/ReactiveBackground.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
+logic-core-v3/src/components/canvas/HeroBackground.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/canvas/Interactive3DNetwork.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/canvas/LiquidProject.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/canvas/NeuralNetwork.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/canvas/ReactiveBackground.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/dashboard/AlertaMetrica.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/AnalyticsAlertas.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/AnalyticsMetricCard.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/AnalyticsPeriodSelector.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/AnalyticsPeriodSelector.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
 logic-core-v3/src/components/dashboard/AnalyticsSkeleton.tsx,D2,profundo,pendiente,,componentes-dashboard
 logic-core-v3/src/components/dashboard/AnimatedCounter.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/AnimatedProgressBar.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/AnimatedTaskList.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/AnimatedTaskList.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
 logic-core-v3/src/components/dashboard/AnnouncementsFeed.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/BackLink.tsx,D2,profundo,pendiente,,componentes-dashboard
 logic-core-v3/src/components/dashboard/ChatBubble.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
@@ -1260,17 +1260,17 @@ logic-core-v3/src/components/dashboard/ClicksImpressionsChart.tsx,D2,profundo,pe
 logic-core-v3/src/components/dashboard/ClientChatComposer.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/ClientChatThread.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/CuentaTabs.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/CurrentMilestone.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/CurrentMilestone.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
 logic-core-v3/src/components/dashboard/CurrentPlanCard.tsx,D2,profundo,pendiente,,componentes-dashboard
 logic-core-v3/src/components/dashboard/DashboardLayoutClient.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/DownloadReportButton.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/DownloadReportButton.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
 logic-core-v3/src/components/dashboard/EmojiPopover.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/ExecutiveReportPrefsForm.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/ExecutiveReportTemplate.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/FadeIn.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/ImpersonationBanner.tsx,D2,profundo,pendiente,,componentes-dashboard
 logic-core-v3/src/components/dashboard/ImpersonationTimer.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/LeakMeter.tsx,D2,profundo,pendiente,,componentes-dashboard; toca-db
+logic-core-v3/src/components/dashboard/LeakMeter.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; toca-db | PODA-ALTA
 logic-core-v3/src/components/dashboard/MessageThread.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/NewTicketModal.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/NotificationCenter.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
@@ -1297,9 +1297,9 @@ logic-core-v3/src/components/dashboard/StaggerWrapper.tsx,D2,profundo,pendiente,
 logic-core-v3/src/components/dashboard/SubscriptionBanner.tsx,D2,profundo,pendiente,,componentes-dashboard
 logic-core-v3/src/components/dashboard/TaskApprovalButtons.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/TicketReplyForm.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/TicketStatusSelector.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/TicketStatusSelector.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
 logic-core-v3/src/components/dashboard/TrendBadge.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/UpsellCard.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/UpsellCard.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
 logic-core-v3/src/components/dashboard/VaultRequestModal.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/VaultRevealButton.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/home/AIExecutiveBriefV2.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
@@ -1332,112 +1332,112 @@ logic-core-v3/src/components/dashboard/results/analysis/DiscoveriesSection.tsx,D
 logic-core-v3/src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/results/analysis/MonthTrendSection.tsx,D2,profundo,pendiente,,componentes-dashboard
 logic-core-v3/src/components/dashboard/results/analysis/MonthlyConversationsChart.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/design-system/ChapterLabel.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/design-system/CtaButton.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/design-system/DataStat.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/design-system/DisplayHeading.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/design-system/Eyebrow.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/design-system/Lead.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/design-system/MonoLabel.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/design-system/RuleDivider.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/design-system/SectionShell.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/design-system/Subhead.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/design-system/Surface.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/design-system/accent.ts,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/design-system/index.ts,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/ia/BentoIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/CalculadorIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/ComparadorIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/CtaIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/DemoIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/FaqIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/GarantiaIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/HeroIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/PipelineIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/RubrosIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/TestimoniosIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ia/VaultIA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
+logic-core-v3/src/components/design-system/ChapterLabel.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/design-system/CtaButton.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/design-system/DataStat.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/design-system/DisplayHeading.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/design-system/Eyebrow.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/design-system/Lead.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/design-system/MonoLabel.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/design-system/RuleDivider.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/design-system/SectionShell.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/design-system/Subhead.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/design-system/Surface.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/design-system/accent.ts,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/design-system/index.ts,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/ia/BentoIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/CalculadorIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/ComparadorIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/CtaIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/DemoIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/FaqIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/GarantiaIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/HeroIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/PipelineIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/RubrosIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/TestimoniosIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/ia/VaultIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/ChatWidgetMount.tsx,D5,profundo,pendiente,,monta-widget-en-sitio-publico; client-component
-logic-core-v3/src/components/layout/DynamicDock.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
+logic-core-v3/src/components/layout/DynamicDock.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/EarlyScrollLock.tsx,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/Hero.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/HeroArtifactLayer.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/HeroCanvas.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/HomeWrapper.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
+logic-core-v3/src/components/layout/Hero.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/layout/HeroArtifactLayer.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/layout/HeroCanvas.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/layout/HomeWrapper.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/Navbar.tsx,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/PublicOnlyComponents.tsx,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/SectionWrapper.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
+logic-core-v3/src/components/layout/SectionWrapper.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/Shutter.tsx,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/SmoothScroll.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/layout.tsx, src/components/ui/MarketingIntro.tsx); componentes-sitio-publico; client-component"
 logic-core-v3/src/components/layout/VersionBadge.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/AdminLayoutClient.tsx, src/components/dashboard/DashboardLayoutClient.tsx); componentes-sitio-publico"
 logic-core-v3/src/components/layout/publicRoute.ts,D9,profundo,pendiente,,decide donde se montan el chrome publico y el widget
 logic-core-v3/src/components/layout/useChromeRevealed.ts,D5,profundo,pendiente,,decide cuando aparece el widget; client-component
-logic-core-v3/src/components/onboarding/OnboardingWizard.tsx,D3,profundo,pendiente,,componentes-admin; client-component
-logic-core-v3/src/components/sections/AILargeCta.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/AIPipelineSection.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/AITechMarquee.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/EnterpriseStandards.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/FeedbackLoop.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/ProcessAutomationCta.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/ProcessAutomationMetrics.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/ROICalculator.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/SoftwareArchitecture.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/TeamSection.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/TemplateWarehouse.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/cierre/Cierre.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/sections/cierre/ContactoCta.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/home/About.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
+logic-core-v3/src/components/onboarding/OnboardingWizard.tsx,D3,profundo,superficial,F1.11,componentes-admin; client-component | PODA-ALTA
+logic-core-v3/src/components/sections/AILargeCta.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/AIPipelineSection.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/AITechMarquee.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/EnterpriseStandards.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/FeedbackLoop.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/ProcessAutomationCta.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/ProcessAutomationMetrics.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/ROICalculator.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/SoftwareArchitecture.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/TeamSection.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/TemplateWarehouse.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/cierre/Cierre.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/sections/cierre/ContactoCta.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/home/About.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/sections/home/Footer.tsx,D7,profundo,pendiente,,webhook n8n desde el navegador; client-component
-logic-core-v3/src/components/sections/home/InfiniteReviews.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/home/OurServices.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/home/Portfolio.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/home/WhyDevelOP.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/modulos-opcionales/ModuloActiveCard.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/modulos-opcionales/ModuloComingSoonCard.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/modulos-opcionales/ModulosOpcionales.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/nosotros/Nosotros.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/sections/nosotros/data.ts,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/sections/portal-demo-cta/PortalDemoCTA.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/portal-demo/PortalDemo.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/portal-demo/PortalDemoHeader.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/portal-demo/StoryArcLunes.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/portal-demo/StoryMomentCard.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/portal-demo/data.ts,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/sections/portal-demo/useEscenaCycle.ts,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/servicios/Servicios.tsx,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/sections/servicios/data.ts,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/sections/software-development/SoftwareDevelopmentCta.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/todo-incluido/TodoIncluido.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/todo-incluido/TodoIncluidoFeatureCard.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/todo-incluido/data.ts,PUB,superficial,pendiente,,componentes-sitio-publico
-logic-core-v3/src/components/sections/web-development/AiSection.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/ComparadorSection.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/PortfolioWebCases.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/PricingSection.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/ShowcaseSection.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/StatementSection.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/WebDevelopmentBento.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/WebDevelopmentByRubro.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/WebDevelopmentCta.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/WebDevelopmentFaq.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/WebDevelopmentObjections.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/WebDevelopmentSensory.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/WebDevelopmentSeo.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/WebDevelopmentTimeline.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/web-development/WebTemplatesImmersive.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/ArchitectureSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/DashboardMockupSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/DiagnosticoSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/FaqSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/HeroSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/PainBentoSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/PipelineSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/ProcesoSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/RoiSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/ShowcaseSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/SocialProofSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/StatementSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
-logic-core-v3/src/components/software/VaultSoftware.tsx,PUB,superficial,pendiente,,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/home/InfiniteReviews.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/home/OurServices.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/home/Portfolio.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/home/WhyDevelOP.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/modulos-opcionales/ModuloActiveCard.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/modulos-opcionales/ModuloComingSoonCard.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/modulos-opcionales/ModulosOpcionales.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/nosotros/Nosotros.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/sections/nosotros/data.ts,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/sections/portal-demo-cta/PortalDemoCTA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/portal-demo/PortalDemo.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/portal-demo/PortalDemoHeader.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/portal-demo/StoryArcLunes.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/portal-demo/StoryMomentCard.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/portal-demo/data.ts,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/sections/portal-demo/useEscenaCycle.ts,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/servicios/Servicios.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/sections/servicios/data.ts,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/sections/software-development/SoftwareDevelopmentCta.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/todo-incluido/TodoIncluido.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/todo-incluido/TodoIncluidoFeatureCard.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/todo-incluido/data.ts,PUB,superficial,superficial,F1,componentes-sitio-publico
+logic-core-v3/src/components/sections/web-development/AiSection.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/ComparadorSection.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/PortfolioWebCases.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/PricingSection.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/ShowcaseSection.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/StatementSection.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/WebDevelopmentBento.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/WebDevelopmentByRubro.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/WebDevelopmentCta.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/WebDevelopmentFaq.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/WebDevelopmentObjections.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/WebDevelopmentSensory.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/WebDevelopmentSeo.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/WebDevelopmentTimeline.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/sections/web-development/WebTemplatesImmersive.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/ArchitectureSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/DashboardMockupSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/DiagnosticoSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/FaqSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/HeroSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/PainBentoSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/PipelineSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/ProcesoSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/RoiSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/ShowcaseSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/SocialProofSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/StatementSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
+logic-core-v3/src/components/software/VaultSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/ui/Badge.tsx,D9,profundo,pendiente,,ui-base; FROZEN
 logic-core-v3/src/components/ui/BrandedIntroCanvas.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
 logic-core-v3/src/components/ui/Button.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
@@ -1448,7 +1448,7 @@ logic-core-v3/src/components/ui/EmptyStateMuted.tsx,D9,profundo,pendiente,,ui-ba
 logic-core-v3/src/components/ui/ErrorState.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
 logic-core-v3/src/components/ui/Field.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
 logic-core-v3/src/components/ui/HeroMetrics.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/HeroTitle.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/HeroTitle.tsx,D9,profundo,superficial,F1.11,ui-base; client-component; FROZEN | PODA-ALTA
 logic-core-v3/src/components/ui/HyperText.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
 logic-core-v3/src/components/ui/Input.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
 logic-core-v3/src/components/ui/IntroLockupText.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
@@ -1485,7 +1485,7 @@ logic-core-v3/src/context/PreloaderContext.tsx,D9,profundo,pendiente,,"compartid
 logic-core-v3/src/context/TransitionContext.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx, src/app/(protected)/setter/_components/setter-nav.tsx +2); contexto-sitio-publico; client-component; FROZEN"
 logic-core-v3/src/emails/ActionRequiredEmail.tsx,D7,profundo,pendiente,,emails
 logic-core-v3/src/emails/TicketReplyEmail.tsx,D7,profundo,pendiente,,emails
-logic-core-v3/src/hooks/useThemeObserver.tsx,PUB,superficial,pendiente,,hook del home publico; client-component
+logic-core-v3/src/hooks/useThemeObserver.tsx,PUB,superficial,superficial,F1,hook del home publico; client-component
 logic-core-v3/src/instrumentation-client.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/src/instrumentation.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/src/lib/action-utils.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
@@ -1494,7 +1494,7 @@ logic-core-v3/src/lib/actions/clients.ts,D3,profundo,pendiente,,server-actions; 
 logic-core-v3/src/lib/actions/contact.ts,D3,profundo,pendiente,,server-actions; endpoint-publico; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/gbp-connection.ts,D7,profundo,pendiente,,server-actions; server-action; usa-auth
 logic-core-v3/src/lib/actions/impersonation.ts,D1,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/lib/actions/invitations.ts,D1,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/lib/actions/invitations.ts,D1,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/lib/actions/leads-constants.ts,D3,profundo,pendiente,,server-actions
 logic-core-v3/src/lib/actions/leads.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/messages.ts,D2,profundo,pendiente,,server-actions del cliente; toca-db; server-action; usa-auth; escribe-db
@@ -1526,13 +1526,13 @@ logic-core-v3/src/lib/auth/assert-ownership.ts,D1,profundo,pendiente,,auth; toca
 logic-core-v3/src/lib/billing/get-current-plan.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
 logic-core-v3/src/lib/bulk-actions.ts,D3,profundo,pendiente,,logica-admin; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/chromeReveal.ts,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/modules/chatbot/components/LogicCompanion.tsx); lib-sitio-publico; FROZEN-inferido
-logic-core-v3/src/lib/client-health.ts,D3,profundo,pendiente,,logica-admin
+logic-core-v3/src/lib/client-health.ts,D3,profundo,superficial,F1.11,logica-admin | PODA-ALTA
 logic-core-v3/src/lib/client-notifications/client-notifications.invariant.ts,D5,superficial,pendiente,,aviso de lead al cliente (lo dispara captureLead); test
 logic-core-v3/src/lib/client-notifications/decide.ts,D5,profundo,pendiente,,aviso de lead al cliente (lo dispara captureLead)
 logic-core-v3/src/lib/client-notifications/index.ts,D5,profundo,pendiente,,aviso de lead al cliente (lo dispara captureLead)
 logic-core-v3/src/lib/client-notifications/notify.ts,D5,profundo,pendiente,,aviso de lead al cliente (lo dispara captureLead); toca-db; escribe-db
 logic-core-v3/src/lib/client-notifications/templates.ts,D5,profundo,pendiente,,aviso de lead al cliente (lo dispara captureLead)
-logic-core-v3/src/lib/cn.ts,D9,profundo,pendiente,,lib-transversal
+logic-core-v3/src/lib/cn.ts,D9,profundo,superficial,F1.11,lib-transversal | PODA-ALTA
 logic-core-v3/src/lib/cron/cron-secret.invariant.ts,D7,superficial,pendiente,,integracion; test; guard-indirecto
 logic-core-v3/src/lib/cron/cron-secret.ts,D7,profundo,pendiente,,integracion; guard-indirecto
 logic-core-v3/src/lib/crypto/__tests__/credential-cipher.test.ts,D7,superficial,pendiente,,integracion; test
@@ -1550,7 +1550,7 @@ logic-core-v3/src/lib/data/onboarding-tasks.ts,D6,profundo,pendiente,,catalogos
 logic-core-v3/src/lib/data/premium-modules.ts,D6,profundo,pendiente,,catalogos
 logic-core-v3/src/lib/dates-ar.invariant.ts,D9,superficial,pendiente,,lib-transversal; test
 logic-core-v3/src/lib/dates-ar.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
-logic-core-v3/src/lib/design-patterns.ts,D9,profundo,pendiente,,lib-transversal
+logic-core-v3/src/lib/design-patterns.ts,D9,profundo,superficial,F1.11,lib-transversal | PODA-ALTA
 logic-core-v3/src/lib/design-tokens.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/email.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/email/admin-message-notification.ts,D7,profundo,pendiente,,integracion; toca-db
@@ -1732,7 +1732,7 @@ logic-core-v3/src/lib/use-step-action.ts,D9,profundo,pendiente,,lib-transversal
 logic-core-v3/src/lib/use-unsaved-guard.ts,D9,profundo,pendiente,,lib-transversal
 logic-core-v3/src/lib/utils.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/whatsapp.ts,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/contact/page.tsx); links wa.me del sitio publico
-logic-core-v3/src/modules/chatbot/README.md,DOC,superficial,pendiente,,doc-de-modulo
+logic-core-v3/src/modules/chatbot/README.md,DOC,superficial,superficial,F1,doc-de-modulo
 logic-core-v3/src/modules/chatbot/components/.gitkeep,-,fuera,excluido-generado,,placeholder
 logic-core-v3/src/modules/chatbot/components/LogicCompanion.tsx,D5,profundo,pendiente,,chatbot; client-component
 logic-core-v3/src/modules/chatbot/components/admin/ActivityLog.tsx,D5,profundo,pendiente,,chatbot; client-component
@@ -1752,7 +1752,7 @@ logic-core-v3/src/modules/chatbot/components/admin/config/EmojiPickerPanel.tsx,D
 logic-core-v3/src/modules/chatbot/components/admin/config/Field.tsx,D5,profundo,pendiente,,chatbot; client-component
 logic-core-v3/src/modules/chatbot/components/admin/config/Input.tsx,D5,profundo,pendiente,,chatbot
 logic-core-v3/src/modules/chatbot/components/admin/config/Slider.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/Toggle.tsx,D5,profundo,pendiente,,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/Toggle.tsx,D5,profundo,superficial,F1.11,chatbot; client-component | PODA-ALTA
 logic-core-v3/src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx,D5,profundo,pendiente,,chatbot; client-component
 logic-core-v3/src/modules/chatbot/components/admin/config/tabs/AppearanceTab.tsx,D5,profundo,pendiente,,chatbot; client-component
 logic-core-v3/src/modules/chatbot/components/admin/config/tabs/AvatarUploader.tsx,D5,profundo,pendiente,,chatbot; client-component
@@ -1873,7 +1873,7 @@ logic-core-v3/src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx,D5,pro
 logic-core-v3/src/modules/chatbot/components/tooltip/index.ts,D5,profundo,pendiente,,chatbot
 logic-core-v3/src/modules/chatbot/components/tooltip/types.ts,D5,profundo,pendiente,,chatbot
 logic-core-v3/src/modules/chatbot/components/tooltip/useTooltipTriggers.ts,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/evals/README.md,DOC,superficial,pendiente,,doc-de-modulo
+logic-core-v3/src/modules/chatbot/evals/README.md,DOC,superficial,superficial,F1,doc-de-modulo
 logic-core-v3/src/modules/chatbot/evals/__tests__/q1-2.invariant.ts,D5,superficial,pendiente,,evals; test
 logic-core-v3/src/modules/chatbot/evals/capture.ts,D5,superficial,pendiente,,evals; toca-db
 logic-core-v3/src/modules/chatbot/evals/cleanup.ts,D5,profundo,pendiente,,evals; toca-db; escribe-db; promovido: escribe en la base
@@ -2079,7 +2079,7 @@ logic-core-v3/src/modules/chatbot/shared/publicConfig.ts,D5,profundo,pendiente,,
 logic-core-v3/src/modules/chatbot/shared/types.ts,D5,profundo,pendiente,,chatbot
 logic-core-v3/src/modules/chatbot/shared/zIndex.ts,D5,profundo,pendiente,,chatbot
 logic-core-v3/src/modules/chatbot/templates/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/motor/README.md,DOC,superficial,pendiente,,doc-de-modulo
+logic-core-v3/src/modules/motor/README.md,DOC,superficial,superficial,F1,doc-de-modulo
 logic-core-v3/src/modules/motor/adapters/.gitkeep,-,fuera,excluido-generado,,placeholder
 logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/auth.ts,D5,profundo,pendiente,,motor
 logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/handle-health.ts,D5,profundo,pendiente,,motor; toca-db; escribe-db
