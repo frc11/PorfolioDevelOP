@@ -40,7 +40,15 @@ interface Props {
   readonly keyLightRef: RefObject<THREE.DirectionalLight | null>
 }
 
-type VentanaDelBanco = Window & { __pieDelBanco?: { piezas: () => unknown; ondas: () => number; coreografia: () => { readonly mostrado: number; readonly pedido: number | null } } }
+type VentanaDelBanco = Window & { __pieDelBanco?: { piezas: () => unknown; ondas: () => number; coreografia: () => { readonly mostrado: number; readonly pedido: number | null }; enPantalla: () => unknown; punto: (x: number, y: number, z: number) => number[] } }
+
+/** [PULIDO 26] X1 · para el banco: un punto del mundo en la pantalla (px de CSS) con la cámara de este cuadro. */
+const EN_PANTALLA = new THREE.Vector3()
+function alCuadroDelBanco(camara: THREE.Camera | null, x: number, y: number, z: number): number[] {
+  if (camara === null) return []
+  EN_PANTALLA.set(x, y, z).project(camara)
+  return [Math.round(((EN_PANTALLA.x + 1) / 2) * innerWidth), Math.round(((1 - EN_PANTALLA.y) / 2) * innerHeight)]
+}
 
 export default function PieDeVolumen({ keyLightRef }: Props) {
   const version = useSyncExternalStore(suscribirALasPiezas, versionDeLasPiezas, versionDeLasPiezas)
@@ -49,6 +57,8 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
   const camara = useThree((s) => s.camera)
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
+  // [PULIDO 26] X1 · la cámara de este cuadro, para el banco (`enPantalla`).
+  const vivaDelBanco = useRef<THREE.Camera | null>(null)
   const m = useRef<EstadoDelPie>({ armadas: [], estudio: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, cuadrilatero: [], matriz: [], coreografia: { mostrado: 0, y: -1, cuando: 0 }, caida: crearLaCaidaDelPie() })
 
   useEffect(() => {
@@ -143,13 +153,28 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       ondas: () => ONDA_PEDIDA.n,
       // [PASADA FINAL] C2 · lo mostrado de la coreografía y lo que pide el scroll.
       coreografia: () => ({ mostrado: m.current.coreografia.mostrado, pedido: PROGRESO_DEL_PIE.valor?.get() ?? null }),
+      // [PULIDO 26] X1 · la cara de cada pieza en la pantalla (sus cuatro esquinas, con la cámara de este cuadro) y un punto cualquiera.
+      enPantalla: () =>
+        m.current.armadas.map((a) => {
+          a.grupo.updateMatrixWorld(true)
+          const { ancho, alto } = a.medida.caja
+          const esquinas = [[0, 0], [ancho, 0], [ancho, -alto], [0, -alto]].map(([x, y]) => {
+            const v = new THREE.Vector3(x, y, 0).applyMatrix4(a.grupo.matrixWorld)
+            return alCuadroDelBanco(vivaDelBanco.current, v.x, v.y, v.z)
+          })
+          return { id: a.pieza.id, forma: a.pieza.forma, visible: a.grupo.visible, esquinas }
+        }),
+      punto: (x, y, z) => alCuadroDelBanco(vivaDelBanco.current, x, y, z),
     }
     return () => {
       delete ventana.__pieDelBanco
     }
   }, [])
 
-  useFrame((state, delta) => alCuadro(m.current, state.camera, keyLightRef.current, { ancho: tam.width, alto: tam.height }, Math.min(delta, 0.1)))
+  useFrame((state, delta) => {
+    vivaDelBanco.current = state.camera
+    alCuadro(m.current, state.camera, keyLightRef.current, { ancho: tam.width, alto: tam.height }, Math.min(delta, 0.1))
+  })
 
   return <group ref={raiz} name="pie de volumen" />
 }

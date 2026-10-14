@@ -43,7 +43,7 @@ import { useArribaFijo } from './useArribaFijo'
 export function Cierre({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
     // El hueco del logo en E, para las dos columnas del pie: sale de la pose, como en «Por qué develOP».
-    <Seccion seccion={seccion} className="grid min-h-svh" style={{ ['--hueco-del-pie' as string]: `${huecoDelLogo(POSES_DEL_FINAL.pie.distance).toFixed(1)}svh`, ['--aire-del-pie' as string]: 'var(--spacing-6)' }}>
+    <Seccion seccion={seccion} className="grid min-h-svh" style={{ ['--hueco-del-pie' as string]: `${huecoDelLogo(POSES_DEL_FINAL.pie.distance).toFixed(1)}svh`, ['--aire-del-pie' as string]: 'var(--spacing-6)', ['--arriba-del-pie' as string]: 'var(--spacing-2)' }}>
       <CoreografiaEnTodoAncho>
         <Bloque patron="P2" anclaje="seccion" className="grid">
           {(progreso: Progreso) => <PieDelFinal seccion={seccion} progreso={progreso} />}
@@ -72,7 +72,9 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
   // y nunca más ancha que lo que queda libre hasta el borde (en un retrato angosto, se angosta en vez de salirse).
   const anchoDeLaColumna = volumen ? 'escritorio:w-[min(max(calc(50%/2),min(calc(var(--spacing-20)*3.3),calc(50%-var(--hueco-del-pie)-var(--aire-del-pie)))),calc(50%-var(--hueco-del-pie)-var(--aire-del-pie)))]' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'
   const columnaDelFormulario = useRef<HTMLDivElement>(null)
-  useArribaFijo(columnaDelFormulario, volumen)
+  // [PULIDO 26] X1 · con el pie de volumen, el formulario centrado con la columna izquierda (anclada arriba), no con el cuadro.
+  const columnaIzquierda = useRef<HTMLDivElement>(null)
+  useArribaFijo(columnaDelFormulario, volumen, columnaIzquierda)
   const progreso = volumen ? null : deLaSeccion
   // [PASADA FINAL] C2 · en 3D llega por columnas (`escena/pie3d/coreografia.ts`), con el progreso de esta pantalla.
   useProgresoDelPie(volumen ? deLaSeccion : null)
@@ -90,8 +92,10 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
     >
       {/* La caja posicionada va AFUERA de la llegada: P5 escribe su propia transformada. */}
       {/* [CIERRE RETOQUE 3D] D5 · ya no es una sala alrededor del logo: cada enlace, campo y botón es un bloque sólido que flota. */}
-      <div className={cn('escritorio:absolute escritorio:top-1/2 escritorio:-translate-y-1/2', volumen ? 'escritorio:right-[calc(50%+var(--hueco-del-pie)+var(--aire-del-pie))]' : 'escritorio:left-0', anchoDeLaColumna)}>
-        <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className="flex flex-col gap-[var(--spacing-3)] tablet:gap-[var(--spacing-6)]">
+      {/* [PULIDO 26] X1 · con el pie de volumen la columna izquierda va ANCLADA ARRIBA (debajo de la cabecera) y más compacta (menos aire
+          entre sus bloques): así entra en línea con el logo al volcar sin que, de pie, su parte de abajo quede bajo el piso (`pie3d/enLinea.ts`). */}
+      <div ref={columnaIzquierda} className={cn('escritorio:absolute', volumen ? 'escritorio:top-[var(--arriba-del-pie)] escritorio:right-[calc(50%+var(--hueco-del-pie)+var(--aire-del-pie))]' : 'escritorio:top-1/2 escritorio:-translate-y-1/2 escritorio:left-0', anchoDeLaColumna)}>
+        <Llega progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className={cn('flex flex-col', volumen ? 'gap-[var(--spacing-2)]' : 'gap-[var(--spacing-3)] tablet:gap-[var(--spacing-6)]')}>
           <TextoDelPie className="max-escritorio:hidden">
             <Logotipo />
           </TextoDelPie>
@@ -112,7 +116,7 @@ function PieDelFinal({ seccion, progreso: deLaSeccion }: PropsDeSeccion & { read
             </div>
             <ContactoDelPie />
           </LlegadaDelPie>
-          {volumen && disposicion === 'producto' && <RecorridoDelPie repartido className="escritorio:mt-[var(--spacing-4)]" />}
+          {volumen && disposicion === 'producto' && <RecorridoDelPie repartido className="escritorio:mt-[var(--spacing-2)]" />}
           {volumen && <RedesDelPie />}
           {volumen && <LineaLegal />}
         </Llega>

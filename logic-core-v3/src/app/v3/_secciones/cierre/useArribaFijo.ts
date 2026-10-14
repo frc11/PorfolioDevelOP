@@ -8,7 +8,7 @@ import { useLayoutEffect, type RefObject } from 'react'
  * recentraba y bajaba 63 px (J4 · d); y un error que crece la subía. Se vuelve a centrar sólo si cambia el cuadro o al
  * llegar las fuentes, antes de que el pie de volumen se arme (los dos lo rearman: `PieDeVolumen.tsx`).
  */
-export function useArribaFijo(ref: RefObject<HTMLElement | null>, activo: boolean): void {
+export function useArribaFijo(ref: RefObject<HTMLElement | null>, activo: boolean, junto: RefObject<HTMLElement | null> | null = null): void {
   useLayoutEffect(() => {
     const el = ref.current
     if (!activo || el === null) return undefined
@@ -20,7 +20,10 @@ export function useArribaFijo(ref: RefObject<HTMLElement | null>, activo: boolea
       el.style.translate = ''
       const padre = el.offsetParent
       if (!(padre instanceof HTMLElement)) return
-      el.style.top = `${String(Math.round((padre.clientHeight - el.offsetHeight) / 2))}px`
+      // [PULIDO 26] X1 · con `junto` (la columna izquierda, anclada arriba) el centro de las dos es el mismo; sin ella, el del cuadro.
+      const otra = junto?.current ?? null
+      const centro = otra !== null && otra.offsetParent === padre ? otra.offsetTop + otra.offsetHeight / 2 : padre.clientHeight / 2
+      el.style.top = `${String(Math.round(centro - el.offsetHeight / 2))}px`
       el.style.translate = 'none'
     }
     const alCambiarElCuadro = (): void => fijar(false)
@@ -36,5 +39,5 @@ export function useArribaFijo(ref: RefObject<HTMLElement | null>, activo: boolea
       el.style.top = ''
       el.style.translate = ''
     }
-  }, [ref, activo])
+  }, [ref, activo, junto])
 }

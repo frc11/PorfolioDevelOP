@@ -340,11 +340,13 @@ const ARRIBA_FIJO = leer('_secciones/cierre/useArribaFijo.ts')
 const cierreBien = (c: string, a: string): boolean =>
   // [PULIDO 24] V3 · las columnas junto al logo (no contra los bordes): el ancho acotado a lo libre hasta el borde, y cada una a su aire del hueco.
   c.includes("const anchoDeLaColumna = volumen ? 'escritorio:w-[min(max(calc(50%/2),min(calc(var(--spacing-20)*3.3),calc(50%-var(--hueco-del-pie)-var(--aire-del-pie)))),calc(50%-var(--hueco-del-pie)-var(--aire-del-pie)))]' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'") &&
-  c.includes("volumen ? 'escritorio:right-[calc(50%+var(--hueco-del-pie)+var(--aire-del-pie))]' : 'escritorio:left-0'") && c.includes("volumen ? 'escritorio:left-[calc(50%+var(--hueco-del-pie)+var(--aire-del-pie))]' : 'escritorio:right-0'") &&
+  // [PULIDO 26] X1 · la columna izquierda, anclada arriba (debajo de la cabecera), y el formulario centrado con ella (el hook, con `junto`).
+  c.includes("volumen ? 'escritorio:top-[var(--arriba-del-pie)] escritorio:right-[calc(50%+var(--hueco-del-pie)+var(--aire-del-pie))]' : 'escritorio:top-1/2 escritorio:-translate-y-1/2 escritorio:left-0'") && c.includes("volumen ? 'escritorio:left-[calc(50%+var(--hueco-del-pie)+var(--aire-del-pie))]' : 'escritorio:right-0'") &&
   c.includes("{volumen && disposicion === 'producto' && <RecorridoDelPie") && c.includes("{volumen && disposicion === 'columna2' && (") &&
   c.includes("{volumen && disposicion === 'menu-abajo' && (") && c.includes('<ColumnasDelPie progreso={p} sinRecorrido={volumen} />') &&
-  c.includes('useArribaFijo(columnaDelFormulario, volumen)') &&
-  a.includes('el.style.top = `${String(Math.round((padre.clientHeight - el.offsetHeight) / 2))}px`') && a.includes("el.style.translate = 'none'")
+  c.includes('useArribaFijo(columnaDelFormulario, volumen, columnaIzquierda)') &&
+  a.includes('const centro = otra !== null && otra.offsetParent === padre ? otra.offsetTop + otra.offsetHeight / 2 : padre.clientHeight / 2') &&
+  a.includes('el.style.top = `${String(Math.round(centro - el.offsetHeight / 2))}px`') && a.includes("el.style.translate = 'none'")
 const disposicionBien = (f: typeof disposicionDelPie): boolean => f('columna2') === 'columna2' && f('menu-abajo') === 'menu-abajo' && f(null) === 'producto' && f('antes') === 'producto'
 afirmar(cierreBien(CIERRE, ARRIBA_FIJO) && disposicionBien(disposicionDelPie), 'D · con el pie de volumen, las columnas junto al logo ([PULIDO 24] V3; eran 25/50/25 contra los bordes), el formulario con su techo fijo (la tarjeta de gracias no baja) y las dos disposiciones de `?pie=`')
 controlPositivo('D · el detector VE el formulario centrado con la transformada (se recentra)', ARRIBA_FIJO.replace("el.style.translate = 'none'", "el.style.translate = ''"), (a: string) => cierreBien(CIERRE, a))
