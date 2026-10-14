@@ -1,0 +1,102 @@
+{
+ "items": [
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "IP del cliente tomada del primer valor de X-Forwarded-For (falsificable segun la plataforma) para rate limit y auditoria",
+   "como_buscarlo": "git grep -n \"x-forwarded-for\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/app/login/actions.ts:53, src/lib/security/auth-rate-limit.ts:39, src/lib/audit-log.ts:21"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Alta de usuarios sin normalizar el email (trim + lowercase) mientras el login normaliza",
+   "como_buscarlo": "git grep -nE \"(userEmail|email): z\\.string\\(\\)(\\.min\\([^)]*\\))?\\.email\\(\" origin/main -- logic-core-v3/src y verificar .toLowerCase() antes del create/findUnique",
+   "donde_aparecio": "createClientOnly.ts:26, createClientWithBot.ts:34, admin/chatbots/new/actions.ts:27 -> onboarding/core.ts:70"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Actions que usan session.user.organizationId (fallan en preview admin) frente a resolveOrgId (escriben como el cliente)",
+   "como_buscarlo": "git grep -n \"session?.user?.organizationId\\|session.user.organizationId\" origin/main -- logic-core-v3/src ; git grep -l resolveOrgId en archivos 'use server'",
+   "donde_aparecio": "src/lib/actions/profile.ts:29, src/lib/actions/upsell.ts:16 vs email-marketing/_actions.ts:18"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Mensajes internos de error devueltos al cliente (toErrorMessage o error instanceof Error ? error.message)",
+   "como_buscarlo": "git grep -n \"toErrorMessage(\\|error instanceof Error ? error.message\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/lib/actions/profile.ts:72, src/lib/actions/settings.ts:92, src/lib/action-utils.ts:31"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Envios de email cuyo resultado se ignora o que fingen exito sin API key",
+   "como_buscarlo": "git grep -n \"await sendTransactionalEmail({\\|await sendEmail({\" origin/main -- logic-core-v3/src y revisar si se lee .ok/.success",
+   "donde_aparecio": "src/auth.ts:104, src/lib/actions/settings.ts:194, src/lib/email.ts:15-16"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "orgMemberships con take:1 sin orderBy (org primaria no deterministica)",
+   "como_buscarlo": "git grep -n -B4 \"take: 1\" origin/main -- logic-core-v3/src | grep -A4 orgMemberships",
+   "donde_aparecio": "src/auth.ts:37, src/app/login/actions.ts:94, src/app/api/qa/login/route.ts:126"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Texto funcional en text-zinc-600/700 sobre #080a0c (contraste < 4,5:1)",
+   "como_buscarlo": "git grep -n \"text-zinc-600\\|text-zinc-700\" origin/main -- logic-core-v3/src/app",
+   "donde_aparecio": "src/app/login/page.tsx:263, :367, :404; forgot-password, reset-password, accept-invite"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Bloques de error sin role=alert/aria-live",
+   "como_buscarlo": "git grep -n \"text-red-400\\\">{\" origin/main -- logic-core-v3/src | grep -v role=",
+   "donde_aparecio": "login/page.tsx:358, forgot-password/page.tsx:157, ResetPasswordForm.tsx:212, AcceptInviteForm.tsx:217"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Paginas admin sin guard propio (dependen de admin/layout + proxy)",
+   "como_buscarlo": "for f in $(git ls-tree -r --name-only origin/main -- \"logic-core-v3/src/app/(protected)/admin\" | grep /page.tsx$); do git show origin/main:$f | grep -qE \"auth\\(\\)|requireSuperAdmin\" || echo $f; done",
+   "donde_aparecio": "22 de 34 paginas /admin (p. ej. admin/leads/page.tsx, admin/tickets/[ticketId]/page.tsx, admin/settings/page.tsx)"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Modulos 'use server' sin importadores (actions muertas pero publicas si se reconectan)",
+   "como_buscarlo": "Para cada archivo con 'use server' en src/lib/actions: git grep -n \"lib/actions/<nombre>'\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/lib/actions/invitations.ts, src/lib/actions/settings.ts, src/lib/actions/clients.ts"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Fallos manejados que solo hacen console.error (no llegan a Sentry; no hay captureConsoleIntegration)",
+   "como_buscarlo": "git grep -n \"console.error\" origin/main -- logic-core-v3/src/app logic-core-v3/src/lib y verificar Sentry.captureException cercano",
+   "donde_aparecio": "forgot-password/actions.ts:105, audit-log.ts:40, brevo-service.ts:41"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Tokens de un solo uso guardados en claro en la DB",
+   "como_buscarlo": "git grep -n \"randomBytes(32).toString('hex')\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "forgot-password/actions.ts:73, invitations.ts:102, settings.ts:180"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "requireSuperAdmin reimplementado en varios modulos",
+   "como_buscarlo": "git grep -n \"function requireSuperAdmin\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/lib/auth-guards.ts:3, src/lib/actions/settings.ts:20, src/modules/chatbot/server/admin/requireSuperAdmin.ts"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "patron": "Config de NextAuth duplicada entre auth.ts y auth.config.ts que diverge (maxAge, callbacks)",
+   "como_buscarlo": "Comparar src/auth.ts:76-272 con src/auth.config.ts:9-41 (session, cookies, callbacks)",
+   "donde_aparecio": "session.maxAge solo en auth.ts:81; jwt callback solo en auth.ts:205"
+  }
+ ]
+}

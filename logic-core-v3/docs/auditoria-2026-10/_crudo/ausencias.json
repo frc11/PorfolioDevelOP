@@ -1,0 +1,151 @@
+{
+ "items": [
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "No existe flujo de baja de miembro ni de cambio de rol de usuario",
+   "comando": "git grep -nE \"orgMember\\.delete(Many)?\\(\" origin/main -- logic-core-v3/src ; git grep -n -A6 \"user\\.update(\" origin/main -- logic-core-v3/src | grep -E \"^\\S+-[0-9]+-\\s+role:\"",
+   "control_positivo": "git grep -cE \"orgMember\\.create\\(\" origin/main -- logic-core-v3/src -> clients.ts, invitations.ts, onboarding/core.ts (+modules); git grep -n -A8 \"user\\.create(\" ... | grep role: -> clients.ts-119, invitations.ts-79, settings.ts-176"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "Ningun codigo asigna el rol CLIENT",
+   "comando": "git grep -nE \"role:\\s*['\\\"]?(Role\\.)?CLIENT\\b\" origin/main -- logic-core-v3/prisma logic-core-v3/scripts logic-core-v3/src",
+   "control_positivo": "Mismo patron con ORG_MEMBER -> prisma/seed.ts:104, :111, :124"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "No hay vinculacion de cuentas OAuth (Google)",
+   "comando": "git grep -nE \"\\.account\\.(create|upsert|createMany)|linkAccount|allowDangerousEmailAccountLinking\" origin/main -- logic-core-v3/src logic-core-v3/prisma logic-core-v3/scripts",
+   "control_positivo": "git grep -n \"\\.user\\.create(\" origin/main -- logic-core-v3/src logic-core-v3/prisma -> 7 resultados"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "/login no lee ?error ni searchParams",
+   "comando": "git grep -n \"searchParams\\|useSearchParams\\|error=\" origin/main -- logic-core-v3/src/app/login",
+   "control_positivo": "git grep -n \"searchParams\" origin/main -- logic-core-v3/src/app/reset-password -> page.tsx:7, :10, :11"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "getPostLoginPath y userExists no tienen lectores",
+   "comando": "git grep -n \"getPostLoginPath\\|userExists\" origin/main -- logic-core-v3/src",
+   "control_positivo": "El mismo grep devuelve las definiciones auth.ts:61 y auth.ts:65"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "No hay SessionProvider ni useSession (nadie refresca la cookie via /api/auth/session)",
+   "comando": "git grep -n \"SessionProvider\\|useSession\" origin/main -- logic-core-v3/src",
+   "control_positivo": "git grep -n \"from 'next-auth/jwt'\" origin/main -- logic-core-v3/src -> api/qa/login/route.ts:27"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "El codigo no usa getToken de Auth.js",
+   "comando": "git grep -n \"getToken\" origin/main -- logic-core-v3/src",
+   "control_positivo": "Devuelve google-business-profile.ts:51 (oauth2Client.getToken, ajeno), prueba que el grep ve el arbol"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "Ni auth ni el portal leen Organization.deletedAt",
+   "comando": "git grep -n \"deletedAt\" origin/main -- logic-core-v3/src/auth.ts logic-core-v3/src/proxy.ts logic-core-v3/src/lib/preview.ts \"logic-core-v3/src/app/(protected)/dashboard/layout.tsx\" logic-core-v3/src/app/login logic-core-v3/src/lib/impersonation.ts",
+   "control_positivo": "git grep -c \"deletedAt\" origin/main -- logic-core-v3/src -> archiveClient.ts:8, admin/clients/page.tsx:4, admin/announcements/page.tsx:1"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "Ningun guard lee orgRole",
+   "comando": "git grep -nE \"orgRole\\s*(===|!==)|'VIEWER'|OrgRole\\.VIEWER|role === 'ADMIN'\" origin/main -- logic-core-v3/src",
+   "control_positivo": "git grep -n \"orgRole\" origin/main -- logic-core-v3/src/app/api/qa -> route.ts:143, :162, :177"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "No existe la ruta /logout",
+   "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep -E \"/logout/\"",
+   "control_positivo": "git grep -n \"'/logout'\" origin/main -- logic-core-v3/src -> proxy.ts:68"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "/login no tiene <h1>",
+   "comando": "git grep -n \"<h1\" origin/main -- logic-core-v3/src/app/login",
+   "control_positivo": "Mismo grep en src/app/forgot-password -> page.tsx:53"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "DotMatrix y las paginas de auth no soportan ?e2e=1",
+   "comando": "git grep -n \"e2e\" origin/main -- logic-core-v3/src/components/canvas/DotMatrix.tsx logic-core-v3/src/app/login logic-core-v3/src/app/forgot-password logic-core-v3/src/app/reset-password logic-core-v3/src/app/accept-invite",
+   "control_positivo": "git grep -n \"e2e=1\\|'e2e'\\|\\\"e2e\\\"\" origin/main -- logic-core-v3/src -> PreloaderContext.tsx:81"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "No hay signup self-service ni 2FA",
+   "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep -iE \"/(signup|sign-up|register|registro)/\" ; git grep -niE \"totp|two.?factor|2fa|otpauth|speakeasy|otplib\" origin/main -- logic-core-v3/src logic-core-v3/package.json",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/forgot-password -> actions.ts, page.tsx"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "No hay logout-all ni revocacion masiva de sesiones",
+   "comando": "git grep -niE \"logout-all|logoutAll|revokeAll|cerrar todas las sesiones|signOutEverywhere\" origin/main -- logic-core-v3/src",
+   "control_positivo": "git grep -c \"sessionVersion: { increment: 1 }\" origin/main -- logic-core-v3/src -> 4 archivos"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "Las actions de invitacion no tienen callers y settings.ts no tiene importadores",
+   "comando": "git grep -n \"inviteTeamMember\\|inviteClient\" origin/main -- logic-core-v3/src logic-core-v3/tests ; git grep -n \"lib/actions/settings'\" origin/main -- logic-core-v3/src",
+   "control_positivo": "git grep -n \"lib/actions/profile'\" -> perfil/page.tsx:29, ProfileForms.tsx:28; git grep -n startImpersonationAction -> ImpersonateButton.tsx:24"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "No hay tests de sessionVersion",
+   "comando": "git grep -n \"sessionVersion\" origin/main -- logic-core-v3/tests logic-core-v3/scripts",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- logic-core-v3/tests | wc -l -> 97"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "El handler de NextAuth no aplica rate limit",
+   "comando": "git grep -n \"rate\\|limit\" origin/main -- \"logic-core-v3/src/app/api/auth/[...nextauth]/route.ts\"",
+   "control_positivo": "git grep -n \"applyAuthRateLimit\" origin/main -- logic-core-v3/src/app/reset-password/actions.ts -> :6, :20"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "magicLinkAction no llama a ningun limiter",
+   "comando": "git grep -n \"checkBlocked\\|applyAuthRateLimit\\|checkRateLimit\" origin/main -- logic-core-v3/src/app/login/actions.ts",
+   "control_positivo": "El mismo grep devuelve :29 (definicion) y :78 (uso dentro de loginAction)"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "Los layouts de portal no chequean passwordResetRequired",
+   "comando": "git grep -n \"passwordResetRequired\" origin/main -- \"logic-core-v3/src/app/(protected)\" logic-core-v3/src/app/bienvenida logic-core-v3/src/lib/preview.ts",
+   "control_positivo": "Mismo patron en src/proxy.ts -> :75, :86"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "/cambiar-password no linkea a /forgot-password",
+   "comando": "git grep -n \"forgot-password\" origin/main -- logic-core-v3/src/app/cambiar-password",
+   "control_positivo": "Mismo grep en src/app/login -> page.tsx:366"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "afirmacion": "AUTH_GOOGLE_ID/AUTH_GOOGLE_SECRET y AUTH_URL no estan documentadas en .env.example",
+   "comando": "git show origin/main:logic-core-v3/.env.example | grep -n \"AUTH_GOOGLE\\|^AUTH_URL\"",
+   "control_positivo": "git show origin/main:logic-core-v3/.env.example | grep -n \"^AUTH_SECRET\" -> :55"
+  }
+ ]
+}

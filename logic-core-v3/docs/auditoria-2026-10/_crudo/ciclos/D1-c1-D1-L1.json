@@ -1,0 +1,3586 @@
+{
+ "dominio": "D1",
+ "ciclo": "D1-c1",
+ "lote": "D1-L1",
+ "run": "wf_0157376e-be1",
+ "fecha": "2026-10-14T02:34:06.806Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/actions/auth-actions.ts",
+    "lineas_total": 7,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/accept-invite/AcceptInviteForm.tsx",
+    "lineas_total": 289,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/accept-invite/InviteBackground.tsx",
+    "lineas_total": 40,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/accept-invite/actions.ts",
+    "lineas_total": 82,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/accept-invite/page.tsx",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/auth/[...nextauth]/route.ts",
+    "lineas_total": 3,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/qa/login/route.ts",
+    "lineas_total": 226,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/cambiar-password/CambiarPasswordForm.tsx",
+    "lineas_total": 219,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/cambiar-password/actions.ts",
+    "lineas_total": 76,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/cambiar-password/page.tsx",
+    "lineas_total": 31,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/forgot-password/actions.ts",
+    "lineas_total": 110,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/forgot-password/page.tsx",
+    "lineas_total": 268,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/login/actions.ts",
+    "lineas_total": 164,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/login/page.tsx",
+    "lineas_total": 511,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/reset-password/ResetPasswordForm.tsx",
+    "lineas_total": 284,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/reset-password/actions.ts",
+    "lineas_total": 99,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/reset-password/page.tsx",
+    "lineas_total": 42,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/auth.config.ts",
+    "lineas_total": 41,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/auth.ts",
+    "lineas_total": 275,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/impersonation.ts",
+    "lineas_total": 80,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/profile.ts",
+    "lineas_total": 246,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/auth-cookies.ts",
+    "lineas_total": 30,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/auth-guards.ts",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/auth/assert-ownership.ts",
+    "lineas_total": 89,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/impersonation-constants.ts",
+    "lineas_total": 2,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/impersonation.ts",
+    "lineas_total": 90,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/rate-limit/limiter.ts",
+    "lineas_total": 84,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/rate-limit/presets.ts",
+    "lineas_total": 72,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/security/auth-rate-limit.ts",
+    "lineas_total": 61,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/security/generate-temp-password.ts",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/proxy.ts",
+    "lineas_total": 173,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/types/next-auth.d.ts",
+    "lineas_total": 34,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/schemas.ts (traza, D3)",
+    "lineas_total": 112,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/audit-log.ts (traza, D3)",
+    "lineas_total": 66,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/preview.ts (traza)",
+    "lineas_total": 27,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/brevo-service.ts (traza)",
+    "lineas_total": 47,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/layout.tsx (traza)",
+    "lineas_total": 160,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/layout.tsx (traza)",
+    "lineas_total": 68,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/layout.tsx (traza)",
+    "lineas_total": 91,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts (traza)",
+    "lineas_total": 114,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/invitations.ts (traza)",
+    "lineas_total": 118,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/settings.ts (traza)",
+    "lineas_total": 364,
+    "leido_completo": true
+   },
+   {
+    "ruta": "node_modules/next-auth/lib/index.js (traza de libreria)",
+    "lineas_total": 187,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/ProfileForms.tsx (traza)",
+    "lineas_total": 792,
+    "leido_completo": false,
+    "rangos": "355-420, 676-730 + greps de actions"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts (re-verificacion S2b-01)",
+    "lineas_total": 218,
+    "leido_completo": false,
+    "rangos": "1-40, 125-218"
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/app/login/page.tsx",
+    "simbolo": "LoginPage",
+    "tipo": "page",
+    "url": "/login",
+    "auth": "no",
+    "evidencia_auth": "Publica por diseno; el proxy redirige al autenticado a su zona (src/proxy.ts:134-146, matcher :172)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "No lee datos de tenant",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Client component; valida el servidor en loginAction/magicLinkAction",
+    "rate_limit": "no-aplica",
+    "notas": "No lee ?error ni ?callbackUrl (sin searchParams); sin <h1>; copy de dev en exito del magic link (:192-197)"
+   },
+   {
+    "archivo": "src/app/forgot-password/page.tsx",
+    "simbolo": "ForgotPasswordPage",
+    "tipo": "page",
+    "url": "/forgot-password",
+    "auth": "no",
+    "evidencia_auth": "Publica; fuera del matcher del proxy (src/proxy.ts:172)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "Sin datos de tenant",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Valida forgotPasswordAction (Zod)",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/reset-password/page.tsx",
+    "simbolo": "ResetPasswordPage",
+    "tipo": "page",
+    "url": "/reset-password?token=",
+    "auth": "no",
+    "evidencia_auth": "Publica; token por searchParams (page.tsx:10-11) pasado al form (:39)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "Sin datos de tenant",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Solo presencia del token en cliente (ResetPasswordForm.tsx:73); validez recien al enviar",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/accept-invite/page.tsx",
+    "simbolo": "AcceptInvitePage",
+    "tipo": "page",
+    "url": "/accept-invite?token=",
+    "auth": "no",
+    "evidencia_auth": "Publica; token por searchParams (page.tsx:11)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "Sin datos de tenant",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Solo presencia del token (AcceptInviteForm.tsx:73)",
+    "rate_limit": "no-aplica",
+    "notas": "Flujo huerfano: ninguna action viva emite links de invitacion"
+   },
+   {
+    "archivo": "src/app/cambiar-password/page.tsx",
+    "simbolo": "CambiarPasswordPage",
+    "tipo": "page",
+    "url": "/cambiar-password",
+    "auth": "si",
+    "evidencia_auth": "auth() + redirect('/login') en page.tsx:6-7; ademas matcher del proxy (proxy.ts:172) y ALWAYS_ALLOWED (:68)",
+    "rol": "cualquier autenticado",
+    "evidencia_rol": "No filtra rol (page.tsx:6-7)",
+    "org_de": "no-aplica",
+    "evidencia_org": "Opera sobre la cuenta de la sesion",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "n/a",
+    "rate_limit": "no-aplica",
+    "notas": "Copy 'antes de entrar' tambien en cambio voluntario (page.tsx:19-21)"
+   },
+   {
+    "archivo": "src/app/api/auth/[...nextauth]/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/auth/* (session, csrf, providers, signin, signout, callback/google, callback/resend, verify-request, error)",
+    "auth": "no",
+    "evidencia_auth": "handlers de Auth.js (route.ts:3); /api fuera del matcher del proxy (proxy.ts:172)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "La org entra al token desde la DB en el callback jwt (auth.ts:209-230), nunca del request",
+    "validacion": "parcial",
+    "evidencia_validacion": "Validacion interna de Auth.js (state/PKCE OAuth, token hasheado del magic link); sin validacion propia",
+    "rate_limit": "no",
+    "notas": "GET /api/auth/callback/resend crea sesion con el magic link; la pagina de error por defecto (pages.error no configurado, auth.ts:95) sale en ingles"
+   },
+   {
+    "archivo": "src/app/api/auth/[...nextauth]/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/auth/* (callback/credentials, signin/resend, signin/google, session, signout)",
+    "auth": "no",
+    "evidencia_auth": "Publico por diseno; solo CSRF double-submit (node_modules/@auth/core/lib/index.js:51-59)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "auth.ts:209-230",
+    "validacion": "parcial",
+    "evidencia_validacion": "Auth.js valida CSRF; authorize solo exige presencia (auth.ts:140)",
+    "rate_limit": "no",
+    "notas": "callback/credentials autentica sin ningun limite; signin/resend envia magic link sin limite; POST session (update) saltea el chequeo de sessionVersion (auth.ts:215-217)"
+   },
+   {
+    "archivo": "src/app/api/qa/login/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/qa/login",
+    "auth": "parcial",
+    "evidencia_auth": "Triple guarda de entorno, no de sesion: QA_ALLOW_LOCALHOST=1, Host localhost, !NETLIFY y VERCEL_ENV!=production (route.ts:49-73) aplicada en :85-88",
+    "rol": "ninguno (mintea SUPER_ADMIN/ORG_MEMBER/SETTER)",
+    "evidencia_rol": "PERSONA_EMAIL (route.ts:36-43)",
+    "org_de": "no-aplica",
+    "evidencia_org": "La org sale de la membresia en DB de la persona (route.ts:111-142), no del body",
+    "validacion": "manual",
+    "evidencia_validacion": "isQaPersona (route.ts:75-82) sobre el body (:90-100)",
+    "rate_limit": "no",
+    "notas": "ZONA-FRANCO. 403 devuelve la razon de la guarda (:87). El token no lleva sessionVersion (:151-167)"
+   },
+   {
+    "archivo": "src/app/api/qa/login/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/qa/login",
+    "auth": "parcial",
+    "evidencia_auth": "Misma triple guarda (route.ts:198-201)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "Lista personas y emails (route.ts:203-211)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin input",
+    "rate_limit": "no",
+    "notas": "ZONA-FRANCO"
+   },
+   {
+    "archivo": "src/app/api/qa/login/route.ts",
+    "simbolo": "DELETE",
+    "tipo": "route-handler",
+    "url": "/api/qa/login",
+    "auth": "parcial",
+    "evidencia_auth": "Misma triple guarda (route.ts:215-218)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "Solo borra cookies (route.ts:220-225)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin input",
+    "rate_limit": "no",
+    "notas": "ZONA-FRANCO"
+   },
+   {
+    "archivo": "src/actions/auth-actions.ts",
+    "simbolo": "signOutAction",
+    "tipo": "server-action",
+    "url": "(form action en admin-topbar.tsx:85, setter/layout.tsx:76, DashboardLayoutClient.tsx:150)",
+    "auth": "no",
+    "evidencia_auth": "No verifica sesion: signOut es idempotente (auth-actions.ts:5-7)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "n/a",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin input",
+    "rate_limit": "no-aplica",
+    "notas": "No borra la cookie impersonation-token"
+   },
+   {
+    "archivo": "src/app/login/actions.ts",
+    "simbolo": "loginAction",
+    "tipo": "server-action",
+    "url": "/login (form password)",
+    "auth": "no",
+    "evidencia_auth": "Publica por diseno",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "Solo prefetch de rol para el redirect (actions.ts:84-108)",
+    "validacion": "manual",
+    "evidencia_validacion": "Chequeos a mano de email/longitud (actions.ts:68-74), sin Zod",
+    "rate_limit": "si",
+    "notas": "Limite en memoria por proceso, clave = primer X-Forwarded-For (actions.ts:20, :50-57, :77-80); solo cuenta AuthError (:113-114) y se limpia en cualquier redirect (:125-127); el endpoint nativo /api/auth/callback/credentials no pasa por aca"
+   },
+   {
+    "archivo": "src/app/login/actions.ts",
+    "simbolo": "magicLinkAction",
+    "tipo": "server-action",
+    "url": "/login (tab Magic Link)",
+    "auth": "no",
+    "evidencia_auth": "Publica por diseno",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "n/a",
+    "validacion": "manual",
+    "evidencia_validacion": "Presencia y '@' (actions.ts:142-143)",
+    "rate_limit": "no",
+    "notas": "Responde 'SUCCESS' solo si el email existe (oraculo) y envia email por Brevo en cada llamada"
+   },
+   {
+    "archivo": "src/app/login/actions.ts",
+    "simbolo": "googleSignInAction",
+    "tipo": "server-action",
+    "url": "/login (boton Google)",
+    "auth": "no",
+    "evidencia_auth": "Publica",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "n/a",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin input",
+    "rate_limit": "no",
+    "notas": "El signIn callback rechaza toda cuenta Google no vinculada y no existe camino de vinculacion"
+   },
+   {
+    "archivo": "src/app/forgot-password/actions.ts",
+    "simbolo": "forgotPasswordAction",
+    "tipo": "server-action",
+    "url": "/forgot-password",
+    "auth": "no",
+    "evidencia_auth": "Publica; respuesta anti-enumeracion identica (actions.ts:17-18, :47, :56, :69, :109)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "n/a",
+    "validacion": "zod",
+    "evidencia_validacion": "ForgotPasswordSchema (actions.ts:29-38; schemas.ts:76-84)",
+    "rate_limit": "si",
+    "notas": "Por IP (hash de X-Forwarded-For) y por email, en DB (actions.ts:43-57)"
+   },
+   {
+    "archivo": "src/app/reset-password/actions.ts",
+    "simbolo": "resetPasswordAction",
+    "tipo": "server-action",
+    "url": "/reset-password",
+    "auth": "no",
+    "evidencia_auth": "Token de un solo uso (actions.ts:45-63)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "n/a",
+    "validacion": "zod",
+    "evidencia_validacion": "ResetPasswordSchema (actions.ts:29-40) pero sin la regla mayuscula+numero (schemas.ts:94-97)",
+    "rate_limit": "si",
+    "notas": "Solo por IP (actions.ts:19-26)"
+   },
+   {
+    "archivo": "src/app/accept-invite/actions.ts",
+    "simbolo": "acceptInviteAction",
+    "tipo": "server-action",
+    "url": "/accept-invite",
+    "auth": "no",
+    "evidencia_auth": "Token (actions.ts:36-55) y usuario sin password (:58-63)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "n/a",
+    "validacion": "manual",
+    "evidencia_validacion": "Casts 'as string' y chequeos a mano (actions.ts:19-34), sin Zod; regla solo min 8",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/cambiar-password/actions.ts",
+    "simbolo": "cambiarPasswordAction",
+    "tipo": "server-action",
+    "url": "/cambiar-password",
+    "auth": "si",
+    "evidencia_auth": "auth() y session.user.id (actions.ts:25-28)",
+    "rol": "cualquier autenticado",
+    "evidencia_rol": "Sin filtro de rol",
+    "org_de": "no-aplica",
+    "evidencia_org": "Opera sobre session.user.id (actions.ts:35-38)",
+    "validacion": "zod",
+    "evidencia_validacion": "CambiarPasswordSchema 8+mayuscula+numero (actions.ts:12-19, :30-33)",
+    "rate_limit": "no",
+    "notas": "Sin limite sobre la contrasena actual (actions.ts:44-47)"
+   },
+   {
+    "archivo": "src/lib/actions/impersonation.ts",
+    "simbolo": "startImpersonationAction",
+    "tipo": "server-action",
+    "url": "/admin/clients/[clientId] (ImpersonateButton.tsx:24 via client.actions.ts:8-9) y /admin/projects/[projectId] (layout.tsx:219)",
+    "auth": "si",
+    "evidencia_auth": "auth() (impersonation.ts:12-15)",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "session.user.role !== 'SUPER_ADMIN' -> redirect (impersonation.ts:13-15)",
+    "org_de": "parametro",
+    "evidencia_org": "orgId argumento (impersonation.ts:11), existencia validada (:17-24); legitimo para SUPER_ADMIN que elige a quien impersonar",
+    "validacion": "parcial",
+    "evidencia_validacion": "Solo tipo TS string, sin Zod",
+    "rate_limit": "no",
+    "notas": "Token HS256 atado a adminId, 30 min (impersonation-constants.ts:2); auditado IMPERSONATION_STARTED (:36-45)"
+   },
+   {
+    "archivo": "src/lib/actions/impersonation.ts",
+    "simbolo": "stopImpersonationAction",
+    "tipo": "server-action",
+    "url": "ImpersonationBanner.tsx:28",
+    "auth": "parcial",
+    "evidencia_auth": "No exige sesion ni rol: solo borra la cookie propia; audita si hay sesion (impersonation.ts:51-77)",
+    "rol": "ninguno",
+    "evidencia_rol": "n/a",
+    "org_de": "no-aplica",
+    "evidencia_org": "orgId del token propio solo para auditoria (:56-62)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin input",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/lib/actions/profile.ts",
+    "simbolo": "updateProfileAction",
+    "tipo": "server-action",
+    "url": "/dashboard/cuenta/perfil (ProfileForms.tsx:216-217)",
+    "auth": "si",
+    "evidencia_auth": "auth() + organizationId y userId (profile.ts:28-34)",
+    "rol": "miembro con organizationId en sesion (ORG_MEMBER); OrgRole no se valida",
+    "evidencia_rol": "profile.ts:29-33",
+    "org_de": "sesion",
+    "evidencia_org": "session.user.organizationId (profile.ts:29) usado en update (:55-63)",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateProfileSchema (profile.ts:36-47)",
+    "rate_limit": "no",
+    "notas": "En preview admin falla con 'Sesion invalida.' (SUPER_ADMIN sin organizationId); catch devuelve error.message (:72)"
+   },
+   {
+    "archivo": "src/lib/actions/profile.ts",
+    "simbolo": "updateContactAction",
+    "tipo": "server-action",
+    "url": "/dashboard/cuenta/perfil (ProfileForms.tsx:278-279)",
+    "auth": "si",
+    "evidencia_auth": "profile.ts:80-85",
+    "rol": "miembro con organizationId",
+    "evidencia_rol": "profile.ts:81-85",
+    "org_de": "sesion",
+    "evidencia_org": "profile.ts:81, :90-93",
+    "validacion": "no",
+    "evidencia_validacion": "whatsapp sin Zod ni largo maximo (profile.ts:87)",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/lib/actions/profile.ts",
+    "simbolo": "updateNotificationPrefsAction",
+    "tipo": "server-action",
+    "url": "/dashboard/cuenta/perfil (ProfileForms.tsx:572-573)",
+    "auth": "si",
+    "evidencia_auth": "profile.ts:107-113",
+    "rol": "miembro con organizationId",
+    "evidencia_rol": "profile.ts:108-113",
+    "org_de": "sesion",
+    "evidencia_org": "profile.ts:108, :132-139",
+    "validacion": "manual",
+    "evidencia_validacion": "Booleans por === 'true' (profile.ts:115-121)",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/lib/actions/profile.ts",
+    "simbolo": "requestAccountDeletionAction",
+    "tipo": "server-action",
+    "url": "/dashboard/cuenta (DangerZone, ProfileForms.tsx:696)",
+    "auth": "si",
+    "evidencia_auth": "profile.ts:151-157",
+    "rol": "miembro con organizationId",
+    "evidencia_rol": "profile.ts:152-157",
+    "org_de": "sesion",
+    "evidencia_org": "profile.ts:152, :166",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin input",
+    "rate_limit": "no",
+    "notas": "Sin dedupe: cada click crea un ticket HIGH"
+   },
+   {
+    "archivo": "src/lib/actions/profile.ts",
+    "simbolo": "updatePasswordAction",
+    "tipo": "server-action",
+    "url": "/dashboard/cuenta/perfil (ProfileForms.tsx:386)",
+    "auth": "si",
+    "evidencia_auth": "profile.ts:191-196",
+    "rol": "cualquier autenticado",
+    "evidencia_rol": "Solo userId",
+    "org_de": "no-aplica",
+    "evidencia_org": "Opera sobre session.user.id (profile.ts:209-232)",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdatePasswordSchema (profile.ts:198-206; schemas.ts:22-35)",
+    "rate_limit": "no",
+    "notas": "Invocacion directa (no form action) y unstable_update (:239)"
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Login con contrasena (Credentials)",
+    "pasos": [
+     "UI: form action={formAction} en src/app/login/page.tsx:347 (useActionState(loginAction) :231)",
+     "Action: src/app/login/actions.ts:65-74 normaliza/valida a mano; :77-80 limite en memoria por IP; :84-108 prefetch de rol para elegir redirectTo",
+     "Auth.js: signIn('credentials') (actions.ts:111) -> callback credentials (node_modules/@auth/core/lib/index.js:51-55)",
+     "authorize: src/auth.ts:142-150 findUnique por email en minuscula; :153-155 emailVerified; :157 bcrypt.compare; :160-169 arma user con org primaria (take 1)",
+     "signIn callback: src/auth.ts:192-201 exige org salvo SUPER_ADMIN/SETTER",
+     "jwt: src/auth.ts:209-230 re-deriva rol/org/onboarding/passwordResetRequired/sessionVersion de la DB (getUserAccessState :19-63)",
+     "Cookie: nombre/atributos de src/lib/auth-cookies.ts:21-30 (auth.ts:89-94)",
+     "Redirect: actions.ts:102-108 -> proxy src/proxy.ts:70-168 -> layout (admin/layout.tsx:41-49 | dashboard/layout.tsx:72-92 | setter/layout.tsx:26-34)"
+    ]
+   },
+   {
+    "nombre": "Magic link (provider Resend que envia por Brevo)",
+    "pasos": [
+     "UI: src/app/login/page.tsx:204 (MagicLinkForm)",
+     "Action: src/app/login/actions.ts:140-151 signIn('resend', redirect:false)",
+     "Auth.js sendToken: normaliza (send-token.js:74-97) y llama al signIn callback con verificationRequest (send-token.js:23-33) -> src/auth.ts:175-186 solo deja pasar emails existentes",
+     "Envio: src/auth.ts:101-120 sendVerificationRequest -> src/lib/email/brevo-service.ts:17-46 (resultado ignorado)",
+     "Token: VerificationToken hasheado (send-token.js:61-63)",
+     "Click: GET /api/auth/callback/resend (src/app/api/auth/[...nextauth]/route.ts:3) -> signIn callback (auth.ts:192-201) -> jwt -> /dashboard (actions.ts:148) -> proxy reubica por rol"
+    ]
+   },
+   {
+    "nombre": "Recupero de contrasena",
+    "pasos": [
+     "UI: link en src/app/login/page.tsx:365-370 -> src/app/forgot-password/page.tsx:120",
+     "forgotPasswordAction: Zod (actions.ts:29-38); rate limit IP+email en DB (:43-57; limiter.ts:37-84)",
+     "Usuario: findUnique (:60-63); inexistente -> bcrypt dummy y mensaje identico (:67-70)",
+     "Token: borra previos y crea uno de 45 min en claro (:73-83)",
+     "Email: Brevo (:86-101); falla solo console.error (:104-106)",
+     "Reset: src/app/reset-password/page.tsx:10-11 -> ResetPasswordForm.tsx:186-188 -> resetPasswordAction rate limit IP (:19-26), Zod (:29-40), token (:45-63), transaccion password+passwordResetRequired=false+emailVerified+sessionVersion+1 y usedAt (:68-84), audit PASSWORD_CHANGED (:87-96)",
+     "Exito -> /login (ResetPasswordForm.tsx:176-182)"
+    ]
+   },
+   {
+    "nombre": "Cambio forzado de contrasena (temporal)",
+    "pasos": [
+     "Alta admin crea usuario con passwordResetRequired=true (createClientOnly.ts:96 / onboarding/core.ts:96) o resend-credentials (route.ts:64-73)",
+     "Login: authorize propaga passwordResetRequired (src/auth.ts:168, :237-240)",
+     "Proxy: src/proxy.ts:84-90 redirige todo lo matcheado a /cambiar-password",
+     "Pagina: src/app/cambiar-password/page.tsx:6-27",
+     "UI: CambiarPasswordForm.tsx:116-131 invocacion directa con startTransition",
+     "Action: src/app/cambiar-password/actions.ts:25-47 sesion, Zod, bcrypt de la actual; :51-61 update + sessionVersion+1; :63-70 audit; :73 unstable_update re-emite la cookie",
+     "Navegacion: router.push('/dashboard') (CambiarPasswordForm.tsx:126) -> proxy reubica SETTER/SUPER_ADMIN"
+    ]
+   },
+   {
+    "nombre": "Impersonacion de soporte (SUPER_ADMIN)",
+    "pasos": [
+     "UI: ImpersonateButton.tsx:24 (con ConfirmDialog) o projects/[projectId]/layout.tsx:219",
+     "Action: client.actions.ts:8-9 -> src/lib/actions/impersonation.ts:12-24 (rol SUPER_ADMIN, org existente)",
+     "Token: signImpersonationToken HS256 (src/lib/impersonation.ts:24-30) con secreto IMPERSONATION_SECRET ?? AUTH_SECRET ?? NEXTAUTH_SECRET ?? literal (:14-22); cookie httpOnly 30 min (:82-90)",
+     "Audit IMPERSONATION_STARTED (impersonation.ts acciones :36-45) -> redirect('/dashboard')",
+     "Proxy deja pasar SUPER_ADMIN con la cookie (src/proxy.ts:77, :154)",
+     "Portal: dashboard/layout.tsx:72-77 -> resolveOrgId src/lib/preview.ts:14-17 -> getImpersonationSession src/lib/impersonation.ts:54-80 (verifica firma, adminId y vencimiento)",
+     "Banner + salida: ImpersonationBanner.tsx:28 -> stopImpersonationAction (src/lib/actions/impersonation.ts:50-79) borra cookie y audita"
+    ]
+   },
+   {
+    "nombre": "Invalidacion de sesion por sessionVersion (y sus huecos)",
+    "pasos": [
+     "Incremento: cambiar-password/actions.ts:59, profile.ts:230, reset-password/actions.ts:76, resend-credentials/route.ts:71",
+     "Mismo dispositivo: unstable_update (cambiar-password/actions.ts:73, profile.ts:239) -> POST session interno con trigger 'update' re-emite cookie N+1",
+     "Otro dispositivo, en Node: jwt compara token vs DB y devuelve null (src/auth.ts:215-223) -> auth() null -> layout redirect('/login') (dashboard/layout.tsx:90-92)",
+     "Otro dispositivo, en el proxy: auth.config.ts no tiene callback jwt (:24-40) -> la cookie vieja sigue 'autenticada' y /login rebota al portal (proxy.ts:134-146) -> bucle",
+     "Revivir: GET /api/auth/csrf + POST /api/auth/session con la cookie vieja -> trigger 'update' saltea el chequeo (auth.ts:215-217) y re-firma con la version nueva (:230)"
+    ]
+   },
+   {
+    "nombre": "QA login (ZONA-FRANCO)",
+    "pasos": [
+     "POST /api/qa/login {persona}",
+     "Guarda: src/app/api/qa/login/route.ts:49-73 (QA_ALLOW_LOCALHOST=1, Host localhost, no Netlify/Vercel prod)",
+     "Persona -> email (:36-43) -> usuario y membresia de DB (:111-142)",
+     "encode JWT con salt = nombre de cookie (:151-167; auth-cookies.ts:21-23) y passwordResetRequired:false",
+     "Set-Cookie de sesion 8 h (:182-188); auth() de las paginas lo decodifica y re-deriva rol/org de DB (auth.ts:209-230)"
+    ]
+   },
+   {
+    "nombre": "Logout",
+    "pasos": [
+     "UI: <form action={signOutAction}> en admin-topbar.tsx:85, setter/layout.tsx:76, DashboardLayoutClient.tsx:150",
+     "Action: src/actions/auth-actions.ts:5-7 signOut({ redirectTo: '/login' })",
+     "Auth.js limpia la cookie de sesion; la cookie impersonation-token queda viva hasta su maxAge (impersonation.ts:82-90)"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Magic link sin rate limit: un anonimo dispara emails ilimitados por Brevo a cualquier cuenta registrada",
+    "prefijo": "SEC",
+    "severidad": "CRÍTICA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/login/actions.ts",
+      "linea": 135,
+      "fragmento": "export async function magicLinkAction("
+     },
+     {
+      "ruta": "src/app/login/actions.ts",
+      "linea": 146,
+      "fragmento": "await signIn('resend', {\n  email,\n  redirectTo: '/dashboard',"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 101,
+      "fragmento": "async sendVerificationRequest({ identifier: email, url }) {"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 104,
+      "fragmento": "await sendTransactionalEmail({"
+     },
+     {
+      "ruta": "src/app/api/auth/[...nextauth]/route.ts",
+      "linea": 3,
+      "fragmento": "export const { GET, POST } = handlers"
+     },
+     {
+      "ruta": "src/lib/rate-limit/presets.ts",
+      "linea": 8,
+      "fragmento": "export const RATE_LIMIT_PRESETS = {\n  // ── Auth ──\n  forgotPasswordPerIp: { limit: 5, windowMs: 15 * 60_000 },"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real: cualquiera puede pedir magic links sin limite para su email, por la action o directo por POST /api/auth/signin/resend (CSRF de /api/auth/csrf). El cliente recibe rafagas de 'Tu acceso a develOP' y la cuenta Brevo compartida gasta cuota y reputacion; si Brevo limita o suspende, dejan de salir resets, bienvenidas y avisos de leads. Por la rubrica (operacion con costo de emails, anonima, sin limite) es CRITICA aunque solo alcance emails registrados, que ademas se enumeran con el mismo endpoint.",
+    "propuesta": "Agregar presets magicLinkPerIp/magicLinkPerEmail en presets.ts y aplicarlos con applyAuthRateLimit en magicLinkAction; envolver handlers.POST en route.ts para aplicar el mismo limite a /api/auth/signin/resend (o sumar /api/auth al matcher del proxy). Responder igual con o sin limite para no abrir otro oraculo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.magic-link",
+     "int.brevo",
+     "lib.rate-limit",
+     "lib.auth"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-04 (auditoria-maestra:285), RESIL-05, enumeracion de usuarios"
+   },
+   {
+    "titulo": "La invalidacion por sessionVersion se revive con POST /api/auth/session (trigger 'update' saltea el chequeo)",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/auth.ts",
+      "linea": 215,
+      "fragmento": "if (\n  trigger !== 'signIn' &&\n  trigger !== 'update' &&"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 230,
+      "fragmento": "token.sessionVersion = accessState.sessionVersion"
+     },
+     {
+      "ruta": "src/app/api/auth/[...nextauth]/route.ts",
+      "linea": 3,
+      "fragmento": "export const { GET, POST } = handlers"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/index.js",
+      "linea": 57,
+      "fragmento": "case \"session\":\n  validateCSRF(action, csrfTokenVerified);\n  return await actions.session(options, sessionStore, cookies, true, request.body?.data);"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/actions/session.js",
+      "linea": 30,
+      "fragmento": "...(isUpdate && { trigger: \"update\" }),"
+     }
+    ],
+    "impacto": "Si alguien obtiene la cookie de sesion de un cliente (PC compartida, malware, cookie filtrada), que el cliente cambie o restablezca la contrasena NO lo echa: con la cookie vieja, GET /api/auth/csrf + POST /api/auth/session (double-submit, sin conocer la contrasena) dispara el callback jwt con trigger 'update', que saltea la comparacion y re-firma el token con la sessionVersion nueva. SEC-AUTH-03 queda cerrado solo contra reuso pasivo.",
+    "propuesta": "Decision para Valentino (auth.ts FROZEN + ZONA-FRANCO): comparar sessionVersion tambien en trigger 'update' (antes de refrescar) y hacer que las actions que suben la version emitan el token nuevo por un camino que no dependa de saltear el chequeo (p. ej. pasar la version nueva en el payload de unstable_update y aceptarla solo si coincide con la DB, o re-loguear tras el cambio). Sumar la prueba multi-dispositivo de PLAN-006.",
+    "esfuerzo": "M",
+    "zona": "FROZEN + ZONA-FRANCO",
+    "nodos": [
+     "h1.auth-login.sesion-jwt",
+     "h1.auth-cambio.cambio-forzado",
+     "h1.auth-recupero.restablecer-password",
+     "lib.auth",
+     "modelo.User"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "SEC-AUTH-03 (2026-05:121, maestra:67), PLAN-005, PLAN-006, bucle de redirecciones"
+   },
+   {
+    "titulo": "Sesion invalidada en Node pero viva en el proxy: bucle /login <-> portal (ERR_TOO_MANY_REDIRECTS)",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/auth.ts",
+      "linea": 222,
+      "fragmento": "return null"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/layout.tsx",
+      "linea": 90,
+      "fragmento": "if (!organizationId) {\n  redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')"
+     },
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 143,
+      "fragmento": "return NextResponse.redirect(\n  new URL(onboardingCompleted ? DASHBOARD_PATH : ONBOARDING_PATH, nextUrl)"
+     },
+     {
+      "ruta": "src/auth.config.ts",
+      "linea": 24,
+      "fragmento": "callbacks: {\n  authorized({ auth }) {\n    return true // Route protection is handled in middleware logic"
+     },
+     {
+      "ruta": "node_modules/next-auth/lib/index.js",
+      "linea": 91,
+      "fragmento": "return Promise.resolve(headers()).then((h) => getSession(h, config).then((r) => r.json()));"
+     },
+     {
+      "ruta": "node_modules/next-auth/lib/index.js",
+      "linea": 169,
+      "fragmento": "finalResponse.headers.append(\"set-cookie\", cookie);"
+     },
+     {
+      "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+      "linea": 71,
+      "fragmento": "sessionVersion: { increment: 1 },"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+      "linea": 141,
+      "fragmento": "await tx.organization.delete({ where: { id: organizationId } })"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real en el flujo de soporte: tras un reset por email, un cambio de contrasena en otro dispositivo o 'Reenviar credenciales' desde admin, el navegador con la sesion vieja queda atrapado: el layout (Node) ve la sesion nula y manda a /login; el proxy (sin chequeo de version, auth() de RSC no limpia la cookie) la ve valida y devuelve a /dashboard. El cliente no llega ni al formulario para entrar con la contrasena nueva hasta borrar cookies. Mismo bucle para usuarios sin membresia (org borrada por hardDeleteClient) o borrados, para admin (/admin <-> /login) y setter (/setter <-> /login).",
+    "propuesta": "(libre) Que el proxy no rebote /login al portal solo por la cookie (dejar renderizar /login y que decida la pagina), o que los layouts, ante sesion nula con cookie presente, redirijan a una ruta que haga signOut y limpie la cookie en vez de /login; opcionalmente dar al proxy un chequeo de validez. Confirmar con la prueba multi-dispositivo de PLAN-006.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.ruteo-por-rol",
+     "h1.auth-login.sesion-jwt",
+     "lib.proxy",
+     "lib.auth",
+     "h2.cli-shell",
+     "h4.adm-shell"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-006, PLAN-005, sessionVersion revivible"
+   },
+   {
+    "titulo": "Fuerza bruta de login sin freno real: el limite vive solo en loginAction (memoria por lambda) y el endpoint nativo de Credentials no tiene ninguno",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/login/actions.ts",
+      "linea": 20,
+      "fragmento": "const rateLimitMap = new Map<string, RateEntry>()"
+     },
+     {
+      "ruta": "src/app/login/actions.ts",
+      "linea": 53,
+      "fragmento": "hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() ??"
+     },
+     {
+      "ruta": "src/app/login/actions.ts",
+      "linea": 113,
+      "fragmento": "if (error instanceof AuthError) {\n  recordFailedAttempt(ip)"
+     },
+     {
+      "ruta": "src/app/api/auth/[...nextauth]/route.ts",
+      "linea": 3,
+      "fragmento": "export const { GET, POST } = handlers"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/index.js",
+      "linea": 51,
+      "fragmento": "case \"callback\":\n  if (options.provider.type === \"credentials\")\n    validateCSRF(action, csrfTokenVerified);"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 157,
+      "fragmento": "const isValid = await bcrypt.compare(String(credentials.password), user.password)"
+     }
+    ],
+    "impacto": "Un anonimo puede probar contrasenas sin limite contra cualquier cuenta (incluido el SUPER_ADMIN) por POST /api/auth/callback/credentials con el CSRF de /api/auth/csrf; ni siquiera por loginAction hay freno real: el Map es por instancia serverless, se pierde en cada lambda fria, se indexa por el primer X-Forwarded-For y cualquier redirect limpia el contador (actions.ts:125-127). Las contrasenas de reset/accept-invite solo exigen 8 caracteres y las temporales tienen ~34 bits.",
+    "propuesta": "(libre) Reemplazar el Map por applyAuthRateLimit (limiter.ts, DB) por IP y por email; aplicar el mismo limite a /api/auth/callback/credentials envolviendo handlers.POST en route.ts (o sumando /api/auth al matcher del proxy); tomar la IP del header confiable de la plataforma (x-nf-client-connection-ip en Netlify).",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.login-password",
+     "lib.rate-limit",
+     "lib.auth",
+     "modelo.User"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "SEC-05, SEC-RATELIMIT-01, P1-5"
+   },
+   {
+    "titulo": "El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+      "linea": 26,
+      "fragmento": "userEmail: z.string().email(),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+      "linea": 91,
+      "fragmento": "email: parsed.userEmail,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 141,
+      "fragmento": "email: parsed.userEmail,"
+     },
+     {
+      "ruta": "src/lib/onboarding/core.ts",
+      "linea": 91,
+      "fragmento": "email: input.userEmail,"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 143,
+      "fragmento": "where: { email: String(credentials.email).trim().toLowerCase() },"
+     },
+     {
+      "ruta": "src/lib/actions/clients.ts",
+      "linea": 96,
+      "fragmento": "// FIX 3 — email casing. Normalizamos a lowercase para alinear con el login"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 289,
+      "fragmento": "email                 String    @unique"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real: si el admin carga 'Juan@Empresa.com' (o el teclado del celular capitaliza), el User queda con mayuscula; el login con contrasena (auth.ts:143), el magic link (signIn callback auth.ts:176-184) y forgot-password (ForgotPasswordSchema toLowerCase, schemas.ts:80) buscan en minuscula con igualdad exacta -> 'Email o contrasena incorrectos' para siempre. Tambien permite duplicados que difieren solo en mayusculas. El arreglo ya existe en el camino viejo (clients.ts:96-100) y en updateClient.ts:71, pero no en los tres caminos vivos de alta.",
+    "propuesta": "(libre) Normalizar con .trim().toLowerCase() en los schemas de alta (createClientOnly.ts:26, createClientWithBot.ts:34, admin/chatbots/new/actions.ts:27 / onboarding/core.ts) y en el wizard (Step1Company.tsx:169); script de datos que pase a minuscula los emails existentes verificando colisiones (sin migrate reset).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.login-password",
+     "h1.auth-login.magic-link",
+     "h4.adm-clientes",
+     "modelo.User"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patron: alta sin normalizar email"
+   },
+   {
+    "titulo": "Magic link con trustHost: si AUTH_URL/NEXTAUTH_URL no estan en prod, el host del link sale de X-Forwarded-Host",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "HIPÓTESIS",
+    "evidencia": [
+     {
+      "ruta": "src/auth.ts",
+      "linea": 78,
+      "fragmento": "trustHost: true,"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/utils/env.js",
+      "linea": 68,
+      "fragmento": "const envUrl = envObject.AUTH_URL ?? envObject.NEXTAUTH_URL;"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/utils/env.js",
+      "linea": 81,
+      "fragmento": "const detectedHost = headers.get(\"x-forwarded-host\") ?? headers.get(\"host\");"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/actions/signin/send-token.js",
+      "linea": 48,
+      "fragmento": "const sendRequest = provider.sendVerificationRequest({"
+     },
+     {
+      "ruta": ".env.example",
+      "linea": 73,
+      "fragmento": "NEXTAUTH_URL="
+     }
+    ],
+    "impacto": "Si la variable falta en Netlify y la plataforma deja pasar X-Forwarded-Host del cliente, un anonimo pide un magic link para la victima con ese header y el email legitimo de develOP lleva el token a un dominio del atacante: un clic = toma de cuenta (incluido SUPER_ADMIN). forgot-password no esta expuesto (arma la URL desde NEXT_PUBLIC_APP_URL, forgot-password/actions.ts:86-88). No verificable leyendo codigo: depende del entorno.",
+    "propuesta": "Verificar que AUTH_URL (o NEXTAUTH_URL) = https://develop.com.ar este seteada en el contexto Production de Netlify; si falta, setearla (sin cambio de codigo).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.magic-link",
+     "lib.auth",
+     "int.brevo"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "magic link sin rate limit"
+   },
+   {
+    "titulo": "Enumeracion de usuarios: el magic link responde distinto si el email existe (y el login/forgot delatan por tiempo y por 'error inesperado')",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/auth.ts",
+      "linea": 181,
+      "fragmento": "const existingUser = await prisma.user.findUnique({"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/actions/signin/send-token.js",
+      "linea": 33,
+      "fragmento": "throw new AccessDenied(\"AccessDenied\");"
+     },
+     {
+      "ruta": "src/app/login/actions.ts",
+      "linea": 151,
+      "fragmento": "return 'SUCCESS'"
+     },
+     {
+      "ruta": "src/app/login/actions.ts",
+      "linea": 154,
+      "fragmento": "return 'No se pudo generar el Magic Link. Intentá de nuevo.'"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 152,
+      "fragmento": "if (!user?.password) return null\nif (!user.emailVerified) {\n  throw new Error('EMAIL_NOT_VERIFIED')"
+     },
+     {
+      "ruta": "src/app/login/actions.ts",
+      "linea": 119,
+      "fragmento": "if ((error.cause as { message?: string })?.message === 'EMAIL_NOT_VERIFIED') {"
+     },
+     {
+      "ruta": "src/app/forgot-password/actions.ts",
+      "linea": 96,
+      "fragmento": "const result = await sendTransactionalEmail({"
+     }
+    ],
+    "impacto": "Un anonimo confirma sin limite que emails son clientes de develOP (y cuales son admin), anulando el trabajo anti-enumeracion de forgot-password y alimentando el bombardeo de magic links y la fuerza bruta. Ademas: login sin bcrypt dummy para usuarios inexistentes (diferencia de tiempo); la rama EMAIL_NOT_VERIFIED nunca matchea porque Auth.js envuelve el error en CallbackRouteError con cause {err} (callback/index.js:388) y devuelve 'Ocurrio un error inesperado' antes de chequear la contrasena; forgot-password espera a Brevo solo si el usuario existe.",
+    "propuesta": "(libre) magicLinkAction debe devolver el mismo exito ante AccessDenied (mensaje 'si la cuenta existe...'); en forgot-password, no esperar el envio en el camino de la respuesta o igualar el tiempo. Decision para Valentino (auth.ts FROZEN): bcrypt dummy cuando no hay usuario y chequear emailVerified despues del bcrypt.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.magic-link",
+     "h1.auth-login.login-password",
+     "h1.auth-recupero.solicitar-enlace",
+     "lib.auth"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "magic link sin rate limit, fuerza bruta"
+   },
+   {
+    "titulo": "La sesion vive 30 dias deslizantes, no 8 h: el proxy re-firma la cookie con el maxAge por defecto de Auth.js",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/auth.ts",
+      "linea": 79,
+      "fragmento": "session: {\n  strategy: 'jwt',\n  maxAge: 8 * 60 * 60,"
+     },
+     {
+      "ruta": "src/auth.config.ts",
+      "linea": 12,
+      "fragmento": "session: { strategy: 'jwt' },"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/init.js",
+      "linea": 38,
+      "fragmento": "const maxAge = 30 * 24 * 60 * 60; // Sessions expire after 30 days of being idle by default"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/actions/session.js",
+      "linea": 46,
+      "fragmento": "const newToken = await jwt.encode({ ...jwt, token, salt });"
+     },
+     {
+      "ruta": "node_modules/next-auth/lib/index.js",
+      "linea": 169,
+      "fragmento": "finalResponse.headers.append(\"set-cookie\", cookie);"
+     }
+    ],
+    "impacto": "Cada visita a /dashboard, /admin, /setter, /login, /bienvenida o /cambiar-password re-emite el JWT con exp y cookie a 30 dias (auth() de paginas no escribe cookies). Una sesion olvidada en una PC compartida o una cookie robada sigue sirviendo hasta 30 dias sin uso en vez de 8 h; la politica declarada (bitacora-roadmap:6334 'JWT (8 h)') no se cumple.",
+    "propuesta": "(libre) Fijar session.maxAge y updateAge en auth.config.ts iguales a auth.ts (idealmente constante compartida, p. ej. junto a auth-cookies.ts).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.sesion-jwt",
+     "lib.proxy",
+     "lib.auth"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "sessionVersion revivible"
+   },
+   {
+    "titulo": "El exito del magic link le dice al cliente que el link 'fue impreso en la consola del servidor'",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/login/page.tsx",
+      "linea": 194,
+      "fragmento": "La URL de verificación fue impresa en la{' '}\n<span className=\"font-mono text-zinc-400\">consola del servidor</span>."
+     },
+     {
+      "ruta": "src/app/login/page.tsx",
+      "linea": 197,
+      "fragmento": "Copiala y pegala en el navegador para ingresar."
+     }
+    ],
+    "impacto": "Copy de desarrollo en el camino del cliente: tras pedir el magic link el cliente lee que tiene que copiar una URL de la consola del servidor y no sabe que debe revisar su email. Incumple 'sin datos de mentira' de L3.",
+    "propuesta": "(libre) Reemplazar por un mensaje anti-enumeracion ('Si la cuenta existe, te mandamos un link de acceso por email; vence en 24 h').",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.magic-link"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-016"
+   },
+   {
+    "titulo": "El envio del magic link nunca falla: sendVerificationRequest ignora el resultado de Brevo y la UI muestra exito",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/auth.ts",
+      "linea": 104,
+      "fragmento": "await sendTransactionalEmail({"
+     },
+     {
+      "ruta": "src/lib/email/brevo-service.ts",
+      "linea": 20,
+      "fragmento": "if (!process.env.BREVO_API_KEY) {\n  console.error('[Brevo] BREVO_API_KEY no configurada')\n  return { ok: false, error: 'EMAIL_NOT_CONFIGURED' }"
+     },
+     {
+      "ruta": "src/lib/email/brevo-service.ts",
+      "linea": 40,
+      "fragmento": "} catch (error) {\n  console.error('[Brevo] Error sending email:', error)"
+     },
+     {
+      "ruta": "node_modules/@getbrevo/brevo/dist/cjs/core/fetcher/requestWithRetries.js",
+      "linea": 15,
+      "fragmento": "const DEFAULT_MAX_RETRIES = 2;"
+     }
+    ],
+    "impacto": "Sin BREVO_API_KEY, con Brevo caido o remitente no verificado, el cliente ve 'Link generado' y nunca recibe nada; no queda rastro en Sentry (solo console.error). El SDK espera hasta 60 s por intento con 2 reintentos, dejando el submit colgado hasta el timeout de la funcion (RESIL-05 parcial).",
+    "propuesta": "Decision para Valentino (auth.ts FROZEN + ZONA-FRANCO): lanzar cuando result.ok es false para que Auth.js devuelva error (PLAN-017). En brevo-service.ts (libre) pasar timeoutInSeconds/maxRetries cortos y Sentry.captureException en el catch.",
+    "esfuerzo": "S",
+    "zona": "FROZEN + ZONA-FRANCO",
+    "nodos": [
+     "h1.auth-login.magic-link",
+     "int.brevo",
+     "int.sentry",
+     "lib.auth"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-017, RESIL-05"
+   },
+   {
+    "titulo": "'Continuar con Google' no puede completar para ningun usuario y /login no muestra ningun ?error",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/auth.ts",
+      "linea": 125,
+      "fragmento": "id: profile.sub,"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 192,
+      "fragmento": "const accessState = await getUserAccessState(user.id)"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 200,
+      "fragmento": "return `${LOGIN_PATH}?error=unauthorized`"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/actions/callback/index.js",
+      "linea": 64,
+      "fragmento": "user: userByAccount ?? userFromProvider,"
+     },
+     {
+      "ruta": "src/app/login/page.tsx",
+      "linea": 286,
+      "fragmento": "<form action={googleSignInAction} className=\"mb-5\">"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 95,
+      "fragmento": "pages: { signIn: LOGIN_PATH },"
+     }
+    ],
+    "impacto": "Sin cuenta Google vinculada (y no existe codigo que vincule: git grep de account.create/linkAccount vacio) el signIn callback recibe user.id = sub de Google, no encuentra usuario y devuelve '/login?error=unauthorized'; /login no lee searchParams, asi que el cliente vuelve al login sin mensaje. Si faltan AUTH_GOOGLE_ID/SECRET (no estan en .env.example) termina en un error de Google. Mismo silencio para cualquier ?error del signIn callback; el magic link vencido cae en la pagina de error por defecto de Auth.js en ingles (pages.error no configurado).",
+    "propuesta": "Decidir: quitar el boton (libre, login/page.tsx:286-299) o implementar vinculacion por email verificado (auth.ts, decision para Valentino). En ambos casos leer ?error en /login con mensajes en espanol y configurar pages.error (auth.ts, decision).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.google-oauth",
+     "h1.auth-login.magic-link",
+     "lib.auth"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-010"
+   },
+   {
+    "titulo": "Open redirect en el proxy: callbackUrl con barra invertida o tab pasa isSafeCallbackUrl",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 19,
+      "fragmento": "return Boolean(value && value.startsWith('/') && !value.startsWith('//'))"
+     },
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 135,
+      "fragmento": "if (isSafeCallbackUrl(callbackUrl) && callbackUrl !== LOGIN_PATH) {\n  return NextResponse.redirect(new URL(callbackUrl as string, nextUrl))"
+     }
+    ],
+    "impacto": "Un link https://develop.com.ar/login?callbackUrl=/%5Cevil.com enviado a un cliente logueado lo manda a https://evil.com: el parser WHATWG trata la barra invertida como '/' en http(s) y elimina tabs (/%09/evil.com). Phishing con dominio legitimo ('tu sesion vencio, ingresa de nuevo'). El eslabon inferido es el parser de URL en runtime.",
+    "propuesta": "(libre) Resolver con new URL(callbackUrl, nextUrl) y exigir url.origin === nextUrl.origin antes de redirigir (o rechazar barra invertida y caracteres de control).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.ruteo-por-rol",
+     "lib.proxy"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "La regla unica de contrasena (8+mayuscula+numero) no se aplica en reset-password ni en accept-invite",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/schemas.ts",
+      "linea": 94,
+      "fragmento": "password: z\n  .string()\n  .min(8, 'La contraseña debe tener al menos 8 caracteres.')"
+     },
+     {
+      "ruta": "src/app/accept-invite/actions.ts",
+      "linea": 26,
+      "fragmento": "if (!password || password.length < 8) {"
+     },
+     {
+      "ruta": "src/app/reset-password/ResetPasswordForm.tsx",
+      "linea": 193,
+      "fragmento": "placeholder=\"Mínimo 8 caracteres\""
+     },
+     {
+      "ruta": "src/app/cambiar-password/actions.ts",
+      "linea": 17,
+      "fragmento": ".regex(/[A-Z]/, 'La nueva contraseña debe incluir al menos una mayúscula.')"
+     }
+    ],
+    "impacto": "Un cliente que se olvida la contrasena puede elegir 'aaaaaaaa' y un usuario invitado (las invitaciones de equipo eran SUPER_ADMIN) tambien; contradice la decision de una sola regla (PLAN-003) y abarata la fuerza bruta. accept-invite ademas valida a mano con casts 'as string', sin Zod.",
+    "propuesta": "(libre) Extraer un passwordSchema compartido en schemas.ts y usarlo en ResetPasswordSchema, en accept-invite (con Zod) y en CambiarPasswordSchema/UpdatePasswordSchema; espejar checkStrength en ResetPasswordForm y AcceptInviteForm.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-recupero.restablecer-password",
+     "h1.auth-invite.aceptar-invitacion",
+     "lib.actions"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-003, PLAN-002, fuerza bruta"
+   },
+   {
+    "titulo": "Tokens de reset e invitacion guardados en claro; consumo no atomico y los demas tokens siguen vivos tras el reset",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/forgot-password/actions.ts",
+      "linea": 73,
+      "fragmento": "const token = crypto.randomBytes(32).toString('hex')"
+     },
+     {
+      "ruta": "src/app/forgot-password/actions.ts",
+      "linea": 81,
+      "fragmento": "data: { token, userId: user.id, expiresAt },"
+     },
+     {
+      "ruta": "src/app/reset-password/actions.ts",
+      "linea": 45,
+      "fragmento": "const record = await prisma.passwordResetToken.findUnique({\n  where: { token },"
+     },
+     {
+      "ruta": "src/app/reset-password/actions.ts",
+      "linea": 80,
+      "fragmento": "prisma.passwordResetToken.update({\n  where: { id: record.id },\n  data: { usedAt: new Date() },"
+     },
+     {
+      "ruta": "node_modules/@auth/core/lib/actions/signin/send-token.js",
+      "linea": 63,
+      "fragmento": "token: await createHash(`${token}${secret}`),"
+     }
+    ],
+    "impacto": "Quien lea la tabla PasswordResetToken (backup, Neon compartida, logs) puede usar cualquier token vigente (45 min reset, 7 dias invitacion) y fijar la contrasena de esa cuenta; Auth.js si hashea el token del magic link, el reset propio no. Dos envios simultaneos del mismo token pasan ambos (check-then-update) y tras un reset exitoso no se borran otros tokens pendientes.",
+    "propuesta": "(libre) Guardar sha256(token) y buscar por hash; consumir con updateMany({ where: { id, usedAt: null } }) verificando count; al resetear, borrar los demas tokens sin usar del usuario.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-recupero.restablecer-password",
+     "h1.auth-invite.aceptar-invitacion",
+     "modelo.PasswordResetToken"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Archivar un cliente no le corta el acceso: login, sesion y portal siguen operativos",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+      "linea": 9,
+      "fragmento": "// Archivar = soft-delete REVERSIBLE. Marca SOLO el Organization (deletedAt); NO"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+      "linea": 34,
+      "fragmento": "(c) => c.organization.update({ where: { id: org.id }, data: { deletedAt: new Date() } }),"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 31,
+      "fragmento": "select: {\n  companyName: true,\n  onboardingCompleted: true,"
+     },
+     {
+      "ruta": "src/lib/preview.ts",
+      "linea": 10,
+      "fragmento": "if (role === 'ORG_MEMBER') {\n  return session?.user?.organizationId ?? null"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/layout.tsx",
+      "linea": 23,
+      "fragmento": "select: { companyName: true, onboardingCompleted: true },"
+     }
+    ],
+    "impacto": "Si 'archivar' se usa para dar de baja a un cliente (falta de pago, fin de contrato), sus usuarios siguen entrando y operando el portal; ningun punto de auth ni del portal lee deletedAt (git grep). Depende de la intencion del producto.",
+    "propuesta": "Decidir que significa archivar. Si debe cortar acceso: chequear organization.deletedAt en resolveOrgId (preview.ts, libre) con mensaje claro, y en getUserAccessState/signIn (auth.ts, decision para Valentino).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.sesion-jwt",
+     "h4.adm-clientes",
+     "lib.auth",
+     "modelo.Organization"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Cambio de contrasena sin limite de intentos sobre la contrasena actual",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/cambiar-password/actions.ts",
+      "linea": 44,
+      "fragmento": "const isValid = await bcrypt.compare(input.oldPassword, user.password)"
+     },
+     {
+      "ruta": "src/lib/actions/profile.ts",
+      "linea": 218,
+      "fragmento": "const isValid = await bcrypt.compare(parsed.data.currentPassword, user.password)"
+     },
+     {
+      "ruta": "src/app/cambiar-password/actions.ts",
+      "linea": 49,
+      "fragmento": "const newHash = await bcrypt.hash(input.newPassword, 10)"
+     }
+    ],
+    "impacto": "Con una sesion robada (precondicion fuerte), un atacante prueba la contrasena actual sin freno y, al acertar, la cambia: el sessionVersion+1 desloguea a la victima de todos sus dispositivos (toma de cuenta persistente). Ademas el costo de bcrypt difiere (10 aca, 12 en profile.ts:223 y reset).",
+    "propuesta": "(libre) applyAuthRateLimit por userId en cambiarPasswordAction y updatePasswordAction; unificar el costo de bcrypt.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-cambio.cambio-forzado",
+     "h2.cli-cuenta.cambiar-password",
+     "lib.rate-limit"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Paginas de auth: /login sin h1, texto por debajo de AA, errores sin anunciar y visor de contrasena fuera del teclado",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/login/page.tsx",
+      "linea": 367,
+      "fragmento": "className=\"text-xs text-zinc-600 transition-colors hover:text-zinc-400\""
+     },
+     {
+      "ruta": "src/app/login/page.tsx",
+      "linea": 263,
+      "fragmento": "<p className=\"mt-4 text-sm text-zinc-600\">"
+     },
+     {
+      "ruta": "src/app/login/page.tsx",
+      "linea": 404,
+      "fragmento": "<p className=\"text-[11px] text-zinc-700\">Powered by develOP</p>"
+     },
+     {
+      "ruta": "src/app/login/page.tsx",
+      "linea": 358,
+      "fragmento": "<p className=\"text-xs text-red-400\">{error}</p>"
+     },
+     {
+      "ruta": "src/app/login/page.tsx",
+      "linea": 112,
+      "fragmento": "tabIndex={-1}"
+     }
+    ],
+    "impacto": "Aritmetica WCAG (paleta zinc de Tailwind 4 aprox. en sRGB): zinc-600 (#52525b, L~0,086) sobre #080a0c (L~0,003) = 0,136/0,053 = 2,6:1; zinc-500 = 4,1:1; zinc-700 = 1,9:1; AA exige 4,5:1. El link '¿Olvidaste tu contrasena?' queda en ~2,5:1. Los errores ('Email o contrasena incorrectos') no tienen role=alert/aria-live, el selector Contrasena/Magic Link no tiene semantica de tabs (:317-334) y no hay <h1> (PLAN-010). Mismo patron en forgot/reset/accept.",
+    "propuesta": "(libre) h1 visible o sr-only; role='alert' en los bloques de error de login/forgot/reset/accept/cambiar; subir a zinc-400 los textos funcionales; quitar tabIndex -1 del visor; role='tablist'/aria-selected en el selector.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.login-password",
+     "h1.auth-recupero.solicitar-enlace",
+     "h1.auth-recupero.restablecer-password",
+     "h1.auth-invite.aceptar-invitacion"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-010"
+   },
+   {
+    "titulo": "profile.ts: WhatsApp sin validacion y mensajes internos de Prisma devueltos al cliente",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/profile.ts",
+      "linea": 87,
+      "fragmento": "const whatsapp = ((formData.get('whatsapp') as string | null) ?? '').trim() || null"
+     },
+     {
+      "ruta": "src/lib/actions/profile.ts",
+      "linea": 72,
+      "fragmento": "return { success: false, error: toErrorMessage(error, 'No se pudo actualizar el perfil.') }"
+     },
+     {
+      "ruta": "src/lib/action-utils.ts",
+      "linea": 31,
+      "fragmento": "if (error instanceof Error) {\n  return error.message\n}"
+     }
+    ],
+    "impacto": "Un error de Prisma (p. ej. P2025 'Invalid prisma.organization.update() invocation...') llega textual a la UI del cliente (viola 'nunca exponer errores internos'); el campo WhatsApp acepta cualquier texto de cualquier largo (lo ve el admin en ClientHeader/OverviewTab). Mismo toErrorMessage en :99, :146, :183, :244.",
+    "propuesta": "(libre en profile.ts) Zod para whatsapp (formato/largo) y mensaje fijo en los catch para errores no-Zod; action-utils.ts es FROZEN -> si se quiere cambiar el helper, decision para Valentino.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-cuenta",
+     "lib.actions"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Flujo de invitacion huerfano: ninguna action viva emite links a /accept-invite (y la de clientes nunca los enviaba)",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/invitations.ts",
+      "linea": 110,
+      "fragmento": "const inviteUrl = `${baseUrl}/accept-invite?token=${token}`"
+     },
+     {
+      "ruta": "src/lib/actions/invitations.ts",
+      "linea": 116,
+      "fragmento": "message: `Invitación generada para ${email}. El link fue impreso en la consola del servidor.`,"
+     },
+     {
+      "ruta": "src/lib/actions/settings.ts",
+      "linea": 194,
+      "fragmento": "await sendEmail({"
+     },
+     {
+      "ruta": "src/lib/email.ts",
+      "linea": 15,
+      "fragmento": "if (!resend) {\n  return { success: true }"
+     },
+     {
+      "ruta": "src/app/accept-invite/actions.ts",
+      "linea": 15,
+      "fragmento": "export async function acceptInviteAction("
+     }
+    ],
+    "impacto": "inviteClientAction no tiene callers y nunca envia ni imprime el link (el mensaje miente); inviteTeamMemberAction vive en settings.ts, modulo sin importadores, y enviaria por Resend (contra PLAN-012) fingiendo exito sin RESEND_API_KEY. /accept-invite queda como superficie publica sin uso. Si alguien lo reconecta tal cual, la invitacion no llega.",
+    "propuesta": "Decidir: borrar accept-invite + invitations.ts + inviteTeamMemberAction, o reconectarlo enviando por Brevo con resultado verificado y la regla de contrasena unica.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-invite.emitir-invitacion",
+     "h1.auth-invite.aceptar-invitacion",
+     "h4.adm-config",
+     "int.resend"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-012"
+   },
+   {
+    "titulo": "passwordResetRequired solo se impone en el proxy; ALWAYS_ALLOWED tiene entradas muertas y getLegacyAdminRedirectPath nunca redirige",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 68,
+      "fragmento": "const ALWAYS_ALLOWED = [CHANGE_PASSWORD_PATH, '/api/auth/', '/logout', '/api/']"
+     },
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 84,
+      "fragmento": "if (\n  isAuthenticated &&\n  passwordResetRequired &&"
+     },
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 172,
+      "fragmento": "matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password'],"
+     },
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 23,
+      "fragmento": "if (pathname === ADMIN_OS_PATH || pathname.startsWith(`${ADMIN_OS_PATH}/`)) {\n  return null"
+     }
+    ],
+    "impacto": "Un usuario con contrasena temporal puede usar /api/* y server actions posteadas a rutas fuera del matcher sin cambiarla (ningun layout ni action lee passwordResetRequired): el forzado es higiene, no frontera, y es lo unico que depende solo del proxy frente al advisory de next. Las entradas '/api/auth/', '/api/' y '/logout' (ruta inexistente, PLAN-014) nunca aplican; getLegacyAdminRedirectPath siempre devuelve null porque ADMIN_OS_PATH === ADMIN_PATH (:8-9). El proxy decide con claims congelados del login (complete-onboarding no llama unstable_update).",
+    "propuesta": "(libre) Chequear passwordResetRequired (dato fresco de Node) en los layouts de portal; limpiar ALWAYS_ALLOWED y borrar getLegacyAdminRedirectPath (:22-65, :81, :92-96); documentar que /api queda fuera del proxy por diseno.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.ruteo-por-rol",
+     "h1.auth-cambio.cambio-forzado",
+     "lib.proxy"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-AUTH-04, PLAN-014"
+   },
+   {
+    "titulo": "auth.ts: codigo muerto y estado sin usar (getPostLoginPath, userExists): un usuario borrado conserva sesion ORG_MEMBER",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/auth.ts",
+      "linea": 65,
+      "fragmento": "function getPostLoginPath(state: {"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 61,
+      "fragmento": "userExists: Boolean(dbUser),"
+     },
+     {
+      "ruta": "src/auth.ts",
+      "linea": 44,
+      "fragmento": "const role = dbUser?.role ?? ('ORG_MEMBER' as Role)"
+     }
+    ],
+    "impacto": "getPostLoginPath (y ADMIN_PATH/DASHBOARD_PATH/ONBOARDING_PATH :15-17) no tienen callers (PLAN-018). userExists se calcula y nunca se lee: un usuario borrado conserva una sesion con rol ORG_MEMBER por defecto y sin org (sessionVersion undefined no invalida, :219) hasta que expire; hoy sin datos expuestos, pero cualquier handler que solo pida 'sesion' lo deja pasar y el portal entra en el bucle de redirecciones.",
+    "propuesta": "Decision para Valentino (FROZEN + ZONA-FRANCO): devolver null en jwt cuando !userExists y borrar getPostLoginPath con sus constantes.",
+    "esfuerzo": "S",
+    "zona": "FROZEN + ZONA-FRANCO",
+    "nodos": [
+     "lib.auth",
+     "h1.auth-login.sesion-jwt"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-018, bucle de redirecciones"
+   },
+   {
+    "titulo": "El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 15,
+      "fragmento": "CLIENT"
+     },
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 154,
+      "fragmento": "if (isDashboardRoute && role !== USER_ROLE && !(role === ADMIN_ROLE && isImpersonating)) {"
+     },
+     {
+      "ruta": "src/lib/preview.ts",
+      "linea": 10,
+      "fragmento": "if (role === 'ORG_MEMBER') {"
+     }
+    ],
+    "impacto": "Latente (ningun codigo asigna CLIENT, git grep vacio), pero un usuario CLIENT con org pasa el signIn y queda en bucle /dashboard -> /login -> /dashboard (proxy.ts:143-145); resolveOrgId le devuelve null. CLAUDE.md documenta 'ORG_MEMBER / CLIENT -> /dashboard/*', lo contrario del codigo.",
+    "propuesta": "Decidir: declarar CLIENT legacy (y corregir la doc) o tratarlo como ORG_MEMBER en proxy.ts y preview.ts. El enum vive en schema.prisma (FROZEN): no tocarlo sin decision.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login.ruteo-por-rol",
+     "lib.proxy",
+     "lib.auth"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "OrgRole (ADMIN/MEMBER/VIEWER) viaja en la sesion pero ningun guard lo lee",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/auth.ts",
+      "linea": 227,
+      "fragmento": "token.orgRole = accessState.orgRole"
+     },
+     {
+      "ruta": "src/lib/actions/profile.ts",
+      "linea": 29,
+      "fragmento": "const organizationId = session?.user?.organizationId"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 523,
+      "fragmento": "role                        OrgRole  @default(ADMIN)"
+     }
+    ],
+    "impacto": "Latente: hoy todas las membresias se crean ADMIN; el dia que se invite a un VIEWER podra cambiar nombre de empresa, contacto, preferencias de toda la org y pedir la baja de la cuenta (profile.ts solo exige organizationId).",
+    "propuesta": "Definir el modelo de permisos por OrgRole antes de habilitar miembros no-ADMIN; helper requireOrgRole en las actions de cuenta.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "lib.auth",
+     "h2.cli-cuenta",
+     "modelo.OrgMember"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Org primaria no deterministica: orgMemberships take:1 sin orderBy en cada auth()",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/auth.ts",
+      "linea": 37,
+      "fragmento": "take: 1,"
+     },
+     {
+      "ruta": "src/app/login/actions.ts",
+      "linea": 94,
+      "fragmento": "take: 1,"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 530,
+      "fragmento": "@@unique([userId, organizationId])"
+     }
+    ],
+    "impacto": "Latente: el schema permite varias membresias por usuario; si un usuario pertenece a dos orgs, cada auth() (que refresca de la DB) puede resolver una org distinta y el usuario ve/escribe en la que Postgres devuelva primero.",
+    "propuesta": "Decision para Valentino (auth.ts FROZEN): orderBy explicito (joinedAt) o selector de org activa; mismo cambio en login/actions.ts:88-95 y qa/login/route.ts:118-127.",
+    "esfuerzo": "S",
+    "zona": "FROZEN + ZONA-FRANCO",
+    "nodos": [
+     "lib.auth",
+     "modelo.OrgMember"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Contrasena temporal de 8 caracteres con estructura fija (~34 bits) y sin vencimiento",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/security/generate-temp-password.ts",
+      "linea": 15,
+      "fragmento": "export function generateTempPassword(): string {\n  return (\n    randomFromString(LETTERS, 4) +"
+     },
+     {
+      "ruta": "src/lib/security/generate-temp-password.ts",
+      "linea": 11,
+      "fragmento": ".map((b) => str[b % str.length])"
+     },
+     {
+      "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+      "linea": 68,
+      "fragmento": "passwordResetRequired: true,"
+     }
+    ],
+    "impacto": "La temporal (4 letras + 2 numeros + 2 especiales, sesgo de modulo) viaja por email y sirve indefinidamente hasta el primer login; junto con la fuerza bruta sin freno real es el eslabon mas debil de las cuentas nuevas. ~5,7% sale sin mayuscula.",
+    "propuesta": "(libre) 16+ caracteres aleatorios (base64url) o reemplazar la temporal por un link de un solo uso en el email de bienvenida, con vencimiento.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-cambio.cambio-forzado",
+     "h4.adm-clientes",
+     "lib.security"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Impersonacion: secreto de respaldo literal, misma clave que AUTH_SECRET, cookie que sobrevive al logout y politica de escritura sin definir",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/impersonation.ts",
+      "linea": 15,
+      "fragmento": "process.env.IMPERSONATION_SECRET ??\nprocess.env.AUTH_SECRET ??\nprocess.env.NEXTAUTH_SECRET ?? <literal de respaldo, valor omitido>"
+     },
+     {
+      "ruta": "src/actions/auth-actions.ts",
+      "linea": 6,
+      "fragmento": "await signOut({ redirectTo: '/login' })"
+     },
+     {
+      "ruta": "src/lib/preview.ts",
+      "linea": 14,
+      "fragmento": "if (role === 'SUPER_ADMIN') {\n  const impersonation = await getImpersonationSession()"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 16,
+      "fragmento": "const organizationId = session?.user?.organizationId"
+     }
+    ],
+    "impacto": "Si faltaran las tres variables, los tokens de impersonacion se firmarian con un literal publico del repo (hoy inalcanzable: Auth.js exige AUTH_SECRET en prod); por defecto firma HS256 con AUTH_SECRET crudo (reuso de clave). El logout no borra impersonation-token. Durante el preview, las actions con resolveOrgId escriben como el cliente y las que usan session.user.organizationId fallan con 'Sesion invalida.' (profile.ts:29-33, upsell.ts:16-19), sin marca de 'hecho por soporte'.",
+    "propuesta": "(libre) Exigir IMPERSONATION_SECRET en prod (fallar si falta, sin literal); borrar la cookie en signOutAction; decidir si el preview es solo lectura (gate de mutaciones) o escritura auditada.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-impersonacion.iniciar",
+     "h1.auth-impersonacion.navegar-como-cliente",
+     "lib.impersonation"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-007"
+   },
+   {
+    "titulo": "/api/qa/login revela en el 403 cual guarda fallo",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/qa/login/route.ts",
+      "linea": 87,
+      "fragmento": "return NextResponse.json({ error: 'forbidden', reason: guard.reason }, { status: 403 })"
+     },
+     {
+      "ruta": "src/app/api/qa/login/route.ts",
+      "linea": 50,
+      "fragmento": "if (process.env.QA_ALLOW_LOCALHOST !== '1') {\n  return { allowed: false, reason: 'qa_flag_off' }"
+     }
+    ],
+    "impacto": "Un sondeo anonimo en produccion sabe si QA_ALLOW_LOCALHOST esta activa; la guarda 3 (:65-70) depende de que NETLIFY/VERCEL_ENV existan en runtime. Bajo: las tres guardas siguen cerrando (Host localhost no es alcanzable por la CDN).",
+    "propuesta": "Coordinar con Franco: 404 generico sin reason fuera de localhost.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h1.auth-login",
+     "lib.auth"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "2026-07-auditoria-seguridad.md:991"
+   },
+   {
+    "titulo": "Hashes de rate limit sin sal: IP y email recuperables por fuerza bruta",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/security/auth-rate-limit.ts",
+      "linea": 26,
+      "fragmento": "return `${scope}:${createHash('sha256').update(raw.toLowerCase()).digest('hex').slice(0, 24)}`"
+     },
+     {
+      "ruta": "src/lib/security/auth-rate-limit.ts",
+      "linea": 42,
+      "fragmento": "return createHash('sha256').update(ip).digest('hex').slice(0, 24)"
+     }
+    ],
+    "impacto": "El comentario promete no guardar IPs ni emails en claro, pero sha256 sin sal de una IPv4 (2^32) o de un email conocido se revierte en segundos; la tabla rate_limit vive en la Neon compartida.",
+    "propuesta": "(libre) HMAC con un pepper de entorno (PLAN-019).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.rate-limit",
+     "lib.security"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-019"
+   },
+   {
+    "titulo": "Cambio forzado sin salida si el cliente no tiene la temporal, y copy de 'forzado' tambien en cambio voluntario",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/cambiar-password/CambiarPasswordForm.tsx",
+      "linea": 140,
+      "fragmento": "<Field label=\"Contraseña actual\" error={errors.oldPassword} required>"
+     },
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 89,
+      "fragmento": "return NextResponse.redirect(new URL(CHANGE_PASSWORD_PATH, nextUrl))"
+     },
+     {
+      "ruta": "src/app/cambiar-password/page.tsx",
+      "linea": 20,
+      "fragmento": "Por seguridad, necesitás definir una nueva antes de entrar."
+     }
+    ],
+    "impacto": "Un cliente nuevo que entra por magic link (passwordResetRequired=true desde el alta) queda encerrado en /cambiar-password pidiendo una 'contrasena actual' que puede no tener (email de bienvenida perdido); la pagina no ofrece /forgot-password (git grep vacio) y todo el portal redirige ahi. El texto de 'antes de entrar' aparece tambien al cambiarla por gusto.",
+    "propuesta": "(libre) Link a /forgot-password en la pagina; copy condicionado a forceChange; evaluar no exigir la actual cuando el ingreso fue por magic link.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-cambio.cambio-forzado"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "router.push en CambiarPasswordForm (justificado inline) con destino fijo /dashboard",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/cambiar-password/CambiarPasswordForm.tsx",
+      "linea": 114,
+      "fragmento": "// Mecanismo intacto (ya es seguro): invocación directa + await + navegación DESPUÉS\n// del await, con el cookie ya en sessionVersion N+1. No se toca auth.ts."
+     },
+     {
+      "ruta": "src/app/cambiar-password/CambiarPasswordForm.tsx",
+      "linea": 126,
+      "fragmento": "router.push('/dashboard')"
+     }
+    ],
+    "impacto": "Rubrica: router.push en portal con comentario que lo justifica = DEU BAJA. Para SETTER y SUPER_ADMIN funciona por un rebote extra del proxy.",
+    "propuesta": "Mantener el comentario o navegar segun el rol que devuelva la action.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-cambio.cambio-forzado"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Fondo de auth copiado en 4 paginas y /login de 511 lineas con estilos inline",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/login/page.tsx",
+      "linea": 412,
+      "fragmento": "function AmbientParticles() {"
+     },
+     {
+      "ruta": "src/app/forgot-password/page.tsx",
+      "linea": 243,
+      "fragmento": "<div\n  className=\"pointer-events-none fixed inset-0\"\n  style={{"
+     },
+     {
+      "ruta": "src/app/accept-invite/InviteBackground.tsx",
+      "linea": 17,
+      "fragmento": "<div\n  className=\"pointer-events-none fixed inset-0\"\n  style={{"
+     },
+     {
+      "ruta": "src/app/reset-password/page.tsx",
+      "linea": 17,
+      "fragmento": "<div\n  className=\"pointer-events-none fixed inset-0\"\n  style={{"
+     }
+    ],
+    "impacto": "Cambiar el look de auth exige tocar 4 archivos (reset-password ademas omite DotMatrix); /login supera las 300 lineas con CSS inline donde hay utilidades Tailwind (anti-vibecode).",
+    "propuesta": "(libre) AuthShell compartido con el fondo y separar LoginForm/MagicLinkForm en archivos propios.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-login",
+     "h1.auth-recupero",
+     "h1.auth-invite"
+    ],
+    "requiere_verificacion_humana": false
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h1.auth-login",
+    "id": "h1.auth-login.login-password",
+    "nombre": "Login con email y contrasena",
+    "descripcion": "Formulario de /login que autentica con Credentials (bcrypt) y redirige por rol",
+    "archivos": [
+     "src/app/login/page.tsx",
+     "src/app/login/actions.ts",
+     "src/auth.ts",
+     "src/lib/auth-cookies.ts",
+     "src/proxy.ts"
+    ],
+    "entradas": [
+     "loginAction",
+     "POST /api/auth/callback/credentials"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz: page.tsx:347 -> actions.ts:65-111 -> auth.ts:142-169 (bcrypt :157) -> signIn callback auth.ts:192-203 -> jwt auth.ts:209-230 -> redirect actions.ts:102-108 -> proxy.ts:134-146 / layouts",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "signIn exige org salvo SUPER_ADMIN/SETTER (auth.ts:195-201); org refrescada de DB en cada auth() (auth.ts:209-230)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario sin colecciones"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Muestra el error de la action (page.tsx:351-360) pero no lee ?error del signIn callback; EMAIL_NOT_VERIFIED nunca mapea (actions.ts:119)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "SubmitButton con spinner (page.tsx:136-164, :363)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Validacion manual sin Zod (actions.ts:68-74)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "max-w-[400px] y px-4 (page.tsx:239, :475) OK; visor de ~16px sin padding (:114) y tabs ~32px (:317-334)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "No manejados via onRequestError (instrumentation.ts:49) y error.tsx raiz; fallos manejados solo console.error"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "La misma pantalla tiene copy de dev en magic link (page.tsx:192-197) y un boton Google que no completa"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Email con mayusculas en el alta impide entrar (createClientOnly.ts:91 vs auth.ts:143); bucle tras invalidacion exige borrar cookies"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-login",
+    "id": "h1.auth-login.magic-link",
+    "nombre": "Ingreso por magic link",
+    "descripcion": "Envio de link de acceso de un solo uso por email (provider Resend con envio por Brevo)",
+    "archivos": [
+     "src/app/login/page.tsx",
+     "src/app/login/actions.ts",
+     "src/auth.ts",
+     "src/lib/email/brevo-service.ts"
+    ],
+    "entradas": [
+     "magicLinkAction",
+     "POST /api/auth/signin/resend",
+     "GET /api/auth/callback/resend"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:204 -> actions.ts:140-151 -> send-token.js:23-33 (signIn callback auth.ts:175-186) -> auth.ts:101-120 -> brevo-service.ts:25-39 -> callback route.ts:3 -> /dashboard (actions.ts:148)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Al consumir el link corre el signIn callback con chequeo de org (auth.ts:192-201)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Sin colecciones"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Fallo de envio invisible (auth.ts:104 ignora el resultado); link vencido cae en la pagina de error por defecto de Auth.js (pages.error no configurado, auth.ts:95)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "SubmitButton 'Generando link...' (page.tsx:223)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Manual: presencia y '@' (actions.ts:142-143)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Mismo layout max-w-[400px] px-4 (page.tsx:239, :475)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Error de Brevo solo console.error (brevo-service.ts:41) y descartado en auth.ts:104"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Copy 'consola del servidor' (page.tsx:194-197)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Si el envio falla el cliente ve exito y no sabe que hacer"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-login",
+    "id": "h1.auth-login.google-oauth",
+    "nombre": "Ingreso con Google",
+    "descripcion": "Boton 'Continuar con Google' (OAuth)",
+    "archivos": [
+     "src/app/login/page.tsx",
+     "src/app/login/actions.ts",
+     "src/auth.ts"
+    ],
+    "entradas": [
+     "googleSignInAction",
+     "GET /api/auth/callback/google"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "El boton (page.tsx:286-299) inicia OAuth (actions.ts:162-164) pero el signIn callback rechaza toda cuenta sin Account vinculada (user.id = sub, auth.ts:125 y :192-201; callback/index.js:64) y no existe camino que vincule (git grep account.create/linkAccount vacio); AUTH_GOOGLE_* no documentadas",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Rechaza a quien no tiene usuario/org (auth.ts:195-201)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Sin colecciones"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "/login no lee ?error=unauthorized (sin searchParams en src/app/login)"
+     },
+     "carga": {
+      "cumple": "no",
+      "evidencia": "Form sin estado pending (page.tsx:286-299)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin input propio"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Boton w-full (page.tsx:289)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Solo errores no manejados"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Affordance visible que no puede completar"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Ningun cliente puede ingresar por esta via"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-login",
+    "id": "h1.auth-login.ruteo-por-rol",
+    "nombre": "Ruteo y proteccion por rol",
+    "descripcion": "Proxy de Next 16 y layouts que envian a cada rol a su zona",
+    "archivos": [
+     "src/proxy.ts",
+     "src/auth.config.ts",
+     "src/app/(protected)/admin/layout.tsx",
+     "src/app/(protected)/setter/layout.tsx",
+     "src/app/(protected)/dashboard/layout.tsx",
+     "src/lib/preview.ts"
+    ],
+    "entradas": [
+     "proxy (matcher /admin, /dashboard, /setter, /login, /bienvenida, /cambiar-password)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "proxy.ts:98-168 (SETTER :117-122, admin :148-152, dashboard :154-156) + re-chequeo en Node: admin/layout.tsx:43-49, setter/layout.tsx:28-34, dashboard/layout.tsx:90-92 via preview.ts:6-20",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Layouts re-chequean rol/org; open redirect por callbackUrl (proxy.ts:18-20, :135-136); CLIENT en bucle (:154)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Sesion invalidada produce bucle sin mensaje (proxy.ts:134-146 vs dashboard/layout.tsx:90-92)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "callbackUrl validado debil (proxy.ts:18-20)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos falsos; hay codigo muerto (proxy.ts:22-65)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Salir del bucle exige borrar cookies"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-login",
+    "id": "h1.auth-login.sesion-jwt",
+    "nombre": "Sesion JWT, expiracion e invalidacion",
+    "descripcion": "Ciclo de vida de la sesion: refresco de rol/org, 8 h declaradas, invalidacion por sessionVersion",
+    "archivos": [
+     "src/auth.ts",
+     "src/auth.config.ts",
+     "src/lib/auth-cookies.ts",
+     "src/types/next-auth.d.ts"
+    ],
+    "entradas": [
+     "GET/POST /api/auth/session",
+     "auth()"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "jwt refresca de DB en cada auth() (auth.ts:205-231); invalida en Node por version (auth.ts:215-223); cookie explicita (auth-cookies.ts:21-30)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Invalidacion revivible por POST /api/auth/session (auth.ts:215-217); usuario borrado conserva sesion (auth.ts:61, :44)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Bucle de redirecciones al invalidar"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin mocks"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Expira a 30 dias deslizantes (auth.config.ts:12) y el bucle exige ayuda"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-login",
+    "id": "h1.auth-login.logout",
+    "nombre": "Cerrar sesion",
+    "descripcion": "Boton de logout en admin, setter y portal",
+    "archivos": [
+     "src/actions/auth-actions.ts"
+    ],
+    "entradas": [
+     "signOutAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "admin-topbar.tsx:85 / setter/layout.tsx:76 / DashboardLayoutClient.tsx:150 -> auth-actions.ts:5-7 -> signOut -> /login",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Opera sobre la cookie propia"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "Form sin estado pending (setter/layout.tsx:76-85)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Boton 36px con aria-label (setter/layout.tsx:77-84)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Solo no manejados"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin mocks"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Un clic; deja viva la cookie de impersonacion"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-recupero",
+    "id": "h1.auth-recupero.solicitar-enlace",
+    "nombre": "Pedir enlace de recupero",
+    "descripcion": "/forgot-password envia un link de reset de 45 min por Brevo con respuesta anti-enumeracion",
+    "archivos": [
+     "src/app/forgot-password/page.tsx",
+     "src/app/forgot-password/actions.ts",
+     "src/lib/security/auth-rate-limit.ts",
+     "src/lib/rate-limit/limiter.ts"
+    ],
+    "entradas": [
+     "forgotPasswordAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "login/page.tsx:365-370 -> forgot-password/page.tsx:120 -> actions.ts:29-57 (Zod + limites) -> :73-83 token -> :96-101 Brevo -> exito :109",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Sin datos de tenant; anti-enumeracion (actions.ts:17-18)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Error de validacion visible (page.tsx:150-159); exito identico por diseno"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner 'Enviando...' (page.tsx:183-201)"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "ForgotPasswordSchema (actions.ts:29-38)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "max-w-[400px], input py-3 (page.tsx:45, :139-145)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Fallo de Brevo solo console.error (actions.ts:104-106)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin mocks"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Flujo completo sin develOP si Brevo funciona"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-recupero",
+    "id": "h1.auth-recupero.restablecer-password",
+    "nombre": "Restablecer contrasena con el token",
+    "descripcion": "/reset-password fija la nueva contrasena e invalida sesiones",
+    "archivos": [
+     "src/app/reset-password/page.tsx",
+     "src/app/reset-password/ResetPasswordForm.tsx",
+     "src/app/reset-password/actions.ts",
+     "src/lib/actions/schemas.ts"
+    ],
+    "entradas": [
+     "resetPasswordAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:10-11 -> ResetPasswordForm.tsx:186-188 -> actions.ts:19-40 -> :45-63 token -> :68-84 transaccion -> :87-96 audit -> exito ResetPasswordForm.tsx:146-183",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Token de un solo uso, sin tenant"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "ResetPasswordForm.tsx:205-214 y token ausente :116-145"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner 'Actualizando...' (:238-256)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod sin regla mayuscula+numero (schemas.ts:94-97)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "max-w-[400px], inputs py-3 (ResetPasswordForm.tsx:80, :55-61)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Solo no manejados; fallo del audit se traga (audit-log.ts:39-41)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin mocks"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Otros dispositivos quedan en bucle; token vencido recien se detecta al enviar"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-cambio",
+    "id": "h1.auth-cambio.cambio-forzado",
+    "nombre": "Cambio obligatorio de contrasena temporal",
+    "descripcion": "/cambiar-password forzado por passwordResetRequired",
+    "archivos": [
+     "src/app/cambiar-password/page.tsx",
+     "src/app/cambiar-password/CambiarPasswordForm.tsx",
+     "src/app/cambiar-password/actions.ts",
+     "src/proxy.ts"
+    ],
+    "entradas": [
+     "cambiarPasswordAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "auth.ts:168 -> proxy.ts:84-90 -> page.tsx:6-27 -> CambiarPasswordForm.tsx:116-131 -> actions.ts:25-75 (update :51-61, unstable_update :73) -> router.push :126",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Solo la cuenta de la sesion (actions.ts:25-38)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "toast.error (CambiarPasswordForm.tsx:128) y errores por campo (:140-180)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Button loading (:203)"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod 8+mayuscula+numero (actions.ts:12-19)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "max-w-md p-4 (page.tsx:10-11)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Solo no manejados"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Copy 'antes de entrar' tambien en cambio voluntario (page.tsx:19-21)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Sin link a /forgot-password si no tiene la temporal"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-invite",
+    "id": "h1.auth-invite.emitir-invitacion",
+    "nombre": "Emitir invitacion",
+    "descripcion": "Generar y enviar link /accept-invite a un cliente o miembro de equipo",
+    "archivos": [
+     "src/lib/actions/invitations.ts",
+     "src/lib/actions/settings.ts",
+     "src/lib/email.ts"
+    ],
+    "entradas": [
+     "inviteClientAction",
+     "inviteTeamMemberAction"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "inviteClientAction (invitations.ts:43-118) sin callers y sin envio (mensaje falso :116); inviteTeamMemberAction (settings.ts:148-237) en modulo sin importadores, por Resend",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "SUPER_ADMIN (invitations.ts:47-50; settings.ts:20-28)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Exito aunque no envie (invitations.ts:116; settings.ts:229 con email.ts:15-16)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin UI conectada"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Regex manual (invitations.ts:56-59; settings.ts:157-161)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "Sin UI"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Mensaje 'impreso en la consola'"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "No hay forma de emitir desde el producto"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-invite",
+    "id": "h1.auth-invite.aceptar-invitacion",
+    "nombre": "Aceptar invitacion y definir contrasena",
+    "descripcion": "/accept-invite activa la cuenta sin contrasena",
+    "archivos": [
+     "src/app/accept-invite/page.tsx",
+     "src/app/accept-invite/AcceptInviteForm.tsx",
+     "src/app/accept-invite/InviteBackground.tsx",
+     "src/app/accept-invite/actions.ts"
+    ],
+    "entradas": [
+     "acceptInviteAction"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "AcceptInviteForm.tsx:187 -> actions.ts:15-82 funciona con un token, pero nada vivo entrega tokens de invitacion (h1.auth-invite.emitir-invitacion)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Token"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "AcceptInviteForm.tsx:210-219"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner 'Activando cuenta...' (:243-261)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Manual sin Zod, min 8 (actions.ts:19-34)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "max-w-[400px], inputs py-3 (:80, :55-61)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Solo no manejados"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin mocks"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Sin emisor vivo"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-impersonacion",
+    "id": "h1.auth-impersonacion.iniciar",
+    "nombre": "Iniciar sesion de soporte (impersonar)",
+    "descripcion": "SUPER_ADMIN entra al portal de un cliente por 30 min",
+    "archivos": [
+     "src/lib/actions/impersonation.ts",
+     "src/lib/impersonation.ts",
+     "src/lib/impersonation-constants.ts"
+    ],
+    "entradas": [
+     "startImpersonationAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ImpersonateButton.tsx:24 -> client.actions.ts:8-9 -> impersonation.ts (actions) :12-47 -> cookie + audit -> /dashboard",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Solo SUPER_ADMIN (:13-15); token atado a adminId (lib/impersonation.ts:68)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Error solo console.error (ImpersonateButton.tsx:25-27); org inexistente redirige en silencio (:22-24)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "ConfirmDialog con isPending (ImpersonateButton.tsx:18, :49)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "orgId sin Zod (:11)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Solo no manejados"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin mocks"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Uso interno"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-impersonacion",
+    "id": "h1.auth-impersonacion.navegar-como-cliente",
+    "nombre": "Ver el portal como el cliente",
+    "descripcion": "Preview del portal con banner y temporizador",
+    "archivos": [
+     "src/lib/preview.ts",
+     "src/lib/impersonation.ts",
+     "src/app/(protected)/dashboard/layout.tsx"
+    ],
+    "entradas": [
+     "resolveOrgId",
+     "getImpersonationSession"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "proxy.ts:154 -> dashboard/layout.tsx:72-77 -> preview.ts:14-17 -> impersonation.ts:54-80 -> banner layout.tsx:148-153",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Firma, adminId y vencimiento verificados (impersonation.ts:66-76)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Los del portal"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Actions con session.user.organizationId fallan con 'Sesion invalida.' (profile.ts:29-33, upsell.ts:16-19)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "loading.tsx del dashboard"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "jwtVerify (impersonation.ts:33)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Banner flex-col sm:flex-row (ImpersonationBanner.tsx:13)"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary captura (SectionErrorBoundary.tsx:64)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin mocks"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Uso interno"
+     }
+    }
+   },
+   {
+    "herramienta": "h1.auth-impersonacion",
+    "id": "h1.auth-impersonacion.terminar",
+    "nombre": "Terminar sesion de soporte",
+    "descripcion": "Boton 'Salir' del banner",
+    "archivos": [
+     "src/lib/actions/impersonation.ts"
+    ],
+    "entradas": [
+     "stopImpersonationAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ImpersonationBanner.tsx:28 -> impersonation.ts (actions) :50-79 (borra cookie, audita, /admin/clients)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Solo borra la cookie propia"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "carga": {
+      "cumple": "no",
+      "evidencia": "Form sin pending (ImpersonationBanner.tsx:28-35)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Boton py-2 en banner responsive"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Solo no manejados"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin mocks"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Uso interno"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-cuenta",
+    "id": "h2.cli-cuenta.cambiar-password",
+    "nombre": "Cambiar contrasena desde Mi Cuenta",
+    "descripcion": "Cambio voluntario con regla unica y sessionVersion",
+    "archivos": [
+     "src/lib/actions/profile.ts",
+     "src/components/dashboard/ProfileForms.tsx"
+    ],
+    "entradas": [
+     "updatePasswordAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ProfileForms.tsx:374-394 (invocacion directa) -> profile.ts:191-232 -> unstable_update :239 -> router.refresh (ProfileForms.tsx:392)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Solo session.user.id (profile.ts:191-196)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "n/a"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Feedback del state (ProfileForms.tsx:401)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "SaveButton isPending (ProfileForms.tsx:532)"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "UpdatePasswordSchema (profile.ts:198-206)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 sm:grid-cols-3 (ProfileForms.tsx:403)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "catch solo console.error (profile.ts:242-244); error.tsx de cuenta captura render"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin mocks"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Completo sin develOP"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-014",
+    "clave": "/logout en ALWAYS_ALLOWED del middleware pero la ruta no existe",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/proxy.ts:68 sigue con '/logout'; git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep /logout/ -> vacio (control: git grep \"'/logout'\" -> proxy.ts:68). Ademas el matcher (:172) no incluye /logout ni /api, asi que '/api/auth/' y '/api/' tambien son muertas",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-006",
+    "clave": "Verificacion dinamica de sessionVersion multi-device",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n sessionVersion origin/main -- logic-core-v3/tests logic-core-v3/scripts -> vacio (control: tests/ tiene 97 archivos). Por lectura fallaria: bucle proxy.ts:134-146 vs dashboard/layout.tsx:90-92 y revivido por POST /api/auth/session (auth.ts:215-217)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "unstable_update si dispara trigger 'update' (next-auth/lib/actions.js update -> session POST)"
+   },
+   {
+    "id": "PLAN-017",
+    "clave": "Manejo de error en el envio del magic link",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/auth.ts:104 descarta el resultado de sendTransactionalEmail; brevo-service.ts:20-23 y :40-46 devuelven {ok:false} sin lanzar",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-018",
+    "clave": "Dead code getPostLoginPath en auth.ts",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/auth.ts:65-74; git grep -n getPostLoginPath origin/main -- logic-core-v3/src -> solo la definicion (auth.ts:65)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Tambien userExists (auth.ts:61) sin lector"
+   },
+   {
+    "id": "PLAN-019",
+    "clave": "Hashes de auth-rate-limit sin salt",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/lib/security/auth-rate-limit.ts:24-27 y :37-43: sha256 sin sal ni pepper",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-012",
+    "clave": "Resend solo para Magic Link; transaccionales por Brevo",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Brevo: forgot-password/actions.ts:96-101, resend-credentials/route.ts:85-90, y el propio magic link (auth.ts:104). Siguen por Resend: src/lib/email.ts:1-30 (usado por tickets/actions.ts:5 y agency-actions.ts:7), notify-message.ts:1-18 y settings.ts:194 (muerto); email.ts:15-16 devuelve success:true sin API key",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-001",
+    "clave": "Acciones que tocan sessionVersion: llamada directa",
+    "estado_en_codigo": "hecho",
+    "evidencia": "CambiarPasswordForm.tsx:116-131 y ProfileForms.tsx:374-394 invocan directo con startTransition y navegan/refrescan despues",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El patron se cumple, pero la invalidacion tiene huecos (bypass por update y bucle en el proxy)"
+   },
+   {
+    "id": "PLAN-011",
+    "clave": "MS-8 Login QA inyectable con triple candado",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/app/api/qa/login/route.ts:49-73 (3 guardas) aplicadas en :85-88, :198-201, :215-218; persona setter agregada (:42)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El 403 revela la guarda (:87)"
+   },
+   {
+    "id": "PLAN-020",
+    "clave": "B12.5 Reset de contrasena endurecido",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Token 45 min (forgot-password/actions.ts:16), un solo uso (reset-password/actions.ts:55-56, :80-83), invalida previos (forgot :77-79), mensaje identico + bcrypt dummy (:17-18, :67-70), limites por IP/email/admin ahora en DB (limiter.ts:37-84), Zod en los 3 endpoints, Brevo, audit PASSWORD_CHANGED (reset :87-96)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Huecos: regla de contrasena debil en reset (schemas.ts:94-97), token en claro, tiempo no igualado (Brevo solo si existe)"
+   },
+   {
+    "id": "PLAN-005",
+    "clave": "B-SEC.3a Invalidacion de JWT al cambiar o resetear password",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Campo (schema.prisma:294), chequeo (auth.ts:212-230) e incrementos (reset :76, cambiar :59, profile :230, resend-credentials :71) existen; pero el trigger 'update' saltea el chequeo (auth.ts:216-217) y el proxy no lo ve (auth.config.ts:24-40) -> SEC-AUTH-03 no queda cerrado",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-002",
+    "clave": "Bloque B: password en /cambiar-password",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Visor Eye/EyeOff (CambiarPasswordForm.tsx:30-76), regla en cliente (:19-25) y Zod (actions.ts:12-19), boton deshabilitado (:95, :203) en origin/main",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-008",
+    "clave": "Bloque B3: visor de password en /login",
+    "estado_en_codigo": "hecho",
+    "evidencia": "login/page.tsx:52-58 y :108-118 (toggle del type; loginAction intacto)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El visor tiene tabIndex -1 (:112)"
+   },
+   {
+    "id": "PLAN-015",
+    "clave": "D-AUTH inputs del login visibles",
+    "estado_en_codigo": "hecho",
+    "evidencia": "FloatingField con initial/animate propios (login/page.tsx:61-72)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-016",
+    "clave": "MAGIC-BREVO magic link por Brevo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "sendVerificationRequest -> sendTransactionalEmail (auth.ts:97-121); el provider ya no tiene 'from'",
+    "sigue_teniendo_sentido": "si",
+    "nota": "La UI de exito sigue diciendo 'consola del servidor' (login/page.tsx:194-197)"
+   },
+   {
+    "id": "PLAN-009",
+    "clave": "0.1 Auth QA-login: nombre de cookie de sesion unificado",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/auth-cookies.ts:19-30 importado por auth.ts:12, auth.config.ts:2 y qa/login/route.ts:29",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-013",
+    "clave": "Extender ?e2e=1 al DotMatrix de las paginas de auth",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n e2e origin/main -- DotMatrix.tsx y src/app/{login,forgot-password,reset-password,accept-invite} -> vacio (control: PreloaderContext.tsx:81)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-021",
+    "clave": "Acceso pospuesto a Beta: signup, olvide mi contrasena, 2FA",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Olvide mi contrasena hecho (forgot-password/actions.ts:24-110); signup y 2FA sin rastro (git ls-tree app | grep signup/register y git grep totp/2fa/otplib -> vacios; control: forgot-password listado)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-007",
+    "clave": "CTA de upsell en preview admin falla con 'Sesion invalida.'",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/lib/actions/upsell.ts:16-19 sigue usando session.user.organizationId (SUPER_ADMIN no tiene); mismo patron en profile.ts:29-33",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Comportamiento aceptado vigente; falta definir la politica de escritura del preview"
+   },
+   {
+    "id": "PLAN-010",
+    "clave": "/login no tiene <h1>",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n \"<h1\" origin/main -- logic-core-v3/src/app/login -> vacio (control: forgot-password/page.tsx:53)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-004",
+    "clave": "Endpoint logout-all",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -niE \"logout-all|logoutAll|revokeAll|signOutEverywhere\" -> vacio (control: 4 archivos con sessionVersion increment)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Seria un incremento de sessionVersion; antes hay que cerrar el bypass por trigger 'update'"
+   },
+   {
+    "id": "PLAN-003",
+    "clave": "Regla unica de password: 8 caracteres, mayuscula y numero",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Aplicada en CambiarPasswordSchema (cambiar-password/actions.ts:12-19) y UpdatePasswordSchema (schemas.ts:22-35); no en ResetPasswordSchema (schemas.ts:94-97) ni en accept-invite (actions.ts:26-31)",
+    "sigue_teniendo_sentido": "si"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "Proxy/middleware: bitacora-roadmap :6334 y :7936 dicen que no hay middleware y que protegen los layouts; :7682/:7687 reportan 307 'middleware'; :7830/:7898 modifican src/proxy.ts; :8138 (SEC-AUTH-04) pide middleware global",
+    "resultado": "parcial",
+    "evidencia": "Si hay middleware: src/proxy.ts (convencion de Next 16) con matcher ['/admin/:path*','/dashboard/:path*','/setter/:path*','/login','/bienvenida','/cambiar-password'] (proxy.ts:172); los docs :6334/:7936 estan desactualizados. El 307 a /login de B12.6 es proxy.ts:104-108; la rama SETTER de B1 esta en :117-122. ALWAYS_ALLOWED (:68) conserva '/logout' (ruta inexistente) y '/api/auth/', '/api/' que el matcher nunca deja pasar. No es global (SEC-AUTH-04 abierto): /api/* queda fuera y cada handler se protege solo. No hay ruta de portal protegida solo por layout que falte en el proxy ni viceversa (admin/layout.tsx:43-49, setter/layout.tsx:28-34, dashboard/layout.tsx:90-92, bienvenida/layout.tsx:9-10, cambiar-password/page.tsx:6-7). Lo unico que depende solo del proxy es el forzado de passwordResetRequired (proxy.ts:84-90).",
+    "hallazgo_titulo": "passwordResetRequired solo se impone en el proxy; ALWAYS_ALLOWED tiene entradas muertas y getLegacyAdminRedirectPath nunca redirige"
+   },
+   {
+    "alerta": "Regla de contrasena 8+mayuscula+numero declarada 'hecho (sin mergear)' para /cambiar-password: ¿esta en main y aplica en reset-password y en el alta?",
+    "resultado": "parcial",
+    "evidencia": "En origin/main si para /cambiar-password (CambiarPasswordForm.tsx:19-25, :95, :203; actions.ts:12-19) y Mi Cuenta (schemas.ts:22-35). No en reset-password (schemas.ts:94-97 solo min 8; ResetPasswordForm.tsx:190-202 sin chequeo) ni en accept-invite (actions.ts:26-31, manual y sin Zod). En las altas vivas la contrasena es temporal (generate-temp-password.ts:15-21, sin mayuscula garantizada) con passwordResetRequired=true, asi que la regla recien aplica en el cambio forzado.",
+    "hallazgo_titulo": "La regla unica de contrasena (8+mayuscula+numero) no se aplica en reset-password ni en accept-invite"
+   },
+   {
+    "alerta": "sessionVersion: las acciones que lo tocan se llaman directo (startTransition), nunca con <form action>; ¿funciona la invalidacion en cambio de contrasena, reset, baja de miembro y cambio de rol?",
+    "resultado": "parcial",
+    "evidencia": "Patron cumplido (CambiarPasswordForm.tsx:116-131, ProfileForms.tsx:374-394). Incrementos en cambiar-password/actions.ts:59, profile.ts:230, reset-password/actions.ts:76, resend-credentials/route.ts:71. No existen flujos de baja de miembro ni de cambio de rol (git grep orgMember.delete y role en user.update -> vacios); hardDeleteClient.ts:141 borra la org sin tocar sessionVersion y archivar (archiveClient.ts:34) no corta acceso. La invalidacion solo vale en Node: trigger 'update' saltea el chequeo (auth.ts:215-217) y el proxy no la ve (auth.config.ts:24-40) -> bucle de redirecciones.",
+    "hallazgo_titulo": "La invalidacion por sessionVersion se revive con POST /api/auth/session (trigger 'update' saltea el chequeo)"
+   },
+   {
+    "alerta": "(Foco del dominio, npm audit, no docs) Advisory critico de next sobre bypass de proxy/middleware: ¿el codigo depende del comportamiento afectado?",
+    "resultado": "parcial",
+    "evidencia": "Dependencia acotada: rol y org se re-chequean en Node en los layouts (admin/layout.tsx:47, setter/layout.tsx:32, dashboard/layout.tsx:90-92 via preview.ts:6-20) y las actions/handlers piden sesion. Depende solo del proxy el forzado de cambio de contrasena (proxy.ts:84-90) y la primera barrera de 22 de 34 paginas /admin sin guard propio (las cubre admin/layout.tsx). Version: D8.",
+    "hallazgo_titulo": "passwordResetRequired solo se impone en el proxy; ALWAYS_ALLOWED tiene entradas muertas y getLegacyAdminRedirectPath nunca redirige"
+   },
+   {
+    "alerta": "(Foco del dominio, npm audit) Auth.js getToken",
+    "resultado": "descartada",
+    "evidencia": "git grep -n getToken origin/main -- logic-core-v3/src -> solo google-business-profile.ts:51 (oauth2Client.getToken de googleapis, ajeno); el unico import de next-auth/jwt es encode en qa/login/route.ts:27"
+   },
+   {
+    "alerta": "(Foco del dominio, npm audit) Normalizador de email de Auth.js en el magic link",
+    "resultado": "descartada",
+    "evidencia": "El provider Resend no define normalizeIdentifier (auth.ts:97-121): usa el defaultNormalizer instalado (@auth/core 0.41.2, send-token.js:74-97) que ya rechaza comillas y recorta ',' del dominio; el signIn callback exige coincidencia exacta en DB (auth.ts:176-185) y el envio va por la API JSON de Brevo (no nodemailer). Sin dependencia explotable encontrada; version: D8."
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/proxy.ts",
+    "senales": [
+     "getLegacyAdminRedirectPath (:22-65) siempre devuelve null: ADMIN_OS_PATH === ADMIN_PATH === '/admin' (:8-9) y el primer if (:23) corta todo /admin, ninguna otra rama puede cumplirse",
+     "ALWAYS_ALLOWED (:68) incluye '/logout' (ruta inexistente: git ls-tree vacio) y '/api/auth/', '/api/' que el matcher (:172) nunca deja entrar",
+     "IMPERSONATION_COOKIE duplicado (:16) en vez de importar impersonation-constants.ts:1"
+    ],
+    "que_rompe": "Nada: el bloque :92-96 nunca redirige; borrar tambien la llamada de :81"
+   },
+   {
+    "archivo": "src/auth.ts",
+    "senales": [
+     "getPostLoginPath (:65-74) sin callers (git grep -> solo la definicion)",
+     "ADMIN_PATH/DASHBOARD_PATH/ONBOARDING_PATH (:15-17) solo usados por esa funcion",
+     "userExists (:61) calculado y nunca leido"
+    ],
+    "que_rompe": "Nada funcional; FROZEN + ZONA-FRANCO -> decision para Valentino"
+   },
+   {
+    "archivo": "src/app/accept-invite/ (page.tsx, AcceptInviteForm.tsx, InviteBackground.tsx, actions.ts)",
+    "senales": [
+     "Sin emisor vivo: inviteClientAction (invitations.ts:43) e inviteTeamMemberAction (settings.ts:148) no tienen callers; settings.ts no tiene importadores (git grep \"lib/actions/settings'\" vacio)",
+     "Solo seria alcanzable con un token de forgot-password de un usuario sin contrasena"
+    ],
+    "que_rompe": "Nada del producto actual; robots.ts:21 y el comentario de sitemap.ts:4 lo mencionan, DotMatrix.tsx:21,49 en comentarios. Decidir: borrar o reconectar"
+   },
+   {
+    "archivo": "src/app/login/actions.ts",
+    "senales": [
+     "Limiter en memoria (:8-48) duplicado del limiter compartido en DB (src/lib/rate-limit/limiter.ts:37-84)",
+     "Rama EMAIL_NOT_VERIFIED (:119-121) inalcanzable: Auth.js envuelve el error en CallbackRouteError con cause {err} (node_modules/@auth/core/lib/actions/callback/index.js:388)"
+    ],
+    "que_rompe": "Reemplazar, no solo borrar: sin el Map el login queda sin ningun limite"
+   },
+   {
+    "archivo": "src/lib/actions/invitations.ts (fuera del lote, mitad muerta de h1.auth-invite)",
+    "senales": [
+     "inviteClientAction sin callers (git grep inviteClient -> solo :43)",
+     "Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116)"
+    ],
+    "que_rompe": "Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)"
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Revivir una sesion invalidada con POST /api/auth/session",
+    "entorno": "local (npm run dev o start:qa) con DB de desarrollo, nunca la Neon compartida",
+    "precondiciones": "Cuenta de prueba con contrasena conocida; dos navegadores (o normal + incognito) y curl",
+    "pasos": [
+     "En A y B iniciar sesion con la misma cuenta y abrir /dashboard",
+     "En B: DevTools > Application > Cookies, copiar el valor de authjs.session-token",
+     "En A: cambiar la contrasena en /dashboard/cuenta/perfil",
+     "curl -c jar.txt -b 'authjs.session-token=<valor copiado>' http://localhost:3000/api/auth/csrf (anotar csrfToken)",
+     "curl -i -b jar.txt -b 'authjs.session-token=<valor copiado>' -H 'Content-Type: application/json' -d '{\"csrfToken\":\"<token>\",\"data\":{}}' http://localhost:3000/api/auth/session",
+     "Si respondio Set-Cookie authjs.session-token nuevo: curl -i -b 'authjs.session-token=<nuevo>' http://localhost:3000/dashboard"
+    ],
+    "esperado": "El POST no entrega cookie valida (body null y cookie limpiada) y /dashboard redirige a /login",
+    "senal_falla": "El POST devuelve Set-Cookie con un token nuevo y con el /dashboard renderiza los datos del cliente",
+    "escribe_db_o_email": true,
+    "hallazgos": "La invalidacion por sessionVersion se revive con POST /api/auth/session"
+   },
+   {
+    "titulo": "Bucle de redirecciones tras invalidar la sesion en otro navegador o reenviar credenciales",
+    "entorno": "local con DB de desarrollo",
+    "precondiciones": "Cliente de prueba logueado en el navegador B; admin en otro navegador",
+    "pasos": [
+     "En B dejar abierta una sesion del cliente en /dashboard",
+     "Desde el admin, en la ficha del cliente, usar 'Reenviar credenciales' (o cambiar la contrasena desde el navegador A)",
+     "En B recargar /dashboard",
+     "En B escribir /login en la barra"
+    ],
+    "esperado": "B termina en /login mostrando el formulario y puede entrar con la contrasena nueva",
+    "senal_falla": "ERR_TOO_MANY_REDIRECTS o 307 alternados /login <-> /dashboard en la pestana Network",
+    "escribe_db_o_email": true,
+    "hallazgos": "Sesion invalidada en Node pero viva en el proxy: bucle /login <-> portal"
+   },
+   {
+    "titulo": "Open redirect por callbackUrl en /login",
+    "entorno": "local o deploy preview",
+    "precondiciones": "Sesion iniciada",
+    "pasos": [
+     "Abrir http://localhost:3000/login?callbackUrl=/%5Cexample.com",
+     "Abrir http://localhost:3000/login?callbackUrl=/%09/example.com"
+    ],
+    "esperado": "Se queda en el sitio (portal o admin)",
+    "senal_falla": "El navegador termina en example.com",
+    "escribe_db_o_email": false,
+    "hallazgos": "Open redirect en el proxy"
+   },
+   {
+    "titulo": "Fuerza bruta por el endpoint nativo de Credentials",
+    "entorno": "local, nunca produccion",
+    "precondiciones": "Cuenta de prueba",
+    "pasos": [
+     "curl -c jar.txt http://localhost:3000/api/auth/csrf (guardar csrfToken)",
+     "Repetir 10 veces: curl -b jar.txt -X POST -d 'csrfToken=<t>&email=<cuenta>&password=Incorrecta1' http://localhost:3000/api/auth/callback/credentials",
+     "Probar la contrasena correcta por el mismo endpoint y mirar si llega Set-Cookie authjs.session-token",
+     "Comparar con 6 intentos fallidos en el formulario de /login"
+    ],
+    "esperado": "Ambos caminos bloquean tras pocos intentos",
+    "senal_falla": "10+ intentos sin bloqueo por el endpoint nativo y el siguiente correcto crea sesion",
+    "escribe_db_o_email": false,
+    "hallazgos": "Fuerza bruta de login sin freno real"
+   },
+   {
+    "titulo": "Magic link: oraculo, limite, copy y fallo silencioso",
+    "entorno": "local con una casilla de prueba y BREVO_API_KEY de test",
+    "precondiciones": "Un email registrado y uno inexistente",
+    "pasos": [
+     "/login > pestana Magic Link > email inexistente: anotar el mensaje",
+     "Email registrado: anotar mensaje y copy de exito",
+     "Repetir 10 veces con el email registrado y contar los emails recibidos",
+     "Quitar BREVO_API_KEY, reiniciar y repetir con el email registrado"
+    ],
+    "esperado": "Mismo mensaje en ambos casos, copy que remite al email, limite tras pocos pedidos, error visible si el envio falla",
+    "senal_falla": "'No se pudo generar el Magic Link' vs 'Link generado'; copy 'consola del servidor'; 10 emails; 'Link generado' sin envio",
+    "escribe_db_o_email": true,
+    "hallazgos": "Magic link sin rate limit; Enumeracion de usuarios; copy de consola; envio que nunca falla"
+   },
+   {
+    "titulo": "Email con mayusculas en el alta de cliente",
+    "entorno": "local con DB de desarrollo",
+    "precondiciones": "Admin de prueba",
+    "pasos": [
+     "Crear un cliente con el wizard de alta usando el email QA.Mayus@Develop.test",
+     "Copiar la contrasena temporal del resumen",
+     "Ir a /login con QA.Mayus@Develop.test y la temporal",
+     "Probar tambien con qa.mayus@develop.test"
+    ],
+    "esperado": "Login OK y cambio forzado",
+    "senal_falla": "'Email o contrasena incorrectos.' en ambos intentos y el User.email guardado con mayusculas",
+    "escribe_db_o_email": true,
+    "hallazgos": "El alta de cliente guarda el email tal cual se tipeo"
+   },
+   {
+    "titulo": "Duracion real de la cookie de sesion",
+    "entorno": "local",
+    "precondiciones": "Cuenta de prueba",
+    "pasos": [
+     "Iniciar sesion",
+     "Navegar a /dashboard y a otra ruta del portal",
+     "DevTools > Cookies > authjs.session-token: mirar Expires"
+    ],
+    "esperado": "Vence a ~8 h",
+    "senal_falla": "Vence a ~30 dias y se renueva en cada navegacion",
+    "escribe_db_o_email": false,
+    "hallazgos": "La sesion vive 30 dias deslizantes"
+   },
+   {
+    "titulo": "Boton 'Continuar con Google'",
+    "entorno": "deploy preview o produccion",
+    "precondiciones": "Cuenta Google cuyo email exista como cliente",
+    "pasos": [
+     "/login > Continuar con Google",
+     "Completar el consentimiento"
+    ],
+    "esperado": "Entra al portal o ve un mensaje claro",
+    "senal_falla": "Error de Google (invalid_client) o vuelta a /login?error=unauthorized sin mensaje",
+    "escribe_db_o_email": false,
+    "hallazgos": "'Continuar con Google' no puede completar"
+   },
+   {
+    "titulo": "Cliente archivado conserva acceso",
+    "entorno": "local con DB de desarrollo",
+    "precondiciones": "Cliente de prueba con credenciales",
+    "pasos": [
+     "Archivar el cliente desde /admin/clients",
+     "Iniciar sesion como ese cliente",
+     "Navegar el portal y usar una action (p. ej. guardar perfil)"
+    ],
+    "esperado": "Definir: si archivar es baja, el login se rechaza con mensaje",
+    "senal_falla": "Portal completo operativo",
+    "escribe_db_o_email": true,
+    "hallazgos": "Archivar un cliente no le corta el acceso"
+   },
+   {
+    "titulo": "AUTH_URL en produccion y X-Forwarded-Host en el magic link",
+    "entorno": "configuracion de Netlify (lectura) y deploy preview",
+    "precondiciones": "Acceso al panel de Netlify; cuenta de prueba",
+    "pasos": [
+     "Netlify > Site configuration > Environment variables: verificar AUTH_URL o NEXTAUTH_URL = https://develop.com.ar en Production",
+     "Solo si faltara: en un deploy preview pedir magic link por curl a /api/auth/signin/resend (con csrf) agregando -H 'X-Forwarded-Host: example.com' y mirar el host del link recibido"
+    ],
+    "esperado": "La variable existe y el link siempre apunta a develop.com.ar",
+    "senal_falla": "Variable ausente o link con example.com",
+    "escribe_db_o_email": true,
+    "hallazgos": "Magic link con trustHost"
+   },
+   {
+    "titulo": "X-Forwarded-For como clave del rate limit en Netlify",
+    "entorno": "deploy preview",
+    "precondiciones": "Ninguna",
+    "pasos": [
+     "Enviar 11 veces el formulario de /reset-password con un token invalido de 64 hex y el mismo header X-Forwarded-For: 1.2.3.4 (curl a la server action o desde DevTools)",
+     "El intento 11 debe decir 'Demasiados intentos'",
+     "Repetir con X-Forwarded-For: 5.6.7.8"
+    ],
+    "esperado": "El limite se mantiene aunque cambie el header (la IP sale de la plataforma)",
+    "senal_falla": "Con otro valor de X-Forwarded-For el limite se resetea",
+    "escribe_db_o_email": true,
+    "hallazgos": "Fuerza bruta de login sin freno real (clave de IP)"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "No existe flujo de baja de miembro ni de cambio de rol de usuario",
+    "comando": "git grep -nE \"orgMember\\.delete(Many)?\\(\" origin/main -- logic-core-v3/src ; git grep -n -A6 \"user\\.update(\" origin/main -- logic-core-v3/src | grep -E \"^\\S+-[0-9]+-\\s+role:\"",
+    "control_positivo": "git grep -cE \"orgMember\\.create\\(\" origin/main -- logic-core-v3/src -> clients.ts, invitations.ts, onboarding/core.ts (+modules); git grep -n -A8 \"user\\.create(\" ... | grep role: -> clients.ts-119, invitations.ts-79, settings.ts-176"
+   },
+   {
+    "afirmacion": "Ningun codigo asigna el rol CLIENT",
+    "comando": "git grep -nE \"role:\\s*['\\\"]?(Role\\.)?CLIENT\\b\" origin/main -- logic-core-v3/prisma logic-core-v3/scripts logic-core-v3/src",
+    "control_positivo": "Mismo patron con ORG_MEMBER -> prisma/seed.ts:104, :111, :124"
+   },
+   {
+    "afirmacion": "No hay vinculacion de cuentas OAuth (Google)",
+    "comando": "git grep -nE \"\\.account\\.(create|upsert|createMany)|linkAccount|allowDangerousEmailAccountLinking\" origin/main -- logic-core-v3/src logic-core-v3/prisma logic-core-v3/scripts",
+    "control_positivo": "git grep -n \"\\.user\\.create(\" origin/main -- logic-core-v3/src logic-core-v3/prisma -> 7 resultados"
+   },
+   {
+    "afirmacion": "/login no lee ?error ni searchParams",
+    "comando": "git grep -n \"searchParams\\|useSearchParams\\|error=\" origin/main -- logic-core-v3/src/app/login",
+    "control_positivo": "git grep -n \"searchParams\" origin/main -- logic-core-v3/src/app/reset-password -> page.tsx:7, :10, :11"
+   },
+   {
+    "afirmacion": "getPostLoginPath y userExists no tienen lectores",
+    "comando": "git grep -n \"getPostLoginPath\\|userExists\" origin/main -- logic-core-v3/src",
+    "control_positivo": "El mismo grep devuelve las definiciones auth.ts:61 y auth.ts:65"
+   },
+   {
+    "afirmacion": "No hay SessionProvider ni useSession (nadie refresca la cookie via /api/auth/session)",
+    "comando": "git grep -n \"SessionProvider\\|useSession\" origin/main -- logic-core-v3/src",
+    "control_positivo": "git grep -n \"from 'next-auth/jwt'\" origin/main -- logic-core-v3/src -> api/qa/login/route.ts:27"
+   },
+   {
+    "afirmacion": "El codigo no usa getToken de Auth.js",
+    "comando": "git grep -n \"getToken\" origin/main -- logic-core-v3/src",
+    "control_positivo": "Devuelve google-business-profile.ts:51 (oauth2Client.getToken, ajeno), prueba que el grep ve el arbol"
+   },
+   {
+    "afirmacion": "Ni auth ni el portal leen Organization.deletedAt",
+    "comando": "git grep -n \"deletedAt\" origin/main -- logic-core-v3/src/auth.ts logic-core-v3/src/proxy.ts logic-core-v3/src/lib/preview.ts \"logic-core-v3/src/app/(protected)/dashboard/layout.tsx\" logic-core-v3/src/app/login logic-core-v3/src/lib/impersonation.ts",
+    "control_positivo": "git grep -c \"deletedAt\" origin/main -- logic-core-v3/src -> archiveClient.ts:8, admin/clients/page.tsx:4, admin/announcements/page.tsx:1"
+   },
+   {
+    "afirmacion": "Ningun guard lee orgRole",
+    "comando": "git grep -nE \"orgRole\\s*(===|!==)|'VIEWER'|OrgRole\\.VIEWER|role === 'ADMIN'\" origin/main -- logic-core-v3/src",
+    "control_positivo": "git grep -n \"orgRole\" origin/main -- logic-core-v3/src/app/api/qa -> route.ts:143, :162, :177"
+   },
+   {
+    "afirmacion": "No existe la ruta /logout",
+    "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep -E \"/logout/\"",
+    "control_positivo": "git grep -n \"'/logout'\" origin/main -- logic-core-v3/src -> proxy.ts:68"
+   },
+   {
+    "afirmacion": "/login no tiene <h1>",
+    "comando": "git grep -n \"<h1\" origin/main -- logic-core-v3/src/app/login",
+    "control_positivo": "Mismo grep en src/app/forgot-password -> page.tsx:53"
+   },
+   {
+    "afirmacion": "DotMatrix y las paginas de auth no soportan ?e2e=1",
+    "comando": "git grep -n \"e2e\" origin/main -- logic-core-v3/src/components/canvas/DotMatrix.tsx logic-core-v3/src/app/login logic-core-v3/src/app/forgot-password logic-core-v3/src/app/reset-password logic-core-v3/src/app/accept-invite",
+    "control_positivo": "git grep -n \"e2e=1\\|'e2e'\\|\\\"e2e\\\"\" origin/main -- logic-core-v3/src -> PreloaderContext.tsx:81"
+   },
+   {
+    "afirmacion": "No hay signup self-service ni 2FA",
+    "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep -iE \"/(signup|sign-up|register|registro)/\" ; git grep -niE \"totp|two.?factor|2fa|otpauth|speakeasy|otplib\" origin/main -- logic-core-v3/src logic-core-v3/package.json",
+    "control_positivo": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/forgot-password -> actions.ts, page.tsx"
+   },
+   {
+    "afirmacion": "No hay logout-all ni revocacion masiva de sesiones",
+    "comando": "git grep -niE \"logout-all|logoutAll|revokeAll|cerrar todas las sesiones|signOutEverywhere\" origin/main -- logic-core-v3/src",
+    "control_positivo": "git grep -c \"sessionVersion: { increment: 1 }\" origin/main -- logic-core-v3/src -> 4 archivos"
+   },
+   {
+    "afirmacion": "Las actions de invitacion no tienen callers y settings.ts no tiene importadores",
+    "comando": "git grep -n \"inviteTeamMember\\|inviteClient\" origin/main -- logic-core-v3/src logic-core-v3/tests ; git grep -n \"lib/actions/settings'\" origin/main -- logic-core-v3/src",
+    "control_positivo": "git grep -n \"lib/actions/profile'\" -> perfil/page.tsx:29, ProfileForms.tsx:28; git grep -n startImpersonationAction -> ImpersonateButton.tsx:24"
+   },
+   {
+    "afirmacion": "No hay tests de sessionVersion",
+    "comando": "git grep -n \"sessionVersion\" origin/main -- logic-core-v3/tests logic-core-v3/scripts",
+    "control_positivo": "git ls-tree -r --name-only origin/main -- logic-core-v3/tests | wc -l -> 97"
+   },
+   {
+    "afirmacion": "El handler de NextAuth no aplica rate limit",
+    "comando": "git grep -n \"rate\\|limit\" origin/main -- \"logic-core-v3/src/app/api/auth/[...nextauth]/route.ts\"",
+    "control_positivo": "git grep -n \"applyAuthRateLimit\" origin/main -- logic-core-v3/src/app/reset-password/actions.ts -> :6, :20"
+   },
+   {
+    "afirmacion": "magicLinkAction no llama a ningun limiter",
+    "comando": "git grep -n \"checkBlocked\\|applyAuthRateLimit\\|checkRateLimit\" origin/main -- logic-core-v3/src/app/login/actions.ts",
+    "control_positivo": "El mismo grep devuelve :29 (definicion) y :78 (uso dentro de loginAction)"
+   },
+   {
+    "afirmacion": "Los layouts de portal no chequean passwordResetRequired",
+    "comando": "git grep -n \"passwordResetRequired\" origin/main -- \"logic-core-v3/src/app/(protected)\" logic-core-v3/src/app/bienvenida logic-core-v3/src/lib/preview.ts",
+    "control_positivo": "Mismo patron en src/proxy.ts -> :75, :86"
+   },
+   {
+    "afirmacion": "/cambiar-password no linkea a /forgot-password",
+    "comando": "git grep -n \"forgot-password\" origin/main -- logic-core-v3/src/app/cambiar-password",
+    "control_positivo": "Mismo grep en src/app/login -> page.tsx:366"
+   },
+   {
+    "afirmacion": "AUTH_GOOGLE_ID/AUTH_GOOGLE_SECRET y AUTH_URL no estan documentadas en .env.example",
+    "comando": "git show origin/main:logic-core-v3/.env.example | grep -n \"AUTH_GOOGLE\\|^AUTH_URL\"",
+    "control_positivo": "git show origin/main:logic-core-v3/.env.example | grep -n \"^AUTH_SECRET\" -> :55"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "IP del cliente tomada del primer valor de X-Forwarded-For (falsificable segun la plataforma) para rate limit y auditoria",
+    "como_buscarlo": "git grep -n \"x-forwarded-for\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "src/app/login/actions.ts:53, src/lib/security/auth-rate-limit.ts:39, src/lib/audit-log.ts:21"
+   },
+   {
+    "patron": "Alta de usuarios sin normalizar el email (trim + lowercase) mientras el login normaliza",
+    "como_buscarlo": "git grep -nE \"(userEmail|email): z\\.string\\(\\)(\\.min\\([^)]*\\))?\\.email\\(\" origin/main -- logic-core-v3/src y verificar .toLowerCase() antes del create/findUnique",
+    "donde_aparecio": "createClientOnly.ts:26, createClientWithBot.ts:34, admin/chatbots/new/actions.ts:27 -> onboarding/core.ts:70"
+   },
+   {
+    "patron": "Actions que usan session.user.organizationId (fallan en preview admin) frente a resolveOrgId (escriben como el cliente)",
+    "como_buscarlo": "git grep -n \"session?.user?.organizationId\\|session.user.organizationId\" origin/main -- logic-core-v3/src ; git grep -l resolveOrgId en archivos 'use server'",
+    "donde_aparecio": "src/lib/actions/profile.ts:29, src/lib/actions/upsell.ts:16 vs email-marketing/_actions.ts:18"
+   },
+   {
+    "patron": "Mensajes internos de error devueltos al cliente (toErrorMessage o error instanceof Error ? error.message)",
+    "como_buscarlo": "git grep -n \"toErrorMessage(\\|error instanceof Error ? error.message\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "src/lib/actions/profile.ts:72, src/lib/actions/settings.ts:92, src/lib/action-utils.ts:31"
+   },
+   {
+    "patron": "Envios de email cuyo resultado se ignora o que fingen exito sin API key",
+    "como_buscarlo": "git grep -n \"await sendTransactionalEmail({\\|await sendEmail({\" origin/main -- logic-core-v3/src y revisar si se lee .ok/.success",
+    "donde_aparecio": "src/auth.ts:104, src/lib/actions/settings.ts:194, src/lib/email.ts:15-16"
+   },
+   {
+    "patron": "orgMemberships con take:1 sin orderBy (org primaria no deterministica)",
+    "como_buscarlo": "git grep -n -B4 \"take: 1\" origin/main -- logic-core-v3/src | grep -A4 orgMemberships",
+    "donde_aparecio": "src/auth.ts:37, src/app/login/actions.ts:94, src/app/api/qa/login/route.ts:126"
+   },
+   {
+    "patron": "Texto funcional en text-zinc-600/700 sobre #080a0c (contraste < 4,5:1)",
+    "como_buscarlo": "git grep -n \"text-zinc-600\\|text-zinc-700\" origin/main -- logic-core-v3/src/app",
+    "donde_aparecio": "src/app/login/page.tsx:263, :367, :404; forgot-password, reset-password, accept-invite"
+   },
+   {
+    "patron": "Bloques de error sin role=alert/aria-live",
+    "como_buscarlo": "git grep -n \"text-red-400\\\">{\" origin/main -- logic-core-v3/src | grep -v role=",
+    "donde_aparecio": "login/page.tsx:358, forgot-password/page.tsx:157, ResetPasswordForm.tsx:212, AcceptInviteForm.tsx:217"
+   },
+   {
+    "patron": "Paginas admin sin guard propio (dependen de admin/layout + proxy)",
+    "como_buscarlo": "for f in $(git ls-tree -r --name-only origin/main -- \"logic-core-v3/src/app/(protected)/admin\" | grep /page.tsx$); do git show origin/main:$f | grep -qE \"auth\\(\\)|requireSuperAdmin\" || echo $f; done",
+    "donde_aparecio": "22 de 34 paginas /admin (p. ej. admin/leads/page.tsx, admin/tickets/[ticketId]/page.tsx, admin/settings/page.tsx)"
+   },
+   {
+    "patron": "Modulos 'use server' sin importadores (actions muertas pero publicas si se reconectan)",
+    "como_buscarlo": "Para cada archivo con 'use server' en src/lib/actions: git grep -n \"lib/actions/<nombre>'\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "src/lib/actions/invitations.ts, src/lib/actions/settings.ts, src/lib/actions/clients.ts"
+   },
+   {
+    "patron": "Fallos manejados que solo hacen console.error (no llegan a Sentry; no hay captureConsoleIntegration)",
+    "como_buscarlo": "git grep -n \"console.error\" origin/main -- logic-core-v3/src/app logic-core-v3/src/lib y verificar Sentry.captureException cercano",
+    "donde_aparecio": "forgot-password/actions.ts:105, audit-log.ts:40, brevo-service.ts:41"
+   },
+   {
+    "patron": "Tokens de un solo uso guardados en claro en la DB",
+    "como_buscarlo": "git grep -n \"randomBytes(32).toString('hex')\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "forgot-password/actions.ts:73, invitations.ts:102, settings.ts:180"
+   },
+   {
+    "patron": "requireSuperAdmin reimplementado en varios modulos",
+    "como_buscarlo": "git grep -n \"function requireSuperAdmin\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "src/lib/auth-guards.ts:3, src/lib/actions/settings.ts:20, src/modules/chatbot/server/admin/requireSuperAdmin.ts"
+   },
+   {
+    "patron": "Config de NextAuth duplicada entre auth.ts y auth.config.ts que diverge (maxAge, callbacks)",
+    "como_buscarlo": "Comparar src/auth.ts:76-272 con src/auth.config.ts:9-41 (session, cookies, callbacks)",
+    "donde_aparecio": "session.maxAge solo en auth.ts:81; jwt callback solo en auth.ts:205"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/baselines/2026-07-auditoria-seguridad.md:1268",
+    "id_previo": "S2b-01",
+    "estado": "abierto",
+    "evidencia": "email-marketing/_actions.ts:17-28 getOrgWithBrevo solo resuelve la org (sin chequeo de modulo contratado ni rate limit); :128-137 fromEmail/htmlContent salen del FormData; :174-205 crea y envia la campana por Brevo"
+   },
+   {
+    "doc": "docs/baselines/2026-07-auditoria-seguridad.md:2181",
+    "id_previo": "S4-01",
+    "estado": "abierto",
+    "evidencia": "src/lib/security/validate-origin.ts:69-75 permite https://develop.com.ar antes del chequeo de allowedDomains (:77-85)"
+   },
+   {
+    "doc": "docs/auditoria-seguridad-2026-05.md:121",
+    "id_previo": "SEC-AUTH-03",
+    "estado": "parcial",
+    "evidencia": "sessionVersion implementado (auth.ts:212-230; reset-password/actions.ts:76) pero el trigger 'update' saltea el chequeo y se revive por POST /api/auth/session (auth.ts:215-217); el proxy no lo ve (auth.config.ts:24-40)"
+   },
+   {
+    "doc": "docs/auditoria-seguridad-2026-05.md:144",
+    "id_previo": "SEC-RATELIMIT-01",
+    "estado": "parcial",
+    "evidencia": "El inMemoryLimiter del chatbot ya no existe y chat/route.ts:81-84 usa el limiter en DB (limiter.ts:37-84); auth-rate-limit.ts usa la DB. Sigue en memoria el login (login/actions.ts:8-56) y sin limite el endpoint nativo de Credentials"
+   },
+   {
+    "doc": "docs/auditoria-seguridad-2026-05.md:232",
+    "id_previo": "SEC-MISC-02",
+    "estado": "cerrado",
+    "evidencia": "Cookie de sesion explicita en auth.ts:89-94 y auth.config.ts:17-22 desde auth-cookies.ts:21-30"
+   },
+   {
+    "doc": "docs/audit-chatbot-runtime.md:113",
+    "id_previo": "P-2",
+    "estado": "cerrado",
+    "evidencia": "Ventana server-side trimHistory en requestSchema.ts:54 (HISTORY_WINDOW_MESSAGES=30, historyPolicy.ts:31) y hard cap en handleChatRequest.ts:547"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-profunda.md:47",
+    "id_previo": "P1-4",
+    "estado": "cerrado",
+    "evidencia": "forgot-password/actions.ts:24-110 (Brevo) + link en login/page.tsx:365-370"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:79",
+    "id_previo": "P1-4",
+    "estado": "cerrado",
+    "evidencia": "forgot-password/actions.ts:24-110"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:80",
+    "id_previo": "P1-5",
+    "estado": "parcial",
+    "evidencia": "limiter.ts ya es compartido en Neon (UPSERT atomico :37-62); el login sigue con Map en memoria (login/actions.ts:20)"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion.md:74",
+    "id_previo": "P1-4",
+    "estado": "cerrado",
+    "evidencia": "forgot-password/actions.ts:24-110"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion.md:74",
+    "id_previo": "P1-5",
+    "estado": "parcial",
+    "evidencia": "limiter.ts:37-84 en DB; login/actions.ts:8-48 sigue en memoria"
+   },
+   {
+    "doc": "docs/b8a-auditoria.md:76",
+    "id_previo": "H8",
+    "estado": "cerrado",
+    "evidencia": "prisma/seed.ts:157 y :165 crean setter-qa con passwordResetRequired: false; qa/login/route.ts:165 mintea false"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:67",
+    "id_previo": "SEC-AUTH-03",
+    "estado": "parcial",
+    "evidencia": "Incrementos en reset-password/actions.ts:76, cambiar-password/actions.ts:59, resend-credentials/route.ts:71 y profile.ts:230; revivible por trigger 'update' (auth.ts:215-217) y bucle en el proxy"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:68",
+    "id_previo": "SEC-AUTH-04",
+    "estado": "parcial",
+    "evidencia": "src/proxy.ts existe con matcher de portales (:172) pero no es global (/api fuera) y ALWAYS_ALLOWED (:68) tiene entradas muertas"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:69",
+    "id_previo": "SEC-RATELIMIT-01 / P1-5",
+    "estado": "parcial",
+    "evidencia": "limiter.ts:37-84 en DB; login/actions.ts:8-48 en memoria"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:75",
+    "id_previo": "SEC-MISC-02",
+    "estado": "cerrado",
+    "evidencia": "auth.ts:89-94 + auth-cookies.ts:21-30"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:102",
+    "id_previo": "P0-6",
+    "estado": "parcial",
+    "evidencia": "callerCanAccessOrg (assert-ownership.ts:81-89) se usa en admin/chatbots/[botId]/page.tsx:61 y admin/projects/[projectId]/layout.tsx:160 + page.tsx:165 (no-op para SUPER_ADMIN por diseno); preflightChecks.ts:13-18 usa unsafeGlobalQuery con razon"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:285",
+    "id_previo": "SEC-04",
+    "estado": "abierto",
+    "evidencia": "magicLinkAction (login/actions.ts:135-158) sin limiter; POST /api/auth/signin/resend tampoco"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:286",
+    "id_previo": "SEC-05",
+    "estado": "abierto",
+    "evidencia": "login/actions.ts:8-48 en memoria y bypass total por /api/auth/callback/credentials (route.ts:3)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1318",
+    "id_previo": "RESIL-05",
+    "estado": "parcial",
+    "evidencia": "Hay timeout por defecto del SDK (60 s y 2 reintentos: @getbrevo/brevo requestWithRetries.js:15) pero brevo-service.ts:3-5 no fija uno corto y auth.ts:104 espera el envio"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1324",
+    "id_previo": "RESIL-07",
+    "estado": "abierto",
+    "evidencia": "src/lib/prisma.ts:5-6 sin connect_timeout ni retry en codigo (la URL de entorno no es visible) y auth() consulta la DB en cada request (auth.ts:207-210)"
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "Magic link sin rate limit: un anonimo dispara emails ilimitados por Brevo a cualquier cuenta registrada",
+    "se_sostiene": true,
+    "severidad_ajustada": "CRÍTICA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Confirmado leyendo el codigo. magicLinkAction (src/app/login/actions.ts:135-158) solo valida la forma del email y llama signIn('resend', {redirect:false}) sin ningun limitador; el Map en memoria (:20) solo lo usa loginAction. El formulario esta vivo en la UI (src/app/login/page.tsx:170). La ruta nativa tambien llega: [...nextauth]/route.ts:3 exporta handlers. Despues @auth/core lib/index.js:60-62 (POST signin: solo validateCSRF, con el par que entrega GET /api/auth/csrf, csrf-token.js:17-26) -> actions/signin/index.js:15-17 -> send-token.js:23-66 -> sendVerificationRequest (src/auth.ts:101-119) -> sendTransactionalEmail (src/lib/email/brevo-service.ts:17-47, sin throttle). El unico filtro es el callback signIn (auth.ts:175-185): exige que el email exista. Ademas la respuesta cambia segun el caso (verify-request contra AccessDenied; 'SUCCESS' contra mensaje de error en la action), asi que sirve para enumerar. Prueba de ausencia: git grep de rateLimit/applyAuthRateLimit/checkRateLimit en src/app/login, src/auth.ts, src/auth.config.ts, src/proxy.ts y la ruta [...nextauth] da 0 usos fuera del Map de loginAction. Control positivo: forgot-password/actions.ts:44-52 usa applyAuthRateLimit (forgotPasswordPerIp y PerEmail). presets.ts:8-70 no tiene preset de magic link. El matcher del proxy no cubre /api (proxy.ts:172). No hay edge functions ni reglas de limite en netlify.toml. Brevo es el canal unico del email transaccional: sendTransactionalEmail se usa en 17 modulos (resets, bienvenidas, avisos de leads, reportes), asi que agotar o perder la cuenta corta todo ese canal. Severidad: la rubrica pone en CRITICA la 'operacion con costo (emails) sin auth' explotable por un anonimo. Conocer un email registrado no es una precondicion fuerte, y el mismo endpoint lo confirma.",
+    "evidencia_contra": [
+     "auth.ts:175-185: el callback signIn corta con AccessDenied si el email no esta registrado. Solo se puede bombardear a cuentas existentes y con plantilla fija: no sirve como relay de spam ni para phishing con contenido del atacante.",
+     "El repo no dice que plan ni que cuota tiene Brevo. El costo concreto (agotar la cuota diaria o generar gasto) depende del plan contratado y no se verifica leyendo."
+    ]
+   },
+   {
+    "titulo": "La invalidacion por sessionVersion se revive con POST /api/auth/session (trigger 'update' saltea el chequeo)",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Confirmado leyendo el codigo. route.ts:3 expone POST = handlers.POST (next-auth/index.js:130-132 -> Auth(reqWithEnvURL(req))). En @auth/core lib/index.js:57-59, POST /api/auth/session solo exige validateCSRF (double-submit: el atacante pide el par a GET /api/auth/csrf y lo reenvia, csrf-token.js:17-26) y llama a actions.session con isUpdate=true. session.js:24-32 decodifica el JWT viejo, que sigue siendo descifrable porque la invalidacion vive solo en el callback, y llama a callbacks.jwt con trigger 'update'. En auth.ts:207 shouldRefreshFromDb queda en true; el corte de :215-223 excluye explicitamente trigger 'update'; y :225-230 copia el estado de la DB, incluida la sessionVersion nueva. Despues session.js:46-51 re-firma y devuelve Set-Cookie. No hace falta la contrasena. El salto de 'update' existe para que unstable_update refresque el navegador que cambio la clave (cambiar-password/actions.ts:59 y :73; lib/actions/profile.ts:230 y :239), pero el endpoint publico dispara el mismo trigger para cualquiera que tenga la cookie. Aparte, fuera de scope (registrar por separado): auth.config.ts:12 no fija session.maxAge. Entonces el proxy, en cada request del matcher, re-firma con exp a 30 dias (init.js:38, :72-77 y :83; session.js:33 y :46-51; jwt.js:50-58), y next-auth/lib/index.js:166-169 reenvia ese Set-Cookie. La sesion efectiva es de 30 dias renovables, no las 8h de auth.ts:81, lo que agranda la ventana para revivir una cookie robada. Queda en ALTA por la rubrica: es un bypass de la revocacion, con la precondicion fuerte de poseer la cookie.",
+    "evidencia_contra": [
+     "Precondicion fuerte: el atacante necesita una cookie de sesion de la victima con el JWE todavia sin vencer.",
+     "Si la version subio por 'Reenviar credenciales' (resend-credentials/route.ts:66-71), la sesion revivida trae passwordResetRequired=true y el proxy la manda a /cambiar-password (proxy.ts:84-90), que pide la contrasena vieja (cambiar-password/actions.ts:12-19). Ese forzado no alcanza a las rutas fuera del matcher (/api/*). En el reset por email y en el cambio desde Mi Cuenta no hay ni ese freno."
+    ]
+   },
+   {
+    "titulo": "Sesion invalidada en Node pero viva en el proxy: bucle /login <-> portal (ERR_TOO_MANY_REDIRECTS)",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "El mecanismo se confirma leyendo; la severidad baja a MEDIA. La sessionVersion sube en tres casos: reset por email (reset-password/actions.ts:76), Reenviar credenciales (resend-credentials/route.ts:71) o cambio de clave en otro dispositivo (cambiar-password/actions.ts:59; profile.ts:230). Desde ahi, el navegador que conserva la cookie vieja hace esto: (1) En Node, auth() -> callback jwt -> null (auth.ts:215-223). El auth() de RSC solo hace r.json() y descarta el Set-Cookie de limpieza (next-auth/lib/index.js:91), asi que la cookie queda. resolveOrgId devuelve null (preview.ts:7-19) y el layout redirige a /login (dashboard/layout.tsx:90-91). admin/layout.tsx y setter/layout.tsx hacen redirect('/login') con sesion nula. (2) authConfig no define jwt (auth.config.ts:24-39), asi que el proxy usa el callback por defecto, que devuelve el token tal cual (init.js:30-32 y :92). req.auth existe y /login rebota a /dashboard (proxy.ts:143-145), a /admin (:139-141) o a /setter (:117-120). Ademas handleAuth re-emite la cookie vieja con exp a 30 dias en cada salto (next-auth/lib/index.js:166-169 + session.js:46-51), asi que no vence sola. No hay loading.tsx en la raiz ni Suspense alrededor de children en el layout raiz: el redirect del layout sale como 307 y el bucle es de 307. No existe ruta /logout (ALWAYS_ALLOWED la nombra en proxy.ts:68, pero no hay archivo), y ningun SessionProvider ni useSession llama a GET /api/auth/session para limpiar la cookie. Pasa lo mismo con un usuario sin membresia o con la org borrada: auth.ts:42-61 deja organizationId undefined sin devolver null, y hardDeleteClient.ts:141 borra la org. Por que MEDIA: solo se dispara si ese navegador tiene una sesion viva al momento de subir la version, y el cliente puede salir solo borrando cookies (Chrome lo sugiere en la pantalla del error) o usando otro navegador. No rompe el primer login ni el uso normal.",
+    "evidencia_contra": [
+     "El navegador donde se cambia la clave no queda atrapado: cambiar-password/actions.ts:73 y profile.ts:239 llaman a unstable_update y re-firman con la version nueva. Por eso el primer login con clave temporal y el cambio forzado funcionan.",
+     "El cliente puede salir sin develOP: borrar las cookies del sitio (Chrome lo propone en ERR_TOO_MANY_REDIRECTS) o abrir otro navegador o incognito.",
+     "'Reenviar credenciales' se usa sobre todo con clientes que nunca entraron o perdieron la temporal. Sin cookie vieja no hay bucle.",
+     "Con la org o el usuario borrados, el bucle solo afea el rechazo: igual no deben entrar."
+    ]
+   },
+   {
+    "titulo": "Fuerza bruta de login sin freno real: el limite vive solo en loginAction (memoria por lambda) y el endpoint nativo de Credentials no tiene ninguno",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Confirmado leyendo el codigo. El unico freno es el Map en memoria de loginAction (src/app/login/actions.ts:12-57, :77-80 y :113-127). Es por instancia y se pierde con cada arranque en frio. Usa como clave el primer valor de X-Forwarded-For (:53). Y se borra ante cualquier throw que no sea AuthError, es decir ante un login exitoso desde la misma IP (:125-127). La ruta nativa lo saltea entero: route.ts:3 -> @auth/core lib/index.js:52-56 (POST callback de credentials: solo validateCSRF, con el par de GET /api/auth/csrf) -> actions/callback/index.js:227-236 -> authorize de auth.ts:139-158 (bcrypt.compare en :157). Ese camino tampoco pasa por las validaciones de longitud de loginAction. La respuesta distingue el exito (Set-Cookie + redirect al callbackUrl) de CredentialsSignin. El proxy no matchea /api (proxy.ts:172) y no hay edge functions ni reglas de limite en netlify.toml. El limitador persistente que ya existe (src/lib/security/auth-rate-limit.ts, tabla rate_limit) no se usa en el login: git grep da 0 usos en src/app/login, src/auth.ts y la ruta [...nextauth]; control positivo en forgot-password/actions.ts:44. Las politicas de clave quedan como dice el hallazgo: reset 8 caracteres sin complejidad (schemas.ts:94-97), accept-invite 8 caracteres (accept-invite/actions.ts:26), y cambiar-password o Mi Cuenta 8 caracteres + mayuscula + numero (cambiar-password/actions.ts:12-19; schemas.ts:25-29). Queda en ALTA y no CRITICA porque el exito exige una clave adivinable, que es una precondicion fuerte. Que el X-Forwarded-For se pueda falsificar depende de Netlify (PROBABLE), pero el hallazgo no lo necesita.",
+    "evidencia_contra": [
+     "Para tener exito hace falta una clave debil o adivinable en la cuenta objetivo. Es una precondicion fuerte por la rubrica.",
+     "Las contrasenas temporales tienen unos 34 bits (generate-temp-password.ts:15-21: 4 letras de 47, 2 digitos de 8 y 2 simbolos de 7). En la practica no se pueden adivinar online aunque no haya limite.",
+     "Cada intento cuesta un bcrypt (cost 10) en una funcion serverless. La tasa real depende de la concurrencia de Netlify, que no se verifica leyendo."
+    ]
+   },
+   {
+    "titulo": "El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Bug confirmado leyendo los tres caminos vivos de alta: /admin/clients/new (OnboardingWizard -> Step5Review.tsx:71 y :87 -> createClientWithBot o createClientOnly) y /admin/chatbots/new (CreateBotForm -> createBotAction en modo new_org, chatbots/new/actions.ts:24-32 y :69 -> onboardClientCore). Los tres validan con z.string().email() sin trim ni toLowerCase (createClientOnly.ts:26, createClientWithBot.ts:34, chatbots/new/actions.ts:27). Los formularios pasan e.target.value sin tocar (Step1Company.tsx:169, CreateBotForm.tsx:239), y el email se guarda tal cual (createClientOnly.ts:91, createClientWithBot.ts:141, onboarding/core.ts:91). User.email es String @unique, sin citext ni indice sobre lower() (schema.prisma:289; git grep en prisma/migrations: 0 resultados). Ninguna capa normaliza: prisma.ts no tiene $extends y lib/isolation no tiene hooks. En cambio, todos los caminos de entrada buscan en minuscula con igualdad exacta: authorize (auth.ts:143), loginAction (actions.ts:65 y :84), magic link (send-token.js:11-14 normaliza + callback signIn en auth.ts:176-184) y forgot-password (schemas.ts:76-83). El chequeo de duplicado tambien distingue mayusculas (createClientOnly.ts:60-63, onboarding/core.ts:69-72), asi que permite tener 'Juan@x' y 'juan@x' a la vez. Hay un disparador realista: copiar el email de un mensaje de WhatsApp, que pone en mayuscula la primera letra. El cliente no puede destrabarse solo, porque forgot-password no encuentra al usuario y responde generico. Bloquea el primer login y la autonomia de L3, por eso se mantiene ALTA.",
+    "evidencia_contra": [
+     "develOP tiene un arreglo manual: abrir 'editar cliente' y guardar pasa el email a minuscula (updateClient.ts:71 y :111). Pero alguien tiene que diagnosticar la causa primero.",
+     "Los inputs son type=email (Step1Company.tsx:167). En iOS y Android ese tipo no pone mayusculas automaticas, asi que la parte del impacto sobre 'el teclado del celular' es debil. El disparador real es el texto que el admin pega o tipea.",
+     "Es condicional: si el admin carga el email en minusculas no pasa nada."
+    ]
+   },
+   {
+    "titulo": "Magic link con trustHost: si AUTH_URL/NEXTAUTH_URL no estan en prod, el host del link sale de X-Forwarded-Host",
+    "se_sostiene": false,
+    "severidad_ajustada": "BAJA",
+    "confianza_ajustada": "HIPÓTESIS",
+    "motivo": "No se puede confirmar leyendo. El camino de codigo existe: trustHost: true esta fijo (auth.ts:78, auth.config.ts:10). Solo si faltan AUTH_URL y NEXTAUTH_URL, createActionURL toma x-forwarded-host (core lib/utils/env.js:68-87). Eso es lo que usa el signIn server-side de magicLinkAction (next-auth/lib/actions.js:10-12), y send-token.js:47-56 lo pone en el href del email. Pero la precondicion contradice la configuracion documentada: NEXTAUTH_URL figura como REQUERIDA en docs/env-vars.md:25, docs/netlify-env-vars.md:11, docs/operations/00-entornos.md:114, AGENTS.md:134 y scripts/check-env.js:19 (CRITICAL_VARS). Con la variable presente, createActionURL usa la URL del entorno y reqWithEnvURL reescribe el origin (next-auth/lib/env.js:5-11); el header no entra en ningun lado. Tampoco se puede saber leyendo si Netlify reenvia sin pisar un X-Forwarded-Host que mande el cliente. Y la ruta nativa /api/auth/signin/resend arma la URL con req.url (core index.js:68 -> lib/utils/web.js:24), no con el header. Lo que queda es un endurecimiento de severidad BAJA: el trustHost: true fijo anula el comportamiento por defecto de Auth.js, que sin AUTH_URL en produccion dejaria trustHost en false (env.js:40-44) y fallaria cerrado con UntrustedHost (assert.js:56-57). Ademas check-env.js no corre en el build: package.json no tiene prebuild y el comando de netlify.toml es 'npx prisma generate && npm run build'.",
+    "evidencia_contra": [
+     "NEXTAUTH_URL esta documentada como obligatoria en produccion: docs/env-vars.md:25, docs/netlify-env-vars.md:11, docs/operations/00-entornos.md:114, AGENTS.md:134, scripts/check-env.js:19. Con la variable puesta no se lee ningun header (env.js:70-79; next-auth/lib/env.js:5-11).",
+     "La ruta nativa POST /api/auth/signin/resend no usa X-Forwarded-Host: @auth/core arma la URL con new URL(req.url) (lib/utils/web.js:24).",
+     "El repo no muestra si Netlify pisa o descarta un X-Forwarded-Host enviado por el cliente: el eslabon de la plataforma queda sin traza.",
+     "El hallazgo mismo admite 'No verificable leyendo codigo: depende del entorno'."
+    ]
+   }
+  ]
+ }
+}

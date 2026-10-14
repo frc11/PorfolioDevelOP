@@ -1,0 +1,108 @@
+{
+ "items": [
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "nombre": "Login con contrasena (Credentials)",
+   "pasos": [
+    "UI: form action={formAction} en src/app/login/page.tsx:347 (useActionState(loginAction) :231)",
+    "Action: src/app/login/actions.ts:65-74 normaliza/valida a mano; :77-80 limite en memoria por IP; :84-108 prefetch de rol para elegir redirectTo",
+    "Auth.js: signIn('credentials') (actions.ts:111) -> callback credentials (node_modules/@auth/core/lib/index.js:51-55)",
+    "authorize: src/auth.ts:142-150 findUnique por email en minuscula; :153-155 emailVerified; :157 bcrypt.compare; :160-169 arma user con org primaria (take 1)",
+    "signIn callback: src/auth.ts:192-201 exige org salvo SUPER_ADMIN/SETTER",
+    "jwt: src/auth.ts:209-230 re-deriva rol/org/onboarding/passwordResetRequired/sessionVersion de la DB (getUserAccessState :19-63)",
+    "Cookie: nombre/atributos de src/lib/auth-cookies.ts:21-30 (auth.ts:89-94)",
+    "Redirect: actions.ts:102-108 -> proxy src/proxy.ts:70-168 -> layout (admin/layout.tsx:41-49 | dashboard/layout.tsx:72-92 | setter/layout.tsx:26-34)"
+   ]
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "nombre": "Magic link (provider Resend que envia por Brevo)",
+   "pasos": [
+    "UI: src/app/login/page.tsx:204 (MagicLinkForm)",
+    "Action: src/app/login/actions.ts:140-151 signIn('resend', redirect:false)",
+    "Auth.js sendToken: normaliza (send-token.js:74-97) y llama al signIn callback con verificationRequest (send-token.js:23-33) -> src/auth.ts:175-186 solo deja pasar emails existentes",
+    "Envio: src/auth.ts:101-120 sendVerificationRequest -> src/lib/email/brevo-service.ts:17-46 (resultado ignorado)",
+    "Token: VerificationToken hasheado (send-token.js:61-63)",
+    "Click: GET /api/auth/callback/resend (src/app/api/auth/[...nextauth]/route.ts:3) -> signIn callback (auth.ts:192-201) -> jwt -> /dashboard (actions.ts:148) -> proxy reubica por rol"
+   ]
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "nombre": "Recupero de contrasena",
+   "pasos": [
+    "UI: link en src/app/login/page.tsx:365-370 -> src/app/forgot-password/page.tsx:120",
+    "forgotPasswordAction: Zod (actions.ts:29-38); rate limit IP+email en DB (:43-57; limiter.ts:37-84)",
+    "Usuario: findUnique (:60-63); inexistente -> bcrypt dummy y mensaje identico (:67-70)",
+    "Token: borra previos y crea uno de 45 min en claro (:73-83)",
+    "Email: Brevo (:86-101); falla solo console.error (:104-106)",
+    "Reset: src/app/reset-password/page.tsx:10-11 -> ResetPasswordForm.tsx:186-188 -> resetPasswordAction rate limit IP (:19-26), Zod (:29-40), token (:45-63), transaccion password+passwordResetRequired=false+emailVerified+sessionVersion+1 y usedAt (:68-84), audit PASSWORD_CHANGED (:87-96)",
+    "Exito -> /login (ResetPasswordForm.tsx:176-182)"
+   ]
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "nombre": "Cambio forzado de contrasena (temporal)",
+   "pasos": [
+    "Alta admin crea usuario con passwordResetRequired=true (createClientOnly.ts:96 / onboarding/core.ts:96) o resend-credentials (route.ts:64-73)",
+    "Login: authorize propaga passwordResetRequired (src/auth.ts:168, :237-240)",
+    "Proxy: src/proxy.ts:84-90 redirige todo lo matcheado a /cambiar-password",
+    "Pagina: src/app/cambiar-password/page.tsx:6-27",
+    "UI: CambiarPasswordForm.tsx:116-131 invocacion directa con startTransition",
+    "Action: src/app/cambiar-password/actions.ts:25-47 sesion, Zod, bcrypt de la actual; :51-61 update + sessionVersion+1; :63-70 audit; :73 unstable_update re-emite la cookie",
+    "Navegacion: router.push('/dashboard') (CambiarPasswordForm.tsx:126) -> proxy reubica SETTER/SUPER_ADMIN"
+   ]
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "nombre": "Impersonacion de soporte (SUPER_ADMIN)",
+   "pasos": [
+    "UI: ImpersonateButton.tsx:24 (con ConfirmDialog) o projects/[projectId]/layout.tsx:219",
+    "Action: client.actions.ts:8-9 -> src/lib/actions/impersonation.ts:12-24 (rol SUPER_ADMIN, org existente)",
+    "Token: signImpersonationToken HS256 (src/lib/impersonation.ts:24-30) con secreto IMPERSONATION_SECRET ?? AUTH_SECRET ?? NEXTAUTH_SECRET ?? literal (:14-22); cookie httpOnly 30 min (:82-90)",
+    "Audit IMPERSONATION_STARTED (impersonation.ts acciones :36-45) -> redirect('/dashboard')",
+    "Proxy deja pasar SUPER_ADMIN con la cookie (src/proxy.ts:77, :154)",
+    "Portal: dashboard/layout.tsx:72-77 -> resolveOrgId src/lib/preview.ts:14-17 -> getImpersonationSession src/lib/impersonation.ts:54-80 (verifica firma, adminId y vencimiento)",
+    "Banner + salida: ImpersonationBanner.tsx:28 -> stopImpersonationAction (src/lib/actions/impersonation.ts:50-79) borra cookie y audita"
+   ]
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "nombre": "Invalidacion de sesion por sessionVersion (y sus huecos)",
+   "pasos": [
+    "Incremento: cambiar-password/actions.ts:59, profile.ts:230, reset-password/actions.ts:76, resend-credentials/route.ts:71",
+    "Mismo dispositivo: unstable_update (cambiar-password/actions.ts:73, profile.ts:239) -> POST session interno con trigger 'update' re-emite cookie N+1",
+    "Otro dispositivo, en Node: jwt compara token vs DB y devuelve null (src/auth.ts:215-223) -> auth() null -> layout redirect('/login') (dashboard/layout.tsx:90-92)",
+    "Otro dispositivo, en el proxy: auth.config.ts no tiene callback jwt (:24-40) -> la cookie vieja sigue 'autenticada' y /login rebota al portal (proxy.ts:134-146) -> bucle",
+    "Revivir: GET /api/auth/csrf + POST /api/auth/session con la cookie vieja -> trigger 'update' saltea el chequeo (auth.ts:215-217) y re-firma con la version nueva (:230)"
+   ]
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "nombre": "QA login (ZONA-FRANCO)",
+   "pasos": [
+    "POST /api/qa/login {persona}",
+    "Guarda: src/app/api/qa/login/route.ts:49-73 (QA_ALLOW_LOCALHOST=1, Host localhost, no Netlify/Vercel prod)",
+    "Persona -> email (:36-43) -> usuario y membresia de DB (:111-142)",
+    "encode JWT con salt = nombre de cookie (:151-167; auth-cookies.ts:21-23) y passwordResetRequired:false",
+    "Set-Cookie de sesion 8 h (:182-188); auth() de las paginas lo decodifica y re-deriva rol/org de DB (auth.ts:209-230)"
+   ]
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "nombre": "Logout",
+   "pasos": [
+    "UI: <form action={signOutAction}> en admin-topbar.tsx:85, setter/layout.tsx:76, DashboardLayoutClient.tsx:150",
+    "Action: src/actions/auth-actions.ts:5-7 signOut({ redirectTo: '/login' })",
+    "Auth.js limpia la cookie de sesion; la cookie impersonation-token queda viva hasta su maxAge (impersonation.ts:82-90)"
+   ]
+  }
+ ]
+}

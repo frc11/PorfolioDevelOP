@@ -1,0 +1,172 @@
+{
+ "items": [
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md:1268",
+   "id_previo": "S2b-01",
+   "estado": "abierto",
+   "evidencia": "email-marketing/_actions.ts:17-28 getOrgWithBrevo solo resuelve la org (sin chequeo de modulo contratado ni rate limit); :128-137 fromEmail/htmlContent salen del FormData; :174-205 crea y envia la campana por Brevo"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md:2181",
+   "id_previo": "S4-01",
+   "estado": "abierto",
+   "evidencia": "src/lib/security/validate-origin.ts:69-75 permite https://develop.com.ar antes del chequeo de allowedDomains (:77-85)"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/auditoria-seguridad-2026-05.md:121",
+   "id_previo": "SEC-AUTH-03",
+   "estado": "parcial",
+   "evidencia": "sessionVersion implementado (auth.ts:212-230; reset-password/actions.ts:76) pero el trigger 'update' saltea el chequeo y se revive por POST /api/auth/session (auth.ts:215-217); el proxy no lo ve (auth.config.ts:24-40)"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/auditoria-seguridad-2026-05.md:144",
+   "id_previo": "SEC-RATELIMIT-01",
+   "estado": "parcial",
+   "evidencia": "El inMemoryLimiter del chatbot ya no existe y chat/route.ts:81-84 usa el limiter en DB (limiter.ts:37-84); auth-rate-limit.ts usa la DB. Sigue en memoria el login (login/actions.ts:8-56) y sin limite el endpoint nativo de Credentials"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/auditoria-seguridad-2026-05.md:232",
+   "id_previo": "SEC-MISC-02",
+   "estado": "cerrado",
+   "evidencia": "Cookie de sesion explicita en auth.ts:89-94 y auth.config.ts:17-22 desde auth-cookies.ts:21-30"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/audit-chatbot-runtime.md:113",
+   "id_previo": "P-2",
+   "estado": "cerrado",
+   "evidencia": "Ventana server-side trimHistory en requestSchema.ts:54 (HISTORY_WINDOW_MESSAGES=30, historyPolicy.ts:31) y hard cap en handleChatRequest.ts:547"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/audits/2026-05-auditoria-profunda.md:47",
+   "id_previo": "P1-4",
+   "estado": "cerrado",
+   "evidencia": "forgot-password/actions.ts:24-110 (Brevo) + link en login/page.tsx:365-370"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:79",
+   "id_previo": "P1-4",
+   "estado": "cerrado",
+   "evidencia": "forgot-password/actions.ts:24-110"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:80",
+   "id_previo": "P1-5",
+   "estado": "parcial",
+   "evidencia": "limiter.ts ya es compartido en Neon (UPSERT atomico :37-62); el login sigue con Map en memoria (login/actions.ts:20)"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/audits/2026-06-revalidacion.md:74",
+   "id_previo": "P1-4",
+   "estado": "cerrado",
+   "evidencia": "forgot-password/actions.ts:24-110"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/audits/2026-06-revalidacion.md:74",
+   "id_previo": "P1-5",
+   "estado": "parcial",
+   "evidencia": "limiter.ts:37-84 en DB; login/actions.ts:8-48 sigue en memoria"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "docs/b8a-auditoria.md:76",
+   "id_previo": "H8",
+   "estado": "cerrado",
+   "evidencia": "prisma/seed.ts:157 y :165 crean setter-qa con passwordResetRequired: false; qa/login/route.ts:165 mintea false"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:67",
+   "id_previo": "SEC-AUTH-03",
+   "estado": "parcial",
+   "evidencia": "Incrementos en reset-password/actions.ts:76, cambiar-password/actions.ts:59, resend-credentials/route.ts:71 y profile.ts:230; revivible por trigger 'update' (auth.ts:215-217) y bucle en el proxy"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:68",
+   "id_previo": "SEC-AUTH-04",
+   "estado": "parcial",
+   "evidencia": "src/proxy.ts existe con matcher de portales (:172) pero no es global (/api fuera) y ALWAYS_ALLOWED (:68) tiene entradas muertas"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:69",
+   "id_previo": "SEC-RATELIMIT-01 / P1-5",
+   "estado": "parcial",
+   "evidencia": "limiter.ts:37-84 en DB; login/actions.ts:8-48 en memoria"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:75",
+   "id_previo": "SEC-MISC-02",
+   "estado": "cerrado",
+   "evidencia": "auth.ts:89-94 + auth-cookies.ts:21-30"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:102",
+   "id_previo": "P0-6",
+   "estado": "parcial",
+   "evidencia": "callerCanAccessOrg (assert-ownership.ts:81-89) se usa en admin/chatbots/[botId]/page.tsx:61 y admin/projects/[projectId]/layout.tsx:160 + page.tsx:165 (no-op para SUPER_ADMIN por diseno); preflightChecks.ts:13-18 usa unsafeGlobalQuery con razon"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:285",
+   "id_previo": "SEC-04",
+   "estado": "abierto",
+   "evidencia": "magicLinkAction (login/actions.ts:135-158) sin limiter; POST /api/auth/signin/resend tampoco"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:286",
+   "id_previo": "SEC-05",
+   "estado": "abierto",
+   "evidencia": "login/actions.ts:8-48 en memoria y bypass total por /api/auth/callback/credentials (route.ts:3)"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1318",
+   "id_previo": "RESIL-05",
+   "estado": "parcial",
+   "evidencia": "Hay timeout por defecto del SDK (60 s y 2 reintentos: @getbrevo/brevo requestWithRetries.js:15) pero brevo-service.ts:3-5 no fija uno corto y auth.ts:104 espera el envio"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1324",
+   "id_previo": "RESIL-07",
+   "estado": "abierto",
+   "evidencia": "src/lib/prisma.ts:5-6 sin connect_timeout ni retry en codigo (la URL de entorno no es visible) y auth() consulta la DB en cada request (auth.ts:207-210)"
+  }
+ ]
+}

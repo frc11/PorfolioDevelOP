@@ -1,0 +1,56 @@
+{
+ "items": [
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "archivo": "src/proxy.ts",
+   "senales": [
+    "getLegacyAdminRedirectPath (:22-65) siempre devuelve null: ADMIN_OS_PATH === ADMIN_PATH === '/admin' (:8-9) y el primer if (:23) corta todo /admin, ninguna otra rama puede cumplirse",
+    "ALWAYS_ALLOWED (:68) incluye '/logout' (ruta inexistente: git ls-tree vacio) y '/api/auth/', '/api/' que el matcher (:172) nunca deja entrar",
+    "IMPERSONATION_COOKIE duplicado (:16) en vez de importar impersonation-constants.ts:1"
+   ],
+   "que_rompe": "Nada: el bloque :92-96 nunca redirige; borrar tambien la llamada de :81"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "archivo": "src/auth.ts",
+   "senales": [
+    "getPostLoginPath (:65-74) sin callers (git grep -> solo la definicion)",
+    "ADMIN_PATH/DASHBOARD_PATH/ONBOARDING_PATH (:15-17) solo usados por esa funcion",
+    "userExists (:61) calculado y nunca leido"
+   ],
+   "que_rompe": "Nada funcional; FROZEN + ZONA-FRANCO -> decision para Valentino"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "archivo": "src/app/accept-invite/ (page.tsx, AcceptInviteForm.tsx, InviteBackground.tsx, actions.ts)",
+   "senales": [
+    "Sin emisor vivo: inviteClientAction (invitations.ts:43) e inviteTeamMemberAction (settings.ts:148) no tienen callers; settings.ts no tiene importadores (git grep \"lib/actions/settings'\" vacio)",
+    "Solo seria alcanzable con un token de forgot-password de un usuario sin contrasena"
+   ],
+   "que_rompe": "Nada del producto actual; robots.ts:21 y el comentario de sitemap.ts:4 lo mencionan, DotMatrix.tsx:21,49 en comentarios. Decidir: borrar o reconectar"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "archivo": "src/app/login/actions.ts",
+   "senales": [
+    "Limiter en memoria (:8-48) duplicado del limiter compartido en DB (src/lib/rate-limit/limiter.ts:37-84)",
+    "Rama EMAIL_NOT_VERIFIED (:119-121) inalcanzable: Auth.js envuelve el error en CallbackRouteError con cause {err} (node_modules/@auth/core/lib/actions/callback/index.js:388)"
+   ],
+   "que_rompe": "Reemplazar, no solo borrar: sin el Map el login queda sin ningun limite"
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "archivo": "src/lib/actions/invitations.ts (fuera del lote, mitad muerta de h1.auth-invite)",
+   "senales": [
+    "inviteClientAction sin callers (git grep inviteClient -> solo :43)",
+    "Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116)"
+   ],
+   "que_rompe": "Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)"
+  }
+ ]
+}

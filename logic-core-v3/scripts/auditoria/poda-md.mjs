@@ -20,7 +20,7 @@ const p = JSON.parse(readFileSync(path.join(CRUDO, 'poda-candidatos.json'), 'utf
 const A = 'logic-core-v3/'
 
 function parsearFila(l) { const f = []; let a = '', q = false; for (let i = 0; i < l.length; i++) { const c = l[i]; if (q) { if (c === '"' && l[i + 1] === '"') { a += '"'; i++ } else if (c === '"') q = false; else a += c } else if (c === '"') q = true; else if (c === ',') { f.push(a); a = '' } else a += c } f.push(a); return f }
-const ledger = new Map(readFileSync(path.resolve(appRoot, 'docs/auditoria-2026-10/_cobertura.csv'), 'utf8').replace(/\r\n/g, '\n').split('\n').slice(1).filter(Boolean).map(parsearFila).map((f) => [f[0], { alcance: f[2], estado: f[3] }]))
+const ledger = new Map(readFileSync(path.resolve(appRoot, 'docs/auditoria-2026-10/_cobertura.csv'), 'utf8').replace(/\r\n/g, '\n').split('\n').slice(1).filter(Boolean).map(parsearFila).map((f) => [f[0], { alcance: f[2], estado: f[3], notas: f[5] ?? '' }]))
 
 // IDs previos (estabilidad).
 const previos = new Map()
@@ -91,6 +91,40 @@ for (const k of ORDEN) {
 md.push('## Esperar merge de `rediseno/home`', '')
 md.push(`Candidatos que \`rediseno/home\` modifica o borra (\`git diff --name-status ${p.ref}...${p.rediseno}\`), que pertenecen al home viejo que v3 reemplaza, o que son ramas intermedias del rediseño. **No se proponen para borrar ahora**: esta sección es el insumo de la poda post-merge.`, '')
 for (const c of rediseno) md.push(ficha(c))
+// Candidatos que traen los lectores de F2 (_crudo/poda-f2.json): si el archivo ya tiene ficha de F1
+// se suman sus señales a esa ficha (sección siguiente); si no, ficha nueva con confianza MEDIA (la
+// señal viene de lectura, no de un barrido mecánico) e ID estable por título.
+const f2 = existsSync(path.join(CRUDO, 'poda-f2.json')) ? JSON.parse(readFileSync(path.join(CRUDO, 'poda-f2.json'), 'utf8')).items : []
+const limpiarRuta = (r) => String(r).replace(/\\/g, '/').replace(/\s+\(.*\)\s*$/, '').replace(/^.*?logic-core-v3\//, '').trim()
+const refuerzos = []
+const nuevosF2 = []
+for (const c of f2) {
+  const ruta = limpiarRuta(c.archivo)
+  const previa = ordenados.find((x) => x.archivos.some((f) => f === `${A}${ruta}` || f.startsWith(`${A}${ruta.replace(/\/$/, '')}/`)))
+  if (previa) refuerzos.push({ id: previa.id, ruta, c })
+  else nuevosF2.push({ ruta, c })
+}
+if (nuevosF2.length || refuerzos.length) {
+  md.push('## Candidatos de F2 (lectores y cazadores)', '')
+  md.push('> Señales que encontraron los lectores de cada dominio al leer el código completo. Confianza MEDIA salvo que el dominio la confirme; la propuesta queda para Valentino (o para Franco en su zona).', '')
+  for (const { ruta, c } of nuevosF2) {
+    const titulo = `${ruta} (${c.ciclo})`
+    const id = previos.get(titulo) ?? ++maximo
+    const zona = ledger.get(`${A}${ruta}`)?.notas ?? ''
+    const z = /ZONA-FRANCO/.test(zona) ? (/FROZEN/.test(zona) ? 'FROZEN + ZONA-FRANCO' : 'ZONA-FRANCO') : /(^|; )FROZEN/.test(zona) ? 'congelado' : 'libre'
+    md.push(`### [POD-${String(id).padStart(3, '0')}] ${titulo}`)
+    md.push(`- Hallado en F2 · \`${ruta}\` · Nodo(s): ${nodoDeRuta(`${A}${ruta}`)} · Señales: ${c.senales.join('; ')}`)
+    md.push(`- Qué rompe si se borra: ${c.que_rompe}`)
+    md.push('- Confianza de poda: MEDIA')
+    md.push(`- Propuesta: ${z === 'libre' ? 'decidir (Valentino)' : z === 'ZONA-FRANCO' ? 'decidir (Franco)' : 'decidir (Valentino): archivo congelado'}`)
+    md.push(`- Zona: ${z}`, '')
+  }
+  if (refuerzos.length) {
+    md.push('### Refuerzos de F2 sobre fichas de F1', '')
+    for (const { id, ruta, c } of refuerzos) md.push(`- [POD-${String(id).padStart(3, '0')}] \`${ruta}\` (${c.ciclo}): ${c.senales.join('; ')}. Qué rompe: ${c.que_rompe}`)
+    md.push('')
+  }
+}
 md.push('## §docs', '', 'Se completa en F6 junto con `14-DOCS-CONSOLIDADOS/` (DEC-44): qué doc se borra, qué consolidado lo reemplaza y qué se pierde, si algo.', '')
 writeFileSync(MD, md.join('\n'), 'utf8')
 console.log(`10-PODA.md: ${ordenados.length} fichas (POD-001..POD-${String(maximo).padStart(3, '0')}); PODA-ALTA profundos: ${altaProfundos.length} archivos / ${locAltaProfundo} LOC → ${path.relative(appRoot, LISTA_ALTA)}`)

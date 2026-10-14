@@ -8,17 +8,17 @@
 |---|---|
 | Fase | **F2 — D1** (F1 cerrada en C01) |
 | Base auditada | `origin/main` @ `57c421bc` (último commit 2026-09-06; refs traídas el 2026-10-13 16:23) |
-| Último ciclo registrado | C01 · F1 |
-| Próximo paso | D1-c1: revisar `_insumos/` y memoria → `node scripts/auditoria/f2-args.mjs D1 D1-c1 <args>` → `build-f2.mjs` → workflow de lectores (1 lote: 32 archivos, 21 previas, 21 PLAN, 3 alertas) → §7.2 |
-| Cobertura profunda | 0 / 1.298 archivos (0 %) · 31 `PODA-ALTA` fuera de lotes · superficial hecho 404 / 691 (DOC 266, PUB 138) |
-| Hallazgos escritos | 4 (SEC-001…SEC-004, BAJA) · VH 4 · POD 281 · PLAN 1.351 «por cruzar» · pendiente: el vencimiento de Vertex (DEC-43, en D7) |
-| Push | al cierre de cada fase, con `[skip ci]` (DEC-04) |
+| Último ciclo registrado | C02 · D1-c1 |
+| Próximo paso | D1-c2: `f2-args.mjs D1 D1-c2 _crudo/ciclos/D1-c2.args.json --cazadores --lente "seguridad y aislamiento"` → `f2-construir.mjs` con `f2-cazadores.plantilla.js` → workflow → `f2-procesar.mjs` → decisiones del padre → `f2-escribir.mjs` |
+| Cobertura profunda | 32 / 1.298 archivos (2,5 %) · 31 `PODA-ALTA` fuera de lotes · superficial hecho 405 / 691 (DOC 266, PUB 138, D1 1) |
+| Hallazgos escritos | 35 (C 1 · A 3 · M 13 · B 18) · VH 12 · POD 285 · PLAN 1.351 (21 cruzados) · pendiente: el vencimiento de Vertex (DEC-43, en D7) |
+| Push | al cierre de cada fase, con `[skip ci]` (DEC-04), **solo si `gh` confirma el repo `PRIVATE`** (DEC-48; a 2026-10-13 22:48 sigue `PUBLIC`: commits locales) · último push: `04ecc0db` (F1) |
 
 ### Estado por dominio
 
 | Dominio | Ciclo (máx.) | Profundo leído / total (PODA-ALTA fuera de lotes) | Superficial hecho / total | Nuevos C / A / M / B | Lentes usadas | Estado |
 |---|---|---|---|---|---|---|
-| D1 Auth | — (3) | 0 / 33 (1) | 0 / 1 | — | — | abierto · 1 lote · 21 PLAN |
+| D1 Auth | 1 (3) | 32 / 33 (1) | 1 / 1 | 1 / 3 / 13 / 14 | lectores | abierto · cobertura 100 % · sigue c2 (seguridad y aislamiento) |
 | D2 Dashboard | — (3) | 0 / 219 (8) | 0 / 13 | — | — | abierto · 5 lotes · 151 PLAN |
 | D3 Admin | — (2) | 0 / 221 (6) | 0 / 0 | — | — | abierto · 6 lotes · 102 PLAN |
 | D4 Setter | — (2) | 0 / 171 (0) | 0 / 34 | — | — | abierto · 6 lotes · 361 PLAN |
@@ -156,6 +156,7 @@
 - **[DECISIÓN] DEC-45 — Entregables, orden y backlog (E12).** Se suman: `10-PODA.md` (F1.11), `11-CONGELADOS.md` (después de D9), `12-PLANEADO.md` (extracción en F1, cruce por dominio), `13` y `14` (F6, antes del backlog) y los JSON de `06-ATLAS/`. El backlog suma tarjetas de poda, congelados, credenciales y consolidación de docs; cada tarjeta lleva `nivel_proceso` **S** (prompt corto) · **M** (plan corto) · **L** (ritual completo), y modelo/esfuerzo/ultracode según la tabla de la ENMIENDA E12 (S mecánica → Sonnet 5.5 · medium · OFF; M con spec → Sonnet 5.5 · high · OFF; L ambigua/seguridad/arquitectura → Opus 5.5 · high · OFF; visual fino → Opus 5.5 · xhigh · OFF; poda masiva → Opus 5.5 · high · ON). `RESUMEN.md` suma LOC candidatas a poda por confianza, congelados a soltar, planeado hecho/parcial/no empezado, la tabla de credenciales en una línea por servicio y el Avance 1.0 propuesto.
 - **[DECISIÓN] DEC-46 — Re-estimación (E13).** §8 se recalcula antes de F1 (hecho en C00b) y de nuevo al cierre de F1 con la poda real; se registran las dos.
 - **[DECISIÓN] DEC-47 — `DATABASE_URL_TEST` (P5).** Valentino cree que apunta a una base de test, sin confirmar: se mantiene `[skip ci]` y va un `VH` para confirmarlo.
+- **[DECISIÓN] DEC-48 — Push condicionado a que el repo sea privado (2026-10-13 22:48).** `gh repo view frc11/PorfolioDevelOP --json visibility` devuelve `PUBLIC` (`isPrivate: false`): el «pasa a privado» de Valentino todavía no se aplicó. El permiso de push por fase (DEC-04e) se apoyaba en esa premisa, así que **desde D1 se commitea igual pero se pushea solo después de confirmar `PRIVATE` con ese comando**, inmediatamente antes de cada push. Lo commiteado y no pusheado se sube entero en el primer push con el repo privado. F0, C00b y F1 ya se pushearon con el repo público: no tienen valores de secrets, y sus hallazgos (SEC-001 a SEC-004, BAJA) solo citan líneas de docs que ya son públicas en el mismo repo.
 
 ## 3. Dominios, alcance y conteos
 
@@ -417,6 +418,15 @@ Corrido el 2026-10-13, uno por vez, desde `logic-core-v3` (detalle en `01-INVENT
 - Herramientas nuevas: `planeado-extraer.mjs` (un solo uso), `secrets-salida.mjs` (los 22 patrones sobre lo que escribe la corrida; control positivo 22/22) y `README.md` de `scripts/auditoria/` (permanentes vs de esta corrida). `01-INVENTARIO.md`: fila de knip corregida (no disponible).
 - §8.2: re-estimación con la poda real (≈ 75–100 agentes, ≈ 20–27 h restantes).
 - Sigue: commit archivo por archivo + push de F1 (sin `_crudo/depcruise.json`, local) → **D1 ciclo 1**.
+- Commit `04ecc0db` (41 archivos), pusheado. Después del push se comprobó que el repo sigue `PUBLIC` → DEC-48.
+
+### C02 · D1-c1 — 2026-10-13 — auth cliente + admin, ciclo 1 (lectores)
+- `D1-c1 · lote D1-L1 · leídos 32/32 del lote (+13 de traza) (_crudo/ciclos/D1-c1-D1-L1.json; run wf_0157376e-be1: lector + verificador, 0,64 M tokens, 55 min) · CRÍTICA/ALTA leídas por el padre 6 (refutadas 1 → BAJA; 1 ajustada a MEDIA) · muestreados 5 de 25 MEDIA/BAJA (fallaron 0) · nuevos 1/3/13/14 · cobertura D1 100 % (32 leídos + 1 PODA-ALTA; superficial 1/1) · sigue D1-c2`.
+- Lo grave: **SEC-005 (CRÍTICA)** magic link sin rate limit, por la action y por `POST /api/auth/signin/resend`: emails ilimitados por la cuenta Brevo compartida a cualquier cuenta registrada. **SEC-006 (ALTA, FROZEN + ZONA-FRANCO)** la invalidación por `sessionVersion` se revive con `POST /api/auth/session` (el trigger `update` saltea el chequeo). **SEC-007 (ALTA)** fuerza bruta de login sin freno real (Map en memoria por lambda; el endpoint nativo de Credentials no tiene límite). **BUG-002 (ALTA)** el alta de cliente guarda el email sin pasarlo a minúscula: con una mayúscula, el cliente no entra por ningún método. Mapeo completo temporal → ID en `_crudo/ciclos/D1-c1-revision.json`.
+- Verificación del padre: leí las líneas de las 6 CRÍTICA/ALTA (más el código de `@auth/core` 0.41.2 y `next-auth` 5.0.0-beta.31 que citan). H03 (bucle de redirecciones) queda en MEDIA como propuso el verificador. H06 (`trustHost` + `X-Forwarded-Host`), refutada como ALTA, queda en BAJA con VH-008: `NEXTAUTH_URL` está documentada como obligatoria, pero `check-env.js` no corre en el build. Para H12 (open redirect) probé la misma función contra el parser WHATWG de Node: `/\evil` y `/<tab>/evil` resuelven a un dominio ajeno.
+- Volcado con las herramientas nuevas: `f2-procesar.mjs` (crudo + revisión con decisiones DEC-37), `f2-escribir.mjs` (IDs, registro `_crudo/hallazgos.json`, VH, cruces de PLAN, acumulados, ledger) y `hallazgos-md.mjs` (03, 02 y 09 desde el registro; el código de librerías se cita como `paquete@versión`, fuera de backticks). SEC-001…SEC-004 se importaron al registro sin cambios. `poda-md.mjs` suma los candidatos de F2.
+- VH-005…VH-012. PLAN cruzados 21/21 (hecho 8 · parcial 4 · no empezado 9). Alertas de D1: las 3 «parcial». Las advisories de npm se evaluaron contra el código: bypass del proxy acotado porque los layouts re-chequean rol y org; `getToken` y el normalizador de email descartados. Previas: 21 re-verificadas (5 abiertas, 9 parciales, 7 cerradas); siguen abiertas S2b-01 (email marketing, D2) y S4-01 (`validate-origin`, D5), que se re-verifican en sus dominios. Poda: POD-282…POD-285 y un refuerzo a POD-046. Test superficial mapeado: `idor-tokens.invariant.ts` cubre el token firmado del opt-out (dato para la alerta D7-A1) y `resolveScopedOrgId`.
+- Funcionalidades: 15 en 6 herramientas (h1 completo: login L1 por Google, recupero L2, cambio L2, invitación huérfana). Ninguna en L3: faltan sobre todo Sentry, autonomía y errores.
 
 ## 14. Autorrevisión §10 por commit
 
@@ -425,3 +435,4 @@ Corrido el 2026-10-13, uno por vez, desde `logic-core-v3` (detalle en `01-INVENT
 | C00-F0 | No: no hay hallazgos escritos; las alertas de P1 citan `ruta:línea` | No: los «no existe» de §1 y §10 citan comando o búsqueda | No: grep de los 22 patrones sobre `docs/auditoria-2026-10` = 0 | No hay propuestas | No (`git status`: solo `docs/auditoria-2026-10/` y `scripts/auditoria/`) | n/a (se escribe en F1) |
 | C00b | No: sigue sin haber hallazgos escritos | No: el «ningún `.docx`» cita el conteo por extensión de `find` | No (mismo grep) | No hay propuestas | No: lo único fuera de las dos carpetas es `docs/_insumos/`, que puso Valentino y no se stagea | n/a |
 | C01-F1 | No: SEC-001…004 y VH-001…004 citan `ruta:línea`; cada ficha POD trae su señal; los PLAN traen `fuente:línea` | No: los «sin uso» de `10-PODA.md` citan la búsqueda (`git grep`, depcruise) y knip figura como no disponible; los PLAN quedan «por cruzar», sin afirmar estado | No: `secrets-salida.mjs` = 0 coincidencias en 48 archivos (control positivo 22/22); los secrets de la extracción se citan solo por línea | No: SEC-001 deja la purga del historial como decisión; ninguna propuesta edita FROZEN ni ZONA-FRANCO | No: `git status` muestra solo las dos carpetas más `docs/_insumos/` (no se stagea) | 0 errores · 0 avisos |
+| C02-D1c1 | No: los 31 nuevos citan `ruta:línea` del repo (validar.mjs comprueba que existan y que la línea no pase el largo); el código de librerías va como `paquete@versión` | No: las 6 CRÍTICA/ALTA y las 5 muestreadas se leyeron; las ausencias del lector traen su `git grep` con control positivo (`_crudo/ausencias.json`) | No: `secrets-salida.mjs` = 0 coincidencias en 71 archivos; los fragmentos pasan por los 22 patrones al renderizar | No: lo que se arregla en `auth.ts` va como «Decisión para Valentino» con Zona FROZEN + ZONA-FRANCO; ZONA-FRANCO repetido en 09 | No (solo las dos carpetas; `_insumos/` sin stagear) | 0 errores · 36 avisos (citas de `auth.ts`/`schema.prisma` como contexto en hallazgos con arreglo libre) |

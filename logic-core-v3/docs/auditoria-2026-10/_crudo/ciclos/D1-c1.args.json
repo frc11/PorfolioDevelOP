@@ -1,0 +1,650 @@
+{
+ "dominio": "D1",
+ "nombre": "Auth cliente + admin",
+ "ciclo": "D1-c1",
+ "lente": "",
+ "foco": "Auth de cliente y de admin. Magic link (provider Resend que envia por Brevo), Google y Credentials (bcrypt); sesion JWT y su invalidacion (User.sessionVersion), expiracion, cookies (auth-cookies), roles y su ruteo en src/proxy.ts y en los layouts; rutas protegidas sin guard; impersonacion (cookies, expiracion, que puede hacer); recupero y cambio obligatorio de contrasena (tokens, expiracion, reutilizacion, enumeracion de usuarios); invitaciones (accept-invite, posible flujo huerfano); api/qa/login (que no quede expuesto en prod: revisar sus guards de entorno); rate limit de login (headers que se pueden falsear); que pasa con los roles CLIENT y SETTER fuera de su portal. Leer tambien las libs compartidas que todos importan (src/lib/actions/schemas.ts, src/lib/audit-log.ts) aunque sean de D3. Las advisories criticas de npm audit sobre next (bypass de proxy/middleware) y Auth.js (getToken, normalizador de email): evaluar si el codigo depende del comportamiento afectado (la version la evalua D8).",
+ "contexto": "ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas; si se confirma, tambien va como hallazgo):\n- Proxy/middleware: docs/bitacora-roadmap.md:6334 (MS-8) y :7936 (B-SEC.2) dicen que no hay middleware y que la proteccion es por layouts; :7682/:7687 (B12.6) reportan un 307 'middleware'; :7830/:7898 (B1 LeadOS) modifican src/proxy.ts (matcher /setter, ALWAYS_ALLOWED); :8138 (SEC-AUTH-04) pide un middleware global. Confirmar que cubre hoy src/proxy.ts (matcher, rutas siempre permitidas) y que no hay rutas protegidas solo por layout que deberian estar en el proxy o viceversa.\n- Regla de contrasena: _insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:60 declara 8+mayuscula+numero en cliente y en Zod en /cambiar-password, 'hecho (sin mergear)'. Confirmar si esta en origin/main y si la misma regla aplica en reset-password y en el alta de usuarios.\n- sessionVersion: el registro Mi Cuenta (_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:398) fija que las acciones que tocan sessionVersion se llaman directo (startTransition), nunca con <form action>. Ver si la invalidacion de sesion funciona en todos los caminos (cambio de contrasena, reset, baja de miembro, cambio de rol).",
+ "lotes": [
+  {
+   "id": "D1-L1",
+   "loc": 3791,
+   "archivos": [
+    "src/actions/auth-actions.ts",
+    "src/app/accept-invite/AcceptInviteForm.tsx",
+    "src/app/accept-invite/InviteBackground.tsx",
+    "src/app/accept-invite/actions.ts",
+    "src/app/accept-invite/page.tsx",
+    "src/app/api/auth/[...nextauth]/route.ts",
+    "src/app/api/qa/login/route.ts",
+    "src/app/cambiar-password/CambiarPasswordForm.tsx",
+    "src/app/cambiar-password/actions.ts",
+    "src/app/cambiar-password/page.tsx",
+    "src/app/forgot-password/actions.ts",
+    "src/app/forgot-password/page.tsx",
+    "src/app/login/actions.ts",
+    "src/app/login/page.tsx",
+    "src/app/reset-password/ResetPasswordForm.tsx",
+    "src/app/reset-password/actions.ts",
+    "src/app/reset-password/page.tsx",
+    "src/auth.config.ts",
+    "src/auth.ts",
+    "src/lib/actions/impersonation.ts",
+    "src/lib/actions/profile.ts",
+    "src/lib/auth-cookies.ts",
+    "src/lib/auth-guards.ts",
+    "src/lib/auth/assert-ownership.ts",
+    "src/lib/impersonation-constants.ts",
+    "src/lib/impersonation.ts",
+    "src/lib/rate-limit/limiter.ts",
+    "src/lib/rate-limit/presets.ts",
+    "src/lib/security/auth-rate-limit.ts",
+    "src/lib/security/generate-temp-password.ts",
+    "src/proxy.ts",
+    "src/types/next-auth.d.ts"
+   ],
+   "previas": [
+    {
+     "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+     "linea": 1268,
+     "id_previo": "S2b-01",
+     "titulo": "Las 3 server actions del modulo premium Email Marketing no verifican la contratacion del modulo: el gate vive solo en el layout, y el envio usa la cuenta Brevo compartida de la agencia con remitente y HTML del input",
+     "severidad_original": "ALTO",
+     "estado_declarado": "CONFIRMADO (refutacion adversarial), vs. ledger NUEVO; abierto en 49fec9b (origin/main 2026-07-24). Severidad adjudicada ALTO tras discrepancia entre pasadas MEDIO/ALTO (:35); fix #3 de la tabla 3.4 (:72) requiere decision de Franco. El verificador (:1306-1308) aclara que con el slug roto (CLEAN-1.1-SLUG) el gate de layout cierra la UI para todos y las actions quedan abiertas para todos; la parte 'sin Zod' ya estaba en SEC-INV-zod-gaps.",
+     "archivos_citados": [
+      "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17-28",
+      "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:71",
+      "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:128",
+      "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:174",
+      "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:131-137",
+      "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:20-21",
+      "src/lib/integrations/brevo.ts:76",
+      "src/lib/rate-limit/presets.ts:8-70",
+      "src/components/dashboard/modules/motor-resenas/_actions.ts:23-24",
+      "src/lib/data/premium-modules.ts:38"
+     ],
+     "dominio_probable": "D2 (secundario D7 Brevo)",
+     "resumen": "Las actions import/create/send de Email Marketing solo resuelven la org (getOrgWithBrevo) y no repiten isModuleActive; createCampaignAction sin Zod ni topes y el envio usa la unica BREVO_API_KEY de la agencia con remitente y HTML del input, sin rate-limit. Riesgo: abuso del activo compartido (reputacion de envio)."
+    },
+    {
+     "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+     "linea": 2181,
+     "id_previo": "S4-01 (lente S4)",
+     "titulo": "El escape origin === https://develop.com.ar de validateOrigin se aplica a TODOS los bots y precede al check de allowedDomains: la allowlist de dominios del widget es un no-op para cualquier cliente que mande ese header",
+     "severidad_original": "ALTO",
+     "estado_declarado": "CONFIRMADO, vs. ledger NUEVO; abierto en 49fec9b. El verificador (:2217) sostiene ALTO pero dice que deberia ser CAMBIO_DE_ESTADO (CLEAN-1.2-ORIGIN ya citaba las mismas lineas como duplicacion DRY) y que el sub-vector /embed solo aplica si develop.com.ar es el host servido. Fix #2 de la tabla 3.4 (:71).",
+     "archivos_citados": [
+      "src/lib/security/validate-origin.ts:69-75",
+      "src/lib/security/validate-origin.ts:77-85",
+      "src/modules/chatbot/server/chat/handleChatRequest.ts:257-263",
+      "src/app/api/chatbot/[slug]/chat/route.ts:43",
+      "src/app/embed/[slug]/page.tsx:29-37",
+      "next.config.ts:85-89",
+      "src/proxy.ts:172"
+     ],
+     "dominio_probable": "D5",
+     "resumen": "validateOrigin devuelve allowed:true para Origin develop.com.ar/www antes de chequear allowedDomains y para cualquier slug (duplicado en isOriginWithinPlanCap): sin auth se conversa con el bot de cualquier org, se consume su cupo y Vertex, se obtienen respuestas con su KB y se inyectan leads."
+    },
+    {
+     "doc": "docs/auditoria-seguridad-2026-05.md",
+     "linea": 121,
+     "id_previo": "SEC-AUTH-03",
+     "titulo": "JWT no invalidado tras password reset (sesiones zombi)",
+     "severidad_original": "P1",
+     "estado_declarado": "Propuesta P1; ABIERTO (:64). Posterior: docs/audit-repo-20260707.md:184 lo da implementado (sessionVersion) y docs/baselines/2026-07-auditoria-seguridad.md:1020 confirma que funciona en los 3 caminos de cambio de password, sin test; residual de usuario borrado en S1-02 (:687, BAJO).",
+     "archivos_citados": [
+      "src/auth.ts:209-232",
+      "src/app/reset-password/actions.ts:68-82"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "Con estrategia JWT, el reset de password no invalidaba sesiones existentes (sin sessionVersion ni chequeo en el jwt callback): un JWT robado sobrevivia hasta ~8h."
+    },
+    {
+     "doc": "docs/auditoria-seguridad-2026-05.md",
+     "linea": 144,
+     "id_previo": "SEC-RATELIMIT-01",
+     "titulo": "Rate-limit in-memory poroso en Netlify serverless",
+     "severidad_original": "P1",
+     "estado_declarado": "Propuesta P1; ABIERTO (:65). Posterior: limiter durable en tabla Neon (docs/audit-chatbot-runtime.md:107 y :175; docs/baselines/2026-07-auditoria-seguridad.md:2415); residual: el login sigue con Map in-memory (2026-07 :1030 y S1-01 :645, MEDIO, CAMBIO_DE_ESTADO).",
+     "archivos_citados": [
+      "src/modules/chatbot/server/rate-limit/inMemoryLimiter.ts:1-64",
+      "src/lib/security/auth-rate-limit.ts:33-39",
+      "src/app/api/chatbot/[slug]/chat/route.ts:68-88",
+      "src/app/login/actions.ts:50-56"
+     ],
+     "dominio_probable": "D9 (afecta D1 login y D5 chat)",
+     "resumen": "El limiter usaba un Map por proceso: en serverless cada lambda tiene su contador y los limites de forgot/reset/login/chat se multiplican por N instancias calientes."
+    },
+    {
+     "doc": "docs/auditoria-seguridad-2026-05.md",
+     "linea": 232,
+     "id_previo": "SEC-MISC-02",
+     "titulo": "Cookies de NextAuth sin configuracion explicita",
+     "severidad_original": "P1",
+     "estado_declarado": "Propuesta P1; abierto. Posterior: docs/baselines/2026-07-auditoria-seguridad.md:1021 CERRADO (config explicita desde src/lib/auth-cookies.ts:25-30).",
+     "archivos_citados": [
+      "src/auth.ts:74-78"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "Las cookies de sesion dependian de defaults de NextAuth v5; un upgrade podia cambiarlos en silencio."
+    },
+    {
+     "doc": "docs/audit-chatbot-runtime.md",
+     "linea": 113,
+     "id_previo": "P-2",
+     "titulo": "Historial client-authoritative completo re-enviado a Vertex cada turno, sin ventana ni cap de turnos",
+     "severidad_original": "ALTO (columna Impacto, Seccion B #3, junto a P-3)",
+     "estado_declarado": "CERTEZA; ranking #3 (:187). Abierto. Posterior: docs/audit-repo-20260707.md:28 y :37 (RT-4, RT-7, MEDIA) y docs/baselines/2026-07-auditoria-seguridad.md:2462 (S5-02, MEDIO: el server nunca reconstruye desde DB); 2026-07 :2630 muestra ventana de 30 mensajes.",
+     "archivos_citados": [
+      "src/modules/chatbot/server/chat/handleChatRequest.ts:668-677",
+      "src/lib/rate-limit/presets.ts:27-33",
+      "src/modules/chatbot/server/prompts/sections.ts:184",
+      "src/modules/chatbot/server/admin/validateKB.ts:66"
+     ],
+     "dominio_probable": "D5",
+     "resumen": "Cada request re-manda todo el historial provisto por el cliente; costo de input crece ~cuadratico y no hay cap duro de turnos (los mensajes en conversacion existente no consumen cupo): actor hostil sostiene ~USD 1.8-5.4/hora."
+    },
+    {
+     "doc": "docs/audits/2026-05-auditoria-profunda.md",
+     "linea": 47,
+     "id_previo": "P1-4",
+     "titulo": "Sin 'olvidé mi contraseña' automatizado",
+     "severidad_original": "P1",
+     "estado_declarado": "Abierto en el doc. CERRADO según 2026-06-revalidacion-dashboard-chatbot.md:79 (forgot-password/actions.ts:24-110) y 2026-06-revalidacion.md:74.",
+     "archivos_citados": [
+      "src/app/forgot-password/page.tsx"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "Franco hacía el reset a mano desde el admin."
+    },
+    {
+     "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md",
+     "linea": 79,
+     "id_previo": "P1-4",
+     "titulo": "Sin 'olvidé mi contraseña' automatizado",
+     "severidad_original": "P1",
+     "estado_declarado": "CERRADO: Zod + rate-limit + token de 45 min + email por Brevo (:79).",
+     "archivos_citados": [
+      "src/app/forgot-password/actions.ts:24-110"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "Re-verificación del P1-4 de profunda:47."
+    },
+    {
+     "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md",
+     "linea": 80,
+     "id_previo": "P1-5",
+     "titulo": "Rate limiter in-memory en serverless",
+     "severidad_original": "P1",
+     "estado_declarado": "CERRADO: UPSERT atómico en Postgres (:80).",
+     "archivos_citados": [
+      "src/lib/rate-limit/limiter.ts:37-84"
+     ],
+     "dominio_probable": "D5",
+     "resumen": "Re-verificación del P1-5 de profunda:48 (= SEC-RATELIMIT-01)."
+    },
+    {
+     "doc": "docs/audits/2026-06-revalidacion.md",
+     "linea": 74,
+     "id_previo": "P1-4",
+     "titulo": "Forgot-password automatizado",
+     "severidad_original": "P1",
+     "estado_declarado": "CERRADO (:74).",
+     "archivos_citados": [
+      "src/app/forgot-password/actions.ts:24-110"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "Re-verificación de profunda:47."
+    },
+    {
+     "doc": "docs/audits/2026-06-revalidacion.md",
+     "linea": 74,
+     "id_previo": "P1-5",
+     "titulo": "Rate limiter in-memory",
+     "severidad_original": "P1",
+     "estado_declarado": "CERRADO: atómico en la base (:74).",
+     "archivos_citados": [
+      "src/lib/rate-limit/limiter.ts:37-84"
+     ],
+     "dominio_probable": "D5",
+     "resumen": "Re-verificación de profunda:48."
+    },
+    {
+     "doc": "docs/b8a-auditoria.md",
+     "linea": 76,
+     "id_previo": "H8",
+     "titulo": "Bypass QA roto por passwordResetRequired",
+     "severidad_original": "bloqueante QA (tabla :88, clase SENSIBLE)",
+     "estado_declarado": "Propuesto 'Ejecutar (seed = false)' (tabla :88). docs/b8a-ii-auditoria.md:6 implica que está resuelto.",
+     "archivos_citados": [
+      "prisma/seed.ts:137-154",
+      "prisma/seed.ts:144,152",
+      "src/auth.ts:237-275",
+      "src/auth.ts:241-261",
+      "src/app/api/qa/login/route.ts:169"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "El seed crea el setter QA con passwordResetRequired:true, y el jwt callback lo vuelve a leer de la DB y pisa el false del token qa-bypass, lo que manda a /cambiar-password. Fix elegido: que el seed lo cree en false."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 67,
+     "id_previo": "SEC-AUTH-03",
+     "titulo": "JWT no invalidado tras un password reset",
+     "severidad_original": "P1",
+     "estado_declarado": "CERRADO-SIN-TEST (:120): User.sessionVersion + chequeo en el jwt callback; sin test (propuesta en :315)",
+     "archivos_citados": [
+      "src/auth.ts:212-230",
+      "src/app/reset-password/actions.ts:76",
+      "src/app/cambiar-password/actions.ts:59",
+      "src/app/api/admin/users/[userId]/resend-credentials/route.ts:71"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "sessionVersion se incrementa en reset, cambio de password y resend-credentials, y el callback devuelve null si la versión no coincide."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 68,
+     "id_previo": "SEC-AUTH-04",
+     "titulo": "Sin middleware global (defensa en profundidad)",
+     "severidad_original": "P1",
+     "estado_declarado": "CERRADO-VERIFICADO parcial (:121): src/proxy.ts con matcher para admin, dashboard y setter y gates por rol; no cubre /api/* por diseño",
+     "archivos_citados": [
+      "src/proxy.ts:171-173",
+      "src/proxy.ts:104-108",
+      "src/proxy.ts:117-156",
+      "tests/e2e/19-security.spec.ts:4,12"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "Cubierto por un test e2e de redirect sin auth; cada route de /api hace su propio guard."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 69,
+     "id_previo": "SEC-RATELIMIT-01 / P1-5",
+     "titulo": "Rate-limit in-memory poroso en serverless",
+     "severidad_original": "P1",
+     "estado_declarado": "PARCIAL (:122): migrado al limiter compartido en Neon (fail-closed), salvo el login (Map in-memory) y magicLinkAction sin RL, que se re-emiten como SEC-05 y SEC-04",
+     "archivos_citados": [
+      "src/lib/rate-limit/limiter.ts:37-84",
+      "src/lib/rate-limit/presets.ts",
+      "src/app/login/actions.ts:8-48",
+      "src/app/login/actions.ts:135-158"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "P1-5 de 2026-05-auditoria-profunda (:104) es el mismo hallazgo; la maestra los une en :122."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 75,
+     "id_previo": "SEC-MISC-02",
+     "titulo": "Cookies de NextAuth sin config explícita",
+     "severidad_original": "P1",
+     "estado_declarado": "CERRADO-VERIFICADO (:130)",
+     "archivos_citados": [
+      "src/auth.ts:89-94",
+      "src/lib/auth-cookies.ts"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "Bloque de cookies explícito tomado de una fuente única."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 102,
+     "id_previo": "P0-6",
+     "titulo": "Queries admin sin scoping defensivo por org",
+     "severidad_original": "P0 (2026-05-auditoria-profunda)",
+     "estado_declarado": "PARCIAL (:149): se crearon los helpers de assert-ownership; una instancia nueva sin guard (runPreflightChecks) se re-emite como SEC-02",
+     "archivos_citados": [
+      "src/lib/auth/assert-ownership.ts",
+      "src/modules/chatbot/server/admin/preflightChecks.ts"
+     ],
+     "dominio_probable": "D3",
+     "resumen": "Existen assertTicketBelongsToOrg, assertProjectBelongsToOrg y callerCanAccessOrg; callerCanAccessOrg no tiene test (:328)."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 285,
+     "id_previo": "SEC-04",
+     "titulo": "magicLinkAction sin rate-limit",
+     "severidad_original": "P1",
+     "estado_declarado": "abierto al 2026-07-10 (sprint 3.0)",
+     "archivos_citados": [
+      "src/app/login/actions.ts:135-158",
+      "src/auth.ts:97-107"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "signIn('resend') manda un email real por Brevo sin límite por IP ni por email: permite bombing de inbox, quema créditos y da una señal de enumeración."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 286,
+     "id_previo": "SEC-05",
+     "titulo": "El brute-force de login sigue frenado por un limiter in-memory",
+     "severidad_original": "P1",
+     "estado_declarado": "abierto al 2026-07-10 (sprint 3.0); residual de SEC-RATELIMIT-01",
+     "archivos_citados": [
+      "src/app/login/actions.ts:8-48"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "El limiter es un Map por proceso: en Netlify multi-lambda el límite efectivo es 5×N intentos cada 5 min."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 1318,
+     "id_previo": "RESIL-05",
+     "titulo": "Brevo sin timeout bloquea el login por magic link",
+     "severidad_original": "P1",
+     "estado_declarado": "abierto al 2026-07-10 (sprint O2.4). rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:77 (CLEAN-R3, 2026-07-18) sigue listando Brevo raw sin timeout.",
+     "archivos_citados": [
+      "src/auth.ts:101-120",
+      "src/lib/email/brevo-service.ts",
+      "src/lib/integrations/brevo.ts"
+     ],
+     "dominio_probable": "D1",
+     "resumen": "sendVerificationRequest espera a Brevo sin AbortSignal: si Brevo se cuelga, el signIn queda colgado hasta el deadline de la función."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 1324,
+     "id_previo": "RESIL-07",
+     "titulo": "Cold-start de Neon fuera del chat: sin connect_timeout ni retry en portal, auth y contacto",
+     "severidad_original": "P1",
+     "estado_declarado": "abierto al 2026-07-10 (sprint O2.3; decisión: fail-open o fail-closed del form)",
+     "archivos_citados": [
+      "src/lib/prisma.ts:5-6",
+      "src/lib/actions/contact.ts:24",
+      "src/auth.ts:205-231"
+     ],
+     "dominio_probable": "D6",
+     "resumen": "El primer hit tras 5 minutos inactivo puede dar un 500 o un login fallido sin reintento. checkRateLimit del form de contacto queda fuera del try."
+    }
+   ],
+   "previas_omitidas": 0,
+   "planeado": [
+    {
+     "id": "PLAN-014",
+     "clave": "docs/bitacora-roadmap.md:7898",
+     "tipo": "pendiente",
+     "titulo": "/logout en ALWAYS_ALLOWED del middleware pero la ruta no existe",
+     "descripcion": "Allowance muerta preexistente (404).",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "src/proxy.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-006",
+     "clave": "docs/bitacora-roadmap.md:8108",
+     "tipo": "pendiente",
+     "titulo": "Verificación dinámica de sessionVersion multi-device",
+     "descripcion": "Probar que un token previo deja de funcionar tras el reset y que unstable_update({}) dispara trigger update en NextAuth beta.30.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "src/auth.ts",
+      "src/lib/actions/profile.ts",
+      "tambien en docs/bitacora-roadmap.md:8083",
+      "tambien en docs/bitacora-roadmap.md:8110"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-017",
+     "clave": "docs/bitacora-roadmap.md:12279",
+     "tipo": "pendiente",
+     "titulo": "Manejo de error en el envío del magic link",
+     "descripcion": "El resultado del envío no se inspecciona; throw on fail queda para sprint propio.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "src/auth.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-018",
+     "clave": "docs/bitacora-roadmap.md:12323",
+     "tipo": "pendiente",
+     "titulo": "Dead code getPostLoginPath en auth.ts",
+     "descripcion": "Función sin callers en auth.ts:65; limpieza en sprint propio.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "src/auth.ts",
+      "también en fuente:12288"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-019",
+     "clave": "docs/bitacora-roadmap.md:16881",
+     "tipo": "pendiente",
+     "titulo": "Hashes de auth-rate-limit sin salt",
+     "descripcion": "Esquemas C/D de hash de la plataforma siguen sin salt.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "src/lib/security/auth-rate-limit.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-012",
+     "clave": "docs/bitacora-roadmap.md:7546",
+     "tipo": "decision",
+     "titulo": "Resend solo para Magic Link; transaccionales por Brevo",
+     "descripcion": "forgot-password migró de Resend a Brevo por consistencia con resend-credentials.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "src/auth.ts",
+      "src/lib/email/brevo-service.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-001",
+     "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:398",
+     "tipo": "decision",
+     "titulo": "Acciones que tocan sessionVersion: llamada directa",
+     "descripcion": "Nunca <form action> con useActionState. Se usa startTransition con await y se navega o refresca después. Patrón: CambiarPasswordForm.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "auth.ts (jwt callback)",
+      "CambiarPasswordForm.tsx",
+      "tambien en Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:87"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-011",
+     "clave": "docs/bitacora-roadmap.md:6321",
+     "tipo": "hecho-declarado",
+     "titulo": "MS-8 — Login QA inyectable con triple candado",
+     "descripcion": "/api/qa/login mintea la cookie de NextAuth para 3 personas seed (super-admin, client-a, client-b) solo con QA_ALLOW_LOCALHOST=1, Host localhost y sin NETLIFY/VERCEL_ENV=production; seed de org qa-cliente-b.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "src/app/api/qa/login/route.ts",
+      "prisma/seed.ts",
+      ".env.example",
+      ".claude/agents/visual-qa.md"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-020",
+     "clave": "docs/bitacora-roadmap.md:7481",
+     "tipo": "hecho-declarado",
+     "titulo": "B12.5 — Reset de contraseña endurecido",
+     "descripcion": "Token de 45 min de un solo uso con invalidación de previos, mensaje anti-enumeration idéntico + dummy bcrypt, rate-limit por IP/email/admin (in-memory), Zod en los 3 endpoints, forgot-password migrado a Brevo y audit PASSWORD_CHANGED.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "src/lib/security/auth-rate-limit.ts",
+      "src/lib/email/templates/password-reset.ts",
+      "src/lib/actions/schemas.ts",
+      "src/app/forgot-password/actions.ts",
+      "src/app/reset-password/actions.ts",
+      "src/app/api/admin/users/[userId]/resend-credentials/route.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-005",
+     "clave": "docs/bitacora-roadmap.md:7968",
+     "tipo": "hecho-declarado",
+     "titulo": "B-SEC.3a — Invalidación de JWT al cambiar o resetear password",
+     "descripcion": "User.sessionVersion (migración aditiva) en el JWT; el callback jwt invalida tokens con versión distinta; incremento en reset, cambio de password, profile y resend-credentials; cierra SEC-AUTH-03.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "prisma/schema.prisma",
+      "prisma/migrations/20260526050401_add_user_session_version/migration.sql",
+      "src/types/next-auth.d.ts",
+      "src/auth.ts",
+      "src/app/reset-password/actions.ts",
+      "src/app/cambiar-password/actions.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-002",
+     "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:60",
+     "tipo": "hecho-declarado",
+     "titulo": "Bloque B: password en /cambiar-password",
+     "descripcion": "Visor Eye/EyeOff, regla 8+mayúscula+número en el cliente y en Zod, y botón deshabilitado hasta que sea válido. Mecanismo intacto. Falta el OK visual.",
+     "estado_declarado": "hecho (sin mergear)",
+     "refs": [
+      "9a1d841",
+      "f22f8d6",
+      "CambiarPasswordForm.tsx",
+      "cambiar-password/actions.ts",
+      "tambien en Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:165"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-008",
+     "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:73",
+     "tipo": "hecho-declarado",
+     "titulo": "Bloque B3: visor de password en /login",
+     "descripcion": "Alterna el tipo del input en FloatingField solo para password. No toca loginAction.",
+     "estado_declarado": "hecho (sin mergear)",
+     "refs": [
+      "e3740a2",
+      "src/app/login/page.tsx"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-015",
+     "clave": "docs/bitacora-roadmap.md:12242",
+     "tipo": "hecho-declarado",
+     "titulo": "D-AUTH inputs del login visibles",
+     "descripcion": "FloatingField con initial/animate propios.",
+     "estado_declarado": "hecho (verificación humana pendiente)",
+     "refs": [
+      "src/app/login/page.tsx"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-016",
+     "clave": "docs/bitacora-roadmap.md:12266",
+     "tipo": "hecho-declarado",
+     "titulo": "MAGIC-BREVO magic link por Brevo",
+     "descripcion": "sendVerificationRequest usa Brevo; se quitó el from muerto del provider.",
+     "estado_declarado": "hecho (verificación humana pendiente)",
+     "refs": [
+      "src/auth.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-009",
+     "clave": "docs/bitacora-beta-2.md:22",
+     "tipo": "hecho-declarado",
+     "titulo": "0.1 Auth QA-login: nombre de cookie de sesión unificado",
+     "descripcion": "src/lib/auth-cookies.ts fija SESSION_COOKIE_NAME/OPTIONS por NODE_ENV y lo importan qa/login, auth.ts y auth.config.ts; corrige prod sobre HTTP. Entrada reconstruida de la memoria del proyecto.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "src/lib/auth-cookies.ts",
+      "src/app/api/qa/login/route.ts",
+      "src/auth.ts",
+      "src/auth.config.ts",
+      "bug detectado en docs/bitacora-beta.md:1744"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-013",
+     "clave": "docs/bitacora-roadmap.md:7705",
+     "tipo": "pendiente",
+     "titulo": "Extender ?e2e=1 al DotMatrix de las páginas de auth",
+     "descripcion": "/login, /forgot-password y /reset-password no se pueden screenshottear headless porque el canvas no pinta el primer frame.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "DotMatrix",
+      "tambien en docs/bitacora-roadmap.md:7900"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-021",
+     "clave": "STATUS.md:190",
+     "tipo": "pendiente",
+     "titulo": "Acceso pospuesto a Beta",
+     "descripcion": "Self-service signup, 'olvidé mi contraseña' por email (P1-4) y 2FA.",
+     "estado_declarado": "pospuesto a Beta",
+     "refs": [
+      "tambien en :191, :192"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-007",
+     "clave": "docs/sprints/p3-a-2-venta.md:131",
+     "tipo": "pendiente",
+     "titulo": "CTA de upsell en preview admin",
+     "descripcion": "Falla con 'Sesión inválida.' porque SUPER_ADMIN no tiene organizationId.",
+     "estado_declarado": "aceptado (precedente P5.2)",
+     "refs": [],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-010",
+     "clave": "docs/bitacora-rediseno.md:3387",
+     "tipo": "pendiente",
+     "titulo": "/login no tiene <h1>",
+     "descripcion": "Preexistente, detectado al verificar que las rutas sirven contenido real.",
+     "estado_declarado": "pendiente (preexistente)",
+     "refs": [
+      "/login"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-004",
+     "clave": "docs/bitacora-roadmap.md:7621",
+     "tipo": "idea",
+     "titulo": "Endpoint logout-all",
+     "descripcion": "Invalidar todos los tokens de un usuario para revocación post-incidente; no urgente.",
+     "estado_declarado": "sin estado",
+     "refs": [],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-003",
+     "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:86",
+     "tipo": "decision",
+     "titulo": "Regla única de password: 8 caracteres, mayúscula y número",
+     "descripcion": "Una sola regla en todo el producto, en el cliente y en Zod del server.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "CambiarPasswordSchema",
+      "UpdatePasswordSchema",
+      "tambien en Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:187"
+     ],
+     "zona_franco": false
+    }
+   ],
+   "planeado_omitidos": [],
+   "insumos": null
+  }
+ ]
+}

@@ -1,0 +1,857 @@
+{
+ "items": [
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-login",
+   "id": "h1.auth-login.login-password",
+   "nombre": "Login con email y contrasena",
+   "descripcion": "Formulario de /login que autentica con Credentials (bcrypt) y redirige por rol",
+   "archivos": [
+    "src/app/login/page.tsx",
+    "src/app/login/actions.ts",
+    "src/auth.ts",
+    "src/lib/auth-cookies.ts",
+    "src/proxy.ts"
+   ],
+   "entradas": [
+    "loginAction",
+    "POST /api/auth/callback/credentials"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: page.tsx:347 -> actions.ts:65-111 -> auth.ts:142-169 (bcrypt :157) -> signIn callback auth.ts:192-203 -> jwt auth.ts:209-230 -> redirect actions.ts:102-108 -> proxy.ts:134-146 / layouts",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "signIn exige org salvo SUPER_ADMIN/SETTER (auth.ts:195-201); org refrescada de DB en cada auth() (auth.ts:209-230)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Formulario sin colecciones"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Muestra el error de la action (page.tsx:351-360) pero no lee ?error del signIn callback; EMAIL_NOT_VERIFIED nunca mapea (actions.ts:119)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "SubmitButton con spinner (page.tsx:136-164, :363)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Validacion manual sin Zod (actions.ts:68-74)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "max-w-[400px] y px-4 (page.tsx:239, :475) OK; visor de ~16px sin padding (:114) y tabs ~32px (:317-334)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "No manejados via onRequestError (instrumentation.ts:49) y error.tsx raiz; fallos manejados solo console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "La misma pantalla tiene copy de dev en magic link (page.tsx:192-197) y un boton Google que no completa"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Email con mayusculas en el alta impide entrar (createClientOnly.ts:91 vs auth.ts:143); bucle tras invalidacion exige borrar cookies"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-login",
+   "id": "h1.auth-login.magic-link",
+   "nombre": "Ingreso por magic link",
+   "descripcion": "Envio de link de acceso de un solo uso por email (provider Resend con envio por Brevo)",
+   "archivos": [
+    "src/app/login/page.tsx",
+    "src/app/login/actions.ts",
+    "src/auth.ts",
+    "src/lib/email/brevo-service.ts"
+   ],
+   "entradas": [
+    "magicLinkAction",
+    "POST /api/auth/signin/resend",
+    "GET /api/auth/callback/resend"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:204 -> actions.ts:140-151 -> send-token.js:23-33 (signIn callback auth.ts:175-186) -> auth.ts:101-120 -> brevo-service.ts:25-39 -> callback route.ts:3 -> /dashboard (actions.ts:148)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Al consumir el link corre el signIn callback con chequeo de org (auth.ts:192-201)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Fallo de envio invisible (auth.ts:104 ignora el resultado); link vencido cae en la pagina de error por defecto de Auth.js (pages.error no configurado, auth.ts:95)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "SubmitButton 'Generando link...' (page.tsx:223)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Manual: presencia y '@' (actions.ts:142-143)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Mismo layout max-w-[400px] px-4 (page.tsx:239, :475)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Error de Brevo solo console.error (brevo-service.ts:41) y descartado en auth.ts:104"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Copy 'consola del servidor' (page.tsx:194-197)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Si el envio falla el cliente ve exito y no sabe que hacer"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-login",
+   "id": "h1.auth-login.google-oauth",
+   "nombre": "Ingreso con Google",
+   "descripcion": "Boton 'Continuar con Google' (OAuth)",
+   "archivos": [
+    "src/app/login/page.tsx",
+    "src/app/login/actions.ts",
+    "src/auth.ts"
+   ],
+   "entradas": [
+    "googleSignInAction",
+    "GET /api/auth/callback/google"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "El boton (page.tsx:286-299) inicia OAuth (actions.ts:162-164) pero el signIn callback rechaza toda cuenta sin Account vinculada (user.id = sub, auth.ts:125 y :192-201; callback/index.js:64) y no existe camino que vincule (git grep account.create/linkAccount vacio); AUTH_GOOGLE_* no documentadas",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Rechaza a quien no tiene usuario/org (auth.ts:195-201)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "/login no lee ?error=unauthorized (sin searchParams en src/app/login)"
+    },
+    "carga": {
+     "cumple": "no",
+     "evidencia": "Form sin estado pending (page.tsx:286-299)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input propio"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Boton w-full (page.tsx:289)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo errores no manejados"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Affordance visible que no puede completar"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Ningun cliente puede ingresar por esta via"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-login",
+   "id": "h1.auth-login.ruteo-por-rol",
+   "nombre": "Ruteo y proteccion por rol",
+   "descripcion": "Proxy de Next 16 y layouts que envian a cada rol a su zona",
+   "archivos": [
+    "src/proxy.ts",
+    "src/auth.config.ts",
+    "src/app/(protected)/admin/layout.tsx",
+    "src/app/(protected)/setter/layout.tsx",
+    "src/app/(protected)/dashboard/layout.tsx",
+    "src/lib/preview.ts"
+   ],
+   "entradas": [
+    "proxy (matcher /admin, /dashboard, /setter, /login, /bienvenida, /cambiar-password)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "proxy.ts:98-168 (SETTER :117-122, admin :148-152, dashboard :154-156) + re-chequeo en Node: admin/layout.tsx:43-49, setter/layout.tsx:28-34, dashboard/layout.tsx:90-92 via preview.ts:6-20",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Layouts re-chequean rol/org; open redirect por callbackUrl (proxy.ts:18-20, :135-136); CLIENT en bucle (:154)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Sesion invalidada produce bucle sin mensaje (proxy.ts:134-146 vs dashboard/layout.tsx:90-92)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "callbackUrl validado debil (proxy.ts:18-20)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos falsos; hay codigo muerto (proxy.ts:22-65)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Salir del bucle exige borrar cookies"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-login",
+   "id": "h1.auth-login.sesion-jwt",
+   "nombre": "Sesion JWT, expiracion e invalidacion",
+   "descripcion": "Ciclo de vida de la sesion: refresco de rol/org, 8 h declaradas, invalidacion por sessionVersion",
+   "archivos": [
+    "src/auth.ts",
+    "src/auth.config.ts",
+    "src/lib/auth-cookies.ts",
+    "src/types/next-auth.d.ts"
+   ],
+   "entradas": [
+    "GET/POST /api/auth/session",
+    "auth()"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "jwt refresca de DB en cada auth() (auth.ts:205-231); invalida en Node por version (auth.ts:215-223); cookie explicita (auth-cookies.ts:21-30)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Invalidacion revivible por POST /api/auth/session (auth.ts:215-217); usuario borrado conserva sesion (auth.ts:61, :44)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Bucle de redirecciones al invalidar"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin mocks"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Expira a 30 dias deslizantes (auth.config.ts:12) y el bucle exige ayuda"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-login",
+   "id": "h1.auth-login.logout",
+   "nombre": "Cerrar sesion",
+   "descripcion": "Boton de logout en admin, setter y portal",
+   "archivos": [
+    "src/actions/auth-actions.ts"
+   ],
+   "entradas": [
+    "signOutAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "admin-topbar.tsx:85 / setter/layout.tsx:76 / DashboardLayoutClient.tsx:150 -> auth-actions.ts:5-7 -> signOut -> /login",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Opera sobre la cookie propia"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "Form sin estado pending (setter/layout.tsx:76-85)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Boton 36px con aria-label (setter/layout.tsx:77-84)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo no manejados"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin mocks"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Un clic; deja viva la cookie de impersonacion"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-recupero",
+   "id": "h1.auth-recupero.solicitar-enlace",
+   "nombre": "Pedir enlace de recupero",
+   "descripcion": "/forgot-password envia un link de reset de 45 min por Brevo con respuesta anti-enumeracion",
+   "archivos": [
+    "src/app/forgot-password/page.tsx",
+    "src/app/forgot-password/actions.ts",
+    "src/lib/security/auth-rate-limit.ts",
+    "src/lib/rate-limit/limiter.ts"
+   ],
+   "entradas": [
+    "forgotPasswordAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "login/page.tsx:365-370 -> forgot-password/page.tsx:120 -> actions.ts:29-57 (Zod + limites) -> :73-83 token -> :96-101 Brevo -> exito :109",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Sin datos de tenant; anti-enumeracion (actions.ts:17-18)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Error de validacion visible (page.tsx:150-159); exito identico por diseno"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Spinner 'Enviando...' (page.tsx:183-201)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "ForgotPasswordSchema (actions.ts:29-38)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "max-w-[400px], input py-3 (page.tsx:45, :139-145)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Fallo de Brevo solo console.error (actions.ts:104-106)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin mocks"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Flujo completo sin develOP si Brevo funciona"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-recupero",
+   "id": "h1.auth-recupero.restablecer-password",
+   "nombre": "Restablecer contrasena con el token",
+   "descripcion": "/reset-password fija la nueva contrasena e invalida sesiones",
+   "archivos": [
+    "src/app/reset-password/page.tsx",
+    "src/app/reset-password/ResetPasswordForm.tsx",
+    "src/app/reset-password/actions.ts",
+    "src/lib/actions/schemas.ts"
+   ],
+   "entradas": [
+    "resetPasswordAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:10-11 -> ResetPasswordForm.tsx:186-188 -> actions.ts:19-40 -> :45-63 token -> :68-84 transaccion -> :87-96 audit -> exito ResetPasswordForm.tsx:146-183",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Token de un solo uso, sin tenant"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "ResetPasswordForm.tsx:205-214 y token ausente :116-145"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Spinner 'Actualizando...' (:238-256)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod sin regla mayuscula+numero (schemas.ts:94-97)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "max-w-[400px], inputs py-3 (ResetPasswordForm.tsx:80, :55-61)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo no manejados; fallo del audit se traga (audit-log.ts:39-41)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin mocks"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Otros dispositivos quedan en bucle; token vencido recien se detecta al enviar"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-cambio",
+   "id": "h1.auth-cambio.cambio-forzado",
+   "nombre": "Cambio obligatorio de contrasena temporal",
+   "descripcion": "/cambiar-password forzado por passwordResetRequired",
+   "archivos": [
+    "src/app/cambiar-password/page.tsx",
+    "src/app/cambiar-password/CambiarPasswordForm.tsx",
+    "src/app/cambiar-password/actions.ts",
+    "src/proxy.ts"
+   ],
+   "entradas": [
+    "cambiarPasswordAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "auth.ts:168 -> proxy.ts:84-90 -> page.tsx:6-27 -> CambiarPasswordForm.tsx:116-131 -> actions.ts:25-75 (update :51-61, unstable_update :73) -> router.push :126",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Solo la cuenta de la sesion (actions.ts:25-38)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast.error (CambiarPasswordForm.tsx:128) y errores por campo (:140-180)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Button loading (:203)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod 8+mayuscula+numero (actions.ts:12-19)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "max-w-md p-4 (page.tsx:10-11)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo no manejados"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Copy 'antes de entrar' tambien en cambio voluntario (page.tsx:19-21)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Sin link a /forgot-password si no tiene la temporal"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-invite",
+   "id": "h1.auth-invite.emitir-invitacion",
+   "nombre": "Emitir invitacion",
+   "descripcion": "Generar y enviar link /accept-invite a un cliente o miembro de equipo",
+   "archivos": [
+    "src/lib/actions/invitations.ts",
+    "src/lib/actions/settings.ts",
+    "src/lib/email.ts"
+   ],
+   "entradas": [
+    "inviteClientAction",
+    "inviteTeamMemberAction"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "inviteClientAction (invitations.ts:43-118) sin callers y sin envio (mensaje falso :116); inviteTeamMemberAction (settings.ts:148-237) en modulo sin importadores, por Resend",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "SUPER_ADMIN (invitations.ts:47-50; settings.ts:20-28)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Exito aunque no envie (invitations.ts:116; settings.ts:229 con email.ts:15-16)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI conectada"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Regex manual (invitations.ts:56-59; settings.ts:157-161)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Mensaje 'impreso en la consola'"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "No hay forma de emitir desde el producto"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-invite",
+   "id": "h1.auth-invite.aceptar-invitacion",
+   "nombre": "Aceptar invitacion y definir contrasena",
+   "descripcion": "/accept-invite activa la cuenta sin contrasena",
+   "archivos": [
+    "src/app/accept-invite/page.tsx",
+    "src/app/accept-invite/AcceptInviteForm.tsx",
+    "src/app/accept-invite/InviteBackground.tsx",
+    "src/app/accept-invite/actions.ts"
+   ],
+   "entradas": [
+    "acceptInviteAction"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "AcceptInviteForm.tsx:187 -> actions.ts:15-82 funciona con un token, pero nada vivo entrega tokens de invitacion (h1.auth-invite.emitir-invitacion)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Token"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "AcceptInviteForm.tsx:210-219"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Spinner 'Activando cuenta...' (:243-261)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Manual sin Zod, min 8 (actions.ts:19-34)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "max-w-[400px], inputs py-3 (:80, :55-61)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo no manejados"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin mocks"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Sin emisor vivo"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-impersonacion",
+   "id": "h1.auth-impersonacion.iniciar",
+   "nombre": "Iniciar sesion de soporte (impersonar)",
+   "descripcion": "SUPER_ADMIN entra al portal de un cliente por 30 min",
+   "archivos": [
+    "src/lib/actions/impersonation.ts",
+    "src/lib/impersonation.ts",
+    "src/lib/impersonation-constants.ts"
+   ],
+   "entradas": [
+    "startImpersonationAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ImpersonateButton.tsx:24 -> client.actions.ts:8-9 -> impersonation.ts (actions) :12-47 -> cookie + audit -> /dashboard",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Solo SUPER_ADMIN (:13-15); token atado a adminId (lib/impersonation.ts:68)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Error solo console.error (ImpersonateButton.tsx:25-27); org inexistente redirige en silencio (:22-24)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "ConfirmDialog con isPending (ImpersonateButton.tsx:18, :49)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "orgId sin Zod (:11)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo no manejados"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin mocks"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Uso interno"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-impersonacion",
+   "id": "h1.auth-impersonacion.navegar-como-cliente",
+   "nombre": "Ver el portal como el cliente",
+   "descripcion": "Preview del portal con banner y temporizador",
+   "archivos": [
+    "src/lib/preview.ts",
+    "src/lib/impersonation.ts",
+    "src/app/(protected)/dashboard/layout.tsx"
+   ],
+   "entradas": [
+    "resolveOrgId",
+    "getImpersonationSession"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "proxy.ts:154 -> dashboard/layout.tsx:72-77 -> preview.ts:14-17 -> impersonation.ts:54-80 -> banner layout.tsx:148-153",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Firma, adminId y vencimiento verificados (impersonation.ts:66-76)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Los del portal"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Actions con session.user.organizationId fallan con 'Sesion invalida.' (profile.ts:29-33, upsell.ts:16-19)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading.tsx del dashboard"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "jwtVerify (impersonation.ts:33)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Banner flex-col sm:flex-row (ImpersonationBanner.tsx:13)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary captura (SectionErrorBoundary.tsx:64)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin mocks"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Uso interno"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h1.auth-impersonacion",
+   "id": "h1.auth-impersonacion.terminar",
+   "nombre": "Terminar sesion de soporte",
+   "descripcion": "Boton 'Salir' del banner",
+   "archivos": [
+    "src/lib/actions/impersonation.ts"
+   ],
+   "entradas": [
+    "stopImpersonationAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ImpersonationBanner.tsx:28 -> impersonation.ts (actions) :50-79 (borra cookie, audita, /admin/clients)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Solo borra la cookie propia"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "carga": {
+     "cumple": "no",
+     "evidencia": "Form sin pending (ImpersonationBanner.tsx:28-35)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Boton py-2 en banner responsive"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo no manejados"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin mocks"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Uso interno"
+    }
+   }
+  },
+  {
+   "ciclo": "D1-c1",
+   "lote": "D1-L1",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.cambiar-password",
+   "nombre": "Cambiar contrasena desde Mi Cuenta",
+   "descripcion": "Cambio voluntario con regla unica y sessionVersion",
+   "archivos": [
+    "src/lib/actions/profile.ts",
+    "src/components/dashboard/ProfileForms.tsx"
+   ],
+   "entradas": [
+    "updatePasswordAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ProfileForms.tsx:374-394 (invocacion directa) -> profile.ts:191-232 -> unstable_update :239 -> router.refresh (ProfileForms.tsx:392)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Solo session.user.id (profile.ts:191-196)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "n/a"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Feedback del state (ProfileForms.tsx:401)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "SaveButton isPending (ProfileForms.tsx:532)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpdatePasswordSchema (profile.ts:198-206)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 sm:grid-cols-3 (ProfileForms.tsx:403)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "catch solo console.error (profile.ts:242-244); error.tsx de cuenta captura render"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin mocks"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Completo sin develOP"
+    }
+   }
+  }
+ ]
+}

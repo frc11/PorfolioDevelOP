@@ -685,7 +685,7 @@ logic-core-v3/sentry.edge.config.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/sentry.server.config.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/src/actions/admin/onboarding-tasks.ts,D3,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/actions/agency-actions.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/actions/auth-actions.ts,D1,profundo,pendiente,,server-actions; server-action; usa-auth
+logic-core-v3/src/actions/auth-actions.ts,D1,profundo,leído,D1-c1,server-actions; server-action; usa-auth
 logic-core-v3/src/actions/dashboard-actions.ts,D2,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db; FROZEN
 logic-core-v3/src/actions/metrics-actions.ts,D3,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/actions/onboarding-actions.ts,D2,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
@@ -1124,10 +1124,10 @@ logic-core-v3/src/app/(protected)/setter/nuevo/importar/page.tsx,D4,profundo,pen
 logic-core-v3/src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/setter/nuevo/page.tsx,D4,profundo,pendiente,,setter; toca-db; guard-indirecto; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/setter/page.tsx,D4,profundo,pendiente,,setter; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/accept-invite/AcceptInviteForm.tsx,D1,profundo,pendiente,,auth-ui; client-component
-logic-core-v3/src/app/accept-invite/InviteBackground.tsx,D1,profundo,pendiente,,auth-ui; client-component
-logic-core-v3/src/app/accept-invite/actions.ts,D1,profundo,pendiente,,auth-ui; toca-db; server-action; escribe-db
-logic-core-v3/src/app/accept-invite/page.tsx,D1,profundo,pendiente,,auth-ui
+logic-core-v3/src/app/accept-invite/AcceptInviteForm.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
+logic-core-v3/src/app/accept-invite/InviteBackground.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
+logic-core-v3/src/app/accept-invite/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; escribe-db
+logic-core-v3/src/app/accept-invite/page.tsx,D1,profundo,leído,D1-c1,auth-ui
 logic-core-v3/src/app/ai-implementations/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/ai-implementations/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
 logic-core-v3/src/app/api/admin/alerts/trigger-detector/route.ts,D3,profundo,pendiente,,api-admin; usa-auth; route-handler
@@ -1139,7 +1139,7 @@ logic-core-v3/src/app/api/admin/chatbot/test-prompt/route.ts,D5,profundo,pendien
 logic-core-v3/src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts,D3,profundo,pendiente,,api-admin; usa-auth; guard-indirecto; route-handler
 logic-core-v3/src/app/api/admin/reports/send-now/route.ts,D3,profundo,pendiente,,api-admin; usa-auth; route-handler
 logic-core-v3/src/app/api/admin/users/[userId]/resend-credentials/route.ts,D3,profundo,pendiente,,api-admin; toca-db; usa-auth; route-handler; escribe-db
-logic-core-v3/src/app/api/auth/[...nextauth]/route.ts,D1,profundo,pendiente,,nextauth; usa-auth; route-handler
+logic-core-v3/src/app/api/auth/[...nextauth]/route.ts,D1,profundo,leído,D1-c1,nextauth; usa-auth; route-handler
 logic-core-v3/src/app/api/auth/google-business/callback/route.ts,D7,profundo,pendiente,,oauth; toca-db; usa-auth; route-handler; escribe-db
 logic-core-v3/src/app/api/auth/google-business/start/route.ts,D7,profundo,pendiente,,oauth; usa-auth; route-handler
 logic-core-v3/src/app/api/auth/tiendanube/callback/route.ts,D7,profundo,pendiente,,oauth; toca-db; usa-auth; route-handler; escribe-db
@@ -1164,7 +1164,7 @@ logic-core-v3/src/app/api/dev/email-preview/executive-weekly/route.ts,D7,profund
 logic-core-v3/src/app/api/email/optout/[contactId]/route.ts,D7,profundo,pendiente,,api-integracion; toca-db; route-handler; escribe-db
 logic-core-v3/src/app/api/email/unsubscribe-executive/route.ts,D7,profundo,pendiente,,api-integracion; toca-db; route-handler; escribe-db
 logic-core-v3/src/app/api/motor/webhook/[channelToken]/route.ts,D5,profundo,pendiente,,motor; webhook; route-handler
-logic-core-v3/src/app/api/qa/login/route.ts,D1,profundo,pendiente,,qa-login; toca-db; route-handler; escribe-db; ZONA-FRANCO
+logic-core-v3/src/app/api/qa/login/route.ts,D1,profundo,leído,D1-c1,qa-login; toca-db; route-handler; escribe-db; ZONA-FRANCO
 logic-core-v3/src/app/api/reports/client-monthly/route.ts,D2,profundo,pendiente,,api-dashboard; guard-indirecto; route-handler
 logic-core-v3/src/app/api/reports/monthly/route.ts,D2,profundo,pendiente,,api-dashboard; toca-db; usa-auth; route-handler
 logic-core-v3/src/app/api/test-sentry/route.ts,D7,profundo,pendiente,,api-integracion; route-handler
@@ -1177,29 +1177,29 @@ logic-core-v3/src/app/bienvenida/_components/Step2Conexiones.tsx,D2,profundo,pen
 logic-core-v3/src/app/bienvenida/_components/Step3Tour.tsx,D2,profundo,pendiente,,onboarding-cliente; client-component
 logic-core-v3/src/app/bienvenida/layout.tsx,D2,profundo,pendiente,,onboarding-cliente; usa-auth
 logic-core-v3/src/app/bienvenida/page.tsx,D2,profundo,pendiente,,onboarding-cliente; toca-db; usa-auth; guard-indirecto
-logic-core-v3/src/app/cambiar-password/CambiarPasswordForm.tsx,D1,profundo,pendiente,,auth-ui; client-component
-logic-core-v3/src/app/cambiar-password/actions.ts,D1,profundo,pendiente,,auth-ui; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/app/cambiar-password/page.tsx,D1,profundo,pendiente,,auth-ui; usa-auth
+logic-core-v3/src/app/cambiar-password/CambiarPasswordForm.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
+logic-core-v3/src/app/cambiar-password/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/app/cambiar-password/page.tsx,D1,profundo,leído,D1-c1,auth-ui; usa-auth
 logic-core-v3/src/app/contact/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/contact/page.tsx,D3,profundo,pendiente,,UI del endpoint publico submitContactForm; captura ?ref=; client-component
 logic-core-v3/src/app/embed/[slug]/page.tsx,D5,profundo,pendiente,,embed; toca-db
 logic-core-v3/src/app/embed/layout.tsx,D5,profundo,pendiente,,embed
 logic-core-v3/src/app/error.tsx,D8,profundo,pendiente,,raiz-app; client-component
 logic-core-v3/src/app/favicon.ico,-,fuera,excluido-generado,,asset-binario
-logic-core-v3/src/app/forgot-password/actions.ts,D1,profundo,pendiente,,auth-ui; toca-db; server-action; escribe-db
-logic-core-v3/src/app/forgot-password/page.tsx,D1,profundo,pendiente,,auth-ui; client-component
+logic-core-v3/src/app/forgot-password/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; escribe-db
+logic-core-v3/src/app/forgot-password/page.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
 logic-core-v3/src/app/global-error.tsx,D8,profundo,pendiente,,raiz-app; client-component
 logic-core-v3/src/app/globals.css,D8,profundo,pendiente,,raiz-app
 logic-core-v3/src/app/layout.tsx,D8,profundo,pendiente,,raiz-app
-logic-core-v3/src/app/login/actions.ts,D1,profundo,pendiente,,auth-ui; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/app/login/page.tsx,D1,profundo,pendiente,,auth-ui; client-component
+logic-core-v3/src/app/login/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/app/login/page.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
 logic-core-v3/src/app/not-found.tsx,D8,profundo,pendiente,,raiz-app; client-component
 logic-core-v3/src/app/page.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/process-automation/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/process-automation/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
-logic-core-v3/src/app/reset-password/ResetPasswordForm.tsx,D1,profundo,pendiente,,auth-ui; client-component
-logic-core-v3/src/app/reset-password/actions.ts,D1,profundo,pendiente,,auth-ui; toca-db; server-action; escribe-db
-logic-core-v3/src/app/reset-password/page.tsx,D1,profundo,pendiente,,auth-ui
+logic-core-v3/src/app/reset-password/ResetPasswordForm.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
+logic-core-v3/src/app/reset-password/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; escribe-db
+logic-core-v3/src/app/reset-password/page.tsx,D1,profundo,leído,D1-c1,auth-ui
 logic-core-v3/src/app/robots.ts,PUB,superficial,superficial,F1,seo
 logic-core-v3/src/app/sitemap.ts,PUB,superficial,superficial,F1,seo
 logic-core-v3/src/app/software-development/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
@@ -1216,8 +1216,8 @@ logic-core-v3/src/app/styleguide/_components/TypographyBlock.tsx,PUB,superficial
 logic-core-v3/src/app/styleguide/page.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/web-development/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/web-development/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
-logic-core-v3/src/auth.config.ts,D1,profundo,pendiente,,auth
-logic-core-v3/src/auth.ts,D1,profundo,pendiente,,auth; toca-db; FROZEN; ZONA-FRANCO
+logic-core-v3/src/auth.config.ts,D1,profundo,leído,D1-c1,auth
+logic-core-v3/src/auth.ts,D1,profundo,leído,D1-c1,auth; toca-db; FROZEN; ZONA-FRANCO
 logic-core-v3/src/components/3d/BrandedLogoWhite.tsx,D9,profundo,pendiente,,compartido: lo importa components/ui (FROZEN) (src/components/ui/BrandedIntroCanvas.tsx); componentes-sitio-publico; client-component
 logic-core-v3/src/components/3d/HeroArtifact.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component; FROZEN
 logic-core-v3/src/components/admin/MessagesScrollAnchor.tsx,D3,profundo,pendiente,,componentes-admin; client-component
@@ -1493,13 +1493,13 @@ logic-core-v3/src/lib/actions/announcements.ts,D2,profundo,pendiente,,server-act
 logic-core-v3/src/lib/actions/clients.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/contact.ts,D3,profundo,pendiente,,server-actions; endpoint-publico; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/gbp-connection.ts,D7,profundo,pendiente,,server-actions; server-action; usa-auth
-logic-core-v3/src/lib/actions/impersonation.ts,D1,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/lib/actions/impersonation.ts,D1,profundo,leído,D1-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/invitations.ts,D1,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/lib/actions/leads-constants.ts,D3,profundo,pendiente,,server-actions
 logic-core-v3/src/lib/actions/leads.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/messages.ts,D2,profundo,pendiente,,server-actions del cliente; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/notifications.ts,D2,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/lib/actions/profile.ts,D1,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/lib/actions/profile.ts,D1,profundo,leído,D1-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/projects.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/referrals.ts,D2,profundo,pendiente,,server-actions; server-action; usa-auth
 logic-core-v3/src/lib/actions/schemas.ts,D3,profundo,pendiente,,server-actions
@@ -1520,9 +1520,9 @@ logic-core-v3/src/lib/announcements/get-announcements-for-org.ts,D2,profundo,pen
 logic-core-v3/src/lib/announcements/visibility.ts,D2,profundo,pendiente,,logica-dashboard
 logic-core-v3/src/lib/audit-log-queries.ts,D3,profundo,pendiente,,logica-admin; toca-db; server-action; guard-indirecto
 logic-core-v3/src/lib/audit-log.ts,D3,profundo,pendiente,,logica-admin; toca-db; escribe-db; FROZEN-inferido
-logic-core-v3/src/lib/auth-cookies.ts,D1,profundo,pendiente,,auth; ZONA-FRANCO
-logic-core-v3/src/lib/auth-guards.ts,D1,profundo,pendiente,,auth; usa-auth; guard-indirecto; FROZEN-inferido
-logic-core-v3/src/lib/auth/assert-ownership.ts,D1,profundo,pendiente,,auth; toca-db; escribe-db
+logic-core-v3/src/lib/auth-cookies.ts,D1,profundo,leído,D1-c1,auth; ZONA-FRANCO
+logic-core-v3/src/lib/auth-guards.ts,D1,profundo,leído,D1-c1,auth; usa-auth; guard-indirecto; FROZEN-inferido
+logic-core-v3/src/lib/auth/assert-ownership.ts,D1,profundo,leído,D1-c1,auth; toca-db; escribe-db
 logic-core-v3/src/lib/billing/get-current-plan.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
 logic-core-v3/src/lib/bulk-actions.ts,D3,profundo,pendiente,,logica-admin; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/chromeReveal.ts,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/modules/chatbot/components/LogicCompanion.tsx); lib-sitio-publico; FROZEN-inferido
@@ -1566,8 +1566,8 @@ logic-core-v3/src/lib/follow-up.ts,D4,profundo,pendiente,,leados-libre
 logic-core-v3/src/lib/health-score.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
 logic-core-v3/src/lib/home-routes.ts,D9,profundo,pendiente,,compartido: lo importa components/ui (FROZEN) (src/components/ui/Preloader.tsx); lib-sitio-publico
 logic-core-v3/src/lib/hover.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/alerts/AlertsClient.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +39); lib-sitio-publico; FROZEN-inferido"
-logic-core-v3/src/lib/impersonation-constants.ts,D1,profundo,pendiente,,auth
-logic-core-v3/src/lib/impersonation.ts,D1,profundo,pendiente,,auth; usa-auth
+logic-core-v3/src/lib/impersonation-constants.ts,D1,profundo,leído,D1-c1,auth
+logic-core-v3/src/lib/impersonation.ts,D1,profundo,leído,D1-c1,auth; usa-auth
 logic-core-v3/src/lib/integrations/brevo.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/integrations/cal-com-v2.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/integrations/cal-com.ts,D7,profundo,pendiente,,integracion; toca-db
@@ -1685,8 +1685,8 @@ logic-core-v3/src/lib/premium-modules.ts,D2,profundo,pendiente,,logica-dashboard
 logic-core-v3/src/lib/preview.ts,D2,profundo,pendiente,,tenant-scope (resolveOrgId del portal); usa-auth; guard-indirecto
 logic-core-v3/src/lib/prisma-enums.ts,D6,profundo,pendiente,,datos
 logic-core-v3/src/lib/prisma.ts,D6,profundo,pendiente,,datos; toca-db; FROZEN
-logic-core-v3/src/lib/rate-limit/limiter.ts,D1,profundo,pendiente,,rate-limit; toca-db
-logic-core-v3/src/lib/rate-limit/presets.ts,D1,profundo,pendiente,,rate-limit
+logic-core-v3/src/lib/rate-limit/limiter.ts,D1,profundo,leído,D1-c1,rate-limit; toca-db
+logic-core-v3/src/lib/rate-limit/presets.ts,D1,profundo,leído,D1-c1,rate-limit
 logic-core-v3/src/lib/recommendations/get-recommendations-for-org.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
 logic-core-v3/src/lib/recommendations/recommendations.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
 logic-core-v3/src/lib/recommendations/rules.ts,D2,profundo,pendiente,,logica-dashboard
@@ -1708,9 +1708,9 @@ logic-core-v3/src/lib/reports/executive-weekly/send-manual.ts,D2,profundo,pendie
 logic-core-v3/src/lib/reports/executive-weekly/send.ts,D2,profundo,pendiente,,logica-dashboard; toca-db; escribe-db
 logic-core-v3/src/lib/reports/executive-weekly/top-hot-leads.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
 logic-core-v3/src/lib/searchconsole.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/security/auth-rate-limit.ts,D1,profundo,pendiente,,seguridad
-logic-core-v3/src/lib/security/generate-temp-password.ts,D1,profundo,pendiente,,seguridad
-logic-core-v3/src/lib/security/idor-tokens.invariant.ts,D1,superficial,pendiente,,seguridad; test
+logic-core-v3/src/lib/security/auth-rate-limit.ts,D1,profundo,leído,D1-c1,seguridad
+logic-core-v3/src/lib/security/generate-temp-password.ts,D1,profundo,leído,D1-c1,seguridad
+logic-core-v3/src/lib/security/idor-tokens.invariant.ts,D1,superficial,superficial,D1-c1,"seguridad; test | test: cubre el token firmado del opt-out por contacto (/api/email/optout, D7) y resolveScopedOrgId (org-scope.ts); sin DB"
 logic-core-v3/src/lib/security/oauth-state.ts,D7,profundo,pendiente,,oauth
 logic-core-v3/src/lib/security/org-scope.ts,D2,profundo,pendiente,,tenant-scope; guard-indirecto
 logic-core-v3/src/lib/security/origin-matcher.ts,D5,profundo,pendiente,,origen-widget
@@ -2097,8 +2097,8 @@ logic-core-v3/src/modules/motor/domain/identity.ts,D5,profundo,pendiente,,motor;
 logic-core-v3/src/modules/motor/domain/prisma-errors.ts,D5,profundo,pendiente,,motor
 logic-core-v3/src/modules/motor/domain/window.ts,D5,profundo,pendiente,,motor
 logic-core-v3/src/modules/motor/services/sendMessage.ts,D5,profundo,pendiente,,motor; toca-db; escribe-db
-logic-core-v3/src/proxy.ts,D1,profundo,pendiente,,auth
-logic-core-v3/src/types/next-auth.d.ts,D1,profundo,pendiente,,tipos-sesion
+logic-core-v3/src/proxy.ts,D1,profundo,leído,D1-c1,auth
+logic-core-v3/src/types/next-auth.d.ts,D1,profundo,leído,D1-c1,tipos-sesion
 logic-core-v3/tailwind.config.ts,D8,profundo,pendiente,,config
 logic-core-v3/test-chat.mjs,D9,superficial,pendiente,,script-suelto-raiz-app
 logic-core-v3/tests/e2e/01-landing.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test

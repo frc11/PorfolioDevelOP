@@ -7,7 +7,7 @@
 ## Resumen
 
 - Ítems: **1351** — por tipo: decision 212 · hecho-declarado 443 · idea 56 · pendiente 556 · promesa 6 · bloque 78.
-- Estado en código: por cruzar 1351.
+- Estado en código: hecho 8 · parcial 4 · no empezado 9 · por cruzar 1330.
 - ZONA-FRANCO: 361 ítems.
 - TODO/FIXME en el código de `origin/main`: 70 (`_crudo/todos-codigo.json`).
 
@@ -76,47 +76,47 @@
 - Nodo(s): h1.auth-cambio
 - Qué es: Nunca <form action> con useActionState. Se usa startTransition con await y se navega o refresca después. Patrón: CambiarPasswordForm.
 - Referencias: auth.ts (jwt callback) · CambiarPasswordForm.tsx · tambien en Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:87
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — CambiarPasswordForm.tsx:116-131 y ProfileForms.tsx:374-394 invocan directo con startTransition y navegan/refrescan despues (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-002] Bloque B: password en /cambiar-password
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:60` · tipo: hecho-declarado · estado declarado: hecho (sin mergear)
 - Nodo(s): h1.auth-cambio
 - Qué es: Visor Eye/EyeOff, regla 8+mayúscula+número en el cliente y en Zod, y botón deshabilitado hasta que sea válido. Mecanismo intacto. Falta el OK visual.
 - Referencias: 9a1d841 · f22f8d6 · CambiarPasswordForm.tsx · cambiar-password/actions.ts · tambien en Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:165
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Visor Eye/EyeOff (CambiarPasswordForm.tsx:30-76), regla en cliente (:19-25) y Zod (actions.ts:12-19), boton deshabilitado (:95, :203) en origin/main (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-003] Regla única de password: 8 caracteres, mayúscula y número
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:86` · tipo: decision · estado declarado: hecho
 - Nodo(s): h1.auth-cambio
 - Qué es: Una sola regla en todo el producto, en el cliente y en Zod del server.
 - Referencias: CambiarPasswordSchema · UpdatePasswordSchema · tambien en Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:187
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Aplicada en CambiarPasswordSchema (cambiar-password/actions.ts:12-19) y UpdatePasswordSchema (schemas.ts:22-35); no en ResetPasswordSchema (schemas.ts:94-97) ni en accept-invite (actions.ts:26-31) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-004] Endpoint logout-all
 - Fuente: `docs/bitacora-roadmap.md:7621` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-25
 - Nodo(s): h1.auth-cambio
 - Qué es: Invalidar todos los tokens de un usuario para revocación post-incidente; no urgente.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -niE "logout-all|logoutAll|revokeAll|signOutEverywhere" -> vacio (control: 4 archivos con sessionVersion increment) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-005] B-SEC.3a — Invalidación de JWT al cambiar o resetear password
 - Fuente: `docs/bitacora-roadmap.md:7968` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h1.auth-cambio
 - Qué es: User.sessionVersion (migración aditiva) en el JWT; el callback jwt invalida tokens con versión distinta; incremento en reset, cambio de password, profile y resend-credentials; cierra SEC-AUTH-03.
 - Referencias: prisma/schema.prisma · prisma/migrations/20260526050401_add_user_session_version/migration.sql · src/types/next-auth.d.ts · src/auth.ts · src/app/reset-password/actions.ts · src/app/cambiar-password/actions.ts +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Campo (schema.prisma:294), chequeo (auth.ts:212-230) e incrementos (reset :76, cambiar :59, profile :230, resend-credentials :71) existen; pero el trigger 'update' saltea el chequeo (auth.ts:216-217) y el proxy no lo ve (auth.config.ts:24-40) -> SEC-AUTH-03 no queda cerrado (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-006] Verificación dinámica de sessionVersion multi-device
 - Fuente: `docs/bitacora-roadmap.md:8108` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h1.auth-cambio
 - Qué es: Probar que un token previo deja de funcionar tras el reset y que unstable_update({}) dispara trigger update en NextAuth beta.30.
 - Referencias: src/auth.ts · src/lib/actions/profile.ts · tambien en docs/bitacora-roadmap.md:8083 · tambien en docs/bitacora-roadmap.md:8110
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n sessionVersion origin/main -- logic-core-v3/tests logic-core-v3/scripts -> vacio (control: tests/ tiene 97 archivos). Por lectura fallaria: bucle proxy.ts:134-146 vs dashboard/layout.tsx:90-92 y revivido por POST /api/auth/session (auth.ts:215-217) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 ### h1.auth-impersonacion — Ver como cliente (impersonación)
 
@@ -124,8 +124,8 @@
 - Fuente: `docs/sprints/p3-a-2-venta.md:131` · tipo: pendiente · estado declarado: aceptado (precedente P5.2)
 - Nodo(s): h1.auth-impersonacion
 - Qué es: Falla con 'Sesión inválida.' porque SUPER_ADMIN no tiene organizationId.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/actions/upsell.ts:16-19 sigue usando session.user.organizationId (SUPER_ADMIN no tiene); mismo patron en profile.ts:29-33 (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h1.auth-login — Login (contraseña, magic link, Google)
 
@@ -134,96 +134,96 @@
 - Nodo(s): h1.auth-login
 - Qué es: Alterna el tipo del input en FloatingField solo para password. No toca loginAction.
 - Referencias: e3740a2 · src/app/login/page.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — login/page.tsx:52-58 y :108-118 (toggle del type; loginAction intacto) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-009] 0.1 Auth QA-login: nombre de cookie de sesión unificado
 - Fuente: `docs/bitacora-beta-2.md:22` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-25
 - Nodo(s): h1.auth-login
 - Qué es: src/lib/auth-cookies.ts fija SESSION_COOKIE_NAME/OPTIONS por NODE_ENV y lo importan qa/login, auth.ts y auth.config.ts; corrige prod sobre HTTP. Entrada reconstruida de la memoria del proyecto.
 - Referencias: src/lib/auth-cookies.ts · src/app/api/qa/login/route.ts · src/auth.ts · src/auth.config.ts · bug detectado en docs/bitacora-beta.md:1744
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/auth-cookies.ts:19-30 importado por auth.ts:12, auth.config.ts:2 y qa/login/route.ts:29 (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-010] /login no tiene <h1>
 - Fuente: `docs/bitacora-rediseno.md:3387` · tipo: pendiente · estado declarado: pendiente (preexistente) · fecha: 2026-08-05
 - Nodo(s): h1.auth-login
 - Qué es: Preexistente, detectado al verificar que las rutas sirven contenido real.
 - Referencias: /login
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n "<h1" origin/main -- logic-core-v3/src/app/login -> vacio (control: forgot-password/page.tsx:53) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-011] MS-8 — Login QA inyectable con triple candado
 - Fuente: `docs/bitacora-roadmap.md:6321` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h1.auth-login
 - Qué es: /api/qa/login mintea la cookie de NextAuth para 3 personas seed (super-admin, client-a, client-b) solo con QA_ALLOW_LOCALHOST=1, Host localhost y sin NETLIFY/VERCEL_ENV=production; seed de org qa-cliente-b.
 - Referencias: src/app/api/qa/login/route.ts · prisma/seed.ts · .env.example · .claude/agents/visual-qa.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/app/api/qa/login/route.ts:49-73 (3 guardas) aplicadas en :85-88, :198-201, :215-218; persona setter agregada (:42) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-012] Resend solo para Magic Link; transaccionales por Brevo
 - Fuente: `docs/bitacora-roadmap.md:7546` · tipo: decision · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h1.auth-login
 - Qué es: forgot-password migró de Resend a Brevo por consistencia con resend-credentials.
 - Referencias: src/auth.ts · src/lib/email/brevo-service.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Brevo: forgot-password/actions.ts:96-101, resend-credentials/route.ts:85-90, y el propio magic link (auth.ts:104). Siguen por Resend: src/lib/email.ts:1-30 (usado por tickets/actions.ts:5 y agency-actions.ts:7), notify-message.ts:1-18 y settings.ts:194 (muerto); email.ts:15-16 devuelve success:true sin API key (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-013] Extender ?e2e=1 al DotMatrix de las páginas de auth
 - Fuente: `docs/bitacora-roadmap.md:7705` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h1.auth-login
 - Qué es: /login, /forgot-password y /reset-password no se pueden screenshottear headless porque el canvas no pinta el primer frame.
 - Referencias: DotMatrix · tambien en docs/bitacora-roadmap.md:7900
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n e2e origin/main -- DotMatrix.tsx y src/app/{login,forgot-password,reset-password,accept-invite} -> vacio (control: PreloaderContext.tsx:81) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-014] /logout en ALWAYS_ALLOWED del middleware pero la ruta no existe
 - Fuente: `docs/bitacora-roadmap.md:7898` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h1.auth-login
 - Qué es: Allowance muerta preexistente (404).
 - Referencias: src/proxy.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/proxy.ts:68 sigue con '/logout'; git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep /logout/ -> vacio (control: git grep "'/logout'" -> proxy.ts:68). Ademas el matcher (:172) no incluye /logout ni /api, asi que '/api/auth/' y '/api/' tambien son muertas (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-015] D-AUTH inputs del login visibles
 - Fuente: `docs/bitacora-roadmap.md:12242` · tipo: hecho-declarado · estado declarado: hecho (verificación humana pendiente)
 - Nodo(s): h1.auth-login
 - Qué es: FloatingField con initial/animate propios.
 - Referencias: src/app/login/page.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — FloatingField con initial/animate propios (login/page.tsx:61-72) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-016] MAGIC-BREVO magic link por Brevo
 - Fuente: `docs/bitacora-roadmap.md:12266` · tipo: hecho-declarado · estado declarado: hecho (verificación humana pendiente)
 - Nodo(s): h1.auth-login
 - Qué es: sendVerificationRequest usa Brevo; se quitó el from muerto del provider.
 - Referencias: src/auth.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — sendVerificationRequest -> sendTransactionalEmail (auth.ts:97-121); el provider ya no tiene 'from' (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-017] Manejo de error en el envío del magic link
 - Fuente: `docs/bitacora-roadmap.md:12279` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h1.auth-login
 - Qué es: El resultado del envío no se inspecciona; throw on fail queda para sprint propio.
 - Referencias: src/auth.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/auth.ts:104 descarta el resultado de sendTransactionalEmail; brevo-service.ts:20-23 y :40-46 devuelven {ok:false} sin lanzar (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-018] Dead code getPostLoginPath en auth.ts
 - Fuente: `docs/bitacora-roadmap.md:12323` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h1.auth-login
 - Qué es: Función sin callers en auth.ts:65; limpieza en sprint propio.
 - Referencias: src/auth.ts · también en fuente:12288
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/auth.ts:65-74; git grep -n getPostLoginPath origin/main -- logic-core-v3/src -> solo la definicion (auth.ts:65) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-019] Hashes de auth-rate-limit sin salt
 - Fuente: `docs/bitacora-roadmap.md:16881` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-11
 - Nodo(s): h1.auth-login
 - Qué es: Esquemas C/D de hash de la plataforma siguen sin salt.
 - Referencias: src/lib/security/auth-rate-limit.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/security/auth-rate-limit.ts:24-27 y :37-43: sha256 sin sal ni pepper (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 ### h1.auth-recupero — Olvidé / restablecer contraseña
 
@@ -232,16 +232,16 @@
 - Nodo(s): h1.auth-recupero
 - Qué es: Token de 45 min de un solo uso con invalidación de previos, mensaje anti-enumeration idéntico + dummy bcrypt, rate-limit por IP/email/admin (in-memory), Zod en los 3 endpoints, forgot-password migrado a Brevo y audit PASSWORD_CHANGED.
 - Referencias: src/lib/security/auth-rate-limit.ts · src/lib/email/templates/password-reset.ts · src/lib/actions/schemas.ts · src/app/forgot-password/actions.ts · src/app/reset-password/actions.ts · src/app/api/admin/users/[userId]/resend-credentials/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Token 45 min (forgot-password/actions.ts:16), un solo uso (reset-password/actions.ts:55-56, :80-83), invalida previos (forgot :77-79), mensaje identico + bcrypt dummy (:17-18, :67-70), limites por IP/email/admin ahora en DB (limiter.ts:37-84), Zod en los 3 endpoints, Brevo, audit PASSWORD_CHANGED (reset :87-96) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-021] Acceso pospuesto a Beta
 - Fuente: `STATUS.md:190` · tipo: pendiente · estado declarado: pospuesto a Beta · fecha: 2026-05-21
 - Nodo(s): h1.auth-recupero
 - Qué es: Self-service signup, 'olvidé mi contraseña' por email (P1-4) y 2FA.
 - Referencias: tambien en :191, :192
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Olvide mi contrasena hecho (forgot-password/actions.ts:24-110); signup y 2FA sin rastro (git ls-tree app | grep signup/register y git grep totp/2fa/otplib -> vacios; control: forgot-password listado) (D1-c1, lector D1-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 ## h2 · Portal del cliente
 

@@ -2007,6 +2007,42 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - Propuesta: esperar merge de rediseno/home
 - Zona: libre
 
+## Candidatos de F2 (lectores y cazadores)
+
+> Señales que encontraron los lectores de cada dominio al leer el código completo. Confianza MEDIA salvo que el dominio la confirme; la propuesta queda para Valentino (o para Franco en su zona).
+
+### [POD-282] src/proxy.ts (D1-c1)
+- Hallado en F2 · `src/proxy.ts` · Nodo(s): lib.proxy · Señales: getLegacyAdminRedirectPath (:22-65) siempre devuelve null: ADMIN_OS_PATH === ADMIN_PATH === '/admin' (:8-9) y el primer if (:23) corta todo /admin, ninguna otra rama puede cumplirse; ALWAYS_ALLOWED (:68) incluye '/logout' (ruta inexistente: git ls-tree vacio) y '/api/auth/', '/api/' que el matcher (:172) nunca deja entrar; IMPERSONATION_COOKIE duplicado (:16) en vez de importar impersonation-constants.ts:1
+- Qué rompe si se borra: Nada: el bloque :92-96 nunca redirige; borrar tambien la llamada de :81
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-283] src/auth.ts (D1-c1)
+- Hallado en F2 · `src/auth.ts` · Nodo(s): lib.auth · Señales: getPostLoginPath (:65-74) sin callers (git grep -> solo la definicion); ADMIN_PATH/DASHBOARD_PATH/ONBOARDING_PATH (:15-17) solo usados por esa funcion; userExists (:61) calculado y nunca leido
+- Qué rompe si se borra: Nada funcional; FROZEN + ZONA-FRANCO -> decision para Valentino
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino): archivo congelado
+- Zona: FROZEN + ZONA-FRANCO
+
+### [POD-284] src/app/accept-invite/ (D1-c1)
+- Hallado en F2 · `src/app/accept-invite/` · Nodo(s): h1.auth-invite · Señales: Sin emisor vivo: inviteClientAction (invitations.ts:43) e inviteTeamMemberAction (settings.ts:148) no tienen callers; settings.ts no tiene importadores (git grep "lib/actions/settings'" vacio); Solo seria alcanzable con un token de forgot-password de un usuario sin contrasena
+- Qué rompe si se borra: Nada del producto actual; robots.ts:21 y el comentario de sitemap.ts:4 lo mencionan, DotMatrix.tsx:21,49 en comentarios. Decidir: borrar o reconectar
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-285] src/app/login/actions.ts (D1-c1)
+- Hallado en F2 · `src/app/login/actions.ts` · Nodo(s): h1.auth-login · Señales: Limiter en memoria (:8-48) duplicado del limiter compartido en DB (src/lib/rate-limit/limiter.ts:37-84); Rama EMAIL_NOT_VERIFIED (:119-121) inalcanzable: Auth.js envuelve el error en CallbackRouteError con cause {err} (node_modules/@auth/core/lib/actions/callback/index.js:388)
+- Qué rompe si se borra: Reemplazar, no solo borrar: sin el Map el login queda sin ningun limite
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### Refuerzos de F2 sobre fichas de F1
+
+- [POD-046] `src/lib/actions/invitations.ts` (D1-c1): inviteClientAction sin callers (git grep inviteClient -> solo :43); Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116). Qué rompe: Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)
+
 ## §docs
 
 Se completa en F6 junto con `14-DOCS-CONSOLIDADOS/` (DEC-44): qué doc se borra, qué consolidado lo reemplaza y qué se pierde, si algo.

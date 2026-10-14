@@ -1,0 +1,1804 @@
+{
+ "hallazgos": [
+  {
+   "id": "SEC-001",
+   "prefijo": "SEC",
+   "titulo": "Clave de Google AI con el valor completo en dos documentos y en el historial",
+   "bloque_md": "### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial\n- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad\n- Confianza: VERIFICADO-POR-LECTURA\n- Evidencia: `docs/audits/2026-05-bfg-leak-cleanup.md:94` y `docs/bitacora-roadmap.md:36` — valor completo de una `GOOGLE_GENERATIVE_AI_API_KEY` (omitido); historial: `logic-core-v3/enviroment.env` agregado en `3953558312` (2026-02-12) y alcanzable desde 116 refs (`_crudo/secrets-historial.json`); `docs/audits/2026-05-bfg-leak-cleanup.md:193-197` — «### 8.2 Lo que NO se hizo … ❌ `git push --force` al remote»; `:204` — «La key `…` sigue deshabilitada en Google Cloud (Franco ya rotó — confirmado)».\n- Impacto: bloqueante para el primer cliente real solo si la clave siguiera viva: cualquiera con un clon (el repo pasó a privado, pero estuvo público según `docs/baselines/2026-07-auditoria-seguridad.md:3360`) podría consumir la cuota de Google AI a nombre de develOP. Valentino confirma que las credenciales del repo son de prueba (ENMIENDA-01 P1).\n- Propuesta: borrar el valor de los dos documentos (dejar solo un prefijo), confirmar en Google Cloud que la clave está revocada y decidir si se purga el historial (`git-filter-repo` + force-push coordinado) o se acepta como clave muerta.\n- Esfuerzo: S  ·  Zona: libre\n- Relacionado: [SEC-002], [SEC-003], [SEC-004]\n- Nodo(s): int.google-ai, doc.audits-2026-05-bfg-leak-cleanup, doc.bitacora-roadmap\n- REQUIERE-VERIFICACIÓN-HUMANA: VH-001",
+   "severidad": "BAJA",
+   "zona": "libre",
+   "dominio": "D7",
+   "nodos": [
+    "int.google-ai",
+    "doc.audits-2026-05-bfg-leak-cleanup",
+    "doc.bitacora-roadmap"
+   ],
+   "vh": "VH-001",
+   "seccion": "Seguridad",
+   "origen": {
+    "ciclo": "F1",
+    "manual": true
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-002",
+   "prefijo": "SEC",
+   "titulo": "Email y contraseña de las cuentas del seed (SUPER_ADMIN y cliente) escritos en el repo",
+   "bloque_md": "### [SEC-002] Email y contraseña de las cuentas del seed (SUPER_ADMIN y cliente) escritos en el repo\n- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad\n- Confianza: VERIFICADO-POR-LECTURA\n- Evidencia: `README.md:29-30`, `STATUS.md:258-259`, `docs/demo-guion.md:15-16`, `docs/bitacora-beta.md:15`, `docs/bitacora-roadmap.md:6375-6377` (tabla de MS-8: super-admin, client-a y client-b) y `:10534`, `tests/helpers/auth.ts:21` y `:25` — patrón «email / contraseña» (valores omitidos); el seed actual ya no los usa: `prisma/seed.ts:76-79` — `bcrypt.hash(requireSeedPassword('SEED_ADMIN_PASSWORD'), 12)`.\n- Impacto: bloqueante para el primer cliente real: si la base de producción se siembra —o se sembró antes del cambio— con esas contraseñas, queda un SUPER_ADMIN con contraseña conocida por cualquiera que lea el repo.\n- Propuesta: sacar los literales de docs y del helper de tests (que lea de entorno, como el seed), sembrar producción limpia y confirmar que ninguna base expuesta conserva esas contraseñas.\n- Esfuerzo: S  ·  Zona: libre\n- Relacionado: [SEC-001], [SEC-003]\n- Nodo(s): lib.auth, lib.prisma.seeds, lib.tests\n- REQUIERE-VERIFICACIÓN-HUMANA: VH-002",
+   "severidad": "BAJA",
+   "zona": "libre",
+   "dominio": "D1",
+   "nodos": [
+    "lib.auth",
+    "lib.prisma.seeds",
+    "lib.tests"
+   ],
+   "vh": "VH-002",
+   "seccion": "Seguridad",
+   "origen": {
+    "ciclo": "F1",
+    "manual": true
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-003",
+   "prefijo": "SEC",
+   "titulo": "Contraseña de la cuenta QA de setter en docs y como literal en dos scripts",
+   "bloque_md": "### [SEC-003] Contraseña de la cuenta QA de setter en docs y como literal en dos scripts\n- Dominio: D4  ·  Severidad: BAJA  ·  Tipo: seguridad\n- Confianza: VERIFICADO-POR-LECTURA\n- Evidencia: `docs/leados-alta-setter.md:25` (cuenta QA de setter + contraseña) y `:40` (`bcrypt.hash` de un literal); `docs/bitacora-roadmap.md:7837` (la misma cuenta y contraseña); `scripts/b1-verify-setter-ownership.ts:44` y `scripts/b2-verify-dossier.ts:66` — `const setterPassword = await bcrypt.hash('…', 12)` (valores omitidos).\n- Impacto: bloqueante para el primer cliente real si alguna de esas cuentas existe en producción con esa contraseña (un setter ve leads y opera sobre ellos).\n- Propuesta: sacar la contraseña de los docs; los dos scripts son one-off (ver [POD-161], [POD-162]): borrarlos o hacer que lean la contraseña de entorno.\n- Esfuerzo: S  ·  Zona: libre\n- Relacionado: [SEC-002], [POD-161], [POD-162]\n- Nodo(s): h5.set-dia, lib.scripts, doc.leados-alta-setter\n- REQUIERE-VERIFICACIÓN-HUMANA: VH-002",
+   "severidad": "BAJA",
+   "zona": "libre",
+   "dominio": "D4",
+   "nodos": [
+    "h5.set-dia",
+    "lib.scripts",
+    "doc.leados-alta-setter"
+   ],
+   "vh": "VH-002",
+   "seccion": "Seguridad",
+   "origen": {
+    "ciclo": "F1",
+    "manual": true
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-004",
+   "prefijo": "SEC",
+   "titulo": "Contraseña del admin de Matsu (base de dev) literal en un script commiteado",
+   "bloque_md": "### [SEC-004] Contraseña del admin de Matsu (base de dev) literal en un script commiteado\n- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: seguridad\n- Confianza: VERIFICADO-POR-LECTURA\n- Evidencia: `scripts/set-matsu-password.ts:17` — `const PASSWORD = '…'` (omitido); `:15` — host de la Neon de dev en `EXPECTED_DEV_HOST` (no es una credencial, pero ubica la base); `docs/bitacora-roadmap.md:3001` repite la contraseña del usuario dev de Matsu en texto plano (omitida; hallado en F1.12).\n- Impacto: bloqueante para el primer cliente real solo si esa contraseña se reutiliza fuera de dev o si la base de dev queda accesible con datos reales del piloto.\n- Propuesta: borrar el script (one-off, [POD-155], confianza de poda ALTA) o que lea la contraseña de entorno; no reutilizarla en otros entornos.\n- Esfuerzo: S  ·  Zona: libre\n- Relacionado: [SEC-002], [POD-155]\n- Nodo(s): lib.scripts\n- REQUIERE-VERIFICACIÓN-HUMANA: VH-002",
+   "severidad": "BAJA",
+   "zona": "libre",
+   "dominio": "D9",
+   "nodos": [
+    "lib.scripts"
+   ],
+   "vh": "VH-002",
+   "seccion": "Seguridad",
+   "origen": {
+    "ciclo": "F1",
+    "manual": true
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-005",
+   "prefijo": "SEC",
+   "titulo": "Magic link sin rate limit: un anonimo dispara emails ilimitados por Brevo a cualquier cuenta registrada",
+   "dominio": "D1",
+   "severidad": "CRÍTICA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 135,
+     "fragmento": "export async function magicLinkAction("
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 146,
+     "fragmento": "await signIn('resend', {\n  email,\n  redirectTo: '/dashboard',"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 101,
+     "fragmento": "async sendVerificationRequest({ identifier: email, url }) {"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 104,
+     "fragmento": "await sendTransactionalEmail({"
+    },
+    {
+     "ruta": "src/app/api/auth/[...nextauth]/route.ts",
+     "linea": 3,
+     "fragmento": "export const { GET, POST } = handlers"
+    },
+    {
+     "ruta": "src/lib/rate-limit/presets.ts",
+     "linea": 8,
+     "fragmento": "export const RATE_LIMIT_PRESETS = {\n  // ── Auth ──\n  forgotPasswordPerIp: { limit: 5, windowMs: 15 * 60_000 },"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real: cualquiera puede pedir magic links sin limite para su email, por la action o directo por POST /api/auth/signin/resend (CSRF de /api/auth/csrf). El cliente recibe rafagas de 'Tu acceso a develOP' y la cuenta Brevo compartida gasta cuota y reputacion; si Brevo limita o suspende, dejan de salir resets, bienvenidas y avisos de leads. Por la rubrica (operacion con costo de emails, anonima, sin limite) es CRITICA aunque solo alcance emails registrados, que ademas se enumeran con el mismo endpoint.",
+   "propuesta": "Agregar presets magicLinkPerIp/magicLinkPerEmail en presets.ts y aplicarlos con applyAuthRateLimit en magicLinkAction; envolver handlers.POST en route.ts para aplicar el mismo limite a /api/auth/signin/resend (o sumar /api/auth al matcher del proxy). Responder igual con o sin limite para no abrir otro oraculo.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.magic-link",
+    "int.brevo",
+    "lib.rate-limit",
+    "lib.auth"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-04 (auditoria-maestra:285), RESIL-05, enumeracion de usuarios",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H01",
+    "verificado_padre": true,
+    "nota_padre": "Leído: login/actions.ts:135-158 llama signIn(resend) sin limitador (el Map de :20 solo lo usa loginAction); auth.ts:101-119 envía por Brevo; route.ts:3 expone POST /api/auth/signin/resend; /api fuera del matcher (proxy.ts:172); git grep -i magic en rate-limit/security/proxy/api-auth = 0 (control +: forgotPasswordPerIp). El callback signIn (auth.ts:174-186) lo limita a emails registrados. CRÍTICA por la rúbrica (costo de emails, anónimo).",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "CRÍTICA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-006",
+   "prefijo": "SEC",
+   "titulo": "La invalidacion por sessionVersion se revive con POST /api/auth/session (trigger 'update' saltea el chequeo)",
+   "dominio": "D1",
+   "severidad": "ALTA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 215,
+     "fragmento": "if (\n  trigger !== 'signIn' &&\n  trigger !== 'update' &&"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 230,
+     "fragmento": "token.sessionVersion = accessState.sessionVersion"
+    },
+    {
+     "ruta": "src/app/api/auth/[...nextauth]/route.ts",
+     "linea": 3,
+     "fragmento": "export const { GET, POST } = handlers"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/index.js",
+     "linea": 57,
+     "fragmento": "case \"session\":\n  validateCSRF(action, csrfTokenVerified);\n  return await actions.session(options, sessionStore, cookies, true, request.body?.data);"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/session.js",
+     "linea": 30,
+     "fragmento": "...(isUpdate && { trigger: \"update\" }),"
+    }
+   ],
+   "impacto": "Si alguien obtiene la cookie de sesion de un cliente (PC compartida, malware, cookie filtrada), que el cliente cambie o restablezca la contrasena NO lo echa: con la cookie vieja, GET /api/auth/csrf + POST /api/auth/session (double-submit, sin conocer la contrasena) dispara el callback jwt con trigger 'update', que saltea la comparacion y re-firma el token con la sessionVersion nueva. SEC-AUTH-03 queda cerrado solo contra reuso pasivo.",
+   "propuesta": "Decision para Valentino (auth.ts FROZEN + ZONA-FRANCO): comparar sessionVersion tambien en trigger 'update' (antes de refrescar) y hacer que las actions que suben la version emitan el token nuevo por un camino que no dependa de saltear el chequeo (p. ej. pasar la version nueva en el payload de unstable_update y aceptarla solo si coincide con la DB, o re-loguear tras el cambio). Sumar la prueba multi-dispositivo de PLAN-006.",
+   "esfuerzo": "M",
+   "zona": "FROZEN + ZONA-FRANCO",
+   "nodos": [
+    "h1.auth-login.sesion-jwt",
+    "h1.auth-cambio.cambio-forzado",
+    "h1.auth-recupero.restablecer-password",
+    "lib.auth",
+    "modelo.User"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-AUTH-03 (2026-05:121, maestra:67), PLAN-005, PLAN-006, bucle de redirecciones",
+   "vh": "VH-005",
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H02",
+    "verificado_padre": true,
+    "nota_padre": "Leído: auth.ts:207-230 excluye trigger update del corte y copia la sessionVersion de la base; @auth/core 0.41.2 lib/index.js POST session = validateCSRF + actions.session(isUpdate) y session.js re-firma con trigger update. Precondición fuerte (tener la cookie) → ALTA.",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "ALTA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-001",
+   "prefijo": "BUG",
+   "titulo": "Sesion invalidada en Node pero viva en el proxy: bucle /login <-> portal (ERR_TOO_MANY_REDIRECTS)",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 222,
+     "fragmento": "return null"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/layout.tsx",
+     "linea": 90,
+     "fragmento": "if (!organizationId) {\n  redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')"
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 143,
+     "fragmento": "return NextResponse.redirect(\n  new URL(onboardingCompleted ? DASHBOARD_PATH : ONBOARDING_PATH, nextUrl)"
+    },
+    {
+     "ruta": "src/auth.config.ts",
+     "linea": 24,
+     "fragmento": "callbacks: {\n  authorized({ auth }) {\n    return true // Route protection is handled in middleware logic"
+    },
+    {
+     "ruta": "node_modules/next-auth/lib/index.js",
+     "linea": 91,
+     "fragmento": "return Promise.resolve(headers()).then((h) => getSession(h, config).then((r) => r.json()));"
+    },
+    {
+     "ruta": "node_modules/next-auth/lib/index.js",
+     "linea": 169,
+     "fragmento": "finalResponse.headers.append(\"set-cookie\", cookie);"
+    },
+    {
+     "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+     "linea": 71,
+     "fragmento": "sessionVersion: { increment: 1 },"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+     "linea": 141,
+     "fragmento": "await tx.organization.delete({ where: { id: organizationId } })"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real en el flujo de soporte: tras un reset por email, un cambio de contrasena en otro dispositivo o 'Reenviar credenciales' desde admin, el navegador con la sesion vieja queda atrapado: el layout (Node) ve la sesion nula y manda a /login; el proxy (sin chequeo de version, auth() de RSC no limpia la cookie) la ve valida y devuelve a /dashboard. El cliente no llega ni al formulario para entrar con la contrasena nueva hasta borrar cookies. Mismo bucle para usuarios sin membresia (org borrada por hardDeleteClient) o borrados, para admin (/admin <-> /login) y setter (/setter <-> /login).",
+   "propuesta": "(libre) Que el proxy no rebote /login al portal solo por la cookie (dejar renderizar /login y que decida la pagina), o que los layouts, ante sesion nula con cookie presente, redirijan a una ruta que haga signOut y limpie la cookie en vez de /login; opcionalmente dar al proxy un chequeo de validez. Confirmar con la prueba multi-dispositivo de PLAN-006.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.ruteo-por-rol",
+    "h1.auth-login.sesion-jwt",
+    "lib.proxy",
+    "lib.auth",
+    "h2.cli-shell",
+    "h4.adm-shell"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-006, PLAN-005, sessionVersion revivible",
+   "vh": "VH-006",
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H03",
+    "verificado_padre": true,
+    "nota_padre": "Leído: proxy.ts:134-146 rebota /login al portal con el token viejo (authConfig sin callback jwt); el layout (Node) ve sesión nula y manda a /login; next-auth lib/index.js:91 descarta el Set-Cookie en RSC y :166-169 re-emite la cookie en el proxy. Severidad ajustada a MEDIA con el verificador: solo con sesión viva al subir la versión y hay salida borrando cookies.",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "MEDIA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-007",
+   "prefijo": "SEC",
+   "titulo": "Fuerza bruta de login sin freno real: el limite vive solo en loginAction (memoria por lambda) y el endpoint nativo de Credentials no tiene ninguno",
+   "dominio": "D1",
+   "severidad": "ALTA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 20,
+     "fragmento": "const rateLimitMap = new Map<string, RateEntry>()"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 53,
+     "fragmento": "hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() ??"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 113,
+     "fragmento": "if (error instanceof AuthError) {\n  recordFailedAttempt(ip)"
+    },
+    {
+     "ruta": "src/app/api/auth/[...nextauth]/route.ts",
+     "linea": 3,
+     "fragmento": "export const { GET, POST } = handlers"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/index.js",
+     "linea": 51,
+     "fragmento": "case \"callback\":\n  if (options.provider.type === \"credentials\")\n    validateCSRF(action, csrfTokenVerified);"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 157,
+     "fragmento": "const isValid = await bcrypt.compare(String(credentials.password), user.password)"
+    }
+   ],
+   "impacto": "Un anonimo puede probar contrasenas sin limite contra cualquier cuenta (incluido el SUPER_ADMIN) por POST /api/auth/callback/credentials con el CSRF de /api/auth/csrf; ni siquiera por loginAction hay freno real: el Map es por instancia serverless, se pierde en cada lambda fria, se indexa por el primer X-Forwarded-For y cualquier redirect limpia el contador (actions.ts:125-127). Las contrasenas de reset/accept-invite solo exigen 8 caracteres y las temporales tienen ~34 bits.",
+   "propuesta": "(libre) Reemplazar el Map por applyAuthRateLimit (limiter.ts, DB) por IP y por email; aplicar el mismo limite a /api/auth/callback/credentials envolviendo handlers.POST en route.ts (o sumando /api/auth al matcher del proxy); tomar la IP del header confiable de la plataforma (x-nf-client-connection-ip en Netlify).",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.login-password",
+    "lib.rate-limit",
+    "lib.auth",
+    "modelo.User"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-05, SEC-RATELIMIT-01, P1-5",
+   "vh": "VH-007",
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H04",
+    "verificado_padre": true,
+    "nota_padre": "Leído: el único freno es el Map por instancia de login/actions.ts:12-57 (clave = primer X-Forwarded-For, se limpia en cualquier redirect, :125-127); POST /api/auth/callback/credentials solo pide CSRF (@auth/core lib/index.js:51-56) y llega a authorize (auth.ts:139-158) sin límite. ALTA (éxito requiere clave adivinable).",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "ALTA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-002",
+   "prefijo": "BUG",
+   "titulo": "El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo",
+   "dominio": "D1",
+   "severidad": "ALTA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+     "linea": 26,
+     "fragmento": "userEmail: z.string().email(),"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+     "linea": 91,
+     "fragmento": "email: parsed.userEmail,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+     "linea": 141,
+     "fragmento": "email: parsed.userEmail,"
+    },
+    {
+     "ruta": "src/lib/onboarding/core.ts",
+     "linea": 91,
+     "fragmento": "email: input.userEmail,"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 143,
+     "fragmento": "where: { email: String(credentials.email).trim().toLowerCase() },"
+    },
+    {
+     "ruta": "src/lib/actions/clients.ts",
+     "linea": 96,
+     "fragmento": "// FIX 3 — email casing. Normalizamos a lowercase para alinear con el login"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 289,
+     "fragmento": "email                 String    @unique"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real: si el admin carga 'Juan@Empresa.com' (o el teclado del celular capitaliza), el User queda con mayuscula; el login con contrasena (auth.ts:143), el magic link (signIn callback auth.ts:176-184) y forgot-password (ForgotPasswordSchema toLowerCase, schemas.ts:80) buscan en minuscula con igualdad exacta -> 'Email o contrasena incorrectos' para siempre. Tambien permite duplicados que difieren solo en mayusculas. El arreglo ya existe en el camino viejo (clients.ts:96-100) y en updateClient.ts:71, pero no en los tres caminos vivos de alta.",
+   "propuesta": "(libre) Normalizar con .trim().toLowerCase() en los schemas de alta (createClientOnly.ts:26, createClientWithBot.ts:34, admin/chatbots/new/actions.ts:27 / onboarding/core.ts) y en el wizard (Step1Company.tsx:169); script de datos que pase a minuscula los emails existentes verificando colisiones (sin migrate reset).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.login-password",
+    "h1.auth-login.magic-link",
+    "h4.adm-clientes",
+    "modelo.User"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "patron: alta sin normalizar email",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H05",
+    "verificado_padre": true,
+    "nota_padre": "Leído: createClientOnly.ts:26 y :91, createClientWithBot.ts:34 y :141, onboarding/core.ts:69-72 y :91 guardan el email sin normalizar; auth.ts:143 busca en minúscula; schema.prisma:289 String @unique sin índice sobre lower() (git grep lower(/citext en migraciones: solo companyName). El camino viejo sí normaliza (clients.ts:96-100).",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "ALTA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-008",
+   "prefijo": "SEC",
+   "titulo": "trustHost fijo en true: si falta AUTH_URL/NEXTAUTH_URL en producción, el host del magic link sale de X-Forwarded-Host",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 78,
+     "fragmento": "trustHost: true,"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/utils/env.js",
+     "linea": 68,
+     "fragmento": "const envUrl = envObject.AUTH_URL ?? envObject.NEXTAUTH_URL;"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/utils/env.js",
+     "linea": 81,
+     "fragmento": "const detectedHost = headers.get(\"x-forwarded-host\") ?? headers.get(\"host\");"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/signin/send-token.js",
+     "linea": 48,
+     "fragmento": "const sendRequest = provider.sendVerificationRequest({"
+    },
+    {
+     "ruta": ".env.example",
+     "linea": 73,
+     "fragmento": "NEXTAUTH_URL="
+    }
+   ],
+   "impacto": "Endurecimiento. Con trustHost: true fijo (auth.ts:78), Auth.js no falla cerrado si en producción falta AUTH_URL/NEXTAUTH_URL, y en ese caso el signIn de magicLinkAction arma la URL del link con X-Forwarded-Host. NEXTAUTH_URL figura como obligatoria en la documentación, pero scripts/check-env.js no corre en el build (no hay prebuild y netlify.toml usa npm run build). Para el primer cliente real solo es explotable si la variable falta y Netlify deja pasar el header del cliente: el email legítimo llevaría el token a un dominio ajeno (toma de cuenta).",
+   "propuesta": "Confirmar AUTH_URL/NEXTAUTH_URL en el contexto Production de Netlify (VH); correr check-env.js antes del build para fallar si falta. Decisión para Valentino (auth.ts es FROZEN): limitar trustHost a entornos no productivos.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.magic-link",
+    "lib.auth",
+    "int.brevo"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "magic link sin rate limit",
+   "vh": "VH-008",
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H06",
+    "verificado_padre": true,
+    "nota_padre": "Refutada como ALTA por el verificador (NEXTAUTH_URL documentada como requerida en docs/env-vars.md:25 y AGENTS.md:134; la ruta nativa usa req.url). Leído: auth.ts:78 trustHost fijo; check-env.js no corre en el build. Queda BAJA con VH.",
+    "verificador": {
+     "se_sostiene": false,
+     "severidad_ajustada": "BAJA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-009",
+   "prefijo": "SEC",
+   "titulo": "Enumeracion de usuarios: el magic link responde distinto si el email existe (y el login/forgot delatan por tiempo y por 'error inesperado')",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 181,
+     "fragmento": "const existingUser = await prisma.user.findUnique({"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/signin/send-token.js",
+     "linea": 33,
+     "fragmento": "throw new AccessDenied(\"AccessDenied\");"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 151,
+     "fragmento": "return 'SUCCESS'"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 154,
+     "fragmento": "return 'No se pudo generar el Magic Link. Intentá de nuevo.'"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 152,
+     "fragmento": "if (!user?.password) return null\nif (!user.emailVerified) {\n  throw new Error('EMAIL_NOT_VERIFIED')"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 119,
+     "fragmento": "if ((error.cause as { message?: string })?.message === 'EMAIL_NOT_VERIFIED') {"
+    },
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 96,
+     "fragmento": "const result = await sendTransactionalEmail({"
+    }
+   ],
+   "impacto": "Un anonimo confirma sin limite que emails son clientes de develOP (y cuales son admin), anulando el trabajo anti-enumeracion de forgot-password y alimentando el bombardeo de magic links y la fuerza bruta. Ademas: login sin bcrypt dummy para usuarios inexistentes (diferencia de tiempo); la rama EMAIL_NOT_VERIFIED nunca matchea porque Auth.js envuelve el error en CallbackRouteError con cause {err} (callback/index.js:388) y devuelve 'Ocurrio un error inesperado' antes de chequear la contrasena; forgot-password espera a Brevo solo si el usuario existe.",
+   "propuesta": "(libre) magicLinkAction debe devolver el mismo exito ante AccessDenied (mensaje 'si la cuenta existe...'); en forgot-password, no esperar el envio en el camino de la respuesta o igualar el tiempo. Decision para Valentino (auth.ts FROZEN): bcrypt dummy cuando no hay usuario y chequear emailVerified despues del bcrypt.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.magic-link",
+    "h1.auth-login.login-password",
+    "h1.auth-recupero.solicitar-enlace",
+    "lib.auth"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "magic link sin rate limit, fuerza bruta",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H07",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene leyendo las líneas citadas. Además: en modo raw, @auth/core re-lanza el AccessDenied del callback signIn (index.js:123-125) y magicLinkAction devuelve otro mensaje (login/actions.ts:151-154).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-010",
+   "prefijo": "SEC",
+   "titulo": "La sesion vive 30 dias deslizantes, no 8 h: el proxy re-firma la cookie con el maxAge por defecto de Auth.js",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 79,
+     "fragmento": "session: {\n  strategy: 'jwt',\n  maxAge: 8 * 60 * 60,"
+    },
+    {
+     "ruta": "src/auth.config.ts",
+     "linea": 12,
+     "fragmento": "session: { strategy: 'jwt' },"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/init.js",
+     "linea": 38,
+     "fragmento": "const maxAge = 30 * 24 * 60 * 60; // Sessions expire after 30 days of being idle by default"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/session.js",
+     "linea": 46,
+     "fragmento": "const newToken = await jwt.encode({ ...jwt, token, salt });"
+    },
+    {
+     "ruta": "node_modules/next-auth/lib/index.js",
+     "linea": 169,
+     "fragmento": "finalResponse.headers.append(\"set-cookie\", cookie);"
+    }
+   ],
+   "impacto": "Cada visita a /dashboard, /admin, /setter, /login, /bienvenida o /cambiar-password re-emite el JWT con exp y cookie a 30 dias (auth() de paginas no escribe cookies). Una sesion olvidada en una PC compartida o una cookie robada sigue sirviendo hasta 30 dias sin uso en vez de 8 h; la politica declarada (bitacora-roadmap:6334 'JWT (8 h)') no se cumple.",
+   "propuesta": "(libre) Fijar session.maxAge y updateAge en auth.config.ts iguales a auth.ts (idealmente constante compartida, p. ej. junto a auth-cookies.ts).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.sesion-jwt",
+    "lib.proxy",
+    "lib.auth"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "sessionVersion revivible",
+   "vh": "VH-009",
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H08",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-001",
+   "prefijo": "UX",
+   "titulo": "El exito del magic link le dice al cliente que el link 'fue impreso en la consola del servidor'",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 194,
+     "fragmento": "La URL de verificación fue impresa en la{' '}\n<span className=\"font-mono text-zinc-400\">consola del servidor</span>."
+    },
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 197,
+     "fragmento": "Copiala y pegala en el navegador para ingresar."
+    }
+   ],
+   "impacto": "Copy de desarrollo en el camino del cliente: tras pedir el magic link el cliente lee que tiene que copiar una URL de la consola del servidor y no sabe que debe revisar su email. Incumple 'sin datos de mentira' de L3.",
+   "propuesta": "(libre) Reemplazar por un mensaje anti-enumeracion ('Si la cuenta existe, te mandamos un link de acceso por email; vence en 24 h').",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.magic-link"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-016",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H09",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-003",
+   "prefijo": "BUG",
+   "titulo": "El envio del magic link nunca falla: sendVerificationRequest ignora el resultado de Brevo y la UI muestra exito",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 104,
+     "fragmento": "await sendTransactionalEmail({"
+    },
+    {
+     "ruta": "src/lib/email/brevo-service.ts",
+     "linea": 20,
+     "fragmento": "if (!process.env.BREVO_API_KEY) {\n  console.error('[Brevo] BREVO_API_KEY no configurada')\n  return { ok: false, error: 'EMAIL_NOT_CONFIGURED' }"
+    },
+    {
+     "ruta": "src/lib/email/brevo-service.ts",
+     "linea": 40,
+     "fragmento": "} catch (error) {\n  console.error('[Brevo] Error sending email:', error)"
+    },
+    {
+     "ruta": "node_modules/@getbrevo/brevo/dist/cjs/core/fetcher/requestWithRetries.js",
+     "linea": 15,
+     "fragmento": "const DEFAULT_MAX_RETRIES = 2;"
+    }
+   ],
+   "impacto": "Sin BREVO_API_KEY, con Brevo caido o remitente no verificado, el cliente ve 'Link generado' y nunca recibe nada; no queda rastro en Sentry (solo console.error). El SDK espera hasta 60 s por intento con 2 reintentos, dejando el submit colgado hasta el timeout de la funcion (RESIL-05 parcial).",
+   "propuesta": "Decision para Valentino (auth.ts FROZEN + ZONA-FRANCO): lanzar cuando result.ok es false para que Auth.js devuelva error (PLAN-017). En brevo-service.ts (libre) pasar timeoutInSeconds/maxRetries cortos y Sentry.captureException en el catch.",
+   "esfuerzo": "S",
+   "zona": "FROZEN + ZONA-FRANCO",
+   "nodos": [
+    "h1.auth-login.magic-link",
+    "int.brevo",
+    "int.sentry",
+    "lib.auth"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-017, RESIL-05",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H10",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-002",
+   "prefijo": "UX",
+   "titulo": "'Continuar con Google' no puede completar para ningun usuario y /login no muestra ningun ?error",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 125,
+     "fragmento": "id: profile.sub,"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 192,
+     "fragmento": "const accessState = await getUserAccessState(user.id)"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 200,
+     "fragmento": "return `${LOGIN_PATH}?error=unauthorized`"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/callback/index.js",
+     "linea": 64,
+     "fragmento": "user: userByAccount ?? userFromProvider,"
+    },
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 286,
+     "fragmento": "<form action={googleSignInAction} className=\"mb-5\">"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 95,
+     "fragmento": "pages: { signIn: LOGIN_PATH },"
+    }
+   ],
+   "impacto": "Sin cuenta Google vinculada (y no existe codigo que vincule: git grep de account.create/linkAccount vacio) el signIn callback recibe user.id = sub de Google, no encuentra usuario y devuelve '/login?error=unauthorized'; /login no lee searchParams, asi que el cliente vuelve al login sin mensaje. Si faltan AUTH_GOOGLE_ID/SECRET (no estan en .env.example) termina en un error de Google. Mismo silencio para cualquier ?error del signIn callback; el magic link vencido cae en la pagina de error por defecto de Auth.js en ingles (pages.error no configurado).",
+   "propuesta": "Decidir: quitar el boton (libre, login/page.tsx:286-299) o implementar vinculacion por email verificado (auth.ts, decision para Valentino). En ambos casos leer ?error en /login con mensajes en espanol y configurar pages.error (auth.ts, decision).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.google-oauth",
+    "h1.auth-login.magic-link",
+    "lib.auth"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-010",
+   "vh": "VH-010",
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H11",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-011",
+   "prefijo": "SEC",
+   "titulo": "Open redirect en el proxy: callbackUrl con barra invertida o tab pasa isSafeCallbackUrl",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 19,
+     "fragmento": "return Boolean(value && value.startsWith('/') && !value.startsWith('//'))"
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 135,
+     "fragmento": "if (isSafeCallbackUrl(callbackUrl) && callbackUrl !== LOGIN_PATH) {\n  return NextResponse.redirect(new URL(callbackUrl as string, nextUrl))"
+    }
+   ],
+   "impacto": "Un link https://develop.com.ar/login?callbackUrl=/%5Cevil.com enviado a un cliente logueado lo manda a https://evil.com: el parser WHATWG trata la barra invertida como '/' en http(s) y elimina tabs (/%09/evil.com). Phishing con dominio legitimo ('tu sesion vencio, ingresa de nuevo'). El eslabon inferido es el parser de URL en runtime.",
+   "propuesta": "(libre) Resolver con new URL(callbackUrl, nextUrl) y exigir url.origin === nextUrl.origin antes de redirigir (o rechazar barra invertida y caracteres de control).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.ruteo-por-rol",
+    "lib.proxy"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": "VH-011",
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H12",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene leyendo las líneas citadas. Prueba local del parser WHATWG con la misma función: \"/\\evil\" y \"/<tab>/evil\" pasan el filtro y resuelven a https://evil.example/.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-012",
+   "prefijo": "SEC",
+   "titulo": "La regla unica de contrasena (8+mayuscula+numero) no se aplica en reset-password ni en accept-invite",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 94,
+     "fragmento": "password: z\n  .string()\n  .min(8, 'La contraseña debe tener al menos 8 caracteres.')"
+    },
+    {
+     "ruta": "src/app/accept-invite/actions.ts",
+     "linea": 26,
+     "fragmento": "if (!password || password.length < 8) {"
+    },
+    {
+     "ruta": "src/app/reset-password/ResetPasswordForm.tsx",
+     "linea": 193,
+     "fragmento": "placeholder=\"Mínimo 8 caracteres\""
+    },
+    {
+     "ruta": "src/app/cambiar-password/actions.ts",
+     "linea": 17,
+     "fragmento": ".regex(/[A-Z]/, 'La nueva contraseña debe incluir al menos una mayúscula.')"
+    }
+   ],
+   "impacto": "Un cliente que se olvida la contrasena puede elegir 'aaaaaaaa' y un usuario invitado (las invitaciones de equipo eran SUPER_ADMIN) tambien; contradice la decision de una sola regla (PLAN-003) y abarata la fuerza bruta. accept-invite ademas valida a mano con casts 'as string', sin Zod.",
+   "propuesta": "(libre) Extraer un passwordSchema compartido en schemas.ts y usarlo en ResetPasswordSchema, en accept-invite (con Zod) y en CambiarPasswordSchema/UpdatePasswordSchema; espejar checkStrength en ResetPasswordForm y AcceptInviteForm.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-recupero.restablecer-password",
+    "h1.auth-invite.aceptar-invitacion",
+    "lib.actions"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-003, PLAN-002, fuerza bruta",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H13",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-013",
+   "prefijo": "SEC",
+   "titulo": "Tokens de reset e invitacion guardados en claro; consumo no atomico y los demas tokens siguen vivos tras el reset",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 73,
+     "fragmento": "const token = crypto.randomBytes(32).toString('hex')"
+    },
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 81,
+     "fragmento": "data: { token, userId: user.id, expiresAt },"
+    },
+    {
+     "ruta": "src/app/reset-password/actions.ts",
+     "linea": 45,
+     "fragmento": "const record = await prisma.passwordResetToken.findUnique({\n  where: { token },"
+    },
+    {
+     "ruta": "src/app/reset-password/actions.ts",
+     "linea": 80,
+     "fragmento": "prisma.passwordResetToken.update({\n  where: { id: record.id },\n  data: { usedAt: new Date() },"
+    },
+    {
+     "ruta": "node_modules/@auth/core/lib/actions/signin/send-token.js",
+     "linea": 63,
+     "fragmento": "token: await createHash(`${token}${secret}`),"
+    }
+   ],
+   "impacto": "Quien lea la tabla PasswordResetToken (backup, Neon compartida, logs) puede usar cualquier token vigente (45 min reset, 7 dias invitacion) y fijar la contrasena de esa cuenta; Auth.js si hashea el token del magic link, el reset propio no. Dos envios simultaneos del mismo token pasan ambos (check-then-update) y tras un reset exitoso no se borran otros tokens pendientes.",
+   "propuesta": "(libre) Guardar sha256(token) y buscar por hash; consumir con updateMany({ where: { id, usedAt: null } }) verificando count; al resetear, borrar los demas tokens sin usar del usuario.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-recupero.restablecer-password",
+    "h1.auth-invite.aceptar-invitacion",
+    "modelo.PasswordResetToken"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H14",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-014",
+   "prefijo": "SEC",
+   "titulo": "Archivar un cliente no le corta el acceso: login, sesion y portal siguen operativos",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+     "linea": 9,
+     "fragmento": "// Archivar = soft-delete REVERSIBLE. Marca SOLO el Organization (deletedAt); NO"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+     "linea": 34,
+     "fragmento": "(c) => c.organization.update({ where: { id: org.id }, data: { deletedAt: new Date() } }),"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 31,
+     "fragmento": "select: {\n  companyName: true,\n  onboardingCompleted: true,"
+    },
+    {
+     "ruta": "src/lib/preview.ts",
+     "linea": 10,
+     "fragmento": "if (role === 'ORG_MEMBER') {\n  return session?.user?.organizationId ?? null"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/layout.tsx",
+     "linea": 23,
+     "fragmento": "select: { companyName: true, onboardingCompleted: true },"
+    }
+   ],
+   "impacto": "Si 'archivar' se usa para dar de baja a un cliente (falta de pago, fin de contrato), sus usuarios siguen entrando y operando el portal; ningun punto de auth ni del portal lee deletedAt (git grep). Depende de la intencion del producto.",
+   "propuesta": "Decidir que significa archivar. Si debe cortar acceso: chequear organization.deletedAt en resolveOrgId (preview.ts, libre) con mensaje claro, y en getUserAccessState/signIn (auth.ts, decision para Valentino).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.sesion-jwt",
+    "h4.adm-clientes",
+    "lib.auth",
+    "modelo.Organization"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": "VH-012",
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H15",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-015",
+   "prefijo": "SEC",
+   "titulo": "Cambio de contrasena sin limite de intentos sobre la contrasena actual",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/cambiar-password/actions.ts",
+     "linea": 44,
+     "fragmento": "const isValid = await bcrypt.compare(input.oldPassword, user.password)"
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 218,
+     "fragmento": "const isValid = await bcrypt.compare(parsed.data.currentPassword, user.password)"
+    },
+    {
+     "ruta": "src/app/cambiar-password/actions.ts",
+     "linea": 49,
+     "fragmento": "const newHash = await bcrypt.hash(input.newPassword, 10)"
+    }
+   ],
+   "impacto": "Con una sesion robada (precondicion fuerte), un atacante prueba la contrasena actual sin freno y, al acertar, la cambia: el sessionVersion+1 desloguea a la victima de todos sus dispositivos (toma de cuenta persistente). Ademas el costo de bcrypt difiere (10 aca, 12 en profile.ts:223 y reset).",
+   "propuesta": "(libre) applyAuthRateLimit por userId en cambiarPasswordAction y updatePasswordAction; unificar el costo de bcrypt.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-cambio.cambio-forzado",
+    "h2.cli-cuenta.cambiar-password",
+    "lib.rate-limit"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H16",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-001",
+   "prefijo": "A11Y",
+   "titulo": "Paginas de auth: /login sin h1, texto por debajo de AA, errores sin anunciar y visor de contrasena fuera del teclado",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 367,
+     "fragmento": "className=\"text-xs text-zinc-600 transition-colors hover:text-zinc-400\""
+    },
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 263,
+     "fragmento": "<p className=\"mt-4 text-sm text-zinc-600\">"
+    },
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 404,
+     "fragmento": "<p className=\"text-[11px] text-zinc-700\">Powered by develOP</p>"
+    },
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 358,
+     "fragmento": "<p className=\"text-xs text-red-400\">{error}</p>"
+    },
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 112,
+     "fragmento": "tabIndex={-1}"
+    }
+   ],
+   "impacto": "Aritmetica WCAG (paleta zinc de Tailwind 4 aprox. en sRGB): zinc-600 (#52525b, L~0,086) sobre #080a0c (L~0,003) = 0,136/0,053 = 2,6:1; zinc-500 = 4,1:1; zinc-700 = 1,9:1; AA exige 4,5:1. El link '¿Olvidaste tu contrasena?' queda en ~2,5:1. Los errores ('Email o contrasena incorrectos') no tienen role=alert/aria-live, el selector Contrasena/Magic Link no tiene semantica de tabs (:317-334) y no hay <h1> (PLAN-010). Mismo patron en forgot/reset/accept.",
+   "propuesta": "(libre) h1 visible o sr-only; role='alert' en los bloques de error de login/forgot/reset/accept/cambiar; subir a zinc-400 los textos funcionales; quitar tabIndex -1 del visor; role='tablist'/aria-selected en el selector.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.login-password",
+    "h1.auth-recupero.solicitar-enlace",
+    "h1.auth-recupero.restablecer-password",
+    "h1.auth-invite.aceptar-invitacion"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-010",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H17",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene leyendo las líneas citadas.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-016",
+   "prefijo": "SEC",
+   "titulo": "profile.ts: WhatsApp sin validacion y mensajes internos de Prisma devueltos al cliente",
+   "dominio": "D1",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 87,
+     "fragmento": "const whatsapp = ((formData.get('whatsapp') as string | null) ?? '').trim() || null"
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 72,
+     "fragmento": "return { success: false, error: toErrorMessage(error, 'No se pudo actualizar el perfil.') }"
+    },
+    {
+     "ruta": "src/lib/action-utils.ts",
+     "linea": 31,
+     "fragmento": "if (error instanceof Error) {\n  return error.message\n}"
+    }
+   ],
+   "impacto": "Un error de Prisma (p. ej. P2025 'Invalid prisma.organization.update() invocation...') llega textual a la UI del cliente (viola 'nunca exponer errores internos'); el campo WhatsApp acepta cualquier texto de cualquier largo (lo ve el admin en ClientHeader/OverviewTab). Mismo toErrorMessage en :99, :146, :183, :244.",
+   "propuesta": "(libre en profile.ts) Zod para whatsapp (formato/largo) y mensaje fijo en los catch para errores no-Zod; action-utils.ts es FROZEN -> si se quiere cambiar el helper, decision para Valentino.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-cuenta",
+    "lib.actions"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H18",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-001",
+   "prefijo": "DEU",
+   "titulo": "Flujo de invitacion huerfano: ninguna action viva emite links a /accept-invite (y la de clientes nunca los enviaba)",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/invitations.ts",
+     "linea": 110,
+     "fragmento": "const inviteUrl = `${baseUrl}/accept-invite?token=${token}`"
+    },
+    {
+     "ruta": "src/lib/actions/invitations.ts",
+     "linea": 116,
+     "fragmento": "message: `Invitación generada para ${email}. El link fue impreso en la consola del servidor.`,"
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 194,
+     "fragmento": "await sendEmail({"
+    },
+    {
+     "ruta": "src/lib/email.ts",
+     "linea": 15,
+     "fragmento": "if (!resend) {\n  return { success: true }"
+    },
+    {
+     "ruta": "src/app/accept-invite/actions.ts",
+     "linea": 15,
+     "fragmento": "export async function acceptInviteAction("
+    }
+   ],
+   "impacto": "inviteClientAction no tiene callers y nunca envia ni imprime el link (el mensaje miente); inviteTeamMemberAction vive en settings.ts, modulo sin importadores, y enviaria por Resend (contra PLAN-012) fingiendo exito sin RESEND_API_KEY. /accept-invite queda como superficie publica sin uso. Si alguien lo reconecta tal cual, la invitacion no llega.",
+   "propuesta": "Decidir: borrar accept-invite + invitations.ts + inviteTeamMemberAction, o reconectarlo enviando por Brevo con resultado verificado y la regla de contrasena unica.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-invite.emitir-invitacion",
+    "h1.auth-invite.aceptar-invitacion",
+    "h4.adm-config",
+    "int.resend"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-012",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H19",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-017",
+   "prefijo": "SEC",
+   "titulo": "passwordResetRequired solo se impone en el proxy; ALWAYS_ALLOWED tiene entradas muertas y getLegacyAdminRedirectPath nunca redirige",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 68,
+     "fragmento": "const ALWAYS_ALLOWED = [CHANGE_PASSWORD_PATH, '/api/auth/', '/logout', '/api/']"
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 84,
+     "fragmento": "if (\n  isAuthenticated &&\n  passwordResetRequired &&"
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 172,
+     "fragmento": "matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password'],"
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 23,
+     "fragmento": "if (pathname === ADMIN_OS_PATH || pathname.startsWith(`${ADMIN_OS_PATH}/`)) {\n  return null"
+    }
+   ],
+   "impacto": "Un usuario con contrasena temporal puede usar /api/* y server actions posteadas a rutas fuera del matcher sin cambiarla (ningun layout ni action lee passwordResetRequired): el forzado es higiene, no frontera, y es lo unico que depende solo del proxy frente al advisory de next. Las entradas '/api/auth/', '/api/' y '/logout' (ruta inexistente, PLAN-014) nunca aplican; getLegacyAdminRedirectPath siempre devuelve null porque ADMIN_OS_PATH === ADMIN_PATH (:8-9). El proxy decide con claims congelados del login (complete-onboarding no llama unstable_update).",
+   "propuesta": "(libre) Chequear passwordResetRequired (dato fresco de Node) en los layouts de portal; limpiar ALWAYS_ALLOWED y borrar getLegacyAdminRedirectPath (:22-65, :81, :92-96); documentar que /api queda fuera del proxy por diseno.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.ruteo-por-rol",
+    "h1.auth-cambio.cambio-forzado",
+    "lib.proxy"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-AUTH-04, PLAN-014",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H20",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-002",
+   "prefijo": "DEU",
+   "titulo": "auth.ts: codigo muerto y estado sin usar (getPostLoginPath, userExists): un usuario borrado conserva sesion ORG_MEMBER",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 65,
+     "fragmento": "function getPostLoginPath(state: {"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 61,
+     "fragmento": "userExists: Boolean(dbUser),"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 44,
+     "fragmento": "const role = dbUser?.role ?? ('ORG_MEMBER' as Role)"
+    }
+   ],
+   "impacto": "getPostLoginPath (y ADMIN_PATH/DASHBOARD_PATH/ONBOARDING_PATH :15-17) no tienen callers (PLAN-018). userExists se calcula y nunca se lee: un usuario borrado conserva una sesion con rol ORG_MEMBER por defecto y sin org (sessionVersion undefined no invalida, :219) hasta que expire; hoy sin datos expuestos, pero cualquier handler que solo pida 'sesion' lo deja pasar y el portal entra en el bucle de redirecciones.",
+   "propuesta": "Decision para Valentino (FROZEN + ZONA-FRANCO): devolver null en jwt cuando !userExists y borrar getPostLoginPath con sus constantes.",
+   "esfuerzo": "S",
+   "zona": "FROZEN + ZONA-FRANCO",
+   "nodos": [
+    "lib.auth",
+    "h1.auth-login.sesion-jwt"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-018, bucle de redirecciones",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H21",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-004",
+   "prefijo": "BUG",
+   "titulo": "El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 15,
+     "fragmento": "CLIENT"
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 154,
+     "fragmento": "if (isDashboardRoute && role !== USER_ROLE && !(role === ADMIN_ROLE && isImpersonating)) {"
+    },
+    {
+     "ruta": "src/lib/preview.ts",
+     "linea": 10,
+     "fragmento": "if (role === 'ORG_MEMBER') {"
+    }
+   ],
+   "impacto": "Latente (ningun codigo asigna CLIENT, git grep vacio), pero un usuario CLIENT con org pasa el signIn y queda en bucle /dashboard -> /login -> /dashboard (proxy.ts:143-145); resolveOrgId le devuelve null. CLAUDE.md documenta 'ORG_MEMBER / CLIENT -> /dashboard/*', lo contrario del codigo.",
+   "propuesta": "Decidir: declarar CLIENT legacy (y corregir la doc) o tratarlo como ORG_MEMBER en proxy.ts y preview.ts. El enum vive en schema.prisma (FROZEN): no tocarlo sin decision.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login.ruteo-por-rol",
+    "lib.proxy",
+    "lib.auth"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H22",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene leyendo las líneas citadas.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-018",
+   "prefijo": "SEC",
+   "titulo": "OrgRole (ADMIN/MEMBER/VIEWER) viaja en la sesion pero ningun guard lo lee",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 227,
+     "fragmento": "token.orgRole = accessState.orgRole"
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 29,
+     "fragmento": "const organizationId = session?.user?.organizationId"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 523,
+     "fragmento": "role                        OrgRole  @default(ADMIN)"
+    }
+   ],
+   "impacto": "Latente: hoy todas las membresias se crean ADMIN; el dia que se invite a un VIEWER podra cambiar nombre de empresa, contacto, preferencias de toda la org y pedir la baja de la cuenta (profile.ts solo exige organizationId).",
+   "propuesta": "Definir el modelo de permisos por OrgRole antes de habilitar miembros no-ADMIN; helper requireOrgRole en las actions de cuenta.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "lib.auth",
+    "h2.cli-cuenta",
+    "modelo.OrgMember"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H23",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-005",
+   "prefijo": "BUG",
+   "titulo": "Org primaria no deterministica: orgMemberships take:1 sin orderBy en cada auth()",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/auth.ts",
+     "linea": 37,
+     "fragmento": "take: 1,"
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 94,
+     "fragmento": "take: 1,"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 530,
+     "fragmento": "@@unique([userId, organizationId])"
+    }
+   ],
+   "impacto": "Latente: el schema permite varias membresias por usuario; si un usuario pertenece a dos orgs, cada auth() (que refresca de la DB) puede resolver una org distinta y el usuario ve/escribe en la que Postgres devuelva primero.",
+   "propuesta": "Decision para Valentino (auth.ts FROZEN): orderBy explicito (joinedAt) o selector de org activa; mismo cambio en login/actions.ts:88-95 y qa/login/route.ts:118-127.",
+   "esfuerzo": "S",
+   "zona": "FROZEN + ZONA-FRANCO",
+   "nodos": [
+    "lib.auth",
+    "modelo.OrgMember"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H24",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-019",
+   "prefijo": "SEC",
+   "titulo": "Contrasena temporal de 8 caracteres con estructura fija (~34 bits) y sin vencimiento",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/security/generate-temp-password.ts",
+     "linea": 15,
+     "fragmento": "export function generateTempPassword(): string {\n  return (\n    randomFromString(LETTERS, 4) +"
+    },
+    {
+     "ruta": "src/lib/security/generate-temp-password.ts",
+     "linea": 11,
+     "fragmento": ".map((b) => str[b % str.length])"
+    },
+    {
+     "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+     "linea": 68,
+     "fragmento": "passwordResetRequired: true,"
+    }
+   ],
+   "impacto": "La temporal (4 letras + 2 numeros + 2 especiales, sesgo de modulo) viaja por email y sirve indefinidamente hasta el primer login; junto con la fuerza bruta sin freno real es el eslabon mas debil de las cuentas nuevas. ~5,7% sale sin mayuscula.",
+   "propuesta": "(libre) 16+ caracteres aleatorios (base64url) o reemplazar la temporal por un link de un solo uso en el email de bienvenida, con vencimiento.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-cambio.cambio-forzado",
+    "h4.adm-clientes",
+    "lib.security"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H25",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-020",
+   "prefijo": "SEC",
+   "titulo": "Impersonacion: secreto de respaldo literal, misma clave que AUTH_SECRET, cookie que sobrevive al logout y politica de escritura sin definir",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/impersonation.ts",
+     "linea": 15,
+     "fragmento": "process.env.IMPERSONATION_SECRET ??\nprocess.env.AUTH_SECRET ??\nprocess.env.NEXTAUTH_SECRET ?? <literal de respaldo, valor omitido>"
+    },
+    {
+     "ruta": "src/actions/auth-actions.ts",
+     "linea": 6,
+     "fragmento": "await signOut({ redirectTo: '/login' })"
+    },
+    {
+     "ruta": "src/lib/preview.ts",
+     "linea": 14,
+     "fragmento": "if (role === 'SUPER_ADMIN') {\n  const impersonation = await getImpersonationSession()"
+    },
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 16,
+     "fragmento": "const organizationId = session?.user?.organizationId"
+    }
+   ],
+   "impacto": "Si faltaran las tres variables, los tokens de impersonacion se firmarian con un literal publico del repo (hoy inalcanzable: Auth.js exige AUTH_SECRET en prod); por defecto firma HS256 con AUTH_SECRET crudo (reuso de clave). El logout no borra impersonation-token. Durante el preview, las actions con resolveOrgId escriben como el cliente y las que usan session.user.organizationId fallan con 'Sesion invalida.' (profile.ts:29-33, upsell.ts:16-19), sin marca de 'hecho por soporte'.",
+   "propuesta": "(libre) Exigir IMPERSONATION_SECRET en prod (fallar si falta, sin literal); borrar la cookie en signOutAction; decidir si el preview es solo lectura (gate de mutaciones) o escritura auditada.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-impersonacion.iniciar",
+    "h1.auth-impersonacion.navegar-como-cliente",
+    "lib.impersonation"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-007",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H26",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-021",
+   "prefijo": "SEC",
+   "titulo": "/api/qa/login revela en el 403 cual guarda fallo",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/qa/login/route.ts",
+     "linea": 87,
+     "fragmento": "return NextResponse.json({ error: 'forbidden', reason: guard.reason }, { status: 403 })"
+    },
+    {
+     "ruta": "src/app/api/qa/login/route.ts",
+     "linea": 50,
+     "fragmento": "if (process.env.QA_ALLOW_LOCALHOST !== '1') {\n  return { allowed: false, reason: 'qa_flag_off' }"
+    }
+   ],
+   "impacto": "Un sondeo anonimo en produccion sabe si QA_ALLOW_LOCALHOST esta activa; la guarda 3 (:65-70) depende de que NETLIFY/VERCEL_ENV existan en runtime. Bajo: las tres guardas siguen cerrando (Host localhost no es alcanzable por la CDN).",
+   "propuesta": "Coordinar con Franco: 404 generico sin reason fuera de localhost.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h1.auth-login",
+    "lib.auth"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "2026-07-auditoria-seguridad.md:991",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H27",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene leyendo las líneas citadas.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-022",
+   "prefijo": "SEC",
+   "titulo": "Hashes de rate limit sin sal: IP y email recuperables por fuerza bruta",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/security/auth-rate-limit.ts",
+     "linea": 26,
+     "fragmento": "return `${scope}:${createHash('sha256').update(raw.toLowerCase()).digest('hex').slice(0, 24)}`"
+    },
+    {
+     "ruta": "src/lib/security/auth-rate-limit.ts",
+     "linea": 42,
+     "fragmento": "return createHash('sha256').update(ip).digest('hex').slice(0, 24)"
+    }
+   ],
+   "impacto": "El comentario promete no guardar IPs ni emails en claro, pero sha256 sin sal de una IPv4 (2^32) o de un email conocido se revierte en segundos; la tabla rate_limit vive en la Neon compartida.",
+   "propuesta": "(libre) HMAC con un pepper de entorno (PLAN-019).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.rate-limit",
+    "lib.security"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-019",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H28",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-003",
+   "prefijo": "UX",
+   "titulo": "Cambio forzado sin salida si el cliente no tiene la temporal, y copy de 'forzado' tambien en cambio voluntario",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/cambiar-password/CambiarPasswordForm.tsx",
+     "linea": 140,
+     "fragmento": "<Field label=\"Contraseña actual\" error={errors.oldPassword} required>"
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 89,
+     "fragmento": "return NextResponse.redirect(new URL(CHANGE_PASSWORD_PATH, nextUrl))"
+    },
+    {
+     "ruta": "src/app/cambiar-password/page.tsx",
+     "linea": 20,
+     "fragmento": "Por seguridad, necesitás definir una nueva antes de entrar."
+    }
+   ],
+   "impacto": "Un cliente nuevo que entra por magic link (passwordResetRequired=true desde el alta) queda encerrado en /cambiar-password pidiendo una 'contrasena actual' que puede no tener (email de bienvenida perdido); la pagina no ofrece /forgot-password (git grep vacio) y todo el portal redirige ahi. El texto de 'antes de entrar' aparece tambien al cambiarla por gusto.",
+   "propuesta": "(libre) Link a /forgot-password en la pagina; copy condicionado a forceChange; evaluar no exigir la actual cuando el ingreso fue por magic link.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-cambio.cambio-forzado"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H29",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-003",
+   "prefijo": "DEU",
+   "titulo": "router.push en CambiarPasswordForm (justificado inline) con destino fijo /dashboard",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/cambiar-password/CambiarPasswordForm.tsx",
+     "linea": 114,
+     "fragmento": "// Mecanismo intacto (ya es seguro): invocación directa + await + navegación DESPUÉS\n// del await, con el cookie ya en sessionVersion N+1. No se toca auth.ts."
+    },
+    {
+     "ruta": "src/app/cambiar-password/CambiarPasswordForm.tsx",
+     "linea": 126,
+     "fragmento": "router.push('/dashboard')"
+    }
+   ],
+   "impacto": "Rubrica: router.push en portal con comentario que lo justifica = DEU BAJA. Para SETTER y SUPER_ADMIN funciona por un rebote extra del proxy.",
+   "propuesta": "Mantener el comentario o navegar segun el rol que devuelva la action.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-cambio.cambio-forzado"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H30",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-004",
+   "prefijo": "DEU",
+   "titulo": "Fondo de auth copiado en 4 paginas y /login de 511 lineas con estilos inline",
+   "dominio": "D1",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 412,
+     "fragmento": "function AmbientParticles() {"
+    },
+    {
+     "ruta": "src/app/forgot-password/page.tsx",
+     "linea": 243,
+     "fragmento": "<div\n  className=\"pointer-events-none fixed inset-0\"\n  style={{"
+    },
+    {
+     "ruta": "src/app/accept-invite/InviteBackground.tsx",
+     "linea": 17,
+     "fragmento": "<div\n  className=\"pointer-events-none fixed inset-0\"\n  style={{"
+    },
+    {
+     "ruta": "src/app/reset-password/page.tsx",
+     "linea": 17,
+     "fragmento": "<div\n  className=\"pointer-events-none fixed inset-0\"\n  style={{"
+    }
+   ],
+   "impacto": "Cambiar el look de auth exige tocar 4 archivos (reset-password ademas omite DotMatrix); /login supera las 300 lineas con CSS inline donde hay utilidades Tailwind (anti-vibecode).",
+   "propuesta": "(libre) AuthShell compartido con el fondo y separar LoginForm/MagicLinkForm en archivos propios.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login",
+    "h1.auth-recupero",
+    "h1.auth-invite"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D1-c1",
+    "lote": "D1-L1",
+    "tmp": "D1-c1/D1-L1/H31",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  }
+ ]
+}

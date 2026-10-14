@@ -17,7 +17,14 @@
 // decisión y hecho declarado); los que quedan afuera se listan en `planeado_omitidos` y
 // van primero en el ciclo siguiente. Lo del sitio público queda para F3.
 //
-// Uso (desde logic-core-v3): node scripts/auditoria/f2-args.mjs <D1..D9> <ciclo> <salida.json> [--lotes D2-L1,D2-L3] [--tope 80]
+// Modo cazadores (ciclos 2 y 3, DEC-26): con --cazadores --lente "<texto>" los lotes del
+// dominio se funden en tramos de <= 16k LOC y cada tramo lleva, en vez de previas, los
+// títulos ya registrados del dominio (vigentes y descartados), lo planeado que sigue sin
+// cruce y las alertas sin resolver. Las alertas llevan id [Dx-An] para seguirlas entre ciclos.
+//
+// Uso (desde logic-core-v3):
+//   node scripts/auditoria/f2-args.mjs <D1..D9> <ciclo> <salida.json> [--lotes D2-L1,D2-L3] [--tope 80]
+//   node scripts/auditoria/f2-args.mjs <D1..D9> <ciclo> <salida.json> --cazadores --lente "<texto>"
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
@@ -27,6 +34,8 @@ const [, , DOM, CICLO, SALIDA] = process.argv
 const args = process.argv.slice(2)
 const soloLotes = args.includes('--lotes') ? args[args.indexOf('--lotes') + 1].split(',') : null
 const TOPE = args.includes('--tope') ? Number(args[args.indexOf('--tope') + 1]) : 80
+const CAZA = args.includes('--cazadores')
+const LENTE = args.includes('--lente') ? args[args.indexOf('--lente') + 1] : ''
 const appRoot = process.cwd()
 const CRUDO = path.resolve(appRoot, 'docs/auditoria-2026-10/_crudo')
 const MD_PLAN = path.resolve(appRoot, 'docs/auditoria-2026-10/12-PLANEADO.md')
@@ -37,7 +46,7 @@ const todosLotes = lotesDeTodos.filter((l) => l.dominio === DOM)
 const lotes = todosLotes.filter((l) => !soloLotes || soloLotes.includes(l.id))
 const previas = leer('previas.json', { items: [] }).items
 const planeado = leer('planeado-extraido.json', { items: [] }).items
-const alertas = leer('alertas-planeado.json', { dominios: {} }).dominios[DOM] ?? []
+const alertas = (leer('alertas-planeado.json', { dominios: {} }).dominios[DOM] ?? []).map((a, i) => `[${DOM}-A${i + 1}] ${a}`)
 const cruces = leer('planeado-cruces.json', {})
 
 // clave «fuente:línea[#sub]» → PLAN-NNN
@@ -127,17 +136,41 @@ for (const p of planeado) {
   asignados.get(elegido.l.id).push({ p, cita: puntaje(elegido) > 0 })
 }
 
+const NOMBRE = { D1: 'Auth cliente + admin', D2: 'Portal del cliente', D3: 'Admin', D4: 'Setter (ZONA-FRANCO)', D5: 'Chatbot e IA', D6: 'Datos', D7: 'Integraciones', D8: 'Plataforma', D9: 'Transversal' }[DOM]
+const forma = ({ p }) => ({ id: idPlan.get(claveDe(p)) ?? null, clave: claveDe(p), tipo: p.tipo, titulo: p.titulo, descripcion: p.descripcion, estado_declarado: p.estado_declarado, refs: (p.refs ?? []).slice(0, 6), zona_franco: !!p.zona_franco })
+
+if (CAZA) {
+  // tramos de <= 16k LOC en orden de lote
+  const tramos = []
+  for (const x of info) {
+    let t = tramos[tramos.length - 1]
+    if (!t || t.loc + x.l.loc > 16000) { t = { id: `${DOM}-T${tramos.length + 1}`, archivos: [], loc: 0, lotes: [], plan: [] }; tramos.push(t) }
+    t.archivos.push(...x.archivos); t.loc += x.l.loc; t.lotes.push(x.l.id); t.plan.push(...asignados.get(x.l.id))
+  }
+  const reg = leer('hallazgos.json', { hallazgos: [] }).hallazgos.filter((h) => h.dominio === DOM && h.estado !== 'descartado')
+  const desc = leer('descartados.json', { items: [] }).items.filter((d) => String(d.ciclo).startsWith(`${DOM}-`))
+  const titulos = [...reg.map((h) => `${h.id} ${h.titulo}`), ...desc.map((d) => `(descartado) ${d.titulo} — ${d.motivo_padre}`)]
+  const resueltas = new Set(leer('alertas-estado.json', { items: [] }).items.filter((a) => ['confirmada', 'descartada', 'parcial'].includes(a.resultado)).map((a) => (String(a.alerta).match(/\[(D\d-A\d+)\]/) ?? [])[1]).filter(Boolean))
+  const pendientes = alertas.filter((a) => !resueltas.has((a.match(/\[(D\d-A\d+)\]/) ?? [])[1]))
+  const salida = {
+    dominio: DOM, nombre: NOMBRE, ciclo: CICLO, lente: LENTE, foco: FOCO[DOM], contexto: '',
+    lotes: tramos.map((t) => ({ id: t.id, loc: t.loc, lotes_origen: t.lotes, archivos: t.archivos, titulos_existentes: titulos, planeado: t.plan.slice(0, TOPE).map(forma), planeado_omitidos: t.plan.slice(TOPE).map(({ p }) => idPlan.get(claveDe(p)) ?? claveDe(p)), alertas_pendientes: pendientes })),
+  }
+  writeFileSync(SALIDA, JSON.stringify(salida, null, 1), 'utf8')
+  for (const l of salida.lotes) console.log(`${l.id} (${l.lotes_origen.join(', ')}): ${l.archivos.length} archivos · ${l.loc} LOC · ${titulos.length} títulos · ${l.planeado.length} PLAN sin cruce${l.planeado_omitidos.length ? ` (+${l.planeado_omitidos.length})` : ''} · ${pendientes.length} alertas pendientes`)
+  process.exit(0)
+}
+
 const salida = {
   dominio: DOM,
-  nombre: { D1: 'Auth cliente + admin', D2: 'Portal del cliente', D3: 'Admin', D4: 'Setter (ZONA-FRANCO)', D5: 'Chatbot e IA', D6: 'Datos', D7: 'Integraciones', D8: 'Plataforma', D9: 'Transversal' }[DOM],
+  nombre: NOMBRE,
   ciclo: CICLO,
-  lente: '',
+  lente: LENTE,
   foco: FOCO[DOM],
-  contexto: alertas.length ? `ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en patrones_a_cruzar o en hallazgos):\n- ${alertas.join('\n- ')}` : '',
+  contexto: alertas.length ? `ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas, empezando el campo 'alerta' con su id entre corchetes; si se confirma, tambien va como hallazgo):\n- ${alertas.join('\n- ')}` : '',
   lotes: info.filter((x) => lotes.includes(x.l)).map((x) => {
     const prev = previas.filter((p) => (p.archivos_citados ?? []).some((c) => x.set.has(c.replace(/:\d+(-\d+)?$/, '').replace(/^logic-core-v3\//, ''))))
     const plan = asignados.get(x.l.id).sort((a, b) => Number(b.cita) - Number(a.cita) || (ORDEN_TIPO[a.p.tipo] ?? 9) - (ORDEN_TIPO[b.p.tipo] ?? 9))
-    const forma = ({ p }) => ({ id: idPlan.get(claveDe(p)) ?? null, clave: claveDe(p), tipo: p.tipo, titulo: p.titulo, descripcion: p.descripcion, estado_declarado: p.estado_declarado, refs: (p.refs ?? []).slice(0, 6), zona_franco: !!p.zona_franco })
     return {
       id: x.l.id,
       loc: x.l.loc,
