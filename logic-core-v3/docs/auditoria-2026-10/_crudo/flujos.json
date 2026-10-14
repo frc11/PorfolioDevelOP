@@ -103,6 +103,213 @@
     "Action: src/actions/auth-actions.ts:5-7 signOut({ redirectTo: '/login' })",
     "Auth.js limpia la cookie de sesion; la cookie impersonation-token queda viva hasta su maxAge (impersonation.ts:82-90)"
    ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "nombre": "Seed principal: prisma db seed → prisma/seed.ts",
+   "pasos": [
+    "prisma.config.ts:23-24 carga .env.local y después .env (dotenv no pisa valores ya cargados)",
+    "prisma.config.ts:32 el comando de seed es 'npx tsx prisma/seed.ts'",
+    "seed.ts:73 assertDevSeedTarget('seed.ts') → seed-guard.ts:42-78: ALLOW_PROD_SEED=1 saltea todo (:43-49); DATABASE_URL vacía aborta (:53-59); NODE_ENV=production aborta (:61-67); el host se valida por substring de la URL entera (:25-30, :69-77)",
+    "seed.ts:75-80 hashea con bcrypt las cuatro SEED_*_PASSWORD; seed-guard.ts:86-98 aborta si falta alguna",
+    "seed.ts:82-167 upsert de admin@develop.com (SUPER_ADMIN), cliente@sanmiguel.com, qa-cliente-b@develop.test y setter-qa@develop.test con passwordResetRequired false (:157)",
+    "seed.ts:169-245 orgs qa-cliente-b y san-miguel con su OrgMember ADMIN",
+    "seed.ts:247-403 servicios, proyecto, 7 tareas y suscripción (Plan BUSINESS si existe, :377-403)",
+    "seed.ts:405-743 mensajes, tickets con mensajes, facturas, assets y notificaciones de San Miguel",
+    "seed.ts:745-772 AgencySettings por id DEFAULT_AGENCY_SETTINGS_ID (importado de src/lib/agency-settings.ts:1)",
+    "seed.ts:781-833 BotConfig 'sanmiguel' (industry 'automotive', verticalPack 'usados') y su KnowledgeBase"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "nombre": "Seed Agency OS: npm run seed:agency-os → prisma/seed-agency-os.ts",
+   "pasos": [
+    "package.json:17 'ts-node prisma/seed-agency-os.ts' (package.json:18 es un duplicado exacto)",
+    "seed-agency-os.ts:2386 assertDevSeedTarget('seed-agency-os.ts')",
+    "seed-agency-os.ts:2388 getAgencyMembers (:345-394): toma SUPER_ADMIN cuyo nombre o email contenga 'franco'/'valentino' o hace upsert por email con role SUPER_ADMIN y SEED_ADMIN_PASSWORD (:355-391)",
+    "seed-agency-os.ts:2394 ensureAgencySettings (:1912-1927) crea la fila por defecto solo si no hay ninguna",
+    "seed-agency-os.ts:2396-2408 por cada org de :396-455: ensureOrganization (:1790-1820, cae a findFirst por companyName), ensureClientUser, ensureOrgMember ADMIN, servicio, suscripción, mensajes y tickets",
+    "seed-agency-os.ts:2410-2417 leads base y QA (ensureLead busca por businessName, :1929-1965), actividades, demos y dossiers",
+    "seed-agency-os.ts:2419-2427 proyectos: el tercero (:1301-1303, organizationSlug null) busca 'develop' en un mapa que solo recibió san-miguel, sonrisa-norte y sigma-contable (:2398) → throw en :2426",
+    "seed-agency-os.ts:2440 ensureContactSubmissions y :2442-2455 resumen nunca se ejecutan; :2458-2462 sale con código 1"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "nombre": "Migraciones hacia prod",
+   "pasos": [
+    "netlify.toml:2 el build de Netlify es 'npx prisma generate && npm run build' (no migra)",
+    "DEPLOY.md:52 la aplicación es manual: 'npx prisma migrate deploy' contra la base de prod",
+    "prisma.config.ts:26-34 define ruta del schema y comando de seed; no define datasource",
+    "prisma/schema.prisma:5-8 datasource con url = env('DATABASE_URL') y sin directUrl",
+    "logic-core-v3/.env.example:28-35 DATABASE_URL es el endpoint -pooler; DIRECT_DATABASE_URL solo se documenta para pg_dump",
+    "Estado real de prod y dev desconocido: docs/auditoria-2026-10/_crudo/prisma-migrate-status.txt:9 (migrate status de F0 falló sin DATABASE_URL)"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "nombre": "Cambio de plan → precio que ve el cliente",
+   "pasos": [
+    "src/app/(protected)/admin/clients/_actions/plan.actions.ts:179-183 arma subData (planId, pendingPlanId, pendingPlanEffectiveAt, lastPlanChangedAt) sin price",
+    "plan.actions.ts:186-195 solo el create de la primera asignación escribe price = Plan.monthlyPrice (:192)",
+    "plan.actions.ts:197-200 upgrade inmediato: update con subData, price queda igual",
+    "src/lib/plan/get-plan-for-org.ts:50-58 el downgrade diferido se aplica en lectura sin tocar price",
+    "src/app/(protected)/dashboard/cuenta/perfil/page.tsx:80-101 lee subscription.plan.name y subscription.price",
+    "perfil/page.tsx:208-216 serializa {planName, price, currency, renewalDate, status}",
+    "src/components/dashboard/ProfileForms.tsx:660-662 muestra 'Precio / mes' con subscription.price"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "nombre": "Archivar cliente (soft-delete de Organization)",
+   "pasos": [
+    "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:161-171 handleArchive → archiveClient",
+    "src/modules/chatbot/server/admin/archiveClient.ts:17 requireSuperAdmin; :19-21 Zod; :32-35 update deletedAt = new Date()",
+    "archiveClient.ts:37-46 auditoría CLIENT_UPDATED; :48-49 revalida /admin/clients",
+    "src/app/(protected)/admin/clients/page.tsx:23 lista activos (deletedAt null) y :34 archivados",
+    "Ningún otro lector de deletedAt en src (auth, portal, chatbot público, crons): git grep -n deletedAt origin/main -- logic-core-v3/src"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "nombre": "OAuth de GBP y Tiendanube → tokens en Organization",
+   "pasos": [
+    "src/app/api/auth/google-business/callback/route.ts:49-56 guarda gbpAccessToken y gbpRefreshToken tal como llegan",
+    "src/app/api/auth/tiendanube/callback/route.ts:63-70 guarda tiendanubeAccessToken tal como llega",
+    "src/lib/integrations/google-business-profile.ts:59-60 los lee y :81 reescribe el access token renovado",
+    "prisma/schema.prisma:359-360, 367, 375, 835 columnas sin cifrar; contraste: schema.prisma:1704-1709 (CRM) y :2025-2034 (WABA) cifradas con src/lib/crypto/secret-box.ts"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "nombre": "Hard-delete de cliente y cascadas",
+   "pasos": [
+    "ClientsListClient.tsx:187-191 modal TypeToConfirm, también abierto por el deep-link ?delete=<orgId> de una 'Solicitud de eliminación de cuenta'",
+    "src/modules/chatbot/server/admin/hardDeleteClient.ts:60-86 resumen: 'Leads del bot' cuenta solo convertedToOsLeadId null (:84)",
+    "hardDeleteClient.ts:141 tx.organization.delete dentro de $transaction",
+    "prisma/schema.prisma:528 OrgMember cae en cascada por la org; el User queda vivo (no hay borrado de users en src)",
+    "prisma/schema.prisma:1275 y :1441 BotConfig y todos sus ChatbotLead caen en cascada (convertidos incluidos); OsLead sobrevive porque no tiene FK"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "nombre": "Revisión manual de las 14 sentencias DML de migraciones (veredicto por sentencia)",
+   "pasos": [
+    "prisma/migrations/20260320200000_multi_tenancy_organizations/migration.sql:24 INSERT OrgMember desde Organization.userId: cada usuario queda ADMIN de su propia org (o.userId, o.id). No pierde ni mezcla.",
+    "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:29 INSERT Organization ('os-org-'||id, slug 'agency-os-'||id) para OsProject sin match; el match es difuso (:46-48, ILIKE de prefijo sin escapar % ni _). PUEDE MEZCLAR tenants (hallazgo de la migración 20260406010000).",
+    "20260406010000/migration.sql:77 UPDATE OsProject.organizationId con la misma resolución difusa. PUEDE MEZCLAR.",
+    "20260406010000/migration.sql:114 INSERT Project desde OsProject con la org resuelta: hereda la mezcla y además CORROMPE el estado (CANCELADO→COMPLETED, EN_MANTENIMIENTO→IN_PROGRESS, :131-137).",
+    "20260406010000/migration.sql:153 INSERT Task desde OsTask por projectId (FK): no mezcla; un estado fuera del CASE (:166-170) daría NULL y abortaría la migración en vez de corromper.",
+    "20260406010000/migration.sql:182 UPDATE OsTimeEntry.projectId desde OsTask por FK: correcto.",
+    "prisma/migrations/20260406113000_allow_internal_projects_without_organization/migration.sql:6 UPDATE Project.organizationId = NULL para la org 'agency-os-internal': acotado, pero esos NULL hicieron que 20260525182135_b11_1 (:11 SET NOT NULL, sin backfill) exigiera borrar proyectos a mano fuera de la historia.",
+    "20260406113000/migration.sql:14 DELETE Service de 'agency-os-internal': acotado a la org interna, no toca clientes.",
+    "20260406113000/migration.sql:21 DELETE Organization 'agency-os-internal' solo si no tiene hijos en 9 tablas (:23-67): acotado, sin pérdida de clientes.",
+    "prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql:16 UPDATE chatbot_message.role = UPPER(role): normalización por fila, sin cruce ni pérdida.",
+    "20260525190100/migration.sql:17 UPDATE chatbot_lead.intent = UPPER(intent): idem; un valor fuera del enum haría fallar el ALTER TYPE (:26-27) en vez de corromper.",
+    "20260525190100/migration.sql:18 UPDATE chatbot_events.level = UPPER(level): idem.",
+    "20260525190100/migration.sql:19 UPDATE chatbot_bot_config.intensityLevel = UPPER(...): idem.",
+    "20260525190100/migration.sql:20 UPDATE chatbot_bot_config.llmProvider = UPPER(...): idem ('google'→'GOOGLE', coherente con LlmProvider)."
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "nombre": "Mensaje del widget público: tenant resuelto por slug y escrituras aisladas del chatbot",
+   "pasos": [
+    "POST /api/chatbot/[slug]/chat -> src/app/api/chatbot/[slug]/chat/route.ts:97 handleChatRequest(request, slug)",
+    "src/modules/chatbot/server/chat/handleChatRequest.ts:155 resolveBotBySlug(slug) -> src/modules/chatbot/server/conversation/resolver.ts:24-36 unsafeGlobalQuery('TENANT-RESOLUTION...') botConfig.findUnique por slug (incluye organization {id, companyName}, sin mirar deletedAt) -> resolver.ts:38 solo descarta !isActive o sin KB",
+    "handleChatRequest.ts:163-164 orgId = bot.organization.id; scope = forOrg(orgId) -> src/lib/isolation/index.ts:71-76 -> registry.ts:833-846 buildScope",
+    "handleChatRequest.ts:232 getOrCreateConversation -> resolver.ts:76-83 scope.conversation.findFirst (scoped-model.ts:157-164 compone AND con {botConfig:{organizationId}} de registry.ts:312) -> resolver.ts:97-112 scope.conversation.create (parentCheck botConfigId registry.ts:314-320) -> P2002: adopción scopeada resolver.ts:124-137",
+    "src/modules/chatbot/server/quota/checker.ts:137 forOrg(org).quotaUsage.reserveConversation -> registry.ts:605 assertBotInScope, :607-611 upsert del período, :612-624 UPDATE condicional parametrizado con EXISTS sobre chatbot_bot_config (guard de org en SQL)",
+    "DB: chatbot_conversation (prisma/migrations/20260512150823_chatbot_init/migration.sql:57-75, sessionId único GLOBAL :142) y chatbot_quota_usage (:111-127, unique (botConfigId,year,month) :166)"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "nombre": "Webhook entrante de WhatsApp (motor): tenant por channelToken y FKs compuestas",
+   "pasos": [
+    "POST /api/motor/webhook/[channelToken] -> src/app/api/motor/webhook/[channelToken]/route.ts:27,50 handleInboundWebhookRequest",
+    "src/modules/motor/adapters/whatsapp/inbound/handle-request.ts:22 resolveChannelByToken -> resolve-channel.ts:22-37 valida formato y unsafeGlobalQuery('TENANT-RESOLUTION: webhook inbound') wabaChannel.findUnique({channelToken}) (unique global en 20260709163143.../migration.sql:26)",
+    "handle-request.ts:53 processInboundPayload(forOrg(channel.organizationId), channel, envelope.data)",
+    "Escrituras: registry.ts:467-496 contactIdentity.upsertByExternalId (unique org+canal+externalId, 20260707044711.../migration.sql:83); creates de conversación/mensaje con organizationId forzado por scoped-model.ts:343-351",
+    "DB: FKs compuestas (organizationId, id) que rechazan referencias cross-org (20260707044711_motor_whatsapp_b0_schema/migration.sql:116-125); la única excepción es la FK simple de transitions (registry.ts:241-258 con parentCheck)"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "nombre": "Archivar cliente (admin): soft-delete que solo oculta del listado",
+   "pasos": [
+    "/admin/clients -> src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:161-171 handleArchive (diálogo de confirmación con copy 'Es reversible: su bot, proyectos y tickets quedan intactos')",
+    "src/modules/chatbot/server/admin/archiveClient.ts:16-17 requireSuperAdmin; :19 Zod; :25-27 lectura; :32-34 organization.update {deletedAt: new Date()} vía unsafeGlobalQuery",
+    "src/app/(protected)/admin/clients/page.tsx:23 lista activos con deletedAt: null y :34 archivados",
+    "Ningún otro consumidor mira deletedAt: resolver.ts:24-38 (widget), crons, reportes, auth y proxy la siguen tratando como activa (ver ausencias)"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "nombre": "Eliminar cliente (hard-delete) y su cascada",
+   "pasos": [
+    "ClientsListClient.tsx:192-206 openDeleteFor -> src/modules/chatbot/server/admin/hardDeleteClient.ts:107-123 getClientDeletionSummary (requireSuperAdmin + Zod; cuenta projects/tickets/messages/assets :49-50)",
+    "Modal type-to-confirm -> ClientsListClient.tsx:222-243 confirmDelete -> hardDeleteClient.ts:125-145 $transaction: gatherDeletionSummary + tx.organization.delete :141",
+    "Cascada definida en migraciones: Project (20260525182135.../migration.sql:17) -> OsPaymentMilestone/OsMaintenancePayment/OsTimeEntry (20260406010000.../migration.sql:198,:201,:207); BotConfig y sus hijos (20260512150823_chatbot_init/migration.sql:169-187); motor (20260707044711.../migration.sql:107-125); OrgMember (20260320200000.../migration.sql:39-41). Los User del cliente NO se borran",
+    "hardDeleteClient.ts:166-178 audit CLIENT_DELETED fuera de la transacción (AdminAuditLog sin FK, sobrevive)"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "nombre": "Catálogo de módulos premium: código -> sitio público / DB -> portal y gates",
+   "pasos": [
+    "src/lib/data/premium-modules.ts:21-140 PREMIUM_MODULES_CATALOG (declarado fuente de verdad :17-19)",
+    "Sitio público: src/app/page.tsx:39 -> src/components/sections/modulos-opcionales/ModulosOpcionales.tsx:426-427 -> ModuloActiveCard.tsx:248 precio leído del código",
+    "Sync manual: prisma/seeds/sync-premium-modules.ts:64-158 (borra obsoletos y activaciones no ACTIVE :102-119; crea/actualiza :125-150)",
+    "Portal: src/app/(protected)/dashboard/services/page.tsx:177 premiumModule.findMany (precio de la DB); admin: src/app/(protected)/admin/settings/_actions/settings.actions.ts:175-199 edita priceMonthlyUsd en la DB",
+    "Gates: src/app/(protected)/dashboard/layout.tsx:53-61 slugs activos -> src/components/dashboard/SidebarNav.tsx:78,102; email-marketing/layout.tsx:20-21 isModuleActive('email-marketing') -> src/lib/modules/check-activation.ts:7-13 (el catálogo solo tiene 'email-marketing-pro')"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "nombre": "Plan del bot: catálogo de planes -> plan efectivo -> tools habilitadas",
+   "pasos": [
+    "prisma/seeds/sync-plans.ts:66-115 PLANS_CATALOG -> :149-176 create/update completo por key (corrida manual)",
+    "prisma/seeds/add-contact-tool.ts:47-68 agrega solo el slug confirm_contact_request a Plan.tools (corrida manual)",
+    "handleChatRequest.ts:218 getPlanForOrg(orgId) -> src/lib/plan/get-plan-for-org.ts:40-49 (Subscription.planId/pendingPlan); sin plan -> PLAN_FALLBACK src/lib/plan/fallback.ts:44-63 (espejo de STARTER)",
+    "handleChatRequest.ts:675 getTools(ctx, plan.tools) -> src/modules/chatbot/server/tools/getTools.ts:121 descarta navigate_to_page salvo el bot 'develop' (:90)"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "nombre": "Migraciones hacia producción",
+   "pasos": [
+    "Desarrollo: carpeta nueva en prisma/migrations/<timestamp>_<nombre>/migration.sql (86 hoy; drift.mjs 0 diferencias contra prisma/schema.prisma)",
+    "Build de Netlify: netlify.toml:2 'npx prisma generate && npm run build' -> package.json:9 next build --webpack: no corre migrate deploy desde el commit b85f791d (2026-06-28)",
+    "Aplicación real: manual 'DATABASE_URL=<prod> npx prisma migrate deploy' (docs/operations/b14-deploy-checklist.md:75); CI solo migra la base de test si existe el secret DATABASE_URL_TEST (../.github/workflows/ci.yml:162, :212), que hoy no existe (:174)",
+    "Datos de catálogo: seeds manuales con npx tsx (prisma/seeds/sync-plans.ts:9-13, add-contact-tool.ts:24-27, backfill-vertical-pack.ts:58-62), sin guard de entorno"
+   ]
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "nombre": "Mensaje precargado en Mensajes del portal",
+   "pasos": [
+    "Un link con ?context=<clave>[&moduleName=...] lleva a /dashboard/messages",
+    "src/components/dashboard/MessageThread.tsx:72-88 lee context/moduleName de searchParams -> src/lib/data/message-context.ts:54-63 getMessageForContext -> setInputValue; router.replace limpia la URL (:87)",
+    "Respuestas rápidas: MessageThread.tsx:173 setInputValue(getMessageForContext(qr.context))",
+    "El envío sigue por la action de mensajes del portal (fuera del lote)"
+   ]
   }
  ]
 }

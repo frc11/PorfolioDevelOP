@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Auditoría de renovación 2026-10 — junta la salida de los agentes de extracción de F1.12
-// (DEC-39) en docs/auditoria-2026-10/_crudo/planeado-extraido.json. Un solo uso.
+// (DEC-39) en docs/auditoria-2026-10/_crudo/planeado-extraido/ (partido en piezas de menos
+// de 300 KB, PROMPT §5; ver crudo-partes.mjs). Un solo uso.
 //
 // Lee el journal del workflow (una línea JSON por evento; las de type "result" traen
 // { items, docs_leidos, notas }) y se queda con los resultados cuyos ítems tienen
@@ -10,12 +11,13 @@
 //
 // Uso (desde logic-core-v3): node scripts/auditoria/planeado-extraer.mjs <journal.jsonl> <id-del-workflow>
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
+import { escribirPartido } from './crudo-partes.mjs'
 import path from 'node:path'
 
 const [, , JOURNAL, WF] = process.argv
 if (!JOURNAL || !WF) { console.error('uso: planeado-extraer.mjs <journal.jsonl> <id-del-workflow>'); process.exit(1) }
-const SALIDA = path.resolve(process.cwd(), 'docs/auditoria-2026-10/_crudo/planeado-extraido.json')
+const CRUDO = path.resolve(process.cwd(), 'docs/auditoria-2026-10/_crudo')
 
 const eventos = readFileSync(JOURNAL, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l))
 const agentes = []
@@ -33,7 +35,7 @@ for (const i of items) {
   if (n > 1) i.sub = n
 }
 // el id del endpoint de Neon no es una credencial, pero ubica la base: se recorta igual
-const texto = JSON.stringify({ workflow: WF, agentes, total: items.length, items }, null, 1).replace(/\bep-[a-z]+-[a-z]+[\w.-]*(?:\.\.\.|…)?/g, 'ep-…')
-writeFileSync(SALIDA, texto, 'utf8')
+const limpio = JSON.parse(JSON.stringify({ workflow: WF, agentes, total: items.length, items }).replace(/\bep-[a-z]+-[a-z]+[\w.-]*(?:\.\.\.|…)?/g, 'ep-…'))
+const partes = escribirPartido(CRUDO, 'planeado-extraido', limpio)
 const conSub = items.filter((i) => i.sub).length
-console.log(`planeado-extraido.json: ${items.length} ítems de ${agentes.length} agentes; ${conSub} con sub-clave`)
+console.log(`planeado-extraido/: ${items.length} ítems de ${agentes.length} agentes en ${partes} partes; ${conSub} con sub-clave`)

@@ -44,6 +44,7 @@ const normRuta = (r) => {
   let s = String(r ?? '').replace(/\\/g, '/').replace(/\s+\(.*\)\s*$/, '').trim()
   if (/^[A-Za-z]:\/auditoria-2026-10\/(?!logic-core-v3\/)/.test(s)) return `raíz:${s.replace(/^[A-Za-z]:\/auditoria-2026-10\//, '')}`
   s = s.replace(/^.*?logic-core-v3\//, '')
+  if (s.startsWith('../')) return `raíz:${s.slice(3)}`
   if (/^\.github\//.test(s)) return `raíz:${s}`
   return s
 }
@@ -102,8 +103,10 @@ for (const h of rev.hallazgos) {
     const caso = h.caso ?? casos.find((c) => norm(c.hallazgos).includes(t.slice(0, 50))) ?? casos.find((c) => norm(c.titulo) === t) ?? casos.find((c) => t && norm(c.hallazgos).split(' ').filter((w) => w.length > 4 && t.includes(w)).length >= 4)
     if (!caso) console.log(`aviso: ${id} (${h.tmp}) pide verificación humana y no tiene caso de prueba: agregá «caso» en la revisión`)
     else {
-      if (!vhPorCaso.has(caso)) vhPorCaso.set(caso, { vh: siguiente('VH'), ids: [], prioridad: 3 })
-      const e = vhPorCaso.get(caso)
+      // clave por contenido: dos hallazgos con el mismo caso (copiado en la revisión) comparten una sola VH
+      const clave = JSON.stringify(caso)
+      if (!vhPorCaso.has(clave)) vhPorCaso.set(clave, { caso, vh: siguiente('VH'), ids: [], prioridad: 3 })
+      const e = vhPorCaso.get(clave)
       e.ids.push(id)
       e.prioridad = Math.min(e.prioridad, SEV[h.severidad] ?? 3)
       vh = e.vh
@@ -122,6 +125,23 @@ for (const h of rev.hallazgos) {
   h.vh_asignado = vh
   nuevos.push(entrada)
 }
+// ── 1b. Fusiones: misma causa raíz que otro hallazgo (del ciclo o ya registrado) ──────────
+const fusionados = []
+for (const h of rev.hallazgos) {
+  if (h.decision !== 'fusionar' || h.fusionado_en) continue
+  const destinoId = /^[A-Z0-9]+-\d+$/.test(h.con) ? h.con : rev.hallazgos.find((x) => x.tmp === h.con)?.id_asignado
+  const destino = reg.hallazgos.find((x) => x.id === destinoId)
+  if (!destino) { console.error(`${h.tmp}: no se encontró el destino de la fusión «${h.con}» (¿quedó sin aceptar?)`); process.exit(1) }
+  const ya = new Set((destino.evidencia ?? []).map((e) => `${e.ruta}:${e.linea}`))
+  const sumar = (h.evidencia ?? []).map((e) => ({ ruta: normRuta(e.ruta), linea: e.linea, fragmento: e.fragmento })).filter((e) => !ya.has(`${e.ruta}:${e.linea}`))
+  if (destino.bloque_md) console.log(`aviso: ${h.tmp} se fusiona con ${destino.id}, que es un bloque escrito a mano: la evidencia nueva queda solo en el registro`)
+  else destino.evidencia = [...(destino.evidencia ?? []), ...sumar]
+  destino.nodos = [...new Set([...(destino.nodos ?? []), ...(h.nodos ?? []).filter((n) => NODO_VALIDO.test(n))])]
+  destino.origen = { ...(destino.origen ?? {}), fusionados: [...(destino.origen?.fusionados ?? []), { ciclo, tmp: h.tmp, titulo: h.titulo, severidad: h.severidad, nota_padre: h.nota_padre || '' }] }
+  if ((SEV[h.severidad] ?? 9) < (SEV[destino.severidad] ?? 9)) console.log(`aviso: ${h.tmp} (${h.severidad}) es más grave que su destino ${destino.id} (${destino.severidad}): revisar la severidad del destino`)
+  h.fusionado_en = destino.id
+  fusionados.push(`${h.tmp}→${destino.id}`)
+}
 escribir(REG, reg)
 escribir(path.join(CRUDO, 'descartados.json'), descartados)
 
@@ -131,7 +151,7 @@ const limpiar = (s) => String(s ?? '').replace(/\s+/g, ' ').trim()
 if (vhPorCaso.size) {
   const p08 = path.join(DIR, '08-VERIFICACION-HUMANA.md')
   let t08 = readFileSync(p08, 'utf8').replace(/\r\n/g, '\n').trimEnd()
-  for (const [c, { vh, ids, prioridad }] of vhPorCaso) {
+  for (const { caso: c, vh, ids, prioridad } of vhPorCaso.values()) {
     t08 += `\n\n### [${vh}] ${limpiar(c.titulo)}\n- Verifica: ${ids.map((i) => `[${i}]`).join(', ')} · Prioridad: ${PRIO[prioridad]}\n- Entorno: ${limpiar(c.entorno)}\n- Precondiciones: ${limpiar(c.precondiciones) || '—'}\n- Pasos: ${(c.pasos ?? []).map((p, i) => `${i + 1}) ${limpiar(p)}`).join(' ')}\n- Resultado esperado: ${limpiar(c.esperado)}\n- Señal de falla: ${limpiar(c.senal_falla)}\n- ¿Escribe en la base o manda emails?: ${c.escribe_db_o_email ? 'sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción' : 'no'}`
   }
   writeFileSync(p08, `${t08}\n`, 'utf8')
@@ -210,6 +230,6 @@ console.log(execFileSync(process.execPath, ['scripts/auditoria/planeado-md.mjs']
 
 const c = (s) => nuevos.filter((h) => h.severidad === s).length
 console.log(`${ciclo}: nuevos ${nuevos.length} (C ${c('CRÍTICA')} / A ${c('ALTA')} / M ${c('MEDIA')} / B ${c('BAJA')}): ${nuevos.map((h) => h.id).join(', ') || '—'}`)
-console.log(`VH nuevos: ${[...vhPorCaso.values()].map((v) => v.vh).join(', ') || '—'} · descartados en el ciclo: ${rev.hallazgos.filter((h) => h.decision === 'descartar').length}`)
+console.log(`VH nuevos: ${[...vhPorCaso.values()].map((v) => v.vh).join(', ') || '—'} · descartados en el ciclo: ${rev.hallazgos.filter((h) => h.decision === 'descartar').length} · fusionados: ${fusionados.length}${fusionados.length ? ` (${fusionados.join(', ')})` : ''}`)
 console.log(`PLAN cruzados: ${aplicados} · sin cruce (quedan para el ciclo siguiente): ${sinCruce.length}${sinCruce.length ? ` → ${sinCruce.slice(0, 15).join(', ')}${sinCruce.length > 15 ? '…' : ''}` : ''}`)
 console.log(`ledger: ${new Set(leidos).size} leídos · incompletos ${incompletos.length}${incompletos.length ? ` → ${incompletos.slice(0, 10).join('; ')}` : ''}`)

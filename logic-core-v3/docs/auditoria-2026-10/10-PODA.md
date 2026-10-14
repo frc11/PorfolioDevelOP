@@ -2039,9 +2039,82 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - Propuesta: decidir (Valentino)
 - Zona: libre
 
+### [POD-286] prisma/migrate-os-to-unified.ts (D6-c1)
+- Hallado en F2 · `prisma/migrate-os-to-unified.ts` · Nodo(s): lib.prisma.seeds · Señales: Solo cuenta filas de Project, Task y OsLead (líneas 6-10) y declara la migración 'finalizada' (14-15); Último commit 3cdcc55e del 2026-04-06; Lo invoca package.json:19 (migrate:os-v2) con ts-node
+- Qué rompe si se borra: Nada: es de solo lectura. Quitar también el script migrate:os-v2 de package.json.
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-287] prisma/backups/backup.js (D6-c1)
+- Hallado en F2 · `prisma/backups/backup.js` · Nodo(s): lib.prisma.seeds · Señales: Usa prisma.modulePricing (línea 6), modelo que ya no existe en el schema: fallaría al correr; Último commit c8478587 del 2026-04-27; Sin referencias desde package.json ni scripts
+- Qué rompe si se borra: Nada.
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-288] prisma/backups/module-pricing-legacy.json, organization-module-pre-push.json, premium-module-pre-push.json (D6-c1)
+- Hallado en F2 · `prisma/backups/module-pricing-legacy.json, organization-module-pre-push.json, premium-module-pre-push.json` · Nodo(s): lib.prisma.seeds · Señales: Dumps de datos de abril commiteados en un repo público (11, 1 y 9 filas; una con organizationId); Generados por backup.js, que ya no puede correr
+- Qué rompe si se borra: Nada salvo la referencia histórica (sigue en git).
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-289] package.json (D6-c1)
+- Hallado en F2 · `package.json` · Nodo(s): lib.plataforma.package · Señales: Duplicado exacto de seed:agency-os (línea 17)
+- Qué rompe si se borra: Nada.
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-290] prisma/seed-agency-os.ts (D6-c1)
+- Hallado en F2 · `prisma/seed-agency-os.ts` · Nodo(s): lib.prisma.seeds · Señales: Duplica src/lib/agency-settings.ts:1-19, que seed.ts:19 ya importa; Valores idénticos hoy; pueden divergir
+- Qué rompe si se borra: Nada si se reemplaza por el import.
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-291] prisma/seeds/init-data-connections.ts (D6-c1)
+- Hallado en F2 · `prisma/seeds/init-data-connections.ts` · Nodo(s): lib.prisma.seeds · Señales: git grep 'init-data-connections|initDataConnections' solo lo encuentra a sí mismo; backfill one-shot de abril: la columna tiene DEFAULT desde 20260427194426:7; único error de eslint del lote (no-explicit-any en :18); fabrica connected/lastSync (:34-45)
+- Qué rompe si se borra: Nada en runtime; solo se pierde un backfill que ya no aplica a orgs nuevas.
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-292] src/lib/data/onboarding-tasks.ts (D6-c1)
+- Hallado en F2 · `src/lib/data/onboarding-tasks.ts` · Nodo(s): lib.data · Señales: solo lo consume src/lib/onboarding/seed-tasks-for-org.ts:2; esa siembra solo se llama desde src/lib/actions/clients.ts e invitations.ts, sin importadores (git grep = 0); las actions de admin src/actions/admin/onboarding-tasks.ts tampoco tienen importadores; el alta vigente no siembra (createClientOnly.ts:85)
+- Qué rompe si se borra: OnboardingStatusCard (dashboard/page.tsx:61) quedaría sin catálogo; hoy ya devuelve null para orgs sin tareas. Decidir antes: retirar la feature completa o reconectarla.
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-293] prisma/seeds/backfill-vertical-pack.ts (D6-c1)
+- Hallado en F2 · `prisma/seeds/backfill-vertical-pack.ts` · Nodo(s): lib.prisma.seeds · Señales: backfill one-shot D.1 para 3 slugs fijos (:71-75); idempotente: después de correr en prod es no-op; sin referencias desde package.json ni otros scripts
+- Qué rompe si se borra: Nada si ya corrió en prod (verificar verticalPack de develop/sanmiguel/matsu).
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-294] prisma/seeds/add-contact-tool.ts (D6-c1)
+- Hallado en F2 · `prisma/seeds/add-contact-tool.ts` · Nodo(s): lib.prisma.seeds · Señales: one-shot CONTACT-PATH (:2-3); el catálogo ya incluye el slug (sync-plans.ts:57, :63); sin referencias desde package.json
+- Qué rompe si se borra: Nada si Plan.tools en prod ya tiene confirm_contact_request (PLAN-1145).
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-295] prisma/seeds/premium-modules.ts (D6-c1)
+- Hallado en F2 · `prisma/seeds/premium-modules.ts` · Nodo(s): lib.prisma.seeds · Señales: 3 líneas que solo llaman runSyncPremiumModules; sync-premium-modules.ts:180-182 ya se auto-ejecuta al invocarse directo; segundo punto de entrada del mismo script destructivo
+- Qué rompe si se borra: Nada; quien lo use debe invocar sync-premium-modules.ts. (Adyacente al lote.)
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
 ### Refuerzos de F2 sobre fichas de F1
 
 - [POD-046] `src/lib/actions/invitations.ts` (D1-c1): inviteClientAction sin callers (git grep inviteClient -> solo :43); Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116). Qué rompe: Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)
+- [POD-178] `prisma/migrations/__diff_check.sql` (D6-c1): 0 bytes; Está suelto en la raíz de migrations (Prisma solo lee carpetas); Commit 7fe804db del 2026-04-28. Qué rompe: Nada.
+- [POD-203] `prisma/schema.prisma` (D6-c1): Sin lectores en src; Único escritor src/lib/actions/clients.ts:164,199, módulo sin importadores (D1); Seeds lo siguen llenando (seed.ts:204,219). Qué rompe: Requiere migración DROP COLUMN sobre schema FROZEN: decisión para Valentino.
+- [POD-178] `prisma/migrations/__diff_check.sql` (D6-c1): 0 bytes; commit 7fe804db (2026-04-28) sin uso posterior; sin referencias fuera de los docs de esta auditoría; archivo suelto dentro de prisma/migrations (Prisma solo lee subcarpetas). Qué rompe: Nada. (Adyacente al lote: no figura en la lista, se reporta por estar en la carpeta de migraciones.)
 
 ## §docs
 

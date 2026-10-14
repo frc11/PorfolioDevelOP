@@ -4,7 +4,8 @@
 // Entrada: _crudo/ciclos/<ciclo>-decisiones.json, que queda commiteado como registro de la
 // verificación del padre (DEC-37, DEC-31). Forma:
 //   {
-//     "H01": { "decision": "aceptar" | "descartar", "verificado_padre": true, "nota_padre": "qué se leyó",
+//     "H01": { "decision": "aceptar" | "descartar" | "fusionar", "verificado_padre": true, "nota_padre": "qué se leyó",
+//              "con": "H05" | "SEC-014",   // solo con fusionar: hallazgo del ciclo o ya registrado que se queda
 //              ...campos a pisar del hallazgo (severidad, confianza, titulo, impacto, propuesta, zona,
 //                 seccion, nodos, relacionados_ids, previas, requiere_verificacion_humana, coordinacion),
 //              "caso_indice": 2            // caso de prueba del lote (índice en casos_prueba_manual)
@@ -43,8 +44,17 @@ for (const [clave, d] of Object.entries(decisiones)) {
   const candidatos = rev.hallazgos.filter((h) => h.tmp === clave || h.tmp.endsWith(`/${clave}`))
   if (candidatos.length !== 1) { console.error(`${clave}: ${candidatos.length ? 'ambigua (usar la clave completa)' : 'no existe en la revisión'}`); process.exit(1) }
   const h = candidatos[0]
-  if (!['aceptar', 'descartar'].includes(d.decision)) { console.error(`${clave}: decision inválida «${d.decision}»`); process.exit(1) }
+  if (!['aceptar', 'descartar', 'fusionar'].includes(d.decision)) { console.error(`${clave}: decision inválida «${d.decision}»`); process.exit(1) }
   if (d.decision === 'descartar' && !d.nota_padre) { console.error(`${clave}: descartar exige nota_padre con el motivo (DEC-31)`); process.exit(1) }
+  // fusionar: misma causa raíz que otro hallazgo del ciclo (clave temporal) o ya registrado (ID): se suma su evidencia, sin ID nuevo
+  if (d.decision === 'fusionar') {
+    if (!d.con) { console.error(`${clave}: fusionar exige «con» (clave temporal del ciclo o ID registrado)`); process.exit(1) }
+    if (!/^[A-Z0-9]+-\d+$/.test(d.con)) {
+      const destino = rev.hallazgos.filter((x) => x.tmp === d.con || x.tmp.endsWith(`/${d.con}`))
+      if (destino.length !== 1) { console.error(`${clave}: destino de fusión «${d.con}» ${destino.length ? 'ambiguo' : 'inexistente'}`); process.exit(1) }
+      d.con = destino[0].tmp
+    }
+  }
   for (const [k, v] of Object.entries(d)) if (!ESPECIALES.has(k)) h[k] = v
   const indices = d.caso_indices ?? (d.caso_indice !== undefined ? [d.caso_indice] : null)
   if (indices) {
@@ -57,4 +67,4 @@ for (const [clave, d] of Object.entries(decisiones)) {
 writeFileSync(REV, JSON.stringify(rev, null, 1), 'utf8')
 const pend = rev.hallazgos.filter((h) => ['leer', 'leer-refutada', 'muestrear'].includes(h.decision))
 const cuenta = (x) => rev.hallazgos.filter((h) => h.decision === x).length
-console.log(`${CICLO}: ${aplicadas} decisiones aplicadas · aceptar ${cuenta('aceptar')} · descartar ${cuenta('descartar')} · pendientes ${pend.length}${pend.length ? ` → ${pend.map((h) => h.tmp).join(', ')}` : ''}`)
+console.log(`${CICLO}: ${aplicadas} decisiones aplicadas · aceptar ${cuenta('aceptar')} · fusionar ${cuenta('fusionar')} · descartar ${cuenta('descartar')} · pendientes ${pend.length}${pend.length ? ` → ${pend.map((h) => h.tmp).join(', ')}` : ''}`)

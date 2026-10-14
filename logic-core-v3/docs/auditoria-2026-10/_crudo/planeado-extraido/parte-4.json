@@ -1,0 +1,894 @@
+{
+ "workflow": "wf_2638c35d-8e4",
+ "agentes": [
+  {
+   "agente": "a0e75c531e201682c",
+   "items": 232,
+   "docs_leidos": [
+    {
+     "doc": "docs/bitacora-roadmap.md",
+     "lineas_total": 17161,
+     "leido_completo": false,
+     "rango": "1-8600"
+    }
+   ],
+   "notas": [
+    "Rango asignado docs/bitacora-roadmap.md:1-8600 leído completo con Read (el archivo tiene 17161 líneas; el resto lo lee otro agente). La entrada B13.2 (L8585) continúa después de la línea 8600.",
+    "Rutas en refs relativas a logic-core-v3/ salvo .claude/* (raíz del repo) y C:/tmp/* (fuera del repo). Duplicados unificados con 'tambien en docs/bitacora-roadmap.md:N'; pendientes que la propia bitácora cierra más adelante se registraron como 'pendiente originado en ...' dentro del hecho-declarado que los cierra.",
+    "SECRET: docs/bitacora-roadmap.md:36 — valor completo de la key filtrada en enviroment.env (UUID; el doc dice que fue rotada, L50). Prefijos parciales de la misma key en L19 (comando git log -S) y L50.",
+    "SECRET: docs/bitacora-roadmap.md:3001 — password en texto plano del usuario dev matsu-admin@dev.local.",
+    "SECRET: docs/bitacora-roadmap.md:6375, :6376 y :6377 — passwords en texto plano de las cuentas seed super-admin, client-a y client-b (tabla de MS-8).",
+    "SECRET: docs/bitacora-roadmap.md:7837 — password en texto plano del setter QA seed.",
+    "No credencial pero identificador de infra: hostname del endpoint Neon dev (ep-…) en L64, L390, L544, L1097, L1150, L1983, L3663 (con y sin -pooler y sufijo de query), L6654, L6924, L7828, L7861, L7985 (db neondb); prefijo del host de prod en L1983.",
+    "Contradicción script dev: B1.2 (L313) dice que dev pasó a --turbopack; B3.3 (L1369) dice que dev usa webpack por default; MS-7 (L5369) cita 'next dev --webpack' en package.json:7.",
+    "Contradicción middleware: MS-8 (L6334) y B-SEC.2 (L7936) afirman que no hay middleware y que la protección es por layouts; B12.6 (L7682, L7687) reporta 307 'middleware'; B1 LeadOS (L7830, L7898) modifica src/proxy.ts (matcher /setter, ALWAYS_ALLOWED); SEC-AUTH-04 (L8138) pide un middleware global. Verificar si src/proxy.ts existía antes de LeadOS.",
+    "Contradicción F1 (state-swap Google Business): B11.2 (L6822) lo deja sin tocar; B11.3 (L7210, L7257) lo cuenta como cerrado aunque solo re-probó el curl anónimo; recién B-SEC.3b (L8145) lo cierra. B-SEC.3b/3c lo llaman F3 (L8145, L8333) cuando en B11.0 F3 era /admin/messages (L6492).",
+    "Contradicción F7 (/api/email/optout sin firma): B11.3 (L7241) lo deja pendiente para un sprint de HMAC; el checklist de B-SEC.3c (L8401) lo marca cerrado citando unsubscribe-token.ts, que pertenece al reporte ejecutivo (B6.2, L5095, ruta /api/email/unsubscribe-executive). En el rango no hay sprint que firme /api/email/optout/[contactId].",
+    "Numeración inconsistente en el checklist de B-SEC.3c (L8398-L8400): F2 descrito como 'IDOR projects.ts' y F4 como 'agency-actions cross-projectId', cuando en B11.0 F2 era trust-the-layout de projects.ts, F4 la página de payments y agency-actions era F5.",
+    "Contradicción clientId: B9.1 (L6013) dice que en /admin/clients/[clientId] el clientId es el orgSlug; B11.6 (L7163) dice que el valor que se pasa es Organization.id.",
+    "IDs internos en URL: B5.6 (L3919) crea /dashboard/chatbot/leads/[id] con el id del lead; B6.3 (L5259) dice que 'los IDs de lead no van en URLs por política'; CLAUDE.md prohíbe exponer IDs internos en URLs; también /admin/chatbots/[botId] con cuid (L8544).",
+    "Hosting ambiguo: Netlify aplica prisma migrate deploy (L2080, L2563) pero el cron del reporte semanal se registra en vercel.json (L5036, L5146); MS-8 guarda contra NETLIFY y VERCEL_ENV (L6351); B12.5 habla de que 'Vercel escala horizontalmente' (L7620).",
+    "Sentry: B12.1 (L7433) habla de 'cuando B14 instale @sentry/nextjs', pero B1.2 (L307-L311) ya configuraba Sentry en instrumentation-client.ts y MS-7 (L5368) cita withSentryConfig en next.config.ts.",
+    "Contra CLAUDE.md: B13.0 (L8562) decide no usar IntersectionObserver para el Canvas 3D del preview (CLAUDE.md lo exige en animaciones pesadas); MS-7 (L5370) diagnostica canvas con dpr [1,2] (CLAUDE.md: máximo [1,1.5]).",
+    "Frozen: MS-6 (L4815) edita src/context/PreloaderContext.tsx (frozen 'no romper el flujo de fases'); B13.0 (L8526) trata LegacyNeuroAvatar como FROZEN aunque no figura en la tabla de frozen de CLAUDE.md.",
+    "Orden de migraciones: la de B4.4 (20260522214201_drop_user_unlocked_features, L2557) tiene timestamp anterior a las de B4.1 (20260522234313, L1999) y B4.3 (20260523001750, L2317) aunque se creó después.",
+    "B11.1 (L6593) corrige una afirmación heredada de B0.3: había 3 proyectos sin org, no 1.",
+    "B8.5 (L5887) propone /admin/clients/[clientId]/chatbot/install, ruta que el catch-all de B9.1 (L6011-L6016) captura y redirige a overview.",
+    "Estructura del doc: B-SEC.2 (L7771) queda partido por las entradas B1 y B2 de LeadOS (L7819-L7904) y sigue en L7906; los flags y pendientes de B1 LeadOS (L7895-L7904) aparecen después del contenido de B2 con numeración '### 3)' y '### 4)' duplicada.",
+    "Sin entrada propia en el rango: B5.3 (B5.4 lo da por hecho en L3776, L3785, L3790), B3.4, B7.1-B7.3 (B7 aparece solo como visual-qa retroactivo en L5909), B10, B12.0, B12.2-B12.4, B-SEC.1 (auditoría docs/auditoria-seguridad-2026-05.md) y B14. B12.7 aparece antes que B12.1 y B13.0 después de B13.1.",
+    "Sin fecha en el encabezado: B-SEC.2, B-SEC.3a, B-SEC.3b, B-SEC.3c y B1 LeadOS (sus migraciones son 20260526050401 y 20260611210802 respectivamente); B5.4-B5.7, MS-6, B6.x, MS-7, B7 y B9.x la tienen en el cuerpo.",
+    "El probe ejecutable de B-SEC.3b/3c vive fuera del repo (C:/tmp/probe-oauth-state.mjs, L8241 y L8350); no es reproducible desde el repositorio.",
+    "Muchos sprints cierran con 'verificación visual/manual pendiente de Franco'; se consolidaron en pocos ítems (L3897 para B5, L5820 widget mobile, L5927 B7, L7888 LeadOS)."
+   ]
+  },
+  {
+   "agente": "a557469f86c97aa90",
+   "items": 243,
+   "docs_leidos": [
+    {
+     "doc": "_insumos/drive/Olme/Ideas de nuevas features.md",
+     "lineas_total": 73,
+     "leido_completo": true,
+     "rango": "1-73"
+    },
+    {
+     "doc": "_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md",
+     "lineas_total": 92,
+     "leido_completo": true,
+     "rango": "1-92"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Chatbot_ registro de cambios.md",
+     "lineas_total": 122,
+     "leido_completo": true,
+     "rango": "1-122"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md",
+     "lineas_total": 78,
+     "leido_completo": true,
+     "rango": "1-78"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md",
+     "lineas_total": 80,
+     "leido_completo": true,
+     "rango": "1-80"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md",
+     "lineas_total": 124,
+     "leido_completo": true,
+     "rango": "1-124"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md",
+     "lineas_total": 133,
+     "leido_completo": true,
+     "rango": "1-133"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md",
+     "lineas_total": 106,
+     "leido_completo": true,
+     "rango": "1-106"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Admin (operacion)_ registro de cambios.md",
+     "lineas_total": 85,
+     "leido_completo": true,
+     "rango": "1-85"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md",
+     "lineas_total": 193,
+     "leido_completo": true,
+     "rango": "1-193"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md",
+     "lineas_total": 70,
+     "leido_completo": true,
+     "rango": "1-70"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Leads_ registro de cambios.md",
+     "lineas_total": 74,
+     "leido_completo": true,
+     "rango": "1-74"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md",
+     "lineas_total": 86,
+     "leido_completo": true,
+     "rango": "1-86"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Revision Demos_ registro de cambios.md",
+     "lineas_total": 85,
+     "leido_completo": true,
+     "rango": "1-85"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md",
+     "lineas_total": 177,
+     "leido_completo": true,
+     "rango": "1-177"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/Inicio_ registro de cambios.md",
+     "lineas_total": 140,
+     "leido_completo": true,
+     "rango": "1-140"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md",
+     "lineas_total": 489,
+     "leido_completo": true,
+     "rango": "1-489"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/Mi Plan_ registro de cambios.md",
+     "lineas_total": 119,
+     "leido_completo": true,
+     "rango": "1-119"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/Mi proyecto_ registro de cambio.md",
+     "lineas_total": 57,
+     "leido_completo": true,
+     "rango": "1-57"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md",
+     "lineas_total": 269,
+     "leido_completo": true,
+     "rango": "1-269"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md",
+     "lineas_total": 178,
+     "leido_completo": true,
+     "rango": "1-178"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/Soporte_ registro de cambios.md",
+     "lineas_total": 96,
+     "leido_completo": true,
+     "rango": "1-96"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md",
+     "lineas_total": 98,
+     "leido_completo": true,
+     "rango": "1-98"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/General_ registro de cambios.md",
+     "lineas_total": 103,
+     "leido_completo": true,
+     "rango": "1-103"
+    },
+    {
+     "doc": "_insumos/drive/Olme/Cliente - Registro de cambios/Mensajes_ registro de cambios.md",
+     "lineas_total": 67,
+     "leido_completo": true,
+     "rango": "1-67"
+    },
+    {
+     "doc": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md",
+     "lineas_total": 32,
+     "leido_completo": true,
+     "rango": "1-32"
+    },
+    {
+     "doc": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md",
+     "lineas_total": 97,
+     "leido_completo": true,
+     "rango": "1-97"
+    },
+    {
+     "doc": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md",
+     "lineas_total": 67,
+     "leido_completo": true,
+     "rango": "1-67"
+    },
+    {
+     "doc": "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md",
+     "lineas_total": 40,
+     "leido_completo": true,
+     "rango": "1-40"
+    },
+    {
+     "doc": "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md",
+     "lineas_total": 93,
+     "leido_completo": true,
+     "rango": "1-93"
+    }
+   ],
+   "notas": [
+    "Credenciales: ningún doc contiene un valor de secreto; un grep de patrones de API key, cadena de conexión, token y private_key no encontró nada. Solo aparecen nombres de variables y archivos: ONBOARDING_SECRET_KEY (registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:15), CRON_SECRET (ROADMAP-MEJORA-post-auditoria.md:13,15), RESEND_API_KEY (Operaciones/Chatbot_:44), DIRECT_URL (Operaciones/Chatbot_:168), y el token de Vercel Blob quitado del .env (Olme/Chatbot_:97). Relevante para E10: Cliente - Registro de cambios/General_:75 indica copiar .env.local y vertex-credentials.json a cada worktree nuevo, sin valor.",
+    "Contradicción 1, onFinish: RB.3 (ROADMAP-MEJORA-post-auditoria.md:38) lo quiere transaccional con $transaction sobre mensaje, conversación y cuota; C3.4 (ROADMAP-CHATBOT-bloques-C.md:72) quiere paralelizar esos mismos 3 writes.",
+    "Contradicción 2, /smoke: el roadmap de evolución lo pone en el carril inmediato T0.1 (ROADMAP-MEJORA:13; HANDOFF-cierre:28). Los bloques C lo excluyen como P-4 y lo mandan al carril de seguridad de Franco (ROADMAP-CHATBOT-bloques-C:21; HANDOFF-chatbot-arranque:29). /health va a seguridad en ambos.",
+    "Contradicción 3, getLatencyHistory: DERIVACION-chat-panel:24 lo asigna al panel (las vistas admin son de ustedes), pero MH.1 del runtime también lo incluye (ROADMAP-MEJORA:23).",
+    "Contradicción 4, Matsu: HANDOFF-cierre:9 dice que 'pinchó' y que la propuesta pasó a wishlist. HANDOFF-chatbot-arranque:6 y ROADMAP-CHATBOT-bloques-C:5 lo dan como primer cliente real entrando, y C2 como deuda comercial firmada. Por el contexto de la auditoría, hoy no hay clientes reales.",
+    "Contradicción 5, modelo: ROADMAP-CHATBOT-bloques-C:62 asigna 'Fable · high' a C2.2; HANDOFF-cierre:13 y ROADMAP-MEJORA:4 dicen tope Opus 4.8 con Fable retirado.",
+    "Contradicción 6, avatar: Olme/Chatbot_:97,119 declara decidido base64 en DB sin infra externa (Vercel Blob revertido). Cliente - Registro de cambios/Chatbot_:89 deja abierto el storage externo como decisión de infra.",
+    "Contradicción 7, cerrar lead → cliente: Ideas:18 propone un FK OsLead→Organization o closedToOrgId. Cliente/Chatbot_:88 propone volver FK a ChatbotLead.convertedToOsLeadId, lo que choca con la decisión deliberada de que sea string suelto (Clientes_:60).",
+    "Contradicción 8, runner de seeds: Inicio_:88 dice usar tsx, nunca ts-node (Node 24). Resultados_:31 usó npx ts-node --transpile-only porque tsx no estaba instalado.",
+    "Tensión, aislamiento: la Auditoría III declara 0 rojos de aislamiento en el dominio chatbot (HANDOFF-cierre:28; ROADMAP-MEJORA:64). Inicio_:97 registra que el conteo de leads de Inicio y computeLeadsScore usan ContactSubmission sin organizationId, o sea datos de otros tenants mostrados al cliente.",
+    "Solapamiento entre los dos roadmaps del runtime (ambos del 2026-07-06). C0.2/C1.2 ≈ RB.2 (historial y mensaje 51). C3.2 ≈ unique compuesto A1.2 (ROADMAP-MEJORA:45). C3.5/C3.1 ≈ MH.2 (conversaciones degradadas y cuota sin respuesta). C3.6 ≈ A5.2. C2.1 ≈ E1 (gaps de KB). C2.2 ≈ E3 (catálogo e inventario). C2.3 ≈ E0/E2 (memoria). Se dejaron como entradas separadas con referencias cruzadas ('ver ...').",
+    "Resoluciones entre docs, sin verificar contra código. Pendiente de subir imagen del avatar (Operaciones/Chatbot_:154) → B4 3792ab8. Fuga de ZodError en updateSettings (Configuracion_:113) → 5e33733. Merge y pasada visual de Inteligencia (Inteligencia_:6,132) → Transversal:29-31. Botón volver (Soporte:84) → BackLink en soporte/[ticketId] (Portal General:21). Cyan del widget → parcial según Cliente/Chatbot:55-59. EmptyState con Lucide (Servicios:218) → migración a EmptyStateMuted (Portal General:45-48). El snapshot 'secciones sin trabajar' de General_:84,97-102 quedó desactualizado por las lanes posteriores.",
+    "Estado de merge: varias lanes del portal cliente se declaran cerradas pero sin mergear a main: inicio, plan, project, services, resultados, cuenta, y los Bloques A/B de portal-pulido. También la rama b0-isolation-motor-chatbot (PD1-PA-CO5:81). Va como estado_declarado 'hecho (sin mergear)'; hay que cruzarlo con git.",
+    "El paquete Drive de Franco que cita HANDOFF-cierre:19-26 (LEEME-PRIMERO, 00-INDICE, roadmap-macro v2.4, 11 hojas de bloque EV/UTM1/Q1/E1/R1/M1/EST/E0/E2/E3/E4, MICROSPRINTS-E5-E6, pendientes-delta-evolucion) no está en _insumos/drive/Franco: solo están Bloques a Ejecutar y Work Flow. Las entradas de esos bloques salen solo de menciones; su contenido detallado no está disponible. M1 casi no tiene descripción. Los docs del repo citados (docs/audit-chatbot-runtime.md, docs/roadmap-maestro.md, docs/roadmap-pendientes.md, docs/bitacora-roadmap.md) no se verificaron: fuera de alcance.",
+    "Convenciones de extracción. En Ideas de nuevas features.md, las secciones 1-2 son tipo idea; la sección 3 (follow-ups), la 4 (deuda de consolidación, que el doc aclara que no son features) y la 5 (coordinación) son tipo pendiente, salvo 'stat cards del Audit log' que es decision. Para duplicados, la entrada principal va en la aparición más antigua por fecha del doc, excepto cuando el ítem es una idea de Ideas de nuevas features.md, que se ancla ahí. Las demás apariciones van en refs como 'tambien en <ruta sin _insumos/drive/>:linea'. En tipo decision, estado_declarado 'hecho' = decisión tomada y 'pendiente' = decisión abierta. 'Archivado' o 'diferido' se registran como pendiente con el matiz en la descripción. Los hechos se agruparon por sección o sprint, reuniendo sub-secciones cosméticas chicas.",
+    "zona_franco se aplicó literalmente: true en ítems cuyo objeto es OsLead, LeadOS, setter o /admin/leados. Eso incluye el kanban /admin/leads (opera OsLead), Revisión Demos (OsLeadDossier), pipelineOrder, 'cerrar lead → cliente', el drift de la lane setter y la decisión de no-acople. La conversión ChatbotLead→OsLead (B2) se dejó en false porque es código del módulo chatbot. Los bloques CHATBOT y DASHBOARD de Franco no son zona franca. Este rango no cubre la carpeta OSLEAD.",
+    "Promesas visibles al cliente para cruzar con la realidad: 'Próximamente Q3 2026' en los módulos coming-soon (Servicios_:175), ya vencida a 2026-10-13; 'Respondemos en < 4 hs, Lun–Vie 9–18' (Mensajes_:30); y la docstring 'GDPR-friendly', que el propio doc declara falsa (HANDOFF-cierre:58)."
+   ]
+  },
+  {
+   "agente": "adab93ac4d525c75f",
+   "items": 184,
+   "docs_leidos": [
+    {
+     "doc": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md",
+     "lineas_total": 959,
+     "leido_completo": true,
+     "rango": "1-959"
+    },
+    {
+     "doc": "docs/roadmap-pendientes.md",
+     "lineas_total": 181,
+     "leido_completo": true,
+     "rango": "1-181"
+    },
+    {
+     "doc": "STATUS.md",
+     "lineas_total": 334,
+     "leido_completo": true,
+     "rango": "1-334"
+    },
+    {
+     "doc": "raiz:PRODUCT.md",
+     "lineas_total": 88,
+     "leido_completo": true,
+     "rango": "1-88"
+    },
+    {
+     "doc": "raiz:DESIGN.md",
+     "lineas_total": 301,
+     "leido_completo": true,
+     "rango": "1-301"
+    },
+    {
+     "doc": "raiz:lane-LOG.md",
+     "lineas_total": 192,
+     "leido_completo": true,
+     "rango": "1-192"
+    },
+    {
+     "doc": "raiz:lane-dashboard-log.md",
+     "lineas_total": 272,
+     "leido_completo": true,
+     "rango": "1-272"
+    },
+    {
+     "doc": "raiz:lane-plan-log.md",
+     "lineas_total": 103,
+     "leido_completo": true,
+     "rango": "1-103"
+    },
+    {
+     "doc": "raiz:lane-resultados-redesign-log.md",
+     "lineas_total": 317,
+     "leido_completo": true,
+     "rango": "1-317"
+    },
+    {
+     "doc": "docs/sprints/alpha-0-cleanup.md",
+     "lineas_total": 50,
+     "leido_completo": true,
+     "rango": "1-50"
+    },
+    {
+     "doc": "docs/sprints/alpha-0-5-cleanup.md",
+     "lineas_total": 35,
+     "leido_completo": true,
+     "rango": "1-35"
+    },
+    {
+     "doc": "docs/sprints/alpha-0-6-cleanup-extended.md",
+     "lineas_total": 25,
+     "leido_completo": true,
+     "rango": "1-25"
+    },
+    {
+     "doc": "docs/sprints/alpha-0-7-baseline-observability.md",
+     "lineas_total": 26,
+     "leido_completo": true,
+     "rango": "1-26"
+    },
+    {
+     "doc": "docs/sprints/alpha-0-8-tests-e2e.md",
+     "lineas_total": 56,
+     "leido_completo": true,
+     "rango": "1-56"
+    },
+    {
+     "doc": "docs/sprints/alpha-0-9-status-verificacion.md",
+     "lineas_total": 47,
+     "leido_completo": true,
+     "rango": "1-47"
+    },
+    {
+     "doc": "docs/sprints/alpha-1-reaudit.md",
+     "lineas_total": 267,
+     "leido_completo": true,
+     "rango": "1-267"
+    },
+    {
+     "doc": "docs/sprints/alpha-2-onboarding.md",
+     "lineas_total": 71,
+     "leido_completo": true,
+     "rango": "1-71"
+    },
+    {
+     "doc": "docs/sprints/alpha-bloque-C-RESUMEN.md",
+     "lineas_total": 41,
+     "leido_completo": true,
+     "rango": "1-41"
+    },
+    {
+     "doc": "docs/sprints/alpha-RESUMEN-FINAL.md",
+     "lineas_total": 93,
+     "leido_completo": true,
+     "rango": "1-93"
+    },
+    {
+     "doc": "docs/sprints/alpha-pre-cierre-RESUMEN.md",
+     "lineas_total": 114,
+     "leido_completo": true,
+     "rango": "1-114"
+    },
+    {
+     "doc": "docs/sprints/infra-1-observabilidad.md",
+     "lineas_total": 77,
+     "leido_completo": true,
+     "rango": "1-77"
+    },
+    {
+     "doc": "docs/sprints/infra-2-cold-start-retry.md",
+     "lineas_total": 139,
+     "leido_completo": true,
+     "rango": "1-139"
+    },
+    {
+     "doc": "docs/sprints/p3-a-1-gbp-connection.md",
+     "lineas_total": 152,
+     "leido_completo": true,
+     "rango": "1-152"
+    },
+    {
+     "doc": "docs/sprints/p3-a-2-venta.md",
+     "lineas_total": 230,
+     "leido_completo": true,
+     "rango": "1-230"
+    },
+    {
+     "doc": "docs/sprints/p4-1-render-utm.md",
+     "lineas_total": 125,
+     "leido_completo": true,
+     "rango": "1-125"
+    },
+    {
+     "doc": "docs/sprints/q1-1-harness.md",
+     "lineas_total": 187,
+     "leido_completo": true,
+     "rango": "1-187"
+    },
+    {
+     "doc": "docs/sprints/q1-2-scoring.md",
+     "lineas_total": 102,
+     "leido_completo": true,
+     "rango": "1-102"
+    },
+    {
+     "doc": "docs/sprints/sprint-b0-bis-cierre.md",
+     "lineas_total": 61,
+     "leido_completo": true,
+     "rango": "1-61"
+    },
+    {
+     "doc": "docs/sprints/sprint-b05-sanidad-sitio.md",
+     "lineas_total": 85,
+     "leido_completo": true,
+     "rango": "1-85"
+    },
+    {
+     "doc": "docs/sprints/utm-1-captura.md",
+     "lineas_total": 262,
+     "leido_completo": true,
+     "rango": "1-262"
+    }
+   ],
+   "notas": [
+    "SECRETS: STATUS.md:258 contraseña en texto plano de una cuenta seed admin; STATUS.md:259 contraseña en texto plano de una cuenta seed cliente (mock San Miguel). No se copiaron los valores.",
+    "Identificadores de infraestructura (no son credenciales): hostname del pooler Neon dev en STATUS.md:86, STATUS.md:299 y _insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:452, :454.",
+    "CONTRADICCIÓN sobre el acento de Software: raiz:PRODUCT.md:54 dice índigo; raiz:DESIGN.md:20/:125 dice violeta #8b5cf6 (Gate 1 cerrado: queda el token); docs/sprints/sprint-b05-sanidad-sitio.md:63 dice 'índigo/violeta'; CLAUDE.md dice Violet.",
+    "CONTRADICCIÓN sobre glassmorphism: raiz:DESIGN.md:92/:211/:291 lo prohíbe en el sitio público y CLAUDE.md lo da como convención. En el portal: raiz:lane-LOG.md:107/:186 agrega backdrop-blur (KBValidation, KnowledgeBaseEditor) y raiz:lane-plan-log.md:25 lo usa como ancla admin, pero raiz:lane-resultados-redesign-log.md:273/:275 lo quita por considerarlo fuera del canon admin.",
+    "CONTRADICCIÓN de motion: raiz:DESIGN.md:271 pide reveals de ~0.9s; CLAUDE.md fija la convención en 0.6s / y 20.",
+    "Matsu: STATUS.md:177 dice que no existe en código ni DB (2026-05-21). raiz:lane-resultados-redesign-log.md:229 dice que el seed resolvió Matsu BUSINESS con bot en Neon dev (2026-06-25), y docs/sprints/q1-1-harness.md:31/:103 lo trata como bot de cliente real. STATUS.md está desactualizado.",
+    "Widget: docs/sprints/alpha-RESUMEN-FINAL.md:72 pone 'Priorizar Widget embebible' como Beta, pero STATUS.md:21/:61 lo declara hecho en v1.0.",
+    "'Zero any': docs/sprints/alpha-RESUMEN-FINAL.md:41 declara 100% sin any, pero docs/sprints/alpha-1-reaudit.md:229 deja un 'as any' pendiente, raiz:lane-resultados-redesign-log.md:82 encuentra any en SessionsChart y raiz:lane-LOG.md:130 elimina un any en ConversationsTable.",
+    "Estrategia de tests: docs/sprints/alpha-RESUMEN-FINAL.md:50 dice E2E como estrategia principal y sin unit tests; los sprints de julio usan *.invariant.ts con tsx como gate (infra-1:21, q1-2:32, p3-a-1:41).",
+    "Rutas del chatbot admin: docs/sprints/alpha-0-cleanup.md:15-19 crea /admin/clients/[orgSlug]/chatbot/*; STATUS.md:216 las depreca a favor de /admin/chatbots; docs/roadmap-pendientes.md:26 igual propone una vista nueva bajo /admin/clients/[clientId]/chatbot/.",
+    "Gate de build: CLAUDE.md exige npm run build; lanes y sprints declaran el build rojo por un baseline ajeno y lo excluyen como gate (raiz:lane-plan-log.md:32-33, p3-a-1:23, p3-a-2:102, raiz:lane-resultados-redesign-log.md:191). docs/sprints/utm-1-captura.md:223 dice que el build pasó con heap de 6144.",
+    "Frozen: CLAUDE.md lista 4 archivos; los lanes congelan además components/ui/* (incluido StatCard), lib/plan/*, upsell.ts, lib/hover.ts, LatencyChart.tsx y tratan schema.prisma como FROZEN (raiz:lane-dashboard-log.md:12, raiz:lane-plan-log.md:15, raiz:lane-resultados-redesign-log.md:21, raiz:lane-LOG.md:33).",
+    "Navegación en el portal: docs/sprints/p3-a-2-venta.md:190-192 usa window.location.assign() después del éxito, patrón que no está entre los que permite CLAUDE.md para portales.",
+    "OSLEAD interno: PROMPT 2 (:298-318) declara correcto el gate del self-check y la auditoría H-04 (:737) lo marca como falso verde. Además, H-04 cuenta '4 criterios nuevos' (:741) y lista 5 (:737, igual que :241-:247).",
+    "OSLEAD interno: el aire mobile es 56 px en el prompt de estética (:19, :72) y 48 px en el criterio 'Aire suficiente' (:260). Las transiciones son <0,5 s en la reconciliación (:20) y <0,3 s en el prompt 3 (:85).",
+    "OSLEAD: la decisión de P43 (:26, un tilde) contradice decisiones-por-pantalla, que pide cinco tildes; la auditoría lo levanta como H-05. La tabla de :885-:899 recoge 11 contradicciones entre docs/decisiones-oslead-vii/ y el código.",
+    "Nombre del DSN de Sentry: docs/sprints/alpha-0-7-baseline-observability.md:16 y alpha-pre-cierre:62 dicen SENTRY_DSN; docs/sprints/infra-1-observabilidad.md:18/:69 dicen NEXT_PUBLIC_SENTRY_DSN.",
+    "Sprints que son planes y no registros (sin resultado declarado): docs/sprints/sprint-b0-bis-cierre.md y docs/sprints/sprint-b05-sanidad-sitio.md. Sus tareas van como tipo 'bloque'.",
+    "docs/sprints/alpha-pre-cierre-RESUMEN.md:107-113 nombra alpha-bloque-A, B, D, E y F; en docs/sprints/ solo existe alpha-bloque-C-RESUMEN.md.",
+    "Criterio zona_franco: además del doc OSLEAD (todo en true), marqué true lo que toca OsLead (raiz:lane-LOG.md:124 y :141, y docs/sprints/alpha-1-reaudit.md:227 sobre leads OS). Los KPIs comerciales de raiz:lane-dashboard-log.md leen OsLead/OsDemo pero quedaron en false como adm-dashboard."
+   ]
+  },
+  {
+   "agente": "a95ac5abb16d990fe",
+   "items": 103,
+   "docs_leidos": [
+    {
+     "doc": "docs/bitacora-beta-3.md",
+     "lineas_total": 10981,
+     "leido_completo": true,
+     "rango": "5501-10981 (rango asignado, leído entero; 1-5500 lo leyó otro agente)"
+    }
+   ],
+   "notas": [
+    "El archivo está en C:\\auditoria-2026-10\\logic-core-v3\\docs\\bitacora-beta-3.md (no en el docs/ de la raíz) y tiene 10.981 líneas. El rango asignado arranca dentro de C1b, cuyo encabezado está en la línea 5380, fuera del rango; su declaración de cierre (5799) se extrajo igual.",
+    "Todo el rango es del Bloque 3 de LeadOS (el wizard y el panel del setter, carril de Franco), así que zona_franco=true salvo lo transversal o ajeno a LeadOS: lint, regla y runner de invariantes, envenenamiento del build por Tailwind, Modal y Select compartidos, schemas de fecha de admin/projects, admin/team y admin/leads, excludeDqWhere, helpers de fecha de admin y chatbot, client-monthly-report-pdf, helpers de test mixtos y los carriles del rediseño del home.",
+    "Pendientes que el mismo rango declara cerrados más adelante: se plegaron dentro del hecho-declarado que los cierra, con refs del tipo 'cierra pendiente de docs/bitacora-beta-3.md:NNNN'. Casos: 5787→C2; 6175, 6181, 6277 y 6328→P8; 6726 y 6730→P4; 7038→P5; 7134, 7254 y 7562→P10; 7248 y 7252→P7; 7850→P11; 7980, 8000 y 8001→LA CORRIDA; 8334 y 8483→D15-bis; 9163→P17; 9693→P19; 10450→P22. Baches de la corrida: B1 y B2→CONFIGURACIÓN QUE FALTA y D15-bis, B4, B6 y B8→P19, B7→P21, B9→P23. La «corrida de comportamiento pendiente» (6740, 7860)→CORRIDA DE RECORRIDO.",
+    "Numeración de sprints según la tabla de 7579-7584 y el resto del rango: P3 callejones, P4 municiones, P5 vocabulario, P6 datos-viajan, P7 quinta-superficie, P8 una-sola-fuente, P10 destinos, P11 helpers, D15-bis = P15, P16 a P23, y P25 = carrera de tildes. Inconsistencia: LA CONFIGURACIÓN QUE FALTA usa el worktree wt-p13-config (8305), pero D15-bis la llama P14 (8497, 8501).",
+    "Contradicción de política de tests: V1-A-MAIN (6500-6505), EL ASCENSO (7625) y P11 (7878, 7980) no corrieron test:setter ni test:leados por la regla de cero escrituras en la base. LA CORRIDA (8082) dice que esa prohibición «era un error de redacción» y que las suites corren contra Neon dev desde P3 (CALLEJONES ya las corrió, 6708). La base de test dedicada sigue pendiente.",
+    "Para cruzar con el código: QUINTA (7400) dice que una APROBADA con gate cerrado y toque vencido cae en «trabajar» (flow.ts:433), mientras que P23 (10769-10771) afirma que grupoPara manda la APROBADA con gate cerrado a seguimiento. Puede ser un cambio entre sprints o una descripción parcial.",
+    "Herramientas sin URL (7034, 8479): tras D15-bis el evaluador ya no tiene pantalla que lo consuma, pero sigue en herramientas.ts y en el rail (8779, 9177). El pendiente de Franco quedó en parte obsoleto.",
+    "Push a main: todos los sprints del rango declaran que no pushearon a main y EL TRONCO (10975) se lo deja a Franco. Sin embargo, la base auditada origin/main @ 57c421bc es, según el git log de este worktree, el commit «docs(tronco): EL TRONCO». Conviene verificar cuándo y cómo se movió main. En ese mismo log P22 = 1112b2b7 (el doc no da ese hash) y P23 = ea94dbf8 (coincide con 10895).",
+    "Autocorrecciones dentro del rango: 7658 (son siete causas de espera, no seis); 7743 («Correcciones» sí era alcanzable, por un enlace genérico); 10223-10229 (citas archivo:línea de P20 corregidas); 10517 (la premisa de P22 era falsa: los íconos ya tenían nombre accesible); 10951-10952 (P25, commit d0b37c71, midió sobre el árbol equivocado: 63/25 pruebas contra las 187/33 de la punta).",
+    "La segunda corrida del novato (8 baches, N1 a N8; 10649) se menciona pero este rango no la describe. N8 y «la revisión que sale a internet sola» (10862) no tienen detalle aquí; probablemente estén en el reporte de esa corrida (ver docs/corrida-recorrido-* u otra bitácora).",
+    "La pasada perceptual de Franco (copy y estética), que se repite en casi todos los sprints, se unificó en un solo ítem (6738) con todas las líneas en refs. Las decisiones puntuales que trae cada lista de verificación humana se extrajeron por separado: propagar el avance por completitud, el nudge que frena el avance, las guías numeradas, la barra fija, la franja y el plegado del preview.",
+    "Credenciales: no aparece ninguna (ni password, ni token, ni API key, ni cadena de conexión completa). docs/bitacora-beta-3.md:8086 trae en texto plano el host del endpoint de Neon dev, un fragmento de DATABASE_URL sin usuario ni password, y :8199 repite el id del endpoint; no se copiaron. :8088 lista solo nombres de variables de entorno, sin valores. 6549, 6919 y 10609 tienen emails de cuentas QA @develop.test, que no son secretos."
+   ]
+  },
+  {
+   "agente": "a7a35b3c1d8ded31b",
+   "items": 258,
+   "docs_leidos": [
+    {
+     "doc": "docs/bitacora-roadmap.md",
+     "lineas_total": 17161,
+     "leido_completo": true,
+     "rango": "8601-17161 (rango asignado completo hasta el final del archivo; 1-8600 lo leyó otro agente)"
+    }
+   ],
+   "notas": [
+    "SECRET: docs/bitacora-roadmap.md:10534 trae passwords de usuarios seed en texto plano (SUPER_ADMIN, cliente, setter). C.0 las movió a env vars en el código, pero la bitácora las sigue mostrando. No se copiaron.",
+    "Identificador de infraestructura (no es credencial completa): las líneas 9491-9492 y 10535 traen el hostname del endpoint Neon. Contradicción: 9491 lo usa para derivar DIRECT_DATABASE_URL_PROD y 10535 lo llama 'host dev'.",
+    "Seguridad: 15604, 15785, 16508 y 16678 dicen 'key de Vertex expuesta en logs, pendiente de rotación' (sin el valor). El usuario indicó no renovarla durante la corrida y seguir E10.",
+    "Contradicción con CLAUDE.md: B0.2 (10611, 10788) fija la navegación del setter solo por triggerTransition(), que según CLAUDE.md no aplica en portales. P3-A.2 (12663) marca a PremiumModuleCard como violación de esa misma regla.",
+    "Contradicción: BP.4 (9240-9242) declara que el build entra en el heap por defecto y quita el flag. P1.A (11110), P5.3 (11762), UTM.1 (12746) y PRIVACIDAD (16845) dicen que el build da OOM sin 6-8 GB.",
+    "Contradicción: B13.5 (8905) dice que el literal 'Protocolo de consultoría' no existía. BLOQUE VOZ (16584) lo encuentra en ChatWindow.tsx.",
+    "Contradicción interna EV: el cierre del bloque (11572-11576) describe EV.1, EV.2 y EV.4 distinto de sus propias entradas: EV.1 'cero runtime' en 10984, EV.3 '5 señales' en 10871 y las claves de intents usados en 10834.",
+    "Compuerta incumplida: EV.4 (10858) exigía que Franco leyera los transcripts antes de EV.5, pero EV.5 se cerró (11465) con los smokes sin correr.",
+    "El backfill de verticalPack cambia entre fuentes: EV.5 (11541) lo hace sobre sanmiguel, Q1.1 (12896) sobre matsu y D.1 (15656) sobre ambos. D.1 (15621) dice que Matsu 'pinchó, cero tráfico' y C0.1 (15520) que san-miguel es un fixture mock. Coincide con 'no hay clientes reales'.",
+    "10803 declara este archivo 'histórico' (la beta de LeadOS sigue en bitacora-beta.md), pero recibe entradas del chatbot y el panel hasta 2026-08-12.",
+    "Diagnósticos que se contradicen en serie: STREAM-TIMEOUT F1/F2, WATCHDOG y PROVIDER-CLOSE culpan a Gemini por no cerrar el stream. DEADLOCK-FINISH-STEP (15120-15130) prueba que Gemini estaba sano y que el culpable era el transform propio de ONF-1 (commit 644b2b7, 2026-07-14). Además, DEADLINE-ONFINISH aparece como 'ONF-2' en 14393 y 14660.",
+    "Contradicción con la regla 'cero any': D3' (12213) llama 'excepción sancionada' al any de generate-insights/route.ts:58, y H.2 (15907) lo quita.",
+    "Repo público: B14.3 (9452-9456) y PRIVACIDAD (16772) apoyan decisiones en que el repo es público. El usuario indica que pasa a privado (DEC-34/R15 cerrados), así que esas restricciones quedan como contexto histórico.",
+    "Sentry: B14.5 (9630) planea activarlo, pero INFRA.1 (13036) y PRIVACIDAD (16738) confirman que a 2026-08 no hay DSN en Netlify (inactivo en prod).",
+    "Varias entradas no tienen fecha en el encabezado: quedaron con '' o con una fecha inferida de evidencia interna (ONF-1 = 2026-07-14 por 15167; UTM.1 por el smoke del 2026-07-04).",
+    "El encabezado de B13.2 está antes de la línea 8601 (rango del otro agente); de esa sección solo extraje sus flags pendientes (8636-8684).",
+    "El archivo termina en la línea 17161, dentro del BLOQUE CARRERAS (EN CURSO), sin cierre del bloque. Las líneas 16711-16801 tienen mojibake ('â€”').",
+    "Muchos cierres llevan una 'verificación humana declarada' sin resolver. La marqué en estado_declarado de cada hecho-declarado en vez de crear ítems aparte.",
+    "Los pendientes que una entrada posterior del mismo rango declara cerrados se unificaron en el hecho-declarado que los cierra (refs 'cierra pendiente fuente:N'): seed BotConfig client-a, 4 errores TS, computeTrend, Test email Resend, PII de show_whatsapp_handoff, hashes de IP/salt y demo-chat sin provider-close."
+   ]
+  },
+  {
+   "agente": "a603c44c535d27ced",
+   "items": 152,
+   "docs_leidos": [
+    {
+     "doc": "docs/bitacora-beta-3.md",
+     "lineas_total": 10981,
+     "leido_completo": false,
+     "rango": "1-5500 (rango asignado, leído completo)"
+    }
+   ],
+   "notas": [
+    "Ruta real: logic-core-v3/docs/bitacora-beta-3.md.",
+    "Hay números de sprint repetidos con fechas distintas: 2.3, 3.1, 3.2, 4.1, 5.1, 5.3, 6.1 y 6.2 existen en dos tandas (jul-02..04 y jul-17..23). Hay que distinguirlos por fecha o línea.",
+    "Contradicción: setter-nav.tsx:38 y L633 dicen que la navegación del setter con triggerTransition es «decisión cerrada · CLAUDE.md», pero CLAUDE.md no clasifica /setter (L1806, backlog C-26).",
+    "Contradicción sobre el drift Prisma: L528 habla de 7 columnas físicas que el schema ya no declara; L554 dice que el schema sí las declara y era cliente stale; L560 lo sigue marcando como drift.",
+    "Contradicción de QA: L95 recomienda navegar por 127.0.0.1; L836 dice que con 127.0.0.1 Next 16 dev no hidrata y hay que usar localhost.",
+    "Contradicción: F3 (L4595) declara refutado B-P3 (la pantalla acompaña al dato), pero la corrida del 20/08 (L4779) captura m4 y m14 mostrando la instrucción anterior tras escribir.",
+    "Contradicción: L1986 dice que el checkbox de m16 no tiene nombre accesible; L4003 dice que el label envolvente sí lo nombra. P1 (L2091) igual le agregó aria-label.",
+    "Contradicción: L4776 dice que espera y revisión muestran el mismo encabezado; A3 (L4939) dice que las pantallas ya difieren y lo compartido es la capa de turno.",
+    "La corrida de experiencia del 11/8 (L3958) midió 4dadd274, que no tiene la poda; F0 (L4058) lo explica.",
+    "Conteos de lint dispares: ~101-104 errores (L778, L914, L1010), 11.381 (L2635), 212 problemas/102 errores (L5073) y 108.208 cuando no se ignoran los distDirs (L5258).",
+    "C1b (L5413) corrige que el comentario de C1 sobre «type-stripping nativo» en ci.yml es incorrecto.",
+    "Commits no registrados: 7.2 figura «Commit <pendiente>» (L1148); P7 y P9 cerraron sin commit (L3041, L3179) y P9 se commiteó luego como f06df31e (L3795).",
+    "Secret: no se encontró ningún valor de credencial en 1-5500. L4807-4809 informa que un prefijo del password de la branch Neon dev quedó impreso en un log de sesión, sin el valor. L301 y L484 nombran el endpoint de la branch Neon dev (identificador, no credencial). L5308 y L5373 citan el comando gh secret set DATABASE_URL_TEST sin valor.",
+    "El rango termina en L5500, dentro de C1b; el detalle de C1b (Fase 2) y las secciones siguientes (C2, V1-A-MAIN, etc.) los lee otro agente."
+   ]
+  },
+  {
+   "agente": "a9f54e6308e93a071",
+   "items": 179,
+   "docs_leidos": [
+    {
+     "doc": "docs/bitacora-beta.md",
+     "lineas_total": 1750,
+     "leido_completo": true,
+     "rango": "1-1750"
+    },
+    {
+     "doc": "docs/bitacora-beta-2.md",
+     "lineas_total": 561,
+     "leido_completo": true,
+     "rango": "1-561"
+    },
+    {
+     "doc": "docs/bitacora-rediseno.md",
+     "lineas_total": 3736,
+     "leido_completo": true,
+     "rango": "1-3736"
+    }
+   ],
+   "notas": [
+    "Rutas reales: los tres documentos están en C:/auditoria-2026-10/logic-core-v3/docs/ (no en la raíz del repo).",
+    "Contradicción de regla: docs/bitacora-beta.md:92 fija la navegación del rail del setter solo por triggerTransition(). El CLAUDE.md vigente pide <Link> en portales y dice que triggerTransition() no aplica fuera del sitio público; el doc no aclara si /setter cuenta como portal. El mismo doc navega con <Link>/.click() en el recorrido y en los atajos (:734, :779).",
+    "Contradicción interna sobre el drift en docs/bitacora-beta.md: :470-511 lo da por cerrado (convertedToOsLeadId dropeada y verificada inexistente en :502). :1252 lo vuelve a listar como deuda abierta. :1271 dice que la migración 20260619140100 se registró con migrate resolve --applied sin ejecutar el SQL.",
+    "Decisiones opuestas sobre las columnas Organization.avatar*/city/deletedAt/internalNotes, AgencySettings.singleton y chatbot_lead.convertedToOsLeadId. En docs/bitacora-beta.md:1274-1279 (FG-1.pre) Franco aprobó DROP. En :1746 se dice que la lane de clientes las usa y se propone adoptarlas con migración aditiva, a confirmar.",
+    "Playwright y test:setter: docs/bitacora-beta.md:1735-1742 (fechado 2026-06-22) crea tests/setter/ y npm run test:setter y dice que el host bloquea los browsers. :1643-1651 y docs/bitacora-beta-2.md:54-62 (2026-06-25) dicen que Playwright NO está bloqueado y que NO existen test:setter ni specs del setter. bitacora-beta-2 repite 'no existe spec de /setter' (:314, :339, :462). La entrada del 06-22 está ubicada después de las del 06-25.",
+    "docs/bitacora-beta-2.md:10 (Estado global) está desactualizado: dice 'Próximo: 2.3', pero 2.3, 2.4, 2.5 y el cierre del Bloque 2 ya están registrados (:440-561). La entrada 0.1 (:22-24) declara que se reconstruyó desde la memoria del proyecto y no tiene entrada en bitacora-beta.md.",
+    "Varios ítems de bitacora-beta fueron reemplazados según bitacora-beta-2: 0.5.9 'Continuá donde dejaste', el recorrido de cola (?cola=) y los atajos j/k/r/b se borraron en 2.1a (docs/bitacora-beta-2.md:323, :445). El marcador de 5 StatCards de B0.3 se retiró (:478).",
+    "Merges del rediseño: docs/bitacora-rediseno.md:569 decide cero merges a main hasta terminar el rediseño, y :2665/:2824/:3325 fijan un gate de merge por placeholders. Pero :3606-3611 (HOME-CLASICO) dice que el rediseño sí entró a main vía PR #4 y se revirtió restaurando archivos de 63a4e364. Los 'hecho' del rediseño (B2–B4, D9) pueden no estar en origin/main; por eso los hecho puramente del home público no se extrajeron.",
+    "Corrección interna: docs/bitacora-rediseno.md:3312-3316 (B4-S3) atribuye el render delay del LCP al preloader; :3438-3442 (D9) lo corrige: la causa era animate-ds-reveal sobre el ancestro del h1.",
+    "Riesgo cruzado: docs/bitacora-rediseno.md:133-135 planea eliminar src/lib/design-tokens.ts por estar 'desconectado del pipeline', y :141 limpiar --color-void. Según docs/bitacora-beta.md:52 y :221-222, el Modal (zIndex.modal) y el shell del setter consumen design-tokens.ts por style inline, y :230 dice que dossier-stepper usa var(--color-void).",
+    "Heap del build: NODE_OPTIONS=--max-old-space-size=6144 en docs/bitacora-beta.md:1733 y docs/bitacora-rediseno.md:3699; 8192 en docs/bitacora-rediseno.md:1556.",
+    "Documentos de sprint citados que no existen: docs/sprints/sprint-b1-sistema-diseno.md (docs/bitacora-rediseno.md:10, :504) y docs/sprints/sprint-b06-motion-bugs.md (:833).",
+    "Secret: docs/bitacora-beta.md:15 contiene contraseñas literales de cuentas de seed (tipo password; valores no copiados).",
+    "Identificadores sin credencial: docs/bitacora-beta.md:16, :334, :387, :472 y :508 nombran el host de la rama dev de Neon (endpoint parcial). docs/bitacora-rediseno.md:1628-1630 y :1817 listan números de WhatsApp hardcodeados (dato de contacto; no se copiaron).",
+    "Criterio de zona_franco: todo lo de bitacora-beta y bitacora-beta-2 es LeadOS/setter (zona_franco=true), salvo infra, seeds generales, drift de columnas de clientes, e2e de admin/cliente, QA-login, el sender de Telegram y SectionErrorBoundary, que se marcaron false. Nada de bitacora-rediseno es ZONA-FRANCO."
+   ]
+  }
+ ],
+ "total": 1351,
+ "parte": 4,
+ "partes": 4,
+ "items": [
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 2698,
+   "tipo": "pendiente",
+   "titulo": "Portal cliente: 'visits' hardcodeado en 0 en Resultados de la semana",
+   "descripcion": "No hay integración de analítica (la card muestra 'Sin integración aún'); WeekResultsData no tiene ventas ni facturación y compara contra la semana anterior.",
+   "herramienta": "cli-inicio",
+   "estado_declarado": "sin estado",
+   "fecha": "2026-08-04",
+   "refs": [
+    "src/lib/dashboard/week-results.ts",
+    "src/lib/health-score.ts",
+    "src/lib/dashboard/attention.ts",
+    "src/lib/ai/executive-brief.ts",
+    "también en docs/bitacora-rediseno.md:2690"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3323,
+   "tipo": "pendiente",
+   "titulo": "Inventario de placeholders del rediseño (27 cadenas) + fotos del equipo",
+   "descripcion": "Contenido que Franco debe cerrar en Portfolio.tsx, portal-demo/data.ts, servicios/data.ts, nosotros/data.ts y cierre/Cierre.tsx, más fotos de Franco y Valentino; la home clásica de main no los renderiza.",
+   "herramienta": "sitio-publico",
+   "estado_declarado": "pendiente (Franco)",
+   "fecha": "2026-08-05",
+   "refs": [
+    "src/components/sections/home/Portfolio.tsx",
+    "src/components/sections/portal-demo/data.ts",
+    "src/components/sections/servicios/data.ts",
+    "src/components/sections/nosotros/data.ts",
+    "src/components/sections/cierre/Cierre.tsx",
+    "también en docs/bitacora-rediseno.md:2822",
+    "también en docs/bitacora-rediseno.md:3369"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 2976,
+   "tipo": "decision",
+   "titulo": "D1 del rediseño: sin pricing ni módulos en el home",
+   "descripcion": "Los servicios del home no muestran precios ('módulos y precios salen del home').",
+   "herramienta": "sitio-publico",
+   "estado_declarado": "vigente",
+   "fecha": "2026-08-05",
+   "refs": [
+    "src/components/sections/servicios/",
+    "relacionado PRODUCT.md (docs/bitacora-rediseno.md:2230)"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 2988,
+   "tipo": "decision",
+   "titulo": "Los ids servicios y caracteristicas no se renombran",
+   "descripcion": "Los consumen Navbar (MAIN_NAV_ITEMS/HASH_TO_LABEL), la tool navigate_to_page del chatbot (VALID_PATHS) y TransitionContext frozen (líneas 28 y 41).",
+   "herramienta": "vis-widget-develop",
+   "estado_declarado": "vigente",
+   "fecha": "2026-08-05",
+   "refs": [
+    "src/context/TransitionContext.tsx:28",
+    "src/context/TransitionContext.tsx:41",
+    "navigateToPage.ts",
+    "Navbar.tsx",
+    "también en docs/bitacora-rediseno.md:3070"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3380,
+   "tipo": "decision",
+   "titulo": "No borrar src/lib/data/premium-modules.ts",
+   "descripcion": "Sin consumidores en src/, pero lo usa prisma/seeds/sync-premium-modules.ts, que hace deleteMany sobre PremiumModule y organizationModule; borrarlo rompe el seed.",
+   "herramienta": "cli-servicios",
+   "estado_declarado": "vigente",
+   "fecha": "2026-08-05",
+   "refs": [
+    "src/lib/data/premium-modules.ts",
+    "prisma/seeds/sync-premium-modules.ts",
+    "relacionado docs/bitacora-beta.md:17 (sync-premium-modules prod-runnable sin guard)"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3387,
+   "tipo": "pendiente",
+   "titulo": "/login no tiene <h1>",
+   "descripcion": "Preexistente, detectado al verificar que las rutas sirven contenido real.",
+   "herramienta": "auth-login",
+   "estado_declarado": "pendiente (preexistente)",
+   "fecha": "2026-08-05",
+   "refs": [
+    "/login"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3405,
+   "tipo": "bloque",
+   "titulo": "B7: rediseño de la landing /web-development",
+   "descripcion": "Incluye un bloque de casos propio, el gradient-text del h1 y los huérfanos de sections/web-development/.",
+   "herramienta": "sitio-publico",
+   "estado_declarado": "sin estado (planeado)",
+   "fecha": "2026-08-07",
+   "refs": [
+    "src/app/web-development/page.tsx",
+    "también en docs/bitacora-rediseno.md:3589",
+    "también en docs/bitacora-rediseno.md:3591"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3587,
+   "tipo": "pendiente",
+   "titulo": "Cuatro huérfanos en sections/web-development/",
+   "descripcion": "PortfolioWebCases.tsx (con cursor custom), ShowcaseSection.tsx (con un <Link href='#'> placeholder), WebDevelopmentObjections.tsx y WebDevelopmentSensory.tsx sin importadores; insumo para B7.",
+   "herramienta": "sitio-publico",
+   "estado_declarado": "sin estado (no se borra)",
+   "fecha": "2026-08-07",
+   "refs": [
+    "src/components/sections/web-development/PortfolioWebCases.tsx",
+    "src/components/sections/web-development/ShowcaseSection.tsx:580",
+    "src/components/sections/web-development/WebDevelopmentObjections.tsx",
+    "src/components/sections/web-development/WebDevelopmentSensory.tsx",
+    "también en docs/bitacora-rediseno.md:1466",
+    "también en docs/bitacora-rediseno.md:1866",
+    "también en docs/bitacora-rediseno.md:3407"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3573,
+   "tipo": "pendiente",
+   "titulo": "Techo de FCP/LCP: los 19 scripts async del <head>",
+   "descripcion": "1,1 MB raw / 356,5 KB gz con 1.078 ms de long tasks retrasan el primer paint; bajar LCP a menos de 2,5 s pide trabajar el bundle, no el hero.",
+   "herramienta": "transversal",
+   "estado_declarado": "sin estado",
+   "fecha": "2026-08-07",
+   "refs": [
+    "también en docs/bitacora-rediseno.md:3292"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3579,
+   "tipo": "pendiente",
+   "titulo": "Errores de consola preexistentes en /web-development",
+   "descripcion": "404 de assets de WebTemplatesImmersive, CSP report-only por el iframe a template-zero.netlify.app, 404 de grainy-gradients.vercel.app/noise.svg (×2) y ERR_ABORTED de un video.",
+   "herramienta": "sitio-publico",
+   "estado_declarado": "sin estado",
+   "fecha": "2026-08-07",
+   "refs": [
+    "WebTemplatesImmersive",
+    "también en docs/bitacora-rediseno.md:1236",
+    "también en docs/bitacora-rediseno.md:1452"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3595,
+   "tipo": "decision",
+   "titulo": "Contenido crítico va en ds-rise, no en ds-reveal",
+   "descripcion": "Un ancestro en opacity 0 saca al h1 de la carrera de LCP; regla escrita en globals.css. Portfolio, PortalDemo, Nosotros, Servicios y Cierre todavía envuelven su titular en ds-reveal.",
+   "herramienta": "transversal",
+   "estado_declarado": "vigente",
+   "fecha": "2026-08-07",
+   "refs": [
+    "src/app/globals.css",
+    "src/components/layout/Hero.tsx",
+    "también en docs/bitacora-rediseno.md:3482"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3604,
+   "tipo": "hecho-declarado",
+   "titulo": "HOME-CLASICO: la home clásica vuelve a main y el rediseño queda experimental",
+   "descripcion": "Decisión de producto: 30 archivos restaurados desde 63a4e364 (padre del merge del PR #4), EarlyScrollLock remontado en layout.tsx y PanelPlate.tsx borrado; el rediseño vive en origin/redesign/home.",
+   "herramienta": "sitio-publico",
+   "estado_declarado": "hecho (pasada mobile y flujo en producción sin verificar)",
+   "fecha": "2026-08-12",
+   "refs": [
+    "commit 63a4e364",
+    "PR #4",
+    "origin/redesign/home",
+    "src/app/layout.tsx",
+    "src/components/sections/portal-demo/PanelPlate.tsx",
+    "también en docs/bitacora-rediseno.md:3606",
+    "también en docs/bitacora-rediseno.md:3715"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3633,
+   "tipo": "decision",
+   "titulo": "HOME-CLASICO: qué conserva la versión del rediseño",
+   "descripcion": "Se conservan publicRoute.ts (superset), PublicOnlyComponents, SmoothScroll, ChatWidgetMount, chromeReveal, useThemeObserver, MarketingIntro, ui/Button, lib/utils, design-tokens y globals.css (+322 ds-*); useChromeRevealed vuelve al viejo (espera phase 'done').",
+   "herramienta": "transversal",
+   "estado_declarado": "vigente",
+   "fecha": "2026-08-12",
+   "refs": [
+    "src/components/layout/publicRoute.ts",
+    "src/components/layout/PublicOnlyComponents.tsx",
+    "src/components/layout/SmoothScroll.tsx",
+    "src/components/layout/useChromeRevealed.ts",
+    "src/app/globals.css"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3682,
+   "tipo": "decision",
+   "titulo": "Regresión de performance y chrome viejo aceptados con la home clásica",
+   "descripcion": "Vuelven el scroll-lock de ~9,8 s, los dynamic() con carga en cascada y ~9.000 líneas; Navbar/DynamicDock vuelven a todas las rutas públicas.",
+   "herramienta": "sitio-publico",
+   "estado_declarado": "vigente (decisión de producto)",
+   "fecha": "2026-08-12",
+   "refs": [
+    "también en docs/bitacora-rediseno.md:3691"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3722,
+   "tipo": "pendiente",
+   "titulo": "framer-motion y three-stdlib son dependencias fantasma",
+   "descripcion": "No están en package.json; resuelven por transitivas de motion y drei (ya era así en julio).",
+   "herramienta": "infra",
+   "estado_declarado": "sin estado",
+   "fecha": "2026-08-12",
+   "refs": [
+    "package.json"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3724,
+   "tipo": "pendiente",
+   "titulo": "El Hero clásico baja el HDRI de un CDN en runtime",
+   "descripcion": "<Environment preset='studio' /> pierde reflejos sin red; el rediseño lo había self-hosteado (1641 KB) y propuesto Lightformers o comprimirlo.",
+   "herramienta": "sitio-publico",
+   "estado_declarado": "sin estado",
+   "fecha": "2026-08-12",
+   "refs": [
+    "src/components/layout/Hero.tsx",
+    "public/hdri/studio_small_03_1k.hdr",
+    "también en docs/bitacora-rediseno.md:1646",
+    "también en docs/bitacora-rediseno.md:2160"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3726,
+   "tipo": "pendiente",
+   "titulo": "Anclas /#... en carga fría pueden no aterrizar (vuelve con la home clásica)",
+   "descripcion": "Secciones dynamic() sin caja al resolver el hash y #nosotros duplicado en About.tsx; afecta también la navegación del chatbot a anclas del home.",
+   "herramienta": "sitio-publico",
+   "estado_declarado": "pendiente (bug viejo reintroducido)",
+   "fecha": "2026-08-12",
+   "refs": [
+    "src/app/page.tsx",
+    "src/components/sections/home/About.tsx",
+    "también en docs/bitacora-rediseno.md:1681",
+    "también en docs/bitacora-rediseno.md:2654",
+    "también en docs/bitacora-rediseno.md:3042"
+   ],
+   "zona_franco": false
+  },
+  {
+   "fuente": "docs/bitacora-rediseno.md",
+   "linea": 3729,
+   "tipo": "decision",
+   "titulo": "Huérfanos del rediseño dejados a propósito en main",
+   "descripcion": "HeroArtifactLayer, HeroCanvas, cierre/*, nosotros/*, servicios/* y portal-demo/useEscenaCycle compilan solos; design-system y /styleguide intactos; receta documentada para volver al rediseño.",
+   "herramienta": "sitio-publico",
+   "estado_declarado": "vigente",
+   "fecha": "2026-08-12",
+   "refs": [
+    "src/components/layout/HeroArtifactLayer.tsx",
+    "src/components/layout/HeroCanvas.tsx",
+    "src/components/sections/cierre/",
+    "src/components/sections/nosotros/",
+    "src/components/sections/servicios/",
+    "src/components/sections/portal-demo/useEscenaCycle"
+   ],
+   "zona_franco": false
+  }
+ ]
+}

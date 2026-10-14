@@ -134,6 +134,17 @@ for (const f of todos) {
   lineas.forEach((l, i) => { for (const re of PATRONES) if (re.test(l)) err(path.relative(DIR, f), `línea ${i + 1}: patrón de secret (${re.source.slice(0, 30)}…)`) })
 }
 
+// ── Tope de 300 KB por archivo de _crudo/ (PROMPT §5) ───────────────────────
+// Lo que pasa el tope queda local (no se commitea) y se anota en el plan; lo que la corrida
+// necesita para regenerar va partido con crudo-partes.mjs.
+const LOCALES = new Set(['_crudo/depcruise.json'])
+for (const f of todos) {
+  const rel = path.relative(DIR, f).split(path.sep).join('/')
+  if (!rel.startsWith('_crudo/') || LOCALES.has(rel)) continue
+  const bytes = statSync(f).size
+  if (bytes > 300 * 1024) err(rel, `pesa ${Math.round(bytes / 1024)} KB: el tope de lo crudo es 300 KB (partirlo con crudo-partes.mjs o dejarlo local)`)
+}
+
 if (args.includes('--emitir')) {
   const destino = path.join(DIR, '06-ATLAS')
   mkdirSync(destino, { recursive: true })

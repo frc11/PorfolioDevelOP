@@ -2,7 +2,7 @@
 // Auditoría de renovación 2026-10 — genera docs/auditoria-2026-10/12-PLANEADO.md (DEC-39).
 //
 // Entrada:
-//   _crudo/planeado-extraido.json  — ítems extraídos en F1.12 (fuente:línea, tipo, título…)
+//   _crudo/planeado-extraido/      — ítems extraídos en F1.12 (partido en piezas < 300 KB) (fuente:línea, tipo, título…)
 //   _crudo/planeado-cruces.json    — (opcional) estado en código de cada ítem, que van
 //                                    completando los ciclos de F2: { "<fuente>:<línea>": {estado, evidencia, sentido, ciclo} }
 //   _crudo/todos-codigo.json       — TODO/FIXME del código (se resumen por herramienta)
@@ -13,12 +13,13 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { HERRAMIENTAS, AREAS, nodoDeRuta } from './atlas/nodos.mjs'
+import { leerPartido } from './crudo-partes.mjs'
 
 const appRoot = process.cwd()
 const CRUDO = path.resolve(appRoot, 'docs/auditoria-2026-10/_crudo')
 const MD = path.resolve(appRoot, 'docs/auditoria-2026-10/12-PLANEADO.md')
 const leer = (f, d) => (existsSync(path.join(CRUDO, f)) ? JSON.parse(readFileSync(path.join(CRUDO, f), 'utf8').replace(/^﻿/, '')) : d)
-const extraido = leer('planeado-extraido.json', { items: [] })
+const extraido = leerPartido(CRUDO, 'planeado-extraido', { items: [] })
 const cruces = leer('planeado-cruces.json', {})
 const todos = leer('todos-codigo.json', { items: [] })
 

@@ -307,6 +307,244 @@
    "afirmacion": "getToken de next-auth no se usa (advisory GHSA-xmf8 no aplica al código)",
    "comando": "git grep -n \"getToken\" origin/main -- logic-core-v3/src -> solo oauth2Client.getToken de googleapis en lib/integrations/google-business-profile.ts:51",
    "control_positivo": "git grep -n \"from 'next-auth/jwt'\" origin/main -- logic-core-v3/src -> api/qa/login/route.ts:27"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "El datasource no declara directUrl y prisma.config.ts tampoco lo define",
+   "comando": "git grep -n \"directUrl\" origin/main -- logic-core-v3/prisma/schema.prisma logic-core-v3/prisma.config.ts → sin resultados",
+   "control_positivo": "git grep -n 'env(\"DATABASE_URL\")' origin/main -- logic-core-v3/prisma/schema.prisma → schema.prisma:7"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "Fuera del listado admin, nadie filtra Organization.deletedAt (auth, portal, chatbot público, crons)",
+   "comando": "git grep -n \"deletedAt\" origin/main -- logic-core-v3/src → solo admin/announcements/page.tsx:27, admin/clients/page.tsx:17-36 y archiveClient.ts",
+   "control_positivo": "El mismo comando devuelve admin/clients/page.tsx:23 'where: { deletedAt: null }' (el patrón encuentra usos reales)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "organizationIdBySlug nunca recibe la clave 'develop' en seed-agency-os",
+   "comando": "git grep -n -E \"organizationIdBySlug.set|slug: 'develop'\" origin/main -- logic-core-v3/prisma/seed-agency-os.ts → solo :2398, que itera organizationSeeds",
+   "control_positivo": "git grep -n \"slug: 'san-miguel'\" origin/main -- logic-core-v3/prisma/seed-agency-os.ts → :398"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "No hay escritor de calComApiKey, calComUsername, calComEmbedUrl ni googleMapsPlaceId en src, scripts ni prisma",
+   "comando": "git grep -n -E \"calComApiKey|calComUsername|calComEmbedUrl|googleMapsPlaceId\" origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma → solo selects y lecturas (agenda-inteligente/page.tsx:325-348, cal-com.ts:27-29, motor-resenas/page.tsx:113-161, leados/agenda.ts:59), migraciones y schema",
+   "control_positivo": "git grep -n \"brevoListId: listId\" origin/main -- logic-core-v3/src → dashboard/modules/email-marketing/_actions.ts:38 (el escritor de una columna hermana sí aparece)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "No hay purga por antigüedad de rate_limit, chatbot_message ni ContactSubmission",
+   "comando": "git grep -n -E \"(rateLimit|chatMessage|contactSubmission)\\.deleteMany\\(\" origin/main -- logic-core-v3/src → sin resultados",
+   "control_positivo": "git grep -n \"chatbotEvent.deleteMany\" origin/main -- logic-core-v3/src → modules/chatbot/server/logging/persistentLogger.ts:160"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "No existe DATABASE_URL_TEST ni guard de host en los tests",
+   "comando": "git grep -n -E \"DATABASE_URL_TEST|assertDevSeedTarget|ALLOW_PROD_SEED|ep-quiet\" origin/main -- logic-core-v3/tests logic-core-v3/playwright.config.ts logic-core-v3/playwright.integration.config.ts → sin resultados",
+   "control_positivo": "git grep -n \"DATABASE_URL\" origin/main -- logic-core-v3/playwright.integration.config.ts → :10 y :15"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "Ningún camino de src borra Users",
+   "comando": "git grep -n -E \"\\.user\\.(delete|deleteMany)\\(\" origin/main -- logic-core-v3/src → sin resultados",
+   "control_positivo": "El mismo patrón en logic-core-v3/tests → tests/e2e/30-onboarding-e2e-complete.spec.ts:156 y tests/helpers/setter-db.ts:376"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "El build y el deploy no corren prisma migrate deploy",
+   "comando": "git grep -n \"migrate deploy\" origin/main -- logic-core-v3/package.json logic-core-v3/netlify.toml logic-core-v3/vercel.json → sin resultados",
+   "control_positivo": "git grep -n \"migrate deploy\" origin/main -- logic-core-v3/DEPLOY.md → DEPLOY.md:52"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "Las rutas de cambio de plan no actualizan Subscription.price",
+   "comando": "git grep -n -E \"\\bprice:\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/clients/_actions/plan.actions.ts\" logic-core-v3/src/lib/plan/get-plan-for-org.ts → solo plan.actions.ts:192, dentro del create",
+   "control_positivo": "El mismo comando encuentra plan.actions.ts:192 'price: targetPlan.monthlyPrice.toNumber()'"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "Los tokens de GBP, Tiendanube, Cal.com y Telegram no pasan por cifrado",
+   "comando": "git grep -n -i -E \"encrypt|secret-box\" origin/main -- logic-core-v3/src/app/api/auth/google-business logic-core-v3/src/app/api/auth/tiendanube logic-core-v3/src/lib/integrations logic-core-v3/src/lib/notifications/telegram.ts → sin resultados",
+   "control_positivo": "git grep -l \"secret-box\" origin/main -- logic-core-v3/src/modules → motor/services/sendMessage.ts y chatbot/server/crm/*"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "No hay statement_timeout configurado",
+   "comando": "git grep -n \"statement_timeout\" origin/main -- logic-core-v3/src logic-core-v3/prisma → sin resultados",
+   "control_positivo": "git grep -n \"pool_timeout\" origin/main -- logic-core-v3/src → modules/chatbot/server/chat/withDeadline.ts:7"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "AdminAuditLog no tiene organizationId ni targetOrganizationId",
+   "comando": "git grep -n \"targetOrganizationId\" origin/main -- logic-core-v3/prisma/schema.prisma logic-core-v3/src → sin resultados",
+   "control_positivo": "git grep -n \"targetId \" origin/main -- logic-core-v3/prisma/schema.prisma → :1662"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "Los seeds del lote no crean OrganizationModule (módulos premium activos para QA)",
+   "comando": "git grep -n -i \"organizationModule\" origin/main -- logic-core-v3/prisma/seed.ts logic-core-v3/prisma/seed-agency-os.ts → sin resultados",
+   "control_positivo": "git grep -n \"organizationModule\" origin/main -- logic-core-v3/prisma/seeds/sync-premium-modules.ts → :73 y :105"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "No hay páginas legales en src/app ni campos de consentimiento en el schema",
+   "comando": "git ls-tree -r --name-only origin/main logic-core-v3/src/app | grep -i -E \"privac|terminos|legal|cookies\" → vacío; git grep -n -i \"consent\" origin/main -- logic-core-v3/prisma/schema.prisma → vacío",
+   "control_positivo": "git ls-tree -r --name-only origin/main logic-core-v3/src/app/contact → contact/page.tsx; git grep -n \"optedOut \" origin/main -- logic-core-v3/prisma/schema.prisma → :1222"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "Ningún commit de B13 tocó schema ni migraciones",
+   "comando": "git log --format='%h %s' origin/main -- logic-core-v3/prisma/schema.prisma logic-core-v3/prisma/migrations | grep -i -E \"\\bB13\" → vacío",
+   "control_positivo": "git log --format='%h %s' origin/main | grep -i -E \"\\bB13\" → 0ca56f34, bb4cf0d6, b0bc086a"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "No hay umbral de gasto de LLM",
+   "comando": "git grep -n -i -E \"spend(ing)?Limit|costLimit|budgetUsd|maxCostUsd|costThreshold|monthlyBudget|LLM_BUDGET\" origin/main -- logic-core-v3/src → sin resultados",
+   "control_positivo": "git grep -n \"estimatedCostUsd: { increment\" origin/main -- logic-core-v3/src → modules/chatbot/server/chat/persistTurn.ts:450"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "00-INDICE-bloques-ejecucion.md no existe en el repo",
+   "comando": "git ls-tree -r --name-only origin/main | grep -i \"00-INDICE\" → solo logic-core-v3/docs/manual-usuario/00-INDICE.md",
+   "control_positivo": "El mismo comando devuelve ese archivo (el patrón encuentra índices existentes)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "El quick reply 💰 ya no está en el seed del bot develOP",
+   "comando": "git grep -n -F \"💰\" origin/main -- logic-core-v3/src/modules/chatbot/prisma/seed.ts → sin resultados",
+   "control_positivo": "git grep -n \"emoji: '\" origin/main -- logic-core-v3/src/modules/chatbot/prisma/seed.ts → :217, :218, :219"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "afirmacion": "verbatimModuleSyntax no está configurado",
+   "comando": "git grep -n \"verbatimModuleSyntax\" origin/main -- logic-core-v3/tsconfig.json logic-core-v3/next.config.ts → sin resultados",
+   "control_positivo": "git grep -n \"allowImportingTsExtensions\" origin/main -- logic-core-v3/tsconfig.json → :18"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "Ninguna ruta de auth, proxy, chat, crons, reportes ni login consulta Organization.deletedAt",
+   "comando": "git grep -n \"deletedAt\" origin/main -- src/auth.ts src/auth.config.ts src/proxy.ts src/app/api/cron src/modules/chatbot/server/chat src/modules/chatbot/server/conversation src/lib/reports src/app/login  (0 resultados)",
+   "control_positivo": "git grep -n \"deletedAt\" origin/main -- src/modules/chatbot/server/admin/archiveClient.ts -> :9, :27, :30, :34"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "No hay purga de la tabla rate_limit",
+   "comando": "git grep -n \"rateLimit.deleteMany\\|DELETE FROM \\\"rate_limit\\\"\\|DELETE FROM rate_limit\" origin/main -- src scripts  (0)",
+   "control_positivo": "git grep -n \"chatbotEvent.deleteMany\" origin/main -- src -> src/modules/chatbot/server/logging/persistentLogger.ts:160"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "Ni el build de Netlify ni package.json corren prisma migrate deploy",
+   "comando": "(desde la raíz) git grep -n \"migrate deploy\" origin/main -- logic-core-v3/netlify.toml logic-core-v3/package.json  (0)",
+   "control_positivo": "git grep -n \"migrate deploy\" origin/main -- .github/workflows/ci.yml -> :162, :212"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "Ningún flujo de la app borra filas de User",
+   "comando": "git grep -n \"user.delete(\\|user.deleteMany(\" origin/main -- src  (0)",
+   "control_positivo": "git grep -n \"user.delete(\\|user.deleteMany(\" origin/main -- scripts -> scripts/_b14-2-cleanup-bench-prod.ts:125, scripts/dev/m0-galeria-seed.ts:146"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "tsx no está en el lockfile",
+   "comando": "git show origin/main:logic-core-v3/package-lock.json | grep -c '\"node_modules/tsx\"'  (0)",
+   "control_positivo": "git show origin/main:logic-core-v3/package-lock.json | grep -c '\"node_modules/ts-node\"'  (1)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "Los seeds de prisma/seeds no usan seed-guard",
+   "comando": "git grep -n \"seed-guard\\|assertDevSeedTarget\" origin/main -- prisma/seeds  (0)",
+   "control_positivo": "git grep -n \"assertDevSeedTarget\" origin/main -- prisma/seed-agency-os.ts -> :26, :2386"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "El test de aislamiento del motor no cubre nested writes de templates/alerts",
+   "comando": "git grep -n -E \"templates:|alerts:\" origin/main -- tests/integration/motor-isolation.spec.ts  (0)",
+   "control_positivo": "git grep -n \"organization: { connect\" origin/main -- tests/integration/motor-isolation.spec.ts -> :318"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "No existe índice sobre Task.projectId",
+   "comando": "git grep -n '\"Task_projectId_idx\"' origin/main -- prisma/migrations  (0)",
+   "control_positivo": "git grep -n '\"OsTimeEntry_projectId_idx\"' origin/main -- prisma/migrations -> 20260406010000_v2-unify-project-task/migration.sql:189"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "El valor CLIENT del enum Role no se asigna ni se compara en el código",
+   "comando": "git grep -n -E \"role(:| ===| !==| ==) *'CLIENT'|Role\\.CLIENT\" origin/main -- src prisma scripts  (0)",
+   "control_positivo": "git grep -n -E \"role(:| ===| !==| ==) *'ORG_MEMBER'\" origin/main -- src/modules/chatbot/server/admin -> createClientOnly.ts:94, createClientWithBot.ts:144"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "Los write-paths de la Bóveda en main no cifran",
+   "comando": "git grep -n \"encryptCredential\" origin/main -- src/actions  (0)",
+   "control_positivo": "git grep -n \"encryptCredentialForStorage\" origin/b0-isolation-motor-chatbot -- src/actions -> agency-actions.ts:14, :132"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "/api/track no tiene llamadores",
+   "comando": "git grep -n \"api/track\" origin/main -- src public  (0)",
+   "control_positivo": "git grep -n \"/api/admin/alerts/trigger-detector\" origin/main -- src -> src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx:89"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "El catálogo no tiene un módulo con slug 'email-marketing'",
+   "comando": "git grep -n \"slug: 'email-marketing',\" origin/main -- src/lib/data/premium-modules.ts  (0)",
+   "control_positivo": "git grep -n \"slug: 'email-marketing-pro',\" origin/main -- src/lib/data/premium-modules.ts -> :38"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "Los módulos que siembran tareas de onboarding (lib/actions/clients.ts, invitations.ts) no tienen importadores",
+   "comando": "git grep -n \"lib/actions/clients'\\|lib/actions/invitations'\" origin/main -- src  (0)",
+   "control_positivo": "git grep -n \"lib/actions/projects'\" origin/main -- src -> admin/projects/[projectId]/_components/delete-project-button.tsx:6"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "No hay timeouts ni límites de conexión configurados en código (solo comentarios)",
+   "comando": "git grep -n -i \"connect_timeout\\|pool_timeout\\|connection_limit\" origin/main -- src  (2 coincidencias, ambas comentarios: withDeadline.ts:7 y logger.ts:118)",
+   "control_positivo": "git grep -n -i \"cold-start\" origin/main -- src/modules/chatbot/hooks/useChatbot.ts -> :274, :282"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "afirmacion": "Nadie usa createMany a través del helper (el N+1 de parentChecks fila por fila es latente)",
+   "comando": "git grep -n \"\\.createMany(\" origin/main -- src/modules src/app/api/motor src/app/api/chatbot  (0)",
+   "control_positivo": "git grep -n \"createMany(\" origin/main -- src/lib/onboarding/seed-tasks-for-org.ts -> :5"
   }
  ]
 }

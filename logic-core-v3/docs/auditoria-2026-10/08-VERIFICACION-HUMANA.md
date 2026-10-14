@@ -235,3 +235,75 @@
 - Resultado esperado: Redirige a /login.
 - Señal de falla: Entra al dashboard con la sesión cerrada.
 - ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-027] Email Marketing Pro accesible para un cliente que lo contrató
+- Verifica: [BUG-012] · Prioridad: alta
+- Entorno: Neon dev + app local o QA
+- Precondiciones: Org QA con un usuario ORG_MEMBER y su contraseña
+- Pasos: 1) SQL de lectura: SELECT slug, status FROM premium_module ORDER BY "sortOrder"; 2) Como SUPER_ADMIN activar Email Marketing Pro para la org QA 3) Loguearse como el cliente QA 4) Mirar si el sidebar muestra 'Email marketing' 5) Abrir /dashboard/modules/email-marketing
+- Resultado esperado: El ítem aparece y el módulo abre
+- Señal de falla: Sin ítem en el sidebar y redirección a /dashboard
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-028] Nested connect en WabaChannel no cruza tenants
+- Verifica: [SEC-035] · Prioridad: media
+- Entorno: Neon dev con playwright.integration (base compartida: usar prefijos de corrida y limpiar)
+- Precondiciones: Dos orgs sembradas por el spec, cada una con canal y plantilla
+- Pasos: 1) Agregar al test (h) de tests/integration/motor-isolation.spec.ts: await expect(forOrg(a.orgId).wabaChannel.update(a.channelId, { templates: { connect: [{ id: b.templateId }] } } as never)).rejects.toThrow(IsolationError) 2) Después leer la plantilla de B con unsafeGlobalQuery y comparar su organizationId 3) npm run test:integration
+- Resultado esperado: IsolationError y la plantilla de B sigue en B
+- Señal de falla: La promesa resuelve y la plantilla queda con organizationId de A
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-029] Helper con id undefined
+- Verifica: [BUG-013] · Prioridad: media
+- Entorno: Neon dev, script tsx o spec de integración
+- Precondiciones: Org de prueba con al menos 2 ChatbotInsight PENDING
+- Pasos: 1) Ejecutar forOrg(org).chatbotInsight.update(undefined as never, { status: 'DISMISSED' }) 2) Contar insights DISMISSED de esa org
+- Resultado esperado: Lanza error y no cambia ninguna fila
+- Señal de falla: Cambian todas las filas de la org
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-030] Estado de migraciones y drift físico en dev y en prod
+- Verifica: [BUG-014], [DEU-014] · Prioridad: media
+- Entorno: Terminal local; primero Neon dev y después la branch main (prod), siempre en modo lectura
+- Precondiciones: DATABASE_URL apuntando al destino a revisar; no correr migrate deploy, dev ni reset
+- Pasos: 1) cd logic-core-v3 2) npx prisma migrate status 3) npx prisma migrate diff --from-url "$env:DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --script > drift.sql 4) Abrir drift.sql y revisar si tiene sentencias
+- Resultado esperado: 'Database schema is up to date!' con 86 migraciones y drift.sql vacío
+- Señal de falla: Migraciones pendientes (sobre todo las 12 posteriores al 2026-06-28) o sentencias en drift.sql (columnas de la reconciliación, enums de alertas)
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-031] Credenciales en reposo: cuántas están en claro
+- Verifica: [SEC-036] · Prioridad: media
+- Entorno: Prod (solo lectura)
+- Precondiciones: Acceso de lectura; nunca seleccionar los valores
+- Pasos: 1) SELECT count(*) FILTER (WHERE "gbpRefreshToken" IS NOT NULL) AS gbp, count(*) FILTER (WHERE "gbpRefreshToken" LIKE 'enc:v1:%') AS gbp_cifrados, count(*) FILTER (WHERE "tiendanubeAccessToken" IS NOT NULL) AS tn, count(*) FILTER (WHERE "calComApiKey" IS NOT NULL) AS cal FROM "Organization"; 2) SELECT count(*) FILTER (WHERE type = 'ACCESS') AS acceso, count(*) FILTER (WHERE type = 'ACCESS' AND url LIKE 'enc:v1:%') AS acceso_cifrado FROM "ClientAsset"; 3) SELECT count(*) FROM "AgencySettings" WHERE "osTelegramBotToken" IS NOT NULL;
+- Resultado esperado: Ninguna credencial en claro
+- Señal de falla: Conteos de no cifrados mayores a 0
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-032] Dos bots bajo el mismo origen
+- Verifica: [BUG-018] · Prioridad: baja
+- Entorno: App local o preview contra Neon dev
+- Precondiciones: Dos bots activos con slugs A y B
+- Pasos: 1) Abrir /embed/<slugA> y mandar un mensaje 2) En la misma pestaña abrir /embed/<slugB> y mandar un mensaje 3) Revisar los logs del server y la tabla chatbot_conversation
+- Resultado esperado: Cada bot crea su conversación y responde (con la credencial de Vertex vencida, mirar solo la creación de la conversación)
+- Señal de falla: El segundo request falla con P2002 / error en getOrCreateConversation
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-033] Orgs duplicadas y proyectos mal asignados por v2-unify en prod
+- Verifica: [BUG-019] · Prioridad: media
+- Entorno: Prod (solo lectura)
+- Precondiciones: Acceso de lectura a la branch main
+- Pasos: 1) SELECT id, slug, "companyName" FROM "Organization" WHERE id LIKE 'os-org-%' OR slug LIKE 'agency-os-%'; 2) SELECT p.id, p.name, o."companyName", l."businessName" FROM "Project" p JOIN "Organization" o ON o.id = p."organizationId" JOIN "OsLead" l ON l.id = p."osLeadId"; 3) Comparar a ojo companyName contra businessName
+- Resultado esperado: 0 filas en la primera consulta y nombres coherentes en la segunda
+- Señal de falla: Orgs sintéticas presentes o proyectos en un cliente que no corresponde
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-034] Cold start de Neon en login y contacto
+- Verifica: [BUG-020] · Prioridad: media
+- Entorno: App local contra Neon dev
+- Precondiciones: Neon dev sin tráfico al menos 5 minutos (auto-suspend)
+- Pasos: 1) Esperar el suspend 2) Loguearse con un usuario de prueba 3) Enviar el formulario de contacto público con datos de prueba
+- Resultado esperado: Ambos responden, aunque lento, sin error
+- Señal de falla: Error de conexión, timeout o pantalla de error.tsx
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción

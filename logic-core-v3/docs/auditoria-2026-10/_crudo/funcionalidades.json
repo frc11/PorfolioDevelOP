@@ -852,6 +852,445 @@
      "evidencia": "Completo sin develOP"
     }
    }
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.plan-y-precio",
+   "nombre": "Ver plan y precio en el perfil",
+   "descripcion": "Sección Plan de /dashboard/cuenta/perfil: nombre del plan, precio mensual, próximo vencimiento y estado de la suscripción.",
+   "archivos": [
+    "src/app/(protected)/dashboard/cuenta/perfil/page.tsx",
+    "src/components/dashboard/ProfileForms.tsx",
+    "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+    "src/lib/plan/get-plan-for-org.ts",
+    "prisma/schema.prisma"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/cuenta/perfil/page.tsx (page)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: perfil/page.tsx:74 resolveOrgId → :80-101 select de subscription.plan.name y price → :208-216 serializa → ProfileForms.tsx:620-662 renderiza. Es correcto hasta el primer cambio de plan: el precio queda viejo (plan.actions.ts:179-200, get-plan-for-org.ts:50-58).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "perfil/page.tsx:74 resolveOrgId y :80-81 findUnique por id de la org de la sesión"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "ProfileForms.tsx:621-624 'No hay información de plan disponible.' con link a facturación"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "src/app/(protected)/dashboard/cuenta/error.tsx usa SectionErrorBoundary"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "src/app/(protected)/dashboard/cuenta/perfil/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Vista de solo lectura, sin entrada del usuario"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "ProfileForms.tsx:654 grid-cols-2 sm:grid-cols-4; el resto de la página no se revisó en este lote"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "src/components/ui/SectionErrorBoundary.tsx:61-64 Sentry.captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "El precio mostrado puede no ser el vigente: perfil/page.tsx:211 lee Subscription.price, que no se actualiza al cambiar de plan (plan.actions.ts:179-200)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Consulta sin intervención de develOP; link a /dashboard/cuenta/facturacion (ProfileForms.tsx:625-631)"
+    }
+   }
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "herramienta": "h2.cli-agenda",
+   "id": "h2.cli-agenda.conectar-agenda",
+   "nombre": "Conectar y ver la agenda (Cal.com)",
+   "descripcion": "Módulo Agenda inteligente: con Cal.com configurado muestra reservas y métricas; sin configurar, un aviso de agenda en construcción.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
+    "src/lib/integrations/cal-com.ts",
+    "prisma/schema.prisma"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx (page)"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "La vista conectada existe (agenda-inteligente/page.tsx:344-349) pero ningún código de la app escribe calComApiKey, calComUsername ni calComEmbedUrl (git grep en src, scripts y prisma: solo lecturas). Sin edición manual de la base, el cliente ve siempre 'Tu agenda en construcción' (:40-43, :341-342).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "agenda-inteligente/page.tsx:317 resolveOrgId, :320 isModuleActive, :323-326 select por id de la org"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "ConnectAgendaCard (:23-48) cuando no hay API key (:341-342)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "src/app/(protected)/dashboard/modules/error.tsx usa SectionErrorBoundary"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "agenda-inteligente/loading.tsx y Suspense con OverviewSkeleton (:344)"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "No existe la action de configuración que debería validar los datos de Cal.com (sin escritor de calCom*)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "ConnectAgendaCard usa max-w-md mx-auto (:26); la vista conectada no se revisó en este lote"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "dashboard/modules/error.tsx → SectionErrorBoundary.tsx:61-64 captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "La rama sin configurar no inventa datos: solo muestra el aviso (:40-43)"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "El cliente depende de que develOP edite la base: :42 'develOP se encarga de configurar…' y no hay escritor de calComApiKey en la app"
+    }
+   }
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "herramienta": "h2.cli-email-mkt",
+   "id": "h2.cli-email-mkt.acceso-al-modulo",
+   "nombre": "Entrar al módulo Email Marketing contratado",
+   "descripcion": "El cliente con Email Marketing Pro activo ve el ítem en el sidebar y abre /dashboard/modules/email-marketing.",
+   "archivos": [
+    "src/lib/data/premium-modules.ts",
+    "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx",
+    "src/components/dashboard/SidebarNav.tsx",
+    "src/app/(protected)/dashboard/layout.tsx",
+    "src/lib/modules/check-activation.ts",
+    "prisma/seeds/sync-premium-modules.ts"
+   ],
+   "madurez": "L?",
+   "madurez_evidencia": "El camino feliz no se puede trazar como funcionando: el catálogo crea 'email-marketing-pro' (premium-modules.ts:38) y el gate/sidebar exigen 'email-marketing' (email-marketing/layout.tsx:20-21, SidebarNav.tsx:78,102). Depende de que la base conserve la fila legacy.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "El layout resuelve la org con resolveOrgId (layout.tsx:17) pero las server actions no chequean el módulo (S2b-01, _actions.ts:17-28)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Evaluado solo el acceso; las pantallas internas son de otro lote."
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Sin módulo activo redirige a /dashboard sin mensaje (layout.tsx:21)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado en este lote."
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "createCampaignAction toma fromEmail/htmlContent del FormData sin Zod (_actions.ts:128-137)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado en este lote."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado en este lote."
+    },
+    "sin_mocks_todos": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado en este lote."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Con la base sincronizada al catálogo, el cliente no puede entrar al módulo que pagó."
+    }
+   }
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.estado-onboarding",
+   "nombre": "Tarjeta 'Estamos configurando tu negocio'",
+   "descripcion": "El inicio del portal muestra el avance del onboarding y las próximas tareas.",
+   "archivos": [
+    "src/lib/data/onboarding-tasks.ts",
+    "src/lib/onboarding/seed-tasks-for-org.ts",
+    "src/components/dashboard/OnboardingStatusCard.tsx",
+    "src/app/(protected)/dashboard/page.tsx",
+    "src/actions/admin/onboarding-tasks.ts"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "La tarjeta existe (OnboardingStatusCard.tsx:16-80, montada en dashboard/page.tsx:61) pero nada vivo crea las tareas: seed-tasks-for-org.ts:5 solo se llama desde módulos sin importadores y el alta actual no siembra (createClientOnly.ts:85).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "findMany filtrado por organizationId recibido del page (OnboardingStatusCard.tsx:17-18)."
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "Sin tareas devuelve null (OnboardingStatusCard.tsx:28): no hay estado, ni mensaje."
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "La query no tiene try/catch (OnboardingStatusCard.tsx:17-26)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Server component dentro del page; no evaluado."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Solo lectura."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado."
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Títulos internos del equipo como 'Configurar AgencySettings de la organización' (onboarding-tasks.ts:21) se mostrarían al cliente (OnboardingStatusCard.tsx:75)."
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Informativa; las tareas las avanza develOP con actions sin UI."
+    }
+   }
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "herramienta": "h2.cli-mensajes",
+   "id": "h2.cli-mensajes.mensaje-precargado",
+   "nombre": "Mensaje precargado por contexto",
+   "descripcion": "Al llegar a Mensajes con ?context=..., el composer se precarga con una plantilla; también hay respuestas rápidas.",
+   "archivos": [
+    "src/lib/data/message-context.ts",
+    "src/components/dashboard/MessageThread.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "MessageThread.tsx:72-88 lee context/moduleName -> message-context.ts:54-63 -> setInputValue; respuestas rápidas en MessageThread.tsx:173. El envío lo hace la action de mensajes (fuera del lote).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Solo arma texto en el cliente."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Contexto desconocido devuelve cadena vacía (message-context.ts:56)."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones que fallen."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin carga asíncrona."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "El texto se valida al enviarse en la action de mensajes (fuera del lote)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin errores propios."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Plantillas reales sin TODO (message-context.ts:1-52)."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El cliente edita y envía solo."
+    }
+   }
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.archivar-cliente",
+   "nombre": "Archivar y desarchivar cliente",
+   "descripcion": "El admin archiva un cliente para sacarlo de la lista de activos y puede revertirlo.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/archiveClient.ts",
+    "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "src/app/(protected)/admin/clients/page.tsx",
+    "prisma/migrations/20260619234252_add_organization_city_avatar_notes_softdelete/migration.sql"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ClientsListClient.tsx:161-171 -> archiveClient.ts:16-37 (requireSuperAdmin, Zod, update deletedAt) -> page.tsx:23/:34. Funciona como filtro, pero no suspende nada (ver hallazgo).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin (archiveClient.ts:17, :55)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Acción puntual."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast.error con el mensaje de la action (ClientsListClient.tsx:168); mensajes propios en archiveClient.ts:20,30."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "setPendingId mientras corre (ClientsListClient.tsx:162) y diálogo con isPending."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod ArchiveClientInputSchema (archiveClient.ts:12-14, :19)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "El catch solo muestra toast (ClientsListClient.tsx:167-168), sin captureException."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "El admin no tiene forma de suspender: archivar deja bot, portal y crons activos."
+    }
+   }
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.eliminar-cliente",
+   "nombre": "Eliminar cliente (hard-delete)",
+   "descripcion": "El admin ve un resumen, confirma escribiendo ELIMINAR y borra la org con todo lo que cuelga.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+    "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql",
+    "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ClientsListClient.tsx:192-206 -> hardDeleteClient.ts:107-123 (resumen) -> ClientsListClient.tsx:222-243 -> hardDeleteClient.ts:125-145 (tx + delete) -> audit :166-178.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin en resumen y borrado (hardDeleteClient.ts:107-110, :125-128)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Acción puntual."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast.error (ClientsListClient.tsx:239); 'Cliente no encontrado.' (hardDeleteClient.ts:139)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "deleteLoading/deletePending (ClientsListClient.tsx:194, :225)."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod InputSchema (hardDeleteClient.ts:17-19)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Fallos manejados con toast; la auditoría posterior traga errores (patrón D1-c3)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "El resumen omite pagos/horas que se borran y los User del cliente quedan vivos."
+    }
+   }
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "herramienta": "h4.adm-config",
+   "id": "h4.adm-config.precio-modulos",
+   "nombre": "Editar precio de un módulo premium",
+   "descripcion": "El admin cambia el precio mensual de un módulo desde Configuración.",
+   "archivos": [
+    "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+    "src/lib/data/premium-modules.ts",
+    "prisma/seeds/sync-premium-modules.ts",
+    "src/components/sections/modulos-opcionales/ModuloActiveCard.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "settings.actions.ts:175-199 (requireSuperAdmin, Zod, update) -> dashboard/services/page.tsx:177 muestra el precio nuevo; la home pública sigue leyendo el catálogo (ModuloActiveCard.tsx:248) y el sync lo revierte (sync-premium-modules.ts:54, :145-148).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin (settings.actions.ts:180)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Módulo inexistente devuelve 'No se encontro el modulo.' (settings.actions.ts:189-191)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "fail(toErrorMessage(...)) (settings.actions.ts:201-202) puede devolver mensajes internos (patrón D1-c1)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpdateModulePricingSchema.parse (settings.actions.ts:181)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "No evaluado."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "El cambio no llega al sitio público y el próximo sync lo pisa."
+    }
+   }
   }
  ]
 }

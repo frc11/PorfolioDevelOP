@@ -45,6 +45,113 @@
    "alerta": "(Foco del dominio, npm audit) Normalizador de email de Auth.js en el magic link",
    "resultado": "descartada",
    "evidencia": "El provider Resend no define normalizeIdentifier (auth.ts:97-121): usa el defaultNormalizer instalado (@auth/core 0.41.2, send-token.js:74-97) que ya rechaza comillas y recorta ',' del dominio; el signIn callback exige coincidencia exacta en DB (auth.ts:176-185) y el envio va por la API JSON de Brevo (no nodemailer). Sin dependencia explotable encontrada; version: D8."
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "alerta": "[D6-A1] Migración 20260619140100 registrada con migrate resolve --applied sin ejecutar el SQL",
+   "resultado": "confirmada",
+   "evidencia": "La propia historia lo dice: prisma/migrations/20260621120000_reconcile_dev_drift_schema_align/migration.sql:26-28 ('quedó RESUELTA SIN EJECUTAR'). Estructuralmente se neutralizó después: 20260621120000:29 DROP IF EXISTS y 20260622120000:21 ADD IF NOT EXISTS; schema.prisma:1510 declara la columna. El estado real de _prisma_migrations en dev y prod no se puede cerrar por lectura (migrate status de F0 falló): va a verificación humana.",
+   "hallazgo_titulo": "Historial de migraciones con DROP de 9 columnas de cliente revertido al día siguiente y una migración resuelta sin ejecutar"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "alerta": "[D6-A2] Columnas Organization.avatar*/city/deletedAt/internalNotes, AgencySettings.singleton y chatbot_lead.convertedToOsLeadId: DROP aprobado y después adopción",
+   "resultado": "confirmada",
+   "evidencia": "Hoy el schema las declara (schema.prisma:401-402, :413-419, :823, :1510) y el código las usa: EditClientForm.tsx:82-83, InternalNotesCard.tsx:45, ClientHeader.tsx:51, archiveClient.ts:34, convert-chatbot-lead.actions.ts:71, hardDeleteClient.ts:66. La historia hace DROP (20260621120000:14-29) y re-ADD vacío (20260622120000:13-21): adoptadas, con un DROP intermedio que pierde datos en cualquier base que lo aplique con valores.",
+   "hallazgo_titulo": "Historial de migraciones con DROP de 9 columnas de cliente revertido al día siguiente y una migración resuelta sin ejecutar"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "alerta": "[D6-A3] Drift de 7 columnas físicas que el schema no declara, contradicho como cliente stale y vuelto a marcar",
+   "resultado": "parcial",
+   "evidencia": "En origin/main el schema declara las 7 (schema.prisma:409, :1329, :1477, :1481-1483, :1487) y las crean 20260629195726_ev2_vertical_pack_signals_utm/migration.sql:2-9 y 20260630032132_add_org_average_ticket_usd/migration.sql:2; drift schema↔migraciones = 0. El drift físico de la base no se puede cerrar por lectura; además esas migraciones usan ADD COLUMN sin IF NOT EXISTS, así que si las columnas ya existían en dev la migración falló o se resolvió sin ejecutar.",
+   "hallazgo_titulo": "Nada aplica ni verifica las migraciones de prod; una migración asume que Netlify las autoaplica"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "alerta": "[D6-A4] Orden de migraciones: B4.4 (20260522214201) con timestamp anterior a B4.1 (20260522234313) y B4.3 (20260523001750)",
+   "resultado": "descartada",
+   "evidencia": "La inversión existe (las tres entran en el commit a3180600) pero no tiene efecto: B4.4 solo hace DROP de User.unlockedFeatures (20260522214201/migration.sql:15) y B4.1/B4.3 solo tocan plan y Subscription (20260522234313/migration.sql:8-40, 20260523001750/migration.sql:2-16). Aplicadas en cualquier orden dan el mismo schema."
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "alerta": "[D6-A5] Cerrar lead → cliente: FK OsLead→Organization propuesta contra ChatbotLead.convertedToOsLeadId como string suelto",
+   "resultado": "parcial",
+   "evidencia": "OsLead no tiene organizationId ni FK a Organization (schema.prisma:862-901); convertedToOsLeadId sigue siendo String sin FK por decisión (schema.prisma:1505-1510); el vínculo lead→cliente existe indirecto por Project.osLeadId @unique (schema.prisma:557, :562) y hardDeleteClient lo usa (hardDeleteClient.ts:60-73), con referencia colgante posible (:75-76). Es una decisión de diseño abierta, sin hallazgo propio."
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "alerta": "[D6-A6] Base de test dedicada pendiente: las suites corren contra Neon dev",
+   "resultado": "confirmada",
+   "evidencia": "git grep DATABASE_URL_TEST → vacío; playwright.integration.config.ts:9-16 carga DATABASE_URL con dotenv; los specs borran datos (tests/e2e/30-onboarding-e2e-complete.spec.ts:153-156, tests/helpers/setter-db.ts:373-376) sin ningún guard de host.",
+   "hallazgo_titulo": "Los tests e2e e integración escriben y borran en la branch Neon dev compartida, sin base de test ni guard de entorno"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "alerta": "[D6-A7] Runner de seeds: tsx contra ts-node --transpile-only",
+   "resultado": "confirmada",
+   "evidencia": "Conviven los dos: prisma.config.ts:32 usa 'npx tsx prisma/seed.ts'; package.json:17-18 usa ts-node con chequeo de tipos para seed-agency-os y package.json:20 ts-node --transpile-only para seed:latency. seed-agency-os.ts:26 importa './seed-guard.ts' con extensión.",
+   "hallazgo_titulo": "Dos runners para los seeds: tsx en prisma db seed y ts-node en seed:agency-os"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "alerta": "[D6-A1] Migración 20260619140100 registrada con 'migrate resolve --applied' sin ejecutar el SQL",
+   "resultado": "confirmada",
+   "evidencia": "El propio historial lo admite: prisma/migrations/20260621120000_reconcile_dev_drift_schema_align/migration.sql:27-28 ('quedó RESUELTA SIN EJECUTAR (resolve --applied sin correr el SQL)'). El estado se reconvergió con el DROP IF EXISTS de 20260621120000:29 y el ADD IF NOT EXISTS de 20260622120000:21; schema.prisma:1510 declara la columna y el código la usa (convert-chatbot-lead.actions.ts:39). Que la base física coincida solo lo prueba prisma migrate diff de solo lectura (caso de prueba manual).",
+   "hallazgo_titulo": "Migraciones de reconciliación agregaron, borraron y re-agregaron columnas con datos de clientes con un criterio falso, y 20260619140100 quedó resuelta sin ejecutar"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "alerta": "[D6-A2] Columnas Organization.avatar*/city/deletedAt/internalNotes, AgencySettings.singleton y chatbot_lead.convertedToOsLeadId: DROP aprobado y después adopción aditiva",
+   "resultado": "confirmada",
+   "evidencia": "Agregadas en 20260619234252:2-7, 20260620173833:2-5 y 20260617184913:5; dropeadas en 20260621120000:14-29; re-agregadas en 20260622120000:13-21. Hoy el schema las declara (schema.prisma:401-402, :413-419, :823, :1510) y el código las usa (git grep: deletedAt 13, internalNotes 33, avatarEmoji 96, convertedToOsLeadId 19 líneas en src); singleton no se usa por nombre (1 coincidencia ajena) y actúa solo como unique de fila única.",
+   "hallazgo_titulo": "Migraciones de reconciliación agregaron, borraron y re-agregaron columnas con datos de clientes con un criterio falso, y 20260619140100 quedó resuelta sin ejecutar"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "alerta": "[D6-A3] Drift de 7 columnas físicas que el schema no declara (bitacora-beta-3.md:528), contradicho como cliente stale (:554) y vuelto a marcar (:560)",
+   "resultado": "descartada",
+   "evidencia": "Las 7 columnas están declaradas hoy: Organization.averageTicketUsd (schema.prisma:409), BotConfig.verticalPack (:1329), ChatbotLead.signals (:1477), utmSource/utmMedium/utmCampaign (:1481-1483) y firstContactedAt (:1487), y las crean 20260629195726_ev2_vertical_pack_signals_utm/migration.sql:2-9 y 20260630032132_add_org_average_ticket_usd/migration.sql:2. El 'drift' de :528 era el schema del lane de LeadOS sin esas migraciones (lo explica la propia bitácora en :554); drift.mjs da 0 diferencias."
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "alerta": "[D6-A4] Orden de migraciones: B4.4 (20260522214201) con timestamp anterior a B4.1 (20260522234313) y B4.3 (20260523001750) aunque se creó después",
+   "resultado": "descartada",
+   "evidencia": "La inversión de timestamps existe, pero las tres carpetas entraron en el mismo commit a3180600 (2026-05-23) y B4.4 solo hace DROP COLUMN de User.unlockedFeatures (20260522214201:15), sin dependencia con plan/Subscription (20260522234313:2-40, 20260523001750:2-16). En una base reconstruida se aplican en orden de carpeta sin conflicto; drift.mjs 0 diferencias."
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "alerta": "[D6-A5] Cerrar lead -> cliente: FK OsLead->Organization propuesta contra ChatbotLead.convertedToOsLeadId como string suelto por decisión",
+   "resultado": "parcial",
+   "evidencia": "No existe FK OsLead->Organization: OsLead no tiene organizationId (schema.prisma:862-901) y el único vínculo es Project.osLeadId (@unique, SetNull; :557, :562). La decisión del string suelto sí está implementada (schema.prisma:1505-1510) y en uso (convert-chatbot-lead.actions.ts:39); hardDeleteClient.ts:74-79 tolera ids colgantes. La propuesta de FK sigue sin empezar."
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "alerta": "[D6-A6] Base de test dedicada pendiente: las suites corren contra Neon dev (bitacora-beta-3.md:8082); cruza con VH-003 (DATABASE_URL_TEST)",
+   "resultado": "confirmada",
+   "evidencia": "playwright.integration.config.ts:37, playwright.leados.config.ts:25 y playwright.setter.config.ts:31 cargan .env.local (Neon dev); ../.github/workflows/ci.yml:140-146 saltea los tests sin DATABASE_URL_TEST y :174 anota que ninguno de esos secrets existe.",
+   "hallazgo_titulo": "Sin base de test: las suites de integración, LeadOS y setter escriben en la Neon dev compartida y en CI no corren (falta DATABASE_URL_TEST)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "alerta": "[D6-A7] Runner de seeds: tsx contra ts-node --transpile-only",
+   "resultado": "confirmada",
+   "evidencia": "Conviven los dos: package.json:17-20 y 22-35 con ts-node (25 líneas) y 67 líneas con 'npx tsx'; tsx no está declarado ni en el lockfile. Los seeds del lote usan import.meta (add-contact-tool.ts:88, sync-plans.ts:197) y documentan 'npx tsx' (sync-plans.ts:9-13), incompatibles con el ts-node configurado en CommonJS (package.json:172-176).",
+   "hallazgo_titulo": "Los seeds del lote solo corren con tsx, que no está declarado: `npx tsx` resuelve una versión sin fijar mientras DATABASE_URL apunta a prod"
   }
  ]
 }

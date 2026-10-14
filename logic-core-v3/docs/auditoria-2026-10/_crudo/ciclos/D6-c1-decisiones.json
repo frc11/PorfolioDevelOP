@@ -1,0 +1,72 @@
+{
+ "D6-L2/H01": {
+  "decision": "aceptar", "verificado_padre": true, "confianza": "VERIFICADO-POR-LECTURA", "caso_indice": 1,
+  "nota_padre": "Leído: premium-modules.ts:38 (único slug de email: 'email-marketing-pro'); email-marketing/layout.tsx:20-21 (isModuleActive con 'email-marketing' y redirect sin mensaje); SidebarNav.tsx:78 (filtra por 'email-marketing'). git grep de 'email-marketing' entre comillas en src: solo esas dos líneas (control: 'email-marketing-pro' aparece en PremiumModuleCard.tsx:62 y ModuloActiveCard.tsx:59). Lo que queda para la VH es qué slugs tiene hoy la tabla premium_module."
+ },
+ "D6-L2/H02": {
+  "decision": "aceptar", "verificado_padre": true, "caso_indice": 2,
+  "nota_padre": "Leído de más (no muestreado): registry.ts:44 WABA_CHANNEL_NESTED = ['organization','conversations'] sin 'templates' ni 'alerts', que schema.prisma:2042-2044 declara como relaciones; scoped-model.ts:328-336 solo rechaza las claves de esa lista. Latente: ningún caller arma ese data con input de usuario."
+ },
+ "D6-L2/H03": {
+  "decision": "aceptar", "verificado_padre": true, "caso_indice": 3,
+  "nota_padre": "Leído de más: scoped-model.ts:223-224 (update con where {id, organizationId}) y :235 / :262-264 (updateMany/deleteMany con scopedWhere({id})); con id undefined Prisma omite la clave. Latente: los callers actuales validan el id."
+ },
+ "D6-L2/H05": { "decision": "aceptar", "caso_indice": 0 },
+ "D6-L2/H06": { "decision": "aceptar", "caso_indice": 0 },
+ "D6-L2/H07": {
+  "decision": "fusionar", "con": "SEC-014", "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (git grep deletedAt en src: solo admin/clients/page.tsx:23,34, admin/announcements/page.tsx:27 y archiveClient.ts). Misma causa raíz que SEC-014 (archivar no corta el acceso): se fusiona."
+ },
+ "D6-L2/H08": {
+  "decision": "aceptar",
+  "titulo": "El hard-delete de un cliente borra en cascada los registros financieros de la agencia y los leads del bot (que el resumen subinforma) y deja vivos a sus usuarios"
+ },
+ "D6-L2/H09": { "decision": "fusionar", "con": "D6-L1/H10", "nota_padre": "Misma causa raíz que D6-L1/H10 (cascada de tickets al borrar un User)." },
+ "D6-L2/H10": { "decision": "aceptar", "caso_indice": 4 },
+ "D6-L2/H12": {
+  "decision": "aceptar", "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene. settings.actions.ts:193-196 escribe priceMonthlyUsd en la base; sync-premium-modules.ts:54 y :145-148 lo compara contra el catálogo y lo pisa; la home lee el catálogo en código."
+ },
+ "D6-L2/H16": { "decision": "fusionar", "con": "D6-L1/H17", "nota_padre": "Misma causa raíz que D6-L1/H17 (FKs sin índice)." },
+ "D6-L2/H17": {
+  "decision": "aceptar", "verificado_padre": true, "caso_indice": 5,
+  "nota_padre": "Muestreo DEC-37: se sostiene. chatbot_init/migration.sql:142 índice único global sobre sessionId; useChatbot.ts:27 una sola clave 'chatbot:sessionId' por origen en sessionStorage."
+ },
+ "D6-L2/H19": { "decision": "aceptar", "caso_indice": 6 },
+ "D6-L2/H20": { "decision": "aceptar", "caso_indice": 7 },
+ "D6-L2/H21": { "decision": "fusionar", "con": "SEC-031", "nota_padre": "Misma causa raíz que SEC-031 (rate_limit sin purga), registrada en D1-c3." },
+ "D6-L2/H22": {
+  "decision": "aceptar", "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (git grep 'PENDIENTE-DECISI' en src: getActivityChartData.ts:6,13 y getLatencyHistory.ts:68,74)."
+ },
+ "D6-L2/H23": { "decision": "fusionar", "con": "D6-L1/H18", "nota_padre": "Misma causa raíz que D6-L1/H18 (montos en Float)." },
+ "D6-L2/H24": { "decision": "fusionar", "con": "BUG-004", "nota_padre": "Misma causa raíz que BUG-004 (rol CLIENT sin uso que el proxy expulsa), registrada en D1-c1." },
+ "D6-L1/H01": {
+  "decision": "fusionar", "con": "D6-L2/H10", "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (schema.prisma:359-360, 367, 375 y 835 sin cifrar; contraste :1704-1705, cifrado AES-256-GCM en CRM). Misma causa raíz que D6-L2/H10: se fusiona."
+ },
+ "D6-L1/H02": { "decision": "fusionar", "con": "D6-L2/H06", "nota_padre": "Misma causa raíz que D6-L2/H06 (migraciones de reconciliación; 20260619140100 resuelta sin ejecutar)." },
+ "D6-L1/H03": { "decision": "fusionar", "con": "D6-L2/H05", "nota_padre": "Misma causa raíz que D6-L2/H05 (nada aplica las migraciones en el deploy)." },
+ "D6-L1/H05": { "decision": "fusionar", "con": "SEC-014", "nota_padre": "Misma causa raíz que SEC-014 (archivar no corta el acceso)." },
+ "D6-L1/H06": {
+  "decision": "fusionar", "con": "D6-L2/H08", "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (hardDeleteClient.ts:82-85 cuenta solo los leads no convertidos; :141 borra la org y la cascada se lleva todos los ChatbotLead del bot; no hay borrado de User). Misma causa raíz que D6-L2/H08, cuyo título suma los leads subinformados."
+ },
+ "D6-L1/H09": { "decision": "fusionar", "con": "D6-L2/H15", "nota_padre": "Misma causa raíz que D6-L2/H15 (sin base de test)." },
+ "D6-L1/H11": {
+  "decision": "aceptar", "verificado_padre": true, "relacionados_ids": ["SEC-031"],
+  "nota_padre": "Muestreo DEC-37: se sostiene (git grep de deleteMany por fecha en crons, lib y módulos: solo persistentLogger.ts:160 sobre chatbotEvent). Política de retención general; la purga de rate_limit en particular es SEC-031."
+ },
+ "D6-L1/H13": { "decision": "fusionar", "con": "SEC-002", "nota_padre": "Mismo riesgo que SEC-002 (contraseñas de seed); suma el ángulo del historial (válidas en toda base sembrada antes del 20/06/2026)." },
+ "D6-L1/H15": { "decision": "fusionar", "con": "BUG-002", "nota_padre": "Misma causa raíz que BUG-002 (email sin semántica case-insensitive); suma User.email y EmailContact.email @unique sensibles a mayúsculas." },
+ "D6-L1/H16": {
+  "decision": "fusionar", "con": "D6-L2/H19", "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (migration.sql:44-48 ILIKE de prefijo en ambos sentidos). Misma causa raíz que D6-L2/H19."
+ },
+ "D6-L1/H21": {
+  "decision": "aceptar", "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene. prisma.config.ts:9 dice 49 migraciones y hay 86; 20260619140100/migration.sql:3-5 dice que convertedToOsLeadId nunca estuvo en el schema commiteado, pero git log -S lo muestra en 50a3d779 (chore(schema): add convertedToOsLeadId)."
+ },
+ "D6-L1/H22": { "decision": "fusionar", "con": "D6-L2/H14", "nota_padre": "Misma causa raíz que D6-L2/H14 (runner de seeds sin declarar)." },
+ "D6-L1/H23": { "decision": "fusionar", "con": "D6-L2/H20", "nota_padre": "Misma causa raíz que D6-L2/H20 (cold start de Neon sin margen ni reintento)." }
+}

@@ -7,9 +7,9 @@
 | Área | Herramientas medidas | Funcionalidades | En L3 o más | Faltantes de L3 más comunes | FAL |
 |---|---:|---:|---:|---|---:|
 | h1 · Acceso | 5 / 5 | 14 | 0 | Sentry (11), autonomía (9), errores (8) | 3 |
-| h2 · Portal del cliente | 1 / 16 | 1 | 0 | Sentry (1) | 0 |
+| h2 · Portal del cliente | 5 / 16 | 6 | 0 | mobile (2), sin mocks ni TODO (2), validación en servidor (2) | 1 |
 | h3 · Chatbot centralizado | 0 / 8 | 0 | 0 | — | 0 |
-| h4 · Panel de admin | 0 / 13 | 0 | 0 | — | 0 |
+| h4 · Panel de admin | 2 / 13 | 3 | 0 | autonomía (3), Sentry (2), errores (1) | 0 |
 | h5 · Setter y LeadOS | 0 / 7 | 0 | 0 | — | 0 |
 | h6 · Entradas públicas que alimentan lo interno | 0 / 2 | 0 | 0 | — | 0 |
 
@@ -81,18 +81,84 @@
 
 ## h2 · Portal del cliente
 
-### h2.cli-cuenta — Mi cuenta
+### h2.cli-inicio — Inicio
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 1 funcionalidades: 1×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: vacíos, errores, sin mocks ni TODO.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h2.cli-inicio.estado-onboarding` Tarjeta 'Estamos configurando tu negocio' | L1 | vacíos, errores, sin mocks ni TODO | La tarjeta existe (OnboardingStatusCard.tsx:16-80, montada en dashboard/page.tsx:61) pero nada vivo crea las tareas: seed-tasks-for-org.ts:5 solo se llama desde módulos sin importadores y el alta actual no siembra (createClientOnly.ts:85). |
+
+### h2.cli-mensajes — Mensajes
 
 - Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 1 funcionalidades: 1×L2).
-- Criterios de L3 que faltan en alguna funcionalidad: Sentry.
+- Criterios de L3 que faltan en alguna funcionalidad: ninguno.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h2.cli-mensajes.mensaje-precargado` Mensaje precargado por contexto | L2 | — | MessageThread.tsx:72-88 lee context/moduleName -> message-context.ts:54-63 -> setInputValue; respuestas rápidas en MessageThread.tsx:173. El envío lo hace la action de mensajes (fuera del lote). |
+
+### h2.cli-cuenta — Mi cuenta
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 2 funcionalidades: 2×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: Sentry, mobile, sin mocks ni TODO.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h2.cli-cuenta.cambiar-password` Cambiar contrasena desde Mi Cuenta | L2 | Sentry | ProfileForms.tsx:374-394 (invocacion directa) -> profile.ts:191-232 -> unstable_update :239 -> router.refresh (ProfileForms.tsx:392) |
+| `h2.cli-cuenta.plan-y-precio` Ver plan y precio en el perfil | L2 | mobile, sin mocks ni TODO | Camino feliz: perfil/page.tsx:74 resolveOrgId → :80-101 select de subscription.plan.name y price → :208-216 serializa → ProfileForms.tsx:620-662 renderiza. Es correcto hasta el primer cambio de plan: el precio queda viejo (plan.actions.ts:179-200, get-plan-for |
+
+### h2.cli-email-mkt — Email marketing (módulo)
+
+- Madurez de la herramienta: **L?** (la de su funcionalidad más floja; 1 funcionalidades: 1×L?).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, errores, validación en servidor, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h2.cli-email-mkt.acceso-al-modulo` Entrar al módulo Email Marketing contratado | L? | permisos y tenant, errores, validación en servidor, autonomía | El camino feliz no se puede trazar como funcionando: el catálogo crea 'email-marketing-pro' (premium-modules.ts:38) y el gate/sidebar exigen 'email-marketing' (email-marketing/layout.tsx:20-21, SidebarNav.tsx:78,102). Depende de que la base conserve la fila le |
+
+### h2.cli-agenda — Agenda inteligente (módulo)
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 1 funcionalidades: 1×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: validación en servidor, mobile, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h2.cli-agenda.conectar-agenda` Conectar y ver la agenda (Cal.com) | L1 | validación en servidor, mobile, autonomía | La vista conectada existe (agenda-inteligente/page.tsx:344-349) pero ningún código de la app escribe calComApiKey, calComUsername ni calComEmbedUrl (git grep en src, scripts y prisma: solo lecturas). Sin edición manual de la base, el cliente ve siempre 'Tu age |
+
+### [FAL-004] Agenda y QR de reseñas sin camino de configuración: calCom* y googleMapsPlaceId no tienen escritor en la app
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:375` — «calComApiKey String? @db.Text»; `prisma/schema.prisma:363` — «googleMapsPlaceId String?»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:42` — «develOP se encarga de configurar tu sistema de reservas con tus horarios, servicios y precios.»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:329` — «const isConnected = Boolean(org.calComApiKey)»; `src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:161` — «<AskReviewSection placeId={org.googleMapsPlaceId} />»
+- Impacto: Para activar la agenda o el QR de reseñas del primer cliente alguien tiene que editar la base de prod a mano: no hay formulario ni action, ni en el admin ni en el portal, que escriba esas columnas (git grep en src, scripts y prisma solo encuentra lecturas). Es un paso sin validación ni auditoría y deja la API key de Cal.com en claro. El cliente ve 'Tu agenda en construcción' indefinidamente.
+- Propuesta: Agregar en /admin/clients/[clientId] una sección de integraciones con server action (Zod, requireSuperAdmin, logAdminAction) que escriba calComUsername, calComEmbedUrl, calComApiKey (cifrada) y googleMapsPlaceId.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-agenda, h2.cli-resenas, h4.adm-clientes, modelo.Organization, int.calcom
 
 ## h3 · Chatbot centralizado
 
 ## h4 · Panel de admin
+
+### h4.adm-clientes — Clientes
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 2 funcionalidades: 2×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: Sentry, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-clientes.archivar-cliente` Archivar y desarchivar cliente | L2 | Sentry, autonomía | ClientsListClient.tsx:161-171 -> archiveClient.ts:16-37 (requireSuperAdmin, Zod, update deletedAt) -> page.tsx:23/:34. Funciona como filtro, pero no suspende nada (ver hallazgo). |
+| `h4.adm-clientes.eliminar-cliente` Eliminar cliente (hard-delete) | L2 | Sentry, autonomía | ClientsListClient.tsx:192-206 -> hardDeleteClient.ts:107-123 (resumen) -> ClientsListClient.tsx:222-243 -> hardDeleteClient.ts:125-145 (tx + delete) -> audit :166-178. |
+
+### h4.adm-config — Configuración
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 1 funcionalidades: 1×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: errores, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-config.precio-modulos` Editar precio de un módulo premium | L2 | errores, autonomía | settings.actions.ts:175-199 (requireSuperAdmin, Zod, update) -> dashboard/services/page.tsx:177 muestra el precio nuevo; la home pública sigue leyendo el catálogo (ModuloActiveCard.tsx:248) y el sync lo revierte (sync-premium-modules.ts:54, :145-148). |
 
 ## h5 · Setter y LeadOS (ZONA-FRANCO)
 

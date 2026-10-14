@@ -216,6 +216,174 @@
    "patron": "Límite por IP con la dirección exacta: con IPv6 se rota dentro de un /64 aun usando la IP confiable de la plataforma",
    "como_buscarlo": "git grep -n -E \"getClientIpHash\\(|hashIp\\(|extractClientIp\\(\" origin/main -- logic-core-v3/src y verificar normalización a /64",
    "donde_aparecio": "lib/security/auth-rate-limit.ts:37-42, api/chatbot/[slug]/chat/route.ts:79"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Scripts y seeds que escriben o borran en la base sin assertDevSeedTarget",
+   "como_buscarlo": "git grep -l \"new PrismaClient\\|unsafeGlobalQuery\" origin/main -- logic-core-v3/scripts logic-core-v3/prisma/seeds logic-core-v3/src/modules/chatbot/prisma y restar los que importan seed-guard (git grep -l assertDevSeedTarget); revisar los deleteMany de los restantes",
+   "donde_aparecio": "prisma/seeds/sync-premium-modules.ts:105-113 (borra OrganizationModule no ACTIVE de todas las orgs), scripts/dev/seed-events.ts:118-121, scripts/seed-messages-demo.ts:160, scripts/p41-inject-campaigns.ts:16, src/modules/chatbot/prisma/seed.ts (sin guard), prisma/migrate-os-to-unified.ts"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Columnas del schema sin ningún escritor en la app (features que solo se activan editando la base)",
+   "como_buscarlo": "Por cada campo de schema.prisma: git grep -n -E \"\\b<campo>\\b\" origin/main -- logic-core-v3/src y descartar los 'campo: true' de select; si no queda ninguna asignación, no hay escritor",
+   "donde_aparecio": "Organization.calComApiKey/calComUsername/calComEmbedUrl (schema.prisma:375-377) y googleMapsPlaceId (:363)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Over-fetch de Organization con tokens en claro (include: { organization: true } o findUnique sin select) que pueda llegar a un client component, un log o Sentry",
+   "como_buscarlo": "git grep -n \"organization: true\" origin/main -- logic-core-v3/src y git grep -n -A3 \"organization.findUnique({\" sin 'select'; seguir el objeto hasta su destino",
+   "donde_aparecio": "src/app/api/cron/generate-insights/route.ts:20, src/modules/chatbot/server/insights/generateInsights.ts:51, src/modules/chatbot/server/tools/captureLead.ts:426, src/app/api/admin/chatbot/demo-chat/[slug]/route.ts:46 (admin/tickets mapea campos y está bien: ticket.actions.ts:140-175)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Doble fuente de verdad en datos de facturación (Subscription.price frente a Plan.monthlyPrice y priceOverride)",
+   "como_buscarlo": "git grep -n -E \"subscription\\??\\.price|\\.monthlyPrice|priceOverride\" origin/main -- logic-core-v3/src y comprobar qué fuente muestra cada pantalla",
+   "donde_aparecio": "dashboard/cuenta/perfil/page.tsx:211, admin/clients/_actions/plan.actions.ts:179-200, lib/plan/get-plan-for-org.ts:50-58"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Soft-delete de Organization no respetado por los lectores",
+   "como_buscarlo": "git grep -n \"deletedAt\" origin/main -- logic-core-v3/src y compararlo con cada lugar que resuelve una org (resolveOrgId, auth.ts, carga del bot público, crons)",
+   "donde_aparecio": "Solo admin/clients/page.tsx:23,34, admin/announcements/page.tsx:27 y archiveClient.ts"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Notification se escribe con userId pero se lee y se marca por organizationId (todos los miembros ven y marcan las de todos); el cron os-follow-up usa la tabla como marcador de idempotencia por título",
+   "como_buscarlo": "git grep -n -E \"notification\\.(findMany|findFirst|updateMany)\\(\" origin/main -- logic-core-v3/src y ver si filtran userId",
+   "donde_aparecio": "src/lib/actions/notifications.ts:33, :55, :82 (solo organizationId) frente a schema.prisma:718; src/app/api/cron/os-follow-up/route.ts:168-174 y :276-286"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Raíz de esquema del patrón D1-c1 'tokens de un solo uso en claro': PasswordResetToken.token se guarda sin hash",
+   "como_buscarlo": "git grep -n -E \"passwordResetToken\\.(create|findUnique|findFirst)\" origin/main -- logic-core-v3/src y verificar si se hashea antes de escribir y de buscar",
+   "donde_aparecio": "prisma/schema.prisma:317-328 (token String @unique sin columna de hash); D1 lo vio en forgot-password/actions.ts:73"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Raíz de esquema del patrón D1-c3 'escritura en cada navegación a una columna sin lectores'",
+   "como_buscarlo": "git grep -n \"lastDashboardVisit\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "prisma/schema.prisma:299 User.lastDashboardVisit"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "El registry de aislamiento cubre solo los 18 modelos de chatbot y motor; los modelos del portal con organizationId se consultan con prisma directo y filtro manual",
+   "como_buscarlo": "git show origin/main:logic-core-v3/src/lib/isolation/registry.ts | grep \"model: '\" y compararlo con los modelos de schema.prisma que tienen organizationId; luego git grep -n \"prisma\\.<modelo>\\.\" en src/app/(protected)/dashboard",
+   "donde_aparecio": "registry.ts:218-434 frente a Project, Ticket, Message, Invoice, Notification, OnboardingTask, EmailContact, EmailCampaign, OrganizationModule, Subscription, ClientAsset, ReferralCode, Referral (schema.prisma)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Migraciones con ADD COLUMN sin IF NOT EXISTS aplicadas sobre una base con drift conocido (fallan o se resuelven sin ejecutar)",
+   "como_buscarlo": "git grep -n \"ADD COLUMN \" origin/main -- logic-core-v3/prisma/migrations | grep -v \"IF NOT EXISTS\" para migraciones posteriores a 2026-06-17, cruzado con las notas de drift de las bitácoras",
+   "donde_aparecio": "prisma/migrations/20260629195726_ev2_vertical_pack_signals_utm/migration.sql:2-9"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Hard-delete o cascadas que dejan User huérfanos con PII y credenciales",
+   "como_buscarlo": "git grep -n -E \"organization\\.(delete|deleteMany)\\(\" origin/main -- logic-core-v3/src logic-core-v3/tests y revisar qué pasa con los User de esas orgs",
+   "donde_aparecio": "src/modules/chatbot/server/admin/hardDeleteClient.ts:141; src/modules/chatbot/evals/seed-eval-bots.ts:141"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L1",
+   "patron": "Dos archivos instrumentation.ts: el de la raíz sin onRequestError y el de src/ con Sentry.captureRequestError; confirmar cuál carga Next",
+   "como_buscarlo": "git ls-tree origin/main logic-core-v3/instrumentation.ts logic-core-v3/src/instrumentation.ts y git grep -n onRequestError",
+   "donde_aparecio": "instrumentation.ts:1-8 y src/instrumentation.ts:49"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Slugs de módulos premium escritos a mano en gates, nav o actions que no coinciden con el catálogo",
+   "como_buscarlo": "git grep -n \"isModuleActive(\" origin/main -- src y comparar con los slug de src/lib/data/premium-modules.ts y con PREMIUM_MODULES de src/components/dashboard/SidebarNav.tsx",
+   "donde_aparecio": "email-marketing/layout.tsx:20 y SidebarNav.tsx:78 ('email-marketing') contra premium-modules.ts:38 ('email-marketing-pro')"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Credenciales o tokens de terceros guardados en claro",
+   "como_buscarlo": "grep -n -E \"Token|ApiKey|Secret|Password\" prisma/schema.prisma y, por cada campo, git grep '<campo>:' -- src buscando encrypt en el write-path",
+   "donde_aparecio": "Organization.gbp*/tiendanube*/calComApiKey, AgencySettings.osTelegramBotToken, ClientAsset (Bóveda)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Relaciones nuevas que no se agregan a las listas de nested/re-parenting del registro de aislamiento",
+   "como_buscarlo": "Para cada modelo de src/lib/isolation/registry.ts comparar su *_NESTED contra los campos de relación del model en prisma/schema.prisma",
+   "donde_aparecio": "WabaChannel.templates/alerts (registry.ts:44 vs schema.prisma:2043-2044)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Accessors scoped que reciben ids sin validar (undefined se vuelve 'sin filtro' en Prisma)",
+   "como_buscarlo": "git grep -n -E \"scope\\.[a-zA-Z]+\\.(update|delete)\\(\" origin/main -- src y revisar de dónde sale el id",
+   "donde_aparecio": "scoped-model.ts:235 y :262-264"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Unique global donde la semántica es por tenant o por bot",
+   "como_buscarlo": "grep -n \"@unique\" prisma/schema.prisma y revisar si el valor viene del cliente (sessionId, externalId, providerMessageId, slug)",
+   "donde_aparecio": "chatbot_conversation.sessionId (20260512150823_chatbot_init/migration.sql:142)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Cascadas desde User sobre datos que pertenecen a la org",
+   "como_buscarlo": "grep -n \"User .*onDelete: Cascade\" prisma/schema.prisma",
+   "donde_aparecio": "Ticket.user y TicketMessage.user (schema.prisma:771, :786)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Marcas de soft-delete o estado que solo filtran un listado",
+   "como_buscarlo": "git grep -n \"deletedAt\" origin/main -- src y cruzar contra crons, proxy, auth y resolvers públicos",
+   "donde_aparecio": "Organization.deletedAt solo en admin/clients/page.tsx:23 y announcements/page.tsx:27"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Migraciones de 'reconciliación' con DROP validadas por 'build verde'",
+   "como_buscarlo": "git grep -n -i \"DROP COLUMN\\|DROP TABLE\\|DROP INDEX\" origin/main -- prisma/migrations y leer el comentario de cada una",
+   "donde_aparecio": "20260621120000_reconcile_dev_drift_schema_align (revertida por 20260622120000)"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Scripts prod-runnable que borran o pisan filas de clientes sin dry-run ni transacción",
+   "como_buscarlo": "git grep -n \"deleteMany\\|\\.update({\" origin/main -- prisma/seeds scripts",
+   "donde_aparecio": "sync-premium-modules.ts:105-116, sync-plans.ts:168-171"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Docs o comentarios que afirman un automatismo que la config ya no hace",
+   "como_buscarlo": "git grep -n -i -E \"Netlify (lo hace|autoaplica)\" origin/main -- docs prisma",
+   "donde_aparecio": "docs/operations/00-entornos.md:86 y 20260522214201_drop_user_unlocked_features/migration.sql:11-12"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "Agregaciones del admin con findMany sin take sobre tablas de eventos",
+   "como_buscarlo": "git grep -n -A4 \"findMany({\" origin/main -- src/modules/chatbot/server/admin | grep -v take",
+   "donde_aparecio": "getActivityChartData.ts:15-18"
+  },
+  {
+   "ciclo": "D6-c1",
+   "lote": "D6-L2",
+   "patron": "unstable_cache con clave por slug de org (reutilizable tras un hard-delete) en vez de organizationId",
+   "como_buscarlo": "git grep -n -A3 \"unstable_cache(\" origin/main -- src | grep -i slug",
+   "donde_aparecio": "src/modules/chatbot/server/admin/multiTenantQueries.ts:51 ['chatbot-leads', orgSlug, ...]"
   }
  ]
 }

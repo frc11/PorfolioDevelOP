@@ -85,6 +85,9 @@ export function evidenciaMd(h) {
     const frag = e.fragmento ? ` — «${comillas(e.fragmento)}»` : ''
     const lib = String(e.ruta).match(/^node_modules\/((?:@[^/]+\/)?[^/]+)\/(.+)$/)
     if (lib) return `librería ${lib[1]}@${versionDe(lib[1])}, ${lib[2]} línea ${e.linea}${frag}`
+    // salidas de la propia auditoría (baselines de _crudo/): no están en origin/main
+    const propia = String(e.ruta).match(/^docs\/auditoria-2026-10\/(.+)$/)
+    if (propia) return `dato de la auditoría, ${propia[1]} línea ${e.linea}${frag}`
     return `\`${e.ruta}:${e.linea}${e.linea_fin ? `-${e.linea_fin}` : ''}\`${frag}`
   }).join('; ')
 }

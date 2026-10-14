@@ -3,7 +3,7 @@
 //
 // Junta, por lote de _crudo/lotes.json: sus archivos, los hallazgos previos que citan
 // esos archivos (_crudo/previas.json), los ítems de lo planeado que le tocan
-// (_crudo/planeado-extraido.json, con su PLAN-NNN de 12-PLANEADO.md), las alertas del
+// (_crudo/planeado-extraido/, partido en piezas < 300 KB, con su PLAN-NNN de 12-PLANEADO.md), las alertas del
 // dominio que dejaron los extractores (_crudo/alertas-planeado.json, en `contexto`) y el
 // registro de cambios de Valentino que corresponde (DEC-35, solo D2/D3/D5). Escribe un
 // JSON que el constructor del workflow embebe en el script. Solo lectura sobre el repo.
@@ -29,6 +29,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { nodoDeRuta } from './atlas/nodos.mjs'
+import { leerPartido } from './crudo-partes.mjs'
 
 const [, , DOM, CICLO, SALIDA] = process.argv
 const args = process.argv.slice(2)
@@ -45,7 +46,7 @@ const lotesDeTodos = leer('lotes.json', { lotes: [] }).lotes
 const todosLotes = lotesDeTodos.filter((l) => l.dominio === DOM)
 const lotes = todosLotes.filter((l) => !soloLotes || soloLotes.includes(l.id))
 const previas = leer('previas.json', { items: [] }).items
-const planeado = leer('planeado-extraido.json', { items: [] }).items
+const planeado = leerPartido(CRUDO, 'planeado-extraido', { items: [] }).items
 const alertas = (leer('alertas-planeado.json', { dominios: {} }).dominios[DOM] ?? []).map((a, i) => `[${DOM}-A${i + 1}] ${a}`)
 const cruces = leer('planeado-cruces.json', {})
 // patrones defectuosos que dejaron los dominios anteriores (DEC-20): cada lector los busca en su lote

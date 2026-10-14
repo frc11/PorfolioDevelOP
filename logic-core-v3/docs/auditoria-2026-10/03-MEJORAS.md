@@ -102,12 +102,12 @@ Lo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de
 ### [SEC-014] Archivar un cliente no le corta el acceso: login, sesion y portal siguen operativos
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `src/modules/chatbot/server/admin/archiveClient.ts:9` — «// Archivar = soft-delete REVERSIBLE. Marca SOLO el Organization (deletedAt); NO»; `src/modules/chatbot/server/admin/archiveClient.ts:34` — «(c) => c.organization.update({ where: { id: org.id }, data: { deletedAt: new Date() } }),»; `src/auth.ts:31` — «select: { companyName: true, onboardingCompleted: true,»; `src/lib/preview.ts:10` — «if (role === 'ORG_MEMBER') { return session?.user?.organizationId ?? null»; `src/app/(protected)/dashboard/layout.tsx:23` — «select: { companyName: true, onboardingCompleted: true },»
+- Evidencia: `src/modules/chatbot/server/admin/archiveClient.ts:9` — «// Archivar = soft-delete REVERSIBLE. Marca SOLO el Organization (deletedAt); NO»; `src/modules/chatbot/server/admin/archiveClient.ts:34` — «(c) => c.organization.update({ where: { id: org.id }, data: { deletedAt: new Date() } }),»; `src/auth.ts:31` — «select: { companyName: true, onboardingCompleted: true,»; `src/lib/preview.ts:10` — «if (role === 'ORG_MEMBER') { return session?.user?.organizationId ?? null»; `src/app/(protected)/dashboard/layout.tsx:23` — «select: { companyName: true, onboardingCompleted: true },»; `prisma/schema.prisma:417` — «// Soft-delete de cliente. null = activo; con fecha = archivado/eliminado»; `src/app/(protected)/admin/clients/page.tsx:23` — «where: { deletedAt: null },»; `src/modules/chatbot/server/conversation/resolver.ts:38` — «if (!bot || !bot.isActive || !bot.knowledgeBase) {»
 - Impacto: Si 'archivar' se usa para dar de baja a un cliente (falta de pago, fin de contrato), sus usuarios siguen entrando y operando el portal; ningun punto de auth ni del portal lee deletedAt (git grep). Depende de la intencion del producto.
 - Propuesta: Decidir que significa archivar. Si debe cortar acceso: chequear organization.deletedAt en resolveOrgId (preview.ts, libre) con mensaje claro, y en getUserAccessState/signIn (auth.ts, decision para Valentino).
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h1.auth-login.sesion-jwt, h4.adm-clientes, lib.auth, modelo.Organization
+- Nodo(s): h1.auth-login.sesion-jwt, h4.adm-clientes, lib.auth, modelo.Organization, h2.cli-shell, h3.vis-api-chatbot, int.cron.send-weekly-reports, h4.adm-clientes.archivar-cliente
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-012
 
 ### [SEC-015] Cambio de contrasena sin limite de intentos sobre la contrasena actual
@@ -169,7 +169,7 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [SEC-031] rate_limit no se purga nunca y varias claves las elige quien llama: el webhook del motor inserta una fila por cada token inventado en la Neon compartida
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `src/lib/rate-limit/limiter.ts:29` — «// UPSERT resetea count=1 y muda la ventana. No hay job de limpieza — la tabla // no acumula buckets "muertos" dentro de la misma ventana porque la siguiente»; `src/lib/rate-limit/limiter.ts:46` — «INSERT INTO rate_limit (id, key, count, "windowStart", "expiresAt", "createdAt", "updatedAt") VALUES ($1, $2, 1, $3, $4, $3, $3) ON CONFLICT (key) DO UPDATE SET»; `src/app/api/motor/webhook/[channelToken]/route.ts:33` — «const rate = await checkRateLimit({ key: 'motorWebhookPerChannel:${tokenHash}',»; `src/modules/chatbot/server/chat/handleChatRequest.ts:185` — «key: 'chatbotPerBotSession:${slug}:${body.sessionId}',»; `src/app/forgot-password/actions.ts:51` — «const emailLimit = await applyAuthRateLimit({ scope: 'forgotPasswordPerEmail', identifier: email,»; `src/app/api/chatbot/[slug]/chat/route.ts:77` — «// se resetean UNA vez en el deploy (ventana de 60s; las filas viejas las // barre el cleanup perezoso del limiter).»; `src/lib/rate-limit/limiter.ts:65` — «if (!row) { // El UPSERT con RETURNING siempre devuelve una fila. Si no la hay, // hay un problema de conexión o de schema — fail closed (rechazar)»
+- Evidencia: `src/lib/rate-limit/limiter.ts:29` — «// UPSERT resetea count=1 y muda la ventana. No hay job de limpieza — la tabla // no acumula buckets "muertos" dentro de la misma ventana porque la siguiente»; `src/lib/rate-limit/limiter.ts:46` — «INSERT INTO rate_limit (id, key, count, "windowStart", "expiresAt", "createdAt", "updatedAt") VALUES ($1, $2, 1, $3, $4, $3, $3) ON CONFLICT (key) DO UPDATE SET»; `src/app/api/motor/webhook/[channelToken]/route.ts:33` — «const rate = await checkRateLimit({ key: 'motorWebhookPerChannel:${tokenHash}',»; `src/modules/chatbot/server/chat/handleChatRequest.ts:185` — «key: 'chatbotPerBotSession:${slug}:${body.sessionId}',»; `src/app/forgot-password/actions.ts:51` — «const emailLimit = await applyAuthRateLimit({ scope: 'forgotPasswordPerEmail', identifier: email,»; `src/app/api/chatbot/[slug]/chat/route.ts:77` — «// se resetean UNA vez en el deploy (ventana de 60s; las filas viejas las // barre el cleanup perezoso del limiter).»; `src/lib/rate-limit/limiter.ts:65` — «if (!row) { // El UPSERT con RETURNING siempre devuelve una fila. Si no la hay, // hay un problema de conexión o de schema — fail closed (rechazar)»; `prisma/migrations/20260526233939_add_rate_limit_b14_1/migration.sql:18` — «CREATE INDEX "rate_limit_expiresAt_idx" ON "rate_limit"("expiresAt");»; `prisma/schema.prisma:1763` — «// claves muertas dentro de la misma ventana. El índice en expiresAt deja la // puerta abierta a un job de purga futuro si hace falta.»
 - Impacto: La 'limpieza perezosa' solo reusa una fila cuando la MISMA clave vuelve; una clave que no vuelve queda para siempre (git grep sin ningún DELETE sobre rate_limit). Varias claves las elige el visitante: el token de la URL del webhook del motor (POST anónimo; se limita ANTES de validar el canal y sin límite por IP delante), el sessionId del chatbot (1 a 200 caracteres libres), el email de forgot-password y la IP vía X-Forwarded-For (SEC-025). Un script anónimo contra /api/motor/webhook/<aleatorio> suma una fila por pedido: a 50 pedidos/s son unas 180.000 filas por hora, con sus tres índices, en la Neon que comparten la app y Franco, y no se van al terminar el ataque. Para el primer cliente real: el almacenamiento del proyecto puede llenarse y cortar las escrituras de todos. Además la rama 'fail closed' de limiter.ts:65 es inalcanzable: una falla de conexión lanza una excepción que los llamadores de auth no atrapan.
 - Propuesta: Zona libre. Cron diario que borre filas con expiresAt vencido hace más de un día (el índice en expiresAt ya existe), registrado como los demás crons. En el webhook del motor, validar el formato del channelToken y poner un límite por IP antes del límite por canal (o limitar después de confirmar que el canal existe). Corregir los comentarios de limiter.ts:28-33 y chat/route.ts:76-78. Definir y documentar la política ante error de base (fail-closed real con try/catch en checkRateLimit).
 - Esfuerzo: M  ·  Zona: libre
@@ -187,6 +187,28 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h2.cli-cuenta, h2.cli-bienvenida, h3.vis-api-chatbot, int.vertex, modelo.Organization, lib.actions
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-020
+
+### [SEC-035] El registro de aislamiento no bloquea nested writes en WabaChannel.templates/alerts (re-parenting cross-tenant posible)
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/isolation/registry.ts:44` — «const WABA_CHANNEL_NESTED = ['organization', 'conversations'] as const»; `src/lib/isolation/registry.ts:222` — «forbiddenCreateKeys: WABA_CHANNEL_NESTED, forbiddenUpdateKeys: [...WABA_CHANNEL_NESTED, 'organizationId'],»; `prisma/schema.prisma:2042` — «conversations MotorConversation[] templates MotorTemplate[] alerts MotorAlert[]»; `tests/integration/motor-isolation.spec.ts:318` — «organization: { connect: { id: b.orgId } },»
+- Impacto: La garantía documentada del helper (nested writes rechazados, re-parenting prohibido; scoped-model.ts:11-17) no cubre las dos relaciones que se agregaron en B1-S2/S3: el tipo WabaChannelUpdate (Omit de UncheckedUpdateInput) y el chequeo runtime de scoped-model.ts:331-337 dejan pasar templates/alerts, así que un update o create de canal con { templates: { connect: [{ id }] } } haría que Prisma reescriba organizationId/wabaChannelId de una plantilla o alerta de OTRA org hacia el canal propio. Hoy ningún caller arma ese data con input de usuario, así que no hay explotación directa, pero es el borde de aislamiento del motor de WhatsApp del primer cliente y el test negativo no lo cubre.
+- Propuesta: Agregar 'templates' y 'alerts' a WABA_CHANNEL_NESTED; generar las listas de relaciones desde Prisma.dmmf o sumar un test que compare cada *_NESTED contra los campos de relación del schema, para que una relación nueva no quede abierta; sumar el caso al test (h) de motor-isolation.spec.ts.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.isolation, modelo.WabaChannel, modelo.MotorTemplate, modelo.MotorAlert, h3.vis-whatsapp
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-028
+
+### [SEC-036] Credenciales de terceros en claro en la base: tokens OAuth de Google Business, token de Tiendanube, API key de Cal.com, token de Telegram y credenciales de la Bóveda
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `prisma/migrations/20260503150000_add_gbp_fields/migration.sql:5` — «ADD COLUMN "gbpAccessToken" TEXT, ADD COLUMN "gbpRefreshToken" TEXT,»; `prisma/migrations/20260504235814_add_tiendanube_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "tiendanubeAccessToken" TEXT,»; `prisma/migrations/20260505000536_add_cal_com_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "calComApiKey" TEXT,»; `src/app/api/auth/google-business/callback/route.ts:52` — «gbpAccessToken: tokens.access_token, gbpRefreshToken: tokens.refresh_token,»; `src/actions/agency-actions.ts:103` — «await prisma.clientAsset.create({ data: { organizationId,»; `prisma/schema.prisma:1704` — «// Auth opcional vía header (ej. "X-Webhook-Secret"). Secret cifrado AES-256-GCM // con env CRM_SECRET_KEY.»; `prisma/schema.prisma:360` — «gbpRefreshToken String? @db.Text»; `prisma/schema.prisma:367` — «tiendanubeAccessToken String? @db.Text»; `prisma/schema.prisma:375` — «calComApiKey String? @db.Text»; `prisma/schema.prisma:835` — «osTelegramBotToken String?»; `src/app/api/auth/google-business/callback/route.ts:53` — «gbpRefreshToken: tokens.refresh_token,»; `src/app/api/auth/tiendanube/callback/route.ts:67` — «tiendanubeAccessToken: tokens.access_token,»
+- Impacto: Quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio/hosting cargadas en la Bóveda. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear.
+- Propuesta: Cifrar en los write-paths con secret-box/credential-cipher (callbacks OAuth de GBP y Tiendanube, settings de Telegram, carga de Cal.com y assets de la Bóveda), backfill idempotente y lectura tolerante (resolve-credential ya soporta ambos formatos); mergear o portar 9fc616c4.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): modelo.Organization, modelo.AgencySettings, modelo.ClientAsset, int.google-business-profile, int.tiendanube, int.calcom, int.telegram, h2.cli-resenas, h2.cli-tienda, h2.cli-agenda, h2.cli-cuenta, int.gbp, lib.crypto
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-031
 
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
@@ -336,17 +358,38 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h1.auth-login, lib.auth, h2.cli-cuenta
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-026
 
+### [SEC-034] El guard anti-prod de los seeds compara por substring sobre toda la URL
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `prisma/seed-guard.ts:26` — «if (databaseUrl.includes(DEV_HOST_FRAGMENT)) {»; `prisma/seed-guard.ts:29` — «return LOCAL_FRAGMENTS.some((fragment) => databaseUrl.includes(fragment))»; `prisma/seed-guard.ts:43` — «if (process.env.ALLOW_PROD_SEED === '1') {»; `prisma/seed-guard.ts:15` — «* Prisma NO carga '.env.local'; las SEED_*_PASSWORD viven en '.env' (gitignored).»; `prisma.config.ts:23` — «loadEnv({ path: '.env.local' })»
+- Impacto: Una URL que contenga 'localhost', '127.0.0.1' o el id del endpoint dev en cualquier parte (usuario, password, parámetros) pasa el guard, y con ALLOW_PROD_SEED=1 el seed corre contra cualquier destino con solo un aviso. El comentario dice que .env.local no se carga, pero prisma db seed lo carga primero, así que el destino real depende de cómo se invoca. Son seeds de dev: riesgo operativo.
+- Propuesta: Parsear la URL con new URL() y comparar hostname exacto contra una lista de hosts permitidos; exigir que el override nombre el host esperado (ALLOW_PROD_SEED=<host>) y corregir el comentario de seed-guard.ts:13-15.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.seeds, int.neon
+
 ## Bugs latentes
 
 ### [BUG-002] El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo
 - Dominio: D1  ·  Severidad: ALTA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/modules/chatbot/server/admin/createClientOnly.ts:26` — «userEmail: z.string().email(),»; `src/modules/chatbot/server/admin/createClientOnly.ts:91` — «email: parsed.userEmail,»; `src/modules/chatbot/server/admin/createClientWithBot.ts:141` — «email: parsed.userEmail,»; `src/lib/onboarding/core.ts:91` — «email: input.userEmail,»; `src/auth.ts:143` — «where: { email: String(credentials.email).trim().toLowerCase() },»; `src/lib/actions/clients.ts:96` — «// FIX 3 — email casing. Normalizamos a lowercase para alinear con el login»; `prisma/schema.prisma:289` — «email String @unique»
+- Evidencia: `src/modules/chatbot/server/admin/createClientOnly.ts:26` — «userEmail: z.string().email(),»; `src/modules/chatbot/server/admin/createClientOnly.ts:91` — «email: parsed.userEmail,»; `src/modules/chatbot/server/admin/createClientWithBot.ts:141` — «email: parsed.userEmail,»; `src/lib/onboarding/core.ts:91` — «email: input.userEmail,»; `src/auth.ts:143` — «where: { email: String(credentials.email).trim().toLowerCase() },»; `src/lib/actions/clients.ts:96` — «// FIX 3 — email casing. Normalizamos a lowercase para alinear con el login»; `prisma/schema.prisma:289` — «email String @unique»; `prisma/schema.prisma:1229` — «@@unique([organizationId, email])»
 - Impacto: Bloqueante para el primer cliente real: si el admin carga 'Juan@Empresa.com' (o el teclado del celular capitaliza), el User queda con mayuscula; el login con contrasena (auth.ts:143), el magic link (signIn callback auth.ts:176-184) y forgot-password (ForgotPasswordSchema toLowerCase, schemas.ts:80) buscan en minuscula con igualdad exacta -> 'Email o contrasena incorrectos' para siempre. Tambien permite duplicados que difieren solo en mayusculas. El arreglo ya existe en el camino viejo (clients.ts:96-100) y en updateClient.ts:71, pero no en los tres caminos vivos de alta.
 - Propuesta: (libre) Normalizar con .trim().toLowerCase() en los schemas de alta (createClientOnly.ts:26, createClientWithBot.ts:34, admin/chatbots/new/actions.ts:27 / onboarding/core.ts) y en el wizard (Step1Company.tsx:169); script de datos que pase a minuscula los emails existentes verificando colisiones (sin migrate reset).
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h1.auth-login.login-password, h1.auth-login.magic-link, h4.adm-clientes, modelo.User
+- Nodo(s): h1.auth-login.login-password, h1.auth-login.magic-link, h4.adm-clientes, modelo.User, modelo.EmailContact, h1.auth-login, h2.cli-email-mkt
+
+### [BUG-012] Email Marketing Pro inalcanzable: el gate y el sidebar buscan el slug 'email-marketing' y el catálogo sincronizado usa 'email-marketing-pro'
+- Dominio: D6  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/data/premium-modules.ts:38` — «slug: 'email-marketing-pro',»; `src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:20` — «const isActive = await isModuleActive(organizationId, 'email-marketing') if (!isActive) redirect('/dashboard')»; `src/components/dashboard/SidebarNav.tsx:78` — «{ slug: 'email-marketing', item: { href: '/dashboard/modules/email-marketing', label: 'Email marketing', icon: Mail } },»; `src/app/(protected)/dashboard/layout.tsx:57` — «where: { organizationId: orgId, status: 'ACTIVE' }, select: { module: { select: { slug: true } } },»; `prisma/seeds/sync-premium-modules.ts:68` — «const obsoleteModules = existingModules.filter((moduleData) => !catalogSlugs.has(moduleData.slug))»; `prisma/backups/premium-module-pre-push.json:68` — «"slug": "email-marketing",»
+- Impacto: Bloqueante para el primer cliente que contrate Email Marketing Pro: el catálogo (y por lo tanto la tabla premium_module después del sync) solo tiene 'email-marketing-pro', pero el sidebar solo muestra el ítem si el slug activo es 'email-marketing' y el layout del módulo redirige a /dashboard sin mensaje cuando isModuleActive(org, 'email-marketing') es falso. Solo funcionaría si la base conserva la fila legacy 'email-marketing' (anterior al cambio del 2026-05-04) y el admin activó esa. Como el gate vive solo en el layout, las server actions del módulo siguen invocables directamente (ver S2b-01).
+- Propuesta: Unificar el slug con una sola constante derivada de PREMIUM_MODULES_CATALOG (mapa slug -> ruta) y usarla en el layout del módulo y en PREMIUM_MODULES de SidebarNav; revisar qué slugs hay hoy en premium_module y mover activaciones legacy si existen; agregar un invariante que compare los slugs usados en isModuleActive/SidebarNav contra el catálogo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-email-mkt, h2.cli-email-mkt.acceso-al-modulo, h2.cli-servicios, lib.data, modelo.PremiumModule, modelo.OrganizationModule
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-027
 
 ### [BUG-001] Sesion invalidada en Node pero viva en el proxy: bucle /login <-> portal (ERR_TOO_MANY_REDIRECTS)
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -359,15 +402,109 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h1.auth-login.ruteo-por-rol, h1.auth-login.sesion-jwt, lib.proxy, lib.auth, h2.cli-shell, h4.adm-shell
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-006
 
+### [BUG-010] El portal muestra un precio de plan desactualizado: Subscription.price solo se escribe al crear la suscripción
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:659` — «price Float»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:179` — «const subData: Prisma.SubscriptionUncheckedUpdateInput = {»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:192` — «price: targetPlan.monthlyPrice.toNumber(),»; `src/lib/plan/get-plan-for-org.ts:53` — «planId: sub.pendingPlanId,»; `src/app/(protected)/dashboard/cuenta/perfil/page.tsx:211` — «price: org.subscription.price,»; `src/components/dashboard/ProfileForms.tsx:662` — «{plan.currency} {plan.price.toLocaleString('es-AR')}»
+- Impacto: Después de un upgrade (plan.actions.ts:197-200) o de un downgrade diferido (get-plan-for-org.ts:50-58), el cliente ve en /dashboard/cuenta/perfil el nombre del plan nuevo con el precio del anterior; un priceOverride vigente tampoco se muestra. El primer cliente real que cambie de plan va a ver un precio distinto del que se le cobra.
+- Propuesta: Una sola fuente: mostrar el precio efectivo (priceOverride vigente o Plan.monthlyPrice) en lugar de Subscription.price, o actualizar price en las dos rutas de cambio de plan. Eliminar Subscription.price si queda sin uso es decisión para Valentino (schema FROZEN).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-cuenta, h4.adm-clientes, modelo.Subscription, modelo.Plan
+
+### [BUG-011] seed-agency-os aborta siempre en el proyecto interno: el mapa de orgs nunca recibe 'develop'
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `prisma/seed-agency-os.ts:1302` — «organizationSlug: null,»; `prisma/seed-agency-os.ts:2398` — «organizationIdBySlug.set(organizationSeed.slug, organization.id)»; `prisma/seed-agency-os.ts:2422` — «const effectiveSlug = projectSeed.organizationSlug ?? 'develop'»; `prisma/seed-agency-os.ts:2426` — «throw new Error('No se encontro organizationId para ${effectiveSlug}')»; `prisma/seed-agency-os.ts:2453` — «'- Nota: el proyecto interno ya se siembra con organizationId = null.',»
+- Impacto: El dataset de QA de Agency OS queda siempre a medias: se siembran 2 de 4 proyectos, nunca el de Sigma (con pagos de mantenimiento) ni las ContactSubmission, y el proceso sale con código 1. No depende de que exista la org 'develop' en la base: el mapa solo recibe los 3 slugs de organizationSeeds (:396-455). Sin impacto directo en un cliente, pero las pantallas de proyectos, horas y mantenimiento no se pueden verificar con datos sembrados.
+- Propuesta: Resolver la org del proyecto interno consultando la base por slug (o agregar la org interna a organizationSeeds) antes del bucle de proyectos, o quitar el proyecto interno del seed; corregir el mensaje de :2453. Cierra PLAN-1061 y PLAN-993.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.seeds, modelo.Project, modelo.Organization, h4.adm-proyectos
+
+### [BUG-013] update/delete del helper con id undefined en runtime operan sobre todas las filas del tenant (o sobre el bot por organizationId único)
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/isolation/scoped-model.ts:235` — «const batch = await this.unsafe.updateMany({ where: this.scopedWhere({ id }), data: prepared })»; `src/lib/isolation/scoped-model.ts:262` — «const existing = await this.findById(id) if (existing === null) throw new IsolationNotFoundError(this.cfg.model, id) const batch = await this.unsafe.deleteMany({ where: this.scopedWhere({ id }) })»; `src/lib/isolation/scoped-model.ts:223` — «return (await this.unsafe.update({ where: { id, organizationId: this.organizationId },»; `prisma/schema.prisma:1274` — «organizationId String @unique»
+- Impacto: Prisma ignora las claves con valor undefined: en los 8 modelos con scope relacional (Conversation, ChatMessage, ChatbotLead, KnowledgeBase, ChatbotInsight, QuotaUsage, ChatbotEvent, BotAlert) update(undefined) actualiza todas las filas de la org y delete(undefined) las borra todas (findById(undefined) devuelve la primera); en BotConfig y CrmIntegration el where queda en organizationId, que es único, y delete borraría el bot entero con su cascada. Los callers actuales pasan ids validados por Zod o leídos de la base (updateLeadStatus.ts:42, manageInsight.ts:37, updateBotAppearance.ts:95), así que es una trampa latente dentro de un mismo tenant, en la primitiva que protege los datos del cliente.
+- Propuesta: Validar en ScopedModelDelegate.findById/update/delete que id sea string no vacío y lanzar IsolationError si no; agregar el caso al test de aislamiento.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.isolation, modelo.BotConfig, modelo.ChatbotLead, modelo.Conversation, modelo.CrmIntegration
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-029
+
+### [BUG-014] El deploy a producción ya no aplica migraciones (sacado en b85f791d) y la documentación sigue diciendo que Netlify lo hace
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `netlify.toml:2` — «command = "npx prisma generate && npm run build"»; `package.json:9` — «"build": "next build --webpack",»; `prisma/migrations/20260522214201_drop_user_unlocked_features/migration.sql:11` — «-- Riesgo: zero (data migrada + cero readers). Netlify autoaplica esta -- migración en el próximo deploy de main.»; `docs/operations/00-entornos.md:86` — «| Aplicar migraciones a prod | 'main' | Netlify lo hace en build ('prisma migrate deploy' en el script de build) o se corre manualmente»; `DEPLOY.md:52` — «npx prisma migrate deploy»; `prisma/migrations/20260622120000_readd_client_columns_dropped_by_reconcile/migration.sql:4` — «-- declara y la DB no tiene NO rompe el build, rompe en RUNTIME (Prisma default-select pide»; dato de la auditoría, _crudo/prisma-migrate-status.txt línea 9 — «error: Environment variable not found: DATABASE_URL.»
+- Impacto: Desde el 2026-06-28 (commit b85f791d quitó 'npx prisma migrate deploy' del build) cada migración nueva —12 con timestamp posterior, incluidas las del motor y los índices del portal— depende de que alguien corra migrate deploy a mano contra la branch main de Neon. Si se deploya código que lee una columna nueva antes de correrla, Prisma la pide en el select por defecto y las pantallas de ese modelo fallan en producción para todos los clientes; nada en el build ni en CI detecta migraciones pendientes.
+- Propuesta: Decidir el mecanismo y dejarlo escrito: o volver a migrate deploy en el build (con conexión directa sin pooler) o un paso obligatorio de checklist/CI que corra migrate status contra prod y bloquee si hay pendientes; corregir 00-entornos.md y no afirmar autoaplicación en comentarios de migraciones.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.prisma, int.neon, int.netlify, lib.migraciones
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-030
+
+### [BUG-015] El hard-delete de un cliente borra en cascada los registros financieros de la agencia y los leads del bot (que el resumen subinforma) y deja vivos a sus usuarios
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql:17` — «ALTER TABLE "Project" ADD CONSTRAINT "Project_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;»; `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:198` — «ALTER TABLE "OsPaymentMilestone" ADD CONSTRAINT "OsPaymentMilestone_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:49` — «_count: { select: { projects: true, tickets: true, messages: true, clientAssets: true },»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:141` — «await tx.organization.delete({ where: { id: organizationId } })»; `src/modules/chatbot/server/admin/createClientOnly.ts:66` — «if (existingUser) throw new Error('El email ingresado ya está registrado en el sistema.')»; `prisma/schema.prisma:528` — «organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:84` — «where: { botConfigId: botId, convertedToOsLeadId: null },»; `prisma/schema.prisma:1441` — «botConfig BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:190` — «// (p. ej. desde un ticket "Solicitud de eliminación de cuenta"). La action y el»
+- Impacto: Al atender una solicitud de baja (el admin enlaza ?delete=<orgId> desde el ticket) se borran hitos de pago, pagos de mantenimiento y horas cargadas (OsPaymentMilestone/OsMaintenancePayment/OsTimeEntry, también :201 y :207), que son contabilidad de develOP, sin que el modal los mencione. Los User del cliente quedan sin org con email, nombre, teléfono y hash de contraseña: la baja no elimina sus datos personales y el email queda bloqueado para un alta nueva.
+- Propuesta: Contar y mostrar pagos y horas en el resumen; decidir si se preservan (exportarlos antes o desacoplarlos con SetNull, cambio de schema FROZEN: decisión para Valentino); borrar o anonimizar en la misma transacción los User que solo pertenecían a esa org.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes, h4.adm-clientes.eliminar-cliente, modelo.Project, modelo.OsPaymentMilestone, modelo.OsMaintenancePayment, modelo.OsTimeEntry, modelo.User, modelo.OrgMember, modelo.ChatbotLead
+
+### [BUG-016] sync-premium-modules borra activaciones no activas de clientes (PAUSED/CANCELLED/INACTIVE) al retirar un slug del catálogo, sin dry-run ni transacción
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `prisma/seeds/sync-premium-modules.ts:73` — «const activeReferences = await prisma.organizationModule.count({ where: { moduleId: moduleData.id,»; `prisma/seeds/sync-premium-modules.ts:105` — «await prisma.organizationModule.deleteMany({ where: { moduleId: { in: obsoleteIds },»; `prisma/seeds/sync-premium-modules.ts:112` — «const deleteResult = await prisma.premiumModule.deleteMany({»; `src/lib/data/premium-modules.ts:18` — «* Catálogo completo de módulos premium. * SOURCE OF TRUTH del catálogo. Cualquier cambio se hace acá.»
+- Impacto: Renombrar o retirar un slug y correr el sync (declarado prod-runnable, sin guard) borra en todas las orgs el historial de módulos pausados o cancelados y sus contadores de upsell, sin backup; el chequeo (solo cuenta ACTIVE) y los borrados no son atómicos, así que una activación concurrente deja el sync a medias. Es el mismo mecanismo por el que el slug legacy 'email-marketing' quedó fuera de la base.
+- Propuesta: Dry-run por defecto, $transaction, y en vez de borrar marcar el módulo como DEPRECATED (el enum ya existe) preservando las activaciones; borrar solo con confirmación explícita.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-servicios, modelo.OrganizationModule, modelo.PremiumModule, lib.data
+
+### [BUG-017] El precio de los módulos tiene dos fuentes de verdad: la home pública lee el catálogo en código, el portal lee la DB que edita el admin, y el sync revierte la edición
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/components/sections/modulos-opcionales/ModuloActiveCard.tsx:248` — «${module.priceMonthlyUsd}»; `src/app/(protected)/admin/settings/_actions/settings.actions.ts:193` — «await prisma.premiumModule.update({ where: { id: moduleRow.id }, data: { priceMonthlyUsd: parsed.price },»; `prisma/seeds/sync-premium-modules.ts:54` — «existing.priceMonthlyUsd !== nextData.priceMonthlyUsd ||»; `src/app/(protected)/dashboard/services/page.tsx:177` — «prisma.premiumModule.findMany({»
+- Impacto: Si el admin ajusta un precio en /admin/settings, el portal del cliente muestra el nuevo pero la home pública (src/app/page.tsx:39 -> ModulosOpcionales) sigue con el del código, y la próxima corrida del sync (sync-premium-modules.ts:145-148) lo pisa sin aviso. El primer cliente puede ver en su panel un precio distinto del publicado.
+- Propuesta: Elegir una sola fuente: o el precio vive solo en la DB (la home lo lee de ahí con cache y el sync deja de tocarlo), o se quita la edición de precio del admin.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-config, h4.adm-config.precio-modulos, h2.cli-servicios, lib.data, modelo.PremiumModule
+
+### [BUG-019] La migración v2-unify-project-task partió clientes en organizaciones duplicadas por un match difuso de nombres; la limpieza en prod sigue pendiente
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:46` — «ON lower(regexp_replace(org."companyName", ...)) = lower(regexp_replace(op."businessName", ...)) OR org."companyName" ILIKE op."businessName" || '%' OR op."businessName" ILIKE org."companyName" || '%'»; `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:53` — «COALESCE(op."organizationId", om."organizationId", 'os-org-' || op."id") AS "resolvedOrganizationId",»; `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:136` — «WHEN 'CANCELADO' THEN 'COMPLETED'::"ProjectStatus"»; `docs/audits/2026-05-cleanup-db-dev.md:13` — «Se removieron 2 orgs duplicadas leftover del seed 'v2-unify-project-task' (abril)»; `docs/audits/2026-05-cleanup-db-dev.md:6` — «**Estado:** ✅ Ejecutado y verificado en dev. **Pendiente replicar en prod** (branch 'main' de Neon).»; `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:47` — «OR org."companyName" ILIKE op."businessName" || '%'»; `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:48` — «OR op."businessName" ILIKE org."companyName" || '%'»
+- Impacto: Lectura de las 14 sentencias DML pedidas: :29 y :77 asignan proyectos internos a una org por prefijo de nombre (ILIKE sin escapar comodines; puede caer en el cliente equivocado) o crean una org sintética 'os-org-*' sin miembros cuando no matchea —así nacieron los duplicados de Sigma y Sonrisa con su propio proyecto y hasta un bot—; :114 los materializa en Project, visible en el portal; :136 convierte CANCELADO en COMPLETED y :135 EN_MANTENIMIENTO en IN_PROGRESS; :153 pierde el asignado de las tareas; y el DROP TABLE OsProject (20260406040000:2) borró contacto, serviceType y fechas. Las otras 9 (multi_tenancy:24, v2:182, allow_internal:6/:14/:21 sobre la org interna, b11_4b:16-20 normalización a mayúsculas) no mezclan ni pierden datos de clientes. Si prod corrió la misma migración, puede tener orgs duplicadas o proyectos en el tenant equivocado.
+- Propuesta: Correr en prod los SELECT de solo lectura del caso de prueba (orgs 'os-org-%'/'agency-os-%' y proyectos con osLeadId cuyo businessName no coincide con la org) y ejecutar la limpieza B0.3 (PLAN-1169) si aparecen; las migraciones no se editan.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): modelo.Project, modelo.Organization, modelo.Task, h2.cli-proyecto, h4.adm-proyectos, lib.migraciones
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-033
+
+### [BUG-020] Sin timeouts ni reintento ante el cold start de Neon fuera del chat, y el datasource no declara directUrl
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/prisma.ts:5` — «export const prisma = globalForPrisma.prisma ?? new PrismaClient({ log: ['error'] })»; `prisma/schema.prisma:5` — «datasource db { provider = "postgresql" url = env("DATABASE_URL")»; `src/modules/chatbot/hooks/useChatbot.ts:274` — «// INFRA.2 — Reintento acotado para el cold-start de Neon (branch free): un»; `src/lib/prisma.ts:6` — «globalForPrisma.prisma ?? new PrismaClient({ log: ['error'] })»; `.env.example:25` — «DATABASE_URL=»; `src/modules/chatbot/server/logging/logger.ts:118` — «* P2024 pool timeout, P1001 connect) — el discriminador para el sprint de causa raíz.»
+- Impacto: Tras el auto-suspend de Neon, el primer login, el formulario de contacto público y las páginas del portal dependen del timeout por defecto del driver; solo el widget del chatbot reintenta. El primer acceso del día del primer cliente puede terminar en error.tsx. Sin directUrl, las migraciones pasan por el pooler (PLAN-1087/1138).
+- Propuesta: Decisión para Valentino (prisma.ts y schema.prisma son FROZEN): connect_timeout/pool_timeout en la URL, directUrl para migraciones y un reintento acotado para P1001/P1017 en las rutas públicas críticas o en el cliente compartido.
+- Esfuerzo: M  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.prisma, int.neon, h1.auth-login, h6.vis-contacto, h3.vis-api-chatbot
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-034
+
 ### [BUG-004] El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `prisma/schema.prisma:15` — «CLIENT»; `src/proxy.ts:154` — «if (isDashboardRoute && role !== USER_ROLE && !(role === ADMIN_ROLE && isImpersonating)) {»; `src/lib/preview.ts:10` — «if (role === 'ORG_MEMBER') {»
+- Evidencia: `prisma/schema.prisma:15` — «CLIENT»; `src/proxy.ts:154` — «if (isDashboardRoute && role !== USER_ROLE && !(role === ADMIN_ROLE && isImpersonating)) {»; `src/lib/preview.ts:10` — «if (role === 'ORG_MEMBER') {»; `prisma/migrations/20260519232631_add_client_role_and_password_reset_required/migration.sql:2` — «ALTER TYPE "Role" ADD VALUE 'CLIENT';»; `prisma/migrations/20260320200000_multi_tenancy_organizations/migration.sql:84` — «ALTER TYPE "Role" RENAME VALUE 'CLIENT' TO 'ORG_MEMBER';»; `src/modules/chatbot/server/admin/createClientOnly.ts:94` — «role: 'ORG_MEMBER',»; `src/auth.config.ts:4` — «type Role = 'SUPER_ADMIN' | 'ORG_MEMBER' | 'CLIENT' | 'SETTER'»
 - Impacto: Latente (ningun codigo asigna CLIENT, git grep vacio), pero un usuario CLIENT con org pasa el signIn y queda en bucle /dashboard -> /login -> /dashboard (proxy.ts:143-145); resolveOrgId le devuelve null. CLAUDE.md documenta 'ORG_MEMBER / CLIENT -> /dashboard/*', lo contrario del codigo.
 - Propuesta: Decidir: declarar CLIENT legacy (y corregir la doc) o tratarlo como ORG_MEMBER en proxy.ts y preview.ts. El enum vive en schema.prisma (FROZEN): no tocarlo sin decision.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h1.auth-login.ruteo-por-rol, lib.proxy, lib.auth
+- Nodo(s): h1.auth-login.ruteo-por-rol, lib.proxy, lib.auth, modelo.User
 
 ### [BUG-008] magicLinkAction declara éxito sin mirar la URL que devuelve signIn: el 'throw on fail' previsto para BUG-003 con un Error común seguiría mostrando 'Link generado'
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
@@ -390,11 +527,103 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h1.auth-cambio, h2.cli-cuenta, h1.auth-login.password
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-024
 
+### [BUG-018] chatbot_conversation.sessionId es único global y el widget guarda un solo sessionId por origen: dos bots bajo el mismo origen chocan (P2002 sin adopción)
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `prisma/migrations/20260512150823_chatbot_init/migration.sql:142` — «CREATE UNIQUE INDEX "chatbot_conversation_sessionId_key" ON "chatbot_conversation"("sessionId");»; `src/modules/chatbot/hooks/useChatbot.ts:27` — «const existing = window.sessionStorage.getItem('chatbot:sessionId')»; `src/modules/chatbot/server/conversation/resolver.ts:133` — «// p.ej. la colisión cross-bot del sessionId global (@unique sin»
+- Impacto: Si alguien usa el chat de un bot y después el de otro bajo el mismo origen (por ejemplo, el equipo probando /embed/<slug> de dos clientes en la misma pestaña), el segundo create da P2002, la adopción scopeada no encuentra fila (resolver.ts:137 relanza) y el chat del segundo bot falla. No mezcla datos entre tenants.
+- Propuesta: Guardar el sessionId por slug en el widget (clave con el slug) como arreglo libre; a mediano plazo unique compuesto (botConfigId, sessionId) (schema FROZEN, decisión para Valentino).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): modelo.Conversation, h3.vis-widget-cliente, h3.vis-api-chatbot
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-032
+
 ## Tecnología vieja
+
+### [TEC-001] Prisma 6.19 con 7.x disponible: el salto exige cambiar el schema congelado y la carga de .env de los seeds
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: tech-vieja
+- Confianza: PROBABLE
+- Evidencia: `package.json:133` — «"@prisma/client": "^6.19.2",»; `prisma/schema.prisma:2` — «provider = "prisma-client-js"»; `prisma/seed-guard.ts:13` — «* Nota de entorno: '@prisma/client' carga '.env' completo al importarse, así que»; dato de la auditoría, _crudo/npm-outdated.json línea 1 — «@prisma/client current 6.19.3, latest 7.10.0 (resumen del baseline F0)»
+- Impacto: La rama 7 mueve la URL del datasource a prisma.config.ts, cambia el generador y deja de cargar .env automáticamente; el guard de seeds asume esa carga (seed-guard.ts:13-14). El upgrade toca el schema congelado y los seeds; sin plan, queda bloqueado o se hace a ciegas.
+- Propuesta: Decisión para Valentino (schema FROZEN): planificar el salto a Prisma 7 como sprint propio (datasource en prisma.config.ts con directUrl, generador nuevo, carga explícita de env en seeds y scripts) después de cerrar el estado de migraciones de prod.
+- Esfuerzo: M  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.prisma, lib.seeds, lib.migraciones
 
 ## Rendimiento
 
+### [PERF-001] FKs sin índice (Task.projectId, Notification.userId/taskId, ChatbotEvent.conversationId) e índices redundantes
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:584` — «projectId String»; `prisma/schema.prisma:590` — «@@index([assignedToId])»; `src/app/(protected)/dashboard/project/page.tsx:138` — «tasks: { orderBy: { id: 'asc' } },»; `prisma/schema.prisma:1410` — «@@index([sessionId])»; `prisma/schema.prisma:1343` — «@@index([slug])»; `prisma/migrations/20260318202838_init/migration.sql:176` — «ALTER TABLE "Task" ADD CONSTRAINT "Task_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;»; `src/modules/chatbot/server/logging/persistentLogger.ts:160` — «(c) => c.chatbotEvent.deleteMany({ where: { createdAt: { lt: threshold } } }),»
+- Impacto: El include de tareas de /dashboard/project, los conteos de health-score.ts:387-398 y las cascadas Project→Task, Task→Notification y Conversation→ChatbotEvent recorren la tabla entera (no se nota al volumen de hoy). Hay índices duplicados por un unique o por un compuesto con la misma primera columna: Conversation.sessionId (:1375/:1410), BotConfig.slug (:1278/:1343), QuotaUsage.botConfigId (:1594-1595), OrgMember.userId (:530-531), EmailContact.organizationId (:1229-1230), OsMaintenancePayment.projectId (:1047-1048), EmailCampaign.organizationId (:1261-1262), OsLead.status y OsLead.assignedToId (:896-900).
+- Propuesta: Decisión para Valentino (schema FROZEN): agregar @@index([projectId]) en Task, @@index([userId]) y @@index([taskId]) en Notification, @@index([conversationId]) en ChatbotEvent, y hacer los DROP de índices cubiertos que B11.5 dejó diferidos.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): modelo.Task, modelo.Notification, modelo.ChatbotEvent, modelo.Conversation, h2.cli-proyecto, h3.adm-actividad
+
 ## Deuda
+
+### [DEU-005] Borrar un User borra en cascada los tickets que abrió y todas sus respuestas, en cualquier organización
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:771` — «user User @relation(fields: [userId], references: [id], onDelete: Cascade)»; `prisma/schema.prisma:786` — «user User @relation(fields: [userId], references: [id], onDelete: Cascade)»; `prisma/migrations/20260403170000_reconcile_existing_schema/migration.sql:181` — «ALTER TABLE "TicketMessage" ADD CONSTRAINT "TicketMessage_userId_fkey" ... ON DELETE CASCADE ON UPDATE CASCADE;»; `prisma/schema.prisma:1065` — «user User @relation("OsTimeEntryUser", fields: [userId], references: [id])»; `prisma/migrations/20260403170000_reconcile_existing_schema/migration.sql:175` — «ALTER TABLE "Ticket" ADD CONSTRAINT "Ticket_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;»
+- Impacto: El historial de soporte es de la organización pero cuelga del autor: si se elimina un usuario (baja de un empleado del cliente, pedido de borrado, limpieza de una cuenta de develOP) desaparecen los tickets que abrió con todos sus mensajes, y si es SUPER_ADMIN, sus respuestas en los tickets de todos los clientes. A la vez, un usuario con horas cargadas no se puede borrar (Restrict en OsTimeEntry). Hoy no hay ruta de borrado de usuarios en src, así que el riesgo es latente; los tests sí borran usuarios.
+- Propuesta: Decisión para Valentino (schema FROZEN): Ticket.userId y TicketMessage.userId opcionales con onDelete: SetNull (o snapshot del autor) y definir el borrado de usuarios como anonimización en vez de DELETE.
+- Esfuerzo: M  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): modelo.Ticket, modelo.TicketMessage, modelo.User, h2.cli-soporte, h4.adm-tickets
+
+### [DEU-006] Solo chatbot_events tiene retención; rate_limit, mensajes, leads y formularios crecen sin purga
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `prisma/schema.prisma:1763` — «// claves muertas dentro de la misma ventana. El índice en expiresAt deja la»; `prisma/schema.prisma:1764` — «// puerta abierta a un job de purga futuro si hace falta.»; `src/app/api/cron/cleanup-old-events/route.ts:14` — «const RETENTION_DAYS = 30»; `src/modules/chatbot/server/logging/persistentLogger.ts:160` — «(c) => c.chatbotEvent.deleteMany({ where: { createdAt: { lt: threshold } } }),»
+- Impacto: Cada clave nueva de rate limit (incluidas las armadas con datos del pedido, patrón D1-c3) es una fila permanente; conversaciones y mensajes del chatbot (con nombres y teléfonos), ChatbotLead, ContactSubmission, AdminAuditLog con IP (schema.prisma:1667) y PasswordResetToken vencidos no tienen retención. Sin pieza legal (LEG-01) no hay plazo que informarle al primer cliente.
+- Propuesta: Extender el cron de limpieza: purgar rate_limit con expiresAt vencido y PasswordResetToken usados o vencidos; definir con Franco plazos para conversaciones, mensajes y formularios (borrar o anonimizar).
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-031]
+- Nodo(s): modelo.RateLimit, modelo.Conversation, modelo.ChatMessage, modelo.ContactSubmission, modelo.PasswordResetToken, int.cron.cleanup-old-events
+
+### [DEU-007] Sin directUrl: migrate y seeds corren por el pooler de Neon
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:7` — «url = env("DATABASE_URL")»; `.env.example:30` — «# Opción A: sacar '-pooler' del subdomain del DATABASE_URL pooled.»; `.env.example:35` — «DIRECT_DATABASE_URL=»
+- Impacto: prisma migrate usa un advisory lock de sesión y espera una conexión única; por PgBouncer en modo transacción ese lock no garantiza exclusión entre dos corridas y pueden aparecer errores intermitentes de prepared statements. Hasta ahora las migraciones pasaron por -pooler, pero es el camino que Prisma desaconseja para migrar prod.
+- Propuesta: Decisión para Valentino (schema FROZEN): agregar directUrl = env("DIRECT_DATABASE_URL") al datasource; la variable ya existe en .env.example y en los secrets del backup, la app sigue en el pooler.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.prisma, lib.migraciones, int.neon
+
+### [DEU-013] La frontera de aislamiento solo cubre src/modules/{chatbot,motor} y api/chatbot: 46 accesos directos a modelos aislados fuera del helper y la regla de eslint no corre en CI
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `eslint.config.mjs:53` — «files: [ "src/modules/chatbot/**/*.{ts,tsx}", "src/app/api/chatbot/**/*.{ts,tsx}",»; `src/lib/isolation/index.ts:41` — «ChatbotLead, CrmIntegration (chatbot, port en B0-S3). Fuera de este directorio, prisma directo sobre * estos modelos solo queda en el código legacy del chatbot hasta B0-S3;»; `src/lib/dashboard/home-metrics.ts:59` — «const lead = await prisma.chatbotLead.findFirst({ where: { botConfig: { organizationId }, status: 'NEW', classification: 'hot' },»; `src/app/(protected)/dashboard/chatbot/knowledge/page.tsx:14` — «async () => prisma.knowledgeBase.findUnique({ where: { botConfigId: session.bot.id } }),»; `raíz:.github/workflows/ci.yml:20` — «# ── Por qué el lint NO está acá ──»
+- Impacto: git grep de prisma.<modelo aislado> fuera de src/lib/isolation (sin tests ni comentarios) da 46 accesos en 26 archivos de portal, admin, crons, reportes y embed. Los revisados filtran por org a mano, pero un cambio futuro sin filtro no lo frena ni el helper ni el lint, que además no corre en CI (102 errores previos). Para el primer cliente, el riesgo es una regresión de aislamiento silenciosa en las pantallas que más datos del chatbot muestran.
+- Propuesta: Extender no-restricted-imports/no-restricted-syntax a los consumidores de modelos del chatbot y del motor (o migrar esos 26 archivos a forOrg) y correr en CI al menos esa regla sobre ese subconjunto aunque el lint global siga apagado.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.isolation, lib.prisma, h2.cli-inicio, h3.cli-chatbot, h4.adm-config
+
+### [DEU-014] Migraciones de reconciliación agregaron, borraron y re-agregaron columnas con datos de clientes con un criterio falso, y 20260619140100 quedó resuelta sin ejecutar
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/migrations/20260619234252_add_organization_city_avatar_notes_softdelete/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "avatarEmoji" TEXT,»; `prisma/migrations/20260621120000_reconcile_dev_drift_schema_align/migration.sql:5` — «-- Ningún código las lee (build verde ⇒ no son campos del client). Se DROPEAN para»; `prisma/migrations/20260621120000_reconcile_dev_drift_schema_align/migration.sql:10` — «-- • DB reconstruida desde la historia: la historia NUNCA las agrega → el DROP es no-op.»; `prisma/migrations/20260621120000_reconcile_dev_drift_schema_align/migration.sql:27` — «-- La migración 20260619140100 ya lo declaró drop pero quedó RESUELTA SIN EJECUTAR -- (resolve --applied sin correr el SQL) → la columna seguía física.»; `prisma/migrations/20260622120000_readd_client_columns_dropped_by_reconcile/migration.sql:1` — «-- Re-add de columnas de cliente que 20260621120000_reconcile_dev_drift_schema_align -- DROPEÓ por error.»; `prisma/migrations/20260619140100_drop_chatbot_lead_converted_column/migration.sql:4` — «-- NUNCA usó esta columna; el string jamás estuvo en el schema/código committeado»; `prisma/migrations/20260617184913_add_converted_lead_link_and_bot_deleted_audit/migration.sql:5` — «ALTER TABLE "chatbot_lead" ADD COLUMN "convertedToOsLeadId" TEXT;»; `prisma/migrations/20260621120000_reconcile_dev_drift_schema_align/migration.sql:23` — «ALTER TABLE "Organization" DROP COLUMN IF EXISTS "deletedAt";»; `prisma/migrations/20260622120000_readd_client_columns_dropped_by_reconcile/migration.sql:17` — «ALTER TABLE "Organization" ADD COLUMN IF NOT EXISTS "deletedAt" TIMESTAMP(3);»; `prisma/migrations/20260619140100_drop_chatbot_lead_converted_column/migration.sql:9` — «ALTER TABLE "chatbot_lead" DROP COLUMN IF EXISTS "convertedToOsLeadId";»
+- Impacto: En cada base donde corrió la secuencia (la dev compartida y, con el build que hasta el 2026-06-28 aplicaba migraciones, probablemente prod) se perdieron los valores de Organization.city/internalNotes/avatar*/deletedAt (un cliente archivado vuelve a figurar activo) y de chatbot_lead.convertedToOsLeadId. El estado final coincide con el schema, pero el historial guarda una migración marcada como aplicada sin correr y dos comentarios falsos (la historia sí agregaba esas columnas en 20260617184913, 20260619234252 y 20260620173833) que invitan a repetir el procedimiento. Con datos reales, el mismo procedimiento borraría información de clientes.
+- Propuesta: Regla escrita para reconciliaciones: ningún DROP sin (a) git grep de usos en src, (b) prisma migrate diff contra la base y (c) backup previo; registrar en la bitácora qué datos se perdieron; verificar hoy con migrate diff de solo lectura que no queda drift físico. No editar migraciones existentes.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): modelo.Organization, modelo.AgencySettings, modelo.ChatbotLead, lib.prisma, int.neon, lib.migraciones
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-030
+
+### [DEU-017] Sin base de test: las suites de integración, LeadOS y setter escriben en la Neon dev compartida y en CI no corren (falta DATABASE_URL_TEST)
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `playwright.integration.config.ts:37` — «dotenv.config({ path: '.env.local' })»; `playwright.leados.config.ts:25` — «dotenv.config({ path: '.env.local' })»; `raíz:.github/workflows/ci.yml:144` — «echo "::warning::DATABASE_URL_TEST no está configurado — los tests de LeadOS NO corrieron.»; `raíz:.github/workflows/ci.yml:174` — «# del workflow anidado que este archivo reemplaza; ninguno existe hoy.»; `playwright.integration.config.ts:15` — «* globalSetup separado) para que DATABASE_URL esté disponible antes de que»; `tests/e2e/30-onboarding-e2e-complete.spec.ts:153` — «await prisma.organization.delete({ where: { slug: createdOrgSlug } }).catch(() => undefined)»; `tests/e2e/30-onboarding-e2e-complete.spec.ts:156` — «await prisma.user.delete({ where: { email: testEmail } }).catch(() => undefined)»; `tests/helpers/setter-db.ts:376` — «await prisma.user.deleteMany({ where: { id: { in: tracker.userIds } } })»
+- Impacto: Los tests negativos de aislamiento (motor-isolation, chatbot-isolation) y los de LeadOS nunca corren en CI, y a mano siembran y limpian datos en la misma base dev que usa Franco. Una regresión de aislamiento puede entrar a main sin alarma antes del primer cliente.
+- Propuesta: Crear una branch de Neon dedicada a tests (efímera o recreada por branching, nunca migrate reset), cargar DATABASE_URL_TEST en GitHub y apuntar los configs de Playwright a esa variable.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.isolation, int.neon, lib.prisma, modelo.Organization, modelo.User
 
 ### [DEU-001] Flujo de invitacion huerfano: ninguna action viva emite links a /accept-invite (y la de clientes nunca los enviaba)
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -425,6 +654,106 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h1.auth-login, h1.auth-recupero, h1.auth-invite
+
+### [DEU-008] Montos de dinero en Float (Invoice, Subscription, PremiumModule, OrganizationModule) junto a Decimal
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:672` — «amount Float»; `prisma/schema.prisma:659` — «price Float»; `prisma/schema.prisma:1199` — «priceLockedUsd Float»; `prisma/schema.prisma:610` — «monthlyPrice Decimal @db.Decimal(10, 2)»; `prisma/migrations/20260318202838_init/migration.sql:130` — «"amount" DOUBLE PRECISION NOT NULL,»; `prisma/migrations/20260403170000_reconcile_existing_schema/migration.sql:47` — «"price" DOUBLE PRECISION NOT NULL,»; `prisma/migrations/20260420000000_baseline_premium_modules/migration.sql:40` — «"priceLockedUsd" DOUBLE PRECISION NOT NULL,»
+- Impacto: Sumas de facturas y precios bloqueados acumulan error de punto flotante y conviven con montos Decimal del mismo dominio (Plan, Project, OsPaymentMilestone). Cambiar el tipo con datos reales exige una migración con conversión.
+- Propuesta: Decisión para Valentino (schema FROZEN): pasar los montos a Decimal(10,2) antes de cargar facturación real del primer cliente.
+- Esfuerzo: M  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): modelo.Invoice, modelo.Subscription, modelo.PremiumModule, modelo.OrganizationModule, h2.cli-plan
+
+### [DEU-009] Los seeds adoptan datos existentes por nombre no único y les asignan usuarios con contraseña de seed
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/seed-agency-os.ts:1799` — «const existingByCompanyName = await prisma.organization.findFirst({»; `prisma/seed-agency-os.ts:1851` — «update: { role },»; `prisma/seed-agency-os.ts:1930` — «const existingLead = await prisma.osLead.findFirst({»; `prisma/seed-agency-os.ts:360` — «password: adminPassword,»; `prisma/seed.ts:83` — «where: { email: 'admin@develop.com' },»
+- Impacto: En la base dev compartida el seed pisa leads de Franco que compartan businessName (estado, notas, asignación), adjunta usuarios de seed como ADMIN a cualquier org con el mismo companyName y eleva a SUPER_ADMIN con la contraseña de seed a cualquier cuenta franco@ o valentino@develop.com existente. Las cuentas usan dominios reales de terceros (develop.com, sanmiguel.com, sonrisanorte.com), así que cualquier email que la app mande desde dev a esas cuentas sale a dominios ajenos.
+- Propuesta: Buscar solo por ids deterministas del seed (seedId) o por slug, nunca por companyName/businessName; no tocar role ni password de usuarios que el seed no creó; usar dominios reservados (.test/.example) en todas las cuentas sembradas.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.seeds, modelo.Organization, modelo.OsLead, modelo.User
+
+### [DEU-010] BotConfig.industry es String libre con tres vocabularios ('generic', 'generico', 'automotive')
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:1324` — «industry String @default("generic")»; `src/modules/chatbot/server/admin/createClientWithBot.ts:17` — «'inmobiliaria', 'concesionaria', 'distribuidora', 'constructora', 'generico',»; `prisma/seed.ts:807` — «industry: 'automotive',»; `src/app/(protected)/admin/chatbots/BotsListClient.tsx:41` — «if (industryFilter !== 'all' && bot.industry !== industryFilter) return false»
+- Impacto: El filtro por rubro del admin separa valores que significan lo mismo; el bot QA de San Miguel queda con un rubro fuera del catálogo de los formularios de alta ('concesionaria'); el default del schema nunca coincide con el canónico.
+- Propuesta: Decisión para Valentino (schema FROZEN): convertir industry en enum o cambiar el default a 'generico'. Mientras tanto sembrar 'concesionaria' en seed.ts:807 y revisar prisma/seeds/backfill-vertical-pack.ts, que depende de ese valor.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): modelo.BotConfig, lib.seeds, h3.adm-chatbots
+
+### [DEU-011] Comentarios de los archivos de datos que afirman cosas falsas
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `prisma/schema.prisma:399` — «// Client profile (admin-managed). city la captura el creador pero hoy la»; `prisma/schema.prisma:400` — «// action no la persiste; internalNotes se muestra en OverviewTab (hoy placeholder).»; `prisma.config.ts:9` — «// 🔴 NO tocar migrations existentes — los 49 archivos en prisma/migrations/»; `prisma/migrations/20260619140100_drop_chatbot_lead_converted_column/migration.sql:4` — «-- NUNCA usó esta columna; el string jamás estuvo en el schema/código committeado»
+- Impacto: city e internalNotes sí se persisten (EditClientForm.tsx:82-83, InternalNotesCard.tsx:45); hay 86 migraciones, no 49; la columna sí la había agregado 20260617184913:5; seed-agency-os.ts:2453 dice que el proyecto interno se siembra con organizationId null cuando la columna es NOT NULL. Quien decida sobre datos leyendo estos archivos parte de premisas equivocadas.
+- Propuesta: Corregir los comentarios de los archivos libres (prisma.config.ts, seed-agency-os.ts, seed-guard.ts); el de schema.prisma:399-400 es decisión para Valentino (FROZEN). Las migraciones aplicadas no se editan: dejar la corrección en la bitácora.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.prisma, lib.seeds, lib.migraciones
+
+### [DEU-012] AdminAuditLog sin organizationId: no se puede reconstruir la auditoría de un cliente
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:1661` — «targetType String»; `prisma/schema.prisma:1662` — «targetId String»; `prisma/schema.prisma:1673` — «@@index([targetType, targetId, createdAt])»
+- Impacto: Las acciones sobre un cliente quedan con targetType/targetId heterogéneos (Organization, BotConfig, ChatbotLead…); reconstruir todo lo hecho sobre la org X exige conocer cada tipo y resolver ids, y después de un hard-delete ya no se pueden resolver.
+- Propuesta: Decisión para Valentino (schema FROZEN): agregar targetOrganizationId opcional sin FK (para sobrevivir al hard-delete), indexado, y completarlo en logAdminAction.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): modelo.AdminAuditLog, h4.adm-audit
+
+### [DEU-015] init-data-connections.ts usa `as any`, no tiene referencias y fabrica integraciones 'conectadas' con lastSync = ahora
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/seeds/init-data-connections.ts:18` — «where: { dataConnections: { equals: null as any } },»; `prisma/seeds/init-data-connections.ts:34` — «ga4: { connected: Boolean(org.analyticsPropertyId), lastSync: org.analyticsPropertyId ? new Date().toISOString() : null,»; `prisma/migrations/20260427194426_add_health_score_and_brief_cache_fields/migration.sql:7` — «ALTER COLUMN "dataConnections" SET DEFAULT '{"ga4":{"connected":false,"lastSync":null},...»
+- Impacto: Viola la regla 'cero any' (es el único error de eslint del lote). Si se corriera marcaría como conectadas y recién sincronizadas integraciones solo por tener un ID cargado: dato falso para el health score. Además, en Prisma 6 un filtro Json por null pide Prisma.DbNull, así que es probable que falle antes (no verificado en runtime). No lo referencia nada: backfill one-shot de abril.
+- Propuesta: Borrarlo (la columna tiene default desde 20260427194426) o reescribirlo con Prisma.DbNull, sin inventar lastSync y con guard de entorno.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): modelo.Organization, h2.cli-resultados
+
+### [DEU-016] Los seeds del lote solo corren con tsx, que no está declarado: `npx tsx` resuelve una versión sin fijar mientras DATABASE_URL apunta a prod
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/seeds/sync-plans.ts:13` — «* DATABASE_URL=<prod> npx tsx prisma/seeds/sync-plans.ts»; `prisma/seeds/add-contact-tool.ts:88` — «if (import.meta.url === pathToFileURL(resolve(process.argv[1] ?? '')).href) {»; `package.json:172` — «"ts-node": { "compilerOptions": { "module": "CommonJS",»; `package.json:20` — «"seed:latency": "ts-node --transpile-only scripts/dev/seed-latency.ts",»; `prisma.config.ts:32` — «seed: 'npx tsx prisma/seed.ts',»; `package.json:17` — «"seed:agency-os": "ts-node prisma/seed-agency-os.ts",»; `package.json:18` — «"seed:agency-os-v2": "ts-node prisma/seed-agency-os.ts",»; `prisma/seed-agency-os.ts:26` — «import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'»; `tsconfig.json:18` — «"allowImportingTsExtensions": true,»
+- Impacto: package.json tiene 67 líneas con `npx tsx` y 25 con ts-node; tsx no está en dependencies, devDependencies ni en el lockfile, así que cada corrida usa un binario global o descarga la última versión del registro, también al correr scripts contra prod. Los seeds con import.meta no corren con ts-node configurado en CommonJS (el runner que sí está declarado).
+- Propuesta: Declarar tsx con versión fija en devDependencies, exponer los seeds de prod como scripts de npm y unificar el runner.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.prisma, lib.seeds
+
+### [DEU-018] Catálogo de tareas de onboarding huérfano: solo lo siembran módulos 'use server' sin importadores y sus títulos internos se mostrarían al cliente
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/onboarding/seed-tasks-for-org.ts:5` — «await prisma.onboardingTask.createMany({»; `src/lib/data/onboarding-tasks.ts:21` — «title: 'Configurar AgencySettings de la organización',»; `src/components/dashboard/OnboardingStatusCard.tsx:28` — «if (tasks.length === 0) return null»; `src/modules/chatbot/server/admin/createClientOnly.ts:85` — «onboardingCompleted: true,»
+- Impacto: La siembra solo se llama desde src/lib/actions/clients.ts e invitations.ts, que no tienen importadores, y el alta vigente no siembra tareas: la tarjeta 'Estamos configurando tu negocio' del inicio (dashboard/page.tsx:61) nunca aparece para clientes nuevos. Si se reactivara, el cliente vería títulos internos del equipo (nombres de modelos, 'Crear cuenta del cliente y enviar credenciales'). Las actions de admin para avanzarlas (src/actions/admin/onboarding-tasks.ts) tampoco tienen importadores.
+- Propuesta: Decidir: retirar la feature (catálogo, siembra, actions y tarjeta) o reconectarla con títulos para el cliente y una UI de admin que las avance.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio, h2.cli-inicio.estado-onboarding, lib.data, modelo.OnboardingTask
+
+### [DEU-019] Dos escapes unsafeGlobalQuery quedaron con razón 'PENDIENTE-DECISIÓN': métricas del admin rotuladas como del bot de develOP agregan todas las orgs
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/admin/getActivityChartData.ts:12` — «const events = await unsafeGlobalQuery( 'PENDIENTE-DECISIÓN: chart de actividad agrega eventos de todas las orgs en una página enmarcada como el bot develOP»; `src/modules/chatbot/server/admin/getActivityChartData.ts:15` — «c.chatbotEvent.findMany({ where: { createdAt: { gte: sevenDaysAgo } },»; `src/modules/chatbot/server/admin/getLatencyHistory.ts:73` — «const events = await unsafeGlobalQuery( 'PENDIENTE-DECISIÓN: latencia P50/P95 agrega eventos de todas las orgs»
+- Impacto: De los 68 escapes globales del repo (37 archivos), estos dos son los únicos sin justificación de plataforma: /admin/chatbot/activity y /admin/chatbot/health muestran números de todos los clientes como si fueran del bot propio, y el de actividad trae sin límite todos los eventos de 7 días. Solo afecta al admin, sin fuga hacia clientes.
+- Propuesta: Decidir: scopear a forOrg(<org de develOP>) o re-rotular ambas páginas como métricas de plataforma y agregar en SQL (groupBy) en vez de traer filas.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-actividad, h3.adm-health, lib.isolation
+
+### [DEU-020] sync-plans.ts sigue indicando cómo correrlo en prod aunque pisa las 13 columnas del catálogo, y todavía ofrece navigate_to_page a Pro/Business
+- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/seeds/sync-plans.ts:12` — «* Correrlo en prod (después de 'prisma migrate deploy'): * DATABASE_URL=<prod> npx tsx prisma/seeds/sync-plans.ts»; `prisma/seeds/sync-plans.ts:48` — «// columna de la DB. Pero correr ESTE seed pisaría las 13 columnas de cada Plan // (precios, cuotas, límites) con los valores de acá»; `prisma/seeds/sync-plans.ts:168` — «await prisma.plan.update({ where: { key: next.key }, data: next,»; `prisma/seeds/sync-plans.ts:56` — «'navigate_to_page',»
+- Impacto: Quien siga el encabezado revierte en prod precios, cuotas o modelos ajustados a mano; el mismo archivo lo advierte más abajo. El catálogo declara una tool que el runtime descarta para todos los clientes (getTools.ts:121).
+- Propuesta: Sacar la instrucción de prod del encabezado (o agregar --dry-run con diff por columna) y quitar navigate_to_page del catálogo hasta que exista allowedNavigationPaths.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): modelo.Plan, h3.vis-api-chatbot, h2.cli-plan
 
 ## Calidad
 

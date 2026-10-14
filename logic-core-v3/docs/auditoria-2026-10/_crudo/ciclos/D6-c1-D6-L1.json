@@ -1,0 +1,2138 @@
+{
+ "dominio": "D6",
+ "ciclo": "D6-c1",
+ "lote": "D6-L1",
+ "run": "wf_6b545170-172",
+ "fecha": "2026-10-14T15:32:28.684Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "prisma.config.ts",
+    "lineas_total": 34,
+    "leido_completo": true,
+    "rangos": "1-34"
+   },
+   {
+    "ruta": "prisma/schema.prisma",
+    "lineas_total": 2247,
+    "leido_completo": true,
+    "rangos": "1-559, 560-1119, 1119-1678, 1678-2247"
+   },
+   {
+    "ruta": "prisma/seed-agency-os.ts",
+    "lineas_total": 2465,
+    "leido_completo": true,
+    "rangos": "1-400, 400-899, 900-1399, 1400-1949, 1949-2465"
+   },
+   {
+    "ruta": "prisma/seed-guard.ts",
+    "lineas_total": 98,
+    "leido_completo": true,
+    "rangos": "1-98"
+   },
+   {
+    "ruta": "prisma/seed.ts",
+    "lineas_total": 875,
+    "leido_completo": true,
+    "rangos": "1-875"
+   }
+  ],
+  "entradas": [],
+  "flujos": [
+   {
+    "nombre": "Seed principal: prisma db seed → prisma/seed.ts",
+    "pasos": [
+     "prisma.config.ts:23-24 carga .env.local y después .env (dotenv no pisa valores ya cargados)",
+     "prisma.config.ts:32 el comando de seed es 'npx tsx prisma/seed.ts'",
+     "seed.ts:73 assertDevSeedTarget('seed.ts') → seed-guard.ts:42-78: ALLOW_PROD_SEED=1 saltea todo (:43-49); DATABASE_URL vacía aborta (:53-59); NODE_ENV=production aborta (:61-67); el host se valida por substring de la URL entera (:25-30, :69-77)",
+     "seed.ts:75-80 hashea con bcrypt las cuatro SEED_*_PASSWORD; seed-guard.ts:86-98 aborta si falta alguna",
+     "seed.ts:82-167 upsert de admin@develop.com (SUPER_ADMIN), cliente@sanmiguel.com, qa-cliente-b@develop.test y setter-qa@develop.test con passwordResetRequired false (:157)",
+     "seed.ts:169-245 orgs qa-cliente-b y san-miguel con su OrgMember ADMIN",
+     "seed.ts:247-403 servicios, proyecto, 7 tareas y suscripción (Plan BUSINESS si existe, :377-403)",
+     "seed.ts:405-743 mensajes, tickets con mensajes, facturas, assets y notificaciones de San Miguel",
+     "seed.ts:745-772 AgencySettings por id DEFAULT_AGENCY_SETTINGS_ID (importado de src/lib/agency-settings.ts:1)",
+     "seed.ts:781-833 BotConfig 'sanmiguel' (industry 'automotive', verticalPack 'usados') y su KnowledgeBase"
+    ]
+   },
+   {
+    "nombre": "Seed Agency OS: npm run seed:agency-os → prisma/seed-agency-os.ts",
+    "pasos": [
+     "package.json:17 'ts-node prisma/seed-agency-os.ts' (package.json:18 es un duplicado exacto)",
+     "seed-agency-os.ts:2386 assertDevSeedTarget('seed-agency-os.ts')",
+     "seed-agency-os.ts:2388 getAgencyMembers (:345-394): toma SUPER_ADMIN cuyo nombre o email contenga 'franco'/'valentino' o hace upsert por email con role SUPER_ADMIN y SEED_ADMIN_PASSWORD (:355-391)",
+     "seed-agency-os.ts:2394 ensureAgencySettings (:1912-1927) crea la fila por defecto solo si no hay ninguna",
+     "seed-agency-os.ts:2396-2408 por cada org de :396-455: ensureOrganization (:1790-1820, cae a findFirst por companyName), ensureClientUser, ensureOrgMember ADMIN, servicio, suscripción, mensajes y tickets",
+     "seed-agency-os.ts:2410-2417 leads base y QA (ensureLead busca por businessName, :1929-1965), actividades, demos y dossiers",
+     "seed-agency-os.ts:2419-2427 proyectos: el tercero (:1301-1303, organizationSlug null) busca 'develop' en un mapa que solo recibió san-miguel, sonrisa-norte y sigma-contable (:2398) → throw en :2426",
+     "seed-agency-os.ts:2440 ensureContactSubmissions y :2442-2455 resumen nunca se ejecutan; :2458-2462 sale con código 1"
+    ]
+   },
+   {
+    "nombre": "Migraciones hacia prod",
+    "pasos": [
+     "netlify.toml:2 el build de Netlify es 'npx prisma generate && npm run build' (no migra)",
+     "DEPLOY.md:52 la aplicación es manual: 'npx prisma migrate deploy' contra la base de prod",
+     "prisma.config.ts:26-34 define ruta del schema y comando de seed; no define datasource",
+     "prisma/schema.prisma:5-8 datasource con url = env('DATABASE_URL') y sin directUrl",
+     "logic-core-v3/.env.example:28-35 DATABASE_URL es el endpoint -pooler; DIRECT_DATABASE_URL solo se documenta para pg_dump",
+     "Estado real de prod y dev desconocido: docs/auditoria-2026-10/_crudo/prisma-migrate-status.txt:9 (migrate status de F0 falló sin DATABASE_URL)"
+    ]
+   },
+   {
+    "nombre": "Cambio de plan → precio que ve el cliente",
+    "pasos": [
+     "src/app/(protected)/admin/clients/_actions/plan.actions.ts:179-183 arma subData (planId, pendingPlanId, pendingPlanEffectiveAt, lastPlanChangedAt) sin price",
+     "plan.actions.ts:186-195 solo el create de la primera asignación escribe price = Plan.monthlyPrice (:192)",
+     "plan.actions.ts:197-200 upgrade inmediato: update con subData, price queda igual",
+     "src/lib/plan/get-plan-for-org.ts:50-58 el downgrade diferido se aplica en lectura sin tocar price",
+     "src/app/(protected)/dashboard/cuenta/perfil/page.tsx:80-101 lee subscription.plan.name y subscription.price",
+     "perfil/page.tsx:208-216 serializa {planName, price, currency, renewalDate, status}",
+     "src/components/dashboard/ProfileForms.tsx:660-662 muestra 'Precio / mes' con subscription.price"
+    ]
+   },
+   {
+    "nombre": "Archivar cliente (soft-delete de Organization)",
+    "pasos": [
+     "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:161-171 handleArchive → archiveClient",
+     "src/modules/chatbot/server/admin/archiveClient.ts:17 requireSuperAdmin; :19-21 Zod; :32-35 update deletedAt = new Date()",
+     "archiveClient.ts:37-46 auditoría CLIENT_UPDATED; :48-49 revalida /admin/clients",
+     "src/app/(protected)/admin/clients/page.tsx:23 lista activos (deletedAt null) y :34 archivados",
+     "Ningún otro lector de deletedAt en src (auth, portal, chatbot público, crons): git grep -n deletedAt origin/main -- logic-core-v3/src"
+    ]
+   },
+   {
+    "nombre": "OAuth de GBP y Tiendanube → tokens en Organization",
+    "pasos": [
+     "src/app/api/auth/google-business/callback/route.ts:49-56 guarda gbpAccessToken y gbpRefreshToken tal como llegan",
+     "src/app/api/auth/tiendanube/callback/route.ts:63-70 guarda tiendanubeAccessToken tal como llega",
+     "src/lib/integrations/google-business-profile.ts:59-60 los lee y :81 reescribe el access token renovado",
+     "prisma/schema.prisma:359-360, 367, 375, 835 columnas sin cifrar; contraste: schema.prisma:1704-1709 (CRM) y :2025-2034 (WABA) cifradas con src/lib/crypto/secret-box.ts"
+    ]
+   },
+   {
+    "nombre": "Hard-delete de cliente y cascadas",
+    "pasos": [
+     "ClientsListClient.tsx:187-191 modal TypeToConfirm, también abierto por el deep-link ?delete=<orgId> de una 'Solicitud de eliminación de cuenta'",
+     "src/modules/chatbot/server/admin/hardDeleteClient.ts:60-86 resumen: 'Leads del bot' cuenta solo convertedToOsLeadId null (:84)",
+     "hardDeleteClient.ts:141 tx.organization.delete dentro de $transaction",
+     "prisma/schema.prisma:528 OrgMember cae en cascada por la org; el User queda vivo (no hay borrado de users en src)",
+     "prisma/schema.prisma:1275 y :1441 BotConfig y todos sus ChatbotLead caen en cascada (convertidos incluidos); OsLead sobrevive porque no tiene FK"
+    ]
+   },
+   {
+    "nombre": "Revisión manual de las 14 sentencias DML de migraciones (veredicto por sentencia)",
+    "pasos": [
+     "prisma/migrations/20260320200000_multi_tenancy_organizations/migration.sql:24 INSERT OrgMember desde Organization.userId: cada usuario queda ADMIN de su propia org (o.userId, o.id). No pierde ni mezcla.",
+     "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:29 INSERT Organization ('os-org-'||id, slug 'agency-os-'||id) para OsProject sin match; el match es difuso (:46-48, ILIKE de prefijo sin escapar % ni _). PUEDE MEZCLAR tenants (hallazgo de la migración 20260406010000).",
+     "20260406010000/migration.sql:77 UPDATE OsProject.organizationId con la misma resolución difusa. PUEDE MEZCLAR.",
+     "20260406010000/migration.sql:114 INSERT Project desde OsProject con la org resuelta: hereda la mezcla y además CORROMPE el estado (CANCELADO→COMPLETED, EN_MANTENIMIENTO→IN_PROGRESS, :131-137).",
+     "20260406010000/migration.sql:153 INSERT Task desde OsTask por projectId (FK): no mezcla; un estado fuera del CASE (:166-170) daría NULL y abortaría la migración en vez de corromper.",
+     "20260406010000/migration.sql:182 UPDATE OsTimeEntry.projectId desde OsTask por FK: correcto.",
+     "prisma/migrations/20260406113000_allow_internal_projects_without_organization/migration.sql:6 UPDATE Project.organizationId = NULL para la org 'agency-os-internal': acotado, pero esos NULL hicieron que 20260525182135_b11_1 (:11 SET NOT NULL, sin backfill) exigiera borrar proyectos a mano fuera de la historia.",
+     "20260406113000/migration.sql:14 DELETE Service de 'agency-os-internal': acotado a la org interna, no toca clientes.",
+     "20260406113000/migration.sql:21 DELETE Organization 'agency-os-internal' solo si no tiene hijos en 9 tablas (:23-67): acotado, sin pérdida de clientes.",
+     "prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql:16 UPDATE chatbot_message.role = UPPER(role): normalización por fila, sin cruce ni pérdida.",
+     "20260525190100/migration.sql:17 UPDATE chatbot_lead.intent = UPPER(intent): idem; un valor fuera del enum haría fallar el ALTER TYPE (:26-27) en vez de corromper.",
+     "20260525190100/migration.sql:18 UPDATE chatbot_events.level = UPPER(level): idem.",
+     "20260525190100/migration.sql:19 UPDATE chatbot_bot_config.intensityLevel = UPPER(...): idem.",
+     "20260525190100/migration.sql:20 UPDATE chatbot_bot_config.llmProvider = UPPER(...): idem ('google'→'GOOGLE', coherente con LlmProvider)."
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Tokens OAuth y API keys de terceros guardados en claro en Organization y AgencySettings",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 360,
+      "fragmento": "gbpRefreshToken   String?   @db.Text"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 367,
+      "fragmento": "tiendanubeAccessToken String?   @db.Text"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 375,
+      "fragmento": "calComApiKey   String? @db.Text"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 835,
+      "fragmento": "osTelegramBotToken           String?"
+     },
+     {
+      "ruta": "src/app/api/auth/google-business/callback/route.ts",
+      "linea": 53,
+      "fragmento": "gbpRefreshToken: tokens.refresh_token,"
+     },
+     {
+      "ruta": "src/app/api/auth/tiendanube/callback/route.ts",
+      "linea": 67,
+      "fragmento": "tiendanubeAccessToken: tokens.access_token,"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1704,
+      "fragmento": "// Auth opcional vía header (ej. \"X-Webhook-Secret\"). Secret cifrado AES-256-GCM"
+     }
+    ],
+    "impacto": "Cualquier lectura de la tabla Organization (acceso a Neon, un SELECT de soporte, un include: { organization: true } sin select) expone tokens vivos: el refresh token de Google Business Profile da acceso continuo a la ficha del negocio. El primer cliente real que conecte GBP o Tiendanube deja sus credenciales en claro, mientras CRM y WABA ya se cifran con secret-box.",
+    "propuesta": "Decisión para Valentino (schema FROZEN): cifrar estos campos con el mismo secret-box AES-256-GCM (columnas iv/tag o formato empaquetado en la misma columna), migrar los valores existentes y descifrar solo en los lectores (google-business-profile.ts, tiendanube.ts, cal-com.ts, notifications/telegram.ts).",
+    "esfuerzo": "M",
+    "zona": "FROZEN",
+    "nodos": [
+     "modelo.Organization",
+     "modelo.AgencySettings",
+     "int.gbp",
+     "int.tiendanube",
+     "int.calcom",
+     "int.telegram",
+     "lib.crypto"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Agenda y QR de reseñas sin camino de configuración"
+   },
+   {
+    "titulo": "Historial de migraciones con DROP de 9 columnas de cliente revertido al día siguiente y una migración resuelta sin ejecutar",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/migrations/20260621120000_reconcile_dev_drift_schema_align/migration.sql",
+      "linea": 23,
+      "fragmento": "ALTER TABLE \"Organization\" DROP COLUMN IF EXISTS \"deletedAt\";"
+     },
+     {
+      "ruta": "prisma/migrations/20260621120000_reconcile_dev_drift_schema_align/migration.sql",
+      "linea": 27,
+      "fragmento": "-- La migración 20260619140100 ya lo declaró drop pero quedó RESUELTA SIN EJECUTAR"
+     },
+     {
+      "ruta": "prisma/migrations/20260622120000_readd_client_columns_dropped_by_reconcile/migration.sql",
+      "linea": 17,
+      "fragmento": "ALTER TABLE \"Organization\" ADD COLUMN IF NOT EXISTS \"deletedAt\" TIMESTAMP(3);"
+     },
+     {
+      "ruta": "prisma/migrations/20260619140100_drop_chatbot_lead_converted_column/migration.sql",
+      "linea": 9,
+      "fragmento": "ALTER TABLE \"chatbot_lead\" DROP COLUMN IF EXISTS \"convertedToOsLeadId\";"
+     },
+     {
+      "ruta": "prisma/migrations/20260617184913_add_converted_lead_link_and_bot_deleted_audit/migration.sql",
+      "linea": 5,
+      "fragmento": "ALTER TABLE \"chatbot_lead\" ADD COLUMN     \"convertedToOsLeadId\" TEXT;"
+     }
+    ],
+    "impacto": "Una base que todavía no aplicó 20260621120000 (prod si va atrasada, o un restore anterior al 21/06) pierde al aplicar la historia los valores de deletedAt (los clientes archivados vuelven a activos), internalNotes, city, avatar*, convertedToOsLeadId (se pierde el 'Ya convertido') y el guard singleton de AgencySettings; 20260622120000 las recrea vacías. Además 20260619140100 se marcó aplicada sin correr, así que _prisma_migrations no refleja lo ejecutado. Sin clientes reales hoy, pero hay que cerrarlo antes del primero.",
+    "propuesta": "Antes de aplicar cualquier migración pendiente en prod, correr migrate status (caso de prueba). Si 20260621120000 figura pendiente y las columnas tienen datos, respaldarlas y coordinar con Franco marcarla como aplicada (resolve) en lugar de ejecutarla. No editar migraciones ya aplicadas. Sumar a la regla de PLAN-1000 que ninguna migración se resuelve sin ejecutar sin dejarlo escrito en la propia migración.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.migraciones",
+     "modelo.Organization",
+     "modelo.ChatbotLead",
+     "modelo.AgencySettings"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D6-A1, D6-A2, PLAN-994, PLAN-1059"
+   },
+   {
+    "titulo": "Nada aplica ni verifica las migraciones de prod; una migración asume que Netlify las autoaplica",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "netlify.toml",
+      "linea": 2,
+      "fragmento": "command = \"npx prisma generate && npm run build\""
+     },
+     {
+      "ruta": "DEPLOY.md",
+      "linea": 52,
+      "fragmento": "npx prisma migrate deploy"
+     },
+     {
+      "ruta": "prisma/migrations/20260522214201_drop_user_unlocked_features/migration.sql",
+      "linea": 11,
+      "fragmento": "-- Riesgo: zero (data migrada + cero readers). Netlify autoaplica esta"
+     },
+     {
+      "ruta": "prisma/migrations/20260622120000_readd_client_columns_dropped_by_reconcile/migration.sql",
+      "linea": 4,
+      "fragmento": "-- declara y la DB no tiene NO rompe el build, rompe en RUNTIME (Prisma default-select pide"
+     },
+     {
+      "ruta": "docs/auditoria-2026-10/_crudo/prisma-migrate-status.txt",
+      "linea": 9,
+      "fragmento": "error: Environment variable not found: DATABASE_URL."
+     }
+    ],
+    "impacto": "El código desplegado asume el schema de main, pero las migraciones se aplican a mano y nadie verifica que prod esté al día. Una columna que el schema declara y la base no tiene rompe en runtime en cada default-select. El migrate status de F0 no pudo correr, así que hoy no se sabe si prod tiene las 86 migraciones (incluidas las del motor y los índices del portal).",
+    "propuesta": "Agregar un paso previo al deploy o un job de CI que corra prisma migrate status contra prod y falle si hay pendientes, o aplicar migrate deploy desde CI con la URL directa. Corregir el comentario falso de 20260522214201 en la bitácora (no se edita la migración). Verificación humana inmediata del estado de prod con el caso de prueba.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "lib.migraciones",
+     "int.netlify",
+     "int.neon"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "MIG-02, PLAN-1000, PLAN-1139, D6-A3"
+   },
+   {
+    "titulo": "El portal muestra un precio de plan desactualizado: Subscription.price solo se escribe al crear la suscripción",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 659,
+      "fragmento": "price       Float"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+      "linea": 179,
+      "fragmento": "const subData: Prisma.SubscriptionUncheckedUpdateInput = {"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+      "linea": 192,
+      "fragmento": "price: targetPlan.monthlyPrice.toNumber(),"
+     },
+     {
+      "ruta": "src/lib/plan/get-plan-for-org.ts",
+      "linea": 53,
+      "fragmento": "planId: sub.pendingPlanId,"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/cuenta/perfil/page.tsx",
+      "linea": 211,
+      "fragmento": "price: org.subscription.price,"
+     },
+     {
+      "ruta": "src/components/dashboard/ProfileForms.tsx",
+      "linea": 662,
+      "fragmento": "{plan.currency} {plan.price.toLocaleString('es-AR')}"
+     }
+    ],
+    "impacto": "Después de un upgrade (plan.actions.ts:197-200) o de un downgrade diferido (get-plan-for-org.ts:50-58), el cliente ve en /dashboard/cuenta/perfil el nombre del plan nuevo con el precio del anterior; un priceOverride vigente tampoco se muestra. El primer cliente real que cambie de plan va a ver un precio distinto del que se le cobra.",
+    "propuesta": "Una sola fuente: mostrar el precio efectivo (priceOverride vigente o Plan.monthlyPrice) en lugar de Subscription.price, o actualizar price en las dos rutas de cambio de plan. Eliminar Subscription.price si queda sin uso es decisión para Valentino (schema FROZEN).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-cuenta",
+     "h4.adm-clientes",
+     "modelo.Subscription",
+     "modelo.Plan"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "NUEVO-P1-2 / N-4 (planName, cerrado); Montos de dinero en Float"
+   },
+   {
+    "titulo": "Archivar un cliente (Organization.deletedAt) no corta nada fuera del listado del admin",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 417,
+      "fragmento": "// Soft-delete de cliente. null = activo; con fecha = archivado/eliminado"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+      "linea": 9,
+      "fragmento": "// Archivar = soft-delete REVERSIBLE. Marca SOLO el Organization (deletedAt); NO"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+      "linea": 34,
+      "fragmento": "(c) => c.organization.update({ where: { id: org.id }, data: { deletedAt: new Date() } }),"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/page.tsx",
+      "linea": 23,
+      "fragmento": "where: { deletedAt: null },"
+     }
+    ],
+    "impacto": "Un cliente archivado sigue entrando al portal, su chatbot sigue respondiendo en su sitio con costo de LLM y los crons le siguen mandando reportes: fuera de /admin/clients y /admin/announcements ningún lector filtra deletedAt (git grep en src). Para el primer cliente que se dé de baja, archivar no corta el servicio.",
+    "propuesta": "Definir qué significa archivar (bloquear login y portal, pausar el bot, excluir de crons) e implementarlo en los puntos de entrada: resolución de org del portal, carga del bot público y selección de orgs en los crons. Mínimo: al archivar, poner BotConfig.isActive en false y mostrar un aviso en el portal.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h2.cli-shell",
+     "h3.vis-api-chatbot",
+     "int.cron.send-weekly-reports",
+     "modelo.Organization"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Historial de migraciones con DROP de 9 columnas (el DROP también reactiva archivados)"
+   },
+   {
+    "titulo": "El hard-delete de un cliente deja vivos a sus usuarios (PII y credenciales) y subinforma los leads que borra",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+      "linea": 141,
+      "fragmento": "await tx.organization.delete({ where: { id: organizationId } })"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 528,
+      "fragmento": "organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+      "linea": 84,
+      "fragmento": "where: { botConfigId: botId, convertedToOsLeadId: null },"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1441,
+      "fragmento": "botConfig   BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 190,
+      "fragmento": "// (p. ej. desde un ticket \"Solicitud de eliminación de cuenta\"). La action y el"
+     }
+    ],
+    "impacto": "Cuando develOP borra a un cliente, incluso por una solicitud de eliminación de cuenta, sus usuarios quedan en User con email, nombre, teléfono y hash de contraseña, sin organización y sin purga posterior: el pedido de borrado no se cumple. Además el modal cuenta como 'Leads del bot' solo los no convertidos, aunque la cascada BotConfig→ChatbotLead borra también los convertidos y sus conversaciones (sobrevive solo el OsLead).",
+    "propuesta": "En hardDeleteClient, dentro de la misma transacción, borrar o anonimizar los User que queden sin ninguna OrgMember (excluyendo SUPER_ADMIN y SETTER) y contar en el resumen todos los ChatbotLead del bot, marcando cuáles conservan OsLead.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "modelo.User",
+     "modelo.OrgMember",
+     "modelo.ChatbotLead"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "LEG-01; Borrar un User borra en cascada sus tickets"
+   },
+   {
+    "titulo": "Agenda y QR de reseñas sin camino de configuración: calCom* y googleMapsPlaceId no tienen escritor en la app",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 375,
+      "fragmento": "calComApiKey   String? @db.Text"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 363,
+      "fragmento": "googleMapsPlaceId String?"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
+      "linea": 42,
+      "fragmento": "develOP se encarga de configurar tu sistema de reservas con tus horarios, servicios y precios."
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
+      "linea": 329,
+      "fragmento": "const isConnected = Boolean(org.calComApiKey)"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/motor-resenas/page.tsx",
+      "linea": 161,
+      "fragmento": "<AskReviewSection placeId={org.googleMapsPlaceId} />"
+     }
+    ],
+    "impacto": "Para activar la agenda o el QR de reseñas del primer cliente alguien tiene que editar la base de prod a mano: no hay formulario ni action, ni en el admin ni en el portal, que escriba esas columnas (git grep en src, scripts y prisma solo encuentra lecturas). Es un paso sin validación ni auditoría y deja la API key de Cal.com en claro. El cliente ve 'Tu agenda en construcción' indefinidamente.",
+    "propuesta": "Agregar en /admin/clients/[clientId] una sección de integraciones con server action (Zod, requireSuperAdmin, logAdminAction) que escriba calComUsername, calComEmbedUrl, calComApiKey (cifrada) y googleMapsPlaceId.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-agenda",
+     "h2.cli-resenas",
+     "h4.adm-clientes",
+     "modelo.Organization",
+     "int.calcom"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Tokens OAuth y API keys de terceros en claro"
+   },
+   {
+    "titulo": "seed-agency-os aborta siempre en el proyecto interno: el mapa de orgs nunca recibe 'develop'",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 1302,
+      "fragmento": "organizationSlug: null,"
+     },
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 2398,
+      "fragmento": "organizationIdBySlug.set(organizationSeed.slug, organization.id)"
+     },
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 2422,
+      "fragmento": "const effectiveSlug = projectSeed.organizationSlug ?? 'develop'"
+     },
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 2426,
+      "fragmento": "throw new Error(`No se encontro organizationId para ${effectiveSlug}`)"
+     },
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 2453,
+      "fragmento": "'- Nota: el proyecto interno ya se siembra con organizationId = null.',"
+     }
+    ],
+    "impacto": "El dataset de QA de Agency OS queda siempre a medias: se siembran 2 de 4 proyectos, nunca el de Sigma (con pagos de mantenimiento) ni las ContactSubmission, y el proceso sale con código 1. No depende de que exista la org 'develop' en la base: el mapa solo recibe los 3 slugs de organizationSeeds (:396-455). Sin impacto directo en un cliente, pero las pantallas de proyectos, horas y mantenimiento no se pueden verificar con datos sembrados.",
+    "propuesta": "Resolver la org del proyecto interno consultando la base por slug (o agregar la org interna a organizationSeeds) antes del bucle de proyectos, o quitar el proyecto interno del seed; corregir el mensaje de :2453. Cierra PLAN-1061 y PLAN-993.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.seeds",
+     "modelo.Project",
+     "modelo.Organization",
+     "h4.adm-proyectos"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-1061, PLAN-993"
+   },
+   {
+    "titulo": "Los tests e2e e integración escriben y borran en la branch Neon dev compartida, sin base de test ni guard de entorno",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "playwright.integration.config.ts",
+      "linea": 15,
+      "fragmento": " * globalSetup separado) para que DATABASE_URL esté disponible antes de que"
+     },
+     {
+      "ruta": "tests/e2e/30-onboarding-e2e-complete.spec.ts",
+      "linea": 153,
+      "fragmento": "await prisma.organization.delete({ where: { slug: createdOrgSlug } }).catch(() => undefined)"
+     },
+     {
+      "ruta": "tests/e2e/30-onboarding-e2e-complete.spec.ts",
+      "linea": 156,
+      "fragmento": "await prisma.user.delete({ where: { email: testEmail } }).catch(() => undefined)"
+     },
+     {
+      "ruta": "tests/helpers/setter-db.ts",
+      "linea": 376,
+      "fragmento": "await prisma.user.deleteMany({ where: { id: { in: tracker.userIds } } })"
+     }
+    ],
+    "impacto": "Las corridas crean y borran organizaciones, usuarios y leads en la misma base que usa Franco para su lane y para QA; un borrado de usuario arrastra por cascada tickets y respuestas. No existe DATABASE_URL_TEST ni chequeo de host: con un .env apuntando a prod, los mismos borrados correrían contra prod.",
+    "propuesta": "Crear una branch Neon de test (o Postgres local) con DATABASE_URL_TEST, hacer que los configs de Playwright la exijan y reutilizar assertDevSeedTarget en un globalSetup que aborte si el host no es de test.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "lib.prisma",
+     "int.neon",
+     "modelo.Organization",
+     "modelo.User"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D6-A6, VH-003"
+   },
+   {
+    "titulo": "Borrar un User borra en cascada los tickets que abrió y todas sus respuestas, en cualquier organización",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 771,
+      "fragmento": "user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 786,
+      "fragmento": "user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)"
+     },
+     {
+      "ruta": "prisma/migrations/20260403170000_reconcile_existing_schema/migration.sql",
+      "linea": 181,
+      "fragmento": "ALTER TABLE \"TicketMessage\" ADD CONSTRAINT \"TicketMessage_userId_fkey\" ... ON DELETE CASCADE ON UPDATE CASCADE;"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1065,
+      "fragmento": "user    User     @relation(\"OsTimeEntryUser\", fields: [userId], references: [id])"
+     }
+    ],
+    "impacto": "El historial de soporte es de la organización pero cuelga del autor: si se elimina un usuario (baja de un empleado del cliente, pedido de borrado, limpieza de una cuenta de develOP) desaparecen los tickets que abrió con todos sus mensajes, y si es SUPER_ADMIN, sus respuestas en los tickets de todos los clientes. A la vez, un usuario con horas cargadas no se puede borrar (Restrict en OsTimeEntry). Hoy no hay ruta de borrado de usuarios en src, así que el riesgo es latente; los tests sí borran usuarios.",
+    "propuesta": "Decisión para Valentino (schema FROZEN): Ticket.userId y TicketMessage.userId opcionales con onDelete: SetNull (o snapshot del autor) y definir el borrado de usuarios como anonimización en vez de DELETE.",
+    "esfuerzo": "M",
+    "zona": "FROZEN",
+    "nodos": [
+     "modelo.Ticket",
+     "modelo.TicketMessage",
+     "modelo.User",
+     "h2.cli-soporte",
+     "h4.adm-tickets"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "El hard-delete de un cliente deja vivos a sus usuarios"
+   },
+   {
+    "titulo": "Solo chatbot_events tiene retención; rate_limit, mensajes, leads y formularios crecen sin purga",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1763,
+      "fragmento": "// claves muertas dentro de la misma ventana. El índice en expiresAt deja la"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1764,
+      "fragmento": "// puerta abierta a un job de purga futuro si hace falta."
+     },
+     {
+      "ruta": "src/app/api/cron/cleanup-old-events/route.ts",
+      "linea": 14,
+      "fragmento": "const RETENTION_DAYS = 30"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/logging/persistentLogger.ts",
+      "linea": 160,
+      "fragmento": "(c) => c.chatbotEvent.deleteMany({ where: { createdAt: { lt: threshold } } }),"
+     }
+    ],
+    "impacto": "Cada clave nueva de rate limit (incluidas las armadas con datos del pedido, patrón D1-c3) es una fila permanente; conversaciones y mensajes del chatbot (con nombres y teléfonos), ChatbotLead, ContactSubmission, AdminAuditLog con IP (schema.prisma:1667) y PasswordResetToken vencidos no tienen retención. Sin pieza legal (LEG-01) no hay plazo que informarle al primer cliente.",
+    "propuesta": "Extender el cron de limpieza: purgar rate_limit con expiresAt vencido y PasswordResetToken usados o vencidos; definir con Franco plazos para conversaciones, mensajes y formularios (borrar o anonimizar).",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "modelo.RateLimit",
+     "modelo.Conversation",
+     "modelo.ChatMessage",
+     "modelo.ContactSubmission",
+     "modelo.PasswordResetToken",
+     "int.cron.cleanup-old-events"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "OBS-06, LEG-01, patrón D1-c3 (claves de rate limit sin validar)"
+   },
+   {
+    "titulo": "Sin directUrl: migrate y seeds corren por el pooler de Neon",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 7,
+      "fragmento": "url      = env(\"DATABASE_URL\")"
+     },
+     {
+      "ruta": ".env.example",
+      "linea": 30,
+      "fragmento": "#   Opción A: sacar `-pooler` del subdomain del DATABASE_URL pooled."
+     },
+     {
+      "ruta": ".env.example",
+      "linea": 35,
+      "fragmento": "DIRECT_DATABASE_URL="
+     }
+    ],
+    "impacto": "prisma migrate usa un advisory lock de sesión y espera una conexión única; por PgBouncer en modo transacción ese lock no garantiza exclusión entre dos corridas y pueden aparecer errores intermitentes de prepared statements. Hasta ahora las migraciones pasaron por -pooler, pero es el camino que Prisma desaconseja para migrar prod.",
+    "propuesta": "Decisión para Valentino (schema FROZEN): agregar directUrl = env(\"DIRECT_DATABASE_URL\") al datasource; la variable ya existe en .env.example y en los secrets del backup, la app sigue en el pooler.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.prisma",
+     "lib.migraciones",
+     "int.neon"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "MIG-01, PLAN-992"
+   },
+   {
+    "titulo": "Contraseñas literales de seed del historial siguen válidas en toda base sembrada antes del 20/06/2026",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "prisma/seed.ts",
+      "linea": 87,
+      "fragmento": "role: Role.SUPER_ADMIN,"
+     },
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 359,
+      "fragmento": "role: Role.SUPER_ADMIN,"
+     },
+     {
+      "ruta": "prisma/seed.ts",
+      "linea": 75,
+      "fragmento": "const [adminPassword, clientPassword, clientBPassword, setterPassword] = await Promise.all(["
+     }
+    ],
+    "impacto": "Hasta el commit 4148e32d (2026-06-20) los seeds hasheaban contraseñas literales (commits a3c3888c, f330ec3c, 1c252a50, 29ebe8ee, 3cdcc55e, fff3b24e y 40853cd3 según el barrido de historial de F1; no se copian valores). Las cuentas sembradas antes de esa fecha (admin@develop.com, franco@ y valentino@develop.com como SUPER_ADMIN, cliente@sanmiguel.com, setter QA) conservan esa contraseña hasta re-sembrar o rotar. Si alguna existe en prod es un SUPER_ADMIN con contraseña pública y pasa a CRÍTICA; por rúbrica, credencial de seed conocida = BAJA.",
+    "propuesta": "Verificar en prod que esas cuentas no existan (o rotarlas), re-sembrar dev con las SEED_*_PASSWORD actuales y evaluar la purga del historial junto con la de enviroment.env (PLAN-1074).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.seeds",
+     "modelo.User",
+     "h1.auth-login"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-1074, PLAN-1129"
+   },
+   {
+    "titulo": "El guard anti-prod de los seeds compara por substring sobre toda la URL",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/seed-guard.ts",
+      "linea": 26,
+      "fragmento": "if (databaseUrl.includes(DEV_HOST_FRAGMENT)) {"
+     },
+     {
+      "ruta": "prisma/seed-guard.ts",
+      "linea": 29,
+      "fragmento": "return LOCAL_FRAGMENTS.some((fragment) => databaseUrl.includes(fragment))"
+     },
+     {
+      "ruta": "prisma/seed-guard.ts",
+      "linea": 43,
+      "fragmento": "if (process.env.ALLOW_PROD_SEED === '1') {"
+     },
+     {
+      "ruta": "prisma/seed-guard.ts",
+      "linea": 15,
+      "fragmento": " * Prisma NO carga `.env.local`; las SEED_*_PASSWORD viven en `.env` (gitignored)."
+     },
+     {
+      "ruta": "prisma.config.ts",
+      "linea": 23,
+      "fragmento": "loadEnv({ path: '.env.local' })"
+     }
+    ],
+    "impacto": "Una URL que contenga 'localhost', '127.0.0.1' o el id del endpoint dev en cualquier parte (usuario, password, parámetros) pasa el guard, y con ALLOW_PROD_SEED=1 el seed corre contra cualquier destino con solo un aviso. El comentario dice que .env.local no se carga, pero prisma db seed lo carga primero, así que el destino real depende de cómo se invoca. Son seeds de dev: riesgo operativo.",
+    "propuesta": "Parsear la URL con new URL() y comparar hostname exacto contra una lista de hosts permitidos; exigir que el override nombre el host esperado (ALLOW_PROD_SEED=<host>) y corregir el comentario de seed-guard.ts:13-15.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.seeds",
+     "int.neon"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-1129, PLAN-1055"
+   },
+   {
+    "titulo": "Unicidad de email sensible a mayúsculas en User y EmailContact",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 289,
+      "fragmento": "email                 String    @unique"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1229,
+      "fragmento": "@@unique([organizationId, email])"
+     }
+    ],
+    "impacto": "La base acepta 'Juan@x.com' y 'juan@x.com' como usuarios distintos; como el login normaliza y varias altas no (patrón D1-c1), una alta con mayúsculas crea una cuenta que no puede entrar con contraseña y duplica identidades. En email marketing, el mismo contacto con distinto case recibe dos envíos.",
+    "propuesta": "Normalizar en todas las altas (patrón D1-c1) y, como respaldo, decisión para Valentino (schema FROZEN): índice único sobre lower(email) por migración SQL o columna citext.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "modelo.User",
+     "modelo.EmailContact",
+     "h1.auth-login",
+     "h2.cli-email-mkt"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Patrón D1-c1: alta de usuarios sin normalizar el email"
+   },
+   {
+    "titulo": "La migración 20260406010000 asignó proyectos legacy a organizaciones por coincidencia difusa de nombre",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql",
+      "linea": 47,
+      "fragmento": "OR org.\"companyName\" ILIKE op.\"businessName\" || '%'"
+     },
+     {
+      "ruta": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql",
+      "linea": 48,
+      "fragmento": "OR op.\"businessName\" ILIKE org.\"companyName\" || '%'"
+     },
+     {
+      "ruta": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql",
+      "linea": 136,
+      "fragmento": "WHEN 'CANCELADO' THEN 'COMPLETED'::\"ProjectStatus\""
+     }
+    ],
+    "impacto": "En las bases donde corrió (dev y prod si se aplicó), un OsProject pudo quedar en otra organización cuyo nombre empieza igual (el ILIKE no escapa % ni _), con montos, tareas y horas visibles en el portal de ese cliente; los proyectos cancelados quedaron como COMPLETED. En una base nueva es no-op. Conviene verificar los datos migrados antes de reutilizar esas organizaciones.",
+    "propuesta": "Correr las consultas del caso de prueba en dev y prod; reasignar o borrar a mano los proyectos mal ubicados y las orgs 'agency-os-<id>' sin miembros.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.migraciones",
+     "modelo.Project",
+     "modelo.Organization"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "P0-5 / DB-P0-3"
+   },
+   {
+    "titulo": "FKs sin índice (Task.projectId, Notification.userId/taskId, ChatbotEvent.conversationId) e índices redundantes",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 584,
+      "fragmento": "projectId     String"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 590,
+      "fragmento": "@@index([assignedToId])"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/project/page.tsx",
+      "linea": 138,
+      "fragmento": "tasks: { orderBy: { id: 'asc' } },"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1410,
+      "fragmento": "@@index([sessionId])"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1343,
+      "fragmento": "@@index([slug])"
+     }
+    ],
+    "impacto": "El include de tareas de /dashboard/project, los conteos de health-score.ts:387-398 y las cascadas Project→Task, Task→Notification y Conversation→ChatbotEvent recorren la tabla entera (no se nota al volumen de hoy). Hay índices duplicados por un unique o por un compuesto con la misma primera columna: Conversation.sessionId (:1375/:1410), BotConfig.slug (:1278/:1343), QuotaUsage.botConfigId (:1594-1595), OrgMember.userId (:530-531), EmailContact.organizationId (:1229-1230), OsMaintenancePayment.projectId (:1047-1048), EmailCampaign.organizationId (:1261-1262), OsLead.status y OsLead.assignedToId (:896-900).",
+    "propuesta": "Decisión para Valentino (schema FROZEN): agregar @@index([projectId]) en Task, @@index([userId]) y @@index([taskId]) en Notification, @@index([conversationId]) en ChatbotEvent, y hacer los DROP de índices cubiertos que B11.5 dejó diferidos.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "modelo.Task",
+     "modelo.Notification",
+     "modelo.ChatbotEvent",
+     "modelo.Conversation",
+     "h2.cli-proyecto"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-1095, DB-P1-8"
+   },
+   {
+    "titulo": "Montos de dinero en Float (Invoice, Subscription, PremiumModule, OrganizationModule) junto a Decimal",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 672,
+      "fragmento": "amount      Float"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 659,
+      "fragmento": "price       Float"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1199,
+      "fragmento": "priceLockedUsd Float"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 610,
+      "fragmento": "monthlyPrice    Decimal @db.Decimal(10, 2)"
+     }
+    ],
+    "impacto": "Sumas de facturas y precios bloqueados acumulan error de punto flotante y conviven con montos Decimal del mismo dominio (Plan, Project, OsPaymentMilestone). Cambiar el tipo con datos reales exige una migración con conversión.",
+    "propuesta": "Decisión para Valentino (schema FROZEN): pasar los montos a Decimal(10,2) antes de cargar facturación real del primer cliente.",
+    "esfuerzo": "M",
+    "zona": "FROZEN",
+    "nodos": [
+     "modelo.Invoice",
+     "modelo.Subscription",
+     "modelo.PremiumModule",
+     "modelo.OrganizationModule",
+     "h2.cli-plan"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "El portal muestra un precio de plan desactualizado"
+   },
+   {
+    "titulo": "Los seeds adoptan datos existentes por nombre no único y les asignan usuarios con contraseña de seed",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 1799,
+      "fragmento": "const existingByCompanyName = await prisma.organization.findFirst({"
+     },
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 1851,
+      "fragmento": "update: { role },"
+     },
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 1930,
+      "fragmento": "const existingLead = await prisma.osLead.findFirst({"
+     },
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 360,
+      "fragmento": "password: adminPassword,"
+     },
+     {
+      "ruta": "prisma/seed.ts",
+      "linea": 83,
+      "fragmento": "where: { email: 'admin@develop.com' },"
+     }
+    ],
+    "impacto": "En la base dev compartida el seed pisa leads de Franco que compartan businessName (estado, notas, asignación), adjunta usuarios de seed como ADMIN a cualquier org con el mismo companyName y eleva a SUPER_ADMIN con la contraseña de seed a cualquier cuenta franco@ o valentino@develop.com existente. Las cuentas usan dominios reales de terceros (develop.com, sanmiguel.com, sonrisanorte.com), así que cualquier email que la app mande desde dev a esas cuentas sale a dominios ajenos.",
+    "propuesta": "Buscar solo por ids deterministas del seed (seedId) o por slug, nunca por companyName/businessName; no tocar role ni password de usuarios que el seed no creó; usar dominios reservados (.test/.example) en todas las cuentas sembradas.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.seeds",
+     "modelo.Organization",
+     "modelo.OsLead",
+     "modelo.User"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "El guard anti-prod de los seeds compara por substring"
+   },
+   {
+    "titulo": "BotConfig.industry es String libre con tres vocabularios ('generic', 'generico', 'automotive')",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1324,
+      "fragmento": "industry String @default(\"generic\")"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 17,
+      "fragmento": "'inmobiliaria', 'concesionaria', 'distribuidora', 'constructora', 'generico',"
+     },
+     {
+      "ruta": "prisma/seed.ts",
+      "linea": 807,
+      "fragmento": "industry: 'automotive',"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbots/BotsListClient.tsx",
+      "linea": 41,
+      "fragmento": "if (industryFilter !== 'all' && bot.industry !== industryFilter) return false"
+     }
+    ],
+    "impacto": "El filtro por rubro del admin separa valores que significan lo mismo; el bot QA de San Miguel queda con un rubro fuera del catálogo de los formularios de alta ('concesionaria'); el default del schema nunca coincide con el canónico.",
+    "propuesta": "Decisión para Valentino (schema FROZEN): convertir industry en enum o cambiar el default a 'generico'. Mientras tanto sembrar 'concesionaria' en seed.ts:807 y revisar prisma/seeds/backfill-vertical-pack.ts, que depende de ese valor.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "modelo.BotConfig",
+     "lib.seeds",
+     "h3.adm-chatbots"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-992"
+   },
+   {
+    "titulo": "Comentarios de los archivos de datos que afirman cosas falsas",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 399,
+      "fragmento": "// Client profile (admin-managed). city la captura el creador pero hoy la"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 400,
+      "fragmento": "// action no la persiste; internalNotes se muestra en OverviewTab (hoy placeholder)."
+     },
+     {
+      "ruta": "prisma.config.ts",
+      "linea": 9,
+      "fragmento": "//   🔴 NO tocar migrations existentes — los 49 archivos en prisma/migrations/"
+     },
+     {
+      "ruta": "prisma/migrations/20260619140100_drop_chatbot_lead_converted_column/migration.sql",
+      "linea": 4,
+      "fragmento": "-- NUNCA usó esta columna; el string jamás estuvo en el schema/código committeado"
+     }
+    ],
+    "impacto": "city e internalNotes sí se persisten (EditClientForm.tsx:82-83, InternalNotesCard.tsx:45); hay 86 migraciones, no 49; la columna sí la había agregado 20260617184913:5; seed-agency-os.ts:2453 dice que el proyecto interno se siembra con organizationId null cuando la columna es NOT NULL. Quien decida sobre datos leyendo estos archivos parte de premisas equivocadas.",
+    "propuesta": "Corregir los comentarios de los archivos libres (prisma.config.ts, seed-agency-os.ts, seed-guard.ts); el de schema.prisma:399-400 es decisión para Valentino (FROZEN). Las migraciones aplicadas no se editan: dejar la corrección en la bitácora.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.prisma",
+     "lib.seeds",
+     "lib.migraciones"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Nada aplica ni verifica las migraciones de prod"
+   },
+   {
+    "titulo": "Dos runners para los seeds: tsx en prisma db seed y ts-node en seed:agency-os",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "HIPÓTESIS",
+    "evidencia": [
+     {
+      "ruta": "prisma.config.ts",
+      "linea": 32,
+      "fragmento": "seed: 'npx tsx prisma/seed.ts',"
+     },
+     {
+      "ruta": "package.json",
+      "linea": 17,
+      "fragmento": "\"seed:agency-os\": \"ts-node prisma/seed-agency-os.ts\","
+     },
+     {
+      "ruta": "package.json",
+      "linea": 18,
+      "fragmento": "\"seed:agency-os-v2\": \"ts-node prisma/seed-agency-os.ts\","
+     },
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 26,
+      "fragmento": "import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'"
+     },
+     {
+      "ruta": "tsconfig.json",
+      "linea": 18,
+      "fragmento": "\"allowImportingTsExtensions\": true,"
+     }
+    ],
+    "impacto": "seed-agency-os importa con extensión .ts, válido con tsx y con tsconfig (noEmit true), pero ts-node compila con chequeo de tipos y fuerza noEmit en false; esa combinación puede no compilar y no se pudo correr. Hay además dos scripts idénticos. Si ts-node falla, el seed de Agency OS no corre por la vía documentada.",
+    "propuesta": "Unificar en tsx (ya lo usan prisma.config.ts y decenas de scripts), borrar seed:agency-os-v2 y confirmar con el caso de prueba que no escribe en la base.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.seeds"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D6-A7"
+   },
+   {
+    "titulo": "Sin margen configurado en código para el cold start de Neon",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "HIPÓTESIS",
+    "evidencia": [
+     {
+      "ruta": "src/lib/prisma.ts",
+      "linea": 6,
+      "fragmento": "globalForPrisma.prisma ?? new PrismaClient({ log: ['error'] })"
+     },
+     {
+      "ruta": ".env.example",
+      "linea": 25,
+      "fragmento": "DATABASE_URL="
+     },
+     {
+      "ruta": "src/modules/chatbot/server/logging/logger.ts",
+      "linea": 118,
+      "fragmento": " *   P2024 pool timeout, P1001 connect) — el discriminador para el sprint de causa raíz."
+     }
+    ],
+    "impacto": "Si la compute de prod se suspende por inactividad, el primer pedido abre conexión con el connect_timeout por defecto de Prisma (5 s); si el despertar tarda más (el prompt de la auditoría documenta 14 a 30 s en dev), el visitante del chat o del login recibe un error. No hay reintento ni parámetros visibles: todo depende de la URL configurada en Netlify.",
+    "propuesta": "Verificar el autosuspend de la compute de prod y los parámetros de la URL (connect_timeout de 15 o más, pool_timeout); si prod tiene autosuspend, desactivarlo o subir connect_timeout.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.prisma",
+     "int.neon",
+     "h3.vis-api-chatbot",
+     "h1.auth-login"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-1080, PLAN-1144"
+   },
+   {
+    "titulo": "AdminAuditLog sin organizationId: no se puede reconstruir la auditoría de un cliente",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1661,
+      "fragmento": "targetType String"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1662,
+      "fragmento": "targetId   String"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1673,
+      "fragmento": "@@index([targetType, targetId, createdAt])"
+     }
+    ],
+    "impacto": "Las acciones sobre un cliente quedan con targetType/targetId heterogéneos (Organization, BotConfig, ChatbotLead…); reconstruir todo lo hecho sobre la org X exige conocer cada tipo y resolver ids, y después de un hard-delete ya no se pueden resolver.",
+    "propuesta": "Decisión para Valentino (schema FROZEN): agregar targetOrganizationId opcional sin FK (para sobrevivir al hard-delete), indexado, y completarlo en logAdminAction.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "modelo.AdminAuditLog",
+     "h4.adm-audit"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "DB-P1-5"
+   },
+   {
+    "titulo": "Prisma 6.19 con 7.x disponible: el salto exige cambiar el schema congelado y la carga de .env de los seeds",
+    "prefijo": "TEC",
+    "severidad": "BAJA",
+    "tipo": "tech-vieja",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "package.json",
+      "linea": 133,
+      "fragmento": "\"@prisma/client\": \"^6.19.2\","
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 2,
+      "fragmento": "provider = \"prisma-client-js\""
+     },
+     {
+      "ruta": "prisma/seed-guard.ts",
+      "linea": 13,
+      "fragmento": " * Nota de entorno: `@prisma/client` carga `.env` completo al importarse, así que"
+     },
+     {
+      "ruta": "docs/auditoria-2026-10/_crudo/npm-outdated.json",
+      "linea": 1,
+      "fragmento": "@prisma/client current 6.19.3, latest 7.10.0 (resumen del baseline F0)"
+     }
+    ],
+    "impacto": "La rama 7 mueve la URL del datasource a prisma.config.ts, cambia el generador y deja de cargar .env automáticamente; el guard de seeds asume esa carga (seed-guard.ts:13-14). El upgrade toca el schema congelado y los seeds; sin plan, queda bloqueado o se hace a ciegas.",
+    "propuesta": "Decisión para Valentino (schema FROZEN): planificar el salto a Prisma 7 como sprint propio (datasource en prisma.config.ts con directUrl, generador nuevo, carga explícita de env en seeds y scripts) después de cerrar el estado de migraciones de prod.",
+    "esfuerzo": "M",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.prisma",
+     "lib.seeds",
+     "lib.migraciones"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Sin directUrl; PLAN-1113"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h2.cli-cuenta",
+    "id": "h2.cli-cuenta.plan-y-precio",
+    "nombre": "Ver plan y precio en el perfil",
+    "descripcion": "Sección Plan de /dashboard/cuenta/perfil: nombre del plan, precio mensual, próximo vencimiento y estado de la suscripción.",
+    "archivos": [
+     "src/app/(protected)/dashboard/cuenta/perfil/page.tsx",
+     "src/components/dashboard/ProfileForms.tsx",
+     "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+     "src/lib/plan/get-plan-for-org.ts",
+     "prisma/schema.prisma"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/cuenta/perfil/page.tsx (page)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz: perfil/page.tsx:74 resolveOrgId → :80-101 select de subscription.plan.name y price → :208-216 serializa → ProfileForms.tsx:620-662 renderiza. Es correcto hasta el primer cambio de plan: el precio queda viejo (plan.actions.ts:179-200, get-plan-for-org.ts:50-58).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "perfil/page.tsx:74 resolveOrgId y :80-81 findUnique por id de la org de la sesión"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ProfileForms.tsx:621-624 'No hay información de plan disponible.' con link a facturación"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "src/app/(protected)/dashboard/cuenta/error.tsx usa SectionErrorBoundary"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "src/app/(protected)/dashboard/cuenta/perfil/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Vista de solo lectura, sin entrada del usuario"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "ProfileForms.tsx:654 grid-cols-2 sm:grid-cols-4; el resto de la página no se revisó en este lote"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "src/components/ui/SectionErrorBoundary.tsx:61-64 Sentry.captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "El precio mostrado puede no ser el vigente: perfil/page.tsx:211 lee Subscription.price, que no se actualiza al cambiar de plan (plan.actions.ts:179-200)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Consulta sin intervención de develOP; link a /dashboard/cuenta/facturacion (ProfileForms.tsx:625-631)"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-agenda",
+    "id": "h2.cli-agenda.conectar-agenda",
+    "nombre": "Conectar y ver la agenda (Cal.com)",
+    "descripcion": "Módulo Agenda inteligente: con Cal.com configurado muestra reservas y métricas; sin configurar, un aviso de agenda en construcción.",
+    "archivos": [
+     "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
+     "src/lib/integrations/cal-com.ts",
+     "prisma/schema.prisma"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx (page)"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "La vista conectada existe (agenda-inteligente/page.tsx:344-349) pero ningún código de la app escribe calComApiKey, calComUsername ni calComEmbedUrl (git grep en src, scripts y prisma: solo lecturas). Sin edición manual de la base, el cliente ve siempre 'Tu agenda en construcción' (:40-43, :341-342).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "agenda-inteligente/page.tsx:317 resolveOrgId, :320 isModuleActive, :323-326 select por id de la org"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ConnectAgendaCard (:23-48) cuando no hay API key (:341-342)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "src/app/(protected)/dashboard/modules/error.tsx usa SectionErrorBoundary"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "agenda-inteligente/loading.tsx y Suspense con OverviewSkeleton (:344)"
+     },
+     "validacion_servidor": {
+      "cumple": "no",
+      "evidencia": "No existe la action de configuración que debería validar los datos de Cal.com (sin escritor de calCom*)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "ConnectAgendaCard usa max-w-md mx-auto (:26); la vista conectada no se revisó en este lote"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "dashboard/modules/error.tsx → SectionErrorBoundary.tsx:61-64 captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "La rama sin configurar no inventa datos: solo muestra el aviso (:40-43)"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "El cliente depende de que develOP edite la base: :42 'develOP se encarga de configurar…' y no hay escritor de calComApiKey en la app"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.archivar-cliente",
+    "nombre": "Archivar y desarchivar un cliente",
+    "descripcion": "Soft-delete reversible desde /admin/clients: marca Organization.deletedAt y mueve al cliente a la vista Archivados.",
+    "archivos": [
+     "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "src/modules/chatbot/server/admin/archiveClient.ts",
+     "src/app/(protected)/admin/clients/page.tsx",
+     "prisma/schema.prisma"
+    ],
+    "entradas": [
+     "src/modules/chatbot/server/admin/archiveClient.ts (server action archiveClient, unarchiveClient)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz: ClientsListClient.tsx:161-171 → archiveClient.ts:16-52 (requireSuperAdmin, Zod, update deletedAt, auditoría) → admin/clients/page.tsx:23 y :34 filtran activos y archivados. El efecto de negocio (cortar portal, bot y crons) no existe.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "archiveClient.ts:17 requireSuperAdmin; operación de plataforma con unsafeGlobalQuery y razón TENANT-MGMT (:25-28, :32-35)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ClientsListClient.tsx:475 'Sin clientes archivados'"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "ClientsListClient.tsx:167-168 toast.error con el mensaje de la action"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "ClientsListClient.tsx:162 y :170 pendingId durante la acción"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "archiveClient.ts:12-14 y :19-20 Zod safeParse"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "No revisado en este lote (lo cubre D3)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Solo server-side si Next carga src/instrumentation.ts:49 (onRequestError); en el cliente el error termina en un toast sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos inventados ni TODO en el camino"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Archivar no corta portal, bot ni crons (ningún lector de deletedAt fuera del admin): el admin tiene que pausar el bot y avisar a mano"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-1085",
+    "clave": "@@map inconsistente entre modelos",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "23 de 63 modelos tienen @@map (git show origin/main:logic-core-v3/prisma/schema.prisma | grep -c '@@map(' → 23; grep -c '^model ' → 63); ej. Organization sin @@map (schema.prisma:332-452) y Plan con @@map('plan') (:631)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Renombrar tablas exige migración con riesgo sobre la Neon compartida; probablemente no compensa."
+   },
+   {
+    "id": "PLAN-1088",
+    "clave": "Organization.n8nWorkflowIds sin uso",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "schema.prisma:339 sigue declarado; único escritor src/lib/actions/clients.ts:164,199 (módulo sin importadores según D1) y seeds (seed.ts:204,219); sin lectores (git grep -n n8nWorkflowIds origin/main -- logic-core-v3/src)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Borrarlo es migración sobre schema FROZEN: decisión para Valentino."
+   },
+   {
+    "id": "PLAN-1299",
+    "clave": "Notification.organizationId nullable",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "schema.prisma:721 'organizationId String?'; el cron os-follow-up crea notificaciones sin org como marcador de idempotencia (src/app/api/cron/os-follow-up/route.ts:276-286)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Antes de NOT NULL hay que sacar el marcador del cron de esa tabla."
+   },
+   {
+    "id": "PLAN-992",
+    "clave": "Default 'generic', DIRECT_URL, main/prod, Vertex",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "schema.prisma:1324 default 'generic' (canónico 'generico' en createClientWithBot.ts:17); sin directUrl (schema.prisma:5-8); no existe rama git prod (git branch -a); credencial de Vertex vencida (hecho conocido)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1127",
+    "clave": "Módulos premium activos en el seed de QA",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -i organizationModule origin/main -- logic-core-v3/prisma/seed.ts logic-core-v3/prisma/seed-agency-os.ts → vacío; control: prisma/seeds/sync-premium-modules.ts:73",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1133",
+    "clave": "Migración ExecutiveReportFrequency",
+    "estado_en_codigo": "hecho",
+    "evidencia": "prisma/migrations/20260702223350_add_executive_report_config/migration.sql:2-6; schema.prisma:396-397 y :493-497",
+    "sigue_teniendo_sentido": "no",
+    "nota": "La aplicación en Neon no es verificable por lectura (migrate status de F0 falló)."
+   },
+   {
+    "id": "PLAN-1061",
+    "clave": "seed-agency-os falla sin org develop",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "seed-agency-os.ts:2398 (el mapa solo recibe los slugs de organizationSeeds) y :2422-2426 (throw); falla siempre, exista o no la org en la base",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1095",
+    "clave": "B11.5 tres índices",
+    "estado_en_codigo": "hecho",
+    "evidencia": "schema.prisma:731 (Notification), :1413 (Conversation), :1617 (ChatbotEvent); migración 20260525192047_b11_5_add_3_missing_indexes",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Los DROP de índices redundantes siguen pendientes (hallazgo de índices)."
+   },
+   {
+    "id": "PLAN-1315",
+    "clave": "B13.2 tokens y quick wins",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/modules/chatbot/prisma/seed.ts:217-219 quedan 3 quick replies y el 💰 no está (git grep -F vacío); MarkdownEditor.tsx:11 y :29 detectan placeholders; ColorPicker.tsx:60 h-6 w-6",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1113",
+    "clave": "BP.4 prisma.config.ts y sin heap de 8 GB",
+    "estado_en_codigo": "hecho",
+    "evidencia": "prisma.config.ts:26-34; package.json sin bloque 'prisma': { ni NODE_OPTIONS (git grep vacío; control package.json:157 dependencia prisma)",
+    "sigue_teniendo_sentido": "no",
+    "nota": "netlify.toml:7 mantiene NODE_OPTIONS 4096 para el build de Netlify."
+   },
+   {
+    "id": "PLAN-1129",
+    "clave": "C.0 seeds blindados contra prod",
+    "estado_en_codigo": "hecho",
+    "evidencia": "seed.ts:73-80; seed-agency-os.ts:351, :2386-2389; seed-guard.ts:42-98",
+    "sigue_teniendo_sentido": "no",
+    "nota": "El guard compara por substring y no cubre prisma/seeds/* ni varios scripts (hallazgo y patrón)."
+   },
+   {
+    "id": "PLAN-1055",
+    "clave": "C.0 guard anti-prod + passwords a env",
+    "estado_en_codigo": "hecho",
+    "evidencia": "seed-guard.ts:42-98; seed.ts:75-80; logic-core-v3/.env.example:38-49 documenta SEED_*_PASSWORD sin default",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1086",
+    "clave": "Pre-flight en prod antes del DROP de unlockedFeatures",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "prisma/seeds/migrate-unlocked-features.ts se agregó en c8478587 y se borró en a3180600 (git log --diff-filter=AD), el mismo commit de la migración 20260522214201; no hay pre-flight en el repo",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Sin clientes reales, aceptar la pérdida si prod no aplicó el DROP."
+   },
+   {
+    "id": "PLAN-998",
+    "clave": "Enum-izar ContactSubmission.leadStatus",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "schema.prisma:697 'leadStatus String? @default(\"NUEVO\")'; validación solo en app (src/lib/actions/leads.ts:27)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-993",
+    "clave": "Fallback develop de seed-agency-os roto",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "seed-agency-os.ts:2398 y :2422-2426",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-968",
+    "clave": "Integrar T0/MH/RB al índice de bloques",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git ls-tree -r --name-only origin/main | grep -i 00-INDICE → solo logic-core-v3/docs/manual-usuario/00-INDICE.md; 00-INDICE-bloques-ejecucion.md no está en el repo",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Documento de Franco en Drive; no es código."
+   },
+   {
+    "id": "PLAN-1168",
+    "clave": "Borrar org seed san-miguel",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "seed.ts:198-228 y seed-agency-os.ts:397-416 la siguen creando",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Es el cliente QA A de los tests e2e."
+   },
+   {
+    "id": "PLAN-1166",
+    "clave": "Avisar al socio de la migración UTM-1",
+    "estado_en_codigo": "parcial",
+    "evidencia": "La migración 20260704224423_utm1_add_conversation_utm_fields está en main y el schema la declara (schema.prisma:1384-1386); el aviso no es verificable por código",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1109",
+    "clave": "Stubs de Prisma en el bundle cliente",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep verbatimModuleSyntax en tsconfig.json y next.config.ts → vacío; next.config.ts:25-27 solo serverExternalPackages; 58 imports de valor desde @prisma/client en src",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1139",
+    "clave": "Drift de migraciones entre ramas",
+    "estado_en_codigo": "hecho",
+    "evidencia": "20260710203413_add_portal_indexes y 20260709163143/20260709180000/20260709200000 (b1s1-3) están en main; drift schema↔migraciones = 0",
+    "sigue_teniendo_sentido": "no",
+    "nota": "El estado de la base no se pudo verificar."
+   },
+   {
+    "id": "PLAN-1144",
+    "clave": "Envenenamiento del pool por withDeadline",
+    "estado_en_codigo": "parcial",
+    "evidencia": "withDeadline.ts:14-26 documenta que abandona sin cancelar y persistTurn no reintenta ante deadline (persistTurn.ts:480-482); statement_timeout y lock_timeout no están configurados (git grep statement_timeout vacío; control withDeadline.ts:7 pool_timeout)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1007",
+    "clave": "Drift físico de 7 columnas del lane chatbot",
+    "estado_en_codigo": "hecho",
+    "evidencia": "schema.prisma:409, :1329, :1477, :1481-1483, :1487 las declara; las crean 20260629195726_ev2_vertical_pack_signals_utm/migration.sql:2-9 y 20260630032132_add_org_average_ticket_usd/migration.sql:2",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Resuelto en código; la base no se verificó."
+   },
+   {
+    "id": "PLAN-1029",
+    "clave": "Rotar credencial de la branch Neon dev",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "No verificable por código; nada en el repo indica la rotación",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1059",
+    "clave": "Reconciliar main con 3 migraciones del Neon dev",
+    "estado_en_codigo": "hecho",
+    "evidencia": "20260617184913_add_converted_lead_link_and_bot_deleted_audit, 20260619234252_add_organization_city_avatar_notes_softdelete y 20260620173833_add_agency_settings_singleton_unique están en main",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1080",
+    "clave": "Mitigar latencia de Neon en dev",
+    "estado_en_codigo": "parcial",
+    "evidencia": "24 archivos usan unstable_cache y 7 importan cache de React (git grep); la región o branch de dev no es verificable por código",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1313",
+    "clave": "B13: definir, no agregar (sin schema)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git log origin/main -- prisma/schema.prisma prisma/migrations | grep B13 → vacío; control: commits B13 existen (0ca56f34, bb4cf0d6, b0bc086a)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1000",
+    "clave": "Nada a Neon sin commit y push previo",
+    "estado_en_codigo": "parcial",
+    "evidencia": "No hay control técnico: netlify.toml:2 no migra y no hay CI de migrate status; el caso 20260619140100 (resuelta sin ejecutar) es anterior a la regla",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1238",
+    "clave": "Patrones del admin",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Existen adminHoverCls (src/lib/hover.ts:5), admin/_components/type-to-confirm-dialog.tsx y 18 *.schemas.ts, pero router.push sigue en el admin (CreateBotForm.tsx:80, ClientSwitcher.tsx:67, lead-card.tsx:69, convert-lead-dialog.tsx:132)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1254",
+    "clave": "Chat compartido: solo UI",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/components/dashboard/ClientChatThread.tsx, ClientChatComposer.tsx y ChatBubble.tsx solo importan react, motion, lucide y UI local; los usan admin/tickets/_components/ticket-chat.tsx y dashboard/soporte/[ticketId]/page.tsx",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1350",
+    "clave": "Visual regression spec 22",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tests/e2e/22-visual-regression.spec.ts sigue en el repo; la decisión de re-baseline no tiene rastro en código",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1170",
+    "clave": "Aislamiento dev/prod con Neon branching",
+    "estado_en_codigo": "hecho",
+    "evidencia": "logic-core-v3/.env.example:21-24 (local → branch dev, prod → branch main); seed-guard.ts:18-30 reconoce la branch dev",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1074",
+    "clave": "B0.6 build verde + purga de enviroment.env",
+    "estado_en_codigo": "parcial",
+    "evidencia": "git log origin/main --oneline -- '*enviroment.env' → 39535583 y c351b793: la purga hecha en un mirror local no llegó a origin; tsc 0 errores (baseline F0)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Relacionar con la rotación y con las contraseñas literales de seed del historial."
+   },
+   {
+    "id": "PLAN-994",
+    "clave": "Migraciones de la 3ª tanda (city, avatar*, notas, deletedAt, singleton)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "20260619234252_add_organization_city_avatar_notes_softdelete/migration.sql:2-7 y 20260620173833_add_agency_settings_singleton_unique/migration.sql:2-5 en main; luego DROP (20260621120000) y re-ADD (20260622120000)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1161",
+    "clave": "Baseline y observabilidad",
+    "estado_en_codigo": "hecho",
+    "evidencia": "docs/baselines/2026-05-chatbot-runtime.md y docs/operations/neon-backups.md existen; sentry.server.config.ts y src/instrumentation-client.ts",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1321",
+    "clave": "B14.1 rate limiter persistente en Neon",
+    "estado_en_codigo": "hecho",
+    "evidencia": "schema.prisma:1765-1777; src/lib/rate-limit/limiter.ts:46-54 UPSERT con ON CONFLICT; migración 20260526233939_add_rate_limit_b14_1",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Sin purga de la tabla (schema.prisma:1763-1764; hallazgo de retención)."
+   },
+   {
+    "id": "PLAN-1328",
+    "clave": "Cierre del bloque P5 motor comercial",
+    "estado_en_codigo": "hecho",
+    "evidencia": "20260701150307_add_panel_announcement y 20260701154505_add_referrals en main; schema.prisma:1792-1865",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Verificación visual pendiente según el propio ítem."
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D6-A1] Migración 20260619140100 registrada con migrate resolve --applied sin ejecutar el SQL",
+    "resultado": "confirmada",
+    "evidencia": "La propia historia lo dice: prisma/migrations/20260621120000_reconcile_dev_drift_schema_align/migration.sql:26-28 ('quedó RESUELTA SIN EJECUTAR'). Estructuralmente se neutralizó después: 20260621120000:29 DROP IF EXISTS y 20260622120000:21 ADD IF NOT EXISTS; schema.prisma:1510 declara la columna. El estado real de _prisma_migrations en dev y prod no se puede cerrar por lectura (migrate status de F0 falló): va a verificación humana.",
+    "hallazgo_titulo": "Historial de migraciones con DROP de 9 columnas de cliente revertido al día siguiente y una migración resuelta sin ejecutar"
+   },
+   {
+    "alerta": "[D6-A2] Columnas Organization.avatar*/city/deletedAt/internalNotes, AgencySettings.singleton y chatbot_lead.convertedToOsLeadId: DROP aprobado y después adopción",
+    "resultado": "confirmada",
+    "evidencia": "Hoy el schema las declara (schema.prisma:401-402, :413-419, :823, :1510) y el código las usa: EditClientForm.tsx:82-83, InternalNotesCard.tsx:45, ClientHeader.tsx:51, archiveClient.ts:34, convert-chatbot-lead.actions.ts:71, hardDeleteClient.ts:66. La historia hace DROP (20260621120000:14-29) y re-ADD vacío (20260622120000:13-21): adoptadas, con un DROP intermedio que pierde datos en cualquier base que lo aplique con valores.",
+    "hallazgo_titulo": "Historial de migraciones con DROP de 9 columnas de cliente revertido al día siguiente y una migración resuelta sin ejecutar"
+   },
+   {
+    "alerta": "[D6-A3] Drift de 7 columnas físicas que el schema no declara, contradicho como cliente stale y vuelto a marcar",
+    "resultado": "parcial",
+    "evidencia": "En origin/main el schema declara las 7 (schema.prisma:409, :1329, :1477, :1481-1483, :1487) y las crean 20260629195726_ev2_vertical_pack_signals_utm/migration.sql:2-9 y 20260630032132_add_org_average_ticket_usd/migration.sql:2; drift schema↔migraciones = 0. El drift físico de la base no se puede cerrar por lectura; además esas migraciones usan ADD COLUMN sin IF NOT EXISTS, así que si las columnas ya existían en dev la migración falló o se resolvió sin ejecutar.",
+    "hallazgo_titulo": "Nada aplica ni verifica las migraciones de prod; una migración asume que Netlify las autoaplica"
+   },
+   {
+    "alerta": "[D6-A4] Orden de migraciones: B4.4 (20260522214201) con timestamp anterior a B4.1 (20260522234313) y B4.3 (20260523001750)",
+    "resultado": "descartada",
+    "evidencia": "La inversión existe (las tres entran en el commit a3180600) pero no tiene efecto: B4.4 solo hace DROP de User.unlockedFeatures (20260522214201/migration.sql:15) y B4.1/B4.3 solo tocan plan y Subscription (20260522234313/migration.sql:8-40, 20260523001750/migration.sql:2-16). Aplicadas en cualquier orden dan el mismo schema."
+   },
+   {
+    "alerta": "[D6-A5] Cerrar lead → cliente: FK OsLead→Organization propuesta contra ChatbotLead.convertedToOsLeadId como string suelto",
+    "resultado": "parcial",
+    "evidencia": "OsLead no tiene organizationId ni FK a Organization (schema.prisma:862-901); convertedToOsLeadId sigue siendo String sin FK por decisión (schema.prisma:1505-1510); el vínculo lead→cliente existe indirecto por Project.osLeadId @unique (schema.prisma:557, :562) y hardDeleteClient lo usa (hardDeleteClient.ts:60-73), con referencia colgante posible (:75-76). Es una decisión de diseño abierta, sin hallazgo propio."
+   },
+   {
+    "alerta": "[D6-A6] Base de test dedicada pendiente: las suites corren contra Neon dev",
+    "resultado": "confirmada",
+    "evidencia": "git grep DATABASE_URL_TEST → vacío; playwright.integration.config.ts:9-16 carga DATABASE_URL con dotenv; los specs borran datos (tests/e2e/30-onboarding-e2e-complete.spec.ts:153-156, tests/helpers/setter-db.ts:373-376) sin ningún guard de host.",
+    "hallazgo_titulo": "Los tests e2e e integración escriben y borran en la branch Neon dev compartida, sin base de test ni guard de entorno"
+   },
+   {
+    "alerta": "[D6-A7] Runner de seeds: tsx contra ts-node --transpile-only",
+    "resultado": "confirmada",
+    "evidencia": "Conviven los dos: prisma.config.ts:32 usa 'npx tsx prisma/seed.ts'; package.json:17-18 usa ts-node con chequeo de tipos para seed-agency-os y package.json:20 ts-node --transpile-only para seed:latency. seed-agency-os.ts:26 importa './seed-guard.ts' con extensión.",
+    "hallazgo_titulo": "Dos runners para los seeds: tsx en prisma db seed y ts-node en seed:agency-os"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "prisma/migrate-os-to-unified.ts",
+    "senales": [
+     "Solo cuenta filas de Project, Task y OsLead (líneas 6-10) y declara la migración 'finalizada' (14-15)",
+     "Último commit 3cdcc55e del 2026-04-06",
+     "Lo invoca package.json:19 (migrate:os-v2) con ts-node"
+    ],
+    "que_rompe": "Nada: es de solo lectura. Quitar también el script migrate:os-v2 de package.json."
+   },
+   {
+    "archivo": "prisma/backups/backup.js",
+    "senales": [
+     "Usa prisma.modulePricing (línea 6), modelo que ya no existe en el schema: fallaría al correr",
+     "Último commit c8478587 del 2026-04-27",
+     "Sin referencias desde package.json ni scripts"
+    ],
+    "que_rompe": "Nada."
+   },
+   {
+    "archivo": "prisma/backups/module-pricing-legacy.json, organization-module-pre-push.json, premium-module-pre-push.json",
+    "senales": [
+     "Dumps de datos de abril commiteados en un repo público (11, 1 y 9 filas; una con organizationId)",
+     "Generados por backup.js, que ya no puede correr"
+    ],
+    "que_rompe": "Nada salvo la referencia histórica (sigue en git)."
+   },
+   {
+    "archivo": "prisma/migrations/__diff_check.sql",
+    "senales": [
+     "0 bytes",
+     "Está suelto en la raíz de migrations (Prisma solo lee carpetas)",
+     "Commit 7fe804db del 2026-04-28"
+    ],
+    "que_rompe": "Nada."
+   },
+   {
+    "archivo": "package.json (script seed:agency-os-v2, línea 18)",
+    "senales": [
+     "Duplicado exacto de seed:agency-os (línea 17)"
+    ],
+    "que_rompe": "Nada."
+   },
+   {
+    "archivo": "prisma/seed-agency-os.ts (líneas 31-47, DEFAULT_AGENCY_SETTINGS local)",
+    "senales": [
+     "Duplica src/lib/agency-settings.ts:1-19, que seed.ts:19 ya importa",
+     "Valores idénticos hoy; pueden divergir"
+    ],
+    "que_rompe": "Nada si se reemplaza por el import."
+   },
+   {
+    "archivo": "prisma/schema.prisma (Organization.n8nWorkflowIds, línea 339)",
+    "senales": [
+     "Sin lectores en src",
+     "Único escritor src/lib/actions/clients.ts:164,199, módulo sin importadores (D1)",
+     "Seeds lo siguen llenando (seed.ts:204,219)"
+    ],
+    "que_rompe": "Requiere migración DROP COLUMN sobre schema FROZEN: decisión para Valentino."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Estado de migraciones en prod y dev (solo lectura)",
+    "entorno": "Máquina local, PowerShell, Prisma 6.19 de node_modules; primero contra prod (Neon main) y después contra dev",
+    "precondiciones": "Tener la URL de cada branch a mano sin pegarla en ningún archivo; no correr migrate deploy ni resolve durante la prueba",
+    "pasos": [
+     "Abrir una terminal nueva en logic-core-v3 y setear $env:DATABASE_URL con la URL de prod",
+     "npx prisma migrate status",
+     "npx prisma migrate diff --from-url $env:DATABASE_URL --to-schema-datamodel prisma/schema.prisma --script > $env:TEMP\\diff-prod.sql (lee la base y escribe el SQL en un archivo temporal)",
+     "Si 20260621120000_reconcile_dev_drift_schema_align figura pendiente, en el SQL editor de Neon (solo lectura): SELECT count(*) FILTER (WHERE \"deletedAt\" IS NOT NULL) AS archivados, count(*) FILTER (WHERE \"internalNotes\" IS NOT NULL) AS con_notas FROM \"Organization\"; y SELECT count(*) FROM chatbot_lead WHERE \"convertedToOsLeadId\" IS NOT NULL;",
+     "Repetir los pasos 1-3 con la URL de dev",
+     "Cerrar la terminal (la variable no queda guardada)"
+    ],
+    "esperado": "'Database schema is up to date!' con las 86 migraciones en prod y en dev, y diff-prod.sql vacío",
+    "senal_falla": "Migraciones pendientes o fallidas (en especial 20260621120000/20260622120000, 20260629195726 y las del motor de julio) o un diff con ALTER/CREATE: la base no coincide con el código desplegado",
+    "escribe_db_o_email": false,
+    "hallazgos": "Historial de migraciones con DROP de 9 columnas; Nada aplica ni verifica las migraciones de prod; D6-A1; D6-A3; MIG-02"
+   },
+   {
+    "titulo": "seed-agency-os aborta en el proyecto interno (solo dev)",
+    "entorno": "Local contra la branch Neon dev",
+    "precondiciones": "SEED_ADMIN_PASSWORD y SEED_CLIENT_PASSWORD en .env; avisar a Franco porque la base es compartida",
+    "pasos": [
+     "npx tsx prisma/seed-agency-os.ts",
+     "Anotar la última línea de salida y $LASTEXITCODE",
+     "En el SQL editor de dev: SELECT name FROM \"Project\" WHERE id LIKE 'osv2-project-%';",
+     "SELECT count(*) FROM \"ContactSubmission\" WHERE id LIKE 'osv2-contact-submission-%';"
+    ],
+    "esperado": "El seed termina con 'Agency OS v2 seed listo', crea los 4 proyectos y las 2 ContactSubmission",
+    "senal_falla": "Error 'No se encontro organizationId para develop', código de salida 1, solo los proyectos de san-miguel y sonrisa-norte y 0 ContactSubmission del seed",
+    "escribe_db_o_email": true,
+    "hallazgos": "seed-agency-os aborta siempre en el proyecto interno; PLAN-1061; PLAN-993"
+   },
+   {
+    "titulo": "seed:agency-os con ts-node compila (sin tocar ninguna base)",
+    "entorno": "Local, PowerShell, sin conexión a ninguna base",
+    "precondiciones": "ALLOW_PROD_SEED sin setear",
+    "pasos": [
+     "$env:DATABASE_URL = 'postgresql://u:p@example.invalid:5432/db'",
+     "npm run seed:agency-os",
+     "Remove-Item Env:DATABASE_URL"
+    ],
+    "esperado": "Sale con 'ABORT (seed-agency-os.ts): el host de DATABASE_URL \"example.invalid:5432\" no parece dev/local' (compiló y el guard cortó antes de cualquier query)",
+    "senal_falla": "TSError (por ejemplo TS5096 sobre allowImportingTsExtensions o un error por la extensión .ts del import) o 'Cannot use import statement outside a module': el runner documentado no sirve",
+    "escribe_db_o_email": false,
+    "hallazgos": "Dos runners para los seeds; D6-A7"
+   },
+   {
+    "titulo": "Cuentas de seed presentes en prod (solo lectura)",
+    "entorno": "SQL editor de Neon, branch main (prod)",
+    "precondiciones": "Acceso de lectura a prod",
+    "pasos": [
+     "SELECT email, role, \"passwordResetRequired\", \"updatedAt\" FROM \"User\" WHERE email IN ('admin@develop.com','franco@develop.com','valentino@develop.com','cliente@sanmiguel.com','setter-qa@develop.test','qa-cliente-b@develop.test','cliente@sonrisanorte.com','cliente@sigma-contable.com');",
+     "Si aparece alguna, rotar su contraseña por el flujo de reset o borrar la cuenta si es de seed, sin copiar hashes fuera de la base"
+    ],
+    "esperado": "0 filas en prod",
+    "senal_falla": "Alguna fila, sobre todo con role SUPER_ADMIN: credencial potencialmente pública por el historial de seeds (escalar a CRÍTICA)",
+    "escribe_db_o_email": false,
+    "hallazgos": "Contraseñas literales de seed del historial siguen válidas"
+   },
+   {
+    "titulo": "Cold start de Neon en prod (solo lectura)",
+    "entorno": "Consola de Neon, panel de Netlify y navegador contra el sitio de prod",
+    "precondiciones": "Acceso a Neon y Netlify",
+    "pasos": [
+     "En Neon → branch main → compute: anotar si scale-to-zero/autosuspend está activo y con qué demora",
+     "En Netlify → Environment variables → DATABASE_URL: verificar (sin copiar el valor) si incluye connect_timeout y pool_timeout",
+     "Si hay autosuspend: esperar más que esa demora sin tráfico y pedir GET /api/chatbot/<slug-de-un-bot>/config (solo lee)",
+     "Revisar en Sentry y en los logs de Netlify si hubo P1001/P1002 en ese momento"
+    ],
+    "esperado": "La primera respuesta llega (más lenta) sin error; connect_timeout de 15 o más, o autosuspend desactivado en prod",
+    "senal_falla": "Error 500 o 'Can't reach database server' (P1001) en el primer pedido después de la inactividad",
+    "escribe_db_o_email": false,
+    "hallazgos": "Sin margen configurado en código para el cold start de Neon"
+   },
+   {
+    "titulo": "Proyectos legacy asignados por coincidencia de nombre (solo lectura)",
+    "entorno": "SQL editor de Neon, branch dev y después main",
+    "precondiciones": "Acceso de lectura",
+    "pasos": [
+     "SELECT o.slug, o.\"companyName\", count(m.id) AS miembros FROM \"Organization\" o LEFT JOIN \"OrgMember\" m ON m.\"organizationId\" = o.id WHERE o.slug LIKE 'agency-os-%' GROUP BY 1, 2;",
+     "SELECT p.id, p.name, p.status, o.\"companyName\", l.\"businessName\" FROM \"Project\" p JOIN \"Organization\" o ON o.id = p.\"organizationId\" LEFT JOIN \"OsLead\" l ON l.id = p.\"osLeadId\" ORDER BY o.\"companyName\";",
+     "Comparar a mano: cada proyecto con OsLead tiene que estar en la org de ese negocio; ningún proyecto cancelado puede figurar como COMPLETED"
+    ],
+    "esperado": "Sin orgs 'agency-os-%' huérfanas con proyectos de clientes y cada proyecto en su organización",
+    "senal_falla": "Un proyecto cuyo OsLead.businessName no corresponde a la org donde está, u orgs 'agency-os-%' sin miembros",
+    "escribe_db_o_email": false,
+    "hallazgos": "La migración 20260406010000 asignó proyectos legacy por coincidencia difusa de nombre"
+   },
+   {
+    "titulo": "Precio del plan después de un upgrade (dev)",
+    "entorno": "npm run dev contra Neon dev con las cuentas de seed",
+    "precondiciones": "Planes sembrados (npx tsx prisma/seeds/sync-plans.ts); QA Cliente B SA sin suscripción o en STARTER",
+    "pasos": [
+     "Entrar como admin@develop.com → /admin/clients → QA Cliente B SA → asignar STARTER",
+     "Cambiar a PRO (upgrade inmediato)",
+     "Entrar como qa-cliente-b@develop.test → /dashboard/cuenta/perfil → sección Plan"
+    ],
+    "esperado": "Plan PRO con el precio mensual de PRO",
+    "senal_falla": "Plan PRO con el precio de STARTER",
+    "escribe_db_o_email": true,
+    "hallazgos": "El portal muestra un precio de plan desactualizado"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "El datasource no declara directUrl y prisma.config.ts tampoco lo define",
+    "comando": "git grep -n \"directUrl\" origin/main -- logic-core-v3/prisma/schema.prisma logic-core-v3/prisma.config.ts → sin resultados",
+    "control_positivo": "git grep -n 'env(\"DATABASE_URL\")' origin/main -- logic-core-v3/prisma/schema.prisma → schema.prisma:7"
+   },
+   {
+    "afirmacion": "Fuera del listado admin, nadie filtra Organization.deletedAt (auth, portal, chatbot público, crons)",
+    "comando": "git grep -n \"deletedAt\" origin/main -- logic-core-v3/src → solo admin/announcements/page.tsx:27, admin/clients/page.tsx:17-36 y archiveClient.ts",
+    "control_positivo": "El mismo comando devuelve admin/clients/page.tsx:23 'where: { deletedAt: null }' (el patrón encuentra usos reales)"
+   },
+   {
+    "afirmacion": "organizationIdBySlug nunca recibe la clave 'develop' en seed-agency-os",
+    "comando": "git grep -n -E \"organizationIdBySlug.set|slug: 'develop'\" origin/main -- logic-core-v3/prisma/seed-agency-os.ts → solo :2398, que itera organizationSeeds",
+    "control_positivo": "git grep -n \"slug: 'san-miguel'\" origin/main -- logic-core-v3/prisma/seed-agency-os.ts → :398"
+   },
+   {
+    "afirmacion": "No hay escritor de calComApiKey, calComUsername, calComEmbedUrl ni googleMapsPlaceId en src, scripts ni prisma",
+    "comando": "git grep -n -E \"calComApiKey|calComUsername|calComEmbedUrl|googleMapsPlaceId\" origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma → solo selects y lecturas (agenda-inteligente/page.tsx:325-348, cal-com.ts:27-29, motor-resenas/page.tsx:113-161, leados/agenda.ts:59), migraciones y schema",
+    "control_positivo": "git grep -n \"brevoListId: listId\" origin/main -- logic-core-v3/src → dashboard/modules/email-marketing/_actions.ts:38 (el escritor de una columna hermana sí aparece)"
+   },
+   {
+    "afirmacion": "No hay purga por antigüedad de rate_limit, chatbot_message ni ContactSubmission",
+    "comando": "git grep -n -E \"(rateLimit|chatMessage|contactSubmission)\\.deleteMany\\(\" origin/main -- logic-core-v3/src → sin resultados",
+    "control_positivo": "git grep -n \"chatbotEvent.deleteMany\" origin/main -- logic-core-v3/src → modules/chatbot/server/logging/persistentLogger.ts:160"
+   },
+   {
+    "afirmacion": "No existe DATABASE_URL_TEST ni guard de host en los tests",
+    "comando": "git grep -n -E \"DATABASE_URL_TEST|assertDevSeedTarget|ALLOW_PROD_SEED|ep-quiet\" origin/main -- logic-core-v3/tests logic-core-v3/playwright.config.ts logic-core-v3/playwright.integration.config.ts → sin resultados",
+    "control_positivo": "git grep -n \"DATABASE_URL\" origin/main -- logic-core-v3/playwright.integration.config.ts → :10 y :15"
+   },
+   {
+    "afirmacion": "Ningún camino de src borra Users",
+    "comando": "git grep -n -E \"\\.user\\.(delete|deleteMany)\\(\" origin/main -- logic-core-v3/src → sin resultados",
+    "control_positivo": "El mismo patrón en logic-core-v3/tests → tests/e2e/30-onboarding-e2e-complete.spec.ts:156 y tests/helpers/setter-db.ts:376"
+   },
+   {
+    "afirmacion": "El build y el deploy no corren prisma migrate deploy",
+    "comando": "git grep -n \"migrate deploy\" origin/main -- logic-core-v3/package.json logic-core-v3/netlify.toml logic-core-v3/vercel.json → sin resultados",
+    "control_positivo": "git grep -n \"migrate deploy\" origin/main -- logic-core-v3/DEPLOY.md → DEPLOY.md:52"
+   },
+   {
+    "afirmacion": "Las rutas de cambio de plan no actualizan Subscription.price",
+    "comando": "git grep -n -E \"\\bprice:\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/clients/_actions/plan.actions.ts\" logic-core-v3/src/lib/plan/get-plan-for-org.ts → solo plan.actions.ts:192, dentro del create",
+    "control_positivo": "El mismo comando encuentra plan.actions.ts:192 'price: targetPlan.monthlyPrice.toNumber()'"
+   },
+   {
+    "afirmacion": "Los tokens de GBP, Tiendanube, Cal.com y Telegram no pasan por cifrado",
+    "comando": "git grep -n -i -E \"encrypt|secret-box\" origin/main -- logic-core-v3/src/app/api/auth/google-business logic-core-v3/src/app/api/auth/tiendanube logic-core-v3/src/lib/integrations logic-core-v3/src/lib/notifications/telegram.ts → sin resultados",
+    "control_positivo": "git grep -l \"secret-box\" origin/main -- logic-core-v3/src/modules → motor/services/sendMessage.ts y chatbot/server/crm/*"
+   },
+   {
+    "afirmacion": "No hay statement_timeout configurado",
+    "comando": "git grep -n \"statement_timeout\" origin/main -- logic-core-v3/src logic-core-v3/prisma → sin resultados",
+    "control_positivo": "git grep -n \"pool_timeout\" origin/main -- logic-core-v3/src → modules/chatbot/server/chat/withDeadline.ts:7"
+   },
+   {
+    "afirmacion": "AdminAuditLog no tiene organizationId ni targetOrganizationId",
+    "comando": "git grep -n \"targetOrganizationId\" origin/main -- logic-core-v3/prisma/schema.prisma logic-core-v3/src → sin resultados",
+    "control_positivo": "git grep -n \"targetId \" origin/main -- logic-core-v3/prisma/schema.prisma → :1662"
+   },
+   {
+    "afirmacion": "Los seeds del lote no crean OrganizationModule (módulos premium activos para QA)",
+    "comando": "git grep -n -i \"organizationModule\" origin/main -- logic-core-v3/prisma/seed.ts logic-core-v3/prisma/seed-agency-os.ts → sin resultados",
+    "control_positivo": "git grep -n \"organizationModule\" origin/main -- logic-core-v3/prisma/seeds/sync-premium-modules.ts → :73 y :105"
+   },
+   {
+    "afirmacion": "No hay páginas legales en src/app ni campos de consentimiento en el schema",
+    "comando": "git ls-tree -r --name-only origin/main logic-core-v3/src/app | grep -i -E \"privac|terminos|legal|cookies\" → vacío; git grep -n -i \"consent\" origin/main -- logic-core-v3/prisma/schema.prisma → vacío",
+    "control_positivo": "git ls-tree -r --name-only origin/main logic-core-v3/src/app/contact → contact/page.tsx; git grep -n \"optedOut \" origin/main -- logic-core-v3/prisma/schema.prisma → :1222"
+   },
+   {
+    "afirmacion": "Ningún commit de B13 tocó schema ni migraciones",
+    "comando": "git log --format='%h %s' origin/main -- logic-core-v3/prisma/schema.prisma logic-core-v3/prisma/migrations | grep -i -E \"\\bB13\" → vacío",
+    "control_positivo": "git log --format='%h %s' origin/main | grep -i -E \"\\bB13\" → 0ca56f34, bb4cf0d6, b0bc086a"
+   },
+   {
+    "afirmacion": "No hay umbral de gasto de LLM",
+    "comando": "git grep -n -i -E \"spend(ing)?Limit|costLimit|budgetUsd|maxCostUsd|costThreshold|monthlyBudget|LLM_BUDGET\" origin/main -- logic-core-v3/src → sin resultados",
+    "control_positivo": "git grep -n \"estimatedCostUsd: { increment\" origin/main -- logic-core-v3/src → modules/chatbot/server/chat/persistTurn.ts:450"
+   },
+   {
+    "afirmacion": "00-INDICE-bloques-ejecucion.md no existe en el repo",
+    "comando": "git ls-tree -r --name-only origin/main | grep -i \"00-INDICE\" → solo logic-core-v3/docs/manual-usuario/00-INDICE.md",
+    "control_positivo": "El mismo comando devuelve ese archivo (el patrón encuentra índices existentes)"
+   },
+   {
+    "afirmacion": "El quick reply 💰 ya no está en el seed del bot develOP",
+    "comando": "git grep -n -F \"💰\" origin/main -- logic-core-v3/src/modules/chatbot/prisma/seed.ts → sin resultados",
+    "control_positivo": "git grep -n \"emoji: '\" origin/main -- logic-core-v3/src/modules/chatbot/prisma/seed.ts → :217, :218, :219"
+   },
+   {
+    "afirmacion": "verbatimModuleSyntax no está configurado",
+    "comando": "git grep -n \"verbatimModuleSyntax\" origin/main -- logic-core-v3/tsconfig.json logic-core-v3/next.config.ts → sin resultados",
+    "control_positivo": "git grep -n \"allowImportingTsExtensions\" origin/main -- logic-core-v3/tsconfig.json → :18"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Scripts y seeds que escriben o borran en la base sin assertDevSeedTarget",
+    "como_buscarlo": "git grep -l \"new PrismaClient\\|unsafeGlobalQuery\" origin/main -- logic-core-v3/scripts logic-core-v3/prisma/seeds logic-core-v3/src/modules/chatbot/prisma y restar los que importan seed-guard (git grep -l assertDevSeedTarget); revisar los deleteMany de los restantes",
+    "donde_aparecio": "prisma/seeds/sync-premium-modules.ts:105-113 (borra OrganizationModule no ACTIVE de todas las orgs), scripts/dev/seed-events.ts:118-121, scripts/seed-messages-demo.ts:160, scripts/p41-inject-campaigns.ts:16, src/modules/chatbot/prisma/seed.ts (sin guard), prisma/migrate-os-to-unified.ts"
+   },
+   {
+    "patron": "Columnas del schema sin ningún escritor en la app (features que solo se activan editando la base)",
+    "como_buscarlo": "Por cada campo de schema.prisma: git grep -n -E \"\\b<campo>\\b\" origin/main -- logic-core-v3/src y descartar los 'campo: true' de select; si no queda ninguna asignación, no hay escritor",
+    "donde_aparecio": "Organization.calComApiKey/calComUsername/calComEmbedUrl (schema.prisma:375-377) y googleMapsPlaceId (:363)"
+   },
+   {
+    "patron": "Over-fetch de Organization con tokens en claro (include: { organization: true } o findUnique sin select) que pueda llegar a un client component, un log o Sentry",
+    "como_buscarlo": "git grep -n \"organization: true\" origin/main -- logic-core-v3/src y git grep -n -A3 \"organization.findUnique({\" sin 'select'; seguir el objeto hasta su destino",
+    "donde_aparecio": "src/app/api/cron/generate-insights/route.ts:20, src/modules/chatbot/server/insights/generateInsights.ts:51, src/modules/chatbot/server/tools/captureLead.ts:426, src/app/api/admin/chatbot/demo-chat/[slug]/route.ts:46 (admin/tickets mapea campos y está bien: ticket.actions.ts:140-175)"
+   },
+   {
+    "patron": "Doble fuente de verdad en datos de facturación (Subscription.price frente a Plan.monthlyPrice y priceOverride)",
+    "como_buscarlo": "git grep -n -E \"subscription\\??\\.price|\\.monthlyPrice|priceOverride\" origin/main -- logic-core-v3/src y comprobar qué fuente muestra cada pantalla",
+    "donde_aparecio": "dashboard/cuenta/perfil/page.tsx:211, admin/clients/_actions/plan.actions.ts:179-200, lib/plan/get-plan-for-org.ts:50-58"
+   },
+   {
+    "patron": "Soft-delete de Organization no respetado por los lectores",
+    "como_buscarlo": "git grep -n \"deletedAt\" origin/main -- logic-core-v3/src y compararlo con cada lugar que resuelve una org (resolveOrgId, auth.ts, carga del bot público, crons)",
+    "donde_aparecio": "Solo admin/clients/page.tsx:23,34, admin/announcements/page.tsx:27 y archiveClient.ts"
+   },
+   {
+    "patron": "Notification se escribe con userId pero se lee y se marca por organizationId (todos los miembros ven y marcan las de todos); el cron os-follow-up usa la tabla como marcador de idempotencia por título",
+    "como_buscarlo": "git grep -n -E \"notification\\.(findMany|findFirst|updateMany)\\(\" origin/main -- logic-core-v3/src y ver si filtran userId",
+    "donde_aparecio": "src/lib/actions/notifications.ts:33, :55, :82 (solo organizationId) frente a schema.prisma:718; src/app/api/cron/os-follow-up/route.ts:168-174 y :276-286"
+   },
+   {
+    "patron": "Raíz de esquema del patrón D1-c1 'tokens de un solo uso en claro': PasswordResetToken.token se guarda sin hash",
+    "como_buscarlo": "git grep -n -E \"passwordResetToken\\.(create|findUnique|findFirst)\" origin/main -- logic-core-v3/src y verificar si se hashea antes de escribir y de buscar",
+    "donde_aparecio": "prisma/schema.prisma:317-328 (token String @unique sin columna de hash); D1 lo vio en forgot-password/actions.ts:73"
+   },
+   {
+    "patron": "Raíz de esquema del patrón D1-c3 'escritura en cada navegación a una columna sin lectores'",
+    "como_buscarlo": "git grep -n \"lastDashboardVisit\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "prisma/schema.prisma:299 User.lastDashboardVisit"
+   },
+   {
+    "patron": "El registry de aislamiento cubre solo los 18 modelos de chatbot y motor; los modelos del portal con organizationId se consultan con prisma directo y filtro manual",
+    "como_buscarlo": "git show origin/main:logic-core-v3/src/lib/isolation/registry.ts | grep \"model: '\" y compararlo con los modelos de schema.prisma que tienen organizationId; luego git grep -n \"prisma\\.<modelo>\\.\" en src/app/(protected)/dashboard",
+    "donde_aparecio": "registry.ts:218-434 frente a Project, Ticket, Message, Invoice, Notification, OnboardingTask, EmailContact, EmailCampaign, OrganizationModule, Subscription, ClientAsset, ReferralCode, Referral (schema.prisma)"
+   },
+   {
+    "patron": "Migraciones con ADD COLUMN sin IF NOT EXISTS aplicadas sobre una base con drift conocido (fallan o se resuelven sin ejecutar)",
+    "como_buscarlo": "git grep -n \"ADD COLUMN \" origin/main -- logic-core-v3/prisma/migrations | grep -v \"IF NOT EXISTS\" para migraciones posteriores a 2026-06-17, cruzado con las notas de drift de las bitácoras",
+    "donde_aparecio": "prisma/migrations/20260629195726_ev2_vertical_pack_signals_utm/migration.sql:2-9"
+   },
+   {
+    "patron": "Hard-delete o cascadas que dejan User huérfanos con PII y credenciales",
+    "como_buscarlo": "git grep -n -E \"organization\\.(delete|deleteMany)\\(\" origin/main -- logic-core-v3/src logic-core-v3/tests y revisar qué pasa con los User de esas orgs",
+    "donde_aparecio": "src/modules/chatbot/server/admin/hardDeleteClient.ts:141; src/modules/chatbot/evals/seed-eval-bots.ts:141"
+   },
+   {
+    "patron": "Dos archivos instrumentation.ts: el de la raíz sin onRequestError y el de src/ con Sentry.captureRequestError; confirmar cuál carga Next",
+    "como_buscarlo": "git ls-tree origin/main logic-core-v3/instrumentation.ts logic-core-v3/src/instrumentation.ts y git grep -n onRequestError",
+    "donde_aparecio": "instrumentation.ts:1-8 y src/instrumentation.ts:49"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/audits/2026-05-auditoria-profunda.md:36",
+    "id_previo": "P0-5",
+    "estado": "cerrado",
+    "evidencia": "schema.prisma:559 'organizationId String' (NOT NULL) con onDelete Cascade (:560); prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql:11 SET NOT NULL"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md:145",
+    "id_previo": "DB-P0-1",
+    "estado": "cerrado",
+    "evidencia": "Existe el modelo Plan (schema.prisma:606-632) con FK Subscription.planId (:638-639); planName se borró en 20260605225019_drop_subscription_plan_name"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md:147",
+    "id_previo": "DB-P0-3",
+    "estado": "cerrado",
+    "evidencia": "schema.prisma:559 NOT NULL. La fila huérfana se borró fuera de la historia: 20260525182135_b11_1/migration.sql:4 advierte que falla con NULL y no trae backfill"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md:153",
+    "id_previo": "DB-P1-1",
+    "estado": "cerrado",
+    "evidencia": "src/modules/chatbot/server/chat/persistTurn.ts:412 scope.$transaction envuelve chatMessage.create y conversation.update con los increment (:446-452)"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md:155",
+    "id_previo": "DB-P1-3",
+    "estado": "cerrado",
+    "evidencia": "20260522214201_drop_user_unlocked_features/migration.sql:15 DROP COLUMN; User ya no lo declara (schema.prisma:286-315); en src solo queda un comentario (src/lib/premium-modules.ts:15)"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md:156",
+    "id_previo": "DB-P1-4",
+    "estado": "cerrado",
+    "evidencia": "BusinessMetric y PageView usan organizationId con FK a Organization (schema.prisma:797-819); migración 20260525192312_b11_6_clientid_to_organizationid"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md:157",
+    "id_previo": "DB-P1-5",
+    "estado": "abierto",
+    "evidencia": "AdminAuditLog (schema.prisma:1652-1676) sigue sin organizationId ni targetOrganizationId (git grep vacío; control targetId en :1662)"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md:160",
+    "id_previo": "DB-P1-8",
+    "estado": "cerrado",
+    "evidencia": "schema.prisma:1617 @@index([botConfigId, type, createdAt(sort: Desc)]); migración 20260525192047_b11_5_add_3_missing_indexes"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:60",
+    "id_previo": "NUEVO-P0-1",
+    "estado": "cerrado",
+    "evidencia": "handleChatRequest.ts:713 usa normalizeLlmProvider(bot.llmProvider) (providerMapper.ts:14-27 mapea GOOGLE→'google'). Hoy el bot no responde por la credencial de Vertex vencida (hecho conocido), no por el casing"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:62",
+    "id_previo": "P0-1",
+    "estado": "cerrado",
+    "evidencia": "prisma/seed.ts:781-811 crea el BotConfig 'sanmiguel' y :813-833 su KnowledgeBase; en la base depende de volver a correr el seed"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:66",
+    "id_previo": "P0-5",
+    "estado": "cerrado",
+    "evidencia": "schema.prisma:559-560 Project.organizationId NOT NULL con Cascade"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:75",
+    "id_previo": "NUEVO-P1-2",
+    "estado": "cerrado",
+    "evidencia": "Subscription ya no tiene planName (schema.prisma:634-668; migración 20260605225019). Queda otra doble fuente: Subscription.price frente a Plan.monthlyPrice (hallazgo del precio desactualizado)"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion.md:54",
+    "id_previo": "N-1",
+    "estado": "cerrado",
+    "evidencia": "Igual que NUEVO-P0-1: handleChatRequest.ts:713 con normalizeLlmProvider, sin cast 'as'"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion.md:57",
+    "id_previo": "N-4",
+    "estado": "cerrado",
+    "evidencia": "planName eliminado (schema.prisma:634-668; 20260605225019_drop_subscription_plan_name)"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion.md:67",
+    "id_previo": "P0-5",
+    "estado": "cerrado",
+    "evidencia": "schema.prisma:559 NOT NULL; 20260525182135_b11_1/migration.sql:11"
+   },
+   {
+    "doc": "docs/b8a-auditoria.md:76",
+    "id_previo": "H8",
+    "estado": "cerrado",
+    "evidencia": "prisma/seed.ts:150-167 siembra setter-qa@develop.test con passwordResetRequired false (:157, :165), commit 58ce48fe; efectivo en la base solo después de re-sembrar"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:101",
+    "id_previo": "P0-5",
+    "estado": "cerrado",
+    "evidencia": "Project.organizationId NOT NULL (schema.prisma:559); Task se acota por la relación (ej. health-score.ts:387-388 filtra project.organizationId)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1152",
+    "id_previo": "MIG-01",
+    "estado": "abierto",
+    "evidencia": "schema.prisma:5-8 sin directUrl (git grep vacío); logic-core-v3/.env.example:28-35 documenta DATABASE_URL pooled y DIRECT_DATABASE_URL solo para pg_dump"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1153",
+    "id_previo": "MIG-02",
+    "estado": "parcial",
+    "evidencia": "Tablas y enums del motor ya están en el schema (schema.prisma:1884-2247) y en migraciones (20260707044711_motor_whatsapp_b0_schema, 20260709163143, 20260709180000, 20260709200000); drift schema↔migraciones = 0. El estado de la base no se verificó (migrate status de F0 falló sin DATABASE_URL)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1632",
+    "id_previo": "OBS-05",
+    "estado": "parcial",
+    "evidencia": "Hay costo por turno (persistTurn.ts:450 estimatedCostUsd; src/modules/chatbot/server/pricing/costs.ts) y QuotaUsage.costUsd (schema.prisma:1585), pero no hay umbral ni alerta de gasto (git grep de spendLimit/costLimit/budget vacío)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1634",
+    "id_previo": "OBS-06",
+    "estado": "parcial",
+    "evidencia": "chatbot_events tiene retención de 30 días (cleanup-old-events/route.ts:14, persistentLogger.ts:160); conversaciones, mensajes, leads y rate_limit siguen sin retención (hallazgo de retención)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1908",
+    "id_previo": "LEG-01",
+    "estado": "abierto",
+    "evidencia": "No hay páginas legales en src/app (git ls-tree … | grep privac|terminos|legal|cookies vacío), ni campos de consentimiento en el schema, ni aviso en contact/page.tsx o en el chat (git grep vacío; control: contact/page.tsx tiene un form)"
+   }
+  ]
+ },
+ "verificacion": null
+}

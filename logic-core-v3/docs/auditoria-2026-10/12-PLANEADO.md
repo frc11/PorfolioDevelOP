@@ -7,7 +7,7 @@
 ## Resumen
 
 - Ítems: **1351** — por tipo: decision 212 · hecho-declarado 443 · idea 56 · pendiente 556 · promesa 6 · bloque 78.
-- Estado en código: hecho 8 · parcial 4 · no empezado 9 · por cruzar 1330.
+- Estado en código: hecho 41 · parcial 17 · no empezado 32 · por cruzar 1258 · contradicho 2 · abandonado 1.
 - ZONA-FRANCO: 361 ítems.
 - TODO/FIXME en el código de `origin/main`: 70 (`_crudo/todos-codigo.json`).
 
@@ -7825,8 +7825,8 @@
 - Nodo(s): lib.otro
 - Qué es: Sumar 'R1 exige MH' y EST.0 al 00-INDICE. Las hojas de corrida de T0, MH y RB no están generadas.
 - Referencias: 00-INDICE-bloques-ejecucion.md · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:71
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git ls-tree -r --name-only origin/main | grep -i 00-INDICE → solo logic-core-v3/docs/manual-usuario/00-INDICE.md; 00-INDICE-bloques-ejecucion.md no está en el repo (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-969] Archivar pendientes-delta en docs/roadmap-pendientes.md
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:93` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-06
@@ -8017,32 +8017,32 @@
 - Nodo(s): lib.plataforma
 - Qué es: El default 'generic' del schema es código muerto (cambiarlo exige migración). DIRECT_URL sin setear. Reconciliar las branches main y prod. Gobernanza de Vertex/GCP a cargo de Franco.
 - Referencias: prisma/schema.prisma · DIRECT_URL · tambien en Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:168
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — schema.prisma:1324 default 'generic' (canónico 'generico' en createClientWithBot.ts:17); sin directUrl (schema.prisma:5-8); no existe rama git prod (git branch -a); credencial de Vertex vencida (hecho conocido) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-993] Fallback develop de seed-agency-os roto
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:68` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-16
 - Nodo(s): lib.plataforma
 - Qué es: El map organizationIdBySlug nunca recibe la key. Bug separado.
 - Referencias: seed-agency-os · organizationIdBySlug
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — seed-agency-os.ts:2398 y :2422-2426 (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-994] Migraciones de la 3ª tanda
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:37` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-20
 - Nodo(s): lib.plataforma
 - Qué es: Organization recibe city, avatar*, internalNotes y deletedAt. AgencySettings recibe singleton @unique. Ambas con migrate deploy.
 - Referencias: 988d1ae · d14fcff · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:37 · tambien en Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:68
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 20260619234252_add_organization_city_avatar_notes_softdelete/migration.sql:2-7 y 20260620173833_add_agency_settings_singleton_unique/migration.sql:2-5 en main; luego DROP (20260621120000) y re-ADD (20260622120000) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-995] Migraciones aditivas con migrate deploy, nunca dev ni reset
 - Fuente: `_insumos/drive/Olme/Chatbot_ registro de cambios.md:121` · tipo: decision · estado declarado: hecho · fecha: 2026-06-17
 - Nodo(s): lib.plataforma
 - Qué es: Mostrar el SQL antes de aplicar en Neon. Por el drift de Franco se usa SQL manual con migrate deploy, porque migrate dev dispararía un reset. migrate status no detecta drift estructural: hay que usar migrate diff.
 - Referencias: tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:34 · tambien en Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:77 · tambien en Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:66 · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:89
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Las reconciliaciones usan IF EXISTS / IF NOT EXISTS vía deploy (20260621120000:11; 20260622120000:9-11) pero 20260621120000:14-29 fue destructiva (DROP) y docs/operations/00-entornos.md:85 sigue indicando 'npx prisma migrate dev'. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-996] Merge de la lane setter de Franco con drift en Neon
 - Fuente: `_insumos/drive/Olme/Ideas de nuevas features.md:73` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-20 · **ZONA-FRANCO**
@@ -8057,31 +8057,31 @@
 - Nodo(s): lib.plataforma
 - Qué es: Migración con 6 índices aditivos en Service, Invoice, Message y ContactSubmission, aplicada con migrate deploy a la Neon compartida.
 - Referencias: prisma/migrations/20260710203413_add_portal_indexes
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 20260710203413_add_portal_indexes/migration.sql:1-6; declarados en schema.prisma:544, :603, :685, :705-707. La aplicación en prod no es verificable leyendo. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-998] Enum-izar ContactSubmission.leadStatus
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:62` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-13
 - Nodo(s): lib.plataforma
 - Qué es: Diferido: pasar String? a enum no es aditivo. Necesita columna nueva, backfill y cutover, o descartarse.
 - Referencias: ContactSubmission.leadStatus · tambien en Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:91
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — schema.prisma:697 'leadStatus String? @default("NUEVO")'; validación solo en app (src/lib/actions/leads.ts:27) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-999] Migraciones fantasma del motor B1 resueltas
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:66` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-13
 - Nodo(s): lib.plataforma
 - Qué es: Había 3 migraciones aplicadas en Neon sin SQL en git. El dueño las commiteó, los checksums coincidieron y se integraron por merge, sin cirugía.
 - Referencias: b1s1_webhook_credentials_and_identity_transitions · b1s2_outbound_apikey_templates_idempotency · b1s3_health_events_and_alerts · 62994be · 5fcb92d · b1-s2-bsp-outbound
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Las tres están versionadas en origin/main: 20260709163143_b1s1_webhook_credentials_and_identity_transitions, 20260709180000_b1s2_outbound_apikey_templates_idempotency, 20260709200000_b1s3_health_events_and_alerts. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1000] Nada se aplica a Neon sin commit y push previo
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:74` · tipo: decision · estado declarado: hecho · fecha: 2026-07-13
 - Nodo(s): lib.plataforma
 - Qué es: Regla de proceso adoptada tras el incidente de las migraciones fantasma.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — No hay control técnico: netlify.toml:2 no migra y no hay CI de migrate status; el caso 20260619140100 (resuelta sin ejecutar) es anterior a la regla (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1001] Caveats del QA-login
 - Fuente: `docs/bitacora-beta-2.md:44` · tipo: pendiente · estado declarado: abierto (conocido) · fecha: 2026-06-25
@@ -8136,8 +8136,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Organization.averageTicketUsd, chatbot_bot_config.verticalPack, chatbot_lead.firstContactedAt/signals/utm*: reconciliar es decisión de Franco.
 - Referencias: también en fuente:534,554,560,1801
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schema.prisma:409, :1329, :1477, :1481-1483, :1487 las declara; las crean 20260629195726_ev2_vertical_pack_signals_utm/migration.sql:2-9 y 20260630032132_add_org_average_ticket_usd/migration.sql:2 (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1008] Deuda de lint del repo
 - Fuente: `docs/bitacora-beta-3.md:778` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-03
@@ -8296,8 +8296,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Resuelve por binario global o caché de npx; de él dependen ~60 invariantes, prisma db seed y los seeds QA.
 - Referencias: package.json · también en fuente:4736,4801
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — package.json no lo declara (dependencies :122-170, devDependencies :181-201); 67 líneas con 'npx tsx' y 2 con 'tsx' (:117); package-lock sin node_modules/tsx (control: node_modules/ts-node presente); prisma.config.ts:31 seed 'npx tsx prisma/seed.ts'. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1028] ¿leados/v1-integracion pasa a main?
 - Fuente: `docs/bitacora-beta-3.md:4739` · tipo: decision · estado declarado: pendiente de decisión · fecha: 2026-08-20 · **ZONA-FRANCO**
@@ -8311,8 +8311,8 @@
 - Fuente: `docs/bitacora-beta-3.md:4808` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-20
 - Nodo(s): lib.plataforma
 - Qué es: Un prefijo del password quedó impreso en el log de una sesión; el documento no contiene el valor.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — No verificable por código; nada en el repo indica la rotación (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1030] Invariantes con falso verde
 - Fuente: `docs/bitacora-beta-3.md:4904` · tipo: pendiente · estado declarado: pendiente (C1b) · fecha: 2026-08-24 · **ZONA-FRANCO**
@@ -8519,16 +8519,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: Guard compartido assertDevSeedTarget (aborta sin DATABASE_URL, con NODE_ENV=production o host no dev; override ALLOW_PROD_SEED=1) y passwords de seed a env vars SEED_*_PASSWORD sin default.
 - Referencias: prisma/seed-guard.ts · prisma/seed.ts · prisma/seed-agency-os.ts · .env.example
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — seed-guard.ts:42-98; seed.ts:75-80; logic-core-v3/.env.example:38-49 documenta SEED_*_PASSWORD sin default (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1056] sync-plans y sync-premium-modules sin guard anti-prod a propósito
 - Fuente: `docs/bitacora-beta.md:41` · tipo: decision · estado declarado: vigente · fecha: 2026-06-17
 - Nodo(s): lib.plataforma
 - Qué es: Se declaran prod-runnables por diseño y no reciben guard; regla: todo seed mutador futuro reusa assertDevSeedTarget + requireSeedPassword.
 - Referencias: sync-plans.ts · sync-premium-modules.ts · prisma/seed-guard.ts · también en docs/bitacora-beta.md:17 · también en docs/bitacora-beta.md:42 · relacionado docs/bitacora-rediseno.md:3380 (sync-premium-modules hace deleteMany sobre PremiumModule y organizationModule)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — La excepción se cumple; la regla no: add-contact-tool.ts y backfill-vertical-pack.ts (mutadores posteriores, pensados para prod) e init-data-connections.ts tampoco usan assertDevSeedTarget (git grep en prisma/seeds = 0). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1057] Limpieza opcional del @@index([assignedToId]) suelto de OsLead
 - Fuente: `docs/bitacora-beta.md:414` · tipo: pendiente · estado declarado: pendiente (opcional) · fecha: 2026-06-19 · **ZONA-FRANCO**
@@ -8543,32 +8543,32 @@
 - Nodo(s): lib.plataforma
 - Qué es: Decisión de Franco: adoptar BOT_DELETED en AuditActionType y dropear chatbot_lead.convertedToOsLeadId con 2 migraciones idempotentes; los borrados de bot pasan a actionType BOT_DELETED.
 - Referencias: prisma/migrations/20260619140000_add_bot_deleted_audit_action/migration.sql · prisma/migrations/20260619140100_drop_chatbot_lead_converted_column/migration.sql · src/app/(protected)/admin/chatbots/bulk-actions.ts · src/app/(protected)/admin/chatbots/[botId]/actions.ts · también en docs/bitacora-beta.md:1271
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — BOT_DELETED sí: 20260619140000_add_bot_deleted_audit_action/migration.sql:8, schema.prisma:192, admin/chatbots/bulk-actions.ts:205 y [botId]/actions.ts:146. La columna se re-agregó: 20260622120000_readd_client_columns_dropped_by_reconcile/migration.sql:21, y se usa en admin/chatbots/_actions/convert-chatbot-lead.actions.ts:39. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1059] Reconciliar main con 3 migraciones aplicadas en el Neon dev compartido
 - Fuente: `docs/bitacora-beta.md:955` · tipo: pendiente · estado declarado: pendiente (acción para Franco) · fecha: 2026-06-20
 - Nodo(s): lib.plataforma
 - Qué es: Faltan en el repo 20260617184913_add_converted_lead_link_and_bot_deleted_audit, 20260619234252_add_organization_city_avatar_notes_softdelete y 20260620173833_add_agency_settings_singleton_unique; si no, migrate dev pedirá reset.
 - Referencias: prisma/migrations · también en docs/bitacora-beta.md:958 · relacionado docs/bitacora-beta.md:1258 · relacionado docs/bitacora-beta.md:1746
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 20260617184913_add_converted_lead_link_and_bot_deleted_audit, 20260619234252_add_organization_city_avatar_notes_softdelete y 20260620173833_add_agency_settings_singleton_unique están en main (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1060] FG-1.pre Cierre del drift DB↔schema (9 divergencias dropeadas)
 - Fuente: `docs/bitacora-beta.md:1258` · tipo: hecho-declarado · estado declarado: hecho; luego cuestionado (la lane de clientes usa esas columnas) · fecha: 2026-06-21
 - Nodo(s): lib.plataforma
 - Qué es: Franco aprobó 'DROP todo': AgencySettings.singleton, Organization avatarEmoji/avatarImageUrl/avatarInitials/city/deletedAt/internalNotes y chatbot_lead.convertedToOsLeadId, con migración idempotente vía migrate deploy.
 - Referencias: prisma/migrations/20260621120000_reconcile_dev_drift_schema_align · contradicho en docs/bitacora-beta.md:1746
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — 20260621120000_reconcile_dev_drift_schema_align/migration.sql:14-29 las dropeó y 20260622120000_readd_client_columns_dropped_by_reconcile/migration.sql:1-21 las re-agregó; hoy el schema las declara y el código las usa (p. ej. archiveClient.ts:34, convert-chatbot-lead.actions.ts:39). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1061] seed-agency-os falla en projectSeeds sin la org 'develop'
 - Fuente: `docs/bitacora-beta.md:1726` · tipo: pendiente · estado declarado: pendiente (fuera de scope) · fecha: 2026-06-25
 - Nodo(s): lib.plataforma
 - Qué es: Error 'No se encontro organizationId para develop' si la BD no tiene esa org; los qaLeadSeeds se insertan antes de ese punto.
 - Referencias: prisma/seed-agency-os.ts · también en docs/bitacora-beta-2.md:129
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — seed-agency-os.ts:2398 (el mapa solo recibe los slugs de organizationSeeds) y :2422-2426 (throw); falla siempre, exista o no la org en la base (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1062] next build se queda sin heap con el default
 - Fuente: `docs/bitacora-beta.md:1733` · tipo: pendiente · estado declarado: sin estado (workaround) · fecha: 2026-06-22
@@ -8591,8 +8591,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: La DB no tiene AgencySettings.singleton, Organization.avatar*/city/deletedAt/internalNotes ni chatbot_lead.convertedToOsLeadId, que schema y código usan (las dropeó la reconciliación de leados); propuesta IF NOT EXISTS solo con migrate deploy.
 - Referencias: docs/smoke-report.md §2.5 · prisma/migrations/20260621120000_reconcile_dev_drift_schema_align · contradice docs/bitacora-beta.md:1258
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 20260622120000_readd_client_columns_dropped_by_reconcile/migration.sql:13-21 (ADD IF NOT EXISTS de las 9); schema.prisma:401-419, :823 y :1510 las declaran. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1065] next.config.ts ignora errores de tipos y lint en el build
 - Fuente: `docs/bitacora-rediseno.md:162` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-07-30
@@ -8671,8 +8671,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: tsc y build verdes; enviroment.env purgado de todo el history con git-filter-repo en un mirror local (no pusheado). La migración de executive-brief.ts al provider factory (Gemini) ya estaba en el working tree.
 - Referencias: docs/audits/2026-05-bfg-leak-cleanup.md · src/lib/ai/executive-brief.ts · commit 3953558 reescrito a 7f69ff1 (mirror local)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — git log origin/main --oneline -- '*enviroment.env' → 39535583 y c351b793: la purga hecha en un mirror local no llegó a origin; tsc 0 errores (baseline F0) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1075] Force-push del history purgado (leak enviroment.env)
 - Fuente: `docs/bitacora-roadmap.md:46` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-21
@@ -8695,8 +8695,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Build cold 160s (compile webpack 64%), googleapis 13.5MB en server, lucide ~695KB y shim de Prisma en el bundle cliente, dev con turbopack 2.75x más rápido, latencia Neon ~55ms por query; recomendaciones para B1.2.
 - Referencias: package.json · next.config.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Era solo medición; en el código siguen dev y build con --webpack (package.json:7, :9), o sea que la recomendación de turbopack para dev no se adoptó. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1078] Variables críticas faltantes en .env.local (check-env)
 - Fuente: `docs/bitacora-roadmap.md:66` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-21
@@ -8718,8 +8718,8 @@
 - Fuente: `docs/bitacora-roadmap.md:213` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-21
 - Nodo(s): lib.plataforma
 - Qué es: Opciones: branch dev en us-east-2, Postgres local o cache server-side (unstable_cache / React cache); amerita sprint propio por el trade-off con prod en sa-east-1.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — 24 archivos usan unstable_cache y 7 importan cache de React (git grep); la región o branch de dev no es verificable por código (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1081] B1.2 — Optimizaciones de build/dev
 - Fuente: `docs/bitacora-roadmap.md:256` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
@@ -8750,40 +8750,40 @@
 - Nodo(s): lib.plataforma
 - Qué es: Netlify aplica la migración pero no los scripts; sin ellos la tabla plan queda vacía y todas las subs caen al fallback Starter.
 - Referencias: prisma/seeds/sync-plans.ts · prisma/seeds/migrate-subscriptions-to-plan-id.ts · tambien en docs/bitacora-roadmap.md:2135 · tambien en docs/bitacora-roadmap.md:2141
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — prisma/seeds/sync-plans.ts:149-176 existe; migrate-subscriptions-to-plan-id.ts fue borrado en a6746085 (2026-06-05, git log --diff-filter=D); netlify.toml:2 ya no corre migrate deploy, así que 'Netlify aplica la migración' tampoco es cierto. La ejecución en prod no se puede verificar leyendo. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1085] Inconsistencia de @@map (snake_case) entre modelos del schema
 - Fuente: `docs/bitacora-roadmap.md:2126` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): lib.plataforma
 - Qué es: Algunos modelos usan @@map (plan, premium_module, organization_module) y otros no; corregirlo es scope aparte.
 - Referencias: prisma/schema.prisma
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — 23 de 63 modelos tienen @@map (git show origin/main:logic-core-v3/prisma/schema.prisma | grep -c '@@map(' → 23; grep -c '^model ' → 63); ej. Organization sin @@map (schema.prisma:332-452) y Plan con @@map('plan') (:631) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1086] Pre-flight en prod antes del DROP COLUMN de unlockedFeatures
 - Fuente: `docs/bitacora-roadmap.md:2565` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): lib.plataforma
 - Qué es: Migrar slugs residuales de prod a OrganizationModule antes del merge (el script se borró; recuperarlo del historial) o aceptar perder esos arrays.
 - Referencias: prisma/seeds/migrate-unlocked-features.ts (borrado) · tambien en docs/bitacora-roadmap.md:2623 · tambien en docs/bitacora-roadmap.md:2628
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — prisma/seeds/migrate-unlocked-features.ts se agregó en c8478587 y se borró en a3180600 (git log --diff-filter=AD), el mismo commit de la migración 20260522214201; no hay pre-flight en el repo (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1087] Setear DIRECT_URL (Neon sin pooler) en .env.local
 - Fuente: `docs/bitacora-roadmap.md:3663` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): lib.plataforma
 - Qué es: El runner ya lo soporta; sin él el pool de Neon dev sigue cortando conexiones en corridas largas de la batería.
 - Referencias: scripts/regression/run-baseline.ts · scripts/regression/diag-timings.ts · tambien en docs/bitacora-roadmap.md:3297 · tambien en docs/bitacora-roadmap.md:3336 · tambien en docs/bitacora-roadmap.md:3676
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — scripts/regression/run-baseline.ts:25, :40 y diag-timings.ts:16-19 ya lo soportan; el valor en .env.local no se puede verificar leyendo; schema.prisma:5-8 no declara directUrl. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1088] Organization.n8nWorkflowIds (legacy) sin uso
 - Fuente: `docs/bitacora-roadmap.md:4452` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-05-24
 - Nodo(s): lib.plataforma
 - Qué es: Campo String[] existente sin uso en el código; B5.8 creó su propio modelo dedicado.
 - Referencias: prisma/schema.prisma
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — schema.prisma:339 sigue declarado; único escritor src/lib/actions/clients.ts:164,199 (módulo sin importadores según D1) y seeds (seed.ts:204,219); sin lectores (git grep -n n8nWorkflowIds origin/main -- logic-core-v3/src) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1089] tsconfig: scripts/** fuera del typecheck y allowImportingTsExtensions
 - Fuente: `docs/bitacora-roadmap.md:4568` · tipo: decision · estado declarado: hecho · fecha: 2026-05-24
@@ -8822,32 +8822,32 @@
 - Nodo(s): lib.plataforma
 - Qué es: El pool de Prisma queda con sockets muertos; pingear con prisma migrate status y levantar el server fresco.
 - Referencias: tambien en docs/bitacora-roadmap.md:8541
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Es procedimiento; el código lo sigue necesitando: src/lib/prisma.ts:5-6 no reconecta ni reintenta. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1094] Migraciones string a enum en 3 pasos
 - Fuente: `docs/bitacora-roadmap.md:6928` · tipo: decision · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): lib.plataforma
 - Qué es: (a) crear el enum de forma tolerante, (b) deployar el código nuevo, (c) recién entonces el constraint estricto; SQL a mano porque Prisma lo trata como drop + recreate.
 - Referencias: prisma/migrations/20260525190000_b11_4a_create_enum_types/migration.sql · prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql · tambien en docs/bitacora-roadmap.md:6922
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 20260525190000_b11_4a_create_enum_types/migration.sql:15-29 crea los tipos; 20260525190100_b11_4b_promote_columns_to_enum/migration.sql:16-20 normaliza y :23-41 promueve con defaults restaurados. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1095] B11.5 — 3 índices agregados (Conversation, ChatbotEvent, Notification)
 - Fuente: `docs/bitacora-roadmap.md:7013` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): lib.plataforma
 - Qué es: Índices (botConfigId, lastMessageAt desc), (botConfigId, type, createdAt desc) y (organizationId, createdAt desc); los DROP de índices muertos quedaron diferidos (parcial por diseño).
 - Referencias: prisma/schema.prisma · prisma/migrations/20260525192047_b11_5_add_3_missing_indexes/migration.sql · docs/roadmap-pendientes.md · docs/audits/2026-05-auditoria-db.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schema.prisma:731 (Notification), :1413 (Conversation), :1617 (ChatbotEvent); migración 20260525192047_b11_5_add_3_missing_indexes (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1096] Drop de índices redundantes diferido a post-B14
 - Fuente: `docs/bitacora-roadmap.md:7049` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): lib.plataforma
 - Qué es: chatbot_bot_config_slug_idx, EmailContact_organizationId_idx, EmailCampaign_organizationId_idx y otros del audit §3.1; medir con pg_stat_user_indexes en PROD con Matsu viva >=2 semanas tras pg_stat_reset().
 - Referencias: docs/roadmap-pendientes.md · docs/audits/2026-05-auditoria-db.md · tambien en docs/bitacora-roadmap.md:7056
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Siguen en el schema: BotConfig @@index([slug]) (schema.prisma:1343) con slug @unique (:1278); EmailContact @@index([organizationId]) (:1230) cubierto por @@unique([organizationId, email]) (:1229); EmailCampaign @@index([organizationId]) (:1261) cubierto por (:1262). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1097] Drop de índices de OsLead diferido (OsLead_status_idx, OsLead_nextFollowUpAt_idx)
 - Fuente: `docs/bitacora-roadmap.md:7051` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25 · **ZONA-FRANCO**
@@ -8942,23 +8942,23 @@
 - Nodo(s): lib.plataforma
 - Qué es: Enums client-safe en prisma-enums.ts; @prisma/client en serverExternalPackages.
 - Referencias: src/lib/prisma-enums.ts · src/lib/actions/schemas.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/prisma-enums.ts:14-42; next.config.ts:25-27 serverExternalPackages incluye @prisma/client; ningún archivo 'use client' importa valores de @prisma/client (solo import type). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1109] Eliminar stubs de Prisma del bundle cliente
 - Fuente: `docs/bitacora-roadmap.md:9127` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): lib.plataforma
 - Qué es: Requiere verbatimModuleSyntax o alias webpack; sprint dedicado.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep verbatimModuleSyntax en tsconfig.json y next.config.ts → vacío; next.config.ts:25-27 solo serverExternalPackages; 58 imports de valor desde @prisma/client en src (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1110] Codegen de prisma-enums.ts desde schema.prisma
 - Fuente: `docs/bitacora-roadmap.md:9128` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-26
 - Nodo(s): lib.plataforma
 - Qué es: Hoy la copia de enums se sincroniza a mano; considerar generador automático.
 - Referencias: src/lib/prisma-enums.ts · también en fuente:9129
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/prisma-enums.ts:10-12 declara sincronización manual; git grep "prisma-enums" en tests y scripts da 0 (control: importado en PlanAssignmentForm.tsx:4 y NewTicketModal.tsx:8). Hoy los 4 enums coinciden con schema.prisma:76-94 y :234-238. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1111] BP.3 Lucide ya tree-shakeable
 - Fuente: `docs/bitacora-roadmap.md:9135` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
@@ -8979,16 +8979,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: Se quitó NODE_OPTIONS 8 GB del build y la config Prisma pasó a prisma.config.ts.
 - Referencias: prisma.config.ts · package.json
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma.config.ts:26-34; package.json sin bloque 'prisma': { ni NODE_OPTIONS (git grep vacío; control package.json:157 dependencia prisma) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1114] Upgrade a Prisma 7
 - Fuente: `docs/bitacora-roadmap.md:9321` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): lib.plataforma
 - Qué es: Prisma 7.8.0 disponible; major upgrade en sprint dedicado.
 - Referencias: también en fuente:9290
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — package.json:133 "@prisma/client": "^6.19.2" y :157 "prisma": "^6.19.2". (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1115] Quitar cross-env si ya no se usa
 - Fuente: `docs/bitacora-roadmap.md:9322` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
@@ -9003,8 +9003,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: GH Action diaria pg_dump cifrado GPG + job de restore-test; scripts locales de backup/restore.
 - Referencias: .github/workflows/db-backup.yml · scripts/db-backup-local.sh · scripts/db-restore-local.sh · docs/operations/neon-backups.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — .github/workflows/db-backup.yml:36-41 y job restore-test; scripts/db-backup-local.sh, scripts/db-restore-local.sh y docs/operations/neon-backups.md presentes. La primera corrida no es verificable leyendo. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1117] Backups cifrados por ser repo público
 - Fuente: `docs/bitacora-roadmap.md:9452` · tipo: decision · estado declarado: hecho
@@ -9090,8 +9090,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: client-a sin organizationModule ACTIVE impide verificar visualmente motor-reseñas/agenda/tienda/email.
 - Referencias: prisma/seed.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i organizationModule origin/main -- logic-core-v3/prisma/seed.ts logic-core-v3/prisma/seed-agency-os.ts → vacío; control: prisma/seeds/sync-premium-modules.ts:73 (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1128] Baseline tsc rojo por @googleapis/webmasters
 - Fuente: `docs/bitacora-roadmap.md:10451` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-06-02
@@ -9106,16 +9106,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: assertDevSeedTarget aborta contra prod; passwords de seed pasan a env vars sin default.
 - Referencias: prisma/seed-guard.ts · prisma/seed.ts · prisma/seed-agency-os.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — seed.ts:73-80; seed-agency-os.ts:351, :2386-2389; seed-guard.ts:42-98 (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1130] sync-plans/sync-premium-modules sin guard anti-prod
 - Fuente: `docs/bitacora-roadmap.md:10560` · tipo: decision · estado declarado: hecho · fecha: 2026-06-17
 - Nodo(s): lib.plataforma
 - Qué es: Son prod-runnables por diseño; seeds mutadores nuevos deben reusar seed-guard.
 - Referencias: prisma/seeds/sync-plans.ts · también en fuente:10561
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Ninguno importa seed-guard: git grep "seed-guard|assertDevSeedTarget" en prisma/seeds da 0 (control: prisma/seed-agency-os.ts:26, :2386). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1131] Update manual de OrganizationModule mini-crm
 - Fuente: `docs/bitacora-roadmap.md:11037` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-29
@@ -9137,8 +9137,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Revisar y aplicar en la Neon compartida, regenerar Prisma y correr invariantes y tests.
 - Referencias: prisma/schema.prisma · también en fuente:11946 · también en fuente:11986
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma/migrations/20260702223350_add_executive_report_config/migration.sql:2-6; schema.prisma:396-397 y :493-497 (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1134] D6 infra de tests de integración
 - Fuente: `docs/bitacora-roadmap.md:12353` · tipo: hecho-declarado · estado declarado: hecho
@@ -9153,8 +9153,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: El crash era el runner de Playwright; nuevo invariante tsx contra Neon.
 - Referencias: src/lib/reports/client-monthly/get-client-monthly-report-data.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/reports/client-monthly/get-client-monthly-report-data.invariant.ts existe con su script check:invariant:client-monthly-report-pdf; corre contra Neon (no hay base de test). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1136] Aggregate check:invariants incompleto
 - Fuente: `docs/bitacora-roadmap.md:12450` · tipo: pendiente · estado declarado: pendiente
@@ -9169,24 +9169,24 @@
 - Nodo(s): lib.plataforma
 - Qué es: qa-seed-leads.ts solo puebla utmSource; el caso con campaña no es visible.
 - Referencias: scripts/dev/qa-seed-leads.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — scripts/dev/qa-seed-leads.ts:186 solo setea utmSource; git grep utmCampaign en ese archivo = 0. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1138] INFRA.3 causa raíz de conexión a Neon
 - Fuente: `docs/bitacora-roadmap.md:13093` · tipo: pendiente · estado declarado: pendiente (gated) · fecha: 2026-07-06
 - Nodo(s): lib.plataforma
 - Qué es: lib/prisma.ts, pooler, DIRECT_URL y retry de conexión; gated en firma real de prod + Sentry DSN.
 - Referencias: src/lib/prisma.ts · también en fuente:13148 · también en fuente:14049
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/prisma.ts:5-6 cliente sin timeouts ni reintento; prisma/schema.prisma:5-8 sin directUrl; git grep connect_timeout/pool_timeout en src solo encuentra comentarios (withDeadline.ts:7, logger.ts:118). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1139] Drift de migraciones entre ramas
 - Fuente: `docs/bitacora-roadmap.md:13504` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-10
 - Nodo(s): lib.plataforma
 - Qué es: add_portal_indexes local sin aplicar y 3 migraciones b1s* del motor en la DB dev ausentes en la rama.
 - Referencias: 20260710203413_add_portal_indexes · también en fuente:13611
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 20260710203413_add_portal_indexes y 20260709163143/20260709180000/20260709200000 (b1s1-3) están en main; drift schema↔migraciones = 0 (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1140] T0.2 cron de cleanupOldEvents
 - Fuente: `docs/bitacora-roadmap.md:13516` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-11
@@ -9225,16 +9225,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: withDeadline abandona sin cancelar; vigilar P2024; cancelación real exige statement_timeout en Neon (decisión con Franco).
 - Referencias: también en fuente:14366
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — withDeadline.ts:14-26 documenta que abandona sin cancelar y persistTurn no reintenta ante deadline (persistTurn.ts:480-482); statement_timeout y lock_timeout no están configurados (git grep statement_timeout vacío; control withDeadline.ts:7 pool_timeout) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1145] Agregar confirm_contact_request a Plan.tools en prod
 - Fuente: `docs/bitacora-roadmap.md:15436` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.plataforma
 - Qué es: Correr prisma/seeds/add-contact-tool.ts contra prod; no correr sync-plans.ts completo (pisa 13 columnas).
 - Referencias: prisma/seeds/add-contact-tool.ts · también en fuente:15416
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — prisma/seeds/add-contact-tool.ts:47-68 listo; el catálogo ya lo trae (sync-plans.ts:57, :63) y el fallback también (src/lib/plan/fallback.ts:57). Que haya corrido en prod no es verificable por lectura. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1146] BREVO_API_KEY y Telegram sin configurar en prod
 - Fuente: `docs/bitacora-roadmap.md:15600` · tipo: pendiente · estado declarado: pendiente
@@ -9327,8 +9327,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Recién post-B14 con PROD de Matsu viva 2 semanas y pg_stat_reset previo.
 - Referencias: docs/audits/2026-05-auditoria-db.md §3.1 · B11.5
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Mismos índices que PLAN-1096 siguen declarados (schema.prisma:1230, :1261, :1343); además OsLead @@index([status]) y @@index([assignedToId]) (:896, :899) cubiertos por compuestos (:898, :900). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1158] T0.2 cron cleanupOldEvents
 - Fuente: `docs/roadmap-pendientes.md:151` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-10
@@ -9359,8 +9359,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: P95 12987 ms y DB 1082 ms; configs de Sentry; documentación de backups Neon y DR.
 - Referencias: docs/baselines/2026-05-chatbot-runtime.md · docs/operations/neon-backups.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/baselines/2026-05-chatbot-runtime.md y docs/operations/neon-backups.md existen; sentry.server.config.ts y src/instrumentation-client.ts (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1162] DSN de Sentry sin configurar
 - Fuente: `docs/sprints/alpha-0-7-baseline-observability.md:16` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-17
@@ -9388,16 +9388,16 @@
 - Fuente: `docs/sprints/alpha-pre-cierre-RESUMEN.md:63` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-17
 - Nodo(s): lib.plataforma
 - Qué es: Requiere acceso a la consola de Neon.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — .github/workflows/db-backup.yml:36-41 (backup diario cifrado y job restore-test) existe; los backups/PITR de la consola de Neon no son verificables leyendo. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1166] Avisar al socio de la migración en Neon compartida
 - Fuente: `docs/sprints/utm-1-captura.md:228` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-04
 - Nodo(s): lib.plataforma
 - Qué es: SQL aditivo aplicado sobre la branch dev compartida.
 - Referencias: tambien en :252
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — La migración 20260704224423_utm1_add_conversation_utm_fields está en main y el schema la declara (schema.prisma:1384-1386); el aviso no es verificable por código (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1167] Build rojo por baseline ajeno
 - Fuente: `raiz:lane-plan-log.md:33` · tipo: pendiente · estado declarado: abierto · fecha: 2026-06-25
@@ -9412,32 +9412,32 @@
 - Nodo(s): lib.plataforma
 - Qué es: Seed mock marcada para limpieza con 3 projects, 4 services y 1 user.
 - Referencias: tambien en :183, :239, :259
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — seed.ts:198-228 y seed-agency-os.ts:397-416 la siguen creando (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1169] Cleanup B0.3 en prod
 - Fuente: `STATUS.md:168` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-21
 - Nodo(s): lib.plataforma
 - Qué es: Replicar en la branch main de Neon; luego borrar scripts throwaway _db-cleanup-*.mjs.
 - Referencias: docs/audits/2026-05-cleanup-db-dev.md §6 · tambien en :238, :284
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — docs/audits/2026-05-cleanup-db-dev.md:6 'Pendiente replicar en prod'; scripts/_db-cleanup-execute.mjs:10-15 (IDs hardcodeados) sigue versionado junto a _db-cleanup-inspect*.mjs. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1170] Aislamiento dev/prod con Neon branching
 - Fuente: `STATUS.md:223` · tipo: decision · estado declarado: decidido · fecha: 2026-05-21
 - Nodo(s): lib.plataforma
 - Qué es: .env apunta a la branch dev; prod a main desde Netlify.
 - Referencias: B0.1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — logic-core-v3/.env.example:21-24 (local → branch dev, prod → branch main); seed-guard.ts:18-30 reconoce la branch dev (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1171] Plan de Neon y política de retención
 - Fuente: `STATUS.md:233` · tipo: decision · estado declarado: pendiente · fecha: 2026-05-21
 - Nodo(s): lib.plataforma
 - Qué es: Free vs Launch según backups; retención de conversaciones/leads sin definir.
 - Referencias: tambien en :236 · docs/sprints/alpha-RESUMEN-FINAL.md:77
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — La única purga es chatbot_events a 30 días (src/modules/chatbot/server/logging/persistentLogger.ts:153-163); no hay retención para conversaciones, mensajes ni leads, y rate_limit no se purga (git grep rateLimit.deleteMany = 0). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 ### lib.sitio-publico
 
@@ -9971,8 +9971,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Hover único adminHoverCls. Modales portaleados a body por la trampa de backdrop-filter. TypeToConfirmDialog con auditoría sin FK. Schemas Zod en .schemas.ts. Navegación con <Link> o router.refresh, nunca router.push.
 - Referencias: src/lib/hover.ts · TypeToConfirmDialog · AdminLayoutClient.tsx · tambien en Olme/Admin - Registro de cambios/Operaciones/Leads_ registro de cambios.md:73 · tambien en Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:61 · tambien en Olme/Cliente - Registro de cambios/General_ registro de cambios.md:14
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Existen adminHoverCls (src/lib/hover.ts:5), admin/_components/type-to-confirm-dialog.tsx y 18 *.schemas.ts, pero router.push sigue en el admin (CreateBotForm.tsx:80, ClientSwitcher.tsx:67, lead-card.tsx:69, convert-lead-dialog.tsx:132) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1239] column-overview duplicado entre Alertas y Leads
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:52` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-19
@@ -9995,16 +9995,16 @@
 - Nodo(s): lib.transversal
 - Qué es: Consolidación por sector y luego a main. Chocó package.json (seed:latency) y se verificó que la pestaña por bot no regresionó.
 - Referencias: resuelve Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:6 · tambien en Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:132
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — package.json:20 'seed:latency' presente en main. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1242] Limpieza final y push
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:57` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-20
 - Nodo(s): lib.transversal
 - Qué es: Se borró código muerto (deleteClientAction legacy y el cluster client-*, 1999 líneas). Seeds de Neon limpiados, ramas borradas y push a origin/main.
 - Referencias: 289d792 · tambien en Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:70
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep deleteClientAction en src = 0 (control: hardDeleteClient importado en ClientsListClient.tsx:14). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1243] Subida de imágenes = base64 en DB, sin infra externa
 - Fuente: `_insumos/drive/Olme/Chatbot_ registro de cambios.md:119` · tipo: decision · estado declarado: hecho · fecha: 2026-06-17
@@ -10019,8 +10019,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Los merges los hace un humano sobre main, paso a paso, con --no-edit. Los seeds y las migraciones los corre él.
 - Referencias: tambien en Olme/Cliente - Registro de cambios/General_ registro de cambios.md:77 · tambien en Olme/Cliente - Registro de cambios/General_ registro de cambios.md:64
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — No hay automatización que corra seeds ni migraciones: netlify.toml:2 sin migrate deploy; los seeds documentan corrida manual (sync-plans.ts:9-13, add-contact-tool.ts:24-27). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1245] Estado vacío en páginas server: armado a mano
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:402` · tipo: decision · estado declarado: hecho · fecha: 2026-06-27
@@ -10082,8 +10082,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Si una página server le pasa un ícono Lucide a EmptyState, la página no renderiza con datos vacíos. Afecta project, modules/* y chatbot/settings.
 - Referencias: EmptyState · tambien en Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:156 · tambien en Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:267 · ver Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:45-48 (migración de esos empties)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Las páginas server usan EmptyStateMuted, universal y sin 'use client' (src/components/ui/EmptyStateMuted.tsx:7-8): dashboard/chatbot/settings/page.tsx:53-54, agenda-inteligente/page.tsx:262-263. ui/EmptyState.tsx:1 es 'use client' y no se usa desde páginas server. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1253] Chat compartido entre Mensajes y Ticket
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Soporte_ registro de cambios.md:49` · tipo: hecho-declarado · estado declarado: hecho
@@ -10098,8 +10098,8 @@
 - Nodo(s): lib.transversal
 - Qué es: El componente no importa Prisma ni tiene actions. Los datos de tickets y de mensajes no se mezclan.
 - Referencias: tambien en Olme/Cliente - Registro de cambios/Soporte_ registro de cambios.md:68
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/components/dashboard/ClientChatThread.tsx, ClientChatComposer.tsx y ChatBubble.tsx solo importan react, motion, lucide y UI local; los usan admin/tickets/_components/ticket-chat.tsx y dashboard/soporte/[ticketId]/page.tsx (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1255] date-preset-filter compartido
 - Fuente: `_insumos/drive/Olme/Ideas de nuevas features.md:64` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-20
@@ -10122,8 +10122,8 @@
 - Nodo(s): lib.transversal
 - Qué es: El trabajo del panel de esa tanda (PD-1, PA, CO-5) vive en la rama. Está pusheada y ya integra origin/main.
 - Referencias: b0-isolation-motor-chatbot
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git log origin/main..origin/b0-isolation-motor-chatbot da 8 commits fuera de main, entre ellos 9fc616c4 'cifrar credenciales en write-paths + Zod (PD-1.2)'; en main src/actions/agency-actions.ts:103-110 sigue guardando sin cifrar. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1258] Dos helpers AES-GCM conviviendo
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:88` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-13
@@ -10425,8 +10425,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Enums PlanKey/SupportTier, modelo Plan, Subscription.planId nullable (migración aditiva), seed idempotente de 3 planes, script de mapeo planName a planId y constante PLAN_FALLBACK; orgs fake sonrisa-norte y sigma-contable borradas en dev.
 - Referencias: prisma/schema.prisma · prisma/migrations/20260522234313_add_plan_model/migration.sql · prisma/seeds/sync-plans.ts · prisma/seeds/migrate-subscriptions-to-plan-id.ts · src/lib/plan-fallback.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 20260522234313_add_plan_model/migration.sql:2-40; prisma/seeds/sync-plans.ts:66-115; PLAN_FALLBACK en src/lib/plan/fallback.ts:44 (no en src/lib/plan-fallback.ts); migrate-subscriptions-to-plan-id.ts ya borrado (a6746085). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1296] B9.3 — Honestidad de datos demo
 - Fuente: `docs/bitacora-roadmap.md:6152` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
@@ -10457,8 +10457,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Aplicar el mismo patrón NOT NULL + Cascade; no bloqueante.
 - Referencias: prisma/schema.prisma
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — schema.prisma:721 'organizationId String?'; el cron os-follow-up crea notificaciones sin org como marcador de idempotencia (src/app/api/cron/os-follow-up/route.ts:276-286) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1300] B11.2 — assertResourceBelongsToOrg + fixes C1, C2, F2, F5, F6
 - Fuente: `docs/bitacora-roadmap.md:6727` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
@@ -10473,8 +10473,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Tablas vacías: clientId reemplazado por organizationId con FK Cascade; /api/track deriva la org de la sesión; health-score simplificado (cierra F8).
 - Referencias: prisma/migrations/20260525192312_b11_6_clientid_to_organizationid/migration.sql · src/actions/metrics-actions.ts · src/app/api/track/route.ts · src/components/dashboard/LeakMeter.tsx · src/lib/health-score.ts · pendiente originado en docs/bitacora-roadmap.md:6497
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 20260525192312_b11_6_clientid_to_organizationid/migration.sql:20-37; src/app/api/track/route.ts:24-27 toma la org de la sesión (SUPER_ADMIN acepta organizationId del body). /api/track no tiene llamadores (git grep "api/track" en src y public = 0; control: '/api/admin/alerts/trigger-detector' aparece en AlertSettingsClient.tsx:89) y LeakMeter no tiene importadores. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1302] B11.3 — Re-probe de B11.0 (cierre del epic B11)
 - Fuente: `docs/bitacora-roadmap.md:7187` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
@@ -10569,8 +10569,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Visual puro: cero lógica, queries, auth o schema; quitar efectos antes que sumarlos.
 - Referencias: tambien en docs/bitacora-roadmap.md:8506
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git log origin/main -- prisma/schema.prisma prisma/migrations | grep B13 → vacío; control: commits B13 existen (0ca56f34, bb4cf0d6, b0bc086a) (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1314] Kickers del header único: ¿uppercase o sentence case?
 - Fuente: `docs/bitacora-roadmap.md:8503` · tipo: decision · estado declarado: pendiente · fecha: 2026-05-26
@@ -10584,8 +10584,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Inventario: bot demo 'CHATBOT' solo en la DB (slug chatbot, Empresa Demo, pausado), quick reply de Lucia con emoji en seed.ts:248, eyebrows 'Fila 1/2/3', KPIs con color decorativo, ColorPicker, eyebrows con la marca y MarkdownEditor sin highlight de placeholders. Los cambios aplicados se detallan después de la línea 8600 (fuera de este rango).
 - Referencias: src/modules/chatbot/prisma/seed.ts:248 · src/app/(protected)/admin/page.tsx · src/modules/chatbot/components/admin/config/ColorPicker.tsx · src/modules/chatbot/components/admin/kb/MarkdownEditor.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/modules/chatbot/prisma/seed.ts:217-219 quedan 3 quick replies y el 💰 no está (git grep -F vacío); MarkdownEditor.tsx:11 y :29 detectan placeholders; ColorPicker.tsx:60 h-6 w-6 (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1316] 109 eyebrows uppercase técnicos sin pasar a sentence case
 - Fuente: `docs/bitacora-roadmap.md:8662` · tipo: decision · estado declarado: pendiente (decisión de Franco) · fecha: 2026-05-26
@@ -10630,8 +10630,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Tabla rate_limit con UPSERT atómico; reemplaza al in-memory en 6 call sites.
 - Referencias: prisma/migrations/20260526233939_add_rate_limit_b14_1 · src/lib/rate-limit/limiter.ts · src/lib/rate-limit/presets.ts · src/lib/security/auth-rate-limit.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schema.prisma:1765-1777; src/lib/rate-limit/limiter.ts:46-54 UPSERT con ON CONFLICT; migración 20260526233939_add_rate_limit_b14_1 (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1322] B2 — Matsu vivo
 - Fuente: `docs/bitacora-roadmap.md:9705` · tipo: bloque · estado declarado: pendiente
@@ -10677,15 +10677,15 @@
 - Nodo(s): lib.transversal
 - Qué es: dates-ar.ts con rangos semana/mes y Organization.averageTicketUsd.
 - Referencias: src/lib/dates-ar.ts · prisma/migrations/20260630032132_add_org_average_ticket_usd
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/dates-ar.ts existe; 20260630032132_add_org_average_ticket_usd/migration.sql:2; schema.prisma:409. (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1328] Cierre del bloque P5 motor comercial
 - Fuente: `docs/bitacora-roadmap.md:11834` · tipo: hecho-declarado · estado declarado: hecho (verificación visual pendiente) · fecha: 2026-07-01
 - Nodo(s): lib.transversal
 - Qué es: Migraciones P5.3a/P5.4a aplicadas a mano; verificación visual del bloque pendiente.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 20260701150307_add_panel_announcement y 20260701154505_add_referrals en main; schema.prisma:1792-1865 (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1329] requireSuperAdmin() sin tipo de retorno explícito
 - Fuente: `docs/bitacora-roadmap.md:11910` · tipo: pendiente · estado declarado: pendiente
@@ -10855,16 +10855,16 @@
 - Nodo(s): lib.transversal
 - Qué es: 3 fails de spec 22 (drift <2%) esperan decisión de Franco.
 - Referencias: tambien en :237
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/e2e/22-visual-regression.spec.ts sigue en el repo; la decisión de re-baseline no tiene rastro en código (D6-c1, lector D6-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1351] Limitaciones conocidas
 - Fuente: `STATUS.md:203` · tipo: pendiente · estado declarado: abierta · fecha: 2026-05-21
 - Nodo(s): lib.transversal
 - Qué es: Cold start Neon ~1s, rate limiter in-memory por lambda, reportes por bot no consolidados, bulk sin cola, admin básico en mobile.
 - Referencias: tambien en :204-:208
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — El rate limiter ya es compartido en la base (src/lib/rate-limit/limiter.ts:25, :46-52; migración 20260526233939); el cold start sigue igual (src/lib/prisma.ts:5-6). (D6-c1, lector D6-L2)
+- ¿Sigue teniendo sentido?: si
 
 ## Anexo — TODO/FIXME del código por nodo
 
