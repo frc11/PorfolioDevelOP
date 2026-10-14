@@ -60,6 +60,9 @@ interface ColumnaMutable {
   x: number
   y: number
   z: number
+  /** [PULIDO 25] W1 · su profundidad en la pared y su escala (u por px): cada columna la suya (en línea con el logo). */
+  d: number
+  mpp: number
   /** Su caja en la pared (px del cuadro) y el espesor de su pieza más gruesa (px). */
   x0: number
   y0: number
@@ -114,7 +117,7 @@ export function crearLaCaidaDelPie(): CaidaDelPie {
   const lugares: LugarEnElPiso[] = []
   const caidas: CaidaIntegrada[] = []
   for (let k = 0; k < COLUMNAS; k += 1) {
-    columnas.push({ ancho: 1, alto: 1, espesor: 0.1, hondo: 0, x: 0, y: 0, z: 0, x0: 0, y0: 0, x1: 0, y1: 0, e: 0, lado: 0, caida: CAIDA_NULA, caidaAlto: 1, caidaEspesor: 0.1, q: new THREE.Quaternion(), o: new THREE.Vector3(), quieta: false })
+    columnas.push({ ancho: 1, alto: 1, espesor: 0.1, hondo: 0, x: 0, y: 0, z: 0, d: 0, mpp: 1, x0: 0, y0: 0, x1: 0, y1: 0, e: 0, lado: 0, caida: CAIDA_NULA, caidaAlto: 1, caidaEspesor: 0.1, q: new THREE.Quaternion(), o: new THREE.Vector3(), quieta: false })
     lugares.push(crearLugar())
     caidas.push(CAIDA_NULA)
   }
@@ -161,7 +164,7 @@ function ladoDeLaPieza(a: Armada, b: BaseMutable, camara: THREE.PerspectiveCamer
  * el scroll del pie), los lugares de las columnas, la distancia de la cámara desde arriba y la calma (en `EN_VIVO`), y la pose de cada
  * columna a los segundos del reloj (lo que sus piezas siguen). Devuelve los segundos del reloj.
  */
-export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX: number, sy: number, camara: THREE.PerspectiveCamera, cuadro: { readonly ancho: number; readonly alto: number }, d: number): number {
+export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX: number, sy: number, camara: THREE.PerspectiveCamera, cuadro: { readonly ancho: number; readonly alto: number }, d: number, profundidades: ArrayLike<number> | null = null): number {
   const s = segundosDelFinal(EN_VIVO.fin)
   horizontal(DERECHA, 1, 0, camara, 1, 0)
   horizontal(ATRAS, 0, -1, camara, 0, -1)
@@ -183,7 +186,9 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
     const caja = a.medida.caja
     const x = caja.x - scrollX
     const y = caja.y - sy
-    const lado = ladoDeLaPieza(a, b, camara, x, y, cuadro, d)
+    // [PULIDO 25] W1 · la profundidad de su columna (en línea con el logo), si se la dan; si no, la de la pared.
+    const di = profundidades !== null && profundidades[i] > 0 ? profundidades[i] : d
+    const lado = ladoDeLaPieza(a, b, camara, x, y, cuadro, di)
     let k = 0
     while (k < c.m && c.columnas[k].lado !== lado) k += 1
     const col = c.columnas[k]
@@ -196,6 +201,7 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
       col.y1 = y + caja.alto
       col.e = a.espesor
       col.hondo = 0
+      col.d = di
     } else {
       col.x0 = Math.min(col.x0, x)
       col.y0 = Math.min(col.y0, y)
@@ -217,7 +223,8 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
   // Cada columna en el mundo: su canto (el medio de abajo y de atrás) y sus medidas (u); la caída de su tamaño.
   for (let k = 0; k < c.m; k += 1) {
     const col = c.columnas[k]
-    const mpp = colocarLaPieza(TEMP, camara, col.x0, col.y0, cuadro.ancho, cuadro.alto, d)
+    const mpp = colocarLaPieza(TEMP, camara, col.x0, col.y0, cuadro.ancho, cuadro.alto, col.d)
+    col.mpp = mpp
     TEMP.updateMatrixWorld(true)
     CANTO.set((col.x1 - col.x0) / 2, -(col.y1 - col.y0), -col.e).applyMatrix4(TEMP.matrixWorld)
     c.mundoPorPx = mpp
@@ -241,9 +248,9 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
     const caja = armadas[i].medida.caja
     p.dx = caja.x - scrollX - col.x0
     p.dy = caja.y - sy - col.y0
-    p.ancho = p.anchoPx * c.mundoPorPx
-    p.alto = p.altoPx * c.mundoPorPx
-    p.espesor = Math.max(0.02, p.espesorPx * c.mundoPorPx)
+    p.ancho = p.anchoPx * col.mpp
+    p.alto = p.altoPx * col.mpp
+    p.espesor = Math.max(0.02, p.espesorPx * col.mpp)
   }
   c.ultimaS = lugaresEnElPiso(c.columnas, c.m, c.caidas, b, c.lugares)
   huellaDelPie(c.columnas, c.m, c.lugares, b, c.huella)
@@ -269,7 +276,7 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
     const pose = poseDeLaPiezaQueCae(col, c.lugares[k], s)
     col.q.copy(camara.quaternion).slerp(Q_UP, pose.bajada)
     if (pose.a > 0) col.q.multiply(Q_TIP.setFromAxisAngle(EJE_X, -pose.a))
-    OFFSET.set((col.x1 - col.x0) / 2, -(col.y1 - col.y0), -col.e).multiplyScalar(c.mundoPorPx).applyQuaternion(col.q)
+    OFFSET.set((col.x1 - col.x0) / 2, -(col.y1 - col.y0), -col.e).multiplyScalar(col.mpp).applyQuaternion(col.q)
     col.o.set(pose.x, pose.y, pose.z).sub(OFFSET)
     col.quieta = pose.quieta
   }
@@ -307,7 +314,7 @@ export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number):
   grupo.quaternion.copy(col.q)
   // [PULIDO 23] U3 · un texto no se incrusta: al hundirse su columna, sube su espesor (queda apoyado sobre el piso, sin hueco).
   const sube = p.esTexto ? p.espesorPx * poseDeLaPiezaQueCae(col, c.lugares[p.columna], s).hundido : 0
-  OFFSET.set(p.dx, -p.dy, sube).multiplyScalar(c.mundoPorPx).applyQuaternion(col.q)
+  OFFSET.set(p.dx, -p.dy, sube).multiplyScalar(col.mpp).applyQuaternion(col.q)
   grupo.position.copy(col.o).add(OFFSET)
 }
 
@@ -335,7 +342,7 @@ export function sombrasDeLaCaida(c: CaidaDelPie, s: number): number {
     P.a = pose.a
     // [PULIDO 23] U3 · la de un texto se queda acostado (se apoya sobre el piso) y es suave; la de una placa se va al incrustarse.
     P.hundido = p.esTexto ? 0 : pose.hundido
-    OFFSET.set(p.dx + p.anchoPx / 2, -(p.dy + p.altoPx), -p.espesorPx).multiplyScalar(c.mundoPorPx).applyQuaternion(col.q).add(col.o)
+    OFFSET.set(p.dx + p.anchoPx / 2, -(p.dy + p.altoPx), -p.espesorPx).multiplyScalar(col.mpp).applyQuaternion(col.q).add(col.o)
     P.x = OFFSET.x
     P.y = OFFSET.y
     P.z = OFFSET.z

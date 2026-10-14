@@ -65,7 +65,8 @@ export const FINAL_DEL_PIE = {
    * (entre las puntas de `ocupa`): las piezas se ven del mismo tamaño en pantalla.
    */
   // [PULIDO 24] V3 · más cerca y desde arriba: lo acostado (la columna, el logo y el form) entre el 75 y el 85 % del ancho.
-  camara: { elevacion: 89.2, lejos: 1.06, escritorio: { elevacion: 80, ocupa: [0.75, 0.85] } },
+  // [PULIDO 25] W1 · los tres en línea, desde arriba, entre el 80 y el 90 % del ancho.
+  camara: { elevacion: 89.2, lejos: 1.06, escritorio: { elevacion: 85, ocupa: [0.8, 0.9] } },
   /**
    * Quieto en el pie: a los cuántos segundos sin scroll arranca, el giro (°/s), el tope del alejamiento (u) y su tiempo (s).
    * [NOCTURNO FINAL] A1/A2 · la VUELTA (al rebobinar, al salir, en un viaje) va con tope: el giro a lo sumo a `giroS`

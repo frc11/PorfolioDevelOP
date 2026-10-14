@@ -120,7 +120,10 @@ const coreografiaDelPie = sinComentarios(leer('_lib/escena/pie3d/coreografia.ts'
 const sinMouse = (c: string): boolean => !/suscribirALaMirada|puntero|pointer|mouse|clientX/.test(c)
 afirmar(sinMouse(coreografiaDelPie), '  y su llegada por columnas tampoco lo lee: la pose sale sólo de cuánto llegó cada pieza (el scroll)')
 controlPositivo('el detector VE una llegada que mira el mouse', `${coreografiaDelPie}\nconst giro = puntero.x`, sinMouse)
-afirmar(/a\.d = d\b/.test(escena) && /d = Math\.min\(d, profundidadDeLaPieza\(/.test(escena), '  todas en un plano (el más cercano que pide el piso): el paralaje mueve el pie entero, un rótulo no se despega de su columna')
+// [PULIDO 25] W1 · el sentido cambió por pedido: cada COLUMNA en su plano (el que la deja acostada en línea con el logo, con el tope del
+// piso: `enLinea.ts`), todas las piezas de una columna en el mismo: el paralaje mueve cada columna entera, un rótulo no se despega de ella.
+const EN_LINEA = sinComentarios(leer('_lib/escena/pie3d/enLinea.ts'))
+afirmar(/a\.d = PROFUNDIDADES\[k\] > 0 \? PROFUNDIDADES\[k\] : d/.test(escena) && /d = Math\.min\(d, profundidadDeLaPieza\(/.test(escena) && EN_LINEA.includes('destino[i] = PROFUNDIDAD[') && EN_LINEA.includes('return Math.min(d, tope)'), '  cada columna en un plano (en línea con el logo, con el tope del piso): el paralaje mueve cada columna entera, un rótulo no se despega de su columna')
 
 // La geometría: el texto suelto extruido; la placa con su relieve; el formulario, una placa con pozos y la tecla de Enviar.
 const FUENTES: FuentesDelPie = { 400: new Font(datos400 as FontData), 500: new Font(datos500 as FontData), 600: new Font(datos600 as FontData) }

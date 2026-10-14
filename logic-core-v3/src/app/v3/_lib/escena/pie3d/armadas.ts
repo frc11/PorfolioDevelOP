@@ -25,6 +25,7 @@ import { HUECOS_DEL_PIE } from './huecos'
 import { huecosDeLaCaida } from './huecosDeLaCaida'
 import { SOMBRAS_DEL_PIE } from './sombras'
 import { duracionDeLaTransformacion, poseDeLaTransformacion } from './transformacionDelPie'
+import { profundidadesEnLinea } from './enLinea'
 
 /**
  * [RETOQUE DEL PIE] P2 · LAS PIEZAS ARMADAS DEL PIE Y SU CUADRO — sin React (el componente, `PieDeVolumen.tsx`, sólo
@@ -40,6 +41,9 @@ import { duracionDeLaTransformacion, poseDeLaTransformacion } from './transforma
 const FUENTES: FuentesDelPie = { 400: new Font(datos400 as FontData), 500: new Font(datos500 as FontData), 600: new Font(datos600 as FontData), archivo: FUENTES_DEL_CTA.frase }
 
 /** Cuánto se hunde (px) y en cuánto tiempo (la constante, s). */
+/** [PULIDO 25] W1 · la profundidad de cada pieza en este cuadro (la de su columna). */
+const PROFUNDIDADES = new Float64Array(64)
+
 export const HUNDIDA_DEL_PIE = { encima: 5, apretada: 12, tau: 0.05 } as const
 
 /** [PULIDO 10] J8 · el subrayado de un enlace de texto: el del sitio (`cta.css`: `--duracion-muy-lenta` y `--ease-principal`). */
@@ -156,15 +160,17 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
     a.grupo.visible = arriba + c.abajo > -MARGEN && arriba + c.arriba < cuadro.alto + MARGEN
     if (a.grupo.visible) d = Math.min(d, profundidadDeLaPieza(camara, a.medida.caja.x - scrollX + (c.izquierda + c.derecha) / 2, arriba + c.abajo, cuadro.ancho, cuadro.alto))
   }
-  const segundos = enElFinal ? armarLaCaida(s.caida, s.armadas, scrollX, sy, camara, cuadro, d) : 0
+  // [PULIDO 25] W1 · cada columna a su profundidad: la que la deja acostada en línea con el logo (`enLinea.ts`), desde el arranque.
+  profundidadesEnLinea(s.armadas, camara, cuadro, scrollX, sy, PROFUNDIDADES)
+  const segundos = enElFinal ? armarLaCaida(s.caida, s.armadas, scrollX, sy, camara, cuadro, d, PROFUNDIDADES) : 0
   for (let k = 0; k < s.armadas.length; k += 1) {
     const a = s.armadas[k]
     if (!a.grupo.visible) continue
     a.material.envMapIntensity = nivel
     const izquierda = a.medida.caja.x - scrollX
     const arriba = a.medida.caja.y - sy
-    a.d = d
-    a.mundoPorPx = colocarLaPieza(a.grupo, camara, izquierda, arriba, cuadro.ancho, cuadro.alto, d)
+    a.d = PROFUNDIDADES[k] > 0 ? PROFUNDIDADES[k] : d
+    a.mundoPorPx = colocarLaPieza(a.grupo, camara, izquierda, arriba, cuadro.ancho, cuadro.alto, a.d)
     if (enElFinal) aplicarLaCaida(s.caida, k, a, segundos)
     if (a.pieza.forma === 'enlace') dibujarElSubrayado(a, s.quieto, dt)
     else {

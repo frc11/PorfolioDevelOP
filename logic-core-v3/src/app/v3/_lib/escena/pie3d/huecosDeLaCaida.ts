@@ -30,14 +30,14 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     POSE.bajada = pose.bajada
     POSE.a = pose.a
     POSE.hundido = pose.hundido
-    OFFSET.set(p.dx + p.anchoPx / 2, -(p.dy + p.altoPx), -p.espesorPx).multiplyScalar(c.mundoPorPx).applyQuaternion(col.q).add(col.o)
+    OFFSET.set(p.dx + p.anchoPx / 2, -(p.dy + p.altoPx), -p.espesorPx).multiplyScalar(col.mpp).applyQuaternion(col.q).add(col.o)
     POSE.x = OFFSET.x
     POSE.y = OFFSET.y
     POSE.z = OFFSET.z
     const huella = sombraDeLaPiezaQueCae(p, POSE, b)
     const u = Math.min(1, Math.max(0, pose.a / (Math.PI / 2)))
     huecos[k].set(huella.x, huella.z, (huella.medioAncho - SOMBRA_DEL_PIE.sobra) * sobra, (huella.medioFondo - SOMBRA_DEL_PIE.sobra) * sobra)
-    formas[k].set(pose.bajada * u * u * (3 - 2 * u), p.radioPx * c.mundoPorPx * sobra, 0, 0)
+    formas[k].set(pose.bajada * u * u * (3 - 2 * u), p.radioPx * col.mpp * sobra, 0, 0)
     k += 1
   }
   return k
