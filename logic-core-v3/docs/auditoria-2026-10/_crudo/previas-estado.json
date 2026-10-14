@@ -391,6 +391,142 @@
    "id_previo": "CLEAN-H1",
    "estado": "abierto",
    "evidencia": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:15 WhatsApp con número placeholder 5493815555555 (usado en :49 y :156); :148-152 'Desde $150 USD /mes · Incluye 1.000 conversaciones' contra el catálogo Starter 49/500, Pro 90/3000, Business 150/5000 (sync-plans.ts:70-72, :86-88, :102-104). Se renderiza en dashboard/chatbot/page.tsx:21 y :25."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md:1268",
+   "id_previo": "S2b-01",
+   "estado": "abierto",
+   "evidencia": "email-marketing/_actions.ts:17-28 sigue sin isModuleActive (gate solo en layout.tsx:20-21); remitente y HTML del input (:131-135 -> brevo.ts:76); presets.ts:8-70 sin preset para email marketing; control: motor-resenas/_actions.ts:23 si lo chequea"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "doc": "docs/audit-repo-20260707.md:113",
+   "id_previo": "PD-1",
+   "estado": "abierto",
+   "evidencia": "onboarding-actions.ts:110-132 sigue guardando en claro con url 'ENCRIPTADO_EN_TEXTO' pero el modulo quedo sin llamadores; el write path vivo agency-actions.ts:103-110 tambien guarda en claro. El cifrado de escritura (9fc616c4, PD-1.2) solo esta en origin/b0-isolation-motor-chatbot; en main solo hay helper y lectura (credential-cipher.ts:73, resolve-credential.ts:16-25)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "doc": "docs/audits/2026-05-auditoria-db.md:155",
+   "id_previo": "DB-P1-3",
+   "estado": "cerrado",
+   "evidencia": "Columna eliminada en prisma/migrations/20260522214201_drop_user_unlocked_features/migration.sql:15; git grep unlockedFeatures origin/main -- src solo encuentra un comentario (src/lib/premium-modules.ts:15); dashboard/layout.tsx ya usa OrganizationModule (:53-63)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:105",
+   "id_previo": "P1-12",
+   "estado": "parcial",
+   "evidencia": "Con Zod: admin/chatbots/[botId]/actions.ts:16-24, :36, :120; regenerate-brief.ts:16 (sin input); saveOnboardingProfile (onboarding-actions.ts:19-25). Sin Zod: completeOnboardingAction (onboarding-actions.ts:27-34, muerta) y updateClientAction (lib/actions/clients.ts:149-170, modulo sin importadores)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:74",
+   "id_previo": "CLEAN-R2",
+   "estado": "abierto",
+   "evidencia": "dashboard/page.tsx:39-48 sigue sin timeZone; tambien getActivityChartData.ts:25, getLatencyHistory.ts:25, alerts.ts:277 y :287, weekly-report.ts:12, sendLeadNotification.ts:74; y en el lote agenda page.tsx:17-19, :98-99, facturacion/page.tsx:88-94, boveda/page.tsx:202-206, referidos/page.tsx:22-24, project/page.tsx:70-76"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "doc": "docs/auditoria-total-pre-deploy.md:36",
+   "id_previo": "O-2",
+   "estado": "cerrado",
+   "evidencia": "package.json:131 declara @googleapis/webmasters ^4.0.0, package-lock.json:859 lo resuelve y node_modules/@googleapis/webmasters/package.json existe; searchconsole.ts:2 lo importa y el baseline de tsc da 0 errores. El build no se corrió (prohibido en esta auditoría)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "doc": "docs/audits/2026-05-auditoria-profunda.md:50",
+   "id_previo": "P1-7",
+   "estado": "parcial",
+   "evidencia": "El mock ya se marca: PreviewBanner en ?demo (seo/page.tsx:124-125) y cuando isMockData (:226); el comentario citado está hoy en :156. Siguen las tendencias literales sobre datos reales (:234-235 FIXME, :244, :252, :260, :269) y la falla de la API cae a mock sin aviso a develOP (searchconsole.ts:211-213)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:81",
+   "id_previo": "P1-7",
+   "estado": "parcial",
+   "evidencia": "El badge visible que faltaba en junio existe (seo/page.tsx:226 → PreviewBanner, mensaje en PreviewBanner.tsx:15-16). Lo pendiente son los deltas inventados (seo/page.tsx:244-269) y la rama de error inalcanzable (:181-200)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:26",
+   "id_previo": "CLEAN-H3",
+   "estado": "abierto",
+   "evidencia": "Sigue fragmentada en origin/main: src/lib/email.ts:21 remitente 'develOP Agency <hello@develop-agency.com>' (dominio legacy); src/lib/email/brevo-service.ts:33 fallback del remitente a un Gmail personal (no se copia la direccion); src/lib/integrations/brevo.ts:124 fallback 'alerts@develop-agency.com'; src/components/dashboard/ExecutiveReportTemplate.tsx:120 'www.develop-agency.com' (componente muerto). El dominio canonico del sitio es develop.com.ar (src/app/layout.tsx:16)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md:1268",
+   "id_previo": "S2b-01",
+   "estado": "abierto",
+   "evidencia": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17-28 getOrgWithBrevo sin isModuleActive; importContactsAction :71, createCampaignAction :128 y sendCampaignAction :174 sin gate; fromName/fromEmail/htmlContent del formData sin validar :131-135 → brevo.ts createCampaign sender del input; único gate en email-marketing/layout.tsx:20-21. Control: motor-resenas/_actions.ts:23-24 sí verifica el módulo en la action. Además sendCampaignAction devuelve 'Brevo error: …' crudo (:202)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "doc": "docs/audits/2026-05-auditoria-profunda.md:35",
+   "id_previo": "P0-4",
+   "estado": "parcial",
+   "evidencia": "STATUS.md:24, :47 ya dice LLM real; badge 'Resumen Ejecutivo - IA' en AIExecutiveBriefV2.tsx:54-56 y page.tsx:222-224. Sigue sin feature flag (git grep BRIEF_ENABLED|EXECUTIVE_BRIEF → 0) y sin observabilidad: executive-brief.ts:128, :132, :218 solo console.error y el usage del LLM se descarta (:301-308)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:65",
+   "id_previo": "P0-4",
+   "estado": "parcial",
+   "evidencia": "Badge 'IA' presente (AIExecutiveBriefV2.tsx:54-56); sin flag por plan ni kill-switch; modelo gemini-2.5-flash (executive-brief.ts:19)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:83",
+   "id_previo": "P1-9",
+   "estado": "parcial",
+   "evidencia": "El trend por hash se eliminó (git grep computeTrend → 0; HealthScore.tsx:97-100), pero computeSeoScore sigue placeholder (health-score.ts:265-274) y leads/conversión siguen siendo agency-wide (:284-289, :317-333); además el nivel sale de dataConnections, que nadie escribe."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "doc": "docs/audits/2026-06-revalidacion.md:66",
+   "id_previo": "P0-4",
+   "estado": "parcial",
+   "evidencia": "Badge 'IA' sí (AIExecutiveBriefV2.tsx:54-56); feature flag no (git grep → 0)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "doc": "docs/audits/2026-06-revalidacion.md:70",
+   "id_previo": "sin-id (maxTokens→maxOutputTokens)",
+   "estado": "cerrado",
+   "evidencia": "src/lib/ai/executive-brief.ts:305 'maxOutputTokens: BRIEF_MAX_OUTPUT_TOKENS' (1024, :26); sin maxTokens en el archivo."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1632",
+   "id_previo": "OBS-05",
+   "estado": "abierto",
+   "evidencia": "executive-brief.ts:301-308 solo toma text del generateText (git grep usage en el archivo → 0); QuotaUsage.alert80Sent/alert80SentAt (schema.prisma:1587-1588) con 0 referencias en src; no hay umbral de gasto ni alerta global. Agravante: el brief se genera en el render sin caché negativa."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:17",
+   "id_previo": "CLEAN-H1",
+   "estado": "abierto",
+   "evidencia": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:15 sigue con WHATSAPP_URL 'https://wa.me/5493815555555...' (usado en :49 y :156); :148 '$150 USD' y :152 'Incluye 1.000 conversaciones', contra el catálogo real de src/lib/plan/plan-presentation.ts:149-150 (Starter USD 49, 500) y prisma/seeds/sync-plans.ts:68-111 (Business USD 150, 5.000). Se muestra a todo cliente sin chatbot activo (src/app/(protected)/dashboard/chatbot/page.tsx:20-21)."
   }
  ]
 }

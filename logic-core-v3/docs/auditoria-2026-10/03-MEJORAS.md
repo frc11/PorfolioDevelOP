@@ -47,6 +47,17 @@ Lo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de
 - Nodo(s): h4.adm-shell, h4.adm-dashboard, h4.adm-equipo, h4.adm-referidos, h4.adm-proyectos, h4.adm-leads, h4.adm-mensajes, h4.adm-novedades, h3.adm-actividad, h5.adm-revision-demos, h5.adm-fg2lab, lib.proxy, lib.auth
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-013
 
+### [SEC-036] Credenciales de terceros en claro en la base: tokens OAuth de Google Business, token de Tiendanube, API key de Cal.com, token de Telegram y las credenciales de la Bóveda (el cifrado de escritura quedó sin mergear)
+- Dominio: D6  ·  Severidad: ALTA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `prisma/migrations/20260503150000_add_gbp_fields/migration.sql:5` — «ADD COLUMN "gbpAccessToken" TEXT, ADD COLUMN "gbpRefreshToken" TEXT,»; `prisma/migrations/20260504235814_add_tiendanube_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "tiendanubeAccessToken" TEXT,»; `prisma/migrations/20260505000536_add_cal_com_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "calComApiKey" TEXT,»; `src/app/api/auth/google-business/callback/route.ts:52` — «gbpAccessToken: tokens.access_token, gbpRefreshToken: tokens.refresh_token,»; `src/actions/agency-actions.ts:103` — «await prisma.clientAsset.create({ data: { organizationId,»; `prisma/schema.prisma:1704` — «// Auth opcional vía header (ej. "X-Webhook-Secret"). Secret cifrado AES-256-GCM // con env CRM_SECRET_KEY.»; `prisma/schema.prisma:360` — «gbpRefreshToken String? @db.Text»; `prisma/schema.prisma:367` — «tiendanubeAccessToken String? @db.Text»; `prisma/schema.prisma:375` — «calComApiKey String? @db.Text»; `prisma/schema.prisma:835` — «osTelegramBotToken String?»; `src/app/api/auth/google-business/callback/route.ts:53` — «gbpRefreshToken: tokens.refresh_token,»; `src/app/api/auth/tiendanube/callback/route.ts:67` — «tiendanubeAccessToken: tokens.access_token,»; `src/lib/crypto/credential-cipher.ts:73` — «export function encryptCredential(plaintext: string): string { // sin llamadores en origin/main»; `src/lib/crypto/resolve-credential.ts:24` — «return { value: description, error: false } // texto plano pasa tal cual»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:85` — «AES-256 // badge del header (tambien :148 en cada tarjeta)»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:185` — «<VaultRevealButton value={credential.value} /> // el valor viaja en el payload RSC»; `src/actions/agency-actions.ts:109` — «description: data.description»; `src/components/admin/managers/VaultManager.tsx:5` — «import { createClientAssetAction } from '@/actions/agency-actions'»; `src/actions/onboarding-actions.ts:115` — «url: 'ENCRIPTADO_EN_TEXTO',»; `src/components/admin/managers/VaultManager.tsx:85` — «placeholder="Contraseña o instrucciones..."»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:148` — «AES-256»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:51` — «// ─── Demo activity log (PLACEHOLDER — data fake; modelo real = schema, parada aparte) ──»; `src/components/dashboard/VaultRevealButton.tsx:61` — «Información sensible — Solo visible para vos»
+- Impacto: Bloqueante para el primer cliente real: quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio y hosting cargadas en la Bóveda, mientras el portal le asegura al cliente, en el encabezado y en cada tarjeta de la Bóveda, que están cifradas con AES-256. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear: encryptCredential no tiene llamadores fuera de los tests.
+- Propuesta: Cifrar en los write-paths con secret-box/credential-cipher (callbacks OAuth de GBP y Tiendanube, settings de Telegram, carga de Cal.com y assets de la Bóveda), backfill idempotente y lectura tolerante (resolve-credential ya soporta ambos formatos); mergear o portar 9fc616c4.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): modelo.Organization, modelo.AgencySettings, modelo.ClientAsset, int.google-business-profile, int.tiendanube, int.calcom, int.telegram, h2.cli-resenas, h2.cli-tienda, h2.cli-agenda, h2.cli-cuenta, int.gbp, lib.crypto, h2.cli-cuenta.boveda, h4.adm-clientes, lib.actions, h2.cli-cuenta.boveda-solicitar-documento
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-031
+
 ### [SEC-037] El overview de Mi Chatbot manda al navegador la fila completa de Organization: tokens de Google Business y Tiendanube, API key de Cal.com y las notas internas de develOP
 - Dominio: D5  ·  Severidad: ALTA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -57,6 +68,28 @@ Lo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de
 - Relacionado: —
 - Nodo(s): h3.cli-chatbot, lib.chatbot.admin, modelo.Organization, modelo.BotConfig
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-035
+
+### [SEC-045] El cliente puede fijar su analyticsPropertyId desde el onboarding y GA4 se lee con la service account unica de develOP
+- Dominio: D2  ·  Severidad: ALTA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/bienvenida/_actions/complete-onboarding.ts:13` — «ga4MeasurementId: z.string().optional(),»; `src/app/bienvenida/_actions/complete-onboarding.ts:38` — «analyticsPropertyId: parsed.data.ga4MeasurementId,»; `src/app/bienvenida/_actions/complete-onboarding.ts:23` — «const organizationId = await resolveOrgId() // no chequea que el onboarding siga pendiente: re-ejecutable»; `src/lib/analytics.ts:95` — «const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY»; `src/app/(protected)/dashboard/resultados/trafico/page.tsx:92` — «propertyId={client.analyticsPropertyId}»
+- Impacto: Un cliente que conozca el ID numerico de la propiedad GA4 de otro cliente (a la que la service account de develOP tiene acceso) puede fijarlo en su org y ver el trafico de ese otro negocio en su panel.
+- Propuesta: Que solo develOP asigne analyticsPropertyId; si el cliente lo informa, guardarlo como pendiente de verificacion; validar formato y bloquear la re-ejecucion del onboarding completado.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-035], [DEU-023], [FAL-010]
+- Nodo(s): h2.cli-bienvenida, h2.cli-resultados, int.ga4, modelo.Organization
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-048
+
+### [SEC-048] Inicio, Health Score, reporte semanal y brief IA cuentan como leads del cliente los ContactSubmission de toda la agencia (sin organizationId), incluidos los pedidos de upsell de los demás clientes
+- Dominio: D2  ·  Severidad: ALTA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/dashboard/week-results.ts:43` — «prisma.contactSubmission .count({ where: { createdAt: { gte: weekAgo } },»; `src/lib/health-score.ts:312` — «void organizationId // ContactSubmission is global (no orgId FK yet), so this gives an agency-wide»; `src/components/dashboard/home/WeekResultsGrid.tsx:44` — «// · leads: el conteo es agency-wide (ContactSubmission sin organizationId,»; `src/lib/reports/executive-weekly/build.ts:175` — «value: toNumber(week.leads.value),»; `src/lib/ai/executive-brief.ts:293` — «leads: weekResults.leads,»; `src/lib/health-score.ts:311` — «async function computeLeadsScore(organizationId: string): Promise<number | null> { void organizationId»; `src/lib/health-score.ts:284` — «prisma.contactSubmission.count({ where: { createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } } }) // conversion»; `prisma/schema.prisma:688` — «model ContactSubmission { // sin organizationId»; `src/lib/actions/upsell.ts:88` — «await prisma.contactSubmission.create({ data: { name: user.name ?? org.companyName, email: user.email, company: org.companyName,»; `src/components/dashboard/home/WeekResultsGrid.tsx:46` — «// para no presentarlo como dato cerrado del cliente — sin revelar que es // global.»; `src/app/(protected)/dashboard/page.tsx:183` — «const data = await getWeekResults(organizationId)»; `src/lib/health-score.ts:314` — «// ContactSubmission is global (no orgId FK yet), so this gives an agency-wide // lead volume signal — still useful as a relative trend metric.»; `src/lib/reports/executive-weekly/build.ts:174` — «leads: { value: toNumber(week.leads.value), deltaPercent: week.leads.trend,»
+- Impacto: Bloqueante para el primer cliente real: la card 'Leads' de Inicio (dashboard/page.tsx:183), el Health Score (dimensiones leads y conversion, health-score.ts:282-289 y :311-333), el email del reporte ejecutivo semanal y el brief de Gemini muestran el volumen de contactos entrantes de develOP (formulario publico + upsells de todos los clientes) como leads del negocio del cliente. Todos los clientes ven el mismo numero y se filtra un agregado de actividad de otros tenants. El hedge 'En calibracion' solo existe en la card de Inicio, no en el email ni en el brief.
+- Propuesta: Dejar de usar ContactSubmission para metricas de cliente: contar los leads propios de la org (p. ej. ChatbotLead via forOrg(orgId)) o mostrar '—' hasta tener fuente por org. Atribuir ContactSubmission a una org exige organizationId en prisma/schema.prisma (FROZEN: decision para Valentino). Agregar un invariante que falle si lib/dashboard, lib/health-score o lib/reports consultan modelos sin organizationId.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio, h2.cli-inicio.resultados-semana, h2.cli-reportes-email, int.vertex, modelo.ContactSubmission, h2.cli-inicio.resultados-de-la-semana, h2.cli-inicio.health-score, lib.dashboard, lib.health-score, h2.cli-inicio.resumen-ia, h2.cli-reportes-email.reporte-semanal, lib.reports, modelo.ExecutiveBriefSnapshot
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-051
 
 ### [SEC-009] Enumeracion de usuarios: el magic link responde distinto si el email existe (y el login/forgot delatan por tiempo y por 'error inesperado')
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
@@ -210,36 +243,25 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): lib.isolation, modelo.WabaChannel, modelo.MotorTemplate, modelo.MotorAlert, h3.vis-whatsapp
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-028
 
-### [SEC-036] Credenciales de terceros en claro en la base: tokens OAuth de Google Business, token de Tiendanube, API key de Cal.com, token de Telegram y credenciales de la Bóveda
-- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: seguridad
-- Confianza: PROBABLE
-- Evidencia: `prisma/migrations/20260503150000_add_gbp_fields/migration.sql:5` — «ADD COLUMN "gbpAccessToken" TEXT, ADD COLUMN "gbpRefreshToken" TEXT,»; `prisma/migrations/20260504235814_add_tiendanube_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "tiendanubeAccessToken" TEXT,»; `prisma/migrations/20260505000536_add_cal_com_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "calComApiKey" TEXT,»; `src/app/api/auth/google-business/callback/route.ts:52` — «gbpAccessToken: tokens.access_token, gbpRefreshToken: tokens.refresh_token,»; `src/actions/agency-actions.ts:103` — «await prisma.clientAsset.create({ data: { organizationId,»; `prisma/schema.prisma:1704` — «// Auth opcional vía header (ej. "X-Webhook-Secret"). Secret cifrado AES-256-GCM // con env CRM_SECRET_KEY.»; `prisma/schema.prisma:360` — «gbpRefreshToken String? @db.Text»; `prisma/schema.prisma:367` — «tiendanubeAccessToken String? @db.Text»; `prisma/schema.prisma:375` — «calComApiKey String? @db.Text»; `prisma/schema.prisma:835` — «osTelegramBotToken String?»; `src/app/api/auth/google-business/callback/route.ts:53` — «gbpRefreshToken: tokens.refresh_token,»; `src/app/api/auth/tiendanube/callback/route.ts:67` — «tiendanubeAccessToken: tokens.access_token,»
-- Impacto: Quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio/hosting cargadas en la Bóveda. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear.
-- Propuesta: Cifrar en los write-paths con secret-box/credential-cipher (callbacks OAuth de GBP y Tiendanube, settings de Telegram, carga de Cal.com y assets de la Bóveda), backfill idempotente y lectura tolerante (resolve-credential ya soporta ambos formatos); mergear o portar 9fc616c4.
-- Esfuerzo: M  ·  Zona: libre
-- Relacionado: —
-- Nodo(s): modelo.Organization, modelo.AgencySettings, modelo.ClientAsset, int.google-business-profile, int.tiendanube, int.calcom, int.telegram, h2.cli-resenas, h2.cli-tienda, h2.cli-agenda, h2.cli-cuenta, int.gbp, lib.crypto
-- REQUIERE-VERIFICACIÓN-HUMANA: VH-031
-
 ### [SEC-038] Notification es por usuario pero el portal la lee y la marca por organización: el cliente ve y apaga las notificaciones dirigidas al SUPER_ADMIN, con links a /admin/projects/<id>
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `prisma/schema.prisma:718` — «userId String»; `src/app/(protected)/dashboard/layout.tsx:101` — «prisma.notification.findMany({ where: { organizationId },»; `src/lib/actions/notifications.ts:33` — «await prisma.notification.updateMany({ where: { id: parsed.data.id, organizationId },»; `src/lib/actions/notifications.ts:82` — «const notifications = await prisma.notification.findMany({ where: { organizationId },»; `src/actions/dashboard-actions.ts:67` — «userId: admin.id, organizationId, taskId: task.id,»; `src/actions/dashboard-actions.ts:70` — «actionUrl: '/admin/projects/${task.projectId}',»; `src/actions/agency-actions.ts:54` — «const notifications = orgMembers.map(member => ({»; `src/components/dashboard/NotificationCenter.tsx:125` — «router.push(notif.actionUrl)»
+- Evidencia: `prisma/schema.prisma:718` — «userId String»; `src/app/(protected)/dashboard/layout.tsx:101` — «prisma.notification.findMany({ where: { organizationId },»; `src/lib/actions/notifications.ts:33` — «await prisma.notification.updateMany({ where: { id: parsed.data.id, organizationId },»; `src/lib/actions/notifications.ts:82` — «const notifications = await prisma.notification.findMany({ where: { organizationId },»; `src/actions/dashboard-actions.ts:67` — «userId: admin.id, organizationId, taskId: task.id,»; `src/actions/dashboard-actions.ts:70` — «actionUrl: '/admin/projects/${task.projectId}',»; `src/actions/agency-actions.ts:54` — «const notifications = orgMembers.map(member => ({»; `src/components/dashboard/NotificationCenter.tsx:125` — «router.push(notif.actionUrl)»; `src/actions/dashboard-actions.ts:62` — «await tx.notification.createMany({ data: superAdmins.map((admin) => ({ ... userId: admin.id, organizationId,»; `src/lib/actions/notifications.ts:55` — «await prisma.notification.updateMany({ where: { organizationId, read: false },»; `src/lib/actions/upsell.ts:107` — «const superAdmin = await prisma.user.findFirst({ where: { role: 'SUPER_ADMIN' },»
 - Impacto: Cuando un cliente aprueba o rechaza una entrega, la campana de todos los miembros de su org muestra las notificaciones escritas para el SUPER_ADMIN ('Cliente pidio cambios en...', 'Entrega aprobada por cliente...'), con un link a /admin/projects/<id> que expone el id interno y rebota en el proxy; cada miembro ve también las copias de los demás (una por miembro en cada pedido de aprobación) y cualquiera las marca leídas para todos. Ninguna pantalla del admin lee Notification, así que los avisos al SUPER_ADMIN (upsell, mensajes, referidos, aprobaciones) solo terminan en la campana del cliente o en ningún lado.
 - Propuesta: En dashboard/layout.tsx y lib/actions/notifications.ts (libres) filtrar lectura y marcado por { userId de la sesión, organizationId }. Decisión para Valentino (dashboard-actions.ts es FROZEN): no poner organizationId en las notificaciones del admin y decidir si el equipo necesita una bandeja propia o si esos avisos van solo por alerta/email.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-shell, h2.cli-proyecto, h4.adm-proyectos, modelo.Notification, lib.actions
+- Nodo(s): h2.cli-shell, h2.cli-proyecto, h4.adm-proyectos, modelo.Notification, lib.actions, h2.cli-shell.notificaciones, h2.cli-proyecto.aprobar-o-pedir-cambios, h2.cli-shell.campana-notificaciones, h2.cli-proyecto.aprobacion-entregas, h4.adm-dashboard
 
 ### [SEC-039] La baja de una campaña puede caer en otro cliente: CONTACT_ID y OPTOUT_TOKEN se guardan en el contacto global de Brevo y el último import de ese email los pisa
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:114` — «CONTACT_ID: contact.id, OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id),»; `src/lib/integrations/brevo.ts:49` — «listIds: params.listIds, updateEnabled: true,»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:155` — «/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}»; `prisma/schema.prisma:1229` — «@@unique([organizationId, email])»; `src/app/api/email/optout/[contactId]/route.ts:91` — «await prisma.emailContact.updateMany({ where: { id: contactId },»
+- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:114` — «CONTACT_ID: contact.id, OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id),»; `src/lib/integrations/brevo.ts:49` — «listIds: params.listIds, updateEnabled: true,»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:155` — «/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}»; `prisma/schema.prisma:1229` — «@@unique([organizationId, email])»; `src/app/api/email/optout/[contactId]/route.ts:91` — «await prisma.emailContact.updateMany({ where: { id: contactId },»; `src/lib/integrations/brevo.ts:39` — «const res = await fetch('${API_BASE}/contacts', { method: 'POST', ... updateEnabled: true»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:113` — «attributes: { CONTACT_ID: contact.id, OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id) },»
 - Impacto: Si dos clientes de develOP tienen al mismo destinatario (caso común), el contacto de Brevo es uno solo por email en la cuenta compartida y queda con el CONTACT_ID del último cliente que importó. Cuando esa persona se da de baja desde la campaña del cliente A, el link apunta al EmailContact del cliente B: se marca optedOut en la base de B (escritura entre tenants disparada por un tercero) y A la sigue contando como activa. Un cliente con el módulo puede provocarlo a propósito importando emails de la lista de otro.
 - Propuesta: No guardar ids por tenant en atributos globales de Brevo: firmar un token que incluya organizationId y email y resolver la fila por (org, email) en la ruta de baja, o usar atributos por lista/org y el desuscribe nativo por lista. Verificar el modelo de contactos de Brevo con el caso de prueba.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-email-mkt, h6.vis-optout, int.brevo, modelo.EmailContact
+- Nodo(s): h2.cli-email-mkt, h6.vis-optout, int.brevo, modelo.EmailContact, h2.cli-email-mkt.baja-de-contactos
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-037
 
 ### [SEC-040] El export masivo de leads del admin no neutraliza fórmulas: un visitante anónimo del widget puede inyectar una fórmula en un CSV que junta leads de varias organizaciones
@@ -262,6 +284,38 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [SEC-034]
 - Nodo(s): lib.seeds, lib.isolation, modelo.BotConfig, modelo.KnowledgeBase, int.neon
+
+### [SEC-044] Email marketing: las 3 server actions no verifican el módulo contratado, no validan con Zod ni tienen rate limit, y mandan el remitente y el HTML del formulario por la cuenta Brevo de develOP
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17` — «async function getOrgWithBrevo() { const organizationId = await resolveOrgId() // sin isModuleActive»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:134` — «const fromEmail = (formData.get('fromEmail') as string | null)?.trim()»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:137` — «if (!name || !subject || !fromName || !fromEmail || !htmlContent) {»; `src/lib/integrations/brevo.ts:76` — «sender: { name: params.fromName, email: params.fromEmail },»; `src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:20` — «const isActive = await isModuleActive(organizationId, 'email-marketing') // unico gate»; `src/components/dashboard/modules/motor-resenas/_actions.ts:23` — «const isActive = await isModuleActive(organizationId, 'motor-resenas') // control: este modulo si lo chequea en la action»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:174` — «export async function sendCampaignAction(campaignId: string) { const org = await getOrgWithBrevo()»
+- Impacto: Bloqueante para el primer cliente real: cualquier ORG_MEMBER (o un cliente que dio de baja el modulo) que obtenga el ID de las actions puede importar contactos arbitrarios y enviar HTML arbitrario con el remitente que quiera por la cuenta Brevo compartida de develOP, sin tope de tamano ni rate limit. Una denuncia de spam suspende la cuenta Brevo y con ella los emails transaccionales de todos los clientes.
+- Propuesta: En cada action: gate con isModuleActive usando el slug real del catalogo; schema Zod con largos maximos y fromEmail validado contra remitentes verificados de la org o el dominio de develOP; tope de filas/bytes del CSV; checkRateLimit por org con un preset nuevo. Evaluar subcuentas Brevo por cliente.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [BUG-012], [BUG-021], [SEC-039], [SEC-005]
+- Nodo(s): h2.cli-email-mkt, h2.cli-email-mkt.crear-y-enviar-campana, h2.cli-email-mkt.importar-contactos, int.brevo, lib.rate-limit, modelo.EmailCampaign, lib.modules, modelo.EmailContact
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-043
+
+### [SEC-047] Formularios y actions del portal sin rate limit y con validación incompleta: tickets, mensajes, upsell, onboarding y PDF sin tope; texto libre sin .max(); el nombre del módulo lo manda el cliente
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/tickets/schemas.ts:5` — «title: z.string().trim().min(3, 'El título debe tener al menos 3 caracteres.'),»; `src/lib/tickets/actions.ts:88` — «if (parsed.data.priority === 'HIGH' || parsed.data.priority === 'URGENT') {»; `src/lib/actions/schemas.ts:47` — «featureName: z.string().trim().min(1, 'Nombre de feature inválido.'),»; `src/app/api/reports/client-monthly/route.ts:40` — «const buffer = await renderToBuffer(»; `src/app/bienvenida/_actions/complete-onboarding.ts:10` — «companyName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),»; `src/lib/actions/profile.ts:87` — «const whatsapp = ((formData.get('whatsapp') as string | null) ?? '').trim() || null»; `src/lib/tickets/actions.ts:92` — «detail: ticket.title,»; `src/lib/actions/upsell.ts:102` — «detail: 'Solicitó activar ${parsed.data.featureName}. Contacto: ${user.email}.',»; `src/lib/actions/messages.ts:155` — «sendAgencyAlert({ type: 'MESSAGE_NEW',»; `src/lib/tickets/actions.ts:89` — «sendAgencyAlert({ type: 'TICKET_URGENT',»; `src/lib/actions/profile.ts:218` — «const isValid = await bcrypt.compare(parsed.data.currentPassword, user.password)»; `src/lib/actions/schemas.ts:45` — «export const UpsellRequestSchema = z.object({ featureKey: z.string().trim().min(1, 'Feature inválida.'), featureName: z.string().trim().min(1, 'Nombre de feature inválido.'),»; `src/lib/actions/upsell.ts:81` — «const lastSubmission = await prisma.contactSubmission.findFirst({ where: { email: user.email, service: parsed.data.featureKey },»; `src/lib/actions/upsell.ts:99` — «sendAgencyAlert({ type: 'LEAD_UPSELL',»; `src/lib/actions/upsell.ts:128` — «title: '${org.companyName} está interesada en ${parsed.data.featureName}',»; `src/lib/tickets/actions.ts:49` — «const session = await auth() const organizationId = await resolveOrgId() (sin checkRateLimit en todo el archivo)»
+- Impacto: Un usuario de cliente autenticado puede crear tickets urgentes sin límite (cada uno dispara la alerta al webhook de develOP con el título sin tope), inflar upsellRequestCount con clics y forzar renders de PDF en serie. CLAUDE.md exige rate limit en todo envío de formulario; checkRateLimit y RATE_LIMIT_PRESETS ya existen (lib/rate-limit) y no se usan acá.
+- Propuesta: checkRateLimit por userId en createTicketAction, requestUpsellAction, completeOnboardingAction y la ruta del PDF; .max() en title, description, featureName, companyName, whatsapp.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-015], [SEC-016], [SEC-032]
+- Nodo(s): h2.cli-soporte.crear-ticket, h2.cli-servicios.vitrina-modulos, h2.cli-resultados.informe-mensual-pdf, lib.rate-limit, int.webhook-alertas, h2.cli-cuenta.perfil-empresa, h2.cli-servicios.solicitar-modulo, lib.actions, h2.cli-mensajes, h2.cli-soporte, h2.cli-cuenta.cambiar-password, h2.cli-servicios, h2.cli-plan, h4.adm-leads, modelo.ContactSubmission, lib.tickets, int.alert-webhook
+
+### [SEC-051] Acciones del motor de reseñas sin Zod ni rate limit: rating, nombre y texto que van al LLM los manda el navegador, reviewName se interpola en la URL de Google y los errores crudos vuelven al cliente
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/modules/motor-resenas/_actions.ts:11` — «export async function generateDraft(params: { organizationId: string rating: number»; `src/components/dashboard/modules/motor-resenas/_actions.ts:35` — «rating: params.rating, reviewerName: params.reviewerName, reviewComment: params.reviewComment,»; `src/components/dashboard/modules/motor-resenas/_actions.ts:43` — «error: err instanceof Error ? err.message : 'Error generando draft',»; `src/lib/integrations/google-business-profile.ts:285` — «'https://mybusiness.googleapis.com/v4/${reviewName}/reply',»; `src/lib/integrations/google-business-profile.ts:298` — «return { ok: false, error: 'Google API: ${res.status} ${text}' }»; `src/lib/ai/review-reply-draft.ts:28` — «Comentario: ${params.reviewComment ?? '(sin texto, solo rating)'}»; `src/components/dashboard/modules/motor-resenas/_actions.ts:33` — «const draft = await generateReviewReplyDraft({ ... rating: params.rating, reviewerName: params.reviewerName,»; `src/app/(protected)/dashboard/modules/motor-resenas/_components/ReviewItem.tsx:49` — «const result = await generateDraft({ organizationId, rating: review.rating, reviewerName: review.reviewerName, reviewComment: review.comment,»
+- Impacto: Con el módulo activo, un usuario puede mandar a Claude Haiku texto arbitrario y sin tope (costo, y prompt-injection sobre la respuesta que después publica en Google), sin rate limit; puede apuntar el PUT de respuesta a cualquier recurso v4 que alcance el token OAuth de su org (si develOP conectara GBP con una cuenta de agencia que administra varias fichas, a fichas de otros clientes: HIPÓTESIS); y ve en la UI mensajes internos de Anthropic y de Google (ReviewItem.tsx:59, :76).
+- Propuesta: Zod en ambas actions (rating entero 1-5, textos con .max(), reviewName con patrón accounts/{n}/locations/{n}/reviews/{id}); que generateDraft relea la reseña por reviewName en GBP en vez de confiar en el payload; verificar que el reviewName pertenezca al gbpLocationId de la org; mensajes genéricos + captureException; rate limit por org.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-032]
+- Nodo(s): h2.cli-resenas, int.gbp, int.anthropic, lib.ai, h2.cli-resenas.responder-resenas-con-ia, lib.rate-limit
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-056
 
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
@@ -331,12 +385,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [SEC-018] OrgRole (ADMIN/MEMBER/VIEWER) viaja en la sesion pero ningun guard lo lee
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `src/auth.ts:227` — «token.orgRole = accessState.orgRole»; `src/lib/actions/profile.ts:29` — «const organizationId = session?.user?.organizationId»; `prisma/schema.prisma:523` — «role OrgRole @default(ADMIN)»
+- Evidencia: `src/auth.ts:227` — «token.orgRole = accessState.orgRole»; `src/lib/actions/profile.ts:29` — «const organizationId = session?.user?.organizationId»; `prisma/schema.prisma:523` — «role OrgRole @default(ADMIN)»; `prisma/schema.prisma:19` — «enum OrgRole { ADMIN MEMBER VIEWER»; `src/auth.ts:251` — «session.user.orgRole = token.orgRole as OrgRole | undefined»; `src/lib/actions/upsell.ts:14` — «const session = await auth() const userId = session?.user?.id const organizationId = session?.user?.organizationId»; `src/components/dashboard/modules/motor-resenas/_actions.ts:55` — «const organizationId = resolveScopedOrgId(await resolveOrgId(), params.organizationId)»
 - Impacto: Latente: hoy todas las membresias se crean ADMIN; el dia que se invite a un VIEWER podra cambiar nombre de empresa, contacto, preferencias de toda la org y pedir la baja de la cuenta (profile.ts solo exige organizationId).
 - Propuesta: Definir el modelo de permisos por OrgRole antes de habilitar miembros no-ADMIN; helper requireOrgRole en las actions de cuenta.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): lib.auth, h2.cli-cuenta, modelo.OrgMember
+- Nodo(s): lib.auth, h2.cli-cuenta, modelo.OrgMember, h2.cli-shell, h2.cli-resenas, h2.cli-email-mkt, lib.preview
 
 ### [SEC-019] Contrasena temporal de 8 caracteres con estructura fija (~34 bits) y sin vencimiento
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad
@@ -434,13 +488,53 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [SEC-043] El tope de 3 regeneraciones semanales del brief es check-then-act: pedidos en paralelo pasan todos el control y cada uno llama al LLM
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `src/lib/ai/executive-brief.ts:157` — «if (currentRegenerations >= REGENERATION_LIMIT) {»; `src/lib/ai/executive-brief.ts:185` — «const generation = await generateBriefText(organizationId, org.companyName, now)»; `src/lib/ai/executive-brief.ts:201` — «executiveBriefRegenerations: nextRegenerations,»; `src/app/(protected)/dashboard/_actions/regenerate-brief.ts:19` — «const result = await regenerateExecutiveBrief(orgId.data)»
+- Evidencia: `src/lib/ai/executive-brief.ts:157` — «if (currentRegenerations >= REGENERATION_LIMIT) {»; `src/lib/ai/executive-brief.ts:185` — «const generation = await generateBriefText(organizationId, org.companyName, now)»; `src/lib/ai/executive-brief.ts:201` — «executiveBriefRegenerations: nextRegenerations,»; `src/app/(protected)/dashboard/_actions/regenerate-brief.ts:19` — «const result = await regenerateExecutiveBrief(orgId.data)»; `src/lib/ai/executive-brief.ts:195` — «await prisma.organization.update({ where: { id: organizationId }, data: { cachedExecutiveBrief: generation.text, ...»
 - Impacto: Hoy sin efecto (credencial de Vertex vencida). Con Vertex activo, un usuario de cualquier cliente que dispare N llamadas simultáneas a regenerateBriefAction obtiene N generaciones pagadas por develOP y el contador queda en 1; puede repetirlo cada 4 horas hasta tres veces por semana.
 - Propuesta: Reservar el cupo antes de llamar al LLM con un update condicional (where executiveBriefRegenerations < 3 y última regeneración vieja, con increment) y seguir solo si afectó una fila, o sumar checkRateLimit por org.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-inicio, int.vertex, modelo.Organization
+- Nodo(s): h2.cli-inicio, int.vertex, modelo.Organization, h2.cli-inicio.resumen-ejecutivo-ia, lib.rate-limit
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-042
+
+### [SEC-046] Errores crudos de Brevo, Google y Anthropic se devuelven y se muestran al cliente
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/integrations/brevo.ts:82` — «return { ok: false, error: 'Brevo error: ${res.status} ${await res.text()}' }»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:202` — «return { error: brevoResult.error } // se renderiza en send/page.tsx:55»; `src/lib/integrations/google-business-profile.ts:298` — «return { ok: false, error: 'Google API: ${res.status} ${text}' }»; `src/components/dashboard/modules/motor-resenas/_actions.ts:43` — «error: err instanceof Error ? err.message : 'Error generando draft',»
+- Impacto: El cliente ve cuerpos de error de proveedores (codigos, mensajes de la API, datos de la cuenta de develOP) en vez de un mensaje util; viola la regla de CLAUDE.md de no exponer errores internos.
+- Propuesta: Mapear a mensajes de producto, registrar el detalle en Sentry y no devolverlo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-016]
+- Nodo(s): h2.cli-email-mkt, h2.cli-resenas, int.brevo, int.gbp, int.anthropic
+
+### [SEC-049] El avatar de la empresa acepta cualquier URL http(s) que el admin carga con <img>; el base64 (hasta 600 KB) sigue en la DB
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/avatarImageUrlSchema.ts:16` — «/^https?:\/\//i.test(value) ||»; `src/modules/chatbot/server/admin/avatarImageUrlSchema.ts:10` — «const MAX_AVATAR_URL_LENGTH = 600_000 // ~450KB binario; una webp 200x200 entra holgada»; `src/modules/chatbot/components/admin/client-avatar/ClientAvatar.tsx:30` — «<img src={avatarImageUrl}»; `src/app/(protected)/admin/clients/page.tsx:51` — «avatarImageUrl: client.avatarImageUrl,»
+- Impacto: Salteando la UI (que sube data URLs), un cliente puede setear un avatar http(s) propio; cada vez que develOP abre /admin/clients el navegador del SUPER_ADMIN pide esa URL (IP, user-agent, horario). La lista de clientes ademas trae hasta 600 KB de base64 por org en el payload.
+- Propuesta: Desde el portal aceptar solo data URLs (o un dominio de storage propio) y re-encodear server-side; a futuro mover a storage externo y guardar la URL.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-cuenta.perfil-empresa, h4.adm-clientes, modelo.Organization
+
+### [SEC-050] Solicitud de eliminacion de cuenta sin control de OrgRole ni alerta a develOP, detectada en el admin por un titulo que cualquier ticket puede copiar
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/actions/profile.ts:152` — «const organizationId = session?.user?.organizationId»; `src/app/(protected)/admin/tickets/_components/ticket-chat.tsx:119` — «const isDeletionRequest = ticket.title === 'Solicitud de eliminación de cuenta'»; `src/components/dashboard/ProfileForms.tsx:765` — «Esta acción creará un ticket de soporte de alta prioridad. Tu cuenta y todos los datos»
+- Impacto: Latente: hoy todos los miembros se crean con OrgRole ADMIN (createClientOnly.ts:105, createClientWithBot.ts:155, onboarding/core.ts:101-105) y orgRole no se chequea en ningun lado; cuando existan MEMBER/VIEWER cualquiera podra pedir el borrado de toda la org. Un ticket normal con ese titulo exacto (tickets/schemas.ts:5 lo permite) dispara en el admin el banner '¿Aprobar solicitud de eliminacion?' con 'Ir a borrar'. La solicitud real no genera alerta (createTicketAction si alerta HIGH) y puede repetirse sin dedup.
+- Propuesta: Marcar la solicitud con un campo o categoria propios (no el titulo), exigir OrgRole ADMIN, disparar sendAgencyAlert, dedupear por org y registrar quien la pidio.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-018]
+- Nodo(s): h2.cli-cuenta.eliminar-cuenta, h4.adm-tickets, lib.auth
+
+### [SEC-052] Atribución de referidos: guardas anti-abuso con huecos y el email del referido expuesto al referente
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/referrals/referrals.service.ts:115` — «prisma.user.findFirst({ where: { email: referredEmail }, select: { id: true } }),»; `src/lib/actions/contact.ts:68` — «if (referralCode) { await attributeReferralFromContact({ code: referralCode, referredEmail: payload.email })»; `src/lib/referrals/referrals.service.ts:151` — «const superAdmin = await prisma.user.findFirst({ where: { role: 'SUPER_ADMIN' },»; `src/app/(protected)/dashboard/referidos/page.tsx:73` — «{referral.referredEmail ?? 'Contacto referido'}»
+- Impacto: Un cliente existente cuyo User.email tenga mayúsculas (las altas no normalizan) pasa como 'negocio nuevo' y puede terminar en un mes bonificado; cualquiera con un código público puede inflar referidos PENDING con emails inventados (rate limit por IP falsificable, contact.ts:23-27); el email de quien escribió a develOP queda visible para el cliente referente sin consentimiento; solo se notifica a un SUPER_ADMIN cualquiera y los fallos van a console.error. Mitigado porque la conversión la confirma develOP a mano.
+- Propuesta: Comparar emails sin distinguir mayúsculas (o normalizar en las altas); mostrar el email enmascarado; notificar a todos los SUPER_ADMIN; Sentry en el catch.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-referidos, h6.vis-contacto, h6.vis-contacto.atribucion-de-referido, modelo.Referral, lib.referrals
 
 ## Bugs latentes
 
@@ -457,24 +551,66 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-012] Email Marketing Pro inalcanzable: el gate y el sidebar buscan el slug 'email-marketing' y el catálogo sincronizado usa 'email-marketing-pro'
 - Dominio: D6  ·  Severidad: ALTA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/lib/data/premium-modules.ts:38` — «slug: 'email-marketing-pro',»; `src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:20` — «const isActive = await isModuleActive(organizationId, 'email-marketing') if (!isActive) redirect('/dashboard')»; `src/components/dashboard/SidebarNav.tsx:78` — «{ slug: 'email-marketing', item: { href: '/dashboard/modules/email-marketing', label: 'Email marketing', icon: Mail } },»; `src/app/(protected)/dashboard/layout.tsx:57` — «where: { organizationId: orgId, status: 'ACTIVE' }, select: { module: { select: { slug: true } } },»; `prisma/seeds/sync-premium-modules.ts:68` — «const obsoleteModules = existingModules.filter((moduleData) => !catalogSlugs.has(moduleData.slug))»; `prisma/backups/premium-module-pre-push.json:68` — «"slug": "email-marketing",»
+- Evidencia: `src/lib/data/premium-modules.ts:38` — «slug: 'email-marketing-pro',»; `src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:20` — «const isActive = await isModuleActive(organizationId, 'email-marketing') if (!isActive) redirect('/dashboard')»; `src/components/dashboard/SidebarNav.tsx:78` — «{ slug: 'email-marketing', item: { href: '/dashboard/modules/email-marketing', label: 'Email marketing', icon: Mail } },»; `src/app/(protected)/dashboard/layout.tsx:57` — «where: { organizationId: orgId, status: 'ACTIVE' }, select: { module: { select: { slug: true } } },»; `prisma/seeds/sync-premium-modules.ts:68` — «const obsoleteModules = existingModules.filter((moduleData) => !catalogSlugs.has(moduleData.slug))»; `prisma/backups/premium-module-pre-push.json:68` — «"slug": "email-marketing",»; `prisma/seeds/sync-premium-modules.ts:130` — «await prisma.premiumModule.create({ data: { slug: moduleData.slug, ...nextData } })»; `src/components/dashboard/PremiumModuleCard.tsx:307` — «{isOwned ? (»; `src/lib/modules/check-activation.ts:10` — «module: { slug: moduleSlug },»
 - Impacto: Bloqueante para el primer cliente que contrate Email Marketing Pro: el catálogo (y por lo tanto la tabla premium_module después del sync) solo tiene 'email-marketing-pro', pero el sidebar solo muestra el ítem si el slug activo es 'email-marketing' y el layout del módulo redirige a /dashboard sin mensaje cuando isModuleActive(org, 'email-marketing') es falso. Solo funcionaría si la base conserva la fila legacy 'email-marketing' (anterior al cambio del 2026-05-04) y el admin activó esa. Como el gate vive solo en el layout, las server actions del módulo siguen invocables directamente (ver S2b-01).
 - Propuesta: Unificar el slug con una sola constante derivada de PREMIUM_MODULES_CATALOG (mapa slug -> ruta) y usarla en el layout del módulo y en PREMIUM_MODULES de SidebarNav; revisar qué slugs hay hoy en premium_module y mover activaciones legacy si existen; agregar un invariante que compare los slugs usados en isModuleActive/SidebarNav contra el catálogo.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-email-mkt, h2.cli-email-mkt.acceso-al-modulo, h2.cli-servicios, lib.data, modelo.PremiumModule, modelo.OrganizationModule
+- Nodo(s): h2.cli-email-mkt, h2.cli-email-mkt.acceso-al-modulo, h2.cli-servicios, lib.data, modelo.PremiumModule, modelo.OrganizationModule, h2.cli-shell, h2.cli-shell.navegacion-sidebar, lib.modules
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-027
 
 ### [BUG-021] La baja de email marketing no llega a Brevo: la campaña sale a toda la lista y quien se dio de baja sigue recibiendo (un reimport lo vuelve a sumar)
 - Dominio: D2  ·  Severidad: ALTA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/app/api/email/optout/[contactId]/route.ts:91` — «await prisma.emailContact.updateMany({ where: { id: contactId }, data: { optedOut: true, optedOutAt: new Date() },»; `src/app/api/email/optout/[contactId]/route.ts:100` — «'Tu dirección de email fue removida de esta lista. No recibirás más correos de esta campaña.',»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:194` — «listIds: [listId],»; `src/lib/integrations/brevo.ts:77` — «recipients: { listIds: params.listIds },»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:144` — «where: { organizationId: org.id, optedOut: false },»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:104` — «if (listId) { await syncContact({»
+- Evidencia: `src/app/api/email/optout/[contactId]/route.ts:91` — «await prisma.emailContact.updateMany({ where: { id: contactId }, data: { optedOut: true, optedOutAt: new Date() },»; `src/app/api/email/optout/[contactId]/route.ts:100` — «'Tu dirección de email fue removida de esta lista. No recibirás más correos de esta campaña.',»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:194` — «listIds: [listId],»; `src/lib/integrations/brevo.ts:77` — «recipients: { listIds: params.listIds },»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:144` — «where: { organizationId: org.id, optedOut: false },»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:104` — «if (listId) { await syncContact({»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:143` — «const activeContacts = await prisma.emailContact.findMany({ where: { organizationId: org.id, optedOut: false } // solo el conteo excluye bajas»
 - Impacto: Bloqueante para el primer cliente que use Email Marketing: la baja solo cambia optedOut en la base; la campaña se manda a la lista de Brevo completa, así que la persona sigue recibiendo aunque la página le confirmó que fue removida, y si el cliente reimporta su CSV el contacto vuelve a entrar a la lista. Expone al cliente a denuncias por spam y a develOP a la suspensión de la cuenta Brevo compartida; recipientCount (cuenta solo los no dados de baja) tampoco coincide con lo que Brevo envía.
 - Propuesta: Al darse de baja, sacar el contacto de la lista de la org en Brevo (o bloquearlo) además de marcar optedOut; en el import saltear los optedOut; o usar el desuscribe nativo de Brevo y sincronizar su webhook de bajas a EmailContact. Confirmar el comportamiento real de Brevo con el caso de prueba.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-email-mkt, h6.vis-optout, int.brevo, modelo.EmailContact, modelo.EmailCampaign
+- Nodo(s): h2.cli-email-mkt, h6.vis-optout, int.brevo, modelo.EmailContact, modelo.EmailCampaign, h2.cli-email-mkt.baja-de-contactos
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-036
+
+### [BUG-032] Tienda conectada: 'Conectar mi tienda' lleva al cliente a una ruta solo-SUPER_ADMIN que responde 401 en JSON
+- Dominio: D2  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx:39` — «href={'/api/auth/tiendanube/start?orgId=${organizationId}'}»; `src/app/api/auth/tiendanube/start/route.ts:11` — «if (!session?.user || session.user.role !== 'SUPER_ADMIN') {»; `src/app/api/auth/tiendanube/start/route.ts:12` — «return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })»; `src/app/(protected)/dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx:57` — «Vas a ser redirigido a Tiendanube para autorizar el acceso.»
+- Impacto: Bloqueante para el primer cliente del modulo (150 USD/mes en el catalogo): el CTA principal termina en una pagina con JSON crudo; solo develOP puede conectar la tienda desde el modo soporte y nada se lo explica al cliente.
+- Propuesta: Decidir el flujo: self-service del dueno con la org tomada de la sesion (sin orgId en la URL) y state firmado, o un estado 'develOP conecta tu tienda' como ConnectingState del motor de resenas. En ambos casos sacar el orgId de la URL.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-tienda.conectar-tienda, int.tiendanube
+
+### [BUG-039] Tendencias «vs mes anterior» inventadas en Tráfico y SEO, también sobre datos reales
+- Dominio: D2  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/dashboard/resultados/trafico/page.tsx:204` — «trend={{ value: 12.3 }}»; `src/app/(protected)/dashboard/resultados/trafico/page.tsx:238` — «trend={{ value: 23, displayValue: '0:23' }}»; `src/app/(protected)/dashboard/resultados/seo/page.tsx:244` — «trend={12.4}»; `src/app/(protected)/dashboard/resultados/seo/page.tsx:260` — «trend={data.avgCtr >= 3 ? 1.2 : -1.4}»; `src/components/dashboard/AnalyticsMetricCard.tsx:70` — «<span className="text-[10px] text-zinc-500">vs mes anterior</span>»; `src/app/(protected)/dashboard/resultados/seo/page.tsx:234` — «FIXME(data-truth): los 'trend' son deltas hardcodeados (no salen de Search»
+- Impacto: Con datos reales de Search Console el cliente ve siempre «▲12,4% vs mes anterior» en clicks y «▲7,1%» en impresiones aunque su tráfico haya caído, y el delta de CTR/posición cambia de signo por un umbral fijo. Es lo primero que un cliente compara contra su propia consola: dato inventado presentado como medición, bloquea L3. En Tráfico ni siquiera hay FIXME (trafico/page.tsx:204, :215, :227, :238).
+- Propuesta: Quitar las tendencias hasta tener el período anterior, o calcularlas con un segundo dateRange en GA4 y una segunda consulta en Search Console. Nunca literales.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados, h2.cli-resultados.trafico-ga4, h2.cli-resultados.seo-search-console, h2.cli-resultados.trafico, h2.cli-resultados.seo, int.google-analytics, int.search-console
+
+### [BUG-040] Detalle de ticket en mobile: el hilo de mensajes colapsa a 0 px
+- Dominio: D2  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:115` — «<div className="flex h-[calc(100svh-14rem)] min-h-0 w-full flex-col gap-5 sm:h-[calc(100svh-12.5rem)]">»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:159` — «<div className="flex flex-1 min-h-0 flex-col gap-5 lg:flex-row">»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:193` — «<div className="flex flex-col min-h-0 shrink-0 overflow-y-auto rounded-2xl ... lg:w-52 xl:w-56">»; `src/components/dashboard/ClientChatThread.tsx:48` — «<div className={['flex min-h-0 flex-1 flex-col gap-3', className].filter(Boolean).join(' ')}>»
+- Impacto: Aritmética por lectura: en un teléfono el contenedor mide 100svh-224 px (≈330-590 px); la cabecera del ticket ocupa ≈200 px y la columna Timeline+Detalles, shrink-0 y sin alto máximo en <lg, ≈440 px. El hilo (flex-1 min-h-0) queda en 0 px y el composer se superpone a la Timeline. El cliente que abre desde el celular el mail «Actualización de Soporte» no puede leer la respuesta.
+- Propuesta: En <lg dejar fluir la página (h-auto) o mover Timeline/Detalles a un bloque colapsable debajo del chat, con shrink-0 y alto fijo solo desde lg; dar un min-h al hilo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-soporte.conversacion-ticket, h2.cli-soporte
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-050
+
+### [BUG-047] Los crons del reporte ejecutivo semanal y del brief IA (y el de os-follow-up) solo están registrados en vercel.json: en Netlify no tienen disparador
+- Dominio: D7  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `vercel.json:8` — «"path": "/api/cron/regenerate-briefs",»; `vercel.json:12` — «"path": "/api/cron/send-executive-reports",»; `netlify.toml:25` — «[functions."generate-insights-cron"]»; `AGENTS.md:21` — «- **Deploy:** Netlify»; `src/lib/ai/executive-brief.ts:223` — «export async function refreshExecutiveBriefCache(»; `src/components/dashboard/home/AIExecutiveBriefV2.tsx:110` — «: 'Proxima actualizacion automatica: lunes'}»; `netlify.toml:28` — «[functions."send-weekly-reports-cron"] (las únicas agendadas en :25-32 son generate-insights, send-weekly-reports y cleanup-old-events)»; `docs/operations/00-entornos.md:12` — «| **Prod** | Netlify (build + runtime) | Variables del dashboard de Netlify |»; `src/app/api/cron/send-executive-reports/route.ts:5` — «export const maxDuration = 300»; `src/lib/reports/executive-weekly/send.ts:102` — «for (const { id: orgId, executiveReportFrequency } of orgs) {»; `src/lib/plan/plan-presentation.ts:99` — «label: 'Reportes semanales claros',»; `src/app/(protected)/dashboard/page.tsx:227` — «Tu primer resumen ejecutivo se genera el próximo lunes con los datos de tu semana.»
+- Impacto: netlify.toml:25-32 y netlify/functions solo agendan generate-insights, send-weekly-reports y cleanup-old-events; nada dispara /api/cron/regenerate-briefs ni /api/cron/send-executive-reports. En producción el brief solo se genera al abrir el home (y hoy, con la credencial Vertex vencida, nunca) y el email ejecutivo semanal de Pro/Business no sale. La UI promete 'Próxima actualización automática: lunes', el estado vacío dice 'se genera el próximo lunes' (page.tsx:226) y el error de regeneración 'se actualiza automaticamente cada lunes' (executive-brief.ts:161).
+- Propuesta: Agregar netlify/functions/regenerate-briefs-cron.ts y send-executive-reports-cron.ts con el mismo molde que send-weekly-reports-cron.ts y su schedule en netlify.toml, o eliminar vercel.json si no se usa; alinear los textos de la UI con lo que realmente corre.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): int.cron.regenerate-briefs, int.cron.send-executive-reports, h2.cli-inicio.resumen-ia, h2.cli-reportes-email, h2.cli-reportes-email.reporte-semanal, int.brevo, modelo.WeeklyReportLog, lib.reports
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-055
 
 ### [BUG-001] Sesion invalidada en Node pero viva en el proxy: bucle /login <-> portal (ERR_TOO_MANY_REDIRECTS)
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -615,13 +751,190 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-025] EmailCampaign sin estado intermedio ni métricas: SENDING y SCHEDULED no se escriben (doble envío posible), FAILED no tiene reintento y aperturas y clics nunca se actualizan
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:181` — «if (campaign.status !== 'DRAFT') return { error: 'Solo podés enviar campañas en estado DRAFT.' }»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:205` — «const sent = await brevoSendCampaign(brevoResult.campaignId)»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:210` — «status: sent ? 'SENT' : 'FAILED',»; `prisma/schema.prisma:1141` — «enum EmailCampaignStatus { DRAFT SCHEDULED»; `src/lib/integrations/brevo.ts:143` — «export async function getCampaignStats(campaignId: number): Promise<{»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx:110` — «{pct(campaign.openedCount, campaign.recipientCount)}»
+- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:181` — «if (campaign.status !== 'DRAFT') return { error: 'Solo podés enviar campañas en estado DRAFT.' }»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:205` — «const sent = await brevoSendCampaign(brevoResult.campaignId)»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:210` — «status: sent ? 'SENT' : 'FAILED',»; `prisma/schema.prisma:1141` — «enum EmailCampaignStatus { DRAFT SCHEDULED»; `src/lib/integrations/brevo.ts:143` — «export async function getCampaignStats(campaignId: number): Promise<{»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx:110` — «{pct(campaign.openedCount, campaign.recipientCount)}»; `src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:31` — «Envia campanas de email a tus contactos y segui los resultados en tiempo real.»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:148` — «const recipientCount = activeContacts.length // al crear el borrador»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:217` — «return { ok: true } // tambien con sent === false y status FAILED»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx:144` — «El envio fallo. Revisa la configuracion e intenta de nuevo. // sin accion de reintento»
 - Impacto: Cuando el módulo se habilite: dos envíos concurrentes de la misma campaña (dos pestañas, un reintento) pasan el control de DRAFT y Brevo crea y manda dos campañas a toda la lista; una campaña FAILED (por ejemplo Brevo la creó pero sendNow falló) no se puede reintentar y queda huérfana en Brevo; y la tabla de campañas muestra 0% de aperturas y clics para siempre porque getCampaignStats no tiene llamadores (dato falso en el camino del cliente).
 - Propuesta: Pasar DRAFT a SENDING con updateMany condicional (where status DRAFT) antes de llamar a Brevo y abortar si no afectó filas; permitir reintento de FAILED reusando el brevoCampaignId guardado; traer las métricas con getCampaignStats (cron o al abrir la tabla) o webhook de Brevo, u ocultar las columnas.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-email-mkt, int.brevo, modelo.EmailCampaign
+- Nodo(s): h2.cli-email-mkt, int.brevo, modelo.EmailCampaign, h2.cli-email-mkt.metricas-de-campana, h2.cli-email-mkt.crear-y-enviar-campana
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-039
+
+### [BUG-029] Nueva campana: 'Enviar ahora' manda a todos los contactos sin confirmacion, 'Guardar borrador' ignora errores y los botones se traban si la action lanza
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx:87` — «form id=campaign-form onSubmit={handleSendNow} // el submit (y Enter) envia»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx:149` — «await createCampaignAction(fd) // resultado ignorado; luego router.push (:153)»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx:53` — «const createResult = await createCampaignAction(fd) // sin try/catch: setSending(false) no corre si lanza»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx:34` — «const [state, formAction, pending] = useActionState<State, FormData>( // formAction nunca se usa»
+- Impacto: Un envio irreversible a toda la base sale con un clic (o con Enter en un campo de una linea si el HTML ya esta completo) sin el paso de confirmacion que si tiene /send; un borrador que falla validacion se pierde en silencio; un error de red deja 'Enviando...' para siempre.
+- Propuesta: Separar crear de enviar: guardar siempre como borrador y enviar desde /send con confirmacion y conteo de destinatarios; usar el resultado de createCampaignAction; try/catch con estado de error; quitar el useActionState muerto.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-email-mkt.crear-y-enviar-campana
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-044
+
+### [BUG-030] 'Editar' una campana en borrador abre un formulario vacio y guardar crea otra campana
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx:131` — «href={'/dashboard/modules/email-marketing/campaigns/new?edit=${campaign.id}'}»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx:29` — «export default function NewCampaignPage() { // no lee searchParams; no existe accion de update»
+- Impacto: El cliente no puede corregir un borrador: cada 'Editar' termina en un duplicado.
+- Propuesta: Implementar la edicion (cargar la campana por id scoped a la org de la sesion + updateCampaignAction con Zod) o quitar el boton.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-email-mkt.crear-y-enviar-campana, modelo.EmailCampaign
+
+### [BUG-031] Importacion CSV sin limites: una llamada a Brevo por fila en serie, conteo enganoso y fallas de sincronizacion silenciosas
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:73` — «const csvText = formData.get('csv') as string | null»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:84` — «for (const row of rows) { // await upsert + await syncContact por fila»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:102` — «created++ // cuenta tambien actualizaciones; el boolean de syncContact se ignora»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:58` — «const cols = line.split(',')... // split ingenuo, rompe con comas entre comillas»
+- Impacto: Un CSV de algunos miles de filas excede el tiempo de la funcion y queda importado a medias sin aviso; contactos guardados en la base pero no en Brevo nunca reciben campanas y el mensaje 'N importados' miente.
+- Propuesta: Validar tamano y filas maximas, parser CSV real, upsert por lotes y alta masiva en Brevo (contacts/import), contar creados/actualizados/fallidos por separado y mostrar el detalle.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-email-mkt.importar-contactos, int.brevo, modelo.EmailContact
+
+### [BUG-033] Resumen de Tiendanube: los errores de la API se muestran como ceros, no pagina y el stock ilimitado aparece como 'Agotado'
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/integrations/tiendanube.ts:96` — «... = ordersThisMonthRes.ok ? await ordersThisMonthRes.json() : []»; `src/lib/integrations/tiendanube.ts:144` — «stock: v.stock ?? 0,»; `src/lib/integrations/tiendanube.ts:147` — «.filter((p) => p.stock !== null && p.stock <= 3)»; `src/lib/integrations/tiendanube.ts:115` — «'${API_BASE}/${auth.storeId}/carts?per_page=50&abandoned=true', // sin filtro de 7 dias (ConnectStoreCard.tsx:68 promete 'Ultimos 7 dias')»
+- Impacto: Con el token vencido o revocado el cliente ve 0 pedidos y 0 facturacion como si fuera real; con mas de 200 pedidos al mes las cifras quedan cortas; los productos sin control de stock (stock null en Tiendanube) se listan como agotados.
+- Propuesta: Tratar !res.ok como error (estado de error + Sentry), paginar, respetar stock null como ilimitado y filtrar carritos por fecha.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-tienda.resumen-de-ventas, int.tiendanube
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-045
+
+### [BUG-034] Fechas y horas del portal formateadas sin zona horaria: turnos corridos 3 h, saludo y fecha del Inicio, Timeline del ticket, tooltip de sesiones un día antes y horas del chat distintas entre servidor y navegador
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/page.tsx:33` — «const hour = new Date().getHours()»; `src/app/(protected)/dashboard/page.tsx:41` — «.toLocaleDateString('es-AR', { weekday: 'long', ... // sin timeZone»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:18` — «return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:98` — «const day = start.getDate()»; `src/lib/dates-ar.ts:233` — «export function formatTimeAR(date: Date): string { // helper disponible y sin usar aca»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:41` — «return d.toLocaleDateString('es-AR', {»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:304` — «{ticket.createdAt.toLocaleDateString('es-AR', {»; `src/app/(protected)/dashboard/services/page.tsx:149` — «{startDate.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:25` — «timeZone: TZ_AR,»; `src/components/dashboard/SessionsChart.tsx:47` — «{new Date(label).toLocaleDateString('es-AR', {»; `src/lib/analytics.ts:171` — «const date = '${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}'»; `src/components/dashboard/ChatBubble.tsx:19` — «return new Date(date).toLocaleString('es-AR', {»; `src/components/dashboard/ImpersonationTimer.tsx:20` — «const [remaining, setRemaining] = useState(() => new Date(expiresAt).getTime() - Date.now())»; `src/components/dashboard/CurrentPlanCard.tsx:17` — «return date.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/PageSpeedCard.tsx:60` — «return date.toLocaleString('es-AR', {»; `src/components/dashboard/results/GBPMetricsCard.tsx:13` — «return date.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:24` — «const DATE_FMT = new Intl.DateTimeFormat('es-AR', { timeZone: TZ_AR,»
+- Impacto: Con el server en UTC (no hay TZ en vercel.json ni netlify.toml; el repo corre sus invariantes con TZ=UTC) un turno de las 10:00 de Buenos Aires se muestra 13:00; entre las 21 y las 24 h el Inicio muestra la fecha de manana y el saludo es incorrecto en franjas de 3 h (ademas 'Buenos dias' sin tilde, page.tsx:34). Igual en facturacion (:88-94), boveda (:202-206), referidos (:22-24) y proyecto (:70-76).
+- Propuesta: Usar formatDateAR/formatTimeAR/TZ_AR de dates-ar (o timeZone 'America/Argentina/Buenos_Aires') en todos los formateos de server components y agregar un invariante que lo exija.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio, h2.cli-agenda.panel-de-agenda, h2.cli-cuenta, lib.dates-ar, h2.cli-soporte.conversacion-ticket, h2.cli-servicios.servicios-contratados, lib.tz-ar, h2.cli-mensajes, h2.cli-soporte, h2.cli-resultados.trafico, h1.auth-impersonacion, h2.cli-resultados
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-047
+
+### [BUG-035] El onboarding pide el 'ID de medicion (G-XXXX)' y lo guarda como Property ID, que la lectura de GA4 rechaza
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/bienvenida/_components/Step2Conexiones.tsx:38` — «ID de medicion (formato G-XXXXXXX)»; `src/app/bienvenida/_actions/complete-onboarding.ts:38` — «analyticsPropertyId: parsed.data.ga4MeasurementId,»; `src/lib/analytics.ts:66` — «if (/^G-|^GA-/i.test(trimmed)) { // lanza 'El Property ID debe ser el ID numerico...'»
+- Impacto: Todo cliente que sigue las instrucciones del onboarding termina con la pagina de Trafico en error y no tiene como corregirlo desde su panel.
+- Propuesta: Pedir el Property ID numerico (o no pedir nada y que lo cargue develOP) y validar el formato con Zod.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-045], [FAL-010]
+- Nodo(s): h2.cli-bienvenida, h2.cli-resultados, int.ga4
+
+### [BUG-036] Motor de resenas: un error de la API de Google se muestra como 'Sin resenas todavia'
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/integrations/google-business-profile.ts:344` — «const data: unknown = await res.json() // sin chequear res.ok»; `src/lib/integrations/google-business-profile.ts:365` — «return [] // catch»; `src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:27` — «Tu Google ya esta conectado. Cuando lleguen resenas van a aparecer aca para responderlas»
+- Impacto: Con el token vencido, la cuota agotada o la ubicacion mal asignada, el cliente cree que no tiene resenas y deja de responder las reales.
+- Propuesta: Distinguir error de vacio en listReviews (resultado ok/error), estado de error con CTA a develOP y Sentry.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resenas.responder-resenas-con-ia, int.gbp
+
+### [BUG-037] Avisos por email de mensajes nuevos y de respuestas a tickets: el resultado de Resend se ignora (éxito simulado) y el remitente está marcado como no verificado
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/email/notify-message.ts:50` — «await resend.emails.send({»; `src/lib/email/notify-message.ts:51` — «from: 'develOP <hola@develop.com.ar>', // ⚠️ Franco, ajustar al dominio real verificado en Resend»; `src/lib/email/notify-message.ts:62` — «console.log('[notify-message] Email sent to ${obfuscateEmail(member.user.email)}')»; librería resend@6.16.0, dist/index.d.cts línea 601 — «type CreateEmailResponse = Response<CreateEmailResponseSuccess>; // { data, error }: el SDK no lanza»; `src/lib/tickets/actions.ts:156` — «const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000' sendEmail({»; `src/lib/tickets/actions.ts:166` — «}).catch(console.error) (sendEmail nunca rechaza: el resultado se ignora)»; `src/lib/email.ts:15` — «if (!resend) { return { success: true }»; `src/lib/email.ts:21` — «from: 'develOP Agency <hello@develop-agency.com>',»; `docs/env-vars.md:45` — «| 'RESEND_API_KEY' | OPCIONAL (alternativa a Brevo) |»
+- Impacto: Si el dominio no esta verificado en Resend, el cliente nunca recibe el aviso de que develOP le escribio, y los logs dicen 'Email sent'.
+- Propuesta: Leer { error } del resultado, reportarlo a Sentry, verificar el dominio o migrar a Brevo (PLAN-067).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-mensajes.aviso-por-email, h4.adm-mensajes, int.resend, h4.adm-tickets, h4.adm-tickets.responder-y-avisar-por-email, int.brevo, lib.email
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-049
+
+### [BUG-041] Fallas de GA4, Search Console, GBP y del PDF mensual quedan en console.error o se disfrazan de demo
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/analytics.ts:196` — «} catch { // Fall back to mock data on any API error return { ok: true, data: getMockAnalyticsData() }»; `src/lib/searchconsole.ts:211` — «} catch { // Fall back to mock data on any API error return { ok: true, data: getMockSearchConsoleData() }»; `src/app/(protected)/dashboard/resultados/seo/page.tsx:181` — «if (!result.ok) {»; `src/lib/integrations/google-business-profile.ts:203` — «console.error('[GBP] Reviews API error:', reviewsRes.status, await reviewsRes.text())»; `src/app/(protected)/dashboard/resultados/reputacion/page.tsx:22` — «console.error('[GBP] Reputation page failed:', err)»; `src/app/api/reports/client-monthly/route.ts:58` — «console.error('[client-monthly-report] PDF generation error', error)»
+- Impacto: Si la service account pierde acceso o se revoca el token de GBP, el cliente pasa a ver datos de ejemplo con el banner «vista previa… develOP se encarga de la activación», o «Reputación pendiente de conexión», y develOP no se entera: no hay evento en Sentry. La rama de error de SEO (seo/page.tsx:181-200) es inalcanzable porque getSearchConsoleData nunca devuelve ok:false. Los null de GBP y los [] de insights se cachean (1 h y 24 h).
+- Propuesta: Que las libs devuelvan ok:false con causa tipada cuando hay credenciales y la API falla (sin mock); Sentry.captureException (+ flush en route handlers) en esos catch; mostrar «no pudimos actualizar» en vez de demo.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [FAL-015], [UX-015]
+- Nodo(s): h2.cli-resultados, int.google-analytics, int.search-console, int.google-business-profile, int.sentry, h2.cli-resultados.informe-mensual-pdf
+
+### [BUG-042] Tres definiciones de «lead» frente al cliente: el PDF mensual y las recomendaciones cuentan los descalificados
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/reports/client-monthly/get-client-monthly-report-data.ts:56` — «prisma.chatbotLead.count({ where: { botConfigId, capturedAt: { gte: current.start, lt: current.end } },»; `src/lib/dashboard/home-metrics.ts:92` — «const notDq: Prisma.ChatbotLeadWhereInput = { OR: [{ classification: null }, { classification: { not: 'dq' } }],»; `src/modules/chatbot/server/scoring/dqFilter.ts:23` — «NOT: { classification: 'dq' },»; `src/modules/chatbot/server/reports/buildWeeklyReport.ts:63` — «...excludeDqWhere(),»; `src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts:83` — «scope.chatbotLead.groupBy({ by: ['category'], where: { botConfigId, ... (sin filtro DQ; alimenta leadsLast30d :104)»; `src/lib/dashboard/home-metrics.ts:87` — «// Lead "del negocio" = todo lo capturado MENOS los descalificados (DQ).»; `src/modules/chatbot/server/scoring/dqFilter.ts:4` — «* Los DQ NO se borran (auditoría). Se filtran SOLO en queries que alimenten: * - métricas de conversión visibles al cliente,»; `src/lib/recommendations/rules.ts:47` — «body: 'Este mes entraron ${s.leadsLast30d} consultas y tu ficha de Google todavía no está conectada.»
+- Impacto: El PDF «Descargá el informe del mes» suma spam, empleo y proveedores (DQ) y da un número mayor que el de Inicio (que excluye DQ e incluye no clasificados); el reporte semanal usa excludeDqWhere, que en SQL también descarta los null, y da un tercer número. El cliente compara y deja de confiar en todos.
+- Propuesta: Un único helper de «lead del negocio» (el notDq de home-metrics) usado por PDF, semanal y home; corregir excludeDqWhere para incluir null.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados.informe-mensual-pdf, h2.cli-inicio, h2.cli-reportes-email, modelo.ChatbotLead, lib.chatbot.scoring, h2.cli-inicio.ideas-para-crecer, lib.reports, lib.recommendations
+
+### [BUG-044] Modo soporte sin política de escritura: unas actions del portal toman session.user.organizationId (fallan o apuntan a la org del admin) y otras resolveOrgId y escriben como el cliente (marcan leídos sus mensajes, gastan su cupo del brief)
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/actions/messages.ts:119` — «const organizationId = session?.user?.organizationId»; `src/lib/actions/notifications.ts:75` — «const organizationId = session?.user?.organizationId»; `src/lib/actions/referrals.ts:14` — «const organizationId = session?.user?.organizationId»; `src/lib/actions/announcements.ts:20` — «const organizationId = session?.user?.organizationId»; `src/actions/dashboard-actions.ts:14` — «if (!session?.user?.id || !session.user.organizationId) {»; `src/app/(protected)/dashboard/referidos/page.tsx:27` — «const organizationId = await resolveOrgId()»; `src/app/(protected)/dashboard/messages/page.tsx:28` — «<MarkReadOnMount action={markClientMessagesRead} />»; `src/app/(protected)/dashboard/messages/_actions/mark-read.ts:15` — «await prisma.message.updateMany({ where: { organizationId, fromAdmin: true, read: false }, data: { read: true } }) // org de resolveOrgId»; `src/app/(protected)/dashboard/_actions/regenerate-brief.ts:16` — «const orgId = z.string().min(1).safeParse(await resolveOrgId()) // el admin consume el cupo del cliente»; `src/app/(protected)/dashboard/layout.tsx:80` — «prisma.user.update({ where: { id: session.user.id }, data: { lastDashboardVisit: new Date() } })»; `src/app/(protected)/dashboard/cuenta/perfil/page.tsx:121` — «La edicion no esta disponible durante la sesion de soporte.»; `src/lib/actions/upsell.ts:16` — «const organizationId = session?.user?.organizationId»; `src/lib/actions/notifications.ts:48` — «const organizationId = session?.user?.organizationId»; `src/app/(protected)/dashboard/layout.tsx:74` — «resolveOrgId(),»; `src/lib/tickets/actions.ts:50` — «const organizationId = await resolveOrgId() const userId = session?.user?.id (en preview: org del cliente, autor SUPER_ADMIN, isAdmin false :77)»; `src/lib/recommendations/types.ts:56` — «* pre-llenado de /dashboard/messages. Sin 'organizationId' a propósito: la * acción resuelve la org desde la sesión, el cliente no puede targetear otra.»
+- Impacto: En una sesion de soporte (SUPER_ADMIN impersonando) la pagina muestra al cliente pero Mensajes, Boveda→Solicitar documento, Oportunidades SEO, 'Ver todas las notificaciones', marcar leidas, Novedades, Referidos, Desbloquear modulo y Aprobar entrega fallan con 'Sesion invalida.'/'No autorizado.' (en el seed el SUPER_ADMIN no tiene membresia, prisma/seed.ts:80-100) o, si alguna vez la tuviera (auth.ts:37 take:1 sin orderBy), escribirian en esa otra org. Tickets y preferencias del reporte si usan resolveOrgId (tickets/actions.ts:50, executive-report-prefs.actions.ts:23): comportamiento inconsistente dentro del mismo portal.
+- Propuesta: Una politica unica para escrituras en preview: resolveOrgId en todas (con el reparo D1-c3 de la cookie global) o deshabilitar explicitamente las escrituras en preview con aviso (como perfil/page.tsx:105-150). Decision para Valentino sobre dashboard-actions.ts (FROZEN: :14, :102, :190).
+- Esfuerzo: M  ·  Zona: FROZEN
+- Relacionado: [SEC-029], [BUG-022], [BUG-005]
+- Nodo(s): h2.cli-mensajes, h2.cli-shell.campana-notificaciones, h2.cli-referidos, h2.cli-servicios.solicitar-modulo, h1.auth-impersonacion, lib.actions, lib.preview, h2.cli-mensajes.no-leidos-al-abrir, h2.cli-soporte, h2.cli-inicio.ideas-para-crecer
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-052
+
+### [BUG-045] Handlers del portal sin manejo de excepciones ni confirmación: el modal de ticket y «Marcar como resuelto» quedan colgados, el resuelto no pide confirmación y otros fallos son silenciosos
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/components/dashboard/NewTicketModal.tsx:53` — «setIsSubmitting(true) const res = await createTicketAction(parsed.data)»; `src/components/dashboard/NewTicketModal.tsx:104` — «onClick={() => !isSubmitting && setIsOpen(false)}»; `src/components/dashboard/ResolveTicketButton.tsx:14` — «const res = await resolveTicketClientAction(ticketId) setIsPending(false) if (res.success) router.refresh()»; `src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts:31` — «await prisma.organization.update({»; `src/components/dashboard/NotificationCenter.tsx:106` — «await markNotificationAsRead(id)»; `src/components/dashboard/ResolveTicketButton.tsx:16` — «if (res.success) router.refresh()»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:183` — «Si el problema persiste, por favor abrí un nuevo ticket.»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:181` — «Este ticket ha sido marcado como resuelto. ... Si el problema persiste, por favor abrí un nuevo ticket.»; `src/lib/tickets/actions.ts:208` — «if (!ticketId.trim()) return fail('Ticket inválido.')»
+- Impacto: Ante una caida de red o un error del server action el cliente queda con el spinner infinito en 'Abrir Ticket' sin poder cerrar el modal; 'Marcar como resuelto' no informa el fallo (res.success false se ignora) y una excepcion lo deja deshabilitado; un error de DB al guardar la frecuencia del reporte reemplaza la pagina de Cuenta por el error boundary; las marcas de leido fallidas no avisan. Eslabon inferido: comportamiento de React ante el rechazo de la promesa.
+- Propuesta: try/finally para resetear el estado pendiente y mostrar el error (toast o inline con role=alert); en ResolveTicketButton mostrar res.error; en saveExecutiveReportPrefs try/catch con mensaje generico y Sentry.captureException.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-soporte.crear-ticket, h2.cli-soporte.resolver-ticket, h2.cli-reportes-email.preferencias-reporte, h2.cli-shell.campana-notificaciones, h2.cli-soporte
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-053
+
+### [BUG-048] Organization.dataConnections no tiene escritor: Health Score en 'calibrando' y 'develOP está conectando tus herramientas (0/6)' para siempre
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/health-score.ts:86` — «const connections: DataConnections = parseDataConnections(org.dataConnections) const { level, connectedCount, totalCount, percentage } = getConnectionLevel(connections)»; `src/lib/types/data-connections.ts:47` — «if (percentage < 30) level = 'ONBOARDING'»; `src/components/dashboard/home/HealthScore.tsx:31` — «if (data.level === 'ONBOARDING') { return <HealthScoreOnboarding data={data} />»; `src/lib/dashboard/attention.ts:119` — «description: 'develOP esta conectando tus herramientas (${connectedCount}/${totalCount} listas).',»; `src/lib/recommendations/get-recommendations-for-org.ts:53` — «gbpConnected: Boolean(gbpConnectedAt),»
+- Impacto: Ningún código escribe dataConnections (solo el seed one-shot de defaults), así que todas las orgs quedan en 0/6 y nivel ONBOARDING aunque develOP les haya conectado Google Business (gbpConnectedAt, que sí usan las recomendaciones) o cargado analyticsPropertyId. El home muestra 'Estamos calibrando tu score' y 'Atención hoy' agrega un ítem falso perpetuo; el score calculado nunca se ve en la UI pero sí se le pasa al LLM ('Health Score: N/100') y al email: es la contradicción 'CALIBRANDO vs Brief 84' que registró Valentino. Además el tráfico GA4 solo suma si ga4.connected (health-score.ts:143), o sea nunca.
+- Propuesta: Derivar el nivel de conexión de columnas reales (gbpConnectedAt/gbpLocationId, analyticsPropertyId, siteUrl, tokens de integraciones) en vez del JSON sin escritor, o escribirlo en los callbacks OAuth; mientras siga 'calibrando' en la UI, no mandar el total al brief ni al email.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [DEU-015]
+- Nodo(s): h2.cli-inicio.health-score, h2.cli-inicio.atencion-hoy, h2.cli-inicio.resumen-ia, modelo.Organization, lib.health-score
+
+### [BUG-049] El hero compara la semana en curso (parcial) contra la semana anterior completa
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/dashboard/home-metrics-logic.ts:27` — «current: weekRangeAR(now), previous: previousRangeForPeriod('week', now),»; `src/lib/dates-ar.ts:209` — «return { start: new Date(current.start.getTime() - 7 * DAY_MS), end: current.start }»; `src/lib/dashboard/home-metrics.ts:103` — «prisma.chatbotLead.count({ where: businessWhere(current) }), prisma.chatbotLead.count({ where: businessWhere(previous) }),»; `src/components/dashboard/home/BusinessHero.tsx:73` — «: (deltaPhrase(leads) ?? 'esta semana')}»
+- Impacto: La pieza principal del home ('Leads esta semana') compara lunes 00:00 AR → ahora contra los 7 días completos anteriores: un lunes a la mañana con 2 leads contra 15 de la semana pasada el cliente lee '-13 vs la semana pasada'. El delta es negativo casi toda la semana aunque el ritmo sea igual; el doc de la función dice 'anterior equivalente' y no lo es.
+- Propuesta: Comparar contra el mismo tramo de la semana anterior (inicio de semana −7 d hasta now −7 d) o mostrar la semana anterior completa sin delta hasta que cierre la actual; agregar el caso al invariante de home-metrics-logic.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio.semana-en-numeros, lib.dashboard
+
+### [BUG-050] Facturación: 'Total mensual' con precio de catálogo y 'Próxima facturación' inventada (1° del mes siguiente)
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/billing/get-current-plan.ts:70` — «const monthlyTotal = modules.reduce( (sum, om) => sum + (om.module.priceMonthlyUsd ?? 0),»; `src/lib/billing/get-current-plan.ts:76` — «const nextBillingAt = modules.length > 0 ? new Date(now.getFullYear(), now.getMonth() + 1, 1) : null»; `src/lib/premium-modules.ts:125` — «priceLockedUsd: module.priceMonthlyUsd,»; `src/app/(protected)/dashboard/cuenta/facturacion/page.tsx:81` — «const renewalDate = subscription?.renewalDate ?? null»; `src/components/dashboard/CurrentPlanCard.tsx:179` — «{formatUsd(plan.monthlyTotal)}»
+- Impacto: En Mi cuenta → Facturación el cliente puede ver dos fechas de cobro distintas en la misma página (renewalDate real y el 1° del mes siguiente calculado con la hora del server) y un 'Total mensual' que suma precios de lista actuales en lugar del precio bloqueado (priceLockedUsd), sin la mensualidad del plan del chatbot ni el priceOverride. Dato de facturación incorrecto frente al primer cliente.
+- Propuesta: Tomar la fecha de Subscription.renewalDate/Invoice, sumar priceLockedUsd y la mensualidad efectiva del plan (Plan.monthlyPrice o priceOverride vigente), o rotular el bloque como 'módulos adicionales' sin fecha propia.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [FAL-006], [BUG-017]
+- Nodo(s): h2.cli-cuenta, modelo.OrganizationModule, modelo.Subscription, lib.billing
+
+### [BUG-054] La landing de upsell del chatbot sigue con precio falso y WhatsApp placeholder (CLEAN-H1 abierto)
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:15` — «const WHATSAPP_URL = 'https://wa.me/5493815555555?text=Hola%2C+quiero+saber+m%C3%A1s+sobre+el+chatbot'»; `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:148` — «$150 USD»; `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:152` — «Incluye 1.000 conversaciones · reportes semanales · soporte directo»; `src/lib/plan/plan-presentation.ts:149` — «monthlyPriceUsd: 49, customersPerMonth: 500,»; `src/app/(protected)/dashboard/chatbot/page.tsx:21` — «return <ChatbotUpsellLanding />»
+- Impacto: Todo cliente sin chatbot activo ve 'Desde $150 USD / 1.000 conversaciones' (catálogo real: Starter USD 49 con 500, Business USD 150 con 5.000, prisma/seeds/sync-plans.ts:68-111) y el único CTA lleva a un número inexistente: el camino de venta del producto principal está roto y miente el precio. Bloquea L3 del chatbot ('sin datos de mentira').
+- Propuesta: Leer precio y cupo de PLAN_PRESENTATIONS (o del Plan en base) y mandar el CTA a /dashboard/messages?context=activacion vía requestUpsellAction.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, h2.cli-plan, lib.plan
+
+### [BUG-055] El reporte semanal puede mandar un brief y métricas de semanas viejas con la etiqueta de la última semana
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/reports/executive-weekly/build.ts:113` — «const cachedBriefIsCurrent = isBriefCacheCurrent(org.cachedExecutiveBriefAt) let briefText = cachedBriefIsCurrent ? org.cachedExecutiveBrief?.trim() || '' : ''»; `src/lib/ai/executive-brief-input.ts:207` — «export function isBriefCacheCurrent(cachedAt: Date | null): boolean { return cachedAt !== null && cachedAt.getTime() >= BRIEF_LOGIC_CUTOFF.getTime()»; `src/lib/reports/executive-weekly/build.ts:122` — «const history = await getBriefHistory(organizationId, 2) const current = history[0] ?? null»; `src/lib/ai/brief-history.ts:30` — «const rows = await prisma.executiveBriefSnapshot.findMany({ where: { organizationId }, orderBy: { createdAt: 'desc' }, take,»; `src/lib/reports/executive-weekly/build.ts:168` — «weekLabel: formatWeekRangeLabel(weekRange.start, weekRange.end),»; `src/lib/ai/executive-brief.ts:18` — «const CACHE_TTL_DAYS = 7 (TTL que build.ts no aplica)»
+- Impacto: Con el cron de briefs apagado en Netlify y Vertex vencido, el cache y el último snapshot pueden tener semanas; el mail (hoy disparable con 'Enviar ahora') presenta ese texto y esos números como 'tu semana del X al Y', y el delta de salud compara dos snapshots cualesquiera.
+- Propuesta: Exigir que el snapshot usado sea del periodKey de la semana reportada (y el anterior, de la semana previa) y que el brief tenga a lo sumo 7 días; si no se cumple, regenerar o saltear con NO_DATA.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-reportes-email.reporte-semanal, h4.adm-clientes, modelo.ExecutiveBriefSnapshot, lib.reports, int.vertex
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-059
 
 ### [BUG-004] El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
@@ -696,7 +1009,109 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h4.adm-alertas, modelo.BotAlert, int.cron.detect-bot-issues, int.telegram
 
+### [BUG-043] Módulo DEPRECATED que el cliente tiene activo desaparece de 'Tus módulos'
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/services/page.tsx:179` — «status: { in: ['ACTIVE', 'COMING_SOON'] },»; `src/lib/modules/showroom.ts:32` — «if (orgModuleStatus === 'ACTIVE' || orgModuleStatus === 'PAUSED') return 'owned'»; `src/app/(protected)/dashboard/layout.tsx:57` — «where: { organizationId: orgId, status: 'ACTIVE' },»
+- Impacto: Si develOP discontinúa un módulo que un cliente sigue pagando, deja de figurar en Servicios aunque el menú lateral lo siga mostrando (layout.tsx:53-62). Incoherencia visible.
+- Propuesta: Decisión de Franco: traer DEPRECATED en la query y clasificarlo owned si la org lo tiene ACTIVE/PAUSED.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-servicios.vitrina-modulos, modelo.PremiumModule, modelo.OrganizationModule
+
+### [BUG-046] CTAs que llevan a Mensajes con un contexto que Mensajes ignora (?prefill=conexiones, context=bot-activation): el composer queda vacío
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/OnboardingStatusCard.tsx:97` — «href="/dashboard/messages?prefill=conexiones"»; `src/components/dashboard/MessageThread.tsx:73` — «const context = searchParams.get('context')»; `src/lib/data/message-context.ts:2` — «activacion:»; `src/components/dashboard/plan/UsageMeter.tsx:119` — «featureKey="bot-activation"»; `src/components/dashboard/plan/UpgradeCtaButton.tsx:82` — «const targetHref = '/dashboard/messages?context=${resolvedFeatureKey}'»; `src/lib/data/message-context.ts:56` — «let template = MESSAGE_CONTEXTS[context] ?? ''»
+- Impacto: El cliente en onboarding llega a Mensajes con el composer vacio en lugar del mensaje preparado sobre sus conexiones.
+- Propuesta: Cambiar a ?context=activacion (la clave existente).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio.estado-onboarding, h2.cli-mensajes, h2.cli-plan
+
+### [BUG-051] 'Resultados de la semana': visitas fijas en 0, ventanas en milisegundos y centinela +100 % que el LLM narra como suba
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/dashboard/week-results.ts:41` — «Promise.resolve(0), Promise.resolve(0),»; `src/lib/dashboard/week-results.ts:28` — «const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)»; `src/lib/dashboard/week-results.ts:109` — «if (previous === 0) return current > 0 ? 100 : 0»; `src/lib/ai/executive-brief-input.ts:143` — «return '${metric.delta > 0 ? 'subió' : 'bajó'} ${magnitude}% vs la semana anterior'»
+- Impacto: La tarjeta Visitas siempre muestra '—' 'Sin integración aún' aunque la org tenga analyticsPropertyId; con semana previa en 0 el delta se informa como +100 % y el brief le dice al dueño 'subió 100%'; la ventana móvil de 7×24 h no coincide con la semana AR del hero, así que el mismo home muestra dos 'semanas' distintas.
+- Propuesta: Ocultar Visitas hasta cablear GA4; devolver null ('nuevo') cuando la base es 0; migrar a weekRangeAR, o retirar WeekResultsGrid en favor del hero org-scoped y reapuntar brief y email a home-metrics.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio.resultados-semana, h2.cli-inicio.resumen-ia, lib.dashboard
+
+### [BUG-052] sendAgencyAlert sin await dentro de server actions (fire-and-forget en serverless)
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/actions/upsell.ts:99` — «sendAgencyAlert({ type: 'LEAD_UPSELL',»; `src/lib/actions/upsell.ts:104` — «}).catch(() => {})»; `src/lib/actions/messages.ts:163` — «}).catch(() => {})»
+- Impacto: En Netlify la función puede congelarse al devolver la respuesta y el fetch al webhook (alerts.ts:131-137, timeout 8 s) quedar sin completar: el pedido de upsell o el mensaje del cliente llega a la base pero develOP no recibe el aviso.
+- Propuesta: Usar after() de next/server para el envío o await con el timeout existente.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): int.webhook-alertas, lib.actions
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-058
+
+### [BUG-053] Health Score: SEO siempre null (placeholder) y tareas en curso vencidas contadas dos veces
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/health-score.ts:265` — «// Placeholder — will connect to Search Console API in a future iteration»; `src/lib/health-score.ts:396` — «status: { in: ['TODO', 'IN_PROGRESS'] },»; `src/lib/health-score.ts:406` — «const total = done + inProgress + overdue»
+- Impacto: La dimensión Digital nunca suma SEO; una tarea IN_PROGRESS vencida cuenta como sana y como vencida a la vez, distorsionando la dimensión Operativa que alimenta el número del brief y del email.
+- Propuesta: Excluir la métrica SEO del denominador de forma explícita o cablearla; contar las vencidas fuera de inProgress.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio.health-score, lib.health-score
+
+### [BUG-056] Ticket.updatedAt no se toca al responder: la lista ordena mal y un cliente activo puede figurar como inactivo
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/tickets/actions.ts:140` — «const message = await prisma.ticketMessage.create({ data: { content: ..., ticketId: ..., userId, isAdmin },»; `src/app/(protected)/dashboard/soporte/page.tsx:23` — «orderBy: { updatedAt: 'desc' },»; `src/lib/alerts.ts:97` — «organization.tickets[0]?.updatedAt,»
+- Impacto: Un ticket con respuestas nuevas no sube en la lista del cliente ni del admin, y un cliente que solo conversa por tickets suma alertas de 'Cliente inactivo'.
+- Propuesta: Crear el mensaje a través de ticket.update({ data: { messages: { create }, updatedAt: new Date() } }) o en una $transaction.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-soporte, h4.adm-tickets, h4.adm-alertas, modelo.Ticket, modelo.TicketMessage
+
+### [BUG-057] El reporte va a un solo admin elegido sin orden (take: 1 sin orderBy)
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/reports/executive-weekly/build.ts:78` — «members: { where: { role: 'ADMIN' }, include: { user: { select: { email: true, name: true } } }, take: 1, },»; `src/lib/reports/executive-weekly/build.ts:103` — «const primary = org.members[0]?.user»
+- Impacto: Con dos o más admins en la org, el destinatario puede variar entre corridas y el resto nunca recibe el reporte.
+- Propuesta: orderBy createdAt asc o un destinatario explícito; evaluar enviar a todos los ADMIN.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-005]
+- Nodo(s): h2.cli-reportes-email.reporte-semanal, modelo.OrgMember, lib.reports
+
+### [BUG-058] Top de leads calientes: rankea solo los 50 más recientes y el mail dice 'Tus 3' aunque el dueño eligió 5 o 10
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/reports/executive-weekly/top-hot-leads.ts:91` — «orderBy: { capturedAt: 'desc' }, take: 50,»; `src/lib/reports/executive-weekly/top-hot-leads.ts:129` — «.slice(0, safeLeadCount)»; `src/lib/email/templates/executive-weekly.ts:139` — «Tus 3 leads más calientes de la semana»; `src/app/(protected)/dashboard/_actions/executive-report-prefs.schemas.ts:15` — «leadCount: z.union([z.literal(3), z.literal(5), z.literal(10)], {»
+- Impacto: Con más de 50 leads en la semana, un lead de score alto del lunes puede quedar afuera del ranking; el título del bloque contradice la cantidad configurada por el cliente.
+- Propuesta: Traer todos los leads con score de la semana (u ordenar por score en la base) antes del decay; título con la cantidad real.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-reportes-email.reporte-semanal, h2.cli-reportes-email.preferencias-del-reporte, lib.reports
+
+### [BUG-059] Links de emails del lote con fallback a http://localhost:3000
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/reports/executive-weekly/build.ts:187` — «dashboardUrl: '${(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(»; `src/lib/email/unsubscribe-token.ts:58` — «const base = (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace( (usado por build.ts:191)»; `src/lib/tickets/actions.ts:156` — «const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'»
+- Impacto: Si falta la variable en producción, el reporte semanal y el aviso de ticket llevan links a localhost (incluido el de baja del reporte, que entonces no funciona).
+- Propuesta: Leer la URL base de un helper que falle en build/arranque si falta, sin fallback.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-reportes-email.reporte-semanal, h4.adm-tickets, lib.email
+
 ## Tecnología vieja
+
+### [TEC-002] Agenda inteligente usa la API v1 de Cal.com, apagada segun el propio repo, con la API key en la query string
+- Dominio: D2  ·  Severidad: ALTA  ·  Tipo: tech-vieja
+- Confianza: PROBABLE
+- Evidencia: `src/lib/integrations/cal-com.ts:4` — «const API_BASE = 'https://api.cal.com/v1'»; `src/lib/integrations/cal-com.ts:49` — «const res = await fetch('${API_BASE}/bookings?apiKey=${apiKey}', {»; `src/lib/integrations/cal-com-v2.ts:4` — «NUEVO y separado a proposito de 'cal-com.ts' (v1): la v1 fue apagada el 8/abr/2026 y ese modulo es deuda aparte del dashboard del cliente»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:226` — «No se pudo cargar la informacion de tu agenda. Intenta de nuevo en unos minutos.»
+- Impacto: Bloqueante para el primer cliente del modulo (80 USD/mes, ACTIVE en el catalogo): con Cal.com conectado la pagina siempre muestra el error y nunca el link de reservas (EmbedPreview vive dentro del resumen, page.tsx:282); la API key viaja en la URL (logs y cache de fetch).
+- Propuesta: Migrar a la v2 reutilizando cal-com-v2.ts (headers, cal-api-version) con la key fuera de la URL; mostrar el link de reservas aunque falle el resumen; Sentry en el catch.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [FAL-004], [SEC-036]
+- Nodo(s): h2.cli-agenda.panel-de-agenda, int.calcom, modelo.Organization
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-046
 
 ### [TEC-001] Prisma 6.19 con 7.x disponible: el salto exige cambiar el schema congelado y la carga de .env de los seeds
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: tech-vieja
@@ -710,6 +1125,27 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 
 ## Rendimiento
 
+### [PERF-003] SEO y Tráfico llaman a Search Console y GA4 en cada render sin caché
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/resultados/seo/page.tsx:179` — «const result = await getSearchConsoleData(siteUrl)»; `src/lib/searchconsole.ts:125` — «const [queriesRes, pagesRes, dailyRes] = await Promise.all([»; `src/lib/analytics.ts:113` — «const [summaryResponse, pagesResponse, dailyResponse, sourcesResponse] = await Promise.all([»; `src/lib/integrations/pagespeed.ts:30` — «return unstable_cache(»
+- Impacto: Cada visita al tab hace 3 (SEO) o 4 (Tráfico) llamadas a Google antes de pintar, con segundos de skeleton, y consume cuota por propiedad; navegar entre tabs las multiplica. PageSpeed y GBP sí están cacheados (pagespeed.ts:30-34, google-business-profile.ts:178-182).
+- Propuesta: Envolver getSearchConsoleData y getAnalyticsData en unstable_cache por (org, siteUrl/propertyId) con revalidate de horas, como PageSpeed y GBP.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados.seo-search-console, h2.cli-resultados.trafico-ga4, int.search-console, int.google-analytics
+
+### [PERF-004] Brief IA: la llamada al LLM corre dentro del render del Inicio y sin caché negativa (con Vertex vencido, cada visita reintenta)
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/page.tsx:193` — «brief = await getExecutiveBrief(organizationId)»; `src/lib/ai/executive-brief.ts:95` — «try { const generation = await generateBriefText(»; `src/lib/ai/executive-brief.ts:102` — «if (!generation || !isBriefValid(generation.text)) {»; `src/lib/ai/executive-brief.ts:154` — «const currentRegenerations = cacheAge >= CACHE_TTL_DAYS ? 0 : org.executiveBriefRegenerations»; `src/app/(protected)/dashboard/_actions/regenerate-brief.ts:19` — «const result = await regenerateExecutiveBrief(orgId.data)»
+- Impacto: Con el cache vencido (sin cron en Netlify) o la credencial Vertex vencida (hoy) cada visita al home dispara una llamada a Vertex y deja el bloque en skeleton hasta que falla; si el LLM devuelve texto truncado no se guarda nada y la próxima visita reintenta. Dos clics simultáneos (o un script contra la action) pasan el tope de 3 y el gate de 4 h porque el contador se lee antes (:154) y se escribe después del LLM (:196-203). El uso de tokens no se registra en ningún lado.
+- Propuesta: Generar solo desde el cron y leer el cache en el render; guardar marca del último intento fallido con backoff; reservar la regeneración con un update condicional atómico (where executiveBriefRegenerations < 3) antes de llamar al LLM; rate limit en la action; registrar usage.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-043]
+- Nodo(s): h2.cli-inicio.resumen-ia, int.vertex, lib.ai
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-057
+
 ### [PERF-001] FKs sin índice (Task.projectId, Notification.userId/taskId, ChatbotEvent.conversationId) e índices redundantes
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: perf
 - Confianza: PROBABLE
@@ -719,6 +1155,26 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: FROZEN
 - Relacionado: —
 - Nodo(s): modelo.Task, modelo.Notification, modelo.ChatbotEvent, modelo.Conversation, h2.cli-proyecto, h3.adm-actividad
+
+### [PERF-002] Mensajes carga y renderiza la conversación completa sin límite ni paginación
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/messages/page.tsx:16` — «prisma.message.findMany({ where: { organizationId }, orderBy: { createdAt: 'asc' } })»; `src/components/dashboard/MessageThread.tsx:62` — «messages.map((msg) => ({»; `src/components/dashboard/ClientChatThread.tsx:58` — «{messages.map((message) => (»
+- Impacto: Con el tiempo cada visita trae y serializa al cliente todo el historial de la conversacion.
+- Propuesta: Paginar (ultimos N con 'cargar anteriores') usando el indice (organizationId, createdAt).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-mensajes.conversacion, modelo.Message, h2.cli-mensajes, h2.cli-mensajes.chat-con-equipo
+
+### [PERF-005] Plan y consumo se leen varias veces por request y getPlanForOrg escribe dentro de un camino de lectura
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/plan/page.tsx:37` — «const snapshot = await getOrgUsageSnapshot(organizationId) (repetido en :42)»; `src/lib/recommendations/get-recommendations-for-org.ts:34` — «getOrgUsageSnapshot(organizationId), (Inicio ya lo llama en dashboard/page.tsx:164 y getPlanForOrg en :116)»; `src/lib/plan/get-plan-for-org.ts:69` — «const cached = planCache.get(orgId) if (cached && cached.expiresAt > Date.now()) return cached.data await applyPendingPlanIfDue(orgId)»; `src/lib/plan/get-plan-for-org.ts:21` — «const planCache = new Map<string, CacheEntry>()»
+- Impacto: Inicio hace dos lecturas de consumo y hasta tres resoluciones de plan por visita; con Suspense en paralelo todas fallan el cache a la vez y cada una puede ejecutar el update de pendingPlan. La invalidación del cache solo limpia la instancia que atiende al admin (:131-133). Bajo hoy; crece con orgs y tráfico.
+- Propuesta: Envolver getOrgUsageSnapshot y getPlanForOrg en React cache(): deduplica por request sin romper el streaming de cada Suspense (el lane de Plan lo descartó creyendo lo contrario).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-plan, h2.cli-inicio, lib.plan
 
 ## Deuda
 
@@ -782,6 +1238,26 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): lib.isolation, int.neon, lib.prisma, modelo.Organization, modelo.User
+
+### [DEU-023] /bienvenida es inalcanzable para altas reales y arrastra defectos latentes
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/onboarding/core.ts:85` — «onboardingCompleted: true,»; `src/modules/chatbot/server/admin/createClientOnly.ts:85` — «onboardingCompleted: true,»; `src/modules/chatbot/server/admin/createClientWithBot.ts:135` — «onboardingCompleted: true,»; `src/app/(protected)/dashboard/layout.tsx:127` — «if ((!client.onboardingCompleted || !client.companyName?.trim()) && !preview && !isBienvenida) {»; `src/app/bienvenida/_actions/complete-onboarding.ts:39` — «// TODO: Agregar contactEmail a Organization en próximos sprints»; `src/app/bienvenida/_actions/complete-onboarding.ts:50` — «targetAudience: 'Rubro: ${parsed.data.rubro}',»; `src/actions/onboarding-actions.ts:79` — «export async function completeOnboardingAction(data: OnboardingData) {»
+- Impacto: El cliente nuevo nunca ve el wizard: las tres altas vivas crean la org con onboardingCompleted: true y las dos que no (lib/actions/clients.ts:124, invitations.ts:86) no tienen importadores. Queda código mantenido con bugs listos para aparecer si alguien cambia el default: pide el ID de GA equivocado, bloquea con «Email inválido» si se borra el email opcional que ni se guarda (:11, :39), guarda el rubro en targetAudience, que nadie lee, y tiene TODOs en el camino del cliente. Además duplica un onboarding legacy muerto (components/onboarding/OnboardingWizard.tsx + actions/onboarding-actions.ts).
+- Propuesta: Decisión para Valentino: (a) borrar /bienvenida y el onboarding legacy y simplificar los redirects (proxy.ts, login/actions.ts:101-107, dashboard/layout.tsx:123-129; auth.ts:73 es FROZEN), o (b) convertirlo en el primer paso real del cliente (alta con onboardingCompleted:false) arreglando GA, email, rubro, .max y TODOs.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-027], [DEU-018], [SEC-045], [FAL-010]
+- Nodo(s): h2.cli-bienvenida, h2.cli-bienvenida.wizard-3-pasos, lib.proxy, lib.onboarding, modelo.ClientBrandProfile
+
+### [DEU-024] router.push sin comentario que lo justifique en el portal (alta de ticket, bienvenida y envío de campaña)
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/bienvenida/_components/BienvenidaWizard.tsx:38` — «router.push('/dashboard')»; `src/components/dashboard/NewTicketModal.tsx:63` — «router.push('/dashboard/soporte/${res.data.ticketId}')»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/send/page.tsx:24` — «router.push('/dashboard/modules/email-marketing/campaigns')»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/send/page.tsx:23` — «router.push('/dashboard/modules/email-marketing/campaigns')»
+- Impacto: Viola la regla de navegación de CLAUDE.md para portales (router.push solo con justificación inline). Patrón que se replica.
+- Propuesta: redirect() dentro de la server action (complete-onboarding; createTicketAction podría redirigir al detalle) o documentar inline el motivo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-003]
+- Nodo(s): h2.cli-bienvenida.wizard-3-pasos, h2.cli-soporte.crear-ticket, h2.cli-email-mkt.crear-y-enviar-campana, h2.cli-email-mkt
 
 ### [DEU-001] Flujo de invitacion huerfano: ninguna action viva emite links a /accept-invite (y la de clientes nunca los enviaba)
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -886,12 +1362,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [DEU-018] Catálogo de tareas de onboarding huérfano: solo lo siembran módulos 'use server' sin importadores y sus títulos internos se mostrarían al cliente
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
 - Confianza: PROBABLE
-- Evidencia: `src/lib/onboarding/seed-tasks-for-org.ts:5` — «await prisma.onboardingTask.createMany({»; `src/lib/data/onboarding-tasks.ts:21` — «title: 'Configurar AgencySettings de la organización',»; `src/components/dashboard/OnboardingStatusCard.tsx:28` — «if (tasks.length === 0) return null»; `src/modules/chatbot/server/admin/createClientOnly.ts:85` — «onboardingCompleted: true,»
+- Evidencia: `src/lib/onboarding/seed-tasks-for-org.ts:5` — «await prisma.onboardingTask.createMany({»; `src/lib/data/onboarding-tasks.ts:21` — «title: 'Configurar AgencySettings de la organización',»; `src/components/dashboard/OnboardingStatusCard.tsx:28` — «if (tasks.length === 0) return null»; `src/modules/chatbot/server/admin/createClientOnly.ts:85` — «onboardingCompleted: true,»; `src/lib/onboarding/seed-tasks-for-org.ts:4` — «export async function seedOnboardingTasksForOrg(organizationId: string) { await prisma.onboardingTask.createMany({»; `src/lib/actions/clients.ts:139` — «await seedOnboardingTasksForOrg(newOrgId).catch((e) => (módulo sin importadores)»; `src/lib/actions/invitations.ts:93` — «await seedOnboardingTasksForOrg(org.id).catch((e) => (módulo sin importadores)»; `src/modules/chatbot/server/admin/createClientOnly.ts:101` — «await tx.orgMember.create({ (alta viva; no siembra tareas, igual que createClientWithBot.ts:151 y lib/onboarding/core.ts:101)»
 - Impacto: La siembra solo se llama desde src/lib/actions/clients.ts e invitations.ts, que no tienen importadores, y el alta vigente no siembra tareas: la tarjeta 'Estamos configurando tu negocio' del inicio (dashboard/page.tsx:61) nunca aparece para clientes nuevos. Si se reactivara, el cliente vería títulos internos del equipo (nombres de modelos, 'Crear cuenta del cliente y enviar credenciales'). Las actions de admin para avanzarlas (src/actions/admin/onboarding-tasks.ts) tampoco tienen importadores.
 - Propuesta: Decidir: retirar la feature (catálogo, siembra, actions y tarjeta) o reconectarla con títulos para el cliente y una UI de admin que las avance.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-inicio, h2.cli-inicio.estado-onboarding, lib.data, modelo.OnboardingTask
+- Nodo(s): h2.cli-inicio, h2.cli-inicio.estado-onboarding, lib.data, modelo.OnboardingTask, h2.cli-inicio.checklist-de-onboarding, h2.cli-bienvenida, lib.onboarding
 
 ### [DEU-019] Dos escapes unsafeGlobalQuery quedaron con razón 'PENDIENTE-DECISIÓN': métricas del admin rotuladas como del bot de develOP agregan todas las orgs
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -922,6 +1398,116 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h4.adm-referidos, h2.cli-referidos, modelo.Referral
+
+### [DEU-022] Modulo 'use server' muerto que guarda credenciales en claro con url 'ENCRIPTADO_EN_TEXTO'
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/actions/onboarding-actions.ts:79` — «export async function completeOnboardingAction(data: OnboardingData) { // sin Zod»; `src/actions/onboarding-actions.ts:115` — «url: 'ENCRIPTADO_EN_TEXTO',»; `src/actions/onboarding-actions.ts:117` — «description: data.domainCredentials»; `src/components/onboarding/OnboardingWizard.tsx:6` — «import { saveOnboardingProfile } from '@/actions/onboarding-actions' // unico importador, a su vez sin importadores»
+- Impacto: Hoy es inalcanzable desde la UI, pero si alguien lo reconecta vuelve a guardar credenciales en texto plano con una etiqueta que miente, sin validacion.
+- Propuesta: Borrar onboarding-actions.ts y components/onboarding/OnboardingWizard.tsx (ver candidatos de poda).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-036]
+- Nodo(s): h2.cli-bienvenida.guardar-perfil-legacy, modelo.ClientAsset
+
+### [DEU-025] IDs internos (cuid) en URLs del portal (ticket, lead, campaña, ?p= de proyecto), todos resueltos contra la org de la sesión: sin IDOR, contra la regla de CLAUDE.md
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:61` — «where: { id: ticketId, organizationId },»; `src/components/dashboard/SoporteBoard.tsx:108` — «href={'/dashboard/soporte/${ticket.id}'}»; `src/lib/tickets/actions.ts:164` — «ticketUrl: '${baseUrl}/dashboard/soporte/${ticketInfo.id}',»; `src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx:34` — «const lead = await getLeadByIdForOrg(id, session.organization.id)»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:178` — «where: { id: campaignId, organizationId: org.id },»; `src/app/(protected)/dashboard/project/page.tsx:268` — «href={'?p=${p.id}'}»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx:159` — «href={'/dashboard/modules/email-marketing/campaigns/${campaignId}/send'}»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:60` — «const ticket = await prisma.ticket.findUnique({ where: { id: ticketId, organizationId },»; `src/app/(protected)/dashboard/project/page.tsx:194` — «? projects.find((p) => p.id === selectedId)»; `src/components/dashboard/home/BusinessHero.tsx:131` — «href={'${LEADS_HREF}/${semaforo.top.id}'}»; `src/modules/chatbot/server/admin/multiTenantQueries.ts:148` — «return forOrg(organizationId).chatbotLead.findFirst({»; `src/components/dashboard/NewTicketModal.tsx:63` — «router.push('/dashboard/soporte/${res.data.ticketId}') (además sin comentario que justifique router.push)»; `src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx:33` — «const lead = await getLeadByIdForOrg(id, session.organization.id)»
+- Impacto: Sin explotación: los tres ids (ticket, lead, campaña) se validan contra la org de la sesión (getLeadByIdForOrg usa forOrg, multiTenantQueries.ts:147-155). Pero contradice CLAUDE.md y la decisión B6.3, y los ids viajan en historial, mails y logs.
+- Propuesta: Decidir si la regla aplica a cuid opacos; si aplica, token público por ticket/lead; si no, actualizar CLAUDE.md.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-soporte, h3.cli-chatbot, h2.cli-email-mkt, h2.cli-proyecto, h2.cli-inicio.semana-en-numeros
+
+### [DEU-026] Navegación dura con window.location.assign y <a href> internos en vitrina, recomendaciones, plan y resultados
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/PremiumModuleCard.tsx:212` — «// Navegación HARD (no triggerTransition — no aplica en portales, ni router.push):»; `src/components/dashboard/PremiumModuleCard.tsx:215` — «window.location.assign('/dashboard/messages?${params.toString()}')»; `src/components/dashboard/home/Recommendations.tsx:91` — «window.location.assign('/dashboard/messages?${params.toString()}')»; `src/components/dashboard/plan/UpgradeCtaButton.tsx:100` — «window.location.assign(targetHref)»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx:40` — «router.push('/dashboard/modules/email-marketing/campaigns') // con comentario :38-39 (tambien :72 y :153)»; `src/lib/actions/upsell.ts:143` — «revalidatePath('/dashboard')»; `src/components/dashboard/AlertaMetrica.tsx:97` — «<a href={accion.href}»
+- Impacto: Recarga completa del portal tras pedir un módulo (se pierde estado y aparece el loading global) y un tercer patrón de navegación que CLAUDE.md no lista. Está justificado inline, por eso BAJA.
+- Propuesta: Redirigir desde una server action (redirect()) o no revalidar /dashboard antes de navegar; documentar la excepción en CLAUDE.md.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-servicios.vitrina-modulos, h2.cli-inicio, h2.cli-plan, h2.cli-servicios, h2.cli-plan.pedir-cambio-de-plan, h2.cli-inicio.ideas-para-crecer, h2.cli-servicios.solicitar-modulo, h2.cli-resultados
+
+### [DEU-027] Motores PDF y endpoints huérfanos siguen publicados (api/reports/monthly, api/dashboard/leads/recent, DownloadReportButtons con ExecutiveReportTemplate, datos mock y el dominio legacy)
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/reports/monthly/route.ts:21` — «export async function GET(req: NextRequest) {»; `src/app/api/reports/monthly/route.ts:106` — «analytics: analyticsResult?.ok ? analyticsResult.data : null,»; `src/components/dashboard/DownloadReportButton.tsx:129` — «export function DownloadReportButtons({ organizationId, isLocked = false }: { organizationId?: string, isLocked?: boolean }) {»; `src/app/api/dashboard/leads/recent/route.ts:50` — «...lead,»; `src/components/dashboard/ExecutiveReportTemplate.tsx:120` — «www.develop-agency.com»; `src/components/dashboard/DownloadReportButton.tsx:82` — «const mockData: ReportData = {»; `package.json:148` — «"html2canvas": "^1.4.1",»; `src/app/api/reports/monthly/route.ts:31` — «const month = searchParams.get('month') ?? currentMonth() (solo rotula; los datos no se filtran por mes)»; `src/lib/analytics.ts:97` — «// Return mock data for demo property or missing/invalid credentials if (!keyJson || property === MOCK_PROPERTY_ID) {»; `src/lib/reports/MonthlyReport.tsx:296` — «if (data.analytics) { (no mira isMockData) ... Tu sitio recibió ${a.sessions...} visitas este mes»; `src/app/api/reports/monthly/route.ts:125` — «const filename = 'reporte-${client.companyName.toLowerCase().replace(/\s+/g, '-')}-${year}-${mon}.pdf'»
+- Impacto: Superficie autenticada viva sin dueño: /api/reports/monthly acepta organizationId por query para SUPER_ADMIN y armaría un PDF con datos demo como si fueran reales; /api/dashboard/leads/recent devuelve filas completas (incluye convertedToOsLeadId de LeadOS). Más ExecutiveReportTemplate, AnalyticsPeriodSelector y LeakMeter sin importadores.
+- Propuesta: Borrar las dos rutas, lib/reports/MonthlyReport.tsx y los cuatro componentes; ajustar tests/e2e/40.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados, h3.cli-chatbot, modelo.ChatbotLead, h2.cli-reportes-email, h2.cli-reportes-email.pdf-reporte-ejecutivo, lib.reports, int.ga4, int.search-console
+
+### [DEU-028] Convenciones de CLAUDE.md incumplidas en el portal: colores de servicio cruzados, CSS inline donde hay clases Tailwind, Lucide sin strokeWidth={1.5} y copy sin tildes
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/services/page.tsx:37` — «glowRgb: '167,139,250',»; `src/app/(protected)/dashboard/services/page.tsx:44` — «glowRgb: '52,211,153',»; `src/app/(protected)/dashboard/services/page.tsx:51` — «glowRgb: '251,191,36',»; `src/app/(protected)/dashboard/services/page.tsx:292` — «background: 'linear-gradient(90deg, #06b6d4 0%, #818cf8 50%, #c084fc 100%)',»; `src/app/(protected)/dashboard/services/page.tsx:116` — «<Icon size={24} />»; `src/app/bienvenida/_components/Step3Tour.tsx:37` — «<Icon size={16} />»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx:10` — «const glassBorder: React.CSSProperties = { background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(20px) saturate(180%)',»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:28` — «background: 'rgba(16,185,129,0.05)',»; `src/app/(protected)/dashboard/modules/motor-resenas/_components/ReviewItem.tsx:92` — «style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px) saturate(180%)',»; `src/app/(protected)/dashboard/cuenta/facturacion/page.tsx:116` — «<AlertTriangle size={17} className='mt-0.5 shrink-0 text-red-400' />»; `src/app/(protected)/dashboard/page.tsx:222` — «icon={<Sparkles size={10} />}»; `src/components/dashboard/NotificationCenter.tsx:146` — «<Bell size={15} />»; `src/components/dashboard/ProfileForms.tsx:53` — «<CheckCircle size={14} className="flex-shrink-0" />»; `src/components/dashboard/CuentaTabs.tsx:9` — «{ href: '/dashboard/cuenta/facturacion', label: 'Facturacion', icon: CreditCard },»; `src/components/dashboard/NewTicketModal.tsx:14` — «title: z.string().min(5, 'El titulo debe tener al menos 5 caracteres.'),»; `src/components/dashboard/SubscriptionBanner.tsx:16` — «El pago de tu suscripción se encuentra vencido. Por favor, regulariza tu situación ...»; `src/components/dashboard/plan/PlansShowcase.tsx:121` — «<Check size={10} strokeWidth={2} />»; `src/components/dashboard/plan/PlansShowcase.tsx:305` — «<Lock size={7} strokeWidth={2.5} />»; `src/components/dashboard/home/AIExecutiveBriefV2.tsx:81` — «<RefreshCw size={11} />»; `src/components/dashboard/home/HealthScore.tsx:156` — «<Sparkles className="text-cyan-400 mb-2" size={28} />»
+- Impacto: IA aparece violeta, Automatización esmeralda y Software ámbar en Servicios, cuando CLAUDE.md fija IA esmeralda, Automatización ámbar y Software violeta. Gradiente estático inline existiendo clases Tailwind, e iconos sin strokeWidth={1.5} (también trafico/page.tsx:153, PremiumModuleCard.tsx:144, :265, Step2Conexiones.tsx:32).
+- Propuesta: Mapear SERVICE_TYPE_CONFIG a #10b981 / #f59e0b / #8b5cf6, clases Tailwind para el gradiente y strokeWidth={1.5}.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-servicios.servicios-contratados, lib.ui, h2.cli-email-mkt, h2.cli-agenda, h2.cli-resenas, h2.cli-tienda, h2.cli-cuenta.historial-de-facturas, h2.cli-shell, h2.cli-plan, h2.cli-inicio
+
+### [DEU-029] Logica de datos y mapas duplicados en componentes del portal (Prisma en OnboardingStatusCard, PRIORITY/CATEGORY_MAP x3, calcPosition x3)
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/components/dashboard/OnboardingStatusCard.tsx:17` — «const tasks = await prisma.onboardingTask.findMany({»; `src/components/dashboard/SoporteBoard.tsx:28` — «const PRIORITY_MAP: Record<TicketPriority, { label: string; cls: string; pulse?: boolean }> = {»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:33` — «const PRIORITY_MAP: Record<string, { label: string; cls: string; pulse?: boolean }> = {»; `src/components/dashboard/NotificationCenter.tsx:27` — «function calcPosition(trigger: HTMLElement): PanelPosition {»
+- Impacto: Etiquetas/colores de prioridad y el posicionamiento de popovers hay que cambiarlos en 3 lugares (tambien admin ticket-list.tsx:57-70, AnnouncementsFeed.tsx:21, EmojiPopover.tsx:32); la consulta Prisma dentro de un componente UI contradice la regla anti-vibecode.
+- Propuesta: Extraer etiquetas de ticket compartidas, un hook de posicion de popover del portal y mover la consulta de onboarding a lib.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio.estado-onboarding, h2.cli-soporte, h2.cli-shell
+
+### [DEU-030] Código muerto o duplicado en el lote: 6 de 7 exports de lib/premium-modules.ts, 3 actions admin de lib/actions/messages.ts y markNotificationReadAction
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/premium-modules.ts:46` — «export async function hasModuleActive(»; `src/lib/actions/messages.ts:16` — «export async function sendMessageAction(»; `src/lib/actions/notifications.ts:19` — «export async function markNotificationReadAction(id: string): Promise<ActionResult> {»; `src/lib/actions/notifications.ts:15` — «revalidatePath('/dashboard') revalidatePath('/dashboard')»
+- Impacto: hasModuleActive duplica isModuleActive (src/lib/modules/check-activation.ts:3-15); lib/premium-modules.ts convive con lib/data/premium-modules.ts (mismo nombre, otro rol); las actions admin de messages.ts duplican admin/messages/_actions/message.actions.ts:177 y quedan como superficie 'use server' sin dueño.
+- Propuesta: Conservar activateModule/cancelModule para el alta de módulos y borrar el resto; mover getActiveModuleSlugs a lib/modules; eliminar sendMessageAction, markAdminMessagesAsReadAction, markMessagesAsReadAction y markNotificationReadAction; quitar el revalidatePath duplicado.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.premium-modules, lib.actions
+
+### [DEU-031] Snapshots JSON del brief casteados con 'as unknown as' sin validar
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/ai/brief-history.ts:42` — «healthScores: row.healthScores as unknown as HealthScoreResult, weekResults: row.weekResults as unknown as WeekResultsData,»; `src/lib/ai/executive-brief.ts:341` — «const healthScores = generation.healthScore as unknown as Prisma.InputJsonValue»
+- Impacto: Un snapshot viejo o con otra forma da healthTotal undefined y el delta sale NaN ('bajó NaN puntos') en el prompt y en el email.
+- Propuesta: Validar con Zod al leer y descartar el snapshot que no valide.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio.resumen-ia, modelo.ExecutiveBriefSnapshot
+
+### [DEU-032] Gate de plan del reporte duplicado y su invariante no lo compara con build.ts (verde por arnés)
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/reports/executive-weekly/report-eligible-plan.ts:9` — «export function reportEligiblePlan(planKey: PlanKey): boolean { return planKey === 'PRO' || planKey === 'BUSINESS'»; `src/lib/reports/executive-weekly/build.ts:91` — «if (plan.key !== 'PRO' && plan.key !== 'BUSINESS') {»; `src/lib/reports/executive-weekly/report-eligible-plan.invariant.ts:14` — «import { reportEligiblePlan, businessOnlyReportSection } from './report-eligible-plan.ts' (no importa build.ts aunque :7 dice verificar contra él)»; `src/lib/plan/plan-allows.ts:19` — «case 'reports': return plan.reportsEnabled»
+- Impacto: Si cambia el gate de build.ts, la tarjeta de preferencias muestra algo falso y el invariante sigue verde; además el gate ignora Plan.reportsEnabled, que el admin puede editar.
+- Propuesta: Que build.ts importe reportEligiblePlan, o que ambos usen planAllows(plan, 'reports'); actualizar el comentario que lo declara fuera de scope.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-reportes-email, lib.reports, lib.plan
+
+### [DEU-033] send-manual.ts reimplementa la secuencia de send.ts y deja el reenvío expuesto a duplicados por timeout
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/reports/executive-weekly/send-manual.ts:27` — «* P2.B.1) no tiene forma de acotar a 1 org ... Esta función reimplementa la MISMA secuencia»; `src/lib/reports/executive-weekly/send-manual.ts:93` — «const sendResult = await sendTransactionalEmail({ (después del upsert PENDING :74-89)»; `src/lib/reports/executive-weekly/send-manual.ts:151` — «return { ok: false, reason: 'UNEXPECTED_ERROR', periodKey, error: message }»
+- Impacto: Dos copias del flujo crítico divergen con cada cambio; si la función corta después de Brevo y antes del update, el log queda PENDING y el próximo 'Enviar ahora' manda el mail de nuevo. El admin recibe el mensaje de error interno.
+- Propuesta: Extraer un sendForOrg(orgId, { respectCadence }) que usen el cron y el botón; tratar un PENDING reciente como envío en vuelo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes, h2.cli-reportes-email.reporte-semanal, lib.reports, int.brevo
+
+### [DEU-034] getPlanForOrg ignora el estado de la suscripción: una org CANCELED o PAST_DUE conserva su plan
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/plan/get-plan-for-org.ts:74` — «const sub = await prisma.subscription.findUnique({ where: { organizationId: orgId }, select: { plan: { select: { (no lee status)»; `prisma/schema.prisma:658` — «status SubscriptionStatus @default(ACTIVE)»; `src/lib/reports/executive-weekly/send.ts:81` — «subscription: { is: { status: 'ACTIVE' } }, (el cron sí lo filtra)»
+- Impacto: Hoy ningún código pone CANCELED, así que el impacto es latente: cuando develOP dé de baja a un cliente, el bot y el portal siguen con el cupo y las features del plan anterior.
+- Propuesta: Definir el plan efectivo para CANCELED y PAST_DUE (fallback o bot en pausa), aplicarlo en getPlanForOrg y cubrirlo con un invariante.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [FAL-006]
+- Nodo(s): h2.cli-plan, h3.cli-chatbot, lib.plan, modelo.Subscription
 
 ## Calidad
 
@@ -957,6 +1543,46 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h1.auth-recupero, h1.auth-recupero.forgot, h1.auth-recupero.reset, lib.rate-limit, int.brevo
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-022
 
+### [UX-006] Motor de resenas: la vista de venta muestra '[FALTA:precio]' mientras la vitrina cobra 60 USD
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/modules/motor-resenas/_components/LockedView.tsx:151` — «Precio: <span className=... >[FALTA:precio]</span> /mes»; `src/lib/data/premium-modules.ts:31` — «priceMonthlyUsd: 60,»
+- Impacto: El cliente ve un placeholder interno y dos precios distintos para el mismo modulo; incumple 'sin datos de mentira ni TODOs' de L3.
+- Propuesta: Cerrar la decision comercial (PLAN-115) y leer el precio del catalogo en LockedView.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resenas.vista-de-venta, h2.cli-servicios
+
+### [UX-009] Promesas vencidas y contradictorias visibles al cliente: «Próximamente Q3 2026» y cuatro SLA de respuesta distintos sin medición
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/PremiumModuleCard.tsx:300` — «{isComingSoon ? 'Próximamente Q3 2026' : 'Premium'}»; `src/components/dashboard/ServiceDetailModal.tsx:181` — «{isComingSoon ? 'Próximamente Q3 2026' : 'Premium'}»; `src/app/(protected)/dashboard/soporte/page.tsx:87` — «value="< 4h"»; `src/components/dashboard/MessageThread.tsx:114` — «Respondemos en {'< 4 hs'}»; `src/components/dashboard/TicketReplyForm.tsx:32` — «helperText="El equipo de develOP será notificado de inmediato. Respuesta asíncrona estándar en menos de 24hs."»; `src/app/bienvenida/_components/Step3Tour.tsx:14` — «{ icon: MessageSquare, label: 'Comunicación directa', description: 'Mensajes y soporte 24/7' },»; `src/components/sections/modulos-opcionales/ModulosOpcionales.tsx:487` — «PROXIMAMENTE Q3 2026»; `src/components/dashboard/MessageThread.tsx:119` — «<span className="text-zinc-300">9–18hs</span>»; `src/app/(protected)/dashboard/soporte/page.tsx:90` — «subtitle="Lun-Vie 9-19hs ART"»; `src/lib/plan/plan-presentation.ts:135` — «label: 'Soporte prioritario', hint: 'Respuesta en menos de 24 horas hábiles',»; `prisma/seeds/sync-plans.ts:95` — «supportTier: SupportTier.PRIORITY, (Pro ya es prioritario; la vitrina lo vende como exclusivo de Business, plan-presentation.ts:171)»; `src/app/(protected)/dashboard/modules/motor-resenas/_components/LockedView.tsx:151` — «Precio: <span className="font-semibold text-amber-300">[FALTA:precio]</span> /mes»; `src/components/dashboard/PremiumModuleCard.tsx:366` — «${priceMonthlyUsd}{' '} (la vitrina muestra USD 60 para el mismo módulo, premium-modules.ts:31)»
+- Impacto: Al 14/10/2026 la vitrina promete módulos para un trimestre que ya terminó (y el propio comentario de PremiumModuleCard.tsx:335 dice que el CTA «NO promete fecha»). El cliente lee cuatro SLA distintos: 24/7 (bienvenida), <4 h Lun–Vie 9–18 (Mensajes, MessageThread.tsx:117-119), <4 h Lun-Vie 9-19 (Soporte, soporte/page.tsx:90) y <24 h (respuesta de ticket). Primer reclamo previsible del primer cliente.
+- Propuesta: Sacar la fecha del badge (o leerla de PremiumModule) y definir un único SLA en una constante compartida que consuman Soporte, Mensajes y el composer del ticket.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-servicios.vitrina-modulos, h2.cli-soporte, h2.cli-mensajes, h2.cli-bienvenida, h2.cli-servicios, h2.cli-mensajes.conversacion, h2.cli-plan, lib.plan, h2.cli-servicios.vitrina-de-modulos, h2.cli-resenas, lib.modules
+
+### [UX-010] ACTIVAR AHORA de SEO descarta el resultado: sin feedback y falla muda en la vista de soporte
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/resultados/seo/page.tsx:110` — «const activarSeo = async () => { 'use server' await requestUpsellAction('seo-avanzado', 'SEO Avanzado')»; `src/lib/actions/upsell.ts:16` — «const organizationId = session?.user?.organizationId»; `src/lib/actions/upsell.ts:60` — «upsellRequestCount: { increment: 1 },»
+- Impacto: El cliente pulsa y no ve confirmación ni error (el ActionResult se tira) ni estado pendiente; repite clics o cree que no funcionó. En la vista de soporte de un SUPER_ADMIN la acción devuelve «Sesión inválida.» sin que nadie lo vea. Viola la regla de feedback visible de CLAUDE.md.
+- Propuesta: Pasar el CTA a un client component con useActionState que muestre «Solicitud enviada» o el error (como RequestButton de PremiumModuleCard); usar resolveOrgId en upsell.ts.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados.seo-solicitar-activacion, lib.actions
+
+### [UX-013] Oportunidades SEO con copy fijo de Tucuman y CTA que envia pedidos reales sobre datos de ejemplo
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/OportunidadesSEO.tsx:49` — «descripcion: 'En promedio aparecés en la posición #${data.avgPosition.toFixed(0)} de Google. Tus competidores en Tucumán están captando esos clientes.',»; `src/components/dashboard/OportunidadSEO.tsx:84` — «<input type="hidden" name="content" value={mensajeAdmin} />»; `src/app/(protected)/dashboard/resultados/seo/page.tsx:321` — «<OportunidadesSEO data={data} />»; `src/lib/searchconsole.ts:48` — «{ query: 'concesionaria tucuman', clicks: 89, impressions: 1240, ctr: 7.2, position: 4.1 },»; `src/components/dashboard/SeoAlertas.tsx:39` — «¡Eso es tráfico gratuito garantizado!»
+- Impacto: Un cliente de otra ciudad lee que su competencia 'en Tucuman' le gana; en modo demo (seo/page.tsx:157-161) o con el fallback a mock (searchconsole.ts:104/:111/:213) el boton 'Quiero subir al top 3' manda a develOP un pedido real por la keyword ficticia 'concesionaria tucuman'. Tambien promete resultados ('triplicar las visitas' :23, 'garantizado').
+- Propuesta: Parametrizar la ubicacion desde el perfil del negocio o quitarla; ocultar o deshabilitar las CTAs cuando data.isMockData; revisar el copy de promesas.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados, h2.cli-resultados.oportunidades-seo
+
 ### [UX-003] Cambio forzado sin salida si el cliente no tiene la temporal, y copy de 'forzado' tambien en cambio voluntario
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: ux
 - Confianza: PROBABLE
@@ -978,6 +1604,76 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h1.auth-login, lib.proxy, h3.cli-chatbot, h2.cli-soporte, h2.cli-mensajes
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-025
 
+### [UX-007] x-pathname nunca se setea: las tabs de Email marketing no marcan la activa y el gate de onboarding se saltea con un header
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:24` — «const pathname = headersList.get('x-pathname') ?? ''»; `src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:42` — «const isActive = pathname.startsWith(tab.href)»; `src/app/(protected)/dashboard/layout.tsx:124` — «const pathname = headersList.get('x-pathname') || ''»; `src/proxy.ts:168` — «return NextResponse.next() // no setea headers de request»
+- Impacto: Las tabs Campanas/Contactos nunca muestran cual esta activa; quien mande x-pathname: /bienvenida usa el panel sin completar el onboarding.
+- Propuesta: usePathname en un componente cliente para las tabs; sacar la excepcion isBienvenida (la ruta /bienvenida no vive bajo este layout).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-email-mkt, h2.cli-shell.layout-y-navegacion, lib.proxy
+
+### [UX-008] Agenda: 'Copiar link' descarga un archivo link.txt y es un icono sin aria-label; las estadisticas van en 3 columnas fijas en mobile
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:191` — «href={'data:text/plain,${encodeURIComponent(link)}'}»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:192` — «download=link.txt title=Copiar link»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:235` — «div className='grid grid-cols-3 gap-3'»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:46` — «href=/dashboard/messages?context=agenda // <a> en vez de <Link>»
+- Impacto: El boton con titulo 'Copiar link' baja un archivo en vez de copiar y no tiene nombre accesible; en 390 px las tarjetas con 'CANCELADOS' en mayusculas espaciadas no entran.
+- Propuesta: Boton cliente con navigator.clipboard y aria-label, grid-cols-1 sm:grid-cols-3 y <Link> para navegacion interna.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-agenda.panel-de-agenda
+
+### [UX-011] Contenido generado por IA presentado sin aviso en Resultados
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/components/dashboard/results/InsightsBlock.tsx:52` — «Lectura ejecutiva generada con tus datos reales»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:38` — «develOP revisa las conversaciones de tu asistente y te cuenta qué encontró»; `src/lib/ai/results-insights.ts:91` — «const response = await getAnthropicClient().messages.create({»; `src/components/dashboard/home/AIExecutiveBriefV2.tsx:55` — «Resumen Ejecutivo - IA»
+- Impacto: Los insights de Tráfico/SEO (Claude Haiku) y los descubrimientos del análisis (Gemini, generateInsights.ts:99-100) se presentan como lectura «con tus datos reales» o como revisión de develOP; solo el brief de Inicio lleva la etiqueta IA. Riesgo de confianza si un insight se equivoca.
+- Propuesta: Badge o leyenda «Generado con IA» en InsightsBlock y DiscoveriesSection, igual al del brief.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados.insights-ia, h2.cli-resultados.analisis-mensual, int.anthropic, int.vertex
+
+### [UX-012] Copy sin terminar en el camino del cliente: modal y descripciones de 'Ver detalles' PLACEHOLDER que ignoran el longDescription, pestaña 'Trafico', 'Ver detalles' que lleva a Mensajes
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/PremiumModuleCard.tsx:53` — «// PLACEHOLDER — editar copy real luego.»; `src/components/dashboard/ResultadosTabs.tsx:8` — «{ href: '/dashboard/resultados/trafico', label: 'Trafico', icon: BarChart3 },»; `src/app/(protected)/dashboard/services/page.tsx:157` — «href="/dashboard/messages?context=default"»; `src/components/dashboard/PremiumModuleCard.tsx:67` — «'Integración completa con Tiendanube. Ventas, productos, stock, abandonos de carrito y métricas comerciales aparecen en tu panel develOP. ...»; `src/components/dashboard/PremiumModuleCard.tsx:195` — «const longDescription = PRESET_MODULE_DETAILS[slug] ?? GENERIC_MODULE_DETAIL»
+- Impacto: El modal de módulos muestra copy marcado como placeholder (promete «facturas en 30 segundos», «24/7»), la pestaña dice «Trafico» sin tilde y el «Ver detalles» de un servicio contratado lleva al chat. Sin datos inventados graves, pero se nota sin terminar.
+- Propuesta: Pasar longDescription de la DB (la query de services/page.tsx:177-182 ya trae la fila completa), corregir la tilde y renombrar el botón a «Consultar» hasta que exista el detalle (PLAN-145).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-servicios.vitrina-modulos, h2.cli-servicios.servicios-contratados, h2.cli-resultados, h2.cli-servicios, h2.cli-servicios.catalogo-y-detalle
+
+### [UX-014] AnimatedCounter sin formato es-AR ni reduced-motion y AnimatedProgressBar con animacion infinita sin pausa
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/AnimatedCounter.tsx:25` — «ref.current.textContent = Math.round(v).toString()»; `src/components/dashboard/AnimatedCounter.tsx:32` — «0»; `src/components/dashboard/AnimatedProgressBar.tsx:51` — «repeat: Infinity,»; `src/components/dashboard/AnalyticsMetricCard.tsx:55` — «<AnimatedCounter value={Math.round(rawValue)} />»
+- Impacto: En Trafico 12345 sesiones se muestran '12345' mientras el resto del portal usa '12.345'; SSR y lectores de pantalla ven '0' hasta que entra en viewport; la barra de progreso anima para siempre aunque haya reduced-motion o este fuera de pantalla (regla de performance de CLAUDE.md).
+- Propuesta: Formatear con Intl es-AR, renderizar el valor final en SSR y respetar useReducedMotion; pausar el sweep con IntersectionObserver.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados.trafico, h2.cli-proyecto.tareas-por-estado
+
+### [UX-015] Reputación: performance de GBP stubbeada a 0 con FIXME y un fallo de la API se muestra como 'pendiente de conexión'
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/results/GBPMetricsCard.tsx:39` — «// FIXME(data-truth): performance.* viene stubbeado a 0 desde getGBPMetrics»; `src/lib/integrations/google-business-profile.ts:218` — «const performance = { profileViews: 0,»; `src/app/(protected)/dashboard/resultados/reputacion/page.tsx:21` — «} catch (err) { console.error('[GBP] Reputation page failed:', err)»
+- Impacto: El bloque de vistas/llamadas/cómo llegar nunca aparece aunque se pide el scope businessprofileperformance; si la API falla un día, el cliente lee 'Reputación en Google pendiente de conexión' estando conectado.
+- Propuesta: Cablear la Performance API o quitar el scope y el bloque; distinguir error de 'no conectado' en la página.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-041], [FAL-011]
+- Nodo(s): h2.cli-resultados, int.gbp
+
+### [UX-016] 'Cuánto te generó la web' muestra leads × ticket (supone conversión del 100 %)
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/home/MoneyEstimate.tsx:113` — «<p className="text-xs tracking-tight text-zinc-500">Cuánto te generó la web</p>»; `src/lib/dashboard/home-metrics-logic.ts:95` — «return leadCount * ticketUsd»
+- Impacto: Con 20 leads y ticket US$ 1.500 el título afirma que la web generó '≈ US$ 30.000'; el subtítulo dice 'oportunidades', pero el encabezado lo presenta como plata generada.
+- Propuesta: Título 'Valor potencial de tus leads' o aplicar la tasa de cierre real del embudo (sold/total).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio.semana-en-numeros
+
 ## Observabilidad
 
 ## Accesibilidad
@@ -991,6 +1687,67 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h1.auth-login.login-password, h1.auth-recupero.solicitar-enlace, h1.auth-recupero.restablecer-password, h1.auth-invite.aceptar-invitacion
+
+### [A11Y-002] Texto funcional en zinc-600/700 sobre el fondo del portal (#080a0c, ≈2,6:1 y ≈1,9:1) en tickets, servicios, módulos, cuenta e inicio
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:246` — «<p className="mt-0.5 font-mono text-[9px] text-zinc-600">{step.time}</p>»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:249` — «<p className="mt-0.5 text-[9px] italic text-zinc-700">Pendiente</p>»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:261` — «<span className="flex items-center gap-1 text-zinc-600">»; `src/app/(protected)/dashboard/services/page.tsx:145` — «<p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-600">»; `src/components/dashboard/PremiumModuleCard.tsx:362` — «<p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-600">»; `src/app/(protected)/dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx:56` — «p className='max-w-xs text-xs leading-relaxed text-zinc-600' // aviso 'Solo lectura'»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx:104` — «text-[10px] font-medium uppercase tracking-widest text-zinc-600 // Enviados/Abiertos/Clicks/Bajas»; `src/app/(protected)/dashboard/page.tsx:228` — «p className='text-xs text-zinc-600'»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:319` — «p className='mt-5 text-center text-[9px] text-zinc-600'»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx:118` — «p className='text-[11px] text-zinc-600' // ayuda del campo HTML»; `src/components/dashboard/ProfileForms.tsx:67` — «return <p className="text-[10px] text-zinc-600">{children}</p>»; `src/components/dashboard/ProjectEmptyState.tsx:30` — «<p className="mt-1 max-w-sm text-xs leading-relaxed text-zinc-600">»; `src/components/dashboard/notification-shared.tsx:98` — «<span className="flex-shrink-0 text-[10px] text-zinc-600">{timeAgo(notif.createdAt)}</span>»; `src/components/dashboard/ClientChatComposer.tsx:128` — «{helperText && <p className="mt-1.5 text-[10px] text-zinc-600">{helperText}</p>}»; `src/components/dashboard/DashboardLayoutClient.tsx:179` — «<footer className="flex items-center justify-between px-1 py-2 text-xs text-zinc-700">»; `src/components/dashboard/home/AIExecutiveBriefV2.tsx:103` — «<div className="flex flex-col gap-2 border-t border-white/[0.04] pt-2 text-[10px] text-zinc-600 sm:flex-row sm:items-center sm:justify-between">»; `src/components/dashboard/home/HealthScore.tsx:123` — «className="flex items-center gap-2 text-[10px] text-zinc-600"»; `src/components/dashboard/home/WeekResultsGrid.tsx:28` — «<span className="shrink-0 text-[10px] text-zinc-600">vs semana anterior</span>»; `src/components/dashboard/results/analysis/MonthTrendSection.tsx:52` — «<p className="text-xs text-zinc-600">»; `src/components/dashboard/VaultRevealButton.tsx:143` — «<p className="text-[9px] text-red-400/40">»; `src/components/dashboard/DashboardLayoutClient.tsx:51` — «className="fixed inset-0 bg-[#080a0c] text-zinc-100 selection:bg-cyan-500/30"»
+- Impacto: Horas de la Timeline, «Pendiente», etiquetas de Detalles, «Activo desde» y «Desde» quedan en ≈2,5:1 (zinc-600 sobre ≈#0b0d10) y ≈1,9:1 (zinc-700), en 9-10 px. Falla WCAG AA 1.4.3 en el camino del cliente.
+- Propuesta: Subir a zinc-400 o más claro (≥4,5:1) y mínimo 11-12 px para texto con información.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-soporte.conversacion-ticket, h2.cli-servicios.servicios-contratados, h2.cli-servicios.vitrina-modulos, h2.cli-tienda, h2.cli-email-mkt, h2.cli-cuenta.boveda, h2.cli-inicio, lib.ui, h2.cli-shell, h2.cli-cuenta, h2.cli-proyecto, h2.cli-soporte, h2.cli-resultados
+
+### [A11Y-003] NewTicketModal es un modal hecho a mano: sin role=dialog, sin foco atrapado ni Esc, cierre sin aria-label, labels sin asociar, z-50 bajo el sidebar y sin scroll interno
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/NewTicketModal.tsx:83` — «<div className="fixed inset-0 z-50 flex items-center justify-center px-4">»; `src/components/dashboard/NewTicketModal.tsx:103` — «<button onClick={() => !isSubmitting && setIsOpen(false)}»; `src/components/dashboard/NewTicketModal.tsx:127` — «<label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-400">»; `src/lib/design-tokens.ts:242` — «appDrawer: 110, // panel del rail en mobile»
+- Impacto: Con lector de pantalla no se anuncia el dialogo, los campos no tienen nombre accesible (solo placeholder) y el boton de cierre (solo <X/>, :107) se anuncia como 'boton'; Esc no cierra y el Tab escapa a la pagina. En desktop el sidebar (zIndex 110) queda por encima del fondo y sigue clickeable; en pantallas bajas o con teclado abierto el boton 'Abrir Ticket' puede quedar fuera del viewport (sin overflow-y en :83-97, PROBABLE).
+- Propuesta: Migrar al Modal primitivo de components/ui (ya usado por VaultRequestModal y SoporteBoard): portal a body con zIndex.modal, foco atrapado, Esc y aria-modal; label con htmlFor e id en los campos; aria-label en el cierre.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-soporte, h2.cli-soporte.crear-ticket, lib.ui
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-054
+
+### [A11Y-004] Filas del dropdown de notificaciones no operables con teclado
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/NotificationCenter.tsx:238` — «<motion.div layout key={notif.id}»; `src/components/dashboard/NotificationCenter.tsx:245` — «onClick={() => handleNotifClick(notif)}»; `src/components/dashboard/NotificationHistoryModal.tsx:149` — «<button»
+- Impacto: Con teclado o lector de pantalla no se puede abrir ni marcar una notificacion desde la campana (div con onClick, sin role/tabIndex/onKeyDown); si desde 'Ver todas', que usa <button>.
+- Propuesta: Usar <button type='button'> como en el historial.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-shell.campana-notificaciones
+
+### [A11Y-005] Bloques de error de formularios del portal sin role=alert ni aria-live (módulos, cuenta, soporte, mensajes, referidos, servicios, bienvenida)
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/ProfileForms.tsx:43` — «<motion.div initial={{ opacity: 0, y: -4 }}»; `src/components/dashboard/NewTicketModal.tsx:120` — «<div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">»; `src/components/dashboard/ClientChatComposer.tsx:85` — «<div className="mb-2 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm text-rose-200">»; `src/components/dashboard/ReferralPanel.tsx:114` — «<p className="mb-3 text-sm text-rose-300">{error}</p>»; `src/components/dashboard/VaultRequestModal.tsx:108` — «{error && <p className="text-xs font-medium text-red-400">{error}</p>}»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx:124` — «p className='rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-400'»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/send/page.tsx:53` — «div className='flex items-center gap-2 rounded-lg border border-red-500/20 ...'»; `src/app/(protected)/dashboard/modules/email-marketing/contactos/_components/ImportCSVButton.tsx:63` — «div className='flex items-center gap-2 rounded-lg border border-red-500/20 ...'»; `src/app/(protected)/dashboard/modules/motor-resenas/_components/LockedView.tsx:231` — «p role='alert' ... // control: aca si esta»; `src/app/bienvenida/_components/Step1Empresa.tsx:41` — «<label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">»; `src/app/bienvenida/_components/Step2Conexiones.tsx:41` — «<input»; `src/app/bienvenida/_components/BienvenidaWizard.tsx:122` — «<div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">»; `src/app/(protected)/dashboard/resultados/trafico/page.tsx:152` — «<div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4 backdrop-blur-sm">»; `src/components/dashboard/NewTicketModal.tsx:103` — «<button onClick={() => !isSubmitting && setIsOpen(false)}»; `src/components/dashboard/home/AIExecutiveBriefV2.tsx:115` — «<div className="rounded-lg border border-rose-500/20 bg-rose-500/5 px-3 py-2 text-xs text-rose-300">»; `src/components/dashboard/home/Recommendations.tsx:119` — «<p className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-red-400">»; `src/components/dashboard/VaultRevealButton.tsx:119` — «<button onClick={handleCopy} title="Copiar"»
+- Impacto: Los lectores de pantalla no anuncian el error al guardar el perfil, crear un ticket, enviar un mensaje, generar el codigo de referido o pedir un documento (tambien PremiumModuleCard.tsx:328 y DangerZone ProfileForms.tsx:727).
+- Propuesta: role='alert' (o aria-live='assertive') en los contenedores de error y role='status' en los de exito; idealmente un FormFeedback compartido.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [A11Y-001]
+- Nodo(s): h2.cli-cuenta, h2.cli-soporte, h2.cli-mensajes, h2.cli-referidos, h2.cli-servicios, h2.cli-email-mkt, h2.cli-resenas, h2.cli-bienvenida.wizard-3-pasos, h2.cli-resultados, h2.cli-soporte.crear-ticket, h2.cli-inicio.resumen-ia, h2.cli-inicio.ideas-para-crecer, h2.cli-cuenta.boveda, lib.ui
+
+### [A11Y-006] Contenido solo en hover y foco perdido: descripcion de tareas, drawer mobile cerrado enfocable, sin aria-current y toggles de contrasena fuera del Tab
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/components/dashboard/ProjectTaskTabs.tsx:125` — «<div className="overflow-hidden max-h-0 transition-all duration-500 group-hover:max-h-32 group-hover:mt-3">»; `src/components/dashboard/DashboardLayoutClient.tsx:80` — «className={'fixed left-0 top-0 h-screen w-[240px] transition-transform lg:translate-x-0 ${»; `src/components/dashboard/SidebarNav.tsx:138` — «<Link href={href} onClick={onNavigate}»; `src/components/dashboard/ProfileForms.tsx:419` — «tabIndex={-1}»
+- Impacto: En touch y con teclado la descripcion de cada tarea no se puede ver; en mobile el Tab recorre los links del drawer cerrado (solo translate, sin inert); el link activo no se anuncia; mostrar/ocultar contrasena no es alcanzable con teclado.
+- Propuesta: Expandir la descripcion con un control accesible; inert/aria-hidden al aside cerrado en <lg; aria-current='page' en el link activo; quitar tabIndex=-1.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-proyecto.tareas-por-estado, h2.cli-shell.navegacion-sidebar, h2.cli-cuenta.cambiar-password
+
+### [A11Y-007] Contraste por debajo de AA en los PDF de informes (gris sobre gris claro y cian sobre blanco)
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx:24` — «const GRAY = '#71717a' const LIGHT_BG = '#f4f4f5' (4,40:1 en cardLabel 7,5 pt :74-80, cardSub :82, emptyText :112)»; `src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx:58` — «monthLabel: { fontSize: 12, color: CYAN, fontFamily: 'Helvetica-Bold', marginBottom: 3 }, (#06b6d4 sobre blanco = 2,43:1)»; `src/lib/reports/MonthlyReport.tsx:165` — «cardValue: { fontSize: 20, fontFamily: 'Helvetica-Bold', color: CYAN, (sobre LIGHT_BG = 2,21:1, menos de 3:1 aun como texto grande)»
+- Impacto: El informe pensado para reenviarse al socio o contador tiene etiquetas, fecha y marca difíciles de leer impresas o en pantallas con poco brillo.
+- Propuesta: zinc-600 (#52525b, 7,0:1 sobre #f4f4f5) para textos secundarios y un cian oscuro (#0e7490, unos 5,4:1 sobre blanco) para textos de marca.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados.informe-mensual-pdf, lib.reports
 
 ## ZONA-FRANCO
 
@@ -1038,6 +1795,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h1.auth-login, h1.auth-login.magic-link, lib.auth, modelo.VerificationToken, int.brevo
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-021
+
+### [BUG-038] Configurar la agenda de un cliente rompe la agenda del setter: LeadOS busca 'la unica org con calComUsername'
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/leados/agenda.ts:58` — «const orgs = await prisma.organization.findMany({ where: { calComUsername: { not: null } },»; `src/lib/leados/agenda.ts:70` — «if (orgs.length > 1) { // devuelve 'Hay mas de una agenda conectada...'»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:325` — «select: { calComApiKey: true, calComUsername: true, calComEmbedUrl: true }, // mismos campos»
+- Impacto: El dia que develOP configure Cal.com para su primer cliente del modulo Agenda, el setter deja de poder agendar reuniones hasta que alguien borre el username de una de las dos orgs.
+- Propuesta: Coordinar con Franco: identificar la org de develOP por un flag/slug explicito o config propia de LeadOS en vez de 'la unica con calComUsername'.
+- Esfuerzo: S  ·  Zona: ZONA-FRANCO
+- Relacionado: —
+- Nodo(s): h5.set-lead, h2.cli-agenda.panel-de-agenda, lib.leados, int.calcom, modelo.Organization
 
 ### [SEC-024] /api/qa/login confía en el header Host y los scripts QA escuchan en toda la red: cualquiera en la misma LAN obtiene una sesión SUPER_ADMIN
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad

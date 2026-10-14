@@ -193,6 +193,248 @@
     "segundo punto de entrada del mismo script destructivo"
    ],
    "que_rompe": "Nada; quien lo use debe invocar sync-premium-modules.ts. (Adyacente al lote.)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "archivo": "src/actions/onboarding-actions.ts",
+   "senales": [
+    "git grep -n onboarding-actions origin/main -- src -> unico importador src/components/onboarding/OnboardingWizard.tsx:6",
+    "git grep -n components/onboarding origin/main -- src -> vacio (el wizard legacy no lo importa nadie)",
+    "completeOnboardingAction sin llamadores: el onboarding real usa src/app/bienvenida/_actions/complete-onboarding.ts",
+    "registro PD1 seccion 6: 'completeOnboardingAction sin caller'",
+    "sin referencias en tests ni scripts"
+   ],
+   "que_rompe": "Nada en runtime. Borrar junto con src/components/onboarding/OnboardingWizard.tsx; actualizar baselines de knip/depcruise."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "archivo": "src/app/(protected)/dashboard/cuenta/loading.tsx",
+   "senales": [
+    "cuenta/page.tsx:3-5 solo redirige a /perfil",
+    "perfil, facturacion y boveda tienen su propio loading.tsx",
+    "max-w-5xl pb-20 desalineados con el layout full-width (registro Mi Cuenta, pendiente 8)"
+   ],
+   "que_rompe": "Nada; a lo sumo un instante sin skeleton durante el redirect de /dashboard/cuenta."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "archivo": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/loading.tsx",
+   "senales": [
+    "no existe campaigns/[id]/page.tsx (git ls-tree: solo [id]/send/page.tsx)",
+    "el skeleton CampaignDetailLoading (card + 3 stats + lista) no corresponde a la pantalla de confirmacion de /send"
+   ],
+   "que_rompe": "Nada; /send quedaria cubierto por campaigns/loading.tsx."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "archivo": "src/app/api/dashboard/leads/recent/route.ts",
+   "senales": [
+    "Sin llamadores en src: git grep -n \"leads/recent\" origin/main -- logic-core-v3 ':!logic-core-v3/docs' → solo tests/e2e/40-lead-capture-e2e.spec.ts:49-50 y :60-61",
+    "Devuelve la fila completa de ChatbotLead (...lead, :50), incluido convertedToOsLeadId de LeadOS",
+    "La rama de classification null (:35-37) es inalcanzable porque excludeDqWhere (:25) descarta los null"
+   ],
+   "que_rompe": "tests/e2e/40-lead-capture-e2e.spec.ts:49-50 y :60-63 (dos asserts contra la ruta); nada en src."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "archivo": "src/app/api/reports/monthly/route.ts",
+   "senales": [
+    "Sin llamadores: solo la mencionan el comentario de client-monthly/route.ts:6-7 y tests/e2e/43:9",
+    "Única importadora de src/lib/reports/MonthlyReport.tsx (:8)",
+    "PLAN-133 pide borrarla; mezclaría datos mock de GA/GSC en el PDF sin marcarlos (:106-107)"
+   ],
+   "que_rompe": "Nada en src; borrar también MonthlyReport.tsx (ClientMonthlyReportPdf.tsx:6 solo lo nombra en un comentario)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "archivo": "src/app/bienvenida/ (layout.tsx, page.tsx, _actions/complete-onboarding.ts, _components/*.tsx)",
+   "senales": [
+    "Ninguna alta viva deja onboardingCompleted=false: core.ts:85, createClientOnly.ts:85 y createClientWithBot.ts:135 lo crean en true; clients.ts:124 e invitations.ts:86 no tienen importadores",
+    "Duplica el onboarding legacy muerto: src/components/onboarding/OnboardingWizard.tsx (sin importadores) + src/actions/onboarding-actions.ts",
+    "Escribe targetAudience, que nadie lee (git grep \"targetAudience\" → solo escrituras), y el GA ID que analytics.ts:66-69 rechaza"
+   ],
+   "que_rompe": "Redirects a /bienvenida en proxy.ts:130, :144, :150, :158-166, login/actions.ts:101-107, (protected)/dashboard/layout.tsx:123-129 y robots.ts:25 (orgs seed/QA con onboardingCompleted=false irían a 404); auth.ts:17 y :73 (getPostLoginPath, FROZEN + ZONA-FRANCO) → decisión para Valentino."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "archivo": "src/components/dashboard/ExecutiveReportTemplate.tsx",
+   "senales": [
+    "unico importador: src/components/dashboard/DownloadReportButton.tsx:5",
+    "DownloadReportButtons (DownloadReportButton.tsx:129) sin importadores: git grep -n -E 'DownloadReportButtons|DownloadReportButton\\b' origin/main -- src ':!src/components/dashboard/DownloadReportButton.tsx' → vacio",
+    "alimentado con mockData hardcodeado (DownloadReportButton.tsx:82-89, :122)",
+    "dominio legacy www.develop-agency.com (ExecutiveReportTemplate.tsx:120)"
+   ],
+   "que_rompe": "Nada en runtime. Borrarlo junto a DownloadReportButton.tsx permite quitar html2canvas y jspdf (package.json:148-149; solo usados en DownloadReportButton.tsx:44-45)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "archivo": "src/components/dashboard/DownloadReportButton.tsx",
+   "senales": [
+    "fuera del lote; export DownloadReportButtons sin importadores",
+    "usa mockData y deps html2canvas/jspdf exclusivas"
+   ],
+   "que_rompe": "Nada en runtime."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "archivo": "src/lib/actions/notifications.ts",
+   "senales": [
+    "la funcion exportada markNotificationReadAction (:19) no tiene importadores (git grep markNotificationReadAction → solo su definicion)",
+    "duplica markNotificationAsRead de src/actions/dashboard-actions.ts:188 (FROZEN)"
+   ],
+   "que_rompe": "Nada; es una server action publica sin uso (el resto del archivo si se usa)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "archivo": "src/actions/onboarding-actions.ts",
+   "senales": [
+    "completeOnboardingAction (:79) sin importadores; saveOnboardingProfile solo lo importa src/components/onboarding/OnboardingWizard.tsx, que a su vez no tiene importadores",
+    "escribe credenciales en claro con url 'ENCRIPTADO_EN_TEXTO' (:111-131)",
+    "el onboarding vivo es src/app/bienvenida/_actions/complete-onboarding.ts"
+   ],
+   "que_rompe": "Nada del flujo vivo; elimina un write-path de credenciales en claro."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "archivo": "src/lib/premium-modules.ts",
+   "senales": [
+    "getModulesForOrganization, hasModuleActive, getMonthlyRecurringRevenue, isModuleValidForRubro, activateModule y cancelModule sin importadores (git grep -n -w <nombre> origin/main -- . → solo la definición; activateModule además en un doc)",
+    "hasModuleActive (:46-58) duplica isModuleActive de src/lib/modules/check-activation.ts:3-15",
+    "nombre igual a src/lib/data/premium-modules.ts (catálogo del seed)"
+   ],
+   "que_rompe": "Nada hoy (solo getActiveModuleSlugs se usa, get-recommendations-for-org.ts:12). Conservar activateModule/cancelModule si se construye el alta de módulos."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "archivo": "src/lib/actions/messages.ts",
+   "senales": [
+    "sendMessageAction, markAdminMessagesAsReadAction y markMessagesAsReadAction sin importadores",
+    "la vía viva del admin es src/app/(protected)/admin/messages/_actions/message.actions.ts:177"
+   ],
+   "que_rompe": "Nada si se borran esas tres; sendClientMessageAction sigue usada por MessageThread.tsx, VaultRequestModal.tsx y OportunidadSEO.tsx."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "archivo": "src/lib/actions/notifications.ts",
+   "senales": [
+    "markNotificationReadAction sin importadores",
+    "revalidateAll repite revalidatePath('/dashboard') dos veces (:15-16)"
+   ],
+   "que_rompe": "Nada."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "archivo": "src/components/dashboard/home/WeekResultsGrid.tsx",
+   "senales": [
+    "duplica 'Leads' del hero con otra fuente (global)",
+    "visitas hardcodeadas en 0",
+    "page.tsx:82-84 la relegó a 'Tu cuenta'"
+   ],
+   "que_rompe": "El componente se puede quitar del home, pero getWeekResults (src/lib/dashboard/week-results.ts) alimenta executive-brief.ts:279 y build.ts:133: hay que reapuntar brief y email antes de borrar la lib."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "archivo": "src/components/onboarding/OnboardingWizard.tsx",
+   "senales": [
+    "no lo importa ningún archivo (git grep 'components/onboarding' origin/main -- src → 0)",
+    "única vía a saveOnboardingProfile (src/actions/onboarding-actions.ts), que escribe credenciales en claro con url 'ENCRIPTADO_EN_TEXTO'",
+    "el onboarding vivo es src/app/bienvenida"
+   ],
+   "que_rompe": "Nada (fuera del lote; ligado a D2-A5)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "archivo": "src/components/dashboard/results/PageSpeedCard.tsx",
+   "senales": [
+    "rama vacía :179-197 inalcanzable: trafico/page.tsx:133 devuelve null cuando ambos reportes son null"
+   ],
+   "que_rompe": "Nada; o mover el vacío a la página."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "archivo": "src/lib/health-score.ts",
+   "senales": [
+    "HealthScoreResult.computedAt y cachedFrom sin lectores fuera del archivo (git grep → 0); cachedFrom siempre null"
+   ],
+   "que_rompe": "Nada."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "archivo": "src/lib/reports/MonthlyReport.tsx",
+   "senales": [
+    "único importador: src/app/api/reports/monthly/route.ts:8-9",
+    "git grep 'reports/monthly' en src: solo comentarios (client-monthly/route.ts:6) y la propia ruta; ninguna pantalla la llama",
+    "reemplazado por ClientMonthlyReportPdf (P2.C), según ClientMonthlyReportPdf.tsx:6-8",
+    "no mira isMockData y presenta datos de demo como reales"
+   ],
+   "que_rompe": "Nada visible para el cliente. Borrarlo junto con src/app/api/reports/monthly/route.ts (y src/components/dashboard/DownloadReportButton.tsx, también sin importadores)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "archivo": "src/lib/onboarding/seed-tasks-for-org.ts",
+   "senales": [
+    "solo lo importan src/lib/actions/clients.ts:9 y src/lib/actions/invitations.ts:8, módulos 'use server' sin importadores",
+    "las altas vivas (createClientOnly, createClientWithBot, onboarding/core) no lo llaman"
+   ],
+   "que_rompe": "Nada hoy. La recomendación es cablearlo en las altas vivas en lugar de podarlo (checklist de onboarding)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "archivo": "src/lib/reports/executive-weekly/send-manual.ts",
+   "senales": [
+    "reimplementa la secuencia de send.ts, como dice su propio comentario (:26-31)"
+   ],
+   "que_rompe": "El botón 'Enviar ahora' del admin (api/admin/clients/[organizationId]/send-executive-report/route.ts:7,57) si se borra sin extraer un sendForOrg común."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "archivo": "src/lib/reports/executive-weekly/report-eligible-plan.ts",
+   "senales": [
+    "duplica el gate de build.ts:91 (comentario :3-8)",
+    "su invariante no compara contra build.ts"
+   ],
+   "que_rompe": "La tarjeta de preferencias de perfil/page.tsx:31,194-195 si se borra sin que build.ts exponga el gate."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "archivo": "src/lib/plan/plan-presentation.ts",
+   "senales": [
+    "precios y cupos copiados a mano de prisma/seeds/sync-plans.ts (comentario :9-10)",
+    "fallback.ts repite los valores de STARTER"
+   ],
+   "que_rompe": "Vitrina de planes y medidor si se elimina. Propuesta: leer precio y cupo del Plan y dejar aquí solo el copy."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "archivo": "src/lib/modules/check-activation.ts",
+   "senales": [
+    "duplica la noción 'módulo activo' con getActiveModuleSlugs (src/lib/premium-modules.ts:76-84)",
+    "slugs como string suelto sin tipo compartido con el catálogo"
+   ],
+   "que_rompe": "5 importadores (módulos y motor-resenas/_actions.ts). Consolidar en un helper tipado, no borrar."
   }
  ]
 }

@@ -13,14 +13,14 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { HERRAMIENTAS, AREAS, nodoDeRuta } from './atlas/nodos.mjs'
-import { leerPartido } from './crudo-partes.mjs'
+import { leerMapa, leerPartido } from './crudo-partes.mjs'
 
 const appRoot = process.cwd()
 const CRUDO = path.resolve(appRoot, 'docs/auditoria-2026-10/_crudo')
 const MD = path.resolve(appRoot, 'docs/auditoria-2026-10/12-PLANEADO.md')
 const leer = (f, d) => (existsSync(path.join(CRUDO, f)) ? JSON.parse(readFileSync(path.join(CRUDO, f), 'utf8').replace(/^﻿/, '')) : d)
 const extraido = leerPartido(CRUDO, 'planeado-extraido', { items: [] })
-const cruces = leer('planeado-cruces.json', {})
+const cruces = leerMapa(CRUDO, 'planeado-cruces', {})
 const todos = leer('todos-codigo.json', { items: [] })
 
 const previos = new Map()

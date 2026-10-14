@@ -29,7 +29,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { nodoDeRuta } from './atlas/nodos.mjs'
-import { leerPartido } from './crudo-partes.mjs'
+import { leerMapa, leerPartido } from './crudo-partes.mjs'
 
 const [, , DOM, CICLO, SALIDA] = process.argv
 const args = process.argv.slice(2)
@@ -48,11 +48,11 @@ const lotes = todosLotes.filter((l) => !soloLotes || soloLotes.includes(l.id))
 const previas = leer('previas.json', { items: [] }).items
 const planeado = leerPartido(CRUDO, 'planeado-extraido', { items: [] }).items
 const alertas = (leer('alertas-planeado.json', { dominios: {} }).dominios[DOM] ?? []).map((a, i) => `[${DOM}-A${i + 1}] ${a}`)
-const cruces = leer('planeado-cruces.json', {})
+const cruces = leerMapa(CRUDO, 'planeado-cruces', {})
 // patrones defectuosos que dejaron los dominios anteriores (DEC-20): cada lector los busca en su lote
 const patronesPrevios = (() => {
   const vistos = new Set()
-  return leer('patrones.json', { items: [] }).items
+  return leerPartido(CRUDO, 'patrones', { items: [] }).items
     .filter((p) => !String(p.ciclo).startsWith(`${DOM}-`))
     .filter((p) => { const k = String(p.patron).toLowerCase().slice(0, 80); if (vistos.has(k)) return false; vistos.add(k); return true })
     .slice(0, 30)
@@ -162,10 +162,10 @@ if (CAZA) {
     t.archivos.push(...x.archivos); t.loc += x.l.loc; t.lotes.push(x.l.id); t.plan.push(...asignados.get(x.l.id))
   }
   // títulos de TODOS los dominios: un cazador no repite lo que otro dominio ya registró (o lo que se fusionó en él)
-  const reg = leer('hallazgos.json', { hallazgos: [] }).hallazgos.filter((h) => h.estado !== 'descartado').sort((x, y) => Number(y.dominio === DOM) - Number(x.dominio === DOM))
-  const desc = leer('descartados.json', { items: [] }).items.filter((d) => String(d.ciclo).startsWith(`${DOM}-`))
+  const reg = leerPartido(CRUDO, 'hallazgos', { hallazgos: [] }, 'hallazgos').hallazgos.filter((h) => h.estado !== 'descartado').sort((x, y) => Number(y.dominio === DOM) - Number(x.dominio === DOM))
+  const desc = leerPartido(CRUDO, 'descartados', { items: [] }).items.filter((d) => String(d.ciclo).startsWith(`${DOM}-`))
   const titulos = [...reg.map((h) => `${h.id}${h.dominio === DOM ? '' : ` (${h.dominio})`} ${String(h.titulo).slice(0, 150)}`), ...desc.map((d) => `(descartado) ${d.titulo} — ${d.motivo_padre}`)]
-  const resueltas = new Set(leer('alertas-estado.json', { items: [] }).items.filter((a) => ['confirmada', 'descartada', 'parcial'].includes(a.resultado)).map((a) => (String(a.alerta).match(/\[(D\d-A\d+)\]/) ?? [])[1]).filter(Boolean))
+  const resueltas = new Set(leerPartido(CRUDO, 'alertas-estado', { items: [] }).items.filter((a) => ['confirmada', 'descartada', 'parcial'].includes(a.resultado)).map((a) => (String(a.alerta).match(/\[(D\d-A\d+)\]/) ?? [])[1]).filter(Boolean))
   const pendientes = alertas.filter((a) => !resueltas.has((a.match(/\[(D\d-A\d+)\]/) ?? [])[1]))
   const salida = {
     dominio: DOM, nombre: NOMBRE, ciclo: CICLO, lente: LENTE, foco: FOCO[DOM], contexto: '',

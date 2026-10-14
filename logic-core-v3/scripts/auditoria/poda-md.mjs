@@ -11,6 +11,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { nodoDeRuta, nodoDeRama } from './atlas/nodos.mjs'
+import { leerPartido } from './crudo-partes.mjs'
 
 const appRoot = process.cwd()
 const CRUDO = path.resolve(appRoot, 'docs/auditoria-2026-10/_crudo')
@@ -94,34 +95,51 @@ for (const c of rediseno) md.push(ficha(c))
 // Candidatos que traen los lectores de F2 (_crudo/poda-f2.json): si el archivo ya tiene ficha de F1
 // se suman sus señales a esa ficha (sección siguiente); si no, ficha nueva con confianza MEDIA (la
 // señal viene de lectura, no de un barrido mecánico) e ID estable por título.
-const f2 = existsSync(path.join(CRUDO, 'poda-f2.json')) ? JSON.parse(readFileSync(path.join(CRUDO, 'poda-f2.json'), 'utf8')).items : []
+const f2 = leerPartido(CRUDO, 'poda-f2', { items: [] }).items
 const limpiarRuta = (r) => String(r).replace(/\\/g, '/').replace(/\s+\(.*\)\s*$/, '').replace(/^.*?logic-core-v3\//, '').trim()
-const refuerzos = []
-const nuevosF2 = []
+// Dos lectores del mismo ciclo pueden proponer el mismo archivo: se juntan en una ficha (señales sin
+// repetir, «qué rompe» de cada uno). La curaduría del padre (_crudo/poda-f2-curado.json, clave
+// «ruta|ciclo») dice el alcance real del candidato —archivo entero, exports sueltos o fusión con otra
+// implementación— y su propuesta; sin curaduría se asume el archivo entero y «decidir».
+const curado = existsSync(path.join(CRUDO, 'poda-f2-curado.json')) ? JSON.parse(readFileSync(path.join(CRUDO, 'poda-f2-curado.json'), 'utf8')).items ?? {} : {}
+const grupos = new Map()
 for (const c of f2) {
   const ruta = limpiarRuta(c.archivo)
-  const previa = ordenados.find((x) => x.archivos.some((f) => f === `${A}${ruta}` || f.startsWith(`${A}${ruta.replace(/\/$/, '')}/`)))
-  if (previa) refuerzos.push({ id: previa.id, ruta, c })
-  else nuevosF2.push({ ruta, c })
+  const clave = `${ruta}|${c.ciclo}`
+  if (!grupos.has(clave)) grupos.set(clave, { ruta, ciclo: c.ciclo, lotes: [], senales: [], que_rompe: [] })
+  const g = grupos.get(clave)
+  if (!g.lotes.includes(c.lote)) g.lotes.push(c.lote)
+  for (const s of c.senales ?? []) if (!g.senales.includes(s)) g.senales.push(s)
+  if (c.que_rompe && !g.que_rompe.includes(c.que_rompe)) g.que_rompe.push(c.que_rompe)
 }
+const refuerzos = []
+const nuevosF2 = []
+for (const g of grupos.values()) {
+  const previa = ordenados.find((x) => x.archivos.some((f) => f === `${A}${g.ruta}` || f.startsWith(`${A}${g.ruta.replace(/\/$/, '')}/`)))
+  if (previa) refuerzos.push({ id: previa.id, g })
+  else nuevosF2.push(g)
+}
+const ALCANCE = { archivo: 'el archivo entero', exports: 'exports sueltos (el archivo sigue vivo)', codigo: 'código muerto dentro del archivo (el archivo sigue vivo)', fusionar: 'fusión con otra implementación (no se borra sin consolidar)' }
 if (nuevosF2.length || refuerzos.length) {
   md.push('## Candidatos de F2 (lectores y cazadores)', '')
-  md.push('> Señales que encontraron los lectores de cada dominio al leer el código completo. Confianza MEDIA salvo que el dominio la confirme; la propuesta queda para Valentino (o para Franco en su zona).', '')
-  for (const { ruta, c } of nuevosF2) {
-    const titulo = `${ruta} (${c.ciclo})`
+  md.push('> Señales que encontraron los lectores de cada dominio al leer el código completo. Confianza MEDIA salvo que el dominio la confirme; la propuesta queda para Valentino (o para Franco en su zona). «Alcance» dice si el candidato es el archivo entero, unos exports o una fusión.', '')
+  for (const g of nuevosF2) {
+    const titulo = `${g.ruta} (${g.ciclo})`
     const id = previos.get(titulo) ?? ++maximo
-    const zona = ledger.get(`${A}${ruta}`)?.notas ?? ''
+    const cu = curado[`${g.ruta}|${g.ciclo}`] ?? {}
+    const zona = ledger.get(`${A}${g.ruta}`)?.notas ?? ''
     const z = /ZONA-FRANCO/.test(zona) ? (/FROZEN/.test(zona) ? 'FROZEN + ZONA-FRANCO' : 'ZONA-FRANCO') : /(^|; )FROZEN/.test(zona) ? 'congelado' : 'libre'
+    const decidir = z === 'libre' ? 'decidir (Valentino)' : z === 'ZONA-FRANCO' ? 'decidir (Franco)' : 'decidir (Valentino): archivo congelado'
     md.push(`### [POD-${String(id).padStart(3, '0')}] ${titulo}`)
-    md.push(`- Hallado en F2 · \`${ruta}\` · Nodo(s): ${nodoDeRuta(`${A}${ruta}`)} · Señales: ${c.senales.join('; ')}`)
-    md.push(`- Qué rompe si se borra: ${c.que_rompe}`)
+    md.push(`- Hallado en F2 (${g.lotes.join(', ')}) · \`${g.ruta}\` · Nodo(s): ${nodoDeRuta(`${A}${g.ruta}`)} · Alcance: ${cu.alcance ? ALCANCE[cu.alcance] : 'sin curar (ver señales)'}${cu.detalle ? ` — ${cu.detalle}` : ''} · Señales: ${g.senales.join('; ')}`)
+    md.push(`- Qué rompe si se borra: ${g.que_rompe.join(' / ')}`)
     md.push('- Confianza de poda: MEDIA')
-    md.push(`- Propuesta: ${z === 'libre' ? 'decidir (Valentino)' : z === 'ZONA-FRANCO' ? 'decidir (Franco)' : 'decidir (Valentino): archivo congelado'}`)
+    md.push(`- Propuesta: ${cu.propuesta ? `${cu.propuesta}${z === 'libre' ? '' : ` (${decidir})`}` : decidir}`)
     md.push(`- Zona: ${z}`, '')
   }
   if (refuerzos.length) {
     md.push('### Refuerzos de F2 sobre fichas de F1', '')
-    for (const { id, ruta, c } of refuerzos) md.push(`- [POD-${String(id).padStart(3, '0')}] \`${ruta}\` (${c.ciclo}): ${c.senales.join('; ')}. Qué rompe: ${c.que_rompe}`)
+    for (const { id, g } of refuerzos) md.push(`- [POD-${String(id).padStart(3, '0')}] \`${g.ruta}\` (${g.ciclo}): ${g.senales.join('; ')}. Qué rompe: ${g.que_rompe.join(' / ')}`)
     md.push('')
   }
 }

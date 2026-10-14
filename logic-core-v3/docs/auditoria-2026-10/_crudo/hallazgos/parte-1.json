@@ -1,4 +1,6 @@
 {
+ "parte": 1,
+ "partes": 2,
  "hallazgos": [
   {
    "id": "SEC-001",
@@ -1489,6 +1491,26 @@
      "ruta": "prisma/schema.prisma",
      "linea": 523,
      "fragmento": "role                        OrgRole  @default(ADMIN)"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 19,
+     "fragmento": "enum OrgRole {\n  ADMIN\n  MEMBER\n  VIEWER"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 251,
+     "fragmento": "session.user.orgRole = token.orgRole as OrgRole | undefined"
+    },
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 14,
+     "fragmento": "const session = await auth()\n  const userId = session?.user?.id\n  const organizationId = session?.user?.organizationId"
+    },
+    {
+     "ruta": "src/components/dashboard/modules/motor-resenas/_actions.ts",
+     "linea": 55,
+     "fragmento": "const organizationId = resolveScopedOrgId(await resolveOrgId(), params.organizationId)"
     }
    ],
    "impacto": "Latente: hoy todas las membresias se crean ADMIN; el dia que se invite a un VIEWER podra cambiar nombre de empresa, contacto, preferencias de toda la org y pedir la baja de la cuenta (profile.ts solo exige organizationId).",
@@ -1498,7 +1520,11 @@
    "nodos": [
     "lib.auth",
     "h2.cli-cuenta",
-    "modelo.OrgMember"
+    "modelo.OrgMember",
+    "h2.cli-shell",
+    "h2.cli-resenas",
+    "h2.cli-email-mkt",
+    "lib.preview"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -1510,7 +1536,16 @@
     "tmp": "D1-c1/D1-L1/H23",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L4/H10",
+      "titulo": "OrgRole (ADMIN/MEMBER/VIEWER) existe en el schema y en la sesión pero ninguna acción del portal lo aplica",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreo DEC-37: se sostiene (git grep orgRole en dashboard, lib/actions, components/dashboard y bienvenida = 0; control: auth.config.ts:34 lo pone en la sesión). Es SEC-018 (D1); queda BAJA porque hoy las orgs tienen un solo miembro y la invitación está huérfana (DEU-001)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -4104,6 +4139,21 @@
      "ruta": "prisma/backups/premium-module-pre-push.json",
      "linea": 68,
      "fragmento": "\"slug\": \"email-marketing\","
+    },
+    {
+     "ruta": "prisma/seeds/sync-premium-modules.ts",
+     "linea": 130,
+     "fragmento": "await prisma.premiumModule.create({ data: { slug: moduleData.slug, ...nextData } })"
+    },
+    {
+     "ruta": "src/components/dashboard/PremiumModuleCard.tsx",
+     "linea": 307,
+     "fragmento": "{isOwned ? ("
+    },
+    {
+     "ruta": "src/lib/modules/check-activation.ts",
+     "linea": 10,
+     "fragmento": "module: { slug: moduleSlug },"
     }
    ],
    "impacto": "Bloqueante para el primer cliente que contrate Email Marketing Pro: el catálogo (y por lo tanto la tabla premium_module después del sync) solo tiene 'email-marketing-pro', pero el sidebar solo muestra el ítem si el slug activo es 'email-marketing' y el layout del módulo redirige a /dashboard sin mensaje cuando isModuleActive(org, 'email-marketing') es falso. Solo funcionaría si la base conserva la fila legacy 'email-marketing' (anterior al cambio del 2026-05-04) y el admin activó esa. Como el gate vive solo en el layout, las server actions del módulo siguen invocables directamente (ver S2b-01).",
@@ -4116,7 +4166,10 @@
     "h2.cli-servicios",
     "lib.data",
     "modelo.PremiumModule",
-    "modelo.OrganizationModule"
+    "modelo.OrganizationModule",
+    "h2.cli-shell",
+    "h2.cli-shell.navegacion-sidebar",
+    "lib.modules"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -4131,7 +4184,30 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H02",
+      "titulo": "Email marketing inaccesible para quien lo contrata: el layout y el sidebar usan el slug 'email-marketing' y el catalogo sincronizado usa 'email-marketing-pro'",
+      "severidad": "ALTA",
+      "nota_padre": "Mismo slug 'email-marketing' (layout.tsx:20, SidebarNav.tsx:78) contra 'email-marketing-pro' del catálogo; ya registrado en D6-c1."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L3/H04",
+      "titulo": "El slug 'email-marketing' del sidebar y del gate del modulo no coincide con el catalogo ('email-marketing-pro'): el modulo comprado queda inaccesible",
+      "severidad": "ALTA",
+      "nota_padre": "Mismo slug; suma la card 'owned' de Mis servicios sin link al módulo (PremiumModuleCard.tsx:307)."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L5/H03",
+      "titulo": "Email marketing queda inaccesible para quien lo contrata: el gate usa 'email-marketing' y el catálogo define 'email-marketing-pro'",
+      "severidad": "ALTA",
+      "nota_padre": "Mismo slug; suma el commit de origen del desajuste (c19a795e) según el verificador."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -4580,12 +4656,12 @@
   {
    "id": "SEC-036",
    "prefijo": "SEC",
-   "titulo": "Credenciales de terceros en claro en la base: tokens OAuth de Google Business, token de Tiendanube, API key de Cal.com, token de Telegram y credenciales de la Bóveda",
+   "titulo": "Credenciales de terceros en claro en la base: tokens OAuth de Google Business, token de Tiendanube, API key de Cal.com, token de Telegram y las credenciales de la Bóveda (el cifrado de escritura quedó sin mergear)",
    "dominio": "D6",
-   "severidad": "MEDIA",
+   "severidad": "ALTA",
    "tipo": "seguridad",
    "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
+   "confianza": "VERIFICADO-POR-LECTURA",
    "evidencia": [
     {
      "ruta": "prisma/migrations/20260503150000_add_gbp_fields/migration.sql",
@@ -4646,9 +4722,64 @@
      "ruta": "src/app/api/auth/tiendanube/callback/route.ts",
      "linea": 67,
      "fragmento": "tiendanubeAccessToken: tokens.access_token,"
+    },
+    {
+     "ruta": "src/lib/crypto/credential-cipher.ts",
+     "linea": 73,
+     "fragmento": "export function encryptCredential(plaintext: string): string {  // sin llamadores en origin/main"
+    },
+    {
+     "ruta": "src/lib/crypto/resolve-credential.ts",
+     "linea": 24,
+     "fragmento": "return { value: description, error: false }  // texto plano pasa tal cual"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+     "linea": 85,
+     "fragmento": "AES-256  // badge del header (tambien :148 en cada tarjeta)"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+     "linea": 185,
+     "fragmento": "<VaultRevealButton value={credential.value} />  // el valor viaja en el payload RSC"
+    },
+    {
+     "ruta": "src/actions/agency-actions.ts",
+     "linea": 109,
+     "fragmento": "description: data.description"
+    },
+    {
+     "ruta": "src/components/admin/managers/VaultManager.tsx",
+     "linea": 5,
+     "fragmento": "import { createClientAssetAction } from '@/actions/agency-actions'"
+    },
+    {
+     "ruta": "src/actions/onboarding-actions.ts",
+     "linea": 115,
+     "fragmento": "url: 'ENCRIPTADO_EN_TEXTO',"
+    },
+    {
+     "ruta": "src/components/admin/managers/VaultManager.tsx",
+     "linea": 85,
+     "fragmento": "placeholder=\"Contraseña o instrucciones...\""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+     "linea": 148,
+     "fragmento": "AES-256"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+     "linea": 51,
+     "fragmento": "// ─── Demo activity log (PLACEHOLDER — data fake; modelo real = schema, parada aparte) ──"
+    },
+    {
+     "ruta": "src/components/dashboard/VaultRevealButton.tsx",
+     "linea": 61,
+     "fragmento": "Información sensible — Solo visible para vos"
     }
    ],
-   "impacto": "Quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio/hosting cargadas en la Bóveda. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear.",
+   "impacto": "Bloqueante para el primer cliente real: quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio y hosting cargadas en la Bóveda, mientras el portal le asegura al cliente, en el encabezado y en cada tarjeta de la Bóveda, que están cifradas con AES-256. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear: encryptCredential no tiene llamadores fuera de los tests.",
    "propuesta": "Cifrar en los write-paths con secret-box/credential-cipher (callbacks OAuth de GBP y Tiendanube, settings de Telegram, carga de Cal.com y assets de la Bóveda), backfill idempotente y lectura tolerante (resolve-credential ya soporta ambos formatos); mergear o portar 9fc616c4.",
    "esfuerzo": "M",
    "zona": "libre",
@@ -4665,7 +4796,11 @@
     "h2.cli-agenda",
     "h2.cli-cuenta",
     "int.gbp",
-    "lib.crypto"
+    "lib.crypto",
+    "h2.cli-cuenta.boveda",
+    "h4.adm-clientes",
+    "lib.actions",
+    "h2.cli-cuenta.boveda-solicitar-documento"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -4685,6 +4820,54 @@
       "titulo": "Tokens OAuth y API keys de terceros guardados en claro en Organization y AgencySettings",
       "severidad": "MEDIA",
       "nota_padre": "Muestreo DEC-37: se sostiene (schema.prisma:359-360, 367, 375 y 835 sin cifrar; contraste :1704-1705, cifrado AES-256-GCM en CRM). Misma causa raíz que D6-L2/H10: se fusiona."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H15",
+      "titulo": "Credenciales de la Boveda guardadas en texto plano en main mientras la UI muestra 'AES-256': el cifrado de escritura (PD-1.2) quedo en una rama sin mergear",
+      "severidad": "ALTA",
+      "nota_padre": "Leído: agency-actions.ts:94-111 (createClientAssetAction guarda description en claro; SUPER_ADMIN), git grep 'encryptCredential(' fuera de __tests__ = solo la definición credential-cipher.ts:73 (control: los tests la llaman), resolve-credential.ts:16-25 descifra si está cifrado y si no devuelve el texto tal cual; boveda/page.tsx:85 y :148 muestran al cliente el sello 'AES-256' en el encabezado y en cada tarjeta. Tres lectores de D2 lo reportaron ALTA; se sube SEC-036 (D6, MEDIA, PROBABLE) a ALTA verificada: además del reposo en claro, el portal le afirma al cliente un cifrado que no existe. Cuatro de los cinco verificadores la sostienen ALTA por rúbrica (secret expuesto con precondición fuerte: acceso a la base, un dump o un backup); el de L4 propuso MEDIA citando la baseline 2026-07 (S6-01). Se sigue la rúbrica DEC-23. El sello falso y el registro inventado quedan en el hallazgo de UI de la Bóveda (D2-L1/H16)."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L2/H02",
+      "titulo": "Credenciales de la bóveda se guardan en texto plano: el cifrado al escribir quedó sin mergear",
+      "severidad": "ALTA",
+      "nota_padre": "Misma causa raíz (write-path de la Bóveda sin cifrar); se suma su evidencia."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L3/H02",
+      "titulo": "Credenciales de la Boveda guardadas en claro en main: el cifrado en escritura (PD-1.2) quedo en una rama sin mergear y la UI muestra 'AES-256'",
+      "severidad": "ALTA",
+      "nota_padre": "Misma causa raíz (write-path de la Bóveda sin cifrar y sello 'AES-256'); se suma su evidencia."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L4/H02",
+      "titulo": "Bóveda: credenciales de clientes guardadas en texto plano mientras la UI promete AES-256 y muestra un registro de accesos inventado",
+      "severidad": "ALTA",
+      "nota_padre": "DEC-31: el verificador la bajó a MEDIA (precondición de acceso a la base; baseline S6-01) y propuso partirla: el cifrado a SEC-036 y la UI a D2. Se hace así: la parte de reposo se suma a SEC-036 (que sube a ALTA por la rúbrica, ver D2-L1/H15) y el sello y el registro inventado quedan en D2-L1/H16."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L5/H05",
+      "titulo": "La credenciales de la bóveda se guardan en texto plano en main; el cifrado de escritura quedó sin mergear",
+      "severidad": "ALTA",
+      "nota_padre": "Misma causa raíz; suma que el camino de onboarding con ENCRIPTADO_EN_TEXTO es código muerto (D2-L1/H37)."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H15",
+      "antes": {
+       "severidad": "MEDIA",
+       "confianza": "PROBABLE",
+       "titulo": "Credenciales de terceros en claro en la base: tokens OAuth de Google Business, token de Tiendanube, API key de Cal.com, token de Telegram y credenciales de la Bóveda",
+       "impacto": "Quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio/hosting cargadas en la Bóveda. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear."
+      },
+      "nota_padre": "Leído: agency-actions.ts:94-111 (createClientAssetAction guarda description en claro; SUPER_ADMIN), git grep 'encryptCredential(' fuera de __tests__ = solo la definición credential-cipher.ts:73 (control: los tests la llaman), resolve-credential.ts:16-25 descifra si está cifrado y si no devuelve el texto tal cual; boveda/page.tsx:85 y :148 muestran al cliente el sello 'AES-256' en el encabezado y en cada tarjeta. Tres lectores de D2 lo reportaron ALTA; se sube SEC-036 (D6, MEDIA, PROBABLE) a ALTA verificada: además del reposo en claro, el portal le afirma al cliente un cifrado que no existe. Cuatro de los cinco verificadores la sostienen ALTA por rúbrica (secret expuesto con precondición fuerte: acceso a la base, un dump o un backup); el de L4 propuso MEDIA citando la baseline 2026-07 (S6-01). Se sigue la rúbrica DEC-23. El sello falso y el registro inventado quedan en el hallazgo de UI de la Bóveda (D2-L1/H16)."
      }
     ]
    },
@@ -5099,6 +5282,26 @@
      "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
      "linea": 85,
      "fragmento": "onboardingCompleted: true,"
+    },
+    {
+     "ruta": "src/lib/onboarding/seed-tasks-for-org.ts",
+     "linea": 4,
+     "fragmento": "export async function seedOnboardingTasksForOrg(organizationId: string) {\n  await prisma.onboardingTask.createMany({"
+    },
+    {
+     "ruta": "src/lib/actions/clients.ts",
+     "linea": 139,
+     "fragmento": "await seedOnboardingTasksForOrg(newOrgId).catch((e) =>  (módulo sin importadores)"
+    },
+    {
+     "ruta": "src/lib/actions/invitations.ts",
+     "linea": 93,
+     "fragmento": "await seedOnboardingTasksForOrg(org.id).catch((e) =>  (módulo sin importadores)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+     "linea": 101,
+     "fragmento": "await tx.orgMember.create({  (alta viva; no siembra tareas, igual que createClientWithBot.ts:151 y lib/onboarding/core.ts:101)"
     }
    ],
    "impacto": "La siembra solo se llama desde src/lib/actions/clients.ts e invitations.ts, que no tienen importadores, y el alta vigente no siembra tareas: la tarjeta 'Estamos configurando tu negocio' del inicio (dashboard/page.tsx:61) nunca aparece para clientes nuevos. Si se reactivara, el cliente vería títulos internos del equipo (nombres de modelos, 'Crear cuenta del cliente y enviar credenciales'). Las actions de admin para avanzarlas (src/actions/admin/onboarding-tasks.ts) tampoco tienen importadores.",
@@ -5109,7 +5312,10 @@
     "h2.cli-inicio",
     "h2.cli-inicio.estado-onboarding",
     "lib.data",
-    "modelo.OnboardingTask"
+    "modelo.OnboardingTask",
+    "h2.cli-inicio.checklist-de-onboarding",
+    "h2.cli-bienvenida",
+    "lib.onboarding"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5121,7 +5327,16 @@
     "tmp": "D6-c1/D6-L2/H18",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L5/H08",
+      "titulo": "El checklist de onboarding nunca se siembra: seedOnboardingTasksForOrg solo lo llaman módulos muertos",
+      "severidad": "MEDIA",
+      "nota_padre": "Es DEU-018 (D6): seedOnboardingTasksForOrg solo la llaman lib/actions/clients.ts:139 e invitations.ts:93, sin importadores. Queda BAJA: la tarjeta no aparece, sin datos falsos ni bloqueo del camino del cliente."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -5501,6 +5716,11 @@
      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
      "linea": 104,
      "fragmento": "if (listId) {\n        await syncContact({"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 143,
+     "fragmento": "const activeContacts = await prisma.emailContact.findMany({ where: { organizationId: org.id, optedOut: false }  // solo el conteo excluye bajas"
     }
    ],
    "impacto": "Bloqueante para el primer cliente que use Email Marketing: la baja solo cambia optedOut en la base; la campaña se manda a la lista de Brevo completa, así que la persona sigue recibiendo aunque la página le confirmó que fue removida, y si el cliente reimporta su CSV el contacto vuelve a entrar a la lista. Expone al cliente a denuncias por spam y a develOP a la suspensión de la cuenta Brevo compartida; recipientCount (cuenta solo los no dados de baja) tampoco coincide con lo que Brevo envía.",
@@ -5512,7 +5732,8 @@
     "h6.vis-optout",
     "int.brevo",
     "modelo.EmailContact",
-    "modelo.EmailCampaign"
+    "modelo.EmailCampaign",
+    "h2.cli-email-mkt.baja-de-contactos"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5527,7 +5748,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H03",
+      "titulo": "La baja de un contacto no llega a Brevo: las campanas salen a la lista completa y siguen llegando a quien se dio de baja",
+      "severidad": "ALTA",
+      "nota_padre": "Misma baja que no llega a Brevo (optout/route.ts:91, _actions.ts:143); ya registrada en D6-c2."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -5575,6 +5805,16 @@
      "ruta": "src/lib/data/onboarding-tasks.ts",
      "linea": 37,
      "fragmento": "'Activar los OrganizationModule según lo que pagó el cliente. Ej: Motor de Reseñas si lo contrató.',"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_actions/client.schemas.ts",
+     "linea": 15,
+     "fragmento": "export const ToggleModulePremiumSchema = z.object({"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx",
+     "linea": 20,
+     "fragmento": "const isActive = await isModuleActive(organizationId, 'email-marketing')\n  if (!isActive) redirect('/dashboard')"
     }
    ],
    "impacto": "Bloqueante para el primer cliente que compre un módulo: develOP no puede activarlo, pausarlo ni cancelarlo desde el admin (activateModule y cancelModule no tienen llamadores, PAUSED no lo escribe nadie); hay que editar organization_module a mano en la Neon compartida. La única fila que existe es la del pedido de upsell (INACTIVE, priceLockedUsd 0, activatedAt = fecha del pedido): si se activa esa fila (a mano o con activateModule tal como está, que no toca precio ni fecha), queda con precio congelado 0 y el portal muestra 'Activo desde' la fecha del pedido. Como el portal muestra el precio vivo del catálogo y no priceLockedUsd, subir un precio en /admin/settings cambia lo que ve un cliente que ya contrató. El default ACTIVE del schema activaría gratis cualquier alta futura que olvide el status.",
@@ -5587,7 +5827,8 @@
     "h4.adm-clientes",
     "modelo.OrganizationModule",
     "modelo.PremiumModule",
-    "lib.actions"
+    "lib.actions",
+    "lib.premium-modules"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5599,7 +5840,16 @@
     "tmp": "D6-c2/D6-T1/H03",
     "verificado_padre": true,
     "nota_padre": "Muestreo DEC-37: se sostiene lo central (git grep de activateModule/pauseModule/cancelModule fuera de la definición = 0). Corrección: priceLockedUsd sí se lee en premium-modules.ts:70 (suma de módulos activos); el título se ajusta.",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L4/H03",
+      "titulo": "No existe camino en la app para activar un módulo premium: cada venta de módulo exige escribir en la base a mano",
+      "severidad": "ALTA",
+      "nota_padre": "DEC-31: el verificador la bajó a MEDIA (operación interna con workaround; el pedido del cliente llega a develOP) y es el mismo hallazgo que FAL-005 (premium-modules.ts:103, upsell.ts:66, onboarding-tasks.ts:37)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -5652,6 +5902,26 @@
      "ruta": "src/lib/health-score.ts",
      "linea": 442,
      "fragmento": "if (sub.status === 'PAST_DUE') return 30"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+     "linea": 164,
+     "fragmento": "Tus facturas apareceran aca automaticamente cada mes."
+    },
+    {
+     "ruta": "prisma/seed.ts",
+     "linea": 595,
+     "fragmento": "await prisma.invoice.upsert({  // unico escritor de Invoice junto con :618"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 96,
+     "fragmento": "enum AssetType {  // DOCUMENT IMAGE BRANDBOOK LOGO ACCESS OTHER, sin INVOICE"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+     "linea": 106,
+     "fragmento": "const billingEmail = session?.user?.email ?? ''  // en soporte muestra el email del admin"
     }
    ],
    "impacto": "Para el primer cliente: el historial de pagos de /dashboard/cuenta/facturacion queda vacío para siempre (Invoice solo la escribe prisma/seed.ts), nunca ve 'Pago pendiente' ni el aviso de vencimiento, y si deja de pagar sigue ACTIVE: el MRR y el conteo de clientes activos del admin lo incluyen, el health score no baja, la alerta SUBSCRIPTION_EXPIRING no puede disparar (renewalDate null en toda alta hecha desde la app) y el bot conserva el plan completo porque getPlanForOrg no mira status. Las suscripciones del seed traen renewalDate a 30 días: pasada esa fecha la org demo ve 'Tu suscripción está vencida' sin forma de salir.",
@@ -5664,7 +5934,8 @@
     "h4.adm-dashboard",
     "modelo.Invoice",
     "modelo.Subscription",
-    "lib.plan"
+    "lib.plan",
+    "h2.cli-cuenta.historial-de-facturas"
    ],
    "relacionados_ids": [
     "BUG-010"
@@ -5678,7 +5949,16 @@
     "tmp": "D6-c2/D6-T1/H04",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H17",
+      "titulo": "Facturacion: el historial promete facturas 'automaticamente cada mes' pero nada en el sistema crea Invoice",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreo DEC-37: se sostiene (facturacion/page.tsx:164 promete facturas automáticas; git grep de invoice.create/upsert: solo prisma/seed.ts:595 y :618; control: la lectura facturacion/page.tsx:70). Misma causa que FAL-006 (D6-c2)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -5731,6 +6011,21 @@
      "ruta": "src/components/dashboard/NotificationCenter.tsx",
      "linea": 125,
      "fragmento": "router.push(notif.actionUrl)"
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 62,
+     "fragmento": "await tx.notification.createMany({ data: superAdmins.map((admin) => ({ ... userId: admin.id, organizationId,"
+    },
+    {
+     "ruta": "src/lib/actions/notifications.ts",
+     "linea": 55,
+     "fragmento": "await prisma.notification.updateMany({\n      where: { organizationId, read: false },"
+    },
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 107,
+     "fragmento": "const superAdmin = await prisma.user.findFirst({\n          where: { role: 'SUPER_ADMIN' },"
     }
    ],
    "impacto": "Cuando un cliente aprueba o rechaza una entrega, la campana de todos los miembros de su org muestra las notificaciones escritas para el SUPER_ADMIN ('Cliente pidio cambios en...', 'Entrega aprobada por cliente...'), con un link a /admin/projects/<id> que expone el id interno y rebota en el proxy; cada miembro ve también las copias de los demás (una por miembro en cada pedido de aprobación) y cualquiera las marca leídas para todos. Ninguna pantalla del admin lee Notification, así que los avisos al SUPER_ADMIN (upsell, mensajes, referidos, aprobaciones) solo terminan en la campana del cliente o en ningún lado.",
@@ -5742,7 +6037,12 @@
     "h2.cli-proyecto",
     "h4.adm-proyectos",
     "modelo.Notification",
-    "lib.actions"
+    "lib.actions",
+    "h2.cli-shell.notificaciones",
+    "h2.cli-proyecto.aprobar-o-pedir-cambios",
+    "h2.cli-shell.campana-notificaciones",
+    "h2.cli-proyecto.aprobacion-entregas",
+    "h4.adm-dashboard"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5754,7 +6054,30 @@
     "tmp": "D6-c2/D6-T1/H05",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H26",
+      "titulo": "Las notificaciones para los SUPER_ADMIN se guardan con la org del cliente y aparecen en su campana con links a /admin",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma causa que SEC-038 (notificaciones del admin con la org del cliente); se suma su evidencia."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L3/H05",
+      "titulo": "La campana y el historial del cliente listan notificaciones por organizationId sin userId: muestran las del SUPER_ADMIN y 'Marcar todas' marca las de toda la org",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreo DEC-37: se sostiene (dashboard-actions.ts:60-70 crea la notificación del SUPER_ADMIN con organizationId del cliente; dashboard/layout.tsx:101 y notifications.ts:55 y :82 leen y marcan por organizationId). Misma causa que SEC-038 (D6-c2)."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L4/H07",
+      "titulo": "Notificaciones del cliente filtradas solo por organización: muestran y marcan copias dirigidas al SUPER_ADMIN y a otros miembros",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma causa que SEC-038 (notificaciones leídas y marcadas por organización)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -5792,6 +6115,16 @@
      "ruta": "src/app/api/email/optout/[contactId]/route.ts",
      "linea": 91,
      "fragmento": "await prisma.emailContact.updateMany({\n    where: { id: contactId },"
+    },
+    {
+     "ruta": "src/lib/integrations/brevo.ts",
+     "linea": 39,
+     "fragmento": "const res = await fetch(`${API_BASE}/contacts`, { method: 'POST', ... updateEnabled: true"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 113,
+     "fragmento": "attributes: { CONTACT_ID: contact.id, OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id) },"
     }
    ],
    "impacto": "Si dos clientes de develOP tienen al mismo destinatario (caso común), el contacto de Brevo es uno solo por email en la cuenta compartida y queda con el CONTACT_ID del último cliente que importó. Cuando esa persona se da de baja desde la campaña del cliente A, el link apunta al EmailContact del cliente B: se marca optedOut en la base de B (escritura entre tenants disparada por un tercero) y A la sigue contando como activa. Un cliente con el módulo puede provocarlo a propósito importando emails de la lista de otro.",
@@ -5802,7 +6135,8 @@
     "h2.cli-email-mkt",
     "h6.vis-optout",
     "int.brevo",
-    "modelo.EmailContact"
+    "modelo.EmailContact",
+    "h2.cli-email-mkt.baja-de-contactos"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5814,7 +6148,16 @@
     "tmp": "D6-c2/D6-T1/H06",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H04",
+      "titulo": "Contactos de Brevo compartidos entre clientes: CONTACT_ID, OPTOUT_TOKEN y nombre de un contacto se pisan entre organizaciones",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreo DEC-37: se sostiene (brevo.ts:39-51 POST /contacts con updateEnabled: true pisa los atributos globales; _actions.ts:113-117 CONTACT_ID y OPTOUT_TOKEN por import). Misma causa que SEC-039 (D6-c2)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6129,6 +6472,26 @@
      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
      "linea": 110,
      "fragmento": "{pct(campaign.openedCount, campaign.recipientCount)}"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx",
+     "linea": 31,
+     "fragmento": "Envia campanas de email a tus contactos y segui los resultados en tiempo real."
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 148,
+     "fragmento": "const recipientCount = activeContacts.length  // al crear el borrador"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 217,
+     "fragmento": "return { ok: true }  // tambien con sent === false y status FAILED"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
+     "linea": 144,
+     "fragmento": "El envio fallo. Revisa la configuracion e intenta de nuevo.  // sin accion de reintento"
     }
    ],
    "impacto": "Cuando el módulo se habilite: dos envíos concurrentes de la misma campaña (dos pestañas, un reintento) pasan el control de DRAFT y Brevo crea y manda dos campañas a toda la lista; una campaña FAILED (por ejemplo Brevo la creó pero sendNow falló) no se puede reintentar y queda huérfana en Brevo; y la tabla de campañas muestra 0% de aperturas y clics para siempre porque getCampaignStats no tiene llamadores (dato falso en el camino del cliente).",
@@ -6138,7 +6501,9 @@
    "nodos": [
     "h2.cli-email-mkt",
     "int.brevo",
-    "modelo.EmailCampaign"
+    "modelo.EmailCampaign",
+    "h2.cli-email-mkt.metricas-de-campana",
+    "h2.cli-email-mkt.crear-y-enviar-campana"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -6150,7 +6515,23 @@
     "tmp": "D6-c2/D6-T1/H11",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H05",
+      "titulo": "Metricas de campanas que nunca se actualizan: aperturas, clicks y bajas quedan en 0 y 'Enviados' es el conteo previsto del borrador",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismas métricas de EmailCampaign que nunca se actualizan (BUG-025, D6-c2); se suma la evidencia de la pantalla."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H06",
+      "titulo": "sendCampaignAction informa exito aunque Brevo no haya enviado, y una campana FAILED no se puede reintentar",
+      "severidad": "MEDIA",
+      "nota_padre": "BUG-025 ya cubre FAILED sin reintento; se suma que sendCampaignAction devuelve ok aunque sendNow falle (_actions.ts:205-217)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6396,207 +6777,6 @@
     "ciclo": "D6-c2",
     "lote": "D6-T1",
     "tmp": "D6-c2/D6-T1/H15",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-021",
-   "prefijo": "DEU",
-   "titulo": "Un referido pasa a CONVERTED sin vincular la organización referida: referredOrgId no tiene escritor y la conversión no se puede auditar",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts",
-     "linea": 18,
-     "fragmento": "const result = await prisma.referral.updateMany({\n      where: { id, status: 'PENDING' },\n      data: { status: 'CONVERTED' },"
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 1847,
-     "fragmento": "// desde el inicio; `referredOrgId` se completa al convertir. `rewardedAt` marca cuándo se"
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 1855,
-     "fragmento": "referredOrgId String?"
-    }
-   ],
-   "impacto": "El mes bonificado (REWARDED) se acredita sobre una conversión que es solo un clic del admin: no queda qué organización contrató, no se puede verificar que no sea la misma org referente ni recalcular el beneficio, y la relación referred con su índice y su SetNull es letra muerta.",
-   "propuesta": "Pedir en markReferralConvertedAction la org cliente que contrató (select en el admin), guardarla en referredOrgId y validar que no sea la org referente.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-referidos",
-    "h2.cli-referidos",
-    "modelo.Referral"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "—",
-   "vh": null,
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H16",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-028",
-   "prefijo": "BUG",
-   "titulo": "Reconocer una alerta del chatbot no la silencia: el detector solo deduplica contra PENDING de las últimas 24 h y la vuelve a crear con email y Telegram",
-   "dominio": "D5",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
-     "linea": 250,
-     "fragmento": "status: 'PENDING',\n        createdAt: { gte: new Date(Date.now() - ONE_DAY_MS) },"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
-     "linea": 267,
-     "fragmento": "const emailResult = await sendAlertEmail(issue)"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
-     "linea": 46,
-     "fragmento": "status: 'ACKNOWLEDGED',\n          acknowledgedAt: new Date(),"
-    }
-   ],
-   "impacto": "Latente mientras el detector no tenga disparador (D7); en cuanto corra periódicamente, marcar como vista una alerta de un problema que sigue activo (cuota agotada, errores del proveedor) hace que la corrida siguiente cree otra PENDING y mande otro email y otro Telegram; lo mismo a las 24 h con una PENDING. Además, reconocer una alerta ya resuelta la reabre como ACKNOWLEDGED conservando resolvedAt.",
-   "propuesta": "Deduplicar contra alertas abiertas (PENDING y ACKNOWLEDGED) del mismo bot y tipo, y aceptar el reconocimiento solo desde PENDING con updateMany condicional.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-alertas",
-    "modelo.BotAlert",
-    "int.cron.detect-bot-issues",
-    "int.telegram"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "detect-bot-issues sin disparador (D7); hallazgo de doble fuente de cuota (este ciclo)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H17",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-042",
-   "prefijo": "SEC",
-   "titulo": "/api/track no tiene consumidores y acepta escrituras ilimitadas en PageView: sin Zod, sin tope de largo ni rate limit, y el SUPER_ADMIN elige la org por body",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/app/api/track/route.ts",
-     "linea": 20,
-     "fragmento": "const url = String(data?.url ?? '')"
-    },
-    {
-     "ruta": "src/app/api/track/route.ts",
-     "linea": 24,
-     "fragmento": "const organizationId =\n      session.user.role === 'SUPER_ADMIN'\n        ? bodyOrgId ?? session.user.organizationId ?? null"
-    },
-    {
-     "ruta": "src/app/api/track/route.ts",
-     "linea": 33,
-     "fragmento": "await prisma.pageView.create({"
-    }
-   ],
-   "impacto": "Cualquier sesión de cliente puede insertar filas sin límite y con URLs de cualquier tamaño en la Neon compartida (tabla sin lectores ni purga), y el admin puede imputar visitas a cualquier org por body; no aporta nada al producto.",
-   "propuesta": "Borrar la ruta y el modelo (candidato a poda) o, si se va a usar, validar con Zod (url acotada), aplicar rate limit por sesión y tomar la org solo de resolveOrgId.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-shell",
-    "modelo.PageView"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "DEU-006 (retención); poda",
-   "vh": null,
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H18",
-    "verificado_padre": true,
-    "nota_padre": "Muestreo DEC-37: se sostiene (git grep 'api/track' en src y public: sin consumidores; route.ts:19-36 sin Zod ni rate limit, y con SUPER_ADMIN la org sale del body).",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-043",
-   "prefijo": "SEC",
-   "titulo": "El tope de 3 regeneraciones semanales del brief es check-then-act: pedidos en paralelo pasan todos el control y cada uno llama al LLM",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/ai/executive-brief.ts",
-     "linea": 157,
-     "fragmento": "if (currentRegenerations >= REGENERATION_LIMIT) {"
-    },
-    {
-     "ruta": "src/lib/ai/executive-brief.ts",
-     "linea": 185,
-     "fragmento": "const generation = await generateBriefText(organizationId, org.companyName, now)"
-    },
-    {
-     "ruta": "src/lib/ai/executive-brief.ts",
-     "linea": 201,
-     "fragmento": "executiveBriefRegenerations: nextRegenerations,"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/_actions/regenerate-brief.ts",
-     "linea": 19,
-     "fragmento": "const result = await regenerateExecutiveBrief(orgId.data)"
-    }
-   ],
-   "impacto": "Hoy sin efecto (credencial de Vertex vencida). Con Vertex activo, un usuario de cualquier cliente que dispare N llamadas simultáneas a regenerateBriefAction obtiene N generaciones pagadas por develOP y el contador queda en 1; puede repetirlo cada 4 horas hasta tres veces por semana.",
-   "propuesta": "Reservar el cupo antes de llamar al LLM con un update condicional (where executiveBriefRegenerations < 3 y última regeneración vieja, con increment) y seguir solo si afectó una fila, o sumar checkRateLimit por org.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-inicio",
-    "int.vertex",
-    "modelo.Organization"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "SEC-032 (costo de Vertex)",
-   "vh": "VH-042",
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H19",
     "verificado_padre": false,
     "nota_padre": "",
     "verificador": null

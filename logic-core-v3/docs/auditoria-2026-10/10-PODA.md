@@ -2009,112 +2009,234 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 
 ## Candidatos de F2 (lectores y cazadores)
 
-> Señales que encontraron los lectores de cada dominio al leer el código completo. Confianza MEDIA salvo que el dominio la confirme; la propuesta queda para Valentino (o para Franco en su zona).
+> Señales que encontraron los lectores de cada dominio al leer el código completo. Confianza MEDIA salvo que el dominio la confirme; la propuesta queda para Valentino (o para Franco en su zona). «Alcance» dice si el candidato es el archivo entero, unos exports o una fusión.
 
 ### [POD-282] src/proxy.ts (D1-c1)
-- Hallado en F2 · `src/proxy.ts` · Nodo(s): lib.proxy · Señales: getLegacyAdminRedirectPath (:22-65) siempre devuelve null: ADMIN_OS_PATH === ADMIN_PATH === '/admin' (:8-9) y el primer if (:23) corta todo /admin, ninguna otra rama puede cumplirse; ALWAYS_ALLOWED (:68) incluye '/logout' (ruta inexistente: git ls-tree vacio) y '/api/auth/', '/api/' que el matcher (:172) nunca deja entrar; IMPERSONATION_COOKIE duplicado (:16) en vez de importar impersonation-constants.ts:1
+- Hallado en F2 (D1-L1) · `src/proxy.ts` · Nodo(s): lib.proxy · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — getLegacyAdminRedirectPath (:22-65), su llamada (:81, :92-96) y las entradas muertas de ALWAYS_ALLOWED (:68) · Señales: getLegacyAdminRedirectPath (:22-65) siempre devuelve null: ADMIN_OS_PATH === ADMIN_PATH === '/admin' (:8-9) y el primer if (:23) corta todo /admin, ninguna otra rama puede cumplirse; ALWAYS_ALLOWED (:68) incluye '/logout' (ruta inexistente: git ls-tree vacio) y '/api/auth/', '/api/' que el matcher (:172) nunca deja entrar; IMPERSONATION_COOKIE duplicado (:16) en vez de importar impersonation-constants.ts:1
 - Qué rompe si se borra: Nada: el bloque :92-96 nunca redirige; borrar tambien la llamada de :81
 - Confianza de poda: MEDIA
-- Propuesta: decidir (Valentino)
+- Propuesta: borrar ese código muerto (SEC-017) — lo decide Valentino
 - Zona: libre
 
 ### [POD-283] src/auth.ts (D1-c1)
-- Hallado en F2 · `src/auth.ts` · Nodo(s): lib.auth · Señales: getPostLoginPath (:65-74) sin callers (git grep -> solo la definicion); ADMIN_PATH/DASHBOARD_PATH/ONBOARDING_PATH (:15-17) solo usados por esa funcion; userExists (:61) calculado y nunca leido
+- Hallado en F2 (D1-L1) · `src/auth.ts` · Nodo(s): lib.auth · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — getPostLoginPath (:65-74), sus constantes (:15-17) y userExists (:61) · Señales: getPostLoginPath (:65-74) sin callers (git grep -> solo la definicion); ADMIN_PATH/DASHBOARD_PATH/ONBOARDING_PATH (:15-17) solo usados por esa funcion; userExists (:61) calculado y nunca leido
 - Qué rompe si se borra: Nada funcional; FROZEN + ZONA-FRANCO -> decision para Valentino
 - Confianza de poda: MEDIA
-- Propuesta: decidir (Valentino): archivo congelado
+- Propuesta: borrar ese código muerto (DEU-002) (decidir (Valentino): archivo congelado)
 - Zona: FROZEN + ZONA-FRANCO
 
 ### [POD-284] src/app/accept-invite/ (D1-c1)
-- Hallado en F2 · `src/app/accept-invite/` · Nodo(s): h1.auth-invite · Señales: Sin emisor vivo: inviteClientAction (invitations.ts:43) e inviteTeamMemberAction (settings.ts:148) no tienen callers; settings.ts no tiene importadores (git grep "lib/actions/settings'" vacio); Solo seria alcanzable con un token de forgot-password de un usuario sin contrasena
+- Hallado en F2 (D1-L1) · `src/app/accept-invite/` · Nodo(s): h1.auth-invite · Alcance: el archivo entero — la carpeta entera · Señales: Sin emisor vivo: inviteClientAction (invitations.ts:43) e inviteTeamMemberAction (settings.ts:148) no tienen callers; settings.ts no tiene importadores (git grep "lib/actions/settings'" vacio); Solo seria alcanzable con un token de forgot-password de un usuario sin contrasena
 - Qué rompe si se borra: Nada del producto actual; robots.ts:21 y el comentario de sitemap.ts:4 lo mencionan, DotMatrix.tsx:21,49 en comentarios. Decidir: borrar o reconectar
 - Confianza de poda: MEDIA
-- Propuesta: decidir (Valentino)
+- Propuesta: decidir (Valentino): borrar la invitación o reconectarla a un emisor vivo (DEU-001)
 - Zona: libre
 
 ### [POD-285] src/app/login/actions.ts (D1-c1)
-- Hallado en F2 · `src/app/login/actions.ts` · Nodo(s): h1.auth-login · Señales: Limiter en memoria (:8-48) duplicado del limiter compartido en DB (src/lib/rate-limit/limiter.ts:37-84); Rama EMAIL_NOT_VERIFIED (:119-121) inalcanzable: Auth.js envuelve el error en CallbackRouteError con cause {err} (node_modules/@auth/core/lib/actions/callback/index.js:388)
+- Hallado en F2 (D1-L1) · `src/app/login/actions.ts` · Nodo(s): h1.auth-login · Alcance: fusión con otra implementación (no se borra sin consolidar) — el limiter en memoria (:8-48) duplica el limiter en base de src/lib/rate-limit/limiter.ts:37-84; la rama EMAIL_NOT_VERIFIED (:119-121) es inalcanzable · Señales: Limiter en memoria (:8-48) duplicado del limiter compartido en DB (src/lib/rate-limit/limiter.ts:37-84); Rama EMAIL_NOT_VERIFIED (:119-121) inalcanzable: Auth.js envuelve el error en CallbackRouteError con cause {err} (node_modules/@auth/core/lib/actions/callback/index.js:388)
 - Qué rompe si se borra: Reemplazar, no solo borrar: sin el Map el login queda sin ningun limite
 - Confianza de poda: MEDIA
-- Propuesta: decidir (Valentino)
+- Propuesta: fusionar con el limiter compartido (SEC-007) y borrar la rama muerta
 - Zona: libre
 
 ### [POD-286] prisma/migrate-os-to-unified.ts (D6-c1)
-- Hallado en F2 · `prisma/migrate-os-to-unified.ts` · Nodo(s): lib.prisma.seeds · Señales: Solo cuenta filas de Project, Task y OsLead (líneas 6-10) y declara la migración 'finalizada' (14-15); Último commit 3cdcc55e del 2026-04-06; Lo invoca package.json:19 (migrate:os-v2) con ts-node
+- Hallado en F2 (D6-L1) · `prisma/migrate-os-to-unified.ts` · Nodo(s): lib.prisma.seeds · Alcance: el archivo entero · Señales: Solo cuenta filas de Project, Task y OsLead (líneas 6-10) y declara la migración 'finalizada' (14-15); Último commit 3cdcc55e del 2026-04-06; Lo invoca package.json:19 (migrate:os-v2) con ts-node
 - Qué rompe si se borra: Nada: es de solo lectura. Quitar también el script migrate:os-v2 de package.json.
 - Confianza de poda: MEDIA
-- Propuesta: decidir (Valentino)
+- Propuesta: borrar junto con el script migrate:os-v2 de package.json — lo decide Valentino
 - Zona: libre
 
 ### [POD-287] prisma/backups/backup.js (D6-c1)
-- Hallado en F2 · `prisma/backups/backup.js` · Nodo(s): lib.prisma.seeds · Señales: Usa prisma.modulePricing (línea 6), modelo que ya no existe en el schema: fallaría al correr; Último commit c8478587 del 2026-04-27; Sin referencias desde package.json ni scripts
+- Hallado en F2 (D6-L1) · `prisma/backups/backup.js` · Nodo(s): lib.prisma.seeds · Alcance: el archivo entero · Señales: Usa prisma.modulePricing (línea 6), modelo que ya no existe en el schema: fallaría al correr; Último commit c8478587 del 2026-04-27; Sin referencias desde package.json ni scripts
 - Qué rompe si se borra: Nada.
 - Confianza de poda: MEDIA
 - Propuesta: decidir (Valentino)
 - Zona: libre
 
 ### [POD-288] prisma/backups/module-pricing-legacy.json, organization-module-pre-push.json, premium-module-pre-push.json (D6-c1)
-- Hallado en F2 · `prisma/backups/module-pricing-legacy.json, organization-module-pre-push.json, premium-module-pre-push.json` · Nodo(s): lib.prisma.seeds · Señales: Dumps de datos de abril commiteados en un repo público (11, 1 y 9 filas; una con organizationId); Generados por backup.js, que ya no puede correr
+- Hallado en F2 (D6-L1) · `prisma/backups/module-pricing-legacy.json, organization-module-pre-push.json, premium-module-pre-push.json` · Nodo(s): lib.prisma.seeds · Alcance: el archivo entero — los tres volcados · Señales: Dumps de datos de abril commiteados en un repo público (11, 1 y 9 filas; una con organizationId); Generados por backup.js, que ya no puede correr
 - Qué rompe si se borra: Nada salvo la referencia histórica (sigue en git).
 - Confianza de poda: MEDIA
 - Propuesta: decidir (Valentino)
 - Zona: libre
 
 ### [POD-289] package.json (D6-c1)
-- Hallado en F2 · `package.json` · Nodo(s): lib.plataforma.package · Señales: Duplicado exacto de seed:agency-os (línea 17)
+- Hallado en F2 (D6-L1) · `package.json` · Nodo(s): lib.plataforma.package · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — el script duplicado de seed:agency-os (línea 17) · Señales: Duplicado exacto de seed:agency-os (línea 17)
 - Qué rompe si se borra: Nada.
 - Confianza de poda: MEDIA
-- Propuesta: decidir (Valentino)
+- Propuesta: borrar la línea duplicada — lo decide Valentino
 - Zona: libre
 
 ### [POD-290] prisma/seed-agency-os.ts (D6-c1)
-- Hallado en F2 · `prisma/seed-agency-os.ts` · Nodo(s): lib.prisma.seeds · Señales: Duplica src/lib/agency-settings.ts:1-19, que seed.ts:19 ya importa; Valores idénticos hoy; pueden divergir
+- Hallado en F2 (D6-L1) · `prisma/seed-agency-os.ts` · Nodo(s): lib.prisma.seeds · Alcance: fusión con otra implementación (no se borra sin consolidar) — duplica src/lib/agency-settings.ts:1-19 · Señales: Duplica src/lib/agency-settings.ts:1-19, que seed.ts:19 ya importa; Valores idénticos hoy; pueden divergir
 - Qué rompe si se borra: Nada si se reemplaza por el import.
 - Confianza de poda: MEDIA
-- Propuesta: decidir (Valentino)
+- Propuesta: fusionar con src/lib/agency-settings.ts (importarlo en vez de copiarlo)
 - Zona: libre
 
 ### [POD-291] prisma/seeds/init-data-connections.ts (D6-c1)
-- Hallado en F2 · `prisma/seeds/init-data-connections.ts` · Nodo(s): lib.prisma.seeds · Señales: git grep 'init-data-connections|initDataConnections' solo lo encuentra a sí mismo; backfill one-shot de abril: la columna tiene DEFAULT desde 20260427194426:7; único error de eslint del lote (no-explicit-any en :18); fabrica connected/lastSync (:34-45)
+- Hallado en F2 (D6-L2) · `prisma/seeds/init-data-connections.ts` · Nodo(s): lib.prisma.seeds · Alcance: el archivo entero · Señales: git grep 'init-data-connections|initDataConnections' solo lo encuentra a sí mismo; backfill one-shot de abril: la columna tiene DEFAULT desde 20260427194426:7; único error de eslint del lote (no-explicit-any en :18); fabrica connected/lastSync (:34-45)
 - Qué rompe si se borra: Nada en runtime; solo se pierde un backfill que ya no aplica a orgs nuevas.
 - Confianza de poda: MEDIA
 - Propuesta: decidir (Valentino)
 - Zona: libre
 
 ### [POD-292] src/lib/data/onboarding-tasks.ts (D6-c1)
-- Hallado en F2 · `src/lib/data/onboarding-tasks.ts` · Nodo(s): lib.data · Señales: solo lo consume src/lib/onboarding/seed-tasks-for-org.ts:2; esa siembra solo se llama desde src/lib/actions/clients.ts e invitations.ts, sin importadores (git grep = 0); las actions de admin src/actions/admin/onboarding-tasks.ts tampoco tienen importadores; el alta vigente no siembra (createClientOnly.ts:85)
+- Hallado en F2 (D6-L2) · `src/lib/data/onboarding-tasks.ts` · Nodo(s): lib.data · Alcance: el archivo entero · Señales: solo lo consume src/lib/onboarding/seed-tasks-for-org.ts:2; esa siembra solo se llama desde src/lib/actions/clients.ts e invitations.ts, sin importadores (git grep = 0); las actions de admin src/actions/admin/onboarding-tasks.ts tampoco tienen importadores; el alta vigente no siembra (createClientOnly.ts:85)
 - Qué rompe si se borra: OnboardingStatusCard (dashboard/page.tsx:61) quedaría sin catálogo; hoy ya devuelve null para orgs sin tareas. Decidir antes: retirar la feature completa o reconectarla.
 - Confianza de poda: MEDIA
-- Propuesta: decidir (Valentino)
+- Propuesta: decidir (Valentino): retirar la feature del checklist completa o reconectarla (DEU-018)
 - Zona: libre
 
 ### [POD-293] prisma/seeds/backfill-vertical-pack.ts (D6-c1)
-- Hallado en F2 · `prisma/seeds/backfill-vertical-pack.ts` · Nodo(s): lib.prisma.seeds · Señales: backfill one-shot D.1 para 3 slugs fijos (:71-75); idempotente: después de correr en prod es no-op; sin referencias desde package.json ni otros scripts
+- Hallado en F2 (D6-L2) · `prisma/seeds/backfill-vertical-pack.ts` · Nodo(s): lib.prisma.seeds · Alcance: el archivo entero · Señales: backfill one-shot D.1 para 3 slugs fijos (:71-75); idempotente: después de correr en prod es no-op; sin referencias desde package.json ni otros scripts
 - Qué rompe si se borra: Nada si ya corrió en prod (verificar verticalPack de develop/sanmiguel/matsu).
 - Confianza de poda: MEDIA
 - Propuesta: decidir (Valentino)
 - Zona: libre
 
 ### [POD-294] prisma/seeds/add-contact-tool.ts (D6-c1)
-- Hallado en F2 · `prisma/seeds/add-contact-tool.ts` · Nodo(s): lib.prisma.seeds · Señales: one-shot CONTACT-PATH (:2-3); el catálogo ya incluye el slug (sync-plans.ts:57, :63); sin referencias desde package.json
+- Hallado en F2 (D6-L2) · `prisma/seeds/add-contact-tool.ts` · Nodo(s): lib.prisma.seeds · Alcance: el archivo entero · Señales: one-shot CONTACT-PATH (:2-3); el catálogo ya incluye el slug (sync-plans.ts:57, :63); sin referencias desde package.json
 - Qué rompe si se borra: Nada si Plan.tools en prod ya tiene confirm_contact_request (PLAN-1145).
 - Confianza de poda: MEDIA
 - Propuesta: decidir (Valentino)
 - Zona: libre
 
 ### [POD-295] prisma/seeds/premium-modules.ts (D6-c1)
-- Hallado en F2 · `prisma/seeds/premium-modules.ts` · Nodo(s): lib.prisma.seeds · Señales: 3 líneas que solo llaman runSyncPremiumModules; sync-premium-modules.ts:180-182 ya se auto-ejecuta al invocarse directo; segundo punto de entrada del mismo script destructivo
+- Hallado en F2 (D6-L2) · `prisma/seeds/premium-modules.ts` · Nodo(s): lib.prisma.seeds · Alcance: el archivo entero · Señales: 3 líneas que solo llaman runSyncPremiumModules; sync-premium-modules.ts:180-182 ya se auto-ejecuta al invocarse directo; segundo punto de entrada del mismo script destructivo
 - Qué rompe si se borra: Nada; quien lo use debe invocar sync-premium-modules.ts. (Adyacente al lote.)
 - Confianza de poda: MEDIA
 - Propuesta: decidir (Valentino)
 - Zona: libre
 
+### [POD-296] src/actions/onboarding-actions.ts (D2-c1)
+- Hallado en F2 (D2-L1, D2-L3) · `src/actions/onboarding-actions.ts` · Nodo(s): lib.actions · Alcance: el archivo entero · Señales: git grep -n onboarding-actions origin/main -- src -> unico importador src/components/onboarding/OnboardingWizard.tsx:6; git grep -n components/onboarding origin/main -- src -> vacio (el wizard legacy no lo importa nadie); completeOnboardingAction sin llamadores: el onboarding real usa src/app/bienvenida/_actions/complete-onboarding.ts; registro PD1 seccion 6: 'completeOnboardingAction sin caller'; sin referencias en tests ni scripts; completeOnboardingAction (:79) sin importadores; saveOnboardingProfile solo lo importa src/components/onboarding/OnboardingWizard.tsx, que a su vez no tiene importadores; escribe credenciales en claro con url 'ENCRIPTADO_EN_TEXTO' (:111-131); el onboarding vivo es src/app/bienvenida/_actions/complete-onboarding.ts
+- Qué rompe si se borra: Nada en runtime. Borrar junto con src/components/onboarding/OnboardingWizard.tsx; actualizar baselines de knip/depcruise. / Nada del flujo vivo; elimina un write-path de credenciales en claro.
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con src/components/onboarding/OnboardingWizard.tsx, su único importador, también sin importadores (DEU-022) — lo decide Valentino
+- Zona: libre
+
+### [POD-297] src/app/(protected)/dashboard/cuenta/loading.tsx (D2-c1)
+- Hallado en F2 (D2-L1) · `src/app/(protected)/dashboard/cuenta/loading.tsx` · Nodo(s): h2.cli-cuenta · Alcance: el archivo entero · Señales: cuenta/page.tsx:3-5 solo redirige a /perfil; perfil, facturacion y boveda tienen su propio loading.tsx; max-w-5xl pb-20 desalineados con el layout full-width (registro Mi Cuenta, pendiente 8)
+- Qué rompe si se borra: Nada; a lo sumo un instante sin skeleton durante el redirect de /dashboard/cuenta.
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-298] src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/loading.tsx (D2-c1)
+- Hallado en F2 (D2-L1) · `src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/loading.tsx` · Nodo(s): h2.cli-email-mkt · Alcance: el archivo entero · Señales: no existe campaigns/[id]/page.tsx (git ls-tree: solo [id]/send/page.tsx); el skeleton CampaignDetailLoading (card + 3 stats + lista) no corresponde a la pantalla de confirmacion de /send
+- Qué rompe si se borra: Nada; /send quedaria cubierto por campaigns/loading.tsx.
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino)
+- Zona: libre
+
+### [POD-299] src/app/api/dashboard/leads/recent/route.ts (D2-c1)
+- Hallado en F2 (D2-L2) · `src/app/api/dashboard/leads/recent/route.ts` · Nodo(s): h2.cli-inicio · Alcance: el archivo entero · Señales: Sin llamadores en src: git grep -n "leads/recent" origin/main -- logic-core-v3 ':!logic-core-v3/docs' → solo tests/e2e/40-lead-capture-e2e.spec.ts:49-50 y :60-61; Devuelve la fila completa de ChatbotLead (...lead, :50), incluido convertedToOsLeadId de LeadOS; La rama de classification null (:35-37) es inalcanzable porque excludeDqWhere (:25) descarta los null
+- Qué rompe si se borra: tests/e2e/40-lead-capture-e2e.spec.ts:49-50 y :60-63 (dos asserts contra la ruta); nada en src.
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con sus dos asserts de tests/e2e/40-lead-capture-e2e.spec.ts (DEU-027) — lo decide Valentino
+- Zona: libre
+
+### [POD-300] src/app/api/reports/monthly/route.ts (D2-c1)
+- Hallado en F2 (D2-L2) · `src/app/api/reports/monthly/route.ts` · Nodo(s): h2.cli-resultados · Alcance: el archivo entero · Señales: Sin llamadores: solo la mencionan el comentario de client-monthly/route.ts:6-7 y tests/e2e/43:9; Única importadora de src/lib/reports/MonthlyReport.tsx (:8); PLAN-133 pide borrarla; mezclaría datos mock de GA/GSC en el PDF sin marcarlos (:106-107)
+- Qué rompe si se borra: Nada en src; borrar también MonthlyReport.tsx (ClientMonthlyReportPdf.tsx:6 solo lo nombra en un comentario).
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con src/lib/reports/MonthlyReport.tsx; lo reemplazó /api/reports/client-monthly (DEU-027) — lo decide Valentino
+- Zona: libre
+
+### [POD-301] src/app/bienvenida/ (D2-c1)
+- Hallado en F2 (D2-L2) · `src/app/bienvenida/` · Nodo(s): h2.cli-bienvenida · Alcance: el archivo entero — la carpeta entera · Señales: Ninguna alta viva deja onboardingCompleted=false: core.ts:85, createClientOnly.ts:85 y createClientWithBot.ts:135 lo crean en true; clients.ts:124 e invitations.ts:86 no tienen importadores; Duplica el onboarding legacy muerto: src/components/onboarding/OnboardingWizard.tsx (sin importadores) + src/actions/onboarding-actions.ts; Escribe targetAudience, que nadie lee (git grep "targetAudience" → solo escrituras), y el GA ID que analytics.ts:66-69 rechaza
+- Qué rompe si se borra: Redirects a /bienvenida en proxy.ts:130, :144, :150, :158-166, login/actions.ts:101-107, (protected)/dashboard/layout.tsx:123-129 y robots.ts:25 (orgs seed/QA con onboardingCompleted=false irían a 404); auth.ts:17 y :73 (getPostLoginPath, FROZEN + ZONA-FRANCO) → decisión para Valentino.
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino): borrar el onboarding de /bienvenida o reactivarlo corregido; hoy ninguna alta viva lo usa (DEU-023, SEC-045, BUG-035)
+- Zona: libre
+
+### [POD-302] src/components/dashboard/ExecutiveReportTemplate.tsx (D2-c1)
+- Hallado en F2 (D2-L3) · `src/components/dashboard/ExecutiveReportTemplate.tsx` · Nodo(s): lib.componentes-dashboard · Alcance: el archivo entero · Señales: unico importador: src/components/dashboard/DownloadReportButton.tsx:5; DownloadReportButtons (DownloadReportButton.tsx:129) sin importadores: git grep -n -E 'DownloadReportButtons|DownloadReportButton\b' origin/main -- src ':!src/components/dashboard/DownloadReportButton.tsx' → vacio; alimentado con mockData hardcodeado (DownloadReportButton.tsx:82-89, :122); dominio legacy www.develop-agency.com (ExecutiveReportTemplate.tsx:120)
+- Qué rompe si se borra: Nada en runtime. Borrarlo junto a DownloadReportButton.tsx permite quitar html2canvas y jspdf (package.json:148-149; solo usados en DownloadReportButton.tsx:44-45).
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con DownloadReportButton.tsx y evaluar quitar html2canvas y jspdf (DEU-027) — lo decide Valentino
+- Zona: libre
+
+### [POD-303] src/lib/premium-modules.ts (D2-c1)
+- Hallado en F2 (D2-L4) · `src/lib/premium-modules.ts` · Nodo(s): lib.premium-modules · Alcance: exports sueltos (el archivo sigue vivo) — getModulesForOrganization, hasModuleActive, getMonthlyRecurringRevenue, isModuleValidForRubro, activateModule y cancelModule; solo getActiveModuleSlugs tiene uso · Señales: getModulesForOrganization, hasModuleActive, getMonthlyRecurringRevenue, isModuleValidForRubro, activateModule y cancelModule sin importadores (git grep -n -w <nombre> origin/main -- . → solo la definición; activateModule además en un doc); hasModuleActive (:46-58) duplica isModuleActive de src/lib/modules/check-activation.ts:3-15; nombre igual a src/lib/data/premium-modules.ts (catálogo del seed)
+- Qué rompe si se borra: Nada hoy (solo getActiveModuleSlugs se usa, get-recommendations-for-org.ts:12). Conservar activateModule/cancelModule si se construye el alta de módulos.
+- Confianza de poda: MEDIA
+- Propuesta: borrar los exports sin uso salvo activateModule y cancelModule si se construye el alta de módulos (FAL-005, DEU-030) — lo decide Valentino
+- Zona: libre
+
+### [POD-304] src/components/dashboard/home/WeekResultsGrid.tsx (D2-c1)
+- Hallado en F2 (D2-L4) · `src/components/dashboard/home/WeekResultsGrid.tsx` · Nodo(s): h2.cli-inicio · Alcance: el archivo entero — la tarjeta del Inicio; src/lib/dashboard/week-results.ts sigue alimentando el brief y el email · Señales: duplica 'Leads' del hero con otra fuente (global); visitas hardcodeadas en 0; page.tsx:82-84 la relegó a 'Tu cuenta'
+- Qué rompe si se borra: El componente se puede quitar del home, pero getWeekResults (src/lib/dashboard/week-results.ts) alimenta executive-brief.ts:279 y build.ts:133: hay que reapuntar brief y email antes de borrar la lib.
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino): quitar la tarjeta (duplica los leads del hero con una fuente global, SEC-048) o corregir su fuente
+- Zona: libre
+
+### [POD-305] src/components/dashboard/results/PageSpeedCard.tsx (D2-c1)
+- Hallado en F2 (D2-L4) · `src/components/dashboard/results/PageSpeedCard.tsx` · Nodo(s): h2.cli-resultados · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — la rama vacía de :179-197, inalcanzable porque trafico/page.tsx devuelve null antes · Señales: rama vacía :179-197 inalcanzable: trafico/page.tsx:133 devuelve null cuando ambos reportes son null
+- Qué rompe si se borra: Nada; o mover el vacío a la página.
+- Confianza de poda: MEDIA
+- Propuesta: borrar la rama (o mover el vacío a la página) — lo decide Valentino
+- Zona: libre
+
+### [POD-306] src/lib/health-score.ts (D2-c1)
+- Hallado en F2 (D2-L4) · `src/lib/health-score.ts` · Nodo(s): lib.health-score · Alcance: exports sueltos (el archivo sigue vivo) — los campos computedAt y cachedFrom de HealthScoreResult (sin lectores; cachedFrom siempre null); el archivo sigue vivo (Inicio, brief, reporte) · Señales: HealthScoreResult.computedAt y cachedFrom sin lectores fuera del archivo (git grep → 0); cachedFrom siempre null
+- Qué rompe si se borra: Nada.
+- Confianza de poda: MEDIA
+- Propuesta: borrar los dos campos — lo decide Valentino
+- Zona: libre
+
+### [POD-307] src/lib/reports/MonthlyReport.tsx (D2-c1)
+- Hallado en F2 (D2-L5) · `src/lib/reports/MonthlyReport.tsx` · Nodo(s): h2.cli-resultados · Alcance: el archivo entero · Señales: único importador: src/app/api/reports/monthly/route.ts:8-9; git grep 'reports/monthly' en src: solo comentarios (client-monthly/route.ts:6) y la propia ruta; ninguna pantalla la llama; reemplazado por ClientMonthlyReportPdf (P2.C), según ClientMonthlyReportPdf.tsx:6-8; no mira isMockData y presenta datos de demo como reales
+- Qué rompe si se borra: Nada visible para el cliente. Borrarlo junto con src/app/api/reports/monthly/route.ts (y src/components/dashboard/DownloadReportButton.tsx, también sin importadores).
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con src/app/api/reports/monthly/route.ts (DEU-027) — lo decide Valentino
+- Zona: libre
+
+### [POD-308] src/lib/onboarding/seed-tasks-for-org.ts (D2-c1)
+- Hallado en F2 (D2-L5) · `src/lib/onboarding/seed-tasks-for-org.ts` · Nodo(s): lib.onboarding · Alcance: el archivo entero · Señales: solo lo importan src/lib/actions/clients.ts:9 y src/lib/actions/invitations.ts:8, módulos 'use server' sin importadores; las altas vivas (createClientOnly, createClientWithBot, onboarding/core) no lo llaman
+- Qué rompe si se borra: Nada hoy. La recomendación es cablearlo en las altas vivas en lugar de podarlo (checklist de onboarding).
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino): cablearlo en las altas vivas en vez de podarlo (DEU-018)
+- Zona: libre
+
+### [POD-309] src/lib/reports/executive-weekly/send-manual.ts (D2-c1)
+- Hallado en F2 (D2-L5) · `src/lib/reports/executive-weekly/send-manual.ts` · Nodo(s): h2.cli-reportes-email · Alcance: fusión con otra implementación (no se borra sin consolidar) — reimplementa la secuencia de send.ts · Señales: reimplementa la secuencia de send.ts, como dice su propio comentario (:26-31)
+- Qué rompe si se borra: El botón 'Enviar ahora' del admin (api/admin/clients/[organizationId]/send-executive-report/route.ts:7,57) si se borra sin extraer un sendForOrg común.
+- Confianza de poda: MEDIA
+- Propuesta: fusionar con send.ts en un sendForOrg común (DEU-033)
+- Zona: libre
+
+### [POD-310] src/lib/reports/executive-weekly/report-eligible-plan.ts (D2-c1)
+- Hallado en F2 (D2-L5) · `src/lib/reports/executive-weekly/report-eligible-plan.ts` · Nodo(s): h2.cli-reportes-email · Alcance: fusión con otra implementación (no se borra sin consolidar) — duplica el gate de plan de build.ts:91 · Señales: duplica el gate de build.ts:91 (comentario :3-8); su invariante no compara contra build.ts
+- Qué rompe si se borra: La tarjeta de preferencias de perfil/page.tsx:31,194-195 si se borra sin que build.ts exponga el gate.
+- Confianza de poda: MEDIA
+- Propuesta: fusionar con build.ts: que el motor exponga el gate y la tarjeta de perfil lo use (DEU-032)
+- Zona: libre
+
+### [POD-311] src/lib/plan/plan-presentation.ts (D2-c1)
+- Hallado en F2 (D2-L5) · `src/lib/plan/plan-presentation.ts` · Nodo(s): lib.plan · Alcance: fusión con otra implementación (no se borra sin consolidar) — precios y cupos copiados a mano de prisma/seeds/sync-plans.ts · Señales: precios y cupos copiados a mano de prisma/seeds/sync-plans.ts (comentario :9-10); fallback.ts repite los valores de STARTER
+- Qué rompe si se borra: Vitrina de planes y medidor si se elimina. Propuesta: leer precio y cupo del Plan y dejar aquí solo el copy.
+- Confianza de poda: MEDIA
+- Propuesta: fusionar con el catálogo de Plan: leer precio y cupo de la base y dejar acá solo el copy
+- Zona: libre
+
+### [POD-312] src/lib/modules/check-activation.ts (D2-c1)
+- Hallado en F2 (D2-L5) · `src/lib/modules/check-activation.ts` · Nodo(s): h2.cli-servicios · Alcance: fusión con otra implementación (no se borra sin consolidar) — isModuleActive duplica getActiveModuleSlugs (src/lib/premium-modules.ts:76-84) · Señales: duplica la noción 'módulo activo' con getActiveModuleSlugs (src/lib/premium-modules.ts:76-84); slugs como string suelto sin tipo compartido con el catálogo
+- Qué rompe si se borra: 5 importadores (módulos y motor-resenas/_actions.ts). Consolidar en un helper tipado, no borrar.
+- Confianza de poda: MEDIA
+- Propuesta: fusionar con getActiveModuleSlugs en un helper con slugs tipados desde el catálogo (BUG-012)
+- Zona: libre
+
 ### Refuerzos de F2 sobre fichas de F1
 
 - [POD-046] `src/lib/actions/invitations.ts` (D1-c1): inviteClientAction sin callers (git grep inviteClient -> solo :43); Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116). Qué rompe: Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)
-- [POD-178] `prisma/migrations/__diff_check.sql` (D6-c1): 0 bytes; Está suelto en la raíz de migrations (Prisma solo lee carpetas); Commit 7fe804db del 2026-04-28. Qué rompe: Nada.
+- [POD-178] `prisma/migrations/__diff_check.sql` (D6-c1): 0 bytes; Está suelto en la raíz de migrations (Prisma solo lee carpetas); Commit 7fe804db del 2026-04-28; commit 7fe804db (2026-04-28) sin uso posterior; sin referencias fuera de los docs de esta auditoría; archivo suelto dentro de prisma/migrations (Prisma solo lee subcarpetas). Qué rompe: Nada. / Nada. (Adyacente al lote: no figura en la lista, se reporta por estar en la carpeta de migraciones.)
 - [POD-203] `prisma/schema.prisma` (D6-c1): Sin lectores en src; Único escritor src/lib/actions/clients.ts:164,199, módulo sin importadores (D1); Seeds lo siguen llenando (seed.ts:204,219). Qué rompe: Requiere migración DROP COLUMN sobre schema FROZEN: decisión para Valentino.
-- [POD-178] `prisma/migrations/__diff_check.sql` (D6-c1): 0 bytes; commit 7fe804db (2026-04-28) sin uso posterior; sin referencias fuera de los docs de esta auditoría; archivo suelto dentro de prisma/migrations (Prisma solo lee subcarpetas). Qué rompe: Nada. (Adyacente al lote: no figura en la lista, se reporta por estar en la carpeta de migraciones.)
+- [POD-016] `src/components/dashboard/DownloadReportButton.tsx` (D2-c1): fuera del lote; export DownloadReportButtons sin importadores; usa mockData y deps html2canvas/jspdf exclusivas. Qué rompe: Nada en runtime.
+- [POD-078] `src/lib/actions/notifications.ts` (D2-c1): la funcion exportada markNotificationReadAction (:19) no tiene importadores (git grep markNotificationReadAction → solo su definicion); duplica markNotificationAsRead de src/actions/dashboard-actions.ts:188 (FROZEN); markNotificationReadAction sin importadores; revalidateAll repite revalidatePath('/dashboard') dos veces (:15-16). Qué rompe: Nada; es una server action publica sin uso (el resto del archivo si se usa). / Nada.
+- [POD-077] `src/lib/actions/messages.ts` (D2-c1): sendMessageAction, markAdminMessagesAsReadAction y markMessagesAsReadAction sin importadores; la vía viva del admin es src/app/(protected)/admin/messages/_actions/message.actions.ts:177. Qué rompe: Nada si se borran esas tres; sendClientMessageAction sigue usada por MessageThread.tsx, VaultRequestModal.tsx y OportunidadSEO.tsx.
+- [POD-023] `src/components/onboarding/OnboardingWizard.tsx` (D2-c1): no lo importa ningún archivo (git grep 'components/onboarding' origin/main -- src → 0); única vía a saveOnboardingProfile (src/actions/onboarding-actions.ts), que escribe credenciales en claro con url 'ENCRIPTADO_EN_TEXTO'; el onboarding vivo es src/app/bienvenida. Qué rompe: Nada (fuera del lote; ligado a D2-A5).
 
 ## §docs
 

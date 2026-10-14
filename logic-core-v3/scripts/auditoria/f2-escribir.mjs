@@ -23,6 +23,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { HERRAMIENTAS, nodoDeRuta } from './atlas/nodos.mjs'
+import { escribirMapa, escribirSegunPeso, leerMapa, leerPartido } from './crudo-partes.mjs'
 
 const APP = process.cwd()
 const DIR = path.resolve(APP, 'docs/auditoria-2026-10')
@@ -30,8 +31,11 @@ const CRUDO = path.join(DIR, '_crudo')
 const CICLOS = path.join(CRUDO, 'ciclos')
 const leer = (f, d) => (existsSync(f) ? JSON.parse(readFileSync(f, 'utf8').replace(/^﻿/, '')) : d)
 const escribir = (f, o) => writeFileSync(f, JSON.stringify(o, null, 1), 'utf8')
+// la revisión puede estar partida (_crudo/ciclos/<ciclo>-revision/parte-N.json, DEC-49): se pasa la ruta del .json o de la carpeta
 const REV = path.resolve(APP, process.argv[2] ?? '')
-const rev = leer(REV, null)
+const REV_DIR = path.dirname(REV)
+const REV_NOMBRE = path.basename(REV).replace(/.json$/, '')
+const rev = leerPartido(REV_DIR, REV_NOMBRE, null, 'hallazgos')
 if (!rev) { console.error('uso: f2-escribir.mjs <ciclo>-revision.json'); process.exit(1) }
 const { ciclo, dominio } = rev
 const SEV = { 'CRÍTICA': 0, ALTA: 1, MEDIA: 2, BAJA: 3 }
@@ -61,9 +65,9 @@ const args = leer(path.join(CICLOS, `${ciclo}.args.json`), null)
 if (!args) console.log(`aviso: no está ${ciclo}.args.json — no se puede medir qué PLAN quedaron sin cruce ni qué archivos eran del lote`)
 
 // ── 1. IDs ───────────────────────────────────────────────────────────────────
-const REG = path.join(CRUDO, 'hallazgos.json')
-const reg = leer(REG, null)
-if (!reg) { console.error('falta _crudo/hallazgos.json: correr antes node scripts/auditoria/hallazgos-md.mjs'); process.exit(1) }
+// el registro va partido en _crudo/hallazgos/parte-N.json (tope de 300 KB, DEC-49)
+const reg = leerPartido(CRUDO, 'hallazgos', null, 'hallazgos')
+if (!reg) { console.error('falta el registro _crudo/hallazgos: correr antes node scripts/auditoria/hallazgos-md.mjs'); process.exit(1) }
 const maximos = new Map()
 const usar = (id) => { const [p, n] = String(id).split('-'); if (Number(n) > (maximos.get(p) ?? 0)) maximos.set(p, Number(n)) }
 for (const h of reg.hallazgos) usar(h.id)
@@ -81,7 +85,7 @@ const previasDe = (h, lectura) => {
 }
 
 const nuevos = []
-const descartados = leer(path.join(CRUDO, 'descartados.json'), { items: [] })
+const descartados = leerPartido(CRUDO, 'descartados', { items: [] })
 const vhPorCaso = new Map()
 for (const h of rev.hallazgos) {
   const lectura = lotes.get(h.lote)
@@ -95,7 +99,9 @@ for (const h of rev.hallazgos) {
   const evidencia = (h.evidencia ?? []).map((e) => ({ ruta: normRuta(e.ruta), linea: e.linea, ...(e.linea_fin ? { linea_fin: e.linea_fin } : {}), fragmento: e.fragmento }))
   let nodos = (h.nodos ?? []).map((n) => String(n).trim()).filter(Boolean)
   if (!nodos.some((n) => NODO_VALIDO.test(n))) nodos = [...new Set([...nodos, ...evidencia.map((e) => nodoDeRuta(e.ruta)).filter((n) => NODO_VALIDO.test(n))])]
-  const confianza = h.verificado_padre ? 'VERIFICADO-POR-LECTURA' : h.confianza === 'HIPÓTESIS' ? 'HIPÓTESIS' : SEV[h.severidad] >= 2 ? 'PROBABLE' : h.confianza
+  // confianza_padre: el padre leyó las líneas pero un eslabón es de runtime (configuración, permisos,
+  // un servicio externo) → PROBABLE aunque esté verificado por el padre (DEC-23)
+  const confianza = h.verificado_padre ? (['PROBABLE', 'HIPÓTESIS'].includes(h.confianza_padre) ? h.confianza_padre : 'VERIFICADO-POR-LECTURA') : h.confianza === 'HIPÓTESIS' ? 'HIPÓTESIS' : SEV[h.severidad] >= 2 ? 'PROBABLE' : h.confianza
   let vh = null
   if (h.requiere_verificacion_humana) {
     const casos = lectura?.casos_prueba_manual ?? []
@@ -128,6 +134,7 @@ for (const h of rev.hallazgos) {
 }
 // ── 1b. Fusiones: misma causa raíz que otro hallazgo (del ciclo o ya registrado) ──────────
 const fusionados = []
+const prioridadVH = new Map() // VH ya escritas cuyo hallazgo subió de severidad → su prioridad en 08
 for (const h of rev.hallazgos) {
   if (h.decision !== 'fusionar' || h.fusionado_en) continue
   const destinoId = /^[A-Z0-9]+-\d+$/.test(h.con) ? h.con : rev.hallazgos.find((x) => x.tmp === h.con)?.id_asignado
@@ -139,12 +146,47 @@ for (const h of rev.hallazgos) {
   else destino.evidencia = [...(destino.evidencia ?? []), ...sumar]
   destino.nodos = [...new Set([...(destino.nodos ?? []), ...(h.nodos ?? []).filter((n) => NODO_VALIDO.test(n))])]
   destino.origen = { ...(destino.origen ?? {}), fusionados: [...(destino.origen?.fusionados ?? []), { ciclo, tmp: h.tmp, titulo: h.titulo, severidad: h.severidad, nota_padre: h.nota_padre || '' }] }
+  // «destino» en la decisión: el padre corrige el hallazgo que se queda (p. ej. sube su severidad con
+  // lo que trajo la fusión). El valor anterior queda en origen.cambios; un bloque escrito a mano no se toca.
+  if (h.destino && typeof h.destino === 'object') {
+    if (destino.bloque_md) { console.error(`${h.tmp}: «destino» sobre ${destino.id}, que es un bloque escrito a mano: corregirlo a mano`); process.exit(1) }
+    if (h.destino.severidad && SEV[h.destino.severidad] === undefined) { console.error(`${h.tmp}: severidad inválida en «destino»`); process.exit(1) }
+    if (SEV[h.destino.severidad] <= 1 && !h.verificado_padre) { console.error(`${h.tmp}: subir ${destino.id} a ${h.destino.severidad} exige verificado_padre`); process.exit(1) }
+    const antes = {}
+    for (const k of ['severidad', 'confianza', 'titulo', 'impacto', 'propuesta']) {
+      if (h.destino[k] !== undefined && h.destino[k] !== destino[k]) { antes[k] = destino[k]; destino[k] = h.destino[k] }
+    }
+    if (h.destino.relacionados_ids) destino.relacionados_ids = [...new Set([...(destino.relacionados_ids ?? []), ...h.destino.relacionados_ids])]
+    if (Object.keys(antes).length) {
+      destino.origen.cambios = [...(destino.origen.cambios ?? []), { ciclo, tmp: h.tmp, antes, nota_padre: h.nota_padre || '' }]
+      if (antes.severidad && destino.vh) prioridadVH.set(destino.vh, Math.min(prioridadVH.get(destino.vh) ?? 3, SEV[destino.severidad]))
+    }
+  }
   if ((SEV[h.severidad] ?? 9) < (SEV[destino.severidad] ?? 9)) console.log(`aviso: ${h.tmp} (${h.severidad}) es más grave que su destino ${destino.id} (${destino.severidad}): revisar la severidad del destino`)
   h.fusionado_en = destino.id
   fusionados.push(`${h.tmp}→${destino.id}`)
 }
-escribir(REG, reg)
-escribir(path.join(CRUDO, 'descartados.json'), descartados)
+// ── 1c. Relaciones dentro del ciclo: «relacionados_tmp» (claves temporales «lote/Hnn») → IDs, en las dos direcciones ──
+const idDeTmp = (t) => {
+  const xs = rev.hallazgos.filter((y) => y.tmp === t || y.tmp.endsWith(`/${t}`))
+  if (xs.length !== 1) return null
+  return xs[0].id_asignado ?? xs[0].fusionado_en ?? null
+}
+for (const h of rev.hallazgos) {
+  const propio = h.id_asignado ?? h.fusionado_en
+  if (!h.relacionados_tmp?.length || !propio) continue
+  const a = reg.hallazgos.find((x) => x.id === propio)
+  for (const t of h.relacionados_tmp) {
+    const otro = idDeTmp(t)
+    if (!otro) { console.error(`${h.tmp}: relacionado «${t}» sin ID (¿descartado, ambiguo o inexistente?)`); process.exit(1) }
+    if (otro === propio) continue
+    const b = reg.hallazgos.find((x) => x.id === otro)
+    if (!a.bloque_md) a.relacionados_ids = [...new Set([...(a.relacionados_ids ?? []), otro])]
+    if (b && !b.bloque_md) b.relacionados_ids = [...new Set([...(b.relacionados_ids ?? []), propio])]
+  }
+}
+escribirSegunPeso(CRUDO, 'hallazgos', reg, 'hallazgos')
+escribirSegunPeso(CRUDO, 'descartados', descartados)
 
 // ── 2. VH en 08 ──────────────────────────────────────────────────────────────
 const PRIO = ['alta', 'alta', 'media', 'baja']
@@ -157,10 +199,20 @@ if (vhPorCaso.size) {
   }
   writeFileSync(p08, `${t08}\n`, 'utf8')
 }
+if (prioridadVH.size) {
+  const p08 = path.join(DIR, '08-VERIFICACION-HUMANA.md')
+  let t08 = readFileSync(p08, 'utf8')
+  for (const [vh, sev] of prioridadVH) {
+    const re = new RegExp(`(### \\[${vh}\\][^\\n]*\\n- Verifica: [^\\n]*· Prioridad: )(alta|media|baja)`)
+    if (!re.test(t08)) { console.log(`aviso: no encontré la prioridad de ${vh} en 08`); continue }
+    t08 = t08.replace(re, (_, pre, actual) => `${pre}${['alta', 'media', 'baja'].indexOf(PRIO[sev]) < ['alta', 'media', 'baja'].indexOf(actual) ? PRIO[sev] : actual}`)
+  }
+  writeFileSync(p08, t08, 'utf8')
+}
 
 // ── 3. Lo planeado ───────────────────────────────────────────────────────────
-const PC = path.join(CRUDO, 'planeado-cruces.json')
-const cruces = leer(PC, {})
+// mapa clave → cruce; se parte solo si pasa el tope (DEC-49)
+const cruces = leerMapa(CRUDO, 'planeado-cruces', {})
 const mdPlan = readFileSync(path.join(DIR, '12-PLANEADO.md'), 'utf8')
 const idAClave = new Map([...mdPlan.matchAll(/^#### \[(PLAN-\d+)\] .*?\n- Fuente: `([^`]+)`/gm)].map((m) => [m[1], m[2]]))
 const claves = new Set(idAClave.values())
@@ -178,7 +230,7 @@ for (const [lote, lectura] of lotes) {
   const asignados = (args?.lotes ?? []).find((l) => l.id === lote)?.planeado ?? []
   for (const p of asignados) if (!devueltos.has(p.clave)) sinCruce.push(`${p.id} (${lote})`)
 }
-escribir(PC, cruces)
+escribirMapa(CRUDO, 'planeado-cruces', cruces)
 
 // ── 4. Acumulados ────────────────────────────────────────────────────────────
 const normHerr = (h) => { const s = String(h ?? ''); if (/^h\d\./.test(s)) return s; return HERRAMIENTAS[s] ? `${HERRAMIENTAS[s][0]}.${s}` : s }
@@ -193,8 +245,9 @@ const ACUM = {
   'ausencias.json': (l) => l.ausencias ?? [],
 }
 for (const [archivo, sacar] of Object.entries(ACUM)) {
-  const f = path.join(CRUDO, archivo)
-  const a = leer(f, { items: [] })
+  // cada acumulado es archivo único mientras entre en el tope y partes cuando no (DEC-49)
+  const nombre = archivo.replace(/.json$/, '')
+  const a = leerPartido(CRUDO, nombre, { items: [] })
   for (const [lote, lectura] of lotes) {
     if (!lectura) continue
     const nuevosItems = sacar(lectura).map((x) => ({ ciclo, lote, ...x }))
@@ -202,7 +255,7 @@ for (const [archivo, sacar] of Object.entries(ACUM)) {
     if (archivo === 'funcionalidades.json') { const ids = new Set(nuevosItems.map((x) => x.id)); a.items = a.items.filter((x) => !ids.has(x.id)) }
     a.items.push(...nuevosItems)
   }
-  escribir(f, a)
+  escribirSegunPeso(CRUDO, nombre, a)
 }
 
 // ── 5. Ledger ────────────────────────────────────────────────────────────────
@@ -225,7 +278,7 @@ else if (leidos.length) {
 }
 
 // ── 6. Entregables ───────────────────────────────────────────────────────────
-escribir(REV, rev)
+escribirSegunPeso(REV_DIR, REV_NOMBRE, rev, 'hallazgos')
 console.log(execFileSync(process.execPath, ['scripts/auditoria/hallazgos-md.mjs'], { cwd: APP, encoding: 'utf8' }).trim())
 console.log(execFileSync(process.execPath, ['scripts/auditoria/planeado-md.mjs'], { cwd: APP, encoding: 'utf8' }).trim())
 
@@ -233,4 +286,4 @@ const c = (s) => nuevos.filter((h) => h.severidad === s).length
 console.log(`${ciclo}: nuevos ${nuevos.length} (C ${c('CRÍTICA')} / A ${c('ALTA')} / M ${c('MEDIA')} / B ${c('BAJA')}): ${nuevos.map((h) => h.id).join(', ') || '—'}`)
 console.log(`VH nuevos: ${[...vhPorCaso.values()].map((v) => v.vh).join(', ') || '—'} · descartados en el ciclo: ${rev.hallazgos.filter((h) => h.decision === 'descartar').length} · fusionados: ${fusionados.length}${fusionados.length ? ` (${fusionados.join(', ')})` : ''}`)
 console.log(`PLAN cruzados: ${aplicados} · sin cruce (quedan para el ciclo siguiente): ${sinCruce.length}${sinCruce.length ? ` → ${sinCruce.slice(0, 15).join(', ')}${sinCruce.length > 15 ? '…' : ''}` : ''}`)
-console.log(`ledger: ${new Set(leidos).size} leídos · incompletos ${incompletos.length}${incompletos.length ? ` → ${incompletos.slice(0, 10).join('; ')}` : ''}`)
+if (rev.modo !== 'cazador') console.log(`ledger: ${new Set(leidos).size} leídos · incompletos ${incompletos.length}${incompletos.length ? ` → ${incompletos.slice(0, 10).join('; ')}` : ''}`)

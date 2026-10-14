@@ -310,6 +310,736 @@
     "Respuestas rápidas: MessageThread.tsx:173 setInputValue(getMessageForContext(qr.context))",
     "El envío sigue por la action de mensajes del portal (fuera del lote)"
    ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Entrada al portal y gate de onboarding",
+   "pasos": [
+    "src/proxy.ts:154 /dashboard solo ORG_MEMBER o SUPER_ADMIN impersonando",
+    "src/app/(protected)/dashboard/layout.tsx:72-77 auth() + resolveOrgId() + isAdminPreview() + getImpersonationSession()",
+    "src/lib/preview.ts:6-20 ORG_MEMBER -> session.user.organizationId; SUPER_ADMIN -> impersonation.orgId",
+    "layout.tsx:79-88 escribe lastDashboardVisit del usuario de la sesion (fire-and-forget)",
+    "layout.tsx:90-92 sin org -> /admin/clients o /login",
+    "layout.tsx:96-113 org meta, no leidos, leads hot, notificaciones (where organizationId), modulos activos, plan, novedades",
+    "layout.tsx:123-129 gate de onboarding con x-pathname (nadie lo setea) -> /bienvenida",
+    "src/components/dashboard/SidebarNav.tsx:76-81 items de modulos premium por slug"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Inicio: metricas del negocio, Health Score, semana y resumen IA",
+   "pasos": [
+    "src/app/(protected)/dashboard/page.tsx:51-52 resolveOrgId",
+    "page.tsx:110-126 getPlanForOrg + getHomeBusinessMetrics -> src/lib/dashboard/home-metrics.ts:96-118 ChatbotLead por botConfig.organizationId",
+    "page.tsx:172-175 getHealthScore -> src/lib/health-score.ts:284 y :318-323 cuentan ContactSubmission sin organizationId",
+    "page.tsx:182-185 getWeekResults -> src/lib/dashboard/week-results.ts:43-52 ContactSubmission sin organizationId",
+    "page.tsx:187-212 getExecutiveBrief; AIExecutiveBriefV2.tsx:33-47 -> regenerate-brief.ts:9-26 -> executive-brief.ts:137-220 (tope 3/semana)",
+    "MoneyEstimate.tsx:43-52 -> business-profile.actions.ts:22-40 -> organization.averageTicketUsd"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Aprobar o pedir cambios en una entrega",
+   "pasos": [
+    "src/app/(protected)/dashboard/project/page.tsx:134-155 proyectos de la org; :191-196 ?p= dentro del set",
+    "ProjectTaskTabs -> src/components/dashboard/TaskApprovalButtons.tsx:14-37 (confirmacion al aprobar :44-79)",
+    "src/actions/dashboard-actions.ts:12-23 auth + Zod; :26-37 findUnique + comparacion de org",
+    "dashboard-actions.ts:43-82 transaccion: task.update, notificacion al cliente, notificaciones a SUPER_ADMIN con la org del cliente (:61-72), message fromAdmin:false",
+    "dashboard/layout.tsx:101-105 la campana del cliente lee Notification solo por organizationId"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Mensajes con develOP",
+   "pasos": [
+    "src/app/(protected)/dashboard/messages/page.tsx:12-24 message.findMany por organizationId sin limite",
+    "messages/_components/MarkReadOnMount.tsx:13-17 -> messages/_actions/mark-read.ts:11-22 updateMany read:true + revalidateTag (tambien en soporte)",
+    "src/components/dashboard/MessageThread.tsx:51 useActionState(sendClientMessageAction) -> src/lib/actions/messages.ts:114-140 (session.user.organizationId, SendMessageSchema max 1000)",
+    "admin -> cliente: src/lib/email/admin-message-notification.ts -> src/lib/email/notify-message.ts:50-62 Resend sin chequear error"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Email marketing: importar, crear, enviar y darse de baja",
+   "pasos": [
+    "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:17-21 gate isModuleActive('email-marketing') (catalogo: 'email-marketing-pro', premium-modules.ts:38)",
+    "contactos/_components/ImportCSVButton.tsx:14-30 FileReader -> importContactsAction",
+    "email-marketing/_actions.ts:71-126 getOrgWithBrevo (resolveOrgId, sin modulo) -> parseCSV -> upsert EmailContact -> syncContact (brevo.ts:31-58) con CONTACT_ID/OPTOUT_TOKEN",
+    "campaigns/new/page.tsx:47-73 handleSendNow -> createCampaignAction _actions.ts:128-172 (sin Zod; footer de baja :150-156) -> sendCampaignAction :174-218",
+    "src/lib/integrations/brevo.ts:60-90 createCampaign con sender del input -> :92-103 sendNow a la lista completa",
+    "src/app/api/email/optout/[contactId]/route.ts:69-104 token HMAC -> updateMany optedOut (no toca Brevo)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Motor de resenas: vista, borrador IA y respuesta",
+   "pasos": [
+    "src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:105-123 isModuleActive + deriveConnectionStatus -> resolveMotorResenasView (motor-resenas-view.ts:38-42)",
+    "page.tsx:19-33 listReviews -> src/lib/integrations/google-business-profile.ts:329-366 (error -> [])",
+    "_components/ReviewItem.tsx:46-62 generateDraft({organizationId, rating, reviewerName, reviewComment})",
+    "src/components/dashboard/modules/motor-resenas/_actions.ts:11-46 resolveScopedOrgId + isModuleActive -> src/lib/ai/review-reply-draft.ts:25-37 (Anthropic)",
+    "ReviewItem.tsx:64-79 replyAction -> _actions.ts:48-73 -> google-business-profile.ts:275-304 PUT reply"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Tienda conectada: conectar y ver resumen",
+   "pasos": [
+    "src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx:292-304 resolveOrgId + isModuleActive + tiendanubeStoreId",
+    "_components/ConnectStoreCard.tsx:39 -> src/app/api/auth/tiendanube/start/route.ts:9-19 (solo SUPER_ADMIN, orgId de la query)",
+    "src/app/api/auth/tiendanube/callback/route.ts:27-86 state firmado -> guarda tokens -> /dashboard/modules/tienda-conectada?connected=true",
+    "page.tsx:86-106 getStoreSummary -> src/lib/integrations/tiendanube.ts:82-162 (res.ok ? json : [], per_page=200, stock null -> 0)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Agenda inteligente",
+   "pasos": [
+    "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:316-329 resolveOrgId + isModuleActive + calComApiKey",
+    "page.tsx:203-213 getCalSummary -> src/lib/integrations/cal-com.ts:32-111 GET https://api.cal.com/v1/bookings?apiKey=",
+    "page.tsx:95-136 BookingItem con getDate/getMonth/toLocaleTimeString del server",
+    "page.tsx:282 EmbedPreview solo si hubo resumen"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Mi cuenta: perfil, reporte, facturacion y boveda",
+   "pasos": [
+    "src/app/(protected)/dashboard/cuenta/perfil/page.tsx:73-104 resolveOrgId + organization; :107-154 rama de soporte solo lectura",
+    "src/components/dashboard/ExecutiveReportPrefsForm.tsx:45-56 -> _actions/executive-report-prefs.actions.ts:20-47 (Zod schemas.ts:8-18)",
+    "cuenta/facturacion/page.tsx:61-75 subscription, invoice (nunca generadas) y getCurrentPlan",
+    "cuenta/boveda/page.tsx:63-69 clientAsset por org -> resolveCredentialDisplay (src/lib/crypto/resolve-credential.ts:16-25) -> VaultRevealButton value (payload RSC)",
+    "src/actions/agency-actions.ts:94-113 (admin, VaultManager) escribe ClientAsset en claro"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Plan: consumo y pedido de upgrade",
+   "pasos": [
+    "src/app/(protected)/dashboard/plan/page.tsx:12-46 getOrgUsageSnapshot (src/lib/plan/get-org-usage.ts:50-85)",
+    "src/components/dashboard/plan/PlansShowcase.tsx:89-160 tarjetas; :213-243 CTA",
+    "src/components/dashboard/plan/UpgradeCtaButton.tsx:88-100 requestUpsellAction (src/lib/actions/upsell.ts:10-140, session.user.organizationId) -> window.location.assign"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Referidos",
+   "pasos": [
+    "src/app/(protected)/dashboard/referidos/page.tsx:26-35 getReferralCodeForOrg / getReferralsForOrg (src/lib/referrals/referrals.service.ts:16-66)",
+    "src/components/dashboard/ReferralPanel.tsx:43 generateMyReferralCodeAction (src/lib/actions/referrals.ts:12-28, session.user.organizationId)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "nombre": "Onboarding (bienvenida), fuera del lote, trazado por el foco",
+   "pasos": [
+    "src/app/bienvenida/_components/BienvenidaWizard.tsx:33 -> src/app/bienvenida/_actions/complete-onboarding.ts:17-61 (resolveOrgId; Zod sin max; no chequea onboardingCompleted)",
+    "src/app/bienvenida/_components/Step2Conexiones.tsx:38-45 pide el ID de medicion G-XXXX",
+    "complete-onboarding.ts:38 lo guarda como analyticsPropertyId",
+    "src/lib/analytics.ts:60-72 normalizePropertyId rechaza G-; :95-109 lee GA4 con la service account unica"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "nombre": "Resultados › Análisis mensual (Pro+)",
+   "pasos": [
+    "Cliente abre /dashboard/resultados/analisis; proxy.ts:154 deja pasar ORG_MEMBER o SUPER_ADMIN impersonando",
+    "analisis/page.tsx:32-33 resolveOrgId() (preview.ts:6-20); null → redirect('/login')",
+    "analisis/page.tsx:35-36 getPlanForOrg + planAllows(plan,'insight') (plan-allows.ts:21-22); Starter → AnalysisTeaser (:48-51)",
+    "analisis/page.tsx:59-60 getMonthlyAnalysisForOrg(orgId) → forOrg(orgId).botConfig.findFirst (getMonthlyAnalysisForOrg.ts:53-56)",
+    "getMonthlyAnalysisForOrg.ts:60-91 chatbotInsight / quotaUsage / chatbotLead.groupBy por botConfigId",
+    "Sin bot → NoBotState (analisis/page.tsx:62-68); con bot → Discoveries/MonthTrend/Categories (:70-82)",
+    "Insumo de los descubrimientos: cron generate-insights (netlify.toml:25-26; no figura en vercel.json) → generateInsightsForBot con Gemini (generateInsights.ts:99-100)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "nombre": "Descarga del informe mensual en PDF",
+   "pasos": [
+    "DownloadMonthlyReportButton.tsx:21 fetch('/api/reports/client-monthly')",
+    "client-monthly/route.ts:25-28 resolveOrgId() → 401; :30-33 planAllows 'insight' → 403",
+    "route.ts:38 getClientMonthlyReportData → get-client-monthly-report-data.ts:24-27 org + botConfig; :55-66 chatbotLead.count/findMany por botConfigId (sin filtro DQ)",
+    "route.ts:40-56 renderToBuffer(ClientMonthlyReportPdf) → attachment no-store",
+    "DownloadMonthlyReportButton.tsx:24-35 blob → <a download>; error → toast (:36-37)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "nombre": "Resultados › SEO y pedido de activación",
+   "pasos": [
+    "seo/page.tsx:98-108 ?demo + resolveOrgId + organization.siteUrl (lo escribe el admin: updateClient.ts:95)",
+    "Sin siteUrl → ResultEmptyState con <form action={activarSeo}> (:129-147) → requestUpsellAction (upsell.ts:10-156): organizationModule.upsert si existe el slug (:45-72), contactSubmission.create con dedup (:81-97), sendAgencyAlert al webhook (:99-104), notificaciones (:112-135); resultado descartado (seo/page.tsx:112)",
+    "Con siteUrl → SeoContent (:170-344) → getSearchConsoleData (searchconsole.ts:99-215): sin credenciales o con error → mock isMockData (:103-105, :211-213)",
+    "seo/page.tsx:203-221 getSeoInsights (results-insights.ts:44-52, unstable_cache 24 h por org) → Anthropic messages.create (:145-150)",
+    "Render: PreviewBanner si mock (:226), 4 métricas con trend literal (:236-273), gráfico, top queries (overflow-x-auto :389), top páginas, oportunidades, insights"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "nombre": "Resultados › Tráfico + PageSpeed",
+   "pasos": [
+    "trafico/page.tsx:46-57 ?demo + resolveOrgId + organization.analyticsPropertyId/siteUrl",
+    "Sin analyticsPropertyId (caso de todo cliente real: nadie lo escribe) → AnalyticsEmptyState con botón sin handler (:82-86, :106-123)",
+    "Con propertyId → AnalyticsContent (:138-273) → getAnalyticsData (analytics.ts:85-200): ID G-… → ok:false (:66-69, :92) y se pinta result.error (:158); sin credenciales o error de API → mock (:98-100, :196-198)",
+    "getTrafficInsights (results-insights.ts:34-42) solo si no es mock (trafico/page.tsx:166-184)",
+    "PageSpeedSection (:125-136) → getPageSpeedReport mobile/desktop (pagespeed.ts:26-35, caché 6 h) → PageSpeedCard"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "nombre": "Resultados › Reputación (Google Business Profile)",
+   "pasos": [
+    "Activación: un SUPER_ADMIN abre a mano /api/auth/google-business/start?orgId=<cuid> (start/route.ts:5-16; ninguna UI la enlaza) → callback guarda tokens y descubre location (callback/route.ts:49-65)",
+    "reputacion/page.tsx:15-23 resolveOrgId + getGBPMetrics (google-business-profile.ts:165-183, caché 1 h)",
+    "fetchGBPMetrics (:185-236): refresh de token (getAuthedClient :55-100) + reviews v4; error → console.error + null",
+    "metrics → GBPMetricsCard; null → ReputationEmptyState (reputacion/page.tsx:34, :39-55)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "nombre": "Servicios › vitrina y solicitud de módulo",
+   "pasos": [
+    "services/page.tsx:169-189 resolveOrgId; service.findMany y organizationModule.findMany por org; premiumModule.findMany global con status ACTIVE/COMING_SOON",
+    "services/page.tsx:195-196 buildShowroom (showroom.ts:58-74) → owned / available / comingSoon",
+    "PremiumModuleCard.tsx:201-227 submitInterest → requestUpsellAction(slug, name) (upsell.ts:10-156)",
+    "Éxito en 'disponible' → window.location.assign('/dashboard/messages?context=modulo…') (PremiumModuleCard.tsx:211-216); motor-resenas → Link a su LockedView (services/page.tsx:325-327; PremiumModuleCard.tsx:403-410)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "nombre": "Soporte › abrir ticket",
+   "pasos": [
+    "soporte/page.tsx:15-39 auth + resolveOrgId; ticket.findMany/count por org → SoporteBoard (:103)",
+    "NewTicketModal.tsx:29-49 Zod en cliente → createTicketAction (lib/tickets/actions.ts:38-104)",
+    "tickets/actions.ts:49-61 auth + resolveOrgId + CreateTicketSchema; :64-86 ticket.create con primer TicketMessage",
+    "HIGH/URGENT → sendAgencyAlert al webhook (:88-96); revalidateTicketPaths (:98)",
+    "NewTicketModal.tsx:59-64 toast + router.push al detalle (sin comentario que lo justifique)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "nombre": "Soporte › conversación y cierre del ticket",
+   "pasos": [
+    "soporte/[ticketId]/page.tsx:54-70 auth + resolveOrgId; ticket.findUnique({ id, organizationId }) → ajeno: redirect('/dashboard/soporte')",
+    "page.tsx:106-112 mapea TicketMessage → ChatMessage → ClientChatThread (:161-190)",
+    "TicketReplyForm.tsx:13-21 → replyToTicketAction (tickets/actions.ts:110-176): cliente → assertTicketBelongsToOrg (:126-137; assert-ownership.ts:32-43); ticketMessage.create (:140-148); admin → email al cliente (:150-167)",
+    "ResolveTicketButton.tsx:12-17 → resolveTicketClientAction (tickets/actions.ts:202-222): update where { id, organizationId } → router.refresh; sin confirmación"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "nombre": "Bienvenida (onboarding del cliente)",
+   "pasos": [
+    "Disparadores: proxy.ts:130/:144/:150 (JWT onboardingCompleted=false), login/actions.ts:101-107, (protected)/dashboard/layout.tsx:127-129; ninguno se activa para altas vivas (core.ts:85, createClientOnly.ts:85, createClientWithBot.ts:135 crean con onboardingCompleted: true)",
+    "bienvenida/layout.tsx:9-10 auth(); page.tsx:10-26 resolveOrgId + organization.findUnique; :29-31 completado → /dashboard",
+    "BienvenidaWizard.tsx:24-41 Step1Empresa → Step2Conexiones → Step3Tour → completeOnboardingAction(data) (:33)",
+    "complete-onboarding.ts:18-31 auth + resolveOrgId + Zod; :33-43 organization.update (companyName, whatsapp, analyticsPropertyId ← ga4MeasurementId, onboardingCompleted); :46-57 clientBrandProfile.upsert targetAudience = 'Rubro: …'",
+    "complete-onboarding.ts:59 revalidatePath('/dashboard','layout') → BienvenidaWizard.tsx:38-39 router.push('/dashboard') + refresh"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Crear ticket de soporte",
+   "pasos": [
+    "UI: soporte/page.tsx:73 monta NewTicketModal; NewTicketModal.tsx:113-116 onSubmit -> handleSubmit",
+    "Validacion cliente: NewTicketModal.tsx:13-18, :38-49 (z.nativeEnum sobre prisma-enums)",
+    "Action: NewTicketModal.tsx:55 createTicketAction -> tickets/actions.ts:49-53 auth+resolveOrgId, :55-61 CreateTicketSchema",
+    "DB: tickets/actions.ts:65-81 prisma.ticket.create con organizationId de la sesion y primer TicketMessage",
+    "Alerta: tickets/actions.ts:88-96 sendAgencyAlert si HIGH/URGENT (webhook, lib/alerts.ts:109-137)",
+    "Navegacion: NewTicketModal.tsx:63 router.push(/dashboard/soporte/<cuid>) sin comentario",
+    "Detalle: soporte/[ticketId]/page.tsx:54-70 findUnique({ id, organizationId }) -> redirect si no es de la org"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Responder y resolver un ticket",
+   "pasos": [
+    "Pagina: soporte/[ticketId]/page.tsx:56 resolveOrgId, :60-68 ticket por id+org con mensajes",
+    "UI: ClientChatThread (ClientChatThread.tsx:32-71) + TicketReplyForm.tsx:14-35 sobre ClientChatComposer.tsx:92-126",
+    "Action: TicketReplyForm.tsx:17-20 replyToTicketAction -> tickets/actions.ts:121-137 Zod + resolveOrgId + assertTicketBelongsToOrg",
+    "DB: tickets/actions.ts:140-148 ticketMessage.create; revalidate :170",
+    "Resolver: ResolveTicketButton.tsx:12-17 -> tickets/actions.ts:202-215 update where { id, organizationId } -> router.refresh"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Mensaje al equipo develOP",
+   "pasos": [
+    "Pagina: messages/page.tsx:12 resolveOrgId, :16-19 message.findMany por org (sin limite)",
+    "UI: MessageThread.tsx:50-88 (prefill por ?context, router.replace) -> ClientChatComposer.tsx:92-111 (Enter envia)",
+    "Action: MessageThread.tsx:51 useActionState(sendClientMessageAction) -> messages.ts:118-131 sesion (session.user.organizationId) + SendMessageSchema",
+    "DB: messages.ts:134-140 message.create fromAdmin=false",
+    "Efectos: messages.ts:155-163 sendAgencyAlert, :182-191 notificacion al SUPER_ADMIN (sin organizationId), revalidate :195-197"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Aprobar o pedir cambios en una entrega",
+   "pasos": [
+    "Pagina: project/page.tsx:131-135 projects por organizationId (resolveOrgId), :186-195 ?p elige dentro del set",
+    "UI: ProjectTaskTabs.tsx:160-162 -> TaskApprovalButtons.tsx:14-37 con confirmacion (:44-79)",
+    "Action: dashboard-actions.ts:12-37 sesion + Zod + ownership task.project.organizationId (FROZEN)",
+    "DB: dashboard-actions.ts:43-82 task.update, notificacion al cliente (:49-59), notificaciones a cada SUPER_ADMIN con organizationId del cliente (:62-71), mensaje en el hilo (:75-81)",
+    "Lado cliente: esas notificaciones admin se leen en layout.tsx:101-105 y notifications.ts:82-86 (sin userId)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Campana de notificaciones e historial",
+   "pasos": [
+    "Layout: dashboard/layout.tsx:74 resolveOrgId, :101-105 notification.findMany({ organizationId }, take 5)",
+    "UI: DashboardLayoutClient.tsx:148 -> NotificationCenter.tsx:41-127 (portal a body :169-274)",
+    "Marcar una: NotificationCenter.tsx:103-109 -> markNotificationAsRead (dashboard-actions.ts:188-218, chequeo de org :203)",
+    "Marcar todas: NotificationCenter.tsx:111-117 -> notifications.ts:46-66 updateMany por organizationId",
+    "Historial: NotificationCenter.tsx:258-269 -> NotificationHistoryModal.tsx:30-46 -> getMyNotificationsAction (notifications.ts:73-93)",
+    "Click con actionUrl: NotificationCenter.tsx:123-126 router.push(notif.actionUrl)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Solicitar un modulo premium (upsell)",
+   "pasos": [
+    "Pagina: services/page.tsx:169-186 org por resolveOrgId; cards available/coming_soon :315-353",
+    "UI: PremiumModuleCard.tsx:201-227 submitInterest -> requestUpsellAction(slug, name)",
+    "Action: upsell.ts:14-25 sesion (session.user.organizationId) + UpsellRequestSchema",
+    "DB: upsell.ts:57-71 organizationModule.upsert (contador), :81-97 dedup + contactSubmission.create, :112-135 notificaciones",
+    "Efectos: upsell.ts:99-104 sendAgencyAlert; revalidatePath('/dashboard') :143",
+    "Navegacion: PremiumModuleCard.tsx:211-215 window.location.assign(/dashboard/messages?context=modulo&moduleName=...) -> MessageThread.tsx:72-88 prefill"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Perfil de empresa, contacto y contrasena",
+   "pasos": [
+    "Pagina: perfil/page.tsx:74-81 resolveOrgId + organization.findUnique; preview read-only :105-150",
+    "Datos: ProfileForms.tsx:216-237 -> updateProfileAction (profile.ts:28-64: sesion, UpdateProfileSchema, transaction user+organization)",
+    "Contacto: ProfileForms.tsx:278-327 -> updateContactAction (profile.ts:80-93, whatsapp sin Zod)",
+    "Contrasena: ProfileForms.tsx:380-397 llamada directa -> updatePasswordAction (profile.ts:198-239 Zod, bcrypt, sessionVersion++, unstable_update) -> router.refresh"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Solicitar eliminacion de cuenta",
+   "pasos": [
+    "UI: ProfileForms.tsx:689-704 DangerZone con confirmacion (:752-786)",
+    "Action: profile.ts:150-177 crea Ticket HIGH 'Solicitud de eliminacion de cuenta' (sin alerta ni dedup)",
+    "Admin: admin/tickets/_components/ticket-chat.tsx:119 detecta por titulo exacto -> :224-246 banner con link /admin/clients?delete=<orgId>"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Metricas de Trafico y SEO",
+   "pasos": [
+    "Pagina: resultados/trafico/page.tsx:46-48 resolveOrgId; ?demo=true -> PreviewBanner (:68)",
+    "Datos: analytics.ts:36-47 sin credenciales -> mock; :137-139 cualquier error -> mock (isMockData)",
+    "Cards: trafico/page.tsx:194-240 AnalyticsMetricCard con trend hardcodeado (:204, :215, :227, :238) -> AnalyticsMetricCard.tsx:63-71 TrendBadge 'vs mes anterior'",
+    "Alertas: AnalyticsAlertas.tsx:9-59 -> AlertaMetrica.tsx:63-119",
+    "SEO: seo/page.tsx:179 getSearchConsoleData (mock en searchconsole.ts:104/:111/:213) -> cards con trend fijo (:244-269) -> SeoAlertas.tsx:9-44 -> OportunidadesSEO.tsx:10-56 -> OportunidadSEO.tsx:83-97 -> sendClientMessageAction"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Referidos",
+   "pasos": [
+    "Pagina: referidos/page.tsx:27 resolveOrgId, :30-33 codigo y referidos por org",
+    "UI: ReferralPanel.tsx:40-51 'Genera tu codigo' -> generateMyReferralCodeAction (referrals.ts:13-23, session.user.organizationId)",
+    "Link: ReferralPanel.tsx:37-38 buildReferralLink(origin, code) con NEXT_PUBLIC_APP_URL o window.location.origin"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Preferencias del reporte ejecutivo semanal",
+   "pasos": [
+    "Pagina: perfil/page.tsx:196 frecuencia efectiva (opt-out), :304-309 ExecutiveReportPrefsForm",
+    "UI: ExecutiveReportPrefsForm.tsx:45-56 guarda al cambiar el select",
+    "Action: executive-report-prefs.actions.ts:23-29 resolveOrgId + Zod, :31-43 organization.update (limpia opt-out :41)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "nombre": "Card de onboarding en Inicio",
+   "pasos": [
+    "Pagina: dashboard/page.tsx:51 resolveOrgId, :61 <OnboardingStatusCard organizationId>",
+    "Componente servidor: OnboardingStatusCard.tsx:17-26 prisma.onboardingTask.findMany por org; null si no hay tareas o estan completas (:28, :35)",
+    "CTA: OnboardingStatusCard.tsx:97 /dashboard/messages?prefill=conexiones -> MessageThread.tsx:73-74 solo lee context/moduleName (prefill ignorado)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Home: 'Tu semana en números' (leads, semáforo, velocidad, origen, embudo, campañas)",
+   "pasos": [
+    "src/app/(protected)/dashboard/page.tsx:51 resolveOrgId() → src/lib/preview.ts:6-20 (ORG_MEMBER: session.user.organizationId; SUPER_ADMIN: impersonación firmada, impersonation.ts:54-85)",
+    "page.tsx:111-121 organization.averageTicketUsd/siteUrl + getPlanForOrg + planAllows(plan,'leadScoring')",
+    "src/lib/dashboard/home-metrics.ts:85 periodBoundsForHome (home-metrics-logic.ts:22-30: semana AR en curso vs semana anterior completa)",
+    "home-metrics.ts:96-118 ChatbotLead.count/findMany where botConfig.organizationId + notDq + capturedAt; :116-117 semáforo solo Pro+",
+    "home-metrics-logic.ts:69-79 velocidad, :117-127 embudo, :149-178 orígenes, :206-234 campañas",
+    "BusinessHero.tsx:46-197, LeadOrigins.tsx:16-59, LeadFunnel.tsx:27-85, LeadCampaigns.tsx:18-69 (empties vía SectionEmptyState.tsx:28-36)",
+    "BusinessHero.tsx:131 Link a /dashboard/chatbot/leads/{id} → leads/[id]/page.tsx:34 getLeadByIdForOrg → multiTenantQueries.ts:147-148 forOrg(org).chatbotLead.findFirst"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Home: ticket promedio y estimación de plata",
+   "pasos": [
+    "MoneyEstimate.tsx:36-41 validación cliente (finito > 0)",
+    "MoneyEstimate.tsx:44 saveAverageTicket → src/app/(protected)/dashboard/_actions/business-profile.actions.ts:25 resolveOrgId, :28-31 Zod int positivo ≤ 1e8",
+    "business-profile.actions.ts:33-36 prisma.organization.update({ averageTicketUsd }) → :38 revalidatePath('/dashboard')",
+    "MoneyEstimate.tsx:108 estimateMoney (home-metrics-logic.ts:93-96 leadCount × ticket) → :127-135 render"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Home: Resumen ejecutivo IA (lectura on-demand y regeneración manual)",
+   "pasos": [
+    "page.tsx:187-193 BriefServerWrapper → src/lib/ai/executive-brief.ts:52-93 cache válido si edad < 7 d, posterior a BRIEF_LOGIC_CUTOFF (executive-brief-input.ts:204-209) y texto válido (:38-42)",
+    "Si no: executive-brief.ts:95-100 generateBriefText (:272-309) → getHealthScore + getWeekResults + getBriefHistory → buildBriefMetricsInput (executive-brief-input.ts:90-127) → Vertex gemini-2.5-flash (factory.ts:20-47, providers/google.ts:1-60) maxOutputTokens 1024",
+    "executive-brief.ts:109-118 organization.update(cachedExecutiveBrief*) + persistBriefSnapshot (:334-367, upsert por orgId+periodKey)",
+    "Fallo o texto inválido → return null (:102-107, :127-130) → page.tsx:199-201 BriefEmptyState",
+    "Regenerar: AIExecutiveBriefV2.tsx:33-48 → src/app/(protected)/dashboard/_actions/regenerate-brief.ts:9-26 (auth + Zod sobre resolveOrgId) → executive-brief.ts:137-221 (tope 3/sem :157-163, gate 4 h :169-182, update :196-203)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Home: bloque 'Tu cuenta' (Health Score, Atención hoy, Resultados de la semana)",
+   "pasos": [
+    "page.tsx:172-175 getHealthScore → health-score.ts:59-65 unstable_cache 1 h → :69-123 (level desde Organization.dataConnections :86-87, que nadie escribe) → HealthScore.tsx:30-35 (ONBOARDING → HealthScoreOnboarding)",
+    "page.tsx:177-180 getAttentionItems → attention.ts:25-127 (subscription, task PENDING_APPROVAL, mensajes no leídos, dataConnections) → AttentionStack.tsx:76-160",
+    "page.tsx:182-185 getWeekResults → week-results.ts:18-105 (visitas Promise.resolve(0) :41-42; leads = ContactSubmission global :43-52; mensajes y tareas por org :53-80) → WeekResultsGrid.tsx:21-88 (caption 'En calibración' :53-54)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Email ejecutivo semanal (consume las libs del lote)",
+   "pasos": [
+    "vercel.json:12 cron /api/cron/send-executive-reports (no figura en netlify.toml:25-32; deploy Netlify según AGENTS.md:21)",
+    "src/lib/reports/executive-weekly/build.ts:113-119 brief cacheado o getExecutiveBrief",
+    "build.ts:122-141 getBriefHistory(org,2) o fallback getHealthScore/getWeekResults",
+    "build.ts:174-177 leads = week.leads (ContactSubmission global) → src/lib/email/templates/executive-weekly.ts:243-246 tarjeta 'Leads'"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Pedido de upsell (planes, recomendaciones, módulos, SEO)",
+   "pasos": [
+    "UpgradeCtaButton.tsx:80-88 / Recommendations.tsx:82 / PremiumModuleCard.tsx:206 / LockedView.tsx:68 / resultados/seo/page.tsx:112 → requestUpsellAction",
+    "src/lib/actions/upsell.ts:14-25 sesión + UpsellRequestSchema (schemas.ts:45-48)",
+    "upsell.ts:45-72 si featureKey es slug de PremiumModule: upsert OrganizationModule INACTIVE + contador",
+    "upsell.ts:81-98 dedup 24 h por (email, featureKey) (src/lib/upsell/dedup.ts:33-40) → ContactSubmission.create",
+    "upsell.ts:99-104 sendAgencyAlert (webhook, src/lib/alerts.ts:109-149) sin await; :106-135 Notification al cliente y al primer SUPER_ADMIN; :141-143 revalidatePath",
+    "Cliente: window.location.assign('/dashboard/messages?context=…') (UpgradeCtaButton.tsx:100, Recommendations.tsx:91) → src/lib/data/message-context.ts:54-62 prefill del composer"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Mensaje del cliente a develOP",
+   "pasos": [
+    "MessageThread.tsx:51 useActionState(sendClientMessageAction) → ClientChatComposer muestra state.error",
+    "src/lib/actions/messages.ts:118-131 sesión + SendMessageSchema",
+    "messages.ts:134-140 prisma.message.create({ organizationId, fromAdmin:false })",
+    "messages.ts:143-164 alerta MESSAGE_NEW si AgencySettings.alertOnClientMessages (sin await)",
+    "messages.ts:169-197 Notification para el primer SUPER_ADMIN (nadie la lee del lado admin)",
+    "messages.ts:199-201 revalidatePath"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Notificaciones del cliente",
+   "pasos": [
+    "src/app/(protected)/dashboard/layout.tsx:72-74 resolveOrgId → :101-105 notification.findMany({ where:{ organizationId }, take:5 }) (sin userId)",
+    "DashboardLayoutClient → NotificationCenter.tsx:114 markAllNotificationsReadAction → notifications.ts:46-66 updateMany por organizationId",
+    "NotificationHistoryModal.tsx:34 getMyNotificationsAction → notifications.ts:73-93 findMany por organizationId take 200; estados loading/error/empty :117, :134"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Novedades del panel",
+   "pasos": [
+    "layout.tsx:110-112 getAnnouncementsForOrg(org, userId) → get-announcements-for-org.ts:37-57 (vigentes; ALL u ORG propia; reads del usuario; take 20) → :68 countUnread (visibility.ts:59-61)",
+    "AnnouncementsFeed.tsx:57-66 al abrir: badge optimista → markAnnouncementsSeenAction (announcements.ts:29-43 createMany skipDuplicates) → router.refresh"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Código de referido",
+   "pasos": [
+    "src/app/(protected)/dashboard/referidos/page.tsx:27-33 resolveOrgId → getReferralCodeForOrg/getReferralsForOrg",
+    "ReferralPanel.tsx:40-51 → src/lib/actions/referrals.ts:12-28 (session.user.organizationId)",
+    "src/lib/referrals/referrals.service.ts getOrCreateReferralCodeForOrg: findUnique por organizationId + create con reintentos",
+    "ReferralPanel.tsx:48-49 setCode + router.refresh"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Motor de reseñas: borrador IA y publicación en Google",
+   "pasos": [
+    "src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:110 isModuleActive (src/lib/modules/check-activation.ts:3-15)",
+    "ReviewItem.tsx:46-61 generateDraft({organizationId, rating, reviewerName, reviewComment}) → _actions.ts:20-24 org de sesión + módulo → :26-30 org → :33-38 src/lib/ai/review-reply-draft.ts:32-37 (Anthropic claude-haiku-4-5, max_tokens 250)",
+    "ReviewItem.tsx:64-79 replyAction({organizationId, reviewName, comment}) → _actions.ts:55-65 → src/lib/integrations/google-business-profile.ts:275-305 PUT https://mybusiness.googleapis.com/v4/{reviewName}/reply → :67-70 revalidatePath"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Mi plan",
+   "pasos": [
+    "src/app/(protected)/dashboard/plan/page.tsx:12-14 resolveOrgId (loading.tsx de la ruta)",
+    "plan/page.tsx:36-46 getOrgUsageSnapshot (src/lib/plan/get-org-usage.ts:49-85: botConfig por organizationId, QuotaUsage del período UTC :36-37)",
+    "UsageMeter.tsx:75-233 (vacío sin bot :79-127 → CTA bot-activation) + PlansShowcase.tsx:45-81 (precios estáticos plan-presentation.ts:149,165,181)",
+    "PlansShowcase.tsx:212-235 UpgradeCtaButton → flujo de upsell; downgrade = Link a mensajes :201-210"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Bóveda del cliente",
+   "pasos": [
+    "src/app/(protected)/dashboard/cuenta/boveda/page.tsx:63-69 resolveOrgId → clientAsset.findMany({ where:{ organizationId } })",
+    "boveda/page.tsx:129-132 resolveCredentialDisplay (src/lib/crypto/resolve-credential.ts:16-25: descifra solo si 'enc:v1:', si no devuelve el texto tal cual)",
+    "boveda/page.tsx:185 y :242 VaultRevealButton (valor completo en props del client component; ocultado visual 30 s, VaultRevealButton.tsx:7, :31-43)",
+    "Escritura viva: src/components/admin/managers/VaultManager.tsx:25 → src/actions/agency-actions.ts:94-112 (SUPER_ADMIN) prisma.clientAsset.create con description en claro"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Facturación: plan actual",
+   "pasos": [
+    "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx:60-75 resolveOrgId → subscription, invoices, getCurrentPlan",
+    "src/lib/billing/get-current-plan.ts:38-68 service y organizationModule ACTIVE por organizationId",
+    "get-current-plan.ts:70-77 total = suma de priceMonthlyUsd de catálogo; nextBillingAt = 1° del mes siguiente (hora del server)",
+    "src/components/dashboard/CurrentPlanCard.tsx:173-196 'Total mensual' y 'Próxima facturación'; la página muestra además renewalDate real (facturacion/page.tsx:81-94)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "nombre": "Resultados: reputación, velocidad, insights, análisis mensual e informe PDF",
+   "pasos": [
+    "resultados/reputacion/page.tsx:15-23 resolveOrgId → getGBPMetrics (google-business-profile.ts:165+, performance en 0 :218-224) → GBPMetricsCard.tsx:37-178 o ReputationEmptyState :39-56",
+    "resultados/trafico/page.tsx:125-136 getPageSpeedReport (pagespeed.ts:26-35, cache 6 h) → PageSpeedCard.tsx:176-250",
+    "trafico/page.tsx:47-49 getTrafficInsights (results-insights.ts:34-42, Anthropic, cache 24 h por org) → InsightsBlock.tsx:37-89",
+    "resultados/analisis/page.tsx:31-60 planAllows(plan,'insight') → getMonthlyAnalysisForOrg (forOrg, getMonthlyAnalysisForOrg.ts:53-56) → CategoriesSection/DiscoveriesSection/MonthTrendSection(+MonthlyConversationsChart) o AnalysisTeaser",
+    "DownloadMonthlyReportButton.tsx:21 fetch /api/reports/client-monthly → route.ts:24-56 (resolveOrgId, gate de plan, renderToBuffer)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Crear ticket de soporte (cliente)",
+   "pasos": [
+    "src/app/(protected)/dashboard/soporte/page.tsx:73 monta NewTicketModal",
+    "src/components/dashboard/NewTicketModal.tsx:38-55 valida en cliente y llama createTicketAction",
+    "src/lib/tickets/actions.ts:49-53 sesión + resolveOrgId (src/lib/preview.ts:6-20)",
+    "src/lib/tickets/actions.ts:55-61 Zod CreateTicketSchema",
+    "src/lib/tickets/actions.ts:64-86 prisma.ticket.create con el primer TicketMessage",
+    "src/lib/tickets/actions.ts:88-96 webhook TICKET_URGENT solo si HIGH/URGENT (src/lib/alerts.ts:109-147)",
+    "src/lib/tickets/actions.ts:98-99 revalidate + ok({ ticketId })",
+    "src/components/dashboard/NewTicketModal.tsx:59-63 router.push(/dashboard/soporte/{cuid})",
+    "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:60-70 findUnique por id + organizationId"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Responder ticket (cliente y admin)",
+   "pasos": [
+    "src/components/dashboard/TicketReplyForm.tsx:16-20 (cliente) o admin/tickets/_components/ticket-reply-form.tsx (admin) llaman replyToTicketAction",
+    "src/lib/tickets/actions.ts:117-124 sesión y rol",
+    "src/lib/tickets/actions.ts:126-137 rama cliente: resolveOrgId + assertTicketBelongsToOrg (src/lib/auth/assert-ownership.ts:32-43)",
+    "src/lib/tickets/actions.ts:140-148 prisma.ticketMessage.create (no toca Ticket.updatedAt)",
+    "src/lib/tickets/actions.ts:150-167 rama admin: sendEmail por Resend (src/lib/email.ts:15-30), resultado ignorado",
+    "src/lib/tickets/actions.ts:170-171 revalidate + ok",
+    "src/components/dashboard/ClientChatComposer.tsx:84-86 muestra state.error"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Marcar ticket como resuelto (cliente)",
+   "pasos": [
+    "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:150-153 ResolveTicketButton",
+    "src/components/dashboard/ResolveTicketButton.tsx:12-17 sin confirmación",
+    "src/lib/tickets/actions.ts:205-215 update where id + organizationId → RESOLVED",
+    "src/components/dashboard/ResolveTicketButton.tsx:16 router.refresh solo si success (si falla no muestra nada)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Reporte ejecutivo semanal (cron)",
+   "pasos": [
+    "vercel.json:11-14 agenda lunes 12:00 UTC; netlify.toml:25-32 no lo agenda (prod Netlify, docs/operations/00-entornos.md:12)",
+    "src/app/api/cron/send-executive-reports/route.ts:17-27 valida CRON_SECRET y llama sendExecutiveWeeklyReports",
+    "src/lib/reports/executive-weekly/send.ts:78-84 orgs onboardeadas con suscripción ACTIVE",
+    "src/lib/reports/executive-weekly/send.ts:105-117 idempotencia por (org, periodKey) + cadencia BIWEEKLY (:43-59)",
+    "src/lib/reports/executive-weekly/build.ts:68-106 org, gate de plan (:90-93), opt-out (:99-101), destinatario take:1 (:78-82,103-106)",
+    "src/lib/reports/executive-weekly/build.ts:113-119 brief en cache o getExecutiveBrief (LLM, src/lib/ai/executive-brief.ts:52-135)",
+    "src/lib/reports/executive-weekly/build.ts:122-141 snapshots (src/lib/ai/brief-history.ts:24-46) o getHealthScore/getWeekResults en vivo",
+    "src/lib/reports/executive-weekly/build.ts:154-163 top de leads (top-hot-leads.ts:56-160) solo BUSINESS",
+    "src/lib/reports/executive-weekly/send.ts:142-159 log PENDING",
+    "src/lib/reports/executive-weekly/send.ts:161-177 template + sendTransactionalEmail (src/lib/email/brevo-service.ts:17-39) con List-Unsubscribe",
+    "src/lib/reports/executive-weekly/send.ts:179-204 SENT o FAILED en WeeklyReportLog"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Envío manual del reporte (admin)",
+   "pasos": [
+    "src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx:37 fetch POST",
+    "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:13-57 requireSuperAdmin + rate limit + Zod",
+    "src/lib/reports/executive-weekly/send-manual.ts:46-52 bloqueo si ya hay SENT",
+    "src/lib/reports/executive-weekly/send-manual.ts:54 buildExecutiveWeeklyReport (mismo motor que el cron)",
+    "src/lib/reports/executive-weekly/send-manual.ts:74-129 PENDING → Brevo → SENT/FAILED",
+    "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:62-91 audit log y respuesta"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Preferencias del reporte (cliente)",
+   "pasos": [
+    "src/app/(protected)/dashboard/cuenta/perfil/page.tsx:193-203 gate reportEligiblePlan (src/lib/reports/executive-weekly/report-eligible-plan.ts:9-18)",
+    "src/app/(protected)/dashboard/cuenta/perfil/page.tsx:297-306 ExecutiveReportPrefsForm",
+    "src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts:20-46 resolveOrgId + Zod + update de Organization",
+    "src/lib/reports/executive-weekly/send.ts:83,114 y build.ts:99,161 consumen frecuencia y cantidad"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Informe mensual en PDF (cliente)",
+   "pasos": [
+    "src/app/(protected)/dashboard/resultados/analisis/page.tsx:45 DownloadMonthlyReportButton",
+    "src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx:18-35 fetch y descarga del blob",
+    "src/app/api/reports/client-monthly/route.ts:24-33 resolveOrgId + gate planAllows(insight)",
+    "src/lib/reports/client-monthly/get-client-monthly-report-data.ts:24-66 org, análisis mensual y conteos de leads por botConfigId (sin filtro DQ)",
+    "src/lib/reports/client-monthly/monthly-report-data.ts:73-97 ensamblado puro",
+    "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx:287-318 render",
+    "src/app/api/reports/client-monthly/route.ts:40-56 renderToBuffer y respuesta adjunta"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Ideas para crecer (recomendaciones en Inicio)",
+   "pasos": [
+    "src/app/(protected)/dashboard/page.tsx:78-80,238-248 wrapper con try/catch",
+    "src/lib/recommendations/get-recommendations-for-org.ts:32-41 señales org-scoped (análisis mensual, consumo, módulos, leads calientes, GBP)",
+    "src/lib/recommendations/rules.ts:175-218 evaluación, orden y rotación semanal",
+    "src/components/dashboard/home/Recommendations.tsx:78-101 CTA → requestUpsellAction",
+    "src/lib/actions/upsell.ts:43-139 OrganizationModule upsert (si es módulo) y ContactSubmission deduplicado (src/lib/upsell/dedup.ts:33-40)",
+    "src/components/dashboard/home/Recommendations.tsx:88-91 window.location.assign(/dashboard/messages?context=…)"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Mi plan: consumo y vitrina",
+   "pasos": [
+    "src/app/(protected)/dashboard/plan/page.tsx:12-14 resolveOrgId",
+    "src/app/(protected)/dashboard/plan/page.tsx:36-46 dos llamadas a getOrgUsageSnapshot",
+    "src/lib/plan/get-org-usage.ts:49-85 plan efectivo + QuotaUsage del mes UTC",
+    "src/lib/plan/get-plan-for-org.ts:68-125 cache 60 s, aplica pendingPlan vencido (:39-59), fallback Starter (src/lib/plan/fallback.ts:44-64)",
+    "src/components/dashboard/plan/PlansShowcase.tsx con src/lib/plan/plan-presentation.ts:144-196",
+    "src/components/dashboard/plan/UpgradeCtaButton.tsx:80-100 requestUpsellAction y window.location.assign"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Vitrina de servicios y 'avisame cuando esté'",
+   "pasos": [
+    "src/app/(protected)/dashboard/services/page.tsx:169-190 resolveOrgId, catálogo y módulos de la org",
+    "src/lib/modules/showroom.ts:58-74 clasifica owned/available/coming_soon",
+    "src/components/dashboard/PremiumModuleCard.tsx:200-216 submitInterest → requestUpsellAction",
+    "src/lib/actions/upsell.ts:81-97 dedup 24 h y ContactSubmission"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Referidos: código, link y atribución pública",
+   "pasos": [
+    "src/app/(protected)/dashboard/referidos/page.tsx:26-35 resolveOrgId, código y lista (src/lib/referrals/referrals.service.ts:15-21,64-69)",
+    "src/components/dashboard/ReferralPanel.tsx:32-45 generateMyReferralCodeAction",
+    "src/lib/actions/referrals.ts:12-27 session.user.organizationId → getOrCreateReferralCodeForOrg (referrals.service.ts:28-61; code.ts:23-26)",
+    "src/lib/referrals/code.ts:29-32 link /contact?ref=CODE",
+    "src/lib/actions/contact.ts:16-70 formulario público con ref → attributeReferralFromContact",
+    "src/lib/referrals/referrals.service.ts:94-140 hechos + decideReferralAttribution (attribution.ts:41-52) + Referral PENDING",
+    "src/lib/referrals/referrals.service.ts:143-165 webhook LEAD_EXTERNAL y Notification a un SUPER_ADMIN"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Gating de módulos premium",
+   "pasos": [
+    "src/app/(protected)/dashboard/layout.tsx:115 slugs ACTIVE de la org → SidebarNav.tsx:76-103 (lista fija de slugs)",
+    "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:17-21 isModuleActive(org, 'email-marketing')",
+    "src/lib/modules/check-activation.ts:3-15 findFirst por slug y status ACTIVE",
+    "src/lib/data/premium-modules.ts:38 el catálogo define 'email-marketing-pro'",
+    "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17-27 las actions solo resuelven la org, sin gate",
+    "src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:106-153 isModuleActive + resolveMotorResenasView (motor-resenas-view.ts:38-42)",
+    "src/components/dashboard/modules/motor-resenas/_actions.ts:20-24,55-59 resolveScopedOrgId (org-scope.ts:20-27) + isModuleActive"
+   ]
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "nombre": "Leads y Health Score de Inicio alimentados por ContactSubmission global",
+   "pasos": [
+    "src/app/(protected)/dashboard/page.tsx:172-185 HealthScore y WeekResults",
+    "src/lib/dashboard/week-results.ts:43-52 count de ContactSubmission sin organizationId",
+    "src/lib/health-score.ts:283-292 y :311-345 conversión y leads con conteo global",
+    "src/lib/actions/upsell.ts:88-97 cada upsell de cualquier cliente crea un ContactSubmission",
+    "src/lib/reports/executive-weekly/build.ts:130-141,174-177 el mismo número entra al reporte semanal",
+    "src/lib/ai/executive-brief.ts:278,334-360 y al prompt del brief y al snapshot"
+   ]
   }
  ]
 }

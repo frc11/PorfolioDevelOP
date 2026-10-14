@@ -454,6 +454,489 @@
    "patron": "Datos fijos presentados como métricas reales en el portal",
    "como_buscarlo": "git grep -n -E \"successRate: 0\\.|leadValueUSD:\" origin/main -- logic-core-v3/src",
    "donde_aparecio": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:43-44 (leadValueUSD 50 y successRate 0.97 fijos; cruzar con la previa P1-10)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Slugs de modulos premium hardcodeados que divergen del catalogo sincronizado",
+   "como_buscarlo": "git grep -n \"isModuleActive(\\|slug: '\" origin/main -- src y comparar contra PREMIUM_MODULES_CATALOG (src/lib/data/premium-modules.ts)",
+   "donde_aparecio": "email-marketing/layout.tsx:20 y SidebarNav.tsx:78 ('email-marketing') vs premium-modules.ts:38 ('email-marketing-pro')"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Respuesta de API externa sin chequear res.ok convertida en 'vacio' o ceros",
+   "como_buscarlo": "git grep -n \"await res.json()\\|.ok ? await\" origin/main -- src/lib/integrations y revisar si el error se distingue del vacio",
+   "donde_aparecio": "google-business-profile.ts:344; tiendanube.ts:96, :102, :111, :118"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Datos mock devueltos como ok cuando falta la credencial",
+   "como_buscarlo": "git grep -n \"getMock\\|MOCK_\" origin/main -- src/lib",
+   "donde_aparecio": "src/lib/analytics.ts:97-106 (sin GOOGLE_SERVICE_ACCOUNT_KEY devuelve getMockAnalyticsData con ok:true)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Campo de config escrito por el cliente que el servidor usa como id de recurso externo con credenciales compartidas de develOP",
+   "como_buscarlo": "Buscar escrituras a organization.* desde actions de cliente (resolveOrgId) y cruzar con lecturas en src/lib/integrations y src/lib/analytics.ts",
+   "donde_aparecio": "bienvenida/_actions/complete-onboarding.ts:38 -> analytics.ts:95-109"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Notificaciones para admin creadas con la organizationId del cliente",
+   "como_buscarlo": "git grep -n \"notification.create\" origin/main -- src y revisar las que usan userId de un SUPER_ADMIN",
+   "donde_aparecio": "dashboard-actions.ts:62-72 y :153-163"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Escrituras en modo soporte via resolveOrgId, incluidas las disparadas al montar un componente",
+   "como_buscarlo": "git grep -n \"resolveOrgId()\" origin/main -- src en archivos 'use server' + useEffect que llame actions",
+   "donde_aparecio": "mark-read.ts:12 + MarkReadOnMount.tsx:16; regenerate-brief.ts:16; email-marketing/_actions.ts:18"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Atributos globales de contacto en una cuenta de proveedor compartida entre tenants",
+   "como_buscarlo": "git grep -n \"syncContact\\|attributes:\" origin/main -- src",
+   "donde_aparecio": "email-marketing/_actions.ts:105-117 -> brevo.ts:31-58"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Placeholders y datos fijos visibles al cliente",
+   "como_buscarlo": "git grep -n \"\\[FALTA:\\|PLACEHOLDER\\|data fake\" origin/main -- 'src/app/(protected)/dashboard' src/components/dashboard",
+   "donde_aparecio": "LockedView.tsx:151; boveda/page.tsx:51; PremiumModuleCard.tsx:53"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Accion irreversible con efecto externo (emails) sin confirmacion",
+   "como_buscarlo": "Buscar onSubmit/onClick que llamen send* o actions de envio sin paso de confirmacion",
+   "donde_aparecio": "campaigns/new/page.tsx:87, :132-140"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "SDK de email que no lanza (Resend v6 devuelve { data, error }) usado sin leer error",
+   "como_buscarlo": "git grep -n \"resend.emails.send(\" origin/main -- src y revisar si se desestructura error",
+   "donde_aparecio": "src/lib/email/notify-message.ts:50"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "CTA del cliente que apunta a rutas solo-admin",
+   "como_buscarlo": "git grep -n \"href=.*\\/api\\/auth\\/\" origin/main -- src/components/dashboard 'src/app/(protected)/dashboard'",
+   "donde_aparecio": "ConnectStoreCard.tsx:39 -> api/auth/tiendanube/start/route.ts:11"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Metricas del cliente sobre tablas globales sin organizationId",
+   "como_buscarlo": "git grep -n \"contactSubmission\\.\\(count\\|findMany\\|aggregate\\)\" origin/main -- src/lib src/modules",
+   "donde_aparecio": "week-results.ts:43-52; health-score.ts:284, :318-323"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Campos de Organization compartidos entre el modulo de un cliente y LeadOS que asumen una sola org",
+   "como_buscarlo": "git grep -n \"findMany({ where: { calCom\\|findFirst({ where: { calCom\" origin/main -- src/lib/leados",
+   "donde_aparecio": "src/lib/leados/agenda.ts:58-84 vs agenda-inteligente/page.tsx:325"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "patron": "Imagen base64 del avatar en payloads frecuentes (config publica del widget)",
+   "como_buscarlo": "git grep -n \"avatarImageUrl: true\" origin/main -- src",
+   "donde_aparecio": "src/modules/chatbot/server/config/getPublicConfig.ts:84; perfil/page.tsx:84"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "excludeDqWhere() descarta también classification NULL (subconteo de leads sin scorear)",
+   "como_buscarlo": "git grep -n \"excludeDqWhere()\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "api/dashboard/leads/recent/route.ts:25 (deja muerta la rama :35-37); también modules/chatbot/server/reports/buildWeeklyReport.ts:63, :72 (reporte semanal al cliente)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "Distintas definiciones de 'lead del período' según la superficie (DQ y null incluidos o no)",
+   "como_buscarlo": "git grep -n \"chatbotLead.count(\" origin/main -- logic-core-v3/src y comparar los where",
+   "donde_aparecio": "get-client-monthly-report-data.ts:56-65 (con DQ) vs home-metrics.ts:92-99 (sin DQ, con null) vs buildWeeklyReport (sin DQ ni null)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "Libs de integración que ante error de API devuelven mock o null sin log ni Sentry",
+   "como_buscarlo": "git grep -n -A2 \"} catch\" origin/main -- logic-core-v3/src/lib/analytics.ts logic-core-v3/src/lib/searchconsole.ts logic-core-v3/src/lib/n8n.ts logic-core-v3/src/lib/integrations | grep -i \"mock\\|return null\\|return \\[\\]\"",
+   "donde_aparecio": "analytics.ts:196-198, searchconsole.ts:211-213, google-business-profile.ts:202-205"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "Tendencias o deltas literales en tarjetas de métricas",
+   "como_buscarlo": "git grep -n -E \"trend=\\{(\\{ ?value: ?-?[0-9]|-?[0-9])\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "trafico/page.tsx:204, :215, :227, :238; seo/page.tsx:244, :252"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "Copy con fechas o SLA hardcodeados visibles al cliente",
+   "como_buscarlo": "git grep -n -i -E \"Q[1-4] 20[0-9]{2}|< ?4 ?h|24/7|24 ?hs\" origin/main -- logic-core-v3/src/components/dashboard \"logic-core-v3/src/app/(protected)\" logic-core-v3/src/app/bienvenida",
+   "donde_aparecio": "PremiumModuleCard.tsx:300, ServiceDetailModal.tsx:181, soporte/page.tsx:87, MessageThread.tsx:114, TicketReplyForm.tsx:32, Step3Tour.tsx:14"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "Columnas que el portal lee y ningún flujo vivo escribe (integración sin activación)",
+   "como_buscarlo": "Por cada campo de integración que lee el portal (select en src/app/(protected)/dashboard), git grep de sus escrituras ('campo:' fuera de select)",
+   "donde_aparecio": "Organization.analyticsPropertyId (solo bienvenida, inalcanzable, y clients.ts sin importadores)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "CTA del portal del cliente que enlaza a una ruta SUPER_ADMIN-only, o ruta de activación sin enlace",
+   "como_buscarlo": "git grep -n \"api/auth/.*/start\" origin/main -- logic-core-v3/src y revisar el guard de cada route.ts",
+   "donde_aparecio": "google-business/start sin enlace; tiendanube/start enlazado desde dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx:39 pero exige SUPER_ADMIN (tiendanube/start/route.ts:11): el cliente recibiría 401 JSON"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "Páginas con alto fijo calc(100svh-…) y columnas shrink-0 que en mobile ahogan el contenido flex-1",
+   "como_buscarlo": "git grep -n \"h-\\[calc(100svh\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "soporte/[ticketId]/page.tsx:115 (+ :193 shrink-0); mismo armado en admin/tickets/[ticketId]/page.tsx:21"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "Fechas formateadas sin timeZone en server components (UTC en serverless) o en client components que también se pintan en SSR",
+   "como_buscarlo": "git grep -n \"toLocale\\(Date\\|Time\\)\\?String('es-AR'\" origin/main -- logic-core-v3/src | grep -v timeZone",
+   "donde_aparecio": "soporte/[ticketId]/page.tsx:41, :304; services/page.tsx:149; ChatBubble.tsx:19 (client, también en SSR)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "Server actions inline en <form action> que descartan el ActionResult (sin feedback)",
+   "como_buscarlo": "git grep -n -A3 \"'use server'\" origin/main -- \"logic-core-v3/src/app/**/page.tsx\"",
+   "donde_aparecio": "seo/page.tsx:110-113"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "Respuestas JSON que esparcen la fila Prisma completa al cliente",
+   "como_buscarlo": "git grep -n -E \"\\.\\.\\.(lead|row|item|org|user),\" origin/main -- logic-core-v3/src/app/api",
+   "donde_aparecio": "api/dashboard/leads/recent/route.ts:50 (incluye convertedToOsLeadId)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "window.location.assign como parche de revalidatePath dentro de la action",
+   "como_buscarlo": "git grep -n \"window.location.assign\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "PremiumModuleCard.tsx:215, home/Recommendations.tsx:91, plan/UpgradeCtaButton.tsx:100"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "patron": "Método de auditoría: git grep con patrones que empiezan con '@/' devuelve 0 en Git Bash (verde por vacío)",
+   "como_buscarlo": "Repetir toda prueba de ausencia hecha con '@/lib/...' usando 'lib/...' (sin '@') o -e explícito, y exigir control positivo con el mismo patrón",
+   "donde_aparecio": "git grep -F \"@/lib/actions/upsell\" dio 0 aunque hay 3 importadores; con \"lib/actions/upsell\" aparecen"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Listados/marcados de Notification por organizationId sin userId",
+   "como_buscarlo": "git grep -n -E \"notification\\.(findMany|count|updateMany|update)\\(\" origin/main -- src y revisar el where; git grep -n \"userId: admin.id\" -A3 para escrituras con organizationId",
+   "donde_aparecio": "dashboard/layout.tsx:101-105, lib/actions/notifications.ts:55-58 y :82-86; escrituras en actions/dashboard-actions.ts:62-71 y :153-162"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Slugs de modulo hardcodeados que no coinciden con PREMIUM_MODULES_CATALOG",
+   "como_buscarlo": "git grep -n -E \"'(email-marketing|motor-resenas|tienda-conectada|agenda-inteligente|whatsapp-autopilot)[a-z-]*'\" origin/main -- src y comparar con src/lib/data/premium-modules.ts",
+   "donde_aparecio": "SidebarNav.tsx:78 y dashboard/modules/email-marketing/layout.tsx:20 ('email-marketing' vs 'email-marketing-pro')"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Server actions de modulos premium sin chequeo de activacion (gate solo en el layout)",
+   "como_buscarlo": "para cada dashboard/modules/*/_actions*.ts verificar isModuleActive/hasModuleActive: git grep -L \"isModuleActive\\|hasModuleActive\" origin/main -- \"src/app/(protected)/dashboard/modules/*/_actions*\"",
+   "donde_aparecio": "dashboard/modules/email-marketing/_actions.ts:17-28 (getOrgWithBrevo), importContactsAction :71, createCampaignAction :128, sendCampaignAction :174 → envios por Brevo sin entitlement"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Deltas/tendencias hardcodeados en metricas del cliente",
+   "como_buscarlo": "git grep -n -E \"trend=\\{\\{? ?value: -?[0-9]|trend=\\{-?[0-9]\" origin/main -- src/app src/components; git grep -n \"FIXME(data-truth)\" origin/main -- src",
+   "donde_aparecio": "resultados/trafico/page.tsx:204-238, resultados/seo/page.tsx:244-269; GBPMetricsCard.tsx:39 (stub a 0)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Conteos sobre modelos globales (sin organizationId) presentados como datos del cliente",
+   "como_buscarlo": "git grep -n \"contactSubmission\" origin/main -- src/lib src/app/(protected)/dashboard src/components/dashboard (las llamadas son multilinea: buscar 'prisma.contactSubmission' y leer el where)",
+   "donde_aparecio": "lib/dashboard/week-results.ts:43-51, lib/health-score.ts:282-289 y :318-327"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Fechas formateadas con toLocale* sin timeZone en componentes que se renderizan en SSR o con strings YYYY-MM-DD",
+   "como_buscarlo": "git grep -n -E \"toLocale(Date|Time)?String\\('es-AR'\" origin/main -- src/components src/app | grep -v timeZone; git grep -n \"new Date(label)\" origin/main -- src",
+   "donde_aparecio": "ChatBubble.tsx:19, SessionsChart.tsx:47, CurrentPlanCard.tsx:17, soporte/[ticketId]/page.tsx:41, referidos/page.tsx:23"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Promesas con fecha o SLA hardcodeadas en copy",
+   "como_buscarlo": "git grep -n -E \"Q[1-4] 20[0-9]{2}|< ?[0-9]+ ?h|[0-9]+ ?hs\\b|garantizad\" origin/main -- src/components src/app",
+   "donde_aparecio": "PremiumModuleCard.tsx:300, ServiceDetailModal.tsx:181, MessageThread.tsx:114, soporte/page.tsx:86-90, TicketReplyForm.tsx:32, SeoAlertas.tsx:39, sitio publico ModulosOpcionales.tsx:487"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Controles inertes (botones sin handler) o CTAs marcados FIXME en el camino del cliente",
+   "como_buscarlo": "git grep -n \"FIXME\" origin/main -- \"src/app/(protected)/dashboard\" src/components/dashboard; revisar <button> sin onClick ni type=submit",
+   "donde_aparecio": "SoporteBoard.tsx:331-348; resultados/trafico/page.tsx:113-117 ('ACTIVAR AHORA' sin handler)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "OrgRole cargado en la sesion pero nunca chequeado",
+   "como_buscarlo": "git grep -n \"orgRole\" origin/main -- src (fuera de auth y types)",
+   "donde_aparecio": "auth.ts:46 lo carga; ninguna action del portal lo usa (profile.ts:150-157 eliminacion de cuenta)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Marcadores de flujo por titulo exacto de ticket (spoofeables desde el formulario normal)",
+   "como_buscarlo": "git grep -n -E \"title === '|title: '\" origin/main -- src/app src/lib",
+   "donde_aparecio": "admin/tickets/_components/ticket-chat.tsx:119 vs lib/actions/profile.ts:162"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Modales hechos a mano sin el Modal primitivo (sin role=dialog, foco ni Esc, z-index fuera de la escala)",
+   "como_buscarlo": "git grep -n \"fixed inset-0\" origin/main -- src/components src/app | grep -v -i modal",
+   "donde_aparecio": "NewTicketModal.tsx:83"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Datos mock que habilitan acciones reales (CTAs activos con isMockData)",
+   "como_buscarlo": "git grep -n \"isMockData\" origin/main -- src y revisar CTAs/actions renderizados en esa rama",
+   "donde_aparecio": "resultados/seo/page.tsx:157-161 y :319-321 (OportunidadesSEO envia mensajes reales)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Llamadas a server actions desde handlers de cliente sin try/finally (estado pendiente colgado)",
+   "como_buscarlo": "git grep -n -E \"await [a-zA-Z]+Action\\(\" origin/main -- src/components src/app | revisar que haya try/finally o startTransition",
+   "donde_aparecio": "NewTicketModal.tsx:55, ResolveTicketButton.tsx:14"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "URLs de imagen arbitrarias del cliente renderizadas con <img> en el admin",
+   "como_buscarlo": "git grep -n \"<img\" origin/main -- src/modules src/components/admin \"src/app/(protected)/admin\" y revisar el schema del src",
+   "donde_aparecio": "ClientAvatar.tsx:30-31 con avatarImageUrlSchema.ts:16"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Trabajo declarado 'hecho' que vive en ramas sin mergear",
+   "como_buscarlo": "git for-each-ref refs/remotes y git log --oneline origin/main..<rama> por cada una",
+   "donde_aparecio": "origin/b0-isolation-motor-chatbot: 8 commits (PD-1.2 cifrado, PA-2 CSV anti-inyeccion, PA-3/PA-4)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "patron": "Fallback hardcodeado del secreto de impersonacion",
+   "como_buscarlo": "git grep -n -E \"\\?\\? '[a-zA-Z-]*secret[a-zA-Z-]*'\" origin/main -- src",
+   "donde_aparecio": "src/lib/impersonation.ts:15-19 (fallback literal si faltan IMPERSONATION_SECRET/AUTH_SECRET/NEXTAUTH_SECRET); fuera del lote, para D1/D8"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Conteos o lecturas sobre modelos globales de develOP (ContactSubmission, AgencySettings) presentados como datos del cliente",
+   "como_buscarlo": "git grep -n -A3 \"contactSubmission\" origin/main -- src | grep -v \"admin/\" y revisar cada count/findMany fuera de /admin",
+   "donde_aparecio": "src/lib/dashboard/week-results.ts:43-52; src/lib/health-score.ts:284-289, :317-333"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Campos JSON de Organization leídos pero nunca escritos (configuración sin escritor)",
+   "como_buscarlo": "Para cada campo Json? de Organization en schema.prisma: git grep -n \"<campo>\" origin/main -- src y verificar que haya un data: { <campo> fuera de seeds",
+   "donde_aparecio": "Organization.dataConnections (health-score.ts:86, attention.ts:110)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Notificaciones para usuarios de develOP creadas con organizationId del cliente + lectores del cliente que filtran solo por organizationId",
+   "como_buscarlo": "git grep -n -A10 \"notification.create\\|notification.createMany\" origin/main -- src | grep -n \"admin.id\\|superAdmin\" y cruzar con lectores where { organizationId }",
+   "donde_aparecio": "src/actions/dashboard-actions.ts:62-70, :153-160; src/lib/actions/notifications.ts:55-58, :82-86; dashboard/layout.tsx:101-105"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "prisma.user.findFirst({ where: { role: 'SUPER_ADMIN' } }) sin orderBy para notificar o actuar (solo llega a un admin)",
+   "como_buscarlo": "git grep -n -A2 \"findFirst\" origin/main -- src | grep -n \"SUPER_ADMIN\"",
+   "donde_aparecio": "src/lib/actions/upsell.ts:107-110; src/lib/actions/messages.ts:175-178; src/lib/referrals/referrals.service.ts:156"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Período en curso (parcial) comparado contra el período anterior completo",
+   "como_buscarlo": "git grep -n \"previousRangeForPeriod(\" origin/main -- src y verificar si el 'current' termina en now o en el fin del período",
+   "donde_aparecio": "src/lib/dashboard/home-metrics-logic.ts:27-28"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Fechas/horas formateadas en server components sin timeZone AR",
+   "como_buscarlo": "git grep -n \"toLocale\\(Date\\)\\?String('es-AR'\" origin/main -- src | grep -v timeZone, y descartar archivos con 'use client'",
+   "donde_aparecio": "PageSpeedCard.tsx:60; GBPMetricsCard.tsx:13; dashboard/page.tsx:33 (getHours del server para el saludo)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Server actions que alimentan al LLM con contenido mandado por el navegador en vez de releerlo por id",
+   "como_buscarlo": "git grep -n \"generateText\\|messages.create\" origin/main -- src/lib/ai src/components y rastrear el origen de cada campo del prompt hasta la action",
+   "donde_aparecio": "src/components/dashboard/modules/motor-resenas/_actions.ts:33-38"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Parámetros del cliente interpolados en paths de APIs externas",
+   "como_buscarlo": "git grep -n \"fetch(\\`https://[^\\`]*\\${\" origin/main -- src/lib/integrations",
+   "donde_aparecio": "src/lib/integrations/google-business-profile.ts:285 (reviewName)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Promesas con fecha o SLA literales en la UI",
+   "como_buscarlo": "git grep -n -E \"Q[1-4] 20[0-9]{2}|< ?[0-9]+ ?h|[0-9]+ ?hs\" origin/main -- src/components src/app",
+   "donde_aparecio": "PremiumModuleCard.tsx:300; ServiceDetailModal.tsx:181; MessageThread.tsx:114-119; soporte/page.tsx:90; TicketReplyForm.tsx:32"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Insignias o textos de seguridad que no corresponden a la implementación ('AES-256', 'Monitoreo activo', 'Solo visible para vos', registros de acceso fijos)",
+   "como_buscarlo": "git grep -n -i \"AES-256\\|monitoreo activo\\|solo visible\\|encriptado\\|registro de accesos\" origin/main -- src",
+   "donde_aparecio": "cuenta/boveda/page.tsx:85, :148, :260-320; VaultRevealButton.tsx:61"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Casts 'as unknown as' sobre columnas Json de Prisma sin validación",
+   "como_buscarlo": "git grep -n \"as unknown as\" origin/main -- src | grep -v __tests__",
+   "donde_aparecio": "src/lib/ai/brief-history.ts:42-43; src/lib/ai/executive-brief.ts:341-342"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Errores 'tragados' como cero o null en métricas del cliente (.catch(() => 0) / .catch(() => null))",
+   "como_buscarlo": "git grep -n \"\\.catch(() => \\(0\\|null\\|\\[\\]\\)\" origin/main -- src/lib",
+   "donde_aparecio": "src/lib/health-score.ts:253, :290, :297, :322, :332; src/lib/dashboard/week-results.ts:47, :52; src/lib/dashboard/attention.ts:42, :56, :61, :67"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "Gates de módulo premium solo en layout/page y no en las server actions",
+   "como_buscarlo": "Para cada slug de PremiumModule: git grep -n \"isModuleActive(.*'<slug>'\" origin/main -- src y comparar con las actions 'use server' de ese módulo",
+   "donde_aparecio": "dashboard/modules/email-marketing/_actions.ts:17-28 vs layout.tsx:20-21 (motor-resenas sí lo hace en _actions.ts:23-24)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "patron": "router.push en el portal sin comentario inline que lo justifique",
+   "como_buscarlo": "git grep -n -B2 \"router\\.push\" origin/main -- \"src/app/(protected)/dashboard\" src/components/dashboard src/app/bienvenida",
+   "donde_aparecio": "NotificationCenter.tsx:125; NotificationHistoryModal.tsx:80; NewTicketModal.tsx:63; BienvenidaWizard.tsx:38; email-marketing/campaigns/new/page.tsx:40, :72, :153 (fuera del lote)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Server actions de módulos premium sin isModuleActive: el gate comercial vive solo en layout o página",
+   "como_buscarlo": "Listar los archivos 'use server' bajo src/app/(protected)/dashboard/modules y src/components/dashboard/modules y contar isModuleActive en cada uno (git grep -c); revisar también rutas de API de módulos",
+   "donde_aparecio": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17-27 (0 gates); control: motor-resenas/_actions.ts:23,58"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Slugs de módulo como string literal desacoplados del catálogo",
+   "como_buscarlo": "git grep -n -E \"isModuleActive\\([^,]+, '[a-z-]+'\\)|slug: '[a-z-]+'\" origin/main -- logic-core-v3/src y comparar con los slugs de src/lib/data/premium-modules.ts",
+   "donde_aparecio": "email-marketing/layout.tsx:20 y SidebarNav.tsx:78 ('email-marketing') vs premium-modules.ts:38 ('email-marketing-pro'); services/page.tsx:326"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Conteos de ContactSubmission (tabla global sin organizationId) en superficies del cliente",
+   "como_buscarlo": "git grep -n contactSubmission origin/main -- logic-core-v3/src (el .count puede estar en la línea siguiente: buscar el nombre del modelo, no 'contactSubmission.count')",
+   "donde_aparecio": "src/lib/dashboard/week-results.ts:43-52; src/lib/health-score.ts:283-292, :311-345"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Snapshots o caches usados como 'esta semana' sin verificar periodKey o antigüedad",
+   "como_buscarlo": "git grep -n -E \"getBriefHistory\\(|cachedExecutiveBrief\" origin/main -- logic-core-v3/src y revisar si comparan periodKey o TTL",
+   "donde_aparecio": "src/lib/reports/executive-weekly/build.ts:113-141"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Copys de UI que prometen notificaciones, SLA o fechas sin código que las cumpla",
+   "como_buscarlo": "git grep -n -i -E \"notificad|< ?4 ?h|24 ?hs|Próximamente|\\[FALTA\" origin/main -- logic-core-v3/src/components logic-core-v3/src/app",
+   "donde_aparecio": "TicketReplyForm.tsx:32; soporte/page.tsx:87,90; MessageThread.tsx:114; PremiumModuleCard.tsx:300; LockedView.tsx:151"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Invariantes que dicen comparar contra otro módulo pero no lo importan (verde por arnés)",
+   "como_buscarlo": "git grep -n -i -E \"coincid|mismo criterio|EXACTAMENTE\" origin/main -- '**/*.invariant.ts' y verificar que el archivo citado esté entre los imports",
+   "donde_aparecio": "src/lib/reports/executive-weekly/report-eligible-plan.invariant.ts:7-14"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Cache en memoria a nivel de módulo (Map) en serverless con invalidación local",
+   "como_buscarlo": "git grep -n -E \"new Map<.*(Cache|Entry)\" origin/main -- logic-core-v3/src/lib logic-core-v3/src/modules",
+   "donde_aparecio": "src/lib/plan/get-plan-for-org.ts:21,131-133"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Definiciones divergentes de 'lead' (con DQ, sin DQ con nulls, sin DQ excluyendo nulls)",
+   "como_buscarlo": "git grep -n -E \"chatbotLead\\.(count|groupBy|findMany)|scope\\.chatbotLead\" origin/main -- logic-core-v3/src y revisar si usan excludeDqWhere, notDq o nada",
+   "donde_aparecio": "get-client-monthly-report-data.ts:56-65; getMonthlyAnalysisForOrg.ts:83-90; home-metrics.ts:86-99"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Hijos creados sin tocar el updatedAt del padre que se usa como señal de actividad u orden",
+   "como_buscarlo": "git grep -n -E \"(ticketMessage|message|chatMessage)\\.create\\(\" origin/main -- logic-core-v3/src y cruzar con orderBy updatedAt o lastActivity",
+   "donde_aparecio": "src/lib/tickets/actions.ts:140-147 vs soporte/page.tsx:23 y alerts.ts:97"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Emails por sendEmail (Resend, éxito simulado sin key) cuyo resultado no se mira",
+   "como_buscarlo": "git grep -n \"sendEmail(\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/lib/tickets/actions.ts:157-166; src/actions/agency-actions.ts (ActionRequiredEmail); src/lib/actions/settings.ts"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Lectores repetidos por request sin React cache() (plan, consumo, sesión de chatbot)",
+   "como_buscarlo": "git grep -n -E \"getOrgUsageSnapshot\\(|getPlanForOrg\\(\" origin/main -- \"logic-core-v3/src/app/(protected)/dashboard\" y contar llamadas por página",
+   "donde_aparecio": "dashboard/plan/page.tsx:37,42; dashboard/page.tsx:116,164 + get-recommendations-for-org.ts:34"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "patron": "Mutaciones del portal con dos resolvers de org (resolveOrgId en la página, session.user.organizationId en la action)",
+   "como_buscarlo": "git grep -n \"session?.user?.organizationId\" origin/main -- logic-core-v3/src/lib/actions \"logic-core-v3/src/app/(protected)/dashboard\"",
+   "donde_aparecio": "src/lib/actions/referrals.ts:14 vs referidos/page.tsx:27; src/lib/actions/upsell.ts:16"
   }
  ]
 }

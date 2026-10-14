@@ -18,8 +18,9 @@
 // Uso (desde logic-core-v3):
 //   node scripts/auditoria/f2-procesar.mjs <salida-del-workflow (.output o .json)> [--run <runId>] [--forzar]
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { escribirSegunPeso, existePartido } from './crudo-partes.mjs'
 
 const args = process.argv.slice(2)
 const ENTRADA = args[0]
@@ -77,9 +78,10 @@ for (const r of res.resultados) {
   })
 }
 
-const salida = path.join(CICLOS, `${ciclo}-revision.json`)
-if (existsSync(salida) && !FORZAR) console.log(`(la revisión ${path.basename(salida)} ya existe: no se pisa; usar --forzar)`)
-else writeFileSync(salida, JSON.stringify(revision, null, 1), 'utf8')
+// la revisión va en _crudo/ciclos/<ciclo>-revision.json, o partida en <ciclo>-revision/parte-N.json si pasa el tope (DEC-49)
+const salida = `${ciclo}-revision`
+if (existePartido(CICLOS, salida) && !FORZAR) console.log(`(la revisión ${salida} ya existe: no se pisa; usar --forzar)`)
+else escribirSegunPeso(CICLOS, salida, revision, 'hallazgos')
 
 console.log(`${dominio} ${ciclo} · run ${RUN ?? '—'}`)
 for (const l of revision.lotes) console.log(`  ${l.lote}: ${l.estado === 'leido' ? `${l.completos}/${l.archivos_leidos} completos · entradas ${l.entradas} · funcionalidades ${l.funcionalidades} · PLAN ${l.planeado_cruzado} · alertas ${l.alertas} · previas ${l.previas} · poda ${l.poda} · casos ${l.casos} · ausencias ${l.ausencias} · patrones ${l.patrones} · verificador ${l.verificador}` : l.estado}`)

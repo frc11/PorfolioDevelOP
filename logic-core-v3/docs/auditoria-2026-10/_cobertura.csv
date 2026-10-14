@@ -686,9 +686,9 @@ logic-core-v3/sentry.server.config.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/src/actions/admin/onboarding-tasks.ts,D3,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/actions/agency-actions.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/actions/auth-actions.ts,D1,profundo,leído,D1-c1,server-actions; server-action; usa-auth
-logic-core-v3/src/actions/dashboard-actions.ts,D2,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db; FROZEN
+logic-core-v3/src/actions/dashboard-actions.ts,D2,profundo,leído,D2-c1,server-actions; toca-db; server-action; usa-auth; escribe-db; FROZEN
 logic-core-v3/src/actions/metrics-actions.ts,D3,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
-logic-core-v3/src/actions/onboarding-actions.ts,D2,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
+logic-core-v3/src/actions/onboarding-actions.ts,D2,profundo,leído,D2-c1,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/actions/task-approvals.ts,D2,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/app/(protected)/admin/_components/AdminBackButton.tsx,D3,profundo,pendiente,,admin; client-component
 logic-core-v3/src/app/(protected)/admin/_components/AdminBreadcrumbs.tsx,D3,profundo,pendiente,,admin; client-component
@@ -935,11 +935,11 @@ logic-core-v3/src/app/(protected)/admin/tickets/_components/ticket-reply-form.ts
 logic-core-v3/src/app/(protected)/admin/tickets/error.tsx,D3,profundo,pendiente,,admin; client-component
 logic-core-v3/src/app/(protected)/admin/tickets/loading.tsx,D3,profundo,pendiente,,admin
 logic-core-v3/src/app/(protected)/admin/tickets/page.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/dashboard/_actions/business-profile.actions.ts,D2,profundo,pendiente,,dashboard; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts,D2,profundo,pendiente,,dashboard; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.invariant.ts,D2,superficial,pendiente,,dashboard; test
-logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.schemas.ts,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/_actions/regenerate-brief.ts,D2,profundo,pendiente,,dashboard; server-action; usa-auth; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/_actions/business-profile.actions.ts,D2,profundo,leído,D2-c1,dashboard; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts,D2,profundo,leído,D2-c1,dashboard; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.invariant.ts,D2,superficial,superficial,D2-c1,dashboard; test | test sin DB: ExecutiveReportPrefsSchema acepta solo 3 frecuencias x 3 cantidades (preferencias del reporte ejecutivo)
+logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.schemas.ts,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/_actions/regenerate-brief.ts,D2,profundo,leído,D2-c1,dashboard; server-action; usa-auth; guard-indirecto
 logic-core-v3/src/app/(protected)/dashboard/chatbot/conversations/loading.tsx,D5,profundo,pendiente,,dashboard-chatbot
 logic-core-v3/src/app/(protected)/dashboard/chatbot/conversations/page.tsx,D5,profundo,pendiente,,dashboard-chatbot
 logic-core-v3/src/app/(protected)/dashboard/chatbot/conversations/transcript-action.ts,D5,profundo,pendiente,,dashboard-chatbot; server-action
@@ -958,72 +958,72 @@ logic-core-v3/src/app/(protected)/dashboard/chatbot/loading.tsx,D5,profundo,pend
 logic-core-v3/src/app/(protected)/dashboard/chatbot/page.tsx,D5,profundo,pendiente,,dashboard-chatbot; guard-indirecto
 logic-core-v3/src/app/(protected)/dashboard/chatbot/settings/loading.tsx,D5,profundo,pendiente,,dashboard-chatbot
 logic-core-v3/src/app/(protected)/dashboard/chatbot/settings/page.tsx,D5,profundo,pendiente,,dashboard-chatbot; toca-db; usa-auth; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/cuenta/boveda/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/cuenta/boveda/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/cuenta/error.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/cuenta/facturacion/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/cuenta/facturacion/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; usa-auth; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/cuenta/layout.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/cuenta/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/cuenta/page.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/cuenta/perfil/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/cuenta/perfil/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; usa-auth; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/error.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/layout.tsx,D2,profundo,pendiente,,dashboard; toca-db; usa-auth; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/dashboard/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/messages/_actions/mark-read.ts,D2,profundo,pendiente,,dashboard; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/dashboard/messages/_components/MarkReadOnMount.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/messages/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/messages/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/modules/agenda-inteligente/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/_actions.ts,D2,profundo,pendiente,,dashboard; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/send/page.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/campaigns/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/contactos/_components/ImportCSVButton.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/contactos/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/contactos/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/layout.tsx,D2,profundo,pendiente,,dashboard; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/page.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/modules/error.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/modules/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/_components/AskReviewSection.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/_components/ConnectingState.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/_components/LockedView.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/_components/ReviewItem.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/modules/tienda-conectada/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/plan/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/plan/page.tsx,D2,profundo,pendiente,,dashboard; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/project/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/project/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/referidos/page.tsx,D2,profundo,pendiente,,dashboard; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/resultados/analisis/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/resultados/analisis/page.tsx,D2,profundo,pendiente,,dashboard; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/resultados/error.tsx,D2,profundo,pendiente,,dashboard; client-component
-logic-core-v3/src/app/(protected)/dashboard/resultados/layout.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/resultados/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/resultados/page.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/resultados/reputacion/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/resultados/reputacion/page.tsx,D2,profundo,pendiente,,dashboard; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/resultados/seo/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/resultados/seo/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; server-action; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/resultados/trafico/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/resultados/trafico/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/services/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/services/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/soporte/[ticketId]/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; usa-auth; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/soporte/loading.tsx,D2,profundo,pendiente,,dashboard
-logic-core-v3/src/app/(protected)/dashboard/soporte/page.tsx,D2,profundo,pendiente,,dashboard; toca-db; usa-auth; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/cuenta/boveda/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/cuenta/boveda/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/cuenta/error.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/cuenta/facturacion/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/cuenta/facturacion/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; usa-auth; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/cuenta/layout.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/cuenta/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/cuenta/page.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/cuenta/perfil/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/cuenta/perfil/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; usa-auth; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/error.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/layout.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; usa-auth; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/dashboard/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/messages/_actions/mark-read.ts,D2,profundo,leído,D2-c1,dashboard; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/dashboard/messages/_components/MarkReadOnMount.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/messages/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/messages/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/modules/agenda-inteligente/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/_actions.ts,D2,profundo,leído,D2-c1,dashboard; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/send/page.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/campaigns/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/contactos/_components/ImportCSVButton.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/contactos/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/contactos/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/layout.tsx,D2,profundo,leído,D2-c1,dashboard; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/page.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/modules/error.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/modules/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/_components/AskReviewSection.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/_components/ConnectingState.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/_components/LockedView.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/_components/ReviewItem.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/modules/motor-resenas/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/modules/tienda-conectada/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/plan/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/plan/page.tsx,D2,profundo,leído,D2-c1,dashboard; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/project/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/project/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/referidos/page.tsx,D2,profundo,leído,D2-c1,dashboard; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/resultados/analisis/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/resultados/analisis/page.tsx,D2,profundo,leído,D2-c1,dashboard; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/resultados/error.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
+logic-core-v3/src/app/(protected)/dashboard/resultados/layout.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/resultados/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/resultados/page.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/resultados/reputacion/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/resultados/reputacion/page.tsx,D2,profundo,leído,D2-c1,dashboard; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/resultados/seo/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/resultados/seo/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; server-action; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/resultados/trafico/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/resultados/trafico/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/services/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/services/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/soporte/[ticketId]/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; usa-auth; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/soporte/loading.tsx,D2,profundo,leído,D2-c1,dashboard
+logic-core-v3/src/app/(protected)/dashboard/soporte/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; usa-auth; guard-indirecto
 logic-core-v3/src/app/(protected)/setter/_actions/agenda.actions.ts,D4,profundo,pendiente,,setter; server-action; guard-indirecto; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/setter/_actions/agenda.schemas.ts,D4,profundo,pendiente,,setter; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/setter/_actions/cartera.actions.ts,D4,profundo,pendiente,,setter; server-action; guard-indirecto; ZONA-FRANCO
@@ -1159,24 +1159,24 @@ logic-core-v3/src/app/api/cron/regenerate-briefs/route.ts,D7,profundo,pendiente,
 logic-core-v3/src/app/api/cron/send-executive-reports/route.ts,D7,profundo,pendiente,,cron; guard-indirecto; route-handler
 logic-core-v3/src/app/api/cron/send-weekly-reports/route.ts,D7,profundo,pendiente,,cron; route-handler
 logic-core-v3/src/app/api/dashboard/chatbot/leads/export/route.ts,D5,profundo,pendiente,,api-dashboard-chatbot; toca-db; route-handler
-logic-core-v3/src/app/api/dashboard/leads/recent/route.ts,D2,profundo,pendiente,,api-dashboard; toca-db; usa-auth; guard-indirecto; route-handler
+logic-core-v3/src/app/api/dashboard/leads/recent/route.ts,D2,profundo,leído,D2-c1,api-dashboard; toca-db; usa-auth; guard-indirecto; route-handler
 logic-core-v3/src/app/api/dev/email-preview/executive-weekly/route.ts,D7,profundo,pendiente,,api-integracion; route-handler
 logic-core-v3/src/app/api/email/optout/[contactId]/route.ts,D7,profundo,pendiente,,api-integracion; toca-db; route-handler; escribe-db
 logic-core-v3/src/app/api/email/unsubscribe-executive/route.ts,D7,profundo,pendiente,,api-integracion; toca-db; route-handler; escribe-db
 logic-core-v3/src/app/api/motor/webhook/[channelToken]/route.ts,D5,profundo,pendiente,,motor; webhook; route-handler
 logic-core-v3/src/app/api/qa/login/route.ts,D1,profundo,leído,D1-c1,qa-login; toca-db; route-handler; escribe-db; ZONA-FRANCO
-logic-core-v3/src/app/api/reports/client-monthly/route.ts,D2,profundo,pendiente,,api-dashboard; guard-indirecto; route-handler
-logic-core-v3/src/app/api/reports/monthly/route.ts,D2,profundo,pendiente,,api-dashboard; toca-db; usa-auth; route-handler
+logic-core-v3/src/app/api/reports/client-monthly/route.ts,D2,profundo,leído,D2-c1,api-dashboard; guard-indirecto; route-handler
+logic-core-v3/src/app/api/reports/monthly/route.ts,D2,profundo,leído,D2-c1,api-dashboard; toca-db; usa-auth; route-handler
 logic-core-v3/src/app/api/test-sentry/route.ts,D7,profundo,pendiente,,api-integracion; route-handler
 logic-core-v3/src/app/api/track/route.ts,D7,profundo,pendiente,,endpoint-publico; toca-db; usa-auth; route-handler; escribe-db
 logic-core-v3/src/app/api/version/route.ts,D8,profundo,pendiente,,api; route-handler
-logic-core-v3/src/app/bienvenida/_actions/complete-onboarding.ts,D2,profundo,pendiente,,onboarding-cliente; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
-logic-core-v3/src/app/bienvenida/_components/BienvenidaWizard.tsx,D2,profundo,pendiente,,onboarding-cliente; client-component
-logic-core-v3/src/app/bienvenida/_components/Step1Empresa.tsx,D2,profundo,pendiente,,onboarding-cliente; client-component
-logic-core-v3/src/app/bienvenida/_components/Step2Conexiones.tsx,D2,profundo,pendiente,,onboarding-cliente; client-component
-logic-core-v3/src/app/bienvenida/_components/Step3Tour.tsx,D2,profundo,pendiente,,onboarding-cliente; client-component
-logic-core-v3/src/app/bienvenida/layout.tsx,D2,profundo,pendiente,,onboarding-cliente; usa-auth
-logic-core-v3/src/app/bienvenida/page.tsx,D2,profundo,pendiente,,onboarding-cliente; toca-db; usa-auth; guard-indirecto
+logic-core-v3/src/app/bienvenida/_actions/complete-onboarding.ts,D2,profundo,leído,D2-c1,onboarding-cliente; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
+logic-core-v3/src/app/bienvenida/_components/BienvenidaWizard.tsx,D2,profundo,leído,D2-c1,onboarding-cliente; client-component
+logic-core-v3/src/app/bienvenida/_components/Step1Empresa.tsx,D2,profundo,leído,D2-c1,onboarding-cliente; client-component
+logic-core-v3/src/app/bienvenida/_components/Step2Conexiones.tsx,D2,profundo,leído,D2-c1,onboarding-cliente; client-component
+logic-core-v3/src/app/bienvenida/_components/Step3Tour.tsx,D2,profundo,leído,D2-c1,onboarding-cliente; client-component
+logic-core-v3/src/app/bienvenida/layout.tsx,D2,profundo,leído,D2-c1,onboarding-cliente; usa-auth
+logic-core-v3/src/app/bienvenida/page.tsx,D2,profundo,leído,D2-c1,onboarding-cliente; toca-db; usa-auth; guard-indirecto
 logic-core-v3/src/app/cambiar-password/CambiarPasswordForm.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
 logic-core-v3/src/app/cambiar-password/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/app/cambiar-password/page.tsx,D1,profundo,leído,D1-c1,auth-ui; usa-auth
@@ -1245,93 +1245,93 @@ logic-core-v3/src/components/canvas/Interactive3DNetwork.tsx,PUB,superficial,sup
 logic-core-v3/src/components/canvas/LiquidProject.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/canvas/NeuralNetwork.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/canvas/ReactiveBackground.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
-logic-core-v3/src/components/dashboard/AlertaMetrica.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/AnalyticsAlertas.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/AnalyticsMetricCard.tsx,D2,profundo,pendiente,,componentes-dashboard
+logic-core-v3/src/components/dashboard/AlertaMetrica.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/AnalyticsAlertas.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/AnalyticsMetricCard.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
 logic-core-v3/src/components/dashboard/AnalyticsPeriodSelector.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
-logic-core-v3/src/components/dashboard/AnalyticsSkeleton.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/AnimatedCounter.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/AnimatedProgressBar.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/AnalyticsSkeleton.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/AnimatedCounter.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/AnimatedProgressBar.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/AnimatedTaskList.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
-logic-core-v3/src/components/dashboard/AnnouncementsFeed.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/BackLink.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/ChatBubble.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ClicksImpressionsChart.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ClientChatComposer.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ClientChatThread.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/CuentaTabs.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/AnnouncementsFeed.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/BackLink.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/ChatBubble.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ClicksImpressionsChart.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ClientChatComposer.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ClientChatThread.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/CuentaTabs.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/CurrentMilestone.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
-logic-core-v3/src/components/dashboard/CurrentPlanCard.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/DashboardLayoutClient.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/CurrentPlanCard.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/DashboardLayoutClient.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/DownloadReportButton.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
-logic-core-v3/src/components/dashboard/EmojiPopover.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ExecutiveReportPrefsForm.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ExecutiveReportTemplate.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/FadeIn.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ImpersonationBanner.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/ImpersonationTimer.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/EmojiPopover.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ExecutiveReportPrefsForm.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ExecutiveReportTemplate.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/FadeIn.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ImpersonationBanner.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/ImpersonationTimer.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/LeakMeter.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; toca-db | PODA-ALTA
-logic-core-v3/src/components/dashboard/MessageThread.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/NewTicketModal.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/NotificationCenter.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/NotificationHistoryModal.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/OnboardingStatusCard.tsx,D2,profundo,pendiente,,componentes-dashboard; toca-db
-logic-core-v3/src/components/dashboard/OportunidadSEO.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/OportunidadesSEO.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/PageTransition.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/PremiumModuleCard.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/PreviewBanner.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ProfileForms.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ProjectEmptyState.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ProjectTaskTabs.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ReferralPanel.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ResolveTicketButton.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ResultadosTabs.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ScrollTopOnNavigate.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/SeoAlertas.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/ServiceDetailModal.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/SessionsChart.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/SidebarNav.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/SoporteBoard.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/StaggerWrapper.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/SubscriptionBanner.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/TaskApprovalButtons.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/TicketReplyForm.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/MessageThread.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/NewTicketModal.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/NotificationCenter.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/NotificationHistoryModal.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/OnboardingStatusCard.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; toca-db
+logic-core-v3/src/components/dashboard/OportunidadSEO.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/OportunidadesSEO.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/PageTransition.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/PremiumModuleCard.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/PreviewBanner.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ProfileForms.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ProjectEmptyState.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ProjectTaskTabs.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ReferralPanel.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ResolveTicketButton.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ResultadosTabs.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ScrollTopOnNavigate.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/SeoAlertas.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/ServiceDetailModal.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/SessionsChart.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/SidebarNav.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/SoporteBoard.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/StaggerWrapper.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/SubscriptionBanner.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/TaskApprovalButtons.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/TicketReplyForm.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
 logic-core-v3/src/components/dashboard/TicketStatusSelector.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
-logic-core-v3/src/components/dashboard/TrendBadge.tsx,D2,profundo,pendiente,,componentes-dashboard
+logic-core-v3/src/components/dashboard/TrendBadge.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
 logic-core-v3/src/components/dashboard/UpsellCard.tsx,D2,profundo,superficial,F1.11,componentes-dashboard; client-component | PODA-ALTA
-logic-core-v3/src/components/dashboard/VaultRequestModal.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/VaultRevealButton.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/home/AIExecutiveBriefV2.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/home/AttentionStack.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/home/BusinessHero.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/home/HealthScore.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/home/LeadCampaigns.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/home/LeadFunnel.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/home/LeadOrigins.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/home/MoneyEstimate.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/home/Recommendations.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/home/SectionEmptyState.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/home/WeekResultsGrid.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/modules/motor-resenas/_actions.ts,D2,profundo,pendiente,,componentes-dashboard; toca-db; server-action; guard-indirecto
-logic-core-v3/src/components/dashboard/notification-shared.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/plan/PlansShowcase.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/plan/UpgradeCtaButton.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/plan/UsageMeter.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/GBPMetricsCard.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/InsightsBlock.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/PageSpeedCard.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/_shared/HoverCard.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/_shared/ResultEmptyState.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/_shared/chartHover.ts,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/_shared/chartTheme.ts,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/analysis/AnalysisTeaser.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/analysis/CalibratingBlock.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/analysis/CategoriesSection.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/analysis/DiscoveriesSection.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
-logic-core-v3/src/components/dashboard/results/analysis/MonthTrendSection.tsx,D2,profundo,pendiente,,componentes-dashboard
-logic-core-v3/src/components/dashboard/results/analysis/MonthlyConversationsChart.tsx,D2,profundo,pendiente,,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/VaultRequestModal.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/VaultRevealButton.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/home/AIExecutiveBriefV2.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/home/AttentionStack.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/home/BusinessHero.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/home/HealthScore.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/home/LeadCampaigns.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/home/LeadFunnel.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/home/LeadOrigins.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/home/MoneyEstimate.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/home/Recommendations.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/home/SectionEmptyState.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/home/WeekResultsGrid.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/modules/motor-resenas/_actions.ts,D2,profundo,leído,D2-c1,componentes-dashboard; toca-db; server-action; guard-indirecto
+logic-core-v3/src/components/dashboard/notification-shared.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/plan/PlansShowcase.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/plan/UpgradeCtaButton.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/plan/UsageMeter.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/GBPMetricsCard.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/InsightsBlock.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/PageSpeedCard.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/_shared/HoverCard.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/_shared/ResultEmptyState.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/_shared/chartHover.ts,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/_shared/chartTheme.ts,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/analysis/AnalysisTeaser.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/analysis/CalibratingBlock.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/analysis/CategoriesSection.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/analysis/DiscoveriesSection.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
+logic-core-v3/src/components/dashboard/results/analysis/MonthTrendSection.tsx,D2,profundo,leído,D2-c1,componentes-dashboard
+logic-core-v3/src/components/dashboard/results/analysis/MonthlyConversationsChart.tsx,D2,profundo,leído,D2-c1,componentes-dashboard; client-component
 logic-core-v3/src/components/design-system/ChapterLabel.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
 logic-core-v3/src/components/design-system/CtaButton.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/design-system/DataStat.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
@@ -1489,7 +1489,7 @@ logic-core-v3/src/hooks/useThemeObserver.tsx,PUB,superficial,superficial,F1,hook
 logic-core-v3/src/instrumentation-client.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/src/instrumentation.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/src/lib/action-utils.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
-logic-core-v3/src/lib/actions/announcements.ts,D2,profundo,pendiente,,server-actions del cliente; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/lib/actions/announcements.ts,D2,profundo,leído,D2-c1,server-actions del cliente; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/clients.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/contact.ts,D3,profundo,pendiente,,server-actions; endpoint-publico; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/gbp-connection.ts,D7,profundo,pendiente,,server-actions; server-action; usa-auth
@@ -1497,33 +1497,33 @@ logic-core-v3/src/lib/actions/impersonation.ts,D1,profundo,leído,D1-c1,server-a
 logic-core-v3/src/lib/actions/invitations.ts,D1,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/lib/actions/leads-constants.ts,D3,profundo,pendiente,,server-actions
 logic-core-v3/src/lib/actions/leads.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
-logic-core-v3/src/lib/actions/messages.ts,D2,profundo,pendiente,,server-actions del cliente; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/lib/actions/notifications.ts,D2,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/lib/actions/messages.ts,D2,profundo,leído,D2-c1,server-actions del cliente; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/lib/actions/notifications.ts,D2,profundo,leído,D2-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/profile.ts,D1,profundo,leído,D1-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/projects.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/lib/actions/referrals.ts,D2,profundo,pendiente,,server-actions; server-action; usa-auth
+logic-core-v3/src/lib/actions/referrals.ts,D2,profundo,leído,D2-c1,server-actions; server-action; usa-auth
 logic-core-v3/src/lib/actions/schemas.ts,D3,profundo,pendiente,,server-actions
 logic-core-v3/src/lib/actions/services.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/settings.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
-logic-core-v3/src/lib/actions/upsell.ts,D2,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/lib/actions/upsell.ts,D2,profundo,leído,D2-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/agency-settings.ts,D3,profundo,pendiente,,logica-admin
-logic-core-v3/src/lib/ai/brief-history.ts,D2,profundo,pendiente,,ia-llm; toca-db
-logic-core-v3/src/lib/ai/executive-brief-input.invariant.ts,D2,superficial,pendiente,,ia-llm; test
-logic-core-v3/src/lib/ai/executive-brief-input.ts,D2,profundo,pendiente,,ia-llm
-logic-core-v3/src/lib/ai/executive-brief.ts,D2,profundo,pendiente,,ia-llm; toca-db; escribe-db
+logic-core-v3/src/lib/ai/brief-history.ts,D2,profundo,leído,D2-c1,ia-llm; toca-db
+logic-core-v3/src/lib/ai/executive-brief-input.invariant.ts,D2,superficial,superficial,D2-c1,"ia-llm; test | test sin DB/LLM: input del brief ejecutivo (delta = card, sin crecimiento con delta negativo, sin metricas fuera de las cards, reglas anti-invencion, corte de cache); no cubre el conteo de leads global"
+logic-core-v3/src/lib/ai/executive-brief-input.ts,D2,profundo,leído,D2-c1,ia-llm
+logic-core-v3/src/lib/ai/executive-brief.ts,D2,profundo,leído,D2-c1,ia-llm; toca-db; escribe-db
 logic-core-v3/src/lib/ai/results-insights.ts,D5,profundo,pendiente,,proveedor-ia: Anthropic directo fuera del modulo chatbot
 logic-core-v3/src/lib/ai/review-reply-draft.ts,D5,profundo,pendiente,,proveedor-ia: Anthropic directo fuera del modulo chatbot
 logic-core-v3/src/lib/alerts.ts,D3,profundo,pendiente,,logica-admin; toca-db; FROZEN-inferido
 logic-core-v3/src/lib/analytics.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/announcements/announcements.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/announcements/get-announcements-for-org.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
-logic-core-v3/src/lib/announcements/visibility.ts,D2,profundo,pendiente,,logica-dashboard
+logic-core-v3/src/lib/announcements/announcements.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: visibilidad de novedades (ALL a todas las orgs, ORG solo a la suya, caducidad, no leidas)"
+logic-core-v3/src/lib/announcements/get-announcements-for-org.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
+logic-core-v3/src/lib/announcements/visibility.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/audit-log-queries.ts,D3,profundo,pendiente,,logica-admin; toca-db; server-action; guard-indirecto
 logic-core-v3/src/lib/audit-log.ts,D3,profundo,pendiente,,logica-admin; toca-db; escribe-db; FROZEN-inferido
 logic-core-v3/src/lib/auth-cookies.ts,D1,profundo,leído,D1-c1,auth; ZONA-FRANCO
 logic-core-v3/src/lib/auth-guards.ts,D1,profundo,leído,D1-c1,auth; usa-auth; guard-indirecto; FROZEN-inferido
 logic-core-v3/src/lib/auth/assert-ownership.ts,D1,profundo,leído,D1-c1,auth; toca-db; escribe-db
-logic-core-v3/src/lib/billing/get-current-plan.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
+logic-core-v3/src/lib/billing/get-current-plan.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/bulk-actions.ts,D3,profundo,pendiente,,logica-admin; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/chromeReveal.ts,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/modules/chatbot/components/LogicCompanion.tsx); lib-sitio-publico; FROZEN-inferido
 logic-core-v3/src/lib/client-health.ts,D3,profundo,superficial,F1.11,logica-admin | PODA-ALTA
@@ -1539,12 +1539,12 @@ logic-core-v3/src/lib/crypto/__tests__/credential-cipher.test.ts,D7,superficial,
 logic-core-v3/src/lib/crypto/credential-cipher.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/crypto/resolve-credential.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/crypto/secret-box.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/dashboard/attention.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
-logic-core-v3/src/lib/dashboard/home-metrics-logic.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/dashboard/home-metrics-logic.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/dashboard/home-metrics.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
-logic-core-v3/src/lib/dashboard/lead-origin.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/dashboard/week-results.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
+logic-core-v3/src/lib/dashboard/attention.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
+logic-core-v3/src/lib/dashboard/home-metrics-logic.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: logica pura del home de resultados (periodo AR, plata, gate por plan, embudo, vacios); la anti-fuga entre orgs la declara solo en runtime"
+logic-core-v3/src/lib/dashboard/home-metrics-logic.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/dashboard/home-metrics.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
+logic-core-v3/src/lib/dashboard/lead-origin.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/dashboard/week-results.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/data/message-context.ts,D6,profundo,leído,D6-c1,catalogos
 logic-core-v3/src/lib/data/onboarding-tasks.ts,D6,profundo,leído,D6-c1,catalogos
 logic-core-v3/src/lib/data/premium-modules.ts,D6,profundo,leído,D6-c1,catalogos
@@ -1563,7 +1563,7 @@ logic-core-v3/src/lib/email/templates/weekly-report.ts,D7,profundo,pendiente,,in
 logic-core-v3/src/lib/email/templates/welcome-client.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/email/unsubscribe-token.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/follow-up.ts,D4,profundo,pendiente,,leados-libre
-logic-core-v3/src/lib/health-score.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
+logic-core-v3/src/lib/health-score.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/home-routes.ts,D9,profundo,pendiente,,compartido: lo importa components/ui (FROZEN) (src/components/ui/Preloader.tsx); lib-sitio-publico
 logic-core-v3/src/lib/hover.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/alerts/AlertsClient.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +39); lib-sitio-publico; FROZEN-inferido"
 logic-core-v3/src/lib/impersonation-constants.ts,D1,profundo,leído,D1-c1,auth
@@ -1661,70 +1661,70 @@ logic-core-v3/src/lib/logo-footprint.ts,D9,profundo,pendiente,,"compartido: lo i
 logic-core-v3/src/lib/marketing-routes.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/components/layout/useChromeRevealed.ts, src/components/ui/MarketingIntro.tsx +1); lib-sitio-publico"
 logic-core-v3/src/lib/mask-secret.invariant.ts,D9,superficial,pendiente,,lib-transversal; test
 logic-core-v3/src/lib/mask-secret.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/modules/check-activation.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
+logic-core-v3/src/lib/modules/check-activation.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/modules/demand.ts,D3,profundo,pendiente,,logica-admin (cruza orgs a proposito); guard-indirecto
-logic-core-v3/src/lib/modules/modules.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/modules/motor-resenas-view.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/modules/motor-resenas-view.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/modules/showroom.ts,D2,profundo,pendiente,,logica-dashboard
+logic-core-v3/src/lib/modules/modules.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: vitrina de modulos (owned/available/coming_soon, INACTIVE no es tenencia, buildShowroom por org, ranking de demanda); no cubre el slug email-marketing vs email-marketing-pro"
+logic-core-v3/src/lib/modules/motor-resenas-view.invariant.ts,D2,superficial,superficial,D2-c1,logica-dashboard; test | test sin DB: vista del motor de resenas (locked/connecting/operational por modulo x conexion)
+logic-core-v3/src/lib/modules/motor-resenas-view.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/modules/showroom.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/motion-variants.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/PageTransition.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +12); lib-sitio-publico; FROZEN-inferido"
 logic-core-v3/src/lib/n8n.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/notifications/telegram.ts,D7,profundo,pendiente,,integracion; toca-db
 logic-core-v3/src/lib/onboarding/core.ts,D5,profundo,pendiente,,alta de cliente (unico llamador: admin/chatbots/new); toca-db; escribe-db
-logic-core-v3/src/lib/onboarding/seed-tasks-for-org.ts,D2,profundo,pendiente,,logica-dashboard; toca-db; escribe-db
+logic-core-v3/src/lib/onboarding/seed-tasks-for-org.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
 logic-core-v3/src/lib/os-commercial.ts,D4,profundo,pendiente,,leados-libre; toca-db; guard-indirecto; escribe-db
-logic-core-v3/src/lib/plan/fallback.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/plan/get-org-usage.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
-logic-core-v3/src/lib/plan/get-plan-for-org.ts,D2,profundo,pendiente,,logica-dashboard; toca-db; escribe-db
-logic-core-v3/src/lib/plan/index.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/plan/lead-scoring-gate.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/plan/plan-allows.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/plan/plan-presentation.ts,D2,profundo,pendiente,,logica-dashboard
+logic-core-v3/src/lib/plan/fallback.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/plan/get-org-usage.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
+logic-core-v3/src/lib/plan/get-plan-for-org.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
+logic-core-v3/src/lib/plan/index.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/plan/lead-scoring-gate.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: gate de priorizacion de leads por plan (planAllows leadScoring, columna de clasificacion del CSV)"
+logic-core-v3/src/lib/plan/plan-allows.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/plan/plan-presentation.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/premium-features.ts,D3,profundo,pendiente,,logica-admin
-logic-core-v3/src/lib/premium-modules.ts,D2,profundo,pendiente,,logica-dashboard; toca-db; escribe-db
-logic-core-v3/src/lib/preview.ts,D2,profundo,pendiente,,tenant-scope (resolveOrgId del portal); usa-auth; guard-indirecto
+logic-core-v3/src/lib/premium-modules.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
+logic-core-v3/src/lib/preview.ts,D2,profundo,leído,D2-c1,tenant-scope (resolveOrgId del portal); usa-auth; guard-indirecto
 logic-core-v3/src/lib/prisma-enums.ts,D6,profundo,leído,D6-c1,datos
 logic-core-v3/src/lib/prisma.ts,D6,profundo,leído,D6-c1,datos; toca-db; FROZEN
 logic-core-v3/src/lib/rate-limit/limiter.ts,D1,profundo,leído,D1-c1,rate-limit; toca-db
 logic-core-v3/src/lib/rate-limit/presets.ts,D1,profundo,leído,D1-c1,rate-limit
-logic-core-v3/src/lib/recommendations/get-recommendations-for-org.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
-logic-core-v3/src/lib/recommendations/recommendations.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/recommendations/rules.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/recommendations/types.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/referrals/attribution.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/referrals/code.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/referrals/referrals.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/referrals/referrals.service.ts,D2,profundo,pendiente,,logica-dashboard; toca-db; escribe-db
-logic-core-v3/src/lib/reports/MonthlyReport.tsx,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/reports/client-monthly/get-client-monthly-report-data.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/reports/client-monthly/get-client-monthly-report-data.ts,D2,profundo,pendiente,,logica-dashboard; toca-db; guard-indirecto
-logic-core-v3/src/lib/reports/client-monthly/monthly-report-data.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/reports/client-monthly/monthly-report-data.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/reports/executive-weekly/build.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
-logic-core-v3/src/lib/reports/executive-weekly/report-eligible-plan.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/reports/executive-weekly/report-eligible-plan.ts,D2,profundo,pendiente,,logica-dashboard
-logic-core-v3/src/lib/reports/executive-weekly/send-manual.ts,D2,profundo,pendiente,,logica-dashboard; toca-db; escribe-db
-logic-core-v3/src/lib/reports/executive-weekly/send.ts,D2,profundo,pendiente,,logica-dashboard; toca-db; escribe-db
-logic-core-v3/src/lib/reports/executive-weekly/top-hot-leads.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
+logic-core-v3/src/lib/recommendations/get-recommendations-for-org.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
+logic-core-v3/src/lib/recommendations/recommendations.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: motor de recomendaciones por reglas (umbrales, pertinencia, sin org en el CTA, tope y rotacion, vacio)"
+logic-core-v3/src/lib/recommendations/rules.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/recommendations/types.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/referrals/attribution.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/referrals/code.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/referrals/referrals.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: referidos (codigo, atribucion, anti-abuso); el scoping de lectura vive en referrals.service.ts"
+logic-core-v3/src/lib/referrals/referrals.service.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
+logic-core-v3/src/lib/reports/MonthlyReport.tsx,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/reports/client-monthly/get-client-monthly-report-data.invariant.ts,D2,superficial,superficial,D2-c1,logica-dashboard; test | test que ESCRIBE en la Neon del .env (crea y borra filas tagueadas D7-MONTHLYREPORT-PDF-TEST) y renderiza el PDF mensual: caso de DEU-017
+logic-core-v3/src/lib/reports/client-monthly/get-client-monthly-report-data.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; guard-indirecto
+logic-core-v3/src/lib/reports/client-monthly/monthly-report-data.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: ensamblado del informe mensual (sin bot, mes flojo, mes completo, signo ASCII)"
+logic-core-v3/src/lib/reports/client-monthly/monthly-report-data.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/reports/executive-weekly/build.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
+logic-core-v3/src/lib/reports/executive-weekly/report-eligible-plan.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: gate de plan del reporte ejecutivo (PRO/BUSINESS completo, BUSINESS leads destacados)"
+logic-core-v3/src/lib/reports/executive-weekly/report-eligible-plan.ts,D2,profundo,leído,D2-c1,logica-dashboard
+logic-core-v3/src/lib/reports/executive-weekly/send-manual.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
+logic-core-v3/src/lib/reports/executive-weekly/send.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
+logic-core-v3/src/lib/reports/executive-weekly/top-hot-leads.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/searchconsole.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/security/auth-rate-limit.ts,D1,profundo,leído,D1-c1,seguridad
 logic-core-v3/src/lib/security/generate-temp-password.ts,D1,profundo,leído,D1-c1,seguridad
 logic-core-v3/src/lib/security/idor-tokens.invariant.ts,D1,superficial,superficial,D1-c1,"seguridad; test | test: cubre el token firmado del opt-out por contacto (/api/email/optout, D7) y resolveScopedOrgId (org-scope.ts); sin DB"
 logic-core-v3/src/lib/security/oauth-state.ts,D7,profundo,pendiente,,oauth
-logic-core-v3/src/lib/security/org-scope.ts,D2,profundo,pendiente,,tenant-scope; guard-indirecto
+logic-core-v3/src/lib/security/org-scope.ts,D2,profundo,leído,D2-c1,tenant-scope; guard-indirecto
 logic-core-v3/src/lib/security/origin-matcher.ts,D5,profundo,pendiente,,origen-widget
 logic-core-v3/src/lib/security/validate-origin.ts,D5,profundo,pendiente,,origen-widget; toca-db
 logic-core-v3/src/lib/sentry/scrub-pii.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/slugify.ts,D9,profundo,pendiente,,lib-transversal
-logic-core-v3/src/lib/subscription.ts,D2,profundo,pendiente,,logica-dashboard; toca-db
-logic-core-v3/src/lib/tickets/actions.ts,D2,profundo,pendiente,,logica-dashboard; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
-logic-core-v3/src/lib/tickets/schemas.ts,D2,profundo,pendiente,,logica-dashboard
+logic-core-v3/src/lib/subscription.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
+logic-core-v3/src/lib/tickets/actions.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
+logic-core-v3/src/lib/tickets/schemas.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/tokens-estimate.ts,D5,profundo,pendiente,,chatbot
 logic-core-v3/src/lib/types/data-connections.ts,D9,profundo,pendiente,,lib-transversal
 logic-core-v3/src/lib/tz-ar.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
-logic-core-v3/src/lib/upsell/dedup.invariant.ts,D2,superficial,pendiente,,logica-dashboard; test
-logic-core-v3/src/lib/upsell/dedup.ts,D2,profundo,pendiente,,logica-dashboard
+logic-core-v3/src/lib/upsell/dedup.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: dedup de pedidos de upsell en ventana (crea, idempotente, renovado, rage-clicks)"
+logic-core-v3/src/lib/upsell/dedup.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/use-autosave.ts,D9,profundo,pendiente,,lib-transversal
 logic-core-v3/src/lib/use-is-client.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/use-reduced-motion.ts,D9,profundo,pendiente,,lib-transversal; client-component; FROZEN-inferido

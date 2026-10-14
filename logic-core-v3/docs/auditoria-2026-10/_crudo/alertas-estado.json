@@ -152,6 +152,282 @@
    "resultado": "confirmada",
    "evidencia": "Conviven los dos: package.json:17-20 y 22-35 con ts-node (25 líneas) y 67 líneas con 'npx tsx'; tsx no está declarado ni en el lockfile. Los seeds del lote usan import.meta (add-contact-tool.ts:88, sync-plans.ts:197) y documentan 'npx tsx' (sync-plans.ts:9-13), incompatibles con el ts-node configurado en CommonJS (package.json:172-176).",
    "hallazgo_titulo": "Los seeds del lote solo corren con tsx, que no está declarado: `npx tsx` resuelve una versión sin fijar mientras DATABASE_URL apunta a prod"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "alerta": "[D2-A1] Conteo de leads de Inicio y computeLeadsScore usan ContactSubmission sin organizationId",
+   "resultado": "confirmada",
+   "evidencia": "week-results.ts:43-52 y health-score.ts:284 y :311-330 cuentan ContactSubmission sin filtro; el modelo no tiene organizationId (schema.prisma:688-708); upsell.ts:88-97 suma los pedidos de todos los clientes. Contradice el '0 rojos' de la Auditoria III.",
+   "hallazgo_titulo": "Inicio y Health Score cuentan los leads de toda la agencia (ContactSubmission sin organizationId) y se los muestran a cada cliente"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "alerta": "[D2-A2] IDs internos en URL (/dashboard/chatbot/leads/[id] vs B6.3)",
+   "resultado": "parcial",
+   "evidencia": "Existen cuids en URLs del portal: chatbot/leads/[id]/page.tsx:34, soporte/[ticketId]/page.tsx:60, campaigns/[id]/send, project ?p= (page.tsx:268), tiendanube ?orgId= (ConnectStoreCard.tsx:39). Ninguno es IDOR: getLeadByIdForOrg usa forOrg (multiTenantQueries.ts:147-156), el ticket filtra por organizationId, la campana por id+org (_actions.ts:177-179) y ?p= elige dentro del set de la org.",
+   "hallazgo_titulo": "IDs internos (cuid) en URLs del portal: resueltos contra la org de la sesion (sin IDOR), pero contra la regla de CLAUDE.md"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "alerta": "[D2-A3] Promesas visibles: 'Proximamente Q3 2026' y 'Respondemos en < 4 hs, Lun-Vie 9-18'",
+   "resultado": "confirmada",
+   "evidencia": "PremiumModuleCard.tsx:300, ServiceDetailModal.tsx:181, ModulosOpcionales.tsx:487 (Q3 2026, vencido al 2026-10-13); MessageThread.tsx:114 y :118-119.",
+   "hallazgo_titulo": "Promesas visibles vencidas o sin respaldo: 'Proximamente Q3 2026' y 'Respondemos en < 4 hs, Lun-Vie 9-18hs'"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "alerta": "[D2-A4] Lanes del portal declaradas cerradas pero sin mergear a main",
+   "resultado": "parcial",
+   "evidencia": "Los 82 commits citados en los registros de Cliente (Mi Cuenta 20, Mi proyecto 13, Inicio 8, Servicios 7, Resultados 18, Portal General 24) son ancestros de origin/main. La unica rama sin mergear es origin/b0-isolation-motor-chatbot (+8 commits, incluido 9fc616c4 PD-1.2 cifrado en write paths).",
+   "hallazgo_titulo": "Credenciales de la Boveda guardadas en texto plano en main mientras la UI muestra 'AES-256': el cifrado de escritura (PD-1.2) quedo en una rama sin mergear"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "alerta": "[D2-A5] Credenciales de onboarding: texto plano con etiqueta ENCRIPTADO vs ONBOARDING_SECRET_KEY",
+   "resultado": "parcial",
+   "evidencia": "En origin/main existe el cifrado AES-256-GCM con ONBOARDING_SECRET_KEY (credential-cipher.ts:6, :35, :73) y la lectura que descifra (resolve-credential.ts:16-25), pero encryptCredential no tiene llamadores: el write path vivo (agency-actions.ts:103-110) guarda en claro y onboarding-actions.ts:110-132 sigue con 'ENCRIPTADO_EN_TEXTO' (modulo muerto).",
+   "hallazgo_titulo": "Credenciales de la Boveda guardadas en texto plano en main mientras la UI muestra 'AES-256': el cifrado de escritura (PD-1.2) quedo en una rama sin mergear"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "alerta": "[D2-A6] Navegacion post-exito con window.location.assign() en el flujo de venta",
+   "resultado": "confirmada",
+   "evidencia": "PremiumModuleCard.tsx:215, Recommendations.tsx:91 y UpgradeCtaButton.tsx:100 usan window.location.assign con comentario inline; LockedView (P3-A.2) no lo usa. CLAUDE.md no contempla el patron para portales.",
+   "hallazgo_titulo": "Navegacion imperativa en el portal: router.push documentado y window.location.assign, un patron que CLAUDE.md no contempla"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "alerta": "[D2-A7] Avatar en base64 en la base: tamano maximo validado en servidor",
+   "resultado": "parcial",
+   "evidencia": "El servidor si valida: avatarImageUrlSchema.ts:10 MAX 600.000 caracteres y :20-23, usado por UpdateProfileSchema (schemas.ts:17) en profile.ts:36. Sigue sin storage externo: el data URL vive en la base y viaja en el payload de perfil (perfil/page.tsx:225, :250); el avatar del bot entra en la config publica del widget (getPublicConfig.ts:84)."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "alerta": "[D2-A1] Conteo de leads de Inicio y computeLeadsScore sobre ContactSubmission sin organizationId",
+   "resultado": "confirmada",
+   "evidencia": "week-results.ts:43-51 y health-score.ts:311-333 (más computeConversionScore :282-289) cuentan ContactSubmission sin filtro; el modelo no tiene organizationId (schema.prisma:688-708); se renderizan en dashboard/page.tsx:173 y :183; WeekResultsGrid.tsx:44-47 lo tapa con 'En calibración' 'sin revelar que es global'. La Auditoría III no lo ve porque el modelo no tiene la columna.",
+   "hallazgo_titulo": "Inicio cuenta como leads del cliente los ContactSubmission de todas las orgs"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "alerta": "[D2-A2] IDs internos en URLs (/dashboard/chatbot/leads/[id]) contra la regla de CLAUDE.md",
+   "resultado": "parcial",
+   "evidencia": "Hay 3 rutas dinámicas con cuid: soporte/[ticketId] (page.tsx:60-61, where id+organizationId), chatbot/leads/[id] (page.tsx:34, getLeadByIdForOrg con forOrg, multiTenantQueries.ts:147-155) y email-marketing/campaigns/[id]/send (sendCampaignAction, _actions.ts:177-180). Ninguna es IDOR; las tres violan la regla de no exponer IDs.",
+   "hallazgo_titulo": "IDs internos (cuid) en URLs del portal, todos resueltos contra la org"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "alerta": "[D2-A3] Promesas visibles: 'Próximamente Q3 2026' y 'Respondemos en < 4 hs, Lun-Vie 9-18'",
+   "resultado": "confirmada",
+   "evidencia": "PremiumModuleCard.tsx:300 y ServiceDetailModal.tsx:181 'Próximamente Q3 2026' (vencida al 14/10/2026); MessageThread.tsx:114-119 '< 4 hs' 'Lun–Vie 9–18hs'; soporte/page.tsx:87-90 '< 4h' 'Lun-Vie 9-19hs ART'; TicketReplyForm.tsx:32 'menos de 24hs'; Step3Tour.tsx:14 'soporte 24/7'.",
+   "hallazgo_titulo": "Promesas vencidas y contradictorias visibles al cliente (Q3 2026 y cuatro SLA distintos)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "alerta": "[D2-A4] Lanes del portal cerradas pero 'sin mergear' (inicio, services, resultados, … y b0-isolation-motor-chatbot)",
+   "resultado": "parcial",
+   "evidencia": "Todos los commits declarados 'sin mergear' de Inicio (2725caf…7b8aa4f), Servicios (5d97587…91b3b20) y Resultados (583a3ee…df4fbe8) son ancestros de origin/main; no quedan ramas lane/* (git for-each-ref). Sigue sin mergear origin/b0-isolation-motor-chatbot: 7 commits no equivalentes por parche (git cherry), entre ellos 9fc616c4 'feat(crypto): cifrar credenciales en write-paths + Zod (PD-1.2)'.",
+   "hallazgo_titulo": "Credenciales de la bóveda se guardan en texto plano: el cifrado al escribir quedó sin mergear"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "alerta": "[D2-A5] Credenciales de onboarding: texto plano con etiqueta ENCRIPTADO; ONBOARDING_SECRET_KEY",
+   "resultado": "confirmada",
+   "evidencia": "En main están credential-cipher.ts y resolve-credential.ts, pero encryptCredential (credential-cipher.ts:73) no tiene llamadores fuera de tests; encrypt-for-storage.ts no existe en main (git ls-tree). createClientAssetAction (agency-actions.ts:94-111, usado por VaultManager.tsx:5) y completeOnboardingAction (onboarding-actions.ts:110-131, url 'ENCRIPTADO_EN_TEXTO') guardan description en claro. ONBOARDING_SECRET_KEY solo aparece comentada en .env.example:245 y en el test.",
+   "hallazgo_titulo": "Credenciales de la bóveda se guardan en texto plano: el cifrado al escribir quedó sin mergear"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "alerta": "[D2-A6] window.location.assign() post-éxito en el flujo de venta",
+   "resultado": "confirmada",
+   "evidencia": "PremiumModuleCard.tsx:212-215 (con comentario que lo justifica: revalidatePath('/dashboard') de requestUpsellAction cancela la navegación soft); mismo patrón en home/Recommendations.tsx:91 y plan/UpgradeCtaButton.tsx:100.",
+   "hallazgo_titulo": "Navegación dura con window.location.assign en vitrina, recomendaciones y plan"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "alerta": "[D2-A7] Avatar en base64 en la base: tamaño máximo validado en servidor",
+   "resultado": "descartada",
+   "evidencia": "avatarImageUrlSchema.ts:10-23 limita a 600.000 caracteres (~450 KB) y solo acepta png/jpeg/webp en data URL o http(s); lo usan lib/actions/schemas.ts:17 (perfil), createClientOnly.ts:22, createClientWithBot.ts:28, saveBotConfig.ts:31 y saveBotConfigByOrgSlug.ts. El base64 en la base queda acotado; storage externo es decisión de diseño, no defecto."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "alerta": "[D2-A1] Conteo de leads de Inicio y computeLeadsScore usan ContactSubmission sin filtrar por organizationId",
+   "resultado": "confirmada",
+   "evidencia": "week-results.ts:43-51 cuenta ContactSubmission sin organizationId (card 'Leads' de Inicio, dashboard/page.tsx:183); health-score.ts:311-327 computeLeadsScore con 'void organizationId' y :282-289 conversion; WeekResultsGrid.tsx:44-46 lo admite en comentario; tambien llega al reporte semanal (build.ts:133, :174-176) y al brief de Gemini (executive-brief.ts:279, :293). La Auditoria III no lo ve porque ContactSubmission no tiene organizationId (schema) y la consulta no pasa por forOrg.",
+   "hallazgo_titulo": "Inicio, Health Score, reporte semanal y brief IA cuentan los leads de toda la agencia (ContactSubmission sin org) como si fueran del cliente"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "alerta": "[D2-A2] IDs internos en URL (/dashboard/chatbot/leads/[id]) e IDOR",
+   "resultado": "parcial",
+   "evidencia": "Las 3 rutas dinamicas del portal y el ?p= de proyecto resuelven el id contra la org de la sesion: soporte/[ticketId]/page.tsx:56-61 (findUnique id+org), chatbot/leads/[id]/page.tsx:29-35 + multiTenantQueries.ts:147-149 (forOrg), email-marketing/_actions.ts:177-179, project/page.tsx:191-195. Sin IDOR, pero se incumple la regla de CLAUDE.md y B6.3.",
+   "hallazgo_titulo": "IDs internos (cuid) en URLs del portal: ticket, lead, campana y ?p= de proyecto (sin IDOR)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "alerta": "[D2-A3] Promesas visibles: 'Proximamente Q3 2026' y 'Respondemos en < 4 hs, Lun-Vie 9-18'",
+   "resultado": "confirmada",
+   "evidencia": "PremiumModuleCard.tsx:300 y ServiceDetailModal.tsx:181 ('Próximamente Q3 2026', vencido); MessageThread.tsx:114, :118-119; ademas soporte/page.tsx:86-90 ('< 4h', 'Lun-Vie 9-19hs ART') y TicketReplyForm.tsx:32 ('menos de 24hs'). Sin logica de SLA: git grep firstResponseAt|responseTimeMs|slaBreach solo matchea LeadOS.",
+   "hallazgo_titulo": "Promesas visibles vencidas o contradictorias: 'Proximamente Q3 2026' y SLA de respuesta (<4 hs 9–18 / <4h 9–19 / <24hs) sin medicion"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "alerta": "[D2-A4] Lanes del portal 'hechas (sin mergear)' y rama b0-isolation-motor-chatbot",
+   "resultado": "parcial",
+   "evidencia": "Los commits de los items del lote declarados 'sin mergear' son ancestros de origin/main: 6c83b16, f86c911, bded0be, 8b641a0, 7876c02, be6aa4c, 7a6ee10, 2730502, b31d76b, 7cfe4a4, 9699eaa, 6bd00a6, e6155f5, 841425c, 2e6dc93, 461824d (git merge-base --is-ancestor). Lo que si falta: origin/b0-isolation-motor-chatbot tiene 8 commits fuera de main, incl. 9fc616c4 'cifrar credenciales en write-paths + Zod (PD-1.2)', eb3b0d0e 'CSV anti-inyeccion (PA-2)' y 2d8701ef (PA-3/PA-4).",
+   "hallazgo_titulo": "Credenciales de la Boveda guardadas en claro en main: el cifrado en escritura (PD-1.2) quedo en una rama sin mergear y la UI muestra 'AES-256'"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "alerta": "[D2-A5] Credenciales de onboarding: texto plano con etiqueta ENCRIPTADO vs ONBOARDING_SECRET_KEY",
+   "resultado": "confirmada",
+   "evidencia": "En main existe el cifrador (credential-cipher.ts:35-49 con ONBOARDING_SECRET_KEY) y la lectura (resolve-credential.ts:17-26), pero no el cifrado en escritura: agency-actions.ts:103-111 guarda description en claro; onboarding-actions.ts:111-131 en claro con url 'ENCRIPTADO_EN_TEXTO' (inalcanzable: OnboardingWizard sin importadores); encrypt-for-storage.ts solo en la rama sin mergear.",
+   "hallazgo_titulo": "Credenciales de la Boveda guardadas en claro en main: el cifrado en escritura (PD-1.2) quedo en una rama sin mergear y la UI muestra 'AES-256'"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "alerta": "[D2-A6] Navegacion post-exito con window.location.assign() en el flujo de venta",
+   "resultado": "confirmada",
+   "evidencia": "PremiumModuleCard.tsx:212-215, home/Recommendations.tsx:91, plan/UpgradeCtaButton.tsx:95-100 usan window.location.assign con comentario que lo justifica (revalidatePath('/dashboard') de upsell.ts:143 cancela la navegacion soft). CLAUDE.md prescribe redirect() en server actions para portales.",
+   "hallazgo_titulo": "Navegacion dura con window.location.assign y <a href> internos en el portal"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "alerta": "[D2-A7] Avatar base64 en la base: tamano maximo validado en servidor",
+   "resultado": "parcial",
+   "evidencia": "Hay tope server-side: avatarImageUrlSchema.ts:10 (600_000 caracteres) y :20-23; UpdateProfileSchema lo usa (schemas.ts:17). El base64 sigue en la DB (sin storage externo) y el schema acepta cualquier URL http(s) (:16) que se renderiza con <img> (ClientAvatar.tsx:30-31) en /admin/clients (page.tsx:51).",
+   "hallazgo_titulo": "El avatar de la empresa acepta cualquier URL http(s) que el admin carga con <img>; el base64 (hasta 600 KB) sigue en la DB"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "alerta": "[D2-A1] Conteo de leads de Inicio y computeLeadsScore sobre ContactSubmission sin organizationId (fuga entre tenants) vs Auditoría III '0 rojos de aislamiento'",
+   "resultado": "confirmada",
+   "evidencia": "week-results.ts:43-52 y health-score.ts:284-289, :317-333 cuentan ContactSubmission sin filtro; el modelo no tiene organizationId (schema.prisma:688-708) y lo escriben contact.ts:62 (formulario público) y upsell.ts:88 (todos los clientes). Llega a WeekResultsGrid (caption 'En calibración', comentario :44-47 que admite que es global), al prompt del brief (executive-brief.ts:293) y al email (build.ts:174-177, executive-weekly.ts:243-246). No contradice en sentido estricto a la Auditoría III: aquel barrido miró las queries del chatbot (forOrg/registry); lib/dashboard y lib/health-score usan @/lib/prisma directo y ContactSubmission no está en el registry de aislamiento.",
+   "hallazgo_titulo": "Leads y conversión del cliente calculados sobre ContactSubmission global: portal, brief IA y email semanal muestran conteos de develOP y de otras orgs"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "alerta": "[D2-A2] IDs internos en URL: /dashboard/chatbot/leads/[id] con el id del lead; B6.3 y CLAUDE.md lo prohíben; ver IDOR",
+   "resultado": "parcial",
+   "evidencia": "Hay ids cuid en URLs: BusinessHero.tsx:131, chatbot/leads/[id], soporte/[ticketId], email-marketing/campaigns/[id]. Ninguno es IDOR: leads/[id]/page.tsx:34 → getLeadByIdForOrg con forOrg (multiTenantQueries.ts:147-148); soporte/[ticketId]/page.tsx:60-61 findUnique({ id, organizationId }); sendCampaignAction findFirst({ id, organizationId }) (email-marketing/_actions.ts:177-179). Observación: el detalle del lead resuelve la org con getClientChatbotSession (getClientSession.ts:12-25, findFirst sin orderBy ni impersonación), distinta de resolveOrgId del home.",
+   "hallazgo_titulo": "IDs internos (cuid) en URLs del portal; sin IDOR porque se resuelven contra la org"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "alerta": "[D2-A3] Promesas visibles: 'Próximamente Q3 2026' (vencida) y 'Respondemos en < 4 hs, Lun-Vie 9-18'",
+   "resultado": "confirmada",
+   "evidencia": "PremiumModuleCard.tsx:300 y ServiceDetailModal.tsx:181 (portal) y ModulosOpcionales.tsx:487 (sitio público) 'Próximamente Q3 2026', vencida al 2026-10-14. MessageThread.tsx:114-119 '< 4 hs' + 'Lun–Vie 9–18hs', contradicho por soporte/page.tsx:90 'Lun-Vie 9-19hs ART' y TicketReplyForm.tsx:32 'menos de 24hs'.",
+   "hallazgo_titulo": "Promesas vencidas o contradictorias visibles al cliente: 'Próximamente Q3 2026' y tres SLA distintos"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "alerta": "[D2-A4] Lanes del portal declaradas cerradas pero 'sin mergear a main' (incluye b0-isolation-motor-chatbot)",
+   "resultado": "parcial",
+   "evidencia": "Los 'hecho (sin mergear)' de este lote SÍ están en origin/main: b735b3f, 7777cdc, 8c7f12b (Inicio) y bedbda8, 40c37a7, c15b740, 4387cc1, ba584ac, 3fbbfe2 (Mi plan) son ancestros (git merge-base --is-ancestor); lane/portal-pulido entró en c08704dc. origin/b0-isolation-motor-chatbot NO está mergeada: 8 commits propios (git rev-list --count origin/main..origin/b0-isolation-motor-chatbot = 8), entre ellos 9fc616c4 'feat(crypto): cifrar credenciales en write-paths + Zod (PD-1.2)' y eb3b0d0e (PA-2).",
+   "hallazgo_titulo": "Bóveda: credenciales de clientes guardadas en texto plano mientras la UI promete AES-256 y muestra un registro de accesos inventado"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "alerta": "[D2-A5] Credenciales de onboarding en texto plano con etiqueta ENCRIPTADO vs ONBOARDING_SECRET_KEY",
+   "resultado": "confirmada",
+   "evidencia": "En origin/main el cifrado solo existe del lado lectura: encryptCredential (credential-cipher.ts:73) no tiene llamadores fuera de tests; resolve-credential.ts:16-25 descifra solo filas 'enc:v1:'. El escritor vivo (VaultManager → agency-actions.ts:94-112) guarda en claro; el camino legado con url 'ENCRIPTADO_EN_TEXTO' (onboarding-actions.ts:111-131) está muerto (OnboardingWizard sin montar: git grep 'components/onboarding' → 0). ONBOARDING_SECRET_KEY solo comentada en .env.example:245. El fix vive en la rama no mergeada.",
+   "hallazgo_titulo": "Bóveda: credenciales de clientes guardadas en texto plano mientras la UI promete AES-256 y muestra un registro de accesos inventado"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "alerta": "[D2-A6] Navegación post-éxito con window.location.assign() en el flujo de venta",
+   "resultado": "confirmada",
+   "evidencia": "UpgradeCtaButton.tsx:100, Recommendations.tsx:91 y PremiumModuleCard.tsx:215, con justificación inline (UpgradeCtaButton.tsx:95-99) que la atribuye al revalidatePath('/dashboard') de requestUpsellAction (upsell.ts:143). Por rúbrica: DEU BAJA (portal con comentario).",
+   "hallazgo_titulo": "Navegación post-éxito con window.location.assign en el portal (justificada inline) por un revalidatePath('/dashboard') de la action"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "alerta": "[D2-A7] Avatar base64 en la base sin infra externa vs storage externo abierto: tamaño máximo validado en servidor",
+   "resultado": "parcial",
+   "evidencia": "El servidor sí valida tipo y tamaño: avatarImageUrlSchema.ts:10-23 (http(s) o data:image/png|jpeg|webp, máx 600.000 caracteres ≈ 450 KB) usado en schemas.ts:17 (perfil), createClientOnly.ts:22, createClientWithBot.ts:28, saveBotConfig.ts:31. El almacenamiento sigue siendo base64 en Postgres (schema.prisma:414, :1289 avatarImageUrl String?): el 'storage externo' sigue sin hacerse. Sin hallazgo nuevo en este lote."
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "alerta": "[D2-A1] Conteo de leads de Inicio y computeLeadsScore con ContactSubmission sin organizationId",
+   "resultado": "confirmada",
+   "evidencia": "src/lib/dashboard/week-results.ts:43-52 y src/lib/health-score.ts:283-292, :311-345 cuentan ContactSubmission global (prisma/schema.prisma:688-708 no tiene organizationId); upsell.ts:88 suma solicitudes de todos los clientes; el número llega al reporte semanal (build.ts:175). La 'Auditoría III' con 0 rojos no aplica a estas consultas.",
+   "hallazgo_titulo": "Los 'leads' de Inicio, el Health Score y el reporte semanal cuentan ContactSubmission de todos los tenants"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "alerta": "[D2-A2] IDs internos en URL (leads/[id]) e IDOR",
+   "resultado": "parcial",
+   "evidencia": "Las tres rutas dinámicas del portal usan cuid: soporte/[ticketId]/page.tsx:60-61, chatbot/leads/[id]/page.tsx:33 y email-marketing/campaigns/[id]/send/page.tsx:18; todas resuelven contra la org de sesión (sin IDOR: sendCampaignAction filtra por organizationId en _actions.ts:177-178). Contradicen la regla de CLAUDE.md.",
+   "hallazgo_titulo": "Las rutas del portal exponen ids internos (cuid) en la URL y en los links de email"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "alerta": "[D2-A3] Promesas visibles: 'Próximamente Q3 2026' y 'Respondemos en < 4 hs, Lun-Vie 9-18'",
+   "resultado": "confirmada",
+   "evidencia": "PremiumModuleCard.tsx:300, ServiceDetailModal.tsx:181 y ModulosOpcionales.tsx:487 (vencida al 2026-10-14); MessageThread.tsx:114 'Respondemos en < 4 hs'; soporte/page.tsx:87,90 '< 4h' y 'Lun-Vie 9-19hs ART' (no 9-18); plan-presentation.ts:135-136 promete '< 24 h hábiles' como premium.",
+   "hallazgo_titulo": "Promesa vencida 'Próximamente Q3 2026' y precio '[FALTA:precio]' visibles al cliente"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "alerta": "[D2-A4] Lanes declaradas cerradas pero sin mergear (y rama b0-isolation-motor-chatbot)",
+   "resultado": "parcial",
+   "evidencia": "Los commits de Resultados citados en PLAN-125 y PLAN-138 (df4854e, 0e1d35f, 5f7989e, 90a202e, 37609b5, 3ee97f0, df4fbe8) son ancestros de origin/main. La rama origin/b0-isolation-motor-chatbot NO está contenida: 8 commits por delante (git rev-list --count origin/main..origin/b0-isolation-motor-chatbot = 8), entre ellos 9fc616c4 (cifrado PD-1.2), eb3b0d0e (CSV anti-inyección PA-2) y 2d8701ef (PA-3/PA-4).",
+   "hallazgo_titulo": "La credenciales de la bóveda se guardan en texto plano en main; el cifrado de escritura quedó sin mergear"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "alerta": "[D2-A5] Credenciales de onboarding: texto plano con etiqueta ENCRIPTADO vs ONBOARDING_SECRET_KEY",
+   "resultado": "confirmada",
+   "evidencia": "En main existe el cifrador (src/lib/crypto/credential-cipher.ts:35,73 con ONBOARDING_SECRET_KEY) y la lectura que descifra (resolve-credential.ts:16-25), pero ningún write-path cifra: onboarding-actions.ts:115-117,127-129 guarda en claro con url 'ENCRIPTADO_EN_TEXTO' (action sin importadores) y agency-actions.ts:103-109 (form admin de Bóveda, en uso) también. git grep de encryptCredential/encryptForStorage fuera de lib/crypto en main → vacío; en la rama b0 aparecen en agency-actions.ts:14 y onboarding-actions.ts:10.",
+   "hallazgo_titulo": "La credenciales de la bóveda se guardan en texto plano en main; el cifrado de escritura quedó sin mergear"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "alerta": "[D2-A6] Navegación post-éxito con window.location.assign() en el flujo de venta",
+   "resultado": "confirmada",
+   "evidencia": "Recommendations.tsx:91, PremiumModuleCard.tsx:215 y UpgradeCtaButton.tsx:100, cada una con comentario que la justifica (carrera con revalidatePath('/dashboard') de upsell.ts:143). CLAUDE.md no contempla el patrón para portales.",
+   "hallazgo_titulo": "Navegación post-mutación con window.location.assign en el portal, patrón que CLAUDE.md no contempla"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "alerta": "[D2-A7] Avatar en base64 en la base: ¿tamaño máximo validado en servidor?",
+   "resultado": "parcial",
+   "evidencia": "El avatar sigue como data URL en la base (no hay storage externo), pero el servidor lo acota: avatarImageUrlSchema.ts:10-23 (MAX_AVATAR_URL_LENGTH 600000 y tipos png/jpeg/webp), usado por updateBotAppearance.ts:36-38 del cliente. El riesgo de tamaño ilimitado queda descartado; la decisión de storage externo sigue abierta."
   }
  ]
 }

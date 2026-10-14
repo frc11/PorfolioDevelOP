@@ -16,12 +16,10 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { AREAS, HERRAMIENTAS } from './atlas/nodos.mjs'
+import { escribirSegunPeso, existePartido, leerPartido } from './crudo-partes.mjs'
 
 const DIR = path.resolve(process.cwd(), 'docs/auditoria-2026-10')
 const CRUDO = path.join(DIR, '_crudo')
-const REG = path.join(CRUDO, 'hallazgos.json')
-const FUN = path.join(CRUDO, 'funcionalidades.json')
-const leer = (f, d) => (existsSync(f) ? JSON.parse(readFileSync(f, 'utf8').replace(/^﻿/, '')) : d)
 
 // patrones de credencial (los de secrets-historial.mjs, sin duplicarlos)
 const srcSec = readFileSync(path.resolve(process.cwd(), 'scripts/auditoria/secrets-historial.mjs'), 'utf8').replace(/\r\n/g, '\n')
@@ -67,8 +65,9 @@ function importar() {
   }
   return { hallazgos: hs }
 }
-const reg = leer(REG, null) ?? importar()
-if (!existsSync(REG)) writeFileSync(REG, JSON.stringify(reg, null, 1), 'utf8')
+// el registro va en _crudo/hallazgos.json, o partido en _crudo/hallazgos/parte-N.json si pasa el tope (DEC-49)
+const reg = leerPartido(CRUDO, 'hallazgos', null, 'hallazgos') ?? importar()
+if (!existePartido(CRUDO, 'hallazgos')) escribirSegunPeso(CRUDO, 'hallazgos', reg, 'hallazgos')
 const vigentes = reg.hallazgos.filter((h) => h.estado !== 'descartado')
 
 // ── Bloque §5.1 ──────────────────────────────────────────────────────────────
@@ -126,7 +125,7 @@ writeFileSync(path.join(DIR, '03-MEJORAS.md'), md03.join('\n'), 'utf8')
 const CAB_02 = '# 02 — Qué falta\n\n> Madurez de cada herramienta de §6 del plan, con la escala del PROMPT §5.2 (L0 no existe · L1 esqueleto · L2 camino feliz · **L3 listo para cliente** · L4 pulido). **La unidad que se mide es la funcionalidad** (ENMIENDA-01 E7, DEC-25); la madurez de una herramienta es la de su funcionalidad más floja y la de un área, un cálculo agregado. Un L2 o más afirma que algo funciona: exige el camino feliz trazado con `ruta:línea`; si no, queda `L?`. Los faltantes se escriben como `FAL-NNN` bajo su herramienta. La hipótesis de Valentino —«el admin y el portal están muy desarrollados y les faltan sobre todo módulos»— se confirma o se desmiente acá con evidencia, no se asume. Generado por `scripts/auditoria/hallazgos-md.mjs` (funcionalidades de `_crudo/funcionalidades.json`, faltantes de `_crudo/hallazgos.json`).'
 const CRIT = { permisos_tenant: 'permisos y tenant', vacios: 'vacíos', errores: 'errores', carga: 'carga', validacion_servidor: 'validación en servidor', mobile: 'mobile', sentry: 'Sentry', sin_mocks_todos: 'sin mocks ni TODO', autonomia: 'autonomía' }
 const NIVEL = { L0: 0, L1: 1, 'L?': 1.5, L2: 2, L3: 3, L4: 4 }
-const fun = leer(FUN, { items: [] }).items
+const fun = leerPartido(CRUDO, 'funcionalidades', { items: [] }).items
 const funPorHerr = new Map()
 for (const f of fun) { const h = String(f.herramienta).split('.').slice(0, 2).join('.'); if (!funPorHerr.has(h)) funPorHerr.set(h, []); funPorHerr.get(h).push(f) }
 const faltan = (f) => Object.entries(f.criterios_l3 ?? {}).filter(([, v]) => v && v.cumple !== 'si' && v.cumple !== 'n/a').map(([k]) => CRIT[k] ?? k)

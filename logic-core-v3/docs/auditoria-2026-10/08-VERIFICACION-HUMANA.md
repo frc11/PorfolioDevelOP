@@ -273,7 +273,7 @@
 - ¿Escribe en la base o manda emails?: no
 
 ### [VH-031] Credenciales en reposo: cuántas están en claro
-- Verifica: [SEC-036] · Prioridad: media
+- Verifica: [SEC-036] · Prioridad: alta
 - Entorno: Prod (solo lectura)
 - Precondiciones: Acceso de lectura; nunca seleccionar los valores
 - Pasos: 1) SELECT count(*) FILTER (WHERE "gbpRefreshToken" IS NOT NULL) AS gbp, count(*) FILTER (WHERE "gbpRefreshToken" LIKE 'enc:v1:%') AS gbp_cifrados, count(*) FILTER (WHERE "tiendanubeAccessToken" IS NOT NULL) AS tn, count(*) FILTER (WHERE "calComApiKey" IS NOT NULL) AS cal FROM "Organization"; 2) SELECT count(*) FILTER (WHERE type = 'ACCESS') AS acceso, count(*) FILTER (WHERE type = 'ACCESS' AND url LIKE 'enc:v1:%') AS acceso_cifrado FROM "ClientAsset"; 3) SELECT count(*) FROM "AgencySettings" WHERE "osTelegramBotToken" IS NOT NULL;
@@ -378,4 +378,157 @@
 - Pasos: 1) Abrir el inicio del portal del cliente en tres pestañas. 2) Hacer clic en 'Regenerar' en las tres casi a la vez. 3) Leer executiveBriefRegenerations de la org y los logs de llamadas al LLM.
 - Resultado esperado: Una sola generación; las otras dos rechazadas.
 - Señal de falla: Tres textos distintos generados y el contador en 1.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-043] Remitente arbitrario en campanas
+- Verifica: [SEC-044] · Prioridad: media
+- Entorno: Org QA con el modulo, lista con una direccion propia
+- Precondiciones: —
+- Pasos: 1) Crear una campana con 'Email remitente' de un dominio ajeno (p. ej. una cuenta gmail) 2) Crear otra con una direccion inventada del dominio de develOP 3) Enviar ambas y revisar el buzon y el error mostrado
+- Resultado esperado: El panel rechaza remitentes no permitidos
+- Señal de falla: Brevo envia con esos remitentes o el panel muestra el cuerpo crudo del error de Brevo
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-044] Enter en el formulario de nueva campana
+- Verifica: [BUG-029] · Prioridad: media
+- Entorno: Org QA con lista de una sola direccion propia
+- Precondiciones: —
+- Pasos: 1) Abrir /dashboard/modules/email-marketing/campaigns/new 2) Completar nombre, asunto, remitente, email y HTML 3) Volver al campo Asunto y apretar Enter
+- Resultado esperado: No se envia nada sin una confirmacion
+- Señal de falla: La campana se envia y aparece 'Enviada'
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-045] Tiendanube con producto sin control de stock
+- Verifica: [BUG-033] · Prioridad: media
+- Entorno: Tienda de prueba conectada a una org QA
+- Precondiciones: —
+- Pasos: 1) Crear en la tienda un producto sin control de stock 2) Abrir /dashboard/modules/tienda-conectada
+- Resultado esperado: El producto no aparece en 'Stock critico'
+- Señal de falla: Aparece como 'Agotado'
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-046] Agenda con Cal.com v1
+- Verifica: [TEC-002] · Prioridad: alta
+- Entorno: Dev local, org QA
+- Precondiciones: Org QA con modulo agenda activo y calComApiKey de prueba. NO cargar calComUsername en la org QA: rompe la agenda de LeadOS
+- Pasos: 1) Abrir /dashboard/modules/agenda-inteligente 2) Mirar los logs del server
+- Resultado esperado: Estadisticas, proximos turnos y link de reservas
+- Señal de falla: Tarjeta 'No se pudo cargar la informacion de tu agenda' y log '[Cal.com] fetch error'
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-047] Fecha del Inicio y hora de turnos
+- Verifica: [BUG-034] · Prioridad: media
+- Entorno: Deploy en Vercel (server en UTC)
+- Precondiciones: —
+- Pasos: 1) Abrir el Inicio entre las 21:00 y las 23:59 hora Argentina y leer la fecha del encabezado y el saludo 2) Si hay agenda operativa, comparar un turno de las 10:00 ART con la hora mostrada
+- Resultado esperado: Fecha, saludo y hora de Buenos Aires
+- Señal de falla: Muestra el dia siguiente, saludo equivocado o 13:00
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-048] GA4 de otra org desde el onboarding
+- Verifica: [SEC-045] · Prioridad: alta
+- Entorno: Solo QA, nunca con propiedades de clientes reales
+- Precondiciones: Dos orgs QA; una propiedad GA4 de prueba a la que la service account tenga acceso, asignada a la org B
+- Pasos: 1) Como ORG_MEMBER de la org A completar /bienvenida poniendo en el campo GA4 el ID numerico de la propiedad de B 2) Abrir /dashboard/resultados/trafico como la org A
+- Resultado esperado: El panel rechaza el ID o no lo usa
+- Señal de falla: La org A ve las metricas de la propiedad de B
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-049] Aviso por email de mensaje nuevo
+- Verifica: [BUG-037] · Prioridad: media
+- Entorno: Dev local con RESEND_API_KEY de prueba
+- Precondiciones: Org QA con notificaciones por email activas
+- Pasos: 1) Como admin enviar un mensaje a la org QA 2) Revisar el buzon del cliente, el log '[notify-message] Email sent' y el panel de Resend
+- Resultado esperado: El email llega
+- Señal de falla: No llega y el log dice 'Email sent', o Resend registra error de dominio
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-050] Ticket en mobile: el hilo de mensajes queda visible
+- Verifica: [BUG-040] · Prioridad: alta
+- Entorno: dev local o preview con un ORG_MEMBER de prueba (por ejemplo la org seed Matsu); Chrome DevTools en modo dispositivo
+- Precondiciones: Un ticket de la org con 3 o más mensajes. Si no hay, crearlo desde /dashboard/soporte con prioridad MEDIUM (HIGH/URGENT dispara la alerta al webhook).
+- Pasos: 1) Ingresar como el cliente de prueba 2) Abrir /dashboard/soporte/<id del ticket> 3) En DevTools probar 375x667, 390x844 y 768x1024 4) Medir el alto del contenedor de mensajes (el div con overflow-y-auto dentro de la sección del chat) 5) Escribir una respuesta y ver si el composer tapa la tarjeta Timeline
+- Resultado esperado: Los mensajes se ven y scrollean con un alto útil (200 px o más) y el composer queda debajo del hilo, sin superponerse a la Timeline.
+- Señal de falla: El área de mensajes mide 0 px o casi, el composer se dibuja encima de la Timeline, o hay que scrollear la página entera para encontrar los mensajes.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-051] Leads de Inicio: mismo numero para dos clientes distintos
+- Verifica: [SEC-048] · Prioridad: alta
+- Entorno: preview con dos orgs de QA
+- Precondiciones: —
+- Pasos: 1) Loguearse como cliente A y anotar el valor de 'Leads' en Resultados de la semana (Inicio) 2) Loguearse como cliente B y anotar el mismo valor 3) Enviar un formulario en /contact del sitio publico 4) Recargar Inicio en A y en B
+- Resultado esperado: Numeros propios de cada org que no cambian por un contacto del sitio de develOP
+- Señal de falla: A y B muestran el mismo numero y ambos suben en 1
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-052] Sesion de soporte: acciones del portal como el cliente
+- Verifica: [BUG-044] · Prioridad: media
+- Entorno: preview con DB de QA
+- Precondiciones: —
+- Pasos: 1) Como SUPER_ADMIN impersonar al cliente de QA 2) En /dashboard/messages enviar un mensaje 3) Abrir 'Ver todas las notificaciones' 4) En /dashboard/referidos tocar 'Genera tu codigo' 5) En /dashboard/services tocar 'Desbloquear Modulo'
+- Resultado esperado: Comportamiento definido: o funciona sobre la org del cliente o esta deshabilitado con aviso
+- Señal de falla: 'Sesion invalida.' / 'No autorizado.' / 'No se pudieron cargar las notificaciones', o el mensaje aparece en otra org
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-053] Fallo de red en ticket y resolver
+- Verifica: [BUG-045] · Prioridad: media
+- Entorno: local
+- Precondiciones: —
+- Pasos: 1) Abrir el modal de ticket y completar los campos 2) DevTools > Network > Offline 3) Enviar 4) Intentar cerrar el modal 5) Repetir con 'Marcar como resuelto' en un ticket
+- Resultado esperado: Mensaje de error y el modal se puede cerrar; el boton vuelve a estar disponible
+- Señal de falla: Spinner infinito sin poder cerrar; boton deshabilitado sin mensaje
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-054] Modal de nuevo ticket: teclado, capas y pantallas bajas
+- Verifica: [A11Y-003] · Prioridad: media
+- Entorno: preview desktop 1440 y movil 667x375 (horizontal)
+- Precondiciones: —
+- Pasos: 1) Abrir 'Abrir Nuevo Ticket' 2) En desktop intentar hacer clic en el sidebar con el modal abierto 3) Presionar Esc 4) Tabular hasta salir del ultimo campo 5) En el movil horizontal enfocar 'Descripcion' (teclado abierto) e intentar llegar a 'Abrir Ticket'
+- Resultado esperado: El fondo cubre todo, Esc cierra, el foco queda dentro y el boton es alcanzable
+- Señal de falla: El sidebar queda clickeable, Esc no hace nada, el foco escapa o el boton queda fuera de pantalla
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-055] Crons del brief y del email ejecutivo en Netlify
+- Verifica: [BUG-047] · Prioridad: alta
+- Entorno: Panel de Netlify del sitio de producción + lectura de la base
+- Precondiciones: Acceso de lectura al panel y a la base
+- Pasos: 1) Netlify → Site → Functions → filtrar Scheduled 2) Buscar regenerate-briefs y send-executive-reports 3) Leer Organization.cachedExecutiveBriefAt y el último ExecutiveBriefSnapshot de un cliente activo 4) Revisar logs de un lunes a las 10:00 y 12:00 UTC
+- Resultado esperado: Ambas funciones agendadas los lunes y un snapshot por semana
+- Señal de falla: No aparecen; los snapshots solo existen cuando alguien abrió el home
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-056] Alcance de reviewName en replyAction
+- Verifica: [SEC-051] · Prioridad: media
+- Entorno: Local con un cliente con motor-resenas activo y GBP de PRUEBA conectado
+- Precondiciones: Cuenta Google de prueba con dos fichas; nunca con fichas reales
+- Pasos: 1) Abrir /dashboard/modules/motor-resenas 2) Desde devtools, invocar la server action replyAction con el organizationId propio y un reviewName de la otra ficha de la misma cuenta 3) Repetir con un reviewName inválido ('x')
+- Resultado esperado: Rechazo 'Reseña inválida' sin llamar a Google
+- Señal de falla: La respuesta se publica en la otra ficha o vuelve el texto crudo 'Google API: 4xx …'
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-057] Brief con Vertex vencido: llamada al LLM en cada visita
+- Verifica: [PERF-004] · Prioridad: media
+- Entorno: Local con la credencial Vertex actual (vencida)
+- Precondiciones: Cliente con cachedExecutiveBriefAt de más de 7 días o null
+- Pasos: 1) Abrir /dashboard tres veces seguidas 2) Mirar los logs del server
+- Resultado esperado: Un intento y luego backoff
+- Señal de falla: '[Brief] Generation failed' en cada carga y el bloque del brief en skeleton varios segundos
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-058] Alerta de upsell en serverless
+- Verifica: [BUG-052] · Prioridad: baja
+- Entorno: Deploy preview de Netlify con webhook de prueba (p. ej. un bin de requests)
+- Precondiciones: AgencySettings.alertWebhookUrl apuntando al webhook de prueba y alertOnLeads activo
+- Pasos: 1) Pedir 10 módulos distintos desde /dashboard/services con un cliente de prueba 2) Contar las alertas recibidas
+- Resultado esperado: 10 de 10
+- Señal de falla: Faltan alertas aunque las filas de ContactSubmission existan
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-059] Reporte manual con brief y métricas viejos
+- Verifica: [BUG-055] · Prioridad: media
+- Entorno: QA con un email propio como ADMIN de la org de prueba
+- Precondiciones: Org PRO o BUSINESS con cachedExecutiveBriefAt posterior al 2026-07-02 pero de hace más de 7 días y último snapshot de hace más de 2 semanas (SELECT "periodKey", "createdAt" FROM "ExecutiveBriefSnapshot" WHERE "organizationId" = '<id>' ORDER BY "createdAt" DESC LIMIT 2;)
+- Pasos: 1) Ir a /admin/clients/<id> y usar 'Enviar ahora' del reporte ejecutivo. 2) Abrir el mail recibido y comparar texto y números con el snapshot viejo.
+- Resultado esperado: El encabezado dice la última semana pero el texto y los números son los del snapshot viejo.
+- Señal de falla: El envío se saltea con NO_DATA o los datos son de la última semana.
 - ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción

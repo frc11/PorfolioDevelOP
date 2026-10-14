@@ -7,7 +7,11 @@
 //     "H01": { "decision": "aceptar" | "descartar" | "fusionar", "verificado_padre": true, "nota_padre": "qué se leyó",
 //              "con": "H05" | "SEC-014",   // solo con fusionar: hallazgo del ciclo o ya registrado que se queda
 //              ...campos a pisar del hallazgo (severidad, confianza, titulo, impacto, propuesta, zona,
-//                 seccion, nodos, relacionados_ids, previas, requiere_verificacion_humana, coordinacion),
+//                 seccion, nodos, relacionados_ids, previas, requiere_verificacion_humana, coordinacion,
+//                 prefijo, tipo, dominio, evidencia),
+//              "confianza_padre": "PROBABLE",   // leído por el padre pero con un eslabón de runtime (DEC-23)
+//              "relacionados_tmp": ["D2-L1/H19"], // relación con otro hallazgo del ciclo (se resuelve a ID al escribir)
+//              "destino": { "severidad": "ALTA", … },  // con fusionar contra un ID registrado: corrige ese hallazgo
 //              "caso_indice": 2            // caso de prueba del lote (índice en casos_prueba_manual)
 //              "caso_indices": [3, 10],    // o varios, que se funden en uno (pasos concatenados)
 //              "caso_titulo": "…" },       // título del caso fundido (opcional)
@@ -21,14 +25,16 @@
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { escribirSegunPeso, existePartido, leerPartido } from './crudo-partes.mjs'
 
 const CICLO = process.argv[2]
 if (!CICLO) { console.error('uso: f2-decidir.mjs <ciclo>'); process.exit(1) }
 const CICLOS = path.resolve(process.cwd(), 'docs/auditoria-2026-10/_crudo/ciclos')
-const REV = path.join(CICLOS, `${CICLO}-revision.json`)
+const REV = `${CICLO}-revision` // partida en _crudo/ciclos/<ciclo>-revision/ (DEC-49) o archivo único
 const DEC = path.join(CICLOS, `${CICLO}-decisiones.json`)
-for (const f of [REV, DEC]) if (!existsSync(f)) { console.error(`falta ${path.basename(f)}`); process.exit(1) }
-const rev = JSON.parse(readFileSync(REV, 'utf8'))
+if (!existePartido(CICLOS, REV)) { console.error(`falta ${REV}`); process.exit(1) }
+if (!existsSync(DEC)) { console.error(`falta ${path.basename(DEC)}`); process.exit(1) }
+const rev = leerPartido(CICLOS, REV, null, 'hallazgos')
 const decisiones = JSON.parse(readFileSync(DEC, 'utf8').replace(/^﻿/, ''))
 const casosDe = new Map()
 const casos = (lote) => {
@@ -64,7 +70,7 @@ for (const [clave, d] of Object.entries(decisiones)) {
   }
   aplicadas++
 }
-writeFileSync(REV, JSON.stringify(rev, null, 1), 'utf8')
+escribirSegunPeso(CICLOS, REV, rev, 'hallazgos')
 const pend = rev.hallazgos.filter((h) => ['leer', 'leer-refutada', 'muestrear'].includes(h.decision))
 const cuenta = (x) => rev.hallazgos.filter((h) => h.decision === x).length
 console.log(`${CICLO}: ${aplicadas} decisiones aplicadas · aceptar ${cuenta('aceptar')} · fusionar ${cuenta('fusionar')} · descartar ${cuenta('descartar')} · pendientes ${pend.length}${pend.length ? ` → ${pend.map((h) => h.tmp).join(', ')}` : ''}`)

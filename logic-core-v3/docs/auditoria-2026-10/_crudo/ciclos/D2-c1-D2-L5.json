@@ -1,0 +1,3507 @@
+{
+ "dominio": "D2",
+ "ciclo": "D2-c1",
+ "lote": "D2-L5",
+ "run": "wf_c8d83c7c-a28",
+ "fecha": "2026-10-14T23:28:01.383Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/lib/modules/check-activation.ts",
+    "lineas_total": 15,
+    "leido_completo": true,
+    "rangos": "1-15"
+   },
+   {
+    "ruta": "src/lib/modules/motor-resenas-view.ts",
+    "lineas_total": 42,
+    "leido_completo": true,
+    "rangos": "1-42"
+   },
+   {
+    "ruta": "src/lib/modules/showroom.ts",
+    "lineas_total": 74,
+    "leido_completo": true,
+    "rangos": "1-74"
+   },
+   {
+    "ruta": "src/lib/onboarding/seed-tasks-for-org.ts",
+    "lineas_total": 16,
+    "leido_completo": true,
+    "rangos": "1-16"
+   },
+   {
+    "ruta": "src/lib/plan/fallback.ts",
+    "lineas_total": 64,
+    "leido_completo": true,
+    "rangos": "1-64"
+   },
+   {
+    "ruta": "src/lib/plan/get-org-usage.ts",
+    "lineas_total": 85,
+    "leido_completo": true,
+    "rangos": "1-85"
+   },
+   {
+    "ruta": "src/lib/plan/get-plan-for-org.ts",
+    "lineas_total": 141,
+    "leido_completo": true,
+    "rangos": "1-141"
+   },
+   {
+    "ruta": "src/lib/plan/index.ts",
+    "lineas_total": 11,
+    "leido_completo": true,
+    "rangos": "1-11"
+   },
+   {
+    "ruta": "src/lib/plan/plan-allows.ts",
+    "lineas_total": 36,
+    "leido_completo": true,
+    "rangos": "1-36"
+   },
+   {
+    "ruta": "src/lib/plan/plan-presentation.ts",
+    "lineas_total": 291,
+    "leido_completo": true,
+    "rangos": "1-291"
+   },
+   {
+    "ruta": "src/lib/recommendations/get-recommendations-for-org.ts",
+    "lineas_total": 64,
+    "leido_completo": true,
+    "rangos": "1-64"
+   },
+   {
+    "ruta": "src/lib/recommendations/rules.ts",
+    "lineas_total": 218,
+    "leido_completo": true,
+    "rangos": "1-218"
+   },
+   {
+    "ruta": "src/lib/recommendations/types.ts",
+    "lineas_total": 96,
+    "leido_completo": true,
+    "rangos": "1-96"
+   },
+   {
+    "ruta": "src/lib/referrals/attribution.ts",
+    "lineas_total": 52,
+    "leido_completo": true,
+    "rangos": "1-52"
+   },
+   {
+    "ruta": "src/lib/referrals/code.ts",
+    "lineas_total": 32,
+    "leido_completo": true,
+    "rangos": "1-32"
+   },
+   {
+    "ruta": "src/lib/referrals/referrals.service.ts",
+    "lineas_total": 175,
+    "leido_completo": true,
+    "rangos": "1-175"
+   },
+   {
+    "ruta": "src/lib/reports/MonthlyReport.tsx",
+    "lineas_total": 522,
+    "leido_completo": true,
+    "rangos": "1-522"
+   },
+   {
+    "ruta": "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx",
+    "lineas_total": 318,
+    "leido_completo": true,
+    "rangos": "1-318"
+   },
+   {
+    "ruta": "src/lib/reports/client-monthly/get-client-monthly-report-data.ts",
+    "lineas_total": 76,
+    "leido_completo": true,
+    "rangos": "1-76"
+   },
+   {
+    "ruta": "src/lib/reports/client-monthly/monthly-report-data.ts",
+    "lineas_total": 97,
+    "leido_completo": true,
+    "rangos": "1-97"
+   },
+   {
+    "ruta": "src/lib/reports/executive-weekly/build.ts",
+    "lineas_total": 199,
+    "leido_completo": true,
+    "rangos": "1-199"
+   },
+   {
+    "ruta": "src/lib/reports/executive-weekly/report-eligible-plan.ts",
+    "lineas_total": 18,
+    "leido_completo": true,
+    "rangos": "1-18"
+   },
+   {
+    "ruta": "src/lib/reports/executive-weekly/send-manual.ts",
+    "lineas_total": 153,
+    "leido_completo": true,
+    "rangos": "1-153"
+   },
+   {
+    "ruta": "src/lib/reports/executive-weekly/send.ts",
+    "lineas_total": 233,
+    "leido_completo": true,
+    "rangos": "1-233"
+   },
+   {
+    "ruta": "src/lib/reports/executive-weekly/top-hot-leads.ts",
+    "lineas_total": 161,
+    "leido_completo": true,
+    "rangos": "1-161"
+   },
+   {
+    "ruta": "src/lib/security/org-scope.ts",
+    "lineas_total": 27,
+    "leido_completo": true,
+    "rangos": "1-27"
+   },
+   {
+    "ruta": "src/lib/tickets/actions.ts",
+    "lineas_total": 222,
+    "leido_completo": true,
+    "rangos": "1-222"
+   },
+   {
+    "ruta": "src/lib/tickets/schemas.ts",
+    "lineas_total": 23,
+    "leido_completo": true,
+    "rangos": "1-23"
+   },
+   {
+    "ruta": "src/lib/upsell/dedup.ts",
+    "lineas_total": 40,
+    "leido_completo": true,
+    "rangos": "1-40"
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/lib/tickets/actions.ts",
+    "simbolo": "createTicketAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "src/lib/tickets/actions.ts:49-53 auth() + resolveOrgId(); sin userId u org devuelve fail('No autorizado.')",
+    "rol": "ORG_MEMBER, o SUPER_ADMIN impersonando (src/lib/preview.ts:10-17; CLIENT y SETTER reciben null)",
+    "org_de": "sesion",
+    "evidencia_org": "src/lib/tickets/actions.ts:50 resolveOrgId(); :70 organizationId en el create",
+    "validacion": "parcial",
+    "evidencia_validacion": "Zod CreateTicketSchema en actions.ts:55-61 (schemas.ts:4-9) sin .max() en title ni description",
+    "rate_limit": "no",
+    "notas": "En preview el autor del ticket es el SUPER_ADMIN (userId :51) dentro de la org del cliente; HIGH/URGENT dispara webhook TICKET_URGENT (:88-96)."
+   },
+   {
+    "archivo": "src/lib/tickets/actions.ts",
+    "simbolo": "replyToTicketAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "src/lib/tickets/actions.ts:117-119 auth(); sin userId fail",
+    "rol": "SUPER_ADMIN (cualquier ticket, isAdmin=true) u ORG_MEMBER/SUPER_ADMIN impersonando sobre tickets de su org (:124-137)",
+    "org_de": "sesion",
+    "evidencia_org": "rama cliente: resolveOrgId() :127 + assertTicketBelongsToOrg :130 (src/lib/auth/assert-ownership.ts:32-43); rama SUPER_ADMIN sin filtro de org por diseño",
+    "validacion": "zod",
+    "evidencia_validacion": "TicketReplySchema actions.ts:121-122 (schemas.ts:11-18, max 2000)",
+    "rate_limit": "no",
+    "notas": "Rama admin manda email por Resend con resultado ignorado (:150-167); rama cliente no avisa a develOP. Errores que no son ResourceNotOwnedError se relanzan fuera del try (:135)."
+   },
+   {
+    "archivo": "src/lib/tickets/actions.ts",
+    "simbolo": "updateTicketStatusAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "src/lib/tickets/actions.ts:187 requireSuperAdmin() dentro del try (después del parse :183)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "admin global: ticketId de parámetro, update por id (:188-191)",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateTicketStatusSchema actions.ts:183-184 (schemas.ts:20-23)",
+    "rate_limit": "no",
+    "notas": "No autorizado y error de DB devuelven el mismo mensaje (:195-198). También la importa components/dashboard/TicketStatusSelector.tsx, que no tiene importadores."
+   },
+   {
+    "archivo": "src/lib/tickets/actions.ts",
+    "simbolo": "resolveTicketClientAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "src/lib/tickets/actions.ts:205-207 auth() + resolveOrgId()",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando",
+    "org_de": "sesion",
+    "evidencia_org": "src/lib/tickets/actions.ts:211-213 update where { id: ticketId, organizationId }",
+    "validacion": "manual",
+    "evidencia_validacion": "actions.ts:208 solo ticketId.trim(); un valor no-string lanza TypeError fuera del try",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/api/reports/monthly/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/reports/monthly?month=&organizationId=&clientId=",
+    "auth": "si",
+    "evidencia_auth": "src/app/api/reports/monthly/route.ts:22-25 auth(); sin sesión 401",
+    "rol": "cualquier sesión; SUPER_ADMIN elige la org por query",
+    "org_de": "mixto",
+    "evidencia_org": ":38-42 SUPER_ADMIN toma organizationId del query; :43-50 el resto usa session.user.organizationId y rechaza si el query difiere",
+    "validacion": "manual",
+    "evidencia_validacion": ":17-19,33-35 regex del mes; organizationId sin validar formato",
+    "rate_limit": "no",
+    "notas": "Fuera del lote: única puerta de MonthlyReport.tsx; sin consumidor en la UI; el mes solo rotula; llama GA4/Search Console por request."
+   },
+   {
+    "archivo": "src/app/api/reports/client-monthly/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/reports/client-monthly",
+    "auth": "si",
+    "evidencia_auth": "src/app/api/reports/client-monthly/route.ts:25-28 resolveOrgId(); null → 401",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando; gate de plan insight :30-33",
+    "org_de": "sesion",
+    "evidencia_org": ":25 resolveOrgId(); sin parámetros de org",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "no recibe input",
+    "rate_limit": "no",
+    "notas": "Fuera del lote: puerta de get-client-monthly-report-data.ts y ClientMonthlyReportPdf.tsx; render de PDF por request sin límite."
+   },
+   {
+    "archivo": "src/app/api/cron/send-executive-reports/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/cron/send-executive-reports",
+    "auth": "si",
+    "evidencia_auth": "route.ts:17-23 compara CRON_SECRET (Bearer o x-cron-secret); sin secret configurado responde 401",
+    "rol": "n/a (secreto compartido de cron)",
+    "org_de": "no-aplica",
+    "evidencia_org": "itera orgs onboardeadas con suscripción ACTIVE (send.ts:78-84)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no-aplica",
+    "notas": "Fuera del lote: puerta de send.ts. Solo agendada en vercel.json; prod corre en Netlify. Devuelve error.message en el 500 (:29-35)."
+   },
+   {
+    "archivo": "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/admin/clients/[organizationId]/send-executive-report",
+    "auth": "si",
+    "evidencia_auth": "route.ts:13-19 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "route.ts:50-55 organizationId del path (operación admin sobre una org cliente, por diseño)",
+    "validacion": "zod",
+    "evidencia_validacion": "OrganizationIdSchema route.ts:51-54",
+    "rate_limit": "si",
+    "notas": "Fuera del lote: puerta de send-manual.ts. Rate limit por admin :35-48. Devuelve el error interno en UNEXPECTED_ERROR (send-manual.ts:151)."
+   },
+   {
+    "archivo": "src/lib/actions/upsell.ts",
+    "simbolo": "requestUpsellAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "src/lib/actions/upsell.ts:14-20 exige userId y organizationId de sesión",
+    "rol": "cualquier sesión con organizationId (no chequea rol)",
+    "org_de": "sesion",
+    "evidencia_org": "upsell.ts:16 session.user.organizationId (no honra la impersonación, a diferencia de resolveOrgId)",
+    "validacion": "zod",
+    "evidencia_validacion": "UpsellRequestSchema upsell.ts:22-25",
+    "rate_limit": "no",
+    "notas": "Fuera del lote: destino de los CTA de rules.ts/types.ts y usa dedup.ts (:87)."
+   },
+   {
+    "archivo": "src/lib/actions/referrals.ts",
+    "simbolo": "generateMyReferralCodeAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "src/lib/actions/referrals.ts:13-18 sin organizationId de sesión devuelve No autorizado",
+    "rol": "cualquier sesión con organizationId",
+    "org_de": "sesion",
+    "evidencia_org": "referrals.ts:14 session.user.organizationId (la página usa resolveOrgId, referidos/page.tsx:27)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no",
+    "notas": "Fuera del lote: puerta de getOrCreateReferralCodeForOrg."
+   },
+   {
+    "archivo": "src/lib/actions/contact.ts",
+    "simbolo": "contactFormAction",
+    "tipo": "server-action",
+    "auth": "no",
+    "evidencia_auth": "src/lib/actions/contact.ts:16-19 formulario público",
+    "rol": "anónimo",
+    "org_de": "no-aplica",
+    "evidencia_org": "ContactSubmission es global (prisma/schema.prisma:688-708)",
+    "validacion": "zod",
+    "evidencia_validacion": "ContactFormSchema contact.ts:35-47",
+    "rate_limit": "si",
+    "notas": "Fuera del lote: dispara attributeReferralFromContact (:68-70). Rate limit por IP hasheada (:23-33) tomada del primer X-Forwarded-For (patrón D1-c1)."
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Crear ticket de soporte (cliente)",
+    "pasos": [
+     "src/app/(protected)/dashboard/soporte/page.tsx:73 monta NewTicketModal",
+     "src/components/dashboard/NewTicketModal.tsx:38-55 valida en cliente y llama createTicketAction",
+     "src/lib/tickets/actions.ts:49-53 sesión + resolveOrgId (src/lib/preview.ts:6-20)",
+     "src/lib/tickets/actions.ts:55-61 Zod CreateTicketSchema",
+     "src/lib/tickets/actions.ts:64-86 prisma.ticket.create con el primer TicketMessage",
+     "src/lib/tickets/actions.ts:88-96 webhook TICKET_URGENT solo si HIGH/URGENT (src/lib/alerts.ts:109-147)",
+     "src/lib/tickets/actions.ts:98-99 revalidate + ok({ ticketId })",
+     "src/components/dashboard/NewTicketModal.tsx:59-63 router.push(/dashboard/soporte/{cuid})",
+     "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:60-70 findUnique por id + organizationId"
+    ]
+   },
+   {
+    "nombre": "Responder ticket (cliente y admin)",
+    "pasos": [
+     "src/components/dashboard/TicketReplyForm.tsx:16-20 (cliente) o admin/tickets/_components/ticket-reply-form.tsx (admin) llaman replyToTicketAction",
+     "src/lib/tickets/actions.ts:117-124 sesión y rol",
+     "src/lib/tickets/actions.ts:126-137 rama cliente: resolveOrgId + assertTicketBelongsToOrg (src/lib/auth/assert-ownership.ts:32-43)",
+     "src/lib/tickets/actions.ts:140-148 prisma.ticketMessage.create (no toca Ticket.updatedAt)",
+     "src/lib/tickets/actions.ts:150-167 rama admin: sendEmail por Resend (src/lib/email.ts:15-30), resultado ignorado",
+     "src/lib/tickets/actions.ts:170-171 revalidate + ok",
+     "src/components/dashboard/ClientChatComposer.tsx:84-86 muestra state.error"
+    ]
+   },
+   {
+    "nombre": "Marcar ticket como resuelto (cliente)",
+    "pasos": [
+     "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:150-153 ResolveTicketButton",
+     "src/components/dashboard/ResolveTicketButton.tsx:12-17 sin confirmación",
+     "src/lib/tickets/actions.ts:205-215 update where id + organizationId → RESOLVED",
+     "src/components/dashboard/ResolveTicketButton.tsx:16 router.refresh solo si success (si falla no muestra nada)"
+    ]
+   },
+   {
+    "nombre": "Reporte ejecutivo semanal (cron)",
+    "pasos": [
+     "vercel.json:11-14 agenda lunes 12:00 UTC; netlify.toml:25-32 no lo agenda (prod Netlify, docs/operations/00-entornos.md:12)",
+     "src/app/api/cron/send-executive-reports/route.ts:17-27 valida CRON_SECRET y llama sendExecutiveWeeklyReports",
+     "src/lib/reports/executive-weekly/send.ts:78-84 orgs onboardeadas con suscripción ACTIVE",
+     "src/lib/reports/executive-weekly/send.ts:105-117 idempotencia por (org, periodKey) + cadencia BIWEEKLY (:43-59)",
+     "src/lib/reports/executive-weekly/build.ts:68-106 org, gate de plan (:90-93), opt-out (:99-101), destinatario take:1 (:78-82,103-106)",
+     "src/lib/reports/executive-weekly/build.ts:113-119 brief en cache o getExecutiveBrief (LLM, src/lib/ai/executive-brief.ts:52-135)",
+     "src/lib/reports/executive-weekly/build.ts:122-141 snapshots (src/lib/ai/brief-history.ts:24-46) o getHealthScore/getWeekResults en vivo",
+     "src/lib/reports/executive-weekly/build.ts:154-163 top de leads (top-hot-leads.ts:56-160) solo BUSINESS",
+     "src/lib/reports/executive-weekly/send.ts:142-159 log PENDING",
+     "src/lib/reports/executive-weekly/send.ts:161-177 template + sendTransactionalEmail (src/lib/email/brevo-service.ts:17-39) con List-Unsubscribe",
+     "src/lib/reports/executive-weekly/send.ts:179-204 SENT o FAILED en WeeklyReportLog"
+    ]
+   },
+   {
+    "nombre": "Envío manual del reporte (admin)",
+    "pasos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx:37 fetch POST",
+     "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:13-57 requireSuperAdmin + rate limit + Zod",
+     "src/lib/reports/executive-weekly/send-manual.ts:46-52 bloqueo si ya hay SENT",
+     "src/lib/reports/executive-weekly/send-manual.ts:54 buildExecutiveWeeklyReport (mismo motor que el cron)",
+     "src/lib/reports/executive-weekly/send-manual.ts:74-129 PENDING → Brevo → SENT/FAILED",
+     "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:62-91 audit log y respuesta"
+    ]
+   },
+   {
+    "nombre": "Preferencias del reporte (cliente)",
+    "pasos": [
+     "src/app/(protected)/dashboard/cuenta/perfil/page.tsx:193-203 gate reportEligiblePlan (src/lib/reports/executive-weekly/report-eligible-plan.ts:9-18)",
+     "src/app/(protected)/dashboard/cuenta/perfil/page.tsx:297-306 ExecutiveReportPrefsForm",
+     "src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts:20-46 resolveOrgId + Zod + update de Organization",
+     "src/lib/reports/executive-weekly/send.ts:83,114 y build.ts:99,161 consumen frecuencia y cantidad"
+    ]
+   },
+   {
+    "nombre": "Informe mensual en PDF (cliente)",
+    "pasos": [
+     "src/app/(protected)/dashboard/resultados/analisis/page.tsx:45 DownloadMonthlyReportButton",
+     "src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx:18-35 fetch y descarga del blob",
+     "src/app/api/reports/client-monthly/route.ts:24-33 resolveOrgId + gate planAllows(insight)",
+     "src/lib/reports/client-monthly/get-client-monthly-report-data.ts:24-66 org, análisis mensual y conteos de leads por botConfigId (sin filtro DQ)",
+     "src/lib/reports/client-monthly/monthly-report-data.ts:73-97 ensamblado puro",
+     "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx:287-318 render",
+     "src/app/api/reports/client-monthly/route.ts:40-56 renderToBuffer y respuesta adjunta"
+    ]
+   },
+   {
+    "nombre": "Ideas para crecer (recomendaciones en Inicio)",
+    "pasos": [
+     "src/app/(protected)/dashboard/page.tsx:78-80,238-248 wrapper con try/catch",
+     "src/lib/recommendations/get-recommendations-for-org.ts:32-41 señales org-scoped (análisis mensual, consumo, módulos, leads calientes, GBP)",
+     "src/lib/recommendations/rules.ts:175-218 evaluación, orden y rotación semanal",
+     "src/components/dashboard/home/Recommendations.tsx:78-101 CTA → requestUpsellAction",
+     "src/lib/actions/upsell.ts:43-139 OrganizationModule upsert (si es módulo) y ContactSubmission deduplicado (src/lib/upsell/dedup.ts:33-40)",
+     "src/components/dashboard/home/Recommendations.tsx:88-91 window.location.assign(/dashboard/messages?context=…)"
+    ]
+   },
+   {
+    "nombre": "Mi plan: consumo y vitrina",
+    "pasos": [
+     "src/app/(protected)/dashboard/plan/page.tsx:12-14 resolveOrgId",
+     "src/app/(protected)/dashboard/plan/page.tsx:36-46 dos llamadas a getOrgUsageSnapshot",
+     "src/lib/plan/get-org-usage.ts:49-85 plan efectivo + QuotaUsage del mes UTC",
+     "src/lib/plan/get-plan-for-org.ts:68-125 cache 60 s, aplica pendingPlan vencido (:39-59), fallback Starter (src/lib/plan/fallback.ts:44-64)",
+     "src/components/dashboard/plan/PlansShowcase.tsx con src/lib/plan/plan-presentation.ts:144-196",
+     "src/components/dashboard/plan/UpgradeCtaButton.tsx:80-100 requestUpsellAction y window.location.assign"
+    ]
+   },
+   {
+    "nombre": "Vitrina de servicios y 'avisame cuando esté'",
+    "pasos": [
+     "src/app/(protected)/dashboard/services/page.tsx:169-190 resolveOrgId, catálogo y módulos de la org",
+     "src/lib/modules/showroom.ts:58-74 clasifica owned/available/coming_soon",
+     "src/components/dashboard/PremiumModuleCard.tsx:200-216 submitInterest → requestUpsellAction",
+     "src/lib/actions/upsell.ts:81-97 dedup 24 h y ContactSubmission"
+    ]
+   },
+   {
+    "nombre": "Referidos: código, link y atribución pública",
+    "pasos": [
+     "src/app/(protected)/dashboard/referidos/page.tsx:26-35 resolveOrgId, código y lista (src/lib/referrals/referrals.service.ts:15-21,64-69)",
+     "src/components/dashboard/ReferralPanel.tsx:32-45 generateMyReferralCodeAction",
+     "src/lib/actions/referrals.ts:12-27 session.user.organizationId → getOrCreateReferralCodeForOrg (referrals.service.ts:28-61; code.ts:23-26)",
+     "src/lib/referrals/code.ts:29-32 link /contact?ref=CODE",
+     "src/lib/actions/contact.ts:16-70 formulario público con ref → attributeReferralFromContact",
+     "src/lib/referrals/referrals.service.ts:94-140 hechos + decideReferralAttribution (attribution.ts:41-52) + Referral PENDING",
+     "src/lib/referrals/referrals.service.ts:143-165 webhook LEAD_EXTERNAL y Notification a un SUPER_ADMIN"
+    ]
+   },
+   {
+    "nombre": "Gating de módulos premium",
+    "pasos": [
+     "src/app/(protected)/dashboard/layout.tsx:115 slugs ACTIVE de la org → SidebarNav.tsx:76-103 (lista fija de slugs)",
+     "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:17-21 isModuleActive(org, 'email-marketing')",
+     "src/lib/modules/check-activation.ts:3-15 findFirst por slug y status ACTIVE",
+     "src/lib/data/premium-modules.ts:38 el catálogo define 'email-marketing-pro'",
+     "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17-27 las actions solo resuelven la org, sin gate",
+     "src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:106-153 isModuleActive + resolveMotorResenasView (motor-resenas-view.ts:38-42)",
+     "src/components/dashboard/modules/motor-resenas/_actions.ts:20-24,55-59 resolveScopedOrgId (org-scope.ts:20-27) + isModuleActive"
+    ]
+   },
+   {
+    "nombre": "Leads y Health Score de Inicio alimentados por ContactSubmission global",
+    "pasos": [
+     "src/app/(protected)/dashboard/page.tsx:172-185 HealthScore y WeekResults",
+     "src/lib/dashboard/week-results.ts:43-52 count de ContactSubmission sin organizationId",
+     "src/lib/health-score.ts:283-292 y :311-345 conversión y leads con conteo global",
+     "src/lib/actions/upsell.ts:88-97 cada upsell de cualquier cliente crea un ContactSubmission",
+     "src/lib/reports/executive-weekly/build.ts:130-141,174-177 el mismo número entra al reporte semanal",
+     "src/lib/ai/executive-brief.ts:278,334-360 y al prompt del brief y al snapshot"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "El reporte ejecutivo semanal no tiene disparador en producción (Netlify)",
+    "prefijo": "FAL",
+    "severidad": "ALTA",
+    "tipo": "faltante",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "vercel.json",
+      "linea": 12,
+      "fragmento": "\"path\": \"/api/cron/send-executive-reports\", \"schedule\": \"0 12 * * 1\""
+     },
+     {
+      "ruta": "netlify.toml",
+      "linea": 28,
+      "fragmento": "[functions.\"send-weekly-reports-cron\"]  (las únicas agendadas en :25-32 son generate-insights, send-weekly-reports y cleanup-old-events)"
+     },
+     {
+      "ruta": "docs/operations/00-entornos.md",
+      "linea": 12,
+      "fragmento": "| **Prod** | Netlify (build + runtime) | Variables del dashboard de Netlify |"
+     },
+     {
+      "ruta": "src/app/api/cron/send-executive-reports/route.ts",
+      "linea": 5,
+      "fragmento": "export const maxDuration = 300"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/send.ts",
+      "linea": 102,
+      "fragmento": "for (const { id: orgId, executiveReportFrequency } of orgs) {"
+     },
+     {
+      "ruta": "src/lib/plan/plan-presentation.ts",
+      "linea": 99,
+      "fragmento": "label: 'Reportes semanales claros',"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/page.tsx",
+      "linea": 227,
+      "fragmento": "Tu primer resumen ejecutivo se genera el próximo lunes con los datos de tu semana."
+     }
+    ],
+    "impacto": "Bloqueante para vender Pro o Business al primer cliente real: el beneficio 'reportes semanales' que se cobra (y que la vitrina, 'Ideas para crecer' en rules.ts:141 y el estado vacío del brief prometen) nunca llega; el cliente puede configurar frecuencia en Mi cuenta para un mail que no sale. Solo se envía si develOP aprieta 'Enviar ahora' en el admin. Tampoco corre regenerate-briefs (también solo en vercel.json:8), del que depende el brief del lunes.",
+    "propuesta": "Crear netlify/functions/send-executive-reports-cron.ts y regenerate-briefs-cron.ts con el molde de send-weekly-reports-cron.ts y sus entradas en netlify.toml. Como Netlify corta las funciones síncronas a unos 26-30 s y maxDuration=300 es un ajuste de Vercel, partir el envío en lotes (cursor por org) o usar una Background Function. Borrar vercel.json o documentar que no rige. Verificar en el dashboard de Netlify y en WeeklyReportLog.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-reportes-email",
+     "h2.cli-reportes-email.reporte-semanal",
+     "int.cron.send-executive-reports",
+     "int.cron.regenerate-briefs",
+     "int.brevo",
+     "modelo.WeeklyReportLog",
+     "lib.reports"
+    ],
+    "relacionados": "PLAN-099, PLAN-100, PLAN-104; bitácora 13529-13531 ('netlify.toml es la config activa')",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Los 'leads' de Inicio, el Health Score y el reporte semanal cuentan ContactSubmission de todos los tenants",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/dashboard/week-results.ts",
+      "linea": 43,
+      "fragmento": "prisma.contactSubmission .count({ where: { createdAt: { gte: weekAgo } } })"
+     },
+     {
+      "ruta": "src/lib/health-score.ts",
+      "linea": 312,
+      "fragmento": "void organizationId\n// ContactSubmission is global (no orgId FK yet), so this gives an agency-wide"
+     },
+     {
+      "ruta": "src/lib/health-score.ts",
+      "linea": 284,
+      "fragmento": "prisma.contactSubmission .count({ where: { createdAt: { gte: ... } } })  (computeConversionScore)"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 688,
+      "fragmento": "model ContactSubmission {  (sin organizationId)"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 88,
+      "fragmento": "await prisma.contactSubmission.create({"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/build.ts",
+      "linea": 175,
+      "fragmento": "value: toNumber(week.leads.value),"
+     },
+     {
+      "ruta": "src/components/dashboard/home/WeekResultsGrid.tsx",
+      "linea": 44,
+      "fragmento": "//  · leads: el conteo es agency-wide (ContactSubmission sin organizationId,"
+     }
+    ],
+    "impacto": "El cliente ve en Inicio ('Leads' de la semana y 'Salud Comercial' del Health Score) y recibe en el reporte semanal pago un número que mezcla el inbound de develOP con las solicitudes de upsell de los demás clientes: lectura de un agregado entre tenants y dato falso en la pantalla principal. El mismo número entra al prompt del brief IA (src/lib/ai/executive-brief.ts:278) y queda congelado en ExecutiveBriefSnapshot. Bloquea L3 de Inicio (tenant y sin datos de mentira). No expone filas de otros tenants, solo volumen.",
+    "propuesta": "Contar los leads del cliente con ChatbotLead por organización (el criterio de src/lib/dashboard/home-metrics.ts:86-99) en week-results.ts y health-score.ts, y sacar computeConversionScore/computeLeadsScore del agregado hasta tener una fuente por org. Atribuir ContactSubmission a una org exige una columna en prisma/schema.prisma (FROZEN): decisión para Valentino. Invalidar el brief y los snapshots ya generados.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-inicio",
+     "h2.cli-reportes-email.reporte-semanal",
+     "lib.health-score",
+     "lib.dashboard",
+     "lib.reports",
+     "modelo.ContactSubmission",
+     "modelo.ExecutiveBriefSnapshot"
+    ],
+    "relacionados": "D2-A1; registro Inicio:97",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Email marketing queda inaccesible para quien lo contrata: el gate usa 'email-marketing' y el catálogo define 'email-marketing-pro'",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx",
+      "linea": 20,
+      "fragmento": "const isActive = await isModuleActive(organizationId, 'email-marketing')"
+     },
+     {
+      "ruta": "src/lib/data/premium-modules.ts",
+      "linea": 38,
+      "fragmento": "slug: 'email-marketing-pro',"
+     },
+     {
+      "ruta": "src/components/dashboard/SidebarNav.tsx",
+      "linea": 78,
+      "fragmento": "{ slug: 'email-marketing', item: { href: '/dashboard/modules/email-marketing', label: 'Email marketing', icon: Mail } },"
+     },
+     {
+      "ruta": "prisma/seeds/sync-premium-modules.ts",
+      "linea": 68,
+      "fragmento": "const obsoleteModules = existingModules.filter((moduleData) => !catalogSlugs.has(moduleData.slug))"
+     },
+     {
+      "ruta": "prisma/backups/premium-module-pre-push.json",
+      "linea": 68,
+      "fragmento": "\"slug\": \"email-marketing\","
+     },
+     {
+      "ruta": "src/lib/modules/check-activation.ts",
+      "linea": 10,
+      "fragmento": "module: { slug: moduleSlug },"
+     }
+    ],
+    "impacto": "Un cliente con Email Marketing Pro ACTIVE no ve el ítem en el menú (el layout del portal pasa los slugs reales de la base, dashboard/layout.tsx:115) y al entrar a /dashboard/modules/email-marketing es redirigido a /dashboard: paga un módulo que no puede abrir. La vitrina lo muestra como propio (showroom.ts:32) sin link (services/page.tsx:326). Dato para la hipótesis 'faltan módulos': de los 4 módulos ACTIVE del catálogo, este no es alcanzable.",
+    "propuesta": "Exportar los slugs como constantes desde lib/data/premium-modules.ts y tipar isModuleActive, SidebarNav y las páginas con ese tipo; confirmar en la base qué slug existe; sumar un invariante que cruce los slugs usados en gates con el catálogo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-email-mkt",
+     "h2.cli-email-mkt.acceso-al-modulo",
+     "h2.cli-servicios",
+     "lib.modules",
+     "modelo.PremiumModule",
+     "modelo.OrganizationModule"
+    ],
+    "relacionados": "PLAN-150",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Las server actions de email marketing no verifican el módulo contratado ni validan con Zod",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+      "linea": 17,
+      "fragmento": "async function getOrgWithBrevo() {\n  const organizationId = await resolveOrgId()"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+      "linea": 134,
+      "fragmento": "const fromEmail = (formData.get('fromEmail') as string | null)?.trim()"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+      "linea": 174,
+      "fragmento": "export async function sendCampaignAction(campaignId: string) {\n  const org = await getOrgWithBrevo()"
+     },
+     {
+      "ruta": "src/lib/integrations/brevo.ts",
+      "linea": 76,
+      "fragmento": "sender: { name: params.fromName, email: params.fromEmail },"
+     },
+     {
+      "ruta": "src/components/dashboard/modules/motor-resenas/_actions.ts",
+      "linea": 23,
+      "fragmento": "const isActive = await isModuleActive(organizationId, 'motor-resenas')  (control: este módulo sí lo hace)"
+     }
+    ],
+    "impacto": "El gate comercial vive solo en el layout (y las páginas hijas no lo repiten). Un ORG_MEMBER de cualquier cliente que tenga los IDs de las actions (por ejemplo, un cliente que tuvo el módulo y lo dejó) puede importar contactos y mandar campañas por la cuenta Brevo de develOP con remitente y HTML propios: costo y reputación del dominio de envío. CLAUDE.md exige Zod y verificación en cada server action.",
+    "propuesta": "Llamar isModuleActive (con el slug correcto) dentro de getOrgWithBrevo y cortar si no está activo; schemas Zod con límites para import, create y send; rate limit por org; restringir fromEmail a remitentes verificados de la org.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-email-mkt",
+     "int.brevo",
+     "lib.modules",
+     "modelo.EmailCampaign",
+     "modelo.EmailContact"
+    ],
+    "relacionados": "patrón D1-c2 (guard solo en layout); H de slug de email marketing",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "La credenciales de la bóveda se guardan en texto plano en main; el cifrado de escritura quedó sin mergear",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 103,
+      "fragmento": "await prisma.clientAsset.create({ ... description: data.description  (:109; form admin 'Subir a Bóveda', VaultManager.tsx:25)"
+     },
+     {
+      "ruta": "src/actions/onboarding-actions.ts",
+      "linea": 115,
+      "fragmento": "url: 'ENCRIPTADO_EN_TEXTO',\n            type: 'ACCESS',\n            description: data.domainCredentials"
+     },
+     {
+      "ruta": "src/lib/crypto/credential-cipher.ts",
+      "linea": 73,
+      "fragmento": "export function encryptCredential(plaintext: string): string {  (sin llamadas en write-paths de main)"
+     },
+     {
+      "ruta": "src/lib/crypto/resolve-credential.ts",
+      "linea": 24,
+      "fragmento": "return { value: description, error: false }"
+     }
+    ],
+    "impacto": "Las credenciales de hosting, dominio y redes de los clientes quedan legibles para cualquiera con acceso a la Neon compartida (equipo, Franco, una DATABASE_URL filtrada); la etiqueta 'ENCRIPTADO_EN_TEXTO' miente. El fix PD-1.2 (commit 9fc616c4, encryptCredentialForStorage en ambos write-paths) vive en la rama b0-isolation-motor-chatbot, 8 commits por delante de main. Los backups de GitHub sí van cifrados con GPG (db-backup.yml:120).",
+    "propuesta": "Mergear o cherry-pick de PD-1.2 desde b0-isolation-motor-chatbot con su backfill; confirmar ONBOARDING_SECRET_KEY en Netlify; borrar completeOnboardingAction de src/actions/onboarding-actions.ts (sin importadores). Evaluar PA-2 (CSV anti-inyección), que viaja en la misma rama.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-cuenta",
+     "h4.adm-clientes",
+     "modelo.ClientAsset",
+     "lib.crypto"
+    ],
+    "relacionados": "D2-A5, D2-A4; previo PD-1 docs/audit-repo-20260707.md:113",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "La landing de upsell del chatbot sigue con precio falso y WhatsApp placeholder (CLEAN-H1 abierto)",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+      "linea": 15,
+      "fragmento": "const WHATSAPP_URL = 'https://wa.me/5493815555555?text=Hola%2C+quiero+saber+m%C3%A1s+sobre+el+chatbot'"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+      "linea": 148,
+      "fragmento": "$150 USD"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+      "linea": 152,
+      "fragmento": "Incluye 1.000 conversaciones · reportes semanales · soporte directo"
+     },
+     {
+      "ruta": "src/lib/plan/plan-presentation.ts",
+      "linea": 149,
+      "fragmento": "monthlyPriceUsd: 49,\n    customersPerMonth: 500,"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+      "linea": 21,
+      "fragmento": "return <ChatbotUpsellLanding />"
+     }
+    ],
+    "impacto": "Todo cliente sin chatbot activo ve 'Desde $150 USD / 1.000 conversaciones' (catálogo real: Starter USD 49 con 500, Business USD 150 con 5.000, prisma/seeds/sync-plans.ts:68-111) y el único CTA lleva a un número inexistente: el camino de venta del producto principal está roto y miente el precio. Bloquea L3 del chatbot ('sin datos de mentira').",
+    "propuesta": "Leer precio y cupo de PLAN_PRESENTATIONS (o del Plan en base) y mandar el CTA a /dashboard/messages?context=activacion vía requestUpsellAction.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot",
+     "h2.cli-plan",
+     "lib.plan"
+    ],
+    "relacionados": "CLEAN-H1",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "El reporte semanal puede mandar un brief y métricas de semanas viejas con la etiqueta de la última semana",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/reports/executive-weekly/build.ts",
+      "linea": 113,
+      "fragmento": "const cachedBriefIsCurrent = isBriefCacheCurrent(org.cachedExecutiveBriefAt)\nlet briefText = cachedBriefIsCurrent ? org.cachedExecutiveBrief?.trim() || '' : ''"
+     },
+     {
+      "ruta": "src/lib/ai/executive-brief-input.ts",
+      "linea": 207,
+      "fragmento": "export function isBriefCacheCurrent(cachedAt: Date | null): boolean {\n  return cachedAt !== null && cachedAt.getTime() >= BRIEF_LOGIC_CUTOFF.getTime()"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/build.ts",
+      "linea": 122,
+      "fragmento": "const history = await getBriefHistory(organizationId, 2)\nconst current = history[0] ?? null"
+     },
+     {
+      "ruta": "src/lib/ai/brief-history.ts",
+      "linea": 30,
+      "fragmento": "const rows = await prisma.executiveBriefSnapshot.findMany({ where: { organizationId }, orderBy: { createdAt: 'desc' }, take,"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/build.ts",
+      "linea": 168,
+      "fragmento": "weekLabel: formatWeekRangeLabel(weekRange.start, weekRange.end),"
+     },
+     {
+      "ruta": "src/lib/ai/executive-brief.ts",
+      "linea": 18,
+      "fragmento": "const CACHE_TTL_DAYS = 7  (TTL que build.ts no aplica)"
+     }
+    ],
+    "impacto": "Con el cron de briefs apagado en Netlify y Vertex vencido, el cache y el último snapshot pueden tener semanas; el mail (hoy disparable con 'Enviar ahora') presenta ese texto y esos números como 'tu semana del X al Y', y el delta de salud compara dos snapshots cualesquiera.",
+    "propuesta": "Exigir que el snapshot usado sea del periodKey de la semana reportada (y el anterior, de la semana previa) y que el brief tenga a lo sumo 7 días; si no se cumple, regenerar o saltear con NO_DATA.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-reportes-email.reporte-semanal",
+     "h4.adm-clientes",
+     "modelo.ExecutiveBriefSnapshot",
+     "lib.reports",
+     "int.vertex"
+    ],
+    "relacionados": "PLAN-098, PLAN-109; hallazgo del cron sin disparador",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "El checklist de onboarding nunca se siembra: seedOnboardingTasksForOrg solo lo llaman módulos muertos",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/onboarding/seed-tasks-for-org.ts",
+      "linea": 4,
+      "fragmento": "export async function seedOnboardingTasksForOrg(organizationId: string) {\n  await prisma.onboardingTask.createMany({"
+     },
+     {
+      "ruta": "src/lib/actions/clients.ts",
+      "linea": 139,
+      "fragmento": "await seedOnboardingTasksForOrg(newOrgId).catch((e) =>  (módulo sin importadores)"
+     },
+     {
+      "ruta": "src/lib/actions/invitations.ts",
+      "linea": 93,
+      "fragmento": "await seedOnboardingTasksForOrg(org.id).catch((e) =>  (módulo sin importadores)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+      "linea": 101,
+      "fragmento": "await tx.orgMember.create({  (alta viva; no siembra tareas, igual que createClientWithBot.ts:151 y lib/onboarding/core.ts:101)"
+     },
+     {
+      "ruta": "src/components/dashboard/OnboardingStatusCard.tsx",
+      "linea": 28,
+      "fragmento": "if (tasks.length === 0) return null"
+     }
+    ],
+    "impacto": "La card 'Estamos configurando tu negocio' de Inicio nunca aparece para un cliente nuevo y las actions admin de tareas (src/actions/admin/onboarding-tasks.ts:8,50, también sin importadores) no tienen sobre qué operar; el onboarding del primer cliente real solo se ve si alguien corre un script (scripts/seed-matsu-onboarding.ts).",
+    "propuesta": "Llamar seedOnboardingTasksForOrg dentro de las altas vivas (createClientOnly, createClientWithBot, onboarding/core) o decidir retirar la card; borrar lib/actions/clients.ts e invitations.ts si se confirman muertas.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-inicio",
+     "h2.cli-inicio.checklist-de-onboarding",
+     "h2.cli-bienvenida",
+     "modelo.OnboardingTask",
+     "lib.onboarding"
+    ],
+    "relacionados": "patrón D1-c1 (módulos 'use server' sin importadores)",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "'develOP será notificado de inmediato' es falso: ni la respuesta del cliente ni los tickets de prioridad baja o media avisan",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/dashboard/TicketReplyForm.tsx",
+      "linea": 32,
+      "fragmento": "helperText=\"El equipo de develOP será notificado de inmediato. Respuesta asíncrona estándar en menos de 24hs.\""
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 126,
+      "fragmento": "if (!isAdmin) {\n    const organizationId = await resolveOrgId()  (luego solo ticketMessage.create :140, sin alerta ni Notification)"
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 88,
+      "fragmento": "if (parsed.data.priority === 'HIGH' || parsed.data.priority === 'URGENT') {"
+     },
+     {
+      "ruta": "src/lib/alerts.ts",
+      "linea": 125,
+      "fragmento": "const webhookUrl = settings?.alertWebhookUrl?.trim()\n    if (!webhookUrl) return"
+     }
+    ],
+    "impacto": "Un cliente que responde un ticket o abre uno de prioridad baja o media queda esperando sin que nadie en develOP se entere (solo el contador del dashboard admin, admin/page.tsx:239). Para el primer cliente real: tickets sin respuesta con una promesa de '< 4h' en pantalla.",
+    "propuesta": "Crear una Notification para SUPER_ADMIN (y la alerta) en createTicketAction para todas las prioridades y en la rama cliente de replyToTicketAction; o cambiar el copy hasta tenerlo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte",
+     "h2.cli-soporte.responder-ticket",
+     "h4.adm-tickets",
+     "int.alert-webhook",
+     "modelo.Ticket",
+     "modelo.Notification"
+    ],
+    "relacionados": "PLAN-167",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "La respuesta del admin a un ticket se avisa por Resend con éxito simulado y sin mirar el resultado",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 156,
+      "fragmento": "const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'\n        sendEmail({"
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 166,
+      "fragmento": "}).catch(console.error)  (sendEmail nunca rechaza: el resultado se ignora)"
+     },
+     {
+      "ruta": "src/lib/email.ts",
+      "linea": 15,
+      "fragmento": "if (!resend) {\n    return { success: true }"
+     },
+     {
+      "ruta": "src/lib/email.ts",
+      "linea": 21,
+      "fragmento": "from: 'develOP Agency <hello@develop-agency.com>',"
+     },
+     {
+      "ruta": "docs/env-vars.md",
+      "linea": 45,
+      "fragmento": "| `RESEND_API_KEY` | OPCIONAL (alternativa a Brevo) |"
+     }
+    ],
+    "impacto": "El circuito 'toda respuesta del admin dispara email al cliente' (PLAN-167) depende de una segunda proveedora opcional y de un remitente de otro dominio; si falta la key o el dominio no está verificado, el cliente nunca se entera y no queda registro. Sin NEXT_PUBLIC_APP_URL el link apunta a localhost.",
+    "propuesta": "Enviar por sendTransactionalEmail (Brevo, el canal canónico) y mirar ok/error; registrar el fallo en Sentry; sin fallback a localhost.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-tickets",
+     "h4.adm-tickets.responder-y-avisar-por-email",
+     "int.resend",
+     "int.brevo",
+     "lib.email"
+    ],
+    "relacionados": "patrones D1-c1 (envíos que fingen éxito) y D1-c3 (fallback a localhost)",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Tickets sin rate limit y sin tope de longitud en título y descripción",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/tickets/schemas.ts",
+      "linea": 5,
+      "fragmento": "title: z.string().trim().min(3, 'El título debe tener al menos 3 caracteres.'),\n  description: z.string().trim().min(10, '...'),"
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 49,
+      "fragmento": "const session = await auth()\n  const organizationId = await resolveOrgId()  (sin checkRateLimit en todo el archivo)"
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 89,
+      "fragmento": "sendAgencyAlert({ type: 'TICKET_URGENT', ... detail: ticket.title,"
+     }
+    ],
+    "impacto": "Un usuario de cliente puede abrir tickets en ráfaga (cada URGENT dispara el webhook de alertas) o con textos tan largos como permita el body de la server action. CLAUDE.md exige rate limit en formularios. Impacto acotado: requiere sesión de cliente.",
+    "propuesta": ".max() en title (p. ej. 150) y description (p. ej. 5000), alineado con TicketReplySchema; un preset ticketCreatePerUser en RATE_LIMIT_PRESETS.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte.crear-ticket",
+     "lib.tickets",
+     "lib.rate-limit",
+     "int.alert-webhook"
+    ],
+    "relacionados": "patrón D1-c3 (texto libre sin .max())",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Promesas de soporte contradictorias y sin respaldo: SLA < 4 h para todos y 'prioritario < 24 h' como beneficio Business",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/plan/plan-presentation.ts",
+      "linea": 135,
+      "fragmento": "label: 'Soporte prioritario',\n    hint: 'Respuesta en menos de 24 horas hábiles',"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/page.tsx",
+      "linea": 87,
+      "fragmento": "value=\"< 4h\" ... subtitle=\"Lun-Vie 9-19hs ART\"  (:90)"
+     },
+     {
+      "ruta": "src/components/dashboard/MessageThread.tsx",
+      "linea": 114,
+      "fragmento": "Respondemos en {'< 4 hs'}"
+     },
+     {
+      "ruta": "src/components/dashboard/TicketReplyForm.tsx",
+      "linea": 32,
+      "fragmento": "Respuesta asíncrona estándar en menos de 24hs."
+     },
+     {
+      "ruta": "prisma/seeds/sync-plans.ts",
+      "linea": 95,
+      "fragmento": "supportTier: SupportTier.PRIORITY,  (Pro ya es prioritario; la vitrina lo vende como exclusivo de Business, plan-presentation.ts:171)"
+     }
+    ],
+    "impacto": "El cliente lee cuatro SLA distintos y el plan Business vende como premium algo peor que lo que el portal promete a todos. supportTier no se usa en tickets ni mensajes (solo lo muestra PlanAssignmentCard.tsx:120), así que ninguna promesa se cumple por diseño. Bloquea 'sin datos de mentira' en Soporte y Mi plan.",
+    "propuesta": "Decidir un SLA por tier y mostrarlo desde Plan.supportTier (una sola fuente); hasta entonces quitar los números del portal. Decisión comercial para Valentino.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte",
+     "h2.cli-plan",
+     "h2.cli-mensajes",
+     "lib.plan"
+    ],
+    "relacionados": "D2-A3",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Promesa vencida 'Próximamente Q3 2026' y precio '[FALTA:precio]' visibles al cliente",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/dashboard/PremiumModuleCard.tsx",
+      "linea": 300,
+      "fragmento": "{isComingSoon ? 'Próximamente Q3 2026' : 'Premium'}"
+     },
+     {
+      "ruta": "src/components/dashboard/ServiceDetailModal.tsx",
+      "linea": 181,
+      "fragmento": "{isComingSoon ? 'Próximamente Q3 2026' : 'Premium'}"
+     },
+     {
+      "ruta": "src/components/sections/modulos-opcionales/ModulosOpcionales.tsx",
+      "linea": 487,
+      "fragmento": "PRÓXIMAMENTE Q3 2026"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/motor-resenas/_components/LockedView.tsx",
+      "linea": 151,
+      "fragmento": "Precio: <span className=\"font-semibold text-amber-300\">[FALTA:precio]</span> /mes"
+     },
+     {
+      "ruta": "src/components/dashboard/PremiumModuleCard.tsx",
+      "linea": 366,
+      "fragmento": "${priceMonthlyUsd}{' '}  (la vitrina muestra USD 60 para el mismo módulo, premium-modules.ts:31)"
+     }
+    ],
+    "impacto": "Al 2026-10-14 el Q3 2026 ya venció: los 4 módulos COMING_SOON prometen una fecha pasada en el portal y en el sitio público. El Motor de Reseñas muestra USD 60 en la vitrina y un placeholder literal en su propia página.",
+    "propuesta": "Sacar la fecha del literal (o leerla del catálogo); resolver el precio del Motor de Reseñas (decisión comercial) y mostrar el mismo en ambos lugares.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-servicios",
+     "h2.cli-servicios.vitrina-de-modulos",
+     "h2.cli-resenas",
+     "lib.modules"
+    ],
+    "relacionados": "D2-A3, PLAN-154",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Tres definiciones de 'lead' frente al cliente: el PDF mensual y las recomendaciones cuentan descalificados",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/reports/client-monthly/get-client-monthly-report-data.ts",
+      "linea": 56,
+      "fragmento": "prisma.chatbotLead.count({\n      where: { botConfigId, capturedAt: { gte: current.start, lt: current.end } },"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
+      "linea": 83,
+      "fragmento": "scope.chatbotLead.groupBy({ by: ['category'], where: { botConfigId, ...  (sin filtro DQ; alimenta leadsLast30d :104)"
+     },
+     {
+      "ruta": "src/lib/dashboard/home-metrics.ts",
+      "linea": 87,
+      "fragmento": "// Lead \"del negocio\" = todo lo capturado MENOS los descalificados (DQ)."
+     },
+     {
+      "ruta": "src/modules/chatbot/server/scoring/dqFilter.ts",
+      "linea": 4,
+      "fragmento": " * Los DQ NO se borran (auditoría). Se filtran SOLO en queries que alimenten:\n *   - métricas de conversión visibles al cliente,"
+     },
+     {
+      "ruta": "src/lib/recommendations/rules.ts",
+      "linea": 47,
+      "fragmento": "body: `Este mes entraron ${s.leadsLast30d} consultas y tu ficha de Google todavía no está conectada."
+     }
+    ],
+    "impacto": "El 'informe del mes' que el dueño reenvía al socio o contador y las 'Ideas para crecer' usan un número de leads distinto del de Inicio (incluyen spam/DQ y llaman 'este mes' a los últimos 30 días); las reglas pueden dispararse sobre spam.",
+    "propuesta": "Un helper único de 'lead del negocio' (el notDq de home-metrics) usado por el PDF, getMonthlyAnalysisForOrg y las reglas; copy 'en los últimos 30 días'.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados.informe-mensual-pdf",
+     "h2.cli-inicio.ideas-para-crecer",
+     "lib.reports",
+     "lib.recommendations",
+     "modelo.ChatbotLead"
+    ],
+    "relacionados": "memoria 'gotcha de excludeDqWhere/null'",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Los fallos del lote no llegan a Sentry (solo console.error o una fila FAILED)",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 101,
+      "fragmento": "console.error('createTicketAction error:', error)  (idem :173, :196, :219)"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/send.ts",
+      "linea": 207,
+      "fragmento": "result.failed++\n      result.errors.push({ organizationId: orgId, message })"
+     },
+     {
+      "ruta": "src/lib/referrals/referrals.service.ts",
+      "linea": 167,
+      "fragmento": "console.error('[referrals] notificación admin falló:', error)"
+     },
+     {
+      "ruta": "src/app/api/reports/client-monthly/route.ts",
+      "linea": 58,
+      "fragmento": "console.error('[client-monthly-report] PDF generation error', error)"
+     }
+    ],
+    "impacto": "Un reporte que falla para todas las orgs, un PDF que no se genera o un ticket que no se guarda quedan invisibles salvo para quien lea los logs de la función. Bloquea el criterio Sentry de L3 en Soporte, Reportes, Referidos e Informe PDF.",
+    "propuesta": "captureException en esos catch (o captureConsoleIntegration) y una alerta cuando el cron termine con failed > 0.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.sentry",
+     "h2.cli-soporte",
+     "h2.cli-reportes-email",
+     "h2.cli-referidos",
+     "h2.cli-resultados.informe-mensual-pdf"
+    ],
+    "relacionados": "patrón D1-c1 (fallos manejados solo con console.error)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Ticket.updatedAt no se toca al responder: la lista ordena mal y un cliente activo puede figurar como inactivo",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 140,
+      "fragmento": "const message = await prisma.ticketMessage.create({ data: { content: ..., ticketId: ..., userId, isAdmin },"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/page.tsx",
+      "linea": 23,
+      "fragmento": "orderBy: { updatedAt: 'desc' },"
+     },
+     {
+      "ruta": "src/lib/alerts.ts",
+      "linea": 97,
+      "fragmento": "organization.tickets[0]?.updatedAt,"
+     }
+    ],
+    "impacto": "Un ticket con respuestas nuevas no sube en la lista del cliente ni del admin, y un cliente que solo conversa por tickets suma alertas de 'Cliente inactivo'.",
+    "propuesta": "Crear el mensaje a través de ticket.update({ data: { messages: { create }, updatedAt: new Date() } }) o en una $transaction.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte",
+     "h4.adm-tickets",
+     "h4.adm-alertas",
+     "modelo.Ticket",
+     "modelo.TicketMessage"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "'Marcar como resuelto' sin confirmación y con falla silenciosa",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/dashboard/ResolveTicketButton.tsx",
+      "linea": 14,
+      "fragmento": "const res = await resolveTicketClientAction(ticketId)\n    setIsPending(false)\n    if (res.success) router.refresh()"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 181,
+      "fragmento": "Este ticket ha sido marcado como resuelto. ... Si el problema persiste, por favor abrí un nuevo ticket."
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 208,
+      "fragmento": "if (!ticketId.trim()) return fail('Ticket inválido.')"
+     }
+    ],
+    "impacto": "Un click accidental cierra el ticket sin vuelta atrás para el cliente (no hay reabrir) y si la action falla no se muestra nada. CLAUDE.md exige confirmación en acciones destructivas. Además replyToTicketAction acepta respuestas a tickets RESOLVED si se llama directo.",
+    "propuesta": "Diálogo de confirmación; mostrar res.error; Zod para ticketId; rechazar o reabrir al responder un ticket RESOLVED.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte",
+     "h2.cli-soporte.resolver-ticket"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "El reporte va a un solo admin elegido sin orden (take: 1 sin orderBy)",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/reports/executive-weekly/build.ts",
+      "linea": 78,
+      "fragmento": "members: { where: { role: 'ADMIN' }, include: { user: { select: { email: true, name: true } } }, take: 1, },"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/build.ts",
+      "linea": 103,
+      "fragmento": "const primary = org.members[0]?.user"
+     }
+    ],
+    "impacto": "Con dos o más admins en la org, el destinatario puede variar entre corridas y el resto nunca recibe el reporte.",
+    "propuesta": "orderBy createdAt asc o un destinatario explícito; evaluar enviar a todos los ADMIN.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-reportes-email.reporte-semanal",
+     "modelo.OrgMember",
+     "lib.reports"
+    ],
+    "relacionados": "patrón D1-c1 (take:1 sin orderBy)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Top de leads calientes: rankea solo los 50 más recientes y el mail dice 'Tus 3' aunque el dueño eligió 5 o 10",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/reports/executive-weekly/top-hot-leads.ts",
+      "linea": 91,
+      "fragmento": "orderBy: { capturedAt: 'desc' },\n    take: 50,"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/top-hot-leads.ts",
+      "linea": 129,
+      "fragmento": ".slice(0, safeLeadCount)"
+     },
+     {
+      "ruta": "src/lib/email/templates/executive-weekly.ts",
+      "linea": 139,
+      "fragmento": "Tus 3 leads más calientes de la semana"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/_actions/executive-report-prefs.schemas.ts",
+      "linea": 15,
+      "fragmento": "leadCount: z.union([z.literal(3), z.literal(5), z.literal(10)], {"
+     }
+    ],
+    "impacto": "Con más de 50 leads en la semana, un lead de score alto del lunes puede quedar afuera del ranking; el título del bloque contradice la cantidad configurada por el cliente.",
+    "propuesta": "Traer todos los leads con score de la semana (u ordenar por score en la base) antes del decay; título con la cantidad real.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-reportes-email.reporte-semanal",
+     "h2.cli-reportes-email.preferencias-del-reporte",
+     "lib.reports"
+    ],
+    "relacionados": "PLAN-102, PLAN-104",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Gate de plan del reporte duplicado y su invariante no lo compara con build.ts (verde por arnés)",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/reports/executive-weekly/report-eligible-plan.ts",
+      "linea": 9,
+      "fragmento": "export function reportEligiblePlan(planKey: PlanKey): boolean {\n  return planKey === 'PRO' || planKey === 'BUSINESS'"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/build.ts",
+      "linea": 91,
+      "fragmento": "if (plan.key !== 'PRO' && plan.key !== 'BUSINESS') {"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/report-eligible-plan.invariant.ts",
+      "linea": 14,
+      "fragmento": "import { reportEligiblePlan, businessOnlyReportSection } from './report-eligible-plan.ts'  (no importa build.ts aunque :7 dice verificar contra él)"
+     },
+     {
+      "ruta": "src/lib/plan/plan-allows.ts",
+      "linea": 19,
+      "fragmento": "case 'reports':\n      return plan.reportsEnabled"
+     }
+    ],
+    "impacto": "Si cambia el gate de build.ts, la tarjeta de preferencias muestra algo falso y el invariante sigue verde; además el gate ignora Plan.reportsEnabled, que el admin puede editar.",
+    "propuesta": "Que build.ts importe reportEligiblePlan, o que ambos usen planAllows(plan, 'reports'); actualizar el comentario que lo declara fuera de scope.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-reportes-email",
+     "lib.reports",
+     "lib.plan"
+    ],
+    "relacionados": "PLAN-105; memoria 'verde por arnés'",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "send-manual.ts reimplementa la secuencia de send.ts y deja el reenvío expuesto a duplicados por timeout",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/reports/executive-weekly/send-manual.ts",
+      "linea": 27,
+      "fragmento": " * P2.B.1) no tiene forma de acotar a 1 org ... Esta función reimplementa la MISMA secuencia"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/send-manual.ts",
+      "linea": 93,
+      "fragmento": "const sendResult = await sendTransactionalEmail({  (después del upsert PENDING :74-89)"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/send-manual.ts",
+      "linea": 151,
+      "fragmento": "return { ok: false, reason: 'UNEXPECTED_ERROR', periodKey, error: message }"
+     }
+    ],
+    "impacto": "Dos copias del flujo crítico divergen con cada cambio; si la función corta después de Brevo y antes del update, el log queda PENDING y el próximo 'Enviar ahora' manda el mail de nuevo. El admin recibe el mensaje de error interno.",
+    "propuesta": "Extraer un sendForOrg(orgId, { respectCadence }) que usen el cron y el botón; tratar un PENDING reciente como envío en vuelo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h2.cli-reportes-email.reporte-semanal",
+     "lib.reports",
+     "int.brevo"
+    ],
+    "relacionados": "patrón D1-c3 (mutación y Brevo en la misma respuesta)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "MonthlyReport.tsx y /api/reports/monthly: endpoint sin UI que imprime datos mock como reales e ignora el mes pedido",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/reports/monthly/route.ts",
+      "linea": 31,
+      "fragmento": "const month = searchParams.get('month') ?? currentMonth()  (solo rotula; los datos no se filtran por mes)"
+     },
+     {
+      "ruta": "src/app/api/reports/monthly/route.ts",
+      "linea": 106,
+      "fragmento": "analytics: analyticsResult?.ok ? analyticsResult.data : null,"
+     },
+     {
+      "ruta": "src/lib/analytics.ts",
+      "linea": 97,
+      "fragmento": "// Return mock data for demo property or missing/invalid credentials\n  if (!keyJson || property === MOCK_PROPERTY_ID) {"
+     },
+     {
+      "ruta": "src/lib/reports/MonthlyReport.tsx",
+      "linea": 296,
+      "fragmento": "if (data.analytics) {  (no mira isMockData) ... Tu sitio recibió ${a.sessions...} visitas este mes"
+     },
+     {
+      "ruta": "src/app/api/reports/monthly/route.ts",
+      "linea": 125,
+      "fragmento": "const filename = `reporte-${client.companyName.toLowerCase().replace(/\\s+/g, '-')}-${year}-${mon}.pdf`"
+     }
+    ],
+    "impacto": "Cualquier usuario logueado que llame la URL obtiene un PDF con visitas y posiciones de demo presentadas como reales y rotulado con el mes que pida; un companyName con comillas o caracteres fuera de Latin-1 rompe la descarga. Ninguna pantalla lo usa: lo reemplazó /api/reports/client-monthly.",
+    "propuesta": "Borrar la ruta y MonthlyReport.tsx (y DownloadReportButton.tsx, también sin importadores); si se conserva, filtrar isMockData, usar el mes y sanear el filename.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados",
+     "lib.reports",
+     "int.ga4",
+     "int.search-console"
+    ],
+    "relacionados": "PLAN-128",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Contraste por debajo de AA en los PDF de informes (gris sobre gris claro y cian sobre blanco)",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx",
+      "linea": 24,
+      "fragmento": "const GRAY = '#71717a'\nconst LIGHT_BG = '#f4f4f5'  (4,40:1 en cardLabel 7,5 pt :74-80, cardSub :82, emptyText :112)"
+     },
+     {
+      "ruta": "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx",
+      "linea": 58,
+      "fragmento": "monthLabel: { fontSize: 12, color: CYAN, fontFamily: 'Helvetica-Bold', marginBottom: 3 },  (#06b6d4 sobre blanco = 2,43:1)"
+     },
+     {
+      "ruta": "src/lib/reports/MonthlyReport.tsx",
+      "linea": 165,
+      "fragmento": "cardValue: { fontSize: 20, fontFamily: 'Helvetica-Bold', color: CYAN,  (sobre LIGHT_BG = 2,21:1, menos de 3:1 aun como texto grande)"
+     }
+    ],
+    "impacto": "El informe pensado para reenviarse al socio o contador tiene etiquetas, fecha y marca difíciles de leer impresas o en pantallas con poco brillo.",
+    "propuesta": "zinc-600 (#52525b, 7,0:1 sobre #f4f4f5) para textos secundarios y un cian oscuro (#0e7490, unos 5,4:1 sobre blanco) para textos de marca.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados.informe-mensual-pdf",
+     "lib.reports"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Atribución de referidos: guardas anti-abuso con huecos y el email del referido expuesto al referente",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/referrals/referrals.service.ts",
+      "linea": 115,
+      "fragmento": "prisma.user.findFirst({ where: { email: referredEmail }, select: { id: true } }),"
+     },
+     {
+      "ruta": "src/lib/actions/contact.ts",
+      "linea": 68,
+      "fragmento": "if (referralCode) {\n      await attributeReferralFromContact({ code: referralCode, referredEmail: payload.email })"
+     },
+     {
+      "ruta": "src/lib/referrals/referrals.service.ts",
+      "linea": 151,
+      "fragmento": "const superAdmin = await prisma.user.findFirst({\n        where: { role: 'SUPER_ADMIN' },"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/referidos/page.tsx",
+      "linea": 73,
+      "fragmento": "{referral.referredEmail ?? 'Contacto referido'}"
+     }
+    ],
+    "impacto": "Un cliente existente cuyo User.email tenga mayúsculas (las altas no normalizan) pasa como 'negocio nuevo' y puede terminar en un mes bonificado; cualquiera con un código público puede inflar referidos PENDING con emails inventados (rate limit por IP falsificable, contact.ts:23-27); el email de quien escribió a develOP queda visible para el cliente referente sin consentimiento; solo se notifica a un SUPER_ADMIN cualquiera y los fallos van a console.error. Mitigado porque la conversión la confirma develOP a mano.",
+    "propuesta": "Comparar emails sin distinguir mayúsculas (o normalizar en las altas); mostrar el email enmascarado; notificar a todos los SUPER_ADMIN; Sentry en el catch.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-referidos",
+     "h6.vis-contacto",
+     "h6.vis-contacto.atribucion-de-referido",
+     "modelo.Referral",
+     "lib.referrals"
+    ],
+    "relacionados": "patrones D1-c1 (email sin normalizar; IP de X-Forwarded-For)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "En preview las acciones del lote usan orgs distintas: el admin queda como autor del ticket del cliente y los CTA registran contra su propia org",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 50,
+      "fragmento": "const organizationId = await resolveOrgId()\n  const userId = session?.user?.id  (en preview: org del cliente, autor SUPER_ADMIN, isAdmin false :77)"
+     },
+     {
+      "ruta": "src/lib/actions/referrals.ts",
+      "linea": 14,
+      "fragmento": "const organizationId = session?.user?.organizationId  (la página usa resolveOrgId, referidos/page.tsx:27)"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 16,
+      "fragmento": "const organizationId = session?.user?.organizationId"
+     },
+     {
+      "ruta": "src/lib/recommendations/types.ts",
+      "linea": 56,
+      "fragmento": " * pre-llenado de /dashboard/messages. Sin `organizationId` a propósito: la\n * acción resuelve la org desde la sesión, el cliente no puede targetear otra."
+     }
+    ],
+    "impacto": "Un SUPER_ADMIN que prueba el portal en preview crea tickets que el cliente ve como propios (con el nombre del admin del lado del cliente), y los CTA de upsell y referidos actúan sobre otra org o fallan. Solo afecta al modo preview.",
+    "propuesta": "Definir una regla para preview (bloquear mutaciones del portal o registrarlas como admin explícito) y usar el mismo resolver en página y action.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h1.auth-impersonacion",
+     "h2.cli-soporte",
+     "h2.cli-referidos",
+     "h2.cli-inicio.ideas-para-crecer",
+     "lib.preview"
+    ],
+    "relacionados": "patrones D1-c1 y D1-c3 (org de la sesión vs resolveOrgId)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Plan y consumo se leen varias veces por request y getPlanForOrg escribe dentro de un camino de lectura",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/plan/page.tsx",
+      "linea": 37,
+      "fragmento": "const snapshot = await getOrgUsageSnapshot(organizationId)  (repetido en :42)"
+     },
+     {
+      "ruta": "src/lib/recommendations/get-recommendations-for-org.ts",
+      "linea": 34,
+      "fragmento": "getOrgUsageSnapshot(organizationId),  (Inicio ya lo llama en dashboard/page.tsx:164 y getPlanForOrg en :116)"
+     },
+     {
+      "ruta": "src/lib/plan/get-plan-for-org.ts",
+      "linea": 69,
+      "fragmento": "const cached = planCache.get(orgId)\n  if (cached && cached.expiresAt > Date.now()) return cached.data\n  await applyPendingPlanIfDue(orgId)"
+     },
+     {
+      "ruta": "src/lib/plan/get-plan-for-org.ts",
+      "linea": 21,
+      "fragmento": "const planCache = new Map<string, CacheEntry>()"
+     }
+    ],
+    "impacto": "Inicio hace dos lecturas de consumo y hasta tres resoluciones de plan por visita; con Suspense en paralelo todas fallan el cache a la vez y cada una puede ejecutar el update de pendingPlan. La invalidación del cache solo limpia la instancia que atiende al admin (:131-133). Bajo hoy; crece con orgs y tráfico.",
+    "propuesta": "Envolver getOrgUsageSnapshot y getPlanForOrg en React cache(): deduplica por request sin romper el streaming de cada Suspense (el lane de Plan lo descartó creyendo lo contrario).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-plan",
+     "h2.cli-inicio",
+     "lib.plan"
+    ],
+    "relacionados": "lane-plan-log.md:103 (doble fetch conservado)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "getPlanForOrg ignora el estado de la suscripción: una org CANCELED o PAST_DUE conserva su plan",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/plan/get-plan-for-org.ts",
+      "linea": 74,
+      "fragmento": "const sub = await prisma.subscription.findUnique({\n    where: { organizationId: orgId },\n    select: { plan: { select: {  (no lee status)"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 658,
+      "fragmento": "status      SubscriptionStatus @default(ACTIVE)"
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/send.ts",
+      "linea": 81,
+      "fragmento": "subscription: { is: { status: 'ACTIVE' } },  (el cron sí lo filtra)"
+     }
+    ],
+    "impacto": "Hoy ningún código pone CANCELED, así que el impacto es latente: cuando develOP dé de baja a un cliente, el bot y el portal siguen con el cupo y las features del plan anterior.",
+    "propuesta": "Definir el plan efectivo para CANCELED y PAST_DUE (fallback o bot en pausa), aplicarlo en getPlanForOrg y cubrirlo con un invariante.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-plan",
+     "h3.cli-chatbot",
+     "lib.plan",
+     "modelo.Subscription"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Navegación post-mutación con window.location.assign en el portal, patrón que CLAUDE.md no contempla",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/dashboard/home/Recommendations.tsx",
+      "linea": 91,
+      "fragmento": "window.location.assign(`/dashboard/messages?${params.toString()}`)"
+     },
+     {
+      "ruta": "src/components/dashboard/PremiumModuleCard.tsx",
+      "linea": 215,
+      "fragmento": "window.location.assign(`/dashboard/messages?${params.toString()}`)"
+     },
+     {
+      "ruta": "src/components/dashboard/plan/UpgradeCtaButton.tsx",
+      "linea": 100,
+      "fragmento": "window.location.assign(targetHref)"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 143,
+      "fragmento": "revalidatePath('/dashboard')"
+     }
+    ],
+    "impacto": "Recarga completa del portal tras cada solicitud de upsell. Las tres llamadas tienen comentario que lo justifica (la carrera con el revalidatePath('/dashboard') de requestUpsellAction), pero la regla de navegación de CLAUDE.md no lo lista.",
+    "propuesta": "Documentar la excepción en CLAUDE.md, o sacar el revalidatePath('/dashboard') de requestUpsellAction y volver a router.push con comentario.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-inicio.ideas-para-crecer",
+     "h2.cli-servicios",
+     "h2.cli-plan"
+    ],
+    "relacionados": "D2-A6",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Las rutas del portal exponen ids internos (cuid) en la URL y en los links de email",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 60,
+      "fragmento": "const ticket = await prisma.ticket.findUnique({\n    where: { id: ticketId, organizationId },"
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 164,
+      "fragmento": "ticketUrl: `${baseUrl}/dashboard/soporte/${ticketInfo.id}`,"
+     },
+     {
+      "ruta": "src/components/dashboard/NewTicketModal.tsx",
+      "linea": 63,
+      "fragmento": "router.push(`/dashboard/soporte/${res.data.ticketId}`)  (además sin comentario que justifique router.push)"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx",
+      "linea": 33,
+      "fragmento": "const lead = await getLeadByIdForOrg(id, session.organization.id)"
+     }
+    ],
+    "impacto": "No hay IDOR: las tres rutas dinámicas del portal (soporte, leads, campañas) resuelven el id contra la org de sesión. Pero contradicen la regla de CLAUDE.md ('use slugs or tokens') y la decisión B6.3, y los ids viajan en emails y en el historial del navegador.",
+    "propuesta": "Decidir si la regla aplica a ids no adivinables con scoping por org (y documentarlo) o migrar a un token corto por ticket y lead.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte",
+     "h3.cli-chatbot",
+     "h2.cli-email-mkt"
+    ],
+    "relacionados": "D2-A2",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Links de emails del lote con fallback a http://localhost:3000",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/reports/executive-weekly/build.ts",
+      "linea": 187,
+      "fragmento": "dashboardUrl: `${(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace("
+     },
+     {
+      "ruta": "src/lib/email/unsubscribe-token.ts",
+      "linea": 58,
+      "fragmento": "const base = (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(  (usado por build.ts:191)"
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 156,
+      "fragmento": "const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'"
+     }
+    ],
+    "impacto": "Si falta la variable en producción, el reporte semanal y el aviso de ticket llevan links a localhost (incluido el de baja del reporte, que entonces no funciona).",
+    "propuesta": "Leer la URL base de un helper que falle en build/arranque si falta, sin fallback.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-reportes-email.reporte-semanal",
+     "h4.adm-tickets",
+     "lib.email"
+    ],
+    "relacionados": "patrón D1-c3 (fallback a localhost)",
+    "requiere_verificacion_humana": false
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h2.cli-soporte",
+    "id": "h2.cli-soporte.crear-ticket",
+    "nombre": "Crear ticket de soporte",
+    "descripcion": "El cliente abre un ticket con asunto, categoría, prioridad y descripción y llega al detalle.",
+    "archivos": [
+     "src/lib/tickets/actions.ts",
+     "src/lib/tickets/schemas.ts",
+     "src/components/dashboard/NewTicketModal.tsx",
+     "src/app/(protected)/dashboard/soporte/page.tsx"
+    ],
+    "entradas": [
+     "src/lib/tickets/actions.ts#createTicketAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "soporte/page.tsx:73 → NewTicketModal.tsx:38-55 → actions.ts:49-61 (sesión, org, Zod) → :64-86 create con mensaje → :98-99 ok → NewTicketModal.tsx:59-63 navega al detalle (soporte/[ticketId]/page.tsx:60-62).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "org de resolveOrgId (actions.ts:50,70); en preview el autor es el admin (:51)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "SoporteBoard.tsx:56-71 y :217 estados vacíos por columna"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "NewTicketModal.tsx:67-68,119-124 muestra res.error; actions.ts:100-103 mensaje genérico"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "NewTicketModal.tsx:199 spinner; soporte/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod sin .max() (schemas.ts:5-6) y sin rate limit"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "modal w-full max-w-lg px-4 (NewTicketModal.tsx:83,96) pero selects en grid-cols-2 fijo (:138) a 320 px"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch con console.error (actions.ts:100-103)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "SLA '< 4h' sin respaldo en la misma pantalla (soporte/page.tsx:86-91)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "flujo completo sin develOP"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-soporte",
+    "id": "h2.cli-soporte.responder-ticket",
+    "nombre": "Responder un ticket",
+    "descripcion": "El cliente escribe en el hilo del ticket.",
+    "archivos": [
+     "src/lib/tickets/actions.ts",
+     "src/components/dashboard/TicketReplyForm.tsx",
+     "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx"
+    ],
+    "entradas": [
+     "src/lib/tickets/actions.ts#replyToTicketAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "soporte/[ticketId]/page.tsx:187 → TicketReplyForm.tsx:16-20 → actions.ts:117-137 (sesión + assertTicketBelongsToOrg) → :140-148 create → :170-171 revalidate; ClientChatComposer.tsx:84-86 muestra errores.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "assertTicketBelongsToOrg (actions.ts:130; assert-ownership.ts:32-43)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "soporte/[ticketId]/page.tsx:172-176 emptyState"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "ClientChatComposer.tsx:84-86; errores no previstos se relanzan al boundary (actions.ts:135)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "isPending de useActionState (TicketReplyForm.tsx:16)"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "TicketReplySchema con max 2000 (schemas.ts:11-18)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "alto fijo calc(100svh-14rem) con la timeline shrink-0 apilada debajo en <lg (page.tsx:115,159,193): en pantallas bajas el chat queda con poco alto; confirmar visualmente"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (actions.ts:173)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "'El equipo de develOP será notificado de inmediato' es falso (TicketReplyForm.tsx:32 vs actions.ts:126-171)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "la respuesta se guarda pero develOP no recibe aviso"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-soporte",
+    "id": "h2.cli-soporte.resolver-ticket",
+    "nombre": "Marcar ticket como resuelto",
+    "descripcion": "El cliente cierra su ticket desde el detalle.",
+    "archivos": [
+     "src/lib/tickets/actions.ts",
+     "src/components/dashboard/ResolveTicketButton.tsx"
+    ],
+    "entradas": [
+     "src/lib/tickets/actions.ts#resolveTicketClientAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "soporte/[ticketId]/page.tsx:150-153 → ResolveTicketButton.tsx:12-17 → actions.ts:205-216 update por id + org → router.refresh.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "where { id, organizationId } (actions.ts:211-213)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción puntual"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "ResolveTicketButton.tsx:16 ignora el fallo"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Loader2 (ResolveTicketButton.tsx:25-26)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "solo trim manual (actions.ts:208)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "botón inline en el header flex-col (page.tsx:118,150-153)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (actions.ts:219)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos inventados"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "sin confirmación ni forma de reabrir (page.tsx:178-185)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-tickets",
+    "id": "h4.adm-tickets.responder-y-avisar-por-email",
+    "nombre": "Responder ticket como develOP y avisar al cliente",
+    "descripcion": "El SUPER_ADMIN responde y el cliente debería recibir un email.",
+    "archivos": [
+     "src/lib/tickets/actions.ts",
+     "src/lib/email.ts"
+    ],
+    "entradas": [
+     "src/lib/tickets/actions.ts#replyToTicketAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "actions.ts:124 (isAdmin) → :140-148 mensaje → :150-167 sendEmail por Resend (lib/email.ts:15-30); el mensaje se guarda, el email puede no salir sin registro.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "rol SUPER_ADMIN (actions.ts:124); opera sobre cualquier org por diseño"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "resultado del email ignorado (actions.ts:166)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI admin fuera del lote, no evaluada"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "TicketReplySchema (schemas.ts:11-18)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI admin fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (actions.ts:166,173)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "lib/email.ts:15-16 finge éxito sin RESEND_API_KEY"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-tickets",
+    "id": "h4.adm-tickets.cambiar-estado",
+    "nombre": "Cambiar estado del ticket",
+    "descripcion": "El SUPER_ADMIN pasa el ticket entre OPEN, IN_PROGRESS y RESOLVED.",
+    "archivos": [
+     "src/lib/tickets/actions.ts",
+     "src/lib/tickets/schemas.ts"
+    ],
+    "entradas": [
+     "src/lib/tickets/actions.ts#updateTicketStatusAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "admin/tickets/_components/ticket-chat.tsx:9 → actions.ts:183-184 Zod → :187 requireSuperAdmin → :188-193 update + revalidate.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (actions.ts:187)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "no autorizado y fallo de DB devuelven el mismo mensaje (actions.ts:195-198)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI admin fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "UpdateTicketStatusSchema (schemas.ts:20-23)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI admin fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (actions.ts:196)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos inventados"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna; el cliente no recibe aviso del cambio"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-plan",
+    "id": "h2.cli-plan.medidor-de-consumo",
+    "nombre": "Medidor de consumo del mes",
+    "descripcion": "Muestra conversaciones usadas contra el cupo del plan con mensajes según el porcentaje.",
+    "archivos": [
+     "src/lib/plan/get-org-usage.ts",
+     "src/lib/plan/get-plan-for-org.ts",
+     "src/lib/plan/fallback.ts",
+     "src/lib/plan/plan-presentation.ts",
+     "src/components/dashboard/plan/UsageMeter.tsx",
+     "src/app/(protected)/dashboard/plan/page.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L3",
+    "madurez_evidencia": "plan/page.tsx:13,36-38 → get-org-usage.ts:49-85 (QuotaUsage del bot de la org) → get-plan-for-org.ts:68-125 → UsageMeter (estado sin bot :79-95; mensajes plan-presentation.ts:240-278).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId (plan/page.tsx:13); consultas por organizationId/botConfigId (get-org-usage.ts:54-67)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "UsageMeter.tsx:79-95 'Tu vendedor virtual todavía no está activo'"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "boundary de dashboard/error.tsx (SectionErrorBoundary con captureException); /plan no tiene error.tsx propio"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Suspense con skeleton (plan/page.tsx:25-27,52-54) y plan/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "solo lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "barra w-full (UsageMeter.tsx:186)"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "vía boundary (SectionErrorBoundary.tsx:61-64)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "QuotaUsage real (get-org-usage.ts:62-68)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "solo lectura"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-plan",
+    "id": "h2.cli-plan.vitrina-de-planes-y-upgrade",
+    "nombre": "Vitrina de planes y pedido de upgrade",
+    "descripcion": "Tres tarjetas de plan con beneficios; el CTA registra la intención y lleva a Mensajes.",
+    "archivos": [
+     "src/lib/plan/plan-presentation.ts",
+     "src/components/dashboard/plan/PlansShowcase.tsx",
+     "src/components/dashboard/plan/UpgradeCtaButton.tsx",
+     "src/lib/actions/upsell.ts"
+    ],
+    "entradas": [
+     "src/lib/actions/upsell.ts#requestUpsellAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "plan/page.tsx:41-46 → PlansShowcase (plan-presentation.ts:144-196) → UpgradeCtaButton.tsx:80-100 → upsell.ts:10-155 → /dashboard/messages?context=plan-upgrade-*.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "requestUpsellAction usa session.user.organizationId (upsell.ts:16), no honra preview"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "catálogo fijo"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "UpgradeCtaButton.tsx:87-93 solo console.error y navega igual"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "spinner de pending en UpgradeCtaButton; skeleton plan/page.tsx:56-63"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "UpsellRequestSchema (upsell.ts:22-25)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid lg:grid-cols-3 que apila (plan/page.tsx:58)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (upsell.ts:153)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "precios copiados a mano (plan-presentation.ts:149,165,181); 'Soporte prioritario < 24 h' sin respaldo (:135-136)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "el upgrade es un pedido a develOP, no autoservicio (por diseño)"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-inicio",
+    "id": "h2.cli-inicio.ideas-para-crecer",
+    "nombre": "Ideas para crecer",
+    "descripcion": "Hasta 3 recomendaciones por reglas sobre señales de la org, con CTA que registra el interés.",
+    "archivos": [
+     "src/lib/recommendations/get-recommendations-for-org.ts",
+     "src/lib/recommendations/rules.ts",
+     "src/lib/recommendations/types.ts",
+     "src/components/dashboard/home/Recommendations.tsx"
+    ],
+    "entradas": [
+     "src/lib/actions/upsell.ts#requestUpsellAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "dashboard/page.tsx:78-80,238-248 → get-recommendations-for-org.ts:29-64 → rules.ts:175-218 → Recommendations.tsx:78-101 → upsell.ts → Mensajes.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "señales org-scoped (get-recommendations-for-org.ts:32-41); el CTA usa session.user.organizationId (upsell.ts:16)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Recommendations.tsx:187-188 EmptyStateMuted"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "wrapper cae a [] (dashboard/page.tsx:240-245); la card muestra el error (Recommendations.tsx:95-101)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "RecommendationsSkeleton (dashboard/page.tsx:250-262)"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "UpsellRequestSchema"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-col sm:flex-row (Recommendations.tsx:104)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (dashboard/page.tsx:243)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "'este mes' sobre ventana de 30 días con DQ incluidos (rules.ts:47,83,137)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "un tap registra y lleva a Mensajes"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-inicio",
+    "id": "h2.cli-inicio.checklist-de-onboarding",
+    "nombre": "Checklist 'Estamos configurando tu negocio'",
+    "descripcion": "Card de Inicio con el avance de las tareas de onboarding de develOP.",
+    "archivos": [
+     "src/lib/onboarding/seed-tasks-for-org.ts",
+     "src/components/dashboard/OnboardingStatusCard.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L1",
+    "madurez_evidencia": "La card lee tareas (OnboardingStatusCard.tsx:17-28) pero ninguna alta viva las crea: seedOnboardingTasksForOrg (seed-tasks-for-org.ts:4-16) solo lo llaman lib/actions/clients.ts:139 e invitations.ts:93, sin importadores; solo un script de QA siembra tareas.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "where organizationId (OnboardingStatusCard.tsx:17-18)"
+     },
+     "vacios": {
+      "cumple": "no",
+      "evidencia": "return null con 0 tareas (:28), y siempre son 0"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "solo el boundary del dashboard"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "Suspense con fallback null (dashboard/page.tsx:60-62)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "solo lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "p-6 sm:p-8, sin anchos fijos (OnboardingStatusCard.tsx:46-50)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "solo vía boundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "lee datos reales cuando existen"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "depende de que develOP siembre tareas con un script"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-servicios",
+    "id": "h2.cli-servicios.vitrina-de-modulos",
+    "nombre": "Vitrina de módulos premium",
+    "descripcion": "Agrupa el catálogo en propios, disponibles y próximamente. Catálogo: 4 ACTIVE (motor-resenas, email-marketing-pro, agenda-inteligente, tienda-conectada) y 4 COMING_SOON (premium-modules.ts:24-137); email marketing es inalcanzable por slug y el Motor de Reseñas muestra '[FALTA:precio]'.",
+    "archivos": [
+     "src/lib/modules/showroom.ts",
+     "src/app/(protected)/dashboard/services/page.tsx",
+     "src/components/dashboard/PremiumModuleCard.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "services/page.tsx:169-196 (resolveOrgId, catálogo y módulos de la org) → showroom.ts:58-74 → PremiumModuleCard.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId y organizationModule por org (services/page.tsx:169-190); showroom.ts es puro"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "services/page.tsx:222-233 y secciones condicionales :258,307,336"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "boundary dashboard/error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "services/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "lectura; el CTA usa UpsellRequestSchema"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "PremiumModuleCard no leída completa; sin verificar"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "errores de render vía boundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "'Próximamente Q3 2026' vencido (PremiumModuleCard.tsx:300); textos PRESET_MODULE_DETAILS (:59,195)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "contratar es un pedido a develOP"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-servicios",
+    "id": "h2.cli-servicios.avisame-cuando-este",
+    "nombre": "Avisame cuando esté (demanda de módulos)",
+    "descripcion": "Registra interés en un módulo COMING_SOON o pide uno disponible, deduplicado 24 h.",
+    "archivos": [
+     "src/lib/upsell/dedup.ts",
+     "src/lib/actions/upsell.ts",
+     "src/components/dashboard/PremiumModuleCard.tsx"
+    ],
+    "entradas": [
+     "src/lib/actions/upsell.ts#requestUpsellAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "PremiumModuleCard.tsx:200-216 → upsell.ts:45-71 OrganizationModule upsert → :81-97 dedup (dedup.ts:33-40) y ContactSubmission → :99-139 alerta y notificaciones.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "session.user.organizationId (upsell.ts:16)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "PremiumModuleCard.tsx:219-221 muestra el error"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "isPending en la card"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "UpsellRequestSchema"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "sin verificar"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (upsell.ts:137,153)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "fecha Q3 2026 vencida al lado del CTA"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "un click"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-referidos",
+    "id": "h2.cli-referidos.codigo-y-link",
+    "nombre": "Código y link de referido",
+    "descripcion": "El cliente genera su código y copia el link /contact?ref=.",
+    "archivos": [
+     "src/lib/referrals/referrals.service.ts",
+     "src/lib/referrals/code.ts",
+     "src/lib/actions/referrals.ts",
+     "src/components/dashboard/ReferralPanel.tsx"
+    ],
+    "entradas": [
+     "src/lib/actions/referrals.ts#generateMyReferralCodeAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "referidos/page.tsx:26-35 → ReferralPanel.tsx:32-45 → referrals.ts:12-27 → referrals.service.ts:28-61 → code.ts:23-32.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "la página usa resolveOrgId (:27) y la action session.user.organizationId (referrals.ts:14)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "sin código muestra 'Generá tu código' (ReferralPanel.tsx:113-123)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "ReferralPanel.tsx:45,113-114"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "ReferralPanel.tsx:119-123"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "sin verificar"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (referrals.ts:25)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "sin NEXT_PUBLIC_APP_URL el link queda relativo (referidos/page.tsx:35)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "autoservicio"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-referidos",
+    "id": "h2.cli-referidos.lista-de-referidos",
+    "nombre": "Lista y estado de referidos",
+    "descripcion": "Muestra los referidos de la org con estado PENDING, CONVERTED o REWARDED.",
+    "archivos": [
+     "src/lib/referrals/referrals.service.ts",
+     "src/app/(protected)/dashboard/referidos/page.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L3",
+    "madurez_evidencia": "referidos/page.tsx:29-33 → referrals.service.ts:64-76 → render :48-80 con vacío :59-64.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "referrerOrgId = org de sesión (referrals.service.ts:66; page :27)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "EmptyStateMuted (referidos/page.tsx:59-64)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "boundary dashboard/error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "dashboard/loading.tsx del padre"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "truncate y flex justify-between (referidos/page.tsx:70-80)"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "vía boundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos reales"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "lectura; el bonificado lo aplica develOP por diseño"
+     }
+    }
+   },
+   {
+    "herramienta": "h6.vis-contacto",
+    "id": "h6.vis-contacto.atribucion-de-referido",
+    "nombre": "Atribución de referido desde el formulario público",
+    "descripcion": "Un contacto con ?ref= crea un Referral PENDING y avisa a develOP.",
+    "archivos": [
+     "src/lib/referrals/referrals.service.ts",
+     "src/lib/referrals/attribution.ts",
+     "src/lib/referrals/code.ts",
+     "src/lib/actions/contact.ts"
+    ],
+    "entradas": [
+     "src/lib/actions/contact.ts#contactFormAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "contact.ts:16-70 → referrals.service.ts:94-121 hechos → attribution.ts:41-52 → :134-140 Referral → :143-165 alerta y Notification.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "público por diseño; existing_customer exacto (referrals.service.ts:115)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "proceso"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "nunca tumba el alta del contacto (referrals.service.ts:171-174)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "server"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "ContactFormSchema (contact.ts:35-47) y normalizeReferralCode (code.ts:14-16)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "server"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (referrals.service.ts:167,172)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos inventados"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "automático"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-reportes-email",
+    "id": "h2.cli-reportes-email.reporte-semanal",
+    "nombre": "Reporte ejecutivo semanal por email",
+    "descripcion": "Mail de los lunes con brief IA, salud, leads, mensajes, tareas y (Business) top de leads.",
+    "archivos": [
+     "src/lib/reports/executive-weekly/send.ts",
+     "src/lib/reports/executive-weekly/build.ts",
+     "src/lib/reports/executive-weekly/top-hot-leads.ts"
+    ],
+    "entradas": [
+     "src/app/api/cron/send-executive-reports/route.ts#GET"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "El motor existe (send.ts:73-233, build.ts:64-198) pero no hay disparador en Netlify (netlify.toml:25-32; solo vercel.json:11-14): el cliente no recibe nada salvo envío manual del admin.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "todo por organizationId (build.ts:68-84; top-hot-leads.ts:71) pero la métrica de leads es global (week-results.ts:43-52 → build.ts:175)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "NO_DATA/NO_RECIPIENT saltean con log (build.ts:86,104-106,117,142)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "FAILED en WeeklyReportLog sin alerta (send.ts:193-204)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "email"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input; leadCount defensivo (top-hot-leads.ts:66-67)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "template de email no evaluado"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "leads globales; brief y snapshot viejos (build.ts:113-141); 'Tus 3' fijo (executive-weekly.ts:139)"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "no llega sin intervención de develOP"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-reportes-email",
+    "id": "h2.cli-reportes-email.preferencias-del-reporte",
+    "nombre": "Preferencias del reporte semanal",
+    "descripcion": "El dueño elige frecuencia (semanal, quincenal, no recibir) y cantidad de leads destacados.",
+    "archivos": [
+     "src/lib/reports/executive-weekly/report-eligible-plan.ts",
+     "src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts",
+     "src/components/dashboard/ExecutiveReportPrefsForm.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "perfil/page.tsx:193-203,297-306 → ExecutiveReportPrefsForm → executive-report-prefs.actions.ts:20-46 → Organization → send.ts:83,114 y build.ts:99,161.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId (executive-report-prefs.actions.ts:23)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "formulario"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "update sin try/catch (actions.ts:31-43): un fallo de DB va al boundary"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "formulario no leído"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod con literales 3/5/10 (executive-report-prefs.schemas.ts:8-18)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "sin verificar"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "solo boundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "configura un envío que no ocurre en prod; el mail ignora 5/10"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "autoservicio"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.envio-manual-del-reporte",
+    "nombre": "Enviar ahora el reporte ejecutivo",
+    "descripcion": "Botón del admin que manda el reporte de una org.",
+    "archivos": [
+     "src/lib/reports/executive-weekly/send-manual.ts",
+     "src/lib/reports/executive-weekly/build.ts"
+    ],
+    "entradas": [
+     "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts#POST"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "SendExecutiveReportButton.tsx:37 → route.ts:13-57 → send-manual.ts:33-153 → build.ts → Brevo → WeeklyReportLog.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (route.ts:14); org del path validada con Zod (:51-54)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "motivos devueltos (route.ts:75-91), con error interno en UNEXPECTED_ERROR"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI admin fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "OrganizationIdSchema; rate limit (route.ts:35-48)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "admin"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "puede mandar datos viejos (build.ts:113-141)"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.informe-mensual-pdf",
+    "nombre": "Descargar el informe del mes en PDF",
+    "descripcion": "PDF de 1-2 páginas con leads, conversaciones, embudo, categorías e insight.",
+    "archivos": [
+     "src/lib/reports/client-monthly/get-client-monthly-report-data.ts",
+     "src/lib/reports/client-monthly/monthly-report-data.ts",
+     "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx"
+    ],
+    "entradas": [
+     "src/app/api/reports/client-monthly/route.ts#GET"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "analisis/page.tsx:45 → DownloadMonthlyReportButton.tsx:18-35 → client-monthly/route.ts:24-56 → get-client-monthly-report-data.ts:20-76 → monthly-report-data.ts:73-97 → ClientMonthlyReportPdf.tsx:287-318.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId (route.ts:25); consultas por botConfigId de la org (get-client-monthly-report-data.ts:24-30,55-66)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "sin bot, sin leads y categorías insuficientes (ClientMonthlyReportPdf.tsx:206-212,240-241,303-304)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "toast (DownloadMonthlyReportButton.tsx:36-37) y JSON genérico (route.ts:57-63)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "'Generando...' (DownloadMonthlyReportButton.tsx:51-56)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input; gate de plan (route.ts:30-33)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "botón único"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (route.ts:58)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "leads con DQ (get-client-monthly-report-data.ts:56-65); contraste bajo en el PDF"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "autoservicio"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resenas",
+    "id": "h2.cli-resenas.vista-segun-estado",
+    "nombre": "Motor de Reseñas: vista bloqueada, conectando u operativa",
+    "descripcion": "Elige una de tres vistas según tenencia del módulo y conexión GBP.",
+    "archivos": [
+     "src/lib/modules/motor-resenas-view.ts",
+     "src/lib/modules/check-activation.ts",
+     "src/lib/security/org-scope.ts"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "motor-resenas/page.tsx:106-127 (resolveOrgId, isModuleActive, deriveConnectionStatus) → motor-resenas-view.ts:38-42 → LockedView/ConnectingState/ReviewsList (:144-153); acciones con resolveScopedOrgId + isModuleActive (_actions.ts:20-24,55-59).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId y org-scope.ts:20-27 en las actions"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "motor-resenas/page.tsx:22-34"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "dashboard/modules/error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "motor-resenas/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "las actions de borrador y respuesta no usan Zod (_actions.ts:11-16,48-52)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "sin verificar"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "vía boundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "'[FALTA:precio]' visible (LockedView.tsx:151)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "la conexión GBP la hace develOP a mano (motor-resenas-view.ts:12-14)"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-email-mkt",
+    "id": "h2.cli-email-mkt.acceso-al-modulo",
+    "nombre": "Acceso al módulo de email marketing",
+    "descripcion": "Gate de entrada al módulo por tenencia ACTIVE.",
+    "archivos": [
+     "src/lib/modules/check-activation.ts",
+     "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx",
+     "src/components/dashboard/SidebarNav.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L?",
+    "madurez_evidencia": "El gate pide 'email-marketing' (layout.tsx:20) y el catálogo define 'email-marketing-pro' (premium-modules.ts:38): el camino feliz depende del slug real en la base, no trazable por lectura.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "páginas bajo el layout con resolveOrgId; actions sin gate de módulo (_actions.ts:17-27)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "no evaluado (fuera del lote)"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "no evaluado (fuera del lote)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "no evaluado (fuera del lote)"
+     },
+     "validacion_servidor": {
+      "cumple": "no",
+      "evidencia": "actions sin Zod (_actions.ts:131-135)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "no evaluado"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "no evaluado"
+     },
+     "sin_mocks_todos": {
+      "cumple": "n/a",
+      "evidencia": "no evaluado"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "si el slug no existe en la base, el cliente que paga no entra"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-101",
+    "clave": "Sin tests unitarios del HMAC de unsubscribe ni del builder del reporte",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -E 'signUnsubscribeToken|verifyUnsubscribeToken' origin/main -- logic-core-v3/tests '**/*.invariant.ts' '**/*.test.ts' → vacío; control: signEmailContactOptOutToken aparece en src/lib/security/idor-tokens.invariant.ts y tests/e2e/20-idor-optout.spec.ts. build.ts no tiene test propio (tests/e2e/41-admin-executive-report-send-now.spec.ts:5-7 lo evita).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-100",
+    "clave": "Reglas lockeadas del reporte ejecutivo semanal",
+    "estado_en_codigo": "parcial",
+    "evidencia": "PRO/BUSINESS build.ts:91; idempotencia send.ts:105-112; falla parcial no aborta send.ts:103,205; periodKey TZ-AR send.ts:76; RFC 8058 send.ts:171-176. 'Sin LLM al enviar' no se cumple: build.ts:115-119 llama getExecutiveBrief si el cache no es vigente.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El conjunto no corre en prod (cron sin disparador en Netlify)."
+   },
+   {
+    "id": "PLAN-105",
+    "clave": "Gate de plan del reporte duplicado a mano",
+    "estado_en_codigo": "hecho",
+    "evidencia": "report-eligible-plan.ts:9-11 calca build.ts:91; el invariante report-eligible-plan.invariant.ts:14 no importa build.ts.",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Conviene que build.ts importe el helper en lugar de sincronizar a mano."
+   },
+   {
+    "id": "PLAN-099",
+    "clave": "B6.2 — Reporte ejecutivo semanal por email",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Migración 20260524230542_b62_executive_weekly_report_log, send.ts/build.ts, unsubscribe (api/email/unsubscribe-executive/route.ts:103,110) y preview dev-only (api/dev/email-preview/executive-weekly/route.ts:107-108) existen; el cron solo está en vercel.json:11-14 y prod es Netlify (netlify.toml:25-32 no lo agenda; docs/operations/00-entornos.md:12).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-102",
+    "clave": "B6.3 — Top 3 leads calientes en el reporte (solo Business)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "top-hot-leads.ts:56-160 (decay :104-111, DQ :75, org :71); build.ts:154-163 solo BUSINESS.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Rankea sobre los 50 más recientes (:91-92) y el template dice 'Tus 3' fijo."
+   },
+   {
+    "id": "PLAN-167",
+    "clave": "Soporte: actions de tickets consolidadas",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Mutaciones en lib/tickets/actions.ts:38,110,179,202; responder no cambia el status (:106-109); el email del admin va por Resend con éxito simulado (lib/email.ts:15-16) y sin mirar el resultado (:166); components/dashboard/TicketStatusSelector.tsx quedó sin importadores (git grep TicketStatusSelector → solo su definición).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-151",
+    "clave": "P5.2 vitrina de servicios + demanda medida",
+    "estado_en_codigo": "hecho",
+    "evidencia": "showroom.ts:28-74 (3 estados); dedup.ts:33-40 usado en upsell.ts:87; 'avisame' en PremiumModuleCard.tsx:200-216; admin/leads/_components/module-demand-table.tsx existe.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-094",
+    "clave": "P5.5 sistema de referidos",
+    "estado_en_codigo": "hecho",
+    "evidencia": "code.ts:29-32 (/contact?ref=); attribution.ts:41-52; referrals.service.ts:89-175; admin/referrals/page.tsx y _actions/referrals.admin.actions.ts.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Guardas anti-abuso con huecos (hallazgo de atribución)."
+   },
+   {
+    "id": "PLAN-104",
+    "clave": "P2.B.2 reporte ejecutivo a medida",
+    "estado_en_codigo": "hecho",
+    "evidencia": "migración 20260702223350_add_executive_report_config; executive-report-prefs.actions.ts:20-46 con Zod; send.ts:43-59 (BIWEEKLY); build.ts:99,161; perfil/page.tsx:193-203,297-306.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El template ignora 5/10 ('Tus 3', executive-weekly.ts:139) y el envío no corre en prod."
+   },
+   {
+    "id": "PLAN-061",
+    "clave": "P5.1-fix reviewsEngineRule exige GBP operativa",
+    "estado_en_codigo": "hecho",
+    "evidencia": "rules.ts:70-74 (gbpOperational); get-recommendations-for-org.ts:54.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-146",
+    "clave": "longDescription real desde la DB en el modal",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "PremiumModuleCard.tsx:59 PRESET_MODULE_DETAILS y :195 PRESET_MODULE_DETAILS[slug] ?? GENERIC_MODULE_DETAIL; el catálogo tiene longDescription (premium-modules.ts:28).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-128",
+    "clave": "Sprint de datos de Resultados",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Siguen los FIXME(data-truth): trafico/page.tsx:113-117 (CTA sin handler), seo/page.tsx:234-245 (trend 12.4 fijo), GBPMetricsCard.tsx:39 (performance en 0), trafico/page.tsx:74 (propertyId de demo).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-156",
+    "clave": "Panel servicios + CTA a más servicios",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "dashboard/plan/page.tsx:16-33 solo monta UsageMeter y PlansShowcase.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-137",
+    "clave": "Deuda data-truth en Resultados",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Mismos FIXME: trafico/page.tsx:113-117, seo/page.tsx:234-245, GBPMetricsCard.tsx:39, trafico/page.tsx:74.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-154",
+    "clave": "Vitrina muestra priceMonthlyUsd=60",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "PremiumModuleCard.tsx:362-367 muestra el precio del catálogo (premium-modules.ts:31 motor-resenas 60) mientras LockedView.tsx:151 muestra '[FALTA:precio]'.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-131",
+    "clave": "/dashboard/resultados/seo con mock data visible",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Con datos mock se muestra PreviewBanner (seo/page.tsx:226; searchconsole.ts:102-104), pero los deltas de las cards son fijos (seo/page.tsx:234-245).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-150",
+    "clave": "/dashboard/modules/* sin gating",
+    "estado_en_codigo": "parcial",
+    "evidencia": "isModuleActive en agenda-inteligente/page.tsx:320-321, tienda-conectada/page.tsx:295-296, motor-resenas/page.tsx:110,120-127 y email-marketing/layout.tsx:20-21; pero email marketing usa un slug ausente del catálogo (premium-modules.ts:38) y sus actions no chequean el módulo (_actions.ts:17-27).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-052",
+    "clave": "UX del Health Score 'Calibrando' tras redirect",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Módulo inactivo → redirect('/dashboard') (agenda-inteligente/page.tsx:321, tienda-conectada/page.tsx:296, email-marketing/layout.tsx:21); HealthScore.tsx:159,171 'Calibrando'. Sin decisión aplicada.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-107",
+    "clave": "Cadencia quincenal y ubicación del botón de reporte",
+    "estado_en_codigo": "parcial",
+    "evidencia": "send.ts:40-41 excluye a propósito al botón manual de la cadencia; el botón vive en admin/clients/[clientId]/_components/ExecutiveReportCard.tsx:20 y no en admin/settings/reports (git grep send-executive-report).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-109",
+    "clave": "Ajustar BRIEF_LOGIC_CUTOFF a la fecha de deploy",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "executive-brief-input.ts:204 sigue en 2026-07-02 (commit 852fcc39 del 2026-07-02); build.ts:113 lo usa como único control de frescura del brief.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-097",
+    "clave": "client-monthly-report-pdf no es invariante puro",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "scripts/run-invariants.mjs:89-94 lo sigue excluyendo; package.json:105.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-121",
+    "clave": "R1: reporte de ROI (input y render del panel)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Ticket promedio capturado (dashboard/_actions/business-profile.actions.ts, MoneyEstimate.tsx); no hay tasa de cierre ni cálculo: git grep -n calculatePotentialValue origin/main -- logic-core-v3/src → vacío; control: averageTicketUsd aparece en 4 archivos.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-096",
+    "clave": "MH.1: orderBy en reportes y latencia",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "buildWeeklyReport.ts:74-83, 85-92 y 94-101 con take sin orderBy; getLatencyHistory.ts:76-82 take 2000 sin orderBy.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-059",
+    "clave": "Señal 'fuera de horario' en recomendaciones v2",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -i -E 'fuera de horario|outOfHours|afterHours|EXTRACT\\(HOUR' origin/main -- logic-core-v3/src/lib/recommendations → vacío; control: 'connect-gbp' aparece en rules.ts.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-044",
+    "clave": "TrendChip oculto (opción B)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "HealthScore.tsx:97-100 sin TrendChip; no existe model HealthScoreSnapshot (git grep vacío; control: model ExecutiveBriefSnapshot en schema.prisma:459).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-147",
+    "clave": "Servicios: tipografía del admin, accent y badge",
+    "estado_en_codigo": "hecho",
+    "evidencia": "PremiumModuleCard.tsx:300 badge 'Premium'; :251-262 accent por módulo; :340-341 'Ver detalles' como ícono con aria-label.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-095",
+    "clave": "Beneficio de referidos: 1 mes bonificado",
+    "estado_en_codigo": "hecho",
+    "evidencia": "admin/referrals/_actions/referrals.admin.actions.ts:13-24 (PENDING→CONVERTED) y :36-47 (→REWARDED) manuales; sin aplicación automática ni aviso al cliente.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-098",
+    "clave": "B6.1 — Histórico semanal del executive brief",
+    "estado_en_codigo": "hecho",
+    "evidencia": "schema.prisma:459 ExecutiveBriefSnapshot; executive-brief.ts:334-360 persistBriefSnapshot; brief-history.ts:24-46.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "getBriefHistory no filtra por semana y los snapshots arrastran la métrica global de leads."
+   },
+   {
+    "id": "PLAN-125",
+    "clave": "Resultados Sprint 5: SEO",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Commits df4854e, 0e1d35f y 5f7989e son ancestros de origin/main (git merge-base --is-ancestor); seo/page.tsx:181-198 no muestra result.error.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-138",
+    "clave": "Reskin de Resultados (sprints 1-5)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Commits 90a202e, 37609b5, 3ee97f0, df4fbe8, 0e1d35f y 5f7989e están en origin/main (git merge-base --is-ancestor).",
+    "sigue_teniendo_sentido": "si"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D2-A1] Conteo de leads de Inicio y computeLeadsScore con ContactSubmission sin organizationId",
+    "resultado": "confirmada",
+    "evidencia": "src/lib/dashboard/week-results.ts:43-52 y src/lib/health-score.ts:283-292, :311-345 cuentan ContactSubmission global (prisma/schema.prisma:688-708 no tiene organizationId); upsell.ts:88 suma solicitudes de todos los clientes; el número llega al reporte semanal (build.ts:175). La 'Auditoría III' con 0 rojos no aplica a estas consultas.",
+    "hallazgo_titulo": "Los 'leads' de Inicio, el Health Score y el reporte semanal cuentan ContactSubmission de todos los tenants"
+   },
+   {
+    "alerta": "[D2-A2] IDs internos en URL (leads/[id]) e IDOR",
+    "resultado": "parcial",
+    "evidencia": "Las tres rutas dinámicas del portal usan cuid: soporte/[ticketId]/page.tsx:60-61, chatbot/leads/[id]/page.tsx:33 y email-marketing/campaigns/[id]/send/page.tsx:18; todas resuelven contra la org de sesión (sin IDOR: sendCampaignAction filtra por organizationId en _actions.ts:177-178). Contradicen la regla de CLAUDE.md.",
+    "hallazgo_titulo": "Las rutas del portal exponen ids internos (cuid) en la URL y en los links de email"
+   },
+   {
+    "alerta": "[D2-A3] Promesas visibles: 'Próximamente Q3 2026' y 'Respondemos en < 4 hs, Lun-Vie 9-18'",
+    "resultado": "confirmada",
+    "evidencia": "PremiumModuleCard.tsx:300, ServiceDetailModal.tsx:181 y ModulosOpcionales.tsx:487 (vencida al 2026-10-14); MessageThread.tsx:114 'Respondemos en < 4 hs'; soporte/page.tsx:87,90 '< 4h' y 'Lun-Vie 9-19hs ART' (no 9-18); plan-presentation.ts:135-136 promete '< 24 h hábiles' como premium.",
+    "hallazgo_titulo": "Promesa vencida 'Próximamente Q3 2026' y precio '[FALTA:precio]' visibles al cliente"
+   },
+   {
+    "alerta": "[D2-A4] Lanes declaradas cerradas pero sin mergear (y rama b0-isolation-motor-chatbot)",
+    "resultado": "parcial",
+    "evidencia": "Los commits de Resultados citados en PLAN-125 y PLAN-138 (df4854e, 0e1d35f, 5f7989e, 90a202e, 37609b5, 3ee97f0, df4fbe8) son ancestros de origin/main. La rama origin/b0-isolation-motor-chatbot NO está contenida: 8 commits por delante (git rev-list --count origin/main..origin/b0-isolation-motor-chatbot = 8), entre ellos 9fc616c4 (cifrado PD-1.2), eb3b0d0e (CSV anti-inyección PA-2) y 2d8701ef (PA-3/PA-4).",
+    "hallazgo_titulo": "La credenciales de la bóveda se guardan en texto plano en main; el cifrado de escritura quedó sin mergear"
+   },
+   {
+    "alerta": "[D2-A5] Credenciales de onboarding: texto plano con etiqueta ENCRIPTADO vs ONBOARDING_SECRET_KEY",
+    "resultado": "confirmada",
+    "evidencia": "En main existe el cifrador (src/lib/crypto/credential-cipher.ts:35,73 con ONBOARDING_SECRET_KEY) y la lectura que descifra (resolve-credential.ts:16-25), pero ningún write-path cifra: onboarding-actions.ts:115-117,127-129 guarda en claro con url 'ENCRIPTADO_EN_TEXTO' (action sin importadores) y agency-actions.ts:103-109 (form admin de Bóveda, en uso) también. git grep de encryptCredential/encryptForStorage fuera de lib/crypto en main → vacío; en la rama b0 aparecen en agency-actions.ts:14 y onboarding-actions.ts:10.",
+    "hallazgo_titulo": "La credenciales de la bóveda se guardan en texto plano en main; el cifrado de escritura quedó sin mergear"
+   },
+   {
+    "alerta": "[D2-A6] Navegación post-éxito con window.location.assign() en el flujo de venta",
+    "resultado": "confirmada",
+    "evidencia": "Recommendations.tsx:91, PremiumModuleCard.tsx:215 y UpgradeCtaButton.tsx:100, cada una con comentario que la justifica (carrera con revalidatePath('/dashboard') de upsell.ts:143). CLAUDE.md no contempla el patrón para portales.",
+    "hallazgo_titulo": "Navegación post-mutación con window.location.assign en el portal, patrón que CLAUDE.md no contempla"
+   },
+   {
+    "alerta": "[D2-A7] Avatar en base64 en la base: ¿tamaño máximo validado en servidor?",
+    "resultado": "parcial",
+    "evidencia": "El avatar sigue como data URL en la base (no hay storage externo), pero el servidor lo acota: avatarImageUrlSchema.ts:10-23 (MAX_AVATAR_URL_LENGTH 600000 y tipos png/jpeg/webp), usado por updateBotAppearance.ts:36-38 del cliente. El riesgo de tamaño ilimitado queda descartado; la decisión de storage externo sigue abierta."
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/lib/reports/MonthlyReport.tsx",
+    "senales": [
+     "único importador: src/app/api/reports/monthly/route.ts:8-9",
+     "git grep 'reports/monthly' en src: solo comentarios (client-monthly/route.ts:6) y la propia ruta; ninguna pantalla la llama",
+     "reemplazado por ClientMonthlyReportPdf (P2.C), según ClientMonthlyReportPdf.tsx:6-8",
+     "no mira isMockData y presenta datos de demo como reales"
+    ],
+    "que_rompe": "Nada visible para el cliente. Borrarlo junto con src/app/api/reports/monthly/route.ts (y src/components/dashboard/DownloadReportButton.tsx, también sin importadores)."
+   },
+   {
+    "archivo": "src/lib/onboarding/seed-tasks-for-org.ts",
+    "senales": [
+     "solo lo importan src/lib/actions/clients.ts:9 y src/lib/actions/invitations.ts:8, módulos 'use server' sin importadores",
+     "las altas vivas (createClientOnly, createClientWithBot, onboarding/core) no lo llaman"
+    ],
+    "que_rompe": "Nada hoy. La recomendación es cablearlo en las altas vivas en lugar de podarlo (checklist de onboarding)."
+   },
+   {
+    "archivo": "src/lib/reports/executive-weekly/send-manual.ts",
+    "senales": [
+     "reimplementa la secuencia de send.ts, como dice su propio comentario (:26-31)"
+    ],
+    "que_rompe": "El botón 'Enviar ahora' del admin (api/admin/clients/[organizationId]/send-executive-report/route.ts:7,57) si se borra sin extraer un sendForOrg común."
+   },
+   {
+    "archivo": "src/lib/reports/executive-weekly/report-eligible-plan.ts",
+    "senales": [
+     "duplica el gate de build.ts:91 (comentario :3-8)",
+     "su invariante no compara contra build.ts"
+    ],
+    "que_rompe": "La tarjeta de preferencias de perfil/page.tsx:31,194-195 si se borra sin que build.ts exponga el gate."
+   },
+   {
+    "archivo": "src/lib/plan/plan-presentation.ts",
+    "senales": [
+     "precios y cupos copiados a mano de prisma/seeds/sync-plans.ts (comentario :9-10)",
+     "fallback.ts repite los valores de STARTER"
+    ],
+    "que_rompe": "Vitrina de planes y medidor si se elimina. Propuesta: leer precio y cupo del Plan y dejar aquí solo el copy."
+   },
+   {
+    "archivo": "src/lib/modules/check-activation.ts",
+    "senales": [
+     "duplica la noción 'módulo activo' con getActiveModuleSlugs (src/lib/premium-modules.ts:76-84)",
+     "slugs como string suelto sin tipo compartido con el catálogo"
+    ],
+    "que_rompe": "5 importadores (módulos y motor-resenas/_actions.ts). Consolidar en un helper tipado, no borrar."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Confirmar que el reporte ejecutivo semanal no se agenda en producción",
+    "entorno": "Netlify (producción) y consola de Neon en solo lectura",
+    "precondiciones": "Acceso al dashboard de Netlify y a Neon",
+    "pasos": [
+     "Netlify > Site > Functions: listar las Scheduled Functions activas.",
+     "Revisar si existe un cron externo (cron-job.org u otro) que llame a /api/cron/send-executive-reports o /api/cron/regenerate-briefs.",
+     "En Neon: SELECT status, count(*), max(\"createdAt\") FROM \"WeeklyReportLog\" GROUP BY status;",
+     "En Neon: SELECT max(\"createdAt\") FROM \"ExecutiveBriefSnapshot\";"
+    ],
+    "esperado": "Solo aparecen generate-insights-cron, send-weekly-reports-cron y cleanup-old-events-cron; no hay cron externo; WeeklyReportLog vacío o solo con envíos manuales.",
+    "senal_falla": "Hay un disparador y filas SENT todos los lunes: el hallazgo se refuta.",
+    "escribe_db_o_email": false,
+    "hallazgos": "El reporte ejecutivo semanal no tiene disparador en producción (Netlify)"
+   },
+   {
+    "titulo": "Email marketing inaccesible con el módulo contratado",
+    "entorno": "QA o dev con base de pruebas",
+    "precondiciones": "Org de prueba y usuario ORG_MEMBER; acceso admin",
+    "pasos": [
+     "SELECT slug, status FROM \"PremiumModule\" ORDER BY \"sortOrder\";",
+     "Como admin, activar Email Marketing Pro para la org de prueba.",
+     "Entrar como el cliente de esa org y mirar la sección Servicios del menú lateral.",
+     "Navegar a /dashboard/modules/email-marketing."
+    ],
+    "esperado": "La base tiene 'email-marketing-pro'; el menú no muestra 'Email marketing' y la URL redirige a /dashboard.",
+    "senal_falla": "El ítem aparece y la página abre (por ejemplo, porque en la base el slug es 'email-marketing').",
+    "escribe_db_o_email": true,
+    "hallazgos": "Email marketing queda inaccesible para quien lo contrata: el gate usa 'email-marketing' y el catálogo define 'email-marketing-pro'"
+   },
+   {
+    "titulo": "Server actions de email marketing sin gate de módulo",
+    "entorno": "dev local con BREVO_API_KEY vacía (para que no salga ningún mail)",
+    "precondiciones": "Dos usuarios de prueba: uno de una org con acceso al módulo y otro de una org sin el módulo",
+    "pasos": [
+     "Con el usuario que accede al módulo, abrir /dashboard/modules/email-marketing/campaigns/new, enviar el formulario con DevTools abierto y copiar como fetch el POST (incluye el header Next-Action).",
+     "Cerrar sesión y entrar con el usuario de la org SIN el módulo.",
+     "Pegar y ejecutar el fetch copiado en la consola de esa sesión.",
+     "SELECT id, \"organizationId\", status FROM \"EmailCampaign\" ORDER BY \"createdAt\" DESC LIMIT 1;"
+    ],
+    "esperado": "La action responde ok y aparece una EmailCampaign DRAFT para la org sin el módulo.",
+    "senal_falla": "La action rechaza o redirige: el hallazgo se refuta.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Las server actions de email marketing no verifican el módulo contratado ni validan con Zod"
+   },
+   {
+    "titulo": "Reporte manual con brief y métricas viejos",
+    "entorno": "QA con un email propio como ADMIN de la org de prueba",
+    "precondiciones": "Org PRO o BUSINESS con cachedExecutiveBriefAt posterior al 2026-07-02 pero de hace más de 7 días y último snapshot de hace más de 2 semanas (SELECT \"periodKey\", \"createdAt\" FROM \"ExecutiveBriefSnapshot\" WHERE \"organizationId\" = '<id>' ORDER BY \"createdAt\" DESC LIMIT 2;)",
+    "pasos": [
+     "Ir a /admin/clients/<id> y usar 'Enviar ahora' del reporte ejecutivo.",
+     "Abrir el mail recibido y comparar texto y números con el snapshot viejo."
+    ],
+    "esperado": "El encabezado dice la última semana pero el texto y los números son los del snapshot viejo.",
+    "senal_falla": "El envío se saltea con NO_DATA o los datos son de la última semana.",
+    "escribe_db_o_email": true,
+    "hallazgos": "El reporte semanal puede mandar un brief y métricas de semanas viejas con la etiqueta de la última semana"
+   },
+   {
+    "titulo": "Checklist de onboarding vacío en un alta nueva",
+    "entorno": "QA o dev",
+    "precondiciones": "Acceso admin",
+    "pasos": [
+     "Crear un cliente nuevo desde el admin (Nuevo cliente o alta con bot).",
+     "SELECT count(*) FROM \"OnboardingTask\" WHERE \"organizationId\" = '<nueva org>';",
+     "Entrar como ese cliente a /dashboard."
+    ],
+    "esperado": "0 tareas y no aparece la card 'Estamos configurando tu negocio'.",
+    "senal_falla": "Hay tareas sembradas y la card aparece.",
+    "escribe_db_o_email": true,
+    "hallazgos": "El checklist de onboarding nunca se siembra: seedOnboardingTasksForOrg solo lo llaman módulos muertos"
+   },
+   {
+    "titulo": "Email al cliente cuando develOP responde un ticket",
+    "entorno": "Producción o QA con un cliente de prueba con email propio",
+    "precondiciones": "Saber si RESEND_API_KEY está definida en Netlify y si el dominio develop-agency.com está verificado en Resend",
+    "pasos": [
+     "Como cliente de prueba, abrir un ticket de prioridad baja.",
+     "Como admin, responderlo desde /admin/tickets/<id>.",
+     "Revisar el inbox del cliente y los logs de la función."
+    ],
+    "esperado": "No llega mail (o llega desde un dominio distinto al de Brevo) y no queda registro del fallo.",
+    "senal_falla": "Llega el mail con el link correcto a /dashboard/soporte/<id>.",
+    "escribe_db_o_email": true,
+    "hallazgos": "La respuesta del admin a un ticket se avisa por Resend con éxito simulado y sin mirar el resultado"
+   },
+   {
+    "titulo": "Leads de otros tenants en Inicio",
+    "entorno": "QA o dev con dos orgs de prueba A y B",
+    "precondiciones": "Usuarios cliente en A y B",
+    "pasos": [
+     "Como cliente de A, anotar 'Leads' de la semana en Inicio (Tu cuenta).",
+     "Como cliente de B, pedir 'Avisame cuando esté' en un módulo próximamente (crea un ContactSubmission).",
+     "Esperar 30 min (cache de getWeekResults) o reiniciar, y volver a Inicio de A."
+    ],
+    "esperado": "El número de Leads de A sube en 1 sin que A haya recibido ningún lead.",
+    "senal_falla": "El número de A no cambia.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Los 'leads' de Inicio, el Health Score y el reporte semanal cuentan ContactSubmission de todos los tenants"
+   },
+   {
+    "titulo": "Credencial de bóveda guardada en claro",
+    "entorno": "QA o dev (usar un valor ficticio, nunca una credencial real)",
+    "precondiciones": "Acceso admin y a Neon",
+    "pasos": [
+     "Como admin, en un cliente de prueba > Bóveda, subir un acceso tipo ACCESS con descripción 'usuario-ficticio / clave-ficticia'.",
+     "SELECT left(description, 12) FROM \"ClientAsset\" ORDER BY \"createdAt\" DESC LIMIT 1;"
+    ],
+    "esperado": "El valor empieza con el texto ficticio, no con 'enc:v1:'.",
+    "senal_falla": "Empieza con 'enc:v1:'.",
+    "escribe_db_o_email": true,
+    "hallazgos": "La credenciales de la bóveda se guardan en texto plano en main; el cifrado de escritura quedó sin mergear"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "Netlify (config activa de prod) no agenda /api/cron/send-executive-reports ni /api/cron/regenerate-briefs, y ningún workflow de GitHub los llama",
+    "comando": "git grep -n -E \"send-executive-reports|regenerate-briefs\" origin/main -- logic-core-v3/netlify.toml logic-core-v3/netlify .github → vacío",
+    "control_positivo": "git grep -n \"send-weekly-reports-cron\" origin/main -- logic-core-v3/netlify.toml → :28; git grep -n \"cron:\" origin/main -- .github/workflows/db-backup.yml → :41"
+   },
+   {
+    "afirmacion": "Ninguna alta viva de cliente crea OnboardingTask",
+    "comando": "git grep -n -E \"onboardingTask|seedOnboardingTasksForOrg|OnboardingTask\" origin/main -- logic-core-v3/src/modules/chatbot/server/admin logic-core-v3/src/lib/onboarding/core.ts logic-core-v3/src/app → vacío",
+    "control_positivo": "git grep -n -c \"orgMember.create\" origin/main -- createClientOnly.ts createClientWithBot.ts lib/onboarding/core.ts → 1 en cada uno"
+   },
+   {
+    "afirmacion": "src/lib/actions/clients.ts y src/lib/actions/invitations.ts no tienen importadores",
+    "comando": "git grep -n -E \"lib/actions/(clients|invitations)['\\\"]|from './(clients|invitations)'\" origin/main -- logic-core-v3/src logic-core-v3/tests → vacío",
+    "control_positivo": "git grep -n -E \"lib/actions/upsell['\\\"]\" origin/main -- logic-core-v3/src → LockedView.tsx:27, seo/page.tsx:21, PremiumModuleCard.tsx:29"
+   },
+   {
+    "afirmacion": "Ningún write-path de main cifra credenciales de la bóveda",
+    "comando": "git grep -n -E \"encryptCredential|encryptForStorage|encrypt-for-storage\" origin/main -- logic-core-v3/src ':!logic-core-v3/src/lib/crypto' → vacío",
+    "control_positivo": "mismo patrón sobre origin/b0-isolation-motor-chatbot -- logic-core-v3/src → agency-actions.ts:14,132 y onboarding-actions.ts:10,136,148"
+   },
+   {
+    "afirmacion": "No hay tests de signUnsubscribeToken ni verifyUnsubscribeToken (token del reporte ejecutivo)",
+    "comando": "git grep -n -E \"signUnsubscribeToken|verifyUnsubscribeToken\" origin/main -- logic-core-v3/tests '**/*.invariant.ts' '**/*.test.ts' → vacío",
+    "control_positivo": "git grep -n -c signEmailContactOptOutToken origin/main -- logic-core-v3/tests '**/*.invariant.ts' → idor-tokens.invariant.ts:3, 20-idor-optout.spec.ts:4"
+   },
+   {
+    "afirmacion": "/api/reports/monthly (única puerta de MonthlyReport.tsx) no tiene consumidor en la UI",
+    "comando": "git grep -n -E \"reports/monthly\" origin/main -- logic-core-v3/src → solo client-monthly/route.ts:6 (comentario) y la propia ruta",
+    "control_positivo": "git grep -n \"api/reports/client-monthly\" origin/main -- logic-core-v3/src → DownloadMonthlyReportButton.tsx:21"
+   },
+   {
+    "afirmacion": "Ningún archivo del lote reporta a Sentry",
+    "comando": "git grep -n -E \"captureException|@sentry\" origin/main -- logic-core-v3/src/lib/tickets logic-core-v3/src/lib/reports logic-core-v3/src/lib/referrals logic-core-v3/src/lib/plan logic-core-v3/src/lib/recommendations logic-core-v3/src/lib/modules logic-core-v3/src/lib/upsell logic-core-v3/src/lib/onboarding logic-core-v3/src/lib/security/org-scope.ts → vacío",
+    "control_positivo": "git grep -n -l captureException origin/main -- logic-core-v3/src → app/error.tsx, app/global-error.tsx, setter/error.tsx, entre otros"
+   },
+   {
+    "afirmacion": "Las actions de tickets, upsell y referidos no aplican rate limit",
+    "comando": "git grep -n -i -E \"checkRateLimit|applyAuthRateLimit\" origin/main -- logic-core-v3/src/lib/tickets logic-core-v3/src/lib/actions/upsell.ts logic-core-v3/src/lib/actions/referrals.ts → vacío",
+    "control_positivo": "git grep -n checkRateLimit origin/main -- logic-core-v3/src/lib/actions/contact.ts → :9 y :24"
+   },
+   {
+    "afirmacion": "El slug 'email-marketing' no existe en el catálogo de módulos",
+    "comando": "git grep -n \"slug: 'email-marketing',\" origin/main -- logic-core-v3/src/lib/data/premium-modules.ts → vacío",
+    "control_positivo": "git grep -n \"slug: 'email-marketing-pro'\" origin/main -- logic-core-v3/src/lib/data/premium-modules.ts → :38"
+   },
+   {
+    "afirmacion": "Las server actions de email marketing no llaman isModuleActive",
+    "comando": "git grep -n isModuleActive origin/main -- \"logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/_actions.ts\" → vacío",
+    "control_positivo": "git grep -n isModuleActive origin/main -- logic-core-v3/src/components/dashboard/modules/motor-resenas/_actions.ts → :5, :23, :58"
+   },
+   {
+    "afirmacion": "La rama cliente de replyToTicketAction no avisa a develOP (ni alerta, ni Notification, ni email)",
+    "comando": "git grep -n -E \"sendAgencyAlert\\(|notification\\.create|sendEmail\\(\" origin/main -- logic-core-v3/src/lib/tickets/actions.ts → solo :89 (createTicketAction, HIGH/URGENT) y :157 (rama admin)",
+    "control_positivo": "el mismo comando devuelve :89 y :157, así que el patrón matchea"
+   },
+   {
+    "afirmacion": "supportTier no se usa en tickets ni mensajes",
+    "comando": "git grep -n supportTier origin/main -- logic-core-v3/src ':!logic-core-v3/src/lib/plan' → solo admin/clients/[clientId]/_components/PlanAssignmentCard.tsx:120",
+    "control_positivo": "git grep -n supportTier origin/main -- logic-core-v3/src/lib/plan → fallback.ts:38,61; get-plan-for-org.ts:91,115"
+   },
+   {
+    "afirmacion": "No existe el modelo HealthScoreSnapshot",
+    "comando": "git grep -n \"model HealthScoreSnapshot\" origin/main -- logic-core-v3/prisma/schema.prisma → vacío",
+    "control_positivo": "git grep -n \"model ExecutiveBriefSnapshot\" origin/main -- logic-core-v3/prisma/schema.prisma → :459"
+   },
+   {
+    "afirmacion": "No existe calculatePotentialValue",
+    "comando": "git grep -n calculatePotentialValue origin/main -- logic-core-v3/src → vacío",
+    "control_positivo": "git grep -n -c averageTicketUsd origin/main -- logic-core-v3/src → business-profile.actions.ts, dashboard/page.tsx, BusinessHero.tsx, MoneyEstimate.tsx"
+   },
+   {
+    "afirmacion": "No existe la regla 'fuera de horario' en recomendaciones",
+    "comando": "git grep -n -i -E \"fuera de horario|outOfHours|afterHours|EXTRACT\\(HOUR\" origin/main -- logic-core-v3/src/lib/recommendations → vacío",
+    "control_positivo": "git grep -n -c connect-gbp origin/main -- logic-core-v3/src/lib/recommendations/rules.ts → 2"
+   },
+   {
+    "afirmacion": "components/dashboard/TicketStatusSelector.tsx no tiene importadores",
+    "comando": "git grep -n TicketStatusSelector origin/main -- logic-core-v3/src → solo su definición (TicketStatusSelector.tsx:16)",
+    "control_positivo": "git grep -n \"ResolveTicketButton'\" origin/main -- logic-core-v3/src → soporte/[ticketId]/page.tsx:18"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Server actions de módulos premium sin isModuleActive: el gate comercial vive solo en layout o página",
+    "como_buscarlo": "Listar los archivos 'use server' bajo src/app/(protected)/dashboard/modules y src/components/dashboard/modules y contar isModuleActive en cada uno (git grep -c); revisar también rutas de API de módulos",
+    "donde_aparecio": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17-27 (0 gates); control: motor-resenas/_actions.ts:23,58"
+   },
+   {
+    "patron": "Slugs de módulo como string literal desacoplados del catálogo",
+    "como_buscarlo": "git grep -n -E \"isModuleActive\\([^,]+, '[a-z-]+'\\)|slug: '[a-z-]+'\" origin/main -- logic-core-v3/src y comparar con los slugs de src/lib/data/premium-modules.ts",
+    "donde_aparecio": "email-marketing/layout.tsx:20 y SidebarNav.tsx:78 ('email-marketing') vs premium-modules.ts:38 ('email-marketing-pro'); services/page.tsx:326"
+   },
+   {
+    "patron": "Conteos de ContactSubmission (tabla global sin organizationId) en superficies del cliente",
+    "como_buscarlo": "git grep -n contactSubmission origin/main -- logic-core-v3/src (el .count puede estar en la línea siguiente: buscar el nombre del modelo, no 'contactSubmission.count')",
+    "donde_aparecio": "src/lib/dashboard/week-results.ts:43-52; src/lib/health-score.ts:283-292, :311-345"
+   },
+   {
+    "patron": "Snapshots o caches usados como 'esta semana' sin verificar periodKey o antigüedad",
+    "como_buscarlo": "git grep -n -E \"getBriefHistory\\(|cachedExecutiveBrief\" origin/main -- logic-core-v3/src y revisar si comparan periodKey o TTL",
+    "donde_aparecio": "src/lib/reports/executive-weekly/build.ts:113-141"
+   },
+   {
+    "patron": "Copys de UI que prometen notificaciones, SLA o fechas sin código que las cumpla",
+    "como_buscarlo": "git grep -n -i -E \"notificad|< ?4 ?h|24 ?hs|Próximamente|\\[FALTA\" origin/main -- logic-core-v3/src/components logic-core-v3/src/app",
+    "donde_aparecio": "TicketReplyForm.tsx:32; soporte/page.tsx:87,90; MessageThread.tsx:114; PremiumModuleCard.tsx:300; LockedView.tsx:151"
+   },
+   {
+    "patron": "Invariantes que dicen comparar contra otro módulo pero no lo importan (verde por arnés)",
+    "como_buscarlo": "git grep -n -i -E \"coincid|mismo criterio|EXACTAMENTE\" origin/main -- '**/*.invariant.ts' y verificar que el archivo citado esté entre los imports",
+    "donde_aparecio": "src/lib/reports/executive-weekly/report-eligible-plan.invariant.ts:7-14"
+   },
+   {
+    "patron": "Cache en memoria a nivel de módulo (Map) en serverless con invalidación local",
+    "como_buscarlo": "git grep -n -E \"new Map<.*(Cache|Entry)\" origin/main -- logic-core-v3/src/lib logic-core-v3/src/modules",
+    "donde_aparecio": "src/lib/plan/get-plan-for-org.ts:21,131-133"
+   },
+   {
+    "patron": "Definiciones divergentes de 'lead' (con DQ, sin DQ con nulls, sin DQ excluyendo nulls)",
+    "como_buscarlo": "git grep -n -E \"chatbotLead\\.(count|groupBy|findMany)|scope\\.chatbotLead\" origin/main -- logic-core-v3/src y revisar si usan excludeDqWhere, notDq o nada",
+    "donde_aparecio": "get-client-monthly-report-data.ts:56-65; getMonthlyAnalysisForOrg.ts:83-90; home-metrics.ts:86-99"
+   },
+   {
+    "patron": "Hijos creados sin tocar el updatedAt del padre que se usa como señal de actividad u orden",
+    "como_buscarlo": "git grep -n -E \"(ticketMessage|message|chatMessage)\\.create\\(\" origin/main -- logic-core-v3/src y cruzar con orderBy updatedAt o lastActivity",
+    "donde_aparecio": "src/lib/tickets/actions.ts:140-147 vs soporte/page.tsx:23 y alerts.ts:97"
+   },
+   {
+    "patron": "Emails por sendEmail (Resend, éxito simulado sin key) cuyo resultado no se mira",
+    "como_buscarlo": "git grep -n \"sendEmail(\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "src/lib/tickets/actions.ts:157-166; src/actions/agency-actions.ts (ActionRequiredEmail); src/lib/actions/settings.ts"
+   },
+   {
+    "patron": "Lectores repetidos por request sin React cache() (plan, consumo, sesión de chatbot)",
+    "como_buscarlo": "git grep -n -E \"getOrgUsageSnapshot\\(|getPlanForOrg\\(\" origin/main -- \"logic-core-v3/src/app/(protected)/dashboard\" y contar llamadas por página",
+    "donde_aparecio": "dashboard/plan/page.tsx:37,42; dashboard/page.tsx:116,164 + get-recommendations-for-org.ts:34"
+   },
+   {
+    "patron": "Mutaciones del portal con dos resolvers de org (resolveOrgId en la página, session.user.organizationId en la action)",
+    "como_buscarlo": "git grep -n \"session?.user?.organizationId\" origin/main -- logic-core-v3/src/lib/actions \"logic-core-v3/src/app/(protected)/dashboard\"",
+    "donde_aparecio": "src/lib/actions/referrals.ts:14 vs referidos/page.tsx:27; src/lib/actions/upsell.ts:16"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:17",
+    "id_previo": "CLEAN-H1",
+    "estado": "abierto",
+    "evidencia": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:15 sigue con WHATSAPP_URL 'https://wa.me/5493815555555...' (usado en :49 y :156); :148 '$150 USD' y :152 'Incluye 1.000 conversaciones', contra el catálogo real de src/lib/plan/plan-presentation.ts:149-150 (Starter USD 49, 500) y prisma/seeds/sync-plans.ts:68-111 (Business USD 150, 5.000). Se muestra a todo cliente sin chatbot activo (src/app/(protected)/dashboard/chatbot/page.tsx:20-21)."
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "El reporte ejecutivo semanal no tiene disparador en producción (Netlify)",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "Se sostiene. /api/cron/send-executive-reports solo está agendado en vercel.json:11-14. Prod corre en Netlify: docs/operations/00-entornos.md:12, netlify.toml:1-10 con @netlify/plugin-nextjs, y docs/bitacora-roadmap.md:13527-13531 dice 'netlify.toml es la config activa'. netlify.toml:25-32 y netlify/functions/ agendan solo tres funciones: generate-insights-cron, send-weekly-reports-cron (que llama a /api/cron/send-weekly-reports, netlify/functions/send-weekly-reports-cron.ts:81) y cleanup-old-events-cron. git grep 'send-executive-reports' en origin/main encuentra solo vercel.json:12, docs y un comentario en src/lib/cron/cron-secret.ts:18. Control positivo: send-weekly-reports sí aparece en netlify/functions. Ningún workflow de .github lo dispara (ci.yml y db-backup.yml no tienen curl a /api/cron). sendExecutiveWeeklyReports solo la invoca la ruta del cron (route.ts:26); fuera de eso hay un envío manual por org. Por rúbrica, un cron sin disparador es ALTA. PROBABLE porque el eslabón de runtime (dashboard de Netlify o un cron externo) queda fuera del repo. Hay que corregir el impacto en dos puntos. (a) Lo que no sale es el reporte ejecutivo Pro/Business ('Tu semana en X' con Health, Leads y top hot leads; promesa de rules.ts:141; frecuencia configurable en cuenta/perfil/page.tsx:89 y executive-report-prefs.actions.ts:34). El reporte semanal del chatbot sí tiene disparador. (b) El brief de Inicio no depende de regenerate-briefs: getExecutiveBrief lo genera al visitar Inicio si el cache falta o venció (src/lib/ai/executive-brief.ts:77-118), y send.ts usa el cache o regenera como fallback (send.ts:69-70). regenerate-briefs solo precalienta el cache (regenerate-briefs/route.ts:40).",
+    "evidencia_contra": [
+     "netlify/functions/send-weekly-reports-cron.ts:81 dispara el reporte semanal del chatbot (src/modules/chatbot/server/reports/sendWeeklyReports.ts:16-33, a toda org con bot activo). Su contenido 'Leads capturados'/'Consultas frecuentes' (src/lib/email/templates/weekly-report.ts:35,58) coincide con el hint del beneficio 'Reportes semanales claros' (plan-presentation.ts:99-100), así que ese beneficio no queda en cero.",
+     "src/lib/ai/executive-brief.ts:77-118 regenera el brief on-demand: que no corra regenerate-briefs no impide que aparezca el brief en Inicio.",
+     "Un disparador externo (docs/operations/cron-jobs.md:27 sugiere cron-job.org para otro cron) o una configuración en el dashboard de Netlify no se puede descartar leyendo el repo.",
+     "Existe envío manual por org desde el admin: src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx:37."
+    ]
+   },
+   {
+    "titulo": "Los 'leads' de Inicio, el Health Score y el reporte semanal cuentan ContactSubmission de todos los tenants",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Se sostiene. src/lib/dashboard/week-results.ts:43-52 cuenta prisma.contactSubmission sin organizationId, y el modelo no tiene esa columna (prisma/schema.prisma:688-708). src/lib/actions/upsell.ts:88-97 crea un ContactSubmission por cada solicitud de upsell de cualquier org. health-score.ts:284-290 (conversión) y :318-333 (leads) cuentan igual de forma global, y el comentario de :314-315 lo admite. Esos números se usan en varios lugares: se muestran en Inicio (dashboard/page.tsx:90-100), entran a la dimensión 'Salud Comercial' (health-score.ts:185-195, peso 0.35), al prompt del brief IA (executive-brief.ts:278-296), al snapshot persistido (executive-brief.ts:341-344) y al reporte ejecutivo (build.ts:133,141,175). Viola la regla no negociable de filtrar por organizationId y pone datos falsos en Inicio, el brief y el email, lo que bloquea L3 de Inicio (criterios tenant y 'sin datos de mentira'). Se mantiene ALTA por rúbrica, con los atenuantes de abajo.",
+    "evidencia_contra": [
+     "Solo filtra volumen agregado: no expone filas ni identidades de otros tenants (el propio hallazgo lo reconoce).",
+     "La card 'Leads' lleva el caption 'En calibración' como hedge deliberado (WeekResultsGrid.tsx:53-54) y la deuda está documentada (WeekResultsGrid.tsx:44-47, health-score.ts:314-315).",
+     "El bloque principal 'Resultados del negocio' (dashboard/page.tsx:110-137, getHomeBusinessMetrics) no lee ContactSubmission. El número global queda en la sección secundaria 'Tu cuenta'.",
+     "Hoy el reporte ejecutivo no sale solo (hallazgo 1) y el brief IA no se genera con la credencial de Vertex vencida, así que la exposición actual se limita a la card y al Health Score."
+    ]
+   },
+   {
+    "titulo": "Email marketing queda inaccesible para quien lo contrata: el gate usa 'email-marketing' y el catálogo define 'email-marketing-pro'",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Se sostiene. layout.tsx:20-21 llama a isModuleActive(org, 'email-marketing'), que busca el slug exacto con status ACTIVE (check-activation.ts:7-13), y si falla redirige a /dashboard. El catálogo, fuente de verdad, define 'email-marketing-pro' (src/lib/data/premium-modules.ts:38) y la invariante usa el mismo slug (modules.invariant.ts:45). SidebarNav.tsx:78 y :101-103 filtran por 'email-marketing' contra los slugs reales de la DB (dashboard/layout.tsx:115). El sync borra los slugs que no están en el catálogo si no tienen activaciones ACTIVE (sync-premium-modules.ts:68,102-116). Los otros tres módulos usan el slug correcto (agenda-inteligente/page.tsx:320, motor-resenas/page.tsx:110, tienda-conectada/page.tsx:295). El desajuste existe desde que se creó el layout (c19a795e, 2026-05-04); el catálogo ya usaba 'email-marketing-pro' desde 3464fc82, que es ancestro de ese commit. Ninguna página hija repite el gate, así que el redirect alcanza a todo el árbol. Un módulo pago queda inalcanzable, lo que rompe el flujo del cliente que lo compra: ALTA.",
+    "evidencia_contra": [
+     "prisma/backups/premium-module-pre-push.json:68 conserva una fila legacy 'email-marketing' ACTIVE (2026-04-27). Si la DB de prod mantiene esa fila con una activación ACTIVE (en ese caso el sync aborta, sync-premium-modules.ts:89-97), una org activada contra ella sí pasaría el gate. Es un estado de datos que no se puede verificar leyendo.",
+     "No hay UI ni action viva que active módulos: activateModule (src/lib/premium-modules.ts:103) no tiene llamadores y ToggleModulePremiumSchema (admin/clients/_actions/client.schemas.ts:15) no se usa. La activación es manual en la DB, y el operador podría detectar el problema al hacerla."
+    ]
+   },
+   {
+    "titulo": "Las server actions de email marketing no verifican el módulo contratado ni validan con Zod",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Los hechos se confirman: _actions.ts:17-28 solo resuelve la org por sesión (resolveOrgId, src/lib/preview.ts:6-20: ORG_MEMBER o SUPER_ADMIN impersonando), sin isModuleActive y sin Zod (casts 'as string' en :73 y :131-135). Envía por la cuenta Brevo de develOP con sender libre (:188-205; brevo.ts:76). El patrón correcto existe en motor-resenas/_actions.ts:23,58, y la omisión viola CLAUDE.md. Pero el abuso descrito no se puede realizar hoy, por tres razones. (1) Exige sesión ORG_MEMBER y los IDs de las actions. Next 16.2.9 deriva esos IDs con una sal por build (serverReferenceHashSalt = encryptionKey, node_modules/next/dist/build/webpack-config.js:417,443; clave cacheada con vencimiento, encryption-utils-server.js loadOrGenerateKey). Además, solo viajan en los chunks de las páginas de email-marketing, que redirigen a todas las orgs por el gate roto (hallazgo 3), así que nadie, ni un ex-cliente del módulo, pudo obtenerlos desde la app. (2) Las actions están acotadas al tenant de la sesión (_actions.ts:177-179). (3) Brevo exige remitente verificado en la cuenta. Queda como validación y chequeo de módulo faltantes sin explotación directa: MEDIA. Gana peso cuando se arregle el hallazgo 3 (un ex-dueño podría reusar los IDs dentro de la ventana de la clave).",
+    "evidencia_contra": [
+     "Los IDs no se pueden obtener hoy: layout.tsx:20-21 redirige a toda org antes de renderizar las páginas cliente que importan las actions (ImportCSVButton.tsx:5, campaigns/new/page.tsx:6, campaigns/[id]/send/page.tsx:7).",
+     "Los IDs salen de una sal por build/clave con vencimiento en Next 16.2.9 (webpack-config.js:417,443). El 'cliente que tuvo el módulo y lo dejó' no puede existir: el gate está roto desde c19a795e.",
+     "No hay cruce de tenant: la org sale de la sesión (_actions.ts:17-28) y sendCampaignAction filtra por organizationId (_actions.ts:177-179).",
+     "Brevo rechaza remitentes que no estén validados en la cuenta, así que un fromEmail arbitrario no alcanza. Es un eslabón del proveedor, no verificable por lectura."
+    ]
+   },
+   {
+    "titulo": "La credenciales de la bóveda se guardan en texto plano en main; el cifrado de escritura quedó sin mergear",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Se sostiene. En origin/main ningún write-path cifra: git grep 'encryptCredential' fuera de src/lib/crypto da 0 (control positivo: 2 en credential-cipher.ts). El camino vivo es el del admin: VaultTab.tsx:26 monta VaultManager, que en VaultManager.tsx:25 llama a createClientAssetAction (agency-actions.ts:103-111). Esa action guarda la description tal cual, y el textarea invita a escribir 'Contraseña o instrucciones...' (VaultManager.tsx:85). El lector ya convive con texto plano (resolve-credential.ts:24). El fix 9fc616c4 (PD-1.2) existe solo en origin/b0-isolation-motor-chatbot (8 commits adelante y 211 atrás de main). La exposición requiere acceso a la DB o a un dump, una precondición fuerte: ALTA por rúbrica. Corrección: el path de onboarding citado (onboarding-actions.ts:111-131, etiqueta 'ENCRIPTADO_EN_TEXTO') es código muerto. completeOnboardingAction de src/actions/onboarding-actions.ts no tiene importadores desde d1287c27 (2026-03-26); de ese archivo solo se importa saveOnboardingProfile (OnboardingWizard.tsx:6). El wizard vivo usa src/app/bienvenida/_actions/complete-onboarding.ts (BienvenidaWizard.tsx:9), que no guarda credenciales. Solo filas legacy podrían llevar esa etiqueta; las credenciales nuevas entran por el admin.",
+    "evidencia_contra": [
+     "onboarding-actions.ts:115 es código muerto: no tiene importadores y el wizard vivo (src/app/bienvenida/_actions/complete-onboarding.ts:33-43) no escribe ClientAsset, así que no genera filas nuevas con 'ENCRIPTADO_EN_TEXTO'.",
+     "El único escritor vivo es SUPER_ADMIN (agency-actions.ts:98-101). Para leer las credenciales en claro hace falta acceso directo a la DB o a un dump.",
+     "Los backups a GitHub van cifrados con GPG (.github/workflows/db-backup.yml), como reconoce el hallazgo."
+    ]
+   },
+   {
+    "titulo": "La landing de upsell del chatbot sigue con precio falso y WhatsApp placeholder (CLEAN-H1 abierto)",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Los hechos se confirman. ChatbotUpsellLanding.tsx:15 hardcodea wa.me/5493815555555, un número de ejemplo: es el mismo placeholder del input de teléfono del onboarding (docs/bitacora-beta.md:1661) y el fallback del seed (src/modules/chatbot/prisma/seed.ts:231); el número real está en src/lib/whatsapp.ts:21,42. Los dos CTA de conversión ('Quiero activarlo', :48-56, y 'Hablar con un asesor', :155-162) llevan a ese número. 'Desde $150 USD/mes · 1.000 conversaciones' (:147-152) contradice el catálogo (prisma/seeds/sync-plans.ts:66-114: 49/500, 90/3000, 150/5000; plan-presentation.ts:149,165,181). La landing se muestra a toda org sin bot activo (dashboard/chatbot/page.tsx:18-25), y 'Mi Chatbot' está fijo en el menú (SidebarNav.tsx:52). Se baja a MEDIA porque es un defecto del embudo de venta de develOP, no de un flujo operativo ni de los datos del cliente. Hay workaround en el mismo sidebar y no hay impacto de seguridad.",
+    "evidencia_contra": [
+     "No es el 'único CTA': 'Ver demo en vivo' lleva a https://develop.com.ar (ChatbotUpsellLanding.tsx:57-64), el dominio real (src/app/layout.tsx:16, metadataBase).",
+     "Hay workaround en el mismo portal: Mensajes y Soporte (SidebarNav.tsx:58-59) para pedir el chatbot, y la activación no es self-service de todos modos.",
+     "Solo la ve una org sin bot activo (chatbot/page.tsx:20-25). Un cliente con plan y bot activo ve ChatbotOverview.",
+     "El precio mostrado es mayor que el real (desde 49 USD): hace perder ventas pero no induce a pagar de más."
+    ]
+   }
+  ]
+ }
+}

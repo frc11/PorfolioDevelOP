@@ -650,6 +650,573 @@
    "afirmacion": "sendMotorMessage no tiene llamadores (la salida del motor está dormida)",
    "comando": "git grep -n \"sendMotorMessage\" origin/main -- logic-core-v3/src",
    "control_positivo": "Devuelve solo la definición src/modules/motor/services/sendMessage.ts:204"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "Las actions de email marketing no verifican la contratacion del modulo",
+   "comando": "git grep -n isModuleActive origin/main -- 'src/app/(protected)/dashboard/modules/email-marketing/_actions.ts'",
+   "control_positivo": "git grep -n isModuleActive origin/main -- src/components/dashboard/modules/motor-resenas/_actions.ts -> :23 y :58"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "Nada actualiza las metricas de campanas (getCampaignStats sin llamadores, openedCount sin escritores)",
+   "comando": "git grep -n 'getCampaignStats\\|openedCount' origin/main -- src",
+   "control_positivo": "La misma busqueda devuelve la definicion brevo.ts:143 y la lectura campaigns/page.tsx:110"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "Nadie setea el header x-pathname",
+   "comando": "git grep -n x-pathname origin/main -- src",
+   "control_positivo": "Devuelve los dos lectores: dashboard/layout.tsx:124 y email-marketing/layout.tsx:24"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "encryptCredential no tiene llamadores en origin/main",
+   "comando": "git grep -n encryptCredential origin/main -- src | grep -v __tests__",
+   "control_positivo": "git grep -n resolveCredentialDisplay origin/main -- src -> boveda/page.tsx:131 y VaultTab.tsx:41 (el lado lectura si esta cableado)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "Ningun codigo de la app genera Invoice",
+   "comando": "git grep -nE 'invoice\\.(create|createMany|upsert|update)' origin/main -- src prisma scripts",
+   "control_positivo": "Solo prisma/seed.ts:595 y :618; git grep -n 'invoice.findMany' origin/main -- src -> facturacion/page.tsx:70"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "El parametro edit de 'Editar' campana no lo lee nadie",
+   "comando": "git grep -n edit origin/main -- 'src/app/(protected)/dashboard/modules/email-marketing'",
+   "control_positivo": "La busqueda solo encuentra el link que lo genera (campaigns/page.tsx:131)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "No hay rate limit en las actions del portal ni en las de IA del lote",
+   "comando": "git grep -n checkRateLimit origin/main -- 'src/app/(protected)/dashboard' src/actions src/components/dashboard src/lib/ai",
+   "control_positivo": "git grep -c checkRateLimit origin/main -- src/lib/actions/contact.ts -> 2"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "onboarding-actions.ts no tiene importadores vivos",
+   "comando": "git grep -n onboarding-actions origin/main -- src ; git grep -n components/onboarding origin/main -- src",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- src/components/onboarding -> OnboardingWizard.tsx existe e importa el modulo (:6)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "No existe accion para desconectar Tiendanube",
+   "comando": "git grep -niE 'disconnect|desconect' origin/main -- src | grep -i tienda ; git grep -n 'tiendanubeStoreId: null' origin/main -- src",
+   "control_positivo": "git grep -n 'tiendanubeStoreId:' origin/main -- src -> callback/route.ts:66"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "No existe el modelo ProjectMilestone",
+   "comando": "git grep -n ProjectMilestone origin/main -- prisma/schema.prisma",
+   "control_positivo": "git grep -n CurrentMilestone origin/main -- src -> CurrentMilestone.tsx:6, :13"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "No existe el banner de plan pendiente de asignacion",
+   "comando": "git grep -niE 'pendiente de asignaci|plan pendiente' origin/main -- src",
+   "control_positivo": "git grep -n isFallback origin/main -- src -> PlansShowcase.tsx:91, UsageMeter.tsx:129"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "La UI no usa las actions de conexion GBP",
+   "comando": "git grep -n \"actions/gbp-connection'\" origin/main -- src",
+   "control_positivo": "src/lib/actions/gbp-connection.ts:17 listAvailableLocations y :36 setActiveLocation existen"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "Mi plan no tiene error.tsx propio",
+   "comando": "git ls-tree --name-only origin/main -- 'src/app/(protected)/dashboard/plan/'",
+   "control_positivo": "git ls-tree --name-only origin/main -- 'src/app/(protected)/dashboard/cuenta/' -> incluye error.tsx"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "El Modal de ui no cierra con Escape",
+   "comando": "git grep -nE 'Escape|keydown|onKeyDown' origin/main -- src/components/ui/Modal.tsx",
+   "control_positivo": "git grep -n keydown origin/main -- src/components/dashboard/NotificationCenter.tsx -> :92, :97"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "Los formateos de fecha del lote no fijan zona horaria y el deploy no define TZ",
+   "comando": "git grep -n timeZone origin/main -- 'src/app/(protected)/dashboard/page.tsx' 'src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx' 'src/app/(protected)/dashboard/cuenta' 'src/app/(protected)/dashboard/referidos/page.tsx' 'src/app/(protected)/dashboard/project/page.tsx' ; git grep -n TZ origin/main -- vercel.json netlify.toml",
+   "control_positivo": "git grep -n timeZone origin/main -- src/app/api/dashboard/chatbot/leads/export/route.ts -> :70; package.json:109 usa TZ=UTC"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "Ninguna vista de admin lee Notification: solo el cliente las lee, por organizationId",
+   "comando": "git grep -n 'notification\\.findMany\\|notification\\.count' origin/main -- src",
+   "control_positivo": "Devuelve dashboard/layout.tsx:101 y src/lib/actions/notifications.ts:82, ambos por organizationId"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "afirmacion": "ContactSubmission no tiene organizationId",
+   "comando": "git show origin/main:./prisma/schema.prisma | sed -n '688,708p'",
+   "control_positivo": "El mismo archivo muestra organizationId en model Invoice (:682)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "Ningún flujo vivo escribe Organization.analyticsPropertyId",
+   "comando": "git grep -n \"analyticsPropertyId\" origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma/seed.ts logic-core-v3/prisma/seed-agency-os.ts → escrituras solo en src/app/bienvenida/_actions/complete-onboarding.ts:38 (inalcanzable), src/lib/actions/clients.ts:161-197 (sin importadores) y prisma/seed.ts:202, :217 (mock)",
+   "control_positivo": "El mismo grep devuelve las lecturas de trafico/page.tsx:54, :82, :88, :92, api/reports/monthly/route.ts:78 y health-score.ts:75"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "lib/actions/clients.ts y lib/actions/invitations.ts no tienen importadores",
+   "comando": "git grep -n -e \"lib/actions/clients\" -e \"lib/actions/invitations\" origin/main -- logic-core-v3/src logic-core-v3/tests → 0",
+   "control_positivo": "git grep -n -e \"lib/actions/upsell\" origin/main -- logic-core-v3/src → LockedView.tsx:27, seo/page.tsx:21, PremiumModuleCard.tsx:29. (Con el patrón '@/lib/...' Git Bash devolvió 0 también en el control: se buscó sin '@'.)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "Ninguna alta viva crea una org con onboardingCompleted=false",
+   "comando": "git grep -n -e \"organization\\.create(\" -e \"organization\\.upsert(\" -e \"organization\\.createMany(\" origin/main -- logic-core-v3/src → 7 sitios: core.ts:80 (true en :85), createClientOnly.ts:76 (true en :85), createClientWithBot.ts:126 (true en :135), clients.ts:124 e invitations.ts:86 (default false, sin importadores), modules/chatbot/evals/seed-eval-bots.ts:157 y modules/chatbot/prisma/seed.ts:260 (seeds)",
+   "control_positivo": "El mismo grep encuentra las 3 altas vivas; git grep -n \"onboardingCompleted: false\" → solo scripts/qa-corridas"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "Ninguna UI enlaza el inicio de OAuth de Google Business Profile",
+   "comando": "git grep -n \"google-business/start\" origin/main -- logic-core-v3/src → 0",
+   "control_positivo": "git grep -n \"tiendanube/start\" origin/main -- logic-core-v3/src → modules/tienda-conectada/_components/ConnectStoreCard.tsx:39"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "Ni /api/reports/monthly ni /api/dashboard/leads/recent tienen llamadores en src",
+   "comando": "git grep -n \"leads/recent\\|reports/monthly\" origin/main -- logic-core-v3 ':!logic-core-v3/docs' → solo comentario en client-monthly/route.ts:6 y tests/e2e (40:49-50, :60-61; 43:9)",
+   "control_positivo": "git grep -n \"api/reports\" origin/main -- logic-core-v3/src → DownloadMonthlyReportButton.tsx:21"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "encryptCredential no se llama fuera de tests",
+   "comando": "git grep -n \"encryptCredential\\|encryptForStorage\\|resolveCredential\\|secret-box\" origin/main -- logic-core-v3/src ':!logic-core-v3/src/lib/crypto/__tests__' → encryptCredential solo en credential-cipher.ts:73 y en un comentario (:111)",
+   "control_positivo": "El mismo grep encuentra resolveCredentialDisplay en dashboard/cuenta/boveda/page.tsx:131 y admin VaultTab.tsx:41"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "No hay rate limit en createTicketAction, requestUpsellAction, la ruta del PDF ni en /bienvenida",
+   "comando": "git grep -n -l -e \"rateLimit\\|checkRateLimit\\|limiter\" origin/main -- logic-core-v3/src/lib/tickets logic-core-v3/src/lib/actions/upsell.ts logic-core-v3/src/app/api/reports logic-core-v3/src/app/bienvenida → 0",
+   "control_positivo": "El mismo patrón sobre logic-core-v3/src/lib/security → auth-rate-limit.ts"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "El ticket no tiene tiempo real ni polling",
+   "comando": "git grep -n -e EventSource -e setInterval -e refreshInterval -e useSWR -e WebSocket origin/main -- \"logic-core-v3/src/app/(protected)/dashboard/soporte\" logic-core-v3/src/components/dashboard/TicketReplyForm.tsx logic-core-v3/src/components/dashboard/ClientChatThread.tsx logic-core-v3/src/components/dashboard/SoporteBoard.tsx logic-core-v3/src/components/dashboard/ResolveTicketButton.tsx logic-core-v3/src/components/dashboard/ClientChatComposer.tsx → 0",
+   "control_positivo": "git grep -n -e setInterval origin/main -- logic-core-v3/src/modules/chatbot/components logic-core-v3/src/components/dashboard → ClientLeadsTable.tsx:146, ImpersonationTimer.tsx:35"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "No hay aviso 'Generado por IA' en Resultados",
+   "comando": "git grep -n -i \"generado por ia\\|generado con ia\\|AiBadge\\|AIBadge\\|ai-disclaimer\" origin/main -- logic-core-v3/src → 0",
+   "control_positivo": "git grep -n -i \"con IA\" origin/main -- logic-core-v3/src → motor-resenas/_components/ReviewItem.tsx:171 y motor-resenas/page.tsx:139"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "Nadie lee ClientBrandProfile.targetAudience",
+   "comando": "git grep -n \"targetAudience\" origin/main -- logic-core-v3/src → solo escrituras: onboarding-actions.ts:31, :90, :97, :104 y complete-onboarding.ts:50, :54",
+   "control_positivo": "El grep encuentra esas escrituras (la técnica matchea el campo)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "upsertBusinessMetrics no tiene importadores",
+   "comando": "git grep -n \"metrics-actions\" origin/main -- logic-core-v3/src → 0",
+   "control_positivo": "git grep -n \"upsertBusinessMetrics\" origin/main -- logic-core-v3/src → src/actions/metrics-actions.ts:9"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "No hay huso horario configurado para el runtime",
+   "comando": "git grep -n -e \"TZ=\" -e \"\\\"TZ\\\"\" -e \"process.env.TZ\" origin/main -- logic-core-v3/netlify.toml logic-core-v3/vercel.json logic-core-v3/next.config.ts logic-core-v3/.env.example logic-core-v3/src → solo package.json:109 (cross-env TZ=UTC de un invariante del setter) y su archivo de invariante",
+   "control_positivo": "git grep -n \"TZ_AR\\s*=\" origin/main -- logic-core-v3/src → lib/tz-ar.ts:9"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "afirmacion": "Ninguna feature flag cubre el brief IA del home",
+   "comando": "git grep -n -i \"FEATURE_FLAG\\|featureFlag\\|isFeatureEnabled\\|flags\\.\" origin/main -- logic-core-v3/src → solo softFlags de LeadOS (dossier-panels.tsx:186, chequeo-form.tsx:59, m14-chequeo.tsx:117)",
+   "control_positivo": "El mismo grep encuentra esos softFlags"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "No existe lector de Notification en el admin (las notificaciones con userId de SUPER_ADMIN solo las ve el cliente)",
+   "comando": "git grep -n -i -E \"\\.notification\\b|notifications?:\" origin/main -- \"src/app/(protected)/admin\" src/components/admin src/lib/isolation  → vacio; y git grep -n -E \"notification\\.(findMany|count|updateMany|update)\\(\" origin/main -- src → solo dashboard-actions.ts:207, dashboard/layout.tsx:101, notifications.ts:33/:55/:82",
+   "control_positivo": "git grep -n -E \"\\.notification\\.\" origin/main -- \"src/app/(protected)/dashboard/layout.tsx\" → layout.tsx:101"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "Ninguna server action invocada por el lote aplica rate limit",
+   "comando": "git grep -n -i -E \"rateLimit|rate-limit|checkRateLimit|limiter\" origin/main -- src/lib/actions/profile.ts src/lib/actions/upsell.ts src/actions/dashboard-actions.ts src/lib/actions/notifications.ts src/lib/actions/announcements.ts src/lib/tickets/actions.ts src/lib/actions/messages.ts src/lib/actions/referrals.ts \"src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts\" → vacio",
+   "control_positivo": "git grep -l -i -E \"checkRateLimit|rateLimit\\(\" origin/main -- src → login/actions.ts, forgot-password/actions.ts, reset-password/actions.ts, lib/actions/contact.ts, api/chatbot/[slug]/chat/route.ts"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "Ningun componente 'use client' importa valores runtime de @prisma/client",
+   "comando": "para cada archivo de git grep -l -E \"^['\\\"]use client['\\\"]\" origin/main -- src: git show origin/main:logic-core-v3/<f> | grep -E \"^\\} from '@prisma/client'|^import [^t].* from '@prisma/client'|^import \\{ [^t]\" → vacio",
+   "control_positivo": "src/components/dashboard/NotificationCenter.tsx:9 'import type { Notification } from @prisma/client' (detectado por el mismo recorrido); src/lib/tickets/schemas.ts:1 (server) importa valores"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "DownloadReportButtons (unico consumidor de ExecutiveReportTemplate) no tiene importadores",
+   "comando": "git grep -n -E \"DownloadReportButtons|DownloadReportButton\\b\" origin/main -- src ':!src/components/dashboard/DownloadReportButton.tsx' → vacio",
+   "control_positivo": "git grep -c \"DownloadReportButtons\" origin/main -- src/components/dashboard/DownloadReportButton.tsx → 1 (definicion :129)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "Mensajes no lee ?prefill ni existe la clave de contexto 'conexiones'",
+   "comando": "git grep -n \"get('prefill')\" origin/main -- src → vacio; git grep -n -E \"^\\s+'?conexiones'?:\" origin/main -- src/lib/data/message-context.ts → vacio",
+   "control_positivo": "git grep -n \"get('context')\" origin/main -- src → MessageThread.tsx:73; message-context.ts:2 clave 'activacion'"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "No hay medicion de SLA de primera respuesta para mensajes o tickets del cliente",
+   "comando": "git grep -n -i -E \"firstResponseAt|responseTimeMs|slaBreach|sla_\" origin/main -- src prisma/schema.prisma → solo src/lib/leados/pipeline.ts:51, :89 (LeadOS)",
+   "control_positivo": "git grep -n \"SLA horario laboral\" origin/main -- src → soporte/page.tsx:86"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "encrypt-for-storage.ts (cifrado en escritura de credenciales) no esta en origin/main",
+   "comando": "git ls-tree -r --name-only origin/main -- src/lib/crypto → credential-cipher.ts, resolve-credential.ts, secret-box.ts y test; sin encrypt-for-storage.ts",
+   "control_positivo": "git ls-tree -r --name-only origin/b0-isolation-motor-chatbot -- src/lib/crypto → incluye encrypt-for-storage.ts; git grep encryptCredentialForStorage en esa rama → agency-actions.ts:132, onboarding-actions.ts:136/:148"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "Las server actions de email marketing no chequean la activacion del modulo (el gate esta solo en el layout)",
+   "comando": "git grep -n -E \"isModuleActive|hasModuleActive|organizationModule\" origin/main -- \"src/app/(protected)/dashboard/modules/email-marketing\" → solo layout.tsx:6, :20",
+   "control_positivo": "layout.tsx:20 isModuleActive(organizationId, 'email-marketing')"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "El catalogo no tiene un modulo con slug 'email-marketing'",
+   "comando": "git grep -n \"slug: 'email-marketing'\" origin/main -- src/lib/data/premium-modules.ts → vacio",
+   "control_positivo": "git grep -n \"slug: 'email-marketing-pro'\" origin/main -- src/lib/data/premium-modules.ts → :38"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "OrgRole no se chequea en ninguna action del portal",
+   "comando": "git grep -n -E \"orgRole|OrgRole\\.|'VIEWER'|\\\"VIEWER\\\"\" origin/main -- src (sin invariantes/tests) → solo auth.ts, auth.config.ts, api/qa/login/route.ts, types/next-auth.d.ts",
+   "control_positivo": "auth.ts:46 const orgRole = membership?.role (se carga en la sesion)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "No hay triggerTransition en componentes del portal",
+   "comando": "git grep -n \"triggerTransition\" origin/main -- src/components/dashboard \"src/app/(protected)/dashboard\" src/modules/chatbot/components/dashboard → solo comentarios (PremiumModuleCard.tsx:212, LockedView.tsx:10)",
+   "control_positivo": "git grep -c \"triggerTransition\" origin/main -- src/components/layout → DynamicDock.tsx:4, Navbar.tsx:5"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "No hay zona horaria configurada para el runtime del server",
+   "comando": "git grep -n -E \"^TZ=|process\\.env\\.TZ\" origin/main -- next.config.ts netlify.toml vercel.json .env.example → vacio",
+   "control_positivo": "git grep -n \"timeZone: TZ_AR\" origin/main -- src/lib/dates-ar.ts → :48; package.json:109 usa TZ=UTC solo en un script de invariante"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "Los botones de Recursos de Autogestion de SoporteBoard no tienen onClick",
+   "comando": "git grep -n \"onClick\" origin/main -- src/components/dashboard/SoporteBoard.tsx → solo :180 y :231 (header de columna y 'Ver mas'); los botones estan en :331-348",
+   "control_positivo": "las dos coincidencias :180 y :231 prueban que el patron matchea en el archivo"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "Organization.notificationPrefs (projectUpdates, teamMessages, metricAlerts, developNews) no tiene lectores fuera de la pagina de perfil",
+   "comando": "git grep -n -E \"notificationPrefs|projectUpdates|metricAlerts|developNews|teamMessages\" origin/main -- src | grep -v -E \"profile.ts|ProfileForms.tsx\" → solo cuenta/perfil/page.tsx",
+   "control_positivo": "git grep -n \"emailNotificationsOnMessage\" origin/main -- src → src/lib/email/notify-message.ts:40 (esa preferencia si se consume)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "No existe token firmado para el deep link de lead desde el email (PLAN-103)",
+   "comando": "git grep -n -i -E \"signLeadToken|leadToken|lead-link-token\" origin/main -- src → vacio",
+   "control_positivo": "git grep -n \"dashboard/chatbot/leads\" origin/main -- src/modules/chatbot/server → sendTestNotification.ts:58 (enlaza la lista)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "afirmacion": "No existe la clave 'unlockedFeatures' en codigo vivo (PLAN-162)",
+   "comando": "git grep -n \"unlockedFeatures\" origin/main -- src prisma/schema.prisma prisma/seed.ts → solo comentario src/lib/premium-modules.ts:15",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- prisma/migrations | grep unlocked → 20260522214201_drop_user_unlocked_features/migration.sql"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "Ningún código de la app escribe Organization.dataConnections",
+   "comando": "git grep -n \"dataConnections\" origin/main -- . ':!docs' ':!*.md'  y  git grep -n \"connected: true\" origin/main -- src",
+   "control_positivo": "El mismo grep devuelve los lectores attention.ts:65, :110 y health-score.ts:76, :86, más schema.prisma:349, la migración 20260427194426 y el seed one-shot prisma/seeds/init-data-connections.ts:50"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "Ningún camino de la app activa un OrganizationModule (status ACTIVE)",
+   "comando": "git grep -n \"organizationModule\\.\\(update\\|upsert\\|create\\|updateMany\\|createMany\\)\" origin/main -- src prisma scripts  y  git grep -n -w activateModule origin/main -- .",
+   "control_positivo": "Aparecen upsell.ts:57 (crea INACTIVE) y premium-modules.ts:114, :151; activateModule solo en premium-modules.ts:103 y docs/bitacora-roadmap.md:2613"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "Ninguna pantalla del admin lee la tabla Notification",
+   "comando": "git grep -n \"notification\\.\\(findMany\\|count\\|updateMany\\)\" origin/main -- src",
+   "control_positivo": "Devuelve los 4 lectores del portal: dashboard/layout.tsx:101 y lib/actions/notifications.ts:33, :55, :82"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "OrgRole no se aplica en el portal del cliente",
+   "comando": "git grep -n \"orgRole\\|OrgRole\\.\\(VIEWER\\|ADMIN\\|MEMBER\\)\\|'VIEWER'\" origin/main -- \"src/app/(protected)/dashboard\" src/lib/actions src/components/dashboard src/app/bienvenida",
+   "control_positivo": "git grep -l orgRole origin/main -- src → src/auth.ts, src/auth.config.ts, src/app/api/qa/login/route.ts, src/types/next-auth.d.ts"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "Las server actions del lote no tienen rate limit",
+   "comando": "git grep -n -i \"ratelimit\\|rate-limit\\|rate_limit\\|limiter\" origin/main -- src/lib/actions/announcements.ts src/lib/actions/messages.ts src/lib/actions/notifications.ts src/lib/actions/referrals.ts src/lib/actions/upsell.ts src/components/dashboard/modules/motor-resenas/_actions.ts \"src/app/(protected)/dashboard/_actions/regenerate-brief.ts\" src/lib/ai/executive-brief.ts",
+   "control_positivo": "git grep -l -i rate-limit origin/main -- src/app → p. ej. src/app/api/chatbot/[slug]/chat/route.ts y src/app/api/admin/users/[userId]/resend-credentials/route.ts"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "El lote no reporta a Sentry y no hay captureConsoleIntegration",
+   "comando": "git grep -n \"Sentry\\|captureException\" origin/main -- <archivos del lote>  y  git grep -n captureConsoleIntegration origin/main -- . ':!docs'",
+   "control_positivo": "git grep -l captureException origin/main -- src/app src/components/ui → src/app/error.tsx, src/app/global-error.tsx, src/components/ui/SectionErrorBoundary.tsx"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "encryptCredential no tiene llamadores de producción en origin/main",
+   "comando": "git grep -n \"encryptCredential\" origin/main -- src | grep -v __tests__",
+   "control_positivo": "Solo credential-cipher.ts:73 (definición) y :111 (comentario); decryptCredential sí se usa en src/lib/crypto/resolve-credential.ts:19"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "Los crons regenerate-briefs y send-executive-reports no están agendados en Netlify",
+   "comando": "git grep -n \"regenerate-briefs\\|send-executive-reports\" origin/main -- netlify.toml netlify/",
+   "control_positivo": "git grep -n regenerate-briefs origin/main -- vercel.json → vercel.json:8; netlify.toml:25-32 agenda otras tres funciones"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "No existe el contexto 'bot-activation' en MESSAGE_CONTEXTS",
+   "comando": "git grep -n \"bot-activation\" origin/main -- src/lib/data/message-context.ts",
+   "control_positivo": "git grep -n \"'plan-upgrade-pro'\" origin/main -- src/lib/data/message-context.ts → :30"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "El brief IA no registra el uso de tokens",
+   "comando": "git grep -n \"usage\" origin/main -- src/lib/ai/executive-brief.ts",
+   "control_positivo": "git grep -n \"s.usage\" origin/main -- src/modules/chatbot/server/chat/handleChatRequest.ts → :1150 registra usage en el chatbot"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "Seis exports de src/lib/premium-modules.ts no tienen importadores",
+   "comando": "git grep -n -w <getModulesForOrganization|hasModuleActive|getMonthlyRecurringRevenue|isModuleValidForRubro|activateModule|cancelModule> origin/main -- .",
+   "control_positivo": "git grep -n -w getActiveModuleSlugs origin/main -- . → src/lib/recommendations/get-recommendations-for-org.ts:12, :35"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "No hay feature flag para apagar el brief IA",
+   "comando": "git grep -n -i \"BRIEF_ENABLED\\|EXECUTIVE_BRIEF\\|FEATURE_.*BRIEF\\|briefEnabled\" origin/main -- src .env.example",
+   "control_positivo": "git grep -n CHATBOT_LLM_PROVIDER origin/main -- src/modules/chatbot/server/llm/factory.ts → :22 (el patrón de flags por env existe)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "Ninguna vista del cliente muestra priceOverride",
+   "comando": "git grep -n priceOverride origin/main -- \"src/app/(protected)/dashboard\" src/components/dashboard src/lib/plan",
+   "control_positivo": "git grep -n priceOverride origin/main -- src → src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx:14, :22"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "El wizard de onboarding legado no está montado",
+   "comando": "git grep -n \"components/onboarding\" origin/main -- src",
+   "control_positivo": "git grep -n saveOnboardingProfile origin/main -- src → src/actions/onboarding-actions.ts:38 y src/components/onboarding/OnboardingWizard.tsx:6, :371"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "ContactSubmission no tiene columna organizationId",
+   "comando": "git show origin/main:logic-core-v3/prisma/schema.prisma | sed -n 688,708p",
+   "control_positivo": "El mismo schema muestra organizationId en otros modelos de tenant (p. ej. OrganizationModule :1192, Notification debajo de :710)"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "No existen las tools premium show_product_card ni score_lead",
+   "comando": "git grep -n \"show_product_card\\|score_lead\" origin/main -- src prisma",
+   "control_positivo": "git grep -c capture_lead origin/main -- prisma/seeds/sync-plans.ts → 2"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "No hay U+2212 en los archivos de PLAN-134",
+   "comando": "git grep -n $'−' origin/main -- src/lib/reports/client-monthly/monthly-report-data.ts src/lib/dashboard/home-metrics-logic.ts",
+   "control_positivo": "git grep -n -c $'−' origin/main -- src → src/components/ia/RubrosIA.tsx:4"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "computeTrend ya no existe",
+   "comando": "git grep -n computeTrend origin/main -- src",
+   "control_positivo": "git grep -n \"function calcTrend\" origin/main -- src → src/lib/dashboard/week-results.ts:107"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "afirmacion": "/dashboard/plan no tiene error.tsx propio",
+   "comando": "git ls-files \"src/app/(protected)/dashboard/plan\"",
+   "control_positivo": "Lista loading.tsx y page.tsx; git ls-files muestra src/app/(protected)/dashboard/error.tsx"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "Netlify (config activa de prod) no agenda /api/cron/send-executive-reports ni /api/cron/regenerate-briefs, y ningún workflow de GitHub los llama",
+   "comando": "git grep -n -E \"send-executive-reports|regenerate-briefs\" origin/main -- logic-core-v3/netlify.toml logic-core-v3/netlify .github → vacío",
+   "control_positivo": "git grep -n \"send-weekly-reports-cron\" origin/main -- logic-core-v3/netlify.toml → :28; git grep -n \"cron:\" origin/main -- .github/workflows/db-backup.yml → :41"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "Ninguna alta viva de cliente crea OnboardingTask",
+   "comando": "git grep -n -E \"onboardingTask|seedOnboardingTasksForOrg|OnboardingTask\" origin/main -- logic-core-v3/src/modules/chatbot/server/admin logic-core-v3/src/lib/onboarding/core.ts logic-core-v3/src/app → vacío",
+   "control_positivo": "git grep -n -c \"orgMember.create\" origin/main -- createClientOnly.ts createClientWithBot.ts lib/onboarding/core.ts → 1 en cada uno"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "src/lib/actions/clients.ts y src/lib/actions/invitations.ts no tienen importadores",
+   "comando": "git grep -n -E \"lib/actions/(clients|invitations)['\\\"]|from './(clients|invitations)'\" origin/main -- logic-core-v3/src logic-core-v3/tests → vacío",
+   "control_positivo": "git grep -n -E \"lib/actions/upsell['\\\"]\" origin/main -- logic-core-v3/src → LockedView.tsx:27, seo/page.tsx:21, PremiumModuleCard.tsx:29"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "Ningún write-path de main cifra credenciales de la bóveda",
+   "comando": "git grep -n -E \"encryptCredential|encryptForStorage|encrypt-for-storage\" origin/main -- logic-core-v3/src ':!logic-core-v3/src/lib/crypto' → vacío",
+   "control_positivo": "mismo patrón sobre origin/b0-isolation-motor-chatbot -- logic-core-v3/src → agency-actions.ts:14,132 y onboarding-actions.ts:10,136,148"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "No hay tests de signUnsubscribeToken ni verifyUnsubscribeToken (token del reporte ejecutivo)",
+   "comando": "git grep -n -E \"signUnsubscribeToken|verifyUnsubscribeToken\" origin/main -- logic-core-v3/tests '**/*.invariant.ts' '**/*.test.ts' → vacío",
+   "control_positivo": "git grep -n -c signEmailContactOptOutToken origin/main -- logic-core-v3/tests '**/*.invariant.ts' → idor-tokens.invariant.ts:3, 20-idor-optout.spec.ts:4"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "/api/reports/monthly (única puerta de MonthlyReport.tsx) no tiene consumidor en la UI",
+   "comando": "git grep -n -E \"reports/monthly\" origin/main -- logic-core-v3/src → solo client-monthly/route.ts:6 (comentario) y la propia ruta",
+   "control_positivo": "git grep -n \"api/reports/client-monthly\" origin/main -- logic-core-v3/src → DownloadMonthlyReportButton.tsx:21"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "Ningún archivo del lote reporta a Sentry",
+   "comando": "git grep -n -E \"captureException|@sentry\" origin/main -- logic-core-v3/src/lib/tickets logic-core-v3/src/lib/reports logic-core-v3/src/lib/referrals logic-core-v3/src/lib/plan logic-core-v3/src/lib/recommendations logic-core-v3/src/lib/modules logic-core-v3/src/lib/upsell logic-core-v3/src/lib/onboarding logic-core-v3/src/lib/security/org-scope.ts → vacío",
+   "control_positivo": "git grep -n -l captureException origin/main -- logic-core-v3/src → app/error.tsx, app/global-error.tsx, setter/error.tsx, entre otros"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "Las actions de tickets, upsell y referidos no aplican rate limit",
+   "comando": "git grep -n -i -E \"checkRateLimit|applyAuthRateLimit\" origin/main -- logic-core-v3/src/lib/tickets logic-core-v3/src/lib/actions/upsell.ts logic-core-v3/src/lib/actions/referrals.ts → vacío",
+   "control_positivo": "git grep -n checkRateLimit origin/main -- logic-core-v3/src/lib/actions/contact.ts → :9 y :24"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "El slug 'email-marketing' no existe en el catálogo de módulos",
+   "comando": "git grep -n \"slug: 'email-marketing',\" origin/main -- logic-core-v3/src/lib/data/premium-modules.ts → vacío",
+   "control_positivo": "git grep -n \"slug: 'email-marketing-pro'\" origin/main -- logic-core-v3/src/lib/data/premium-modules.ts → :38"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "Las server actions de email marketing no llaman isModuleActive",
+   "comando": "git grep -n isModuleActive origin/main -- \"logic-core-v3/src/app/(protected)/dashboard/modules/email-marketing/_actions.ts\" → vacío",
+   "control_positivo": "git grep -n isModuleActive origin/main -- logic-core-v3/src/components/dashboard/modules/motor-resenas/_actions.ts → :5, :23, :58"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "La rama cliente de replyToTicketAction no avisa a develOP (ni alerta, ni Notification, ni email)",
+   "comando": "git grep -n -E \"sendAgencyAlert\\(|notification\\.create|sendEmail\\(\" origin/main -- logic-core-v3/src/lib/tickets/actions.ts → solo :89 (createTicketAction, HIGH/URGENT) y :157 (rama admin)",
+   "control_positivo": "el mismo comando devuelve :89 y :157, así que el patrón matchea"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "supportTier no se usa en tickets ni mensajes",
+   "comando": "git grep -n supportTier origin/main -- logic-core-v3/src ':!logic-core-v3/src/lib/plan' → solo admin/clients/[clientId]/_components/PlanAssignmentCard.tsx:120",
+   "control_positivo": "git grep -n supportTier origin/main -- logic-core-v3/src/lib/plan → fallback.ts:38,61; get-plan-for-org.ts:91,115"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "No existe el modelo HealthScoreSnapshot",
+   "comando": "git grep -n \"model HealthScoreSnapshot\" origin/main -- logic-core-v3/prisma/schema.prisma → vacío",
+   "control_positivo": "git grep -n \"model ExecutiveBriefSnapshot\" origin/main -- logic-core-v3/prisma/schema.prisma → :459"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "No existe calculatePotentialValue",
+   "comando": "git grep -n calculatePotentialValue origin/main -- logic-core-v3/src → vacío",
+   "control_positivo": "git grep -n -c averageTicketUsd origin/main -- logic-core-v3/src → business-profile.actions.ts, dashboard/page.tsx, BusinessHero.tsx, MoneyEstimate.tsx"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "No existe la regla 'fuera de horario' en recomendaciones",
+   "comando": "git grep -n -i -E \"fuera de horario|outOfHours|afterHours|EXTRACT\\(HOUR\" origin/main -- logic-core-v3/src/lib/recommendations → vacío",
+   "control_positivo": "git grep -n -c connect-gbp origin/main -- logic-core-v3/src/lib/recommendations/rules.ts → 2"
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "afirmacion": "components/dashboard/TicketStatusSelector.tsx no tiene importadores",
+   "comando": "git grep -n TicketStatusSelector origin/main -- logic-core-v3/src → solo su definición (TicketStatusSelector.tsx:16)",
+   "control_positivo": "git grep -n \"ResolveTicketButton'\" origin/main -- logic-core-v3/src → soporte/[ticketId]/page.tsx:18"
   }
  ]
 }

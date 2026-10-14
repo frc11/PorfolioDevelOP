@@ -1,0 +1,2944 @@
+{
+ "dominio": "D2",
+ "ciclo": "D2-c1",
+ "lote": "D2-L2",
+ "run": "wf_c8d83c7c-a28",
+ "fecha": "2026-10-14T23:28:01.383Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/analisis/loading.tsx",
+    "lineas_total": 20,
+    "leido_completo": true,
+    "rangos": "1-20"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/analisis/page.tsx",
+    "lineas_total": 102,
+    "leido_completo": true,
+    "rangos": "1-102"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/error.tsx",
+    "lineas_total": 20,
+    "leido_completo": true,
+    "rangos": "1-20"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/layout.tsx",
+    "lineas_total": 11,
+    "leido_completo": true,
+    "rangos": "1-11"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/loading.tsx",
+    "lineas_total": 15,
+    "leido_completo": true,
+    "rangos": "1-15"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/page.tsx",
+    "lineas_total": 5,
+    "leido_completo": true,
+    "rangos": "1-5"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/reputacion/loading.tsx",
+    "lineas_total": 12,
+    "leido_completo": true,
+    "rangos": "1-12"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/reputacion/page.tsx",
+    "lineas_total": 56,
+    "leido_completo": true,
+    "rangos": "1-56"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/seo/loading.tsx",
+    "lineas_total": 19,
+    "leido_completo": true,
+    "rangos": "1-19"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+    "lineas_total": 490,
+    "leido_completo": true,
+    "rangos": "1-490"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/trafico/loading.tsx",
+    "lineas_total": 26,
+    "leido_completo": true,
+    "rangos": "1-26"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+    "lineas_total": 332,
+    "leido_completo": true,
+    "rangos": "1-332"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/services/loading.tsx",
+    "lineas_total": 100,
+    "leido_completo": true,
+    "rangos": "1-100"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+    "lineas_total": 363,
+    "leido_completo": true,
+    "rangos": "1-363"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/loading.tsx",
+    "lineas_total": 10,
+    "leido_completo": true,
+    "rangos": "1-10"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+    "lineas_total": 316,
+    "leido_completo": true,
+    "rangos": "1-316"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/soporte/loading.tsx",
+    "lineas_total": 24,
+    "leido_completo": true,
+    "rangos": "1-24"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/soporte/page.tsx",
+    "lineas_total": 106,
+    "leido_completo": true,
+    "rangos": "1-106"
+   },
+   {
+    "ruta": "src/app/api/dashboard/leads/recent/route.ts",
+    "lineas_total": 69,
+    "leido_completo": true,
+    "rangos": "1-69"
+   },
+   {
+    "ruta": "src/app/api/reports/client-monthly/route.ts",
+    "lineas_total": 64,
+    "leido_completo": true,
+    "rangos": "1-64"
+   },
+   {
+    "ruta": "src/app/api/reports/monthly/route.ts",
+    "lineas_total": 143,
+    "leido_completo": true,
+    "rangos": "1-143"
+   },
+   {
+    "ruta": "src/app/bienvenida/_actions/complete-onboarding.ts",
+    "lineas_total": 61,
+    "leido_completo": true,
+    "rangos": "1-61"
+   },
+   {
+    "ruta": "src/app/bienvenida/_components/BienvenidaWizard.tsx",
+    "lineas_total": 128,
+    "leido_completo": true,
+    "rangos": "1-128"
+   },
+   {
+    "ruta": "src/app/bienvenida/_components/Step1Empresa.tsx",
+    "lineas_total": 112,
+    "leido_completo": true,
+    "rangos": "1-112"
+   },
+   {
+    "ruta": "src/app/bienvenida/_components/Step2Conexiones.tsx",
+    "lineas_total": 92,
+    "leido_completo": true,
+    "rangos": "1-92"
+   },
+   {
+    "ruta": "src/app/bienvenida/_components/Step3Tour.tsx",
+    "lineas_total": 73,
+    "leido_completo": true,
+    "rangos": "1-73"
+   },
+   {
+    "ruta": "src/app/bienvenida/layout.tsx",
+    "lineas_total": 19,
+    "leido_completo": true,
+    "rangos": "1-19"
+   },
+   {
+    "ruta": "src/app/bienvenida/page.tsx",
+    "lineas_total": 43,
+    "leido_completo": true,
+    "rangos": "1-43"
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/app/(protected)/dashboard/resultados/layout.tsx",
+    "simbolo": "ResultadosLayout",
+    "tipo": "layout",
+    "url": "/dashboard/resultados/*",
+    "auth": "heredado",
+    "evidencia_auth": "proxy.ts:154 (solo ORG_MEMBER o SUPER_ADMIN con cookie de impersonación) + (protected)/dashboard/layout.tsx:72-92 (resolveOrgId, redirect si null). El layout no lee datos.",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando",
+    "evidencia_rol": "proxy.ts:154; src/lib/preview.ts:10-17",
+    "org_de": "no-aplica",
+    "evidencia_org": "layout.tsx:3-10 solo renderiza ResultadosTabs + children",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no-aplica",
+    "notas": "Sin datos propios."
+   },
+   {
+    "archivo": "src/app/(protected)/dashboard/resultados/page.tsx",
+    "simbolo": "ResultadosPage",
+    "tipo": "page",
+    "url": "/dashboard/resultados",
+    "auth": "heredado",
+    "evidencia_auth": "proxy.ts:154 + dashboard/layout.tsx:90-92",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando",
+    "evidencia_rol": "proxy.ts:154",
+    "org_de": "no-aplica",
+    "evidencia_org": "page.tsx:4 solo redirect('/dashboard/resultados/trafico')",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/(protected)/dashboard/resultados/analisis/page.tsx",
+    "simbolo": "AnalisisPage",
+    "tipo": "page",
+    "url": "/dashboard/resultados/analisis",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:32-33 resolveOrgId() (llama auth(), preview.ts:7) y redirect('/login') si null; además proxy.ts:154",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando; contenido solo con plan insightEnabled (Pro/Business)",
+    "evidencia_rol": "preview.ts:10-17; page.tsx:35-36 planAllows(plan,'insight'); plan-allows.ts:21-22",
+    "org_de": "sesion",
+    "evidencia_org": "page.tsx:32 resolveOrgId(); getMonthlyAnalysisForOrg.ts:53 forOrg(organizationId)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input del usuario",
+    "rate_limit": "no-aplica",
+    "notas": "OrgRole (VIEWER/MEMBER/ADMIN) no se mira en ninguna entrada del lote."
+   },
+   {
+    "archivo": "src/app/(protected)/dashboard/resultados/reputacion/page.tsx",
+    "simbolo": "ReputacionPage",
+    "tipo": "page",
+    "url": "/dashboard/resultados/reputacion",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:15-16 resolveOrgId() + redirect('/login')",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando",
+    "evidencia_rol": "preview.ts:10-17",
+    "org_de": "sesion",
+    "evidencia_org": "page.tsx:15 y :20 getGBPMetrics(organizationId) (google-business-profile.ts:166-174 por id)",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica",
+    "notas": "Error de GBP → console.error (:22) y se muestra el mismo vacío 'pendiente de conexión'."
+   },
+   {
+    "archivo": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+    "simbolo": "SeoPage",
+    "tipo": "page",
+    "url": "/dashboard/resultados/seo",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:100-101 resolveOrgId() + redirect('/login')",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando",
+    "evidencia_rol": "preview.ts:10-17",
+    "org_de": "sesion",
+    "evidencia_org": "page.tsx:100, :103-106 organization.findUnique({ id: organizationId })",
+    "validacion": "manual",
+    "evidencia_validacion": "page.tsx:98-99 solo compara searchParams.demo === 'true'",
+    "rate_limit": "no-aplica",
+    "notas": "Llama a Search Console en cada render sin caché (searchconsole.ts:125-156)."
+   },
+   {
+    "archivo": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+    "simbolo": "activarSeo (server action inline)",
+    "tipo": "server-action",
+    "url": "POST /dashboard/resultados/seo (action id)",
+    "auth": "si",
+    "evidencia_auth": "delegada: requestUpsellAction exige session.user.id (upsell.ts:14-20)",
+    "rol": "cualquier sesión con session.user.organizationId; SUPER_ADMIN impersonando recibe 'Sesión inválida.'",
+    "evidencia_rol": "upsell.ts:16-19",
+    "org_de": "sesion",
+    "evidencia_org": "upsell.ts:16 session.user.organizationId (no resolveOrgId: falla en vista de soporte)",
+    "validacion": "zod",
+    "evidencia_validacion": "upsell.ts:22 UpsellRequestSchema (lib/actions/schemas.ts:45-48, sin .max); argumentos constantes en seo/page.tsx:112",
+    "rate_limit": "no",
+    "notas": "Resultado descartado (page.tsx:112): el cliente no ve confirmación ni error. Dedup de ContactSubmission por email+featureKey (upsell.ts:81-87) pero upsellRequestCount sube en cada clic (:57-71)."
+   },
+   {
+    "archivo": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+    "simbolo": "AnalyticsPage",
+    "tipo": "page",
+    "url": "/dashboard/resultados/trafico",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:48-50 resolveOrgId() + redirect('/login')",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando",
+    "evidencia_rol": "preview.ts:10-17",
+    "org_de": "sesion",
+    "evidencia_org": "page.tsx:48, :52-55 organization.findUnique({ id: organizationId })",
+    "validacion": "manual",
+    "evidencia_validacion": "page.tsx:46-47 demo === 'true'",
+    "rate_limit": "no-aplica",
+    "notas": "Renderiza result.error de getAnalyticsData (:158)."
+   },
+   {
+    "archivo": "src/app/(protected)/dashboard/services/page.tsx",
+    "simbolo": "ServicesPage",
+    "tipo": "page",
+    "url": "/dashboard/services",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:169-170 resolveOrgId() + redirect('/login')",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando",
+    "evidencia_rol": "preview.ts:10-17",
+    "org_de": "sesion",
+    "evidencia_org": "page.tsx:173-176 service.findMany({ organizationId }); :185-188 organizationModule.findMany({ organizationId }); premiumModule.findMany (:177-182) es catálogo global por diseño",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/(protected)/dashboard/soporte/page.tsx",
+    "simbolo": "SoportePage",
+    "tipo": "page",
+    "url": "/dashboard/soporte",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:15-18 auth() + resolveOrgId(); redirect('/login') si falta alguno",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando",
+    "evidencia_rol": "preview.ts:10-17",
+    "org_de": "sesion",
+    "evidencia_org": "page.tsx:21-22 ticket.findMany({ organizationId }); :33-37 ticket.count por org",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica",
+    "notas": "Monta NewTicketModal → createTicketAction (lib/tickets/actions.ts:38-104, resolveOrgId + Zod, sin rate limit)."
+   },
+   {
+    "archivo": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+    "simbolo": "TicketDetailPage",
+    "tipo": "page",
+    "url": "/dashboard/soporte/[ticketId]",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:55-58 auth() + resolveOrgId(); redirect('/login')",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando",
+    "evidencia_rol": "preview.ts:10-17",
+    "org_de": "sesion",
+    "evidencia_org": "page.tsx:60-61 ticket.findUnique({ where: { id: ticketId, organizationId } }) → ajeno = redirect (:70). Sin IDOR.",
+    "validacion": "parcial",
+    "evidencia_validacion": "ticketId de la URL sin validar formato; la ownership la valida el where",
+    "rate_limit": "no-aplica",
+    "notas": "Acciones hijas: replyToTicketAction (assertTicketBelongsToOrg, tickets/actions.ts:126-137) y resolveTicketClientAction (where id+organizationId, :211-215)."
+   },
+   {
+    "archivo": "src/app/api/dashboard/leads/recent/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "GET /api/dashboard/leads/recent",
+    "auth": "si",
+    "evidencia_auth": "route.ts:11-14 auth() → 401; /api no está en el matcher del proxy (proxy.ts:172), el guard es propio",
+    "rol": "implícito por resolveOrgId (ORG_MEMBER o SUPER_ADMIN impersonando); otros roles autenticados reciben 200 { leads: [] }",
+    "evidencia_rol": "route.ts:16-19",
+    "org_de": "sesion",
+    "evidencia_org": "route.ts:16 resolveOrgId(); :24 botConfig: { organizationId: orgId }",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no",
+    "notas": "Sin llamadores en src (solo tests/e2e/40). Devuelve la fila completa (...lead, :50) incl. convertedToOsLeadId. excludeDqWhere (:25) descarta classification null → rama :35-37 inalcanzable."
+   },
+   {
+    "archivo": "src/app/api/reports/client-monthly/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "GET /api/reports/client-monthly",
+    "auth": "si",
+    "evidencia_auth": "route.ts:25-28 resolveOrgId() → 401 si null",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando, con plan insightEnabled",
+    "evidencia_rol": "route.ts:30-33 planAllows(plan,'insight') → 403",
+    "org_de": "sesion",
+    "evidencia_org": "route.ts:25 y :38 getClientMonthlyReportData(organizationId); no acepta parámetros",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no",
+    "notas": "renderToBuffer por request (:40-42) sin límite; catch solo console.error (:58), sin Sentry."
+   },
+   {
+    "archivo": "src/app/api/reports/monthly/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "GET /api/reports/monthly?organizationId&clientId&month",
+    "auth": "si",
+    "evidencia_auth": "route.ts:22-25 auth() → 401",
+    "rol": "SUPER_ADMIN (cualquier org) o cualquier otro rol con session.user.organizationId (incluye CLIENT y OrgRole VIEWER)",
+    "evidencia_rol": "route.ts:38-51",
+    "org_de": "mixto",
+    "evidencia_org": "SUPER_ADMIN: organizationId del query (:38-42); resto: session.user.organizationId (:43-50), no resolveOrgId; rechaza query ≠ sesión (:47-49)",
+    "validacion": "manual",
+    "evidencia_validacion": "month con regex (:17-19, :33-35); organizationId/clientId sin validar formato; clientId contra orgMember (:53-72)",
+    "rate_limit": "no",
+    "notas": "Sin llamadores (PLAN-133). Pondría en el PDF datos mock de GA/GSC sin marcarlos (:106-107)."
+   },
+   {
+    "archivo": "src/app/bienvenida/_actions/complete-onboarding.ts",
+    "simbolo": "completeOnboardingAction",
+    "tipo": "server-action",
+    "url": "POST /bienvenida (action id)",
+    "auth": "si",
+    "evidencia_auth": "complete-onboarding.ts:18-21 auth() → 'No autorizado'",
+    "rol": "implícito por resolveOrgId (ORG_MEMBER o SUPER_ADMIN impersonando); sin control de OrgRole",
+    "evidencia_rol": "complete-onboarding.ts:23-26",
+    "org_de": "sesion",
+    "evidencia_org": "complete-onboarding.ts:23 resolveOrgId(); :33-34 organization.update({ id: organizationId }); :47-48 clientBrandProfile.upsert por organizationId",
+    "validacion": "parcial",
+    "evidencia_validacion": "Zod :9-15/:28-31 sin .max; ga4MeasurementId sin formato; contactEmail validado y descartado (:11, :39)",
+    "rate_limit": "no",
+    "notas": "Único llamador BienvenidaWizard.tsx:33. Flujo inalcanzable para altas vivas (ver hallazgo)."
+   },
+   {
+    "archivo": "src/app/bienvenida/layout.tsx",
+    "simbolo": "BienvenidaLayout",
+    "tipo": "layout",
+    "url": "/bienvenida",
+    "auth": "si",
+    "evidencia_auth": "layout.tsx:9-10 auth() → redirect('/login'); proxy.ts:104-108 y :158-166",
+    "rol": "cualquier sesión; el proxy saca a SUPER_ADMIN sin impersonar y a ORG_MEMBER con onboarding completo",
+    "evidencia_rol": "proxy.ts:158-166",
+    "org_de": "no-aplica",
+    "evidencia_org": "no lee datos",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/bienvenida/page.tsx",
+    "simbolo": "BienvenidaPage",
+    "tipo": "page",
+    "url": "/bienvenida",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:10-11 auth(); :13-14 resolveOrgId() → redirect('/login')",
+    "rol": "ORG_MEMBER o SUPER_ADMIN impersonando",
+    "evidencia_rol": "preview.ts:10-17",
+    "org_de": "sesion",
+    "evidencia_org": "page.tsx:13, :16-24 organization.findUnique({ id: organizationId })",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica",
+    "notas": "Pasa organizationId al cliente sin uso (BienvenidaWizard.tsx:20,24)."
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Resultados › Análisis mensual (Pro+)",
+    "pasos": [
+     "Cliente abre /dashboard/resultados/analisis; proxy.ts:154 deja pasar ORG_MEMBER o SUPER_ADMIN impersonando",
+     "analisis/page.tsx:32-33 resolveOrgId() (preview.ts:6-20); null → redirect('/login')",
+     "analisis/page.tsx:35-36 getPlanForOrg + planAllows(plan,'insight') (plan-allows.ts:21-22); Starter → AnalysisTeaser (:48-51)",
+     "analisis/page.tsx:59-60 getMonthlyAnalysisForOrg(orgId) → forOrg(orgId).botConfig.findFirst (getMonthlyAnalysisForOrg.ts:53-56)",
+     "getMonthlyAnalysisForOrg.ts:60-91 chatbotInsight / quotaUsage / chatbotLead.groupBy por botConfigId",
+     "Sin bot → NoBotState (analisis/page.tsx:62-68); con bot → Discoveries/MonthTrend/Categories (:70-82)",
+     "Insumo de los descubrimientos: cron generate-insights (netlify.toml:25-26; no figura en vercel.json) → generateInsightsForBot con Gemini (generateInsights.ts:99-100)"
+    ]
+   },
+   {
+    "nombre": "Descarga del informe mensual en PDF",
+    "pasos": [
+     "DownloadMonthlyReportButton.tsx:21 fetch('/api/reports/client-monthly')",
+     "client-monthly/route.ts:25-28 resolveOrgId() → 401; :30-33 planAllows 'insight' → 403",
+     "route.ts:38 getClientMonthlyReportData → get-client-monthly-report-data.ts:24-27 org + botConfig; :55-66 chatbotLead.count/findMany por botConfigId (sin filtro DQ)",
+     "route.ts:40-56 renderToBuffer(ClientMonthlyReportPdf) → attachment no-store",
+     "DownloadMonthlyReportButton.tsx:24-35 blob → <a download>; error → toast (:36-37)"
+    ]
+   },
+   {
+    "nombre": "Resultados › SEO y pedido de activación",
+    "pasos": [
+     "seo/page.tsx:98-108 ?demo + resolveOrgId + organization.siteUrl (lo escribe el admin: updateClient.ts:95)",
+     "Sin siteUrl → ResultEmptyState con <form action={activarSeo}> (:129-147) → requestUpsellAction (upsell.ts:10-156): organizationModule.upsert si existe el slug (:45-72), contactSubmission.create con dedup (:81-97), sendAgencyAlert al webhook (:99-104), notificaciones (:112-135); resultado descartado (seo/page.tsx:112)",
+     "Con siteUrl → SeoContent (:170-344) → getSearchConsoleData (searchconsole.ts:99-215): sin credenciales o con error → mock isMockData (:103-105, :211-213)",
+     "seo/page.tsx:203-221 getSeoInsights (results-insights.ts:44-52, unstable_cache 24 h por org) → Anthropic messages.create (:145-150)",
+     "Render: PreviewBanner si mock (:226), 4 métricas con trend literal (:236-273), gráfico, top queries (overflow-x-auto :389), top páginas, oportunidades, insights"
+    ]
+   },
+   {
+    "nombre": "Resultados › Tráfico + PageSpeed",
+    "pasos": [
+     "trafico/page.tsx:46-57 ?demo + resolveOrgId + organization.analyticsPropertyId/siteUrl",
+     "Sin analyticsPropertyId (caso de todo cliente real: nadie lo escribe) → AnalyticsEmptyState con botón sin handler (:82-86, :106-123)",
+     "Con propertyId → AnalyticsContent (:138-273) → getAnalyticsData (analytics.ts:85-200): ID G-… → ok:false (:66-69, :92) y se pinta result.error (:158); sin credenciales o error de API → mock (:98-100, :196-198)",
+     "getTrafficInsights (results-insights.ts:34-42) solo si no es mock (trafico/page.tsx:166-184)",
+     "PageSpeedSection (:125-136) → getPageSpeedReport mobile/desktop (pagespeed.ts:26-35, caché 6 h) → PageSpeedCard"
+    ]
+   },
+   {
+    "nombre": "Resultados › Reputación (Google Business Profile)",
+    "pasos": [
+     "Activación: un SUPER_ADMIN abre a mano /api/auth/google-business/start?orgId=<cuid> (start/route.ts:5-16; ninguna UI la enlaza) → callback guarda tokens y descubre location (callback/route.ts:49-65)",
+     "reputacion/page.tsx:15-23 resolveOrgId + getGBPMetrics (google-business-profile.ts:165-183, caché 1 h)",
+     "fetchGBPMetrics (:185-236): refresh de token (getAuthedClient :55-100) + reviews v4; error → console.error + null",
+     "metrics → GBPMetricsCard; null → ReputationEmptyState (reputacion/page.tsx:34, :39-55)"
+    ]
+   },
+   {
+    "nombre": "Servicios › vitrina y solicitud de módulo",
+    "pasos": [
+     "services/page.tsx:169-189 resolveOrgId; service.findMany y organizationModule.findMany por org; premiumModule.findMany global con status ACTIVE/COMING_SOON",
+     "services/page.tsx:195-196 buildShowroom (showroom.ts:58-74) → owned / available / comingSoon",
+     "PremiumModuleCard.tsx:201-227 submitInterest → requestUpsellAction(slug, name) (upsell.ts:10-156)",
+     "Éxito en 'disponible' → window.location.assign('/dashboard/messages?context=modulo…') (PremiumModuleCard.tsx:211-216); motor-resenas → Link a su LockedView (services/page.tsx:325-327; PremiumModuleCard.tsx:403-410)"
+    ]
+   },
+   {
+    "nombre": "Soporte › abrir ticket",
+    "pasos": [
+     "soporte/page.tsx:15-39 auth + resolveOrgId; ticket.findMany/count por org → SoporteBoard (:103)",
+     "NewTicketModal.tsx:29-49 Zod en cliente → createTicketAction (lib/tickets/actions.ts:38-104)",
+     "tickets/actions.ts:49-61 auth + resolveOrgId + CreateTicketSchema; :64-86 ticket.create con primer TicketMessage",
+     "HIGH/URGENT → sendAgencyAlert al webhook (:88-96); revalidateTicketPaths (:98)",
+     "NewTicketModal.tsx:59-64 toast + router.push al detalle (sin comentario que lo justifique)"
+    ]
+   },
+   {
+    "nombre": "Soporte › conversación y cierre del ticket",
+    "pasos": [
+     "soporte/[ticketId]/page.tsx:54-70 auth + resolveOrgId; ticket.findUnique({ id, organizationId }) → ajeno: redirect('/dashboard/soporte')",
+     "page.tsx:106-112 mapea TicketMessage → ChatMessage → ClientChatThread (:161-190)",
+     "TicketReplyForm.tsx:13-21 → replyToTicketAction (tickets/actions.ts:110-176): cliente → assertTicketBelongsToOrg (:126-137; assert-ownership.ts:32-43); ticketMessage.create (:140-148); admin → email al cliente (:150-167)",
+     "ResolveTicketButton.tsx:12-17 → resolveTicketClientAction (tickets/actions.ts:202-222): update where { id, organizationId } → router.refresh; sin confirmación"
+    ]
+   },
+   {
+    "nombre": "Bienvenida (onboarding del cliente)",
+    "pasos": [
+     "Disparadores: proxy.ts:130/:144/:150 (JWT onboardingCompleted=false), login/actions.ts:101-107, (protected)/dashboard/layout.tsx:127-129; ninguno se activa para altas vivas (core.ts:85, createClientOnly.ts:85, createClientWithBot.ts:135 crean con onboardingCompleted: true)",
+     "bienvenida/layout.tsx:9-10 auth(); page.tsx:10-26 resolveOrgId + organization.findUnique; :29-31 completado → /dashboard",
+     "BienvenidaWizard.tsx:24-41 Step1Empresa → Step2Conexiones → Step3Tour → completeOnboardingAction(data) (:33)",
+     "complete-onboarding.ts:18-31 auth + resolveOrgId + Zod; :33-43 organization.update (companyName, whatsapp, analyticsPropertyId ← ga4MeasurementId, onboardingCompleted); :46-57 clientBrandProfile.upsert targetAudience = 'Rubro: …'",
+     "complete-onboarding.ts:59 revalidatePath('/dashboard','layout') → BienvenidaWizard.tsx:38-39 router.push('/dashboard') + refresh"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Inicio cuenta como leads del cliente los ContactSubmission de todas las orgs",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/dashboard/week-results.ts",
+      "linea": 43,
+      "fragmento": "prisma.contactSubmission\n      .count({\n        where: { createdAt: { gte: weekAgo } },"
+     },
+     {
+      "ruta": "src/lib/health-score.ts",
+      "linea": 312,
+      "fragmento": "void organizationId\n\n  // ContactSubmission is global (no orgId FK yet), so this gives an agency-wide"
+     },
+     {
+      "ruta": "src/components/dashboard/home/WeekResultsGrid.tsx",
+      "linea": 46,
+      "fragmento": "//    para no presentarlo como dato cerrado del cliente — sin revelar que es\n//    global."
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 688,
+      "fragmento": "model ContactSubmission {"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/page.tsx",
+      "linea": 183,
+      "fragmento": "const data = await getWeekResults(organizationId)"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 88,
+      "fragmento": "await prisma.contactSubmission.create({"
+     }
+    ],
+    "impacto": "El primer cliente real ve en Inicio («Leads» de la semana, con delta) y en su Health Score (computeLeadsScore) el volumen de contactos de toda la agencia: formulario público de develOP más los pedidos de upsell de los demás clientes (upsell.ts:88). Es un dato falso y una fuga agregada entre tenants (volumen comercial de develOP y actividad de otros clientes). El modelo no tiene organizationId (schema.prisma:688-708), por eso la Auditoría III no lo contó. El rótulo «En calibración» lo tapa a propósito.",
+    "propuesta": "Dejar de usar ContactSubmission en métricas del cliente: contar ChatbotLead por botConfig.organizationId con el filtro notDq de home-metrics.ts:92-99, o quitar la card de leads y el componente leadsScore del Health Score. Agregar organizationId a ContactSubmission es cambio de schema → decisión para Valentino.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-inicio",
+     "modelo.ContactSubmission",
+     "lib.dashboard",
+     "lib.health-score"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D2-A1; Inicio_ registro de cambios.md:97"
+   },
+   {
+    "titulo": "Credenciales de la bóveda se guardan en texto plano: el cifrado al escribir quedó sin mergear",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 103,
+      "fragmento": "await prisma.clientAsset.create({"
+     },
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 109,
+      "fragmento": "description: data.description"
+     },
+     {
+      "ruta": "src/components/admin/managers/VaultManager.tsx",
+      "linea": 5,
+      "fragmento": "import { createClientAssetAction } from '@/actions/agency-actions'"
+     },
+     {
+      "ruta": "src/actions/onboarding-actions.ts",
+      "linea": 115,
+      "fragmento": "url: 'ENCRIPTADO_EN_TEXTO',"
+     },
+     {
+      "ruta": "src/lib/crypto/credential-cipher.ts",
+      "linea": 73,
+      "fragmento": "export function encryptCredential(plaintext: string): string {"
+     },
+     {
+      "ruta": "src/lib/crypto/resolve-credential.ts",
+      "linea": 24,
+      "fragmento": "return { value: description, error: false }"
+     }
+    ],
+    "impacto": "Los accesos de hosting, dominio y redes que un cliente entregue quedan legibles en la Neon compartida (y en cualquier dump o backup). En origin/main existe el cifrador y el lado de lectura, pero encryptCredential no tiene ni un llamador fuera de tests: el form real de la bóveda (VaultManager → createClientAssetAction) guarda en claro. El registro del 13/07 declara PD-1 cerrado, pero el write-path cifrado vive en origin/b0-isolation-motor-chatbot (9fc616c4), sin mergear. Bloqueante para el primer cliente que entregue credenciales.",
+    "propuesta": "Mergear o cherry-pickear PD-1.2 (9fc616c4: encrypt-for-storage + write paths con Zod), o cablear encryptCredential en createClientAssetAction; borrar completeOnboardingAction de onboarding-actions.ts (sin llamadores); revisar en la base las filas ACCESS en claro y rotarlas con el cliente.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h2.cli-cuenta",
+     "modelo.ClientAsset",
+     "lib.crypto",
+     "lib.actions"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D2-A5; D2-A4; PD-1 (docs/audit-repo-20260707.md:113); PLAN-024"
+   },
+   {
+    "titulo": "Tendencias 'vs mes anterior' inventadas en Tráfico y SEO",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+      "linea": 204,
+      "fragmento": "trend={{ value: 12.3 }}"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+      "linea": 238,
+      "fragmento": "trend={{ value: 23, displayValue: '0:23' }}"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+      "linea": 244,
+      "fragmento": "trend={12.4}"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+      "linea": 260,
+      "fragmento": "trend={data.avgCtr >= 3 ? 1.2 : -1.4}"
+     },
+     {
+      "ruta": "src/components/dashboard/AnalyticsMetricCard.tsx",
+      "linea": 70,
+      "fragmento": "<span className=\"text-[10px] text-zinc-500\">vs mes anterior</span>"
+     }
+    ],
+    "impacto": "Con datos reales de Search Console el cliente ve siempre «▲12,4% vs mes anterior» en clicks y «▲7,1%» en impresiones aunque su tráfico haya caído, y el delta de CTR/posición cambia de signo por un umbral fijo. Es lo primero que un cliente compara contra su propia consola: dato inventado presentado como medición, bloquea L3. En Tráfico ni siquiera hay FIXME (trafico/page.tsx:204, :215, :227, :238).",
+    "propuesta": "Quitar las tendencias hasta tener el período anterior, o calcularlas con un segundo dateRange en GA4 y una segunda consulta en Search Console. Nunca literales.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados",
+     "h2.cli-resultados.trafico-ga4",
+     "h2.cli-resultados.seo-search-console"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "P1-7; PLAN-126; PLAN-141"
+   },
+   {
+    "titulo": "Tráfico (GA4) sin camino de activación: nadie escribe analyticsPropertyId y el CTA no hace nada",
+    "prefijo": "FAL",
+    "severidad": "ALTA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+      "linea": 115,
+      "fragmento": "<button type=\"button\" className={resultEmptyCtaCls}>\n        ACTIVAR AHORA"
+     },
+     {
+      "ruta": "src/app/bienvenida/_actions/complete-onboarding.ts",
+      "linea": 38,
+      "fragmento": "analyticsPropertyId: parsed.data.ga4MeasurementId,"
+     },
+     {
+      "ruta": "src/app/bienvenida/_components/Step2Conexiones.tsx",
+      "linea": 38,
+      "fragmento": "ID de medición (formato G-XXXXXXX)"
+     },
+     {
+      "ruta": "src/lib/analytics.ts",
+      "linea": 66,
+      "fragmento": "if (/^G-|^GA-/i.test(trimmed)) {"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+      "linea": 158,
+      "fragmento": "<p className=\"mt-1 text-xs text-amber-400/70\">{result.error}</p>"
+     },
+     {
+      "ruta": "src/lib/actions/clients.ts",
+      "linea": 161,
+      "fragmento": "const analyticsPropertyId ="
+     },
+     {
+      "ruta": "src/components/dashboard/PreviewBanner.tsx",
+      "linea": 14,
+      "fragmento": "develOP se encarga de la activación en tu primera semana."
+     }
+    ],
+    "impacto": "Ningún cliente real puede ver su tráfico: el único escritor vivo-en-código es /bienvenida (inalcanzable) y el otro está en lib/actions/clients.ts, sin importadores; el admin no tiene campo para cargarlo. El tab muestra siempre «Activá el seguimiento profesional» con un botón sin handler, mientras el banner promete activación «en tu primera semana». Si se reactivara /bienvenida, el paso 2 pide el Measurement ID (G-…) que analytics.ts rechaza y el tab mostraría el mensaje técnico de result.error. Medición de la hipótesis de Valentino: en Resultados no faltan pantallas sino la plomería de activación y datos.",
+    "propuesta": "Campo «GA4 Property ID» numérico con validación en la edición de cliente del admin (updateClient.ts), acceso de la service account a la propiedad, cablear el CTA (requestUpsellAction como en SEO o Link a Mensajes), corregir o borrar el paso 2 de /bienvenida y no renderizar result.error.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados.trafico-ga4",
+     "h2.cli-bienvenida.wizard-3-pasos",
+     "int.google-analytics",
+     "h4.adm-clientes",
+     "modelo.Organization"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-136 (D4 parcial); FIXME(data-truth) trafico/page.tsx:113"
+   },
+   {
+    "titulo": "Detalle de ticket en mobile: el hilo de mensajes colapsa a 0 px",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 115,
+      "fragmento": "<div className=\"flex h-[calc(100svh-14rem)] min-h-0 w-full flex-col gap-5 sm:h-[calc(100svh-12.5rem)]\">"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 159,
+      "fragmento": "<div className=\"flex flex-1 min-h-0 flex-col gap-5 lg:flex-row\">"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 193,
+      "fragmento": "<div className=\"flex flex-col min-h-0 shrink-0 overflow-y-auto rounded-2xl ... lg:w-52 xl:w-56\">"
+     },
+     {
+      "ruta": "src/components/dashboard/ClientChatThread.tsx",
+      "linea": 48,
+      "fragmento": "<div className={['flex min-h-0 flex-1 flex-col gap-3', className].filter(Boolean).join(' ')}>"
+     }
+    ],
+    "impacto": "Aritmética por lectura: en un teléfono el contenedor mide 100svh-224 px (≈330-590 px); la cabecera del ticket ocupa ≈200 px y la columna Timeline+Detalles, shrink-0 y sin alto máximo en <lg, ≈440 px. El hilo (flex-1 min-h-0) queda en 0 px y el composer se superpone a la Timeline. El cliente que abre desde el celular el mail «Actualización de Soporte» no puede leer la respuesta.",
+    "propuesta": "En <lg dejar fluir la página (h-auto) o mover Timeline/Detalles a un bloque colapsable debajo del chat, con shrink-0 y alto fijo solo desde lg; dar un min-h al hilo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte.conversacion-ticket",
+     "h2.cli-soporte"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "Mismo patrón en admin/tickets/[ticketId]/page.tsx:21"
+   },
+   {
+    "titulo": "Fallas de GA4, Search Console, GBP y del PDF mensual quedan en console.error o se disfrazan de demo",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/analytics.ts",
+      "linea": 196,
+      "fragmento": "} catch {\n    // Fall back to mock data on any API error\n    return { ok: true, data: getMockAnalyticsData() }"
+     },
+     {
+      "ruta": "src/lib/searchconsole.ts",
+      "linea": 211,
+      "fragmento": "} catch {\n    // Fall back to mock data on any API error\n    return { ok: true, data: getMockSearchConsoleData() }"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+      "linea": 181,
+      "fragmento": "if (!result.ok) {"
+     },
+     {
+      "ruta": "src/lib/integrations/google-business-profile.ts",
+      "linea": 203,
+      "fragmento": "console.error('[GBP] Reviews API error:', reviewsRes.status, await reviewsRes.text())"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/reputacion/page.tsx",
+      "linea": 22,
+      "fragmento": "console.error('[GBP] Reputation page failed:', err)"
+     },
+     {
+      "ruta": "src/app/api/reports/client-monthly/route.ts",
+      "linea": 58,
+      "fragmento": "console.error('[client-monthly-report] PDF generation error', error)"
+     }
+    ],
+    "impacto": "Si la service account pierde acceso o se revoca el token de GBP, el cliente pasa a ver datos de ejemplo con el banner «vista previa… develOP se encarga de la activación», o «Reputación pendiente de conexión», y develOP no se entera: no hay evento en Sentry. La rama de error de SEO (seo/page.tsx:181-200) es inalcanzable porque getSearchConsoleData nunca devuelve ok:false. Los null de GBP y los [] de insights se cachean (1 h y 24 h).",
+    "propuesta": "Que las libs devuelvan ok:false con causa tipada cuando hay credenciales y la API falla (sin mock); Sentry.captureException (+ flush en route handlers) en esos catch; mostrar «no pudimos actualizar» en vez de demo.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados",
+     "int.google-analytics",
+     "int.search-console",
+     "int.google-business-profile",
+     "int.sentry",
+     "h2.cli-resultados.informe-mensual-pdf"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Patrón D1-c1 (console.error sin Sentry); P1-8 de 2026-05"
+   },
+   {
+    "titulo": "Promesas vencidas y contradictorias visibles al cliente (Q3 2026 y cuatro SLA distintos)",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/dashboard/PremiumModuleCard.tsx",
+      "linea": 300,
+      "fragmento": "{isComingSoon ? 'Próximamente Q3 2026' : 'Premium'}"
+     },
+     {
+      "ruta": "src/components/dashboard/ServiceDetailModal.tsx",
+      "linea": 181,
+      "fragmento": "{isComingSoon ? 'Próximamente Q3 2026' : 'Premium'}"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/page.tsx",
+      "linea": 87,
+      "fragmento": "value=\"< 4h\""
+     },
+     {
+      "ruta": "src/components/dashboard/MessageThread.tsx",
+      "linea": 114,
+      "fragmento": "Respondemos en {'< 4 hs'}"
+     },
+     {
+      "ruta": "src/components/dashboard/TicketReplyForm.tsx",
+      "linea": 32,
+      "fragmento": "helperText=\"El equipo de develOP será notificado de inmediato. Respuesta asíncrona estándar en menos de 24hs.\""
+     },
+     {
+      "ruta": "src/app/bienvenida/_components/Step3Tour.tsx",
+      "linea": 14,
+      "fragmento": "{ icon: MessageSquare, label: 'Comunicación directa', description: 'Mensajes y soporte 24/7' },"
+     }
+    ],
+    "impacto": "Al 14/10/2026 la vitrina promete módulos para un trimestre que ya terminó (y el propio comentario de PremiumModuleCard.tsx:335 dice que el CTA «NO promete fecha»). El cliente lee cuatro SLA distintos: 24/7 (bienvenida), <4 h Lun–Vie 9–18 (Mensajes, MessageThread.tsx:117-119), <4 h Lun-Vie 9-19 (Soporte, soporte/page.tsx:90) y <24 h (respuesta de ticket). Primer reclamo previsible del primer cliente.",
+    "propuesta": "Sacar la fecha del badge (o leerla de PremiumModule) y definir un único SLA en una constante compartida que consuman Soporte, Mensajes y el composer del ticket.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-servicios.vitrina-modulos",
+     "h2.cli-soporte",
+     "h2.cli-mensajes",
+     "h2.cli-bienvenida"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D2-A3"
+   },
+   {
+    "titulo": "Tres definiciones de 'leads del mes': el PDF mensual cuenta los descalificados",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/reports/client-monthly/get-client-monthly-report-data.ts",
+      "linea": 56,
+      "fragmento": "prisma.chatbotLead.count({\n      where: { botConfigId, capturedAt: { gte: current.start, lt: current.end } },"
+     },
+     {
+      "ruta": "src/lib/dashboard/home-metrics.ts",
+      "linea": 92,
+      "fragmento": "const notDq: Prisma.ChatbotLeadWhereInput = {\n    OR: [{ classification: null }, { classification: { not: 'dq' } }],"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/scoring/dqFilter.ts",
+      "linea": 23,
+      "fragmento": "NOT: { classification: 'dq' },"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/reports/buildWeeklyReport.ts",
+      "linea": 63,
+      "fragmento": "...excludeDqWhere(),"
+     }
+    ],
+    "impacto": "El PDF «Descargá el informe del mes» suma spam, empleo y proveedores (DQ) y da un número mayor que el de Inicio (que excluye DQ e incluye no clasificados); el reporte semanal usa excludeDqWhere, que en SQL también descarta los null, y da un tercer número. El cliente compara y deja de confiar en todos.",
+    "propuesta": "Un único helper de «lead del negocio» (el notDq de home-metrics) usado por PDF, semanal y home; corregir excludeDqWhere para incluir null.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados.informe-mensual-pdf",
+     "h2.cli-inicio",
+     "h2.cli-reportes-email",
+     "modelo.ChatbotLead",
+     "lib.chatbot.scoring"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-132"
+   },
+   {
+    "titulo": "SEO y Tráfico llaman a Search Console y GA4 en cada render sin caché",
+    "prefijo": "PERF",
+    "severidad": "MEDIA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+      "linea": 179,
+      "fragmento": "const result = await getSearchConsoleData(siteUrl)"
+     },
+     {
+      "ruta": "src/lib/searchconsole.ts",
+      "linea": 125,
+      "fragmento": "const [queriesRes, pagesRes, dailyRes] = await Promise.all(["
+     },
+     {
+      "ruta": "src/lib/analytics.ts",
+      "linea": 113,
+      "fragmento": "const [summaryResponse, pagesResponse, dailyResponse, sourcesResponse] = await Promise.all(["
+     },
+     {
+      "ruta": "src/lib/integrations/pagespeed.ts",
+      "linea": 30,
+      "fragmento": "return unstable_cache("
+     }
+    ],
+    "impacto": "Cada visita al tab hace 3 (SEO) o 4 (Tráfico) llamadas a Google antes de pintar, con segundos de skeleton, y consume cuota por propiedad; navegar entre tabs las multiplica. PageSpeed y GBP sí están cacheados (pagespeed.ts:30-34, google-business-profile.ts:178-182).",
+    "propuesta": "Envolver getSearchConsoleData y getAnalyticsData en unstable_cache por (org, siteUrl/propertyId) con revalidate de horas, como PageSpeed y GBP.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados.seo-search-console",
+     "h2.cli-resultados.trafico-ga4",
+     "int.search-console",
+     "int.google-analytics"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "ACTIVAR AHORA de SEO descarta el resultado: sin feedback y falla muda en la vista de soporte",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+      "linea": 110,
+      "fragmento": "const activarSeo = async () => {\n    'use server'\n    await requestUpsellAction('seo-avanzado', 'SEO Avanzado')"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 16,
+      "fragmento": "const organizationId = session?.user?.organizationId"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 60,
+      "fragmento": "upsellRequestCount: { increment: 1 },"
+     }
+    ],
+    "impacto": "El cliente pulsa y no ve confirmación ni error (el ActionResult se tira) ni estado pendiente; repite clics o cree que no funcionó. En la vista de soporte de un SUPER_ADMIN la acción devuelve «Sesión inválida.» sin que nadie lo vea. Viola la regla de feedback visible de CLAUDE.md.",
+    "propuesta": "Pasar el CTA a un client component con useActionState que muestre «Solicitud enviada» o el error (como RequestButton de PremiumModuleCard); usar resolveOrgId en upsell.ts.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados.seo-solicitar-activacion",
+     "lib.actions"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Patrón D1-c1 (session.user.organizationId vs resolveOrgId, upsell.ts:16)"
+   },
+   {
+    "titulo": "Texto funcional en zinc-600/700 (≈2,5:1 y ≈1,9:1) en el ticket y en Servicios",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 246,
+      "fragmento": "<p className=\"mt-0.5 font-mono text-[9px] text-zinc-600\">{step.time}</p>"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 249,
+      "fragmento": "<p className=\"mt-0.5 text-[9px] italic text-zinc-700\">Pendiente</p>"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 261,
+      "fragmento": "<span className=\"flex items-center gap-1 text-zinc-600\">"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+      "linea": 145,
+      "fragmento": "<p className=\"text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-600\">"
+     },
+     {
+      "ruta": "src/components/dashboard/PremiumModuleCard.tsx",
+      "linea": 362,
+      "fragmento": "<p className=\"text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-600\">"
+     }
+    ],
+    "impacto": "Horas de la Timeline, «Pendiente», etiquetas de Detalles, «Activo desde» y «Desde» quedan en ≈2,5:1 (zinc-600 sobre ≈#0b0d10) y ≈1,9:1 (zinc-700), en 9-10 px. Falla WCAG AA 1.4.3 en el camino del cliente.",
+    "propuesta": "Subir a zinc-400 o más claro (≥4,5:1) y mínimo 11-12 px para texto con información.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte.conversacion-ticket",
+     "h2.cli-servicios.servicios-contratados",
+     "h2.cli-servicios.vitrina-modulos"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Patrón D1-c1 (contraste zinc-600/700)"
+   },
+   {
+    "titulo": "/bienvenida es inalcanzable para altas reales y arrastra defectos latentes",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/onboarding/core.ts",
+      "linea": 85,
+      "fragmento": "onboardingCompleted: true,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+      "linea": 85,
+      "fragmento": "onboardingCompleted: true,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 135,
+      "fragmento": "onboardingCompleted: true,"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/layout.tsx",
+      "linea": 127,
+      "fragmento": "if ((!client.onboardingCompleted || !client.companyName?.trim()) && !preview && !isBienvenida) {"
+     },
+     {
+      "ruta": "src/app/bienvenida/_actions/complete-onboarding.ts",
+      "linea": 39,
+      "fragmento": "// TODO: Agregar contactEmail a Organization en próximos sprints"
+     },
+     {
+      "ruta": "src/app/bienvenida/_actions/complete-onboarding.ts",
+      "linea": 50,
+      "fragmento": "targetAudience: `Rubro: ${parsed.data.rubro}`,"
+     },
+     {
+      "ruta": "src/actions/onboarding-actions.ts",
+      "linea": 79,
+      "fragmento": "export async function completeOnboardingAction(data: OnboardingData) {"
+     }
+    ],
+    "impacto": "El cliente nuevo nunca ve el wizard: las tres altas vivas crean la org con onboardingCompleted: true y las dos que no (lib/actions/clients.ts:124, invitations.ts:86) no tienen importadores. Queda código mantenido con bugs listos para aparecer si alguien cambia el default: pide el ID de GA equivocado, bloquea con «Email inválido» si se borra el email opcional que ni se guarda (:11, :39), guarda el rubro en targetAudience, que nadie lee, y tiene TODOs en el camino del cliente. Además duplica un onboarding legacy muerto (components/onboarding/OnboardingWizard.tsx + actions/onboarding-actions.ts).",
+    "propuesta": "Decisión para Valentino: (a) borrar /bienvenida y el onboarding legacy y simplificar los redirects (proxy.ts, login/actions.ts:101-107, dashboard/layout.tsx:123-129; auth.ts:73 es FROZEN), o (b) convertirlo en el primer paso real del cliente (alta con onboardingCompleted:false) arreglando GA, email, rubro, .max y TODOs.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-bienvenida",
+     "h2.cli-bienvenida.wizard-3-pasos",
+     "lib.proxy",
+     "lib.onboarding",
+     "modelo.ClientBrandProfile"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-024; D1-c3 (texto libre sin .max: complete-onboarding.ts:10)"
+   },
+   {
+    "titulo": "router.push sin comentario que lo justifique en el portal",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/bienvenida/_components/BienvenidaWizard.tsx",
+      "linea": 38,
+      "fragmento": "router.push('/dashboard')"
+     },
+     {
+      "ruta": "src/components/dashboard/NewTicketModal.tsx",
+      "linea": 63,
+      "fragmento": "router.push(`/dashboard/soporte/${res.data.ticketId}`)"
+     }
+    ],
+    "impacto": "Viola la regla de navegación de CLAUDE.md para portales (router.push solo con justificación inline). Patrón que se replica.",
+    "propuesta": "redirect() dentro de la server action (complete-onboarding; createTicketAction podría redirigir al detalle) o documentar inline el motivo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-bienvenida.wizard-3-pasos",
+     "h2.cli-soporte.crear-ticket"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Formularios del portal sin rate limit y con texto libre sin .max()",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/tickets/schemas.ts",
+      "linea": 5,
+      "fragmento": "title: z.string().trim().min(3, 'El título debe tener al menos 3 caracteres.'),"
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 88,
+      "fragmento": "if (parsed.data.priority === 'HIGH' || parsed.data.priority === 'URGENT') {"
+     },
+     {
+      "ruta": "src/lib/actions/schemas.ts",
+      "linea": 47,
+      "fragmento": "featureName: z.string().trim().min(1, 'Nombre de feature inválido.'),"
+     },
+     {
+      "ruta": "src/app/api/reports/client-monthly/route.ts",
+      "linea": 40,
+      "fragmento": "const buffer = await renderToBuffer("
+     },
+     {
+      "ruta": "src/app/bienvenida/_actions/complete-onboarding.ts",
+      "linea": 10,
+      "fragmento": "companyName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),"
+     }
+    ],
+    "impacto": "Un usuario de cliente autenticado puede crear tickets urgentes sin límite (cada uno dispara la alerta al webhook de develOP con el título sin tope), inflar upsellRequestCount con clics y forzar renders de PDF en serie. CLAUDE.md exige rate limit en todo envío de formulario; checkRateLimit y RATE_LIMIT_PRESETS ya existen (lib/rate-limit) y no se usan acá.",
+    "propuesta": "checkRateLimit por userId en createTicketAction, requestUpsellAction, completeOnboardingAction y la ruta del PDF; .max() en title, description, featureName, companyName, whatsapp.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte.crear-ticket",
+     "h2.cli-servicios.vitrina-modulos",
+     "h2.cli-resultados.informe-mensual-pdf",
+     "lib.rate-limit",
+     "int.webhook-alertas"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D1-c3 (texto libre sin .max)"
+   },
+   {
+    "titulo": "Marcar como resuelto sin confirmación y con fallo silencioso",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/dashboard/ResolveTicketButton.tsx",
+      "linea": 14,
+      "fragmento": "const res = await resolveTicketClientAction(ticketId)"
+     },
+     {
+      "ruta": "src/components/dashboard/ResolveTicketButton.tsx",
+      "linea": 16,
+      "fragmento": "if (res.success) router.refresh()"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 183,
+      "fragmento": "Si el problema persiste, por favor abrí un nuevo ticket."
+     }
+    ],
+    "impacto": "Un toque accidental cierra el ticket sin vuelta atrás para el cliente (no puede reabrir: el composer desaparece y le piden abrir otro). Si la acción falla, el botón vuelve a su estado sin decir nada. CLAUDE.md exige confirmación en acciones destructivas.",
+    "propuesta": "Diálogo de confirmación y mensaje de error visible (role=alert).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte.resolver-ticket"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Reputación: la conexión con Google Business Profile no tiene entrada en ninguna UI",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/auth/google-business/start/route.ts",
+      "linea": 7,
+      "fragmento": "if (!session?.user || session.user.role !== 'SUPER_ADMIN') {"
+     },
+     {
+      "ruta": "src/app/api/auth/google-business/start/route.ts",
+      "linea": 12,
+      "fragmento": "const orgId = searchParams.get('orgId')"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/reputacion/page.tsx",
+      "linea": 52,
+      "fragmento": "Setup manual por ahora"
+     }
+    ],
+    "impacto": "La pestaña queda vacía para todo cliente salvo que alguien de develOP arme a mano /api/auth/google-business/start?orgId=<cuid> (git grep 'google-business/start' → 0 enlaces; tiendanube/start sí está enlazado en ConnectStoreCard.tsx:39). El Motor de reseñas depende de los mismos tokens.",
+    "propuesta": "Botón «Conectar Google Business» en la ficha del cliente del admin (el state firmado ya existe en getAuthUrl).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados.reputacion-gbp",
+     "h4.adm-clientes",
+     "int.google-business-profile",
+     "h2.cli-resenas"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Horas de la timeline del ticket en el huso del servidor, no en hora Argentina",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 41,
+      "fragmento": "return d.toLocaleDateString('es-AR', {"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 304,
+      "fragmento": "{ticket.createdAt.toLocaleDateString('es-AR', {"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+      "linea": 149,
+      "fragmento": "{startDate.toLocaleDateString('es-AR', {"
+     },
+     {
+      "ruta": "src/components/dashboard/results/analysis/DiscoveriesSection.tsx",
+      "linea": 25,
+      "fragmento": "timeZone: TZ_AR,"
+     }
+    ],
+    "impacto": "fmtShort (:40-47) formatea en un server component sin timeZone; en serverless el huso por defecto es UTC (no hay TZ configurado: git grep en netlify.toml, vercel.json, next.config.ts, .env.example → nada). La Timeline marcaría «Ticket creado 13:00» para un ticket creado a las 10:00 AR, distinto de la burbuja del chat, y las fechas de cerca de medianoche saltan de día. DiscoveriesSection ya usa TZ_AR: el helper existe.",
+    "propuesta": "Pasar timeZone: TZ_AR (lib/tz-ar.ts:9) o usar dates-ar en fmtShort y en las fechas de Detalles y de ServiceCard.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte.conversacion-ticket",
+     "h2.cli-servicios.servicios-contratados",
+     "lib.tz-ar"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "IDs internos (cuid) en URLs del portal, todos resueltos contra la org",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+      "linea": 61,
+      "fragmento": "where: { id: ticketId, organizationId },"
+     },
+     {
+      "ruta": "src/components/dashboard/SoporteBoard.tsx",
+      "linea": 108,
+      "fragmento": "href={`/dashboard/soporte/${ticket.id}`}"
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 164,
+      "fragmento": "ticketUrl: `${baseUrl}/dashboard/soporte/${ticketInfo.id}`,"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx",
+      "linea": 34,
+      "fragmento": "const lead = await getLeadByIdForOrg(id, session.organization.id)"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+      "linea": 178,
+      "fragmento": "where: { id: campaignId, organizationId: org.id },"
+     }
+    ],
+    "impacto": "Sin explotación: los tres ids (ticket, lead, campaña) se validan contra la org de la sesión (getLeadByIdForOrg usa forOrg, multiTenantQueries.ts:147-155). Pero contradice CLAUDE.md y la decisión B6.3, y los ids viajan en historial, mails y logs.",
+    "propuesta": "Decidir si la regla aplica a cuid opacos; si aplica, token público por ticket/lead; si no, actualizar CLAUDE.md.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-soporte",
+     "h3.cli-chatbot",
+     "h2.cli-email-mkt"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D2-A2"
+   },
+   {
+    "titulo": "Navegación dura con window.location.assign en vitrina, recomendaciones y plan",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/dashboard/PremiumModuleCard.tsx",
+      "linea": 212,
+      "fragmento": "// Navegación HARD (no triggerTransition — no aplica en portales, ni router.push):"
+     },
+     {
+      "ruta": "src/components/dashboard/PremiumModuleCard.tsx",
+      "linea": 215,
+      "fragmento": "window.location.assign(`/dashboard/messages?${params.toString()}`)"
+     },
+     {
+      "ruta": "src/components/dashboard/home/Recommendations.tsx",
+      "linea": 91,
+      "fragmento": "window.location.assign(`/dashboard/messages?${params.toString()}`)"
+     },
+     {
+      "ruta": "src/components/dashboard/plan/UpgradeCtaButton.tsx",
+      "linea": 100,
+      "fragmento": "window.location.assign(targetHref)"
+     }
+    ],
+    "impacto": "Recarga completa del portal tras pedir un módulo (se pierde estado y aparece el loading global) y un tercer patrón de navegación que CLAUDE.md no lista. Está justificado inline, por eso BAJA.",
+    "propuesta": "Redirigir desde una server action (redirect()) o no revalidar /dashboard antes de navegar; documentar la excepción en CLAUDE.md.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-servicios.vitrina-modulos",
+     "h2.cli-inicio",
+     "h2.cli-plan"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D2-A6; PLAN-155"
+   },
+   {
+    "titulo": "Motores PDF y endpoints huérfanos siguen publicados",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/reports/monthly/route.ts",
+      "linea": 21,
+      "fragmento": "export async function GET(req: NextRequest) {"
+     },
+     {
+      "ruta": "src/app/api/reports/monthly/route.ts",
+      "linea": 106,
+      "fragmento": "analytics: analyticsResult?.ok ? analyticsResult.data : null,"
+     },
+     {
+      "ruta": "src/components/dashboard/DownloadReportButton.tsx",
+      "linea": 129,
+      "fragmento": "export function DownloadReportButtons({ organizationId, isLocked = false }: { organizationId?: string, isLocked?: boolean }) {"
+     },
+     {
+      "ruta": "src/app/api/dashboard/leads/recent/route.ts",
+      "linea": 50,
+      "fragmento": "...lead,"
+     }
+    ],
+    "impacto": "Superficie autenticada viva sin dueño: /api/reports/monthly acepta organizationId por query para SUPER_ADMIN y armaría un PDF con datos demo como si fueran reales; /api/dashboard/leads/recent devuelve filas completas (incluye convertedToOsLeadId de LeadOS). Más ExecutiveReportTemplate, AnalyticsPeriodSelector y LeakMeter sin importadores.",
+    "propuesta": "Borrar las dos rutas, lib/reports/MonthlyReport.tsx y los cuatro componentes; ajustar tests/e2e/40.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados",
+     "h3.cli-chatbot",
+     "modelo.ChatbotLead"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-133; PLAN-135"
+   },
+   {
+    "titulo": "Contenido generado por IA presentado sin aviso en Resultados",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/dashboard/results/InsightsBlock.tsx",
+      "linea": 52,
+      "fragmento": "Lectura ejecutiva generada con tus datos reales"
+     },
+     {
+      "ruta": "src/components/dashboard/results/analysis/DiscoveriesSection.tsx",
+      "linea": 38,
+      "fragmento": "develOP revisa las conversaciones de tu asistente y te cuenta qué encontró"
+     },
+     {
+      "ruta": "src/lib/ai/results-insights.ts",
+      "linea": 91,
+      "fragmento": "const response = await getAnthropicClient().messages.create({"
+     },
+     {
+      "ruta": "src/components/dashboard/home/AIExecutiveBriefV2.tsx",
+      "linea": 55,
+      "fragmento": "Resumen Ejecutivo - IA"
+     }
+    ],
+    "impacto": "Los insights de Tráfico/SEO (Claude Haiku) y los descubrimientos del análisis (Gemini, generateInsights.ts:99-100) se presentan como lectura «con tus datos reales» o como revisión de develOP; solo el brief de Inicio lleva la etiqueta IA. Riesgo de confianza si un insight se equivoca.",
+    "propuesta": "Badge o leyenda «Generado con IA» en InsightsBlock y DiscoveriesSection, igual al del brief.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados.insights-ia",
+     "h2.cli-resultados.analisis-mensual",
+     "int.anthropic",
+     "int.vertex"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-049"
+   },
+   {
+    "titulo": "Convenciones de CLAUDE.md incumplidas en el lote: colores de servicio cruzados, CSS inline, Lucide sin strokeWidth",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+      "linea": 37,
+      "fragmento": "glowRgb: '167,139,250',"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+      "linea": 44,
+      "fragmento": "glowRgb: '52,211,153',"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+      "linea": 51,
+      "fragmento": "glowRgb: '251,191,36',"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+      "linea": 292,
+      "fragmento": "background: 'linear-gradient(90deg, #06b6d4 0%, #818cf8 50%, #c084fc 100%)',"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+      "linea": 116,
+      "fragmento": "<Icon size={24} />"
+     },
+     {
+      "ruta": "src/app/bienvenida/_components/Step3Tour.tsx",
+      "linea": 37,
+      "fragmento": "<Icon size={16} />"
+     }
+    ],
+    "impacto": "IA aparece violeta, Automatización esmeralda y Software ámbar en Servicios, cuando CLAUDE.md fija IA esmeralda, Automatización ámbar y Software violeta. Gradiente estático inline existiendo clases Tailwind, e iconos sin strokeWidth={1.5} (también trafico/page.tsx:153, PremiumModuleCard.tsx:144, :265, Step2Conexiones.tsx:32).",
+    "propuesta": "Mapear SERVICE_TYPE_CONFIG a #10b981 / #f59e0b / #8b5cf6, clases Tailwind para el gradiente y strokeWidth={1.5}.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-servicios.servicios-contratados",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Copy sin terminar en el camino del cliente: modal PLACEHOLDER, pestaña 'Trafico', 'Ver detalles' que lleva a Mensajes",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/dashboard/PremiumModuleCard.tsx",
+      "linea": 53,
+      "fragmento": "// PLACEHOLDER — editar copy real luego."
+     },
+     {
+      "ruta": "src/components/dashboard/ResultadosTabs.tsx",
+      "linea": 8,
+      "fragmento": "{ href: '/dashboard/resultados/trafico', label: 'Trafico', icon: BarChart3 },"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+      "linea": 157,
+      "fragmento": "href=\"/dashboard/messages?context=default\""
+     }
+    ],
+    "impacto": "El modal de módulos muestra copy marcado como placeholder (promete «facturas en 30 segundos», «24/7»), la pestaña dice «Trafico» sin tilde y el «Ver detalles» de un servicio contratado lleva al chat. Sin datos inventados graves, pero se nota sin terminar.",
+    "propuesta": "Pasar longDescription de la DB (la query de services/page.tsx:177-182 ya trae la fila completa), corregir la tilde y renombrar el botón a «Consultar» hasta que exista el detalle (PLAN-145).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-servicios.vitrina-modulos",
+     "h2.cli-servicios.servicios-contratados",
+     "h2.cli-resultados"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-145"
+   },
+   {
+    "titulo": "Módulo DEPRECATED que el cliente tiene activo desaparece de 'Tus módulos'",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+      "linea": 179,
+      "fragmento": "status: { in: ['ACTIVE', 'COMING_SOON'] },"
+     },
+     {
+      "ruta": "src/lib/modules/showroom.ts",
+      "linea": 32,
+      "fragmento": "if (orgModuleStatus === 'ACTIVE' || orgModuleStatus === 'PAUSED') return 'owned'"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/layout.tsx",
+      "linea": 57,
+      "fragmento": "where: { organizationId: orgId, status: 'ACTIVE' },"
+     }
+    ],
+    "impacto": "Si develOP discontinúa un módulo que un cliente sigue pagando, deja de figurar en Servicios aunque el menú lateral lo siga mostrando (layout.tsx:53-62). Incoherencia visible.",
+    "propuesta": "Decisión de Franco: traer DEPRECATED en la query y clasificarlo owned si la org lo tiene ACTIVE/PAUSED.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-servicios.vitrina-modulos",
+     "modelo.PremiumModule",
+     "modelo.OrganizationModule"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-152"
+   },
+   {
+    "titulo": "Formularios y errores del lote sin semántica accesible",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/bienvenida/_components/Step1Empresa.tsx",
+      "linea": 41,
+      "fragmento": "<label className=\"text-[11px] font-bold uppercase tracking-wider text-zinc-400\">"
+     },
+     {
+      "ruta": "src/app/bienvenida/_components/Step2Conexiones.tsx",
+      "linea": 41,
+      "fragmento": "<input"
+     },
+     {
+      "ruta": "src/app/bienvenida/_components/BienvenidaWizard.tsx",
+      "linea": 122,
+      "fragmento": "<div className=\"rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300\">"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+      "linea": 152,
+      "fragmento": "<div className=\"flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4 backdrop-blur-sm\">"
+     },
+     {
+      "ruta": "src/components/dashboard/NewTicketModal.tsx",
+      "linea": 103,
+      "fragmento": "<button\n                  onClick={() => !isSubmitting && setIsOpen(false)}"
+     }
+    ],
+    "impacto": "Labels sin htmlFor/id (Step1Empresa.tsx:41-76), el input de GA sin label, rubros como toggles sin aria-pressed (:85-96), bloques de error sin role=alert (wizard, Tráfico :152, SEO :187) y el botón X del modal de ticket sin nombre accesible. El lector de pantalla no anuncia campos ni errores.",
+    "propuesta": "htmlFor/id, role=\"alert\" o aria-live, aria-pressed y aria-label en el botón de cierre.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-bienvenida.wizard-3-pasos",
+     "h2.cli-resultados",
+     "h2.cli-soporte.crear-ticket"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Patrón D1-c1 (errores sin role=alert)"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.trafico-ga4",
+    "nombre": "Tráfico & Analytics (GA4)",
+    "descripcion": "Sesiones, usuarios, rebote, duración, sesiones diarias y páginas más visitadas de los últimos 30 días.",
+    "archivos": [
+     "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+     "src/app/(protected)/dashboard/resultados/trafico/loading.tsx",
+     "src/lib/analytics.ts",
+     "src/components/dashboard/AnalyticsMetricCard.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/resultados/trafico/page.tsx#AnalyticsPage"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "Ningún flujo vivo escribe Organization.analyticsPropertyId (git grep: solo complete-onboarding.ts:38, inalcanzable, y lib/actions/clients.ts:161-197, sin importadores). Un cliente real ve siempre AnalyticsEmptyState (trafico/page.tsx:82-86) con CTA muerto (:113-117); las orgs seed tienen 'properties/123456789' = MOCK_PROPERTY_ID (seed.ts:202; analytics.ts:22, :98) → solo demo.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId (trafico/page.tsx:48-50) y organization.findUnique por id de sesión (:52-55)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "AnalyticsEmptyState (:106-123) existe pero su CTA no hace nada (:115-117)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx con Sentry (resultados/error.tsx:13-18), pero se renderiza result.error (:158) y los fallos de API caen a mock (analytics.ts:196-198)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "trafico/loading.tsx + Suspense con AnalyticsSkeleton (:71, :89)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input; solo ?demo === 'true' (:46-47)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 (:195); truncate en páginas (:307)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "boundary sí; fallos manejados sin captura (analytics.ts:196-198)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "tendencias literales (:204, :215, :227, :238); FIXME (:113)"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "ni el cliente ni el admin tienen dónde cargar el Property ID"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.pagespeed",
+    "nombre": "Velocidad del sitio (PageSpeed)",
+    "descripcion": "Puntaje de performance y Core Web Vitals mobile/desktop del sitio del cliente.",
+    "archivos": [
+     "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+     "src/lib/integrations/pagespeed.ts",
+     "src/components/dashboard/results/PageSpeedCard.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/resultados/trafico/page.tsx#AnalyticsPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "siteUrl lo carga el admin (updateClient.ts:95; createClientOnly.ts:84) → trafico/page.tsx:99-101 → PageSpeedSection (:125-136) → getPageSpeedReport (pagespeed.ts:26-35, caché 6 h) → PageSpeedCard. Requiere GOOGLE_PAGESPEED_API_KEY (pagespeed.ts:41-45).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "siteUrl de la org de sesión (trafico/page.tsx:52-55)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "sin siteUrl o sin datos la sección desaparece sin mensaje (:126, :133)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "falla → null sin aviso (pagespeed.ts:63-72)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Suspense con LoadingState (:99)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "PageSpeedCard grid-cols-1 sm:grid-cols-2 (:225)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error/warn (pagespeed.ts:43, :64, :71)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos de la API sin literales"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "depende de que develOP cargue el sitio"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.seo-search-console",
+    "nombre": "SEO & Posicionamiento (Search Console)",
+    "descripcion": "Clicks, impresiones, CTR, posición, gráfico diario, top 10 consultas, top 5 páginas y oportunidades de los últimos 28 días.",
+    "archivos": [
+     "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+     "src/app/(protected)/dashboard/resultados/seo/loading.tsx",
+     "src/lib/searchconsole.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/resultados/seo/page.tsx#SeoPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "siteUrl (admin) → seo/page.tsx:103-108, :150-152 → getSearchConsoleData (searchconsole.ts:99-210, datos reales si la service account tiene acceso) → métricas y tablas (:223-342). Sin credenciales o con error → mock con PreviewBanner (:226).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId + findUnique por id (:100-106)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "upsell empty (:129-147), aviso de cero datos (:333-341), tablas condicionadas (:308-315)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "rama !ok inalcanzable (:181-200); errores de API → mock con banner"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "seo/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "solo ?demo (:98-99)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "tabla con overflow-x-auto (:389); grid-cols-2 lg:grid-cols-4 (:237)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "boundary sí; fallos de API sin captura (searchconsole.ts:211-213)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "tendencias literales (:244, :252, :260, :269) con FIXME (:234-235)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "la activación la hace develOP tras el pedido"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.seo-solicitar-activacion",
+    "nombre": "Pedir SEO avanzado (ACTIVAR AHORA)",
+    "descripcion": "Botón del vacío de SEO que registra el interés del cliente como lead de upsell para develOP.",
+    "archivos": [
+     "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+     "src/lib/actions/upsell.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/resultados/seo/page.tsx#activarSeo"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "form (seo/page.tsx:137-141) → activarSeo (:110-113) → requestUpsellAction (upsell.ts:10-156) → contactSubmission.create (:88-97), webhook (:99-104), notificaciones (:112-135).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "session.user.organizationId (upsell.ts:16), no resolveOrgId: falla en vista de soporte"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "resultado descartado (seo/page.tsx:112)"
+     },
+     "carga": {
+      "cumple": "no",
+      "evidencia": "botón sin estado pendiente (:138-140)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "UpsellRequestSchema sin .max (schemas.ts:45-48)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "ResultEmptyState centrado"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (upsell.ts:137, :153)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin literales"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "el cliente no sabe si se envió"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.insights-ia",
+    "nombre": "Insights automáticos (Tráfico y SEO)",
+    "descripcion": "Hasta 3 lecturas accionables generadas por Claude Haiku sobre los datos de GA4 o Search Console.",
+    "archivos": [
+     "src/lib/ai/results-insights.ts",
+     "src/components/dashboard/results/InsightsBlock.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/resultados/seo/page.tsx#SeoPage",
+     "src/app/(protected)/dashboard/resultados/trafico/page.tsx#AnalyticsPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "seo/page.tsx:203-221 → getSeoInsights (results-insights.ts:44-52, unstable_cache 24 h por org) → messages.create (:145-150) → parseInsights → InsightsBlock (:326-330). Requiere ANTHROPIC_API_KEY (:172-174); no corre con mock (:203-204).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "caché por organizationId (:49)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "bloque oculto si [] (seo/page.tsx:326)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "catch → [] cacheado 24 h (:156-159)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "dentro de la carga de la página"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "lista vertical"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:103, :157)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "sin aviso de IA (InsightsBlock.tsx:49-52)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "lectura directa"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.reputacion-gbp",
+    "nombre": "Reputación online (Google Business Profile)",
+    "descripcion": "Rating, total y reseñas recientes del perfil de Google del negocio.",
+    "archivos": [
+     "src/app/(protected)/dashboard/resultados/reputacion/page.tsx",
+     "src/app/(protected)/dashboard/resultados/reputacion/loading.tsx",
+     "src/lib/integrations/google-business-profile.ts",
+     "src/components/dashboard/results/GBPMetricsCard.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/resultados/reputacion/page.tsx#ReputacionPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "SUPER_ADMIN abre /api/auth/google-business/start?orgId (start/route.ts:5-16, sin enlace en UI) → callback guarda tokens y location (callback/route.ts:49-65) → reputacion/page.tsx:15-23 → getGBPMetrics (google-business-profile.ts:165-183) → GBPMetricsCard.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId (:15-16) + getGBPMetrics(organizationId)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ReputationEmptyState (:39-56)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "fallo → mismo vacío 'pendiente de conexión' (:21-23, :34)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "reputacion/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "GBPMetricsCard grid-cols-1 lg:grid-cols-[0.8fr_1.2fr]"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:22; google-business-profile.ts:203, :233)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "performance en 0 se filtra (GBPMetricsCard.tsx:39-67)"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "la conexión no tiene UI"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.analisis-mensual",
+    "nombre": "Análisis de tu negocio",
+    "descripcion": "Descubrimientos del mes, tendencia de conversaciones y categorías de consulta del asistente (Pro+).",
+    "archivos": [
+     "src/app/(protected)/dashboard/resultados/analisis/page.tsx",
+     "src/app/(protected)/dashboard/resultados/analisis/loading.tsx",
+     "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/resultados/analisis/page.tsx#AnalisisPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "analisis/page.tsx:31-57 (resolveOrgId + planAllows 'insight') → getMonthlyAnalysisForOrg (forOrg, :48-106) → secciones. Los descubrimientos salen del cron generate-insights (netlify.toml:25-26; ausente en vercel.json) con Gemini (generateInsights.ts:99-100): con la credencial de Vertex vencida no hay nuevos y la sección queda 'calibrando'.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId + forOrg (getMonthlyAnalysisForOrg.ts:53)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "NoBotState (:85-101), CalibratingBlock (DiscoveriesSection.tsx:41-45), AnalysisTeaser (:48-51)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "resultados/error.tsx → SectionErrorBoundary con mensaje y Sentry"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "analisis/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-col; ResponsiveContainer h-48 (MonthlyConversationsChart.tsx:57-61)"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary.tsx:64-67"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "texto generado por IA presentado como revisión de develOP (DiscoveriesSection.tsx:38)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "requiere bot activo y cron+LLM operativos"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.informe-mensual-pdf",
+    "nombre": "Descargar informe del mes (PDF)",
+    "descripcion": "PDF con descubrimientos, conversaciones, categorías, leads del mes y embudo.",
+    "archivos": [
+     "src/app/api/reports/client-monthly/route.ts",
+     "src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx",
+     "src/lib/reports/client-monthly/get-client-monthly-report-data.ts"
+    ],
+    "entradas": [
+     "src/app/api/reports/client-monthly/route.ts#GET"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "DownloadMonthlyReportButton.tsx:18-35 → GET /api/reports/client-monthly (route.ts:24-56) → getClientMonthlyReportData (:20-76) → renderToBuffer(ClientMonthlyReportPdf) → descarga.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "route.ts:25-33, sin parámetros"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "sin bot arma el PDF con ceros (get-client-monthly-report-data.ts:41-50); no verifiqué el texto del PDF"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "toast (DownloadMonthlyReportButton.tsx:36-37); 500 genérico (route.ts:59-62)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "'Generando...' con spinner (:51-56)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "botón en el header"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "route.ts:58 console.error"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "cuenta leads DQ (get-client-monthly-report-data.ts:56-65)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "un clic"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-servicios",
+    "id": "h2.cli-servicios.servicios-contratados",
+    "nombre": "Servicios contratados",
+    "descripcion": "Tarjetas de los servicios de develOP que la org tiene (tipo, estado, fecha de inicio).",
+    "archivos": [
+     "src/app/(protected)/dashboard/services/page.tsx",
+     "src/app/(protected)/dashboard/services/loading.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/services/page.tsx#ServicesPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "services/page.tsx:168-176 resolveOrgId + service.findMany por org → ServiceCard (:84-166, :242-250).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "where { organizationId } (:173-176)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "EmptyStateMuted (:222-234)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "dashboard/error.tsx → SectionErrorBoundary"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "services/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 (:241)"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "boundary con captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "descripción genérica por tipo (:25-54); 'Ver detalles' lleva a Mensajes (:156-162); fechas sin TZ (:149)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "para ver el detalle tiene que escribir a develOP (PLAN-145)"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-servicios",
+    "id": "h2.cli-servicios.vitrina-modulos",
+    "nombre": "Vitrina de módulos premium",
+    "descripcion": "Tus módulos / disponibles / próximamente, con detalle en modal y pedido de activación o de aviso.",
+    "archivos": [
+     "src/app/(protected)/dashboard/services/page.tsx",
+     "src/components/dashboard/PremiumModuleCard.tsx",
+     "src/lib/modules/showroom.ts",
+     "src/lib/actions/upsell.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/services/page.tsx#ServicesPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "services/page.tsx:177-196 → buildShowroom (showroom.ts:58-74) → PremiumModuleCard → submitInterest (:201-227) → requestUpsellAction → window.location.assign a Mensajes (:215).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "organizationModule por org (:185-188); upsell usa session.user.organizationId (upsell.ts:16)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "secciones se ocultan si vacías sin mensaje (:258, :307, :336)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "errorMsg visible (PremiumModuleCard.tsx:327-332, :382-387)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "estados idle/loading/success (:106-171); loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "UpsellRequestSchema sin .max ni chequeo de slug (schemas.ts:45-48)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "upsell.ts:153 console.error"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "'Próximamente Q3 2026' (:300); copy PLACEHOLDER (:53)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "pedido → chat; la contratación la hace develOP"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-soporte",
+    "id": "h2.cli-soporte.tablero-tickets",
+    "nombre": "Centro de soporte (tablero)",
+    "descripcion": "Tickets en 3 columnas (abiertos, en curso, resueltos), contador y datos de SLA.",
+    "archivos": [
+     "src/app/(protected)/dashboard/soporte/page.tsx",
+     "src/app/(protected)/dashboard/soporte/loading.tsx",
+     "src/components/dashboard/SoporteBoard.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/soporte/page.tsx#SoportePage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "soporte/page.tsx:14-54 (auth + resolveOrgId; findMany/count por org) → SoporteBoard (:103).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "where organizationId (:20-38)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "EmptyStateMuted por columna (SoporteBoard.tsx:217-221)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "dashboard/error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "soporte/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 sm:grid-cols-3 (:77); min-h solo en lg (:63)"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "boundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "SLA literal '< 4h' 'Lun-Vie 9-19hs' (:86-91) que contradice otras pantallas"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "navega y abre tickets solo"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-soporte",
+    "id": "h2.cli-soporte.crear-ticket",
+    "nombre": "Abrir ticket",
+    "descripcion": "Modal con asunto, categoría, prioridad y mensaje que crea el ticket y lleva a su detalle.",
+    "archivos": [
+     "src/components/dashboard/NewTicketModal.tsx",
+     "src/lib/tickets/actions.ts",
+     "src/lib/tickets/schemas.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/soporte/page.tsx#SoportePage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "NewTicketModal.tsx:29-69 → createTicketAction (tickets/actions.ts:38-104) → ticket.create con primer mensaje → router.push al detalle (:63).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId (tickets/actions.ts:50-53, :70)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "formulario"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "errorMsg + toast (NewTicketModal.tsx:67-68, :119-124)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "isSubmitting"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod cliente+servidor sin .max (schemas.ts:5-6)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "modal max-w-lg px-4"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "tickets/actions.ts:101 console.error"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin literales"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "lo resuelve solo"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-soporte",
+    "id": "h2.cli-soporte.conversacion-ticket",
+    "nombre": "Conversación del ticket",
+    "descripcion": "Hilo con develOP, respuesta del cliente, timeline y detalles del ticket.",
+    "archivos": [
+     "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+     "src/app/(protected)/dashboard/soporte/[ticketId]/loading.tsx",
+     "src/components/dashboard/TicketReplyForm.tsx",
+     "src/components/dashboard/ClientChatThread.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx#TicketDetailPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "[ticketId]/page.tsx:54-70 (findUnique id+org) → ClientChatThread → TicketReplyForm.tsx:13-21 → replyToTicketAction (tickets/actions.ts:110-176, assertTicketBelongsToOrg :130) → revalidatePath.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "where id+organizationId (:60-61); assert (tickets/actions.ts:126-137)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "emptyState (:172-176)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "ClientChatComposer muestra state.error (:84-86)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "[ticketId]/loading.tsx; isPending"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "TicketReplySchema max 2000 (schemas.ts:11-18)"
+     },
+     "mobile": {
+      "cumple": "no",
+      "evidencia": "PROBABLE colapso del hilo a 0 px (:115, :159, :193)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "catch con console.error (tickets/actions.ts:173)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "'menos de 24hs' (TicketReplyForm.tsx:32) contra '< 4h'; horas sin TZ (:40-47)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "sin tiempo real: hay que recargar para ver la respuesta"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-soporte",
+    "id": "h2.cli-soporte.resolver-ticket",
+    "nombre": "Marcar ticket como resuelto",
+    "descripcion": "El cliente cierra el ticket desde la cabecera del detalle.",
+    "archivos": [
+     "src/components/dashboard/ResolveTicketButton.tsx",
+     "src/lib/tickets/actions.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx#TicketDetailPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ResolveTicketButton.tsx:12-17 → resolveTicketClientAction (tickets/actions.ts:202-222, update where id+organizationId) → router.refresh.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "where { id, organizationId } (:211-213)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "falla silenciosa (ResolveTicketButton.tsx:15-16)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Loader2 (:25-29)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "solo trim manual (:208)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "botón en la cabecera"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:219)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin literales"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "sin confirmación ni reapertura"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-bienvenida",
+    "id": "h2.cli-bienvenida.wizard-3-pasos",
+    "nombre": "Bienvenida en 3 pasos",
+    "descripcion": "Datos del negocio, conexión de GA4 y tour; marca la org como onboardeada.",
+    "archivos": [
+     "src/app/bienvenida/layout.tsx",
+     "src/app/bienvenida/page.tsx",
+     "src/app/bienvenida/_actions/complete-onboarding.ts",
+     "src/app/bienvenida/_components/BienvenidaWizard.tsx",
+     "src/app/bienvenida/_components/Step1Empresa.tsx",
+     "src/app/bienvenida/_components/Step2Conexiones.tsx",
+     "src/app/bienvenida/_components/Step3Tour.tsx"
+    ],
+    "entradas": [
+     "src/app/bienvenida/page.tsx#BienvenidaPage",
+     "src/app/bienvenida/layout.tsx#BienvenidaLayout",
+     "src/app/bienvenida/_actions/complete-onboarding.ts#completeOnboardingAction"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "Código completo pero inalcanzable: las 3 altas vivas crean la org con onboardingCompleted: true (core.ts:85, createClientOnly.ts:85, createClientWithBot.ts:135); las que dejan false (clients.ts:124, invitations.ts:86) no tienen importadores. Guarda el GA ID equivocado (complete-onboarding.ts:38) y el rubro en un campo sin lectores (:50).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "resolveOrgId (:23); sin control de OrgRole (un VIEWER renombra la empresa)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "formulario"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "error visible sin role=alert (BienvenidaWizard.tsx:121-125); excepciones a app/error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "'Configurando...' (Step3Tour.tsx:61-62)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod sin .max; GA sin formato; contactEmail validado y descartado (:9-15, :39)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "max-w-4xl px-4 (layout.tsx:14); grid-cols-2 sm:grid-cols-4"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "app/error.tsx:27-30 para excepciones"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "TODOs (:39-40); promesas '24/7' y 'tiempo real' (Step3Tour.tsx:12-14)"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "nunca se presenta al cliente"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-133",
+    "clave": "Borrar motores PDF huérfanos",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Siguen en origin/main: src/app/api/reports/monthly/route.ts:21 (git grep -n \"leads/recent\\|reports/monthly\" origin/main -- logic-core-v3 ':!logic-core-v3/docs' → solo el comentario de client-monthly/route.ts:6 y tests/e2e/43:9), src/lib/reports/MonthlyReport.tsx (solo lo importa route.ts:8), ExecutiveReportTemplate.tsx y DownloadReportButton.tsx:129 (git grep -n \"dashboard/DownloadReportButton\" → 0 importadores)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "AnalyticsPeriodSelector y LeakMeter también sin importadores."
+   },
+   {
+    "id": "PLAN-155",
+    "clave": "P3-A.2-acceso: vitrina -> LockedView",
+    "estado_en_codigo": "hecho",
+    "evidencia": "services/page.tsx:325-327 salesRouteHref solo 'motor-resenas'; PremiumModuleCard.tsx:403-410 Link 'Ver módulo'; :212-215 window.location.assign tras requestUpsellAction; los demás siguen con RequestButton inline (:411-420)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "window.location.assign no está en CLAUDE.md (ver hallazgo de navegación dura)."
+   },
+   {
+    "id": "PLAN-132",
+    "clave": "P2.C PDF del informe mensual",
+    "estado_en_codigo": "hecho",
+    "evidencia": "DownloadMonthlyReportButton.tsx:21 → client-monthly/route.ts:24-56 (resolveOrgId + planAllows 'insight') → get-client-monthly-report-data.ts:20-76 → ClientMonthlyReportPdf; tests/e2e/43-client-monthly-report-download.spec.ts",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Cuenta leads DQ (:56-65) y sus errores no van a Sentry (route.ts:58)."
+   },
+   {
+    "id": "PLAN-049",
+    "clave": "Badge 'Generado por IA' en outputs LLM",
+    "estado_en_codigo": "parcial",
+    "evidencia": "AIExecutiveBriefV2.tsx:55 'Resumen Ejecutivo - IA'; InsightsBlock.tsx:49-52 y DiscoveriesSection.tsx:38 sin aviso. git grep -n -i \"generado por ia\\|AiBadge\\|ai-disclaimer\" origin/main -- logic-core-v3/src → 0; control: git grep -n -i \"con IA\" → motor-resenas/_components/ReviewItem.tsx:171",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-130",
+    "clave": "upsertBusinessMetrics sin callers ni UI",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/actions/metrics-actions.ts:9 definida; git grep -n \"metrics-actions\" origin/main -- logic-core-v3/src → 0 importadores (control: git grep -n \"upsertBusinessMetrics\" → la definición). Es el único escritor de BusinessMetric (:31, :40): computeConversionScore (health-score.ts:282-298) queda siempre null",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-024",
+    "clave": "completeOnboardingAction sin caller y con auth débil",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/actions/onboarding-actions.ts:79-82 sigue exportada (session obtenida y no usada) y guarda credenciales en claro (:111-131). git grep -n \"onboarding-actions\" → solo components/onboarding/OnboardingWizard.tsx:6 (importa saveOnboardingProfile), y ese wizard (:480) no tiene importadores",
+    "sigue_teniendo_sentido": "si",
+    "nota": "No confundir con el completeOnboardingAction de src/app/bienvenida/_actions/complete-onboarding.ts:17, que sí se llama (BienvenidaWizard.tsx:33)."
+   },
+   {
+    "id": "PLAN-145",
+    "clave": "Modal de detalle de servicios contratados",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "services/page.tsx:156-162: 'Ver detalles' del ServiceCard sigue siendo Link a /dashboard/messages?context=default",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-127",
+    "clave": "Verificación visual de Resultados antes del merge",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "El merge ya ocurrió: 583a3ee, e6578b6, 90a202e, d1a2380, 2b51858, 37609b5, 69ea796, ee24347, 15b1d21 y df4fbe8 son ancestros de origin/main (git merge-base --is-ancestor). No hay registro de verificación visual en docs (lane-resultados-redesign-log.md:298 es pre-merge)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "No verificable por lectura; sigue valiendo como verificación post-merge."
+   },
+   {
+    "id": "PLAN-169",
+    "clave": "Tickets en tiempo real",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -e EventSource -e setInterval -e refreshInterval -e useSWR -e WebSocket origin/main -- soporte/ y componentes del ticket → 0; control: ClientLeadsTable.tsx:146 setInterval(refresh, 30_000)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-141",
+    "clave": "Mocks sin aviso en Resultados",
+    "estado_en_codigo": "parcial",
+    "evidencia": "PreviewBanner con isMockData en seo/page.tsx:226 y trafico/page.tsx:188 (y en ?demo: seo :124-125, trafico :68). Siguen las tendencias literales (trafico :204-238, seo :244-269) y la caída silenciosa a mock (analytics.ts:196-198, searchconsole.ts:211-213)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-140",
+    "clave": "Verificación y merge de lane/resultados",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Merge hecho (commits de la lane ancestros de origin/main; no quedan ramas lane/* en git for-each-ref); la verificación visual no deja rastro",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-051",
+    "clave": "AIExecutiveBrief sin feature flag",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "dashboard/page.tsx:191-210 renderiza AIExecutiveBriefV2 tras getExecutiveBrief sin flag; git grep -n -i \"FEATURE_FLAG\\|featureFlag\\|isFeatureEnabled\" origin/main -- logic-core-v3/src → ningún mecanismo de flags (solo softFlags de LeadOS)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-152",
+    "clave": "Módulo DEPRECATED poseído desaparece de 'Tus módulos'",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "services/page.tsx:177-180 trae solo ACTIVE/COMING_SOON; showroom.ts:28-35 no contempla DEPRECATED",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-025",
+    "clave": "OnboardingWizard no reutilizable y borrador global",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts:6 DRAFT_KEY = 'develop:onboarding:draft' en localStorage (:31, :36)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-129",
+    "clave": "Error de tsc preexistente en src/lib/searchconsole.ts",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Baseline del padre: tsc 0 errores. searchconsole.ts:2 importa @googleapis/webmasters (package.json:131, package-lock.json:859, instalado) y castea el requestBody a webmasters_v3.Schema$SearchAnalyticsQueryRequest (:134, :144)",
+    "sigue_teniendo_sentido": "no",
+    "nota": "No reproduce hoy; la causa intermitente (google-gax duplicado) no se reverificó."
+   },
+   {
+    "id": "PLAN-126",
+    "clave": "D2: quitar datos falsos y marcar deltas fijos",
+    "estado_en_codigo": "parcial",
+    "evidencia": "'Google Ads' ya no aparece en Resultados (git grep → solo copy de home/LeadCampaigns.tsx:28); FIXME(data-truth) solo en seo/page.tsx:234-235; los deltas de trafico/page.tsx:204, :215, :227, :238 no tienen FIXME",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Marcar no alcanza: el cliente sigue viendo el delta inventado."
+   },
+   {
+    "id": "PLAN-135",
+    "clave": "Componentes muertos de Resultados: no revivir ni cablear",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git grep -l -w <nombre> origin/main -- logic-core-v3/src: DownloadReportButton, AnalyticsPeriodSelector y LeakMeter solo aparecen en su propio archivo; ExecutiveReportTemplate solo en sí mismo y en DownloadReportButton.tsx",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Se respetó 'no revivir'; falta borrarlos (PLAN-133)."
+   },
+   {
+    "id": "PLAN-136",
+    "clave": "Decisiones D1-D6 de Resultados",
+    "estado_en_codigo": "parcial",
+    "evidencia": "D1 ResultEmptyState en los 4 tabs (analisis:87, reputacion:41, seo:131, trafico:108); D3 chartCardHoverCls local (_shared/chartHover); D4 cumplido en SEO (seo/page.tsx:181-184) pero trafico/page.tsx:158 sigue renderizando {result.error}; D2 parcial (PLAN-126)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-122",
+    "clave": "P0.2 Análisis mensual (Franco)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "analisis/page.tsx:31-57 (resolveOrgId, planAllows 'insight' :35-36); getMonthlyAnalysisForOrg.ts:48-106 con forOrg",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Los descubrimientos dependen del cron generate-insights (netlify.toml:25-26; no está en vercel.json) y de Gemini/Vertex (generateInsights.ts:99-100), con credencial vencida."
+   },
+   {
+    "id": "PLAN-042",
+    "clave": "Inicio: reskin S1, S2, S3a y S5",
+    "estado_en_codigo": "hecho",
+    "evidencia": "2725caf, b811c17, 6e19f7e, f9eb475 y 7b8aa4f son ancestros de origin/main (git merge-base --is-ancestor); el 'sin mergear' ya no aplica",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-144",
+    "clave": "Servicios: Sprints 0-4 y hotfix",
+    "estado_en_codigo": "hecho",
+    "evidencia": "5d97587, 97c02c1, ab86804, a6550e9, 7fda87c y 91b3b20 ancestros de origin/main; empty hand-rolled en services/page.tsx:222-234; ServiceDetailModal montado (PremiumModuleCard.tsx:427-438)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-123",
+    "clave": "Resultados: Sprints 1, A, 2 y 3",
+    "estado_en_codigo": "hecho",
+    "evidencia": "583a3ee, e6578b6, 90a202e, d1a2380, 2b51858 y 37609b5 ancestros de origin/main; PageHeader propio en los 4 tabs (analisis:40, reputacion:27, seo:117, trafico:61) y layout.tsx:3-10 solo con tabs",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-124",
+    "clave": "Resultados Sprint 4: Tráfico",
+    "estado_en_codigo": "hecho",
+    "evidencia": "69ea796, ee24347, 15b1d21 y df4fbe8 ancestros de origin/main; sin 'Google Ads' en Resultados; AnalyticsSkeleton.tsx:33 determinístico; SessionsChart sin any (git grep ': any\\|as any' → 0)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-139",
+    "clave": "Seed QA de /analisis",
+    "estado_en_codigo": "hecho",
+    "evidencia": ".gitignore:78 'scripts/dev/_seed-resultados-qa.ts'; d1a2380 ancestro de main; el archivo no existe en el disco (gitignored) y la siembra en Neon no es verificable por lectura",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Al no estar versionado, nadie más puede reproducir el QA de /analisis."
+   },
+   {
+    "id": "PLAN-057",
+    "clave": "P1.C-fix cosméticos del home",
+    "estado_en_codigo": "hecho",
+    "evidencia": "MoneyEstimate.tsx:84 input sin spinners ([appearance:textfield]); BusinessHero.tsx:32-38 hover canónico con adminHoverCls",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Los empty states muted no se verificaron uno por uno."
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D2-A1] Conteo de leads de Inicio y computeLeadsScore sobre ContactSubmission sin organizationId",
+    "resultado": "confirmada",
+    "evidencia": "week-results.ts:43-51 y health-score.ts:311-333 (más computeConversionScore :282-289) cuentan ContactSubmission sin filtro; el modelo no tiene organizationId (schema.prisma:688-708); se renderizan en dashboard/page.tsx:173 y :183; WeekResultsGrid.tsx:44-47 lo tapa con 'En calibración' 'sin revelar que es global'. La Auditoría III no lo ve porque el modelo no tiene la columna.",
+    "hallazgo_titulo": "Inicio cuenta como leads del cliente los ContactSubmission de todas las orgs"
+   },
+   {
+    "alerta": "[D2-A2] IDs internos en URLs (/dashboard/chatbot/leads/[id]) contra la regla de CLAUDE.md",
+    "resultado": "parcial",
+    "evidencia": "Hay 3 rutas dinámicas con cuid: soporte/[ticketId] (page.tsx:60-61, where id+organizationId), chatbot/leads/[id] (page.tsx:34, getLeadByIdForOrg con forOrg, multiTenantQueries.ts:147-155) y email-marketing/campaigns/[id]/send (sendCampaignAction, _actions.ts:177-180). Ninguna es IDOR; las tres violan la regla de no exponer IDs.",
+    "hallazgo_titulo": "IDs internos (cuid) en URLs del portal, todos resueltos contra la org"
+   },
+   {
+    "alerta": "[D2-A3] Promesas visibles: 'Próximamente Q3 2026' y 'Respondemos en < 4 hs, Lun-Vie 9-18'",
+    "resultado": "confirmada",
+    "evidencia": "PremiumModuleCard.tsx:300 y ServiceDetailModal.tsx:181 'Próximamente Q3 2026' (vencida al 14/10/2026); MessageThread.tsx:114-119 '< 4 hs' 'Lun–Vie 9–18hs'; soporte/page.tsx:87-90 '< 4h' 'Lun-Vie 9-19hs ART'; TicketReplyForm.tsx:32 'menos de 24hs'; Step3Tour.tsx:14 'soporte 24/7'.",
+    "hallazgo_titulo": "Promesas vencidas y contradictorias visibles al cliente (Q3 2026 y cuatro SLA distintos)"
+   },
+   {
+    "alerta": "[D2-A4] Lanes del portal cerradas pero 'sin mergear' (inicio, services, resultados, … y b0-isolation-motor-chatbot)",
+    "resultado": "parcial",
+    "evidencia": "Todos los commits declarados 'sin mergear' de Inicio (2725caf…7b8aa4f), Servicios (5d97587…91b3b20) y Resultados (583a3ee…df4fbe8) son ancestros de origin/main; no quedan ramas lane/* (git for-each-ref). Sigue sin mergear origin/b0-isolation-motor-chatbot: 7 commits no equivalentes por parche (git cherry), entre ellos 9fc616c4 'feat(crypto): cifrar credenciales en write-paths + Zod (PD-1.2)'.",
+    "hallazgo_titulo": "Credenciales de la bóveda se guardan en texto plano: el cifrado al escribir quedó sin mergear"
+   },
+   {
+    "alerta": "[D2-A5] Credenciales de onboarding: texto plano con etiqueta ENCRIPTADO; ONBOARDING_SECRET_KEY",
+    "resultado": "confirmada",
+    "evidencia": "En main están credential-cipher.ts y resolve-credential.ts, pero encryptCredential (credential-cipher.ts:73) no tiene llamadores fuera de tests; encrypt-for-storage.ts no existe en main (git ls-tree). createClientAssetAction (agency-actions.ts:94-111, usado por VaultManager.tsx:5) y completeOnboardingAction (onboarding-actions.ts:110-131, url 'ENCRIPTADO_EN_TEXTO') guardan description en claro. ONBOARDING_SECRET_KEY solo aparece comentada en .env.example:245 y en el test.",
+    "hallazgo_titulo": "Credenciales de la bóveda se guardan en texto plano: el cifrado al escribir quedó sin mergear"
+   },
+   {
+    "alerta": "[D2-A6] window.location.assign() post-éxito en el flujo de venta",
+    "resultado": "confirmada",
+    "evidencia": "PremiumModuleCard.tsx:212-215 (con comentario que lo justifica: revalidatePath('/dashboard') de requestUpsellAction cancela la navegación soft); mismo patrón en home/Recommendations.tsx:91 y plan/UpgradeCtaButton.tsx:100.",
+    "hallazgo_titulo": "Navegación dura con window.location.assign en vitrina, recomendaciones y plan"
+   },
+   {
+    "alerta": "[D2-A7] Avatar en base64 en la base: tamaño máximo validado en servidor",
+    "resultado": "descartada",
+    "evidencia": "avatarImageUrlSchema.ts:10-23 limita a 600.000 caracteres (~450 KB) y solo acepta png/jpeg/webp en data URL o http(s); lo usan lib/actions/schemas.ts:17 (perfil), createClientOnly.ts:22, createClientWithBot.ts:28, saveBotConfig.ts:31 y saveBotConfigByOrgSlug.ts. El base64 en la base queda acotado; storage externo es decisión de diseño, no defecto."
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/app/api/dashboard/leads/recent/route.ts",
+    "senales": [
+     "Sin llamadores en src: git grep -n \"leads/recent\" origin/main -- logic-core-v3 ':!logic-core-v3/docs' → solo tests/e2e/40-lead-capture-e2e.spec.ts:49-50 y :60-61",
+     "Devuelve la fila completa de ChatbotLead (...lead, :50), incluido convertedToOsLeadId de LeadOS",
+     "La rama de classification null (:35-37) es inalcanzable porque excludeDqWhere (:25) descarta los null"
+    ],
+    "que_rompe": "tests/e2e/40-lead-capture-e2e.spec.ts:49-50 y :60-63 (dos asserts contra la ruta); nada en src."
+   },
+   {
+    "archivo": "src/app/api/reports/monthly/route.ts",
+    "senales": [
+     "Sin llamadores: solo la mencionan el comentario de client-monthly/route.ts:6-7 y tests/e2e/43:9",
+     "Única importadora de src/lib/reports/MonthlyReport.tsx (:8)",
+     "PLAN-133 pide borrarla; mezclaría datos mock de GA/GSC en el PDF sin marcarlos (:106-107)"
+    ],
+    "que_rompe": "Nada en src; borrar también MonthlyReport.tsx (ClientMonthlyReportPdf.tsx:6 solo lo nombra en un comentario)."
+   },
+   {
+    "archivo": "src/app/bienvenida/ (layout.tsx, page.tsx, _actions/complete-onboarding.ts, _components/*.tsx)",
+    "senales": [
+     "Ninguna alta viva deja onboardingCompleted=false: core.ts:85, createClientOnly.ts:85 y createClientWithBot.ts:135 lo crean en true; clients.ts:124 e invitations.ts:86 no tienen importadores",
+     "Duplica el onboarding legacy muerto: src/components/onboarding/OnboardingWizard.tsx (sin importadores) + src/actions/onboarding-actions.ts",
+     "Escribe targetAudience, que nadie lee (git grep \"targetAudience\" → solo escrituras), y el GA ID que analytics.ts:66-69 rechaza"
+    ],
+    "que_rompe": "Redirects a /bienvenida en proxy.ts:130, :144, :150, :158-166, login/actions.ts:101-107, (protected)/dashboard/layout.tsx:123-129 y robots.ts:25 (orgs seed/QA con onboardingCompleted=false irían a 404); auth.ts:17 y :73 (getPostLoginPath, FROZEN + ZONA-FRANCO) → decisión para Valentino."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Ticket en mobile: el hilo de mensajes queda visible",
+    "entorno": "dev local o preview con un ORG_MEMBER de prueba (por ejemplo la org seed Matsu); Chrome DevTools en modo dispositivo",
+    "precondiciones": "Un ticket de la org con 3 o más mensajes. Si no hay, crearlo desde /dashboard/soporte con prioridad MEDIUM (HIGH/URGENT dispara la alerta al webhook).",
+    "pasos": [
+     "Ingresar como el cliente de prueba",
+     "Abrir /dashboard/soporte/<id del ticket>",
+     "En DevTools probar 375x667, 390x844 y 768x1024",
+     "Medir el alto del contenedor de mensajes (el div con overflow-y-auto dentro de la sección del chat)",
+     "Escribir una respuesta y ver si el composer tapa la tarjeta Timeline"
+    ],
+    "esperado": "Los mensajes se ven y scrollean con un alto útil (200 px o más) y el composer queda debajo del hilo, sin superponerse a la Timeline.",
+    "senal_falla": "El área de mensajes mide 0 px o casi, el composer se dibuja encima de la Timeline, o hay que scrollear la página entera para encontrar los mensajes.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Detalle de ticket en mobile: el hilo de mensajes colapsa a 0 px"
+   },
+   {
+    "titulo": "Hora de la Timeline del ticket contra la hora de la burbuja",
+    "entorno": "preview o producción en serverless (huso por defecto del runtime); en dev local el huso es el de la PC y no reproduce",
+    "precondiciones": "Un ticket existente creado a una hora argentina conocida; idealmente otro creado entre las 21:00 y las 23:59 AR",
+    "pasos": [
+     "Abrir /dashboard/soporte/<id>",
+     "Comparar 'Ticket creado' de la Timeline con la hora del primer mensaje del chat",
+     "En el ticket nocturno, mirar la fecha 'Creado' del bloque Detalles"
+    ],
+    "esperado": "Ambas horas coinciden con la hora argentina de creación y la fecha es la del día AR.",
+    "senal_falla": "La Timeline marca 3 horas más (UTC) que la burbuja, o 'Creado' aparece con el día siguiente.",
+    "escribe_db_o_email": false,
+    "hallazgos": "Horas de la timeline del ticket en el huso del servidor, no en hora Argentina"
+   },
+   {
+    "titulo": "Bóveda: ¿quedan credenciales en claro en la base?",
+    "entorno": "Neon en solo lectura (Prisma Studio o consola SQL de lectura); no ejecutar escrituras",
+    "precondiciones": "Acceso de lectura a la base compartida",
+    "pasos": [
+     "Abrir la tabla ClientAsset",
+     "Filtrar type = ACCESS",
+     "Contar las filas cuyo description no empieza con 'enc:v1:'",
+     "Anotar su createdAt (las posteriores al 13/07 vienen de VaultManager → createClientAssetAction)"
+    ],
+    "esperado": "0 filas en claro.",
+    "senal_falla": "Hay filas ACCESS con la credencial legible: rotarlas con el cliente y correr el backfill de PD-1 después de mergear el cifrado al escribir.",
+    "escribe_db_o_email": false,
+    "hallazgos": "Credenciales de la bóveda se guardan en texto plano: el cifrado al escribir quedó sin mergear"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "Ningún flujo vivo escribe Organization.analyticsPropertyId",
+    "comando": "git grep -n \"analyticsPropertyId\" origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma/seed.ts logic-core-v3/prisma/seed-agency-os.ts → escrituras solo en src/app/bienvenida/_actions/complete-onboarding.ts:38 (inalcanzable), src/lib/actions/clients.ts:161-197 (sin importadores) y prisma/seed.ts:202, :217 (mock)",
+    "control_positivo": "El mismo grep devuelve las lecturas de trafico/page.tsx:54, :82, :88, :92, api/reports/monthly/route.ts:78 y health-score.ts:75"
+   },
+   {
+    "afirmacion": "lib/actions/clients.ts y lib/actions/invitations.ts no tienen importadores",
+    "comando": "git grep -n -e \"lib/actions/clients\" -e \"lib/actions/invitations\" origin/main -- logic-core-v3/src logic-core-v3/tests → 0",
+    "control_positivo": "git grep -n -e \"lib/actions/upsell\" origin/main -- logic-core-v3/src → LockedView.tsx:27, seo/page.tsx:21, PremiumModuleCard.tsx:29. (Con el patrón '@/lib/...' Git Bash devolvió 0 también en el control: se buscó sin '@'.)"
+   },
+   {
+    "afirmacion": "Ninguna alta viva crea una org con onboardingCompleted=false",
+    "comando": "git grep -n -e \"organization\\.create(\" -e \"organization\\.upsert(\" -e \"organization\\.createMany(\" origin/main -- logic-core-v3/src → 7 sitios: core.ts:80 (true en :85), createClientOnly.ts:76 (true en :85), createClientWithBot.ts:126 (true en :135), clients.ts:124 e invitations.ts:86 (default false, sin importadores), modules/chatbot/evals/seed-eval-bots.ts:157 y modules/chatbot/prisma/seed.ts:260 (seeds)",
+    "control_positivo": "El mismo grep encuentra las 3 altas vivas; git grep -n \"onboardingCompleted: false\" → solo scripts/qa-corridas"
+   },
+   {
+    "afirmacion": "Ninguna UI enlaza el inicio de OAuth de Google Business Profile",
+    "comando": "git grep -n \"google-business/start\" origin/main -- logic-core-v3/src → 0",
+    "control_positivo": "git grep -n \"tiendanube/start\" origin/main -- logic-core-v3/src → modules/tienda-conectada/_components/ConnectStoreCard.tsx:39"
+   },
+   {
+    "afirmacion": "Ni /api/reports/monthly ni /api/dashboard/leads/recent tienen llamadores en src",
+    "comando": "git grep -n \"leads/recent\\|reports/monthly\" origin/main -- logic-core-v3 ':!logic-core-v3/docs' → solo comentario en client-monthly/route.ts:6 y tests/e2e (40:49-50, :60-61; 43:9)",
+    "control_positivo": "git grep -n \"api/reports\" origin/main -- logic-core-v3/src → DownloadMonthlyReportButton.tsx:21"
+   },
+   {
+    "afirmacion": "encryptCredential no se llama fuera de tests",
+    "comando": "git grep -n \"encryptCredential\\|encryptForStorage\\|resolveCredential\\|secret-box\" origin/main -- logic-core-v3/src ':!logic-core-v3/src/lib/crypto/__tests__' → encryptCredential solo en credential-cipher.ts:73 y en un comentario (:111)",
+    "control_positivo": "El mismo grep encuentra resolveCredentialDisplay en dashboard/cuenta/boveda/page.tsx:131 y admin VaultTab.tsx:41"
+   },
+   {
+    "afirmacion": "No hay rate limit en createTicketAction, requestUpsellAction, la ruta del PDF ni en /bienvenida",
+    "comando": "git grep -n -l -e \"rateLimit\\|checkRateLimit\\|limiter\" origin/main -- logic-core-v3/src/lib/tickets logic-core-v3/src/lib/actions/upsell.ts logic-core-v3/src/app/api/reports logic-core-v3/src/app/bienvenida → 0",
+    "control_positivo": "El mismo patrón sobre logic-core-v3/src/lib/security → auth-rate-limit.ts"
+   },
+   {
+    "afirmacion": "El ticket no tiene tiempo real ni polling",
+    "comando": "git grep -n -e EventSource -e setInterval -e refreshInterval -e useSWR -e WebSocket origin/main -- \"logic-core-v3/src/app/(protected)/dashboard/soporte\" logic-core-v3/src/components/dashboard/TicketReplyForm.tsx logic-core-v3/src/components/dashboard/ClientChatThread.tsx logic-core-v3/src/components/dashboard/SoporteBoard.tsx logic-core-v3/src/components/dashboard/ResolveTicketButton.tsx logic-core-v3/src/components/dashboard/ClientChatComposer.tsx → 0",
+    "control_positivo": "git grep -n -e setInterval origin/main -- logic-core-v3/src/modules/chatbot/components logic-core-v3/src/components/dashboard → ClientLeadsTable.tsx:146, ImpersonationTimer.tsx:35"
+   },
+   {
+    "afirmacion": "No hay aviso 'Generado por IA' en Resultados",
+    "comando": "git grep -n -i \"generado por ia\\|generado con ia\\|AiBadge\\|AIBadge\\|ai-disclaimer\" origin/main -- logic-core-v3/src → 0",
+    "control_positivo": "git grep -n -i \"con IA\" origin/main -- logic-core-v3/src → motor-resenas/_components/ReviewItem.tsx:171 y motor-resenas/page.tsx:139"
+   },
+   {
+    "afirmacion": "Nadie lee ClientBrandProfile.targetAudience",
+    "comando": "git grep -n \"targetAudience\" origin/main -- logic-core-v3/src → solo escrituras: onboarding-actions.ts:31, :90, :97, :104 y complete-onboarding.ts:50, :54",
+    "control_positivo": "El grep encuentra esas escrituras (la técnica matchea el campo)"
+   },
+   {
+    "afirmacion": "upsertBusinessMetrics no tiene importadores",
+    "comando": "git grep -n \"metrics-actions\" origin/main -- logic-core-v3/src → 0",
+    "control_positivo": "git grep -n \"upsertBusinessMetrics\" origin/main -- logic-core-v3/src → src/actions/metrics-actions.ts:9"
+   },
+   {
+    "afirmacion": "No hay huso horario configurado para el runtime",
+    "comando": "git grep -n -e \"TZ=\" -e \"\\\"TZ\\\"\" -e \"process.env.TZ\" origin/main -- logic-core-v3/netlify.toml logic-core-v3/vercel.json logic-core-v3/next.config.ts logic-core-v3/.env.example logic-core-v3/src → solo package.json:109 (cross-env TZ=UTC de un invariante del setter) y su archivo de invariante",
+    "control_positivo": "git grep -n \"TZ_AR\\s*=\" origin/main -- logic-core-v3/src → lib/tz-ar.ts:9"
+   },
+   {
+    "afirmacion": "Ninguna feature flag cubre el brief IA del home",
+    "comando": "git grep -n -i \"FEATURE_FLAG\\|featureFlag\\|isFeatureEnabled\\|flags\\.\" origin/main -- logic-core-v3/src → solo softFlags de LeadOS (dossier-panels.tsx:186, chequeo-form.tsx:59, m14-chequeo.tsx:117)",
+    "control_positivo": "El mismo grep encuentra esos softFlags"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "excludeDqWhere() descarta también classification NULL (subconteo de leads sin scorear)",
+    "como_buscarlo": "git grep -n \"excludeDqWhere()\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "api/dashboard/leads/recent/route.ts:25 (deja muerta la rama :35-37); también modules/chatbot/server/reports/buildWeeklyReport.ts:63, :72 (reporte semanal al cliente)"
+   },
+   {
+    "patron": "Distintas definiciones de 'lead del período' según la superficie (DQ y null incluidos o no)",
+    "como_buscarlo": "git grep -n \"chatbotLead.count(\" origin/main -- logic-core-v3/src y comparar los where",
+    "donde_aparecio": "get-client-monthly-report-data.ts:56-65 (con DQ) vs home-metrics.ts:92-99 (sin DQ, con null) vs buildWeeklyReport (sin DQ ni null)"
+   },
+   {
+    "patron": "Libs de integración que ante error de API devuelven mock o null sin log ni Sentry",
+    "como_buscarlo": "git grep -n -A2 \"} catch\" origin/main -- logic-core-v3/src/lib/analytics.ts logic-core-v3/src/lib/searchconsole.ts logic-core-v3/src/lib/n8n.ts logic-core-v3/src/lib/integrations | grep -i \"mock\\|return null\\|return \\[\\]\"",
+    "donde_aparecio": "analytics.ts:196-198, searchconsole.ts:211-213, google-business-profile.ts:202-205"
+   },
+   {
+    "patron": "Tendencias o deltas literales en tarjetas de métricas",
+    "como_buscarlo": "git grep -n -E \"trend=\\{(\\{ ?value: ?-?[0-9]|-?[0-9])\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "trafico/page.tsx:204, :215, :227, :238; seo/page.tsx:244, :252"
+   },
+   {
+    "patron": "Copy con fechas o SLA hardcodeados visibles al cliente",
+    "como_buscarlo": "git grep -n -i -E \"Q[1-4] 20[0-9]{2}|< ?4 ?h|24/7|24 ?hs\" origin/main -- logic-core-v3/src/components/dashboard \"logic-core-v3/src/app/(protected)\" logic-core-v3/src/app/bienvenida",
+    "donde_aparecio": "PremiumModuleCard.tsx:300, ServiceDetailModal.tsx:181, soporte/page.tsx:87, MessageThread.tsx:114, TicketReplyForm.tsx:32, Step3Tour.tsx:14"
+   },
+   {
+    "patron": "Columnas que el portal lee y ningún flujo vivo escribe (integración sin activación)",
+    "como_buscarlo": "Por cada campo de integración que lee el portal (select en src/app/(protected)/dashboard), git grep de sus escrituras ('campo:' fuera de select)",
+    "donde_aparecio": "Organization.analyticsPropertyId (solo bienvenida, inalcanzable, y clients.ts sin importadores)"
+   },
+   {
+    "patron": "CTA del portal del cliente que enlaza a una ruta SUPER_ADMIN-only, o ruta de activación sin enlace",
+    "como_buscarlo": "git grep -n \"api/auth/.*/start\" origin/main -- logic-core-v3/src y revisar el guard de cada route.ts",
+    "donde_aparecio": "google-business/start sin enlace; tiendanube/start enlazado desde dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx:39 pero exige SUPER_ADMIN (tiendanube/start/route.ts:11): el cliente recibiría 401 JSON"
+   },
+   {
+    "patron": "Páginas con alto fijo calc(100svh-…) y columnas shrink-0 que en mobile ahogan el contenido flex-1",
+    "como_buscarlo": "git grep -n \"h-\\[calc(100svh\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "soporte/[ticketId]/page.tsx:115 (+ :193 shrink-0); mismo armado en admin/tickets/[ticketId]/page.tsx:21"
+   },
+   {
+    "patron": "Fechas formateadas sin timeZone en server components (UTC en serverless) o en client components que también se pintan en SSR",
+    "como_buscarlo": "git grep -n \"toLocale\\(Date\\|Time\\)\\?String('es-AR'\" origin/main -- logic-core-v3/src | grep -v timeZone",
+    "donde_aparecio": "soporte/[ticketId]/page.tsx:41, :304; services/page.tsx:149; ChatBubble.tsx:19 (client, también en SSR)"
+   },
+   {
+    "patron": "Server actions inline en <form action> que descartan el ActionResult (sin feedback)",
+    "como_buscarlo": "git grep -n -A3 \"'use server'\" origin/main -- \"logic-core-v3/src/app/**/page.tsx\"",
+    "donde_aparecio": "seo/page.tsx:110-113"
+   },
+   {
+    "patron": "Respuestas JSON que esparcen la fila Prisma completa al cliente",
+    "como_buscarlo": "git grep -n -E \"\\.\\.\\.(lead|row|item|org|user),\" origin/main -- logic-core-v3/src/app/api",
+    "donde_aparecio": "api/dashboard/leads/recent/route.ts:50 (incluye convertedToOsLeadId)"
+   },
+   {
+    "patron": "window.location.assign como parche de revalidatePath dentro de la action",
+    "como_buscarlo": "git grep -n \"window.location.assign\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "PremiumModuleCard.tsx:215, home/Recommendations.tsx:91, plan/UpgradeCtaButton.tsx:100"
+   },
+   {
+    "patron": "Método de auditoría: git grep con patrones que empiezan con '@/' devuelve 0 en Git Bash (verde por vacío)",
+    "como_buscarlo": "Repetir toda prueba de ausencia hecha con '@/lib/...' usando 'lib/...' (sin '@') o -e explícito, y exigir control positivo con el mismo patrón",
+    "donde_aparecio": "git grep -F \"@/lib/actions/upsell\" dio 0 aunque hay 3 importadores; con \"lib/actions/upsell\" aparecen"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/auditoria-total-pre-deploy.md:36",
+    "id_previo": "O-2",
+    "estado": "cerrado",
+    "evidencia": "package.json:131 declara @googleapis/webmasters ^4.0.0, package-lock.json:859 lo resuelve y node_modules/@googleapis/webmasters/package.json existe; searchconsole.ts:2 lo importa y el baseline de tsc da 0 errores. El build no se corrió (prohibido en esta auditoría)."
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-profunda.md:50",
+    "id_previo": "P1-7",
+    "estado": "parcial",
+    "evidencia": "El mock ya se marca: PreviewBanner en ?demo (seo/page.tsx:124-125) y cuando isMockData (:226); el comentario citado está hoy en :156. Siguen las tendencias literales sobre datos reales (:234-235 FIXME, :244, :252, :260, :269) y la falla de la API cae a mock sin aviso a develOP (searchconsole.ts:211-213)."
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:81",
+    "id_previo": "P1-7",
+    "estado": "parcial",
+    "evidencia": "El badge visible que faltaba en junio existe (seo/page.tsx:226 → PreviewBanner, mensaje en PreviewBanner.tsx:15-16). Lo pendiente son los deltas inventados (seo/page.tsx:244-269) y la rama de error inalcanzable (:181-200)."
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "Inicio cuenta como leads del cliente los ContactSubmission de todas las orgs",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "week-results.ts:43-52 cuenta prisma.contactSubmission sin filtro de org. El modelo no tiene organizationId (schema.prisma:688-708). dashboard/page.tsx:98-100 y :182-185 lo renderiza para toda org en 'Tu cuenta', con delta (WeekResultsGrid.tsx:21-39). No hay plan gate ni flag. El comentario de WeekResultsGrid.tsx:44-47 admite que el conteo es agency-wide y que 'En calibración' lo cubre 'sin revelar que es global'. computeLeadsScore (health-score.ts:311-348, con `void organizationId`) entra en la dimensión Comercial del Health Score (health-score.ts:191-195). Además, aunque no estaba citado, computeConversionScore (health-score.ts:282-309) divide submissions globales por los monthlyVisitors de la org. Escritores en src: el form público (contact.ts:62) y el upsell de cualquier cliente (upsell.ts:88). En la misma página, BusinessHero cuenta leads org-scoped (home-metrics.ts:96-104): el cliente ve dos cifras de 'leads' distintas. Dato falso en Inicio y en el Health Score para todo cliente, sin precondiciones: bloquea L3.",
+    "evidencia_contra": [
+     "El componente 'entre tenants' es un único entero agregado por semana, sin nombres ni emails: no llega a la CRÍTICA de lectura entre tenants. La severidad se apoya en el dato falso.",
+     "La tarjeta vive en la sección secundaria 'Tu cuenta' con caption 'En calibración' (WeekResultsGrid.tsx:53-54). El bloque principal BusinessHero sí está scopeado por org.",
+     "Es deuda conocida y comentada en el código (health-score.ts:314-315, WeekResultsGrid.tsx:44-47), pero sigue abierta en origin/main."
+    ]
+   },
+   {
+    "titulo": "Credenciales de la bóveda se guardan en texto plano: el cifrado al escribir quedó sin mergear",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "createClientAssetAction (agency-actions.ts:94-115) guarda data.description tal cual en clientAsset.create (:103-110). Su único llamador vivo es VaultManager.tsx:5 y :25, montado en VaultTab.tsx:26 (admin), cuyo placeholder pide 'Contraseña o instrucciones...' (VaultManager.tsx:85). En origin/main, encryptCredential (credential-cipher.ts:73) no tiene llamadores fuera de __tests__ (git grep con control positivo). lib/prisma.ts no tiene $extends ni middleware, ninguna migración crea trigger ni pgcrypto, y resolve-credential.ts:24 devuelve el texto plano tal cual. El write-path cifrado (encryptCredentialForStorage en agency-actions.ts:132 y onboarding-actions.ts:136/148) vive solo en 9fc616c4 (PD-1.2), en origin/b0-isolation-motor-chatbot, y no es ancestro de origin/main. Solo se mergeó b06ca120 (helper y lectores). Encima, la bóveda del cliente muestra badges 'AES-256' (boveda/page.tsx:85 y :148) sobre datos en claro. Secreto de cliente expuesto con precondición fuerte (acceso a la DB, a un dump o a un backup): ALTA.",
+    "evidencia_contra": [
+     "La cita onboarding-actions.ts:115 es código muerto: ese completeOnboardingAction no tiene importadores. BienvenidaWizard importa el homónimo de app/bienvenida/_actions/complete-onboarding.ts, que no guarda credenciales.",
+     "El único escritor vivo exige SUPER_ADMIN (agency-actions.ts:98-101). El cliente no escribe en la bóveda (VaultRequestModal solo envía un mensaje), así que no hay vector anónimo ni de cliente.",
+     "Leer las credenciales exige acceso a Neon, a un dump o a un backup: es precondición fuerte, no CRÍTICA.",
+     "No encontré en origin/main el registro del 13/07 que declararía PD-1 cerrado. Es lateral y no cambia el veredicto. La deuda ya estaba documentada (docs/audit-repo-20260707.md:113, docs/baselines/2026-07-auditoria-seguridad.md:2702)."
+    ]
+   },
+   {
+    "titulo": "Tendencias 'vs mes anterior' inventadas en Tráfico y SEO",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "seo/page.tsx:238-271 pasa trend fijo 12.4 (clicks) y 7.1 (impresiones). Los deltas de CTR y posición salen de un umbral fijo (avgCtr>=3 ? 1.2 : -1.4; avgPosition>10 ? -3.1 : 2.8), con FIXME(data-truth) en :233-235. TrendBadge.tsx:28 y :43 los rotula 'vs mes anterior'. Esto se renderiza con datos reales cuando la org tiene siteUrl, que escribe el alta admin (createClientOnly.ts:84, createClientWithBot.ts:134), y getSearchConsoleData devuelve isMockData=false (searchconsole.ts:99-210). Ese es el estado activado que piden las tareas de onboarding (lib/data/onboarding-tasks.ts, 'Conectar Google Search Console'). trafico/page.tsx:204, :215, :227 y :238 hace lo mismo (12.3, 8.1, -2.4, '0:23'), con texto visible 'vs mes anterior' (AnalyticsMetricCard.tsx:70) y sin FIXME. Es un dato inventado presentado como medición en Resultados: falla el criterio L3 de 'sin datos de mentira'.",
+    "evidencia_contra": [
+     "La parte de Tráfico hoy es latente: el camino real exige analyticsPropertyId, que no tiene escritor vivo (hallazgo 4). En ?demo=true o con datos mock se muestra el PreviewBanner.",
+     "La parte de SEO requiere activación. GOOGLE_SERVICE_ACCOUNT_KEY es opcional (scripts/check-env.js:47) y cualquier error de la API cae a mock con banner (searchconsole.ts:103-112 y :211-214). No puedo verificar si prod tiene la clave.",
+     "En SEO, 'vs mes anterior' es solo el atributo title del TrendBadge (tooltip), no texto visible como afirma el impacto.",
+     "Los valores principales (clicks, impresiones, CTR, posición) son reales. Lo inventado es el badge de tendencia, lo que acota el impacto."
+    ]
+   },
+   {
+    "titulo": "Tráfico (GA4) sin camino de activación: nadie escribe analyticsPropertyId y el CTA no hace nada",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "git grep de analyticsPropertyId en origin/main da solo tres escritores: seed.ts:202 y :217 (propiedad mock), app/bienvenida/_actions/complete-onboarding.ts:38 y lib/actions/clients.ts:161-197 (updateClientAction, sin importadores ni por ruta relativa). No lo escriben admin/, modules/ (updateClient de edición no tiene el campo) ni api/. /bienvenida solo se alcanza con onboardingCompleted=false (proxy.ts:130/144/150, dashboard/layout.tsx:127-128, login/actions.ts:101-107). Todos los altas vivos lo ponen en true (createClientOnly.ts:85, createClientWithBot.ts:135, lib/onboarding/core.ts:85) y bienvenida/page.tsx:29 redirige al dashboard. Sin propertyId, trafico/page.tsx:82-86 muestra AnalyticsEmptyState, cuyo botón 'ACTIVAR AHORA' (:115) no tiene handler (FIXME en :113). Step2Conexiones.tsx:38-45 pide el Measurement ID G-, que normalizePropertyId rechaza (analytics.ts:66-70), y la página mostraría result.error (:158). La tarea de onboarding 'Conectar Google Analytics 4' (lib/data/onboarding-tasks.ts:44-46) manda a develOP a configurarlo, pero no existe UI que lo permita. La funcionalidad es inalcanzable para todo cliente real; mismo criterio que BUG-012 (ALTA).",
+    "evidencia_contra": [
+     "/bienvenida no es inalcanzable por ruteo: proxy, layout y login redirigen ahí cuando onboardingCompleted=false. Es inalcanzable en la práctica porque ningún alta vivo deja ese flag en false (solo scripts de QA en scripts/qa-corridas).",
+     "develOP puede escribir analyticsPropertyId a mano en Neon. Es un workaround operativo sin UI y podría justificar MEDIA.",
+     "La promesa 'en tu primera semana' (PreviewBanner.tsx:14) solo aparece en ?demo=true o con datos mock, no en el estado vacío que ve el cliente.",
+     "El result.error del caso G- es texto en español orientado al usuario, no un stack: llamarlo 'mensaje técnico' exagera."
+    ]
+   },
+   {
+    "titulo": "Detalle de ticket en mobile: el hilo de mensajes colapsa a 0 px",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "page.tsx:115 fija h-[calc(100svh-14rem)] (12.5rem desde sm) en flex-col. La cabecera es shrink-0 (:117-156: p-5, BackLink, h1 text-3xl, badges que envuelven y ResolveTicketButton en columna hasta lg) y mide unos 200 px. El main (:159) es flex-1 min-h-0 y flex-col hasta lg. Ahí, la raíz de ClientChatThread es flex-1 con base 0 y min-h-0 (ClientChatThread.tsx:48), mientras la Timeline (:193) es shrink-0 con unos 443 px de contenido (4 pasos ≈173, stats ≈75, detalles ≈120, padding y encabezado ≈75). Mientras el main mida menos de ≈463 px (100svh menor a ≈900 px con el ticket abierto, lo que incluye todo teléfono y el iPad vertical), el espacio libre es negativo y el hilo queda en 0. La section con overflow-hidden (ClientChatThread.tsx:51) recorta todos los mensajes y el composer shrink-0 (ClientChatComposer.tsx:83) desborda sobre la Timeline. El mail de respuesta (lib/tickets/actions.ts:157-165, TicketReplyEmail.tsx:43-50) no trae el contenido, solo el botón 'Ver Respuesta en Dashboard'. En el teléfono el cliente no puede leer la respuesta: se rompe un flujo principal del cliente.",
+    "evidencia_contra": [
+     "Las alturas están estimadas desde las clases; la fuente y el viewport son runtime y no hay captura. El margen es amplio: aun con cabecera de 0 px, el hilo queda en 0 con 100svh menor a ≈707 px.",
+     "Desde lg (1024 px o más) el layout pasa a fila y funciona, así que en desktop hay workaround.",
+     "El composer queda visible (superpuesto a la Timeline): el cliente puede responder aunque no lea. El main del layout scrollea (DashboardLayoutClient.tsx:173) y deja ver la Timeline desbordada."
+    ]
+   }
+  ]
+ }
+}

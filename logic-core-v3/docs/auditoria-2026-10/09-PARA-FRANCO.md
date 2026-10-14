@@ -40,6 +40,15 @@
 - Coordinación: ninguna fuera de la zona
 - Ficha completa: BUG-007 en 03-MEJORAS.md
 
+### BUG-038 · Configurar la agenda de un cliente rompe la agenda del setter: LeadOS busca 'la unica org con calComUsername'
+- Contexto: D2 · h5.set-lead, h2.cli-agenda.panel-de-agenda, lib.leados, int.calcom, modelo.Organization. MEDIA, PROBABLE.
+- Evidencia: `src/lib/leados/agenda.ts:58` — «const orgs = await prisma.organization.findMany({ where: { calComUsername: { not: null } },»; `src/lib/leados/agenda.ts:70` — «if (orgs.length > 1) { // devuelve 'Hay mas de una agenda conectada...'»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:325` — «select: { calComApiKey: true, calComUsername: true, calComEmbedUrl: true }, // mismos campos»
+- Impacto: El dia que develOP configure Cal.com para su primer cliente del modulo Agenda, el setter deja de poder agendar reuniones hasta que alguien borre el username de una de las dos orgs.
+- Propuesta: Coordinar con Franco: identificar la org de develOP por un flag/slug explicito o config propia de LeadOS en vez de 'la unica con calComUsername'.
+- Cómo verificar: leer las líneas citadas en origin/main
+- Coordinación: ninguna fuera de la zona
+- Ficha completa: BUG-038 en 03-MEJORAS.md
+
 ### FAL-003 · Los errores de autenticación no llegan a Sentry: NextAuth sin logger y loginAction convierte todo AuthError en 'error inesperado' (y lo cuenta como intento fallido)
 - Contexto: D1 · h1.auth-login, h1.auth-login.password, h1.auth-login.magic-link, lib.auth, int.sentry. MEDIA, PROBABLE.
 - Evidencia: `src/auth.ts:76` — «const nextAuthResult = NextAuth({ adapter: PrismaAdapter(prisma) as Adapter, trustHost: true,»; librería @auth/core@0.41.2, lib/utils/logger.js línea 7 — «error(error) { const name = error instanceof AuthError ? error.type : error.name; console.error('${red}[auth][error]${reset} ${name}: ${error.message}');»; librería @auth/core@0.41.2, lib/actions/callback/index.js línea 388 — «const error = new CallbackRouteError(e, { provider: provider.id });»; `src/app/login/actions.ts:113` — «if (error instanceof AuthError) { recordFailedAttempt(ip)»; `src/app/login/actions.ts:122` — «return 'Ocurrió un error inesperado. Intentá de nuevo.'»; `src/app/login/actions.ts:153` — «if (error instanceof AuthError) { return 'No se pudo generar el Magic Link. Intentá de nuevo.'»; `src/instrumentation.ts:49` — «export const onRequestError = Sentry.captureRequestError»

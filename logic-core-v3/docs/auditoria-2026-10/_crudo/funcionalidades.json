@@ -799,61 +799,6 @@
    }
   },
   {
-   "ciclo": "D1-c1",
-   "lote": "D1-L1",
-   "herramienta": "h2.cli-cuenta",
-   "id": "h2.cli-cuenta.cambiar-password",
-   "nombre": "Cambiar contrasena desde Mi Cuenta",
-   "descripcion": "Cambio voluntario con regla unica y sessionVersion",
-   "archivos": [
-    "src/lib/actions/profile.ts",
-    "src/components/dashboard/ProfileForms.tsx"
-   ],
-   "entradas": [
-    "updatePasswordAction"
-   ],
-   "madurez": "L2",
-   "madurez_evidencia": "ProfileForms.tsx:374-394 (invocacion directa) -> profile.ts:191-232 -> unstable_update :239 -> router.refresh (ProfileForms.tsx:392)",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "si",
-     "evidencia": "Solo session.user.id (profile.ts:191-196)"
-    },
-    "vacios": {
-     "cumple": "n/a",
-     "evidencia": "n/a"
-    },
-    "errores": {
-     "cumple": "si",
-     "evidencia": "Feedback del state (ProfileForms.tsx:401)"
-    },
-    "carga": {
-     "cumple": "si",
-     "evidencia": "SaveButton isPending (ProfileForms.tsx:532)"
-    },
-    "validacion_servidor": {
-     "cumple": "si",
-     "evidencia": "UpdatePasswordSchema (profile.ts:198-206)"
-    },
-    "mobile": {
-     "cumple": "si",
-     "evidencia": "grid-cols-1 sm:grid-cols-3 (ProfileForms.tsx:403)"
-    },
-    "sentry": {
-     "cumple": "parcial",
-     "evidencia": "catch solo console.error (profile.ts:242-244); error.tsx de cuenta captura render"
-    },
-    "sin_mocks_todos": {
-     "cumple": "si",
-     "evidencia": "Sin mocks"
-    },
-    "autonomia": {
-     "cumple": "si",
-     "evidencia": "Completo sin develOP"
-    }
-   }
-  },
-  {
    "ciclo": "D6-c1",
    "lote": "D6-L1",
    "herramienta": "h2.cli-cuenta",
@@ -964,117 +909,6 @@
     "autonomia": {
      "cumple": "no",
      "evidencia": "El cliente depende de que develOP edite la base: :42 'develOP se encarga de configurar…' y no hay escritor de calComApiKey en la app"
-    }
-   }
-  },
-  {
-   "ciclo": "D6-c1",
-   "lote": "D6-L2",
-   "herramienta": "h2.cli-email-mkt",
-   "id": "h2.cli-email-mkt.acceso-al-modulo",
-   "nombre": "Entrar al módulo Email Marketing contratado",
-   "descripcion": "El cliente con Email Marketing Pro activo ve el ítem en el sidebar y abre /dashboard/modules/email-marketing.",
-   "archivos": [
-    "src/lib/data/premium-modules.ts",
-    "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx",
-    "src/components/dashboard/SidebarNav.tsx",
-    "src/app/(protected)/dashboard/layout.tsx",
-    "src/lib/modules/check-activation.ts",
-    "prisma/seeds/sync-premium-modules.ts"
-   ],
-   "madurez": "L?",
-   "madurez_evidencia": "El camino feliz no se puede trazar como funcionando: el catálogo crea 'email-marketing-pro' (premium-modules.ts:38) y el gate/sidebar exigen 'email-marketing' (email-marketing/layout.tsx:20-21, SidebarNav.tsx:78,102). Depende de que la base conserve la fila legacy.",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "parcial",
-     "evidencia": "El layout resuelve la org con resolveOrgId (layout.tsx:17) pero las server actions no chequean el módulo (S2b-01, _actions.ts:17-28)."
-    },
-    "vacios": {
-     "cumple": "n/a",
-     "evidencia": "Evaluado solo el acceso; las pantallas internas son de otro lote."
-    },
-    "errores": {
-     "cumple": "no",
-     "evidencia": "Sin módulo activo redirige a /dashboard sin mensaje (layout.tsx:21)."
-    },
-    "carga": {
-     "cumple": "n/a",
-     "evidencia": "No evaluado en este lote."
-    },
-    "validacion_servidor": {
-     "cumple": "no",
-     "evidencia": "createCampaignAction toma fromEmail/htmlContent del FormData sin Zod (_actions.ts:128-137)."
-    },
-    "mobile": {
-     "cumple": "n/a",
-     "evidencia": "No evaluado en este lote."
-    },
-    "sentry": {
-     "cumple": "n/a",
-     "evidencia": "No evaluado en este lote."
-    },
-    "sin_mocks_todos": {
-     "cumple": "n/a",
-     "evidencia": "No evaluado en este lote."
-    },
-    "autonomia": {
-     "cumple": "no",
-     "evidencia": "Con la base sincronizada al catálogo, el cliente no puede entrar al módulo que pagó."
-    }
-   }
-  },
-  {
-   "ciclo": "D6-c1",
-   "lote": "D6-L2",
-   "herramienta": "h2.cli-inicio",
-   "id": "h2.cli-inicio.estado-onboarding",
-   "nombre": "Tarjeta 'Estamos configurando tu negocio'",
-   "descripcion": "El inicio del portal muestra el avance del onboarding y las próximas tareas.",
-   "archivos": [
-    "src/lib/data/onboarding-tasks.ts",
-    "src/lib/onboarding/seed-tasks-for-org.ts",
-    "src/components/dashboard/OnboardingStatusCard.tsx",
-    "src/app/(protected)/dashboard/page.tsx",
-    "src/actions/admin/onboarding-tasks.ts"
-   ],
-   "madurez": "L1",
-   "madurez_evidencia": "La tarjeta existe (OnboardingStatusCard.tsx:16-80, montada en dashboard/page.tsx:61) pero nada vivo crea las tareas: seed-tasks-for-org.ts:5 solo se llama desde módulos sin importadores y el alta actual no siembra (createClientOnly.ts:85).",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "si",
-     "evidencia": "findMany filtrado por organizationId recibido del page (OnboardingStatusCard.tsx:17-18)."
-    },
-    "vacios": {
-     "cumple": "parcial",
-     "evidencia": "Sin tareas devuelve null (OnboardingStatusCard.tsx:28): no hay estado, ni mensaje."
-    },
-    "errores": {
-     "cumple": "no",
-     "evidencia": "La query no tiene try/catch (OnboardingStatusCard.tsx:17-26)."
-    },
-    "carga": {
-     "cumple": "n/a",
-     "evidencia": "Server component dentro del page; no evaluado."
-    },
-    "validacion_servidor": {
-     "cumple": "n/a",
-     "evidencia": "Solo lectura."
-    },
-    "mobile": {
-     "cumple": "n/a",
-     "evidencia": "No evaluado."
-    },
-    "sentry": {
-     "cumple": "n/a",
-     "evidencia": "No evaluado."
-    },
-    "sin_mocks_todos": {
-     "cumple": "no",
-     "evidencia": "Títulos internos del equipo como 'Configurar AgencySettings de la organización' (onboarding-tasks.ts:21) se mostrarían al cliente (OnboardingStatusCard.tsx:75)."
-    },
-    "autonomia": {
-     "cumple": "n/a",
-     "evidencia": "Informativa; las tareas las avanza develOP con actions sin UI."
     }
    }
   },
@@ -1289,6 +1123,5771 @@
     "autonomia": {
      "cumple": "parcial",
      "evidencia": "El cambio no llega al sitio público y el próximo sync lo pisa."
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-shell",
+   "id": "h2.cli-shell.layout-y-navegacion",
+   "nombre": "Shell del portal y gate de onboarding",
+   "descripcion": "Layout del dashboard: resuelve la org, arma sidebar/header, banners y redirige a /bienvenida si falta onboarding.",
+   "archivos": [
+    "src/app/(protected)/dashboard/layout.tsx",
+    "src/app/(protected)/dashboard/loading.tsx",
+    "src/app/(protected)/dashboard/error.tsx"
+   ],
+   "entradas": [
+    "DashboardLayout"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "proxy.ts:154 -> layout.tsx:72-113 -> DashboardLayoutClient; cumple los nueve. Deuda: gate salteable por header (layout.tsx:123-129) y lastDashboardVisit del admin en soporte (:79-88).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "layout.tsx:74 resolveOrgId; lecturas por esa org :21-24, :33-35, :56-58, :101-105"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin colecciones propias"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "dashboard/error.tsx:13-19 SectionErrorBoundary sin error.message"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "dashboard/loading.tsx:6-35"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "DashboardLayoutClient.tsx:68-116 drawer con hamburguesa y aria-label"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary.tsx:64 captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "navegacion completa sin develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.resultados-del-negocio",
+   "nombre": "Resultados del negocio",
+   "descripcion": "Leads del chatbot, origen, embudo y campanas del periodo.",
+   "archivos": [
+    "src/app/(protected)/dashboard/page.tsx"
+   ],
+   "entradas": [
+    "DashboardPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:110-138 -> home-metrics.ts:96-118 org-scoped; no L3 por manejo de errores.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "home-metrics.ts:96-100 botConfig.organizationId"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "LeadOrigins.tsx:23, LeadCampaigns.tsx:23"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "page.tsx:110-138 sin try/catch: un fallo tumba todo el Inicio a error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "page.tsx:66-68 BusinessResultsSkeleton"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "page.tsx:131 grid-cols-1 lg:grid-cols-2"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "via dashboard/error.tsx"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos de ChatbotLead"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.ticket-promedio",
+   "nombre": "Ticket promedio para estimar ingresos",
+   "descripcion": "El dueno carga el ticket promedio en USD.",
+   "archivos": [
+    "src/app/(protected)/dashboard/_actions/business-profile.actions.ts"
+   ],
+   "entradas": [
+    "saveAverageTicket"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "MoneyEstimate.tsx:43-52 -> business-profile.actions.ts:22-40 -> organization.averageTicketUsd.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "business-profile.actions.ts:25, :33-36"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin coleccion"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "MoneyEstimate.tsx:45-48 toast con res.error"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "MoneyEstimate.tsx:87 loading={isPending}"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "business-profile.actions.ts:14-18, :28"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "tile dentro del grid de BusinessHero (page.tsx:130)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "error de base lanza en la transicion -> SectionErrorBoundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "dato del cliente"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.resumen-ejecutivo-ia",
+   "nombre": "Resumen ejecutivo IA",
+   "descripcion": "Brief semanal generado por LLM con regeneracion manual (3 por semana).",
+   "archivos": [
+    "src/app/(protected)/dashboard/page.tsx",
+    "src/app/(protected)/dashboard/_actions/regenerate-brief.ts"
+   ],
+   "entradas": [
+    "DashboardPage",
+    "regenerateBriefAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:187-212; AIExecutiveBriefV2.tsx:33-47 -> regenerate-brief.ts:9-26 -> executive-brief.ts:137-220.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "regenerate-brief.ts:16 org de resolveOrgId"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "page.tsx:218-234 BriefEmptyState"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "page.tsx:192-197 error -> estado vacio sin aviso; AIExecutiveBriefV2.tsx:114-116 si muestra el de regenerar"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "page.tsx:71-73 BriefSkeleton; AIExecutiveBriefV2.tsx:74"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "sin input; tope executive-brief.ts:157"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "page.tsx:225 texto responsive"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "page.tsx:195 y executive-brief.ts:218 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "page.tsx:226 promete 'el proximo lunes' (cron regenerate-briefs solo en vercel.json; credencial Vertex vencida)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "regeneracion autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.resultados-de-la-semana",
+   "nombre": "Resultados de la semana",
+   "descripcion": "Visitas, leads, mensajes respondidos y tareas completadas con tendencia.",
+   "archivos": [
+    "src/app/(protected)/dashboard/page.tsx"
+   ],
+   "entradas": [
+    "DashboardPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:182-185 -> week-results.ts:26-105.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "no",
+     "evidencia": "week-results.ts:43-52 ContactSubmission sin org"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "WeekResultsGrid.tsx:48-53 'Sin integracion aun'"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "week-results.ts:47, :52, :57 .catch(() => 0)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "page.tsx:98-100"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-2 lg:grid-cols-4 (page.tsx:273)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "fallos convertidos en 0"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "visitas fijas en 0 (week-results.ts:41-42) y leads de la agencia"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-plan",
+   "id": "h2.cli-plan.consumo-y-planes",
+   "nombre": "Consumo del plan y planes",
+   "descripcion": "Medidor de conversaciones del mes y tarjetas Starter/Pro/Business.",
+   "archivos": [
+    "src/app/(protected)/dashboard/plan/page.tsx",
+    "src/app/(protected)/dashboard/plan/loading.tsx"
+   ],
+   "entradas": [
+    "DashboardPlanPage"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "plan/page.tsx:12-46 -> get-org-usage.ts:50-85 -> UsageMeter/PlansShowcase.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "get-org-usage.ts:54-66"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "plan fallback con mensaje propio (UsageMeter.tsx:129)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "hereda dashboard/error.tsx (no hay plan/error.tsx)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "plan/loading.tsx + Suspense page.tsx:25-31"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "PlansShowcase.tsx:22-24 stack en xs/sm"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "via error.tsx"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "precios de plan-presentation.ts"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-plan",
+   "id": "h2.cli-plan.pedir-cambio-de-plan",
+   "nombre": "Pedir upgrade de plan",
+   "descripcion": "CTA que registra el pedido y lleva a Mensajes.",
+   "archivos": [
+    "src/app/(protected)/dashboard/plan/page.tsx"
+   ],
+   "entradas": [
+    "DashboardPlanPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "PlansShowcase.tsx:213-243 -> UpgradeCtaButton.tsx:88-100 -> upsell.ts:10-140 -> window.location.assign.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "upsell.ts:16 session.user.organizationId (en soporte falla)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin coleccion"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "UpgradeCtaButton.tsx:90-93 console.error y navega igual"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "PlansShowcase.tsx:228 disabled:cursor-wait"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "upsell.ts:22"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "PlansShowcase.tsx:22-24"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "upsell.ts:137 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "termina en Mensajes con contexto"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-proyecto",
+   "id": "h2.cli-proyecto.tablero-del-proyecto",
+   "nombre": "Tablero del proyecto",
+   "descripcion": "Estado, progreso, datos y tareas del proyecto con selector si hay varios.",
+   "archivos": [
+    "src/app/(protected)/dashboard/project/page.tsx",
+    "src/app/(protected)/dashboard/project/loading.tsx"
+   ],
+   "entradas": [
+    "ProjectPage"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "project/page.tsx:131-356 org-scoped; cumple los nueve (deuda: cuid en ?p=).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "project/page.tsx:134-135; :191-196"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "project/page.tsx:158-185; :342-343"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "hereda dashboard/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "project/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "?p= solo dentro del set de la org (:191-196)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap (:262), grid-cols-2 lg:grid-cols-4 (:323)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "via error.tsx"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "tareas reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-proyecto",
+   "id": "h2.cli-proyecto.aprobar-o-pedir-cambios",
+   "nombre": "Aprobar o pedir cambios en entregas",
+   "descripcion": "El cliente aprueba o rechaza con motivo una tarea en PENDING_APPROVAL.",
+   "archivos": [
+    "src/actions/dashboard-actions.ts"
+   ],
+   "entradas": [
+    "approveTaskAction",
+    "rejectTaskAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "TaskApprovalButtons.tsx:14-37 -> dashboard-actions.ts:12-186 con confirmacion (:44-79).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "dashboard-actions.ts:35, :123"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "accion puntual"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "TaskApprovalButtons.tsx:20, :34 toast"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "TaskApprovalButtons.tsx:74, :115"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "dashboard-actions.ts:20, :108 Zod"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "TaskApprovalButtons.tsx:130 flex gap-3"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "dashboard-actions.ts:92, :183 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-mensajes",
+   "id": "h2.cli-mensajes.conversacion",
+   "nombre": "Conversacion con develOP",
+   "descripcion": "Chat cliente-equipo con respuestas rapidas y contexto por query.",
+   "archivos": [
+    "src/app/(protected)/dashboard/messages/page.tsx",
+    "src/app/(protected)/dashboard/messages/loading.tsx"
+   ],
+   "entradas": [
+    "ClientMessagesPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "messages/page.tsx:11-35 -> MessageThread.tsx:51 -> messages.ts:114-140.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "messages/page.tsx:16-19; messages.ts:119"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "MessageThread.tsx:134-158"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "sin error.tsx propio; error de envio en ClientChatComposer (no leido)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "messages/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "schemas.ts:10-12 max 1000"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "messages/page.tsx:27 alto con dvh"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "messages.ts:166 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "MessageThread.tsx:114 'Respondemos en < 4 hs' sin respaldo"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-mensajes",
+   "id": "h2.cli-mensajes.no-leidos-al-abrir",
+   "nombre": "Badge de no leidos que se limpia al abrir",
+   "descripcion": "Al abrir Mensajes se marcan leidos los mensajes de develOP.",
+   "archivos": [
+    "src/app/(protected)/dashboard/messages/_actions/mark-read.ts",
+    "src/app/(protected)/dashboard/messages/_components/MarkReadOnMount.tsx"
+   ],
+   "entradas": [
+    "markClientMessagesRead"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "MarkReadOnMount.tsx:13-17 -> mark-read.ts:11-22.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "mark-read.ts:12 resolveOrgId: en soporte el admin marca leidos los mensajes del cliente"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin coleccion"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "MarkReadOnMount.tsx:16 sin catch"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "efecto en segundo plano"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "sin UI propia"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "automatico"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-mensajes",
+   "id": "h2.cli-mensajes.aviso-por-email",
+   "nombre": "Aviso por email de mensaje nuevo",
+   "descripcion": "Email al cliente cuando develOP le escribe.",
+   "archivos": [
+    "src/lib/email/notify-message.ts"
+   ],
+   "madurez": "L?",
+   "madurez_evidencia": "admin-message-notification.ts -> notify-message.ts:11-66: el camino feliz depende de la verificacion del dominio en Resend, no trazable por lectura.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "notify-message.ts:20-25 miembro de la org"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin coleccion"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "notify-message.ts:50-62 resultado de Resend ignorado"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "backend"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input del cliente"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "email"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "notify-message.ts:51 remitente marcado con aviso"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "automatico"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-referidos",
+   "id": "h2.cli-referidos.programa-de-referidos",
+   "nombre": "Programa de referidos",
+   "descripcion": "Codigo y link propios y listado de referidos con estado.",
+   "archivos": [
+    "src/app/(protected)/dashboard/referidos/page.tsx"
+   ],
+   "entradas": [
+    "ReferidosPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "referidos/page.tsx:26-35 -> referrals.service.ts; ReferralPanel.tsx:43 -> referrals.ts:12-28.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "referrals.service.ts:16-17, :65-66; referrals.ts:14"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "referidos/page.tsx:60-66"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "referrals.ts:25-26 console.error; sin error.tsx propio"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "sin loading.tsx: hereda el skeleton del Inicio"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "referidos/page.tsx:73-81 truncate"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "solo via error.tsx"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "copiar codigo/link (ReferralPanel.tsx:77-96)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.perfil",
+   "nombre": "Perfil, seguridad y notificaciones",
+   "descripcion": "Datos de empresa, avatar, contacto, password, preferencias y zona de peligro.",
+   "archivos": [
+    "src/app/(protected)/dashboard/cuenta/perfil/page.tsx",
+    "src/app/(protected)/dashboard/cuenta/perfil/loading.tsx",
+    "src/app/(protected)/dashboard/cuenta/error.tsx",
+    "src/app/(protected)/dashboard/cuenta/layout.tsx"
+   ],
+   "entradas": [
+    "ProfilePage",
+    "CuentaLayout"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "perfil/page.tsx:73-337; soporte solo lectura (:107-154); actions de ProfileForms en lib/actions/profile.ts.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "pagina por resolveOrgId (:75); actions con session.user.organizationId (profile.ts:29, patron D1-c1)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formularios"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "cuenta/error.tsx; profile.ts:72 devuelve error.message (D1-c1)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "perfil/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "schemas.ts:14-20 UpdateProfileSchema"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "perfil/page.tsx:237 grid-cols-1 lg:grid-cols-2"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "boundary si; actions console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.plan-y-renovacion",
+   "nombre": "Plan actual y renovacion",
+   "descripcion": "Tarjeta de plan, alerta de vencimiento e informacion de facturacion.",
+   "archivos": [
+    "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+    "src/app/(protected)/dashboard/cuenta/facturacion/loading.tsx"
+   ],
+   "entradas": [
+    "BillingPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "facturacion/page.tsx:60-138, :278-334.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "facturacion/page.tsx:64-75"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "facturacion/page.tsx:302 '—' sin renovacion"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "cuenta/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "facturacion/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid lg:grid-cols-3; tabla overflow-x-auto (:168)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "via error.tsx"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "email de la sesion (:106); metodos de pago fijos (:311-320)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "'Actualizar datos' deriva a Mensajes (:325-330)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.historial-de-facturas",
+   "nombre": "Historial de pagos y facturas",
+   "descripcion": "Tabla de Invoice con PDF o link de pago.",
+   "archivos": [
+    "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx"
+   ],
+   "entradas": [
+    "BillingPage"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "La tabla existe (facturacion/page.tsx:157-272) pero Invoice nunca se genera fuera del seed (prisma/seed.ts:595, :618).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "facturacion/page.tsx:70-73"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "facturacion/page.tsx:157-166 (con promesa falsa)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "cuenta/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "facturacion/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "overflow-x-auto (:168)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "via error.tsx"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "promesa 'automaticamente cada mes' sin generacion"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "sin facturas ni links de pago reales"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-email-mkt",
+   "id": "h2.cli-email-mkt.importar-contactos",
+   "nombre": "Importar contactos por CSV",
+   "descripcion": "Carga un CSV, guarda EmailContact y sincroniza con la lista Brevo de la org.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+    "src/app/(protected)/dashboard/modules/email-marketing/contactos/_components/ImportCSVButton.tsx"
+   ],
+   "entradas": [
+    "importContactsAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ImportCSVButton.tsx:14-30 -> _actions.ts:71-126 -> brevo.ts:31-58.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "org de la sesion (_actions.ts:18) sin verificar el modulo"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "contactos/page.tsx:80-86 explica el formato"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "fallas de Brevo silenciosas (_actions.ts:104-121)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "ImportCSVButton.tsx:49"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "_actions.ts:59-60, :73 cast e includes('@')"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "boton y mensajes en columna (ImportCSVButton.tsx:34)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch silencioso :119-121"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-email-mkt",
+   "id": "h2.cli-email-mkt.listar-contactos",
+   "nombre": "Listado de contactos",
+   "descripcion": "Totales, suscriptos, bajas y los ultimos 50 contactos.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/email-marketing/contactos/page.tsx",
+    "src/app/(protected)/dashboard/modules/email-marketing/contactos/loading.tsx"
+   ],
+   "entradas": [
+    "ContactosPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "contactos/page.tsx:10-153.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "contactos/page.tsx:15-33"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "contactos/page.tsx:80-86"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "modules/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "contactos/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "tabla overflow-x-auto (:100)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "via error.tsx"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "solo 50, sin baja ni borrado (:18)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-email-mkt",
+   "id": "h2.cli-email-mkt.crear-y-enviar-campana",
+   "nombre": "Crear y enviar campana",
+   "descripcion": "Formulario de campana HTML y envio por Brevo con confirmacion en /send.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+    "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
+    "src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx",
+    "src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/send/page.tsx",
+    "src/app/(protected)/dashboard/modules/email-marketing/campaigns/loading.tsx",
+    "src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/loading.tsx"
+   ],
+   "entradas": [
+    "createCampaignAction",
+    "sendCampaignAction",
+    "CampaignsPage",
+    "NewCampaignPage",
+    "SendCampaignPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "new/page.tsx:47-73 -> _actions.ts:128-218 -> brevo.ts:60-103; /send con confirmacion (send/page.tsx:46-49).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "_actions.ts:17-28 sin chequeo de modulo"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "campaigns/page.tsx:58-69"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "exito con fallo de envio (:205-217); errores crudos (:202); botones trabados (new/page.tsx:53-62)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "new/page.tsx:139; send/page.tsx:76"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "_actions.ts:131-139 sin Zod"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "new/page.tsx:98 grid-cols-2 fijo"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "'Editar' no edita (campaigns/page.tsx:131); FAILED sin reintento"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-email-mkt",
+   "id": "h2.cli-email-mkt.metricas-de-campana",
+   "nombre": "Metricas de campana",
+   "descripcion": "Enviados, aperturas, clicks y bajas por campana.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx"
+   ],
+   "entradas": [
+    "CampaignsPage"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Los contadores existen en el modelo y la UI (campaigns/page.tsx:102-125) pero nada los escribe (getCampaignStats sin llamadores, brevo.ts:143).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "campaigns/page.tsx:36-39"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "pct() da '—' sin destinatarios (:27-30)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "no hay sincronizacion"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "campaigns/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "fila de 4 stats sin wrap (:102)"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "sin proceso"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "siempre 0"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "sin datos utiles"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-email-mkt",
+   "id": "h2.cli-email-mkt.baja-de-contactos",
+   "nombre": "Baja de contactos (opt-out)",
+   "descripcion": "Link firmado en el pie de cada campana para darse de baja.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts"
+   ],
+   "entradas": [
+    "createCampaignAction"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "optout/[contactId]/route.ts:69-104 marca la baja en la base pero los envios van a la lista Brevo completa (brevo.ts:77).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "token HMAC por contacto (route.ts:77)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin coleccion"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "route.ts:77-87 pagina de link invalido"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "pagina estatica"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "unsubscribe-token.ts:97-109"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "route.ts:13 viewport y :32 max-width"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "sin errores capturables"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "atributos compartidos entre orgs (_actions.ts:113)"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "la baja no se propaga a Brevo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-resenas",
+   "id": "h2.cli-resenas.vista-de-venta",
+   "nombre": "Vista de venta del Motor de resenas",
+   "descripcion": "Superficie de venta, estado pausado y pedido del modulo.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/motor-resenas/_components/LockedView.tsx",
+    "src/app/(protected)/dashboard/modules/motor-resenas/page.tsx"
+   ],
+   "entradas": [
+    "MotorResenasPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "motor-resenas/page.tsx:120-148 -> LockedView.tsx:63-82 -> upsell.ts:10-140.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "upsell.ts:16 session.user.organizationId: en soporte falla"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin coleccion"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "LockedView.tsx:230-235 role=alert"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "LockedView.tsx:193-203"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "upsell.ts:22"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "LockedView.tsx:184, :190 flex-col sm:flex-row, min-h-[44px]"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "upsell.ts:137 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "LockedView.tsx:151 [FALTA:precio]"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "pedido autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-resenas",
+   "id": "h2.cli-resenas.estado-conectando",
+   "nombre": "Estado 'conectando tu Google'",
+   "descripcion": "Mensaje honesto cuando el modulo esta activo pero la conexion GBP no.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/motor-resenas/_components/ConnectingState.tsx",
+    "src/app/(protected)/dashboard/modules/motor-resenas/loading.tsx"
+   ],
+   "entradas": [
+    "MotorResenasPage"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "ConnectingState.tsx:13-46 via resolveMotorResenasView (motor-resenas-view.ts:38-42).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "motor-resenas/page.tsx:109-123 senales de la org"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "estado informativo"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "sin operaciones"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "motor-resenas/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "ConnectingState.tsx:15, :38"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "sin operaciones"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "copy honesto"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "ConnectingState.tsx:30-42 explica y deriva a Mensajes"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-resenas",
+   "id": "h2.cli-resenas.responder-resenas-con-ia",
+   "nombre": "Listar y responder resenas con borrador IA",
+   "descripcion": "Resenas de Google con borrador IA editable y publicacion de la respuesta.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/motor-resenas/page.tsx",
+    "src/app/(protected)/dashboard/modules/motor-resenas/_components/ReviewItem.tsx"
+   ],
+   "entradas": [
+    "MotorResenasPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:19-80 -> listReviews; ReviewItem.tsx:46-79 -> motor-resenas/_actions.ts:11-73.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "_actions.ts:20-24, :55-59 resolveScopedOrgId + isModuleActive"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "page.tsx:22-33 vacio que tambien tapa errores"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "errores crudos (google-business-profile.ts:298; _actions.ts:43)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "page.tsx:82-103; ReviewItem.tsx:171"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "_actions.ts:11-16, :48-52 sin Zod"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "ReviewItem.tsx:99, :190"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos de GBP"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-resenas",
+   "id": "h2.cli-resenas.pedir-resenas-qr",
+   "nombre": "Pedir resenas con QR y link",
+   "descripcion": "QR, link copiable y atajos de WhatsApp/email para pedir resenas.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/motor-resenas/_components/AskReviewSection.tsx"
+   ],
+   "entradas": [
+    "MotorResenasPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "AskReviewSection.tsx:42-137 con placeId de la org (page.tsx:161).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "page.tsx:113, :161"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "AskReviewSection.tsx:14-40"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "AskReviewSection.tsx:45 clipboard sin catch"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "render inmediato"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "AskReviewSection.tsx:71"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "sin operaciones de servidor"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "link real de Google"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "el placeId lo carga develOP (:35)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-tienda",
+   "id": "h2.cli-tienda.conectar-tienda",
+   "nombre": "Conectar Tiendanube",
+   "descripcion": "CTA de OAuth con Tiendanube.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx"
+   ],
+   "entradas": [
+    "TiendaConectadaPage"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "ConnectStoreCard.tsx:38-54 -> start/route.ts:9-19 rechaza al ORG_MEMBER con 401.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "orgId en la URL (ConnectStoreCard.tsx:39) hacia ruta solo admin"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin coleccion"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "401 JSON crudo (start/route.ts:11-13)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "link"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input del cliente"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "ConnectStoreCard.tsx:7 max-w-lg"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "copy promete self-service (:56-58)"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "solo develOP puede conectar"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-tienda",
+   "id": "h2.cli-tienda.resumen-de-ventas",
+   "nombre": "Resumen de ventas de Tiendanube",
+   "descripcion": "Pedidos, facturacion, ticket, top productos, stock critico y carritos.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx",
+    "src/app/(protected)/dashboard/modules/tienda-conectada/loading.tsx"
+   ],
+   "entradas": [
+    "TiendaConectadaPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:86-255 -> tiendanube.ts:82-162 (conexion hecha por develOP).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "tiendanube.ts:55; page.tsx:298-301"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "page.tsx:157-163"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "!res.ok -> [] (tiendanube.ts:96); null -> mensaje (page.tsx:89-106)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "page.tsx:259-283"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "page.tsx:114 grid-cols-2 lg:grid-cols-4"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error en tiendanube.ts"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "stock null -> 'Agotado' (tiendanube.ts:144); carritos sin filtro de 7 dias"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "sin desconexion (PLAN-171)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-agenda",
+   "id": "h2.cli-agenda.panel-de-agenda",
+   "nombre": "Panel de agenda (Cal.com)",
+   "descripcion": "Turnos de la semana/mes, proximos turnos y link de reservas.",
+   "archivos": [
+    "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
+    "src/app/(protected)/dashboard/modules/agenda-inteligente/loading.tsx"
+   ],
+   "entradas": [
+    "AgendaInteligentePage"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "page.tsx:316-353 -> cal-com.ts:40-111 contra api.cal.com/v1 (apagada segun cal-com-v2.ts:4-5).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "page.tsx:320-326"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "page.tsx:261-267; ConnectAgendaCard :23-54"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "page.tsx:214-229 mensaje generico"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "page.tsx:290-312; loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "page.tsx:235 grid-cols-3 fijo"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "cal-com.ts:53, :108 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "config por develOP y API v1 apagada"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L1",
+   "herramienta": "h2.cli-bienvenida",
+   "id": "h2.cli-bienvenida.guardar-perfil-legacy",
+   "nombre": "Wizard de onboarding legacy (onboarding-actions)",
+   "descripcion": "Guardado de perfil y credenciales del wizard viejo.",
+   "archivos": [
+    "src/actions/onboarding-actions.ts"
+   ],
+   "entradas": [
+    "saveOnboardingProfile",
+    "completeOnboardingAction"
+   ],
+   "madurez": "L0",
+   "madurez_evidencia": "Sin importadores vivos: solo components/onboarding/OnboardingWizard.tsx:6, que nadie importa; el onboarding real es src/app/bienvenida (fuera del lote).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "onboarding-actions.ts:42, :81 resolveOrgId"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "inalcanzable"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "inalcanzable"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "inalcanzable"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod en saveOnboardingProfile (:19-25); completeOnboardingAction sin Zod (:27-34)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "inalcanzable"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "onboarding-actions.ts:145 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "url 'ENCRIPTADO_EN_TEXTO' (:115, :127)"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "inalcanzable"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.trafico-ga4",
+   "nombre": "Tráfico & Analytics (GA4)",
+   "descripcion": "Sesiones, usuarios, rebote, duración, sesiones diarias y páginas más visitadas de los últimos 30 días.",
+   "archivos": [
+    "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+    "src/app/(protected)/dashboard/resultados/trafico/loading.tsx",
+    "src/lib/analytics.ts",
+    "src/components/dashboard/AnalyticsMetricCard.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/resultados/trafico/page.tsx#AnalyticsPage"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Ningún flujo vivo escribe Organization.analyticsPropertyId (git grep: solo complete-onboarding.ts:38, inalcanzable, y lib/actions/clients.ts:161-197, sin importadores). Un cliente real ve siempre AnalyticsEmptyState (trafico/page.tsx:82-86) con CTA muerto (:113-117); las orgs seed tienen 'properties/123456789' = MOCK_PROPERTY_ID (seed.ts:202; analytics.ts:22, :98) → solo demo.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId (trafico/page.tsx:48-50) y organization.findUnique por id de sesión (:52-55)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "AnalyticsEmptyState (:106-123) existe pero su CTA no hace nada (:115-117)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx con Sentry (resultados/error.tsx:13-18), pero se renderiza result.error (:158) y los fallos de API caen a mock (analytics.ts:196-198)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "trafico/loading.tsx + Suspense con AnalyticsSkeleton (:71, :89)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input; solo ?demo === 'true' (:46-47)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 (:195); truncate en páginas (:307)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "boundary sí; fallos manejados sin captura (analytics.ts:196-198)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "tendencias literales (:204, :215, :227, :238); FIXME (:113)"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "ni el cliente ni el admin tienen dónde cargar el Property ID"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.pagespeed",
+   "nombre": "Velocidad del sitio (PageSpeed)",
+   "descripcion": "Puntaje de performance y Core Web Vitals mobile/desktop del sitio del cliente.",
+   "archivos": [
+    "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+    "src/lib/integrations/pagespeed.ts",
+    "src/components/dashboard/results/PageSpeedCard.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/resultados/trafico/page.tsx#AnalyticsPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "siteUrl lo carga el admin (updateClient.ts:95; createClientOnly.ts:84) → trafico/page.tsx:99-101 → PageSpeedSection (:125-136) → getPageSpeedReport (pagespeed.ts:26-35, caché 6 h) → PageSpeedCard. Requiere GOOGLE_PAGESPEED_API_KEY (pagespeed.ts:41-45).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "siteUrl de la org de sesión (trafico/page.tsx:52-55)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "sin siteUrl o sin datos la sección desaparece sin mensaje (:126, :133)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "falla → null sin aviso (pagespeed.ts:63-72)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Suspense con LoadingState (:99)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "PageSpeedCard grid-cols-1 sm:grid-cols-2 (:225)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error/warn (pagespeed.ts:43, :64, :71)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos de la API sin literales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "depende de que develOP cargue el sitio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.seo-search-console",
+   "nombre": "SEO & Posicionamiento (Search Console)",
+   "descripcion": "Clicks, impresiones, CTR, posición, gráfico diario, top 10 consultas, top 5 páginas y oportunidades de los últimos 28 días.",
+   "archivos": [
+    "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+    "src/app/(protected)/dashboard/resultados/seo/loading.tsx",
+    "src/lib/searchconsole.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/resultados/seo/page.tsx#SeoPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "siteUrl (admin) → seo/page.tsx:103-108, :150-152 → getSearchConsoleData (searchconsole.ts:99-210, datos reales si la service account tiene acceso) → métricas y tablas (:223-342). Sin credenciales o con error → mock con PreviewBanner (:226).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId + findUnique por id (:100-106)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "upsell empty (:129-147), aviso de cero datos (:333-341), tablas condicionadas (:308-315)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "rama !ok inalcanzable (:181-200); errores de API → mock con banner"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "seo/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo ?demo (:98-99)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "tabla con overflow-x-auto (:389); grid-cols-2 lg:grid-cols-4 (:237)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "boundary sí; fallos de API sin captura (searchconsole.ts:211-213)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "tendencias literales (:244, :252, :260, :269) con FIXME (:234-235)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "la activación la hace develOP tras el pedido"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.seo-solicitar-activacion",
+   "nombre": "Pedir SEO avanzado (ACTIVAR AHORA)",
+   "descripcion": "Botón del vacío de SEO que registra el interés del cliente como lead de upsell para develOP.",
+   "archivos": [
+    "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+    "src/lib/actions/upsell.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/resultados/seo/page.tsx#activarSeo"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "form (seo/page.tsx:137-141) → activarSeo (:110-113) → requestUpsellAction (upsell.ts:10-156) → contactSubmission.create (:88-97), webhook (:99-104), notificaciones (:112-135).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "session.user.organizationId (upsell.ts:16), no resolveOrgId: falla en vista de soporte"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "resultado descartado (seo/page.tsx:112)"
+    },
+    "carga": {
+     "cumple": "no",
+     "evidencia": "botón sin estado pendiente (:138-140)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "UpsellRequestSchema sin .max (schemas.ts:45-48)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "ResultEmptyState centrado"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (upsell.ts:137, :153)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin literales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "el cliente no sabe si se envió"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "herramienta": "h2.cli-servicios",
+   "id": "h2.cli-servicios.servicios-contratados",
+   "nombre": "Servicios contratados",
+   "descripcion": "Tarjetas de los servicios de develOP que la org tiene (tipo, estado, fecha de inicio).",
+   "archivos": [
+    "src/app/(protected)/dashboard/services/page.tsx",
+    "src/app/(protected)/dashboard/services/loading.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/services/page.tsx#ServicesPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "services/page.tsx:168-176 resolveOrgId + service.findMany por org → ServiceCard (:84-166, :242-250).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "where { organizationId } (:173-176)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "EmptyStateMuted (:222-234)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "dashboard/error.tsx → SectionErrorBoundary"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "services/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 (:241)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "descripción genérica por tipo (:25-54); 'Ver detalles' lleva a Mensajes (:156-162); fechas sin TZ (:149)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "para ver el detalle tiene que escribir a develOP (PLAN-145)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "herramienta": "h2.cli-servicios",
+   "id": "h2.cli-servicios.vitrina-modulos",
+   "nombre": "Vitrina de módulos premium",
+   "descripcion": "Tus módulos / disponibles / próximamente, con detalle en modal y pedido de activación o de aviso.",
+   "archivos": [
+    "src/app/(protected)/dashboard/services/page.tsx",
+    "src/components/dashboard/PremiumModuleCard.tsx",
+    "src/lib/modules/showroom.ts",
+    "src/lib/actions/upsell.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/services/page.tsx#ServicesPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "services/page.tsx:177-196 → buildShowroom (showroom.ts:58-74) → PremiumModuleCard → submitInterest (:201-227) → requestUpsellAction → window.location.assign a Mensajes (:215).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "organizationModule por org (:185-188); upsell usa session.user.organizationId (upsell.ts:16)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "secciones se ocultan si vacías sin mensaje (:258, :307, :336)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "errorMsg visible (PremiumModuleCard.tsx:327-332, :382-387)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "estados idle/loading/success (:106-171); loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "UpsellRequestSchema sin .max ni chequeo de slug (schemas.ts:45-48)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "upsell.ts:153 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "'Próximamente Q3 2026' (:300); copy PLACEHOLDER (:53)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "pedido → chat; la contratación la hace develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L2",
+   "herramienta": "h2.cli-bienvenida",
+   "id": "h2.cli-bienvenida.wizard-3-pasos",
+   "nombre": "Bienvenida en 3 pasos",
+   "descripcion": "Datos del negocio, conexión de GA4 y tour; marca la org como onboardeada.",
+   "archivos": [
+    "src/app/bienvenida/layout.tsx",
+    "src/app/bienvenida/page.tsx",
+    "src/app/bienvenida/_actions/complete-onboarding.ts",
+    "src/app/bienvenida/_components/BienvenidaWizard.tsx",
+    "src/app/bienvenida/_components/Step1Empresa.tsx",
+    "src/app/bienvenida/_components/Step2Conexiones.tsx",
+    "src/app/bienvenida/_components/Step3Tour.tsx"
+   ],
+   "entradas": [
+    "src/app/bienvenida/page.tsx#BienvenidaPage",
+    "src/app/bienvenida/layout.tsx#BienvenidaLayout",
+    "src/app/bienvenida/_actions/complete-onboarding.ts#completeOnboardingAction"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Código completo pero inalcanzable: las 3 altas vivas crean la org con onboardingCompleted: true (core.ts:85, createClientOnly.ts:85, createClientWithBot.ts:135); las que dejan false (clients.ts:124, invitations.ts:86) no tienen importadores. Guarda el GA ID equivocado (complete-onboarding.ts:38) y el rubro en un campo sin lectores (:50).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "resolveOrgId (:23); sin control de OrgRole (un VIEWER renombra la empresa)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "error visible sin role=alert (BienvenidaWizard.tsx:121-125); excepciones a app/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "'Configurando...' (Step3Tour.tsx:61-62)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod sin .max; GA sin formato; contactEmail validado y descartado (:9-15, :39)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "max-w-4xl px-4 (layout.tsx:14); grid-cols-2 sm:grid-cols-4"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "app/error.tsx:27-30 para excepciones"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "TODOs (:39-40); promesas '24/7' y 'tiempo real' (Step3Tour.tsx:12-14)"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "nunca se presenta al cliente"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-shell",
+   "id": "h2.cli-shell.navegacion-sidebar",
+   "nombre": "Navegacion del portal (sidebar y drawer mobile)",
+   "descripcion": "Sidebar con secciones fijas mas modulos premium activos, drawer en mobile, transicion y scroll al tope.",
+   "archivos": [
+    "src/components/dashboard/DashboardLayoutClient.tsx",
+    "src/components/dashboard/SidebarNav.tsx",
+    "src/components/dashboard/PageTransition.tsx",
+    "src/components/dashboard/ScrollTopOnNavigate.tsx",
+    "src/app/(protected)/dashboard/layout.tsx"
+   ],
+   "entradas": [
+    "DashboardLayout (dashboard/layout.tsx)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: layout.tsx:74 resolveOrgId -> :115 activeModuleSlugs -> DashboardLayoutClient.tsx:94-100 -> SidebarNav.tsx:101-103, :123-172. No L3: item de Email marketing con slug que no coincide con el catalogo (SidebarNav.tsx:78) y drawer cerrado enfocable.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "layout.tsx:74 resolveOrgId; modulos por org layout.tsx:53-63"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "navegacion fija"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "dashboard/error.tsx -> SectionErrorBoundary.tsx:64 Sentry.captureException"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "dashboard/loading.tsx; PageTransition.tsx:8-26"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "hamburguesa DashboardLayoutClient.tsx:112-119; aside cerrado sigue en el Tab (:79-83)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary.tsx:64 para errores de render"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "slug 'email-marketing' (SidebarNav.tsx:78) vs catalogo 'email-marketing-pro' (premium-modules.ts:38)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "modulo Email marketing posiblemente inalcanzable (layout.tsx:20 del modulo)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-shell",
+   "id": "h2.cli-shell.campana-notificaciones",
+   "nombre": "Campana de notificaciones e historial",
+   "descripcion": "Dropdown con las ultimas notificaciones, marcar una/todas y modal de historial.",
+   "archivos": [
+    "src/components/dashboard/NotificationCenter.tsx",
+    "src/components/dashboard/NotificationHistoryModal.tsx",
+    "src/components/dashboard/notification-shared.tsx",
+    "src/lib/actions/notifications.ts",
+    "src/actions/dashboard-actions.ts"
+   ],
+   "entradas": [
+    "markNotificationAsRead",
+    "markAllNotificationsReadAction",
+    "getMyNotificationsAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "layout.tsx:101-105 -> DashboardLayoutClient.tsx:148 -> NotificationCenter.tsx:41-127 -> dashboard-actions.ts:188-218 / notifications.ts:46-93. No L3 por scoping sin userId y errores ignorados.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "filtra organizationId pero no userId (layout.tsx:101-105, notifications.ts:82-86); muestra las del SUPER_ADMIN (dashboard-actions.ts:62-71)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "NotificationCenter.tsx:217-233; NotificationHistoryModal.tsx:134-144"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "historial con reintentar (NotificationHistoryModal.tsx:117-132); dropdown ignora resultados (NotificationCenter.tsx:105-116)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "NotificationHistoryModal.tsx:111-115"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "markNotificationAsRead solo trim (dashboard-actions.ts:194)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "ancho clamp NotificationCenter.tsx:29"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "catch con console.error (notifications.ts:63, :90)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "filas no operables con teclado (NotificationCenter.tsx:238-250); badge capado a 5 (layout take:5)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-shell",
+   "id": "h2.cli-shell.banner-suscripcion-vencida",
+   "nombre": "Banner de suscripcion vencida",
+   "descripcion": "Aviso global cuando la suscripcion de la org esta PAST_DUE.",
+   "archivos": [
+    "src/components/dashboard/SubscriptionBanner.tsx",
+    "src/lib/subscription.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "layout.tsx:147 -> SubscriptionBanner.tsx:5-10 -> subscription.ts:4-12 (findUnique por organizationId).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "orgId de resolveOrgId en layout.tsx:74, :147"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "null si no PAST_DUE (SubscriptionBanner.tsx:8-10)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "sin try/catch; un fallo de DB rompe el layout"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "server"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "texto en <p> que envuelve"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "depende del boundary raiz"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "dato real"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "pagar depende de invoice.paymentLink cargado por develOP (facturacion/page.tsx:255-261)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h1.auth-impersonacion",
+   "id": "h1.auth-impersonacion.banner-sesion-soporte",
+   "nombre": "Banner de sesion de soporte (impersonacion)",
+   "descripcion": "Banner rojo con cuenta regresiva y boton Salir cuando el SUPER_ADMIN ve el portal como el cliente.",
+   "archivos": [
+    "src/components/dashboard/ImpersonationBanner.tsx",
+    "src/components/dashboard/ImpersonationTimer.tsx",
+    "src/lib/actions/impersonation.ts"
+   ],
+   "entradas": [
+    "stopImpersonationAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "layout.tsx:148-153 -> ImpersonationBanner.tsx:5-38 -> ImpersonationTimer.tsx:18-40; expiracion tambien server-side (lib/impersonation.ts:72); Salir -> impersonation.ts:50-80.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "stopImpersonationAction sin chequeo de rol (impersonation.ts:50-66, D1-c2)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no aplica"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "no aplica"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "no aplica"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-col sm:flex-row ImpersonationBanner.tsx:14"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "no aplica"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "el admin sale solo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.estado-onboarding",
+   "nombre": "Card de estado de onboarding en Inicio",
+   "descripcion": "Progreso de las tareas de onboarding y proximos pasos con CTA a Mensajes.",
+   "archivos": [
+    "src/components/dashboard/OnboardingStatusCard.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "dashboard/page.tsx:51, :61 -> OnboardingStatusCard.tsx:17-26 (onboardingTask por org) -> render :44-104.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "organizationId de resolveOrgId (dashboard/page.tsx:51)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "null sin tareas o completas (OnboardingStatusCard.tsx:28, :35)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "sin try/catch; cae a dashboard/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "dashboard/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "layout fluido"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos de OnboardingTask"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "CTA ?prefill=conexiones ignorado (OnboardingStatusCard.tsx:97; MessageThread.tsx:73-74)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-proyecto",
+   "id": "h2.cli-proyecto.tareas-por-estado",
+   "nombre": "Tareas del proyecto por estado y progreso",
+   "descripcion": "Tabs En curso/Pendientes/Completadas, barra de progreso y contador.",
+   "archivos": [
+    "src/components/dashboard/ProjectTaskTabs.tsx",
+    "src/components/dashboard/ProjectEmptyState.tsx",
+    "src/components/dashboard/AnimatedProgressBar.tsx",
+    "src/components/dashboard/AnimatedCounter.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "project/page.tsx:131-135, :186-206 -> ProjectTaskTabs.tsx:172-297; vacio ProjectEmptyState.tsx:18-44.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "project/page.tsx:134-135 por org; ?p elige dentro del set (:191-195)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "ProjectTaskTabs.tsx:265-274; ProjectEmptyState.tsx"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "dashboard/error.tsx (render)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "project/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "descripcion solo en hover (ProjectTaskTabs.tsx:125)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "IMPACT_MAP de copy fijo por titulo (ProjectTaskTabs.tsx:35-42), p. ej. 'operativo 24/7'"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura autonoma"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-proyecto",
+   "id": "h2.cli-proyecto.aprobacion-entregas",
+   "nombre": "Aprobar o pedir cambios en entregas",
+   "descripcion": "Botones de aprobar/solicitar cambios con confirmacion sobre tareas PENDING_APPROVAL.",
+   "archivos": [
+    "src/components/dashboard/TaskApprovalButtons.tsx",
+    "src/actions/dashboard-actions.ts"
+   ],
+   "entradas": [
+    "approveTaskAction",
+    "rejectTaskAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ProjectTaskTabs.tsx:160-162 -> TaskApprovalButtons.tsx:14-37 -> dashboard-actions.ts:12-95/:97-186 (ownership :35/:123).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "ownership por org (dashboard-actions.ts:35); org de session.user.organizationId (falla en preview); genera notificaciones admin visibles al cliente (:62-71)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "accion"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast con result.error (TaskApprovalButtons.tsx:17-21, :30-35)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 TaskApprovalButtons.tsx:74, :115"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "TaskApprovalSchema/TaskRejectionSchema (schemas.ts:67-74)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "botones en fila flexible"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error dashboard-actions.ts:92, :183"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "el cliente decide solo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.trafico",
+   "nombre": "Metricas de trafico (GA4)",
+   "descripcion": "Cards de sesiones/usuarios/rebote/duracion, grafico diario y alertas automaticas.",
+   "archivos": [
+    "src/components/dashboard/AnalyticsMetricCard.tsx",
+    "src/components/dashboard/TrendBadge.tsx",
+    "src/components/dashboard/SessionsChart.tsx",
+    "src/components/dashboard/AnalyticsAlertas.tsx",
+    "src/components/dashboard/AlertaMetrica.tsx",
+    "src/components/dashboard/AnalyticsSkeleton.tsx",
+    "src/components/dashboard/PreviewBanner.tsx",
+    "src/components/dashboard/ResultadosTabs.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "trafico/page.tsx:48 -> :147 getAnalyticsData -> :186-241 AnalyticsMetricCard -> TrendBadge; Suspense con AnalyticsSkeleton (:89-94). Datos de mentira (trends fijos) impiden L3.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId trafico/page.tsx:48"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "AnalyticsEmptyState con CTA 'ACTIVAR AHORA' sin handler (trafico/page.tsx:113-117)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "cualquier error de API cae a mock (analytics.ts:137-139)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "AnalyticsSkeleton en Suspense"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid sm:2 lg:4; ResponsiveContainer"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "sin captura del fallo de GA"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "trends hardcodeados trafico/page.tsx:204-238"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "activacion depende de develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.seo",
+   "nombre": "Metricas SEO (Search Console)",
+   "descripcion": "Cards de clicks/impresiones/CTR/posicion, grafico y alertas SEO.",
+   "archivos": [
+    "src/components/dashboard/ClicksImpressionsChart.tsx",
+    "src/components/dashboard/SeoAlertas.tsx",
+    "src/components/dashboard/AlertaMetrica.tsx",
+    "src/components/dashboard/TrendBadge.tsx",
+    "src/components/dashboard/PreviewBanner.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "seo/page.tsx:100 resolveOrgId -> :179 getSearchConsoleData -> :230-270 cards con TrendBadge -> SeoAlertas.tsx:9-44.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId seo/page.tsx:100"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "empty state con demo (seo/page.tsx:142-143)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "mensaje generico sin detalle interno (seo/page.tsx:181-200)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "seo/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "ResponsiveContainer ClicksImpressionsChart.tsx:42"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error seo/page.tsx:184"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "FIXME y trends fijos seo/page.tsx:234-269; 'garantizado' SeoAlertas.tsx:39"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.oportunidades-seo",
+   "nombre": "Oportunidades SEO con pedido al equipo",
+   "descripcion": "Detecta keywords con potencial y permite pedir la mejora como mensaje.",
+   "archivos": [
+    "src/components/dashboard/OportunidadesSEO.tsx",
+    "src/components/dashboard/OportunidadSEO.tsx",
+    "src/lib/actions/messages.ts"
+   ],
+   "entradas": [
+    "sendClientMessageAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "seo/page.tsx:319-321 -> OportunidadesSEO.tsx:10-56 -> OportunidadSEO.tsx:83-97 -> messages.ts:114-140.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "mensaje a session.user.organizationId (messages.ts:119)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "null sin oportunidades (OportunidadesSEO.tsx:58)"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "OportunidadSEO no muestra state.error (OportunidadSEO.tsx:58, :77-98)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 OportunidadSEO.tsx:90-91"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "SendMessageSchema max 1000"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-col sm:flex-row"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error en messages.ts"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "'Tucuman' fijo (OportunidadesSEO.tsx:49); CTA activo sobre mock/demo"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "un clic"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-servicios",
+   "id": "h2.cli-servicios.catalogo-y-detalle",
+   "nombre": "Catalogo de modulos y modal de detalle",
+   "descripcion": "Cards owned/available/coming soon con modal 'Ver detalles'.",
+   "archivos": [
+    "src/components/dashboard/PremiumModuleCard.tsx",
+    "src/components/dashboard/ServiceDetailModal.tsx",
+    "src/components/dashboard/StaggerWrapper.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "services/page.tsx:169-186, :266-353 -> PremiumModuleCard.tsx:174-441 -> ServiceDetailModal.tsx:53-234 (portal, foco, Esc).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "services/page.tsx:174, :186 por organizationId"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "lo maneja la pagina"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "boundary de dashboard"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "services/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "sm:flex-row; modal max-h-[88vh] con scroll (ServiceDetailModal.tsx:145, :198)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "PLACEHOLDER (PremiumModuleCard.tsx:53-79) y 'Proximamente Q3 2026' vencido (:300)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "card owned sin link al modulo (PremiumModuleCard.tsx:307-320)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-mensajes",
+   "id": "h2.cli-mensajes.chat-con-equipo",
+   "nombre": "Chat con el equipo develOP",
+   "descripcion": "Hilo de mensajes con composer (emoji, autogrow, Enter), respuestas rapidas y prefill por contexto.",
+   "archivos": [
+    "src/components/dashboard/MessageThread.tsx",
+    "src/components/dashboard/ClientChatThread.tsx",
+    "src/components/dashboard/ClientChatComposer.tsx",
+    "src/components/dashboard/ChatBubble.tsx",
+    "src/components/dashboard/EmojiPopover.tsx"
+   ],
+   "entradas": [
+    "sendClientMessageAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "messages/page.tsx:12-31 -> MessageThread.tsx:50-188 -> ClientChatComposer.tsx:92-126 -> messages.ts:114-140.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "lectura resolveOrgId (messages/page.tsx:12), escritura session.user.organizationId (messages.ts:119)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "WELCOME_MESSAGE MessageThread.tsx:134-158"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "state.error en ClientChatComposer.tsx:84-88 (sin role=alert)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "messages/loading.tsx; Loader2 ClientChatComposer.tsx:118-119"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "SendMessageSchema max 1000"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "alto calc(100dvh) messages/page.tsx:27"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error en messages.ts"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "promesa '< 4 hs' Lun–Vie 9–18 sin medicion (MessageThread.tsx:114-119)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "envio autonomo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-soporte",
+   "id": "h2.cli-soporte.tablero-tickets",
+   "nombre": "Tablero de tickets (3 columnas)",
+   "descripcion": "Abiertos/En curso/Resueltos con overview modal y recursos de autogestion.",
+   "archivos": [
+    "src/components/dashboard/SoporteBoard.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "soporte/page.tsx:14-54 -> SoporteBoard.tsx:246-354.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "soporte/page.tsx:21-23 por organizationId"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "EmptyStateMuted SoporteBoard.tsx:216-223, :291-298"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "boundary de dashboard"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "soporte/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 lg:grid-cols-3 (SoporteBoard.tsx:264)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "recursos sin accion (SoporteBoard.tsx:311-348); SLA fijo (soporte/page.tsx:86-90)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "autogestion inerte"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-soporte",
+   "id": "h2.cli-soporte.conversacion-ticket",
+   "nombre": "Ver y responder un ticket",
+   "descripcion": "Detalle con chat compartido, linea de tiempo y composer de respuesta.",
+   "archivos": [
+    "src/components/dashboard/TicketReplyForm.tsx",
+    "src/components/dashboard/ClientChatThread.tsx",
+    "src/components/dashboard/ClientChatComposer.tsx",
+    "src/components/dashboard/BackLink.tsx"
+   ],
+   "entradas": [
+    "replyToTicketAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "soporte/[ticketId]/page.tsx:54-70 -> ClientChatThread + TicketReplyForm.tsx:14-35 -> tickets/actions.ts:110-176.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "findUnique id+org (page.tsx:60-61); assertTicketBelongsToOrg (actions.ts:126-137)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "page.tsx:172-176"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "state.error en el composer"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "soporte/[ticketId]/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "TicketReplySchema max 2000"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "linea de tiempo shrink-0 en contenedor fijo (page.tsx:115, :159, :193), PROBABLE"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "'menos de 24hs' (TicketReplyForm.tsx:32) contradice '< 4h'"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autonomo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.perfil-empresa",
+   "nombre": "Datos de empresa, avatar y contacto",
+   "descripcion": "Editar nombre de empresa/contacto, avatar (imagen/emoji/iniciales) y WhatsApp.",
+   "archivos": [
+    "src/components/dashboard/ProfileForms.tsx",
+    "src/lib/actions/profile.ts"
+   ],
+   "entradas": [
+    "updateProfileAction",
+    "updateContactAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "perfil/page.tsx:74-81 -> ProfileForms.tsx:208-327 -> profile.ts:24-101.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "session.user.organizationId (profile.ts:29, :81); preview read-only (perfil/page.tsx:105-150)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Feedback muestra toErrorMessage (profile.ts:72, :99; ProfileForms.tsx:57)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "SaveButton Loader2 ProfileForms.tsx:121; perfil/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "UpdateProfileSchema sin max (schemas.ts:15-16); whatsapp sin Zod (profile.ts:87)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 sm:grid-cols-2/3"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error profile.ts:71, :98"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autonomo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.cambiar-password",
+   "nombre": "Cambiar contrasena desde el perfil",
+   "descripcion": "Formulario con fuerza de contrasena y refresco de sesion.",
+   "archivos": [
+    "src/components/dashboard/ProfileForms.tsx",
+    "src/lib/actions/profile.ts"
+   ],
+   "entradas": [
+    "updatePasswordAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ProfileForms.tsx:359-397 -> profile.ts:187-246 (Zod, bcrypt, sessionVersion, unstable_update) -> router.refresh.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "userId de la sesion (profile.ts:192)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Feedback (ProfileForms.tsx:401)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPending (ProfileForms.tsx:532)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpdatePasswordSchema (schemas.ts:22-35)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 sm:grid-cols-3"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error profile.ts:243"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "real"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "usuarios sin password reciben 'No se encontro contrasena registrada' (profile.ts:214-216); sin rate limit"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.preferencias-notificacion",
+   "nombre": "Preferencias de notificacion",
+   "descripcion": "Cinco toggles de notificaciones guardados en la org y el miembro.",
+   "archivos": [
+    "src/components/dashboard/ProfileForms.tsx",
+    "src/lib/actions/profile.ts"
+   ],
+   "entradas": [
+    "updateNotificationPrefsAction"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Se guarda (ProfileForms.tsx:571-608 -> profile.ts:103-148) pero 4 de 5 claves no tienen lector fuera de perfil (git grep); solo emailNotificationsOnMessage se respeta (notify-message.ts:40).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "session.user.organizationId (profile.ts:108)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "toErrorMessage (profile.ts:146)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "SaveButton"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "booleanos manuales profile.ts:115-121"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "lista vertical"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error :145"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "toggles sin efecto (profile.ts:123-135)"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "el cliente no controla lo que cree controlar"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.plan-actual",
+   "nombre": "Plan actual y facturacion resumida",
+   "descripcion": "Card de servicios/modulos activos, total mensual y proxima facturacion; resumen en perfil.",
+   "archivos": [
+    "src/components/dashboard/CurrentPlanCard.tsx",
+    "src/components/dashboard/ProfileForms.tsx",
+    "src/components/dashboard/CuentaTabs.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "facturacion/page.tsx:61-74, :147 -> getCurrentPlan (get-current-plan.ts:37-97, por organizationId :40-41, :53-54) -> CurrentPlanCard.tsx:52-203; PlanInfoSection ProfileForms.tsx:620-685.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId facturacion/page.tsx:61"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "CurrentPlanCard.tsx:55-88; PlanInfoSection :621-635"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "cuenta/error.tsx con captureException"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "facturacion/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-2 sm:grid-cols-4"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "fechas con TZ del server (CurrentPlanCard.tsx:17); 'Total mensual' solo suma modulos (get-current-plan.ts:70)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.eliminar-cuenta",
+   "nombre": "Solicitar eliminacion de cuenta",
+   "descripcion": "Zona de peligro que genera un ticket HIGH de eliminacion.",
+   "archivos": [
+    "src/components/dashboard/ProfileForms.tsx",
+    "src/lib/actions/profile.ts"
+   ],
+   "entradas": [
+    "requestAccountDeletionAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ProfileForms.tsx:689-704 (confirmacion :752-786) -> profile.ts:150-177 -> admin ticket-chat.tsx:119, :224-246.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "sin OrgRole (profile.ts:150-157)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "accion"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "ProfileForms.tsx:700, :726-735"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 :775"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "layout simple"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error :182"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "copy promete borrado 'permanente e irreversible' pero solo crea un ticket (:765-766)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "depende de develOP por diseno; sin alerta a develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.boveda-solicitar-documento",
+   "nombre": "Solicitar documento a la boveda",
+   "descripcion": "Modal que manda un mensaje al equipo pidiendo un recurso.",
+   "archivos": [
+    "src/components/dashboard/VaultRequestModal.tsx",
+    "src/lib/actions/messages.ts"
+   ],
+   "entradas": [
+    "sendClientMessageAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "boveda/page.tsx:63-67 -> VaultRequestModal.tsx:35-52 -> messages.ts:114-140.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "session.user.organizationId (messages.ts:119)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "accion (vacio de boveda en la pagina)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "VaultRequestModal.tsx:45-46, :108"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 :123-124"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "SendMessageSchema max 1000 (el prefijo suma ≈50 caracteres sin contador)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Modal primitivo size sm"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "real"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autonomo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-reportes-email",
+   "id": "h2.cli-reportes-email.preferencias-reporte",
+   "nombre": "Frecuencia y leads destacados del reporte semanal",
+   "descripcion": "Selects que guardan al instante la frecuencia y cantidad de leads del reporte ejecutivo.",
+   "archivos": [
+    "src/components/dashboard/ExecutiveReportPrefsForm.tsx",
+    "src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts"
+   ],
+   "entradas": [
+    "saveExecutiveReportPrefs"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "perfil/page.tsx:196, :304-309 -> ExecutiveReportPrefsForm.tsx:45-56 -> executive-report-prefs.actions.ts:20-47.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId :23"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "toast de res.error, pero sin try/catch del update (:31-43)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "selects disabled con isPending (ExecutiveReportPrefsForm.tsx:67, :85)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "ExecutiveReportPrefsSchema"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "columna"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "sin captura del fallo"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "real (el contenido del reporte usa leads agency-wide, ver hallazgo)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autonomo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L3",
+   "herramienta": "h2.cli-reportes-email",
+   "id": "h2.cli-reportes-email.pdf-reporte-ejecutivo",
+   "nombre": "Descarga de reporte ejecutivo en PDF",
+   "descripcion": "Template A4 para html2canvas/jspdf.",
+   "archivos": [
+    "src/components/dashboard/ExecutiveReportTemplate.tsx",
+    "src/components/dashboard/DownloadReportButton.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L1",
+   "madurez_evidencia": "Maqueta no cableada: DownloadReportButtons (DownloadReportButton.tsx:129) sin importadores y alimentado con mockData (:82-89, :122).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "no consulta datos"
+    },
+    "vacios": {
+     "cumple": "no",
+     "evidencia": "no existe"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "no cableado"
+    },
+    "carga": {
+     "cumple": "no",
+     "evidencia": "no cableado"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin server"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "template fijo 794px para captura"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "no cableado"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "mockData '120 hs' / '$3,600'"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "inaccesible para el cliente"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.semana-en-numeros",
+   "nombre": "Tu semana en números",
+   "descripcion": "Hero del home: leads de la semana con delta, semáforo de leads calientes (Pro+) y velocidad de primer contacto",
+   "archivos": [
+    "src/components/dashboard/home/BusinessHero.tsx",
+    "src/lib/dashboard/home-metrics.ts",
+    "src/lib/dashboard/home-metrics-logic.ts"
+   ],
+   "entradas": [
+    "page /dashboard"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino trazado: page.tsx:51 resolveOrgId → :123 getHomeBusinessMetrics → home-metrics.ts:96-118 (ChatbotLead por botConfig.organizationId) → BusinessHero.tsx:67-74, :94-149, :163-179. No llega a L3 por el delta que compara semana parcial contra completa (home-metrics-logic.ts:27-28).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "home-metrics.ts:96-100 botConfig.organizationId; :58-61 top hot lead idem; org de resolveOrgId (page.tsx:51)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "BusinessHero.tsx:71-73, :111-121, :163-168"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "sin catch local; cae a dashboard/error.tsx → SectionErrorBoundary (role=alert)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "page.tsx:66 Suspense con BusinessResultsSkeleton :140-161"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "BusinessHero.tsx:57 grid-cols-1 sm:grid-cols-2"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary.tsx:64 captureException; sin catch silencioso en este camino"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "datos reales, pero el delta es engañoso (home-metrics-logic.ts:27-28, dates-ar.ts:209)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "links a Mis contactos y al lead (BusinessHero.tsx:131, :192)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.estimacion-plata",
+   "nombre": "Estimación de plata por ticket promedio",
+   "descripcion": "El cliente carga su ticket promedio y ve leads × ticket",
+   "archivos": [
+    "src/components/dashboard/home/MoneyEstimate.tsx",
+    "src/lib/dashboard/home-metrics-logic.ts"
+   ],
+   "entradas": [
+    "saveAverageTicket (business-profile.actions.ts)"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "MoneyEstimate.tsx:36-53 → business-profile.actions.ts:22-40 (resolveOrgId, Zod, update) → home-metrics-logic.ts:93-96; título engañoso como UX aparte.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "business-profile.actions.ts:25 resolveOrgId; update por id de esa org :33-36"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "card de setup MoneyEstimate.tsx:55-105; sin leads :137-145"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast.error MoneyEstimate.tsx:38-40, :45-47"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Button loading MoneyEstimate.tsx:87"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "business-profile.actions.ts:14-18, :28-31 Zod int positivo ≤ 1e8"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "input min-h-[44px] MoneyEstimate.tsx:84; flex"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "la action no atrapa errores de DB → error boundary con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "rotulado 'estimado' (MoneyEstimate.tsx:133-135); el título 'Cuánto te generó la web' se reporta como UX BAJA"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "edición con lápiz MoneyEstimate.tsx:114-124"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.origen-leads",
+   "nombre": "De dónde llegan",
+   "descripcion": "Top de orígenes de los leads de la semana",
+   "archivos": [
+    "src/components/dashboard/home/LeadOrigins.tsx",
+    "src/lib/dashboard/lead-origin.ts",
+    "src/lib/dashboard/home-metrics-logic.ts"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "home-metrics.ts:105-115, :126-132 → home-metrics-logic.ts:149-178 (suma preservada) → LeadOrigins.tsx:16-59.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "misma query org-scoped home-metrics.ts:105-115"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "LeadOrigins.tsx:19-27 SectionEmptyState"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "dashboard/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "BusinessResultsSkeleton page.tsx:151-158"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "page.tsx:131 grid-cols-1 lg:grid-cols-2"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "error boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "lead-origin.ts:24-25 lo no mapeable cae en 'Otros'/'Directo'"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "informativo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.embudo-leads",
+   "nombre": "Qué pasó con tus leads",
+   "descripcion": "Embudo entraron → contactaste → vendiste con nudge a los pendientes",
+   "archivos": [
+    "src/components/dashboard/home/LeadFunnel.tsx",
+    "src/lib/dashboard/home-metrics-logic.ts"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "home-metrics.ts:123-125 → home-metrics-logic.ts:117-127 → LeadFunnel.tsx:27-85 (link ?status=NEW soportado por leads/page.tsx:32-40).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "home-metrics.ts:105-115"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "LeadFunnel.tsx:28-36"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "dashboard/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "skeleton page.tsx:151-158"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "LeadFunnel.tsx:50 grid-cols-3 (entra en 360 px)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "error boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "LeadFunnel.tsx:70-81 link a pendientes"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.campanas-utm",
+   "nombre": "Campañas",
+   "descripcion": "Leads de la semana por utm_campaign humanizado",
+   "archivos": [
+    "src/components/dashboard/home/LeadCampaigns.tsx",
+    "src/lib/dashboard/lead-origin.ts",
+    "src/lib/dashboard/home-metrics-logic.ts"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "home-metrics.ts:134 → home-metrics-logic.ts:206-234 → LeadCampaigns.tsx:18-69.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "misma query org-scoped"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "LeadCampaigns.tsx:23-31"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "dashboard/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "skeleton"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "lista vertical"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "error boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "'Sin campaña' honesto LeadCampaigns.tsx:36"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "informativo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.resumen-ia",
+   "nombre": "Resumen ejecutivo IA",
+   "descripcion": "Brief de 3 oraciones generado por Gemini con cache semanal y 3 regeneraciones manuales",
+   "archivos": [
+    "src/components/dashboard/home/AIExecutiveBriefV2.tsx",
+    "src/lib/ai/executive-brief.ts",
+    "src/lib/ai/executive-brief-input.ts",
+    "src/lib/ai/brief-history.ts"
+   ],
+   "entradas": [
+    "page /dashboard",
+    "regenerateBriefAction (regenerate-brief.ts)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino trazado por lectura: page.tsx:187-212 → executive-brief.ts:52-135 → :272-309 (Vertex) → AIExecutiveBriefV2; regen regenerate-brief.ts:9-26 → executive-brief.ts:137-221. En runtime hoy cae a BriefEmptyState por la credencial Vertex vencida (requiere verificación humana) y no hay cron en Netlify.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId page.tsx:51 y regenerate-brief.ts:16; queries por organizationId"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "page.tsx:218-234 BriefEmptyState"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "AIExecutiveBriefV2.tsx:37-39, :114-118; mensajes amigables executive-brief.ts:158-162, :178-180"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "page.tsx:71 BriefSkeleton; 'Generando...' AIExecutiveBriefV2.tsx:74-78"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "regenerate-brief.ts:16 Zod sobre la org; sin input del cliente"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "AIExecutiveBriefV2.tsx:103 flex-col sm:flex-row"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "executive-brief.ts:128, :132, :218, :365 y page.tsx:195 solo console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "el prompt recibe leads globales (week-results.ts:43-52) y un Health total que la UI muestra como 'calibrando'; promete actualización los lunes sin cron (AIExecutiveBriefV2.tsx:110)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "regenerar sin develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.health-score",
+   "nombre": "Health Score",
+   "descripcion": "Anillos Digital/Comercial/Operativa con score 0-100",
+   "archivos": [
+    "src/components/dashboard/home/HealthScore.tsx",
+    "src/lib/health-score.ts"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "health-score.ts:86-87 deriva el nivel de dataConnections, que nadie escribe → level ONBOARDING para toda org → HealthScore.tsx:31-33 siempre muestra 'Estamos calibrando tu score'; el score real nunca se ve.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "no",
+     "evidencia": "conversión y leads sobre ContactSubmission global health-score.ts:284-289, :317-333"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "HealthScoreOnboarding HealthScore.tsx:139-208"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "lanza si no hay org (:82-84) → boundary, pero los .catch(() => 0/null) esconden fallos como datos"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "page.tsx:90 HealthScoreSkeleton"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "anillo w-[260px] y grid-cols-1 lg:grid-cols-[auto_1fr] HealthScore.tsx:57-61"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "boundary sí; fallos de DB tragados en health-score.ts:253, :290, :297, :322"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "SEO placeholder :265-274; texto 'develOP está conectando las herramientas' perpetuo HealthScore.tsx:173-176"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "informativo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.atencion-hoy",
+   "nombre": "Atención hoy",
+   "descripcion": "Pila priorizada: factura vencida, entrega por aprobar, mensajes nuevos, conexiones",
+   "archivos": [
+    "src/components/dashboard/home/AttentionStack.tsx",
+    "src/lib/dashboard/attention.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:177-180 → attention.ts:25-127 (org-scoped) → AttentionStack.tsx:76-160 con Links a rutas existentes; el ítem de conexiones es falso perpetuo.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "attention.ts:37-68 filtros por organizationId"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "AttentionStack.tsx:77 return null (nunca vacío por el ítem de onboarding)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": ".catch(() => null) en attention.ts:42, :56, :61, :67"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "page.tsx:94 Suspense fallback={null}"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "CTA visible en mobile AttentionStack.tsx:147-150; link min-h-[44px] :104"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "fallos tragados sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "attention.ts:113-123 'develOP esta conectando tus herramientas (0/6)' siempre"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "CTAs a facturación, proyecto, mensajes"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.resultados-semana",
+   "nombre": "Resultados de la semana",
+   "descripcion": "Cuatro tarjetas: visitas, leads, mensajes respondidos, tareas completadas",
+   "archivos": [
+    "src/components/dashboard/home/WeekResultsGrid.tsx",
+    "src/lib/dashboard/week-results.ts"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "page.tsx:182-185 → week-results.ts:18-105 → WeekResultsGrid.tsx:21-88: visitas hardcodeadas (:41-42), leads de otros tenants (:43-52); solo mensajes y tareas son de la org.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "no",
+     "evidencia": "week-results.ts:43-52 ContactSubmission sin organizationId"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "muestra 0 y '—' sin estado vacío"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": ".catch(() => 0) convierte fallos en ceros"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "page.tsx:98 WeekResultsSkeleton"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "WeekResultsGrid.tsx:31 grid-cols-2 lg:grid-cols-4"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "fallos tragados"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Promise.resolve(0) :41-42; caption 'En calibración' encubre el dato global WeekResultsGrid.tsx:44-55"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "informativo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-plan",
+   "id": "h2.cli-plan.medidor-consumo",
+   "nombre": "Medidor de clientes atendidos",
+   "descripcion": "Uso del mes contra el tope del plan, con tono adaptativo y estado sin bot",
+   "archivos": [
+    "src/components/dashboard/plan/UsageMeter.tsx"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "plan/page.tsx:36-39 y page.tsx:163-166 → get-org-usage.ts:49-85 (botConfig por organizationId, QuotaUsage) → UsageMeter.tsx:75-233. Período en UTC (PLAN-084) como salvedad.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "get-org-usage.ts:54-57, :62-66"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "UsageMeter.tsx:79-127"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "dashboard/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "plan/loading.tsx y Suspense plan/page.tsx:25-27"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "UsageMeter.tsx:141 flex-col sm:flex-row"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "error boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "QuotaUsage real; corte de mes en UTC get-org-usage.ts:36-37"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "informativo + link a planes"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-plan",
+   "id": "h2.cli-plan.planes-y-upgrade",
+   "nombre": "Planes y pedido de upgrade",
+   "descripcion": "Tres planes con CTA que registra el pedido y lleva a Mensajes con texto pre-cargado",
+   "archivos": [
+    "src/components/dashboard/plan/PlansShowcase.tsx",
+    "src/components/dashboard/plan/UpgradeCtaButton.tsx",
+    "src/lib/actions/upsell.ts"
+   ],
+   "entradas": [
+    "requestUpsellAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "plan/page.tsx:41-46 → PlansShowcase.tsx:45-81 → UpgradeCtaButton.tsx:84-101 → upsell.ts:10-156 → window.location.assign.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "upsell.ts:16 org de sesión"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "catálogo estático"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "UpgradeCtaButton.tsx:87-94 si la action falla solo hay console.error en el navegador y navega igual"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "spinner UpgradeCtaButton.tsx:117-121"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "schemas.ts:45-48 sin max ni allowlist"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "PlansShowcase.tsx:67 stack en mobile, lg:grid-cols-3"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "upsell.ts:137, :153 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "precios espejo de sync-plans (plan-presentation.ts:149,165,181)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "el cambio de plan lo hace develOP (por diseño)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-plan",
+   "id": "h2.cli-plan.activacion-bot",
+   "nombre": "Pedido de activación del vendedor virtual",
+   "descripcion": "CTA del estado sin bot que registra el pedido",
+   "archivos": [
+    "src/components/dashboard/plan/UsageMeter.tsx",
+    "src/components/dashboard/plan/UpgradeCtaButton.tsx"
+   ],
+   "entradas": [
+    "requestUpsellAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "UsageMeter.tsx:118-123 → UpgradeCtaButton.tsx:80-101 → upsell.ts; el destino no tiene prefill (message-context.ts sin 'bot-activation').",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "upsell.ts:16"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "es el propio estado vacío"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "error silenciado UpgradeCtaButton.tsx:87-94"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "spinner"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "schemas.ts:45-48"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "botón w-full UsageMeter.tsx:122"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos inventados"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "llega a un composer vacío (message-context.ts:56)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.reputacion-gbp",
+   "nombre": "Reputación en Google",
+   "descripcion": "Rating, total y reseñas recientes de Google Business Profile",
+   "archivos": [
+    "src/components/dashboard/results/GBPMetricsCard.tsx",
+    "src/components/dashboard/results/_shared/HoverCard.tsx",
+    "src/components/dashboard/results/_shared/ResultEmptyState.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "reputacion/page.tsx:15-34 → getGBPMetrics(org) → GBPMetricsCard.tsx:37-178.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "reputacion/page.tsx:15-20 org de resolveOrgId"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "reputacion/page.tsx:39-56; GBPMetricsCard.tsx:116-119"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "reputacion/page.tsx:21-23 un fallo se muestra como 'pendiente de conexión'"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "resultados/reputacion/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "GBPMetricsCard.tsx:71 grid-cols-1"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "reputacion/page.tsx:22 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "FIXME GBPMetricsCard.tsx:39-41; performance en 0 google-business-profile.ts:218-224"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "CTA 'Hablar con mi equipo'"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.velocidad-sitio",
+   "nombre": "Velocidad del sitio (PageSpeed)",
+   "descripcion": "Score mobile/desktop, Core Web Vitals y oportunidades",
+   "archivos": [
+    "src/components/dashboard/results/PageSpeedCard.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "trafico/page.tsx:125-136 → pagespeed.ts:26-35 (cache 6 h) → PageSpeedCard.tsx:176-250.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "siteUrl de la org de resolveOrgId (trafico/page.tsx:48)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "PageSpeedCard.tsx:179-197 nunca se ve: trafico/page.tsx:133 devuelve null"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "fallo → null y la sección desaparece"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "resultados/trafico/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "PageSpeedCard.tsx:225 grid-cols-1 sm:grid-cols-2"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "pagespeed.ts:43, :48 console.warn"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos de la API"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "informativo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.insights-ia",
+   "nombre": "Insights automáticos",
+   "descripcion": "Tres lecturas generadas por IA sobre tráfico y SEO",
+   "archivos": [
+    "src/components/dashboard/results/InsightsBlock.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "trafico/page.tsx:47-49 → results-insights.ts:34-42 (Anthropic, cache 24 h por org) → InsightsBlock.tsx:37-89; no corre sobre datos mock.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "clave de cache por organizationId results-insights.ts:39"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "InsightsBlock.tsx:38 return null"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "generador no leído en detalle; sin estado de error propio"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading.tsx de la ruta"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "lista vertical"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "boundary sí; generador no verificado"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "trafico/page.tsx:47-48 sin insights si isMockData"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "informativo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.analisis-mensual",
+   "nombre": "Análisis mensual de conversaciones",
+   "descripcion": "Temas de consulta, descubrimientos y tendencia mes a mes (Pro+)",
+   "archivos": [
+    "src/components/dashboard/results/analysis/CategoriesSection.tsx",
+    "src/components/dashboard/results/analysis/DiscoveriesSection.tsx",
+    "src/components/dashboard/results/analysis/MonthTrendSection.tsx",
+    "src/components/dashboard/results/analysis/MonthlyConversationsChart.tsx",
+    "src/components/dashboard/results/analysis/CalibratingBlock.tsx",
+    "src/components/dashboard/results/analysis/AnalysisTeaser.tsx",
+    "src/components/dashboard/results/_shared/chartTheme.ts",
+    "src/components/dashboard/results/_shared/chartHover.ts"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "analisis/page.tsx:31-60 (gate planAllows) → getMonthlyAnalysisForOrg (forOrg :53-56) → secciones con CalibratingBlock como vacío.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "getMonthlyAnalysisForOrg.ts:53-56 forOrg"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "CategoriesSection.tsx:26-31, DiscoveriesSection.tsx:41-45, MonthTrendSection.tsx:25-30"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "resultados/error.tsx (SectionErrorBoundary)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "resultados/analisis/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "ResponsiveContainer MonthlyConversationsChart.tsx:61; flex-wrap MonthTrendSection.tsx:37"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "agregados reales; teaser solo para planes sin análisis"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "informativo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.informe-pdf",
+   "nombre": "Descargar informe del mes",
+   "descripcion": "PDF mensual generado server-side",
+   "archivos": [
+    "src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "DownloadMonthlyReportButton.tsx:18-41 → api/reports/client-monthly/route.ts:24-56 (org de sesión, gate de plan, renderToBuffer).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "route.ts:25 resolveOrgId, sin parámetros"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "builder del PDF no leído en este lote"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast DownloadMonthlyReportButton.tsx:36-38; route.ts:57-62 mensaje genérico"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "DownloadMonthlyReportButton.tsx:51-56"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "botón único"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "route.ts:58 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "builder no leído"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "descarga directa"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-shell",
+   "id": "h2.cli-shell.notificaciones",
+   "nombre": "Centro de notificaciones",
+   "descripcion": "Campana con las últimas 5, historial de 200 y 'marcar todas'",
+   "archivos": [
+    "src/lib/actions/notifications.ts"
+   ],
+   "entradas": [
+    "markAllNotificationsReadAction",
+    "getMyNotificationsAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "layout.tsx:101-105 → NotificationCenter.tsx:114 → notifications.ts:46-66; historial NotificationHistoryModal.tsx:34 → notifications.ts:73-93.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "filtra por organizationId pero no por userId (notifications.ts:55-58, :82-86)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "NotificationCenter.tsx:217; NotificationHistoryModal.tsx:134-141"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "NotificationHistoryModal.tsx:117"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "NotificationHistoryModal.tsx:12 estado loading"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input en las acciones vivas"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "panel no verificado en 360 px"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "notifications.ts:41, :63, :90 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "muestra copias del admin con actionUrl /admin/... (dashboard-actions.ts:62-70)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autogestión"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-shell",
+   "id": "h2.cli-shell.novedades",
+   "nombre": "Novedades del panel",
+   "descripcion": "Feed de anuncios ALL u ORG con badge 'no visto'",
+   "archivos": [
+    "src/lib/announcements/get-announcements-for-org.ts",
+    "src/lib/announcements/visibility.ts",
+    "src/lib/actions/announcements.ts"
+   ],
+   "entradas": [
+    "markAnnouncementsSeenAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "layout.tsx:110-112 → get-announcements-for-org.ts:31-69 → AnnouncementsFeed.tsx:57-66 → announcements.ts:17-52.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "get-announcements-for-org.ts:43 y announcements.ts:33 ALL u ORG propia"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "AnnouncementsFeed.tsx:165-171"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "AnnouncementsFeed.tsx:64 no mira el resultado (optimista)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "SSR en el layout"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "panel no verificado en 360 px"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "announcements.ts:49 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "contenido curado por develOP"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autogestión"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-mensajes",
+   "id": "h2.cli-mensajes.enviar-mensaje",
+   "nombre": "Enviar mensaje a develOP",
+   "descripcion": "Chat cliente → equipo con alerta y notificación al admin",
+   "archivos": [
+    "src/lib/actions/messages.ts"
+   ],
+   "entradas": [
+    "sendClientMessageAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "MessageThread.tsx:51 → messages.ts:114-208 → message.create :134-140.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "messages.ts:119 org de sesión (falla en vista previa)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "WELCOME_MESSAGE MessageThread.tsx:155"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "ClientChatComposer muestra state.error; mensaje genérico messages.ts:204-206"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPending MessageThread.tsx:51"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "SendMessageSchema 1..1000 schemas.ts:10-12"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "layout del thread no verificado"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "messages.ts:166, :196, :205 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "SLA literal '< 4 hs' sin respaldo MessageThread.tsx:114"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autogestión"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-referidos",
+   "id": "h2.cli-referidos.codigo-referido",
+   "nombre": "Código de referido",
+   "descripcion": "Generar y copiar el código y link de referido",
+   "archivos": [
+    "src/lib/actions/referrals.ts"
+   ],
+   "entradas": [
+    "generateMyReferralCodeAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "referidos/page.tsx:26-33 → ReferralPanel.tsx:40-51 → referrals.ts:12-28 → referrals.service.ts getOrCreateReferralCodeForOrg.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "referrals.ts:14 org de sesión (diverge en vista previa)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "ReferralPanel sin código muestra el botón generar"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "ReferralPanel.tsx:44-46"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPending ReferralPanel.tsx:33"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "no verificado"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "referrals.ts:25 console.error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autogestión"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-servicios",
+   "id": "h2.cli-servicios.solicitar-modulo",
+   "nombre": "Solicitar un módulo premium",
+   "descripcion": "Pedido de módulo desde la vitrina o la vista bloqueada",
+   "archivos": [
+    "src/lib/actions/upsell.ts",
+    "src/lib/premium-modules.ts"
+   ],
+   "entradas": [
+    "requestUpsellAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "PremiumModuleCard.tsx:206 / LockedView.tsx:68 → upsell.ts:10-156 (fila INACTIVE + ContactSubmission + alertas).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "upsell.ts:16"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "upsell.ts:152-155 genérico; manejo en PremiumModuleCard no leído en detalle"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "spinners en los CTA"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "schemas.ts:45-48"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "componentes fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "upsell.ts:137, :153"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "'Próximamente Q3 2026' vencido PremiumModuleCard.tsx:300; '[FALTA:precio]' LockedView.tsx:151"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "la activación requiere edición manual de la DB"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-servicios",
+   "id": "h2.cli-servicios.activacion-modulo-premium",
+   "nombre": "Activación de un módulo contratado",
+   "descripcion": "Pasar un OrganizationModule a ACTIVE cuando el cliente contrata",
+   "archivos": [
+    "src/lib/premium-modules.ts"
+   ],
+   "madurez": "L0",
+   "madurez_evidencia": "No existe camino: activateModule (premium-modules.ts:103) sin llamadores; ToggleModulePremiumSchema (client.schemas.ts:15) sin acción; único escritor upsell.ts:57-71 crea INACTIVE.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "sin_mocks_todos": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "requiere escribir en la base a mano"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-resenas",
+   "id": "h2.cli-resenas.borrador-ia",
+   "nombre": "Borrador de respuesta con IA",
+   "descripcion": "Genera una respuesta sugerida a una reseña de Google",
+   "archivos": [
+    "src/components/dashboard/modules/motor-resenas/_actions.ts"
+   ],
+   "entradas": [
+    "generateDraft"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ReviewItem.tsx:46-61 → _actions.ts:11-46 → review-reply-draft.ts:5-44 (Anthropic).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "_actions.ts:20 resolveScopedOrgId + :23-24 módulo activo"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "devuelve err.message crudo _actions.ts:43"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isGenerating ReviewItem.tsx:43"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "sin Zod _actions.ts:11-16"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "ReviewItem fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captura _actions.ts:40-45"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "LLM real"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autogestión"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-resenas",
+   "id": "h2.cli-resenas.publicar-respuesta",
+   "nombre": "Publicar respuesta en Google",
+   "descripcion": "PUT de la respuesta a la reseña en GBP",
+   "archivos": [
+    "src/components/dashboard/modules/motor-resenas/_actions.ts"
+   ],
+   "entradas": [
+    "replyAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ReviewItem.tsx:64-79 → _actions.ts:48-73 → google-business-profile.ts:275-305.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "org de sesión _actions.ts:55, pero reviewName no se verifica contra la ficha de la org"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "texto crudo de Google google-business-profile.ts:298"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPublishing ReviewItem.tsx:44"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "sin Zod _actions.ts:48-52"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "ReviewItem fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "API real"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autogestión"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.boveda",
+   "nombre": "Bóveda de recursos y accesos",
+   "descripcion": "Lista de activos del cliente con revelado temporal de credenciales",
+   "archivos": [
+    "src/components/dashboard/VaultRevealButton.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "boveda/page.tsx:63-69 (clientAsset por organizationId) → resolveCredentialDisplay → VaultRevealButton.tsx:15-147; datos inventados en la misma pantalla.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "boveda/page.tsx:66-69 where organizationId"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "boveda/page.tsx:99-120"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "cuenta/error.tsx; error por fila :180-184"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "cuenta/boveda/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "grid-cols-1 sm:grid-cols-2 :124; botones de 28 px VaultRevealButton.tsx:122"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "ACTIVITY_LOG inventado :51-58; 'AES-256' :85, :148 sobre datos en claro"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "VaultRequestModal para pedir recursos"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L4",
+   "herramienta": "h2.cli-cuenta",
+   "id": "h2.cli-cuenta.facturacion-plan-actual",
+   "nombre": "Plan actual en Facturación",
+   "descripcion": "Servicios y módulos activos, total mensual y próxima facturación",
+   "archivos": [
+    "src/lib/billing/get-current-plan.ts",
+    "src/lib/subscription.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "facturacion/page.tsx:60-75 → get-current-plan.ts:37-99 → CurrentPlanCard.tsx:173-196.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "get-current-plan.ts:41, :54 por organizationId"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "CurrentPlanCard.tsx:53 hasPlan + 'Ver catálogo'"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "cuenta/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "cuenta/facturacion/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "CurrentPlanCard no leído completo"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "nextBillingAt inventada get-current-plan.ts:75-77; total con precio de catálogo :70-73"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "informativo"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-soporte",
+   "id": "h2.cli-soporte.crear-ticket",
+   "nombre": "Crear ticket de soporte",
+   "descripcion": "El cliente abre un ticket con asunto, categoría, prioridad y descripción y llega al detalle.",
+   "archivos": [
+    "src/lib/tickets/actions.ts",
+    "src/lib/tickets/schemas.ts",
+    "src/components/dashboard/NewTicketModal.tsx",
+    "src/app/(protected)/dashboard/soporte/page.tsx"
+   ],
+   "entradas": [
+    "src/lib/tickets/actions.ts#createTicketAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "soporte/page.tsx:73 → NewTicketModal.tsx:38-55 → actions.ts:49-61 (sesión, org, Zod) → :64-86 create con mensaje → :98-99 ok → NewTicketModal.tsx:59-63 navega al detalle (soporte/[ticketId]/page.tsx:60-62).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "org de resolveOrgId (actions.ts:50,70); en preview el autor es el admin (:51)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "SoporteBoard.tsx:56-71 y :217 estados vacíos por columna"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "NewTicketModal.tsx:67-68,119-124 muestra res.error; actions.ts:100-103 mensaje genérico"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "NewTicketModal.tsx:199 spinner; soporte/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod sin .max() (schemas.ts:5-6) y sin rate limit"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "modal w-full max-w-lg px-4 (NewTicketModal.tsx:83,96) pero selects en grid-cols-2 fijo (:138) a 320 px"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch con console.error (actions.ts:100-103)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "SLA '< 4h' sin respaldo en la misma pantalla (soporte/page.tsx:86-91)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "flujo completo sin develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-soporte",
+   "id": "h2.cli-soporte.responder-ticket",
+   "nombre": "Responder un ticket",
+   "descripcion": "El cliente escribe en el hilo del ticket.",
+   "archivos": [
+    "src/lib/tickets/actions.ts",
+    "src/components/dashboard/TicketReplyForm.tsx",
+    "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx"
+   ],
+   "entradas": [
+    "src/lib/tickets/actions.ts#replyToTicketAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "soporte/[ticketId]/page.tsx:187 → TicketReplyForm.tsx:16-20 → actions.ts:117-137 (sesión + assertTicketBelongsToOrg) → :140-148 create → :170-171 revalidate; ClientChatComposer.tsx:84-86 muestra errores.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "assertTicketBelongsToOrg (actions.ts:130; assert-ownership.ts:32-43)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "soporte/[ticketId]/page.tsx:172-176 emptyState"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "ClientChatComposer.tsx:84-86; errores no previstos se relanzan al boundary (actions.ts:135)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPending de useActionState (TicketReplyForm.tsx:16)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "TicketReplySchema con max 2000 (schemas.ts:11-18)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "alto fijo calc(100svh-14rem) con la timeline shrink-0 apilada debajo en <lg (page.tsx:115,159,193): en pantallas bajas el chat queda con poco alto; confirmar visualmente"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (actions.ts:173)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "'El equipo de develOP será notificado de inmediato' es falso (TicketReplyForm.tsx:32 vs actions.ts:126-171)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "la respuesta se guarda pero develOP no recibe aviso"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-soporte",
+   "id": "h2.cli-soporte.resolver-ticket",
+   "nombre": "Marcar ticket como resuelto",
+   "descripcion": "El cliente cierra su ticket desde el detalle.",
+   "archivos": [
+    "src/lib/tickets/actions.ts",
+    "src/components/dashboard/ResolveTicketButton.tsx"
+   ],
+   "entradas": [
+    "src/lib/tickets/actions.ts#resolveTicketClientAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "soporte/[ticketId]/page.tsx:150-153 → ResolveTicketButton.tsx:12-17 → actions.ts:205-216 update por id + org → router.refresh.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "where { id, organizationId } (actions.ts:211-213)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción puntual"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "ResolveTicketButton.tsx:16 ignora el fallo"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 (ResolveTicketButton.tsx:25-26)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "solo trim manual (actions.ts:208)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "botón inline en el header flex-col (page.tsx:118,150-153)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (actions.ts:219)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos inventados"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "sin confirmación ni forma de reabrir (page.tsx:178-185)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h4.adm-tickets",
+   "id": "h4.adm-tickets.responder-y-avisar-por-email",
+   "nombre": "Responder ticket como develOP y avisar al cliente",
+   "descripcion": "El SUPER_ADMIN responde y el cliente debería recibir un email.",
+   "archivos": [
+    "src/lib/tickets/actions.ts",
+    "src/lib/email.ts"
+   ],
+   "entradas": [
+    "src/lib/tickets/actions.ts#replyToTicketAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "actions.ts:124 (isAdmin) → :140-148 mensaje → :150-167 sendEmail por Resend (lib/email.ts:15-30); el mensaje se guarda, el email puede no salir sin registro.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "rol SUPER_ADMIN (actions.ts:124); opera sobre cualquier org por diseño"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "resultado del email ignorado (actions.ts:166)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI admin fuera del lote, no evaluada"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "TicketReplySchema (schemas.ts:11-18)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI admin fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (actions.ts:166,173)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "lib/email.ts:15-16 finge éxito sin RESEND_API_KEY"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h4.adm-tickets",
+   "id": "h4.adm-tickets.cambiar-estado",
+   "nombre": "Cambiar estado del ticket",
+   "descripcion": "El SUPER_ADMIN pasa el ticket entre OPEN, IN_PROGRESS y RESOLVED.",
+   "archivos": [
+    "src/lib/tickets/actions.ts",
+    "src/lib/tickets/schemas.ts"
+   ],
+   "entradas": [
+    "src/lib/tickets/actions.ts#updateTicketStatusAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "admin/tickets/_components/ticket-chat.tsx:9 → actions.ts:183-184 Zod → :187 requireSuperAdmin → :188-193 update + revalidate.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin (actions.ts:187)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "no autorizado y fallo de DB devuelven el mismo mensaje (actions.ts:195-198)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI admin fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpdateTicketStatusSchema (schemas.ts:20-23)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI admin fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (actions.ts:196)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos inventados"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna; el cliente no recibe aviso del cambio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-plan",
+   "id": "h2.cli-plan.medidor-de-consumo",
+   "nombre": "Medidor de consumo del mes",
+   "descripcion": "Muestra conversaciones usadas contra el cupo del plan con mensajes según el porcentaje.",
+   "archivos": [
+    "src/lib/plan/get-org-usage.ts",
+    "src/lib/plan/get-plan-for-org.ts",
+    "src/lib/plan/fallback.ts",
+    "src/lib/plan/plan-presentation.ts",
+    "src/components/dashboard/plan/UsageMeter.tsx",
+    "src/app/(protected)/dashboard/plan/page.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L3",
+   "madurez_evidencia": "plan/page.tsx:13,36-38 → get-org-usage.ts:49-85 (QuotaUsage del bot de la org) → get-plan-for-org.ts:68-125 → UsageMeter (estado sin bot :79-95; mensajes plan-presentation.ts:240-278).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId (plan/page.tsx:13); consultas por organizationId/botConfigId (get-org-usage.ts:54-67)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "UsageMeter.tsx:79-95 'Tu vendedor virtual todavía no está activo'"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "boundary de dashboard/error.tsx (SectionErrorBoundary con captureException); /plan no tiene error.tsx propio"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Suspense con skeleton (plan/page.tsx:25-27,52-54) y plan/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "barra w-full (UsageMeter.tsx:186)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "vía boundary (SectionErrorBoundary.tsx:61-64)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "QuotaUsage real (get-org-usage.ts:62-68)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "solo lectura"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-plan",
+   "id": "h2.cli-plan.vitrina-de-planes-y-upgrade",
+   "nombre": "Vitrina de planes y pedido de upgrade",
+   "descripcion": "Tres tarjetas de plan con beneficios; el CTA registra la intención y lleva a Mensajes.",
+   "archivos": [
+    "src/lib/plan/plan-presentation.ts",
+    "src/components/dashboard/plan/PlansShowcase.tsx",
+    "src/components/dashboard/plan/UpgradeCtaButton.tsx",
+    "src/lib/actions/upsell.ts"
+   ],
+   "entradas": [
+    "src/lib/actions/upsell.ts#requestUpsellAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "plan/page.tsx:41-46 → PlansShowcase (plan-presentation.ts:144-196) → UpgradeCtaButton.tsx:80-100 → upsell.ts:10-155 → /dashboard/messages?context=plan-upgrade-*.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "requestUpsellAction usa session.user.organizationId (upsell.ts:16), no honra preview"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "catálogo fijo"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "UpgradeCtaButton.tsx:87-93 solo console.error y navega igual"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "spinner de pending en UpgradeCtaButton; skeleton plan/page.tsx:56-63"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpsellRequestSchema (upsell.ts:22-25)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid lg:grid-cols-3 que apila (plan/page.tsx:58)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (upsell.ts:153)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "precios copiados a mano (plan-presentation.ts:149,165,181); 'Soporte prioritario < 24 h' sin respaldo (:135-136)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "el upgrade es un pedido a develOP, no autoservicio (por diseño)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.ideas-para-crecer",
+   "nombre": "Ideas para crecer",
+   "descripcion": "Hasta 3 recomendaciones por reglas sobre señales de la org, con CTA que registra el interés.",
+   "archivos": [
+    "src/lib/recommendations/get-recommendations-for-org.ts",
+    "src/lib/recommendations/rules.ts",
+    "src/lib/recommendations/types.ts",
+    "src/components/dashboard/home/Recommendations.tsx"
+   ],
+   "entradas": [
+    "src/lib/actions/upsell.ts#requestUpsellAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "dashboard/page.tsx:78-80,238-248 → get-recommendations-for-org.ts:29-64 → rules.ts:175-218 → Recommendations.tsx:78-101 → upsell.ts → Mensajes.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "señales org-scoped (get-recommendations-for-org.ts:32-41); el CTA usa session.user.organizationId (upsell.ts:16)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Recommendations.tsx:187-188 EmptyStateMuted"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "wrapper cae a [] (dashboard/page.tsx:240-245); la card muestra el error (Recommendations.tsx:95-101)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "RecommendationsSkeleton (dashboard/page.tsx:250-262)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpsellRequestSchema"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-col sm:flex-row (Recommendations.tsx:104)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (dashboard/page.tsx:243)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "'este mes' sobre ventana de 30 días con DQ incluidos (rules.ts:47,83,137)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "un tap registra y lleva a Mensajes"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.checklist-de-onboarding",
+   "nombre": "Checklist 'Estamos configurando tu negocio'",
+   "descripcion": "Card de Inicio con el avance de las tareas de onboarding de develOP.",
+   "archivos": [
+    "src/lib/onboarding/seed-tasks-for-org.ts",
+    "src/components/dashboard/OnboardingStatusCard.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L1",
+   "madurez_evidencia": "La card lee tareas (OnboardingStatusCard.tsx:17-28) pero ninguna alta viva las crea: seedOnboardingTasksForOrg (seed-tasks-for-org.ts:4-16) solo lo llaman lib/actions/clients.ts:139 e invitations.ts:93, sin importadores; solo un script de QA siembra tareas.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "where organizationId (OnboardingStatusCard.tsx:17-18)"
+    },
+    "vacios": {
+     "cumple": "no",
+     "evidencia": "return null con 0 tareas (:28), y siempre son 0"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "solo el boundary del dashboard"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "Suspense con fallback null (dashboard/page.tsx:60-62)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "p-6 sm:p-8, sin anchos fijos (OnboardingStatusCard.tsx:46-50)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "solo vía boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "lee datos reales cuando existen"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "depende de que develOP siembre tareas con un script"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-servicios",
+   "id": "h2.cli-servicios.vitrina-de-modulos",
+   "nombre": "Vitrina de módulos premium",
+   "descripcion": "Agrupa el catálogo en propios, disponibles y próximamente. Catálogo: 4 ACTIVE (motor-resenas, email-marketing-pro, agenda-inteligente, tienda-conectada) y 4 COMING_SOON (premium-modules.ts:24-137); email marketing es inalcanzable por slug y el Motor de Reseñas muestra '[FALTA:precio]'.",
+   "archivos": [
+    "src/lib/modules/showroom.ts",
+    "src/app/(protected)/dashboard/services/page.tsx",
+    "src/components/dashboard/PremiumModuleCard.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "services/page.tsx:169-196 (resolveOrgId, catálogo y módulos de la org) → showroom.ts:58-74 → PremiumModuleCard.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId y organizationModule por org (services/page.tsx:169-190); showroom.ts es puro"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "services/page.tsx:222-233 y secciones condicionales :258,307,336"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "boundary dashboard/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "services/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura; el CTA usa UpsellRequestSchema"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "PremiumModuleCard no leída completa; sin verificar"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "errores de render vía boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "'Próximamente Q3 2026' vencido (PremiumModuleCard.tsx:300); textos PRESET_MODULE_DETAILS (:59,195)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "contratar es un pedido a develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-servicios",
+   "id": "h2.cli-servicios.avisame-cuando-este",
+   "nombre": "Avisame cuando esté (demanda de módulos)",
+   "descripcion": "Registra interés en un módulo COMING_SOON o pide uno disponible, deduplicado 24 h.",
+   "archivos": [
+    "src/lib/upsell/dedup.ts",
+    "src/lib/actions/upsell.ts",
+    "src/components/dashboard/PremiumModuleCard.tsx"
+   ],
+   "entradas": [
+    "src/lib/actions/upsell.ts#requestUpsellAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "PremiumModuleCard.tsx:200-216 → upsell.ts:45-71 OrganizationModule upsert → :81-97 dedup (dedup.ts:33-40) y ContactSubmission → :99-139 alerta y notificaciones.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "session.user.organizationId (upsell.ts:16)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "PremiumModuleCard.tsx:219-221 muestra el error"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPending en la card"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpsellRequestSchema"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "sin verificar"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (upsell.ts:137,153)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "fecha Q3 2026 vencida al lado del CTA"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "un click"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-referidos",
+   "id": "h2.cli-referidos.codigo-y-link",
+   "nombre": "Código y link de referido",
+   "descripcion": "El cliente genera su código y copia el link /contact?ref=.",
+   "archivos": [
+    "src/lib/referrals/referrals.service.ts",
+    "src/lib/referrals/code.ts",
+    "src/lib/actions/referrals.ts",
+    "src/components/dashboard/ReferralPanel.tsx"
+   ],
+   "entradas": [
+    "src/lib/actions/referrals.ts#generateMyReferralCodeAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "referidos/page.tsx:26-35 → ReferralPanel.tsx:32-45 → referrals.ts:12-27 → referrals.service.ts:28-61 → code.ts:23-32.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "la página usa resolveOrgId (:27) y la action session.user.organizationId (referrals.ts:14)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "sin código muestra 'Generá tu código' (ReferralPanel.tsx:113-123)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "ReferralPanel.tsx:45,113-114"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "ReferralPanel.tsx:119-123"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "sin verificar"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (referrals.ts:25)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "sin NEXT_PUBLIC_APP_URL el link queda relativo (referidos/page.tsx:35)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-referidos",
+   "id": "h2.cli-referidos.lista-de-referidos",
+   "nombre": "Lista y estado de referidos",
+   "descripcion": "Muestra los referidos de la org con estado PENDING, CONVERTED o REWARDED.",
+   "archivos": [
+    "src/lib/referrals/referrals.service.ts",
+    "src/app/(protected)/dashboard/referidos/page.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L3",
+   "madurez_evidencia": "referidos/page.tsx:29-33 → referrals.service.ts:64-76 → render :48-80 con vacío :59-64.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "referrerOrgId = org de sesión (referrals.service.ts:66; page :27)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "EmptyStateMuted (referidos/page.tsx:59-64)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "boundary dashboard/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "dashboard/loading.tsx del padre"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "truncate y flex justify-between (referidos/page.tsx:70-80)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "vía boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura; el bonificado lo aplica develOP por diseño"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h6.vis-contacto",
+   "id": "h6.vis-contacto.atribucion-de-referido",
+   "nombre": "Atribución de referido desde el formulario público",
+   "descripcion": "Un contacto con ?ref= crea un Referral PENDING y avisa a develOP.",
+   "archivos": [
+    "src/lib/referrals/referrals.service.ts",
+    "src/lib/referrals/attribution.ts",
+    "src/lib/referrals/code.ts",
+    "src/lib/actions/contact.ts"
+   ],
+   "entradas": [
+    "src/lib/actions/contact.ts#contactFormAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "contact.ts:16-70 → referrals.service.ts:94-121 hechos → attribution.ts:41-52 → :134-140 Referral → :143-165 alerta y Notification.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "público por diseño; existing_customer exacto (referrals.service.ts:115)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "proceso"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "nunca tumba el alta del contacto (referrals.service.ts:171-174)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "server"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "ContactFormSchema (contact.ts:35-47) y normalizeReferralCode (code.ts:14-16)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "server"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (referrals.service.ts:167,172)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos inventados"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "automático"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-reportes-email",
+   "id": "h2.cli-reportes-email.reporte-semanal",
+   "nombre": "Reporte ejecutivo semanal por email",
+   "descripcion": "Mail de los lunes con brief IA, salud, leads, mensajes, tareas y (Business) top de leads.",
+   "archivos": [
+    "src/lib/reports/executive-weekly/send.ts",
+    "src/lib/reports/executive-weekly/build.ts",
+    "src/lib/reports/executive-weekly/top-hot-leads.ts"
+   ],
+   "entradas": [
+    "src/app/api/cron/send-executive-reports/route.ts#GET"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "El motor existe (send.ts:73-233, build.ts:64-198) pero no hay disparador en Netlify (netlify.toml:25-32; solo vercel.json:11-14): el cliente no recibe nada salvo envío manual del admin.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "todo por organizationId (build.ts:68-84; top-hot-leads.ts:71) pero la métrica de leads es global (week-results.ts:43-52 → build.ts:175)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "NO_DATA/NO_RECIPIENT saltean con log (build.ts:86,104-106,117,142)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "FAILED en WeeklyReportLog sin alerta (send.ts:193-204)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "email"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input; leadCount defensivo (top-hot-leads.ts:66-67)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "template de email no evaluado"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "leads globales; brief y snapshot viejos (build.ts:113-141); 'Tus 3' fijo (executive-weekly.ts:139)"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "no llega sin intervención de develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-reportes-email",
+   "id": "h2.cli-reportes-email.preferencias-del-reporte",
+   "nombre": "Preferencias del reporte semanal",
+   "descripcion": "El dueño elige frecuencia (semanal, quincenal, no recibir) y cantidad de leads destacados.",
+   "archivos": [
+    "src/lib/reports/executive-weekly/report-eligible-plan.ts",
+    "src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts",
+    "src/components/dashboard/ExecutiveReportPrefsForm.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "perfil/page.tsx:193-203,297-306 → ExecutiveReportPrefsForm → executive-report-prefs.actions.ts:20-46 → Organization → send.ts:83,114 y build.ts:99,161.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId (executive-report-prefs.actions.ts:23)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "update sin try/catch (actions.ts:31-43): un fallo de DB va al boundary"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "formulario no leído"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod con literales 3/5/10 (executive-report-prefs.schemas.ts:8-18)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "sin verificar"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "solo boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "configura un envío que no ocurre en prod; el mail ignora 5/10"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.envio-manual-del-reporte",
+   "nombre": "Enviar ahora el reporte ejecutivo",
+   "descripcion": "Botón del admin que manda el reporte de una org.",
+   "archivos": [
+    "src/lib/reports/executive-weekly/send-manual.ts",
+    "src/lib/reports/executive-weekly/build.ts"
+   ],
+   "entradas": [
+    "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts#POST"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "SendExecutiveReportButton.tsx:37 → route.ts:13-57 → send-manual.ts:33-153 → build.ts → Brevo → WeeklyReportLog.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin (route.ts:14); org del path validada con Zod (:51-54)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "motivos devueltos (route.ts:75-91), con error interno en UNEXPECTED_ERROR"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI admin fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "OrganizationIdSchema; rate limit (route.ts:35-48)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "admin"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "puede mandar datos viejos (build.ts:113-141)"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.informe-mensual-pdf",
+   "nombre": "Descargar el informe del mes en PDF",
+   "descripcion": "PDF de 1-2 páginas con leads, conversaciones, embudo, categorías e insight.",
+   "archivos": [
+    "src/lib/reports/client-monthly/get-client-monthly-report-data.ts",
+    "src/lib/reports/client-monthly/monthly-report-data.ts",
+    "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx"
+   ],
+   "entradas": [
+    "src/app/api/reports/client-monthly/route.ts#GET"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "analisis/page.tsx:45 → DownloadMonthlyReportButton.tsx:18-35 → client-monthly/route.ts:24-56 → get-client-monthly-report-data.ts:20-76 → monthly-report-data.ts:73-97 → ClientMonthlyReportPdf.tsx:287-318.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId (route.ts:25); consultas por botConfigId de la org (get-client-monthly-report-data.ts:24-30,55-66)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "sin bot, sin leads y categorías insuficientes (ClientMonthlyReportPdf.tsx:206-212,240-241,303-304)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast (DownloadMonthlyReportButton.tsx:36-37) y JSON genérico (route.ts:57-63)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "'Generando...' (DownloadMonthlyReportButton.tsx:51-56)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input; gate de plan (route.ts:30-33)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "botón único"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (route.ts:58)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "leads con DQ (get-client-monthly-report-data.ts:56-65); contraste bajo en el PDF"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-resenas",
+   "id": "h2.cli-resenas.vista-segun-estado",
+   "nombre": "Motor de Reseñas: vista bloqueada, conectando u operativa",
+   "descripcion": "Elige una de tres vistas según tenencia del módulo y conexión GBP.",
+   "archivos": [
+    "src/lib/modules/motor-resenas-view.ts",
+    "src/lib/modules/check-activation.ts",
+    "src/lib/security/org-scope.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "motor-resenas/page.tsx:106-127 (resolveOrgId, isModuleActive, deriveConnectionStatus) → motor-resenas-view.ts:38-42 → LockedView/ConnectingState/ReviewsList (:144-153); acciones con resolveScopedOrgId + isModuleActive (_actions.ts:20-24,55-59).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId y org-scope.ts:20-27 en las actions"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "motor-resenas/page.tsx:22-34"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "dashboard/modules/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "motor-resenas/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "las actions de borrador y respuesta no usan Zod (_actions.ts:11-16,48-52)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "sin verificar"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "vía boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "'[FALTA:precio]' visible (LockedView.tsx:151)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "la conexión GBP la hace develOP a mano (motor-resenas-view.ts:12-14)"
+    }
+   }
+  },
+  {
+   "ciclo": "D2-c1",
+   "lote": "D2-L5",
+   "herramienta": "h2.cli-email-mkt",
+   "id": "h2.cli-email-mkt.acceso-al-modulo",
+   "nombre": "Acceso al módulo de email marketing",
+   "descripcion": "Gate de entrada al módulo por tenencia ACTIVE.",
+   "archivos": [
+    "src/lib/modules/check-activation.ts",
+    "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx",
+    "src/components/dashboard/SidebarNav.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L?",
+   "madurez_evidencia": "El gate pide 'email-marketing' (layout.tsx:20) y el catálogo define 'email-marketing-pro' (premium-modules.ts:38): el camino feliz depende del slug real en la base, no trazable por lectura.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "páginas bajo el layout con resolveOrgId; actions sin gate de módulo (_actions.ts:17-27)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no evaluado (fuera del lote)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "no evaluado (fuera del lote)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "no evaluado (fuera del lote)"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "actions sin Zod (_actions.ts:131-135)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "no evaluado"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "no evaluado"
+    },
+    "sin_mocks_todos": {
+     "cumple": "n/a",
+     "evidencia": "no evaluado"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "si el slug no existe en la base, el cliente que paga no entra"
     }
    }
   }

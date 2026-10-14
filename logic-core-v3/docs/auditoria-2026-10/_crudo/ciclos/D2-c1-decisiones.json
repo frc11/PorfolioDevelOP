@@ -1,0 +1,812 @@
+{
+ "D2-c1/D2-L3/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "prefijo": "SEC",
+  "tipo": "seguridad",
+  "titulo": "Inicio, Health Score, reporte semanal y brief IA cuentan como leads del cliente los ContactSubmission de toda la agencia (sin organizationId), incluidos los pedidos de upsell de los demás clientes",
+  "requiere_verificacion_humana": true,
+  "caso_indice": 1,
+  "nota_padre": "Leído: week-results.ts:43-51 cuenta contactSubmission sin where de org (solo createdAt); health-score.ts:283-289 (conversión) y :311-333 (computeLeadsScore, con el comentario 'ContactSubmission is global') igual; dashboard/page.tsx:182-184 → getWeekResults → WeekResultsGrid.tsx:33-49 muestra valor y tendencia con el caption 'En calibración' (el comentario :44-47 dice que es para no revelar que es global); executive-brief.ts:290-296 y reporte semanal build.ts:174-176 usan el mismo week.leads sin el caption; upsell.ts:88-95 crea ContactSubmission por cada pedido de módulo de cualquier cliente. schema.prisma:688-700: el modelo no tiene organizationId. Es la alerta pre-verificada en C03 (D2-A1). Fusiona D2-L2/H01 y D2-L1/H18."
+ },
+ "D2-c1/D2-L2/H01": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H01",
+  "nota_padre": "Mismo conteo global de ContactSubmission (week-results.ts:43, health-score.ts:312); se suma su evidencia."
+ },
+ "D2-c1/D2-L1/H18": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H01",
+  "nota_padre": "Mismo conteo global de ContactSubmission (week-results.ts:43, health-score.ts:311); se suma su evidencia."
+ },
+ "D2-c1/D2-L2/H02": {
+  "decision": "fusionar",
+  "con": "SEC-036",
+  "nota_padre": "Misma causa raíz (write-path de la Bóveda sin cifrar); se suma su evidencia."
+ },
+ "D2-c1/D2-L1/H15": {
+  "decision": "fusionar",
+  "con": "SEC-036",
+  "verificado_padre": true,
+  "nota_padre": "Leído: agency-actions.ts:94-111 (createClientAssetAction guarda description en claro; SUPER_ADMIN), git grep 'encryptCredential(' fuera de __tests__ = solo la definición credential-cipher.ts:73 (control: los tests la llaman), resolve-credential.ts:16-25 descifra si está cifrado y si no devuelve el texto tal cual; boveda/page.tsx:85 y :148 muestran al cliente el sello 'AES-256' en el encabezado y en cada tarjeta. Tres lectores de D2 lo reportaron ALTA; se sube SEC-036 (D6, MEDIA, PROBABLE) a ALTA verificada: además del reposo en claro, el portal le afirma al cliente un cifrado que no existe. Cuatro de los cinco verificadores la sostienen ALTA por rúbrica (secret expuesto con precondición fuerte: acceso a la base, un dump o un backup); el de L4 propuso MEDIA citando la baseline 2026-07 (S6-01). Se sigue la rúbrica DEC-23. El sello falso y el registro inventado quedan en el hallazgo de UI de la Bóveda (D2-L1/H16).",
+  "destino": {
+   "severidad": "ALTA",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "titulo": "Credenciales de terceros en claro en la base: tokens OAuth de Google Business, token de Tiendanube, API key de Cal.com, token de Telegram y las credenciales de la Bóveda (el cifrado de escritura quedó sin mergear)",
+   "impacto": "Bloqueante para el primer cliente real: quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio y hosting cargadas en la Bóveda, mientras el portal le asegura al cliente, en el encabezado y en cada tarjeta de la Bóveda, que están cifradas con AES-256. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear: encryptCredential no tiene llamadores fuera de los tests."
+  }
+ },
+ "D2-c1/D2-L3/H02": {
+  "decision": "fusionar",
+  "con": "SEC-036",
+  "nota_padre": "Misma causa raíz (write-path de la Bóveda sin cifrar y sello 'AES-256'); se suma su evidencia."
+ },
+ "D2-c1/D2-L2/H03": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "titulo": "Tendencias «vs mes anterior» inventadas en Tráfico y SEO, también sobre datos reales",
+  "nota_padre": "Leído: trafico/page.tsx:204, :215, :227, :238 pasan trend fijo (12.3, 8.1, -2.4, 23 con '0:23') en la rama de datos reales de GA4 (AnalyticsContent, :136-160); seo/page.tsx:233-260 trend 12.4 y 7.1 fijos y el de CTR por umbral (FIXME data-truth en :233-235). Fusiona D2-L3/H03."
+ },
+ "D2-c1/D2-L3/H03": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H03",
+  "nota_padre": "Mismo defecto (literales de trend en trafico/page.tsx y seo/page.tsx)."
+ },
+ "D2-c1/D2-L2/H04": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "relacionados_tmp": [
+   "D2-L1/H19",
+   "D2-L1/H20",
+   "D2-L2/H12"
+  ],
+  "nota_padre": "Leído: trafico/page.tsx:82-96 (sin analyticsPropertyId → AnalyticsEmptyState) y :105-121 (botón 'ACTIVAR AHORA' sin handler, FIXME data-truth); git grep analyticsPropertyId sobre src, prisma y scripts: escriben solo complete-onboarding.ts:38 (/bienvenida), lib/actions/clients.ts:161-197 y prisma/seed.ts; git grep 'actions/clients' en src = 0 importadores (control: 'actions/upsell' tiene 3)."
+ },
+ "D2-c1/D2-L2/H05": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "caso_indice": 0,
+  "nota_padre": "Leído: soporte/[ticketId]/page.tsx:115 contenedor h-[calc(100svh-14rem)] en mobile; :117-156 cabecera shrink-0 (breadcrumb, h1 text-3xl, badges y botón 'Marcar como resuelto' en columna bajo lg); :158 main flex-col bajo lg; :193 la columna Timeline es shrink-0 sin alto máximo (4 pasos + estadísticas, :73-97 y :195-280); ClientChatThread.tsx:48-53 el hilo es flex-1 min-h-0. Con ≈200 px de cabecera y ≈340 px de Timeline, en un teléfono el hilo queda sin alto. La aritmética cierra por lectura; el alto real depende del viewport → VH. Fusiona D2-L3/H12.",
+  "confianza_padre": "PROBABLE"
+ },
+ "D2-c1/D2-L3/H12": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H05",
+  "nota_padre": "Mismo layout (soporte/[ticketId]/page.tsx: contenedor de alto fijo y Timeline shrink-0)."
+ },
+ "D2-c1/D2-L1/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "caso_indice": 3,
+  "relacionados_ids": [
+   "BUG-012",
+   "BUG-021",
+   "SEC-039",
+   "SEC-005"
+  ],
+  "nota_padre": "Leído: email-marketing/_actions.ts:17-28 (getOrgWithBrevo: solo resolveOrgId, sin isModuleActive), :71-79 (importContactsAction sin Zod ni tope), :127-171 (createCampaignAction: name, subject, fromName, fromEmail y htmlContent del FormData sin Zod ni largo), :173-218 (sendCampaignAction); brevo.ts:60-79 manda sender {name, email} tal cual a /emailCampaigns con la API key de develOP. El gate del módulo vive solo en layout.tsx:20-21 y no protege las actions. Que Brevo rechace un remitente no verificado es runtime → VH. DEC-31: los verificadores de L1 y L5 la bajan a MEDIA: hoy ningún navegador recibe los IDs de las actions (sus únicos importadores viven bajo el layout que redirige a todas las orgs por BUG-012) y Next 16 los deriva con una sal por build; arreglado el slug, elegir remitente y HTML es el diseño del módulo. Queda validación y gate faltantes sin explotación directa = MEDIA por rúbrica; gana peso cuando se arregle BUG-012. Fusiona D2-L5/H04.",
+  "severidad": "MEDIA",
+  "titulo": "Email marketing: las 3 server actions no verifican el módulo contratado, no validan con Zod ni tienen rate limit, y mandan el remitente y el HTML del formulario por la cuenta Brevo de develOP"
+ },
+ "D2-c1/D2-L1/H02": {
+  "decision": "fusionar",
+  "con": "BUG-012",
+  "nota_padre": "Mismo slug 'email-marketing' (layout.tsx:20, SidebarNav.tsx:78) contra 'email-marketing-pro' del catálogo; ya registrado en D6-c1."
+ },
+ "D2-c1/D2-L3/H04": {
+  "decision": "fusionar",
+  "con": "BUG-012",
+  "nota_padre": "Mismo slug; suma la card 'owned' de Mis servicios sin link al módulo (PremiumModuleCard.tsx:307)."
+ },
+ "D2-c1/D2-L1/H03": {
+  "decision": "fusionar",
+  "con": "BUG-021",
+  "nota_padre": "Misma baja que no llega a Brevo (optout/route.ts:91, _actions.ts:143); ya registrada en D6-c2."
+ },
+ "D2-c1/D2-L1/H11": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: ConnectStoreCard.tsx:38-54 (el CTA del cliente es <a href='/api/auth/tiendanube/start?orgId=…'>); api/auth/tiendanube/start/route.ts:9-13 devuelve 401 JSON a todo rol que no sea SUPER_ADMIN (endurecido en B11.2, :5-8)."
+ },
+ "D2-c1/D2-L1/H13": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "caso_indice": 6,
+  "relacionados_ids": [
+   "FAL-004",
+   "SEC-036"
+  ],
+  "nota_padre": "Leído: cal-com.ts:4 API_BASE v1 y :49 fetch con ?apiKey= en la URL; cal-com-v2.ts:4-5 documenta que la v1 'fue apagada el 8/abr/2026'; agenda-inteligente/page.tsx:212-229 (sin summary → solo el error) y :282-286 (EmbedPreview, el link de reservas, vive dentro de la rama con summary). Que la v1 responda error hoy es runtime → VH.",
+  "confianza_padre": "PROBABLE"
+ },
+ "D2-c1/D2-L2/H06": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (analytics.ts:196-199 y searchconsole.ts:211-213 devuelven datos de ejemplo ante cualquier error; google-business-profile.ts:202-205, reputacion/page.tsx:19-23 y client-monthly/route.ts:57-62 solo console.error; 0 captureException en los cinco archivos).",
+  "relacionados_tmp": [
+   "D2-L5/H15"
+  ]
+ },
+ "D2-c1/D2-L2/H11": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "titulo": "Texto funcional en zinc-600/700 sobre el fondo del portal (#080a0c, ≈2,6:1 y ≈1,9:1) en tickets, servicios, módulos, cuenta e inicio",
+  "nota_padre": "Muestreo DEC-37: se sostiene (soporte/[ticketId]/page.tsx:246, :249, :261; services/page.tsx:145; PremiumModuleCard.tsx:362; fondo bg-[#080a0c] en DashboardLayoutClient.tsx:51; zinc-600 #52525b da ≈2,6:1). Fusiona D2-L1/H29 y D2-L3/H25 (mismo patrón en otras pantallas)."
+ },
+ "D2-c1/D2-L1/H29": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H11",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (ConnectStoreCard.tsx:56, campaigns/page.tsx:104, dashboard/page.tsx:228, boveda/page.tsx:319). Mismo patrón: se suma la evidencia."
+ },
+ "D2-c1/D2-L3/H25": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H11",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (ProfileForms.tsx:67, ProjectEmptyState.tsx:30, notification-shared.tsx:98, DashboardLayoutClient.tsx:179). Mismo patrón: se suma la evidencia."
+ },
+ "D2-c1/D2-L2/H16": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (google-business/start/route.ts:7-9 solo SUPER_ADMIN; git grep 'google-business/start' en src = 0 enlaces, control 'tiendanube/start' = 1 en ConnectStoreCard.tsx:39; reputacion/page.tsx:52 'Setup manual por ahora')."
+ },
+ "D2-c1/D2-L2/H21": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (InsightsBlock.tsx:52 'Lectura ejecutiva generada con tus datos reales' sin rótulo de IA, DiscoveriesSection.tsx:38; el brief sí lleva 'Resumen Ejecutivo - IA', AIExecutiveBriefV2.tsx:55)."
+ },
+ "D2-c1/D2-L1/H04": {
+  "decision": "fusionar",
+  "con": "SEC-039",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (brevo.ts:39-51 POST /contacts con updateEnabled: true pisa los atributos globales; _actions.ts:113-117 CONTACT_ID y OPTOUT_TOKEN por import). Misma causa que SEC-039 (D6-c2)."
+ },
+ "D2-c1/D2-L1/H05": {
+  "decision": "fusionar",
+  "con": "BUG-025",
+  "nota_padre": "Mismas métricas de EmailCampaign que nunca se actualizan (BUG-025, D6-c2); se suma la evidencia de la pantalla."
+ },
+ "D2-c1/D2-L1/H06": {
+  "decision": "fusionar",
+  "con": "BUG-025",
+  "nota_padre": "BUG-025 ya cubre FAILED sin reintento; se suma que sendCampaignAction devuelve ok aunque sendNow falle (_actions.ts:205-217)."
+ },
+ "D2-c1/D2-L1/H09": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (_actions.ts:84-121 upsert y syncContact en serie por fila; created++ cuenta también actualizaciones y el boolean de syncContact se ignora; :58 split(',') ingenuo)."
+ },
+ "D2-c1/D2-L1/H17": {
+  "decision": "fusionar",
+  "con": "FAL-006",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (facturacion/page.tsx:164 promete facturas automáticas; git grep de invoice.create/upsert: solo prisma/seed.ts:595 y :618; control: la lectura facturacion/page.tsx:70). Misma causa que FAL-006 (D6-c2)."
+ },
+ "D2-c1/D2-L1/H24": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "relacionados_ids": [
+   "SEC-016"
+  ],
+  "nota_padre": "Muestreo DEC-37: se sostiene (brevo.ts:81-83 arma el error con el cuerpo de la respuesta; _actions.ts:202 lo devuelve y send/page.tsx:21 y :55 lo muestran; google-business-profile.ts:296-299; motor-resenas/_actions.ts:40-45 devuelve err.message)."
+ },
+ "D2-c1/D2-L1/H34": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (git grep 'x-pathname' en src: solo lectores, dashboard/layout.tsx:124 y email-marketing/layout.tsx:24; proxy.ts:168 devuelve NextResponse.next() sin headers de request)."
+ },
+ "D2-c1/D2-L1/H39": {
+  "decision": "fusionar",
+  "con": "SEC-043",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene; es exactamente SEC-043 (D6-c2, misma evidencia executive-brief.ts:157 y :185)."
+ },
+ "D2-c1/D2-L3/H05": {
+  "decision": "fusionar",
+  "con": "SEC-038",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (dashboard-actions.ts:60-70 crea la notificación del SUPER_ADMIN con organizationId del cliente; dashboard/layout.tsx:101 y notifications.ts:55 y :82 leen y marcan por organizationId). Misma causa que SEC-038 (D6-c2)."
+ },
+ "D2-c1/D2-L1/H26": {
+  "decision": "fusionar",
+  "con": "SEC-038",
+  "nota_padre": "Misma causa que SEC-038 (notificaciones del admin con la org del cliente); se suma su evidencia."
+ },
+ "D2-c1/D2-L3/H10": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "caso_indice": 7,
+  "titulo": "Handlers del portal sin manejo de excepciones ni confirmación: el modal de ticket y «Marcar como resuelto» quedan colgados, el resuelto no pide confirmación y otros fallos son silenciosos",
+  "nota_padre": "Muestreo DEC-37: se sostiene (NewTicketModal.tsx:53-55 sin try/finally, el cierre :104 depende de !isSubmitting; ResolveTicketButton.tsx:12-17 sin try, ignora res.success false y no confirma). Fusiona D2-L2/H15."
+ },
+ "D2-c1/D2-L2/H15": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H10",
+  "nota_padre": "Mismo botón (ResolveTicketButton.tsx): sin confirmación y con fallo silencioso."
+ },
+ "D2-c1/D2-L3/H15": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H13",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (NewTicketModal.tsx:63 y send/page.tsx:23, router.push sin comentario). Mismo patrón que D2-L2/H13."
+ },
+ "D2-c1/D2-L1/H31": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H13",
+  "nota_padre": "Mismo patrón (router.push sin comentario tras enviar la campaña)."
+ },
+ "D2-c1/D2-L2/H13": {
+  "decision": "aceptar",
+  "titulo": "router.push sin comentario que lo justifique en el portal (alta de ticket, bienvenida y envío de campaña)",
+  "relacionados_ids": [
+   "DEU-003"
+  ]
+ },
+ "D2-c1/D2-L3/H20": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L1/H14",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (SessionsChart.tsx:47 new Date('YYYY-MM-DD') = medianoche UTC; analytics.ts:171; ChatBubble.tsx:18-25 toLocaleString sin timeZone, SSR contra navegador). Misma causa que D2-L1/H14."
+ },
+ "D2-c1/D2-L2/H17": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L1/H14",
+  "nota_padre": "Misma causa (fechas formateadas sin timeZone de Argentina en el servidor)."
+ },
+ "D2-c1/D2-L1/H14": {
+  "decision": "aceptar",
+  "caso_indice": 7,
+  "titulo": "Fechas y horas del portal formateadas sin zona horaria: turnos corridos 3 h, saludo y fecha del Inicio, Timeline del ticket, tooltip de sesiones un día antes y horas del chat distintas entre servidor y navegador"
+ },
+ "D2-c1/D2-L3/H30": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (OnboardingStatusCard.tsx:16-20 consulta Prisma dentro del componente; PRIORITY_MAP en SoporteBoard.tsx:28 y soporte/[ticketId]/page.tsx:33; calcPosition en NotificationCenter.tsx:27)."
+ },
+ "D2-c1/D2-L2/H07": {
+  "decision": "aceptar",
+  "titulo": "Promesas vencidas y contradictorias visibles al cliente: «Próximamente Q3 2026» y cuatro SLA de respuesta distintos sin medición"
+ },
+ "D2-c1/D2-L1/H27": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H07",
+  "nota_padre": "Mismas promesas (Q3 2026 y SLA); se suma su evidencia."
+ },
+ "D2-c1/D2-L3/H06": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H07",
+  "nota_padre": "Mismas promesas (Q3 2026 y SLA); se suma su evidencia."
+ },
+ "D2-c1/D2-L2/H19": {
+  "decision": "aceptar",
+  "titulo": "Navegación dura con window.location.assign y <a href> internos en vitrina, recomendaciones, plan y resultados"
+ },
+ "D2-c1/D2-L1/H32": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H19",
+  "nota_padre": "Mismo patrón (window.location.assign en el portal)."
+ },
+ "D2-c1/D2-L3/H16": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H19",
+  "nota_padre": "Mismo patrón (window.location.assign y <a href> internos)."
+ },
+ "D2-c1/D2-L2/H18": {
+  "decision": "aceptar",
+  "titulo": "IDs internos (cuid) en URLs del portal (ticket, lead, campaña, ?p= de proyecto), todos resueltos contra la org de la sesión: sin IDOR, contra la regla de CLAUDE.md"
+ },
+ "D2-c1/D2-L1/H33": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H18",
+  "nota_padre": "Mismo patrón (cuid en URLs, sin IDOR)."
+ },
+ "D2-c1/D2-L3/H17": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H18",
+  "nota_padre": "Mismo patrón (cuid en URLs, sin IDOR)."
+ },
+ "D2-c1/D2-L2/H14": {
+  "decision": "aceptar",
+  "titulo": "Formularios y actions del portal sin rate limit y con validación incompleta: tickets, mensajes, upsell, onboarding y PDF sin tope; texto libre sin .max(); el nombre del módulo lo manda el cliente",
+  "relacionados_ids": [
+   "SEC-015",
+   "SEC-016",
+   "SEC-032"
+  ]
+ },
+ "D2-c1/D2-L3/H13": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H14",
+  "nota_padre": "Misma falta de validación en servidor del portal; el WhatsApp de perfil ya es SEC-016 (D1)."
+ },
+ "D2-c1/D2-L3/H18": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H14",
+  "nota_padre": "Misma falta de rate limit en formularios del portal; el cambio de contraseña ya es SEC-015 (D1)."
+ },
+ "D2-c1/D2-L3/H24": {
+  "decision": "aceptar",
+  "titulo": "Bloques de error de formularios del portal sin role=alert ni aria-live (módulos, cuenta, soporte, mensajes, referidos, servicios, bienvenida)",
+  "relacionados_ids": [
+   "A11Y-001"
+  ]
+ },
+ "D2-c1/D2-L1/H30": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H24",
+  "nota_padre": "Mismo patrón (errores sin anunciar) en los módulos."
+ },
+ "D2-c1/D2-L2/H25": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H24",
+  "nota_padre": "Mismo patrón (errores sin anunciar) en bienvenida, resultados y crear ticket."
+ },
+ "D2-c1/D2-L2/H22": {
+  "decision": "aceptar",
+  "titulo": "Convenciones de CLAUDE.md incumplidas en el portal: colores de servicio cruzados, CSS inline donde hay clases Tailwind, Lucide sin strokeWidth={1.5} y copy sin tildes"
+ },
+ "D2-c1/D2-L1/H36": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H22",
+  "nota_padre": "Mismo patrón de convenciones en los módulos."
+ },
+ "D2-c1/D2-L3/H29": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H22",
+  "nota_padre": "Mismo patrón de convenciones en el shell y la cuenta."
+ },
+ "D2-c1/D2-L1/H38": {
+  "decision": "aceptar",
+  "titulo": "Mensajes carga y renderiza la conversación completa sin límite ni paginación"
+ },
+ "D2-c1/D2-L3/H31": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L1/H38",
+  "nota_padre": "Mismo defecto (findMany sin take en Mensajes)."
+ },
+ "D2-c1/D2-L2/H23": {
+  "decision": "aceptar",
+  "titulo": "Copy sin terminar en el camino del cliente: modal y descripciones de 'Ver detalles' PLACEHOLDER que ignoran el longDescription, pestaña 'Trafico', 'Ver detalles' que lleva a Mensajes"
+ },
+ "D2-c1/D2-L3/H28": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H23",
+  "nota_padre": "Mismo copy PLACEHOLDER de 'Ver detalles'."
+ },
+ "D2-c1/D2-L3/H09": {
+  "decision": "aceptar",
+  "caso_indice": 9,
+  "titulo": "Modo soporte sin política de escritura: unas actions del portal toman session.user.organizationId (fallan o apuntan a la org del admin) y otras resolveOrgId y escriben como el cliente (marcan leídos sus mensajes, gastan su cupo del brief)",
+  "relacionados_ids": [
+   "SEC-029",
+   "BUG-022",
+   "BUG-005"
+  ]
+ },
+ "D2-c1/D2-L1/H25": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H09",
+  "nota_padre": "Misma causa (no hay una política única de escrituras en modo soporte); se suma la evidencia de mark-read y regenerate-brief."
+ },
+ "D2-c1/D2-L2/H20": {
+  "decision": "aceptar",
+  "titulo": "Motores PDF y endpoints huérfanos siguen publicados (api/reports/monthly, api/dashboard/leads/recent, DownloadReportButtons con ExecutiveReportTemplate, datos mock y el dominio legacy)"
+ },
+ "D2-c1/D2-L3/H27": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H20",
+  "nota_padre": "Mismo conjunto huérfano (DownloadReportButton.tsx:129 sin importadores)."
+ },
+ "D2-c1/D2-L1/H37": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-036"
+  ]
+ },
+ "D2-c1/D2-L1/H16": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-036"
+  ],
+  "titulo": "La Bóveda le muestra al cliente seguridad que no existe: sello «AES-256» sobre credenciales en claro, un «Registro de integridad y accesos» inventado, «Monitoreo activo» y una retención de 30 días",
+  "evidencia": [
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+    "linea": 85,
+    "fragmento": "AES-256"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+    "linea": 148,
+    "fragmento": "AES-256"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+    "linea": 51,
+    "fragmento": "// Demo activity log (PLACEHOLDER — data fake; modelo real = schema, parada aparte)"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+    "linea": 54,
+    "fragmento": "{ icon: User, actor: 'Vos', action: 'accediste a', resource: 'Credenciales de Dominio', time: 'hace 2 h', isAdmin: false },"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+    "linea": 265,
+    "fragmento": "Monitoreo activo"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+    "linea": 320,
+    "fragmento": "Los registros de acceso se mantienen por 30 días para tu auditoría personal."
+   }
+  ],
+  "nota_padre": "Leído: boveda/page.tsx:85 y :148 (sello AES-256 en el encabezado y en cada tarjeta), :51-58 (registro marcado PLACEHOLDER — data fake), :265 y :320. El sello se suma acá desde D2-L4/H02 (la parte de reposo va a SEC-036).",
+  "verificado_padre": true
+ },
+ "D2-c1/D2-L2/H12": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-027",
+   "DEU-018"
+  ]
+ },
+ "D2-c1/D2-L1/H20": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L1/H07": {
+  "decision": "aceptar",
+  "caso_indice": 4
+ },
+ "D2-c1/D2-L1/H12": {
+  "decision": "aceptar",
+  "caso_indice": 14
+ },
+ "D2-c1/D2-L1/H22": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L1/H28": {
+  "decision": "aceptar",
+  "caso_indice": 12,
+  "titulo": "Avisos por email de mensajes nuevos y de respuestas a tickets: el resultado de Resend se ignora (éxito simulado) y el remitente está marcado como no verificado"
+ },
+ "D2-c1/D2-L3/H11": {
+  "decision": "aceptar",
+  "caso_indice": 6
+ },
+ "D2-c1/D2-L4/H02": {
+  "decision": "fusionar",
+  "con": "SEC-036",
+  "verificado_padre": true,
+  "nota_padre": "DEC-31: el verificador la bajó a MEDIA (precondición de acceso a la base; baseline S6-01) y propuso partirla: el cifrado a SEC-036 y la UI a D2. Se hace así: la parte de reposo se suma a SEC-036 (que sube a ALTA por la rúbrica, ver D2-L1/H15) y el sello y el registro inventado quedan en D2-L1/H16."
+ },
+ "D2-c1/D2-L5/H05": {
+  "decision": "fusionar",
+  "con": "SEC-036",
+  "nota_padre": "Misma causa raíz; suma que el camino de onboarding con ENCRIPTADO_EN_TEXTO es código muerto (D2-L1/H37)."
+ },
+ "D2-c1/D2-L5/H04": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L1/H01",
+  "verificado_padre": true,
+  "nota_padre": "Mismo defecto (_actions.ts:17-28 sin isModuleActive ni Zod); el verificador lo bajó a MEDIA por las mismas razones."
+ },
+ "D2-c1/D2-L1/H19": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "confianza_padre": "PROBABLE",
+  "caso_indice": 8,
+  "relacionados_tmp": [
+   "D2-L1/H20",
+   "D2-L2/H12"
+  ],
+  "nota_padre": "Leído: complete-onboarding.ts:9-15 (ga4MeasurementId z.string() libre), :22-26 (org de resolveOrgId) y :33-38 (lo guarda en analyticsPropertyId sin mirar onboardingCompleted, así que la action sirve aunque /bienvenida redirija a quien ya completó); analytics.ts:60-72 (normaliza un número a properties/N) y :95-109 (consulta con la única GOOGLE_SERVICE_ACCOUNT_KEY, sin validar que la propiedad sea de la org); trafico/page.tsx:88-93. El verificador la sostiene ALTA. PROBABLE: que la service account tenga acceso a las propiedades de otros clientes es configuración operativa que no está en el código → VH."
+ },
+ "D2-c1/D2-L4/H01": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H01",
+  "nota_padre": "Mismo conteo global; suma el snapshot del brief y el email semanal."
+ },
+ "D2-c1/D2-L5/H02": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H01",
+  "nota_padre": "Mismo conteo global; suma executive-brief.ts:341-344 y build.ts:133-175."
+ },
+ "D2-c1/D2-L5/H03": {
+  "decision": "fusionar",
+  "con": "BUG-012",
+  "nota_padre": "Mismo slug; suma el commit de origen del desajuste (c19a795e) según el verificador."
+ },
+ "D2-c1/D2-L4/H03": {
+  "decision": "fusionar",
+  "con": "FAL-005",
+  "verificado_padre": true,
+  "nota_padre": "DEC-31: el verificador la bajó a MEDIA (operación interna con workaround; el pedido del cliente llega a develOP) y es el mismo hallazgo que FAL-005 (premium-modules.ts:103, upsell.ts:66, onboarding-tasks.ts:37)."
+ },
+ "D2-c1/D2-L4/H04": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "confianza_padre": "PROBABLE",
+  "dominio": "D7",
+  "caso_indice": 2,
+  "titulo": "Los crons del reporte ejecutivo semanal y del brief IA (y el de os-follow-up) solo están registrados en vercel.json: en Netlify no tienen disparador",
+  "nota_padre": "Leído: vercel.json:2-15 registra os-follow-up, regenerate-briefs y send-executive-reports; netlify.toml:25-32 agenda solo generate-insights-cron, send-weekly-reports-cron y cleanup-old-events-cron, las únicas tres de netlify/functions/; git grep de send-executive-reports y regenerate-briefs fuera de docs y .md: solo vercel.json y comentarios (cron-secret.ts:18, build.ts:112). Cron sin disparador = ALTA por rúbrica. PROBABLE: un scheduler externo o la configuración del panel de Netlify no se ven en el repo → VH. Es de D7 (crons); confirma la premisa §10 #9 del plan. Fusiona D2-L5/H01."
+ },
+ "D2-c1/D2-L5/H01": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L4/H04",
+  "nota_padre": "Mismo cron sin disparador (send-executive-reports); el verificador corrige que el brief de Inicio se regenera igual al visitar Inicio."
+ },
+ "D2-c1/D2-L5/H06": {
+  "decision": "aceptar",
+  "severidad": "MEDIA",
+  "dominio": "D5",
+  "verificado_padre": true,
+  "nota_padre": "DEC-31: leído ChatbotUpsellLanding.tsx:15 (wa.me con el número de ejemplo) y :146-152 ($150 USD/mes, 1.000 conversaciones, contra sync-plans.ts); el verificador la baja a MEDIA (defecto del embudo de venta, sin datos del cliente ni seguridad). El archivo es del ledger de D5."
+ },
+ "D2-c1/D2-L4/H05": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "relacionados_ids": [
+   "DEU-015"
+  ],
+  "nota_padre": "Muestreo DEC-37: se sostiene (git grep dataConnections: solo lo escriben el default del schema/migración y prisma/seeds/init-data-connections.ts:50; data-connections.ts:47 → ONBOARDING con menos de 30 %; attention.ts:113-121 agrega el ítem «develOP está conectando tus herramientas»)."
+ },
+ "D2-c1/D2-L4/H06": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L4/H07": {
+  "decision": "fusionar",
+  "con": "SEC-038",
+  "nota_padre": "Misma causa que SEC-038 (notificaciones leídas y marcadas por organización)."
+ },
+ "D2-c1/D2-L4/H08": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H14",
+  "nota_padre": "Misma falta de validación y rate limit en actions del portal; suma el dedup de upsell esquivable con featureKey libre."
+ },
+ "D2-c1/D2-L4/H09": {
+  "decision": "aceptar",
+  "caso_indice": 3,
+  "titulo": "Acciones del motor de reseñas sin Zod ni rate limit: rating, nombre y texto que van al LLM los manda el navegador, reviewName se interpola en la URL de Google y los errores crudos vuelven al cliente",
+  "relacionados_ids": [
+   "SEC-032"
+  ]
+ },
+ "D2-c1/D2-L1/H23": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L4/H09",
+  "nota_padre": "Mismo defecto (borrador con IA sin Zod ni tope al prompt)."
+ },
+ "D2-c1/D2-L4/H10": {
+  "decision": "fusionar",
+  "con": "SEC-018",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (git grep orgRole en dashboard, lib/actions, components/dashboard y bienvenida = 0; control: auth.config.ts:34 lo pone en la sesión). Es SEC-018 (D1); queda BAJA porque hoy las orgs tienen un solo miembro y la invitación está huérfana (DEU-001)."
+ },
+ "D2-c1/D2-L4/H11": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "FAL-006",
+   "BUG-017"
+  ]
+ },
+ "D2-c1/D2-L4/H12": {
+  "decision": "aceptar",
+  "caso_indice": 4,
+  "titulo": "Brief IA: la llamada al LLM corre dentro del render del Inicio y sin caché negativa (con Vertex vencido, cada visita reintenta)",
+  "relacionados_ids": [
+   "SEC-043"
+  ]
+ },
+ "D2-c1/D2-L4/H13": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H07",
+  "nota_padre": "Mismas promesas (Q3 2026 y SLA)."
+ },
+ "D2-c1/D2-L4/H14": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H11",
+  "nota_padre": "Mismo patrón de contraste; suma red-400/40."
+ },
+ "D2-c1/D2-L4/H15": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (week-results.ts:41-42 visitas Promise.resolve(0); :28-29 ventanas de 7×24 h; :107-111 calcTrend da 100 con la semana previa en 0; executive-brief-input.ts:141-143 lo narra como «subió 100%»)."
+ },
+ "D2-c1/D2-L4/H16": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H19",
+  "nota_padre": "Mismo patrón (window.location.assign)."
+ },
+ "D2-c1/D2-L4/H17": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H18",
+  "nota_padre": "Mismo patrón (cuid en URLs, sin IDOR)."
+ },
+ "D2-c1/D2-L4/H18": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H09",
+  "nota_padre": "Misma causa (modo soporte sin política de escritura)."
+ },
+ "D2-c1/D2-L4/H19": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L5/H15",
+  "nota_padre": "Mismo patrón (fallos que solo hacen console.error)."
+ },
+ "D2-c1/D2-L4/H20": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "caso_indice": 7,
+  "nota_padre": "Muestreo DEC-37: se sostiene (upsell.ts:99-104 y messages.ts:155-163 llaman sendAgencyAlert sin await y con .catch vacío dentro de la action)."
+ },
+ "D2-c1/D2-L4/H21": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H24",
+  "nota_padre": "Mismo patrón; suma botones solo-ícono sin aria-label."
+ },
+ "D2-c1/D2-L4/H22": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H22",
+  "nota_padre": "Mismo patrón (Lucide sin strokeWidth)."
+ },
+ "D2-c1/D2-L4/H23": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L4/H24": {
+  "decision": "aceptar",
+  "relacionados_tmp": [
+   "D2-L2/H06",
+   "D2-L2/H16"
+  ]
+ },
+ "D2-c1/D2-L4/H25": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L1/H14",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (PageSpeedCard.tsx:59-65 y GBPMetricsCard.tsx:12-17 toLocaleString sin timeZone). Misma causa que D2-L1/H14."
+ },
+ "D2-c1/D2-L4/H26": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H21",
+  "nota_padre": "Misma causa (Mensajes ignora el contexto o el prefill que mandan los CTA)."
+ },
+ "D2-c1/D2-L3/H21": {
+  "decision": "aceptar",
+  "titulo": "CTAs que llevan a Mensajes con un contexto que Mensajes ignora (?prefill=conexiones, context=bot-activation): el composer queda vacío"
+ },
+ "D2-c1/D2-L4/H27": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L4/H28": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L4/H29": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L5/H07": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "caso_indice": 3,
+  "nota_padre": "Muestreo DEC-37: se sostiene (build.ts:113-119 usa el cache si es posterior al corte, sin el TTL de 7 días de executive-brief.ts:18; :122-124 toma los dos últimos snapshots sin mirar la semana; :168 rotula con la semana actual)."
+ },
+ "D2-c1/D2-L5/H08": {
+  "decision": "fusionar",
+  "con": "DEU-018",
+  "nota_padre": "Es DEU-018 (D6): seedOnboardingTasksForOrg solo la llaman lib/actions/clients.ts:139 e invitations.ts:93, sin importadores. Queda BAJA: la tarjeta no aparece, sin datos falsos ni bloqueo del camino del cliente."
+ },
+ "D2-c1/D2-L5/H09": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L5/H10": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L1/H28",
+  "nota_padre": "Misma causa (el resultado del aviso por Resend se ignora)."
+ },
+ "D2-c1/D2-L5/H11": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H14",
+  "nota_padre": "Misma falta de rate limit y tope en tickets."
+ },
+ "D2-c1/D2-L5/H12": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H07",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (plan-presentation.ts:133-136 «menos de 24 horas hábiles» como beneficio; soporte/page.tsx:85-90 «< 4h, Lun-Vie 9-19hs»; MessageThread.tsx:114 «< 4 hs»; TicketReplyForm.tsx:32 «menos de 24hs»; sync-plans.ts:95 Pro ya es PRIORITY). Mismas promesas que D2-L2/H07."
+ },
+ "D2-c1/D2-L5/H13": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H07",
+  "nota_padre": "Misma promesa vencida (Q3 2026); el [FALTA:precio] también es D2-L1/H21."
+ },
+ "D2-c1/D2-L5/H14": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H08",
+  "nota_padre": "Mismas definiciones de lead; suma las recomendaciones."
+ },
+ "D2-c1/D2-L2/H08": {
+  "decision": "aceptar",
+  "titulo": "Tres definiciones de «lead» frente al cliente: el PDF mensual y las recomendaciones cuentan los descalificados"
+ },
+ "D2-c1/D2-L5/H15": {
+  "decision": "aceptar",
+  "titulo": "Los errores del portal no llegan a Sentry: actions, Inicio y módulos solo hacen console.error o dejan una fila FAILED",
+  "relacionados_ids": [
+   "FAL-003"
+  ],
+  "relacionados_tmp": [
+   "D2-L2/H06"
+  ]
+ },
+ "D2-c1/D2-L5/H16": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L5/H17": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H10",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (ResolveTicketButton.tsx:12-17 sin confirmación; replyToTicketAction, actions.ts:110-135, no mira si el ticket está RESOLVED). Mismo botón que D2-L3/H10."
+ },
+ "D2-c1/D2-L5/H18": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-005"
+  ]
+ },
+ "D2-c1/D2-L5/H19": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L5/H20": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L5/H21": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L5/H22": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H20",
+  "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (monthly/route.ts:31 el mes solo rotula; MonthlyReport.tsx:296-300 no mira isMockData; la org de un cliente sale de la sesión, :42-50, sin IDOR). Mismo conjunto huérfano que D2-L2/H20."
+ },
+ "D2-c1/D2-L5/H23": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L5/H24": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L5/H25": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L3/H09",
+  "nota_padre": "Misma causa (modo soporte); suma el admin como autor del ticket del cliente."
+ },
+ "D2-c1/D2-L5/H26": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L5/H27": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "relacionados_ids": [
+   "FAL-006"
+  ],
+  "nota_padre": "Muestreo DEC-37: se sostiene (get-plan-for-org.ts:74-90 no selecciona status; send.ts:81 sí filtra ACTIVE; git grep: ningún código de src escribe CANCELED ni PAST_DUE)."
+ },
+ "D2-c1/D2-L5/H28": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H19",
+  "nota_padre": "Mismo patrón (window.location.assign)."
+ },
+ "D2-c1/D2-L5/H29": {
+  "decision": "fusionar",
+  "con": "D2-c1/D2-L2/H18",
+  "nota_padre": "Mismo patrón (cuid en URLs y links de email)."
+ },
+ "D2-c1/D2-L5/H30": {
+  "decision": "aceptar"
+ },
+ "D2-c1/D2-L3/H22": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-018"
+  ]
+ }
+}

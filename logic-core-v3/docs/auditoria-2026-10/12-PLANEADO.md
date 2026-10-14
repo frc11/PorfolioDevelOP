@@ -7,7 +7,7 @@
 ## Resumen
 
 - Ítems: **1351** — por tipo: decision 212 · hecho-declarado 443 · idea 56 · pendiente 556 · promesa 6 · bloque 78.
-- Estado en código: hecho 41 · parcial 17 · no empezado 32 · por cruzar 1258 · contradicho 2 · abandonado 1.
+- Estado en código: hecho 119 · parcial 42 · no empezado 77 · abandonado 3 · contradicho 3 · por cruzar 1107.
 - ZONA-FRANCO: 361 ítems.
 - TODO/FIXME en el código de `origin/main`: 70 (`_crudo/todos-codigo.json`).
 
@@ -252,16 +252,16 @@
 - Nodo(s): h2.cli-agenda
 - Qué es: Pertenece al proyecto agenda (~35%, API v1 apagada).
 - Referencias: tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:25 · tambien en Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:89
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — git grep -niE 'cal\.com|createBooking|bookAppointment|reservar turno' origin/main -- src/modules/chatbot vacio; control: integrations/cal-com usado en agenda-inteligente/page.tsx:6 y cal-com-v2 en setter/_actions/agenda.actions.ts:28 (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-023] Agenda Cal.com y WhatsApp Business API
 - Fuente: `STATUS.md:198` · tipo: pendiente · estado declarado: pospuesto a Beta · fecha: 2026-05-21
 - Nodo(s): h2.cli-agenda
 - Qué es: Pospuestas a Beta (hoy WhatsApp es link).
 - Referencias: tambien en :199
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Agenda: modulo ACTIVE en el catalogo (premium-modules.ts:52, :63) con integracion read-only v1 (cal-com.ts:4, :49); WhatsApp: 'whatsapp-autopilot' COMING_SOON (premium-modules.ts:84) (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 ### h2.cli-bienvenida — Bienvenida / onboarding inicial
 
@@ -270,16 +270,16 @@
 - Nodo(s): h2.cli-bienvenida
 - Qué es: No tiene caller en src/, y obtiene la session pero no la usa. ¿Ruta muerta o a medio cablear?
 - Referencias: completeOnboardingAction
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/actions/onboarding-actions.ts:79-82 sigue exportada (session obtenida y no usada) y guarda credenciales en claro (:111-131). git grep -n "onboarding-actions" → solo components/onboarding/OnboardingWizard.tsx:6 (importa saveOnboardingProfile), y ese wizard (:480) no tiene importadores (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-025] OnboardingWizard no reutilizable y borrador global
 - Fuente: `docs/bitacora-beta-3.md:4928` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-08-24
 - Nodo(s): h2.cli-bienvenida
 - Qué es: 30 campos hardcodeados; el autoguardado es localStorage con clave global develop:onboarding:draft, sin servidor.
 - Referencias: OnboardingWizard · ProgressBar.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts:6 DRAFT_KEY = 'develop:onboarding:draft' en localStorage (:31, :36) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 ### h2.cli-cuenta — Mi cuenta
 
@@ -288,104 +288,104 @@
 - Nodo(s): h2.cli-cuenta
 - Qué es: Ancho completo, receta visual del admin, primitivos Input y Toggle, menos ruido en la Bóveda. Corrige rutas muertas de revalidate/links y el mojibake.
 - Referencias: 2c6966e · a5d511c · 26026df · 17a9e0a · 31bfd39 · lane/cuenta +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 2c6966e, a5d511c, 26026df, 17a9e0a, 31bfd39 son ancestros de origin/main (git merge-base --is-ancestor) (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-027] Fase 1: validación de password
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:177` · tipo: hecho-declarado · estado declarado: hecho (sin mergear) · fecha: 2026-06-27
 - Nodo(s): h2.cli-cuenta
 - Qué es: Regex de mayúscula y número en UpdatePasswordSchema, submit deshabilitado, visor corregido y unstable_update con payload.
 - Referencias: 8b641a0 · src/lib/actions/schemas.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schemas.ts:22-35 (regex mayuscula y numero); ProfileForms.tsx:331-344, :532 (submit deshabilitado); profile.ts:239; 8b641a0 ancestro. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-028] Fases 3 y 4: avatar del cliente y modal de la Bóveda
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:211` · tipo: hecho-declarado · estado declarado: hecho (sin mergear) · fecha: 2026-06-27
 - Nodo(s): h2.cli-cuenta
 - Qué es: ClientAvatarField reemplaza logoUrl en el form; logoUrl queda intacto en la DB. VaultRequestModal pasa al Modal primitivo.
 - Referencias: 6c83b16 · f86c911 · ClientAvatarField · VaultRequestModal.tsx · tambien en Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:229
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ProfileForms.tsx:33-36, :234-237 (ClientAvatarField + hidden inputs); VaultRequestModal.tsx:7, :66-73 (Modal primitivo); commits 6c83b16 y f86c911 ancestros de origin/main. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-029] Fix de la pantalla negra al cambiar password
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:276` · tipo: hecho-declarado · estado declarado: hecho (sin verificar) · fecha: 2026-06-27
 - Nodo(s): h2.cli-cuenta
 - Qué es: PasswordForm pasa a onSubmit con startTransition, await y router.refresh, sin <form action>. auth.ts intacto. Pendiente de verificación humana.
 - Referencias: 7a6ee10 · 2730502 · b31d76b · ProfileForms.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ProfileForms.tsx:375-397 (onSubmit + startTransition + await + router.refresh, sin <form action>); profile.ts:234-239 (unstable_update con payload); commits 7a6ee10, 2730502, b31d76b ancestros. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-030] Layout de Perfil en 2 columnas alineadas
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:319` · tipo: hecho-declarado · estado declarado: hecho (sin verificar) · fecha: 2026-06-27
 - Nodo(s): h2.cli-cuenta
 - Qué es: Reorden de columnas, zona de peligro a ancho completo y última card con flex-1 y h-full. También quita el espacio muerto inferior. Pendiente de verificación humana.
 - Referencias: b9a8565 · 7adeae6 · 040ce97 · fde9bdb
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — b9a8565, 7adeae6, 040ce97, fde9bdb en origin/main; perfil/page.tsx:237-323 (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-031] Facturas sin generación (frenado por schema)
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:420` · tipo: pendiente · estado declarado: bloqueado · fecha: 2026-06-27
 - Nodo(s): h2.cli-cuenta
 - Qué es: Invoice existe pero nunca se genera en producción. Requiere AssetType.INVOICE, una librería PDF, un form en el admin y poblar Invoice.pdfUrl.
 - Referencias: Invoice.pdfUrl · AssetType.INVOICE · tambien en Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:171 · tambien en Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:410
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -nE 'invoice\.(create|createMany|upsert|update)' origin/main -- src prisma scripts -> solo prisma/seed.ts:595, :618; enum AssetType sin INVOICE (schema.prisma:96-103) (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-032] Timeline de la Bóveda con datos falsos
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:431` · tipo: pendiente · estado declarado: bloqueado · fecha: 2026-06-27
 - Nodo(s): h2.cli-cuenta
 - Qué es: El 'Registro de integridad y accesos' muestra ACTIVITY_LOG hardcodeado. El modelo real requiere schema.
 - Referencias: boveda/page.tsx ACTIVITY_LOG · tambien en Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:117
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — boveda/page.tsx:51-58 ACTIVITY_LOG fijo, renderizado en :275-316 (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-033] Defectos menores de UX en Mi Cuenta
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:435` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-27
 - Nodo(s): h2.cli-cuenta
 - Qué es: ?delete= queda en la URL. VaultRequestModal no cierra con Escape. set-state-in-effect en VaultRevealButton:21. El tooltip 'Generando' se recorta. Eye sin strokeWidth. cuenta/loading.tsx desactualizado.
 - Referencias: VaultRevealButton.tsx:21 · VaultRequestModal.tsx · cuenta/loading.tsx · tambien en Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:439 · tambien en Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:443 · tambien en Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:455
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Siguen: Modal.tsx sin Escape (git grep -nE 'Escape|keydown|onKeyDown' origin/main -- src/components/ui/Modal.tsx vacio); Eye/EyeOff sin strokeWidth (ProfileForms.tsx:423, :447, :503); tooltip 'Generando...' dentro de overflow-x-auto (facturacion/page.tsx:168, :241-254); cuenta/loading.tsx:5 max-w-5xl pb-20; ?delete= (ClientsListClient.tsx:251). Resuelto: VaultRevealButton.tsx:31-43 ya no hace setState directo en el effect. (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-034] 6 verificaciones humanas pendientes de lane/cuenta
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:461` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-27
 - Nodo(s): h2.cli-cuenta
 - Qué es: Password end-to-end, avatar, backdrop del modal, ticket→borrar, alineación de columnas y visual fino. Necesarias antes de declararla lista para producción.
 - Referencias: tambien en Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:484
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Las features existen en main (PasswordForm ProfileForms.tsx:359-535, avatar :230-238, VaultRequestModal con Modal primitivo); la verificacion humana no es comprobable por codigo. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-035] PD-1: credenciales de la bóveda cifradas
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:8` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-13
 - Nodo(s): h2.cli-cuenta
 - Qué es: AES-256-GCM en ClientAsset.description con formato enc:v1. Ambos caminos de escritura cifran con validación Zod. Los lectores descifran y enmascaran con botón reveal. Backfill de 2 filas. Verificado end-to-end.
 - Referencias: src/lib/crypto/credential-cipher.ts · src/lib/crypto/encrypt-for-storage.ts · src/lib/crypto/resolve-credential.ts · completeOnboardingAction · VaultRevealButton · env ONBOARDING_SECRET_KEY (solo nombre) +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Lectura en main: resolve-credential.ts:17-26, boveda/page.tsx:131, VaultTab.tsx:41. Escritura en claro en main: agency-actions.ts:103-111 (sin Zod ni cifrado); onboarding-actions.ts:111-131 en claro con url 'ENCRIPTADO_EN_TEXTO'. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-036] Cifrado serializado dentro de description
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:12` · tipo: decision · estado declarado: hecho · fecha: 2026-07-13
 - Nodo(s): h2.cli-cuenta
 - Qué es: Formato enc:v1:<iv>:<tag>:<ciphertext> en ClientAsset.description en lugar de columnas nuevas, para no depender de una migración.
 - Referencias: ClientAsset.description
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Formato y lectura en main (credential-cipher.ts:11, :22; resolve-credential.ts:16-25); escritura cifrada solo en origin/b0-isolation-motor-chatbot (9fc616c4, no ancestro de origin/main); agency-actions.ts:103-110 escribe en claro (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-037] Credencial en claro al mostrarla (at-display)
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:24` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-13
 - Nodo(s): h2.cli-cuenta
 - Qué es: El enmascarado es cosmético: el valor descifrado viaja en el prop del RSC. PD-1 solo cerró el cifrado en reposo; endurecer lo que se muestra es deuda aparte.
 - Referencias: /dashboard/cuenta/boveda · VaultRevealButton
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — boveda/page.tsx:185 <VaultRevealButton value={credential.value} /> serializa el valor descifrado como prop de un client component. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-038] PD-1 Onboarding Vault sin cerrar
 - Fuente: `docs/bitacora-roadmap.md:13623` · tipo: pendiente · estado declarado: en curso · fecha: 2026-07-11
 - Nodo(s): h2.cli-cuenta
 - Qué es: Cambios de cifrado de credenciales del onboarding sin commitear y sin entrada de cierre en esta bitácora.
 - Referencias: src/lib/crypto/ · docs/audit-PD1-cifrado-onboarding.md · src/components/dashboard/VaultRevealButton.tsx · también en fuente:13731
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — En origin/main: credential-cipher.ts, resolve-credential.ts, VaultRevealButton. encrypt-for-storage.ts y su uso en agency-actions/onboarding-actions solo en origin/b0-isolation-motor-chatbot (commit 9fc616c4, rama 8 commits por delante de main). (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 ### h2.cli-email-mkt — Email marketing (módulo)
 
@@ -394,24 +394,24 @@
 - Nodo(s): h2.cli-email-mkt
 - Qué es: Sin botón volver en campaigns/contactos (mismo criterio que resultados/* y cuenta/*). Los router.push post-acción de campaigns/new se documentan, no se migran.
 - Referencias: campaigns/new · tambien en Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:85
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — campaigns/new/page.tsx:38-40, :69-72, :150-153 documentados; send/page.tsx:24 router.push sin comentario (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-040] fromEmail libre en campañas sin validar dominio
 - Fuente: `docs/bitacora-roadmap.md:9822` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-email-mkt
 - Qué es: Riesgo de spoofing/deliverability si el envío no valida SPF/DKIM del remitente; sprint de deliverability propio.
 - Referencias: también en fuente:9871
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — email-marketing/_actions.ts:134-137 solo chequea presencia; brevo.ts:76 usa params.fromEmail como sender. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-041] sendCampaignAction: updates por id y htmlContent sin sanitizar
 - Fuente: `docs/bitacora-roadmap.md:11020#2` · tipo: pendiente · estado declarado: pendiente (reportado para decisión)
 - Nodo(s): h2.cli-email-mkt
 - Qué es: Dos update scoped solo por id y HTML de campañas sin sanitizar (XSS saliente).
 - Referencias: src/app/(protected)/dashboard/modules/email-marketing/_actions.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — _actions.ts:198-201 y :207-214 update por id (precedidos por findFirst scoped :177-179, no explotable); htmlContent sin sanitizar :135, :150-156 -> brevo.ts:75 (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h2.cli-inicio — Inicio
 
@@ -420,172 +420,172 @@
 - Nodo(s): h2.cli-inicio
 - Qué es: OnboardingStatusCard con tokens y vidrio canónico. Hover split-wrapper en AttentionStack y WeekResultsGrid. Ancho completo y barrido de strokeWidth.
 - Referencias: 2725caf · b811c17 · 6e19f7e · f9eb475 · 7b8aa4f · lane/inicio
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 2725caf, b811c17, 6e19f7e, f9eb475 y 7b8aa4f son ancestros de origin/main (git merge-base --is-ancestor); el 'sin mergear' ya no aplica (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-043] Inicio: datos honestos (S3b, S4, S4b)
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Inicio_ registro de cambios.md:34` · tipo: hecho-declarado · estado declarado: hecho (sin mergear)
 - Nodo(s): h2.cli-inicio
 - Qué es: Captions 'Sin integración aún' y 'En calibración'. Oculta el TrendChip falso (hash del orgId) y la frase de tendencia falsa del subtítulo.
 - Referencias: b735b3f · 7777cdc · 8c7f12b · HealthScore.tsx · lib/health-score.ts computeTrend
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — commits b735b3f, 7777cdc, 8c7f12b son ancestros de origin/main (git merge-base --is-ancestor); WeekResultsGrid.tsx:48-55; HealthScore.tsx:97-100, :394-401; computeTrend ausente (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-044] TrendChip oculto (opción B)
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Inicio_ registro de cambios.md:72` · tipo: decision · estado declarado: hecho
 - Nodo(s): h2.cli-inicio
 - Qué es: No se toca lib/health-score. Se reactiva cuando exista historial real (HealthScoreSnapshot, lane de datos aparte).
 - Referencias: HealthScoreSnapshot · TrendChip
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — HealthScore.tsx:97-100 sin TrendChip; no existe model HealthScoreSnapshot (git grep vacío; control: model ExecutiveBriefSnapshot en schema.prisma:459). (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-045] Deuda de datos de Inicio
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Inicio_ registro de cambios.md:96` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-inicio
 - Qué es: Dos fuentes de score que se contradicen (CALIBRANDO contra Brief IA 84). Visitas fijas en 0 (falta GA4). Centinela ↑100% de calcTrend cuando la semana previa es 0.
 - Referencias: week-results.ts · calcTrend · lib/dashboard/* · tambien en Olme/Cliente - Registro de cambios/Inicio_ registro de cambios.md:98 · tambien en Olme/Cliente - Registro de cambios/Inicio_ registro de cambios.md:99
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — HealthScore.tsx:31-33 'calibrando' perpetuo (dataConnections sin escritor) vs executive-brief.ts:291 total al LLM; week-results.ts:41-42 visitas 0; week-results.ts:109 centinela 100 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-046] El conteo de leads de Inicio mezcla tenants
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Inicio_ registro de cambios.md:97` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-inicio
 - Qué es: contactSubmission.count se calcula sin organizationId: el número y el delta incluyen leads de otros tenants. Se tapó con el caption 'En calibración'. El fix real es scopear por organizationId (schema y query).
 - Referencias: week-results.ts · computeLeadsScore · ContactSubmission
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — week-results.ts:43-52 y health-score.ts:284-289, :317-333 siguen contando ContactSubmission sin organizationId; solo existe el caption 'En calibración' (WeekResultsGrid.tsx:44-55) (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-047] Portal cliente: 'visits' hardcodeado en 0 en Resultados de la semana
 - Fuente: `docs/bitacora-rediseno.md:2698` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-08-04
 - Nodo(s): h2.cli-inicio
 - Qué es: No hay integración de analítica (la card muestra 'Sin integración aún'); WeekResultsData no tiene ventas ni facturación y compara contra la semana anterior.
 - Referencias: src/lib/dashboard/week-results.ts · src/lib/health-score.ts · src/lib/dashboard/attention.ts · src/lib/ai/executive-brief.ts · también en docs/bitacora-rediseno.md:2690
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — week-results.ts:41-42 Promise.resolve(0); WeekResultsGrid.tsx:49-52 solo rotula 'Sin integración aún'; WeekResultsData sin ventas :11-16 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-048] B6.4 — Gate de 4h entre regeneraciones manuales del brief (cierre de B6)
 - Fuente: `docs/bitacora-roadmap.md:5264` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h2.cli-inicio
 - Qué es: MIN_HOURS_BETWEEN_MANUAL_REGENS = 4 sobre el límite semanal de 3, inferido del estado existente sin schema nuevo; declara cerrado el bloque B6 (B6.1 a B6.4).
 - Referencias: src/lib/ai/executive-brief.ts · AIExecutiveBriefV2.tsx · tambien en docs/bitacora-roadmap.md:5342
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — executive-brief.ts:32, :169-182 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-049] Badge/disclaimer 'Generado por IA' en outputs LLM
 - Fuente: `docs/bitacora-roadmap.md:6193` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h2.cli-inicio
 - Qué es: Anotado en roadmap-pendientes §B9.3; incluye el AIExecutiveBrief (transparencia de IA, sprint propio).
 - Referencias: docs/roadmap-pendientes.md · tambien en docs/bitacora-roadmap.md:6201
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — AIExecutiveBriefV2.tsx:55 'Resumen Ejecutivo - IA'; InsightsBlock.tsx:49-52 y DiscoveriesSection.tsx:38 sin aviso. git grep -n -i "generado por ia\|AiBadge\|ai-disclaimer" origin/main -- logic-core-v3/src → 0; control: git grep -n -i "con IA" → motor-resenas/_components/ReviewItem.tsx:171 (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-050] B12.7 — Brief truncado por thinking tokens + label '0/6'
 - Fuente: `docs/bitacora-roadmap.md:7265` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h2.cli-inicio
 - Qué es: maxOutputTokens del brief a 1024 (gemini-2.5-flash consume tokens de thinking), isBriefValid invalida el brief truncado cacheado, BriefEmptyState honesto y label 'Integraciones conectadas'.
 - Referencias: src/lib/ai/executive-brief.ts · src/app/(protected)/dashboard/page.tsx · src/components/dashboard/home/HealthScore.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — executive-brief.ts:26 (1024), :38-42 isBriefValid usado en :84, :102, :187, :239; page.tsx:218-234 BriefEmptyState; HealthScore.tsx:186 'Integraciones conectadas' (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-051] AIExecutiveBrief sin feature flag
 - Fuente: `docs/bitacora-roadmap.md:8921#3` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h2.cli-inicio
 - Qué es: El brief IA del dashboard no tiene feature flag; derivado a B14.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — dashboard/page.tsx:191-210 renderiza AIExecutiveBriefV2 tras getExecutiveBrief sin flag; git grep -n -i "FEATURE_FLAG\|featureFlag\|isFeatureEnabled" origin/main -- logic-core-v3/src → ningún mecanismo de flags (solo softFlags de LeadOS) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-052] UX del Health Score 'Calibrando' tras redirect
 - Fuente: `docs/bitacora-roadmap.md:10355` · tipo: pendiente · estado declarado: pendiente (decisión de Franco)
 - Nodo(s): h2.cli-inicio
 - Qué es: Al entrar a un módulo desactivado se redirige al home con 'Calibrando tu score'; decidir si es la UX deseada.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Módulo inactivo → redirect('/dashboard') (agenda-inteligente/page.tsx:321, tienda-conectada/page.tsx:296, email-marketing/layout.tsx:21); HealthScore.tsx:159,171 'Calibrando'. Sin decisión aplicada. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-053] Ventanas de semana por milisegundos crudos
 - Fuente: `docs/bitacora-roadmap.md:11101` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-30
 - Nodo(s): h2.cli-inicio
 - Qué es: week-results.ts no alinea a días AR; migrar a weekRangeAR.
 - Referencias: src/lib/dashboard/week-results.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — week-results.ts:27-29 now − 7×24 h; home-metrics-logic.ts:22-30 sí usa weekRangeAR (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-054] P1.C home como panel de resultados
 - Fuente: `docs/bitacora-roadmap.md:11172` · tipo: hecho-declarado · estado declarado: hecho (checkpoint visual humano) · fecha: 2026-06-30
 - Nodo(s): h2.cli-inicio
 - Qué es: Hero con las 4 preguntas del dueño, origen y embudo.
 - Referencias: src/lib/dashboard/home-metrics.ts · src/components/dashboard/home/BusinessHero.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — page.tsx:66-68, :110-138; home-metrics.ts:79-144; BusinessHero.tsx:46-197 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-055] Refactors futuros del home
 - Fuente: `docs/bitacora-roadmap.md:11207` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-30
 - Nodo(s): h2.cli-inicio
 - Qué es: getGreeting()/formatDateES() a dates-ar (usa hora del server) y currentPath como 'página específica' del origen.
 - Referencias: src/app/(protected)/dashboard/page.tsx · también en fuente:11190 · también en fuente:11222
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — dashboard/page.tsx:32-37 getHours(); :39-48 toLocaleDateString sin timeZone (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-056] P1.C-fix1 frontera RSC de empty states
 - Fuente: `docs/bitacora-roadmap.md:11278` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30
 - Nodo(s): h2.cli-inicio
 - Qué es: SectionEmptyState client resuelve íconos por key.
 - Referencias: src/components/dashboard/home/SectionEmptyState.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — SectionEmptyState.tsx:1 'use client', :16-20 íconos por key (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-057] P1.C-fix cosméticos del home
 - Fuente: `docs/bitacora-roadmap.md:11312` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30
 - Nodo(s): h2.cli-inicio
 - Qué es: Hover canónico, input sin spinners y empty states muted.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — MoneyEstimate.tsx:84 input sin spinners ([appearance:textfield]); BusinessHero.tsx:32-38 hover canónico con adminHoverCls (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-058] P5.1 motor de recomendaciones por reglas
 - Fuente: `docs/bitacora-roadmap.md:11594` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30
 - Nodo(s): h2.cli-inicio
 - Qué es: 'Ideas para crecer' en el home con 4 reglas y CTA de upsell.
 - Referencias: src/lib/recommendations/rules.ts · src/components/dashboard/home/Recommendations.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/recommendations/rules.ts (featureKey en :53, :89, :115, :147); Recommendations.tsx:180-205; page.tsx:78-80, :239-249 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-059] Señal 'fuera de horario' en recomendaciones v2
 - Fuente: `docs/bitacora-roadmap.md:11649` · tipo: idea · estado declarado: pendiente · fecha: 2026-06-30
 - Nodo(s): h2.cli-inicio
 - Qué es: Señal cara (EXTRACT(HOUR)) diferida a v2.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i -E 'fuera de horario|outOfHours|afterHours|EXTRACT\(HOUR' origin/main -- logic-core-v3/src/lib/recommendations → vacío; control: 'connect-gbp' aparece en rules.ts. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-060] D1 computeTrend zombie eliminado
 - Fuente: `docs/bitacora-roadmap.md:12325` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h2.cli-inicio
 - Qué es: Se borró el trend por hash de health-score.ts.
 - Referencias: src/lib/health-score.ts · cierra pendiente fuente:12058
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep -n computeTrend origin/main -- src → 0 (control: calcTrend en week-results.ts:107) (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-061] P5.1-fix reviewsEngineRule exige GBP operativa
 - Fuente: `docs/bitacora-roadmap.md:12549` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h2.cli-inicio
 - Qué es: Nueva señal gbpOperational para el borde CONNECTED_NO_LOCATION.
 - Referencias: src/lib/recommendations/rules.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — rules.ts:70-74 (gbpOperational); get-recommendations-for-org.ts:54. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-062] P4.1 atribución por campaña en el panel
 - Fuente: `docs/bitacora-roadmap.md:12778` · tipo: hecho-declarado · estado declarado: hecho (visual parcial) · fecha: 2026-07-04
 - Nodo(s): h2.cli-inicio
 - Qué es: LeadCampaigns en el home y celda 'Campaña' en el detalle del lead.
 - Referencias: src/components/dashboard/home/LeadCampaigns.tsx · docs/sprints/p4-1-render-utm.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — LeadCampaigns.tsx:18-69; leads/[id]/page.tsx:87-100 celda Campaña (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-063] Campaña UTM en el panel
 - Fuente: `docs/sprints/p4-1-render-utm.md:16` · tipo: hecho-declarado · estado declarado: hecho, verificación visual pendiente
 - Nodo(s): h2.cli-inicio
 - Qué es: campaignLabel y tallyCampaigns, tarjeta LeadCampaigns en el home y celda Campaña en LeadDetail; nulos como 'Sin campaña'.
 - Referencias: src/lib/dashboard/lead-origin.ts · src/components/dashboard/home/LeadCampaigns.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — lead-origin.ts:108-120; home-metrics-logic.ts:206-234; LeadCampaigns.tsx:18-69; page.tsx:135; leads/[id]/page.tsx:90-100 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 ### h2.cli-mensajes — Mensajes
 
@@ -594,31 +594,31 @@
 - Nodo(s): h2.cli-mensajes
 - Qué es: Burbujas izquierda/derecha según autor, altura fija con scroll interno y word-break. Badge de no leídos que desaparece al abrir (markClientMessagesRead). Badge de presencia honesto.
 - Referencias: _actions/mark-read.ts · MarkReadOnMount · tambien en Olme/Cliente - Registro de cambios/Mensajes_ registro de cambios.md:32
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — messages/page.tsx:27-28; mark-read.ts:11-22; MarkReadOnMount.tsx:13-17; MessageThread.tsx:113-120 (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-065] 'Respondemos en < 4 hs, Lun–Vie 9–18hs'
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mensajes_ registro de cambios.md:30` · tipo: promesa · estado declarado: sin estado
 - Nodo(s): h2.cli-mensajes
 - Qué es: Pill fija en el chat del cliente que reemplazó al falso 'Equipo en línea'. Es un compromiso de tiempo de respuesta.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — MessageThread.tsx:114-119; contradicho por soporte/page.tsx:90 (9-19) y TicketReplyForm.tsx:32 (<24 h) (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-066] SEC-PII-01: email en un log de notify-message.ts
 - Fuente: `docs/bitacora-roadmap.md:8321` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-mensajes
 - Qué es: P1 de la auditoría de seguridad pendiente de corregir.
 - Referencias: notify-message.ts:62 · docs/auditoria-seguridad-2026-05.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — notify-message.ts:62 usa obfuscateEmail (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-067] Migrar notify-message y email.ts de Resend a Brevo
 - Fuente: `docs/bitacora-roadmap.md:12216` · tipo: pendiente · estado declarado: pendiente (decisión)
 - Nodo(s): h2.cli-mensajes
 - Qué es: notify-message (from no verificado) y email.ts (agency/tickets/invites, from develop-agency.com) siguen en Resend.
 - Referencias: src/lib/email/notify-message.ts · src/lib/email.ts · también en fuente:12239 · también en fuente:12271
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — notify-message.ts:1, :18, :50; email.ts:1, :4, :20-21 siguen con Resend (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h2.cli-plan — Mi plan
 
@@ -627,168 +627,168 @@
 - Nodo(s): h2.cli-plan
 - Qué es: El lead scoring se habilita según el plan (planAllows('leadScoring')), también en el CSV. Starter baja de 50 a 49 y se quita mini-crm de los módulos premium.
 - Referencias: planAllows('leadScoring') · premium-modules · tambien en Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:131
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — planAllows(plan,'leadScoring') en 17 llamadas (layout.tsx:119, page.tsx:121, api/dashboard/chatbot/leads/export/route.ts:95); Starter 49 (sync-plans.ts:70, plan-presentation.ts:149); mini-crm fuera del catalogo (git grep mini-crm origin/main -- src/lib/data/premium-modules.ts vacio) (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-069] Mi plan: reskin, hover y ancho completo
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Plan_ registro de cambios.md:9` · tipo: hecho-declarado · estado declarado: hecho (sin mergear)
 - Nodo(s): h2.cli-plan
 - Qué es: Tokens de GlassCard del admin y adminHoverCls en los tiers. Hover sin scale en el medidor. Skeletons alineados.
 - Referencias: lane/plan · UsageMeter.tsx · PlansShowcase.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — bedbda8, c15b740, ba584ac ancestros de origin/main; PlansShowcase.tsx:101-110; UsageMeter.tsx:83, :138; plan/page.tsx:17 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-070] Mi plan: estado sin bot y CTA de activación
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Plan_ registro de cambios.md:22` · tipo: hecho-declarado · estado declarado: hecho (sin mergear)
 - Nodo(s): h2.cli-plan
 - Qué es: UsageMeter usa hasBotConfigured: card de onboarding y CTA bot-activation vía requestUpsellAction, sin acción nueva. Spinner de pending en UpgradeCtaButton.
 - Referencias: UpgradeCtaButton.tsx · requestUpsellAction · featureKey bot-activation
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 40c37a7, 3fbbfe2, 4387cc1 ancestros de origin/main; UsageMeter.tsx:79-127; UpgradeCtaButton.tsx:117-121 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-071] No adoptar AnimatedProgressBar ni AnimatedCounter
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Plan_ registro de cambios.md:56` · tipo: decision · estado declarado: descartado
 - Nodo(s): h2.cli-plan
 - Qué es: Traen copy fijo de proyectos y rompen el formato es-AR. Se mantienen la barra inline y formatNumberEs.
 - Referencias: AnimatedProgressBar · AnimatedCounter
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Mi Plan no los importa (importadores: project/page.tsx:11-12 y AnalyticsMetricCard.tsx:3). (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-072] Panel 'mis servicios' y error.tsx en Mi plan
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Plan_ registro de cambios.md:112` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-plan
 - Qué es: Panel con CTA a /dashboard/services, diferido por decisión de diseño. /dashboard/plan no tiene error.tsx. Warning isUpgrade sin uso.
 - Referencias: src/app/(protected)/dashboard/plan · tambien en Olme/Cliente - Registro de cambios/Mi Plan_ registro de cambios.md:114 · tambien en Olme/Cliente - Registro de cambios/Mi Plan_ registro de cambios.md:116
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git ls-tree origin/main -- 'src/app/(protected)/dashboard/plan/' -> solo loading.tsx y page.tsx; PlansShowcase.tsx:192 isUpgrade desestructurado y sin uso; sin link a /dashboard/services en plan/ (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-073] Doble fetch de getOrgUsageSnapshot a propósito
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Plan_ registro de cambios.md:118` · tipo: decision · estado declarado: hecho
 - Nodo(s): h2.cli-plan
 - Qué es: Permite streaming independiente de cada Suspense. lib/plan está frozen y no se colapsa.
 - Referencias: getOrgUsageSnapshot
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — plan/page.tsx:37 y :42 llaman getOrgUsageSnapshot en cada Suspense. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-074] Sumar tools premium al plan BUSINESS cuando existan
 - Fuente: `docs/bitacora-roadmap.md:2015` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h2.cli-plan
 - Qué es: Hoy BUSINESS tiene las mismas 4 tools que PRO; nuevas tools (show_product_card, score_lead) se agregan al array tools de BUSINESS en sync-plans.ts sin cambiar schema.
 - Referencias: prisma/seeds/sync-plans.ts · tambien en docs/bitacora-roadmap.md:2133 · tambien en docs/bitacora-roadmap.md:2306
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — prisma/seeds/sync-plans.ts:90 y :106 PRO y BUSINESS con BASE_TOOLS_5; git grep "show_product_card\|score_lead" origin/main -- src prisma → 0 (control: capture_lead aparece en sync-plans.ts) (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-075] Valores lockeados de los planes STARTER/PRO/BUSINESS
 - Fuente: `docs/bitacora-roadmap.md:2036` · tipo: decision · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h2.cli-plan
 - Qué es: 50/90/150 USD al mes; setup 700/900/1000; 500/3000/5000 conversaciones; 1/3/ilimitados dominios; reportes e insight desde PRO; CRM solo BUSINESS; soporte STANDARD/PRIORITY/PRIORITY_24H.
 - Referencias: prisma/seeds/sync-plans.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — prisma/seeds/sync-plans.ts:70 Starter 49 (no 50); resto coincide: :86 Pro 90, :102 Business 150, setup :71/:87/:103, quotas :72/:88/:104, maxDomains 1/3/null, reports/insight desde PRO, CRM solo BUSINESS, soporte STANDARD/PRIORITY/PRIORITY_24H (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-076] PLAN_FALLBACK es espejo manual del plan STARTER
 - Fuente: `docs/bitacora-roadmap.md:2065` · tipo: decision · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h2.cli-plan
 - Qué es: Si cambia STARTER en sync-plans.ts hay que actualizar la constante en paralelo (no DRY a propósito, para que exista aunque la DB esté caída).
 - Referencias: src/lib/plan/fallback.ts · prisma/seeds/sync-plans.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/plan/fallback.ts:44-60 = STARTER de prisma/seeds/sync-plans.ts:68-82 (49/700/500/gemini-2.5-flash/3 tools/1 dominio) (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-077] Dimensiones reports/insight/crm solo con helper en B4.2
 - Fuente: `docs/bitacora-roadmap.md:2214` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h2.cli-plan
 - Qué es: planAllows quedó listo pero las features no se construyeron en B4.2; luego B5.8 usa crmEnabled y B6.2 gatea el reporte por plan; en este rango no hay consumidor declarado de insightEnabled.
 - Referencias: src/lib/plan/plan-allows.ts · tambien en docs/bitacora-roadmap.md:2215 · tambien en docs/bitacora-roadmap.md:2216 · tambien en docs/bitacora-roadmap.md:4450 · tambien en docs/bitacora-roadmap.md:4989
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — 'insight' consumido en resultados/analisis/page.tsx:36 y api/reports/client-monthly/route.ts:31; 'crm' con 6 consumidores; 'reports' sin consumidor via planAllows (git grep "planAllows([^)]*'reports')" vacio; el reporte ejecutivo gatea por plan key) (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-078] B4.6 — Medidor de consumo + presentación de planes
 - Fuente: `docs/bitacora-roadmap.md:2792` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h2.cli-plan
 - Qué es: getOrgUsageSnapshot, UsageMeter con tono adaptativo sin alarma, PlansShowcase con Pro destacado y footer locked-as-celebration, página /dashboard/plan, medidor en /dashboard e item 'Mi plan' en el sidebar; adenda con fix de TZ en periodLabel.
 - Referencias: src/lib/plan/get-org-usage.ts · src/lib/plan/plan-presentation.ts · src/components/dashboard/plan/UsageMeter.tsx · src/components/dashboard/plan/PlansShowcase.tsx · src/app/(protected)/dashboard/plan/page.tsx · src/app/(protected)/dashboard/page.tsx +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — get-org-usage.ts:49-85; UsageMeter.tsx; PlansShowcase.tsx; plan/page.tsx:12-34; page.tsx:102-104; SidebarNav.tsx:65 'Mi plan'; fix TZ get-org-usage.ts:43-45 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-079] La cortesía/override de precio no se muestra al cliente
 - Fuente: `docs/bitacora-roadmap.md:2949` · tipo: decision · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h2.cli-plan
 - Qué es: Decisión de no exponer el priceOverride en /dashboard/plan (mostrarlo serían ~10 líneas).
 - Referencias: src/components/dashboard/plan/UsageMeter.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep -n priceOverride origin/main -- "src/app/(protected)/dashboard" src/components/dashboard src/lib/plan → 0 (control: admin BillingOverrideCard.tsx:14, :22); PlansShowcase.tsx:135 muestra plan.monthlyPriceUsd de lista (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-080] Banner 'Plan pendiente de asignación' para orgs en fallback
 - Fuente: `docs/bitacora-roadmap.md:2952` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h2.cli-plan
 - Qué es: Opcional y de bajo impacto; hoy las orgs sin planId ven las 3 cards como 'Subir a X'.
 - Referencias: src/app/(protected)/dashboard/plan/page.tsx · tambien en docs/bitacora-roadmap.md:2967
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -niE 'pendiente de asignaci|plan pendiente' origin/main -- src -> vacio; control: git grep -n isFallback origin/main -- src -> PlansShowcase.tsx:91, UsageMeter.tsx:129 (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-081] MS-3 — CTA de upgrade conectado a requestUpsellAction
 - Fuente: `docs/bitacora-roadmap.md:3093` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h2.cli-plan
 - Qué es: UpgradeCtaButton registra el lead (contactSubmission, alerta y notificaciones) y navega con window.location.assign a mensajes con texto pre-cargado (plan-upgrade-* / plan-change-*).
 - Referencias: src/components/dashboard/plan/UpgradeCtaButton.tsx · src/components/dashboard/plan/PlansShowcase.tsx · src/lib/data/message-context.ts · src/lib/actions/upsell.ts · pendiente originado en docs/bitacora-roadmap.md:2853 · pendiente originado en docs/bitacora-roadmap.md:2951 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — UpgradeCtaButton.tsx:84-101; message-context.ts:30-48 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-082] Idempotencia del lead de upsell de plan
 - Fuente: `docs/bitacora-roadmap.md:3191` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h2.cli-plan
 - Qué es: Clicks repetidos generan filas y notificaciones duplicadas; dedupe por (org, service) en una ventana o ocultar el CTA 24h.
 - Referencias: src/lib/actions/upsell.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/actions/upsell.ts:81-87 + src/lib/upsell/dedup.ts:21, :33-40 (ventana 24 h por email + featureKey) (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-083] P0.4 coherencia comercial
 - Fuente: `docs/bitacora-roadmap.md:11035` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-29
 - Nodo(s): h2.cli-plan
 - Qué es: Precio Starter USD 49 unificado; mini-crm removido.
 - Referencias: fallback.ts · premium-features.ts · next.config.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Starter 49 en lib/plan/fallback.ts:48 y plan-presentation.ts:149; 'mini-crm' sigue en src/lib/premium-features.ts:59 (usado por admin/settings) y en el redirect next.config.ts:157-160. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-084] Clave de período de cuota/billing en UTC
 - Fuente: `docs/bitacora-roadmap.md:11100` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-30
 - Nodo(s): h2.cli-plan
 - Qué es: En las últimas 3h del mes AR la cuota/billing apunta al mes equivocado; migrar a monthRangeAR.
 - Referencias: src/lib/plan/get-org-usage.ts · src/modules/chatbot/server/quota/checker.ts · src/modules/chatbot/server/admin/multiTenantQueries.ts · src/app/(protected)/admin/clients/_actions/plan.actions.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — get-org-usage.ts:36-37, quota/checker.ts:15-16, multiTenantQueries.ts:251-252, admin/clients/_actions/plan.actions.ts:50, :56 con getUTCMonth; monthRangeAR existe en dates-ar.ts:180 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-085] Frozen del lane y decisiones locked de Mi plan
 - Fuente: `raiz:lane-plan-log.md:15` · tipo: decision · estado declarado: decidido · fecha: 2026-06-25
 - Nodo(s): h2.cli-plan
 - Qué es: lib/plan, upsell.ts y components/ui solo lectura; superficie frosted, estado vacío sin bot, downgrade sin confirmación, meter sin scale.
 - Referencias: tambien en :18-:20
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — downgrade = Link sin confirmación PlansShowcase.tsx:201-210; medidor sin scale UsageMeter.tsx:83, :138; vacío sin bot :79-127; superficie frosted :83 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-086] /dashboard/plan sin error.tsx
 - Fuente: `raiz:lane-plan-log.md:43` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-25
 - Nodo(s): h2.cli-plan
 - Qué es: Queda para un lane futuro.
 - Referencias: tambien en :100
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — git ls-files "src/app/(protected)/dashboard/plan" → loading.tsx, page.tsx; lo cubre dashboard/error.tsx:5-20 (SectionErrorBoundary con captureException :64) (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-087] Rediseño de Mi plan (5 sprints)
 - Fuente: `raiz:lane-plan-log.md:72` · tipo: hecho-declarado · estado declarado: cerrado, verificación visual pendiente · fecha: 2026-06-25
 - Nodo(s): h2.cli-plan
 - Qué es: Reskin y estado vacío de UsageMeter (también en /dashboard), tier cards, spinner, fullwidth y CTA de activación sin bot; sin merge.
 - Referencias: bedbda8 · 40c37a7 · c15b740 · 4387cc1 · ba584ac · 3fbbfe2 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — bedbda8, 40c37a7, c15b740, 4387cc1, ba584ac, 3fbbfe2 ancestros de origin/main (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-088] Sistema modular por planes
 - Fuente: `STATUS.md:200` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-21
 - Nodo(s): h2.cli-plan
 - Qué es: Sin modelo Plan (B-Plan-1); definir con el socio y cuándo activar toggles por suscripción.
 - Referencias: tambien en :232, :235 · docs/sprints/alpha-RESUMEN-FINAL.md:76
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma/schema.prisma:606 model Plan, :638-639 Subscription.planId; get-plan-for-org.ts:68; plan-allows.ts:17; gates en page.tsx:121 y analisis/page.tsx:36 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: no
 
 ### h2.cli-proyecto — Mi proyecto
 
@@ -797,40 +797,40 @@
 - Nodo(s): h2.cli-proyecto
 - Qué es: Header, TaskCards, hero de progreso y hover split-wrapper. Ancho completo, fix del tab destino del banner de aprobación y empties sin tinte teal.
 - Referencias: e644e55 · 92f1218 · e86ae3d · 8c71ec1 · fe89c1b · 32caad8 +5
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — e644e55, 92f1218, e86ae3d, 8c71ec1, fe89c1b, 32caad8 en origin/main (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-090] Tiles de datos y selector de proyectos
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi proyecto_ registro de cambio.md:21` · tipo: hecho-declarado · estado declarado: hecho (sin mergear) · fecha: 2026-06-27
 - Nodo(s): h2.cli-proyecto
 - Qué es: Tipo, monto, inicio y entrega derivados sin schema. Selector por ?p=<id> con fallback que no filtra datos de otros tenants.
 - Referencias: 7876c02 · be6aa4c
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — project/page.tsx:186-195 (?p elige dentro del set scopeado, fallback sin fuga); 7876c02 y be6aa4c ancestros. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-091] Empties con tinte teal restantes
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi proyecto_ registro de cambio.md:54` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-27
 - Nodo(s): h2.cli-proyecto
 - Qué es: Quedan el 'Sin proyectos' de page.tsx y otros 2 EmptyState de task-list.tsx. bg-zinc-950/70 sin verificar visualmente.
 - Referencias: dashboard/project/page.tsx · admin/projects/_components/task-list.tsx · tambien en Olme/Cliente - Registro de cambios/Mi proyecto_ registro de cambio.md:55 · ver Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:49
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — project/page.tsx:172-181 y task-list.tsx:254, :529 usan EmptyStateMuted; ProjectEmptyState.tsx:11-22 sin el glow teal (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-092] Modelar ProjectMilestone + admin UI
 - Fuente: `docs/bitacora-roadmap.md:6195` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h2.cli-proyecto
 - Qué es: Para volver a mostrar milestones con datos reales en /dashboard/project; el componente CurrentMilestone quedó sin uso.
 - Referencias: docs/roadmap-pendientes.md · src/components/dashboard/CurrentMilestone · tambien en docs/bitacora-roadmap.md:6188
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n ProjectMilestone origin/main -- prisma/schema.prisma vacio; control: git grep -n CurrentMilestone origin/main -- src -> solo CurrentMilestone.tsx:6, :13 (sin importadores) (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-093] Milestones reales de proyecto
 - Fuente: `docs/roadmap-pendientes.md:85` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h2.cli-proyecto
 - Qué es: Modelo ProjectMilestone + CRUD admin + reactivar CurrentMilestone en /dashboard/project.
 - Referencias: src/components/dashboard/CurrentMilestone.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — igual que PLAN-092: sin modelo; CurrentMilestone.tsx sin importadores (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h2.cli-referidos — Recomendá y ganá
 
@@ -839,16 +839,16 @@
 - Nodo(s): h2.cli-referidos
 - Qué es: Código/link /contact?ref=, atribución anti-abuso y admin de conversión.
 - Referencias: src/lib/referrals/attribution.ts · src/app/(protected)/admin/referrals
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — code.ts:29-32 (/contact?ref=); attribution.ts:41-52; referrals.service.ts:89-175; admin/referrals/page.tsx y _actions/referrals.admin.actions.ts. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-095] Beneficio de referidos: 1 mes bonificado
 - Fuente: `docs/bitacora-roadmap.md:11823` · tipo: decision · estado declarado: hecho · fecha: 2026-07-01
 - Nodo(s): h2.cli-referidos
 - Qué es: Conversión = plan pago confirmado por develOP; el mes no se auto-aplica ni se notifica al cliente.
 - Referencias: también en fuente:11830
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — admin/referrals/_actions/referrals.admin.actions.ts:13-24 (PENDING→CONVERTED) y :36-47 (→REWARDED) manuales; sin aplicación automática ni aviso al cliente. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 ### h2.cli-reportes-email — Reportes por email
 
@@ -857,109 +857,109 @@
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Agregar orderBy en buildWeeklyReport (3 sets) y en getLatencyHistory, para que las métricas salgan sobre filas reales.
 - Referencias: buildWeeklyReport · getLatencyHistory · A2.3 · A2.2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — buildWeeklyReport.ts:74-83, 85-92 y 94-101 con take sin orderBy; getLatencyHistory.ts:76-82 take 2000 sin orderBy. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-097] client-monthly-report-pdf no es invariante puro
 - Fuente: `docs/bitacora-beta-3.md:5331` · tipo: pendiente · estado declarado: pendiente (C1b) · fecha: 2026-08-25
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Consulta la DB; quedó excluido del agregado y reclasificarlo al job con base es C1b.
 - Referencias: scripts/run-invariants.mjs
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — scripts/run-invariants.mjs:89-94 lo sigue excluyendo; package.json:105. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-098] B6.1 — Histórico semanal del executive brief
 - Fuente: `docs/bitacora-roadmap.md:4866` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Tabla ExecutiveBriefSnapshot (una fila por org y semana ISO en TZ-AR) upserteada desde los 3 paths que escriben el cache; helper getBriefHistory.
 - Referencias: prisma/schema.prisma · prisma/migrations/20260524225006_b61_executive_brief_snapshots/migration.sql · src/lib/ai/executive-brief.ts · src/lib/tz-ar.ts · src/lib/ai/brief-history.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schema.prisma:459 ExecutiveBriefSnapshot; executive-brief.ts:334-360 persistBriefSnapshot; brief-history.ts:24-46. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-099] B6.2 — Reporte ejecutivo semanal por email
 - Fuente: `docs/bitacora-roadmap.md:4978` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h2.cli-reportes-email
 - Qué es: WeeklyReportLog + Organization.executiveReportOptOut; cron lunes 12:00 UTC registrado en vercel.json; gating PRO/BUSINESS, idempotencia por (org, periodKey), template nuevo y unsubscribe 1-click con HMAC; ruta de preview dev-only.
 - Referencias: prisma/migrations/20260524230542_b62_executive_weekly_report_log/migration.sql · src/lib/email/unsubscribe-token.ts · src/lib/email/templates/executive-weekly.ts · src/lib/reports/executive-weekly/build.ts · src/lib/reports/executive-weekly/send.ts · src/app/api/cron/send-executive-reports/route.ts +5
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Migración 20260524230542_b62_executive_weekly_report_log, send.ts/build.ts, unsubscribe (api/email/unsubscribe-executive/route.ts:103,110) y preview dev-only (api/dev/email-preview/executive-weekly/route.ts:107-108) existen; el cron solo está en vercel.json:11-14 y prod es Netlify (netlify.toml:25-32 no lo agenda; docs/operations/00-entornos.md:12). (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-100] Reglas lockeadas del reporte ejecutivo semanal
 - Fuente: `docs/bitacora-roadmap.md:4986` · tipo: decision · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Sin LLM al enviar (reusa cachedExecutiveBrief), solo PRO/BUSINESS, idempotente por (org, periodKey), falla parcial no aborta el cron, periodKey en TZ-AR, opt-out 1-click RFC 8058 y cero PII en logs.
 - Referencias: src/lib/reports/executive-weekly/send.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — PRO/BUSINESS build.ts:91; idempotencia send.ts:105-112; falla parcial no aborta send.ts:103,205; periodKey TZ-AR send.ts:76; RFC 8058 send.ts:171-176. 'Sin LLM al enviar' no se cumple: build.ts:115-119 llama getExecutiveBrief si el cache no es vigente. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-101] Sin tests unitarios del HMAC de unsubscribe ni del builder del reporte
 - Fuente: `docs/bitacora-roadmap.md:5154` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Hoy solo cubren el build y visual-qa; sumar un smoke en un sprint posterior.
 - Referencias: src/lib/email/unsubscribe-token.ts · src/lib/reports/executive-weekly/build.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -E 'signUnsubscribeToken|verifyUnsubscribeToken' origin/main -- logic-core-v3/tests '**/*.invariant.ts' '**/*.test.ts' → vacío; control: signEmailContactOptOutToken aparece en src/lib/security/idor-tokens.invariant.ts y tests/e2e/20-idor-optout.spec.ts. build.ts no tiene test propio (tests/e2e/41-admin-executive-report-send-now.spec.ts:5-7 lo evita). (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-102] B6.3 — Top 3 leads calientes en el reporte (solo Business)
 - Fuente: `docs/bitacora-roadmap.md:5158` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h2.cli-reportes-email
 - Qué es: getTopHotLeadsForWeek rankea por score efectivo con decay, excluye DQ y filtra por org; sección en el email solo para BUSINESS.
 - Referencias: src/lib/reports/executive-weekly/top-hot-leads.ts · src/lib/email/templates/executive-weekly.ts · src/lib/reports/executive-weekly/build.ts · src/app/api/dev/email-preview/executive-weekly/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — top-hot-leads.ts:56-160 (decay :104-111, DQ :75, org :71); build.ts:154-163 solo BUSINESS. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-103] Link directo al detalle del lead desde el email
 - Fuente: `docs/bitacora-roadmap.md:5259` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-24
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Requiere firmar un token porque 'los IDs de lead no van en URLs por política'.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep signLeadToken|leadToken|lead-link-token → vacio; los emails enlazan la lista (sendTestNotification.ts:58). (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-104] P2.B.2 reporte ejecutivo a medida
 - Fuente: `docs/bitacora-roadmap.md:11927` · tipo: hecho-declarado · estado declarado: hecho (migración editada, no aplicada)
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Frecuencia y cantidad de leads configurables por el dueño en /dashboard/cuenta/perfil.
 - Referencias: src/components/dashboard/ExecutiveReportPrefsForm.tsx · src/lib/reports/executive-weekly/send.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — migración 20260702223350_add_executive_report_config; executive-report-prefs.actions.ts:20-46 con Zod; send.ts:43-59 (BIWEEKLY); build.ts:99,161; perfil/page.tsx:193-203,297-306. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-105] Gate de plan del reporte duplicado a mano
 - Fuente: `docs/bitacora-roadmap.md:11936` · tipo: decision · estado declarado: hecho
 - Nodo(s): h2.cli-reportes-email
 - Qué es: report-eligible-plan.ts calca el chequeo literal PRO/BUSINESS de build.ts (no planAllows); sincronizar a mano.
 - Referencias: src/lib/reports/executive-weekly/report-eligible-plan.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — report-eligible-plan.ts:9-11 calca build.ts:91; el invariante report-eligible-plan.invariant.ts:14 no importa build.ts. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-106] executiveReportOptOut convive con la frecuencia
 - Fuente: `docs/bitacora-roadmap.md:11940` · tipo: decision · estado declarado: hecho
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Reactivar una frecuencia limpia el opt-out; la UI muestra el estado efectivo.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — executive-report-prefs.actions.ts:41 limpia el opt-out al reactivar; perfil/page.tsx:196, :305 muestra la frecuencia efectiva. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-107] Cadencia quincenal y ubicación del botón de reporte
 - Fuente: `docs/bitacora-roadmap.md:11994` · tipo: pendiente · estado declarado: pendiente (decisión)
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Decidir si el botón manual respeta la cadencia quincenal y si se copia a /admin/settings/reports.
 - Referencias: también en fuente:11995
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — send.ts:40-41 excluye a propósito al botón manual de la cadencia; el botón vive en admin/clients/[clientId]/_components/ExecutiveReportCard.tsx:20 y no en admin/settings/reports (git grep send-executive-report). (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-108] FIX-BRIEF: el brief IA ya no contradice las cards
 - Fuente: `docs/bitacora-roadmap.md:11999` · tipo: hecho-declarado · estado declarado: hecho (verificación viva pendiente)
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Gemini recibe solo los 4 números de las cards con dirección; corte de cache BRIEF_LOGIC_CUTOFF.
 - Referencias: src/lib/ai/executive-brief-input.ts · src/lib/ai/executive-brief.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — executive-brief-input.ts:95-115 (solo numeros de las cards); BRIEF_LOGIC_CUTOFF en executive-brief-input.invariant.ts:15-126. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-109] Ajustar BRIEF_LOGIC_CUTOFF a la fecha de deploy
 - Fuente: `docs/bitacora-roadmap.md:12041` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-reportes-email
 - Qué es: Si el deploy fue posterior al 2026-07-02, subir la fecha del corte.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — executive-brief-input.ts:204 sigue en 2026-07-02 (commit 852fcc39 del 2026-07-02); build.ts:113 lo usa como único control de frescura del brief. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h2.cli-resenas — Motor de reseñas (módulo)
 
@@ -968,86 +968,86 @@
 - Nodo(s): h2.cli-resenas
 - Qué es: generateDraft/replyAction validan organizationId contra la sesión (resolveScopedOrgId).
 - Referencias: src/components/dashboard/modules/motor-resenas/_actions.ts · src/lib/security/org-scope.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/components/dashboard/modules/motor-resenas/_actions.ts:20, :55 resolveScopedOrgId; src/lib/security/org-scope.ts:20-27 (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-111] P3-A.1 backend de conexión GBP
 - Fuente: `docs/bitacora-roadmap.md:12500` · tipo: hecho-declarado · estado declarado: hecho (verificación viva pendiente)
 - Nodo(s): h2.cli-resenas
 - Qué es: Descubre y persiste account/location, estados honestos y rating one-shot.
 - Referencias: src/lib/actions/gbp-connection.ts · docs/sprints/p3-a-1-gbp-connection.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/actions/gbp-connection.ts:17 listAvailableLocations, :36 setActiveLocation. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-112] Verificación viva de la conexión GBP
 - Fuente: `docs/bitacora-roadmap.md:12542` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-resenas
 - Qué es: No hay cuenta GBP de prueba; OAuth vivo y locations reales sin ejercitar.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -li 'gbp|google-business' origin/main -- tests -> solo un snapshot png; sin test ni script de verificacion (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-113] P3-A.2 venta del módulo de reseñas + estados honestos
 - Fuente: `docs/bitacora-roadmap.md:12609` · tipo: hecho-declarado · estado declarado: hecho (verificación visual pendiente)
 - Nodo(s): h2.cli-resenas
 - Qué es: Vistas locked/connecting/operational según módulo × conexión.
 - Referencias: src/lib/modules/motor-resenas-view.ts · docs/sprints/p3-a-2-venta.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/modules/motor-resenas-view.ts:20 (locked/connecting/operational), :38 resolveMotorResenasView. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-114] Selector de sucursal GBP y CTA en preview admin
 - Fuente: `docs/bitacora-roadmap.md:12661` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-resenas
 - Qué es: Selector para CONNECTED_NO_LOCATION('multiple') diferido; el CTA en preview de admin falla con 'Sesión inválida.'.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — upsell.ts:16-19 session.user.organizationId -> 'Sesion invalida.' en soporte; selector sin UI (ver PLAN-118) (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-115] Cerrar el precio del Motor de Reseñas
 - Fuente: `docs/bitacora-roadmap.md:12669` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-resenas
 - Qué es: LockedView muestra [FALTA:precio] y la vitrina 60 USD con pricing no cerrado.
 - Referencias: también en fuente:12629 · también en fuente:12661
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — LockedView.tsx:151 [FALTA:precio] vs premium-modules.ts:31 priceMonthlyUsd: 60 (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-116] Backend de conexión GBP
 - Fuente: `docs/sprints/p3-a-1-gbp-connection.md:8` · tipo: hecho-declarado · estado declarado: hecho (sin verificación viva)
 - Nodo(s): h2.cli-resenas
 - Qué es: Descubre account+location, persiste por cardinalidad con estados honestos, listAvailableLocations/setActiveLocation y rating one-shot desde el callback (fetch crudo, sin dependencia).
 - Referencias: src/lib/integrations/gbp-connection-logic.ts · src/lib/actions/gbp-connection.ts · tambien en :29
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — gbp-connection-logic.ts:57-77 tipos y estados; src/lib/actions/gbp-connection.ts:17, :36; api/auth/google-business/callback/route.ts:61-68 descubrimiento tolerante (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-117] Verificación viva de GBP
 - Fuente: `docs/sprints/p3-a-1-gbp-connection.md:138` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-resenas
 - Qué es: Sin cuenta GBP de prueba; /reputacion no se puede sembrar (OAuth vivo, sin mock).
 - Referencias: tambien en :149 · raiz:lane-resultados-redesign-log.md:225, :234, :312
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — El codigo a verificar existe (gbp-connection.ts:17, :36; motor-resenas-view.ts:38); no hay artefactos de verificacion ni cuenta de prueba en el repo. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-118] UI de conexión GBP y selector de sucursal
 - Fuente: `docs/sprints/p3-a-1-gbp-connection.md:150` · tipo: pendiente · estado declarado: diferido
 - Nodo(s): h2.cli-resenas
 - Qué es: Botón self-service, wizard y selector para CONNECTED_NO_LOCATION('multiple'); P3-A.2 lo dejó diferido.
 - Referencias: tambien en :19 · docs/sprints/p3-a-2-venta.md:5, :134
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n "actions/gbp-connection'" origin/main -- src vacio; control: src/lib/actions/gbp-connection.ts:17 listAvailableLocations y :36 setActiveLocation existen (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-119] Venta y estados del Motor de Reseñas
 - Fuente: `docs/sprints/p3-a-2-venta.md:7` · tipo: hecho-declarado · estado declarado: hecho, verificación visual pendiente
 - Nodo(s): h2.cli-resenas
 - Qué es: LockedView (con variante pausada y 'ya lo pediste'), ConnectingState, resolveMotorResenasView y key gbp en message-context.
 - Referencias: src/lib/modules/motor-resenas-view.ts · LockedView.tsx · ConnectingState.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — LockedView.tsx:84-108, :156-177; ConnectingState.tsx:13-46; motor-resenas-view.ts:38-42; message-context.ts:23 (gbp) (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-120] [FALTA:precio] en LockedView
 - Fuente: `docs/sprints/p3-a-2-venta.md:84` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-resenas
 - Qué es: Cerrar el precio antes de mostrarle la pantalla a un cliente real.
 - Referencias: tambien en :43, :71, :153
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/app/(protected)/dashboard/modules/motor-resenas/_components/LockedView.tsx:151 'Precio: [FALTA:precio] /mes' visible al cliente (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 ### h2.cli-resultados — Resultados
 
@@ -1056,165 +1056,165 @@
 - Nodo(s): h2.cli-resultados
 - Qué es: El runtime calcula calculatePotentialValue. El panel captura tasa de cierre y ticket promedio, y renderiza. Exige que MH esté cerrado.
 - Referencias: calculatePotentialValue · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:39
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Ticket promedio capturado (dashboard/_actions/business-profile.actions.ts, MoneyEstimate.tsx); no hay tasa de cierre ni cálculo: git grep -n calculatePotentialValue origin/main -- logic-core-v3/src → vacío; control: averageTicketUsd aparece en 4 archivos. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-122] P0.2 Análisis mensual (Franco)
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:129` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-12
 - Nodo(s): h2.cli-resultados
 - Qué es: Pestaña en /dashboard/resultados/analisis, solo desde el plan Pro, filtrada por organización, sobre ChatbotInsight y agregados. Su contrato quedó congelado para la lane resultados.
 - Referencias: getMonthlyAnalysisForOrg · monthly-analysis.ts · planAllows · tambien en Olme/Chatbot_ registro de cambios.md:50 · tambien en Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:122
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — analisis/page.tsx:31-57 (resolveOrgId, planAllows 'insight' :35-36); getMonthlyAnalysisForOrg.ts:48-106 con forOrg (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-123] Resultados: Sprints 1, A, 2 y 3
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:19` · tipo: hecho-declarado · estado declarado: hecho (sin mergear)
 - Nodo(s): h2.cli-resultados
 - Qué es: Header único en los 4 tabs. Seed de QA para /analisis (gitignored). Infra en _shared (HoverCard, ResultEmptyState, chartTheme). Reskin de reputación y análisis.
 - Referencias: 583a3ee · e6578b6 · 90a202e · d1a2380 · 2b51858 · 37609b5 +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 583a3ee, e6578b6, 90a202e, d1a2380, 2b51858 y 37609b5 ancestros de origin/main; PageHeader propio en los 4 tabs (analisis:40, reputacion:27, seo:117, trafico:61) y layout.tsx:3-10 solo con tabs (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-124] Resultados Sprint 4: Tráfico
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:55` · tipo: hecho-declarado · estado declarado: hecho (sin mergear)
 - Nodo(s): h2.cli-resultados
 - Qué es: Saca el dato inventado 'Google Ads', tipa el any del tooltip y hace determinístico el skeleton (sin Math.random). Reskin de tráfico y de los componentes compartidos.
 - Referencias: 69ea796 · ee24347 · 15b1d21 · df4fbe8 · SessionsChart
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 69ea796, ee24347, 15b1d21 y df4fbe8 ancestros de origin/main; sin 'Google Ads' en Resultados; AnalyticsSkeleton.tsx:33 determinístico; SessionsChart sin any (git grep ': any\|as any' → 0) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-125] Resultados Sprint 5: SEO
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:69` · tipo: hecho-declarado · estado declarado: hecho (sin mergear)
 - Nodo(s): h2.cli-resultados
 - Qué es: Saca un probe muerto. result.error ya no se muestra al cliente. Reskin de SEO con upsell.ts intacto.
 - Referencias: df4854e · 0e1d35f · 5f7989e · SeoContent
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Commits df4854e, 0e1d35f y 5f7989e son ancestros de origin/main (git merge-base --is-ancestor); seo/page.tsx:181-198 no muestra result.error. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-126] D2: quitar datos falsos y marcar deltas fijos
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:106` · tipo: decision · estado declarado: hecho
 - Nodo(s): h2.cli-resultados
 - Qué es: Los datos inventados se eliminan. Los deltas hardcodeados se conservan con FIXME(data-truth) hasta un sprint de datos.
 - Referencias: FIXME(data-truth)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — 'Google Ads' ya no aparece en Resultados (git grep → solo copy de home/LeadCampaigns.tsx:28); FIXME(data-truth) solo en seo/page.tsx:234-235; los deltas de trafico/page.tsx:204, :215, :227, :238 no tienen FIXME (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-127] Verificación visual de Resultados antes del merge
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:174` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-resultados
 - Qué es: Obligatoria: 4 tabs, con ?demo=true y el seed de Matsu.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — El merge ya ocurrió: 583a3ee, e6578b6, 90a202e, d1a2380, 2b51858, 37609b5, 69ea796, ee24347, 15b1d21 y df4fbe8 son ancestros de origin/main (git merge-base --is-ancestor). No hay registro de verificación visual en docs (lane-resultados-redesign-log.md:298 es pre-merge) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-128] Sprint de datos de Resultados
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:175` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-resultados
 - Qué es: Deltas reales, performance de GBP (hoy llega en 0), CTA 'ACTIVAR AHORA' sin handler e ID de propiedad GA4 de demo fijo.
 - Referencias: getAnalyticsData · GBPMetricsCard · tambien en Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:130 · tambien en Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:133
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Siguen los FIXME(data-truth): trafico/page.tsx:113-117 (CTA sin handler), seo/page.tsx:234-245 (trend 12.4 fijo), GBPMetricsCard.tsx:39 (performance en 0), trafico/page.tsx:74 (propertyId de demo). (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-129] Error de tsc preexistente en src/lib/searchconsole.ts
 - Fuente: `docs/bitacora-rediseno.md:1553` · tipo: pendiente · estado declarado: intermitente · fecha: 2026-07-31
 - Nodo(s): h2.cli-resultados
 - Qué es: Conflicto de tipos googleapis/google-gax; aparece en B2-S1, B2-S2 y B2-S3 y no aparece en B2-S4.
 - Referencias: src/lib/searchconsole.ts · también en docs/bitacora-rediseno.md:1825 · también en docs/bitacora-rediseno.md:2048 · también en docs/bitacora-rediseno.md:2529
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Baseline del padre: tsc 0 errores. searchconsole.ts:2 importa @googleapis/webmasters (package.json:131, package-lock.json:859, instalado) y castea el requestBody a webmasters_v3.Schema$SearchAnalyticsQueryRequest (:134, :144) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-130] upsertBusinessMetrics sin callers ni UI
 - Fuente: `docs/bitacora-roadmap.md:7154` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-05-25
 - Nodo(s): h2.cli-resultados
 - Qué es: La función existe pero ninguna UI la usa.
 - Referencias: src/actions/metrics-actions.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/actions/metrics-actions.ts:9 definida; git grep -n "metrics-actions" origin/main -- logic-core-v3/src → 0 importadores (control: git grep -n "upsertBusinessMetrics" → la definición). Es el único escritor de BusinessMetric (:31, :40): computeConversionScore (health-score.ts:282-298) queda siempre null (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-131] /dashboard/resultados/seo con mock data visible
 - Fuente: `docs/bitacora-roadmap.md:8843` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h2.cli-resultados
 - Qué es: Flag P1-7 del audit: la página SEO muestra datos mock.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Con datos mock se muestra PreviewBanner (seo/page.tsx:226; searchconsole.ts:102-104), pero los deltas de las cards son fijos (seo/page.tsx:234-245). (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-132] P2.C PDF del informe mensual
 - Fuente: `docs/bitacora-roadmap.md:12062` · tipo: hecho-declarado · estado declarado: hecho (verificación humana pendiente)
 - Nodo(s): h2.cli-resultados
 - Qué es: Descarga en /dashboard/resultados/analisis vía @react-pdf/renderer server-side.
 - Referencias: src/app/api/reports/client-monthly/route.ts · src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — DownloadMonthlyReportButton.tsx:21 → client-monthly/route.ts:24-56 (resolveOrgId + planAllows 'insight') → get-client-monthly-report-data.ts:20-76 → ClientMonthlyReportPdf; tests/e2e/43-client-monthly-report-download.spec.ts (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-133] Borrar motores PDF huérfanos
 - Fuente: `docs/bitacora-roadmap.md:12109` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-resultados
 - Qué es: ExecutiveReportTemplate/DownloadReportButton (mock) y MonthlyReport + /api/reports/monthly sin uso.
 - Referencias: src/components/dashboard/ExecutiveReportTemplate.tsx · src/app/api/reports/monthly/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Siguen en origin/main: src/app/api/reports/monthly/route.ts:21 (git grep -n "leads/recent\|reports/monthly" origin/main -- logic-core-v3 ':!logic-core-v3/docs' → solo el comentario de client-monthly/route.ts:6 y tests/e2e/43:9), src/lib/reports/MonthlyReport.tsx (solo lo importa route.ts:8), ExecutiveReportTemplate.tsx y DownloadReportButton.tsx:129 (git grep -n "dashboard/DownloadReportButton" → 0 importadores) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-134] P2.C-fix-signo guion ASCII en deltas
 - Fuente: `docs/bitacora-roadmap.md:12113` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h2.cli-resultados
 - Qué es: MINUS SIGN U+2212 reemplazado en el PDF y en deltaPhrase del home.
 - Referencias: src/lib/reports/client-monthly/monthly-report-data.ts · src/lib/dashboard/home-metrics-logic.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — home-metrics-logic.ts:49 y monthly-report-data.ts:61 usan '-'; git grep U+2212 en ambos → 0 (control: src/components/ia/RubrosIA.tsx lo contiene) (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-135] Componentes muertos de Resultados
 - Fuente: `raiz:lane-resultados-redesign-log.md:19` · tipo: decision · estado declarado: decidido · fecha: 2026-06-25
 - Nodo(s): h2.cli-resultados
 - Qué es: DownloadReportButton, AnalyticsPeriodSelector, LeakMeter, ExecutiveReportTemplate: no revivir ni cablear.
 - Referencias: tambien en :122
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep -l -w <nombre> origin/main -- logic-core-v3/src: DownloadReportButton, AnalyticsPeriodSelector y LeakMeter solo aparecen en su propio archivo; ExecutiveReportTemplate solo en sí mismo y en DownloadReportButton.tsx (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-136] Decisiones D1-D6 de Resultados
 - Fuente: `raiz:lane-resultados-redesign-log.md:127` · tipo: decision · estado declarado: decidido · fecha: 2026-06-25
 - Nodo(s): h2.cli-resultados
 - Qué es: ResultEmptyState canónico, quitar fila 'Google Ads', FIXME en deltas, chartCardHoverCls local, no exponer result.error, commits atómicos.
 - Referencias: tambien en :129-:134
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — D1 ResultEmptyState en los 4 tabs (analisis:87, reputacion:41, seo:131, trafico:108); D3 chartCardHoverCls local (_shared/chartHover); D4 cumplido en SEO (seo/page.tsx:181-184) pero trafico/page.tsx:158 sigue renderizando {result.error}; D2 parcial (PLAN-126) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-137] Deuda data-truth en Resultados
 - Fuente: `raiz:lane-resultados-redesign-log.md:186` · tipo: pendiente · estado declarado: pendiente (FIXME data-truth) · fecha: 2026-06-25
 - Nodo(s): h2.cli-resultados
 - Qué es: Deltas de tendencia hardcodeados (/trafico, /seo), performance GBP en 0, CTA muerto 'ACTIVAR AHORA', demo property id hardcodeado.
 - Referencias: tambien en :22, :316
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Mismos FIXME: trafico/page.tsx:113-117, seo/page.tsx:234-245, GBPMetricsCard.tsx:39, trafico/page.tsx:74. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-138] Reskin de Resultados (sprints 1-5)
 - Fuente: `raiz:lane-resultados-redesign-log.md:205` · tipo: hecho-declarado · estado declarado: hecho, sin merge · fecha: 2026-06-25
 - Nodo(s): h2.cli-resultados
 - Qué es: Header único por tab; /reputacion, /analisis, /trafico y /seo al canon admin; fixes Google Ads, tooltip tipado, skeleton determinístico y fuga de error.
 - Referencias: 90a202e · 37609b5 · 3ee97f0 · df4fbe8 · 0e1d35f · 5f7989e +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Commits 90a202e, 37609b5, 3ee97f0, df4fbe8, 0e1d35f y 5f7989e están en origin/main (git merge-base --is-ancestor). (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-139] Seed QA de /analisis
 - Fuente: `raiz:lane-resultados-redesign-log.md:217` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-25
 - Nodo(s): h2.cli-resultados
 - Qué es: scripts/dev/_seed-resultados-qa.ts (gitignored) corrido en Neon dev; resolvió Matsu BUSINESS.
 - Referencias: d1a2380
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — .gitignore:78 'scripts/dev/_seed-resultados-qa.ts'; d1a2380 ancestro de main; el archivo no existe en el disco (gitignored) y la siembra en Neon no es verificable por lectura (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-140] Verificación y merge de lane/resultados
 - Fuente: `raiz:lane-resultados-redesign-log.md:309` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-25
 - Nodo(s): h2.cli-resultados
 - Qué es: Visual desde el worktree, /analisis con seed, coreografía por grabación; el merge lo hace el humano.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Merge hecho (commits de la lane ancestros de origin/main; no quedan ramas lane/* en git for-each-ref); la verificación visual no deja rastro (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-141] Mocks sin aviso en Resultados
 - Fuente: `STATUS.md:209` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-21
 - Nodo(s): h2.cli-resultados
 - Qué es: SEO muestra mock sin badge 'datos demo'; analytics/searchconsole/n8n devuelven mock sin avisar en UI.
 - Referencias: tambien en :210
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — PreviewBanner con isMockData en seo/page.tsx:226 y trafico/page.tsx:188 (y en ?demo: seo :124-125, trafico :68). Siguen las tendencias literales (trafico :204-238, seo :244-269) y la caída silenciosa a mock (analytics.ts:196-198, searchconsole.ts:211-213) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 ### h2.cli-servicios — Mis servicios y módulos
 
@@ -1223,124 +1223,124 @@
 - Nodo(s): h2.cli-servicios
 - Qué es: Modal portaleado con longDescription tomado de un preset local. El CTA 'Desbloquear' y sus 4 estados quedan intactos.
 - Referencias: bded0be · ServiceDetailModal.tsx · PremiumModuleCard.tsx · PRESET_MODULE_DETAILS
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ServiceDetailModal.tsx:53-234; PremiumModuleCard.tsx:59-79 (PRESET_MODULE_DETAILS), :427-438; bded0be ancestro de origin/main. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-143] Badge 'Próximamente Q3 2026'
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:175` · tipo: promesa · estado declarado: sin estado · fecha: 2026-06-25
 - Nodo(s): h2.cli-servicios
 - Qué es: Los módulos coming-soon muestran al cliente 'Próximamente Q3 2026', en la card y en el modal. Es una fecha comprometida.
 - Referencias: PremiumModuleCard.tsx · ServiceDetailModal.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — PremiumModuleCard.tsx:300 y ServiceDetailModal.tsx:181 renderizan 'Próximamente Q3 2026'. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-144] Servicios: Sprints 0-4 y hotfix
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:205` · tipo: hecho-declarado · estado declarado: hecho (sin mergear) · fecha: 2026-06-24
 - Nodo(s): h2.cli-servicios
 - Qué es: PremiumModuleCard y ServiceCard con el lenguaje del admin, loading espejado y 3 paneles de vidrio a ancho completo. El estado vacío se arma a mano por el boundary.
 - Referencias: 5d97587 · 97c02c1 · ab86804 · a6550e9 · 7fda87c · 91b3b20 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 5d97587, 97c02c1, ab86804, a6550e9, 7fda87c y 91b3b20 ancestros de origin/main; empty hand-rolled en services/page.tsx:222-234; ServiceDetailModal montado (PremiumModuleCard.tsx:427-438) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-145] Modal de detalle de servicios contratados
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:217` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-25
 - Nodo(s): h2.cli-servicios
 - Qué es: '1 cuadro por servicio + N entidades por tipo'. Requiere relevar la relación Service→Project, que hoy no existe, y posiblemente schema.
 - Referencias: ServiceCard · tambien en Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:266
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — services/page.tsx:156-162: 'Ver detalles' del ServiceCard sigue siendo Link a /dashboard/messages?context=default (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-146] longDescription real desde la DB en el modal
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:220` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-25
 - Nodo(s): h2.cli-servicios
 - Qué es: Reemplazar PRESET_MODULE_DETAILS pasando el campo como prop desde page.tsx. Mini-lane.
 - Referencias: PRESET_MODULE_DETAILS · tambien en Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:268
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — PremiumModuleCard.tsx:59 PRESET_MODULE_DETAILS y :195 PRESET_MODULE_DETAILS[slug] ?? GENERIC_MODULE_DETAIL; el catálogo tiene longDescription (premium-modules.ts:28). (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-147] Servicios: tipografía del admin, accent y badge
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:244` · tipo: decision · estado declarado: hecho · fecha: 2026-06-24
 - Nodo(s): h2.cli-servicios
 - Qué es: Tipografía liviana del admin. Accent por módulo y servicio. Badge 'Premium' neutral. 'Ver detalles' como ícono.
 - Referencias: tambien en Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — PremiumModuleCard.tsx:300 badge 'Premium'; :251-262 accent por módulo; :340-341 'Ver detalles' como ícono con aria-label. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-148] No borrar src/lib/data/premium-modules.ts
 - Fuente: `docs/bitacora-rediseno.md:3380` · tipo: decision · estado declarado: vigente · fecha: 2026-08-05
 - Nodo(s): h2.cli-servicios
 - Qué es: Sin consumidores en src/, pero lo usa prisma/seeds/sync-premium-modules.ts, que hace deleteMany sobre PremiumModule y organizationModule; borrarlo rompe el seed.
 - Referencias: src/lib/data/premium-modules.ts · prisma/seeds/sync-premium-modules.ts · relacionado docs/bitacora-beta.md:17 (sync-premium-modules prod-runnable sin guard)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git ls-tree origin/main src/lib/data/premium-modules.ts existe; prisma/seeds/sync-premium-modules.ts:4 lo importa (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-149] Los planes no incluyen módulos premium
 - Fuente: `docs/bitacora-roadmap.md:2499` · tipo: decision · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h2.cli-servicios
 - Qué es: El chatbot es el producto core; PremiumModule/OrganizationModule son add-ons que se venden aparte vía requestUpsellAction; no hay auto-activación por plan.
 - Referencias: src/lib/premium-modules.ts · src/lib/actions/upsell.ts · tambien en docs/bitacora-roadmap.md:2613
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep -n -w activateModule origin/main -- . → solo premium-modules.ts:103 y docs/bitacora-roadmap.md:2613; no existe applyPlanModuleEntitlements (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-150] /dashboard/modules/* sin gating
 - Fuente: `docs/bitacora-roadmap.md:8921#2` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h2.cli-servicios
 - Qué es: Los módulos premium del dashboard no tenían gating al cierre de B13; derivado a B14.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — isModuleActive en agenda-inteligente/page.tsx:320-321, tienda-conectada/page.tsx:295-296, motor-resenas/page.tsx:110,120-127 y email-marketing/layout.tsx:20-21; pero email marketing usa un slug ausente del catálogo (premium-modules.ts:38) y sus actions no chequean el módulo (_actions.ts:17-27). (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-151] P5.2 vitrina de servicios + demanda medida
 - Fuente: `docs/bitacora-roadmap.md:11654` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30
 - Nodo(s): h2.cli-servicios
 - Qué es: 3 estados, 'avisame cuando esté', dedup del upsell y tab Demanda en admin.
 - Referencias: src/lib/modules/showroom.ts · src/lib/upsell/dedup.ts · src/app/(protected)/admin/leads/_components/module-demand-table.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — showroom.ts:28-74 (3 estados); dedup.ts:33-40 usado en upsell.ts:87; 'avisame' en PremiumModuleCard.tsx:200-216; admin/leads/_components/module-demand-table.tsx existe. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-152] Módulo DEPRECATED poseído desaparece de 'Tus módulos'
 - Fuente: `docs/bitacora-roadmap.md:11720` · tipo: pendiente · estado declarado: pendiente (decisión de Franco) · fecha: 2026-06-30
 - Nodo(s): h2.cli-servicios
 - Qué es: Decisión de producto: honrar 'ya lo tenés' para discontinuados exige tocar query y classifyModuleState.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — services/page.tsx:177-180 trae solo ACTIVE/COMING_SOON; showroom.ts:28-35 no contempla DEPRECATED (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-153] PremiumModuleCard usa triggerTransition en portal
 - Fuente: `docs/bitacora-roadmap.md:12663` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-servicios
 - Qué es: Viola la regla de navegación de portales; migrar es otro alcance.
 - Referencias: src/components/dashboard/PremiumModuleCard.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep triggerTransition en components/dashboard y (protected)/dashboard: solo comentarios (PremiumModuleCard.tsx:212, LockedView.tsx:10); la card navega con Link (:404-410) y window.location.assign (:215). (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-154] Vitrina muestra priceMonthlyUsd=60
 - Fuente: `docs/sprints/p3-a-2-venta.md:129` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-servicios
 - Qué es: Precio visible con el pricing sin cerrar.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — PremiumModuleCard.tsx:362-367 muestra el precio del catálogo (premium-modules.ts:31 motor-resenas 60) mientras LockedView.tsx:151 muestra '[FALTA:precio]'. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-155] P3-A.2-acceso: vitrina -> LockedView
 - Fuente: `docs/sprints/p3-a-2-venta.md:158` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-04
 - Nodo(s): h2.cli-servicios
 - Qué es: salesRouteHref en PremiumModuleCard solo para motor-resenas; submitInterest navega con window.location.assign en vez de triggerTransition. Los otros 3 módulos siguen pidiendo inline.
 - Referencias: src/components/dashboard/PremiumModuleCard.tsx · src/app/(protected)/dashboard/services/page.tsx · tambien en :176
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — services/page.tsx:325-327 salesRouteHref solo 'motor-resenas'; PremiumModuleCard.tsx:403-410 Link 'Ver módulo'; :212-215 window.location.assign tras requestUpsellAction; los demás siguen con RequestButton inline (:411-420) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-156] Panel servicios + CTA a más servicios
 - Fuente: `raiz:lane-plan-log.md:99` · tipo: pendiente · estado declarado: diferido · fecha: 2026-06-25
 - Nodo(s): h2.cli-servicios
 - Qué es: Diferido a post-merge.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — dashboard/plan/page.tsx:16-33 solo monta UsageMeter y PlansShowcase. (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-157] Contrato de upsell congelado
 - Fuente: `raiz:lane-resultados-redesign-log.md:182` · tipo: decision · estado declarado: decidido · fecha: 2026-06-25
 - Nodo(s): h2.cli-servicios
 - Qué es: requestUpsellAction(featureKey, featureName) contra PremiumModule.slug; tocarlo requiere coordinación (rompe Servicios y Plan).
 - Referencias: src/lib/actions/upsell.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — upsell.ts:10-13 firma (featureKey, featureName); :45-48 lookup por PremiumModule.slug; consumidores UpgradeCtaButton.tsx:88, Recommendations.tsx:82, PremiumModuleCard.tsx:206, LockedView.tsx:68, seo/page.tsx:112 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 ### h2.cli-shell — Shell del portal (sidebar, notificaciones, novedades)
 
@@ -1349,71 +1349,71 @@
 - Nodo(s): h2.cli-shell
 - Qué es: NotificationCenter portaleado a body (trampa de backdrop-filter) y modal con el historial completo.
 - Referencias: NotificationCenter.tsx · NotificationHistoryModal.tsx · lib/actions/notifications.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — NotificationCenter.tsx:169-274 (createPortal a body), NotificationHistoryModal.tsx:14-163, notifications.ts:46-93. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-159] Tarea 1: módulos premium en el sidebar y fullwidth
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:9` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h2.cli-shell
 - Qué es: Los módulos activos pasan a la sección Servicios por el mismo .map que el resto de los ítems. Las páginas de módulo van a ancho completo. Mergeado.
 - Referencias: 7cfe4a4 · 9699eaa · 6bd00a6 · src/components/dashboard/SidebarNav.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — SidebarNav.tsx:72-81, :101-103, :123; commits 7cfe4a4, 9699eaa, 6bd00a6 ancestros de origin/main (git merge-base --is-ancestor). (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-160] Tarea 2: BackLink y navegación
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:21` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h2.cli-shell
 - Qué es: Componente BackLink aplicado en soporte/[ticketId]. router.back de campaigns/send pasa a <Link>, y los router.push de campaigns/new quedan documentados. Mergeado.
 - Referencias: e6155f5 · 841425c · 2e6dc93 · 461824d · src/components/dashboard/BackLink.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — BackLink.tsx:17-30 usado en soporte/[ticketId]/page.tsx:120; campaigns/[id]/send/page.tsx:60 Cancelar con Link; router.push documentados en campaigns/new/page.tsx:38-40, :69-72, :150-153; commits e6155f5, 841425c, 2e6dc93, 461824d ancestros. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-161] Botón 'volver atrás' en subpáginas
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Soporte_ registro de cambios.md:84` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-shell
 - Qué es: Patrón global del admin, diferido para todas las secciones con subpáginas.
 - Referencias: tambien en Olme/Cliente - Registro de cambios/Mensajes_ registro de cambios.md:58 · tambien en Olme/Cliente - Registro de cambios/General_ registro de cambios.md:83 · ver Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:21 (BackLink)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — src/components/dashboard/BackLink.tsx:17 existe y solo se usa en soporte/[ticketId]/page.tsx:120 (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-162] B4.4 — Drop de User.unlockedFeatures (legacy)
 - Fuente: `docs/bitacora-roadmap.md:2491` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h2.cli-shell
 - Qué es: Slug legacy migrado a OrganizationModule, refactor de dashboard/layout, DashboardLayoutClient y SidebarNav, borradas toggleClientFeatureAction y toggleClientFeature (sin callers), DROP COLUMN con migración manual; fix de activeModuleSlugs en el sidebar mobile.
 - Referencias: prisma/migrations/20260522214201_drop_user_unlocked_features/migration.sql · prisma/schema.prisma · prisma/seed.ts · src/app/(protected)/dashboard/layout.tsx · src/components/dashboard/DashboardLayoutClient.tsx · src/components/dashboard/SidebarNav.tsx +5
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma/migrations/20260522214201_drop_user_unlocked_features/migration.sql existe; git grep unlockedFeatures en src/prisma: solo comentario src/lib/premium-modules.ts:15; SidebarNav.tsx:95, :101-103 usa activeModuleSlugs. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-163] Quitar '(scaffolding)' del nombre del usuario seed
 - Fuente: `docs/bitacora-roadmap.md:4226` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h2.cli-shell
 - Qué es: Aparece en el banner del dashboard ('Matsu Admin (scaffolding)'); el doc no precisa en qué seed ('seed-agency-os o similar').
 - Referencias: tambien en docs/bitacora-roadmap.md:4230 · tambien en docs/bitacora-roadmap.md:5934
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — scripts/seed-matsu.ts:27 const USER_NAME = 'Matsu Admin (scaffolding)' (se muestra en DashboardLayoutClient.tsx:140-143 via userDisplayName). (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-164] error.tsx faltantes en 12 páginas del dashboard
 - Fuente: `docs/bitacora-roadmap.md:8921#4` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h2.cli-shell
 - Qué es: 12 dashboard pages sin error boundary propio; derivado a B14.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Existen dashboard/error.tsx (cubre a todas las hijas), cuenta/, resultados/, modules/ y chatbot/error.tsx, todos via SectionErrorBoundary con Sentry (SectionErrorBoundary.tsx:64). Soporte, messages, project, services, plan y referidos no tienen boundary propio. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-165] CC.5 pulida visual del dashboard cliente
 - Fuente: `docs/bitacora-roadmap.md:10233` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h2.cli-shell
 - Qué es: PageHeader unificado en 10 pantallas; seed BotConfig client-a y 4 errores TS resueltos; flag B7 declarado falso positivo.
 - Referencias: src/components/ui/PageHeader.tsx · prisma/seed.ts · cierra pendientes fuente:10020, 10120, 10228, 10022, 9864
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep -l PageHeader origin/main -- "src/app/(protected)/dashboard" → 16 archivos (p. ej. page.tsx:299, plan/page.tsx:18, referidos/page.tsx) (D2-c1, lector D2-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-166] P1-fix scroll reset al navegar
 - Fuente: `docs/bitacora-roadmap.md:11419` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30
 - Nodo(s): h2.cli-shell
 - Qué es: ScrollTopOnNavigate montado en el main del dashboard.
 - Referencias: src/components/dashboard/ScrollTopOnNavigate.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ScrollTopOnNavigate.tsx:16-35 montado en DashboardLayoutClient.tsx:174. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: no
 
 ### h2.cli-soporte — Soporte
 
@@ -1422,31 +1422,31 @@
 - Nodo(s): h2.cli-soporte
 - Qué es: Todo en lib/tickets. Responder no cambia el status y cada respuesta del admin manda email. Se borraron los archivos muertos.
 - Referencias: lib/tickets/actions.ts · lib/tickets/schemas.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Mutaciones en lib/tickets/actions.ts:38,110,179,202; responder no cambia el status (:106-109); el email del admin va por Resend con éxito simulado (lib/email.ts:15-16) y sin mirar el resultado (:166); components/dashboard/TicketStatusSelector.tsx quedó sin importadores (git grep TicketStatusSelector → solo su definición). (D2-c1, lector D2-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-168] Soporte: tablero de 3 columnas
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Soporte_ registro de cambios.md:21` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h2.cli-soporte
 - Qué es: SoporteBoard con fade, overview portaleado, página sin scroll y hover. Badges de prioridad y categoría también en el admin.
 - Referencias: SoporteBoard.tsx · tambien en Olme/Cliente - Registro de cambios/Soporte_ registro de cambios.md:17
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — SoporteBoard.tsx:246-354 (fade :203-210, overview Modal :277-299); badges en admin ticket-list.tsx:57-70. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-169] Tickets en tiempo real
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Soporte_ registro de cambios.md:85` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h2.cli-soporte
 - Qué es: Polling, SSE o websockets. Está fichado pero sin diseñar.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -e EventSource -e setInterval -e refreshInterval -e useSWR -e WebSocket origin/main -- soporte/ y componentes del ticket → 0; control: ClientLeadsTable.tsx:146 setInterval(refresh, 30_000) (D2-c1, lector D2-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-170] Sacar el cliente Prisma del bundle del browser (NewTicketModal)
 - Fuente: `docs/bitacora-roadmap.md:305` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h2.cli-soporte
 - Qué es: El chunk de Prisma (~65KB) persiste porque NewTicketModal usa z.nativeEnum(TicketCategory/TicketPriority); el refactor a z.enum quedó diferido.
 - Referencias: NewTicketModal.tsx · tambien en docs/bitacora-roadmap.md:327 · tambien en docs/bitacora-roadmap.md:374
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — NewTicketModal.tsx:8 importa TicketCategory/TicketPriority de '@/lib/prisma-enums' (espejo client-safe, prisma-enums.ts:1-42). Barrido: ningun archivo 'use client' de origin/main importa valores runtime de @prisma/client (grep de lineas 'import {…} from' y '} from' sobre git show de cada archivo; control positivo: NotificationCenter.tsx:9 'import type' y tickets/schemas.ts:1 server importa valores). (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: no
 
 ### h2.cli-tienda — Tienda online (módulo)
 
@@ -1454,16 +1454,16 @@
 - Fuente: `docs/bitacora-roadmap.md:9832` · tipo: idea · estado declarado: sin estado
 - Nodo(s): h2.cli-tienda
 - Qué es: No existe acción de desconexión de la tienda.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -niE 'disconnect|desconect' origin/main -- src | grep -i tienda vacio; git grep -n 'tiendanubeStoreId: null' vacio; control: callback/route.ts:66 escribe tiendanubeStoreId (D2-c1, lector D2-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-172] Integración Tiendanube por API
 - Fuente: `STATUS.md:234` · tipo: decision · estado declarado: pendiente · fecha: 2026-05-21
 - Nodo(s): h2.cli-tienda
 - Qué es: Pendiente de decisión.
 - Referencias: docs/sprints/alpha-RESUMEN-FINAL.md:78
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — src/lib/integrations/tiendanube.ts:5-55 (OAuth + API) y tienda-conectada/page.tsx:86-87, :300-304 ya existen; la decision figura pendiente en docs; PremiumModuleCard.tsx:67 promete 'Integracion completa con Tiendanube'. (D2-c1, lector D2-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 ## h3 · Chatbot centralizado
 
