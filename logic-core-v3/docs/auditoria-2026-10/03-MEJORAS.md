@@ -47,6 +47,17 @@ Lo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de
 - Nodo(s): h4.adm-shell, h4.adm-dashboard, h4.adm-equipo, h4.adm-referidos, h4.adm-proyectos, h4.adm-leads, h4.adm-mensajes, h4.adm-novedades, h3.adm-actividad, h5.adm-revision-demos, h5.adm-fg2lab, lib.proxy, lib.auth
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-013
 
+### [SEC-037] El overview de Mi Chatbot manda al navegador la fila completa de Organization: tokens de Google Business y Tiendanube, API key de Cal.com y las notas internas de develOP
+- Dominio: D5  ·  Severidad: ALTA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/admin/getClientSession.ts:17` — «include: { organization: { include: {»; `src/app/(protected)/dashboard/chatbot/page.tsx:46` — «<ChatbotOverview session={session}»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:1` — «'use client'»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:30` — «organization: Organization & { botConfig: BotConfig | null }»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:63` — «{session.bot.botName} está atendiendo consultas las 24 horas.»; `prisma/schema.prisma:359` — «gbpAccessToken String? @db.Text gbpRefreshToken String? @db.Text»; `prisma/schema.prisma:367` — «tiendanubeAccessToken String? @db.Text»; `prisma/schema.prisma:402` — «internalNotes String?»
+- Impacto: Bloqueante para el primer cliente con Reseñas o Tienda conectada: cualquier usuario de su org (incluido un VIEWER) recibe en el payload RSC de /dashboard/chatbot el access y refresh token de Google Business, el token sin vencimiento de Tiendanube y la API key de Cal.com (credenciales emitidas a la app de develOP sobre sus cuentas), legibles en DevTools y por cualquier XSS o extensión del navegador, y además internalNotes, las notas privadas que develOP escribe sobre ese cliente. El componente solo usa session.bot.botName; getPublicConfig del mismo módulo sí usa select.
+- Propuesta: En getClientChatbotSession leer org y bot con select acotado (lo que usan las páginas: id, slug, siteUrl, companyName y campos del bot) y pasarle a ChatbotOverview solo botName; agregar un invariante que prohíba tipos Prisma completos (Organization, BotConfig, User) en props de componentes 'use client'. Confirmar antes y después con el caso de prueba del payload.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, lib.chatbot.admin, modelo.Organization, modelo.BotConfig
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-035
+
 ### [SEC-009] Enumeracion de usuarios: el magic link responde distinto si el email existe (y el login/forgot delatan por tiempo y por 'error inesperado')
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -210,6 +221,48 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): modelo.Organization, modelo.AgencySettings, modelo.ClientAsset, int.google-business-profile, int.tiendanube, int.calcom, int.telegram, h2.cli-resenas, h2.cli-tienda, h2.cli-agenda, h2.cli-cuenta, int.gbp, lib.crypto
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-031
 
+### [SEC-038] Notification es por usuario pero el portal la lee y la marca por organización: el cliente ve y apaga las notificaciones dirigidas al SUPER_ADMIN, con links a /admin/projects/<id>
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:718` — «userId String»; `src/app/(protected)/dashboard/layout.tsx:101` — «prisma.notification.findMany({ where: { organizationId },»; `src/lib/actions/notifications.ts:33` — «await prisma.notification.updateMany({ where: { id: parsed.data.id, organizationId },»; `src/lib/actions/notifications.ts:82` — «const notifications = await prisma.notification.findMany({ where: { organizationId },»; `src/actions/dashboard-actions.ts:67` — «userId: admin.id, organizationId, taskId: task.id,»; `src/actions/dashboard-actions.ts:70` — «actionUrl: '/admin/projects/${task.projectId}',»; `src/actions/agency-actions.ts:54` — «const notifications = orgMembers.map(member => ({»; `src/components/dashboard/NotificationCenter.tsx:125` — «router.push(notif.actionUrl)»
+- Impacto: Cuando un cliente aprueba o rechaza una entrega, la campana de todos los miembros de su org muestra las notificaciones escritas para el SUPER_ADMIN ('Cliente pidio cambios en...', 'Entrega aprobada por cliente...'), con un link a /admin/projects/<id> que expone el id interno y rebota en el proxy; cada miembro ve también las copias de los demás (una por miembro en cada pedido de aprobación) y cualquiera las marca leídas para todos. Ninguna pantalla del admin lee Notification, así que los avisos al SUPER_ADMIN (upsell, mensajes, referidos, aprobaciones) solo terminan en la campana del cliente o en ningún lado.
+- Propuesta: En dashboard/layout.tsx y lib/actions/notifications.ts (libres) filtrar lectura y marcado por { userId de la sesión, organizationId }. Decisión para Valentino (dashboard-actions.ts es FROZEN): no poner organizationId en las notificaciones del admin y decidir si el equipo necesita una bandeja propia o si esos avisos van solo por alerta/email.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-shell, h2.cli-proyecto, h4.adm-proyectos, modelo.Notification, lib.actions
+
+### [SEC-039] La baja de una campaña puede caer en otro cliente: CONTACT_ID y OPTOUT_TOKEN se guardan en el contacto global de Brevo y el último import de ese email los pisa
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:114` — «CONTACT_ID: contact.id, OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id),»; `src/lib/integrations/brevo.ts:49` — «listIds: params.listIds, updateEnabled: true,»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:155` — «/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}»; `prisma/schema.prisma:1229` — «@@unique([organizationId, email])»; `src/app/api/email/optout/[contactId]/route.ts:91` — «await prisma.emailContact.updateMany({ where: { id: contactId },»
+- Impacto: Si dos clientes de develOP tienen al mismo destinatario (caso común), el contacto de Brevo es uno solo por email en la cuenta compartida y queda con el CONTACT_ID del último cliente que importó. Cuando esa persona se da de baja desde la campaña del cliente A, el link apunta al EmailContact del cliente B: se marca optedOut en la base de B (escritura entre tenants disparada por un tercero) y A la sigue contando como activa. Un cliente con el módulo puede provocarlo a propósito importando emails de la lista de otro.
+- Propuesta: No guardar ids por tenant en atributos globales de Brevo: firmar un token que incluya organizationId y email y resolver la fila por (org, email) en la ruta de baja, o usar atributos por lista/org y el desuscribe nativo por lista. Verificar el modelo de contactos de Brevo con el caso de prueba.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-email-mkt, h6.vis-optout, int.brevo, modelo.EmailContact
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-037
+
+### [SEC-040] El export masivo de leads del admin no neutraliza fórmulas: un visitante anónimo del widget puede inyectar una fórmula en un CSV que junta leads de varias organizaciones
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/bulk-actions.ts:50` — «const leads = await prisma.chatbotLead.findMany({ where: { botConfig: { organizationId: { in: uniqueOrgIds } } },»; `src/lib/bulk-actions.ts:74` — «.map((value) => '"${String(value).replace(/"/g, '""')}"')»; `src/modules/chatbot/server/leads/csv/csvEscape.ts:22` — «const DANGEROUS_PREFIX = /^[=+\-@\t\r]/»; `src/modules/chatbot/server/tools/captureLead.ts:59` — «name: z.string().min(2).max(100).describe(»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:121` — «const result = await bulkExportLeads([...selected])»
+- Impacto: El export del cliente ya prefija las celdas peligrosas (csvEscape.ts:5-10 documenta este mismo ataque), pero el export del admin no: un visitante que deja como nombre '=HYPERLINK(...)' o una fórmula IMPORT convierte el CSV que develOP abre en Excel o Google Sheets en un vector para mandar a un tercero nombres, emails y teléfonos de los leads de todas las orgs seleccionadas.
+- Propuesta: Reusar rowToCsv/csvEscape de modules/chatbot/server/leads/csv en bulkExportLeads (y en cualquier otro CSV del admin); agregar un invariante que busque armados de CSV con join(',') fuera de ese helper.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes, h3.vis-widget-cliente, modelo.ChatbotLead, lib.actions
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-040
+
+### [SEC-041] El seed del chatbot y update-proactive-prompts escriben en cualquier DATABASE_URL sin guard, aunque el escape los rotula 'script de dev' y ese seed define el bot de producción de develOP
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/prisma/seed.ts:272` — «const botConfig = await unsafeGlobalQuery('SEED: upsert del bot develOP (script de dev)', (c) =>»; `src/modules/chatbot/prisma/seed.ts:275` — «update: { // Update mantiene el id pero refresca todo el contenido»; `src/modules/chatbot/prisma/seed.ts:342` — «const kb = await unsafeGlobalQuery('SEED: upsert de la KB del bot develOP (script de dev)', (c) =>»; `src/modules/chatbot/prisma/update-proactive-prompts.ts:23` — «'SEED: update de proactivePrompts del bot develOP por slug (script de dev)',»; `docs/bitacora-roadmap.md:10815` — «- **Bot de la agencia**: vive en 'src/modules/chatbot/prisma/seed.ts' (org 'develop', slug 'develop'), no en el seed principal.»; `prisma/seed.ts:20` — «import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'»
+- Impacto: Correr 'npx tsx src/modules/chatbot/prisma/seed.ts' con el .env apuntando a prod (es el camino documentado para el bot de la agencia) pisa sin dry-run ni confirmación toda la config del bot público de develOP (activo, bienvenida, quick replies, WhatsApp, modelo, cuota) y las siete secciones de su knowledge base con los valores del código, borrando cualquier ajuste hecho desde el admin. La razón 'script de dev' de los cuatro escapes SEED es falsa: no hay guard y el script es la fuente del bot de producción.
+- Propuesta: Agregar assertDevSeedTarget o un flag explícito de destino más un dry-run con diff antes de escribir; corregir las razones de los escapes SEED para que digan mantenimiento de prod; separar la provisión del bot de prod en un script con confirmación.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-034]
+- Nodo(s): lib.seeds, lib.isolation, modelo.BotConfig, modelo.KnowledgeBase, int.neon
+
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -368,6 +421,27 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): lib.seeds, int.neon
 
+### [SEC-042] /api/track no tiene consumidores y acepta escrituras ilimitadas en PageView: sin Zod, sin tope de largo ni rate limit, y el SUPER_ADMIN elige la org por body
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/api/track/route.ts:20` — «const url = String(data?.url ?? '')»; `src/app/api/track/route.ts:24` — «const organizationId = session.user.role === 'SUPER_ADMIN' ? bodyOrgId ?? session.user.organizationId ?? null»; `src/app/api/track/route.ts:33` — «await prisma.pageView.create({»
+- Impacto: Cualquier sesión de cliente puede insertar filas sin límite y con URLs de cualquier tamaño en la Neon compartida (tabla sin lectores ni purga), y el admin puede imputar visitas a cualquier org por body; no aporta nada al producto.
+- Propuesta: Borrar la ruta y el modelo (candidato a poda) o, si se va a usar, validar con Zod (url acotada), aplicar rate limit por sesión y tomar la org solo de resolveOrgId.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-shell, modelo.PageView
+
+### [SEC-043] El tope de 3 regeneraciones semanales del brief es check-then-act: pedidos en paralelo pasan todos el control y cada uno llama al LLM
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/ai/executive-brief.ts:157` — «if (currentRegenerations >= REGENERATION_LIMIT) {»; `src/lib/ai/executive-brief.ts:185` — «const generation = await generateBriefText(organizationId, org.companyName, now)»; `src/lib/ai/executive-brief.ts:201` — «executiveBriefRegenerations: nextRegenerations,»; `src/app/(protected)/dashboard/_actions/regenerate-brief.ts:19` — «const result = await regenerateExecutiveBrief(orgId.data)»
+- Impacto: Hoy sin efecto (credencial de Vertex vencida). Con Vertex activo, un usuario de cualquier cliente que dispare N llamadas simultáneas a regenerateBriefAction obtiene N generaciones pagadas por develOP y el contador queda en 1; puede repetirlo cada 4 horas hasta tres veces por semana.
+- Propuesta: Reservar el cupo antes de llamar al LLM con un update condicional (where executiveBriefRegenerations < 3 y última regeneración vieja, con increment) y seguir solo si afectó una fila, o sumar checkRateLimit por org.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-inicio, int.vertex, modelo.Organization
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-042
+
 ## Bugs latentes
 
 ### [BUG-002] El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo
@@ -390,6 +464,17 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h2.cli-email-mkt, h2.cli-email-mkt.acceso-al-modulo, h2.cli-servicios, lib.data, modelo.PremiumModule, modelo.OrganizationModule
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-027
+
+### [BUG-021] La baja de email marketing no llega a Brevo: la campaña sale a toda la lista y quien se dio de baja sigue recibiendo (un reimport lo vuelve a sumar)
+- Dominio: D2  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/api/email/optout/[contactId]/route.ts:91` — «await prisma.emailContact.updateMany({ where: { id: contactId }, data: { optedOut: true, optedOutAt: new Date() },»; `src/app/api/email/optout/[contactId]/route.ts:100` — «'Tu dirección de email fue removida de esta lista. No recibirás más correos de esta campaña.',»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:194` — «listIds: [listId],»; `src/lib/integrations/brevo.ts:77` — «recipients: { listIds: params.listIds },»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:144` — «where: { organizationId: org.id, optedOut: false },»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:104` — «if (listId) { await syncContact({»
+- Impacto: Bloqueante para el primer cliente que use Email Marketing: la baja solo cambia optedOut en la base; la campaña se manda a la lista de Brevo completa, así que la persona sigue recibiendo aunque la página le confirmó que fue removida, y si el cliente reimporta su CSV el contacto vuelve a entrar a la lista. Expone al cliente a denuncias por spam y a develOP a la suspensión de la cuenta Brevo compartida; recipientCount (cuenta solo los no dados de baja) tampoco coincide con lo que Brevo envía.
+- Propuesta: Al darse de baja, sacar el contacto de la lista de la org en Brevo (o bloquearlo) además de marcar optedOut; en el import saltear los optedOut; o usar el desuscribe nativo de Brevo y sincronizar su webhook de bajas a EmailContact. Confirmar el comportamiento real de Brevo con el caso de prueba.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-email-mkt, h6.vis-optout, int.brevo, modelo.EmailContact, modelo.EmailCampaign
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-036
 
 ### [BUG-001] Sesion invalidada en Node pero viva en el proxy: bucle /login <-> portal (ERR_TOO_MANY_REDIRECTS)
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -496,6 +581,48 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): lib.prisma, int.neon, h1.auth-login, h6.vis-contacto, h3.vis-api-chatbot
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-034
 
+### [BUG-022] Mi Chatbot resuelve la organización con su propia consulta (orgMember.findFirst sin orderBy) e ignora resolveOrgId: la vista previa del admin no ve el bot del cliente y con dos membresías muestra otra org
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/getClientSession.ts:15` — «c.orgMember.findFirst({ where: { userId: session.user.id },»; `src/lib/preview.ts:14` — «if (role === 'SUPER_ADMIN') { const impersonation = await getImpersonationSession() return impersonation?.orgId ?? null»; `src/app/(protected)/dashboard/chatbot/page.tsx:24` — «const session = await getClientChatbotSession() if (!session) return <ChatbotUpsellLanding />»; `src/app/(protected)/dashboard/chatbot/leads/page.tsx:36` — «const session = await getClientChatbotSession() if (!session) redirect('/dashboard')»; `src/app/api/dashboard/chatbot/leads/export/route.ts:84` — «const session = await getClientChatbotSession()»; `src/modules/chatbot/server/dashboard/updateBotAppearance.ts:61` — «const orgId = await resolveOrgId()»; `prisma/seed.ts:82` — «const admin = await prisma.user.upsert({»
+- Impacto: Soporte no puede revisar el chatbot de un cliente impersonándolo: con un SUPER_ADMIN sin OrgMember (así lo siembra el seed) /dashboard/chatbot muestra la landing de 'activá tu chatbot' aunque checkClientHasChatbot (con resolveOrgId, page.tsx:15-18) dijo que hay bot, leads y conversaciones redirigen a /dashboard y el CSV da 401, mientras la apariencia sí se edita sobre el cliente. Si un usuario tiene membresías en dos orgs, esta sección puede mostrar y modificar (estado de leads, insights) una org distinta de la del resto del portal en el mismo request.
+- Propuesta: Que getClientChatbotSession derive la org de resolveOrgId() (o reciba el orgId) y lea org y bot con select acotado; agregar un invariante que prohíba orgMember.findFirst sin orderBy como resolución de tenant. Verificar en prod (solo lectura) si los SUPER_ADMIN tienen OrgMember.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-005], [SEC-029]
+- Nodo(s): h3.cli-chatbot, h1.auth-impersonacion, lib.chatbot.admin, modelo.OrgMember
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-038
+
+### [BUG-023] Los insights del chatbot quedan PENDING para siempre: ninguna pantalla llama a actOnInsight y el cron deja de generar para ese bot al quinto pendiente
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/api/cron/generate-insights/route.ts:38` — «if (pendingCount >= 5) { results.skipped_pending_overload++»; `src/modules/chatbot/server/insights/manageInsight.ts:15` — «export async function actOnInsight(input: z.infer<typeof InsightActionSchema>) {»; `src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts:62` — «where: { botConfigId, status: { in: ['PENDING', 'APPLIED'] } },»; `src/app/api/cron/generate-insights/route.ts:66` — «dashboardUrl: '${process.env.NEXT_PUBLIC_APP_URL}/dashboard/chatbot',»; `netlify.toml:25` — «[functions."generate-insights-cron"] schedule = "0 9 * * *"»
+- Impacto: Para un cliente Pro/Business: el cron diario genera insights con Vertex y le manda un email para verlos en /dashboard/chatbot, donde no aparecen (solo se listan, sin acciones, en Resultados > Análisis). Como nada los saca de PENDING (actOnInsight no tiene consumidores e IGNORED no tiene escritor), al juntar cinco el bot queda excluido del cron para siempre: los 'Insights semanales' que promete la landing se cortan a los pocos días.
+- Propuesta: Agregar en Análisis los botones Aplicar/Descartar que llamen a actOnInsight, o expirar a IGNORED los PENDING viejos dentro del cron; corregir el link del email a la página que los muestra.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, h2.cli-resultados, int.cron.generate-insights, int.vertex, modelo.ChatbotInsight
+
+### [BUG-024] El plan y BotConfig son dos fuentes de verdad: el chat corta por Plan.quota y usa el modelo del plan con temperatura fija, pero el admin edita y el detector de alertas lee BotConfig.monthlyQuota (1000) y maxOutputTokens no se aplica
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:345` — «if (quota.conversationsUsed >= plan.quota) {»; `src/modules/chatbot/server/chat/handleChatRequest.ts:952` — «temperature: 0.7,»; `src/modules/chatbot/server/admin/detectBotIssues.ts:68` — «if (usage && usage.conversationsCount >= bot.monthlyQuota) {»; `src/modules/chatbot/server/admin/createClientWithBot.ts:186` — «monthlyQuota: 1000,»; `prisma/seeds/sync-plans.ts:72` — «quota: 500,»; `src/modules/chatbot/server/admin/saveBotConfig.ts:45` — «llmModel: z.string().min(1).max(80), temperature: z.number().min(0).max(2), maxOutputTokens: z.number().int().min(100).max(8192),»; `src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx:98` — «value={'${quotaUsed.toLocaleString('es-AR')} / ${bot.monthlyQuota.toLocaleString('es-AR')}'}»
+- Impacto: Con el primer cliente Starter el bot se corta a 500 conversaciones pero la alerta QUOTA_EXHAUSTED compara contra 1000 y nunca dispara; con Pro o Business (3000/5000, sync-plans.ts:88 y :104) dispara a 1000 aunque el bot sigue funcionando. El admin ve '500 / 1000' y el cliente ve el límite del plan. Editar modelo, temperatura, tope de salida o cuota en el admin no cambia nada en runtime, y como streamText no recibe maxOutputTokens, cada uno de los hasta 3 pasos de un turno puede generar el máximo del modelo: el costo por turno de un visitante anónimo no tiene tope configurable.
+- Propuesta: Sacar del editor del admin los campos legacy (o mostrarlos solo lectura con el valor del plan); que detector, preflight y fichas del admin usen getPlanForOrg().quota; pasar maxOutputTokens explícito en streamText. Decisión para Valentino (schema FROZEN): borrar las columnas legacy de BotConfig.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots, h4.adm-alertas, h3.vis-api-chatbot, modelo.BotConfig, modelo.Plan, lib.plan, int.vertex
+
+### [BUG-025] EmailCampaign sin estado intermedio ni métricas: SENDING y SCHEDULED no se escriben (doble envío posible), FAILED no tiene reintento y aperturas y clics nunca se actualizan
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:181` — «if (campaign.status !== 'DRAFT') return { error: 'Solo podés enviar campañas en estado DRAFT.' }»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:205` — «const sent = await brevoSendCampaign(brevoResult.campaignId)»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:210` — «status: sent ? 'SENT' : 'FAILED',»; `prisma/schema.prisma:1141` — «enum EmailCampaignStatus { DRAFT SCHEDULED»; `src/lib/integrations/brevo.ts:143` — «export async function getCampaignStats(campaignId: number): Promise<{»; `src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx:110` — «{pct(campaign.openedCount, campaign.recipientCount)}»
+- Impacto: Cuando el módulo se habilite: dos envíos concurrentes de la misma campaña (dos pestañas, un reintento) pasan el control de DRAFT y Brevo crea y manda dos campañas a toda la lista; una campaña FAILED (por ejemplo Brevo la creó pero sendNow falló) no se puede reintentar y queda huérfana en Brevo; y la tabla de campañas muestra 0% de aperturas y clics para siempre porque getCampaignStats no tiene llamadores (dato falso en el camino del cliente).
+- Propuesta: Pasar DRAFT a SENDING con updateMany condicional (where status DRAFT) antes de llamar a Brevo y abortar si no afectó filas; permitir reintento de FAILED reusando el brevoCampaignId guardado; traer las métricas con getCampaignStats (cron o al abrir la tabla) o webhook de Brevo, u ocultar las columnas.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-email-mkt, int.brevo, modelo.EmailCampaign
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-039
+
 ### [BUG-004] El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
@@ -537,6 +664,37 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): modelo.Conversation, h3.vis-widget-cliente, h3.vis-api-chatbot
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-032
+
+### [BUG-026] El reporte ejecutivo semanal no usa PENDING como cerrojo: el cron y el envío manual concurrentes mandan el mail dos veces
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/reports/executive-weekly/send.ts:109` — «if (existing?.status === 'SENT') {»; `src/lib/reports/executive-weekly/send.ts:149` — «status: 'PENDING',»; `src/lib/reports/executive-weekly/send-manual.ts:50` — «if (existing?.status === 'SENT') {»; `src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:57` — «const result = await sendExecutiveWeeklyReportManual(organizationId)»
+- Impacto: Si el admin dispara el envío manual mientras corre el cron (o hace dos clics, o el scheduler reintenta), ambos leen un estado distinto de SENT, ambos marcan PENDING y ambos mandan: el cliente recibe el mismo reporte dos veces; si la función muere después de Brevo y antes de marcar SENT, la próxima corrida lo reenvía.
+- Propuesta: Reservar la fila con un update o insert condicional (status distinto de SENT y sin PENDING reciente) y seguir solo si la reserva afectó una fila; expirar PENDING viejos.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-reportes-email, h4.adm-clientes, int.brevo, modelo.WeeklyReportLog
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-041
+
+### [BUG-027] Salida del motor de WhatsApp (latente): el estado se escribe sin condición, el wamid se guarda después del envío y el estado del canal no frena la salida
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/motor/adapters/whatsapp/inbound/handle-status.ts:53` — «const currentRank = STATUS_RANK[message.status]»; `src/modules/motor/adapters/whatsapp/inbound/handle-status.ts:58` — «await scope.motorMessage.update(message.id, { status: next })»; `src/modules/motor/services/sendMessage.ts:248` — «await scope.motorMessage.update(messageId, { status: 'SENT', providerMessageId: result.wamid })»; `src/modules/motor/adapters/whatsapp/inbound/process.ts:163` — «next = addTo(next, 'statusesSkipped')»; `src/modules/motor/services/sendMessage.ts:113` — «if (channel === null || channel.apiKeyEncrypted === null || channel.apiKeyIv === null || channel.apiKeyTag === null) {»; `src/modules/motor/adapters/whatsapp/inbound/handle-request.ts:39` — «if (channel.status === 'INACTIVE') {»
+- Impacto: Hoy latente: sendMotorMessage no tiene llamadores hasta B2. Cuando se conecte: dos webhooks concurrentes (delivered y read) pueden dejar el mensaje en DELIVERED después de READ o pisar un FAILED; un status que llega antes de que se guarde el wamid se descarta como unknown-message sin reintento; si la función muere entre la aceptación del BSP y el update, el mensaje queda PENDING para siempre con la clave de idempotencia quemada; y un canal INACTIVE (solo se chequea en la entrada) o reportado BANNED/RESTRICTED sigue despachando, justo lo que la alerta de calidad de Meta quería evitar.
+- Propuesta: Aplicar el status con updateMany condicional (where status en rangos menores y distinto de FAILED); correlacionar el wamid antes del despacho o reintentar el lookup; marcar como desconocidos los PENDING viejos; chequear status y channelStatus en resolveTargets antes de enviar.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp, modelo.MotorMessage, modelo.WabaChannel, lib.motor
+
+### [BUG-028] Reconocer una alerta del chatbot no la silencia: el detector solo deduplica contra PENDING de las últimas 24 h y la vuelve a crear con email y Telegram
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/detectBotIssues.ts:250` — «status: 'PENDING', createdAt: { gte: new Date(Date.now() - ONE_DAY_MS) },»; `src/modules/chatbot/server/admin/detectBotIssues.ts:267` — «const emailResult = await sendAlertEmail(issue)»; `src/modules/chatbot/server/admin/manageAlerts.ts:46` — «status: 'ACKNOWLEDGED', acknowledgedAt: new Date(),»
+- Impacto: Latente mientras el detector no tenga disparador (D7); en cuanto corra periódicamente, marcar como vista una alerta de un problema que sigue activo (cuota agotada, errores del proveedor) hace que la corrida siguiente cree otra PENDING y mande otro email y otro Telegram; lo mismo a las 24 h con una PENDING. Además, reconocer una alerta ya resuelta la reabre como ACKNOWLEDGED conservando resolvedAt.
+- Propuesta: Deduplicar contra alertas abiertas (PENDING y ACKNOWLEDGED) del mismo bot y tipo, y aceptar el reconocimiento solo desde PENDING con updateMany condicional.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-alertas, modelo.BotAlert, int.cron.detect-bot-issues, int.telegram
 
 ## Tecnología vieja
 
@@ -754,6 +912,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): modelo.Plan, h3.vis-api-chatbot, h2.cli-plan
+
+### [DEU-021] Un referido pasa a CONVERTED sin vincular la organización referida: referredOrgId no tiene escritor y la conversión no se puede auditar
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts:18` — «const result = await prisma.referral.updateMany({ where: { id, status: 'PENDING' }, data: { status: 'CONVERTED' },»; `prisma/schema.prisma:1847` — «// desde el inicio; 'referredOrgId' se completa al convertir. 'rewardedAt' marca cuándo se»; `prisma/schema.prisma:1855` — «referredOrgId String?»
+- Impacto: El mes bonificado (REWARDED) se acredita sobre una conversión que es solo un clic del admin: no queda qué organización contrató, no se puede verificar que no sea la misma org referente ni recalcular el beneficio, y la relación referred con su índice y su SetNull es letra muerta.
+- Propuesta: Pedir en markReferralConvertedAction la org cliente que contrató (select en el admin), guardarla en referredOrgId y validar que no sea la org referente.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-referidos, h2.cli-referidos, modelo.Referral
 
 ## Calidad
 

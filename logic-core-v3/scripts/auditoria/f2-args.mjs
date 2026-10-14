@@ -161,9 +161,10 @@ if (CAZA) {
     if (!t || t.loc + x.l.loc > 16000) { t = { id: `${DOM}-T${tramos.length + 1}`, archivos: [], loc: 0, lotes: [], plan: [] }; tramos.push(t) }
     t.archivos.push(...x.archivos); t.loc += x.l.loc; t.lotes.push(x.l.id); t.plan.push(...asignados.get(x.l.id))
   }
-  const reg = leer('hallazgos.json', { hallazgos: [] }).hallazgos.filter((h) => h.dominio === DOM && h.estado !== 'descartado')
+  // títulos de TODOS los dominios: un cazador no repite lo que otro dominio ya registró (o lo que se fusionó en él)
+  const reg = leer('hallazgos.json', { hallazgos: [] }).hallazgos.filter((h) => h.estado !== 'descartado').sort((x, y) => Number(y.dominio === DOM) - Number(x.dominio === DOM))
   const desc = leer('descartados.json', { items: [] }).items.filter((d) => String(d.ciclo).startsWith(`${DOM}-`))
-  const titulos = [...reg.map((h) => `${h.id} ${h.titulo}`), ...desc.map((d) => `(descartado) ${d.titulo} — ${d.motivo_padre}`)]
+  const titulos = [...reg.map((h) => `${h.id}${h.dominio === DOM ? '' : ` (${h.dominio})`} ${String(h.titulo).slice(0, 150)}`), ...desc.map((d) => `(descartado) ${d.titulo} — ${d.motivo_padre}`)]
   const resueltas = new Set(leer('alertas-estado.json', { items: [] }).items.filter((a) => ['confirmada', 'descartada', 'parcial'].includes(a.resultado)).map((a) => (String(a.alerta).match(/\[(D\d-A\d+)\]/) ?? [])[1]).filter(Boolean))
   const pendientes = alertas.filter((a) => !resueltas.has((a.match(/\[(D\d-A\d+)\]/) ?? [])[1]))
   const salida = {

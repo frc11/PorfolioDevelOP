@@ -307,3 +307,75 @@
 - Resultado esperado: Ambos responden, aunque lento, sin error
 - Señal de falla: Error de conexión, timeout o pantalla de error.tsx
 - ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-035] Credenciales y notas internas en el payload de /dashboard/chatbot
+- Verifica: [SEC-037] · Prioridad: alta
+- Entorno: dev local (npm run dev contra la branch Neon dev) con una cuenta de cliente de prueba
+- Precondiciones: Una org de prueba con bot activo y al menos un campo sensible no nulo: notas internas cargadas desde /admin/clients/<id> (o un token de Tiendanube/GBP de prueba).
+- Pasos: 1) Entrar como el usuario ORG_MEMBER de esa org. 2) Abrir DevTools > Network y navegar a /dashboard/chatbot. 3) Buscar en la respuesta HTML del documento y en las respuestas con ?_rsc= los textos internalNotes, gbpAccessToken, tiendanubeAccessToken y calComApiKey (o el texto de la nota cargada). 4) Opcional: en la consola, buscar esas claves en self.__next_f.
+- Resultado esperado: Ninguna de esas claves ni sus valores aparecen en lo que recibe el navegador.
+- Señal de falla: Aparecen las claves con su valor (tokens o la nota interna) en el payload.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-036] La baja de email marketing frena el próximo envío
+- Verifica: [BUG-021] · Prioridad: alta
+- Entorno: dev local con BREVO_API_KEY de una cuenta de prueba y dos casillas propias
+- Precondiciones: Org de prueba con el módulo de email activo (por BUG-012 hace falta una activación con el slug que busca el layout o probar llamando las actions) y un remitente verificado en Brevo.
+- Pasos: 1) Importar un CSV con dos casillas propias (A y B). 2) Crear la campaña 1 y enviarla. 3) En la casilla A abrir 'Darme de baja' y confirmar en la base dev que su EmailContact quedó optedOut=true. 4) Crear la campaña 2 y enviarla. 5) Revisar si la casilla A recibe la campaña 2 y, en el panel de Brevo, si el contacto A sigue en la lista 'develOP - <org>'. 6) Reimportar el mismo CSV y volver a mirar la lista en Brevo.
+- Resultado esperado: La casilla A no recibe la campaña 2 y el contacto queda fuera de la lista (o bloqueado) también después del reimport.
+- Señal de falla: La casilla A recibe la campaña 2 o sigue en la lista de Brevo.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-037] La baja de un destinatario se aplica a otra organización
+- Verifica: [SEC-039] · Prioridad: media
+- Entorno: dev local con la misma cuenta Brevo de prueba
+- Precondiciones: Dos orgs de prueba (X e Y) con el módulo de email operativo y una casilla propia C.
+- Pasos: 1) Importar C en la org X y después en la org Y. 2) En Brevo, ver los atributos CONTACT_ID y OPTOUT_TOKEN del contacto C. 3) Leer en dev (solo lectura) SELECT id, "organizationId" FROM "EmailContact" WHERE email = '<C>'. 4) Enviar una campaña desde X y comparar el contactId del link de baja con los dos ids. 5) Hacer clic en el link de baja y volver a leer optedOut de las dos filas.
+- Resultado esperado: El link de la campaña de X apunta al EmailContact de X y la baja marca solo esa fila.
+- Señal de falla: El link trae el id de la fila de Y y la baja marca la fila de Y.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-038] Vista previa de soporte de Mi Chatbot
+- Verifica: [BUG-022] · Prioridad: media
+- Entorno: dev local para la UI; prod solo con una consulta de lectura
+- Precondiciones: Una org de prueba con bot activo y leads; cuenta SUPER_ADMIN.
+- Pasos: 1) Entrar como SUPER_ADMIN e impersonar la org desde /admin/clients/<id>. 2) Abrir /dashboard/chatbot, /dashboard/chatbot/leads y /dashboard/chatbot/conversations. 3) En prod, solo lectura: SELECT u.email, COUNT(om.id) FROM "User" u LEFT JOIN "OrgMember" om ON om."userId" = u.id WHERE u.role = 'SUPER_ADMIN' GROUP BY u.email;
+- Resultado esperado: Se ven el overview, los leads y las conversaciones del cliente impersonado.
+- Señal de falla: Aparece la landing de 'activá tu chatbot' y leads/conversaciones redirigen a /dashboard (admin sin membresía), o se ven datos de otra org (admin con membresía).
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-039] Doble envío de una campaña y métricas en cero
+- Verifica: [BUG-025] · Prioridad: media
+- Entorno: dev local con Brevo de prueba
+- Precondiciones: Campaña en DRAFT con una lista de casillas propias.
+- Pasos: 1) Abrir /dashboard/modules/email-marketing/campaigns/<id>/send en dos pestañas. 2) Hacer clic en Enviar en las dos casi a la vez. 3) Revisar en Brevo cuántas campañas se crearon y enviaron, y en las casillas cuántos mails llegaron. 4) Abrir uno de los mails y, más tarde, mirar la tabla de campañas.
+- Resultado esperado: Una sola campaña enviada; la tabla refleja aperturas.
+- Señal de falla: Dos campañas en Brevo o dos mails por casilla; aperturas en 0% después de abrir.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-040] Fórmulas en el export masivo de leads del admin
+- Verifica: [SEC-040] · Prioridad: media
+- Entorno: dev local
+- Precondiciones: Una org de prueba con bot; un ChatbotLead de prueba cuyo nombre sea =HYPERLINK("https://example.com","x") (cargado por el widget si Vertex responde, o insertado en la base dev).
+- Pasos: 1) En /admin/clients seleccionar esa org y usar 'Exportar leads'. 2) Abrir el CSV en Excel o Google Sheets. 3) Comparar con el export del cliente (/api/dashboard/chatbot/leads/export) de la misma org.
+- Resultado esperado: La celda del nombre se ve como texto en los dos exports.
+- Señal de falla: En el export del admin la celda se interpreta como fórmula (link activo); en el del cliente aparece con comilla simple.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-041] Reporte ejecutivo duplicado por envío manual concurrente
+- Verifica: [BUG-026] · Prioridad: baja
+- Entorno: dev local con Brevo de prueba
+- Precondiciones: Org Pro o Business con destinatario propio y datos de la semana; sin log SENT para la semana ISO actual.
+- Pasos: 1) Abrir la ficha del cliente en el admin en dos pestañas. 2) Disparar el envío manual del reporte (POST /api/admin/clients/<id>/send-executive-report) en las dos casi a la vez. 3) Contar los mails recibidos y leer attempts en WeeklyReportLog para la org y la semana.
+- Resultado esperado: Un solo mail; la segunda llamada responde ALREADY_SENT o queda bloqueada.
+- Señal de falla: Dos mails y attempts = 2.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-042] Regeneración del brief en paralelo
+- Verifica: [SEC-043] · Prioridad: baja
+- Entorno: dev local
+- Precondiciones: Credencial de Vertex válida en dev (hoy vencida); org con executiveBriefRegenerations = 0 y brief viejo.
+- Pasos: 1) Abrir el inicio del portal del cliente en tres pestañas. 2) Hacer clic en 'Regenerar' en las tres casi a la vez. 3) Leer executiveBriefRegenerations de la org y los logs de llamadas al LLM.
+- Resultado esperado: Una sola generación; las otras dos rechazadas.
+- Señal de falla: Tres textos distintos generados y el contador en 1.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción

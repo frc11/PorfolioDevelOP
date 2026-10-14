@@ -545,6 +545,111 @@
    "afirmacion": "Nadie usa createMany a través del helper (el N+1 de parentChecks fila por fila es latente)",
    "comando": "git grep -n \"\\.createMany(\" origin/main -- src/modules src/app/api/motor src/app/api/chatbot  (0)",
    "control_positivo": "git grep -n \"createMany(\" origin/main -- src/lib/onboarding/seed-tasks-for-org.ts -> :5"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "activateModule y cancelModule no tienen llamadores en la app, scripts ni seeds",
+   "comando": "git grep -n -E \"\\b(activateModule|cancelModule)\\(\" origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma",
+   "control_positivo": "El mismo grep devuelve solo las definiciones src/lib/premium-modules.ts:103 y :140"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "Ningún código de la app escribe OrganizationModule en ACTIVE, PAUSED o CANCELLED salvo las funciones muertas de premium-modules.ts; el único escritor vivo es el upsell (INACTIVE)",
+   "comando": "git grep -n -E \"organizationModule\\.(create|createMany|update|updateMany|upsert)\\(\" origin/main -- logic-core-v3/src logic-core-v3/scripts ; git grep -n -i \"organization_module\" origin/main -- logic-core-v3/src logic-core-v3/scripts",
+   "control_positivo": "El primer grep devuelve src/lib/actions/upsell.ts:57 y src/lib/premium-modules.ts:114 y :151; el nombre de tabla aparece en prisma/migrations/20260420000000_baseline_premium_modules/migration.sql:32"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "priceLockedUsd no lo lee ninguna pantalla del portal",
+   "comando": "git grep -n \"priceLockedUsd\" origin/main -- logic-core-v3/src",
+   "control_positivo": "Devuelve upsell.ts:67 (escribe 0) y premium-modules.ts:70 y :125 (funciones sin llamadores salvo getActiveModuleSlugs, que no lo usa)"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "Ningún código de la app ni de scripts crea o modifica Invoice",
+   "comando": "git grep -n -E \"invoice\\.(create|createMany|update|updateMany|upsert|delete|deleteMany)\\(\" origin/main -- logic-core-v3/src logic-core-v3/scripts",
+   "control_positivo": "El mismo patrón sobre logic-core-v3/prisma devuelve prisma/seed.ts:595 y :618"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "Subscription.renewalDate no se escribe en la app y status no se pone en otro valor que ACTIVE",
+   "comando": "git grep -n \"renewalDate\" origin/main -- logic-core-v3/src ; git grep -n -E \"subscription\\.(create|update|updateMany|upsert)\\(\" origin/main -- logic-core-v3/src",
+   "control_positivo": "renewalDate solo aparece en lecturas (facturacion/page.tsx, perfil/page.tsx, alerts.ts, subscription.ts); los escritores de seeds sí lo setean: git grep -n \"renewalDate: days\" origin/main -- logic-core-v3/prisma devuelve seed.ts:392,401 y seed-agency-os.ts:414,433,452"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "Ninguna pantalla del admin lee Notification",
+   "comando": "git grep -n -E \"notification\\.(findMany|findFirst|findUnique|count|groupBy)\\(\" origin/main -- logic-core-v3/src",
+   "control_positivo": "Devuelve dashboard-actions.ts:199 (mark-read del cliente), dashboard/layout.tsx:101, lib/actions/notifications.ts:82 y cron/os-follow-up/route.ts:168 (marcador por título)"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "actOnInsight, getPendingInsightsByOrgSlug y getInsightHistoryByOrgSlug no tienen consumidores fuera de los barrels del módulo, y nadie escribe IGNORED",
+   "comando": "git grep -n -E \"actOnInsight|getPendingInsightsByOrgSlug|getInsightHistoryByOrgSlug\" origin/main -- logic-core-v3/src ; git grep -n \"'IGNORED'\" origin/main -- logic-core-v3/src",
+   "control_positivo": "El primero devuelve la definición manageInsight.ts:15 y los re-exports de insights/index.ts e index.server.ts:73-75; IGNORED existe en prisma/schema.prisma:223"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "Project.maintenanceStartDate no tiene escritor en la app",
+   "comando": "git grep -n \"maintenanceStartDate\" origin/main -- logic-core-v3/src",
+   "control_positivo": "Los 16 resultados son tipos, selects y serializaciones; el escritor existe en prisma/seed-agency-os.ts:1396 y :2084"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "Referral.referredOrgId no se escribe en ningún lado",
+   "comando": "git grep -n \"referredOrgId\" origin/main -- logic-core-v3/src logic-core-v3/scripts",
+   "control_positivo": "La columna existe en prisma/schema.prisma:1855 (y relación :1856, índice :1862)"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "La app nunca saca de la lista ni bloquea un contacto en Brevo",
+   "comando": "git grep -n -i -E \"emailBlacklisted|unlinkListIds|contacts/remove|blacklist\" origin/main -- logic-core-v3/src",
+   "control_positivo": "git grep -n \"listIds\" origin/main -- logic-core-v3/src/lib/integrations/brevo.ts devuelve :35, :49, :66 y :77"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "getCampaignStats no tiene llamadores y SENDING/SCHEDULED no se escriben",
+   "comando": "git grep -n \"getCampaignStats\" origin/main -- logic-core-v3/src ; git grep -n -E \"'SENDING'|'SCHEDULED'\" origin/main -- logic-core-v3/src",
+   "control_positivo": "El primero devuelve la definición brevo.ts:143; el escritor de estados existe: email-marketing/_actions.ts:210 (status: sent ? 'SENT' : 'FAILED')"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "Los scripts de modules/chatbot/prisma no tienen guard de destino",
+   "comando": "git grep -n -E \"assertDevSeedTarget|guardDevHost|ALLOW_PROD_SEED\" origin/main -- logic-core-v3/src/modules/chatbot/prisma",
+   "control_positivo": "git grep -n \"guardDevHost()\" origin/main -- logic-core-v3/src/modules/chatbot/evals devuelve cleanup.ts:129, runner.ts:276 y seed-eval-bots.ts:130"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "/api/track no tiene consumidores y PageView no tiene lectores",
+   "comando": "git grep -n -E \"/api/track|pageView\\.|PageView\" origin/main -- logic-core-v3/src",
+   "control_positivo": "El único resultado es la propia ruta src/app/api/track/route.ts:33 (prisma.pageView.create)"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "La llamada al LLM del chat no pasa maxOutputTokens",
+   "comando": "git grep -n \"maxOutputTokens\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat",
+   "control_positivo": "En la misma llamada streamText aparece temperature: git grep -n \"temperature: 0.7\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts devuelve :952"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "afirmacion": "sendMotorMessage no tiene llamadores (la salida del motor está dormida)",
+   "comando": "git grep -n \"sendMotorMessage\" origin/main -- logic-core-v3/src",
+   "control_positivo": "Devuelve solo la definición src/modules/motor/services/sendMessage.ts:204"
   }
  ]
 }

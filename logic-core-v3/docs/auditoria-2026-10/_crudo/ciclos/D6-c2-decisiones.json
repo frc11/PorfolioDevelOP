@@ -1,0 +1,40 @@
+{
+ "H01": {
+  "decision": "aceptar", "verificado_padre": true, "confianza": "VERIFICADO-POR-LECTURA", "dominio": "D5", "caso_indice": 0,
+  "nota_padre": "Leído: getClientSession.ts:12-24 trae la org completa con include (sin select); dashboard/chatbot/page.tsx:46-51 le pasa el session entero a ChatbotOverview, que es 'use client' (ChatbotOverview.tsx:1, tipo :26-30 con Organization completo). Las props de un client component viajan serializadas en el payload RSC: incluyen gbp*/tiendanube/calCom e internalNotes (schema.prisma:359-375, 402)."
+ },
+ "H02": {
+  "decision": "aceptar", "verificado_padre": true, "confianza": "VERIFICADO-POR-LECTURA", "dominio": "D2", "caso_indice": 1,
+  "nota_padre": "Leído: optout/[contactId]/route.ts:90-100 solo marca optedOut en Postgres y confirma la baja; sendCampaignAction manda a listIds [lista de la org] (_actions.ts:183-195). git grep de emailBlacklisted|unlinkListIds|contacts/remove|blacklist en src = 0 (control: listIds aparece en _actions.ts y brevo.ts). El comportamiento real de Brevo queda para la VH."
+ },
+ "H03": {
+  "decision": "aceptar", "verificado_padre": true, "dominio": "D3",
+  "nota_padre": "Muestreo DEC-37: se sostiene lo central (git grep de activateModule/pauseModule/cancelModule fuera de la definición = 0). Corrección: priceLockedUsd sí se lee en premium-modules.ts:70 (suma de módulos activos); el título se ajusta.",
+  "titulo": "Activar, pausar o cancelar un módulo premium no tiene camino en la app y el precio congelado (priceLockedUsd) solo lo lee una suma, no la facturación"
+ },
+ "H04": { "decision": "aceptar", "dominio": "D3", "relacionados_ids": ["BUG-010"] },
+ "H05": { "decision": "aceptar", "dominio": "D2" },
+ "H06": { "decision": "aceptar", "dominio": "D2", "caso_indice": 2 },
+ "H07": { "decision": "aceptar", "dominio": "D5", "caso_indice": 3, "relacionados_ids": ["BUG-005", "SEC-029"] },
+ "H08": {
+  "decision": "aceptar", "verificado_padre": true, "dominio": "D5",
+  "nota_padre": "Muestreo DEC-37: se sostiene (actOnInsight solo se exporta: index.server.ts:73, insights/index.ts:2; ninguna pantalla lo llama; generate-insights/route.ts:36-40 saltea el bot con 5 o más PENDING)."
+ },
+ "H09": { "decision": "aceptar", "dominio": "D5" },
+ "H10": { "decision": "aceptar", "dominio": "D3" },
+ "H11": { "decision": "aceptar", "dominio": "D2", "caso_indice": 5 },
+ "H12": { "decision": "aceptar", "dominio": "D3", "caso_indice": 4 },
+ "H13": {
+  "decision": "aceptar", "verificado_padre": true, "dominio": "D5", "relacionados_ids": ["SEC-034"],
+  "nota_padre": "Muestreo DEC-37: se sostiene (src/modules/chatbot/prisma/seed.ts y update-proactive-prompts.ts no importan seed-guard ni llaman assertDevSeedTarget; el seed principal sí, prisma/seed.ts:20)."
+ },
+ "H14": { "decision": "aceptar", "dominio": "D7", "caso_indice": 6 },
+ "H15": { "decision": "aceptar", "dominio": "D5" },
+ "H16": { "decision": "aceptar", "dominio": "D3" },
+ "H17": { "decision": "aceptar", "dominio": "D5" },
+ "H18": {
+  "decision": "aceptar", "verificado_padre": true, "dominio": "D2",
+  "nota_padre": "Muestreo DEC-37: se sostiene (git grep 'api/track' en src y public: sin consumidores; route.ts:19-36 sin Zod ni rate limit, y con SUPER_ADMIN la org sale del body)."
+ },
+ "H19": { "decision": "aceptar", "dominio": "D2", "caso_indice": 7 }
+}

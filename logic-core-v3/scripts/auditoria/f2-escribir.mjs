@@ -113,7 +113,8 @@ for (const h of rev.hallazgos) {
     }
   }
   const entrada = {
-    id, prefijo: h.prefijo, titulo: h.titulo, dominio, severidad: h.severidad, tipo: TIPO[h.prefijo], tipo_detalle: h.tipo, confianza,
+    // un hallazgo cruzado (p. ej. un cazador de D6 que llega a una pantalla de D5) puede llevar su propio dominio
+    id, prefijo: h.prefijo, titulo: h.titulo, dominio: /^D\d$/.test(h.dominio ?? '') ? h.dominio : dominio, severidad: h.severidad, tipo: TIPO[h.prefijo], tipo_detalle: h.tipo, confianza,
     evidencia, impacto: h.impacto, propuesta: h.propuesta, esfuerzo: h.esfuerzo, zona: h.zona, nodos,
     relacionados_ids: h.relacionados_ids ?? [], previas: h.previas ?? previasDe(h, lectura), relacionados_texto: h.relacionados ?? '',
     vh, ...(h.seccion ? { seccion: h.seccion } : {}), ...(h.coordinacion ? { coordinacion: h.coordinacion } : {}), ...(h.como_verificar ? { como_verificar: h.como_verificar } : {}),

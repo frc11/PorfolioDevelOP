@@ -384,6 +384,76 @@
    "patron": "unstable_cache con clave por slug de org (reutilizable tras un hard-delete) en vez de organizationId",
    "como_buscarlo": "git grep -n -A3 \"unstable_cache(\" origin/main -- src | grep -i slug",
    "donde_aparecio": "src/modules/chatbot/server/admin/multiTenantQueries.ts:51 ['chatbot-leads', orgSlug, ...]"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "patron": "Componentes 'use client' que reciben filas Prisma completas (include o findUnique sin select): serializan tokens, notas internas o ids internos al navegador",
+   "como_buscarlo": "git grep -n -E \"import type \\{[^}]*\\b(Organization|BotConfig|User|ChatbotLead)\\b[^}]*\\} from '@prisma/client'\" origin/main -- logic-core-v3/src/components logic-core-v3/src/modules ; cruzar con 'use client' en la línea 1",
+   "donde_aparecio": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:18,30 (Organization y BotConfig completos; también recentLeads: ChatbotLead[] con internalNotes, scoreSignals y convertedToOsLeadId)"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "patron": "Estado intermedio que no se usa como cerrojo antes de un efecto externo (email, BSP, LLM): chequeo de estado y update incondicional después",
+   "como_buscarlo": "Buscar status !== 'DRAFT' | status === 'SENT' | >= REGENERATION_LIMIT seguidos de fetch/sendTransactionalEmail/generateText y un update por id sin where de estado",
+   "donde_aparecio": "email-marketing/_actions.ts:181-214; executive-weekly/send.ts:109-163; send-manual.ts:50-93; lib/ai/executive-brief.ts:157-201; motor/services/sendMessage.ts:165-248"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "patron": "Actions del portal que toman la org de session.user.organizationId mientras el layout usa resolveOrgId (no honran la impersonación y pueden diferir de lo que se muestra)",
+   "como_buscarlo": "git grep -n -E \"session\\??\\.user\\??\\.organizationId\" origin/main -- logic-core-v3/src/lib/actions \"logic-core-v3/src/app/(protected)/dashboard\" logic-core-v3/src/actions",
+   "donde_aparecio": "lib/actions/notifications.ts:21,48,75; announcements.ts:20; referrals.ts:14; gbp-connection.ts:19,40; messages.ts:119; profile.ts:29,81,108,152; upsell.ts:16 frente a dashboard/layout.tsx (resolveOrgId)"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "patron": "Columnas de config legacy editables que el runtime ignora (doble fuente de verdad con Plan)",
+   "como_buscarlo": "git grep -n -E \"bot\\.(monthlyQuota|llmModel|temperature|maxOutputTokens)|botConfig\\.monthlyQuota\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "detectBotIssues.ts:68; preflightChecks.ts:151; admin/chatbots/[botId]/tabs/OverviewTab.tsx:46,98; admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx:94; components/admin/managers/ChatbotManager.tsx:69"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "patron": "Rutas que devuelven clasificación o score sin el gate de plan (planAllows('leadScoring'))",
+   "como_buscarlo": "git grep -n -E \"getEffectiveScore|effectiveClassification\" origin/main -- logic-core-v3/src/app ; cruzar con planAllows en el mismo archivo",
+   "donde_aparecio": "src/app/api/dashboard/leads/recent/route.ts:22-57 (sin planAllows; el export y la página de leads sí lo aplican)"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "patron": "CSV armados a mano fuera de csvEscape",
+   "como_buscarlo": "git grep -n -E \"text/csv|\\.join\\(','\\)\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/lib/bulk-actions.ts:62-77"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "patron": "Escapes unsafeGlobalQuery cuya razón promete un guard (super-admin, script de dev) que la función no tiene",
+   "como_buscarlo": "Por cada resultado de git grep -n -A3 \"unsafeGlobalQuery(\" con razón ADMIN/SEED/EVAL, verificar requireSuperAdmin, guardDevHost o assertDevSeedTarget en la misma función",
+   "donde_aparecio": "modules/chatbot/server/admin/preflightChecks.ts:18 (previa PA-1/SEC-02); modules/chatbot/prisma/seed.ts:259-342; update-proactive-prompts.ts:22"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "patron": "Rutas públicas que devuelven error.message interno (Prisma, proveedor LLM) y presencia de variables de entorno",
+   "como_buscarlo": "git grep -n -E \"error: error instanceof Error \\? error.message\" origin/main -- logic-core-v3/src/modules logic-core-v3/src/app/api",
+   "donde_aparecio": "modules/chatbot/server/health/checkHealth.ts:35,56,81 servido sin auth por src/app/api/chatbot/[slug]/health/route.ts:12-14 (D5/D8)"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "patron": "Server actions que llaman al LLM sin rate limit ni tope de largo del input",
+   "como_buscarlo": "git grep -n -E \"generateText|streamText|generateObject\" origin/main -- logic-core-v3/src/lib/ai logic-core-v3/src/modules ; cruzar con checkRateLimit y Zod en la action que las invoca",
+   "donde_aparecio": "src/components/dashboard/modules/motor-resenas/_actions.ts:11-37 (generateDraft: reviewComment sin Zod ni tope, sin rate limit)"
+  },
+  {
+   "ciclo": "D6-c2",
+   "lote": "D6-T1",
+   "patron": "Datos fijos presentados como métricas reales en el portal",
+   "como_buscarlo": "git grep -n -E \"successRate: 0\\.|leadValueUSD:\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:43-44 (leadValueUSD 50 y successRate 0.97 fijos; cruzar con la previa P1-10)"
   }
  ]
 }

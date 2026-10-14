@@ -1,0 +1,1280 @@
+{
+ "dominio": "D6",
+ "ciclo": "D6-c2",
+ "modo": "cazador",
+ "run": "wf_7e4c653c-38d",
+ "fecha": "2026-10-14T16:31:43.929Z",
+ "lotes": [
+  {
+   "lote": "D6-T1",
+   "estado": "leido",
+   "archivos_leidos": 106,
+   "completos": 71,
+   "entradas": 0,
+   "funcionalidades": 0,
+   "planeado_cruzado": 0,
+   "alertas": 0,
+   "previas": 0,
+   "poda": 0,
+   "casos": 8,
+   "ausencias": 15,
+   "patrones": 10,
+   "verificador": "2 veredictos"
+  }
+ ],
+ "hallazgos": [
+  {
+   "decision": "aceptar",
+   "nota_padre": "Leído: getClientSession.ts:12-24 trae la org completa con include (sin select); dashboard/chatbot/page.tsx:46-51 le pasa el session entero a ChatbotOverview, que es 'use client' (ChatbotOverview.tsx:1, tipo :26-30 con Organization completo). Las props de un client component viajan serializadas en el payload RSC: incluyen gbp*/tiendanube/calCom e internalNotes (schema.prisma:359-375, 402).",
+   "titulo": "El overview de Mi Chatbot manda al navegador la fila completa de Organization: tokens de Google Business y Tiendanube, API key de Cal.com y las notas internas de develOP",
+   "prefijo": "SEC",
+   "severidad": "ALTA",
+   "tipo": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/admin/getClientSession.ts",
+     "linea": 17,
+     "fragmento": "include: {\n  organization: {\n    include: {"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+     "linea": 46,
+     "fragmento": "<ChatbotOverview\n      session={session}"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+     "linea": 1,
+     "fragmento": "'use client'"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+     "linea": 30,
+     "fragmento": "organization: Organization & { botConfig: BotConfig | null }"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+     "linea": 63,
+     "fragmento": "{session.bot.botName} está atendiendo consultas las 24 horas."
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 359,
+     "fragmento": "gbpAccessToken    String?   @db.Text\n  gbpRefreshToken   String?   @db.Text"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 367,
+     "fragmento": "tiendanubeAccessToken String?   @db.Text"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 402,
+     "fragmento": "internalNotes String?"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente con Reseñas o Tienda conectada: cualquier usuario de su org (incluido un VIEWER) recibe en el payload RSC de /dashboard/chatbot el access y refresh token de Google Business, el token sin vencimiento de Tiendanube y la API key de Cal.com (credenciales emitidas a la app de develOP sobre sus cuentas), legibles en DevTools y por cualquier XSS o extensión del navegador, y además internalNotes, las notas privadas que develOP escribe sobre ese cliente. El componente solo usa session.bot.botName; getPublicConfig del mismo módulo sí usa select.",
+   "propuesta": "En getClientChatbotSession leer org y bot con select acotado (lo que usan las páginas: id, slug, siteUrl, companyName y campos del bot) y pasarle a ChatbotOverview solo botName; agregar un invariante que prohíba tipos Prisma completos (Organization, BotConfig, User) en props de componentes 'use client'. Confirmar antes y después con el caso de prueba del payload.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "lib.chatbot.admin",
+    "modelo.Organization",
+    "modelo.BotConfig"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "SEC-036 (credenciales en claro en reposo); patrón D6-c1 'over-fetch de Organization con tokens'",
+   "tmp": "D6-c2/D6-T1/H01",
+   "lote": "D6-T1",
+   "verificador": {
+    "titulo": "El overview de Mi Chatbot manda al navegador la fila completa de Organization: tokens de Google Business y Tiendanube, API key de Cal.com y las notas internas de develOP",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Se sostiene. La cadena cierra leyendo el código en origin/main 57c421bc (src del worktree idéntico a origin/main). (1) proxy.ts:154 deja /dashboard a ORG_MEMBER y no mira OrgRole: auth.config.ts:5/34 solo lo transporta y no se chequea en ningún otro lado. (2) dashboard/chatbot/page.tsx:15-25 resuelve la org, exige bot activo (clientHasChatbot.ts:5-8) y llama a getClientChatbotSession. (3) getClientSession.ts:12-24 hace orgMember.findFirst con include organization{botConfig:true} por unsafeGlobalQuery, que le pasa el PrismaClient crudo (isolation/index.ts:84-91). prisma.ts:5-6 no tiene omit global. git grep encontró 0 'omit:' y 0 'taint' en src y next.config; el control positivo con 'select:' sí da coincidencias. (4) page.tsx:46-51 le pasa el session entero a ChatbotOverview, que es 'use client' (ChatbotOverview.tsx:1). La frontera RSC serializa la prop completa en el payload Flight, aunque el componente solo use session.bot.botName (:63). El mismo page.tsx:34-43 muestra que el autor sabe que las props cruzan serializadas: convierte el Decimal y deja pasar el resto. (5) Organization trae en claro gbpAccessToken/gbpRefreshToken (schema.prisma:359-360), tiendanubeAccessToken (:367), calComApiKey (:375) e internalNotes (:402). Los callbacks OAuth guardan los tokens crudos: google-business/callback/route.ts:52-53 y tiendanube/callback/route.ts:67. internalNotes es un dato solo de SUPER_ADMIN y la función está viva: updateClientInternalNotes.ts:20 exige requireSuperAdmin y InternalNotesCard está en OverviewTab de /admin/clients. El scope de GBP es business.manage (google-business-profile.ts:6-9), o sea de escritura, aunque el comentario del schema diga read-only. Las otras páginas del chatbot eligen campos (install/page.tsx:12-17, leads/[id]/page.tsx:84-97) y getPublicConfig usa select (:77, :97): solo el overview pasa el session entero. La ruta está viva: SidebarNav.tsx:52 y ClientDashboardTabs.tsx:9, sin redirect en next.config. La auditoría de seguridad de 2026-07 dio por inexistente este camino HTTP (docs/baselines/2026-07-auditoria-seguridad.md:2719 y :2752), y existe desde mayo de 2026. Queda en ALTA y no en CRÍTICA porque no cruza tenants: quien lee es miembro de la misma org, y hace falta chatbot activo más una integración conectada o notas cargadas. Bloqueante para el primer cliente con chatbot y Reseñas, Tienda o Agenda: sus credenciales de terceros y las notas privadas de develOP salen del servidor al navegador.",
+    "evidencia_contra": [
+     "No cruza tenants. getClientSession.ts:16 filtra OrgMember por session.user.id y proxy.ts:154 limita /dashboard a ORG_MEMBER. Un SUPER_ADMIN que impersona recibe null, porque se usa su propio OrgMember, y le aparece la upsell: cada lector solo ve la fila de su propia org.",
+     "Lo de 'incluido un VIEWER' es teórico. OrgRole no se aplica en ningún lado, pero todo OrgMember se crea como ADMIN (OrgMember.role @default(ADMIN); invitations.ts:89-90). Los receptores reales son los usuarios dueños del cliente, así que los tokens dan acceso a recursos del propio cliente. Lo que cruza un límite de rol sin condiciones es internalNotes.",
+     "Hay una precondición de datos. Hace falta chatbot activo y además una de estas: GBP o Tiendanube conectados (los callbacks exigen SUPER_ADMIN: google-business/callback/route.ts:15, tiendanube/callback/route.ts:29), calComApiKey cargada a mano en la DB (no hay setter en src; docs/onboarding-modulo-agenda.md:76-79; está en NULL en todas las orgs según docs/b7-probe-cal-com.md:13) o notas internas escritas. Hoy ninguna org real cumple eso.",
+     "gbpRefreshToken no sirve solo sin GOOGLE_BUSINESS_PROFILE_CLIENT_SECRET (google-business-profile.ts:29-35). gbpAccessToken vence y solo se refresca cuando se usa (:74-86), así que la ventana útil de GBP es corta. El token de Tiendanube no tiene vencimiento ni refresh modelado (tiendanube.ts:55-58).",
+     "El escenario cross-tenant vía Google, con un OAuth de GBP hecho desde una cuenta de agencia de develOP que administra varias fichas (gbp-connection-logic.ts:58 admite 'multiple'), es una HIPÓTESIS: leyendo no se puede saber qué cuenta da el consentimiento."
+    ]
+   },
+   "verificado_padre": true,
+   "dominio": "D5",
+   "caso": {
+    "titulo": "Credenciales y notas internas en el payload de /dashboard/chatbot",
+    "entorno": "dev local (npm run dev contra la branch Neon dev) con una cuenta de cliente de prueba",
+    "precondiciones": "Una org de prueba con bot activo y al menos un campo sensible no nulo: notas internas cargadas desde /admin/clients/<id> (o un token de Tiendanube/GBP de prueba).",
+    "pasos": [
+     "Entrar como el usuario ORG_MEMBER de esa org.",
+     "Abrir DevTools > Network y navegar a /dashboard/chatbot.",
+     "Buscar en la respuesta HTML del documento y en las respuestas con ?_rsc= los textos internalNotes, gbpAccessToken, tiendanubeAccessToken y calComApiKey (o el texto de la nota cargada).",
+     "Opcional: en la consola, buscar esas claves en self.__next_f."
+    ],
+    "esperado": "Ninguna de esas claves ni sus valores aparecen en lo que recibe el navegador.",
+    "senal_falla": "Aparecen las claves con su valor (tokens o la nota interna) en el payload.",
+    "escribe_db_o_email": true,
+    "hallazgos": "El overview de Mi Chatbot manda al navegador la fila completa de Organization"
+   },
+   "id_asignado": "SEC-037",
+   "vh_asignado": "VH-035"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Leído: optout/[contactId]/route.ts:90-100 solo marca optedOut en Postgres y confirma la baja; sendCampaignAction manda a listIds [lista de la org] (_actions.ts:183-195). git grep de emailBlacklisted|unlinkListIds|contacts/remove|blacklist en src = 0 (control: listIds aparece en _actions.ts y brevo.ts). El comportamiento real de Brevo queda para la VH.",
+   "titulo": "La baja de email marketing no llega a Brevo: la campaña sale a toda la lista y quien se dio de baja sigue recibiendo (un reimport lo vuelve a sumar)",
+   "prefijo": "BUG",
+   "severidad": "ALTA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+     "linea": 91,
+     "fragmento": "await prisma.emailContact.updateMany({\n    where: { id: contactId },\n    data: { optedOut: true, optedOutAt: new Date() },"
+    },
+    {
+     "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+     "linea": 100,
+     "fragmento": "'Tu dirección de email fue removida de esta lista. No recibirás más correos de esta campaña.',"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 194,
+     "fragmento": "listIds: [listId],"
+    },
+    {
+     "ruta": "src/lib/integrations/brevo.ts",
+     "linea": 77,
+     "fragmento": "recipients: { listIds: params.listIds },"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 144,
+     "fragmento": "where: { organizationId: org.id, optedOut: false },"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 104,
+     "fragmento": "if (listId) {\n        await syncContact({"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente que use Email Marketing: la baja solo cambia optedOut en la base; la campaña se manda a la lista de Brevo completa, así que la persona sigue recibiendo aunque la página le confirmó que fue removida, y si el cliente reimporta su CSV el contacto vuelve a entrar a la lista. Expone al cliente a denuncias por spam y a develOP a la suspensión de la cuenta Brevo compartida; recipientCount (cuenta solo los no dados de baja) tampoco coincide con lo que Brevo envía.",
+   "propuesta": "Al darse de baja, sacar el contacto de la lista de la org en Brevo (o bloquearlo) además de marcar optedOut; en el import saltear los optedOut; o usar el desuscribe nativo de Brevo y sincronizar su webhook de bajas a EmailContact. Confirmar el comportamiento real de Brevo con el caso de prueba.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-email-mkt",
+    "h6.vis-optout",
+    "int.brevo",
+    "modelo.EmailContact",
+    "modelo.EmailCampaign"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "BUG-012 (módulo inalcanzable por slug); previa S2b-01 (actions del módulo sin gate de contratación)",
+   "tmp": "D6-c2/D6-T1/H02",
+   "lote": "D6-T1",
+   "verificador": {
+    "titulo": "La baja de email marketing no llega a Brevo: la campaña sale a toda la lista y quien se dio de baja sigue recibiendo (un reimport lo vuelve a sumar)",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "El defecto se sostiene. api/email/optout/[contactId]/route.ts:91-94 solo hace updateMany de optedOut/optedOutAt en Postgres, y :96-100 le dice al destinatario 'fue removida de esta lista. No recibirás más correos'. Nada le avisa a Brevo. Buscar con git grep 'emailBlacklisted|unlinkListIds|contacts/remove|blacklist' en src da 0; el control positivo 'listIds' da 6. brevo.ts solo expone POST /contacts/lists, POST /contacts, POST /emailCampaigns y sendNow. No hay webhook de Brevo en src/app/api, y fuera del módulo solo la ruta de optout toca emailContact. sendCampaignAction (_actions.ts:183-205) crea la campaña con recipients.listIds = [lista de la org] (_actions.ts:194, brevo.ts:77) y la manda con sendNow. Brevo no ve optedOut, así que el contacto dado de baja sigue en la lista y le llega el mail. createCampaignAction:143-148 calcula recipientCount solo con optedOut=false, y ese número no coincide con lo que manda Brevo. importContactsAction:84-118 vuelve a sincronizar con Brevo cada fila sin mirar optedOut, y el upsert (:96-100) no toca optedOut. Agravante verificado: la misma BREVO_API_KEY (brevo-service.ts:4, brevo.ts:4) manda el magic link de login (auth.ts:101-104). Si la cuenta compartida se suspende por quejas de spam, se corta el login por email de todos los tenants y también las notificaciones. Queda en ALTA por la rúbrica: impide que el módulo llegue a L3 (la baja es obligatoria y la página de confirmación miente) y el cliente no tiene cómo esquivarlo, porque no accede a la cuenta Brevo de develOP. Ajuste: hoy el bug está latente detrás de CLEAN-1.1-SLUG, ya registrado. Ninguna campaña puede salir desde la UI, y se activa en cuanto se corrija el slug para vender el módulo. Es una causa raíz distinta a la del slug.",
+    "evidencia_contra": [
+     "Hoy está latente. Por CLEAN-1.1-SLUG, premium-modules.ts:38 siembra 'email-marketing-pro', email-marketing/layout.tsx:20 consulta 'email-marketing' y sync-premium-modules.ts:64-119 borra el slug obsoleto. Resultado: la UI del módulo queda cerrada para todas las orgs (ya registrado en docs/baselines/2026-07-auditoria-seguridad.md:1306 y :1619). Hoy una campaña solo sale invocando la server action por fuera de la UI, porque las actions no tienen gate de módulo (_actions.ts:17-28).",
+     "Si Brevo agrega su propio pie de baja a las campañas que no lo traen (comportamiento externo, no verificable sin web), el destinatario tendría una vía de baja que sí funciona en Brevo. Aun así el link de develOP no tiene efecto, confirma algo falso, y la base no se entera de esas bajas porque no hay webhook.",
+     "'Un reimport lo vuelve a sumar' es impreciso: el contacto nunca sale de la lista de Brevo. El reimport solo lo vuelve a sincronizar sin mirar optedOut (_actions.ts:104-118), y en la base sigue figurando como Baja.",
+     "Si la cuenta Brevo no tiene definidos los atributos CONTACT_ID y OPTOUT_TOKEN (docs/bitacora-roadmap.md:11031), el link de develOP cae en 403 (optout/route.ts:77-87). Es otra falla del mismo flujo, no refuta el hallazgo.",
+     "No hay clientes reales ni el módulo está activo en ninguna org: el impacto aplica al primer cliente de Email Marketing."
+    ]
+   },
+   "verificado_padre": true,
+   "dominio": "D2",
+   "caso": {
+    "titulo": "La baja de email marketing frena el próximo envío",
+    "entorno": "dev local con BREVO_API_KEY de una cuenta de prueba y dos casillas propias",
+    "precondiciones": "Org de prueba con el módulo de email activo (por BUG-012 hace falta una activación con el slug que busca el layout o probar llamando las actions) y un remitente verificado en Brevo.",
+    "pasos": [
+     "Importar un CSV con dos casillas propias (A y B).",
+     "Crear la campaña 1 y enviarla.",
+     "En la casilla A abrir 'Darme de baja' y confirmar en la base dev que su EmailContact quedó optedOut=true.",
+     "Crear la campaña 2 y enviarla.",
+     "Revisar si la casilla A recibe la campaña 2 y, en el panel de Brevo, si el contacto A sigue en la lista 'develOP - <org>'.",
+     "Reimportar el mismo CSV y volver a mirar la lista en Brevo."
+    ],
+    "esperado": "La casilla A no recibe la campaña 2 y el contacto queda fuera de la lista (o bloqueado) también después del reimport.",
+    "senal_falla": "La casilla A recibe la campaña 2 o sigue en la lista de Brevo.",
+    "escribe_db_o_email": true,
+    "hallazgos": "La baja de email marketing no llega a Brevo"
+   },
+   "id_asignado": "BUG-021",
+   "vh_asignado": "VH-036"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Muestreo DEC-37: se sostiene lo central (git grep de activateModule/pauseModule/cancelModule fuera de la definición = 0). Corrección: priceLockedUsd sí se lee en premium-modules.ts:70 (suma de módulos activos); el título se ajusta.",
+   "titulo": "Activar, pausar o cancelar un módulo premium no tiene camino en la app y el precio congelado (priceLockedUsd) solo lo lee una suma, no la facturación",
+   "prefijo": "FAL",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/premium-modules.ts",
+     "linea": 103,
+     "fragmento": "export async function activateModule("
+    },
+    {
+     "ruta": "src/lib/premium-modules.ts",
+     "linea": 127,
+     "fragmento": "update: {\n      status: 'ACTIVE',\n      pausedAt: null,"
+    },
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 66,
+     "fragmento": "status: 'INACTIVE',\n          priceLockedUsd: 0,"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1195,
+     "fragmento": "status         OrganizationModuleStatus @default(ACTIVE)\n  activatedAt    DateTime                 @default(now())"
+    },
+    {
+     "ruta": "src/lib/billing/get-current-plan.ts",
+     "linea": 92,
+     "fragmento": "priceMonthlyUsd: om.module.priceMonthlyUsd ?? 0,"
+    },
+    {
+     "ruta": "src/components/dashboard/CurrentPlanCard.tsx",
+     "linea": 147,
+     "fragmento": "Activo desde {formatDate(moduleData.activatedAt)}"
+    },
+    {
+     "ruta": "src/lib/data/onboarding-tasks.ts",
+     "linea": 37,
+     "fragmento": "'Activar los OrganizationModule según lo que pagó el cliente. Ej: Motor de Reseñas si lo contrató.',"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente que compre un módulo: develOP no puede activarlo, pausarlo ni cancelarlo desde el admin (activateModule y cancelModule no tienen llamadores, PAUSED no lo escribe nadie); hay que editar organization_module a mano en la Neon compartida. La única fila que existe es la del pedido de upsell (INACTIVE, priceLockedUsd 0, activatedAt = fecha del pedido): si se activa esa fila (a mano o con activateModule tal como está, que no toca precio ni fecha), queda con precio congelado 0 y el portal muestra 'Activo desde' la fecha del pedido. Como el portal muestra el precio vivo del catálogo y no priceLockedUsd, subir un precio en /admin/settings cambia lo que ve un cliente que ya contrató. El default ACTIVE del schema activaría gratis cualquier alta futura que olvide el status.",
+   "propuesta": "Exponer en /admin/clients/<id> una action con requireSuperAdmin y Zod que active, pause o cancele, usando activateModule corregido (en el update setear priceLockedUsd del catálogo y activatedAt al pasar de INACTIVE/CANCELLED a ACTIVE, y pausedAt al pausar); leer priceLockedUsd en get-current-plan. Decisión para Valentino (schema FROZEN): default INACTIVE en OrganizationModule.status.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-servicios",
+    "h2.cli-plan",
+    "h4.adm-clientes",
+    "modelo.OrganizationModule",
+    "modelo.PremiumModule",
+    "lib.actions"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "BUG-012, BUG-016, BUG-017, DEU-018; FAL-004 (mismo patrón de estado sin escritor)",
+   "tmp": "D6-c2/D6-T1/H03",
+   "lote": "D6-T1",
+   "verificador": null,
+   "verificado_padre": true,
+   "dominio": "D3",
+   "id_asignado": "FAL-005",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "La facturación no tiene escritor: ninguna pantalla crea ni cambia Invoice, Subscription.status nunca sale de ACTIVE y renewalDate no se escribe, pero el portal, las alertas, el MRR y el health score los leen",
+   "prefijo": "FAL",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+     "linea": 187,
+     "fragmento": "await prisma.subscription.create({\n        data: {\n          organizationId,"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+     "linea": 70,
+     "fragmento": "prisma.invoice.findMany({\n      where: { organizationId },"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+     "linea": 118,
+     "fragmento": "Tu suscripción está vencida.{' '}"
+    },
+    {
+     "ruta": "src/components/dashboard/SubscriptionBanner.tsx",
+     "linea": 8,
+     "fragmento": "if (!subscription || subscription.status !== 'PAST_DUE') {"
+    },
+    {
+     "ruta": "src/lib/alerts.ts",
+     "linea": 244,
+     "fragmento": "renewalDate: {\n          gte: today,"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/page.tsx",
+     "linea": 222,
+     "fragmento": "prisma.subscription.aggregate({\n      where: {\n        status: SubscriptionStatus.ACTIVE,"
+    },
+    {
+     "ruta": "src/lib/plan/get-plan-for-org.ts",
+     "linea": 98,
+     "fragmento": "const plan = sub?.plan"
+    },
+    {
+     "ruta": "src/lib/health-score.ts",
+     "linea": 442,
+     "fragmento": "if (sub.status === 'PAST_DUE') return 30"
+    }
+   ],
+   "impacto": "Para el primer cliente: el historial de pagos de /dashboard/cuenta/facturacion queda vacío para siempre (Invoice solo la escribe prisma/seed.ts), nunca ve 'Pago pendiente' ni el aviso de vencimiento, y si deja de pagar sigue ACTIVE: el MRR y el conteo de clientes activos del admin lo incluyen, el health score no baja, la alerta SUBSCRIPTION_EXPIRING no puede disparar (renewalDate null en toda alta hecha desde la app) y el bot conserva el plan completo porque getPlanForOrg no mira status. Las suscripciones del seed traen renewalDate a 30 días: pasada esa fecha la org demo ve 'Tu suscripción está vencida' sin forma de salir.",
+   "propuesta": "Decidir dónde vive la facturación: si es externa, ocultar el historial y los avisos que dependen de Invoice/status/renewalDate y sacarlos del MRR; si es interna, agregar en el admin alta de Invoice, marcar pagada (paidAt) y las transiciones de Subscription (ACTIVE, PAST_DUE, CANCELED con renewalDate), y que getPlanForOrg caiga al plan de respaldo con CANCELED.",
+   "esfuerzo": "L",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-plan",
+    "h4.adm-clientes",
+    "h4.adm-dashboard",
+    "modelo.Invoice",
+    "modelo.Subscription",
+    "lib.plan"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "BUG-010 (Subscription.price solo al crear); FAL-004 (patrón); SEC-014",
+   "tmp": "D6-c2/D6-T1/H04",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D3",
+   "relacionados_ids": [
+    "BUG-010"
+   ],
+   "id_asignado": "FAL-006",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Notification es por usuario pero el portal la lee y la marca por organización: el cliente ve y apaga las notificaciones dirigidas al SUPER_ADMIN, con links a /admin/projects/<id>",
+   "prefijo": "SEC",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 718,
+     "fragmento": "userId String"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/layout.tsx",
+     "linea": 101,
+     "fragmento": "prisma.notification.findMany({\n        where: { organizationId },"
+    },
+    {
+     "ruta": "src/lib/actions/notifications.ts",
+     "linea": 33,
+     "fragmento": "await prisma.notification.updateMany({\n      where: { id: parsed.data.id, organizationId },"
+    },
+    {
+     "ruta": "src/lib/actions/notifications.ts",
+     "linea": 82,
+     "fragmento": "const notifications = await prisma.notification.findMany({\n      where: { organizationId },"
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 67,
+     "fragmento": "userId: admin.id,\n            organizationId,\n            taskId: task.id,"
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 70,
+     "fragmento": "actionUrl: `/admin/projects/${task.projectId}`,"
+    },
+    {
+     "ruta": "src/actions/agency-actions.ts",
+     "linea": 54,
+     "fragmento": "const notifications = orgMembers.map(member => ({"
+    },
+    {
+     "ruta": "src/components/dashboard/NotificationCenter.tsx",
+     "linea": 125,
+     "fragmento": "router.push(notif.actionUrl)"
+    }
+   ],
+   "impacto": "Cuando un cliente aprueba o rechaza una entrega, la campana de todos los miembros de su org muestra las notificaciones escritas para el SUPER_ADMIN ('Cliente pidio cambios en...', 'Entrega aprobada por cliente...'), con un link a /admin/projects/<id> que expone el id interno y rebota en el proxy; cada miembro ve también las copias de los demás (una por miembro en cada pedido de aprobación) y cualquiera las marca leídas para todos. Ninguna pantalla del admin lee Notification, así que los avisos al SUPER_ADMIN (upsell, mensajes, referidos, aprobaciones) solo terminan en la campana del cliente o en ningún lado.",
+   "propuesta": "En dashboard/layout.tsx y lib/actions/notifications.ts (libres) filtrar lectura y marcado por { userId de la sesión, organizationId }. Decisión para Valentino (dashboard-actions.ts es FROZEN): no poner organizationId en las notificaciones del admin y decidir si el equipo necesita una bandeja propia o si esos avisos van solo por alerta/email.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-shell",
+    "h2.cli-proyecto",
+    "h4.adm-proyectos",
+    "modelo.Notification",
+    "lib.actions"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "Patrón D6-c1 'Notification se escribe con userId pero se lee por organizationId'; SEC-018",
+   "tmp": "D6-c2/D6-T1/H05",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D2",
+   "id_asignado": "SEC-038",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "La baja de una campaña puede caer en otro cliente: CONTACT_ID y OPTOUT_TOKEN se guardan en el contacto global de Brevo y el último import de ese email los pisa",
+   "prefijo": "SEC",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 114,
+     "fragmento": "CONTACT_ID: contact.id,\n            OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id),"
+    },
+    {
+     "ruta": "src/lib/integrations/brevo.ts",
+     "linea": 49,
+     "fragmento": "listIds: params.listIds,\n        updateEnabled: true,"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 155,
+     "fragmento": "/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1229,
+     "fragmento": "@@unique([organizationId, email])"
+    },
+    {
+     "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+     "linea": 91,
+     "fragmento": "await prisma.emailContact.updateMany({\n    where: { id: contactId },"
+    }
+   ],
+   "impacto": "Si dos clientes de develOP tienen al mismo destinatario (caso común), el contacto de Brevo es uno solo por email en la cuenta compartida y queda con el CONTACT_ID del último cliente que importó. Cuando esa persona se da de baja desde la campaña del cliente A, el link apunta al EmailContact del cliente B: se marca optedOut en la base de B (escritura entre tenants disparada por un tercero) y A la sigue contando como activa. Un cliente con el módulo puede provocarlo a propósito importando emails de la lista de otro.",
+   "propuesta": "No guardar ids por tenant en atributos globales de Brevo: firmar un token que incluya organizationId y email y resolver la fila por (org, email) en la ruta de baja, o usar atributos por lista/org y el desuscribe nativo por lista. Verificar el modelo de contactos de Brevo con el caso de prueba.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-email-mkt",
+    "h6.vis-optout",
+    "int.brevo",
+    "modelo.EmailContact"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "Hallazgo 'la baja no llega a Brevo' (este ciclo); BUG-012; previa S2b-01; BUG-002 (email sensible a mayúsculas)",
+   "tmp": "D6-c2/D6-T1/H06",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D2",
+   "caso": {
+    "titulo": "La baja de un destinatario se aplica a otra organización",
+    "entorno": "dev local con la misma cuenta Brevo de prueba",
+    "precondiciones": "Dos orgs de prueba (X e Y) con el módulo de email operativo y una casilla propia C.",
+    "pasos": [
+     "Importar C en la org X y después en la org Y.",
+     "En Brevo, ver los atributos CONTACT_ID y OPTOUT_TOKEN del contacto C.",
+     "Leer en dev (solo lectura) SELECT id, \"organizationId\" FROM \"EmailContact\" WHERE email = '<C>'.",
+     "Enviar una campaña desde X y comparar el contactId del link de baja con los dos ids.",
+     "Hacer clic en el link de baja y volver a leer optedOut de las dos filas."
+    ],
+    "esperado": "El link de la campaña de X apunta al EmailContact de X y la baja marca solo esa fila.",
+    "senal_falla": "El link trae el id de la fila de Y y la baja marca la fila de Y.",
+    "escribe_db_o_email": true,
+    "hallazgos": "La baja de una campaña puede caer en otro cliente"
+   },
+   "id_asignado": "SEC-039",
+   "vh_asignado": "VH-037"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Mi Chatbot resuelve la organización con su propia consulta (orgMember.findFirst sin orderBy) e ignora resolveOrgId: la vista previa del admin no ve el bot del cliente y con dos membresías muestra otra org",
+   "prefijo": "BUG",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/admin/getClientSession.ts",
+     "linea": 15,
+     "fragmento": "c.orgMember.findFirst({\n        where: { userId: session.user.id },"
+    },
+    {
+     "ruta": "src/lib/preview.ts",
+     "linea": 14,
+     "fragmento": "if (role === 'SUPER_ADMIN') {\n    const impersonation = await getImpersonationSession()\n    return impersonation?.orgId ?? null"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+     "linea": 24,
+     "fragmento": "const session = await getClientChatbotSession()\n  if (!session) return <ChatbotUpsellLanding />"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/leads/page.tsx",
+     "linea": 36,
+     "fragmento": "const session = await getClientChatbotSession()\n  if (!session) redirect('/dashboard')"
+    },
+    {
+     "ruta": "src/app/api/dashboard/chatbot/leads/export/route.ts",
+     "linea": 84,
+     "fragmento": "const session = await getClientChatbotSession()"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
+     "linea": 61,
+     "fragmento": "const orgId = await resolveOrgId()"
+    },
+    {
+     "ruta": "prisma/seed.ts",
+     "linea": 82,
+     "fragmento": "const admin = await prisma.user.upsert({"
+    }
+   ],
+   "impacto": "Soporte no puede revisar el chatbot de un cliente impersonándolo: con un SUPER_ADMIN sin OrgMember (así lo siembra el seed) /dashboard/chatbot muestra la landing de 'activá tu chatbot' aunque checkClientHasChatbot (con resolveOrgId, page.tsx:15-18) dijo que hay bot, leads y conversaciones redirigen a /dashboard y el CSV da 401, mientras la apariencia sí se edita sobre el cliente. Si un usuario tiene membresías en dos orgs, esta sección puede mostrar y modificar (estado de leads, insights) una org distinta de la del resto del portal en el mismo request.",
+   "propuesta": "Que getClientChatbotSession derive la org de resolveOrgId() (o reciba el orgId) y lea org y bot con select acotado; agregar un invariante que prohíba orgMember.findFirst sin orderBy como resolución de tenant. Verificar en prod (solo lectura) si los SUPER_ADMIN tienen OrgMember.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "h1.auth-impersonacion",
+    "lib.chatbot.admin",
+    "modelo.OrgMember"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "BUG-005 (org primaria no determinística en auth.ts); SEC-029; patrón D1-c2 'resolución de org paralela a resolveOrgId'",
+   "tmp": "D6-c2/D6-T1/H07",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D5",
+   "relacionados_ids": [
+    "BUG-005",
+    "SEC-029"
+   ],
+   "caso": {
+    "titulo": "Vista previa de soporte de Mi Chatbot",
+    "entorno": "dev local para la UI; prod solo con una consulta de lectura",
+    "precondiciones": "Una org de prueba con bot activo y leads; cuenta SUPER_ADMIN.",
+    "pasos": [
+     "Entrar como SUPER_ADMIN e impersonar la org desde /admin/clients/<id>.",
+     "Abrir /dashboard/chatbot, /dashboard/chatbot/leads y /dashboard/chatbot/conversations.",
+     "En prod, solo lectura: SELECT u.email, COUNT(om.id) FROM \"User\" u LEFT JOIN \"OrgMember\" om ON om.\"userId\" = u.id WHERE u.role = 'SUPER_ADMIN' GROUP BY u.email;"
+    ],
+    "esperado": "Se ven el overview, los leads y las conversaciones del cliente impersonado.",
+    "senal_falla": "Aparece la landing de 'activá tu chatbot' y leads/conversaciones redirigen a /dashboard (admin sin membresía), o se ven datos de otra org (admin con membresía).",
+    "escribe_db_o_email": true,
+    "hallazgos": "Mi Chatbot resuelve la organización con su propia consulta"
+   },
+   "id_asignado": "BUG-022",
+   "vh_asignado": "VH-038"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Muestreo DEC-37: se sostiene (actOnInsight solo se exporta: index.server.ts:73, insights/index.ts:2; ninguna pantalla lo llama; generate-insights/route.ts:36-40 saltea el bot con 5 o más PENDING).",
+   "titulo": "Los insights del chatbot quedan PENDING para siempre: ninguna pantalla llama a actOnInsight y el cron deja de generar para ese bot al quinto pendiente",
+   "prefijo": "BUG",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/cron/generate-insights/route.ts",
+     "linea": 38,
+     "fragmento": "if (pendingCount >= 5) {\n        results.skipped_pending_overload++"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/insights/manageInsight.ts",
+     "linea": 15,
+     "fragmento": "export async function actOnInsight(input: z.infer<typeof InsightActionSchema>) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
+     "linea": 62,
+     "fragmento": "where: { botConfigId, status: { in: ['PENDING', 'APPLIED'] } },"
+    },
+    {
+     "ruta": "src/app/api/cron/generate-insights/route.ts",
+     "linea": 66,
+     "fragmento": "dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/chatbot`,"
+    },
+    {
+     "ruta": "netlify.toml",
+     "linea": 25,
+     "fragmento": "[functions.\"generate-insights-cron\"]\n  schedule = \"0 9 * * *\""
+    }
+   ],
+   "impacto": "Para un cliente Pro/Business: el cron diario genera insights con Vertex y le manda un email para verlos en /dashboard/chatbot, donde no aparecen (solo se listan, sin acciones, en Resultados > Análisis). Como nada los saca de PENDING (actOnInsight no tiene consumidores e IGNORED no tiene escritor), al juntar cinco el bot queda excluido del cron para siempre: los 'Insights semanales' que promete la landing se cortan a los pocos días.",
+   "propuesta": "Agregar en Análisis los botones Aplicar/Descartar que llamen a actOnInsight, o expirar a IGNORED los PENDING viejos dentro del cron; corregir el link del email a la página que los muestra.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "h2.cli-resultados",
+    "int.cron.generate-insights",
+    "int.vertex",
+    "modelo.ChatbotInsight"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "DEU-006 (retención); crons en D7",
+   "tmp": "D6-c2/D6-T1/H08",
+   "lote": "D6-T1",
+   "verificador": null,
+   "verificado_padre": true,
+   "dominio": "D5",
+   "id_asignado": "BUG-023",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "El plan y BotConfig son dos fuentes de verdad: el chat corta por Plan.quota y usa el modelo del plan con temperatura fija, pero el admin edita y el detector de alertas lee BotConfig.monthlyQuota (1000) y maxOutputTokens no se aplica",
+   "prefijo": "BUG",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 345,
+     "fragmento": "if (quota.conversationsUsed >= plan.quota) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 952,
+     "fragmento": "temperature: 0.7,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+     "linea": 68,
+     "fragmento": "if (usage && usage.conversationsCount >= bot.monthlyQuota) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+     "linea": 186,
+     "fragmento": "monthlyQuota: 1000,"
+    },
+    {
+     "ruta": "prisma/seeds/sync-plans.ts",
+     "linea": 72,
+     "fragmento": "quota: 500,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+     "linea": 45,
+     "fragmento": "llmModel: z.string().min(1).max(80),\n  temperature: z.number().min(0).max(2),\n  maxOutputTokens: z.number().int().min(100).max(8192),"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx",
+     "linea": 98,
+     "fragmento": "value={`${quotaUsed.toLocaleString('es-AR')} / ${bot.monthlyQuota.toLocaleString('es-AR')}`}"
+    }
+   ],
+   "impacto": "Con el primer cliente Starter el bot se corta a 500 conversaciones pero la alerta QUOTA_EXHAUSTED compara contra 1000 y nunca dispara; con Pro o Business (3000/5000, sync-plans.ts:88 y :104) dispara a 1000 aunque el bot sigue funcionando. El admin ve '500 / 1000' y el cliente ve el límite del plan. Editar modelo, temperatura, tope de salida o cuota en el admin no cambia nada en runtime, y como streamText no recibe maxOutputTokens, cada uno de los hasta 3 pasos de un turno puede generar el máximo del modelo: el costo por turno de un visitante anónimo no tiene tope configurable.",
+   "propuesta": "Sacar del editor del admin los campos legacy (o mostrarlos solo lectura con el valor del plan); que detector, preflight y fichas del admin usen getPlanForOrg().quota; pasar maxOutputTokens explícito en streamText. Decisión para Valentino (schema FROZEN): borrar las columnas legacy de BotConfig.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.adm-chatbots",
+    "h4.adm-alertas",
+    "h3.vis-api-chatbot",
+    "modelo.BotConfig",
+    "modelo.Plan",
+    "lib.plan",
+    "int.vertex"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "SEC-032 (costo de Vertex por prompt inflado); detect-bot-issues sin disparador (D7)",
+   "tmp": "D6-c2/D6-T1/H09",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D5",
+   "id_asignado": "BUG-024",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "El ciclo de vida de Project no modela mantenimiento ni cancelación: maintenanceStartDate no tiene escritor, deliveredAt no se limpia al reabrir y la migración v2 convirtió CANCELADO en COMPLETED",
+   "prefijo": "FAL",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "linea": 115,
+     "fragmento": "const isInMaintenance = Boolean(project.maintenanceStartDate)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "linea": 204,
+     "fragmento": "El proyecto pasara a mantenimiento cuando tenga una fecha de inicio de mantenimiento."
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+     "linea": 120,
+     "fragmento": "if (!project.maintenanceStartDate) {\n      return fail('Project has no maintenance start date')"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+     "linea": 750,
+     "fragmento": "status: parsed.status,\n          ...(parsed.status === ProjectStatus.COMPLETED\n            ? { deliveredAt: new Date() }"
+    },
+    {
+     "ruta": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql",
+     "linea": 135,
+     "fragmento": "WHEN 'EN_MANTENIMIENTO' THEN 'IN_PROGRESS'::\"ProjectStatus\"\n        WHEN 'CANCELADO' THEN 'COMPLETED'::\"ProjectStatus\""
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 38,
+     "fragmento": "enum ProjectStatus {\n  PLANNING\n  IN_PROGRESS"
+    }
+   ],
+   "impacto": "Para el primer proyecto entregado con abono mensual: ninguna action ni formulario escribe maintenanceStartDate (solo seed-agency-os.ts y los proyectos migrados lo tienen), así que 'Generar meses pendientes' nunca aparece y el mantenimiento no se puede cobrar por el flujo previsto. Reabrir un proyecto COMPLETED deja el deliveredAt viejo y volver a completarlo pisa la fecha real de entrega. Un proyecto cancelado no tiene estado posible: los CANCELADO legacy quedaron COMPLETED y el cliente los ve como 'Completado'.",
+   "propuesta": "Agregar el inicio de mantenimiento a la edición del proyecto (o setearlo al completar si hay monthlyRate), limpiar deliveredAt al salir de COMPLETED y no pisarlo si ya existe. Decisión para Valentino (schema FROZEN): sumar CANCELLED (y quizá MAINTENANCE) a ProjectStatus y revisar los proyectos legacy que eran CANCELADO.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-proyectos",
+    "h2.cli-proyecto",
+    "modelo.Project",
+    "modelo.OsMaintenancePayment"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "FAL-004 (mismo patrón de columnas sin escritor); BUG-019 y DEU-014 (misma migración, otra causa); BUG-015",
+   "tmp": "D6-c2/D6-T1/H10",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D3",
+   "id_asignado": "FAL-007",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "EmailCampaign sin estado intermedio ni métricas: SENDING y SCHEDULED no se escriben (doble envío posible), FAILED no tiene reintento y aperturas y clics nunca se actualizan",
+   "prefijo": "BUG",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 181,
+     "fragmento": "if (campaign.status !== 'DRAFT') return { error: 'Solo podés enviar campañas en estado DRAFT.' }"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 205,
+     "fragmento": "const sent = await brevoSendCampaign(brevoResult.campaignId)"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 210,
+     "fragmento": "status: sent ? 'SENT' : 'FAILED',"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1141,
+     "fragmento": "enum EmailCampaignStatus {\n  DRAFT\n  SCHEDULED"
+    },
+    {
+     "ruta": "src/lib/integrations/brevo.ts",
+     "linea": 143,
+     "fragmento": "export async function getCampaignStats(campaignId: number): Promise<{"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
+     "linea": 110,
+     "fragmento": "{pct(campaign.openedCount, campaign.recipientCount)}"
+    }
+   ],
+   "impacto": "Cuando el módulo se habilite: dos envíos concurrentes de la misma campaña (dos pestañas, un reintento) pasan el control de DRAFT y Brevo crea y manda dos campañas a toda la lista; una campaña FAILED (por ejemplo Brevo la creó pero sendNow falló) no se puede reintentar y queda huérfana en Brevo; y la tabla de campañas muestra 0% de aperturas y clics para siempre porque getCampaignStats no tiene llamadores (dato falso en el camino del cliente).",
+   "propuesta": "Pasar DRAFT a SENDING con updateMany condicional (where status DRAFT) antes de llamar a Brevo y abortar si no afectó filas; permitir reintento de FAILED reusando el brevoCampaignId guardado; traer las métricas con getCampaignStats (cron o al abrir la tabla) o webhook de Brevo, u ocultar las columnas.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-email-mkt",
+    "int.brevo",
+    "modelo.EmailCampaign"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "BUG-012; previa S2b-01",
+   "tmp": "D6-c2/D6-T1/H11",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D2",
+   "caso": {
+    "titulo": "Doble envío de una campaña y métricas en cero",
+    "entorno": "dev local con Brevo de prueba",
+    "precondiciones": "Campaña en DRAFT con una lista de casillas propias.",
+    "pasos": [
+     "Abrir /dashboard/modules/email-marketing/campaigns/<id>/send en dos pestañas.",
+     "Hacer clic en Enviar en las dos casi a la vez.",
+     "Revisar en Brevo cuántas campañas se crearon y enviaron, y en las casillas cuántos mails llegaron.",
+     "Abrir uno de los mails y, más tarde, mirar la tabla de campañas."
+    ],
+    "esperado": "Una sola campaña enviada; la tabla refleja aperturas.",
+    "senal_falla": "Dos campañas en Brevo o dos mails por casilla; aperturas en 0% después de abrir.",
+    "escribe_db_o_email": true,
+    "hallazgos": "EmailCampaign sin estado intermedio ni métricas"
+   },
+   "id_asignado": "BUG-025",
+   "vh_asignado": "VH-039"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "El export masivo de leads del admin no neutraliza fórmulas: un visitante anónimo del widget puede inyectar una fórmula en un CSV que junta leads de varias organizaciones",
+   "prefijo": "SEC",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/bulk-actions.ts",
+     "linea": 50,
+     "fragmento": "const leads = await prisma.chatbotLead.findMany({\n    where: { botConfig: { organizationId: { in: uniqueOrgIds } } },"
+    },
+    {
+     "ruta": "src/lib/bulk-actions.ts",
+     "linea": 74,
+     "fragmento": ".map((value) => `\"${String(value).replace(/\"/g, '\"\"')}\"`)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/leads/csv/csvEscape.ts",
+     "linea": 22,
+     "fragmento": "const DANGEROUS_PREFIX = /^[=+\\-@\\t\\r]/"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 59,
+     "fragmento": "name: z.string().min(2).max(100).describe("
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 121,
+     "fragmento": "const result = await bulkExportLeads([...selected])"
+    }
+   ],
+   "impacto": "El export del cliente ya prefija las celdas peligrosas (csvEscape.ts:5-10 documenta este mismo ataque), pero el export del admin no: un visitante que deja como nombre '=HYPERLINK(...)' o una fórmula IMPORT convierte el CSV que develOP abre en Excel o Google Sheets en un vector para mandar a un tercero nombres, emails y teléfonos de los leads de todas las orgs seleccionadas.",
+   "propuesta": "Reusar rowToCsv/csvEscape de modules/chatbot/server/leads/csv en bulkExportLeads (y en cualquier otro CSV del admin); agregar un invariante que busque armados de CSV con join(',') fuera de ese helper.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-clientes",
+    "h3.vis-widget-cliente",
+    "modelo.ChatbotLead",
+    "lib.actions"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "B5.9 (csvEscape del export del cliente)",
+   "tmp": "D6-c2/D6-T1/H12",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D3",
+   "caso": {
+    "titulo": "Fórmulas en el export masivo de leads del admin",
+    "entorno": "dev local",
+    "precondiciones": "Una org de prueba con bot; un ChatbotLead de prueba cuyo nombre sea =HYPERLINK(\"https://example.com\",\"x\") (cargado por el widget si Vertex responde, o insertado en la base dev).",
+    "pasos": [
+     "En /admin/clients seleccionar esa org y usar 'Exportar leads'.",
+     "Abrir el CSV en Excel o Google Sheets.",
+     "Comparar con el export del cliente (/api/dashboard/chatbot/leads/export) de la misma org."
+    ],
+    "esperado": "La celda del nombre se ve como texto en los dos exports.",
+    "senal_falla": "En el export del admin la celda se interpreta como fórmula (link activo); en el del cliente aparece con comilla simple.",
+    "escribe_db_o_email": true,
+    "hallazgos": "El export masivo de leads del admin no neutraliza fórmulas"
+   },
+   "id_asignado": "SEC-040",
+   "vh_asignado": "VH-040"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Muestreo DEC-37: se sostiene (src/modules/chatbot/prisma/seed.ts y update-proactive-prompts.ts no importan seed-guard ni llaman assertDevSeedTarget; el seed principal sí, prisma/seed.ts:20).",
+   "titulo": "El seed del chatbot y update-proactive-prompts escriben en cualquier DATABASE_URL sin guard, aunque el escape los rotula 'script de dev' y ese seed define el bot de producción de develOP",
+   "prefijo": "SEC",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/prisma/seed.ts",
+     "linea": 272,
+     "fragmento": "const botConfig = await unsafeGlobalQuery('SEED: upsert del bot develOP (script de dev)', (c) =>"
+    },
+    {
+     "ruta": "src/modules/chatbot/prisma/seed.ts",
+     "linea": 275,
+     "fragmento": "update: {\n      // Update mantiene el id pero refresca todo el contenido"
+    },
+    {
+     "ruta": "src/modules/chatbot/prisma/seed.ts",
+     "linea": 342,
+     "fragmento": "const kb = await unsafeGlobalQuery('SEED: upsert de la KB del bot develOP (script de dev)', (c) =>"
+    },
+    {
+     "ruta": "src/modules/chatbot/prisma/update-proactive-prompts.ts",
+     "linea": 23,
+     "fragmento": "'SEED: update de proactivePrompts del bot develOP por slug (script de dev)',"
+    },
+    {
+     "ruta": "docs/bitacora-roadmap.md",
+     "linea": 10815,
+     "fragmento": "- **Bot de la agencia**: vive en `src/modules/chatbot/prisma/seed.ts` (org `develop`, slug `develop`), no en el seed principal."
+    },
+    {
+     "ruta": "prisma/seed.ts",
+     "linea": 20,
+     "fragmento": "import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'"
+    }
+   ],
+   "impacto": "Correr 'npx tsx src/modules/chatbot/prisma/seed.ts' con el .env apuntando a prod (es el camino documentado para el bot de la agencia) pisa sin dry-run ni confirmación toda la config del bot público de develOP (activo, bienvenida, quick replies, WhatsApp, modelo, cuota) y las siete secciones de su knowledge base con los valores del código, borrando cualquier ajuste hecho desde el admin. La razón 'script de dev' de los cuatro escapes SEED es falsa: no hay guard y el script es la fuente del bot de producción.",
+   "propuesta": "Agregar assertDevSeedTarget o un flag explícito de destino más un dry-run con diff antes de escribir; corregir las razones de los escapes SEED para que digan mantenimiento de prod; separar la provisión del bot de prod en un script con confirmación.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.seeds",
+    "lib.isolation",
+    "modelo.BotConfig",
+    "modelo.KnowledgeBase",
+    "int.neon"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "SEC-034 (guard por substring); DEU-016 (tsx sin fijar); DEU-020",
+   "tmp": "D6-c2/D6-T1/H13",
+   "lote": "D6-T1",
+   "verificador": null,
+   "verificado_padre": true,
+   "dominio": "D5",
+   "relacionados_ids": [
+    "SEC-034"
+   ],
+   "id_asignado": "SEC-041",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "El reporte ejecutivo semanal no usa PENDING como cerrojo: el cron y el envío manual concurrentes mandan el mail dos veces",
+   "prefijo": "BUG",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/reports/executive-weekly/send.ts",
+     "linea": 109,
+     "fragmento": "if (existing?.status === 'SENT') {"
+    },
+    {
+     "ruta": "src/lib/reports/executive-weekly/send.ts",
+     "linea": 149,
+     "fragmento": "status: 'PENDING',"
+    },
+    {
+     "ruta": "src/lib/reports/executive-weekly/send-manual.ts",
+     "linea": 50,
+     "fragmento": "if (existing?.status === 'SENT') {"
+    },
+    {
+     "ruta": "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts",
+     "linea": 57,
+     "fragmento": "const result = await sendExecutiveWeeklyReportManual(organizationId)"
+    }
+   ],
+   "impacto": "Si el admin dispara el envío manual mientras corre el cron (o hace dos clics, o el scheduler reintenta), ambos leen un estado distinto de SENT, ambos marcan PENDING y ambos mandan: el cliente recibe el mismo reporte dos veces; si la función muere después de Brevo y antes de marcar SENT, la próxima corrida lo reenvía.",
+   "propuesta": "Reservar la fila con un update o insert condicional (status distinto de SENT y sin PENDING reciente) y seguir solo si la reserva afectó una fila; expirar PENDING viejos.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-reportes-email",
+    "h4.adm-clientes",
+    "int.brevo",
+    "modelo.WeeklyReportLog"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "send-executive-reports registrado solo en vercel.json (D7)",
+   "tmp": "D6-c2/D6-T1/H14",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D7",
+   "caso": {
+    "titulo": "Reporte ejecutivo duplicado por envío manual concurrente",
+    "entorno": "dev local con Brevo de prueba",
+    "precondiciones": "Org Pro o Business con destinatario propio y datos de la semana; sin log SENT para la semana ISO actual.",
+    "pasos": [
+     "Abrir la ficha del cliente en el admin en dos pestañas.",
+     "Disparar el envío manual del reporte (POST /api/admin/clients/<id>/send-executive-report) en las dos casi a la vez.",
+     "Contar los mails recibidos y leer attempts en WeeklyReportLog para la org y la semana."
+    ],
+    "esperado": "Un solo mail; la segunda llamada responde ALREADY_SENT o queda bloqueada.",
+    "senal_falla": "Dos mails y attempts = 2.",
+    "escribe_db_o_email": true,
+    "hallazgos": "El reporte ejecutivo semanal no usa PENDING como cerrojo"
+   },
+   "id_asignado": "BUG-026",
+   "vh_asignado": "VH-041"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Salida del motor de WhatsApp (latente): el estado se escribe sin condición, el wamid se guarda después del envío y el estado del canal no frena la salida",
+   "prefijo": "BUG",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
+     "linea": 53,
+     "fragmento": "const currentRank = STATUS_RANK[message.status]"
+    },
+    {
+     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
+     "linea": 58,
+     "fragmento": "await scope.motorMessage.update(message.id, { status: next })"
+    },
+    {
+     "ruta": "src/modules/motor/services/sendMessage.ts",
+     "linea": 248,
+     "fragmento": "await scope.motorMessage.update(messageId, { status: 'SENT', providerMessageId: result.wamid })"
+    },
+    {
+     "ruta": "src/modules/motor/adapters/whatsapp/inbound/process.ts",
+     "linea": 163,
+     "fragmento": "next = addTo(next, 'statusesSkipped')"
+    },
+    {
+     "ruta": "src/modules/motor/services/sendMessage.ts",
+     "linea": 113,
+     "fragmento": "if (channel === null || channel.apiKeyEncrypted === null || channel.apiKeyIv === null || channel.apiKeyTag === null) {"
+    },
+    {
+     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-request.ts",
+     "linea": 39,
+     "fragmento": "if (channel.status === 'INACTIVE') {"
+    }
+   ],
+   "impacto": "Hoy latente: sendMotorMessage no tiene llamadores hasta B2. Cuando se conecte: dos webhooks concurrentes (delivered y read) pueden dejar el mensaje en DELIVERED después de READ o pisar un FAILED; un status que llega antes de que se guarde el wamid se descarta como unknown-message sin reintento; si la función muere entre la aceptación del BSP y el update, el mensaje queda PENDING para siempre con la clave de idempotencia quemada; y un canal INACTIVE (solo se chequea en la entrada) o reportado BANNED/RESTRICTED sigue despachando, justo lo que la alerta de calidad de Meta quería evitar.",
+   "propuesta": "Aplicar el status con updateMany condicional (where status en rangos menores y distinto de FAILED); correlacionar el wamid antes del despacho o reintentar el lookup; marcar como desconocidos los PENDING viejos; chequear status y channelStatus en resolveTargets antes de enviar.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-whatsapp",
+    "modelo.MotorMessage",
+    "modelo.WabaChannel",
+    "lib.motor"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "SEC-035 (registro del motor)",
+   "tmp": "D6-c2/D6-T1/H15",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D5",
+   "id_asignado": "BUG-027",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Un referido pasa a CONVERTED sin vincular la organización referida: referredOrgId no tiene escritor y la conversión no se puede auditar",
+   "prefijo": "DEU",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts",
+     "linea": 18,
+     "fragmento": "const result = await prisma.referral.updateMany({\n      where: { id, status: 'PENDING' },\n      data: { status: 'CONVERTED' },"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1847,
+     "fragmento": "// desde el inicio; `referredOrgId` se completa al convertir. `rewardedAt` marca cuándo se"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1855,
+     "fragmento": "referredOrgId String?"
+    }
+   ],
+   "impacto": "El mes bonificado (REWARDED) se acredita sobre una conversión que es solo un clic del admin: no queda qué organización contrató, no se puede verificar que no sea la misma org referente ni recalcular el beneficio, y la relación referred con su índice y su SetNull es letra muerta.",
+   "propuesta": "Pedir en markReferralConvertedAction la org cliente que contrató (select en el admin), guardarla en referredOrgId y validar que no sea la org referente.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-referidos",
+    "h2.cli-referidos",
+    "modelo.Referral"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "—",
+   "tmp": "D6-c2/D6-T1/H16",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D3",
+   "id_asignado": "DEU-021",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Reconocer una alerta del chatbot no la silencia: el detector solo deduplica contra PENDING de las últimas 24 h y la vuelve a crear con email y Telegram",
+   "prefijo": "BUG",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+     "linea": 250,
+     "fragmento": "status: 'PENDING',\n        createdAt: { gte: new Date(Date.now() - ONE_DAY_MS) },"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+     "linea": 267,
+     "fragmento": "const emailResult = await sendAlertEmail(issue)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+     "linea": 46,
+     "fragmento": "status: 'ACKNOWLEDGED',\n          acknowledgedAt: new Date(),"
+    }
+   ],
+   "impacto": "Latente mientras el detector no tenga disparador (D7); en cuanto corra periódicamente, marcar como vista una alerta de un problema que sigue activo (cuota agotada, errores del proveedor) hace que la corrida siguiente cree otra PENDING y mande otro email y otro Telegram; lo mismo a las 24 h con una PENDING. Además, reconocer una alerta ya resuelta la reabre como ACKNOWLEDGED conservando resolvedAt.",
+   "propuesta": "Deduplicar contra alertas abiertas (PENDING y ACKNOWLEDGED) del mismo bot y tipo, y aceptar el reconocimiento solo desde PENDING con updateMany condicional.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-alertas",
+    "modelo.BotAlert",
+    "int.cron.detect-bot-issues",
+    "int.telegram"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "detect-bot-issues sin disparador (D7); hallazgo de doble fuente de cuota (este ciclo)",
+   "tmp": "D6-c2/D6-T1/H17",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D5",
+   "id_asignado": "BUG-028",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Muestreo DEC-37: se sostiene (git grep 'api/track' en src y public: sin consumidores; route.ts:19-36 sin Zod ni rate limit, y con SUPER_ADMIN la org sale del body).",
+   "titulo": "/api/track no tiene consumidores y acepta escrituras ilimitadas en PageView: sin Zod, sin tope de largo ni rate limit, y el SUPER_ADMIN elige la org por body",
+   "prefijo": "SEC",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/track/route.ts",
+     "linea": 20,
+     "fragmento": "const url = String(data?.url ?? '')"
+    },
+    {
+     "ruta": "src/app/api/track/route.ts",
+     "linea": 24,
+     "fragmento": "const organizationId =\n      session.user.role === 'SUPER_ADMIN'\n        ? bodyOrgId ?? session.user.organizationId ?? null"
+    },
+    {
+     "ruta": "src/app/api/track/route.ts",
+     "linea": 33,
+     "fragmento": "await prisma.pageView.create({"
+    }
+   ],
+   "impacto": "Cualquier sesión de cliente puede insertar filas sin límite y con URLs de cualquier tamaño en la Neon compartida (tabla sin lectores ni purga), y el admin puede imputar visitas a cualquier org por body; no aporta nada al producto.",
+   "propuesta": "Borrar la ruta y el modelo (candidato a poda) o, si se va a usar, validar con Zod (url acotada), aplicar rate limit por sesión y tomar la org solo de resolveOrgId.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-shell",
+    "modelo.PageView"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "DEU-006 (retención); poda",
+   "tmp": "D6-c2/D6-T1/H18",
+   "lote": "D6-T1",
+   "verificador": null,
+   "verificado_padre": true,
+   "dominio": "D2",
+   "id_asignado": "SEC-042",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "El tope de 3 regeneraciones semanales del brief es check-then-act: pedidos en paralelo pasan todos el control y cada uno llama al LLM",
+   "prefijo": "SEC",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/ai/executive-brief.ts",
+     "linea": 157,
+     "fragmento": "if (currentRegenerations >= REGENERATION_LIMIT) {"
+    },
+    {
+     "ruta": "src/lib/ai/executive-brief.ts",
+     "linea": 185,
+     "fragmento": "const generation = await generateBriefText(organizationId, org.companyName, now)"
+    },
+    {
+     "ruta": "src/lib/ai/executive-brief.ts",
+     "linea": 201,
+     "fragmento": "executiveBriefRegenerations: nextRegenerations,"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/_actions/regenerate-brief.ts",
+     "linea": 19,
+     "fragmento": "const result = await regenerateExecutiveBrief(orgId.data)"
+    }
+   ],
+   "impacto": "Hoy sin efecto (credencial de Vertex vencida). Con Vertex activo, un usuario de cualquier cliente que dispare N llamadas simultáneas a regenerateBriefAction obtiene N generaciones pagadas por develOP y el contador queda en 1; puede repetirlo cada 4 horas hasta tres veces por semana.",
+   "propuesta": "Reservar el cupo antes de llamar al LLM con un update condicional (where executiveBriefRegenerations < 3 y última regeneración vieja, con increment) y seguir solo si afectó una fila, o sumar checkRateLimit por org.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-inicio",
+    "int.vertex",
+    "modelo.Organization"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "SEC-032 (costo de Vertex)",
+   "tmp": "D6-c2/D6-T1/H19",
+   "lote": "D6-T1",
+   "verificador": null,
+   "dominio": "D2",
+   "caso": {
+    "titulo": "Regeneración del brief en paralelo",
+    "entorno": "dev local",
+    "precondiciones": "Credencial de Vertex válida en dev (hoy vencida); org con executiveBriefRegenerations = 0 y brief viejo.",
+    "pasos": [
+     "Abrir el inicio del portal del cliente en tres pestañas.",
+     "Hacer clic en 'Regenerar' en las tres casi a la vez.",
+     "Leer executiveBriefRegenerations de la org y los logs de llamadas al LLM."
+    ],
+    "esperado": "Una sola generación; las otras dos rechazadas.",
+    "senal_falla": "Tres textos distintos generados y el contador en 1.",
+    "escribe_db_o_email": true,
+    "hallazgos": "El tope de 3 regeneraciones semanales del brief es check-then-act"
+   },
+   "id_asignado": "SEC-043",
+   "vh_asignado": "VH-042"
+  }
+ ]
+}

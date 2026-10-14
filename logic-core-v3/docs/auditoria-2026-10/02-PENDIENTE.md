@@ -7,9 +7,9 @@
 | Área | Herramientas medidas | Funcionalidades | En L3 o más | Faltantes de L3 más comunes | FAL |
 |---|---:|---:|---:|---|---:|
 | h1 · Acceso | 5 / 5 | 14 | 0 | Sentry (11), autonomía (9), errores (8) | 3 |
-| h2 · Portal del cliente | 5 / 16 | 6 | 0 | mobile (2), sin mocks ni TODO (2), validación en servidor (2) | 1 |
+| h2 · Portal del cliente | 5 / 16 | 6 | 0 | mobile (2), sin mocks ni TODO (2), validación en servidor (2) | 3 |
 | h3 · Chatbot centralizado | 0 / 8 | 0 | 0 | — | 0 |
-| h4 · Panel de admin | 2 / 13 | 3 | 0 | autonomía (3), Sentry (2), errores (1) | 0 |
+| h4 · Panel de admin | 2 / 13 | 3 | 0 | autonomía (3), Sentry (2), errores (1) | 1 |
 | h5 · Setter y LeadOS | 0 / 7 | 0 | 0 | — | 0 |
 | h6 · Entradas públicas que alimentan lo interno | 0 / 2 | 0 | 0 | — | 0 |
 
@@ -90,6 +90,18 @@
 |---|---|---|---|
 | `h2.cli-inicio.estado-onboarding` Tarjeta 'Estamos configurando tu negocio' | L1 | vacíos, errores, sin mocks ni TODO | La tarjeta existe (OnboardingStatusCard.tsx:16-80, montada en dashboard/page.tsx:61) pero nada vivo crea las tareas: seed-tasks-for-org.ts:5 solo se llama desde módulos sin importadores y el alta actual no siembra (createClientOnly.ts:85). |
 
+### h2.cli-servicios — Mis servicios y módulos
+
+### [FAL-005] Activar, pausar o cancelar un módulo premium no tiene camino en la app y el precio congelado (priceLockedUsd) solo lo lee una suma, no la facturación
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/premium-modules.ts:103` — «export async function activateModule(»; `src/lib/premium-modules.ts:127` — «update: { status: 'ACTIVE', pausedAt: null,»; `src/lib/actions/upsell.ts:66` — «status: 'INACTIVE', priceLockedUsd: 0,»; `prisma/schema.prisma:1195` — «status OrganizationModuleStatus @default(ACTIVE) activatedAt DateTime @default(now())»; `src/lib/billing/get-current-plan.ts:92` — «priceMonthlyUsd: om.module.priceMonthlyUsd ?? 0,»; `src/components/dashboard/CurrentPlanCard.tsx:147` — «Activo desde {formatDate(moduleData.activatedAt)}»; `src/lib/data/onboarding-tasks.ts:37` — «'Activar los OrganizationModule según lo que pagó el cliente. Ej: Motor de Reseñas si lo contrató.',»
+- Impacto: Bloqueante para el primer cliente que compre un módulo: develOP no puede activarlo, pausarlo ni cancelarlo desde el admin (activateModule y cancelModule no tienen llamadores, PAUSED no lo escribe nadie); hay que editar organization_module a mano en la Neon compartida. La única fila que existe es la del pedido de upsell (INACTIVE, priceLockedUsd 0, activatedAt = fecha del pedido): si se activa esa fila (a mano o con activateModule tal como está, que no toca precio ni fecha), queda con precio congelado 0 y el portal muestra 'Activo desde' la fecha del pedido. Como el portal muestra el precio vivo del catálogo y no priceLockedUsd, subir un precio en /admin/settings cambia lo que ve un cliente que ya contrató. El default ACTIVE del schema activaría gratis cualquier alta futura que olvide el status.
+- Propuesta: Exponer en /admin/clients/<id> una action con requireSuperAdmin y Zod que active, pause o cancele, usando activateModule corregido (en el update setear priceLockedUsd del catálogo y activatedAt al pasar de INACTIVE/CANCELLED a ACTIVE, y pausedAt al pausar); leer priceLockedUsd en get-current-plan. Decisión para Valentino (schema FROZEN): default INACTIVE en OrganizationModule.status.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-servicios, h2.cli-plan, h4.adm-clientes, modelo.OrganizationModule, modelo.PremiumModule, lib.actions
+
 ### h2.cli-mensajes — Mensajes
 
 - Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 1 funcionalidades: 1×L2).
@@ -98,6 +110,18 @@
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h2.cli-mensajes.mensaje-precargado` Mensaje precargado por contexto | L2 | — | MessageThread.tsx:72-88 lee context/moduleName -> message-context.ts:54-63 -> setInputValue; respuestas rápidas en MessageThread.tsx:173. El envío lo hace la action de mensajes (fuera del lote). |
+
+### h2.cli-plan — Mi plan
+
+### [FAL-006] La facturación no tiene escritor: ninguna pantalla crea ni cambia Invoice, Subscription.status nunca sale de ACTIVE y renewalDate no se escribe, pero el portal, las alertas, el MRR y el health score los leen
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/_actions/plan.actions.ts:187` — «await prisma.subscription.create({ data: { organizationId,»; `src/app/(protected)/dashboard/cuenta/facturacion/page.tsx:70` — «prisma.invoice.findMany({ where: { organizationId },»; `src/app/(protected)/dashboard/cuenta/facturacion/page.tsx:118` — «Tu suscripción está vencida.{' '}»; `src/components/dashboard/SubscriptionBanner.tsx:8` — «if (!subscription || subscription.status !== 'PAST_DUE') {»; `src/lib/alerts.ts:244` — «renewalDate: { gte: today,»; `src/app/(protected)/admin/page.tsx:222` — «prisma.subscription.aggregate({ where: { status: SubscriptionStatus.ACTIVE,»; `src/lib/plan/get-plan-for-org.ts:98` — «const plan = sub?.plan»; `src/lib/health-score.ts:442` — «if (sub.status === 'PAST_DUE') return 30»
+- Impacto: Para el primer cliente: el historial de pagos de /dashboard/cuenta/facturacion queda vacío para siempre (Invoice solo la escribe prisma/seed.ts), nunca ve 'Pago pendiente' ni el aviso de vencimiento, y si deja de pagar sigue ACTIVE: el MRR y el conteo de clientes activos del admin lo incluyen, el health score no baja, la alerta SUBSCRIPTION_EXPIRING no puede disparar (renewalDate null en toda alta hecha desde la app) y el bot conserva el plan completo porque getPlanForOrg no mira status. Las suscripciones del seed traen renewalDate a 30 días: pasada esa fecha la org demo ve 'Tu suscripción está vencida' sin forma de salir.
+- Propuesta: Decidir dónde vive la facturación: si es externa, ocultar el historial y los avisos que dependen de Invoice/status/renewalDate y sacarlos del MRR; si es interna, agregar en el admin alta de Invoice, marcar pagada (paidAt) y las transiciones de Subscription (ACTIVE, PAST_DUE, CANCELED con renewalDate), y que getPlanForOrg caiga al plan de respaldo con CANCELED.
+- Esfuerzo: L  ·  Zona: libre
+- Relacionado: [BUG-010]
+- Nodo(s): h2.cli-plan, h4.adm-clientes, h4.adm-dashboard, modelo.Invoice, modelo.Subscription, lib.plan
 
 ### h2.cli-cuenta — Mi cuenta
 
@@ -150,6 +174,18 @@
 |---|---|---|---|
 | `h4.adm-clientes.archivar-cliente` Archivar y desarchivar cliente | L2 | Sentry, autonomía | ClientsListClient.tsx:161-171 -> archiveClient.ts:16-37 (requireSuperAdmin, Zod, update deletedAt) -> page.tsx:23/:34. Funciona como filtro, pero no suspende nada (ver hallazgo). |
 | `h4.adm-clientes.eliminar-cliente` Eliminar cliente (hard-delete) | L2 | Sentry, autonomía | ClientsListClient.tsx:192-206 -> hardDeleteClient.ts:107-123 (resumen) -> ClientsListClient.tsx:222-243 -> hardDeleteClient.ts:125-145 (tx + delete) -> audit :166-178. |
+
+### h4.adm-proyectos — Proyectos
+
+### [FAL-007] El ciclo de vida de Project no modela mantenimiento ni cancelación: maintenanceStartDate no tiene escritor, deliveredAt no se limpia al reabrir y la migración v2 convirtió CANCELADO en COMPLETED
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:115` — «const isInMaintenance = Boolean(project.maintenanceStartDate)»; `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:204` — «El proyecto pasara a mantenimiento cuando tenga una fecha de inicio de mantenimiento.»; `src/app/(protected)/admin/projects/_actions/maintenance.actions.ts:120` — «if (!project.maintenanceStartDate) { return fail('Project has no maintenance start date')»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:750` — «status: parsed.status, ...(parsed.status === ProjectStatus.COMPLETED ? { deliveredAt: new Date() }»; `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:135` — «WHEN 'EN_MANTENIMIENTO' THEN 'IN_PROGRESS'::"ProjectStatus" WHEN 'CANCELADO' THEN 'COMPLETED'::"ProjectStatus"»; `prisma/schema.prisma:38` — «enum ProjectStatus { PLANNING IN_PROGRESS»
+- Impacto: Para el primer proyecto entregado con abono mensual: ninguna action ni formulario escribe maintenanceStartDate (solo seed-agency-os.ts y los proyectos migrados lo tienen), así que 'Generar meses pendientes' nunca aparece y el mantenimiento no se puede cobrar por el flujo previsto. Reabrir un proyecto COMPLETED deja el deliveredAt viejo y volver a completarlo pisa la fecha real de entrega. Un proyecto cancelado no tiene estado posible: los CANCELADO legacy quedaron COMPLETED y el cliente los ve como 'Completado'.
+- Propuesta: Agregar el inicio de mantenimiento a la edición del proyecto (o setearlo al completar si hay monthlyRate), limpiar deliveredAt al salir de COMPLETED y no pisarlo si ya existe. Decisión para Valentino (schema FROZEN): sumar CANCELLED (y quizá MAINTENANCE) a ProjectStatus y revisar los proyectos legacy que eran CANCELADO.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-proyectos, h2.cli-proyecto, modelo.Project, modelo.OsMaintenancePayment
 
 ### h4.adm-config — Configuración
 
