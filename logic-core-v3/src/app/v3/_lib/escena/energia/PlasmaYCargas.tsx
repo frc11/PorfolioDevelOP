@@ -4,7 +4,9 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useRef, type RefObject } from 'react'
 import * as THREE from 'three'
 
+import { AMANECER_EN_VIVO } from '../amanecer/luz'
 import { hayBanco } from '../entorno'
+import { nocheDeLaEnergia } from '../entorno/nocheDelLogo'
 import { PEDIDOS_DEL_PASE } from '../pase/pase'
 import { NACE_EN } from '../entorno/Pulso'
 import { PULSO_VIVO, VIVO } from '../entorno/vivo'
@@ -78,7 +80,8 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
     state.gl.getDrawingBufferSize(u.uResolucion.value)
     u.uPixel.value = state.gl.getPixelRatio()
     if (state.camera instanceof THREE.PerspectiveCamera) u.uEscalaPx.value = u.uResolucion.value.y / (2 * Math.tan(THREE.MathUtils.degToRad(state.camera.fov) / 2))
-    u.uNoche.value = VIVO.uNoche.value
+    // [PULIDO 26] X3 · la noche de la energía sigue al frente del amanecer (sin el salto del cambio: `nocheDeLaEnergia`).
+    u.uNoche.value = nocheDeLaEnergia(VIVO.uNoche.value, AMANECER_EN_VIVO.uBarridoDelDia.value, AMANECER_EN_VIVO.uFrenteDelDia.value)
     // [PULIDO 18] P1.c · de día, el calor refracta lo de atrás: la copia del cuadro (el pase compartido).
     if (u.uNoche.value < 0.97) PEDIDOS_DEL_PASE.colorEsteCuadro = true
     u.uFoco.value = state.camera.position.distanceTo(a.centro)

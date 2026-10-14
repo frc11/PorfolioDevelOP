@@ -18,3 +18,18 @@ export function nocheDelLogo(noche: number, barrido: number, frente: number): nu
   const alcanzado = u * u * (3 - 2 * u)
   return 1 - (1 - noche) * alcanzado
 }
+
+/**
+ * [PULIDO 26] X3 · LA NOCHE DE LA ENERGÍA (las cargas, los arcos y la red): en el amanecer la sala sostiene la noche hasta el cambio y
+ * después pasa a día de un cuadro al otro (lo demás lo destapa el frente): las cargas, que leían la noche de la sala, pasaban de golpe
+ * del brillo al grafito. Ahora siguen el MISMO frente del amanecer: de noche hasta que el frente entra a la sala (`desde`, u de radio) y
+ * de día cuando llega al logo (`hasta`), con la curva suave; hacia atrás (el atardecer, el rebobinado), igual. Sin barrido, la de la sala.
+ */
+export const NOCHE_DE_LA_ENERGIA = { desde: 40, hasta: 0 } as const
+
+export function nocheDeLaEnergia(noche: number, barrido: number, frente: number): number {
+  if (barrido < 0.5) return noche
+  const N = NOCHE_DE_LA_ENERGIA
+  const u = Math.min(1, Math.max(0, (N.desde - frente) / (N.desde - N.hasta)))
+  return 1 - (1 - noche) * u * u * (3 - 2 * u)
+}

@@ -67,7 +67,7 @@ export const CLARO_EN_REPOSO: Readonly<Record<Estilo, number>> = { chispa: 0 }
  * ellas, cuántas casi no se ven (parte de las partículas) y cuánto, la perspectiva aérea (cuánto se funden con el papel las lejanas, entre
  * qué distancias en veces la del logo) y cuánto más se apagan sobre un texto.
  */
-export const DIA_SECUNDARIO = { tope: 0.36, tamano: 0.7, variacion: 0.6, menos: 0.4, casiNada: 0.12, aerea: 0.9, desde: 0.9, hasta: 2.2, textos: 0.98 } as const
+export const DIA_SECUNDARIO = { tope: 0.36, tamano: 0.7, variacion: 0.6, menos: 0.4, casiNada: 0.12, aerea: 0.9, desde: 0.9, hasta: 2.2, textos: 0.98, desfase: 0.5 } as const
 const D = DIA_SECUNDARIO
 const g = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
 
@@ -132,8 +132,16 @@ varying float vDistancia;
 varying float vSuave;
 varying float vCruz;
 varying float vCalor;
+varying float vNoche;
+// [PULIDO 26] X3 · cada una cambia de noche a día un poco corrida (no todas a la vez): sólo a mitad del cambio; de acá en adelante la
+// noche (\`uNoche\`) es la suya.
+float nocheDeLaParticula( uint id ) {
+	return clamp( uNoche + ( azar01( id, 34u ) - 0.5 ) * ${g(D.desfase)} * 4.0 * uNoche * ( 1.0 - uNoche ), 0.0, 1.0 );
+}
+#define uNoche vNoche
 void main() {
 	uint id = uint( gl_InstanceID );
+	vNoche = nocheDeLaParticula( id );
 	vec3 p = aLugar;
 	float e = aEnergia;
 	vec3 vel = aVelocidad;
@@ -246,6 +254,8 @@ varying float vDistancia;
 varying float vSuave;
 varying float vCruz;
 varying float vCalor;
+varying float vNoche;
+#define uNoche vNoche
 void main() {
 	// La distancia (px) al tramo de la estela (de la cola, 0, a la cabeza, vLargo); la cola más tenue.
 	float x = vLocal.x < 0.0 ? vLocal.x : max( 0.0, vLocal.x - vLargo );
