@@ -1,0 +1,130 @@
+import * as THREE from 'three'
+
+import { FLOOR_Y } from '../probeScene'
+import { CRISTAL, azarDelCristal } from './cristal'
+
+/**
+ * [PULIDO 23] U1 · EL MURO DE CRISTAL: UN VITRAL ROTO (el humano lo dibujó: un parabrisas astillado). Una sola malla continua que envuelve
+ * la escena (los 360°, del piso hasta arriba de la trama), en un cilindro adentro de la trama y de la fábrica de logos, partida en celdas
+ * de Voronoi IRREGULARES que comparten sus bordes (cero huecos: cada borde es el mismo segmento en las dos celdas). Las celdas se arman en
+ * el cilindro desenrollado (periódico en el ancho: las semillas se copian a los dos lados) recortando un rectángulo por la mediatriz con
+ * cada vecina; cada una, un abanico desde su centro. Cada celda tiene su normal apenas inclinada (desfasa la refracción entre celdas) y
+ * cada vértice sabe cuánto es centro (`aInterior`: 1 el centro, 0 el borde): el sombreador traza ahí la línea de quiebre. Mira hacia
+ * adentro (una sola cara). Puro salvo la geometría de three.
+ */
+export interface Celda {
+  /** Su polígono en el cilindro desenrollado (pares u, v: u a lo largo del perímetro, v desde el piso), en orden. */
+  readonly poligono: readonly number[]
+  /** Su inclinación: alrededor de la vertical y de la tangente (rad). */
+  readonly giro: readonly [number, number]
+}
+
+type P = [number, number]
+
+/** El ancho del cilindro desenrollado (u) y su alto (u). */
+export function medidasDelMuro(): { readonly ancho: number; readonly alto: number } {
+  return { ancho: 2 * Math.PI * CRISTAL.muro.radio, alto: CRISTAL.muro.alto }
+}
+
+/** Recorta el polígono `p` al semiplano de los puntos más cerca de `a` que de `b` (Sutherland–Hodgman). */
+function recortar(p: P[], a: P, b: P): P[] {
+  const nx = b[0] - a[0]
+  const ny = b[1] - a[1]
+  const c = (b[0] * b[0] + b[1] * b[1] - a[0] * a[0] - a[1] * a[1]) / 2
+  const dentro = (q: P): number => c - (nx * q[0] + ny * q[1])
+  const salida: P[] = []
+  for (let k = 0; k < p.length; k += 1) {
+    const q = p[k]
+    const r = p[(k + 1) % p.length]
+    const dq = dentro(q)
+    const dr = dentro(r)
+    if (dq >= 0) salida.push(q)
+    if (dq >= 0 !== dr >= 0) {
+      const t = dq / (dq - dr)
+      salida.push([q[0] + (r[0] - q[0]) * t, q[1] + (r[1] - q[1]) * t])
+    }
+  }
+  return salida
+}
+
+/** Las celdas del muro (siempre las mismas: la semilla), del Voronoi periódico de una grilla desordenada. */
+export function celdasDelMuro(): Celda[] {
+  const M = CRISTAL.muro
+  const { ancho, alto } = medidasDelMuro()
+  const azar = azarDelCristal(M.semilla)
+  const cw = ancho / M.columnas
+  const ch = alto / M.filas
+  const semillas: P[] = []
+  for (let f = 0; f < M.filas; f += 1) {
+    for (let c = 0; c < M.columnas; c += 1) {
+      const u = (c + 0.5 + (f % 2) * 0.5 + (azar() - 0.5) * M.desorden) * cw
+      const v = Math.min(alto - 0.05 * ch, Math.max(0.05 * ch, (f + 0.5 + (azar() - 0.5) * M.desorden) * ch))
+      semillas.push([((u % ancho) + ancho) % ancho, v])
+    }
+  }
+  const alcance = 3 * Math.max(cw, ch)
+  const inclina = THREE.MathUtils.degToRad(M.inclinacionGrados)
+  return semillas.map((s) => {
+    let p: P[] = [[s[0] - alcance, 0], [s[0] + alcance, 0], [s[0] + alcance, alto], [s[0] - alcance, alto]]
+    for (const o of semillas) {
+      for (const corre of [-ancho, 0, ancho]) {
+        const b: P = [o[0] + corre, o[1]]
+        if ((b[0] === s[0] && b[1] === s[1]) || Math.abs(b[0] - s[0]) > alcance || Math.abs(b[1] - s[1]) > alcance) continue
+        p = recortar(p, s, b)
+      }
+    }
+    return { poligono: p.flat(), giro: [(azar() - 0.5) * 2 * inclina, (azar() - 0.5) * 2 * inclina] }
+  })
+}
+
+const N = new THREE.Vector3()
+const T = new THREE.Vector3()
+const Q = new THREE.Quaternion()
+const EJE_Y = new THREE.Vector3(0, 1, 0)
+
+/** Un punto del cilindro desenrollado (u, v) en el mundo. */
+function enElMundo(u: number, v: number, destino: THREE.Vector3): THREE.Vector3 {
+  const a = u / CRISTAL.muro.radio
+  return destino.set(Math.sin(a) * CRISTAL.muro.radio, FLOOR_Y + v, Math.cos(a) * CRISTAL.muro.radio)
+}
+
+/** El muro en un búfer: por celda, un abanico desde su centro, mirando hacia adentro; la normal (inclinada, plana por celda) y `aInterior`. */
+export function armarElMuro(celdas: readonly Celda[]): THREE.BufferGeometry {
+  const posicion: number[] = []
+  const normal: number[] = []
+  const interior: number[] = []
+  const c = new THREE.Vector3()
+  const a = new THREE.Vector3()
+  const b = new THREE.Vector3()
+  for (const celda of celdas) {
+    const p = celda.poligono
+    const n = p.length / 2
+    if (n < 3) continue
+    let cu = 0
+    let cv = 0
+    for (let k = 0; k < n; k += 1) {
+      cu += p[k * 2] / n
+      cv += p[k * 2 + 1] / n
+    }
+    enElMundo(cu, cv, c)
+    // La normal: hacia el centro de la sala, inclinada un poco alrededor de la vertical y de la tangente.
+    N.set(-c.x, 0, -c.z).normalize()
+    T.crossVectors(EJE_Y, N).normalize()
+    N.applyQuaternion(Q.setFromAxisAngle(EJE_Y, celda.giro[0])).applyQuaternion(Q.setFromAxisAngle(T, celda.giro[1]))
+    for (let k = 0; k < n; k += 1) {
+      enElMundo(p[k * 2], p[k * 2 + 1], a)
+      enElMundo(p[((k + 1) % n) * 2], p[((k + 1) % n) * 2 + 1], b)
+      // La cara de adelante mira hacia adentro (el orden de los vértices).
+      const hacia = new THREE.Vector3().subVectors(a, c).cross(new THREE.Vector3().subVectors(b, c)).dot(c) < 0
+      const [x, y] = hacia ? [a, b] : [b, a]
+      posicion.push(c.x, c.y, c.z, x.x, x.y, x.z, y.x, y.y, y.z)
+      for (let q = 0; q < 3; q += 1) normal.push(N.x, N.y, N.z)
+      interior.push(1, 0, 0)
+    }
+  }
+  const g = new THREE.BufferGeometry()
+  g.setAttribute('position', new THREE.Float32BufferAttribute(posicion, 3))
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(normal, 3))
+  g.setAttribute('aInterior', new THREE.Float32BufferAttribute(interior, 1))
+  return g
+}

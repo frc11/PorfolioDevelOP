@@ -28,8 +28,8 @@ import type { Armada } from '../escena/pie3d/armadas'
 import { aplicarLaCaida, armarLaCaida, crearLaCaidaDelPie, sombrasDeLaCaida, type CaidaDelPie } from '../escena/pie3d/caida'
 import { colocarLaPieza } from '../escena/pie3d/colocacion'
 import { FLOOR_Y } from '../escena/probeScene'
-import { CRISTAL, esquirlasDelCristal, zonaDelCristal } from '../escena/cristal/cristal'
-import { armarLasEsquirlas } from '../escena/cristal/esquirlas'
+import { CRISTAL } from '../escena/cristal/cristal'
+import { armarElMuro, celdasDelMuro, medidasDelMuro } from '../escena/cristal/muro'
 import { CAPA_DEL_FONDO, NOMBRES_DEL_FONDO } from '../escena/cristal/fondo'
 import { FRAGMENTOS_DEL_VIDRIO, VERTICES_DEL_VIDRIO, armarElVidrio, uniformesDelVidrio } from '../escena/cristal/vidrio'
 import { CAMINO } from '../escena/energia/arcos/camino'
@@ -394,52 +394,63 @@ afirmar(sombrasBien(SOMBRAS), `  las sombras de contacto: ${String(SOMBRAS.mitad
 controlPositivo('  el detector VE sombras que se quedan al terminar', { ...SOMBRAS, alFinal: 1 }, sombrasBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('R2 · El cristal de esquirlas: sólo en el borde, nunca sobre un texto ni el logo, nunca tapa una partícula, refracta sólo el fondo')
+titulo('R2 · El cristal: [PULIDO 23] U1 · un muro continuo (un vitral roto) sin máscaras, nunca de espaldas, nunca tapa una partícula, refracta sólo el fondo')
 
-// Dónde se ve (lo mismo que el sombreador): adentro de una caja del texto, en el rectángulo del logo y en el centro, cero; en el borde
-// del cuadro lejos de todo, entero; el fundido, entre medio.
-const CAJAS = [-0.95, 0.55, -0.3, 0.8, 0.2, -0.95, 0.6, -0.85]
-const LOGO_EN_EL_CUADRO = [-0.1, -0.4, 0.5, 0.4]
-type Zona = typeof zonaDelCristal
-const zonaBien = (z: Zona): boolean => {
-  let enCajas = 0
-  for (let k = 0; k < 2; k += 1) for (let i = 0; i <= 10; i += 1) for (let j = 0; j <= 10; j += 1) {
-    const x = CAJAS[k * 4] + ((CAJAS[k * 4 + 2] - CAJAS[k * 4]) * i) / 10
-    const y = CAJAS[k * 4 + 1] + ((CAJAS[k * 4 + 3] - CAJAS[k * 4 + 1]) * j) / 10
-    enCajas = Math.max(enCajas, z(x, y, 1.6, CAJAS, 2, LOGO_EN_EL_CUADRO))
+// [PULIDO 23] U1 · el sentido cambió por pedido: las esquirlas sueltas (con rendijas, de espaldas y desvanecidas por máscaras cerca de
+// los textos y del logo) se borraron. Ahora un MURO: las celdas de Voronoi del cilindro desenrollado comparten sus bordes (cada borde que
+// no es el piso ni el techo está en exactamente dos celdas), cubren el cilindro entero sin solaparse (la suma de las áreas es la del
+// cilindro) y cada triángulo mira hacia adentro (la única cara que se dibuja: la cámara está adentro).
+const CELDAS = celdasDelMuro()
+const MURO = armarElMuro(CELDAS)
+const { ancho: ANCHO_DEL_MURO, alto: ALTO_DEL_MURO } = medidasDelMuro()
+interface DelMuro { readonly celdas: number; readonly sueltos: number; readonly area: number; readonly deEspaldas: number; readonly triangulos: number }
+function medirElMuro(celdas: readonly { readonly poligono: readonly number[] }[], g: THREE.BufferGeometry): DelMuro {
+  const clave = (u: number, v: number): string => `${String(Math.round((((u % ANCHO_DEL_MURO) + ANCHO_DEL_MURO) % ANCHO_DEL_MURO) * 1e3) % Math.round(ANCHO_DEL_MURO * 1e3))},${String(Math.round(v * 1e3))}`
+  const bordes = new Map<string, number>()
+  let area = 0
+  for (const c of celdas) {
+    const p = c.poligono
+    const n = p.length / 2
+    for (let k = 0; k < n; k += 1) {
+      const [u0, v0, u1, v1] = [p[k * 2], p[k * 2 + 1], p[((k + 1) % n) * 2], p[((k + 1) % n) * 2 + 1]]
+      area += (u0 * v1 - u1 * v0) / 2
+      if ((v0 < 1e-6 && v1 < 1e-6) || (v0 > ALTO_DEL_MURO - 1e-6 && v1 > ALTO_DEL_MURO - 1e-6)) continue
+      const [a, b] = [clave(u0, v0), clave(u1, v1)].sort()
+      bordes.set(`${a}|${b}`, (bordes.get(`${a}|${b}`) ?? 0) + 1)
+    }
   }
-  let enElLogo = 0
-  for (let i = 0; i <= 10; i += 1) for (let j = 0; j <= 10; j += 1) enElLogo = Math.max(enElLogo, z(-0.1 + 0.06 * i, -0.4 + 0.08 * j, 1.6, CAJAS, 2, LOGO_EN_EL_CUADRO))
-  return enCajas === 0 && enElLogo === 0 && z(0, 0, 1.6, [], 0, null) === 0 && z(0.97, -0.95, 1.6, CAJAS, 2, LOGO_EN_EL_CUADRO) === 1 && z(-0.97, -0.2, 1.6, CAJAS, 2, LOGO_EN_EL_CUADRO) === 1
+  const pos = g.getAttribute('position')
+  const [A, B, C] = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()]
+  let deEspaldas = 0
+  for (let t = 0; t < pos.count; t += 3) {
+    A.fromBufferAttribute(pos, t)
+    B.fromBufferAttribute(pos, t + 1)
+    C.fromBufferAttribute(pos, t + 2)
+    const normal = new THREE.Vector3().subVectors(B, A).cross(new THREE.Vector3().subVectors(C, A))
+    if (normal.x * A.x + normal.z * A.z >= 0) deEspaldas += 1
+  }
+  return { celdas: celdas.length, sueltos: [...bordes.values()].filter((x) => x !== 2).length, area: Math.abs(area), deEspaldas, triangulos: pos.count / 3 }
 }
-afirmar(zonaBien(zonaDelCristal), '  dónde se ve: cero en cada caja del texto, en el rectángulo del logo y en el centro (la elipse segura); entero en el borde, lejos de todo')
-controlPositivo('  el detector VE un cristal que no mira los textos', ((x: number, y: number, a: number, _t: ArrayLike<number>, _n: number, l: ArrayLike<number> | null) => zonaDelCristal(x, y, a, [], 0, l)) as Zona, zonaBien)
-controlPositivo('  y uno que no mira el logo', ((x: number, y: number, a: number, t: ArrayLike<number>, n: number) => zonaDelCristal(x, y, a, t, n, null)) as Zona, zonaBien)
-
-// Las esquirlas: en el anillo contra el domo (lejos del centro), a alturas y tamaños distintos, facetadas (cascos convexos con canto,
-// caras y cresta: cada vértice sabe cuánto es canto), en un solo búfer.
-const ESQUIRLAS = esquirlasDelCristal()
-const GEOMETRIA = armarLasEsquirlas(ESQUIRLAS)
-const FILOS = new Set(Array.from(GEOMETRIA.getAttribute('aFilo').array as Float32Array, (v) => Math.round(v * 100) / 100))
-const E = CRISTAL.esquirlas
-const esquirlasBien = (es: typeof ESQUIRLAS, triangulos: number, filos: ReadonlySet<number>): boolean => es.length === E.cuantas && es.every((e) => {
-  const r = Math.hypot(e.x, e.z)
-  return r >= E.radio[0] - 1e-9 && r <= E.radio[1] + 1e-9 && e.y >= FLOOR_Y + E.alto[0] - 1e-9 && e.y <= FLOOR_Y + E.alto[1] + 1e-9 && e.largo >= E.largo[0] && e.largo <= E.largo[1] && Math.abs(e.velocidad) > 0
-}) && triangulos >= es.length * 12 && [0, 0.35, 1].every((f) => filos.has(f)) && filos.size === 3
-afirmar(esquirlasBien(ESQUIRLAS, GEOMETRIA.getAttribute('position').count / 3, FILOS), `  ${String(ESQUIRLAS.length)} esquirlas en el anillo de ${String(E.radio[0])} a ${String(E.radio[1])} u (contra el domo), de ${String(E.largo[0])} a ${String(E.largo[1])} u, facetadas: ${String(GEOMETRIA.getAttribute('position').count / 3)} triángulos en un búfer, cada vértice canto, cara o cresta`)
-controlPositivo('  el detector VE una esquirla en el centro de la sala', [...ESQUIRLAS.slice(1), { ...ESQUIRLAS[0], x: 2, z: 2 }], (es: typeof ESQUIRLAS) => esquirlasBien(es, GEOMETRIA.getAttribute('position').count / 3, FILOS))
-GEOMETRIA.dispose()
+const DEL_MURO = medirElMuro(CELDAS, MURO)
+const muroBien = (m: DelMuro): boolean => m.celdas === CRISTAL.muro.columnas * CRISTAL.muro.filas && m.sueltos === 0 && Math.abs(m.area / (ANCHO_DEL_MURO * ALTO_DEL_MURO) - 1) < 1e-3 && m.deEspaldas === 0 && m.triangulos > m.celdas * 3
+afirmar(muroBien(DEL_MURO), `  un muro: ${String(DEL_MURO.celdas)} celdas de Voronoi que comparten todos sus bordes (ninguno suelto), cubren el cilindro entero (${String(CRISTAL.muro.radio)} u, ${String(CRISTAL.muro.alto)} de alto: el área, la suma) y miran hacia adentro (${String(DEL_MURO.triangulos)} triángulos, ninguno de espaldas)`)
+controlPositivo('  el detector VE un muro con un hueco (una celda menos)', medirElMuro(CELDAS.slice(1), MURO), muroBien)
+const DADO_VUELTA = MURO.clone()
+const P0 = DADO_VUELTA.getAttribute('position')
+for (let k = 0; k < 3; k += 1) [P0.array[3 + k], P0.array[6 + k]] = [P0.array[6 + k], P0.array[3 + k]]
+controlPositivo('  y uno con un triángulo de espaldas', medirElMuro(CELDAS, DADO_VUELTA), muroBien)
+DADO_VUELTA.dispose()
 
 // Nunca tapa una partícula ni dobla un texto o el logo: va ANTES que todo lo transparente que no es fondo (las partículas en 0, la energía
 // desde −10, el espejo en −14), no escribe profundidad (sí la lee: lo de adelante la tapa), sólo las caras de adelante; el sombreador
 // refracta SÓLO el fondo (`uFondo`: ni la copia del cuadro ni la profundidad del pase, lo de PULIDO 19), se desvanece donde la refracción
-// mira fuera del fondo, y no se dibuja en las cajas (la barra y los textos) ni en el logo; el fondo es una capa propia con lo de atrás nada
-// más; y la cámara es la de ESTE cuadro (su matriz, al día antes de leerla: con la del cuadro anterior el cristal de PULIDO 19 vibraba).
+// mira fuera del fondo; [PULIDO 23] U1 · SIN máscaras (ni cajas, ni logo, ni la elipse, ni la cercanía: lo tapa la profundidad), con la
+// línea de quiebre por píxel y quieto (sin el reloj en el vértice); el fondo es una capa propia con lo de atrás nada más; y la cámara es la de ESTE cuadro (su matriz, al día antes de leerla: con la del cuadro anterior el cristal de PULIDO 19 vibraba).
 const DEPTH = leer('_lib/escena/DepthParticles.tsx')
 const BOKEH = leer('_lib/escena/BokehParticles.tsx')
 const CRISTAL_TSX = ESCENA('cristal/CristalDeLaEscena.tsx')
 const FONDO_TS = ESCENA('cristal/fondo.ts')
-const MALLA = armarElVidrio(new THREE.BufferGeometry(), uniformesDelVidrio(), ESQUIRLAS.length)
+const MALLA = armarElVidrio(new THREE.BufferGeometry(), uniformesDelVidrio(), CELDAS.length)
 interface DelVidrio {
   readonly orden: number
   readonly particulasSinOrden: boolean
@@ -450,21 +461,23 @@ interface DelVidrio {
   readonly fondo: readonly string[]
   readonly pase: string
 }
-const DEL_VIDRIO: DelVidrio = { orden: MALLA.renderOrder, particulasSinOrden: !/renderOrder/.test(DEPTH) && !/renderOrder/.test(BOKEH), material: MALLA.material as THREE.Material, fragmentos: FRAGMENTOS_DEL_VIDRIO, vertices: VERTICES_DEL_VIDRIO(ESQUIRLAS.length), componente: CRISTAL_TSX, fondo: NOMBRES_DEL_FONDO, pase: FONDO_TS }
+const DEL_VIDRIO: DelVidrio = { orden: MALLA.renderOrder, particulasSinOrden: !/renderOrder/.test(DEPTH) && !/renderOrder/.test(BOKEH), material: MALLA.material as THREE.Material, fragmentos: FRAGMENTOS_DEL_VIDRIO, vertices: VERTICES_DEL_VIDRIO(CELDAS.length), componente: CRISTAL_TSX, fondo: NOMBRES_DEL_FONDO, pase: FONDO_TS }
 const vidrioBien = (v: DelVidrio): boolean => v.orden < ORDEN_DEL_ESPEJO && v.orden < ORDEN_DE_LA_ENERGIA && v.orden < 0 && v.particulasSinOrden &&
   v.material.transparent && !v.material.depthWrite && v.material.depthTest && v.material.side === THREE.FrontSide &&
-  v.fragmentos.includes('texture2D( uFondo,') && !v.fragmentos.includes('uColorDeLaEscena') && !v.fragmentos.includes('distanciaALoOpaco') && v.fragmentos.includes('amp *= adentro;') && v.fragmentos.includes('zona *= 1.0 - adentroDeLasCajas( ndc );') && v.fragmentos.includes('fueraDeLaCaja( ndc, uLogo )') &&
-  v.vertices.includes('float a = G.w * uTiempo + V.y;') && !/random|Math\.random/.test(v.vertices) &&
-  /cam\.updateMatrixWorld\(\)[\s\S]*uVista\.value\.multiplyMatrices\(cam\.projectionMatrix, cam\.matrixWorldInverse\)/.test(v.componente) && v.componente.includes('cajasDeLaBarra(u.uCajas.value') &&
+  v.fragmentos.includes('texture2D( uFondo,') && !v.fragmentos.includes('uColorDeLaEscena') && !v.fragmentos.includes('distanciaALoOpaco') && v.fragmentos.includes('amp *= adentro;') && !/uCajas|uLogo|uZona|uCerca|adentroDeLasCajas/.test(v.fragmentos) && v.fragmentos.includes('fwidth( vInterior )') &&
+  !v.vertices.includes('uTiempo') && !/random|Math\.random/.test(v.vertices) &&
+  /cam\.updateMatrixWorld\(\)[\s\S]*uVista\.value\.multiplyMatrices\(cam\.projectionMatrix, cam\.matrixWorldInverse\)/.test(v.componente) && !/cajasDelTexto|rectanguloDelLogo|uCajas/.test(v.componente) &&
   !v.fondo.some((n) => /polvo|bokeh|logo|t[ií]tulo|pie|energ|plasma/i.test(n)) && v.pase.includes('camara.layers.set(CAPA_DEL_FONDO)') && v.pase.includes('o instanceof THREE.Light') && Number(CAPA_DEL_FONDO) !== Number(PASE.capa)
-afirmar(vidrioBien(DEL_VIDRIO), `  nunca tapa una partícula (orden ${String(DEL_VIDRIO.orden)}: antes que el espejo, la energía y las partículas; sin escribir profundidad), refracta sólo el fondo (${NOMBRES_DEL_FONDO.join(', ')}), se desvanece donde mira afuera, nunca en las cajas ni el logo, con la cámara de este cuadro; las esquirlas giran con el reloj (sin temblor)`)
+afirmar(vidrioBien(DEL_VIDRIO), `  nunca tapa una partícula (orden ${String(DEL_VIDRIO.orden)}: antes que el espejo, la energía y las partículas; sin escribir profundidad), refracta sólo el fondo (${NOMBRES_DEL_FONDO.join(', ')}), se desvanece donde mira afuera, sin máscaras (lo tapa sólo lo que está delante), con la línea de quiebre, la cámara de este cuadro y quieto`)
 controlPositivo('  el detector VE el cristal después de las partículas', { ...DEL_VIDRIO, orden: 1 }, vidrioBien)
 controlPositivo('  y uno que escribe profundidad', { ...DEL_VIDRIO, material: new THREE.MeshBasicMaterial({ transparent: true, depthWrite: true }) }, vidrioBien)
 controlPositivo('  y uno que lee la copia del cuadro (PULIDO 19: doblaba los textos)', { ...DEL_VIDRIO, fragmentos: `${FRAGMENTOS_DEL_VIDRIO}\nuniform sampler2D uColorDeLaEscena;` }, vidrioBien)
 controlPositivo('  y la cámara del cuadro anterior (PULIDO 19: vibraba)', { ...DEL_VIDRIO, componente: CRISTAL_TSX.replace('cam.updateMatrixWorld()', '') }, vidrioBien)
 controlPositivo('  y un fondo con el logo adentro', { ...DEL_VIDRIO, fondo: [...NOMBRES_DEL_FONDO, 'logo'] }, vidrioBien)
+controlPositivo('  y uno con la máscara del logo de vuelta', { ...DEL_VIDRIO, fragmentos: `${FRAGMENTOS_DEL_VIDRIO}\nuniform vec4 uLogo;` }, vidrioBien)
 controlPositivo('  y uno que estira en el borde (sin desvanecerse)', { ...DEL_VIDRIO, fragmentos: FRAGMENTOS_DEL_VIDRIO.replace('amp *= adentro;', '') }, vidrioBien)
 MALLA.geometry.dispose()
+MURO.dispose()
 ;(MALLA.material as THREE.Material).dispose()
 
 // Las variantes del fondo: `fondo=moire` (sin el cristal), `fondo=espejo` (sin la trama), `fondo=ambos` y nada (los dos); `cristal=no`
@@ -502,8 +515,8 @@ const medidoBien = (m: Medido): boolean => ['1440', '390'].every((w) => ['calma-
 afirmar(medidoBien(MEDIDO), `  en el sitio, con el cristal ningún cuadro de más de 20 ms a 1440 y 390 (calma y recorrido); cuesta ${costo(MEDIDO, '1440').toFixed(2)} ms por cuadro a 1440 y ${costo(MEDIDO, '390').toFixed(2)} a 390 (≤ ${String(COSTO_MAXIMO_MS)}); en calma la cámara no se mueve entre cuadros`)
 controlPositivo('  el detector VE un cuadro de 25 ms en el recorrido', { ...MEDIDO, '1440': { ...MEDIDO['1440'], 'recorrido-con-1': { ...(tanda(MEDIDO, '1440', 'recorrido-con-1') as Tanda), mayoresDe20: 1, maximo: 25 } } }, medidoBien)
 
-const MODULOS = ['cristal/cristal.ts', 'cristal/esquirlas.ts', 'cristal/vidrio.ts', 'cristal/fondo.ts', 'cristal/CristalDeLaEscena.tsx'].map((m) => [m, ESCENA(m)] as const)
-afirmar(MODULOS.every(([, t]) => lineasDeCodigo(t) <= 300) && sinReservasEn(ESCENA('cristal/cristal.ts'), 'zonaDelCristal'), '  los módulos del cristal, de menos de 300 líneas; la zona, sin reservas')
+const MODULOS = ['cristal/cristal.ts', 'cristal/muro.ts', 'cristal/vidrio.ts', 'cristal/fondo.ts', 'cristal/CristalDeLaEscena.tsx'].map((m) => [m, ESCENA(m)] as const)
+afirmar(MODULOS.every(([, t]) => lineasDeCodigo(t) <= 300) && sinReservasEn(ESCENA('cristal/cristal.ts'), 'amplitudPorDonde'), '  los módulos del cristal, de menos de 300 líneas; la amplitud por dónde está la página, sin reservas')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('R3 · La red en reposo: rayos congelados (el arco del plasma, quebrado y con su rama), en un búfer estático; el corte abre desde el medio')
