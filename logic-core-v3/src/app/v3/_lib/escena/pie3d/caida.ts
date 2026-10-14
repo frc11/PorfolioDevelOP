@@ -7,7 +7,7 @@ import { sombraDeLaPiezaQueCae } from '../final/sombraDeLaPieza'
 import { FLOOR_Y } from '../probeScene'
 import type { Armada } from './armadas'
 import { colocarLaPieza } from './colocacion'
-import { distanciaDeLaVista } from './encuadre'
+import { cajaDelPieAcostado, distanciaDeLaVista } from './encuadre'
 import { VOLUMEN_DEL_PIE } from './geometria'
 import { MAXIMO_DE_SOMBRAS_DEL_PIE, SOMBRAS_DEL_PIE } from './sombras'
 
@@ -132,6 +132,7 @@ const Q_UP = new THREE.Quaternion()
 const Q_TIP = new THREE.Quaternion()
 const EJE_X = new THREE.Vector3(1, 0, 0)
 const OFFSET = new THREE.Vector3()
+const CAJA_ACOSTADA = new Float64Array(4)
 
 const suave = (x: number): number => {
   const u = Math.min(1, Math.max(0, x))
@@ -250,7 +251,10 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
   c.primeraS = c.m === 0 ? Number.POSITIVE_INFINITY : CAIDA_AL_HUECO.golpeS
   // [PULIDO 20] R1 · la cámara del final de costado y lejos: el pie acostado y el logo en `ocupa` del cuadro (`encuadre.ts`).
   const V = FINAL_DEL_PIE.camara.escritorio
-  EN_VIVO.distanciaDelPie = c.m === 0 ? 0 : distanciaDeLaVista(camara.fov, camara.aspect, V.elevacion, ocupaDePie(c, cuadro.ancho), b.logoX, b.logoZ, b.derechaX, b.derechaZ, b.atrasX, b.atrasZ, c.huella[0], c.huella[1])
+  // [PULIDO 24] V3 · encuadrada en el centro del pie acostado con el logo (el blanco de la cámara baja ahí), con su caja.
+  cajaDelPieAcostado(c.columnas, c.m, c.lugares, b, CAJA_ACOSTADA)
+  EN_VIVO.centroDelPie.set(c.m === 0 ? 0 : CAJA_ACOSTADA[0], c.m === 0 ? 0 : CAJA_ACOSTADA[1])
+  EN_VIVO.distanciaDelPie = c.m === 0 ? 0 : distanciaDeLaVista(camara.fov, camara.aspect, V.elevacion, ocupaDePie(c, cuadro.ancho), CAJA_ACOSTADA[0], CAJA_ACOSTADA[1], b.derechaX, b.derechaZ, b.atrasX, b.atrasZ, CAJA_ACOSTADA[2], CAJA_ACOSTADA[3])
   EN_VIVO.calmaDelPie.set(b.logoX, b.logoZ, c.huella[0] + CAIDA_DEL_PIE.aire, c.huella[1] + CAIDA_DEL_PIE.aire)
   EN_VIVO.baseDelPie.set(b.derechaX, b.derechaZ, b.atrasX, b.atrasZ)
   EN_VIVO.calmaDelPieFuerza = c.m === 0 ? 0 : suave((s - c.primeraS + 0.4) / 0.8)

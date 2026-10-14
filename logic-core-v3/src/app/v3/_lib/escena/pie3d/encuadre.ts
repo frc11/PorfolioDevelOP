@@ -1,6 +1,30 @@
 import * as THREE from 'three'
 
+import type { BaseDelPie, LugarEnElPiso, PiezaDePie } from '../final/caidaDelPie'
 import { FLOOR_Y } from '../probeScene'
+
+/**
+ * [PULIDO 24] V3 · La caja del pie acostado con el logo, en la base del pie: su centro (x, z del mundo) y sus medias extensiones a lo largo
+ * de `derecha` y de `atras` (u), en `destino` (4). Las columnas caen donde están (delante del logo): la caja no está centrada en él.
+ */
+export function cajaDelPieAcostado(columnas: readonly PiezaDePie[], cuantas: number, lugares: readonly LugarEnElPiso[], b: BaseDelPie, destino: Float64Array): void {
+  let [d0, d1, a0, a1] = [-b.logoAncho / 2, b.logoAncho / 2, -b.logoFondo / 2, b.logoFondo / 2]
+  for (let i = 0; i < Math.min(cuantas, columnas.length, lugares.length); i += 1) {
+    const p = columnas[i]
+    const l = lugares[i]
+    const d = (l.x - b.logoX) * b.derechaX + (l.z - b.logoZ) * b.derechaZ
+    const a = (l.x - b.logoX) * b.atrasX + (l.z - b.logoZ) * b.atrasZ
+    d0 = Math.min(d0, d - p.ancho / 2)
+    d1 = Math.max(d1, d + p.ancho / 2)
+    a0 = Math.min(a0, a)
+    a1 = Math.max(a1, a + p.alto)
+  }
+  const [dc, ac] = [(d0 + d1) / 2, (a0 + a1) / 2]
+  destino[0] = b.logoX + b.derechaX * dc + b.atrasX * ac
+  destino[1] = b.logoZ + b.derechaZ * dc + b.atrasZ * ac
+  destino[2] = (d1 - d0) / 2
+  destino[3] = (a1 - a0) / 2
+}
 
 /**
  * [PULIDO 20] R1 · LA DISTANCIA DE LA CÁMARA DEL FINAL EN ESCRITORIO, DE COSTADO Y LEJOS: el humano quiere ver gran parte de la escena al

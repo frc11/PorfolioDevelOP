@@ -374,6 +374,11 @@ export const EN_VIVO = {
   baseDelPie: new THREE.Vector4(1, 0, 0, -1),
   calmaDelPieFuerza: 0,
   huellaDelLogo: new THREE.Vector2(6.9, 4.78),
+  /**
+   * [PULIDO 24] V3 · el centro del pie acostado con el logo (x, z del mundo): el blanco de la cámara del final baja ahí (no al centro del
+   * logo: las columnas acostadas quedan delante de él y, encuadrando desde el logo, todo quedaba chico). Sin pie, el origen.
+   */
+  centroDelPie: new THREE.Vector2(0, 0),
 }
 
 /** El scroll con el que se colocan las piezas del pie: el de la página hasta que el pie se pega; después, ése. */
@@ -569,7 +574,7 @@ export function sombraConFundido(anterior: number, objetivo: number, dt: number)
 export function blancoDelFinal(fin: number, destino: THREE.Vector3): THREE.Vector3 {
   const { desdeS, hastaS } = FINAL_DEL_PIE.blanco
   const b = suave((segundosDelFinal(fin) - desdeS) / (hastaS - desdeS))
-  return destino.set(0, ORBIT_TARGET_Y + (FLOOR_Y - ORBIT_TARGET_Y) * b, 0)
+  return destino.set(EN_VIVO.centroDelPie.x * b, ORBIT_TARGET_Y + (FLOOR_Y - ORBIT_TARGET_Y) * b, EN_VIVO.centroDelPie.y * b)
 }
 
 const BLANCO = new THREE.Vector3()
