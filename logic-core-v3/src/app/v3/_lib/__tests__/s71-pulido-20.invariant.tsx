@@ -469,9 +469,12 @@ interface DelVidrio {
 const DEL_VIDRIO: DelVidrio = { orden: MALLA.renderOrder, particulasSinOrden: !/renderOrder/.test(DEPTH) && !/renderOrder/.test(BOKEH), material: MALLA.material as THREE.Material, fragmentos: FRAGMENTOS_DEL_VIDRIO, vertices: VERTICES_DEL_VIDRIO(CELDAS.length), componente: CRISTAL_TSX, fondo: NOMBRES_DEL_FONDO, pase: FONDO_TS }
 const vidrioBien = (v: DelVidrio): boolean => v.orden < ORDEN_DEL_ESPEJO && v.orden < ORDEN_DE_LA_ENERGIA && v.orden < 0 && v.particulasSinOrden &&
   v.material.transparent && !v.material.depthWrite && v.material.depthTest && v.material.side === THREE.FrontSide &&
-  v.fragmentos.includes('texture2D( uFondo,') && !v.fragmentos.includes('uColorDeLaEscena') && !v.fragmentos.includes('distanciaALoOpaco') && v.fragmentos.includes('amp *= adentro;') && !/uCajas|uLogo|uZona|uCerca|adentroDeLasCajas/.test(v.fragmentos) && v.fragmentos.includes('fwidth( vInterior )') &&
+  v.fragmentos.includes('texture2D( uFondo,') && !v.fragmentos.includes('uColorDeLaEscena') && !v.fragmentos.includes('distanciaALoOpaco') && // [PULIDO 24] V1 · el sentido cambió por pedido: nunca se desvanece (los costados se veían vacíos): el fondo con margen y la lectura acotada;
+  // y sin la línea de quiebre (el filo, sólo con ?vitral-filo=si): el vitral es la refracción de cada celda con su hondura.
+  v.fragmentos.includes('enElCuadro( enElFondo(') && !v.fragmentos.includes('adentroDelFondo') && !v.fragmentos.includes('quiebre') && v.fragmentos.includes('uVidrio.y * vHondura') && v.pase.includes('CRISTAL.fondo.sobra') &&
+  !/uCajas|uLogo|uZona|uCerca|adentroDeLasCajas/.test(v.fragmentos) && v.fragmentos.includes('fwidth( vInterior )') &&
   !v.vertices.includes('uTiempo') && !/random|Math\.random/.test(v.vertices) &&
-  /cam\.updateMatrixWorld\(\)[\s\S]*uVista\.value\.multiplyMatrices\(cam\.projectionMatrix, cam\.matrixWorldInverse\)/.test(v.componente) && !/cajasDelTexto|rectanguloDelLogo|uCajas/.test(v.componente) &&
+  /cam\.updateMatrixWorld\(\)[\s\S]*dibujarElFondo\([\s\S]*uVista\.value\.copy\(fondo\.vista\)/.test(v.componente) && !/cajasDelTexto|rectanguloDelLogo|uCajas/.test(v.componente) &&
   !v.fondo.some((n) => /polvo|bokeh|logo|t[ií]tulo|pie|energ|plasma/i.test(n)) && v.pase.includes('camara.layers.set(CAPA_DEL_FONDO)') && v.pase.includes('o instanceof THREE.Light') && Number(CAPA_DEL_FONDO) !== Number(PASE.capa)
 afirmar(vidrioBien(DEL_VIDRIO), `  nunca tapa una partícula (orden ${String(DEL_VIDRIO.orden)}: antes que el espejo, la energía y las partículas; sin escribir profundidad), refracta sólo el fondo (${NOMBRES_DEL_FONDO.join(', ')}), se desvanece donde mira afuera, sin máscaras (lo tapa sólo lo que está delante), con la línea de quiebre, la cámara de este cuadro y quieto`)
 controlPositivo('  el detector VE el cristal después de las partículas', { ...DEL_VIDRIO, orden: 1 }, vidrioBien)
@@ -480,7 +483,11 @@ controlPositivo('  y uno que lee la copia del cuadro (PULIDO 19: doblaba los tex
 controlPositivo('  y la cámara del cuadro anterior (PULIDO 19: vibraba)', { ...DEL_VIDRIO, componente: CRISTAL_TSX.replace('cam.updateMatrixWorld()', '') }, vidrioBien)
 controlPositivo('  y un fondo con el logo adentro', { ...DEL_VIDRIO, fondo: [...NOMBRES_DEL_FONDO, 'logo'] }, vidrioBien)
 controlPositivo('  y uno con la máscara del logo de vuelta', { ...DEL_VIDRIO, fragmentos: `${FRAGMENTOS_DEL_VIDRIO}\nuniform vec4 uLogo;` }, vidrioBien)
-controlPositivo('  y uno que estira en el borde (sin desvanecerse)', { ...DEL_VIDRIO, fragmentos: FRAGMENTOS_DEL_VIDRIO.replace('amp *= adentro;', '') }, vidrioBien)
+controlPositivo('  y uno que se desvanece en los costados (PULIDO 23)', { ...DEL_VIDRIO, fragmentos: `${FRAGMENTOS_DEL_VIDRIO}
+float adentroDelFondo( vec2 m ) { return 1.0; }` }, vidrioBien)
+controlPositivo('  y un fondo sin margen', { ...DEL_VIDRIO, pase: FONDO_TS.replace('CRISTAL.fondo.sobra', '1') }, vidrioBien)
+controlPositivo('  y la línea de quiebre de vuelta', { ...DEL_VIDRIO, fragmentos: `${FRAGMENTOS_DEL_VIDRIO}
+float quiebre = 0.0;` }, vidrioBien)
 MALLA.geometry.dispose()
 MURO.dispose()
 ;(MALLA.material as THREE.Material).dispose()

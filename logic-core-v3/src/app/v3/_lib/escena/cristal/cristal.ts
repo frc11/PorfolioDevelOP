@@ -10,7 +10,8 @@ export const CRISTAL = {
    * escena), su alto desde el piso (u: hasta arriba de la trama lejana), la grilla desordenada de las semillas del Voronoi (columnas en
    * el perímetro, filas en el alto, cuánto se corren: partes de la celda), la inclinación de cada celda (grados, como mucho) y la semilla.
    */
-  muro: { radio: 37, alto: 44, columnas: 34, filas: 6, desorden: 0.85, inclinacionGrados: 5, semilla: 20 },
+  // [PULIDO 24] V1 · más inclinadas y con su hondura (de cuánto más cerca o más lejos se lee el fondo, en veces de `vidrio.fondo`).
+  muro: { radio: 37, alto: 44, columnas: 34, filas: 6, desorden: 0.85, inclinacionGrados: 9, hondura: [0.45, 1.6], semilla: 20 },
   /** El vidrio: el índice, a qué distancia detrás se lee el fondo (u), el F0 de Schlick y la dispersión del prisma (en los cantos, el doble). */
   vidrio: { indice: 1.5, fondo: 14, f0: 0.04, dispersion: 0.03 },
   /**
@@ -18,14 +19,17 @@ export const CRISTAL = {
    * noche y se oscurece de día: la reflexión total en el borde) y la tinta del cuerpo de día.
    */
   luz: { especular: [0.9, 1.6], dureza: 60, reflejo: [0.15, 0.22], filo: [0.65, 0.8], tinta: 0.06 },
-  /** [PULIDO 23] U1 · la línea de quiebre en cada borde: su brillo (día, noche), su medio ancho (px) y hasta dónde llega el prisma del canto (px). */
-  quiebre: { brillo: [0.5, 1.1], anchoPx: 1.2, prismaPx: 9 },
+  /** [PULIDO 24] V1 · sin línea de quiebre: con `?vitral-filo=si`, un filo oscuro muy fino y tenue (cuánto oscurece, su ancho en px). */
+  filo: { oscurece: 0.22, anchoPx: 0.8 },
   /** Aparece en (s). [PULIDO 23] U1 · quieto: sin giro ni respiración (sin temblor). */
   movimiento: { aparecenS: 2.5 },
   /** Dónde se apaga la página (las secciones de papel opaco y el túnel) y el fundido alrededor (pantallas). */
   donde: { apagadas: ['trabajos', 'tu-panel'], fundido: 0.35 },
-  /** El fondo que refractan, a esta fracción del búfer de dibujo. */
-  fondo: { escala: 0.5 },
+  /**
+   * El fondo que refractan, a esta fracción del búfer de dibujo. [PULIDO 24] V1 · con margen (`sobra`: el campo, tantas veces más ancho
+   * y más alto): la refracción de los costados de la pantalla mira afuera del cuadro y ahí hay fondo (antes se desvanecía).
+   */
+  fondo: { escala: 0.6, sobra: 1.3 },
   /** Antes que todo lo transparente que no es fondo (las partículas en 0, la energía en −10, el espejo en −14): nunca las tapa. */
   orden: -17,
 } as const

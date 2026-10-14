@@ -17,10 +17,13 @@ import { CRISTAL } from './cristal'
 export const VERTICES_DEL_VIDRIO = (n: number): string => /* glsl */ `
 // [PULIDO 23] U1 · el muro de ${String(n)} celdas, quieto.
 attribute float aInterior;
+attribute float aHondura;
 varying vec3 vMundo;
 varying vec3 vNormal;
 varying float vInterior;
+varying float vHondura;
 void main() {
+	vHondura = aHondura;
 	vec4 p = modelMatrix * vec4( position, 1.0 );
 	vMundo = p.xyz;
 	vNormal = normalize( mat3( modelMatrix ) * normal );
@@ -29,12 +32,11 @@ void main() {
 }
 `
 
-const Q = CRISTAL.quiebre
+const Q = CRISTAL.filo
 const f = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
 
 export const FRAGMENTOS_DEL_VIDRIO = /* glsl */ `
 uniform sampler2D uFondo;
-uniform vec2 uResolucion;
 uniform float uAmplitud;
 uniform float uNoche;
 uniform float uPrisma;
@@ -44,52 +46,43 @@ uniform vec3 uLuz;
 uniform vec4 uVidrio;
 uniform vec4 uBrillo;
 uniform vec4 uFilo;
+uniform float uVitralFilo;
 varying vec3 vMundo;
 varying vec3 vNormal;
 varying float vInterior;
+varying float vHondura;
 vec2 enElFondo( vec3 p ) {
 	vec4 c = uVista * vec4( p, 1.0 );
 	return c.xy / max( 1e-4, c.w ) * 0.5 + 0.5;
 }
-// Cuánto adentro del fondo cae una lectura (0 afuera, 1 lejos del borde): afuera se desvanece, nunca estira.
-float adentroDelFondo( vec2 m ) {
-	vec2 b = smoothstep( vec2( 0.0 ), vec2( 0.03 ), m ) * smoothstep( vec2( 0.0 ), vec2( 0.03 ), 1.0 - m );
-	return b.x * b.y;
+// [PULIDO 24] V1 · la lectura del fondo, acotada (el fondo tiene margen: \`CRISTAL.fondo.sobra\`): nunca se desvanece.
+vec2 enElCuadro( vec2 m ) {
+	return clamp( m, vec2( 0.002 ), vec2( 0.998 ) );
 }
 void main() {
-	vec2 uv = gl_FragCoord.xy / uResolucion;
 	float amp = uAmplitud;
 	if ( amp < 0.002 ) discard;
 	vec3 n = normalize( vNormal );
 	vec3 v = normalize( vMundo - uCamara );
 	if ( dot( n, v ) > 0.0 ) n = - n;
-	// La distancia al borde de la celda en px: la línea de quiebre y el canto donde el prisma abre más.
-	float px = vInterior / max( fwidth( vInterior ), 1e-5 );
-	float quiebre = 1.0 - smoothstep( ${f(Q.anchoPx * 0.5)}, ${f(Q.anchoPx * 1.6)}, px );
-	float filo = 1.0 - smoothstep( 0.0, ${f(Q.prismaPx)}, px );
-	filo *= filo;
-	// La refracción: dónde cae el rayo desviado a «fondo» u detrás, contra dónde caería derecho.
-	vec2 derecho = enElFondo( vMundo + v * uVidrio.y );
+	// [PULIDO 24] V1 · el vitral se nota SÓLO por la refracción: cada celda con su inclinación (la normal) y su hondura (a cuánto lee el
+	// fondo), así lo de atrás se desfasa de una a la otra. El prisma, sólo como dispersión adentro de la refracción. La lectura, en el fondo
+	// con margen y acotada: nunca se desvanece (los costados de la pantalla también se ven).
+	float hondo = uVidrio.y * vHondura;
 	vec3 color;
-	float adentro;
 	if ( uPrisma >= 0.5 ) {
-		float d = uVidrio.z * ( 1.0 + 2.0 * filo );
-		vec2 mr = uv + enElFondo( vMundo + refract( v, n, 1.0 / ( uVidrio.x - d ) ) * uVidrio.y ) - derecho;
-		vec2 mg = uv + enElFondo( vMundo + refract( v, n, 1.0 / uVidrio.x ) * uVidrio.y ) - derecho;
-		vec2 mb = uv + enElFondo( vMundo + refract( v, n, 1.0 / ( uVidrio.x + d ) ) * uVidrio.y ) - derecho;
+		float d = uVidrio.z;
+		vec2 mr = enElCuadro( enElFondo( vMundo + refract( v, n, 1.0 / ( uVidrio.x - d ) ) * hondo ) );
+		vec2 mg = enElCuadro( enElFondo( vMundo + refract( v, n, 1.0 / uVidrio.x ) * hondo ) );
+		vec2 mb = enElCuadro( enElFondo( vMundo + refract( v, n, 1.0 / ( uVidrio.x + d ) ) * hondo ) );
 		color = vec3( texture2D( uFondo, mr ).r, texture2D( uFondo, mg ).g, texture2D( uFondo, mb ).b );
-		adentro = min( adentroDelFondo( mr ), min( adentroDelFondo( mg ), adentroDelFondo( mb ) ) );
 	} else {
-		vec2 m = uv + enElFondo( vMundo + refract( v, n, 1.0 / uVidrio.x ) * uVidrio.y ) - derecho;
-		color = texture2D( uFondo, m ).rgb;
-		adentro = adentroDelFondo( m );
+		color = texture2D( uFondo, enElCuadro( enElFondo( vMundo + refract( v, n, 1.0 / uVidrio.x ) * hondo ) ) ).rgb;
 	}
-	amp *= adentro;
-	if ( amp < 0.002 ) discard;
-	// De día el cuerpo apenas se tiñe; el canto: de día la reflexión total lo oscurece, de noche toma la luz.
+	// De día el cuerpo apenas se tiñe. Con \`?vitral-filo=si\`, el filo entre celdas: oscuro, muy fino y tenue.
 	color *= 1.0 - uFilo.z * ( 1.0 - uNoche );
-	color *= 1.0 - uFilo.x * filo * ( 1.0 - uNoche ) * 0.5;
-	color += vec3( uFilo.y * filo * uNoche * 0.5 );
+	float px = vInterior / max( fwidth( vInterior ), 1e-5 );
+	color *= 1.0 - uVitralFilo * ${f(Q.oscurece)} * ( 1.0 - smoothstep( 0.0, ${f(Q.anchoPx)}, px ) );
 	// El Fresnel con el reflejo tenue del entorno (el cielo por la altura del reflejado) y el brillo de la luz en las facetas.
 	float cosV = max( 0.0, dot( - v, n ) );
 	float fresnel = uVidrio.w + ( 1.0 - uVidrio.w ) * pow( 1.0 - cosV, 5.0 );
@@ -97,10 +90,9 @@ void main() {
 	vec3 cielo = mix( mix( vec3( 0.78, 0.78, 0.77 ), vec3( 0.98 ), r.y * 0.5 + 0.5 ), mix( vec3( 0.01 ), vec3( 0.09, 0.09, 0.1 ), r.y * 0.5 + 0.5 ), uNoche );
 	color = mix( color, cielo, fresnel * mix( uBrillo.w, uFilo.w, uNoche ) );
 	vec3 h = normalize( uLuz - v );
-	float especular = pow( max( 0.0, dot( n, h ) ), uBrillo.z ) * mix( uBrillo.x, uBrillo.y, uNoche ) * ( 0.4 + 0.6 * filo + fresnel );
+	// El brillo de la luz en cada celda, por su orientación (cambia de una a la otra: lo único que marca el borde).
+	float especular = pow( max( 0.0, dot( n, h ) ), uBrillo.z ) * mix( uBrillo.x, uBrillo.y, uNoche ) * ( 0.4 + fresnel );
 	color += vec3( especular );
-	// La línea de quiebre, fina y brillante.
-	color += vec3( quiebre * mix( ${f(Q.brillo[0])}, ${f(Q.brillo[1])}, uNoche ) );
 	gl_FragColor = vec4( color * amp, amp );
 }
 `
@@ -110,7 +102,7 @@ export function uniformesDelVidrio() {
   const C = CRISTAL
   return {
     uFondo: { value: null as THREE.Texture | null },
-    uResolucion: { value: new THREE.Vector2(1, 1) },
+    uVitralFilo: { value: 0 },
     uAmplitud: { value: 0 },
     uNoche: { value: 0 },
     uPrisma: { value: 1 },

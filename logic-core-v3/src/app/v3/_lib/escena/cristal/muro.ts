@@ -17,6 +17,8 @@ export interface Celda {
   readonly poligono: readonly number[]
   /** Su inclinación: alrededor de la vertical y de la tangente (rad). */
   readonly giro: readonly [number, number]
+  /** [PULIDO 24] V1 · su hondura: a cuántas veces de `vidrio.fondo` lee el fondo (unas más hundidas que otras: lo de atrás se desfasa). */
+  readonly hondura: number
 }
 
 type P = [number, number]
@@ -73,7 +75,7 @@ export function celdasDelMuro(): Celda[] {
         p = recortar(p, s, b)
       }
     }
-    return { poligono: p.flat(), giro: [(azar() - 0.5) * 2 * inclina, (azar() - 0.5) * 2 * inclina] }
+    return { poligono: p.flat(), giro: [(azar() - 0.5) * 2 * inclina, (azar() - 0.5) * 2 * inclina], hondura: M.hondura[0] + azar() * (M.hondura[1] - M.hondura[0]) }
   })
 }
 
@@ -93,6 +95,7 @@ export function armarElMuro(celdas: readonly Celda[]): THREE.BufferGeometry {
   const posicion: number[] = []
   const normal: number[] = []
   const interior: number[] = []
+  const hondura: number[] = []
   const c = new THREE.Vector3()
   const a = new THREE.Vector3()
   const b = new THREE.Vector3()
@@ -120,11 +123,13 @@ export function armarElMuro(celdas: readonly Celda[]): THREE.BufferGeometry {
       posicion.push(c.x, c.y, c.z, x.x, x.y, x.z, y.x, y.y, y.z)
       for (let q = 0; q < 3; q += 1) normal.push(N.x, N.y, N.z)
       interior.push(1, 0, 0)
+      hondura.push(celda.hondura, celda.hondura, celda.hondura)
     }
   }
   const g = new THREE.BufferGeometry()
   g.setAttribute('position', new THREE.Float32BufferAttribute(posicion, 3))
   g.setAttribute('normal', new THREE.Float32BufferAttribute(normal, 3))
   g.setAttribute('aInterior', new THREE.Float32BufferAttribute(interior, 1))
+  g.setAttribute('aHondura', new THREE.Float32BufferAttribute(hondura, 1))
   return g
 }

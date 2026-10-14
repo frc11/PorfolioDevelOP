@@ -81,6 +81,8 @@ function CristalPrendido(): React.JSX.Element {
     const g = grupo.current
     if (g === null) return undefined
     const u = uniformes.current
+    // [PULIDO 24] V1 · `?vitral-filo=si`: el filo oscuro, muy fino, entre las celdas (para comparar; por defecto, sin línea).
+    u.uVitralFilo.value = new URLSearchParams(window.location.search).get('vitral-filo') === 'si' ? 1 : 0
     const malla = armarElVidrio(armarElMuro(CELDAS), u, CELDAS.length)
     const fondo = crearElFondo()
     armado.current = { malla, fondo }
@@ -120,14 +122,14 @@ function CristalPrendido(): React.JSX.Element {
     const cam = state.camera
     cam.updateMatrixWorld()
     u.uCamara.value.setFromMatrixPosition(cam.matrixWorld)
-    u.uVista.value.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse)
     const az = Math.atan2(u.uCamara.value.x, u.uCamara.value.z) + THREE.MathUtils.degToRad(KEY_AZIMUTH_DEG + KEY_FOLLOW_AZIMUTH_OFFSET_DEG)
     const el = THREE.MathUtils.degToRad(KEY_ELEVATION_DEG)
     u.uLuz.value.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az))
     u.uNoche.value = VIVO.uNoche.value
-    state.gl.getDrawingBufferSize(u.uResolucion.value)
-    // El fondo que refracta: sólo lo de atrás (el cielo, el domo, la trama, la fábrica), con la cámara de este cuadro.
+    // El fondo que refracta: sólo lo de atrás (el cielo, el domo, la trama, la fábrica), con la cámara de este cuadro y su margen
+    // ([PULIDO 24] V1): el vidrio lo lee con esa vista.
     u.uFondo.value = dibujarElFondo(fondo, state.gl, state.scene, cam, state.scene.fog?.color ?? NEGRO)
+    u.uVista.value.copy(fondo.vista)
   })
   return <group ref={grupo} name="cristal" />
 }
