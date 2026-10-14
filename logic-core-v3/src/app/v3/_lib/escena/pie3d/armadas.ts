@@ -4,7 +4,6 @@ import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 import datos400 from '../../../_fuentes/chivo-400-pie.json'
 import datos500 from '../../../_fuentes/chivo-500-pie.json'
 import datos600 from '../../../_fuentes/chivo-600-pie.json'
-import { homografia, matrix3dCss, transformadaNitida } from '../../pie3d/homografia'
 import { firmaDeLaForma, medirLaPieza, type MedidaDeLaPieza } from '../../pie3d/medida'
 import { HUNDIDOS, PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, cuantoSeHunde, type PiezaDelPie } from '../../pie3d/registro'
 import { ASIENTO } from '../../titulos3d/repeticiones'
@@ -15,7 +14,8 @@ import { VOLTEO_TERMINADO } from '../../formularios/volteo'
 import { viajeEnCurso } from '../viaje'
 import { FUENTES_DEL_CTA } from '../ctaDelFinal/fuentesDelCta'
 import { cubicBezierEase } from '../bezier'
-import { caraEnElCuadro, colocarLaPieza, profundidadDeLaPieza } from './colocacion'
+import { colocarLaPieza, profundidadDeLaPieza } from './colocacion'
+import { capaPropia, seguirLaPieza } from './domQueSigue'
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
@@ -102,6 +102,8 @@ export interface Armada {
   readonly boton: Element | null
   /** [PULIDO 14] L2 c · la opacidad que la llegada le escribió al DOM (vacía: la pieza en su lugar, el DOM como lo deja su dueño). */
   opacidadDeLlegada: string
+  /** [PULIDO 27] Y1 a · el cuadrilátero de la última transformada escrita (`domQueSigue.ts`). */
+  readonly escrito: Float64Array
 }
 
 /** [PULIDO 9] H2 · la placa que estaba (sus mallas, en el grupo de la nueva) y cuánto va (0 a 1). */
@@ -296,6 +298,7 @@ export function rearmar(s: EstadoDelPie, raiz: THREE.Group, estudio: THREE.Textu
       a.hundido = vieja.hundido
       if (vieja.pieza.elemento === p.elemento && p.forma !== 'texto') {
         a.css = vieja.css
+        a.escrito.set(vieja.escrito)
         p.elemento.style.transform = a.css
       }
       if (transforma) {
@@ -353,6 +356,7 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
   }
   grupo.visible = false
   if (pieza.forma !== 'texto') pieza.elemento.style.transformOrigin = '0 0'
+  if (pieza.forma !== 'texto') capaPropia(pieza.elemento, true)
   // [NOCTURNO FINAL] B4 · su caja en la pieza (lo de la tecla, en la placa: lo que se hunde es apenas).
   const caja = new THREE.Box3()
   for (const malla of mallas) {
@@ -361,7 +365,7 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
   }
   const delHundido = pieza.forma === 'placa' || pieza.forma === 'enlace' ? pieza.elemento : pieza.forma === 'formulario' ? pieza.elemento.querySelector('[data-forma="principal"]') : null
   const boton = pieza.forma === 'formulario' ? (delHundido?.querySelector('button') ?? null) : null
-  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja, estado, transformacion: null, boton, opacidadDeLlegada: '' }
+  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja, estado, transformacion: null, boton, opacidadDeLlegada: '', escrito: new Float64Array(8) }
 }
 
 export function soltar(a: Armada): void {
@@ -371,6 +375,7 @@ export function soltar(a: Armada): void {
     a.pieza.elemento.style.transformOrigin = ''
     a.pieza.elemento.style.pointerEvents = ''
     a.pieza.elemento.style.opacity = ''
+    capaPropia(a.pieza.elemento, false)
   }
 }
 
@@ -442,16 +447,4 @@ function transformar(a: Armada, x: TransformacionEnCurso, quieto: boolean, dt: n
 /** [PULIDO 11] B1 · el aviso del volteo terminado, con el estado que quedó a la vista (uno viejo, de vuelta, no arranca nada). */
 function avisarQueTermino(a: Armada): void {
   a.pieza.elemento.dispatchEvent(new CustomEvent(VOLTEO_TERMINADO, { detail: a.estado }))
-}
-
-/** Lo interactivo, sobre la cara de su pieza como la ve la cámara viva (la placa, hundida con ella). */
-function seguirLaPieza(a: Armada, viva: THREE.Camera, cuadro: { readonly ancho: number; readonly alto: number }, izquierda: number, arriba: number, s: EstadoDelPie): void {
-  const { ancho, alto } = a.medida.caja
-  caraEnElCuadro(a.pieza.forma === 'placa' ? a.cuerpo : a.grupo, viva, ancho, alto, 0, cuadro, { x: izquierda, y: arriba }, s.cuadrilatero)
-  const nitida = transformadaNitida(ancho, alto, s.cuadrilatero)
-  if (nitida === null && !homografia(ancho, alto, s.cuadrilatero, s.matriz)) return
-  const css = nitida ?? matrix3dCss(s.matriz)
-  if (css === a.css) return
-  a.css = css
-  a.pieza.elemento.style.transform = css
 }

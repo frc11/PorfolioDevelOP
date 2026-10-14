@@ -77,6 +77,7 @@ export function usePiezaDelPie(ref: RefObject<HTMLElement | null>, { id, forma, 
       PIEZAS_DEL_PIE.delete(id)
       el.style.transform = ''
       el.style.pointerEvents = ''
+      el.style.willChange = ''
       avisar()
     }
   }, [ref, id, forma, activo, llegada])
