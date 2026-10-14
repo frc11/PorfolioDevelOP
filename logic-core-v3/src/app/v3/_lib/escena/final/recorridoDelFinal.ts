@@ -61,8 +61,10 @@ export const FINAL_DEL_PIE = {
    * costado y lejos (el humano: «que se vea gran parte de la escena»): hasta `escritorio.elevacion` y a la distancia en que el pie acostado
    * y el logo ocupan `escritorio.ocupa` del cuadro (`pie3d/encuadre.ts`); abajo de 1024, desde arriba como siempre.
    * [PULIDO 21] S3 · el humano: «a 28° y al 62 % todo queda chico»: desde arriba y cerca, el conjunto acostado en el 88 % del ancho.
+   * [PULIDO 23] U4 · sin el zoom fuerte: sube moderado (hasta `elevacion`) y lo acostado ocupa del cuadro lo mismo que ocupaba de pie
+   * (entre las puntas de `ocupa`): las piezas se ven del mismo tamaño en pantalla.
    */
-  camara: { elevacion: 89.2, lejos: 1.06, escritorio: { elevacion: 89.2, ocupa: 0.88 } },
+  camara: { elevacion: 89.2, lejos: 1.06, escritorio: { elevacion: 60, ocupa: [0.6, 0.92] } },
   /**
    * Quieto en el pie: a los cuántos segundos sin scroll arranca, el giro (°/s), el tope del alejamiento (u) y su tiempo (s).
    * [NOCTURNO FINAL] A1/A2 · la VUELTA (al rebobinar, al salir, en un viaje) va con tope: el giro a lo sumo a `giroS`

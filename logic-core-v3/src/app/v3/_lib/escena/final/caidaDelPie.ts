@@ -109,11 +109,6 @@ export function crearLugar(): LugarEnElPiso {
 const ORDEN = new Int32Array(64)
 const ALTURA = new Float64Array(64)
 
-/** Si la pieza `k` de la pila (por altura) arranca otra fila: su canto está más arriba que el de la anterior (`mismaFila`, o la mitad del alto de la más baja). */
-function otraFila(piezas: readonly PiezaDePie[], k: number): boolean {
-  return ALTURA[k] - ALTURA[k - 1] > Math.min(CAIDA_DEL_PIE.mismaFila, 0.5 * Math.min(piezas[ORDEN[k]].alto, piezas[ORDEN[k - 1]].alto))
-}
-
 /** Cuánto hacia la derecha está el canto de la pieza respecto del logo (u). */
 const aLaDerecha = (p: PiezaDePie, b: BaseDelPie): number => (p.x - b.logoX) * b.derechaX + (p.z - b.logoZ) * b.derechaZ
 
@@ -146,41 +141,24 @@ export function lugaresEnElPiso(piezas: readonly PiezaDePie[], cuantas: number, 
       m += 1
     }
     if (m === 0) continue
-    // Las filas (las que estaban a la misma altura van una al lado de la otra) y el fondo total de la pila, centrada en el logo.
-    let fondo = 0
-    let filaAlto = 0
-    for (let k = 0; k < m; k += 1) {
-      if (k > 0 && otraFila(piezas, k)) {
-        fondo += filaAlto + CAIDA_DEL_PIE.aire
-        filaAlto = 0
-      }
-      filaAlto = Math.max(filaAlto, piezas[ORDEN[k]].alto)
-    }
-    fondo += filaAlto
-    // El borde de la pila pegado al logo: la pieza que más se acerca al logo queda a `aire` de su huella; las demás, con su mismo
-    // corrimiento (la alineación de la columna, como de pie).
+    // [PULIDO 23] U4 · CAE DONDE ESTÁ PARADA: su lugar en el piso es el de su canto de pie (ni se acerca ni va hacia el logo: baja lo que
+    // flota y vuelca sobre su base). Antes se apilaba pegada al logo (la cámara después la buscaba con un zoom fuerte). Sólo si de pie
+    // queda encima de la huella del logo (de pie está más cerca que él: el hueco del cuadro es más angosto ahí), se corre HACIA AFUERA lo
+    // justo para dejarle `aire`.
     let masCerca = lado < 0 ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY
     for (let k = 0; k < m; k += 1) {
       const p = piezas[ORDEN[k]]
       const borde = aLaDerecha(p, b) - (lado * p.ancho) / 2
       masCerca = lado < 0 ? Math.max(masCerca, borde) : Math.min(masCerca, borde)
     }
-    const corrimiento = lado * (b.logoAncho / 2 + CAIDA_DEL_PIE.aire) - masCerca
-    let atras = -fondo / 2
-    filaAlto = 0
+    const libre = lado * (b.logoAncho / 2 + CAIDA_DEL_PIE.aire) - masCerca
+    const afuera = lado < 0 ? Math.min(0, libre) : Math.max(0, libre)
     for (let k = 0; k < m; k += 1) {
       const i = ORDEN[k]
       const p = piezas[i]
       const l = destino[i]
-      if (k > 0 && otraFila(piezas, k)) {
-        atras += filaAlto + CAIDA_DEL_PIE.aire
-        filaAlto = 0
-      }
-      filaAlto = Math.max(filaAlto, p.alto)
-      const derecha = aLaDerecha(p, b) + corrimiento
-      // El canto queda en el frente de su lugar (la cabeza va hacia atrás).
-      l.x = b.logoX + b.derechaX * derecha + b.atrasX * atras
-      l.z = b.logoZ + b.derechaZ * derecha + b.atrasZ * atras
+      l.x = p.x + b.derechaX * afuera
+      l.z = p.z + b.derechaZ * afuera
       l.lado = lado
       l.puesto = k
       // El reloj: toca en el golpe; su física arranca lo que tarda en caer antes (apurada lo justo si no entra después de la bajada).

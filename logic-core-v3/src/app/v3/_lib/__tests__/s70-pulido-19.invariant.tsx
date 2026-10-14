@@ -365,9 +365,22 @@ function elPieDePie(): { readonly piezas: PiezaDePie[]; readonly lugares: LugarE
     return { ancho: c.ancho * mpp, alto: c.alto * mpp, espesor: Math.max(0.02, c.espesor * mpp), x: canto.x, y: Math.max(FLOOR_Y, canto.y), z: canto.z }
   })
   const base: BaseDelPie = { derechaX: 1, derechaZ: 0, atrasX: 0, atrasZ: -1, logoX: 0, logoZ: 0, logoAncho: LOGO.ancho, logoFondo: LOGO.fondo }
+  // [PULIDO 23] U4 · lo que cae son las columnas (la caja de las piezas de cada lado del logo, como en el sitio: `pie3d/caida.ts`), y
+  // caen donde están paradas: con las piezas sueltas, las de una misma columna se pisaban (eran del modelo de PULIDO 19, que las apilaba).
+  const columnas = [-1, 1].map((lado) => {
+    const de = piezas.filter((p) => (p.x < 0 ? -1 : 1) === lado)
+    const x0 = Math.min(...de.map((p) => p.x - p.ancho / 2))
+    const x1 = Math.max(...de.map((p) => p.x + p.ancho / 2))
+    const y0 = Math.min(...de.map((p) => p.y))
+    const y1 = Math.max(...de.map((p) => p.y + p.alto))
+    return { ancho: x1 - x0, alto: y1 - y0, espesor: Math.max(...de.map((p) => p.espesor)), x: (x0 + x1) / 2, y: y0, z: de[0]?.z ?? 0 }
+  }).filter((c) => Number.isFinite(c.ancho))
+  return { piezas: columnas, ...enElPiso(columnas, base), camara }
+}
+function enElPiso(piezas: readonly PiezaDePie[], base: BaseDelPie): { readonly lugares: LugarEnElPiso[]; readonly base: BaseDelPie; readonly ultima: number } {
   const lugares = piezas.map(() => crearLugar())
   const ultima = lugaresEnElPiso(piezas, piezas.length, piezas.map((p) => caidaIntegrada({ alto: p.alto, espesor: p.espesor })), base, lugares)
-  return { piezas, lugares, base, ultima, camara }
+  return { lugares, base, ultima }
 }
 const PIE = elPieDePie()
 /** La caja acostada de una pieza en el piso (x0, x1, z0, z1): el canto al frente y la cabeza hacia atrás. */
@@ -409,7 +422,7 @@ function medirElPie(piezas: readonly PiezaDePie[], lugares: readonly LugarEnElPi
 }
 const MEDIDO = medirElPie(PIE.piezas, PIE.lugares, PIE.base, PIE.ultima)
 const pieBien = (m: DelPie): boolean => m.solapes === 0 && m.conElLogo === 0 && m.aire >= CAIDA_DEL_PIE.aire - 1e-6 && m.fueraDelGolpe === 0 && m.ultima + CAIDA_DEL_PIE.despuesS <= RELOJ_DEL_FINAL.duracionS + 1e-6 && m.fuera === 0
-afirmar(pieBien(MEDIDO), `  el pie de 1440 acostado: ${String(PIE.piezas.length)} piezas sin solaparse entre sí ni con el logo (a ≥ ${MEDIDO.aire.toFixed(2)} u de él), todas tocan en el golpe (${String(CAIDA_AL_HUECO.golpeS)} s; [PULIDO 20] R1) y el DOM de la última aparece a los ${MEDIDO.ultima.toFixed(2)} s (el reloj dura ${String(RELOJ_DEL_FINAL.duracionS)}); desde arriba, todas las esquinas y el logo adentro del cuadro con margen`)
+afirmar(pieBien(MEDIDO), `  el pie de 1440 acostado: sus ${String(PIE.piezas.length)} columnas sin solaparse entre sí ni con el logo (a ≥ ${MEDIDO.aire.toFixed(2)} u de él), todas tocan en el golpe (${String(CAIDA_AL_HUECO.golpeS)} s; [PULIDO 20] R1) y el DOM de la última aparece a los ${MEDIDO.ultima.toFixed(2)} s (el reloj dura ${String(RELOJ_DEL_FINAL.duracionS)}); desde arriba, todas las esquinas y el logo adentro del cuadro con margen`)
 controlPositivo('  el detector VE dos piezas en el mismo lugar', { ...MEDIDO, solapes: 1 }, pieBien)
 controlPositivo('  y una pieza sobre el logo', { ...MEDIDO, conElLogo: 1 }, pieBien)
 controlPositivo('  y una pieza que toca fuera del golpe', { ...MEDIDO, fueraDelGolpe: 1 }, pieBien)

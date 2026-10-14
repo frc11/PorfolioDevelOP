@@ -250,7 +250,7 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
   c.primeraS = c.m === 0 ? Number.POSITIVE_INFINITY : CAIDA_AL_HUECO.golpeS
   // [PULIDO 20] R1 · la cámara del final de costado y lejos: el pie acostado y el logo en `ocupa` del cuadro (`encuadre.ts`).
   const V = FINAL_DEL_PIE.camara.escritorio
-  EN_VIVO.distanciaDelPie = c.m === 0 ? 0 : distanciaDeLaVista(camara.fov, camara.aspect, V.elevacion, V.ocupa, b.logoX, b.logoZ, b.derechaX, b.derechaZ, b.atrasX, b.atrasZ, c.huella[0], c.huella[1])
+  EN_VIVO.distanciaDelPie = c.m === 0 ? 0 : distanciaDeLaVista(camara.fov, camara.aspect, V.elevacion, ocupaDePie(c, cuadro.ancho), b.logoX, b.logoZ, b.derechaX, b.derechaZ, b.atrasX, b.atrasZ, c.huella[0], c.huella[1])
   EN_VIVO.calmaDelPie.set(b.logoX, b.logoZ, c.huella[0] + CAIDA_DEL_PIE.aire, c.huella[1] + CAIDA_DEL_PIE.aire)
   EN_VIVO.baseDelPie.set(b.derechaX, b.derechaZ, b.atrasX, b.atrasZ)
   EN_VIVO.calmaDelPieFuerza = c.m === 0 ? 0 : suave((s - c.primeraS + 0.4) / 0.8)
@@ -283,6 +283,18 @@ export function domSigueEnLaCaida(c: CaidaDelPie, i: number, s: number): boolean
 }
 
 /** La pose de la pieza `i` a los `s` del reloj, sobre el grupo ya colocado en la pared: pegada a su columna (su giro y su lugar en ella). */
+/** [PULIDO 23] U4 · lo que ocupan las columnas de pie en el ancho del cuadro (NDC, la mitad: como `ocupa`), entre las puntas de `escritorio.ocupa`. */
+export function ocupaDePie(c: CaidaDelPie, ancho: number): number {
+  let x0 = Number.POSITIVE_INFINITY
+  let x1 = Number.NEGATIVE_INFINITY
+  for (let k = 0; k < c.m; k += 1) {
+    x0 = Math.min(x0, c.columnas[k].x0)
+    x1 = Math.max(x1, c.columnas[k].x1)
+  }
+  const O = FINAL_DEL_PIE.camara.escritorio.ocupa
+  return Math.min(O[1], Math.max(O[0], Math.max(Math.abs(x0 / ancho - 0.5), Math.abs(x1 / ancho - 0.5)) * 2))
+}
+
 export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number): void {
   if (i >= c.n || s <= 0) return
   const p = c.piezas[i]

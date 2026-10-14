@@ -331,11 +331,13 @@ function encuadreAlFinal(datos: DatosDelPie, cerca: boolean): Encuadre {
 const ENCUADRE = encuadreAlFinal(DATOS, false)
 const ENCUADRE_1920 = encuadreAlFinal(DATOS_1920, false)
 const V = FINAL_DEL_PIE.camara.escritorio
-// [PULIDO 21] S3 · el sentido cambió por pedido («a 28° y al 62 % todo queda chico»): desde arriba y cerca, el conjunto acostado entero en
-// el 85–90 % del cuadro; la cámara lejos de PULIDO 20 es el control.
-const encuadreBien = (m: Encuadre): boolean => m.fuera === 0 && m.ocupa >= 0.84 && m.ocupa <= 0.93 && m.elevacion >= V.elevacion - 3
-afirmar(encuadreBien(ENCUADRE) && encuadreBien(ENCUADRE_1920), `  la cámara del final en escritorio, desde arriba (${ENCUADRE.elevacion.toFixed(0)}° sobre el blanco) y cerca: el pie acostado y el logo enteros en el cuadro, en el ${(ENCUADRE.ocupa * 100).toFixed(0)} % a 1440 y el ${(ENCUADRE_1920.ocupa * 100).toFixed(0)} % a 1920`)
+// [PULIDO 21] S3 · el sentido cambió por pedido («a 28° y al 62 % todo queda chico»): desde arriba y cerca. [PULIDO 23] U4 · y otra vez:
+// sin el zoom fuerte, la cámara sube moderado (a `escritorio.elevacion`) y lo acostado ocupa del cuadro lo mismo que de pie (entre las
+// puntas de `escritorio.ocupa`), entero; las cámaras de PULIDO 20 (lejos) y de PULIDO 21 (desde arriba) son los controles.
+const encuadreBien = (m: Encuadre): boolean => m.fuera === 0 && m.ocupa >= V.ocupa[0] - 0.04 && m.ocupa <= V.ocupa[1] + 0.04 && Math.abs(m.elevacion - V.elevacion) <= 3
+afirmar(encuadreBien(ENCUADRE) && encuadreBien(ENCUADRE_1920), `  la cámara del final en escritorio, moderada (${ENCUADRE.elevacion.toFixed(0)}° sobre el blanco): el pie acostado y el logo enteros en el cuadro, en el ${(ENCUADRE.ocupa * 100).toFixed(0)} % a 1440 y el ${(ENCUADRE_1920.ocupa * 100).toFixed(0)} % a 1920 (lo de pie)`)
 controlPositivo('  el detector VE la cámara lejos de PULIDO 20 (28°, al 62 %)', { ...ENCUADRE, elevacion: 28, ocupa: 0.62 }, encuadreBien)
+controlPositivo('  y la de PULIDO 21 (desde arriba, 89°)', { ...ENCUADRE, elevacion: 89 }, encuadreBien)
 controlPositivo('  y una esquina afuera', { ...ENCUADRE, fuera: 1 }, encuadreBien)
 const ELEVACION_EN_EL_CUADRO = CUADRO_DEL_FINAL.includes('ELEVACION_DEL_FINAL.grados = !s.angosto && EN_VIVO.distanciaDelPie > 0 ? FINAL_DEL_PIE.camara.escritorio.elevacion : FINAL_DEL_PIE.camara.elevacion') && CUADRO_DEL_FINAL.indexOf('ELEVACION_DEL_FINAL.grados =') < CUADRO_DEL_FINAL.indexOf('const sube = alturaDeLaCaida(')
 afirmar(ELEVACION_EN_EL_CUADRO, '  el final pone la elevación de escritorio (con el pie) antes de mover la cámara; abajo de 1024, la de siempre (desde arriba)')
