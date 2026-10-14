@@ -61,6 +61,16 @@ export function uniformesDelAspecto(estilo: Estilo): Record<NombreDelAspecto, { 
 /** De día, el destello blanco en reposo: ninguna (con el punto claro en reposo, la energía oscura se leía como ojos; sobre el logo, como rayones). Sólo calientes. */
 export const CLARO_EN_REPOSO: Readonly<Record<Estilo, number>> = { chispa: 0 }
 
+/**
+ * [PULIDO 24] V2 · DE DÍA, ATMÓSFERA SECUNDARIA (de noche, igual: aprobada). De día eran puntos negros nítidos del mismo peso sobre todo:
+ * se leían como suciedad. Ahora, encima del aspecto: el tope del alfa (grafito translúcido), el tamaño (parte) y cuánto varía entre
+ * ellas, cuántas casi no se ven (parte de las partículas) y cuánto, la perspectiva aérea (cuánto se funden con el papel las lejanas, entre
+ * qué distancias en veces la del logo) y cuánto más se apagan sobre un texto.
+ */
+export const DIA_SECUNDARIO = { tope: 0.36, tamano: 0.7, variacion: 0.6, menos: 0.4, casiNada: 0.12, aerea: 0.9, desde: 0.9, hasta: 2.2, textos: 0.98 } as const
+const D = DIA_SECUNDARIO
+const g = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
+
 export const ASPECTO_GLSL = /* glsl */ `
 uniform vec4 uNucleo;
 uniform vec4 uChispa;
@@ -114,6 +124,7 @@ attribute float aBrillo;
 varying vec2 vLocal;
 varying float vLargo;
 varying float vRadioPx;
+varying vec2 vDia;
 varying float vBrillo;
 varying float vClaro;
 varying float vTexto;
@@ -155,6 +166,9 @@ void main() {
 	float radio = clamp( sqrt( nitido * nitido + desenfoque * desenfoque ), uTamano.z, uTamano.w + desenfoque );
 	// El mismo brillo total: lo que se abre (o lo que no llega al mínimo) se ve más tenue.
 	float conserva = mix( min( 1.0, ( nitido * nitido ) / max( 1e-4, radio * radio ) ), 1.0, 0.2 );
+	// [PULIDO 24] V2 · de día, más chica y más variada; y algunas casi no se ven (las mismas, menos presentes).
+	vDia = vec2( mix( ${g(D.tamano)} * ( ${g(1 - D.variacion / 2)} + ${g(D.variacion)} * azar01( id, 29u ) ), 1.0, uNoche ), azar01( id, 30u ) < ${g(D.menos)} ? ${g(D.casiNada)} : 1.0 );
+	radio *= vDia.x;
 	float radioPx = radio * uPixel;
 	vec4 cP = projectionMatrix * mv;
 	vec4 cQ = projectionMatrix * viewMatrix * vec4( p - vel * uMovida.x, 1.0 );
@@ -224,6 +238,7 @@ ${COLOR_DE_LA_ESCENA_GLSL}
 varying vec2 vLocal;
 varying float vLargo;
 varying float vRadioPx;
+varying vec2 vDia;
 varying float vBrillo;
 varying float vClaro;
 varying float vTexto;
@@ -239,6 +254,7 @@ void main() {
 	float cola = vLargo > 0.01 ? mix( 0.3, 1.0, clamp( vLocal.x / vLargo, 0.0, 1.0 ) ) : 1.0;
 	// [PULIDO 18] P1.d · el núcleo, chico y nítido: su radio tiene un tope (px); el tamaño de la chispa lo lleva el halo (corto).
 	float rNucleo = min( vRadioPx, uNucleo.x * uPixel );
+	rNucleo = min( rNucleo, uNucleo.x * uPixel * vDia.x );
 	float nucleo = exp( - 0.5 * d2 / ( rNucleo * rNucleo ) ) * cola;
 	float halo = uLuz.z * exp( - 0.5 * r2 / ( uLuz.w * uLuz.w ) ) * cola;
 	// [PULIDO 18] P1.d · la cruz: dos rayos finos (en la pantalla), cortos.
@@ -256,6 +272,8 @@ void main() {
 	// El velo, con tope: una cercana y caliente no se vuelve una mancha (un lunar); el cuerpo, translúcido.
 	float aDia = min( 0.85, cuerpo * uDia.x * vBrillo * 2.0 + min( 0.25, humo * uDiaForma.z * vBrillo * 2.0 ) + especular );
 	vec3 colorDia = mix( uTintaDia, uClaroDia, especular / max( 1e-4, aDia ) );
+	// [PULIDO 24] V2 · de día, secundaria: grafito con tope, las lejanas se funden con el papel, algunas casi nada, sobre un texto menos.
+	aDia = min( aDia, ${g(D.tope)} ) * vDia.y * ( 1.0 - ${g(D.aerea)} * smoothstep( uFoco * ${g(D.desde)}, uFoco * ${g(D.hasta)}, vDistancia ) ) * ( 1.0 - ${g(D.textos)} * vTexto );
 	// El calor (de día, las calientes): lo de atrás (la copia del cuadro), corrido como en el aire que tiembla y con más contraste.
 	float radioDelCalor = uCalorDia.z * uPixel;
 	float qc = dot( vLocal, vLocal ) / ( radioDelCalor * radioDelCalor );
