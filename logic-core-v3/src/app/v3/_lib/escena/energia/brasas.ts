@@ -157,13 +157,15 @@ export interface EntradaDeLasBrasas {
   dt: number
   /** [PULIDO 19] Q1.d · el freno de la red en reposo (0 a 1; se suma a la amortiguación: `REPOSO.frena`). */
   freno: number
+  /** [PULIDO 23] U2 · a quién frena: las brasas enlazadas (1); las otras siguen andando. Sin red, todas (null). */
+  quietas: Uint8Array | null
 }
 
 /** Cuántos arcos entran al paso como mucho (los lugares de los arcos, `arcos/arcos.ts`). */
 export const ARCOS_EN_LA_ENTRADA = 6
 
 export function crearEntradaDeLasBrasas(): EntradaDeLasBrasas {
-  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), viento: new Float32Array(3), estela: new Float32Array(3), arcos: new Float32Array(ARCOS_EN_LA_ENTRADA * 7), cuantosArcos: 0, piso: -100, dominio: null, dt: 1 / 60, freno: 0 }
+  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), viento: new Float32Array(3), estela: new Float32Array(3), arcos: new Float32Array(ARCOS_EN_LA_ENTRADA * 7), cuantosArcos: 0, piso: -100, dominio: null, dt: 1 / 60, freno: 0, quietas: null }
 }
 
 /** Un azar con semilla (mulberry32): las mismas brasas y los mismos arcos en cada carga de la página (y en el banco). */

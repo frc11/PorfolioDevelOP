@@ -62,6 +62,8 @@ export function pasoDeLasBrasas(b: Brasas, dt: number, en: EntradaDeLasBrasas, a
   }
   // [PULIDO 19] Q1.d · con la red en reposo las brasas se frenan (`en.freno`, de `reposo.ts`).
   const frena = Math.exp(-(F.amortigua + REPOSO.frena * en.freno) * dt)
+  // [PULIDO 23] U2 · sólo a las enlazadas: las que ningún rayo agarró siguen con su deriva.
+  const libre = Math.exp(-F.amortigua * dt)
   const enfria = Math.exp(-dt / K.apagaS)
   const reposo = K.base + K.porTemperatura * en.temperatura
   for (let i = 0; i < b.n; i += 1) {
@@ -85,9 +87,10 @@ export function pasoDeLasBrasas(b: Brasas, dt: number, en: EntradaDeLasBrasas, a
       if (v[i * 3 + 1] < 0) v[i * 3 + 1] *= Math.exp(-PISO.frena * s * dt)
       roza = Math.exp(-PISO.roce * s * dt)
     }
-    let vx = (v[i * 3] + fx * dt) * frena * roza
-    let vy = (v[i * 3 + 1] + fy * dt) * frena
-    let vz = (v[i * 3 + 2] + fz * dt) * frena * roza
+    const fr = en.quietas === null || en.quietas[i] !== 0 ? frena : libre
+    let vx = (v[i * 3] + fx * dt) * fr * roza
+    let vy = (v[i * 3 + 1] + fy * dt) * fr
+    let vz = (v[i * 3 + 2] + fz * dt) * fr * roza
     const rap = Math.sqrt(vx * vx + vy * vy + vz * vz)
     if (rap > F.tope) {
       vx *= F.tope / rap

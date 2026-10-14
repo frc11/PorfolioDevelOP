@@ -364,7 +364,7 @@ const cuerpo = (texto: string, nombre: string): string => {
 }
 // [PULIDO 18] P1.b · `brasas.ts` se partió (pasaba las 300 líneas): el paso, en `paso.ts`; lo de afuera de cada una, en `afuera.ts`. Los dos
 // entran a los módulos y a las funciones de cada cuadro (las mismas comprobaciones, en su lugar nuevo).
-const MODULOS = ['PlasmaYCargas.tsx', 'banco.ts', 'brasas.ts', 'grilla.ts', 'dominio.ts', 'paso.ts', 'afuera.ts', 'vecinas.ts', 'calor.ts', 'cuadro.ts', 'direcciones.ts', 'ruido.ts', 'reposo.ts', 'textoEnPantalla.ts', 'arcos/arcos.ts', 'arcos/camino.ts', 'arcos/cinta.ts', 'arcos/programador.ts', 'dibujo/arcos.ts', 'dibujo/armado.ts', 'dibujo/comun.ts', 'dibujo/efectos.ts', 'dibujo/particulas.ts', 'dibujo/red.ts', 'interaccion/interaccion.ts', 'interaccion/puntero.ts'] as const
+const MODULOS = ['PlasmaYCargas.tsx', 'banco.ts', 'brasas.ts', 'grilla.ts', 'dominio.ts', 'paso.ts', 'afuera.ts', 'vecinas.ts', 'calor.ts', 'cuadro.ts', 'direcciones.ts', 'ruido.ts', 'reposo.ts', 'cadenas.ts', 'textoEnPantalla.ts', 'arcos/arcos.ts', 'arcos/camino.ts', 'arcos/cinta.ts', 'arcos/programador.ts', 'dibujo/arcos.ts', 'dibujo/armado.ts', 'dibujo/comun.ts', 'dibujo/efectos.ts', 'dibujo/particulas.ts', 'dibujo/red.ts', 'interaccion/interaccion.ts', 'interaccion/puntero.ts'] as const
 const ARCHIVOS: Record<string, string | undefined> = Object.fromEntries(MODULOS.map((m) => [m, existsSync(`${ENERGIA}/${m}`) ? readFileSync(`${ENERGIA}/${m}`, 'utf8').replace(/\r\n/g, '\n') : undefined]))
 const deCodigo = (t: string): number => t.split('\n').filter((l) => l.trim() !== '' && !/^\s*(\/\/|\*|\/\*)/.test(l)).length
 const modulosBien = (a: Record<string, string | undefined>): boolean => MODULOS.every((m) => a[m] !== undefined && deCodigo(a[m] ?? '') <= 300)
@@ -386,7 +386,9 @@ const POR_CUADRO: readonly (readonly [string, readonly string[]])[] = [
   ['arcos/camino.ts', ['puntoDelCamino']],
   ['dibujo/armado.ts', ['subir']],
   // [PULIDO 19] Q1.d · la red en reposo (su máquina y su relleno).
-  ['reposo.ts', ['pasoDeLaRed', 'leerElGesto', 'formar', 'cortar', 'enlazar', 'chasquear', 'soltar']],
+  ['reposo.ts', ['pasoDeLaRed', 'leerElGesto', 'formar', 'cortar', 'chasquear', 'soltar']],
+  // [PULIDO 23] U2 · la red crece en cadenas (`enlazar` se mudó a `cadenas.ts`).
+  ['cadenas.ts', ['empezarLasCadenas', 'crecerLasCadenas', 'enlazar', 'sinAire']],
   ['dibujo/red.ts', ['rellenarRed']],
 ]
 const RESERVA = /\bnew\s+[A-Z]|=>|(?:[=(,:?]|\breturn)\s*\[|(?:[=(,:?]|\breturn)\s*\{(?!\s*$)|addUpdateRange|\.slice\(|\.map\(|\.filter\(/
