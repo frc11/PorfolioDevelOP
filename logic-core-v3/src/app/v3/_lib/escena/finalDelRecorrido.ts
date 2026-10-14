@@ -74,7 +74,8 @@ export const POSES_DEL_FINAL = {
   // 36 en todo el camino. Lo que sube y se aleja lo limita el techo de velocidad del final (s23: subir cuesta recorrido): a
   // 31, el logo queda a 31,3 de ojo (era 32). El dolly-in leve al llegar va por tiempo (`DOLLY_DEL_CTA`): la pista sostiene.
   cta: { angleDeg: 360, height: 4.5, distance: 31, frameX: 0, frameY: -1 },
-  pie: { angleDeg: 360, height: 5, distance: 40, frameX: 0, frameY: 0 },
+  // [PULIDO 24] V3 · el pie, más cerca (eran 40: el conjunto arrancaba lejos y chico); más que la del CTA (s23: dos pasos) y con la pared de atrás en la niebla (s28).
+  pie: { angleDeg: 360, height: 5, distance: 34, frameX: 0, frameY: 0 },
 } as const
 
 /**

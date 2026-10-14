@@ -39,8 +39,17 @@ afirmar(quieto.indexOf(TITULAR_DE_CIERRE) < quieto.indexOf('El recorrido') && qu
 // volumen, un cuarto (25/50/25), que deja libre más que el hueco en todos los cuadros desde 1024 (también en el retrato).
 // [PULIDO 12] C1 · con un mínimo de 264 px si el hueco lo deja (a 1024 un cuarto no alcanzaba para la columna izquierda).
 const HUECO_DEL_PIE = huecoDelLogo(POSES_DEL_FINAL.pie.distance)
-const unCuartoDejaElHueco = [[1024, 824], [1024, 768], [1280, 800], [1440, 900], [1920, 1080], [1024, 1366]].every(([w, h]) => Math.max(0.25 * w, Math.min(264, 0.5 * w - (HUECO_DEL_PIE * h) / 100)) <= 0.5 * w - (HUECO_DEL_PIE * h) / 100 && 0.25 * w <= 0.5 * w - (HUECO_DEL_PIE * h) / 100)
-afirmar(FUENTE.includes("const anchoDeLaColumna = volumen ? 'escritorio:w-[max(calc(50%/2),min(calc(var(--spacing-20)*3.3),calc(50%-var(--hueco-del-pie))))]' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'") && (FUENTE.match(/, anchoDeLaColumna\)\}/g) ?? []).length === 2 && unCuartoDejaElHueco, 'las dos columnas dejan libre el hueco del logo: en el pie plano, medio cuadro menos el hueco a cada lado; con el de volumen, un cuarto (25/50/25)', `hueco ${HUECO_DEL_PIE.toFixed(1)} svh`)
+// [PULIDO 24] V3 · el sentido cambió por pedido: con el pie de volumen las columnas van JUNTO AL LOGO (a `--aire-del-pie` del hueco, las dos
+// iguales), no contra los bordes; el ancho, un cuarto (con su mínimo), acotado a lo libre hasta el borde: nunca se salen del cuadro ni
+// pisan el hueco, y en los cuadros apaisados siguen midiendo al menos un cuarto.
+const AIRE_DEL_PIE = 24
+const juntoAlLogo = [[1024, 824], [1024, 768], [1280, 800], [1440, 900], [1920, 1080], [1024, 1366]].every(([w, h]) => {
+  const libre = 0.5 * w - (HUECO_DEL_PIE * h) / 100 - AIRE_DEL_PIE
+  const ancho = Math.min(Math.max(0.25 * w, Math.min(264, libre)), libre)
+  const izquierda = 0.5 * w - (HUECO_DEL_PIE * h) / 100 - AIRE_DEL_PIE - ancho
+  return izquierda >= -1e-9 && ancho > 0 && (w < h || ancho >= Math.min(0.25 * w, 264) - 1e-9)
+})
+afirmar(FUENTE.includes("const anchoDeLaColumna = volumen ? 'escritorio:w-[min(max(calc(50%/2),min(calc(var(--spacing-20)*3.3),calc(50%-var(--hueco-del-pie)-var(--aire-del-pie)))),calc(50%-var(--hueco-del-pie)-var(--aire-del-pie)))]' : 'escritorio:w-[calc(50%-var(--hueco-del-pie))]'") && (FUENTE.match(/, anchoDeLaColumna\)\}/g) ?? []).length === 2 && FUENTE.includes("['--aire-del-pie' as string]: 'var(--spacing-6)'") && juntoAlLogo, 'las dos columnas dejan libre el hueco del logo: en el pie plano, medio cuadro menos el hueco a cada lado; con el de volumen, junto al logo con el mismo aire y adentro del cuadro', `hueco ${HUECO_DEL_PIE.toFixed(1)} svh`)
 const hueco = huecoDelLogo(POSES_DEL_FINAL.pie.distance)
 afirmar(hueco > 10 && hueco < 25, `el hueco sale de la pose E (a ${String(POSES_DEL_FINAL.pie.distance)}): ${hueco.toFixed(1)} svh`)
 afirmar(!/CabeceraDeSeccion|MarcaDeSeccion|PrefijoDeServicio|Isotipo/.test(FUENTE) && !/data-pieza="(marca-de-seccion|prefijo-de-servicio|isotipo)"/.test(quieto + movido), 'sin el punto azul (ni la marca de sección ni el prefijo) y sin el logo chico: el 3D ya está detrás')

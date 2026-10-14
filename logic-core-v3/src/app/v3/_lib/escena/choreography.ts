@@ -413,14 +413,14 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     name: 'pie',
     ease: 'arrive',
     turn: 'literal',
-    pose: { angleDeg: 360, height: 5, distance: 40, frameX: 0, frameY: 0 },
+    pose: { angleDeg: 360, height: 5, distance: 34, frameX: 0, frameY: 0 },
   },
   {
     at: 1,
     name: 'pie · sostén',
     ease: 'arrive',
     turn: 'literal',
-    pose: { angleDeg: 360, height: 5, distance: 40, frameX: 0, frameY: 0 },
+    pose: { angleDeg: 360, height: 5, distance: 34, frameX: 0, frameY: 0 },
   },
 ]
 
