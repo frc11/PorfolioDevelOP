@@ -10,6 +10,7 @@ import { colocarLaPieza } from './colocacion'
 import { cajaDelPieAcostado, distanciaDeLaVista } from './encuadre'
 import { VOLUMEN_DEL_PIE } from './geometria'
 import { TECHO_DE_LOS_TEXTOS } from './huecos'
+import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, hundidaParaElViaje } from '../../pie3d/salidas'
 import { MAXIMO_DE_SOMBRAS_DEL_PIE, SOMBRAS_DEL_PIE } from './sombras'
 
 /**
@@ -264,6 +265,8 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
   EN_VIVO.calmaDelPie.set(b.logoX, b.logoZ, c.huella[0] + CAIDA_DEL_PIE.aire, c.huella[1] + CAIDA_DEL_PIE.aire)
   EN_VIVO.baseDelPie.set(b.derechaX, b.derechaZ, b.atrasX, b.atrasZ)
   EN_VIVO.calmaDelPieFuerza = c.m === 0 ? 0 : suave((s - c.primeraS + 0.4) / 0.8)
+  // [PULIDO 27] Y4 b · acostado entero, con su DOM: un enlace del recorrido, ahí, primero se hunde.
+  SALIDA_EN_VIVO.acostado = c.m > 0 && s >= c.ultimaS
   // La pose de cada columna: de la orientación de la pared a la vertical, de frente (la base de la cámara horizontal), y el vuelco sobre
   // su canto (su eje x); su esquina de arriba a la izquierda, desde el canto.
   DERECHA.set(b.derechaX, 0, b.derechaZ)
@@ -291,7 +294,8 @@ export function acostadaDeLaCaida(c: CaidaDelPie, i: number, s: number): number 
 
 /** [PULIDO 20] R1 · cuánto se ve el DOM de la pieza `i` a los `s` del reloj (0 a 1; sin caída, entero): el de su columna. */
 export function domDeLaCaida(c: CaidaDelPie, i: number, s: number): number {
-  return i >= c.n ? 1 : domDeLaPieza(c.lugares[c.piezas[i].columna], s)
+  // [PULIDO 27] Y4 b · hundiéndose antes de un viaje, el DOM ya no.
+  return i >= c.n ? 1 : SALIDA_EN_VIVO.hunde > 0 ? 0 : domDeLaPieza(c.lugares[c.piezas[i].columna], s)
 }
 
 /** [PULIDO 20] R1 · si el DOM de la pieza `i` sigue a la pieza a los `s` del reloj (en camino, se queda donde estaba, apagado). */
@@ -323,6 +327,11 @@ export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number):
   const sube = p.esTexto ? (p.espesorPx + TECHO_DE_LOS_TEXTOS.sube / col.mpp) * poseDeLaPiezaQueCae(col, c.lugares[p.columna], s).hundido : 0
   OFFSET.set(p.dx, -p.dy, sube).multiplyScalar(col.mpp).applyQuaternion(col.q)
   grupo.position.copy(col.o).add(OFFSET)
+  // [PULIDO 27] Y4 b · antes de un viaje desde el pie acostado se hunde en su hueco; hundida, no se dibuja hasta que el viaje termina.
+  const h = SALIDA_EN_VIVO.hunde
+  if (h <= 0) return
+  grupo.position.y -= (p.espesor + SALIDAS_DEL_PIE.hundeDeMas + (p.esTexto ? TECHO_DE_LOS_TEXTOS.sube : 0)) * hundidaParaElViaje(h)
+  if (h >= 1) grupo.visible = false
 }
 
 /** La pose de la sombra de una pieza pegada a su columna: su canto de abajo y de atrás en el mundo, con el ángulo y el reloj de la columna. */

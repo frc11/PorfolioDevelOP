@@ -9,10 +9,12 @@ import { pantallasDelViaje, planDelViaje } from '../_lib/escena/planDelViaje'
 import { curvaDelViaje } from '../_lib/escena/repartoDelViaje'
 import { retenerLosGestos } from '../_lib/gestosDelScroll'
 import { empezarElViaje, terminarElViaje } from '../_lib/escena/viaje'
+import { demoraDelViaje } from '../_lib/pie3d/salidas'
 
 import {
   ATRIBUTO_DEL_VELO,
   CURVA_DEL_VIAJE,
+  DURACION_DE_LOS_VIAJES,
   PRELUDIO_MS,
   RETARDO_ANTES_DE_DESAPARECER_MS,
   SELECTOR_DE_LOS_VIAJES,
@@ -169,6 +171,8 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
     let reloj: number | undefined
     /** [VIAJES] El que suelta la escena cuando el velo terminó de volver. */
     let relojDeLaEscena: number | undefined
+    /** [PULIDO 27] Y4 b · el que empieza el viaje de la escena después del hundimiento del pie. */
+    let relojDeLaDemora: number | undefined
 
     /**
      * APAGA EL VELO. Idempotente, y la llaman las cinco salidas.
@@ -196,6 +200,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
         window.clearTimeout(reloj)
         reloj = undefined
       }
+      window.clearTimeout(relojDeLaDemora)
       if (soltarLaRueda !== null) {
         soltarLaRueda()
         soltarLaRueda = null
@@ -305,12 +310,17 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       const destinoEnPx = destinoDelViaje(seccion, elAncla === seccion ? null : elAncla)
       // [NOCTURNO FINAL] A2 · la velocidad con tope: un viaje largo tarda más (`deslizamiento.ts`).
       // [PULIDO 2] 2 · ahora función de la distancia de la escena, con saturación: de 1,2 s a 2,5 s del click a la llegada.
-      const duracionMs = duracionDelViaje(pantallasDelViaje(destinoEnPx))
+      // [PULIDO 27] Y4 b · desde el pie acostado, primero las piezas se hunden en sus huecos (`demora`): el viaje arranca después y dura
+      // eso menos (el mismo presupuesto del click a la llegada).
+      const demora = demoraDelViaje(enlace)
+      const duracionMs = Math.max(DURACION_DE_LOS_VIAJES.minimoMs - PRELUDIO_MS, duracionDelViaje(pantallasDelViaje(destinoEnPx)) - demora)
       // [PULIDO 2] 2 · y su curva, repartida por lo que se ve cambiar (la cámara que gira cuesta tiempo: `repartoDelViaje.ts`).
       const curva = curvaDelViaje(destinoEnPx, CURVA_DEL_VIAJE)
       window.clearTimeout(relojDeLaEscena)
       // [PULIDO 1] P5 · y cuánto dura, del click al frenazo: el final del pie vuelve a cero adentro de esto, en paralelo.
-      empezarElViaje({ ...planDelViaje(seccion.id, destinoEnPx), duracionMs: PRELUDIO_MS + duracionMs })
+      const empezar = (): void => empezarElViaje({ ...planDelViaje(seccion.id, destinoEnPx), duracionMs: PRELUDIO_MS + duracionMs })
+      if (demora > 0) relojDeLaDemora = window.setTimeout(empezar, demora)
+      else empezar()
 
       // El velo espera `RETARDO_ANTES_DE_DESAPARECER_MS`; con 0 va en el mismo cuadro.
       const encenderElVelo = (): void => {
@@ -329,8 +339,8 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
        */
         zona.inert = true
       }
-      if (RETARDO_ANTES_DE_DESAPARECER_MS === 0) encenderElVelo()
-      else relojDelVelo = window.setTimeout(encenderElVelo, RETARDO_ANTES_DE_DESAPARECER_MS)
+      if (RETARDO_ANTES_DE_DESAPARECER_MS + demora === 0) encenderElVelo()
+      else relojDelVelo = window.setTimeout(encenderElVelo, RETARDO_ANTES_DE_DESAPARECER_MS + demora)
 
       /**
        * [RETOQUE DEL ENCASTRE] 2C · SIN FRENO: mientras viaja, el scroll se IGNORA. La rueda, el dedo y las teclas que
@@ -342,7 +352,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
        */
       soltarLaRueda = retenerLosGestos(() => true)
 
-      reloj = window.setTimeout(() => terminar(false), relojDeSeguridadMs(duracionMs))
+      reloj = window.setTimeout(() => terminar(false), demora + relojDeSeguridadMs(duracionMs))
 
       /**
        * 🔴 LA PAUSA. El viaje NO arranca en el mismo cuadro que el velo: espera
@@ -403,7 +413,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
           onComplete: () => terminar(true),
         })
       }
-      relojDeArranque = window.setTimeout(arrancar, espera)
+      relojDeArranque = window.setTimeout(arrancar, espera + demora)
     }
 
     const alHistorial = (): void => terminar(false)

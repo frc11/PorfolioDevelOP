@@ -367,10 +367,11 @@ const FUENTE_DEL_EFECTO = quitarComentarios(leer(EFECTO))
 // [NOCTURNO FINAL] A2 · cambió por pedido (velocidad con tope): la duración ya no es una sola; la calcula el módulo para
 // cada viaje (`duracionDelViaje`, con `DURACION_DEL_VIAJE_MS` como mínimo) y el efecto la pasa en segundos (s52 A2).
 // [PULIDO 2] 2 · ahora de la distancia de la escena (`pantallasDelViaje`), con saturación; y la curva del viaje va de base
-// de la curva repartida por lo que se ve cambiar (`curvaDelViaje`): sigue explícita.
+// de la curva repartida por lo que se ve cambiar (`curvaDelViaje`): sigue explícita. [PULIDO 27] Y4 b · desde el pie acostado, menos lo
+// que tarda el hundimiento de antes (`demoraDelViaje`): el mismo total del click a la llegada.
 afirmar(
-  FUENTE_DEL_EFECTO.includes('const duracionMs = duracionDelViaje(pantallasDelViaje(destinoEnPx))') && FUENTE_DEL_EFECTO.includes('duration: duracionMs / 1000'),
-  '  el efecto la consume del módulo (`duracionDelViaje`, por viaje), no escribe un 4',
+  FUENTE_DEL_EFECTO.includes('const demora = demoraDelViaje(enlace)') && FUENTE_DEL_EFECTO.includes('duracionDelViaje(pantallasDelViaje(destinoEnPx)) - demora)') && FUENTE_DEL_EFECTO.includes('duration: duracionMs / 1000'),
+  '  el efecto la consume del módulo (`duracionDelViaje`, por viaje; desde el pie acostado, menos el hundimiento), no escribe un 4',
 )
 afirmar(
   FUENTE_DEL_EFECTO.includes('const curva = curvaDelViaje(destinoEnPx, CURVA_DEL_VIAJE)') && FUENTE_DEL_EFECTO.includes('easing: curva'),
@@ -390,18 +391,20 @@ afirmar(
   FUENTE_DEL_EFECTO.includes('const relojDeSeguridadMs = (duracionMs: number): number => PRELUDIO_MS + duracionMs + MARGEN_DEL_RELOJ_MS'),
   '  🔴 el reloj de seguridad sale del TOTAL (el preludio, el recorrido de ESTE viaje y el margen): si se olvidara uno, abortaría un viaje válido a mitad de camino',
 )
+// [PULIDO 27] Y4 b · más el hundimiento del pie acostado, que va antes.
 afirmar(
-  FUENTE_DEL_EFECTO.includes('window.setTimeout(() => terminar(false), relojDeSeguridadMs(duracionMs))'),
-  '  y es ese total el que se le pasa al reloj, no una cuenta escrita de nuevo',
+  FUENTE_DEL_EFECTO.includes('window.setTimeout(() => terminar(false), demora + relojDeSeguridadMs(duracionMs))'),
+  '  y es ese total (más el hundimiento del pie, que va antes) el que se le pasa al reloj, no una cuenta escrita de nuevo',
 )
 afirmar(
   /window\.clearTimeout\(relojDeArranque\)/.test(FUENTE_DEL_EFECTO),
   '  🔴 y `terminar` cancela el reloj de ARRANQUE: sin esa línea una rueda en los primeros 600 ms apagaría el velo y el scroll saldría de viaje igual',
 )
-// [VIAJES] La espera es `PRELUDIO_MS` en el viaje y el fundido del velo en el salto (movimiento reducido).
+// [VIAJES] La espera es `PRELUDIO_MS` en el viaje y el fundido del velo en el salto (movimiento reducido). [PULIDO 27] Y4 b · después del
+// hundimiento del pie acostado (el velo y el viaje de la escena, también).
 afirmar(
-  FUENTE_DEL_EFECTO.includes('const espera = salto ? duracionDelFundido(zona) : PRELUDIO_MS') && FUENTE_DEL_EFECTO.includes('relojDeArranque = window.setTimeout(arrancar, espera)'),
-  '  el viaje arranca a los `PRELUDIO_MS`, no en el mismo cuadro que el velo: es la pausa que el dueño pidió',
+  FUENTE_DEL_EFECTO.includes('const espera = salto ? duracionDelFundido(zona) : PRELUDIO_MS') && FUENTE_DEL_EFECTO.includes('relojDeArranque = window.setTimeout(arrancar, espera + demora)') && FUENTE_DEL_EFECTO.includes('relojDelVelo = window.setTimeout(encenderElVelo, RETARDO_ANTES_DE_DESAPARECER_MS + demora)') && FUENTE_DEL_EFECTO.includes('if (demora > 0) relojDeLaDemora = window.setTimeout(empezar, demora)'),
+  '  el viaje arranca a los `PRELUDIO_MS`, no en el mismo cuadro que el velo: es la pausa que el dueño pidió (desde el pie acostado, después de que las piezas se hunden)',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

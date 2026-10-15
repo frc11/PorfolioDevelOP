@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { VIVO } from '../entorno/vivo'
 import { FLOOR_Y } from '../probeScene'
 import type { GestoDeScroll } from '../../gestosDelScroll'
+import { SALIDA_EN_VIVO } from '../../pie3d/salidas'
 import { CAMARA_ANTES_DEL_FINAL, CAMARA_SIN_EL_MOUSE, copiarLaCamara } from '../sinElMouse'
 import { relojDelCuadro, segundosDelViaje, viajeEnCurso } from '../viaje'
 import { FINAL_EN_EL_PISO, LUZ_DEL_BANCO } from './enElPiso'
@@ -244,9 +245,11 @@ export function gestoDelFinal(s: EstadoDelFinal, g: GestoDeScroll): boolean {
   }
   const enLaCola = g.magnitud > 0 && g.magnitud <= RELOJ_DEL_FINAL.colaDelGesto * G.pico
   G.pico = Math.max(G.pico, g.magnitud)
-  const d = decidirElGesto(s.reloj, alFondo, g.sentido, g.nuevo, G.retenido, ahora - G.desde, enLaCola)
+  // [PULIDO 27] Y4 a · con el pie entero a la vista, parada, la salida del pie (`pie3d/salidas.ts`).
+  const d = decidirElGesto(s.reloj, alFondo, g.sentido, g.nuevo, G.retenido, ahora - G.desde, enLaCola, { aLaVista: EN_VIVO.pieEntero, saliendo: SALIDA_EN_VIVO.saliendo && !SALIDA_EN_VIVO.seFue, seFue: SALIDA_EN_VIVO.saliendo && SALIDA_EN_VIVO.seFue })
   G.retenido = d.retiene
   if (d.rebobina) G.rebobinar = true
+  if (d.sale === true) [SALIDA_EN_VIVO.saliendo, SALIDA_EN_VIVO.seFue] = [true, false]
   if (g.sentido < 0) G.arriba = ahora
   else if (ahora - G.arriba > RELOJ_DEL_FINAL.cambioDeSentidoS) G.abajo = ahora
   return d.retiene
@@ -275,6 +278,8 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   const ahora = ahoraS()
   const haciaAbajo = s.gestos.abajo > s.gestos.leido
   s.gestos.leido = ahora
+  // [PULIDO 27] Y4 a · un gesto hacia abajo trae el pie de vuelta.
+  if (haciaAbajo) SALIDA_EN_VIVO.saliendo = false
   const rebobinar = s.gestos.rebobinar
   s.gestos.rebobinar = false
   const sinGestoS = ahora - Math.max(s.gestos.arriba, s.gestos.abajo)

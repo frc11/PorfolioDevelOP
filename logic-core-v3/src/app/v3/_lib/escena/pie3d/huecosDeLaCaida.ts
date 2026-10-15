@@ -5,6 +5,7 @@ import { sombraDeLaPiezaQueCae } from '../final/sombraDeLaPieza'
 import type { CaidaDelPie } from './caida'
 import { HUECOS_DEL_PIE, HUECO_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
 import { SOMBRA_DEL_PIE } from './sombras'
+import { SALIDA_EN_VIVO, cerradoParaElViaje } from '../../pie3d/salidas'
 
 /**
  * [PULIDO 22] T3 · Los huecos de este cuadro (`huecos.ts`): por placa que cae, su huella en el piso, cuánto se abrió y [PULIDO 23] U3 · su
@@ -50,7 +51,8 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     const p = c.piezas[i]
     const col = c.columnas[p.columna]
     const l = c.lugares[p.columna]
-    const abre = suave((s - l.inclina) / Math.max(1e-3, l.toca - HUECO_DEL_PIE.antesDelContactoS - l.inclina))
+    // [PULIDO 27] Y4 b · y antes de un viaje desde el pie acostado, el piso se cierra sobre la pieza hundida.
+    const abre = suave((s - l.inclina) / Math.max(1e-3, l.toca - HUECO_DEL_PIE.antesDelContactoS - l.inclina)) * (1 - cerradoParaElViaje(SALIDA_EN_VIVO.hunde))
     if (abre <= 0) continue
     // La columna acostada e incrustada (su esquina de arriba a la izquierda) y el canto de la pieza en ella.
     const fin = poseDeLaPiezaQueCae(col, l, l.incrustada + 1)

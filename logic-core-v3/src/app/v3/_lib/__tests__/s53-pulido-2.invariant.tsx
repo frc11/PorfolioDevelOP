@@ -208,9 +208,10 @@ titulo('2 · Los viajes del menú: más rápidos sin perder calidad (la distanci
 const efectoP2 = sinComentarios(leer('_componentes/useDeslizamientoDelCta.ts'))
 const planP2 = sinComentarios(leer('_lib/escena/planDelViaje.ts'))
 const distanciaBien = (ef: string, pl: string): boolean =>
-  ef.includes('const duracionMs = duracionDelViaje(pantallasDelViaje(destinoEnPx))') && /export function pantallasDelViaje\(y1: number\): number \{[\s\S]*?medidaSinElEstiramiento\(y0,[\s\S]*?medidaSinElEstiramiento\(y1,/.test(pl) &&
+  ef.includes('duracionDelViaje(pantallasDelViaje(destinoEnPx)) - demora)') && /export function pantallasDelViaje\(y1: number\): number \{[\s\S]*?medidaSinElEstiramiento\(y0,[\s\S]*?medidaSinElEstiramiento\(y1,/.test(pl) &&
   !/fin|final/i.test(ef.slice(ef.indexOf('const duracionMs ='), ef.indexOf('const duracionMs =') + 80))
-afirmar(distanciaBien(efectoP2, planP2), 'la duración sale de la distancia de la escena (sin el túnel estirado), la misma desde el pie en reposo que desde el encastre avanzado')
+// [PULIDO 27] Y4 b · desde el pie acostado, el viaje dura lo que tarda el hundimiento de antes menos: del click a la llegada, lo mismo.
+afirmar(distanciaBien(efectoP2, planP2), 'la duración sale de la distancia de la escena (sin el túnel estirado), la misma (del click a la llegada) desde el pie en reposo que desde el encastre avanzado')
 controlPositivo('el detector VE la distancia en px crudos (con el túnel estirado)', [efectoP2.replace('duracionDelViaje(pantallasDelViaje(destinoEnPx))', 'duracionDelViaje((destinoEnPx - window.scrollY) / window.innerHeight)'), planP2] as const, ([ef, pl]: readonly [string, string]) => distanciaBien(ef, pl))
 
 // UN SOLO RELOJ: el scroll (Lenis o el motor sin Lenis) y la vuelta del final leen el mismo (`relojDelCuadro`): el de pared,

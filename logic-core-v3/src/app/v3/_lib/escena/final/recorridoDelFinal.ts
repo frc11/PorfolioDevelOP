@@ -280,7 +280,8 @@ export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): 
     } else if (r.fase === 'rebobina' && e.haciaAbajo) r.fase = 'corre'
     else if (r.fase === 'parada') {
       r.paradaS += paso
-      if (e.haciaAbajo || (r.paradaS >= R.vuelveAEmpezarS && e.sinGestoS >= R.vuelveAEmpezarS)) r.fase = 'corre'
+      // [PULIDO 27] Y4 a · sin el pie entero (se fue) no vuelve a correr: espera a que llegue.
+      if (e.haciaAbajo || (r.paradaS >= R.vuelveAEmpezarS && e.sinGestoS >= R.vuelveAEmpezarS)) r.fase = e.pieEntero ? 'corre' : 'espera'
     }
     // [PULIDO 1] P2 · rebobinando, `fin` es función del tiempo del rebobinado (su curva), no de una velocidad perseguida; la
     // velocidad queda anotada para que un gesto hacia abajo a mitad la retome sin salto.
@@ -313,20 +314,35 @@ export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): 
 export interface DecisionDelGesto {
   readonly retiene: boolean
   readonly rebobina: boolean
+  /** [PULIDO 27] Y4 a · pide la salida del pie (`pie3d/salidas.ts`). */
+  readonly sale?: boolean
 }
 const NADA: DecisionDelGesto = { retiene: false, rebobina: false }
 const REBOBINA: DecisionDelGesto = { retiene: true, rebobina: true }
 const SIGUE: DecisionDelGesto = { retiene: true, rebobina: false }
+const SALE: DecisionDelGesto = { retiene: true, rebobina: false, sale: true }
+
+/** [PULIDO 27] Y4 a · el pie en el gesto: si está entero a la vista, si se está yendo (todavía no se fue entero) y si ya se fue. */
+export interface PieEnElGesto {
+  readonly aLaVista: boolean
+  readonly saliendo: boolean
+  readonly seFue?: boolean
+}
+const SIN_PIE: PieEnElGesto = { aLaVista: false, saliendo: false }
 
 /**
  * [NOCTURNO FINAL] A1 · sólo al fondo y hacia arriba. Un gesto que EMPIEZA (`nuevo`) mientras corre (o ya terminó) pide el
  * rebobinado y se retiene; los eventos que lo siguen (`retenido`: el gesto en curso se retuvo; `duraS`: cuánto lleva) se
  * retienen hasta `topeDelGestoS`, y después sólo su cola (`enLaCola`: la inercia que se apaga). Un gesto nuevo
- * rebobinando o parada no se retiene: la página sube normal.
+ * rebobinando o parada no se retiene: la página sube normal. [PULIDO 27] Y4 a · salvo con el pie entero a la vista (`pie`): parada,
+ * el gesto nuevo pide la salida del pie y se retiene, y todo lo que suba se retiene mientras el pie se va.
  */
-export function decidirElGesto(r: RelojDelFinal, alFondo: boolean, sentido: -1 | 1, nuevo: boolean, retenido: boolean, duraS: number, enLaCola: boolean): DecisionDelGesto {
+export function decidirElGesto(r: RelojDelFinal, alFondo: boolean, sentido: -1 | 1, nuevo: boolean, retenido: boolean, duraS: number, enLaCola: boolean, pie: PieEnElGesto = SIN_PIE): DecisionDelGesto {
   if (!alFondo || sentido > 0) return NADA
-  if (nuevo) return r.fase === 'corre' && r.fin > 0 ? REBOBINA : NADA
+  if (pie.saliendo) return SIGUE
+  // Ido el pie, el scroll se suelta ya (también lo que queda del gesto que lo sacó).
+  if (pie.seFue === true) return NADA
+  if (nuevo) return r.fase === 'corre' && r.fin > 0 ? REBOBINA : r.fase === 'parada' && pie.aLaVista ? SALE : NADA
   return retenido && (duraS < RELOJ_DEL_FINAL.topeDelGestoS || enLaCola) ? SIGUE : NADA
 }
 

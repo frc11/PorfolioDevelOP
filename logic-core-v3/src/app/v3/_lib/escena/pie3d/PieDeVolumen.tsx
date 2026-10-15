@@ -5,6 +5,8 @@ import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 import * as THREE from 'three'
 
 import { PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, marcarElPieListo, suscribirALasPiezas, versionDeLasPiezas } from '../../pie3d/registro'
+import { SALIDA_EN_VIVO, pasoDelHundimiento } from '../../pie3d/salidas'
+import { viajeEnCurso } from '../viaje'
 import { hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
 import { calentar } from '../gpu/Precompilar'
@@ -182,6 +184,9 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
 
   useFrame((state, delta) => {
     vivaDelBanco.current = state.camera
+    // [PULIDO 27] Y4 b · el hundimiento antes de un viaje desde el pie acostado (lo leen la caída y los huecos); acostado, lo escribe la caída.
+    SALIDA_EN_VIVO.hunde = pasoDelHundimiento(performance.now(), viajeEnCurso() !== null)
+    SALIDA_EN_VIVO.acostado = false
     alCuadro(m.current, state.camera, keyLightRef.current, { ancho: tam.width, alto: tam.height }, Math.min(delta, 0.1))
     pozos.current?.alCuadro()
   })
