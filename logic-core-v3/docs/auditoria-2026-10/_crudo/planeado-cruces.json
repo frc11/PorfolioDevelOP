@@ -3817,5 +3817,664 @@
   "sentido": "decidir",
   "nota": "El trigger de reapertura ('primer vertical facturando') choca con FAL ALTA: si el motor se vende, falta todo el lazo de respuesta y el alta del canal. Lo decide Valentino.",
   "ciclo": "D5-c1, lector D5-L9"
+ },
+ "docs/bitacora-roadmap.md:8497": {
+  "estado": "no empezado",
+  "evidencia": "AdminLayoutClient.tsx:43-46 botón fixed left-4 top-4 z-[120] siempre montado; aside z-[110] (:62); BrandMark en px-5 py-5 (admin-sidebar.tsx:117-118)",
+  "sentido": "si",
+  "nota": "Va como hallazgo UX BAJA junto con Escape/foco del drawer",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/bitacora-roadmap.md:8499": {
+  "estado": "hecho",
+  "evidencia": "git grep -n -i 'FILA [0-9]' origin/main -- admin/page.tsx admin/loading.tsx: solo comentarios JSX en loading.tsx:19,33,47,61 (no se renderizan). Control: 'KPIs comerciales' en page.tsx:571",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/bitacora-roadmap.md:8501": {
+  "estado": "no empezado",
+  "evidencia": "admin-sidebar.tsx:206 {userRole}; layout.tsx:60 userRole={session.user.role} sin mapear",
+  "sentido": "si",
+  "nota": "En higiene_ui",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "_insumos/drive/Olme/Ideas de nuevas features.md:66": {
+  "estado": "no empezado",
+  "evidencia": "audit-period-filter.tsx:26 'Réplica LOCAL del look del dropdown de proyectos'; projects/_components/projects-period-dropdown.tsx:73 sigue existiendo; alerts-date-filter.tsx es una tercera variante",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Admin (operacion)_ registro de cambios.md:65": {
+  "estado": "no empezado",
+  "evidencia": "page.tsx:497-500 let mutado dentro de map; baseline eslint react-hooks/immutability en admin/page.tsx:500 (docs/auditoria-2026-10/_crudo/eslint.json:739-743)",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:50": {
+  "estado": "hecho",
+  "evidencia": "AuditLogClient.tsx:208 y :325 adminHoverCls; :67-104 runQuery server-side con requestSeq (:65, :72, :86); audit-log-queries.ts:43-44 skip/take",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:17": {
+  "estado": "hecho",
+  "evidencia": "AdminLayoutClient.tsx:88-98 backdrop-filter en capa hermana de main; schema.prisma:192 BOT_DELETED; schema.prisma:1510 convertedToOsLeadId; leados/[leadId]/_components/decision-bar.tsx existe",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/bitacora-roadmap.md:8814": {
+  "estado": "parcial",
+  "evidencia": "admin-topbar.tsx:24-37 mapa en español sin announcements, referrals, leados ni fg2-lab; 'announcements' cae en 'Detalle' por la regex de :12-13",
+  "sentido": "si",
+  "nota": "Hallazgo UX BAJA",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/bitacora-roadmap.md:2480": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n targetOrganizationId origin/main -- logic-core-v3/prisma/schema.prisma: vacío. Control: schema.prisma:1652 'model AdminAuditLog {'",
+  "sentido": "si",
+  "nota": "Hallazgo FAL BAJA, zona FROZEN",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/bitacora-roadmap.md:8495": {
+  "estado": "parcial",
+  "evidencia": "page.tsx:551 y announcements/page.tsx:47 ya sin uppercase; queda settings/_components/settings-console.tsx:429 eyebrow='develOP' renderizado con uppercase en :652",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:51": {
+  "estado": "no empezado",
+  "evidencia": "AlertsClient.tsx:75-85 filtra en cliente; listAlerts corta en take 100 (manageAlerts.ts:25)",
+  "sentido": "si",
+  "nota": "El tope de 100 lo vuelve necesario antes de lo previsto",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "raiz:lane-LOG.md:39": {
+  "estado": "hecho",
+  "evidencia": "schema.prisma:192 BOT_DELETED; migraciones 20260617184913_add_converted_lead_link_and_bot_deleted_audit y 20260619140000_add_bot_deleted_audit_action; AuditLogClient.tsx:348",
+  "sentido": "no",
+  "nota": "Dos migraciones mencionan el valor: revisar idempotencia (D6)",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "raiz:lane-LOG.md:80": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -E 'Escape|keydown|focus' en confirm-dialog.tsx, type-to-confirm-dialog.tsx, inline-confirm.tsx: solo una clase CSS focus:. Control: alert-column-overview.tsx:55",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "raiz:lane-dashboard-log.md:100": {
+  "estado": "parcial",
+  "evidencia": "Solo subtítulos (page.tsx:607, :610); responseRate (:349) sigue sobre el estado actual con PERDIDO/POSTERGADO en el denominador (:39-47)",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "raiz:lane-dashboard-log.md:172": {
+  "estado": "no empezado",
+  "evidencia": "page.tsx:497-500; eslint.json:739-743 (react-hooks/immutability, línea 500)",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/sprints/alpha-1-reaudit.md:219": {
+  "estado": "hecho",
+  "evidencia": "git ls-tree origin/main: admin/error.tsx, clients/[clientId]/error.tsx (cubre chatbot/*), projects/[projectId]/error.tsx; todos vía AdminErrorBoundary -> SectionErrorBoundary.tsx:64 captureException",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/sprints/alpha-1-reaudit.md:224": {
+  "estado": "parcial",
+  "evidencia": "19 loading.tsx bajo admin (alerts, audit-log, chatbot/*, chatbots, clients, leados, leads, messages/[orgId], projects, settings/*, team, tickets); faltan announcements, referrals y fg2-lab, que caen en admin/loading.tsx (skeleton del Dashboard)",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/bitacora-roadmap.md:8668": {
+  "estado": "no empezado",
+  "evidencia": "git grep -l PageHeader origin/main -- 'logic-core-v3/src/app/(protected)/admin': vacío. Control: src/components/ui/PageHeader.tsx:60",
+  "sentido": "decidir",
+  "nota": "Atado a PLAN-649",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/sprints/alpha-bloque-C-RESUMEN.md:40": {
+  "estado": "parcial",
+  "evidencia": "PageTransition (layout.tsx:65, solo primer montaje); skeletons por sección en 19 loading.tsx; Alertas pulidas (alert-column-overview.tsx, AlertsClient.tsx:26-38)",
+  "sentido": "decidir",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "_insumos/drive/Olme/Ideas de nuevas features.md:56": {
+  "estado": "hecho",
+  "evidencia": "audit-log/page.tsx:15 getAuditLogStats() sin filtros; AuditLogClient.tsx:149-151 no se recalcula al filtrar",
+  "sentido": "decidir",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Admin (operacion)_ registro de cambios.md:57": {
+  "estado": "hecho",
+  "evidencia": "page.tsx:719 keyframes dashReveal en CSS; StatCard recibe strings formateados (page.tsx:579, :628) sin count-up",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "raiz:lane-dashboard-log.md:243": {
+  "estado": "hecho",
+  "evidencia": "Sin count-up (page.tsx:577-699). MemberHoursCard bg-white/5 (page.tsx:818) vs DualMetricCard bg-white/[0.02] (:765) sigue sin decidir",
+  "sentido": "decidir",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/bitacora-roadmap.md:10378": {
+  "estado": "no empezado",
+  "evidencia": "git grep -c 'rounded-[28px]' en admin: 81 ocurrencias en 50 archivos (p. ej. page.tsx:548, announcements/page.tsx:46)",
+  "sentido": "decidir",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/bitacora-roadmap.md:10379": {
+  "estado": "no empezado",
+  "evidencia": "alerts/page.tsx:9-19 y audit-log/page.tsx:20-30 sin caja y eyebrow uppercase; page.tsx:548-567 y announcements/page.tsx:46-53 en caja rounded-[28px]; además el topbar pone su h1 (admin-topbar.tsx:75)",
+  "sentido": "decidir",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:9": {
+  "estado": "parcial",
+  "evidencia": "admin-sidebar.tsx:57-100: 4 áreas con 16 ítems. Quedan huecos: detector de alertas sin disparador (alerts/page.tsx:17), título 'Detalle' en Novedades (admin-topbar.tsx:12-13), credenciales en claro (agency-actions.ts:109)",
+  "sentido": "no",
+  "nota": "La verificación visual humana declarada no es verificable por lectura",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:11": {
+  "estado": "hecho",
+  "evidencia": "confirm-dialog.tsx:42 createPortal a body con z-[210] (:44); AdminBackButton usado en 8 archivos (git grep -l)",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Admin (operacion)_ registro de cambios.md:9": {
+  "estado": "hecho",
+  "evidencia": "Empty states dashboard-history-charts.tsx:166, :209, :257, :316; loading alineado admin/loading.tsx:19-73; chart-card.tsx:18 aria-label; isAnimationActive={!reduced} (:161); HoverCard page.tsx:724; CSS dashReveal :719",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "raiz:lane-dashboard-log.md:111": {
+  "estado": "hecho",
+  "evidencia": "Igual que PLAN-594; subtítulos de cierre page.tsx:607-611; motion-reduce en cardHoverClass (page.tsx:36-37)",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/sprints/alpha-bloque-C-RESUMEN.md:5": {
+  "estado": "parcial",
+  "evidencia": "src/components/ui tiene Badge, Button, Callout, Card, EmptyStateMuted, Input, PageHeader, Select, Skeleton, StatCard y más (git ls-tree); no quedan archivos stat-card/empty-state legacy; /admin/_design no está en el árbol ni en la historia de origin/main (git ls-tree y git log vacíos)",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/bitacora-roadmap.md:11726": {
+  "estado": "hecho",
+  "evidencia": "announcements/page.tsx:10-65, announcements.actions.ts:14-77, src/lib/announcements/visibility.ts (git ls-tree); consumo en flujo D2 'Novedades del panel'",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L1"
+ },
+ "docs/bitacora-roadmap.md:2337": {
+  "estado": "hecho",
+  "evidencia": "setBillingOverride solo toca priceOverride/overrideUntil/overrideReason (plan.actions.ts:273-280); assignPlanToOrg toca planId/pending/lastPlanChangedAt (:179-184) y nunca priceOverride; el gating usa plan.quota (handleChatRequest.ts:345). Resto legacy: create escribe Subscription.price (:192) y no lo mantiene.",
+  "sentido": "si",
+  "nota": "La separacion se respeta; el campo price legacy rompe la idea de una sola fuente de precio (hallazgo BUG precio legacy).",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/bitacora-roadmap.md:2311": {
+  "estado": "hecho",
+  "evidencia": "Migracion prisma/migrations/20260523001750_add_billing_override_and_plan_scheduling (git ls-tree); plan.actions.ts:88-92 requireSuperAdmin+Zod, audit :147 y :210, invalidateOrgPlanCache :167 y :233; cards en OverviewTab.tsx:72-73.",
+  "sentido": "si",
+  "nota": "El override de Matsu 'hasta 2026-08-21' ya vencio (hoy 2026-10-15): BillingOverrideCard.tsx:24-26 lo mostraria '(vencido)'. Estado en la DB no verificable por lectura.",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/bitacora-roadmap.md:2019": {
+  "estado": "parcial",
+  "evidencia": "planName ya no existe en el modelo (schema.prisma:634-667; git grep planName solo encuentra props de UI); lib/subscription.ts solo selecciona status/renewalDate; ClientHeader.tsx:77, OverviewTab.tsx:41 y la lista leen plan.name. price Float sigue (schema.prisma:659) y lo leen admin/page.tsx:222-228 y perfil/page.tsx:211.",
+  "sentido": "si",
+  "nota": "Falta price: hoy es fuente de datos viejos (hallazgo BUG precio legacy).",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/bitacora-roadmap.md:4454": {
+  "estado": "hecho",
+  "evidencia": "git grep CrmIntegrationAdminCard: src/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard.tsx montado en admin/chatbots/[botId]/tabs/IntegrationsTab.tsx (editable, no solo lectura).",
+  "sentido": "no",
+  "nota": "Superado por la tab 'integrations' del bot; la ubicacion propuesta (/admin/clients/[x]/chatbot) esta deprecada. ChatbotTab no enlaza a esa tab.",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "_insumos/drive/Olme/Ideas de nuevas features.md:67": {
+  "estado": "no empezado",
+  "evidencia": "HoverScaleCard sigue en admin/clients/_components/HoverScaleCard.tsx con 8 importadores (git grep -l HoverScaleCard); git ls-tree de src/components/ui sin archivos hover/bubble; hover-scale.tsx sigue en admin/tickets/_components. Control positivo: git grep adminHoverCls encuentra AlertsClient.tsx:8.",
+  "sentido": "decidir",
+  "nota": "src/components/ui/* es FROZEN: mover alli es decision para Valentino.",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:86": {
+  "estado": "no empezado",
+  "evidencia": "VaultManager.tsx:30-31 catch -> console.error(error) (git grep); montado en VaultTab.tsx:26.",
+  "sentido": "si",
+  "nota": "Hallazgo UX MEDIA del lote.",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/sprints/alpha-0-cleanup.md:35": {
+  "estado": "hecho",
+  "evidencia": "git ls-tree de admin/ sin 'agency-dashboard' y git grep 'agency-dashboard' en src sin resultados (control: el mismo ls-tree lista projects/[projectId]/payments/page.tsx); ProjectManager en ProjectsTab.tsx:73 y VaultManager en VaultTab.tsx:26.",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/sprints/alpha-1-reaudit.md:220": {
+  "estado": "hecho",
+  "evidencia": "createClientWithBot.ts:99-104 y createClientOnly.ts:51-55 safeParse + requireSuperAdmin (:96, :48); Step5Review.tsx:61-62 estado, :111 error, :311 bloque de error, :331 spinner (git grep).",
+  "sentido": "no",
+  "nota": "El mensaje mostrado es err.message de un Error lanzado: probable texto generico en produccion (hallazgo UX MEDIA).",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/bitacora-roadmap.md:15520": {
+  "estado": "no empezado",
+  "evidencia": "prisma/seed-agency-os.ts:398 sigue sembrando slug 'san-miguel' (y :1112, :1468...). La DB no es verificable por lectura.",
+  "sentido": "decidir",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/bitacora-roadmap.md:15609": {
+  "estado": "no empezado",
+  "evidencia": "scripts/seed-matsu.ts no crea Subscription ni asigna plan: git grep -i 'subscription|planKey|BUSINESS|priceOverride|overrideUntil' solo encuentra :163 businessInfo (control positivo del patron). La asignacion depende de la UI PlanAssignmentCard.",
+  "sentido": "si",
+  "nota": "Verificar en /admin/clients/<matsu>?tab=overview.",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/bitacora-beta.md:1660": {
+  "estado": "no empezado",
+  "evidencia": "ClientsListClient.tsx:610-620 input sr-only dentro de <label> absoluto; tests/e2e/16-admin-bulk-actions.spec.ts:13, :17-18 siguen haciendo .check() sobre input[type=checkbox].",
+  "sentido": "si",
+  "nota": "Por lectura el clic real en el label funciona (activacion nativa del label -> onChange); la falla es del test que apunta al input oculto. Arreglar el selector del test (clic en el label o getByLabel).",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/bitacora-beta.md:1661": {
+  "estado": "no empezado",
+  "evidencia": "tests/e2e/30-onboarding-e2e-complete.spec.ts:62 busca placeholder /5493815555555/ pero Step4Appearance.tsx:109 tiene 'Ej: 5491155551234'; el placeholder '#06b6d4' (:61) tampoco aparece en Step4Appearance (git grep).",
+  "sentido": "si",
+  "nota": "Causa por lectura: selectores del test desactualizados, no el wizard.",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "STATUS.md:5": {
+  "estado": "parcial",
+  "evidencia": "scripts/seed-matsu.ts existe (git ls-tree) y arma org/bot con KB de concesionaria (:163), sin Subscription. Si corrio en la DB no es verificable por lectura.",
+  "sentido": "decidir",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:51": {
+  "estado": "hecho",
+  "evidencia": "Archivar con InlineConfirm ClientsListClient.tsx:750-768 -> archiveClient; hard-delete con TypeToConfirmDialog frase ELIMINAR :521-531; lista filtra deletedAt page.tsx:23 y :34; cascada y preservacion de OsLead en flujo D6 'Hard-delete de cliente y cascadas'.",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/bitacora-roadmap.md:6228": {
+  "estado": "parcial",
+  "evidencia": "git ls-tree de admin/clients (36 archivos) sin bulk-import; git grep -i 'bulk-import|bulkImport' en src sin resultados; docs/csv-import-format.md no existe; scripts/b9-4-dedupe-kb-develop.mjs sigue presente (ejecucion no verificable).",
+  "sentido": "decidir",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:23": {
+  "estado": "hecho",
+  "evidencia": "field-normalize.ts en src/modules/chatbot/shared (usado en EditClientForm.tsx:8); createClientOnly.ts y updateClient.ts existen con requireSuperAdmin; BotPreview.tsx no esta en onboarding/ (git ls-tree).",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/sprints/alpha-2-onboarding.md:9": {
+  "estado": "parcial",
+  "evidencia": "useOnboardingDraft.ts:8 MAX_DRAFT_AGE_DAYS = 7, DraftBanner.tsx, slugify.ts, suggestions.ts existen; Step5Review.tsx:331 spinner y :311 error. BotPreview fue borrado despues (PLAN-551).",
+  "sentido": "no",
+  "nota": "Todo lo declarado salvo BotPreview, que contradice el estado actual.",
+  "ciclo": "D3-c1, lector D3-L2"
+ },
+ "docs/bitacora-roadmap.md:6492": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n \"auth()\\|requireSuperAdmin\\|auth-guards\" origin/main -- \"src/app/(protected)/admin/messages/[orgId]/page.tsx\" -> vacío (control: admin/clients/[clientId]/page.tsx:28 `const session = await auth()`). [orgId]/page.tsx:24 descarta el resultado de markAsRead y :27-28 lee Organization sin guard.",
+  "sentido": "si",
+  "nota": "La mitigación declarada (actions con requireSuperAdmin, message.actions.ts:141/:210) cubre Message pero no la lectura de Organization; además markAsRead en render falla en revalidatePath (E7).",
+  "ciclo": "D3-c1, lector D3-L3"
+ },
+ "docs/bitacora-beta-3.md:6354": {
+  "estado": "no empezado",
+  "evidencia": "admin/leads/_actions/lead.schemas.ts:32-40 sigue en `z.coerce.date().optional()` sin normalizar fechas de calendario; los llamadores siguen mandando instantes: change-status-select.tsx:40-43 y lead-pipeline.tsx:125-128.",
+  "sentido": "si",
+  "nota": "La línea citada (:40) es hoy el cierre del schema (:32-40). ZONA-FRANCO.",
+  "ciclo": "D3-c1, lector D3-L3"
+ },
+ "docs/bitacora-roadmap.md:3192": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n \"service\" origin/main -- \"src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx\" -> sólo :17 (tipo); columnas :104-109 sin servicio (control: 'company' aparece 3 veces en el mismo archivo). upsell.ts:93 sigue escribiendo service=featureKey y UpgradeCtaButton.tsx:80 genera plan-upgrade-*.",
+  "sentido": "si",
+  "nota": "El doc dice que la UI 'muestra el string crudo'; hoy el campo ni se muestra.",
+  "ciclo": "D3-c1, lector D3-L3"
+ },
+ "docs/bitacora-roadmap.md:6493": {
+  "estado": "parcial",
+  "evidencia": "payments/page.tsx:67-104 sigue sin auth() ni requireSuperAdmin. Las mutaciones sí tienen guard: milestone.actions.ts:23, maintenance.actions.ts:35, :64, :94.",
+  "sentido": "si",
+  "nota": "Lo que falta es el guard del loader; queda incluido en el hallazgo SEC de páginas sin guard de rol propio.",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "docs/bitacora-roadmap.md:6678": {
+  "estado": "no empezado",
+  "evidencia": "project.actions.ts:524 'isInternal: false'. serializeProjectDetail solo lo usa getProjectById (:1111), y git grep -w getProjectById origin/main -- src devuelve solo la definición.",
+  "sentido": "si",
+  "nota": "Conviene borrar getProjectById y serializeProjectDetail en vez de arreglar el flag.",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "docs/bitacora-beta-3.md:6350": {
+  "estado": "no empezado",
+  "evidencia": "project.schemas.ts:23 z.coerce.date(); project-form.tsx:296-301 input type=date; el mismo patrón está en time-entry.schemas.ts:33 (git grep).",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "docs/bitacora-roadmap.md:6577": {
+  "estado": "hecho",
+  "evidencia": "schema.prisma:559-560 (organizationId String, onDelete: Cascade) y :567 @@index; migración prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql; seed-agency-os.ts:2422 usa ?? 'develop'.",
+  "sentido": "si",
+  "nota": "Lo de 'project.actions falla temprano sin org' fue reemplazado por el fallback a la org develop (project.actions.ts:229-239, commit 0dfc004).",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:21": {
+  "estado": "no empezado",
+  "evidencia": "Siguen los cuatro: overlay-modal.tsx:141 onClick={onClose} saltea dismissible (latente: dismissible no se usa fuera del archivo); lock por instancia en :80-82 y :99; task-list.tsx:628 ignora el resultado; project-list.tsx:57, :130 y :181 comparten confirmingId.",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:67": {
+  "estado": "no empezado",
+  "evidencia": "project.actions.ts:726-760: requireSuperAdmin y findUnique y update por id, sin filtro de org.",
+  "sentido": "no",
+  "nota": "SUPER_ADMIN es global por modelo y no existe un rol de staff por org que justifique filtrar.",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "docs/sprints/alpha-1-reaudit.md:228": {
+  "estado": "no empezado",
+  "evidencia": "src/components/admin/managers/ProjectManager.tsx:21 '// Optionally show a toast here'. La carpeta agency-dashboard ya no existe (git ls-files | grep agency-dashboard da 0).",
+  "sentido": "decidir",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "docs/bitacora-roadmap.md:8921": {
+  "estado": "contradicho",
+  "evidencia": "schema.prisma:559 'organizationId String' (NOT NULL) desde la migración B11.1; PLAN-630 decidió mantenerlo así.",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:52": {
+  "estado": "hecho",
+  "evidencia": "schema.prisma:559; project.actions.ts:229-239 resuelve develop; presentación en layout.tsx:166-168 y project.actions.ts:455-457.",
+  "sentido": "si",
+  "nota": "serializeProjectDetail (:510) usa otro texto, 'Proyecto interno develOP'.",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:5": {
+  "estado": "hecho",
+  "evidencia": "Cinco sitios importan team/_actions: task-form.tsx:7-10, task-list.tsx:17-20, time-entry-panel.tsx:8-11, hours/page.tsx:5, tasks/page.tsx:4.",
+  "sentido": "si",
+  "nota": "Sigue además una tercera capa de actions de Task muertas en src/lib/actions/projects.ts (createTaskAction, updateTaskStatusAction, deleteTaskAction).",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:9": {
+  "estado": "contradicho",
+  "evidencia": "lastActivityAt está (project.actions.ts:408-423, :480), pero no lo lee nadie. Los dos fixes declarados no están en el código: matchesStart sigue devolviendo false con startDate null (projects-filters.ts:162-164) y deleteProject sigue devolviendo error.message (project.actions.ts:829). git log --all -G 'if \\(!startDate\\) \\{?\\s*return true' -- '*projects-filters.ts' devuelve vacío.",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:29": {
+  "estado": "hecho",
+  "evidencia": "projects-board.tsx:6-16 (DndContext), :42-43 (HOLD 200/5), :231 (id estable), :248-259 (DragOverlay portaleado); draggable-project-card.tsx:42-63 (guarda anti phantom-click). Los commits 82a213c y a83e61c están en origin/main.",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:48": {
+  "estado": "parcial",
+  "evidencia": "El fallback a develop está (project.actions.ts:229-239) y la presentación también (:455-457; layout.tsx:166-168). El helper único no existe: git grep 'isInternalProject(' origin/main -- src da 0, y la condición está repetida en layout.tsx:164, page.tsx:169, tasks/page.tsx:57 y project.actions.ts:454.",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "_insumos/drive/Olme/Cliente - Registro de cambios/Mi proyecto_ registro de cambio.md:33": {
+  "estado": "hecho",
+  "evidencia": "page.tsx:323-334 (zona de peligro); delete-project-button.tsx:44-90 (modal + form) -> src/lib/actions/projects.ts:108. El commit 5733e29 está en origin/main.",
+  "sentido": "si",
+  "nota": "Convive con deleteProject del tablero: son dos implementaciones.",
+  "ciclo": "D3-c1, lector D3-L4"
+ },
+ "docs/bitacora-roadmap.md:2614": {
+  "estado": "parcial",
+  "evidencia": "admin/settings ya lee la tabla PremiumModule (settings.actions.ts:92, :113-120; update por slug :185-196), pero premium-features.ts sigue como tipo (settings.actions.ts:10, settings-console.tsx:16) con un cast que miente (:114) y su catálogo runtime solo lo usa src/lib/actions/settings.ts:12-16, sin importadores (git grep \"lib/actions/settings'\" → 0)",
+  "sentido": "si",
+  "nota": "Falta tipar moduleKey como string y podar el archivo",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-roadmap.md:7622": {
+  "estado": "hecho",
+  "evidencia": "src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx:18 (fetch al endpoint) montado en tabs/OverviewTab.tsx:90",
+  "sentido": "no",
+  "nota": "Queda el hallazgo de rol destino sin filtrar",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-roadmap.md:8373": {
+  "estado": "no empezado",
+  "evidencia": "start/route.ts:11-15 toma orgId del query y redirige; git show … | grep -i 'cookie|nonce' → 0 (control: 'orgId' aparece en :12). El state sí va firmado (google-business-profile.ts:44)",
+  "sentido": "si",
+  "nota": "Dominio D7",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-roadmap.md:8375": {
+  "estado": "parcial",
+  "evidencia": "callback/route.ts:59-71 descubre account+location tras persistir tokens y escribe logAdminAction (:71); no valida un gbpLocationId esperado (selector P3-A.2)",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:112": {
+  "estado": "hecho",
+  "evidencia": "settings-console.tsx:18 y settings.actions.ts:11 importan maskSecret de src/lib/mask-secret.ts; maskFromInput solo sobrevive en comentarios de mask-secret.invariant.ts:3, :25",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-beta-3.md:6352": {
+  "estado": "no empezado",
+  "evidencia": "time-entry.schemas.ts:33-34 sigue con z.coerce.date(); time-entry-panel.tsx:252 manda 'YYYY-MM-DD' y formatDate (:63-68) no fija timeZone",
+  "sentido": "si",
+  "nota": "Ver hallazgo de horas un día antes",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-roadmap.md:16882": {
+  "estado": "no empezado",
+  "evidencia": "settings/reports/page.tsx:3, :13-27 usa prisma directo sobre botConfig y chatbotEvent; igual alerts/page.tsx:3, :12-22 (botAlert)",
+  "sentido": "decidir",
+  "nota": "Son lecturas globales de admin: podrían ir por unsafeGlobalQuery con razón documentada",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-rediseno.md:790": {
+  "estado": "no empezado",
+  "evidencia": "contact/page.tsx:74 setReferralCode dentro de useEffect; el baseline de eslint (_crudo/eslint.json) lo reporta como error react-hooks/set-state-in-effect en :74",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-roadmap.md:304": {
+  "estado": "parcial",
+  "evidencia": "VaultManager.tsx:10 usa 'as const satisfies readonly AssetType[]': impide valores inválidos pero no detecta un valor nuevo del enum; no hay script de generación",
+  "sentido": "decidir",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:406": {
+  "estado": "hecho",
+  "evidencia": "ticket-chat.tsx:119 compara con el título que crea profile.ts:162; el título es libre para cualquier ticket (tickets/schemas.ts:5)",
+  "sentido": "no",
+  "nota": "La decisión sigue implementada pero SEC-050 propone reemplazarla por un campo propio",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-beta.md:429": {
+  "estado": "hecho",
+  "evidencia": "src/lib/notifications/telegram.ts:39-60: usa AgencySettings solo si token y chatId están completos, si no el par de env; DB caída → env",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:21": {
+  "estado": "hecho",
+  "evidencia": "adminHoverCls en settings-console.tsx:17, :355; inputs sin spinners :61-62, :399, :455; contrato por slug settings.actions.ts:183-191 y settings.schemas.ts:36-38; ZodError → issues[0].message en action-utils.ts:28-29 (commit 5e33733 en origin/main)",
+  "sentido": "no",
+  "nota": "Error.message genérico todavía pasa (action-utils.ts:31-32)",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:243": {
+  "estado": "hecho",
+  "evidencia": "ticket-chat.tsx:241-247 Link /admin/clients?delete=<orgId>; ClientsListClient.tsx:245-256 abre el diálogo de borrado desde el query",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "_insumos/drive/Olme/Cliente - Registro de cambios/General_ registro de cambios.md:33": {
+  "estado": "parcial",
+  "evidencia": "MessagesScrollAnchor en message-thread.tsx:39; Enter con guarda IME ticket-reply-form.tsx:94; auto-scroll ticket-chat.tsx:95-97; break-words en message-bubble.tsx:52 pero no en las burbujas de ticket-chat.tsx:209",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-roadmap.md:11886": {
+  "estado": "hecho",
+  "evidencia": "send-executive-report/route.ts:9-91 + SendExecutiveReportButton.tsx:37 (flujo D2) + tests/e2e/41-admin-executive-report-send-now.spec.ts",
+  "sentido": "no",
+  "nota": "El e2e existe pero CI e2e no corre",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-roadmap.md:2476": {
+  "estado": "no empezado",
+  "evidencia": "git grep -i override en src/app/api/cron, netlify, netlify.toml, vercel.json → 0 (control: overrideUntil existe en schema.prisma:646 y lo lee BillingOverrideCard.tsx:15)",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:24": {
+  "estado": "no empezado",
+  "evidencia": "time-entry.actions.ts:195-241 no compara entry.userId con la sesión; deleteTimeEntry tampoco (:243-268). updateTimeEntry no tiene llamadores",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/sprints/alpha-1-reaudit.md:235": {
+  "estado": "no empezado",
+  "evidencia": "git grep 'take:|skip:' en admin/tickets/_actions/ticket.actions.ts → 0 (control: referrals/page.tsx:11 take); projects/page.tsx:9 findMany sin take",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-roadmap.md:2346": {
+  "estado": "hecho",
+  "evidencia": "plan.actions.ts:26-27 (downgrade a pendingPlanId) y get-plan-for-org.ts:39-49 (applyPendingPlanIfDue lazy)",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:20": {
+  "estado": "hecho",
+  "evidencia": "time-entry.actions.ts:156-170 (session userId, rechaza tareas de otro, autoasigna las libres); hours/page.tsx:117 filtra tareas propias o sin asignar",
+  "sentido": "si",
+  "nota": "Al borrar no se aplica (PLAN-605)",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:9": {
+  "estado": "hecho",
+  "evidencia": "time-entry.actions.ts:140, :176 (userId de sesión) y :160-162 (pertenencia validada en servidor)",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:28": {
+  "estado": "hecho",
+  "evidencia": "member-workload.tsx:152-213 (proyectos colapsables con aria-expanded), :113-150 (horas reales vs estimadas), :99 (adminHoverCls en métricas); team/page.tsx:127-161",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L5"
+ },
+ "docs/bitacora-roadmap.md:7163": {
+  "estado": "no empezado",
+  "evidencia": "src/app/(protected)/admin/clients/[clientId]/page.tsx:33 `const { clientId: orgSlug } = await params` y :42 `OR: [{ id: orgSlug }, { slug: orgSlug }]`; los links usan el id (ClientsListClient.tsx:630)",
+  "sentido": "decidir",
+  "nota": "Contradice la regla de CLAUDE.md sobre IDs en URLs; solo admin.",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:24": {
+  "estado": "hecho",
+  "evidencia": "manageAlerts.ts:71/:114 revalidateTag('admin-alerts-count'); :31/:76 alertIdSchema (cuid, manageAlerts.schemas.ts:3); scripts/dev/seed-alerts.ts; alerts/_components/alerts-date-filter.tsx; alert-column-overview.tsx; alert-card.tsx:3 import Link y :66 'Ver bot'; AlertsClient.tsx:206-208 VISIBLE_CAP",
+  "sentido": "no",
+  "nota": "Queda la deuda declarada de filtros en el cliente sobre take 100 (hallazgo de listAlerts).",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "docs/bitacora-roadmap.md:2034": {
+  "estado": "abandonado",
+  "evidencia": "El script prisma/seeds/migrate-subscriptions-to-plan-id.ts no existe en origin/main: `git ls-tree -r --name-only origin/main -- logic-core-v3/prisma | grep -i -E \"migrate-sub|plan-id\"` → vacío. Control: `git grep -l PLAN_NAME_TO_KEY origin/main -- logic-core-v3` → solo docs/bitacora-roadmap.md",
+  "sentido": "decidir",
+  "nota": "El estado de los datos en prod no se puede verificar por código; hoy se haría desde /admin/clients (plan.actions.ts, flujo D6 'Cambio de plan').",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "docs/bitacora-roadmap.md:2474": {
+  "estado": "no empezado",
+  "evidencia": "Operación de datos en prod, no verificable por código. El camino correcto existe: flujo D6 'Cambio de plan → precio que ve el cliente' (plan.actions.ts:179)",
+  "sentido": "decidir",
+  "nota": "Matsu es cuenta de prueba (sin clientes reales).",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "docs/bitacora-roadmap.md:2478": {
+  "estado": "no empezado",
+  "evidencia": "`git grep -l -i downgrade origin/main -- \"*.spec.ts\" \"*.test.ts\"` → solo src/lib/crypto/__tests__/credential-cipher.test.ts (otro sentido). Control: el mismo patrón en src → plan.actions.ts, PlanAssignmentCard.tsx",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "_insumos/drive/Olme/Ideas de nuevas features.md:53": {
+  "estado": "no empezado",
+  "evidencia": "admin/settings/_actions/settings.actions.ts:38-41 sigue con findFirst orderBy updatedAt; el schema ya tiene `singleton Boolean @default(true) @unique` en AgencySettings; la legacy src/lib/actions/settings.ts:30-37 repite el patrón",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:107": {
+  "estado": "parcial",
+  "evidencia": "Escriben priceMonthlyUsd: settings.actions.ts:195 (vivo), src/lib/actions/settings.ts:129 (muerto) y prisma/seeds/sync-premium-modules.ts:36/:54 (corrida manual que pisa el precio de la DB con el catálogo de código src/lib/data/premium-modules.ts:31). Sigue sin un writer canónico.",
+  "sentido": "si",
+  "nota": "Si alguien corre el sync después de editar precios en el admin, los revierte sin aviso.",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "docs/sprints/alpha-1-reaudit.md:225": {
+  "estado": "hecho",
+  "evidencia": "ClientsListClient.tsx:50 search, :51 filterBot, :54 sortBy, :258-262 filtrado",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "docs/sprints/alpha-2-onboarding.md:69": {
+  "estado": "parcial",
+  "evidencia": "E2E del wizard: tests/e2e/08-admin-onboarding.spec.ts:11-18 (page.goto('/admin/clients/new')); el cronometraje de menos de 8 min es manual y no se puede verificar por código",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "docs/bitacora-roadmap.md:11020": {
+  "estado": "contradicho",
+  "evidencia": "src/actions/agency-actions.ts:24-35 assertProjectBelongsToOrg(projectId, organizationId) al inicio; prueba en bitacora:7211 ('CERRADO')",
+  "sentido": "no",
+  "nota": "El pendiente quedó viejo: el fix B11.2 F5 está en el código.",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "docs/bitacora-roadmap.md:12400": {
+  "estado": "parcial",
+  "evidencia": "playwright.integration.config.ts:41 `testIgnore: ['**/alerts-detector.spec.ts']`; no hay config dedicada; el spec usa rutas relativas sin baseURL (alerts-detector.spec.ts:26)",
+  "sentido": "decidir",
+  "nota": "Quedó excluido: hoy no corre en ninguna suite.",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "docs/bitacora-roadmap.md:5887": {
+  "estado": "parcial",
+  "evidencia": "InstallTab existe en /admin/chatbots/[botId] (BotDetailClient.tsx:98, tabs.ts:1), pero ChatbotTab.tsx:128-159 enlaza solo overview/config/knowledge/conversations/leads/activity, y el catch-all deprecado no mapea 'install' (chatbot/[[...tab]]/page.tsx:6-13)",
+  "sentido": "si",
+  "nota": "Arreglo barato: botHref('install') en ChatbotTab.",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:91": {
+  "estado": "abandonado",
+  "evidencia": "`git ls-tree -r --name-only origin/main -- \"logic-core-v3/src/app/(protected)/admin\" | grep -i -E \"_design|theme\"` → solo leads/_components/themed-date-input.tsx (control positivo del grep); no hay ruta _design ni editor de tema",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:53": {
+  "estado": "hecho",
+  "evidencia": "updateClient.ts:19-21 (avatarImageUrlSchema, avatarEmoji max 8, avatarInitials max 2) y :92-94; UpdateProfileSchema schemas.ts:17-19",
+  "sentido": "no",
+  "nota": "No verifiqué el orden de fallback del componente ClientAvatar (fuera del lote).",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:34": {
+  "estado": "parcial",
+  "evidencia": "city updateClient.ts:90; internalNotes updateClientInternalNotes.ts:35-38; archivar archiveClient.ts:32-35; TypeToConfirmDialog ClientsListClient.tsx:522-527; CLIENT_DELETED hardDeleteClient.ts:170; toErrorMessage action-utils.ts:28-29. Pero los mensajes legibles de updateClient se lanzan con throw (:37) y en producción no llegan; los User quedan vivos tras el hard-delete.",
+  "sentido": "si",
+  "ciclo": "D3-c1, lector D3-L6"
+ },
+ "docs/bitacora-roadmap.md:12294": {
+  "estado": "hecho",
+  "evidencia": "src/lib/mask-secret.ts existe (git ls-tree); lo importan admin/settings/_actions/settings.actions.ts y settings-console.tsx; invariante src/lib/mask-secret.invariant.ts",
+  "sentido": "no",
+  "ciclo": "D3-c1, lector D3-L6"
  }
 }

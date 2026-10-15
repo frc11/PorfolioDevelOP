@@ -114,8 +114,11 @@ for (const c of f2) {
 }
 const refuerzos = []
 const nuevosF2 = []
+// un candidato «archivo.ts#export» se compara por su archivo: si F1 ya tiene ficha de ese archivo, es refuerzo
+const archivoDe = (ruta) => ruta.split('#')[0]
 for (const g of grupos.values()) {
-  const previa = ordenados.find((x) => x.archivos.some((f) => f === `${A}${g.ruta}` || f.startsWith(`${A}${g.ruta.replace(/\/$/, '')}/`)))
+  const base = archivoDe(g.ruta)
+  const previa = ordenados.find((x) => x.archivos.some((f) => f === `${A}${base}` || f.startsWith(`${A}${base.replace(/\/$/, '')}/`)))
   if (previa) refuerzos.push({ id: previa.id, g })
   else nuevosF2.push(g)
 }
@@ -127,11 +130,11 @@ if (nuevosF2.length || refuerzos.length) {
     const titulo = `${g.ruta} (${g.ciclo})`
     const id = previos.get(titulo) ?? ++maximo
     const cu = curado[`${g.ruta}|${g.ciclo}`] ?? {}
-    const zona = ledger.get(`${A}${g.ruta}`)?.notas ?? ''
+    const zona = ledger.get(`${A}${archivoDe(g.ruta)}`)?.notas ?? ''
     const z = /ZONA-FRANCO/.test(zona) ? (/FROZEN/.test(zona) ? 'FROZEN + ZONA-FRANCO' : 'ZONA-FRANCO') : /(^|; )FROZEN/.test(zona) ? 'congelado' : 'libre'
     const decidir = z === 'libre' ? 'decidir (Valentino)' : z === 'ZONA-FRANCO' ? 'decidir (Franco)' : 'decidir (Valentino): archivo congelado'
     md.push(`### [POD-${String(id).padStart(3, '0')}] ${titulo}`)
-    md.push(`- Hallado en F2 (${g.lotes.join(', ')}) · \`${g.ruta}\` · Nodo(s): ${nodoDeRuta(`${A}${g.ruta}`)} · Alcance: ${cu.alcance ? ALCANCE[cu.alcance] : 'sin curar (ver señales)'}${cu.detalle ? ` — ${cu.detalle}` : ''} · Señales: ${g.senales.join('; ')}`)
+    md.push(`- Hallado en F2 (${g.lotes.join(', ')}) · \`${g.ruta}\` · Nodo(s): ${nodoDeRuta(`${A}${archivoDe(g.ruta)}`)} · Alcance: ${cu.alcance ? ALCANCE[cu.alcance] : 'sin curar (ver señales)'}${cu.detalle ? ` — ${cu.detalle}` : ''} · Señales: ${g.senales.join('; ')}`)
     md.push(`- Qué rompe si se borra: ${g.que_rompe.join(' / ')}`)
     md.push('- Confianza de poda: MEDIA')
     md.push(`- Propuesta: ${cu.propuesta ? `${cu.propuesta}${z === 'libre' ? '' : ` (${decidir})`}` : decidir}`)

@@ -2431,6 +2431,132 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - Propuesta: mover la variante con field a isolation y repuntar los 3 importadores
 - Zona: libre
 
+### [POD-342] src/app/(protected)/admin/audit-log/_components/audit-period-filter.tsx (D3-c1)
+- Hallado en F2 (D3-L1) · `src/app/(protected)/admin/audit-log/_components/audit-period-filter.tsx` · Nodo(s): h4.adm-audit · Alcance: fusión con otra implementación (no se borra sin consolidar) — réplica local del dropdown de período de Proyectos (projects-period-dropdown.tsx:73), según su propio comentario de :26 · Señales: Comentario :26 'Réplica LOCAL del look del dropdown de proyectos (NO se importa nada de projects/)'; projects/_components/projects-period-dropdown.tsx:73 implementa el mismo dropdown; PLAN-548 pendiente de unificar
+- Qué rompe si se borra: AuditLogClient.tsx:13 lo importa; unificar en un componente compartido de admin y adaptar projects-filter-bar.tsx:96, :106
+- Confianza de poda: MEDIA
+- Propuesta: unificar en un selector de período compartido del admin (PLAN-548) y borrar las réplicas
+- Zona: libre
+
+### [POD-343] src/app/(protected)/admin/alerts/_components/alerts-filters.ts (D3-c1)
+- Hallado en F2 (D3-L1) · `src/app/(protected)/admin/alerts/_components/alerts-filters.ts` · Nodo(s): h4.adm-alertas · Alcance: fusión con otra implementación (no se borra sin consolidar) — tercera variante del cálculo de presets de período (la de audit-filters.ts:21-54 resuelve la misma ventana con date-fns) · Señales: Comentario :5 'Patrón de presets replicado de Proyectos/Leads'; audit-filters.ts:21-54 periodToRange resuelve la misma ventana hacia atrás con date-fns; Tercera variante del filtro de período (con alerts-date-filter.tsx)
+- Qué rompe si se borra: AlertsClient.tsx:9-10 importa ambos; extraer un helper de período compartido
+- Confianza de poda: MEDIA
+- Propuesta: extraer un helper de período compartido junto con el selector de audit-period-filter.tsx
+- Zona: libre
+
+### [POD-344] src/app/(protected)/admin/_components/AdminErrorBoundary.tsx (D3-c1)
+- Hallado en F2 (D3-L1) · `src/app/(protected)/admin/_components/AdminErrorBoundary.tsx` · Nodo(s): h4.adm-shell · Alcance: fusión con otra implementación (no se borra sin consolidar) — wrapper de una sola llamada sobre SectionErrorBoundary con un TODO de Sentry obsoleto (SectionErrorBoundary.tsx:64 ya captura) · Señales: Wrapper de una sola llamada sobre SectionErrorBoundary (:16-24); Comentario :13 'para no romper los 10 imports existentes'; Comentario :15 'TODO Sentry' obsoleto (SectionErrorBoundary.tsx:64 ya captura)
+- Qué rompe si se borra: Los error.tsx de admin (admin/error.tsx:3, alerts/error.tsx:3, audit-log/error.tsx:3 y los de chatbots, clients, leados, leads, messages, projects, settings, team, tickets) cambiarían el import
+- Confianza de poda: MEDIA
+- Propuesta: decidir: re-apuntar los error.tsx del admin a SectionErrorBoundary y borrar el wrapper, o dejarlo y borrar el TODO
+- Zona: libre
+
+### [POD-345] src/app/(protected)/admin/_components/PageTransition.tsx (D3-c1)
+- Hallado en F2 (D3-L1) · `src/app/(protected)/admin/_components/PageTransition.tsx` · Nodo(s): h4.adm-shell · Alcance: el archivo entero — en el layout persistente solo anima el primer montaje (DEU-057) · Señales: Único consumidor: layout.tsx:65; En un layout persistente solo anima el primer montaje, no cada navegación
+- Qué rompe si se borra: layout.tsx:6 y :65; si se quiere la transición por página, moverla a template.tsx
+- Confianza de poda: MEDIA
+- Propuesta: decidir: moverlo a admin/template.tsx si se quiere la transición por página, o borrarlo con su uso en layout.tsx:65
+- Zona: libre
+
+### [POD-346] src/app/(protected)/admin/_components/dashboard-history-charts.tsx (D3-c1)
+- Hallado en F2 (D3-L1) · `src/app/(protected)/admin/_components/dashboard-history-charts.tsx` · Nodo(s): h4.adm-shell · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — formatCurrency de :69-74, idéntico a admin/page.tsx:120-125 · Señales: formatCurrency duplicado: dashboard-history-charts.tsx:69-74 idéntico a page.tsx:120-125
+- Qué rompe si se borra: Nada si se extrae a un util compartido; solo el duplicado, no el archivo
+- Confianza de poda: MEDIA
+- Propuesta: extraer formatCurrency a un util compartido; el archivo queda
+- Zona: libre
+
+### [POD-347] src/app/(protected)/admin/clients/_actions/client.actions.ts (D3-c1)
+- Hallado en F2 (D3-L2) · `src/app/(protected)/admin/clients/_actions/client.actions.ts` · Nodo(s): h4.adm-clientes · Alcance: exports sueltos (el archivo sigue vivo) — stopImpersonationAction (:12-14) sin importadores; el módulo es un re-export de lib/actions/impersonation · Señales: stopImpersonationAction (:12-14) sin importadores: git grep -n stopImpersonationAction origin/main -- logic-core-v3/src solo devuelve la definicion, la base impersonation.ts:50 y ImpersonationBanner.tsx:2 (que importa la base); el modulo entero es un re-export de lib/actions/impersonation; su unico consumidor es ImpersonateButton.tsx:6
+- Qué rompe si se borra: Nada si se borra stopImpersonationAction; si se borra el archivo, ImpersonateButton.tsx:6 debe importar startImpersonationAction desde @/lib/actions/impersonation
+- Confianza de poda: MEDIA
+- Propuesta: borrar stopImpersonationAction; opcional: que ImpersonateButton.tsx:6 importe de lib/actions/impersonation y borrar el archivo
+- Zona: libre
+
+### [POD-348] src/app/(protected)/admin/clients/_components/HoverScaleCard.tsx (D3-c1)
+- Hallado en F2 (D3-L2) · `src/app/(protected)/admin/clients/_components/HoverScaleCard.tsx` · Nodo(s): h4.adm-clientes · Alcance: fusión con otra implementación (no se borra sin consolidar) — duplica hover-scale.tsx de Tickets y adminHoverCls de lib/hover (8 importadores); su comentario deja la unificación para después del merge · Señales: Duplica el patron de hover de admin/tickets/_components/hover-scale.tsx y de adminHoverCls (lib/hover, usado en AlertsClient.tsx:8); Su propio comentario dice 'LOCAL al worktree de clientes... unificacion queda para post-merge' (:8-17); PLAN-555 pendiente
+- Qué rompe si se borra: 8 importadores (BillingOverrideCard, ClientHeader, ChatbotTab, OverviewTab, ProjectsTab, SupportTab, VaultTab, ChatbotManager) a re-apuntar; mover a src/components/ui es zona FROZEN
+- Confianza de poda: MEDIA
+- Propuesta: unificar después del merge de rediseno/home (PLAN-555); lib/hover.ts es FROZEN-inferido: decisión para Valentino
+- Zona: libre
+
+### [POD-349] src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx (D3-c1)
+- Hallado en F2 (D3-L2) · `src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx` · Nodo(s): h4.adm-clientes · Alcance: el archivo entero — redirect deprecado solo para bookmarks viejos, roto con ids y sin install ni integrations (BUG-124); ningún link interno lo genera · Señales: Ruta deprecada (STATUS.md:216) solo para bookmarks viejos; Solo funciona con slug mientras toda la UI genera cuids; Ningun link interno la genera (git grep '/chatbot' en admin/clients solo encuentra links a /admin/chatbots)
+- Qué rompe si se borra: Bookmarks viejos de /admin/clients/<slug>/chatbot/* darian 404
+- Confianza de poda: MEDIA
+- Propuesta: decidir: arreglarlo (id o slug y las 8 tabs) o borrarlo si no quedan bookmarks
+- Zona: libre
+
+### [POD-350] src/app/(protected)/admin/messages/_components/emoji-popover.tsx (D3-c1)
+- Hallado en F2 (D3-L3) · `src/app/(protected)/admin/messages/_components/emoji-popover.tsx` · Nodo(s): h4.adm-mensajes · Alcance: fusión con otra implementación (no se borra sin consolidar) — duplica el wrapper de tickets/_components/emoji-picker-button.tsx (mismo dynamic import de EmojiPickerPanel) con posicionamiento propio · Señales: Duplica el wrapper de admin/tickets/_components/emoji-picker-button.tsx:12-13: ambos hacen dynamic(import('@/modules/chatbot/components/admin/config/EmojiPickerPanel')); Lógica de posicionamiento/portal propia (calcPosition :34-42) en vez de compartida
+- Qué rompe si se borra: Nada si se unifica en un componente compartido usado por Mensajes y Tickets
+- Confianza de poda: MEDIA
+- Propuesta: unificar en un componente compartido de Mensajes y Tickets
+- Zona: libre
+
+### [POD-351] src/app/(protected)/admin/leads/_components/lead-card.helpers.ts (D3-c1)
+- Hallado en F2 (D3-L3) · `src/app/(protected)/admin/leads/_components/lead-card.helpers.ts` · Nodo(s): h4.adm-leads · Alcance: fusión con otra implementación (no se borra sin consolidar) — serviceBadgeTone y serviceLabel copiados en [leadId]/page.tsx:64-92 y demo-form.tsx:48-76; formatRelativeTime duplica relativeTime de lead-activity.helpers.ts:50 con otra salida · Señales: serviceBadgeTone/serviceLabel repetidos en [leadId]/page.tsx:64-92 y demo-form.tsx:48-76; formatRelativeTime duplica relativeTime de lead-activity.helpers.ts:50 con salida distinta
+- Qué rompe si se borra: Nada: es consolidar, no borrar; las copias locales de page.tsx y demo-form.tsx son las que sobran
+- Confianza de poda: MEDIA
+- Propuesta: dejar este archivo como única fuente y borrar las copias locales
+- Zona: libre
+
+### [POD-352] src/app/(protected)/admin/leads/_components/demo-form.tsx (D3-c1)
+- Hallado en F2 (D3-L3) · `src/app/(protected)/admin/leads/_components/demo-form.tsx` · Nodo(s): h4.adm-leads · Alcance: exports sueltos (el archivo sigue vivo) — export DemoForm sin importadores externos; redefine DemoServiceType (:11) y SERVICE_OPTIONS (:38) · Señales: `export function DemoForm` sin importadores externos (git grep: sólo demo-form.tsx:267); Redefine DemoServiceType (:11) y SERVICE_OPTIONS (:38) que ya existen en lead-pipeline.shared.ts:75 y lead-form.tsx:53
+- Qué rompe si se borra: Nada al quitar el export y reusar los tipos compartidos
+- Confianza de poda: MEDIA
+- Propuesta: quitar el export y reusar los tipos de lead-pipeline.shared.ts y lead-form.tsx
+- Zona: libre
+
+### [POD-353] src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts (D3-c1)
+- Hallado en F2 (D3-L3) · `src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts` · Nodo(s): h4.adm-leads · Alcance: exports sueltos (el archivo sigue vivo) — emptyGroupedLeads (:103) y PipelineGroupId (:22) exportados pero usados solo dentro del archivo · Señales: emptyGroupedLeads (:103) y PipelineGroupId (:22) exportados pero sólo usados dentro del mismo archivo (git grep)
+- Qué rompe si se borra: Nada (sólo reducir superficie exportada)
+- Confianza de poda: MEDIA
+- Propuesta: dejar de exportarlos
+- Zona: libre
+
+### [POD-354] src/app/(protected)/admin/projects/_actions/project.schemas.ts (D3-c1)
+- Hallado en F2 (D3-L4) · `src/app/(protected)/admin/projects/_actions/project.schemas.ts` · Nodo(s): h4.adm-proyectos · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — campos legacy businessName, contactName, contactPhone y contactEmail (:61-65): ninguna action los lee y el formulario no los envía · Señales: Campos legacy businessName, contactName, contactPhone y contactEmail (:61-65): ninguna action los lee (git grep 'parsed.businessName|parsed.contactEmail|data.businessName' da 0) y el form no los envía (project-form.tsx:156-165)
+- Qué rompe si se borra: Nada.
+- Confianza de poda: MEDIA
+- Propuesta: borrar los 4 campos
+- Zona: libre
+
+### [POD-355] src/app/(protected)/admin/projects/_components/overlay-modal.tsx (D3-c1)
+- Hallado en F2 (D3-L4) · `src/app/(protected)/admin/projects/_components/overlay-modal.tsx` · Nodo(s): h4.adm-proyectos · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — useIsClient local (:14-23) duplica src/lib/use-is-client.ts · Señales: useIsClient local (:14-23) duplica src/lib/use-is-client.ts:15, que ya usan projects-board.tsx:20 y projects-period-dropdown.tsx:6; Es un modal propio del lane, paralelo a src/components/ui/Modal.tsx:26 (decisión documentada por el trap de backdrop-filter)
+- Qué rompe si se borra: Nada si se importa el hook compartido; el modal propio se mantiene por decisión del lane.
+- Confianza de poda: MEDIA
+- Propuesta: importar el hook compartido; el modal propio se queda (decisión documentada del lane)
+- Zona: libre
+
+### [POD-356] src/lib/premium-features.ts (D3-c1)
+- Hallado en F2 (D3-L5) · `src/lib/premium-features.ts` · Nodo(s): lib.premium-features · Alcance: el archivo entero — catálogo legacy: su runtime solo lo usa lib/actions/settings.ts (POD-062, sin importadores) y sus claves no coinciden con los slugs de PremiumModule (DEU-065) · Señales: El catálogo en runtime (PREMIUM_FEATURE_KEYS/LABELS) solo lo importa src/lib/actions/settings.ts:12-16, que no tiene importadores; PREMIUM_FEATURE_OPTIONS y PREMIUM_FEATURE_DEFAULTS sin usos (git grep -w); Sus claves no coinciden con los slugs de PremiumModule (premium-features.ts:51 'motor-resenias' vs premium-modules.ts:24 'motor-resenas')
+- Qué rompe si se borra: Solo el import de tipo PremiumFeatureKey en settings.actions.ts:10 y settings-console.tsx:16 (reemplazar por string) y el módulo muerto lib/actions/settings.ts
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con lib/actions/settings.ts y tipar los precios con el slug de PremiumModule
+- Zona: libre
+
+### [POD-357] src/lib/alerts.ts#sendTestAgencyAlert (D3-c1)
+- Hallado en F2 (D3-L5) · `src/lib/alerts.ts#sendTestAgencyAlert` · Nodo(s): lib.alerts · Alcance: exports sueltos (el archivo sigue vivo) — su único llamador es lib/actions/settings.ts (POD-062); la consola nueva no tiene botón de prueba · Señales: Único llamador: src/lib/actions/settings.ts:8, módulo sin importadores; La consola nueva no tiene botón de prueba
+- Qué rompe si se borra: Nada vivo; conviene reutilizarlo para un 'Probar webhook' antes de podar
+- Confianza de poda: MEDIA
+- Propuesta: reusarla para un «Probar webhook» en Configuración antes de podarla (decidir (Valentino): archivo congelado)
+- Zona: congelado
+
+### [POD-358] src/lib/agency-settings.ts#AGENCY_TIMEZONE (D3-c1)
+- Hallado en F2 (D3-L5) · `src/lib/agency-settings.ts#AGENCY_TIMEZONE` · Nodo(s): lib.agency-settings · Alcance: exports sueltos (el archivo sigue vivo) — constante sin usos (solo la definición de :20) · Señales: git grep -w AGENCY_TIMEZONE: solo la definición (agency-settings.ts:20)
+- Qué rompe si se borra: Nada
+- Confianza de poda: MEDIA
+- Propuesta: borrar
+- Zona: libre
+
+### [POD-359] src/lib/actions/leads-constants.ts (D3-c1)
+- Hallado en F2 (D3-L6) · `src/lib/actions/leads-constants.ts` · Nodo(s): h4.adm-leads · Alcance: el archivo entero — solo lo importa lib/actions/leads.ts (POD-060, sin importadores); LEAD_STATUS_VALUES está duplicado en admin/leads/_actions/lead.schemas.ts:4 · Señales: solo lo importa leads.ts (muerto); LEAD_STATUS_VALUES duplicado en admin/leads/_actions/lead.schemas.ts:4
+- Qué rompe si se borra: Nada si se borra junto con leads.ts.
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con lib/actions/leads.ts
+- Zona: libre
+
 ### Refuerzos de F2 sobre fichas de F1
 
 - [POD-046] `src/lib/actions/invitations.ts` (D1-c1): inviteClientAction sin callers (git grep inviteClient -> solo :43); Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116). Qué rompe: Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)
@@ -2442,6 +2568,20 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - [POD-023] `src/components/onboarding/OnboardingWizard.tsx` (D2-c1): no lo importa ningún archivo (git grep 'components/onboarding' origin/main -- src → 0); única vía a saveOnboardingProfile (src/actions/onboarding-actions.ts), que escribe credenciales en claro con url 'ENCRIPTADO_EN_TEXTO'; el onboarding vivo es src/app/bienvenida. Qué rompe: Nada (fuera del lote; ligado a D2-A5).
 - [POD-050] `src/modules/chatbot/components/admin/config/Toggle.tsx` (D5-c1): Fuera del lote listado pero en la misma carpeta; 0 importadores: git grep "Toggle['\"]" sólo muestra el import del kit en CrmConfigForm.tsx:9 y el export de components/ui/index.ts:20. Qué rompe: Nada.
 - [POD-069] `src/modules/motor/services/sendMessage.ts` (D5-c1): Sin llamadores en src/ ni scripts/: git grep sendMotorMessage solo encuentra la definicion (sendMessage.ts:204); Solo lo ejercitan tests/integration/motor-outbound.spec.ts y motor-window.spec.ts. Qué rompe: Esas dos specs de integracion. NO podar: es una base pasiva planificada para B2 (PLAN-482). Solo seria candidato si Valentino abandona el motor.
+- [POD-004] `src/app/(protected)/admin/clients/_actions/client.schemas.ts` (D3-c1): git grep -n 'client.schemas' origin/main -- logic-core-v3/src sin resultados; el registro de cambios dice que se borraron exports muertos de client.actions.ts; el schema quedo huerfano. Qué rompe: Nada por lectura (sin importadores)
+- [POD-073] `src/app/(protected)/admin/projects/_actions/project.actions.ts` (D3-c1): getProjectById (:1020-1115), serializeProjectDetail (:505-591) y el tipo ProjectDetailRecord (:95-170): unas 270 líneas sin consumidores (git grep -w getProjectById origin/main -- src devuelve solo la definición); isInternal fijo en false (:524) y texto distinto al resto (:510); deriveProjectLastActivityAt (:408-423) y lastActivityAt (:480): se serializan pero nadie los lee (en admin/projects solo aparecen en el tipo de project-card.tsx:28). Qué rompe: Nada en origin/main. Borrar getProjectById también quita una server action pública sin uso.
+- [POD-072] `src/app/(protected)/admin/projects/_actions/milestone.actions.ts` (D3-c1): unmarkMilestonePaid (:49-77) no tiene consumidores (git grep -w). Qué rompe: Nada. Mejor alternativa: conectarla como 'Deshacer' en Pagos en vez de borrarla.
+- [POD-071] `src/app/(protected)/admin/projects/_actions/maintenance.actions.ts` (D3-c1): createMaintenancePayment (:31-58) no tiene consumidores (git grep -w); CreateMaintenancePaymentSchema (maintenance.schemas.ts:19-24) solo lo usa esa función. Qué rompe: Nada.
+- [POD-075] `src/app/(protected)/admin/team/_actions/time-entry.actions.ts#updateTimeEntry,listTimeEntriesByUser` (D3-c1): git grep -w en src y tests: solo las definiciones (:195, :310); updateTimeEntry además sin guard de pertenencia. Qué rompe: Nada vivo
+- [POD-074] `src/app/(protected)/admin/team/_actions/task.actions.ts#listTasksByUser,reorderTasks` (D3-c1): git grep -w en src y tests: solo las definiciones (:264, :377). Qué rompe: Nada vivo; reorderTasks puede servir si se agrega drag & drop
+- [POD-081] `src/app/(protected)/admin/settings/alerts/page.tsx` (D3-c1): Ningún link a /admin/settings/alerts (git grep fuera de su carpeta → 0); Hay otra sección /admin/alerts en el sidebar (admin-sidebar.tsx, entrada 'Alertas'). Qué rompe: Es la única UI que llama a /api/admin/alerts/trigger-detector: enlazarla o mover el botón a /admin/alerts, no borrarla sin reemplazo
+- [POD-082] `src/app/(protected)/admin/settings/reports/page.tsx` (D3-c1): Ningún link a /admin/settings/reports (git grep → 0). Qué rompe: Es la única UI de /api/admin/reports/send-now y del historial de envíos semanales
+- [POD-058] `src/lib/actions/clients.ts` (D3-c1): 0 importadores: git grep -E "lib/actions/clients['\"]|createClientAction|updateClientAction" origin/main -- src tests scripts → solo definiciones; duplica el alta y la edición vivas (createClientOnly / updateClient.ts); el registro de Clientes §6 da por limpiado el código muerto del sector. Qué rompe: Nada (sin consumidores).
+- [POD-061] `src/lib/actions/services.ts` (D3-c1): 0 importadores (git grep createServiceAction|updateServiceStatusAction|deleteServiceAction); Service se escribe en vivo desde admin/projects/_actions/project.actions.ts:280 y :291. Qué rompe: Nada.
+- [POD-062] `src/lib/actions/settings.ts` (D3-c1): 0 importadores (git grep de las 6 actions); reemplazado por admin/settings/_actions/settings.actions.ts (updateSettings :127, updateModulePricing :175); contiene un requireSuperAdmin reimplementado (:20-28). Qué rompe: Nada; también desaparece uno de los dos generadores de links /accept-invite (el otro, invitations.ts, también está muerto).
+- [POD-060] `src/lib/actions/leads.ts` (D3-c1): 0 importadores (git grep updateLeadStatusAction|updateLeadNotesAction); la versión viva está en admin/leads/_actions (ZONA-FRANCO); guard reimplementado ensureAdmin (:14-17). Qué rompe: Nada.
+- [POD-079] `src/lib/actions/projects.ts` (D3-c1): 5 de 7 exports sin importadores (createProjectAction, updateProjectAction, createTaskAction, updateTaskStatusAction, deleteTaskAction); duplica admin/projects/_actions/project.actions.ts (bitacora:6491 ya lo marcaba). Qué rompe: delete-project-button.tsx:6 (deleteProjectAction) y task-list.tsx:22 (sendTaskForApprovalAction): hay que migrarlos antes de borrar.
+- [POD-076] `src/lib/actions/contact.ts` (D3-c1): markLeadAsRead (:110) sin importadores; contactFormAction exportada solo para el wrapper submitContactForm (:100-105). Qué rompe: Nada si se quita markLeadAsRead; contact/page.tsx:6 usa submitContactForm.
 
 ## §docs
 

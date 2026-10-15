@@ -1167,6 +1167,126 @@
    "id_previo": "S7-01",
    "estado": "abierto",
    "evidencia": "Parte motor: el cuerpo del mensaje (handle-message.ts:48) y el telefono (identity.ts:72, waId) se guardan en claro, y no hay purga de las tablas motor_* (git grep -i 'motorMessage.deleteMany|motor_message' -- src scripts solo encuentra registry.ts:50-51 y :127)."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "doc": "docs/sprints/alpha-1-reaudit.md",
+   "id_previo": "alpha-1-reaudit:224 (P1) Loading states solo en el root de /admin/*",
+   "estado": "parcial",
+   "evidencia": "Hoy hay 19 loading.tsx bajo admin (git ls-tree: alerts, audit-log, chatbot/activity, chatbot/health, chatbots, chatbots/[botId], clients, clients/[clientId], leados, leados/[leadId], leads, messages/[orgId], projects, projects/[projectId], settings, settings/alerts, settings/reports, team, tickets). Siguen cayendo en admin/loading.tsx (skeleton del Dashboard) announcements, referrals y fg2-lab."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "doc": "docs/sprints/alpha-1-reaudit.md:220",
+   "id_previo": "sin-id (P0 wizard /admin/clients/new sin validacion server-side ni feedback de error)",
+   "estado": "cerrado",
+   "evidencia": "Validacion server-side: createClientWithBot.ts:99-104 y createClientOnly.ts:51-55 (safeParse) con requireSuperAdmin (:96, :48). Feedback: Step5Review.tsx:61-62 estados, :111 setError, :311 bloque de error, :331 spinner (git grep). new/page.tsx:14 monta el wizard. Salvedad: el error mostrado viene de un Error lanzado y probablemente sale generico en produccion (hallazgo UX MEDIA nuevo)."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "doc": "docs/sprints/alpha-1-reaudit.md:227",
+   "id_previo": "sin-id (P1) Toast faltante en el CRUD de leads (OS) de /admin/leads",
+   "estado": "parcial",
+   "evidencia": "Sigue sin toasts (git grep -i toast en admin/leads vacío; control positivo AlertsClient.tsx). Los errores sí se ven inline: lead-pipeline.tsx:218-225 (role=alert), lead-form.tsx:342-346, demo-form.tsx:205-209; el éxito no tiene feedback salvo el movimiento de la card y 'Asignación guardada.' (assign-setter-control.tsx:231-233)."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:67",
+   "id_previo": "P0-6",
+   "estado": "parcial",
+   "evidencia": "chatbots/[botId]/page.tsx:29 (role !== 'SUPER_ADMIN') y :61 (callerCanAccessOrg): cerrado ahí. projects/[projectId]/page.tsx:99-102 y :165 ahora tiene auth() + callerCanAccessOrg (scoping defensivo), pero sin chequeo de rol, igual que layout.tsx:160. Sus hermanas payments/page.tsx:67-104 y tasks/page.tsx:14-53 siguen sin guard propio. Lo mitiga admin/layout.tsx:47."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "doc": "docs/audits/2026-06-revalidacion.md:68",
+   "id_previo": "P0-6",
+   "estado": "parcial",
+   "evidencia": "Mismo estado que el anterior: findUnique sin org en projects/[projectId]/page.tsx:106-107, ahora seguido de callerCanAccessOrg (:165) sin rol. chatbots/[botId]/page.tsx:29 y :61 tiene rol + scoping. Payments y tasks siguen sin guard (payments/page.tsx:70-104; tasks/page.tsx:17-27)."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "doc": "docs/audits/2026-05-auditoria-db.md:146",
+   "id_previo": "DB-P0-2",
+   "estado": "parcial",
+   "evidencia": "La migración existe (prisma/migrations/20260520190000_add_alert_types/migration.sql) y el enum BotAlertType del schema tiene los 9 valores (schema.prisma:139-149). No se puede verificar si está aplicada en Neon (migrate status no disponible, P1012 sin DATABASE_URL, VH-004). AlertSettingsClient.tsx:7-18 conserva una copia local con el comentario 'pending prisma generate', ya innecesaria."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:67",
+   "id_previo": "SEC-AUTH-03",
+   "estado": "parcial",
+   "evidencia": "En este lote está cerrado: resend-credentials/route.ts:69-71 incrementa sessionVersion. Los huecos que quedan (proxy y RSC que no miran sessionVersion) están en el flujo D1 «Invalidacion de sesion por sessionVersion (y sus huecos)» y en SEC-023/BUG-001."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1908",
+   "id_previo": "LEG-01",
+   "estado": "abierto",
+   "evidencia": "El formulario de /contact sigue capturando nombre, email, teléfono y empresa (contact/page.tsx:148-224) sin aviso de privacidad ni link; no hay ruta legal en src/app (git ls-tree … | grep -i privacidad|privacy|terminos|legal → 0)."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1916",
+   "id_previo": "A11Y-02",
+   "estado": "abierto",
+   "evidencia": "En contact/page.tsx los seis <label> siguen sin htmlFor y los inputs sin id (:151-152, :161, :171, :180, :189, :203); el error (:213) no tiene role=alert."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:20",
+   "id_previo": "CLEAN-H2a",
+   "estado": "parcial",
+   "evidencia": "contact/page.tsx ya usa lib/whatsapp (:8, :56-63, :96), igual que PricingSection, WebDevelopmentTimeline y CalculadoraAutomation (git grep getWhatsappHref). Quedan literales en CalculadorIA.tsx:316, en el WHATSAPP_NUMBER de Footer.tsx:92 y en PortalDemoCTA.tsx:237; AgencySettings.contactWhatsapp no lo lee nadie."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:23",
+   "id_previo": "CLEAN-H2b",
+   "estado": "abierto",
+   "evidencia": "lib/alerts.ts:49-51 sigue con su propio getBaseUrl (NEXT_PUBLIC_APP_URL || NEXTAUTH_URL || localhost); resend-credentials/route.ts:76 cae a 'https://develop.com.ar'. En src hay 23 lecturas de NEXT_PUBLIC_APP_URL fuera de tests: 10 con fallback a http://localhost:3000 y 6 a https://develop.com.ar."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "doc": "docs/audits/2026-05-auditoria-db.md:155",
+   "id_previo": "DB-P1-3",
+   "estado": "cerrado",
+   "evidencia": "git grep unlockedFeatures en src y prisma/schema.prisma → solo el comentario src/lib/premium-modules.ts:15 ('se deprecó en B4.4'); clients.ts tiene 227 líneas y ya no tiene el bloque :222-244 citado. Control: sessionVersion en el schema → 1."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:105",
+   "id_previo": "P1-12",
+   "estado": "parcial",
+   "evidencia": "admin/chatbots/[botId]/actions.ts, dashboard/_actions/regenerate-brief.ts y actions/onboarding-actions.ts ya importan zod o usan parse (git grep -c: 3, 2, 2). En clients.ts, createClientAction usa Zod (:25-40, :83-93), pero updateClientAction sigue manual con casts (:157-171); el módulo no tiene importadores."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1151",
+   "id_previo": "DR-01",
+   "estado": "abierto",
+   "evidencia": ".github/workflows/db-backup.yml sin cambios desde ef6dd076 (2026-05-26). Sigue dependiendo de secrets.DIRECT_DATABASE_URL_PROD/DEV (:84-85) y BACKUP_GPG_PASSPHRASE (:105), y corta si faltan (:95). El historial de corridas no se puede verificar desde git: Valentino tiene que mirar Actions. hardDeleteClient.ts:141 sigue siendo irreversible."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1324",
+   "id_previo": "RESIL-07",
+   "estado": "abierto",
+   "evidencia": "src/lib/prisma.ts:5-6 sin retry ni opciones de conexión (connect_timeout de la URL no verificable). En contact.ts, el rate limit (:24 → limiter.ts:44, $queryRawUnsafe sin catch) corre antes del try (:61): un cold-start o un fallo de Neon lanza la excepción al visitante. auth.ts:205-231 no se revisó (fuera del lote)."
   }
  ]
 }

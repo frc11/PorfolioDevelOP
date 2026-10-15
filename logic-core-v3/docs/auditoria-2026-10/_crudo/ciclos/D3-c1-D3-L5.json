@@ -1,0 +1,4197 @@
+{
+ "dominio": "D3",
+ "ciclo": "D3-c1",
+ "lote": "D3-L5",
+ "run": "wf_5edd9c03-0ab",
+ "fecha": "2026-10-15T17:27:46.358Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts",
+    "lineas_total": 53,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/referrals/_components/referrals-admin-table.tsx",
+    "lineas_total": 108,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/referrals/page.tsx",
+    "lineas_total": 52,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+    "lineas_total": 239,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
+    "lineas_total": 40,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+    "lineas_total": 751,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+    "lineas_total": 224,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/alerts/loading.tsx",
+    "lineas_total": 16,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/alerts/page.tsx",
+    "lineas_total": 42,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/loading.tsx",
+    "lineas_total": 10,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/page.tsx",
+    "lineas_total": 70,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/reports/ReportSettingsClient.tsx",
+    "lineas_total": 159,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/reports/loading.tsx",
+    "lineas_total": 16,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/reports/page.tsx",
+    "lineas_total": 55,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+    "lineas_total": 417,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/_actions/task.schemas.ts",
+    "lineas_total": 109,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+    "lineas_total": 366,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/_actions/time-entry.schemas.ts",
+    "lineas_total": 56,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/_components/member-workload.tsx",
+    "lineas_total": 267,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/loading.tsx",
+    "lineas_total": 10,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/page.tsx",
+    "lineas_total": 209,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/[ticketId]/page.tsx",
+    "lineas_total": 29,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
+    "lineas_total": 189,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_actions/ticket.schemas.ts",
+    "lineas_total": 25,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_components/emoji-picker-button.tsx",
+    "lineas_total": 180,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_components/hover-scale.tsx",
+    "lineas_total": 31,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx",
+    "lineas_total": 264,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx",
+    "lineas_total": 177,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_components/ticket-list.tsx",
+    "lineas_total": 224,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_components/ticket-reply-form.tsx",
+    "lineas_total": 117,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/loading.tsx",
+    "lineas_total": 16,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/page.tsx",
+    "lineas_total": 37,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/admin/alerts/trigger-detector/route.ts",
+    "lineas_total": 17,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts",
+    "lineas_total": 92,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/admin/reports/send-now/route.ts",
+    "lineas_total": 17,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+    "lineas_total": 114,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/contact/page.tsx",
+    "lineas_total": 348,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/admin/MessagesScrollAnchor.tsx",
+    "lineas_total": 15,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/admin/managers/ChatbotManager.tsx",
+    "lineas_total": 158,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/admin/managers/ProjectManager.tsx",
+    "lineas_total": 65,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/admin/managers/VaultManager.tsx",
+    "lineas_total": 102,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/agency-settings.ts",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/alerts.ts",
+    "lineas_total": 297,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/audit-log-queries.ts",
+    "lineas_total": 70,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/audit-log.ts",
+    "lineas_total": 66,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/bulk-actions.ts",
+    "lineas_total": 80,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/premium-features.ts",
+    "lineas_total": 132,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/app/(protected)/admin/referrals/page.tsx",
+    "simbolo": "AdminReferralsPage",
+    "tipo": "page",
+    "url": "/admin/referrals",
+    "auth": "heredado",
+    "evidencia_auth": "Sin auth() propio: lee prisma.referral en page.tsx:9; protegida por admin/layout.tsx:47 + proxy.ts:148 (patrón SEC-023)",
+    "rol": "SUPER_ADMIN (layout)",
+    "org_de": "no-aplica",
+    "evidencia_org": "Lista global de referidos de todas las orgs (page.tsx:9-20), por diseño del admin",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada",
+    "rate_limit": "no-aplica",
+    "notas": "take 200 sin paginación (page.tsx:11)"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/settings/page.tsx",
+    "simbolo": "AgencyOsSettingsPage",
+    "tipo": "page",
+    "url": "/admin/settings",
+    "auth": "si",
+    "evidencia_auth": "Solo lee vía getSettings/listTeamMembers, que llaman requireSuperAdmin (settings.actions.ts:88, :217)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "AgencySettings es global de develOP (settings.actions.ts:38-52)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada",
+    "rate_limit": "no-aplica",
+    "notas": "Con sesión vencida muestra 'Unauthorized' en caja roja (page.tsx:31-33) en vez de redirigir"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/settings/alerts/page.tsx",
+    "simbolo": "AlertSettingsPage",
+    "tipo": "page",
+    "url": "/admin/settings/alerts",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:7-10 auth() + role !== 'SUPER_ADMIN' → redirect('/login')",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Conteos globales de BotAlert (page.tsx:12-22)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada",
+    "rate_limit": "no-aplica",
+    "notas": "Página huérfana: ningún link la referencia (git grep)"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/settings/reports/page.tsx",
+    "simbolo": "ReportSettingsPage",
+    "tipo": "page",
+    "url": "/admin/settings/reports",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:7-10 auth() + rol SUPER_ADMIN",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Consulta global botConfig/chatbotEvent con prisma directo (page.tsx:12-28), fuera de isolation (PLAN-593)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada",
+    "rate_limit": "no-aplica",
+    "notas": "Página huérfana"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/page.tsx",
+    "simbolo": "AgencyOsTeamPage",
+    "tipo": "page",
+    "url": "/admin/team",
+    "auth": "heredado",
+    "evidencia_auth": "Sin auth() propio: prisma.user.findMany en page.tsx:19; depende de admin/layout.tsx:47 + proxy (SEC-023)",
+    "rol": "SUPER_ADMIN (layout)",
+    "org_de": "no-aplica",
+    "evidencia_org": "Usuarios internos y sus tareas (page.tsx:19-102)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/tickets/page.tsx",
+    "simbolo": "AgencyOsTicketsPage",
+    "tipo": "page",
+    "url": "/admin/tickets",
+    "auth": "si",
+    "evidencia_auth": "listTickets llama requireSuperAdmin (ticket.actions.ts:52)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Bandeja global de todas las orgs (ticket.actions.ts:59-79)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/tickets/[ticketId]/page.tsx",
+    "simbolo": "AgencyOsTicketDetailPage",
+    "tipo": "page",
+    "url": "/admin/tickets/[ticketId]",
+    "auth": "si",
+    "evidencia_auth": "getTicketById llama requireSuperAdmin (ticket.actions.ts:134); cualquier fallo → notFound() (page.tsx:16-18)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "El ticket se resuelve por id (ticket.actions.ts:137-153); el admin ve cualquier org por diseño",
+    "validacion": "zod",
+    "evidencia_validacion": "GetTicketByIdSchema.parse(id) ticket.actions.ts:135",
+    "rate_limit": "no-aplica",
+    "notas": "ticketId es cuid en la URL"
+   },
+   {
+    "archivo": "src/app/contact/page.tsx",
+    "simbolo": "ContactPage",
+    "tipo": "page",
+    "url": "/contact",
+    "auth": "no",
+    "evidencia_auth": "Página pública por diseño ('use client' page.tsx:1)",
+    "rol": "público",
+    "org_de": "no-aplica",
+    "evidencia_org": "Formulario de develOP, sin tenant",
+    "validacion": "zod",
+    "evidencia_validacion": "El form envía a submitContactForm (page.tsx:66) que valida con ContactFormSchema.safeParse (src/lib/actions/contact.ts:35, fuera del lote)",
+    "rate_limit": "si",
+    "notas": "Rate limit por IP en la action (contact.ts:20-26, IP de XFF: patrón D1). En < 1024 px el formulario no se renderiza (page.tsx:119)"
+   },
+   {
+    "archivo": "src/app/api/admin/alerts/trigger-detector/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/admin/alerts/trigger-detector",
+    "auth": "si",
+    "evidencia_auth": "route.ts:6-9 auth() + role !== 'SUPER_ADMIN' → 403",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "El detector barre todos los bots (runAlertDetector, route.ts:12)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada",
+    "rate_limit": "no",
+    "notas": "500 con String(error) (route.ts:15)"
+   },
+   {
+    "archivo": "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/admin/clients/[organizationId]/send-executive-report",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() route.ts:14 (try/catch :13-19)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId de la URL (route.ts:50-55): legítimo para SUPER_ADMIN que opera sobre una org elegida; el recurso se valida en send-manual (NOT_FOUND → 404, route.ts:83-85)",
+    "validacion": "zod",
+    "evidencia_validacion": "OrganizationIdSchema.safeParse(rawParams) route.ts:51",
+    "rate_limit": "si",
+    "notas": "applyAuthRateLimit por adminId (route.ts:35-48); espera 'UNAUTHORIZED' pero el guard lanza 'Unauthorized' → siempre 403 (route.ts:17)"
+   },
+   {
+    "archivo": "src/app/api/admin/reports/send-now/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/admin/reports/send-now",
+    "auth": "si",
+    "evidencia_auth": "route.ts:6-9 auth() + rol SUPER_ADMIN",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Envía a todos los bots activos (sendWeeklyReports, route.ts:12)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada",
+    "rate_limit": "no",
+    "notas": "Sin dedupe ni confirmación; 500 con String(error) (route.ts:15)"
+   },
+   {
+    "archivo": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/admin/users/[userId]/resend-credentials",
+    "auth": "si",
+    "evidencia_auth": "route.ts:16-19 auth() + rol SUPER_ADMIN → 403",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Opera sobre un userId de la URL (route.ts:39-47); no filtra por rol del usuario destino",
+    "validacion": "zod",
+    "evidencia_validacion": "ResendCredentialsParamsSchema.safeParse(rawParams) route.ts:40",
+    "rate_limit": "si",
+    "notas": "applyAuthRateLimit por adminId (route.ts:25-37); incrementa sessionVersion (:71)"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts",
+    "simbolo": "markReferralConvertedAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :15",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Referral por id (:18-21), admin global",
+    "validacion": "manual",
+    "evidencia_validacion": "if (!id?.trim()) :16; transición atómica updateMany where status PENDING :18-21",
+    "rate_limit": "no",
+    "notas": "Sin audit log"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts",
+    "simbolo": "markReferralRewardedAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :38",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Referral por id (:41-44)",
+    "validacion": "manual",
+    "evidencia_validacion": "if (!id?.trim()) :39; where status CONVERTED :42",
+    "rate_limit": "no",
+    "notas": "Sin audit log; irreversible desde la UI"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+    "simbolo": "getSettings",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :88",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "AgencySettings global (:90-93)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada; crea el registro si falta (:38-52)",
+    "rate_limit": "no",
+    "notas": "Token de Telegram enmascarado con maskSecret (:109)"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+    "simbolo": "updateSettings",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :142",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "AgencySettings global (:145-166)",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateSettingsSchema.parse(data) :143 (settings.schemas.ts:21-34)",
+    "rate_limit": "no",
+    "notas": "Sin audit log; webhook acepta cualquier URL (schemas :25); token se guarda en claro (:161-163, SEC-036)"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+    "simbolo": "updateModulePricing",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :180",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "PremiumModule global por slug (:185-196)",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateModulePricingSchema.parse :181 + existencia :185-191",
+    "rate_limit": "no",
+    "notas": "Acepta 0 (schemas :39); sin audit log"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+    "simbolo": "listTeamMembers",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :217",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Usuarios SUPER_ADMIN (:219-227)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+    "simbolo": "createTask",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :157",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "projectId del input (:162,:170), admin global",
+    "validacion": "zod",
+    "evidencia_validacion": "CreateTaskSchema.parse :158",
+    "rate_limit": "no",
+    "notas": "assignedToId acepta cualquier userId (task.schemas.ts:50-53)"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+    "simbolo": "updateTask",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :199",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "taskId del input (:203-204)",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateTaskSchema.parse :200",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+    "simbolo": "deleteTask",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :233",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "taskId (:236-255)",
+    "validacion": "zod",
+    "evidencia_validacion": "TaskIdSchema.parse :234",
+    "rate_limit": "no",
+    "notas": "Sin audit log"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+    "simbolo": "reorderTasks",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :268",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Valida que todas las tareas sean del mismo proyecto (:289-296)",
+    "validacion": "zod",
+    "evidencia_validacion": "ReorderTasksSchema.parse :269",
+    "rate_limit": "no",
+    "notas": "Sin llamadores (git grep)"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+    "simbolo": "listTasksByProject",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :325",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "projectId (:329)",
+    "validacion": "zod",
+    "evidencia_validacion": "ProjectIdSchema.parse :326",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+    "simbolo": "listTasksByUser",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :381",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "userId (:385)",
+    "validacion": "zod",
+    "evidencia_validacion": "UserIdSchema.parse :382",
+    "rate_limit": "no",
+    "notas": "Sin llamadores"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+    "simbolo": "createTimeEntry",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "const userId = await requireSuperAdmin() :140; la entrada se graba con el userId de sesión (:176)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "taskId (:143-150); rechaza tareas asignadas a otro (:160-162)",
+    "validacion": "zod",
+    "evidencia_validacion": "CreateTimeEntrySchema.parse :141 (z.coerce.date en schemas :33)",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+    "simbolo": "updateTimeEntry",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :199",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "entryId (:203-213) sin verificar dueño",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateTimeEntrySchema.parse :200",
+    "rate_limit": "no",
+    "notas": "Sin guard de pertenencia (PLAN-605) y sin llamadores"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+    "simbolo": "deleteTimeEntry",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :247",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "entryId (:250-251) sin verificar dueño",
+    "validacion": "zod",
+    "evidencia_validacion": "EntryIdSchema.parse :248",
+    "rate_limit": "no",
+    "notas": "Llamada desde time-entry-panel.tsx:189"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+    "simbolo": "listTimeEntriesByProject",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :274",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "projectId (:278-281)",
+    "validacion": "zod",
+    "evidencia_validacion": "ProjectIdSchema.parse :275",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+    "simbolo": "listTimeEntriesByUser",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :318",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "userId (:334)",
+    "validacion": "zod",
+    "evidencia_validacion": "UserIdSchema.parse :319 + DateRangeSchema.parse :320",
+    "rate_limit": "no",
+    "notas": "Sin llamadores"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
+    "simbolo": "listTickets",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :52",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId opcional como filtro del admin (:62-64); hoy la página no lo pasa (tickets/page.tsx:6)",
+    "validacion": "zod",
+    "evidencia_validacion": "ListTicketsSchema.parse :53-56",
+    "rate_limit": "no",
+    "notas": "Sin take/skip (:59-79)"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
+    "simbolo": "getTicketById",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :134",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "ticket por id con organization completa (:137-153); al cliente solo se devuelven campos elegidos (:168-176)",
+    "validacion": "zod",
+    "evidencia_validacion": "GetTicketByIdSchema.parse :135",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/lib/audit-log-queries.ts",
+    "simbolo": "listAuditLog",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() del módulo chatbot :5,:21",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Log global (:32-45)",
+    "validacion": "parcial",
+    "evidencia_validacion": "actionType casteado sin validar (:36); pageSize sin tope (:19); sin zod",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/lib/audit-log-queries.ts",
+    "simbolo": "getAuditLogStats",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :54",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Conteos globales (:57-67)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin entrada",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/lib/bulk-actions.ts",
+    "simbolo": "bulkPauseBots",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() del módulo chatbot :6,:9",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "orgIds elegidos en la lista de clientes (:8-10, :18-25): legítimo para SUPER_ADMIN",
+    "validacion": "manual",
+    "evidencia_validacion": "Dedup y filter(Boolean) :10; sin zod",
+    "rate_limit": "no",
+    "notas": "Audita cada bot pausado (:28-39)"
+   },
+   {
+    "archivo": "src/lib/bulk-actions.ts",
+    "simbolo": "bulkExportLeads",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin() :47",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "orgIds (:48-51)",
+    "validacion": "no",
+    "evidencia_validacion": "orgIds: string[] sin schema (:46-48)",
+    "rate_limit": "no",
+    "notas": "Exporta PII sin audit log y sin neutralizar fórmulas (SEC-040)"
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Configuración: guardar datos de contacto, alertas, meta de demos y Telegram",
+    "pasos": [
+     "src/app/(protected)/admin/settings/page.tsx:6-9 — getSettings() + listTeamMembers()",
+     "src/app/(protected)/admin/settings/_actions/settings.actions.ts:87-121 — requireSuperAdmin :88, ensureAgencySettingsRecord :38-52, maskSecret del token :109",
+     "src/app/(protected)/admin/settings/_components/settings-console.tsx:100-115 — saveAllSettings → updateSettings(draft)",
+     "settings.actions.ts:141-166 — requireSuperAdmin :142, UpdateSettingsSchema.parse :143, agencySettings.update :148",
+     "settings-console.tsx:117-132 — toast.error / toast.success + router.refresh()",
+     "src/lib/alerts.ts:111-129 — sendAgencyAlert lee alertWebhookUrl y toggles (consumidor de lo guardado)",
+     "sale del lote: settings.actions.ts:161 (osTelegramBotToken) -> src/lib/notifications/telegram.ts:41 (resolveTelegramCredentials, config-first con fallback a env)"
+    ]
+   },
+   {
+    "nombre": "Configuración: cambiar el precio de un módulo premium",
+    "pasos": [
+     "settings-console.tsx:404-407 — botón Guardar de la fila → saveModulePricing :136-141 (Number(input), '' → 0)",
+     "settings.actions.ts:175-191 — requireSuperAdmin :180, UpdateModulePricingSchema.parse :181, premiumModule.findUnique por slug :185",
+     "settings.actions.ts:193-199 — premiumModule.update priceMonthlyUsd + revalidatePath('/dashboard/services')",
+     "sale del lote: desemboca en el flujo D6 «Catálogo de módulos premium: código -> sitio público / DB -> portal y gates»"
+    ]
+   },
+   {
+    "nombre": "Tickets: bandeja, detalle, respuesta y cambio de estado",
+    "pasos": [
+     "src/app/(protected)/admin/tickets/page.tsx:6 — listTickets()",
+     "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts:51-94 — requireSuperAdmin :52, ListTicketsSchema :53, findMany sin take :59",
+     "src/app/(protected)/admin/tickets/_components/ticket-list.tsx:86-113 — filtro por updatedAt (default '1m' de ticket-date-filter.tsx:88,:123) y tab de estado",
+     "ticket-list.tsx:166-167 — Link a /admin/tickets/[id]",
+     "src/app/(protected)/admin/tickets/[ticketId]/page.tsx:13-18 — getTicketById (ticket.actions.ts:133-184); cualquier fallo → notFound()",
+     "ticket-chat.tsx:99-115 — handleStatusChange → updateTicketStatusAction (sale del lote: src/lib/tickets/actions.ts)",
+     "ticket-reply-form.tsx:53-67 — replyToTicketAction({ ticketId, content }) + router.refresh()",
+     "sale del lote: src/lib/tickets/actions.ts → flujo D2 «Responder ticket (cliente y admin)»"
+    ]
+   },
+   {
+    "nombre": "Solicitud de eliminación de cuenta vista desde un ticket",
+    "pasos": [
+     "ticket-chat.tsx:118-119 — isDeletionRequest = ticket.title === 'Solicitud de eliminación de cuenta'",
+     "ticket-chat.tsx:224-247 — banner '¿Aprobar solicitud de eliminación?' + Link /admin/clients?delete=<organizationId>",
+     "sale del lote: src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:251 → flujo D6 «Eliminar cliente (hard-delete) y su cascada»"
+    ]
+   },
+   {
+    "nombre": "Referidos: confirmar conversión y mes bonificado",
+    "pasos": [
+     "src/app/(protected)/admin/referrals/page.tsx:9-29 — referral.findMany take 200 sin guard propio",
+     "referrals-admin-table.tsx:79-101 — botón según estado → run() :35-42 (ignora el ActionResult)",
+     "referrals.admin.actions.ts:13-26 — requireSuperAdmin :15, updateMany PENDING→CONVERTED :18-21",
+     "referrals.admin.actions.ts:36-49 — CONVERTED→REWARDED + rewardedAt :41-44",
+     "revalidatePath('/dashboard/referidos') :48 → flujo D2 «Referidos: código, link y atribución pública»"
+    ]
+   },
+   {
+    "nombre": "Equipo: workload por miembro",
+    "pasos": [
+     "src/app/(protected)/admin/team/page.tsx:19-36 — usuarios SUPER_ADMIN",
+     "team/page.tsx:43-102 — tareas asignadas (todas, incl. DONE) + groupBy de horas semana/mes en hora del servidor (:5-16)",
+     "team/page.tsx:127-170 — agrupado por proyecto y activeTasksCount",
+     "member-workload.tsx:215-266 → ProjectSection :152-213 → Link /admin/projects/[id]/tasks :202-207"
+    ]
+   },
+   {
+    "nombre": "Carga de horas en un proyecto",
+    "pasos": [
+     "sale del lote (origen): src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:8-11 importa createTimeEntry/deleteTimeEntry; manda date 'YYYY-MM-DD' (:162, :252)",
+     "time-entry.actions.ts:140-162 — userId de sesión; rechaza tareas de otro",
+     "time-entry.schemas.ts:33 — z.coerce.date() (medianoche UTC)",
+     "time-entry.actions.ts:164-186 — autoasigna tarea sin dueño y crea OsTimeEntry en $transaction",
+     "listado: src/app/(protected)/admin/projects/[projectId]/hours/page.tsx:58 → time-entry.actions.ts:270-302"
+    ]
+   },
+   {
+    "nombre": "Tareas de proyecto (crear, editar, borrar)",
+    "pasos": [
+     "sale del lote (origen): src/app/(protected)/admin/projects/_components/task-form.tsx:7-10 importa createTask/updateTask",
+     "task.actions.ts:155-191 — requireSuperAdmin, CreateTaskSchema, posición por aggregate en $transaction",
+     "sale del lote (origen): task-list.tsx:17-20 → task.actions.ts:197-225 (updateTask) / :231-257 (deleteTask)",
+     "task.actions.ts:89-99 — revalidateTaskPaths incl. /dashboard/project"
+    ]
+   },
+   {
+    "nombre": "Detector de alertas de bots disparado a mano",
+    "pasos": [
+     "src/app/(protected)/admin/settings/alerts/page.tsx:7-22 — auth inline + conteos de BotAlert",
+     "AlertSettingsClient.tsx:85-97 — fetch POST /api/admin/alerts/trigger-detector",
+     "src/app/api/admin/alerts/trigger-detector/route.ts:5-13 — rol SUPER_ADMIN → runAlertDetector()",
+     "sale del lote: route.ts:3 -> src/modules/chatbot/server/admin/detectBotIssues.ts → flujo D5 «Detector de incidencias de bots»"
+    ]
+   },
+   {
+    "nombre": "Envío manual de reportes semanales del chatbot",
+    "pasos": [
+     "src/app/(protected)/admin/settings/reports/page.tsx:7-28 — auth inline + historial REPORT.WEEKLY_SENT",
+     "ReportSettingsClient.tsx:30-42 — fetch POST /api/admin/reports/send-now (sin confirmación)",
+     "src/app/api/admin/reports/send-now/route.ts:5-13 — rol SUPER_ADMIN → sendWeeklyReports()",
+     "sale del lote: route.ts:3 -> src/modules/chatbot/server/reports/sendWeeklyReports.ts → flujo D5 «Reporte semanal del chatbot por email»"
+    ]
+   },
+   {
+    "nombre": "Reenviar credenciales a un usuario",
+    "pasos": [
+     "sale del lote (origen): src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx:18 — fetch POST",
+     "resend-credentials/route.ts:16-37 — rol SUPER_ADMIN + rate limit por admin",
+     "route.ts:39-58 — zod del userId + findUnique (sin filtro de rol destino, orgMemberships take:1 sin orderBy)",
+     "route.ts:60-73 — temp password + passwordResetRequired + sessionVersion++",
+     "route.ts:85-105 — Brevo y luego audit log",
+     "route.ts:109-113 — devuelve tempPassword si el envío falló",
+     "desemboca en el flujo D1 «Cambio forzado de contrasena (temporal)»"
+    ]
+   },
+   {
+    "nombre": "Reporte ejecutivo semanal enviado a mano para una org",
+    "pasos": [
+     "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:13-19 — requireSuperAdmin (403 siempre por el chequeo 'UNAUTHORIZED' :17)",
+     "route.ts:35-48 — rate limit por admin",
+     "route.ts:50-57 — OrganizationIdSchema y sendExecutiveWeeklyReportManual",
+     "route.ts:62-91 — audit log y respuesta",
+     "ya trazado: flujo D2 «Envío manual del reporte (admin)»"
+    ]
+   },
+   {
+    "nombre": "Contacto público y atribución de referido",
+    "pasos": [
+     "src/app/contact/page.tsx:71-75 — lee ?ref del querystring en un efecto",
+     "contact/page.tsx:119 — la sección con el formulario es hidden por debajo de lg",
+     "contact/page.tsx:148-149 — form action + input hidden referralCode → useActionState(submitContactForm) :66",
+     "sale del lote: src/lib/actions/contact.ts:100 → flujo D2 «Referidos: código, link y atribución pública»"
+    ]
+   },
+   {
+    "nombre": "Alertas de la agencia por webhook (inmediatas y periódicas)",
+    "pasos": [
+     "sale del lote (origen): src/lib/tickets/actions.ts:8, src/lib/actions/contact.ts:6, messages.ts:4, upsell.ts:4, referrals.service.ts:4 importan sendAgencyAlert",
+     "src/lib/alerts.ts:109-129 — lee AgencySettings y el toggle del tipo de evento",
+     "alerts.ts:131-146 — POST al webhook con timeout 8 s; fallos solo console.error",
+     "periódicas: src/app/api/cron/alerts/route.ts:2 → alerts.ts:195-296 (sin disparador en netlify.toml ni vercel.json)"
+    ]
+   },
+   {
+    "nombre": "Acciones masivas sobre clientes",
+    "pasos": [
+     "sale del lote (origen): src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:16 importa bulkExportLeads/bulkPauseBots",
+     "src/lib/bulk-actions.ts:8-26 — pausa bots de las orgs elegidas",
+     "bulk-actions.ts:28-39 — audit log por bot pausado",
+     "bulk-actions.ts:46-79 — export CSV de todos los leads de las orgs elegidas (sin auditoría, sin neutralizar fórmulas)"
+    ]
+   },
+   {
+    "nombre": "Audit log: lectura y escritura",
+    "pasos": [
+     "sale del lote (origen): src/app/(protected)/admin/audit-log/page.tsx:4 importa getAuditLogStats/listAuditLog",
+     "src/lib/audit-log-queries.ts:16-51 — paginación pageSize+1, filtros sin validar",
+     "audit-log-queries.ts:53-70 — estadísticas de 7 días",
+     "escritura: src/lib/audit-log.ts:17-42 — IP del primer X-Forwarded-For :20-21; error tragado en console.error :39-41"
+    ]
+   },
+   {
+    "nombre": "Ficha del cliente: tabs Chatbot, Proyectos y Bóveda",
+    "pasos": [
+     "sale del lote (origen): admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx:101 → src/components/admin/managers/ChatbotManager.tsx:35-157 (cuota en tokens :68-70)",
+     "sale del lote (origen): tabs/ProjectsTab.tsx:7 → ProjectManager.tsx:12-26 → src/actions/agency-actions.ts:14 (assertProjectBelongsToOrg :29)",
+     "sale del lote (origen): tabs/VaultTab.tsx:6 → VaultManager.tsx:19-34 → src/actions/agency-actions.ts:94 → flujo D2 «Bóveda del cliente»"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "En mobile /contact no tiene formulario: el link de referido /contact?ref= no puede atribuir desde un teléfono",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/contact/page.tsx",
+      "linea": 119,
+      "fragmento": "className=\"relative hidden h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#031319]/84 p-5 md:p-6 lg:flex\""
+     },
+     {
+      "ruta": "src/app/contact/page.tsx",
+      "linea": 148,
+      "fragmento": "<form action={action} className=\"grid grid-cols-2 gap-2\">\n  <input type=\"hidden\" name=\"referralCode\" value={referralCode} />"
+     },
+     {
+      "ruta": "src/app/contact/page.tsx",
+      "linea": 262,
+      "fragmento": "<div className=\"mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 lg:hidden\">"
+     }
+    ],
+    "impacto": "Debajo de 1024 px la sección que contiene el único formulario (y el campo oculto referralCode) está en display:none; en mobile solo quedan WhatsApp, llamada y email, que no llevan el código. La atribución ocurre solo en submitContactForm (src/lib/actions/contact.ts:68-69). Bloqueante para el primer cliente que comparta su link desde Referidos: los negocios que lo abran en el celular nunca quedan registrados y el mes bonificado no se gana. Además la página bloquea el scroll (page.tsx:77-94) y en desktops de poca altura el bloque del formulario puede recortarse (PROBABLE, caso manual).",
+    "propuesta": "Mostrar el formulario también en mobile (o un CTA que lo despliegue) o propagar ?ref= al prefill de WhatsApp/email con otro camino de atribución; revisar el bloqueo de scroll en alturas bajas.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6.vis-contacto.formulario",
+     "h6.vis-contacto.captura-referido",
+     "h2.cli-referidos",
+     "modelo.Referral",
+     "modelo.ContactSubmission"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "Flujo D2 «Referidos: código, link y atribución pública»; LEG-01"
+   },
+   {
+    "titulo": "La bandeja de tickets del admin arranca filtrada al último mes por updatedAt: un ticket abierto sin actividad reciente desaparece de la vista y de los contadores",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx",
+      "linea": 88,
+      "fragmento": "const [preset, setPreset] = useState<Preset>('1m')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx",
+      "linea": 123,
+      "fragmento": "onChange({ fromMs: presetCutoff(nowMs, preset), toMs: nowMs })"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/tickets/_components/ticket-list.tsx",
+      "linea": 91,
+      "fragmento": "return tickets.filter((ticket) => {\n  const updatedMs = new Date(ticket.updatedAt).getTime()"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/tickets/_components/ticket-list.tsx",
+      "linea": 151,
+      "fragmento": "title=\"No hay tickets en esta bandeja\""
+     }
+    ],
+    "impacto": "Un ticket OPEN creado hace más de 30 días no aparece en 'Abiertos' ni en el contador al entrar a /admin/tickets, y como responder no toca updatedAt (BUG-056) tampoco vuelve aunque el cliente siga escribiendo; el estado vacío afirma que no hay tickets. Para el primer cliente real: su pedido queda sin respuesta sin que nadie lo vea.",
+    "propuesta": "Default 'Todos' o aplicar el periodo solo a RESUELTOS (OPEN/IN_PROGRESS siempre visibles); avisar en el estado vacío cuántos quedan fuera del periodo; arreglar BUG-056.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-tickets",
+     "h4.adm-tickets.bandeja",
+     "modelo.Ticket"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "BUG-056"
+   },
+   {
+    "titulo": "La ficha del cliente mide la cuota del bot en tokens contra monthlyQuota×1000, pero monthlyQuota es el cupo de conversaciones",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/admin/managers/ChatbotManager.tsx",
+      "linea": 69,
+      "fragmento": "const maxTokens = botConfig.monthlyQuota * 1000"
+     },
+     {
+      "ruta": "src/components/admin/managers/ChatbotManager.tsx",
+      "linea": 70,
+      "fragmento": "const usagePercentage = Math.min((currentQuota.tokensOut / maxTokens) * 100, 100)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/quota/checker.ts",
+      "linea": 44,
+      "fragmento": "withinQuota: conversationsUsed < monthlyQuota,"
+     }
+    ],
+    "impacto": "El admin ve 'Límite: 1.000.000' tokens y una barra casi vacía mientras el bot puede estar al 100 % de sus conversaciones y respondiendo degradado; no anticipa el QUOTA_EXHAUSTED ni ofrece el upgrade. Con monthlyQuota = 0 la barra calcula 0/0 y el ancho queda en NaN %.",
+    "propuesta": "Mostrar conversationsCount / monthlyQuota (la métrica de checker.ts) y, si interesa, los tokens como dato aparte sin límite inventado; proteger la división por cero.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h4.adm-clientes.resumen-chatbot",
+     "lib.chatbot.quota",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-057, BUG-085"
+   },
+   {
+    "titulo": "Guardar un precio de módulo con el campo vacío lo publica a USD 0 en el portal de clientes, sin confirmación",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+      "linea": 140,
+      "fragmento": "const nextPrice = Number(pricingDrafts[moduleKey] ?? '')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
+      "linea": 39,
+      "fragmento": "price: z.coerce.number().min(0, 'Ingresa un precio valido.'),"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+      "linea": 193,
+      "fragmento": "await prisma.premiumModule.update({\n  where: { id: moduleRow.id },\n  data: { priceMonthlyUsd: parsed.price },"
+     }
+    ],
+    "impacto": "Number('') es 0 y el schema acepta 0: un clic en 'Guardar' con el input borrado deja el módulo a USD 0 en /dashboard/services (revalidatePath :199) y el toast dice 'Precio actualizado'. El primer cliente ve un módulo gratis y lo pide a ese precio.",
+    "propuesta": "Rechazar el vacío en cliente y servidor (string no vacío antes del coerce, o .positive() si 0 no es válido), pedir confirmación del cambio de precio y auditarlo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-config.precios-modulos",
+     "modelo.PremiumModule",
+     "h2.cli-servicios"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "BUG-017"
+   },
+   {
+    "titulo": "Cambios sensibles del admin sin registro de auditoría: webhook de alertas, token de Telegram, precios, estados de referidos y export masivo de leads",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+      "linea": 148,
+      "fragmento": "await prisma.agencySettings.update({"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts",
+      "linea": 41,
+      "fragmento": "const result = await prisma.referral.updateMany({\n  where: { id, status: 'CONVERTED' },\n  data: { status: 'REWARDED', rewardedAt: new Date() },"
+     },
+     {
+      "ruta": "src/lib/bulk-actions.ts",
+      "linea": 50,
+      "fragmento": "const leads = await prisma.chatbotLead.findMany({"
+     },
+     {
+      "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+      "linea": 93,
+      "fragmento": "await logAdminAction({"
+     }
+    ],
+    "impacto": "Una cuenta SUPER_ADMIN mal usada o comprometida puede redirigir el webhook de alertas (lleva nombres de clientes y detalle de tickets) a un servidor propio, cambiar el token de Telegram, bajar precios, marcar referidos como bonificados o exportar todos los leads de todos los clientes sin rastro en /admin/audit-log (git grep de logAdminAction en settings, referrals y team: 0 resultados). Bloqueante para el primer cliente en trazabilidad de sus datos personales.",
+    "propuesta": "Llamar a logAdminAction (con computeDiff, sin valores de secretos) en updateSettings, updateModulePricing, markReferral*Action y bulkExportLeads (cantidad de filas y orgs), con actionType dedicados si hace falta migración.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-config",
+     "h4.adm-referidos.gestion-estados",
+     "h4.adm-clientes.acciones-masivas",
+     "h4.adm-audit",
+     "lib.audit-log",
+     "modelo.AdminAuditLog",
+     "modelo.AgencySettings"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-030, SEC-040, SEC-054, DEU-021"
+   },
+   {
+    "titulo": "Las horas cargadas se guardan a medianoche UTC del día elegido y se muestran un día antes en Argentina",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/team/_actions/time-entry.schemas.ts",
+      "linea": 33,
+      "fragmento": "const dateSchema = z.preprocess(emptyValueToUndefined, z.coerce.date())"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+      "linea": 178,
+      "fragmento": "date: parsed.date,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+      "linea": 68,
+      "fragmento": "}).format(new Date(value))"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+      "linea": 72,
+      "fragmento": "return new Date().toISOString().slice(0, 10)"
+     }
+    ],
+    "impacto": "El <input type=date> manda 'YYYY-MM-DD', z.coerce.date lo toma como 00:00 UTC y formatDate (sin timeZone) lo pinta en hora local: 1 h cargada el 15/10 figura el 14/10. El valor por defecto es la fecha UTC (después de las 21 h propone mañana) y los totales de /admin/team cortan semana y mes en hora del servidor (team/page.tsx:5-16). Las horas facturables no coinciden con lo cargado.",
+    "propuesta": "Parsear como día civil de Argentina con el helper de fechas existente, formatear con timeZone fijo y calcular inicio de semana/mes en hora AR.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.carga-horas",
+     "h4.adm-equipo.workload",
+     "modelo.OsTimeEntry"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-608"
+   },
+   {
+    "titulo": "'Enviar reportes ahora' reenvía el reporte semanal a todos los clientes en cada clic: sin confirmación, sin deduplicación por semana y sin rate limit",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/settings/reports/ReportSettingsClient.tsx",
+      "linea": 34,
+      "fragmento": "const res = await fetch('/api/admin/reports/send-now', { method: 'POST' })"
+     },
+     {
+      "ruta": "src/app/api/admin/reports/send-now/route.ts",
+      "linea": 12,
+      "fragmento": "const results = await sendWeeklyReports()"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/reports/sendWeeklyReports.ts",
+      "linea": 63,
+      "fragmento": "const result = await sendTransactionalEmail({"
+     }
+    ],
+    "impacto": "Cada clic (o el cron del lunes más un clic) manda otro email a cada cliente con bot activo: sendWeeklyReports no mira REPORT.WEEKLY_SENT antes de enviar. El envío es secuencial dentro del request y puede cortarse por timeout a mitad. A diferencia de send-executive-report (route.ts:35, applyAuthRateLimit), este endpoint no tiene límite. El primer cliente recibe el mismo reporte varias veces.",
+    "propuesta": "Confirmación 'Vas a mandar N emails'; deduplicar por bot y semana (evento o periodKey como el reporte ejecutivo); rate limit por admin; mover el envío a un job o paginarlo.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-config.reportes-semanales",
+     "int.brevo",
+     "int.cron.send-weekly-reports",
+     "lib.chatbot.reports",
+     "modelo.ChatbotEvent"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "BUG-026"
+   },
+   {
+    "titulo": "/admin/settings/alerts y /admin/settings/reports son páginas huérfanas y prometen crons que no corren",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/_components/admin-sidebar.tsx",
+      "linea": 96,
+      "fragmento": "{ href: '/admin/settings', label: 'Configuración', icon: Settings },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+      "linea": 124,
+      "fragmento": "Corre el detector manualmente sin esperar el cron de 15 minutos."
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+      "linea": 628,
+      "fragmento": "9:00 AM Argentina"
+     }
+    ],
+    "impacto": "Ningún link lleva a 'Sistema de alertas' ni a 'Reportes semanales' (git grep sin resultados fuera de su carpeta): son la única UI para correr el detector de bots, que no tiene cron (FAL-016), y el envío manual. El texto asegura 'cada 15 minutos' y una 'Hora del cron 9:00 AM' (os-follow-up solo figura en vercel.json, BUG-047). develOP confía en un monitoreo que no existe.",
+    "propuesta": "Enlazar ambas subpáginas desde /admin/settings (o fusionarlas con /admin/alerts) y reemplazar los horarios fijos por la última corrida real leída de la base, o quitarlos hasta que haya disparador.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas.detector-incidencias",
+     "h4.adm-config.reportes-semanales",
+     "h4.adm-config",
+     "int.cron.detect-bot-issues"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "FAL-016, BUG-047"
+   },
+   {
+    "titulo": "Las alertas periódicas de churn y vencimientos (/api/cron/alerts) no tienen disparador: los toggles 'Alertar churn' y 'Alertar vencimientos' no producen nada",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/alerts.ts",
+      "linea": 195,
+      "fragmento": "export async function runPeriodicAgencyAlerts(): Promise<{"
+     },
+     {
+      "ruta": "src/app/api/cron/alerts/route.ts",
+      "linea": 2,
+      "fragmento": "import { runPeriodicAgencyAlerts } from '@/lib/alerts'"
+     },
+     {
+      "ruta": "netlify.toml",
+      "linea": 25,
+      "fragmento": "[functions.\"generate-insights-cron\"]"
+     },
+     {
+      "ruta": "vercel.json",
+      "linea": 4,
+      "fragmento": "\"path\": \"/api/cron/os-follow-up\","
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+      "linea": 296,
+      "fragmento": "label=\"Alertar churn\""
+     }
+    ],
+    "impacto": "netlify.toml agenda solo generate-insights, send-weekly-reports y cleanup-old-events (:25, :28, :31) y vercel.json otras tres; /api/cron/alerts no figura en ningún registro ni en .github. Si el primer cliente deja de usar el portal o se le vence la suscripción, develOP no recibe el aviso aunque el toggle esté prendido. Aun con disparador, SUBSCRIPTION_EXPIRING no saldría (renewalDate sin escritor, FAL-006) y no hay deduplicación: un cron diario repetiría el aviso por org todos los días (alerts.ts:272-291).",
+    "propuesta": "Agendar /api/cron/alerts con una scheduled function de Netlify (como send-weekly-reports-cron) con deduplicación por org antes de activarlo; si no se va a usar, ocultar los dos toggles.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas",
+     "h4.adm-alertas.churn-y-vencimientos",
+     "h4.adm-config.datos-y-alertas",
+     "int.cron.alerts",
+     "lib.alerts"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "FAL-016, FAL-006, BUG-047"
+   },
+   {
+    "titulo": "Email, WhatsApp y sitio web de la agencia en Configuración no los lee nadie, aunque la pantalla dice que son 'la fuente de verdad del portal'",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+      "linea": 207,
+      "fragmento": "Esta configuracion sigue siendo la fuente de verdad del portal."
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+      "linea": 151,
+      "fragmento": "contactEmail: normalizeNullableString(parsed.contactEmail),\ncontactWhatsapp: normalizeNullableString(parsed.contactWhatsapp),"
+     },
+     {
+      "ruta": "src/app/contact/page.tsx",
+      "linea": 10,
+      "fragmento": "const EMAIL = 'hola@develop.com.ar';"
+     },
+     {
+      "ruta": "src/lib/agency-settings.ts",
+      "linea": 6,
+      "fragmento": "contactEmail: 'hello@develop.com.ar',"
+     }
+    ],
+    "impacto": "Si develOP cambia el WhatsApp o el email desde el panel, el sitio, /contact y los emails siguen con los valores del código (lib/whatsapp.ts y 'hola@'); el default guardado es 'hello@', distinto del publicado. git grep: ningún lector de contactEmail/contactWhatsapp/websiteUrl de AgencySettings fuera de Configuración. El equipo cree que actualizó un dato que el cliente no ve.",
+    "propuesta": "Elegir una fuente: leer AgencySettings en lib/whatsapp y en los textos de contacto (con caché) o quitar esos campos de la pantalla; unificar hola@/hello@.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-config.datos-y-alertas",
+     "modelo.AgencySettings",
+     "h6.vis-contacto.canales-directos",
+     "lib.agency-settings"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "CLEAN-H2a"
+   },
+   {
+    "titulo": "Reenviar credenciales resetea la contraseña de cualquier usuario, incluidos SUPER_ADMIN y SETTER, y si Brevo falla devuelve la temporal en la respuesta",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+      "linea": 46,
+      "fragmento": "const user = await prisma.user.findUnique({\n  where: { id: userId },"
+     },
+     {
+      "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+      "linea": 64,
+      "fragmento": "await prisma.user.update({\n  where: { id: userId },\n  data: {"
+     },
+     {
+      "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+      "linea": 112,
+      "fragmento": "tempPassword: emailResult.ok ? null : tempPassword,"
+     },
+     {
+      "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+      "linea": 49,
+      "fragmento": "orgMemberships: {\n  include: { organization: { select: { companyName: true } } },\n  take: 1,"
+     }
+    ],
+    "impacto": "Un SUPER_ADMIN (o su sesión robada, SEC-023) puede tomar la cuenta de otro admin o del setter de Franco pidiendo el reset por userId: si el envío falla recibe la temporal. El email es la bienvenida de cliente aunque el destino no lo sea, y para usuarios con varias orgs nombra una arbitraria (take: 1 sin orderBy, patrón D1).",
+    "propuesta": "Limitar el endpoint a usuarios CLIENT/ORG_MEMBER (o confirmación reforzada para SUPER_ADMIN/SETTER), plantilla según rol, orderBy determinista y aviso a la cuenta afectada.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.reenviar-credenciales",
+     "h1.auth-cambio",
+     "int.brevo",
+     "modelo.User"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "SEC-019, SEC-023, patrón D1-c1 (take:1 sin orderBy), patrón D1-c3 (mutación y luego Brevo)"
+   },
+   {
+    "titulo": "Acciones del admin cuyo fallo no se muestra: Referidos ignora el resultado y Crear entregable / Subir a Bóveda tragan el error en console.error",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/referrals/_components/referrals-admin-table.tsx",
+      "linea": 38,
+      "fragmento": "await action(id)"
+     },
+     {
+      "ruta": "src/components/admin/managers/ProjectManager.tsx",
+      "linea": 21,
+      "fragmento": "// Optionally show a toast here\n} catch (error) {\n  console.error(error)"
+     },
+     {
+      "ruta": "src/components/admin/managers/VaultManager.tsx",
+      "linea": 30,
+      "fragmento": "} catch (error) {\n  console.error(error)"
+     },
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 90,
+      "fragmento": "revalidatePath('/admin/clients')"
+     }
+    ],
+    "impacto": "Si la action falla (sesión vencida, proyecto de otra org, URL inválida) el admin no ve nada; 'Crear y Notificar al Cliente' tampoco confirma el éxito. revalidatePath('/admin/clients') no es la ruta en la que se está (/admin/clients/<slug>?tab=…), así que la lista puede no refrescarse hasta recargar (PROBABLE).",
+    "propuesta": "Mostrar result.error o el error capturado (toast + role=alert), confirmar el éxito y revalidar la ruta de detalle o hacer router.refresh() tras éxito.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-referidos.gestion-estados",
+     "h4.adm-clientes.crear-entregable",
+     "h4.adm-clientes.boveda-carga"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "No hay gestión del equipo interno: ninguna pantalla ni action viva da de alta, baja o cambia el rol de un SUPER_ADMIN, y la consola nueva perdió invitar miembro y probar el webhook",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/team/page.tsx",
+      "linea": 19,
+      "fragmento": "const users = await prisma.user.findMany({\n  where: {\n    role: Role.SUPER_ADMIN,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+      "linea": 521,
+      "fragmento": "Usuarios con rol SUPER_ADMIN habilitados para operar la OS."
+     },
+     {
+      "ruta": "src/lib/actions/settings.ts",
+      "linea": 148,
+      "fragmento": "export async function inviteTeamMemberAction(input: {"
+     },
+     {
+      "ruta": "src/lib/actions/settings.ts",
+      "linea": 309,
+      "fragmento": "export async function testWebhookAction(input?: {"
+     }
+    ],
+    "impacto": "Sumar un colaborador o sacar a uno que se va exige tocar la base a mano (y su JWT sigue vivo, SEC-023). Las funciones del admin clásico (invitar, probar webhook, probar n8n, verificar permisos de Google) siguen en lib/actions/settings.ts, sin importadores. Mide la hipótesis de Valentino: al admin le faltan módulos más que pantallas.",
+    "propuesta": "Módulo Equipo con invitar (reusando inviteTeamMemberAction con token hasheado), desactivar y cambiar rol, todo auditado; botón 'Probar webhook' en Configuración; después podar lib/actions/settings.ts.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-equipo",
+     "h4.adm-equipo.alta-baja-miembros",
+     "h4.adm-config",
+     "modelo.User"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-023; patrón D1-c1 (módulos 'use server' sin importadores)"
+   },
+   {
+    "titulo": "Formulario público de /contact: labels sin asociar a sus campos y error sin role=alert",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/contact/page.tsx",
+      "linea": 151,
+      "fragmento": "<label className=\"mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60\">Nombre *</label>\n<input\n  name=\"name\""
+     },
+     {
+      "ruta": "src/app/contact/page.tsx",
+      "linea": 213,
+      "fragmento": "<p className=\"col-span-2 text-xs text-rose-300\">{state.error}</p>"
+     }
+    ],
+    "impacto": "Ninguno de los seis <label> tiene htmlFor ni envuelve su campo: un lector de pantalla anuncia 'campo de edición' sin nombre; el error de envío no se anuncia. Falla WCAG 1.3.1 y 4.1.2 en el formulario de captación pública.",
+    "propuesta": "id + htmlFor (o label envolvente) en cada campo, aria-invalid/aria-describedby y role=alert en el mensaje de error.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6.vis-contacto.formulario"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "A11Y-02 (auditoría maestra); patrón D1-c1 (errores sin role=alert)"
+   },
+   {
+    "titulo": "Errores internos devueltos al admin: String(error) en trigger-detector y send-now, y error.message de Prisma en las actions de tareas, horas, tickets y configuración",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/admin/alerts/trigger-detector/route.ts",
+      "linea": 15,
+      "fragmento": "return NextResponse.json({ ok: false, error: String(error) }, { status: 500 })"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+      "linea": 193,
+      "fragmento": "return fail(error instanceof Error ? error.message : 'Failed to create task')"
+     },
+     {
+      "ruta": "src/lib/action-utils.ts",
+      "linea": 31,
+      "fragmento": "if (error instanceof Error) {\n  return error.message"
+     }
+    ],
+    "impacto": "Un fallo de base muestra al operador el texto de Prisma (modelo, campos, a veces la invocación) en inglés; incumple 'Never expose internal error messages'. Ninguno de esos catch reporta a Sentry (git grep sin captureException en el lote; onRequestError solo ve errores no capturados). El leak de ZodError de updateSettings sí quedó resuelto (action-utils.ts:28-29).",
+    "propuesta": "Decisión para Valentino (action-utils.ts es FROZEN-inferido): que toErrorMessage devuelva el fallback salvo errores de negocio tipados. En las rutas (zona libre): mensaje genérico + Sentry.captureException; en task/time-entry/ticket.actions, usar el helper compartido.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "h4.adm-alertas",
+     "h4.adm-config",
+     "h4.adm-proyectos.tareas",
+     "h4.adm-tickets",
+     "lib.actions",
+     "int.sentry"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D3-A4; patrón D1-c1 (mensajes internos al cliente)"
+   },
+   {
+    "titulo": "Contrato del guard SUPER_ADMIN roto en el lote: send-executive-report espera 'UNAUTHORIZED' y siempre responde 403; las páginas muestran 'Unauthorized' o un 404 en vez de ir a /login",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts",
+      "linea": 17,
+      "fragmento": "const status = message.startsWith('UNAUTHORIZED') ? 401 : 403"
+     },
+     {
+      "ruta": "src/lib/auth-guards.ts",
+      "linea": 7,
+      "fragmento": "throw new Error('Unauthorized')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/tickets/[ticketId]/page.tsx",
+      "linea": 16,
+      "fragmento": "if (!ticketResult.success) {\n  notFound()"
+     },
+     {
+      "ruta": "src/lib/audit-log-queries.ts",
+      "linea": 5,
+      "fragmento": "import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'"
+     }
+    ],
+    "impacto": "Sin sesión el endpoint responde 403 y el botón no puede decir 'tu sesión venció'; en /admin/settings y /admin/tickets una sesión vencida pinta 'Unauthorized' en una caja roja (settings/page.tsx:31-33, tickets/page.tsx:28-31) y el detalle de ticket da 404 también ante un error de base. Conviven tres guards: auth-guards, el del módulo chatbot (audit-log-queries.ts:5, bulk-actions.ts:6) y chequeos inline en 5 archivos.",
+    "propuesta": "En la ruta, comparar contra el mensaje real o un código tipado (zona libre). Decisión para Valentino: un único requireSuperAdmin con error tipado en auth-guards (FROZEN-inferido) y un manejador común (redirect('/login') en páginas, 401/403 en rutas); distinguir not-found de error en getTicketById.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.auth",
+     "h4.adm-shell",
+     "h4.adm-tickets.conversacion-y-respuesta",
+     "h4.adm-config",
+     "h4.adm-clientes.reporte-ejecutivo-manual"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Patrones D1-c1 (requireSuperAdmin reimplementado) y D1-c3 (guards que lanzan Error genérico)"
+   },
+   {
+    "titulo": "Controles del admin sin nombre accesible: switches de alertas, input de precio y textarea de respuesta de tickets; errores sin role=alert",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+      "linea": 730,
+      "fragmento": "<button\n  type=\"button\"\n  role=\"switch\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+      "linea": 386,
+      "fragmento": "<input\n  type=\"number\"\n  min=\"0\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/tickets/_components/ticket-reply-form.tsx",
+      "linea": 84,
+      "fragmento": "<textarea\n  ref={textareaRef}\n  value={content}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx",
+      "linea": 175,
+      "fragmento": "<div className=\"mt-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200\">"
+     }
+    ],
+    "impacto": "Los cinco switches de alertas se anuncian como 'interruptor' sin decir cuál; el precio de cada módulo no tiene label; la respuesta al cliente solo tiene placeholder. ProjectManager.tsx:31-32 y VaultManager.tsx:40-41 usan <label> sin htmlFor. Los errores de ticket-chat, ticket-reply-form (:75-79) y las páginas no se anuncian.",
+    "propuesta": "aria-labelledby al título de cada ToggleRow, aria-label con el nombre del módulo en el precio, label sr-only en el textarea y role=alert en los bloques de error.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-config.datos-y-alertas",
+     "h4.adm-config.precios-modulos",
+     "h4.adm-tickets.conversacion-y-respuesta",
+     "h4.adm-clientes.crear-entregable"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Patrón D1-c1 (errores sin role=alert)"
+   },
+   {
+    "titulo": "El formulario de la Bóveda invita a escribir contraseñas en la descripción, que se guarda en claro",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/admin/managers/VaultManager.tsx",
+      "linea": 85,
+      "fragmento": "placeholder=\"Contraseña o instrucciones...\""
+     },
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 109,
+      "fragmento": "description: data.description"
+     }
+    ],
+    "impacto": "Accesos de hosting o redes del cliente terminan en texto plano en la base compartida (Neon dev con otro desarrollador) y visibles en el portal; agrava SEC-036.",
+    "propuesta": "Cambiar el placeholder y guardar secretos como asset ACCESS con la credencial cifrada (secret-box), nunca en description.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.boveda-carga",
+     "h2.cli-cuenta",
+     "modelo.ClientAsset"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-036"
+   },
+   {
+    "titulo": "Editar y borrar horas no valida a quién pertenecen: un SUPER_ADMIN borra horas ajenas sin rastro (updateTimeEntry además no tiene llamadores)",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+      "linea": 203,
+      "fragmento": "const existingEntry = await prisma.osTimeEntry.findUnique({\n  where: { id: entryId },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+      "linea": 250,
+      "fragmento": "const entry = await prisma.osTimeEntry.delete({"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+      "linea": 160,
+      "fragmento": "if (task.assignedToId !== null && task.assignedToId !== userId) {"
+     }
+    ],
+    "impacto": "La regla 'nadie registra horas en nombre de otro' (PLAN-604) se cumple al crear pero no al editar ni al borrar: desde el panel de horas (time-entry-panel.tsx:189) un admin puede borrar las de un compañero y no queda audit log. Riesgo bajo entre socios, pero el reporte de horas pierde valor como registro.",
+    "propuesta": "Exigir entry.userId === sesión en update/delete (o auditar si se permite) y podar updateTimeEntry si no se usa.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.carga-horas",
+     "modelo.OsTimeEntry"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-605"
+   },
+   {
+    "titulo": "El webhook de alertas acepta cualquier URL (http, hosts internos) y el servidor le hace POST sin restricción",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
+      "linea": 25,
+      "fragmento": "alertWebhookUrl: z.preprocess(emptyStringToNull, z.string().url().nullable()),"
+     },
+     {
+      "ruta": "src/lib/alerts.ts",
+      "linea": 131,
+      "fragmento": "const response = await fetch(webhookUrl, {"
+     }
+    ],
+    "impacto": "Con una cuenta SUPER_ADMIN (precondición fuerte) el server de develOP manda POSTs a direcciones internas o a un servidor propio con nombres de clientes y detalle de tickets, y el cambio no se audita.",
+    "propuesta": "Exigir https y una allowlist de hosts (Slack, Discord, n8n propio) o reutilizar validateWebhookUrl del módulo CRM.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-config.datos-y-alertas",
+     "lib.alerts"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-054"
+   },
+   {
+    "titulo": "Si el webhook de alertas falla, solo queda un console.error: develOP pierde los avisos de tickets urgentes, leads y mensajes sin enterarse",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/alerts.ts",
+      "linea": 139,
+      "fragmento": "if (!response.ok) {\n  console.error(\n    `[alerts] Webhook respondió ${response.status} ${response.statusText} para ${event.type}.`"
+     },
+     {
+      "ruta": "src/lib/alerts.ts",
+      "linea": 144,
+      "fragmento": "} catch (error) {\n  console.error(`[alerts] No se pudo enviar la alerta ${event.type}:`, error)"
+     }
+    ],
+    "impacto": "Un webhook vencido o mal escrito apaga todas las alertas de la agencia en silencio: no hay Sentry, no hay captureConsoleIntegration y Configuración no muestra el último envío.",
+    "propuesta": "Sentry.captureException/Message con el tipo de evento y mostrar en Configuración el estado del último envío.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas.webhook-agencia",
+     "lib.alerts",
+     "int.sentry"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Patrón D1-c1 (fallos solo con console.error); FAL-014"
+   },
+   {
+    "titulo": "Catálogos y tipos copiados a mano: PremiumFeatureKey castea slugs que no le pertenecen, BotAlertType local 'pendiente de prisma generate' y ASSET_TYPES espejado",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+      "linea": 114,
+      "fragmento": "moduleKey: mod.slug as PremiumFeatureKey,"
+     },
+     {
+      "ruta": "src/lib/premium-features.ts",
+      "linea": 51,
+      "fragmento": "key: 'motor-resenias',"
+     },
+     {
+      "ruta": "src/lib/data/premium-modules.ts",
+      "linea": 24,
+      "fragmento": "slug: 'motor-resenas',"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+      "linea": 7,
+      "fragmento": "// Include new enum values pending prisma generate\ntype BotAlertType ="
+     }
+    ],
+    "impacto": "El tipo de la consola dice que las claves son las 11 del catálogo legacy pero en runtime llegan los slugs de PremiumModule (otra lista): el compilador no protege nada. El catálogo legacy solo lo usa lib/actions/settings.ts (sin importadores). El enum BotAlertType ya tiene los 9 valores en schema.prisma:139-149, así que la copia local es innecesaria.",
+    "propuesta": "Tipar moduleKey como string (o el tipo del catálogo de premium-modules), importar BotAlertType de @prisma/client y podar premium-features.ts junto con lib/actions/settings.ts.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-config.precios-modulos",
+     "lib.premium-features",
+     "h4.adm-alertas.detector-incidencias",
+     "modelo.PremiumModule"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-591, PLAN-559, BUG-017, DB-P0-2"
+   },
+   {
+    "titulo": "IDs internos de Organization en URLs del admin (link de alertas, deep-link de baja, fallback de ChatbotManager) contra la regla de usar slugs",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/alerts.ts",
+      "linea": 278,
+      "fragmento": "link: `/admin/clients/${organization.id}`,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx",
+      "linea": 242,
+      "fragmento": "href={`/admin/clients?delete=${ticket.organizationId}`}"
+     },
+     {
+      "ruta": "src/components/admin/managers/ChatbotManager.tsx",
+      "linea": 45,
+      "fragmento": "const clientPath = organizationSlug ?? organizationId"
+     }
+    ],
+    "impacto": "Los links que salen al webhook (canal externo) y dentro del admin llevan el cuid de la org. La ficha los acepta porque busca por id o slug (admin/clients/[clientId]/page.tsx:40-42), pero el redirect de /chatbot resuelve solo por slug y daría 404. Incumple la regla de CLAUDE.md y vuelve inconsistente el identificador.",
+    "propuesta": "Usar el slug en todos los links (alerts.ts con slug, ?delete=<slug>) y resolver un único identificador en la ficha y en el redirect.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h4.adm-alertas.webhook-agencia",
+     "h4.adm-tickets.solicitud-baja"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D3-A1"
+   },
+   {
+    "titulo": "Docs desactualizados sobre el admin: la lección de CLAUDE.md sobre ticket-chat ya no aplica y roadmap-pendientes propone una vista en una ruta que solo redirige",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "raíz:CLAUDE.md",
+      "linea": 189,
+      "fragmento": "`ticket-chat.tsx:110` y `TicketStatusSelector.tsx:31` NO fueron migrados al `<Select>` compartido."
+     },
+     {
+      "ruta": "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx",
+      "linea": 160,
+      "fragmento": "<Select"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 28,
+      "fragmento": "const org = await prisma.organization.findUnique({\n  where: { slug: orgSlug },"
+     },
+     {
+      "ruta": "docs/roadmap-pendientes.md",
+      "linea": 26,
+      "fragmento": "En `/admin/clients/[clientId]/chatbot/` o equivalente, una sección read-only que muestre la `CrmIntegration`"
+     }
+    ],
+    "impacto": "Un agente que siga CLAUDE.md evita migrar algo que ya está migrado (el Loader2 ahora va fuera del Select, ticket-chat.tsx:153-159). Quien implemente la vista de CRM la pondría en una ruta deprecada (STATUS.md:216) que hoy es un redirect a /admin/chatbots/<botId>?tab=overview y que solo resuelve slug; la vista de CRM ya existe en /admin/chatbots (IntegrationsTab, flujo D5).",
+    "propuesta": "Actualizar la lección (ticket-chat migrado, queda TicketStatusSelector), marcar el ítem de roadmap-pendientes como resuelto en /admin/chatbots y, si se mantiene el redirect, aceptar id o slug.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-tickets.cambio-estado",
+     "h4.adm-clientes",
+     "h3.adm-chatbots"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D3-A3"
+   },
+   {
+    "titulo": "Listados del admin sin paginación ni tope: tickets, workload del equipo, export masivo de leads y el barrido de alertas periódicas",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
+      "linea": 59,
+      "fragmento": "const tickets = await prisma.ticket.findMany({"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/team/page.tsx",
+      "linea": 44,
+      "fragmento": "prisma.task.findMany({\n  where: {\n    assignedToId: {"
+     },
+     {
+      "ruta": "src/lib/bulk-actions.ts",
+      "linea": 50,
+      "fragmento": "const leads = await prisma.chatbotLead.findMany({"
+     },
+     {
+      "ruta": "src/lib/alerts.ts",
+      "linea": 205,
+      "fragmento": "prisma.organization.findMany({"
+     }
+    ],
+    "impacto": "Con datos de prueba no se nota; con el primer año de clientes /admin/tickets trae todos los tickets de todas las orgs para filtrar en memoria, /admin/team trae todas las tareas históricas (incluidas DONE, que además se listan) con todas sus horas y el export arma el CSV completo en memoria de la action.",
+    "propuesta": "Paginación por cursor y filtros en servidor en tickets; workload solo de tareas no DONE o en ventana; export en streaming con tope.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-tickets.bandeja",
+     "h4.adm-equipo.workload",
+     "h4.adm-clientes.acciones-masivas"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-658"
+   },
+   {
+    "titulo": "Validación laxa en entradas del admin: actionType del audit log casteado sin validar, pageSize sin tope, orgIds sin schema y tareas asignables a cualquier usuario",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/audit-log-queries.ts",
+      "linea": 35,
+      "fragmento": "...(filter?.actionType && {\n  actionType: filter.actionType as AuditActionType,"
+     },
+     {
+      "ruta": "src/lib/audit-log-queries.ts",
+      "linea": 19,
+      "fragmento": "pageSize = 10,"
+     },
+     {
+      "ruta": "src/lib/bulk-actions.ts",
+      "linea": 8,
+      "fragmento": "export async function bulkPauseBots(orgIds: string[]) {"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/team/_actions/task.schemas.ts",
+      "linea": 50,
+      "fragmento": "const optionalCreateAssignedToSchema = z.preprocess(\n  emptyStringToUndefined,\n  UserIdSchema.optional()"
+     }
+    ],
+    "impacto": "Un actionType inválido llega a Prisma y rompe la página del audit log (sin try/catch → error.tsx); pageSize lo decide quien llama; una tarea puede quedar asignada a un CLIENT o SETTER y desaparecer del workload (que solo lista SUPER_ADMIN). Títulos, descripciones y notas sin .max().",
+    "propuesta": "Zod en listAuditLog (enum de AuditActionType, pageSize ≤ 100) y en bulk-actions; validar que assignedToId sea SUPER_ADMIN; .max() en textos.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-audit.listado",
+     "h4.adm-clientes.acciones-masivas",
+     "h4.adm-proyectos.tareas"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Patrón D1-c3 (texto libre sin .max())"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h4.adm-config",
+    "id": "h4.adm-config.datos-y-alertas",
+    "nombre": "Datos de la agencia, webhook y toggles de alertas",
+    "descripcion": "Editar email, WhatsApp, sitio, URL del webhook y los cinco toggles de alertas de la agencia.",
+    "archivos": [
+     "src/app/(protected)/admin/settings/page.tsx",
+     "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+     "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
+     "src/lib/alerts.ts",
+     "src/lib/agency-settings.ts"
+    ],
+    "entradas": [
+     "getSettings",
+     "updateSettings"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz: settings/page.tsx:6-9 → settings.actions.ts:87-121 → settings-console.tsx:100-115 → settings.actions.ts:141-169 → consumido por alerts.ts:111-129. Pero email/WhatsApp/sitio no los lee nadie y los toggles de churn/vencimientos no tienen cron.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin settings.actions.ts:88, :142; configuración global de develOP"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ensureAgencySettingsRecord crea el registro si falta (settings.actions.ts:38-52); vacíos → null (:18-21)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "toast.error settings-console.tsx:117-119 y caja settings/page.tsx:31-33, pero el texto puede ser Error.message crudo (action-utils.ts:31-32) o un mensaje de Zod en inglés"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "settings/loading.tsx:3-9; SaveButton con spinner settings-console.tsx:698"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "UpdateSettingsSchema.parse settings.actions.ts:143"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid md:grid-cols-2 settings-console.tsx:217; flex-wrap :183"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "settings/error.tsx → SectionErrorBoundary.tsx:64 captureException; el catch de updateSettings (:170-172) no reporta"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "'fuente de verdad del portal' (settings-console.tsx:207) con campos sin lectores; toggles de churn/vencimientos sin disparador"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "No hay 'Probar webhook' (testWebhookAction quedó en lib/actions/settings.ts:309 sin importadores)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-config",
+    "id": "h4.adm-config.precios-modulos",
+    "nombre": "Precio mensual de los módulos premium",
+    "descripcion": "Cambiar el precio USD que ve el cliente en la vitrina de servicios.",
+    "archivos": [
+     "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+     "src/app/(protected)/admin/settings/_actions/settings.schemas.ts"
+    ],
+    "entradas": [
+     "updateModulePricing"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "settings-console.tsx:404-407 → :136-141 → settings.actions.ts:175-199 (update + revalidatePath('/dashboard/services')).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin settings.actions.ts:180"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "Sin rama si no hay módulos (pricingRows.map settings-console.tsx:347)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "toast.error :143-146; mensajes crudos posibles"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Loader2 por fila :410-411"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod :181 y existencia :185-191, pero acepta 0 desde un input vacío (:140, schemas :39)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-col sm:flex-row :381; input w-full sm:w-[150px] :398"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx con captureException; catch de la action sin Sentry (:202-204)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "type 'monthly' fijo (settings.actions.ts:118) y cast a PremiumFeatureKey (:114)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Sin confirmación ni auditoría; la home pública no refleja el precio (BUG-017)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-config",
+    "id": "h4.adm-config.telegram",
+    "nombre": "Credenciales de Telegram para alertas internas",
+    "descripcion": "Guardar token y chat ID del bot de Telegram (config-first con fallback a env).",
+    "archivos": [
+     "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "src/app/(protected)/admin/settings/_actions/settings.actions.ts"
+    ],
+    "entradas": [
+     "updateSettings"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "settings-console.tsx:583-615 → settings.actions.ts:146, :161-164 → sale a src/lib/notifications/telegram.ts:41-49.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin :142"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "'Sin configurar' / 'Todavia no hay token' settings-console.tsx:594, :597-599"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "toast.error :117-119"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "SaveButton :575-579"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "string libre sin formato (settings.schemas.ts:32-33)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "xl:grid-cols-[1fr_1fr_0.8fr] colapsa a 1 columna :582"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx sí; catch de la action no"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "'Hora del cron 9:00 AM Argentina' fijo (:626-632) de un cron que no corre en Netlify (BUG-047)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "No se puede borrar el token (:161-163) ni probar el envío; el token se guarda en claro (SEC-036)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-config",
+    "id": "h4.adm-config.meta-demos",
+    "nombre": "Objetivo semanal de demos",
+    "descripcion": "Meta comercial que usa el dashboard del admin.",
+    "archivos": [
+     "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "src/app/(protected)/admin/settings/_actions/settings.actions.ts"
+    ],
+    "entradas": [
+     "updateSettings"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "settings-console.tsx:451-467 → settings.actions.ts:160 (coerceWeeklyDemoTarget :23-36) → sale a admin/page.tsx:182-184.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin :142"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "Input vacío → Number('') = 0 (settings-console.tsx:112) y se guarda 0"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "toast.error :117-119"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "SaveButton :443-447"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "z.coerce.number().int().min(0) settings.schemas.ts:31"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid lg:grid-cols-2 :450"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx sí; catch no"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Intervalos de follow-up fijos 'Dia 2/4/7' (:501), coinciden con lib/follow-up.ts pero no se leen de ahí"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Se edita y guarda sin ayuda"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-config",
+    "id": "h4.adm-config.miembros-listado",
+    "nombre": "Lista de miembros del equipo en Configuración",
+    "descripcion": "Ver los usuarios SUPER_ADMIN.",
+    "archivos": [
+     "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+     "src/app/(protected)/admin/settings/_components/settings-console.tsx"
+    ],
+    "entradas": [
+     "listTeamMembers"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "settings/page.tsx:8 → settings.actions.ts:207-239 → settings-console.tsx:529-554. Solo lectura.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin :217"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "'No hay miembros internos cargados.' settings-console.tsx:550-553"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Aviso ámbar si falla settings/page.tsx:40-44"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "settings/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid md:grid-cols-[1fr_auto] :535"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx sí; catch no"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Datos reales de User"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "No se puede invitar ni dar de baja (ver h4.adm-equipo.alta-baja-miembros)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-config",
+    "id": "h4.adm-config.reportes-semanales",
+    "nombre": "Reportes semanales del chatbot: historial y envío manual",
+    "descripcion": "Ver los últimos envíos y disparar el reporte semanal a todos los clientes.",
+    "archivos": [
+     "src/app/(protected)/admin/settings/reports/page.tsx",
+     "src/app/(protected)/admin/settings/reports/ReportSettingsClient.tsx",
+     "src/app/(protected)/admin/settings/reports/loading.tsx",
+     "src/app/api/admin/reports/send-now/route.ts"
+    ],
+    "entradas": [
+     "ReportSettingsPage",
+     "POST /api/admin/reports/send-now"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "reports/page.tsx:7-28 → ReportSettingsClient.tsx:30-42 → send-now/route.ts:5-13 → sendWeeklyReports (flujo D5). Página huérfana.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "reports/page.tsx:7-10; send-now/route.ts:6-9"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "El historial se oculta si está vacío (ReportSettingsClient.tsx:131) sin mensaje; 'Último envío' muestra '—' (:59)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "'Error: …' con String(error) (:110-115; route.ts:15)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "reports/loading.tsx; 'Enviando...' :87"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-2 sm:grid-cols-3 :47"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch de la ruta sin captureException (route.ts:14-16)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Historial real de ChatbotEvent"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Sin link a la página; envío sin confirmación ni deduplicación"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-alertas",
+    "id": "h4.adm-alertas.detector-incidencias",
+    "nombre": "Detector de incidencias de bots disparado a mano",
+    "descripcion": "Ver estadísticas de BotAlert y correr el detector manualmente.",
+    "archivos": [
+     "src/app/(protected)/admin/settings/alerts/page.tsx",
+     "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+     "src/app/(protected)/admin/settings/alerts/loading.tsx",
+     "src/app/api/admin/alerts/trigger-detector/route.ts"
+    ],
+    "entradas": [
+     "AlertSettingsPage",
+     "POST /api/admin/alerts/trigger-detector"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "alerts/page.tsx:7-22 → AlertSettingsClient.tsx:85-97 → trigger-detector/route.ts:5-13 → runAlertDetector (flujo D5). Sin cron (FAL-016) y sin link.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "alerts/page.tsx:7-10; route.ts:6-9"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "Alertas recientes ocultas si no hay (AlertSettingsClient.tsx:196), sin mensaje"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "'Error: …' con String(error) (:154; route.ts:15)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "alerts/loading.tsx; 'Ejecutando...' :133"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "grid-cols-3 fijo con text-3xl (:102) a 390 px"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch de la ruta sin Sentry (route.ts:14-16)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Promete 'cada 15 minutos' (:124, :165) sin disparador; tipo BotAlertType local (:7-18)"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Página huérfana: solo por URL"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-alertas",
+    "id": "h4.adm-alertas.webhook-agencia",
+    "nombre": "Alertas inmediatas de la agencia por webhook",
+    "descripcion": "Aviso a Slack/webhook ante ticket urgente, lead, mensaje de cliente o upsell.",
+    "archivos": [
+     "src/lib/alerts.ts"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "Callers (tickets/actions.ts:8, contact.ts:6, messages.ts:4, upsell.ts:4, referrals.service.ts:4) → alerts.ts:109-129 → POST :131-137.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Lib interna sin 'use server'"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Sin webhook o toggle apagado → return (alerts.ts:123-129)"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Fallos solo console.error (:139-146)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Proceso de servidor"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "URL validada al guardar (settings.schemas.ts:25) sin restringir hosts"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "Sin UI"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captureException en alerts.ts"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Mensaje real (formatAlertMessage :59-78)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Sin botón de prueba ni estado del último envío"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-alertas",
+    "id": "h4.adm-alertas.churn-y-vencimientos",
+    "nombre": "Alertas periódicas de clientes inactivos y suscripciones por vencer",
+    "descripcion": "Barrido de orgs inactivas 30 días y renovaciones en 7 días.",
+    "archivos": [
+     "src/lib/alerts.ts"
+    ],
+    "entradas": [],
+    "madurez": "L1",
+    "madurez_evidencia": "Código en alerts.ts:195-296 y ruta api/cron/alerts/route.ts:2, sin disparador (netlify.toml:25-32, vercel.json:4-12); renewalDate sin escritor (FAL-006).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Cron interno"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Filtra orgs sin suscripción activa (:263-270)"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Fallos por evento solo en console.error (sendAgencyAlert :139-146)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin UI"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "Sin UI"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin Sentry"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Los toggles prometen un aviso que no corre"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Sin disparador ni deduplicación"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-equipo",
+    "id": "h4.adm-equipo.workload",
+    "nombre": "Workload por miembro",
+    "descripcion": "Tareas activas, horas de la semana y del mes y tareas agrupadas por proyecto por cada SUPER_ADMIN.",
+    "archivos": [
+     "src/app/(protected)/admin/team/page.tsx",
+     "src/app/(protected)/admin/team/_components/member-workload.tsx",
+     "src/app/(protected)/admin/team/loading.tsx",
+     "src/app/(protected)/admin/team/error.tsx"
+    ],
+    "entradas": [
+     "AgencyOsTeamPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "team/page.tsx:19-170 → member-workload.tsx:215-266.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Sin guard propio en team/page.tsx:19 (SEC-023)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "team/page.tsx:198-204; member-workload.tsx:257-262"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "team/error.tsx → SectionErrorBoundary"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "team/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Solo lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "md:grid-cols-3 member-workload.tsx:248; xl:flex-row :226"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "error.tsx → SectionErrorBoundary.tsx:64"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Semana y mes en hora del servidor (team/page.tsx:5-16); lista también tareas DONE"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Solo lectura"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-equipo",
+    "id": "h4.adm-equipo.alta-baja-miembros",
+    "nombre": "Alta, baja y rol de miembros del equipo",
+    "descripcion": "Invitar, desactivar o cambiar el rol de un SUPER_ADMIN.",
+    "archivos": [
+     "src/app/(protected)/admin/team/page.tsx",
+     "src/app/(protected)/admin/settings/_components/settings-console.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L0",
+    "madurez_evidencia": "Ninguna UI ni action viva escribe role SUPER_ADMIN (git grep); inviteTeamMemberAction vive en lib/actions/settings.ts:148 sin importadores.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "No existe"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No existe"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "No existe"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No existe"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "No existe"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "No existe"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "No existe"
+     },
+     "sin_mocks_todos": {
+      "cumple": "n/a",
+      "evidencia": "No existe"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Requiere tocar la base"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.tareas",
+    "nombre": "Tareas de un proyecto (crear, editar, borrar)",
+    "descripcion": "Server actions de tareas usadas por la pantalla de Proyectos.",
+    "archivos": [
+     "src/app/(protected)/admin/team/_actions/task.actions.ts",
+     "src/app/(protected)/admin/team/_actions/task.schemas.ts"
+    ],
+    "entradas": [
+     "createTask",
+     "updateTask",
+     "deleteTask",
+     "reorderTasks",
+     "listTasksByProject",
+     "listTasksByUser"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "task-form.tsx:7-10 → task.actions.ts:155-191; task-list.tsx:17-20 → :197-257; listado tasks/page.tsx:34 → :321-371.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin :157, :199, :233, :268, :325, :381"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Error.message crudo en inglés (:193, :227, :260)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod :158, :200, :234, :269"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch sin Sentry"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "CRUD completo"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.carga-horas",
+    "nombre": "Carga de horas por tarea",
+    "descripcion": "Registrar, listar y borrar horas propias por tarea.",
+    "archivos": [
+     "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+     "src/app/(protected)/admin/team/_actions/time-entry.schemas.ts"
+    ],
+    "entradas": [
+     "createTimeEntry",
+     "updateTimeEntry",
+     "deleteTimeEntry",
+     "listTimeEntriesByProject",
+     "listTimeEntriesByUser"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "time-entry-panel.tsx:8-11 → time-entry.actions.ts:136-189; hours/page.tsx:58 → :270-302.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Create valida pertenencia (:160-162); update/delete no (:195-268)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Mensajes en inglés y crudos (:153, :191)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod :141, :200, :248"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch sin Sentry"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Fecha mostrada un día antes (time-entry.schemas.ts:33)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Autoasigna tareas sin dueño (:164-170)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-tickets",
+    "id": "h4.adm-tickets.bandeja",
+    "nombre": "Bandeja de tickets con filtros",
+    "descripcion": "Listado de tickets de todas las orgs con tabs de estado y filtro de periodo.",
+    "archivos": [
+     "src/app/(protected)/admin/tickets/page.tsx",
+     "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
+     "src/app/(protected)/admin/tickets/_actions/ticket.schemas.ts",
+     "src/app/(protected)/admin/tickets/_components/ticket-list.tsx",
+     "src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx",
+     "src/app/(protected)/admin/tickets/loading.tsx",
+     "src/app/(protected)/admin/tickets/error.tsx"
+    ],
+    "entradas": [
+     "AgencyOsTicketsPage",
+     "listTickets"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "tickets/page.tsx:6 → ticket.actions.ts:51-94 → ticket-list.tsx:79-224.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin ticket.actions.ts:52"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "EmptyStateMuted ticket-list.tsx:148-153, pero con el default de 1 mes afirma que no hay tickets cuando sí hay"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Caja roja tickets/page.tsx:28-31 con mensaje crudo; error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "tickets/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "ListTicketsSchema :53-56"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap :118-119; lg:flex-row :170"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx sí; catch de listTickets no"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Datos reales"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Filtro por defecto oculta tickets viejos; sin paginación, asignación ni cambio de prioridad"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-tickets",
+    "id": "h4.adm-tickets.conversacion-y-respuesta",
+    "nombre": "Conversación del ticket y respuesta al cliente",
+    "descripcion": "Ver el hilo y responder con emoji, Enter y auto-scroll.",
+    "archivos": [
+     "src/app/(protected)/admin/tickets/[ticketId]/page.tsx",
+     "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx",
+     "src/app/(protected)/admin/tickets/_components/ticket-reply-form.tsx",
+     "src/app/(protected)/admin/tickets/_components/emoji-picker-button.tsx",
+     "src/app/(protected)/admin/tickets/_components/hover-scale.tsx"
+    ],
+    "entradas": [
+     "AgencyOsTicketDetailPage",
+     "getTicketById"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "tickets/[ticketId]/page.tsx:12-26 → ticket.actions.ts:133-184 → ticket-chat.tsx:189-221 → ticket-reply-form.tsx:53-67 → lib/tickets/actions (flujo D2 «Responder ticket (cliente y admin)»).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin ticket.actions.ts:134"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "'Todavía no hay mensajes' ticket-chat.tsx:213-216"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Error de envío visible (ticket-reply-form.tsx:75-79) sin role=alert; cualquier fallo de carga → 404"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Loader2 ticket-reply-form.tsx:107-108; tickets/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "GetTicketByIdSchema :135; la respuesta se valida en lib/tickets (D2)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Burbujas max-w-[85%] :198 y textarea flex-1 :99, pero sin break-words (:209)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx sí; catch no"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Responde sin ayuda"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-tickets",
+    "id": "h4.adm-tickets.cambio-estado",
+    "nombre": "Cambiar el estado del ticket",
+    "descripcion": "Select Abierto / En progreso / Resuelto con revert si falla.",
+    "archivos": [
+     "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "ticket-chat.tsx:160-170 → handleStatusChange :99-115 → updateTicketStatusAction (src/lib/tickets/actions.ts, fuera del lote).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Se valida en lib/tickets (fuera del lote)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No aplica"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Revert + mensaje :107-111, :174-178 (sin role=alert)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Loader2 + Select disabled :153-162"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Fuera del lote"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-col lg:flex-row :124"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx sí"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Directo"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-tickets",
+    "id": "h4.adm-tickets.solicitud-baja",
+    "nombre": "Aprobar solicitud de eliminación de cuenta desde el ticket",
+    "descripcion": "Banner que lleva al borrado definitivo con confirmación tipeada.",
+    "archivos": [
+     "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "ticket-chat.tsx:118-119, :224-247 → ClientsListClient.tsx:245-256 (flujo D6 «Eliminar cliente (hard-delete) y su cascada»).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "La solicitud no exige OrgRole (SEC-050)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No aplica"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Solo navega"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Solo navega"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "El borrado se valida en hardDeleteClient"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap :240"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin action"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Detección por título literal (:119); 'Cancelar' solo oculta en memoria (:250)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Lleva al diálogo existente"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-referidos",
+    "id": "h4.adm-referidos.gestion-estados",
+    "nombre": "Confirmar conversión y mes bonificado de referidos",
+    "descripcion": "Listado y transiciones PENDING → CONVERTED → REWARDED.",
+    "archivos": [
+     "src/app/(protected)/admin/referrals/page.tsx",
+     "src/app/(protected)/admin/referrals/_components/referrals-admin-table.tsx",
+     "src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts"
+    ],
+    "entradas": [
+     "AdminReferralsPage",
+     "markReferralConvertedAction",
+     "markReferralRewardedAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "referrals/page.tsx:9-29 → referrals-admin-table.tsx:35-42, :79-101 → referrals.admin.actions.ts:13-53.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Actions con requireSuperAdmin (:15, :38); página sin guard propio (SEC-023)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "'Todavía no hay referidos' referrals-admin-table.tsx:44-53"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "El resultado de la action se ignora (:38)"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "admin/loading.tsx heredado; '...' por fila (:87, :99)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Chequeo manual del id (:16, :39), transición atómica"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-col sm:flex-row :63"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "admin/error.tsx heredado; catch de la action sin Sentry"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Datos reales"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "No vincula referredOrgId (DEU-021); irreversible sin confirmación ni auditoría"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.resumen-chatbot",
+    "nombre": "Resumen del chatbot en la ficha del cliente",
+    "descripcion": "Estado del bot, consumo del mes y últimos leads.",
+    "archivos": [
+     "src/components/admin/managers/ChatbotManager.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "ChatbotTab.tsx:101 → ChatbotManager.tsx:35-157.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Componente de presentación; datos del tab (fuera del lote)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Sin bot → CTA 'Configurar chatbot' (:47-66)"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Sin fetch propio"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin fetch propio"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Solo lectura"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "grid-cols-2 fijo (:94)"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin fetch"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Cuota en tokens con límite inventado (:69-70, :113)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "El admin no ve el cupo real de conversaciones"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.crear-entregable",
+    "nombre": "Crear entregable y notificar al cliente",
+    "descripcion": "Formulario de la ficha que crea una tarea y avisa a los miembros de la org.",
+    "archivos": [
+     "src/components/admin/managers/ProjectManager.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "ProjectsTab.tsx:7 → ProjectManager.tsx:12-26 → agency-actions.ts:14-91 (assertProjectBelongsToOrg :29).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "agency-actions.ts:19-35 (SUPER_ADMIN + proyecto de la org)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "console.error sin feedback (ProjectManager.tsx:22-23)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Loader2 y disabled (:57-60)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "required en cliente (:38); la action no usa Zod (agency-actions.ts:17)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-col (:29)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Error capturado y descartado"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "'// Optionally show a toast here' (:21)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "No confirma ni refresca la lista (revalidatePath('/admin/clients') agency-actions.ts:90)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.boveda-carga",
+    "nombre": "Subir un recurso a la Bóveda del cliente",
+    "descripcion": "Alta de link/archivo con tipo y descripción.",
+    "archivos": [
+     "src/components/admin/managers/VaultManager.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "VaultTab.tsx:6 → VaultManager.tsx:19-34 → agency-actions.ts:94-113 (flujo D2 «Bóveda del cliente»).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "agency-actions.ts:99 (SUPER_ADMIN)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "console.error sin feedback (VaultManager.tsx:30-31)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Loader2 (:97)"
+     },
+     "validacion_servidor": {
+      "cumple": "no",
+      "evidencia": "La action recibe data tipada sin Zod (agency-actions.ts:96)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "grid-cols-2 fijo (:38)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Error descartado"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Placeholder pide contraseñas en texto plano (:85)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Sin confirmación de éxito"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.reenviar-credenciales",
+    "nombre": "Reenviar credenciales temporales",
+    "descripcion": "Genera contraseña temporal, invalida sesiones y la envía por Brevo.",
+    "archivos": [
+     "src/app/api/admin/users/[userId]/resend-credentials/route.ts"
+    ],
+    "entradas": [
+     "POST /api/admin/users/[userId]/resend-credentials"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ResendCredentialsButton.tsx:18 → route.ts:16-113.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "SUPER_ADMIN (:16-19) pero sin filtrar el rol del usuario destino"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No aplica"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "400/404/429 con mensaje (:42, :57, :30-36) y fallback de la temporal (:112)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "ResendCredentialsParamsSchema :40"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Sin try/catch: un throw lo captura onRequestError (src/instrumentation.ts:49)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Usa la plantilla de bienvenida de cliente para cualquier rol (:77-83)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Botón en OverviewTab.tsx:90"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.reporte-ejecutivo-manual",
+    "nombre": "Enviar ahora el reporte ejecutivo de una org",
+    "descripcion": "Dispara el reporte ejecutivo semanal para un cliente.",
+    "archivos": [
+     "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts"
+    ],
+    "entradas": [
+     "POST /api/admin/clients/[organizationId]/send-executive-report"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Flujo D2 «Envío manual del reporte (admin)»: SendExecutiveReportButton.tsx:37 → route.ts:9-91 → send-manual.ts.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin :14; org validada en send-manual (NOT_FOUND :83-85)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No aplica"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Motivo de negocio en la respuesta (:87-91)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "OrganizationIdSchema :51"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Sin captura explícita; onRequestError solo ve throws"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Rate limit por admin (:35-48)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.acciones-masivas",
+    "nombre": "Pausar bots y exportar leads de varios clientes",
+    "descripcion": "Acciones en lote desde la lista de clientes.",
+    "archivos": [
+     "src/lib/bulk-actions.ts"
+    ],
+    "entradas": [
+     "bulkPauseBots",
+     "bulkExportLeads"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ClientsListClient.tsx:16 → bulk-actions.ts:8-44 / :46-80.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin :9, :47"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Sin orgs → affected 0 (:12-14)"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "no",
+      "evidencia": "orgIds sin schema (:8, :46)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin try/catch ni Sentry"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "CSV sin neutralizar fórmulas (SEC-040); export sin auditoría"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Funciona sin ayuda"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-audit",
+    "id": "h4.adm-audit.listado",
+    "nombre": "Audit log de acciones del admin",
+    "descripcion": "Lectura paginada y estadísticas de 7 días; escritor compartido.",
+    "archivos": [
+     "src/lib/audit-log-queries.ts",
+     "src/lib/audit-log.ts"
+    ],
+    "entradas": [
+     "listAuditLog",
+     "getAuditLogStats"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "audit-log/page.tsx:4 → audit-log-queries.ts:16-70; escritor audit-log.ts:17-42.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin :21, :54"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "audit-log/error.tsx existe; un actionType inválido rompe la consulta (:36)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "audit-log/loading.tsx fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Cast sin validar (:36), pageSize sin tope (:19)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "El escritor traga errores en console.error (audit-log.ts:39-41, SEC-030)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "IP del primer X-Forwarded-For (audit-log.ts:20-21, SEC-026)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Faltan registros de settings, precios, referidos y export"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-mensajes",
+    "id": "h4.adm-mensajes.hilo-autoscroll",
+    "nombre": "Auto-scroll del hilo de mensajes del admin",
+    "descripcion": "Ancla que lleva el hilo al último mensaje.",
+    "archivos": [
+     "src/components/admin/MessagesScrollAnchor.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "message-thread.tsx:39 → MessagesScrollAnchor.tsx:7-14.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Componente visual"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Componente visual"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Componente visual"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Componente visual"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Componente visual"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "scrollIntoView sin anchos fijos (:11)"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Componente visual"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Automático"
+     }
+    }
+   },
+   {
+    "herramienta": "h6.vis-contacto",
+    "id": "h6.vis-contacto.formulario",
+    "nombre": "Formulario de contacto público",
+    "descripcion": "Nombre, email, teléfono, empresa, servicio y mensaje hacia develOP.",
+    "archivos": [
+     "src/app/contact/page.tsx"
+    ],
+    "entradas": [
+     "ContactPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "En desktop: contact/page.tsx:66, :148-224 → submitContactForm (src/lib/actions/contact.ts:100). En mobile no existe (:119).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Público"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "state.error visible (:212-214) sin role=alert"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "'Enviando...' y disabled (:217, :221)"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "ContactFormSchema en contact.ts:35 + rate limit :20-26"
+     },
+     "mobile": {
+      "cumple": "no",
+      "evidencia": "La sección del formulario es hidden por debajo de lg (:119)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Depende de la action (fuera del lote); la página no tiene error.tsx propio"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Promesas fijas 'Menos de 2 horas' (:234) y 'Online ahora' (:277)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Labels sin asociar (:151-203); en mobile no hay formulario"
+     }
+    }
+   },
+   {
+    "herramienta": "h6.vis-contacto",
+    "id": "h6.vis-contacto.canales-directos",
+    "nombre": "Canales directos: WhatsApp, llamada y email",
+    "descripcion": "Links a WhatsApp con prefill, tel: y mailto:.",
+    "archivos": [
+     "src/app/contact/page.tsx"
+    ],
+    "entradas": [
+     "ContactPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "contact/page.tsx:96-103 (getWhatsappHref de lib/whatsapp) → :281-334 y :336-341.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Público"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Sin datos"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Links"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin fetch"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Sección visible en mobile (:255-259), grid-cols-1 (:280)"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin fetch"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Email fijo 'hola@' (:10) distinto del default de AgencySettings; 'Online ahora' fijo (:277)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Un toque abre el canal"
+     }
+    }
+   },
+   {
+    "herramienta": "h6.vis-contacto",
+    "id": "h6.vis-contacto.captura-referido",
+    "nombre": "Captura del código de referido en /contact?ref=",
+    "descripcion": "Lee ?ref y lo manda oculto con el formulario para atribuir el referido.",
+    "archivos": [
+     "src/app/contact/page.tsx"
+    ],
+    "entradas": [
+     "ContactPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "contact/page.tsx:71-75 → :149 → contact.ts:42, :68-69. Solo en desktop.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Público"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Sin ref → campo vacío (:71-75)"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Silencioso por diseño"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin fetch"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Validado en contact.ts:35-49"
+     },
+     "mobile": {
+      "cumple": "no",
+      "evidencia": "Sin formulario por debajo de lg (:119)"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Fuera del lote"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Un referido que abre el link en el celular no se puede atribuir"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-591",
+    "clave": "Consolidar premium-features.ts (legacy) con premium-modules.ts",
+    "estado_en_codigo": "parcial",
+    "evidencia": "admin/settings ya lee la tabla PremiumModule (settings.actions.ts:92, :113-120; update por slug :185-196), pero premium-features.ts sigue como tipo (settings.actions.ts:10, settings-console.tsx:16) con un cast que miente (:114) y su catálogo runtime solo lo usa src/lib/actions/settings.ts:12-16, sin importadores (git grep \"lib/actions/settings'\" → 0)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Falta tipar moduleKey como string y podar el archivo"
+   },
+   {
+    "id": "PLAN-572",
+    "clave": "UI admin para regenerar password (resend-credentials)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx:18 (fetch al endpoint) montado en tabs/OverviewTab.tsx:90",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Queda el hallazgo de rol destino sin filtrar"
+   },
+   {
+    "id": "PLAN-573",
+    "clave": "CSRF en /api/auth/google-business/start?orgId=",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "start/route.ts:11-15 toma orgId del query y redirige; git show … | grep -i 'cookie|nonce' → 0 (control: 'orgId' aparece en :12). El state sí va firmado (google-business-profile.ts:44)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Dominio D7"
+   },
+   {
+    "id": "PLAN-574",
+    "clave": "Sin verificación del recurso GBP tras el callback",
+    "estado_en_codigo": "parcial",
+    "evidencia": "callback/route.ts:59-71 descubre account+location tras persistir tokens y escribe logAdminAction (:71); no valida un gbpLocationId esperado (selector P3-A.2)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-588",
+    "clave": "Máscara del token de Telegram duplicada",
+    "estado_en_codigo": "hecho",
+    "evidencia": "settings-console.tsx:18 y settings.actions.ts:11 importan maskSecret de src/lib/mask-secret.ts; maskFromInput solo sobrevive en comentarios de mask-secret.invariant.ts:3, :25",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-608",
+    "clave": "Time entries con z.coerce.date() sobre fecha sin hora",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "time-entry.schemas.ts:33-34 sigue con z.coerce.date(); time-entry-panel.tsx:252 manda 'YYYY-MM-DD' y formatDate (:63-68) no fija timeZone",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Ver hallazgo de horas un día antes"
+   },
+   {
+    "id": "PLAN-593",
+    "clave": "Prisma crudo fuera de isolation en reports",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "settings/reports/page.tsx:3, :13-27 usa prisma directo sobre botConfig y chatbotEvent; igual alerts/page.tsx:3, :12-22 (botAlert)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Son lecturas globales de admin: podrían ir por unsafeGlobalQuery con razón documentada"
+   },
+   {
+    "id": "PLAN-962",
+    "clave": "ESLint set-state-in-effect en /contact (captura de ?ref)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "contact/page.tsx:74 setReferralCode dentro de useEffect; el baseline de eslint (_crudo/eslint.json) lo reporta como error react-hooks/set-state-in-effect en :74",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-559",
+    "clave": "Generar ASSET_TYPES desde el schema (VaultManager)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "VaultManager.tsx:10 usa 'as const satisfies readonly AssetType[]': impide valores inválidos pero no detecta un valor nuevo del enum; no hay script de generación",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-657",
+    "clave": "Ticket de eliminación identificado por el título literal",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ticket-chat.tsx:119 compara con el título que crea profile.ts:162; el título es libre para cualquier ticket (tickets/schemas.ts:5)",
+    "sigue_teniendo_sentido": "no",
+    "nota": "La decisión sigue implementada pero SEC-050 propone reemplazarla por un campo propio"
+   },
+   {
+    "id": "PLAN-590",
+    "clave": "Credenciales de Telegram config-first con fallback a env (par atómico)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/notifications/telegram.ts:39-60: usa AgencySettings solo si token y chatId están completos, si no el par de env; DB caída → env",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-585",
+    "clave": "Lane config-settings",
+    "estado_en_codigo": "hecho",
+    "evidencia": "adminHoverCls en settings-console.tsx:17, :355; inputs sin spinners :61-62, :399, :455; contrato por slug settings.actions.ts:183-191 y settings.schemas.ts:36-38; ZodError → issues[0].message en action-utils.ts:28-29 (commit 5e33733 en origin/main)",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Error.message genérico todavía pasa (action-utils.ts:31-32)"
+   },
+   {
+    "id": "PLAN-656",
+    "clave": "Fase 5: ticket de eliminación lleva al hard-delete",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ticket-chat.tsx:241-247 Link /admin/clients?delete=<orgId>; ClientsListClient.tsx:245-256 abre el diálogo de borrado desde el query",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-655",
+    "clave": "Cambios cross-rol en tickets y messages del admin",
+    "estado_en_codigo": "parcial",
+    "evidencia": "MessagesScrollAnchor en message-thread.tsx:39; Enter con guarda IME ticket-reply-form.tsx:94; auto-scroll ticket-chat.tsx:95-97; break-words en message-bubble.tsx:52 pero no en las burbujas de ticket-chat.tsx:209",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-575",
+    "clave": "P2.B.1 botón admin 'Enviar reporte ahora'",
+    "estado_en_codigo": "hecho",
+    "evidencia": "send-executive-report/route.ts:9-91 + SendExecutiveReportButton.tsx:37 (flujo D2) + tests/e2e/41-admin-executive-report-send-now.spec.ts",
+    "sigue_teniendo_sentido": "no",
+    "nota": "El e2e existe pero CI e2e no corre"
+   },
+   {
+    "id": "PLAN-566",
+    "clave": "Cron de aviso de override por vencer",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -i override en src/app/api/cron, netlify, netlify.toml, vercel.json → 0 (control: overrideUntil existe en schema.prisma:646 y lo lee BillingOverrideCard.tsx:15)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-605",
+    "clave": "updateTimeEntry sin guard de pertenencia",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "time-entry.actions.ts:195-241 no compara entry.userId con la sesión; deleteTimeEntry tampoco (:243-268). updateTimeEntry no tiene llamadores",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-658",
+    "clave": "P2 paginación de tickets y proyectos",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep 'take:|skip:' en admin/tickets/_actions/ticket.actions.ts → 0 (control: referrals/page.tsx:11 take); projects/page.tsx:9 findMany sin take",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-564",
+    "clave": "Upgrade inmediato con reset de cuota; downgrade al 1° del mes siguiente",
+    "estado_en_codigo": "hecho",
+    "evidencia": "plan.actions.ts:26-27 (downgrade a pendingPlanId) y get-plan-for-org.ts:39-49 (applyPendingPlanIfDue lazy)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-604",
+    "clave": "Regla de negocio de carga de horas",
+    "estado_en_codigo": "hecho",
+    "evidencia": "time-entry.actions.ts:156-170 (session userId, rechaza tareas de otro, autoasigna las libres); hours/page.tsx:117 filtra tareas propias o sin asignar",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Al borrar no se aplica (PLAN-605)"
+   },
+   {
+    "id": "PLAN-603",
+    "clave": "Bug de horas cargadas a otro usuario",
+    "estado_en_codigo": "hecho",
+    "evidencia": "time-entry.actions.ts:140, :176 (userId de sesión) y :160-162 (pertenencia validada en servidor)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-606",
+    "clave": "Equipo: display jerárquico y hover",
+    "estado_en_codigo": "hecho",
+    "evidencia": "member-workload.tsx:152-213 (proyectos colapsables con aria-expanded), :113-150 (horas reales vs estimadas), :99 (adminHoverCls en métricas); team/page.tsx:127-161",
+    "sigue_teniendo_sentido": "no"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: orgSlug (B9.1) vs Organization.id (B11.6); re-validación del recurso en cada action",
+    "resultado": "parcial",
+    "evidencia": "La ficha acepta ambos: admin/clients/[clientId]/page.tsx:33 (clientId renombrado a orgSlug) y :40-42 findFirst OR [{ id }, { slug }]. Los links del lote usan el id: alerts.ts:278 y :288, ticket-chat.tsx:242 (?delete=<organizationId>), ChatbotManager.tsx:45 (fallback a organizationId). El redirect de /chatbot resuelve solo por slug (chatbot/[[...tab]]/page.tsx:28-29). Re-validación: createTaskForClientAction comprueba que el proyecto sea de la org (agency-actions.ts:28-35); send-executive-report valida con zod y NOT_FOUND (route.ts:51-57, :83-85); createClientAssetAction solo depende de la FK (agency-actions.ts:96-110).",
+    "hallazgo_titulo": "IDs internos de Organization en URLs del admin (link de alertas, deep-link de baja, fallback de ChatbotManager) contra la regla de usar slugs"
+   },
+   {
+    "alerta": "[D3-A2] Checklist B-SEC.3c renumera los fixes (F2 IDOR projects.ts, F4 agency-actions) frente a B11.0 (F2 trust-the-layout, F4 payments, F5 agency-actions)",
+    "resultado": "parcial",
+    "evidencia": "Renumeración confirmada: docs/bitacora-roadmap.md:8398 (F2 projects.ts) y :8400 (F4 agency-actions). En código: projects.ts tiene requireSuperAdmin en :26, :109, :159, :178, :214 (F2 cerrado); agency-actions.ts:24-35 cierra el cross-projectId con el comentario 'B11.2 fix F5'. La página de pagos (F4 de B11.0) sigue confiando en el layout: projects/[projectId]/payments/page.tsx:67-73 lee prisma.project sin auth() (guard en projects/[projectId]/layout.tsx:105 y admin/layout.tsx:47), cubierto por SEC-023; sus actions sí tienen guard (maintenance.actions.ts:35, milestone.actions.ts:23)."
+   },
+   {
+    "alerta": "[D3-A3] /admin/clients/[clientId]/chatbot/install (B8.5) redirigido por el catch-all de B9.1; /admin/clients/[orgSlug]/chatbot/* deprecadas (STATUS.md:216) mientras roadmap-pendientes.md:26 propone una vista ahí",
+    "resultado": "confirmada",
+    "evidencia": "No existe ruta install: el catch-all chatbot/[[...tab]]/page.tsx:6-13 no tiene 'install' en TAB_MAP y :35-38 redirige a /admin/chatbots/<botId>?tab=overview; resuelve solo por slug (:28-29). STATUS.md:216 declara la ruta deprecada y docs/roadmap-pendientes.md:24-28 sigue proponiendo la vista de CrmIntegration ahí, que ya existe en /admin/chatbots (IntegrationsTab, flujo D5 «Configurar y probar la integración CRM (n8n)»).",
+    "hallazgo_titulo": "Docs desactualizados sobre el admin: la lección de CLAUDE.md sobre ticket-chat ya no aplica y roadmap-pendientes propone una vista en una ruta que solo redirige"
+   },
+   {
+    "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+    "resultado": "parcial",
+    "evidencia": "5e33733 está en origin/main y agregó toErrorMessage: un ZodError devuelve solo issues[0].message (action-utils.ts:28-29), usado en settings.actions.ts:171 y :203, así que el detalle interno de Zod ya no sale. Cualquier otro Error se devuelve tal cual (action-utils.ts:31-32), incluido el de Prisma, y los mensajes de Zod por defecto llegan en inglés ('Invalid email').",
+    "hallazgo_titulo": "Errores internos devueltos al admin: String(error) en trigger-detector y send-now, y error.message de Prisma en las actions de tareas, horas, tickets y configuración"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/lib/premium-features.ts",
+    "senales": [
+     "El catálogo en runtime (PREMIUM_FEATURE_KEYS/LABELS) solo lo importa src/lib/actions/settings.ts:12-16, que no tiene importadores",
+     "PREMIUM_FEATURE_OPTIONS y PREMIUM_FEATURE_DEFAULTS sin usos (git grep -w)",
+     "Sus claves no coinciden con los slugs de PremiumModule (premium-features.ts:51 'motor-resenias' vs premium-modules.ts:24 'motor-resenas')"
+    ],
+    "que_rompe": "Solo el import de tipo PremiumFeatureKey en settings.actions.ts:10 y settings-console.tsx:16 (reemplazar por string) y el módulo muerto lib/actions/settings.ts"
+   },
+   {
+    "archivo": "src/lib/alerts.ts#sendTestAgencyAlert",
+    "senales": [
+     "Único llamador: src/lib/actions/settings.ts:8, módulo sin importadores",
+     "La consola nueva no tiene botón de prueba"
+    ],
+    "que_rompe": "Nada vivo; conviene reutilizarlo para un 'Probar webhook' antes de podar"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts#updateTimeEntry,listTimeEntriesByUser",
+    "senales": [
+     "git grep -w en src y tests: solo las definiciones (:195, :310)",
+     "updateTimeEntry además sin guard de pertenencia"
+    ],
+    "que_rompe": "Nada vivo"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/team/_actions/task.actions.ts#listTasksByUser,reorderTasks",
+    "senales": [
+     "git grep -w en src y tests: solo las definiciones (:264, :377)"
+    ],
+    "que_rompe": "Nada vivo; reorderTasks puede servir si se agrega drag & drop"
+   },
+   {
+    "archivo": "src/lib/agency-settings.ts#AGENCY_TIMEZONE",
+    "senales": [
+     "git grep -w AGENCY_TIMEZONE: solo la definición (agency-settings.ts:20)"
+    ],
+    "que_rompe": "Nada"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/settings/alerts/page.tsx",
+    "senales": [
+     "Ningún link a /admin/settings/alerts (git grep fuera de su carpeta → 0)",
+     "Hay otra sección /admin/alerts en el sidebar (admin-sidebar.tsx, entrada 'Alertas')"
+    ],
+    "que_rompe": "Es la única UI que llama a /api/admin/alerts/trigger-detector: enlazarla o mover el botón a /admin/alerts, no borrarla sin reemplazo"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/settings/reports/page.tsx",
+    "senales": [
+     "Ningún link a /admin/settings/reports (git grep → 0)"
+    ],
+    "que_rompe": "Es la única UI de /api/admin/reports/send-now y del historial de envíos semanales"
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Formulario de /contact y atribución de ?ref= en mobile",
+    "entorno": "Producción o preview, navegador del teléfono o DevTools a 390×844",
+    "precondiciones": "Un código de referido válido de una org de prueba (panel /dashboard/referidos)",
+    "pasos": [
+     "Abrir https://develop.com.ar/contact?ref=<CODIGO> en un teléfono (o DevTools 390×844)",
+     "Buscar el formulario 'Enviar consulta'",
+     "Repetir en desktop 1366×768 y 1024×700 y comprobar si el botón 'Enviar consulta' y las tarjetas inferiores se ven completas sin scroll"
+    ],
+    "esperado": "Hallazgo confirmado si en mobile solo aparecen WhatsApp, Llamar y Email, sin formulario. En desktops bajos, el bloque se recorta sin poder scrollear.",
+    "senal_falla": "El formulario aparece en mobile (descarta el hallazgo) o el desktop bajo muestra todo",
+    "escribe_db_o_email": false,
+    "hallazgos": "En mobile /contact no tiene formulario: el link de referido /contact?ref= no puede atribuir desde un teléfono"
+   },
+   {
+    "titulo": "Disparador de /api/cron/alerts (churn y vencimientos)",
+    "entorno": "Panel de Netlify del sitio de producción y cuentas de cron externas de develOP",
+    "precondiciones": "Acceso al panel de Netlify",
+    "pasos": [
+     "Netlify → Site → Functions: listar las scheduled functions y sus horarios",
+     "Revisar si existe un cron externo (cron-job.org, GitHub Actions de otra cuenta, Zapier) que llame a /api/cron/alerts",
+     "Revisar en Netlify → Logs → Functions si hubo invocaciones de /api/cron/alerts en los últimos 30 días"
+    ],
+    "esperado": "Hallazgo confirmado si no hay ninguna función ni cron externo que llame a /api/cron/alerts y no hay invocaciones",
+    "senal_falla": "Aparece un disparador o hay invocaciones registradas",
+    "escribe_db_o_email": false,
+    "hallazgos": "Las alertas periódicas de churn y vencimientos (/api/cron/alerts) no tienen disparador"
+   },
+   {
+    "titulo": "Reenviar credenciales a un usuario SUPER_ADMIN",
+    "entorno": "Local con base de desarrollo propia (no la Neon compartida) y BREVO_API_KEY vacía o inválida",
+    "precondiciones": "Dos cuentas SUPER_ADMIN de prueba (A y B) y el id de B",
+    "pasos": [
+     "Iniciar sesión como A en /admin",
+     "En la consola del navegador: fetch('/api/admin/users/<idDeB>/resend-credentials',{method:'POST'}).then(r=>r.json()).then(console.log)",
+     "Anotar si la respuesta trae tempPassword",
+     "Cerrar sesión e intentar entrar como B con esa contraseña temporal"
+    ],
+    "esperado": "Hallazgo confirmado si responde 200 con tempPassword y B puede entrar con ella (forzado a cambiarla)",
+    "senal_falla": "El endpoint rechaza usuarios SUPER_ADMIN o SETTER",
+    "escribe_db_o_email": true,
+    "hallazgos": "Reenviar credenciales resetea la contraseña de cualquier usuario, incluidos SUPER_ADMIN y SETTER"
+   },
+   {
+    "titulo": "Crear entregable y subir a Bóveda: feedback de error y refresco",
+    "entorno": "Local o preview con una org de prueba (sus miembros reciben email)",
+    "precondiciones": "Org de prueba con un proyecto; sesión SUPER_ADMIN",
+    "pasos": [
+     "Abrir /admin/clients/<slug>?tab=projects y crear un entregable válido",
+     "Comprobar si la lista se actualiza sin recargar y si hay un mensaje de éxito",
+     "En otra pestaña cerrar sesión; volver y enviar otro entregable",
+     "Repetir en ?tab=vault subiendo un link"
+    ],
+    "esperado": "Hallazgo confirmado si con la sesión cerrada no aparece ningún mensaje de error y el formulario queda como si nada; con sesión válida, si la lista no se refresca sin recargar",
+    "senal_falla": "Aparece un mensaje de error y la lista se refresca sola",
+    "escribe_db_o_email": true,
+    "hallazgos": "Acciones del admin cuyo fallo no se muestra"
+   },
+   {
+    "titulo": "Precio de módulo vacío",
+    "entorno": "Local con base propia o preview coordinado con Franco (Neon compartida)",
+    "precondiciones": "Sesión SUPER_ADMIN; anotar el precio actual de un módulo",
+    "pasos": [
+     "Abrir /admin/settings",
+     "Borrar el número del input de precio de un módulo y pulsar Guardar",
+     "Ver el toast",
+     "Abrir /dashboard/services con un cliente de prueba",
+     "Restaurar el precio original"
+    ],
+    "esperado": "Toast 'Precio actualizado' y el módulo a USD 0 en la vitrina",
+    "senal_falla": "El servidor rechaza el valor vacío",
+    "escribe_db_o_email": true,
+    "hallazgos": "Guardar un precio de módulo con el campo vacío lo publica a USD 0"
+   },
+   {
+    "titulo": "Fecha de horas cargadas un día antes",
+    "entorno": "Local o preview con navegador en zona horaria de Argentina",
+    "precondiciones": "Proyecto de prueba con una tarea propia",
+    "pasos": [
+     "Abrir /admin/projects/<id>/hours",
+     "Cargar 1 h con la fecha de hoy",
+     "Ver la fecha de la fila en la tabla",
+     "Borrar la entrada"
+    ],
+    "esperado": "La fila muestra la fecha de ayer",
+    "senal_falla": "La fila muestra la fecha elegida",
+    "escribe_db_o_email": true,
+    "hallazgos": "Las horas cargadas se guardan a medianoche UTC del día elegido y se muestran un día antes en Argentina"
+   },
+   {
+    "titulo": "Envío manual de reportes semanales duplicado",
+    "entorno": "Solo local con Brevo apuntando a casillas de prueba (nunca producción)",
+    "precondiciones": "Al menos un bot activo cuya org tenga un ADMIN con casilla de prueba",
+    "pasos": [
+     "Tipear /admin/settings/reports",
+     "Pulsar 'Enviar ahora' y esperar el resultado",
+     "Pulsar 'Enviar ahora' otra vez",
+     "Revisar la casilla de prueba y el historial de la página"
+    ],
+    "esperado": "Dos emails iguales por cliente y dos filas REPORT.WEEKLY_SENT",
+    "senal_falla": "El segundo envío se omite (skipped)",
+    "escribe_db_o_email": true,
+    "hallazgos": "'Enviar reportes ahora' reenvía el reporte semanal a todos los clientes en cada clic"
+   },
+   {
+    "titulo": "Bandeja de tickets con filtro por defecto",
+    "entorno": "Preview o local con datos existentes, sin escribir",
+    "precondiciones": "Un ticket OPEN con updatedAt de hace más de 31 días (consultarlo en modo solo lectura)",
+    "pasos": [
+     "Entrar como SUPER_ADMIN a /admin/tickets sin tocar filtros",
+     "Buscar ese ticket en 'Todos' y en 'Abiertos'",
+     "Pulsar el chip 'Todos' del periodo"
+    ],
+    "esperado": "El ticket no aparece hasta elegir el periodo 'Todos'",
+    "senal_falla": "El ticket aparece con el filtro por defecto",
+    "escribe_db_o_email": false,
+    "hallazgos": "La bandeja de tickets del admin arranca filtrada al último mes por updatedAt"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "/api/cron/alerts (runPeriodicAgencyAlerts) no tiene disparador en el repo",
+    "comando": "git grep -n \"cron/alerts\\|runPeriodicAgencyAlerts\" origin/main -- logic-core-v3/netlify.toml logic-core-v3/vercel.json logic-core-v3/netlify .github  → 0 resultados",
+    "control_positivo": "git grep -n \"send-weekly-reports\" origin/main -- logic-core-v3/netlify.toml → netlify.toml:28 [functions.\"send-weekly-reports-cron\"]"
+   },
+   {
+    "afirmacion": "AgencySettings.contactEmail y contactWhatsapp no tienen lectores fuera de Configuración",
+    "comando": "git grep -n \"contactWhatsapp\\|contactEmail\" origin/main -- logic-core-v3/src | grep -v \"admin/settings/\\|lib/agency-settings.ts\\|lib/actions/settings.ts\\|bienvenida\\|Step1Empresa\"  → solo campos de proyecto (project.actions.ts:468, :518; project.schemas.ts:65; project-card.tsx:16)",
+    "control_positivo": "git grep -n -c \"contactWhatsapp\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/settings/_actions/settings.actions.ts\" → 4"
+   },
+   {
+    "afirmacion": "Ninguna mutación de Configuración, Referidos ni Equipo escribe en el audit log",
+    "comando": "git grep -n \"logAdminAction\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/settings\" \"logic-core-v3/src/app/(protected)/admin/referrals\" \"logic-core-v3/src/app/(protected)/admin/team\" → 0",
+    "control_positivo": "git grep -n -c \"logAdminAction\" origin/main -- \"logic-core-v3/src/app/api/admin/users/[userId]/resend-credentials/route.ts\" → 2"
+   },
+   {
+    "afirmacion": "Ningún link lleva a /admin/settings/alerts ni a /admin/settings/reports",
+    "comando": "git grep -n \"settings/alerts\\|settings/reports\" origin/main -- src | grep -v \"^origin/main:src/app/(protected)/admin/settings/\" → 0",
+    "control_positivo": "git ls-tree -r --name-only origin/main -- \"src/app/(protected)/admin/settings/alerts\" → AlertSettingsClient.tsx, loading.tsx, page.tsx"
+   },
+   {
+    "afirmacion": "Ningún código vivo crea o promueve un usuario a SUPER_ADMIN",
+    "comando": "git grep -n \"role: 'SUPER_ADMIN'\\|role: Role.SUPER_ADMIN\" origin/main -- src → solo cláusulas where y src/lib/actions/settings.ts:176 (create dentro de inviteTeamMemberAction); git grep -n \"lib/actions/settings'\" origin/main -- src tests → 0 importadores",
+    "control_positivo": "git grep -n \"SUPER_ADMIN\" origin/main -- prisma/seed.ts → seed.ts:87, :94 (role: Role.SUPER_ADMIN)"
+   },
+   {
+    "afirmacion": "updateTimeEntry, listTimeEntriesByUser, listTasksByUser y reorderTasks no tienen llamadores",
+    "comando": "git grep -n -w \"updateTimeEntry\\|listTasksByUser\\|listTimeEntriesByUser\\|reorderTasks\" origin/main -- src tests → solo las definiciones (task.actions.ts:264, :377; time-entry.actions.ts:195, :310)",
+    "control_positivo": "git grep -n -w \"deleteTimeEntry\" origin/main -- src → time-entry-panel.tsx:10 y :189"
+   },
+   {
+    "afirmacion": "sendWeeklyReports no consulta envíos previos antes de mandar",
+    "comando": "git grep -n \"REPORT.WEEKLY_SENT\\|findFirst\" origin/main -- src/modules/chatbot/server/reports/sendWeeklyReports.ts → solo :74 (create del evento después de enviar)",
+    "control_positivo": "git grep -n \"skipped\" origin/main -- src/modules/chatbot/server/reports/sendWeeklyReports.ts → :10, :39, :47, :53"
+   },
+   {
+    "afirmacion": "No hay página de privacidad ni términos en src/app",
+    "comando": "git ls-tree -r --name-only origin/main -- src/app | grep -i \"privacidad\\|privacy\\|terminos\\|terms\\|legal\" → 0",
+    "control_positivo": "git ls-tree -r --name-only origin/main -- src/app | grep -i contact → src/app/contact/layout.tsx, src/app/contact/page.tsx"
+   },
+   {
+    "afirmacion": "No hay cron de aviso de override de facturación por vencer",
+    "comando": "git grep -n -i \"override\" origin/main -- src/app/api/cron netlify netlify.toml vercel.json → 0",
+    "control_positivo": "git grep -n \"overrideUntil\" origin/main -- prisma/schema.prisma → schema.prisma:646"
+   },
+   {
+    "afirmacion": "listTickets del admin no pagina",
+    "comando": "git grep -n \"take:\\|skip:\" origin/main -- \"src/app/(protected)/admin/tickets/_actions/ticket.actions.ts\" → 0",
+    "control_positivo": "git grep -n \"take:\" origin/main -- \"src/app/(protected)/admin/referrals/page.tsx\" → :11"
+   },
+   {
+    "afirmacion": "Los catch de las actions y rutas del lote no reportan a Sentry",
+    "comando": "git grep -n \"captureException\\|Sentry\" origin/main -- \"src/app/(protected)/admin/settings\" \"src/app/(protected)/admin/team\" \"src/app/(protected)/admin/tickets\" \"src/app/(protected)/admin/referrals\" src/app/api/admin/alerts src/app/api/admin/reports src/app/api/admin/users src/lib/alerts.ts src/lib/audit-log.ts src/lib/bulk-actions.ts → 0",
+    "control_positivo": "git grep -n \"captureException\" origin/main -- src/components/ui/SectionErrorBoundary.tsx → :61, :64"
+   },
+   {
+    "afirmacion": "El start de GBP no usa nonce en cookie",
+    "comando": "git show \"origin/main:./src/app/api/auth/google-business/start/route.ts\" | grep -n -i \"cookie\\|nonce\" → 0",
+    "control_positivo": "mismo archivo | grep -n \"orgId\" → :12, :13"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Filtro de fecha del lado del cliente con un default restrictivo que esconde items abiertos (y estado vacío que afirma que no hay nada)",
+    "como_buscarlo": "git grep -n \"useState<Preset>('1m')\\|ThemedDateInput\\|presetCutoff\" origin/main -- src; revisar que OPEN/pendientes queden fuera del filtro",
+    "donde_aparecio": "admin/tickets/_components/ticket-date-filter.tsx:88 + ticket-list.tsx:86-95 (la réplica viene del filtro de admin/leads)"
+   },
+   {
+    "patron": "Number(input) sobre un campo vacío que da 0 y pasa z.coerce.number().min(0)",
+    "como_buscarlo": "git grep -n \"Number(.*?? '')\\|Number(draft\" origin/main -- src y cruzar con git grep -n \"z.coerce.number().min(0\\|z.coerce.number().int().min(0\" origin/main -- src",
+    "donde_aparecio": "settings-console.tsx:140 y :112 con settings.schemas.ts:31, :39"
+   },
+   {
+    "patron": "z.coerce.date() sobre strings 'YYYY-MM-DD' de <input type=date> y formateo sin timeZone",
+    "como_buscarlo": "git grep -n \"z.coerce.date()\" origin/main -- src; git grep -n \"toISOString().slice(0, 10)\" origin/main -- src",
+    "donde_aparecio": "admin/team/_actions/time-entry.schemas.ts:33-34; admin/projects/_components/time-entry-panel.tsx:68, :72"
+   },
+   {
+    "patron": "Mutaciones sensibles del admin sin logAdminAction",
+    "como_buscarlo": "Listar archivos de src/app/(protected)/admin/**/_actions y src/lib/actions con prisma.*.update|create|delete y restar los que importan logAdminAction (git grep -L \"logAdminAction\")",
+    "donde_aparecio": "settings.actions.ts:148, :193; referrals.admin.actions.ts:18, :41; bulk-actions.ts:50"
+   },
+   {
+    "patron": "Rutas handler que devuelven String(error) o error.message al cliente",
+    "como_buscarlo": "git grep -n \"String(error)\\|error: error instanceof Error ? error.message\" origin/main -- src/app/api",
+    "donde_aparecio": "api/admin/alerts/trigger-detector/route.ts:15; api/admin/reports/send-now/route.ts:15"
+   },
+   {
+    "patron": "Formularios client que tragan el error de la action con console.error y no dan feedback",
+    "como_buscarlo": "git grep -n -A2 \"} catch (error) {\" origin/main -- src/components src/app | grep \"console.error\" en archivos 'use client'; y await action(...) sin leer el resultado",
+    "donde_aparecio": "components/admin/managers/ProjectManager.tsx:22-23; VaultManager.tsx:30-31; referrals-admin-table.tsx:38"
+   },
+   {
+    "patron": "revalidatePath de una ruta padre exacta desde actions que se disparan en rutas hijas o con query",
+    "como_buscarlo": "git grep -n \"revalidatePath('/admin/clients')\" origin/main -- src y comparar con dónde se monta el componente que la llama",
+    "donde_aparecio": "src/actions/agency-actions.ts:90, :113 (llamadas desde /admin/clients/<slug>?tab=…)"
+   },
+   {
+    "patron": "Comparación de mensajes de guard con mayúsculas distintas ('UNAUTHORIZED' vs 'Unauthorized')",
+    "como_buscarlo": "git grep -n \"startsWith('UNAUTHORIZED')\\|=== 'UNAUTHORIZED'\\|'FORBIDDEN'\" origin/main -- src",
+    "donde_aparecio": "api/admin/clients/[organizationId]/send-executive-report/route.ts:17 contra auth-guards.ts:7"
+   },
+   {
+    "patron": "Página que contiene el único formulario oculta con hidden ... lg:flex",
+    "como_buscarlo": "git grep -n \"hidden[^\\\"]*lg:flex\\|hidden[^\\\"]*md:flex\" origin/main -- src/app src/components y revisar si la sección oculta tiene <form",
+    "donde_aparecio": "src/app/contact/page.tsx:119"
+   },
+   {
+    "patron": "Métrica de cuota interpretada con otra unidad (tokens vs conversaciones)",
+    "como_buscarlo": "git grep -n \"monthlyQuota \\*\\|monthlyQuota\\b\" origin/main -- src/components src/app y comparar con quota/checker.ts:44",
+    "donde_aparecio": "components/admin/managers/ChatbotManager.tsx:69-70"
+   },
+   {
+    "patron": "Páginas sin ningún link entrante (huérfanas)",
+    "como_buscarlo": "Para cada page.tsx de src/app/(protected)/admin, git grep de su ruta en hrefs y redirects; las que no aparecen son huérfanas",
+    "donde_aparecio": "admin/settings/alerts/page.tsx, admin/settings/reports/page.tsx"
+   },
+   {
+    "patron": "Textos de la UI que prometen frecuencias u horarios de cron fijos",
+    "como_buscarlo": "git grep -n -i \"cada 15 minutos\\|cron de\\|9:00 AM\\|cada lunes\" origin/main -- src y contrastar con netlify.toml",
+    "donde_aparecio": "AlertSettingsClient.tsx:124, :165; settings-console.tsx:628"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md:146",
+    "id_previo": "DB-P0-2",
+    "estado": "parcial",
+    "evidencia": "La migración existe (prisma/migrations/20260520190000_add_alert_types/migration.sql) y el enum BotAlertType del schema tiene los 9 valores (schema.prisma:139-149). No se puede verificar si está aplicada en Neon (migrate status no disponible, P1012 sin DATABASE_URL, VH-004). AlertSettingsClient.tsx:7-18 conserva una copia local con el comentario 'pending prisma generate', ya innecesaria."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:67",
+    "id_previo": "SEC-AUTH-03",
+    "estado": "parcial",
+    "evidencia": "En este lote está cerrado: resend-credentials/route.ts:69-71 incrementa sessionVersion. Los huecos que quedan (proxy y RSC que no miran sessionVersion) están en el flujo D1 «Invalidacion de sesion por sessionVersion (y sus huecos)» y en SEC-023/BUG-001."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1908",
+    "id_previo": "LEG-01",
+    "estado": "abierto",
+    "evidencia": "El formulario de /contact sigue capturando nombre, email, teléfono y empresa (contact/page.tsx:148-224) sin aviso de privacidad ni link; no hay ruta legal en src/app (git ls-tree … | grep -i privacidad|privacy|terminos|legal → 0)."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1916",
+    "id_previo": "A11Y-02",
+    "estado": "abierto",
+    "evidencia": "En contact/page.tsx los seis <label> siguen sin htmlFor y los inputs sin id (:151-152, :161, :171, :180, :189, :203); el error (:213) no tiene role=alert."
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:20",
+    "id_previo": "CLEAN-H2a",
+    "estado": "parcial",
+    "evidencia": "contact/page.tsx ya usa lib/whatsapp (:8, :56-63, :96), igual que PricingSection, WebDevelopmentTimeline y CalculadoraAutomation (git grep getWhatsappHref). Quedan literales en CalculadorIA.tsx:316, en el WHATSAPP_NUMBER de Footer.tsx:92 y en PortalDemoCTA.tsx:237; AgencySettings.contactWhatsapp no lo lee nadie."
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:23",
+    "id_previo": "CLEAN-H2b",
+    "estado": "abierto",
+    "evidencia": "lib/alerts.ts:49-51 sigue con su propio getBaseUrl (NEXT_PUBLIC_APP_URL || NEXTAUTH_URL || localhost); resend-credentials/route.ts:76 cae a 'https://develop.com.ar'. En src hay 23 lecturas de NEXT_PUBLIC_APP_URL fuera de tests: 10 con fallback a http://localhost:3000 y 6 a https://develop.com.ar."
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+    "linea": 184,
+    "tipo": "strokeWidth",
+    "detalle": "Settings2, Clock3 (:187), Target (:478), Users (:524), BellRing (:624) sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+    "linea": 411,
+    "tipo": "strokeWidth",
+    "detalle": "Loader2/CheckCircle2 del botón por fila y del SaveButton (:698) sin strokeWidth"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/page.tsx",
+    "linea": 17,
+    "tipo": "strokeWidth",
+    "detalle": "Icono Settings sin strokeWidth"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx",
+    "linea": 184,
+    "tipo": "strokeWidth",
+    "detalle": "MessageSquareText sin strokeWidth"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_components/ticket-list.tsx",
+    "linea": 208,
+    "tipo": "strokeWidth",
+    "detalle": "MessageSquareText sin strokeWidth"
+   },
+   {
+    "ruta": "src/components/admin/managers/ChatbotManager.tsx",
+    "linea": 80,
+    "tipo": "strokeWidth",
+    "detalle": "Bot (:80), Activity (:100) y TrendingUp (:122) sin strokeWidth"
+   },
+   {
+    "ruta": "src/components/admin/managers/ProjectManager.tsx",
+    "linea": 60,
+    "tipo": "strokeWidth",
+    "detalle": "Loader2/Send sin strokeWidth"
+   },
+   {
+    "ruta": "src/components/admin/managers/VaultManager.tsx",
+    "linea": 97,
+    "tipo": "strokeWidth",
+    "detalle": "Loader2/UploadCloud sin strokeWidth"
+   },
+   {
+    "ruta": "src/app/contact/page.tsx",
+    "linea": 140,
+    "tipo": "strokeWidth",
+    "detalle": "CheckCircle, Send (:222), TimerReset (:231), ShieldCheck (:239), MapPin (:247), iconos de canal (:316) y ArrowUpRight (:329) sin strokeWidth"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+    "linea": 213,
+    "tipo": "contraste",
+    "detalle": "Fecha y estado de cada alerta en text-zinc-600 sobre fondo oscuro"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/reports/ReportSettingsClient.tsx",
+    "linea": 146,
+    "tipo": "contraste",
+    "detalle": "Email del destinatario y fecha (:149) en text-zinc-600"
+   },
+   {
+    "ruta": "src/components/admin/managers/ChatbotManager.tsx",
+    "linea": 54,
+    "tipo": "contraste",
+    "detalle": "Texto de ayuda 'Creá uno para empezar…' en text-zinc-600"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/page.tsx",
+    "linea": 201,
+    "tipo": "contraste",
+    "detalle": "Descripción del estado vacío en text-white/40"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+    "linea": 178,
+    "tipo": "tilde",
+    "detalle": "'configuracion', 'parametros' (:179), 'catalogo' y 'clasico' (:198), 'configuracion' (:207), 'proximas' (:308), 'modulos' (:336), 'Parametros' (:430), 'composicion' (:431), 'Operacion' (:438), 'logica' (:498), 'Dia' (:501), 'vacio' (:572), 'Todavia' (:599), 'programacion' (:631)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+    "linea": 123,
+    "tipo": "tilde",
+    "detalle": "'configuracion' (:123), 'Configuracion actualizada.' (:169), 'No se encontro el modulo.' (:190)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
+    "linea": 38,
+    "tipo": "tilde",
+    "detalle": "'Modulo invalido.' y 'Ingresa un precio valido.' (:39)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/page.tsx",
+    "linea": 25,
+    "tipo": "tilde",
+    "detalle": "Título 'Configuracion'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/page.tsx",
+    "linea": 202,
+    "tipo": "tilde",
+    "detalle": "'aca' (también member-workload.tsx:261 y ticket-list.tsx:152)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+    "linea": 250,
+    "tipo": "copy",
+    "detalle": "Mensajes al usuario en inglés: 'Task not found', 'One or more tasks were not found' (:290), 'Tasks must belong to the same project' (:295) y fallbacks 'Failed to …'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/_actions/task.schemas.ts",
+    "linea": 38,
+    "tipo": "copy",
+    "detalle": "Mensajes de validación en inglés ('Invalid project id', 'Title is required' :79, 'Estimated hours must be…' :68)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/_actions/time-entry.schemas.ts",
+    "linea": 20,
+    "tipo": "copy",
+    "detalle": "Mensajes en inglés ('Invalid task id', 'Hours must be positive' :27)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+    "linea": 153,
+    "tipo": "copy",
+    "detalle": "'Task not found' y 'Time entry not found' (:216) en inglés"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
+    "linea": 156,
+    "tipo": "copy",
+    "detalle": "'Ticket not found' y 'Failed to list tickets' (:96) en inglés"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
+    "linea": 22,
+    "tipo": "copy",
+    "detalle": ".email() y .url() (:24, :25) sin mensaje propio: el toast muestra 'Invalid email' / 'Invalid url' de Zod en inglés"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+    "linea": 148,
+    "tipo": "copy",
+    "detalle": "'issues encontrados' mezcla inglés y español"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/alerts/page.tsx",
+    "linea": 28,
+    "tipo": "copy",
+    "detalle": "Eyebrow 'Settings · Alertas' en inglés (también reports/page.tsx:34 'Settings · Reportes')"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+    "linea": 545,
+    "tipo": "copy",
+    "detalle": "Muestra el enum crudo 'SUPER_ADMIN' como etiqueta de rol"
+   },
+   {
+    "ruta": "src/app/contact/page.tsx",
+    "linea": 277,
+    "tipo": "copy",
+    "detalle": "'Online ahora' y 'Menos de 2 horas' (:234) son promesas fijas que no dependen de nada"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx",
+    "linea": 67,
+    "tipo": "inline",
+    "detalle": "style={{ colorScheme: 'dark' }} cuando existe la clase [color-scheme:dark]"
+   },
+   {
+    "ruta": "src/app/contact/page.tsx",
+    "linea": 219,
+    "tipo": "inline",
+    "detalle": "style={{ transition: 'none' }} repetido (:297, :303, :339, :340) en lugar de transition-none; boxShadow inline en :120 y :260"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+    "linea": 56,
+    "tipo": "otro",
+    "detalle": "cn() local duplicado en vez de importar el de @/lib/utils"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx",
+    "linea": 209,
+    "tipo": "otro",
+    "detalle": "Burbuja con whitespace-pre-wrap sin break-words: una URL larga desborda en mobile (message-bubble.tsx:52 sí lo tiene)"
+   },
+   {
+    "ruta": "src/components/admin/managers/ChatbotManager.tsx",
+    "linea": 130,
+    "tipo": "otro",
+    "detalle": "'Leads (últimos)' cuenta solo la lista recortada que pasa el tab, no el total"
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "BUG: en mobile /contact no tiene formulario, así que el link de referido /contact?ref= no puede atribuir desde un teléfono",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Los hechos se sostienen leyendo origin/main@57c421bc. src/app/contact/page.tsx:119: la primera motion.section tiene 'hidden ... lg:flex' y contiene el único <form> (:148) con el input oculto referralCode (:149). Debajo de 1024 px solo se renderiza la segunda sección (:255-343), con el encabezado mobile (:262, lg:hidden) y los tres canales (WhatsApp con prefill fijo WHATSAPP_PREFILL_CONTACTO :11/:96, tel: y mailto:), y ninguno lleva el código. El breakpoint lg es el default de Tailwind 4 (64rem = 1024 px): git grep '--breakpoint' en src/**/*.css da 0 (exit 1), con control positivo '--color-' en globals.css:46. La atribución solo ocurre en contactFormAction (src/lib/actions/contact.ts:49, :68-69 -> attributeReferralFromContact, referrals.service.ts:89-175). Su único llamador es /contact/page.tsx:66 (git grep). No hay alta manual de Referral: admin/referrals/_actions solo tiene markReferralConverted y markReferralRewarded, que exigen un Referral PENDING existente. Tampoco hay un input visible para el código, aunque ReferralPanel.tsx:107 dice 'Compartí tu link o código'. El link se arma como /contact?ref= (lib/referrals/code.ts:29-31) y la función está viva en la nav del cliente (SidebarNav.tsx:66). El blame muestra que el form desktop-only es de abril (90eb32ca) y que P5.5b (55e3ae51, julio) metió la captura del ref solo en ese form sin cubrir mobile: es un bug de integración, no un diseño intencional del referido. Bajo de ALTA a MEDIA porque Referidos es una función secundaria de crecimiento, no un flujo principal del cliente. Además el lead no se pierde: el referido igual llega por WhatsApp, llamada o email. Lo que se pierde es la atribución automática del mes bonificado. Desktop funciona y el bonificado se aplica a mano por develOP (referrals.admin.actions.ts:33-34), así que hay un workaround fuera del sistema. Encaja en 'impacto acotado o con workaround'. La parte de desktops de poca altura (main h-[100dvh] overflow-hidden :106, scroll bloqueado :77-94, form en mt-auto dentro de una sección overflow-hidden :119/:136) es plausible pero queda PROBABLE: depende de la altura real del viewport.",
+    "evidencia_contra": [
+     "No es un flujo principal del cliente: Referidos ('Recomendá y ganá', SidebarNav.tsx:66) es una función secundaria de crecimiento, y el primer cliente puede usar el producto entero sin ella.",
+     "El lead del referido no se pierde: en mobile tiene WhatsApp, llamada y email (page.tsx:99-103, :280-341). Solo se pierde la atribución automática.",
+     "La recompensa ya es manual (develOP aplica la facturación, referrals.admin.actions.ts:33-34), así que develOP puede honrar el referido fuera del sistema si el referido lo menciona.",
+     "En desktop o tablet de 1024 px o más el form y el campo oculto funcionan (page.tsx:148-149 -> contact.ts:68-69).",
+     "El recorte en desktops de poca altura no está trazado con un viewport concreto: es PROBABLE, no verificado."
+    ]
+   }
+  ]
+ }
+}

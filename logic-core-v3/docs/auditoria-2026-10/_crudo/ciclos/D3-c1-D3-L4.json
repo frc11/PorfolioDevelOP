@@ -1,0 +1,2472 @@
+{
+ "dominio": "D3",
+ "ciclo": "D3-c1",
+ "lote": "D3-L4",
+ "run": "wf_5edd9c03-0ab",
+ "fecha": "2026-10-15T17:27:46.358Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx",
+    "lineas_total": 90,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/project-status-control.tsx",
+    "lineas_total": 88,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/project-tabs.tsx",
+    "lineas_total": 83,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/scroll-reset.tsx",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/hours/page.tsx",
+    "lineas_total": 127,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+    "lineas_total": 258,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/loading.tsx",
+    "lineas_total": 15,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+    "lineas_total": 337,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+    "lineas_total": 325,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx",
+    "lineas_total": 88,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+    "lineas_total": 174,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_actions/maintenance.schemas.ts",
+    "lineas_total": 28,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_actions/milestone.actions.ts",
+    "lineas_total": 77,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_actions/milestone.schemas.ts",
+    "lineas_total": 3,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "lineas_total": 1115,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_actions/project.schemas.ts",
+    "lineas_total": 88,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/draggable-project-card.tsx",
+    "lineas_total": 119,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/droppable-project-column.tsx",
+    "lineas_total": 37,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/overlay-modal.tsx",
+    "lineas_total": 154,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/project-card.tsx",
+    "lineas_total": 264,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+    "lineas_total": 371,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/project-list.tsx",
+    "lineas_total": 194,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/projects-board.tsx",
+    "lineas_total": 263,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/projects-filter-bar.tsx",
+    "lineas_total": 129,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/projects-filters.ts",
+    "lineas_total": 230,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/projects-period-dropdown.tsx",
+    "lineas_total": 278,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/task-form.tsx",
+    "lineas_total": 283,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+    "lineas_total": 648,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+    "lineas_total": 449,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/loading.tsx",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/page.tsx",
+    "lineas_total": 33,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/app/(protected)/admin/projects/page.tsx",
+    "simbolo": "AgencyOsProjectsPage",
+    "tipo": "page",
+    "url": "/admin/projects",
+    "auth": "parcial",
+    "evidencia_auth": "Sin auth() propio (page.tsx:18-22). listProjects exige requireSuperAdmin (project.actions.ts:934), pero getOrganizationsForDropdown (page.tsx:7-16, unstable_cache) corre sin guard y su resultado va al client component ProjectsBoard. El resto es heredado de admin/layout.tsx:47 y el proxy.",
+    "rol": "SUPER_ADMIN (heredado)",
+    "evidencia_rol": "admin/layout.tsx:47 (contexto fijo); project.actions.ts:934",
+    "org_de": "no-filtra",
+    "evidencia_org": "Lista todos los proyectos (project.actions.ts:936) y todas las orgs salvo develop (page.tsx:9-13). SUPER_ADMIN es global por diseño.",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+    "simbolo": "AgencyOsProjectLayout",
+    "tipo": "layout",
+    "url": "/admin/projects/[projectId]/*",
+    "auth": "parcial",
+    "evidencia_auth": "auth() + redirect('/login') (layout.tsx:105-108) y callerCanAccessOrg (layout.tsx:160). No exige rol: assert-ownership.ts:85-88 deja pasar a cualquier usuario cuya organizationId coincida con la del proyecto.",
+    "rol": "cualquier usuario autenticado de la org del proyecto (guard propio); SUPER_ADMIN solo por herencia",
+    "evidencia_rol": "assert-ownership.ts:88; admin/layout.tsx:47",
+    "org_de": "mixto",
+    "evidencia_org": "projectId de la URL (layout.tsx:110) comparado con session.user.organizationId vía callerCanAccessOrg (:160). Además carga id+companyName de todas las orgs (layout.tsx:140-153) y los pasa a ProjectForm (:232-235).",
+    "validacion": "no",
+    "evidencia_validacion": "projectId sin validar; findUnique por id (layout.tsx:113-114)",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+    "simbolo": "AgencyOsProjectOverviewPage",
+    "tipo": "page",
+    "url": "/admin/projects/[projectId]",
+    "auth": "parcial",
+    "evidencia_auth": "auth() (page.tsx:99-102) + callerCanAccessOrg (page.tsx:165), sin chequeo de rol",
+    "rol": "usuario autenticado de la org del proyecto (guard propio); SUPER_ADMIN por herencia",
+    "evidencia_rol": "assert-ownership.ts:85-88",
+    "org_de": "mixto",
+    "evidencia_org": "projectId de la URL (page.tsx:104) y callerCanAccessOrg contra la org de la sesión (page.tsx:165)",
+    "validacion": "no",
+    "evidencia_validacion": "projectId sin validar (page.tsx:106-107)",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+    "simbolo": "AgencyOsProjectPaymentsPage",
+    "tipo": "page",
+    "url": "/admin/projects/[projectId]/payments",
+    "auth": "heredado",
+    "evidencia_auth": "Sin auth() ni require* propio (payments/page.tsx:67-104). Depende de [projectId]/layout.tsx:105,160 y de admin/layout.tsx:47.",
+    "rol": "SUPER_ADMIN (heredado)",
+    "evidencia_rol": "admin/layout.tsx:47",
+    "org_de": "no-filtra",
+    "evidencia_org": "projectId de la URL (payments/page.tsx:70) sin scoping (:73-103)",
+    "validacion": "no",
+    "evidencia_validacion": "projectId sin validar",
+    "rate_limit": "no-aplica",
+    "notas": "Es el F4 de B11.0 (alerta D3-A2) y el PLAN-634, que siguen abiertos."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+    "simbolo": "inline action 'Marcar pagado' (hito) :156-159",
+    "tipo": "server-action",
+    "url": "/admin/projects/[projectId]/payments",
+    "auth": "si",
+    "evidencia_auth": "Delegado: markMilestonePaid -> requireSuperAdmin (milestone.actions.ts:23)",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "auth-guards.ts:6",
+    "org_de": "no-filtra",
+    "evidencia_org": "milestone.id va en el closure de la action inline (lo cifra Next; PROBABLE)",
+    "validacion": "zod",
+    "evidencia_validacion": "MilestoneIdSchema (milestone.actions.ts:24)",
+    "rate_limit": "no",
+    "notas": "El ActionResult se descarta (payments/page.tsx:158)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+    "simbolo": "inline action 'Generar meses pendientes' :186-189",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "Delegado: generatePendingMaintenance -> requireSuperAdmin (maintenance.actions.ts:94)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "project.id en el closure (payments/page.tsx:188)",
+    "validacion": "zod",
+    "evidencia_validacion": "ProjectIdSchema (maintenance.actions.ts:95)",
+    "rate_limit": "no",
+    "notas": "Solo se renderiza si hay maintenanceStartDate, campo que ninguna UI escribe. El resultado se descarta."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+    "simbolo": "inline action 'Marcar pagado' (mantenimiento) :249-252 y :299-302",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "Delegado: markMaintenancePaid -> requireSuperAdmin (maintenance.actions.ts:64)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "payment.id en el closure",
+    "validacion": "zod",
+    "evidencia_validacion": "MarkMaintenancePaidSchema (maintenance.actions.ts:65)",
+    "rate_limit": "no",
+    "notas": "El resultado se descarta."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx",
+    "simbolo": "AgencyOsProjectTasksPage",
+    "tipo": "page",
+    "url": "/admin/projects/[projectId]/tasks",
+    "auth": "heredado",
+    "evidencia_auth": "Sin guard propio (tasks/page.tsx:14-53). listTasksByProject exige SUPER_ADMIN fuera del lote (task.actions.ts:325), pero prisma.project.findUnique (:17-27) y prisma.user.findMany de los SUPER_ADMIN (:35-52, nombres y emails) no tienen guard.",
+    "rol": "SUPER_ADMIN (heredado)",
+    "evidencia_rol": "admin/layout.tsx:47",
+    "org_de": "no-filtra",
+    "evidencia_org": "projectId de la URL (tasks/page.tsx:15)",
+    "validacion": "no",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/[projectId]/hours/page.tsx",
+    "simbolo": "AgencyOsProjectHoursPage",
+    "tipo": "page",
+    "url": "/admin/projects/[projectId]/hours",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (hours/page.tsx:28), que lanza Error('Unauthorized') hacia error.tsx (auth-guards.ts:6-7)",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "hours/page.tsx:28",
+    "org_de": "no-filtra",
+    "evidencia_org": "projectId de la URL (hours/page.tsx:27); SUPER_ADMIN global",
+    "validacion": "no",
+    "rate_limit": "no-aplica",
+    "notas": "Control positivo del guard que falta en payments y tasks."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "simbolo": "createProject",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (project.actions.ts:595)",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "auth-guards.ts:6",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId sale del body (project.schemas.ts:55) y se resuelve en resolveProjectOrganization (project.actions.ts:242-251); si es null, la org es develop (:229-239). Es un desvío formal del protocolo SEC, justificado porque el SUPER_ADMIN elige el cliente. No valida deletedAt.",
+    "validacion": "zod",
+    "evidencia_validacion": "CreateProjectSchema.parse (project.actions.ts:596)",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "simbolo": "updateProject",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (project.actions.ts:645)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "data.organizationId del body (project.actions.ts:665-670); el proyecto se busca por id sin scoping (:650-659)",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateProjectSchema.parse (project.actions.ts:646). Un string vacío pasa a undefined: no se pueden vaciar campos.",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "simbolo": "updateProjectStatus",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (project.actions.ts:726)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "projectId global (project.actions.ts:730-743), por diseño (PLAN-631)",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateProjectStatusSchema.parse (project.actions.ts:727)",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "simbolo": "deleteProject",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (project.actions.ts:784)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "projectId global (project.actions.ts:788-801)",
+    "validacion": "zod",
+    "evidencia_validacion": "ProjectIdSchema.parse (project.actions.ts:785)",
+    "rate_limit": "no",
+    "notas": "Borra hijos en cascada sin auditoría (:806-810)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "simbolo": "convertLeadToProject",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (project.actions.ts:837)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del body (project.actions.ts:862) y leadId (:841-844)",
+    "validacion": "zod",
+    "evidencia_validacion": "ConvertLeadToProjectSchema.parse (project.actions.ts:838)",
+    "rate_limit": "no",
+    "notas": "Escribe OsLead.status=CERRADO (:894-901), un modelo de ZONA-FRANCO, desde zona libre. La consume convert-lead-dialog.tsx:124, que está fuera del lote."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "simbolo": "listProjects",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (project.actions.ts:934)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "findMany global sin paginación (project.actions.ts:936-1007)",
+    "validacion": "no-aplica",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "simbolo": "getProjectById",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (project.actions.ts:1024)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "findUnique por id (project.actions.ts:1027-1030)",
+    "validacion": "zod",
+    "evidencia_validacion": "ProjectIdSchema.parse (project.actions.ts:1025)",
+    "rate_limit": "no",
+    "notas": "Sin consumidores (git grep -w getProjectById devuelve solo la definición)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/milestone.actions.ts",
+    "simbolo": "markMilestonePaid",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (milestone.actions.ts:23)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "update por id (milestone.actions.ts:26-27)",
+    "validacion": "zod",
+    "evidencia_validacion": "MilestoneIdSchema (milestone.actions.ts:24)",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/milestone.actions.ts",
+    "simbolo": "unmarkMilestonePaid",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (milestone.actions.ts:53)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "update por id (milestone.actions.ts:56-57)",
+    "validacion": "zod",
+    "evidencia_validacion": "MilestoneIdSchema (milestone.actions.ts:54)",
+    "rate_limit": "no",
+    "notas": "Sin consumidores. La UI no permite deshacer."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+    "simbolo": "createMaintenancePayment",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (maintenance.actions.ts:35)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "projectId del body (maintenance.schemas.ts:20)",
+    "validacion": "zod",
+    "evidencia_validacion": "CreateMaintenancePaymentSchema (maintenance.actions.ts:36)",
+    "rate_limit": "no",
+    "notas": "Sin consumidores."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+    "simbolo": "markMaintenancePaid",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (maintenance.actions.ts:64)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "update por id (maintenance.actions.ts:67-68)",
+    "validacion": "zod",
+    "evidencia_validacion": "MarkMaintenancePaidSchema (maintenance.actions.ts:65)",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+    "simbolo": "generatePendingMaintenance",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin (maintenance.actions.ts:94)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "projectId global (maintenance.actions.ts:97-114)",
+    "validacion": "zod",
+    "evidencia_validacion": "ProjectIdSchema (maintenance.actions.ts:95); createMany con skipDuplicates sobre @@unique([projectId, month, year]) (schema.prisma:1047)",
+    "rate_limit": "no"
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Tablero de proyectos: listar, filtrar y mover de estado",
+    "pasos": [
+     "admin/projects/page.tsx:19-22: el RSC pide listProjects() y las orgs (unstable_cache sin guard, :7-16)",
+     "_actions/project.actions.ts:934: requireSuperAdmin; :936-1007: findMany global con horas, hitos y mantenimiento",
+     "_actions/project.actions.ts:449-503: serializeProjectListItem. isInternal por slug develop (:454), startDate derivado (:477), null si no hay señales (:382-384)",
+     "_components/projects-board.tsx:89-92: filterProjects en memoria con DEFAULT_FILTERS (projects-filters.ts:62-67, inicio 6m)",
+     "_components/projects-filters.ts:158-164: con startDate null la card queda oculta salvo con 'Todos'",
+     "_components/project-list.tsx:73-136: columnas droppables (droppable-project-column.tsx:23) y cards draggables (draggable-project-card.tsx:37-40)",
+     "_components/projects-board.tsx:130-143 -> :100-120: drop optimista y updateProjectStatus",
+     "_actions/project.actions.ts:722-780: requireSuperAdmin, Zod, update de status (+deliveredAt en COMPLETED, :751-753) y revalidatePath (:768-774)",
+     "_components/projects-board.tsx:118: router.refresh()"
+    ]
+   },
+   {
+    "nombre": "Alta y edición de proyecto",
+    "pasos": [
+     "_components/projects-board.tsx:192 y [projectId]/layout.tsx:232-246: ProjectForm (orgs sin filtrar deletedAt, layout.tsx:140-153 / page.tsx:9-13)",
+     "_components/project-form.tsx:152-172: arma el payload y corre CreateProjectSchema.safeParse en el cliente",
+     "_actions/project.actions.ts:593-602: requireSuperAdmin, Zod, resolveProjectOrganization (:225-258, null => org develop) y syncOrganizationService (:260-300, crea o activa un Service en la org)",
+     "_actions/project.actions.ts:604-620: project.create y createDefaultMilestones 50/50 si hay monto (:302-346)",
+     "_actions/project.actions.ts:643-720: updateProject. Los campos vacíos se ignoran (:680-690) y no crea hitos",
+     "_components/project-form.tsx:182-188: error crudo en serverError, o closeModal + router.refresh"
+    ]
+   },
+   {
+    "nombre": "Ficha del proyecto: resumen, estado y ver como cliente",
+    "pasos": [
+     "[projectId]/layout.tsx:105-108: auth(); :113-153: proyecto + todas las orgs; :160: callerCanAccessOrg sin chequeo de rol",
+     "[projectId]/page.tsx:99-167: auth() + findUnique + callerCanAccessOrg; render del resumen y las finanzas",
+     "[projectId]/_components/project-status-control.tsx:43-63 -> _actions/project.actions.ts:722 -> router.refresh (:62)",
+     "[projectId]/layout.tsx:219: form startImpersonationAction. Desemboca en el flujo D1 'Impersonacion de soporte (SUPER_ADMIN)'"
+    ]
+   },
+   {
+    "nombre": "Eliminar proyecto (tablero y ficha)",
+    "pasos": [
+     "_components/draggable-project-card.tsx:84-115: tacho + InlineConfirm",
+     "_components/projects-board.tsx:149-166: borrado optimista + deleteProject",
+     "_actions/project.actions.ts:782-831: requireSuperAdmin, Zod, deleteMany explícitos (:806-810) + delete, sin auditoría; error.message crudo en el catch (:829)",
+     "[projectId]/page.tsx:325-334 -> [projectId]/_components/delete-project-button.tsx:58-85: modal de confirmación + useFormStatus",
+     "sale del lote: [projectId]/_components/delete-project-button.tsx:75 -> src/lib/actions/projects.ts:108 (deleteProjectAction: cast de FormData :111, prisma.project.delete :114, redirect)"
+    ]
+   },
+   {
+    "nombre": "Pagos: hitos y mantenimiento mensual",
+    "pasos": [
+     "[projectId]/payments/page.tsx:70-104: loader sin guard propio; proyecto, hitos y mantenimiento por projectId",
+     "[projectId]/payments/page.tsx:154-160 -> _actions/milestone.actions.ts:19-47: requireSuperAdmin, Zod, paidAt=now, revalidate. El ActionResult se descarta",
+     "[projectId]/payments/page.tsx:184-190: aparece solo si hay maintenanceStartDate, que ninguna UI escribe -> _actions/maintenance.actions.ts:90-174 (createMany con skipDuplicates sobre schema.prisma:1047)",
+     "[projectId]/payments/page.tsx:248-253 y :298-303 -> _actions/maintenance.actions.ts:60-88"
+    ]
+   },
+   {
+    "nombre": "Tareas del proyecto y envío a aprobación del cliente",
+    "pasos": [
+     "[projectId]/tasks/page.tsx:17-53: proyecto + lista de SUPER_ADMIN, sin guard propio",
+     "sale del lote: [projectId]/tasks/page.tsx:34 -> src/app/(protected)/admin/team/_actions/task.actions.ts:321 (listTasksByProject)",
+     "_components/task-form.tsx:108-163: validación en el cliente; sale del lote: :144 -> task.actions.ts:197 (updateTask) / :148 -> task.actions.ts:155 (createTask)",
+     "_components/task-list.tsx:187-211: cambio rápido de estado (drag HTML5 :321-337); sale del lote: :196 -> task.actions.ts:197",
+     "_components/task-list.tsx:230-250 + modal :567-604; sale del lote: :238 -> task.actions.ts:231 (deleteTask)",
+     "_components/task-list.tsx:618-631: el botón aparece solo con DONE y sin approvalStatus; sale del lote: :628 -> src/lib/actions/projects.ts:177 (sendTaskForApprovalAction). Desemboca en el flujo D2 'Aprobar o pedir cambios en una entrega'"
+    ]
+   },
+   {
+    "nombre": "Horas del proyecto",
+    "pasos": [
+     "[projectId]/hours/page.tsx:28: requireSuperAdmin; :30-52: proyecto y tareas",
+     "sale del lote: [projectId]/hours/page.tsx:58 -> src/app/(protected)/admin/team/_actions/time-entry.actions.ts:270 (listTimeEntriesByProject)",
+     "[projectId]/hours/page.tsx:114-124: TimeEntryPanel solo con tareas propias o sin asignar",
+     "_components/time-entry-panel.tsx:138-179: validación en el cliente; sale del lote: :159 -> time-entry.actions.ts:136 (createTimeEntry)",
+     "_components/time-entry-panel.tsx:181-201 + modal :409-446; sale del lote: :189 -> time-entry.actions.ts:243 (deleteTimeEntry)"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Un proyecto recién creado sin monto, lead ni horas queda oculto en el tablero por el filtro por defecto",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/projects-filters.ts",
+      "linea": 65,
+      "fragmento": "start: { period: '6m', from: '', to: '' },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/projects-filters.ts",
+      "linea": 162,
+      "fragmento": "if (!startDate) {\n    return false"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 382,
+      "fragmento": "if (candidates.length === 0) {\n    return null"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+      "linea": 187,
+      "fragmento": "closeModal()\n      router.refresh()"
+     }
+    ],
+    "impacto": "Bloqueante menor para el primer cliente real. Si se da de alta su proyecto sin monto (o un proyecto interno), no hay hitos, horas, mantenimiento ni lead, y deriveProjectStartDate devuelve null. Con el filtro por defecto (Inicio: 6 meses) la card no aparece en Planning después de guardar: el contador sube pero el tablero no la muestra, y el alta parece fallida. Pasa lo mismo con proyectos convertidos de un lead creado hace más de 6 meses. El registro de cambios declara el fix ('if (!startDate) return true', Proyectos_ registro de cambios.md:15), pero no está en ningún branch.",
+    "propuesta": "Que matchesStart trate startDate null como visible (o que el default de Inicio sea 'Todos'). Agregar un test del filtro con startDate null y corregir el registro de cambios.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos",
+     "h4.adm-proyectos.tablero-kanban",
+     "h4.adm-proyectos.alta-edicion",
+     "modelo.Project"
+    ],
+    "relacionados": "PLAN-626",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "El mantenimiento mensual no se puede activar: ninguna pantalla ni action escribe maintenanceStartDate",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+      "linea": 115,
+      "fragmento": "const isInMaintenance = Boolean(project.maintenanceStartDate)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.schemas.ts",
+      "linea": 58,
+      "fragmento": "monthlyRate: optionalPositiveNumberSchema,\n  estimatedEndDate: optionalDateSchema,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+      "linea": 120,
+      "fragmento": "if (!project.maintenanceStartDate) {\n      return fail('Project has no maintenance start date')"
+     },
+     {
+      "ruta": "prisma/seed-agency-os.ts",
+      "linea": 1396,
+      "fragmento": "maintenanceStartDate: daysAgo(44, 10),"
+     }
+    ],
+    "impacto": "develOP no puede registrar ni cobrar desde el admin el mantenimiento mensual del primer cliente. La sección Mantenimiento se queda para siempre en 'El proyecto pasara a mantenimiento cuando tenga una fecha...' (payments/page.tsx:204) y nunca aparece 'Generar meses pendientes'. Marcar el proyecto COMPLETED tampoco lo inicia: solo sella deliveredAt (project.actions.ts:749-754). Únicamente funciona con datos del seed o editando la base. Las actions de mantenimiento (maintenance.actions.ts:60-174) existen pero no se pueden alcanzar.",
+    "propuesta": "Agregar 'Inicio de mantenimiento' al ProjectForm y a Create/UpdateProjectSchema, o proponerlo al pasar a COMPLETED con una confirmación. Mostrar en Pagos el monthlyRate vigente.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos",
+     "h4.adm-proyectos.mantenimiento",
+     "modelo.Project",
+     "modelo.OsMaintenancePayment"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Los hitos de pago se crean solo en el alta: si el monto se carga o cambia después no se crean ni se ajustan, y Pagos no tiene estado vacío",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 620,
+      "fragmento": "await createDefaultMilestones(tx, createdProject.id, parsed.agreedAmount)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 685,
+      "fragmento": "...(data.agreedAmount !== undefined ? { agreedAmount: data.agreedAmount } : {}),"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+      "linea": 127,
+      "fragmento": "<div className=\"mt-5 grid gap-4 lg:grid-cols-2\">\n          {project.milestones.map((milestone) => ("
+     }
+    ],
+    "impacto": "Si el proyecto del primer cliente se crea sin monto y el monto se carga al editarlo, nunca tendrá hitos de inicio y entrega. createDefaultMilestones solo se llama en :620 y :903, y no hay UI para crearlos. La pestaña Pagos muestra un bloque 'Hitos de desarrollo' vacío y sin explicación. Si el monto cambia, los hitos quedan con el 50/50 anterior y 'Hitos pagados' (page.tsx:307) y la card del tablero muestran montos que no coinciden con lo acordado.",
+    "propuesta": "En updateProject, llamar a createDefaultMilestones cuando el proyecto no tenga hitos. Decisión para Valentino: si un cambio de monto recalcula los hitos no pagados. Agregar en Pagos una rama vacía con explicación.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.pagos-hitos",
+     "h4.adm-proyectos.alta-edicion",
+     "modelo.OsPaymentMilestone"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Una entrega con cambios pedidos por el cliente no se puede reenviar a aprobación desde el admin",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+      "linea": 618,
+      "fragmento": "if (task.approvalStatus || task.status !== 'DONE') {\n    return null"
+     },
+     {
+      "ruta": "src/actions/dashboard-actions.ts",
+      "linea": 135,
+      "fragmento": "approvalStatus: 'REJECTED',"
+     },
+     {
+      "ruta": "src/lib/actions/projects.ts",
+      "linea": 194,
+      "fragmento": "data: { approvalStatus: 'PENDING_APPROVAL' },"
+     }
+    ],
+    "impacto": "Cuando el primer cliente pide cambios en una entrega (flujo D2 'Aprobar o pedir cambios en una entrega'), el admin ve 'Cambios solicitados' y el motivo, pero el botón 'Enviar a aprobacion' no vuelve a aparecer. Ninguna escritura del repo vuelve approvalStatus a null ni re-envía una tarea REJECTED (ver ausencias). El ciclo pedir cambios, corregir y aprobar no se puede cerrar, y la tarea queda rechazada en el portal del cliente. La única salida es crear otra tarea.",
+    "propuesta": "Mostrar el control también con REJECTED: el re-envío pasa la tarea a PENDING_APPROVAL y limpia rejectionReason. Alternativa: resetear approvalStatus cuando la tarea sale de DONE. En ambos casos, mirar el resultado de la action.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.aprobacion-entregas",
+     "h2.cli-proyecto",
+     "modelo.Task"
+    ],
+    "relacionados": "PLAN-627 (TaskApprovalControl); flujo D2 'Aprobar o pedir cambios en una entrega'",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Pagos: 'Marcar pagado' no tiene confirmación, estado pendiente, mensaje de error ni forma de deshacer",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+      "linea": 156,
+      "fragmento": "action={async () => {\n                    'use server'\n                    await markMilestonePaid(milestone.id)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+      "linea": 188,
+      "fragmento": "await generatePendingMaintenance(project.id)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/milestone.actions.ts",
+      "linea": 49,
+      "fragmento": "export async function unmarkMilestonePaid("
+     }
+    ],
+    "impacto": "Un clic equivocado marca como cobrado un pago del cliente y la UI no permite deshacerlo: unmarkMilestonePaid existe pero no tiene consumidores. Si la action falla (sesión vencida, error de base), el ActionResult se descarta y el botón no muestra nada. Un doble clic vuelve a sellar paidAt. 'Generar meses pendientes' no dice cuántos meses creó. Para cobros reales esto es un estado financiero que no se puede corregir desde el admin.",
+    "propuesta": "Pasar los formularios de Pagos a un client component con useActionState o useFormStatus: confirmación breve, mensaje de error y un botón 'Deshacer' conectado a unmarkMilestonePaid (y su equivalente para mantenimiento).",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.pagos-hitos",
+     "h4.adm-proyectos.mantenimiento",
+     "modelo.OsPaymentMilestone"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Páginas de Proyectos sin guard de rol propio: Pagos y Tareas no verifican sesión y la ficha acepta a cualquier usuario de la org del proyecto (y carga la lista de todas las orgs)",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+      "linea": 70,
+      "fragmento": "const { projectId } = await params\n\n  const [projectRecord, milestones, maintenancePayments] = await Promise.all(["
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx",
+      "linea": 35,
+      "fragmento": "prisma.user.findMany({\n      where: {\n        role: Role.SUPER_ADMIN,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+      "linea": 160,
+      "fragmento": "if (!project || !callerCanAccessOrg(session.user, project.organizationId)) {"
+     },
+     {
+      "ruta": "src/lib/auth/assert-ownership.ts",
+      "linea": 88,
+      "fragmento": "return Boolean(resourceOrgId) && caller.organizationId === resourceOrgId"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/page.tsx",
+      "linea": 9,
+      "fragmento": "prisma.organization.findMany({\n      select: { id: true, companyName: true },"
+     }
+    ],
+    "impacto": "La defensa en profundidad está incompleta (mismo patrón que D1-c2). Si el guard de admin/layout.tsx:47 o el proxy no corren en un render (render parcial de RSC o refactor del layout), Pagos y Tareas entregan montos, hitos y nombres y emails de los SUPER_ADMIN sin verificar la sesión. La ficha y su layout dejan pasar a un ORG_MEMBER o CLIENT de la org del proyecto, y el layout además manda al cliente id y companyName de todas las organizaciones (layout.tsx:140-153 -> ProjectForm). Hoy lo mitiga el layout de admin. Los controles positivos son hours/page.tsx:28 (requireSuperAdmin) y chatbots/[botId]/page.tsx:29 (role !== 'SUPER_ADMIN').",
+    "propuesta": "Poner requireSuperAdmin() (o role === 'SUPER_ADMIN' con redirect) al principio de projects/page.tsx, [projectId]/layout.tsx, [projectId]/page.tsx, payments/page.tsx y tasks/page.tsx. callerCanAccessOrg no reemplaza el chequeo de rol dentro de /admin.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos",
+     "h4.adm-proyectos.ficha",
+     "h4.adm-proyectos.pagos-hitos",
+     "lib.auth",
+     "modelo.Organization"
+    ],
+    "relacionados": "D1-c2 (páginas que confían en el layout); P0-6; D3-A2 (F4 payments); PLAN-634",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Las actions de Proyectos devuelven error.message crudo (ZodError en JSON, mensajes de Prisma, 'Unauthorized') y no reportan a Sentry",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 639,
+      "fragmento": "return fail(error instanceof Error ? error.message : 'Failed to create project')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 829,
+      "fragmento": "return fail(error instanceof Error ? error.message : 'Failed to delete project')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+      "linea": 86,
+      "fragmento": "return fail(error instanceof Error ? error.message : 'Failed to mark payment as paid')"
+     },
+     {
+      "ruta": "src/lib/action-utils.ts",
+      "linea": 20,
+      "fragmento": "// Convierte cualquier error en un mensaje limpio para el cliente, sin filtrar\n// el array crudo de un ZodError ni un stack trace."
+     }
+    ],
+    "impacto": "Las 12 actions del lote atrapan cualquier error y lo devuelven como texto a la UI. Un ZodError (zod 3.25) llega como el JSON de issues, un error de Prisma con su mensaje interno (por ejemplo, la unique de osLeadId), y una sesión vencida como 'Unauthorized' en un recuadro rojo, sin llevar a /login. Ningún catch llama a Sentry (git grep da 0 en el lote): si falla crear, borrar o marcar pagos del primer cliente, no queda registro. El registro de cambios dice que la fuga de deleteProject se corrigió (Proyectos_ registro de cambios.md:19), pero :829 sigue devolviendo error.message. En el lote no se usa el helper toErrorMessage.",
+    "propuesta": "Usar toErrorMessage con mensajes en español por caso, convertir Unauthorized en redirect('/login') o en un código de error, y capturar con Sentry en los catch (idealmente con un wrapper de action compartido).",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos",
+     "lib.actions",
+     "int.sentry"
+    ],
+    "relacionados": "D1-c1 (mensajes internos al cliente); D1-c3 (Unauthorized genérico); D3-A4; PLAN-626",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Las fechas sin hora se guardan como medianoche UTC y se muestran un día antes en Argentina (entrega estimada y horas)",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.schemas.ts",
+      "linea": 23,
+      "fragmento": "const optionalDateSchema = z.preprocess(emptyValueToUndefined, z.coerce.date().optional())"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/project-card.tsx",
+      "linea": 111,
+      "fragmento": "}).format(new Date(value))"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+      "linea": 72,
+      "fragmento": "return new Date().toISOString().slice(0, 10)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/projects-filters.ts",
+      "linea": 199,
+      "fragmento": "return time >= startOfToday().getTime() && (windowEnd ? time <= windowEnd.getTime() : true)"
+     }
+    ],
+    "impacto": "Una entrega estimada del 20/10 se guarda como 2026-10-20T00:00Z. La card, formateada en un navegador en UTC-3, muestra '19 oct', mientras la ficha (formateada en el servidor) dice 20. El filtro 'Próxima semana' deja afuera una entrega de hoy. En Horas, después de las 21 h la fecha por defecto es la de mañana, y el schema de horas tiene el mismo patrón (time-entry.schemas.ts:33). Si el portal del cliente formatea igual, el cliente ve la fecha corrida.",
+    "propuesta": "Parsear 'YYYY-MM-DD' como fecha calendario (mediodía UTC, o un helper de dates-ar) en project.schemas y time-entry.schemas, y formatear con timeZone 'America/Argentina/Buenos_Aires'.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.tablero-kanban",
+     "h4.adm-proyectos.horas",
+     "modelo.Project",
+     "modelo.OsTimeEntry"
+    ],
+    "relacionados": "PLAN-633",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Editar proyecto no permite vaciar campos opcionales (descripción, montos, entrega, servicio)",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.schemas.ts",
+      "linea": 9,
+      "fragmento": "const trimmed = value.trim()\n  return trimmed === '' ? undefined : trimmed"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.schemas.ts",
+      "linea": 14,
+      "fragmento": "if (value === null || value === undefined || value === '') {"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 681,
+      "fragmento": "...(data.description !== undefined ? { description: data.description } : {}),"
+     }
+    ],
+    "impacto": "Si en 'Editar' se borra la descripción, el monto acordado, el monthly rate o la entrega estimada y se guarda, no cambia nada: el string vacío pasa a undefined y updateProject saltea el campo. El admin cree que lo borró, pero el dato viejo sigue en la ficha, en los filtros y en el portal del cliente.",
+    "propuesta": "En UpdateProjectSchema, distinguir 'no enviado' de 'vaciado' (null explícito para limpiar) y mapear null a la columna en updateProject.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.alta-edicion",
+     "modelo.Project"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Elegir el servicio de un proyecto activa un Service en la org del cliente y nunca desactiva el anterior",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 279,
+      "fragmento": "if (!existingService) {\n    await tx.service.create({"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 673,
+      "fragmento": "await syncOrganizationService(tx, organization, normalizedServiceType)"
+     },
+     {
+      "ruta": "src/lib/billing/get-current-plan.ts",
+      "linea": 39,
+      "fragmento": "prisma.service.findMany({\n      where: {\n        organizationId,"
+     }
+    ],
+    "impacto": "Si el admin elige 'AI' por error y lo corrige a 'Web', el primer cliente queda con dos Service ACTIVE. Esos servicios se leen en Servicios (dashboard/services/page.tsx:173) y en Facturación (get-current-plan.ts:39), así que el cliente vería servicios que no contrató. Los proyectos internos también crean Services en la org develop.",
+    "propuesta": "Decisión para Valentino: si la clasificación del proyecto debe sincronizar Service, hacerlo idempotente por proyecto y pausar el anterior; si no, separar la clasificación del proyecto del alta de servicios contratados.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.alta-edicion",
+     "h2.cli-servicios",
+     "h2.cli-cuenta",
+     "modelo.Service"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "No queda auditoría al borrar proyectos, cambiar de estado ni marcar pagos",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 806,
+      "fragmento": "await tx.osTimeEntry.deleteMany({ where: { projectId } })\n      await tx.osPaymentMilestone.deleteMany({ where: { projectId } })"
+     },
+     {
+      "ruta": "src/lib/actions/projects.ts",
+      "linea": 114,
+      "fragmento": "await prisma.project.delete({ where: { id: projectId } })"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/milestone.actions.ts",
+      "linea": 26,
+      "fragmento": "const milestone = await prisma.osPaymentMilestone.update({"
+     }
+    ],
+    "impacto": "Borrar el proyecto del primer cliente elimina en cascada tareas, hitos, mantenimiento y horas sin registrar quién lo hizo ni cuándo. Marcar un pago como cobrado tampoco llega al Audit log del admin, que sí registra acciones de chatbots, planes, impersonación y credenciales (logAdminAction en 11 archivos, 0 en Proyectos).",
+    "propuesta": "Llamar a logAdminAction en deleteProject y deleteProjectAction, updateProjectStatus, markMilestonePaid, markMaintenancePaid y updateProject (con computeDiff).",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.borrado",
+     "h4.adm-proyectos.pagos-hitos",
+     "h4.adm-audit"
+    ],
+    "relacionados": "D1-c3 (auditoría después del efecto)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Hay dos implementaciones del borrado de proyecto y 8 server actions exportadas sin consumidores",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/projects-board.tsx",
+      "linea": 156,
+      "fragmento": "const result = await deleteProject(projectId)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx",
+      "linea": 75,
+      "fragmento": "<form action={deleteProjectAction} className=\"flex justify-end gap-3\">"
+     },
+     {
+      "ruta": "src/lib/actions/projects.ts",
+      "linea": 111,
+      "fragmento": "const projectId = (formData.get('projectId') as string | null) ?? ''"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 524,
+      "fragmento": "isInternal: false,"
+     }
+    ],
+    "impacto": "El tablero borra con deleteProject (Zod, transacción, ActionResult) y la ficha con deleteProjectAction (cast de FormData sin Zod, delete directo, redirect). Cualquier cambio, como auditoría, soft-delete o aviso al cliente, hay que hacerlo dos veces y ya divergen. Además quedan exportadas y sin uso: getProjectById (con isInternal fijo en false y otro texto en :510), unmarkMilestonePaid, createMaintenancePayment, y 5 actions de lib/actions/projects.ts (createProjectAction, updateProjectAction, createTaskAction, updateTaskStatusAction, deleteTaskAction).",
+    "propuesta": "Unificar en project.actions.deleteProject; la ficha puede llamarla y después hacer redirect. Borrar las exports muertas, o conectar unmarkMilestonePaid como 'Deshacer'.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.borrado",
+     "lib.actions"
+    ],
+    "relacionados": "PLAN-632; PLAN-636; D1-c1 (módulos 'use server' sin importadores)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "El tablero de proyectos usa cards de ancho fijo de 340 px que desbordan en teléfonos",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/project-list.tsx",
+      "linea": 125,
+      "fragmento": "className=\"flex w-[340px] shrink-0\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/project-list.tsx",
+      "linea": 171,
+      "fragmento": "style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/droppable-project-column.tsx",
+      "linea": 30,
+      "fragmento": "'rounded-[28px] border bg-white/5 p-5 backdrop-blur-xl transition-colors',"
+     }
+    ],
+    "impacto": "A 390 px de ancho, después del padding del main y los 20 px por lado de la columna, quedan unos 318 px para una card de 340 px que no puede encogerse: el tablero desborda o se recorta. Es justo la vista que se diseñó para touch (HOLD de 200 ms). El overview tiene el mismo mínimo de 320 px dentro de p-4 + p-6.",
+    "propuesta": "Usar w-full max-w-[340px] en la card y minmax(min(100%,320px),1fr) en el overview.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.tablero-kanban"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Formularios de proyecto, tarea y horas con labels no asociados, errores sin aria-live y modal sin focus trap",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+      "linea": 213,
+      "fragmento": "<label className=\"mb-2 block text-sm font-medium text-zinc-200\">\n                Vincular a cliente del portal (opcional)\n              </label>"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+      "linea": 236,
+      "fragmento": "<label className=\"mb-2 block text-sm font-medium text-zinc-200\">Horas</label>\n                <input"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/projects-board.tsx",
+      "linea": 225,
+      "fragmento": "<div className=\"rounded-[28px] border border-rose-400/20 bg-rose-500/10 p-5 text-sm text-rose-200\">"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/overlay-modal.tsx",
+      "linea": 92,
+      "fragmento": "const focusFrame = window.requestAnimationFrame(() => {\n      panelRef.current?.focus()"
+     }
+    ],
+    "impacto": "Con lector de pantalla, los campos de los 4 formularios se anuncian sin nombre: no hay htmlFor ni Field en el lote, y ui/Input.tsx:23 espera un Field contenedor. Los errores de servidor no se anuncian porque no hay role=alert en el lote. Con Tab se puede salir del diálogo modal, y la card del tablero hereda role=button de dnd-kit sobre un <a> (project-card.tsx:257). Incumple el WCAG AA que exige CLAUDE.md.",
+    "propuesta": "Usar Field (o htmlFor/id) en ProjectForm, TaskForm, TimeEntryPanel y el filtro de fechas; role=alert en los bloques de error; un focus trap en OverlayModal.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.alta-edicion",
+     "h4.adm-proyectos.tareas",
+     "h4.adm-proyectos.horas",
+     "lib.ui"
+    ],
+    "relacionados": "D1-c1 (bloques de error sin role=alert)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "deliveredAt no se limpia al reabrir un proyecto completado y se vuelve a sellar en cada COMPLETED",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 751,
+      "fragmento": "...(parsed.status === ProjectStatus.COMPLETED\n            ? { deliveredAt: new Date() }\n            : {}),"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+      "linea": 208,
+      "fragmento": "Entregado: {formatDate(project.deliveredAt)}"
+     }
+    ],
+    "impacto": "Un proyecto que vuelve de Completado a En progreso sigue mostrando 'Entregado: <fecha>'. Al completarlo otra vez se pierde la fecha de entrega original. Un arrastre accidental a Completado y de vuelta deja una fecha de entrega falsa.",
+    "propuesta": "Limpiar deliveredAt al salir de COMPLETED, o sellarlo solo si es null, según decida Valentino.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.ficha",
+     "modelo.Project"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Los selectores de cliente de Proyectos ofrecen organizaciones archivadas",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+      "linea": 145,
+      "fragmento": "where: {\n        slug: {\n          not: 'develop',"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/page.tsx",
+      "linea": 11,
+      "fragmento": "where: { slug: { not: 'develop' } },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 242,
+      "fragmento": "const organization = await tx.organization.findUnique({\n    where: {\n      id: organizationId,"
+     }
+    ],
+    "impacto": "Un cliente archivado (soft-delete con deletedAt, schema.prisma:419, que admin/clients/page.tsx:23 oculta) sigue en el desplegable 'Vincular a cliente', y createProject y updateProject lo aceptan. Se pueden crear proyectos (y activar Services) para una org dada de baja.",
+    "propuesta": "Filtrar deletedAt: null en los dos findMany y rechazar orgs archivadas en resolveProjectOrganization.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.alta-edicion",
+     "modelo.Organization"
+    ],
+    "relacionados": "flujo D6 'Archivar cliente (soft-delete de Organization)'",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "El criterio 'proyecto interno' se repite como slug mágico 'develop' en 7 sitios y el helper único que declara el registro no existe",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+      "linea": 164,
+      "fragmento": "const isInternalProject = project.organization?.slug === 'develop'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx",
+      "linea": 57,
+      "fragmento": "const showApprovalFlow = project.organization?.slug !== 'develop'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 510,
+      "fragmento": "const businessName = project.organization?.companyName ?? 'Proyecto interno develOP'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+      "linea": 163,
+      "fragmento": "// P0-6: scoping defensivo. SUPER_ADMIN ve cualquier proyecto (incl. internos\n  // con organizationId null); cualquier otro rol futuro queda atado a su org."
+     }
+    ],
+    "impacto": "El registro de cambios (Proyectos_ registro de cambios.md:56) dice que se extrajo isInternalProject() como fuente única, pero git grep 'isInternalProject(' da 0. La condición está en layout.tsx:147 y :164, page.tsx:169, tasks/page.tsx:57, project.actions.ts:233 y :454, y page.tsx:11 (la lista). serializeProjectDetail fija isInternal en false. Los comentarios de la ficha siguen hablando de organizationId null aunque la columna es NOT NULL (schema.prisma:559). Es la 'bomba de tiempo' que el propio registro describe.",
+    "propuesta": "Crear un helper isInternalProject(org) y una constante AGENCY_ORG_SLUG en lib, usarlos en los 7 sitios y actualizar los comentarios.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos",
+     "modelo.Project"
+    ],
+    "relacionados": "PLAN-629; PLAN-636",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "listProjects trae todas las filas de horas, hitos y mantenimiento de todos los proyectos solo para calcular resúmenes",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 936,
+      "fragmento": "const projects = await prisma.project.findMany({"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 976,
+      "fragmento": "timeEntries: {\n          select: {\n            id: true,"
+     }
+    ],
+    "impacto": "No hay paginación ni agregados. Con un año de horas cargadas por proyecto, cada visita al tablero baja miles de filas solo para sumar horas y derivar fechas (:460, :348-387). Hoy, con pocos proyectos de prueba, no se nota.",
+    "propuesta": "Usar _sum, _min y _max (aggregate o groupBy) para horas y fechas, y paginar o acotar por estado o período.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.tablero-kanban",
+     "modelo.OsTimeEntry"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "IDs internos (cuid) en las URLs del admin y resolución dual id/slug en la ficha de cliente",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/project-card.tsx",
+      "linea": 251,
+      "fragmento": "href={`/admin/projects/${project.id}`}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+      "linea": 42,
+      "fragmento": "OR: [{ id: orgSlug }, { slug: orgSlug }],"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 630,
+      "fragmento": "href={`/admin/clients/${client.id}`}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 28,
+      "fragmento": "const org = await prisma.organization.findUnique({\n    where: { slug: orgSlug },"
+     }
+    ],
+    "impacto": "CLAUDE.md pide no exponer IDs internos en URLs, pero los links del admin usan cuid tanto para proyectos como para clientes. La ficha de cliente acepta id o slug en un parámetro llamado orgSlug, por eso B9.1 (orgSlug) y B11.6 (Organization.id) son ciertos a medias. El catch-all deprecado busca solo por slug, así que con el cuid que generan los links daría notFound. Riesgo bajo: solo afecta a SUPER_ADMIN.",
+    "propuesta": "Decidir un identificador (slug para clientes) y alinear links, parámetro y catch-all. Para proyectos, documentar el cuid como excepción o agregar un slug.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos",
+     "h4.adm-clientes"
+    ],
+    "relacionados": "D3-A1",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "roadmap-pendientes propone una vista nueva en /admin/clients/[clientId]/chatbot/, una ruta deprecada que el catch-all redirige a /admin/chatbots",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "docs/roadmap-pendientes.md",
+      "linea": 26,
+      "fragmento": "- **Qué:** En `/admin/clients/[clientId]/chatbot/` o equivalente, una sección read-only que muestre la `CrmIntegration`"
+     },
+     {
+      "ruta": "STATUS.md",
+      "linea": 216,
+      "fragmento": "1. Nueva ruta canónica `/admin/chatbots` — la vieja `/admin/clients/[id]/chatbot/*` queda deprecada"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 36,
+      "fragmento": "const targetTab: TabId = requested && TAB_MAP[requested] ? TAB_MAP[requested] : 'overview'\n\n  permanentRedirect(`/admin/chatbots/${org.botConfig.id}?tab=${targetTab}`)"
+     }
+    ],
+    "impacto": "Quien retome el pendiente B5.8 (vista read-only de CrmIntegration) o la ruta chatbot/install de B8.5 va a construir sobre una ruta que hoy hace permanentRedirect. Cualquier subruta no mapeada, incluida 'install', termina en la pestaña overview del bot.",
+    "propuesta": "Actualizar docs/roadmap-pendientes.md:26 para ubicar la vista en /admin/chatbots/[botId] (por ejemplo, en la pestaña de integraciones).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots",
+     "h4.adm-clientes"
+    ],
+    "relacionados": "D3-A3",
+    "requiere_verificacion_humana": false
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.tablero-kanban",
+    "nombre": "Tablero de proyectos por estado con filtros y arrastre",
+    "descripcion": "Lista todos los proyectos, de cliente e internos, en 4 columnas por estado. Filtra por servicio, visibilidad, inicio y entrega en memoria, y cambia el estado arrastrando la card (dnd-kit) en el tablero o desde el overview de la columna.",
+    "archivos": [
+     "src/app/(protected)/admin/projects/page.tsx",
+     "src/app/(protected)/admin/projects/_components/projects-board.tsx",
+     "src/app/(protected)/admin/projects/_components/project-list.tsx",
+     "src/app/(protected)/admin/projects/_components/project-card.tsx",
+     "src/app/(protected)/admin/projects/_components/draggable-project-card.tsx",
+     "src/app/(protected)/admin/projects/_components/droppable-project-column.tsx",
+     "src/app/(protected)/admin/projects/_components/projects-filter-bar.tsx",
+     "src/app/(protected)/admin/projects/_components/projects-filters.ts",
+     "src/app/(protected)/admin/projects/_components/projects-period-dropdown.tsx",
+     "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+     "src/app/(protected)/admin/projects/loading.tsx",
+     "src/app/(protected)/admin/projects/error.tsx"
+    ],
+    "entradas": [
+     "AgencyOsProjectsPage",
+     "listProjects",
+     "updateProjectStatus"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz trazado: page.tsx:19-22 -> project.actions.ts:934-1014 -> projects-board.tsx:89-92 -> project-list.tsx:121-133 -> projects-board.tsx:130-143 -> project.actions.ts:745-754 -> projects-board.tsx:118. No llega a L3: un proyecto nuevo queda oculto por el filtro por defecto, las cards fijas rompen mobile y los errores salen crudos y sin Sentry.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "listProjects con requireSuperAdmin (project.actions.ts:934); la page no tiene guard propio y getOrganizationsForDropdown (page.tsx:7-16) lista todas las orgs sin chequeo. SUPER_ADMIN es global por diseño."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Columna vacía con mensaje (project-list.tsx:138-150) y overview vacío (:188)."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Hay error.tsx (projects/error.tsx:12) y banner de error (projects-board.tsx:224-228), pero el texto es el error.message crudo (project.actions.ts:1016, :778)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "projects/loading.tsx:4-19 con skeletons."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "UpdateProjectStatusSchema (project.schemas.ts:73-76) parseado en project.actions.ts:727."
+     },
+     "mobile": {
+      "cumple": "no",
+      "evidencia": "Cards w-[340px] shrink-0 (project-list.tsx:125) y overview con minmax(320px) (:171): desbordan por debajo de unos 390 px."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Los errores de render llegan a Sentry por SectionErrorBoundary.tsx:64; los de las actions se devuelven sin captura (project.actions.ts:777-779)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "git grep TODO|FIXME en admin/projects: 0 (solo aparece el enum TaskStatus.TODO)."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Un proyecto recién creado sin señales de inicio no aparece con el filtro por defecto (projects-filters.ts:65, :162-164)."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.alta-edicion",
+    "nombre": "Crear y editar proyecto (cliente o interno)",
+    "descripcion": "Modal para crear o editar un proyecto con cliente opcional, servicio, entrega estimada, monto y monthly rate. Sin cliente, el proyecto cuelga de la org develop; con monto, se crean hitos 50/50.",
+    "archivos": [
+     "src/app/(protected)/admin/projects/_components/project-form.tsx",
+     "src/app/(protected)/admin/projects/_components/overlay-modal.tsx",
+     "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+     "src/app/(protected)/admin/projects/_actions/project.schemas.ts"
+    ],
+    "entradas": [
+     "createProject",
+     "updateProject"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "project-form.tsx:152-188 -> project.actions.ts:593-641 (alta: resolveProjectOrganization :225-258, project.create :604, hitos :620) / :643-720 (edición) -> router.refresh (project-form.tsx:188).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin en createProject (:595) y updateProject (:645). La org viene del body por diseño de SUPER_ADMIN (project.schemas.ts:55)."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Es un formulario."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "serverError visible (project-form.tsx:345-349), pero con error.message crudo o JSON de ZodError (project.actions.ts:639, :718)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Button con loading y 'Guardando...' (project-form.tsx:359-365)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "CreateProjectSchema y UpdateProjectSchema con .parse (project.actions.ts:596, :646), además del safeParse en el cliente (project-form.tsx:167)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Modal w-full max-w-3xl con grid md:grid-cols-2 (project-form.tsx:208-211; overlay-modal.tsx:124)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch sin captureException (project.actions.ts:638-640, :717-719)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO ni datos de prueba en el camino."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "No se pueden vaciar campos (project.schemas.ts:9-10; project.actions.ts:680-690), aparecen orgs archivadas en el selector (layout.tsx:145-149) y no se crean hitos si el monto se carga al editar."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.ficha",
+    "nombre": "Ficha del proyecto (resumen, finanzas, estado, ver como cliente)",
+    "descripcion": "Cabecera con estado, servicio, editar y 'Ver como cliente', y pestañas Overview, Tareas, Horas y Pagos. El Overview muestra resumen, fechas, cliente vinculado, lead original, conteo de tareas y finanzas.",
+    "archivos": [
+     "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+     "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+     "src/app/(protected)/admin/projects/[projectId]/_components/project-status-control.tsx",
+     "src/app/(protected)/admin/projects/[projectId]/_components/project-tabs.tsx",
+     "src/app/(protected)/admin/projects/[projectId]/_components/scroll-reset.tsx",
+     "src/app/(protected)/admin/projects/[projectId]/loading.tsx",
+     "src/app/(protected)/admin/projects/[projectId]/error.tsx"
+    ],
+    "entradas": [
+     "AgencyOsProjectLayout",
+     "AgencyOsProjectOverviewPage",
+     "updateProjectStatus"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "layout.tsx:105-162 -> page.tsx:99-167 -> render; estado: project-status-control.tsx:43-63 -> project.actions.ts:722-780 -> router.refresh (project-status-control.tsx:62).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "auth() + callerCanAccessOrg sin chequeo de rol (page.tsx:165; layout.tsx:160; assert-ownership.ts:85-88). El rol solo lo exige admin/layout.tsx:47."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Descripción vacía (page.tsx:184), proyecto interno sin cliente (:235-246) y sin lead (:248-263)."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "[projectId]/error.tsx:12 y error inline del control de estado (project-status-control.tsx:85), con el mensaje crudo de la action."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "[projectId]/loading.tsx:3-14 y spinner del estado (project-status-control.tsx:83)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "UpdateProjectStatusSchema (project.actions.ts:727)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid lg:grid-cols-2 y flex-wrap (page.tsx:180; layout.tsx:175, :217); pestañas con overflow-x-auto (project-tabs.tsx:60)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx -> SectionErrorBoundary.tsx:64; la action no captura."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO en el camino."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Muestra el estado real y permite cambiarlo. Detalle menor: 'Entregado' persiste al reabrir (project.actions.ts:751-753)."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.borrado",
+    "nombre": "Eliminar proyecto (tablero y ficha)",
+    "descripcion": "Borrado definitivo del proyecto con sus tareas, hitos, mantenimiento y horas. Se puede hacer desde el tacho de la card (confirmación en línea) o desde la zona de peligro de la ficha (modal).",
+    "archivos": [
+     "src/app/(protected)/admin/projects/_components/draggable-project-card.tsx",
+     "src/app/(protected)/admin/projects/_components/projects-board.tsx",
+     "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx",
+     "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+     "src/app/(protected)/admin/projects/_actions/project.actions.ts"
+    ],
+    "entradas": [
+     "deleteProject"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "draggable-project-card.tsx:84-105 -> projects-board.tsx:149-166 -> project.actions.ts:782-831. Desde la ficha: delete-project-button.tsx:58-85 -> src/lib/actions/projects.ts:108-117 (fuera del lote).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin en ambos caminos (project.actions.ts:784; lib/actions/projects.ts:109)."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Es una acción."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Tablero: banner con el error crudo (projects-board.tsx:158-161, :224-228). Ficha: la excepción va a error.tsx."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "useFormStatus en la ficha (delete-project-button.tsx:21-33) y borrado optimista en el tablero (projects-board.tsx:153)."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod en deleteProject (:785); en deleteProjectAction, cast de FormData sin Zod (lib/actions/projects.ts:111)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Modal max-w-md (delete-project-button.tsx:63)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Las excepciones de la ficha llegan por error.tsx; el catch del tablero no captura (project.actions.ts:828-830)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Hay confirmación en ambos caminos (InlineConfirm en draggable-project-card.tsx:99-115; modal en delete-project-button.tsx:58-87). Falta auditoría."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.pagos-hitos",
+    "nombre": "Hitos de pago (inicio y entrega) y marcar pagado",
+    "descripcion": "Al crear con monto se generan dos hitos 50/50. En la pestaña Pagos se ven y se marcan como pagados.",
+    "archivos": [
+     "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "src/app/(protected)/admin/projects/_actions/milestone.actions.ts",
+     "src/app/(protected)/admin/projects/_actions/milestone.schemas.ts",
+     "src/app/(protected)/admin/projects/_actions/project.actions.ts"
+    ],
+    "entradas": [
+     "AgencyOsProjectPaymentsPage",
+     "markMilestonePaid",
+     "unmarkMilestonePaid"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "project.actions.ts:620 -> :330-345 (hitos 50/50) -> payments/page.tsx:81-92 -> :154-160 -> milestone.actions.ts:23-43 (revalidate :42).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "El loader no tiene guard (payments/page.tsx:67-104); la action tiene requireSuperAdmin (milestone.actions.ts:23)."
+     },
+     "vacios": {
+      "cumple": "no",
+      "evidencia": "No hay rama para cero hitos (payments/page.tsx:127-172)."
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "El resultado de la action se descarta (payments/page.tsx:158)."
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "Hay loading.tsx del segmento, pero el botón no tiene estado pendiente (payments/page.tsx:161-166)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "MilestoneIdSchema (milestone.actions.ts:24)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid lg:grid-cols-2 (payments/page.tsx:127)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch sin captura (milestone.actions.ts:44-46)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "No hay forma de deshacer (unmarkMilestonePaid sin consumidores, milestone.actions.ts:49) ni de crear hitos si el monto se carga después."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.mantenimiento",
+    "nombre": "Mantenimiento mensual (generar meses y marcar pagado)",
+    "descripcion": "Después de la entrega, genera un pago por mes desde maintenanceStartDate al monthlyRate y permite marcarlos como pagados.",
+    "archivos": [
+     "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+     "src/app/(protected)/admin/projects/_actions/maintenance.schemas.ts",
+     "src/app/(protected)/admin/projects/[projectId]/page.tsx"
+    ],
+    "entradas": [
+     "generatePendingMaintenance",
+     "markMaintenancePaid",
+     "createMaintenancePayment"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "El código está completo (payments/page.tsx:175-322; maintenance.actions.ts:60-174), pero su puerta de entrada, maintenanceStartDate, no la escribe ninguna UI ni action: el único escritor es prisma/seed-agency-os.ts:1396. El camino feliz no se puede alcanzar sin datos de seed.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "El loader no tiene guard; las actions tienen requireSuperAdmin (maintenance.actions.ts:64, :94)."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Mensaje sin mantenimiento (payments/page.tsx:201-206) y sin meses generados (:209-212)."
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Los resultados se descartan (payments/page.tsx:188, :251, :301)."
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "Los botones no tienen estado pendiente (payments/page.tsx:191-196, :254-259)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "MarkMaintenancePaidSchema y ProjectIdSchema (maintenance.actions.ts:65, :95)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Tabla en md+ con overflow-x-auto y cards en mobile (payments/page.tsx:215, :270)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch sin captura (maintenance.actions.ts:85-87, :169-173)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "No se puede activar desde el admin (ver ausencias)."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.tareas",
+    "nombre": "Tareas del proyecto (crear, editar, mover de estado, borrar)",
+    "descripcion": "Backlog agrupado en Pendiente, En progreso y Completada, con edición en modal, cambio de estado por arrastre HTML5, detalle expandible con horas y borrado con confirmación.",
+    "archivos": [
+     "src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx",
+     "src/app/(protected)/admin/projects/_components/task-form.tsx",
+     "src/app/(protected)/admin/projects/_components/task-list.tsx",
+     "src/app/(protected)/admin/projects/_components/overlay-modal.tsx"
+    ],
+    "entradas": [
+     "AgencyOsProjectTasksPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "tasks/page.tsx:33-55 -> task-form.tsx:141-163 -> task.actions.ts:155 (fuera del lote) -> task-list.tsx:187-211 -> task.actions.ts:197 -> router.refresh (task-list.tsx:209).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "tasks/page.tsx no tiene guard propio (:14-53); las actions tienen requireSuperAdmin fuera del lote (task.actions.ts:157, :199, :233)."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "task-list.tsx:252-260 y columnas vacías en :549-559."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Banners de error (task-list.tsx:265-269; tasks/page.tsx:74-78; task-form.tsx:257-261) con el mensaje crudo."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner por tarea (task-list.tsx:391-393) y [projectId]/loading.tsx."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "CreateTaskSchema, UpdateTaskSchema y TaskIdSchema con .parse (task.actions.ts:158, :200, :234; fuera del lote, por git grep)."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "El arrastre es HTML5 nativo (task-list.tsx:321-337) y no funciona con touch; la alternativa es Editar > Estado (task-form.tsx:239-254)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Los errores se devuelven como texto (task-list.tsx:201-205) sin captura en el lote."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "CRUD completo con confirmación de borrado (task-list.tsx:567-604)."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.aprobacion-entregas",
+    "nombre": "Enviar una tarea completada a aprobación del cliente",
+    "descripcion": "En proyectos con cliente, una tarea DONE se envía a aprobación: queda en PENDING_APPROVAL y el cliente recibe un mensaje en su panel.",
+    "archivos": [
+     "src/app/(protected)/admin/projects/_components/task-list.tsx",
+     "src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx"
+    ],
+    "entradas": [
+     "AgencyOsProjectTasksPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "task-list.tsx:456-458 -> :622-631 -> src/lib/actions/projects.ts:177-209 (PENDING_APPROVAL :194 + Message al cliente :197) -> flujo D2 'Aprobar o pedir cambios en una entrega'.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (lib/actions/projects.ts:178); la org del mensaje sale del proyecto (:188-189)."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Es una acción."
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "No se mira el resultado (task-list.tsx:628) y la action hace returns silenciosos (lib/actions/projects.ts:182, :188)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner y disabled (task-list.tsx:637-644)."
+     },
+     "validacion_servidor": {
+      "cumple": "no",
+      "evidencia": "Cast de FormData sin Zod (lib/actions/projects.ts:180-181)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Botón en una fila flex (task-list.tsx:455)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Una excepción llega a error.tsx (SectionErrorBoundary.tsx:64); los returns silenciosos no."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Después de que el cliente pide cambios no se puede reenviar (task-list.tsx:618)."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.horas",
+    "nombre": "Carga y borrado de horas por tarea, con métricas de horas y valor hora",
+    "descripcion": "KPIs de horas totales, estimadas, diferencia y valor hora; carga rápida de horas por tarea y listado agrupado con borrado confirmado.",
+    "archivos": [
+     "src/app/(protected)/admin/projects/[projectId]/hours/page.tsx",
+     "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx"
+    ],
+    "entradas": [
+     "AgencyOsProjectHoursPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "hours/page.tsx:28-58 -> time-entry-panel.tsx:138-179 -> time-entry.actions.ts:136 (fuera del lote) -> router.refresh (time-entry-panel.tsx:177).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin en la page (hours/page.tsx:28) y en las actions (time-entry.actions.ts:140, :247, :274)."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "time-entry-panel.tsx:297-302."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Banners (time-entry-panel.tsx:276-280; hours/page.tsx:108-112) con el texto crudo."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Button con loading (time-entry-panel.tsx:283-292)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "CreateTimeEntrySchema con .parse (time-entry.actions.ts:141, por git grep)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Tabla en md+ con overflow-x-auto y cards en mobile (time-entry-panel.tsx:322, :366)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Errores devueltos como texto sin captura en el lote."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Solo se listan tareas propias o sin asignar (hours/page.tsx:115-118) y la fecha por defecto está en UTC (time-entry-panel.tsx:72)."
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-634",
+    "clave": "F4: /admin/projects/[projectId]/payments sin re-guard local",
+    "estado_en_codigo": "parcial",
+    "evidencia": "payments/page.tsx:67-104 sigue sin auth() ni requireSuperAdmin. Las mutaciones sí tienen guard: milestone.actions.ts:23, maintenance.actions.ts:35, :64, :94.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Lo que falta es el guard del loader; queda incluido en el hallazgo SEC de páginas sin guard de rol propio."
+   },
+   {
+    "id": "PLAN-636",
+    "clave": "Flag isInternal siempre false en project.actions",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "project.actions.ts:524 'isInternal: false'. serializeProjectDetail solo lo usa getProjectById (:1111), y git grep -w getProjectById origin/main -- src devuelve solo la definición.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Conviene borrar getProjectById y serializeProjectDetail en vez de arreglar el flag."
+   },
+   {
+    "id": "PLAN-633",
+    "clave": "estimatedEndDate con z.coerce.date() sobre fecha sin hora",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "project.schemas.ts:23 z.coerce.date(); project-form.tsx:296-301 input type=date; el mismo patrón está en time-entry.schemas.ts:33 (git grep).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-635",
+    "clave": "B11.1: Project.organizationId NOT NULL + Cascade + índice",
+    "estado_en_codigo": "hecho",
+    "evidencia": "schema.prisma:559-560 (organizationId String, onDelete: Cascade) y :567 @@index; migración prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql; seed-agency-os.ts:2422 usa ?? 'develop'.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Lo de 'project.actions falla temprano sin org' fue reemplazado por el fallback a la org develop (project.actions.ts:229-239, commit 0dfc004)."
+   },
+   {
+    "id": "PLAN-627",
+    "clave": "Defectos menores latentes de Proyectos (X de overlay-modal, scroll-lock, TaskApprovalControl, confirmingId)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Siguen los cuatro: overlay-modal.tsx:141 onClick={onClose} saltea dismissible (latente: dismissible no se usa fuera del archivo); lock por instancia en :80-82 y :99; task-list.tsx:628 ignora el resultado; project-list.tsx:57, :130 y :181 comparten confirmingId.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-631",
+    "clave": "updateProjectStatus global para super-admin",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "project.actions.ts:726-760: requireSuperAdmin y findUnique y update por id, sin filtro de org.",
+    "sigue_teniendo_sentido": "no",
+    "nota": "SUPER_ADMIN es global por modelo y no existe un rol de staff por org que justifique filtrar."
+   },
+   {
+    "id": "PLAN-639",
+    "clave": "P1 toast en ProjectManager",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/components/admin/managers/ProjectManager.tsx:21 '// Optionally show a toast here'. La carpeta agency-dashboard ya no existe (git ls-files | grep agency-dashboard da 0).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-637",
+    "clave": "Project.organizationId nullable (derivado a B14)",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "schema.prisma:559 'organizationId String' (NOT NULL) desde la migración B11.1; PLAN-630 decidió mantenerlo así.",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-630",
+    "clave": "Project.organizationId NOT NULL; un proyecto interno usa la org develop",
+    "estado_en_codigo": "hecho",
+    "evidencia": "schema.prisma:559; project.actions.ts:229-239 resuelve develop; presentación en layout.tsx:166-168 y project.actions.ts:455-457.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "serializeProjectDetail (:510) usa otro texto, 'Proyecto interno develOP'."
+   },
+   {
+    "id": "PLAN-625",
+    "clave": "Proyectos y Equipo inseparables (actions de Task y TimeEntry en team/_actions)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Cinco sitios importan team/_actions: task-form.tsx:7-10, task-list.tsx:17-20, time-entry-panel.tsx:8-11, hours/page.tsx:5, tasks/page.tsx:4.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Sigue además una tercera capa de actions de Task muertas en src/lib/actions/projects.ts (createTaskAction, updateTaskStatusAction, deleteTaskAction)."
+   },
+   {
+    "id": "PLAN-626",
+    "clave": "lane/proyectos: proyecto interno invisible (matchesStart null), fuga de errores de Prisma en deleteProject, lastActivityAt",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "lastActivityAt está (project.actions.ts:408-423, :480), pero no lo lee nadie. Los dos fixes declarados no están en el código: matchesStart sigue devolviendo false con startDate null (projects-filters.ts:162-164) y deleteProject sigue devolviendo error.message (project.actions.ts:829). git log --all -G 'if \\(!startDate\\) \\{?\\s*return true' -- '*projects-filters.ts' devuelve vacío.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-628",
+    "clave": "Kanban de Proyectos migrado a @dnd-kit",
+    "estado_en_codigo": "hecho",
+    "evidencia": "projects-board.tsx:6-16 (DndContext), :42-43 (HOLD 200/5), :231 (id estable), :248-259 (DragOverlay portaleado); draggable-project-card.tsx:42-63 (guarda anti phantom-click). Los commits 82a213c y a83e61c están en origin/main.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-629",
+    "clave": "Proyectos internos: resolveProjectOrganization + helper único isInternalProject + presentación",
+    "estado_en_codigo": "parcial",
+    "evidencia": "El fallback a develop está (project.actions.ts:229-239) y la presentación también (:455-457; layout.tsx:166-168). El helper único no existe: git grep 'isInternalProject(' origin/main -- src da 0, y la condición está repetida en layout.tsx:164, page.tsx:169, tasks/page.tsx:57 y project.actions.ts:454.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-632",
+    "clave": "Admin: eliminar proyecto desde el detalle",
+    "estado_en_codigo": "hecho",
+    "evidencia": "page.tsx:323-334 (zona de peligro); delete-project-button.tsx:44-90 (modal + form) -> src/lib/actions/projects.ts:108. El commit 5733e29 está en origin/main.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Convive con deleteProject del tablero: son dos implementaciones."
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: orgSlug (B9.1) vs Organization.id (B11.6); /admin/chatbots/[botId] usa cuid",
+    "resultado": "parcial",
+    "evidencia": "Los dos documentos son ciertos a medias. clients/[clientId]/page.tsx:33 renombra el parámetro a orgSlug, pero :42 busca por 'OR: [{ id: orgSlug }, { slug: orgSlug }]'. Los links mandan el cuid: ClientsListClient.tsx:630, ClientTabsNav.tsx:34, ClientHeader.tsx:136. El catch-all chatbot/[[...tab]]/page.tsx:28-29 busca solo por slug. En mi lote, /admin/projects/[projectId] también usa cuid (project-card.tsx:251, project-tabs.tsx:13), y cada action vuelve a buscar el recurso por id con requireSuperAdmin (project.actions.ts:650-663, :730-743, :788-801), sin chequeo de org porque SUPER_ADMIN es global.",
+    "hallazgo_titulo": "IDs internos (cuid) en las URLs del admin y resolución dual id/slug en la ficha de cliente"
+   },
+   {
+    "alerta": "[D3-A2] Checklist B-SEC.3c renumera los fixes (F2 IDOR projects.ts, F4 agency-actions) frente a B11.0 (F2 trust-the-layout, F4 payments, F5 agency-actions)",
+    "resultado": "parcial",
+    "evidencia": "Verificado en el código, no en el checklist. F2 (projects.ts trust-the-layout) está corregido: src/lib/actions/projects.ts:18-32 (ensureSuperAdminOrErrorString) y requireSuperAdmin en :109, :159, :178, :214. F5 (agency-actions cross-projectId) está corregido: src/actions/agency-actions.ts:24-32 (assertProjectBelongsToOrg, comentario 'B11.2 fix F5'). F4 (página de payments) sigue abierto: payments/page.tsx:67-104 no tiene guard propio, aunque las actions sí (milestone.actions.ts:23; maintenance.actions.ts:35, :64, :94). La numeración de B-SEC.3c (F4 = agency-actions) no coincide con el comentario del código (F5).",
+    "hallazgo_titulo": "Páginas de Proyectos sin guard de rol propio: Pagos y Tareas no verifican sesión y la ficha acepta a cualquier usuario de la org del proyecto (y carga la lista de todas las orgs)"
+   },
+   {
+    "alerta": "[D3-A3] Ruta /admin/clients/[clientId]/chatbot/install (B8.5) redirigida por el catch-all de B9.1; rutas deprecadas (STATUS.md:216) mientras roadmap-pendientes.md:26 propone una vista nueva ahí",
+    "resultado": "confirmada",
+    "evidencia": "No existe un archivo chatbot/install (git ls-files de clients/[clientId] muestra solo chatbot/[[...tab]]/page.tsx). TAB_MAP no incluye 'install' (:6-13), y :35-38 hace permanentRedirect de cualquier tab desconocida a /admin/chatbots/<botId>?tab=overview. STATUS.md:216 declara deprecada la ruta y docs/roadmap-pendientes.md:26 propone igual una sección nueva en esa ruta.",
+    "hallazgo_titulo": "roadmap-pendientes propone una vista nueva en /admin/clients/[clientId]/chatbot/, una ruta deprecada que el catch-all redirige a /admin/chatbots"
+   },
+   {
+    "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+    "resultado": "parcial",
+    "evidencia": "El commit 5e337337 está en origin/main. settings.actions.ts:170-171 usa fail(toErrorMessage(error, ...)), así que el array de ZodError ya no sale. Pero toErrorMessage deja pasar el message de cualquier Error genérico (action-utils.ts:20-31, patrón D1-c1), de modo que los mensajes de Prisma siguen saliendo. En mi lote ninguna action usa toErrorMessage (git grep da 0) y el ZodError crudo sí sale (project.actions.ts:639 y siguientes).",
+    "hallazgo_titulo": "Las actions de Proyectos devuelven error.message crudo (ZodError en JSON, mensajes de Prisma, 'Unauthorized') y no reportan a Sentry"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "senales": [
+     "getProjectById (:1020-1115), serializeProjectDetail (:505-591) y el tipo ProjectDetailRecord (:95-170): unas 270 líneas sin consumidores (git grep -w getProjectById origin/main -- src devuelve solo la definición)",
+     "isInternal fijo en false (:524) y texto distinto al resto (:510)",
+     "deriveProjectLastActivityAt (:408-423) y lastActivityAt (:480): se serializan pero nadie los lee (en admin/projects solo aparecen en el tipo de project-card.tsx:28)"
+    ],
+    "que_rompe": "Nada en origin/main. Borrar getProjectById también quita una server action pública sin uso."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/milestone.actions.ts",
+    "senales": [
+     "unmarkMilestonePaid (:49-77) no tiene consumidores (git grep -w)"
+    ],
+    "que_rompe": "Nada. Mejor alternativa: conectarla como 'Deshacer' en Pagos en vez de borrarla."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+    "senales": [
+     "createMaintenancePayment (:31-58) no tiene consumidores (git grep -w)",
+     "CreateMaintenancePaymentSchema (maintenance.schemas.ts:19-24) solo lo usa esa función"
+    ],
+    "que_rompe": "Nada."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_actions/project.schemas.ts",
+    "senales": [
+     "Campos legacy businessName, contactName, contactPhone y contactEmail (:61-65): ninguna action los lee (git grep 'parsed.businessName|parsed.contactEmail|data.businessName' da 0) y el form no los envía (project-form.tsx:156-165)"
+    ],
+    "que_rompe": "Nada."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/projects/_components/overlay-modal.tsx",
+    "senales": [
+     "useIsClient local (:14-23) duplica src/lib/use-is-client.ts:15, que ya usan projects-board.tsx:20 y projects-period-dropdown.tsx:6",
+     "Es un modal propio del lane, paralelo a src/components/ui/Modal.tsx:26 (decisión documentada por el trap de backdrop-filter)"
+    ],
+    "que_rompe": "Nada si se importa el hook compartido; el modal propio se mantiene por decisión del lane."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Un proyecto nuevo sin monto queda oculto en el tablero",
+    "entorno": "local (npm run dev) con una base de desarrollo propia (no la Neon compartida); usuario SUPER_ADMIN",
+    "precondiciones": "Filtros sin tocar (Inicio = Últimos 6 meses).",
+    "pasos": [
+     "Entrar a /admin/projects y anotar el contador 'N internos'",
+     "Clic en 'Nuevo proyecto', dejar 'Proyecto interno de develOP', nombre 'Prueba oculto', sin monto ni entrega, y 'Crear proyecto'",
+     "Mirar la columna Planning",
+     "Cambiar el filtro Inicio a 'Todos' y volver a mirar"
+    ],
+    "esperado": "La card 'Prueba oculto' aparece en Planning apenas se guarda.",
+    "senal_falla": "El contador de internos sube 1 pero la card solo aparece con Inicio = 'Todos'.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Un proyecto recién creado sin monto, lead ni horas queda oculto en el tablero por el filtro por defecto"
+   },
+   {
+    "titulo": "Fecha de entrega corrida un día",
+    "entorno": "local con base de desarrollo; navegador en zona horaria America/Argentina/Buenos_Aires",
+    "precondiciones": "Un proyecto de prueba existente.",
+    "pasos": [
+     "Editar el proyecto y poner Entrega estimada 20/10/2026; guardar",
+     "En /admin/projects, con Entrega en 'Todos', leer la fecha de la card",
+     "Abrir la ficha (Overview) y leer 'Entrega estimada'",
+     "Después de las 21:00 hora local, abrir la pestaña Horas y mirar la fecha por defecto del formulario"
+    ],
+    "esperado": "La card y la ficha muestran 20 oct 2026, y la fecha por defecto en Horas es la de hoy.",
+    "senal_falla": "La card dice 19 oct (y la ficha 20), o la fecha por defecto en Horas es la de mañana.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Las fechas sin hora se guardan como medianoche UTC y se muestran un día antes en Argentina (entrega estimada y horas)"
+   },
+   {
+    "titulo": "Tablero de proyectos en teléfono",
+    "entorno": "local o deploy de preview; DevTools en 390x844 y 360x800",
+    "precondiciones": "Al menos 2 proyectos en una misma columna.",
+    "pasos": [
+     "Abrir /admin/projects a 390 px de ancho",
+     "Ver si hay scroll horizontal o cards cortadas a la derecha",
+     "Abrir el overview de una columna con el ícono de expandir",
+     "Repetir a 360 px"
+    ],
+    "esperado": "Las cards se ajustan al ancho, sin scroll horizontal de página ni dentro del modal.",
+    "senal_falla": "Hay scroll horizontal o las cards se ven recortadas.",
+    "escribe_db_o_email": false,
+    "hallazgos": "El tablero de proyectos usa cards de ancho fijo de 340 px que desbordan en teléfonos"
+   },
+   {
+    "titulo": "Reenviar una entrega rechazada",
+    "entorno": "local con base de desarrollo; un SUPER_ADMIN y un ORG_MEMBER de un cliente de prueba con un proyecto vinculado",
+    "precondiciones": "Una tarea del proyecto en estado Completada.",
+    "pasos": [
+     "Admin: en /admin/projects/<id>/tasks, clic en 'Enviar a aprobacion'",
+     "Cliente: en /dashboard/project, pedir cambios con un motivo",
+     "Admin: recargar Tareas, mover la tarea a En progreso y otra vez a Completada",
+     "Buscar un control para volver a enviarla a aprobación"
+    ],
+    "esperado": "Hay una forma de reenviar la tarea corregida a aprobación.",
+    "senal_falla": "La tarea queda en 'Cambios solicitados' sin botón de reenvío, aunque se cambie su estado.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Una entrega con cambios pedidos por el cliente no se puede reenviar a aprobación desde el admin"
+   },
+   {
+    "titulo": "Marcar pagado con la sesión vencida",
+    "entorno": "local con base de desarrollo; SUPER_ADMIN",
+    "precondiciones": "Un proyecto con un hito pendiente.",
+    "pasos": [
+     "Abrir /admin/projects/<id>/payments",
+     "En otra pestaña, cerrar sesión",
+     "Volver a la primera pestaña y hacer clic en 'Marcar pagado'"
+    ],
+    "esperado": "Aparece un mensaje de error o se redirige a /login.",
+    "senal_falla": "No pasa nada visible: el botón queda igual y no hay mensaje.",
+    "escribe_db_o_email": false,
+    "hallazgos": "Pagos: 'Marcar pagado' no tiene confirmación, estado pendiente, mensaje de error ni forma de deshacer"
+   },
+   {
+    "titulo": "Páginas de Proyectos con un usuario que perdió el rol",
+    "entorno": "local con base de desarrollo; un usuario que hoy es SUPER_ADMIN y Prisma Studio sobre esa base",
+    "precondiciones": "Un proyecto vinculado a la org X.",
+    "pasos": [
+     "Con ese usuario, abrir /admin/projects/<id del proyecto de X>/payments",
+     "Sin cerrar la pestaña, cambiar en la base su rol a ORG_MEMBER y su organización a X",
+     "En la misma pestaña, navegar con las pestañas Overview, Tareas y Pagos (navegación client-side, sin recargar)",
+     "Inspeccionar en DevTools la respuesta RSC de la ficha y buscar companyName de otras organizaciones"
+    ],
+    "esperado": "Al perder el rol, cualquier navegación dentro de /admin redirige a /login o al portal.",
+    "senal_falla": "Se siguen viendo Pagos, Tareas o la ficha, o el payload trae la lista de todas las organizaciones.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Páginas de Proyectos sin guard de rol propio: Pagos y Tareas no verifican sesión y la ficha acepta a cualquier usuario de la org del proyecto (y carga la lista de todas las orgs)"
+   },
+   {
+    "titulo": "El servicio del proyecto aparece en el portal del cliente",
+    "entorno": "local con base de desarrollo; SUPER_ADMIN y un usuario del cliente de prueba",
+    "precondiciones": "El cliente de prueba no tiene servicios activos.",
+    "pasos": [
+     "Admin: crear un proyecto vinculado al cliente con Servicio 'AI'",
+     "Editarlo y cambiar el Servicio a 'Web'",
+     "Cliente: abrir /dashboard/services y /dashboard/cuenta/facturacion"
+    ],
+    "esperado": "El cliente ve solo los servicios que contrató de verdad (o uno solo, el actual).",
+    "senal_falla": "Aparecen AI y Web como servicios activos.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Elegir el servicio de un proyecto activa un Service en la org del cliente y nunca desactiva el anterior"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "Ninguna UI ni action de src escribe Project.maintenanceStartDate; solo hay lecturas, selects y tipos",
+    "comando": "git grep -n \"maintenanceStartDate\" origin/main -- src  (fuera de admin/projects: 0 resultados; dentro del lote solo selects, serializaciones y lecturas, confirmado leyendo los 33 archivos)",
+    "control_positivo": "git grep -n \"maintenanceStartDate\" origin/main -- prisma/seed-agency-os.ts -> :1396 'maintenanceStartDate: daysAgo(44, 10),' (escritor del seed)"
+   },
+   {
+    "afirmacion": "Ninguna escritura vuelve approvalStatus a null ni reenvía una tarea REJECTED",
+    "comando": "git grep -n \"approvalStatus:\" origin/main -- src | grep -v \"approvalStatus: true\" -> solo PENDING_APPROVAL (lib/actions/projects.ts:194, agency-actions.ts:45, task-approvals.ts:23), APPROVED y REJECTED; git grep -n \"approvalStatus: null\" origin/main -- src -> 0",
+    "control_positivo": "El mismo grep encuentra src/actions/dashboard-actions.ts:135 \"approvalStatus: 'REJECTED',\""
+   },
+   {
+    "afirmacion": "Proyectos no escribe auditoría",
+    "comando": "git grep -n \"logAdminAction\" origin/main -- \"src/app/(protected)/admin/projects\" src/lib/actions/projects.ts -> 0",
+    "control_positivo": "git grep -c \"logAdminAction\" origin/main -- src -> 11 archivos (p. ej. admin/clients/_actions/plan.actions.ts, lib/actions/impersonation.ts)"
+   },
+   {
+    "afirmacion": "Ningún archivo del lote llama a Sentry",
+    "comando": "git grep -n -i \"sentry\\|captureException\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0",
+    "control_positivo": "git grep -n \"Sentry.captureException\" origin/main -- src/components/ui/SectionErrorBoundary.tsx -> :64"
+   },
+   {
+    "afirmacion": "unmarkMilestonePaid, createMaintenancePayment y getProjectById no tienen consumidores",
+    "comando": "git grep -n -w <simbolo> origin/main -- src, excluyendo su archivo de definición -> 0 para los tres",
+    "control_positivo": "El mismo comando con markMilestonePaid encuentra payments/page.tsx:9 y :158"
+   },
+   {
+    "afirmacion": "No existe un helper isInternalProject()",
+    "comando": "git grep -n \"isInternalProject(\" origin/main -- src -> 0",
+    "control_positivo": "git grep -n \"isInternalProject\" origin/main -- \"src/app/(protected)/admin/projects\" -> layout.tsx:164 y page.tsx:169 (constantes locales)"
+   },
+   {
+    "afirmacion": "El fix 'if (!startDate) return true' de matchesStart no está en ningún branch",
+    "comando": "git log --all --oneline -G \"if \\(!startDate\\) \\{?\\s*return true\" -- \"*projects-filters.ts\" -> vacío",
+    "control_positivo": "git log --oneline origin/main -S \"if (!startDate)\" -- \"src/app/(protected)/admin/projects/_components/projects-filters.ts\" -> 4d2dd3ec"
+   },
+   {
+    "afirmacion": "No hay router.push en los archivos del lote",
+    "comando": "git grep -n \"router.push\" origin/main -- \"src/app/(protected)/admin/projects\" -> solo un comentario en delete-project-button.tsx:16 y convert-lead-dialog.tsx:132, que no es del lote",
+    "control_positivo": "El mismo grep encuentra convert-lead-dialog.tsx:132 (el patrón funciona)"
+   },
+   {
+    "afirmacion": "No hay any en el lote",
+    "comando": "git grep -n -E \":\\s*any\\b|as any\\b\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0",
+    "control_positivo": "El mismo patrón sobre src encuentra src/lib/integrations/pagespeed.ts:77 'data: any,'"
+   },
+   {
+    "afirmacion": "Los formularios del lote no asocian los labels (no hay htmlFor ni Field)",
+    "comando": "git grep -n \"htmlFor\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0; git grep -n \"<Field\" -> solo genéricos de TypeScript (project-form.tsx:137, task-form.tsx:93)",
+    "control_positivo": "git grep -l \"<Field\" origin/main -- src/app -> admin/announcements/_components/announcement-publisher.tsx, admin/chatbots/new/CreateBotForm.tsx"
+   },
+   {
+    "afirmacion": "No hay role=alert ni aria-live en el lote",
+    "comando": "git grep -n \"role=\\\"alert\\\"\\|aria-live\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0",
+    "control_positivo": "git grep -l \"role=\\\"alert\\\"\" origin/main -- src -> admin/leads/_components/lead-pipeline.tsx"
+   },
+   {
+    "afirmacion": "Las actions del lote no usan toErrorMessage",
+    "comando": "git grep -n \"toErrorMessage\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0",
+    "control_positivo": "git grep -n \"toErrorMessage\" origin/main -- \"src/app/(protected)/admin/settings/_actions/settings.actions.ts\" -> :6, :123, :171"
+   },
+   {
+    "afirmacion": "Los selectores de organización del lote no filtran deletedAt",
+    "comando": "git grep -n \"deletedAt\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0",
+    "control_positivo": "git grep -n \"deletedAt\" origin/main -- \"src/app/(protected)/admin/clients/page.tsx\" -> :23 'where: { deletedAt: null }'"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Filtro por defecto que excluye registros con fecha derivada null: el registro recién creado desaparece después del alta",
+    "como_buscarlo": "En otros boards con filtros en memoria, buscar matchers de fecha que devuelven false con null y tienen un default distinto de 'all': git grep -n \"return false\" en archivos *-filters.ts y revisar DEFAULT_FILTERS",
+    "donde_aparecio": "src/app/(protected)/admin/projects/_components/projects-filters.ts:65, :162-164"
+   },
+   {
+    "patron": "Server actions inline ('use server' dentro de action={async () => ...}) en RSC que descartan el ActionResult: fallo silencioso, sin pending y sin feedback",
+    "como_buscarlo": "git grep -n -A2 \"action={async\" origin/main -- \"src/app/**/*.tsx\" y revisar si se usa el resultado",
+    "donde_aparecio": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:156-159, :186-189, :249-252, :299-302"
+   },
+   {
+    "patron": "Schemas de update parcial que convierten '' en undefined: el campo no se puede vaciar al editar",
+    "como_buscarlo": "git grep -n \"emptyStringToUndefined\\|emptyValueToUndefined\" origin/main -- src, cruzado con schemas .partial() usados en updates con '!== undefined ?'",
+    "donde_aparecio": "src/app/(protected)/admin/projects/_actions/project.schemas.ts:4-19, :69; project.actions.ts:680-690"
+   },
+   {
+    "patron": "Funcionalidad que depende de una columna que ninguna UI ni action escribe (inalcanzable salvo con seed)",
+    "como_buscarlo": "Por cada campo opcional del schema leído en una condición de UI, git grep -n \"<campo>:\" en objetos data de create/update de src",
+    "donde_aparecio": "Project.maintenanceStartDate (payments/page.tsx:115; único escritor prisma/seed-agency-os.ts:1396)"
+   },
+   {
+    "patron": "Estado terminal de un workflow sin camino de reapertura (REJECTED sin reenvío)",
+    "como_buscarlo": "Por cada enum de workflow (ApprovalStatus, TicketStatus, LeadStatus), listar escritores con git grep -n \"<campo>:\" y ver si hay transición de salida del estado terminal",
+    "donde_aparecio": "approvalStatus REJECTED: task-list.tsx:618; escritores en dashboard-actions.ts:135 y task-approvals.ts:113"
+   },
+   {
+    "patron": "Acciones del admin que crean o activan registros visibles en el portal del cliente como efecto lateral, sin desactivar el anterior",
+    "como_buscarlo": "git grep -n \"service.create\\|ServiceStatus.ACTIVE\" origin/main -- src y cruzar con lectores del portal (dashboard/services/page.tsx:173, lib/billing/get-current-plan.ts:39)",
+    "donde_aparecio": "src/app/(protected)/admin/projects/_actions/project.actions.ts:260-300"
+   },
+   {
+    "patron": "Dos capas de server actions para la misma mutación (legacy src/lib/actions/*.ts frente a app/**/_actions/*.ts), con exports muertos",
+    "como_buscarlo": "Por cada export de src/lib/actions/*.ts, git grep -n -w <export> origin/main -- src excluyendo el archivo",
+    "donde_aparecio": "src/lib/actions/projects.ts (5 de 7 exports sin consumidores; deleteProjectAction duplica project.actions.ts:782)"
+   },
+   {
+    "patron": "z.coerce.date() sobre <input type=date> (medianoche UTC) formateado con new Date(iso) en el navegador: corrimiento de un día en UTC-3",
+    "como_buscarlo": "git grep -n \"z.coerce.date()\" origin/main -- src y revisar dónde se formatea (Intl sin timeZone)",
+    "donde_aparecio": "project.schemas.ts:23; time-entry.schemas.ts:33; project-card.tsx:107-111; time-entry-panel.tsx:72"
+   },
+   {
+    "patron": "Selectores u alta de organizaciones que no excluyen orgs archivadas (deletedAt)",
+    "como_buscarlo": "git grep -n \"organization.findMany\" origin/main -- src y verificar el filtro deletedAt: null",
+    "donde_aparecio": "[projectId]/layout.tsx:140-153; projects/page.tsx:9-13"
+   },
+   {
+    "patron": "Módulo 'use server' sin consumidores que solo chequea session.user.organizationId, sin rol (public si alguien lo reconecta)",
+    "como_buscarlo": "git grep -n \"task-approvals\" origin/main -- src (0 importadores); revisar requestTaskApproval, approveTask y rejectTask",
+    "donde_aparecio": "src/actions/task-approvals.ts:7-35 (visto al trazar approvalStatus; fuera del lote, para D1/D2)"
+   },
+   {
+    "patron": "Escritura de un modelo de ZONA-FRANCO (OsLead.status) desde zona libre, por fuera del flujo de LeadOS",
+    "como_buscarlo": "git grep -n \"osLead.update\" origin/main -- src fuera de src/lib/leados y admin/leads/_actions; revisar en D4 si rompe invariantes (actividad, OsLeadSetterMeta)",
+    "donde_aparecio": "src/app/(protected)/admin/projects/_actions/project.actions.ts:894-901 (convertLeadToProject -> CERRADO)"
+   },
+   {
+    "patron": "Guard de página en /admin con callerCanAccessOrg y sin chequeo de rol: deja pasar a un usuario no admin de la misma org",
+    "como_buscarlo": "git grep -n \"callerCanAccessOrg\" origin/main -- \"src/app/(protected)/admin\" y verificar que haya role === 'SUPER_ADMIN' antes",
+    "donde_aparecio": "[projectId]/page.tsx:165; [projectId]/layout.tsx:160 (en cambio, chatbots/[botId]/page.tsx:29 sí chequea el rol)"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:67",
+    "id_previo": "P0-6",
+    "estado": "parcial",
+    "evidencia": "chatbots/[botId]/page.tsx:29 (role !== 'SUPER_ADMIN') y :61 (callerCanAccessOrg): cerrado ahí. projects/[projectId]/page.tsx:99-102 y :165 ahora tiene auth() + callerCanAccessOrg (scoping defensivo), pero sin chequeo de rol, igual que layout.tsx:160. Sus hermanas payments/page.tsx:67-104 y tasks/page.tsx:14-53 siguen sin guard propio. Lo mitiga admin/layout.tsx:47."
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion.md:68",
+    "id_previo": "P0-6",
+    "estado": "parcial",
+    "evidencia": "Mismo estado que el anterior: findUnique sin org en projects/[projectId]/page.tsx:106-107, ahora seguido de callerCanAccessOrg (:165) sin rol. chatbots/[botId]/page.tsx:29 y :61 tiene rol + scoping. Payments y tasks siguen sin guard (payments/page.tsx:70-104; tasks/page.tsx:17-27)."
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+    "linea": 38,
+    "tipo": "copy",
+    "detalle": "Etiqueta de estado en inglés 'Planning' (también en project-list.tsx:27 y project-status-control.tsx:11)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+    "linea": 42,
+    "tipo": "tilde",
+    "detalle": "'Revision' sin tilde (también en project-list.tsx:29 y project-status-control.tsx:13)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+    "linea": 185,
+    "tipo": "strokeWidth",
+    "detalle": "Building2 sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+    "linea": 224,
+    "tipo": "strokeWidth",
+    "detalle": "LogIn sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+    "linea": 72,
+    "tipo": "tilde",
+    "detalle": "'Todavia no inicio mantenimiento' (Todavía, inició)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+    "linea": 90,
+    "tipo": "tilde",
+    "detalle": "'Mantenimiento al dia' (día)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+    "linea": 184,
+    "tipo": "tilde",
+    "detalle": "'Todavia no hay una descripcion detallada' (Todavía, descripción)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+    "linea": 231,
+    "tipo": "tilde",
+    "detalle": "'Suscripcion' (Suscripción)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+    "linea": 190,
+    "tipo": "contraste",
+    "detalle": "Rótulos de 10 px en text-zinc-500 sobre fondo oscuro (~4,1:1 < 4,5:1); se repite en las tiles de page.tsx, project-card.tsx:176 y hours/page.tsx:74"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+    "linea": 35,
+    "tipo": "otro",
+    "detalle": "Moneda fija en USD en los formateadores (también en payments/page.tsx:39, hours/page.tsx:17, project-card.tsx:97 y project-form.tsx:61): confirmar si es decisión de producto"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+    "linea": 204,
+    "tipo": "tilde",
+    "detalle": "'El proyecto pasara a mantenimiento' (pasará)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+    "linea": 211,
+    "tipo": "tilde",
+    "detalle": "'Todavia no hay meses generados' (Todavía)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+    "linea": 222,
+    "tipo": "tilde",
+    "detalle": "Encabezado 'Accion' y 'Sin accion' en :262 y :312 (Acción)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/project-tabs.tsx",
+    "linea": 12,
+    "tipo": "copy",
+    "detalle": "Pestaña 'Overview' en inglés"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx",
+    "linea": 30,
+    "tipo": "strokeWidth",
+    "detalle": "LoaderCircle sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/project-status-control.tsx",
+    "linea": 83,
+    "tipo": "strokeWidth",
+    "detalle": "LoaderCircle sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/project-card.tsx",
+    "linea": 183,
+    "tipo": "strokeWidth",
+    "detalle": "CalendarDays (:183, :191), CircleDollarSign (:199), FolderKanban (:210) y CheckCircle2 (:216) sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+    "linea": 230,
+    "tipo": "strokeWidth",
+    "detalle": "AlertTriangle sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+    "linea": 252,
+    "tipo": "tilde",
+    "detalle": "Placeholder 'automatizacion' (automatización)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+    "linea": 261,
+    "tipo": "tilde",
+    "detalle": "Label 'Descripcion' (Descripción)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+    "linea": 325,
+    "tipo": "copy",
+    "detalle": "Label 'Monthly rate' en inglés"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_actions/project.schemas.ts",
+    "linea": 53,
+    "tipo": "copy",
+    "detalle": "Errores de validación en inglés que ve el usuario: 'Project name is required' y 'Amount must be positive' (:26)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "linea": 662,
+    "tipo": "copy",
+    "detalle": "Mensajes en inglés que llegan a la UI vía fail: 'Project not found', 'Organization not found' (:254), 'Lead already has a linked project' (:859); en maintenance.actions.ts:121 y :125 'Project has no maintenance start date' y '...monthly rate configured'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "linea": 510,
+    "tipo": "copy",
+    "detalle": "'Proyecto interno develOP' frente a 'Proyecto interno de develOP' en el resto (:456, layout.tsx:167)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/task-form.tsx",
+    "linea": 115,
+    "tipo": "copy",
+    "detalle": "Errores en inglés: 'Title is required' y 'Estimated hours must be zero or positive' (:123)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+    "linea": 150,
+    "tipo": "tilde",
+    "detalle": "'Esperando aprobacion del cliente' y 'Enviar a aprobacion' en :645 (aprobación)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+    "linea": 256,
+    "tipo": "copy",
+    "detalle": "'Todavia no hay tareas' / 'Crea la primera tarea' (:257): falta tilde y usa tuteo en vez de voseo (Creá)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+    "linea": 430,
+    "tipo": "copy",
+    "detalle": "Rótulo 'Time entries' en inglés (también en :496)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+    "linea": 487,
+    "tipo": "tilde",
+    "detalle": "'Descripcion' y 'Sin descripcion detallada todavia.' (:490); 'Todavia no hay horas' (:532)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+    "linea": 362,
+    "tipo": "strokeWidth",
+    "detalle": "ChevronDown (:362), ChevronRight (:364), LoaderCircle (:392, :475, :641), Clock3 (:412), CheckCircle2 (:427), AlertTriangle (:440) y Send (:643) sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+    "linea": 556,
+    "tipo": "contraste",
+    "detalle": "Texto descriptivo en text-zinc-600 sobre fondo oscuro (< 4,5:1)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+    "linea": 143,
+    "tipo": "copy",
+    "detalle": "'Selecciona una tarea.', 'Ingresa una cantidad de horas valida.' (:149) y 'Selecciona una fecha.' (:154): tuteo y falta tilde (Seleccioná, Ingresá, válida)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+    "linea": 208,
+    "tipo": "copy",
+    "detalle": "'Carga rapida de horas' / 'Registra trabajo real ... y manten el costo/hora' (:210): faltan tildes y usa tuteo"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+    "linea": 272,
+    "tipo": "tilde",
+    "detalle": "Placeholder 'Que se hizo, bloqueo, avance, revision...' (Qué, revisión)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+    "linea": 300,
+    "tipo": "copy",
+    "detalle": "'Todavia no hay horas registradas' / 'Empieza cargando...' (:301): falta tilde y usa tuteo (Empezá)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+    "linea": 331,
+    "tipo": "tilde",
+    "detalle": "Encabezado 'Accion' (Acción)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+    "linea": 288,
+    "tipo": "strokeWidth",
+    "detalle": "Plus (:288) y Trash2 (:354, :395) sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/projects-filter-bar.tsx",
+    "linea": 123,
+    "tipo": "copy",
+    "detalle": "'Reestablecer filtros' debería ser 'Restablecer filtros'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/draggable-project-card.tsx",
+    "linea": 109,
+    "tipo": "copy",
+    "detalle": "La confirmación de borrado del tablero no menciona los pagos de mantenimiento; la de la ficha sí (delete-project-button.tsx:69-71). Ninguna avisa que el cliente deja de ver el proyecto"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/project-list.tsx",
+    "linea": 105,
+    "tipo": "inline",
+    "detalle": "style con maxHeight y maskImage para el preview capado; Tailwind 4 lo cubre con max-h-[42rem] y utilidades mask-*/arbitrarias"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/projects/_components/project-list.tsx",
+    "linea": 171,
+    "tipo": "inline",
+    "detalle": "style gridTemplateColumns; existe grid-cols-[repeat(auto-fill,minmax(320px,1fr))]"
+   }
+  ]
+ },
+ "verificacion": null
+}

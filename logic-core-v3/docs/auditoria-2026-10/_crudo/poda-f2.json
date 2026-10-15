@@ -766,6 +766,329 @@
     "Solo lo ejercitan tests/integration/motor-outbound.spec.ts y motor-window.spec.ts"
    ],
    "que_rompe": "Esas dos specs de integracion. NO podar: es una base pasiva planificada para B2 (PLAN-482). Solo seria candidato si Valentino abandona el motor."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "archivo": "src/app/(protected)/admin/audit-log/_components/audit-period-filter.tsx",
+   "senales": [
+    "Comentario :26 'Réplica LOCAL del look del dropdown de proyectos (NO se importa nada de projects/)'",
+    "projects/_components/projects-period-dropdown.tsx:73 implementa el mismo dropdown",
+    "PLAN-548 pendiente de unificar"
+   ],
+   "que_rompe": "AuditLogClient.tsx:13 lo importa; unificar en un componente compartido de admin y adaptar projects-filter-bar.tsx:96, :106"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "archivo": "src/app/(protected)/admin/alerts/_components/alerts-filters.ts",
+   "senales": [
+    "Comentario :5 'Patrón de presets replicado de Proyectos/Leads'",
+    "audit-filters.ts:21-54 periodToRange resuelve la misma ventana hacia atrás con date-fns",
+    "Tercera variante del filtro de período (con alerts-date-filter.tsx)"
+   ],
+   "que_rompe": "AlertsClient.tsx:9-10 importa ambos; extraer un helper de período compartido"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "archivo": "src/app/(protected)/admin/_components/AdminErrorBoundary.tsx",
+   "senales": [
+    "Wrapper de una sola llamada sobre SectionErrorBoundary (:16-24)",
+    "Comentario :13 'para no romper los 10 imports existentes'",
+    "Comentario :15 'TODO Sentry' obsoleto (SectionErrorBoundary.tsx:64 ya captura)"
+   ],
+   "que_rompe": "Los error.tsx de admin (admin/error.tsx:3, alerts/error.tsx:3, audit-log/error.tsx:3 y los de chatbots, clients, leados, leads, messages, projects, settings, team, tickets) cambiarían el import"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "archivo": "src/app/(protected)/admin/_components/PageTransition.tsx",
+   "senales": [
+    "Único consumidor: layout.tsx:65",
+    "En un layout persistente solo anima el primer montaje, no cada navegación"
+   ],
+   "que_rompe": "layout.tsx:6 y :65; si se quiere la transición por página, moverla a template.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "archivo": "src/app/(protected)/admin/_components/dashboard-history-charts.tsx",
+   "senales": [
+    "formatCurrency duplicado: dashboard-history-charts.tsx:69-74 idéntico a page.tsx:120-125"
+   ],
+   "que_rompe": "Nada si se extrae a un util compartido; solo el duplicado, no el archivo"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "archivo": "src/app/(protected)/admin/clients/_actions/client.actions.ts",
+   "senales": [
+    "stopImpersonationAction (:12-14) sin importadores: git grep -n stopImpersonationAction origin/main -- logic-core-v3/src solo devuelve la definicion, la base impersonation.ts:50 y ImpersonationBanner.tsx:2 (que importa la base)",
+    "el modulo entero es un re-export de lib/actions/impersonation; su unico consumidor es ImpersonateButton.tsx:6"
+   ],
+   "que_rompe": "Nada si se borra stopImpersonationAction; si se borra el archivo, ImpersonateButton.tsx:6 debe importar startImpersonationAction desde @/lib/actions/impersonation"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "archivo": "src/app/(protected)/admin/clients/_components/HoverScaleCard.tsx",
+   "senales": [
+    "Duplica el patron de hover de admin/tickets/_components/hover-scale.tsx y de adminHoverCls (lib/hover, usado en AlertsClient.tsx:8)",
+    "Su propio comentario dice 'LOCAL al worktree de clientes... unificacion queda para post-merge' (:8-17)",
+    "PLAN-555 pendiente"
+   ],
+   "que_rompe": "8 importadores (BillingOverrideCard, ClientHeader, ChatbotTab, OverviewTab, ProjectsTab, SupportTab, VaultTab, ChatbotManager) a re-apuntar; mover a src/components/ui es zona FROZEN"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "archivo": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+   "senales": [
+    "Ruta deprecada (STATUS.md:216) solo para bookmarks viejos",
+    "Solo funciona con slug mientras toda la UI genera cuids",
+    "Ningun link interno la genera (git grep '/chatbot' en admin/clients solo encuentra links a /admin/chatbots)"
+   ],
+   "que_rompe": "Bookmarks viejos de /admin/clients/<slug>/chatbot/* darian 404"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "archivo": "src/app/(protected)/admin/clients/_actions/client.schemas.ts (fuera de la lista del lote, misma carpeta)",
+   "senales": [
+    "git grep -n 'client.schemas' origin/main -- logic-core-v3/src sin resultados",
+    "el registro de cambios dice que se borraron exports muertos de client.actions.ts; el schema quedo huerfano"
+   ],
+   "que_rompe": "Nada por lectura (sin importadores)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "archivo": "src/app/(protected)/admin/messages/_components/emoji-popover.tsx",
+   "senales": [
+    "Duplica el wrapper de admin/tickets/_components/emoji-picker-button.tsx:12-13: ambos hacen dynamic(import('@/modules/chatbot/components/admin/config/EmojiPickerPanel'))",
+    "Lógica de posicionamiento/portal propia (calcPosition :34-42) en vez de compartida"
+   ],
+   "que_rompe": "Nada si se unifica en un componente compartido usado por Mensajes y Tickets"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "archivo": "src/app/(protected)/admin/leads/_components/lead-card.helpers.ts",
+   "senales": [
+    "serviceBadgeTone/serviceLabel repetidos en [leadId]/page.tsx:64-92 y demo-form.tsx:48-76",
+    "formatRelativeTime duplica relativeTime de lead-activity.helpers.ts:50 con salida distinta"
+   ],
+   "que_rompe": "Nada: es consolidar, no borrar; las copias locales de page.tsx y demo-form.tsx son las que sobran"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "archivo": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+   "senales": [
+    "`export function DemoForm` sin importadores externos (git grep: sólo demo-form.tsx:267)",
+    "Redefine DemoServiceType (:11) y SERVICE_OPTIONS (:38) que ya existen en lead-pipeline.shared.ts:75 y lead-form.tsx:53"
+   ],
+   "que_rompe": "Nada al quitar el export y reusar los tipos compartidos"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "archivo": "src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts",
+   "senales": [
+    "emptyGroupedLeads (:103) y PipelineGroupId (:22) exportados pero sólo usados dentro del mismo archivo (git grep)"
+   ],
+   "que_rompe": "Nada (sólo reducir superficie exportada)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "archivo": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+   "senales": [
+    "getProjectById (:1020-1115), serializeProjectDetail (:505-591) y el tipo ProjectDetailRecord (:95-170): unas 270 líneas sin consumidores (git grep -w getProjectById origin/main -- src devuelve solo la definición)",
+    "isInternal fijo en false (:524) y texto distinto al resto (:510)",
+    "deriveProjectLastActivityAt (:408-423) y lastActivityAt (:480): se serializan pero nadie los lee (en admin/projects solo aparecen en el tipo de project-card.tsx:28)"
+   ],
+   "que_rompe": "Nada en origin/main. Borrar getProjectById también quita una server action pública sin uso."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "archivo": "src/app/(protected)/admin/projects/_actions/milestone.actions.ts",
+   "senales": [
+    "unmarkMilestonePaid (:49-77) no tiene consumidores (git grep -w)"
+   ],
+   "que_rompe": "Nada. Mejor alternativa: conectarla como 'Deshacer' en Pagos en vez de borrarla."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "archivo": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+   "senales": [
+    "createMaintenancePayment (:31-58) no tiene consumidores (git grep -w)",
+    "CreateMaintenancePaymentSchema (maintenance.schemas.ts:19-24) solo lo usa esa función"
+   ],
+   "que_rompe": "Nada."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "archivo": "src/app/(protected)/admin/projects/_actions/project.schemas.ts",
+   "senales": [
+    "Campos legacy businessName, contactName, contactPhone y contactEmail (:61-65): ninguna action los lee (git grep 'parsed.businessName|parsed.contactEmail|data.businessName' da 0) y el form no los envía (project-form.tsx:156-165)"
+   ],
+   "que_rompe": "Nada."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "archivo": "src/app/(protected)/admin/projects/_components/overlay-modal.tsx",
+   "senales": [
+    "useIsClient local (:14-23) duplica src/lib/use-is-client.ts:15, que ya usan projects-board.tsx:20 y projects-period-dropdown.tsx:6",
+    "Es un modal propio del lane, paralelo a src/components/ui/Modal.tsx:26 (decisión documentada por el trap de backdrop-filter)"
+   ],
+   "que_rompe": "Nada si se importa el hook compartido; el modal propio se mantiene por decisión del lane."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "archivo": "src/lib/premium-features.ts",
+   "senales": [
+    "El catálogo en runtime (PREMIUM_FEATURE_KEYS/LABELS) solo lo importa src/lib/actions/settings.ts:12-16, que no tiene importadores",
+    "PREMIUM_FEATURE_OPTIONS y PREMIUM_FEATURE_DEFAULTS sin usos (git grep -w)",
+    "Sus claves no coinciden con los slugs de PremiumModule (premium-features.ts:51 'motor-resenias' vs premium-modules.ts:24 'motor-resenas')"
+   ],
+   "que_rompe": "Solo el import de tipo PremiumFeatureKey en settings.actions.ts:10 y settings-console.tsx:16 (reemplazar por string) y el módulo muerto lib/actions/settings.ts"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "archivo": "src/lib/alerts.ts#sendTestAgencyAlert",
+   "senales": [
+    "Único llamador: src/lib/actions/settings.ts:8, módulo sin importadores",
+    "La consola nueva no tiene botón de prueba"
+   ],
+   "que_rompe": "Nada vivo; conviene reutilizarlo para un 'Probar webhook' antes de podar"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "archivo": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts#updateTimeEntry,listTimeEntriesByUser",
+   "senales": [
+    "git grep -w en src y tests: solo las definiciones (:195, :310)",
+    "updateTimeEntry además sin guard de pertenencia"
+   ],
+   "que_rompe": "Nada vivo"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "archivo": "src/app/(protected)/admin/team/_actions/task.actions.ts#listTasksByUser,reorderTasks",
+   "senales": [
+    "git grep -w en src y tests: solo las definiciones (:264, :377)"
+   ],
+   "que_rompe": "Nada vivo; reorderTasks puede servir si se agrega drag & drop"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "archivo": "src/lib/agency-settings.ts#AGENCY_TIMEZONE",
+   "senales": [
+    "git grep -w AGENCY_TIMEZONE: solo la definición (agency-settings.ts:20)"
+   ],
+   "que_rompe": "Nada"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "archivo": "src/app/(protected)/admin/settings/alerts/page.tsx",
+   "senales": [
+    "Ningún link a /admin/settings/alerts (git grep fuera de su carpeta → 0)",
+    "Hay otra sección /admin/alerts en el sidebar (admin-sidebar.tsx, entrada 'Alertas')"
+   ],
+   "que_rompe": "Es la única UI que llama a /api/admin/alerts/trigger-detector: enlazarla o mover el botón a /admin/alerts, no borrarla sin reemplazo"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "archivo": "src/app/(protected)/admin/settings/reports/page.tsx",
+   "senales": [
+    "Ningún link a /admin/settings/reports (git grep → 0)"
+   ],
+   "que_rompe": "Es la única UI de /api/admin/reports/send-now y del historial de envíos semanales"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "archivo": "src/lib/actions/clients.ts",
+   "senales": [
+    "0 importadores: git grep -E \"lib/actions/clients['\\\"]|createClientAction|updateClientAction\" origin/main -- src tests scripts → solo definiciones",
+    "duplica el alta y la edición vivas (createClientOnly / updateClient.ts)",
+    "el registro de Clientes §6 da por limpiado el código muerto del sector"
+   ],
+   "que_rompe": "Nada (sin consumidores)."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "archivo": "src/lib/actions/services.ts",
+   "senales": [
+    "0 importadores (git grep createServiceAction|updateServiceStatusAction|deleteServiceAction)",
+    "Service se escribe en vivo desde admin/projects/_actions/project.actions.ts:280 y :291"
+   ],
+   "que_rompe": "Nada."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "archivo": "src/lib/actions/settings.ts",
+   "senales": [
+    "0 importadores (git grep de las 6 actions)",
+    "reemplazado por admin/settings/_actions/settings.actions.ts (updateSettings :127, updateModulePricing :175)",
+    "contiene un requireSuperAdmin reimplementado (:20-28)"
+   ],
+   "que_rompe": "Nada; también desaparece uno de los dos generadores de links /accept-invite (el otro, invitations.ts, también está muerto)."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "archivo": "src/lib/actions/leads.ts",
+   "senales": [
+    "0 importadores (git grep updateLeadStatusAction|updateLeadNotesAction)",
+    "la versión viva está en admin/leads/_actions (ZONA-FRANCO)",
+    "guard reimplementado ensureAdmin (:14-17)"
+   ],
+   "que_rompe": "Nada."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "archivo": "src/lib/actions/leads-constants.ts",
+   "senales": [
+    "solo lo importa leads.ts (muerto)",
+    "LEAD_STATUS_VALUES duplicado en admin/leads/_actions/lead.schemas.ts:4"
+   ],
+   "que_rompe": "Nada si se borra junto con leads.ts."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "archivo": "src/lib/actions/projects.ts",
+   "senales": [
+    "5 de 7 exports sin importadores (createProjectAction, updateProjectAction, createTaskAction, updateTaskStatusAction, deleteTaskAction)",
+    "duplica admin/projects/_actions/project.actions.ts (bitacora:6491 ya lo marcaba)"
+   ],
+   "que_rompe": "delete-project-button.tsx:6 (deleteProjectAction) y task-list.tsx:22 (sendTaskForApprovalAction): hay que migrarlos antes de borrar."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "archivo": "src/lib/actions/contact.ts",
+   "senales": [
+    "markLeadAsRead (:110) sin importadores",
+    "contactFormAction exportada solo para el wrapper submitContactForm (:100-105)"
+   ],
+   "que_rompe": "Nada si se quita markLeadAsRead; contact/page.tsx:6 usa submitContactForm."
   }
  ]
 }

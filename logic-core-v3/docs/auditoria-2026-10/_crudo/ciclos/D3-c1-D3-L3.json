@@ -1,0 +1,2438 @@
+{
+ "dominio": "D3",
+ "ciclo": "D3-c1",
+ "lote": "D3-L3",
+ "run": "wf_5edd9c03-0ab",
+ "fecha": "2026-10-15T17:27:46.358Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+    "lineas_total": 460,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/assign-setter-control.tsx",
+    "lineas_total": 245,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/change-status-select.tsx",
+    "lineas_total": 66,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/column-overview.tsx",
+    "lineas_total": 179,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+    "lineas_total": 360,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/draggable-lead-card.tsx",
+    "lineas_total": 74,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/droppable-column.tsx",
+    "lineas_total": 24,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx",
+    "lineas_total": 217,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/inbound-period-filter.tsx",
+    "lineas_total": 121,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx",
+    "lineas_total": 283,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-activity.helpers.ts",
+    "lineas_total": 138,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-card.helpers.ts",
+    "lineas_total": 61,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+    "lineas_total": 199,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-filters-bar.tsx",
+    "lineas_total": 133,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-filters.ts",
+    "lineas_total": 196,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-form.tsx",
+    "lineas_total": 372,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts",
+    "lineas_total": 123,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-pipeline.tsx",
+    "lineas_total": 267,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-zone.helpers.ts",
+    "lineas_total": 15,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/location-typeahead.tsx",
+    "lineas_total": 228,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/module-demand-table.tsx",
+    "lineas_total": 124,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/outbound-leads-view.tsx",
+    "lineas_total": 57,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/pipeline-board.tsx",
+    "lineas_total": 61,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/pipeline-column.tsx",
+    "lineas_total": 126,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/reunion-panel.tsx",
+    "lineas_total": 211,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/themed-date-input.tsx",
+    "lineas_total": 31,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/use-scroll-fades.ts",
+    "lineas_total": 49,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/loading.tsx",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/page.tsx",
+    "lineas_total": 220,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/[orgId]/loading.tsx",
+    "lineas_total": 15,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+    "lineas_total": 78,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+    "lineas_total": 229,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_actions/message.schemas.ts",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_components/active-org.ts",
+    "lineas_total": 12,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_components/conversation-list-loader.tsx",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_components/conversation-list-skeleton.tsx",
+    "lineas_total": 27,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_components/conversation-list.tsx",
+    "lineas_total": 156,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_components/emoji-popover.tsx",
+    "lineas_total": 142,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_components/message-bubble.tsx",
+    "lineas_total": 56,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_components/message-input.tsx",
+    "lineas_total": 128,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_components/message-thread.tsx",
+    "lineas_total": 49,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_components/messages-inbox-shell.tsx",
+    "lineas_total": 49,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/layout.tsx",
+    "lineas_total": 25,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/page.tsx",
+    "lineas_total": 12,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/app/(protected)/admin/leads/page.tsx",
+    "simbolo": "AgencyOsLeadsPage",
+    "tipo": "page",
+    "url": "/admin/leads",
+    "auth": "heredado",
+    "evidencia_auth": "Sin auth()/require* propio (git grep vacío sobre el archivo). Lee prisma.osLead.findMany en page.tsx:23 dentro de unstable_cache (:21-58). Depende de admin/layout.tsx:47 + proxy.",
+    "rol": "SUPER_ADMIN (heredado)",
+    "evidencia_rol": "admin/layout.tsx:47 `if (session.user.role !== 'SUPER_ADMIN')`",
+    "org_de": "no-aplica",
+    "evidencia_org": "OsLead no es org-owned (pipeline interno de develOP); findMany sin where en page.tsx:23",
+    "validacion": "parcial",
+    "evidencia_validacion": "tab con lista blanca page.tsx:112-113; period/from/to pasan crudos a listInboundLeads (page.tsx:118), validados fuera del lote (inbound.actions/inbound.schemas, ZONA-FRANCO)",
+    "rate_limit": "no-aplica",
+    "notas": "Las tres pestañas llaman actions de admin/leads/_actions (ZONA-FRANCO): listInboundLeads :118, listModuleDemand :120. Patrón D1-c2."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+    "simbolo": "AgencyOsLeadDetailPage",
+    "tipo": "page",
+    "url": "/admin/leads/[leadId]",
+    "auth": "heredado",
+    "evidencia_auth": "Sin auth() propio; lee osLead.findUnique (:183-184) y user.findMany role SETTER con emails (:212-216) y cargarCargaSetters (:225, lib/leados). Depende de admin/layout.tsx:47 + proxy.",
+    "rol": "SUPER_ADMIN (heredado)",
+    "evidencia_rol": "admin/layout.tsx:47",
+    "org_de": "no-aplica",
+    "evidencia_org": "OsLead sin organizationId; where: { id: leadId } en :184",
+    "validacion": "no",
+    "evidencia_validacion": "leadId de la URL usado directo en findUnique (:184); si no existe redirect silencioso a /admin/leads (:219-221)",
+    "rate_limit": "no-aplica",
+    "notas": "ID interno (cuid) en la URL. Monta LeadForm, ChangeStatusSelect, AssignSetterControl, LeadDemosPanel, LeadActivityFeed y ReunionPanel, cuyas actions viven en admin/leads/_actions (ZONA-FRANCO)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/messages/layout.tsx",
+    "simbolo": "MessagesLayout",
+    "tipo": "layout",
+    "url": "/admin/messages/*",
+    "auth": "si",
+    "evidencia_auth": "Renderiza ConversationListLoader (layout.tsx:18) -> listConversations -> requireSuperAdmin() en message.actions.ts:44; además admin/layout.tsx:47",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "src/lib/auth-guards.ts:6 `session?.user?.role !== 'SUPER_ADMIN'` (FROZEN)",
+    "org_de": "no-filtra",
+    "evidencia_org": "Lista global de orgs con mensajes (message.actions.ts:46-51), por diseño para SUPER_ADMIN; no excluye archivadas (deletedAt)",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/messages/page.tsx",
+    "simbolo": "AgencyOsMessagesPage",
+    "tipo": "page",
+    "url": "/admin/messages",
+    "auth": "heredado",
+    "evidencia_auth": "Placeholder estático sin datos (page.tsx:6-11); guard del layout admin/layout.tsx:47",
+    "rol": "SUPER_ADMIN (heredado)",
+    "org_de": "no-aplica",
+    "evidencia_org": "No lee datos",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica",
+    "notas": "No lee searchParams: el link de SupportTab.tsx:55 `/admin/messages?clientId=...` cae acá sin seleccionar conversación."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+    "simbolo": "AgencyOsMessageConversationPage",
+    "tipo": "page",
+    "url": "/admin/messages/[orgId]",
+    "auth": "parcial",
+    "evidencia_auth": "markAsRead (:24) y getConversation (:34) llaman requireSuperAdmin internamente (message.actions.ts:210, :141), pero el resultado de markAsRead se ignora y prisma.organization.findUnique (:27-28) corre sin guard propio",
+    "rol": "SUPER_ADMIN (dentro de las actions + heredado)",
+    "evidencia_rol": "message.actions.ts:141, :210; admin/layout.tsx:47",
+    "org_de": "parametro",
+    "evidencia_org": "orgId de la URL (:22) usado en markAsRead(:24), findUnique where id (:28) y getConversation(:34). Por diseño: el SUPER_ADMIN opera sobre cualquier org; desvío formal del protocolo SEC justificado por rol",
+    "validacion": "parcial",
+    "evidencia_validacion": "z.string().trim().min(1) dentro de las actions (message.schemas.ts:12-14); el findUnique de :27 usa el valor crudo",
+    "rate_limit": "no-aplica",
+    "notas": "Escribe en el GET (markAsRead en el render). PLAN-623 (F3) sigue abierto."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+    "simbolo": "listConversations",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "message.actions.ts:44 `await requireSuperAdmin()`",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "src/lib/auth-guards.ts:6",
+    "org_de": "no-filtra",
+    "evidencia_org": "organization.findMany where messages some (:46-51) + groupBy (:78-90): global por diseño, sin filtro deletedAt",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "Sin parámetros",
+    "rate_limit": "no",
+    "notas": "catch devuelve error.message crudo (:121-122) sin Sentry."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+    "simbolo": "getConversation",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "message.actions.ts:141 `await requireSuperAdmin()`",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "src/lib/auth-guards.ts:6",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId argumento (:126-127, :142) -> message.findMany where organizationId (:144-147); admin cross-tenant por diseño",
+    "validacion": "zod",
+    "evidencia_validacion": "GetConversationSchema.parse (:142) = z.string().trim().min(1) (message.schemas.ts:12-13)",
+    "rate_limit": "no",
+    "notas": "Sin límite ni paginación (:144-151). catch con error.message crudo (:163-164)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+    "simbolo": "sendMessage",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "message.actions.ts:173 `const adminUserId = await requireSuperAdmin()`",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "src/lib/auth-guards.ts:6",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId argumento (:168-170, :174) -> message.create (:177-181); no verifica que la org exista ni que no esté archivada",
+    "validacion": "parcial",
+    "evidencia_validacion": "SendMessageSchema.parse (:174): content min(1) sin .max() (message.schemas.ts:15-21)",
+    "rate_limit": "no",
+    "notas": "Email al cliente fire-and-forget: queueAdminMessageEmail (:193-197) -> src/lib/email/admin-message-notification.ts:19-20 `void (async () => {` sin after(). catch con error.message crudo (:201-202)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+    "simbolo": "markAsRead",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "message.actions.ts:210 `await requireSuperAdmin()`",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "src/lib/auth-guards.ts:6",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId argumento (:206-207, :211) -> message.updateMany (:213-222)",
+    "validacion": "zod",
+    "evidencia_validacion": "MarkAsReadSchema.parse (:211)",
+    "rate_limit": "no",
+    "notas": "Invocada durante el render de [orgId]/page.tsx:24: revalidatePath (:224 -> :15) lanza E7 en Next 16.2.9 y el catch (:226-227) la convierte en fail() que nadie lee."
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Kanban outbound: mover un lead de estado por drag",
+    "pasos": [
+     "src/app/(protected)/admin/leads/page.tsx:21 getLeads (unstable_cache, tag admin-leads) -> :23 prisma.osLead.findMany",
+     "page.tsx:202 <OutboundLeadsView leads>",
+     "outbound-leads-view.tsx:28 applyLeadFilters -> :29 groupLeads (lead-pipeline.shared.ts:117)",
+     "lead-pipeline.tsx:227 DndContext -> pipeline-board.tsx:48 DroppableColumn (droppable-column.tsx:22 useDroppable id=status)",
+     "draggable-lead-card.tsx:30 useDraggable -> lead-pipeline.tsx:164 handleDragStart (captura activeDragLead)",
+     "lead-pipeline.tsx:192 handleDragEnd -> :203 targetStatus -> :115 handleMoveStatus (optimista :119; reactivateAt cliente :125-128)",
+     "sale del lote: lead-pipeline.tsx:122 updateLeadStatus -> src/app/(protected)/admin/leads/_actions/lead.actions.ts (ZONA-FRANCO; revalida 'admin-leads' según git grep)",
+     "lead-pipeline.tsx:131-135 rollback + error role=alert (:220) | :139 router.refresh"
+    ]
+   },
+   {
+    "nombre": "Eliminar lead desde la card",
+    "pasos": [
+     "lead-card.tsx:116-123 botón Eliminar (stopPropagation) -> :184 InlineConfirm",
+     "lead-card.tsx:187-190 onConfirm -> onDelete",
+     "lead-pipeline.tsx:143 handleDelete (optimista removeLead :147)",
+     "sale del lote: lead-pipeline.tsx:150 deleteLead -> admin/leads/_actions/lead.actions.ts (ZONA-FRANCO)",
+     "lead-pipeline.tsx:153 rollback | :160 router.refresh"
+    ]
+   },
+   {
+    "nombre": "Alta y edición de lead outbound",
+    "pasos": [
+     "page.tsx:159 <LeadForm/> | [leadId]/page.tsx:277 <LeadForm lead triggerLabel='Editar'>",
+     "lead-form.tsx:157 abre modal portalizado (:164-168)",
+     "lead-form.tsx:129 CreateLeadSchema.safeParse (cliente; schema compartido lead-form.tsx:13)",
+     "sale del lote: lead-form.tsx:140-141 updateLead/createLead -> admin/leads/_actions/lead.actions.ts (ZONA-FRANCO)",
+     "lead-form.tsx:143-145 error del servidor | :148-149 cierra + router.refresh"
+    ]
+   },
+   {
+    "nombre": "Ficha del lead: estado, setter, demos, actividad y reunión",
+    "pasos": [
+     "lead-card.tsx:69 router.push(`/admin/leads/${lead.id}`)",
+     "[leadId]/page.tsx:183 osLead.findUnique + :212 user.findMany(role SETTER) + :225 cargarCargaSetters (sale: src/lib/leados/setter-carga, ZONA-FRANCO)",
+     "[leadId]/page.tsx:279 ChangeStatusSelect -> change-status-select.tsx:37 updateLeadStatus (sale: lead.actions.ts)",
+     "[leadId]/page.tsx:412 AssignSetterControl -> assign-setter-control.tsx:63 assignLeadSetter (sale: lead.actions.ts)",
+     "[leadId]/page.tsx:427 LeadDemosPanel -> demo-form.tsx:113 createDemo / :246 markDemoViewed (sale: demo.actions.ts)",
+     "[leadId]/page.tsx:401 LeadActivityFeed -> lead-activity-feed.tsx:75 createActivity (sale: activity.actions.ts)",
+     "[leadId]/page.tsx:229-230 parseAgenda (sale: src/lib/leados/flow) -> :296 ReunionPanel -> reunion-panel.tsx:61 marcarReunionRealizada / :73 registrarResultadoReunion (sale: reunion.actions.ts)",
+     "[leadId]/page.tsx:281-289 'Convertir a proyecto' deshabilitado (sin action conectada)"
+    ]
+   },
+   {
+    "nombre": "Inbound: listar por período y convertir a Lead OS",
+    "pasos": [
+     "inbound-period-filter.tsx:72 Link ?tab=inbound&period= -> page.tsx:111",
+     "sale del lote: page.tsx:118 listInboundLeads -> admin/leads/_actions/inbound.actions.ts (ZONA-FRANCO)",
+     "page.tsx:212 <InboundLeadsTable> (inbound-leads-table.tsx:100 tabla md+, :161 cards mobile)",
+     "inbound-leads-table.tsx:143 handleConvert -> sale del lote: :52 convertInboundToLead -> inbound.actions.ts",
+     "inbound-leads-table.tsx:61-67 marca 'Ya convertido' + router.refresh"
+    ]
+   },
+   {
+    "nombre": "Demanda de módulos",
+    "pasos": [
+     "sale del lote: page.tsx:120 listModuleDemand -> admin/leads/_actions/module-demand.actions.ts (ZONA-FRANCO)",
+     "page.tsx:204-205 <ModuleDemandTable> -> module-demand-table.tsx:30 vacío | :50 ranking con <details> por org (:100)",
+     "origen de los datos: D2 'Vitrina de servicios y avisame cuando esté' (upsell.ts:81)"
+    ]
+   },
+   {
+    "nombre": "Bandeja de mensajes del admin: abrir conversación y marcar leído",
+    "pasos": [
+     "messages/layout.tsx:17 Suspense -> conversation-list-loader.tsx:10 listConversations",
+     "message.actions.ts:44 requireSuperAdmin -> :46 organization.findMany (orgs con mensajes) -> :78 groupBy no leídos",
+     "conversation-list.tsx:104 Link /admin/messages/${organizationId}",
+     "[orgId]/page.tsx:24 markAsRead -> message.actions.ts:213 updateMany read=true -> :224 revalidatePath lanza E7 (render) -> :227 fail descartado",
+     "[orgId]/page.tsx:27 organization.findUnique (sin guard) + :34 getConversation (message.actions.ts:141-151)",
+     "message-thread.tsx:30 MessageBubble por mensaje / :42 vacío"
+    ]
+   },
+   {
+    "nombre": "Admin responde a un cliente (mensaje + email)",
+    "pasos": [
+     "message-input.tsx:63 Enter / :88 submit -> :42 sendMessage(organizationId, content)",
+     "message.actions.ts:173 requireSuperAdmin -> :174 SendMessageSchema -> :177 message.create fromAdmin=true",
+     "sale del lote: message.actions.ts:193 queueAdminMessageEmail -> src/lib/email/admin-message-notification.ts:19 (void async, sin after)",
+     "message.actions.ts:199 revalidateMessagePaths -> message-input.tsx:49-50 limpia + router.refresh",
+     "el cliente lo ve en D2 'Mensajes con develOP'"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Páginas de Leads y de la conversación de Mensajes leen la base sin guard propio (confían en el layout)",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/page.tsx",
+      "linea": 23,
+      "fragmento": "const leads = await prisma.osLead.findMany({"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+      "linea": 212,
+      "fragmento": "prisma.user.findMany({\n  where: { role: 'SETTER' },\n  select: { id: true, name: true, email: true },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+      "linea": 24,
+      "fragmento": "await markAsRead(orgId)\n\nconst [organization, conversationResult] = await Promise.all(["
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+      "linea": 27,
+      "fragmento": "prisma.organization.findUnique({\n  where: { id: orgId },"
+     }
+    ],
+    "impacto": "Mismo patrón que D1-c2: si el guard del layout no se re-ejecuta (render parcial en navegación cliente) y el proxy decide con claims viejos del JWT, un ex SUPER_ADMIN degradado lee el pipeline completo de prospectos (teléfonos, emails), los emails de los setters y el nombre de cualquier org. En [orgId] el resultado de markAsRead (que sí tiene guard) se descarta, así que la falta de rol no corta el render. Para el primer cliente real es defensa en profundidad faltante en el panel que concentra datos de todos.",
+    "propuesta": "Agregar requireSuperAdmin()/auth() al tope de las tres pages (antes de getLeads y del findUnique) y, en [orgId], leer el resultado de las actions y cortar con notFound/redirect si falla. Unificar con el fix del patrón D1-c2.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads",
+     "h4.adm-mensajes",
+     "lib.auth",
+     "lib.proxy",
+     "modelo.OsLead",
+     "modelo.Organization"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D1-c2 (páginas admin sin guard propio); PLAN-623 (F3)"
+   },
+   {
+    "titulo": "«Convertir a proyecto» en la ficha del lead está siempre deshabilitado; la action y el diálogo existen sin conectar",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+      "linea": 281,
+      "fragmento": "{canConvertToProject ? (\n  <button\n    type=\"button\"\n    disabled"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 833,
+      "fragmento": "export async function convertLeadToProject("
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/convert-lead-dialog.tsx",
+      "linea": 72,
+      "fragmento": "export function ConvertLeadDialog({"
+     }
+    ],
+    "impacto": "Cuando develOP cierre el primer cliente real desde el pipeline, el botón que promete crear el proyecto no hace nada y no explica por qué; la tarjeta «Proyecto vinculado» (:367-383) queda en «Todavía sin proyecto» salvo que se vincule a mano desde el form de proyectos (project.actions.ts:612 acepta leadId). ConvertLeadDialog no tiene importadores (git grep).",
+    "propuesta": "Montar ConvertLeadDialog (ya trae schema y action) en lugar del botón deshabilitado, o quitar el botón si la conversión se decide hacer desde /admin/projects. Decisión de producto antes de tocar.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads",
+     "h4.adm-leads.convertir-a-proyecto",
+     "h4.adm-proyectos",
+     "modelo.OsLead",
+     "modelo.Project"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "candidato de poda: admin/projects/_components/convert-lead-dialog.tsx"
+   },
+   {
+    "titulo": "No se puede iniciar desde la UI la primera conversación con un cliente",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+      "linea": 46,
+      "fragmento": "const organizations = await prisma.organization.findMany({\n  where: {\n    messages: {"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/page.tsx",
+      "linea": 6,
+      "fragmento": "export default function AgencyOsMessagesPage() {"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx",
+      "linea": 55,
+      "fragmento": "<SupportSection title=\"Mensajes recientes\" href={`/admin/messages?clientId=${clientId}`}>"
+     }
+    ],
+    "impacto": "La bandeja sólo lista orgs que ya tienen mensajes, el índice ignora ?clientId= (no recibe searchParams) y la ficha del cliente sin mensajes sólo ofrece ese link. Con el primer cliente real, develOP no puede mandarle el primer mensaje (bienvenida, pedido de accesos) salvo tipeando /admin/messages/<id> a mano; el único mensaje automático llega al completar todo el onboarding (src/actions/admin/onboarding-tasks.ts:33-40).",
+    "propuesta": "Que el índice honre ?clientId= (redirect a /admin/messages/[id]) y agregar «Nueva conversación» con selector de clientes activos. La página [orgId] ya soporta hilo vacío + composer (:73).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-mensajes",
+     "h4.adm-mensajes.iniciar-conversacion",
+     "h4.adm-clientes",
+     "modelo.Message"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "h2.cli-mensajes"
+   },
+   {
+    "titulo": "Email al cliente por respuesta del admin: fire-and-forget sin after(), puede perderse en serverless",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+      "linea": 193,
+      "fragmento": "queueAdminMessageEmail({\n  organizationId: parsed.organizationId,\n  senderName: adminUser?.name ?? 'Equipo develOP',"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+      "linea": 200,
+      "fragmento": "return ok({ id: message.id })"
+     },
+     {
+      "ruta": "src/lib/email/admin-message-notification.ts",
+      "linea": 20,
+      "fragmento": "void (async () => {"
+     }
+    ],
+    "impacto": "La action responde OK antes de que el email salga; en Netlify (funciones serverless) el trabajo pendiente después de la respuesta puede congelarse o cortarse. El primer cliente real puede no enterarse por email de que develOP le respondió, y nadie lo sabe: el resultado no vuelve a la action ni hay Sentry en este camino. No hay after()/waitUntil en todo src (git grep).",
+    "propuesta": "Envolver el envío en after() de next/server (o await con timeout acotado) y capturar el fallo en Sentry; decidir si el aviso por email es parte del contrato con el cliente.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-mensajes.responder",
+     "int.brevo",
+     "h2.cli-mensajes",
+     "modelo.Message"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D1-c1 (envíos de email cuyo resultado se ignora); D1-c3 (mutación y envío dentro de la respuesta)"
+   },
+   {
+    "titulo": "Cards del pipeline: botón anidado en un article role=button; por teclado no se puede borrar un lead",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+      "linea": 64,
+      "fragmento": "role=\"button\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+      "linea": 80,
+      "fragmento": "if (event.key === 'Enter') {\n  event.preventDefault()\n  router.push(`/admin/leads/${lead.id}`)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+      "linea": 116,
+      "fragmento": "<button\n  type=\"button\"\n  disabled={isPending}"
+     }
+    ],
+    "impacto": "El keydown de Enter sobre «Eliminar lead» (o sobre los botones del InlineConfirm, que se renderiza dentro de la card) burbujea al article, que hace preventDefault y navega al detalle: el botón nunca se activa. Space dispara el KeyboardSensor de dnd-kit (activador = la card entera) y levanta la card. Un lector de pantalla anuncia un botón dentro de otro botón.",
+    "propuesta": "En el onKeyDown del article actuar sólo si event.target === event.currentTarget; mejor aún, separar la navegación (Link) del handle de arrastre y sacar el botón del elemento con role=button.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads.eliminar-lead",
+     "h4.adm-leads.pipeline-kanban",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "inline-confirm.tsx (sin onKeyDown propio)"
+   },
+   {
+    "titulo": "router.push sin comentario que lo justifique en la card del pipeline (portal admin)",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+      "linea": 69,
+      "fragmento": "onClick={presentational ? undefined : () => router.push(`/admin/leads/${lead.id}`)}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+      "linea": 82,
+      "fragmento": "router.push(`/admin/leads/${lead.id}`)"
+     }
+    ],
+    "impacto": "Navegación imperativa sin semántica de link: no se puede abrir la ficha en otra pestaña ni con ctrl+clic, sin prefetch; incumple la regla de navegación de CLAUDE.md para portales (el comentario de :74-75 habla de Enter vs Space, no justifica router.push).",
+    "propuesta": "Usar <Link> (conservando el supresor de clic post-drag de draggable-lead-card.tsx:49-55) o documentar inline por qué la card arrastrable necesita navegación imperativa.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads.pipeline-kanban"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Overview de columna con 3 columnas fijas en cualquier ancho: inusable en mobile",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/column-overview.tsx",
+      "linea": 19,
+      "fragmento": "const OVERVIEW_COLS = 3 // columnas de la grilla de cards dentro del overlay"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/column-overview.tsx",
+      "linea": 160,
+      "fragmento": "style={{ gridTemplateColumns: `repeat(${OVERVIEW_COLS}, minmax(0, 1fr))` }}"
+     }
+    ],
+    "impacto": "A 390 px: 390 − 32 (p-4 del overlay, :108) − 48 (p-6, :156) = 310 px; menos 2 gaps de 16 px = 278 / 3 ≈ 92,7 px por card. La card tiene p-4 (lead-card.tsx:87) → ~60 px útiles, de los que el botón de borrar ocupa 36 px + gap 12 (lead-card.tsx:124, :100): ~12 px para el nombre. Ver todos los leads de una columna desde el teléfono es imposible.",
+    "propuesta": "Grilla responsive con clases Tailwind (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3) en lugar del style inline.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads.pipeline-kanban"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "markAsRead se ejecuta durante el render: revalidatePath lanza (E7) y el fallo se descarta",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+      "linea": 24,
+      "fragmento": "await markAsRead(orgId)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+      "linea": 224,
+      "fragmento": "revalidateMessagePaths(parsedOrganizationId)\n    return ok({ count: result.count })\n  } catch (error) {"
+     },
+     {
+      "ruta": "node_modules/next/dist/server/web/spec-extension/revalidate.js",
+      "linea": 114,
+      "fragmento": "if (workUnitStore.phase === 'render') {\n    throw ... during render which is unsupported"
+     }
+    ],
+    "impacto": "Next 16.2.9 prohíbe revalidatePath en render (la request store arranca en phase 'render', app-render.js:733). El updateMany (:213) sí escribe, pero la invalidación de /admin/messages, /dashboard y /dashboard/messages nunca corre desde este camino y cada apertura de conversación genera una excepción tragada (fail() no loguea). Además, una escritura en el GET se re-ejecuta en cada router.refresh (p. ej. tras sendMessage).",
+    "propuesta": "Replicar el patrón del portal (D2 'Mensajes con develOP': MarkReadOnMount -> mark-read action) o separar una función de escritura sin revalidate para usar en el render; no ignorar el ActionResult.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-mensajes.hilo-y-leido",
+     "modelo.Message"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-623"
+   },
+   {
+    "titulo": "Actions de Mensajes devuelven error.message crudo y no reportan a Sentry",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+      "linea": 122,
+      "fragmento": "return fail(error instanceof Error ? error.message : 'Failed to list conversations')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+      "linea": 202,
+      "fragmento": "return fail(error instanceof Error ? error.message : 'Failed to send message')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/_components/conversation-list-loader.tsx",
+      "linea": 15,
+      "fragmento": "{conversationsResult.error}"
+     }
+    ],
+    "impacto": "Un ZodError llega como JSON de issues, un error de Prisma (FK de un orgId inválido) como texto interno, y una sesión vencida como 'Unauthorized' en inglés; se pintan tal cual en la lista, el hilo y el composer (:15, [orgId]/page.tsx:61, message-input.tsx:94). Sólo lo ve un SUPER_ADMIN, pero ningún fallo de la bandeja llega a Sentry: si Mensajes se rompe con el primer cliente, develOP no se entera.",
+    "propuesta": "Usar toErrorMessage de action-utils (como settings.actions.ts:171) en los cuatro catch (:122, :164, :202, :227) y capturar en Sentry antes de devolver fail.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-mensajes",
+     "int.sentry",
+     "lib.actions"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D1-c1 (mensajes internos de error devueltos al cliente; fallos manejados que no llegan a Sentry)"
+   },
+   {
+    "titulo": "Clientes archivados siguen en la bandeja de Mensajes y se les puede escribir (y mandar email)",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+      "linea": 47,
+      "fragmento": "where: {\n  messages: {\n    some: {},"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+      "linea": 177,
+      "fragmento": "prisma.message.create({\n  data: {\n    organizationId: parsed.organizationId,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/page.tsx",
+      "linea": 23,
+      "fragmento": "where: { deletedAt: null },"
+     }
+    ],
+    "impacto": "Archivar un cliente lo saca de /admin/clients pero no de Mensajes; el admin puede seguir escribiéndole y dispararle emails. Inconsistente con el soft-delete del resto del admin.",
+    "propuesta": "Filtrar deletedAt: null en listConversations (o mostrarlo con badge «Archivado») y rechazar sendMessage sobre orgs archivadas o inexistentes con un mensaje claro.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-mensajes.bandeja",
+     "h4.adm-mensajes.responder",
+     "modelo.Organization"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D6 'Archivar cliente (admin): soft-delete que solo oculta del listado'"
+   },
+   {
+    "titulo": "Contenido del mensaje del admin sin .max(): termina en la base y en el email",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/messages/_actions/message.schemas.ts",
+      "linea": 17,
+      "fragmento": "content: z.preprocess(\n  emptyStringToUndefined,\n  z.string().min(1, 'El mensaje no puede estar vacio.')"
+     }
+    ],
+    "impacto": "Sin tope de largo en servidor ni en el textarea (message-input.tsx:101-110); un pegado accidental muy largo se guarda y se manda por email al cliente. Sólo lo escribe un SUPER_ADMIN.",
+    "propuesta": "Agregar .max() razonable (p. ej. 5000) y maxLength en el textarea con el mismo valor.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-mensajes.responder",
+     "int.brevo"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D1-c3 (texto libre sin .max())"
+   },
+   {
+    "titulo": "Modal de LeadForm sin semántica de diálogo, foco ni Escape; botón cerrar sin aria-label y labels sin asociar",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-form.tsx",
+      "linea": 166,
+      "fragmento": "<div className=\"fixed inset-0 z-[130] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md\">"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-form.tsx",
+      "linea": 176,
+      "fragmento": "<button\n  type=\"button\"\n  onClick={closeModal}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-form.tsx",
+      "linea": 188,
+      "fragmento": "<label className=\"mb-2 block text-sm font-medium text-zinc-200\">"
+     }
+    ],
+    "impacto": "El form principal de alta/edición no anuncia diálogo, no mueve ni atrapa el foco, no cierra con Esc y su botón de cerrar (sólo ícono X, :181) no tiene nombre accesible; los labels no apuntan a sus inputs (mismo caso en lead-activity-feed.tsx:136-147). El overview de columna ya lo resuelve bien (column-overview.tsx:56-97, :117-119).",
+    "propuesta": "Reusar el patrón de column-overview (role=dialog, aria-modal, foco inicial, trap, Esc, restore) y el componente Field del kit (que asocia label con useId) en lugar de label suelto.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads.alta-edicion",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Bloques de error sin role=alert/aria-live en Leads y Mensajes",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-form.tsx",
+      "linea": 343,
+      "fragmento": "<div className=\"rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200\">"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/_components/message-input.tsx",
+      "linea": 93,
+      "fragmento": "<div className=\"mb-2 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm text-rose-200\">"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-pipeline.tsx",
+      "linea": 220,
+      "fragmento": "role=\"alert\""
+     }
+    ],
+    "impacto": "Los errores de las actions aparecen sin anunciarse a lectores de pantalla en demo-form.tsx:206 y :270, lead-activity-feed.tsx:178, assign-setter-control.tsx:237, change-status-select.tsx:63, reunion-panel.tsx:208, inbound-leads-table.tsx:85, [orgId]/page.tsx:60, conversation-list-loader.tsx:14, leads/page.tsx:207 y :214. Sólo lead-pipeline.tsx:220 lo hace bien (control positivo).",
+    "propuesta": "Agregar role=\"alert\" a esos bloques (o un componente de error compartido que ya lo traiga).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads",
+     "h4.adm-mensajes",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D1-c1 (bloques de error sin role=alert)"
+   },
+   {
+    "titulo": "Fecha de reactivación de POSTERGADO calculada en el cliente y duplicada; la trampa de z.coerce.date sigue armada",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/change-status-select.tsx",
+      "linea": 40,
+      "fragmento": "reactivateAt:\n  next === 'POSTERGADO'\n    ? new Date(Date.now() + POSTPONE_DAYS * 24 * 60 * 60 * 1000)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-pipeline.tsx",
+      "linea": 125,
+      "fragmento": "reactivateAt:\n  status === 'POSTERGADO'\n    ? new Date(Date.now() + POSTPONE_DAYS * 24 * 60 * 60 * 1000)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_actions/lead.schemas.ts",
+      "linea": 40,
+      "fragmento": "z.coerce.date().optional()"
+     }
+    ],
+    "impacto": "La regla de negocio (7 días) vive en dos componentes (POSTPONE_DAYS en change-status-select.tsx:14 y lead-pipeline.tsx:32) y depende del reloj del navegador. Si se conecta un date-picker, 'YYYY-MM-DD' se interpreta como medianoche UTC (21:00 del día anterior en Argentina).",
+    "propuesta": "Que updateLeadStatus derive el default de reactivateAt en servidor con el helper de fechas AR y que el schema normalice fechas de calendario. Requiere coordinar con Franco (lead.actions/lead.schemas).",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h4.adm-leads.ficha-y-estado",
+     "h4.adm-leads.pipeline-kanban",
+     "lib.leados"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-618"
+   },
+   {
+    "titulo": "Helpers y rótulos duplicados con divergencias en admin/leads",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+      "linea": 64,
+      "fragmento": "function serviceBadgeTone(serviceType: OsServiceType | null): string {"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+      "linea": 48,
+      "fragmento": "function serviceBadgeTone(serviceType: DemoServiceType): string {"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts",
+      "linea": 46,
+      "fragmento": "RESPONDIO: 'Respondio',"
+     }
+    ],
+    "impacto": "serviceBadgeTone/serviceLabel existen tres veces ([leadId]/page.tsx:64-92, demo-form.tsx:48-76, lead-card.helpers.ts:33-61); statusLabel de la ficha dice 'Respondió' ([leadId]/page.tsx:103) y el board 'Respondio'; relativeTime (lead-activity.helpers.ts:50) y formatRelativeTime (lead-card.helpers.ts:3) difieren ('dias' vs 'd', guard de NaN sólo en uno). Cada cambio de copy o de servicio hay que hacerlo en varios lugares.",
+    "propuesta": "Un único módulo de presentación del lead (labels, tonos, fechas) en _components y que ficha, card y demos lo importen.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Conteo de actividad distinto entre el board y la ficha del lead",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/page.tsx",
+      "linea": 29,
+      "fragmento": "activities: { where: SOLO_CONTACTOS_COMERCIALES },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+      "linea": 450,
+      "fragmento": "<p className=\"mt-2 text-sm text-zinc-200\">{lead.activities.length} registros</p>"
+     }
+    ],
+    "impacto": "La card del board cuenta sólo contactos comerciales y la ficha cuenta todas las actividades (incluye las reasignaciones SISTEMA, include sin where en :186): el mismo lead muestra dos números distintos.",
+    "propuesta": "Mostrar en la ficha el mismo conteo comercial (o rotular explícitamente 'incluye reasignaciones').",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads.ficha-y-estado",
+     "modelo.OsLead"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "markDemoViewed sin manejo de rechazo: el botón queda trabado en «Guardando...»",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+      "linea": 246,
+      "fragmento": "void markDemoViewed({ demoId }).then((result) => {\n  setDemoPendingId(null)"
+     }
+    ],
+    "impacto": "Si la llamada a la server action falla por red o lanza, la promesa rechaza sin catch: demoPendingId nunca vuelve a null, el botón queda deshabilitado y no se muestra error.",
+    "propuesta": "Usar useTransition como el resto de los componentes o agregar .catch que limpie el estado y muestre un error.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads.demos"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Consultas sin límite: todo el pipeline OsLead serializado al cliente y el hilo completo de mensajes",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/page.tsx",
+      "linea": 23,
+      "fragmento": "const leads = await prisma.osLead.findMany({"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/page.tsx",
+      "linea": 202,
+      "fragmento": "<OutboundLeadsView leads={leads} />"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+      "linea": 144,
+      "fragmento": "const messages = await prisma.message.findMany({\n  where: {\n    organizationId: parsedOrganizationId,"
+     }
+    ],
+    "impacto": "Con la importación de leads de LeadOS el board trae todos los OsLead (también PERDIDO/POSTERGADO) y los manda enteros en el payload RSC para filtrar en el cliente; cada conversación carga todos sus mensajes. Hoy el volumen es de prueba; crece lineal con el uso.",
+    "propuesta": "Paginar o acotar por estado/fecha en servidor (los filtros ya existen en cliente) y paginar el hilo por los últimos N mensajes.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads.pipeline-kanban",
+     "h4.adm-mensajes.hilo-y-leido",
+     "modelo.OsLead",
+     "modelo.Message"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "IDs internos (cuid) en URLs de admin: /admin/messages/[orgId] y /admin/leads/[leadId]",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/messages/_components/conversation-list.tsx",
+      "linea": 104,
+      "fragmento": "href={`/admin/messages/${conversation.organizationId}`}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+      "linea": 28,
+      "fragmento": "where: { id: orgId },"
+     }
+    ],
+    "impacto": "Incumple la regla de CLAUDE.md (usar slugs o tokens en URLs). El slug ya viaja en la conversación (message.actions.ts:55, conversation-list.tsx:15) y no se usa. Mismo criterio en clients (ClientTabsNav.tsx:34 usa client.id).",
+    "propuesta": "Decidir la convención del admin (slug para orgs); si se adopta, rutear Mensajes por slug y resolver id en servidor.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-mensajes",
+     "h4.adm-leads",
+     "h4.adm-clientes"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D3-A1"
+   },
+   {
+    "titulo": "La tabla Inbound no muestra qué pidió el cliente: no distingue módulo vs upgrade de plan",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx",
+      "linea": 17,
+      "fragmento": "service: string | null"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx",
+      "linea": 104,
+      "fragmento": "<th className=\"px-4 py-3 font-medium\">Nombre</th>"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 93,
+      "fragmento": "service: parsed.data.featureKey,"
+     }
+    ],
+    "impacto": "Los pedidos de módulo y de upgrade (plan-upgrade-*, UpgradeCtaButton.tsx:80) que hace el cliente desde su panel caen en Inbound sin columna de servicio (el campo llega pero no se renderiza); para saber qué pidió hay que leer el mensaje.",
+    "propuesta": "Agregar columna/badge de servicio con mapeo módulo vs plan-upgrade-* (PLAN-620).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-leads.inbound",
+     "h2.cli-plan",
+     "h2.cli-servicios"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-620; D2 'Pedido de upsell'"
+   },
+   {
+    "titulo": "El redirect de /admin/clients/[clientId]/chatbot/* pierde los tabs install e integrations",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 36,
+      "fragmento": "const targetTab: TabId = requested && TAB_MAP[requested] ? TAB_MAP[requested] : 'overview'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 29,
+      "fragmento": "where: { slug: orgSlug },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbots/[botId]/tabs.ts",
+      "linea": 1,
+      "fragmento": "export const VALID_TABS = ['overview', 'config', 'knowledge', 'activity', 'leads', 'conversations', 'install', 'integrations'] as const"
+     }
+    ],
+    "impacto": "TAB_MAP (:6-13) no tiene install ni integrations: links viejos a /chatbot/install (B8.5) caen en overview. Además busca sólo por slug mientras la navegación interna de clients usa Organization.id (ClientTabsNav.tsx:34), así que un link con id da 404.",
+    "propuesta": "Agregar install e integrations a TAB_MAP y resolver la org por id o slug como hace clients/[clientId]/page.tsx:40-42; actualizar roadmap-pendientes.md:26 (la vista CRM ya existe en IntegrationsTab).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h3.adm-chatbots"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D3-A3; D3-A1"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.pipeline-kanban",
+    "nombre": "Kanban outbound con drag & drop y vista de columna",
+    "descripcion": "Board 3+3+2 de OsLead por estado, mover por drag (mouse/teclado), overview fullscreen por columna.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/page.tsx",
+     "src/app/(protected)/admin/leads/_components/outbound-leads-view.tsx",
+     "src/app/(protected)/admin/leads/_components/lead-pipeline.tsx",
+     "src/app/(protected)/admin/leads/_components/pipeline-board.tsx",
+     "src/app/(protected)/admin/leads/_components/pipeline-column.tsx",
+     "src/app/(protected)/admin/leads/_components/droppable-column.tsx",
+     "src/app/(protected)/admin/leads/_components/draggable-lead-card.tsx",
+     "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+     "src/app/(protected)/admin/leads/_components/column-overview.tsx",
+     "src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts"
+    ],
+    "entradas": [
+     "AgencyOsLeadsPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:21-54 getLeads -> :202 -> outbound-leads-view.tsx:29 groupLeads -> lead-pipeline.tsx:192-207 handleDragEnd -> :122 updateLeadStatus (sale a lead.actions.ts, que revalida 'admin-leads' según git grep) -> :139 refresh / :132 rollback.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "OsLead no es org-owned; page sin guard propio (page.tsx:23), depende de admin/layout.tsx:47; actions fuera del lote"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "pipeline-column.tsx:106-111 y column-overview.tsx:165-170 EmptyStateMuted"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "lead-pipeline.tsx:131-135 rollback + :218-225 role=alert; leads/error.tsx -> SectionErrorBoundary"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "leads/loading.tsx:4-19; spinner por card lead-card.tsx:126-127"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Validación en lead.actions/lead.schemas (ZONA-FRANCO, fuera del lote; lead.schemas.ts:79-86 por git grep)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Board responsive pipeline-board.tsx:42-44, pero overview fijo en 3 columnas column-overview.tsx:19/:160 (~93 px por card a 390 px)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx captura (SectionErrorBoundary.tsx:64); los fail() de las actions sólo se muestran"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO ni datos inventados en los archivos del kanban"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna de develOP"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.filtros-outbound",
+    "nombre": "Filtros del board (servicio, período, setter, ubicación)",
+    "descripcion": "Filtrado client-side en AND con typeahead de ubicación normalizada.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/_components/lead-filters.ts",
+     "src/app/(protected)/admin/leads/_components/lead-filters-bar.tsx",
+     "src/app/(protected)/admin/leads/_components/location-typeahead.tsx",
+     "src/app/(protected)/admin/leads/_components/lead-zone.helpers.ts",
+     "src/app/(protected)/admin/leads/_components/themed-date-input.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "outbound-leads-view.tsx:27-30 -> lead-filters.ts:43 deriveFilterOptions / :154 applyLeadFilters -> lead-filters-bar.tsx:59-129 -> location-typeahead.tsx:118-133.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Opera sobre datos ya cargados en el cliente"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Columnas vacías con EmptyStateMuted (pipeline-column.tsx:106)"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Sin llamadas al servidor"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Síncrono"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Filtro client-side"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap lead-filters-bar.tsx:58, campos min-w-[150px] :32"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin I/O"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Opciones derivadas en runtime lead-filters.ts:43"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.alta-edicion",
+    "nombre": "Alta y edición de lead",
+    "descripcion": "Modal con validación cliente (schema compartido) y create/update en servidor.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/_components/lead-form.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:159 -> lead-form.tsx:129 safeParse -> :140-141 createLead/updateLead (sale a lead.actions.ts) -> :148-149 cierra + refresh.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Guard en la action fuera del lote (ZONA-FRANCO)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Errores por campo :197-199 y del servidor :342-346"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Button loading :358"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "CreateLeadSchema compartido (lead-form.tsx:13, :129); el lado servidor está en lead.actions (no leído)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "max-h-[90vh] overflow-y-auto :167; grid md:grid-cols-2 :186"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Sin captura de fail(); sólo boundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.eliminar-lead",
+    "nombre": "Eliminar lead con confirmación",
+    "descripcion": "Tacho en la card con InlineConfirm y borrado optimista con rollback.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+     "src/app/(protected)/admin/leads/_components/lead-pipeline.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "lead-card.tsx:120-123 -> :184-195 InlineConfirm -> lead-pipeline.tsx:143-161 deleteLead (sale a lead.actions.ts) -> :153 rollback / :160 refresh.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Guard en la action fuera del lote"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Acción"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "lead-pipeline.tsx:153-155 + role=alert :220"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner en el botón lead-card.tsx:126-127"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Fuera del lote"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Botón 36 px lead-card.tsx:124"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "fail() sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna; por teclado no se puede borrar (lead-card.tsx:80-83)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.ficha-y-estado",
+    "nombre": "Ficha del lead y cambio de estado",
+    "descripcion": "Detalle del lead con datos, links, proyecto vinculado y selector de estado (POSTERGADO +7 días).",
+    "archivos": [
+     "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+     "src/app/(protected)/admin/leads/_components/change-status-select.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "lead-card.tsx:69 -> [leadId]/page.tsx:183-217 -> :279 -> change-status-select.tsx:37 updateLeadStatus (sale) -> :49 refresh.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Page sin guard propio ([leadId]/page.tsx:183, :212)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "'Sin links cargados.' :360-362; 'Todavía sin proyecto.' :381"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "change-status-select.tsx:63 sin role=alert; lead inexistente redirige sin mensaje :219-221"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "Hereda leads/loading.tsx (skeleton del board, no de la ficha)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "leadId sin validar en la page; status validado en la action (fuera del lote)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-col lg:flex-row :237; grid xl:grid-cols-[...] :298"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Boundary sí; fail() no"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Botón 'Convertir a proyecto' deshabilitado permanente :281-289"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.actividad-comercial",
+    "nombre": "Registrar actividad comercial y timeline",
+    "descripcion": "Alta de contacto (canal/resultado/notas) y timeline con reasignaciones SISTEMA.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx",
+     "src/app/(protected)/admin/leads/_components/lead-activity.helpers.ts",
+     "src/app/(protected)/admin/leads/_components/use-scroll-fades.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "lead-activity-feed.tsx:131 -> :75 createActivity (sale a activity.actions.ts, revalida admin-leads :28 por git grep) -> :87-90 limpia + refresh.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Guard en la action fuera del lote"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "EmptyStateMuted con CTA :262-276"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Bloque de error :177-181 (sin role=alert)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner :196-197"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "activity.schemas.ts fuera del lote"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid md:grid-cols-2 :134; scroll interno sólo en xl :206"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "fail() sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Fallback 'Super Admin' :255 es copy, no dato inventado"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.demos",
+    "nombre": "Demos y Looms del lead",
+    "descripcion": "Cargar demo/Loom y marcar como vista.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/_components/demo-form.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "demo-form.tsx:153 -> :113 createDemo (sale a demo.actions.ts) -> :126-128 refresh; :246 markDemoViewed (sale).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Guard en la action fuera del lote"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "EmptyStateMuted :351-355"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Errores :205-209/:269-273 pero markDemoViewed sin catch :246"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Button loading :224, :307"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "demo.schemas.ts fuera del lote"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap :282"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "fail() sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.asignar-setter",
+    "nombre": "Asignar setter y marcar caliente",
+    "descripcion": "Elegir setter con carga del equipo y ratio de descarte; toggle caliente.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/_components/assign-setter-control.tsx",
+     "src/app/(protected)/admin/leads/[leadId]/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "[leadId]/page.tsx:212-216 + :225 cargarCargaSetters (sale a lib/leados) -> :412 -> assign-setter-control.tsx:224 -> :63 assignLeadSetter (sale a lead.actions.ts) -> :72-73.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Lectura de setters sin guard propio en la page; action fuera del lote"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "'No hay usuarios con rol setter todavía.' :87-90"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": ":236-240"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner :228"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Fuera del lote"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Filas con truncate :130"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "fail() sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Carga real del helper"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.reunion-resultado",
+    "nombre": "Reunión agendada: realizada y resultado",
+    "descripcion": "Panel de la reunión de Cal.com con traspaso del setter, marca de realizada y resultado con confirmación.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/_components/reunion-panel.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "[leadId]/page.tsx:229-230 parseAgenda (sale a lib/leados/flow) -> :296 -> reunion-panel.tsx:130 -> :61 marcarReunionRealizada; :165 -> :189 -> :73 registrarResultadoReunion (sale a reunion.actions.ts).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Actions fuera del lote"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "'Sin horario registrado' :91; el panel sólo aparece con reunión :296"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": ":208 (sin role=alert)"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "'Registrando…' :193; 'Marcar realizada' sin spinner :128-135"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Fuera del lote"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid gap-2 :157"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "fail() sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Fallback con nota interna visible :109 'no debería pasar — son obligatorias desde B7'"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.inbound",
+    "nombre": "Inbound por período y conversión a Lead OS",
+    "descripcion": "Formularios entrantes y pedidos de upsell filtrables por período, convertibles al pipeline.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx",
+     "src/app/(protected)/admin/leads/_components/inbound-period-filter.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:117-119 listInboundLeads (sale) -> :212 -> inbound-leads-table.tsx:143 -> :52 convertInboundToLead (sale) -> :61-67.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Actions fuera del lote"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": ":92-97"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "page.tsx:213-216; tabla :84-90"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "loading.tsx; Button loading :146"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "InboundRangeSchema fuera del lote"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Cards md:hidden :161; tabla overflow-x-auto :100"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "fail() sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO; el campo service no se muestra (PLAN-620)"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.demanda-modulos",
+    "nombre": "Ranking de demanda de módulos",
+    "descripcion": "Módulos pedidos por los clientes, con orgs y fechas.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/_components/module-demand-table.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:120 listModuleDemand (sale) -> :204-205 -> module-demand-table.tsx:50-121.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Action fuera del lote; page sin guard propio"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": ":30-41"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "page.tsx:206-209"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Columna de solicitudes hidden sm:block :83"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "fail() sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Datos reales"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.convertir-a-proyecto",
+    "nombre": "Convertir lead cerrado en proyecto",
+    "descripcion": "Botón en la ficha para crear el proyecto desde un lead CERRADO.",
+    "archivos": [
+     "src/app/(protected)/admin/leads/[leadId]/page.tsx"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "[leadId]/page.tsx:227 canConvertToProject + :281-289 botón disabled sin handler; convertLeadToProject (project.actions.ts:833) y ConvertLeadDialog (convert-lead-dialog.tsx:72) existen sin importadores.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "No hay llamada"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Botón muerto sin explicación"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "No conectado"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Control de maqueta :281-289"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-mensajes",
+    "id": "h4.adm-mensajes.bandeja",
+    "nombre": "Bandeja de conversaciones con no leídos",
+    "descripcion": "Lista persistente de orgs con mensajes, ordenada por último mensaje, con badge optimista.",
+    "archivos": [
+     "src/app/(protected)/admin/messages/layout.tsx",
+     "src/app/(protected)/admin/messages/_components/conversation-list-loader.tsx",
+     "src/app/(protected)/admin/messages/_components/conversation-list.tsx",
+     "src/app/(protected)/admin/messages/_components/conversation-list-skeleton.tsx",
+     "src/app/(protected)/admin/messages/_components/messages-inbox-shell.tsx",
+     "src/app/(protected)/admin/messages/_components/active-org.ts",
+     "src/app/(protected)/admin/messages/_actions/message.actions.ts"
+    ],
+    "entradas": [
+     "MessagesLayout",
+     "listConversations"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "layout.tsx:15-20 -> conversation-list-loader.tsx:10 -> message.actions.ts:44-120 -> conversation-list.tsx:92-150.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin message.actions.ts:44; global por diseño de rol"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "conversation-list.tsx:65-75"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "conversation-list-loader.tsx:12-17 muestra error.message crudo"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Suspense + skeleton layout.tsx:17"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "messages-inbox-shell.tsx:39-44 lista o hilo según ruta"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch sin captura :121-123; el error se pinta inline"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna; incluye orgs archivadas"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-mensajes",
+    "id": "h4.adm-mensajes.hilo-y-leido",
+    "nombre": "Ver conversación y marcar leído",
+    "descripcion": "Hilo de la org con burbujas y marca de leído al abrir.",
+    "archivos": [
+     "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+     "src/app/(protected)/admin/messages/[orgId]/loading.tsx",
+     "src/app/(protected)/admin/messages/_components/message-thread.tsx",
+     "src/app/(protected)/admin/messages/_components/message-bubble.tsx"
+    ],
+    "entradas": [
+     "AgencyOsMessageConversationPage",
+     "getConversation",
+     "markAsRead"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "conversation-list.tsx:104 -> [orgId]/page.tsx:24 markAsRead (updateMany :213 escribe; revalidate falla en render) -> :26-35 -> message-thread.tsx:30-39.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "findUnique de la org sin guard :27; resultado de markAsRead ignorado :24"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "message-thread.tsx:41-44"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "[orgId]/page.tsx:59-62 con mensaje crudo"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "[orgId]/loading.tsx:7-14"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "zod en actions message.actions.ts:142, :211"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Volver en mobile messages-inbox-shell.tsx:33-37; burbujas max-w-[85%] message-bubble.tsx:40"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch sin captura :163-164, :226-227"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-mensajes",
+    "id": "h4.adm-mensajes.responder",
+    "nombre": "Responder al cliente (mensaje + aviso por email)",
+    "descripcion": "Composer con emoji, Enter para enviar, y email al cliente.",
+    "archivos": [
+     "src/app/(protected)/admin/messages/_components/message-input.tsx",
+     "src/app/(protected)/admin/messages/_components/emoji-popover.tsx",
+     "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+     "src/app/(protected)/admin/messages/_actions/message.schemas.ts"
+    ],
+    "entradas": [
+     "sendMessage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "message-input.tsx:88 -> :42 sendMessage -> message.actions.ts:173-181 create -> :193 queueAdminMessageEmail (sale a lib/email/admin-message-notification.ts:19) -> :199 -> message-input.tsx:49-50.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin :173; org por parámetro por diseño de rol"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Composer"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "message-input.tsx:92-96 muestra error crudo; el fallo del email no se ve"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner y textarea disabled :107, :118-123"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "zod min(1) sin .max(); no valida org existente/archivada"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Panel de emoji acotado al viewport emoji-popover.tsx:36-41"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch :201-202 sin captura; email fire-and-forget"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-mensajes",
+    "id": "h4.adm-mensajes.iniciar-conversacion",
+    "nombre": "Iniciar conversación con un cliente sin mensajes",
+    "descripcion": "Escribirle primero a un cliente nuevo.",
+    "archivos": [
+     "src/app/(protected)/admin/messages/page.tsx",
+     "src/app/(protected)/admin/messages/[orgId]/page.tsx"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "Sólo funciona tipeando /admin/messages/<id> ([orgId]/page.tsx:73 renderiza el composer con hilo vacío); la bandeja filtra orgs con mensajes (message.actions.ts:47-51) y el índice ignora ?clientId= (page.tsx:6, SupportTab.tsx:55).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Mismas actions con guard"
+     },
+     "vacios": {
+      "cumple": "no",
+      "evidencia": "No hay entrada en la UI"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "No valida org"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Igual que responder"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "-"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Requiere conocer el id interno"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-623",
+    "clave": "F3: /admin/messages/[orgId] confía en el layout",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n \"auth()\\|requireSuperAdmin\\|auth-guards\" origin/main -- \"src/app/(protected)/admin/messages/[orgId]/page.tsx\" -> vacío (control: admin/clients/[clientId]/page.tsx:28 `const session = await auth()`). [orgId]/page.tsx:24 descarta el resultado de markAsRead y :27-28 lee Organization sin guard.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "La mitigación declarada (actions con requireSuperAdmin, message.actions.ts:141/:210) cubre Message pero no la lectura de Organization; además markAsRead en render falla en revalidatePath (E7)."
+   },
+   {
+    "id": "PLAN-618",
+    "clave": "optionalReactivateAtSchema de admin/leads: trampa latente",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "admin/leads/_actions/lead.schemas.ts:32-40 sigue en `z.coerce.date().optional()` sin normalizar fechas de calendario; los llamadores siguen mandando instantes: change-status-select.tsx:40-43 y lead-pipeline.tsx:125-128.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "La línea citada (:40) es hoy el cierre del schema (:32-40). ZONA-FRANCO."
+   },
+   {
+    "id": "PLAN-620",
+    "clave": "Distinguir 'módulo' vs 'plan upgrade' en /admin/leads",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n \"service\" origin/main -- \"src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx\" -> sólo :17 (tipo); columnas :104-109 sin servicio (control: 'company' aparece 3 veces en el mismo archivo). upsell.ts:93 sigue escribiendo service=featureKey y UpgradeCtaButton.tsx:80 genera plan-upgrade-*.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El doc dice que la UI 'muestra el string crudo'; hoy el campo ni se muestra."
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: orgSlug (B9.1) vs Organization.id (B11.6); si cada action re-valida el recurso",
+    "resultado": "parcial",
+    "evidencia": "clients/[clientId]/page.tsx:33 `const { clientId: orgSlug } = await params` pero :40-42 resuelve `OR: [{ id: orgSlug }, { slug: orgSlug }]` (acepta ambos; edit/page.tsx:19-20 igual). La navegación interna usa Organization.id: page.tsx:83 ClientTabsNav clientId={client.id} -> ClientTabsNav.tsx:34; SupportTab.tsx:63 /admin/messages/${clientId}. El catch-all chatbot/[[...tab]]/page.tsx:28-29 busca SOLO por slug. La re-validación del recurso en cada action no se trazó (fuera del lote).",
+    "hallazgo_titulo": "IDs internos (cuid) en URLs de admin: /admin/messages/[orgId] y /admin/leads/[leadId]"
+   },
+   {
+    "alerta": "[D3-A2] Checklist B-SEC.3c renumera F2 (IDOR projects.ts), F4 (agency-actions cross-projectId); en B11.0 F2=projects.ts, F4=payments, F5=agency-actions",
+    "resultado": "parcial",
+    "evidencia": "Numeración real = B11.0 (bitacora-roadmap.md:6486-6496). F2 cerrado: src/lib/actions/projects.ts:19 comentario 'B11.2 fix F2' + guard :24-26 y requireSuperAdmin en :109, :159, :178, :214. F5 cerrado: src/actions/agency-actions.ts:24 'B11.2 fix F5' + assertProjectBelongsToOrg :29. F4 abierto: admin/projects/[projectId]/payments/page.tsx sin auth()/requireSuperAdmin (git grep vacío; control clients/[clientId]/page.tsx:28) — mismo patrón D1-c2."
+   },
+   {
+    "alerta": "[D3-A3] /admin/clients/[clientId]/chatbot/install (B8.5) redirigida a overview por el catch-all; rutas deprecadas a favor de /admin/chatbots mientras roadmap-pendientes.md:26 propone una vista nueva ahí",
+    "resultado": "confirmada",
+    "evidencia": "clients/[clientId]/chatbot/[[...tab]]/page.tsx:6-13 TAB_MAP sin install/integrations y :36 cae a 'overview'; :38 permanentRedirect a /admin/chatbots/${botId}. chatbots/[botId]/tabs.ts:1 VALID_TABS incluye 'install' e 'integrations'. La vista CRM que propone roadmap-pendientes.md:24-28 ya existe en /admin/chatbots (IntegrationsTab, flujo D5 'Configurar y probar la integración CRM'): el doc quedó viejo.",
+    "hallazgo_titulo": "El redirect de /admin/clients/[clientId]/chatbot/* pierde los tabs install e integrations"
+   },
+   {
+    "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+    "resultado": "parcial",
+    "evidencia": "admin/settings/_actions/settings.actions.ts:171 `return fail(toErrorMessage(error, 'No se pudo actualizar la configuracion.'))`; toErrorMessage (src/lib/action-utils.ts, FROZEN) mapea ZodError a issues[0].message: la fuga de ZodError está cerrada. Pero para cualquier Error genérico (Prisma incluido) devuelve error.message tal cual: fuga residual de mensajes internos (patrón D1-c1)."
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/app/(protected)/admin/messages/_components/emoji-popover.tsx",
+    "senales": [
+     "Duplica el wrapper de admin/tickets/_components/emoji-picker-button.tsx:12-13: ambos hacen dynamic(import('@/modules/chatbot/components/admin/config/EmojiPickerPanel'))",
+     "Lógica de posicionamiento/portal propia (calcPosition :34-42) en vez de compartida"
+    ],
+    "que_rompe": "Nada si se unifica en un componente compartido usado por Mensajes y Tickets"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/leads/_components/lead-card.helpers.ts",
+    "senales": [
+     "serviceBadgeTone/serviceLabel repetidos en [leadId]/page.tsx:64-92 y demo-form.tsx:48-76",
+     "formatRelativeTime duplica relativeTime de lead-activity.helpers.ts:50 con salida distinta"
+    ],
+    "que_rompe": "Nada: es consolidar, no borrar; las copias locales de page.tsx y demo-form.tsx son las que sobran"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+    "senales": [
+     "`export function DemoForm` sin importadores externos (git grep: sólo demo-form.tsx:267)",
+     "Redefine DemoServiceType (:11) y SERVICE_OPTIONS (:38) que ya existen en lead-pipeline.shared.ts:75 y lead-form.tsx:53"
+    ],
+    "que_rompe": "Nada al quitar el export y reusar los tipos compartidos"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts",
+    "senales": [
+     "emptyGroupedLeads (:103) y PipelineGroupId (:22) exportados pero sólo usados dentro del mismo archivo (git grep)"
+    ],
+    "que_rompe": "Nada (sólo reducir superficie exportada)"
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Páginas de admin sin guard propio con JWT viejo (Leads y conversación de Mensajes)",
+    "entorno": "local (npm run dev) contra base de prueba",
+    "precondiciones": "Un usuario SUPER_ADMIN de prueba y forma de cambiarle el rol (Prisma Studio o flujo de equipo) subiendo sessionVersion",
+    "pasos": [
+     "Loguearse como el SUPER_ADMIN de prueba y abrir /admin/leads (dejar la pestaña abierta)",
+     "En la base, cambiar el rol de ese usuario a CLIENT e incrementar sessionVersion",
+     "Sin recargar, hacer clic en una card del board (navegación cliente a /admin/leads/<id>)",
+     "Repetir: desde /admin/messages hacer clic en una conversación"
+    ],
+    "esperado": "Redirect a /login o pantalla de no autorizado; no se ve ningún dato del lead ni el nombre de la org",
+    "senal_falla": "Se renderiza la ficha del lead (teléfono/email/setters) o el encabezado 'Conversación activa' con el nombre de la org",
+    "escribe_db_o_email": true,
+    "hallazgos": "Páginas de Leads y de la conversación de Mensajes leen la base sin guard propio"
+   },
+   {
+    "titulo": "Aviso por email al cliente tras respuesta del admin en serverless",
+    "entorno": "deploy de preview en Netlify (no local: en local el proceso sigue vivo)",
+    "precondiciones": "Org de prueba con un miembro cuyo email sea un buzón de prueba propio; claves de envío configuradas en la preview",
+    "pasos": [
+     "Entrar como SUPER_ADMIN a /admin/messages/<id de la org de prueba>",
+     "Enviar 5 mensajes cortos espaciados ~30 s",
+     "Revisar el buzón de prueba y los logs de la función en Netlify"
+    ],
+    "esperado": "Llegan los 5 emails y los logs muestran el envío completo de cada uno",
+    "senal_falla": "Faltan emails o el log de la invocación termina antes del envío",
+    "escribe_db_o_email": true,
+    "hallazgos": "Email al cliente por respuesta del admin: fire-and-forget sin after()"
+   },
+   {
+    "titulo": "Borrar un lead sólo con teclado desde el board",
+    "entorno": "local (npm run dev)",
+    "precondiciones": "Al menos un lead de prueba en el board",
+    "pasos": [
+     "Abrir /admin/leads",
+     "Con Tab llegar al botón 'Eliminar lead' (tacho) de una card",
+     "Presionar Enter",
+     "Volver y repetir con Space"
+    ],
+    "esperado": "Enter y Space abren la confirmación 'Eliminar lead' sin navegar ni levantar la card (no confirmar el borrado)",
+    "senal_falla": "Enter navega a /admin/leads/<id>; Space levanta la card para arrastrar",
+    "escribe_db_o_email": false,
+    "hallazgos": "Cards del pipeline: botón anidado en un article role=button"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "Las tres páginas con datos del lote no tienen guard propio",
+    "comando": "git grep -n \"auth()\\|requireSuperAdmin\\|auth-guards\" origin/main -- \"src/app/(protected)/admin/leads/page.tsx\" \"src/app/(protected)/admin/leads/[leadId]/page.tsx\" \"src/app/(protected)/admin/messages/[orgId]/page.tsx\" \"src/app/(protected)/admin/messages/layout.tsx\"  -> vacío",
+    "control_positivo": "git grep -n \"auth()\" origin/main -- \"src/app/(protected)/admin/clients/[clientId]/page.tsx\" -> :28 `const session = await auth()`"
+   },
+   {
+    "afirmacion": "ConvertLeadDialog no tiene importadores (el diálogo de conversión no está montado en ningún lado)",
+    "comando": "git grep -n \"ConvertLeadDialog\\|convert-lead-dialog\" origin/main -- src  -> sólo convert-lead-dialog.tsx:10, :72, :75",
+    "control_positivo": "git grep -n \"convertLeadToProject\" origin/main -- src -> project.actions.ts:833 y convert-lead-dialog.tsx:7 (el patrón encuentra importaciones)"
+   },
+   {
+    "afirmacion": "No hay toasts en admin/leads",
+    "comando": "git grep -n -i \"toast\" origin/main -- \"src/app/(protected)/admin/leads/\"  -> vacío",
+    "control_positivo": "git grep -l -i \"toast\" origin/main -- \"src/app/(protected)/admin/\" -> AlertsClient.tsx, BulkActionBar.tsx, BotDetailClient.tsx, ..."
+   },
+   {
+    "afirmacion": "Mensajes no filtra organizaciones archivadas (deletedAt)",
+    "comando": "git grep -n \"deletedAt\" origin/main -- \"src/app/(protected)/admin/messages/\"  -> vacío",
+    "control_positivo": "git grep -n \"deletedAt\" origin/main -- \"src/app/(protected)/admin/clients/page.tsx\" -> :23 `where: { deletedAt: null }`"
+   },
+   {
+    "afirmacion": "Sólo un bloque de error del lote tiene role=alert/aria-live",
+    "comando": "git grep -n 'role=\"alert\"\\|aria-live' origin/main -- \"src/app/(protected)/admin/leads/\" \"src/app/(protected)/admin/messages/\"  -> sólo lead-pipeline.tsx:220",
+    "control_positivo": "El mismo comando encuentra lead-pipeline.tsx:220 (el patrón detecta el atributo)"
+   },
+   {
+    "afirmacion": "Ningún archivo de admin/leads ni admin/messages reporta a Sentry",
+    "comando": "git grep -n \"Sentry\\|captureException\" origin/main -- \"src/app/(protected)/admin/messages/\" \"src/app/(protected)/admin/leads/\"  -> vacío",
+    "control_positivo": "git grep -n \"captureException\" origin/main -- src/components/ui/SectionErrorBoundary.tsx -> :64"
+   },
+   {
+    "afirmacion": "El schema del mensaje del admin no tiene .max()",
+    "comando": "git grep -n \"\\.max(\\|\\.min(\" origin/main -- \"src/app/(protected)/admin/messages/_actions/message.schemas.ts\"  -> sólo .min en :12 y :19",
+    "control_positivo": "El mismo comando matchea .min( en :12 y :19"
+   },
+   {
+    "afirmacion": "InboundLeadsTable no renderiza el campo service",
+    "comando": "git grep -n \"service\" origin/main -- \"src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx\"  -> sólo :17 (tipo)",
+    "control_positivo": "git grep -c \"company\" origin/main -- (mismo archivo) -> 3 (tipo + dos renders :123, :176)"
+   },
+   {
+    "afirmacion": "No se usa after()/waitUntil en src para trabajo post-respuesta",
+    "comando": "git grep -n \"waitUntil\\|unstable_after\\|\\bafter(\" origin/main -- src  -> sólo un comentario en src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts:7",
+    "control_positivo": "El mismo comando matchea 'after()' en ese comentario (el patrón detecta la llamada)"
+   },
+   {
+    "afirmacion": "El catch-all deprecado de chatbot no mapea install ni integrations",
+    "comando": "git grep -n \"install\\|integrations\" origin/main -- \"src/app/(protected)/admin/clients/[clientId]/chatbot/\"  -> vacío",
+    "control_positivo": "git grep -n \"VALID_TABS\" origin/main -- \"src/app/(protected)/admin/chatbots/[botId]/tabs.ts\" -> :1 incluye 'install', 'integrations'"
+   },
+   {
+    "afirmacion": "payments/page.tsx (F4) no tiene guard propio",
+    "comando": "git grep -n \"auth\\b\\|auth()\" origin/main -- \"src/app/(protected)/admin/projects/[projectId]/payments/page.tsx\"  -> vacío",
+    "control_positivo": "git grep -n \"auth()\" origin/main -- \"src/app/(protected)/admin/clients/[clientId]/page.tsx\" -> :28"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Server action que llama revalidatePath/revalidateTag invocada directamente durante el render de una page (Next 16 lanza E7 y el catch lo traga)",
+    "como_buscarlo": "git grep -n \"await .*(\" -- \"src/app/**/page.tsx\" cruzado con las funciones de archivos 'use server' que llaman revalidatePath; empezar por git grep -n \"await mark\" -- \"src/app/**/page.tsx\"",
+    "donde_aparecio": "src/app/(protected)/admin/messages/[orgId]/page.tsx:24 -> message.actions.ts:224"
+   },
+   {
+    "patron": "Envío de email o trabajo asíncrono fire-and-forget (`void (async () => ...)()`) sin after()/waitUntil en serverless",
+    "como_buscarlo": "git grep -n \"void (async\\|void send\\|\\.catch(() => {})\" origin/main -- src",
+    "donde_aparecio": "src/lib/email/admin-message-notification.ts:20 (llamado desde message.actions.ts:193)"
+   },
+   {
+    "patron": "Feature construida (action + componente) pero sin conectar; en su lugar un botón deshabilitado permanente",
+    "como_buscarlo": "git grep -n -B2 -A4 \"disabled$\" origin/main -- \"src/app/**/*.tsx\" y exports sin importadores (knip/dependency-cruiser del padre)",
+    "donde_aparecio": "admin/leads/[leadId]/page.tsx:281-289 vs admin/projects/_components/convert-lead-dialog.tsx:72"
+   },
+   {
+    "patron": "Elemento con role=button y onKeyDown(Enter) que contiene botones interactivos: Enter/Space en el hijo dispara la acción del padre",
+    "como_buscarlo": "git grep -n 'role=\"button\"' origin/main -- src y revisar si el elemento contiene <button> o confirmaciones inline",
+    "donde_aparecio": "src/app/(protected)/admin/leads/_components/lead-card.tsx:64, :80-83, :116"
+   },
+   {
+    "patron": "Grillas con gridTemplateColumns inline de N columnas fijas sin breakpoint (rotas en mobile)",
+    "como_buscarlo": "git grep -n \"gridTemplateColumns\" origin/main -- src",
+    "donde_aparecio": "src/app/(protected)/admin/leads/_components/column-overview.tsx:160 (el registro de Leads dice que el patrón se reusó en el kanban de Proyectos)"
+   },
+   {
+    "patron": "Listados admin de Organization que no excluyen archivadas (deletedAt) fuera de /admin/clients",
+    "como_buscarlo": "git grep -n \"organization.findMany\" origin/main -- src y verificar deletedAt en cada where",
+    "donde_aparecio": "src/app/(protected)/admin/messages/_actions/message.actions.ts:46-51"
+   },
+   {
+    "patron": "Links con query param que la page destino ignora (no recibe searchParams)",
+    "como_buscarlo": "git grep -n \"?clientId=\\|?orgId=\\|?organizationId=\" origin/main -- src y abrir la page destino",
+    "donde_aparecio": "admin/clients/[clientId]/_components/tabs/SupportTab.tsx:55 -> admin/messages/page.tsx:6"
+   },
+   {
+    "patron": "Regla de negocio de fechas calculada en el cliente (Date.now() + N días) y enviada a la action",
+    "como_buscarlo": "git grep -n \"Date.now() +\" origin/main -- \"src/**/*.tsx\"",
+    "donde_aparecio": "change-status-select.tsx:42, lead-pipeline.tsx:127"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/sprints/alpha-1-reaudit.md:227",
+    "id_previo": "sin-id (P1) Toast faltante en el CRUD de leads (OS) de /admin/leads",
+    "estado": "parcial",
+    "evidencia": "Sigue sin toasts (git grep -i toast en admin/leads vacío; control positivo AlertsClient.tsx). Los errores sí se ven inline: lead-pipeline.tsx:218-225 (role=alert), lead-form.tsx:342-346, demo-form.tsx:205-209; el éxito no tiene feedback salvo el movimiento de la card y 'Asignación guardada.' (assign-setter-control.tsx:231-233)."
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/assign-setter-control.tsx",
+    "linea": 80,
+    "tipo": "strokeWidth",
+    "detalle": "UserRound sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/assign-setter-control.tsx",
+    "linea": 228,
+    "tipo": "strokeWidth",
+    "detalle": "LoaderCircle sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+    "linea": 297,
+    "tipo": "strokeWidth",
+    "detalle": "Eye sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+    "linea": 308,
+    "tipo": "strokeWidth",
+    "detalle": "PlayCircle sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+    "linea": 325,
+    "tipo": "strokeWidth",
+    "detalle": "ExternalLink sin strokeWidth (también :337)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx",
+    "linea": 136,
+    "tipo": "strokeWidth",
+    "detalle": "CheckCircle2 y Sparkles sin strokeWidth (:136, :147, :191, :202)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx",
+    "linea": 109,
+    "tipo": "strokeWidth",
+    "detalle": "LoaderCircle sin strokeWidth (también :196) e ícono de canal :223"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+    "linea": 108,
+    "tipo": "strokeWidth",
+    "detalle": "MapPin, LoaderCircle, UserRound, Clock3, FlaskConical sin strokeWidth (:108, :127, :153, :162, :168, :173)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-form.tsx",
+    "linea": 181,
+    "tipo": "strokeWidth",
+    "detalle": "X del botón cerrar sin strokeWidth"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts",
+    "linea": 37,
+    "tipo": "tilde",
+    "detalle": "'Captacion' y 'Conversion' (:38) sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts",
+    "linea": 46,
+    "tipo": "tilde",
+    "detalle": "'Respondio' (la ficha dice 'Respondió'); igual en lead-activity.helpers.ts:42 y :129"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-activity.helpers.ts",
+    "linea": 65,
+    "tipo": "tilde",
+    "detalle": "'Hace N dias' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-filters-bar.tsx",
+    "linea": 92,
+    "tipo": "tilde",
+    "detalle": "'Ubicacion' y 'Periodo' (:68), 'Cualquier periodo' (:14)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-filters.ts",
+    "linea": 109,
+    "tipo": "tilde",
+    "detalle": "'Sin ubicacion'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/location-typeahead.tsx",
+    "linea": 177,
+    "tipo": "tilde",
+    "detalle": "placeholder 'Cualquier ubicacion'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx",
+    "linea": 95,
+    "tipo": "tilde",
+    "detalle": "'Todavia', 'aca' (:96), 'Telefono' (:106, :128, :185), 'Accion' (:109)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/inbound-period-filter.tsx",
+    "linea": 68,
+    "tipo": "tilde",
+    "detalle": "'Periodo' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/column-overview.tsx",
+    "linea": 168,
+    "tipo": "tilde",
+    "detalle": "'aca' sin tilde (también pipeline-column.tsx:109, lead-activity-feed.tsx:265)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx",
+    "linea": 100,
+    "tipo": "tilde",
+    "detalle": "'proximos' (:100, :172), 'Proximo' (:125), 'conversacion' (:172)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+    "linea": 201,
+    "tipo": "tilde",
+    "detalle": "'Que cubre ... proximos pasos', 'visualizacion' (:263), 'Agrega' sin voseo (:354)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_actions/message.schemas.ts",
+    "linea": 19,
+    "tipo": "tilde",
+    "detalle": "'El mensaje no puede estar vacio.'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+    "linea": 442,
+    "tipo": "copy",
+    "detalle": "Rótulo en inglés 'Reactivate at'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+    "linea": 376,
+    "tipo": "copy",
+    "detalle": "Monto acordado como `$${agreedAmount}` sin formato de moneda ni separadores es-AR"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-form.tsx",
+    "linea": 189,
+    "tipo": "copy",
+    "detalle": "Labels en inglés 'Business name', 'Instagram URL' (:291), 'Google Maps URL' (:321); opción 'WEB' (:54)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+    "linea": 154,
+    "tipo": "copy",
+    "detalle": "Labels 'Demo URL' y 'Loom URL' (:166); opción 'WEB' (:39)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx",
+    "linea": 124,
+    "tipo": "copy",
+    "detalle": "'Follow-up pendiente!' sin signo de apertura; fallback 'Super Admin' (:255)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/reunion-panel.tsx",
+    "linea": 109,
+    "tipo": "copy",
+    "detalle": "Nota interna de desarrollo visible: 'Sin notas (no debería pasar — son obligatorias desde B7)'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+    "linea": 122,
+    "tipo": "copy",
+    "detalle": "Fallbacks de error en inglés ('Failed to list conversations', :164, :202, :227) y 'Invalid organization id' en message.schemas.ts:12"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/assign-setter-control.tsx",
+    "linea": 155,
+    "tipo": "contraste",
+    "detalle": "'sin evaluar' en text-zinc-600 sobre fondo oscuro (< 4,5:1)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/page.tsx",
+    "linea": 8,
+    "tipo": "contraste",
+    "detalle": "Texto de placeholder en text-white/40 (~3,7:1)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/reunion-panel.tsx",
+    "linea": 184,
+    "tipo": "contraste",
+    "detalle": "placeholder:text-zinc-600 en el textarea de nota"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+    "linea": 310,
+    "tipo": "contraste",
+    "detalle": "Rótulos text-[10px] text-zinc-500 sobre bg-black/20 en todas las tarjetas (~4,1:1 o menos); patrón repetido en el lote"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/messages/_components/conversation-list.tsx",
+    "linea": 109,
+    "tipo": "inline",
+    "detalle": "borderBottom inline; existe border-b border-white/[0.06] + last:border-0"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/column-overview.tsx",
+    "linea": 160,
+    "tipo": "inline",
+    "detalle": "gridTemplateColumns inline en lugar de grid-cols-*"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/leads/_components/themed-date-input.tsx",
+    "linea": 26,
+    "tipo": "inline",
+    "detalle": "colorScheme inline; Tailwind 4 tiene utilidad de color-scheme"
+   }
+  ]
+ },
+ "verificacion": null
+}

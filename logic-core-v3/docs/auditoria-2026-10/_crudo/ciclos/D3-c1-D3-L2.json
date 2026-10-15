@@ -1,0 +1,2917 @@
+{
+ "dominio": "D3",
+ "ciclo": "D3-c1",
+ "lote": "D3-L2",
+ "run": "wf_5edd9c03-0ab",
+ "fecha": "2026-10-15T17:27:46.358Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx",
+    "lineas_total": 119,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx",
+    "lineas_total": 178,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientHeader.tsx",
+    "lineas_total": 161,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx",
+    "lineas_total": 161,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx",
+    "lineas_total": 70,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ExecutiveReportCard.tsx",
+    "lineas_total": 23,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ImpersonateButton.tsx",
+    "lineas_total": 54,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx",
+    "lineas_total": 128,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx",
+    "lineas_total": 147,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx",
+    "lineas_total": 129,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/QuickActionMotion.tsx",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx",
+    "lineas_total": 105,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx",
+    "lineas_total": 139,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/TabContentTransition.tsx",
+    "lineas_total": 36,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/TabSkeleton.tsx",
+    "lineas_total": 12,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+    "lineas_total": 204,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx",
+    "lineas_total": 132,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx",
+    "lineas_total": 82,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx",
+    "lineas_total": 113,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+    "lineas_total": 82,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+    "lineas_total": 39,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx",
+    "lineas_total": 254,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/edit/page.tsx",
+    "lineas_total": 71,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/error.tsx",
+    "lineas_total": 15,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/loading.tsx",
+    "lineas_total": 43,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+    "lineas_total": 96,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_actions/client.actions.ts",
+    "lineas_total": 14,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+    "lineas_total": 375,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_actions/plan.schemas.ts",
+    "lineas_total": 36,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "lineas_total": 772,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_components/HoverScaleCard.tsx",
+    "lineas_total": 57,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/loading.tsx",
+    "lineas_total": 27,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/new/page.tsx",
+    "lineas_total": 17,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/page.tsx",
+    "lineas_total": 112,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/app/(protected)/admin/clients/page.tsx",
+    "simbolo": "ClientsPage",
+    "tipo": "page",
+    "url": "/admin/clients",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:91-94 auth() + role !== 'SUPER_ADMIN' -> redirect('/login'); ademas admin/layout.tsx:47 y proxy",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "page.tsx:22-26 y :33-37 listan TODAS las orgs (activas y archivadas) por diseno de admin; unstable_cache tag 'admin-clients' revalidate 60 (:27-28, :38-39)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input de usuario en servidor; filtros/busqueda son client-side (ClientsListClient.tsx:258-304)",
+    "rate_limit": "no-aplica",
+    "notas": "Guard propio presente (no cae en el patron D1-c2). Embebe avatares base64 de todas las orgs en el payload (ver hallazgo PERF)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/new/page.tsx",
+    "simbolo": "NewClientPage",
+    "tipo": "page",
+    "url": "/admin/clients/new",
+    "auth": "heredado",
+    "evidencia_auth": "sin auth() propio (new/page.tsx:3-16); depende de admin/layout.tsx:47 + proxy. No lee la base: solo monta OnboardingWizard (:14); las actions destino exigen rol (createClientWithBot.ts:96, createClientOnly.ts:48 requireSuperAdmin, via git grep)",
+    "rol": "SUPER_ADMIN (heredado)",
+    "org_de": "no-aplica",
+    "evidencia_org": "crea una org nueva; no filtra",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "la validacion vive en las actions fuera del lote (createClientWithBot.ts:99-104 safeParse; createClientOnly.ts:51-55)",
+    "rate_limit": "no-aplica",
+    "notas": "Pagina sin lectura de datos: el patron D1-c2 no aplica en sentido estricto."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+    "simbolo": "ClientDetailPage",
+    "tipo": "page",
+    "url": "/admin/clients/[clientId]?tab=overview|chatbot|projects|vault|support",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:28-31 auth() + role SUPER_ADMIN -> redirect('/login')",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "page.tsx:33 `const { clientId: orgSlug } = await params` -> :40-43 findFirst OR [{id},{slug}]; las tabs reciben client.id resuelto (:87-91). Admin cross-tenant por diseno; la defensa es el rol",
+    "validacion": "parcial",
+    "evidencia_validacion": "tab en whitelist VALID_TABS (:22, :35-37); clientId sin validar (solo se usa como parametro Prisma)",
+    "rate_limit": "no-aplica",
+    "notas": "allClients (:65-68) incluye orgs archivadas. Los links internos usan el cuid (ver hallazgo de identificador, alerta D3-A1)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/[clientId]/edit/page.tsx",
+    "simbolo": "EditClientPage",
+    "tipo": "page",
+    "url": "/admin/clients/[clientId]/edit",
+    "auth": "si",
+    "evidencia_auth": "edit/page.tsx:11-14 auth() + role SUPER_ADMIN",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "edit/page.tsx:16-20 findFirst OR id|slug; miembro ADMIN mas antiguo (:30-35)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "pagina de lectura; el submit va a updateClient (fuera del lote) con safeParse (updateClient.ts:33-37 via git grep)",
+    "rate_limit": "no-aplica"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+    "simbolo": "DeprecatedChatbotRedirect",
+    "tipo": "page",
+    "url": "/admin/clients/[clientId]/chatbot/[[...tab]]",
+    "auth": "si",
+    "evidencia_auth": "page.tsx:20-23 auth() + role SUPER_ADMIN; usa permanentRedirect('/login') (308) para el rechazo",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "page.tsx:25-29 findUnique({ where: { slug } }) — solo slug, nunca id",
+    "validacion": "parcial",
+    "evidencia_validacion": "tab mapeado por TAB_MAP (:6-13, :35-36); faltan 'install' e 'integrations' que existen en admin/chatbots/[botId]/tabs.ts:1",
+    "rate_limit": "no-aplica",
+    "notas": "Redireccion legacy (alerta D3-A3)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/_actions/client.actions.ts",
+    "simbolo": "startImpersonationAction",
+    "tipo": "server-action",
+    "auth": "parcial",
+    "evidencia_auth": "el wrapper (client.actions.ts:8-10) no chequea nada; delega en lib/actions/impersonation.ts:12 (flujo D1 'Impersonacion de soporte (SUPER_ADMIN)')",
+    "rol": "SUPER_ADMIN (delegado)",
+    "org_de": "parametro",
+    "evidencia_org": "client.actions.ts:8 organizationId del argumento; lo pasa ImpersonateButton.tsx:24 con client.id resuelto en el server",
+    "validacion": "parcial",
+    "evidencia_validacion": "sin esquema en el wrapper; la validacion, si existe, esta en impersonation.ts (fuera del lote)",
+    "rate_limit": "no",
+    "notas": "Unico importador: ImpersonateButton.tsx:6."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/_actions/client.actions.ts",
+    "simbolo": "stopImpersonationAction",
+    "tipo": "server-action",
+    "auth": "no",
+    "evidencia_auth": "client.actions.ts:12-13 sin chequeo; delega en impersonation.ts:50 que no chequea rol (patron D1-c2)",
+    "rol": "ninguno",
+    "org_de": "no-aplica",
+    "evidencia_org": "no recibe org; corta la impersonacion",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin argumentos",
+    "rate_limit": "no",
+    "notas": "Export sin importadores: `git grep -n stopImpersonationAction origin/main -- logic-core-v3/src` solo devuelve la definicion (:12-13), la base (impersonation.ts:50) y ImpersonationBanner.tsx:2 que importa la base. Candidato a poda."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+    "simbolo": "assignPlanToOrg",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "plan.actions.ts:88 `const userId = await requireSuperAdmin()` (lib/auth-guards) + :95 auth() para email/nombre del audit",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "plan.actions.ts:93 organizationId del input (admin cross-tenant por diseno); no verifica que la org exista ni que no este archivada (:101-107, :186-196)",
+    "validacion": "zod",
+    "evidencia_validacion": "plan.actions.ts:89-92 AssignPlanSchema.safeParse; plan.schemas.ts:4-10 (nativeEnum PlanKey, reason max 500)",
+    "rate_limit": "no",
+    "notas": "Errores devueltos con error.message crudo (:240) y solo console.error (:239)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+    "simbolo": "setBillingOverride",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "plan.actions.ts:248 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "plan.actions.ts:253 organizationId del input; exige Subscription existente (:256-269)",
+    "validacion": "zod",
+    "evidencia_validacion": "plan.actions.ts:249-252; plan.schemas.ts:14-28 (priceOverride 0..100000, fecha futura, reason max 500). Acepta 0 (cortesia) sin confirmacion",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+    "simbolo": "clearBillingOverride",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "plan.actions.ts:324 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "plan.actions.ts:329 organizationId del input; exige Subscription (:332-336)",
+    "validacion": "zod",
+    "evidencia_validacion": "plan.actions.ts:325-328; plan.schemas.ts:32-34",
+    "rate_limit": "no"
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Listado de clientes (activos/archivados, busqueda, filtros, fijados)",
+    "pasos": [
+     "src/app/(protected)/admin/clients/page.tsx:91-94 guard SUPER_ADMIN",
+     "page.tsx:62-65 getClients()/getArchivedClients() con unstable_cache tag 'admin-clients' (:20-40)",
+     "page.tsx:44-59 toListItem (incluye avatarImageUrl base64)",
+     "ClientsListClient.tsx:258-304 filtro/orden/pins (pins en localStorage :71-78)",
+     "ClientsListClient.tsx:468-489 estado vacio | :497-517 grilla de ClientCard",
+     "ClientsListClient.tsx:629-630 Link a /admin/clients/${client.id}"
+    ]
+   },
+   {
+    "nombre": "Archivar y desarchivar cliente",
+    "pasos": [
+     "ClientsListClient.tsx:708-717 boton Archivar (opacity-0 hasta hover)",
+     "ClientsListClient.tsx:750-768 InlineConfirm",
+     "ClientsListClient.tsx:161-172 handleArchive -> toast + router.refresh",
+     "sale del lote: ClientsListClient.tsx:164 -> src/modules/chatbot/server/admin/archiveClient.ts (flujo D6 'Archivar cliente (soft-delete de Organization)')",
+     "ClientsListClient.tsx:733-748 Desarchivar -> :174-185 -> archiveClient.ts (unarchiveClient)"
+    ]
+   },
+   {
+    "nombre": "Eliminar cliente (hard-delete) con confirmacion por texto",
+    "pasos": [
+     "ClientsListClient.tsx:609-627 checkbox de seleccion",
+     "ClientsListClient.tsx:437-454 boton Eliminar (solo con 1 seleccionado)",
+     "ClientsListClient.tsx:209-213 openDelete -> :192-207 openDeleteFor -> getClientDeletionSummary",
+     "ClientsListClient.tsx:521-531 TypeToConfirmDialog (frase ELIMINAR) con DeleteSummaryDetail :537-572",
+     "ClientsListClient.tsx:222-243 confirmDelete",
+     "sale del lote: ClientsListClient.tsx:227 -> hardDeleteClient.ts (flujo D6 'Hard-delete de cliente y cascadas')",
+     "ClientsListClient.tsx:248-256 deep-link ?delete=<orgId> abre el mismo dialogo"
+    ]
+   },
+   {
+    "nombre": "Acciones masivas (exportar leads, pausar bots)",
+    "pasos": [
+     "ClientsListClient.tsx:392-466 barra de seleccion",
+     "ClientsListClient.tsx:118-135 handleBulkExportLeads (try/finally sin catch) -> Blob CSV :124-130",
+     "ClientsListClient.tsx:137-154 handleBulkPauseBots con confirm() nativo :138",
+     "sale del lote: ClientsListClient.tsx:121/:142 -> src/lib/bulk-actions.ts:46/:8 (flujo D5 'Admin exporta leads de varios bots')"
+    ]
+   },
+   {
+    "nombre": "Detalle del cliente (shell, switcher y tabs)",
+    "pasos": [
+     "src/app/(protected)/admin/clients/[clientId]/page.tsx:28-31 guard",
+     "page.tsx:33-43 resuelve org por id o slug; :65-68 allClients para el switcher",
+     "page.tsx:75-82 ClientHeader -> ClientHeader.tsx:57-61 ClientSwitcher (router.push ClientSwitcher.tsx:67)",
+     "page.tsx:83 ClientTabsNav (Links ?tab= ClientTabsNav.tsx:32-34)",
+     "page.tsx:85-93 TabContentTransition + Suspense(TabSkeleton) -> tab activo"
+    ]
+   },
+   {
+    "nombre": "Asignar plan (upgrade inmediato / downgrade programado)",
+    "pasos": [
+     "OverviewTab.tsx:72 PlanAssignmentCard",
+     "PlanAssignmentCard.tsx:17-28 lee planes y suscripcion",
+     "PlanAssignmentForm.tsx:39-49 submit (boton deshabilitado si plan == actual :37, :109)",
+     "plan.actions.ts:88-92 requireSuperAdmin + Zod",
+     "plan.actions.ts:101-122 clasifica first_assignment/upgraded/downgraded/unchanged",
+     "plan.actions.ts:137-176 downgrade: pendingPlanId + pendingPlanEffectiveAt (UTC dia 1) + audit",
+     "plan.actions.ts:179-208 upgrade/first: planId (sin tocar price legacy) + reset de QuotaUsage :65-82",
+     "plan.actions.ts:210-235 audit + invalidateOrgPlanCache + revalidatePath",
+     "sale del lote: plan.actions.ts:233 -> src/lib/plan (flujo D6 'Cambio de plan -> precio que ve el cliente')"
+    ]
+   },
+   {
+    "nombre": "Billing override (aplicar / quitar)",
+    "pasos": [
+     "OverviewTab.tsx:73 BillingOverrideCard",
+     "BillingOverrideCard.tsx:11-28 calcula vigente/vencido y 'Se factura'",
+     "BillingOverrideForm.tsx:33-41 estado inicial (precio '0', fecha +90 dias)",
+     "BillingOverrideForm.tsx:50-73 handleSet -> plan.actions.ts:244-313 (Zod, update priceOverride/overrideUntil/overrideReason, audit)",
+     "BillingOverrideForm.tsx:144-151 Quitar -> ConfirmDialog :166-175 -> :75-90 -> plan.actions.ts:320-370"
+    ]
+   },
+   {
+    "nombre": "Editar datos del cliente",
+    "pasos": [
+     "ClientHeader.tsx:135-141 Link a /admin/clients/${client.id}/edit",
+     "edit/page.tsx:11-14 guard; :19-37 org + miembro ADMIN",
+     "EditClientForm.tsx:58-71 validacion client-side; :73-91 submit",
+     "sale del lote: EditClientForm.tsx:79 -> src/modules/chatbot/server/admin/updateClient.ts (requireSuperAdmin :29, safeParse :33-37, revalidatePath :148-149 via git grep)",
+     "EditClientForm.tsx:92 triggerTransition(detalle) | :93-96 error"
+    ]
+   },
+   {
+    "nombre": "Notas internas inline",
+    "pasos": [
+     "OverviewTab.tsx:98 InternalNotesCard",
+     "InternalNotesCard.tsx:39-57 save",
+     "sale del lote: InternalNotesCard.tsx:43 -> src/modules/chatbot/server/admin/updateClientInternalNotes.ts (requireSuperAdmin :20, safeParse :22-23)"
+    ]
+   },
+   {
+    "nombre": "Impersonar al cliente",
+    "pasos": [
+     "ClientHeader.tsx:142 ImpersonateButton",
+     "ImpersonateButton.tsx:42-51 ConfirmDialog -> :20-29 handleConfirm",
+     "client.actions.ts:8-10 wrapper",
+     "sale del lote: client.actions.ts:9 -> src/lib/actions/impersonation.ts:12 (flujo D1 'Impersonacion de soporte (SUPER_ADMIN)')"
+    ]
+   },
+   {
+    "nombre": "Re-enviar credenciales al usuario primario",
+    "pasos": [
+     "OverviewTab.tsx:19-25 primer miembro por joinedAt (sin filtrar rol) -> :88-94",
+     "ResendCredentialsButton.tsx:69-89 confirmacion inline -> :15-35 fetch POST",
+     "sale del lote: ResendCredentialsButton.tsx:18 -> /api/admin/users/[userId]/resend-credentials (flujos D1 'Cambio forzado de contrasena (temporal)' e 'Invalidacion de sesion por sessionVersion')",
+     "ResendCredentialsButton.tsx:46-58 muestra la temporal si el email fallo"
+    ]
+   },
+   {
+    "nombre": "Envio manual del reporte ejecutivo",
+    "pasos": [
+     "OverviewTab.tsx:74 ExecutiveReportCard -> ExecutiveReportCard.tsx:20",
+     "SendExecutiveReportButton.tsx:103-123 confirmacion -> :34-65 fetch POST",
+     "sale del lote: SendExecutiveReportButton.tsx:37 -> flujo D2 'Envio manual del reporte (admin)'"
+    ]
+   },
+   {
+    "nombre": "Tab Chatbot del cliente",
+    "pasos": [
+     "ChatbotTab.tsx:15-36 org + botConfig + quotaUsages (mes en hora local :22-23) + 5 leads",
+     "ChatbotTab.tsx:40-56 vacio -> /admin/chatbots/new?organizationId= (la pagina lo lee: chatbots/new/page.tsx:16 via git grep)",
+     "ChatbotTab.tsx:65-99 stats (Quota mensual = botConfig.monthlyQuota :94)",
+     "sale del lote: ChatbotTab.tsx:101 -> src/components/admin/managers/ChatbotManager.tsx",
+     "ChatbotTab.tsx:127-163 accesos a /admin/chatbots/[botId]?tab=..."
+    ]
+   },
+   {
+    "nombre": "Tab Proyectos y crear entregable",
+    "pasos": [
+     "ProjectsTab.tsx:14-20 proyectos de la org",
+     "ProjectsTab.tsx:22-25 proyecto activo (IN_PROGRESS > REVIEW > primero)",
+     "sale del lote: ProjectsTab.tsx:73 -> ProjectManager -> src/actions/agency-actions.ts:14 createTaskForClientAction (rol :20, assertProjectBelongsToOrg :29 via git grep)"
+    ]
+   },
+   {
+    "nombre": "Tab Boveda",
+    "pasos": [
+     "VaultTab.tsx:15-18 assets de la org",
+     "VaultTab.tsx:39-42 resolveCredentialDisplay (descifra en el server)",
+     "VaultTab.tsx:71 VaultRevealButton (client, recibe el valor en claro)",
+     "sale del lote: VaultTab.tsx:26 -> VaultManager -> agency-actions.ts:94 (flujo D2 'Boveda del cliente')"
+    ]
+   },
+   {
+    "nombre": "Tab Soporte",
+    "pasos": [
+     "SupportTab.tsx:15-26 ultimos 10 tickets y 10 mensajes",
+     "SupportTab.tsx:30 'Ver todos' -> /admin/tickets?clientId= (parametro que la pagina no lee)",
+     "SupportTab.tsx:36-38 ticket -> /admin/tickets/[ticketId]",
+     "SupportTab.tsx:55, :61-63 mensajes -> /admin/messages?clientId= y /admin/messages/[orgId]"
+    ]
+   },
+   {
+    "nombre": "Alta de cliente",
+    "pasos": [
+     "ClientsListClient.tsx:352-358 'Nuevo cliente'",
+     "new/page.tsx:14 OnboardingWizard",
+     "sale del lote: new/page.tsx:1 -> flujo D5 'Alta de cliente con bot (asistente)' / 'Alta de cliente con bot desde el wizard admin'"
+    ]
+   },
+   {
+    "nombre": "Redireccion legacy /admin/clients/[x]/chatbot/*",
+    "pasos": [
+     "chatbot/[[...tab]]/page.tsx:20-23 guard (permanentRedirect a /login)",
+     "page.tsx:28-31 org por slug",
+     "page.tsx:33 notFound si no hay bot",
+     "page.tsx:35-38 permanentRedirect a /admin/chatbots/${botId}?tab= (TAB_MAP :6-13)"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Cambiar el plan no actualiza el precio legacy que leen el MRR del admin y el perfil del cliente",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+      "linea": 179,
+      "fragmento": "const subData: Prisma.SubscriptionUncheckedUpdateInput = {\n  planId: targetPlan.id,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+      "linea": 192,
+      "fragmento": "price: targetPlan.monthlyPrice.toNumber(),"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/page.tsx",
+      "linea": 226,
+      "fragmento": "_sum: {\n  price: true,"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/cuenta/perfil/page.tsx",
+      "linea": 211,
+      "fragmento": "price: org.subscription.price,"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real: tras un upgrade o downgrade aplicado, Subscription.price (Float legacy, schema.prisma:659) queda con el precio del primer plan asignado. El cliente ve en Mi cuenta un precio que no es el de su plan, y el MRR del dashboard admin suma precios viejos e ignora el billing override.",
+    "propuesta": "Decidir una sola fuente de precio: o bien assignPlanToOrg (y el lazy apply del downgrade en get-plan-for-org.ts:50) mantienen price sincronizado, o mejor, los lectores (admin/page.tsx y perfil/page.tsx) calculan el precio desde Plan.monthlyPrice/priceOverride vigente como ya hace BillingOverrideCard.tsx:21-28, y price queda deprecado.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.plan",
+     "h4.adm-dashboard",
+     "h2.cli-cuenta",
+     "modelo.Subscription",
+     "lib.plan"
+    ],
+    "relacionados": "Flujo D6 'Cambio de plan -> precio que ve el cliente'; PLAN-560; PLAN-563",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Billing override: precio vacio o por defecto aplica una cortesia de 0 USD por 90 dias en un clic",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx",
+      "linea": 33,
+      "fragmento": "const [price, setPrice] = useState<string>(\n  currentPriceOverride !== null ? String(currentPriceOverride) : '0',"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx",
+      "linea": 52,
+      "fragmento": "const priceNum = Number(price)\nif (Number.isNaN(priceNum) || priceNum < 0) {"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.schemas.ts",
+      "linea": 17,
+      "fragmento": "priceOverride: z.number().min(0).max(100_000),"
+     }
+    ],
+    "impacto": "Si el admin borra el campo (Number('') = 0) o toca 'Aplicar override' sin cambiar el valor inicial, el cliente queda facturado en 0 USD hasta la fecha por defecto (+90 dias), sin confirmacion (BillingOverrideForm.tsx:141). Quitar el override si pide confirmacion; aplicarlo no.",
+    "propuesta": "Campo de precio vacio por defecto y obligatorio; rechazar '' en cliente y servidor (precio requerido explicito); pedir confirmacion cuando el precio es 0 o menor al del plan, mostrando el monto y la fecha.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.billing-override",
+     "modelo.Subscription",
+     "h2.cli-cuenta"
+    ],
+    "relacionados": "Flujo D2 'Facturacion: plan actual'",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "No se puede cancelar un downgrade programado desde la UI",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx",
+      "linea": 37,
+      "fragmento": "const noChange = selectedKey === currentPlanKey"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx",
+      "linea": 109,
+      "fragmento": "disabled={pending || noChange}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+      "linea": 124,
+      "fragmento": "if (kind === 'unchanged') {\n  // Limpia cualquier pending obsoleto que apunte a este mismo plan."
+     }
+    ],
+    "impacto": "Si se programa por error un downgrade, la unica rama que lo limpia (re-elegir el plan actual) esta bloqueada por el boton. El unico camino es un upgrade real (que resetea la cuota del mes, plan.actions.ts:206-208) y volver a bajar. Ademas esa rama no deja audit ni invalida cache (:124-132).",
+    "propuesta": "Agregar en PlanAssignmentCard (junto al aviso de downgrade pendiente :62-75) un boton 'Cancelar downgrade' que llame a una action dedicada con audit; o permitir 'Sin cambios' cuando hay pendingPlan.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.plan",
+     "modelo.Subscription",
+     "lib.audit-log"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "La pestana Chatbot muestra como cuota un limite que el gating ya no usa",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+      "linea": 94,
+      "fragmento": "value={`${org.botConfig.monthlyQuota.toLocaleString('es-AR')} conv`}"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 211,
+      "fragmento": "//       a las otras dos. La cuota del plan reemplaza bot.monthlyQuota"
+     },
+     {
+      "ruta": "prisma/seeds/sync-plans.ts",
+      "linea": 72,
+      "fragmento": "quota: 500,"
+     }
+    ],
+    "impacto": "Los bots se crean con monthlyQuota 1000 (createClientWithBot.ts:186) pero el limite efectivo es Plan.quota (500/3000/5000, handleChatRequest.ts:345). Un cliente Starter aparece con '1.000 conv' en el admin y su bot se corta a las 500: soporte diagnostica mal. ChatbotManager tambien deriva maxTokens de monthlyQuota (ChatbotTab.tsx:108).",
+    "propuesta": "Mostrar la cuota del plan efectivo (getPlanForOrg / getOrgUsage) en ChatbotTab y ChatbotManager, y deprecar monthlyQuota (incluye el editor AdvancedTab y detectBotIssues que alerta con ese valor).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.tab-chatbot",
+     "h3.adm-chatbots",
+     "modelo.BotConfig",
+     "modelo.Plan",
+     "lib.plan"
+    ],
+    "relacionados": "Flujo D6 'Plan del bot: catalogo de planes -> plan efectivo -> tools habilitadas'",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Los errores de las actions que lanzan se ven genericos en produccion (y cada uno va a Sentry)",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx",
+      "linea": 94,
+      "fragmento": "setError(err instanceof Error ? err.message : 'No se pudo guardar. Intentá de nuevo.')"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
+      "linea": 79,
+      "fragmento": "throw new Error('El email ingresado ya está registrado en otro usuario.')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 168,
+      "fragmento": "toast.error(err instanceof Error ? err.message : 'No se pudo archivar el cliente')"
+     },
+     {
+      "ruta": "src/instrumentation.ts",
+      "linea": 49,
+      "fragmento": "export const onRequestError = Sentry.captureRequestError"
+     }
+    ],
+    "impacto": "updateClient, updateClientInternalNotes, archive/unarchive, getClientDeletionSummary y hardDeleteClient comunican errores esperados lanzando Error. En un build de produccion Next reemplaza el mensaje de errores lanzados en server actions por uno generico con digest, asi que el admin veria un texto en ingles inutil en vez de 'El email ya esta registrado'. Ademas cada error esperado se registra en Sentry via onRequestError (ruido).",
+    "propuesta": "Que esas actions devuelvan un resultado tipado ({ ok:false, error }) para errores esperados (como ya hacen plan.actions con ActionResult) y reservar throw para fallos reales; la UI muestra result.error.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.editar-datos",
+     "h4.adm-clientes.notas-internas",
+     "h4.adm-clientes.archivar",
+     "h4.adm-clientes.eliminar",
+     "int.sentry"
+    ],
+    "relacionados": "Patron D1-c3 (guards que lanzan Error generico); InternalNotesCard.tsx:52-53; ClientsListClient.tsx:181, :199-201, :238-239; Step5Review.tsx:111",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "plan.actions devuelve el mensaje interno del error y no lo reporta a Sentry",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+      "linea": 239,
+      "fragmento": "console.error('assignPlanToOrg error:', error)\nreturn fail(error instanceof Error ? error.message : 'Error desconocido.')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+      "linea": 187,
+      "fragmento": "await prisma.subscription.create({\n  data: {\n    organizationId,"
+     }
+    ],
+    "impacto": "Un fallo de Prisma (por ejemplo, FK si la org no existe: la action no lo verifica antes de crear la Subscription) llega textual a la UI del admin (PlanAssignmentForm.tsx:48, BillingOverrideForm.tsx:65) y solo queda en console.error, sin Sentry. Mismo patron en :315-316 y :372-373.",
+    "propuesta": "Mensajes fijos por caso conocido + Sentry.captureException en el catch; verificar la org (existe y no archivada) antes de crear la Subscription. No depender de error.message (el helper toErrorMessage de action-utils, FROZEN-inferido, tiene el mismo comportamiento para Error: decision para Valentino si se ajusta).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.plan",
+     "h4.adm-clientes.billing-override",
+     "int.sentry",
+     "lib.actions"
+    ],
+    "relacionados": "Patron D1-c1 (mensajes internos y console.error); alerta D3-A4",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Boveda admin: las credenciales se descifran en el render y el 'revelar' no protege ni audita",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+      "linea": 39,
+      "fragmento": "const credential =\n  isAccess && asset.description\n    ? resolveCredentialDisplay(asset.description)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+      "linea": 71,
+      "fragmento": "<VaultRevealButton value={credential.value} />"
+     },
+     {
+      "ruta": "src/components/dashboard/VaultRevealButton.tsx",
+      "linea": 1,
+      "fragmento": "'use client'"
+     }
+    ],
+    "impacto": "Al abrir la pestana Boveda, todas las credenciales ACCESS del cliente viajan en claro en el payload RSC al navegador del admin, aunque nadie toque 'revelar'. No queda registro de que SUPER_ADMIN vio que credencial: para el primer cliente real no hay trazabilidad de acceso a sus accesos.",
+    "propuesta": "Descifrar bajo demanda con una server action que exija SUPER_ADMIN, devuelva un solo valor y escriba audit (CREDENTIAL_REVEALED); el render solo manda metadatos.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.tab-boveda",
+     "modelo.ClientAsset",
+     "lib.audit-log"
+    ],
+    "relacionados": "Flujo D2 'Boveda del cliente' (mismo patron en el portal)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Subir a la boveda falla en silencio: VaultManager solo hace console.error",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+      "linea": 26,
+      "fragmento": "<VaultManager organizationId={clientId} />"
+     },
+     {
+      "ruta": "src/components/admin/managers/VaultManager.tsx",
+      "linea": 30,
+      "fragmento": "} catch (error) {\n  console.error(error)"
+     }
+    ],
+    "impacto": "Si la carga de un acceso o archivo falla, el admin no ve mensaje; puede creer que la credencial del cliente quedo guardada. Pendiente declarado en PLAN-556 y sigue igual.",
+    "propuesta": "Mostrar el error en VaultManager (estado de error con role=alert) y capturarlo en Sentry; la action debe devolver resultado tipado.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.tab-boveda",
+     "int.sentry"
+    ],
+    "relacionados": "PLAN-556",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Soporte: 'Ver todos' manda ?clientId= que /admin/tickets y /admin/messages ignoran",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx",
+      "linea": 30,
+      "fragmento": "<SupportSection title={`Tickets recientes (${tickets.length})`} href={`/admin/tickets?clientId=${clientId}`}>"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx",
+      "linea": 55,
+      "fragmento": "<SupportSection title=\"Mensajes recientes\" href={`/admin/messages?clientId=${clientId}`}>"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx",
+      "linea": 19,
+      "fragmento": "take: 10,"
+     }
+    ],
+    "impacto": "Desde la ficha del cliente, 'Ver todos' abre todos los tickets de todos los clientes y la bandeja de mensajes sin seleccion. El titulo 'Tickets recientes (N)' tope 10 aparenta ser el total.",
+    "propuesta": "Que /admin/tickets acepte el filtro por org (slug) y que 'Ver todos' de mensajes apunte a /admin/messages/[orgId]; mostrar el total real con _count.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.tab-soporte",
+     "h4.adm-tickets",
+     "h4.adm-mensajes"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "ClientSwitcher navega con router.push sin justificacion en el portal admin",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx",
+      "linea": 64,
+      "fragmento": "function handleSelect(client: ClientOption) {\n  setOpen(false)\n  setSearch('')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx",
+      "linea": 67,
+      "fragmento": "router.push(`/admin/clients/${client.id}`)"
+     }
+    ],
+    "impacto": "Viola la convencion de portales de CLAUDE.md (usar <Link>; router.push solo con comentario que lo justifique). Pierde prefetch, abrir en pestana nueva y semantica de enlace.",
+    "propuesta": "Renderizar cada opcion como <Link> (cerrando el dropdown en onClick).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.detalle"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Editar datos usa triggerTransition (shutter del sitio publico) dentro del admin",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx",
+      "linea": 92,
+      "fragmento": "triggerTransition(detailHref)"
+     },
+     {
+      "ruta": "src/context/TransitionContext.tsx",
+      "linea": 111,
+      "fragmento": "setIsAnimating(true);                 // cierra shutter (0.3s)"
+     },
+     {
+      "ruta": "src/app/layout.tsx",
+      "linea": 114,
+      "fragmento": "<Shutter />"
+     }
+    ],
+    "impacto": "CLAUDE.md dice que triggerTransition no aplica en portales; como el Shutter esta montado en el layout raiz, guardar o cancelar cierra la cortina del sitio publico sobre el admin y demora 300 ms la navegacion (tambien en :232).",
+    "propuesta": "Tras el submit usar router.push con comentario inline (navegacion post-submit) o redirect desde la action; 'Cancelar' como <Link>.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.editar-datos"
+    ],
+    "relacionados": "Step5Review.tsx:60 usa el mismo patron (fuera del lote)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "El detalle de cliente acepta id o slug y publica el cuid en la URL",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+      "linea": 33,
+      "fragmento": "const { clientId: orgSlug } = await params"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+      "linea": 42,
+      "fragmento": "OR: [{ id: orgSlug }, { slug: orgSlug }],"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 630,
+      "fragmento": "href={`/admin/clients/${client.id}`}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+      "linea": 168,
+      "fragmento": "revalidatePath(`/admin/clients/${organizationId}`)"
+     }
+    ],
+    "impacto": "Contradice la regla 'no IDs internos en URLs' de CLAUDE.md; los docs se contradicen (B9.1 slug vs B11.6 id). Todas las rutas internas usan el cuid (ClientTabsNav.tsx:34, ClientHeader.tsx:136, ClientSwitcher.tsx:67) y la revalidacion solo cubre esa forma: quien entra por slug puede ver datos sin refrescar. findFirst con OR sin orderBy es ambiguo si un slug coincidiera con un cuid.",
+    "propuesta": "Decidir un identificador canonico (slug) para /admin/clients/[orgSlug], redirigir la otra forma y revalidar con el canonico.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.detalle",
+     "modelo.Organization"
+    ],
+    "relacionados": "Alerta D3-A1",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "La redireccion legacy de chatbot solo resuelve slug, pierde install/integrations y usa 308 para el rechazo",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 28,
+      "fragmento": "const org = await prisma.organization.findUnique({\n  where: { slug: orgSlug },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 36,
+      "fragmento": "const targetTab: TabId = requested && TAB_MAP[requested] ? TAB_MAP[requested] : 'overview'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 22,
+      "fragmento": "permanentRedirect('/login')"
+     }
+    ],
+    "impacto": "/admin/clients/<cuid>/chatbot da 404 aunque toda la UI genera cuids; /chatbot/install y /chatbot/integrations caen en overview (existen en admin/chatbots/[botId]/tabs.ts:1). El rechazo de sesion con 308 puede quedar cacheado por el navegador. Cualquier vista nueva propuesta bajo esa ruta (B8.5, roadmap-pendientes.md:26) seria tragada por el catch-all.",
+    "propuesta": "Resolver id o slug, agregar install/integrations al mapa y usar redirect (307) para el rechazo; o eliminar el catch-all si los bookmarks viejos ya no importan. Cerrar en docs que /admin/clients/[x]/chatbot/* esta deprecado.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.redireccion-chatbot-legacy",
+     "h3.adm-chatbots"
+    ],
+    "relacionados": "Alerta D3-A3",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Fechas limite a medianoche UTC se muestran corridas un dia en hora argentina",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+      "linea": 271,
+      "fragmento": "const overrideUntilDate = new Date(overrideUntil)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx",
+      "linea": 70,
+      "fragmento": "message: `Override seteado: $${result.data.priceOverride} hasta ${new Date(result.data.overrideUntil).toLocaleDateString('es-AR')}`,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx",
+      "linea": 58,
+      "fragmento": "const date = new Date(data.pending.effectiveAt).toLocaleDateString('es-AR')"
+     }
+    ],
+    "impacto": "'Vigente hasta 21/08' se guarda como 2026-08-21T00:00Z: vence el 20/08 a las 21:00 AR y el aviso de exito dice '20/8/2026'. El downgrade del 1/10 (Date.UTC dia 1, plan.actions.ts:47-52) se anuncia como '30/9'. Las cards server (BillingOverrideCard.tsx:72, PlanAssignmentCard.tsx:57, :70, SupportTab.tsx:45, :70, OverviewTab.tsx:86) formatean sin timeZone (UTC en el server). ChatbotTab.tsx:22-23 arma el periodo de cuota en hora local, el checker usa UTC.",
+    "propuesta": "Usar el helper TZ_AR (src/lib/tz-ar.ts:9, FROZEN-inferido, solo se importa) para guardar fin de dia AR y para formatear; periodo de cuota con el mismo currentPeriodKey UTC del checker.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.billing-override",
+     "h4.adm-clientes.plan",
+     "h4.adm-clientes.tab-chatbot"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "El listado embebe los avatares base64 de todos los clientes, activos y archivados",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/page.tsx",
+      "linea": 51,
+      "fragmento": "avatarImageUrl: client.avatarImageUrl,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/page.tsx",
+      "linea": 72,
+      "fragmento": "clients={clients.map(toListItem)}\narchivedClients={archivedClients.map(toListItem)}"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/avatarImageUrlSchema.ts",
+      "linea": 10,
+      "fragmento": "const MAX_AVATAR_URL_LENGTH = 600_000 // ~450KB binario"
+     }
+    ],
+    "impacto": "El avatar se guarda como data URL en la DB (hasta 600 KB cada uno) y la lista los manda todos en el payload RSC y en las entradas de unstable_cache (que tienen tope de 2 MB por entrada). Con decenas de clientes el listado se vuelve pesado y el cache puede dejar de escribirse.",
+    "propuesta": "Servir el avatar por una ruta propia (o storage) y mandar solo la URL; o traer los archivados recien al abrir el toggle.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.listado",
+     "modelo.Organization"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "El alta de un cliente no invalida el cache del listado",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/page.tsx",
+      "linea": 20,
+      "fragmento": "const getClients = unstable_cache(\n  async () =>"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/page.tsx",
+      "linea": 28,
+      "fragmento": "{ revalidate: 60, tags: ['admin-clients'] }"
+     }
+    ],
+    "impacto": "createClientOnly.ts, createClientWithBot.ts y lib/onboarding/core.ts no llaman revalidateTag('admin-clients') ni revalidatePath (git grep sin resultados; control: archiveClient.ts:48 si lo hace). El cliente recien creado puede no aparecer en /admin/clients hasta 60 s o mas; igual tras renombrar (updateClient solo revalidatePath) o cambiar plan.",
+    "propuesta": "revalidateTag('admin-clients') en las actions de alta, edicion y plan.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.listado",
+     "h4.adm-clientes.alta-cliente"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Fallos silenciosos: exportar leads en lote e impersonar no muestran el error",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 120,
+      "fragmento": "try {\n  const result = await bulkExportLeads([...selected])\n  if (!result.ok) return"
+     },
+     {
+      "ruta": "src/lib/bulk-actions.ts",
+      "linea": 79,
+      "fragmento": "return { ok: true, csv, count: leads.length }"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ImpersonateButton.tsx",
+      "linea": 25,
+      "fragmento": "} catch (error) {\n  console.error('Impersonation failed', error)"
+     }
+    ],
+    "impacto": "bulkExportLeads nunca devuelve ok:false (lanza), y handleBulkExportLeads no tiene catch: el boton deja de girar y no pasa nada. Impersonar fallido solo deja un console.error con el dialogo abierto. handleBulkPauseBots re-lanza tras toast.promise (:148).",
+    "propuesta": "catch con toast.error en ambos; resultado tipado en bulk-actions.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.acciones-masivas",
+     "h4.adm-clientes.impersonar"
+    ],
+    "relacionados": "Flujo D5 'Admin exporta leads de varios bots'",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Archivar y fijar son invisibles sin hover: teclado y pantallas tactiles",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 712,
+      "fragmento": "className=\"rounded-lg p-1.5 text-zinc-500 opacity-0 transition-opacity hover:bg-white/[0.05] hover:text-amber-300 group-hover:opacity-100 disabled:opacity-50\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 721,
+      "fragmento": "className=\"rounded-lg p-1.5 opacity-0 transition-opacity hover:bg-white/[0.05] group-hover:opacity-100\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx",
+      "linea": 32,
+      "fragmento": "if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {\n  event.preventDefault()"
+     }
+    ],
+    "impacto": "Con teclado el foco cae en botones invisibles (sin focus-visible:opacity-100); en celular no hay hover, asi que archivar y fijar no se ven. El switcher secuestra Ctrl+K en toda la pagina y su boton no expone aria-expanded/aria-haspopup (:72-86).",
+    "propuesta": "Agregar focus-visible:opacity-100 y mostrar las acciones siempre en pantallas sin hover (media hover:none); roles y aria-expanded en el switcher.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.listado",
+     "h4.adm-clientes.archivar",
+     "h4.adm-clientes.detalle"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Formularios de plan, billing y notas con label sin asociar y mensajes sin role=alert",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx",
+      "linea": 98,
+      "fragmento": "<label className=\"text-[10px] uppercase tracking-[0.24em] text-zinc-500\">\n  Precio override (USD/mes)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx",
+      "linea": 155,
+      "fragmento": "<div\n  className={\n    feedback.type === 'success'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx",
+      "linea": 88,
+      "fragmento": "{error && <p className=\"text-xs text-red-400\">{error}</p>}"
+     }
+    ],
+    "impacto": "Los <label> no tienen htmlFor ni envuelven el input (BillingOverrideForm.tsx:113, :126; PlanAssignmentForm.tsx:77, :92); el textarea de notas no tiene nombre accesible (InternalNotesCard.tsx:79). Los avisos de exito/error no se anuncian (PlanAssignmentForm.tsx:117, EditClientForm.tsx:219, ResendCredentialsButton.tsx:61, SendExecutiveReportButton.tsx:95).",
+    "propuesta": "Asociar label/input con id, aria-label en el textarea y role=alert/aria-live en los bloques de feedback.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.plan",
+     "h4.adm-clientes.billing-override",
+     "h4.adm-clientes.notas-internas"
+    ],
+    "relacionados": "Patron D1-c1 (errores sin role=alert)",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Re-enviar credenciales apunta al primer miembro sin filtrar rol, distinto del que se edita",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx",
+      "linea": 19,
+      "fragmento": "members: {\n  orderBy: { joinedAt: 'asc' },\n  take: 1,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/edit/page.tsx",
+      "linea": 31,
+      "fragmento": "where: { role: 'ADMIN' },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx",
+      "linea": 90,
+      "fragmento": "<ResendCredentialsButton\n  userId={primaryMember.user.id}"
+     }
+    ],
+    "impacto": "Si el miembro mas antiguo no es el ADMIN de la org (por ejemplo, un usuario de develOP agregado para soporte o un VIEWER), 'Re-enviar credenciales' invalida la contrasena de ese usuario y no la del administrador que muestra Editar datos.",
+    "propuesta": "Usar el mismo criterio (OrgRole ADMIN, joinedAt asc) en OverviewTab y mostrar a quien se le resetea.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.reenviar-credenciales",
+     "modelo.OrgMember"
+    ],
+    "relacionados": "Flujo D1 'Cambio forzado de contrasena (temporal)'",
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Falta el ciclo de cobro en el admin: facturas, renovacion y estado de la suscripcion solo existen por seed",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx",
+      "linea": 72,
+      "fragmento": "<PlanAssignmentCard clientId={clientId} />\n<BillingOverrideCard clientId={clientId} />\n<ExecutiveReportCard clientId={clientId} />"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+      "linea": 191,
+      "fragmento": "status: SubscriptionStatus.ACTIVE,"
+     },
+     {
+      "ruta": "prisma/seed.ts",
+      "linea": 595,
+      "fragmento": "await prisma.invoice.upsert({"
+     }
+    ],
+    "impacto": "El portal muestra facturas (dashboard/cuenta/facturacion/page.tsx:70) y alerta por suscripciones por vencer (lib/alerts.ts:244), pero ninguna pantalla ni action del admin crea Invoice, fija renewalDate o cambia el estado de la Subscription (las unicas escrituras de subscription estan en plan.actions.ts y get-plan-for-org.ts:50; invoice solo en seed.ts:595 y :618). Para el primer cliente real, Facturacion queda vacia y la alerta nunca dispara. Confirma la hipotesis: lo que falta en Clientes son modulos, no la base.",
+    "propuesta": "Modulo 'Facturacion' en la ficha del cliente: alta de factura (monto desde Plan/override vigente, vencimiento, link de pago, PDF), marcar pagada, fijar renovacion y estado (ACTIVE/PAST_DUE/CANCELLED) con audit.",
+    "esfuerzo": "L",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h4.adm-clientes.facturacion",
+     "h2.cli-cuenta",
+     "modelo.Invoice",
+     "modelo.Subscription"
+    ],
+    "relacionados": "Flujo D2 'Mi cuenta: perfil, reporte, facturacion y boveda'",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Deuda anti-vibecode en Clientes: componente de 772 lineas y fetch directo a route handlers",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 124,
+      "fragmento": "const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8' })"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx",
+      "linea": 18,
+      "fragmento": "const res = await fetch(`/api/admin/users/${userId}/resend-credentials`, { method: 'POST' })"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx",
+      "linea": 18,
+      "fragmento": "retryAfterSeconds?: number"
+     }
+    ],
+    "impacto": "ClientsListClient (772 lineas) mezcla lista, seleccion, bulk, archivo, borrado, deep-link y la tarjeta: cada cambio toca un archivo enorme. Los botones de credenciales y reporte usan fetch directo en vez de server actions; el 429 con retryAfterSeconds se muestra como error generico (:61).",
+    "propuesta": "Separar ClientCard, BulkBar y el flujo de borrado en archivos propios; mover las dos llamadas a server actions con resultado tipado y mostrar el tiempo de espera del rate limit.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.listado",
+     "h4.adm-clientes.reenviar-credenciales",
+     "h4.adm-clientes.reporte-ejecutivo-manual"
+    ],
+    "relacionados": "",
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Estados borde del detalle: sin ADMIN no se puede editar nada y los archivados no se distinguen",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx",
+      "linea": 64,
+      "fragmento": "const canSubmit =\n  hasAdminUser &&"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+      "linea": 65,
+      "fragmento": "prisma.organization.findMany({\n  select: { id: true, companyName: true, slug: true },"
+     }
+    ],
+    "impacto": "Una org sin miembro ADMIN no permite corregir ni el nombre de la empresa (EditClientForm.tsx:101-105). El switcher lista orgs archivadas y el header no marca 'Archivado', asi que se puede impersonar o cambiar plan a un archivado sin advertencia.",
+    "propuesta": "Permitir editar los datos de la empresa sin usuario admin (y ofrecer crear uno); filtrar o marcar archivados en el switcher y mostrar un badge en ClientHeader.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.editar-datos",
+     "h4.adm-clientes.detalle"
+    ],
+    "relacionados": "Flujo D6 'Archivar cliente (admin): soft-delete que solo oculta del listado'",
+    "requiere_verificacion_humana": false
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.listado",
+    "nombre": "Listado de clientes",
+    "descripcion": "Lista de clientes activos y archivados con busqueda, filtro por estado del bot, orden y fijados",
+    "archivos": [
+     "src/app/(protected)/admin/clients/page.tsx",
+     "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "src/app/(protected)/admin/clients/loading.tsx",
+     "src/app/(protected)/admin/clients/error.tsx"
+    ],
+    "entradas": [
+     "ClientsPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz: page.tsx:91-94 -> :62-65 -> ClientsListClient.tsx:258-304 -> :497-517 -> :630. No llega a L3 por mobile parcial (fijar oculto sin hover) y cache que no se invalida en el alta.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "page.tsx:92 role SUPER_ADMIN; listado global por diseno admin"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ClientsListClient.tsx:468-489 EmptyStateMuted con CTA"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "clients/error.tsx:12 AdminErrorBoundary -> SectionErrorBoundary"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "loading.tsx:4-26; Suspense con skeleton page.tsx:107"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "solo lectura"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "grilla responsive :492 y filtros flex-col :308; boton fijar opacity-0 sin hover :721"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary.tsx:64 Sentry.captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos reales de prisma; sin TODO en el lote"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna de develOP"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.archivar",
+    "nombre": "Archivar y desarchivar",
+    "descripcion": "Soft-delete reversible del cliente desde la tarjeta",
+    "archivos": [
+     "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ClientsListClient.tsx:710 -> InlineConfirm :750-768 -> :161-172 -> archiveClient.ts (flujo D6). Mensaje de error generico en prod y boton invisible en tactil.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "archiveClient.ts:17 requireSuperAdmin (git grep)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "vista Archivados vacia :475, :480"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "toast con err.message :168 (enmascarado en prod; hallazgo UX)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "actionPending :711, spinner :741-742"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "archiveClient.ts:19 safeParse (git grep)"
+     },
+     "mobile": {
+      "cumple": "no",
+      "evidencia": "boton Archivar opacity-0 group-hover :712"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "errores lanzados llegan por onRequestError (instrumentation.ts:49)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.eliminar",
+    "nombre": "Eliminar cliente (hard-delete)",
+    "descripcion": "Borrado irreversible con resumen y confirmacion por texto ELIMINAR; deep-link ?delete=",
+    "archivos": [
+     "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ClientsListClient.tsx:437-454 -> :192-207 -> :521-531 TypeToConfirmDialog -> :222-243 -> hardDeleteClient.ts (flujo D6).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "hardDeleteClient.ts:110 y :126 requireSuperAdmin (git grep)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "accion puntual"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "toast err.message :239 (generico en prod)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "deleteLoading :448-449; isPending del dialogo :529"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "hardDeleteClient.ts:111, :127 safeParse"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "checkbox visible :621-626; barra flex-col/flex-wrap :397, :415"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "onRequestError instrumentation.ts:49"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "resumen real DeleteSummaryDetail :537-572"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.acciones-masivas",
+    "nombre": "Acciones masivas",
+    "descripcion": "Exportar leads de los clientes seleccionados a CSV y pausar sus bots",
+    "archivos": [
+     "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ClientsListClient.tsx:416-436 -> :118-135 / :137-154 -> bulk-actions.ts:46 / :8 (flujo D5). La exportacion falla en silencio.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "bulk-actions.ts:9, :47 requireSuperAdmin (git grep)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "0 leads descarga CSV vacio con toast '0 leads exportados' :131"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "try/finally sin catch :120-134"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "loading del Button :421, :431"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "bulk-actions.ts:10, :48 dedupe+filter(Boolean); sin Zod (git grep de 'z.' y safeParse sin resultados)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "barra flex-col md:flex-row :397"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "lanzado -> onRequestError; sin feedback UI"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.detalle",
+    "nombre": "Ficha del cliente",
+    "descripcion": "Header con datos y metricas, switcher de clientes, tabs y transiciones",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/_components/ClientHeader.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/_components/TabContentTransition.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/_components/TabSkeleton.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/loading.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/error.tsx"
+    ],
+    "entradas": [
+     "ClientDetailPage"
+    ],
+    "madurez": "L3",
+    "madurez_evidencia": "page.tsx:28-31 -> :39-69 -> :75-83 -> :85-93; cumple los criterios aplicables. Deuda: router.push en switcher, cuid en URL, archivados sin marca.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "page.tsx:29 role SUPER_ADMIN"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "notFound() si no existe :71; switcher 'Sin resultados' ClientSwitcher.tsx:115-118"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "[clientId]/error.tsx:13"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "loading.tsx:4-42; Suspense TabSkeleton page.tsx:86"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "tab en whitelist page.tsx:35-37"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "tabs overflow-x-auto ClientTabsNav.tsx:27; header flex-col ClientHeader.tsx:45; stats grid-cols-2 :123"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary.tsx:64"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.plan",
+    "nombre": "Asignar plan",
+    "descripcion": "Upgrade inmediato con reset de cuota, downgrade programado al mes siguiente, tabla de 7 dimensiones",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx",
+     "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+     "src/app/(protected)/admin/clients/_actions/plan.schemas.ts"
+    ],
+    "entradas": [
+     "assignPlanToOrg"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "PlanAssignmentForm.tsx:39-49 -> plan.actions.ts:88-92 -> :101-122 -> :179-208 -> :210-235. Falla: precio legacy desincronizado, downgrade no cancelable, error crudo.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "plan.actions.ts:88 requireSuperAdmin"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "'Sin plan asignado (fallback Starter)' PlanAssignmentCard.tsx:45-52"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "feedback de error PlanAssignmentForm.tsx:47-49 con error.message crudo plan.actions.ts:240"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "loading/disabled PlanAssignmentForm.tsx:107-109"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "plan.actions.ts:89-92; plan.schemas.ts:4-10"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "tabla con overflow-x-auto PlanAssignmentCard.tsx:88"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch con console.error plan.actions.ts:239"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "planes desde la DB :18"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.billing-override",
+    "nombre": "Billing override",
+    "descripcion": "Precio facturable independiente del plan con vencimiento y motivo; quitar con confirmacion",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx",
+     "src/app/(protected)/admin/clients/_actions/plan.actions.ts"
+    ],
+    "entradas": [
+     "setBillingOverride",
+     "clearBillingOverride"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "BillingOverrideForm.tsx:50-73 -> plan.actions.ts:244-313; quitar :75-90 -> :320-370. Default 0 USD sin confirmacion y fecha corrida.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "plan.actions.ts:248, :324"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "'—' sin override BillingOverrideCard.tsx:53; error si no hay Subscription plan.actions.ts:265-269"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "BillingOverrideForm.tsx:64-66 muestra result.error (crudo :316)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "loading/disabled :141, :146"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "plan.schemas.ts:14-28 Zod, pero acepta 0 y el cliente convierte '' a 0 (:52)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 sm:grid-cols-2 :96"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error plan.actions.ts:315"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.editar-datos",
+    "nombre": "Editar datos del cliente",
+    "descripcion": "Empresa, usuario admin, avatar y notas en una pantalla",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/edit/page.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx"
+    ],
+    "entradas": [
+     "EditClientPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "edit/page.tsx:11-41 -> EditClientForm.tsx:73-91 -> updateClient.ts (fuera del lote) -> :92.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "edit/page.tsx:12; updateClient.ts:29 requireSuperAdmin"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "aviso sin usuario admin EditClientForm.tsx:101-106"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "bloque de error :219-227 con err.message lanzado (generico en prod)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "spinner :244-245"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "updateClient.ts:33-37 safeParse; email lowercase :71"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 lg:grid-cols-2 :108; botones flex-col :229"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "onRequestError instrumentation.ts:49"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.notas-internas",
+    "nombre": "Notas internas inline",
+    "descripcion": "Editar notas del equipo sobre el cliente desde Overview",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "OverviewTab.tsx:98 -> InternalNotesCard.tsx:39-57 -> updateClientInternalNotes.ts.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "updateClientInternalNotes.ts:20 requireSuperAdmin"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "InternalNotesCard.tsx:121-124"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": ":88 muestra err.message lanzado"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": ":109-110"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "updateClientInternalNotes.ts:22-23"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "layout fluido :89"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "onRequestError"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.impersonar",
+    "nombre": "Impersonar al cliente",
+    "descripcion": "Entrar al portal como el cliente para soporte",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/ImpersonateButton.tsx",
+     "src/app/(protected)/admin/clients/_actions/client.actions.ts"
+    ],
+    "entradas": [
+     "startImpersonationAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ImpersonateButton.tsx:20-29 -> client.actions.ts:8 -> flujo D1 'Impersonacion de soporte'.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "delegado a impersonation.ts:12 (flujo D1)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "accion puntual"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "ImpersonateButton.tsx:25-28 solo console.error"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "isPending :49"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "delegada; el wrapper no valida"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "boton en flex :134"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "solo si la action lanza (onRequestError)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.reenviar-credenciales",
+    "nombre": "Re-enviar credenciales",
+    "descripcion": "Genera contrasena temporal y la envia por email; la muestra si el email falla",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "OverviewTab.tsx:88-94 -> ResendCredentialsButton.tsx:15-35 -> route resend-credentials (flujos D1).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "guard en la route (D1); el destino es el primer miembro sin filtrar rol OverviewTab.tsx:19-25"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "no se muestra sin usuario OverviewTab.tsx:88"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "mensaje generico :60-66"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": ":97-98"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin body"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "fila de confirmacion flex sin wrap :71"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "depende de la route (fuera del lote)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.reporte-ejecutivo-manual",
+    "nombre": "Enviar reporte ejecutivo ahora",
+    "descripcion": "Disparo manual del reporte semanal para la org",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/ExecutiveReportCard.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ExecutiveReportCard.tsx:20 -> SendExecutiveReportButton.tsx:34-65 -> flujo D2 'Envio manual del reporte (admin)'.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "route fuera del lote (flujo D2)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "motivos BUILD_SKIPPED legibles :21-26, :54-58"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "429 y SEND_FAILED caen en error generico :61"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": ":131-132"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin body"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "fila de confirmacion flex sin wrap :105"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "fuera del lote"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.tab-chatbot",
+    "nombre": "Pestana Chatbot",
+    "descripcion": "Resumen del bot del cliente, manager y accesos al detalle del bot",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+     "src/app/(protected)/admin/clients/[clientId]/_components/QuickActionMotion.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ChatbotTab.tsx:15-36 -> :65-99 -> :101-124 -> :127-163. La cuota mostrada no es la efectiva.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "renderizada dentro de page.tsx:28-31; filtra por clientId resuelto"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": ":40-56 con CTA"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "[clientId]/error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Suspense TabSkeleton page.tsx:86"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 sm:grid-cols-2 :65, :126"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "'Quota mensual' muestra monthlyQuota que el gating no usa :94"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.tab-proyectos",
+    "nombre": "Pestana Proyectos",
+    "descripcion": "Proyectos del cliente y alta de entregables sobre el proyecto activo",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ProjectsTab.tsx:14-20 -> :22-25 -> :73 ProjectManager -> agency-actions.ts:14.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "where organizationId :15; agency-actions.ts:20 rol y :29 assertProjectBelongsToOrg"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": ":33-34 y :75-77"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "[clientId]/error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Suspense TabSkeleton"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "fuera del lote (agency-actions)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "xl:grid-cols solo en xl :28"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.tab-boveda",
+    "nombre": "Pestana Boveda",
+    "descripcion": "Assets y credenciales del cliente; alta via VaultManager",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "VaultTab.tsx:15-18 -> :39-42 -> :71; alta :26 -> VaultManager -> agency-actions.ts:94.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "where organizationId :16; agency-actions.ts:99 rol"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": ":33-34"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "VaultManager.tsx:30-31 solo console.error"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Suspense TabSkeleton"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "fuera del lote"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 :21, :36"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "error de alta no se captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.tab-soporte",
+    "nombre": "Pestana Soporte",
+    "descripcion": "Ultimos tickets y mensajes del cliente con accesos",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "SupportTab.tsx:15-26 -> :30-53 -> :55-84. 'Ver todos' sin filtro.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "where organizationId :17, :22"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": ":31-32, :56-57"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "[clientId]/error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Suspense TabSkeleton"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 lg:grid-cols-2 :29"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.alta-cliente",
+    "nombre": "Alta de cliente (wizard)",
+    "descripcion": "Wizard de onboarding con o sin chatbot",
+    "archivos": [
+     "src/app/(protected)/admin/clients/new/page.tsx"
+    ],
+    "entradas": [
+     "NewClientPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ClientsListClient.tsx:352 -> new/page.tsx:14 -> flujo D5 'Alta de cliente con bot (asistente)' (OnboardingWizard.tsx:87 -> Step5Review.tsx:71 -> createClientWithBot.ts:96). El listado no se invalida tras el alta.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "createClientWithBot.ts:96 / createClientOnly.ts:48 requireSuperAdmin"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "formulario"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Step5Review.tsx:111 err.message lanzado"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Step5Review.tsx:331 spinner"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "createClientWithBot.ts:99-104 safeParse"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "layout del wizard fuera del lote"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "onRequestError"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos en new/page.tsx"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.redireccion-chatbot-legacy",
+    "nombre": "Redireccion legacy de chatbot",
+    "descripcion": "Bookmarks viejos /admin/clients/[slug]/chatbot/* van a /admin/chatbots/[botId]",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx"
+    ],
+    "entradas": [
+     "DeprecatedChatbotRedirect"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:20-23 -> :28-31 -> :35-38. Solo slug; sin install/integrations.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": ":21"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "notFound :33"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "redireccion"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "redireccion"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "TAB_MAP :6-13 incompleto"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "sin UI"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "sin UI"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos falsos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.facturacion",
+    "nombre": "Ciclo de cobro del cliente",
+    "descripcion": "Emitir facturas, marcar pagos, fijar renovacion y estado de la suscripcion",
+    "archivos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx"
+    ],
+    "madurez": "L0",
+    "madurez_evidencia": "No existe: OverviewTab.tsx:72-74 solo monta plan, override y reporte; invoice solo se escribe en prisma/seed.ts:595 y :618; subscription solo en plan.actions.ts y get-plan-for-org.ts:50 (git grep).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "las facturas que ve el cliente solo pueden venir del seed"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-563",
+    "clave": "Separacion gating / billing (non-negotiable)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "setBillingOverride solo toca priceOverride/overrideUntil/overrideReason (plan.actions.ts:273-280); assignPlanToOrg toca planId/pending/lastPlanChangedAt (:179-184) y nunca priceOverride; el gating usa plan.quota (handleChatRequest.ts:345). Resto legacy: create escribe Subscription.price (:192) y no lo mantiene.",
+    "nota": "La separacion se respeta; el campo price legacy rompe la idea de una sola fuente de precio (hallazgo BUG precio legacy).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-562",
+    "clave": "B4.3 UI admin: asignar plan + billing override",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Migracion prisma/migrations/20260523001750_add_billing_override_and_plan_scheduling (git ls-tree); plan.actions.ts:88-92 requireSuperAdmin+Zod, audit :147 y :210, invalidateOrgPlanCache :167 y :233; cards en OverviewTab.tsx:72-73.",
+    "nota": "El override de Matsu 'hasta 2026-08-21' ya vencio (hoy 2026-10-15): BillingOverrideCard.tsx:24-26 lo mostraria '(vencido)'. Estado en la DB no verificable por lectura.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-560",
+    "clave": "Deprecar Subscription.planName y Subscription.price (legacy)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "planName ya no existe en el modelo (schema.prisma:634-667; git grep planName solo encuentra props de UI); lib/subscription.ts solo selecciona status/renewalDate; ClientHeader.tsx:77, OverviewTab.tsx:41 y la lista leen plan.name. price Float sigue (schema.prisma:659) y lo leen admin/page.tsx:222-228 y perfil/page.tsx:211.",
+    "nota": "Falta price: hoy es fuente de datos viejos (hallazgo BUG precio legacy).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-568",
+    "clave": "Vista admin read-only de CrmIntegration por org",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git grep CrmIntegrationAdminCard: src/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard.tsx montado en admin/chatbots/[botId]/tabs/IntegrationsTab.tsx (editable, no solo lectura).",
+    "nota": "Superado por la tab 'integrations' del bot; la ubicacion propuesta (/admin/clients/[x]/chatbot) esta deprecada. ChatbotTab no enlaza a esa tab.",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-555",
+    "clave": "Wrappers de hover de Clientes a ui compartido",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "HoverScaleCard sigue en admin/clients/_components/HoverScaleCard.tsx con 8 importadores (git grep -l HoverScaleCard); git ls-tree de src/components/ui sin archivos hover/bubble; hover-scale.tsx sigue en admin/tickets/_components. Control positivo: git grep adminHoverCls encuentra AlertsClient.tsx:8.",
+    "nota": "src/components/ui/* es FROZEN: mover alli es decision para Valentino.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-556",
+    "clave": "VaultManager no muestra errores al admin",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "VaultManager.tsx:30-31 catch -> console.error(error) (git grep); montado en VaultTab.tsx:26.",
+    "nota": "Hallazgo UX MEDIA del lote.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-578",
+    "clave": "Unificar Command Center: entregables y boveda en /admin/clients/[clientId]",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git ls-tree de admin/ sin 'agency-dashboard' y git grep 'agency-dashboard' en src sin resultados (control: el mismo ls-tree lista projects/[projectId]/payments/page.tsx); ProjectManager en ProjectsTab.tsx:73 y VaultManager en VaultTab.tsx:26.",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-579",
+    "clave": "P0 wizard sin validacion server-side",
+    "estado_en_codigo": "hecho",
+    "evidencia": "createClientWithBot.ts:99-104 y createClientOnly.ts:51-55 safeParse + requireSuperAdmin (:96, :48); Step5Review.tsx:61-62 estado, :111 error, :311 bloque de error, :331 spinner (git grep).",
+    "nota": "El mensaje mostrado es err.message de un Error lanzado: probable texto generico en produccion (hallazgo UX MEDIA).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-576",
+    "clave": "Limpiar org mock san-miguel",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "prisma/seed-agency-os.ts:398 sigue sembrando slug 'san-miguel' (y :1112, :1468...). La DB no es verificable por lectura.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-577",
+    "clave": "Confirmar Subscription/Plan de matsu",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "scripts/seed-matsu.ts no crea Subscription ni asigna plan: git grep -i 'subscription|planKey|BUSINESS|priceOverride|overrideUntil' solo encuentra :163 businessInfo (control positivo del patron). La asignacion depende de la UI PlanAssignmentCard.",
+    "nota": "Verificar en /admin/clients/<matsu>?tab=overview.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-557",
+    "clave": "Bulk actions: el label intercepta el click del checkbox",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "ClientsListClient.tsx:610-620 input sr-only dentro de <label> absoluto; tests/e2e/16-admin-bulk-actions.spec.ts:13, :17-18 siguen haciendo .check() sobre input[type=checkbox].",
+    "nota": "Por lectura el clic real en el label funciona (activacion nativa del label -> onChange); la falla es del test que apunta al input oculto. Arreglar el selector del test (clic en el label o getByLabel).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-558",
+    "clave": "e2e de onboarding falla en el input de telefono",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tests/e2e/30-onboarding-e2e-complete.spec.ts:62 busca placeholder /5493815555555/ pero Step4Appearance.tsx:109 tiene 'Ej: 5491155551234'; el placeholder '#06b6d4' (:61) tampoco aparece en Step4Appearance (git grep).",
+    "nota": "Causa por lectura: selectores del test desactualizados, no el wizard.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-583",
+    "clave": "Onboarding del piloto Matsu (Beta)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "scripts/seed-matsu.ts existe (git ls-tree) y arma org/bot con KB de concesionaria (:163), sin Subscription. Si corrio en la DB no es verificable por lectura.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-553",
+    "clave": "Eliminar cliente: archivar (soft) y borrar (hard, cascade C)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Archivar con InlineConfirm ClientsListClient.tsx:750-768 -> archiveClient; hard-delete con TypeToConfirmDialog frase ELIMINAR :521-531; lista filtra deletedAt page.tsx:23 y :34; cascada y preservacion de OsLead en flujo D6 'Hard-delete de cliente y cascadas'.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-570",
+    "clave": "B9.4 Bulk Import eliminado (dedupe de KB pendiente)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "git ls-tree de admin/clients (36 archivos) sin bulk-import; git grep -i 'bulk-import|bulkImport' en src sin resultados; docs/csv-import-format.md no existe; scripts/b9-4-dedupe-kb-develop.mjs sigue presente (ejecucion no verificable).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-551",
+    "clave": "Sub-lanes de Clientes (clients, tickets, messages)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "field-normalize.ts en src/modules/chatbot/shared (usado en EditClientForm.tsx:8); createClientOnly.ts y updateClient.ts existen con requireSuperAdmin; BotPreview.tsx no esta en onboarding/ (git ls-tree).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-581",
+    "clave": "Wizard de onboarding profesionalizado",
+    "estado_en_codigo": "parcial",
+    "evidencia": "useOnboardingDraft.ts:8 MAX_DRAFT_AGE_DAYS = 7, DraftBanner.tsx, slugify.ts, suggestions.ts existen; Step5Review.tsx:331 spinner y :311 error. BotPreview fue borrado despues (PLAN-551).",
+    "nota": "Todo lo declarado salvo BotPreview, que contradice el estado actual.",
+    "sigue_teniendo_sentido": "no"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: orgSlug (B9.1) vs Organization.id (B11.6); si cada action re-valida el recurso",
+    "resultado": "parcial",
+    "evidencia": "Ambos docs tienen razon a medias: page.tsx:33 renombra el param a orgSlug y :40-43 busca por id O slug (igual edit/page.tsx:19-20); todos los links generan el cuid (ClientsListClient.tsx:630, ClientTabsNav.tsx:34, ClientHeader.tsx:136, ClientSwitcher.tsx:67); el catch-all solo acepta slug (chatbot/[[...tab]]/page.tsx:28-29). Re-validacion: updateClient.ts:65, updateClientInternalNotes.ts:33, archiveClient.ts:29, hardDeleteClient.ts:120 y :139 re-buscan la org; setBillingOverride/clearBillingOverride exigen Subscription (plan.actions.ts:265, :336); assignPlanToOrg NO verifica la org antes de crear la Subscription (:186-196).",
+    "hallazgo_titulo": "El detalle de cliente acepta id o slug y publica el cuid en la URL"
+   },
+   {
+    "alerta": "[D3-A2] Checklist B-SEC.3c renumera F2 (IDOR projects.ts), F4 (agency-actions cross-projectId); en B11.0 F4 era la pagina de payments",
+    "resultado": "parcial",
+    "evidencia": "Por codigo: projects.ts tiene guard en cada action (ensureSuperAdminOrErrorString projects.ts:24-31 usado en :35/:122; requireSuperAdmin :109, :159, :178, :214) -> F2 cerrado. agency-actions.ts:20 chequea SUPER_ADMIN y :29 assertProjectBelongsToOrg; createClientAssetAction :99 -> cross-projectId cerrado. La pagina projects/[projectId]/payments/page.tsx lee prisma (:73, :81, :93) sin auth() propio y depende de projects/[projectId]/layout.tsx:105 -> sigue trust-the-layout (patron D1-c2, fuera de este lote). La numeracion del checklist no coincide con B11.0 pero el estado real es: dos de tres cerrados."
+   },
+   {
+    "alerta": "[D3-A3] /admin/clients/[clientId]/chatbot/install propuesta (B8.5) que el catch-all redirige a overview; rutas deprecadas (STATUS.md:216) vs vista nueva propuesta (roadmap-pendientes.md:26)",
+    "resultado": "confirmada",
+    "evidencia": "chatbot/[[...tab]]/page.tsx:6-13 TAB_MAP sin 'install' ni 'integrations' y :36 cae a 'overview'; resuelve solo por slug :28-29. La vista de instalacion existe como tab 'install' y la de CRM como 'integrations' en admin/chatbots/[botId]/tabs.ts:1 (CrmIntegrationAdminCard en IntegrationsTab.tsx). La propuesta de roadmap-pendientes.md:26 contradice la deprecacion y ya esta cubierta en /admin/chatbots.",
+    "hallazgo_titulo": "La redireccion legacy de chatbot solo resuelve slug, pierde install/integrations y usa 308 para el rechazo"
+   },
+   {
+    "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+    "resultado": "parcial",
+    "evidencia": "Commit 5e337337 aplico toErrorMessage; settings.actions.ts:170 `return fail(toErrorMessage(error, ...))` y action-utils.ts:28-30 devuelve solo el primer issue del ZodError (ya no vuelca JSON). Pero action-utils.ts:31-32 devuelve error.message crudo para cualquier Error no-Zod (por ejemplo, de Prisma) -> la fuga de mensajes internos sigue para esos casos (patron D1-c1). En este lote, plan.actions.ts:240, :316, :373 tiene el mismo patron sin helper.",
+    "hallazgo_titulo": "plan.actions devuelve el mensaje interno del error y no lo reporta a Sentry"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/app/(protected)/admin/clients/_actions/client.actions.ts",
+    "senales": [
+     "stopImpersonationAction (:12-14) sin importadores: git grep -n stopImpersonationAction origin/main -- logic-core-v3/src solo devuelve la definicion, la base impersonation.ts:50 y ImpersonationBanner.tsx:2 (que importa la base)",
+     "el modulo entero es un re-export de lib/actions/impersonation; su unico consumidor es ImpersonateButton.tsx:6"
+    ],
+    "que_rompe": "Nada si se borra stopImpersonationAction; si se borra el archivo, ImpersonateButton.tsx:6 debe importar startImpersonationAction desde @/lib/actions/impersonation"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/_components/HoverScaleCard.tsx",
+    "senales": [
+     "Duplica el patron de hover de admin/tickets/_components/hover-scale.tsx y de adminHoverCls (lib/hover, usado en AlertsClient.tsx:8)",
+     "Su propio comentario dice 'LOCAL al worktree de clientes... unificacion queda para post-merge' (:8-17)",
+     "PLAN-555 pendiente"
+    ],
+    "que_rompe": "8 importadores (BillingOverrideCard, ClientHeader, ChatbotTab, OverviewTab, ProjectsTab, SupportTab, VaultTab, ChatbotManager) a re-apuntar; mover a src/components/ui es zona FROZEN"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+    "senales": [
+     "Ruta deprecada (STATUS.md:216) solo para bookmarks viejos",
+     "Solo funciona con slug mientras toda la UI genera cuids",
+     "Ningun link interno la genera (git grep '/chatbot' en admin/clients solo encuentra links a /admin/chatbots)"
+    ],
+    "que_rompe": "Bookmarks viejos de /admin/clients/<slug>/chatbot/* darian 404"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/clients/_actions/client.schemas.ts (fuera de la lista del lote, misma carpeta)",
+    "senales": [
+     "git grep -n 'client.schemas' origin/main -- logic-core-v3/src sin resultados",
+     "el registro de cambios dice que se borraron exports muertos de client.actions.ts; el schema quedo huerfano"
+    ],
+    "que_rompe": "Nada por lectura (sin importadores)"
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Mensaje de error de Editar datos en build de produccion",
+    "entorno": "Deploy preview de Netlify (build de produccion), sesion SUPER_ADMIN",
+    "precondiciones": "Dos clientes de prueba A y B con usuario ADMIN",
+    "pasos": [
+     "Abrir /admin/clients/<id de A>/edit",
+     "Cambiar el email del usuario administrador por el email del admin de B",
+     "Guardar cambios"
+    ],
+    "esperado": "Bloque 'No se pudo guardar' con el texto 'El email ingresado ya está registrado en otro usuario.'",
+    "senal_falla": "Aparece un texto generico en ingles ('An error occurred in the Server Components render...') o un digest; y en Sentry queda un evento por ese error esperado",
+    "escribe_db_o_email": false,
+    "hallazgos": "Los errores de las actions que lanzan se ven genericos en produccion (y cada uno va a Sentry)"
+   },
+   {
+    "titulo": "Billing override con precio vacio",
+    "entorno": "Dev o preview con DB de prueba, sesion SUPER_ADMIN",
+    "precondiciones": "Cliente de prueba con plan asignado y sin override",
+    "pasos": [
+     "Abrir /admin/clients/<id>?tab=overview",
+     "En Billing override, borrar el valor del campo Precio override",
+     "Tocar 'Aplicar override'",
+     "Despues, tocar 'Quitar override' para dejarlo como estaba"
+    ],
+    "esperado": "Error de validacion pidiendo un precio y sin cambios en la Subscription",
+    "senal_falla": "Aviso 'Override seteado: $0 hasta ...' y la card muestra 'Se factura $0.00/mes'",
+    "escribe_db_o_email": true,
+    "hallazgos": "Billing override: precio vacio o por defecto aplica una cortesia de 0 USD por 90 dias en un clic"
+   },
+   {
+    "titulo": "Cancelar un downgrade programado",
+    "entorno": "Dev o preview con DB de prueba, sesion SUPER_ADMIN",
+    "precondiciones": "Cliente de prueba en plan PRO",
+    "pasos": [
+     "En Overview > Plan asignado elegir STARTER y Aplicar plan",
+     "Ver el aviso 'Downgrade pendiente'",
+     "Volver a elegir PRO en el selector"
+    ],
+    "esperado": "Alguna forma de cancelar el downgrade sin aplicar un upgrade",
+    "senal_falla": "El boton queda deshabilitado con 'Sin cambios' y no hay otra opcion para cancelar",
+    "escribe_db_o_email": true,
+    "hallazgos": "No se puede cancelar un downgrade programado desde la UI"
+   },
+   {
+    "titulo": "Fecha del override en el aviso de exito",
+    "entorno": "Navegador en zona horaria de Argentina, dev o preview",
+    "precondiciones": "Cliente de prueba con Subscription",
+    "pasos": [
+     "En Billing override poner precio 10 y 'Vigente hasta' = 21/08 del ano proximo",
+     "Aplicar override",
+     "Leer el aviso de exito y la linea 'Vence:' de la card"
+    ],
+    "esperado": "Ambos muestran el 21/08",
+    "senal_falla": "El aviso dice 20/8 y la card muestra 21/8 00:00:00",
+    "escribe_db_o_email": true,
+    "hallazgos": "Fechas limite a medianoche UTC se muestran corridas un dia en hora argentina"
+   },
+   {
+    "titulo": "Cuota del bot en la ficha vs plan",
+    "entorno": "Dev o preview, sesion SUPER_ADMIN",
+    "precondiciones": "Cliente Starter con bot creado por el wizard",
+    "pasos": [
+     "Abrir /admin/clients/<id>?tab=chatbot y leer 'Quota mensual'",
+     "Abrir tab Overview > 'Comparacion de las 7 dimensiones' y leer 'Cuota conv/mes' de Starter"
+    ],
+    "esperado": "La ficha muestra la cuota del plan (500)",
+    "senal_falla": "La ficha muestra '1.000 conv'",
+    "escribe_db_o_email": false,
+    "hallazgos": "La pestana Chatbot muestra como cuota un limite que el gating ya no usa"
+   },
+   {
+    "titulo": "Cliente nuevo en el listado inmediatamente",
+    "entorno": "Deploy preview (build de produccion) con DB de prueba",
+    "precondiciones": "Email de prueba que no exista; Brevo apuntando a una casilla de prueba",
+    "pasos": [
+     "Crear un cliente de prueba desde /admin/clients/new",
+     "Ir enseguida a /admin/clients"
+    ],
+    "esperado": "El cliente nuevo aparece en la lista",
+    "senal_falla": "No aparece hasta pasados 60 s o una segunda recarga",
+    "escribe_db_o_email": true,
+    "hallazgos": "El alta de un cliente no invalida el cache del listado"
+   },
+   {
+    "titulo": "Acciones de tarjeta en celular",
+    "entorno": "Celular real o DevTools con emulacion tactil a 390 px",
+    "precondiciones": "Al menos un cliente activo",
+    "pasos": [
+     "Abrir /admin/clients",
+     "Buscar los iconos de Archivar y Fijar en una tarjeta sin pasar el mouse",
+     "Recorrer la tarjeta con Tab en desktop"
+    ],
+    "esperado": "Los iconos se ven en tactil y al recibir foco",
+    "senal_falla": "Los iconos no se ven; el foco cae en botones invisibles",
+    "escribe_db_o_email": false,
+    "hallazgos": "Archivar y fijar son invisibles sin hover: teclado y pantallas tactiles"
+   },
+   {
+    "titulo": "'Ver todos' de la pestana Soporte",
+    "entorno": "Dev o preview, sesion SUPER_ADMIN",
+    "precondiciones": "Dos clientes con tickets",
+    "pasos": [
+     "Abrir /admin/clients/<id>?tab=support",
+     "Tocar 'Ver todos' de Tickets recientes"
+    ],
+    "esperado": "Solo los tickets de ese cliente",
+    "senal_falla": "Lista con tickets de todos los clientes",
+    "escribe_db_o_email": false,
+    "hallazgos": "Soporte: 'Ver todos' manda ?clientId= que /admin/tickets y /admin/messages ignoran"
+   },
+   {
+    "titulo": "Error al subir a la boveda",
+    "entorno": "Dev con DB de prueba",
+    "precondiciones": "Forzar un fallo (por ejemplo, credencial de cifrado ausente en el entorno de prueba)",
+    "pasos": [
+     "Abrir /admin/clients/<id>?tab=vault",
+     "Cargar un acceso con VaultManager"
+    ],
+    "esperado": "Mensaje de error visible y el formulario conserva lo escrito",
+    "senal_falla": "No aparece ningun mensaje; solo un console.error",
+    "escribe_db_o_email": true,
+    "hallazgos": "Subir a la boveda falla en silencio: VaultManager solo hace console.error"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "/admin/tickets y /admin/messages no leen el parametro clientId (ni searchParams/useSearchParams)",
+    "comando": "git grep -n \"clientId\\|useSearchParams\\|searchParams\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/tickets/\" \"logic-core-v3/src/app/(protected)/admin/messages/\"",
+    "control_positivo": "git grep -n \"export default\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/tickets/page.tsx\" -> :5 AgencyOsTicketsPage; idem messages/page.tsx:6"
+   },
+   {
+    "afirmacion": "Las actions de alta de cliente no invalidan el cache 'admin-clients' ni revalidan rutas",
+    "comando": "git grep -n \"revalidatePath\\|revalidateTag\" origin/main -- logic-core-v3/src/modules/chatbot/server/admin/createClientOnly.ts logic-core-v3/src/modules/chatbot/server/admin/createClientWithBot.ts logic-core-v3/src/lib/onboarding/core.ts",
+    "control_positivo": "git grep -n \"admin-clients\" origin/main -- logic-core-v3/src -> archiveClient.ts:48, hardDeleteClient.ts:181, bulk-actions.ts:42 revalidateTag('admin-clients')"
+   },
+   {
+    "afirmacion": "bulkExportLeads/bulkPauseBots nunca devuelven ok:false (la rama de ClientsListClient.tsx:122 es muerta)",
+    "comando": "git grep -n \"ok: false\" origin/main -- logic-core-v3/src/lib/bulk-actions.ts",
+    "control_positivo": "git grep -n \"ok: true\" origin/main -- logic-core-v3/src/lib/bulk-actions.ts -> :13, :43, :79"
+   },
+   {
+    "afirmacion": "Ningun codigo del admin crea o edita facturas (Invoice); solo el seed",
+    "comando": "git grep -n \"invoice.create\\|invoice.update\\|invoice.upsert\" origin/main -- logic-core-v3/src logic-core-v3/prisma logic-core-v3/scripts",
+    "control_positivo": "El mismo comando encuentra prisma/seed.ts:595 y :618 (invoice.upsert); git grep -l prisma.invoice encuentra dashboard/cuenta/facturacion/page.tsx"
+   },
+   {
+    "afirmacion": "Nadie en src escribe status, renewalDate o price de Subscription fuera de plan.actions y del lazy apply",
+    "comando": "git grep -n \"subscription.update\\|subscription.create\\|subscription.upsert\" origin/main -- logic-core-v3/src",
+    "control_positivo": "Devuelve plan.actions.ts:127, :139, :187, :198, :273, :341, get-plan-for-org.ts:50 y seed-eval-bots.ts:164"
+   },
+   {
+    "afirmacion": "El lote no usa zona horaria AR para formatear fechas",
+    "comando": "git grep -n \"TZ_AR\\|tz-ar\\|dates-ar\\|timeZone\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/clients/\"",
+    "control_positivo": "git grep -l \"TZ_AR\\|timeZone\" origin/main -- logic-core-v3/src -> os-follow-up/route.ts, leads/export/route.ts, DiscoveriesSection.tsx, entre otros"
+   },
+   {
+    "afirmacion": "stopImpersonationAction del wrapper de Clientes no tiene importadores",
+    "comando": "git grep -n \"stopImpersonationAction\" origin/main -- logic-core-v3/src",
+    "control_positivo": "El mismo comando encuentra ImpersonationBanner.tsx:2 importando la base de @/lib/actions/impersonation"
+   },
+   {
+    "afirmacion": "No existe /admin/agency-dashboard",
+    "comando": "git ls-tree -r --name-only origin/main -- \"logic-core-v3/src/app/(protected)/admin/\" | grep -i agency-dashboard ; git grep -n \"agency-dashboard\" origin/main -- logic-core-v3/src",
+    "control_positivo": "El mismo ls-tree lista admin/projects/[projectId]/payments/page.tsx"
+   },
+   {
+    "afirmacion": "HoverScaleCard/hover-scale/message-bubble no estan en src/components/ui",
+    "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/components/ui | grep -i \"hover\\|bubble\"",
+    "control_positivo": "git grep -n adminHoverCls origin/main -- logic-core-v3/src -> AlertsClient.tsx:8"
+   },
+   {
+    "afirmacion": "El modelo Subscription ya no tiene planName (sigue price)",
+    "comando": "git grep -n \"planName\" origin/main -- logic-core-v3/prisma/schema.prisma",
+    "control_positivo": "git show origin/main:logic-core-v3/prisma/schema.prisma | sed -n '634,667p' muestra `price       Float` en :659"
+   },
+   {
+    "afirmacion": "scripts/seed-matsu.ts no crea Subscription ni asigna plan",
+    "comando": "git grep -n -i \"subscription\\|planKey\\|BUSINESS\\|priceOverride\\|overrideUntil\" origin/main -- logic-core-v3/scripts/seed-matsu.ts",
+    "control_positivo": "El patron -i BUSINESS matchea :163 (businessInfo), probando que el archivo se recorre"
+   },
+   {
+    "afirmacion": "client.schemas.ts no tiene importadores",
+    "comando": "git grep -n \"client.schemas\" origin/main -- logic-core-v3/src",
+    "control_positivo": "git grep -n \"plan.schemas\" origin/main -- logic-core-v3/src encuentra plan.actions.ts:18"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "UI que muestra BotConfig.monthlyQuota como limite cuando el gating usa Plan.quota",
+    "como_buscarlo": "git grep -n \"monthlyQuota\" origin/main -- logic-core-v3/src | grep -v test (revisar admin/chatbots/[botId]/tabs/OverviewTab.tsx:46,98, ChatbotManager.tsx:69, detectBotIssues.ts:68 que alerta con ese valor, preflightChecks.ts:151)",
+    "donde_aparecio": "ChatbotTab.tsx:94, :108"
+   },
+   {
+    "patron": "Server actions que comunican errores esperados con throw y UI que muestra err.message (generico en prod, ruido en Sentry por onRequestError)",
+    "como_buscarlo": "git grep -n \"err instanceof Error ? err.message\\|error instanceof Error ? error.message\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "EditClientForm.tsx:94, InternalNotesCard.tsx:53, ClientsListClient.tsx:168, :181, :201, :239; Step5Review.tsx:111"
+   },
+   {
+    "patron": "Fechas guardadas a medianoche UTC (new Date('YYYY-MM-DD'), Date.UTC dia 1) y formateo toLocale* sin timeZone",
+    "como_buscarlo": "git grep -n \"toLocaleDateString('es-AR')\\|toLocaleString('es-AR'\" origin/main -- logic-core-v3/src | grep -v timeZone",
+    "donde_aparecio": "BillingOverrideForm.tsx:70, PlanAssignmentForm.tsx:58, BillingOverrideCard.tsx:72, PlanAssignmentCard.tsx:57, :70, SupportTab.tsx:45, :70, OverviewTab.tsx:86"
+   },
+   {
+    "patron": "Lectores de Subscription.price legacy (desincronizado del plan y del override)",
+    "como_buscarlo": "git grep -n \"subscription.price\\|price: true\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "admin/page.tsx:226-228 (MRR), dashboard/cuenta/perfil/page.tsx:211"
+   },
+   {
+    "patron": "Links con query params que la pagina destino no lee",
+    "como_buscarlo": "git grep -n \"?clientId=\\|?orgId=\\|?organizationId=\" origin/main -- logic-core-v3/src/app y verificar searchParams en el destino",
+    "donde_aparecio": "SupportTab.tsx:30, :55"
+   },
+   {
+    "patron": "Acciones con opacity-0 + group-hover sin focus-visible ni alternativa tactil",
+    "como_buscarlo": "git grep -n \"opacity-0\" origin/main -- logic-core-v3/src | grep \"group-hover:opacity-100\" | grep -v \"focus\"",
+    "donde_aparecio": "ClientsListClient.tsx:712, :721"
+   },
+   {
+    "patron": "Secretos descifrados en el render y pasados como prop a client components (reveal cosmetico, sin audit)",
+    "como_buscarlo": "git grep -n \"resolveCredentialDisplay\\|VaultRevealButton\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "VaultTab.tsx:41, :71 (y boveda del portal, flujo D2)"
+   },
+   {
+    "patron": "Inputs numericos que convierten '' a 0 con Number() antes de validar",
+    "como_buscarlo": "git grep -n \"Number(price\\|Number(e.target.value\\|Number(event.target.value\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "BillingOverrideForm.tsx:52 (posible tambien en config/tabs/AdvancedTab.tsx:81 monthlyQuota)"
+   },
+   {
+    "patron": "Mutaciones que no invalidan los tags de unstable_cache que consumen las listas admin",
+    "como_buscarlo": "git grep -n \"unstable_cache\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/\" y cruzar cada tag con git grep revalidateTag('<tag>'",
+    "donde_aparecio": "clients/page.tsx:20-40 (tag admin-clients sin invalidar en alta, edicion ni plan)"
+   },
+   {
+    "patron": "Uso de triggerTransition o router.push sin comentario en portales",
+    "como_buscarlo": "git grep -n \"triggerTransition\\|router.push(\" origin/main -- \"logic-core-v3/src/app/(protected)/\" logic-core-v3/src/modules/chatbot/components/admin",
+    "donde_aparecio": "EditClientForm.tsx:92, :232; ClientSwitcher.tsx:67; Step5Review.tsx:60 y setter-nav.tsx:43 (ZONA-FRANCO)"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/sprints/alpha-1-reaudit.md:220",
+    "id_previo": "sin-id (P0 wizard /admin/clients/new sin validacion server-side ni feedback de error)",
+    "estado": "cerrado",
+    "evidencia": "Validacion server-side: createClientWithBot.ts:99-104 y createClientOnly.ts:51-55 (safeParse) con requireSuperAdmin (:96, :48). Feedback: Step5Review.tsx:61-62 estados, :111 setError, :311 bloque de error, :331 spinner (git grep). new/page.tsx:14 monta el wizard. Salvedad: el error mostrado viene de un Error lanzado y probablemente sale generico en produccion (hallazgo UX MEDIA nuevo)."
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx",
+    "linea": 14,
+    "tipo": "tilde",
+    "detalle": "'Boveda' sin tilde (Bóveda)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx",
+    "linea": 11,
+    "tipo": "copy",
+    "detalle": "Tab 'Overview' en ingles (Resumen)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "linea": 348,
+    "tipo": "tilde",
+    "detalle": "'Mas activos' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "linea": 480,
+    "tipo": "tilde",
+    "detalle": "'aca' sin tilde (acá)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "linea": 481,
+    "tipo": "tilde",
+    "detalle": "'Ajusta la busqueda' -> 'Ajustá la búsqueda' (voseo y tilde)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "linea": 662,
+    "tipo": "strokeWidth",
+    "detalle": "Icono Bot con strokeWidth={2}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "linea": 725,
+    "tipo": "strokeWidth",
+    "detalle": "Icono Pin con strokeWidth={2}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "linea": 722,
+    "tipo": "copy",
+    "detalle": "aria-label 'Despinear'/'Pinear' (anglicismo; Fijar/Quitar fijado)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "linea": 684,
+    "tipo": "copy",
+    "detalle": "Abreviaturas 'Proy' y 'Msgs' (:700) en la tarjeta"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "linea": 138,
+    "tipo": "otro",
+    "detalle": "confirm() nativo 'Pausar bots de N clientes?' sin ¿ y fuera del sistema de dialogos"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx",
+    "linea": 143,
+    "tipo": "strokeWidth",
+    "detalle": "Icono Check con strokeWidth={2}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientHeader.tsx",
+    "linea": 77,
+    "tipo": "copy",
+    "detalle": "Estado de suscripcion crudo del enum '(ACTIVE)'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx",
+    "linea": 48,
+    "tipo": "tilde",
+    "detalle": "'Estado suscripcion' sin tilde y valor enum crudo en :49"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx",
+    "linea": 64,
+    "tipo": "tilde",
+    "detalle": "'Modulos activos' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx",
+    "linea": 79,
+    "tipo": "tilde",
+    "detalle": "'Informacion de contacto' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx",
+    "linea": 53,
+    "tipo": "copy",
+    "detalle": "Estado de proyecto crudo del enum (IN_PROGRESS)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx",
+    "linea": 58,
+    "tipo": "tilde",
+    "detalle": "'pendientes de aprobacion' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx",
+    "linea": 45,
+    "tipo": "copy",
+    "detalle": "Estado de ticket crudo del enum"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+    "linea": 24,
+    "tipo": "tilde",
+    "detalle": "'Subir a boveda' y 'Sin archivos en la boveda.' (:34) sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+    "linea": 56,
+    "tipo": "copy",
+    "detalle": "Tipo de asset crudo del enum"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+    "linea": 67,
+    "tipo": "contraste",
+    "detalle": "Error de credencial en text-red-400/60 (bajo contraste)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+    "linea": 44,
+    "tipo": "tilde",
+    "detalle": "'todavia' sin tilde; 'Configura' sin voseo (:45)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+    "linea": 93,
+    "tipo": "copy",
+    "detalle": "'Quota mensual' / 'conv' (spanglish y abreviatura)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+    "linea": 131,
+    "tipo": "tilde",
+    "detalle": "'Metricas' sin tilde; 'Activity log' (:161) y 'Knowledge Base' (:143) en ingles"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ImpersonateButton.tsx",
+    "linea": 46,
+    "tipo": "copy",
+    "detalle": "Titulo 'Impersonar a X?' sin ¿; descripcion 'usa el boton' sin tilde ni voseo (:47)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx",
+    "linea": 48,
+    "tipo": "contraste",
+    "detalle": "Texto funcional en text-zinc-600 '(fallback Starter en runtime)'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx",
+    "linea": 64,
+    "tipo": "otro",
+    "detalle": "Emoji '⏳' en la UI en lugar de icono Lucide"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx",
+    "linea": 102,
+    "tipo": "contraste",
+    "detalle": "placeholder text-zinc-600"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx",
+    "linea": 136,
+    "tipo": "contraste",
+    "detalle": "placeholder text-zinc-600"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx",
+    "linea": 33,
+    "tipo": "copy",
+    "detalle": "Titulo 'Billing override' en ingles"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx",
+    "linea": 90,
+    "tipo": "contraste",
+    "detalle": "Contador en text-zinc-600"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx",
+    "linea": 213,
+    "tipo": "contraste",
+    "detalle": "Contador en text-zinc-600"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx",
+    "linea": 51,
+    "tipo": "copy",
+    "detalle": "'password temporal' en ingles (contraseña)"
+   }
+  ]
+ },
+ "verificacion": null
+}

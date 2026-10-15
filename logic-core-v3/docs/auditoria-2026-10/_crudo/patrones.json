@@ -1938,6 +1938,447 @@
    "patron": "avatarImageUrlSchema acepta URLs http(s) arbitrarias: el avatar del bot que pone el cliente se carga en el widget de los visitantes y en las vistas del admin (mismo esquema que SEC-049)",
    "como_buscarlo": "git grep -n \"avatarImageUrlSchema\" origin/main -- src",
    "donde_aparecio": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts:39 (y SEC-049 en el avatar de la org)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "patron": "Credenciales de bóveda escritas sin encryptCredential (cifrado solo en lectura)",
+   "como_buscarlo": "git grep -n -E 'clientAsset\\.(create|update|upsert)' origin/main -- logic-core-v3/src logic-core-v3/prisma y revisar si las filas type ACCESS pasan por encryptCredential",
+   "donde_aparecio": "src/actions/agency-actions.ts:103-110; también onboarding-actions.ts:111, :123 y prisma/seed.ts:672 (no recorridos)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "patron": "Endpoints /api/cron/* sin scheduler que los dispare",
+   "como_buscarlo": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/api/cron y cruzar contra [functions.*] de netlify.toml y netlify/functions/*.ts (vercel.json no corre en Netlify)",
+   "donde_aparecio": "api/cron/detect-bot-issues/route.ts:13 y api/cron/alerts/route.ts (runPeriodicAgencyAlerts); la copy de alerts/page.tsx:17 promete 15 minutos"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "patron": "Heurística de ID por largo que pisa palabras reales",
+   "como_buscarlo": "git grep -n -E '\\{10,\\}' origin/main -- logic-core-v3/src",
+   "donde_aparecio": "admin-topbar.tsx:12-13 ('announcements' se vuelve 'Detalle')"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "patron": "UI que espera una server action sin mirar result.success",
+   "como_buscarlo": "git grep -n -E 'await [a-zA-Z]+Action\\(' origin/main -- 'logic-core-v3/src/app/(protected)/admin' logic-core-v3/src/components/admin y verificar que el resultado se use",
+   "donde_aparecio": "announcement-list.tsx:40-43"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "patron": "Listados admin con take fijo y métricas calculadas en el cliente sobre el recorte",
+   "como_buscarlo": "git grep -n -E 'take: (50|100|200)' origin/main -- logic-core-v3/src/modules/chatbot/server/admin logic-core-v3/src/lib y ver si el consumidor calcula totales sobre esas filas",
+   "donde_aparecio": "manageAlerts.ts:25 + AlertsClient.tsx:55-73"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "patron": "Límites de día/semana/mes con setHours del servidor (UTC) o T23:59:59Z en vez de helpers AR",
+   "como_buscarlo": "git grep -n -E 'setHours\\((0|23)|T23:59:59' origin/main -- logic-core-v3/src ':(exclude)logic-core-v3/src/lib/dates-ar.ts' ':(exclude)logic-core-v3/src/lib/tz-ar.ts'",
+   "donde_aparecio": "admin/page.tsx:60, :66; announcements.actions.ts:36"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "patron": "Callers de actions admin que solo hacen console.error (el admin no ve el fallo)",
+   "como_buscarlo": "git grep -n -A1 'catch (error)' origin/main -- logic-core-v3/src/components/admin 'logic-core-v3/src/app/(protected)/admin' | grep console.error",
+   "donde_aparecio": "VaultManager.tsx:30-31, ProjectManager.tsx:21-23"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "patron": "Diffs de auditoría que podrían guardar secretos en claro",
+   "como_buscarlo": "git grep -n 'computeDiff(' origin/main -- logic-core-v3/src y revisar si el modelo diffeado tiene campos secret/apiKey/token/password",
+   "donde_aparecio": "Hipótesis desde AuditLogClient.tsx:363-403 (muestra before/after crudos en el panel)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "patron": "Modales con role=dialog sin Escape ni manejo de foco",
+   "como_buscarlo": "git grep -l 'role=\"dialog\"' origin/main -- logic-core-v3/src y para cada archivo git grep -L Escape",
+   "donde_aparecio": "confirm-dialog.tsx:48, type-to-confirm-dialog.tsx:50, inline-confirm.tsx:51, AdminLayoutClient.tsx (drawer)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "patron": "Server actions admin sin logAdminAction (escrituras sin rastro)",
+   "como_buscarlo": "Listar archivos 'use server' bajo src/actions y src/app/(protected)/admin/**/_actions y git grep -L logAdminAction sobre ellos",
+   "donde_aparecio": "agency-actions.ts (tarea y bóveda), announcements.actions.ts (publicar y retirar)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "patron": "UI que muestra BotConfig.monthlyQuota como limite cuando el gating usa Plan.quota",
+   "como_buscarlo": "git grep -n \"monthlyQuota\" origin/main -- logic-core-v3/src | grep -v test (revisar admin/chatbots/[botId]/tabs/OverviewTab.tsx:46,98, ChatbotManager.tsx:69, detectBotIssues.ts:68 que alerta con ese valor, preflightChecks.ts:151)",
+   "donde_aparecio": "ChatbotTab.tsx:94, :108"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "patron": "Server actions que comunican errores esperados con throw y UI que muestra err.message (generico en prod, ruido en Sentry por onRequestError)",
+   "como_buscarlo": "git grep -n \"err instanceof Error ? err.message\\|error instanceof Error ? error.message\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "EditClientForm.tsx:94, InternalNotesCard.tsx:53, ClientsListClient.tsx:168, :181, :201, :239; Step5Review.tsx:111"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "patron": "Fechas guardadas a medianoche UTC (new Date('YYYY-MM-DD'), Date.UTC dia 1) y formateo toLocale* sin timeZone",
+   "como_buscarlo": "git grep -n \"toLocaleDateString('es-AR')\\|toLocaleString('es-AR'\" origin/main -- logic-core-v3/src | grep -v timeZone",
+   "donde_aparecio": "BillingOverrideForm.tsx:70, PlanAssignmentForm.tsx:58, BillingOverrideCard.tsx:72, PlanAssignmentCard.tsx:57, :70, SupportTab.tsx:45, :70, OverviewTab.tsx:86"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "patron": "Lectores de Subscription.price legacy (desincronizado del plan y del override)",
+   "como_buscarlo": "git grep -n \"subscription.price\\|price: true\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "admin/page.tsx:226-228 (MRR), dashboard/cuenta/perfil/page.tsx:211"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "patron": "Links con query params que la pagina destino no lee",
+   "como_buscarlo": "git grep -n \"?clientId=\\|?orgId=\\|?organizationId=\" origin/main -- logic-core-v3/src/app y verificar searchParams en el destino",
+   "donde_aparecio": "SupportTab.tsx:30, :55"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "patron": "Acciones con opacity-0 + group-hover sin focus-visible ni alternativa tactil",
+   "como_buscarlo": "git grep -n \"opacity-0\" origin/main -- logic-core-v3/src | grep \"group-hover:opacity-100\" | grep -v \"focus\"",
+   "donde_aparecio": "ClientsListClient.tsx:712, :721"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "patron": "Secretos descifrados en el render y pasados como prop a client components (reveal cosmetico, sin audit)",
+   "como_buscarlo": "git grep -n \"resolveCredentialDisplay\\|VaultRevealButton\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "VaultTab.tsx:41, :71 (y boveda del portal, flujo D2)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "patron": "Inputs numericos que convierten '' a 0 con Number() antes de validar",
+   "como_buscarlo": "git grep -n \"Number(price\\|Number(e.target.value\\|Number(event.target.value\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "BillingOverrideForm.tsx:52 (posible tambien en config/tabs/AdvancedTab.tsx:81 monthlyQuota)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "patron": "Mutaciones que no invalidan los tags de unstable_cache que consumen las listas admin",
+   "como_buscarlo": "git grep -n \"unstable_cache\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/\" y cruzar cada tag con git grep revalidateTag('<tag>'",
+   "donde_aparecio": "clients/page.tsx:20-40 (tag admin-clients sin invalidar en alta, edicion ni plan)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "patron": "Uso de triggerTransition o router.push sin comentario en portales",
+   "como_buscarlo": "git grep -n \"triggerTransition\\|router.push(\" origin/main -- \"logic-core-v3/src/app/(protected)/\" logic-core-v3/src/modules/chatbot/components/admin",
+   "donde_aparecio": "EditClientForm.tsx:92, :232; ClientSwitcher.tsx:67; Step5Review.tsx:60 y setter-nav.tsx:43 (ZONA-FRANCO)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "patron": "Server action que llama revalidatePath/revalidateTag invocada directamente durante el render de una page (Next 16 lanza E7 y el catch lo traga)",
+   "como_buscarlo": "git grep -n \"await .*(\" -- \"src/app/**/page.tsx\" cruzado con las funciones de archivos 'use server' que llaman revalidatePath; empezar por git grep -n \"await mark\" -- \"src/app/**/page.tsx\"",
+   "donde_aparecio": "src/app/(protected)/admin/messages/[orgId]/page.tsx:24 -> message.actions.ts:224"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "patron": "Envío de email o trabajo asíncrono fire-and-forget (`void (async () => ...)()`) sin after()/waitUntil en serverless",
+   "como_buscarlo": "git grep -n \"void (async\\|void send\\|\\.catch(() => {})\" origin/main -- src",
+   "donde_aparecio": "src/lib/email/admin-message-notification.ts:20 (llamado desde message.actions.ts:193)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "patron": "Feature construida (action + componente) pero sin conectar; en su lugar un botón deshabilitado permanente",
+   "como_buscarlo": "git grep -n -B2 -A4 \"disabled$\" origin/main -- \"src/app/**/*.tsx\" y exports sin importadores (knip/dependency-cruiser del padre)",
+   "donde_aparecio": "admin/leads/[leadId]/page.tsx:281-289 vs admin/projects/_components/convert-lead-dialog.tsx:72"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "patron": "Elemento con role=button y onKeyDown(Enter) que contiene botones interactivos: Enter/Space en el hijo dispara la acción del padre",
+   "como_buscarlo": "git grep -n 'role=\"button\"' origin/main -- src y revisar si el elemento contiene <button> o confirmaciones inline",
+   "donde_aparecio": "src/app/(protected)/admin/leads/_components/lead-card.tsx:64, :80-83, :116"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "patron": "Grillas con gridTemplateColumns inline de N columnas fijas sin breakpoint (rotas en mobile)",
+   "como_buscarlo": "git grep -n \"gridTemplateColumns\" origin/main -- src",
+   "donde_aparecio": "src/app/(protected)/admin/leads/_components/column-overview.tsx:160 (el registro de Leads dice que el patrón se reusó en el kanban de Proyectos)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "patron": "Listados admin de Organization que no excluyen archivadas (deletedAt) fuera de /admin/clients",
+   "como_buscarlo": "git grep -n \"organization.findMany\" origin/main -- src y verificar deletedAt en cada where",
+   "donde_aparecio": "src/app/(protected)/admin/messages/_actions/message.actions.ts:46-51"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "patron": "Links con query param que la page destino ignora (no recibe searchParams)",
+   "como_buscarlo": "git grep -n \"?clientId=\\|?orgId=\\|?organizationId=\" origin/main -- src y abrir la page destino",
+   "donde_aparecio": "admin/clients/[clientId]/_components/tabs/SupportTab.tsx:55 -> admin/messages/page.tsx:6"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "patron": "Regla de negocio de fechas calculada en el cliente (Date.now() + N días) y enviada a la action",
+   "como_buscarlo": "git grep -n \"Date.now() +\" origin/main -- \"src/**/*.tsx\"",
+   "donde_aparecio": "change-status-select.tsx:42, lead-pipeline.tsx:127"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Filtro por defecto que excluye registros con fecha derivada null: el registro recién creado desaparece después del alta",
+   "como_buscarlo": "En otros boards con filtros en memoria, buscar matchers de fecha que devuelven false con null y tienen un default distinto de 'all': git grep -n \"return false\" en archivos *-filters.ts y revisar DEFAULT_FILTERS",
+   "donde_aparecio": "src/app/(protected)/admin/projects/_components/projects-filters.ts:65, :162-164"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Server actions inline ('use server' dentro de action={async () => ...}) en RSC que descartan el ActionResult: fallo silencioso, sin pending y sin feedback",
+   "como_buscarlo": "git grep -n -A2 \"action={async\" origin/main -- \"src/app/**/*.tsx\" y revisar si se usa el resultado",
+   "donde_aparecio": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:156-159, :186-189, :249-252, :299-302"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Schemas de update parcial que convierten '' en undefined: el campo no se puede vaciar al editar",
+   "como_buscarlo": "git grep -n \"emptyStringToUndefined\\|emptyValueToUndefined\" origin/main -- src, cruzado con schemas .partial() usados en updates con '!== undefined ?'",
+   "donde_aparecio": "src/app/(protected)/admin/projects/_actions/project.schemas.ts:4-19, :69; project.actions.ts:680-690"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Funcionalidad que depende de una columna que ninguna UI ni action escribe (inalcanzable salvo con seed)",
+   "como_buscarlo": "Por cada campo opcional del schema leído en una condición de UI, git grep -n \"<campo>:\" en objetos data de create/update de src",
+   "donde_aparecio": "Project.maintenanceStartDate (payments/page.tsx:115; único escritor prisma/seed-agency-os.ts:1396)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Estado terminal de un workflow sin camino de reapertura (REJECTED sin reenvío)",
+   "como_buscarlo": "Por cada enum de workflow (ApprovalStatus, TicketStatus, LeadStatus), listar escritores con git grep -n \"<campo>:\" y ver si hay transición de salida del estado terminal",
+   "donde_aparecio": "approvalStatus REJECTED: task-list.tsx:618; escritores en dashboard-actions.ts:135 y task-approvals.ts:113"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Acciones del admin que crean o activan registros visibles en el portal del cliente como efecto lateral, sin desactivar el anterior",
+   "como_buscarlo": "git grep -n \"service.create\\|ServiceStatus.ACTIVE\" origin/main -- src y cruzar con lectores del portal (dashboard/services/page.tsx:173, lib/billing/get-current-plan.ts:39)",
+   "donde_aparecio": "src/app/(protected)/admin/projects/_actions/project.actions.ts:260-300"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Dos capas de server actions para la misma mutación (legacy src/lib/actions/*.ts frente a app/**/_actions/*.ts), con exports muertos",
+   "como_buscarlo": "Por cada export de src/lib/actions/*.ts, git grep -n -w <export> origin/main -- src excluyendo el archivo",
+   "donde_aparecio": "src/lib/actions/projects.ts (5 de 7 exports sin consumidores; deleteProjectAction duplica project.actions.ts:782)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "z.coerce.date() sobre <input type=date> (medianoche UTC) formateado con new Date(iso) en el navegador: corrimiento de un día en UTC-3",
+   "como_buscarlo": "git grep -n \"z.coerce.date()\" origin/main -- src y revisar dónde se formatea (Intl sin timeZone)",
+   "donde_aparecio": "project.schemas.ts:23; time-entry.schemas.ts:33; project-card.tsx:107-111; time-entry-panel.tsx:72"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Selectores u alta de organizaciones que no excluyen orgs archivadas (deletedAt)",
+   "como_buscarlo": "git grep -n \"organization.findMany\" origin/main -- src y verificar el filtro deletedAt: null",
+   "donde_aparecio": "[projectId]/layout.tsx:140-153; projects/page.tsx:9-13"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Módulo 'use server' sin consumidores que solo chequea session.user.organizationId, sin rol (public si alguien lo reconecta)",
+   "como_buscarlo": "git grep -n \"task-approvals\" origin/main -- src (0 importadores); revisar requestTaskApproval, approveTask y rejectTask",
+   "donde_aparecio": "src/actions/task-approvals.ts:7-35 (visto al trazar approvalStatus; fuera del lote, para D1/D2)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Escritura de un modelo de ZONA-FRANCO (OsLead.status) desde zona libre, por fuera del flujo de LeadOS",
+   "como_buscarlo": "git grep -n \"osLead.update\" origin/main -- src fuera de src/lib/leados y admin/leads/_actions; revisar en D4 si rompe invariantes (actividad, OsLeadSetterMeta)",
+   "donde_aparecio": "src/app/(protected)/admin/projects/_actions/project.actions.ts:894-901 (convertLeadToProject -> CERRADO)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "patron": "Guard de página en /admin con callerCanAccessOrg y sin chequeo de rol: deja pasar a un usuario no admin de la misma org",
+   "como_buscarlo": "git grep -n \"callerCanAccessOrg\" origin/main -- \"src/app/(protected)/admin\" y verificar que haya role === 'SUPER_ADMIN' antes",
+   "donde_aparecio": "[projectId]/page.tsx:165; [projectId]/layout.tsx:160 (en cambio, chatbots/[botId]/page.tsx:29 sí chequea el rol)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "Filtro de fecha del lado del cliente con un default restrictivo que esconde items abiertos (y estado vacío que afirma que no hay nada)",
+   "como_buscarlo": "git grep -n \"useState<Preset>('1m')\\|ThemedDateInput\\|presetCutoff\" origin/main -- src; revisar que OPEN/pendientes queden fuera del filtro",
+   "donde_aparecio": "admin/tickets/_components/ticket-date-filter.tsx:88 + ticket-list.tsx:86-95 (la réplica viene del filtro de admin/leads)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "Number(input) sobre un campo vacío que da 0 y pasa z.coerce.number().min(0)",
+   "como_buscarlo": "git grep -n \"Number(.*?? '')\\|Number(draft\" origin/main -- src y cruzar con git grep -n \"z.coerce.number().min(0\\|z.coerce.number().int().min(0\" origin/main -- src",
+   "donde_aparecio": "settings-console.tsx:140 y :112 con settings.schemas.ts:31, :39"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "z.coerce.date() sobre strings 'YYYY-MM-DD' de <input type=date> y formateo sin timeZone",
+   "como_buscarlo": "git grep -n \"z.coerce.date()\" origin/main -- src; git grep -n \"toISOString().slice(0, 10)\" origin/main -- src",
+   "donde_aparecio": "admin/team/_actions/time-entry.schemas.ts:33-34; admin/projects/_components/time-entry-panel.tsx:68, :72"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "Mutaciones sensibles del admin sin logAdminAction",
+   "como_buscarlo": "Listar archivos de src/app/(protected)/admin/**/_actions y src/lib/actions con prisma.*.update|create|delete y restar los que importan logAdminAction (git grep -L \"logAdminAction\")",
+   "donde_aparecio": "settings.actions.ts:148, :193; referrals.admin.actions.ts:18, :41; bulk-actions.ts:50"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "Rutas handler que devuelven String(error) o error.message al cliente",
+   "como_buscarlo": "git grep -n \"String(error)\\|error: error instanceof Error ? error.message\" origin/main -- src/app/api",
+   "donde_aparecio": "api/admin/alerts/trigger-detector/route.ts:15; api/admin/reports/send-now/route.ts:15"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "Formularios client que tragan el error de la action con console.error y no dan feedback",
+   "como_buscarlo": "git grep -n -A2 \"} catch (error) {\" origin/main -- src/components src/app | grep \"console.error\" en archivos 'use client'; y await action(...) sin leer el resultado",
+   "donde_aparecio": "components/admin/managers/ProjectManager.tsx:22-23; VaultManager.tsx:30-31; referrals-admin-table.tsx:38"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "revalidatePath de una ruta padre exacta desde actions que se disparan en rutas hijas o con query",
+   "como_buscarlo": "git grep -n \"revalidatePath('/admin/clients')\" origin/main -- src y comparar con dónde se monta el componente que la llama",
+   "donde_aparecio": "src/actions/agency-actions.ts:90, :113 (llamadas desde /admin/clients/<slug>?tab=…)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "Comparación de mensajes de guard con mayúsculas distintas ('UNAUTHORIZED' vs 'Unauthorized')",
+   "como_buscarlo": "git grep -n \"startsWith('UNAUTHORIZED')\\|=== 'UNAUTHORIZED'\\|'FORBIDDEN'\" origin/main -- src",
+   "donde_aparecio": "api/admin/clients/[organizationId]/send-executive-report/route.ts:17 contra auth-guards.ts:7"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "Página que contiene el único formulario oculta con hidden ... lg:flex",
+   "como_buscarlo": "git grep -n \"hidden[^\\\"]*lg:flex\\|hidden[^\\\"]*md:flex\" origin/main -- src/app src/components y revisar si la sección oculta tiene <form",
+   "donde_aparecio": "src/app/contact/page.tsx:119"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "Métrica de cuota interpretada con otra unidad (tokens vs conversaciones)",
+   "como_buscarlo": "git grep -n \"monthlyQuota \\*\\|monthlyQuota\\b\" origin/main -- src/components src/app y comparar con quota/checker.ts:44",
+   "donde_aparecio": "components/admin/managers/ChatbotManager.tsx:69-70"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "Páginas sin ningún link entrante (huérfanas)",
+   "como_buscarlo": "Para cada page.tsx de src/app/(protected)/admin, git grep de su ruta en hrefs y redirects; las que no aparecen son huérfanas",
+   "donde_aparecio": "admin/settings/alerts/page.tsx, admin/settings/reports/page.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "patron": "Textos de la UI que prometen frecuencias u horarios de cron fijos",
+   "como_buscarlo": "git grep -n -i \"cada 15 minutos\\|cron de\\|9:00 AM\\|cada lunes\" origin/main -- src y contrastar con netlify.toml",
+   "donde_aparecio": "AlertSettingsClient.tsx:124, :165; settings-console.tsx:628"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "Errores esperados comunicados con throw en server actions cuyo client component muestra err.message (en producción llega solo el digest)",
+   "como_buscarlo": "git grep -n \"throw new Error('\" origin/main -- src/modules/chatbot/server/admin \"src/app/(protected)/admin\" y cruzar con git grep -n \"err instanceof Error ? err.message\" en client components",
+   "donde_aparecio": "updateClient.ts:37, archiveClient.ts:30, updateClientInternalNotes.ts:23 → EditClientForm.tsx:94, ClientsListClient.tsx:168, InternalNotesCard.tsx:53"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "Acciones destructivas o masivas de plataforma sin guarda para la org de la agencia (slug 'develop')",
+   "como_buscarlo": "git grep -n -E \"organization\\.(delete|update)|botConfig\\.updateMany|bulk\" en src/modules/chatbot/server/admin, src/lib/bulk-actions.ts y admin/*/_actions, y verificar que excluyan slug 'develop'",
+   "donde_aparecio": "hardDeleteClient.ts:141, archiveClient.ts:34; admin/clients/page.tsx:22-23 lista la org sin filtro"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "Llamadas a la DB (rate limit, sesión) antes del try en actions públicas",
+   "como_buscarlo": "git grep -n -B3 \"checkRateLimit(\" origin/main -- src y verificar que el await quede adentro de un try con mensaje útil",
+   "donde_aparecio": "contact.ts:24 (try recién en :61)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "Dos implementaciones vivas de la misma mutación (legacy src/lib/actions vs _actions nuevas) con contratos distintos",
+   "como_buscarlo": "Comparar los exports de src/lib/actions/*.ts y src/actions/*.ts con los de src/app/(protected)/admin/*/_actions/*.ts por modelo Prisma (project.delete, service.create, contactSubmission.update)",
+   "donde_aparecio": "projects.ts:108 (deleteProjectAction) vs project.actions.ts:782 (deleteProject)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "Listas admin con take fijo, sin paginación y con filtros en el cliente",
+   "como_buscarlo": "git grep -n -E \"take: (100|200|250)\" origin/main -- src/modules/chatbot/server/admin \"src/app/(protected)/admin\"",
+   "donde_aparecio": "manageAlerts.ts:25"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "Transiciones de estado por id sin condicionar al estado previo",
+   "como_buscarlo": "git grep -n -A3 \"update({\\s*$\" en actions de estado (status:) y revisar que el where incluya el estado esperado o use updateMany con count",
+   "donde_aparecio": "manageAlerts.ts:43-49, :86-92"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "Borrado de una org que deja Users huérfanos (solo cae OrgMember)",
+   "como_buscarlo": "Cruzar los flujos que borran Organization (git grep \"organization.delete\") con la ausencia de user.delete; revisar el login de un ORG_MEMBER sin membresías",
+   "donde_aparecio": "hardDeleteClient.ts:141 + schema.prisma:527-528"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "Texto del visitante interpolado en alertas de agencia (webhook o email) sin escapar",
+   "como_buscarlo": "Leer src/lib/alerts.ts sendAgencyAlert: ver si detail/clientName se escapan antes de HTML o markdown de Slack/Telegram",
+   "donde_aparecio": "contact.ts:74-75 (company/name/email/service del form público)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "revalidatePath hacia rutas que no existen",
+   "como_buscarlo": "Extraer los literales de revalidatePath(`...`) y compararlos con git ls-tree de src/app",
+   "donde_aparecio": "src/actions/admin/onboarding-tasks.ts:44 y :61 revalidan /admin/clients/[id]/onboarding, que no existe en el árbol"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "Agregados admin que no excluyen orgs archivadas (deletedAt)",
+   "como_buscarlo": "git grep -n -E \"organization(Module)?\\.findMany\" origin/main -- \"src/app/(protected)/admin\" src/modules/chatbot/server/admin y ver si filtran deletedAt",
+   "donde_aparecio": "admin/leads/_actions/module-demand.actions.ts:27-28 (HIPÓTESIS, ZONA-FRANCO)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "patron": "Bloque de error del form público sin role=alert",
+   "como_buscarlo": "git grep -n \"state?.error\" origin/main -- src/app y verificar role=alert/aria-live",
+   "donde_aparecio": "src/app/contact/page.tsx:212-213 (instancia del patrón D1-c1)"
   }
  ]
 }

@@ -1,0 +1,950 @@
+{
+ "parte": 5,
+ "partes": 5,
+ "hallazgos": [
+  {
+   "id": "DEU-069",
+   "prefijo": "DEU",
+   "titulo": "Higiene de UI — D3: 180 detalles cosméticos (tilde 54, copy 51, strokeWidth 30, contraste 23, inline 11, otro 11)",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/_components/admin-sidebar.tsx",
+     "linea": 206,
+     "fragmento": "[copy] La card de usuario muestra el rol crudo 'SUPER_ADMIN' (PLAN-645)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/_components/admin-sidebar.tsx",
+     "linea": 89,
+     "fragmento": "[copy] Ítems 'Health score' y 'Audit log' (:97) en inglés en una nav en español"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+     "linea": 47,
+     "fragmento": "[tilde] aria-label 'Abrir menu' sin tilde; también 'Cerrar menu' en :55 y :70"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+     "linea": 104,
+     "fragmento": "[contraste] Footer 'develOP Admin' en text-zinc-700 sobre #080a0c"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+     "linea": 34,
+     "fragmento": "[inline] Gradientes de fondo en style inline"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/_components/admin-topbar.tsx",
+     "linea": 91,
+     "fragmento": "[strokeWidth] LogOut sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/_components/AdminBackButton.tsx",
+     "linea": 15,
+     "fragmento": "[copy] 'Equipo' con mayúscula y el resto en minúscula: 'Volver a Equipo' contra 'Volver a leads'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/_components/AdminErrorBoundary.tsx",
+     "linea": 15,
+     "fragmento": "[otro] Comentario 'TODO Sentry' obsoleto: SectionErrorBoundary ya captura en :64"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/error.tsx",
+     "linea": 12,
+     "fragmento": "[otro] context 'el admin' genera el tag de Sentry 'admin.el admin' (audit-log/error.tsx:12 'audit log' con espacio)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/alerts/page.tsx",
+     "linea": 17,
+     "fragmento": "[tilde] 'automaticamente' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+     "linea": 249,
+     "fragmento": "[copy] Emoji en el estado vacío 'Todo OK 🎉'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+     "linea": 190,
+     "fragmento": "[copy] Severidad 'Warning' en inglés (también alert-card.tsx:107)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+     "linea": 178,
+     "fragmento": "[contraste] Rótulo 'Severidad' text-[10px] text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+     "linea": 248,
+     "fragmento": "[contraste] Estado vacío por columna en text-zinc-600 italic"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/alerts/_components/alert-card.tsx",
+     "linea": 41,
+     "fragmento": "[contraste] Fecha de la alerta text-[10px] text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx",
+     "linea": 59,
+     "fragmento": "[contraste] Rótulo 'Período' text-[10px] text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx",
+     "linea": 94,
+     "fragmento": "[inline] style colorScheme dark inline (también :105); existe la clase [color-scheme:dark]"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/alerts/loading.tsx",
+     "linea": 14,
+     "fragmento": "[otro] Skeleton de tabs y lista vertical; la vista real es kanban de 3 columnas con 4 stat cards"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+     "linea": 150,
+     "fragmento": "[tilde] 'Ultimos 7 dias' sin tildes"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+     "linea": 151,
+     "fragmento": "[tilde] 'Tipos de accion' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+     "linea": 182,
+     "fragmento": "[tilde] 'aca' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+     "linea": 307,
+     "fragmento": "[tilde] 'Cargar mas' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+     "linea": 371,
+     "fragmento": "[tilde] 'Despues' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+     "linea": 452,
+     "fragmento": "[tilde] 'Se elimino' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+     "linea": 358,
+     "fragmento": "[copy] Badge y opciones del filtro (:141) muestran el enum crudo (CLIENT_CREATED, BOT_DELETED)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/loading.tsx",
+     "linea": 15,
+     "fragmento": "[otro] Skeleton con 4 stats y tabla; la página real tiene 3 stats y lista de cards"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/loading.tsx",
+     "linea": 13,
+     "fragmento": "[otro] Skeleton w-[480px] (y w-96 en :12) desborda a 390 px mientras carga"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/page.tsx",
+     "linea": 569,
+     "fragmento": "[inline] style animationDelay inline en 4 secciones (:569, :618, :668, :704)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/page.tsx",
+     "linea": 719,
+     "fragmento": "[inline] Bloque <style> inline con keyframes dashReveal"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/announcements/_components/announcement-list.tsx",
+     "linea": 122,
+     "fragmento": "[contraste] 'Publicada ...' en text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx",
+     "linea": 150,
+     "fragmento": "[contraste] Ayuda 'Sin fecha = no caduca.' en text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/_components/type-to-confirm-dialog.tsx",
+     "linea": 112,
+     "fragmento": "[copy] Texto de pending fijo 'Eliminando...' aunque confirmLabel sea otra acción"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx",
+     "linea": 14,
+     "fragmento": "[tilde] 'Boveda' sin tilde (Bóveda)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx",
+     "linea": 11,
+     "fragmento": "[copy] Tab 'Overview' en ingles (Resumen)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 348,
+     "fragmento": "[tilde] 'Mas activos' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 480,
+     "fragmento": "[tilde] 'aca' sin tilde (acá)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 481,
+     "fragmento": "[tilde] 'Ajusta la busqueda' -> 'Ajustá la búsqueda' (voseo y tilde)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 662,
+     "fragmento": "[strokeWidth] Icono Bot con strokeWidth={2}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 725,
+     "fragmento": "[strokeWidth] Icono Pin con strokeWidth={2}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 722,
+     "fragmento": "[copy] aria-label 'Despinear'/'Pinear' (anglicismo; Fijar/Quitar fijado)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 684,
+     "fragmento": "[copy] Abreviaturas 'Proy' y 'Msgs' (:700) en la tarjeta"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 138,
+     "fragmento": "[otro] confirm() nativo 'Pausar bots de N clientes?' sin ¿ y fuera del sistema de dialogos"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx",
+     "linea": 143,
+     "fragmento": "[strokeWidth] Icono Check con strokeWidth={2}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ClientHeader.tsx",
+     "linea": 77,
+     "fragmento": "[copy] Estado de suscripcion crudo del enum '(ACTIVE)'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx",
+     "linea": 48,
+     "fragmento": "[tilde] 'Estado suscripcion' sin tilde y valor enum crudo en :49"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx",
+     "linea": 64,
+     "fragmento": "[tilde] 'Modulos activos' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx",
+     "linea": 79,
+     "fragmento": "[tilde] 'Informacion de contacto' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx",
+     "linea": 53,
+     "fragmento": "[copy] Estado de proyecto crudo del enum (IN_PROGRESS)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx",
+     "linea": 58,
+     "fragmento": "[tilde] 'pendientes de aprobacion' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx",
+     "linea": 45,
+     "fragmento": "[copy] Estado de ticket crudo del enum"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+     "linea": 24,
+     "fragmento": "[tilde] 'Subir a boveda' y 'Sin archivos en la boveda.' (:34) sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+     "linea": 56,
+     "fragmento": "[copy] Tipo de asset crudo del enum"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+     "linea": 67,
+     "fragmento": "[contraste] Error de credencial en text-red-400/60 (bajo contraste)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+     "linea": 44,
+     "fragmento": "[tilde] 'todavia' sin tilde; 'Configura' sin voseo (:45)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+     "linea": 93,
+     "fragmento": "[copy] 'Quota mensual' / 'conv' (spanglish y abreviatura)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+     "linea": 131,
+     "fragmento": "[tilde] 'Metricas' sin tilde; 'Activity log' (:161) y 'Knowledge Base' (:143) en ingles"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ImpersonateButton.tsx",
+     "linea": 46,
+     "fragmento": "[copy] Titulo 'Impersonar a X?' sin ¿; descripcion 'usa el boton' sin tilde ni voseo (:47)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx",
+     "linea": 48,
+     "fragmento": "[contraste] Texto funcional en text-zinc-600 '(fallback Starter en runtime)'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx",
+     "linea": 64,
+     "fragmento": "[otro] Emoji '⏳' en la UI en lugar de icono Lucide"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx",
+     "linea": 102,
+     "fragmento": "[contraste] placeholder text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx",
+     "linea": 136,
+     "fragmento": "[contraste] placeholder text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx",
+     "linea": 33,
+     "fragmento": "[copy] Titulo 'Billing override' en ingles"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx",
+     "linea": 90,
+     "fragmento": "[contraste] Contador en text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx",
+     "linea": 213,
+     "fragmento": "[contraste] Contador en text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx",
+     "linea": 51,
+     "fragmento": "[copy] 'password temporal' en ingles (contraseña)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/assign-setter-control.tsx",
+     "linea": 80,
+     "fragmento": "[strokeWidth] UserRound sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/assign-setter-control.tsx",
+     "linea": 228,
+     "fragmento": "[strokeWidth] LoaderCircle sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+     "linea": 297,
+     "fragmento": "[strokeWidth] Eye sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+     "linea": 308,
+     "fragmento": "[strokeWidth] PlayCircle sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+     "linea": 325,
+     "fragmento": "[strokeWidth] ExternalLink sin strokeWidth (también :337)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx",
+     "linea": 136,
+     "fragmento": "[strokeWidth] CheckCircle2 y Sparkles sin strokeWidth (:136, :147, :191, :202)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx",
+     "linea": 109,
+     "fragmento": "[strokeWidth] LoaderCircle sin strokeWidth (también :196) e ícono de canal :223"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+     "linea": 108,
+     "fragmento": "[strokeWidth] MapPin, LoaderCircle, UserRound, Clock3, FlaskConical sin strokeWidth (:108, :127, :153, :162, :168, :173)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-form.tsx",
+     "linea": 181,
+     "fragmento": "[strokeWidth] X del botón cerrar sin strokeWidth"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts",
+     "linea": 37,
+     "fragmento": "[tilde] 'Captacion' y 'Conversion' (:38) sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts",
+     "linea": 46,
+     "fragmento": "[tilde] 'Respondio' (la ficha dice 'Respondió'); igual en lead-activity.helpers.ts:42 y :129"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-activity.helpers.ts",
+     "linea": 65,
+     "fragmento": "[tilde] 'Hace N dias' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-filters-bar.tsx",
+     "linea": 92,
+     "fragmento": "[tilde] 'Ubicacion' y 'Periodo' (:68), 'Cualquier periodo' (:14)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-filters.ts",
+     "linea": 109,
+     "fragmento": "[tilde] 'Sin ubicacion'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/location-typeahead.tsx",
+     "linea": 177,
+     "fragmento": "[tilde] placeholder 'Cualquier ubicacion'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx",
+     "linea": 95,
+     "fragmento": "[tilde] 'Todavia', 'aca' (:96), 'Telefono' (:106, :128, :185), 'Accion' (:109)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/inbound-period-filter.tsx",
+     "linea": 68,
+     "fragmento": "[tilde] 'Periodo' sin tilde"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/column-overview.tsx",
+     "linea": 168,
+     "fragmento": "[tilde] 'aca' sin tilde (también pipeline-column.tsx:109, lead-activity-feed.tsx:265)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx",
+     "linea": 100,
+     "fragmento": "[tilde] 'proximos' (:100, :172), 'Proximo' (:125), 'conversacion' (:172)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+     "linea": 201,
+     "fragmento": "[tilde] 'Que cubre ... proximos pasos', 'visualizacion' (:263), 'Agrega' sin voseo (:354)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/messages/_actions/message.schemas.ts",
+     "linea": 19,
+     "fragmento": "[tilde] 'El mensaje no puede estar vacio.'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+     "linea": 442,
+     "fragmento": "[copy] Rótulo en inglés 'Reactivate at'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+     "linea": 376,
+     "fragmento": "[copy] Monto acordado como `$${agreedAmount}` sin formato de moneda ni separadores es-AR"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-form.tsx",
+     "linea": 189,
+     "fragmento": "[copy] Labels en inglés 'Business name', 'Instagram URL' (:291), 'Google Maps URL' (:321); opción 'WEB' (:54)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/demo-form.tsx",
+     "linea": 154,
+     "fragmento": "[copy] Labels 'Demo URL' y 'Loom URL' (:166); opción 'WEB' (:39)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx",
+     "linea": 124,
+     "fragmento": "[copy] 'Follow-up pendiente!' sin signo de apertura; fallback 'Super Admin' (:255)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/reunion-panel.tsx",
+     "linea": 109,
+     "fragmento": "[copy] Nota interna de desarrollo visible: 'Sin notas (no debería pasar — son obligatorias desde B7)'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+     "linea": 122,
+     "fragmento": "[copy] Fallbacks de error en inglés ('Failed to list conversations', :164, :202, :227) y 'Invalid organization id' en message.schemas.ts:12"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/assign-setter-control.tsx",
+     "linea": 155,
+     "fragmento": "[contraste] 'sin evaluar' en text-zinc-600 sobre fondo oscuro (< 4,5:1)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/messages/page.tsx",
+     "linea": 8,
+     "fragmento": "[contraste] Texto de placeholder en text-white/40 (~3,7:1)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/reunion-panel.tsx",
+     "linea": 184,
+     "fragmento": "[contraste] placeholder:text-zinc-600 en el textarea de nota"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+     "linea": 310,
+     "fragmento": "[contraste] Rótulos text-[10px] text-zinc-500 sobre bg-black/20 en todas las tarjetas (~4,1:1 o menos); patrón repetido en el lote"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/messages/_components/conversation-list.tsx",
+     "linea": 109,
+     "fragmento": "[inline] borderBottom inline; existe border-b border-white/[0.06] + last:border-0"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/column-overview.tsx",
+     "linea": 160,
+     "fragmento": "[inline] gridTemplateColumns inline en lugar de grid-cols-*"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_components/themed-date-input.tsx",
+     "linea": 26,
+     "fragmento": "[inline] colorScheme inline; Tailwind 4 tiene utilidad de color-scheme"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+     "linea": 38,
+     "fragmento": "[copy] Etiqueta de estado en inglés 'Planning' (también en project-list.tsx:27 y project-status-control.tsx:11)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+     "linea": 42,
+     "fragmento": "[tilde] 'Revision' sin tilde (también en project-list.tsx:29 y project-status-control.tsx:13)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+     "linea": 185,
+     "fragmento": "[strokeWidth] Building2 sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+     "linea": 224,
+     "fragmento": "[strokeWidth] LogIn sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+     "linea": 72,
+     "fragmento": "[tilde] 'Todavia no inicio mantenimiento' (Todavía, inició)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+     "linea": 90,
+     "fragmento": "[tilde] 'Mantenimiento al dia' (día)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+     "linea": 184,
+     "fragmento": "[tilde] 'Todavia no hay una descripcion detallada' (Todavía, descripción)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+     "linea": 231,
+     "fragmento": "[tilde] 'Suscripcion' (Suscripción)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+     "linea": 190,
+     "fragmento": "[contraste] Rótulos de 10 px en text-zinc-500 sobre fondo oscuro (~4,1:1 < 4,5:1); se repite en las tiles de page.tsx, project-card.tsx:176 y hours/page.tsx:74"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+     "linea": 35,
+     "fragmento": "[otro] Moneda fija en USD en los formateadores (también en payments/page.tsx:39, hours/page.tsx:17, project-card.tsx:97 y project-form.tsx:61): confirmar si es decisió"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "linea": 204,
+     "fragmento": "[tilde] 'El proyecto pasara a mantenimiento' (pasará)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "linea": 211,
+     "fragmento": "[tilde] 'Todavia no hay meses generados' (Todavía)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "linea": 222,
+     "fragmento": "[tilde] Encabezado 'Accion' y 'Sin accion' en :262 y :312 (Acción)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/project-tabs.tsx",
+     "linea": 12,
+     "fragmento": "[copy] Pestaña 'Overview' en inglés"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx",
+     "linea": 30,
+     "fragmento": "[strokeWidth] LoaderCircle sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/project-status-control.tsx",
+     "linea": 83,
+     "fragmento": "[strokeWidth] LoaderCircle sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/project-card.tsx",
+     "linea": 183,
+     "fragmento": "[strokeWidth] CalendarDays (:183, :191), CircleDollarSign (:199), FolderKanban (:210) y CheckCircle2 (:216) sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+     "linea": 230,
+     "fragmento": "[strokeWidth] AlertTriangle sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+     "linea": 252,
+     "fragmento": "[tilde] Placeholder 'automatizacion' (automatización)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+     "linea": 261,
+     "fragmento": "[tilde] Label 'Descripcion' (Descripción)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/project-form.tsx",
+     "linea": 325,
+     "fragmento": "[copy] Label 'Monthly rate' en inglés"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/project.schemas.ts",
+     "linea": 53,
+     "fragmento": "[copy] Errores de validación en inglés que ve el usuario: 'Project name is required' y 'Amount must be positive' (:26)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+     "linea": 662,
+     "fragmento": "[copy] Mensajes en inglés que llegan a la UI vía fail: 'Project not found', 'Organization not found' (:254), 'Lead already has a linked project' (:859); en maintenance"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+     "linea": 510,
+     "fragmento": "[copy] 'Proyecto interno develOP' frente a 'Proyecto interno de develOP' en el resto (:456, layout.tsx:167)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/task-form.tsx",
+     "linea": 115,
+     "fragmento": "[copy] Errores en inglés: 'Title is required' y 'Estimated hours must be zero or positive' (:123)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+     "linea": 150,
+     "fragmento": "[tilde] 'Esperando aprobacion del cliente' y 'Enviar a aprobacion' en :645 (aprobación)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+     "linea": 256,
+     "fragmento": "[copy] 'Todavia no hay tareas' / 'Crea la primera tarea' (:257): falta tilde y usa tuteo en vez de voseo (Creá)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+     "linea": 430,
+     "fragmento": "[copy] Rótulo 'Time entries' en inglés (también en :496)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+     "linea": 487,
+     "fragmento": "[tilde] 'Descripcion' y 'Sin descripcion detallada todavia.' (:490); 'Todavia no hay horas' (:532)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+     "linea": 362,
+     "fragmento": "[strokeWidth] ChevronDown (:362), ChevronRight (:364), LoaderCircle (:392, :475, :641), Clock3 (:412), CheckCircle2 (:427), AlertTriangle (:440) y Send (:643) sin strokeWidth"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+     "linea": 556,
+     "fragmento": "[contraste] Texto descriptivo en text-zinc-600 sobre fondo oscuro (< 4,5:1)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+     "linea": 143,
+     "fragmento": "[copy] 'Selecciona una tarea.', 'Ingresa una cantidad de horas valida.' (:149) y 'Selecciona una fecha.' (:154): tuteo y falta tilde (Seleccioná, Ingresá, válida)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+     "linea": 208,
+     "fragmento": "[copy] 'Carga rapida de horas' / 'Registra trabajo real ... y manten el costo/hora' (:210): faltan tildes y usa tuteo"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+     "linea": 272,
+     "fragmento": "[tilde] Placeholder 'Que se hizo, bloqueo, avance, revision...' (Qué, revisión)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+     "linea": 300,
+     "fragmento": "[copy] 'Todavia no hay horas registradas' / 'Empieza cargando...' (:301): falta tilde y usa tuteo (Empezá)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+     "linea": 331,
+     "fragmento": "[tilde] Encabezado 'Accion' (Acción)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx",
+     "linea": 288,
+     "fragmento": "[strokeWidth] Plus (:288) y Trash2 (:354, :395) sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/projects-filter-bar.tsx",
+     "linea": 123,
+     "fragmento": "[copy] 'Reestablecer filtros' debería ser 'Restablecer filtros'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/draggable-project-card.tsx",
+     "linea": 109,
+     "fragmento": "[copy] La confirmación de borrado del tablero no menciona los pagos de mantenimiento; la de la ficha sí (delete-project-button.tsx:69-71). Ninguna avisa que el cliente"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/project-list.tsx",
+     "linea": 105,
+     "fragmento": "[inline] style con maxHeight y maskImage para el preview capado; Tailwind 4 lo cubre con max-h-[42rem] y utilidades mask-*/arbitrarias"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/project-list.tsx",
+     "linea": 171,
+     "fragmento": "[inline] style gridTemplateColumns; existe grid-cols-[repeat(auto-fill,minmax(320px,1fr))]"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "linea": 184,
+     "fragmento": "[strokeWidth] Settings2, Clock3 (:187), Target (:478), Users (:524), BellRing (:624) sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "linea": 411,
+     "fragmento": "[strokeWidth] Loader2/CheckCircle2 del botón por fila y del SaveButton (:698) sin strokeWidth"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/page.tsx",
+     "linea": 17,
+     "fragmento": "[strokeWidth] Icono Settings sin strokeWidth"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx",
+     "linea": 184,
+     "fragmento": "[strokeWidth] MessageSquareText sin strokeWidth"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/tickets/_components/ticket-list.tsx",
+     "linea": 208,
+     "fragmento": "[strokeWidth] MessageSquareText sin strokeWidth"
+    },
+    {
+     "ruta": "src/components/admin/managers/ChatbotManager.tsx",
+     "linea": 80,
+     "fragmento": "[strokeWidth] Bot (:80), Activity (:100) y TrendingUp (:122) sin strokeWidth"
+    },
+    {
+     "ruta": "src/components/admin/managers/ProjectManager.tsx",
+     "linea": 60,
+     "fragmento": "[strokeWidth] Loader2/Send sin strokeWidth"
+    },
+    {
+     "ruta": "src/components/admin/managers/VaultManager.tsx",
+     "linea": 97,
+     "fragmento": "[strokeWidth] Loader2/UploadCloud sin strokeWidth"
+    },
+    {
+     "ruta": "src/app/contact/page.tsx",
+     "linea": 140,
+     "fragmento": "[strokeWidth] CheckCircle, Send (:222), TimerReset (:231), ShieldCheck (:239), MapPin (:247), iconos de canal (:316) y ArrowUpRight (:329) sin strokeWidth"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+     "linea": 213,
+     "fragmento": "[contraste] Fecha y estado de cada alerta en text-zinc-600 sobre fondo oscuro"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/reports/ReportSettingsClient.tsx",
+     "linea": 146,
+     "fragmento": "[contraste] Email del destinatario y fecha (:149) en text-zinc-600"
+    },
+    {
+     "ruta": "src/components/admin/managers/ChatbotManager.tsx",
+     "linea": 54,
+     "fragmento": "[contraste] Texto de ayuda 'Creá uno para empezar…' en text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/page.tsx",
+     "linea": 201,
+     "fragmento": "[contraste] Descripción del estado vacío en text-white/40"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "linea": 178,
+     "fragmento": "[tilde] 'configuracion', 'parametros' (:179), 'catalogo' y 'clasico' (:198), 'configuracion' (:207), 'proximas' (:308), 'modulos' (:336), 'Parametros' (:430), 'composic"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+     "linea": 123,
+     "fragmento": "[tilde] 'configuracion' (:123), 'Configuracion actualizada.' (:169), 'No se encontro el modulo.' (:190)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
+     "linea": 38,
+     "fragmento": "[tilde] 'Modulo invalido.' y 'Ingresa un precio valido.' (:39)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/page.tsx",
+     "linea": 25,
+     "fragmento": "[tilde] Título 'Configuracion'"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/page.tsx",
+     "linea": 202,
+     "fragmento": "[tilde] 'aca' (también member-workload.tsx:261 y ticket-list.tsx:152)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+     "linea": 250,
+     "fragmento": "[copy] Mensajes al usuario en inglés: 'Task not found', 'One or more tasks were not found' (:290), 'Tasks must belong to the same project' (:295) y fallbacks 'Failed t"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/_actions/task.schemas.ts",
+     "linea": 38,
+     "fragmento": "[copy] Mensajes de validación en inglés ('Invalid project id', 'Title is required' :79, 'Estimated hours must be…' :68)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/_actions/time-entry.schemas.ts",
+     "linea": 20,
+     "fragmento": "[copy] Mensajes en inglés ('Invalid task id', 'Hours must be positive' :27)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+     "linea": 153,
+     "fragmento": "[copy] 'Task not found' y 'Time entry not found' (:216) en inglés"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
+     "linea": 156,
+     "fragmento": "[copy] 'Ticket not found' y 'Failed to list tickets' (:96) en inglés"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
+     "linea": 22,
+     "fragmento": "[copy] .email() y .url() (:24, :25) sin mensaje propio: el toast muestra 'Invalid email' / 'Invalid url' de Zod en inglés"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+     "linea": 148,
+     "fragmento": "[copy] 'issues encontrados' mezcla inglés y español"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/alerts/page.tsx",
+     "linea": 28,
+     "fragmento": "[copy] Eyebrow 'Settings · Alertas' en inglés (también reports/page.tsx:34 'Settings · Reportes')"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "linea": 545,
+     "fragmento": "[copy] Muestra el enum crudo 'SUPER_ADMIN' como etiqueta de rol"
+    },
+    {
+     "ruta": "src/app/contact/page.tsx",
+     "linea": 277,
+     "fragmento": "[copy] 'Online ahora' y 'Menos de 2 horas' (:234) son promesas fijas que no dependen de nada"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx",
+     "linea": 67,
+     "fragmento": "[inline] style={{ colorScheme: 'dark' }} cuando existe la clase [color-scheme:dark]"
+    },
+    {
+     "ruta": "src/app/contact/page.tsx",
+     "linea": 219,
+     "fragmento": "[inline] style={{ transition: 'none' }} repetido (:297, :303, :339, :340) en lugar de transition-none; boxShadow inline en :120 y :260"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "linea": 56,
+     "fragmento": "[otro] cn() local duplicado en vez de importar el de @/lib/utils"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx",
+     "linea": 209,
+     "fragmento": "[otro] Burbuja con whitespace-pre-wrap sin break-words: una URL larga desborda en mobile (message-bubble.tsx:52 sí lo tiene)"
+    },
+    {
+     "ruta": "src/components/admin/managers/ChatbotManager.tsx",
+     "linea": 130,
+     "fragmento": "[otro] 'Leads (últimos)' cuenta solo la lista recortada que pasa el tab, no el total"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+     "linea": 59,
+     "fragmento": "[tilde] Texto de auditoría visible en /admin/audit-log: 'Marco alerta como vista' → 'Marcó'"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+     "linea": 102,
+     "fragmento": "[tilde] Texto de auditoría visible: 'Resolvio alerta' → 'Resolvió'"
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 342,
+     "fragmento": "[copy] El mensaje de prueba del webhook usa un cliente y un ticket inventados ('Concesionaria San Miguel') (código muerto)"
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 204,
+     "fragmento": "[copy] El email de invitación muestra el nombre del enum 'SUPER_ADMIN' al usuario (código muerto)"
+    },
+    {
+     "ruta": "src/lib/actions/clients.ts",
+     "linea": 30,
+     "fragmento": "[tilde] 'formato valido' → 'válido' (código muerto)"
+    },
+    {
+     "ruta": "src/lib/actions/clients.ts",
+     "linea": 168,
+     "fragmento": "[tilde] 'ID de cliente invalido.' → 'inválido' (código muerto)"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.",
+   "propuesta": "Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-shell",
+    "h4.adm-alertas",
+    "h4.adm-audit",
+    "h4.adm-dashboard",
+    "h4.adm-novedades",
+    "h4.adm-clientes",
+    "h4.adm-leads",
+    "h4.adm-mensajes",
+    "h4.adm-proyectos",
+    "h4.adm-config",
+    "h4.adm-tickets",
+    "h6.vis-contacto",
+    "h4.adm-equipo"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "todos",
+    "tmp": "D3-c1/HIGIENE",
+    "verificado_padre": false,
+    "nota_padre": "DEC-55: higiene de UI agrupada, sin verificación individual",
+    "verificador": null
+   },
+   "estado": "vigente"
+  }
+ ]
+}

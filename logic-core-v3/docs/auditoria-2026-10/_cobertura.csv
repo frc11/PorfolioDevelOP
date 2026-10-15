@@ -684,44 +684,44 @@ logic-core-v3/scripts/v1-qa-wizard-states.ts,D9,superficial,pendiente,,script-op
 logic-core-v3/sentry.edge.config.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/sentry.server.config.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/src/actions/admin/onboarding-tasks.ts,D3,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
-logic-core-v3/src/actions/agency-actions.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/actions/agency-actions.ts,D3,profundo,leído,D3-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/actions/auth-actions.ts,D1,profundo,leído,D1-c1,server-actions; server-action; usa-auth
 logic-core-v3/src/actions/dashboard-actions.ts,D2,profundo,leído,D2-c1,server-actions; toca-db; server-action; usa-auth; escribe-db; FROZEN
 logic-core-v3/src/actions/metrics-actions.ts,D3,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/actions/onboarding-actions.ts,D2,profundo,leído,D2-c1,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/actions/task-approvals.ts,D2,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
-logic-core-v3/src/app/(protected)/admin/_components/AdminBackButton.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/AdminBreadcrumbs.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/AdminErrorBoundary.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/AdminLayoutClient.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/PageTransition.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/admin-sidebar.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/admin-topbar.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/chart-card.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/confirm-dialog.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/dashboard-history-charts.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/inline-confirm.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/_components/type-to-confirm-dialog.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/alerts/AlertsClient.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/alerts/_components/alert-card.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/alerts/_components/alert-column-overview.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/alerts/_components/alert-types.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/alerts/_components/alerts-filters.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/alerts/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/alerts/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/alerts/page.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/announcements/_actions/announcements.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/announcements/_actions/announcements.schemas.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/announcements/_components/announcement-list.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/announcements/page.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/audit-log/_components/audit-filters.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/audit-log/_components/audit-period-filter.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/audit-log/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/audit-log/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/audit-log/page.tsx,D3,profundo,pendiente,,admin; usa-auth
+logic-core-v3/src/app/(protected)/admin/_components/AdminBackButton.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/AdminBreadcrumbs.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/AdminErrorBoundary.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/AdminLayoutClient.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/PageTransition.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/admin-sidebar.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/admin-topbar.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/chart-card.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/confirm-dialog.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/dashboard-history-charts.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/inline-confirm.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/_components/type-to-confirm-dialog.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/alerts/AlertsClient.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/alerts/_components/alert-card.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/alerts/_components/alert-column-overview.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/alerts/_components/alert-types.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/alerts/_components/alerts-filters.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/alerts/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/alerts/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/alerts/page.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/announcements/_actions/announcements.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/announcements/_actions/announcements.schemas.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/announcements/_components/announcement-list.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/announcements/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/audit-log/_components/audit-filters.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/audit-log/_components/audit-period-filter.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/audit-log/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/audit-log/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/audit-log/page.tsx,D3,profundo,leído,D3-c1,admin; usa-auth
 logic-core-v3/src/app/(protected)/admin/chatbot/activity/loading.tsx,D5,profundo,leído,D5-c1,admin-chatbot
 logic-core-v3/src/app/(protected)/admin/chatbot/activity/page.tsx,D5,profundo,leído,D5-c1,admin-chatbot; toca-db
 logic-core-v3/src/app/(protected)/admin/chatbot/health/loading.tsx,D5,profundo,leído,D5-c1,admin-chatbot
@@ -753,47 +753,47 @@ logic-core-v3/src/app/(protected)/admin/chatbots/new/CreateBotForm.tsx,D5,profun
 logic-core-v3/src/app/(protected)/admin/chatbots/new/actions.ts,D5,profundo,leído,D5-c1,admin-chatbot; toca-db; server-action; usa-auth
 logic-core-v3/src/app/(protected)/admin/chatbots/new/page.tsx,D5,profundo,leído,D5-c1,admin-chatbot; toca-db; usa-auth
 logic-core-v3/src/app/(protected)/admin/chatbots/page.tsx,D5,profundo,leído,D5-c1,admin-chatbot; usa-auth
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ClientHeader.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ExecutiveReportCard.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ImpersonateButton.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/QuickActionMotion.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/TabContentTransition.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/TabSkeleton.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx,D3,profundo,pendiente,,admin; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/edit/page.tsx,D3,profundo,pendiente,,admin; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/clients/[clientId]/page.tsx,D3,profundo,pendiente,,admin; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/clients/_actions/client.actions.ts,D3,profundo,pendiente,,admin; server-action
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ClientHeader.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ExecutiveReportCard.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ImpersonateButton.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/QuickActionMotion.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/TabContentTransition.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/TabSkeleton.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/edit/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/clients/[clientId]/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/clients/_actions/client.actions.ts,D3,profundo,leído,D3-c1,admin; server-action
 logic-core-v3/src/app/(protected)/admin/clients/_actions/client.schemas.ts,D3,profundo,superficial,F1.11,admin | PODA-ALTA
-logic-core-v3/src/app/(protected)/admin/clients/_actions/plan.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/clients/_actions/plan.schemas.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/clients/_components/ClientsListClient.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/_components/HoverScaleCard.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/clients/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/clients/new/page.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/clients/page.tsx,D3,profundo,pendiente,,admin; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/error.tsx,D3,profundo,pendiente,,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/_actions/plan.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/clients/_actions/plan.schemas.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/clients/_components/ClientsListClient.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/_components/HoverScaleCard.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/clients/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/clients/new/page.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/clients/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
 logic-core-v3/src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx,D4,profundo,pendiente,,experimento LeadOS (ZONA-FRANCO-inferida); client-component
 logic-core-v3/src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx,D4,profundo,pendiente,,experimento LeadOS (ZONA-FRANCO-inferida); client-component
 logic-core-v3/src/app/(protected)/admin/fg2-lab/page.tsx,D4,profundo,pendiente,,experimento LeadOS (ZONA-FRANCO-inferida); toca-db
-logic-core-v3/src/app/(protected)/admin/layout.tsx,D3,profundo,pendiente,,admin; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/layout.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
 logic-core-v3/src/app/(protected)/admin/leados/[leadId]/_components/decision-bar.tsx,D4,profundo,pendiente,,admin-leados; client-component; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx,D4,profundo,pendiente,,admin-leados; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/admin/leados/[leadId]/_components/ficha-accordion.tsx,D4,profundo,pendiente,,admin-leados; client-component; ZONA-FRANCO
@@ -807,7 +807,7 @@ logic-core-v3/src/app/(protected)/admin/leados/loading.tsx,D4,profundo,pendiente
 logic-core-v3/src/app/(protected)/admin/leados/page.tsx,D4,profundo,pendiente,,admin-leados; toca-db; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx,D4,profundo,pendiente,,admin-leados; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/admin/leados/setter/[setterId]/page.tsx,D4,profundo,pendiente,,admin-leados; toca-db; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/[leadId]/page.tsx,D3,profundo,pendiente,,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/leads/[leadId]/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db
 logic-core-v3/src/app/(protected)/admin/leads/_actions/activity.actions.ts,D4,profundo,pendiente,,admin-leads-actions; server-action; guard-indirecto; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/admin/leads/_actions/activity.schemas.ts,D4,profundo,pendiente,,admin-leads-actions; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/admin/leads/_actions/demo.actions.ts,D4,profundo,pendiente,,admin-leads-actions; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
@@ -819,122 +819,122 @@ logic-core-v3/src/app/(protected)/admin/leads/_actions/lead.schemas.ts,D4,profun
 logic-core-v3/src/app/(protected)/admin/leads/_actions/module-demand.actions.ts,D4,profundo,pendiente,,admin-leads-actions; toca-db; server-action; guard-indirecto; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/admin/leads/_actions/reunion.actions.ts,D4,profundo,pendiente,,admin-leads-actions; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/admin/leads/_actions/reunion.schemas.ts,D4,profundo,pendiente,,admin-leads-actions; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_components/assign-setter-control.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/change-status-select.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/column-overview.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/demo-form.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/draggable-lead-card.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/droppable-column.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/inbound-period-filter.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/lead-activity.helpers.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/leads/_components/lead-card.helpers.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/leads/_components/lead-card.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/lead-filters-bar.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/lead-filters.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/leads/_components/lead-form.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/leads/_components/lead-pipeline.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/lead-zone.helpers.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/leads/_components/location-typeahead.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/module-demand-table.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/leads/_components/outbound-leads-view.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/pipeline-board.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/pipeline-column.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/reunion-panel.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/themed-date-input.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/_components/use-scroll-fades.ts,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/leads/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/leads/page.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/messages/[orgId]/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/messages/[orgId]/page.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/messages/_actions/message.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/messages/_actions/message.schemas.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/messages/_components/active-org.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/messages/_components/conversation-list-loader.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/messages/_components/conversation-list-skeleton.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/messages/_components/conversation-list.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/messages/_components/emoji-popover.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/messages/_components/message-bubble.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/messages/_components/message-input.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/messages/_components/message-thread.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/messages/_components/messages-inbox-shell.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/messages/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/messages/layout.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/messages/page.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/page.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx,D3,profundo,pendiente,,admin; guard-indirecto; client-component
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/_components/project-status-control.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/_components/project-tabs.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/_components/scroll-reset.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/hours/page.tsx,D3,profundo,pendiente,,admin; toca-db; guard-indirecto
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/layout.tsx,D3,profundo,pendiente,,admin; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/page.tsx,D3,profundo,pendiente,,admin; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/payments/page.tsx,D3,profundo,pendiente,,admin; toca-db; server-action
-logic-core-v3/src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/projects/_actions/maintenance.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/projects/_actions/maintenance.schemas.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/projects/_actions/milestone.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/projects/_actions/milestone.schemas.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/projects/_actions/project.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/projects/_actions/project.schemas.ts,D3,profundo,pendiente,,admin
+logic-core-v3/src/app/(protected)/admin/leads/_components/assign-setter-control.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/change-status-select.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/column-overview.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/demo-form.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/draggable-lead-card.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/droppable-column.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/inbound-period-filter.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/lead-activity.helpers.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/leads/_components/lead-card.helpers.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/leads/_components/lead-card.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/lead-filters-bar.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/lead-filters.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/leads/_components/lead-form.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/leads/_components/lead-pipeline.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/lead-zone.helpers.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/leads/_components/location-typeahead.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/module-demand-table.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/leads/_components/outbound-leads-view.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/pipeline-board.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/pipeline-column.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/reunion-panel.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/themed-date-input.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/_components/use-scroll-fades.ts,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/leads/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/leads/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/messages/[orgId]/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/messages/[orgId]/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/messages/_actions/message.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/messages/_actions/message.schemas.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/messages/_components/active-org.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/messages/_components/conversation-list-loader.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/messages/_components/conversation-list-skeleton.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/messages/_components/conversation-list.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/messages/_components/emoji-popover.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/messages/_components/message-bubble.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/messages/_components/message-input.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/messages/_components/message-thread.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/messages/_components/messages-inbox-shell.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/messages/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/messages/layout.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/messages/page.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx,D3,profundo,leído,D3-c1,admin; guard-indirecto; client-component
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/_components/project-status-control.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/_components/project-tabs.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/_components/scroll-reset.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/hours/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db; guard-indirecto
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/layout.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/payments/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db; server-action
+logic-core-v3/src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/projects/_actions/maintenance.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/projects/_actions/maintenance.schemas.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/projects/_actions/milestone.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/projects/_actions/milestone.schemas.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/projects/_actions/project.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/projects/_actions/project.schemas.ts,D3,profundo,leído,D3-c1,admin
 logic-core-v3/src/app/(protected)/admin/projects/_components/convert-lead-dialog.tsx,D3,profundo,superficial,F1.11,admin; client-component | PODA-ALTA
-logic-core-v3/src/app/(protected)/admin/projects/_components/draggable-project-card.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/droppable-project-column.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/overlay-modal.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/project-card.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/project-form.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/project-list.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/projects-board.tsx,D3,profundo,pendiente,,admin; guard-indirecto; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/projects-filter-bar.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/projects-filters.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/projects/_components/projects-period-dropdown.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/task-form.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/task-list.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/_components/time-entry-panel.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/projects/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/projects/page.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/referrals/_components/referrals-admin-table.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/referrals/page.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/settings/_actions/settings.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/settings/_actions/settings.schemas.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/settings/_components/settings-console.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/settings/alerts/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/settings/alerts/page.tsx,D3,profundo,pendiente,,admin; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/settings/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/settings/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/settings/page.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/settings/reports/ReportSettingsClient.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/settings/reports/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/settings/reports/page.tsx,D3,profundo,pendiente,,admin; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/team/_actions/task.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/team/_actions/task.schemas.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/team/_actions/time-entry.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/team/_actions/time-entry.schemas.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/team/_components/member-workload.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/team/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/team/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/team/page.tsx,D3,profundo,pendiente,,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/tickets/[ticketId]/page.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/tickets/_actions/ticket.actions.ts,D3,profundo,pendiente,,admin; toca-db; server-action; guard-indirecto
-logic-core-v3/src/app/(protected)/admin/tickets/_actions/ticket.schemas.ts,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/tickets/_components/emoji-picker-button.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/tickets/_components/hover-scale.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/tickets/_components/ticket-chat.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/tickets/_components/ticket-list.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/tickets/_components/ticket-reply-form.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/tickets/error.tsx,D3,profundo,pendiente,,admin; client-component
-logic-core-v3/src/app/(protected)/admin/tickets/loading.tsx,D3,profundo,pendiente,,admin
-logic-core-v3/src/app/(protected)/admin/tickets/page.tsx,D3,profundo,pendiente,,admin
+logic-core-v3/src/app/(protected)/admin/projects/_components/draggable-project-card.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/droppable-project-column.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/overlay-modal.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/project-card.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/project-form.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/project-list.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/projects-board.tsx,D3,profundo,leído,D3-c1,admin; guard-indirecto; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/projects-filter-bar.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/projects-filters.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/projects/_components/projects-period-dropdown.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/task-form.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/task-list.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/_components/time-entry-panel.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/projects/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/projects/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/referrals/_components/referrals-admin-table.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/referrals/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/settings/_actions/settings.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/settings/_actions/settings.schemas.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/settings/_components/settings-console.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/settings/alerts/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/settings/alerts/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/settings/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/settings/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/settings/page.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/settings/reports/ReportSettingsClient.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/settings/reports/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/settings/reports/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/team/_actions/task.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/team/_actions/task.schemas.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/team/_actions/time-entry.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/team/_actions/time-entry.schemas.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/team/_components/member-workload.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/team/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/team/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/team/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db
+logic-core-v3/src/app/(protected)/admin/tickets/[ticketId]/page.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/tickets/_actions/ticket.actions.ts,D3,profundo,leído,D3-c1,admin; toca-db; server-action; guard-indirecto
+logic-core-v3/src/app/(protected)/admin/tickets/_actions/ticket.schemas.ts,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/tickets/_components/emoji-picker-button.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/tickets/_components/hover-scale.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/tickets/_components/ticket-chat.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/tickets/_components/ticket-list.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/tickets/_components/ticket-reply-form.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/tickets/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
+logic-core-v3/src/app/(protected)/admin/tickets/loading.tsx,D3,profundo,leído,D3-c1,admin
+logic-core-v3/src/app/(protected)/admin/tickets/page.tsx,D3,profundo,leído,D3-c1,admin
 logic-core-v3/src/app/(protected)/dashboard/_actions/business-profile.actions.ts,D2,profundo,leído,D2-c1,dashboard; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts,D2,profundo,leído,D2-c1,dashboard; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.invariant.ts,D2,superficial,superficial,D2-c1,dashboard; test | test sin DB: ExecutiveReportPrefsSchema acepta solo 3 frecuencias x 3 cantidades (preferencias del reporte ejecutivo)
@@ -1130,15 +1130,15 @@ logic-core-v3/src/app/accept-invite/actions.ts,D1,profundo,leído,D1-c1,auth-ui;
 logic-core-v3/src/app/accept-invite/page.tsx,D1,profundo,leído,D1-c1,auth-ui
 logic-core-v3/src/app/ai-implementations/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/ai-implementations/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
-logic-core-v3/src/app/api/admin/alerts/trigger-detector/route.ts,D3,profundo,pendiente,,api-admin; usa-auth; route-handler
+logic-core-v3/src/app/api/admin/alerts/trigger-detector/route.ts,D3,profundo,leído,D3-c1,api-admin; usa-auth; route-handler
 logic-core-v3/src/app/api/admin/chatbot/demo-chat/[slug]/__tests__/demo-chat-model-resolution.invariant.ts,D5,superficial,superficial,D5-c1,"api-admin-chatbot; test | test sin DB: resolucion modelo/provider del demo-chat del admin (COST-2b, resolveEffectiveModel con bot.llmModel); no cubre que el chat publico use plan.llmModel (BUG-024)"
 logic-core-v3/src/app/api/admin/chatbot/demo-chat/[slug]/route.ts,D5,profundo,leído,D5-c1,api-admin-chatbot; toca-db; guard-indirecto; route-handler
 logic-core-v3/src/app/api/admin/chatbot/events/route.ts,D5,profundo,leído,D5-c1,api-admin-chatbot; toca-db; usa-auth; route-handler
 logic-core-v3/src/app/api/admin/chatbot/insights/generate/route.ts,D5,profundo,leído,D5-c1,api-admin-chatbot; toca-db; usa-auth; route-handler
 logic-core-v3/src/app/api/admin/chatbot/test-prompt/route.ts,D5,profundo,leído,D5-c1,api-admin-chatbot; guard-indirecto; route-handler
-logic-core-v3/src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts,D3,profundo,pendiente,,api-admin; usa-auth; guard-indirecto; route-handler
-logic-core-v3/src/app/api/admin/reports/send-now/route.ts,D3,profundo,pendiente,,api-admin; usa-auth; route-handler
-logic-core-v3/src/app/api/admin/users/[userId]/resend-credentials/route.ts,D3,profundo,pendiente,,api-admin; toca-db; usa-auth; route-handler; escribe-db
+logic-core-v3/src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts,D3,profundo,leído,D3-c1,api-admin; usa-auth; guard-indirecto; route-handler
+logic-core-v3/src/app/api/admin/reports/send-now/route.ts,D3,profundo,leído,D3-c1,api-admin; usa-auth; route-handler
+logic-core-v3/src/app/api/admin/users/[userId]/resend-credentials/route.ts,D3,profundo,leído,D3-c1,api-admin; toca-db; usa-auth; route-handler; escribe-db
 logic-core-v3/src/app/api/auth/[...nextauth]/route.ts,D1,profundo,leído,D1-c1,nextauth; usa-auth; route-handler
 logic-core-v3/src/app/api/auth/google-business/callback/route.ts,D7,profundo,pendiente,,oauth; toca-db; usa-auth; route-handler; escribe-db
 logic-core-v3/src/app/api/auth/google-business/start/route.ts,D7,profundo,pendiente,,oauth; usa-auth; route-handler
@@ -1181,7 +1181,7 @@ logic-core-v3/src/app/cambiar-password/CambiarPasswordForm.tsx,D1,profundo,leíd
 logic-core-v3/src/app/cambiar-password/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/app/cambiar-password/page.tsx,D1,profundo,leído,D1-c1,auth-ui; usa-auth
 logic-core-v3/src/app/contact/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
-logic-core-v3/src/app/contact/page.tsx,D3,profundo,pendiente,,UI del endpoint publico submitContactForm; captura ?ref=; client-component
+logic-core-v3/src/app/contact/page.tsx,D3,profundo,leído,D3-c1,UI del endpoint publico submitContactForm; captura ?ref=; client-component
 logic-core-v3/src/app/embed/[slug]/page.tsx,D5,profundo,leído,D5-c1,embed; toca-db
 logic-core-v3/src/app/embed/layout.tsx,D5,profundo,leído,D5-c1,embed
 logic-core-v3/src/app/error.tsx,D8,profundo,pendiente,,raiz-app; client-component
@@ -1220,10 +1220,10 @@ logic-core-v3/src/auth.config.ts,D1,profundo,leído,D1-c1,auth
 logic-core-v3/src/auth.ts,D1,profundo,leído,D1-c1,auth; toca-db; FROZEN; ZONA-FRANCO
 logic-core-v3/src/components/3d/BrandedLogoWhite.tsx,D9,profundo,pendiente,,compartido: lo importa components/ui (FROZEN) (src/components/ui/BrandedIntroCanvas.tsx); componentes-sitio-publico; client-component
 logic-core-v3/src/components/3d/HeroArtifact.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component; FROZEN
-logic-core-v3/src/components/admin/MessagesScrollAnchor.tsx,D3,profundo,pendiente,,componentes-admin; client-component
-logic-core-v3/src/components/admin/managers/ChatbotManager.tsx,D3,profundo,pendiente,,componentes-admin; client-component
-logic-core-v3/src/components/admin/managers/ProjectManager.tsx,D3,profundo,pendiente,,componentes-admin; client-component
-logic-core-v3/src/components/admin/managers/VaultManager.tsx,D3,profundo,pendiente,,componentes-admin; client-component
+logic-core-v3/src/components/admin/MessagesScrollAnchor.tsx,D3,profundo,leído,D3-c1,componentes-admin; client-component
+logic-core-v3/src/components/admin/managers/ChatbotManager.tsx,D3,profundo,leído,D3-c1,componentes-admin; client-component
+logic-core-v3/src/components/admin/managers/ProjectManager.tsx,D3,profundo,leído,D3-c1,componentes-admin; client-component
+logic-core-v3/src/components/admin/managers/VaultManager.tsx,D3,profundo,leído,D3-c1,componentes-admin; client-component
 logic-core-v3/src/components/automation/BentoAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/automation/CalculadoraAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/automation/ComparativaAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
@@ -1490,41 +1490,41 @@ logic-core-v3/src/instrumentation-client.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/src/instrumentation.ts,D7,profundo,pendiente,,sentry
 logic-core-v3/src/lib/action-utils.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/actions/announcements.ts,D2,profundo,leído,D2-c1,server-actions del cliente; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/lib/actions/clients.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/lib/actions/contact.ts,D3,profundo,pendiente,,server-actions; endpoint-publico; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/lib/actions/clients.ts,D3,profundo,leído,D3-c1,server-actions; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/lib/actions/contact.ts,D3,profundo,leído,D3-c1,server-actions; endpoint-publico; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/gbp-connection.ts,D7,profundo,pendiente,,server-actions; server-action; usa-auth
 logic-core-v3/src/lib/actions/impersonation.ts,D1,profundo,leído,D1-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/invitations.ts,D1,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
-logic-core-v3/src/lib/actions/leads-constants.ts,D3,profundo,pendiente,,server-actions
-logic-core-v3/src/lib/actions/leads.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
+logic-core-v3/src/lib/actions/leads-constants.ts,D3,profundo,leído,D3-c1,server-actions
+logic-core-v3/src/lib/actions/leads.ts,D3,profundo,leído,D3-c1,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/messages.ts,D2,profundo,leído,D2-c1,server-actions del cliente; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/notifications.ts,D2,profundo,leído,D2-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/profile.ts,D1,profundo,leído,D1-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/lib/actions/projects.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/lib/actions/projects.ts,D3,profundo,leído,D3-c1,server-actions; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/referrals.ts,D2,profundo,leído,D2-c1,server-actions; server-action; usa-auth
-logic-core-v3/src/lib/actions/schemas.ts,D3,profundo,pendiente,,server-actions
-logic-core-v3/src/lib/actions/services.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/lib/actions/settings.ts,D3,profundo,pendiente,,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
+logic-core-v3/src/lib/actions/schemas.ts,D3,profundo,leído,D3-c1,server-actions
+logic-core-v3/src/lib/actions/services.ts,D3,profundo,leído,D3-c1,server-actions; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/lib/actions/settings.ts,D3,profundo,leído,D3-c1,server-actions; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/upsell.ts,D2,profundo,leído,D2-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/lib/agency-settings.ts,D3,profundo,pendiente,,logica-admin
+logic-core-v3/src/lib/agency-settings.ts,D3,profundo,leído,D3-c1,logica-admin
 logic-core-v3/src/lib/ai/brief-history.ts,D2,profundo,leído,D2-c1,ia-llm; toca-db
 logic-core-v3/src/lib/ai/executive-brief-input.invariant.ts,D2,superficial,superficial,D2-c1,"ia-llm; test | test sin DB/LLM: input del brief ejecutivo (delta = card, sin crecimiento con delta negativo, sin metricas fuera de las cards, reglas anti-invencion, corte de cache); no cubre el conteo de leads global"
 logic-core-v3/src/lib/ai/executive-brief-input.ts,D2,profundo,leído,D2-c1,ia-llm
 logic-core-v3/src/lib/ai/executive-brief.ts,D2,profundo,leído,D2-c1,ia-llm; toca-db; escribe-db
 logic-core-v3/src/lib/ai/results-insights.ts,D5,profundo,leído,D5-c1,proveedor-ia: Anthropic directo fuera del modulo chatbot
 logic-core-v3/src/lib/ai/review-reply-draft.ts,D5,profundo,leído,D5-c1,proveedor-ia: Anthropic directo fuera del modulo chatbot
-logic-core-v3/src/lib/alerts.ts,D3,profundo,pendiente,,logica-admin; toca-db; FROZEN-inferido
+logic-core-v3/src/lib/alerts.ts,D3,profundo,leído,D3-c1,logica-admin; toca-db; FROZEN-inferido
 logic-core-v3/src/lib/analytics.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/announcements/announcements.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: visibilidad de novedades (ALL a todas las orgs, ORG solo a la suya, caducidad, no leidas)"
 logic-core-v3/src/lib/announcements/get-announcements-for-org.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/announcements/visibility.ts,D2,profundo,leído,D2-c1,logica-dashboard
-logic-core-v3/src/lib/audit-log-queries.ts,D3,profundo,pendiente,,logica-admin; toca-db; server-action; guard-indirecto
-logic-core-v3/src/lib/audit-log.ts,D3,profundo,pendiente,,logica-admin; toca-db; escribe-db; FROZEN-inferido
+logic-core-v3/src/lib/audit-log-queries.ts,D3,profundo,leído,D3-c1,logica-admin; toca-db; server-action; guard-indirecto
+logic-core-v3/src/lib/audit-log.ts,D3,profundo,leído,D3-c1,logica-admin; toca-db; escribe-db; FROZEN-inferido
 logic-core-v3/src/lib/auth-cookies.ts,D1,profundo,leído,D1-c1,auth; ZONA-FRANCO
 logic-core-v3/src/lib/auth-guards.ts,D1,profundo,leído,D1-c1,auth; usa-auth; guard-indirecto; FROZEN-inferido
 logic-core-v3/src/lib/auth/assert-ownership.ts,D1,profundo,leído,D1-c1,auth; toca-db; escribe-db
 logic-core-v3/src/lib/billing/get-current-plan.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
-logic-core-v3/src/lib/bulk-actions.ts,D3,profundo,pendiente,,logica-admin; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/lib/bulk-actions.ts,D3,profundo,leído,D3-c1,logica-admin; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/chromeReveal.ts,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/modules/chatbot/components/LogicCompanion.tsx); lib-sitio-publico; FROZEN-inferido
 logic-core-v3/src/lib/client-health.ts,D3,profundo,superficial,F1.11,logica-admin | PODA-ALTA
 logic-core-v3/src/lib/client-notifications/client-notifications.invariant.ts,D5,superficial,superficial,D5-c1,aviso de lead al cliente (lo dispara captureLead); test | test sin DB ni server: aviso de lead al cliente (P2.A) que dispara captureLead; modos de notificacion y armado del mail
@@ -1662,7 +1662,7 @@ logic-core-v3/src/lib/marketing-routes.ts,D9,profundo,pendiente,,"compartido: lo
 logic-core-v3/src/lib/mask-secret.invariant.ts,D9,superficial,pendiente,,lib-transversal; test
 logic-core-v3/src/lib/mask-secret.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/modules/check-activation.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
-logic-core-v3/src/lib/modules/demand.ts,D3,profundo,pendiente,,logica-admin (cruza orgs a proposito); guard-indirecto
+logic-core-v3/src/lib/modules/demand.ts,D3,profundo,leído,D3-c1,logica-admin (cruza orgs a proposito); guard-indirecto
 logic-core-v3/src/lib/modules/modules.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: vitrina de modulos (owned/available/coming_soon, INACTIVE no es tenencia, buildShowroom por org, ranking de demanda); no cubre el slug email-marketing vs email-marketing-pro"
 logic-core-v3/src/lib/modules/motor-resenas-view.invariant.ts,D2,superficial,superficial,D2-c1,logica-dashboard; test | test sin DB: vista del motor de resenas (locked/connecting/operational por modulo x conexion)
 logic-core-v3/src/lib/modules/motor-resenas-view.ts,D2,profundo,leído,D2-c1,logica-dashboard
@@ -1680,7 +1680,7 @@ logic-core-v3/src/lib/plan/index.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/plan/lead-scoring-gate.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: gate de priorizacion de leads por plan (planAllows leadScoring, columna de clasificacion del CSV)"
 logic-core-v3/src/lib/plan/plan-allows.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/plan/plan-presentation.ts,D2,profundo,leído,D2-c1,logica-dashboard
-logic-core-v3/src/lib/premium-features.ts,D3,profundo,pendiente,,logica-admin
+logic-core-v3/src/lib/premium-features.ts,D3,profundo,leído,D3-c1,logica-admin
 logic-core-v3/src/lib/premium-modules.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
 logic-core-v3/src/lib/preview.ts,D2,profundo,leído,D2-c1,tenant-scope (resolveOrgId del portal); usa-auth; guard-indirecto
 logic-core-v3/src/lib/prisma-enums.ts,D6,profundo,leído,D6-c1,datos
@@ -1910,7 +1910,7 @@ logic-core-v3/src/modules/chatbot/lib/monthly-analysis.ts,D5,profundo,leído,D5-
 logic-core-v3/src/modules/chatbot/prisma/developProactivePrompts.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/prisma/seed.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
 logic-core-v3/src/modules/chatbot/prisma/update-proactive-prompts.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/archiveClient.ts,D3,profundo,pendiente,,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/archiveClient.ts,D3,profundo,leído,D3-c1,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/modules/chatbot/server/admin/avatarImageUrlSchema.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/server/admin/clientHasChatbot.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
 logic-core-v3/src/modules/chatbot/server/admin/createBot.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
@@ -1921,7 +1921,7 @@ logic-core-v3/src/modules/chatbot/server/admin/getActivityChartData.ts,D5,profun
 logic-core-v3/src/modules/chatbot/server/admin/getClientSession.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; usa-auth
 logic-core-v3/src/modules/chatbot/server/admin/getGlobalBotsOverviewStats.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; guard-indirecto
 logic-core-v3/src/modules/chatbot/server/admin/getLatencyHistory.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/admin/hardDeleteClient.ts,D3,profundo,pendiente,,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/hardDeleteClient.ts,D3,profundo,leído,D3-c1,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/modules/chatbot/server/admin/index.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; guard-indirecto
 logic-core-v3/src/modules/chatbot/server/admin/integrations/retryCrmSync.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto
@@ -1929,7 +1929,7 @@ logic-core-v3/src/modules/chatbot/server/admin/integrations/saveCrmIntegration.t
 logic-core-v3/src/modules/chatbot/server/admin/integrations/testCrmConnection.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto
 logic-core-v3/src/modules/chatbot/server/admin/listAllBots.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
 logic-core-v3/src/modules/chatbot/server/admin/manageAlerts.schemas.ts,D5,profundo,leído,D5-c1,chatbot
-logic-core-v3/src/modules/chatbot/server/admin/manageAlerts.ts,D3,profundo,pendiente,,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/manageAlerts.ts,D3,profundo,leído,D3-c1,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/modules/chatbot/server/admin/multiTenantQueries.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
 logic-core-v3/src/modules/chatbot/server/admin/preflightChecks.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action
 logic-core-v3/src/modules/chatbot/server/admin/queries.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
@@ -1940,8 +1940,8 @@ logic-core-v3/src/modules/chatbot/server/admin/saveClientSettings.ts,D5,profundo
 logic-core-v3/src/modules/chatbot/server/admin/saveKnowledgeBase.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/modules/chatbot/server/admin/sendTestNotification.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto
-logic-core-v3/src/modules/chatbot/server/admin/updateClient.ts,D3,profundo,pendiente,,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/updateClientInternalNotes.ts,D3,profundo,pendiente,,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/updateClient.ts,D3,profundo,leído,D3-c1,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/updateClientInternalNotes.ts,D3,profundo,leído,D3-c1,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/modules/chatbot/server/admin/updateLeadStatus.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; escribe-db
 logic-core-v3/src/modules/chatbot/server/admin/validateKB.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts,D5,profundo,leído,D5-c1,chatbot; toca-db

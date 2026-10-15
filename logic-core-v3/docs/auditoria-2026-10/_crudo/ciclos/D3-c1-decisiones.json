@@ -1,0 +1,761 @@
+{
+ "D3-c1/D3-L1/H01": {
+  "decision": "fusionar",
+  "con": "SEC-036",
+  "nota_padre": "Misma causa raíz: encryptCredential no tiene llamador de escritura. Suma createClientAssetAction (agency-actions.ts:103-110) y el rótulo «Contraseña o instrucciones» de VaultManager.tsx:85. El verificador lo bajó a MEDIA mirando solo la bóveda; SEC-036 sigue ALTA por los tokens OAuth y de tiendas.",
+  "caso_indice": 1
+ },
+ "D3-c1/D3-L1/H02": {
+  "decision": "fusionar",
+  "con": "FAL-016",
+  "nota_padre": "Mismo faltante (detect-bot-issues sin cron en netlify.toml ni en netlify/functions/). Suma la promesa de la UI: admin/alerts/page.tsx:17 dice «cada 15 minutos». El verificador la sostiene ALTA.",
+  "caso_indice": 0
+ },
+ "D3-c1/D3-L1/H03": {
+  "decision": "fusionar",
+  "con": "SEC-023",
+  "nota_padre": "Muestreado: admin/page.tsx y announcements/page.tsx leen Prisma sin auth() propio (grep sin resultados en los dos; el único guard está en admin/layout.tsx:41-47). Mismo patrón que SEC-023; suma el dashboard (MRR, horas, leads) y la lista de organizaciones de Novedades.",
+  "verificado_padre": true
+ },
+ "D3-c1/D3-L3/H01": {
+  "decision": "fusionar",
+  "con": "SEC-023",
+  "nota_padre": "Muestreado: leads/page.tsx:23, leads/[leadId]/page.tsx:212 y messages/[orgId]/page.tsx:24-27 leen Prisma sin auth() propio; el guard está solo en admin/layout.tsx:41-47. Mismo patrón que SEC-023; suma el pipeline de prospectos, los emails de setters y markAsRead (escritura) en el render.",
+  "verificado_padre": true,
+  "caso_indice": 0
+ },
+ "D3-c1/D3-L1/H14": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L6/H17",
+  "nota_padre": "Misma causa: announcements.actions.ts:56 pasa el error a toErrorMessage, que devuelve error.message de cualquier Error (action-utils.ts:31-32)."
+ },
+ "D3-c1/D3-L2/H06": {
+  "decision": "fusionar",
+  "con": "SEC-062",
+  "nota_padre": "Muestreado: plan.actions.ts:239-240 hace console.error y devuelve error.message (también :315-316 y :372-373); sin Sentry. Mismo patrón que SEC-062.",
+  "verificado_padre": true,
+  "destino": {
+   "titulo": "Las acciones del admin devuelven el mensaje crudo del error (Prisma/SDK) a la UI y no lo reportan a Sentry: chatbots, planes, mensajes y proyectos"
+  }
+ },
+ "D3-c1/D3-L3/H09": {
+  "decision": "fusionar",
+  "con": "SEC-062",
+  "nota_padre": "Mismo patrón que SEC-062 en las actions de Mensajes (sin Sentry).",
+  "destino": {
+   "titulo": "Las acciones del admin devuelven el mensaje crudo del error (Prisma/SDK) a la UI y no lo reportan a Sentry: chatbots, planes, mensajes y proyectos"
+  }
+ },
+ "D3-c1/D3-L3/H06": {
+  "decision": "fusionar",
+  "con": "DEU-035",
+  "nota_padre": "Muestreado: lead-card.tsx:69 y :82 navegan con router.push; el comentario de :74-75 habla de Enter vs Space, no justifica el push. Misma regla que DEU-035.",
+  "verificado_padre": true,
+  "destino": {
+   "titulo": "router.push sin justificación en el portal admin: alta de bot, card del pipeline de leads y ClientSwitcher"
+  }
+ },
+ "D3-c1/D3-L2/H10": {
+  "decision": "fusionar",
+  "con": "DEU-035",
+  "nota_padre": "Misma regla que DEU-035 (ClientSwitcher).",
+  "destino": {
+   "titulo": "router.push sin justificación en el portal admin: alta de bot, card del pipeline de leads y ClientSwitcher"
+  }
+ },
+ "D3-c1/D3-L2/H11": {
+  "decision": "fusionar",
+  "con": "DEU-039",
+  "nota_padre": "Muestreado: EditClientForm.tsx:92 (y :232) llama triggerTransition dentro del admin; el Shutter está en el layout raíz (layout.tsx:114). Mismo defecto que DEU-039 en otro formulario.",
+  "verificado_padre": true,
+  "destino": {
+   "titulo": "triggerTransition del sitio público usado en el portal admin (alta de bot y edición de cliente)"
+  }
+ },
+ "D3-c1/D3-L2/H01": {
+  "decision": "fusionar",
+  "con": "BUG-010",
+  "nota_padre": "Muestreado: plan.actions.ts:179-200 (al actualizar, subData no toca price; solo el create de :187-195 lo escribe). Misma causa que BUG-010; suma que el MRR del dashboard admin (admin/page.tsx:226) suma esos precios viejos.",
+  "verificado_padre": true
+ },
+ "D3-c1/D3-L2/H15": {
+  "decision": "fusionar",
+  "con": "SEC-049",
+  "nota_padre": "SEC-049 ya registra que la lista de clientes trae hasta 600 KB de base64 por organización (clients/page.tsx:51); suma que también trae los archivados."
+ },
+ "D3-c1/D3-L1/H21": {
+  "decision": "fusionar",
+  "con": "DEU-012",
+  "nota_padre": "Mismo faltante en el modelo congelado (AdminAuditLog sin organizationId); suma la pantalla del audit log que no puede filtrar por cliente."
+ },
+ "D3-c1/D3-L1/H06": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-052",
+   "BUG-099"
+  ],
+  "relacionados_tmp": [
+   "D3-L3/H04"
+  ],
+  "caso_indice": 5
+ },
+ "D3-c1/D3-L3/H04": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-052",
+   "BUG-099"
+  ],
+  "relacionados_tmp": [
+   "D3-L1/H06"
+  ],
+  "caso_indice": 1
+ },
+ "D3-c1/D3-L1/H15": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-034"
+  ],
+  "relacionados_tmp": [
+   "D3-L4/H08"
+  ],
+  "caso_indice": 6
+ },
+ "D3-c1/D3-L2/H14": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L4/H08",
+  "nota_padre": "Mismo mecanismo (fecha sin hora guardada a medianoche UTC y mostrada en hora argentina); suma las fechas límite del plan y del billing override."
+ },
+ "D3-c1/D3-L1/H10": {
+  "decision": "aceptar",
+  "titulo": "Diálogos del admin sin semántica de diálogo, foco inicial, trap ni Escape: confirmaciones destructivas y el modal de LeadForm"
+ },
+ "D3-c1/D3-L3/H12": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L1/H10",
+  "nota_padre": "Mismo defecto de accesibilidad en el modal de LeadForm (sin role=dialog, foco ni Escape; cerrar sin aria-label)."
+ },
+ "D3-c1/D3-L1/H12": {
+  "decision": "aceptar",
+  "titulo": "Formularios y controles del admin sin semántica accesible (labels sin asociar, controles sin nombre, errores sin role=alert): novedades, audit log, plan, billing override, notas, leads, mensajes, proyectos, configuración y tickets"
+ },
+ "D3-c1/D3-L2/H19": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L1/H12",
+  "nota_padre": "Mismo defecto en los formularios de plan, billing override y notas."
+ },
+ "D3-c1/D3-L3/H13": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L1/H12",
+  "nota_padre": "Mismo defecto en los bloques de error de Leads y Mensajes."
+ },
+ "D3-c1/D3-L3/H19": {
+  "decision": "aceptar",
+  "titulo": "IDs internos (cuid) en URLs del admin: /admin/messages/[orgId], /admin/leads/[leadId] y /admin/clients/[clientId], que además acepta id o slug",
+  "relacionados_ids": [
+   "DEU-025"
+  ]
+ },
+ "D3-c1/D3-L1/H19": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L3/H19",
+  "nota_padre": "Mismo tema: /admin/clients/[clientId] enlaza con Organization.id y acepta id o slug; la parte de la ruta deprecada de chatbot queda en D3-L3/H21."
+ },
+ "D3-c1/D3-L2/H12": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L3/H19",
+  "nota_padre": "Mismo tema (el detalle de cliente acepta id o slug y publica el cuid)."
+ },
+ "D3-c1/D3-L3/H21": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: chatbot/[[...tab]]/page.tsx:6-13 (TAB_MAP sin install ni integrations, que sí están en chatbots/[botId]/tabs.ts:1) y :26-29 (busca solo por slug), mientras ClientTabsNav.tsx:34 arma los links con el clientId de la ruta."
+ },
+ "D3-c1/D3-L2/H13": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L3/H21",
+  "nota_padre": "Misma redirección legacy; suma que el rechazo usa 308."
+ },
+ "D3-c1/D3-L1/H08": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: admin-topbar.tsx:12-13 (toda palabra de 10+ letras se toma como ID y sale «Detalle»: «announcements» tiene 13).",
+  "caso_indice": 2
+ },
+ "D3-c1/D3-L1/H13": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: announcement-list.tsx:39-41 hace await de deleteAnnouncementAction sin mirar el resultado y cierra la confirmación; la action devuelve fail() en :75."
+ },
+ "D3-c1/D3-L1/H18": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: AlertsClient.tsx:87-102 (toast.promise con error «Error», try/finally sin catch) y :132 (void handleAck): el rechazo queda sin manejar."
+ },
+ "D3-c1/D3-L1/H23": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: admin/layout.tsx:65 envuelve children en PageTransition; el layout persiste entre navegaciones de App Router, así que el fade corre una vez. alert-card.tsx:57 asume lo contrario."
+ },
+ "D3-c1/D3-L2/H16": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: clients/page.tsx:20-28 (unstable_cache 60 s con tag admin-clients). git grep de admin-clients: revalidan archiveClient, hardDeleteClient, bulk-actions y lib/actions/clients.ts, pero el alta real va por Step5Review → createClientOnly / createClientWithBot, que no revalidan (createClientAction de lib/actions/clients.ts no tiene llamadores).",
+  "caso_indice": 5
+ },
+ "D3-c1/D3-L2/H21": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: git grep de invoice.create/upsert y renewalDate en src y seed: solo prisma/seed.ts:392-401 y :595-618 escriben; la app solo lee (perfil, alerts.ts:244). plan.actions solo fija planId/status/price.",
+  "relacionados_ids": [
+   "BUG-050"
+  ]
+ },
+ "D3-c1/D3-L3/H11": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: message.schemas.ts:15-20 (content solo con min(1), sin max) y message-input.tsx sin maxLength."
+ },
+ "D3-c1/D3-L3/H16": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: leads/page.tsx:29 filtra activities con SOLO_CONTACTOS_COMERCIALES; la ficha ([leadId]/page.tsx:186-196) incluye todas y :450 muestra lead.activities.length."
+ },
+ "D3-c1/D3-L1/H04": {
+  "decision": "aceptar",
+  "caso_indice": 7,
+  "titulo": "Alertas: la vista carga solo las 100 más recientes de cualquier estado y calcula filtros, contadores y triage sobre ese recorte (las pendientes viejas desaparecen)"
+ },
+ "D3-c1/D3-L1/H05": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L1/H07": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L1/H11": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L1/H16": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L1/H22": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L1/H24": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L1/H20": {
+  "decision": "aceptar",
+  "titulo": "Docs desactualizados sobre el admin: roadmap-pendientes propone una vista en /admin/clients/[clientId]/chatbot/* (ruta que solo redirige; la vista CRM ya existe en /admin/chatbots) y la lección de CLAUDE.md sobre ticket-chat ya no aplica"
+ },
+ "D3-c1/D3-L1/H09": {
+  "decision": "aceptar",
+  "caso_indice": 3
+ },
+ "D3-c1/D3-L1/H17": {
+  "decision": "aceptar",
+  "caso_indice": 4
+ },
+ "D3-c1/D3-L2/H02": {
+  "decision": "aceptar",
+  "caso_indice": 1
+ },
+ "D3-c1/D3-L2/H03": {
+  "decision": "aceptar",
+  "caso_indice": 2
+ },
+ "D3-c1/D3-L2/H04": {
+  "decision": "fusionar",
+  "con": "BUG-024",
+  "nota_padre": "BUG-024 ya registra que el admin lee BotConfig.monthlyQuota (1000) mientras el chat corta por Plan.quota; suma la pestaña Chatbot de la ficha del cliente (ChatbotTab.tsx:94)."
+ },
+ "D3-c1/D3-L2/H07": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-036"
+  ]
+ },
+ "D3-c1/D3-L2/H08": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L5/H12",
+  "nota_padre": "Mismo defecto (VaultManager.tsx:30 traga el error en console.error); el caso de D3-L5 cubre la bóveda."
+ },
+ "D3-c1/D3-L2/H09": {
+  "decision": "aceptar",
+  "caso_indice": 7
+ },
+ "D3-c1/D3-L2/H18": {
+  "decision": "aceptar",
+  "caso_indice": 6,
+  "relacionados_ids": [
+   "A11Y-006"
+  ]
+ },
+ "D3-c1/D3-L2/H17": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L2/H22": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L2/H23": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L2/H20": {
+  "decision": "aceptar",
+  "relacionados_tmp": [
+   "D3-L5/H11"
+  ],
+  "caso": {
+   "titulo": "'Re-enviar credenciales' cuando el miembro más antiguo no es el ADMIN",
+   "entorno": "Dev o preview con base de prueba, sesión SUPER_ADMIN",
+   "precondiciones": "Una org de prueba cuyo OrgMember más antiguo (joinedAt) no sea ADMIN (por ejemplo VIEWER) y con un ADMIN agregado después",
+   "pasos": [
+    "Abrir /admin/clients/<id> en la pestaña Resumen y anotar a qué email apunta «Re-enviar credenciales»",
+    "Abrir «Editar datos» de la misma org y anotar el email del administrador que muestra",
+    "Solo en la base de prueba: tocar «Re-enviar credenciales» y ver qué usuario recibió el mail y cambió de contraseña"
+   ],
+   "esperado": "El botón apunta al mismo ADMIN que muestra Editar datos",
+   "senal_falla": "El botón apunta al miembro más antiguo (no ADMIN) y le resetea la contraseña a él",
+   "escribe_db_o_email": true,
+   "hallazgos": "Re-enviar credenciales apunta al primer miembro sin filtrar rol, distinto del que se edita"
+  }
+ },
+ "D3-c1/D3-L2/H05": {
+  "decision": "aceptar",
+  "caso_indice": 0,
+  "titulo": "Las actions del admin que comunican errores esperados con throw se ven genéricas en producción (solo llega el digest) y cada una va a Sentry: Clientes (editar datos, notas internas, archivar y eliminar)"
+ },
+ "D3-c1/D3-L3/H05": {
+  "decision": "aceptar",
+  "caso_indice": 2
+ },
+ "D3-c1/D3-L3/H10": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-014"
+  ],
+  "relacionados_tmp": [
+   "D3-L4/H16"
+  ]
+ },
+ "D3-c1/D3-L3/H02": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L3/H03": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L3/H07": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L3/H08": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L3/H14": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L3/H15": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L3/H17": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L3/H20": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L3/H18": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L5/H25",
+  "nota_padre": "Mismo patrón (consultas del admin sin límite): suma el pipeline OsLead serializado entero y el hilo completo de mensajes."
+ },
+ "D3-c1/D3-L5/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: contact/page.tsx:119 (la primera motion.section, que contiene el único <form> de :148 con el campo oculto referralCode de :149, es «hidden … lg:flex») y :255-343 (debajo de 1024 px solo queda la sección de canales directos: WhatsApp, teléfono y mail, sin el código). La atribución solo ocurre en submitContactForm (contact.ts:66-69). El verificador la bajó a MEDIA y se le sigue: el programa de referidos todavía no tiene usuarios y el contacto por los otros canales funciona; lo que se pierde es la atribución y el formulario en mobile.",
+  "severidad": "MEDIA",
+  "caso_indice": 0,
+  "relacionados_ids": [
+   "SEC-052",
+   "DEU-021"
+  ]
+ },
+ "D3-c1/D3-L6/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: admin/clients/page.tsx:20-29 (findMany con deletedAt null, sin excluir la org de la agencia), mientras admin/projects/page.tsx:8-12 y [projectId]/layout.tsx:140-148 sí excluyen slug «develop»; hardDeleteClient.ts y archiveClient.ts no miran el slug (grep sin resultados) y el diálogo pide tipear «ELIMINAR» (ClientsListClient.tsx:522-527), no el nombre. La org «develop» la crea el seed del chatbot (modules/chatbot/prisma/seed.ts:186) y es la del bot del sitio. El verificador la bajó a MEDIA (guardarraíl faltante ante un error humano) y se le sigue; que la org exista así en producción es runtime → PROBABLE.",
+  "severidad": "MEDIA",
+  "confianza_padre": "PROBABLE",
+  "caso_indice": 0,
+  "relacionados_ids": [
+   "BUG-015"
+  ],
+  "relacionados_tmp": [
+   "D3-L4/H17"
+  ]
+ },
+ "D3-c1/D3-L4/H02": {
+  "decision": "fusionar",
+  "con": "FAL-007",
+  "nota_padre": "FAL-007 ya registra que maintenanceStartDate no tiene escritor; suma la pantalla de Pagos sin camino para activar el mantenimiento."
+ },
+ "D3-c1/D3-L4/H15": {
+  "decision": "fusionar",
+  "con": "FAL-007",
+  "nota_padre": "FAL-007 ya registra que deliveredAt no se limpia al reabrir el proyecto."
+ },
+ "D3-c1/D3-L6/H02": {
+  "decision": "fusionar",
+  "con": "BUG-015",
+  "nota_padre": "Muestreado: hardDeleteClient.ts:141 borra la Organization y la cascada de schema.prisma:527 solo se lleva el OrgMember; no hay user.delete en src. BUG-015 ya registra que el hard-delete deja vivos a los usuarios; suma el email bloqueado para una nueva alta (updateClient.ts:79) y que no se sube sessionVersion.",
+  "verificado_padre": true
+ },
+ "D3-c1/D3-L6/H08": {
+  "decision": "fusionar",
+  "con": "DEU-001",
+  "nota_padre": "Mismo faltante (ninguna action viva emite links a /accept-invite)."
+ },
+ "D3-c1/D3-L4/H06": {
+  "decision": "fusionar",
+  "con": "SEC-023",
+  "nota_padre": "Muestreado: projects/[projectId]/payments/page.tsx:70 y tasks/page.tsx:35 leen Prisma sin auth() propio; el layout de [projectId] (:105) llama auth() pero autoriza con callerCanAccessOrg (assert-ownership.ts:85-88: también deja pasar a un usuario de la org del proyecto, aunque el proxy y admin/layout.tsx:47 ya lo frenan). Mismo patrón que SEC-023.",
+  "verificado_padre": true
+ },
+ "D3-c1/D3-L6/H09": {
+  "decision": "fusionar",
+  "con": "SEC-023",
+  "nota_padre": "Mismo patrón (loader de pagos de proyecto sin guard propio); suma que el checklist B-SEC.3c renumeró los fixes y el F4 original sigue abierto (alerta D3-A2)."
+ },
+ "D3-c1/D3-L4/H07": {
+  "decision": "fusionar",
+  "con": "SEC-062",
+  "nota_padre": "Mismo patrón que SEC-062 en las actions de Proyectos (project.actions.ts:639 y :829, maintenance.actions.ts:86: error.message crudo, sin Sentry).",
+  "destino": {
+   "titulo": "Las acciones del admin devuelven el mensaje crudo del error (Prisma/SDK) a la UI y no lo reportan a Sentry: chatbots, planes, mensajes y proyectos"
+  }
+ },
+ "D3-c1/D3-L5/H18": {
+  "decision": "fusionar",
+  "con": "SEC-036",
+  "nota_padre": "Misma causa que SEC-036 (la descripción de la bóveda se guarda en claro); suma el rótulo del formulario que invita a escribir contraseñas."
+ },
+ "D3-c1/D3-L6/H18": {
+  "decision": "fusionar",
+  "con": "BUG-052",
+  "nota_padre": "Mismo patrón (sendAgencyAlert sin await en una server action); suma el formulario público de contacto (contact.ts:72) con catch vacío."
+ },
+ "D3-c1/D3-L6/H17": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: action-utils.ts:24-34 (toErrorMessage: el ZodError se resolvió en 5e33733, pero cualquier Error devuelve su message) y settings.actions.ts:168-171 (updateSettings le pasa el error de Prisma). action-utils.ts es FROZEN-inferido (DEC-10): el cambio del helper es decisión para Valentino; los llamadores pueden mapear a mensajes fijos.",
+  "titulo": "toErrorMessage (action-utils, FROZEN-inferido) devuelve al cliente el message crudo de cualquier Error: la alerta D3-A4 quedó resuelta solo para ZodError (configuración, novedades, tareas, horas, tickets) y dos rutas devuelven String(error)",
+  "relacionados_ids": [
+   "SEC-062"
+  ]
+ },
+ "D3-c1/D3-L5/H15": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L6/H17",
+  "nota_padre": "Misma causa (toErrorMessage en tareas, horas, tickets y configuración); suma String(error) en trigger-detector y send-now."
+ },
+ "D3-c1/D3-L4/H19": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L3/H19",
+  "nota_padre": "Mismo tema (cuid en las URLs del admin y resolución dual id/slug)."
+ },
+ "D3-c1/D3-L5/H23": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L3/H19",
+  "nota_padre": "Mismo tema; suma el link de alertas, el deep-link de baja y el fallback de ChatbotManager."
+ },
+ "D3-c1/D3-L6/H11": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L3/H19",
+  "nota_padre": "Mismo tema; suma que la variable se llama orgSlug pero guarda el id."
+ },
+ "D3-c1/D3-L6/H10": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L3/H21",
+  "nota_padre": "Misma redirección legacy (solo slug, sin install ni integrations)."
+ },
+ "D3-c1/D3-L4/H20": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L1/H20",
+  "nota_padre": "Misma propuesta desactualizada de roadmap-pendientes."
+ },
+ "D3-c1/D3-L5/H24": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L1/H20",
+  "nota_padre": "Misma propuesta desactualizada; suma la lección de CLAUDE.md sobre ticket-chat."
+ },
+ "D3-c1/D3-L5/H17": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L1/H12",
+  "nota_padre": "Muestreado: settings-console.tsx:730-737 (switch con aria-checked y sin nombre), :386 (input de precio sin label) y ticket-reply-form.tsx:84 (textarea solo con placeholder). Mismo defecto de accesibilidad en otras pantallas del admin.",
+  "verificado_padre": true
+ },
+ "D3-c1/D3-L4/H14": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L1/H12",
+  "nota_padre": "Mismo defecto en los formularios de proyecto, tarea y horas; el modal sin focus trap va con D3-L1/H10. Se agrupa en BAJA como el resto: solo lo usa el equipo interno."
+ },
+ "D3-c1/D3-L4/H18": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L5/H25",
+  "nota_padre": "Mismo patrón (consultas del admin sin tope): listProjects trae todas las horas, hitos y pagos para calcular resúmenes."
+ },
+ "D3-c1/D3-L5/H06": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L4/H08",
+  "nota_padre": "Mismo mecanismo y mismo campo (horas guardadas a medianoche UTC); D3-L4/H08 ya incluye las horas."
+ },
+ "D3-c1/D3-L6/H03": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L2/H05",
+  "nota_padre": "Misma causa (throw en las actions de Clientes: en producción solo llega el digest); mismo caso de prueba."
+ },
+ "D3-c1/D3-L6/H07": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L4/H12",
+  "nota_padre": "Muestreado: el detalle usa deleteProjectAction de lib/actions/projects.ts:107-117 (sin Zod ni try, revalida solo /admin/projects) y el tablero deleteProject de project.actions.ts (:829 devuelve error.message). Mismo tema que D3-L4/H12; la falta de auditoría va en D3-L5/H05.",
+  "verificado_padre": true
+ },
+ "D3-c1/D3-L4/H11": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L5/H05",
+  "nota_padre": "Muestreado: git grep de logAdminAction en admin/projects y lib/actions/projects.ts sin resultados (control: 32 archivos de src lo usan); milestone.actions.ts:26 marca el pago sin registro. Misma falta de auditoría en otro módulo.",
+  "verificado_padre": true
+ },
+ "D3-c1/D3-L6/H12": {
+  "decision": "fusionar",
+  "con": "D3-c1/D3-L1/H04",
+  "nota_padre": "Muestreado: manageAlerts.ts:12-27 (findMany sin filtro de estado desde la página, orderBy createdAt desc y take 100). Misma causa que D3-L1/H04; suma que las PENDING viejas desaparecen.",
+  "verificado_padre": true
+ },
+ "D3-c1/D3-L4/H08": {
+  "decision": "aceptar",
+  "caso_indice": 1,
+  "titulo": "Fechas sin hora guardadas como medianoche UTC se muestran un día antes en Argentina: entrega estimada, horas cargadas y fechas límite del plan y del billing override",
+  "relacionados_ids": [
+   "BUG-034"
+  ],
+  "relacionados_tmp": [
+   "D3-L1/H15"
+  ]
+ },
+ "D3-c1/D3-L5/H05": {
+  "decision": "aceptar",
+  "titulo": "Cambios sensibles del admin sin registro de auditoría: webhook de alertas, token de Telegram, precios, referidos y acciones masivas, y en Proyectos borrar, cambiar de estado y marcar pagos",
+  "relacionados_ids": [
+   "DEU-012"
+  ]
+ },
+ "D3-c1/D3-L5/H12": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: referrals-admin-table.tsx:37-39 (await action(id) sin mirar el resultado), ProjectManager.tsx:21-23 y VaultManager.tsx:30-31 (catch con console.error, sin aviso).",
+  "caso_indice": 3,
+  "titulo": "Acciones del admin cuyo fallo no se muestra: Referidos ignora el resultado y Crear entregable / Subir a Bóveda tragan el error en console.error"
+ },
+ "D3-c1/D3-L4/H12": {
+  "decision": "aceptar",
+  "titulo": "Borrar un proyecto tiene dos implementaciones distintas (el detalle usa la legacy, sin Zod ni try) y hay 8 server actions exportadas sin consumidores",
+  "relacionados_tmp": [
+   "D3-L6/H06"
+  ]
+ },
+ "D3-c1/D3-L5/H25": {
+  "decision": "aceptar",
+  "titulo": "Listados y consultas del admin sin paginación ni tope: tickets, workload del equipo, export masivo de leads, barrido de alertas, pipeline de leads, hilo de mensajes y resúmenes de proyectos"
+ },
+ "D3-c1/D3-L4/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: projects-filters.ts:62-67 (filtro por defecto Inicio = 6 meses) y :159-164 (sin fecha de inicio la card se descarta), project.actions.ts:382-384 (deriveProjectStartDate devuelve null sin lead, hitos, horas ni pagos).",
+  "caso_indice": 0
+ },
+ "D3-c1/D3-L4/H16": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: projects/page.tsx:8-12 y [projectId]/layout.tsx:140-148 filtran solo slug ≠ develop (no deletedAt) y project.actions.ts:242-248 busca la org por id sin mirar deletedAt.",
+  "relacionados_tmp": [
+   "D3-L3/H10"
+  ]
+ },
+ "D3-c1/D3-L5/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: ticket-date-filter.tsx:88 (preset «1m» por defecto) y ticket-list.tsx:91-92 (filtra por updatedAt).",
+  "caso_indice": 7,
+  "relacionados_ids": [
+   "BUG-056"
+  ]
+ },
+ "D3-c1/D3-L5/H07": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: send-now/route.ts:11-13 llama sendWeeklyReports sin rate limit; sendWeeklyReports.ts escribe REPORT.WEEKLY_SENT (:74) pero no lo consulta antes de mandar (:63).",
+  "caso_indice": 6,
+  "relacionados_ids": [
+   "BUG-026"
+  ]
+ },
+ "D3-c1/D3-L5/H22": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: settings.actions.ts:114 castea mod.slug a PremiumFeatureKey; premium-features.ts:51 usa «motor-resenias» y premium-modules.ts:24 «motor-resenas».",
+  "relacionados_ids": [
+   "BUG-017"
+  ]
+ },
+ "D3-c1/D3-L4/H03": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L4/H09": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L4/H17": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L4/H04": {
+  "decision": "aceptar",
+  "caso_indice": 3,
+  "relacionados_ids": [
+   "BUG-062"
+  ]
+ },
+ "D3-c1/D3-L4/H05": {
+  "decision": "aceptar",
+  "caso_indice": 4
+ },
+ "D3-c1/D3-L4/H10": {
+  "decision": "aceptar",
+  "caso_indice": 6
+ },
+ "D3-c1/D3-L4/H13": {
+  "decision": "aceptar",
+  "caso_indice": 2
+ },
+ "D3-c1/D3-L5/H03": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-024"
+  ]
+ },
+ "D3-c1/D3-L5/H04": {
+  "decision": "aceptar",
+  "caso_indice": 4,
+  "relacionados_ids": [
+   "BUG-017"
+  ],
+  "relacionados_tmp": [
+   "D3-L2/H02"
+  ]
+ },
+ "D3-c1/D3-L5/H08": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "FAL-016"
+  ]
+ },
+ "D3-c1/D3-L5/H09": {
+  "decision": "aceptar",
+  "caso_indice": 1,
+  "relacionados_ids": [
+   "FAL-016",
+   "BUG-047"
+  ]
+ },
+ "D3-c1/D3-L5/H10": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L5/H11": {
+  "decision": "aceptar",
+  "caso_indice": 2,
+  "relacionados_ids": [
+   "SEC-019",
+   "SEC-023"
+  ],
+  "relacionados_tmp": [
+   "D3-L2/H20"
+  ]
+ },
+ "D3-c1/D3-L5/H13": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "DEU-001"
+  ]
+ },
+ "D3-c1/D3-L5/H14": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "A11Y-005"
+  ]
+ },
+ "D3-c1/D3-L5/H16": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L5/H19": {
+  "decision": "aceptar"
+ },
+ "D3-c1/D3-L5/H26": {
+  "decision": "aceptar",
+  "relacionados_tmp": [
+   "D3-L1/H05"
+  ]
+ },
+ "D3-c1/D3-L5/H20": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-054"
+  ]
+ },
+ "D3-c1/D3-L5/H21": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-052"
+  ]
+ },
+ "D3-c1/D3-L6/H04": {
+  "decision": "aceptar",
+  "caso_indice": 3,
+  "relacionados_ids": [
+   "SEC-025"
+  ]
+ },
+ "D3-c1/D3-L6/H05": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-054",
+   "SEC-055"
+  ]
+ },
+ "D3-c1/D3-L6/H06": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "DEU-001",
+   "DEU-018"
+  ]
+ },
+ "D3-c1/D3-L6/H13": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-062"
+  ]
+ },
+ "D3-c1/D3-L6/H14": {
+  "decision": "aceptar",
+  "relacionados_tmp": [
+   "D3-L1/H06"
+  ]
+ },
+ "D3-c1/D3-L6/H15": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-014"
+  ]
+ },
+ "D3-c1/D3-L6/H16": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "DEU-012"
+  ]
+ }
+}

@@ -2442,6 +2442,552 @@
    "afirmacion": "En persistTurn no hay incrementQuota ni calculateCost antes del early-return de la conversación descartada (353-365)",
    "comando": "git grep -n \"incrementQuota\\|calculateCost\" origin/main -- src/modules/chatbot/server/chat/persistTurn.ts → :49, :50 (imports), :372, :460: todos fuera del bloque 353-365",
    "control_positivo": "el mismo grep encuentra las dos llamadas en el camino normal (:372 y :460)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "Ningún scheduler del repo (Netlify ni Vercel) dispara /api/cron/detect-bot-issues",
+   "comando": "git grep -n detect-bot-issues origin/main -- logic-core-v3/netlify.toml logic-core-v3/vercel.json logic-core-v3/netlify/functions  (salida vacía)",
+   "control_positivo": "git grep -n cleanup-old-events origin/main -- logic-core-v3/netlify.toml -> netlify.toml:31"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "encryptCredential no se llama en ningún camino de escritura (solo existe su definición)",
+   "comando": "git grep -n encryptCredential origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma ':(exclude)*__tests__*'  -> solo credential-cipher.ts:73 (definición) y :111 (comentario)",
+   "control_positivo": "git grep -n decryptCredential origin/main -- logic-core-v3/src/lib/crypto/resolve-credential.ts -> :1 y :19"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "admin/page.tsx y announcements/page.tsx no llaman auth() ni requireSuperAdmin",
+   "comando": "git grep -n -E 'auth\\(\\)|requireSuperAdmin' origin/main -- 'logic-core-v3/src/app/(protected)/admin/page.tsx' 'logic-core-v3/src/app/(protected)/admin/announcements/page.tsx'  (salida vacía)",
+   "control_positivo": "git grep -n 'auth()' origin/main -- 'logic-core-v3/src/app/(protected)/admin/audit-log/page.tsx' -> :8"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "Los tres diálogos de confirmación no manejan Escape ni foco",
+   "comando": "git grep -n -E 'Escape|keydown|focus' origin/main -- confirm-dialog.tsx type-to-confirm-dialog.tsx inline-confirm.tsx (en admin/_components) -> solo la clase CSS focus: en type-to-confirm-dialog.tsx:92",
+   "control_positivo": "git grep -n Escape origin/main -- 'logic-core-v3/src/app/(protected)/admin/alerts/_components/alert-column-overview.tsx' -> :55"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "Las actions y el cliente de alertas del lote no reportan a Sentry",
+   "comando": "git grep -n -E 'Sentry|captureException' origin/main -- logic-core-v3/src/actions/agency-actions.ts '.../admin/announcements/_actions/announcements.actions.ts' '.../admin/alerts/AlertsClient.tsx'  (salida vacía)",
+   "control_positivo": "git grep -n captureException origin/main -- logic-core-v3/src/components/ui/SectionErrorBoundary.tsx -> :61, :64"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "agency-actions y announcements.actions no escriben AdminAuditLog",
+   "comando": "git grep -n -E \"logAdminAction|audit-log'|adminAuditLog\" origin/main -- logic-core-v3/src/actions/agency-actions.ts '.../admin/announcements/_actions/announcements.actions.ts'  (salida vacía)",
+   "control_positivo": "git grep -n \"from '@/lib/audit-log'\" origin/main -- logic-core-v3/src/modules/chatbot/server/admin/archiveClient.ts -> :6"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "AdminAuditLog no tiene targetOrganizationId",
+   "comando": "git grep -n targetOrganizationId origin/main -- logic-core-v3/prisma/schema.prisma  (salida vacía)",
+   "control_positivo": "git grep -n 'model AdminAuditLog' origin/main -- logic-core-v3/prisma/schema.prisma -> :1652"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "Ninguna página admin usa PageHeader",
+   "comando": "git grep -l PageHeader origin/main -- 'logic-core-v3/src/app/(protected)/admin'  (salida vacía)",
+   "control_positivo": "git grep -n '{eyebrow}' origin/main -- logic-core-v3/src/components/ui/PageHeader.tsx -> :60"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "No hay router.push en el lote (solo un comentario)",
+   "comando": "git grep -n router.push origin/main -- admin/page.tsx admin/layout.tsx admin/_components admin/alerts admin/announcements admin/audit-log src/actions/agency-actions.ts -> solo alert-card.tsx:57 (comentario)",
+   "control_positivo": "git grep -n router.push origin/main -- '.../admin/clients/[[]clientId]/_components/ClientSwitcher.tsx' -> :67"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "announcements, referrals y fg2-lab no tienen loading.tsx propio",
+   "comando": "git ls-tree -r --name-only origin/main -- 'logic-core-v3/src/app/(protected)/admin' | grep -E '(announcements|referrals|fg2-lab)/loading'  (salida vacía)",
+   "control_positivo": "El mismo listado muestra alerts/loading.tsx y audit-log/loading.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "Callout del design system no tiene role ni aria-live",
+   "comando": "git grep -n -E 'role=|aria-live' origin/main -- logic-core-v3/src/components/ui/Callout.tsx  (salida vacía)",
+   "control_positivo": "git grep -n 'role=' origin/main -- 'logic-core-v3/src/app/(protected)/admin/_components/confirm-dialog.tsx' -> :48"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "afirmacion": "No se renderizan eyebrows 'FILA n' en /admin",
+   "comando": "git grep -n -i 'FILA [0-9]' origin/main -- 'logic-core-v3/src/app/(protected)/admin/page.tsx' 'logic-core-v3/src/app/(protected)/admin/loading.tsx' -> solo comentarios JSX en loading.tsx:19, :33, :47, :61",
+   "control_positivo": "git grep -n 'KPIs comerciales' origin/main -- 'logic-core-v3/src/app/(protected)/admin/page.tsx' -> :555, :571"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "/admin/tickets y /admin/messages no leen el parametro clientId (ni searchParams/useSearchParams)",
+   "comando": "git grep -n \"clientId\\|useSearchParams\\|searchParams\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/tickets/\" \"logic-core-v3/src/app/(protected)/admin/messages/\"",
+   "control_positivo": "git grep -n \"export default\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/tickets/page.tsx\" -> :5 AgencyOsTicketsPage; idem messages/page.tsx:6"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "Las actions de alta de cliente no invalidan el cache 'admin-clients' ni revalidan rutas",
+   "comando": "git grep -n \"revalidatePath\\|revalidateTag\" origin/main -- logic-core-v3/src/modules/chatbot/server/admin/createClientOnly.ts logic-core-v3/src/modules/chatbot/server/admin/createClientWithBot.ts logic-core-v3/src/lib/onboarding/core.ts",
+   "control_positivo": "git grep -n \"admin-clients\" origin/main -- logic-core-v3/src -> archiveClient.ts:48, hardDeleteClient.ts:181, bulk-actions.ts:42 revalidateTag('admin-clients')"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "bulkExportLeads/bulkPauseBots nunca devuelven ok:false (la rama de ClientsListClient.tsx:122 es muerta)",
+   "comando": "git grep -n \"ok: false\" origin/main -- logic-core-v3/src/lib/bulk-actions.ts",
+   "control_positivo": "git grep -n \"ok: true\" origin/main -- logic-core-v3/src/lib/bulk-actions.ts -> :13, :43, :79"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "Ningun codigo del admin crea o edita facturas (Invoice); solo el seed",
+   "comando": "git grep -n \"invoice.create\\|invoice.update\\|invoice.upsert\" origin/main -- logic-core-v3/src logic-core-v3/prisma logic-core-v3/scripts",
+   "control_positivo": "El mismo comando encuentra prisma/seed.ts:595 y :618 (invoice.upsert); git grep -l prisma.invoice encuentra dashboard/cuenta/facturacion/page.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "Nadie en src escribe status, renewalDate o price de Subscription fuera de plan.actions y del lazy apply",
+   "comando": "git grep -n \"subscription.update\\|subscription.create\\|subscription.upsert\" origin/main -- logic-core-v3/src",
+   "control_positivo": "Devuelve plan.actions.ts:127, :139, :187, :198, :273, :341, get-plan-for-org.ts:50 y seed-eval-bots.ts:164"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "El lote no usa zona horaria AR para formatear fechas",
+   "comando": "git grep -n \"TZ_AR\\|tz-ar\\|dates-ar\\|timeZone\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/clients/\"",
+   "control_positivo": "git grep -l \"TZ_AR\\|timeZone\" origin/main -- logic-core-v3/src -> os-follow-up/route.ts, leads/export/route.ts, DiscoveriesSection.tsx, entre otros"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "stopImpersonationAction del wrapper de Clientes no tiene importadores",
+   "comando": "git grep -n \"stopImpersonationAction\" origin/main -- logic-core-v3/src",
+   "control_positivo": "El mismo comando encuentra ImpersonationBanner.tsx:2 importando la base de @/lib/actions/impersonation"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "No existe /admin/agency-dashboard",
+   "comando": "git ls-tree -r --name-only origin/main -- \"logic-core-v3/src/app/(protected)/admin/\" | grep -i agency-dashboard ; git grep -n \"agency-dashboard\" origin/main -- logic-core-v3/src",
+   "control_positivo": "El mismo ls-tree lista admin/projects/[projectId]/payments/page.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "HoverScaleCard/hover-scale/message-bubble no estan en src/components/ui",
+   "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/components/ui | grep -i \"hover\\|bubble\"",
+   "control_positivo": "git grep -n adminHoverCls origin/main -- logic-core-v3/src -> AlertsClient.tsx:8"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "El modelo Subscription ya no tiene planName (sigue price)",
+   "comando": "git grep -n \"planName\" origin/main -- logic-core-v3/prisma/schema.prisma",
+   "control_positivo": "git show origin/main:logic-core-v3/prisma/schema.prisma | sed -n '634,667p' muestra `price       Float` en :659"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "scripts/seed-matsu.ts no crea Subscription ni asigna plan",
+   "comando": "git grep -n -i \"subscription\\|planKey\\|BUSINESS\\|priceOverride\\|overrideUntil\" origin/main -- logic-core-v3/scripts/seed-matsu.ts",
+   "control_positivo": "El patron -i BUSINESS matchea :163 (businessInfo), probando que el archivo se recorre"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "afirmacion": "client.schemas.ts no tiene importadores",
+   "comando": "git grep -n \"client.schemas\" origin/main -- logic-core-v3/src",
+   "control_positivo": "git grep -n \"plan.schemas\" origin/main -- logic-core-v3/src encuentra plan.actions.ts:18"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "Las tres páginas con datos del lote no tienen guard propio",
+   "comando": "git grep -n \"auth()\\|requireSuperAdmin\\|auth-guards\" origin/main -- \"src/app/(protected)/admin/leads/page.tsx\" \"src/app/(protected)/admin/leads/[leadId]/page.tsx\" \"src/app/(protected)/admin/messages/[orgId]/page.tsx\" \"src/app/(protected)/admin/messages/layout.tsx\"  -> vacío",
+   "control_positivo": "git grep -n \"auth()\" origin/main -- \"src/app/(protected)/admin/clients/[clientId]/page.tsx\" -> :28 `const session = await auth()`"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "ConvertLeadDialog no tiene importadores (el diálogo de conversión no está montado en ningún lado)",
+   "comando": "git grep -n \"ConvertLeadDialog\\|convert-lead-dialog\" origin/main -- src  -> sólo convert-lead-dialog.tsx:10, :72, :75",
+   "control_positivo": "git grep -n \"convertLeadToProject\" origin/main -- src -> project.actions.ts:833 y convert-lead-dialog.tsx:7 (el patrón encuentra importaciones)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "No hay toasts en admin/leads",
+   "comando": "git grep -n -i \"toast\" origin/main -- \"src/app/(protected)/admin/leads/\"  -> vacío",
+   "control_positivo": "git grep -l -i \"toast\" origin/main -- \"src/app/(protected)/admin/\" -> AlertsClient.tsx, BulkActionBar.tsx, BotDetailClient.tsx, ..."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "Mensajes no filtra organizaciones archivadas (deletedAt)",
+   "comando": "git grep -n \"deletedAt\" origin/main -- \"src/app/(protected)/admin/messages/\"  -> vacío",
+   "control_positivo": "git grep -n \"deletedAt\" origin/main -- \"src/app/(protected)/admin/clients/page.tsx\" -> :23 `where: { deletedAt: null }`"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "Sólo un bloque de error del lote tiene role=alert/aria-live",
+   "comando": "git grep -n 'role=\"alert\"\\|aria-live' origin/main -- \"src/app/(protected)/admin/leads/\" \"src/app/(protected)/admin/messages/\"  -> sólo lead-pipeline.tsx:220",
+   "control_positivo": "El mismo comando encuentra lead-pipeline.tsx:220 (el patrón detecta el atributo)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "Ningún archivo de admin/leads ni admin/messages reporta a Sentry",
+   "comando": "git grep -n \"Sentry\\|captureException\" origin/main -- \"src/app/(protected)/admin/messages/\" \"src/app/(protected)/admin/leads/\"  -> vacío",
+   "control_positivo": "git grep -n \"captureException\" origin/main -- src/components/ui/SectionErrorBoundary.tsx -> :64"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "El schema del mensaje del admin no tiene .max()",
+   "comando": "git grep -n \"\\.max(\\|\\.min(\" origin/main -- \"src/app/(protected)/admin/messages/_actions/message.schemas.ts\"  -> sólo .min en :12 y :19",
+   "control_positivo": "El mismo comando matchea .min( en :12 y :19"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "InboundLeadsTable no renderiza el campo service",
+   "comando": "git grep -n \"service\" origin/main -- \"src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx\"  -> sólo :17 (tipo)",
+   "control_positivo": "git grep -c \"company\" origin/main -- (mismo archivo) -> 3 (tipo + dos renders :123, :176)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "No se usa after()/waitUntil en src para trabajo post-respuesta",
+   "comando": "git grep -n \"waitUntil\\|unstable_after\\|\\bafter(\" origin/main -- src  -> sólo un comentario en src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts:7",
+   "control_positivo": "El mismo comando matchea 'after()' en ese comentario (el patrón detecta la llamada)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "El catch-all deprecado de chatbot no mapea install ni integrations",
+   "comando": "git grep -n \"install\\|integrations\" origin/main -- \"src/app/(protected)/admin/clients/[clientId]/chatbot/\"  -> vacío",
+   "control_positivo": "git grep -n \"VALID_TABS\" origin/main -- \"src/app/(protected)/admin/chatbots/[botId]/tabs.ts\" -> :1 incluye 'install', 'integrations'"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "afirmacion": "payments/page.tsx (F4) no tiene guard propio",
+   "comando": "git grep -n \"auth\\b\\|auth()\" origin/main -- \"src/app/(protected)/admin/projects/[projectId]/payments/page.tsx\"  -> vacío",
+   "control_positivo": "git grep -n \"auth()\" origin/main -- \"src/app/(protected)/admin/clients/[clientId]/page.tsx\" -> :28"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "Ninguna UI ni action de src escribe Project.maintenanceStartDate; solo hay lecturas, selects y tipos",
+   "comando": "git grep -n \"maintenanceStartDate\" origin/main -- src  (fuera de admin/projects: 0 resultados; dentro del lote solo selects, serializaciones y lecturas, confirmado leyendo los 33 archivos)",
+   "control_positivo": "git grep -n \"maintenanceStartDate\" origin/main -- prisma/seed-agency-os.ts -> :1396 'maintenanceStartDate: daysAgo(44, 10),' (escritor del seed)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "Ninguna escritura vuelve approvalStatus a null ni reenvía una tarea REJECTED",
+   "comando": "git grep -n \"approvalStatus:\" origin/main -- src | grep -v \"approvalStatus: true\" -> solo PENDING_APPROVAL (lib/actions/projects.ts:194, agency-actions.ts:45, task-approvals.ts:23), APPROVED y REJECTED; git grep -n \"approvalStatus: null\" origin/main -- src -> 0",
+   "control_positivo": "El mismo grep encuentra src/actions/dashboard-actions.ts:135 \"approvalStatus: 'REJECTED',\""
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "Proyectos no escribe auditoría",
+   "comando": "git grep -n \"logAdminAction\" origin/main -- \"src/app/(protected)/admin/projects\" src/lib/actions/projects.ts -> 0",
+   "control_positivo": "git grep -c \"logAdminAction\" origin/main -- src -> 11 archivos (p. ej. admin/clients/_actions/plan.actions.ts, lib/actions/impersonation.ts)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "Ningún archivo del lote llama a Sentry",
+   "comando": "git grep -n -i \"sentry\\|captureException\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0",
+   "control_positivo": "git grep -n \"Sentry.captureException\" origin/main -- src/components/ui/SectionErrorBoundary.tsx -> :64"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "unmarkMilestonePaid, createMaintenancePayment y getProjectById no tienen consumidores",
+   "comando": "git grep -n -w <simbolo> origin/main -- src, excluyendo su archivo de definición -> 0 para los tres",
+   "control_positivo": "El mismo comando con markMilestonePaid encuentra payments/page.tsx:9 y :158"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "No existe un helper isInternalProject()",
+   "comando": "git grep -n \"isInternalProject(\" origin/main -- src -> 0",
+   "control_positivo": "git grep -n \"isInternalProject\" origin/main -- \"src/app/(protected)/admin/projects\" -> layout.tsx:164 y page.tsx:169 (constantes locales)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "El fix 'if (!startDate) return true' de matchesStart no está en ningún branch",
+   "comando": "git log --all --oneline -G \"if \\(!startDate\\) \\{?\\s*return true\" -- \"*projects-filters.ts\" -> vacío",
+   "control_positivo": "git log --oneline origin/main -S \"if (!startDate)\" -- \"src/app/(protected)/admin/projects/_components/projects-filters.ts\" -> 4d2dd3ec"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "No hay router.push en los archivos del lote",
+   "comando": "git grep -n \"router.push\" origin/main -- \"src/app/(protected)/admin/projects\" -> solo un comentario en delete-project-button.tsx:16 y convert-lead-dialog.tsx:132, que no es del lote",
+   "control_positivo": "El mismo grep encuentra convert-lead-dialog.tsx:132 (el patrón funciona)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "No hay any en el lote",
+   "comando": "git grep -n -E \":\\s*any\\b|as any\\b\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0",
+   "control_positivo": "El mismo patrón sobre src encuentra src/lib/integrations/pagespeed.ts:77 'data: any,'"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "Los formularios del lote no asocian los labels (no hay htmlFor ni Field)",
+   "comando": "git grep -n \"htmlFor\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0; git grep -n \"<Field\" -> solo genéricos de TypeScript (project-form.tsx:137, task-form.tsx:93)",
+   "control_positivo": "git grep -l \"<Field\" origin/main -- src/app -> admin/announcements/_components/announcement-publisher.tsx, admin/chatbots/new/CreateBotForm.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "No hay role=alert ni aria-live en el lote",
+   "comando": "git grep -n \"role=\\\"alert\\\"\\|aria-live\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0",
+   "control_positivo": "git grep -l \"role=\\\"alert\\\"\" origin/main -- src -> admin/leads/_components/lead-pipeline.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "Las actions del lote no usan toErrorMessage",
+   "comando": "git grep -n \"toErrorMessage\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0",
+   "control_positivo": "git grep -n \"toErrorMessage\" origin/main -- \"src/app/(protected)/admin/settings/_actions/settings.actions.ts\" -> :6, :123, :171"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "afirmacion": "Los selectores de organización del lote no filtran deletedAt",
+   "comando": "git grep -n \"deletedAt\" origin/main -- \"src/app/(protected)/admin/projects\" -> 0",
+   "control_positivo": "git grep -n \"deletedAt\" origin/main -- \"src/app/(protected)/admin/clients/page.tsx\" -> :23 'where: { deletedAt: null }'"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "/api/cron/alerts (runPeriodicAgencyAlerts) no tiene disparador en el repo",
+   "comando": "git grep -n \"cron/alerts\\|runPeriodicAgencyAlerts\" origin/main -- logic-core-v3/netlify.toml logic-core-v3/vercel.json logic-core-v3/netlify .github  → 0 resultados",
+   "control_positivo": "git grep -n \"send-weekly-reports\" origin/main -- logic-core-v3/netlify.toml → netlify.toml:28 [functions.\"send-weekly-reports-cron\"]"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "AgencySettings.contactEmail y contactWhatsapp no tienen lectores fuera de Configuración",
+   "comando": "git grep -n \"contactWhatsapp\\|contactEmail\" origin/main -- logic-core-v3/src | grep -v \"admin/settings/\\|lib/agency-settings.ts\\|lib/actions/settings.ts\\|bienvenida\\|Step1Empresa\"  → solo campos de proyecto (project.actions.ts:468, :518; project.schemas.ts:65; project-card.tsx:16)",
+   "control_positivo": "git grep -n -c \"contactWhatsapp\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/settings/_actions/settings.actions.ts\" → 4"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "Ninguna mutación de Configuración, Referidos ni Equipo escribe en el audit log",
+   "comando": "git grep -n \"logAdminAction\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/settings\" \"logic-core-v3/src/app/(protected)/admin/referrals\" \"logic-core-v3/src/app/(protected)/admin/team\" → 0",
+   "control_positivo": "git grep -n -c \"logAdminAction\" origin/main -- \"logic-core-v3/src/app/api/admin/users/[userId]/resend-credentials/route.ts\" → 2"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "Ningún link lleva a /admin/settings/alerts ni a /admin/settings/reports",
+   "comando": "git grep -n \"settings/alerts\\|settings/reports\" origin/main -- src | grep -v \"^origin/main:src/app/(protected)/admin/settings/\" → 0",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- \"src/app/(protected)/admin/settings/alerts\" → AlertSettingsClient.tsx, loading.tsx, page.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "Ningún código vivo crea o promueve un usuario a SUPER_ADMIN",
+   "comando": "git grep -n \"role: 'SUPER_ADMIN'\\|role: Role.SUPER_ADMIN\" origin/main -- src → solo cláusulas where y src/lib/actions/settings.ts:176 (create dentro de inviteTeamMemberAction); git grep -n \"lib/actions/settings'\" origin/main -- src tests → 0 importadores",
+   "control_positivo": "git grep -n \"SUPER_ADMIN\" origin/main -- prisma/seed.ts → seed.ts:87, :94 (role: Role.SUPER_ADMIN)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "updateTimeEntry, listTimeEntriesByUser, listTasksByUser y reorderTasks no tienen llamadores",
+   "comando": "git grep -n -w \"updateTimeEntry\\|listTasksByUser\\|listTimeEntriesByUser\\|reorderTasks\" origin/main -- src tests → solo las definiciones (task.actions.ts:264, :377; time-entry.actions.ts:195, :310)",
+   "control_positivo": "git grep -n -w \"deleteTimeEntry\" origin/main -- src → time-entry-panel.tsx:10 y :189"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "sendWeeklyReports no consulta envíos previos antes de mandar",
+   "comando": "git grep -n \"REPORT.WEEKLY_SENT\\|findFirst\" origin/main -- src/modules/chatbot/server/reports/sendWeeklyReports.ts → solo :74 (create del evento después de enviar)",
+   "control_positivo": "git grep -n \"skipped\" origin/main -- src/modules/chatbot/server/reports/sendWeeklyReports.ts → :10, :39, :47, :53"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "No hay página de privacidad ni términos en src/app",
+   "comando": "git ls-tree -r --name-only origin/main -- src/app | grep -i \"privacidad\\|privacy\\|terminos\\|terms\\|legal\" → 0",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- src/app | grep -i contact → src/app/contact/layout.tsx, src/app/contact/page.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "No hay cron de aviso de override de facturación por vencer",
+   "comando": "git grep -n -i \"override\" origin/main -- src/app/api/cron netlify netlify.toml vercel.json → 0",
+   "control_positivo": "git grep -n \"overrideUntil\" origin/main -- prisma/schema.prisma → schema.prisma:646"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "listTickets del admin no pagina",
+   "comando": "git grep -n \"take:\\|skip:\" origin/main -- \"src/app/(protected)/admin/tickets/_actions/ticket.actions.ts\" → 0",
+   "control_positivo": "git grep -n \"take:\" origin/main -- \"src/app/(protected)/admin/referrals/page.tsx\" → :11"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "Los catch de las actions y rutas del lote no reportan a Sentry",
+   "comando": "git grep -n \"captureException\\|Sentry\" origin/main -- \"src/app/(protected)/admin/settings\" \"src/app/(protected)/admin/team\" \"src/app/(protected)/admin/tickets\" \"src/app/(protected)/admin/referrals\" src/app/api/admin/alerts src/app/api/admin/reports src/app/api/admin/users src/lib/alerts.ts src/lib/audit-log.ts src/lib/bulk-actions.ts → 0",
+   "control_positivo": "git grep -n \"captureException\" origin/main -- src/components/ui/SectionErrorBoundary.tsx → :61, :64"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "afirmacion": "El start de GBP no usa nonce en cookie",
+   "comando": "git show \"origin/main:./src/app/api/auth/google-business/start/route.ts\" | grep -n -i \"cookie\\|nonce\" → 0",
+   "control_positivo": "mismo archivo | grep -n \"orgId\" → :12, :13"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "src/lib/actions/clients.ts no tiene importadores",
+   "comando": "git grep -n -E \"lib/actions/clients['\\\"]|createClientAction|updateClientAction\" origin/main -- logic-core-v3/src logic-core-v3/tests logic-core-v3/scripts | grep -v src/lib/actions/clients.ts → vacío",
+   "control_positivo": "El mismo patrón para projects encuentra delete-project-button.tsx:6 y task-list.tsx:22; git grep -c createClientAction en clients.ts = 2"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "src/lib/actions/services.ts no tiene importadores",
+   "comando": "git grep -n -E \"lib/actions/services['\\\"]|createServiceAction|updateServiceStatusAction|deleteServiceAction\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v services.ts → vacío",
+   "control_positivo": "git grep -c createServiceAction en services.ts = 2"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "src/lib/actions/settings.ts no tiene importadores",
+   "comando": "git grep -n -E \"lib/actions/settings['\\\"]|saveAgencySettingsAction|updateModulePricingAction|inviteTeamMemberAction|testN8nConnectionAction|verifyGooglePermissionsAction|testWebhookAction\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v settings.ts → vacío",
+   "control_positivo": "git grep -c saveAgencySettingsAction en settings.ts = 1"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "src/lib/actions/leads.ts no tiene importadores y leads-constants.ts solo lo usa leads.ts",
+   "comando": "git grep -n -E \"lib/actions/leads['\\\"]|lib/actions/leads-constants|updateLeadStatusAction|updateLeadNotesAction|LEAD_STATUS_VALUES\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v -E \"leads(-constants)?\\.ts\" → solo admin/leads/_actions/lead.schemas.ts:4 y :78 (constante local duplicada)",
+   "control_positivo": "El mismo grep encuentra la constante homónima en lead.schemas.ts; git grep ensureAdmin → leads.ts:14, :23, :49"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "markLeadAsRead no tiene importadores; contact.ts solo se importa desde contact/page.tsx",
+   "comando": "git grep -n -E \"lib/actions/contact['\\\"]|contactFormAction|submitContactForm|markLeadAsRead\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v contact.ts → solo src/app/contact/page.tsx:6 y :66",
+   "control_positivo": "El mismo grep encuentra submitContactForm en contact/page.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "5 de 7 actions de projects.ts no tienen importadores",
+   "comando": "git grep -n -E \"createProjectAction|updateProjectAction|deleteProjectAction|createTaskAction|updateTaskStatusAction|sendTaskForApprovalAction|deleteTaskAction\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v projects.ts → solo deleteProjectAction y sendTaskForApprovalAction",
+   "control_positivo": "El mismo grep encuentra delete-project-button.tsx:6 y task-list.tsx:22"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "Ningún código vivo genera links /accept-invite",
+   "comando": "git grep -n \"accept-invite\" origin/main -- logic-core-v3/src | grep -v src/app/accept-invite/ → solo invitations.ts:110 y settings.ts:192 (ambos sin importadores) más robots.ts, sitemap.ts y comentarios; git grep -n \"lib/actions/invitations\" → vacío",
+   "control_positivo": "El grep encuentra los dos generadores muertos y el path en robots.ts:21"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "No hay UI de invitar miembros en admin/team ni admin/settings",
+   "comando": "git grep -n -i invit origin/main -- \"logic-core-v3/src/app/(protected)/admin/team\" \"logic-core-v3/src/app/(protected)/admin/settings\" → vacío",
+   "control_positivo": "git grep -c -i invit en src/lib/actions/settings.ts = 9"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "Ningún código de src borra User",
+   "comando": "git grep -n -E \"\\.user\\.(delete|deleteMany)\\(\" origin/main -- logic-core-v3/src → vacío",
+   "control_positivo": "git grep -n -E \"\\.organization\\.(delete|deleteMany)\\(\" → hardDeleteClient.ts:141 y evals/seed-eval-bots.ts:141"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "La página /admin/projects/[projectId]/payments no tiene guard propio",
+   "comando": "git grep -c -E \"auth\\(\\)|requireSuperAdmin|SUPER_ADMIN\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/projects/[[]projectId]/payments/page.tsx\" → sin coincidencias",
+   "control_positivo": "El mismo comando sobre admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx → 2"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "Ninguna de las dos implementaciones de borrar proyecto audita",
+   "comando": "git grep -c logAdminAction origin/main -- logic-core-v3/src/lib/actions/projects.ts \"logic-core-v3/src/app/(protected)/admin/projects/_actions/project.actions.ts\" → sin coincidencias",
+   "control_positivo": "El mismo comando sobre modules/chatbot/server/admin/archiveClient.ts → 3"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "User.unlockedFeatures ya no existe en el schema ni en el código",
+   "comando": "git grep -n unlockedFeatures origin/main -- logic-core-v3/src logic-core-v3/prisma/schema.prisma → solo el comentario src/lib/premium-modules.ts:15",
+   "control_positivo": "git grep -c sessionVersion en prisma/schema.prisma = 1"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "No hay tests E2E de downgrade de plan",
+   "comando": "git grep -l -i downgrade origin/main -- \"*.spec.ts\" \"*.test.ts\" → solo src/lib/crypto/__tests__/credential-cipher.test.ts (criptografía)",
+   "control_positivo": "git grep -l -i downgrade origin/main -- logic-core-v3/src → plan.actions.ts, PlanAssignmentCard.tsx, PlanAssignmentForm.tsx"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "next.config no configura bodySizeLimit para server actions",
+   "comando": "git grep -n -E \"bodySizeLimit|experimental|serverActions\" origin/main -- logic-core-v3/next.config.ts logic-core-v3/src → vacío",
+   "control_positivo": "git grep -c -E \"nextConfig|headers\" en next.config.ts = 10"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "El script migrate-subscriptions-to-plan-id.ts ya no existe",
+   "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/prisma | grep -i -E \"migrate-sub|plan-id\" → vacío",
+   "control_positivo": "git grep -l PLAN_NAME_TO_KEY origin/main -- logic-core-v3 → docs/bitacora-roadmap.md"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "No existe la ruta /admin/_design ni un editor de tema",
+   "comando": "git ls-tree -r --name-only origin/main -- \"logic-core-v3/src/app/(protected)/admin\" | grep -i -E \"_design|theme\"",
+   "control_positivo": "El mismo grep encuentra leads/_components/themed-date-input.tsx (el patrón 'theme' funciona)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "ChatbotTab del cliente no enlaza la pestaña Instalación",
+   "comando": "git grep -n \"botHref(\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/clients/[[]clientId]/_components/tabs/ChatbotTab.tsx\" → overview, config, knowledge, conversations, leads, activity",
+   "control_positivo": "git grep -n -i \"'install'|InstallTab\" en admin/chatbots → BotDetailClient.tsx:24, :98, tabs.ts:1"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "afirmacion": "La lista de Clientes no excluye la org 'develop'",
+   "comando": "git grep -n -E \"AGENCY_ORG_SLUG|'develop'\" origin/main -- logic-core-v3/src → no aparece admin/clients/page.tsx",
+   "control_positivo": "El mismo grep encuentra admin/projects/page.tsx:11 `where: { slug: { not: 'develop' } }`"
   }
  ]
 }

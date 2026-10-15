@@ -39,7 +39,7 @@
 ### [SEC-023] Las páginas de /admin exigen SUPER_ADMIN solo en el layout y en el proxy: un token invalidado, degradado o de un admin borrado sigue leyendo datos de todos los clientes por navegación RSC
 - Dominio: D1  ·  Severidad: ALTA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/proxy.ts:148` — «if (isAdminRoute && role !== ADMIN_ROLE) {»; `src/auth.config.ts:24` — «callbacks: { authorized({ auth }) { return true // Route protection is handled in middleware logic»; `src/app/(protected)/admin/layout.tsx:47` — «if (session.user.role !== 'SUPER_ADMIN') { redirect('/dashboard')»; librería next@16.2.9, dist/server/app-render/app-render.js línea 164 — «const flightRouterState = shouldProvideFlightRouterState ? (0, _parseandvalidateflightrouterstate.parseAndValidateFlightRouterState)(headers[_approuterheaders.NEXT_ROUTER_STATE_TREE_HEADER]) : undefined;»; librería next@16.2.9, dist/server/app-render/walk-tree-with-flight-router-state.js línea 53 — «const renderComponentsOnThisLevel = // No further router state available !flightRouterState || // Segment in router state does not match current segment !(0, _matchsegments.matchSegment)(actualSegment, flightRouterState[»; `src/app/(protected)/admin/team/page.tsx:19` — «const users = await prisma.user.findMany({»; `src/app/(protected)/admin/referrals/page.tsx:9` — «const referrals = await prisma.referral.findMany({»; `src/app/(protected)/admin/page.tsx:182` — «prisma.agencySettings.findFirst({»
+- Evidencia: `src/proxy.ts:148` — «if (isAdminRoute && role !== ADMIN_ROLE) {»; `src/auth.config.ts:24` — «callbacks: { authorized({ auth }) { return true // Route protection is handled in middleware logic»; `src/app/(protected)/admin/layout.tsx:47` — «if (session.user.role !== 'SUPER_ADMIN') { redirect('/dashboard')»; librería next@16.2.9, dist/server/app-render/app-render.js línea 164 — «const flightRouterState = shouldProvideFlightRouterState ? (0, _parseandvalidateflightrouterstate.parseAndValidateFlightRouterState)(headers[_approuterheaders.NEXT_ROUTER_STATE_TREE_HEADER]) : undefined;»; librería next@16.2.9, dist/server/app-render/walk-tree-with-flight-router-state.js línea 53 — «const renderComponentsOnThisLevel = // No further router state available !flightRouterState || // Segment in router state does not match current segment !(0, _matchsegments.matchSegment)(actualSegment, flightRouterState[»; `src/app/(protected)/admin/team/page.tsx:19` — «const users = await prisma.user.findMany({»; `src/app/(protected)/admin/referrals/page.tsx:9` — «const referrals = await prisma.referral.findMany({»; `src/app/(protected)/admin/page.tsx:182` — «prisma.agencySettings.findFirst({»; `src/app/(protected)/admin/announcements/page.tsx:11` — «const [announcements, organizations] = await Promise.all([»; `src/app/(protected)/admin/audit-log/page.tsx:9` — «if (!session?.user || session.user.role !== 'SUPER_ADMIN') {»; `src/app/(protected)/admin/leads/page.tsx:23` — «const leads = await prisma.osLead.findMany({»; `src/app/(protected)/admin/leads/[leadId]/page.tsx:212` — «prisma.user.findMany({ where: { role: 'SETTER' }, select: { id: true, name: true, email: true },»; `src/app/(protected)/admin/messages/[orgId]/page.tsx:24` — «await markAsRead(orgId) const [organization, conversationResult] = await Promise.all([»; `src/app/(protected)/admin/messages/[orgId]/page.tsx:27` — «prisma.organization.findUnique({ where: { id: orgId },»; `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:70` — «const { projectId } = await params const [projectRecord, milestones, maintenancePayments] = await Promise.all([»; `src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx:35` — «prisma.user.findMany({ where: { role: Role.SUPER_ADMIN,»; `src/app/(protected)/admin/projects/[projectId]/layout.tsx:160` — «if (!project || !callerCanAccessOrg(session.user, project.organizationId)) {»; `src/lib/auth/assert-ownership.ts:88` — «return Boolean(resourceOrgId) && caller.organizationId === resourceOrgId»; `src/app/(protected)/admin/projects/page.tsx:9` — «prisma.organization.findMany({ select: { id: true, companyName: true },»; `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:73` — «prisma.project.findUnique({ where: { id: projectId },»; `docs/bitacora-roadmap.md:8400` — «| F4 / B11 agency-actions cross-projectId | ✅ Cerrado |»; `docs/bitacora-roadmap.md:6493` — «| **F4** | ['src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:69-103'] ... Loader sin auth check»
 - Impacto: Bloqueante para el primer cliente real. Escenario: se filtra la cookie del SUPER_ADMIN (PC compartida, malware, extensión) y develOP reacciona cambiando la contraseña. El corte por sessionVersion no llega al panel. El proxy decide /admin con el rol del JWT (auth.config.ts no tiene callback jwt ni mira sessionVersion) y re-firma la cookie por 30 días (SEC-010). En un pedido RSC con el árbol del layout ya montado, Next no ejecuta admin/layout.tsx y renderiza solo la página. Es lo que manda el router en cada clic, o un curl con Next-Router-State-Tree. Hay 15 páginas de /admin que consultan Prisma sin auth() propio:
 - admin (KPIs y cobros)
 - team (usuarios admin)
@@ -55,18 +55,18 @@ Lo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de
 - Propuesta: Zona libre, salvo admin/leados/* y fg2-lab, que son ZONA-FRANCO (coordinar con Franco). Mover la autorización al lado del dato: un helper cacheado requireSuperAdminPage() (auth() fresco + rol, y si no pasa redirect/notFound) que se llame al inicio de cada page.tsx de /admin o dentro de sus funciones de datos, como ya hace /setter. Sumar un invariante que falle si una page de /admin no lo llama. El layout queda como UX, no como frontera.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h4.adm-shell, h4.adm-dashboard, h4.adm-equipo, h4.adm-referidos, h4.adm-proyectos, h4.adm-leads, h4.adm-mensajes, h4.adm-novedades, h3.adm-actividad, h5.adm-revision-demos, h5.adm-fg2lab, lib.proxy, lib.auth
+- Nodo(s): h4.adm-shell, h4.adm-dashboard, h4.adm-equipo, h4.adm-referidos, h4.adm-proyectos, h4.adm-leads, h4.adm-mensajes, h4.adm-novedades, h3.adm-actividad, h5.adm-revision-demos, h5.adm-fg2lab, lib.proxy, lib.auth, modelo.OsLead, modelo.Organization, h4.adm-proyectos.ficha, h4.adm-proyectos.pagos-hitos, modelo.OsPaymentMilestone, modelo.OsMaintenancePayment
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-013
 
 ### [SEC-036] Credenciales de terceros en claro en la base: tokens OAuth de Google Business, token de Tiendanube, API key de Cal.com, token de Telegram y las credenciales de la Bóveda (el cifrado de escritura quedó sin mergear)
 - Dominio: D6  ·  Severidad: ALTA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `prisma/migrations/20260503150000_add_gbp_fields/migration.sql:5` — «ADD COLUMN "gbpAccessToken" TEXT, ADD COLUMN "gbpRefreshToken" TEXT,»; `prisma/migrations/20260504235814_add_tiendanube_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "tiendanubeAccessToken" TEXT,»; `prisma/migrations/20260505000536_add_cal_com_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "calComApiKey" TEXT,»; `src/app/api/auth/google-business/callback/route.ts:52` — «gbpAccessToken: tokens.access_token, gbpRefreshToken: tokens.refresh_token,»; `src/actions/agency-actions.ts:103` — «await prisma.clientAsset.create({ data: { organizationId,»; `prisma/schema.prisma:1704` — «// Auth opcional vía header (ej. "X-Webhook-Secret"). Secret cifrado AES-256-GCM // con env CRM_SECRET_KEY.»; `prisma/schema.prisma:360` — «gbpRefreshToken String? @db.Text»; `prisma/schema.prisma:367` — «tiendanubeAccessToken String? @db.Text»; `prisma/schema.prisma:375` — «calComApiKey String? @db.Text»; `prisma/schema.prisma:835` — «osTelegramBotToken String?»; `src/app/api/auth/google-business/callback/route.ts:53` — «gbpRefreshToken: tokens.refresh_token,»; `src/app/api/auth/tiendanube/callback/route.ts:67` — «tiendanubeAccessToken: tokens.access_token,»; `src/lib/crypto/credential-cipher.ts:73` — «export function encryptCredential(plaintext: string): string { // sin llamadores en origin/main»; `src/lib/crypto/resolve-credential.ts:24` — «return { value: description, error: false } // texto plano pasa tal cual»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:85` — «AES-256 // badge del header (tambien :148 en cada tarjeta)»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:185` — «<VaultRevealButton value={credential.value} /> // el valor viaja en el payload RSC»; `src/actions/agency-actions.ts:109` — «description: data.description»; `src/components/admin/managers/VaultManager.tsx:5` — «import { createClientAssetAction } from '@/actions/agency-actions'»; `src/actions/onboarding-actions.ts:115` — «url: 'ENCRIPTADO_EN_TEXTO',»; `src/components/admin/managers/VaultManager.tsx:85` — «placeholder="Contraseña o instrucciones..."»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:148` — «AES-256»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:51` — «// ─── Demo activity log (PLACEHOLDER — data fake; modelo real = schema, parada aparte) ──»; `src/components/dashboard/VaultRevealButton.tsx:61` — «Información sensible — Solo visible para vos»
+- Evidencia: `prisma/migrations/20260503150000_add_gbp_fields/migration.sql:5` — «ADD COLUMN "gbpAccessToken" TEXT, ADD COLUMN "gbpRefreshToken" TEXT,»; `prisma/migrations/20260504235814_add_tiendanube_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "tiendanubeAccessToken" TEXT,»; `prisma/migrations/20260505000536_add_cal_com_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "calComApiKey" TEXT,»; `src/app/api/auth/google-business/callback/route.ts:52` — «gbpAccessToken: tokens.access_token, gbpRefreshToken: tokens.refresh_token,»; `src/actions/agency-actions.ts:103` — «await prisma.clientAsset.create({ data: { organizationId,»; `prisma/schema.prisma:1704` — «// Auth opcional vía header (ej. "X-Webhook-Secret"). Secret cifrado AES-256-GCM // con env CRM_SECRET_KEY.»; `prisma/schema.prisma:360` — «gbpRefreshToken String? @db.Text»; `prisma/schema.prisma:367` — «tiendanubeAccessToken String? @db.Text»; `prisma/schema.prisma:375` — «calComApiKey String? @db.Text»; `prisma/schema.prisma:835` — «osTelegramBotToken String?»; `src/app/api/auth/google-business/callback/route.ts:53` — «gbpRefreshToken: tokens.refresh_token,»; `src/app/api/auth/tiendanube/callback/route.ts:67` — «tiendanubeAccessToken: tokens.access_token,»; `src/lib/crypto/credential-cipher.ts:73` — «export function encryptCredential(plaintext: string): string { // sin llamadores en origin/main»; `src/lib/crypto/resolve-credential.ts:24` — «return { value: description, error: false } // texto plano pasa tal cual»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:85` — «AES-256 // badge del header (tambien :148 en cada tarjeta)»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:185` — «<VaultRevealButton value={credential.value} /> // el valor viaja en el payload RSC»; `src/actions/agency-actions.ts:109` — «description: data.description»; `src/components/admin/managers/VaultManager.tsx:5` — «import { createClientAssetAction } from '@/actions/agency-actions'»; `src/actions/onboarding-actions.ts:115` — «url: 'ENCRIPTADO_EN_TEXTO',»; `src/components/admin/managers/VaultManager.tsx:85` — «placeholder="Contraseña o instrucciones..."»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:148` — «AES-256»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:51` — «// ─── Demo activity log (PLACEHOLDER — data fake; modelo real = schema, parada aparte) ──»; `src/components/dashboard/VaultRevealButton.tsx:61` — «Información sensible — Solo visible para vos»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:131` — «? resolveCredentialDisplay(asset.description)»
 - Impacto: Bloqueante para el primer cliente real: quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio y hosting cargadas en la Bóveda, mientras el portal le asegura al cliente, en el encabezado y en cada tarjeta de la Bóveda, que están cifradas con AES-256. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear: encryptCredential no tiene llamadores fuera de los tests.
 - Propuesta: Cifrar en los write-paths con secret-box/credential-cipher (callbacks OAuth de GBP y Tiendanube, settings de Telegram, carga de Cal.com y assets de la Bóveda), backfill idempotente y lectura tolerante (resolve-credential ya soporta ambos formatos); mergear o portar 9fc616c4.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): modelo.Organization, modelo.AgencySettings, modelo.ClientAsset, int.google-business-profile, int.tiendanube, int.calcom, int.telegram, h2.cli-resenas, h2.cli-tienda, h2.cli-agenda, h2.cli-cuenta, int.gbp, lib.crypto, h2.cli-cuenta.boveda, h4.adm-clientes, lib.actions, h2.cli-cuenta.boveda-solicitar-documento
+- Nodo(s): modelo.Organization, modelo.AgencySettings, modelo.ClientAsset, int.google-business-profile, int.tiendanube, int.calcom, int.telegram, h2.cli-resenas, h2.cli-tienda, h2.cli-agenda, h2.cli-cuenta, int.gbp, lib.crypto, h2.cli-cuenta.boveda, h4.adm-clientes, lib.actions, h2.cli-cuenta.boveda-solicitar-documento, h4.adm-clientes.boveda-alta-activo, h4.adm-clientes.boveda-carga
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-031
 
 ### [SEC-037] El overview de Mi Chatbot manda al navegador la fila completa de Organization: tokens de Google Business y Tiendanube, API key de Cal.com y las notas internas de develOP
@@ -490,6 +490,47 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h3.vis-widget-develop, h3.vis-widget-cliente, lib.chatbot.components, int.vertex
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-109
 
+### [SEC-084] agency-actions: server actions sin Zod, sin auditoría y con organizationId por parámetro sin verificar en la bóveda
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/actions/agency-actions.ts:17` — «data: { title: string; description: string; dueDate?: Date }»; `src/actions/agency-actions.ts:96` — «data: { name: string; url: string; type: AssetType; description?: string }»; `src/actions/agency-actions.ts:21` — «throw new Error('Unauthorized')»; `src/components/admin/managers/VaultManager.tsx:31` — «console.error(error)»
+- Impacto: Viola la regla de Zod en cada Server Action: title/description/url sin tope terminan en notificaciones y emails al cliente; la url del activo se publica como href en la bóveda del cliente (boveda/page.tsx:212) sin exigir http(s); el activo se crea en una org que puede no existir o estar archivada (error de FK crudo). Ni la tarea ni el activo quedan en AdminAuditLog (git grep vacío; control archiveClient.ts:6 sí audita). Si algo falla el admin no ve nada: el caller solo hace console.error. El organizationId por parámetro es inherente a una acción admin cross-tenant y en la tarea está mitigado por assertProjectBelongsToOrg (:29), no en el activo.
+- Propuesta: Schemas Zod (title/description con .max, url con protocolo http/https, type como nativeEnum, organizationId existente y no archivada), devolver ActionResult en vez de throw, logAdminAction en ambas, y que VaultManager/ProjectManager muestren el error.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [DEU-066]
+- Nodo(s): h4.adm-clientes, h4.adm-clientes.boveda-alta-activo, h4.adm-clientes.tarea-para-aprobacion, lib.actions, modelo.ClientAsset, modelo.Task, modelo.AdminAuditLog
+
+### [SEC-086] Cambios sensibles del admin sin registro de auditoría: webhook de alertas, token de Telegram, precios, referidos y acciones masivas, y en Proyectos borrar, cambiar de estado y marcar pagos
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/settings/_actions/settings.actions.ts:148` — «await prisma.agencySettings.update({»; `src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts:41` — «const result = await prisma.referral.updateMany({ where: { id, status: 'CONVERTED' }, data: { status: 'REWARDED', rewardedAt: new Date() },»; `src/lib/bulk-actions.ts:50` — «const leads = await prisma.chatbotLead.findMany({»; `src/app/api/admin/users/[userId]/resend-credentials/route.ts:93` — «await logAdminAction({»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:806` — «await tx.osTimeEntry.deleteMany({ where: { projectId } }) await tx.osPaymentMilestone.deleteMany({ where: { projectId } })»; `src/lib/actions/projects.ts:114` — «await prisma.project.delete({ where: { id: projectId } })»; `src/app/(protected)/admin/projects/_actions/milestone.actions.ts:26` — «const milestone = await prisma.osPaymentMilestone.update({»
+- Impacto: Una cuenta SUPER_ADMIN mal usada o comprometida puede redirigir el webhook de alertas (lleva nombres de clientes y detalle de tickets) a un servidor propio, cambiar el token de Telegram, bajar precios, marcar referidos como bonificados o exportar todos los leads de todos los clientes sin rastro en /admin/audit-log (git grep de logAdminAction en settings, referrals y team: 0 resultados). Bloqueante para el primer cliente en trazabilidad de sus datos personales.
+- Propuesta: Llamar a logAdminAction (con computeDiff, sin valores de secretos) en updateSettings, updateModulePricing, markReferral*Action y bulkExportLeads (cantidad de filas y orgs), con actionType dedicados si hace falta migración.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-012]
+- Nodo(s): h4.adm-config, h4.adm-referidos.gestion-estados, h4.adm-clientes.acciones-masivas, h4.adm-audit, lib.audit-log, modelo.AdminAuditLog, modelo.AgencySettings, h4.adm-proyectos.borrado, h4.adm-proyectos.pagos-hitos
+
+### [SEC-087] Reenviar credenciales resetea la contraseña de cualquier usuario, incluidos SUPER_ADMIN y SETTER, y si Brevo falla devuelve la temporal en la respuesta
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/admin/users/[userId]/resend-credentials/route.ts:46` — «const user = await prisma.user.findUnique({ where: { id: userId },»; `src/app/api/admin/users/[userId]/resend-credentials/route.ts:64` — «await prisma.user.update({ where: { id: userId }, data: {»; `src/app/api/admin/users/[userId]/resend-credentials/route.ts:112` — «tempPassword: emailResult.ok ? null : tempPassword,»; `src/app/api/admin/users/[userId]/resend-credentials/route.ts:49` — «orgMemberships: { include: { organization: { select: { companyName: true } } }, take: 1,»
+- Impacto: Un SUPER_ADMIN (o su sesión robada, SEC-023) puede tomar la cuenta de otro admin o del setter de Franco pidiendo el reset por userId: si el envío falla recibe la temporal. El email es la bienvenida de cliente aunque el destino no lo sea, y para usuarios con varias orgs nombra una arbitraria (take: 1 sin orderBy, patrón D1).
+- Propuesta: Limitar el endpoint a usuarios CLIENT/ORG_MEMBER (o confirmación reforzada para SUPER_ADMIN/SETTER), plantilla según rol, orderBy determinista y aviso a la cuenta afectada.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-019], [SEC-023], [BUG-118]
+- Nodo(s): h4.adm-clientes.reenviar-credenciales, h1.auth-cambio, int.brevo, modelo.User
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-128
+
+### [SEC-090] El formulario público de contacto acepta texto sin tope en todos sus campos y lo replica a la DB, la alerta de agencia y n8n
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/actions/schemas.ts:57` — «name: z.string().trim().min(2, 'Nombre inválido.'), email: z.string().trim().email('El email no es válido.'),»; `src/lib/actions/schemas.ts:62` — «message: z.string().trim().min(10, 'El mensaje debe tener al menos 10 caracteres.'),»; `src/lib/actions/contact.ts:75` — «detail: 'Nuevo lead desde formulario. Contacto: ${payload.email}. Servicio: ${payload.service || 'General'}.',»; `src/lib/actions/schemas.ts:46` — «featureKey: z.string().trim().min(1, 'Feature inválida.'), featureName: z.string().trim().min(1, 'Nombre de feature inválido.'),»
+- Impacto: Un anónimo puede mandar campos de hasta el límite por defecto del body de server actions (~1 MB; next.config sin bodySizeLimit). Eso se guarda en ContactSubmission (message es @db.Text), entra a la alerta de agencia y al webhook de n8n, y se interpola en texto de alerta (company/name/email/service). El rate limit es de 5 por IP cada 15 min, pero la IP sale del primer X-Forwarded-For (patrón D1-c1) y cada IP falsificada crea una fila nueva en rate_limit (patrón D1-c3). Riesgo para el primer cliente: spam y crecimiento de almacenamiento en Neon, más ruido en las alertas. UpsellRequestSchema (portal autenticado) tiene el mismo defecto en featureKey/featureName.
+- Propuesta: Agregar .max() razonables (name 120, email 254, phone 40, company 120, service 60 o enum, message 5000, featureName 120). Opcional: bodySizeLimit explícito para server actions. Escapar los campos del visitante en sendAgencyAlert.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-054], [SEC-055]
+- Nodo(s): h6.vis-contacto.enviar-formulario, modelo.ContactSubmission, lib.actions, int.n8n, h2.cli-servicios
+
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -682,12 +723,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [SEC-049] El avatar de la empresa acepta cualquier URL http(s) que el admin carga con <img>; el base64 (hasta 600 KB) sigue en la DB
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `src/modules/chatbot/server/admin/avatarImageUrlSchema.ts:16` — «/^https?:\/\//i.test(value) ||»; `src/modules/chatbot/server/admin/avatarImageUrlSchema.ts:10` — «const MAX_AVATAR_URL_LENGTH = 600_000 // ~450KB binario; una webp 200x200 entra holgada»; `src/modules/chatbot/components/admin/client-avatar/ClientAvatar.tsx:30` — «<img src={avatarImageUrl}»; `src/app/(protected)/admin/clients/page.tsx:51` — «avatarImageUrl: client.avatarImageUrl,»
+- Evidencia: `src/modules/chatbot/server/admin/avatarImageUrlSchema.ts:16` — «/^https?:\/\//i.test(value) ||»; `src/modules/chatbot/server/admin/avatarImageUrlSchema.ts:10` — «const MAX_AVATAR_URL_LENGTH = 600_000 // ~450KB binario; una webp 200x200 entra holgada»; `src/modules/chatbot/components/admin/client-avatar/ClientAvatar.tsx:30` — «<img src={avatarImageUrl}»; `src/app/(protected)/admin/clients/page.tsx:51` — «avatarImageUrl: client.avatarImageUrl,»; `src/app/(protected)/admin/clients/page.tsx:72` — «clients={clients.map(toListItem)} archivedClients={archivedClients.map(toListItem)}»
 - Impacto: Salteando la UI (que sube data URLs), un cliente puede setear un avatar http(s) propio; cada vez que develOP abre /admin/clients el navegador del SUPER_ADMIN pide esa URL (IP, user-agent, horario). La lista de clientes ademas trae hasta 600 KB de base64 por org en el payload.
 - Propuesta: Desde el portal aceptar solo data URLs (o un dominio de storage propio) y re-encodear server-side; a futuro mover a storage externo y guardar la URL.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-cuenta.perfil-empresa, h4.adm-clientes, modelo.Organization
+- Nodo(s): h2.cli-cuenta.perfil-empresa, h4.adm-clientes, modelo.Organization, h4.adm-clientes.listado
 
 ### [SEC-050] Solicitud de eliminacion de cuenta sin control de OrgRole ni alerta a develOP, detectada en el admin por un titulo que cualquier ticket puede copiar
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
@@ -719,15 +760,15 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [SEC-048], [SEC-047]
 - Nodo(s): h2.cli-servicios.solicitar-modulo, h6.vis-contacto, modelo.ContactSubmission, modelo.OrganizationModule, lib.actions
 
-### [SEC-062] Las acciones del admin de chatbots devuelven el mensaje crudo del error (Prisma/SDK) a la UI
+### [SEC-062] Las acciones del admin devuelven el mensaje crudo del error (Prisma/SDK) a la UI y no lo reportan a Sentry: chatbots, planes, mensajes y proyectos
 - Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/app/(protected)/admin/chatbots/[botId]/actions.ts:96` — «error: error instanceof Error ? error.message : 'unknown',»; `src/app/(protected)/admin/chatbots/[botId]/transcript-action.ts:61` — «error: error instanceof Error ? error.message : 'No se pudo cargar el transcript.',»; `src/app/(protected)/admin/chatbots/bulk-actions.ts:55` — «error: error instanceof Error ? error.message : 'unknown',»; `src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx:144` — «toast.error('No se pudieron correr los checks: ${String(error)}')»; `src/app/(protected)/admin/chatbots/new/actions.ts:91` — «error: error instanceof Error ? error.message : 'Error desconocido',»
+- Evidencia: `src/app/(protected)/admin/chatbots/[botId]/actions.ts:96` — «error: error instanceof Error ? error.message : 'unknown',»; `src/app/(protected)/admin/chatbots/[botId]/transcript-action.ts:61` — «error: error instanceof Error ? error.message : 'No se pudo cargar el transcript.',»; `src/app/(protected)/admin/chatbots/bulk-actions.ts:55` — «error: error instanceof Error ? error.message : 'unknown',»; `src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx:144` — «toast.error('No se pudieron correr los checks: ${String(error)}')»; `src/app/(protected)/admin/chatbots/new/actions.ts:91` — «error: error instanceof Error ? error.message : 'Error desconocido',»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:239` — «console.error('assignPlanToOrg error:', error) return fail(error instanceof Error ? error.message : 'Error desconocido.')»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:187` — «await prisma.subscription.create({ data: { organizationId,»; `src/app/(protected)/admin/messages/_actions/message.actions.ts:122` — «return fail(error instanceof Error ? error.message : 'Failed to list conversations')»; `src/app/(protected)/admin/messages/_actions/message.actions.ts:202` — «return fail(error instanceof Error ? error.message : 'Failed to send message')»; `src/app/(protected)/admin/messages/_components/conversation-list-loader.tsx:15` — «{conversationsResult.error}»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:639` — «return fail(error instanceof Error ? error.message : 'Failed to create project')»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:829` — «return fail(error instanceof Error ? error.message : 'Failed to delete project')»; `src/app/(protected)/admin/projects/_actions/maintenance.actions.ts:86` — «return fail(error instanceof Error ? error.message : 'Failed to mark payment as paid')»; `src/lib/action-utils.ts:20` — «// Convierte cualquier error en un mensaje limpio para el cliente, sin filtrar // el array crudo de un ZodError ni un stack trace.»
 - Impacto: Solo lo ve un SUPER_ADMIN, pero expone nombres de tablas, constraints y mensajes del SDK en toasts; contradice 'Never expose internal error messages'.
 - Propuesta: Mapear errores conocidos a mensajes y loguear el resto con captureException.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h3.adm-chatbots
+- Nodo(s): h3.adm-chatbots, h4.adm-clientes.plan, h4.adm-clientes.billing-override, int.sentry, lib.actions, h4.adm-mensajes, h4.adm-proyectos
 
 ### [SEC-063] Las páginas de Inteligencia del chatbot (actividad y health) no tienen guard propio
 - Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
@@ -863,6 +904,56 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [SEC-073]
 - Nodo(s): lib.chatbot.tools, int.telegram, modelo.ChatbotEvent, h3.vis-api-chatbot
 
+### [SEC-085] Boveda admin: las credenciales se descifran en el render y el 'revelar' no protege ni audita
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx:39` — «const credential = isAccess && asset.description ? resolveCredentialDisplay(asset.description)»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx:71` — «<VaultRevealButton value={credential.value} />»; `src/components/dashboard/VaultRevealButton.tsx:1` — «'use client'»
+- Impacto: Al abrir la pestana Boveda, todas las credenciales ACCESS del cliente viajan en claro en el payload RSC al navegador del admin, aunque nadie toque 'revelar'. No queda registro de que SUPER_ADMIN vio que credencial: para el primer cliente real no hay trazabilidad de acceso a sus accesos.
+- Propuesta: Descifrar bajo demanda con una server action que exija SUPER_ADMIN, devuelva un solo valor y escriba audit (CREDENTIAL_REVEALED); el render solo manda metadatos.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-036]
+- Nodo(s): h4.adm-clientes.tab-boveda, modelo.ClientAsset, lib.audit-log
+
+### [SEC-088] Editar y borrar horas no valida a quién pertenecen: un SUPER_ADMIN borra horas ajenas sin rastro (updateTimeEntry además no tiene llamadores)
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/team/_actions/time-entry.actions.ts:203` — «const existingEntry = await prisma.osTimeEntry.findUnique({ where: { id: entryId },»; `src/app/(protected)/admin/team/_actions/time-entry.actions.ts:250` — «const entry = await prisma.osTimeEntry.delete({»; `src/app/(protected)/admin/team/_actions/time-entry.actions.ts:160` — «if (task.assignedToId !== null && task.assignedToId !== userId) {»
+- Impacto: La regla 'nadie registra horas en nombre de otro' (PLAN-604) se cumple al crear pero no al editar ni al borrar: desde el panel de horas (time-entry-panel.tsx:189) un admin puede borrar las de un compañero y no queda audit log. Riesgo bajo entre socios, pero el reporte de horas pierde valor como registro.
+- Propuesta: Exigir entry.userId === sesión en update/delete (o auditar si se permite) y podar updateTimeEntry si no se usa.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-proyectos.carga-horas, modelo.OsTimeEntry
+
+### [SEC-089] El webhook de alertas acepta cualquier URL (http, hosts internos) y el servidor le hace POST sin restricción
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/settings/_actions/settings.schemas.ts:25` — «alertWebhookUrl: z.preprocess(emptyStringToNull, z.string().url().nullable()),»; `src/lib/alerts.ts:131` — «const response = await fetch(webhookUrl, {»
+- Impacto: Con una cuenta SUPER_ADMIN (precondición fuerte) el server de develOP manda POSTs a direcciones internas o a un servidor propio con nombres de clientes y detalle de tickets, y el cambio no se audita.
+- Propuesta: Exigir https y una allowlist de hosts (Slack, Discord, n8n propio) o reutilizar validateWebhookUrl del módulo CRM.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-054]
+- Nodo(s): h4.adm-config.datos-y-alertas, lib.alerts
+
+### [SEC-091] updateClient cambia el email de login del cliente sin avisar al email anterior ni invalidar la sesión
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/updateClient.ts:71` — «const nextEmail = parsed.userEmail.toLowerCase()»; `src/modules/chatbot/server/admin/updateClient.ts:108` — «const nextUser = await tx.user.update({ where: { id: adminUser.id }, data: {»
+- Impacto: El SUPER_ADMIN reescribe el email con el que el cliente se loguea y recibe el magic link: no se le avisa ni al email viejo ni al nuevo, no se resetea emailVerified y no se sube sessionVersion. Un typo deja al cliente sin acceso por magic link, sin que él sepa por qué. userPhone no tiene .max() (:25).
+- Propuesta: Avisar por email (viejo y nuevo) al cambiar el email de login, resetear emailVerified o pedir confirmación, subir sessionVersion y acotar userPhone.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-014]
+- Nodo(s): h4.adm-clientes.editar-datos, modelo.User, h1.auth-login
+
+### [SEC-092] toErrorMessage (action-utils, FROZEN-inferido) devuelve al cliente el message crudo de cualquier Error: la alerta D3-A4 quedó resuelta solo para ZodError (configuración, novedades, tareas, horas, tickets) y dos rutas devuelven String(error)
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/settings/_actions/settings.actions.ts:171` — «return fail(toErrorMessage(error, 'No se pudo actualizar la configuracion.'))»; `src/lib/action-utils.ts:31` — «if (error instanceof Error) { return error.message }»; `src/lib/action-utils.ts:28` — «if (error instanceof ZodError) { return error.issues[0]?.message ?? fallback»; `src/app/(protected)/admin/announcements/_actions/announcements.actions.ts:56` — «return fail(toErrorMessage(error, 'No se pudo publicar la novedad.'))»; `src/lib/action-utils.ts:32` — «return error.message»; `src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx:178` — «{serverError}»; `src/app/api/admin/alerts/trigger-detector/route.ts:15` — «return NextResponse.json({ ok: false, error: String(error) }, { status: 500 })»; `src/app/(protected)/admin/team/_actions/task.actions.ts:193` — «return fail(error instanceof Error ? error.message : 'Failed to create task')»
+- Impacto: El fix 5e33733 resolvió el ZodError (action-utils.ts:28-29). Sin embargo, un error de ensureAgencySettingsRecord o de agencySettings.update (settings.actions.ts:145-166), por ejemplo un PrismaClientKnownRequestError o un fallo de conexión, devuelve su message completo a la UI: invocación de Prisma, modelo, campo y posiblemente el host. Solo lo ve un SUPER_ADMIN, pero viola 'Never expose internal error messages'. Lo mismo pasa en project.actions.ts:829.
+- Propuesta: Decisión para Valentino (action-utils.ts es FROZEN-inferido): que toErrorMessage solo pase el message de una clase UserFacingError, y fallback para el resto. Mientras tanto, los callers pueden mapear errores de Prisma a fallback.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [SEC-062]
+- Nodo(s): h4.adm-config, lib.action-utils, h4.adm-novedades.publicar, lib.actions, int.sentry, h4.adm-alertas, h4.adm-proyectos.tareas, h4.adm-tickets
+
 ## Bugs latentes
 
 ### [BUG-002] El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo
@@ -975,12 +1066,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-010] El portal muestra un precio de plan desactualizado: Subscription.price solo se escribe al crear la suscripción
 - Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `prisma/schema.prisma:659` — «price Float»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:179` — «const subData: Prisma.SubscriptionUncheckedUpdateInput = {»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:192` — «price: targetPlan.monthlyPrice.toNumber(),»; `src/lib/plan/get-plan-for-org.ts:53` — «planId: sub.pendingPlanId,»; `src/app/(protected)/dashboard/cuenta/perfil/page.tsx:211` — «price: org.subscription.price,»; `src/components/dashboard/ProfileForms.tsx:662` — «{plan.currency} {plan.price.toLocaleString('es-AR')}»
+- Evidencia: `prisma/schema.prisma:659` — «price Float»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:179` — «const subData: Prisma.SubscriptionUncheckedUpdateInput = {»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:192` — «price: targetPlan.monthlyPrice.toNumber(),»; `src/lib/plan/get-plan-for-org.ts:53` — «planId: sub.pendingPlanId,»; `src/app/(protected)/dashboard/cuenta/perfil/page.tsx:211` — «price: org.subscription.price,»; `src/components/dashboard/ProfileForms.tsx:662` — «{plan.currency} {plan.price.toLocaleString('es-AR')}»; `src/app/(protected)/admin/page.tsx:226` — «_sum: { price: true,»
 - Impacto: Después de un upgrade (plan.actions.ts:197-200) o de un downgrade diferido (get-plan-for-org.ts:50-58), el cliente ve en /dashboard/cuenta/perfil el nombre del plan nuevo con el precio del anterior; un priceOverride vigente tampoco se muestra. El primer cliente real que cambie de plan va a ver un precio distinto del que se le cobra.
 - Propuesta: Una sola fuente: mostrar el precio efectivo (priceOverride vigente o Plan.monthlyPrice) en lugar de Subscription.price, o actualizar price en las dos rutas de cambio de plan. Eliminar Subscription.price si queda sin uso es decisión para Valentino (schema FROZEN).
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-cuenta, h4.adm-clientes, modelo.Subscription, modelo.Plan
+- Nodo(s): h2.cli-cuenta, h4.adm-clientes, modelo.Subscription, modelo.Plan, h4.adm-clientes.plan, h4.adm-dashboard, lib.plan
 
 ### [BUG-011] seed-agency-os aborta siempre en el proyecto interno: el mapa de orgs nunca recibe 'develop'
 - Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -1017,12 +1108,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-015] El hard-delete de un cliente borra en cascada los registros financieros de la agencia y los leads del bot (que el resumen subinforma) y deja vivos a sus usuarios
 - Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql:17` — «ALTER TABLE "Project" ADD CONSTRAINT "Project_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;»; `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:198` — «ALTER TABLE "OsPaymentMilestone" ADD CONSTRAINT "OsPaymentMilestone_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:49` — «_count: { select: { projects: true, tickets: true, messages: true, clientAssets: true },»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:141` — «await tx.organization.delete({ where: { id: organizationId } })»; `src/modules/chatbot/server/admin/createClientOnly.ts:66` — «if (existingUser) throw new Error('El email ingresado ya está registrado en el sistema.')»; `prisma/schema.prisma:528` — «organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:84` — «where: { botConfigId: botId, convertedToOsLeadId: null },»; `prisma/schema.prisma:1441` — «botConfig BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:190` — «// (p. ej. desde un ticket "Solicitud de eliminación de cuenta"). La action y el»
+- Evidencia: `prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql:17` — «ALTER TABLE "Project" ADD CONSTRAINT "Project_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;»; `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:198` — «ALTER TABLE "OsPaymentMilestone" ADD CONSTRAINT "OsPaymentMilestone_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:49` — «_count: { select: { projects: true, tickets: true, messages: true, clientAssets: true },»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:141` — «await tx.organization.delete({ where: { id: organizationId } })»; `src/modules/chatbot/server/admin/createClientOnly.ts:66` — «if (existingUser) throw new Error('El email ingresado ya está registrado en el sistema.')»; `prisma/schema.prisma:528` — «organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:84` — «where: { botConfigId: botId, convertedToOsLeadId: null },»; `prisma/schema.prisma:1441` — «botConfig BotConfig @relation(fields: [botConfigId], references: [id], onDelete: Cascade)»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:190` — «// (p. ej. desde un ticket "Solicitud de eliminación de cuenta"). La action y el»; `prisma/schema.prisma:527` — «user User @relation(fields: [userId], references: [id], onDelete: Cascade) organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:50` — «select: { projects: true, tickets: true, messages: true, clientAssets: true },»; `src/modules/chatbot/server/admin/updateClient.ts:79` — «throw new Error('El email ingresado ya está registrado en otro usuario.')»
 - Impacto: Al atender una solicitud de baja (el admin enlaza ?delete=<orgId> desde el ticket) se borran hitos de pago, pagos de mantenimiento y horas cargadas (OsPaymentMilestone/OsMaintenancePayment/OsTimeEntry, también :201 y :207), que son contabilidad de develOP, sin que el modal los mencione. Los User del cliente quedan sin org con email, nombre, teléfono y hash de contraseña: la baja no elimina sus datos personales y el email queda bloqueado para un alta nueva.
 - Propuesta: Contar y mostrar pagos y horas en el resumen; decidir si se preservan (exportarlos antes o desacoplarlos con SetNull, cambio de schema FROZEN: decisión para Valentino); borrar o anonimizar en la misma transacción los User que solo pertenecían a esa org.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h4.adm-clientes, h4.adm-clientes.eliminar-cliente, modelo.Project, modelo.OsPaymentMilestone, modelo.OsMaintenancePayment, modelo.OsTimeEntry, modelo.User, modelo.OrgMember, modelo.ChatbotLead
+- Nodo(s): h4.adm-clientes, h4.adm-clientes.eliminar-cliente, modelo.Project, modelo.OsPaymentMilestone, modelo.OsMaintenancePayment, modelo.OsTimeEntry, modelo.User, modelo.OrgMember, modelo.ChatbotLead, h4.adm-clientes.eliminar-definitivo, h1.auth-login, h2.cli-cuenta
 
 ### [BUG-016] sync-premium-modules borra activaciones no activas de clientes (PAUSED/CANCELLED/INACTIVE) al retirar un slug del catálogo, sin dry-run ni transacción
 - Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -1090,12 +1181,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-024] El plan y BotConfig son dos fuentes de verdad: el chat corta por Plan.quota y usa el modelo del plan con temperatura fija, pero el admin edita y el detector de alertas lee BotConfig.monthlyQuota (1000) y maxOutputTokens no se aplica
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:345` — «if (quota.conversationsUsed >= plan.quota) {»; `src/modules/chatbot/server/chat/handleChatRequest.ts:952` — «temperature: 0.7,»; `src/modules/chatbot/server/admin/detectBotIssues.ts:68` — «if (usage && usage.conversationsCount >= bot.monthlyQuota) {»; `src/modules/chatbot/server/admin/createClientWithBot.ts:186` — «monthlyQuota: 1000,»; `prisma/seeds/sync-plans.ts:72` — «quota: 500,»; `src/modules/chatbot/server/admin/saveBotConfig.ts:45` — «llmModel: z.string().min(1).max(80), temperature: z.number().min(0).max(2), maxOutputTokens: z.number().int().min(100).max(8192),»; `src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx:98` — «value={'${quotaUsed.toLocaleString('es-AR')} / ${bot.monthlyQuota.toLocaleString('es-AR')}'}»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:56` — «<Field label="Temperature" hint="0 es mas determinista, 2 es mas creativo">»; `src/modules/chatbot/server/chat/handleChatRequest.ts:713` — «const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)»; `src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx:46` — «bot.monthlyQuota > 0 ? Math.min(100, (quotaUsed / bot.monthlyQuota) * 100) : 0»; `src/lib/onboarding/core.ts:134` — «monthlyQuota: 1000,»; `src/lib/plan/fallback.ts:50` — «quota: 500,»; `src/app/api/admin/chatbot/demo-chat/[slug]/route.ts:57` — «const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:120` — «{ value: 'DAILY_DIGEST', label: 'Digest diario' },»; `src/lib/client-notifications/notify.ts:94` — «if (org.leadNotificationMode === 'DISABLED') return»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:77` — «<Field label="Quota mensual">»; `src/modules/chatbot/server/llm/providers/anthropic.ts:18` — «throw new ProviderNotImplementedError('anthropic')»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:304` — «<LlmFact label="Quota" value="1000 conv/mes" />»; `src/modules/chatbot/server/admin/preflightChecks.ts:151` — «if (bot.monthlyQuota > 0) {»; `src/modules/chatbot/server/admin/saveBotConfig.ts:47` — «maxOutputTokens: z.number().int().min(100).max(8192),»; `src/modules/chatbot/server/config/getPublicConfig.ts:121` — «routeColorMap: (bot.routeColorMap as unknown as RouteColorMap) ?? {},»; `src/app/api/admin/chatbot/demo-chat/[slug]/route.ts:113` — «maxOutputTokens: bot.maxOutputTokens,»; `prisma/schema.prisma:1315` — «maxOutputTokens Int @default(800)»
+- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:345` — «if (quota.conversationsUsed >= plan.quota) {»; `src/modules/chatbot/server/chat/handleChatRequest.ts:952` — «temperature: 0.7,»; `src/modules/chatbot/server/admin/detectBotIssues.ts:68` — «if (usage && usage.conversationsCount >= bot.monthlyQuota) {»; `src/modules/chatbot/server/admin/createClientWithBot.ts:186` — «monthlyQuota: 1000,»; `prisma/seeds/sync-plans.ts:72` — «quota: 500,»; `src/modules/chatbot/server/admin/saveBotConfig.ts:45` — «llmModel: z.string().min(1).max(80), temperature: z.number().min(0).max(2), maxOutputTokens: z.number().int().min(100).max(8192),»; `src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx:98` — «value={'${quotaUsed.toLocaleString('es-AR')} / ${bot.monthlyQuota.toLocaleString('es-AR')}'}»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:56` — «<Field label="Temperature" hint="0 es mas determinista, 2 es mas creativo">»; `src/modules/chatbot/server/chat/handleChatRequest.ts:713` — «const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)»; `src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx:46` — «bot.monthlyQuota > 0 ? Math.min(100, (quotaUsed / bot.monthlyQuota) * 100) : 0»; `src/lib/onboarding/core.ts:134` — «monthlyQuota: 1000,»; `src/lib/plan/fallback.ts:50` — «quota: 500,»; `src/app/api/admin/chatbot/demo-chat/[slug]/route.ts:57` — «const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:120` — «{ value: 'DAILY_DIGEST', label: 'Digest diario' },»; `src/lib/client-notifications/notify.ts:94` — «if (org.leadNotificationMode === 'DISABLED') return»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:77` — «<Field label="Quota mensual">»; `src/modules/chatbot/server/llm/providers/anthropic.ts:18` — «throw new ProviderNotImplementedError('anthropic')»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:304` — «<LlmFact label="Quota" value="1000 conv/mes" />»; `src/modules/chatbot/server/admin/preflightChecks.ts:151` — «if (bot.monthlyQuota > 0) {»; `src/modules/chatbot/server/admin/saveBotConfig.ts:47` — «maxOutputTokens: z.number().int().min(100).max(8192),»; `src/modules/chatbot/server/config/getPublicConfig.ts:121` — «routeColorMap: (bot.routeColorMap as unknown as RouteColorMap) ?? {},»; `src/app/api/admin/chatbot/demo-chat/[slug]/route.ts:113` — «maxOutputTokens: bot.maxOutputTokens,»; `prisma/schema.prisma:1315` — «maxOutputTokens Int @default(800)»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx:94` — «value={'${org.botConfig.monthlyQuota.toLocaleString('es-AR')} conv'}»; `src/modules/chatbot/server/chat/handleChatRequest.ts:211` — «// a las otras dos. La cuota del plan reemplaza bot.monthlyQuota»
 - Impacto: Con el primer cliente Starter el bot se corta a 500 conversaciones pero la alerta QUOTA_EXHAUSTED compara contra 1000 y nunca dispara; con Pro o Business (3000/5000, sync-plans.ts:88 y :104) dispara a 1000 aunque el bot sigue funcionando. El admin ve '500 / 1000' y el cliente ve el límite del plan. Editar modelo, temperatura, tope de salida o cuota en el admin no cambia nada en runtime, y como streamText no recibe maxOutputTokens, cada uno de los hasta 3 pasos de un turno puede generar el máximo del modelo: el costo por turno de un visitante anónimo no tiene tope configurable.
 - Propuesta: Sacar del editor del admin los campos legacy (o mostrarlos solo lectura con el valor del plan); que detector, preflight y fichas del admin usen getPlanForOrg().quota; pasar maxOutputTokens explícito en streamText. Decisión para Valentino (schema FROZEN): borrar las columnas legacy de BotConfig.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h3.adm-chatbots, h4.adm-alertas, h3.vis-api-chatbot, modelo.BotConfig, modelo.Plan, lib.plan, int.vertex, h3.adm-chatbots.config-llm-y-cuota, h3.adm-chatbots.detalle-overview, lib.chatbot.chat, lib.client-notifications, h3.adm-chatbots.editar-config-bot, h4.adm-clientes.alta-cliente-con-bot, lib.chatbot.llm, h3.adm-chatbots.editar-config
+- Nodo(s): h3.adm-chatbots, h4.adm-alertas, h3.vis-api-chatbot, modelo.BotConfig, modelo.Plan, lib.plan, int.vertex, h3.adm-chatbots.config-llm-y-cuota, h3.adm-chatbots.detalle-overview, lib.chatbot.chat, lib.client-notifications, h3.adm-chatbots.editar-config-bot, h4.adm-clientes.alta-cliente-con-bot, lib.chatbot.llm, h3.adm-chatbots.editar-config, h4.adm-clientes.tab-chatbot
 
 ### [BUG-025] EmailCampaign sin estado intermedio ni métricas: SENDING y SCHEDULED no se escriben (doble envío posible), FAILED no tiene reintento y aperturas y clics nunca se actualizan
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -1601,6 +1692,185 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [BUG-060]
 - Nodo(s): int.cron.generate-insights, lib.chatbot.insights, lib.chatbot.notifications, h2.cli-resultados, int.vertex, int.brevo, modelo.ChatbotInsight
 
+### [BUG-111] Alertas: la vista carga solo las 100 más recientes de cualquier estado y calcula filtros, contadores y triage sobre ese recorte (las pendientes viejas desaparecen)
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/manageAlerts.ts:25` — «take: 100,»; `src/app/(protected)/admin/alerts/AlertsClient.tsx:58` — «const totalPending = alerts.filter((a) => a.status === 'PENDING').length»; `src/app/(protected)/admin/layout.tsx:11` — «async () => prisma.botAlert.count({ where: { status: 'PENDING' } }),»; `src/modules/chatbot/server/admin/manageAlerts.ts:24` — «orderBy: { createdAt: 'desc' }, take: 100,»; `src/modules/chatbot/server/admin/manageAlerts.ts:16` — «...(filter?.status && { status: filter.status as never }),»; `src/app/(protected)/admin/alerts/page.tsx:5` — «const alerts = await listAlerts()»
+- Impacto: Con más de 100 alertas, las PENDING más viejas no aparecen en ninguna columna ni en 'Ver todas' y no se pueden marcar ni resolver desde la UI; 'Totales pendientes', 'Críticas pendientes' y el tiempo promedio de resolución quedan subestimados y el badge del sidebar (que cuenta todas) no coincide con la página.
+- Propuesta: Traer siempre todas las PENDING/ACKNOWLEDGED (o paginar por columna en el server), calcular los stats con count/aggregate en el server y bajar los filtros a listAlerts (PLAN-544).
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-alertas, h4.adm-alertas.triage, h4.adm-alertas.filtros-y-vista-completa, modelo.BotAlert, h4.adm-alertas.listado
+
+### [BUG-112] Emails 'Acción requerida' de una tarea para aprobación: sin await, con fallback a localhost y fallos solo a console.error
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/actions/agency-actions.ts:74` — «// Fire and forget emails to each user»; `src/actions/agency-actions.ts:75` — «const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'»; `src/actions/agency-actions.ts:86` — «}).catch(console.error)»
+- Impacto: El primer cliente real puede no recibir el email de que tiene una entrega para aprobar: la action devuelve antes de que salgan los envíos y en una función serverless las promesas pendientes pueden cortarse; si falta la variable, el link apunta a localhost; ningún fallo llega a Sentry. La notificación in-app sí se crea dentro de la transacción (:37-72).
+- Propuesta: Esperar los envíos con Promise.allSettled (o encolarlos), registrar fallos con captureException y eliminar el fallback a localhost (fallar al arrancar si falta la URL).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-052], [BUG-099], [BUG-119], [UX-051]
+- Nodo(s): h4.adm-clientes.tarea-para-aprobacion, h2.cli-proyecto, int.brevo, int.sentry
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-112
+
+### [BUG-115] Billing override: precio vacio o por defecto aplica una cortesia de 0 USD por 90 dias en un clic
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx:33` — «const [price, setPrice] = useState<string>( currentPriceOverride !== null ? String(currentPriceOverride) : '0',»; `src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx:52` — «const priceNum = Number(price) if (Number.isNaN(priceNum) || priceNum < 0) {»; `src/app/(protected)/admin/clients/_actions/plan.schemas.ts:17` — «priceOverride: z.number().min(0).max(100_000),»
+- Impacto: Si el admin borra el campo (Number('') = 0) o toca 'Aplicar override' sin cambiar el valor inicial, el cliente queda facturado en 0 USD hasta la fecha por defecto (+90 dias), sin confirmacion (BillingOverrideForm.tsx:141). Quitar el override si pide confirmacion; aplicarlo no.
+- Propuesta: Campo de precio vacio por defecto y obligatorio; rechazar '' en cliente y servidor (precio requerido explicito); pedir confirmacion cuando el precio es 0 o menor al del plan, mostrando el monto y la fecha.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-134]
+- Nodo(s): h4.adm-clientes.billing-override, modelo.Subscription, h2.cli-cuenta
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-116
+
+### [BUG-116] No se puede cancelar un downgrade programado desde la UI
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx:37` — «const noChange = selectedKey === currentPlanKey»; `src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx:109` — «disabled={pending || noChange}»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:124` — «if (kind === 'unchanged') { // Limpia cualquier pending obsoleto que apunte a este mismo plan.»
+- Impacto: Si se programa por error un downgrade, la unica rama que lo limpia (re-elegir el plan actual) esta bloqueada por el boton. El unico camino es un upgrade real (que resetea la cuota del mes, plan.actions.ts:206-208) y volver a bajar. Ademas esa rama no deja audit ni invalida cache (:124-132).
+- Propuesta: Agregar en PlanAssignmentCard (junto al aviso de downgrade pendiente :62-75) un boton 'Cancelar downgrade' que llame a una action dedicada con audit; o permitir 'Sin cambios' cuando hay pendingPlan.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.plan, modelo.Subscription, lib.audit-log
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-117
+
+### [BUG-119] Email al cliente por respuesta del admin: fire-and-forget sin after(), puede perderse en serverless
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/messages/_actions/message.actions.ts:193` — «queueAdminMessageEmail({ organizationId: parsed.organizationId, senderName: adminUser?.name ?? 'Equipo develOP',»; `src/app/(protected)/admin/messages/_actions/message.actions.ts:200` — «return ok({ id: message.id })»; `src/lib/email/admin-message-notification.ts:20` — «void (async () => {»
+- Impacto: La action responde OK antes de que el email salga; en Netlify (funciones serverless) el trabajo pendiente después de la respuesta puede congelarse o cortarse. El primer cliente real puede no enterarse por email de que develOP le respondió, y nadie lo sabe: el resultado no vuelve a la action ni hay Sentry en este camino. No hay after()/waitUntil en todo src (git grep).
+- Propuesta: Envolver el envío en after() de next/server (o await con timeout acotado) y capturar el fallo en Sentry; decidir si el aviso por email es parte del contrato con el cliente.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-052], [BUG-099], [BUG-112]
+- Nodo(s): h4.adm-mensajes.responder, int.brevo, h2.cli-mensajes, modelo.Message
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-121
+
+### [BUG-125] Un proyecto recién creado sin monto, lead ni horas queda oculto en el tablero por el filtro por defecto
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/projects/_components/projects-filters.ts:65` — «start: { period: '6m', from: '', to: '' },»; `src/app/(protected)/admin/projects/_components/projects-filters.ts:162` — «if (!startDate) { return false»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:382` — «if (candidates.length === 0) { return null»; `src/app/(protected)/admin/projects/_components/project-form.tsx:187` — «closeModal() router.refresh()»
+- Impacto: Bloqueante menor para el primer cliente real. Si se da de alta su proyecto sin monto (o un proyecto interno), no hay hitos, horas, mantenimiento ni lead, y deriveProjectStartDate devuelve null. Con el filtro por defecto (Inicio: 6 meses) la card no aparece en Planning después de guardar: el contador sube pero el tablero no la muestra, y el alta parece fallida. Pasa lo mismo con proyectos convertidos de un lead creado hace más de 6 meses. El registro de cambios declara el fix ('if (!startDate) return true', Proyectos_ registro de cambios.md:15), pero no está en ningún branch.
+- Propuesta: Que matchesStart trate startDate null como visible (o que el default de Inicio sea 'Todos'). Agregar un test del filtro con startDate null y corregir el registro de cambios.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-proyectos, h4.adm-proyectos.tablero-kanban, h4.adm-proyectos.alta-edicion, modelo.Project
+
+### [BUG-126] Los hitos de pago se crean solo en el alta: si el monto se carga o cambia después no se crean ni se ajustan, y Pagos no tiene estado vacío
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/projects/_actions/project.actions.ts:620` — «await createDefaultMilestones(tx, createdProject.id, parsed.agreedAmount)»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:685` — «...(data.agreedAmount !== undefined ? { agreedAmount: data.agreedAmount } : {}),»; `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:127` — «<div className="mt-5 grid gap-4 lg:grid-cols-2"> {project.milestones.map((milestone) => (»
+- Impacto: Si el proyecto del primer cliente se crea sin monto y el monto se carga al editarlo, nunca tendrá hitos de inicio y entrega. createDefaultMilestones solo se llama en :620 y :903, y no hay UI para crearlos. La pestaña Pagos muestra un bloque 'Hitos de desarrollo' vacío y sin explicación. Si el monto cambia, los hitos quedan con el 50/50 anterior y 'Hitos pagados' (page.tsx:307) y la card del tablero muestran montos que no coinciden con lo acordado.
+- Propuesta: En updateProject, llamar a createDefaultMilestones cuando el proyecto no tenga hitos. Decisión para Valentino: si un cambio de monto recalcula los hitos no pagados. Agregar en Pagos una rama vacía con explicación.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-proyectos.pagos-hitos, h4.adm-proyectos.alta-edicion, modelo.OsPaymentMilestone
+
+### [BUG-127] Una entrega con cambios pedidos por el cliente no se puede reenviar a aprobación desde el admin
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/projects/_components/task-list.tsx:618` — «if (task.approvalStatus || task.status !== 'DONE') { return null»; `src/actions/dashboard-actions.ts:135` — «approvalStatus: 'REJECTED',»; `src/lib/actions/projects.ts:194` — «data: { approvalStatus: 'PENDING_APPROVAL' },»
+- Impacto: Cuando el primer cliente pide cambios en una entrega (flujo D2 'Aprobar o pedir cambios en una entrega'), el admin ve 'Cambios solicitados' y el motivo, pero el botón 'Enviar a aprobacion' no vuelve a aparecer. Ninguna escritura del repo vuelve approvalStatus a null ni re-envía una tarea REJECTED (ver ausencias). El ciclo pedir cambios, corregir y aprobar no se puede cerrar, y la tarea queda rechazada en el portal del cliente. La única salida es crear otra tarea.
+- Propuesta: Mostrar el control también con REJECTED: el re-envío pasa la tarea a PENDING_APPROVAL y limpia rejectionReason. Alternativa: resetear approvalStatus cuando la tarea sale de DONE. En ambos casos, mirar el resultado de la action.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-062]
+- Nodo(s): h4.adm-proyectos.aprobacion-entregas, h2.cli-proyecto, modelo.Task
+
+### [BUG-128] Fechas sin hora guardadas como medianoche UTC se muestran un día antes en Argentina: entrega estimada, horas cargadas y fechas límite del plan y del billing override
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/projects/_actions/project.schemas.ts:23` — «const optionalDateSchema = z.preprocess(emptyValueToUndefined, z.coerce.date().optional())»; `src/app/(protected)/admin/projects/_components/project-card.tsx:111` — «}).format(new Date(value))»; `src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:72` — «return new Date().toISOString().slice(0, 10)»; `src/app/(protected)/admin/projects/_components/projects-filters.ts:199` — «return time >= startOfToday().getTime() && (windowEnd ? time <= windowEnd.getTime() : true)»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:271` — «const overrideUntilDate = new Date(overrideUntil)»; `src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx:70` — «message: 'Override seteado: $${result.data.priceOverride} hasta ${new Date(result.data.overrideUntil).toLocaleDateString('es-AR')}',»; `src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx:58` — «const date = new Date(data.pending.effectiveAt).toLocaleDateString('es-AR')»; `src/app/(protected)/admin/team/_actions/time-entry.schemas.ts:33` — «const dateSchema = z.preprocess(emptyValueToUndefined, z.coerce.date())»; `src/app/(protected)/admin/team/_actions/time-entry.actions.ts:178` — «date: parsed.date,»; `src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:68` — «}).format(new Date(value))»
+- Impacto: Una entrega estimada del 20/10 se guarda como 2026-10-20T00:00Z. La card, formateada en un navegador en UTC-3, muestra '19 oct', mientras la ficha (formateada en el servidor) dice 20. El filtro 'Próxima semana' deja afuera una entrega de hoy. En Horas, después de las 21 h la fecha por defecto es la de mañana, y el schema de horas tiene el mismo patrón (time-entry.schemas.ts:33). Si el portal del cliente formatea igual, el cliente ve la fecha corrida.
+- Propuesta: Parsear 'YYYY-MM-DD' como fecha calendario (mediodía UTC, o un helper de dates-ar) en project.schemas y time-entry.schemas, y formatear con timeZone 'America/Argentina/Buenos_Aires'.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [BUG-034], [BUG-113]
+- Nodo(s): h4.adm-proyectos.tablero-kanban, h4.adm-proyectos.horas, modelo.Project, modelo.OsTimeEntry, h4.adm-clientes.billing-override, h4.adm-clientes.plan, h4.adm-clientes.tab-chatbot, h4.adm-proyectos.carga-horas, h4.adm-equipo.workload
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-123
+
+### [BUG-129] Editar proyecto no permite vaciar campos opcionales (descripción, montos, entrega, servicio)
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/projects/_actions/project.schemas.ts:9` — «const trimmed = value.trim() return trimmed === '' ? undefined : trimmed»; `src/app/(protected)/admin/projects/_actions/project.schemas.ts:14` — «if (value === null || value === undefined || value === '') {»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:681` — «...(data.description !== undefined ? { description: data.description } : {}),»
+- Impacto: Si en 'Editar' se borra la descripción, el monto acordado, el monthly rate o la entrega estimada y se guarda, no cambia nada: el string vacío pasa a undefined y updateProject saltea el campo. El admin cree que lo borró, pero el dato viejo sigue en la ficha, en los filtros y en el portal del cliente.
+- Propuesta: En UpdateProjectSchema, distinguir 'no enviado' de 'vaciado' (null explícito para limpiar) y mapear null a la columna en updateProject.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-proyectos.alta-edicion, modelo.Project
+
+### [BUG-130] Elegir el servicio de un proyecto activa un Service en la org del cliente y nunca desactiva el anterior
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/projects/_actions/project.actions.ts:279` — «if (!existingService) { await tx.service.create({»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:673` — «await syncOrganizationService(tx, organization, normalizedServiceType)»; `src/lib/billing/get-current-plan.ts:39` — «prisma.service.findMany({ where: { organizationId,»
+- Impacto: Si el admin elige 'AI' por error y lo corrige a 'Web', el primer cliente queda con dos Service ACTIVE. Esos servicios se leen en Servicios (dashboard/services/page.tsx:173) y en Facturación (get-current-plan.ts:39), así que el cliente vería servicios que no contrató. Los proyectos internos también crean Services en la org develop.
+- Propuesta: Decisión para Valentino: si la clasificación del proyecto debe sincronizar Service, hacerlo idempotente por proyecto y pausar el anterior; si no, separar la clasificación del proyecto del alta de servicios contratados.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-proyectos.alta-edicion, h2.cli-servicios, h2.cli-cuenta, modelo.Service
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-124
+
+### [BUG-132] En mobile /contact no tiene formulario: el link de referido /contact?ref= no puede atribuir desde un teléfono
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/contact/page.tsx:119` — «className="relative hidden h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#031319]/84 p-5 md:p-6 lg:flex"»; `src/app/contact/page.tsx:148` — «<form action={action} className="grid grid-cols-2 gap-2"> <input type="hidden" name="referralCode" value={referralCode} />»; `src/app/contact/page.tsx:262` — «<div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 lg:hidden">»
+- Impacto: Debajo de 1024 px la sección que contiene el único formulario (y el campo oculto referralCode) está en display:none; en mobile solo quedan WhatsApp, llamada y email, que no llevan el código. La atribución ocurre solo en submitContactForm (src/lib/actions/contact.ts:68-69). Bloqueante para el primer cliente que comparta su link desde Referidos: los negocios que lo abran en el celular nunca quedan registrados y el mes bonificado no se gana. Además la página bloquea el scroll (page.tsx:77-94) y en desktops de poca altura el bloque del formulario puede recortarse (PROBABLE, caso manual).
+- Propuesta: Mostrar el formulario también en mobile (o un CTA que lo despliegue) o propagar ?ref= al prefill de WhatsApp/email con otro camino de atribución; revisar el bloqueo de scroll en alturas bajas.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-052], [DEU-021]
+- Nodo(s): h6.vis-contacto.formulario, h6.vis-contacto.captura-referido, h2.cli-referidos, modelo.Referral, modelo.ContactSubmission
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-126
+
+### [BUG-133] La ficha del cliente mide la cuota del bot en tokens contra monthlyQuota×1000, pero monthlyQuota es el cupo de conversaciones
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/components/admin/managers/ChatbotManager.tsx:69` — «const maxTokens = botConfig.monthlyQuota * 1000»; `src/components/admin/managers/ChatbotManager.tsx:70` — «const usagePercentage = Math.min((currentQuota.tokensOut / maxTokens) * 100, 100)»; `src/modules/chatbot/server/quota/checker.ts:44` — «withinQuota: conversationsUsed < monthlyQuota,»
+- Impacto: El admin ve 'Límite: 1.000.000' tokens y una barra casi vacía mientras el bot puede estar al 100 % de sus conversaciones y respondiendo degradado; no anticipa el QUOTA_EXHAUSTED ni ofrece el upgrade. Con monthlyQuota = 0 la barra calcula 0/0 y el ancho queda en NaN %.
+- Propuesta: Mostrar conversationsCount / monthlyQuota (la métrica de checker.ts) y, si interesa, los tokens como dato aparte sin límite inventado; proteger la división por cero.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-024]
+- Nodo(s): h4.adm-clientes, h4.adm-clientes.resumen-chatbot, lib.chatbot.quota, modelo.BotConfig
+
+### [BUG-134] Guardar un precio de módulo con el campo vacío lo publica a USD 0 en el portal de clientes, sin confirmación
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/settings/_components/settings-console.tsx:140` — «const nextPrice = Number(pricingDrafts[moduleKey] ?? '')»; `src/app/(protected)/admin/settings/_actions/settings.schemas.ts:39` — «price: z.coerce.number().min(0, 'Ingresa un precio valido.'),»; `src/app/(protected)/admin/settings/_actions/settings.actions.ts:193` — «await prisma.premiumModule.update({ where: { id: moduleRow.id }, data: { priceMonthlyUsd: parsed.price },»
+- Impacto: Number('') es 0 y el schema acepta 0: un clic en 'Guardar' con el input borrado deja el módulo a USD 0 en /dashboard/services (revalidatePath :199) y el toast dice 'Precio actualizado'. El primer cliente ve un módulo gratis y lo pide a ese precio.
+- Propuesta: Rechazar el vacío en cliente y servidor (string no vacío antes del coerce, o .positive() si 0 no es válido), pedir confirmación del cambio de precio y auditarlo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-017], [BUG-115]
+- Nodo(s): h4.adm-config.precios-modulos, modelo.PremiumModule, h2.cli-servicios
+
+### [BUG-135] 'Enviar reportes ahora' reenvía el reporte semanal a todos los clientes en cada clic: sin confirmación, sin deduplicación por semana y sin rate limit
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/settings/reports/ReportSettingsClient.tsx:34` — «const res = await fetch('/api/admin/reports/send-now', { method: 'POST' })»; `src/app/api/admin/reports/send-now/route.ts:12` — «const results = await sendWeeklyReports()»; `src/modules/chatbot/server/reports/sendWeeklyReports.ts:63` — «const result = await sendTransactionalEmail({»
+- Impacto: Cada clic (o el cron del lunes más un clic) manda otro email a cada cliente con bot activo: sendWeeklyReports no mira REPORT.WEEKLY_SENT antes de enviar. El envío es secuencial dentro del request y puede cortarse por timeout a mitad. A diferencia de send-executive-report (route.ts:35, applyAuthRateLimit), este endpoint no tiene límite. El primer cliente recibe el mismo reporte varias veces.
+- Propuesta: Confirmación 'Vas a mandar N emails'; deduplicar por bot y semana (evento o periodKey como el reporte ejecutivo); rate limit por admin; mover el envío a un job o paginarlo.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [BUG-026]
+- Nodo(s): h4.adm-config.reportes-semanales, int.brevo, int.cron.send-weekly-reports, lib.chatbot.reports, modelo.ChatbotEvent
+
+### [BUG-138] El hard-delete y el archivado no protegen la org de la agencia (develOP), que aparece como un cliente más
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/page.tsx:22` — «prisma.organization.findMany({ where: { deletedAt: null },»; `src/app/(protected)/admin/projects/page.tsx:11` — «where: { slug: { not: 'develop' } },»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:141` — «await tx.organization.delete({ where: { id: organizationId } })»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:527` — «confirmPhrase="ELIMINAR"»; `src/app/(protected)/admin/chatbot/activity/page.tsx:11` — «prisma.botConfig.findUnique({ where: { slug: 'develop' }, ...»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:233` — «where: { slug: 'develop' },»
+- Impacto: La lista de Clientes trae todas las orgs no archivadas, sin excluir la de la agencia, al revés que Proyectos, que sí la excluye. Ni hardDeleteClient ni archiveClient la bloquean del lado del servidor, y la confirmación pide tipear 'ELIMINAR', no el nombre del cliente. Un error del SUPER_ADMIN (elegir la fila de develOP y confirmar) borra en cascada el bot del sitio con sus conversaciones y leads, todos los proyectos internos con sus hitos de pago y horas, más tickets y mensajes. Sin backups (DR-01) no hay vuelta atrás. Además, el widget del sitio, /admin/chatbot/activity y health, que buscan slug 'develop', y el alta de proyectos internos (project.actions.ts:233) dejan de funcionar. Antes del primer cliente real, es el borrado irreversible más grande al que el panel está expuesto.
+- Propuesta: Rechazar en el servidor el archivado y el hard-delete de la org de la agencia (slug 'develop' o un flag isAgency) dentro de hardDeleteClient/archiveClient. Excluirla de /admin/clients igual que hace projects/page.tsx:11. Pedir que se tipee el nombre o el slug del cliente en vez de una frase genérica. Exigir que el cliente esté archivado antes del hard-delete. Resolver DR-01 (backups).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-015], [DEU-064]
+- Nodo(s): h4.adm-clientes, h4.adm-clientes.eliminar-definitivo, h4.adm-clientes.archivar, modelo.Organization, h3.vis-widget-develop, h4.adm-proyectos
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-130
+
+### [BUG-139] Form de contacto: el rate limit consulta la DB fuera del try y un fallo de Neon tira la página de error en vez del mensaje
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/actions/contact.ts:24` — «const rl = await checkRateLimit({ key: 'contactFormPerIp:${ipHash}',»; `src/lib/actions/contact.ts:61` — «try {»; `src/lib/rate-limit/limiter.ts:44` — «const rows = await prisma.$queryRawUnsafe<UpsertRow[]>(»; `src/lib/prisma.ts:6` — «globalForPrisma.prisma ?? new PrismaClient({ log: ['error'] })»
+- Impacto: El upsert del rate limit no tiene catch (limiter.ts:44) y en contactFormAction corre antes del try (:61). Si Neon tarda en despertar o la conexión falla, la action lanza la excepción, useActionState la propaga al error boundary y el visitante ve la pantalla de error en vez de 'No se pudo enviar el formulario'. Es el formulario con el que entran los leads de develOP, y no hay retry ni connect_timeout en prisma.ts.
+- Propuesta: Mover getClientIpHash/checkRateLimit adentro del try, o envolverlos con un mensaje útil y captureException. Evaluar retry corto ante cold-start (RESIL-07).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-025]
+- Nodo(s): h6.vis-contacto.enviar-formulario, lib.rate-limit, lib.prisma
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-131
+
 ### [BUG-004] El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
@@ -1707,12 +1977,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-052] sendAgencyAlert sin await dentro de server actions (fire-and-forget en serverless)
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/lib/actions/upsell.ts:99` — «sendAgencyAlert({ type: 'LEAD_UPSELL',»; `src/lib/actions/upsell.ts:104` — «}).catch(() => {})»; `src/lib/actions/messages.ts:163` — «}).catch(() => {})»
+- Evidencia: `src/lib/actions/upsell.ts:99` — «sendAgencyAlert({ type: 'LEAD_UPSELL',»; `src/lib/actions/upsell.ts:104` — «}).catch(() => {})»; `src/lib/actions/messages.ts:163` — «}).catch(() => {})»; `src/lib/actions/contact.ts:72` — «sendAgencyAlert({ type: 'LEAD_EXTERNAL',»; `src/lib/actions/contact.ts:77` — «}).catch(() => {})»; `src/lib/actions/contact.ts:95` — «console.error('contactFormAction error:', error)»
 - Impacto: En Netlify la función puede congelarse al devolver la respuesta y el fetch al webhook (alerts.ts:131-137, timeout 8 s) quedar sin completar: el pedido de upsell o el mensaje del cliente llega a la base pero develOP no recibe el aviso.
 - Propuesta: Usar after() de next/server para el envío o await con el timeout existente.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): int.webhook-alertas, lib.actions
+- Nodo(s): int.webhook-alertas, lib.actions, h6.vis-contacto.enviar-formulario, int.sentry, int.n8n
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-058
 
 ### [BUG-053] Health Score: SEO siempre null (placeholder) y tareas en curso vencidas contadas dos veces
@@ -1960,6 +2230,139 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h3.vis-whatsapp.identidad-bsuid, modelo.ContactIdentityTransition
 
+### [BUG-113] Fechas en UTC en vez de hora Argentina: KPIs de hoy/semana/mes del dashboard y caducidad de novedades
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/page.tsx:66` — «current.setHours(23, 59, 59, 999)»; `src/app/(protected)/admin/page.tsx:60` — «current.setHours(0, 0, 0, 0)»; `src/app/(protected)/admin/announcements/_actions/announcements.actions.ts:36` — «const candidate = new Date('${parsed.expiresOn}T23:59:59.999Z')»
+- Impacto: Con el servidor en UTC, 'Leads pendientes de follow-up hoy' corta a las 20:59 ART y después de las 21:00 suma los de mañana; la semana arranca el domingo 21:00 y el mes el último día 21:00 ART, así que un cobro de esa noche cae en el mes siguiente. Una novedad que caduca 'el 10' desaparece el 10 a las 20:59 ART (esto último no depende del TZ del server).
+- Propuesta: Usar los helpers de fecha AR existentes (src/lib/dates-ar.ts / tz-ar.ts) para los límites de día, semana y mes y para el fin de día de expiresOn.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-034], [BUG-128]
+- Nodo(s): h4.adm-dashboard, h4.adm-dashboard.kpis-comerciales, h4.adm-novedades.publicar, lib.dates-ar
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-114
+
+### [BUG-114] Tasa de respuesta del dashboard subestimada: el denominador incluye perdidos y postergados que sí respondieron
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/page.tsx:45` — «LeadStatus.PERDIDO,»; `src/app/(protected)/admin/page.tsx:349` — «const responseRate = formatPercentage(respondedCount, demoQualifiedCount)»; `src/app/(protected)/admin/page.tsx:607` — «primaryHint="Sobre leads en etapa demo o posterior, según su estado actual"»
+- Impacto: Un lead que respondió y después pasó a PERDIDO o POSTERGADO cuenta en el denominador (DEMO_PIPELINE_STATUSES) y no en el numerador (RESPONDED_PIPELINE_STATUSES): la tasa baja con cada pérdida aunque la respuesta haya ocurrido. Card de cierre (histórica) y chart (cohorte por createdAt) siguen sin reconciliar; solo se agregaron subtítulos.
+- Propuesta: Basar la tasa en eventos (timestamp de respuesta en OsActivity o un respondedAt) y no en el estado actual; alinear card y chart al mismo criterio.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-dashboard, h4.adm-dashboard.kpis-comerciales, modelo.OsLead
+
+### [BUG-117] El alta de un cliente no invalida el cache del listado
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/clients/page.tsx:20` — «const getClients = unstable_cache( async () =>»; `src/app/(protected)/admin/clients/page.tsx:28` — «{ revalidate: 60, tags: ['admin-clients'] }»
+- Impacto: createClientOnly.ts, createClientWithBot.ts y lib/onboarding/core.ts no llaman revalidateTag('admin-clients') ni revalidatePath (git grep sin resultados; control: archiveClient.ts:48 si lo hace). El cliente recien creado puede no aparecer en /admin/clients hasta 60 s o mas; igual tras renombrar (updateClient solo revalidatePath) o cambiar plan.
+- Propuesta: revalidateTag('admin-clients') en las actions de alta, edicion y plan.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.listado, h4.adm-clientes.alta-cliente
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-119
+
+### [BUG-118] Re-enviar credenciales apunta al primer miembro sin filtrar rol, distinto del que se edita
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx:19` — «members: { orderBy: { joinedAt: 'asc' }, take: 1,»; `src/app/(protected)/admin/clients/[clientId]/edit/page.tsx:31` — «where: { role: 'ADMIN' },»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx:90` — «<ResendCredentialsButton userId={primaryMember.user.id}»
+- Impacto: Si el miembro mas antiguo no es el ADMIN de la org (por ejemplo, un usuario de develOP agregado para soporte o un VIEWER), 'Re-enviar credenciales' invalida la contrasena de ese usuario y no la del administrador que muestra Editar datos.
+- Propuesta: Usar el mismo criterio (OrgRole ADMIN, joinedAt asc) en OverviewTab y mostrar a quien se le resetea.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-087]
+- Nodo(s): h4.adm-clientes.reenviar-credenciales, modelo.OrgMember
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-132
+
+### [BUG-120] markAsRead se ejecuta durante el render: revalidatePath lanza (E7) y el fallo se descarta
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/messages/[orgId]/page.tsx:24` — «await markAsRead(orgId)»; `src/app/(protected)/admin/messages/_actions/message.actions.ts:224` — «revalidateMessagePaths(parsedOrganizationId) return ok({ count: result.count }) } catch (error) {»; librería next@16.2.9, dist/server/web/spec-extension/revalidate.js línea 114 — «if (workUnitStore.phase === 'render') { throw ... during render which is unsupported»
+- Impacto: Next 16.2.9 prohíbe revalidatePath en render (la request store arranca en phase 'render', app-render.js:733). El updateMany (:213) sí escribe, pero la invalidación de /admin/messages, /dashboard y /dashboard/messages nunca corre desde este camino y cada apertura de conversación genera una excepción tragada (fail() no loguea). Además, una escritura en el GET se re-ejecuta en cada router.refresh (p. ej. tras sendMessage).
+- Propuesta: Replicar el patrón del portal (D2 'Mensajes con develOP': MarkReadOnMount -> mark-read action) o separar una función de escritura sin revalidate para usar en el render; no ignorar el ActionResult.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-mensajes.hilo-y-leido, modelo.Message
+
+### [BUG-121] Clientes archivados siguen en la bandeja de Mensajes y se les puede escribir (y mandar email)
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/messages/_actions/message.actions.ts:47` — «where: { messages: { some: {},»; `src/app/(protected)/admin/messages/_actions/message.actions.ts:177` — «prisma.message.create({ data: { organizationId: parsed.organizationId,»; `src/app/(protected)/admin/clients/page.tsx:23` — «where: { deletedAt: null },»
+- Impacto: Archivar un cliente lo saca de /admin/clients pero no de Mensajes; el admin puede seguir escribiéndole y dispararle emails. Inconsistente con el soft-delete del resto del admin.
+- Propuesta: Filtrar deletedAt: null en listConversations (o mostrarlo con badge «Archivado») y rechazar sendMessage sobre orgs archivadas o inexistentes con un mensaje claro.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-014], [BUG-131]
+- Nodo(s): h4.adm-mensajes.bandeja, h4.adm-mensajes.responder, modelo.Organization
+
+### [BUG-122] Conteo de actividad distinto entre el board y la ficha del lead
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/leads/page.tsx:29` — «activities: { where: SOLO_CONTACTOS_COMERCIALES },»; `src/app/(protected)/admin/leads/[leadId]/page.tsx:450` — «<p className="mt-2 text-sm text-zinc-200">{lead.activities.length} registros</p>»
+- Impacto: La card del board cuenta sólo contactos comerciales y la ficha cuenta todas las actividades (incluye las reasignaciones SISTEMA, include sin where en :186): el mismo lead muestra dos números distintos.
+- Propuesta: Mostrar en la ficha el mismo conteo comercial (o rotular explícitamente 'incluye reasignaciones').
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-leads.ficha-y-estado, modelo.OsLead
+
+### [BUG-123] markDemoViewed sin manejo de rechazo: el botón queda trabado en «Guardando...»
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/leads/_components/demo-form.tsx:246` — «void markDemoViewed({ demoId }).then((result) => { setDemoPendingId(null)»
+- Impacto: Si la llamada a la server action falla por red o lanza, la promesa rechaza sin catch: demoPendingId nunca vuelve a null, el botón queda deshabilitado y no se muestra error.
+- Propuesta: Usar useTransition como el resto de los componentes o agregar .catch que limpie el estado y muestre un error.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-leads.demos
+
+### [BUG-124] El redirect de /admin/clients/[clientId]/chatbot/* pierde los tabs install e integrations
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:36` — «const targetTab: TabId = requested && TAB_MAP[requested] ? TAB_MAP[requested] : 'overview'»; `src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:29` — «where: { slug: orgSlug },»; `src/app/(protected)/admin/chatbots/[botId]/tabs.ts:1` — «export const VALID_TABS = ['overview', 'config', 'knowledge', 'activity', 'leads', 'conversations', 'install', 'integrations'] as const»; `src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:28` — «const org = await prisma.organization.findUnique({ where: { slug: orgSlug },»; `src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:22` — «permanentRedirect('/login')»
+- Impacto: TAB_MAP (:6-13) no tiene install ni integrations: links viejos a /chatbot/install (B8.5) caen en overview. Además busca sólo por slug mientras la navegación interna de clients usa Organization.id (ClientTabsNav.tsx:34), así que un link con id da 404.
+- Propuesta: Agregar install e integrations a TAB_MAP y resolver la org por id o slug como hace clients/[clientId]/page.tsx:40-42; actualizar roadmap-pendientes.md:26 (la vista CRM ya existe en IntegrationsTab).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes, h3.adm-chatbots, h4.adm-clientes.redireccion-chatbot-legacy
+
+### [BUG-131] Los selectores de cliente de Proyectos ofrecen organizaciones archivadas
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/projects/[projectId]/layout.tsx:145` — «where: { slug: { not: 'develop',»; `src/app/(protected)/admin/projects/page.tsx:11` — «where: { slug: { not: 'develop' } },»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:242` — «const organization = await tx.organization.findUnique({ where: { id: organizationId,»
+- Impacto: Un cliente archivado (soft-delete con deletedAt, schema.prisma:419, que admin/clients/page.tsx:23 oculta) sigue en el desplegable 'Vincular a cliente', y createProject y updateProject lo aceptan. Se pueden crear proyectos (y activar Services) para una org dada de baja.
+- Propuesta: Filtrar deletedAt: null en los dos findMany y rechazar orgs archivadas en resolveProjectOrganization.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-121]
+- Nodo(s): h4.adm-proyectos.alta-edicion, modelo.Organization
+
+### [BUG-136] Contrato del guard SUPER_ADMIN roto en el lote: send-executive-report espera 'UNAUTHORIZED' y siempre responde 403; las páginas muestran 'Unauthorized' o un 404 en vez de ir a /login
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:17` — «const status = message.startsWith('UNAUTHORIZED') ? 401 : 403»; `src/lib/auth-guards.ts:7` — «throw new Error('Unauthorized')»; `src/app/(protected)/admin/tickets/[ticketId]/page.tsx:16` — «if (!ticketResult.success) { notFound()»; `src/lib/audit-log-queries.ts:5` — «import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'»
+- Impacto: Sin sesión el endpoint responde 403 y el botón no puede decir 'tu sesión venció'; en /admin/settings y /admin/tickets una sesión vencida pinta 'Unauthorized' en una caja roja (settings/page.tsx:31-33, tickets/page.tsx:28-31) y el detalle de ticket da 404 también ante un error de base. Conviven tres guards: auth-guards, el del módulo chatbot (audit-log-queries.ts:5, bulk-actions.ts:6) y chequeos inline en 5 archivos.
+- Propuesta: En la ruta, comparar contra el mensaje real o un código tipado (zona libre). Decisión para Valentino: un único requireSuperAdmin con error tipado en auth-guards (FROZEN-inferido) y un manejador común (redirect('/login') en páginas, 401/403 en rutas); distinguir not-found de error en getTicketById.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.auth, h4.adm-shell, h4.adm-tickets.conversacion-y-respuesta, h4.adm-config, h4.adm-clientes.reporte-ejecutivo-manual
+
+### [BUG-137] Si el webhook de alertas falla, solo queda un console.error: develOP pierde los avisos de tickets urgentes, leads y mensajes sin enterarse
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/alerts.ts:139` — «if (!response.ok) { console.error( '[alerts] Webhook respondió ${response.status} ${response.statusText} para ${event.type}.'»; `src/lib/alerts.ts:144` — «} catch (error) { console.error('[alerts] No se pudo enviar la alerta ${event.type}:', error)»
+- Impacto: Un webhook vencido o mal escrito apaga todas las alertas de la agencia en silencio: no hay Sentry, no hay captureConsoleIntegration y Configuración no muestra el último envío.
+- Propuesta: Sentry.captureException/Message con el tipo de evento y mostrar en Configuración el estado del último envío.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-052]
+- Nodo(s): h4.adm-alertas.webhook-agencia, lib.alerts, int.sentry
+
+### [BUG-140] acknowledgeAlert/resolveAlert no verifican el estado previo: marcar como vista una resuelta la reabre
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/manageAlerts.ts:44` — «where: { id }, data: { status: 'ACKNOWLEDGED',»; `src/modules/chatbot/server/admin/manageAlerts.ts:87` — «where: { id }, data: { status: 'RESOLVED',»
+- Impacto: El update va solo por id. Una doble acción (dos pestañas o dos admins) o un ack tardío sobre una alerta RESOLVED la devuelve a ACKNOWLEDGED, y el badge de pendientes y el historial quedan incoherentes. Si la alerta no existe, el update lanza P2025 (throw, no mensaje).
+- Propuesta: Condicionar la transición (where: { id, status: 'PENDING' } para el ack; status distinto de RESOLVED para resolver) con updateMany y devolver ok/fail según count.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-062]
+- Nodo(s): h4.adm-alertas.marcar-vista-resolver, modelo.BotAlert
+
 ## Tecnología vieja
 
 ### [TEC-002] Agenda inteligente usa la API v1 de Cal.com, apagada segun el propio repo, con la API key en la query string
@@ -2003,6 +2406,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): lib.chatbot.llm, int.vertex
+
+### [TEC-005] Layout del admin con APIs de caché heredadas (unstable_noStore redundante y unstable_cache)
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: tech-vieja
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/layout.tsx:2` — «import { unstable_noStore as noStore, unstable_cache } from 'next/cache'»; `src/app/(protected)/admin/layout.tsx:8` — «export const dynamic = 'force-dynamic'»; `src/app/(protected)/admin/layout.tsx:39` — «noStore()»
+- Impacto: noStore() es redundante con force-dynamic y ambas APIs unstable_* tienen reemplazo en Next 15/16 (connection() y 'use cache' + cacheTag); cuando se retiren, el layout del admin deja de compilar. Sin fuente web citada en esta corrida (WebFetch no permitido).
+- Propuesta: Quitar noStore() y planificar la migración de unstable_cache a 'use cache' + cacheTag en el sprint de actualización de Next.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-shell, h4.adm-shell.acceso-y-layout
 
 ## Rendimiento
 
@@ -2110,6 +2523,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h4.adm-alertas.detector-incidencias, int.cron.detect-bot-issues, lib.chatbot.admin, modelo.ChatbotEvent
 
+### [PERF-011] Listados y consultas del admin sin paginación ni tope: tickets, workload del equipo, export masivo de leads, barrido de alertas, pipeline de leads, hilo de mensajes y resúmenes de proyectos
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/tickets/_actions/ticket.actions.ts:59` — «const tickets = await prisma.ticket.findMany({»; `src/app/(protected)/admin/team/page.tsx:44` — «prisma.task.findMany({ where: { assignedToId: {»; `src/lib/bulk-actions.ts:50` — «const leads = await prisma.chatbotLead.findMany({»; `src/lib/alerts.ts:205` — «prisma.organization.findMany({»; `src/app/(protected)/admin/leads/page.tsx:23` — «const leads = await prisma.osLead.findMany({»; `src/app/(protected)/admin/leads/page.tsx:202` — «<OutboundLeadsView leads={leads} />»; `src/app/(protected)/admin/messages/_actions/message.actions.ts:144` — «const messages = await prisma.message.findMany({ where: { organizationId: parsedOrganizationId,»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:936` — «const projects = await prisma.project.findMany({»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:976` — «timeEntries: { select: { id: true,»
+- Impacto: Con datos de prueba no se nota; con el primer año de clientes /admin/tickets trae todos los tickets de todas las orgs para filtrar en memoria, /admin/team trae todas las tareas históricas (incluidas DONE, que además se listan) con todas sus horas y el export arma el CSV completo en memoria de la action.
+- Propuesta: Paginación por cursor y filtros en servidor en tickets; workload solo de tareas no DONE o en ventana; export en streaming con tope.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-tickets.bandeja, h4.adm-equipo.workload, h4.adm-clientes.acciones-masivas, h4.adm-leads.pipeline-kanban, h4.adm-mensajes.hilo-y-leido, modelo.OsLead, modelo.Message, h4.adm-proyectos.tablero-kanban, modelo.OsTimeEntry
+
 ## Deuda
 
 ### [DEU-005] Borrar un User borra en cascada los tickets que abrió y todas sus respuestas, en cualquier organización
@@ -2193,15 +2616,15 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [DEU-003]
 - Nodo(s): h2.cli-bienvenida.wizard-3-pasos, h2.cli-soporte.crear-ticket, h2.cli-email-mkt.crear-y-enviar-campana, h2.cli-email-mkt
 
-### [DEU-035] router.push sin justificación en el alta de bot del admin
+### [DEU-035] router.push sin justificación en el portal admin: alta de bot, card del pipeline de leads y ClientSwitcher
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
 - Confianza: PROBABLE
-- Evidencia: `src/app/(protected)/admin/chatbots/new/CreateBotForm.tsx:80` — «router.push('/admin/chatbots/${result.botId}')»
+- Evidencia: `src/app/(protected)/admin/chatbots/new/CreateBotForm.tsx:80` — «router.push('/admin/chatbots/${result.botId}')»; `src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx:64` — «function handleSelect(client: ClientOption) { setOpen(false) setSearch('')»; `src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx:67` — «router.push('/admin/clients/${client.id}')»; `src/app/(protected)/admin/leads/_components/lead-card.tsx:69` — «onClick={presentational ? undefined : () => router.push('/admin/leads/${lead.id}')}»; `src/app/(protected)/admin/leads/_components/lead-card.tsx:82` — «router.push('/admin/leads/${lead.id}')»
 - Impacto: Contradice la regla de navegación de portales (redirect() en la server action o comentario inline que justifique el push).
 - Propuesta: redirect() en createBotAction tras el éxito, o documentar el motivo inline.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h3.adm-chatbots.crear-bot
+- Nodo(s): h3.adm-chatbots.crear-bot, h4.adm-clientes.detalle, h4.adm-leads.pipeline-kanban
 
 ### [DEU-038] Acciones gemelas por id y por slug divergieron: la que usa la UI devuelve err.message crudo
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
@@ -2213,15 +2636,15 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h3.adm-chatbots.editar-config-bot, h3.adm-chatbots.editar-kb, lib.chatbot.admin, h3.adm-chatbots.editar-config
 
-### [DEU-039] triggerTransition del sitio público usado en el portal admin
+### [DEU-039] triggerTransition del sitio público usado en el portal admin (alta de bot y edición de cliente)
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
 - Confianza: PROBABLE
-- Evidencia: `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:11` — «import { useTransitionContext } from '@/context/TransitionContext'»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:183` — «triggerTransition(»; `src/context/TransitionContext.tsx:118` — «router.push(target);»
+- Evidencia: `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:11` — «import { useTransitionContext } from '@/context/TransitionContext'»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:183` — «triggerTransition(»; `src/context/TransitionContext.tsx:118` — «router.push(target);»; `src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:92` — «triggerTransition(detailHref)»; `src/context/TransitionContext.tsx:111` — «setIsAnimating(true); // cierra shutter (0.3s)»; `src/app/layout.tsx:114` — «<Shutter />»
 - Impacto: CLAUDE.md reserva triggerTransition para el sitio público (el Shutter no existe en portales); acá navega al bot recién creado con 300 ms de demora y un router.push sin comentario que lo justifique. Funciona, pero rompe la convención de navegación del portal y arrastra el estado de animación del sitio.
 - Propuesta: Usar <Link> a /admin/chatbots/[id] (o router.push con comentario si se quiere imperativo post-submit).
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h4.adm-clientes.alta-cliente-con-bot, lib.ui
+- Nodo(s): h4.adm-clientes.alta-cliente-con-bot, lib.ui, h4.adm-clientes.editar-datos
 
 ### [DEU-042] Tres implementaciones paralelas del panel de chat (ChatWindow 694 lineas, ChatbotEmbed 559, BotConfigPreview) con paridad mantenida a mano y estilos inline
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
@@ -2253,15 +2676,45 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h3.vis-whatsapp, int.sentry, lib.logger
 
+### [DEU-055] admin/page.tsx: 865 líneas con el cálculo de KPIs dentro del componente y el error de lint react-hooks/immutability
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/page.tsx:497` — «let cumulativeRevenue = 0»; `src/app/(protected)/admin/page.tsx:500` — «cumulativeRevenue += revenue»; dato de la auditoría, _crudo/eslint.json línea 740 — «"regla": "react-hooks/immutability",»; `src/app/(protected)/admin/page.tsx:353` — «const revenueMap = new Map<string, number>()»
+- Impacto: Cada cambio de métrica obliga a tocar un server component que mezcla 15 consultas, reglas de negocio (qué cuenta como respuesta, cuándo se reconoce un ingreso) y JSX, sin tests sobre esos cálculos; el único error de lint del lote vive acá (línea 500). Viola la política anti-vibecode (componente > 300 líneas, lógica de negocio en UI).
+- Propuesta: Extraer consultas y cálculos a un módulo de lib (funciones puras testeables), recomputar el acumulado sin reasignar un let y dejar la página como composición.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-dashboard, h4.adm-dashboard.kpis-operativos-y-financieros, h4.adm-dashboard.tendencias-historicas
+
+### [DEU-063] Borrar un proyecto tiene dos implementaciones distintas (el detalle usa la legacy, sin Zod ni try) y hay 8 server actions exportadas sin consumidores
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/projects/_components/projects-board.tsx:156` — «const result = await deleteProject(projectId)»; `src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx:75` — «<form action={deleteProjectAction} className="flex justify-end gap-3">»; `src/lib/actions/projects.ts:111` — «const projectId = (formData.get('projectId') as string | null) ?? ''»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:524` — «isInternal: false,»; `src/lib/actions/projects.ts:114` — «await prisma.project.delete({ where: { id: projectId } })»; `src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx:6` — «import { deleteProjectAction } from '@/lib/actions/projects'»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:829` — «return fail(error instanceof Error ? error.message : 'Failed to delete project')»
+- Impacto: El tablero borra con deleteProject (Zod, transacción, ActionResult) y la ficha con deleteProjectAction (cast de FormData sin Zod, delete directo, redirect). Cualquier cambio, como auditoría, soft-delete o aviso al cliente, hay que hacerlo dos veces y ya divergen. Además quedan exportadas y sin uso: getProjectById (con isInternal fijo en false y otro texto en :510), unmarkMilestonePaid, createMaintenancePayment, y 5 actions de lib/actions/projects.ts (createProjectAction, updateProjectAction, createTaskAction, updateTaskStatusAction, deleteTaskAction).
+- Propuesta: Unificar en project.actions.deleteProject; la ficha puede llamarla y después hacer redirect. Borrar las exports muertas, o conectar unmarkMilestonePaid como 'Deshacer'.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [DEU-067]
+- Nodo(s): h4.adm-proyectos.borrado, lib.actions, h4.adm-proyectos.eliminar-proyecto, modelo.Project, lib.audit-log, h4.adm-audit
+
+### [DEU-067] Cuatro módulos 'use server' legacy sin importadores y 6 actions muertas más, que duplican versiones vivas con contratos peores
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/actions/settings.ts:92` — «error: error instanceof Error ? error.message : 'No se pudo guardar la configuración.',»; `src/lib/actions/settings.ts:191` — «const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'»; `src/lib/actions/leads.ts:14` — «async function ensureAdmin() { const session = await auth() return session?.user?.role === 'SUPER_ADMIN'»; `src/lib/actions/clients.ts:177` — «members: { where: { role: 'ADMIN' },»; `src/lib/actions/services.ts:21` — «export async function createServiceAction(»; `src/lib/actions/projects.ts:35` — «export async function createProjectAction(»
+- Impacto: clients.ts, services.ts, settings.ts y leads.ts (+ leads-constants.ts) no tienen importadores. Tampoco los tienen 5 de las 7 actions de projects.ts ni markLeadAsRead. Duplican _actions vivas (settings.actions.ts:127/:175, project.actions.ts:593/:643, admin/leads/_actions) y arrastran defectos que volverían si alguien las reconecta: error.message crudo (settings.ts:92, :142, :234, :270, :304, y JSON.parse del service account en :285), token de invitación en claro (:180-189), fallback a localhost (:191), usuario creado antes del email (:172-194), guard reimplementado (leads.ts:14-17, settings.ts:20-28), take:1 sin orderBy (clients.ts:177-181) y update sin Zod (clients.ts:157-171). Encarecen cada cambio: hay que adivinar cuál es la versión vigente.
+- Propuesta: Borrar clients.ts, services.ts, settings.ts, leads.ts y leads-constants.ts. En projects.ts, migrar los dos consumidores vivos (delete-project-button.tsx:6 → deleteProject; task-list.tsx:22 → una action en admin/projects/_actions) y borrar el archivo. Quitar markLeadAsRead de contact.ts.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-001], [DEU-018], [DEU-063]
+- Nodo(s): lib.actions, h4.adm-config, h4.adm-equipo, h4.adm-leads, h4.adm-proyectos, h4.adm-clientes
+
 ### [DEU-001] Flujo de invitacion huerfano: ninguna action viva emite links a /accept-invite (y la de clientes nunca los enviaba)
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: deuda
 - Confianza: PROBABLE
-- Evidencia: `src/lib/actions/invitations.ts:110` — «const inviteUrl = '${baseUrl}/accept-invite?token=${token}'»; `src/lib/actions/invitations.ts:116` — «message: 'Invitación generada para ${email}. El link fue impreso en la consola del servidor.',»; `src/lib/actions/settings.ts:194` — «await sendEmail({»; `src/lib/email.ts:15` — «if (!resend) { return { success: true }»; `src/app/accept-invite/actions.ts:15` — «export async function acceptInviteAction(»
+- Evidencia: `src/lib/actions/invitations.ts:110` — «const inviteUrl = '${baseUrl}/accept-invite?token=${token}'»; `src/lib/actions/invitations.ts:116` — «message: 'Invitación generada para ${email}. El link fue impreso en la consola del servidor.',»; `src/lib/actions/settings.ts:194` — «await sendEmail({»; `src/lib/email.ts:15` — «if (!resend) { return { success: true }»; `src/app/accept-invite/actions.ts:15` — «export async function acceptInviteAction(»; `src/lib/actions/settings.ts:148` — «export async function inviteTeamMemberAction(input: {»; `src/lib/actions/settings.ts:192` — «const inviteUrl = '${baseUrl}/accept-invite?token=${token}'»
 - Impacto: inviteClientAction no tiene callers y nunca envia ni imprime el link (el mensaje miente); inviteTeamMemberAction vive en settings.ts, modulo sin importadores, y enviaria por Resend (contra PLAN-012) fingiendo exito sin RESEND_API_KEY. /accept-invite queda como superficie publica sin uso. Si alguien lo reconecta tal cual, la invitacion no llega.
 - Propuesta: Decidir: borrar accept-invite + invitations.ts + inviteTeamMemberAction, o reconectarlo enviando por Brevo con resultado verificado y la regla de contrasena unica.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h1.auth-invite.emitir-invitacion, h1.auth-invite.aceptar-invitacion, h4.adm-config, int.resend
+- Nodo(s): h1.auth-invite.emitir-invitacion, h1.auth-invite.aceptar-invitacion, h4.adm-config, int.resend, h4.adm-equipo, h4.adm-equipo.invitar-miembro, h1.auth-invite
 
 ### [DEU-003] router.push en CambiarPasswordForm (justificado inline) con destino fijo /dashboard
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -2326,12 +2779,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [DEU-012] AdminAuditLog sin organizationId: no se puede reconstruir la auditoría de un cliente
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
 - Confianza: PROBABLE
-- Evidencia: `prisma/schema.prisma:1661` — «targetType String»; `prisma/schema.prisma:1662` — «targetId String»; `prisma/schema.prisma:1673` — «@@index([targetType, targetId, createdAt])»
+- Evidencia: `prisma/schema.prisma:1661` — «targetType String»; `prisma/schema.prisma:1662` — «targetId String»; `prisma/schema.prisma:1673` — «@@index([targetType, targetId, createdAt])»; `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx:246` — «{entry.targetType} / {entry.targetId.slice(0, 12)}»; `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx:27` — «targetType: string»; `prisma/schema.prisma:1652` — «model AdminAuditLog {»
 - Impacto: Las acciones sobre un cliente quedan con targetType/targetId heterogéneos (Organization, BotConfig, ChatbotLead…); reconstruir todo lo hecho sobre la org X exige conocer cada tipo y resolver ids, y después de un hard-delete ya no se pueden resolver.
 - Propuesta: Decisión para Valentino (schema FROZEN): agregar targetOrganizationId opcional sin FK (para sobrevivir al hard-delete), indexado, y completarlo en logAdminAction.
 - Esfuerzo: S  ·  Zona: FROZEN
 - Relacionado: —
-- Nodo(s): modelo.AdminAuditLog, h4.adm-audit
+- Nodo(s): modelo.AdminAuditLog, h4.adm-audit, h4.adm-audit.listado-y-filtros
 
 ### [DEU-015] init-data-connections.ts usa `as any`, no tiene referencias y fabrica integraciones 'conectadas' con lastSync = ahora
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -2643,6 +3096,116 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [SEC-060]
 - Nodo(s): h3.adm-chatbots, lib.chatbot.insights, int.vertex, modelo.ChatbotInsight
 
+### [DEU-056] Docs desactualizados sobre el admin: roadmap-pendientes propone una vista en /admin/clients/[clientId]/chatbot/* (ruta que solo redirige; la vista CRM ya existe en /admin/chatbots) y la lección de CLAUDE.md sobre ticket-chat ya no aplica
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:36` — «const targetTab: TabId = requested && TAB_MAP[requested] ? TAB_MAP[requested] : 'overview'»; `docs/roadmap-pendientes.md:26` — «- **Qué:** En '/admin/clients/[clientId]/chatbot/' o equivalente, una sección read-only que muestre la 'CrmIntegration'»; `STATUS.md:216` — «1. Nueva ruta canónica '/admin/chatbots' — la vieja '/admin/clients/[id]/chatbot/*' queda deprecada»; `raíz:CLAUDE.md:189` — «'ticket-chat.tsx:110' y 'TicketStatusSelector.tsx:31' NO fueron migrados al '<Select>' compartido.»; `src/app/(protected)/admin/tickets/_components/ticket-chat.tsx:160` — «<Select»; `src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:28` — «const org = await prisma.organization.findUnique({ where: { slug: orgSlug },»
+- Impacto: Quien retome roadmap-pendientes construiría la vista en una ruta que redirige a /admin/chatbots/<botId>?tab=overview ('install' de B8.5 tampoco está en TAB_MAP), duplicando lo que la tab de Integraciones de /admin/chatbots/[botId] ya muestra (flujo D5 'Configurar y probar la integración CRM').
+- Propuesta: Marcar la pendiente de roadmap-pendientes.md:24-30 como cubierta o reubicarla en /admin/chatbots/[botId], y anotar en la bitácora que 'install' no se implementó.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots, h4.adm-clientes, h4.adm-tickets.cambio-estado
+
+### [DEU-057] PageTransition vive en el layout: anima solo el primer montaje del admin, no cada navegación
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/layout.tsx:65` — «<PageTransition>{children}</PageTransition>»; `src/app/(protected)/admin/_components/PageTransition.tsx:21` — «initial="hidden"»; `src/app/(protected)/admin/alerts/_components/alert-card.tsx:57` — «navega con <Link> + PageTransition, NO con router.push ni triggerTransition»
+- Impacto: El layout de App Router persiste entre navegaciones, así que el fade-up corre una vez al entrar al admin y las páginas siguientes aparecen sin transición, aunque otros componentes asumen lo contrario. Código que promete algo que no hace.
+- Propuesta: Moverlo a un template.tsx (se remonta por navegación) o borrarlo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-shell, h4.adm-shell.acceso-y-layout
+
+### [DEU-058] Deuda anti-vibecode en Clientes: componente de 772 lineas y fetch directo a route handlers
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:124` — «const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8' })»; `src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx:18` — «const res = await fetch('/api/admin/users/${userId}/resend-credentials', { method: 'POST' })»; `src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx:18` — «retryAfterSeconds?: number»
+- Impacto: ClientsListClient (772 lineas) mezcla lista, seleccion, bulk, archivo, borrado, deep-link y la tarjeta: cada cambio toca un archivo enorme. Los botones de credenciales y reporte usan fetch directo en vez de server actions; el 429 con retryAfterSeconds se muestra como error generico (:61).
+- Propuesta: Separar ClientCard, BulkBar y el flujo de borrado en archivos propios; mover las dos llamadas a server actions con resultado tipado y mostrar el tiempo de espera del rate limit.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.listado, h4.adm-clientes.reenviar-credenciales, h4.adm-clientes.reporte-ejecutivo-manual
+
+### [DEU-059] Contenido del mensaje del admin sin .max(): termina en la base y en el email
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/messages/_actions/message.schemas.ts:17` — «content: z.preprocess( emptyStringToUndefined, z.string().min(1, 'El mensaje no puede estar vacio.')»
+- Impacto: Sin tope de largo en servidor ni en el textarea (message-input.tsx:101-110); un pegado accidental muy largo se guarda y se manda por email al cliente. Sólo lo escribe un SUPER_ADMIN.
+- Propuesta: Agregar .max() razonable (p. ej. 5000) y maxLength en el textarea con el mismo valor.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-mensajes.responder, int.brevo
+
+### [DEU-061] Helpers y rótulos duplicados con divergencias en admin/leads
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/leads/[leadId]/page.tsx:64` — «function serviceBadgeTone(serviceType: OsServiceType | null): string {»; `src/app/(protected)/admin/leads/_components/demo-form.tsx:48` — «function serviceBadgeTone(serviceType: DemoServiceType): string {»; `src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts:46` — «RESPONDIO: 'Respondio',»
+- Impacto: serviceBadgeTone/serviceLabel existen tres veces ([leadId]/page.tsx:64-92, demo-form.tsx:48-76, lead-card.helpers.ts:33-61); statusLabel de la ficha dice 'Respondió' ([leadId]/page.tsx:103) y el board 'Respondio'; relativeTime (lead-activity.helpers.ts:50) y formatRelativeTime (lead-card.helpers.ts:3) difieren ('dias' vs 'd', guard de NaN sólo en uno). Cada cambio de copy o de servicio hay que hacerlo en varios lugares.
+- Propuesta: Un único módulo de presentación del lead (labels, tonos, fechas) en _components y que ficha, card y demos lo importen.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-leads
+
+### [DEU-062] IDs internos (cuid) en URLs del admin: /admin/messages/[orgId], /admin/leads/[leadId] y /admin/clients/[clientId], que además acepta id o slug
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/messages/_components/conversation-list.tsx:104` — «href={'/admin/messages/${conversation.organizationId}'}»; `src/app/(protected)/admin/messages/[orgId]/page.tsx:28` — «where: { id: orgId },»; `src/app/(protected)/admin/clients/[clientId]/page.tsx:42` — «OR: [{ id: orgSlug }, { slug: orgSlug }],»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:630` — «href={'/admin/clients/${client.id}'}»; `src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:29` — «where: { slug: orgSlug },»; `src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:22` — «permanentRedirect('/login')»; `src/app/(protected)/admin/clients/[clientId]/page.tsx:33` — «const { clientId: orgSlug } = await params»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:168` — «revalidatePath('/admin/clients/${organizationId}')»; `src/app/(protected)/admin/projects/_components/project-card.tsx:251` — «href={'/admin/projects/${project.id}'}»; `src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:28` — «const org = await prisma.organization.findUnique({ where: { slug: orgSlug },»; `src/lib/alerts.ts:278` — «link: '/admin/clients/${organization.id}',»; `src/app/(protected)/admin/tickets/_components/ticket-chat.tsx:242` — «href={'/admin/clients?delete=${ticket.organizationId}'}»; `src/components/admin/managers/ChatbotManager.tsx:45` — «const clientPath = organizationSlug ?? organizationId»
+- Impacto: Incumple la regla de CLAUDE.md (usar slugs o tokens en URLs). El slug ya viaja en la conversación (message.actions.ts:55, conversation-list.tsx:15) y no se usa. Mismo criterio en clients (ClientTabsNav.tsx:34 usa client.id).
+- Propuesta: Decidir la convención del admin (slug para orgs); si se adopta, rutear Mensajes por slug y resolver id en servidor.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-025]
+- Nodo(s): h4.adm-mensajes, h4.adm-leads, h4.adm-clientes, h3.adm-chatbots, h4.adm-clientes.detalle, modelo.Organization, h4.adm-proyectos, h4.adm-alertas.webhook-agencia, h4.adm-tickets.solicitud-baja
+
+### [DEU-064] El criterio 'proyecto interno' se repite como slug mágico 'develop' en 7 sitios y el helper único que declara el registro no existe
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/projects/[projectId]/layout.tsx:164` — «const isInternalProject = project.organization?.slug === 'develop'»; `src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx:57` — «const showApprovalFlow = project.organization?.slug !== 'develop'»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:510` — «const businessName = project.organization?.companyName ?? 'Proyecto interno develOP'»; `src/app/(protected)/admin/projects/[projectId]/page.tsx:163` — «// P0-6: scoping defensivo. SUPER_ADMIN ve cualquier proyecto (incl. internos // con organizationId null); cualquier otro rol futuro queda atado a su org.»
+- Impacto: El registro de cambios (Proyectos_ registro de cambios.md:56) dice que se extrajo isInternalProject() como fuente única, pero git grep 'isInternalProject(' da 0. La condición está en layout.tsx:147 y :164, page.tsx:169, tasks/page.tsx:57, project.actions.ts:233 y :454, y page.tsx:11 (la lista). serializeProjectDetail fija isInternal en false. Los comentarios de la ficha siguen hablando de organizationId null aunque la columna es NOT NULL (schema.prisma:559). Es la 'bomba de tiempo' que el propio registro describe.
+- Propuesta: Crear un helper isInternalProject(org) y una constante AGENCY_ORG_SLUG en lib, usarlos en los 7 sitios y actualizar los comentarios.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-138]
+- Nodo(s): h4.adm-proyectos, modelo.Project
+
+### [DEU-065] Catálogos y tipos copiados a mano: PremiumFeatureKey castea slugs que no le pertenecen, BotAlertType local 'pendiente de prisma generate' y ASSET_TYPES espejado
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/settings/_actions/settings.actions.ts:114` — «moduleKey: mod.slug as PremiumFeatureKey,»; `src/lib/premium-features.ts:51` — «key: 'motor-resenias',»; `src/lib/data/premium-modules.ts:24` — «slug: 'motor-resenas',»; `src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx:7` — «// Include new enum values pending prisma generate type BotAlertType =»
+- Impacto: El tipo de la consola dice que las claves son las 11 del catálogo legacy pero en runtime llegan los slugs de PremiumModule (otra lista): el compilador no protege nada. El catálogo legacy solo lo usa lib/actions/settings.ts (sin importadores). El enum BotAlertType ya tiene los 9 valores en schema.prisma:139-149, así que la copia local es innecesaria.
+- Propuesta: Tipar moduleKey como string (o el tipo del catálogo de premium-modules), importar BotAlertType de @prisma/client y podar premium-features.ts junto con lib/actions/settings.ts.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-017]
+- Nodo(s): h4.adm-config.precios-modulos, lib.premium-features, h4.adm-alertas.detector-incidencias, modelo.PremiumModule
+
+### [DEU-066] Validación laxa en entradas del admin: actionType del audit log casteado sin validar, pageSize sin tope, orgIds sin schema y tareas asignables a cualquier usuario
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/audit-log-queries.ts:35` — «...(filter?.actionType && { actionType: filter.actionType as AuditActionType,»; `src/lib/audit-log-queries.ts:19` — «pageSize = 10,»; `src/lib/bulk-actions.ts:8` — «export async function bulkPauseBots(orgIds: string[]) {»; `src/app/(protected)/admin/team/_actions/task.schemas.ts:50` — «const optionalCreateAssignedToSchema = z.preprocess( emptyStringToUndefined, UserIdSchema.optional()»
+- Impacto: Un actionType inválido llega a Prisma y rompe la página del audit log (sin try/catch → error.tsx); pageSize lo decide quien llama; una tarea puede quedar asignada a un CLIENT o SETTER y desaparecer del workload (que solo lista SUPER_ADMIN). Títulos, descripciones y notas sin .max().
+- Propuesta: Zod en listAuditLog (enum de AuditActionType, pageSize ≤ 100) y en bulk-actions; validar que assignedToId sea SUPER_ADMIN; .max() en textos.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-084]
+- Nodo(s): h4.adm-audit.listado, h4.adm-clientes.acciones-masivas, h4.adm-proyectos.tareas
+
+### [DEU-068] Instancias del lote: auditoría escrita después del efecto con un helper que traga el error (y archivar se registra como CLIENT_UPDATED)
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/hardDeleteClient.ts:166` — «await logAdminAction({»; `src/modules/chatbot/server/admin/archiveClient.ts:41` — «actionType: 'CLIENT_UPDATED', action: 'Archivó (soft-delete reversible) el cliente "${org.companyName}"',»; `src/modules/chatbot/server/admin/manageAlerts.ts:53` — «if (before) { await logAdminAction({»
+- Impacto: Todas las mutaciones auditadas del lote auditan después del efecto, con el helper que solo hace console.error (verificado en D1: audit-log.ts:40): hardDeleteClient.ts:166, archiveClient.ts:37/:73, updateClient.ts:121, updateClientInternalNotes.ts:40, manageAlerts.ts:54/:97. Si el insert del audit falla tras un hard-delete irreversible, no queda registro y nadie se entera. Archivar y desarchivar usan CLIENT_UPDATED, así que el filtro por acción del audit log no los distingue.
+- Propuesta: Igual que el patrón D1-c3: captureException en el helper (decisión para Valentino, porque audit-log.ts es FROZEN-inferido) y, para el hard-delete, escribir el audit dentro de la transacción. Agregar CLIENT_ARCHIVED/CLIENT_UNARCHIVED al enum (schema FROZEN: decisión para Valentino).
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [DEU-012]
+- Nodo(s): lib.audit-log, h4.adm-audit, h4.adm-clientes
+
+### [DEU-069] Higiene de UI — D3: 180 detalles cosméticos (tilde 54, copy 51, strokeWidth 30, contraste 23, inline 11, otro 11)
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/_components/admin-sidebar.tsx:206` — «[copy] La card de usuario muestra el rol crudo 'SUPER_ADMIN' (PLAN-645)»; `src/app/(protected)/admin/_components/admin-sidebar.tsx:89` — «[copy] Ítems 'Health score' y 'Audit log' (:97) en inglés en una nav en español»; `src/app/(protected)/admin/_components/AdminLayoutClient.tsx:47` — «[tilde] aria-label 'Abrir menu' sin tilde; también 'Cerrar menu' en :55 y :70»; `src/app/(protected)/admin/_components/AdminLayoutClient.tsx:104` — «[contraste] Footer 'develOP Admin' en text-zinc-700 sobre #080a0c»; `src/app/(protected)/admin/_components/AdminLayoutClient.tsx:34` — «[inline] Gradientes de fondo en style inline»; `src/app/(protected)/admin/_components/admin-topbar.tsx:91` — «[strokeWidth] LogOut sin strokeWidth={1.5}»; `src/app/(protected)/admin/_components/AdminBackButton.tsx:15` — «[copy] 'Equipo' con mayúscula y el resto en minúscula: 'Volver a Equipo' contra 'Volver a leads'»; `src/app/(protected)/admin/_components/AdminErrorBoundary.tsx:15` — «[otro] Comentario 'TODO Sentry' obsoleto: SectionErrorBoundary ya captura en :64»; `src/app/(protected)/admin/error.tsx:12` — «[otro] context 'el admin' genera el tag de Sentry 'admin.el admin' (audit-log/error.tsx:12 'audit log' con espacio)»; `src/app/(protected)/admin/alerts/page.tsx:17` — «[tilde] 'automaticamente' sin tilde»; `src/app/(protected)/admin/alerts/AlertsClient.tsx:249` — «[copy] Emoji en el estado vacío 'Todo OK 🎉'»; `src/app/(protected)/admin/alerts/AlertsClient.tsx:190` — «[copy] Severidad 'Warning' en inglés (también alert-card.tsx:107)»; `src/app/(protected)/admin/alerts/AlertsClient.tsx:178` — «[contraste] Rótulo 'Severidad' text-[10px] text-zinc-600»; `src/app/(protected)/admin/alerts/AlertsClient.tsx:248` — «[contraste] Estado vacío por columna en text-zinc-600 italic»; `src/app/(protected)/admin/alerts/_components/alert-card.tsx:41` — «[contraste] Fecha de la alerta text-[10px] text-zinc-600»; `src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx:59` — «[contraste] Rótulo 'Período' text-[10px] text-zinc-600»; `src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx:94` — «[inline] style colorScheme dark inline (también :105); existe la clase [color-scheme:dark]»; `src/app/(protected)/admin/alerts/loading.tsx:14` — «[otro] Skeleton de tabs y lista vertical; la vista real es kanban de 3 columnas con 4 stat cards»; `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx:150` — «[tilde] 'Ultimos 7 dias' sin tildes»; `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx:151` — «[tilde] 'Tipos de accion' sin tilde»; `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx:182` — «[tilde] 'aca' sin tilde»; `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx:307` — «[tilde] 'Cargar mas' sin tilde»; `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx:371` — «[tilde] 'Despues' sin tilde»; `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx:452` — «[tilde] 'Se elimino' sin tilde»; `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx:358` — «[copy] Badge y opciones del filtro (:141) muestran el enum crudo (CLIENT_CREATED, BOT_DELETED)»; `src/app/(protected)/admin/audit-log/loading.tsx:15` — «[otro] Skeleton con 4 stats y tabla; la página real tiene 3 stats y lista de cards»; `src/app/(protected)/admin/loading.tsx:13` — «[otro] Skeleton w-[480px] (y w-96 en :12) desborda a 390 px mientras carga»; `src/app/(protected)/admin/page.tsx:569` — «[inline] style animationDelay inline en 4 secciones (:569, :618, :668, :704)»; `src/app/(protected)/admin/page.tsx:719` — «[inline] Bloque <style> inline con keyframes dashReveal»; `src/app/(protected)/admin/announcements/_components/announcement-list.tsx:122` — «[contraste] 'Publicada ...' en text-zinc-600»; `src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx:150` — «[contraste] Ayuda 'Sin fecha = no caduca.' en text-zinc-600»; `src/app/(protected)/admin/_components/type-to-confirm-dialog.tsx:112` — «[copy] Texto de pending fijo 'Eliminando...' aunque confirmLabel sea otra acción»; `src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx:14` — «[tilde] 'Boveda' sin tilde (Bóveda)»; `src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx:11` — «[copy] Tab 'Overview' en ingles (Resumen)»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:348` — «[tilde] 'Mas activos' sin tilde»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:480` — «[tilde] 'aca' sin tilde (acá)»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:481` — «[tilde] 'Ajusta la busqueda' -> 'Ajustá la búsqueda' (voseo y tilde)»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:662` — «[strokeWidth] Icono Bot con strokeWidth={2}»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:725` — «[strokeWidth] Icono Pin con strokeWidth={2}»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:722` — «[copy] aria-label 'Despinear'/'Pinear' (anglicismo; Fijar/Quitar fijado)»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:684` — «[copy] Abreviaturas 'Proy' y 'Msgs' (:700) en la tarjeta»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:138` — «[otro] confirm() nativo 'Pausar bots de N clientes?' sin ¿ y fuera del sistema de dialogos»; `src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx:143` — «[strokeWidth] Icono Check con strokeWidth={2}»; `src/app/(protected)/admin/clients/[clientId]/_components/ClientHeader.tsx:77` — «[copy] Estado de suscripcion crudo del enum '(ACTIVE)'»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx:48` — «[tilde] 'Estado suscripcion' sin tilde y valor enum crudo en :49»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx:64` — «[tilde] 'Modulos activos' sin tilde»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx:79` — «[tilde] 'Informacion de contacto' sin tilde»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx:53` — «[copy] Estado de proyecto crudo del enum (IN_PROGRESS)»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx:58` — «[tilde] 'pendientes de aprobacion' sin tilde»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx:45` — «[copy] Estado de ticket crudo del enum»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx:24` — «[tilde] 'Subir a boveda' y 'Sin archivos en la boveda.' (:34) sin tilde»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx:56` — «[copy] Tipo de asset crudo del enum»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx:67` — «[contraste] Error de credencial en text-red-400/60 (bajo contraste)»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx:44` — «[tilde] 'todavia' sin tilde; 'Configura' sin voseo (:45)»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx:93` — «[copy] 'Quota mensual' / 'conv' (spanglish y abreviatura)»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx:131` — «[tilde] 'Metricas' sin tilde; 'Activity log' (:161) y 'Knowledge Base' (:143) en ingles»; `src/app/(protected)/admin/clients/[clientId]/_components/ImpersonateButton.tsx:46` — «[copy] Titulo 'Impersonar a X?' sin ¿; descripcion 'usa el boton' sin tilde ni voseo (:47)»; `src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx:48` — «[contraste] Texto funcional en text-zinc-600 '(fallback Starter en runtime)'»; `src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx:64` — «[otro] Emoji '⏳' en la UI en lugar de icono Lucide»; `src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx:102` — «[contraste] placeholder text-zinc-600»; `src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx:136` — «[contraste] placeholder text-zinc-600»; `src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx:33` — «[copy] Titulo 'Billing override' en ingles»; `src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx:90` — «[contraste] Contador en text-zinc-600»; `src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:213` — «[contraste] Contador en text-zinc-600»; `src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx:51` — «[copy] 'password temporal' en ingles (contraseña)»; `src/app/(protected)/admin/leads/_components/assign-setter-control.tsx:80` — «[strokeWidth] UserRound sin strokeWidth={1.5}»; `src/app/(protected)/admin/leads/_components/assign-setter-control.tsx:228` — «[strokeWidth] LoaderCircle sin strokeWidth={1.5}»; `src/app/(protected)/admin/leads/_components/demo-form.tsx:297` — «[strokeWidth] Eye sin strokeWidth={1.5}»; `src/app/(protected)/admin/leads/_components/demo-form.tsx:308` — «[strokeWidth] PlayCircle sin strokeWidth={1.5}»; `src/app/(protected)/admin/leads/_components/demo-form.tsx:325` — «[strokeWidth] ExternalLink sin strokeWidth (también :337)»; `src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx:136` — «[strokeWidth] CheckCircle2 y Sparkles sin strokeWidth (:136, :147, :191, :202)»; `src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx:109` — «[strokeWidth] LoaderCircle sin strokeWidth (también :196) e ícono de canal :223»; `src/app/(protected)/admin/leads/_components/lead-card.tsx:108` — «[strokeWidth] MapPin, LoaderCircle, UserRound, Clock3, FlaskConical sin strokeWidth (:108, :127, :153, :162, :168, :173)»; `src/app/(protected)/admin/leads/_components/lead-form.tsx:181` — «[strokeWidth] X del botón cerrar sin strokeWidth»; `src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts:37` — «[tilde] 'Captacion' y 'Conversion' (:38) sin tilde»; `src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts:46` — «[tilde] 'Respondio' (la ficha dice 'Respondió'); igual en lead-activity.helpers.ts:42 y :129»; `src/app/(protected)/admin/leads/_components/lead-activity.helpers.ts:65` — «[tilde] 'Hace N dias' sin tilde»; `src/app/(protected)/admin/leads/_components/lead-filters-bar.tsx:92` — «[tilde] 'Ubicacion' y 'Periodo' (:68), 'Cualquier periodo' (:14)»; `src/app/(protected)/admin/leads/_components/lead-filters.ts:109` — «[tilde] 'Sin ubicacion'»; `src/app/(protected)/admin/leads/_components/location-typeahead.tsx:177` — «[tilde] placeholder 'Cualquier ubicacion'»; `src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx:95` — «[tilde] 'Todavia', 'aca' (:96), 'Telefono' (:106, :128, :185), 'Accion' (:109)»; `src/app/(protected)/admin/leads/_components/inbound-period-filter.tsx:68` — «[tilde] 'Periodo' sin tilde»; `src/app/(protected)/admin/leads/_components/column-overview.tsx:168` — «[tilde] 'aca' sin tilde (también pipeline-column.tsx:109, lead-activity-feed.tsx:265)»; `src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx:100` — «[tilde] 'proximos' (:100, :172), 'Proximo' (:125), 'conversacion' (:172)»; `src/app/(protected)/admin/leads/_components/demo-form.tsx:201` — «[tilde] 'Que cubre ... proximos pasos', 'visualizacion' (:263), 'Agrega' sin voseo (:354)»; `src/app/(protected)/admin/messages/_actions/message.schemas.ts:19` — «[tilde] 'El mensaje no puede estar vacio.'»; `src/app/(protected)/admin/leads/[leadId]/page.tsx:442` — «[copy] Rótulo en inglés 'Reactivate at'»; `src/app/(protected)/admin/leads/[leadId]/page.tsx:376` — «[copy] Monto acordado como '$${agreedAmount}' sin formato de moneda ni separadores es-AR»; `src/app/(protected)/admin/leads/_components/lead-form.tsx:189` — «[copy] Labels en inglés 'Business name', 'Instagram URL' (:291), 'Google Maps URL' (:321); opción 'WEB' (:54)»; `src/app/(protected)/admin/leads/_components/demo-form.tsx:154` — «[copy] Labels 'Demo URL' y 'Loom URL' (:166); opción 'WEB' (:39)»; `src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx:124` — «[copy] 'Follow-up pendiente!' sin signo de apertura; fallback 'Super Admin' (:255)»; `src/app/(protected)/admin/leads/_components/reunion-panel.tsx:109` — «[copy] Nota interna de desarrollo visible: 'Sin notas (no debería pasar — son obligatorias desde B7)'»; `src/app/(protected)/admin/messages/_actions/message.actions.ts:122` — «[copy] Fallbacks de error en inglés ('Failed to list conversations', :164, :202, :227) y 'Invalid organization id' en message.schemas.ts:12»; `src/app/(protected)/admin/leads/_components/assign-setter-control.tsx:155` — «[contraste] 'sin evaluar' en text-zinc-600 sobre fondo oscuro (< 4,5:1)»; `src/app/(protected)/admin/messages/page.tsx:8` — «[contraste] Texto de placeholder en text-white/40 (~3,7:1)»; `src/app/(protected)/admin/leads/_components/reunion-panel.tsx:184` — «[contraste] placeholder:text-zinc-600 en el textarea de nota»; `src/app/(protected)/admin/leads/[leadId]/page.tsx:310` — «[contraste] Rótulos text-[10px] text-zinc-500 sobre bg-black/20 en todas las tarjetas (~4,1:1 o menos); patrón repetido en el lote»; `src/app/(protected)/admin/messages/_components/conversation-list.tsx:109` — «[inline] borderBottom inline; existe border-b border-white/[0.06] + last:border-0»; `src/app/(protected)/admin/leads/_components/column-overview.tsx:160` — «[inline] gridTemplateColumns inline en lugar de grid-cols-*»; `src/app/(protected)/admin/leads/_components/themed-date-input.tsx:26` — «[inline] colorScheme inline; Tailwind 4 tiene utilidad de color-scheme»; `src/app/(protected)/admin/projects/[projectId]/layout.tsx:38` — «[copy] Etiqueta de estado en inglés 'Planning' (también en project-list.tsx:27 y project-status-control.tsx:11)»; `src/app/(protected)/admin/projects/[projectId]/layout.tsx:42` — «[tilde] 'Revision' sin tilde (también en project-list.tsx:29 y project-status-control.tsx:13)»; `src/app/(protected)/admin/projects/[projectId]/layout.tsx:185` — «[strokeWidth] Building2 sin strokeWidth={1.5}»; `src/app/(protected)/admin/projects/[projectId]/layout.tsx:224` — «[strokeWidth] LogIn sin strokeWidth={1.5}»; `src/app/(protected)/admin/projects/[projectId]/page.tsx:72` — «[tilde] 'Todavia no inicio mantenimiento' (Todavía, inició)»; `src/app/(protected)/admin/projects/[projectId]/page.tsx:90` — «[tilde] 'Mantenimiento al dia' (día)»; `src/app/(protected)/admin/projects/[projectId]/page.tsx:184` — «[tilde] 'Todavia no hay una descripcion detallada' (Todavía, descripción)»; `src/app/(protected)/admin/projects/[projectId]/page.tsx:231` — «[tilde] 'Suscripcion' (Suscripción)»; `src/app/(protected)/admin/projects/[projectId]/page.tsx:190` — «[contraste] Rótulos de 10 px en text-zinc-500 sobre fondo oscuro (~4,1:1 < 4,5:1); se repite en las tiles de page.tsx, project-card.tsx:176 y hours/page.tsx:74»; `src/app/(protected)/admin/projects/[projectId]/page.tsx:35` — «[otro] Moneda fija en USD en los formateadores (también en payments/page.tsx:39, hours/page.tsx:17, project-card.tsx:97 y project-form.tsx:61): confirmar si es decisió»; `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:204` — «[tilde] 'El proyecto pasara a mantenimiento' (pasará)»; `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:211` — «[tilde] 'Todavia no hay meses generados' (Todavía)»; `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:222` — «[tilde] Encabezado 'Accion' y 'Sin accion' en :262 y :312 (Acción)»; `src/app/(protected)/admin/projects/[projectId]/_components/project-tabs.tsx:12` — «[copy] Pestaña 'Overview' en inglés»; `src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx:30` — «[strokeWidth] LoaderCircle sin strokeWidth={1.5}»; `src/app/(protected)/admin/projects/[projectId]/_components/project-status-control.tsx:83` — «[strokeWidth] LoaderCircle sin strokeWidth={1.5}»; `src/app/(protected)/admin/projects/_components/project-card.tsx:183` — «[strokeWidth] CalendarDays (:183, :191), CircleDollarSign (:199), FolderKanban (:210) y CheckCircle2 (:216) sin strokeWidth={1.5}»; `src/app/(protected)/admin/projects/_components/project-form.tsx:230` — «[strokeWidth] AlertTriangle sin strokeWidth={1.5}»; `src/app/(protected)/admin/projects/_components/project-form.tsx:252` — «[tilde] Placeholder 'automatizacion' (automatización)»; `src/app/(protected)/admin/projects/_components/project-form.tsx:261` — «[tilde] Label 'Descripcion' (Descripción)»; `src/app/(protected)/admin/projects/_components/project-form.tsx:325` — «[copy] Label 'Monthly rate' en inglés»; `src/app/(protected)/admin/projects/_actions/project.schemas.ts:53` — «[copy] Errores de validación en inglés que ve el usuario: 'Project name is required' y 'Amount must be positive' (:26)»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:662` — «[copy] Mensajes en inglés que llegan a la UI vía fail: 'Project not found', 'Organization not found' (:254), 'Lead already has a linked project' (:859); en maintenance»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:510` — «[copy] 'Proyecto interno develOP' frente a 'Proyecto interno de develOP' en el resto (:456, layout.tsx:167)»; `src/app/(protected)/admin/projects/_components/task-form.tsx:115` — «[copy] Errores en inglés: 'Title is required' y 'Estimated hours must be zero or positive' (:123)»; `src/app/(protected)/admin/projects/_components/task-list.tsx:150` — «[tilde] 'Esperando aprobacion del cliente' y 'Enviar a aprobacion' en :645 (aprobación)»; `src/app/(protected)/admin/projects/_components/task-list.tsx:256` — «[copy] 'Todavia no hay tareas' / 'Crea la primera tarea' (:257): falta tilde y usa tuteo en vez de voseo (Creá)»; `src/app/(protected)/admin/projects/_components/task-list.tsx:430` — «[copy] Rótulo 'Time entries' en inglés (también en :496)»; `src/app/(protected)/admin/projects/_components/task-list.tsx:487` — «[tilde] 'Descripcion' y 'Sin descripcion detallada todavia.' (:490); 'Todavia no hay horas' (:532)»; `src/app/(protected)/admin/projects/_components/task-list.tsx:362` — «[strokeWidth] ChevronDown (:362), ChevronRight (:364), LoaderCircle (:392, :475, :641), Clock3 (:412), CheckCircle2 (:427), AlertTriangle (:440) y Send (:643) sin strokeWidth»; `src/app/(protected)/admin/projects/_components/task-list.tsx:556` — «[contraste] Texto descriptivo en text-zinc-600 sobre fondo oscuro (< 4,5:1)»; `src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:143` — «[copy] 'Selecciona una tarea.', 'Ingresa una cantidad de horas valida.' (:149) y 'Selecciona una fecha.' (:154): tuteo y falta tilde (Seleccioná, Ingresá, válida)»; `src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:208` — «[copy] 'Carga rapida de horas' / 'Registra trabajo real ... y manten el costo/hora' (:210): faltan tildes y usa tuteo»; `src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:272` — «[tilde] Placeholder 'Que se hizo, bloqueo, avance, revision...' (Qué, revisión)»; `src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:300` — «[copy] 'Todavia no hay horas registradas' / 'Empieza cargando...' (:301): falta tilde y usa tuteo (Empezá)»; `src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:331` — «[tilde] Encabezado 'Accion' (Acción)»; `src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:288` — «[strokeWidth] Plus (:288) y Trash2 (:354, :395) sin strokeWidth={1.5}»; `src/app/(protected)/admin/projects/_components/projects-filter-bar.tsx:123` — «[copy] 'Reestablecer filtros' debería ser 'Restablecer filtros'»; `src/app/(protected)/admin/projects/_components/draggable-project-card.tsx:109` — «[copy] La confirmación de borrado del tablero no menciona los pagos de mantenimiento; la de la ficha sí (delete-project-button.tsx:69-71). Ninguna avisa que el cliente»; `src/app/(protected)/admin/projects/_components/project-list.tsx:105` — «[inline] style con maxHeight y maskImage para el preview capado; Tailwind 4 lo cubre con max-h-[42rem] y utilidades mask-*/arbitrarias»; `src/app/(protected)/admin/projects/_components/project-list.tsx:171` — «[inline] style gridTemplateColumns; existe grid-cols-[repeat(auto-fill,minmax(320px,1fr))]»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:184` — «[strokeWidth] Settings2, Clock3 (:187), Target (:478), Users (:524), BellRing (:624) sin strokeWidth={1.5}»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:411` — «[strokeWidth] Loader2/CheckCircle2 del botón por fila y del SaveButton (:698) sin strokeWidth»; `src/app/(protected)/admin/settings/page.tsx:17` — «[strokeWidth] Icono Settings sin strokeWidth»; `src/app/(protected)/admin/tickets/_components/ticket-chat.tsx:184` — «[strokeWidth] MessageSquareText sin strokeWidth»; `src/app/(protected)/admin/tickets/_components/ticket-list.tsx:208` — «[strokeWidth] MessageSquareText sin strokeWidth»; `src/components/admin/managers/ChatbotManager.tsx:80` — «[strokeWidth] Bot (:80), Activity (:100) y TrendingUp (:122) sin strokeWidth»; `src/components/admin/managers/ProjectManager.tsx:60` — «[strokeWidth] Loader2/Send sin strokeWidth»; `src/components/admin/managers/VaultManager.tsx:97` — «[strokeWidth] Loader2/UploadCloud sin strokeWidth»; `src/app/contact/page.tsx:140` — «[strokeWidth] CheckCircle, Send (:222), TimerReset (:231), ShieldCheck (:239), MapPin (:247), iconos de canal (:316) y ArrowUpRight (:329) sin strokeWidth»; `src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx:213` — «[contraste] Fecha y estado de cada alerta en text-zinc-600 sobre fondo oscuro»; `src/app/(protected)/admin/settings/reports/ReportSettingsClient.tsx:146` — «[contraste] Email del destinatario y fecha (:149) en text-zinc-600»; `src/components/admin/managers/ChatbotManager.tsx:54` — «[contraste] Texto de ayuda 'Creá uno para empezar…' en text-zinc-600»; `src/app/(protected)/admin/team/page.tsx:201` — «[contraste] Descripción del estado vacío en text-white/40»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:178` — «[tilde] 'configuracion', 'parametros' (:179), 'catalogo' y 'clasico' (:198), 'configuracion' (:207), 'proximas' (:308), 'modulos' (:336), 'Parametros' (:430), 'composic»; `src/app/(protected)/admin/settings/_actions/settings.actions.ts:123` — «[tilde] 'configuracion' (:123), 'Configuracion actualizada.' (:169), 'No se encontro el modulo.' (:190)»; `src/app/(protected)/admin/settings/_actions/settings.schemas.ts:38` — «[tilde] 'Modulo invalido.' y 'Ingresa un precio valido.' (:39)»; `src/app/(protected)/admin/settings/page.tsx:25` — «[tilde] Título 'Configuracion'»; `src/app/(protected)/admin/team/page.tsx:202` — «[tilde] 'aca' (también member-workload.tsx:261 y ticket-list.tsx:152)»; `src/app/(protected)/admin/team/_actions/task.actions.ts:250` — «[copy] Mensajes al usuario en inglés: 'Task not found', 'One or more tasks were not found' (:290), 'Tasks must belong to the same project' (:295) y fallbacks 'Failed t»; `src/app/(protected)/admin/team/_actions/task.schemas.ts:38` — «[copy] Mensajes de validación en inglés ('Invalid project id', 'Title is required' :79, 'Estimated hours must be…' :68)»; `src/app/(protected)/admin/team/_actions/time-entry.schemas.ts:20` — «[copy] Mensajes en inglés ('Invalid task id', 'Hours must be positive' :27)»; `src/app/(protected)/admin/team/_actions/time-entry.actions.ts:153` — «[copy] 'Task not found' y 'Time entry not found' (:216) en inglés»; `src/app/(protected)/admin/tickets/_actions/ticket.actions.ts:156` — «[copy] 'Ticket not found' y 'Failed to list tickets' (:96) en inglés»; `src/app/(protected)/admin/settings/_actions/settings.schemas.ts:22` — «[copy] .email() y .url() (:24, :25) sin mensaje propio: el toast muestra 'Invalid email' / 'Invalid url' de Zod en inglés»; `src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx:148` — «[copy] 'issues encontrados' mezcla inglés y español»; `src/app/(protected)/admin/settings/alerts/page.tsx:28` — «[copy] Eyebrow 'Settings · Alertas' en inglés (también reports/page.tsx:34 'Settings · Reportes')»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:545` — «[copy] Muestra el enum crudo 'SUPER_ADMIN' como etiqueta de rol»; `src/app/contact/page.tsx:277` — «[copy] 'Online ahora' y 'Menos de 2 horas' (:234) son promesas fijas que no dependen de nada»; `src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx:67` — «[inline] style={{ colorScheme: 'dark' }} cuando existe la clase [color-scheme:dark]»; `src/app/contact/page.tsx:219` — «[inline] style={{ transition: 'none' }} repetido (:297, :303, :339, :340) en lugar de transition-none; boxShadow inline en :120 y :260»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:56` — «[otro] cn() local duplicado en vez de importar el de @/lib/utils»; `src/app/(protected)/admin/tickets/_components/ticket-chat.tsx:209` — «[otro] Burbuja con whitespace-pre-wrap sin break-words: una URL larga desborda en mobile (message-bubble.tsx:52 sí lo tiene)»; `src/components/admin/managers/ChatbotManager.tsx:130` — «[otro] 'Leads (últimos)' cuenta solo la lista recortada que pasa el tab, no el total»; `src/modules/chatbot/server/admin/manageAlerts.ts:59` — «[tilde] Texto de auditoría visible en /admin/audit-log: 'Marco alerta como vista' → 'Marcó'»; `src/modules/chatbot/server/admin/manageAlerts.ts:102` — «[tilde] Texto de auditoría visible: 'Resolvio alerta' → 'Resolvió'»; `src/lib/actions/settings.ts:342` — «[copy] El mensaje de prueba del webhook usa un cliente y un ticket inventados ('Concesionaria San Miguel') (código muerto)»; `src/lib/actions/settings.ts:204` — «[copy] El email de invitación muestra el nombre del enum 'SUPER_ADMIN' al usuario (código muerto)»; `src/lib/actions/clients.ts:30` — «[tilde] 'formato valido' → 'válido' (código muerto)»; `src/lib/actions/clients.ts:168` — «[tilde] 'ID de cliente invalido.' → 'inválido' (código muerto)»
+- Impacto: Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.
+- Propuesta: Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-shell, h4.adm-alertas, h4.adm-audit, h4.adm-dashboard, h4.adm-novedades, h4.adm-clientes, h4.adm-leads, h4.adm-mensajes, h4.adm-proyectos, h4.adm-config, h4.adm-tickets, h6.vis-contacto, h4.adm-equipo
+
 ## Calidad
 
 ### [UX-001] El exito del magic link le dice al cliente que el link 'fue impreso en la consola del servidor'
@@ -2789,6 +3352,79 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h3.vis-api-chatbot, lib.chatbot.prompts, lib.chatbot.verticals, lib.chatbot.tools
+
+### [UX-040] Las actions del admin que comunican errores esperados con throw se ven genéricas en producción (solo llega el digest) y cada una va a Sentry: Clientes (editar datos, notas internas, archivar y eliminar)
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:94` — «setError(err instanceof Error ? err.message : 'No se pudo guardar. Intentá de nuevo.')»; `src/modules/chatbot/server/admin/updateClient.ts:79` — «throw new Error('El email ingresado ya está registrado en otro usuario.')»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:168` — «toast.error(err instanceof Error ? err.message : 'No se pudo archivar el cliente')»; `src/instrumentation.ts:49` — «export const onRequestError = Sentry.captureRequestError»; `src/modules/chatbot/server/admin/updateClient.ts:37` — «if (!result.success) throw new Error(zodErrorToMessage(result.error))»; `src/modules/chatbot/server/admin/archiveClient.ts:30` — «if (org.deletedAt) throw new Error('El cliente ya está archivado.')»; `src/modules/chatbot/server/admin/updateClientInternalNotes.ts:23` — «if (!result.success) throw new Error('Datos inválidos para las notas internas.')»; `docs/bitacora-roadmap.md:7211` — «HTTP 200 + **'1:E{"digest":"3529886923"}'** (error server thrown ...»
+- Impacto: updateClient, updateClientInternalNotes, archive/unarchive, getClientDeletionSummary y hardDeleteClient comunican errores esperados lanzando Error. En un build de produccion Next reemplaza el mensaje de errores lanzados en server actions por uno generico con digest, asi que el admin veria un texto en ingles inutil en vez de 'El email ya esta registrado'. Ademas cada error esperado se registra en Sentry via onRequestError (ruido).
+- Propuesta: Que esas actions devuelvan un resultado tipado ({ ok:false, error }) para errores esperados (como ya hacen plan.actions con ActionResult) y reservar throw para fallos reales; la UI muestra result.error.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.editar-datos, h4.adm-clientes.notas-internas, h4.adm-clientes.archivar, h4.adm-clientes.eliminar, int.sentry, h4.adm-clientes.eliminar-definitivo, lib.actions
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-118
+
+### [UX-044] Overview de columna con 3 columnas fijas en cualquier ancho: inusable en mobile
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/leads/_components/column-overview.tsx:19` — «const OVERVIEW_COLS = 3 // columnas de la grilla de cards dentro del overlay»; `src/app/(protected)/admin/leads/_components/column-overview.tsx:160` — «style={{ gridTemplateColumns: 'repeat(${OVERVIEW_COLS}, minmax(0, 1fr))' }}»
+- Impacto: A 390 px: 390 − 32 (p-4 del overlay, :108) − 48 (p-6, :156) = 310 px; menos 2 gaps de 16 px = 278 / 3 ≈ 92,7 px por card. La card tiene p-4 (lead-card.tsx:87) → ~60 px útiles, de los que el botón de borrar ocupa 36 px + gap 12 (lead-card.tsx:124, :100): ~12 px para el nombre. Ver todos los leads de una columna desde el teléfono es imposible.
+- Propuesta: Grilla responsive con clases Tailwind (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3) en lugar del style inline.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-leads.pipeline-kanban
+
+### [UX-046] Pagos: 'Marcar pagado' no tiene confirmación, estado pendiente, mensaje de error ni forma de deshacer
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:156` — «action={async () => { 'use server' await markMilestonePaid(milestone.id)»; `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:188` — «await generatePendingMaintenance(project.id)»; `src/app/(protected)/admin/projects/_actions/milestone.actions.ts:49` — «export async function unmarkMilestonePaid(»
+- Impacto: Un clic equivocado marca como cobrado un pago del cliente y la UI no permite deshacerlo: unmarkMilestonePaid existe pero no tiene consumidores. Si la action falla (sesión vencida, error de base), el ActionResult se descarta y el botón no muestra nada. Un doble clic vuelve a sellar paidAt. 'Generar meses pendientes' no dice cuántos meses creó. Para cobros reales esto es un estado financiero que no se puede corregir desde el admin.
+- Propuesta: Pasar los formularios de Pagos a un client component con useActionState o useFormStatus: confirmación breve, mensaje de error y un botón 'Deshacer' conectado a unmarkMilestonePaid (y su equivalente para mantenimiento).
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-proyectos.pagos-hitos, h4.adm-proyectos.mantenimiento, modelo.OsPaymentMilestone
+
+### [UX-047] El tablero de proyectos usa cards de ancho fijo de 340 px que desbordan en teléfonos
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/projects/_components/project-list.tsx:125` — «className="flex w-[340px] shrink-0"»; `src/app/(protected)/admin/projects/_components/project-list.tsx:171` — «style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}»; `src/app/(protected)/admin/projects/_components/droppable-project-column.tsx:30` — «'rounded-[28px] border bg-white/5 p-5 backdrop-blur-xl transition-colors',»
+- Impacto: A 390 px de ancho, después del padding del main y los 20 px por lado de la columna, quedan unos 318 px para una card de 340 px que no puede encogerse: el tablero desborda o se recorta. Es justo la vista que se diseñó para touch (HOLD de 200 ms). El overview tiene el mismo mínimo de 320 px dentro de p-4 + p-6.
+- Propuesta: Usar w-full max-w-[340px] en la card y minmax(min(100%,320px),1fr) en el overview.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-proyectos.tablero-kanban
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-125
+
+### [UX-048] La bandeja de tickets del admin arranca filtrada al último mes por updatedAt: un ticket abierto sin actividad reciente desaparece de la vista y de los contadores
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx:88` — «const [preset, setPreset] = useState<Preset>('1m')»; `src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx:123` — «onChange({ fromMs: presetCutoff(nowMs, preset), toMs: nowMs })»; `src/app/(protected)/admin/tickets/_components/ticket-list.tsx:91` — «return tickets.filter((ticket) => { const updatedMs = new Date(ticket.updatedAt).getTime()»; `src/app/(protected)/admin/tickets/_components/ticket-list.tsx:151` — «title="No hay tickets en esta bandeja"»
+- Impacto: Un ticket OPEN creado hace más de 30 días no aparece en 'Abiertos' ni en el contador al entrar a /admin/tickets, y como responder no toca updatedAt (BUG-056) tampoco vuelve aunque el cliente siga escribiendo; el estado vacío afirma que no hay tickets. Para el primer cliente real: su pedido queda sin respuesta sin que nadie lo vea.
+- Propuesta: Default 'Todos' o aplicar el periodo solo a RESUELTOS (OPEN/IN_PROGRESS siempre visibles); avisar en el estado vacío cuántos quedan fuera del periodo; arreglar BUG-056.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-056]
+- Nodo(s): h4.adm-tickets, h4.adm-tickets.bandeja, modelo.Ticket
+
+### [UX-049] /admin/settings/alerts y /admin/settings/reports son páginas huérfanas y prometen crons que no corren
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/_components/admin-sidebar.tsx:96` — «{ href: '/admin/settings', label: 'Configuración', icon: Settings },»; `src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx:124` — «Corre el detector manualmente sin esperar el cron de 15 minutos.»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:628` — «9:00 AM Argentina»
+- Impacto: Ningún link lleva a 'Sistema de alertas' ni a 'Reportes semanales' (git grep sin resultados fuera de su carpeta): son la única UI para correr el detector de bots, que no tiene cron (FAL-016), y el envío manual. El texto asegura 'cada 15 minutos' y una 'Hora del cron 9:00 AM' (os-follow-up solo figura en vercel.json, BUG-047). develOP confía en un monitoreo que no existe.
+- Propuesta: Enlazar ambas subpáginas desde /admin/settings (o fusionarlas con /admin/alerts) y reemplazar los horarios fijos por la última corrida real leída de la base, o quitarlos hasta que haya disparador.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [FAL-016]
+- Nodo(s): h4.adm-alertas.detector-incidencias, h4.adm-config.reportes-semanales, h4.adm-config, int.cron.detect-bot-issues
+
+### [UX-050] Acciones del admin cuyo fallo no se muestra: Referidos ignora el resultado y Crear entregable / Subir a Bóveda tragan el error en console.error
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/referrals/_components/referrals-admin-table.tsx:38` — «await action(id)»; `src/components/admin/managers/ProjectManager.tsx:21` — «// Optionally show a toast here } catch (error) { console.error(error)»; `src/components/admin/managers/VaultManager.tsx:30` — «} catch (error) { console.error(error)»; `src/actions/agency-actions.ts:90` — «revalidatePath('/admin/clients')»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx:26` — «<VaultManager organizationId={clientId} />»
+- Impacto: Si la action falla (sesión vencida, proyecto de otra org, URL inválida) el admin no ve nada; 'Crear y Notificar al Cliente' tampoco confirma el éxito. revalidatePath('/admin/clients') no es la ruta en la que se está (/admin/clients/<slug>?tab=…), así que la lista puede no refrescarse hasta recargar (PROBABLE).
+- Propuesta: Mostrar result.error o el error capturado (toast + role=alert), confirmar el éxito y revalidar la ruta de detalle o hacer router.refresh() tras éxito.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-referidos.gestion-estados, h4.adm-clientes.crear-entregable, h4.adm-clientes.boveda-carga, h4.adm-clientes.tab-boveda, int.sentry
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-129
 
 ### [UX-003] Cambio forzado sin salida si el cliente no tiene la temporal, y copy de 'forzado' tambien en cambio voluntario
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: ux
@@ -2983,6 +3619,118 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h3.cli-chatbot, lib.chatbot.reports, lib.chatbot.quota
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-103
 
+### [UX-034] Topbar: /admin/announcements se titula 'Detalle' y otras secciones salen en inglés por la heurística de ID
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/_components/admin-topbar.tsx:12` — «if (/^[a-z0-9]{10,}$/i.test(segment)) {»; `src/app/(protected)/admin/_components/admin-topbar.tsx:13` — «return 'Detalle'»; `src/app/(protected)/admin/_components/admin-topbar.tsx:24` — «const sectionLabelMap: Record<string, string> = {»
+- Impacto: En Novedades el h1 del topbar dice 'Detalle' ('announcements' son 13 letras y la regex lo toma por ID); Referidos sale 'Referrals', Revisión demos 'Leados' y las subrutas 'New', 'Edit', 'Payments'. Contradice el cierre B13.5 de labels en español.
+- Propuesta: Completar el mapa con todas las secciones y subrutas y detectar IDs por formato cuid (letra inicial + dígitos) en vez de por largo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-shell, h4.adm-shell.navegacion, h4.adm-novedades
+
+### [UX-035] Menú mobile del admin: la hamburguesa queda encima del drawer y tapa el logo; drawer sin Escape ni manejo de foco
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/_components/AdminLayoutClient.tsx:46` — «className="fixed left-4 top-4 z-[120] rounded-xl border border-white/10 bg-zinc-900/90 p-2.5 backdrop-blur lg:hidden"»; `src/app/(protected)/admin/_components/AdminLayoutClient.tsx:62` — «className={'fixed left-0 top-0 z-[110] h-screen w-[240px] transition-transform lg:translate-x-0 ${»; `src/app/(protected)/admin/_components/admin-sidebar.tsx:117` — «<div className="border-b border-white/10 px-5 py-5">»
+- Impacto: En el teléfono, al abrir el menú el botón (caja de 16 a 58 px, z-120) queda sobre el BrandMark del sidebar (arranca en 20 px, z-110). El drawer no cierra con Escape, no mueve ni atrapa el foco y el botón no expone aria-expanded.
+- Propuesta: Ocultar la hamburguesa mientras mobileOpen (o bajarla de z), agregar Escape, foco inicial/trap y aria-expanded/aria-controls reutilizando el patrón de alert-column-overview.tsx:43-89.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-shell, h4.adm-shell.navegacion
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-113
+
+### [UX-036] Retirar una novedad ignora el resultado de la action: si falla, el admin no ve nada
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/announcements/_components/announcement-list.tsx:40` — «await deleteAnnouncementAction(id)»; `src/app/(protected)/admin/announcements/_components/announcement-list.tsx:41` — «setConfirmingId(null)»; `src/app/(protected)/admin/announcements/_actions/announcements.actions.ts:75` — «return fail(toErrorMessage(error, 'No se pudo retirar la novedad.'))»
+- Impacto: Si el retiro falla (sesión vencida, base caída), la confirmación se cierra como si hubiera funcionado; la novedad sigue visible para los clientes y el admin solo lo nota si vuelve a mirar la lista. Tampoco queda registro en AdminAuditLog de quién publicó o retiró.
+- Propuesta: Chequear result.success y mostrar el error en la fila; registrar publicar/retirar con logAdminAction.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-novedades, h4.adm-novedades.listar-y-retirar, modelo.PanelAnnouncement
+
+### [UX-037] Filtros de /admin/alerts no envuelven en mobile: desborde horizontal y popover de rango fuera de pantalla
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/alerts/AlertsClient.tsx:177` — «<div className="flex items-center gap-2">»; `src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx:58` — «<div className="flex items-center gap-2">»; `src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx:81` — «className="absolute left-full top-0 z-50 ml-2 w-64 rounded-2xl border ...»
+- Impacto: A 390 px el ancho útil del main es ~334 px (390 menos p-3 del shell y p-4 del main); la fila de severidad suma ~400 px (rótulo + 5 chips) y la de período ~550 px (rótulo + 6 chips), ambas sin flex-wrap, así que el contenido scrollea en horizontal y el popover 'Personalizado' (256 px, a la derecha del último chip) abre fuera del viewport.
+- Propuesta: flex-wrap en ambas filas (o un select en mobile) y anclar el popover debajo del chip con clamp al viewport como audit-period-filter.tsx:31-45.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-alertas, h4.adm-alertas.filtros-y-vista-completa
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-115
+
+### [UX-038] Acciones de alertas: error genérico 'Error' y rechazo de promesa sin manejar
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/alerts/AlertsClient.tsx:94` — «error: 'Error',»; `src/app/(protected)/admin/alerts/AlertsClient.tsx:96` — «await promise»; `src/app/(protected)/admin/alerts/AlertsClient.tsx:132` — «onAck={(id) => void handleAck(id)}»
+- Impacto: Si marcar como vista o resolver falla (sesión vencida: requireSuperAdmin lanza 'Unauthorized'), el toast dice solo 'Error' y la promesa rechazada queda sin manejar (try/finally sin catch, llamada con void), lo que termina como unhandledrejection.
+- Propuesta: catch con mensaje útil ('No se pudo resolver la alerta; reintentá') y que acknowledgeAlert/resolveAlert devuelvan ActionResult.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-alertas.triage
+
+### [UX-039] Secciones sin loading.tsx propio muestran el skeleton del Dashboard (/admin/announcements, /admin/referrals, /admin/fg2-lab)
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/loading.tsx:19` — «{/* Fila 1 — KPIs comerciales (3 cols) */}»; `src/app/(protected)/admin/loading.tsx:61` — «{/* Fila 4 — Gráficos (2x2) */}»; `src/app/(protected)/admin/announcements/page.tsx:10` — «export default async function AdminAnnouncementsPage() {»
+- Impacto: Al navegar a Novedades o Referidos aparece el esqueleto de KPIs y gráficos del Dashboard y después salta a un formulario o lista: un estado de carga que anuncia otra pantalla.
+- Propuesta: loading.tsx propio en announcements, referrals y fg2-lab, o un skeleton genérico en el root y el de KPIs dentro de la página con Suspense.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-shell, h4.adm-novedades, h4.adm-referidos
+
+### [UX-041] Soporte: 'Ver todos' manda ?clientId= que /admin/tickets y /admin/messages ignoran
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx:30` — «<SupportSection title={'Tickets recientes (${tickets.length})'} href={'/admin/tickets?clientId=${clientId}'}>»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx:55` — «<SupportSection title="Mensajes recientes" href={'/admin/messages?clientId=${clientId}'}>»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx:19` — «take: 10,»
+- Impacto: Desde la ficha del cliente, 'Ver todos' abre todos los tickets de todos los clientes y la bandeja de mensajes sin seleccion. El titulo 'Tickets recientes (N)' tope 10 aparenta ser el total.
+- Propuesta: Que /admin/tickets acepte el filtro por org (slug) y que 'Ver todos' de mensajes apunte a /admin/messages/[orgId]; mostrar el total real con _count.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.tab-soporte, h4.adm-tickets, h4.adm-mensajes
+
+### [UX-042] Fallos silenciosos: exportar leads en lote e impersonar no muestran el error
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:120` — «try { const result = await bulkExportLeads([...selected]) if (!result.ok) return»; `src/lib/bulk-actions.ts:79` — «return { ok: true, csv, count: leads.length }»; `src/app/(protected)/admin/clients/[clientId]/_components/ImpersonateButton.tsx:25` — «} catch (error) { console.error('Impersonation failed', error)»
+- Impacto: bulkExportLeads nunca devuelve ok:false (lanza), y handleBulkExportLeads no tiene catch: el boton deja de girar y no pasa nada. Impersonar fallido solo deja un console.error con el dialogo abierto. handleBulkPauseBots re-lanza tras toast.promise (:148).
+- Propuesta: catch con toast.error en ambos; resultado tipado en bulk-actions.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.acciones-masivas, h4.adm-clientes.impersonar
+
+### [UX-043] Estados borde del detalle: sin ADMIN no se puede editar nada y los archivados no se distinguen
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:64` — «const canSubmit = hasAdminUser &&»; `src/app/(protected)/admin/clients/[clientId]/page.tsx:65` — «prisma.organization.findMany({ select: { id: true, companyName: true, slug: true },»
+- Impacto: Una org sin miembro ADMIN no permite corregir ni el nombre de la empresa (EditClientForm.tsx:101-105). El switcher lista orgs archivadas y el header no marca 'Archivado', asi que se puede impersonar o cambiar plan a un archivado sin advertencia.
+- Propuesta: Permitir editar los datos de la empresa sin usuario admin (y ofrecer crear uno); filtrar o marcar archivados en el switcher y mostrar un badge en ClientHeader.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.editar-datos, h4.adm-clientes.detalle
+
+### [UX-045] La tabla Inbound no muestra qué pidió el cliente: no distingue módulo vs upgrade de plan
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx:17` — «service: string | null»; `src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx:104` — «<th className="px-4 py-3 font-medium">Nombre</th>»; `src/lib/actions/upsell.ts:93` — «service: parsed.data.featureKey,»
+- Impacto: Los pedidos de módulo y de upgrade (plan-upgrade-*, UpgradeCtaButton.tsx:80) que hace el cliente desde su panel caen en Inbound sin columna de servicio (el campo llega pero no se renderiza); para saber qué pidió hay que leer el mensaje.
+- Propuesta: Agregar columna/badge de servicio con mapeo módulo vs plan-upgrade-* (PLAN-620).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-leads.inbound, h2.cli-plan, h2.cli-servicios
+
+### [UX-051] 'Enviar a aprobación' no avisa al cliente (ni campana ni email), falla en silencio y no audita
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/lib/actions/projects.ts:197` — «await tx.message.create({ data: { content: '📋 Tu entrega "${task.title}" está lista para revisión. ...»; `src/actions/agency-actions.ts:54` — «const notifications = orgMembers.map(member => ({ type: 'ACTION_REQUIRED' as const,»; `src/app/(protected)/admin/projects/_components/task-list.tsx:628` — «await sendTaskForApprovalAction(formData) router.refresh()»
+- Impacto: El camino vivo para pedir aprobación (task-list) solo crea un Message. A diferencia de createTaskForClientAction, no genera Notification ACTION_REQUIRED ni email, así que el cliente se entera recién cuando entra al portal. La action devuelve void y sale en silencio si la tarea no existe (:182, :188). Un guard vencido lanza dentro de startTransition sin catch y termina en el error boundary. No hay auditoría.
+- Propuesta: Reusar la creación de Notification + email de agency-actions (o un helper común), devolver ActionResult y mostrar el feedback en la UI. Agregar logAdminAction.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-112]
+- Nodo(s): h4.adm-proyectos.enviar-a-aprobacion, h2.cli-proyecto, modelo.Message, modelo.Notification
+
 ## Observabilidad
 
 ## Accesibilidad
@@ -3059,6 +3807,27 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h3.cli-chatbot.contacto-detalle, h3.cli-chatbot.resumen, h3.cli-chatbot.contactos-lista
+
+### [A11Y-023] Cards del pipeline: botón anidado en un article role=button; por teclado no se puede borrar un lead
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/leads/_components/lead-card.tsx:64` — «role="button"»; `src/app/(protected)/admin/leads/_components/lead-card.tsx:80` — «if (event.key === 'Enter') { event.preventDefault() router.push('/admin/leads/${lead.id}')»; `src/app/(protected)/admin/leads/_components/lead-card.tsx:116` — «<button type="button" disabled={isPending}»
+- Impacto: El keydown de Enter sobre «Eliminar lead» (o sobre los botones del InlineConfirm, que se renderiza dentro de la card) burbujea al article, que hace preventDefault y navega al detalle: el botón nunca se activa. Space dispara el KeyboardSensor de dnd-kit (activador = la card entera) y levanta la card. Un lector de pantalla anuncia un botón dentro de otro botón.
+- Propuesta: En el onKeyDown del article actuar sólo si event.target === event.currentTarget; mejor aún, separar la navegación (Link) del handle de arrastre y sacar el botón del elemento con role=button.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-leads.eliminar-lead, h4.adm-leads.pipeline-kanban, lib.ui
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-122
+
+### [A11Y-024] Formulario público de /contact: labels sin asociar a sus campos y error sin role=alert
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/app/contact/page.tsx:151` — «<label className="mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60">Nombre *</label> <input name="name"»; `src/app/contact/page.tsx:213` — «<p className="col-span-2 text-xs text-rose-300">{state.error}</p>»
+- Impacto: Ninguno de los seis <label> tiene htmlFor ni envuelve su campo: un lector de pantalla anuncia 'campo de edición' sin nombre; el error de envío no se anuncia. Falla WCAG 1.3.1 y 4.1.2 en el formulario de captación pública.
+- Propuesta: id + htmlFor (o label envolvente) en cada campo, aria-invalid/aria-describedby y role=alert en el mensaje de error.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [A11Y-005]
+- Nodo(s): h6.vis-contacto.formulario
 
 ### [A11Y-004] Filas del dropdown de notificaciones no operables con teclado
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: a11y
@@ -3171,6 +3940,47 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h3.cli-chatbot.contactos-lista, h3.cli-chatbot.contacto-detalle, h3.vis-widget-develop.tooltip-proactivo
 
+### [A11Y-019] Diálogos del admin sin semántica de diálogo, foco inicial, trap ni Escape: confirmaciones destructivas y el modal de LeadForm
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/_components/confirm-dialog.tsx:48` — «role="dialog"»; `src/app/(protected)/admin/_components/type-to-confirm-dialog.tsx:46` — «onClick={isPending ? undefined : onClose}»; `src/app/(protected)/admin/_components/inline-confirm.tsx:51` — «role="dialog"»; `src/app/(protected)/admin/leads/_components/lead-form.tsx:166` — «<div className="fixed inset-0 z-[130] flex items-center justify-center bg-[#05070a]/80 p-4 backdrop-blur-md">»; `src/app/(protected)/admin/leads/_components/lead-form.tsx:176` — «<button type="button" onClick={closeModal}»; `src/app/(protected)/admin/leads/_components/lead-form.tsx:188` — «<label className="mb-2 block text-sm font-medium text-zinc-200">»
+- Impacto: Con teclado o lector de pantalla, al confirmar archivar/eliminar cliente, acciones masivas de bots o impersonar, el foco queda detrás del modal, Tab recorre el fondo y Escape no cierra (git grep Escape vacío en los tres); ConfirmDialog no tiene aria-label/labelledby y se anuncia como un diálogo sin título.
+- Propuesta: Un hook de modal accesible compartido (foco inicial, trap, Escape, restore, aria-labelledby) como el de alert-column-overview.tsx:43-89, aplicado a los tres componentes.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-shell, h4.adm-shell.confirmaciones, h4.adm-leads.alta-edicion, lib.ui
+
+### [A11Y-020] Topbar y breadcrumbs con controles solo-ícono sin aria-label y h1 duplicado por página
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/_components/admin-topbar.tsx:88` — «title="Cerrar sesión"»; `src/app/(protected)/admin/_components/admin-topbar.tsx:75` — «<h1 className="mt-1 truncate text-lg font-medium tracking-tight text-white">»; `src/app/(protected)/admin/alerts/page.tsx:13` — «<h1 className="text-3xl font-semibold tracking-tight text-zinc-100">»; `src/app/(protected)/admin/_components/AdminBreadcrumbs.tsx:26` — «<Home className="h-3 w-3" strokeWidth={1.5} />»
+- Impacto: El botón de logout y el link a Inicio de los breadcrumbs se anuncian sin nombre (title no es confiable para lectores); cada página admin con h1 propio (19 archivos por git grep) queda con dos h1, uno de ellos el del topbar.
+- Propuesta: aria-label en ambos íconos, nav con aria-label de breadcrumb, y que el título del topbar no sea un h1 (o quitar el h1 de las páginas).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-shell, h4.adm-shell.navegacion
+
+### [A11Y-021] Formularios y controles del admin sin semántica accesible (labels sin asociar, controles sin nombre, errores sin role=alert): novedades, audit log, plan, billing override, notas, leads, mensajes, proyectos, configuración y tickets
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx:102` — «<label className="mb-2 block text-sm font-medium text-zinc-200">Título</label>»; `src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx:177` — «<div className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">»; `src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx:297` — «{error ? <Callout tone="danger">{error}</Callout> : null}»; `src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx:98` — «<label className="text-[10px] uppercase tracking-[0.24em] text-zinc-500"> Precio override (USD/mes)»; `src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx:155` — «<div className={ feedback.type === 'success'»; `src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx:88` — «{error && <p className="text-xs text-red-400">{error}</p>}»; `src/app/(protected)/admin/leads/_components/lead-form.tsx:343` — «<div className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">»; `src/app/(protected)/admin/messages/_components/message-input.tsx:93` — «<div className="mb-2 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm text-rose-200">»; `src/app/(protected)/admin/leads/_components/lead-pipeline.tsx:220` — «role="alert"»; `src/app/(protected)/admin/projects/_components/project-form.tsx:213` — «<label className="mb-2 block text-sm font-medium text-zinc-200"> Vincular a cliente del portal (opcional) </label>»; `src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:236` — «<label className="mb-2 block text-sm font-medium text-zinc-200">Horas</label> <input»; `src/app/(protected)/admin/projects/_components/projects-board.tsx:225` — «<div className="rounded-[28px] border border-rose-400/20 bg-rose-500/10 p-5 text-sm text-rose-200">»; `src/app/(protected)/admin/projects/_components/overlay-modal.tsx:92` — «const focusFrame = window.requestAnimationFrame(() => { panelRef.current?.focus()»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:730` — «<button type="button" role="switch"»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:386` — «<input type="number" min="0"»; `src/app/(protected)/admin/tickets/_components/ticket-reply-form.tsx:84` — «<textarea ref={textareaRef} value={content}»; `src/app/(protected)/admin/tickets/_components/ticket-chat.tsx:175` — «<div className="mt-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">»
+- Impacto: Los labels no tienen htmlFor/id, así que un lector de pantalla anuncia los campos sin nombre; los errores por campo, el error del server y el aviso de éxito no tienen role=alert/aria-live, y el Callout del design system tampoco (git grep vacío en Callout.tsx).
+- Propuesta: Asociar label e input (o usar el Field del design system), role=alert/aria-live en errores y éxito; decisión para Valentino si Callout (src/components/ui, FROZEN) agrega role según tone.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-novedades.publicar, h4.adm-audit.listado-y-filtros, lib.ui, h4.adm-clientes.plan, h4.adm-clientes.billing-override, h4.adm-clientes.notas-internas, h4.adm-leads, h4.adm-mensajes, h4.adm-proyectos.alta-edicion, h4.adm-proyectos.tareas, h4.adm-proyectos.horas, h4.adm-config.datos-y-alertas, h4.adm-config.precios-modulos, h4.adm-tickets.conversacion-y-respuesta, h4.adm-clientes.crear-entregable
+
+### [A11Y-022] Archivar y fijar son invisibles sin hover: teclado y pantallas tactiles
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:712` — «className="rounded-lg p-1.5 text-zinc-500 opacity-0 transition-opacity hover:bg-white/[0.05] hover:text-amber-300 group-hover:opacity-100 disabled:opacity-50"»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:721` — «className="rounded-lg p-1.5 opacity-0 transition-opacity hover:bg-white/[0.05] group-hover:opacity-100"»; `src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx:32` — «if (event.key === 'k' && (event.metaKey || event.ctrlKey)) { event.preventDefault()»
+- Impacto: Con teclado el foco cae en botones invisibles (sin focus-visible:opacity-100); en celular no hay hover, asi que archivar y fijar no se ven. El switcher secuestra Ctrl+K en toda la pagina y su boton no expone aria-expanded/aria-haspopup (:72-86).
+- Propuesta: Agregar focus-visible:opacity-100 y mostrar las acciones siempre en pantallas sin hover (media hover:none); roles y aria-expanded en el switcher.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [A11Y-006]
+- Nodo(s): h4.adm-clientes.listado, h4.adm-clientes.archivar, h4.adm-clientes.detalle
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-120
+
 ## ZONA-FRANCO
 
 > Hallazgos sobre `src/lib/leados/`, `setter/`, `admin/leados/`, `admin/leads/_actions/`, `admin/fg2-lab/`, `src/auth.ts`, `src/lib/auth-cookies.ts`, `api/qa/login` y los modelos `OsLead*`/`ActivityChannel`. Se repiten en `09-PARA-FRANCO.md`.
@@ -3261,6 +4071,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: FROZEN + ZONA-FRANCO
 - Relacionado: —
 - Nodo(s): lib.auth, h1.auth-login.sesion-jwt
+
+### [DEU-060] Fecha de reactivación de POSTERGADO calculada en el cliente y duplicada; la trampa de z.coerce.date sigue armada
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/leads/_components/change-status-select.tsx:40` — «reactivateAt: next === 'POSTERGADO' ? new Date(Date.now() + POSTPONE_DAYS * 24 * 60 * 60 * 1000)»; `src/app/(protected)/admin/leads/_components/lead-pipeline.tsx:125` — «reactivateAt: status === 'POSTERGADO' ? new Date(Date.now() + POSTPONE_DAYS * 24 * 60 * 60 * 1000)»; `src/app/(protected)/admin/leads/_actions/lead.schemas.ts:40` — «z.coerce.date().optional()»
+- Impacto: La regla de negocio (7 días) vive en dos componentes (POSTPONE_DAYS en change-status-select.tsx:14 y lead-pipeline.tsx:32) y depende del reloj del navegador. Si se conecta un date-picker, 'YYYY-MM-DD' se interpreta como medianoche UTC (21:00 del día anterior en Argentina).
+- Propuesta: Que updateLeadStatus derive el default de reactivateAt en servidor con el helper de fechas AR y que el schema normalice fechas de calendario. Requiere coordinar con Franco (lead.actions/lead.schemas).
+- Esfuerzo: S  ·  Zona: ZONA-FRANCO
+- Relacionado: —
+- Nodo(s): h4.adm-leads.ficha-y-estado, h4.adm-leads.pipeline-kanban, lib.leados
 
 ### [SEC-021] /api/qa/login revela en el 403 cual guarda fallo
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad

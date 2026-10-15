@@ -2270,62 +2270,6 @@
   },
   {
    "ciclo": "D5-c1",
-   "lote": "D5-L6",
-   "herramienta": "h4.adm-alertas",
-   "id": "h4.adm-alertas.detector-incidencias",
-   "nombre": "Detector de incidencias de bots",
-   "descripcion": "Detecta 9 tipos de incidencia por bot, crea BotAlert deduplicada y notifica por email y Telegram.",
-   "archivos": [
-    "src/modules/chatbot/server/admin/detectBotIssues.ts",
-    "src/modules/chatbot/server/admin/manageAlerts.schemas.ts"
-   ],
-   "entradas": [
-    "GET /api/cron/detect-bot-issues",
-    "POST /api/admin/alerts/trigger-detector"
-   ],
-   "madurez": "L1",
-   "madurez_evidencia": "Funciona solo a mano: AlertSettingsClient.tsx:89 -> trigger-detector/route.ts:5-16 -> detectBotIssues.ts:285-297; sin scheduler (netlify.toml:25-32) y ciego a errores de stream",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "si",
-     "evidencia": "Escrituras forOrg por org del bot (detectBotIssues.ts:43, :245)"
-    },
-    "vacios": {
-     "cumple": "n/a",
-     "evidencia": "Proceso batch"
-    },
-    "errores": {
-     "cumple": "parcial",
-     "evidencia": "Sin try por issue (:242-280); rutas devuelven String(error)"
-    },
-    "carga": {
-     "cumple": "n/a",
-     "evidencia": "Proceso batch"
-    },
-    "validacion_servidor": {
-     "cumple": "n/a",
-     "evidencia": "Sin input"
-    },
-    "mobile": {
-     "cumple": "n/a",
-     "evidencia": "Proceso batch"
-    },
-    "sentry": {
-     "cumple": "no",
-     "evidencia": "Sin captureException"
-    },
-    "sin_mocks_todos": {
-     "cumple": "si",
-     "evidencia": "Senales reales"
-    },
-    "autonomia": {
-     "cumple": "no",
-     "evidencia": "No corre solo (sin disparador programado)"
-    }
-   }
-  },
-  {
-   "ciclo": "D5-c1",
    "lote": "D5-L7",
    "herramienta": "h3.vis-api-chatbot",
    "id": "h3.vis-api-chatbot.responder-turno",
@@ -4011,6 +3955,5138 @@
     "autonomia": {
      "cumple": "no",
      "evidencia": "Hoy el alta requiere escribir a mano en la base."
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-shell",
+   "id": "h4.adm-shell.acceso-y-layout",
+   "nombre": "Guard SUPER_ADMIN y shell del admin",
+   "descripcion": "Layout que exige SUPER_ADMIN, arma el shell (fondo, sidebar, topbar, main con scroll) y define error y loading raíz.",
+   "archivos": [
+    "src/app/(protected)/admin/layout.tsx",
+    "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+    "src/app/(protected)/admin/error.tsx",
+    "src/app/(protected)/admin/loading.tsx",
+    "src/app/(protected)/admin/_components/AdminErrorBoundary.tsx",
+    "src/app/(protected)/admin/_components/PageTransition.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/layout.tsx:AgencyOsLayout"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: layout.tsx:41-49 (auth + rol) -> :52-55 badges -> AdminLayoutClient.tsx:74-101 (sidebar + main). No llega a L3 por mobile parcial (hamburguesa sobre el drawer, AdminLayoutClient.tsx:43-46).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "layout.tsx:47 redirect si no es SUPER_ADMIN (las páginas hijas sin guard propio son hallazgo aparte)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Shell sin colecciones propias"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "admin/error.tsx:12 -> AdminErrorBoundary.tsx:18 -> SectionErrorBoundary sin error.message en UI"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "admin/loading.tsx:4-75"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada de usuario"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "Drawer colapsable (AdminLayoutClient.tsx:52-82) pero hamburguesa z-120 sobre el BrandMark y sin Escape"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary.tsx:64 Sentry.captureException (fuera del lote, git grep)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "git grep TODO/FIXME en el lote: solo un comentario obsoleto AdminErrorBoundary.tsx:15"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna de develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-shell",
+   "id": "h4.adm-shell.navegacion",
+   "nombre": "Sidebar, topbar y volver",
+   "descripcion": "Navegación por 4 áreas y 16 ítems con estado activo y badges (alertas, revisión de demos), topbar con breadcrumb/título/fecha/logout, botones Volver y breadcrumbs.",
+   "archivos": [
+    "src/app/(protected)/admin/_components/admin-sidebar.tsx",
+    "src/app/(protected)/admin/_components/admin-topbar.tsx",
+    "src/app/(protected)/admin/_components/AdminBackButton.tsx",
+    "src/app/(protected)/admin/_components/AdminBreadcrumbs.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "admin-sidebar.tsx:57-100 secciones -> :131-195 Link con activo y badge (datos de layout.tsx:11, :21) -> admin-topbar.tsx:66-77 breadcrumb/título -> :85 signOutAction (flujo D1 'Logout'). Título 'Detalle' en Novedades (admin-topbar.tsx:12-13) y mobile parcial.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Heredado del layout"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Badges se ocultan en 0 (admin-sidebar.tsx:169)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin llamadas propias"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Badges cacheados server-side (layout.tsx:10-14)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "AdminBackButton acepta ?from= solo si empieza con /admin/ (AdminBackButton.tsx:39)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "Drawer de 240 px (AdminLayoutClient.tsx:61-82); hamburguesa superpuesta al BrandMark"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin efectos con fallo propio"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Rol crudo 'SUPER_ADMIN' (admin-sidebar.tsx:206) es copy, no dato falso"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-shell",
+   "id": "h4.adm-shell.confirmaciones",
+   "nombre": "Confirmaciones de acciones destructivas",
+   "descripcion": "ConfirmDialog (portal), TypeToConfirmDialog (frase exacta) e InlineConfirm (anclado a la card) usados por clientes, bots, proyectos y leads.",
+   "archivos": [
+    "src/app/(protected)/admin/_components/confirm-dialog.tsx",
+    "src/app/(protected)/admin/_components/type-to-confirm-dialog.tsx",
+    "src/app/(protected)/admin/_components/inline-confirm.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L3",
+   "madurez_evidencia": "Consumidores fuera del lote (ClientsListClient, BotDetailClient, BulkActionBar, ImpersonateButton, BillingOverrideForm por git grep) -> confirm-dialog.tsx:42 portal a body -> :85-96 confirmar con isPending; type-to-confirm-dialog.tsx:41, :107 exige la frase. Faltan foco/Escape (a11y), no entre los nueve.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Componente de UI"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "El error lo maneja el consumidor"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Spinner y botones deshabilitados con isPending (confirm-dialog.tsx:94, type-to-confirm-dialog.tsx:111)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Componente de UI"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "w-full max-w-md con p-4 del overlay (confirm-dialog.tsx:44-50); InlineConfirm max-w-[300px] (inline-confirm.tsx:55)"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Componente de UI"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO ni datos fijos"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-dashboard",
+   "id": "h4.adm-dashboard.kpis-comerciales",
+   "nombre": "KPIs comerciales",
+   "descripcion": "Demos de la semana contra objetivo, leads con follow-up vencido hoy y tasas de respuesta y cierre.",
+   "archivos": [
+    "src/app/(protected)/admin/page.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/page.tsx:AgencyOsPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:182-221 (settings, osDemo.count, osLead.count por estado) -> :343-350 objetivo, progreso y tasas -> :576-614 StatCard/DualMetricCard. Permisos heredados y tasa de respuesta sesgada.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Sin guard propio (page.tsx:154); depende de layout.tsx:47. Datos globales por diseño"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Valores en 0 con subtítulo útil ('Bandeja comercial al día', page.tsx:592-594)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "admin/error.tsx:12"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "admin/loading.tsx:19-31 replica la fila"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 hasta xl (page.tsx:575); DualMetricCard sm:grid-cols-2 (:776)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Boundary con captureException (SectionErrorBoundary.tsx:64)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Todo sale de Prisma; sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-dashboard",
+   "id": "h4.adm-dashboard.kpis-operativos-y-financieros",
+   "nombre": "KPIs operativos y financieros",
+   "descripcion": "MRR, clientes activos, tickets abiertos, proyectos en curso, ingresos del mes, horas por miembro y valor hora.",
+   "archivos": [
+    "src/app/(protected)/admin/page.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/page.tsx:AgencyOsPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:222-250 (subscription.aggregate, organization.count, ticket.count, project.count) y :281-340 (proyectos con agreedAmount, pagos, horas) -> :351-427 cálculo -> :625-700 render.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Heredado del layout, sin guard propio"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "MemberHoursCard con mensaje vacío (page.tsx:857-860)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "admin/error.tsx:12"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "admin/loading.tsx:33-59"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 md:grid-cols-2 (page.tsx:624) y grid-cols-1 hasta xl (:674)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Boundary con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO; datos reales"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-dashboard",
+   "id": "h4.adm-dashboard.tendencias-historicas",
+   "nombre": "Tendencias de semanas y meses",
+   "descripcion": "Charts de demos por semana con objetivo, tasa de cierre mensual, ingresos acumulados y horas por miembro.",
+   "archivos": [
+    "src/app/(protected)/admin/page.tsx",
+    "src/app/(protected)/admin/_components/dashboard-history-charts.tsx",
+    "src/app/(protected)/admin/_components/chart-card.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/page.tsx:AgencyOsPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:443-542 series -> :710-716 DashboardHistoryCharts -> dashboard-history-charts.tsx:125-318 -> chart-card.tsx:18 aria-label.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Heredado del layout"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "ChartEmptyState en los 4 (dashboard-history-charts.tsx:166, :209, :257, :316)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "admin/error.tsx:12"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "admin/loading.tsx:61-73"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 xl:grid-cols-2 (dashboard-history-charts.tsx:124), ResponsiveContainer"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Boundary con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO; series de Prisma"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.triage",
+   "nombre": "Triage de alertas de bots",
+   "descripcion": "Tablero en tres columnas (pendientes, vistas, resueltas) con stats, marcar como vista, resolver e ir al bot.",
+   "archivos": [
+    "src/app/(protected)/admin/alerts/page.tsx",
+    "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+    "src/app/(protected)/admin/alerts/_components/alert-card.tsx",
+    "src/app/(protected)/admin/alerts/_components/alert-types.ts",
+    "src/app/(protected)/admin/alerts/error.tsx",
+    "src/app/(protected)/admin/alerts/loading.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/alerts/page.tsx:AlertsPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "alerts/page.tsx:5 listAlerts (manageAlerts.ts:10 guard, :25 take 100) -> AlertsClient.tsx:81-85 columnas -> alert-card.tsx:75 -> AlertsClient.tsx:87-101 acknowledgeAlert (manageAlerts.ts:30) + update optimista.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin en listAlerts/acknowledgeAlert/resolveAlert (manageAlerts.ts:10, :32, :77, git grep)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Por columna (AlertsClient.tsx:247-250) y global (:283-289)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Toast 'Error' genérico (AlertsClient.tsx:94, :114); render cubierto por alerts/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "alerts/loading.tsx y botones con loading (alert-card.tsx:78, :90)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "alertId string; schema no visible desde el lote (manageAlerts.ts fuera del lote)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "Columnas grid-cols-1 (AlertsClient.tsx:202) pero filtros sin flex-wrap"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Boundary sí; rechazos de ack/resolve sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO; datos de BotAlert"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.filtros-y-vista-completa",
+   "nombre": "Filtros de alertas y vista completa por columna",
+   "descripcion": "Filtro de severidad y período (presets y rango), cap de 4 por columna y overlay 'Ver todas' accesible.",
+   "archivos": [
+    "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+    "src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx",
+    "src/app/(protected)/admin/alerts/_components/alerts-filters.ts",
+    "src/app/(protected)/admin/alerts/_components/alert-column-overview.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "AlertsClient.tsx:48-49 estado -> :75-79 passesFilters -> alerts-filters.ts:50-70 -> AlertsClient.tsx:207-275 cap -> alert-column-overview.tsx:95-158 overlay con Escape/trap (:43-89). Opera sobre el recorte de 100 filas.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Filtra datos ya autorizados en el cliente"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "alert-column-overview.tsx:145-150"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Lógica pura en cliente"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin fetch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Filtro client-side (PLAN-544 pendiente)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "Filas sin flex-wrap (AlertsClient.tsx:177, alerts-date-filter.tsx:58); popover left-full (:81)"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin efectos con fallo"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.deteccion-automatica",
+   "nombre": "Detección automática de incidencias",
+   "descripcion": "Corrida periódica del detector que crea BotAlert; la página afirma que corre cada 15 minutos.",
+   "archivos": [
+    "src/app/(protected)/admin/alerts/page.tsx",
+    "src/app/(protected)/admin/layout.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L1",
+   "madurez_evidencia": "El detector existe (api/cron/detect-bot-issues/route.ts:13 -> detectBotIssues.ts:285) pero ningún scheduler lo llama: netlify.toml:25-32 y vercel.json:2-15 no lo incluyen; solo corre a mano (api/admin/alerts/trigger-detector/route.ts:12).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Cron con secreto, fuera del lote"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI propia"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Fuera del lote"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Proceso de fondo"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "No verificado (fuera del lote)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "La copy afirma 'cada 15 minutos' (alerts/page.tsx:17) sin disparador"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Depende de que un admin dispare el detector a mano"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-novedades",
+   "id": "h4.adm-novedades.publicar",
+   "nombre": "Publicar novedad del panel",
+   "descripcion": "Formulario con título, cuerpo, alcance (todos o una org) y caducidad; publica en el feed del dashboard del cliente.",
+   "archivos": [
+    "src/app/(protected)/admin/announcements/page.tsx",
+    "src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx",
+    "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
+    "src/app/(protected)/admin/announcements/_actions/announcements.schemas.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/announcements/page.tsx:AdminAnnouncementsPage",
+    "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts:createAnnouncementAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "announcement-publisher.tsx:53-75 safeParse -> :78 createAnnouncementAction -> announcements.actions.ts:18 guard -> :19 parse -> :41-50 create -> :52-53 revalidate -> flujo D2 'Novedades del panel'.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Action con requireSuperAdmin (:18); la página lee sin guard propio"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "serverError visible (publisher.tsx:176-180) pero puede ser error.message crudo (action-utils.ts:32)"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "Botón con loading (publisher.tsx:190); sin loading.tsx de sección (cae en el skeleton del Dashboard)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod en server (actions.ts:19; schemas.ts:11-35 con .max)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "sm:grid-cols-2 (publisher.tsx:124), inputs w-full"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Catch devuelve fail sin captureException (actions.ts:55-57)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-novedades",
+   "id": "h4.adm-novedades.listar-y-retirar",
+   "nombre": "Novedades publicadas y retiro",
+   "descripcion": "Lista de las últimas 100 novedades con alcance, caducidad y lecturas; retiro con confirmación inline.",
+   "archivos": [
+    "src/app/(protected)/admin/announcements/page.tsx",
+    "src/app/(protected)/admin/announcements/_components/announcement-list.tsx",
+    "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts:deleteAnnouncementAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "announcements/page.tsx:12-25 -> announcement-list.tsx:58-126 -> :93 Retirar -> :75 Confirmar -> :39-44 deleteAnnouncementAction (actions.ts:66-69) -> router.refresh.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Action con guard (:66); página sin guard propio"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "announcement-list.tsx:47-54"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Resultado de la action ignorado (announcement-list.tsx:40-43)"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "'Retirando...' en el botón (:79); sin loading.tsx de sección"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Solo id no vacío (actions.ts:67)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Filas flex con flex-wrap en badges (:103)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Catch sin captureException (actions.ts:74-76)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-audit",
+   "id": "h4.adm-audit.listado-y-filtros",
+   "nombre": "Audit log: listado, filtros y cargar más",
+   "descripcion": "Registro de acciones administrativas con stats globales, filtro por tipo de acción y período, y paginación incremental server-side.",
+   "archivos": [
+    "src/app/(protected)/admin/audit-log/page.tsx",
+    "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+    "src/app/(protected)/admin/audit-log/_components/audit-filters.ts",
+    "src/app/(protected)/admin/audit-log/_components/audit-period-filter.tsx",
+    "src/app/(protected)/admin/audit-log/error.tsx",
+    "src/app/(protected)/admin/audit-log/loading.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/audit-log/page.tsx:AuditLogPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "audit-log/page.tsx:8-11 guard -> :13-16 listAuditLog/getAuditLogStats (audit-log-queries.ts:21, :54 requireSuperAdmin) -> AuditLogClient.tsx:106-126 -> :67-104 runQuery anti-race -> audit-filters.ts:21-54. Validación de filtros no verificable desde el lote.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Guard en la página (:8-11) y en las actions (audit-log-queries.ts:21, :54)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "AuditLogClient.tsx:179-183"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Callout 'No se pudieron cargar los registros.' (:98, :297) + audit-log/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "audit-log/loading.tsx, 'Cargando...' (:168-177), aria-busy (:191), botón loading (:304)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "actionType libre desde el cliente (:79); schema de listAuditLog no visible desde el lote"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap (:154); panel de fecha con clamp al viewport (audit-period-filter.tsx:35-38)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Boundary sí; catch de runQuery sin captureException (:94-98)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-audit",
+   "id": "h4.adm-audit.detalle-de-cambios",
+   "nombre": "Detalle de cambios y de borrados",
+   "descripcion": "Expande cada registro para ver diff antes/después, motivo y el detalle del hard-delete de cliente.",
+   "archivos": [
+    "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L3",
+   "madurez_evidencia": "AuditLogClient.tsx:194-199 normaliza diff/metadata sin any -> :210-214 expandir -> :276-285 DeletionDetail (:447-473) o DiffDisplay (:363-403).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Datos del listado con doble guard"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "No expandible si no hay diff ni borrado (:199, :213)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Lectura defensiva de Json (:405-445) sin fetch"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin fetch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 md:grid-cols-2 (:369); pre con overflow-auto (:398)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Boundary con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.boveda-alta-activo",
+   "nombre": "Alta de activo en la bóveda del cliente",
+   "descripcion": "El admin sube links, documentos o accesos (con contraseña en la descripción) a la bóveda de una organización.",
+   "archivos": [
+    "src/actions/agency-actions.ts"
+   ],
+   "entradas": [
+    "src/actions/agency-actions.ts:createClientAssetAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "VaultManager.tsx:25 (fuera del lote) -> agency-actions.ts:98-101 rol -> :103-111 clientAsset.create -> flujo D2 'Bóveda del cliente' (boveda/page.tsx:129). La credencial queda en claro.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Rol sí (:99); organizationId por parámetro sin verificar existencia ni archivado"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Alta"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "throw genérico (:100); VaultManager.tsx:30-31 solo console.error"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "VaultManager.tsx:97 Loader2 con isPending (fuera del lote, git show)"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "Sin Zod (:96)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captureException (git grep vacío)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.tarea-para-aprobacion",
+   "nombre": "Pedir aprobación de una entrega al cliente",
+   "descripcion": "Crea una tarea PENDING_APPROVAL en un proyecto del cliente, notifica in-app a los miembros y les manda email.",
+   "archivos": [
+    "src/actions/agency-actions.ts"
+   ],
+   "entradas": [
+    "src/actions/agency-actions.ts:createTaskForClientAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ProjectManager.tsx:18 (fuera del lote) -> agency-actions.ts:19-22 -> :29 assertProjectBelongsToOrg -> :37-72 transacción task + notificaciones -> :75-88 emails -> flujo D2 'Aprobar o pedir cambios en una entrega'.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Rol (:20) + pertenencia del proyecto a la org (:29)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Alta"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "ProjectManager.tsx:21-23 '// Optionally show a toast here' + console.error"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "Sin Zod ni .max (:17)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Emails con .catch(console.error) (:86); sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.listado",
+   "nombre": "Listado de clientes",
+   "descripcion": "Lista de clientes activos y archivados con busqueda, filtro por estado del bot, orden y fijados",
+   "archivos": [
+    "src/app/(protected)/admin/clients/page.tsx",
+    "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "src/app/(protected)/admin/clients/loading.tsx",
+    "src/app/(protected)/admin/clients/error.tsx"
+   ],
+   "entradas": [
+    "ClientsPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: page.tsx:91-94 -> :62-65 -> ClientsListClient.tsx:258-304 -> :497-517 -> :630. No llega a L3 por mobile parcial (fijar oculto sin hover) y cache que no se invalida en el alta.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "page.tsx:92 role SUPER_ADMIN; listado global por diseno admin"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "ClientsListClient.tsx:468-489 EmptyStateMuted con CTA"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "clients/error.tsx:12 AdminErrorBoundary -> SectionErrorBoundary"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading.tsx:4-26; Suspense con skeleton page.tsx:107"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "grilla responsive :492 y filtros flex-col :308; boton fijar opacity-0 sin hover :721"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary.tsx:64 Sentry.captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales de prisma; sin TODO en el lote"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna de develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.eliminar",
+   "nombre": "Eliminar cliente (hard-delete)",
+   "descripcion": "Borrado irreversible con resumen y confirmacion por texto ELIMINAR; deep-link ?delete=",
+   "archivos": [
+    "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ClientsListClient.tsx:437-454 -> :192-207 -> :521-531 TypeToConfirmDialog -> :222-243 -> hardDeleteClient.ts (flujo D6).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "hardDeleteClient.ts:110 y :126 requireSuperAdmin (git grep)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "accion puntual"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "toast err.message :239 (generico en prod)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "deleteLoading :448-449; isPending del dialogo :529"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "hardDeleteClient.ts:111, :127 safeParse"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "checkbox visible :621-626; barra flex-col/flex-wrap :397, :415"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "onRequestError instrumentation.ts:49"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "resumen real DeleteSummaryDetail :537-572"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.detalle",
+   "nombre": "Ficha del cliente",
+   "descripcion": "Header con datos y metricas, switcher de clientes, tabs y transiciones",
+   "archivos": [
+    "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+    "src/app/(protected)/admin/clients/[clientId]/_components/ClientHeader.tsx",
+    "src/app/(protected)/admin/clients/[clientId]/_components/ClientSwitcher.tsx",
+    "src/app/(protected)/admin/clients/[clientId]/_components/ClientTabsNav.tsx",
+    "src/app/(protected)/admin/clients/[clientId]/_components/TabContentTransition.tsx",
+    "src/app/(protected)/admin/clients/[clientId]/_components/TabSkeleton.tsx",
+    "src/app/(protected)/admin/clients/[clientId]/loading.tsx",
+    "src/app/(protected)/admin/clients/[clientId]/error.tsx"
+   ],
+   "entradas": [
+    "ClientDetailPage"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "page.tsx:28-31 -> :39-69 -> :75-83 -> :85-93; cumple los criterios aplicables. Deuda: router.push en switcher, cuid en URL, archivados sin marca.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "page.tsx:29 role SUPER_ADMIN"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "notFound() si no existe :71; switcher 'Sin resultados' ClientSwitcher.tsx:115-118"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "[clientId]/error.tsx:13"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading.tsx:4-42; Suspense TabSkeleton page.tsx:86"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "tab en whitelist page.tsx:35-37"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "tabs overflow-x-auto ClientTabsNav.tsx:27; header flex-col ClientHeader.tsx:45; stats grid-cols-2 :123"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary.tsx:64"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos falsos"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.plan",
+   "nombre": "Asignar plan",
+   "descripcion": "Upgrade inmediato con reset de cuota, downgrade programado al mes siguiente, tabla de 7 dimensiones",
+   "archivos": [
+    "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx",
+    "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx",
+    "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+    "src/app/(protected)/admin/clients/_actions/plan.schemas.ts"
+   ],
+   "entradas": [
+    "assignPlanToOrg"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "PlanAssignmentForm.tsx:39-49 -> plan.actions.ts:88-92 -> :101-122 -> :179-208 -> :210-235. Falla: precio legacy desincronizado, downgrade no cancelable, error crudo.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "plan.actions.ts:88 requireSuperAdmin"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'Sin plan asignado (fallback Starter)' PlanAssignmentCard.tsx:45-52"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "feedback de error PlanAssignmentForm.tsx:47-49 con error.message crudo plan.actions.ts:240"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading/disabled PlanAssignmentForm.tsx:107-109"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "plan.actions.ts:89-92; plan.schemas.ts:4-10"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "tabla con overflow-x-auto PlanAssignmentCard.tsx:88"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch con console.error plan.actions.ts:239"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "planes desde la DB :18"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.billing-override",
+   "nombre": "Billing override",
+   "descripcion": "Precio facturable independiente del plan con vencimiento y motivo; quitar con confirmacion",
+   "archivos": [
+    "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx",
+    "src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx",
+    "src/app/(protected)/admin/clients/_actions/plan.actions.ts"
+   ],
+   "entradas": [
+    "setBillingOverride",
+    "clearBillingOverride"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "BillingOverrideForm.tsx:50-73 -> plan.actions.ts:244-313; quitar :75-90 -> :320-370. Default 0 USD sin confirmacion y fecha corrida.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "plan.actions.ts:248, :324"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'—' sin override BillingOverrideCard.tsx:53; error si no hay Subscription plan.actions.ts:265-269"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "BillingOverrideForm.tsx:64-66 muestra result.error (crudo :316)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading/disabled :141, :146"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "plan.schemas.ts:14-28 Zod, pero acepta 0 y el cliente convierte '' a 0 (:52)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 sm:grid-cols-2 :96"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error plan.actions.ts:315"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos falsos"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.impersonar",
+   "nombre": "Impersonar al cliente",
+   "descripcion": "Entrar al portal como el cliente para soporte",
+   "archivos": [
+    "src/app/(protected)/admin/clients/[clientId]/_components/ImpersonateButton.tsx",
+    "src/app/(protected)/admin/clients/_actions/client.actions.ts"
+   ],
+   "entradas": [
+    "startImpersonationAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ImpersonateButton.tsx:20-29 -> client.actions.ts:8 -> flujo D1 'Impersonacion de soporte'.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "delegado a impersonation.ts:12 (flujo D1)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "accion puntual"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "ImpersonateButton.tsx:25-28 solo console.error"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPending :49"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "delegada; el wrapper no valida"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "boton en flex :134"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "solo si la action lanza (onRequestError)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos falsos"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.tab-chatbot",
+   "nombre": "Pestana Chatbot",
+   "descripcion": "Resumen del bot del cliente, manager y accesos al detalle del bot",
+   "archivos": [
+    "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+    "src/app/(protected)/admin/clients/[clientId]/_components/QuickActionMotion.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ChatbotTab.tsx:15-36 -> :65-99 -> :101-124 -> :127-163. La cuota mostrada no es la efectiva.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "renderizada dentro de page.tsx:28-31; filtra por clientId resuelto"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": ":40-56 con CTA"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "[clientId]/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Suspense TabSkeleton page.tsx:86"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 sm:grid-cols-2 :65, :126"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "'Quota mensual' muestra monthlyQuota que el gating no usa :94"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.tab-proyectos",
+   "nombre": "Pestana Proyectos",
+   "descripcion": "Proyectos del cliente y alta de entregables sobre el proyecto activo",
+   "archivos": [
+    "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ProjectsTab.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ProjectsTab.tsx:14-20 -> :22-25 -> :73 ProjectManager -> agency-actions.ts:14.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "where organizationId :15; agency-actions.ts:20 rol y :29 assertProjectBelongsToOrg"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": ":33-34 y :75-77"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "[clientId]/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Suspense TabSkeleton"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "fuera del lote (agency-actions)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "xl:grid-cols solo en xl :28"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos falsos"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.tab-boveda",
+   "nombre": "Pestana Boveda",
+   "descripcion": "Assets y credenciales del cliente; alta via VaultManager",
+   "archivos": [
+    "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "VaultTab.tsx:15-18 -> :39-42 -> :71; alta :26 -> VaultManager -> agency-actions.ts:94.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "where organizationId :16; agency-actions.ts:99 rol"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": ":33-34"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "VaultManager.tsx:30-31 solo console.error"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Suspense TabSkeleton"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "fuera del lote"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 :21, :36"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "error de alta no se captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos falsos"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.tab-soporte",
+   "nombre": "Pestana Soporte",
+   "descripcion": "Ultimos tickets y mensajes del cliente con accesos",
+   "archivos": [
+    "src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "SupportTab.tsx:15-26 -> :30-53 -> :55-84. 'Ver todos' sin filtro.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "where organizationId :17, :22"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": ":31-32, :56-57"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "[clientId]/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Suspense TabSkeleton"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 lg:grid-cols-2 :29"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos falsos"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.alta-cliente",
+   "nombre": "Alta de cliente (wizard)",
+   "descripcion": "Wizard de onboarding con o sin chatbot",
+   "archivos": [
+    "src/app/(protected)/admin/clients/new/page.tsx"
+   ],
+   "entradas": [
+    "NewClientPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ClientsListClient.tsx:352 -> new/page.tsx:14 -> flujo D5 'Alta de cliente con bot (asistente)' (OnboardingWizard.tsx:87 -> Step5Review.tsx:71 -> createClientWithBot.ts:96). El listado no se invalida tras el alta.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "createClientWithBot.ts:96 / createClientOnly.ts:48 requireSuperAdmin"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Step5Review.tsx:111 err.message lanzado"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Step5Review.tsx:331 spinner"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "createClientWithBot.ts:99-104 safeParse"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "layout del wizard fuera del lote"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "onRequestError"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos falsos en new/page.tsx"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.redireccion-chatbot-legacy",
+   "nombre": "Redireccion legacy de chatbot",
+   "descripcion": "Bookmarks viejos /admin/clients/[slug]/chatbot/* van a /admin/chatbots/[botId]",
+   "archivos": [
+    "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx"
+   ],
+   "entradas": [
+    "DeprecatedChatbotRedirect"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:20-23 -> :28-31 -> :35-38. Solo slug; sin install/integrations.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": ":21"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "notFound :33"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "redireccion"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "redireccion"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "TAB_MAP :6-13 incompleto"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "sin UI"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "sin UI"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos falsos"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.facturacion",
+   "nombre": "Ciclo de cobro del cliente",
+   "descripcion": "Emitir facturas, marcar pagos, fijar renovacion y estado de la suscripcion",
+   "archivos": [
+    "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx"
+   ],
+   "madurez": "L0",
+   "madurez_evidencia": "No existe: OverviewTab.tsx:72-74 solo monta plan, override y reporte; invoice solo se escribe en prisma/seed.ts:595 y :618; subscription solo en plan.actions.ts y get-plan-for-org.ts:50 (git grep).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "las facturas que ve el cliente solo pueden venir del seed"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.pipeline-kanban",
+   "nombre": "Kanban outbound con drag & drop y vista de columna",
+   "descripcion": "Board 3+3+2 de OsLead por estado, mover por drag (mouse/teclado), overview fullscreen por columna.",
+   "archivos": [
+    "src/app/(protected)/admin/leads/page.tsx",
+    "src/app/(protected)/admin/leads/_components/outbound-leads-view.tsx",
+    "src/app/(protected)/admin/leads/_components/lead-pipeline.tsx",
+    "src/app/(protected)/admin/leads/_components/pipeline-board.tsx",
+    "src/app/(protected)/admin/leads/_components/pipeline-column.tsx",
+    "src/app/(protected)/admin/leads/_components/droppable-column.tsx",
+    "src/app/(protected)/admin/leads/_components/draggable-lead-card.tsx",
+    "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+    "src/app/(protected)/admin/leads/_components/column-overview.tsx",
+    "src/app/(protected)/admin/leads/_components/lead-pipeline.shared.ts"
+   ],
+   "entradas": [
+    "AgencyOsLeadsPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:21-54 getLeads -> :202 -> outbound-leads-view.tsx:29 groupLeads -> lead-pipeline.tsx:192-207 handleDragEnd -> :122 updateLeadStatus (sale a lead.actions.ts, que revalida 'admin-leads' según git grep) -> :139 refresh / :132 rollback.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "OsLead no es org-owned; page sin guard propio (page.tsx:23), depende de admin/layout.tsx:47; actions fuera del lote"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "pipeline-column.tsx:106-111 y column-overview.tsx:165-170 EmptyStateMuted"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "lead-pipeline.tsx:131-135 rollback + :218-225 role=alert; leads/error.tsx -> SectionErrorBoundary"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "leads/loading.tsx:4-19; spinner por card lead-card.tsx:126-127"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Validación en lead.actions/lead.schemas (ZONA-FRANCO, fuera del lote; lead.schemas.ts:79-86 por git grep)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "Board responsive pipeline-board.tsx:42-44, pero overview fijo en 3 columnas column-overview.tsx:19/:160 (~93 px por card a 390 px)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx captura (SectionErrorBoundary.tsx:64); los fail() de las actions sólo se muestran"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO ni datos inventados en los archivos del kanban"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna de develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.filtros-outbound",
+   "nombre": "Filtros del board (servicio, período, setter, ubicación)",
+   "descripcion": "Filtrado client-side en AND con typeahead de ubicación normalizada.",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_components/lead-filters.ts",
+    "src/app/(protected)/admin/leads/_components/lead-filters-bar.tsx",
+    "src/app/(protected)/admin/leads/_components/location-typeahead.tsx",
+    "src/app/(protected)/admin/leads/_components/lead-zone.helpers.ts",
+    "src/app/(protected)/admin/leads/_components/themed-date-input.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "outbound-leads-view.tsx:27-30 -> lead-filters.ts:43 deriveFilterOptions / :154 applyLeadFilters -> lead-filters-bar.tsx:59-129 -> location-typeahead.tsx:118-133.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Opera sobre datos ya cargados en el cliente"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Columnas vacías con EmptyStateMuted (pipeline-column.tsx:106)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin llamadas al servidor"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Síncrono"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Filtro client-side"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap lead-filters-bar.tsx:58, campos min-w-[150px] :32"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin I/O"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Opciones derivadas en runtime lead-filters.ts:43"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.alta-edicion",
+   "nombre": "Alta y edición de lead",
+   "descripcion": "Modal con validación cliente (schema compartido) y create/update en servidor.",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_components/lead-form.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:159 -> lead-form.tsx:129 safeParse -> :140-141 createLead/updateLead (sale a lead.actions.ts) -> :148-149 cierra + refresh.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Guard en la action fuera del lote (ZONA-FRANCO)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Formulario"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Errores por campo :197-199 y del servidor :342-346"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Button loading :358"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "CreateLeadSchema compartido (lead-form.tsx:13, :129); el lado servidor está en lead.actions (no leído)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "max-h-[90vh] overflow-y-auto :167; grid md:grid-cols-2 :186"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Sin captura de fail(); sólo boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.eliminar-lead",
+   "nombre": "Eliminar lead con confirmación",
+   "descripcion": "Tacho en la card con InlineConfirm y borrado optimista con rollback.",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_components/lead-card.tsx",
+    "src/app/(protected)/admin/leads/_components/lead-pipeline.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "lead-card.tsx:120-123 -> :184-195 InlineConfirm -> lead-pipeline.tsx:143-161 deleteLead (sale a lead.actions.ts) -> :153 rollback / :160 refresh.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Guard en la action fuera del lote"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Acción"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "lead-pipeline.tsx:153-155 + role=alert :220"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Spinner en el botón lead-card.tsx:126-127"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Fuera del lote"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Botón 36 px lead-card.tsx:124"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "fail() sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna; por teclado no se puede borrar (lead-card.tsx:80-83)"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.ficha-y-estado",
+   "nombre": "Ficha del lead y cambio de estado",
+   "descripcion": "Detalle del lead con datos, links, proyecto vinculado y selector de estado (POSTERGADO +7 días).",
+   "archivos": [
+    "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+    "src/app/(protected)/admin/leads/_components/change-status-select.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "lead-card.tsx:69 -> [leadId]/page.tsx:183-217 -> :279 -> change-status-select.tsx:37 updateLeadStatus (sale) -> :49 refresh.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Page sin guard propio ([leadId]/page.tsx:183, :212)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'Sin links cargados.' :360-362; 'Todavía sin proyecto.' :381"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "change-status-select.tsx:63 sin role=alert; lead inexistente redirige sin mensaje :219-221"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "Hereda leads/loading.tsx (skeleton del board, no de la ficha)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "leadId sin validar en la page; status validado en la action (fuera del lote)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-col lg:flex-row :237; grid xl:grid-cols-[...] :298"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Boundary sí; fail() no"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Botón 'Convertir a proyecto' deshabilitado permanente :281-289"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.actividad-comercial",
+   "nombre": "Registrar actividad comercial y timeline",
+   "descripcion": "Alta de contacto (canal/resultado/notas) y timeline con reasignaciones SISTEMA.",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_components/lead-activity-feed.tsx",
+    "src/app/(protected)/admin/leads/_components/lead-activity.helpers.ts",
+    "src/app/(protected)/admin/leads/_components/use-scroll-fades.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "lead-activity-feed.tsx:131 -> :75 createActivity (sale a activity.actions.ts, revalida admin-leads :28 por git grep) -> :87-90 limpia + refresh.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Guard en la action fuera del lote"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "EmptyStateMuted con CTA :262-276"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Bloque de error :177-181 (sin role=alert)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Spinner :196-197"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "activity.schemas.ts fuera del lote"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid md:grid-cols-2 :134; scroll interno sólo en xl :206"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "fail() sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Fallback 'Super Admin' :255 es copy, no dato inventado"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.demos",
+   "nombre": "Demos y Looms del lead",
+   "descripcion": "Cargar demo/Loom y marcar como vista.",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_components/demo-form.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "demo-form.tsx:153 -> :113 createDemo (sale a demo.actions.ts) -> :126-128 refresh; :246 markDemoViewed (sale).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Guard en la action fuera del lote"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "EmptyStateMuted :351-355"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Errores :205-209/:269-273 pero markDemoViewed sin catch :246"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Button loading :224, :307"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "demo.schemas.ts fuera del lote"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap :282"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "fail() sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.asignar-setter",
+   "nombre": "Asignar setter y marcar caliente",
+   "descripcion": "Elegir setter con carga del equipo y ratio de descarte; toggle caliente.",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_components/assign-setter-control.tsx",
+    "src/app/(protected)/admin/leads/[leadId]/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "[leadId]/page.tsx:212-216 + :225 cargarCargaSetters (sale a lib/leados) -> :412 -> assign-setter-control.tsx:224 -> :63 assignLeadSetter (sale a lead.actions.ts) -> :72-73.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Lectura de setters sin guard propio en la page; action fuera del lote"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'No hay usuarios con rol setter todavía.' :87-90"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": ":236-240"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Spinner :228"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Fuera del lote"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Filas con truncate :130"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "fail() sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Carga real del helper"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.reunion-resultado",
+   "nombre": "Reunión agendada: realizada y resultado",
+   "descripcion": "Panel de la reunión de Cal.com con traspaso del setter, marca de realizada y resultado con confirmación.",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_components/reunion-panel.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "[leadId]/page.tsx:229-230 parseAgenda (sale a lib/leados/flow) -> :296 -> reunion-panel.tsx:130 -> :61 marcarReunionRealizada; :165 -> :189 -> :73 registrarResultadoReunion (sale a reunion.actions.ts).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Actions fuera del lote"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "'Sin horario registrado' :91; el panel sólo aparece con reunión :296"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": ":208 (sin role=alert)"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "'Registrando…' :193; 'Marcar realizada' sin spinner :128-135"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Fuera del lote"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid gap-2 :157"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "fail() sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Fallback con nota interna visible :109 'no debería pasar — son obligatorias desde B7'"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.inbound",
+   "nombre": "Inbound por período y conversión a Lead OS",
+   "descripcion": "Formularios entrantes y pedidos de upsell filtrables por período, convertibles al pipeline.",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx",
+    "src/app/(protected)/admin/leads/_components/inbound-period-filter.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:117-119 listInboundLeads (sale) -> :212 -> inbound-leads-table.tsx:143 -> :52 convertInboundToLead (sale) -> :61-67.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Actions fuera del lote"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": ":92-97"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "page.tsx:213-216; tabla :84-90"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading.tsx; Button loading :146"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "InboundRangeSchema fuera del lote"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Cards md:hidden :161; tabla overflow-x-auto :100"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "fail() sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO; el campo service no se muestra (PLAN-620)"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.convertir-a-proyecto",
+   "nombre": "Convertir lead cerrado en proyecto",
+   "descripcion": "Botón en la ficha para crear el proyecto desde un lead CERRADO.",
+   "archivos": [
+    "src/app/(protected)/admin/leads/[leadId]/page.tsx"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "[leadId]/page.tsx:227 canConvertToProject + :281-289 botón disabled sin handler; convertLeadToProject (project.actions.ts:833) y ConvertLeadDialog (convert-lead-dialog.tsx:72) existen sin importadores.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "No hay llamada"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Botón muerto sin explicación"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "No conectado"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Control de maqueta :281-289"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-mensajes",
+   "id": "h4.adm-mensajes.bandeja",
+   "nombre": "Bandeja de conversaciones con no leídos",
+   "descripcion": "Lista persistente de orgs con mensajes, ordenada por último mensaje, con badge optimista.",
+   "archivos": [
+    "src/app/(protected)/admin/messages/layout.tsx",
+    "src/app/(protected)/admin/messages/_components/conversation-list-loader.tsx",
+    "src/app/(protected)/admin/messages/_components/conversation-list.tsx",
+    "src/app/(protected)/admin/messages/_components/conversation-list-skeleton.tsx",
+    "src/app/(protected)/admin/messages/_components/messages-inbox-shell.tsx",
+    "src/app/(protected)/admin/messages/_components/active-org.ts",
+    "src/app/(protected)/admin/messages/_actions/message.actions.ts"
+   ],
+   "entradas": [
+    "MessagesLayout",
+    "listConversations"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "layout.tsx:15-20 -> conversation-list-loader.tsx:10 -> message.actions.ts:44-120 -> conversation-list.tsx:92-150.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin message.actions.ts:44; global por diseño de rol"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "conversation-list.tsx:65-75"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "conversation-list-loader.tsx:12-17 muestra error.message crudo"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Suspense + skeleton layout.tsx:17"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "messages-inbox-shell.tsx:39-44 lista o hilo según ruta"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captura :121-123; el error se pinta inline"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna; incluye orgs archivadas"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-mensajes",
+   "id": "h4.adm-mensajes.hilo-y-leido",
+   "nombre": "Ver conversación y marcar leído",
+   "descripcion": "Hilo de la org con burbujas y marca de leído al abrir.",
+   "archivos": [
+    "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+    "src/app/(protected)/admin/messages/[orgId]/loading.tsx",
+    "src/app/(protected)/admin/messages/_components/message-thread.tsx",
+    "src/app/(protected)/admin/messages/_components/message-bubble.tsx"
+   ],
+   "entradas": [
+    "AgencyOsMessageConversationPage",
+    "getConversation",
+    "markAsRead"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "conversation-list.tsx:104 -> [orgId]/page.tsx:24 markAsRead (updateMany :213 escribe; revalidate falla en render) -> :26-35 -> message-thread.tsx:30-39.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "findUnique de la org sin guard :27; resultado de markAsRead ignorado :24"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "message-thread.tsx:41-44"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "[orgId]/page.tsx:59-62 con mensaje crudo"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "[orgId]/loading.tsx:7-14"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "zod en actions message.actions.ts:142, :211"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Volver en mobile messages-inbox-shell.tsx:33-37; burbujas max-w-[85%] message-bubble.tsx:40"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captura :163-164, :226-227"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-mensajes",
+   "id": "h4.adm-mensajes.responder",
+   "nombre": "Responder al cliente (mensaje + aviso por email)",
+   "descripcion": "Composer con emoji, Enter para enviar, y email al cliente.",
+   "archivos": [
+    "src/app/(protected)/admin/messages/_components/message-input.tsx",
+    "src/app/(protected)/admin/messages/_components/emoji-popover.tsx",
+    "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+    "src/app/(protected)/admin/messages/_actions/message.schemas.ts"
+   ],
+   "entradas": [
+    "sendMessage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "message-input.tsx:88 -> :42 sendMessage -> message.actions.ts:173-181 create -> :193 queueAdminMessageEmail (sale a lib/email/admin-message-notification.ts:19) -> :199 -> message-input.tsx:49-50.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin :173; org por parámetro por diseño de rol"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Composer"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "message-input.tsx:92-96 muestra error crudo; el fallo del email no se ve"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Spinner y textarea disabled :107, :118-123"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "zod min(1) sin .max(); no valida org existente/archivada"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Panel de emoji acotado al viewport emoji-popover.tsx:36-41"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch :201-202 sin captura; email fire-and-forget"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "herramienta": "h4.adm-mensajes",
+   "id": "h4.adm-mensajes.iniciar-conversacion",
+   "nombre": "Iniciar conversación con un cliente sin mensajes",
+   "descripcion": "Escribirle primero a un cliente nuevo.",
+   "archivos": [
+    "src/app/(protected)/admin/messages/page.tsx",
+    "src/app/(protected)/admin/messages/[orgId]/page.tsx"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Sólo funciona tipeando /admin/messages/<id> ([orgId]/page.tsx:73 renderiza el composer con hilo vacío); la bandeja filtra orgs con mensajes (message.actions.ts:47-51) y el índice ignora ?clientId= (page.tsx:6, SupportTab.tsx:55).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Mismas actions con guard"
+    },
+    "vacios": {
+     "cumple": "no",
+     "evidencia": "No hay entrada en la UI"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "No valida org"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Igual que responder"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "-"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Requiere conocer el id interno"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.tablero-kanban",
+   "nombre": "Tablero de proyectos por estado con filtros y arrastre",
+   "descripcion": "Lista todos los proyectos, de cliente e internos, en 4 columnas por estado. Filtra por servicio, visibilidad, inicio y entrega en memoria, y cambia el estado arrastrando la card (dnd-kit) en el tablero o desde el overview de la columna.",
+   "archivos": [
+    "src/app/(protected)/admin/projects/page.tsx",
+    "src/app/(protected)/admin/projects/_components/projects-board.tsx",
+    "src/app/(protected)/admin/projects/_components/project-list.tsx",
+    "src/app/(protected)/admin/projects/_components/project-card.tsx",
+    "src/app/(protected)/admin/projects/_components/draggable-project-card.tsx",
+    "src/app/(protected)/admin/projects/_components/droppable-project-column.tsx",
+    "src/app/(protected)/admin/projects/_components/projects-filter-bar.tsx",
+    "src/app/(protected)/admin/projects/_components/projects-filters.ts",
+    "src/app/(protected)/admin/projects/_components/projects-period-dropdown.tsx",
+    "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "src/app/(protected)/admin/projects/loading.tsx",
+    "src/app/(protected)/admin/projects/error.tsx"
+   ],
+   "entradas": [
+    "AgencyOsProjectsPage",
+    "listProjects",
+    "updateProjectStatus"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz trazado: page.tsx:19-22 -> project.actions.ts:934-1014 -> projects-board.tsx:89-92 -> project-list.tsx:121-133 -> projects-board.tsx:130-143 -> project.actions.ts:745-754 -> projects-board.tsx:118. No llega a L3: un proyecto nuevo queda oculto por el filtro por defecto, las cards fijas rompen mobile y los errores salen crudos y sin Sentry.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "listProjects con requireSuperAdmin (project.actions.ts:934); la page no tiene guard propio y getOrganizationsForDropdown (page.tsx:7-16) lista todas las orgs sin chequeo. SUPER_ADMIN es global por diseño."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Columna vacía con mensaje (project-list.tsx:138-150) y overview vacío (:188)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Hay error.tsx (projects/error.tsx:12) y banner de error (projects-board.tsx:224-228), pero el texto es el error.message crudo (project.actions.ts:1016, :778)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "projects/loading.tsx:4-19 con skeletons."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpdateProjectStatusSchema (project.schemas.ts:73-76) parseado en project.actions.ts:727."
+    },
+    "mobile": {
+     "cumple": "no",
+     "evidencia": "Cards w-[340px] shrink-0 (project-list.tsx:125) y overview con minmax(320px) (:171): desbordan por debajo de unos 390 px."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Los errores de render llegan a Sentry por SectionErrorBoundary.tsx:64; los de las actions se devuelven sin captura (project.actions.ts:777-779)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "git grep TODO|FIXME en admin/projects: 0 (solo aparece el enum TaskStatus.TODO)."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Un proyecto recién creado sin señales de inicio no aparece con el filtro por defecto (projects-filters.ts:65, :162-164)."
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.alta-edicion",
+   "nombre": "Crear y editar proyecto (cliente o interno)",
+   "descripcion": "Modal para crear o editar un proyecto con cliente opcional, servicio, entrega estimada, monto y monthly rate. Sin cliente, el proyecto cuelga de la org develop; con monto, se crean hitos 50/50.",
+   "archivos": [
+    "src/app/(protected)/admin/projects/_components/project-form.tsx",
+    "src/app/(protected)/admin/projects/_components/overlay-modal.tsx",
+    "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+    "src/app/(protected)/admin/projects/_actions/project.schemas.ts"
+   ],
+   "entradas": [
+    "createProject",
+    "updateProject"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "project-form.tsx:152-188 -> project.actions.ts:593-641 (alta: resolveProjectOrganization :225-258, project.create :604, hitos :620) / :643-720 (edición) -> router.refresh (project-form.tsx:188).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin en createProject (:595) y updateProject (:645). La org viene del body por diseño de SUPER_ADMIN (project.schemas.ts:55)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Es un formulario."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "serverError visible (project-form.tsx:345-349), pero con error.message crudo o JSON de ZodError (project.actions.ts:639, :718)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Button con loading y 'Guardando...' (project-form.tsx:359-365)."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "CreateProjectSchema y UpdateProjectSchema con .parse (project.actions.ts:596, :646), además del safeParse en el cliente (project-form.tsx:167)."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Modal w-full max-w-3xl con grid md:grid-cols-2 (project-form.tsx:208-211; overlay-modal.tsx:124)."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captureException (project.actions.ts:638-640, :717-719)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO ni datos de prueba en el camino."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "No se pueden vaciar campos (project.schemas.ts:9-10; project.actions.ts:680-690), aparecen orgs archivadas en el selector (layout.tsx:145-149) y no se crean hitos si el monto se carga al editar."
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.ficha",
+   "nombre": "Ficha del proyecto (resumen, finanzas, estado, ver como cliente)",
+   "descripcion": "Cabecera con estado, servicio, editar y 'Ver como cliente', y pestañas Overview, Tareas, Horas y Pagos. El Overview muestra resumen, fechas, cliente vinculado, lead original, conteo de tareas y finanzas.",
+   "archivos": [
+    "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+    "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+    "src/app/(protected)/admin/projects/[projectId]/_components/project-status-control.tsx",
+    "src/app/(protected)/admin/projects/[projectId]/_components/project-tabs.tsx",
+    "src/app/(protected)/admin/projects/[projectId]/_components/scroll-reset.tsx",
+    "src/app/(protected)/admin/projects/[projectId]/loading.tsx",
+    "src/app/(protected)/admin/projects/[projectId]/error.tsx"
+   ],
+   "entradas": [
+    "AgencyOsProjectLayout",
+    "AgencyOsProjectOverviewPage",
+    "updateProjectStatus"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "layout.tsx:105-162 -> page.tsx:99-167 -> render; estado: project-status-control.tsx:43-63 -> project.actions.ts:722-780 -> router.refresh (project-status-control.tsx:62).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "auth() + callerCanAccessOrg sin chequeo de rol (page.tsx:165; layout.tsx:160; assert-ownership.ts:85-88). El rol solo lo exige admin/layout.tsx:47."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Descripción vacía (page.tsx:184), proyecto interno sin cliente (:235-246) y sin lead (:248-263)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "[projectId]/error.tsx:12 y error inline del control de estado (project-status-control.tsx:85), con el mensaje crudo de la action."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "[projectId]/loading.tsx:3-14 y spinner del estado (project-status-control.tsx:83)."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpdateProjectStatusSchema (project.actions.ts:727)."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid lg:grid-cols-2 y flex-wrap (page.tsx:180; layout.tsx:175, :217); pestañas con overflow-x-auto (project-tabs.tsx:60)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx -> SectionErrorBoundary.tsx:64; la action no captura."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO en el camino."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Muestra el estado real y permite cambiarlo. Detalle menor: 'Entregado' persiste al reabrir (project.actions.ts:751-753)."
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.borrado",
+   "nombre": "Eliminar proyecto (tablero y ficha)",
+   "descripcion": "Borrado definitivo del proyecto con sus tareas, hitos, mantenimiento y horas. Se puede hacer desde el tacho de la card (confirmación en línea) o desde la zona de peligro de la ficha (modal).",
+   "archivos": [
+    "src/app/(protected)/admin/projects/_components/draggable-project-card.tsx",
+    "src/app/(protected)/admin/projects/_components/projects-board.tsx",
+    "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx",
+    "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+    "src/app/(protected)/admin/projects/_actions/project.actions.ts"
+   ],
+   "entradas": [
+    "deleteProject"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "draggable-project-card.tsx:84-105 -> projects-board.tsx:149-166 -> project.actions.ts:782-831. Desde la ficha: delete-project-button.tsx:58-85 -> src/lib/actions/projects.ts:108-117 (fuera del lote).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin en ambos caminos (project.actions.ts:784; lib/actions/projects.ts:109)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Es una acción."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Tablero: banner con el error crudo (projects-board.tsx:158-161, :224-228). Ficha: la excepción va a error.tsx."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "useFormStatus en la ficha (delete-project-button.tsx:21-33) y borrado optimista en el tablero (projects-board.tsx:153)."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod en deleteProject (:785); en deleteProjectAction, cast de FormData sin Zod (lib/actions/projects.ts:111)."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Modal max-w-md (delete-project-button.tsx:63)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Las excepciones de la ficha llegan por error.tsx; el catch del tablero no captura (project.actions.ts:828-830)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Hay confirmación en ambos caminos (InlineConfirm en draggable-project-card.tsx:99-115; modal en delete-project-button.tsx:58-87). Falta auditoría."
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.pagos-hitos",
+   "nombre": "Hitos de pago (inicio y entrega) y marcar pagado",
+   "descripcion": "Al crear con monto se generan dos hitos 50/50. En la pestaña Pagos se ven y se marcan como pagados.",
+   "archivos": [
+    "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+    "src/app/(protected)/admin/projects/_actions/milestone.actions.ts",
+    "src/app/(protected)/admin/projects/_actions/milestone.schemas.ts",
+    "src/app/(protected)/admin/projects/_actions/project.actions.ts"
+   ],
+   "entradas": [
+    "AgencyOsProjectPaymentsPage",
+    "markMilestonePaid",
+    "unmarkMilestonePaid"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "project.actions.ts:620 -> :330-345 (hitos 50/50) -> payments/page.tsx:81-92 -> :154-160 -> milestone.actions.ts:23-43 (revalidate :42).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "El loader no tiene guard (payments/page.tsx:67-104); la action tiene requireSuperAdmin (milestone.actions.ts:23)."
+    },
+    "vacios": {
+     "cumple": "no",
+     "evidencia": "No hay rama para cero hitos (payments/page.tsx:127-172)."
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "El resultado de la action se descarta (payments/page.tsx:158)."
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "Hay loading.tsx del segmento, pero el botón no tiene estado pendiente (payments/page.tsx:161-166)."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "MilestoneIdSchema (milestone.actions.ts:24)."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid lg:grid-cols-2 (payments/page.tsx:127)."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captura (milestone.actions.ts:44-46)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "No hay forma de deshacer (unmarkMilestonePaid sin consumidores, milestone.actions.ts:49) ni de crear hitos si el monto se carga después."
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.mantenimiento",
+   "nombre": "Mantenimiento mensual (generar meses y marcar pagado)",
+   "descripcion": "Después de la entrega, genera un pago por mes desde maintenanceStartDate al monthlyRate y permite marcarlos como pagados.",
+   "archivos": [
+    "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+    "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+    "src/app/(protected)/admin/projects/_actions/maintenance.schemas.ts",
+    "src/app/(protected)/admin/projects/[projectId]/page.tsx"
+   ],
+   "entradas": [
+    "generatePendingMaintenance",
+    "markMaintenancePaid",
+    "createMaintenancePayment"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "El código está completo (payments/page.tsx:175-322; maintenance.actions.ts:60-174), pero su puerta de entrada, maintenanceStartDate, no la escribe ninguna UI ni action: el único escritor es prisma/seed-agency-os.ts:1396. El camino feliz no se puede alcanzar sin datos de seed.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "El loader no tiene guard; las actions tienen requireSuperAdmin (maintenance.actions.ts:64, :94)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Mensaje sin mantenimiento (payments/page.tsx:201-206) y sin meses generados (:209-212)."
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Los resultados se descartan (payments/page.tsx:188, :251, :301)."
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "Los botones no tienen estado pendiente (payments/page.tsx:191-196, :254-259)."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "MarkMaintenancePaidSchema y ProjectIdSchema (maintenance.actions.ts:65, :95)."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Tabla en md+ con overflow-x-auto y cards en mobile (payments/page.tsx:215, :270)."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captura (maintenance.actions.ts:85-87, :169-173)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "No se puede activar desde el admin (ver ausencias)."
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.aprobacion-entregas",
+   "nombre": "Enviar una tarea completada a aprobación del cliente",
+   "descripcion": "En proyectos con cliente, una tarea DONE se envía a aprobación: queda en PENDING_APPROVAL y el cliente recibe un mensaje en su panel.",
+   "archivos": [
+    "src/app/(protected)/admin/projects/_components/task-list.tsx",
+    "src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx"
+   ],
+   "entradas": [
+    "AgencyOsProjectTasksPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "task-list.tsx:456-458 -> :622-631 -> src/lib/actions/projects.ts:177-209 (PENDING_APPROVAL :194 + Message al cliente :197) -> flujo D2 'Aprobar o pedir cambios en una entrega'.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin (lib/actions/projects.ts:178); la org del mensaje sale del proyecto (:188-189)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Es una acción."
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "No se mira el resultado (task-list.tsx:628) y la action hace returns silenciosos (lib/actions/projects.ts:182, :188)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Spinner y disabled (task-list.tsx:637-644)."
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "Cast de FormData sin Zod (lib/actions/projects.ts:180-181)."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Botón en una fila flex (task-list.tsx:455)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Una excepción llega a error.tsx (SectionErrorBoundary.tsx:64); los returns silenciosos no."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Después de que el cliente pide cambios no se puede reenviar (task-list.tsx:618)."
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.horas",
+   "nombre": "Carga y borrado de horas por tarea, con métricas de horas y valor hora",
+   "descripcion": "KPIs de horas totales, estimadas, diferencia y valor hora; carga rápida de horas por tarea y listado agrupado con borrado confirmado.",
+   "archivos": [
+    "src/app/(protected)/admin/projects/[projectId]/hours/page.tsx",
+    "src/app/(protected)/admin/projects/_components/time-entry-panel.tsx"
+   ],
+   "entradas": [
+    "AgencyOsProjectHoursPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "hours/page.tsx:28-58 -> time-entry-panel.tsx:138-179 -> time-entry.actions.ts:136 (fuera del lote) -> router.refresh (time-entry-panel.tsx:177).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin en la page (hours/page.tsx:28) y en las actions (time-entry.actions.ts:140, :247, :274)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "time-entry-panel.tsx:297-302."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Banners (time-entry-panel.tsx:276-280; hours/page.tsx:108-112) con el texto crudo."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Button con loading (time-entry-panel.tsx:283-292)."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "CreateTimeEntrySchema con .parse (time-entry.actions.ts:141, por git grep)."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Tabla en md+ con overflow-x-auto y cards en mobile (time-entry-panel.tsx:322, :366)."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Errores devueltos como texto sin captura en el lote."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Solo se listan tareas propias o sin asignar (hours/page.tsx:115-118) y la fecha por defecto está en UTC (time-entry-panel.tsx:72)."
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-config",
+   "id": "h4.adm-config.datos-y-alertas",
+   "nombre": "Datos de la agencia, webhook y toggles de alertas",
+   "descripcion": "Editar email, WhatsApp, sitio, URL del webhook y los cinco toggles de alertas de la agencia.",
+   "archivos": [
+    "src/app/(protected)/admin/settings/page.tsx",
+    "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+    "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+    "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
+    "src/lib/alerts.ts",
+    "src/lib/agency-settings.ts"
+   ],
+   "entradas": [
+    "getSettings",
+    "updateSettings"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: settings/page.tsx:6-9 → settings.actions.ts:87-121 → settings-console.tsx:100-115 → settings.actions.ts:141-169 → consumido por alerts.ts:111-129. Pero email/WhatsApp/sitio no los lee nadie y los toggles de churn/vencimientos no tienen cron.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin settings.actions.ts:88, :142; configuración global de develOP"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "ensureAgencySettingsRecord crea el registro si falta (settings.actions.ts:38-52); vacíos → null (:18-21)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "toast.error settings-console.tsx:117-119 y caja settings/page.tsx:31-33, pero el texto puede ser Error.message crudo (action-utils.ts:31-32) o un mensaje de Zod en inglés"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "settings/loading.tsx:3-9; SaveButton con spinner settings-console.tsx:698"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpdateSettingsSchema.parse settings.actions.ts:143"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid md:grid-cols-2 settings-console.tsx:217; flex-wrap :183"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "settings/error.tsx → SectionErrorBoundary.tsx:64 captureException; el catch de updateSettings (:170-172) no reporta"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "'fuente de verdad del portal' (settings-console.tsx:207) con campos sin lectores; toggles de churn/vencimientos sin disparador"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "No hay 'Probar webhook' (testWebhookAction quedó en lib/actions/settings.ts:309 sin importadores)"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-config",
+   "id": "h4.adm-config.precios-modulos",
+   "nombre": "Precio mensual de los módulos premium",
+   "descripcion": "Cambiar el precio USD que ve el cliente en la vitrina de servicios.",
+   "archivos": [
+    "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+    "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+    "src/app/(protected)/admin/settings/_actions/settings.schemas.ts"
+   ],
+   "entradas": [
+    "updateModulePricing"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "settings-console.tsx:404-407 → :136-141 → settings.actions.ts:175-199 (update + revalidatePath('/dashboard/services')).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin settings.actions.ts:180"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "Sin rama si no hay módulos (pricingRows.map settings-console.tsx:347)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "toast.error :143-146; mensajes crudos posibles"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 por fila :410-411"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod :181 y existencia :185-191, pero acepta 0 desde un input vacío (:140, schemas :39)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-col sm:flex-row :381; input w-full sm:w-[150px] :398"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx con captureException; catch de la action sin Sentry (:202-204)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "type 'monthly' fijo (settings.actions.ts:118) y cast a PremiumFeatureKey (:114)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Sin confirmación ni auditoría; la home pública no refleja el precio (BUG-017)"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-config",
+   "id": "h4.adm-config.telegram",
+   "nombre": "Credenciales de Telegram para alertas internas",
+   "descripcion": "Guardar token y chat ID del bot de Telegram (config-first con fallback a env).",
+   "archivos": [
+    "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+    "src/app/(protected)/admin/settings/_actions/settings.actions.ts"
+   ],
+   "entradas": [
+    "updateSettings"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "settings-console.tsx:583-615 → settings.actions.ts:146, :161-164 → sale a src/lib/notifications/telegram.ts:41-49.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin :142"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'Sin configurar' / 'Todavia no hay token' settings-console.tsx:594, :597-599"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "toast.error :117-119"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "SaveButton :575-579"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "string libre sin formato (settings.schemas.ts:32-33)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "xl:grid-cols-[1fr_1fr_0.8fr] colapsa a 1 columna :582"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx sí; catch de la action no"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "'Hora del cron 9:00 AM Argentina' fijo (:626-632) de un cron que no corre en Netlify (BUG-047)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "No se puede borrar el token (:161-163) ni probar el envío; el token se guarda en claro (SEC-036)"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-config",
+   "id": "h4.adm-config.meta-demos",
+   "nombre": "Objetivo semanal de demos",
+   "descripcion": "Meta comercial que usa el dashboard del admin.",
+   "archivos": [
+    "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+    "src/app/(protected)/admin/settings/_actions/settings.actions.ts"
+   ],
+   "entradas": [
+    "updateSettings"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "settings-console.tsx:451-467 → settings.actions.ts:160 (coerceWeeklyDemoTarget :23-36) → sale a admin/page.tsx:182-184.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin :142"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "Input vacío → Number('') = 0 (settings-console.tsx:112) y se guarda 0"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "toast.error :117-119"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "SaveButton :443-447"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "z.coerce.number().int().min(0) settings.schemas.ts:31"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid lg:grid-cols-2 :450"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx sí; catch no"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Intervalos de follow-up fijos 'Dia 2/4/7' (:501), coinciden con lib/follow-up.ts pero no se leen de ahí"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Se edita y guarda sin ayuda"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-config",
+   "id": "h4.adm-config.miembros-listado",
+   "nombre": "Lista de miembros del equipo en Configuración",
+   "descripcion": "Ver los usuarios SUPER_ADMIN.",
+   "archivos": [
+    "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+    "src/app/(protected)/admin/settings/_components/settings-console.tsx"
+   ],
+   "entradas": [
+    "listTeamMembers"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "settings/page.tsx:8 → settings.actions.ts:207-239 → settings-console.tsx:529-554. Solo lectura.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin :217"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'No hay miembros internos cargados.' settings-console.tsx:550-553"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Aviso ámbar si falla settings/page.tsx:40-44"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "settings/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid md:grid-cols-[1fr_auto] :535"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx sí; catch no"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Datos reales de User"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "No se puede invitar ni dar de baja (ver h4.adm-equipo.alta-baja-miembros)"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-config",
+   "id": "h4.adm-config.reportes-semanales",
+   "nombre": "Reportes semanales del chatbot: historial y envío manual",
+   "descripcion": "Ver los últimos envíos y disparar el reporte semanal a todos los clientes.",
+   "archivos": [
+    "src/app/(protected)/admin/settings/reports/page.tsx",
+    "src/app/(protected)/admin/settings/reports/ReportSettingsClient.tsx",
+    "src/app/(protected)/admin/settings/reports/loading.tsx",
+    "src/app/api/admin/reports/send-now/route.ts"
+   ],
+   "entradas": [
+    "ReportSettingsPage",
+    "POST /api/admin/reports/send-now"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "reports/page.tsx:7-28 → ReportSettingsClient.tsx:30-42 → send-now/route.ts:5-13 → sendWeeklyReports (flujo D5). Página huérfana.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "reports/page.tsx:7-10; send-now/route.ts:6-9"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "El historial se oculta si está vacío (ReportSettingsClient.tsx:131) sin mensaje; 'Último envío' muestra '—' (:59)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "'Error: …' con String(error) (:110-115; route.ts:15)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "reports/loading.tsx; 'Enviando...' :87"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-2 sm:grid-cols-3 :47"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch de la ruta sin captureException (route.ts:14-16)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Historial real de ChatbotEvent"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Sin link a la página; envío sin confirmación ni deduplicación"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.detector-incidencias",
+   "nombre": "Detector de incidencias de bots disparado a mano",
+   "descripcion": "Ver estadísticas de BotAlert y correr el detector manualmente.",
+   "archivos": [
+    "src/app/(protected)/admin/settings/alerts/page.tsx",
+    "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+    "src/app/(protected)/admin/settings/alerts/loading.tsx",
+    "src/app/api/admin/alerts/trigger-detector/route.ts"
+   ],
+   "entradas": [
+    "AlertSettingsPage",
+    "POST /api/admin/alerts/trigger-detector"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "alerts/page.tsx:7-22 → AlertSettingsClient.tsx:85-97 → trigger-detector/route.ts:5-13 → runAlertDetector (flujo D5). Sin cron (FAL-016) y sin link.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "alerts/page.tsx:7-10; route.ts:6-9"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "Alertas recientes ocultas si no hay (AlertSettingsClient.tsx:196), sin mensaje"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "'Error: …' con String(error) (:154; route.ts:15)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "alerts/loading.tsx; 'Ejecutando...' :133"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "grid-cols-3 fijo con text-3xl (:102) a 390 px"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch de la ruta sin Sentry (route.ts:14-16)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Promete 'cada 15 minutos' (:124, :165) sin disparador; tipo BotAlertType local (:7-18)"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Página huérfana: solo por URL"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.webhook-agencia",
+   "nombre": "Alertas inmediatas de la agencia por webhook",
+   "descripcion": "Aviso a Slack/webhook ante ticket urgente, lead, mensaje de cliente o upsell.",
+   "archivos": [
+    "src/lib/alerts.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "Callers (tickets/actions.ts:8, contact.ts:6, messages.ts:4, upsell.ts:4, referrals.service.ts:4) → alerts.ts:109-129 → POST :131-137.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Lib interna sin 'use server'"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Sin webhook o toggle apagado → return (alerts.ts:123-129)"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Fallos solo console.error (:139-146)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Proceso de servidor"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "URL validada al guardar (settings.schemas.ts:25) sin restringir hosts"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captureException en alerts.ts"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Mensaje real (formatAlertMessage :59-78)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Sin botón de prueba ni estado del último envío"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.churn-y-vencimientos",
+   "nombre": "Alertas periódicas de clientes inactivos y suscripciones por vencer",
+   "descripcion": "Barrido de orgs inactivas 30 días y renovaciones en 7 días.",
+   "archivos": [
+    "src/lib/alerts.ts"
+   ],
+   "entradas": [],
+   "madurez": "L1",
+   "madurez_evidencia": "Código en alerts.ts:195-296 y ruta api/cron/alerts/route.ts:2, sin disparador (netlify.toml:25-32, vercel.json:4-12); renewalDate sin escritor (FAL-006).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Cron interno"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Filtra orgs sin suscripción activa (:263-270)"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Fallos por evento solo en console.error (sendAgencyAlert :139-146)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin Sentry"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Los toggles prometen un aviso que no corre"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Sin disparador ni deduplicación"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-equipo",
+   "id": "h4.adm-equipo.workload",
+   "nombre": "Workload por miembro",
+   "descripcion": "Tareas activas, horas de la semana y del mes y tareas agrupadas por proyecto por cada SUPER_ADMIN.",
+   "archivos": [
+    "src/app/(protected)/admin/team/page.tsx",
+    "src/app/(protected)/admin/team/_components/member-workload.tsx",
+    "src/app/(protected)/admin/team/loading.tsx",
+    "src/app/(protected)/admin/team/error.tsx"
+   ],
+   "entradas": [
+    "AgencyOsTeamPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "team/page.tsx:19-170 → member-workload.tsx:215-266.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Sin guard propio en team/page.tsx:19 (SEC-023)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "team/page.tsx:198-204; member-workload.tsx:257-262"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "team/error.tsx → SectionErrorBoundary"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "team/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "md:grid-cols-3 member-workload.tsx:248; xl:flex-row :226"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "error.tsx → SectionErrorBoundary.tsx:64"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Semana y mes en hora del servidor (team/page.tsx:5-16); lista también tareas DONE"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Solo lectura"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-equipo",
+   "id": "h4.adm-equipo.alta-baja-miembros",
+   "nombre": "Alta, baja y rol de miembros del equipo",
+   "descripcion": "Invitar, desactivar o cambiar el rol de un SUPER_ADMIN.",
+   "archivos": [
+    "src/app/(protected)/admin/team/page.tsx",
+    "src/app/(protected)/admin/settings/_components/settings-console.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L0",
+   "madurez_evidencia": "Ninguna UI ni action viva escribe role SUPER_ADMIN (git grep); inviteTeamMemberAction vive en lib/actions/settings.ts:148 sin importadores.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "No existe"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No existe"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "No existe"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No existe"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "No existe"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No existe"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "No existe"
+    },
+    "sin_mocks_todos": {
+     "cumple": "n/a",
+     "evidencia": "No existe"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Requiere tocar la base"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.tareas",
+   "nombre": "Tareas de un proyecto (crear, editar, borrar)",
+   "descripcion": "Server actions de tareas usadas por la pantalla de Proyectos.",
+   "archivos": [
+    "src/app/(protected)/admin/team/_actions/task.actions.ts",
+    "src/app/(protected)/admin/team/_actions/task.schemas.ts"
+   ],
+   "entradas": [
+    "createTask",
+    "updateTask",
+    "deleteTask",
+    "reorderTasks",
+    "listTasksByProject",
+    "listTasksByUser"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "task-form.tsx:7-10 → task.actions.ts:155-191; task-list.tsx:17-20 → :197-257; listado tasks/page.tsx:34 → :321-371.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin :157, :199, :233, :268, :325, :381"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Error.message crudo en inglés (:193, :227, :260)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod :158, :200, :234, :269"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin Sentry"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "CRUD completo"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.carga-horas",
+   "nombre": "Carga de horas por tarea",
+   "descripcion": "Registrar, listar y borrar horas propias por tarea.",
+   "archivos": [
+    "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+    "src/app/(protected)/admin/team/_actions/time-entry.schemas.ts"
+   ],
+   "entradas": [
+    "createTimeEntry",
+    "updateTimeEntry",
+    "deleteTimeEntry",
+    "listTimeEntriesByProject",
+    "listTimeEntriesByUser"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "time-entry-panel.tsx:8-11 → time-entry.actions.ts:136-189; hours/page.tsx:58 → :270-302.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Create valida pertenencia (:160-162); update/delete no (:195-268)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Mensajes en inglés y crudos (:153, :191)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod :141, :200, :248"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin Sentry"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Fecha mostrada un día antes (time-entry.schemas.ts:33)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Autoasigna tareas sin dueño (:164-170)"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-tickets",
+   "id": "h4.adm-tickets.bandeja",
+   "nombre": "Bandeja de tickets con filtros",
+   "descripcion": "Listado de tickets de todas las orgs con tabs de estado y filtro de periodo.",
+   "archivos": [
+    "src/app/(protected)/admin/tickets/page.tsx",
+    "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
+    "src/app/(protected)/admin/tickets/_actions/ticket.schemas.ts",
+    "src/app/(protected)/admin/tickets/_components/ticket-list.tsx",
+    "src/app/(protected)/admin/tickets/_components/ticket-date-filter.tsx",
+    "src/app/(protected)/admin/tickets/loading.tsx",
+    "src/app/(protected)/admin/tickets/error.tsx"
+   ],
+   "entradas": [
+    "AgencyOsTicketsPage",
+    "listTickets"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "tickets/page.tsx:6 → ticket.actions.ts:51-94 → ticket-list.tsx:79-224.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin ticket.actions.ts:52"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "EmptyStateMuted ticket-list.tsx:148-153, pero con el default de 1 mes afirma que no hay tickets cuando sí hay"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Caja roja tickets/page.tsx:28-31 con mensaje crudo; error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "tickets/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "ListTicketsSchema :53-56"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap :118-119; lg:flex-row :170"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx sí; catch de listTickets no"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Datos reales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Filtro por defecto oculta tickets viejos; sin paginación, asignación ni cambio de prioridad"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-tickets",
+   "id": "h4.adm-tickets.conversacion-y-respuesta",
+   "nombre": "Conversación del ticket y respuesta al cliente",
+   "descripcion": "Ver el hilo y responder con emoji, Enter y auto-scroll.",
+   "archivos": [
+    "src/app/(protected)/admin/tickets/[ticketId]/page.tsx",
+    "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx",
+    "src/app/(protected)/admin/tickets/_components/ticket-reply-form.tsx",
+    "src/app/(protected)/admin/tickets/_components/emoji-picker-button.tsx",
+    "src/app/(protected)/admin/tickets/_components/hover-scale.tsx"
+   ],
+   "entradas": [
+    "AgencyOsTicketDetailPage",
+    "getTicketById"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "tickets/[ticketId]/page.tsx:12-26 → ticket.actions.ts:133-184 → ticket-chat.tsx:189-221 → ticket-reply-form.tsx:53-67 → lib/tickets/actions (flujo D2 «Responder ticket (cliente y admin)»).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin ticket.actions.ts:134"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'Todavía no hay mensajes' ticket-chat.tsx:213-216"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Error de envío visible (ticket-reply-form.tsx:75-79) sin role=alert; cualquier fallo de carga → 404"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 ticket-reply-form.tsx:107-108; tickets/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "GetTicketByIdSchema :135; la respuesta se valida en lib/tickets (D2)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "Burbujas max-w-[85%] :198 y textarea flex-1 :99, pero sin break-words (:209)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx sí; catch no"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Responde sin ayuda"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-tickets",
+   "id": "h4.adm-tickets.cambio-estado",
+   "nombre": "Cambiar el estado del ticket",
+   "descripcion": "Select Abierto / En progreso / Resuelto con revert si falla.",
+   "archivos": [
+    "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "ticket-chat.tsx:160-170 → handleStatusChange :99-115 → updateTicketStatusAction (src/lib/tickets/actions.ts, fuera del lote).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Se valida en lib/tickets (fuera del lote)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No aplica"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Revert + mensaje :107-111, :174-178 (sin role=alert)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 + Select disabled :153-162"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Fuera del lote"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-col lg:flex-row :124"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx sí"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Directo"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-tickets",
+   "id": "h4.adm-tickets.solicitud-baja",
+   "nombre": "Aprobar solicitud de eliminación de cuenta desde el ticket",
+   "descripcion": "Banner que lleva al borrado definitivo con confirmación tipeada.",
+   "archivos": [
+    "src/app/(protected)/admin/tickets/_components/ticket-chat.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "ticket-chat.tsx:118-119, :224-247 → ClientsListClient.tsx:245-256 (flujo D6 «Eliminar cliente (hard-delete) y su cascada»).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "La solicitud no exige OrgRole (SEC-050)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No aplica"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Solo navega"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Solo navega"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "El borrado se valida en hardDeleteClient"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap :240"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin action"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Detección por título literal (:119); 'Cancelar' solo oculta en memoria (:250)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Lleva al diálogo existente"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-referidos",
+   "id": "h4.adm-referidos.gestion-estados",
+   "nombre": "Confirmar conversión y mes bonificado de referidos",
+   "descripcion": "Listado y transiciones PENDING → CONVERTED → REWARDED.",
+   "archivos": [
+    "src/app/(protected)/admin/referrals/page.tsx",
+    "src/app/(protected)/admin/referrals/_components/referrals-admin-table.tsx",
+    "src/app/(protected)/admin/referrals/_actions/referrals.admin.actions.ts"
+   ],
+   "entradas": [
+    "AdminReferralsPage",
+    "markReferralConvertedAction",
+    "markReferralRewardedAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "referrals/page.tsx:9-29 → referrals-admin-table.tsx:35-42, :79-101 → referrals.admin.actions.ts:13-53.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Actions con requireSuperAdmin (:15, :38); página sin guard propio (SEC-023)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'Todavía no hay referidos' referrals-admin-table.tsx:44-53"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "El resultado de la action se ignora (:38)"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "admin/loading.tsx heredado; '...' por fila (:87, :99)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Chequeo manual del id (:16, :39), transición atómica"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-col sm:flex-row :63"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "admin/error.tsx heredado; catch de la action sin Sentry"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Datos reales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "No vincula referredOrgId (DEU-021); irreversible sin confirmación ni auditoría"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.resumen-chatbot",
+   "nombre": "Resumen del chatbot en la ficha del cliente",
+   "descripcion": "Estado del bot, consumo del mes y últimos leads.",
+   "archivos": [
+    "src/components/admin/managers/ChatbotManager.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "ChatbotTab.tsx:101 → ChatbotManager.tsx:35-157.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Componente de presentación; datos del tab (fuera del lote)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Sin bot → CTA 'Configurar chatbot' (:47-66)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin fetch propio"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin fetch propio"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Solo lectura"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "grid-cols-2 fijo (:94)"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin fetch"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Cuota en tokens con límite inventado (:69-70, :113)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "El admin no ve el cupo real de conversaciones"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.crear-entregable",
+   "nombre": "Crear entregable y notificar al cliente",
+   "descripcion": "Formulario de la ficha que crea una tarea y avisa a los miembros de la org.",
+   "archivos": [
+    "src/components/admin/managers/ProjectManager.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "ProjectsTab.tsx:7 → ProjectManager.tsx:12-26 → agency-actions.ts:14-91 (assertProjectBelongsToOrg :29).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "agency-actions.ts:19-35 (SUPER_ADMIN + proyecto de la org)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Formulario"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "console.error sin feedback (ProjectManager.tsx:22-23)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 y disabled (:57-60)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "required en cliente (:38); la action no usa Zod (agency-actions.ts:17)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-col (:29)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Error capturado y descartado"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "'// Optionally show a toast here' (:21)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "No confirma ni refresca la lista (revalidatePath('/admin/clients') agency-actions.ts:90)"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.boveda-carga",
+   "nombre": "Subir un recurso a la Bóveda del cliente",
+   "descripcion": "Alta de link/archivo con tipo y descripción.",
+   "archivos": [
+    "src/components/admin/managers/VaultManager.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "VaultTab.tsx:6 → VaultManager.tsx:19-34 → agency-actions.ts:94-113 (flujo D2 «Bóveda del cliente»).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "agency-actions.ts:99 (SUPER_ADMIN)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Formulario"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "console.error sin feedback (VaultManager.tsx:30-31)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 (:97)"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "La action recibe data tipada sin Zod (agency-actions.ts:96)"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "grid-cols-2 fijo (:38)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Error descartado"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Placeholder pide contraseñas en texto plano (:85)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Sin confirmación de éxito"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.reenviar-credenciales",
+   "nombre": "Reenviar credenciales temporales",
+   "descripcion": "Genera contraseña temporal, invalida sesiones y la envía por Brevo.",
+   "archivos": [
+    "src/app/api/admin/users/[userId]/resend-credentials/route.ts"
+   ],
+   "entradas": [
+    "POST /api/admin/users/[userId]/resend-credentials"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ResendCredentialsButton.tsx:18 → route.ts:16-113.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "SUPER_ADMIN (:16-19) pero sin filtrar el rol del usuario destino"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No aplica"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "400/404/429 con mensaje (:42, :57, :30-36) y fallback de la temporal (:112)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "ResendCredentialsParamsSchema :40"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Sin try/catch: un throw lo captura onRequestError (src/instrumentation.ts:49)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Usa la plantilla de bienvenida de cliente para cualquier rol (:77-83)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Botón en OverviewTab.tsx:90"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.reporte-ejecutivo-manual",
+   "nombre": "Enviar ahora el reporte ejecutivo de una org",
+   "descripcion": "Dispara el reporte ejecutivo semanal para un cliente.",
+   "archivos": [
+    "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts"
+   ],
+   "entradas": [
+    "POST /api/admin/clients/[organizationId]/send-executive-report"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Flujo D2 «Envío manual del reporte (admin)»: SendExecutiveReportButton.tsx:37 → route.ts:9-91 → send-manual.ts.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin :14; org validada en send-manual (NOT_FOUND :83-85)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No aplica"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Motivo de negocio en la respuesta (:87-91)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "OrganizationIdSchema :51"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Sin captura explícita; onRequestError solo ve throws"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Rate limit por admin (:35-48)"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.acciones-masivas",
+   "nombre": "Pausar bots y exportar leads de varios clientes",
+   "descripcion": "Acciones en lote desde la lista de clientes.",
+   "archivos": [
+    "src/lib/bulk-actions.ts"
+   ],
+   "entradas": [
+    "bulkPauseBots",
+    "bulkExportLeads"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ClientsListClient.tsx:16 → bulk-actions.ts:8-44 / :46-80.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin :9, :47"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Sin orgs → affected 0 (:12-14)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "orgIds sin schema (:8, :46)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin try/catch ni Sentry"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "CSV sin neutralizar fórmulas (SEC-040); export sin auditoría"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Funciona sin ayuda"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-audit",
+   "id": "h4.adm-audit.listado",
+   "nombre": "Audit log de acciones del admin",
+   "descripcion": "Lectura paginada y estadísticas de 7 días; escritor compartido.",
+   "archivos": [
+    "src/lib/audit-log-queries.ts",
+    "src/lib/audit-log.ts"
+   ],
+   "entradas": [
+    "listAuditLog",
+    "getAuditLogStats"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "audit-log/page.tsx:4 → audit-log-queries.ts:16-70; escritor audit-log.ts:17-42.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin :21, :54"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "audit-log/error.tsx existe; un actionType inválido rompe la consulta (:36)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "audit-log/loading.tsx fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Cast sin validar (:36), pageSize sin tope (:19)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "El escritor traga errores en console.error (audit-log.ts:39-41, SEC-030)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "IP del primer X-Forwarded-For (audit-log.ts:20-21, SEC-026)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Faltan registros de settings, precios, referidos y export"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h4.adm-mensajes",
+   "id": "h4.adm-mensajes.hilo-autoscroll",
+   "nombre": "Auto-scroll del hilo de mensajes del admin",
+   "descripcion": "Ancla que lleva el hilo al último mensaje.",
+   "archivos": [
+    "src/components/admin/MessagesScrollAnchor.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "message-thread.tsx:39 → MessagesScrollAnchor.tsx:7-14.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Componente visual"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Componente visual"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Componente visual"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Componente visual"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Componente visual"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "scrollIntoView sin anchos fijos (:11)"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Componente visual"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Automático"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h6.vis-contacto",
+   "id": "h6.vis-contacto.formulario",
+   "nombre": "Formulario de contacto público",
+   "descripcion": "Nombre, email, teléfono, empresa, servicio y mensaje hacia develOP.",
+   "archivos": [
+    "src/app/contact/page.tsx"
+   ],
+   "entradas": [
+    "ContactPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "En desktop: contact/page.tsx:66, :148-224 → submitContactForm (src/lib/actions/contact.ts:100). En mobile no existe (:119).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Público"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "state.error visible (:212-214) sin role=alert"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "'Enviando...' y disabled (:217, :221)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "ContactFormSchema en contact.ts:35 + rate limit :20-26"
+    },
+    "mobile": {
+     "cumple": "no",
+     "evidencia": "La sección del formulario es hidden por debajo de lg (:119)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Depende de la action (fuera del lote); la página no tiene error.tsx propio"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Promesas fijas 'Menos de 2 horas' (:234) y 'Online ahora' (:277)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Labels sin asociar (:151-203); en mobile no hay formulario"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h6.vis-contacto",
+   "id": "h6.vis-contacto.canales-directos",
+   "nombre": "Canales directos: WhatsApp, llamada y email",
+   "descripcion": "Links a WhatsApp con prefill, tel: y mailto:.",
+   "archivos": [
+    "src/app/contact/page.tsx"
+   ],
+   "entradas": [
+    "ContactPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "contact/page.tsx:96-103 (getWhatsappHref de lib/whatsapp) → :281-334 y :336-341.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Público"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin datos"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Links"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin fetch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Sección visible en mobile (:255-259), grid-cols-1 (:280)"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin fetch"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Email fijo 'hola@' (:10) distinto del default de AgencySettings; 'Online ahora' fijo (:277)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Un toque abre el canal"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "herramienta": "h6.vis-contacto",
+   "id": "h6.vis-contacto.captura-referido",
+   "nombre": "Captura del código de referido en /contact?ref=",
+   "descripcion": "Lee ?ref y lo manda oculto con el formulario para atribuir el referido.",
+   "archivos": [
+    "src/app/contact/page.tsx"
+   ],
+   "entradas": [
+    "ContactPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "contact/page.tsx:71-75 → :149 → contact.ts:42, :68-69. Solo en desktop.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Público"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Sin ref → campo vacío (:71-75)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Silencioso por diseño"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin fetch"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Validado en contact.ts:35-49"
+    },
+    "mobile": {
+     "cumple": "no",
+     "evidencia": "Sin formulario por debajo de lg (:119)"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Fuera del lote"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Un referido que abre el link en el celular no se puede atribuir"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.editar-datos",
+   "nombre": "Editar datos del cliente",
+   "descripcion": "El admin edita empresa, ciudad, notas, avatar, sitio y el usuario administrador (email, nombre, teléfono) del cliente.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/updateClient.ts",
+    "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx"
+   ],
+   "entradas": [
+    "updateClient"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "EditClientForm.tsx:79 → updateClient.ts:29 (guard) → :33-37 (Zod) → :42-65 (lee org+admin) → :71-81 (unicidad email) → :83-119 (tx) → :121 (audit) → :148-149 (revalidate)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin updateClient.ts:29; org re-leída por id :42-65 (cross-tenant por diseño admin)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario de edición, sin colección"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "errores esperados con throw (updateClient.ts:37, :79); la UI muestra err.message (EditClientForm.tsx:94), que en producción llega saneado"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "[clientId]/loading.tsx existe (git ls-tree); estado pending del submit no evaluado (UI fuera del lote)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "UpdateClientInputSchema updateClient.ts:14-26, safeParse :33-37"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO: el layout vive en EditClientForm.tsx (otro lote)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException en la action ni en el catch de EditClientForm.tsx:93-94"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO/FIXME ni datos inventados en updateClient.ts"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "el admin completa la edición solo"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.notas-internas",
+   "nombre": "Notas internas inline",
+   "descripcion": "Editar Organization.internalNotes desde el tab Overview sin tocar el resto del cliente.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/updateClientInternalNotes.ts",
+    "src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx"
+   ],
+   "entradas": [
+    "updateClientInternalNotes"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "InternalNotesCard.tsx:43 → updateClientInternalNotes.ts:20 → :22-25 → :29-38 → :40 → :54",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "updateClientInternalNotes.ts:20; org re-leída :29-33"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "vacío → null (updateClientInternalNotes.ts:25)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "throw (:23, :33) + InternalNotesCard.tsx:52-53 muestra err.message (saneado en producción)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO: estado 'guardando' declarado en InternalNotesCard.tsx:19 (comentario), fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod max 5000 updateClientInternalNotes.ts:12-15, :22-23"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO (UI fuera del lote)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO ni datos inventados"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "edición inline directa"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.archivar",
+   "nombre": "Archivar / desarchivar cliente",
+   "descripcion": "Soft-delete reversible de la org (deletedAt) para sacarla del listado.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/archiveClient.ts"
+   ],
+   "entradas": [
+    "archiveClient",
+    "unarchiveClient"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ClientsListClient.tsx:164 → archiveClient.ts:17 → :25-35 → :37 → :48-49 → admin/clients/page.tsx:23 (flujo D6)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "guard archiveClient.ts:17, :55; no bloquea la org de la agencia (slug develop)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción puntual"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "throw (:29-30, :65-66) → toast err.message ClientsListClient.tsx:168 (saneado en producción)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO (UI fuera del lote)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod archiveClient.ts:12-14, :19-20"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "botón en la barra de selección"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.eliminar-definitivo",
+   "nombre": "Eliminar cliente (hard-delete)",
+   "descripcion": "Borra la org y en cascada todo lo propio; preserva los OsLead; deja una entrada CLIENT_DELETED.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/hardDeleteClient.ts"
+   ],
+   "entradas": [
+    "getClientDeletionSummary",
+    "hardDeleteClient"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ClientsListClient.tsx:196 → hardDeleteClient.ts:107-123 → ClientsListClient.tsx:527 (confirm) → :227 → hardDeleteClient.ts:125-146 → :166 → :181-182",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "guard :110/:126; sin guarda para la org de la agencia; deja vivos los User (schema.prisma:527-528)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción puntual"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "throw (:112, :120, :139) → toast err.message ClientsListClient.tsx:239"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPending={deletePending} ClientsListClient.tsx:529"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod :17-19, :111-112, :127-128"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException; el audit se traga el error"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "modal con resumen + tipeo de 'ELIMINAR'"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.servicios-contratados",
+   "nombre": "Servicios contratados del cliente",
+   "descripcion": "Alta, cambio de estado y baja de Service (web, IA, automatización) por cliente.",
+   "archivos": [
+    "src/lib/actions/services.ts"
+   ],
+   "entradas": [
+    "createServiceAction",
+    "updateServiceStatusAction",
+    "deleteServiceAction"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "CRUD en services.ts sin importadores (git grep vacío); Service solo se escribe como efecto de proyectos (project.actions.ts:280, :291) y se lee en OverviewTab.tsx:26. No hay UI para gestionarlo directamente.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin services.ts:28, :60, :81 (código muerto)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin UI viva"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "updateServiceStatusAction/deleteServiceAction devuelven void sin try (services.ts:68, :87)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "sin UI viva"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "manual services.ts:30-39"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "sin UI"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "no hay camino en el panel"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.eliminar-proyecto",
+   "nombre": "Eliminar proyecto desde el detalle",
+   "descripcion": "Zona de peligro del detalle admin que borra el proyecto con sus dependientes.",
+   "archivos": [
+    "src/lib/actions/projects.ts",
+    "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx"
+   ],
+   "entradas": [
+    "deleteProjectAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "projects/[projectId]/page.tsx:323 → delete-project-button.tsx:75 → projects.ts:109-117",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin projects.ts:109"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción puntual"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "sin try/catch en projects.ts:108-118: error de guard o de Prisma va al error boundary"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "ConfirmDeleteSubmit delete-project-button.tsx:19 (estado no leído en detalle)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "solo !projectId projects.ts:112"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura propia"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "diálogo de confirmación delete-project-button.tsx:59-84"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-proyectos",
+   "id": "h4.adm-proyectos.enviar-a-aprobacion",
+   "nombre": "Enviar entrega a aprobación del cliente",
+   "descripcion": "Marca la tarea PENDING_APPROVAL y deja un mensaje al cliente para que apruebe o pida cambios.",
+   "archivos": [
+    "src/lib/actions/projects.ts",
+    "src/app/(protected)/admin/projects/_components/task-list.tsx"
+   ],
+   "entradas": [
+    "sendTaskForApprovalAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "task-list.tsx:622-630 → projects.ts:178-208 → flujo D2 'Aprobar o pedir cambios en una entrega'",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "guard projects.ts:178; la org del mensaje sale del registro (:189), no del form"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción puntual"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "devuelve void con retornos silenciosos (:182, :188); task-list.tsx:627-630 sin catch"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "spinner con isPending task-list.tsx:637-641"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "manual projects.ts:180-182"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "el cliente no recibe Notification ni email (projects.ts:191-204)"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.listado",
+   "nombre": "Listado de alertas del sistema",
+   "descripcion": "Kanban PENDING/ACK/RESOLVED de BotAlert de todas las orgs.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/manageAlerts.ts"
+   ],
+   "entradas": [
+    "listAlerts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "alerts/page.tsx:5 → manageAlerts.ts:9-27 → AlertsClient (columnas con VISIBLE_CAP AlertsClient.tsx:206-208)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "guard manageAlerts.ts:10; cross-org por diseño"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO (AlertsClient fuera del lote)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "alerts/error.tsx existe (git ls-tree); captureException no verificada"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "alerts/loading.tsx existe (git ls-tree)"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "filtros `as never` sin validar manageAlerts.ts:16-17"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO (error.tsx no leído)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO en manageAlerts.ts"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "take 100 sin paginar oculta pendientes viejas (manageAlerts.ts:25)"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.marcar-vista-resolver",
+   "nombre": "Marcar alerta vista / resolver",
+   "descripcion": "Transiciones de estado de una BotAlert, con auditoría y refresco del badge.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/manageAlerts.ts"
+   ],
+   "entradas": [
+    "acknowledgeAlert",
+    "resolveAlert"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "AlertsClient.tsx:90/:110 → manageAlerts.ts:31-51/:76-94 → :54/:97 → :70-71/:113-114",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "guard manageAlerts.ts:32, :77"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción puntual"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "errores por throw (parse :31, P2025 en update)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "alertIdSchema cuid manageAlerts.ts:31, :76"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "botones en la card"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.demanda-modulos",
+   "nombre": "Demanda medida de módulos",
+   "descripcion": "Ranking de qué módulos premium piden más orgs (incluye 'avisame cuando esté').",
+   "archivos": [
+    "src/lib/modules/demand.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "module-demand.actions.ts:25-50 (ZONA-FRANCO) → demand.ts:87-134 → demand.ts:137-153 → module-demand-table.tsx:3; invariantes modules.invariant.ts:91-120",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin module-demand.actions.ts:25; cruce de orgs deliberado (demand.ts:5-9)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO (tabla fuera del lote); rankModuleDemand([]) → [] (modules.invariant.ts:120)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "la action devuelve ok() (module-demand.actions.ts:50); el catch no se leyó"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "lógica pura sin TODO (demand.ts)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura directa en el tab de demanda"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h4.adm-equipo",
+   "id": "h4.adm-equipo.invitar-miembro",
+   "nombre": "Invitar miembro del equipo",
+   "descripcion": "Alta de un nuevo SUPER_ADMIN por invitación con link a /accept-invite.",
+   "archivos": [
+    "src/lib/actions/settings.ts"
+   ],
+   "entradas": [
+    "inviteTeamMemberAction"
+   ],
+   "madurez": "L0",
+   "madurez_evidencia": "inviteTeamMemberAction (settings.ts:148) e invitations.ts no tienen importadores; no hay UI de invitación en admin/team ni admin/settings (git grep -i invit vacío)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "no existe camino vivo"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "sin_mocks_todos": {
+     "cumple": "n/a",
+     "evidencia": "no existe"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "requiere tocar la DB o un seed"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h6.vis-contacto",
+   "id": "h6.vis-contacto.enviar-formulario",
+   "nombre": "Enviar formulario de contacto",
+   "descripcion": "Un visitante deja nombre, email, servicio y mensaje; se guarda el lead, se alerta a la agencia y se envía a n8n.",
+   "archivos": [
+    "src/lib/actions/contact.ts",
+    "src/lib/actions/schemas.ts",
+    "src/app/contact/page.tsx"
+   ],
+   "entradas": [
+    "submitContactForm",
+    "contactFormAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "contact/page.tsx:66 → contact.ts:100-105 → :23-33 → :35-47 → :62-64 → :72-85 → contact/page.tsx:212-213",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "público; ContactSubmission global"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "state.error visible (contact/page.tsx:212-213), pero un fallo de DB en el rate limit (contact.ts:24) queda fuera del try"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPending de useActionState contact/page.tsx:66"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod sin .max() schemas.ts:56-65"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO (página fuera del lote)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "solo console.error contact.ts:87-90, :95; .catch(() => {}) :77"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO en contact.ts"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "el visitante completa el envío solo"
+    }
+   }
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "herramienta": "h6.vis-contacto",
+   "id": "h6.vis-contacto.atribucion-referido",
+   "nombre": "Atribución de referido desde /contact?ref=",
+   "descripcion": "Si el visitante llega con un código de referido, se atribuye al cliente que lo refirió.",
+   "archivos": [
+    "src/lib/actions/contact.ts"
+   ],
+   "entradas": [
+    "submitContactForm"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "contact.ts:49 → :68-70 → flujo D2 'Referidos: código, link y atribución pública'",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "público; las guardas anti-abuso viven en el servicio (fuera del lote)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "sin código → null (contact.ts:49)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "se espera dentro del try (contact.ts:69): si el servicio lanza, el lead ya quedó guardado y el visitante ve error y reintenta"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "mismo submit"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "referralCode max 64 schemas.ts:64"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "NO EVALUADO"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "automático"
     }
    }
   }

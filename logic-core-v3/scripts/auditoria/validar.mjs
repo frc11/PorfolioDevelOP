@@ -81,7 +81,8 @@ for (const f of mds) {
     const tipoBloque = PREFIJOS_HALLAZGO.includes(prefijo) ? 'hallazgo' : prefijo
     const campos = CAMPOS[tipoBloque]
     if (campos) for (const c of campos) if (!b.includes(c)) err(rel, `${id} sin el campo «${c}»`)
-    for (const r of b.matchAll(/\[([A-Z0-9]+-\d+)\]/g)) if (r[1] !== id) citados.push([rel, id, r[1]])
+    // un ID empieza con letra (A11Y-, SEC-, PLAN-…): así «[0-9]» de una regex citada no cuenta como cita
+    for (const r of b.matchAll(/\[([A-Z][A-Z0-9]*-\d+)\]/g)) if (r[1] !== id) citados.push([rel, id, r[1]])
     const nodos = (b.match(/Nodo\(s\):\s*([^\n]+)/) ?? [])[1]
     if (nodos !== undefined) {
       const lista = nodos.split(/[,·]/).map((s) => s.replace(/`/g, '').trim().split(/\s/)[0]).filter(Boolean)

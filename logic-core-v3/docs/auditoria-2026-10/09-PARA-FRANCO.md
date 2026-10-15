@@ -88,6 +88,15 @@
 - Coordinación: ninguna fuera de la zona
 - Ficha completa: DEU-002 en 03-MEJORAS.md
 
+### DEU-060 · Fecha de reactivación de POSTERGADO calculada en el cliente y duplicada; la trampa de z.coerce.date sigue armada
+- Contexto: D3 · h4.adm-leads.ficha-y-estado, h4.adm-leads.pipeline-kanban, lib.leados. BAJA, PROBABLE.
+- Evidencia: `src/app/(protected)/admin/leads/_components/change-status-select.tsx:40` — «reactivateAt: next === 'POSTERGADO' ? new Date(Date.now() + POSTPONE_DAYS * 24 * 60 * 60 * 1000)»; `src/app/(protected)/admin/leads/_components/lead-pipeline.tsx:125` — «reactivateAt: status === 'POSTERGADO' ? new Date(Date.now() + POSTPONE_DAYS * 24 * 60 * 60 * 1000)»; `src/app/(protected)/admin/leads/_actions/lead.schemas.ts:40` — «z.coerce.date().optional()»
+- Impacto: La regla de negocio (7 días) vive en dos componentes (POSTPONE_DAYS en change-status-select.tsx:14 y lead-pipeline.tsx:32) y depende del reloj del navegador. Si se conecta un date-picker, 'YYYY-MM-DD' se interpreta como medianoche UTC (21:00 del día anterior en Argentina).
+- Propuesta: Que updateLeadStatus derive el default de reactivateAt en servidor con el helper de fechas AR y que el schema normalice fechas de calendario. Requiere coordinar con Franco (lead.actions/lead.schemas).
+- Cómo verificar: leer las líneas citadas en origin/main
+- Coordinación: ninguna fuera de la zona
+- Ficha completa: DEU-060 en 03-MEJORAS.md
+
 ### FAL-001 · Los inicios de sesión no dejan rastro: no hay events en auth.ts ni tipo LOGIN en AuditActionType
 - Contexto: D1 · h1.auth-login, lib.auth, h4.adm-audit, modelo.AdminAuditLog. BAJA, PROBABLE.
 - Evidencia: `src/auth.ts:173` — «callbacks: {»; `prisma/schema.prisma:190` — «enum AuditActionType {»; `prisma/schema.prisma:211` — «PASSWORD_CHANGED»; `src/app/login/actions.ts:113` — «if (error instanceof AuthError) { recordFailedAttempt(ip)»

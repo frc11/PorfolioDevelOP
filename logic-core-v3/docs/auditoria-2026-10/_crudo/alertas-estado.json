@@ -971,6 +971,193 @@
    "alerta": "[D5-A8] getLatencyHistory asignado al panel (DERIVACION) y al runtime (MH.1)",
    "resultado": "parcial",
    "evidencia": "Hoy vive solo en el panel admin: definicion en src/modules/chatbot/server/admin/getLatencyHistory.ts:63, consumida por src/app/(protected)/admin/chatbot/health/page.tsx:13 y como tipo en server/health/buildHealthVerdict.ts:2. No hay uso en runtime (git grep getLatencyHistory -- src). DERIVACION describe el estado actual; MH.1 no esta hecho."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: B9.1 dice orgSlug, B11.6 dice Organization.id; /admin/chatbots/[botId] usa cuid",
+   "resultado": "confirmada",
+   "evidencia": "Los links usan Organization.id: ClientsListClient.tsx:630, ClientSwitcher.tsx:67, ClientHeader.tsx:136. La página acepta ambos (clients/[clientId]/page.tsx:33 renombra clientId a orgSlug, :42 OR id/slug). La ruta deprecada chatbot/[[...tab]]/page.tsx:28-29 busca solo por slug (con id da notFound en :33). /admin/chatbots/[botId] usa cuid (alert-card.tsx:59 alert.botConfig.id). B11.6 describe el código; B9.1 quedó viejo. Re-validación por action: plan.actions revalida por organizationId (:168, :234); no se recorrió cada action (otro lote).",
+   "hallazgo_titulo": "Ruta /admin/clients/[clientId]: los links usan Organization.id, la página acepta id o slug y la ruta deprecada de chatbot solo slug"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "alerta": "[D3-A2] Checklist B-SEC.3c renumera los fixes (F2 IDOR projects.ts, F4 agency-actions) frente a B11.0 (F2 projects.ts, F4 payments, F5 agency-actions)",
+   "resultado": "parcial",
+   "evidencia": "La renumeración existe: bitacora-roadmap.md:6493-6494 (F4 = payments page, F5 = agency-actions) contra :8398-8400 (F4 = agency-actions). En código: F2 cerrado (lib/actions/projects.ts:24-30 ensureSuperAdminOrErrorString usado en :39, :74, :126 y requireSuperAdmin en :109, :159, :178, :214 = 7 actions); F5 agency-actions cerrado (agency-actions.ts:24-35 assertProjectBelongsToOrg); F4 payments: las actions tienen guard (milestone.actions.ts:23, :53; maintenance.actions.ts:35, :64, :94) pero el loader projects/[projectId]/payments/page.tsx no tiene auth propio (git grep vacío) y depende de projects/[projectId]/layout.tsx:105 y admin/layout (patrón D1-c2). El checklist B-SEC.3c no lista el F4 de payments."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "alerta": "[D3-A3] Ruta propuesta /admin/clients/[clientId]/chatbot/install (B8.5) redirigida por el catch-all de B9.1; rutas deprecadas (STATUS.md:216) mientras roadmap-pendientes.md:26 propone una vista nueva ahí",
+   "resultado": "confirmada",
+   "evidencia": "chatbot/[[...tab]]/page.tsx:6-13 TAB_MAP sin 'install' y :36-38 redirige cualquier otra tab a /admin/chatbots/<botId>?tab=overview; STATUS.md:216 deprecada; roadmap-pendientes.md:26 sigue proponiendo la vista CRM read-only en esa ruta, que ya existe en /admin/chatbots/[botId] (flujo D5 'Configurar y probar la integración CRM': IntegrationsTab.tsx:36 -> CrmIntegrationAdminCard.tsx:29).",
+   "hallazgo_titulo": "Docs proponen una vista nueva en /admin/clients/[clientId]/chatbot/*, ruta deprecada que el catch-all redirige; la vista CRM ya existe en /admin/chatbots"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+   "resultado": "parcial",
+   "evidencia": "Commit 5e337337 agregó toErrorMessage (src/lib/action-utils.ts:24-35): ZodError -> primer issue (:28-29), y settings.actions.ts:123, :171, :203, :237 lo usan; el ZodError ya no se vuelca. Pero la rama Error genérico devuelve error.message (action-utils.ts:31-32), así que errores de Prisma o el 'Unauthorized' del guard siguen llegando crudos; lo mismo en announcements.actions.ts:56, :75 de este lote.",
+   "hallazgo_titulo": "Actions de novedades devuelven error.message crudo a la UI (D3-A4 resuelto solo para ZodError)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: orgSlug (B9.1) vs Organization.id (B11.6); si cada action re-valida el recurso",
+   "resultado": "parcial",
+   "evidencia": "Ambos docs tienen razon a medias: page.tsx:33 renombra el param a orgSlug y :40-43 busca por id O slug (igual edit/page.tsx:19-20); todos los links generan el cuid (ClientsListClient.tsx:630, ClientTabsNav.tsx:34, ClientHeader.tsx:136, ClientSwitcher.tsx:67); el catch-all solo acepta slug (chatbot/[[...tab]]/page.tsx:28-29). Re-validacion: updateClient.ts:65, updateClientInternalNotes.ts:33, archiveClient.ts:29, hardDeleteClient.ts:120 y :139 re-buscan la org; setBillingOverride/clearBillingOverride exigen Subscription (plan.actions.ts:265, :336); assignPlanToOrg NO verifica la org antes de crear la Subscription (:186-196).",
+   "hallazgo_titulo": "El detalle de cliente acepta id o slug y publica el cuid en la URL"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "alerta": "[D3-A2] Checklist B-SEC.3c renumera F2 (IDOR projects.ts), F4 (agency-actions cross-projectId); en B11.0 F4 era la pagina de payments",
+   "resultado": "parcial",
+   "evidencia": "Por codigo: projects.ts tiene guard en cada action (ensureSuperAdminOrErrorString projects.ts:24-31 usado en :35/:122; requireSuperAdmin :109, :159, :178, :214) -> F2 cerrado. agency-actions.ts:20 chequea SUPER_ADMIN y :29 assertProjectBelongsToOrg; createClientAssetAction :99 -> cross-projectId cerrado. La pagina projects/[projectId]/payments/page.tsx lee prisma (:73, :81, :93) sin auth() propio y depende de projects/[projectId]/layout.tsx:105 -> sigue trust-the-layout (patron D1-c2, fuera de este lote). La numeracion del checklist no coincide con B11.0 pero el estado real es: dos de tres cerrados."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "alerta": "[D3-A3] /admin/clients/[clientId]/chatbot/install propuesta (B8.5) que el catch-all redirige a overview; rutas deprecadas (STATUS.md:216) vs vista nueva propuesta (roadmap-pendientes.md:26)",
+   "resultado": "confirmada",
+   "evidencia": "chatbot/[[...tab]]/page.tsx:6-13 TAB_MAP sin 'install' ni 'integrations' y :36 cae a 'overview'; resuelve solo por slug :28-29. La vista de instalacion existe como tab 'install' y la de CRM como 'integrations' en admin/chatbots/[botId]/tabs.ts:1 (CrmIntegrationAdminCard en IntegrationsTab.tsx). La propuesta de roadmap-pendientes.md:26 contradice la deprecacion y ya esta cubierta en /admin/chatbots.",
+   "hallazgo_titulo": "La redireccion legacy de chatbot solo resuelve slug, pierde install/integrations y usa 308 para el rechazo"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+   "resultado": "parcial",
+   "evidencia": "Commit 5e337337 aplico toErrorMessage; settings.actions.ts:170 `return fail(toErrorMessage(error, ...))` y action-utils.ts:28-30 devuelve solo el primer issue del ZodError (ya no vuelca JSON). Pero action-utils.ts:31-32 devuelve error.message crudo para cualquier Error no-Zod (por ejemplo, de Prisma) -> la fuga de mensajes internos sigue para esos casos (patron D1-c1). En este lote, plan.actions.ts:240, :316, :373 tiene el mismo patron sin helper.",
+   "hallazgo_titulo": "plan.actions devuelve el mensaje interno del error y no lo reporta a Sentry"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: orgSlug (B9.1) vs Organization.id (B11.6); si cada action re-valida el recurso",
+   "resultado": "parcial",
+   "evidencia": "clients/[clientId]/page.tsx:33 `const { clientId: orgSlug } = await params` pero :40-42 resuelve `OR: [{ id: orgSlug }, { slug: orgSlug }]` (acepta ambos; edit/page.tsx:19-20 igual). La navegación interna usa Organization.id: page.tsx:83 ClientTabsNav clientId={client.id} -> ClientTabsNav.tsx:34; SupportTab.tsx:63 /admin/messages/${clientId}. El catch-all chatbot/[[...tab]]/page.tsx:28-29 busca SOLO por slug. La re-validación del recurso en cada action no se trazó (fuera del lote).",
+   "hallazgo_titulo": "IDs internos (cuid) en URLs de admin: /admin/messages/[orgId] y /admin/leads/[leadId]"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "alerta": "[D3-A2] Checklist B-SEC.3c renumera F2 (IDOR projects.ts), F4 (agency-actions cross-projectId); en B11.0 F2=projects.ts, F4=payments, F5=agency-actions",
+   "resultado": "parcial",
+   "evidencia": "Numeración real = B11.0 (bitacora-roadmap.md:6486-6496). F2 cerrado: src/lib/actions/projects.ts:19 comentario 'B11.2 fix F2' + guard :24-26 y requireSuperAdmin en :109, :159, :178, :214. F5 cerrado: src/actions/agency-actions.ts:24 'B11.2 fix F5' + assertProjectBelongsToOrg :29. F4 abierto: admin/projects/[projectId]/payments/page.tsx sin auth()/requireSuperAdmin (git grep vacío; control clients/[clientId]/page.tsx:28) — mismo patrón D1-c2."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "alerta": "[D3-A3] /admin/clients/[clientId]/chatbot/install (B8.5) redirigida a overview por el catch-all; rutas deprecadas a favor de /admin/chatbots mientras roadmap-pendientes.md:26 propone una vista nueva ahí",
+   "resultado": "confirmada",
+   "evidencia": "clients/[clientId]/chatbot/[[...tab]]/page.tsx:6-13 TAB_MAP sin install/integrations y :36 cae a 'overview'; :38 permanentRedirect a /admin/chatbots/${botId}. chatbots/[botId]/tabs.ts:1 VALID_TABS incluye 'install' e 'integrations'. La vista CRM que propone roadmap-pendientes.md:24-28 ya existe en /admin/chatbots (IntegrationsTab, flujo D5 'Configurar y probar la integración CRM'): el doc quedó viejo.",
+   "hallazgo_titulo": "El redirect de /admin/clients/[clientId]/chatbot/* pierde los tabs install e integrations"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+   "resultado": "parcial",
+   "evidencia": "admin/settings/_actions/settings.actions.ts:171 `return fail(toErrorMessage(error, 'No se pudo actualizar la configuracion.'))`; toErrorMessage (src/lib/action-utils.ts, FROZEN) mapea ZodError a issues[0].message: la fuga de ZodError está cerrada. Pero para cualquier Error genérico (Prisma incluido) devuelve error.message tal cual: fuga residual de mensajes internos (patrón D1-c1)."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: orgSlug (B9.1) vs Organization.id (B11.6); /admin/chatbots/[botId] usa cuid",
+   "resultado": "parcial",
+   "evidencia": "Los dos documentos son ciertos a medias. clients/[clientId]/page.tsx:33 renombra el parámetro a orgSlug, pero :42 busca por 'OR: [{ id: orgSlug }, { slug: orgSlug }]'. Los links mandan el cuid: ClientsListClient.tsx:630, ClientTabsNav.tsx:34, ClientHeader.tsx:136. El catch-all chatbot/[[...tab]]/page.tsx:28-29 busca solo por slug. En mi lote, /admin/projects/[projectId] también usa cuid (project-card.tsx:251, project-tabs.tsx:13), y cada action vuelve a buscar el recurso por id con requireSuperAdmin (project.actions.ts:650-663, :730-743, :788-801), sin chequeo de org porque SUPER_ADMIN es global.",
+   "hallazgo_titulo": "IDs internos (cuid) en las URLs del admin y resolución dual id/slug en la ficha de cliente"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "alerta": "[D3-A2] Checklist B-SEC.3c renumera los fixes (F2 IDOR projects.ts, F4 agency-actions) frente a B11.0 (F2 trust-the-layout, F4 payments, F5 agency-actions)",
+   "resultado": "parcial",
+   "evidencia": "Verificado en el código, no en el checklist. F2 (projects.ts trust-the-layout) está corregido: src/lib/actions/projects.ts:18-32 (ensureSuperAdminOrErrorString) y requireSuperAdmin en :109, :159, :178, :214. F5 (agency-actions cross-projectId) está corregido: src/actions/agency-actions.ts:24-32 (assertProjectBelongsToOrg, comentario 'B11.2 fix F5'). F4 (página de payments) sigue abierto: payments/page.tsx:67-104 no tiene guard propio, aunque las actions sí (milestone.actions.ts:23; maintenance.actions.ts:35, :64, :94). La numeración de B-SEC.3c (F4 = agency-actions) no coincide con el comentario del código (F5).",
+   "hallazgo_titulo": "Páginas de Proyectos sin guard de rol propio: Pagos y Tareas no verifican sesión y la ficha acepta a cualquier usuario de la org del proyecto (y carga la lista de todas las orgs)"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "alerta": "[D3-A3] Ruta /admin/clients/[clientId]/chatbot/install (B8.5) redirigida por el catch-all de B9.1; rutas deprecadas (STATUS.md:216) mientras roadmap-pendientes.md:26 propone una vista nueva ahí",
+   "resultado": "confirmada",
+   "evidencia": "No existe un archivo chatbot/install (git ls-files de clients/[clientId] muestra solo chatbot/[[...tab]]/page.tsx). TAB_MAP no incluye 'install' (:6-13), y :35-38 hace permanentRedirect de cualquier tab desconocida a /admin/chatbots/<botId>?tab=overview. STATUS.md:216 declara deprecada la ruta y docs/roadmap-pendientes.md:26 propone igual una sección nueva en esa ruta.",
+   "hallazgo_titulo": "roadmap-pendientes propone una vista nueva en /admin/clients/[clientId]/chatbot/, una ruta deprecada que el catch-all redirige a /admin/chatbots"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+   "resultado": "parcial",
+   "evidencia": "El commit 5e337337 está en origin/main. settings.actions.ts:170-171 usa fail(toErrorMessage(error, ...)), así que el array de ZodError ya no sale. Pero toErrorMessage deja pasar el message de cualquier Error genérico (action-utils.ts:20-31, patrón D1-c1), de modo que los mensajes de Prisma siguen saliendo. En mi lote ninguna action usa toErrorMessage (git grep da 0) y el ZodError crudo sí sale (project.actions.ts:639 y siguientes).",
+   "hallazgo_titulo": "Las actions de Proyectos devuelven error.message crudo (ZodError en JSON, mensajes de Prisma, 'Unauthorized') y no reportan a Sentry"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: orgSlug (B9.1) vs Organization.id (B11.6); re-validación del recurso en cada action",
+   "resultado": "parcial",
+   "evidencia": "La ficha acepta ambos: admin/clients/[clientId]/page.tsx:33 (clientId renombrado a orgSlug) y :40-42 findFirst OR [{ id }, { slug }]. Los links del lote usan el id: alerts.ts:278 y :288, ticket-chat.tsx:242 (?delete=<organizationId>), ChatbotManager.tsx:45 (fallback a organizationId). El redirect de /chatbot resuelve solo por slug (chatbot/[[...tab]]/page.tsx:28-29). Re-validación: createTaskForClientAction comprueba que el proyecto sea de la org (agency-actions.ts:28-35); send-executive-report valida con zod y NOT_FOUND (route.ts:51-57, :83-85); createClientAssetAction solo depende de la FK (agency-actions.ts:96-110).",
+   "hallazgo_titulo": "IDs internos de Organization en URLs del admin (link de alertas, deep-link de baja, fallback de ChatbotManager) contra la regla de usar slugs"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "alerta": "[D3-A2] Checklist B-SEC.3c renumera los fixes (F2 IDOR projects.ts, F4 agency-actions) frente a B11.0 (F2 trust-the-layout, F4 payments, F5 agency-actions)",
+   "resultado": "parcial",
+   "evidencia": "Renumeración confirmada: docs/bitacora-roadmap.md:8398 (F2 projects.ts) y :8400 (F4 agency-actions). En código: projects.ts tiene requireSuperAdmin en :26, :109, :159, :178, :214 (F2 cerrado); agency-actions.ts:24-35 cierra el cross-projectId con el comentario 'B11.2 fix F5'. La página de pagos (F4 de B11.0) sigue confiando en el layout: projects/[projectId]/payments/page.tsx:67-73 lee prisma.project sin auth() (guard en projects/[projectId]/layout.tsx:105 y admin/layout.tsx:47), cubierto por SEC-023; sus actions sí tienen guard (maintenance.actions.ts:35, milestone.actions.ts:23)."
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "alerta": "[D3-A3] /admin/clients/[clientId]/chatbot/install (B8.5) redirigido por el catch-all de B9.1; /admin/clients/[orgSlug]/chatbot/* deprecadas (STATUS.md:216) mientras roadmap-pendientes.md:26 propone una vista ahí",
+   "resultado": "confirmada",
+   "evidencia": "No existe ruta install: el catch-all chatbot/[[...tab]]/page.tsx:6-13 no tiene 'install' en TAB_MAP y :35-38 redirige a /admin/chatbots/<botId>?tab=overview; resuelve solo por slug (:28-29). STATUS.md:216 declara la ruta deprecada y docs/roadmap-pendientes.md:24-28 sigue proponiendo la vista de CrmIntegration ahí, que ya existe en /admin/chatbots (IntegrationsTab, flujo D5 «Configurar y probar la integración CRM (n8n)»).",
+   "hallazgo_titulo": "Docs desactualizados sobre el admin: la lección de CLAUDE.md sobre ticket-chat ya no aplica y roadmap-pendientes propone una vista en una ruta que solo redirige"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+   "resultado": "parcial",
+   "evidencia": "5e33733 está en origin/main y agregó toErrorMessage: un ZodError devuelve solo issues[0].message (action-utils.ts:28-29), usado en settings.actions.ts:171 y :203, así que el detalle interno de Zod ya no sale. Cualquier otro Error se devuelve tal cual (action-utils.ts:31-32), incluido el de Prisma, y los mensajes de Zod por defecto llegan en inglés ('Invalid email').",
+   "hallazgo_titulo": "Errores internos devueltos al admin: String(error) en trigger-detector y send-now, y error.message de Prisma en las actions de tareas, horas, tickets y configuración"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: orgSlug (B9.1) vs Organization.id (B11.6); ¿las actions revalidan el recurso?",
+   "resultado": "confirmada",
+   "evidencia": "[clientId]/page.tsx:33 aliasa clientId a 'orgSlug' y :42 acepta id o slug; todos los links y revalidates usan Organization.id (ClientsListClient.tsx:630, updateClient.ts:149, services.ts:52, alerts.ts:278). Las actions del lote releen la org por id antes de escribir: updateClient.ts:42-65, updateClientInternalNotes.ts:29-33, archiveClient.ts:25-30, hardDeleteClient.ts:138-139 (solo existencia; el rol SUPER_ADMIN es el control).",
+   "hallazgo_titulo": "/admin/clients/[clientId] expone el id interno de la org en la URL y nombra 'orgSlug' a un valor que es el id"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "alerta": "[D3-A2] El checklist B-SEC.3c renumera los fixes F2/F4/F5 de B11.0",
+   "resultado": "confirmada",
+   "evidencia": "F2 (projects.ts trust-the-layout) cerrado en el código: guards en projects.ts:39, :74, :109, :126, :159, :178, :214. El 'F4' del checklist (bitacora:8400) es en realidad el F5 de B11.0 y está cerrado (agency-actions.ts:24-35). El F4 original (bitacora:6493, loader de payments) sigue sin guard propio: payments/page.tsx:70-74, git grep de auth()/requireSuperAdmin/SUPER_ADMIN → 0 (control: chatbot/[[...tab]]/page.tsx → 2); sus actions sí se protegen (milestone.actions.ts:23, :53; maintenance.actions.ts:35, :64, :94).",
+   "hallazgo_titulo": "El checklist B-SEC.3c renumera los fixes y el F4 original (loader de pagos de proyecto sin guard propio) sigue abierto"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "alerta": "[D3-A3] Ruta propuesta /admin/clients/[clientId]/chatbot/install que el catch-all redirige a overview; rutas deprecadas vs vista nueva de roadmap-pendientes:26",
+   "resultado": "confirmada",
+   "evidencia": "chatbot/[[...tab]]/page.tsx:6-13 TAB_MAP sin install/integrations y :36 fallback a 'overview'; además busca solo por slug (:28-29), así que con el id que generan los links da 404. STATUS.md:216 la depreca. roadmap-pendientes.md:26 proponía una vista CRM read-only ahí: hoy existe con edición en /admin/chatbots/[botId] (tab integrations, flujo D5 'Configurar y probar la integración CRM (n8n)').",
+   "hallazgo_titulo": "El redirect deprecado /admin/clients/[clientId]/chatbot/* busca solo por slug (los links usan el id → 404) y no mapea install ni integrations"
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+   "resultado": "parcial",
+   "evidencia": "updateSettings (admin/settings/_actions/settings.actions.ts:127-173) parsea dentro del try (:143) y devuelve fail(toErrorMessage(...)) (:171): el ZodError se mapea al primer issue (action-utils.ts:28-29), así que esa fuga está resuelta. Pero cualquier otro Error (Prisma, conexión) devuelve su message crudo (action-utils.ts:31-32).",
+   "hallazgo_titulo": "D3-A4 parcial: updateSettings ya no filtra el ZodError, pero sigue devolviendo al cliente el message crudo de cualquier otro Error (Prisma)"
   }
  ]
 }

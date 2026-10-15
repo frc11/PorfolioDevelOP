@@ -1,0 +1,2884 @@
+{
+ "dominio": "D3",
+ "ciclo": "D3-c1",
+ "lote": "D3-L1",
+ "run": "wf_5edd9c03-0ab",
+ "fecha": "2026-10-15T17:27:46.358Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/actions/agency-actions.ts",
+    "lineas_total": 115,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/AdminBackButton.tsx",
+    "lineas_total": 53,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/AdminBreadcrumbs.tsx",
+    "lineas_total": 67,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/AdminErrorBoundary.tsx",
+    "lineas_total": 25,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+    "lineas_total": 112,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/PageTransition.tsx",
+    "lineas_total": 30,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/admin-sidebar.tsx",
+    "lineas_total": 211,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/admin-topbar.tsx",
+    "lineas_total": 97,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/chart-card.tsx",
+    "lineas_total": 23,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/confirm-dialog.tsx",
+    "lineas_total": 102,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/dashboard-history-charts.tsx",
+    "lineas_total": 329,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/inline-confirm.tsx",
+    "lineas_total": 110,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/type-to-confirm-dialog.tsx",
+    "lineas_total": 119,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+    "lineas_total": 299,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/_components/alert-card.tsx",
+    "lineas_total": 123,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/_components/alert-column-overview.tsx",
+    "lineas_total": 159,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/_components/alert-types.ts",
+    "lineas_total": 9,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx",
+    "lineas_total": 129,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/_components/alerts-filters.ts",
+    "lineas_total": 70,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/loading.tsx",
+    "lineas_total": 32,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/page.tsx",
+    "lineas_total": 24,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
+    "lineas_total": 77,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/announcements/_actions/announcements.schemas.ts",
+    "lineas_total": 37,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/announcements/_components/announcement-list.tsx",
+    "lineas_total": 129,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx",
+    "lineas_total": 199,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/announcements/page.tsx",
+    "lineas_total": 65,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+    "lineas_total": 486,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/_components/audit-filters.ts",
+    "lineas_total": 54,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/_components/audit-period-filter.tsx",
+    "lineas_total": 263,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/loading.tsx",
+    "lineas_total": 32,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/page.tsx",
+    "lineas_total": 40,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/error.tsx",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/layout.tsx",
+    "lineas_total": 68,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/loading.tsx",
+    "lineas_total": 76,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/admin/page.tsx",
+    "lineas_total": 865,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/app/(protected)/admin/layout.tsx",
+    "simbolo": "AgencyOsLayout",
+    "tipo": "layout",
+    "url": "/admin/*",
+    "auth": "si",
+    "evidencia_auth": "layout.tsx:41-49 auth(); sin sesion -> redirect('/login'); rol distinto de SUPER_ADMIN -> redirect('/dashboard')",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "layout.tsx:47 if (session.user.role !== 'SUPER_ADMIN')",
+    "org_de": "no-aplica",
+    "evidencia_org": "Solo conteos globales para badges: botAlert.count (layout.tsx:11) y osLeadDossier EN_REVISION (layout.tsx:23-27), cacheados 30 s",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica",
+    "notas": "Usa unstable_noStore + unstable_cache (layout.tsx:2, :39) con force-dynamic (:8). PageTransition en el layout (:65) anima solo el primer montaje."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/page.tsx",
+    "simbolo": "AgencyOsPage",
+    "tipo": "page",
+    "url": "/admin",
+    "auth": "heredado",
+    "evidencia_auth": "Sin auth()/requireSuperAdmin propio (git grep vacio); depende de admin/layout.tsx:47 y del proxy. Control: audit-log/page.tsx:8 si lo tiene",
+    "rol": "SUPER_ADMIN (heredado)",
+    "evidencia_rol": "admin/layout.tsx:47",
+    "org_de": "no-filtra",
+    "evidencia_org": "Agregados globales cross-tenant por diseño: subscription.aggregate (page.tsx:222), organization.count (:230), osLead/osDemo/osTimeEntry sin filtro de org (:186-340)",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica",
+    "notas": "Suma al patron D1-c2 (pagina que lee la base confiando en el layout). 15 consultas en paralelo; fechas con setHours del servidor."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/alerts/page.tsx",
+    "simbolo": "AlertsPage",
+    "tipo": "page",
+    "url": "/admin/alerts",
+    "auth": "si",
+    "evidencia_auth": "alerts/page.tsx:5 llama listAlerts, que re-chequea rol: manageAlerts.ts:10 await requireSuperAdmin() (fuera del lote, git grep) + admin/layout.tsx:47",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "manageAlerts.ts:10 (requireSuperAdmin de modules/chatbot/server/admin)",
+    "org_de": "no-filtra",
+    "evidencia_org": "Alertas de todos los bots, orderBy createdAt desc y take 100 (manageAlerts.ts:24-25); global por diseño",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica",
+    "notas": "Las actions acknowledgeAlert/resolveAlert (manageAlerts.ts:30, :75) tambien re-chequean rol (:32, :77)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/announcements/page.tsx",
+    "simbolo": "AdminAnnouncementsPage",
+    "tipo": "page",
+    "url": "/admin/announcements",
+    "auth": "heredado",
+    "evidencia_auth": "Sin auth()/requireSuperAdmin propio (git grep vacio); prisma.panelAnnouncement.findMany y organization.findMany directos (page.tsx:11-31); depende de admin/layout.tsx:47",
+    "rol": "SUPER_ADMIN (heredado)",
+    "evidencia_rol": "admin/layout.tsx:47",
+    "org_de": "no-filtra",
+    "evidencia_org": "Lista las ultimas 100 novedades de todas las orgs y todas las orgs activas (page.tsx:12-30)",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica",
+    "notas": "Suma al patron D1-c2. No tiene loading.tsx propio: cae en admin/loading.tsx (skeleton del Dashboard)."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/audit-log/page.tsx",
+    "simbolo": "AuditLogPage",
+    "tipo": "page",
+    "url": "/admin/audit-log",
+    "auth": "si",
+    "evidencia_auth": "audit-log/page.tsx:8-11 auth() y redirect('/login') si no es SUPER_ADMIN; ademas listAuditLog/getAuditLogStats llaman requireSuperAdmin (audit-log-queries.ts:21, :54)",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "audit-log/page.tsx:9",
+    "org_de": "no-filtra",
+    "evidencia_org": "Registro global de AdminAuditLog; el modelo no tiene organizacion objetivo (schema.prisma:1652, git grep targetOrganizationId vacio)",
+    "validacion": "no-aplica",
+    "rate_limit": "no-aplica",
+    "notas": "Unica pagina del lote con guard propio (control positivo del patron D1-c2)."
+   },
+   {
+    "archivo": "src/actions/agency-actions.ts",
+    "simbolo": "createTaskForClientAction",
+    "tipo": "server-action",
+    "url": "(server action, invocada desde ProjectManager.tsx:18)",
+    "auth": "si",
+    "evidencia_auth": "agency-actions.ts:19-22 auth() y throw new Error('Unauthorized') si no es SUPER_ADMIN",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "agency-actions.ts:20",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId llega como argumento (agency-actions.ts:16); validado contra el proyecto con assertProjectBelongsToOrg (:29). Admin cross-tenant por diseño",
+    "validacion": "no",
+    "evidencia_validacion": "agency-actions.ts:17 solo tipos TS { title; description; dueDate? }; sin Zod ni .max; title/description van a notificaciones y emails",
+    "rate_limit": "no",
+    "notas": "Emails fire-and-forget (:74-88) con fallback a localhost (:75). Sin logAdminAction."
+   },
+   {
+    "archivo": "src/actions/agency-actions.ts",
+    "simbolo": "createClientAssetAction",
+    "tipo": "server-action",
+    "url": "(server action, invocada desde VaultManager.tsx:25)",
+    "auth": "si",
+    "evidencia_auth": "agency-actions.ts:98-101 auth() y throw new Error('Unauthorized') si no es SUPER_ADMIN",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "agency-actions.ts:99",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId argumento (agency-actions.ts:95) sin verificar existencia ni archivado antes del create (:103-111)",
+    "validacion": "no",
+    "evidencia_validacion": "agency-actions.ts:96 solo tipos TS; url sin protocolo validado (se publica como href en boveda/page.tsx:212); description (contraseña) se guarda en claro (:109)",
+    "rate_limit": "no",
+    "notas": "Credenciales ACCESS en texto plano: encryptCredential no se usa en ningun write path. Sin logAdminAction."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
+    "simbolo": "createAnnouncementAction",
+    "tipo": "server-action",
+    "url": "(server action, invocada desde announcement-publisher.tsx:78)",
+    "auth": "si",
+    "evidencia_auth": "announcements.actions.ts:18 await requireSuperAdmin() (src/lib/auth-guards.ts:3-11)",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "auth-guards.ts:6",
+    "org_de": "parametro",
+    "evidencia_org": "body.organizationId es el destino elegido por el admin (audiencia ORG); se verifica que exista (announcements.actions.ts:25-29) pero no que no este archivada",
+    "validacion": "zod",
+    "evidencia_validacion": "announcements.actions.ts:19 CreateAnnouncementSchema.parse; announcements.schemas.ts:11-35 con .min/.max y regex de fecha",
+    "rate_limit": "no",
+    "notas": "Catch devuelve toErrorMessage (error.message crudo para errores no-Zod). Sin logAdminAction ni captureException."
+   },
+   {
+    "archivo": "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
+    "simbolo": "deleteAnnouncementAction",
+    "tipo": "server-action",
+    "url": "(server action, invocada desde announcement-list.tsx:40)",
+    "auth": "si",
+    "evidencia_auth": "announcements.actions.ts:66 await requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "auth-guards.ts:6",
+    "org_de": "no-aplica",
+    "evidencia_org": "Borra por id de novedad (deleteMany where id, :69); recurso global del admin",
+    "validacion": "manual",
+    "evidencia_validacion": "announcements.actions.ts:67 if (!id?.trim()) return fail(...)",
+    "rate_limit": "no",
+    "notas": "La UI ignora el resultado (announcement-list.tsx:40-43). Sin logAdminAction."
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Entrada al admin: guard, badges y shell",
+    "pasos": [
+     "proxy (contexto fijo, no releido) -> src/app/(protected)/admin/layout.tsx:41 auth()",
+     "layout.tsx:43-49 sin sesion -> /login; rol != SUPER_ADMIN -> /dashboard",
+     "layout.tsx:52-55 getPendingAlerts (botAlert.count PENDING, unstable_cache 30 s :10-14) + getRevisionResumen (osLeadDossier EN_REVISION :21-32)",
+     "AdminLayoutClient.tsx:74-81 AdminSidebar con badges -> admin-sidebar.tsx:131-195 Links con estado activo y badge",
+     "AdminLayoutClient.tsx:86 AdminTopbar -> admin-topbar.tsx:66-77 breadcrumb y titulo derivados del pathname (heuristica :12-13)",
+     "layout.tsx:65 PageTransition -> PageTransition.tsx:20-28 (solo primer montaje del layout)",
+     "admin-topbar.tsx:85 form action signOutAction -> desemboca en flujo D1 'Logout'"
+    ]
+   },
+   {
+    "nombre": "Dashboard de KPIs (/admin)",
+    "pasos": [
+     "src/app/(protected)/admin/page.tsx:154 AgencyOsPage (sin guard propio)",
+     "page.tsx:165-341 15 consultas Prisma en paralelo (agencySettings, osDemo, osLead, subscription, organization, ticket, project, osMaintenancePayment, osTimeEntry)",
+     "page.tsx:343-350 objetivo semanal, progreso y tasas de respuesta/cierre por estado actual",
+     "page.tsx:353-398 ingresos del mes: agreedAmount reconocido al primer hito + mantenimiento cobrado",
+     "page.tsx:409-544 horas por miembro, series semanales/mensuales, acumulado (let mutado en map :497-500), valor hora",
+     "page.tsx:576-716 StatCard/DualMetricCard/MemberHoursCard + DashboardHistoryCharts",
+     "dashboard-history-charts.tsx:125-318 cuatro charts con ChartEmptyState -> chart-card.tsx:18 role=img + aria-label"
+    ]
+   },
+   {
+    "nombre": "Triage de alertas de bots (/admin/alerts)",
+    "pasos": [
+     "alerts/page.tsx:5 listAlerts() -> sale del lote: src/modules/chatbot/server/admin/manageAlerts.ts:9 (requireSuperAdmin :10, orderBy createdAt desc :24, take 100 :25)",
+     "AlertsClient.tsx:46 estado local; :55-73 stats calculados sobre las filas cargadas",
+     "AlertsClient.tsx:75-85 filtros de severidad y periodo en cliente -> alerts-filters.ts:50-70 matchesDateFilter",
+     "alert-card.tsx:75 'Visto' -> AlertsClient.tsx:87-101 handleAck -> sale del lote: manageAlerts.ts:30 acknowledgeAlert (requireSuperAdmin :32) -> update optimista :97-101",
+     "alert-card.tsx:87 'Resolver' -> AlertsClient.tsx:107-121 -> sale del lote: manageAlerts.ts:75 resolveAlert (requireSuperAdmin :77)",
+     "AlertsClient.tsx:207-275 cap de 4 por columna y 'Ver todas' -> alert-column-overview.tsx:95-158 overlay con Escape y trap de foco",
+     "alert-card.tsx:59 'Ver bot' -> /admin/chatbots/[botId]?tab=overview (flujo D5 'Admin activa, pausa o elimina un bot')"
+    ]
+   },
+   {
+    "nombre": "Deteccion automatica de alertas (prometida, sin disparador)",
+    "pasos": [
+     "alerts/page.tsx:17 copy 'Issues detectados automaticamente cada 15 minutos'",
+     "sale del lote: src/app/api/cron/detect-bot-issues/route.ts:13 runAlertDetector() (endpoint existe)",
+     "netlify.toml:25-32 solo programa generate-insights, send-weekly-reports y cleanup-old-events; vercel.json:2-15 solo os-follow-up, regenerate-briefs, send-executive-reports (git grep detect-bot-issues vacio)",
+     "unico disparo: src/app/api/admin/alerts/trigger-detector/route.ts:12 (manual desde el admin)",
+     "admin/layout.tsx:11 el badge del sidebar cuenta BotAlert PENDING que solo existen si alguien disparo el detector"
+    ]
+   },
+   {
+    "nombre": "Publicar novedad del panel",
+    "pasos": [
+     "announcements/page.tsx:11-31 lee ultimas 100 novedades y orgs activas (deletedAt null)",
+     "announcement-publisher.tsx:53-75 safeParse con CreateAnnouncementSchema en cliente y errores por campo",
+     "announcement-publisher.tsx:78 createAnnouncementAction(parsed.data)",
+     "announcements.actions.ts:18 requireSuperAdmin -> :19 CreateAnnouncementSchema.parse -> :23-31 org existente si audiencia ORG",
+     "announcements.actions.ts:34-39 expiresOn -> fin del dia en UTC (T23:59:59.999Z)",
+     "announcements.actions.ts:41-50 panelAnnouncement.create -> :52-53 revalidatePath('/admin/announcements','/dashboard')",
+     "desemboca en flujo D2 'Novedades del panel' (get-announcements-for-org.ts:37)"
+    ]
+   },
+   {
+    "nombre": "Retirar novedad",
+    "pasos": [
+     "announcement-list.tsx:93 abre confirmacion inline -> :75 'Confirmar'",
+     "announcement-list.tsx:37-44 handleDelete: await deleteAnnouncementAction(id) sin mirar result.success",
+     "announcements.actions.ts:66 requireSuperAdmin -> :67 id no vacio -> :69 deleteMany (lecturas en cascada)",
+     "announcement-list.tsx:43 router.refresh()"
+    ]
+   },
+   {
+    "nombre": "Audit log: listado, filtros y carga incremental",
+    "pasos": [
+     "audit-log/page.tsx:8-11 auth() + rol SUPER_ADMIN",
+     "audit-log/page.tsx:13-16 sale del lote: src/lib/audit-log-queries.ts:16 listAuditLog (requireSuperAdmin :21, skip/take :43-44) y :53 getAuditLogStats (:54)",
+     "AuditLogClient.tsx:106-126 changeAction / changeDate / loadMore",
+     "AuditLogClient.tsx:67-104 runQuery con requestSeq anti-race -> audit-filters.ts:21-54 periodToRange",
+     "audit-period-filter.tsx:131-150 presets inmediatos y rango custom con 'Aplicar' (panel portaleado :180-259)",
+     "AuditLogClient.tsx:193-293 tarjetas expandibles -> DiffDisplay :363-377 o DeletionDetail :447-473"
+    ]
+   },
+   {
+    "nombre": "Alta de activo en la boveda de un cliente (admin)",
+    "pasos": [
+     "sale de otro lote: src/components/admin/managers/VaultManager.tsx:25 (montado en clients/[clientId]/_components/tabs/VaultTab.tsx:26)",
+     "agency-actions.ts:98-101 rol SUPER_ADMIN",
+     "agency-actions.ts:103-111 prisma.clientAsset.create con description (placeholder 'Contraseña o instrucciones...', VaultManager.tsx:85) en claro",
+     "agency-actions.ts:113 revalidatePath('/admin/clients')",
+     "desemboca en flujo D2 'Bóveda del cliente' (boveda/page.tsx:129-131 -> resolve-credential.ts:24 devuelve el texto plano)"
+    ]
+   },
+   {
+    "nombre": "Tarea para aprobacion del cliente",
+    "pasos": [
+     "sale de otro lote: src/components/admin/managers/ProjectManager.tsx:18 (ProjectsTab.tsx:73)",
+     "agency-actions.ts:19-22 rol SUPER_ADMIN -> :29 assertProjectBelongsToOrg (fix B11.2 F5)",
+     "agency-actions.ts:37-72 transaccion: task PENDING_APPROVAL + notificaciones ACTION_REQUIRED a todos los orgMembers",
+     "agency-actions.ts:75-88 emails ActionRequiredEmail sin await, .catch(console.error), baseUrl con fallback a localhost",
+     "desemboca en flujo D2 'Aprobar o pedir cambios en una entrega'"
+    ]
+   },
+   {
+    "nombre": "Error de render en una pagina admin",
+    "pasos": [
+     "admin/error.tsx:12 / alerts/error.tsx:12 / audit-log/error.tsx:12 -> AdminErrorBoundary.tsx:16-24",
+     "sale del lote: src/components/ui/SectionErrorBoundary.tsx:55 logger.error + :64 Sentry.captureException con tag de seccion (UI sin error.message, ref = digest)"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Credenciales de la bóveda (tipo ACCESS) se guardan en texto plano: ningún camino de escritura usa encryptCredential",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 109,
+      "fragmento": "description: data.description"
+     },
+     {
+      "ruta": "src/components/admin/managers/VaultManager.tsx",
+      "linea": 85,
+      "fragmento": "placeholder=\"Contraseña o instrucciones...\""
+     },
+     {
+      "ruta": "src/lib/crypto/resolve-credential.ts",
+      "linea": 24,
+      "fragmento": "return { value: description, error: false }"
+     },
+     {
+      "ruta": "src/lib/crypto/credential-cipher.ts",
+      "linea": 73,
+      "fragmento": "export function encryptCredential(plaintext: string): string {"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+      "linea": 131,
+      "fragmento": "? resolveCredentialDisplay(asset.description)"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real que le confíe accesos (hosting, CMS, redes) a develOP: la contraseña queda legible en ClientAsset.description en la Neon compartida, en backups y en cualquier volcado. El cifrado PD-1.3a existe solo del lado de lectura (acepta filas en claro como 'pre-backfill'): encryptCredential no tiene ningún llamador fuera de los tests (git grep), así que da una falsa sensación de protección.",
+    "propuesta": "Cifrar con encryptCredential en el write path cuando type === 'ACCESS' (createClientAssetAction y los clientAsset.create de onboarding-actions.ts:111/:123), backfill único de las filas en claro, invariante que falle si un create/update de ClientAsset ACCESS no pasa por el cifrador, y después del backfill tratar el texto plano como error en resolveCredentialDisplay.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h4.adm-clientes.boveda-alta-activo",
+     "h2.cli-cuenta",
+     "lib.crypto",
+     "modelo.ClientAsset"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Flujo D2 'Bóveda del cliente'; patrón a cruzar onboarding-actions.ts:111, :123"
+   },
+   {
+    "titulo": "Detector automático de alertas de bots sin disparador programado (la página promete 'cada 15 minutos')",
+    "prefijo": "FAL",
+    "severidad": "ALTA",
+    "tipo": "faltante",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/alerts/page.tsx",
+      "linea": 17,
+      "fragmento": "Issues detectados automaticamente cada 15 minutos"
+     },
+     {
+      "ruta": "netlify.toml",
+      "linea": 31,
+      "fragmento": "[functions.\"cleanup-old-events-cron\"]"
+     },
+     {
+      "ruta": "vercel.json",
+      "linea": 4,
+      "fragmento": "\"path\": \"/api/cron/os-follow-up\","
+     },
+     {
+      "ruta": "src/app/api/cron/detect-bot-issues/route.ts",
+      "linea": 13,
+      "fragmento": "const result = await runAlertDetector()"
+     },
+     {
+      "ruta": "src/app/api/admin/alerts/trigger-detector/route.ts",
+      "linea": 12,
+      "fragmento": "const result = await runAlertDetector()"
+     }
+    ],
+    "impacto": "Con el primer cliente real nadie se entera solo de que su bot dejó de responder (p. ej. la credencial de Vertex vencida, E10): netlify.toml programa solo generate-insights, send-weekly-reports y cleanup-old-events (:25-32) y vercel.json (que no corre en Netlify) tampoco incluye detect-bot-issues. El tablero /admin/alerts y el badge del sidebar (layout.tsx:11) quedan vacíos salvo disparo manual. /api/cron/alerts (runPeriodicAgencyAlerts) tampoco tiene disparador.",
+    "propuesta": "Agregar una scheduled function de Netlify como cleanup-old-events-cron.ts que llame a /api/cron/detect-bot-issues con el secreto de cron (y decidir lo mismo para /api/cron/alerts); ajustar la copy a la frecuencia real; invariante que cruce src/app/api/cron/* contra netlify.toml y netlify/functions.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas",
+     "h4.adm-alertas.deteccion-automatica",
+     "int.cron.detect-bot-issues",
+     "int.cron.alerts",
+     "modelo.BotAlert"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "Flujo D5 'Detector de incidencias de bots'; precedente T0.2 (crons distintos en netlify.toml y vercel.json)"
+   },
+   {
+    "titulo": "Páginas del lote que leen la base sin guard propio (suma al patrón D1-c2): /admin y /admin/announcements",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/page.tsx",
+      "linea": 182,
+      "fragmento": "prisma.agencySettings.findFirst({"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/announcements/page.tsx",
+      "linea": 11,
+      "fragmento": "const [announcements, organizations] = await Promise.all(["
+     },
+     {
+      "ruta": "src/app/(protected)/admin/audit-log/page.tsx",
+      "linea": 9,
+      "fragmento": "if (!session?.user || session.user.role !== 'SUPER_ADMIN') {"
+     }
+    ],
+    "impacto": "MRR, leads, horas del equipo y la lista de todas las organizaciones se leen confiando en que layout y proxy ya decidieron; si el guard del layout se rompe en un refactor o el render parcial usa claims viejos (D1-c2), estos datos cross-tenant quedan expuestos. En el mismo lote, /admin/audit-log tiene guard propio y /admin/alerts lee vía una action que re-chequea rol.",
+    "propuesta": "requireSuperAdmin() al inicio de AgencyOsPage y AdminAnnouncementsPage (mismo patrón que audit-log/page.tsx:8-11), o mover las lecturas a funciones de lib con guard.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-dashboard",
+     "h4.adm-novedades",
+     "lib.auth"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D1-c2 (admin/page.tsx:182 ya listado; announcements/page.tsx es nueva aparición)"
+   },
+   {
+    "titulo": "Alertas: la vista carga solo las 100 más recientes y calcula contadores y triage sobre ese recorte",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+      "linea": 25,
+      "fragmento": "take: 100,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+      "linea": 58,
+      "fragmento": "const totalPending = alerts.filter((a) => a.status === 'PENDING').length"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/layout.tsx",
+      "linea": 11,
+      "fragmento": "async () => prisma.botAlert.count({ where: { status: 'PENDING' } }),"
+     }
+    ],
+    "impacto": "Con más de 100 alertas, las PENDING más viejas no aparecen en ninguna columna ni en 'Ver todas' y no se pueden marcar ni resolver desde la UI; 'Totales pendientes', 'Críticas pendientes' y el tiempo promedio de resolución quedan subestimados y el badge del sidebar (que cuenta todas) no coincide con la página.",
+    "propuesta": "Traer siempre todas las PENDING/ACKNOWLEDGED (o paginar por columna en el server), calcular los stats con count/aggregate en el server y bajar los filtros a listAlerts (PLAN-544).",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas",
+     "h4.adm-alertas.triage",
+     "h4.adm-alertas.filtros-y-vista-completa",
+     "modelo.BotAlert"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-544"
+   },
+   {
+    "titulo": "agency-actions: server actions sin Zod, sin auditoría y con organizationId por parámetro sin verificar en la bóveda",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 17,
+      "fragmento": "data: { title: string; description: string; dueDate?: Date }"
+     },
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 96,
+      "fragmento": "data: { name: string; url: string; type: AssetType; description?: string }"
+     },
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 21,
+      "fragmento": "throw new Error('Unauthorized')"
+     },
+     {
+      "ruta": "src/components/admin/managers/VaultManager.tsx",
+      "linea": 31,
+      "fragmento": "console.error(error)"
+     }
+    ],
+    "impacto": "Viola la regla de Zod en cada Server Action: title/description/url sin tope terminan en notificaciones y emails al cliente; la url del activo se publica como href en la bóveda del cliente (boveda/page.tsx:212) sin exigir http(s); el activo se crea en una org que puede no existir o estar archivada (error de FK crudo). Ni la tarea ni el activo quedan en AdminAuditLog (git grep vacío; control archiveClient.ts:6 sí audita). Si algo falla el admin no ve nada: el caller solo hace console.error. El organizationId por parámetro es inherente a una acción admin cross-tenant y en la tarea está mitigado por assertProjectBelongsToOrg (:29), no en el activo.",
+    "propuesta": "Schemas Zod (title/description con .max, url con protocolo http/https, type como nativeEnum, organizationId existente y no archivada), devolver ActionResult en vez de throw, logAdminAction en ambas, y que VaultManager/ProjectManager muestren el error.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h4.adm-clientes.boveda-alta-activo",
+     "h4.adm-clientes.tarea-para-aprobacion",
+     "lib.actions",
+     "modelo.ClientAsset",
+     "modelo.Task",
+     "modelo.AdminAuditLog"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D1-c1 (fallos solo a console.error), D1-c3 (Error('Unauthorized') genérico; texto libre sin .max)"
+   },
+   {
+    "titulo": "Emails 'Acción requerida' de una tarea para aprobación: sin await, con fallback a localhost y fallos solo a console.error",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 74,
+      "fragmento": "// Fire and forget emails to each user"
+     },
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 75,
+      "fragmento": "const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'"
+     },
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 86,
+      "fragmento": "}).catch(console.error)"
+     }
+    ],
+    "impacto": "El primer cliente real puede no recibir el email de que tiene una entrega para aprobar: la action devuelve antes de que salgan los envíos y en una función serverless las promesas pendientes pueden cortarse; si falta la variable, el link apunta a localhost; ningún fallo llega a Sentry. La notificación in-app sí se crea dentro de la transacción (:37-72).",
+    "propuesta": "Esperar los envíos con Promise.allSettled (o encolarlos), registrar fallos con captureException y eliminar el fallback a localhost (fallar al arrancar si falta la URL).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.tarea-para-aprobacion",
+     "h2.cli-proyecto",
+     "int.brevo",
+     "int.sentry"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D1-c1 (envíos ignorados), D1-c3 (fallback a localhost); flujo D2 'Aprobar o pedir cambios en una entrega'"
+   },
+   {
+    "titulo": "admin/page.tsx: 865 líneas con el cálculo de KPIs dentro del componente y el error de lint react-hooks/immutability",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/page.tsx",
+      "linea": 497,
+      "fragmento": "let cumulativeRevenue = 0"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/page.tsx",
+      "linea": 500,
+      "fragmento": "cumulativeRevenue += revenue"
+     },
+     {
+      "ruta": "docs/auditoria-2026-10/_crudo/eslint.json",
+      "linea": 740,
+      "fragmento": "\"regla\": \"react-hooks/immutability\","
+     },
+     {
+      "ruta": "src/app/(protected)/admin/page.tsx",
+      "linea": 353,
+      "fragmento": "const revenueMap = new Map<string, number>()"
+     }
+    ],
+    "impacto": "Cada cambio de métrica obliga a tocar un server component que mezcla 15 consultas, reglas de negocio (qué cuenta como respuesta, cuándo se reconoce un ingreso) y JSX, sin tests sobre esos cálculos; el único error de lint del lote vive acá (línea 500). Viola la política anti-vibecode (componente > 300 líneas, lógica de negocio en UI).",
+    "propuesta": "Extraer consultas y cálculos a un módulo de lib (funciones puras testeables), recomputar el acumulado sin reasignar un let y dejar la página como composición.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-dashboard",
+     "h4.adm-dashboard.kpis-operativos-y-financieros",
+     "h4.adm-dashboard.tendencias-historicas"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-596, PLAN-600"
+   },
+   {
+    "titulo": "Topbar: /admin/announcements se titula 'Detalle' y otras secciones salen en inglés por la heurística de ID",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/_components/admin-topbar.tsx",
+      "linea": 12,
+      "fragmento": "if (/^[a-z0-9]{10,}$/i.test(segment)) {"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/_components/admin-topbar.tsx",
+      "linea": 13,
+      "fragmento": "return 'Detalle'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/_components/admin-topbar.tsx",
+      "linea": 24,
+      "fragmento": "const sectionLabelMap: Record<string, string> = {"
+     }
+    ],
+    "impacto": "En Novedades el h1 del topbar dice 'Detalle' ('announcements' son 13 letras y la regex lo toma por ID); Referidos sale 'Referrals', Revisión demos 'Leados' y las subrutas 'New', 'Edit', 'Payments'. Contradice el cierre B13.5 de labels en español.",
+    "propuesta": "Completar el mapa con todas las secciones y subrutas y detectar IDs por formato cuid (letra inicial + dígitos) en vez de por largo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-shell",
+     "h4.adm-shell.navegacion",
+     "h4.adm-novedades"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-647"
+   },
+   {
+    "titulo": "Menú mobile del admin: la hamburguesa queda encima del drawer y tapa el logo; drawer sin Escape ni manejo de foco",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+      "linea": 46,
+      "fragmento": "className=\"fixed left-4 top-4 z-[120] rounded-xl border border-white/10 bg-zinc-900/90 p-2.5 backdrop-blur lg:hidden\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+      "linea": 62,
+      "fragmento": "className={`fixed left-0 top-0 z-[110] h-screen w-[240px] transition-transform lg:translate-x-0 ${"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/_components/admin-sidebar.tsx",
+      "linea": 117,
+      "fragmento": "<div className=\"border-b border-white/10 px-5 py-5\">"
+     }
+    ],
+    "impacto": "En el teléfono, al abrir el menú el botón (caja de 16 a 58 px, z-120) queda sobre el BrandMark del sidebar (arranca en 20 px, z-110). El drawer no cierra con Escape, no mueve ni atrapa el foco y el botón no expone aria-expanded.",
+    "propuesta": "Ocultar la hamburguesa mientras mobileOpen (o bajarla de z), agregar Escape, foco inicial/trap y aria-expanded/aria-controls reutilizando el patrón de alert-column-overview.tsx:43-89.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-shell",
+     "h4.adm-shell.navegacion"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-644"
+   },
+   {
+    "titulo": "Diálogos de confirmación destructiva sin foco inicial, trap ni Escape; ConfirmDialog sin nombre accesible",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/_components/confirm-dialog.tsx",
+      "linea": 48,
+      "fragmento": "role=\"dialog\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/_components/type-to-confirm-dialog.tsx",
+      "linea": 46,
+      "fragmento": "onClick={isPending ? undefined : onClose}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/_components/inline-confirm.tsx",
+      "linea": 51,
+      "fragmento": "role=\"dialog\""
+     }
+    ],
+    "impacto": "Con teclado o lector de pantalla, al confirmar archivar/eliminar cliente, acciones masivas de bots o impersonar, el foco queda detrás del modal, Tab recorre el fondo y Escape no cierra (git grep Escape vacío en los tres); ConfirmDialog no tiene aria-label/labelledby y se anuncia como un diálogo sin título.",
+    "propuesta": "Un hook de modal accesible compartido (foco inicial, trap, Escape, restore, aria-labelledby) como el de alert-column-overview.tsx:43-89, aplicado a los tres componentes.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-shell",
+     "h4.adm-shell.confirmaciones"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-654"
+   },
+   {
+    "titulo": "Topbar y breadcrumbs con controles solo-ícono sin aria-label y h1 duplicado por página",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/_components/admin-topbar.tsx",
+      "linea": 88,
+      "fragmento": "title=\"Cerrar sesión\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/_components/admin-topbar.tsx",
+      "linea": 75,
+      "fragmento": "<h1 className=\"mt-1 truncate text-lg font-medium tracking-tight text-white\">"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/alerts/page.tsx",
+      "linea": 13,
+      "fragmento": "<h1 className=\"text-3xl font-semibold tracking-tight text-zinc-100\">"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/_components/AdminBreadcrumbs.tsx",
+      "linea": 26,
+      "fragmento": "<Home className=\"h-3 w-3\" strokeWidth={1.5} />"
+     }
+    ],
+    "impacto": "El botón de logout y el link a Inicio de los breadcrumbs se anuncian sin nombre (title no es confiable para lectores); cada página admin con h1 propio (19 archivos por git grep) queda con dos h1, uno de ellos el del topbar.",
+    "propuesta": "aria-label en ambos íconos, nav con aria-label de breadcrumb, y que el título del topbar no sea un h1 (o quitar el h1 de las páginas).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-shell",
+     "h4.adm-shell.navegacion"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-649"
+   },
+   {
+    "titulo": "Formulario de novedades y error del audit log sin semántica accesible (labels sin asociar, errores sin role=alert)",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx",
+      "linea": 102,
+      "fragmento": "<label className=\"mb-2 block text-sm font-medium text-zinc-200\">Título</label>"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx",
+      "linea": 177,
+      "fragmento": "<div className=\"rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200\">"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+      "linea": 297,
+      "fragmento": "{error ? <Callout tone=\"danger\">{error}</Callout> : null}"
+     }
+    ],
+    "impacto": "Los labels no tienen htmlFor/id, así que un lector de pantalla anuncia los campos sin nombre; los errores por campo, el error del server y el aviso de éxito no tienen role=alert/aria-live, y el Callout del design system tampoco (git grep vacío en Callout.tsx).",
+    "propuesta": "Asociar label e input (o usar el Field del design system), role=alert/aria-live en errores y éxito; decisión para Valentino si Callout (src/components/ui, FROZEN) agrega role según tone.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-novedades.publicar",
+     "h4.adm-audit.listado-y-filtros",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D1-c1 (bloques de error sin role=alert)"
+   },
+   {
+    "titulo": "Retirar una novedad ignora el resultado de la action: si falla, el admin no ve nada",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/announcements/_components/announcement-list.tsx",
+      "linea": 40,
+      "fragmento": "await deleteAnnouncementAction(id)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/announcements/_components/announcement-list.tsx",
+      "linea": 41,
+      "fragmento": "setConfirmingId(null)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
+      "linea": 75,
+      "fragmento": "return fail(toErrorMessage(error, 'No se pudo retirar la novedad.'))"
+     }
+    ],
+    "impacto": "Si el retiro falla (sesión vencida, base caída), la confirmación se cierra como si hubiera funcionado; la novedad sigue visible para los clientes y el admin solo lo nota si vuelve a mirar la lista. Tampoco queda registro en AdminAuditLog de quién publicó o retiró.",
+    "propuesta": "Chequear result.success y mostrar el error en la fila; registrar publicar/retirar con logAdminAction.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-novedades",
+     "h4.adm-novedades.listar-y-retirar",
+     "modelo.PanelAnnouncement"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Patrón 'UI que espera una action sin mirar result.success'"
+   },
+   {
+    "titulo": "Actions de novedades devuelven error.message crudo a la UI (D3-A4 resuelto solo para ZodError)",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
+      "linea": 56,
+      "fragmento": "return fail(toErrorMessage(error, 'No se pudo publicar la novedad.'))"
+     },
+     {
+      "ruta": "src/lib/action-utils.ts",
+      "linea": 32,
+      "fragmento": "return error.message"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx",
+      "linea": 178,
+      "fragmento": "{serverError}"
+     }
+    ],
+    "impacto": "Un error de Prisma (texto 'Invalid prisma.panelAnnouncement.create() invocation' con tablas y campos) o el 'Unauthorized' del guard llega tal cual al panel. Solo lo ve un SUPER_ADMIN (por eso BAJA), pero contradice la regla de no exponer errores internos; el fix 5e337337 cubrió el ZodError y dejó la rama de Error genérico.",
+    "propuesta": "En las actions, mapear errores conocidos y devolver el fallback para el resto con captureException; decisión para Valentino si toErrorMessage (action-utils, FROZEN-inferido) deja de devolver error.message.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-novedades.publicar",
+     "lib.actions",
+     "int.sentry"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D1-c1 (mensajes internos de error al cliente); alerta D3-A4"
+   },
+   {
+    "titulo": "Fechas en UTC en vez de hora Argentina: KPIs de hoy/semana/mes del dashboard y caducidad de novedades",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/page.tsx",
+      "linea": 66,
+      "fragmento": "current.setHours(23, 59, 59, 999)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/page.tsx",
+      "linea": 60,
+      "fragmento": "current.setHours(0, 0, 0, 0)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
+      "linea": 36,
+      "fragmento": "const candidate = new Date(`${parsed.expiresOn}T23:59:59.999Z`)"
+     }
+    ],
+    "impacto": "Con el servidor en UTC, 'Leads pendientes de follow-up hoy' corta a las 20:59 ART y después de las 21:00 suma los de mañana; la semana arranca el domingo 21:00 y el mes el último día 21:00 ART, así que un cobro de esa noche cae en el mes siguiente. Una novedad que caduca 'el 10' desaparece el 10 a las 20:59 ART (esto último no depende del TZ del server).",
+    "propuesta": "Usar los helpers de fecha AR existentes (src/lib/dates-ar.ts / tz-ar.ts) para los límites de día, semana y mes y para el fin de día de expiresOn.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-dashboard",
+     "h4.adm-dashboard.kpis-comerciales",
+     "h4.adm-novedades.publicar",
+     "lib.dates-ar"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "Memoria 'Helper de fechas AR (dates-ar.ts)'"
+   },
+   {
+    "titulo": "Tasa de respuesta del dashboard subestimada: el denominador incluye perdidos y postergados que sí respondieron",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/page.tsx",
+      "linea": 45,
+      "fragmento": "LeadStatus.PERDIDO,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/page.tsx",
+      "linea": 349,
+      "fragmento": "const responseRate = formatPercentage(respondedCount, demoQualifiedCount)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/page.tsx",
+      "linea": 607,
+      "fragmento": "primaryHint=\"Sobre leads en etapa demo o posterior, según su estado actual\""
+     }
+    ],
+    "impacto": "Un lead que respondió y después pasó a PERDIDO o POSTERGADO cuenta en el denominador (DEMO_PIPELINE_STATUSES) y no en el numerador (RESPONDED_PIPELINE_STATUSES): la tasa baja con cada pérdida aunque la respuesta haya ocurrido. Card de cierre (histórica) y chart (cohorte por createdAt) siguen sin reconciliar; solo se agregaron subtítulos.",
+    "propuesta": "Basar la tasa en eventos (timestamp de respuesta en OsActivity o un respondedAt) y no en el estado actual; alinear card y chart al mismo criterio.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-dashboard",
+     "h4.adm-dashboard.kpis-comerciales",
+     "modelo.OsLead"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-598"
+   },
+   {
+    "titulo": "Filtros de /admin/alerts no envuelven en mobile: desborde horizontal y popover de rango fuera de pantalla",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+      "linea": 177,
+      "fragmento": "<div className=\"flex items-center gap-2\">"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx",
+      "linea": 58,
+      "fragmento": "<div className=\"flex items-center gap-2\">"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx",
+      "linea": 81,
+      "fragmento": "className=\"absolute left-full top-0 z-50 ml-2 w-64 rounded-2xl border ..."
+     }
+    ],
+    "impacto": "A 390 px el ancho útil del main es ~334 px (390 menos p-3 del shell y p-4 del main); la fila de severidad suma ~400 px (rótulo + 5 chips) y la de período ~550 px (rótulo + 6 chips), ambas sin flex-wrap, así que el contenido scrollea en horizontal y el popover 'Personalizado' (256 px, a la derecha del último chip) abre fuera del viewport.",
+    "propuesta": "flex-wrap en ambas filas (o un select en mobile) y anclar el popover debajo del chip con clamp al viewport como audit-period-filter.tsx:31-45.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas",
+     "h4.adm-alertas.filtros-y-vista-completa"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Acciones de alertas: error genérico 'Error' y rechazo de promesa sin manejar",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+      "linea": 94,
+      "fragmento": "error: 'Error',"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+      "linea": 96,
+      "fragmento": "await promise"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+      "linea": 132,
+      "fragmento": "onAck={(id) => void handleAck(id)}"
+     }
+    ],
+    "impacto": "Si marcar como vista o resolver falla (sesión vencida: requireSuperAdmin lanza 'Unauthorized'), el toast dice solo 'Error' y la promesa rechazada queda sin manejar (try/finally sin catch, llamada con void), lo que termina como unhandledrejection.",
+    "propuesta": "catch con mensaje útil ('No se pudo resolver la alerta; reintentá') y que acknowledgeAlert/resolveAlert devuelvan ActionResult.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas.triage"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D1-c3 (guards con Error genérico)"
+   },
+   {
+    "titulo": "Ruta /admin/clients/[clientId]: los links usan Organization.id, la página acepta id o slug y la ruta deprecada de chatbot solo slug",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+      "linea": 42,
+      "fragmento": "OR: [{ id: orgSlug }, { slug: orgSlug }],"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 630,
+      "fragmento": "href={`/admin/clients/${client.id}`}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 29,
+      "fragmento": "where: { slug: orgSlug },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 22,
+      "fragmento": "permanentRedirect('/login')"
+     }
+    ],
+    "impacto": "Los docs se contradicen (B9.1 dice orgSlug, B11.6 dice id); en el código manda el cuid en la URL (contra la regla de no exponer IDs internos), la variable se llama orgSlug pero recibe un id, un link /admin/clients/<id>/chatbot da 404 porque la ruta deprecada solo busca por slug, y el rebote de no-admins es un 308 cacheable por el navegador.",
+    "propuesta": "Elegir un identificador (slug) para /admin/clients/*, que la ruta deprecada resuelva igual que la página (o borrarla si no tiene tráfico), redirect temporal para el caso no autorizado y corregir la bitácora.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h3.adm-chatbots"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Alerta D3-A1"
+   },
+   {
+    "titulo": "Docs proponen una vista nueva en /admin/clients/[clientId]/chatbot/*, ruta deprecada que el catch-all redirige; la vista CRM ya existe en /admin/chatbots",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 36,
+      "fragmento": "const targetTab: TabId = requested && TAB_MAP[requested] ? TAB_MAP[requested] : 'overview'"
+     },
+     {
+      "ruta": "docs/roadmap-pendientes.md",
+      "linea": 26,
+      "fragmento": "- **Qué:** En `/admin/clients/[clientId]/chatbot/` o equivalente, una sección read-only que muestre la `CrmIntegration`"
+     },
+     {
+      "ruta": "STATUS.md",
+      "linea": 216,
+      "fragmento": "1. Nueva ruta canónica `/admin/chatbots` — la vieja `/admin/clients/[id]/chatbot/*` queda deprecada"
+     }
+    ],
+    "impacto": "Quien retome roadmap-pendientes construiría la vista en una ruta que redirige a /admin/chatbots/<botId>?tab=overview ('install' de B8.5 tampoco está en TAB_MAP), duplicando lo que la tab de Integraciones de /admin/chatbots/[botId] ya muestra (flujo D5 'Configurar y probar la integración CRM').",
+    "propuesta": "Marcar la pendiente de roadmap-pendientes.md:24-30 como cubierta o reubicarla en /admin/chatbots/[botId], y anotar en la bitácora que 'install' no se implementó.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots",
+     "h4.adm-clientes"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Alerta D3-A3"
+   },
+   {
+    "titulo": "AdminAuditLog sin organización objetivo: no se puede filtrar ni leer el registro por cliente",
+    "prefijo": "FAL",
+    "severidad": "BAJA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+      "linea": 246,
+      "fragmento": "{entry.targetType} / {entry.targetId.slice(0, 12)}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+      "linea": 27,
+      "fragmento": "targetType: string"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1652,
+      "fragmento": "model AdminAuditLog {"
+     }
+    ],
+    "impacto": "Ante un reclamo del primer cliente ('¿quién cambió mi plan o mi bot?'), el admin tiene que reconocer IDs truncados a 12 caracteres: no hay filtro por cliente ni nombre legible del objetivo; las acciones del lote sobre bóveda, tareas y novedades ni siquiera se auditan.",
+    "propuesta": "Decisión para Valentino (schema FROZEN): targetOrganizationId nullable + índice con migración aditiva, poblarlo en logAdminAction y filtro por cliente en listAuditLog; mientras tanto resolver y mostrar el nombre del objetivo.",
+    "esfuerzo": "M",
+    "zona": "FROZEN",
+    "nodos": [
+     "h4.adm-audit",
+     "h4.adm-audit.listado-y-filtros",
+     "modelo.AdminAuditLog"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-549"
+   },
+   {
+    "titulo": "Secciones sin loading.tsx propio muestran el skeleton del Dashboard (/admin/announcements, /admin/referrals, /admin/fg2-lab)",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/loading.tsx",
+      "linea": 19,
+      "fragmento": "{/* Fila 1 — KPIs comerciales (3 cols) */}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/loading.tsx",
+      "linea": 61,
+      "fragmento": "{/* Fila 4 — Gráficos (2x2) */}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/announcements/page.tsx",
+      "linea": 10,
+      "fragmento": "export default async function AdminAnnouncementsPage() {"
+     }
+    ],
+    "impacto": "Al navegar a Novedades o Referidos aparece el esqueleto de KPIs y gráficos del Dashboard y después salta a un formulario o lista: un estado de carga que anuncia otra pantalla.",
+    "propuesta": "loading.tsx propio en announcements, referrals y fg2-lab, o un skeleton genérico en el root y el de KPIs dentro de la página con Suspense.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-shell",
+     "h4.adm-novedades",
+     "h4.adm-referidos"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Previa alpha-1-reaudit.md:224; PLAN-651"
+   },
+   {
+    "titulo": "PageTransition vive en el layout: anima solo el primer montaje del admin, no cada navegación",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/layout.tsx",
+      "linea": 65,
+      "fragmento": "<PageTransition>{children}</PageTransition>"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/_components/PageTransition.tsx",
+      "linea": 21,
+      "fragmento": "initial=\"hidden\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/alerts/_components/alert-card.tsx",
+      "linea": 57,
+      "fragmento": "navega con <Link> + PageTransition, NO con router.push ni triggerTransition"
+     }
+    ],
+    "impacto": "El layout de App Router persiste entre navegaciones, así que el fade-up corre una vez al entrar al admin y las páginas siguientes aparecen sin transición, aunque otros componentes asumen lo contrario. Código que promete algo que no hace.",
+    "propuesta": "Moverlo a un template.tsx (se remonta por navegación) o borrarlo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-shell",
+     "h4.adm-shell.acceso-y-layout"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Layout del admin con APIs de caché heredadas (unstable_noStore redundante y unstable_cache)",
+    "prefijo": "TEC",
+    "severidad": "BAJA",
+    "tipo": "tech-vieja",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/layout.tsx",
+      "linea": 2,
+      "fragmento": "import { unstable_noStore as noStore, unstable_cache } from 'next/cache'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/layout.tsx",
+      "linea": 8,
+      "fragmento": "export const dynamic = 'force-dynamic'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/layout.tsx",
+      "linea": 39,
+      "fragmento": "noStore()"
+     }
+    ],
+    "impacto": "noStore() es redundante con force-dynamic y ambas APIs unstable_* tienen reemplazo en Next 15/16 (connection() y 'use cache' + cacheTag); cuando se retiren, el layout del admin deja de compilar. Sin fuente web citada en esta corrida (WebFetch no permitido).",
+    "propuesta": "Quitar noStore() y planificar la migración de unstable_cache a 'use cache' + cacheTag en el sprint de actualización de Next.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-shell",
+     "h4.adm-shell.acceso-y-layout"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h4.adm-shell",
+    "id": "h4.adm-shell.acceso-y-layout",
+    "nombre": "Guard SUPER_ADMIN y shell del admin",
+    "descripcion": "Layout que exige SUPER_ADMIN, arma el shell (fondo, sidebar, topbar, main con scroll) y define error y loading raíz.",
+    "archivos": [
+     "src/app/(protected)/admin/layout.tsx",
+     "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+     "src/app/(protected)/admin/error.tsx",
+     "src/app/(protected)/admin/loading.tsx",
+     "src/app/(protected)/admin/_components/AdminErrorBoundary.tsx",
+     "src/app/(protected)/admin/_components/PageTransition.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/layout.tsx:AgencyOsLayout"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz: layout.tsx:41-49 (auth + rol) -> :52-55 badges -> AdminLayoutClient.tsx:74-101 (sidebar + main). No llega a L3 por mobile parcial (hamburguesa sobre el drawer, AdminLayoutClient.tsx:43-46).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "layout.tsx:47 redirect si no es SUPER_ADMIN (las páginas hijas sin guard propio son hallazgo aparte)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Shell sin colecciones propias"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "admin/error.tsx:12 -> AdminErrorBoundary.tsx:18 -> SectionErrorBoundary sin error.message en UI"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "admin/loading.tsx:4-75"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada de usuario"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Drawer colapsable (AdminLayoutClient.tsx:52-82) pero hamburguesa z-120 sobre el BrandMark y sin Escape"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary.tsx:64 Sentry.captureException (fuera del lote, git grep)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "git grep TODO/FIXME en el lote: solo un comentario obsoleto AdminErrorBoundary.tsx:15"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna de develOP"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-shell",
+    "id": "h4.adm-shell.navegacion",
+    "nombre": "Sidebar, topbar y volver",
+    "descripcion": "Navegación por 4 áreas y 16 ítems con estado activo y badges (alertas, revisión de demos), topbar con breadcrumb/título/fecha/logout, botones Volver y breadcrumbs.",
+    "archivos": [
+     "src/app/(protected)/admin/_components/admin-sidebar.tsx",
+     "src/app/(protected)/admin/_components/admin-topbar.tsx",
+     "src/app/(protected)/admin/_components/AdminBackButton.tsx",
+     "src/app/(protected)/admin/_components/AdminBreadcrumbs.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "admin-sidebar.tsx:57-100 secciones -> :131-195 Link con activo y badge (datos de layout.tsx:11, :21) -> admin-topbar.tsx:66-77 breadcrumb/título -> :85 signOutAction (flujo D1 'Logout'). Título 'Detalle' en Novedades (admin-topbar.tsx:12-13) y mobile parcial.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Heredado del layout"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Badges se ocultan en 0 (admin-sidebar.tsx:169)"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Sin llamadas propias"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Badges cacheados server-side (layout.tsx:10-14)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "AdminBackButton acepta ?from= solo si empieza con /admin/ (AdminBackButton.tsx:39)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Drawer de 240 px (AdminLayoutClient.tsx:61-82); hamburguesa superpuesta al BrandMark"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin efectos con fallo propio"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Rol crudo 'SUPER_ADMIN' (admin-sidebar.tsx:206) es copy, no dato falso"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-shell",
+    "id": "h4.adm-shell.confirmaciones",
+    "nombre": "Confirmaciones de acciones destructivas",
+    "descripcion": "ConfirmDialog (portal), TypeToConfirmDialog (frase exacta) e InlineConfirm (anclado a la card) usados por clientes, bots, proyectos y leads.",
+    "archivos": [
+     "src/app/(protected)/admin/_components/confirm-dialog.tsx",
+     "src/app/(protected)/admin/_components/type-to-confirm-dialog.tsx",
+     "src/app/(protected)/admin/_components/inline-confirm.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L3",
+    "madurez_evidencia": "Consumidores fuera del lote (ClientsListClient, BotDetailClient, BulkActionBar, ImpersonateButton, BillingOverrideForm por git grep) -> confirm-dialog.tsx:42 portal a body -> :85-96 confirmar con isPending; type-to-confirm-dialog.tsx:41, :107 exige la frase. Faltan foco/Escape (a11y), no entre los nueve.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Componente de UI"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Sin colecciones"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "El error lo maneja el consumidor"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner y botones deshabilitados con isPending (confirm-dialog.tsx:94, type-to-confirm-dialog.tsx:111)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Componente de UI"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "w-full max-w-md con p-4 del overlay (confirm-dialog.tsx:44-50); InlineConfirm max-w-[300px] (inline-confirm.tsx:55)"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Componente de UI"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO ni datos fijos"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-dashboard",
+    "id": "h4.adm-dashboard.kpis-comerciales",
+    "nombre": "KPIs comerciales",
+    "descripcion": "Demos de la semana contra objetivo, leads con follow-up vencido hoy y tasas de respuesta y cierre.",
+    "archivos": [
+     "src/app/(protected)/admin/page.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/page.tsx:AgencyOsPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:182-221 (settings, osDemo.count, osLead.count por estado) -> :343-350 objetivo, progreso y tasas -> :576-614 StatCard/DualMetricCard. Permisos heredados y tasa de respuesta sesgada.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Sin guard propio (page.tsx:154); depende de layout.tsx:47. Datos globales por diseño"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Valores en 0 con subtítulo útil ('Bandeja comercial al día', page.tsx:592-594)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "admin/error.tsx:12"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "admin/loading.tsx:19-31 replica la fila"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 hasta xl (page.tsx:575); DualMetricCard sm:grid-cols-2 (:776)"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "Boundary con captureException (SectionErrorBoundary.tsx:64)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Todo sale de Prisma; sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-dashboard",
+    "id": "h4.adm-dashboard.kpis-operativos-y-financieros",
+    "nombre": "KPIs operativos y financieros",
+    "descripcion": "MRR, clientes activos, tickets abiertos, proyectos en curso, ingresos del mes, horas por miembro y valor hora.",
+    "archivos": [
+     "src/app/(protected)/admin/page.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/page.tsx:AgencyOsPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:222-250 (subscription.aggregate, organization.count, ticket.count, project.count) y :281-340 (proyectos con agreedAmount, pagos, horas) -> :351-427 cálculo -> :625-700 render.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Heredado del layout, sin guard propio"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "MemberHoursCard con mensaje vacío (page.tsx:857-860)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "admin/error.tsx:12"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "admin/loading.tsx:33-59"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 md:grid-cols-2 (page.tsx:624) y grid-cols-1 hasta xl (:674)"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "Boundary con captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO; datos reales"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-dashboard",
+    "id": "h4.adm-dashboard.tendencias-historicas",
+    "nombre": "Tendencias de semanas y meses",
+    "descripcion": "Charts de demos por semana con objetivo, tasa de cierre mensual, ingresos acumulados y horas por miembro.",
+    "archivos": [
+     "src/app/(protected)/admin/page.tsx",
+     "src/app/(protected)/admin/_components/dashboard-history-charts.tsx",
+     "src/app/(protected)/admin/_components/chart-card.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/page.tsx:AgencyOsPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:443-542 series -> :710-716 DashboardHistoryCharts -> dashboard-history-charts.tsx:125-318 -> chart-card.tsx:18 aria-label.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Heredado del layout"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ChartEmptyState en los 4 (dashboard-history-charts.tsx:166, :209, :257, :316)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "admin/error.tsx:12"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "admin/loading.tsx:61-73"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 xl:grid-cols-2 (dashboard-history-charts.tsx:124), ResponsiveContainer"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "Boundary con captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO; series de Prisma"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-alertas",
+    "id": "h4.adm-alertas.triage",
+    "nombre": "Triage de alertas de bots",
+    "descripcion": "Tablero en tres columnas (pendientes, vistas, resueltas) con stats, marcar como vista, resolver e ir al bot.",
+    "archivos": [
+     "src/app/(protected)/admin/alerts/page.tsx",
+     "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+     "src/app/(protected)/admin/alerts/_components/alert-card.tsx",
+     "src/app/(protected)/admin/alerts/_components/alert-types.ts",
+     "src/app/(protected)/admin/alerts/error.tsx",
+     "src/app/(protected)/admin/alerts/loading.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/alerts/page.tsx:AlertsPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "alerts/page.tsx:5 listAlerts (manageAlerts.ts:10 guard, :25 take 100) -> AlertsClient.tsx:81-85 columnas -> alert-card.tsx:75 -> AlertsClient.tsx:87-101 acknowledgeAlert (manageAlerts.ts:30) + update optimista.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin en listAlerts/acknowledgeAlert/resolveAlert (manageAlerts.ts:10, :32, :77, git grep)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Por columna (AlertsClient.tsx:247-250) y global (:283-289)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Toast 'Error' genérico (AlertsClient.tsx:94, :114); render cubierto por alerts/error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "alerts/loading.tsx y botones con loading (alert-card.tsx:78, :90)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "alertId string; schema no visible desde el lote (manageAlerts.ts fuera del lote)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Columnas grid-cols-1 (AlertsClient.tsx:202) pero filtros sin flex-wrap"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Boundary sí; rechazos de ack/resolve sin captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO; datos de BotAlert"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-alertas",
+    "id": "h4.adm-alertas.filtros-y-vista-completa",
+    "nombre": "Filtros de alertas y vista completa por columna",
+    "descripcion": "Filtro de severidad y período (presets y rango), cap de 4 por columna y overlay 'Ver todas' accesible.",
+    "archivos": [
+     "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+     "src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx",
+     "src/app/(protected)/admin/alerts/_components/alerts-filters.ts",
+     "src/app/(protected)/admin/alerts/_components/alert-column-overview.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "AlertsClient.tsx:48-49 estado -> :75-79 passesFilters -> alerts-filters.ts:50-70 -> AlertsClient.tsx:207-275 cap -> alert-column-overview.tsx:95-158 overlay con Escape/trap (:43-89). Opera sobre el recorte de 100 filas.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Filtra datos ya autorizados en el cliente"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "alert-column-overview.tsx:145-150"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Lógica pura en cliente"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin fetch"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Filtro client-side (PLAN-544 pendiente)"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Filas sin flex-wrap (AlertsClient.tsx:177, alerts-date-filter.tsx:58); popover left-full (:81)"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin efectos con fallo"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-alertas",
+    "id": "h4.adm-alertas.deteccion-automatica",
+    "nombre": "Detección automática de incidencias",
+    "descripcion": "Corrida periódica del detector que crea BotAlert; la página afirma que corre cada 15 minutos.",
+    "archivos": [
+     "src/app/(protected)/admin/alerts/page.tsx",
+     "src/app/(protected)/admin/layout.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L1",
+    "madurez_evidencia": "El detector existe (api/cron/detect-bot-issues/route.ts:13 -> detectBotIssues.ts:285) pero ningún scheduler lo llama: netlify.toml:25-32 y vercel.json:2-15 no lo incluyen; solo corre a mano (api/admin/alerts/trigger-detector/route.ts:12).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Cron con secreto, fuera del lote"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Sin UI propia"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Fuera del lote"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Proceso de fondo"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "Sin UI"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "No verificado (fuera del lote)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "La copy afirma 'cada 15 minutos' (alerts/page.tsx:17) sin disparador"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Depende de que un admin dispare el detector a mano"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-novedades",
+    "id": "h4.adm-novedades.publicar",
+    "nombre": "Publicar novedad del panel",
+    "descripcion": "Formulario con título, cuerpo, alcance (todos o una org) y caducidad; publica en el feed del dashboard del cliente.",
+    "archivos": [
+     "src/app/(protected)/admin/announcements/page.tsx",
+     "src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx",
+     "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
+     "src/app/(protected)/admin/announcements/_actions/announcements.schemas.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/announcements/page.tsx:AdminAnnouncementsPage",
+     "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts:createAnnouncementAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "announcement-publisher.tsx:53-75 safeParse -> :78 createAnnouncementAction -> announcements.actions.ts:18 guard -> :19 parse -> :41-50 create -> :52-53 revalidate -> flujo D2 'Novedades del panel'.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Action con requireSuperAdmin (:18); la página lee sin guard propio"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "serverError visible (publisher.tsx:176-180) pero puede ser error.message crudo (action-utils.ts:32)"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "Botón con loading (publisher.tsx:190); sin loading.tsx de sección (cae en el skeleton del Dashboard)"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod en server (actions.ts:19; schemas.ts:11-35 con .max)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "sm:grid-cols-2 (publisher.tsx:124), inputs w-full"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Catch devuelve fail sin captureException (actions.ts:55-57)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-novedades",
+    "id": "h4.adm-novedades.listar-y-retirar",
+    "nombre": "Novedades publicadas y retiro",
+    "descripcion": "Lista de las últimas 100 novedades con alcance, caducidad y lecturas; retiro con confirmación inline.",
+    "archivos": [
+     "src/app/(protected)/admin/announcements/page.tsx",
+     "src/app/(protected)/admin/announcements/_components/announcement-list.tsx",
+     "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts:deleteAnnouncementAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "announcements/page.tsx:12-25 -> announcement-list.tsx:58-126 -> :93 Retirar -> :75 Confirmar -> :39-44 deleteAnnouncementAction (actions.ts:66-69) -> router.refresh.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Action con guard (:66); página sin guard propio"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "announcement-list.tsx:47-54"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Resultado de la action ignorado (announcement-list.tsx:40-43)"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "'Retirando...' en el botón (:79); sin loading.tsx de sección"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Solo id no vacío (actions.ts:67)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Filas flex con flex-wrap en badges (:103)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Catch sin captureException (actions.ts:74-76)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-audit",
+    "id": "h4.adm-audit.listado-y-filtros",
+    "nombre": "Audit log: listado, filtros y cargar más",
+    "descripcion": "Registro de acciones administrativas con stats globales, filtro por tipo de acción y período, y paginación incremental server-side.",
+    "archivos": [
+     "src/app/(protected)/admin/audit-log/page.tsx",
+     "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+     "src/app/(protected)/admin/audit-log/_components/audit-filters.ts",
+     "src/app/(protected)/admin/audit-log/_components/audit-period-filter.tsx",
+     "src/app/(protected)/admin/audit-log/error.tsx",
+     "src/app/(protected)/admin/audit-log/loading.tsx"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/audit-log/page.tsx:AuditLogPage"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "audit-log/page.tsx:8-11 guard -> :13-16 listAuditLog/getAuditLogStats (audit-log-queries.ts:21, :54 requireSuperAdmin) -> AuditLogClient.tsx:106-126 -> :67-104 runQuery anti-race -> audit-filters.ts:21-54. Validación de filtros no verificable desde el lote.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Guard en la página (:8-11) y en las actions (audit-log-queries.ts:21, :54)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "AuditLogClient.tsx:179-183"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Callout 'No se pudieron cargar los registros.' (:98, :297) + audit-log/error.tsx"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "audit-log/loading.tsx, 'Cargando...' (:168-177), aria-busy (:191), botón loading (:304)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "actionType libre desde el cliente (:79); schema de listAuditLog no visible desde el lote"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap (:154); panel de fecha con clamp al viewport (audit-period-filter.tsx:35-38)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Boundary sí; catch de runQuery sin captureException (:94-98)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-audit",
+    "id": "h4.adm-audit.detalle-de-cambios",
+    "nombre": "Detalle de cambios y de borrados",
+    "descripcion": "Expande cada registro para ver diff antes/después, motivo y el detalle del hard-delete de cliente.",
+    "archivos": [
+     "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L3",
+    "madurez_evidencia": "AuditLogClient.tsx:194-199 normaliza diff/metadata sin any -> :210-214 expandir -> :276-285 DeletionDetail (:447-473) o DiffDisplay (:363-403).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Datos del listado con doble guard"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "No expandible si no hay diff ni borrado (:199, :213)"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Lectura defensiva de Json (:405-445) sin fetch"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin fetch"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Solo lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 md:grid-cols-2 (:369); pre con overflow-auto (:398)"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "Boundary con captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.boveda-alta-activo",
+    "nombre": "Alta de activo en la bóveda del cliente",
+    "descripcion": "El admin sube links, documentos o accesos (con contraseña en la descripción) a la bóveda de una organización.",
+    "archivos": [
+     "src/actions/agency-actions.ts"
+    ],
+    "entradas": [
+     "src/actions/agency-actions.ts:createClientAssetAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "VaultManager.tsx:25 (fuera del lote) -> agency-actions.ts:98-101 rol -> :103-111 clientAsset.create -> flujo D2 'Bóveda del cliente' (boveda/page.tsx:129). La credencial queda en claro.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Rol sí (:99); organizationId por parámetro sin verificar existencia ni archivado"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Alta"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "throw genérico (:100); VaultManager.tsx:30-31 solo console.error"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "VaultManager.tsx:97 Loader2 con isPending (fuera del lote, git show)"
+     },
+     "validacion_servidor": {
+      "cumple": "no",
+      "evidencia": "Sin Zod (:96)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captureException (git grep vacío)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.tarea-para-aprobacion",
+    "nombre": "Pedir aprobación de una entrega al cliente",
+    "descripcion": "Crea una tarea PENDING_APPROVAL en un proyecto del cliente, notifica in-app a los miembros y les manda email.",
+    "archivos": [
+     "src/actions/agency-actions.ts"
+    ],
+    "entradas": [
+     "src/actions/agency-actions.ts:createTaskForClientAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ProjectManager.tsx:18 (fuera del lote) -> agency-actions.ts:19-22 -> :29 assertProjectBelongsToOrg -> :37-72 transacción task + notificaciones -> :75-88 emails -> flujo D2 'Aprobar o pedir cambios en una entrega'.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Rol (:20) + pertenencia del proyecto a la org (:29)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Alta"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "ProjectManager.tsx:21-23 '// Optionally show a toast here' + console.error"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "no",
+      "evidencia": "Sin Zod ni .max (:17)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Emails con .catch(console.error) (:86); sin captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-644",
+    "clave": "Header admin mobile: hamburger sobre BrandMark",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "AdminLayoutClient.tsx:43-46 botón fixed left-4 top-4 z-[120] siempre montado; aside z-[110] (:62); BrandMark en px-5 py-5 (admin-sidebar.tsx:117-118)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Va como hallazgo UX BAJA junto con Escape/foco del drawer"
+   },
+   {
+    "id": "PLAN-597",
+    "clave": "Eyebrows técnicos FILA 1/2/3 en /admin",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git grep -n -i 'FILA [0-9]' origin/main -- admin/page.tsx admin/loading.tsx: solo comentarios JSX en loading.tsx:19,33,47,61 (no se renderizan). Control: 'KPIs comerciales' en page.tsx:571",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-645",
+    "clave": "Card de usuario del sidebar con SUPER_ADMIN crudo",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "admin-sidebar.tsx:206 {userRole}; layout.tsx:60 userRole={session.user.role} sin mapear",
+    "sigue_teniendo_sentido": "si",
+    "nota": "En higiene_ui"
+   },
+   {
+    "id": "PLAN-548",
+    "clave": "Dropdown de período duplicado (audit-period-filter copia ProjectsPeriodDropdown)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "audit-period-filter.tsx:26 'Réplica LOCAL del look del dropdown de proyectos'; projects/_components/projects-period-dropdown.tsx:73 sigue existiendo; alerts-date-filter.tsx es una tercera variante",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-596",
+    "clave": "cumulativeRevenue dentro del map",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "page.tsx:497-500 let mutado dentro de map; baseline eslint react-hooks/immutability en admin/page.tsx:500 (docs/auditoria-2026-10/_crudo/eslint.json:739-743)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-546",
+    "clave": "Lane config-audit (hover, load-more server-side, filtros con anti-race)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "AuditLogClient.tsx:208 y :325 adminHoverCls; :67-104 runQuery server-side con requestSeq (:65, :72, :86); audit-log-queries.ts:43-44 skip/take",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-642",
+    "clave": "2ª tanda: Chatbots, Demos y fix de backdrop-filter",
+    "estado_en_codigo": "hecho",
+    "evidencia": "AdminLayoutClient.tsx:88-98 backdrop-filter en capa hermana de main; schema.prisma:192 BOT_DELETED; schema.prisma:1510 convertedToOsLeadId; leados/[leadId]/_components/decision-bar.tsx existe",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-647",
+    "clave": "B13.5 topbar admin con labels en español",
+    "estado_en_codigo": "parcial",
+    "evidencia": "admin-topbar.tsx:24-37 mapa en español sin announcements, referrals, leados ni fg2-lab; 'announcements' cae en 'Detalle' por la regex de :12-13",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Hallazgo UX BAJA"
+   },
+   {
+    "id": "PLAN-549",
+    "clave": "AdminAuditLog sin targetOrganizationId",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n targetOrganizationId origin/main -- logic-core-v3/prisma/schema.prisma: vacío. Control: schema.prisma:1652 'model AdminAuditLog {'",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Hallazgo FAL BAJA, zona FROZEN"
+   },
+   {
+    "id": "PLAN-643",
+    "clave": "Eyebrows en uppercase que deforman develOP",
+    "estado_en_codigo": "parcial",
+    "evidencia": "page.tsx:551 y announcements/page.tsx:47 ya sin uppercase; queda settings/_components/settings-console.tsx:429 eyebrow='develOP' renderizado con uppercase en :652",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-544",
+    "clave": "Filtros de alertas al server",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "AlertsClient.tsx:75-85 filtra en cliente; listAlerts corta en take 100 (manageAlerts.ts:25)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El tope de 100 lo vuelve necesario antes de lo previsto"
+   },
+   {
+    "id": "PLAN-550",
+    "clave": "Valor BOT_DELETED en AuditActionType",
+    "estado_en_codigo": "hecho",
+    "evidencia": "schema.prisma:192 BOT_DELETED; migraciones 20260617184913_add_converted_lead_link_and_bot_deleted_audit y 20260619140000_add_bot_deleted_audit_action; AuditLogClient.tsx:348",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Dos migraciones mencionan el valor: revisar idempotencia (D6)"
+   },
+   {
+    "id": "PLAN-654",
+    "clave": "ConfirmDialog sin focus-trap ni Escape",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -E 'Escape|keydown|focus' en confirm-dialog.tsx, type-to-confirm-dialog.tsx, inline-confirm.tsx: solo una clase CSS focus:. Control: alert-column-overview.tsx:55",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-598",
+    "clave": "Claridad de métricas comerciales",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Solo subtítulos (page.tsx:607, :610); responseRate (:349) sigue sobre el estado actual con PERDIDO/POSTERGADO en el denominador (:39-47)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-600",
+    "clave": "Lint cumulativeRevenue",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "page.tsx:497-500; eslint.json:739-743 (react-hooks/immutability, línea 500)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-650",
+    "clave": "P0 error boundaries en /admin",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git ls-tree origin/main: admin/error.tsx, clients/[clientId]/error.tsx (cubre chatbot/*), projects/[projectId]/error.tsx; todos vía AdminErrorBoundary -> SectionErrorBoundary.tsx:64 captureException",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-651",
+    "clave": "P1 loading por sección del admin",
+    "estado_en_codigo": "parcial",
+    "evidencia": "19 loading.tsx bajo admin (alerts, audit-log, chatbot/*, chatbots, clients, leados, leads, messages/[orgId], projects, settings/*, team, tickets); faltan announcements, referrals y fg2-lab, que caen en admin/loading.tsx (skeleton del Dashboard)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-646",
+    "clave": "Migrar pages admin con headers inline a PageHeader",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -l PageHeader origin/main -- 'logic-core-v3/src/app/(protected)/admin': vacío. Control: src/components/ui/PageHeader.tsx:60",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Atado a PLAN-649"
+   },
+   {
+    "id": "PLAN-653",
+    "clave": "Bloque D estética admin (animaciones, skeletons, polish)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "PageTransition (layout.tsx:65, solo primer montaje); skeletons por sección en 19 loading.tsx; Alertas pulidas (alert-column-overview.tsx, AlertsClient.tsx:26-38)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-547",
+    "clave": "Stat cards del Audit log globales",
+    "estado_en_codigo": "hecho",
+    "evidencia": "audit-log/page.tsx:15 getAuditLogStats() sin filtros; AuditLogClient.tsx:149-151 no se recalcula al filtrar",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-595",
+    "clave": "Dashboard sin datos derivables extra ni count-up; entrada en CSS",
+    "estado_en_codigo": "hecho",
+    "evidencia": "page.tsx:719 keyframes dashReveal en CSS; StatCard recibe strings formateados (page.tsx:579, :628) sin count-up",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-601",
+    "clave": "Sin count-up de KPIs (bg de MemberHoursCard y radios a decidir)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Sin count-up (page.tsx:577-699). MemberHoursCard bg-white/5 (page.tsx:818) vs DualMetricCard bg-white/[0.02] (:765) sigue sin decidir",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-648",
+    "clave": "Unificar lenguaje visual admin y dashboard",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -c 'rounded-[28px]' en admin: 81 ocurrencias en 50 archivos (p. ej. page.tsx:548, announcements/page.tsx:46)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-649",
+    "clave": "Patrón único de header admin",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "alerts/page.tsx:9-19 y audit-log/page.tsx:20-30 sin caja y eyebrow uppercase; page.tsx:548-567 y announcements/page.tsx:46-53 en caja rounded-[28px]; además el topbar pone su h1 (admin-topbar.tsx:75)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-640",
+    "clave": "Admin cerrado: 4 áreas, 14 secciones",
+    "estado_en_codigo": "parcial",
+    "evidencia": "admin-sidebar.tsx:57-100: 4 áreas con 16 ítems. Quedan huecos: detector de alertas sin disparador (alerts/page.tsx:17), título 'Detalle' en Novedades (admin-topbar.tsx:12-13), credenciales en claro (agency-actions.ts:109)",
+    "sigue_teniendo_sentido": "no",
+    "nota": "La verificación visual humana declarada no es verificable por lectura"
+   },
+   {
+    "id": "PLAN-641",
+    "clave": "1ª tanda: lanes en paralelo y fixes de shared (StatCard, ConfirmDialog portaleado, AdminBackButton)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "confirm-dialog.tsx:42 createPortal a body con z-[210] (:44); AdminBackButton usado en 8 archivos (git grep -l)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-594",
+    "clave": "Dashboard admin: visualización y UX",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Empty states dashboard-history-charts.tsx:166, :209, :257, :316; loading alineado admin/loading.tsx:19-73; chart-card.tsx:18 aria-label; isAnimationActive={!reduced} (:161); HoverCard page.tsx:724; CSS dashReveal :719",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-599",
+    "clave": "Dashboard admin fases 1-3",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Igual que PLAN-594; subtítulos de cierre page.tsx:607-611; motion-reduce en cardHoverClass (page.tsx:36-37)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-652",
+    "clave": "Design system del portal (Alpha.10-12)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "src/components/ui tiene Badge, Button, Callout, Card, EmptyStateMuted, Input, PageHeader, Select, Skeleton, StatCard y más (git ls-tree); no quedan archivos stat-card/empty-state legacy; /admin/_design no está en el árbol ni en la historia de origin/main (git ls-tree y git log vacíos)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-624",
+    "clave": "P5.3 feed de novedades + publisher admin",
+    "estado_en_codigo": "hecho",
+    "evidencia": "announcements/page.tsx:10-65, announcements.actions.ts:14-77, src/lib/announcements/visibility.ts (git ls-tree); consumo en flujo D2 'Novedades del panel'",
+    "sigue_teniendo_sentido": "no"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: B9.1 dice orgSlug, B11.6 dice Organization.id; /admin/chatbots/[botId] usa cuid",
+    "resultado": "confirmada",
+    "evidencia": "Los links usan Organization.id: ClientsListClient.tsx:630, ClientSwitcher.tsx:67, ClientHeader.tsx:136. La página acepta ambos (clients/[clientId]/page.tsx:33 renombra clientId a orgSlug, :42 OR id/slug). La ruta deprecada chatbot/[[...tab]]/page.tsx:28-29 busca solo por slug (con id da notFound en :33). /admin/chatbots/[botId] usa cuid (alert-card.tsx:59 alert.botConfig.id). B11.6 describe el código; B9.1 quedó viejo. Re-validación por action: plan.actions revalida por organizationId (:168, :234); no se recorrió cada action (otro lote).",
+    "hallazgo_titulo": "Ruta /admin/clients/[clientId]: los links usan Organization.id, la página acepta id o slug y la ruta deprecada de chatbot solo slug"
+   },
+   {
+    "alerta": "[D3-A2] Checklist B-SEC.3c renumera los fixes (F2 IDOR projects.ts, F4 agency-actions) frente a B11.0 (F2 projects.ts, F4 payments, F5 agency-actions)",
+    "resultado": "parcial",
+    "evidencia": "La renumeración existe: bitacora-roadmap.md:6493-6494 (F4 = payments page, F5 = agency-actions) contra :8398-8400 (F4 = agency-actions). En código: F2 cerrado (lib/actions/projects.ts:24-30 ensureSuperAdminOrErrorString usado en :39, :74, :126 y requireSuperAdmin en :109, :159, :178, :214 = 7 actions); F5 agency-actions cerrado (agency-actions.ts:24-35 assertProjectBelongsToOrg); F4 payments: las actions tienen guard (milestone.actions.ts:23, :53; maintenance.actions.ts:35, :64, :94) pero el loader projects/[projectId]/payments/page.tsx no tiene auth propio (git grep vacío) y depende de projects/[projectId]/layout.tsx:105 y admin/layout (patrón D1-c2). El checklist B-SEC.3c no lista el F4 de payments."
+   },
+   {
+    "alerta": "[D3-A3] Ruta propuesta /admin/clients/[clientId]/chatbot/install (B8.5) redirigida por el catch-all de B9.1; rutas deprecadas (STATUS.md:216) mientras roadmap-pendientes.md:26 propone una vista nueva ahí",
+    "resultado": "confirmada",
+    "evidencia": "chatbot/[[...tab]]/page.tsx:6-13 TAB_MAP sin 'install' y :36-38 redirige cualquier otra tab a /admin/chatbots/<botId>?tab=overview; STATUS.md:216 deprecada; roadmap-pendientes.md:26 sigue proponiendo la vista CRM read-only en esa ruta, que ya existe en /admin/chatbots/[botId] (flujo D5 'Configurar y probar la integración CRM': IntegrationsTab.tsx:36 -> CrmIntegrationAdminCard.tsx:29).",
+    "hallazgo_titulo": "Docs proponen una vista nueva en /admin/clients/[clientId]/chatbot/*, ruta deprecada que el catch-all redirige; la vista CRM ya existe en /admin/chatbots"
+   },
+   {
+    "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+    "resultado": "parcial",
+    "evidencia": "Commit 5e337337 agregó toErrorMessage (src/lib/action-utils.ts:24-35): ZodError -> primer issue (:28-29), y settings.actions.ts:123, :171, :203, :237 lo usan; el ZodError ya no se vuelca. Pero la rama Error genérico devuelve error.message (action-utils.ts:31-32), así que errores de Prisma o el 'Unauthorized' del guard siguen llegando crudos; lo mismo en announcements.actions.ts:56, :75 de este lote.",
+    "hallazgo_titulo": "Actions de novedades devuelven error.message crudo a la UI (D3-A4 resuelto solo para ZodError)"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/app/(protected)/admin/audit-log/_components/audit-period-filter.tsx",
+    "senales": [
+     "Comentario :26 'Réplica LOCAL del look del dropdown de proyectos (NO se importa nada de projects/)'",
+     "projects/_components/projects-period-dropdown.tsx:73 implementa el mismo dropdown",
+     "PLAN-548 pendiente de unificar"
+    ],
+    "que_rompe": "AuditLogClient.tsx:13 lo importa; unificar en un componente compartido de admin y adaptar projects-filter-bar.tsx:96, :106"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/alerts/_components/alerts-filters.ts",
+    "senales": [
+     "Comentario :5 'Patrón de presets replicado de Proyectos/Leads'",
+     "audit-filters.ts:21-54 periodToRange resuelve la misma ventana hacia atrás con date-fns",
+     "Tercera variante del filtro de período (con alerts-date-filter.tsx)"
+    ],
+    "que_rompe": "AlertsClient.tsx:9-10 importa ambos; extraer un helper de período compartido"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/_components/AdminErrorBoundary.tsx",
+    "senales": [
+     "Wrapper de una sola llamada sobre SectionErrorBoundary (:16-24)",
+     "Comentario :13 'para no romper los 10 imports existentes'",
+     "Comentario :15 'TODO Sentry' obsoleto (SectionErrorBoundary.tsx:64 ya captura)"
+    ],
+    "que_rompe": "Los error.tsx de admin (admin/error.tsx:3, alerts/error.tsx:3, audit-log/error.tsx:3 y los de chatbots, clients, leados, leads, messages, projects, settings, team, tickets) cambiarían el import"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/_components/PageTransition.tsx",
+    "senales": [
+     "Único consumidor: layout.tsx:65",
+     "En un layout persistente solo anima el primer montaje, no cada navegación"
+    ],
+    "que_rompe": "layout.tsx:6 y :65; si se quiere la transición por página, moverla a template.tsx"
+   },
+   {
+    "archivo": "src/app/(protected)/admin/_components/dashboard-history-charts.tsx",
+    "senales": [
+     "formatCurrency duplicado: dashboard-history-charts.tsx:69-74 idéntico a page.tsx:120-125"
+    ],
+    "que_rompe": "Nada si se extrae a un util compartido; solo el duplicado, no el archivo"
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "El detector de alertas corre solo",
+    "entorno": "Producción Netlify (solo lectura) y base de prueba",
+    "pasos": [
+     "En el panel de Netlify, Functions > Scheduled: listar las funciones programadas",
+     "Confirmar si existe alguna que llame a /api/cron/detect-bot-issues o /api/cron/alerts (o un cron externo con X-Cron-Secret)",
+     "En Prisma Studio (solo lectura) ordenar BotAlert por createdAt desc y anotar la última fecha",
+     "Esperar 1 hora sin tocar el botón manual de detección y volver a mirar BotAlert"
+    ],
+    "esperado": "Hay una función programada y aparecen alertas nuevas sin disparo manual cuando hay bots con incidencias",
+    "senal_falla": "Solo existen generate-insights, send-weekly-reports y cleanup-old-events; ninguna alerta nueva sin disparo manual",
+    "escribe_db_o_email": false,
+    "precondiciones": "Acceso al panel de Netlify; al menos un bot de prueba con incidencia (p. ej. Vertex vencido)",
+    "hallazgos": "Detector automático de alertas de bots sin disparador programado"
+   },
+   {
+    "titulo": "Credencial de bóveda guardada en claro",
+    "entorno": "Local o preview con base de prueba",
+    "pasos": [
+     "Entrar como SUPER_ADMIN a /admin/clients/<id de org de prueba>?tab=vault",
+     "Crear un activo tipo ACCESS con url https://ejemplo.test y descripción 'prueba-auditoria-123'",
+     "Abrir Prisma Studio (solo lectura) en ClientAsset y buscar el activo por nombre",
+     "Mirar el valor de la columna description"
+    ],
+    "esperado": "description empieza con 'enc:v1:'",
+    "senal_falla": "description muestra 'prueba-auditoria-123' en texto plano",
+    "escribe_db_o_email": true,
+    "precondiciones": "Org de prueba existente; borrar el activo al terminar",
+    "hallazgos": "Credenciales de la bóveda (tipo ACCESS) se guardan en texto plano"
+   },
+   {
+    "titulo": "Título del topbar en Novedades y Referidos",
+    "entorno": "Local o preview, desktop",
+    "pasos": [
+     "Entrar como SUPER_ADMIN",
+     "Ir a /admin/announcements y leer el título grande del topbar",
+     "Ir a /admin/referrals y /admin/leados y repetir"
+    ],
+    "esperado": "'Novedades', 'Referidos', 'Revisión demos'",
+    "senal_falla": "'Detalle' en Novedades, 'Referrals' y 'Leados' en las otras",
+    "escribe_db_o_email": false,
+    "precondiciones": "Ninguna",
+    "hallazgos": "Topbar: /admin/announcements se titula 'Detalle'"
+   },
+   {
+    "titulo": "Menú mobile del admin",
+    "entorno": "Local o preview, viewport 390x844",
+    "pasos": [
+     "Abrir /admin en 390x844",
+     "Tocar el botón de menú arriba a la izquierda",
+     "Mirar si el botón queda encima del logo develOP del sidebar",
+     "Con teclado, presionar Escape y Tab"
+    ],
+    "esperado": "El botón se oculta al abrir, el logo se ve entero, Escape cierra y el foco queda dentro del menú",
+    "senal_falla": "El botón tapa el logo; Escape no cierra; Tab recorre el contenido de atrás",
+    "escribe_db_o_email": false,
+    "precondiciones": "Ninguna",
+    "hallazgos": "Menú mobile del admin: la hamburguesa queda encima del drawer"
+   },
+   {
+    "titulo": "Filtros de alertas en mobile",
+    "entorno": "Local o preview, viewport 390x844",
+    "pasos": [
+     "Abrir /admin/alerts en 390x844",
+     "Mirar si las filas de Severidad y Período desbordan a la derecha",
+     "Tocar 'Personalizado' y ver dónde abre el panel de rango"
+    ],
+    "esperado": "Los chips bajan de línea y el panel de rango queda dentro de la pantalla",
+    "senal_falla": "Scroll horizontal en el main y panel de rango cortado o fuera de pantalla",
+    "escribe_db_o_email": false,
+    "precondiciones": "Ninguna",
+    "hallazgos": "Filtros de /admin/alerts no envuelven en mobile"
+   },
+   {
+    "titulo": "Email de 'Acción requerida' al pedir aprobación",
+    "entorno": "Preview con Brevo de prueba y org de prueba con un miembro con email propio",
+    "pasos": [
+     "En /admin/clients/<id>?tab=projects crear una tarea para aprobación desde ProjectManager",
+     "Revisar el panel de Brevo (logs transaccionales) y la casilla del miembro",
+     "Revisar el link del email"
+    ],
+    "esperado": "El email llega y el link apunta al dominio público /dashboard/project",
+    "senal_falla": "No hay envío registrado, o el link apunta a localhost",
+    "escribe_db_o_email": true,
+    "precondiciones": "NEXT_PUBLIC_APP_URL configurada en el preview; borrar la tarea al terminar",
+    "hallazgos": "Emails 'Acción requerida' de una tarea para aprobación: sin await"
+   },
+   {
+    "titulo": "Follow-ups de hoy después de las 21:00 ART",
+    "entorno": "Preview con base de prueba",
+    "pasos": [
+     "Tener un OsLead de prueba no cerrado con nextFollowUpAt mañana 10:00 ART",
+     "Entre las 21:00 y las 23:59 ART abrir /admin",
+     "Leer 'Leads pendientes de follow-up hoy'"
+    ],
+    "esperado": "El lead de mañana no cuenta",
+    "senal_falla": "El contador lo incluye (corte en UTC)",
+    "escribe_db_o_email": true,
+    "precondiciones": "Crear o editar un lead de prueba; revertir al terminar",
+    "hallazgos": "Fechas en UTC en vez de hora Argentina"
+   },
+   {
+    "titulo": "Badge de alertas contra 'Totales pendientes'",
+    "entorno": "Base con más de 100 BotAlert (solo lectura si ya existen)",
+    "pasos": [
+     "Contar en Prisma Studio las BotAlert con status PENDING",
+     "Abrir /admin/alerts con período 'Todas'",
+     "Comparar el badge del sidebar, la tarjeta 'Totales pendientes' y la cantidad en la columna Pendientes"
+    ],
+    "esperado": "Los tres números coinciden",
+    "senal_falla": "La página muestra menos que el badge y faltan pendientes viejas",
+    "escribe_db_o_email": false,
+    "precondiciones": "Más de 100 alertas en total",
+    "hallazgos": "Alertas: la vista carga solo las 100 más recientes"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "Ningún scheduler del repo (Netlify ni Vercel) dispara /api/cron/detect-bot-issues",
+    "comando": "git grep -n detect-bot-issues origin/main -- logic-core-v3/netlify.toml logic-core-v3/vercel.json logic-core-v3/netlify/functions  (salida vacía)",
+    "control_positivo": "git grep -n cleanup-old-events origin/main -- logic-core-v3/netlify.toml -> netlify.toml:31"
+   },
+   {
+    "afirmacion": "encryptCredential no se llama en ningún camino de escritura (solo existe su definición)",
+    "comando": "git grep -n encryptCredential origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma ':(exclude)*__tests__*'  -> solo credential-cipher.ts:73 (definición) y :111 (comentario)",
+    "control_positivo": "git grep -n decryptCredential origin/main -- logic-core-v3/src/lib/crypto/resolve-credential.ts -> :1 y :19"
+   },
+   {
+    "afirmacion": "admin/page.tsx y announcements/page.tsx no llaman auth() ni requireSuperAdmin",
+    "comando": "git grep -n -E 'auth\\(\\)|requireSuperAdmin' origin/main -- 'logic-core-v3/src/app/(protected)/admin/page.tsx' 'logic-core-v3/src/app/(protected)/admin/announcements/page.tsx'  (salida vacía)",
+    "control_positivo": "git grep -n 'auth()' origin/main -- 'logic-core-v3/src/app/(protected)/admin/audit-log/page.tsx' -> :8"
+   },
+   {
+    "afirmacion": "Los tres diálogos de confirmación no manejan Escape ni foco",
+    "comando": "git grep -n -E 'Escape|keydown|focus' origin/main -- confirm-dialog.tsx type-to-confirm-dialog.tsx inline-confirm.tsx (en admin/_components) -> solo la clase CSS focus: en type-to-confirm-dialog.tsx:92",
+    "control_positivo": "git grep -n Escape origin/main -- 'logic-core-v3/src/app/(protected)/admin/alerts/_components/alert-column-overview.tsx' -> :55"
+   },
+   {
+    "afirmacion": "Las actions y el cliente de alertas del lote no reportan a Sentry",
+    "comando": "git grep -n -E 'Sentry|captureException' origin/main -- logic-core-v3/src/actions/agency-actions.ts '.../admin/announcements/_actions/announcements.actions.ts' '.../admin/alerts/AlertsClient.tsx'  (salida vacía)",
+    "control_positivo": "git grep -n captureException origin/main -- logic-core-v3/src/components/ui/SectionErrorBoundary.tsx -> :61, :64"
+   },
+   {
+    "afirmacion": "agency-actions y announcements.actions no escriben AdminAuditLog",
+    "comando": "git grep -n -E \"logAdminAction|audit-log'|adminAuditLog\" origin/main -- logic-core-v3/src/actions/agency-actions.ts '.../admin/announcements/_actions/announcements.actions.ts'  (salida vacía)",
+    "control_positivo": "git grep -n \"from '@/lib/audit-log'\" origin/main -- logic-core-v3/src/modules/chatbot/server/admin/archiveClient.ts -> :6"
+   },
+   {
+    "afirmacion": "AdminAuditLog no tiene targetOrganizationId",
+    "comando": "git grep -n targetOrganizationId origin/main -- logic-core-v3/prisma/schema.prisma  (salida vacía)",
+    "control_positivo": "git grep -n 'model AdminAuditLog' origin/main -- logic-core-v3/prisma/schema.prisma -> :1652"
+   },
+   {
+    "afirmacion": "Ninguna página admin usa PageHeader",
+    "comando": "git grep -l PageHeader origin/main -- 'logic-core-v3/src/app/(protected)/admin'  (salida vacía)",
+    "control_positivo": "git grep -n '{eyebrow}' origin/main -- logic-core-v3/src/components/ui/PageHeader.tsx -> :60"
+   },
+   {
+    "afirmacion": "No hay router.push en el lote (solo un comentario)",
+    "comando": "git grep -n router.push origin/main -- admin/page.tsx admin/layout.tsx admin/_components admin/alerts admin/announcements admin/audit-log src/actions/agency-actions.ts -> solo alert-card.tsx:57 (comentario)",
+    "control_positivo": "git grep -n router.push origin/main -- '.../admin/clients/[[]clientId]/_components/ClientSwitcher.tsx' -> :67"
+   },
+   {
+    "afirmacion": "announcements, referrals y fg2-lab no tienen loading.tsx propio",
+    "comando": "git ls-tree -r --name-only origin/main -- 'logic-core-v3/src/app/(protected)/admin' | grep -E '(announcements|referrals|fg2-lab)/loading'  (salida vacía)",
+    "control_positivo": "El mismo listado muestra alerts/loading.tsx y audit-log/loading.tsx"
+   },
+   {
+    "afirmacion": "Callout del design system no tiene role ni aria-live",
+    "comando": "git grep -n -E 'role=|aria-live' origin/main -- logic-core-v3/src/components/ui/Callout.tsx  (salida vacía)",
+    "control_positivo": "git grep -n 'role=' origin/main -- 'logic-core-v3/src/app/(protected)/admin/_components/confirm-dialog.tsx' -> :48"
+   },
+   {
+    "afirmacion": "No se renderizan eyebrows 'FILA n' en /admin",
+    "comando": "git grep -n -i 'FILA [0-9]' origin/main -- 'logic-core-v3/src/app/(protected)/admin/page.tsx' 'logic-core-v3/src/app/(protected)/admin/loading.tsx' -> solo comentarios JSX en loading.tsx:19, :33, :47, :61",
+    "control_positivo": "git grep -n 'KPIs comerciales' origin/main -- 'logic-core-v3/src/app/(protected)/admin/page.tsx' -> :555, :571"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Credenciales de bóveda escritas sin encryptCredential (cifrado solo en lectura)",
+    "como_buscarlo": "git grep -n -E 'clientAsset\\.(create|update|upsert)' origin/main -- logic-core-v3/src logic-core-v3/prisma y revisar si las filas type ACCESS pasan por encryptCredential",
+    "donde_aparecio": "src/actions/agency-actions.ts:103-110; también onboarding-actions.ts:111, :123 y prisma/seed.ts:672 (no recorridos)"
+   },
+   {
+    "patron": "Endpoints /api/cron/* sin scheduler que los dispare",
+    "como_buscarlo": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/api/cron y cruzar contra [functions.*] de netlify.toml y netlify/functions/*.ts (vercel.json no corre en Netlify)",
+    "donde_aparecio": "api/cron/detect-bot-issues/route.ts:13 y api/cron/alerts/route.ts (runPeriodicAgencyAlerts); la copy de alerts/page.tsx:17 promete 15 minutos"
+   },
+   {
+    "patron": "Heurística de ID por largo que pisa palabras reales",
+    "como_buscarlo": "git grep -n -E '\\{10,\\}' origin/main -- logic-core-v3/src",
+    "donde_aparecio": "admin-topbar.tsx:12-13 ('announcements' se vuelve 'Detalle')"
+   },
+   {
+    "patron": "UI que espera una server action sin mirar result.success",
+    "como_buscarlo": "git grep -n -E 'await [a-zA-Z]+Action\\(' origin/main -- 'logic-core-v3/src/app/(protected)/admin' logic-core-v3/src/components/admin y verificar que el resultado se use",
+    "donde_aparecio": "announcement-list.tsx:40-43"
+   },
+   {
+    "patron": "Listados admin con take fijo y métricas calculadas en el cliente sobre el recorte",
+    "como_buscarlo": "git grep -n -E 'take: (50|100|200)' origin/main -- logic-core-v3/src/modules/chatbot/server/admin logic-core-v3/src/lib y ver si el consumidor calcula totales sobre esas filas",
+    "donde_aparecio": "manageAlerts.ts:25 + AlertsClient.tsx:55-73"
+   },
+   {
+    "patron": "Límites de día/semana/mes con setHours del servidor (UTC) o T23:59:59Z en vez de helpers AR",
+    "como_buscarlo": "git grep -n -E 'setHours\\((0|23)|T23:59:59' origin/main -- logic-core-v3/src ':(exclude)logic-core-v3/src/lib/dates-ar.ts' ':(exclude)logic-core-v3/src/lib/tz-ar.ts'",
+    "donde_aparecio": "admin/page.tsx:60, :66; announcements.actions.ts:36"
+   },
+   {
+    "patron": "Callers de actions admin que solo hacen console.error (el admin no ve el fallo)",
+    "como_buscarlo": "git grep -n -A1 'catch (error)' origin/main -- logic-core-v3/src/components/admin 'logic-core-v3/src/app/(protected)/admin' | grep console.error",
+    "donde_aparecio": "VaultManager.tsx:30-31, ProjectManager.tsx:21-23"
+   },
+   {
+    "patron": "Diffs de auditoría que podrían guardar secretos en claro",
+    "como_buscarlo": "git grep -n 'computeDiff(' origin/main -- logic-core-v3/src y revisar si el modelo diffeado tiene campos secret/apiKey/token/password",
+    "donde_aparecio": "Hipótesis desde AuditLogClient.tsx:363-403 (muestra before/after crudos en el panel)"
+   },
+   {
+    "patron": "Modales con role=dialog sin Escape ni manejo de foco",
+    "como_buscarlo": "git grep -l 'role=\"dialog\"' origin/main -- logic-core-v3/src y para cada archivo git grep -L Escape",
+    "donde_aparecio": "confirm-dialog.tsx:48, type-to-confirm-dialog.tsx:50, inline-confirm.tsx:51, AdminLayoutClient.tsx (drawer)"
+   },
+   {
+    "patron": "Server actions admin sin logAdminAction (escrituras sin rastro)",
+    "como_buscarlo": "Listar archivos 'use server' bajo src/actions y src/app/(protected)/admin/**/_actions y git grep -L logAdminAction sobre ellos",
+    "donde_aparecio": "agency-actions.ts (tarea y bóveda), announcements.actions.ts (publicar y retirar)"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/sprints/alpha-1-reaudit.md",
+    "id_previo": "alpha-1-reaudit:224 (P1) Loading states solo en el root de /admin/*",
+    "estado": "parcial",
+    "evidencia": "Hoy hay 19 loading.tsx bajo admin (git ls-tree: alerts, audit-log, chatbot/activity, chatbot/health, chatbots, chatbots/[botId], clients, clients/[clientId], leados, leados/[leadId], leads, messages/[orgId], projects, projects/[projectId], settings, settings/alerts, settings/reports, team, tickets). Siguen cayendo en admin/loading.tsx (skeleton del Dashboard) announcements, referrals y fg2-lab."
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/app/(protected)/admin/_components/admin-sidebar.tsx",
+    "linea": 206,
+    "tipo": "copy",
+    "detalle": "La card de usuario muestra el rol crudo 'SUPER_ADMIN' (PLAN-645)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/admin-sidebar.tsx",
+    "linea": 89,
+    "tipo": "copy",
+    "detalle": "Ítems 'Health score' y 'Audit log' (:97) en inglés en una nav en español"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+    "linea": 47,
+    "tipo": "tilde",
+    "detalle": "aria-label 'Abrir menu' sin tilde; también 'Cerrar menu' en :55 y :70"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+    "linea": 104,
+    "tipo": "contraste",
+    "detalle": "Footer 'develOP Admin' en text-zinc-700 sobre #080a0c"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/AdminLayoutClient.tsx",
+    "linea": 34,
+    "tipo": "inline",
+    "detalle": "Gradientes de fondo en style inline"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/admin-topbar.tsx",
+    "linea": 91,
+    "tipo": "strokeWidth",
+    "detalle": "LogOut sin strokeWidth={1.5}"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/AdminBackButton.tsx",
+    "linea": 15,
+    "tipo": "copy",
+    "detalle": "'Equipo' con mayúscula y el resto en minúscula: 'Volver a Equipo' contra 'Volver a leads'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/AdminErrorBoundary.tsx",
+    "linea": 15,
+    "tipo": "otro",
+    "detalle": "Comentario 'TODO Sentry' obsoleto: SectionErrorBoundary ya captura en :64"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/error.tsx",
+    "linea": 12,
+    "tipo": "otro",
+    "detalle": "context 'el admin' genera el tag de Sentry 'admin.el admin' (audit-log/error.tsx:12 'audit log' con espacio)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/page.tsx",
+    "linea": 17,
+    "tipo": "tilde",
+    "detalle": "'automaticamente' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+    "linea": 249,
+    "tipo": "copy",
+    "detalle": "Emoji en el estado vacío 'Todo OK 🎉'"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+    "linea": 190,
+    "tipo": "copy",
+    "detalle": "Severidad 'Warning' en inglés (también alert-card.tsx:107)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+    "linea": 178,
+    "tipo": "contraste",
+    "detalle": "Rótulo 'Severidad' text-[10px] text-zinc-600"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/AlertsClient.tsx",
+    "linea": 248,
+    "tipo": "contraste",
+    "detalle": "Estado vacío por columna en text-zinc-600 italic"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/_components/alert-card.tsx",
+    "linea": 41,
+    "tipo": "contraste",
+    "detalle": "Fecha de la alerta text-[10px] text-zinc-600"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx",
+    "linea": 59,
+    "tipo": "contraste",
+    "detalle": "Rótulo 'Período' text-[10px] text-zinc-600"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/_components/alerts-date-filter.tsx",
+    "linea": 94,
+    "tipo": "inline",
+    "detalle": "style colorScheme dark inline (también :105); existe la clase [color-scheme:dark]"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/alerts/loading.tsx",
+    "linea": 14,
+    "tipo": "otro",
+    "detalle": "Skeleton de tabs y lista vertical; la vista real es kanban de 3 columnas con 4 stat cards"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+    "linea": 150,
+    "tipo": "tilde",
+    "detalle": "'Ultimos 7 dias' sin tildes"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+    "linea": 151,
+    "tipo": "tilde",
+    "detalle": "'Tipos de accion' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+    "linea": 182,
+    "tipo": "tilde",
+    "detalle": "'aca' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+    "linea": 307,
+    "tipo": "tilde",
+    "detalle": "'Cargar mas' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+    "linea": 371,
+    "tipo": "tilde",
+    "detalle": "'Despues' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+    "linea": 452,
+    "tipo": "tilde",
+    "detalle": "'Se elimino' sin tilde"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+    "linea": 358,
+    "tipo": "copy",
+    "detalle": "Badge y opciones del filtro (:141) muestran el enum crudo (CLIENT_CREATED, BOT_DELETED)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/audit-log/loading.tsx",
+    "linea": 15,
+    "tipo": "otro",
+    "detalle": "Skeleton con 4 stats y tabla; la página real tiene 3 stats y lista de cards"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/loading.tsx",
+    "linea": 13,
+    "tipo": "otro",
+    "detalle": "Skeleton w-[480px] (y w-96 en :12) desborda a 390 px mientras carga"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/page.tsx",
+    "linea": 569,
+    "tipo": "inline",
+    "detalle": "style animationDelay inline en 4 secciones (:569, :618, :668, :704)"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/page.tsx",
+    "linea": 719,
+    "tipo": "inline",
+    "detalle": "Bloque <style> inline con keyframes dashReveal"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/announcements/_components/announcement-list.tsx",
+    "linea": 122,
+    "tipo": "contraste",
+    "detalle": "'Publicada ...' en text-zinc-600"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx",
+    "linea": 150,
+    "tipo": "contraste",
+    "detalle": "Ayuda 'Sin fecha = no caduca.' en text-zinc-600"
+   },
+   {
+    "ruta": "src/app/(protected)/admin/_components/type-to-confirm-dialog.tsx",
+    "linea": 112,
+    "tipo": "copy",
+    "detalle": "Texto de pending fijo 'Eliminando...' aunque confirmLabel sea otra acción"
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "Credenciales de la bóveda (tipo ACCESS) se guardan en texto plano: ningún camino de escritura usa encryptCredential",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "El defecto se confirma por lectura en origin/main@57c421bc. src/actions/agency-actions.ts:103-111 (createClientAssetAction) persiste data.description sin cifrar para cualquier AssetType, ACCESS incluido. El llamador vivo es VaultManager.tsx:25, cuyo textarea en :85 pide 'Contraseña o instrucciones...'. VaultManager está montado en VaultTab.tsx:26, que se renderiza desde admin/clients/[clientId]/page.tsx:90. git grep de encryptCredential en origin/main da solo credential-cipher.ts:73 y su test, sin ningún uso de producción ni script de backfill. resolve-credential.ts:24 devuelve tal cual el texto sin prefijo enc:v1:, así que el fallo no se nota. Además la bóveda del cliente muestra 'AES-256' (boveda/page.tsx:85 y :148) sobre texto plano. Bajo la severidad a MEDIA porque explotarlo exige acceso de lectura a la base (dump, backup o consola de Neon) y no hay ningún camino HTTP ni entre tenants. Es un control de cifrado en reposo que falta, no un secreto expuesto. La baseline de 2026-07 (S6-01 y S6-05, tokens de GBP, Tiendanube y Cal.com también en claro) lo calificó MEDIO por la misma razón, y conviene mantener esa consistencia. Hay que corregir el impacto: el cliente nunca escribe estas credenciales. El único escritor vivo es SUPER_ADMIN, y el cliente solo pide altas por mensaje (VaultRequestModal.tsx:6 y :44 → sendClientMessageAction). Es un hallazgo preexistente (S6-01 de docs/baselines/2026-07-auditoria-seguridad.md:2668) que sigue sin corregir en la base auditada. Decidir si conviene custodiar claves de terceros o pasar a acceso delegado queda para Valentino/Franco.",
+    "evidencia_contra": [
+     "Exige acceso de lectura directo a Neon (dump, backup o consola): no existe camino HTTP, ni cross-tenant, ni desde el widget. boveda/page.tsx:66-69 filtra por organizationId usando resolveOrgId.",
+     "El único camino de escritura vivo es SUPER_ADMIN (agency-actions.ts:98-101). src/actions/onboarding-actions.ts:111/123 es código muerto: su único importador, src/components/onboarding/OnboardingWizard.tsx:6, no tiene importadores, porque /admin/clients/new usa el OnboardingWizard de @/modules/chatbot.",
+     "El cliente no carga credenciales: VaultRequestModal manda un mensaje con sendClientMessageAction, no crea ClientAsset.",
+     "La baseline docs/baselines/2026-07-auditoria-seguridad.md:2668-2708 (S6-01) ya lo había confirmado y calificado MEDIO. S6-05 calificó MEDIO los tokens de integración en claro: con acceso a la base, todo lo demás también queda expuesto.",
+     "Lo único que siembra ClientAsset además es prisma/seed.ts:672, con datos de prueba."
+    ]
+   },
+   {
+    "titulo": "Detector automático de alertas de bots sin disparador programado (la página promete 'cada 15 minutos')",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "El hallazgo se confirma por lectura en origin/main@57c421bc. netlify.toml:25-32 programa solo generate-insights-cron, send-weekly-reports-cron y cleanup-old-events-cron. El control positivo da bien: git grep 'generate-insights' encuentra netlify.toml:25 y netlify/functions/generate-insights-cron.ts. netlify/functions/ tiene solo esas 3 funciones. vercel.json:1-16 programa os-follow-up, regenerate-briefs y send-executive-reports, sin detect-bot-issues. Los únicos .github/workflows son ci.yml y db-backup.yml. git grep de 'detect-bot-issues|runAlertDetector' fuera de docs da solo la ruta cron (route.ts:13), el disparador manual (trigger-detector/route.ts:12, que solo acepta SUPER_ADMIN y se llama desde AlertSettingsClient.tsx:89) y tests. detectBotIssues.ts:257 es el ÚNICO lugar que escribe BotAlert, así que el contador del sidebar (admin/layout.tsx:10-14) y /admin/alerts quedan vacíos salvo un disparo manual. La bitácora del proyecto lo confirma: docs/bitacora-roadmap.md:13906-13909 lista detect-bot-issues entre los crons de runtime sin función real, pendientes 'para replicar este mismo patrón en un sprint posterior'. Ninguna entrada posterior lo cablea. /api/cron/alerts (runPeriodicAgencyAlerts) tampoco tiene disparador en el repo. La rúbrica pone 'un cron sin disparador' como ejemplo explícito de ALTA, por eso la mantengo. La confianza es PROBABLE y no VERIFICADO porque un scheduler externo fuera del repo (cron-job.org o EasyCron), que la documentación permite expresamente, no se puede descartar leyendo, aunque la bitácora indica que no existe.",
+    "evidencia_contra": [
+     "docs/operations/cron-jobs.md:9-27 y docs/operations/alerts-types.md:39-46 indican configurarlo en Netlify o con un 'cron externo (cron-job.org, EasyCron)': puede haber un disparador fuera del repo que la lectura no ve.",
+     "Workaround manual: un SUPER_ADMIN puede correr el detector desde /admin/settings/alerts (AlertSettingsClient.tsx:89 → trigger-detector/route.ts:12).",
+     "Mitigación parcial del caso más crítico, el error de LLM: handleChatRequest.ts:1057 y :1389 llaman a Sentry.captureException en los errores de stream y en los no manejados, así que si el DSN y las reglas de alerta de Sentry están configurados, una credencial de Vertex vencida aparecería por Sentry. Otros tipos de alerta, como CLIENT_NO_ACTIVITY, no se cubren.",
+     "Es monitoreo interno de develOP, no un flujo que el cliente use: no bloquea ninguna tarea del cliente en su portal."
+    ]
+   }
+  ]
+ }
+}

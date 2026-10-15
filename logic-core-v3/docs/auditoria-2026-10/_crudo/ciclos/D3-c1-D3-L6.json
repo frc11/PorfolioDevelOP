@@ -1,0 +1,2592 @@
+{
+ "dominio": "D3",
+ "ciclo": "D3-c1",
+ "lote": "D3-L6",
+ "run": "wf_5edd9c03-0ab",
+ "fecha": "2026-10-15T17:27:46.358Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/lib/actions/clients.ts",
+    "lineas_total": 227,
+    "leido_completo": true,
+    "rangos": "1-227"
+   },
+   {
+    "ruta": "src/lib/actions/contact.ts",
+    "lineas_total": 133,
+    "leido_completo": true,
+    "rangos": "1-133"
+   },
+   {
+    "ruta": "src/lib/actions/leads-constants.ts",
+    "lineas_total": 9,
+    "leido_completo": true,
+    "rangos": "1-9"
+   },
+   {
+    "ruta": "src/lib/actions/leads.ts",
+    "lineas_total": 68,
+    "leido_completo": true,
+    "rangos": "1-68"
+   },
+   {
+    "ruta": "src/lib/actions/projects.ts",
+    "lineas_total": 224,
+    "leido_completo": true,
+    "rangos": "1-224"
+   },
+   {
+    "ruta": "src/lib/actions/schemas.ts",
+    "lineas_total": 112,
+    "leido_completo": true,
+    "rangos": "1-112"
+   },
+   {
+    "ruta": "src/lib/actions/services.ts",
+    "lineas_total": 91,
+    "leido_completo": true,
+    "rangos": "1-91"
+   },
+   {
+    "ruta": "src/lib/actions/settings.ts",
+    "lineas_total": 364,
+    "leido_completo": true,
+    "rangos": "1-364"
+   },
+   {
+    "ruta": "src/lib/modules/demand.ts",
+    "lineas_total": 153,
+    "leido_completo": true,
+    "rangos": "1-153"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+    "lineas_total": 88,
+    "leido_completo": true,
+    "rangos": "1-88"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+    "lineas_total": 189,
+    "leido_completo": true,
+    "rangos": "1-189"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+    "lineas_total": 116,
+    "leido_completo": true,
+    "rangos": "1-116"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
+    "lineas_total": 155,
+    "leido_completo": true,
+    "rangos": "1-155"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/updateClientInternalNotes.ts",
+    "lineas_total": 57,
+    "leido_completo": true,
+    "rangos": "1-57"
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/lib/actions/clients.ts",
+    "simbolo": "createClientAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "clients.ts:81 await requireSuperAdmin() (src/lib/auth-guards.ts:3-11, lanza Error('Unauthorized'))",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "crea una org nueva (clients.ts:124-126); no recibe organizationId",
+    "validacion": "zod",
+    "evidencia_validacion": "CreateClientSchema clients.ts:25-40, safeParse :83-93; email a minúsculas :100",
+    "rate_limit": "no",
+    "url": "sin consumidor (módulo sin importadores)",
+    "notas": "Action MUERTA: git grep no encuentra importadores. Duplica el alta viva (createClientOnly / wizard)."
+   },
+   {
+    "archivo": "src/lib/actions/clients.ts",
+    "simbolo": "updateClientAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "clients.ts:155 await requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "clientId del FormData clients.ts:157 → organization.findUnique :173-174 (cross-tenant por diseño admin)",
+    "validacion": "manual",
+    "evidencia_validacion": "casts `as string | null` y chequeos !clientId / !companyName clients.ts:157-171; siteUrl/logoUrl/analyticsPropertyId sin validar",
+    "rate_limit": "no",
+    "url": "sin consumidor (módulo sin importadores)",
+    "notas": "MUERTA. members ADMIN take:1 sin orderBy (clients.ts:177-181)."
+   },
+   {
+    "archivo": "src/lib/actions/contact.ts",
+    "simbolo": "contactFormAction",
+    "tipo": "server-action",
+    "auth": "no",
+    "evidencia_auth": "público por diseño (form de la landing); sin auth() en contact.ts:16-98",
+    "rol": "anónimo",
+    "org_de": "no-aplica",
+    "evidencia_org": "ContactSubmission es global, sin organizationId (contact.ts:62-64; schema model ContactSubmission)",
+    "validacion": "parcial",
+    "evidencia_validacion": "ContactFormSchema (schemas.ts:56-65) sin .max() en name/email/phone/company/service/message",
+    "rate_limit": "si",
+    "url": "/contact (vía submitContactForm)",
+    "notas": "Rate limit 5/15 min por hash de IP (contact.ts:23-27, presets.ts:50) tomado de X-Forwarded-For (patrón D1-c1); se ejecuta FUERA del try (contact.ts:61) → error de DB no se maneja."
+   },
+   {
+    "archivo": "src/lib/actions/contact.ts",
+    "simbolo": "submitContactForm",
+    "tipo": "server-action",
+    "auth": "no",
+    "evidencia_auth": "wrapper público contact.ts:100-105",
+    "rol": "anónimo",
+    "org_de": "no-aplica",
+    "evidencia_org": "delegado a contactFormAction",
+    "validacion": "parcial",
+    "evidencia_validacion": "delegada a contactFormAction (schemas.ts:56-65)",
+    "rate_limit": "si",
+    "url": "/contact (src/app/contact/page.tsx:6, :66 useActionState)",
+    "notas": "Único punto de entrada vivo del módulo."
+   },
+   {
+    "archivo": "src/lib/actions/contact.ts",
+    "simbolo": "markLeadAsRead",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "contact.ts:111-115 requireSuperAdmin() con try/catch → 'No autorizado.'",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "ContactSubmission global; update por id contact.ts:122-125",
+    "validacion": "manual",
+    "evidencia_validacion": "solo !id (contact.ts:117)",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA (sin importadores; B11 F6 ya lo había notado)."
+   },
+   {
+    "archivo": "src/lib/actions/leads.ts",
+    "simbolo": "updateLeadStatusAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "ensureAdmin() reimplementado leads.ts:14-17, usado en :23",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "ContactSubmission global; update por id leads.ts:31-37",
+    "validacion": "manual",
+    "evidencia_validacion": "isLeadStatus contra LEAD_STATUS_VALUES (leads.ts:10-12, :27); sin try/catch en el update :31",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA. La versión viva está en admin/leads/_actions (ZONA-FRANCO), que duplica LEAD_STATUS_VALUES en lead.schemas.ts:4."
+   },
+   {
+    "archivo": "src/lib/actions/leads.ts",
+    "simbolo": "updateLeadNotesAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "leads.ts:49 ensureAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "ContactSubmission global; update por id leads.ts:59-64",
+    "validacion": "parcial",
+    "evidencia_validacion": "solo !id (leads.ts:53); leadNotes sin tipo en runtime ni .max() (:57)",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA."
+   },
+   {
+    "archivo": "src/lib/actions/projects.ts",
+    "simbolo": "createProjectAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "projects.ts:39-40 ensureSuperAdminOrErrorString() → requireSuperAdmin (:24-31)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del FormData projects.ts:44, chequeo de existencia :52-53",
+    "validacion": "manual",
+    "evidencia_validacion": "projects.ts:42-50 (casts y chequeos de vacío; status con isProjectStatus)",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA; la viva es admin/projects/_actions/project.actions.ts:593 createProject."
+   },
+   {
+    "archivo": "src/lib/actions/projects.ts",
+    "simbolo": "updateProjectAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "projects.ts:74-75",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del FormData projects.ts:80, sin chequeo de existencia; permite mover el proyecto de org (:93-96)",
+    "validacion": "manual",
+    "evidencia_validacion": "projects.ts:77-87",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA."
+   },
+   {
+    "archivo": "src/lib/actions/projects.ts",
+    "simbolo": "deleteProjectAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "projects.ts:109 await requireSuperAdmin() (lanza, sin try)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "borra por projectId del FormData projects.ts:111-114 (cross-tenant por diseño)",
+    "validacion": "manual",
+    "evidencia_validacion": "solo !projectId (projects.ts:112)",
+    "rate_limit": "no",
+    "url": "/admin/projects/[projectId] (delete-project-button.tsx:6, :75)",
+    "notas": "VIVA. Sin auditoría y sin try/catch; coexiste con deleteProject de project.actions.ts:782 (el tablero usa esa)."
+   },
+   {
+    "archivo": "src/lib/actions/projects.ts",
+    "simbolo": "createTaskAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "projects.ts:126-127",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "projectId del FormData projects.ts:129, existencia :141-142",
+    "validacion": "manual",
+    "evidencia_validacion": "projects.ts:129-139; dueDate con new Date sin validar (:139)",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA."
+   },
+   {
+    "archivo": "src/lib/actions/projects.ts",
+    "simbolo": "updateTaskStatusAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "projects.ts:159 requireSuperAdmin() (lanza)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "taskId del FormData projects.ts:161, update :167-170; projectId solo para revalidar :172",
+    "validacion": "manual",
+    "evidencia_validacion": "projects.ts:165 (!taskId || !isTaskStatus)",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA."
+   },
+   {
+    "archivo": "src/lib/actions/projects.ts",
+    "simbolo": "sendTaskForApprovalAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "projects.ts:178 requireSuperAdmin() (lanza)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "task por id (projects.ts:184-187); la org del Message sale del registro task.project.organizationId (:189), no del form",
+    "validacion": "manual",
+    "evidencia_validacion": "solo !taskId (projects.ts:182); retornos void silenciosos :182, :188",
+    "rate_limit": "no",
+    "url": "/admin/projects/[projectId] (task-list.tsx:22, :628)",
+    "notas": "VIVA. No crea Notification ni email (contraste agency-actions.ts:49-60)."
+   },
+   {
+    "archivo": "src/lib/actions/projects.ts",
+    "simbolo": "deleteTaskAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "projects.ts:214 requireSuperAdmin() (lanza)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "taskId del FormData projects.ts:216, delete :220",
+    "validacion": "manual",
+    "evidencia_validacion": "solo !taskId (projects.ts:218)",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA."
+   },
+   {
+    "archivo": "src/lib/actions/services.ts",
+    "simbolo": "createServiceAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "services.ts:28 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del FormData services.ts:30, existencia :41-42",
+    "validacion": "manual",
+    "evidencia_validacion": "services.ts:30-39 (isServiceType/isServiceStatus; startDate sin validar)",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA; Service se escribe en vivo desde project.actions.ts:280/:291."
+   },
+   {
+    "archivo": "src/lib/actions/services.ts",
+    "simbolo": "updateServiceStatusAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "services.ts:60",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "serviceId del FormData services.ts:62, update :68-71; organizationId solo para revalidar :63, :73",
+    "validacion": "manual",
+    "evidencia_validacion": "services.ts:66",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA."
+   },
+   {
+    "archivo": "src/lib/actions/services.ts",
+    "simbolo": "deleteServiceAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "services.ts:81",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "serviceId del FormData services.ts:83, delete :87",
+    "validacion": "manual",
+    "evidencia_validacion": "services.ts:85",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA."
+   },
+   {
+    "archivo": "src/lib/actions/settings.ts",
+    "simbolo": "saveAgencySettingsAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "requireSuperAdmin local reimplementado settings.ts:20-28, llamado :51",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "AgencySettings global (settings.ts:53-81)",
+    "validacion": "no",
+    "evidencia_validacion": "solo tipos TS (settings.ts:39-49); alertWebhookUrl sin validar como URL (:61)",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA; reemplazada por admin/settings/_actions/settings.actions.ts:127 updateSettings. Devuelve error.message crudo (:92)."
+   },
+   {
+    "archivo": "src/lib/actions/settings.ts",
+    "simbolo": "updateModulePricingAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "settings.ts:104",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "PremiumModule global (settings.ts:127-130)",
+    "validacion": "manual",
+    "evidencia_validacion": "settings.ts:106-112; type/active recibidos e ignorados (:100-101); updateMany con 0 filas devuelve éxito",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA; la viva (settings.actions.ts:175) ya corrige el éxito silencioso."
+   },
+   {
+    "archivo": "src/lib/actions/settings.ts",
+    "simbolo": "inviteTeamMemberAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "settings.ts:153",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "crea User SUPER_ADMIN global (settings.ts:172-178)",
+    "validacion": "manual",
+    "evidencia_validacion": "regex de email settings.ts:157-161",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA. Token en claro (:180-189), fallback localhost (:191), usuario creado antes del email y resultado de sendEmail ignorado (:194)."
+   },
+   {
+    "archivo": "src/lib/actions/settings.ts",
+    "simbolo": "testN8nConnectionAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "settings.ts:241",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "usa env N8N_API_URL/N8N_API_KEY (settings.ts:243-244)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA."
+   },
+   {
+    "archivo": "src/lib/actions/settings.ts",
+    "simbolo": "verifyGooglePermissionsAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "settings.ts:277",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "usa env GOOGLE_SERVICE_ACCOUNT_KEY (settings.ts:279)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA. JSON.parse (:285) + error.message devuelto (:304): un JSON malformado devolvería un fragmento del env al cliente."
+   },
+   {
+    "archivo": "src/lib/actions/settings.ts",
+    "simbolo": "testWebhookAction",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "settings.ts:313",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "AgencySettings global (settings.ts:327-330)",
+    "validacion": "no",
+    "evidencia_validacion": "url libre del input (settings.ts:315, :332) → fetch POST :338",
+    "rate_limit": "no",
+    "url": "sin consumidor",
+    "notas": "MUERTA. POST a URL arbitraria (solo SUPER_ADMIN) con datos de ejemplo inventados (:342)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/archiveClient.ts",
+    "simbolo": "archiveClient",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "archiveClient.ts:17 requireSuperAdmin() de ./requireSuperAdmin (lanza UNAUTHORIZED/FORBIDDEN)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del input archiveClient.ts:21, re-leída :25-29 (cross-tenant por diseño)",
+    "validacion": "zod",
+    "evidencia_validacion": "ArchiveClientInputSchema archiveClient.ts:12-14, safeParse :19-20",
+    "rate_limit": "no",
+    "url": "/admin/clients (ClientsListClient.tsx:164)",
+    "notas": "No bloquea la org de la agencia (slug develop). Audita como CLIENT_UPDATED (:41)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/archiveClient.ts",
+    "simbolo": "unarchiveClient",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "archiveClient.ts:55",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "archiveClient.ts:59, :61-65",
+    "validacion": "zod",
+    "evidencia_validacion": "archiveClient.ts:57-58",
+    "rate_limit": "no",
+    "url": "/admin/clients (ClientsListClient.tsx:177)"
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+    "simbolo": "getClientDeletionSummary",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "hardDeleteClient.ts:110",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "hardDeleteClient.ts:116-119 (unsafeGlobalQuery TENANT-MGMT)",
+    "validacion": "zod",
+    "evidencia_validacion": "InputSchema hardDeleteClient.ts:17-19, safeParse :111-112",
+    "rate_limit": "no",
+    "url": "/admin/clients (ClientsListClient.tsx:196)",
+    "notas": "El resumen no cuenta usuarios (hardDeleteClient.ts:49-51)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+    "simbolo": "hardDeleteClient",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "hardDeleteClient.ts:126",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "hardDeleteClient.ts:129, tx :136-145",
+    "validacion": "zod",
+    "evidencia_validacion": "hardDeleteClient.ts:127-128",
+    "rate_limit": "no",
+    "url": "/admin/clients (ClientsListClient.tsx:227)",
+    "notas": "Irreversible; sin guarda para la org de la agencia; deja vivos los User; sin backups (DR-01)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/manageAlerts.ts",
+    "simbolo": "listAlerts",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "manageAlerts.ts:10",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "PLATFORM-AGG cross-org por diseño (manageAlerts.ts:12-13)",
+    "validacion": "no",
+    "evidencia_validacion": "filter.status/severity casteados `as never` sin validar (manageAlerts.ts:16-17); el llamador no pasa filtro (alerts/page.tsx:5)",
+    "rate_limit": "no",
+    "url": "/admin/alerts (page.tsx:5, server component)",
+    "notas": "take: 100 de cualquier estado, sin paginar (manageAlerts.ts:24-25)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/manageAlerts.ts",
+    "simbolo": "acknowledgeAlert",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "manageAlerts.ts:32 (después del parse :31)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "alerta por id de cualquier org (manageAlerts.ts:34-51)",
+    "validacion": "zod",
+    "evidencia_validacion": "alertIdSchema = z.string().cuid() (manageAlerts.schemas.ts:3), parse :31",
+    "rate_limit": "no",
+    "url": "/admin/alerts (AlertsClient.tsx:90)",
+    "notas": "Sin chequeo de estado previo (puede pasar RESOLVED→ACKNOWLEDGED)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/manageAlerts.ts",
+    "simbolo": "resolveAlert",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "manageAlerts.ts:77",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-filtra",
+    "evidencia_org": "manageAlerts.ts:79-94",
+    "validacion": "zod",
+    "evidencia_validacion": "manageAlerts.ts:76",
+    "rate_limit": "no",
+    "url": "/admin/alerts (AlertsClient.tsx:110)"
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/updateClient.ts",
+    "simbolo": "updateClient",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "updateClient.ts:29",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del input (updateClient.ts:15), re-leída :42-65 (cross-tenant por diseño admin)",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateClientInputSchema updateClient.ts:14-26, safeParse :33-37 (userPhone sin .max() :25)",
+    "rate_limit": "no",
+    "url": "/admin/clients/[clientId]/edit (EditClientForm.tsx:79)",
+    "notas": "Errores esperados vía throw (:37, :65, :68, :79)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/updateClientInternalNotes.ts",
+    "simbolo": "updateClientInternalNotes",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "updateClientInternalNotes.ts:20",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "updateClientInternalNotes.ts:24, :29-33",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateInternalNotesSchema :12-15 (max 5000), safeParse :22-23",
+    "rate_limit": "no",
+    "url": "/admin/clients/[clientId] tab overview (InternalNotesCard.tsx:43)"
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Editar datos del cliente (admin)",
+    "pasos": [
+     "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:79 await updateClient({...})",
+     "src/modules/chatbot/server/admin/updateClient.ts:29 requireSuperAdmin()",
+     "updateClient.ts:33-37 normalizeWebsiteUrl + safeParse; error → throw new Error(zodErrorToMessage(...))",
+     "updateClient.ts:42-65 lee Organization + primer OrgMember ADMIN (orderBy joinedAt)",
+     "updateClient.ts:71-81 chequeo de unicidad global de email",
+     "updateClient.ts:83-119 $transaction: organization.update + user.update (email/nombre/teléfono)",
+     "sale del lote: updateClient.ts:121 -> src/lib/audit-log.ts (logAdminAction)",
+     "updateClient.ts:148-149 revalidatePath /admin/clients y /admin/clients/[id] (sin revalidateTag 'admin-clients')",
+     "EditClientForm.tsx:93-94 catch muestra err.message"
+    ]
+   },
+   {
+    "nombre": "Notas internas inline del cliente",
+    "pasos": [
+     "src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx:43 updateClientInternalNotes({...})",
+     "src/modules/chatbot/server/admin/updateClientInternalNotes.ts:20 requireSuperAdmin()",
+     "updateClientInternalNotes.ts:22-25 safeParse; vacío → null",
+     "updateClientInternalNotes.ts:29-38 lee y actualiza Organization.internalNotes",
+     "sale del lote: updateClientInternalNotes.ts:40 -> src/lib/audit-log.ts",
+     "updateClientInternalNotes.ts:54 revalidatePath",
+     "InternalNotesCard.tsx:52-53 catch muestra err.message"
+    ]
+   },
+   {
+    "nombre": "Archivar / desarchivar cliente",
+    "pasos": [
+     "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:164 archiveClient({ organizationId })",
+     "src/modules/chatbot/server/admin/archiveClient.ts:17 requireSuperAdmin()",
+     "archiveClient.ts:25-30 lee org; ya archivada → throw",
+     "archiveClient.ts:32-35 organization.update deletedAt = now (sin excluir la org de la agencia)",
+     "sale del lote: archiveClient.ts:37 -> src/lib/audit-log.ts (actionType CLIENT_UPDATED)",
+     "archiveClient.ts:48-49 revalidateTag('admin-clients') + revalidatePath",
+     "desemboca en flujo D6 'Archivar cliente (admin): soft-delete que solo oculta del listado'"
+    ]
+   },
+   {
+    "nombre": "Eliminar cliente definitivamente (hard-delete)",
+    "pasos": [
+     "ClientsListClient.tsx:196 getClientDeletionSummary({ organizationId })",
+     "src/modules/chatbot/server/admin/hardDeleteClient.ts:110-122 guard + safeParse + gatherDeletionSummary (:39-104; cuenta proyectos/tickets/mensajes/assets/bot, no usuarios)",
+     "ClientsListClient.tsx:522-527 TypeToConfirmDialog con confirmPhrase=\"ELIMINAR\" (frase genérica)",
+     "ClientsListClient.tsx:227 hardDeleteClient({ organizationId })",
+     "hardDeleteClient.ts:126-129 guard + safeParse",
+     "hardDeleteClient.ts:133-145 $transaction: resumen + tx.organization.delete (:141)",
+     "prisma/schema.prisma:527-528 OrgMember onDelete Cascade: se borra la membresía, el User queda",
+     "sale del lote: hardDeleteClient.ts:166 -> src/lib/audit-log.ts (CLIENT_DELETED, fuera de la tx)",
+     "hardDeleteClient.ts:181-182 revalidateTag + revalidatePath",
+     "desemboca en flujo D6 'Eliminar cliente (hard-delete) y su cascada'"
+    ]
+   },
+   {
+    "nombre": "Alertas: listar, marcar vista y resolver",
+    "pasos": [
+     "src/app/(protected)/admin/alerts/page.tsx:5 await listAlerts() (sin filtro)",
+     "src/modules/chatbot/server/admin/manageAlerts.ts:9-27 requireSuperAdmin + botAlert.findMany cross-org orderBy createdAt desc take 100",
+     "src/app/(protected)/admin/alerts/AlertsClient.tsx:90 acknowledgeAlert(id)",
+     "manageAlerts.ts:31-51 parse cuid + guard + findUnique + update status ACKNOWLEDGED (sin chequear estado previo)",
+     "sale del lote: manageAlerts.ts:54 -> src/lib/audit-log.ts",
+     "manageAlerts.ts:70-71 revalidatePath + revalidateTag('admin-alerts-count')",
+     "AlertsClient.tsx:110 resolveAlert(id) -> manageAlerts.ts:75-115 (mismo esquema, status RESOLVED)"
+    ]
+   },
+   {
+    "nombre": "Eliminar proyecto desde el detalle admin",
+    "pasos": [
+     "src/app/(protected)/admin/projects/[projectId]/page.tsx:323 zona de peligro",
+     "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx:59-84 diálogo de confirmación; :75 <form action={deleteProjectAction}>",
+     "src/lib/actions/projects.ts:109 requireSuperAdmin() (lanza)",
+     "projects.ts:111-114 prisma.project.delete por id (cascada de hitos, mantenimiento, horas y tareas según project.actions.ts:803)",
+     "projects.ts:116-117 revalidatePath('/admin/projects') + redirect (sin auditoría)"
+    ]
+   },
+   {
+    "nombre": "Enviar entrega a aprobación del cliente",
+    "pasos": [
+     "src/app/(protected)/admin/projects/_components/task-list.tsx:618-630 botón visible si DONE y sin approvalStatus; startTransition sin try/catch",
+     "src/lib/actions/projects.ts:178 requireSuperAdmin()",
+     "projects.ts:184-189 lee task + project; org = task.project.organizationId",
+     "projects.ts:191-204 $transaction: task.approvalStatus = PENDING_APPROVAL + message.create fromAdmin a la org",
+     "projects.ts:206-208 revalidatePath admin y dashboard",
+     "desemboca en flujo D2 'Aprobar o pedir cambios en una entrega'"
+    ]
+   },
+   {
+    "nombre": "Formulario público de contacto",
+    "pasos": [
+     "src/app/contact/page.tsx:66 useActionState(submitContactForm)",
+     "src/lib/actions/contact.ts:100-105 submitContactForm -> contactFormAction",
+     "contact.ts:23-27 rate limit por IP hash FUERA del try (sale del lote: src/lib/security/auth-rate-limit.ts y src/lib/rate-limit/limiter.ts:44)",
+     "contact.ts:35-47 ContactFormSchema (src/lib/actions/schemas.ts:56-65, sin .max())",
+     "contact.ts:62-64 contactSubmission.create",
+     "sale del lote: contact.ts:69 -> src/lib/referrals/referrals.service.ts (flujo D2 'Referidos: código, link y atribución pública')",
+     "sale del lote: contact.ts:72-77 -> src/lib/alerts.ts sendAgencyAlert sin await, .catch(() => {})",
+     "sale del lote: contact.ts:82-85 -> src/lib/n8n.ts sendLeadToN8n (error solo a consola :87-90)",
+     "src/app/contact/page.tsx:212-213 muestra state.error"
+    ]
+   },
+   {
+    "nombre": "Demanda medida de módulos premium (admin)",
+    "pasos": [
+     "src/app/(protected)/admin/leads/_actions/module-demand.actions.ts:25 requireSuperAdmin (ZONA-FRANCO, fuera del lote)",
+     "module-demand.actions.ts:27-28 organizationModule.findMany upsellRequestCount > 0",
+     "module-demand.actions.ts:50 rankModuleDemand(...).map(serializeModuleDemand)",
+     "src/lib/modules/demand.ts:87-134 agrega por módulo (orgs distintas, total, última) y ordena",
+     "demand.ts:137-153 serializa Dates a ISO",
+     "src/app/(protected)/admin/leads/_components/module-demand-table.tsx:3 consume SerializedModuleDemand"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "El hard-delete y el archivado no protegen la org de la agencia (develOP), que aparece como un cliente más",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/page.tsx",
+      "linea": 22,
+      "fragmento": "prisma.organization.findMany({\n      where: { deletedAt: null },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/page.tsx",
+      "linea": 11,
+      "fragmento": "where: { slug: { not: 'develop' } },"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+      "linea": 141,
+      "fragmento": "await tx.organization.delete({ where: { id: organizationId } })"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 527,
+      "fragmento": "confirmPhrase=\"ELIMINAR\""
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbot/activity/page.tsx",
+      "linea": 11,
+      "fragmento": "prisma.botConfig.findUnique({ where: { slug: 'develop' }, ..."
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 233,
+      "fragmento": "where: { slug: 'develop' },"
+     }
+    ],
+    "impacto": "La lista de Clientes trae todas las orgs no archivadas, sin excluir la de la agencia, al revés que Proyectos, que sí la excluye. Ni hardDeleteClient ni archiveClient la bloquean del lado del servidor, y la confirmación pide tipear 'ELIMINAR', no el nombre del cliente. Un error del SUPER_ADMIN (elegir la fila de develOP y confirmar) borra en cascada el bot del sitio con sus conversaciones y leads, todos los proyectos internos con sus hitos de pago y horas, más tickets y mensajes. Sin backups (DR-01) no hay vuelta atrás. Además, el widget del sitio, /admin/chatbot/activity y health, que buscan slug 'develop', y el alta de proyectos internos (project.actions.ts:233) dejan de funcionar. Antes del primer cliente real, es el borrado irreversible más grande al que el panel está expuesto.",
+    "propuesta": "Rechazar en el servidor el archivado y el hard-delete de la org de la agencia (slug 'develop' o un flag isAgency) dentro de hardDeleteClient/archiveClient. Excluirla de /admin/clients igual que hace projects/page.tsx:11. Pedir que se tipee el nombre o el slug del cliente en vez de una frase genérica. Exigir que el cliente esté archivado antes del hard-delete. Resolver DR-01 (backups).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h4.adm-clientes.eliminar-definitivo",
+     "h4.adm-clientes.archivar",
+     "modelo.Organization",
+     "h3.vis-widget-develop",
+     "h4.adm-proyectos"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "DR-01; flujo D6 'Eliminar cliente (hard-delete) y su cascada'"
+   },
+   {
+    "titulo": "El hard-delete de un cliente deja vivos sus User: credenciales activas, datos personales y email bloqueado para volver a darlo de alta",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+      "linea": 141,
+      "fragmento": "await tx.organization.delete({ where: { id: organizationId } })"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 527,
+      "fragmento": "user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)\n  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+      "linea": 50,
+      "fragmento": "select: { projects: true, tickets: true, messages: true, clientAssets: true },"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
+      "linea": 79,
+      "fragmento": "throw new Error('El email ingresado ya está registrado en otro usuario.')"
+     }
+    ],
+    "impacto": "La cascada solo borra la fila OrgMember. El User del cliente (email, nombre, teléfono, hash de contraseña) sobrevive, sin bump de sessionVersion, y no hay ningún .user.delete en src. Consecuencias: (1) el ex-cliente sigue pudiendo autenticarse; (2) no se cumple la 'Solicitud de eliminación de cuenta' del portal (flujo D2), porque los datos personales quedan; (3) el mismo email ya no sirve para volver a dar de alta al cliente, porque el chequeo de unicidad lo rechaza; (4) el resumen previo al borrado no informa usuarios. Además, los diffs del audit (updateClient.ts:141-143, con email y teléfono) sobreviven a propósito (hardDeleteClient.ts:164-165).",
+    "propuesta": "Dentro de la misma transacción, borrar o anonimizar los User cuya única membresía es esa org y subir su sessionVersion. Contar los usuarios en gatherDeletionSummary y mostrarlos en el modal. Definir la política de retención del audit (anonimizar la PII de los diffs al borrar).",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.eliminar-definitivo",
+     "modelo.User",
+     "modelo.OrgMember",
+     "h1.auth-login",
+     "h2.cli-cuenta"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "flujo D2 'Solicitar eliminacion de cuenta'; flujo D1 'Invalidacion de sesion por sessionVersion'"
+   },
+   {
+    "titulo": "Las actions de Clientes comunican errores esperados con throw: en producción solo llega el digest y la UI muestra un texto genérico",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
+      "linea": 37,
+      "fragmento": "if (!result.success) throw new Error(zodErrorToMessage(result.error))"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+      "linea": 30,
+      "fragmento": "if (org.deletedAt) throw new Error('El cliente ya está archivado.')"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateClientInternalNotes.ts",
+      "linea": 23,
+      "fragmento": "if (!result.success) throw new Error('Datos inválidos para las notas internas.')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx",
+      "linea": 94,
+      "fragmento": "setError(err instanceof Error ? err.message : 'No se pudo guardar. Intentá de nuevo.')"
+     },
+     {
+      "ruta": "docs/bitacora-roadmap.md",
+      "linea": 7211,
+      "fragmento": "HTTP 200 + **`1:E{\"digest\":\"3529886923\"}`** (error server thrown ..."
+     }
+    ],
+    "impacto": "En un build de producción, Next.js sanea los errores lanzados por server actions: al cliente llega un mensaje genérico con digest, como ya registró la prueba de B11 (bitacora:7211). Por eso 'El email ingresado ya está registrado en otro usuario.', 'El cliente ya está archivado.' y los mensajes de Zod armados con zodErrorToMessage (el fix de PLAN-552) no llegan al admin: EditClientForm, InternalNotesCard y ClientsListClient muestran err.message saneado. El admin no puede saber por qué falló una edición.",
+    "propuesta": "Pasar updateClient, updateClientInternalNotes, archiveClient/unarchiveClient y getClientDeletionSummary/hardDeleteClient al contrato ActionResult (ok/fail de action-utils), como ya hacen admin/settings y admin/projects. Dejar throw solo para lo inesperado y capturarlo con Sentry.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.editar-datos",
+     "h4.adm-clientes.notas-internas",
+     "h4.adm-clientes.archivar",
+     "h4.adm-clientes.eliminar-definitivo",
+     "lib.actions"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-552; D3-A4"
+   },
+   {
+    "titulo": "Form de contacto: el rate limit consulta la DB fuera del try y un fallo de Neon tira la página de error en vez del mensaje",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/contact.ts",
+      "linea": 24,
+      "fragmento": "const rl = await checkRateLimit({\n    key: `contactFormPerIp:${ipHash}`,"
+     },
+     {
+      "ruta": "src/lib/actions/contact.ts",
+      "linea": 61,
+      "fragmento": "try {"
+     },
+     {
+      "ruta": "src/lib/rate-limit/limiter.ts",
+      "linea": 44,
+      "fragmento": "const rows = await prisma.$queryRawUnsafe<UpsertRow[]>("
+     },
+     {
+      "ruta": "src/lib/prisma.ts",
+      "linea": 6,
+      "fragmento": "globalForPrisma.prisma ?? new PrismaClient({ log: ['error'] })"
+     }
+    ],
+    "impacto": "El upsert del rate limit no tiene catch (limiter.ts:44) y en contactFormAction corre antes del try (:61). Si Neon tarda en despertar o la conexión falla, la action lanza la excepción, useActionState la propaga al error boundary y el visitante ve la pantalla de error en vez de 'No se pudo enviar el formulario'. Es el formulario con el que entran los leads de develOP, y no hay retry ni connect_timeout en prisma.ts.",
+    "propuesta": "Mover getClientIpHash/checkRateLimit adentro del try, o envolverlos con un mensaje útil y captureException. Evaluar retry corto ante cold-start (RESIL-07).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6.vis-contacto.enviar-formulario",
+     "lib.rate-limit",
+     "lib.prisma"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "RESIL-07"
+   },
+   {
+    "titulo": "El formulario público de contacto acepta texto sin tope en todos sus campos y lo replica a la DB, la alerta de agencia y n8n",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/schemas.ts",
+      "linea": 57,
+      "fragmento": "name: z.string().trim().min(2, 'Nombre inválido.'),\n  email: z.string().trim().email('El email no es válido.'),"
+     },
+     {
+      "ruta": "src/lib/actions/schemas.ts",
+      "linea": 62,
+      "fragmento": "message: z.string().trim().min(10, 'El mensaje debe tener al menos 10 caracteres.'),"
+     },
+     {
+      "ruta": "src/lib/actions/contact.ts",
+      "linea": 75,
+      "fragmento": "detail: `Nuevo lead desde formulario. Contacto: ${payload.email}. Servicio: ${payload.service || 'General'}.`,"
+     },
+     {
+      "ruta": "src/lib/actions/schemas.ts",
+      "linea": 46,
+      "fragmento": "featureKey: z.string().trim().min(1, 'Feature inválida.'),\n  featureName: z.string().trim().min(1, 'Nombre de feature inválido.'),"
+     }
+    ],
+    "impacto": "Un anónimo puede mandar campos de hasta el límite por defecto del body de server actions (~1 MB; next.config sin bodySizeLimit). Eso se guarda en ContactSubmission (message es @db.Text), entra a la alerta de agencia y al webhook de n8n, y se interpola en texto de alerta (company/name/email/service). El rate limit es de 5 por IP cada 15 min, pero la IP sale del primer X-Forwarded-For (patrón D1-c1) y cada IP falsificada crea una fila nueva en rate_limit (patrón D1-c3). Riesgo para el primer cliente: spam y crecimiento de almacenamiento en Neon, más ruido en las alertas. UpsellRequestSchema (portal autenticado) tiene el mismo defecto en featureKey/featureName.",
+    "propuesta": "Agregar .max() razonables (name 120, email 254, phone 40, company 120, service 60 o enum, message 5000, featureName 120). Opcional: bodySizeLimit explícito para server actions. Escapar los campos del visitante en sendAgencyAlert.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6.vis-contacto.enviar-formulario",
+     "modelo.ContactSubmission",
+     "lib.actions",
+     "int.n8n",
+     "h2.cli-servicios"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patrón D1-c3 'Texto libre sin .max()'; patrón D1-c1 X-Forwarded-For; patrón D1-c3 claves de rate limit"
+   },
+   {
+    "titulo": "Cuatro módulos 'use server' legacy sin importadores y 6 actions muertas más, que duplican versiones vivas con contratos peores",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/settings.ts",
+      "linea": 92,
+      "fragmento": "error: error instanceof Error ? error.message : 'No se pudo guardar la configuración.',"
+     },
+     {
+      "ruta": "src/lib/actions/settings.ts",
+      "linea": 191,
+      "fragmento": "const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'"
+     },
+     {
+      "ruta": "src/lib/actions/leads.ts",
+      "linea": 14,
+      "fragmento": "async function ensureAdmin() {\n  const session = await auth()\n  return session?.user?.role === 'SUPER_ADMIN'"
+     },
+     {
+      "ruta": "src/lib/actions/clients.ts",
+      "linea": 177,
+      "fragmento": "members: {\n        where: { role: 'ADMIN' },"
+     },
+     {
+      "ruta": "src/lib/actions/services.ts",
+      "linea": 21,
+      "fragmento": "export async function createServiceAction("
+     },
+     {
+      "ruta": "src/lib/actions/projects.ts",
+      "linea": 35,
+      "fragmento": "export async function createProjectAction("
+     }
+    ],
+    "impacto": "clients.ts, services.ts, settings.ts y leads.ts (+ leads-constants.ts) no tienen importadores. Tampoco los tienen 5 de las 7 actions de projects.ts ni markLeadAsRead. Duplican _actions vivas (settings.actions.ts:127/:175, project.actions.ts:593/:643, admin/leads/_actions) y arrastran defectos que volverían si alguien las reconecta: error.message crudo (settings.ts:92, :142, :234, :270, :304, y JSON.parse del service account en :285), token de invitación en claro (:180-189), fallback a localhost (:191), usuario creado antes del email (:172-194), guard reimplementado (leads.ts:14-17, settings.ts:20-28), take:1 sin orderBy (clients.ts:177-181) y update sin Zod (clients.ts:157-171). Encarecen cada cambio: hay que adivinar cuál es la versión vigente.",
+    "propuesta": "Borrar clients.ts, services.ts, settings.ts, leads.ts y leads-constants.ts. En projects.ts, migrar los dos consumidores vivos (delete-project-button.tsx:6 → deleteProject; task-list.tsx:22 → una action en admin/projects/_actions) y borrar el archivo. Quitar markLeadAsRead de contact.ts.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.actions",
+     "h4.adm-config",
+     "h4.adm-equipo",
+     "h4.adm-leads",
+     "h4.adm-proyectos",
+     "h4.adm-clientes"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patrón D1-c1 módulos 'use server' sin importadores; requireSuperAdmin reimplementado; tokens en claro; D1-c3 fallback localhost"
+   },
+   {
+    "titulo": "Borrar un proyecto tiene dos implementaciones distintas y ninguna deja auditoría; el detalle usa la legacy",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/projects.ts",
+      "linea": 114,
+      "fragmento": "await prisma.project.delete({ where: { id: projectId } })"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx",
+      "linea": 6,
+      "fragmento": "import { deleteProjectAction } from '@/lib/actions/projects'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+      "linea": 829,
+      "fragmento": "return fail(error instanceof Error ? error.message : 'Failed to delete project')"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/projects-board.tsx",
+      "linea": 156,
+      "fragmento": "const result = await deleteProject(projectId)"
+     }
+    ],
+    "impacto": "El detalle usa deleteProjectAction: sin Zod, sin try (un guard vencido o un error de Prisma termina en el error boundary), revalida solo /admin/projects y no el cliente ni el lead. El tablero usa deleteProject, que revalida bien pero devuelve error.message crudo (:829), a pesar de que el registro de Proyectos lo da por arreglado. Ninguna llama a logAdminAction (0 coincidencias en ambos archivos), así que el borrado de un proyecto con hitos de pago, mantenimiento y horas en cascada no deja rastro en el audit log.",
+    "propuesta": "Unificar en deleteProject de project.actions.ts (con fallback genérico en el catch y logAdminAction con resumen de lo borrado) y hacer que delete-project-button lo consuma. Borrar la legacy.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.eliminar-proyecto",
+     "modelo.Project",
+     "lib.audit-log",
+     "h4.adm-audit"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patrón D1-c3 guards que lanzan sin try/catch (projects.ts:109)"
+   },
+   {
+    "titulo": "Equipo: invitar un miembro no tiene camino vivo y /accept-invite no tiene productor de links",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/settings.ts",
+      "linea": 148,
+      "fragmento": "export async function inviteTeamMemberAction(input: {"
+     },
+     {
+      "ruta": "src/lib/actions/settings.ts",
+      "linea": 192,
+      "fragmento": "const inviteUrl = `${baseUrl}/accept-invite?token=${token}`"
+     },
+     {
+      "ruta": "src/lib/actions/invitations.ts",
+      "linea": 110,
+      "fragmento": "const inviteUrl = `${baseUrl}/accept-invite?token=${token}`"
+     }
+    ],
+    "impacto": "Los únicos dos generadores de links /accept-invite están en módulos sin importadores, y ni admin/team ni admin/settings tienen UI de invitación (git grep -i invit vacío). La página pública /accept-invite (h1.auth-invite) existe y se mantiene, pero nada la alimenta. Sumar otro miembro al equipo de develOP exige tocar la DB o un seed. No bloquea al primer cliente, pero confirma la hipótesis de que al admin le faltan módulos (Equipo sin alta de miembros).",
+    "propuesta": "Decidir: o se conecta un alta de miembros en /admin/team (action viva con Zod, token hasheado, email por Brevo con resultado verificado y URL base sin fallback a localhost), o se retira /accept-invite junto con las dos actions muertas.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-equipo",
+     "h4.adm-equipo.invitar-miembro",
+     "h1.auth-invite"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patrón D1-c1 módulos 'use server' sin importadores; tokens en claro"
+   },
+   {
+    "titulo": "El checklist B-SEC.3c renumera los fixes y el F4 original (loader de pagos de proyecto sin guard propio) sigue abierto",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+      "linea": 70,
+      "fragmento": "const { projectId } = await params"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+      "linea": 73,
+      "fragmento": "prisma.project.findUnique({\n      where: { id: projectId },"
+     },
+     {
+      "ruta": "docs/bitacora-roadmap.md",
+      "linea": 8400,
+      "fragmento": "| F4 / B11 agency-actions cross-projectId | ✅ Cerrado |"
+     },
+     {
+      "ruta": "docs/bitacora-roadmap.md",
+      "linea": 6493,
+      "fragmento": "| **F4** | [`src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:69-103`] ... Loader sin auth check"
+     }
+    ],
+    "impacto": "En B11.0, F4 era el loader de /admin/projects/[projectId]/payments (trust-the-layout) y F5 era agency-actions. El checklist B-SEC.3c llama F4 a agency-actions y lo da por cerrado, así que el F4 original desaparece del seguimiento. En el código, la página lee OsPaymentMilestone/OsMaintenancePayment sin auth() ni require* propio (git grep: 0 coincidencias de auth()/requireSuperAdmin/SUPER_ADMIN). Las tres actions de esa página sí se protegen (milestone.actions.ts:23, maintenance.actions.ts:64, :94). Es otra instancia del patrón D1-c2: el render parcial de RSC no reejecuta el layout.",
+    "propuesta": "Agregar requireSuperAdmin()/auth() al inicio de la página (como hace admin/clients/page.tsx:91-94) y corregir el checklist para que F4 y F5 conserven la numeración de B11.0.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos",
+     "lib.proxy",
+     "modelo.OsPaymentMilestone",
+     "modelo.OsMaintenancePayment"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D3-A2; patrón D1-c2 páginas que confían en el guard del layout; PLAN-638"
+   },
+   {
+    "titulo": "El redirect deprecado /admin/clients/[clientId]/chatbot/* busca solo por slug (los links usan el id → 404) y no mapea install ni integrations",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 28,
+      "fragmento": "const org = await prisma.organization.findUnique({\n    where: { slug: orgSlug },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 36,
+      "fragmento": "const targetTab: TabId = requested && TAB_MAP[requested] ? TAB_MAP[requested] : 'overview'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx",
+      "linea": 22,
+      "fragmento": "permanentRedirect('/login')"
+     }
+    ],
+    "impacto": "El segmento [clientId] lleva el Organization.id en todos los links (ClientsListClient.tsx:630), pero el redirect busca solo por slug: un bookmark o link viejo con id da 404. TAB_MAP no incluye 'install' ni 'integrations' (tabs.ts:1 sí las tiene), así que la ruta /chatbot/install propuesta en B8.5 cae en overview. Para un no-admin, el redirect a /login es permanente (308) y el navegador puede cachearlo.",
+    "propuesta": "Buscar por id o slug (como hace [clientId]/page.tsx:42), agregar install e integrations al TAB_MAP y usar redirect (no permanent) para el caso no autorizado. Alternativa: borrar la ruta deprecada.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes",
+     "h3.adm-chatbots"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D3-A3; PLAN-569"
+   },
+   {
+    "titulo": "/admin/clients/[clientId] expone el id interno de la org en la URL y nombra 'orgSlug' a un valor que es el id",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+      "linea": 33,
+      "fragmento": "const { clientId: orgSlug } = await params"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/page.tsx",
+      "linea": 42,
+      "fragmento": "OR: [{ id: orgSlug }, { slug: orgSlug }],"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+      "linea": 630,
+      "fragmento": "href={`/admin/clients/${client.id}`}"
+     }
+    ],
+    "impacto": "La página acepta id o slug, pero todos los links y revalidates (updateClient.ts:149, services.ts:52, alerts.ts:278, handleChatRequest.ts:383) usan el cuid, en contra de la regla de CLAUDE.md 'Never expose internal DB IDs in URLs'. Los docs se contradicen (bitacora:6013 dice orgSlug; :7163 dice Organization.id). El riesgo es bajo porque es solo admin, pero el nombre engaña a quien toque la ruta (ver el bug del redirect deprecado).",
+    "propuesta": "Decidir un identificador canónico (slug) y migrar los links, con redirect desde el id, o renombrar la variable a orgIdOrSlug y documentar la excepción admin.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D3-A1; PLAN-571"
+   },
+   {
+    "titulo": "listAlerts trae solo las 100 alertas más recientes de cualquier estado y filtra en el cliente: las pendientes viejas desaparecen",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+      "linea": 24,
+      "fragmento": "orderBy: { createdAt: 'desc' },\n      take: 100,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+      "linea": 16,
+      "fragmento": "...(filter?.status && { status: filter.status as never }),"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/alerts/page.tsx",
+      "linea": 5,
+      "fragmento": "const alerts = await listAlerts()"
+     }
+    ],
+    "impacto": "La página pide las alertas sin filtro. El corte de 100 mezcla PENDING, ACKNOWLEDGED y RESOLVED, y los filtros de fecha y columna corren en el cliente sobre esas 100 (deuda reconocida en el registro de Inteligencia). Cuando el detector acumule más de 100, una alerta PENDING vieja (por ejemplo, la credencial de Vertex vencida) deja de verse en Pendientes, y el filtro 'Personalizado' sobre fechas viejas sale vacío. Los parámetros status/severity no se validan (`as never`) y ningún llamador los usa.",
+    "propuesta": "Paginar en el servidor y traer siempre todas las PENDING (o una query por columna), mover el filtro de fecha al servidor y validar los filtros con z.nativeEnum.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas.listado",
+     "modelo.BotAlert"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-543"
+   },
+   {
+    "titulo": "acknowledgeAlert/resolveAlert no verifican el estado previo: marcar como vista una resuelta la reabre",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+      "linea": 44,
+      "fragmento": "where: { id },\n        data: {\n          status: 'ACKNOWLEDGED',"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+      "linea": 87,
+      "fragmento": "where: { id },\n        data: {\n          status: 'RESOLVED',"
+     }
+    ],
+    "impacto": "El update va solo por id. Una doble acción (dos pestañas o dos admins) o un ack tardío sobre una alerta RESOLVED la devuelve a ACKNOWLEDGED, y el badge de pendientes y el historial quedan incoherentes. Si la alerta no existe, el update lanza P2025 (throw, no mensaje).",
+    "propuesta": "Condicionar la transición (where: { id, status: 'PENDING' } para el ack; status distinto de RESOLVED para resolver) con updateMany y devolver ok/fail según count.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas.marcar-vista-resolver",
+     "modelo.BotAlert"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "'Enviar a aprobación' no avisa al cliente (ni campana ni email), falla en silencio y no audita",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/projects.ts",
+      "linea": 197,
+      "fragmento": "await tx.message.create({\n      data: {\n        content: `📋 Tu entrega \"${task.title}\" está lista para revisión. ..."
+     },
+     {
+      "ruta": "src/actions/agency-actions.ts",
+      "linea": 54,
+      "fragmento": "const notifications = orgMembers.map(member => ({\n      type: 'ACTION_REQUIRED' as const,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+      "linea": 628,
+      "fragmento": "await sendTaskForApprovalAction(formData)\n      router.refresh()"
+     }
+    ],
+    "impacto": "El camino vivo para pedir aprobación (task-list) solo crea un Message. A diferencia de createTaskForClientAction, no genera Notification ACTION_REQUIRED ni email, así que el cliente se entera recién cuando entra al portal. La action devuelve void y sale en silencio si la tarea no existe (:182, :188). Un guard vencido lanza dentro de startTransition sin catch y termina en el error boundary. No hay auditoría.",
+    "propuesta": "Reusar la creación de Notification + email de agency-actions (o un helper común), devolver ActionResult y mostrar el feedback en la UI. Agregar logAdminAction.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-proyectos.enviar-a-aprobacion",
+     "h2.cli-proyecto",
+     "modelo.Message",
+     "modelo.Notification"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "flujo D2 'Aprobar o pedir cambios en una entrega'; patrón D1-c3 guards que lanzan"
+   },
+   {
+    "titulo": "updateClient cambia el email de login del cliente sin avisar al email anterior ni invalidar la sesión",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
+      "linea": 71,
+      "fragmento": "const nextEmail = parsed.userEmail.toLowerCase()"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
+      "linea": 108,
+      "fragmento": "const nextUser = await tx.user.update({\n      where: { id: adminUser.id },\n      data: {"
+     }
+    ],
+    "impacto": "El SUPER_ADMIN reescribe el email con el que el cliente se loguea y recibe el magic link: no se le avisa ni al email viejo ni al nuevo, no se resetea emailVerified y no se sube sessionVersion. Un typo deja al cliente sin acceso por magic link, sin que él sepa por qué. userPhone no tiene .max() (:25).",
+    "propuesta": "Avisar por email (viejo y nuevo) al cambiar el email de login, resetear emailVerified o pedir confirmación, subir sessionVersion y acotar userPhone.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.editar-datos",
+     "modelo.User",
+     "h1.auth-login"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "flujo D1 'Invalidacion de sesion por sessionVersion'"
+   },
+   {
+    "titulo": "Instancias del lote: auditoría escrita después del efecto con un helper que traga el error (y archivar se registra como CLIENT_UPDATED)",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+      "linea": 166,
+      "fragmento": "await logAdminAction({"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+      "linea": 41,
+      "fragmento": "actionType: 'CLIENT_UPDATED',\n    action: `Archivó (soft-delete reversible) el cliente \"${org.companyName}\"`,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+      "linea": 53,
+      "fragmento": "if (before) {\n    await logAdminAction({"
+     }
+    ],
+    "impacto": "Todas las mutaciones auditadas del lote auditan después del efecto, con el helper que solo hace console.error (verificado en D1: audit-log.ts:40): hardDeleteClient.ts:166, archiveClient.ts:37/:73, updateClient.ts:121, updateClientInternalNotes.ts:40, manageAlerts.ts:54/:97. Si el insert del audit falla tras un hard-delete irreversible, no queda registro y nadie se entera. Archivar y desarchivar usan CLIENT_UPDATED, así que el filtro por acción del audit log no los distingue.",
+    "propuesta": "Igual que el patrón D1-c3: captureException en el helper (decisión para Valentino, porque audit-log.ts es FROZEN-inferido) y, para el hard-delete, escribir el audit dentro de la transacción. Agregar CLIENT_ARCHIVED/CLIENT_UNARCHIVED al enum (schema FROZEN: decisión para Valentino).",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.audit-log",
+     "h4.adm-audit",
+     "h4.adm-clientes"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patrón D1-c3 'Auditoría escrita después del efecto'"
+   },
+   {
+    "titulo": "D3-A4 parcial: updateSettings ya no filtra el ZodError, pero sigue devolviendo al cliente el message crudo de cualquier otro Error (Prisma)",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+      "linea": 171,
+      "fragmento": "return fail(toErrorMessage(error, 'No se pudo actualizar la configuracion.'))"
+     },
+     {
+      "ruta": "src/lib/action-utils.ts",
+      "linea": 31,
+      "fragmento": "if (error instanceof Error) {\n    return error.message\n  }"
+     },
+     {
+      "ruta": "src/lib/action-utils.ts",
+      "linea": 28,
+      "fragmento": "if (error instanceof ZodError) {\n    return error.issues[0]?.message ?? fallback"
+     }
+    ],
+    "impacto": "El fix 5e33733 resolvió el ZodError (action-utils.ts:28-29). Sin embargo, un error de ensureAgencySettingsRecord o de agencySettings.update (settings.actions.ts:145-166), por ejemplo un PrismaClientKnownRequestError o un fallo de conexión, devuelve su message completo a la UI: invocación de Prisma, modelo, campo y posiblemente el host. Solo lo ve un SUPER_ADMIN, pero viola 'Never expose internal error messages'. Lo mismo pasa en project.actions.ts:829.",
+    "propuesta": "Decisión para Valentino (action-utils.ts es FROZEN-inferido): que toErrorMessage solo pase el message de una clase UserFacingError, y fallback para el resto. Mientras tanto, los callers pueden mapear errores de Prisma a fallback.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "h4.adm-config",
+     "lib.action-utils"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D3-A4; PLAN-552; patrón D1-c1 'Mensajes internos de error devueltos al cliente'"
+   },
+   {
+    "titulo": "Form de contacto: alerta de agencia fire-and-forget con catch vacío y fallos solo a consola (sin Sentry)",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/contact.ts",
+      "linea": 72,
+      "fragmento": "sendAgencyAlert({\n      type: 'LEAD_EXTERNAL',"
+     },
+     {
+      "ruta": "src/lib/actions/contact.ts",
+      "linea": 77,
+      "fragmento": "}).catch(() => {})"
+     },
+     {
+      "ruta": "src/lib/actions/contact.ts",
+      "linea": 95,
+      "fragmento": "console.error('contactFormAction error:', error)"
+     }
+    ],
+    "impacto": "La alerta de lead nuevo sale sin await y con catch vacío. En serverless puede cortarse al terminar la respuesta (sobre todo si n8n no está configurado y la respuesta vuelve enseguida), y si falla nadie se entera. Los fallos de n8n (:87-90) y del alta (:95) van solo a consola, sin captureException: un lead perdido no deja rastro en Sentry.",
+    "propuesta": "Usar after() de next/server para la alerta y n8n, y captureException en los catch. Opcional: guardar el estado de notificación en la fila.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6.vis-contacto.enviar-formulario",
+     "int.sentry",
+     "int.n8n"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patrón D1-c1 'Fallos manejados que solo hacen console.error'; patrón D1-c1 envíos cuyo resultado se ignora"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.editar-datos",
+    "nombre": "Editar datos del cliente",
+    "descripcion": "El admin edita empresa, ciudad, notas, avatar, sitio y el usuario administrador (email, nombre, teléfono) del cliente.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/updateClient.ts",
+     "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx"
+    ],
+    "entradas": [
+     "updateClient"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "EditClientForm.tsx:79 → updateClient.ts:29 (guard) → :33-37 (Zod) → :42-65 (lee org+admin) → :71-81 (unicidad email) → :83-119 (tx) → :121 (audit) → :148-149 (revalidate)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin updateClient.ts:29; org re-leída por id :42-65 (cross-tenant por diseño admin)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "formulario de edición, sin colección"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "errores esperados con throw (updateClient.ts:37, :79); la UI muestra err.message (EditClientForm.tsx:94), que en producción llega saneado"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "[clientId]/loading.tsx existe (git ls-tree); estado pending del submit no evaluado (UI fuera del lote)"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "UpdateClientInputSchema updateClient.ts:14-26, safeParse :33-37"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO: el layout vive en EditClientForm.tsx (otro lote)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captureException en la action ni en el catch de EditClientForm.tsx:93-94"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO/FIXME ni datos inventados en updateClient.ts"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "el admin completa la edición solo"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.notas-internas",
+    "nombre": "Notas internas inline",
+    "descripcion": "Editar Organization.internalNotes desde el tab Overview sin tocar el resto del cliente.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/updateClientInternalNotes.ts",
+     "src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx"
+    ],
+    "entradas": [
+     "updateClientInternalNotes"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "InternalNotesCard.tsx:43 → updateClientInternalNotes.ts:20 → :22-25 → :29-38 → :40 → :54",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "updateClientInternalNotes.ts:20; org re-leída :29-33"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "vacío → null (updateClientInternalNotes.ts:25)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "throw (:23, :33) + InternalNotesCard.tsx:52-53 muestra err.message (saneado en producción)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO: estado 'guardando' declarado en InternalNotesCard.tsx:19 (comentario), fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod max 5000 updateClientInternalNotes.ts:12-15, :22-23"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO (UI fuera del lote)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO ni datos inventados"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "edición inline directa"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.archivar",
+    "nombre": "Archivar / desarchivar cliente",
+    "descripcion": "Soft-delete reversible de la org (deletedAt) para sacarla del listado.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/archiveClient.ts"
+    ],
+    "entradas": [
+     "archiveClient",
+     "unarchiveClient"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ClientsListClient.tsx:164 → archiveClient.ts:17 → :25-35 → :37 → :48-49 → admin/clients/page.tsx:23 (flujo D6)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "guard archiveClient.ts:17, :55; no bloquea la org de la agencia (slug develop)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción puntual"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "throw (:29-30, :65-66) → toast err.message ClientsListClient.tsx:168 (saneado en producción)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO (UI fuera del lote)"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod archiveClient.ts:12-14, :19-20"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "botón en la barra de selección"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.eliminar-definitivo",
+    "nombre": "Eliminar cliente (hard-delete)",
+    "descripcion": "Borra la org y en cascada todo lo propio; preserva los OsLead; deja una entrada CLIENT_DELETED.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/hardDeleteClient.ts"
+    ],
+    "entradas": [
+     "getClientDeletionSummary",
+     "hardDeleteClient"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ClientsListClient.tsx:196 → hardDeleteClient.ts:107-123 → ClientsListClient.tsx:527 (confirm) → :227 → hardDeleteClient.ts:125-146 → :166 → :181-182",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "guard :110/:126; sin guarda para la org de la agencia; deja vivos los User (schema.prisma:527-528)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción puntual"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "throw (:112, :120, :139) → toast err.message ClientsListClient.tsx:239"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "isPending={deletePending} ClientsListClient.tsx:529"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod :17-19, :111-112, :127-128"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captureException; el audit se traga el error"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "modal con resumen + tipeo de 'ELIMINAR'"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.servicios-contratados",
+    "nombre": "Servicios contratados del cliente",
+    "descripcion": "Alta, cambio de estado y baja de Service (web, IA, automatización) por cliente.",
+    "archivos": [
+     "src/lib/actions/services.ts"
+    ],
+    "entradas": [
+     "createServiceAction",
+     "updateServiceStatusAction",
+     "deleteServiceAction"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "CRUD en services.ts sin importadores (git grep vacío); Service solo se escribe como efecto de proyectos (project.actions.ts:280, :291) y se lee en OverviewTab.tsx:26. No hay UI para gestionarlo directamente.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin services.ts:28, :60, :81 (código muerto)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "sin UI viva"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "updateServiceStatusAction/deleteServiceAction devuelven void sin try (services.ts:68, :87)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "sin UI viva"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "manual services.ts:30-39"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "sin UI"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "no hay camino en el panel"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.eliminar-proyecto",
+    "nombre": "Eliminar proyecto desde el detalle",
+    "descripcion": "Zona de peligro del detalle admin que borra el proyecto con sus dependientes.",
+    "archivos": [
+     "src/lib/actions/projects.ts",
+     "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx"
+    ],
+    "entradas": [
+     "deleteProjectAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "projects/[projectId]/page.tsx:323 → delete-project-button.tsx:75 → projects.ts:109-117",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin projects.ts:109"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción puntual"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "sin try/catch en projects.ts:108-118: error de guard o de Prisma va al error boundary"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "ConfirmDeleteSubmit delete-project-button.tsx:19 (estado no leído en detalle)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "solo !projectId projects.ts:112"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura propia"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "diálogo de confirmación delete-project-button.tsx:59-84"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-proyectos",
+    "id": "h4.adm-proyectos.enviar-a-aprobacion",
+    "nombre": "Enviar entrega a aprobación del cliente",
+    "descripcion": "Marca la tarea PENDING_APPROVAL y deja un mensaje al cliente para que apruebe o pida cambios.",
+    "archivos": [
+     "src/lib/actions/projects.ts",
+     "src/app/(protected)/admin/projects/_components/task-list.tsx"
+    ],
+    "entradas": [
+     "sendTaskForApprovalAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "task-list.tsx:622-630 → projects.ts:178-208 → flujo D2 'Aprobar o pedir cambios en una entrega'",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "guard projects.ts:178; la org del mensaje sale del registro (:189), no del form"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción puntual"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "devuelve void con retornos silenciosos (:182, :188); task-list.tsx:627-630 sin catch"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "spinner con isPending task-list.tsx:637-641"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "manual projects.ts:180-182"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "el cliente no recibe Notification ni email (projects.ts:191-204)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-alertas",
+    "id": "h4.adm-alertas.listado",
+    "nombre": "Listado de alertas del sistema",
+    "descripcion": "Kanban PENDING/ACK/RESOLVED de BotAlert de todas las orgs.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/manageAlerts.ts"
+    ],
+    "entradas": [
+     "listAlerts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "alerts/page.tsx:5 → manageAlerts.ts:9-27 → AlertsClient (columnas con VISIBLE_CAP AlertsClient.tsx:206-208)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "guard manageAlerts.ts:10; cross-org por diseño"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO (AlertsClient fuera del lote)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "alerts/error.tsx existe (git ls-tree); captureException no verificada"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "alerts/loading.tsx existe (git ls-tree)"
+     },
+     "validacion_servidor": {
+      "cumple": "no",
+      "evidencia": "filtros `as never` sin validar manageAlerts.ts:16-17"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO (error.tsx no leído)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO en manageAlerts.ts"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "take 100 sin paginar oculta pendientes viejas (manageAlerts.ts:25)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-alertas",
+    "id": "h4.adm-alertas.marcar-vista-resolver",
+    "nombre": "Marcar alerta vista / resolver",
+    "descripcion": "Transiciones de estado de una BotAlert, con auditoría y refresco del badge.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/manageAlerts.ts"
+    ],
+    "entradas": [
+     "acknowledgeAlert",
+     "resolveAlert"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "AlertsClient.tsx:90/:110 → manageAlerts.ts:31-51/:76-94 → :54/:97 → :70-71/:113-114",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "guard manageAlerts.ts:32, :77"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción puntual"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "errores por throw (parse :31, P2025 en update)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "alertIdSchema cuid manageAlerts.ts:31, :76"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "botones en la card"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.demanda-modulos",
+    "nombre": "Demanda medida de módulos",
+    "descripcion": "Ranking de qué módulos premium piden más orgs (incluye 'avisame cuando esté').",
+    "archivos": [
+     "src/lib/modules/demand.ts"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "module-demand.actions.ts:25-50 (ZONA-FRANCO) → demand.ts:87-134 → demand.ts:137-153 → module-demand-table.tsx:3; invariantes modules.invariant.ts:91-120",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin module-demand.actions.ts:25; cruce de orgs deliberado (demand.ts:5-9)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO (tabla fuera del lote); rankModuleDemand([]) → [] (modules.invariant.ts:120)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "la action devuelve ok() (module-demand.actions.ts:50); el catch no se leyó"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "lógica pura sin TODO (demand.ts)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "lectura directa en el tab de demanda"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-equipo",
+    "id": "h4.adm-equipo.invitar-miembro",
+    "nombre": "Invitar miembro del equipo",
+    "descripcion": "Alta de un nuevo SUPER_ADMIN por invitación con link a /accept-invite.",
+    "archivos": [
+     "src/lib/actions/settings.ts"
+    ],
+    "entradas": [
+     "inviteTeamMemberAction"
+    ],
+    "madurez": "L0",
+    "madurez_evidencia": "inviteTeamMemberAction (settings.ts:148) e invitations.ts no tienen importadores; no hay UI de invitación en admin/team ni admin/settings (git grep -i invit vacío)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "no existe camino vivo"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "sin_mocks_todos": {
+      "cumple": "n/a",
+      "evidencia": "no existe"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "requiere tocar la DB o un seed"
+     }
+    }
+   },
+   {
+    "herramienta": "h6.vis-contacto",
+    "id": "h6.vis-contacto.enviar-formulario",
+    "nombre": "Enviar formulario de contacto",
+    "descripcion": "Un visitante deja nombre, email, servicio y mensaje; se guarda el lead, se alerta a la agencia y se envía a n8n.",
+    "archivos": [
+     "src/lib/actions/contact.ts",
+     "src/lib/actions/schemas.ts",
+     "src/app/contact/page.tsx"
+    ],
+    "entradas": [
+     "submitContactForm",
+     "contactFormAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "contact/page.tsx:66 → contact.ts:100-105 → :23-33 → :35-47 → :62-64 → :72-85 → contact/page.tsx:212-213",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "público; ContactSubmission global"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "formulario"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "state.error visible (contact/page.tsx:212-213), pero un fallo de DB en el rate limit (contact.ts:24) queda fuera del try"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "isPending de useActionState contact/page.tsx:66"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod sin .max() schemas.ts:56-65"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO (página fuera del lote)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "solo console.error contact.ts:87-90, :95; .catch(() => {}) :77"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO en contact.ts"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "el visitante completa el envío solo"
+     }
+    }
+   },
+   {
+    "herramienta": "h6.vis-contacto",
+    "id": "h6.vis-contacto.atribucion-referido",
+    "nombre": "Atribución de referido desde /contact?ref=",
+    "descripcion": "Si el visitante llega con un código de referido, se atribuye al cliente que lo refirió.",
+    "archivos": [
+     "src/lib/actions/contact.ts"
+    ],
+    "entradas": [
+     "submitContactForm"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "contact.ts:49 → :68-70 → flujo D2 'Referidos: código, link y atribución pública'",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "público; las guardas anti-abuso viven en el servicio (fuera del lote)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "sin código → null (contact.ts:49)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "se espera dentro del try (contact.ts:69): si el servicio lanza, el lead ya quedó guardado y el visitante ve error y reintenta"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "mismo submit"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "referralCode max 64 schemas.ts:64"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "NO EVALUADO"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "automático"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-571",
+    "clave": "Naming: clientId en /admin/clients/[clientId] es en realidad la organización",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/app/(protected)/admin/clients/[clientId]/page.tsx:33 `const { clientId: orgSlug } = await params` y :42 `OR: [{ id: orgSlug }, { slug: orgSlug }]`; los links usan el id (ClientsListClient.tsx:630)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Contradice la regla de CLAUDE.md sobre IDs en URLs; solo admin."
+   },
+   {
+    "id": "PLAN-543",
+    "clave": "Lane Alertas: badge, Zod en alertId, seed, filtros de fecha, overview, Ver bot con Link, cap uniforme",
+    "estado_en_codigo": "hecho",
+    "evidencia": "manageAlerts.ts:71/:114 revalidateTag('admin-alerts-count'); :31/:76 alertIdSchema (cuid, manageAlerts.schemas.ts:3); scripts/dev/seed-alerts.ts; alerts/_components/alerts-date-filter.tsx; alert-column-overview.tsx; alert-card.tsx:3 import Link y :66 'Ver bot'; AlertsClient.tsx:206-208 VISIBLE_CAP",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Queda la deuda declarada de filtros en el cliente sobre take 100 (hallazgo de listAlerts)."
+   },
+   {
+    "id": "PLAN-561",
+    "clave": "Asignar tier a sonrisa-norte y sigma-contable en prod",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "El script prisma/seeds/migrate-subscriptions-to-plan-id.ts no existe en origin/main: `git ls-tree -r --name-only origin/main -- logic-core-v3/prisma | grep -i -E \"migrate-sub|plan-id\"` → vacío. Control: `git grep -l PLAN_NAME_TO_KEY origin/main -- logic-core-v3` → solo docs/bitacora-roadmap.md",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "El estado de los datos en prod no se puede verificar por código; hoy se haría desde /admin/clients (plan.actions.ts, flujo D6 'Cambio de plan')."
+   },
+   {
+    "id": "PLAN-565",
+    "clave": "Aplicar plan BUSINESS + cortesía 0 USD a Matsu en prod",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Operación de datos en prod, no verificable por código. El camino correcto existe: flujo D6 'Cambio de plan → precio que ve el cliente' (plan.actions.ts:179)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Matsu es cuenta de prueba (sin clientes reales)."
+   },
+   {
+    "id": "PLAN-567",
+    "clave": "Tests de downgrade real con tráfico (E2E)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "`git grep -l -i downgrade origin/main -- \"*.spec.ts\" \"*.test.ts\"` → solo src/lib/crypto/__tests__/credential-cipher.test.ts (otro sentido). Control: el mismo patrón en src → plan.actions.ts, PlanAssignmentCard.tsx",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-589",
+    "clave": "Simplificar ensureAgencySettingsRecord con findUnique({singleton:true})",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "admin/settings/_actions/settings.actions.ts:38-41 sigue con findFirst orderBy updatedAt; el schema ya tiene `singleton Boolean @default(true) @unique` en AgencySettings; la legacy src/lib/actions/settings.ts:30-37 repite el patrón",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-587",
+    "clave": "Writer canónico del pricing de PremiumModule",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Escriben priceMonthlyUsd: settings.actions.ts:195 (vivo), src/lib/actions/settings.ts:129 (muerto) y prisma/seeds/sync-premium-modules.ts:36/:54 (corrida manual que pisa el precio de la DB con el catálogo de código src/lib/data/premium-modules.ts:31). Sigue sin un writer canónico.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Si alguien corre el sync después de editar precios en el admin, los revierte sin aviso."
+   },
+   {
+    "id": "PLAN-580",
+    "clave": "Búsqueda, filtros y sort en /admin/clients",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ClientsListClient.tsx:50 search, :51 filterBot, :54 sortBy, :258-262 filtrado",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-582",
+    "clave": "Cronometrar el wizard y E2E",
+    "estado_en_codigo": "parcial",
+    "evidencia": "E2E del wizard: tests/e2e/08-admin-onboarding.spec.ts:11-18 (page.goto('/admin/clients/new')); el cronometraje de menos de 8 min es manual y no se puede verificar por código",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-638",
+    "clave": "createTaskForClientAction no cross-valida org del proyecto",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "src/actions/agency-actions.ts:24-35 assertProjectBelongsToOrg(projectId, organizationId) al inicio; prueba en bitacora:7211 ('CERRADO')",
+    "sigue_teniendo_sentido": "no",
+    "nota": "El pendiente quedó viejo: el fix B11.2 F5 está en el código."
+   },
+   {
+    "id": "PLAN-545",
+    "clave": "alerts-detector.spec.ts no corre bajo test:integration",
+    "estado_en_codigo": "parcial",
+    "evidencia": "playwright.integration.config.ts:41 `testIgnore: ['**/alerts-detector.spec.ts']`; no hay config dedicada; el spec usa rutas relativas sin baseURL (alerts-detector.spec.ts:26)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Quedó excluido: hoy no corre en ninguna suite."
+   },
+   {
+    "id": "PLAN-569",
+    "clave": "Vista de instalación desde /admin/clients/[clientId]",
+    "estado_en_codigo": "parcial",
+    "evidencia": "InstallTab existe en /admin/chatbots/[botId] (BotDetailClient.tsx:98, tabs.ts:1), pero ChatbotTab.tsx:128-159 enlaza solo overview/config/knowledge/conversations/leads/activity, y el catch-all deprecado no mapea 'install' (chatbot/[[...tab]]/page.tsx:6-13)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Arreglo barato: botHref('install') en ChatbotTab."
+   },
+   {
+    "id": "PLAN-586",
+    "clave": "config-design no-go: editor de tema diferido",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "`git ls-tree -r --name-only origin/main -- \"logic-core-v3/src/app/(protected)/admin\" | grep -i -E \"_design|theme\"` → solo leads/_components/themed-date-input.tsx (control positivo del grep); no hay ruta _design ni editor de tema",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-554",
+    "clave": "Avatar del cliente: emoji, imagen base64 e iniciales (máx 2)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "updateClient.ts:19-21 (avatarImageUrlSchema, avatarEmoji max 8, avatarInitials max 2) y :92-94; UpdateProfileSchema schemas.ts:17-19",
+    "sigue_teniendo_sentido": "no",
+    "nota": "No verifiqué el orden de fallback del componente ClientAvatar (fuera del lote)."
+   },
+   {
+    "id": "PLAN-552",
+    "clave": "Tanda de fixes de Clientes (city, internalNotes, toErrorMessage, archivar, avatar, hard-delete)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "city updateClient.ts:90; internalNotes updateClientInternalNotes.ts:35-38; archivar archiveClient.ts:32-35; TypeToConfirmDialog ClientsListClient.tsx:522-527; CLIENT_DELETED hardDeleteClient.ts:170; toErrorMessage action-utils.ts:28-29. Pero los mensajes legibles de updateClient se lanzan con throw (:37) y en producción no llegan; los User quedan vivos tras el hard-delete.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-592",
+    "clave": "D5' máscara del token Telegram consolidada (mask-secret.ts)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/mask-secret.ts existe (git ls-tree); lo importan admin/settings/_actions/settings.actions.ts y settings-console.tsx; invariante src/lib/mask-secret.invariant.ts",
+    "sigue_teniendo_sentido": "no"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D3-A1] Identificador en /admin/clients/[clientId]: orgSlug (B9.1) vs Organization.id (B11.6); ¿las actions revalidan el recurso?",
+    "resultado": "confirmada",
+    "evidencia": "[clientId]/page.tsx:33 aliasa clientId a 'orgSlug' y :42 acepta id o slug; todos los links y revalidates usan Organization.id (ClientsListClient.tsx:630, updateClient.ts:149, services.ts:52, alerts.ts:278). Las actions del lote releen la org por id antes de escribir: updateClient.ts:42-65, updateClientInternalNotes.ts:29-33, archiveClient.ts:25-30, hardDeleteClient.ts:138-139 (solo existencia; el rol SUPER_ADMIN es el control).",
+    "hallazgo_titulo": "/admin/clients/[clientId] expone el id interno de la org en la URL y nombra 'orgSlug' a un valor que es el id"
+   },
+   {
+    "alerta": "[D3-A2] El checklist B-SEC.3c renumera los fixes F2/F4/F5 de B11.0",
+    "resultado": "confirmada",
+    "evidencia": "F2 (projects.ts trust-the-layout) cerrado en el código: guards en projects.ts:39, :74, :109, :126, :159, :178, :214. El 'F4' del checklist (bitacora:8400) es en realidad el F5 de B11.0 y está cerrado (agency-actions.ts:24-35). El F4 original (bitacora:6493, loader de payments) sigue sin guard propio: payments/page.tsx:70-74, git grep de auth()/requireSuperAdmin/SUPER_ADMIN → 0 (control: chatbot/[[...tab]]/page.tsx → 2); sus actions sí se protegen (milestone.actions.ts:23, :53; maintenance.actions.ts:35, :64, :94).",
+    "hallazgo_titulo": "El checklist B-SEC.3c renumera los fixes y el F4 original (loader de pagos de proyecto sin guard propio) sigue abierto"
+   },
+   {
+    "alerta": "[D3-A3] Ruta propuesta /admin/clients/[clientId]/chatbot/install que el catch-all redirige a overview; rutas deprecadas vs vista nueva de roadmap-pendientes:26",
+    "resultado": "confirmada",
+    "evidencia": "chatbot/[[...tab]]/page.tsx:6-13 TAB_MAP sin install/integrations y :36 fallback a 'overview'; además busca solo por slug (:28-29), así que con el id que generan los links da 404. STATUS.md:216 la depreca. roadmap-pendientes.md:26 proponía una vista CRM read-only ahí: hoy existe con edición en /admin/chatbots/[botId] (tab integrations, flujo D5 'Configurar y probar la integración CRM (n8n)').",
+    "hallazgo_titulo": "El redirect deprecado /admin/clients/[clientId]/chatbot/* busca solo por slug (los links usan el id → 404) y no mapea install ni integrations"
+   },
+   {
+    "alerta": "[D3-A4] Fuga de ZodError en updateSettings declarada resuelta en 5e33733",
+    "resultado": "parcial",
+    "evidencia": "updateSettings (admin/settings/_actions/settings.actions.ts:127-173) parsea dentro del try (:143) y devuelve fail(toErrorMessage(...)) (:171): el ZodError se mapea al primer issue (action-utils.ts:28-29), así que esa fuga está resuelta. Pero cualquier otro Error (Prisma, conexión) devuelve su message crudo (action-utils.ts:31-32).",
+    "hallazgo_titulo": "D3-A4 parcial: updateSettings ya no filtra el ZodError, pero sigue devolviendo al cliente el message crudo de cualquier otro Error (Prisma)"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/lib/actions/clients.ts",
+    "senales": [
+     "0 importadores: git grep -E \"lib/actions/clients['\\\"]|createClientAction|updateClientAction\" origin/main -- src tests scripts → solo definiciones",
+     "duplica el alta y la edición vivas (createClientOnly / updateClient.ts)",
+     "el registro de Clientes §6 da por limpiado el código muerto del sector"
+    ],
+    "que_rompe": "Nada (sin consumidores)."
+   },
+   {
+    "archivo": "src/lib/actions/services.ts",
+    "senales": [
+     "0 importadores (git grep createServiceAction|updateServiceStatusAction|deleteServiceAction)",
+     "Service se escribe en vivo desde admin/projects/_actions/project.actions.ts:280 y :291"
+    ],
+    "que_rompe": "Nada."
+   },
+   {
+    "archivo": "src/lib/actions/settings.ts",
+    "senales": [
+     "0 importadores (git grep de las 6 actions)",
+     "reemplazado por admin/settings/_actions/settings.actions.ts (updateSettings :127, updateModulePricing :175)",
+     "contiene un requireSuperAdmin reimplementado (:20-28)"
+    ],
+    "que_rompe": "Nada; también desaparece uno de los dos generadores de links /accept-invite (el otro, invitations.ts, también está muerto)."
+   },
+   {
+    "archivo": "src/lib/actions/leads.ts",
+    "senales": [
+     "0 importadores (git grep updateLeadStatusAction|updateLeadNotesAction)",
+     "la versión viva está en admin/leads/_actions (ZONA-FRANCO)",
+     "guard reimplementado ensureAdmin (:14-17)"
+    ],
+    "que_rompe": "Nada."
+   },
+   {
+    "archivo": "src/lib/actions/leads-constants.ts",
+    "senales": [
+     "solo lo importa leads.ts (muerto)",
+     "LEAD_STATUS_VALUES duplicado en admin/leads/_actions/lead.schemas.ts:4"
+    ],
+    "que_rompe": "Nada si se borra junto con leads.ts."
+   },
+   {
+    "archivo": "src/lib/actions/projects.ts",
+    "senales": [
+     "5 de 7 exports sin importadores (createProjectAction, updateProjectAction, createTaskAction, updateTaskStatusAction, deleteTaskAction)",
+     "duplica admin/projects/_actions/project.actions.ts (bitacora:6491 ya lo marcaba)"
+    ],
+    "que_rompe": "delete-project-button.tsx:6 (deleteProjectAction) y task-list.tsx:22 (sendTaskForApprovalAction): hay que migrarlos antes de borrar."
+   },
+   {
+    "archivo": "src/lib/actions/contact.ts",
+    "senales": [
+     "markLeadAsRead (:110) sin importadores",
+     "contactFormAction exportada solo para el wrapper submitContactForm (:100-105)"
+    ],
+    "que_rompe": "Nada si se quita markLeadAsRead; contact/page.tsx:6 usa submitContactForm."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "La org de la agencia (develOP) aparece en Clientes y deja abrir 'Eliminar' (NO CONFIRMAR)",
+    "entorno": "dev local o preview con SUPER_ADMIN; base de prueba",
+    "pasos": [
+     "Loguear como SUPER_ADMIN",
+     "Ir a /admin/clients",
+     "Buscar 'develOP' o el slug 'develop' entre los clientes activos",
+     "Seleccionar SOLO esa fila y mirar si Archivar y Eliminar quedan habilitados",
+     "Click en Eliminar: debe abrirse el resumen (bot, proyectos internos, conversaciones)",
+     "CANCELAR sin tipear ELIMINAR"
+    ],
+    "esperado": "La org de la agencia no figura como cliente, o Archivar/Eliminar están deshabilitados y el servidor la rechaza.",
+    "senal_falla": "La fila aparece y el diálogo de borrado se abre con el resumen del bot develOP.",
+    "escribe_db_o_email": false,
+    "precondiciones": "Seed con la org slug 'develop' (existe según el registro de Proyectos).",
+    "hallazgos": "El hard-delete y el archivado no protegen la org de la agencia (develOP), que aparece como un cliente más"
+   },
+   {
+    "titulo": "Tras el hard-delete, el usuario del cliente sigue pudiendo loguear y su email queda bloqueado",
+    "entorno": "dev local con DB de prueba propia (NO la Neon compartida con Franco)",
+    "pasos": [
+     "Como SUPER_ADMIN, crear un cliente de prueba con email borrar-prueba@ejemplo.test y una contraseña conocida",
+     "Loguear como ese cliente, verificar que entra a /dashboard y cerrar sesión",
+     "Como SUPER_ADMIN, en /admin/clients seleccionar ese cliente → Eliminar → tipear ELIMINAR",
+     "Intentar loguear de nuevo con borrar-prueba@ejemplo.test y su contraseña",
+     "Intentar crear de nuevo un cliente con el mismo email"
+    ],
+    "esperado": "Login rechazado y re-alta permitida (el User se borró o anonimizó).",
+    "senal_falla": "El login se acepta (llega al portal vacío o a un error) y la re-alta falla por email ya registrado.",
+    "escribe_db_o_email": true,
+    "precondiciones": "Base de pruebas descartable; el alta puede mandar email de bienvenida por Brevo (usar un dominio de prueba).",
+    "hallazgos": "El hard-delete de un cliente deja vivos sus User: credenciales activas, datos personales y email bloqueado para volver a darlo de alta"
+   },
+   {
+    "titulo": "Mensajes de error de Clientes en un build de producción",
+    "entorno": "deploy preview de Netlify (build de producción), base de prueba",
+    "pasos": [
+     "Tener dos clientes de prueba, A y B",
+     "En /admin/clients/<A>/edit poner como email el del admin de B y Guardar",
+     "Abrir el mismo cliente archivado en dos pestañas y Desarchivar en ambas",
+     "Anotar el texto exacto que muestra la UI en cada caso"
+    ],
+    "esperado": "'El email ingresado ya está registrado en otro usuario.' y 'El cliente no está archivado.'",
+    "senal_falla": "Texto genérico en inglés (p. ej. 'An error occurred in the Server Components render...') o sin detalle.",
+    "escribe_db_o_email": true,
+    "precondiciones": "El primer desarchivado sí escribe (deletedAt = null); el choque de email falla antes de escribir.",
+    "hallazgos": "Las actions de Clientes comunican errores esperados con throw: en producción solo llega el digest y la UI muestra un texto genérico"
+   },
+   {
+    "titulo": "Form de contacto con la base inaccesible",
+    "entorno": "dev local",
+    "pasos": [
+     "Arrancar la app en local con DATABASE_URL apuntando a un host inexistente (o con la red cortada)",
+     "Abrir /contact",
+     "Completar el formulario con datos válidos y enviar"
+    ],
+    "esperado": "Mensaje inline 'No se pudo enviar el formulario. Intentá de nuevo.' sin perder la página.",
+    "senal_falla": "Aparece la página de error global (error.tsx) o el form queda colgado.",
+    "escribe_db_o_email": false,
+    "precondiciones": "Ninguna (la DB no es alcanzable, no se escribe nada).",
+    "hallazgos": "Form de contacto: el rate limit consulta la DB fuera del try y un fallo de Neon tira la página de error en vez del mensaje"
+   },
+   {
+    "titulo": "Alertas pendientes viejas desaparecen con más de 100 alertas",
+    "entorno": "dev local con DB de prueba propia",
+    "pasos": [
+     "Crear una alerta PENDING con createdAt antigua",
+     "Correr scripts/dev/seed-alerts.ts varias veces hasta pasar 100 alertas más recientes (resolver la mayoría)",
+     "Abrir /admin/alerts y buscar la alerta antigua en Pendientes",
+     "Comparar con el número del badge de pendientes"
+    ],
+    "esperado": "Todas las PENDING visibles y el badge coincide con la columna.",
+    "senal_falla": "La PENDING antigua no aparece y el badge cuenta más de lo que muestra la columna.",
+    "escribe_db_o_email": true,
+    "precondiciones": "Base de pruebas descartable.",
+    "hallazgos": "listAlerts trae solo las 100 alertas más recientes de cualquier estado y filtra en el cliente: las pendientes viejas desaparecen"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "src/lib/actions/clients.ts no tiene importadores",
+    "comando": "git grep -n -E \"lib/actions/clients['\\\"]|createClientAction|updateClientAction\" origin/main -- logic-core-v3/src logic-core-v3/tests logic-core-v3/scripts | grep -v src/lib/actions/clients.ts → vacío",
+    "control_positivo": "El mismo patrón para projects encuentra delete-project-button.tsx:6 y task-list.tsx:22; git grep -c createClientAction en clients.ts = 2"
+   },
+   {
+    "afirmacion": "src/lib/actions/services.ts no tiene importadores",
+    "comando": "git grep -n -E \"lib/actions/services['\\\"]|createServiceAction|updateServiceStatusAction|deleteServiceAction\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v services.ts → vacío",
+    "control_positivo": "git grep -c createServiceAction en services.ts = 2"
+   },
+   {
+    "afirmacion": "src/lib/actions/settings.ts no tiene importadores",
+    "comando": "git grep -n -E \"lib/actions/settings['\\\"]|saveAgencySettingsAction|updateModulePricingAction|inviteTeamMemberAction|testN8nConnectionAction|verifyGooglePermissionsAction|testWebhookAction\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v settings.ts → vacío",
+    "control_positivo": "git grep -c saveAgencySettingsAction en settings.ts = 1"
+   },
+   {
+    "afirmacion": "src/lib/actions/leads.ts no tiene importadores y leads-constants.ts solo lo usa leads.ts",
+    "comando": "git grep -n -E \"lib/actions/leads['\\\"]|lib/actions/leads-constants|updateLeadStatusAction|updateLeadNotesAction|LEAD_STATUS_VALUES\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v -E \"leads(-constants)?\\.ts\" → solo admin/leads/_actions/lead.schemas.ts:4 y :78 (constante local duplicada)",
+    "control_positivo": "El mismo grep encuentra la constante homónima en lead.schemas.ts; git grep ensureAdmin → leads.ts:14, :23, :49"
+   },
+   {
+    "afirmacion": "markLeadAsRead no tiene importadores; contact.ts solo se importa desde contact/page.tsx",
+    "comando": "git grep -n -E \"lib/actions/contact['\\\"]|contactFormAction|submitContactForm|markLeadAsRead\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v contact.ts → solo src/app/contact/page.tsx:6 y :66",
+    "control_positivo": "El mismo grep encuentra submitContactForm en contact/page.tsx"
+   },
+   {
+    "afirmacion": "5 de 7 actions de projects.ts no tienen importadores",
+    "comando": "git grep -n -E \"createProjectAction|updateProjectAction|deleteProjectAction|createTaskAction|updateTaskStatusAction|sendTaskForApprovalAction|deleteTaskAction\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v projects.ts → solo deleteProjectAction y sendTaskForApprovalAction",
+    "control_positivo": "El mismo grep encuentra delete-project-button.tsx:6 y task-list.tsx:22"
+   },
+   {
+    "afirmacion": "Ningún código vivo genera links /accept-invite",
+    "comando": "git grep -n \"accept-invite\" origin/main -- logic-core-v3/src | grep -v src/app/accept-invite/ → solo invitations.ts:110 y settings.ts:192 (ambos sin importadores) más robots.ts, sitemap.ts y comentarios; git grep -n \"lib/actions/invitations\" → vacío",
+    "control_positivo": "El grep encuentra los dos generadores muertos y el path en robots.ts:21"
+   },
+   {
+    "afirmacion": "No hay UI de invitar miembros en admin/team ni admin/settings",
+    "comando": "git grep -n -i invit origin/main -- \"logic-core-v3/src/app/(protected)/admin/team\" \"logic-core-v3/src/app/(protected)/admin/settings\" → vacío",
+    "control_positivo": "git grep -c -i invit en src/lib/actions/settings.ts = 9"
+   },
+   {
+    "afirmacion": "Ningún código de src borra User",
+    "comando": "git grep -n -E \"\\.user\\.(delete|deleteMany)\\(\" origin/main -- logic-core-v3/src → vacío",
+    "control_positivo": "git grep -n -E \"\\.organization\\.(delete|deleteMany)\\(\" → hardDeleteClient.ts:141 y evals/seed-eval-bots.ts:141"
+   },
+   {
+    "afirmacion": "La página /admin/projects/[projectId]/payments no tiene guard propio",
+    "comando": "git grep -c -E \"auth\\(\\)|requireSuperAdmin|SUPER_ADMIN\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/projects/[[]projectId]/payments/page.tsx\" → sin coincidencias",
+    "control_positivo": "El mismo comando sobre admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx → 2"
+   },
+   {
+    "afirmacion": "Ninguna de las dos implementaciones de borrar proyecto audita",
+    "comando": "git grep -c logAdminAction origin/main -- logic-core-v3/src/lib/actions/projects.ts \"logic-core-v3/src/app/(protected)/admin/projects/_actions/project.actions.ts\" → sin coincidencias",
+    "control_positivo": "El mismo comando sobre modules/chatbot/server/admin/archiveClient.ts → 3"
+   },
+   {
+    "afirmacion": "User.unlockedFeatures ya no existe en el schema ni en el código",
+    "comando": "git grep -n unlockedFeatures origin/main -- logic-core-v3/src logic-core-v3/prisma/schema.prisma → solo el comentario src/lib/premium-modules.ts:15",
+    "control_positivo": "git grep -c sessionVersion en prisma/schema.prisma = 1"
+   },
+   {
+    "afirmacion": "No hay tests E2E de downgrade de plan",
+    "comando": "git grep -l -i downgrade origin/main -- \"*.spec.ts\" \"*.test.ts\" → solo src/lib/crypto/__tests__/credential-cipher.test.ts (criptografía)",
+    "control_positivo": "git grep -l -i downgrade origin/main -- logic-core-v3/src → plan.actions.ts, PlanAssignmentCard.tsx, PlanAssignmentForm.tsx"
+   },
+   {
+    "afirmacion": "next.config no configura bodySizeLimit para server actions",
+    "comando": "git grep -n -E \"bodySizeLimit|experimental|serverActions\" origin/main -- logic-core-v3/next.config.ts logic-core-v3/src → vacío",
+    "control_positivo": "git grep -c -E \"nextConfig|headers\" en next.config.ts = 10"
+   },
+   {
+    "afirmacion": "El script migrate-subscriptions-to-plan-id.ts ya no existe",
+    "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/prisma | grep -i -E \"migrate-sub|plan-id\" → vacío",
+    "control_positivo": "git grep -l PLAN_NAME_TO_KEY origin/main -- logic-core-v3 → docs/bitacora-roadmap.md"
+   },
+   {
+    "afirmacion": "No existe la ruta /admin/_design ni un editor de tema",
+    "comando": "git ls-tree -r --name-only origin/main -- \"logic-core-v3/src/app/(protected)/admin\" | grep -i -E \"_design|theme\"",
+    "control_positivo": "El mismo grep encuentra leads/_components/themed-date-input.tsx (el patrón 'theme' funciona)"
+   },
+   {
+    "afirmacion": "ChatbotTab del cliente no enlaza la pestaña Instalación",
+    "comando": "git grep -n \"botHref(\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/clients/[[]clientId]/_components/tabs/ChatbotTab.tsx\" → overview, config, knowledge, conversations, leads, activity",
+    "control_positivo": "git grep -n -i \"'install'|InstallTab\" en admin/chatbots → BotDetailClient.tsx:24, :98, tabs.ts:1"
+   },
+   {
+    "afirmacion": "La lista de Clientes no excluye la org 'develop'",
+    "comando": "git grep -n -E \"AGENCY_ORG_SLUG|'develop'\" origin/main -- logic-core-v3/src → no aparece admin/clients/page.tsx",
+    "control_positivo": "El mismo grep encuentra admin/projects/page.tsx:11 `where: { slug: { not: 'develop' } }`"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Errores esperados comunicados con throw en server actions cuyo client component muestra err.message (en producción llega solo el digest)",
+    "como_buscarlo": "git grep -n \"throw new Error('\" origin/main -- src/modules/chatbot/server/admin \"src/app/(protected)/admin\" y cruzar con git grep -n \"err instanceof Error ? err.message\" en client components",
+    "donde_aparecio": "updateClient.ts:37, archiveClient.ts:30, updateClientInternalNotes.ts:23 → EditClientForm.tsx:94, ClientsListClient.tsx:168, InternalNotesCard.tsx:53"
+   },
+   {
+    "patron": "Acciones destructivas o masivas de plataforma sin guarda para la org de la agencia (slug 'develop')",
+    "como_buscarlo": "git grep -n -E \"organization\\.(delete|update)|botConfig\\.updateMany|bulk\" en src/modules/chatbot/server/admin, src/lib/bulk-actions.ts y admin/*/_actions, y verificar que excluyan slug 'develop'",
+    "donde_aparecio": "hardDeleteClient.ts:141, archiveClient.ts:34; admin/clients/page.tsx:22-23 lista la org sin filtro"
+   },
+   {
+    "patron": "Llamadas a la DB (rate limit, sesión) antes del try en actions públicas",
+    "como_buscarlo": "git grep -n -B3 \"checkRateLimit(\" origin/main -- src y verificar que el await quede adentro de un try con mensaje útil",
+    "donde_aparecio": "contact.ts:24 (try recién en :61)"
+   },
+   {
+    "patron": "Dos implementaciones vivas de la misma mutación (legacy src/lib/actions vs _actions nuevas) con contratos distintos",
+    "como_buscarlo": "Comparar los exports de src/lib/actions/*.ts y src/actions/*.ts con los de src/app/(protected)/admin/*/_actions/*.ts por modelo Prisma (project.delete, service.create, contactSubmission.update)",
+    "donde_aparecio": "projects.ts:108 (deleteProjectAction) vs project.actions.ts:782 (deleteProject)"
+   },
+   {
+    "patron": "Listas admin con take fijo, sin paginación y con filtros en el cliente",
+    "como_buscarlo": "git grep -n -E \"take: (100|200|250)\" origin/main -- src/modules/chatbot/server/admin \"src/app/(protected)/admin\"",
+    "donde_aparecio": "manageAlerts.ts:25"
+   },
+   {
+    "patron": "Transiciones de estado por id sin condicionar al estado previo",
+    "como_buscarlo": "git grep -n -A3 \"update({\\s*$\" en actions de estado (status:) y revisar que el where incluya el estado esperado o use updateMany con count",
+    "donde_aparecio": "manageAlerts.ts:43-49, :86-92"
+   },
+   {
+    "patron": "Borrado de una org que deja Users huérfanos (solo cae OrgMember)",
+    "como_buscarlo": "Cruzar los flujos que borran Organization (git grep \"organization.delete\") con la ausencia de user.delete; revisar el login de un ORG_MEMBER sin membresías",
+    "donde_aparecio": "hardDeleteClient.ts:141 + schema.prisma:527-528"
+   },
+   {
+    "patron": "Texto del visitante interpolado en alertas de agencia (webhook o email) sin escapar",
+    "como_buscarlo": "Leer src/lib/alerts.ts sendAgencyAlert: ver si detail/clientName se escapan antes de HTML o markdown de Slack/Telegram",
+    "donde_aparecio": "contact.ts:74-75 (company/name/email/service del form público)"
+   },
+   {
+    "patron": "revalidatePath hacia rutas que no existen",
+    "como_buscarlo": "Extraer los literales de revalidatePath(`...`) y compararlos con git ls-tree de src/app",
+    "donde_aparecio": "src/actions/admin/onboarding-tasks.ts:44 y :61 revalidan /admin/clients/[id]/onboarding, que no existe en el árbol"
+   },
+   {
+    "patron": "Agregados admin que no excluyen orgs archivadas (deletedAt)",
+    "como_buscarlo": "git grep -n -E \"organization(Module)?\\.findMany\" origin/main -- \"src/app/(protected)/admin\" src/modules/chatbot/server/admin y ver si filtran deletedAt",
+    "donde_aparecio": "admin/leads/_actions/module-demand.actions.ts:27-28 (HIPÓTESIS, ZONA-FRANCO)"
+   },
+   {
+    "patron": "Bloque de error del form público sin role=alert",
+    "como_buscarlo": "git grep -n \"state?.error\" origin/main -- src/app y verificar role=alert/aria-live",
+    "donde_aparecio": "src/app/contact/page.tsx:212-213 (instancia del patrón D1-c1)"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md:155",
+    "id_previo": "DB-P1-3",
+    "estado": "cerrado",
+    "evidencia": "git grep unlockedFeatures en src y prisma/schema.prisma → solo el comentario src/lib/premium-modules.ts:15 ('se deprecó en B4.4'); clients.ts tiene 227 líneas y ya no tiene el bloque :222-244 citado. Control: sessionVersion en el schema → 1."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:105",
+    "id_previo": "P1-12",
+    "estado": "parcial",
+    "evidencia": "admin/chatbots/[botId]/actions.ts, dashboard/_actions/regenerate-brief.ts y actions/onboarding-actions.ts ya importan zod o usan parse (git grep -c: 3, 2, 2). En clients.ts, createClientAction usa Zod (:25-40, :83-93), pero updateClientAction sigue manual con casts (:157-171); el módulo no tiene importadores."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1151",
+    "id_previo": "DR-01",
+    "estado": "abierto",
+    "evidencia": ".github/workflows/db-backup.yml sin cambios desde ef6dd076 (2026-05-26). Sigue dependiendo de secrets.DIRECT_DATABASE_URL_PROD/DEV (:84-85) y BACKUP_GPG_PASSPHRASE (:105), y corta si faltan (:95). El historial de corridas no se puede verificar desde git: Valentino tiene que mirar Actions. hardDeleteClient.ts:141 sigue siendo irreversible."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1324",
+    "id_previo": "RESIL-07",
+    "estado": "abierto",
+    "evidencia": "src/lib/prisma.ts:5-6 sin retry ni opciones de conexión (connect_timeout de la URL no verificable). En contact.ts, el rate limit (:24 → limiter.ts:44, $queryRawUnsafe sin catch) corre antes del try (:61): un cold-start o un fallo de Neon lanza la excepción al visitante. auth.ts:205-231 no se revisó (fuera del lote)."
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+    "linea": 59,
+    "tipo": "tilde",
+    "detalle": "Texto de auditoría visible en /admin/audit-log: 'Marco alerta como vista' → 'Marcó'"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+    "linea": 102,
+    "tipo": "tilde",
+    "detalle": "Texto de auditoría visible: 'Resolvio alerta' → 'Resolvió'"
+   },
+   {
+    "ruta": "src/lib/actions/settings.ts",
+    "linea": 342,
+    "tipo": "copy",
+    "detalle": "El mensaje de prueba del webhook usa un cliente y un ticket inventados ('Concesionaria San Miguel') (código muerto)"
+   },
+   {
+    "ruta": "src/lib/actions/settings.ts",
+    "linea": 204,
+    "tipo": "copy",
+    "detalle": "El email de invitación muestra el nombre del enum 'SUPER_ADMIN' al usuario (código muerto)"
+   },
+   {
+    "ruta": "src/lib/actions/clients.ts",
+    "linea": 30,
+    "tipo": "tilde",
+    "detalle": "'formato valido' → 'válido' (código muerto)"
+   },
+   {
+    "ruta": "src/lib/actions/clients.ts",
+    "linea": 168,
+    "tipo": "tilde",
+    "detalle": "'ID de cliente invalido.' → 'inválido' (código muerto)"
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "El hard-delete y el archivado no protegen la org de la agencia (develOP), que aparece como un cliente más",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Se sostiene solo la mitad del hard-delete, y como guardarraíl faltante, no como hallazgo ALTA. Confirmado por lectura en origin/main@57c421bc: (1) admin/clients/page.tsx:22-24 trae prisma.organization.findMany({where:{deletedAt:null}}) sin excluir slug 'develop', y ClientsListClient.tsx:258-304 tampoco la filtra del lado del cliente; en cambio, admin/projects/page.tsx:11 y projects/[projectId]/layout.tsx:146-147 sí la excluyen ({slug:{not:'develop'}}). (2) hardDeleteClient.ts:125-146 solo hace requireSuperAdmin + Zod + tx.organization.delete, sin chequear el slug. (3) ClientsListClient.tsx:527 usa confirmPhrase='ELIMINAR' fijo, no el nombre. (4) En el schema, BotConfig (1275) y Project (560) están en onDelete: Cascade sobre Organization, y los hijos del bot también caen en cascada; OsLead sobrevive (hardDeleteClient.ts:13-15). (5) La org 'develop' es la del bot público (seed.ts:259-268, ChatWidgetMount.tsx:10 WIDGET_SLUG='develop') y la de los proyectos internos (project.actions.ts:232-238). Un hard-delete de esa fila borra el bot del sitio con sus conversaciones y los leads no convertidos, los proyectos internos con sus hijos, y los tickets y mensajes de esa org; después rompe el widget, activity/health y el alta de proyectos internos. Por qué baja a MEDIA según la rúbrica: el único que puede hacerlo es SUPER_ADMIN (requireSuperAdmin.ts:14), operando dentro de sus permisos. No hay vector anónimo, de cliente ni cross-tenant, así que es una 'validación faltante sin explotación directa'. Requiere un error del operador que pasa una confirmación explícita: elegir exactamente una tarjeta (ClientsListClient.tsx:440) y un modal que muestra en negrita 'Vas a eliminar develOP y todo lo suyo de forma irreversible' con los conteos (536-565) antes de tipear ELIMINAR. Los datos perdidos son de la agencia, no de los clientes: los proyectos de cliente viven en su propia org y los OsLead se preservan. La rotura funcional tiene salida: re-correr el seed vuelve a crear la org y el bot (seed.ts:259-275; project.actions.ts:237 lo indica en el error). Solo el historial es irrecuperable. La parte del archivado no se sostiene: archiveClient.ts:32-35 solo setea deletedAt y es reversible (unarchiveClient, :54-88). git grep 'deletedAt' en src muestra que solo leen Organization.deletedAt la lista de clientes y el dropdown de announcements/page.tsx:26-27. Ni el widget, ni el chat, ni activity/health, ni project.actions filtran por deletedAt, así que archivar develOP no rompe nada salvo moverla de pestaña. 'Sin vuelta atrás' es PROBABLE, no verificado: DR-01 viene del ledger citado en docs/baselines/2026-07-auditoria-seguridad.md:880 (backups fallando 44/44) y la restauración a un punto en el tiempo de Neon no se puede verificar por lectura. Fix sugerido (no FROZEN; ZONA normal): rechazar slug 'develop' en hardDeleteClient y archiveClient del lado del servidor, excluirla o marcarla en la lista, y pedir el nombre exacto de la org como confirmPhrase. Nodos: h4.admin-clientes (h4.admin-clientes.eliminar-cliente, h4.admin-clientes.archivar-cliente), lib.chatbot.admin, modelo.Organization, modelo.BotConfig, modelo.Project.",
+    "evidencia_contra": [
+     "Solo SUPER_ADMIN puede ejecutarlo: hardDeleteClient.ts:126 y archiveClient.ts:17 llaman a requireSuperAdmin (requireSuperAdmin.ts:14 exige role SUPER_ADMIN). No hay vector anónimo, de cliente ni cross-tenant; el deep-link ?delete= toma ticket.organizationId del servidor (admin/tickets/_components/ticket-chat.tsx:242).",
+     "Precondición fuerte de error humano: hay que seleccionar exactamente una tarjeta (ClientsListClient.tsx:440) y el modal muestra en negrita el companyName 'develOP' con conteos y la palabra 'irreversible' (ClientsListClient.tsx:553-565) antes de tipear ELIMINAR.",
+     "El archivado es un soft-delete reversible que solo setea deletedAt (archiveClient.ts:32-35; unarchiveClient en :54-88). git grep deletedAt en origin/main:src muestra que solo leen Organization.deletedAt admin/clients/page.tsx y announcements/page.tsx:26-27. Archivar develOP no rompe widget, chat, activity, health ni project.actions: esa mitad del hallazgo no se sostiene.",
+     "La rotura funcional se recupera re-corriendo el seed: modules/chatbot/prisma/seed.ts:259-275 hace upsert de la org slug 'develop' y del bot; project.actions.ts:237 ya instruye 'ejecutá el seed para crearla'. Solo se pierde el historial.",
+     "Los datos perdidos son de la propia agencia (conversaciones y leads no convertidos del bot público, proyectos internos, tickets y mensajes de la org develOP), no de otros tenants. Los proyectos de clientes viven en su propia org y los OsLead sobreviven a la cascada (hardDeleteClient.ts:13-15, 140).",
+     "'Sin vuelta atrás' no está verificado: DR-01 sale de un ledger previo (docs/baselines/2026-07-auditoria-seguridad.md:880, backups 44/44 fallando) y la restauración a un punto en el tiempo de Neon no es verificable por lectura (PROBABLE)."
+    ]
+   }
+  ]
+ }
+}

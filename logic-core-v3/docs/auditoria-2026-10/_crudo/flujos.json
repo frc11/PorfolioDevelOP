@@ -1954,6 +1954,856 @@
     "sendViaProvider -> client.ts:252-290: POST /messages con D360-API-KEY, timeout de 10 s y reintentos [1 s, 3 s] ante red, timeout o 5xx",
     "Update a SENT con el wamid o a FAILED con el error redactado (sendMessage.ts:247-255)"
    ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "nombre": "Entrada al admin: guard, badges y shell",
+   "pasos": [
+    "proxy (contexto fijo, no releido) -> src/app/(protected)/admin/layout.tsx:41 auth()",
+    "layout.tsx:43-49 sin sesion -> /login; rol != SUPER_ADMIN -> /dashboard",
+    "layout.tsx:52-55 getPendingAlerts (botAlert.count PENDING, unstable_cache 30 s :10-14) + getRevisionResumen (osLeadDossier EN_REVISION :21-32)",
+    "AdminLayoutClient.tsx:74-81 AdminSidebar con badges -> admin-sidebar.tsx:131-195 Links con estado activo y badge",
+    "AdminLayoutClient.tsx:86 AdminTopbar -> admin-topbar.tsx:66-77 breadcrumb y titulo derivados del pathname (heuristica :12-13)",
+    "layout.tsx:65 PageTransition -> PageTransition.tsx:20-28 (solo primer montaje del layout)",
+    "admin-topbar.tsx:85 form action signOutAction -> desemboca en flujo D1 'Logout'"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "nombre": "Dashboard de KPIs (/admin)",
+   "pasos": [
+    "src/app/(protected)/admin/page.tsx:154 AgencyOsPage (sin guard propio)",
+    "page.tsx:165-341 15 consultas Prisma en paralelo (agencySettings, osDemo, osLead, subscription, organization, ticket, project, osMaintenancePayment, osTimeEntry)",
+    "page.tsx:343-350 objetivo semanal, progreso y tasas de respuesta/cierre por estado actual",
+    "page.tsx:353-398 ingresos del mes: agreedAmount reconocido al primer hito + mantenimiento cobrado",
+    "page.tsx:409-544 horas por miembro, series semanales/mensuales, acumulado (let mutado en map :497-500), valor hora",
+    "page.tsx:576-716 StatCard/DualMetricCard/MemberHoursCard + DashboardHistoryCharts",
+    "dashboard-history-charts.tsx:125-318 cuatro charts con ChartEmptyState -> chart-card.tsx:18 role=img + aria-label"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "nombre": "Triage de alertas de bots (/admin/alerts)",
+   "pasos": [
+    "alerts/page.tsx:5 listAlerts() -> sale del lote: src/modules/chatbot/server/admin/manageAlerts.ts:9 (requireSuperAdmin :10, orderBy createdAt desc :24, take 100 :25)",
+    "AlertsClient.tsx:46 estado local; :55-73 stats calculados sobre las filas cargadas",
+    "AlertsClient.tsx:75-85 filtros de severidad y periodo en cliente -> alerts-filters.ts:50-70 matchesDateFilter",
+    "alert-card.tsx:75 'Visto' -> AlertsClient.tsx:87-101 handleAck -> sale del lote: manageAlerts.ts:30 acknowledgeAlert (requireSuperAdmin :32) -> update optimista :97-101",
+    "alert-card.tsx:87 'Resolver' -> AlertsClient.tsx:107-121 -> sale del lote: manageAlerts.ts:75 resolveAlert (requireSuperAdmin :77)",
+    "AlertsClient.tsx:207-275 cap de 4 por columna y 'Ver todas' -> alert-column-overview.tsx:95-158 overlay con Escape y trap de foco",
+    "alert-card.tsx:59 'Ver bot' -> /admin/chatbots/[botId]?tab=overview (flujo D5 'Admin activa, pausa o elimina un bot')"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "nombre": "Deteccion automatica de alertas (prometida, sin disparador)",
+   "pasos": [
+    "alerts/page.tsx:17 copy 'Issues detectados automaticamente cada 15 minutos'",
+    "sale del lote: src/app/api/cron/detect-bot-issues/route.ts:13 runAlertDetector() (endpoint existe)",
+    "netlify.toml:25-32 solo programa generate-insights, send-weekly-reports y cleanup-old-events; vercel.json:2-15 solo os-follow-up, regenerate-briefs, send-executive-reports (git grep detect-bot-issues vacio)",
+    "unico disparo: src/app/api/admin/alerts/trigger-detector/route.ts:12 (manual desde el admin)",
+    "admin/layout.tsx:11 el badge del sidebar cuenta BotAlert PENDING que solo existen si alguien disparo el detector"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "nombre": "Publicar novedad del panel",
+   "pasos": [
+    "announcements/page.tsx:11-31 lee ultimas 100 novedades y orgs activas (deletedAt null)",
+    "announcement-publisher.tsx:53-75 safeParse con CreateAnnouncementSchema en cliente y errores por campo",
+    "announcement-publisher.tsx:78 createAnnouncementAction(parsed.data)",
+    "announcements.actions.ts:18 requireSuperAdmin -> :19 CreateAnnouncementSchema.parse -> :23-31 org existente si audiencia ORG",
+    "announcements.actions.ts:34-39 expiresOn -> fin del dia en UTC (T23:59:59.999Z)",
+    "announcements.actions.ts:41-50 panelAnnouncement.create -> :52-53 revalidatePath('/admin/announcements','/dashboard')",
+    "desemboca en flujo D2 'Novedades del panel' (get-announcements-for-org.ts:37)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "nombre": "Retirar novedad",
+   "pasos": [
+    "announcement-list.tsx:93 abre confirmacion inline -> :75 'Confirmar'",
+    "announcement-list.tsx:37-44 handleDelete: await deleteAnnouncementAction(id) sin mirar result.success",
+    "announcements.actions.ts:66 requireSuperAdmin -> :67 id no vacio -> :69 deleteMany (lecturas en cascada)",
+    "announcement-list.tsx:43 router.refresh()"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "nombre": "Audit log: listado, filtros y carga incremental",
+   "pasos": [
+    "audit-log/page.tsx:8-11 auth() + rol SUPER_ADMIN",
+    "audit-log/page.tsx:13-16 sale del lote: src/lib/audit-log-queries.ts:16 listAuditLog (requireSuperAdmin :21, skip/take :43-44) y :53 getAuditLogStats (:54)",
+    "AuditLogClient.tsx:106-126 changeAction / changeDate / loadMore",
+    "AuditLogClient.tsx:67-104 runQuery con requestSeq anti-race -> audit-filters.ts:21-54 periodToRange",
+    "audit-period-filter.tsx:131-150 presets inmediatos y rango custom con 'Aplicar' (panel portaleado :180-259)",
+    "AuditLogClient.tsx:193-293 tarjetas expandibles -> DiffDisplay :363-377 o DeletionDetail :447-473"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "nombre": "Alta de activo en la boveda de un cliente (admin)",
+   "pasos": [
+    "sale de otro lote: src/components/admin/managers/VaultManager.tsx:25 (montado en clients/[clientId]/_components/tabs/VaultTab.tsx:26)",
+    "agency-actions.ts:98-101 rol SUPER_ADMIN",
+    "agency-actions.ts:103-111 prisma.clientAsset.create con description (placeholder 'Contraseña o instrucciones...', VaultManager.tsx:85) en claro",
+    "agency-actions.ts:113 revalidatePath('/admin/clients')",
+    "desemboca en flujo D2 'Bóveda del cliente' (boveda/page.tsx:129-131 -> resolve-credential.ts:24 devuelve el texto plano)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "nombre": "Tarea para aprobacion del cliente",
+   "pasos": [
+    "sale de otro lote: src/components/admin/managers/ProjectManager.tsx:18 (ProjectsTab.tsx:73)",
+    "agency-actions.ts:19-22 rol SUPER_ADMIN -> :29 assertProjectBelongsToOrg (fix B11.2 F5)",
+    "agency-actions.ts:37-72 transaccion: task PENDING_APPROVAL + notificaciones ACTION_REQUIRED a todos los orgMembers",
+    "agency-actions.ts:75-88 emails ActionRequiredEmail sin await, .catch(console.error), baseUrl con fallback a localhost",
+    "desemboca en flujo D2 'Aprobar o pedir cambios en una entrega'"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L1",
+   "nombre": "Error de render en una pagina admin",
+   "pasos": [
+    "admin/error.tsx:12 / alerts/error.tsx:12 / audit-log/error.tsx:12 -> AdminErrorBoundary.tsx:16-24",
+    "sale del lote: src/components/ui/SectionErrorBoundary.tsx:55 logger.error + :64 Sentry.captureException con tag de seccion (UI sin error.message, ref = digest)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Listado de clientes (activos/archivados, busqueda, filtros, fijados)",
+   "pasos": [
+    "src/app/(protected)/admin/clients/page.tsx:91-94 guard SUPER_ADMIN",
+    "page.tsx:62-65 getClients()/getArchivedClients() con unstable_cache tag 'admin-clients' (:20-40)",
+    "page.tsx:44-59 toListItem (incluye avatarImageUrl base64)",
+    "ClientsListClient.tsx:258-304 filtro/orden/pins (pins en localStorage :71-78)",
+    "ClientsListClient.tsx:468-489 estado vacio | :497-517 grilla de ClientCard",
+    "ClientsListClient.tsx:629-630 Link a /admin/clients/${client.id}"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Archivar y desarchivar cliente",
+   "pasos": [
+    "ClientsListClient.tsx:708-717 boton Archivar (opacity-0 hasta hover)",
+    "ClientsListClient.tsx:750-768 InlineConfirm",
+    "ClientsListClient.tsx:161-172 handleArchive -> toast + router.refresh",
+    "sale del lote: ClientsListClient.tsx:164 -> src/modules/chatbot/server/admin/archiveClient.ts (flujo D6 'Archivar cliente (soft-delete de Organization)')",
+    "ClientsListClient.tsx:733-748 Desarchivar -> :174-185 -> archiveClient.ts (unarchiveClient)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Eliminar cliente (hard-delete) con confirmacion por texto",
+   "pasos": [
+    "ClientsListClient.tsx:609-627 checkbox de seleccion",
+    "ClientsListClient.tsx:437-454 boton Eliminar (solo con 1 seleccionado)",
+    "ClientsListClient.tsx:209-213 openDelete -> :192-207 openDeleteFor -> getClientDeletionSummary",
+    "ClientsListClient.tsx:521-531 TypeToConfirmDialog (frase ELIMINAR) con DeleteSummaryDetail :537-572",
+    "ClientsListClient.tsx:222-243 confirmDelete",
+    "sale del lote: ClientsListClient.tsx:227 -> hardDeleteClient.ts (flujo D6 'Hard-delete de cliente y cascadas')",
+    "ClientsListClient.tsx:248-256 deep-link ?delete=<orgId> abre el mismo dialogo"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Acciones masivas (exportar leads, pausar bots)",
+   "pasos": [
+    "ClientsListClient.tsx:392-466 barra de seleccion",
+    "ClientsListClient.tsx:118-135 handleBulkExportLeads (try/finally sin catch) -> Blob CSV :124-130",
+    "ClientsListClient.tsx:137-154 handleBulkPauseBots con confirm() nativo :138",
+    "sale del lote: ClientsListClient.tsx:121/:142 -> src/lib/bulk-actions.ts:46/:8 (flujo D5 'Admin exporta leads de varios bots')"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Detalle del cliente (shell, switcher y tabs)",
+   "pasos": [
+    "src/app/(protected)/admin/clients/[clientId]/page.tsx:28-31 guard",
+    "page.tsx:33-43 resuelve org por id o slug; :65-68 allClients para el switcher",
+    "page.tsx:75-82 ClientHeader -> ClientHeader.tsx:57-61 ClientSwitcher (router.push ClientSwitcher.tsx:67)",
+    "page.tsx:83 ClientTabsNav (Links ?tab= ClientTabsNav.tsx:32-34)",
+    "page.tsx:85-93 TabContentTransition + Suspense(TabSkeleton) -> tab activo"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Asignar plan (upgrade inmediato / downgrade programado)",
+   "pasos": [
+    "OverviewTab.tsx:72 PlanAssignmentCard",
+    "PlanAssignmentCard.tsx:17-28 lee planes y suscripcion",
+    "PlanAssignmentForm.tsx:39-49 submit (boton deshabilitado si plan == actual :37, :109)",
+    "plan.actions.ts:88-92 requireSuperAdmin + Zod",
+    "plan.actions.ts:101-122 clasifica first_assignment/upgraded/downgraded/unchanged",
+    "plan.actions.ts:137-176 downgrade: pendingPlanId + pendingPlanEffectiveAt (UTC dia 1) + audit",
+    "plan.actions.ts:179-208 upgrade/first: planId (sin tocar price legacy) + reset de QuotaUsage :65-82",
+    "plan.actions.ts:210-235 audit + invalidateOrgPlanCache + revalidatePath",
+    "sale del lote: plan.actions.ts:233 -> src/lib/plan (flujo D6 'Cambio de plan -> precio que ve el cliente')"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Billing override (aplicar / quitar)",
+   "pasos": [
+    "OverviewTab.tsx:73 BillingOverrideCard",
+    "BillingOverrideCard.tsx:11-28 calcula vigente/vencido y 'Se factura'",
+    "BillingOverrideForm.tsx:33-41 estado inicial (precio '0', fecha +90 dias)",
+    "BillingOverrideForm.tsx:50-73 handleSet -> plan.actions.ts:244-313 (Zod, update priceOverride/overrideUntil/overrideReason, audit)",
+    "BillingOverrideForm.tsx:144-151 Quitar -> ConfirmDialog :166-175 -> :75-90 -> plan.actions.ts:320-370"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Editar datos del cliente",
+   "pasos": [
+    "ClientHeader.tsx:135-141 Link a /admin/clients/${client.id}/edit",
+    "edit/page.tsx:11-14 guard; :19-37 org + miembro ADMIN",
+    "EditClientForm.tsx:58-71 validacion client-side; :73-91 submit",
+    "sale del lote: EditClientForm.tsx:79 -> src/modules/chatbot/server/admin/updateClient.ts (requireSuperAdmin :29, safeParse :33-37, revalidatePath :148-149 via git grep)",
+    "EditClientForm.tsx:92 triggerTransition(detalle) | :93-96 error"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Notas internas inline",
+   "pasos": [
+    "OverviewTab.tsx:98 InternalNotesCard",
+    "InternalNotesCard.tsx:39-57 save",
+    "sale del lote: InternalNotesCard.tsx:43 -> src/modules/chatbot/server/admin/updateClientInternalNotes.ts (requireSuperAdmin :20, safeParse :22-23)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Impersonar al cliente",
+   "pasos": [
+    "ClientHeader.tsx:142 ImpersonateButton",
+    "ImpersonateButton.tsx:42-51 ConfirmDialog -> :20-29 handleConfirm",
+    "client.actions.ts:8-10 wrapper",
+    "sale del lote: client.actions.ts:9 -> src/lib/actions/impersonation.ts:12 (flujo D1 'Impersonacion de soporte (SUPER_ADMIN)')"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Re-enviar credenciales al usuario primario",
+   "pasos": [
+    "OverviewTab.tsx:19-25 primer miembro por joinedAt (sin filtrar rol) -> :88-94",
+    "ResendCredentialsButton.tsx:69-89 confirmacion inline -> :15-35 fetch POST",
+    "sale del lote: ResendCredentialsButton.tsx:18 -> /api/admin/users/[userId]/resend-credentials (flujos D1 'Cambio forzado de contrasena (temporal)' e 'Invalidacion de sesion por sessionVersion')",
+    "ResendCredentialsButton.tsx:46-58 muestra la temporal si el email fallo"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Envio manual del reporte ejecutivo",
+   "pasos": [
+    "OverviewTab.tsx:74 ExecutiveReportCard -> ExecutiveReportCard.tsx:20",
+    "SendExecutiveReportButton.tsx:103-123 confirmacion -> :34-65 fetch POST",
+    "sale del lote: SendExecutiveReportButton.tsx:37 -> flujo D2 'Envio manual del reporte (admin)'"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Tab Chatbot del cliente",
+   "pasos": [
+    "ChatbotTab.tsx:15-36 org + botConfig + quotaUsages (mes en hora local :22-23) + 5 leads",
+    "ChatbotTab.tsx:40-56 vacio -> /admin/chatbots/new?organizationId= (la pagina lo lee: chatbots/new/page.tsx:16 via git grep)",
+    "ChatbotTab.tsx:65-99 stats (Quota mensual = botConfig.monthlyQuota :94)",
+    "sale del lote: ChatbotTab.tsx:101 -> src/components/admin/managers/ChatbotManager.tsx",
+    "ChatbotTab.tsx:127-163 accesos a /admin/chatbots/[botId]?tab=..."
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Tab Proyectos y crear entregable",
+   "pasos": [
+    "ProjectsTab.tsx:14-20 proyectos de la org",
+    "ProjectsTab.tsx:22-25 proyecto activo (IN_PROGRESS > REVIEW > primero)",
+    "sale del lote: ProjectsTab.tsx:73 -> ProjectManager -> src/actions/agency-actions.ts:14 createTaskForClientAction (rol :20, assertProjectBelongsToOrg :29 via git grep)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Tab Boveda",
+   "pasos": [
+    "VaultTab.tsx:15-18 assets de la org",
+    "VaultTab.tsx:39-42 resolveCredentialDisplay (descifra en el server)",
+    "VaultTab.tsx:71 VaultRevealButton (client, recibe el valor en claro)",
+    "sale del lote: VaultTab.tsx:26 -> VaultManager -> agency-actions.ts:94 (flujo D2 'Boveda del cliente')"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Tab Soporte",
+   "pasos": [
+    "SupportTab.tsx:15-26 ultimos 10 tickets y 10 mensajes",
+    "SupportTab.tsx:30 'Ver todos' -> /admin/tickets?clientId= (parametro que la pagina no lee)",
+    "SupportTab.tsx:36-38 ticket -> /admin/tickets/[ticketId]",
+    "SupportTab.tsx:55, :61-63 mensajes -> /admin/messages?clientId= y /admin/messages/[orgId]"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Alta de cliente",
+   "pasos": [
+    "ClientsListClient.tsx:352-358 'Nuevo cliente'",
+    "new/page.tsx:14 OnboardingWizard",
+    "sale del lote: new/page.tsx:1 -> flujo D5 'Alta de cliente con bot (asistente)' / 'Alta de cliente con bot desde el wizard admin'"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L2",
+   "nombre": "Redireccion legacy /admin/clients/[x]/chatbot/*",
+   "pasos": [
+    "chatbot/[[...tab]]/page.tsx:20-23 guard (permanentRedirect a /login)",
+    "page.tsx:28-31 org por slug",
+    "page.tsx:33 notFound si no hay bot",
+    "page.tsx:35-38 permanentRedirect a /admin/chatbots/${botId}?tab= (TAB_MAP :6-13)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "nombre": "Kanban outbound: mover un lead de estado por drag",
+   "pasos": [
+    "src/app/(protected)/admin/leads/page.tsx:21 getLeads (unstable_cache, tag admin-leads) -> :23 prisma.osLead.findMany",
+    "page.tsx:202 <OutboundLeadsView leads>",
+    "outbound-leads-view.tsx:28 applyLeadFilters -> :29 groupLeads (lead-pipeline.shared.ts:117)",
+    "lead-pipeline.tsx:227 DndContext -> pipeline-board.tsx:48 DroppableColumn (droppable-column.tsx:22 useDroppable id=status)",
+    "draggable-lead-card.tsx:30 useDraggable -> lead-pipeline.tsx:164 handleDragStart (captura activeDragLead)",
+    "lead-pipeline.tsx:192 handleDragEnd -> :203 targetStatus -> :115 handleMoveStatus (optimista :119; reactivateAt cliente :125-128)",
+    "sale del lote: lead-pipeline.tsx:122 updateLeadStatus -> src/app/(protected)/admin/leads/_actions/lead.actions.ts (ZONA-FRANCO; revalida 'admin-leads' según git grep)",
+    "lead-pipeline.tsx:131-135 rollback + error role=alert (:220) | :139 router.refresh"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "nombre": "Eliminar lead desde la card",
+   "pasos": [
+    "lead-card.tsx:116-123 botón Eliminar (stopPropagation) -> :184 InlineConfirm",
+    "lead-card.tsx:187-190 onConfirm -> onDelete",
+    "lead-pipeline.tsx:143 handleDelete (optimista removeLead :147)",
+    "sale del lote: lead-pipeline.tsx:150 deleteLead -> admin/leads/_actions/lead.actions.ts (ZONA-FRANCO)",
+    "lead-pipeline.tsx:153 rollback | :160 router.refresh"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "nombre": "Alta y edición de lead outbound",
+   "pasos": [
+    "page.tsx:159 <LeadForm/> | [leadId]/page.tsx:277 <LeadForm lead triggerLabel='Editar'>",
+    "lead-form.tsx:157 abre modal portalizado (:164-168)",
+    "lead-form.tsx:129 CreateLeadSchema.safeParse (cliente; schema compartido lead-form.tsx:13)",
+    "sale del lote: lead-form.tsx:140-141 updateLead/createLead -> admin/leads/_actions/lead.actions.ts (ZONA-FRANCO)",
+    "lead-form.tsx:143-145 error del servidor | :148-149 cierra + router.refresh"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "nombre": "Ficha del lead: estado, setter, demos, actividad y reunión",
+   "pasos": [
+    "lead-card.tsx:69 router.push(`/admin/leads/${lead.id}`)",
+    "[leadId]/page.tsx:183 osLead.findUnique + :212 user.findMany(role SETTER) + :225 cargarCargaSetters (sale: src/lib/leados/setter-carga, ZONA-FRANCO)",
+    "[leadId]/page.tsx:279 ChangeStatusSelect -> change-status-select.tsx:37 updateLeadStatus (sale: lead.actions.ts)",
+    "[leadId]/page.tsx:412 AssignSetterControl -> assign-setter-control.tsx:63 assignLeadSetter (sale: lead.actions.ts)",
+    "[leadId]/page.tsx:427 LeadDemosPanel -> demo-form.tsx:113 createDemo / :246 markDemoViewed (sale: demo.actions.ts)",
+    "[leadId]/page.tsx:401 LeadActivityFeed -> lead-activity-feed.tsx:75 createActivity (sale: activity.actions.ts)",
+    "[leadId]/page.tsx:229-230 parseAgenda (sale: src/lib/leados/flow) -> :296 ReunionPanel -> reunion-panel.tsx:61 marcarReunionRealizada / :73 registrarResultadoReunion (sale: reunion.actions.ts)",
+    "[leadId]/page.tsx:281-289 'Convertir a proyecto' deshabilitado (sin action conectada)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "nombre": "Inbound: listar por período y convertir a Lead OS",
+   "pasos": [
+    "inbound-period-filter.tsx:72 Link ?tab=inbound&period= -> page.tsx:111",
+    "sale del lote: page.tsx:118 listInboundLeads -> admin/leads/_actions/inbound.actions.ts (ZONA-FRANCO)",
+    "page.tsx:212 <InboundLeadsTable> (inbound-leads-table.tsx:100 tabla md+, :161 cards mobile)",
+    "inbound-leads-table.tsx:143 handleConvert -> sale del lote: :52 convertInboundToLead -> inbound.actions.ts",
+    "inbound-leads-table.tsx:61-67 marca 'Ya convertido' + router.refresh"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "nombre": "Demanda de módulos",
+   "pasos": [
+    "sale del lote: page.tsx:120 listModuleDemand -> admin/leads/_actions/module-demand.actions.ts (ZONA-FRANCO)",
+    "page.tsx:204-205 <ModuleDemandTable> -> module-demand-table.tsx:30 vacío | :50 ranking con <details> por org (:100)",
+    "origen de los datos: D2 'Vitrina de servicios y avisame cuando esté' (upsell.ts:81)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "nombre": "Bandeja de mensajes del admin: abrir conversación y marcar leído",
+   "pasos": [
+    "messages/layout.tsx:17 Suspense -> conversation-list-loader.tsx:10 listConversations",
+    "message.actions.ts:44 requireSuperAdmin -> :46 organization.findMany (orgs con mensajes) -> :78 groupBy no leídos",
+    "conversation-list.tsx:104 Link /admin/messages/${organizationId}",
+    "[orgId]/page.tsx:24 markAsRead -> message.actions.ts:213 updateMany read=true -> :224 revalidatePath lanza E7 (render) -> :227 fail descartado",
+    "[orgId]/page.tsx:27 organization.findUnique (sin guard) + :34 getConversation (message.actions.ts:141-151)",
+    "message-thread.tsx:30 MessageBubble por mensaje / :42 vacío"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L3",
+   "nombre": "Admin responde a un cliente (mensaje + email)",
+   "pasos": [
+    "message-input.tsx:63 Enter / :88 submit -> :42 sendMessage(organizationId, content)",
+    "message.actions.ts:173 requireSuperAdmin -> :174 SendMessageSchema -> :177 message.create fromAdmin=true",
+    "sale del lote: message.actions.ts:193 queueAdminMessageEmail -> src/lib/email/admin-message-notification.ts:19 (void async, sin after)",
+    "message.actions.ts:199 revalidateMessagePaths -> message-input.tsx:49-50 limpia + router.refresh",
+    "el cliente lo ve en D2 'Mensajes con develOP'"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "nombre": "Tablero de proyectos: listar, filtrar y mover de estado",
+   "pasos": [
+    "admin/projects/page.tsx:19-22: el RSC pide listProjects() y las orgs (unstable_cache sin guard, :7-16)",
+    "_actions/project.actions.ts:934: requireSuperAdmin; :936-1007: findMany global con horas, hitos y mantenimiento",
+    "_actions/project.actions.ts:449-503: serializeProjectListItem. isInternal por slug develop (:454), startDate derivado (:477), null si no hay señales (:382-384)",
+    "_components/projects-board.tsx:89-92: filterProjects en memoria con DEFAULT_FILTERS (projects-filters.ts:62-67, inicio 6m)",
+    "_components/projects-filters.ts:158-164: con startDate null la card queda oculta salvo con 'Todos'",
+    "_components/project-list.tsx:73-136: columnas droppables (droppable-project-column.tsx:23) y cards draggables (draggable-project-card.tsx:37-40)",
+    "_components/projects-board.tsx:130-143 -> :100-120: drop optimista y updateProjectStatus",
+    "_actions/project.actions.ts:722-780: requireSuperAdmin, Zod, update de status (+deliveredAt en COMPLETED, :751-753) y revalidatePath (:768-774)",
+    "_components/projects-board.tsx:118: router.refresh()"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "nombre": "Alta y edición de proyecto",
+   "pasos": [
+    "_components/projects-board.tsx:192 y [projectId]/layout.tsx:232-246: ProjectForm (orgs sin filtrar deletedAt, layout.tsx:140-153 / page.tsx:9-13)",
+    "_components/project-form.tsx:152-172: arma el payload y corre CreateProjectSchema.safeParse en el cliente",
+    "_actions/project.actions.ts:593-602: requireSuperAdmin, Zod, resolveProjectOrganization (:225-258, null => org develop) y syncOrganizationService (:260-300, crea o activa un Service en la org)",
+    "_actions/project.actions.ts:604-620: project.create y createDefaultMilestones 50/50 si hay monto (:302-346)",
+    "_actions/project.actions.ts:643-720: updateProject. Los campos vacíos se ignoran (:680-690) y no crea hitos",
+    "_components/project-form.tsx:182-188: error crudo en serverError, o closeModal + router.refresh"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "nombre": "Ficha del proyecto: resumen, estado y ver como cliente",
+   "pasos": [
+    "[projectId]/layout.tsx:105-108: auth(); :113-153: proyecto + todas las orgs; :160: callerCanAccessOrg sin chequeo de rol",
+    "[projectId]/page.tsx:99-167: auth() + findUnique + callerCanAccessOrg; render del resumen y las finanzas",
+    "[projectId]/_components/project-status-control.tsx:43-63 -> _actions/project.actions.ts:722 -> router.refresh (:62)",
+    "[projectId]/layout.tsx:219: form startImpersonationAction. Desemboca en el flujo D1 'Impersonacion de soporte (SUPER_ADMIN)'"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "nombre": "Eliminar proyecto (tablero y ficha)",
+   "pasos": [
+    "_components/draggable-project-card.tsx:84-115: tacho + InlineConfirm",
+    "_components/projects-board.tsx:149-166: borrado optimista + deleteProject",
+    "_actions/project.actions.ts:782-831: requireSuperAdmin, Zod, deleteMany explícitos (:806-810) + delete, sin auditoría; error.message crudo en el catch (:829)",
+    "[projectId]/page.tsx:325-334 -> [projectId]/_components/delete-project-button.tsx:58-85: modal de confirmación + useFormStatus",
+    "sale del lote: [projectId]/_components/delete-project-button.tsx:75 -> src/lib/actions/projects.ts:108 (deleteProjectAction: cast de FormData :111, prisma.project.delete :114, redirect)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "nombre": "Pagos: hitos y mantenimiento mensual",
+   "pasos": [
+    "[projectId]/payments/page.tsx:70-104: loader sin guard propio; proyecto, hitos y mantenimiento por projectId",
+    "[projectId]/payments/page.tsx:154-160 -> _actions/milestone.actions.ts:19-47: requireSuperAdmin, Zod, paidAt=now, revalidate. El ActionResult se descarta",
+    "[projectId]/payments/page.tsx:184-190: aparece solo si hay maintenanceStartDate, que ninguna UI escribe -> _actions/maintenance.actions.ts:90-174 (createMany con skipDuplicates sobre schema.prisma:1047)",
+    "[projectId]/payments/page.tsx:248-253 y :298-303 -> _actions/maintenance.actions.ts:60-88"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "nombre": "Tareas del proyecto y envío a aprobación del cliente",
+   "pasos": [
+    "[projectId]/tasks/page.tsx:17-53: proyecto + lista de SUPER_ADMIN, sin guard propio",
+    "sale del lote: [projectId]/tasks/page.tsx:34 -> src/app/(protected)/admin/team/_actions/task.actions.ts:321 (listTasksByProject)",
+    "_components/task-form.tsx:108-163: validación en el cliente; sale del lote: :144 -> task.actions.ts:197 (updateTask) / :148 -> task.actions.ts:155 (createTask)",
+    "_components/task-list.tsx:187-211: cambio rápido de estado (drag HTML5 :321-337); sale del lote: :196 -> task.actions.ts:197",
+    "_components/task-list.tsx:230-250 + modal :567-604; sale del lote: :238 -> task.actions.ts:231 (deleteTask)",
+    "_components/task-list.tsx:618-631: el botón aparece solo con DONE y sin approvalStatus; sale del lote: :628 -> src/lib/actions/projects.ts:177 (sendTaskForApprovalAction). Desemboca en el flujo D2 'Aprobar o pedir cambios en una entrega'"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L4",
+   "nombre": "Horas del proyecto",
+   "pasos": [
+    "[projectId]/hours/page.tsx:28: requireSuperAdmin; :30-52: proyecto y tareas",
+    "sale del lote: [projectId]/hours/page.tsx:58 -> src/app/(protected)/admin/team/_actions/time-entry.actions.ts:270 (listTimeEntriesByProject)",
+    "[projectId]/hours/page.tsx:114-124: TimeEntryPanel solo con tareas propias o sin asignar",
+    "_components/time-entry-panel.tsx:138-179: validación en el cliente; sale del lote: :159 -> time-entry.actions.ts:136 (createTimeEntry)",
+    "_components/time-entry-panel.tsx:181-201 + modal :409-446; sale del lote: :189 -> time-entry.actions.ts:243 (deleteTimeEntry)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Configuración: guardar datos de contacto, alertas, meta de demos y Telegram",
+   "pasos": [
+    "src/app/(protected)/admin/settings/page.tsx:6-9 — getSettings() + listTeamMembers()",
+    "src/app/(protected)/admin/settings/_actions/settings.actions.ts:87-121 — requireSuperAdmin :88, ensureAgencySettingsRecord :38-52, maskSecret del token :109",
+    "src/app/(protected)/admin/settings/_components/settings-console.tsx:100-115 — saveAllSettings → updateSettings(draft)",
+    "settings.actions.ts:141-166 — requireSuperAdmin :142, UpdateSettingsSchema.parse :143, agencySettings.update :148",
+    "settings-console.tsx:117-132 — toast.error / toast.success + router.refresh()",
+    "src/lib/alerts.ts:111-129 — sendAgencyAlert lee alertWebhookUrl y toggles (consumidor de lo guardado)",
+    "sale del lote: settings.actions.ts:161 (osTelegramBotToken) -> src/lib/notifications/telegram.ts:41 (resolveTelegramCredentials, config-first con fallback a env)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Configuración: cambiar el precio de un módulo premium",
+   "pasos": [
+    "settings-console.tsx:404-407 — botón Guardar de la fila → saveModulePricing :136-141 (Number(input), '' → 0)",
+    "settings.actions.ts:175-191 — requireSuperAdmin :180, UpdateModulePricingSchema.parse :181, premiumModule.findUnique por slug :185",
+    "settings.actions.ts:193-199 — premiumModule.update priceMonthlyUsd + revalidatePath('/dashboard/services')",
+    "sale del lote: desemboca en el flujo D6 «Catálogo de módulos premium: código -> sitio público / DB -> portal y gates»"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Tickets: bandeja, detalle, respuesta y cambio de estado",
+   "pasos": [
+    "src/app/(protected)/admin/tickets/page.tsx:6 — listTickets()",
+    "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts:51-94 — requireSuperAdmin :52, ListTicketsSchema :53, findMany sin take :59",
+    "src/app/(protected)/admin/tickets/_components/ticket-list.tsx:86-113 — filtro por updatedAt (default '1m' de ticket-date-filter.tsx:88,:123) y tab de estado",
+    "ticket-list.tsx:166-167 — Link a /admin/tickets/[id]",
+    "src/app/(protected)/admin/tickets/[ticketId]/page.tsx:13-18 — getTicketById (ticket.actions.ts:133-184); cualquier fallo → notFound()",
+    "ticket-chat.tsx:99-115 — handleStatusChange → updateTicketStatusAction (sale del lote: src/lib/tickets/actions.ts)",
+    "ticket-reply-form.tsx:53-67 — replyToTicketAction({ ticketId, content }) + router.refresh()",
+    "sale del lote: src/lib/tickets/actions.ts → flujo D2 «Responder ticket (cliente y admin)»"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Solicitud de eliminación de cuenta vista desde un ticket",
+   "pasos": [
+    "ticket-chat.tsx:118-119 — isDeletionRequest = ticket.title === 'Solicitud de eliminación de cuenta'",
+    "ticket-chat.tsx:224-247 — banner '¿Aprobar solicitud de eliminación?' + Link /admin/clients?delete=<organizationId>",
+    "sale del lote: src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:251 → flujo D6 «Eliminar cliente (hard-delete) y su cascada»"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Referidos: confirmar conversión y mes bonificado",
+   "pasos": [
+    "src/app/(protected)/admin/referrals/page.tsx:9-29 — referral.findMany take 200 sin guard propio",
+    "referrals-admin-table.tsx:79-101 — botón según estado → run() :35-42 (ignora el ActionResult)",
+    "referrals.admin.actions.ts:13-26 — requireSuperAdmin :15, updateMany PENDING→CONVERTED :18-21",
+    "referrals.admin.actions.ts:36-49 — CONVERTED→REWARDED + rewardedAt :41-44",
+    "revalidatePath('/dashboard/referidos') :48 → flujo D2 «Referidos: código, link y atribución pública»"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Equipo: workload por miembro",
+   "pasos": [
+    "src/app/(protected)/admin/team/page.tsx:19-36 — usuarios SUPER_ADMIN",
+    "team/page.tsx:43-102 — tareas asignadas (todas, incl. DONE) + groupBy de horas semana/mes en hora del servidor (:5-16)",
+    "team/page.tsx:127-170 — agrupado por proyecto y activeTasksCount",
+    "member-workload.tsx:215-266 → ProjectSection :152-213 → Link /admin/projects/[id]/tasks :202-207"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Carga de horas en un proyecto",
+   "pasos": [
+    "sale del lote (origen): src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:8-11 importa createTimeEntry/deleteTimeEntry; manda date 'YYYY-MM-DD' (:162, :252)",
+    "time-entry.actions.ts:140-162 — userId de sesión; rechaza tareas de otro",
+    "time-entry.schemas.ts:33 — z.coerce.date() (medianoche UTC)",
+    "time-entry.actions.ts:164-186 — autoasigna tarea sin dueño y crea OsTimeEntry en $transaction",
+    "listado: src/app/(protected)/admin/projects/[projectId]/hours/page.tsx:58 → time-entry.actions.ts:270-302"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Tareas de proyecto (crear, editar, borrar)",
+   "pasos": [
+    "sale del lote (origen): src/app/(protected)/admin/projects/_components/task-form.tsx:7-10 importa createTask/updateTask",
+    "task.actions.ts:155-191 — requireSuperAdmin, CreateTaskSchema, posición por aggregate en $transaction",
+    "sale del lote (origen): task-list.tsx:17-20 → task.actions.ts:197-225 (updateTask) / :231-257 (deleteTask)",
+    "task.actions.ts:89-99 — revalidateTaskPaths incl. /dashboard/project"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Detector de alertas de bots disparado a mano",
+   "pasos": [
+    "src/app/(protected)/admin/settings/alerts/page.tsx:7-22 — auth inline + conteos de BotAlert",
+    "AlertSettingsClient.tsx:85-97 — fetch POST /api/admin/alerts/trigger-detector",
+    "src/app/api/admin/alerts/trigger-detector/route.ts:5-13 — rol SUPER_ADMIN → runAlertDetector()",
+    "sale del lote: route.ts:3 -> src/modules/chatbot/server/admin/detectBotIssues.ts → flujo D5 «Detector de incidencias de bots»"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Envío manual de reportes semanales del chatbot",
+   "pasos": [
+    "src/app/(protected)/admin/settings/reports/page.tsx:7-28 — auth inline + historial REPORT.WEEKLY_SENT",
+    "ReportSettingsClient.tsx:30-42 — fetch POST /api/admin/reports/send-now (sin confirmación)",
+    "src/app/api/admin/reports/send-now/route.ts:5-13 — rol SUPER_ADMIN → sendWeeklyReports()",
+    "sale del lote: route.ts:3 -> src/modules/chatbot/server/reports/sendWeeklyReports.ts → flujo D5 «Reporte semanal del chatbot por email»"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Reenviar credenciales a un usuario",
+   "pasos": [
+    "sale del lote (origen): src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx:18 — fetch POST",
+    "resend-credentials/route.ts:16-37 — rol SUPER_ADMIN + rate limit por admin",
+    "route.ts:39-58 — zod del userId + findUnique (sin filtro de rol destino, orgMemberships take:1 sin orderBy)",
+    "route.ts:60-73 — temp password + passwordResetRequired + sessionVersion++",
+    "route.ts:85-105 — Brevo y luego audit log",
+    "route.ts:109-113 — devuelve tempPassword si el envío falló",
+    "desemboca en el flujo D1 «Cambio forzado de contrasena (temporal)»"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Reporte ejecutivo semanal enviado a mano para una org",
+   "pasos": [
+    "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:13-19 — requireSuperAdmin (403 siempre por el chequeo 'UNAUTHORIZED' :17)",
+    "route.ts:35-48 — rate limit por admin",
+    "route.ts:50-57 — OrganizationIdSchema y sendExecutiveWeeklyReportManual",
+    "route.ts:62-91 — audit log y respuesta",
+    "ya trazado: flujo D2 «Envío manual del reporte (admin)»"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Contacto público y atribución de referido",
+   "pasos": [
+    "src/app/contact/page.tsx:71-75 — lee ?ref del querystring en un efecto",
+    "contact/page.tsx:119 — la sección con el formulario es hidden por debajo de lg",
+    "contact/page.tsx:148-149 — form action + input hidden referralCode → useActionState(submitContactForm) :66",
+    "sale del lote: src/lib/actions/contact.ts:100 → flujo D2 «Referidos: código, link y atribución pública»"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Alertas de la agencia por webhook (inmediatas y periódicas)",
+   "pasos": [
+    "sale del lote (origen): src/lib/tickets/actions.ts:8, src/lib/actions/contact.ts:6, messages.ts:4, upsell.ts:4, referrals.service.ts:4 importan sendAgencyAlert",
+    "src/lib/alerts.ts:109-129 — lee AgencySettings y el toggle del tipo de evento",
+    "alerts.ts:131-146 — POST al webhook con timeout 8 s; fallos solo console.error",
+    "periódicas: src/app/api/cron/alerts/route.ts:2 → alerts.ts:195-296 (sin disparador en netlify.toml ni vercel.json)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Acciones masivas sobre clientes",
+   "pasos": [
+    "sale del lote (origen): src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:16 importa bulkExportLeads/bulkPauseBots",
+    "src/lib/bulk-actions.ts:8-26 — pausa bots de las orgs elegidas",
+    "bulk-actions.ts:28-39 — audit log por bot pausado",
+    "bulk-actions.ts:46-79 — export CSV de todos los leads de las orgs elegidas (sin auditoría, sin neutralizar fórmulas)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Audit log: lectura y escritura",
+   "pasos": [
+    "sale del lote (origen): src/app/(protected)/admin/audit-log/page.tsx:4 importa getAuditLogStats/listAuditLog",
+    "src/lib/audit-log-queries.ts:16-51 — paginación pageSize+1, filtros sin validar",
+    "audit-log-queries.ts:53-70 — estadísticas de 7 días",
+    "escritura: src/lib/audit-log.ts:17-42 — IP del primer X-Forwarded-For :20-21; error tragado en console.error :39-41"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L5",
+   "nombre": "Ficha del cliente: tabs Chatbot, Proyectos y Bóveda",
+   "pasos": [
+    "sale del lote (origen): admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx:101 → src/components/admin/managers/ChatbotManager.tsx:35-157 (cuota en tokens :68-70)",
+    "sale del lote (origen): tabs/ProjectsTab.tsx:7 → ProjectManager.tsx:12-26 → src/actions/agency-actions.ts:14 (assertProjectBelongsToOrg :29)",
+    "sale del lote (origen): tabs/VaultTab.tsx:6 → VaultManager.tsx:19-34 → src/actions/agency-actions.ts:94 → flujo D2 «Bóveda del cliente»"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "nombre": "Editar datos del cliente (admin)",
+   "pasos": [
+    "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:79 await updateClient({...})",
+    "src/modules/chatbot/server/admin/updateClient.ts:29 requireSuperAdmin()",
+    "updateClient.ts:33-37 normalizeWebsiteUrl + safeParse; error → throw new Error(zodErrorToMessage(...))",
+    "updateClient.ts:42-65 lee Organization + primer OrgMember ADMIN (orderBy joinedAt)",
+    "updateClient.ts:71-81 chequeo de unicidad global de email",
+    "updateClient.ts:83-119 $transaction: organization.update + user.update (email/nombre/teléfono)",
+    "sale del lote: updateClient.ts:121 -> src/lib/audit-log.ts (logAdminAction)",
+    "updateClient.ts:148-149 revalidatePath /admin/clients y /admin/clients/[id] (sin revalidateTag 'admin-clients')",
+    "EditClientForm.tsx:93-94 catch muestra err.message"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "nombre": "Notas internas inline del cliente",
+   "pasos": [
+    "src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx:43 updateClientInternalNotes({...})",
+    "src/modules/chatbot/server/admin/updateClientInternalNotes.ts:20 requireSuperAdmin()",
+    "updateClientInternalNotes.ts:22-25 safeParse; vacío → null",
+    "updateClientInternalNotes.ts:29-38 lee y actualiza Organization.internalNotes",
+    "sale del lote: updateClientInternalNotes.ts:40 -> src/lib/audit-log.ts",
+    "updateClientInternalNotes.ts:54 revalidatePath",
+    "InternalNotesCard.tsx:52-53 catch muestra err.message"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "nombre": "Archivar / desarchivar cliente",
+   "pasos": [
+    "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:164 archiveClient({ organizationId })",
+    "src/modules/chatbot/server/admin/archiveClient.ts:17 requireSuperAdmin()",
+    "archiveClient.ts:25-30 lee org; ya archivada → throw",
+    "archiveClient.ts:32-35 organization.update deletedAt = now (sin excluir la org de la agencia)",
+    "sale del lote: archiveClient.ts:37 -> src/lib/audit-log.ts (actionType CLIENT_UPDATED)",
+    "archiveClient.ts:48-49 revalidateTag('admin-clients') + revalidatePath",
+    "desemboca en flujo D6 'Archivar cliente (admin): soft-delete que solo oculta del listado'"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "nombre": "Eliminar cliente definitivamente (hard-delete)",
+   "pasos": [
+    "ClientsListClient.tsx:196 getClientDeletionSummary({ organizationId })",
+    "src/modules/chatbot/server/admin/hardDeleteClient.ts:110-122 guard + safeParse + gatherDeletionSummary (:39-104; cuenta proyectos/tickets/mensajes/assets/bot, no usuarios)",
+    "ClientsListClient.tsx:522-527 TypeToConfirmDialog con confirmPhrase=\"ELIMINAR\" (frase genérica)",
+    "ClientsListClient.tsx:227 hardDeleteClient({ organizationId })",
+    "hardDeleteClient.ts:126-129 guard + safeParse",
+    "hardDeleteClient.ts:133-145 $transaction: resumen + tx.organization.delete (:141)",
+    "prisma/schema.prisma:527-528 OrgMember onDelete Cascade: se borra la membresía, el User queda",
+    "sale del lote: hardDeleteClient.ts:166 -> src/lib/audit-log.ts (CLIENT_DELETED, fuera de la tx)",
+    "hardDeleteClient.ts:181-182 revalidateTag + revalidatePath",
+    "desemboca en flujo D6 'Eliminar cliente (hard-delete) y su cascada'"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "nombre": "Alertas: listar, marcar vista y resolver",
+   "pasos": [
+    "src/app/(protected)/admin/alerts/page.tsx:5 await listAlerts() (sin filtro)",
+    "src/modules/chatbot/server/admin/manageAlerts.ts:9-27 requireSuperAdmin + botAlert.findMany cross-org orderBy createdAt desc take 100",
+    "src/app/(protected)/admin/alerts/AlertsClient.tsx:90 acknowledgeAlert(id)",
+    "manageAlerts.ts:31-51 parse cuid + guard + findUnique + update status ACKNOWLEDGED (sin chequear estado previo)",
+    "sale del lote: manageAlerts.ts:54 -> src/lib/audit-log.ts",
+    "manageAlerts.ts:70-71 revalidatePath + revalidateTag('admin-alerts-count')",
+    "AlertsClient.tsx:110 resolveAlert(id) -> manageAlerts.ts:75-115 (mismo esquema, status RESOLVED)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "nombre": "Eliminar proyecto desde el detalle admin",
+   "pasos": [
+    "src/app/(protected)/admin/projects/[projectId]/page.tsx:323 zona de peligro",
+    "src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx:59-84 diálogo de confirmación; :75 <form action={deleteProjectAction}>",
+    "src/lib/actions/projects.ts:109 requireSuperAdmin() (lanza)",
+    "projects.ts:111-114 prisma.project.delete por id (cascada de hitos, mantenimiento, horas y tareas según project.actions.ts:803)",
+    "projects.ts:116-117 revalidatePath('/admin/projects') + redirect (sin auditoría)"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "nombre": "Enviar entrega a aprobación del cliente",
+   "pasos": [
+    "src/app/(protected)/admin/projects/_components/task-list.tsx:618-630 botón visible si DONE y sin approvalStatus; startTransition sin try/catch",
+    "src/lib/actions/projects.ts:178 requireSuperAdmin()",
+    "projects.ts:184-189 lee task + project; org = task.project.organizationId",
+    "projects.ts:191-204 $transaction: task.approvalStatus = PENDING_APPROVAL + message.create fromAdmin a la org",
+    "projects.ts:206-208 revalidatePath admin y dashboard",
+    "desemboca en flujo D2 'Aprobar o pedir cambios en una entrega'"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "nombre": "Formulario público de contacto",
+   "pasos": [
+    "src/app/contact/page.tsx:66 useActionState(submitContactForm)",
+    "src/lib/actions/contact.ts:100-105 submitContactForm -> contactFormAction",
+    "contact.ts:23-27 rate limit por IP hash FUERA del try (sale del lote: src/lib/security/auth-rate-limit.ts y src/lib/rate-limit/limiter.ts:44)",
+    "contact.ts:35-47 ContactFormSchema (src/lib/actions/schemas.ts:56-65, sin .max())",
+    "contact.ts:62-64 contactSubmission.create",
+    "sale del lote: contact.ts:69 -> src/lib/referrals/referrals.service.ts (flujo D2 'Referidos: código, link y atribución pública')",
+    "sale del lote: contact.ts:72-77 -> src/lib/alerts.ts sendAgencyAlert sin await, .catch(() => {})",
+    "sale del lote: contact.ts:82-85 -> src/lib/n8n.ts sendLeadToN8n (error solo a consola :87-90)",
+    "src/app/contact/page.tsx:212-213 muestra state.error"
+   ]
+  },
+  {
+   "ciclo": "D3-c1",
+   "lote": "D3-L6",
+   "nombre": "Demanda medida de módulos premium (admin)",
+   "pasos": [
+    "src/app/(protected)/admin/leads/_actions/module-demand.actions.ts:25 requireSuperAdmin (ZONA-FRANCO, fuera del lote)",
+    "module-demand.actions.ts:27-28 organizationModule.findMany upsellRequestCount > 0",
+    "module-demand.actions.ts:50 rankModuleDemand(...).map(serializeModuleDemand)",
+    "src/lib/modules/demand.ts:87-134 agrega por módulo (orgs distintas, total, última) y ordena",
+    "demand.ts:137-153 serializa Dates a ISO",
+    "src/app/(protected)/admin/leads/_components/module-demand-table.tsx:3 consume SerializedModuleDemand"
+   ]
   }
  ]
 }

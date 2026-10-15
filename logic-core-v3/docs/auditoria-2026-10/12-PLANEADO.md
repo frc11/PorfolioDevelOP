@@ -7,7 +7,7 @@
 ## Resumen
 
 - Ítems: **1351** — por tipo: decision 212 · hecho-declarado 443 · idea 56 · pendiente 556 · promesa 6 · bloque 78.
-- Estado en código: hecho 265 · parcial 106 · no empezado 222 · abandonado 8 · contradicho 11 · por cruzar 739.
+- Estado en código: hecho 304 · parcial 128 · no empezado 258 · abandonado 10 · contradicho 14 · por cruzar 637.
 - ZONA-FRANCO: 361 ítems.
 - TODO/FIXME en el código de `origin/main`: 70 (`_crudo/todos-codigo.json`).
 
@@ -4398,24 +4398,24 @@
 - Nodo(s): h4.adm-alertas
 - Qué es: Badge que se revalida, Zod en alertId, seed, filtros de fecha, overview por columna, 'Ver bot' con <Link> y cap uniforme de columnas.
 - Referencias: 404b224 · e90a195 · e60dca4 · a665ffc · 5f73f80 · 8be5a26 +12
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — manageAlerts.ts:71/:114 revalidateTag('admin-alerts-count'); :31/:76 alertIdSchema (cuid, manageAlerts.schemas.ts:3); scripts/dev/seed-alerts.ts; alerts/_components/alerts-date-filter.tsx; alert-column-overview.tsx; alert-card.tsx:3 import Link y :66 'Ver bot'; AlertsClient.tsx:206-208 VISIBLE_CAP (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-544] Filtros de alertas al server
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:51` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-19
 - Nodo(s): h4.adm-alertas
 - Qué es: Hoy filtran en el cliente. Si el volumen crece, bajar el filtrado a listAlerts. No es urgente.
 - Referencias: listAlerts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — AlertsClient.tsx:75-85 filtra en cliente; listAlerts corta en take 100 (manageAlerts.ts:25) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-545] alerts-detector.spec.ts no corre bajo test:integration
 - Fuente: `docs/bitacora-roadmap.md:12400` · tipo: pendiente · estado declarado: pendiente (decisión)
 - Nodo(s): h4.adm-alertas
 - Qué es: 7 fallos por falta de baseURL/webServer; decidir config dedicada o corrida manual.
 - Referencias: tests/integration/alerts-detector.spec.ts · también en fuente:12493
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — playwright.integration.config.ts:41 `testIgnore: ['**/alerts-detector.spec.ts']`; no hay config dedicada; el spec usa rutas relativas sin baseURL (alerts-detector.spec.ts:26) (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h4.adm-audit — Audit log
 
@@ -4424,40 +4424,40 @@
 - Nodo(s): h4.adm-audit
 - Qué es: Hover en filas y stat cards. Paginación load-more server-side (cambia el contrato de listAuditLog). Filtros de fecha y acción en el server con anti-race.
 - Referencias: lane/config-audit · 53ba0cf · 0daa5bb · 401bd9c · 2c51a90 · src/lib/audit-log-queries.ts +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — AuditLogClient.tsx:208 y :325 adminHoverCls; :67-104 runQuery server-side con requestSeq (:65, :72, :86); audit-log-queries.ts:43-44 skip/take (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-547] Stat cards del Audit log globales
 - Fuente: `_insumos/drive/Olme/Ideas de nuevas features.md:56` · tipo: decision · estado declarado: hecho · fecha: 2026-06-20
 - Nodo(s): h4.adm-audit
 - Qué es: Se decidió que muestren los últimos 7 días globales y no el filtro activo. Si se cambia, hay que agregar el filtro al contrato de getAuditLogStats. La decisión sigue abierta a revisión.
 - Referencias: getAuditLogStats
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — audit-log/page.tsx:15 getAuditLogStats() sin filtros; AuditLogClient.tsx:149-151 no se recalcula al filtrar (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-548] Dropdown de período duplicado
 - Fuente: `_insumos/drive/Olme/Ideas de nuevas features.md:66` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-20
 - Nodo(s): h4.adm-audit
 - Qué es: audit-period-filter copia ProjectsPeriodDropdown. No se importó por la regla anti-acople del trabajo en paralelo. Unificar.
 - Referencias: audit-log/_components/audit-period-filter.tsx · ProjectsPeriodDropdown · tambien en Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:91
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — audit-period-filter.tsx:26 'Réplica LOCAL del look del dropdown de proyectos'; projects/_components/projects-period-dropdown.tsx:73 sigue existiendo; alerts-date-filter.tsx es una tercera variante (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-549] AdminAuditLog sin targetOrganizationId (P1-5 del audit de DB)
 - Fuente: `docs/bitacora-roadmap.md:2480` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h4.adm-audit
 - Qué es: Solo tiene targetType + targetId; no hay filtro por org en la UI del audit.
 - Referencias: prisma/schema.prisma
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n targetOrganizationId origin/main -- logic-core-v3/prisma/schema.prisma: vacío. Control: schema.prisma:1652 'model AdminAuditLog {' (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-550] Valor BOT_DELETED en AuditActionType
 - Fuente: `raiz:lane-LOG.md:39` · tipo: pendiente · estado declarado: pendiente de coordinación
 - Nodo(s): h4.adm-audit
 - Qué es: Hoy se audita como OTHER con metadata.subAction; requiere migración aditiva.
 - Referencias: tambien en :79
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schema.prisma:192 BOT_DELETED; migraciones 20260617184913_add_converted_lead_link_and_bot_deleted_audit y 20260619140000_add_bot_deleted_audit_action; AuditLogClient.tsx:348 (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 ### h4.adm-clientes — Clientes
 
@@ -4466,261 +4466,261 @@
 - Nodo(s): h4.adm-clientes
 - Qué es: Clients: lista, detalle, plan y billing, onboarding (createClientOnly y updateClient nuevos) y field-normalize; borró BotPreview. Tickets y messages: scopes propios. Merge interno limpio y luego a main.
 - Referencias: lane/clientes @ 3ba49df · lane/clientes-clients · lane/clientes-tickets · lane/clientes-messages · field-normalize.ts · tambien en Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:30 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — field-normalize.ts en src/modules/chatbot/shared (usado en EditClientForm.tsx:8); createClientOnly.ts y updateClient.ts existen con requireSuperAdmin; BotPreview.tsx no esta en onboarding/ (git ls-tree). (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-552] Tanda de fixes de Clientes
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:34` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-20
 - Nodo(s): h4.adm-clientes
 - Qué es: city persistida, internalNotes, toErrorMessage (corrige la fuga de ZodError en updateSettings), archivar con deletedAt, avatar y hard-delete con TypeToConfirmDialog y audit CLIENT_DELETED.
 - Referencias: f5ccebc · ef97856 · 2c26930 · 5e33733 · 3f1ad22 · e8c7ae0 +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — city updateClient.ts:90; internalNotes updateClientInternalNotes.ts:35-38; archivar archiveClient.ts:32-35; TypeToConfirmDialog ClientsListClient.tsx:522-527; CLIENT_DELETED hardDeleteClient.ts:170; toErrorMessage action-utils.ts:28-29. Pero los mensajes legibles de updateClient se lanzan con throw (:37) y en producción no llegan; los User quedan vivos tras el hard-delete. (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-553] Eliminar cliente: archivar (soft) y borrar (hard, cascade C)
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:51` · tipo: decision · estado declarado: hecho · fecha: 2026-06-20
 - Nodo(s): h4.adm-clientes
 - Qué es: Archivar es reversible y es el default. Eliminar es irreversible y pide confirmación por texto. El hard-delete preserva los OsLead y borra lo propio del cliente.
 - Referencias: hardDeleteClient · TypeToConfirmDialog · Organization.deletedAt · tambien en Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:52 · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:45
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Archivar con InlineConfirm ClientsListClient.tsx:750-768 -> archiveClient; hard-delete con TypeToConfirmDialog frase ELIMINAR :521-531; lista filtra deletedAt page.tsx:23 y :34; cascada y preservacion de OsLead en flujo D6 'Hard-delete de cliente y cascadas'. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-554] Avatar del cliente
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:53` · tipo: decision · estado declarado: hecho · fecha: 2026-06-20
 - Nodo(s): h4.adm-clientes
 - Qué es: Emoji, imagen base64 comprimida en el cliente e iniciales editables a mano (máximo 2, no derivadas del nombre). Fallback: imagen, emoji, iniciales y neutro.
 - Referencias: ClientAvatar · ClientAvatarField · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:46
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — updateClient.ts:19-21 (avatarImageUrlSchema, avatarEmoji max 8, avatarInitials max 2) y :92-94; UpdateProfileSchema schemas.ts:17-19 (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-555] Wrappers de hover de Clientes a ui compartido
 - Fuente: `_insumos/drive/Olme/Ideas de nuevas features.md:67` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-20
 - Nodo(s): h4.adm-clientes
 - Qué es: HoverScaleCard, hover-scale y message-bubble se mueven a @/components/ui. Config e Inteligencia ya usan adminHoverCls.
 - Referencias: HoverScaleCard · hover-scale · message-bubble · @/components/ui
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — HoverScaleCard sigue en admin/clients/_components/HoverScaleCard.tsx con 8 importadores (git grep -l HoverScaleCard); git ls-tree de src/components/ui sin archivos hover/bubble; hover-scale.tsx sigue en admin/tickets/_components. Control positivo: git grep adminHoverCls encuentra AlertsClient.tsx:8. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-556] VaultManager no muestra errores al admin
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:86` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-13
 - Nodo(s): h4.adm-clientes
 - Qué es: Los errores solo van a console.error. Con el fallo duro de PD-1, el form no se limpia y no aparece ningún mensaje.
 - Referencias: VaultManager
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — VaultManager.tsx:30-31 catch -> console.error(error) (git grep); montado en VaultTab.tsx:26. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-557] Bulk actions de /admin/clients: el label intercepta el click del checkbox
 - Fuente: `docs/bitacora-beta.md:1660` · tipo: pendiente · estado declarado: pendiente (preexistente) · fecha: 2026-06-25
 - Nodo(s): h4.adm-clientes
 - Qué es: e2e 16-admin-bulk-actions: checkbox sr-only bajo un <label> absoluto que intercepta pointer events; interacción rota/flaky real.
 - Referencias: tests/e2e/16-admin-bulk-actions.spec.ts · también en docs/bitacora-beta-2.md:70
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ClientsListClient.tsx:610-620 input sr-only dentro de <label> absoluto; tests/e2e/16-admin-bulk-actions.spec.ts:13, :17-18 siguen haciendo .check() sobre input[type=checkbox]. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-558] e2e de onboarding del cliente falla en el wizard /admin/clients/new
 - Fuente: `docs/bitacora-beta.md:1661` · tipo: pendiente · estado declarado: pendiente (preexistente) · fecha: 2026-06-25
 - Nodo(s): h4.adm-clientes
 - Qué es: 30-onboarding-e2e-complete no llega al input de teléfono (Step 4, typeControlledInput en helpers/form.ts:15); deuda ajena al setter.
 - Referencias: tests/e2e/30-onboarding-e2e-complete.spec.ts · tests/helpers/form.ts:15 · también en docs/bitacora-beta-2.md:71 · también en docs/bitacora-beta-2.md:520 · también en docs/bitacora-beta-2.md:560
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/e2e/30-onboarding-e2e-complete.spec.ts:62 busca placeholder /5493815555555/ pero Step4Appearance.tsx:109 tiene 'Ej: 5491155551234'; el placeholder '#06b6d4' (:61) tampoco aparece en Step4Appearance (git grep). (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-559] Generar ASSET_TYPES desde el schema (VaultManager)
 - Fuente: `docs/bitacora-roadmap.md:304` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-22
 - Nodo(s): h4.adm-clientes
 - Qué es: El array local espeja el enum AssetType de Prisma y debe actualizarse a mano si cambia el enum; script gen-from-schema fuera de scope.
 - Referencias: src/components/admin/managers/VaultManager.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — VaultManager.tsx:10 usa 'as const satisfies readonly AssetType[]': impide valores inválidos pero no detecta un valor nuevo del enum; no hay script de generación (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-560] Deprecar Subscription.planName y Subscription.price (legacy)
 - Fuente: `docs/bitacora-roadmap.md:2019` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h4.adm-clientes
 - Qué es: Se mantienen por rollback; aún los leen src/lib/subscription.ts, SubscriptionBanner, client-list/client-card/ClientHeader y el StatCard 'Plan' del OverviewTab.
 - Referencias: src/lib/subscription.ts · src/components/dashboard/SubscriptionBanner.tsx · tambien en docs/bitacora-roadmap.md:2112 · tambien en docs/bitacora-roadmap.md:2131 · tambien en docs/bitacora-roadmap.md:2468 · tambien en docs/bitacora-roadmap.md:2475 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — planName ya no existe en el modelo (schema.prisma:634-667; git grep planName solo encuentra props de UI); lib/subscription.ts solo selecciona status/renewalDate; ClientHeader.tsx:77, OverviewTab.tsx:41 y la lista leen plan.name. price Float sigue (schema.prisma:659) y lo leen admin/page.tsx:222-228 y perfil/page.tsx:211. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-561] Asignar tier a sonrisa-norte y sigma-contable en prod
 - Fuente: `docs/bitacora-roadmap.md:2034` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h4.adm-clientes
 - Qué es: 'Plan AI Care' y 'Plan Maintenance' no tienen mapeo; editar PLAN_NAME_TO_KEY y re-correr el script, o dejarlas en fallback Starter.
 - Referencias: prisma/seeds/migrate-subscriptions-to-plan-id.ts · tambien en docs/bitacora-roadmap.md:2092 · tambien en docs/bitacora-roadmap.md:2132 · tambien en docs/bitacora-roadmap.md:2142
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — El script prisma/seeds/migrate-subscriptions-to-plan-id.ts no existe en origin/main: `git ls-tree -r --name-only origin/main -- logic-core-v3/prisma | grep -i -E "migrate-sub|plan-id"` → vacío. Control: `git grep -l PLAN_NAME_TO_KEY origin/main -- logic-core-v3` → solo docs/bitacora-roadmap.md (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-562] B4.3 — UI admin: asignar plan + billing override
 - Fuente: `docs/bitacora-roadmap.md:2311` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h4.adm-clientes
 - Qué es: Migración aditiva de override y scheduling; actions assignPlanToOrg, setBillingOverride y clearBillingOverride con Zod, requireSuperAdmin, audit e invalidación de cache; cards en /admin/clients/[clientId]; Matsu piloto en BUSINESS con 0 USD hasta 2026-08-21 (dev).
 - Referencias: prisma/migrations/20260523001750_add_billing_override_and_plan_scheduling/migration.sql · src/app/(protected)/admin/clients/_actions/plan.actions.ts · src/app/(protected)/admin/clients/_actions/plan.schemas.ts · src/lib/plan/get-plan-for-org.ts · src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx · src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentForm.tsx +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Migracion prisma/migrations/20260523001750_add_billing_override_and_plan_scheduling (git ls-tree); plan.actions.ts:88-92 requireSuperAdmin+Zod, audit :147 y :210, invalidateOrgPlanCache :167 y :233; cards en OverviewTab.tsx:72-73. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-563] Separación gating / billing (non-negotiable)
 - Fuente: `docs/bitacora-roadmap.md:2337` · tipo: decision · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h4.adm-clientes
 - Qué es: El gating del bot solo lee Plan; la facturación usa priceOverride vigente o Plan.monthlyPrice; la action de billing nunca toca planId y viceversa.
 - Referencias: prisma/schema.prisma:472-486 · src/app/(protected)/admin/clients/_actions/plan.actions.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setBillingOverride solo toca priceOverride/overrideUntil/overrideReason (plan.actions.ts:273-280); assignPlanToOrg toca planId/pending/lastPlanChangedAt (:179-184) y nunca priceOverride; el gating usa plan.quota (handleChatRequest.ts:345). Resto legacy: create escribe Subscription.price (:192) y no lo mantiene. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-564] Upgrade inmediato con reset de cuota; downgrade al 1° del mes siguiente (UTC)
 - Fuente: `docs/bitacora-roadmap.md:2346` · tipo: decision · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h4.adm-clientes
 - Qué es: Decidido por sortOrder; el downgrade pendiente se aplica lazy en getPlanForOrg sin cron; first assignment también resetea la cuota.
 - Referencias: src/lib/plan/get-plan-for-org.ts · tambien en docs/bitacora-roadmap.md:2355 · tambien en docs/bitacora-roadmap.md:2461
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — plan.actions.ts:26-27 (downgrade a pendingPlanId) y get-plan-for-org.ts:39-49 (applyPendingPlanIfDue lazy) (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-565] Aplicar plan BUSINESS + cortesía 0 USD a Matsu en prod
 - Fuente: `docs/bitacora-roadmap.md:2474` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h4.adm-clientes
 - Qué es: Se aplicó solo en dev con un script throwaway que bypassea la action; en prod hacerlo desde /admin/clients/matsu.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Operación de datos en prod, no verificable por código. El camino correcto existe: flujo D6 'Cambio de plan → precio que ve el cliente' (plan.actions.ts:179) (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-566] Cron de aviso de override por vencer
 - Fuente: `docs/bitacora-roadmap.md:2476` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h4.adm-clientes
 - Qué es: Hoy el override pasa a 'vencido' sin notificación; agregar un cron de aviso (B4.4/B4.5 o posterior).
 - Referencias: tambien en docs/bitacora-roadmap.md:2486 · tambien en docs/bitacora-roadmap.md:2788
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -i override en src/app/api/cron, netlify, netlify.toml, vercel.json → 0 (control: overrideUntil existe en schema.prisma:646 y lo lee BillingOverrideCard.tsx:15) (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-567] Tests de downgrade real con tráfico (E2E)
 - Fuente: `docs/bitacora-roadmap.md:2478` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h4.adm-clientes
 - Qué es: El path está cubierto por code review pero no probado en vivo antes del primer cliente downgradeable.
 - Referencias: tambien en docs/bitacora-roadmap.md:2488
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — `git grep -l -i downgrade origin/main -- "*.spec.ts" "*.test.ts"` → solo src/lib/crypto/__tests__/credential-cipher.test.ts (otro sentido). Control: el mismo patrón en src → plan.actions.ts, PlanAssignmentCard.tsx (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-568] Vista admin read-only de CrmIntegration por org
 - Fuente: `docs/bitacora-roadmap.md:4454` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h4.adm-clientes
 - Qué es: El super admin solo tiene el audit log o la impersonation para soportar al cliente.
 - Referencias: tambien en docs/bitacora-roadmap.md:4534 · tambien en docs/bitacora-roadmap.md:4620
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep CrmIntegrationAdminCard: src/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard.tsx montado en admin/chatbots/[botId]/tabs/IntegrationsTab.tsx (editable, no solo lectura). (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-569] Vista de instalación desde /admin/clients/[clientId]
 - Fuente: `docs/bitacora-roadmap.md:5887` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-25
 - Nodo(s): h4.adm-clientes
 - Qué es: Hoy hay que ir por /admin/chatbots/[botId] para ver lo que ve el cliente.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — InstallTab existe en /admin/chatbots/[botId] (BotDetailClient.tsx:98, tabs.ts:1), pero ChatbotTab.tsx:128-159 enlaza solo overview/config/knowledge/conversations/leads/activity, y el catch-all deprecado no mapea 'install' (chatbot/[[...tab]]/page.tsx:6-13) (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-570] B9.4 — Bulk Import eliminado (dedupe de KB pendiente)
 - Fuente: `docs/bitacora-roadmap.md:6228` · tipo: hecho-declarado · estado declarado: en curso · fecha: 2026-05-25
 - Nodo(s): h4.adm-clientes
 - Qué es: Borrada la carpeta admin/clients/bulk-import (form y action), su entrada en el sidebar y docs/csv-import-format.md; el dedupe de la KB de develOP quedó como script sin ejecutar (sprint parcial).
 - Referencias: src/app/(protected)/admin/clients/bulk-import/ (borrado) · src/app/(protected)/admin/_components/admin-sidebar.tsx · docs/csv-import-format.md (borrado) · scripts/b9-4-dedupe-kb-develop.mjs
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — git ls-tree de admin/clients (36 archivos) sin bulk-import; git grep -i 'bulk-import|bulkImport' en src sin resultados; docs/csv-import-format.md no existe; scripts/b9-4-dedupe-kb-develop.mjs sigue presente (ejecucion no verificable). (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-571] Naming: clientId en /admin/clients/[clientId] es en realidad la organización
 - Fuente: `docs/bitacora-roadmap.md:7163` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-05-25
 - Nodo(s): h4.adm-clientes
 - Qué es: Cambiarlo requiere migrar URLs, redirects y bookmarks; marcado como inconsistencia conocida.
 - Referencias: src/lib/actions/clients.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/app/(protected)/admin/clients/[clientId]/page.tsx:33 `const { clientId: orgSlug } = await params` y :42 `OR: [{ id: orgSlug }, { slug: orgSlug }]`; los links usan el id (ClientsListClient.tsx:630) (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-572] UI admin para regenerar password (resend-credentials)
 - Fuente: `docs/bitacora-roadmap.md:7622` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-05-25
 - Nodo(s): h4.adm-clientes
 - Qué es: El botón del panel que dispara el endpoint no fue parte de B12.5; 'si ya existe, está cubierto; si no, es un paso aparte'.
 - Referencias: src/app/api/admin/users/[userId]/resend-credentials/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx:18 (fetch al endpoint) montado en tabs/OverviewTab.tsx:90 (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-573] CSRF en /api/auth/google-business/start?orgId=
 - Fuente: `docs/bitacora-roadmap.md:8373` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h4.adm-clientes
 - Qué es: Un SUPER_ADMIN engañado puede iniciar el flujo para otra org (linking attack); mitigar con nonce CSRF en cookie o doble confirmación post-callback.
 - Referencias: src/app/api/auth/google-business/start/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — start/route.ts:11-15 toma orgId del query y redirige; git show … | grep -i 'cookie|nonce' → 0 (control: 'orgId' aparece en :12). El state sí va firmado (google-business-profile.ts:44) (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-574] Sin verificación del recurso GBP tras el callback
 - Fuente: `docs/bitacora-roadmap.md:8375` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h4.adm-clientes
 - Qué es: Los tokens se asocian a la org del state sin validar el gbpLocationId esperado; propuesta: selector de cuentas/locations con audit log.
 - Referencias: src/app/api/auth/google-business/callback/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — callback/route.ts:59-71 descubre account+location tras persistir tokens y escribe logAdminAction (:71); no valida un gbpLocationId esperado (selector P3-A.2) (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-575] P2.B.1 botón admin 'Enviar reporte ahora'
 - Fuente: `docs/bitacora-roadmap.md:11886` · tipo: hecho-declarado · estado declarado: hecho (e2e 41 sin correr)
 - Nodo(s): h4.adm-clientes
 - Qué es: Trigger manual del Executive Weekly Report por org, sin tocar el motor.
 - Referencias: src/lib/reports/executive-weekly/send-manual.ts · src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — send-executive-report/route.ts:9-91 + SendExecutiveReportButton.tsx:37 (flujo D2) + tests/e2e/41-admin-executive-report-send-now.spec.ts (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-576] Limpiar org mock san-miguel
 - Fuente: `docs/bitacora-roadmap.md:15520` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h4.adm-clientes
 - Qué es: Fixture mock anotado por Franco para cleanup.
 - Referencias: STATUS.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — prisma/seed-agency-os.ts:398 sigue sembrando slug 'san-miguel' (y :1112, :1468...). La DB no es verificable por lectura. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-577] Confirmar Subscription/Plan de matsu
 - Fuente: `docs/bitacora-roadmap.md:15609` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h4.adm-clientes
 - Qué es: No se pudo confirmar por archivos si el piloto matsu tiene plan asignado; verificar en admin.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — scripts/seed-matsu.ts no crea Subscription ni asigna plan: git grep -i 'subscription|planKey|BUSINESS|priceOverride|overrideUntil' solo encuentra :163 businessInfo (control positivo del patron). La asignacion depende de la UI PlanAssignmentCard. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-578] Unificar Command Center
 - Fuente: `docs/sprints/alpha-0-cleanup.md:35` · tipo: pendiente · estado declarado: pospuesto a Alpha.1
 - Nodo(s): h4.adm-clientes
 - Qué es: Mover entregables y bóveda a /admin/clients/[clientId] y eliminar /admin/agency-dashboard.
 - Referencias: docs/sprints/alpha-RESUMEN-FINAL.md:45 (lo declara hecho)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git ls-tree de admin/ sin 'agency-dashboard' y git grep 'agency-dashboard' en src sin resultados (control: el mismo ls-tree lista projects/[projectId]/payments/page.tsx); ProjectManager en ProjectsTab.tsx:73 y VaultManager en VaultTab.tsx:26. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-579] P0 wizard sin validación server-side
 - Fuente: `docs/sprints/alpha-1-reaudit.md:220` · tipo: pendiente · estado declarado: pendiente (Alpha.2) · fecha: 2026-05-17
 - Nodo(s): h4.adm-clientes
 - Qué es: /admin/clients/new sin feedback de error ni spinner.
 - Referencias: tambien en :85, :246 · docs/sprints/alpha-2-onboarding.md:30
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — createClientWithBot.ts:99-104 y createClientOnly.ts:51-55 safeParse + requireSuperAdmin (:96, :48); Step5Review.tsx:61-62 estado, :111 error, :311 bloque de error, :331 spinner (git grep). (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-580] P1 búsqueda, filtros y sort en /admin/clients
 - Fuente: `docs/sprints/alpha-1-reaudit.md:225` · tipo: pendiente · estado declarado: pendiente (Alpha.5) · fecha: 2026-05-17
 - Nodo(s): h4.adm-clientes
 - Qué es: Sin búsqueda, filtros por estado/servicio ni sort.
 - Referencias: tambien en :237, :261, :262
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ClientsListClient.tsx:50 search, :51 filterBot, :54 sortBy, :258-262 filtrado (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-581] Wizard de onboarding profesionalizado
 - Fuente: `docs/sprints/alpha-2-onboarding.md:9` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-17
 - Nodo(s): h4.adm-clientes
 - Qué es: Borrador en localStorage (7 días), DraftBanner, slugify, sugerencias por industria, BotPreview y Step5 con spinner y error.
 - Referencias: src/lib/slugify.ts · useOnboardingDraft.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — useOnboardingDraft.ts:8 MAX_DRAFT_AGE_DAYS = 7, DraftBanner.tsx, slugify.ts, suggestions.ts existen; Step5Review.tsx:331 spinner y :311 error. BotPreview fue borrado despues (PLAN-551). (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-582] Cronometrar el wizard y E2E
 - Fuente: `docs/sprints/alpha-2-onboarding.md:69` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-17
 - Nodo(s): h4.adm-clientes
 - Qué es: Completar en <8 min (test manual); E2E del wizard pospuestos a Alpha.19.
 - Referencias: tambien en :70
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — E2E del wizard: tests/e2e/08-admin-onboarding.spec.ts:11-18 (page.goto('/admin/clients/new')); el cronometraje de menos de 8 min es manual y no se puede verificar por código (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-583] Onboarding del piloto Matsu (Beta)
 - Fuente: `STATUS.md:5` · tipo: promesa · estado declarado: pendiente · fecha: 2026-05-21
 - Nodo(s): h4.adm-clientes
 - Qué es: Matsu (plan Business) contratado, onboarding pendiente; sin org/bot/user en DB al 2026-05-21.
 - Referencias: tambien en :174-:180
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — scripts/seed-matsu.ts existe (git ls-tree) y arma org/bot con KB de concesionaria (:163), sin Subscription. Si corrio en la DB no es verificable por lectura. (D3-c1, lector D3-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h4.adm-config — Configuración
 
@@ -4736,72 +4736,72 @@
 - Nodo(s): h4.adm-config
 - Qué es: Hover canónico, sin spinners en los number inputs, limpieza de imports muertos y fix del contrato de pricing (valida por slug real) más la fuga de ZodError en updateModulePricing.
 - Referencias: lane/config-settings · b1000cc · 78e7d86 · b0a8ea5 · 20dd783 · 8f93de3 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — adminHoverCls en settings-console.tsx:17, :355; inputs sin spinners :61-62, :399, :455; contrato por slug settings.actions.ts:183-191 y settings.schemas.ts:36-38; ZodError → issues[0].message en action-utils.ts:28-29 (commit 5e33733 en origin/main) (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-586] config-design no-go: editor de tema diferido
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:91` · tipo: decision · estado declarado: descartado · fecha: 2026-06-19
 - Nodo(s): h4.adm-config
 - Qué es: Un editor de tema en runtime obligaría a cablear CSS vars en ~35 componentes de ui/* y a crear un modelo Prisma. Rama descartada; el relevamiento queda como documentación.
 - Referencias: /admin/_design · lane/config-design · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:18 · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:48
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — `git ls-tree -r --name-only origin/main -- "logic-core-v3/src/app/(protected)/admin" | grep -i -E "_design|theme"` → solo leads/_components/themed-date-input.tsx (control positivo del grep); no hay ruta _design ni editor de tema (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-587] Writer canónico del pricing de PremiumModule
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:107` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-19
 - Nodo(s): h4.adm-config
 - Qué es: config-settings escribe priceMonthlyUsd y la lane plan&billing de Clientes consume el mismo modelo. Falta definir quién es el writer canónico. Ojo: revalidar /dashboard/services con el dueño de esa ruta.
 - Referencias: PremiumModule.priceMonthlyUsd · updateModulePricing · tambien en Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:108
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Escriben priceMonthlyUsd: settings.actions.ts:195 (vivo), src/lib/actions/settings.ts:129 (muerto) y prisma/seeds/sync-premium-modules.ts:36/:54 (corrida manual que pisa el precio de la DB con el catálogo de código src/lib/data/premium-modules.ts:31). Sigue sin un writer canónico. (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-588] Máscara del token de Telegram duplicada
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:112` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-19
 - Nodo(s): h4.adm-config
 - Qué es: Unificar maskFromInput (cliente) y maskSecret (server) en un solo helper, con el server como fuente de verdad. Hay riesgo de que diverjan. Falta la decisión y un refactor chico.
 - Referencias: src/app/(protected)/admin/settings/_components/settings-console.tsx · src/app/(protected)/admin/settings/_actions/settings.actions.ts · tambien en Olme/Ideas de nuevas features.md:54 · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:70
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — settings-console.tsx:18 y settings.actions.ts:11 importan maskSecret de src/lib/mask-secret.ts; maskFromInput solo sobrevive en comentarios de mask-secret.invariant.ts:3, :25 (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-589] Simplificar ensureAgencySettingsRecord
 - Fuente: `_insumos/drive/Olme/Ideas de nuevas features.md:53` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-20
 - Nodo(s): h4.adm-config
 - Qué es: Con el singleton @unique se puede pasar de findFirst orderBy a findUnique({where:{singleton:true}}). Refactor chico y opcional.
 - Referencias: d14fcff · AgencySettings.singleton · ensureAgencySettingsRecord
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — admin/settings/_actions/settings.actions.ts:38-41 sigue con findFirst orderBy updatedAt; el schema ya tiene `singleton Boolean @default(true) @unique` en AgencySettings; la legacy src/lib/actions/settings.ts:30-37 repite el patrón (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-590] Credenciales de Telegram config-first con fallback a env (par atómico)
 - Fuente: `docs/bitacora-beta.md:429` · tipo: decision · estado declarado: vigente · fecha: 2026-06-19
 - Nodo(s): h4.adm-config
 - Qué es: AgencySettings.osTelegramBotToken/ChatId editables en /admin/settings mandan si están completos; si no, el par de env; DB caída cae a env; nunca se mezclan fuentes.
 - Referencias: src/lib/notifications/telegram.ts · prisma/schema.prisma (AgencySettings.osTelegram*) · settings.actions.ts · settings-console.tsx · también en docs/bitacora-beta.md:936 (isTelegramConfigured)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/notifications/telegram.ts:39-60: usa AgencySettings solo si token y chatId están completos, si no el par de env; DB caída → env (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-591] Consolidar premium-features.ts (legacy) con premium-modules.ts
 - Fuente: `docs/bitacora-roadmap.md:2614` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h4.adm-config
 - Qué es: El catálogo legacy de 11 slugs sigue vivo porque admin/settings lo usa para precios de módulos.
 - Referencias: premium-features.ts · src/lib/premium-modules.ts · tambien en docs/bitacora-roadmap.md:2624 · tambien en docs/bitacora-roadmap.md:2634
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — admin/settings ya lee la tabla PremiumModule (settings.actions.ts:92, :113-120; update por slug :185-196), pero premium-features.ts sigue como tipo (settings.actions.ts:10, settings-console.tsx:16) con un cast que miente (:114) y su catálogo runtime solo lo usa src/lib/actions/settings.ts:12-16, sin importadores (git grep "lib/actions/settings'" → 0) (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-592] D5' máscara del token Telegram consolidada
 - Fuente: `docs/bitacora-roadmap.md:12294` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h4.adm-config
 - Qué es: mask-secret.ts compartido; el dropdown de período no se consolidó.
 - Referencias: src/lib/mask-secret.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/mask-secret.ts existe (git ls-tree); lo importan admin/settings/_actions/settings.actions.ts y settings-console.tsx; invariante src/lib/mask-secret.invariant.ts (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-593] Prisma crudo fuera de isolation en reports
 - Fuente: `docs/bitacora-roadmap.md:16882` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-11
 - Nodo(s): h4.adm-config
 - Qué es: admin/settings/reports/page.tsx consulta sin pasar por la frontera de isolation.
 - Referencias: src/app/(protected)/admin/settings/reports/page.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — settings/reports/page.tsx:3, :13-27 usa prisma directo sobre botConfig y chatbotEvent; igual alerts/page.tsx:3, :12-22 (botAlert) (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h4.adm-dashboard — Dashboard del admin
 
@@ -4810,64 +4810,64 @@
 - Nodo(s): h4.adm-dashboard
 - Qué es: Código muerto, labels, estados vacíos, loading alineado, a11y, reduced-motion, hover en wrapper externo y entrada en CSS. Mergeado a main.
 - Referencias: c092747 · 5e25ea9 · 651f68e · 8acb272 · 5bb5e38 · 8caad3c +5
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Empty states dashboard-history-charts.tsx:166, :209, :257, :316; loading alineado admin/loading.tsx:19-73; chart-card.tsx:18 aria-label; isAnimationActive={!reduced} (:161); HoverCard page.tsx:724; CSS dashReveal :719 (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-595] Dashboard: sin datos derivables extra ni count-up
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Admin (operacion)_ registro de cambios.md:57` · tipo: decision · estado declarado: descartado · fecha: 2026-06-16
 - Nodo(s): h4.adm-dashboard
 - Qué es: La Fase 3 de datos derivables no se ejecuta (su material se borró). Count-up de KPIs descartado. La entrada es en CSS, no con motion/react.
 - Referencias: tambien en Olme/Admin - Registro de cambios/Operaciones/Admin (operacion)_ registro de cambios.md:58
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — page.tsx:719 keyframes dashReveal en CSS; StatCard recibe strings formateados (page.tsx:579, :628) sin count-up (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-596] cumulativeRevenue dentro del map
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Admin (operacion)_ registro de cambios.md:65` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-16
 - Nodo(s): h4.adm-dashboard
 - Qué es: Error de lint previo (react-hooks/immutability). El fix es refactorizar el cálculo financiero fuera del map.
 - Referencias: src/app/(protected)/admin/page.tsx:500
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — page.tsx:497-500 let mutado dentro de map; baseline eslint react-hooks/immutability en admin/page.tsx:500 (docs/auditoria-2026-10/_crudo/eslint.json:739-743) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-597] Eyebrows técnicos 'FILA 1/2/3' en /admin
 - Fuente: `docs/bitacora-roadmap.md:8499` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h4.adm-dashboard
 - Qué es: Polish per-pantalla derivado a B13.2.
 - Referencias: src/app/(protected)/admin/page.tsx · tambien en docs/bitacora-roadmap.md:8595
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep -n -i 'FILA [0-9]' origin/main -- admin/page.tsx admin/loading.tsx: solo comentarios JSX en loading.tsx:19,33,47,61 (no se renderizan). Control: 'KPIs comerciales' en page.tsx:571 (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-598] Claridad de métricas comerciales
 - Fuente: `raiz:lane-dashboard-log.md:100` · tipo: pendiente · estado declarado: parcial (solo subtítulos)
 - Nodo(s): h4.adm-dashboard
 - Qué es: Tasa de respuesta mal etiquetada; cierre de card (histórico) vs chart (cohorte mensual) no reconcilian.
 - Referencias: tambien en :46, :47, :105
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Solo subtítulos (page.tsx:607, :610); responseRate (:349) sigue sobre el estado actual con PERDIDO/POSTERGADO en el denominador (:39-47) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-599] Dashboard admin fases 1-3
 - Fuente: `raiz:lane-dashboard-log.md:111` · tipo: hecho-declarado · estado declarado: commiteado, esperando verificación visual
 - Nodo(s): h4.adm-dashboard
 - Qué es: Código muerto, typos, subtítulos de cierre, empty states en charts, loading alineado, a11y, reduced-motion, hover en 14 cards y reveal de secciones.
 - Referencias: c092747 · 8acb272 · 4683a2f · 1ded1c7 · a9739cc · 3240425 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Igual que PLAN-594; subtítulos de cierre page.tsx:607-611; motion-reduce en cardHoverClass (page.tsx:36-37) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-600] Lint cumulativeRevenue
 - Fuente: `raiz:lane-dashboard-log.md:172` · tipo: pendiente · estado declarado: pendiente (decisión del humano)
 - Nodo(s): h4.adm-dashboard
 - Qué es: react-hooks/immutability preexistente en admin/page.tsx; recomputar sin reasignar un let.
 - Referencias: tambien en :179
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — page.tsx:497-500; eslint.json:739-743 (react-hooks/immutability, línea 500) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-601] Sin count-up de KPIs
 - Fuente: `raiz:lane-dashboard-log.md:243` · tipo: decision · estado declarado: decidido
 - Nodo(s): h4.adm-dashboard
 - Qué es: Count-up descartado; bg de MemberHoursCard y dos tiers de radios quedan a decisión de Valentino.
 - Referencias: tambien en :258
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Sin count-up (page.tsx:577-699). MemberHoursCard bg-white/5 (page.tsx:818) vs DualMetricCard bg-white/[0.02] (:765) sigue sin decidir (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h4.adm-equipo — Equipo
 
@@ -4883,32 +4883,32 @@
 - Nodo(s): h4.adm-equipo
 - Qué es: La time entry siempre usa session.user.id y se valida la pertenencia en el server. El selector muestra tareas propias y sin asignar; cargar horas en una sin asignar la autoasigna.
 - Referencias: 08af3ae · a64d36b · listTasksByProject
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — time-entry.actions.ts:140, :176 (userId de sesión) y :160-162 (pertenencia validada en servidor) (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-604] Regla de negocio de carga de horas
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:20` · tipo: decision · estado declarado: hecho · fecha: 2026-06-17
 - Nodo(s): h4.adm-equipo
 - Qué es: Nadie registra horas en nombre de otro. Una tarea sin asignar se autoasigna al cargarle horas. Lo decidió Valentino.
 - Referencias: tambien en Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:13
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — time-entry.actions.ts:156-170 (session userId, rechaza tareas de otro, autoasigna las libres); hours/page.tsx:117 filtra tareas propias o sin asignar (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-605] updateTimeEntry sin guard de pertenencia
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:24` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-17
 - Nodo(s): h4.adm-equipo
 - Qué es: Al crear horas ya se valida a quién pertenece la entrada; al editarlas no. Un admin puede editar horas ajenas. Riesgo bajo, pero conviene cerrarlo.
 - Referencias: updateTimeEntry · team/_actions/* · tambien en Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:59 · tambien en Olme/Ideas de nuevas features.md:55
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — time-entry.actions.ts:195-241 no compara entry.userId con la sesión; deleteTimeEntry tampoco (:243-268). updateTimeEntry no tiene llamadores (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-606] Equipo: display jerárquico y hover
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:28` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-17
 - Nodo(s): h4.adm-equipo
 - Qué es: Miembro, proyectos colapsables y tareas con horas reales contra estimadas. Se enriqueció la query assignedTasks existente. Hover en las stat cards.
 - Referencias: 7f5cf97 · 38edcaa · tambien en Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:41
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — member-workload.tsx:152-213 (proyectos colapsables con aria-expanded), :113-150 (horas reales vs estimadas), :99 (adminHoverCls en métricas); team/page.tsx:127-161 (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-607] No hay pantalla de setters en el admin
 - Fuente: `docs/bitacora-beta-3.md:4843` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-22 · **ZONA-FRANCO**
@@ -4923,8 +4923,8 @@
 - Nodo(s): h4.adm-equipo
 - Qué es: date, from y to de time-entry.schemas.ts, alimentados por time-entry-panel: el mismo bug de un día, vivo según la bitácora.
 - Referencias: admin/team/_actions/time-entry.schemas.ts:33-34 · time-entry-panel.tsx:252
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — time-entry.schemas.ts:33-34 sigue con z.coerce.date(); time-entry-panel.tsx:252 manda 'YYYY-MM-DD' y formatDate (:63-68) no fija timeZone (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 ### h4.adm-leads — Leads
 
@@ -5005,8 +5005,8 @@
 - Nodo(s): h4.adm-leads
 - Qué es: Hoy no está afectado porque recibe instantes reales (Date.now() más N días), pero falla igual el día que se le conecte un date-picker.
 - Referencias: admin/leads/_actions/lead.schemas.ts:40 · change-status-select.tsx:42 · lead-pipeline.tsx:127
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — admin/leads/_actions/lead.schemas.ts:32-40 sigue en `z.coerce.date().optional()` sin normalizar fechas de calendario; los llamadores siguen mandando instantes: change-status-select.tsx:40-43 y lead-pipeline.tsx:125-128. (D3-c1, lector D3-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-619] Carga + ratio de descarte del setter en el control de asignación
 - Fuente: `docs/bitacora-beta.md:802` · tipo: hecho-declarado · estado declarado: hecho (falta ver con 2+ setters y layout mobile) · fecha: 2026-06-20 · **ZONA-FRANCO**
@@ -5021,8 +5021,8 @@
 - Nodo(s): h4.adm-leads
 - Qué es: El campo service de contactSubmission mezcla slugs de módulos y plan-upgrade-*; mapearlo visualmente en InboundLeadsTable.
 - Referencias: InboundLeadsTable
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n "service" origin/main -- "src/app/(protected)/admin/leads/_components/inbound-leads-table.tsx" -> sólo :17 (tipo); columnas :104-109 sin servicio (control: 'company' aparece 3 veces en el mismo archivo). upsell.ts:93 sigue escribiendo service=featureKey y UpgradeCtaButton.tsx:80 genera plan-upgrade-*. (D3-c1, lector D3-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-621] ContactSubmission.leadStatus colisiona con el enum LeadStatus
 - Fuente: `docs/bitacora-roadmap.md:6980` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25 · **ZONA-FRANCO**
@@ -5047,8 +5047,8 @@
 - Nodo(s): h4.adm-mensajes
 - Qué es: Mitigado porque las actions validan SUPER_ADMIN; limpiar la duplicación; no re-probado en runtime.
 - Referencias: src/app/(protected)/admin/messages/[orgId]/page.tsx · tambien en docs/bitacora-roadmap.md:6823 · tambien en docs/bitacora-roadmap.md:7240
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n "auth()\|requireSuperAdmin\|auth-guards" origin/main -- "src/app/(protected)/admin/messages/[orgId]/page.tsx" -> vacío (control: admin/clients/[clientId]/page.tsx:28 `const session = await auth()`). [orgId]/page.tsx:24 descarta el resultado de markAsRead y :27-28 lee Organization sin guard. (D3-c1, lector D3-L3)
+- ¿Sigue teniendo sentido?: si
 
 ### h4.adm-novedades — Novedades
 
@@ -5057,8 +5057,8 @@
 - Nodo(s): h4.adm-novedades
 - Qué es: Badge y lista en el dashboard; /admin/announcements con alcance ALL/ORG.
 - Referencias: src/lib/announcements/visibility.ts · src/app/(protected)/admin/announcements
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — announcements/page.tsx:10-65, announcements.actions.ts:14-77, src/lib/announcements/visibility.ts (git ls-tree); consumo en flujo D2 'Novedades del panel' (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 ### h4.adm-proyectos — Proyectos
 
@@ -5067,120 +5067,120 @@
 - Nodo(s): h4.adm-proyectos
 - Qué es: Las actions de Task y TimeEntry viven en team/_actions/* y las importan 5 sitios de Proyectos. El trabajo va secuencial en main.
 - Referencias: team/_actions/* · tambien en Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:60 · tambien en Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:11
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Cinco sitios importan team/_actions: task-form.tsx:7-10, task-list.tsx:17-20, time-entry-panel.tsx:8-11, hours/page.tsx:5, tasks/page.tsx:4. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-626] lane/proyectos
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:9` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-16
 - Nodo(s): h4.adm-proyectos
 - Qué es: Arregla el proyecto interno invisible (matchesStart null) y la fuga de errores de Prisma en deleteProject. Agrega lastActivityAt. Review adversarial: mergeable.
 - Referencias: b9d4475 · matchesStart · deriveProjectLastActivityAt
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — lastActivityAt está (project.actions.ts:408-423, :480), pero no lo lee nadie. Los dos fixes declarados no están en el código: matchesStart sigue devolviendo false con startDate null (projects-filters.ts:162-164) y deleteProject sigue devolviendo error.message (project.actions.ts:829). git log --all -G 'if \(!startDate\) \{?\s*return true' -- '*projects-filters.ts' devuelve vacío. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-627] Defectos menores latentes de Proyectos
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:21` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-16
 - Nodo(s): h4.adm-proyectos
 - Qué es: La X de overlay-modal saltea dismissible; scroll-lock no-LIFO; TaskApprovalControl no mira result.success; confirmingId compartido.
 - Referencias: overlay-modal · TaskApprovalControl · tambien en Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:66
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Siguen los cuatro: overlay-modal.tsx:141 onClick={onClose} saltea dismissible (latente: dismissible no se usa fuera del archivo); lock por instancia en :80-82 y :99; task-list.tsx:628 ignora el resultado; project-list.tsx:57, :130 y :181 comparten confirmingId. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-628] Kanban de Proyectos migrado a @dnd-kit
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:29` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-16
 - Nodo(s): h4.adm-proyectos
 - Qué es: Drag desde el overview, DragOverlay, HOLD 200/5, guard contra phantom-click e id estable en el DndContext.
 - Referencias: 26a4922 · 5f86933 · 7c17f00 · 82a213c · ab2a182 · a32932c +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — projects-board.tsx:6-16 (DndContext), :42-43 (HOLD 200/5), :231 (id estable), :248-259 (DragOverlay portaleado); draggable-project-card.tsx:42-63 (guarda anti phantom-click). Los commits 82a213c y a83e61c están en origin/main. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-629] Proyectos internos (B11.1)
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:48` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-16
 - Nodo(s): h4.adm-proyectos
 - Qué es: Sin cliente, el proyecto se resuelve a la org develop. Helper único isInternalProject y presentación 'Proyecto interno de develOP'.
 - Referencias: 0dfc004 · 336e0df · 251cb3a · resolveProjectOrganization · isInternalProject
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — El fallback a develop está (project.actions.ts:229-239) y la presentación también (:455-457; layout.tsx:166-168). El helper único no existe: git grep 'isInternalProject(' origin/main -- src da 0, y la condición está repetida en layout.tsx:164, page.tsx:169, tasks/page.tsx:57 y project.actions.ts:454. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-630] Project.organizationId NOT NULL; un proyecto interno usa la org develop
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:52` · tipo: decision · estado declarado: hecho · fecha: 2026-06-16
 - Nodo(s): h4.adm-proyectos
 - Qué es: No se toca el schema: B11.1 revirtió a propósito el nullable. Se renombra solo la presentación, no la org en la DB (es compartida con el chatbot).
 - Referencias: Project.organizationId · tambien en Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:83
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schema.prisma:559; project.actions.ts:229-239 resuelve develop; presentación en layout.tsx:166-168 y project.actions.ts:455-457. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-631] updateProjectStatus global para super-admin
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md:67` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-16
 - Nodo(s): h4.adm-proyectos
 - Qué es: Usa requireSuperAdmin sin filtrar por organizationId. Cambiar la autorización es decisión aparte.
 - Referencias: updateProjectStatus
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — project.actions.ts:726-760: requireSuperAdmin y findUnique y update por id, sin filtro de org. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-632] Admin: eliminar proyecto desde el detalle
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi proyecto_ registro de cambio.md:33` · tipo: hecho-declarado · estado declarado: hecho (sin mergear) · fecha: 2026-06-27
 - Nodo(s): h4.adm-proyectos
 - Qué es: Zona de peligro con un modal que llama al deleteProjectAction existente (SUPER_ADMIN).
 - Referencias: 5733e29 · deleteProjectAction
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — page.tsx:323-334 (zona de peligro); delete-project-button.tsx:44-90 (modal + form) -> src/lib/actions/projects.ts:108. El commit 5733e29 está en origin/main. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-633] estimatedEndDate de proyectos con z.coerce.date() sobre fecha sin hora
 - Fuente: `docs/bitacora-beta-3.md:6350` · tipo: pendiente · estado declarado: listado, sin tocar · fecha: 2026-08-25/26 (inferida)
 - Nodo(s): h4.adm-proyectos
 - Qué es: Mismo corrimiento de un día que F1 arregló en la postergación, y según la bitácora sigue vivo. Lo alimentan los date-pickers de project-form y convert-lead-dialog.
 - Referencias: admin/projects/_actions/project.schemas.ts:23 · project-form.tsx:297 · convert-lead-dialog.tsx:242
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — project.schemas.ts:23 z.coerce.date(); project-form.tsx:296-301 input type=date; el mismo patrón está en time-entry.schemas.ts:33 (git grep). (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-634] F4: /admin/projects/[projectId]/payments sin re-guard local
 - Fuente: `docs/bitacora-roadmap.md:6493` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h4.adm-proyectos
 - Qué es: Loader sin auth y mutaciones inline (markMilestonePaid, generatePendingMaintenance, markMaintenancePaid); verificar las actions de milestone y maintenance.
 - Referencias: src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:69-103 · tambien en docs/bitacora-roadmap.md:6824 · tambien en docs/bitacora-roadmap.md:7240
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — payments/page.tsx:67-104 sigue sin auth() ni requireSuperAdmin. Las mutaciones sí tienen guard: milestone.actions.ts:23, maintenance.actions.ts:35, :64, :94. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-635] B11.1 — Project.organizationId NOT NULL + Cascade + índice
 - Fuente: `docs/bitacora-roadmap.md:6577` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h4.adm-proyectos
 - Qué es: Proyectos huérfanos demo (Sigma y Sonrisa) borrados con cascade; organizationId NOT NULL con FK Cascade e índice; project.actions falla temprano sin org y seed-agency-os usa 'develop' para proyectos internos.
 - Referencias: prisma/schema.prisma · prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql · src/app/(protected)/admin/projects/_actions/project.actions.ts · prisma/seed-agency-os.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schema.prisma:559-560 (organizationId String, onDelete: Cascade) y :567 @@index; migración prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql; seed-agency-os.ts:2422 usa ?? 'develop'. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-636] Flag isInternal siempre false en project.actions
 - Fuente: `docs/bitacora-roadmap.md:6678` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h4.adm-proyectos
 - Qué es: Se dejó en el contrato para no romper consumidores; borrar si no se usa.
 - Referencias: src/app/(protected)/admin/projects/_actions/project.actions.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — project.actions.ts:524 'isInternal: false'. serializeProjectDetail solo lo usa getProjectById (:1111), y git grep -w getProjectById origin/main -- src devuelve solo la definición. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-637] Project.organizationId nullable
 - Fuente: `docs/bitacora-roadmap.md:8921` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h4.adm-proyectos
 - Qué es: Derivado a B14 junto con otros pendientes estructurales del portal.
 - Referencias: prisma/schema.prisma
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — schema.prisma:559 'organizationId String' (NOT NULL) desde la migración B11.1; PLAN-630 decidió mantenerlo así. (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-638] createTaskForClientAction no cross-valida org del proyecto
 - Fuente: `docs/bitacora-roadmap.md:11020` · tipo: pendiente · estado declarado: pendiente (reportado para decisión)
 - Nodo(s): h4.adm-proyectos
 - Qué es: F5: SUPER_ADMIN puede crear tarea sin validar project.organizationId === organizationId.
 - Referencias: agency-actions.createTaskForClientAction
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — src/actions/agency-actions.ts:24-35 assertProjectBelongsToOrg(projectId, organizationId) al inicio; prueba en bitacora:7211 ('CERRADO') (D3-c1, lector D3-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-639] P1 toast en ProjectManager
 - Fuente: `docs/sprints/alpha-1-reaudit.md:228` · tipo: pendiente · estado declarado: pendiente (Alpha.4) · fecha: 2026-05-17
 - Nodo(s): h4.adm-proyectos
 - Qué es: TODO explícito en agency-dashboard.
 - Referencias: tambien en :49, :257
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/components/admin/managers/ProjectManager.tsx:21 '// Optionally show a toast here'. La carpeta agency-dashboard ya no existe (git ls-files | grep agency-dashboard da 0). (D3-c1, lector D3-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h4.adm-shell — Shell del admin
 
@@ -5189,119 +5189,119 @@
 - Nodo(s): h4.adm-shell
 - Qué es: Operaciones, Clientes, Inteligencia y Configuración en origin/main, con tsc verde y verificación visual humana por sección.
 - Referencias: tambien en Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:74
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — admin-sidebar.tsx:57-100: 4 áreas con 16 ítems. Quedan huecos: detector de alertas sin disparador (alerts/page.tsx:17), título 'Detalle' en Novedades (admin-topbar.tsx:12-13), credenciales en claro (agency-actions.ts:109) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-641] 1ª tanda: 3 lanes en paralelo y fixes de shared
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:11` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-20
 - Nodo(s): h4.adm-shell
 - Qué es: Dashboard, Proyectos+Equipo y Leads, mergeados con --no-ff. Fixes de StatCard, ConfirmDialog portaleado y z-index. AdminBackButton unificado.
 - Referencias: 3da90cf · AdminBackButton · tambien en Olme/Admin - Registro de cambios/Operaciones/Admin (operacion)_ registro de cambios.md:67
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — confirm-dialog.tsx:42 createPortal a body con z-[210] (:44); AdminBackButton usado en 8 archivos (git grep -l) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-642] 2ª tanda: Chatbots, Demos y bloque en main
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:17` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-20
 - Nodo(s): h4.adm-shell
 - Qué es: Fix de decision-bar después del merge, migración de convertedToOsLeadId y BOT_DELETED, y fix centralizado del backdrop-filter en AdminLayoutClient.
 - Referencias: AdminLayoutClient.tsx · decision-bar.tsx · tambien en Olme/Admin - Registro de cambios/Operaciones/Revision Demos_ registro de cambios.md:40
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — AdminLayoutClient.tsx:88-98 backdrop-filter en capa hermana de main; schema.prisma:192 BOT_DELETED; schema.prisma:1510 convertedToOsLeadId; leados/[leadId]/_components/decision-bar.tsx existe (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-643] Eyebrows en uppercase que deforman la marca develOP
 - Fuente: `docs/bitacora-roadmap.md:8495` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h4.adm-shell
 - Qué es: Los eyebrows admin muestran 'DEVELOP / SECCIÓN' por el uppercase; derivado a B13.2.
 - Referencias: tambien en docs/bitacora-roadmap.md:8598
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — page.tsx:551 y announcements/page.tsx:47 ya sin uppercase; queda settings/_components/settings-console.tsx:429 eyebrow='develOP' renderizado con uppercase en :652 (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-644] Header admin mobile: el hamburger se superpone al BrandMark
 - Fuente: `docs/bitacora-roadmap.md:8497` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h4.adm-shell
 - Qué es: Diferencia de layout mobile entre admin y dashboard; derivado a B13.2.
 - Referencias: src/app/(protected)/admin/_components/admin-sidebar.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — AdminLayoutClient.tsx:43-46 botón fixed left-4 top-4 z-[120] siempre montado; aside z-[110] (:62); BrandMark en px-5 py-5 (admin-sidebar.tsx:117-118) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-645] Card de usuario del sidebar admin con 'SUPER_ADMIN' y 'Admin DevelOP' crudos
 - Fuente: `docs/bitacora-roadmap.md:8501` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h4.adm-shell
 - Qué es: Mapear server-side a sentence case; derivado a B13.2.
 - Referencias: src/app/(protected)/admin/_components/admin-sidebar.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — admin-sidebar.tsx:206 {userRole}; layout.tsx:60 userRole={session.user.role} sin mapear (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-646] Migrar 11 pages admin con headers inline a PageHeader
 - Fuente: `docs/bitacora-roadmap.md:8668` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h4.adm-shell
 - Qué es: Requiere extender PageHeader con eyebrow tipo breadcrumb y action slot; derivado a B14.
 - Referencias: también en fuente:8684 · también en fuente:8869 · también en fuente:8919
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -l PageHeader origin/main -- 'logic-core-v3/src/app/(protected)/admin': vacío. Control: src/components/ui/PageHeader.tsx:60 (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-647] B13.5 cierre de coherencia visual
 - Fuente: `docs/bitacora-roadmap.md:8814` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
 - Nodo(s): h4.adm-shell
 - Qué es: Radios hardcodeados residuales a tokens y topbar admin con labels en español.
 - Referencias: src/app/(protected)/admin/_components/admin-topbar.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — admin-topbar.tsx:24-37 mapa en español sin announcements, referrals, leados ni fg2-lab; 'announcements' cae en 'Detalle' por la regex de :12-13 (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-648] Unificar lenguaje visual admin ↔ dashboard
 - Fuente: `docs/bitacora-roadmap.md:10378` · tipo: decision · estado declarado: pendiente (decisión de Franco) · fecha: 2026-05-30
 - Nodo(s): h4.adm-shell
 - Qué es: Admin usa panels rounded-[28px] bg-white/5 (×36) vs tokens del dashboard; migrar es sprint grande o se conserva identidad 'consola'.
 - Referencias: b0bc086 revertido por bb4cf0d · también en fuente:10402
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -c 'rounded-[28px]' en admin: 81 ocurrencias en 50 archivos (p. ej. page.tsx:548, announcements/page.tsx:46) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-649] Patrón único de header admin
 - Fuente: `docs/bitacora-roadmap.md:10379` · tipo: decision · estado declarado: pendiente (decisión de Franco) · fecha: 2026-05-30
 - Nodo(s): h4.adm-shell
 - Qué es: Peso/color del título dividido entre páginas boxed y unboxed.
 - Referencias: también en fuente:10403
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — alerts/page.tsx:9-19 y audit-log/page.tsx:20-30 sin caja y eyebrow uppercase; page.tsx:548-567 y announcements/page.tsx:46-53 en caja rounded-[28px]; además el topbar pone su h1 (admin-topbar.tsx:75) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-650] P0 error boundaries en /admin
 - Fuente: `docs/sprints/alpha-1-reaudit.md:219` · tipo: pendiente · estado declarado: pendiente (Alpha.2) · fecha: 2026-05-17
 - Nodo(s): h4.adm-shell
 - Qué es: Crear error.tsx en /admin, /admin/clients/[clientId]/chatbot y /admin/projects/[projectId].
 - Referencias: tambien en :34, :245
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git ls-tree origin/main: admin/error.tsx, clients/[clientId]/error.tsx (cubre chatbot/*), projects/[projectId]/error.tsx; todos vía AdminErrorBoundary -> SectionErrorBoundary.tsx:64 captureException (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-651] P1 loading por sección del admin
 - Fuente: `docs/sprints/alpha-1-reaudit.md:224` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-17
 - Nodo(s): h4.adm-shell
 - Qué es: Solo admin/loading.tsx; skeletons por sub-ruta (P2 #14 a Bloque C).
 - Referencias: tambien en :238, :247, :266
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — 19 loading.tsx bajo admin (alerts, audit-log, chatbot/*, chatbots, clients, leados, leads, messages/[orgId], projects, settings/*, team, tickets); faltan announcements, referrals y fg2-lab, que caen en admin/loading.tsx (skeleton del Dashboard) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-652] Design system del portal (Alpha.10-12)
 - Fuente: `docs/sprints/alpha-bloque-C-RESUMEN.md:5` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h4.adm-shell
 - Qué es: 12 componentes en src/components/ui, design-tokens.ts, /admin/_design, migración a Card/Button/Input, legacy stat-card y empty-state borrados.
 - Referencias: docs/design-system.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — src/components/ui tiene Badge, Button, Callout, Card, EmptyStateMuted, Input, PageHeader, Select, Skeleton, StatCard y más (git ls-tree); no quedan archivos stat-card/empty-state legacy; /admin/_design no está en el árbol ni en la historia de origin/main (git ls-tree y git log vacíos) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-653] Bloque D estética admin (Alpha.13-15)
 - Fuente: `docs/sprints/alpha-bloque-C-RESUMEN.md:40` · tipo: bloque · estado declarado: próximo
 - Nodo(s): h4.adm-shell
 - Qué es: Animaciones, skeletons premium y polish de Activity/Health/Alerts.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — PageTransition (layout.tsx:65, solo primer montaje); skeletons por sección en 19 loading.tsx; Alertas pulidas (alert-column-overview.tsx, AlertsClient.tsx:26-38) (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-654] ConfirmDialog sin focus-trap ni Escape
 - Fuente: `raiz:lane-LOG.md:80` · tipo: pendiente · estado declarado: pendiente de coordinación
 - Nodo(s): h4.adm-shell
 - Qué es: Mejorar el componente compartido del admin.
 - Referencias: src/app/(protected)/admin/_components/confirm-dialog · tambien en :22
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -E 'Escape|keydown|focus' en confirm-dialog.tsx, type-to-confirm-dialog.tsx, inline-confirm.tsx: solo una clase CSS focus:. Control: alert-column-overview.tsx:55 (D3-c1, lector D3-L1)
+- ¿Sigue teniendo sentido?: si
 
 ### h4.adm-tickets — Tickets
 
@@ -5310,32 +5310,32 @@
 - Nodo(s): h4.adm-tickets
 - Qué es: Badges, input unificado, Enter envía con IME guard, auto-scroll y word-break.
 - Referencias: message-bubble.tsx · message-thread.tsx · MessagesScrollAnchor.tsx · tambien en Olme/Cliente - Registro de cambios/General_ registro de cambios.md:41
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — MessagesScrollAnchor en message-thread.tsx:39; Enter con guarda IME ticket-reply-form.tsx:94; auto-scroll ticket-chat.tsx:95-97; break-words en message-bubble.tsx:52 pero no en las burbujas de ticket-chat.tsx:209 (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-656] Fase 5: ticket de eliminación lleva al hard-delete
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:243` · tipo: hecho-declarado · estado declarado: hecho (sin mergear) · fecha: 2026-06-27
 - Nodo(s): h4.adm-tickets
 - Qué es: Bloque en ticket-chat con <Link> a /admin/clients?delete=<orgId>, que abre automáticamente el TypeToConfirmDialog existente. Solo abre el diálogo, nunca borra.
 - Referencias: fe32886 · ticket-chat.tsx · ClientsListClient.tsx · requestAccountDeletionAction
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ticket-chat.tsx:241-247 Link /admin/clients?delete=<orgId>; ClientsListClient.tsx:245-256 abre el diálogo de borrado desde el query (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-657] Ticket de eliminación identificado por el título literal
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:406` · tipo: decision · estado declarado: hecho · fecha: 2026-06-27
 - Nodo(s): h4.adm-tickets
 - Qué es: Se usa ticket.title === 'Solicitud de eliminación de cuenta', sin categoría en el schema. Si cambia el string, el bloque de aprobación deja de aparecer.
 - Referencias: requestAccountDeletionAction · ticket-chat.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ticket-chat.tsx:119 compara con el título que crea profile.ts:162; el título es libre para cualquier ticket (tickets/schemas.ts:5) (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-658] P2 paginación de tickets y proyectos
 - Fuente: `docs/sprints/alpha-1-reaudit.md:235` · tipo: pendiente · estado declarado: pendiente (Alpha.5) · fecha: 2026-05-17
 - Nodo(s): h4.adm-tickets
 - Qué es: No escalan con volumen.
 - Referencias: tambien en :236, :263
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep 'take:|skip:' en admin/tickets/_actions/ticket.actions.ts → 0 (control: referrals/page.tsx:11 take); projects/page.tsx:9 findMany sin take (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 ## h5 · Setter y LeadOS
 
@@ -7772,8 +7772,8 @@
 - Nodo(s): h6.vis-contacto
 - Qué es: Error preexistente en app/contact/page.tsx:73 (y en DiagnosticoSoftware.tsx:520); queda abierto si va en sprint aparte o se deja.
 - Referencias: src/app/contact/page.tsx:73 · src/components/software/DiagnosticoSoftware.tsx:520 · también en docs/bitacora-rediseno.md:1037 · también en docs/bitacora-rediseno.md:1080 · también en docs/bitacora-rediseno.md:1231
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — contact/page.tsx:74 setReferralCode dentro de useEffect; el baseline de eslint (_crudo/eslint.json) lo reporta como error react-hooks/set-state-in-effect en :74 (D3-c1, lector D3-L5)
+- ¿Sigue teniendo sentido?: si
 
 ### h6.vis-optout — Baja de emails de marketing
 

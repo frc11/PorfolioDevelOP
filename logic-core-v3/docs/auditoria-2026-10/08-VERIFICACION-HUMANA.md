@@ -1000,3 +1000,192 @@
 - Resultado esperado: No se emite develop:lead mientras no haya un lead guardado
 - Señal de falla: El log muestra develop:lead con name 'Ana' y phone '123' aunque el bot repregunta y en el panel no hay lead
 - ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-112] Email de 'Acción requerida' al pedir aprobación
+- Verifica: [BUG-112] · Prioridad: media
+- Entorno: Preview con Brevo de prueba y org de prueba con un miembro con email propio
+- Precondiciones: NEXT_PUBLIC_APP_URL configurada en el preview; borrar la tarea al terminar
+- Pasos: 1) En /admin/clients/<id>?tab=projects crear una tarea para aprobación desde ProjectManager 2) Revisar el panel de Brevo (logs transaccionales) y la casilla del miembro 3) Revisar el link del email
+- Resultado esperado: El email llega y el link apunta al dominio público /dashboard/project
+- Señal de falla: No hay envío registrado, o el link apunta a localhost
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-113] Menú mobile del admin
+- Verifica: [UX-035] · Prioridad: baja
+- Entorno: Local o preview, viewport 390x844
+- Precondiciones: Ninguna
+- Pasos: 1) Abrir /admin en 390x844 2) Tocar el botón de menú arriba a la izquierda 3) Mirar si el botón queda encima del logo develOP del sidebar 4) Con teclado, presionar Escape y Tab
+- Resultado esperado: El botón se oculta al abrir, el logo se ve entero, Escape cierra y el foco queda dentro del menú
+- Señal de falla: El botón tapa el logo; Escape no cierra; Tab recorre el contenido de atrás
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-114] Follow-ups de hoy después de las 21:00 ART
+- Verifica: [BUG-113] · Prioridad: baja
+- Entorno: Preview con base de prueba
+- Precondiciones: Crear o editar un lead de prueba; revertir al terminar
+- Pasos: 1) Tener un OsLead de prueba no cerrado con nextFollowUpAt mañana 10:00 ART 2) Entre las 21:00 y las 23:59 ART abrir /admin 3) Leer 'Leads pendientes de follow-up hoy'
+- Resultado esperado: El lead de mañana no cuenta
+- Señal de falla: El contador lo incluye (corte en UTC)
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-115] Filtros de alertas en mobile
+- Verifica: [UX-037] · Prioridad: baja
+- Entorno: Local o preview, viewport 390x844
+- Precondiciones: Ninguna
+- Pasos: 1) Abrir /admin/alerts en 390x844 2) Mirar si las filas de Severidad y Período desbordan a la derecha 3) Tocar 'Personalizado' y ver dónde abre el panel de rango
+- Resultado esperado: Los chips bajan de línea y el panel de rango queda dentro de la pantalla
+- Señal de falla: Scroll horizontal en el main y panel de rango cortado o fuera de pantalla
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-116] Billing override con precio vacio
+- Verifica: [BUG-115] · Prioridad: media
+- Entorno: Dev o preview con DB de prueba, sesion SUPER_ADMIN
+- Precondiciones: Cliente de prueba con plan asignado y sin override
+- Pasos: 1) Abrir /admin/clients/<id>?tab=overview 2) En Billing override, borrar el valor del campo Precio override 3) Tocar 'Aplicar override' 4) Despues, tocar 'Quitar override' para dejarlo como estaba
+- Resultado esperado: Error de validacion pidiendo un precio y sin cambios en la Subscription
+- Señal de falla: Aviso 'Override seteado: $0 hasta ...' y la card muestra 'Se factura $0.00/mes'
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-117] Cancelar un downgrade programado
+- Verifica: [BUG-116] · Prioridad: media
+- Entorno: Dev o preview con DB de prueba, sesion SUPER_ADMIN
+- Precondiciones: Cliente de prueba en plan PRO
+- Pasos: 1) En Overview > Plan asignado elegir STARTER y Aplicar plan 2) Ver el aviso 'Downgrade pendiente' 3) Volver a elegir PRO en el selector
+- Resultado esperado: Alguna forma de cancelar el downgrade sin aplicar un upgrade
+- Señal de falla: El boton queda deshabilitado con 'Sin cambios' y no hay otra opcion para cancelar
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-118] Mensaje de error de Editar datos en build de produccion
+- Verifica: [UX-040] · Prioridad: media
+- Entorno: Deploy preview de Netlify (build de produccion), sesion SUPER_ADMIN
+- Precondiciones: Dos clientes de prueba A y B con usuario ADMIN
+- Pasos: 1) Abrir /admin/clients/<id de A>/edit 2) Cambiar el email del usuario administrador por el email del admin de B 3) Guardar cambios
+- Resultado esperado: Bloque 'No se pudo guardar' con el texto 'El email ingresado ya está registrado en otro usuario.'
+- Señal de falla: Aparece un texto generico en ingles ('An error occurred in the Server Components render...') o un digest; y en Sentry queda un evento por ese error esperado
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-119] Cliente nuevo en el listado inmediatamente
+- Verifica: [BUG-117] · Prioridad: baja
+- Entorno: Deploy preview (build de produccion) con DB de prueba
+- Precondiciones: Email de prueba que no exista; Brevo apuntando a una casilla de prueba
+- Pasos: 1) Crear un cliente de prueba desde /admin/clients/new 2) Ir enseguida a /admin/clients
+- Resultado esperado: El cliente nuevo aparece en la lista
+- Señal de falla: No aparece hasta pasados 60 s o una segunda recarga
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-120] Acciones de tarjeta en celular
+- Verifica: [A11Y-022] · Prioridad: baja
+- Entorno: Celular real o DevTools con emulacion tactil a 390 px
+- Precondiciones: Al menos un cliente activo
+- Pasos: 1) Abrir /admin/clients 2) Buscar los iconos de Archivar y Fijar en una tarjeta sin pasar el mouse 3) Recorrer la tarjeta con Tab en desktop
+- Resultado esperado: Los iconos se ven en tactil y al recibir foco
+- Señal de falla: Los iconos no se ven; el foco cae en botones invisibles
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-121] Aviso por email al cliente tras respuesta del admin en serverless
+- Verifica: [BUG-119] · Prioridad: media
+- Entorno: deploy de preview en Netlify (no local: en local el proceso sigue vivo)
+- Precondiciones: Org de prueba con un miembro cuyo email sea un buzón de prueba propio; claves de envío configuradas en la preview
+- Pasos: 1) Entrar como SUPER_ADMIN a /admin/messages/<id de la org de prueba> 2) Enviar 5 mensajes cortos espaciados ~30 s 3) Revisar el buzón de prueba y los logs de la función en Netlify
+- Resultado esperado: Llegan los 5 emails y los logs muestran el envío completo de cada uno
+- Señal de falla: Faltan emails o el log de la invocación termina antes del envío
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-122] Borrar un lead sólo con teclado desde el board
+- Verifica: [A11Y-023] · Prioridad: media
+- Entorno: local (npm run dev)
+- Precondiciones: Al menos un lead de prueba en el board
+- Pasos: 1) Abrir /admin/leads 2) Con Tab llegar al botón 'Eliminar lead' (tacho) de una card 3) Presionar Enter 4) Volver y repetir con Space
+- Resultado esperado: Enter y Space abren la confirmación 'Eliminar lead' sin navegar ni levantar la card (no confirmar el borrado)
+- Señal de falla: Enter navega a /admin/leads/<id>; Space levanta la card para arrastrar
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-123] Fecha de entrega corrida un día
+- Verifica: [BUG-128] · Prioridad: media
+- Entorno: local con base de desarrollo; navegador en zona horaria America/Argentina/Buenos_Aires
+- Precondiciones: Un proyecto de prueba existente.
+- Pasos: 1) Editar el proyecto y poner Entrega estimada 20/10/2026; guardar 2) En /admin/projects, con Entrega en 'Todos', leer la fecha de la card 3) Abrir la ficha (Overview) y leer 'Entrega estimada' 4) Después de las 21:00 hora local, abrir la pestaña Horas y mirar la fecha por defecto del formulario
+- Resultado esperado: La card y la ficha muestran 20 oct 2026, y la fecha por defecto en Horas es la de hoy.
+- Señal de falla: La card dice 19 oct (y la ficha 20), o la fecha por defecto en Horas es la de mañana.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-124] El servicio del proyecto aparece en el portal del cliente
+- Verifica: [BUG-130] · Prioridad: media
+- Entorno: local con base de desarrollo; SUPER_ADMIN y un usuario del cliente de prueba
+- Precondiciones: El cliente de prueba no tiene servicios activos.
+- Pasos: 1) Admin: crear un proyecto vinculado al cliente con Servicio 'AI' 2) Editarlo y cambiar el Servicio a 'Web' 3) Cliente: abrir /dashboard/services y /dashboard/cuenta/facturacion
+- Resultado esperado: El cliente ve solo los servicios que contrató de verdad (o uno solo, el actual).
+- Señal de falla: Aparecen AI y Web como servicios activos.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-125] Tablero de proyectos en teléfono
+- Verifica: [UX-047] · Prioridad: media
+- Entorno: local o deploy de preview; DevTools en 390x844 y 360x800
+- Precondiciones: Al menos 2 proyectos en una misma columna.
+- Pasos: 1) Abrir /admin/projects a 390 px de ancho 2) Ver si hay scroll horizontal o cards cortadas a la derecha 3) Abrir el overview de una columna con el ícono de expandir 4) Repetir a 360 px
+- Resultado esperado: Las cards se ajustan al ancho, sin scroll horizontal de página ni dentro del modal.
+- Señal de falla: Hay scroll horizontal o las cards se ven recortadas.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-126] Formulario de /contact y atribución de ?ref= en mobile
+- Verifica: [BUG-132] · Prioridad: media
+- Entorno: Producción o preview, navegador del teléfono o DevTools a 390×844
+- Precondiciones: Un código de referido válido de una org de prueba (panel /dashboard/referidos)
+- Pasos: 1) Abrir https://develop.com.ar/contact?ref=<CODIGO> en un teléfono (o DevTools 390×844) 2) Buscar el formulario 'Enviar consulta' 3) Repetir en desktop 1366×768 y 1024×700 y comprobar si el botón 'Enviar consulta' y las tarjetas inferiores se ven completas sin scroll
+- Resultado esperado: Hallazgo confirmado si en mobile solo aparecen WhatsApp, Llamar y Email, sin formulario. En desktops bajos, el bloque se recorta sin poder scrollear.
+- Señal de falla: El formulario aparece en mobile (descarta el hallazgo) o el desktop bajo muestra todo
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-127] Disparador de /api/cron/alerts (churn y vencimientos)
+- Verifica: [FAL-026] · Prioridad: media
+- Entorno: Panel de Netlify del sitio de producción y cuentas de cron externas de develOP
+- Precondiciones: Acceso al panel de Netlify
+- Pasos: 1) Netlify → Site → Functions: listar las scheduled functions y sus horarios 2) Revisar si existe un cron externo (cron-job.org, GitHub Actions de otra cuenta, Zapier) que llame a /api/cron/alerts 3) Revisar en Netlify → Logs → Functions si hubo invocaciones de /api/cron/alerts en los últimos 30 días
+- Resultado esperado: Hallazgo confirmado si no hay ninguna función ni cron externo que llame a /api/cron/alerts y no hay invocaciones
+- Señal de falla: Aparece un disparador o hay invocaciones registradas
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-128] Reenviar credenciales a un usuario SUPER_ADMIN
+- Verifica: [SEC-087] · Prioridad: media
+- Entorno: Local con base de desarrollo propia (no la Neon compartida) y BREVO_API_KEY vacía o inválida
+- Precondiciones: Dos cuentas SUPER_ADMIN de prueba (A y B) y el id de B
+- Pasos: 1) Iniciar sesión como A en /admin 2) En la consola del navegador: fetch('/api/admin/users/<idDeB>/resend-credentials',{method:'POST'}).then(r=>r.json()).then(console.log) 3) Anotar si la respuesta trae tempPassword 4) Cerrar sesión e intentar entrar como B con esa contraseña temporal
+- Resultado esperado: Hallazgo confirmado si responde 200 con tempPassword y B puede entrar con ella (forzado a cambiarla)
+- Señal de falla: El endpoint rechaza usuarios SUPER_ADMIN o SETTER
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-129] Crear entregable y subir a Bóveda: feedback de error y refresco
+- Verifica: [UX-050] · Prioridad: media
+- Entorno: Local o preview con una org de prueba (sus miembros reciben email)
+- Precondiciones: Org de prueba con un proyecto; sesión SUPER_ADMIN
+- Pasos: 1) Abrir /admin/clients/<slug>?tab=projects y crear un entregable válido 2) Comprobar si la lista se actualiza sin recargar y si hay un mensaje de éxito 3) En otra pestaña cerrar sesión; volver y enviar otro entregable 4) Repetir en ?tab=vault subiendo un link
+- Resultado esperado: Hallazgo confirmado si con la sesión cerrada no aparece ningún mensaje de error y el formulario queda como si nada; con sesión válida, si la lista no se refresca sin recargar
+- Señal de falla: Aparece un mensaje de error y la lista se refresca sola
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-130] La org de la agencia (develOP) aparece en Clientes y deja abrir 'Eliminar' (NO CONFIRMAR)
+- Verifica: [BUG-138] · Prioridad: media
+- Entorno: dev local o preview con SUPER_ADMIN; base de prueba
+- Precondiciones: Seed con la org slug 'develop' (existe según el registro de Proyectos).
+- Pasos: 1) Loguear como SUPER_ADMIN 2) Ir a /admin/clients 3) Buscar 'develOP' o el slug 'develop' entre los clientes activos 4) Seleccionar SOLO esa fila y mirar si Archivar y Eliminar quedan habilitados 5) Click en Eliminar: debe abrirse el resumen (bot, proyectos internos, conversaciones) 6) CANCELAR sin tipear ELIMINAR
+- Resultado esperado: La org de la agencia no figura como cliente, o Archivar/Eliminar están deshabilitados y el servidor la rechaza.
+- Señal de falla: La fila aparece y el diálogo de borrado se abre con el resumen del bot develOP.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-131] Form de contacto con la base inaccesible
+- Verifica: [BUG-139] · Prioridad: media
+- Entorno: dev local
+- Precondiciones: Ninguna (la DB no es alcanzable, no se escribe nada).
+- Pasos: 1) Arrancar la app en local con DATABASE_URL apuntando a un host inexistente (o con la red cortada) 2) Abrir /contact 3) Completar el formulario con datos válidos y enviar
+- Resultado esperado: Mensaje inline 'No se pudo enviar el formulario. Intentá de nuevo.' sin perder la página.
+- Señal de falla: Aparece la página de error global (error.tsx) o el form queda colgado.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-132] 'Re-enviar credenciales' cuando el miembro más antiguo no es el ADMIN
+- Verifica: [BUG-118] · Prioridad: baja
+- Entorno: Dev o preview con base de prueba, sesión SUPER_ADMIN
+- Precondiciones: Una org de prueba cuyo OrgMember más antiguo (joinedAt) no sea ADMIN (por ejemplo VIEWER) y con un ADMIN agregado después
+- Pasos: 1) Abrir /admin/clients/<id> en la pestaña Resumen y anotar a qué email apunta «Re-enviar credenciales» 2) Abrir «Editar datos» de la misma org y anotar el email del administrador que muestra 3) Solo en la base de prueba: tocar «Re-enviar credenciales» y ver qué usuario recibió el mail y cambió de contraseña
+- Resultado esperado: El botón apunta al mismo ADMIN que muestra Editar datos
+- Señal de falla: El botón apunta al miembro más antiguo (no ADMIN) y le resetea la contraseña a él
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción

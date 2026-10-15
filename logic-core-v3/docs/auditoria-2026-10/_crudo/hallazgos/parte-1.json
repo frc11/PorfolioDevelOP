@@ -1,6 +1,6 @@
 {
  "parte": 1,
- "partes": 4,
+ "partes": 5,
  "hallazgos": [
   {
    "id": "SEC-001",
@@ -1260,6 +1260,16 @@
      "ruta": "src/app/accept-invite/actions.ts",
      "linea": 15,
      "fragmento": "export async function acceptInviteAction("
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 148,
+     "fragmento": "export async function inviteTeamMemberAction(input: {"
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 192,
+     "fragmento": "const inviteUrl = `${baseUrl}/accept-invite?token=${token}`"
     }
    ],
    "impacto": "inviteClientAction no tiene callers y nunca envia ni imprime el link (el mensaje miente); inviteTeamMemberAction vive en settings.ts, modulo sin importadores, y enviaria por Resend (contra PLAN-012) fingiendo exito sin RESEND_API_KEY. /accept-invite queda como superficie publica sin uso. Si alguien lo reconecta tal cual, la invitacion no llega.",
@@ -1270,7 +1280,10 @@
     "h1.auth-invite.emitir-invitacion",
     "h1.auth-invite.aceptar-invitacion",
     "h4.adm-config",
-    "int.resend"
+    "int.resend",
+    "h4.adm-equipo",
+    "h4.adm-equipo.invitar-miembro",
+    "h1.auth-invite"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -1282,7 +1295,16 @@
     "tmp": "D1-c1/D1-L1/H19",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L6/H08",
+      "titulo": "Equipo: invitar un miembro no tiene camino vivo y /accept-invite no tiene productor de links",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo faltante (ninguna action viva emite links a /accept-invite)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -1996,6 +2018,76 @@
      "ruta": "src/app/(protected)/admin/page.tsx",
      "linea": 182,
      "fragmento": "prisma.agencySettings.findFirst({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/announcements/page.tsx",
+     "linea": 11,
+     "fragmento": "const [announcements, organizations] = await Promise.all(["
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/page.tsx",
+     "linea": 9,
+     "fragmento": "if (!session?.user || session.user.role !== 'SUPER_ADMIN') {"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/page.tsx",
+     "linea": 23,
+     "fragmento": "const leads = await prisma.osLead.findMany({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/[leadId]/page.tsx",
+     "linea": 212,
+     "fragmento": "prisma.user.findMany({\n  where: { role: 'SETTER' },\n  select: { id: true, name: true, email: true },"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+     "linea": 24,
+     "fragmento": "await markAsRead(orgId)\n\nconst [organization, conversationResult] = await Promise.all(["
+    },
+    {
+     "ruta": "src/app/(protected)/admin/messages/[orgId]/page.tsx",
+     "linea": 27,
+     "fragmento": "prisma.organization.findUnique({\n  where: { id: orgId },"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "linea": 70,
+     "fragmento": "const { projectId } = await params\n\n  const [projectRecord, milestones, maintenancePayments] = await Promise.all(["
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/tasks/page.tsx",
+     "linea": 35,
+     "fragmento": "prisma.user.findMany({\n      where: {\n        role: Role.SUPER_ADMIN,"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/layout.tsx",
+     "linea": 160,
+     "fragmento": "if (!project || !callerCanAccessOrg(session.user, project.organizationId)) {"
+    },
+    {
+     "ruta": "src/lib/auth/assert-ownership.ts",
+     "linea": 88,
+     "fragmento": "return Boolean(resourceOrgId) && caller.organizationId === resourceOrgId"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/page.tsx",
+     "linea": 9,
+     "fragmento": "prisma.organization.findMany({\n      select: { id: true, companyName: true },"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "linea": 73,
+     "fragmento": "prisma.project.findUnique({\n      where: { id: projectId },"
+    },
+    {
+     "ruta": "docs/bitacora-roadmap.md",
+     "linea": 8400,
+     "fragmento": "| F4 / B11 agency-actions cross-projectId | ✅ Cerrado |"
+    },
+    {
+     "ruta": "docs/bitacora-roadmap.md",
+     "linea": 6493,
+     "fragmento": "| **F4** | [`src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:69-103`] ... Loader sin auth check"
     }
    ],
    "impacto": "Bloqueante para el primer cliente real. Escenario: se filtra la cookie del SUPER_ADMIN (PC compartida, malware, extensión) y develOP reacciona cambiando la contraseña. El corte por sessionVersion no llega al panel. El proxy decide /admin con el rol del JWT (auth.config.ts no tiene callback jwt ni mira sessionVersion) y re-firma la cookie por 30 días (SEC-010). En un pedido RSC con el árbol del layout ya montado, Next no ejecuta admin/layout.tsx y renderiza solo la página. Es lo que manda el router en cada clic, o un curl con Next-Router-State-Tree. Hay 15 páginas de /admin que consultan Prisma sin auth() propio:\n- admin (KPIs y cobros)\n- team (usuarios admin)\n- referrals (emails de referidos de todos los clientes)\n- projects, projects/[id]/payments y projects/[id]/tasks\n- leads y leads/[leadId]\n- messages/[orgId] (nombre de la org)\n- announcements\n- chatbot/activity\n- leados, leados/[leadId] y leados/setter/[setterId]\n- fg2-lab\nLo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de otro dispositivo que sigue navegando por clics después del cambio de contraseña. Las mutaciones sí fallan porque las actions llaman requireSuperAdmin. Contraste: /setter carga sus datos con requireSetter en _data.ts y el portal con resolveOrgId, que releen la base.",
@@ -2015,7 +2107,13 @@
     "h5.adm-revision-demos",
     "h5.adm-fg2lab",
     "lib.proxy",
-    "lib.auth"
+    "lib.auth",
+    "modelo.OsLead",
+    "modelo.Organization",
+    "h4.adm-proyectos.ficha",
+    "h4.adm-proyectos.pagos-hitos",
+    "modelo.OsPaymentMilestone",
+    "modelo.OsMaintenancePayment"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -2030,7 +2128,37 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L1/H03",
+      "titulo": "Páginas del lote que leen la base sin guard propio (suma al patrón D1-c2): /admin y /admin/announcements",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: admin/page.tsx y announcements/page.tsx leen Prisma sin auth() propio (grep sin resultados en los dos; el único guard está en admin/layout.tsx:41-47). Mismo patrón que SEC-023; suma el dashboard (MRR, horas, leads) y la lista de organizaciones de Novedades."
+     },
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L3/H01",
+      "titulo": "Páginas de Leads y de la conversación de Mensajes leen la base sin guard propio (confían en el layout)",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: leads/page.tsx:23, leads/[leadId]/page.tsx:212 y messages/[orgId]/page.tsx:24-27 leen Prisma sin auth() propio; el guard está solo en admin/layout.tsx:41-47. Mismo patrón que SEC-023; suma el pipeline de prospectos, los emails de setters y markAsRead (escritura) en el render."
+     },
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L4/H06",
+      "titulo": "Páginas de Proyectos sin guard de rol propio: Pagos y Tareas no verifican sesión y la ficha acepta a cualquier usuario de la org del proyecto (y carga la lista de todas las orgs)",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: projects/[projectId]/payments/page.tsx:70 y tasks/page.tsx:35 leen Prisma sin auth() propio; el layout de [projectId] (:105) llama auth() pero autoriza con callerCanAccessOrg (assert-ownership.ts:85-88: también deja pasar a un usuario de la org del proyecto, aunque el proxy y admin/layout.tsx:47 ya lo frenan). Mismo patrón que SEC-023."
+     },
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L6/H09",
+      "titulo": "El checklist B-SEC.3c renumera los fixes y el F4 original (loader de pagos de proyecto sin guard propio) sigue abierto",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo patrón (loader de pagos de proyecto sin guard propio); suma que el checklist B-SEC.3c renumeró los fixes y el F4 original sigue abierto (alerta D3-A2)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -3304,6 +3432,11 @@
      "ruta": "src/components/dashboard/ProfileForms.tsx",
      "linea": 662,
      "fragmento": "{plan.currency} {plan.price.toLocaleString('es-AR')}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/page.tsx",
+     "linea": 226,
+     "fragmento": "_sum: {\n  price: true,"
     }
    ],
    "impacto": "Después de un upgrade (plan.actions.ts:197-200) o de un downgrade diferido (get-plan-for-org.ts:50-58), el cliente ve en /dashboard/cuenta/perfil el nombre del plan nuevo con el precio del anterior; un priceOverride vigente tampoco se muestra. El primer cliente real que cambie de plan va a ver un precio distinto del que se le cobra.",
@@ -3314,7 +3447,10 @@
     "h2.cli-cuenta",
     "h4.adm-clientes",
     "modelo.Subscription",
-    "modelo.Plan"
+    "modelo.Plan",
+    "h4.adm-clientes.plan",
+    "h4.adm-dashboard",
+    "lib.plan"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -3326,7 +3462,16 @@
     "tmp": "D6-c1/D6-L1/H04",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L2/H01",
+      "titulo": "Cambiar el plan no actualiza el precio legacy que leen el MRR del admin y el perfil del cliente",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: plan.actions.ts:179-200 (al actualizar, subData no toca price; solo el create de :187-195 lo escribe). Misma causa que BUG-010; suma que el MRR del dashboard admin (admin/page.tsx:226) suma esos precios viejos."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -4040,6 +4185,21 @@
      "ruta": "prisma/schema.prisma",
      "linea": 1673,
      "fragmento": "@@index([targetType, targetId, createdAt])"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+     "linea": 246,
+     "fragmento": "{entry.targetType} / {entry.targetId.slice(0, 12)}"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx",
+     "linea": 27,
+     "fragmento": "targetType: string"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1652,
+     "fragmento": "model AdminAuditLog {"
     }
    ],
    "impacto": "Las acciones sobre un cliente quedan con targetType/targetId heterogéneos (Organization, BotConfig, ChatbotLead…); reconstruir todo lo hecho sobre la org X exige conocer cada tipo y resolver ids, y después de un hard-delete ya no se pueden resolver.",
@@ -4048,7 +4208,8 @@
    "zona": "FROZEN",
    "nodos": [
     "modelo.AdminAuditLog",
-    "h4.adm-audit"
+    "h4.adm-audit",
+    "h4.adm-audit.listado-y-filtros"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -4060,7 +4221,16 @@
     "tmp": "D6-c1/D6-L1/H24",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L1/H21",
+      "titulo": "AdminAuditLog sin organización objetivo: no se puede filtrar ni leer el registro por cliente",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo faltante en el modelo congelado (AdminAuditLog sin organizationId); suma la pantalla del audit log que no puede filtrar por cliente."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -4631,6 +4801,21 @@
      "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
      "linea": 190,
      "fragmento": "// (p. ej. desde un ticket \"Solicitud de eliminación de cuenta\"). La action y el"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 527,
+     "fragmento": "user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)\n  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+     "linea": 50,
+     "fragmento": "select: { projects: true, tickets: true, messages: true, clientAssets: true },"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
+     "linea": 79,
+     "fragmento": "throw new Error('El email ingresado ya está registrado en otro usuario.')"
     }
    ],
    "impacto": "Al atender una solicitud de baja (el admin enlaza ?delete=<orgId> desde el ticket) se borran hitos de pago, pagos de mantenimiento y horas cargadas (OsPaymentMilestone/OsMaintenancePayment/OsTimeEntry, también :201 y :207), que son contabilidad de develOP, sin que el modal los mencione. Los User del cliente quedan sin org con email, nombre, teléfono y hash de contraseña: la baja no elimina sus datos personales y el email queda bloqueado para un alta nueva.",
@@ -4646,7 +4831,10 @@
     "modelo.OsTimeEntry",
     "modelo.User",
     "modelo.OrgMember",
-    "modelo.ChatbotLead"
+    "modelo.ChatbotLead",
+    "h4.adm-clientes.eliminar-definitivo",
+    "h1.auth-login",
+    "h2.cli-cuenta"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -4666,6 +4854,13 @@
       "titulo": "El hard-delete de un cliente deja vivos a sus usuarios (PII y credenciales) y subinforma los leads que borra",
       "severidad": "MEDIA",
       "nota_padre": "Muestreo DEC-37: se sostiene (hardDeleteClient.ts:82-85 cuenta solo los leads no convertidos; :141 borra la org y la cascada se lleva todos los ChatbotLead del bot; no hay borrado de User). Misma causa raíz que D6-L2/H08, cuyo título suma los leads subinformados."
+     },
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L6/H02",
+      "titulo": "El hard-delete de un cliente deja vivos sus User: credenciales activas, datos personales y email bloqueado para volver a darlo de alta",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: hardDeleteClient.ts:141 borra la Organization y la cascada de schema.prisma:527 solo se lleva el OrgMember; no hay user.delete en src. BUG-015 ya registra que el hard-delete deja vivos a los usuarios; suma el email bloqueado para una nueva alta (updateClient.ts:79) y que no se sube sessionVersion."
      }
     ]
    },
@@ -4795,6 +4990,11 @@
      "ruta": "src/components/dashboard/VaultRevealButton.tsx",
      "linea": 61,
      "fragmento": "Información sensible — Solo visible para vos"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+     "linea": 131,
+     "fragmento": "? resolveCredentialDisplay(asset.description)"
     }
    ],
    "impacto": "Bloqueante para el primer cliente real: quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio y hosting cargadas en la Bóveda, mientras el portal le asegura al cliente, en el encabezado y en cada tarjeta de la Bóveda, que están cifradas con AES-256. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear: encryptCredential no tiene llamadores fuera de los tests.",
@@ -4818,7 +5018,9 @@
     "h2.cli-cuenta.boveda",
     "h4.adm-clientes",
     "lib.actions",
-    "h2.cli-cuenta.boveda-solicitar-documento"
+    "h2.cli-cuenta.boveda-solicitar-documento",
+    "h4.adm-clientes.boveda-alta-activo",
+    "h4.adm-clientes.boveda-carga"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -4873,6 +5075,20 @@
       "titulo": "La credenciales de la bóveda se guardan en texto plano en main; el cifrado de escritura quedó sin mergear",
       "severidad": "ALTA",
       "nota_padre": "Misma causa raíz; suma que el camino de onboarding con ENCRIPTADO_EN_TEXTO es código muerto (D2-L1/H37)."
+     },
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L1/H01",
+      "titulo": "Credenciales de la bóveda (tipo ACCESS) se guardan en texto plano: ningún camino de escritura usa encryptCredential",
+      "severidad": "ALTA",
+      "nota_padre": "Misma causa raíz: encryptCredential no tiene llamador de escritura. Suma createClientAssetAction (agency-actions.ts:103-110) y el rótulo «Contraseña o instrucciones» de VaultManager.tsx:85. El verificador lo bajó a MEDIA mirando solo la bóveda; SEC-036 sigue ALTA por los tokens OAuth y de tiendas."
+     },
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L5/H18",
+      "titulo": "El formulario de la Bóveda invita a escribir contraseñas en la descripción, que se guarda en claro",
+      "severidad": "BAJA",
+      "nota_padre": "Misma causa que SEC-036 (la descripción de la bóveda se guarda en claro); suma el rótulo del formulario que invita a escribir contraseñas."
      }
     ],
     "cambios": [
@@ -6512,262 +6728,6 @@
     "tmp": "D6-c2/D6-T1/H08",
     "verificado_padre": true,
     "nota_padre": "Muestreo DEC-37: se sostiene (actOnInsight solo se exporta: index.server.ts:73, insights/index.ts:2; ninguna pantalla lo llama; generate-insights/route.ts:36-40 saltea el bot con 5 o más PENDING).",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-024",
-   "prefijo": "BUG",
-   "titulo": "El plan y BotConfig son dos fuentes de verdad: el chat corta por Plan.quota y usa el modelo del plan con temperatura fija, pero el admin edita y el detector de alertas lee BotConfig.monthlyQuota (1000) y maxOutputTokens no se aplica",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-     "linea": 345,
-     "fragmento": "if (quota.conversationsUsed >= plan.quota) {"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-     "linea": 952,
-     "fragmento": "temperature: 0.7,"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
-     "linea": 68,
-     "fragmento": "if (usage && usage.conversationsCount >= bot.monthlyQuota) {"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
-     "linea": 186,
-     "fragmento": "monthlyQuota: 1000,"
-    },
-    {
-     "ruta": "prisma/seeds/sync-plans.ts",
-     "linea": 72,
-     "fragmento": "quota: 500,"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/saveBotConfig.ts",
-     "linea": 45,
-     "fragmento": "llmModel: z.string().min(1).max(80),\n  temperature: z.number().min(0).max(2),\n  maxOutputTokens: z.number().int().min(100).max(8192),"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx",
-     "linea": 98,
-     "fragmento": "value={`${quotaUsed.toLocaleString('es-AR')} / ${bot.monthlyQuota.toLocaleString('es-AR')}`}"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
-     "linea": 56,
-     "fragmento": "<Field label=\"Temperature\" hint=\"0 es mas determinista, 2 es mas creativo\">"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-     "linea": 713,
-     "fragmento": "const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx",
-     "linea": 46,
-     "fragmento": "bot.monthlyQuota > 0 ? Math.min(100, (quotaUsed / bot.monthlyQuota) * 100) : 0"
-    },
-    {
-     "ruta": "src/lib/onboarding/core.ts",
-     "linea": 134,
-     "fragmento": "monthlyQuota: 1000,"
-    },
-    {
-     "ruta": "src/lib/plan/fallback.ts",
-     "linea": 50,
-     "fragmento": "quota: 500,"
-    },
-    {
-     "ruta": "src/app/api/admin/chatbot/demo-chat/[slug]/route.ts",
-     "linea": 57,
-     "fragmento": "const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
-     "linea": 120,
-     "fragmento": "{ value: 'DAILY_DIGEST', label: 'Digest diario' },"
-    },
-    {
-     "ruta": "src/lib/client-notifications/notify.ts",
-     "linea": 94,
-     "fragmento": "if (org.leadNotificationMode === 'DISABLED') return"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
-     "linea": 77,
-     "fragmento": "<Field label=\"Quota mensual\">"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/llm/providers/anthropic.ts",
-     "linea": 18,
-     "fragmento": "throw new ProviderNotImplementedError('anthropic')"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
-     "linea": 304,
-     "fragmento": "<LlmFact label=\"Quota\" value=\"1000 conv/mes\" />"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
-     "linea": 151,
-     "fragmento": "if (bot.monthlyQuota > 0) {"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/saveBotConfig.ts",
-     "linea": 47,
-     "fragmento": "maxOutputTokens: z.number().int().min(100).max(8192),"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/config/getPublicConfig.ts",
-     "linea": 121,
-     "fragmento": "routeColorMap: (bot.routeColorMap as unknown as RouteColorMap) ?? {},"
-    },
-    {
-     "ruta": "src/app/api/admin/chatbot/demo-chat/[slug]/route.ts",
-     "linea": 113,
-     "fragmento": "maxOutputTokens: bot.maxOutputTokens,"
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 1315,
-     "fragmento": "maxOutputTokens Int         @default(800)"
-    }
-   ],
-   "impacto": "Con el primer cliente Starter el bot se corta a 500 conversaciones pero la alerta QUOTA_EXHAUSTED compara contra 1000 y nunca dispara; con Pro o Business (3000/5000, sync-plans.ts:88 y :104) dispara a 1000 aunque el bot sigue funcionando. El admin ve '500 / 1000' y el cliente ve el límite del plan. Editar modelo, temperatura, tope de salida o cuota en el admin no cambia nada en runtime, y como streamText no recibe maxOutputTokens, cada uno de los hasta 3 pasos de un turno puede generar el máximo del modelo: el costo por turno de un visitante anónimo no tiene tope configurable.",
-   "propuesta": "Sacar del editor del admin los campos legacy (o mostrarlos solo lectura con el valor del plan); que detector, preflight y fichas del admin usen getPlanForOrg().quota; pasar maxOutputTokens explícito en streamText. Decisión para Valentino (schema FROZEN): borrar las columnas legacy de BotConfig.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h3.adm-chatbots",
-    "h4.adm-alertas",
-    "h3.vis-api-chatbot",
-    "modelo.BotConfig",
-    "modelo.Plan",
-    "lib.plan",
-    "int.vertex",
-    "h3.adm-chatbots.config-llm-y-cuota",
-    "h3.adm-chatbots.detalle-overview",
-    "lib.chatbot.chat",
-    "lib.client-notifications",
-    "h3.adm-chatbots.editar-config-bot",
-    "h4.adm-clientes.alta-cliente-con-bot",
-    "lib.chatbot.llm",
-    "h3.adm-chatbots.editar-config"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "SEC-032 (costo de Vertex por prompt inflado); detect-bot-issues sin disparador (D7)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H09",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L1/H04",
-      "titulo": "El tab Avanzado del bot edita modelo, temperatura, tokens máximos, cuota y 'Digest diario', y el runtime no usa ninguno",
-      "severidad": "MEDIA",
-      "nota_padre": "Muestreado: AdvancedTab.tsx:56 edita la temperatura; handleChatRequest.ts:713 usa plan.llmModel; core.ts:134 deja monthlyQuota 1000 frente a fallback.ts:50 (500). Es la causa raíz de BUG-024 (dos fuentes de verdad); suma el «Digest diario» sin efecto."
-     },
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L3/H05",
-      "titulo": "Avanzado y resumen del alta muestran modelo, temperatura, tokens y cuota que el runtime ignora",
-      "severidad": "MEDIA",
-      "nota_padre": "Misma causa (el resumen del alta muestra modelo, temperatura y cuota que el runtime ignora)."
-     },
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L6/H09",
-      "titulo": "Controles del admin que el runtime ignora: modelo, temperatura, tope de tokens, proveedor y colores por ruta",
-      "severidad": "MEDIA",
-      "nota_padre": "Muestreado: saveBotConfig.ts:47 (maxOutputTokens editable), handleChatRequest.ts:713 (plan.llmModel) y :952 (temperature 0.7 fija), getPublicConfig.ts:121. Es BUG-024; suma el proveedor y los colores por ruta."
-     },
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L8/H09",
-      "titulo": "El chat de produccion no aplica maxOutputTokens ni la temperatura del BotConfig; el demo del admin si (preview distinta de prod)",
-      "severidad": "MEDIA",
-      "nota_padre": "Misma causa; suma que el demo del admin sí aplica la config del bot y el chat de producción no (preview distinta de prod)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "FAL-007",
-   "prefijo": "FAL",
-   "titulo": "El ciclo de vida de Project no modela mantenimiento ni cancelación: maintenanceStartDate no tiene escritor, deliveredAt no se limpia al reabrir y la migración v2 convirtió CANCELADO en COMPLETED",
-   "dominio": "D3",
-   "severidad": "MEDIA",
-   "tipo": "faltante",
-   "tipo_detalle": "faltante",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
-     "linea": 115,
-     "fragmento": "const isInMaintenance = Boolean(project.maintenanceStartDate)"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
-     "linea": 204,
-     "fragmento": "El proyecto pasara a mantenimiento cuando tenga una fecha de inicio de mantenimiento."
-    },
-    {
-     "ruta": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
-     "linea": 120,
-     "fragmento": "if (!project.maintenanceStartDate) {\n      return fail('Project has no maintenance start date')"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
-     "linea": 750,
-     "fragmento": "status: parsed.status,\n          ...(parsed.status === ProjectStatus.COMPLETED\n            ? { deliveredAt: new Date() }"
-    },
-    {
-     "ruta": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql",
-     "linea": 135,
-     "fragmento": "WHEN 'EN_MANTENIMIENTO' THEN 'IN_PROGRESS'::\"ProjectStatus\"\n        WHEN 'CANCELADO' THEN 'COMPLETED'::\"ProjectStatus\""
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 38,
-     "fragmento": "enum ProjectStatus {\n  PLANNING\n  IN_PROGRESS"
-    }
-   ],
-   "impacto": "Para el primer proyecto entregado con abono mensual: ninguna action ni formulario escribe maintenanceStartDate (solo seed-agency-os.ts y los proyectos migrados lo tienen), así que 'Generar meses pendientes' nunca aparece y el mantenimiento no se puede cobrar por el flujo previsto. Reabrir un proyecto COMPLETED deja el deliveredAt viejo y volver a completarlo pisa la fecha real de entrega. Un proyecto cancelado no tiene estado posible: los CANCELADO legacy quedaron COMPLETED y el cliente los ve como 'Completado'.",
-   "propuesta": "Agregar el inicio de mantenimiento a la edición del proyecto (o setearlo al completar si hay monthlyRate), limpiar deliveredAt al salir de COMPLETED y no pisarlo si ya existe. Decisión para Valentino (schema FROZEN): sumar CANCELLED (y quizá MAINTENANCE) a ProjectStatus y revisar los proyectos legacy que eran CANCELADO.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-proyectos",
-    "h2.cli-proyecto",
-    "modelo.Project",
-    "modelo.OsMaintenancePayment"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "FAL-004 (mismo patrón de columnas sin escritor); BUG-019 y DEU-014 (misma migración, otra causa); BUG-015",
-   "vh": null,
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H10",
-    "verificado_padre": false,
-    "nota_padre": "",
     "verificador": null
    },
    "estado": "vigente"

@@ -9,9 +9,9 @@
 | h1 · Acceso | 5 / 5 | 15 | 0 | Sentry (11), autonomía (9), errores (8) | 3 |
 | h2 · Portal del cliente | 16 / 16 | 103 | 12 | Sentry (66), sin mocks ni TODO (55), errores (48) | 11 |
 | h3 · Chatbot centralizado | 8 / 8 | 109 | 3 | Sentry (64), errores (61), autonomía (50) | 6 |
-| h4 · Panel de admin | 4 / 13 | 15 | 0 | Sentry (11), errores (8), autonomía (6) | 2 |
+| h4 · Panel de admin | 13 / 13 | 102 | 3 | Sentry (70), errores (58), validación en servidor (38) | 8 |
 | h5 · Setter y LeadOS | 0 / 7 | 0 | 0 | — | 0 |
-| h6 · Entradas públicas que alimentan lo interno | 1 / 2 | 1 | 0 | permisos y tenant (1), Sentry (1) | 0 |
+| h6 · Entradas públicas que alimentan lo interno | 1 / 2 | 6 | 0 | Sentry (4), errores (3), mobile (2) | 0 |
 
 ## h1 · Acceso
 
@@ -660,75 +660,293 @@
 
 ## h4 · Panel de admin
 
-### h4.adm-clientes — Clientes
+### h4.adm-shell — Shell del admin
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 10 funcionalidades: 10×L2).
-- Criterios de L3 que faltan en alguna funcionalidad: Sentry, autonomía, sin mocks ni TODO, errores, validación en servidor.
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 3 funcionalidades: 2×L2, 1×L3).
+- Criterios de L3 que faltan en alguna funcionalidad: mobile.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
+| `h4.adm-shell.acceso-y-layout` Guard SUPER_ADMIN y shell del admin | L2 | mobile | Camino feliz: layout.tsx:41-49 (auth + rol) -> :52-55 badges -> AdminLayoutClient.tsx:74-101 (sidebar + main). No llega a L3 por mobile parcial (hamburguesa sobre el drawer, AdminLayoutClient.tsx:43-46). |
+| `h4.adm-shell.confirmaciones` Confirmaciones de acciones destructivas | L3 | — | Consumidores fuera del lote (ClientsListClient, BotDetailClient, BulkActionBar, ImpersonateButton, BillingOverrideForm por git grep) -> confirm-dialog.tsx:42 portal a body -> :85-96 confirmar con isPending; type-to-confirm-dialog.tsx:41, :107 exige la frase. F |
+| `h4.adm-shell.navegacion` Sidebar, topbar y volver | L2 | mobile | admin-sidebar.tsx:57-100 secciones -> :131-195 Link con activo y badge (datos de layout.tsx:11, :21) -> admin-topbar.tsx:66-77 breadcrumb/título -> :85 signOutAction (flujo D1 'Logout'). Título 'Detalle' en Novedades (admin-topbar.tsx:12-13) y mobile parcial. |
+
+### h4.adm-dashboard — Dashboard del admin
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 3 funcionalidades: 3×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-dashboard.kpis-comerciales` KPIs comerciales | L2 | permisos y tenant | page.tsx:182-221 (settings, osDemo.count, osLead.count por estado) -> :343-350 objetivo, progreso y tasas -> :576-614 StatCard/DualMetricCard. Permisos heredados y tasa de respuesta sesgada. |
+| `h4.adm-dashboard.kpis-operativos-y-financieros` KPIs operativos y financieros | L2 | permisos y tenant | page.tsx:222-250 (subscription.aggregate, organization.count, ticket.count, project.count) y :281-340 (proyectos con agreedAmount, pagos, horas) -> :351-427 cálculo -> :625-700 render. |
+| `h4.adm-dashboard.tendencias-historicas` Tendencias de semanas y meses | L2 | permisos y tenant | page.tsx:443-542 series -> :710-716 DashboardHistoryCharts -> dashboard-history-charts.tsx:125-318 -> chart-card.tsx:18 aria-label. |
+
+### h4.adm-clientes — Clientes
+
+- Madurez de la herramienta: **L0** (la de su funcionalidad más floja; 36 funcionalidades: 33×L2, 1×L3, 1×L0, 1×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: Sentry, autonomía, sin mocks ni TODO, errores, validación en servidor, permisos y tenant, mobile, carga.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-clientes.acciones-masivas` Pausar bots y exportar leads de varios clientes | L2 | validación en servidor, Sentry, sin mocks ni TODO | ClientsListClient.tsx:16 → bulk-actions.ts:8-44 / :46-80. |
+| `h4.adm-clientes.alta-cliente` Alta de cliente (wizard) | L2 | errores | ClientsListClient.tsx:352 -> new/page.tsx:14 -> flujo D5 'Alta de cliente con bot (asistente)' (OnboardingWizard.tsx:87 -> Step5Review.tsx:71 -> createClientWithBot.ts:96). El listado no se invalida tras el alta. |
 | `h4.adm-clientes.alta-cliente-con-bot` Alta de cliente con chatbot | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO | clients/new/page.tsx:14 -> OnboardingWizard.tsx:87-160 -> Step5Review.tsx:66-86 -> createClientWithBot.ts:96-273 -> Step5Review.tsx:123-193. |
 | `h4.adm-clientes.alta-cliente-sin-bot` Alta de cliente sin chatbot | L2 | errores, validación en servidor, Sentry | Step1Company.tsx:58-69 -> Step5Review.tsx:87-108 -> createClientOnly.ts:48-175. |
 | `h4.adm-clientes.alta-sin-bot` Alta de cliente sin chatbot | L2 | errores, Sentry, autonomía | Step5Review.tsx:87 -> createClientOnly.ts:48-111 -> :132-147 email -> :165-175 |
+| `h4.adm-clientes.archivar` Archivar / desarchivar cliente | L2 | permisos y tenant, errores, Sentry | ClientsListClient.tsx:164 → archiveClient.ts:17 → :25-35 → :37 → :48-49 → admin/clients/page.tsx:23 (flujo D6) |
 | `h4.adm-clientes.archivar-cliente` Archivar y desarchivar cliente | L2 | Sentry, autonomía | ClientsListClient.tsx:161-171 -> archiveClient.ts:16-37 (requireSuperAdmin, Zod, update deletedAt) -> page.tsx:23/:34. Funciona como filtro, pero no suspende nada (ver hallazgo). |
 | `h4.adm-clientes.avatar-cliente` Avatar del cliente | L2 | Sentry | ClientAvatarField.tsx:24-83 -> AvatarUploader.tsx:19-66 (WebP 200 px) -> createClientWithBot.ts:28-30 / EditClientForm -> ClientAvatar.tsx:16-75. |
+| `h4.adm-clientes.billing-override` Billing override | L2 | errores, validación en servidor, Sentry | BillingOverrideForm.tsx:50-73 -> plan.actions.ts:244-313; quitar :75-90 -> :320-370. Default 0 USD sin confirmacion y fecha corrida. |
 | `h4.adm-clientes.borrador-alta` Borrador automático del alta | L2 | sin mocks ni TODO | useOnboardingDraft.ts:26-56 restaura, :59-78 autoguarda; DraftBanner.tsx:12-42; OnboardingWizard.tsx:115-121. |
 | `h4.adm-clientes.borrador-del-alta` Borrador persistente del alta de cliente | L2 | errores, Sentry | admin/clients/new/page.tsx:14 -> OnboardingWizard.tsx:98 -> useOnboardingDraft.ts:26-56 restore, :59-78 autosave, OnboardingWizard.tsx:140 clearDraft al crear. |
+| `h4.adm-clientes.boveda-alta-activo` Alta de activo en la bóveda del cliente | L2 | permisos y tenant, errores, validación en servidor, Sentry | VaultManager.tsx:25 (fuera del lote) -> agency-actions.ts:98-101 rol -> :103-111 clientAsset.create -> flujo D2 'Bóveda del cliente' (boveda/page.tsx:129). La credencial queda en claro. |
+| `h4.adm-clientes.boveda-carga` Subir un recurso a la Bóveda del cliente | L2 | errores, validación en servidor, mobile, Sentry, sin mocks ni TODO, autonomía | VaultTab.tsx:6 → VaultManager.tsx:19-34 → agency-actions.ts:94-113 (flujo D2 «Bóveda del cliente»). |
+| `h4.adm-clientes.crear-entregable` Crear entregable y notificar al cliente | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | ProjectsTab.tsx:7 → ProjectManager.tsx:12-26 → agency-actions.ts:14-91 (assertProjectBelongsToOrg :29). |
+| `h4.adm-clientes.detalle` Ficha del cliente | L3 | — | page.tsx:28-31 -> :39-69 -> :75-83 -> :85-93; cumple los criterios aplicables. Deuda: router.push en switcher, cuid en URL, archivados sin marca. |
+| `h4.adm-clientes.editar-datos` Editar datos del cliente | L2 | errores, carga, Sentry | EditClientForm.tsx:79 → updateClient.ts:29 (guard) → :33-37 (Zod) → :42-65 (lee org+admin) → :71-81 (unicidad email) → :83-119 (tx) → :121 (audit) → :148-149 (revalidate) |
+| `h4.adm-clientes.eliminar` Eliminar cliente (hard-delete) | L2 | errores | ClientsListClient.tsx:437-454 -> :192-207 -> :521-531 TypeToConfirmDialog -> :222-243 -> hardDeleteClient.ts (flujo D6). |
 | `h4.adm-clientes.eliminar-cliente` Eliminar cliente (hard-delete) | L2 | Sentry, autonomía | ClientsListClient.tsx:192-206 -> hardDeleteClient.ts:107-123 (resumen) -> ClientsListClient.tsx:222-243 -> hardDeleteClient.ts:125-145 (tx + delete) -> audit :166-178. |
+| `h4.adm-clientes.eliminar-definitivo` Eliminar cliente (hard-delete) | L2 | permisos y tenant, errores, Sentry | ClientsListClient.tsx:196 → hardDeleteClient.ts:107-123 → ClientsListClient.tsx:527 (confirm) → :227 → hardDeleteClient.ts:125-146 → :166 → :181-182 |
 | `h4.adm-clientes.envio-manual-del-reporte` Enviar ahora el reporte ejecutivo | L2 | Sentry, sin mocks ni TODO | SendExecutiveReportButton.tsx:37 → route.ts:13-57 → send-manual.ts:33-153 → build.ts → Brevo → WeeklyReportLog. |
+| `h4.adm-clientes.facturacion` Ciclo de cobro del cliente | L0 | sin mocks ni TODO | No existe: OverviewTab.tsx:72-74 solo monta plan, override y reporte; invoice solo se escribe en prisma/seed.ts:595 y :618; subscription solo en plan.actions.ts y get-plan-for-org.ts:50 (git grep). |
+| `h4.adm-clientes.impersonar` Impersonar al cliente | L2 | errores, validación en servidor, Sentry | ImpersonateButton.tsx:20-29 -> client.actions.ts:8 -> flujo D1 'Impersonacion de soporte'. |
+| `h4.adm-clientes.listado` Listado de clientes | L2 | mobile | Camino feliz: page.tsx:91-94 -> :62-65 -> ClientsListClient.tsx:258-304 -> :497-517 -> :630. No llega a L3 por mobile parcial (fijar oculto sin hover) y cache que no se invalida en el alta. |
+| `h4.adm-clientes.notas-internas` Notas internas inline | L2 | errores, Sentry | InternalNotesCard.tsx:43 → updateClientInternalNotes.ts:20 → :22-25 → :29-38 → :40 → :54 |
+| `h4.adm-clientes.plan` Asignar plan | L2 | errores, Sentry | PlanAssignmentForm.tsx:39-49 -> plan.actions.ts:88-92 -> :101-122 -> :179-208 -> :210-235. Falla: precio legacy desincronizado, downgrade no cancelable, error crudo. |
 | `h4.adm-clientes.plantilla-kb-industria` Plantilla de KB por industria | L2 | validación en servidor, sin mocks ni TODO | Step3KnowledgeBase.tsx:9-23 getTemplate -> kb-templates/index.ts:25-40 -> createClientWithBot.ts:192-202; también createBot.ts:58, :93-102 y lib/onboarding/core.ts:7. |
+| `h4.adm-clientes.redireccion-chatbot-legacy` Redireccion legacy de chatbot | L2 | validación en servidor | page.tsx:20-23 -> :28-31 -> :35-38. Solo slug; sin install/integrations. |
+| `h4.adm-clientes.reenviar-credenciales` Reenviar credenciales temporales | L2 | permisos y tenant, Sentry, sin mocks ni TODO | ResendCredentialsButton.tsx:18 → route.ts:16-113. |
+| `h4.adm-clientes.reporte-ejecutivo-manual` Enviar ahora el reporte ejecutivo de una org | L2 | Sentry | Flujo D2 «Envío manual del reporte (admin)»: SendExecutiveReportButton.tsx:37 → route.ts:9-91 → send-manual.ts. |
+| `h4.adm-clientes.resumen-chatbot` Resumen del chatbot en la ficha del cliente | L2 | mobile, sin mocks ni TODO, autonomía | ChatbotTab.tsx:101 → ChatbotManager.tsx:35-157. |
+| `h4.adm-clientes.servicios-contratados` Servicios contratados del cliente | L1 | errores, validación en servidor, Sentry, autonomía | CRUD en services.ts sin importadores (git grep vacío); Service solo se escribe como efecto de proyectos (project.actions.ts:280, :291) y se lee en OverviewTab.tsx:26. No hay UI para gestionarlo directamente. |
+| `h4.adm-clientes.tab-boveda` Pestana Boveda | L2 | errores, validación en servidor, Sentry | VaultTab.tsx:15-18 -> :39-42 -> :71; alta :26 -> VaultManager -> agency-actions.ts:94. |
+| `h4.adm-clientes.tab-chatbot` Pestana Chatbot | L2 | sin mocks ni TODO | ChatbotTab.tsx:15-36 -> :65-99 -> :101-124 -> :127-163. La cuota mostrada no es la efectiva. |
+| `h4.adm-clientes.tab-proyectos` Pestana Proyectos | L2 | validación en servidor | ProjectsTab.tsx:14-20 -> :22-25 -> :73 ProjectManager -> agency-actions.ts:14. |
+| `h4.adm-clientes.tab-soporte` Pestana Soporte | L2 | — | SupportTab.tsx:15-26 -> :30-53 -> :55-84. 'Ver todos' sin filtro. |
+| `h4.adm-clientes.tarea-para-aprobacion` Pedir aprobación de una entrega al cliente | L2 | errores, validación en servidor, Sentry | ProjectManager.tsx:18 (fuera del lote) -> agency-actions.ts:19-22 -> :29 assertProjectBelongsToOrg -> :37-72 transacción task + notificaciones -> :75-88 emails -> flujo D2 'Aprobar o pedir cambios en una entrega'. |
+
+### [FAL-023] Falta el ciclo de cobro en el admin: facturas, renovacion y estado de la suscripcion solo existen por seed
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx:72` — «<PlanAssignmentCard clientId={clientId} /> <BillingOverrideCard clientId={clientId} /> <ExecutiveReportCard clientId={clientId} />»; `src/app/(protected)/admin/clients/_actions/plan.actions.ts:191` — «status: SubscriptionStatus.ACTIVE,»; `prisma/seed.ts:595` — «await prisma.invoice.upsert({»
+- Impacto: El portal muestra facturas (dashboard/cuenta/facturacion/page.tsx:70) y alerta por suscripciones por vencer (lib/alerts.ts:244), pero ninguna pantalla ni action del admin crea Invoice, fija renewalDate o cambia el estado de la Subscription (las unicas escrituras de subscription estan en plan.actions.ts y get-plan-for-org.ts:50; invoice solo en seed.ts:595 y :618). Para el primer cliente real, Facturacion queda vacia y la alerta nunca dispara. Confirma la hipotesis: lo que falta en Clientes son modulos, no la base.
+- Propuesta: Modulo 'Facturacion' en la ficha del cliente: alta de factura (monto desde Plan/override vigente, vencimiento, link de pago, PDF), marcar pagada, fijar renovacion y estado (ACTIVE/PAST_DUE/CANCELLED) con audit.
+- Esfuerzo: L  ·  Zona: libre
+- Relacionado: [BUG-050]
+- Nodo(s): h4.adm-clientes, h4.adm-clientes.facturacion, h2.cli-cuenta, modelo.Invoice, modelo.Subscription
 
 ### h4.adm-proyectos — Proyectos
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 12 funcionalidades: 11×L2, 1×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, errores, mobile, Sentry, autonomía, validación en servidor, vacíos, carga, sin mocks ni TODO.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-proyectos.alta-edicion` Crear y editar proyecto (cliente o interno) | L2 | errores, Sentry, autonomía | project-form.tsx:152-188 -> project.actions.ts:593-641 (alta: resolveProjectOrganization :225-258, project.create :604, hitos :620) / :643-720 (edición) -> router.refresh (project-form.tsx:188). |
+| `h4.adm-proyectos.aprobacion-entregas` Enviar una tarea completada a aprobación del cliente | L2 | errores, validación en servidor, Sentry, autonomía | task-list.tsx:456-458 -> :622-631 -> src/lib/actions/projects.ts:177-209 (PENDING_APPROVAL :194 + Message al cliente :197) -> flujo D2 'Aprobar o pedir cambios en una entrega'. |
+| `h4.adm-proyectos.borrado` Eliminar proyecto (tablero y ficha) | L2 | errores, validación en servidor, Sentry | draggable-project-card.tsx:84-105 -> projects-board.tsx:149-166 -> project.actions.ts:782-831. Desde la ficha: delete-project-button.tsx:58-85 -> src/lib/actions/projects.ts:108-117 (fuera del lote). |
+| `h4.adm-proyectos.carga-horas` Carga de horas por tarea | L2 | permisos y tenant, errores, Sentry, sin mocks ni TODO | time-entry-panel.tsx:8-11 → time-entry.actions.ts:136-189; hours/page.tsx:58 → :270-302. |
+| `h4.adm-proyectos.eliminar-proyecto` Eliminar proyecto desde el detalle | L2 | errores, carga, validación en servidor, Sentry | projects/[projectId]/page.tsx:323 → delete-project-button.tsx:75 → projects.ts:109-117 |
+| `h4.adm-proyectos.enviar-a-aprobacion` Enviar entrega a aprobación del cliente | L2 | errores, validación en servidor, Sentry, autonomía | task-list.tsx:622-630 → projects.ts:178-208 → flujo D2 'Aprobar o pedir cambios en una entrega' |
+| `h4.adm-proyectos.ficha` Ficha del proyecto (resumen, finanzas, estado, ver como cliente) | L2 | permisos y tenant, errores, Sentry | layout.tsx:105-162 -> page.tsx:99-167 -> render; estado: project-status-control.tsx:43-63 -> project.actions.ts:722-780 -> router.refresh (project-status-control.tsx:62). |
+| `h4.adm-proyectos.horas` Carga y borrado de horas por tarea, con métricas de horas y valor hora | L2 | errores, Sentry, autonomía | hours/page.tsx:28-58 -> time-entry-panel.tsx:138-179 -> time-entry.actions.ts:136 (fuera del lote) -> router.refresh (time-entry-panel.tsx:177). |
+| `h4.adm-proyectos.mantenimiento` Mantenimiento mensual (generar meses y marcar pagado) | L1 | permisos y tenant, errores, carga, Sentry, autonomía | El código está completo (payments/page.tsx:175-322; maintenance.actions.ts:60-174), pero su puerta de entrada, maintenanceStartDate, no la escribe ninguna UI ni action: el único escritor es prisma/seed-agency-os.ts:1396. El camino feliz no se puede alcanzar si |
+| `h4.adm-proyectos.pagos-hitos` Hitos de pago (inicio y entrega) y marcar pagado | L2 | permisos y tenant, vacíos, errores, carga, Sentry, autonomía | project.actions.ts:620 -> :330-345 (hitos 50/50) -> payments/page.tsx:81-92 -> :154-160 -> milestone.actions.ts:23-43 (revalidate :42). |
+| `h4.adm-proyectos.tablero-kanban` Tablero de proyectos por estado con filtros y arrastre | L2 | permisos y tenant, errores, mobile, Sentry, autonomía | Camino feliz trazado: page.tsx:19-22 -> project.actions.ts:934-1014 -> projects-board.tsx:89-92 -> project-list.tsx:121-133 -> projects-board.tsx:130-143 -> project.actions.ts:745-754 -> projects-board.tsx:118. No llega a L3: un proyecto nuevo queda oculto por |
+| `h4.adm-proyectos.tareas` Tareas de un proyecto (crear, editar, borrar) | L2 | errores, Sentry | task-form.tsx:7-10 → task.actions.ts:155-191; task-list.tsx:17-20 → :197-257; listado tasks/page.tsx:34 → :321-371. |
 
 ### [FAL-007] El ciclo de vida de Project no modela mantenimiento ni cancelación: maintenanceStartDate no tiene escritor, deliveredAt no se limpia al reabrir y la migración v2 convirtió CANCELADO en COMPLETED
 - Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: faltante
 - Confianza: PROBABLE
-- Evidencia: `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:115` — «const isInMaintenance = Boolean(project.maintenanceStartDate)»; `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:204` — «El proyecto pasara a mantenimiento cuando tenga una fecha de inicio de mantenimiento.»; `src/app/(protected)/admin/projects/_actions/maintenance.actions.ts:120` — «if (!project.maintenanceStartDate) { return fail('Project has no maintenance start date')»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:750` — «status: parsed.status, ...(parsed.status === ProjectStatus.COMPLETED ? { deliveredAt: new Date() }»; `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:135` — «WHEN 'EN_MANTENIMIENTO' THEN 'IN_PROGRESS'::"ProjectStatus" WHEN 'CANCELADO' THEN 'COMPLETED'::"ProjectStatus"»; `prisma/schema.prisma:38` — «enum ProjectStatus { PLANNING IN_PROGRESS»
+- Evidencia: `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:115` — «const isInMaintenance = Boolean(project.maintenanceStartDate)»; `src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:204` — «El proyecto pasara a mantenimiento cuando tenga una fecha de inicio de mantenimiento.»; `src/app/(protected)/admin/projects/_actions/maintenance.actions.ts:120` — «if (!project.maintenanceStartDate) { return fail('Project has no maintenance start date')»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:750` — «status: parsed.status, ...(parsed.status === ProjectStatus.COMPLETED ? { deliveredAt: new Date() }»; `prisma/migrations/20260406010000_v2-unify-project-task/migration.sql:135` — «WHEN 'EN_MANTENIMIENTO' THEN 'IN_PROGRESS'::"ProjectStatus" WHEN 'CANCELADO' THEN 'COMPLETED'::"ProjectStatus"»; `prisma/schema.prisma:38` — «enum ProjectStatus { PLANNING IN_PROGRESS»; `src/app/(protected)/admin/projects/_actions/project.schemas.ts:58` — «monthlyRate: optionalPositiveNumberSchema, estimatedEndDate: optionalDateSchema,»; `prisma/seed-agency-os.ts:1396` — «maintenanceStartDate: daysAgo(44, 10),»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:751` — «...(parsed.status === ProjectStatus.COMPLETED ? { deliveredAt: new Date() } : {}),»; `src/app/(protected)/admin/projects/[projectId]/page.tsx:208` — «Entregado: {formatDate(project.deliveredAt)}»
 - Impacto: Para el primer proyecto entregado con abono mensual: ninguna action ni formulario escribe maintenanceStartDate (solo seed-agency-os.ts y los proyectos migrados lo tienen), así que 'Generar meses pendientes' nunca aparece y el mantenimiento no se puede cobrar por el flujo previsto. Reabrir un proyecto COMPLETED deja el deliveredAt viejo y volver a completarlo pisa la fecha real de entrega. Un proyecto cancelado no tiene estado posible: los CANCELADO legacy quedaron COMPLETED y el cliente los ve como 'Completado'.
 - Propuesta: Agregar el inicio de mantenimiento a la edición del proyecto (o setearlo al completar si hay monthlyRate), limpiar deliveredAt al salir de COMPLETED y no pisarlo si ya existe. Decisión para Valentino (schema FROZEN): sumar CANCELLED (y quizá MAINTENANCE) a ProjectStatus y revisar los proyectos legacy que eran CANCELADO.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h4.adm-proyectos, h2.cli-proyecto, modelo.Project, modelo.OsMaintenancePayment
+- Nodo(s): h4.adm-proyectos, h2.cli-proyecto, modelo.Project, modelo.OsMaintenancePayment, h4.adm-proyectos.mantenimiento, h4.adm-proyectos.ficha
 
-### h4.adm-tickets — Tickets
+### h4.adm-equipo — Equipo
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 2 funcionalidades: 2×L2).
-- Criterios de L3 que faltan en alguna funcionalidad: errores, Sentry, sin mocks ni TODO.
+- Madurez de la herramienta: **L0** (la de su funcionalidad más floja; 3 funcionalidades: 1×L2, 2×L0).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, sin mocks ni TODO, autonomía.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
+| `h4.adm-equipo.alta-baja-miembros` Alta, baja y rol de miembros del equipo | L0 | autonomía | Ninguna UI ni action viva escribe role SUPER_ADMIN (git grep); inviteTeamMemberAction vive en lib/actions/settings.ts:148 sin importadores. |
+| `h4.adm-equipo.invitar-miembro` Invitar miembro del equipo | L0 | autonomía | inviteTeamMemberAction (settings.ts:148) e invitations.ts no tienen importadores; no hay UI de invitación en admin/team ni admin/settings (git grep -i invit vacío) |
+| `h4.adm-equipo.workload` Workload por miembro | L2 | permisos y tenant, sin mocks ni TODO, autonomía | team/page.tsx:19-170 → member-workload.tsx:215-266. |
+
+### [FAL-028] No hay gestión del equipo interno: ninguna pantalla ni action viva da de alta, baja o cambia el rol de un SUPER_ADMIN, y la consola nueva perdió invitar miembro y probar el webhook
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/team/page.tsx:19` — «const users = await prisma.user.findMany({ where: { role: Role.SUPER_ADMIN,»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:521` — «Usuarios con rol SUPER_ADMIN habilitados para operar la OS.»; `src/lib/actions/settings.ts:148` — «export async function inviteTeamMemberAction(input: {»; `src/lib/actions/settings.ts:309` — «export async function testWebhookAction(input?: {»
+- Impacto: Sumar un colaborador o sacar a uno que se va exige tocar la base a mano (y su JWT sigue vivo, SEC-023). Las funciones del admin clásico (invitar, probar webhook, probar n8n, verificar permisos de Google) siguen en lib/actions/settings.ts, sin importadores. Mide la hipótesis de Valentino: al admin le faltan módulos más que pantallas.
+- Propuesta: Módulo Equipo con invitar (reusando inviteTeamMemberAction con token hasheado), desactivar y cambiar rol, todo auditado; botón 'Probar webhook' en Configuración; después podar lib/actions/settings.ts.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [DEU-001]
+- Nodo(s): h4.adm-equipo, h4.adm-equipo.alta-baja-miembros, h4.adm-config, modelo.User
+
+### h4.adm-leads — Leads
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 12 funcionalidades: 11×L2, 1×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, validación en servidor, mobile, Sentry, errores, carga, sin mocks ni TODO, vacíos.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-leads.actividad-comercial` Registrar actividad comercial y timeline | L2 | permisos y tenant, validación en servidor, Sentry | lead-activity-feed.tsx:131 -> :75 createActivity (sale a activity.actions.ts, revalida admin-leads :28 por git grep) -> :87-90 limpia + refresh. |
+| `h4.adm-leads.alta-edicion` Alta y edición de lead | L2 | permisos y tenant, validación en servidor, Sentry | page.tsx:159 -> lead-form.tsx:129 safeParse -> :140-141 createLead/updateLead (sale a lead.actions.ts) -> :148-149 cierra + refresh. |
+| `h4.adm-leads.asignar-setter` Asignar setter y marcar caliente | L2 | permisos y tenant, validación en servidor, Sentry | [leadId]/page.tsx:212-216 + :225 cargarCargaSetters (sale a lib/leados) -> :412 -> assign-setter-control.tsx:224 -> :63 assignLeadSetter (sale a lead.actions.ts) -> :72-73. |
+| `h4.adm-leads.convertir-a-proyecto` Convertir lead cerrado en proyecto | L1 | errores, sin mocks ni TODO | [leadId]/page.tsx:227 canConvertToProject + :281-289 botón disabled sin handler; convertLeadToProject (project.actions.ts:833) y ConvertLeadDialog (convert-lead-dialog.tsx:72) existen sin importadores. |
+| `h4.adm-leads.demanda-modulos` Demanda medida de módulos | L2 | errores | module-demand.actions.ts:25-50 (ZONA-FRANCO) → demand.ts:87-134 → demand.ts:137-153 → module-demand-table.tsx:3; invariantes modules.invariant.ts:91-120 |
+| `h4.adm-leads.demos` Demos y Looms del lead | L2 | permisos y tenant, errores, validación en servidor, Sentry | demo-form.tsx:153 -> :113 createDemo (sale a demo.actions.ts) -> :126-128 refresh; :246 markDemoViewed (sale). |
+| `h4.adm-leads.eliminar-lead` Eliminar lead con confirmación | L2 | permisos y tenant, validación en servidor, Sentry | lead-card.tsx:120-123 -> :184-195 InlineConfirm -> lead-pipeline.tsx:143-161 deleteLead (sale a lead.actions.ts) -> :153 rollback / :160 refresh. |
+| `h4.adm-leads.ficha-y-estado` Ficha del lead y cambio de estado | L2 | permisos y tenant, errores, carga, validación en servidor, Sentry, sin mocks ni TODO | lead-card.tsx:69 -> [leadId]/page.tsx:183-217 -> :279 -> change-status-select.tsx:37 updateLeadStatus (sale) -> :49 refresh. |
+| `h4.adm-leads.filtros-outbound` Filtros del board (servicio, período, setter, ubicación) | L2 | — | outbound-leads-view.tsx:27-30 -> lead-filters.ts:43 deriveFilterOptions / :154 applyLeadFilters -> lead-filters-bar.tsx:59-129 -> location-typeahead.tsx:118-133. |
+| `h4.adm-leads.inbound` Inbound por período y conversión a Lead OS | L2 | permisos y tenant, validación en servidor, Sentry | page.tsx:117-119 listInboundLeads (sale) -> :212 -> inbound-leads-table.tsx:143 -> :52 convertInboundToLead (sale) -> :61-67. |
+| `h4.adm-leads.pipeline-kanban` Kanban outbound con drag & drop y vista de columna | L2 | permisos y tenant, validación en servidor, mobile, Sentry | page.tsx:21-54 getLeads -> :202 -> outbound-leads-view.tsx:29 groupLeads -> lead-pipeline.tsx:192-207 handleDragEnd -> :122 updateLeadStatus (sale a lead.actions.ts, que revalida 'admin-leads' según git grep) -> :139 refresh / :132 rollback. |
+| `h4.adm-leads.reunion-resultado` Reunión agendada: realizada y resultado | L2 | permisos y tenant, vacíos, carga, validación en servidor, Sentry, sin mocks ni TODO | [leadId]/page.tsx:229-230 parseAgenda (sale a lib/leados/flow) -> :296 -> reunion-panel.tsx:130 -> :61 marcarReunionRealizada; :165 -> :189 -> :73 registrarResultadoReunion (sale a reunion.actions.ts). |
+
+### [FAL-024] «Convertir a proyecto» en la ficha del lead está siempre deshabilitado; la action y el diálogo existen sin conectar
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/leads/[leadId]/page.tsx:281` — «{canConvertToProject ? ( <button type="button" disabled»; `src/app/(protected)/admin/projects/_actions/project.actions.ts:833` — «export async function convertLeadToProject(»; `src/app/(protected)/admin/projects/_components/convert-lead-dialog.tsx:72` — «export function ConvertLeadDialog({»
+- Impacto: Cuando develOP cierre el primer cliente real desde el pipeline, el botón que promete crear el proyecto no hace nada y no explica por qué; la tarjeta «Proyecto vinculado» (:367-383) queda en «Todavía sin proyecto» salvo que se vincule a mano desde el form de proyectos (project.actions.ts:612 acepta leadId). ConvertLeadDialog no tiene importadores (git grep).
+- Propuesta: Montar ConvertLeadDialog (ya trae schema y action) en lugar del botón deshabilitado, o quitar el botón si la conversión se decide hacer desde /admin/projects. Decisión de producto antes de tocar.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-leads, h4.adm-leads.convertir-a-proyecto, h4.adm-proyectos, modelo.OsLead, modelo.Project
+
+### h4.adm-tickets — Tickets
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 6 funcionalidades: 6×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: errores, Sentry, sin mocks ni TODO, vacíos, autonomía, mobile, permisos y tenant.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-tickets.bandeja` Bandeja de tickets con filtros | L2 | vacíos, errores, Sentry, autonomía | tickets/page.tsx:6 → ticket.actions.ts:51-94 → ticket-list.tsx:79-224. |
 | `h4.adm-tickets.cambiar-estado` Cambiar estado del ticket | L2 | errores, Sentry | admin/tickets/_components/ticket-chat.tsx:9 → actions.ts:183-184 Zod → :187 requireSuperAdmin → :188-193 update + revalidate. |
+| `h4.adm-tickets.cambio-estado` Cambiar el estado del ticket | L2 | Sentry | ticket-chat.tsx:160-170 → handleStatusChange :99-115 → updateTicketStatusAction (src/lib/tickets/actions.ts, fuera del lote). |
+| `h4.adm-tickets.conversacion-y-respuesta` Conversación del ticket y respuesta al cliente | L2 | errores, mobile, Sentry | tickets/[ticketId]/page.tsx:12-26 → ticket.actions.ts:133-184 → ticket-chat.tsx:189-221 → ticket-reply-form.tsx:53-67 → lib/tickets/actions (flujo D2 «Responder ticket (cliente y admin)»). |
 | `h4.adm-tickets.responder-y-avisar-por-email` Responder ticket como develOP y avisar al cliente | L2 | errores, Sentry, sin mocks ni TODO | actions.ts:124 (isAdmin) → :140-148 mensaje → :150-167 sendEmail por Resend (lib/email.ts:15-30); el mensaje se guarda, el email puede no salir sin registro. |
+| `h4.adm-tickets.solicitud-baja` Aprobar solicitud de eliminación de cuenta desde el ticket | L2 | permisos y tenant, sin mocks ni TODO | ticket-chat.tsx:118-119, :224-247 → ClientsListClient.tsx:245-256 (flujo D6 «Eliminar cliente (hard-delete) y su cascada»). |
+
+### h4.adm-mensajes — Mensajes (admin)
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 5 funcionalidades: 4×L2, 1×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: errores, Sentry, permisos y tenant, validación en servidor, vacíos, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-mensajes.bandeja` Bandeja de conversaciones con no leídos | L2 | errores, Sentry | layout.tsx:15-20 -> conversation-list-loader.tsx:10 -> message.actions.ts:44-120 -> conversation-list.tsx:92-150. |
+| `h4.adm-mensajes.hilo-autoscroll` Auto-scroll del hilo de mensajes del admin | L2 | — | message-thread.tsx:39 → MessagesScrollAnchor.tsx:7-14. |
+| `h4.adm-mensajes.hilo-y-leido` Ver conversación y marcar leído | L2 | permisos y tenant, errores, Sentry | conversation-list.tsx:104 -> [orgId]/page.tsx:24 markAsRead (updateMany :213 escribe; revalidate falla en render) -> :26-35 -> message-thread.tsx:30-39. |
+| `h4.adm-mensajes.iniciar-conversacion` Iniciar conversación con un cliente sin mensajes | L1 | vacíos, validación en servidor, Sentry, autonomía | Sólo funciona tipeando /admin/messages/<id> ([orgId]/page.tsx:73 renderiza el composer con hilo vacío); la bandeja filtra orgs con mensajes (message.actions.ts:47-51) y el índice ignora ?clientId= (page.tsx:6, SupportTab.tsx:55). |
+| `h4.adm-mensajes.responder` Responder al cliente (mensaje + aviso por email) | L2 | errores, validación en servidor, Sentry | message-input.tsx:88 -> :42 sendMessage -> message.actions.ts:173-181 create -> :193 queueAdminMessageEmail (sale a lib/email/admin-message-notification.ts:19) -> :199 -> message-input.tsx:49-50. |
+
+### [FAL-025] No se puede iniciar desde la UI la primera conversación con un cliente
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/messages/_actions/message.actions.ts:46` — «const organizations = await prisma.organization.findMany({ where: { messages: {»; `src/app/(protected)/admin/messages/page.tsx:6` — «export default function AgencyOsMessagesPage() {»; `src/app/(protected)/admin/clients/[clientId]/_components/tabs/SupportTab.tsx:55` — «<SupportSection title="Mensajes recientes" href={'/admin/messages?clientId=${clientId}'}>»
+- Impacto: La bandeja sólo lista orgs que ya tienen mensajes, el índice ignora ?clientId= (no recibe searchParams) y la ficha del cliente sin mensajes sólo ofrece ese link. Con el primer cliente real, develOP no puede mandarle el primer mensaje (bienvenida, pedido de accesos) salvo tipeando /admin/messages/<id> a mano; el único mensaje automático llega al completar todo el onboarding (src/actions/admin/onboarding-tasks.ts:33-40).
+- Propuesta: Que el índice honre ?clientId= (redirect a /admin/messages/[id]) y agregar «Nueva conversación» con selector de clientes activos. La página [orgId] ya soporta hilo vacío + composer (:73).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-mensajes, h4.adm-mensajes.iniciar-conversacion, h4.adm-clientes, modelo.Message
+
+### h4.adm-novedades — Novedades
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 2 funcionalidades: 2×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, errores, carga, Sentry, validación en servidor.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-novedades.listar-y-retirar` Novedades publicadas y retiro | L2 | permisos y tenant, errores, carga, validación en servidor, Sentry | announcements/page.tsx:12-25 -> announcement-list.tsx:58-126 -> :93 Retirar -> :75 Confirmar -> :39-44 deleteAnnouncementAction (actions.ts:66-69) -> router.refresh. |
+| `h4.adm-novedades.publicar` Publicar novedad del panel | L2 | permisos y tenant, errores, carga, Sentry | announcement-publisher.tsx:53-75 safeParse -> :78 createAnnouncementAction -> announcements.actions.ts:18 guard -> :19 parse -> :41-50 create -> :52-53 revalidate -> flujo D2 'Novedades del panel'. |
+
+### h4.adm-referidos — Referidos (admin)
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 1 funcionalidades: 1×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, errores, carga, validación en servidor, Sentry, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-referidos.gestion-estados` Confirmar conversión y mes bonificado de referidos | L2 | permisos y tenant, errores, carga, validación en servidor, Sentry, autonomía | referrals/page.tsx:9-29 → referrals-admin-table.tsx:35-42, :79-101 → referrals.admin.actions.ts:13-53. |
 
 ### h4.adm-alertas — Alertas
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 2 funcionalidades: 1×L1, 1×L2).
-- Criterios de L3 que faltan en alguna funcionalidad: errores, Sentry, autonomía, sin mocks ni TODO.
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 9 funcionalidades: 7×L2, 2×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: sin mocks ni TODO, autonomía, errores, validación en servidor, mobile, Sentry, vacíos.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h4.adm-alertas.alerta-upsell-cuota` Alerta de upsell al agotar cuota | L2 | sin mocks ni TODO, autonomía | handleChatRequest.ts:374 -> upsellAlert.ts:52-58 (markDegradedIfFirst) -> :68-88. |
-| `h4.adm-alertas.detector-incidencias` Detector de incidencias de bots | L1 | errores, Sentry, autonomía | Funciona solo a mano: AlertSettingsClient.tsx:89 -> trigger-detector/route.ts:5-16 -> detectBotIssues.ts:285-297; sin scheduler (netlify.toml:25-32) y ciego a errores de stream |
+| `h4.adm-alertas.churn-y-vencimientos` Alertas periódicas de clientes inactivos y suscripciones por vencer | L1 | errores, Sentry, sin mocks ni TODO, autonomía | Código en alerts.ts:195-296 y ruta api/cron/alerts/route.ts:2, sin disparador (netlify.toml:25-32, vercel.json:4-12); renewalDate sin escritor (FAL-006). |
+| `h4.adm-alertas.deteccion-automatica` Detección automática de incidencias | L1 | sin mocks ni TODO, autonomía | El detector existe (api/cron/detect-bot-issues/route.ts:13 -> detectBotIssues.ts:285) pero ningún scheduler lo llama: netlify.toml:25-32 y vercel.json:2-15 no lo incluyen; solo corre a mano (api/admin/alerts/trigger-detector/route.ts:12). |
+| `h4.adm-alertas.detector-incidencias` Detector de incidencias de bots disparado a mano | L2 | vacíos, errores, mobile, Sentry, sin mocks ni TODO, autonomía | alerts/page.tsx:7-22 → AlertSettingsClient.tsx:85-97 → trigger-detector/route.ts:5-13 → runAlertDetector (flujo D5). Sin cron (FAL-016) y sin link. |
+| `h4.adm-alertas.filtros-y-vista-completa` Filtros de alertas y vista completa por columna | L2 | mobile | AlertsClient.tsx:48-49 estado -> :75-79 passesFilters -> alerts-filters.ts:50-70 -> AlertsClient.tsx:207-275 cap -> alert-column-overview.tsx:95-158 overlay con Escape/trap (:43-89). Opera sobre el recorte de 100 filas. |
+| `h4.adm-alertas.listado` Listado de alertas del sistema | L2 | errores, validación en servidor, autonomía | alerts/page.tsx:5 → manageAlerts.ts:9-27 → AlertsClient (columnas con VISIBLE_CAP AlertsClient.tsx:206-208) |
+| `h4.adm-alertas.marcar-vista-resolver` Marcar alerta vista / resolver | L2 | errores, Sentry | AlertsClient.tsx:90/:110 → manageAlerts.ts:31-51/:76-94 → :54/:97 → :70-71/:113-114 |
+| `h4.adm-alertas.triage` Triage de alertas de bots | L2 | errores, validación en servidor, mobile, Sentry | alerts/page.tsx:5 listAlerts (manageAlerts.ts:10 guard, :25 take 100) -> AlertsClient.tsx:81-85 columnas -> alert-card.tsx:75 -> AlertsClient.tsx:87-101 acknowledgeAlert (manageAlerts.ts:30) + update optimista. |
+| `h4.adm-alertas.webhook-agencia` Alertas inmediatas de la agencia por webhook | L2 | errores, validación en servidor, Sentry, autonomía | Callers (tickets/actions.ts:8, contact.ts:6, messages.ts:4, upsell.ts:4, referrals.service.ts:4) → alerts.ts:109-129 → POST :131-137. |
 
 ### [FAL-016] El detector de alertas de los bots (/api/cron/detect-bot-issues) no tiene ningún disparador programado
 - Dominio: D5  ·  Severidad: ALTA  ·  Tipo: faltante
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `netlify.toml:25` — «[functions."generate-insights-cron"] schedule = "0 9 * * *"»; `netlify.toml:31` — «[functions."cleanup-old-events-cron"]»; `vercel.json:4` — «"path": "/api/cron/os-follow-up",»; `src/app/api/cron/detect-bot-issues/route.ts:7` — «export async function GET(req: Request) { if (!isAuthorizedCronRequest(req)) {»; `src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx:89` — «const res = await fetch('/api/admin/alerts/trigger-detector', { method: 'POST' })»; `src/app/api/cron/detect-bot-issues/route.ts:13` — «const result = await runAlertDetector()»
+- Evidencia: `netlify.toml:25` — «[functions."generate-insights-cron"] schedule = "0 9 * * *"»; `netlify.toml:31` — «[functions."cleanup-old-events-cron"]»; `vercel.json:4` — «"path": "/api/cron/os-follow-up",»; `src/app/api/cron/detect-bot-issues/route.ts:7` — «export async function GET(req: Request) { if (!isAuthorizedCronRequest(req)) {»; `src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx:89` — «const res = await fetch('/api/admin/alerts/trigger-detector', { method: 'POST' })»; `src/app/api/cron/detect-bot-issues/route.ts:13` — «const result = await runAlertDetector()»; `src/app/(protected)/admin/alerts/page.tsx:17` — «Issues detectados automaticamente cada 15 minutos»; `src/app/api/admin/alerts/trigger-detector/route.ts:12` — «const result = await runAlertDetector()»
 - Impacto: Bloqueante para el primer cliente real: las alertas de bot (LLM_PROVIDER_ERROR, QUOTA_EXHAUSTED, LATENCY_DEGRADED, LEAD_CAPTURE_FAILURE, CLIENT_NO_ACTIVITY) solo se generan si un SUPER_ADMIN aprieta el botón manual de Configuración → Alertas. Un bot caído o con el cupo agotado pasa días sin aviso. netlify.toml agenda solo generate-insights, weekly-reports y cleanup; vercel.json agenda otros tres crons que en Netlify no corren.
 - Propuesta: Agendar el detector con una función programada de Netlify (mismo patrón que cleanup-old-events-cron, p. ej. cada 15 min) o documentar el scheduler externo si existe; alinear netlify.toml y vercel.json.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [BUG-047]
-- Nodo(s): int.cron.detect-bot-issues, h4.adm-alertas, h3.adm-health, lib.chatbot.admin, modelo.BotAlert, h4.adm-alertas.detector-incidencias
+- Nodo(s): int.cron.detect-bot-issues, h4.adm-alertas, h3.adm-health, lib.chatbot.admin, modelo.BotAlert, h4.adm-alertas.detector-incidencias, h4.adm-alertas.deteccion-automatica, int.cron.alerts
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-067
+
+### [FAL-026] Las alertas periódicas de churn y vencimientos (/api/cron/alerts) no tienen disparador: los toggles 'Alertar churn' y 'Alertar vencimientos' no producen nada
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/lib/alerts.ts:195` — «export async function runPeriodicAgencyAlerts(): Promise<{»; `src/app/api/cron/alerts/route.ts:2` — «import { runPeriodicAgencyAlerts } from '@/lib/alerts'»; `netlify.toml:25` — «[functions."generate-insights-cron"]»; `vercel.json:4` — «"path": "/api/cron/os-follow-up",»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:296` — «label="Alertar churn"»
+- Impacto: netlify.toml agenda solo generate-insights, send-weekly-reports y cleanup-old-events (:25, :28, :31) y vercel.json otras tres; /api/cron/alerts no figura en ningún registro ni en .github. Si el primer cliente deja de usar el portal o se le vence la suscripción, develOP no recibe el aviso aunque el toggle esté prendido. Aun con disparador, SUBSCRIPTION_EXPIRING no saldría (renewalDate sin escritor, FAL-006) y no hay deduplicación: un cron diario repetiría el aviso por org todos los días (alerts.ts:272-291).
+- Propuesta: Agendar /api/cron/alerts con una scheduled function de Netlify (como send-weekly-reports-cron) con deduplicación por org antes de activarlo; si no se va a usar, ocultar los dos toggles.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [FAL-016], [BUG-047]
+- Nodo(s): h4.adm-alertas, h4.adm-alertas.churn-y-vencimientos, h4.adm-config.datos-y-alertas, int.cron.alerts, lib.alerts
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-127
 
 ### h4.adm-config — Configuración
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 1 funcionalidades: 1×L2).
-- Criterios de L3 que faltan en alguna funcionalidad: errores, autonomía.
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 7 funcionalidades: 7×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: errores, autonomía, Sentry, sin mocks ni TODO, vacíos, validación en servidor.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
+| `h4.adm-config.datos-y-alertas` Datos de la agencia, webhook y toggles de alertas | L2 | errores, Sentry, sin mocks ni TODO, autonomía | Camino feliz: settings/page.tsx:6-9 → settings.actions.ts:87-121 → settings-console.tsx:100-115 → settings.actions.ts:141-169 → consumido por alerts.ts:111-129. Pero email/WhatsApp/sitio no los lee nadie y los toggles de churn/vencimientos no tienen cron. |
+| `h4.adm-config.meta-demos` Objetivo semanal de demos | L2 | vacíos, errores, Sentry, sin mocks ni TODO | settings-console.tsx:451-467 → settings.actions.ts:160 (coerceWeeklyDemoTarget :23-36) → sale a admin/page.tsx:182-184. |
+| `h4.adm-config.miembros-listado` Lista de miembros del equipo en Configuración | L2 | Sentry, autonomía | settings/page.tsx:8 → settings.actions.ts:207-239 → settings-console.tsx:529-554. Solo lectura. |
 | `h4.adm-config.precio-modulos` Editar precio de un módulo premium | L2 | errores, autonomía | settings.actions.ts:175-199 (requireSuperAdmin, Zod, update) -> dashboard/services/page.tsx:177 muestra el precio nuevo; la home pública sigue leyendo el catálogo (ModuloActiveCard.tsx:248) y el sync lo revierte (sync-premium-modules.ts:54, :145-148). |
+| `h4.adm-config.precios-modulos` Precio mensual de los módulos premium | L2 | vacíos, errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | settings-console.tsx:404-407 → :136-141 → settings.actions.ts:175-199 (update + revalidatePath('/dashboard/services')). |
+| `h4.adm-config.reportes-semanales` Reportes semanales del chatbot: historial y envío manual | L2 | vacíos, errores, Sentry, autonomía | reports/page.tsx:7-28 → ReportSettingsClient.tsx:30-42 → send-now/route.ts:5-13 → sendWeeklyReports (flujo D5). Página huérfana. |
+| `h4.adm-config.telegram` Credenciales de Telegram para alertas internas | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | settings-console.tsx:583-615 → settings.actions.ts:146, :161-164 → sale a src/lib/notifications/telegram.ts:41-49. |
+
+### [FAL-027] Email, WhatsApp y sitio web de la agencia en Configuración no los lee nadie, aunque la pantalla dice que son 'la fuente de verdad del portal'
+- Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/settings/_components/settings-console.tsx:207` — «Esta configuracion sigue siendo la fuente de verdad del portal.»; `src/app/(protected)/admin/settings/_actions/settings.actions.ts:151` — «contactEmail: normalizeNullableString(parsed.contactEmail), contactWhatsapp: normalizeNullableString(parsed.contactWhatsapp),»; `src/app/contact/page.tsx:10` — «const EMAIL = 'hola@develop.com.ar';»; `src/lib/agency-settings.ts:6` — «contactEmail: 'hello@develop.com.ar',»
+- Impacto: Si develOP cambia el WhatsApp o el email desde el panel, el sitio, /contact y los emails siguen con los valores del código (lib/whatsapp.ts y 'hola@'); el default guardado es 'hello@', distinto del publicado. git grep: ningún lector de contactEmail/contactWhatsapp/websiteUrl de AgencySettings fuera de Configuración. El equipo cree que actualizó un dato que el cliente no ve.
+- Propuesta: Elegir una fuente: leer AgencySettings en lib/whatsapp y en los textos de contacto (con caché) o quitar esos campos de la pantalla; unificar hola@/hello@.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-config.datos-y-alertas, modelo.AgencySettings, h6.vis-contacto.canales-directos, lib.agency-settings
+
+### h4.adm-audit — Audit log
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 3 funcionalidades: 2×L2, 1×L3).
+- Criterios de L3 que faltan en alguna funcionalidad: validación en servidor, Sentry, errores, sin mocks ni TODO, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-audit.detalle-de-cambios` Detalle de cambios y de borrados | L3 | — | AuditLogClient.tsx:194-199 normaliza diff/metadata sin any -> :210-214 expandir -> :276-285 DeletionDetail (:447-473) o DiffDisplay (:363-403). |
+| `h4.adm-audit.listado` Audit log de acciones del admin | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | audit-log/page.tsx:4 → audit-log-queries.ts:16-70; escritor audit-log.ts:17-42. |
+| `h4.adm-audit.listado-y-filtros` Audit log: listado, filtros y cargar más | L2 | validación en servidor, Sentry | audit-log/page.tsx:8-11 guard -> :13-16 listAuditLog/getAuditLogStats (audit-log-queries.ts:21, :54 requireSuperAdmin) -> AuditLogClient.tsx:106-126 -> :67-104 runQuery anti-race -> audit-filters.ts:21-54. Validación de filtros no verificable desde el lote. |
 
 ## h5 · Setter y LeadOS (ZONA-FRANCO)
 
@@ -736,12 +954,17 @@
 
 ### h6.vis-contacto — Formulario de contacto público
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 1 funcionalidades: 1×L2).
-- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, Sentry.
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 6 funcionalidades: 6×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, Sentry, errores, mobile, sin mocks ni TODO, autonomía, validación en servidor.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h6.vis-contacto.atribucion-de-referido` Atribución de referido desde el formulario público | L2 | permisos y tenant, Sentry | contact.ts:16-70 → referrals.service.ts:94-121 hechos → attribution.ts:41-52 → :134-140 Referral → :143-165 alerta y Notification. |
+| `h6.vis-contacto.atribucion-referido` Atribución de referido desde /contact?ref= | L2 | errores, Sentry | contact.ts:49 → :68-70 → flujo D2 'Referidos: código, link y atribución pública' |
+| `h6.vis-contacto.canales-directos` Canales directos: WhatsApp, llamada y email | L2 | sin mocks ni TODO | contact/page.tsx:96-103 (getWhatsappHref de lib/whatsapp) → :281-334 y :336-341. |
+| `h6.vis-contacto.captura-referido` Captura del código de referido en /contact?ref= | L2 | mobile, autonomía | contact/page.tsx:71-75 → :149 → contact.ts:42, :68-69. Solo en desktop. |
+| `h6.vis-contacto.enviar-formulario` Enviar formulario de contacto | L2 | errores, validación en servidor, Sentry | contact/page.tsx:66 → contact.ts:100-105 → :23-33 → :35-47 → :62-64 → :72-85 → contact/page.tsx:212-213 |
+| `h6.vis-contacto.formulario` Formulario de contacto público | L2 | errores, mobile, Sentry, sin mocks ni TODO, autonomía | En desktop: contact/page.tsx:66, :148-224 → submitContactForm (src/lib/actions/contact.ts:100). En mobile no existe (:119). |
 
 ## ZONA-FRANCO
 

@@ -1,7 +1,319 @@
 {
  "parte": 2,
- "partes": 4,
+ "partes": 5,
  "hallazgos": [
+  {
+   "id": "BUG-024",
+   "prefijo": "BUG",
+   "titulo": "El plan y BotConfig son dos fuentes de verdad: el chat corta por Plan.quota y usa el modelo del plan con temperatura fija, pero el admin edita y el detector de alertas lee BotConfig.monthlyQuota (1000) y maxOutputTokens no se aplica",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 345,
+     "fragmento": "if (quota.conversationsUsed >= plan.quota) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 952,
+     "fragmento": "temperature: 0.7,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+     "linea": 68,
+     "fragmento": "if (usage && usage.conversationsCount >= bot.monthlyQuota) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+     "linea": 186,
+     "fragmento": "monthlyQuota: 1000,"
+    },
+    {
+     "ruta": "prisma/seeds/sync-plans.ts",
+     "linea": 72,
+     "fragmento": "quota: 500,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+     "linea": 45,
+     "fragmento": "llmModel: z.string().min(1).max(80),\n  temperature: z.number().min(0).max(2),\n  maxOutputTokens: z.number().int().min(100).max(8192),"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx",
+     "linea": 98,
+     "fragmento": "value={`${quotaUsed.toLocaleString('es-AR')} / ${bot.monthlyQuota.toLocaleString('es-AR')}`}"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+     "linea": 56,
+     "fragmento": "<Field label=\"Temperature\" hint=\"0 es mas determinista, 2 es mas creativo\">"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 713,
+     "fragmento": "const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx",
+     "linea": 46,
+     "fragmento": "bot.monthlyQuota > 0 ? Math.min(100, (quotaUsed / bot.monthlyQuota) * 100) : 0"
+    },
+    {
+     "ruta": "src/lib/onboarding/core.ts",
+     "linea": 134,
+     "fragmento": "monthlyQuota: 1000,"
+    },
+    {
+     "ruta": "src/lib/plan/fallback.ts",
+     "linea": 50,
+     "fragmento": "quota: 500,"
+    },
+    {
+     "ruta": "src/app/api/admin/chatbot/demo-chat/[slug]/route.ts",
+     "linea": 57,
+     "fragmento": "const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+     "linea": 120,
+     "fragmento": "{ value: 'DAILY_DIGEST', label: 'Digest diario' },"
+    },
+    {
+     "ruta": "src/lib/client-notifications/notify.ts",
+     "linea": 94,
+     "fragmento": "if (org.leadNotificationMode === 'DISABLED') return"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+     "linea": 77,
+     "fragmento": "<Field label=\"Quota mensual\">"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/llm/providers/anthropic.ts",
+     "linea": 18,
+     "fragmento": "throw new ProviderNotImplementedError('anthropic')"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+     "linea": 304,
+     "fragmento": "<LlmFact label=\"Quota\" value=\"1000 conv/mes\" />"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+     "linea": 151,
+     "fragmento": "if (bot.monthlyQuota > 0) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+     "linea": 47,
+     "fragmento": "maxOutputTokens: z.number().int().min(100).max(8192),"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/config/getPublicConfig.ts",
+     "linea": 121,
+     "fragmento": "routeColorMap: (bot.routeColorMap as unknown as RouteColorMap) ?? {},"
+    },
+    {
+     "ruta": "src/app/api/admin/chatbot/demo-chat/[slug]/route.ts",
+     "linea": 113,
+     "fragmento": "maxOutputTokens: bot.maxOutputTokens,"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1315,
+     "fragmento": "maxOutputTokens Int         @default(800)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx",
+     "linea": 94,
+     "fragmento": "value={`${org.botConfig.monthlyQuota.toLocaleString('es-AR')} conv`}"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 211,
+     "fragmento": "//       a las otras dos. La cuota del plan reemplaza bot.monthlyQuota"
+    }
+   ],
+   "impacto": "Con el primer cliente Starter el bot se corta a 500 conversaciones pero la alerta QUOTA_EXHAUSTED compara contra 1000 y nunca dispara; con Pro o Business (3000/5000, sync-plans.ts:88 y :104) dispara a 1000 aunque el bot sigue funcionando. El admin ve '500 / 1000' y el cliente ve el límite del plan. Editar modelo, temperatura, tope de salida o cuota en el admin no cambia nada en runtime, y como streamText no recibe maxOutputTokens, cada uno de los hasta 3 pasos de un turno puede generar el máximo del modelo: el costo por turno de un visitante anónimo no tiene tope configurable.",
+   "propuesta": "Sacar del editor del admin los campos legacy (o mostrarlos solo lectura con el valor del plan); que detector, preflight y fichas del admin usen getPlanForOrg().quota; pasar maxOutputTokens explícito en streamText. Decisión para Valentino (schema FROZEN): borrar las columnas legacy de BotConfig.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.adm-chatbots",
+    "h4.adm-alertas",
+    "h3.vis-api-chatbot",
+    "modelo.BotConfig",
+    "modelo.Plan",
+    "lib.plan",
+    "int.vertex",
+    "h3.adm-chatbots.config-llm-y-cuota",
+    "h3.adm-chatbots.detalle-overview",
+    "lib.chatbot.chat",
+    "lib.client-notifications",
+    "h3.adm-chatbots.editar-config-bot",
+    "h4.adm-clientes.alta-cliente-con-bot",
+    "lib.chatbot.llm",
+    "h3.adm-chatbots.editar-config",
+    "h4.adm-clientes.tab-chatbot"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-032 (costo de Vertex por prompt inflado); detect-bot-issues sin disparador (D7)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H09",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L1/H04",
+      "titulo": "El tab Avanzado del bot edita modelo, temperatura, tokens máximos, cuota y 'Digest diario', y el runtime no usa ninguno",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: AdvancedTab.tsx:56 edita la temperatura; handleChatRequest.ts:713 usa plan.llmModel; core.ts:134 deja monthlyQuota 1000 frente a fallback.ts:50 (500). Es la causa raíz de BUG-024 (dos fuentes de verdad); suma el «Digest diario» sin efecto."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L3/H05",
+      "titulo": "Avanzado y resumen del alta muestran modelo, temperatura, tokens y cuota que el runtime ignora",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma causa (el resumen del alta muestra modelo, temperatura y cuota que el runtime ignora)."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L6/H09",
+      "titulo": "Controles del admin que el runtime ignora: modelo, temperatura, tope de tokens, proveedor y colores por ruta",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: saveBotConfig.ts:47 (maxOutputTokens editable), handleChatRequest.ts:713 (plan.llmModel) y :952 (temperature 0.7 fija), getPublicConfig.ts:121. Es BUG-024; suma el proveedor y los colores por ruta."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L8/H09",
+      "titulo": "El chat de produccion no aplica maxOutputTokens ni la temperatura del BotConfig; el demo del admin si (preview distinta de prod)",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma causa; suma que el demo del admin sí aplica la config del bot y el chat de producción no (preview distinta de prod)."
+     },
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L2/H04",
+      "titulo": "La pestana Chatbot muestra como cuota un limite que el gating ya no usa",
+      "severidad": "MEDIA",
+      "nota_padre": "BUG-024 ya registra que el admin lee BotConfig.monthlyQuota (1000) mientras el chat corta por Plan.quota; suma la pestaña Chatbot de la ficha del cliente (ChatbotTab.tsx:94)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "FAL-007",
+   "prefijo": "FAL",
+   "titulo": "El ciclo de vida de Project no modela mantenimiento ni cancelación: maintenanceStartDate no tiene escritor, deliveredAt no se limpia al reabrir y la migración v2 convirtió CANCELADO en COMPLETED",
+   "dominio": "D3",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "linea": 115,
+     "fragmento": "const isInMaintenance = Boolean(project.maintenanceStartDate)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/payments/page.tsx",
+     "linea": 204,
+     "fragmento": "El proyecto pasara a mantenimiento cuando tenga una fecha de inicio de mantenimiento."
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts",
+     "linea": 120,
+     "fragmento": "if (!project.maintenanceStartDate) {\n      return fail('Project has no maintenance start date')"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+     "linea": 750,
+     "fragmento": "status: parsed.status,\n          ...(parsed.status === ProjectStatus.COMPLETED\n            ? { deliveredAt: new Date() }"
+    },
+    {
+     "ruta": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql",
+     "linea": 135,
+     "fragmento": "WHEN 'EN_MANTENIMIENTO' THEN 'IN_PROGRESS'::\"ProjectStatus\"\n        WHEN 'CANCELADO' THEN 'COMPLETED'::\"ProjectStatus\""
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 38,
+     "fragmento": "enum ProjectStatus {\n  PLANNING\n  IN_PROGRESS"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/project.schemas.ts",
+     "linea": 58,
+     "fragmento": "monthlyRate: optionalPositiveNumberSchema,\n  estimatedEndDate: optionalDateSchema,"
+    },
+    {
+     "ruta": "prisma/seed-agency-os.ts",
+     "linea": 1396,
+     "fragmento": "maintenanceStartDate: daysAgo(44, 10),"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+     "linea": 751,
+     "fragmento": "...(parsed.status === ProjectStatus.COMPLETED\n            ? { deliveredAt: new Date() }\n            : {}),"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/[projectId]/page.tsx",
+     "linea": 208,
+     "fragmento": "Entregado: {formatDate(project.deliveredAt)}"
+    }
+   ],
+   "impacto": "Para el primer proyecto entregado con abono mensual: ninguna action ni formulario escribe maintenanceStartDate (solo seed-agency-os.ts y los proyectos migrados lo tienen), así que 'Generar meses pendientes' nunca aparece y el mantenimiento no se puede cobrar por el flujo previsto. Reabrir un proyecto COMPLETED deja el deliveredAt viejo y volver a completarlo pisa la fecha real de entrega. Un proyecto cancelado no tiene estado posible: los CANCELADO legacy quedaron COMPLETED y el cliente los ve como 'Completado'.",
+   "propuesta": "Agregar el inicio de mantenimiento a la edición del proyecto (o setearlo al completar si hay monthlyRate), limpiar deliveredAt al salir de COMPLETED y no pisarlo si ya existe. Decisión para Valentino (schema FROZEN): sumar CANCELLED (y quizá MAINTENANCE) a ProjectStatus y revisar los proyectos legacy que eran CANCELADO.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-proyectos",
+    "h2.cli-proyecto",
+    "modelo.Project",
+    "modelo.OsMaintenancePayment",
+    "h4.adm-proyectos.mantenimiento",
+    "h4.adm-proyectos.ficha"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "FAL-004 (mismo patrón de columnas sin escritor); BUG-019 y DEU-014 (misma migración, otra causa); BUG-015",
+   "vh": null,
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H10",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L4/H02",
+      "titulo": "El mantenimiento mensual no se puede activar: ninguna pantalla ni action escribe maintenanceStartDate",
+      "severidad": "MEDIA",
+      "nota_padre": "FAL-007 ya registra que maintenanceStartDate no tiene escritor; suma la pantalla de Pagos sin camino para activar el mantenimiento."
+     },
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L4/H15",
+      "titulo": "deliveredAt no se limpia al reabrir un proyecto completado y se vuelve a sellar en cada COMPLETED",
+      "severidad": "BAJA",
+      "nota_padre": "FAL-007 ya registra que deliveredAt no se limpia al reabrir el proyecto."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
   {
    "id": "BUG-025",
    "prefijo": "BUG",
@@ -4399,6 +4711,11 @@
      "ruta": "src/app/(protected)/admin/clients/page.tsx",
      "linea": 51,
      "fragmento": "avatarImageUrl: client.avatarImageUrl,"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/page.tsx",
+     "linea": 72,
+     "fragmento": "clients={clients.map(toListItem)}\narchivedClients={archivedClients.map(toListItem)}"
     }
    ],
    "impacto": "Salteando la UI (que sube data URLs), un cliente puede setear un avatar http(s) propio; cada vez que develOP abre /admin/clients el navegador del SUPER_ADMIN pide esa URL (IP, user-agent, horario). La lista de clientes ademas trae hasta 600 KB de base64 por org en el payload.",
@@ -4408,7 +4725,8 @@
    "nodos": [
     "h2.cli-cuenta.perfil-empresa",
     "h4.adm-clientes",
-    "modelo.Organization"
+    "modelo.Organization",
+    "h4.adm-clientes.listado"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -4420,7 +4738,16 @@
     "tmp": "D2-c1/D2-L3/H19",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L2/H15",
+      "titulo": "El listado embebe los avatares base64 de todos los clientes, activos y archivados",
+      "severidad": "BAJA",
+      "nota_padre": "SEC-049 ya registra que la lista de clientes trae hasta 600 KB de base64 por organización (clients/page.tsx:51); suma que también trae los archivados."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -5454,6 +5781,21 @@
      "ruta": "src/lib/actions/messages.ts",
      "linea": 163,
      "fragmento": "}).catch(() => {})"
+    },
+    {
+     "ruta": "src/lib/actions/contact.ts",
+     "linea": 72,
+     "fragmento": "sendAgencyAlert({\n      type: 'LEAD_EXTERNAL',"
+    },
+    {
+     "ruta": "src/lib/actions/contact.ts",
+     "linea": 77,
+     "fragmento": "}).catch(() => {})"
+    },
+    {
+     "ruta": "src/lib/actions/contact.ts",
+     "linea": 95,
+     "fragmento": "console.error('contactFormAction error:', error)"
     }
    ],
    "impacto": "En Netlify la función puede congelarse al devolver la respuesta y el fetch al webhook (alerts.ts:131-137, timeout 8 s) quedar sin completar: el pedido de upsell o el mensaje del cliente llega a la base pero develOP no recibe el aviso.",
@@ -5462,7 +5804,10 @@
    "zona": "libre",
    "nodos": [
     "int.webhook-alertas",
-    "lib.actions"
+    "lib.actions",
+    "h6.vis-contacto.enviar-formulario",
+    "int.sentry",
+    "int.n8n"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5474,7 +5819,16 @@
     "tmp": "D2-c1/D2-L4/H20",
     "verificado_padre": true,
     "nota_padre": "Muestreo DEC-37: se sostiene (upsell.ts:99-104 y messages.ts:155-163 llaman sendAgencyAlert sin await y con .catch vacío dentro de la action).",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L6/H18",
+      "titulo": "Form de contacto: alerta de agencia fire-and-forget con catch vacío y fallos solo a consola (sin Sentry)",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo patrón (sendAgencyAlert sin await en una server action); suma el formulario público de contacto (contact.ts:72) con catch vacío."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -7066,305 +7420,6 @@
     "verificado_padre": true,
     "nota_padre": "Muestreo DEC-37: se sostiene (upsell.ts:81-87 deduplica por email y service contra ContactSubmission; contact.ts:62 crea ContactSubmission desde el formulario público con email y service libres, schemas.ts:61).",
     "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "PERF-006",
-   "prefijo": "PERF",
-   "titulo": "El layout del portal escribe User.lastDashboardVisit en cada render, sin esperar el resultado, y ningun codigo lo lee",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "perf",
-   "tipo_detalle": "perf",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/dashboard/layout.tsx",
-     "linea": 80,
-     "fragmento": "prisma.user\n      .update({ where: { id: session.user.id }, data: { lastDashboardVisit: new Date() } })"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/layout.tsx",
-     "linea": 85,
-     "fragmento": ".catch((error) => { console.error('[lastDashboardVisit] update failed:', error)"
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 298,
-     "fragmento": "updatedAt             DateTime  @updatedAt\n  lastDashboardVisit    DateTime?"
-    }
-   ],
-   "impacto": "Cada render completo del layout (carga, navegacion dura y cada router.refresh que el portal hace tras sus mutaciones) dispara un UPDATE sobre User sin await, tambien en modo soporte sobre el usuario del SUPER_ADMIN, y mueve User.updatedAt. Es carga de escritura sin valor sobre la Neon compartida; si el dato se empezara a usar (ultimo acceso, churn), el fire-and-forget en serverless lo puede perder (mismo riesgo que BUG-052).",
-   "propuesta": "Quitar la escritura o, si se quiere el dato, escribirlo con await una vez por dia/sesion (solo si cambio) y darle un lector (ficha del cliente en el admin o detector de inactividad).",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-shell.layout-y-navegacion",
-    "modelo.User",
-    "lib.prisma"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "BUG-052, PERF-005",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c2",
-    "lote": "D2-T1",
-    "tmp": "D2-c2/D2-T1/H08",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-056",
-   "prefijo": "SEC",
-   "titulo": "Inyección indirecta de instrucciones: lo que un visitante escribe en el widget entra al prompt de los insights y vuelve al dueño como «Qué podés hacer», firmado por develOP y sin revisión",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/insights/generateInsights.ts",
-     "linea": 62,
-     "fragmento": ".filter((message) => message.role === 'USER')\n        .map((message) => message.content)"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/insights/generateInsights.ts",
-     "linea": 66,
-     "fragmento": "return `[Conv ${index + 1}, path=${conversation.currentPath ?? '/'}, leadCaptured=${conversation.leadCaptured}]: ${userMessages.slice(0, 400)}`"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/insights/generateInsights.ts",
-     "linea": 106,
-     "fragmento": "prompt: `Conversaciones a analizar:\\n\\n${conversationsSummary}`,"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/insights/generateInsights.ts",
-     "linea": 123,
-     "fragmento": "suggestedAction: insight.suggestedAction,\n          evidenceCount: insight.evidenceCount,\n          status: 'PENDING',"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
-     "linea": 62,
-     "fragmento": "where: { botConfigId, status: { in: ['PENDING', 'APPLIED'] } },"
-    },
-    {
-     "ruta": "src/components/dashboard/results/analysis/DiscoveriesSection.tsx",
-     "linea": 38,
-     "fragmento": "develOP revisa las conversaciones de tu asistente y te cuenta qué encontró"
-    },
-    {
-     "ruta": "src/components/dashboard/results/analysis/DiscoveriesSection.tsx",
-     "linea": 87,
-     "fragmento": "{insight.suggestedAction}   (bajo el rótulo «Qué podés hacer», :84)"
-    },
-    {
-     "ruta": "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx",
-     "linea": 280,
-     "fragmento": "<Text>{insight.suggestedAction}</Text>"
-    },
-    {
-     "ruta": "netlify.toml",
-     "linea": 25,
-     "fragmento": "[functions.\"generate-insights-cron\"]\n  schedule = \"0 9 * * *\""
-    },
-    {
-     "ruta": "src/lib/ai/results-insights.ts",
-     "linea": 133,
-     "fragmento": "`- \"${q.query}\": ${q.impressions} imp, ${q.clicks} clicks, posición ${q.position.toFixed(1)}`   (mismo patrón con los pagePath de GA4 en :82)"
-    }
-   ],
-   "impacto": "Bloqueante para el primer cliente Pro o Business con el análisis activo. Un visitante anónimo que abra 10 o más conversaciones en el widget (el mínimo está en :45) puede dictarle al modelo el texto de los «descubrimientos». El cron diario los publica como PENDING, sin revisión humana, y el cliente los ve en Resultados > Análisis y en el PDF mensual bajo «Qué podés hacer», con un copy que asegura que develOP revisó las conversaciones. Ejemplos: «cambiá el WhatsApp de derivación al +54…», «agregá a la KB que los pagos van al alias X», «contactá a tal proveedor». Las respuestas del modelo admiten hasta 500 caracteres por campo (:17). Hoy está latente por la credencial de Vertex vencida.",
-   "propuesta": "Tratar como datos no confiables los mensajes de visitantes, el currentPath y las consultas y paths de GA4/Search Console: delimitarlos en un bloque etiquetado e instruir al modelo a no seguir instrucciones que vengan adentro. No mostrarle al cliente insights PENDING; publicar solo los que develOP revisó (hoy actOnInsight no tiene pantalla, BUG-023) o, al menos, filtrar en la salida teléfonos, URLs, CBU/alias y pedidos de cambio de contacto. Corregir el copy «develOP revisa» para que diga lo que realmente pasa. El generador es del dominio D5.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-resultados",
-    "h3.vis-widget-cliente",
-    "lib.chatbot.insights",
-    "modelo.ChatbotInsight",
-    "int.vertex",
-    "int.cron.generate-insights"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "UX-011 (IA sin aviso), BUG-023 (insights PENDING para siempre, sin revisión), SEC-051 (prompt-injection en borradores de reseñas), BUG-041",
-   "vh": "VH-064",
-   "origen": {
-    "ciclo": "D2-c2",
-    "lote": "D2-T2",
-    "tmp": "D2-c2/D2-T2/H03",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-057",
-   "prefijo": "SEC",
-   "titulo": "Un anónimo agota en minutos el cupo mensual de conversaciones de cualquier bot de cliente (y el gasto de Vertex): el Origin de develop.com.ar vale para todos los bots y cada sessionId nuevo reserva un cupo",
-   "dominio": "D5",
-   "severidad": "CRÍTICA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-     "linea": 400,
-     "fragmento": "if (isNewConversation) {\n    const reserve = await tryReserveConversation(orgId, bot.id, plan.quota)"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/requestSchema.ts",
-     "linea": 55,
-     "fragmento": "sessionId: z.string().min(1).max(200),"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-     "linea": 185,
-     "fragmento": "key: `chatbotPerBotSession:${slug}:${body.sessionId}`,"
-    },
-    {
-     "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
-     "linea": 80,
-     "fragmento": "const rateKey = `chatbotPerSession:${origin ?? 'no-origin'}:${ipHash}`"
-    },
-    {
-     "ruta": "src/lib/rate-limit/presets.ts",
-     "linea": 27,
-     "fragmento": "chatbotPerSession: { limit: 30, windowMs: 60_000 },"
-    },
-    {
-     "ruta": "src/lib/security/validate-origin.ts",
-     "linea": 70,
-     "fragmento": "if (\n    origin === 'https://develop.com.ar' ||\n    origin === 'https://www.develop.com.ar'"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/degradedResponse.ts",
-     "linea": 97,
-     "fragmento": "// develop.com.ar nunca cae al cap"
-    },
-    {
-     "ruta": "src/lib/security/origin-matcher.ts",
-     "linea": 40,
-     "fragmento": "if (originHost.endsWith('.' + clean)) return true"
-    },
-    {
-     "ruta": "next.config.ts",
-     "linea": 131,
-     "fragmento": "{ key: 'Content-Security-Policy', value: \"frame-ancestors *;\" },"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
-     "linea": 67,
-     "fragmento": "if (event.data?.type === 'develop:init') {\n        parentOriginRef.current = event.origin"
-    },
-    {
-     "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
-     "linea": 272,
-     "fragmento": "api: `/api/chatbot/${slug}/chat`,"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-     "linea": 952,
-     "fragmento": "temperature: 0.7,\n    stopWhen: stepCountIs(3),"
-    },
-    {
-     "ruta": "src/lib/security/origin-matcher.ts",
-     "linea": 39,
-     "fragmento": "if (originHost === clean) return true\nif (originHost.endsWith('.' + clean)) return true"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-     "linea": 345,
-     "fragmento": "if (quota.conversationsUsed >= plan.quota) {"
-    },
-    {
-     "ruta": "prisma/seeds/sync-plans.ts",
-     "linea": 72,
-     "fragmento": "quota: 500,"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/requestSchema.ts",
-     "linea": 111,
-     "fragmento": "if (forwarded) return forwarded.split(',')[0].trim()"
-    },
-    {
-     "ruta": "src/lib/security/validate-origin.ts",
-     "linea": 71,
-     "fragmento": "origin === 'https://develop.com.ar' ||"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-     "linea": 401,
-     "fragmento": "const reserve = await tryReserveConversation(orgId, bot.id, plan.quota)"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/quota/checker.ts",
-     "linea": 137,
-     "fragmento": "const { reserved, conversationsUsed } = await forOrg(organizationId).quotaUsage.reserveConversation({"
-    }
-   ],
-   "impacto": "Bloqueante para el primer cliente real. Cualquier script sin login que conozca el slug (está en el snippet público del sitio del cliente) manda POST con Origin https://develop.com.ar (permitido para todos los bots y exento del tope de dominios del plan) y un sessionId nuevo por pedido: cada pedido crea una conversación y reserva 1 cupo del mes, que no se devuelve si el LLM respondió. Con el tope de 30/min por (origin, IP) y los dos orígenes de develOP son 60 conversaciones/min desde una sola IP: Starter (500) se agota en ~8 min, Pro (3000) en ~50 min y Business (5000) en ~83 min; rotando subdominios del cliente o el esquema como Origin cada variante abre un balde nuevo. Desde ahí todo visitante real recibe 'alcanzamos el límite de atención automática del mes' hasta fin de mes, y develOP paga cada llamada (hasta ~30 mensajes de 4000 caracteres de entrada y salida sin maxOutputTokens). La allowlist tampoco protege el widget oficial: /embed se deja enmarcar por cualquier sitio y llama same-origin con Origin develop.com.ar, así que un tercero puede embeber el bot de un cliente, consumir su cupo y recibir los leads por postMessage. Hoy queda enmascarado por la credencial de Vertex vencida (cada fallo devuelve el cupo); se activa al renovarla.",
-   "propuesta": "Decisión de diseño en tres partes: (1) rate limit por la IP confiable de la plataforma (no por el header Origin ni por sessionId) más un techo de conversaciones nuevas por IP/hora y por bot/hora; (2) cobrar el cupo cuando hay intercambio real (p. ej. primer turno respondido o segundo mensaje), no al crear la conversación; (3) hacer cumplir allowedDomains en el embed: frame-ancestors por bot y validar el origin del padre en el handshake, dejando develop.com.ar exento solo para el bot propio. Además fijar maxOutputTokens y alertar por velocidad de consumo del cupo.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h3.vis-api-chatbot",
-    "h3.vis-widget-cliente",
-    "lib.security",
-    "lib.rate-limit",
-    "lib.chatbot.chat",
-    "lib.chatbot.quota",
-    "int.vertex",
-    "modelo.QuotaUsage",
-    "modelo.Conversation"
-   ],
-   "relacionados_ids": [
-    "SEC-068"
-   ],
-   "previas": [],
-   "relacionados_texto": "S4-01 (previa, sigue abierta); SEC-RATELIMIT-01; patrón D1-c1/D1-c2 IP del primer X-Forwarded-For (requestSchema.ts:109-111); patrón D1-c3 claves de rate limit con datos del pedido; PLAN-400; PLAN-381",
-   "vh": "VH-065",
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L1",
-    "tmp": "D5-c1/D5-L1/H01",
-    "verificado_padre": true,
-    "nota_padre": "Leído: route.ts:79-80 (la clave del rate limit de la ruta es origin + hash de IP: 30/min por cada Origin distinto), validate-origin.ts:72-77 (https://develop.com.ar y www valen para cualquier bot activo, antes de mirar allowedDomains), origin-matcher.ts:38-39 (cualquier subdominio del dominio permitido), handleChatRequest.ts:183-186 (el segundo límite es slug + sessionId, que manda el cliente), requestSchema.ts:55 (sessionId: string libre de 1 a 200), handleChatRequest.ts:345 y :398-400 (cada conversación nueva reserva 1 cupo) y sync-plans.ts:72 (Starter: 500 por mes). Desde una sola IP con el Origin de develOP: 30 conversaciones nuevas por minuto, 500 en ≈ 17 min; después el bot responde «alcanzamos el límite del mes» a todos los visitantes reales y dispara el aviso de upsell. Rúbrica: anónimo, sin precondiciones, operación con costo de LLM. Verificadores: L1 la sostiene CRÍTICA; L2, L7 y L8 la sostienen ALTA y agregan que el Origin también rota con http/https y con sufijos de path (la clave del rate limit usa el header crudo y validateOrigin solo mira el host). Se sigue la rúbrica DEC-23 (anónimo, sin precondiciones, costo de LLM sin auth): CRÍTICA. Mismo escape que D5-L5/H01 (develop.com.ar siempre permitido).",
-    "verificador": {
-     "se_sostiene": true,
-     "severidad_ajustada": "CRÍTICA"
-    },
-    "fusionados": [
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L2/H02",
-      "titulo": "Cuota mensual del bot de cualquier cliente agotable por un anonimo: el rate limit se esquiva rotando el Origin",
-      "severidad": "ALTA",
-      "nota_padre": "Misma causa raíz (rate limit por Origin + sessionId del cliente; develop.com.ar y subdominios aceptados); se suma su evidencia."
-     },
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L7/H01",
-      "titulo": "Ningún límite protege el cupo mensual del bot: un script anónimo lo agota abriendo conversaciones nuevas (y más rápido rotando el Origin por subdominios)",
-      "severidad": "ALTA",
-      "nota_padre": "Misma causa raíz; suma la rotación por subdominios del cliente y el slice maxDomains que también los acepta."
-     },
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L8/H01",
-      "titulo": "Cualquier anonimo puede agotar la cuota mensual de conversaciones de cualquier bot",
-      "severidad": "ALTA",
-      "nota_padre": "Misma causa raíz; suma que no hay captcha (git grep turnstile|captcha = 0, con control positivo)."
-     }
-    ]
    },
    "estado": "vigente"
   }
