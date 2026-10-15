@@ -83,7 +83,7 @@ export function rectanguloRedondeado<T extends THREE.Path>(destino: T, c: Pick<C
 }
 
 /** Le pone a la geometría su color (en cada vértice). */
-function pintar(g: THREE.BufferGeometry, color: THREE.Color): THREE.BufferGeometry {
+export function pintar(g: THREE.BufferGeometry, color: THREE.Color): THREE.BufferGeometry {
   const n = g.getAttribute('position').count
   const colores = new Float32Array(n * 3)
   for (let i = 0; i < n; i += 1) colores.set([color.r, color.g, color.b], i * 3)
@@ -103,7 +103,7 @@ function conSuLetra(g: THREE.BufferGeometry, orden: number): THREE.BufferGeometr
 }
 
 /** [PULIDO 11] B4 · el rótulo de la tecla: w = −1 (el sombreador no lo dibuja con el botón ocupado: `coreografia.ts`). */
-function deRotulo(g: THREE.BufferGeometry): THREE.BufferGeometry {
+export function deRotulo(g: THREE.BufferGeometry): THREE.BufferGeometry {
   const n = g.getAttribute('position').count
   const datos = new Float32Array(n * 4)
   for (let k = 0; k < n; k += 1) datos[k * 4 + 3] = -1
@@ -115,7 +115,7 @@ function deRotulo(g: THREE.BufferGeometry): THREE.BufferGeometry {
  * [PULIDO 27] Y1 b · la tecla de Enviar a lo ancho: en cada vértice de lo que se hunde, x = dónde está entre su borde izquierdo (0) y el
  * derecho (1), para el relleno del hover; su cuerpo, w = −2 (el rótulo sigue en −1).
  */
-function aLoAnchoDeLaTecla(g: THREE.BufferGeometry, tecla: Pick<CajaDelPie, 'x' | 'ancho'>): THREE.BufferGeometry {
+export function aLoAnchoDeLaTecla(g: THREE.BufferGeometry, tecla: Pick<CajaDelPie, 'x' | 'ancho'>): THREE.BufferGeometry {
   const p = g.getAttribute('position')
   const l = g.getAttribute('aLetraDelPie')
   for (let k = 0; k < p.count; k += 1) {
@@ -126,7 +126,7 @@ function aLoAnchoDeLaTecla(g: THREE.BufferGeometry, tecla: Pick<CajaDelPie, 'x' 
 }
 
 /** Lo que llega entero: sin letra (el atributo en cero, para que todas las piezas compartan el programa). */
-function sinLetra(g: THREE.BufferGeometry): THREE.BufferGeometry {
+export function sinLetra(g: THREE.BufferGeometry): THREE.BufferGeometry {
   g.setAttribute('aLetraDelPie', new THREE.BufferAttribute(new Float32Array(g.getAttribute('position').count * 4), 4))
   return g
 }
@@ -235,10 +235,11 @@ function trazo(t: TrazoDelPie, z: number, relieve: number): THREE.BufferGeometry
   return g
 }
 
-function relieveDe(m: MedidaDeLaPieza, fuentes: FuentesDelPie, enLaTecla: boolean, z: number): THREE.BufferGeometry[] {
+/** [PULIDO 28] AA1 · `conLetras`: sin las letras en Chivo (las del formulario van impresas: `impresas.ts`). */
+function relieveDe(m: MedidaDeLaPieza, fuentes: FuentesDelPie, enLaTecla: boolean, z: number, conLetras = true): THREE.BufferGeometry[] {
   const { px } = VOLUMEN_DEL_PIE.relieve
   const geos = letras(
-    m.letras.filter((l) => l.enLaTecla === enLaTecla),
+    m.letras.filter((l) => l.enLaTecla === enLaTecla && (conLetras || l.archivo === true)),
     fuentes,
     z,
     px,
@@ -317,11 +318,11 @@ export function armarLaPieza(forma: FormaDeLaPieza, m: MedidaDeLaPieza, fuentes:
   const placa = pintar(solido(contorno, v.formulario, v.bisel), COLORES_DEL_PIE.negro)
   const fondos = m.pozos.map((p) => pintar(solido(rectanguloRedondeado(new THREE.Shape(), { x: p.x - 2, y: p.y - 2, ancho: p.ancho + 4, alto: p.alto + 4 }, p.radio + 2), 1, 0, -v.pozo), COLORES_DEL_PIE.pozo))
   // [PULIDO 27] Y1 c · teselada: se derrite en el sombreador (`derretido.ts`).
-  const fija = teselar(sinLetra(unir([placa, ...fondos, ...relieveDe(m, fuentes, false, 0)])), DERRETIDO.lado)
+  const fija = teselar(sinLetra(unir([placa, ...fondos, ...relieveDe(m, fuentes, false, 0, false)])), DERRETIDO.lado)
   if (m.tecla === null) return { fija, hundible: null, espesor: v.formulario }
   // La tecla: sale `tecla` px de la cara (y entra 4 en la placa, para que hundida no deje luz); su texto, en su cara.
   const tecla = pintar(solido(rectanguloRedondeado(new THREE.Shape(), m.tecla, m.tecla.radio > 0 ? m.tecla.radio : v.radio), v.tecla + 4, v.bisel, v.tecla), COLORES_DEL_PIE.negro)
-  return { fija, hundible: teselar(aLoAnchoDeLaTecla(unir([sinLetra(tecla), ...relieveDe(m, fuentes, true, v.tecla).map(deRotulo)]), m.tecla), DERRETIDO.lado), espesor: v.formulario }
+  return { fija, hundible: teselar(aLoAnchoDeLaTecla(unir([sinLetra(tecla), ...relieveDe(m, fuentes, true, v.tecla, false).map(deRotulo)]), m.tecla), DERRETIDO.lado), espesor: v.formulario }
 }
 
 /** La caja de lo que se ve de una pieza (px, y hacia abajo, relativa a su caja): para el texto suelto, sus letras. */

@@ -149,7 +149,11 @@ const pozos = (p: typeof formulario): boolean => {
   for (let i = 0; i < pos.count; i += 1) if (Math.abs(pos.getZ(i) + VOLUMEN_DEL_PIE.pozo) < 0.01) enElFondo += 1
   return enElFondo > 0
 }
-afirmar(pozos(formulario) && Math.abs(atrasDelFormulario + VOLUMEN_DEL_PIE.formulario) < 1.01 && adelanteDeLaTecla >= VOLUMEN_DEL_PIE.tecla + VOLUMEN_DEL_PIE.relieve.px - 0.01, '  el formulario: UNA placa, con un pozo por campo (su pared y su fondo, más adentro) y Enviar como tecla que sale de la cara (aparte: se hunde sola)')
+// [PULIDO 28] AA1 · el sentido cambió por pedido: las letras del formulario (los rótulos y el de la tecla) ya no van en relieve (titilaban
+// con la cámara): van impresas en su cara (`impresas.ts`). La tecla sale de la cara su espesor y nada más.
+const teclaSinRelieve = (adelante: number): boolean => adelante >= VOLUMEN_DEL_PIE.tecla - 0.01 && adelante < VOLUMEN_DEL_PIE.tecla + VOLUMEN_DEL_PIE.relieve.px / 2
+afirmar(pozos(formulario) && Math.abs(atrasDelFormulario + VOLUMEN_DEL_PIE.formulario) < 1.01 && teclaSinRelieve(adelanteDeLaTecla), '  el formulario: UNA placa, con un pozo por campo (su pared y su fondo, más adentro) y Enviar como tecla que sale de la cara (aparte: se hunde sola), con su rótulo impreso')
+controlPositivo('el detector VE el rótulo de la tecla en relieve (el de antes)', adelanteDeLaTecla + VOLUMEN_DEL_PIE.relieve.px, teclaSinRelieve)
 controlPositivo('el detector VE el formulario sin pozos', { ...formulario, fija: armarLaPieza('formulario', { caja: caja(0, 0, 253, 400, 10), letras: [], trazos: [], pozos: [], tecla: null }, FUENTES).fija }, pozos)
 const texto = armarLaPieza('texto', { caja: caja(0, 0, 500, 120), letras: [...'Lo que'].filter((c) => c !== ' ').map((c, k) => letra(c, k * 30, 10, 56, 400)), trazos: [], pozos: [], tecla: null }, FUENTES)
 const [atrasDelTexto, adelanteDelTexto] = zDe(texto.fija)

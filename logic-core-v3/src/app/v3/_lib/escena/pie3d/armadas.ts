@@ -17,6 +17,7 @@ import { FUENTES_DEL_CTA } from '../ctaDelFinal/fuentesDelCta'
 import { cubicBezierEase } from '../bezier'
 import { colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { capaPropia, seguirLaPieza } from './domQueSigue'
+import { colgarLasMallas } from './impresas'
 import { encimaDeLaPieza } from './encimaDelPie'
 import { mojar } from './derretido'
 import { luzAcostada, relieveAcostado } from './acostado'
@@ -106,7 +107,7 @@ export interface Armada {
   readonly boton: Element | null
   /** [PULIDO 14] L2 c · la opacidad que la llegada le escribió al DOM (vacía: la pieza en su lugar, el DOM como lo deja su dueño). */
   opacidadDeLlegada: string
-  /** [PULIDO 27] Y1 a · el cuadrilátero de la última transformada escrita (`domQueSigue.ts`). */
+  /** [PULIDO 27] Y1 a · [PULIDO 28] AA1 · la transformada escrita y su tipo (`domQueSigue.ts`). */
   readonly escrito: Float64Array
 }
 
@@ -354,15 +355,8 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
   cuerpo.position.x = origen ?? 0
   cuerpo.visible = pieza.forma !== 'enlace'
   grupo.name = `pie de volumen · ${pieza.forma}`
-  const mallas: THREE.Mesh[] = []
-  for (const [geo, padre] of [[fija, viaje], [hundible, cuerpo]] as const) {
-    if (geo === null) continue
-    const malla = new THREE.Mesh(geo, material)
-    // Las letras del titular salen de su caja en el sombreador: sin descarte por encuadre (el pie son pocas mallas).
-    malla.frustumCulled = false
-    padre.add(malla)
-    mallas.push(malla)
-  }
+  // [PULIDO 28] AA1 · y las letras impresas del formulario (`impresas.ts`).
+  const mallas = colgarLasMallas(pieza.forma, medida, FUENTES, fija, hundible, material, uniformes, viaje, cuerpo)
   grupo.visible = false
   if (pieza.forma !== 'texto') pieza.elemento.style.transformOrigin = '0 0'
   if (pieza.forma !== 'texto') capaPropia(pieza.elemento, true)
@@ -374,7 +368,7 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
   }
   const delHundido = pieza.forma === 'placa' || pieza.forma === 'enlace' ? pieza.elemento : pieza.forma === 'formulario' ? pieza.elemento.querySelector('[data-forma="principal"]') : null
   const boton = pieza.forma === 'formulario' ? (delHundido?.querySelector('button') ?? null) : null
-  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja, estado, transformacion: null, boton, opacidadDeLlegada: '', escrito: new Float64Array(8) }
+  return { pieza, medida, firma, grupo, viaje, cuerpo, mallas, material, uniformes, espesor, contenido: contenidoDe(pieza.forma, medida), delHundido, hundido: 0, css: '', d: 0, mundoPorPx: 0, orden: 0, llego: 0, tocable: true, caja, estado, transformacion: null, boton, opacidadDeLlegada: '', escrito: new Float64Array(17) }
 }
 
 export function soltar(a: Armada): void {

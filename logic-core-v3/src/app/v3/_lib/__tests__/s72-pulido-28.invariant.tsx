@@ -10,6 +10,9 @@
  *         (el centro del pie, el blanco y la cámara del final; las cargas lo guardaban para siempre y el cristal quedaba negro). Ahora, la
  *         última pared con una pieza a la vista; y la energía no toma un cuadro con la cámara sin número. EL AVISO «1 Issue» de Next era
  *         el mismo NaN: el orden de los bloques del piso pedía el sector NaN y tiraba un TypeError en cada cuadro.
+ *   AA1 · la letra del form no titila con la cámara: los rótulos y el de la tecla, impresos en la cara (una textura con mipmaps, en una
+ *         escala potencia de dos), no en relieve; el DOM que sigue a la pieza, con la fase fija (la forma se sostiene, la traslación va
+ *         de a píxel entero).
  */
 import { empiezaUnGesto, type GestoDeScroll } from '../gestosDelScroll'
 import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, pasoDeLaSalida, pedirLaSalida, type FaseDeLaSalida } from '../pie3d/salidas'
@@ -21,6 +24,9 @@ import { EN_VIVO, blancoDelFinal } from '../escena/final/recorridoDelFinal'
 import type { Armada } from '../escena/pie3d/armadas'
 import { armarLaCaida, crearLaCaidaDelPie } from '../escena/pie3d/caida'
 import { armarLosOrdenes, ponerElOrden, sectorDe } from '../escena/piso/ordenDeLosBloques'
+import { DOM_QUE_SIGUE, fijarLaFase } from '../escena/pie3d/domQueSigue'
+import { IMPRESAS } from '../escena/pie3d/impresas'
+import { aplicar, homografia } from '../pie3d/homografia'
 import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
@@ -212,5 +218,65 @@ controlPositivo('  el detector VE un orden que tira (el de antes leía un orden 
   throw new TypeError("Cannot read properties of undefined (reading 'length')")
 }, sinTirar)
 EN_VIVO.fin = 0
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('AA1 · La letra del form no titila con la cámara: impresa en la cara y el DOM con la fase fija')
+
+/**
+ * La órbita del mouse sobre el form (367 × 414 px), 300 cuadros: la cara se corre, cambia apenas de escala y de sesgo y tiene un poco de
+ * perspectiva. Cuántas veces cambia la FASE con la que el compositor muestrea la letra (cambia la forma o la parte fraccionaria de la
+ * traslación), si la traslación escrita es siempre entera y lo más que se aparta lo escrito de la cara (px, en cada eje).
+ */
+interface DeLaFase {
+  readonly cuadros: number
+  readonly fases: number
+  readonly entera: boolean
+  readonly desvio: number
+}
+function correrLaFase(escribe: (w: Float64Array, pedida: number[], hay: boolean) => boolean): DeLaFase {
+  const [ancho, alto] = [367, 414]
+  const w = new Float64Array(17)
+  const pedida: number[] = []
+  const antes = new Float64Array(17)
+  let [hay, fases, entera, desvio] = [false, 0, true, 0]
+  for (let k = 0; k < 300; k += 1) {
+    const t = (2 * Math.PI * k) / 300
+    const [tx, ty, e, sesgo, hondo] = [40 * Math.sin(t) + 0.13 * k, 25 * Math.cos(0.7 * t), 1 + 0.02 * Math.sin(0.5 * t), 6 * Math.sin(t), 3 * Math.cos(t)]
+    const q = [tx, ty, tx + ancho * e, ty + sesgo, tx + ancho * e + 0.013 * alto, ty + alto * e + sesgo + hondo, tx + 0.013 * alto, ty + alto * e]
+    if (!homografia(ancho, alto, q, pedida)) continue
+    if (escribe(w, pedida, hay)) {
+      if (w.some((v, j) => j < 16 && j !== 12 && j !== 13 && v !== antes[j]) || w[12] % 1 !== antes[12] % 1 || w[13] % 1 !== antes[13] % 1) fases += 1
+      entera = entera && Number.isInteger(w[12]) && Number.isInteger(w[13])
+      antes.set(w)
+    }
+    hay = true
+    for (const [x, y] of [[0, 0], [ancho, 0], [ancho, alto], [0, alto]]) {
+      const [a, b] = [aplicar(w, x, y), aplicar(pedida, x, y)]
+      desvio = Math.max(desvio, Math.abs(a[0] - b[0]), Math.abs(a[1] - b[1]))
+    }
+  }
+  return { cuadros: 300, fases, entera, desvio }
+}
+const FIJA = correrLaFase((w, pedida, hay) => fijarLaFase(w, pedida, 2, 367, 414, hay))
+// Lo escrito, a lo sumo `linealPx` de forma más medio píxel de redondeo de la cara en cada eje.
+const faseBien = (c: DeLaFase): boolean => c.entera && c.fases <= 0.6 * c.cuadros && c.desvio <= DOM_QUE_SIGUE.linealPx + 0.5 + 0.01
+afirmar(faseBien(FIJA), `  el DOM con la fase fija: la traslación siempre entera, la fase cambia en ${String(FIJA.fases)} de ${String(FIJA.cuadros)} cuadros y lo escrito se aparta de la cara a lo sumo ${FIJA.desvio.toFixed(2)} px en cada eje`)
+// El control: la de PULIDO 27 (la transformada de la cámara tal cual, en cuanto una esquina se movía más de 0,15 px).
+const FASE_DE_PULIDO_27 = correrLaFase((w, pedida, hay) => {
+  const movio = !hay || [[0, 0], [367, 0], [367, 414], [0, 414]].some(([x, y]) => Math.hypot(aplicar(w, x, y)[0] - aplicar(pedida, x, y)[0], aplicar(w, x, y)[1] - aplicar(pedida, x, y)[1]) > 0.15)
+  if (movio) for (let j = 0; j < 16; j += 1) w[j] = pedida[j]
+  return movio
+})
+controlPositivo(`  el detector VE la de antes (la fase cambia en ${String(FASE_DE_PULIDO_27.fases)} cuadros, la traslación fraccionaria)`, FASE_DE_PULIDO_27, faseBien)
+// Las letras impresas: la geometría del form sin las letras en relieve (ni los rótulos ni el de la tecla), la textura en una escala potencia
+// de dos (el nivel del mipmap que cae a 1:1 es la letra entera) con su filtro anisótropo, y las mallas colgadas desde `armadas.ts`.
+const GEOMETRIA = readFileSync('src/app/v3/_lib/escena/pie3d/geometria.ts', 'utf8')
+const IMPRESAS_TS = readFileSync('src/app/v3/_lib/escena/pie3d/impresas.ts', 'utf8')
+const ARMADAS_TS = readFileSync('src/app/v3/_lib/escena/pie3d/armadas.ts', 'utf8')
+const impresasBien = (escala: number, g: string): boolean =>
+  Number.isInteger(Math.log2(escala)) && escala >= 2 && g.includes('relieveDe(m, fuentes, false, 0, false)') && g.includes('relieveDe(m, fuentes, true, v.tecla, false)') && IMPRESAS_TS.includes('textura.anisotropy = IMPRESAS.anisotropia') && !/minFilter|generateMipmaps/.test(IMPRESAS_TS) && ARMADAS_TS.includes('colgarLasMallas(pieza.forma, medida, FUENTES, fija, hundible, material, uniformes, viaje, cuerpo)')
+afirmar(impresasBien(IMPRESAS.escala, GEOMETRIA), `  las letras del form, impresas: sin relieve, a ${String(IMPRESAS.escala)}x con sus mipmaps y el filtro anisótropo (medido en el sitio: el vaivén de la tinta de un rótulo entre cuadros, de 0,88 % a 0,19 %; el de Enviar, de 0,9 % a 0,37 %)`)
+controlPositivo('  el detector VE los rótulos en relieve (los de antes)', GEOMETRIA.replace('relieveDe(m, fuentes, false, 0, false)', 'relieveDe(m, fuentes, false, 0)'), (g: string) => impresasBien(IMPRESAS.escala, g))
+controlPositivo('  y una escala que no es potencia de dos (con 3 la letra quedaba blanda)', 3, (e: number) => impresasBien(e, GEOMETRIA))
 
 cerrar('s72-pulido-28')

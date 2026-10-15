@@ -406,12 +406,14 @@ const ARMADAS_B = leer('_lib/escena/pie3d/armadas.ts')
 const COREO_B = leer('_lib/escena/pie3d/coreografia.ts')
 const GEOM_B = leer('_lib/escena/pie3d/geometria.ts')
 const MEDIDA_B = leer('_lib/pie3d/medida.ts')
+// [PULIDO 28] AA1 · el sentido cambió por pedido: el rótulo de la tecla va impreso (`impresas.ts`), con la misma marca (w = −1).
+const IMPRESAS_B = leer('_lib/escena/pie3d/impresas.ts')
 const sucesivos = (pie: string, panel: string, a: string, c: string, g: string, m: string, html: string): boolean =>
   // DOM del pie: la carga con el botón ocupado; el rótulo, invisible y mudo; la tarjeta en la otra rama, en espera.
   pie.includes('{enviando && <Carga ') && pie.includes("aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}") &&
   pie.includes('<AnimatePresence mode="wait" initial={false}>') && pie.indexOf('<TarjetaDeResultado') < pie.indexOf('<Carga ') && !/Reintentar|REINTENTAR/.test(pie.slice(pie.indexOf('<Carga '))) &&
   // 3D: el relieve del rótulo marcado, descartado con el botón ocupado, leído cada cuadro; medido aunque esté mudo.
-  g.includes('relieveDe(m, fuentes, true, v.tecla).map(deRotulo)') && c.includes('if ( vRotuloDelPie > 0.5 && uSinRotuloDelPie > 0.5 ) discard;') &&
+  g.includes('relieveDe(m, fuentes, true, v.tecla, false).map(deRotulo)') && IMPRESAS_B.includes('aLoAnchoDeLaTecla(deRotulo(pintado), m.tecla)') && c.includes('if ( vRotuloDelPie > 0.5 && uSinRotuloDelPie > 0.5 ) discard;') &&
   a.includes("a.uniformes.uSinRotuloDelPie.value = a.boton?.getAttribute('aria-busy') === 'true' ? 1 : 0") && m.includes("mudo.hasAttribute('data-rotulo-de-la-tecla')") &&
   // El panel: la carga y la tarjeta son estados distintos de la misma presencia.
   /\{enviando \? \([\s\S]*?<Carga [\s\S]*?\) : enviado \|\| fase === 'error' \? \([\s\S]*?<TarjetaDeResultado/.test(panel) &&

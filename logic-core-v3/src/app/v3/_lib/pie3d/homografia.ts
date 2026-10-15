@@ -64,13 +64,32 @@ export function transformadaNitida(ancho: number, alto: number, q: ArrayLike<num
   return `matrix(${[a, b, c, d].map((v) => v.toFixed(5)).join(',')},${String(e)},${String(f)})`
 }
 
+/**
+ * [PULIDO 28] AA1 · la misma transformada nítida, en números: escribe en `m` (16, como `homografia`) el paralelogramo del promedio de los
+ * lados, sin redondear la traslación; `false` si la cara no está casi de frente.
+ */
+export function nitidaEn(ancho: number, alto: number, q: ArrayLike<number>, m: number[], tope = 3): boolean {
+  if (ancho <= 0 || alto <= 0 || q.length < 8) return false
+  if (Math.abs(q[0] - q[2] + q[4] - q[6]) > tope || Math.abs(q[1] - q[3] + q[5] - q[7]) > tope) return false
+  const [a, b] = [(q[2] - q[0] + q[4] - q[6]) / (2 * ancho), (q[3] - q[1] + q[5] - q[7]) / (2 * ancho)]
+  const [c, d] = [(q[6] - q[0] + q[4] - q[2]) / (2 * alto), (q[7] - q[1] + q[5] - q[3]) / (2 * alto)]
+  m.length = 16
+  m.fill(0)
+  ;[m[0], m[1], m[4], m[5], m[10], m[15]] = [a, b, c, d, 1, 1]
+  m[12] = (q[0] + q[2] + q[4] + q[6]) / 4 - (a * ancho + c * alto) / 2
+  m[13] = (q[1] + q[3] + q[5] + q[7]) / 4 - (b * ancho + d * alto) / 2
+  return true
+}
+
 /** La `matrix3d` en CSS (con pocos decimales: lo que se escribe por cuadro es corto y se compara barato). */
-export function matrix3dCss(m: readonly number[]): string {
-  return `matrix3d(${m.map((v, k) => (k === 3 || k === 7 ? v.toExponential(4) : v.toFixed(4))).join(',')})`
+export function matrix3dCss(m: ArrayLike<number>): string {
+  const v: string[] = []
+  for (let k = 0; k < 16; k += 1) v.push(k === 3 || k === 7 ? m[k].toExponential(4) : m[k].toFixed(4))
+  return `matrix3d(${v.join(',')})`
 }
 
 /** Lleva un punto de la caja por la matriz (lo usa el invariante para comprobar las esquinas). */
-export function aplicar(m: readonly number[], x: number, y: number): [number, number] {
+export function aplicar(m: ArrayLike<number>, x: number, y: number): [number, number] {
   const w = m[3] * x + m[7] * y + m[15]
   return [(m[0] * x + m[4] * y + m[12]) / w, (m[1] * x + m[5] * y + m[13]) / w]
 }
