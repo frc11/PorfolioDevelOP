@@ -19,7 +19,6 @@ import { colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { capaPropia, seguirLaPieza } from './domQueSigue'
 import { colgarLasMallas } from './impresas'
 import { encimaDeLaPieza } from './encimaDelPie'
-import { mojar } from './derretido'
 import { luzAcostada, relieveAcostado } from './acostado'
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, salidaDelPie, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
@@ -29,7 +28,7 @@ import { CAJAS_DEL_PIE, escribirLaCaja } from './cajasDelPolvo'
 import { HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
 import { huecosDeLaCaida } from './huecosDeLaCaida'
 import { SOMBRAS_DEL_PIE } from './sombras'
-import { duracionDeLaTransformacion, poseDeLaTransformacion } from './transformacionDelPie'
+import { PLATAFORMA_EN_VIVO, duracionDeLaTransformacion, hundimientoDelPiso, poseDeLaTransformacion } from './transformacionDelPie'
 import { profundidadesEnLinea } from './enLinea'
 
 /**
@@ -143,6 +142,7 @@ export interface EstadoDelPie {
 export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.DirectionalLight | null, cuadro: { readonly ancho: number; readonly alto: number }, dt: number): void {
   // [RETOQUE DEL ENCASTRE] 1D · el final del pie espera a que el pie haya aparecido entero (lo de abajo, al terminar el cuadro).
   EN_VIVO.pieEntero = false
+  PLATAFORMA_EN_VIVO.hundido = PLATAFORMA_EN_VIVO.cerrado = 0
   if (!s.listo || s.estudio === null || s.armadas.length === 0) {
     CAJAS_DEL_PIE.uCuantasCajasDelPie.value = 0
     return
@@ -341,7 +341,6 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
   const { fija, hundible, espesor, origen } = armarLaPieza(pieza.forma, medida, FUENTES)
   const uniformes = uniformesDelPie()
   uniformes.uCuerpoDelPie.value = medida.letras.reduce((m, l) => Math.max(m, l.cuerpo), 0)
-  uniformes.uCajaDelPie.value.set(medida.caja.ancho, medida.caja.alto, espesor)
   uniformes.uRelieveAcostadoDelPie.value = relieveAcostado(pieza.forma)
   const material = materialDelPie(uniformes)
   material.envMap = estudio
@@ -436,9 +435,8 @@ function transformar(a: Armada, x: TransformacionEnCurso, quieto: boolean, dt: n
   const sale = poseDeLaTransformacion(quieto, x.t, false, caja, desde, a.espesor, x.saliente.viaje.matrix)
   x.saliente.viaje.visible = sale.visible
   x.saliente.uniformes.uApareceDelPie.value = sale.aparece
-  // [PULIDO 27] Y1 c · la que estaba se derrite y la nueva nace del charco (`derretido.ts`).
-  mojar(a.material, a.uniformes, x.t < 1 ? entra.derrite : 0)
-  mojar(x.saliente.material, x.saliente.uniformes, sale.derrite)
+  // [PULIDO 28] AA2 · la plataforma del pozo baja con la placa y el piso se cierra sobre ella (`huecosDeLaCaida.ts`).
+  hundimientoDelPiso(quieto, x.t, a.espesor)
   x.saliente.material.envMapIntensity = a.material.envMapIntensity
   x.saliente.viaje.updateMatrixWorld(true)
   if (x.t < 1) return

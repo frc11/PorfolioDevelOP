@@ -22,14 +22,14 @@ export function duracionDelVolteo(reducido: boolean): number {
 }
 
 /**
- * [PULIDO 27] Y1 c · en el pie de volumen (la placa 3D) el cambio no es el volteo: la placa se DERRITE en el piso y lo nuevo nace del
- * mismo charco (`escena/pie3d/derretido.ts`), viscoso: lento. La duración entera (s), la mitad de cada lado; con movimiento reducido, el
- * fundido de siempre.
+ * [PULIDO 27] Y1 c · en el pie de volumen (la placa 3D) el cambio no es el volteo: la placa se derretía en el piso y lo nuevo nacía del
+ * mismo charco. [PULIDO 28] AA2 · se hunde por su hueco sobre su plataforma, el piso se cierra, se cambian y sube la otra
+ * (`escena/pie3d/transformacionDelPie.ts`). La duración entera (s), la mitad de cada lado; con movimiento reducido, el fundido de siempre.
  */
-export const DERRETIDO_DEL_PIE = { s: 2.4 } as const
+export const CAMBIO_DEL_PIE = { s: 2.4 } as const
 
 export function duracionDelCambioDelPie(reducido: boolean): number {
-  return reducido ? VOLTEO.fundido.s : DERRETIDO_DEL_PIE.s
+  return reducido ? VOLTEO.fundido.s : CAMBIO_DEL_PIE.s
 }
 
 const CURVA: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94]

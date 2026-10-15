@@ -129,7 +129,7 @@ export function FormularioDelPie(): React.JSX.Element {
         el.style.opacity = ''
         setSeVe(true)
       },
-      // [PULIDO 27] Y1 c · en 3D el cambio es el derretido (más largo que el volteo).
+      // [PULIDO 27] Y1 c · en 3D el cambio es más largo que el volteo ([PULIDO 28] AA2 · el hundimiento por su hueco).
       (duracionDelCambioDelPie(reducido) + RESPALDO_DEL_VOLTEO_S) * 1000,
     )
     const termino = (e: Event): void => {

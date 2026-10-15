@@ -20,6 +20,8 @@
  *         volcó (nada al empezar a inclinarse, entero al incrustarse); el fondo baja con ella.
  *   AA6 · el © no se tapa mientras cae: en toda la zona del pie (todas sus piezas, hayan volcado o no) los bloques quedan en reposo
  *         durante la caída y la energía vuelve recién cuando todo se asentó, con la quietud de siempre.
+ *   AA2 · gracias y error: el derretido se descartó; la placa del form baja por su hueco sobre su plataforma (el fondo del pozo la
+ *         acompaña), el piso se cierra sobre ella, se cambian a cubierto, se abre y sube la otra.
  */
 import { empiezaUnGesto, type GestoDeScroll } from '../gestosDelScroll'
 import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, pasoDeLaSalida, pedirLaSalida, type FaseDeLaSalida } from '../pie3d/salidas'
@@ -36,6 +38,8 @@ import { IMPRESAS } from '../escena/pie3d/impresas'
 import { aplicar, homografia } from '../pie3d/homografia'
 import { HUECOS_DEL_PIE, HUECO_DEL_PIE, QUIETUD, QUIETUD_DEL_PIE } from '../escena/pie3d/huecos'
 import { huecosDeLaCaida } from '../escena/pie3d/huecosDeLaCaida'
+import { HUNDIMIENTO_DEL_PIE, PLATAFORMA_EN_VIVO, hundimientoDelPiso } from '../escena/pie3d/transformacionDelPie'
+import { existsSync } from 'node:fs'
 import { poseDeLaPiezaQueCae } from '../escena/final/caidaDelPie'
 import { RELOJ_DEL_FINAL as RELOJ } from '../escena/final/recorridoDelFinal'
 import { POZO_DEL_PIE } from '../escena/pie3d/pozos'
@@ -440,5 +444,57 @@ controlPositivo('  y una zona sólo con las piezas que ya volcaron (la de antes)
 QUIETUD_DEL_PIE.uReposoDelPie.value = 0
 QUIETUD_DEL_PIE.uCuantasQuietudes.value = 0
 EN_VIVO.fin = 0
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('AA2 · Gracias y error: la placa baja sobre su plataforma, el piso se cierra, se cambian a cubierto y sube la otra')
+
+/**
+ * El pie de 1440 acostado (el final entero) y la transformación de la placa del form cuadro a cuadro: su hueco. `plataforma`: si el fondo
+ * baja con la placa (lo de ahora) o no (el control). Cuántos cuadros con la placa más honda que el fondo de su pozo, con el piso sin
+ * cerrar en el cambio o abierto a medias fuera de él.
+ */
+function correrElHundimiento(plataforma: boolean): number {
+  const c = crearLaCaidaDelPie()
+  SALIDA_EN_VIVO.hunde = 0
+  EN_VIVO.fin = 1
+  armarLaCaida(c, ARMADAS, 0, 0, CAMARA_DEL_PIE, { ancho: PIE.ancho, alto: PIE.alto }, PIE.camara.d)
+  const i = c.piezas.findIndex((p, k) => k < c.n && p.esForm)
+  const form = c.piezas[i]
+  const mpp = c.columnas[form.columna].mpp
+  let h = 0
+  for (let k = 0; k < i; k += 1) if (c.piezas[k].conSombra) h += 1
+  let malos = 0
+  hundimientoDelPiso(false, 1, form.espesorPx)
+  const abiertos = huecosDeLaCaida(c, RELOJ.duracionS)
+  for (let k = 0; k <= 240; k += 1) {
+    const t = k / 240
+    hundimientoDelPiso(false, t, form.espesorPx)
+    const hundido = PLATAFORMA_EN_VIVO.hundido
+    if (!plataforma) PLATAFORMA_EN_VIVO.hundido = 0
+    // Cerrado del todo, su hueco no está (uno menos).
+    if (huecosDeLaCaida(c, RELOJ.duracionS) < abiertos) {
+      if (PLATAFORMA_EN_VIVO.cerrado < 1) malos += 1
+      continue
+    }
+    const forma = HUECOS_DEL_PIE.uFormaDeLosHuecosDelPie.value[h]
+    const placaAbajo = form.espesor + hundido * mpp
+    const cerrado = PLATAFORMA_EN_VIVO.cerrado
+    if (forma.z + 1e-9 < placaAbajo || Math.abs(forma.x - (1 - cerrado)) > 1e-9 || (Math.abs(t - 0.5) < 1e-9 && forma.x > 0) || ((t <= HUNDIMIENTO_DEL_PIE.baja || t >= 1 - HUNDIMIENTO_DEL_PIE.baja) && forma.x < 1)) malos += 1
+  }
+  hundimientoDelPiso(false, 1, form.espesorPx)
+  EN_VIVO.fin = 0
+  return malos
+}
+const HUNDIMIENTO = correrElHundimiento(true)
+const PIE3D = 'src/app/v3/_lib/escena/pie3d'
+const sinDerretido = !existsSync(`${PIE3D}/derretido.ts`) && !existsSync(`${PIE3D}/teselado.ts`) && !readFileSync(`${PIE3D}/material.ts`, 'utf8').includes('DERRETIDO') && !readFileSync(`${PIE3D}/coreografia.ts`, 'utf8').includes('uDerriteDelPie')
+afirmar(HUNDIMIENTO === 0 && sinDerretido, `  la transformación entera: la placa nunca más honda que el fondo de su pozo (su plataforma baja con ella), el piso cerrado en el cambio y abierto al bajar y al subir (${String(HUNDIMIENTO)} cuadros mal); sin el derretido (su módulo, su teselado y su sombreador)`)
+controlPositivo('  el detector VE un pozo sin plataforma (la placa se hunde en el fondo)', correrElHundimiento(false), (m: number) => m === 0 && sinDerretido)
+// El vacío con cosas borrosas (medido en el sitio, apagando capas): la placa hundida pasaba por debajo del plano de la luz de abajo y lo que
+// se veía en el pozo eran sus manchas de energía. El plano no se dibuja adentro de los huecos del pie.
+const PLANO = readFileSync('src/app/v3/_lib/escena/final/planoDeLaLuz.ts', 'utf8')
+const planoBien = (p: string): boolean => p.includes('	if ( huecoDelPie( vXZ ) < 0.0 ) discard;') && p.includes('...HUECOS_DEL_PIE, uBaseDelPie: FINAL_EN_EL_PISO.uBaseDelPie')
+afirmar(planoBien(PLANO), '  el plano de la luz de abajo, recortado por los huecos del pie: en el pozo, las paredes, la placa y su plataforma')
+controlPositivo('  el detector VE el plano entero (el de antes)', PLANO.replace('	if ( huecoDelPie( vXZ ) < 0.0 ) discard;', ''), planoBien)
 
 cerrar('s72-pulido-28')

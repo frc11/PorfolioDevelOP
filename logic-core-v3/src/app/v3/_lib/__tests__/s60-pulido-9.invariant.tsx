@@ -17,8 +17,8 @@ import { DESPUES_DEL_ENVIO } from '../../_chrome/contacto/contenido'
 import { CIERRE_MS } from '../../_chrome/contacto/FormularioDeContacto'
 import { ENVIO_SIMULADO, envioSimulado } from '../formularios/enviar'
 import { ANUNCIO_DE_EXITO, RESULTADO } from '../formularios/gracias'
-import { DERRETIDO_DEL_PIE } from '../formularios/volteo'
-import { DERRETIDO_DEL_CAMBIO, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
+import { CAMBIO_DEL_PIE } from '../formularios/volteo'
+import { HUNDIMIENTO_DEL_PIE, pisoDelHundimiento, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { FLOOR_Y } from '../escena/probeScene'
 import { NUNCA, POSARSE, frenteInicial, polvoInicial, quietoConHisteresis, tomarElFrente, type EstadoDelPolvoVivo } from '../escena/polvo/posarse'
 import { FISICA, SIMULACION_DEL_POLVO_GLSL } from '../escena/polvo/simulacion'
@@ -118,7 +118,7 @@ const CAJA = { ancho: 253, alto: 181 }
 const DESDE = { ancho: 253, alto: 400, dx: 0, dy: -63 }
 const ESPESOR = 30
 // [PULIDO 13] · un solo volteo (el centrado): el columpio se borró.
-type Pose = (t: number, entrante: boolean, quieto?: boolean) => { m: THREE.Matrix4; visible: boolean; aparece: number; derrite: number }
+type Pose = (t: number, entrante: boolean, quieto?: boolean) => { m: THREE.Matrix4; visible: boolean; aparece: number }
 const pose: Pose = (t, entrante, quieto = false) => {
   const m = new THREE.Matrix4()
   const r = poseDeLaTransformacion(quieto, t, entrante, CAJA, DESDE, ESPESOR, m)
@@ -126,23 +126,34 @@ const pose: Pose = (t, entrante, quieto = false) => {
 }
 const normal = (m: THREE.Matrix4): THREE.Vector3 => new THREE.Vector3(0, 0, 1).transformDirection(m)
 const esquina = (m: THREE.Matrix4): THREE.Vector3 => new THREE.Vector3(0, 0, 0).applyMatrix4(m)
-// [PULIDO 22] T2 c · se hundía por su hueco y se cambiaba en el fondo. [PULIDO 27] Y1 c · el sentido cambió por pedido: SE DERRITE. Las dos
-// se quedan en su lugar (de cara, sin moverse: la deformación es del sombreador); la que estaba se derrite entera (`derrite` de 0 a 1)
-// hasta la mitad y la nueva nace del mismo charco (de 1 a 0); se cambian en la mitad, las dos derretidas enteras; sin tramado.
+// [PULIDO 22] T2 c · se hundía por su hueco y se cambiaba en el fondo. [PULIDO 27] Y1 c · se derretía. [PULIDO 28] AA2 · el sentido cambió
+// por pedido: SE HUNDE, NÍTIDO. La que estaba baja por su hueco (hacia atrás de su cara, sin girar ni correrse) hasta lo hondo y queda
+// ahí; el piso se cierra sobre ella (`pisoDelHundimiento`); se cambian a la mitad, entero cerrado y las dos abajo; el piso se abre y la
+// nueva sube hasta su lugar exacto. Enteras siempre: sin tramado.
 const MUESTRAS = Array.from({ length: 41 }, (_, k) => k / 40)
-const MITAD_D = DERRETIDO_DEL_CAMBIO.mitad
-const derriteBien = (p: Pose): boolean => {
-  const [s0, sMitad, eMitad, e1] = [p(0, false), p(MITAD_D - 1e-4, false), p(MITAD_D, true), p(1, true)]
-  const quietas = MUESTRAS.every((t) => esquina(p(t, false).m).distanceTo(new THREE.Vector3(DESDE.dx, -DESDE.dy, 0)) < 1e-6 && esquina(p(t, true).m).length() < 1e-6 && normal(p(t, false).m).z > 0.999 && normal(p(t, true).m).z > 0.999)
-  const sube = MUESTRAS.every((t, k) => k === 0 || (p(t, false).derrite >= p(MUESTRAS[k - 1], false).derrite && p(t, true).derrite <= p(MUESTRAS[k - 1], true).derrite))
-  const enElCharco = sMitad.derrite > 0.999 && eMitad.derrite > 0.999
-  const cambia = s0.visible && s0.derrite === 0 && sMitad.visible && !p(MITAD_D, false).visible && eMitad.visible && !p(MITAD_D - 1e-4, true).visible
-  const enteras = MUESTRAS.every((t) => p(t, false).aparece === 1 && p(t, true).aparece === 1)
-  return quietas && sube && enElCharco && cambia && enteras && e1.m.equals(new THREE.Matrix4()) && e1.visible && e1.aparece === 1 && e1.derrite === 0
+const HONDO = ESPESOR * HUNDIMIENTO_DEL_PIE.espesores
+interface DelPiso {
+  readonly cerrado: (t: number) => number
 }
-afirmar(derriteBien(pose), '2 · se derrite: la placa se derrite en su lugar hasta el charco; ahí se cambian (las dos derretidas enteras) y la tarjeta nace del mismo charco hasta quedar sólida en su lugar exacto', `${String(DERRETIDO_DEL_PIE.s)} s`)
-controlPositivo('2 · el detector VE el cambio de antes (sin derretirse: se cambian enteras)', ((t, e, q) => ({ ...pose(t, e, q), derrite: 0 })) as Pose, derriteBien)
-controlPositivo('  y un cambio con la que estaba a medio derretir', ((t, e, q) => ({ ...pose(t, e, q), derrite: e ? pose(t, e, q).derrite : t })) as Pose, derriteBien)
+const DEL_PISO: DelPiso = { cerrado: (t) => pisoDelHundimiento(t).cerrado }
+const hundeBien = (p: Pose, piso: DelPiso = DEL_PISO): boolean => {
+  const [s0, sMitad, eMitad, e1] = [p(0, false), p(0.5 - 1e-4, false), p(0.5, true), p(1, true)]
+  const enSuLinea = MUESTRAS.every((t) => {
+    const [s, e] = [esquina(p(t, false).m), esquina(p(t, true).m)]
+    return Math.abs(s.x - DESDE.dx) < 1e-6 && Math.abs(s.y + DESDE.dy) < 1e-6 && Math.abs(e.x) < 1e-6 && Math.abs(e.y) < 1e-6 && normal(p(t, false).m).z > 0.999 && normal(p(t, true).m).z > 0.999
+  })
+  // (Cada una mientras se ve: la que estaba baja hasta la mitad; la nueva sube desde ahí.)
+  const baja = MUESTRAS.every((t, k) => k === 0 || (t < 0.5 ? esquina(p(t, false).m).z <= esquina(p(MUESTRAS[k - 1], false).m).z + 1e-9 : MUESTRAS[k - 1] < 0.5 || esquina(p(t, true).m).z >= esquina(p(MUESTRAS[k - 1], true).m).z - 1e-9))
+  const abajo = Math.abs(esquina(sMitad.m).z + HONDO) < 1e-6 && Math.abs(esquina(eMitad.m).z + HONDO) < 1e-6
+  const cambia = s0.visible && sMitad.visible && !p(0.5, false).visible && eMitad.visible && !p(0.5 - 1e-4, true).visible
+  const enteras = MUESTRAS.every((t) => p(t, false).aparece === 1 && p(t, true).aparece === 1)
+  const cerrado = piso.cerrado(0.5) === 1 && piso.cerrado(HUNDIMIENTO_DEL_PIE.baja) === 0 && piso.cerrado(1 - HUNDIMIENTO_DEL_PIE.baja) === 0 && piso.cerrado(0) === 0 && piso.cerrado(1) === 0
+  return enSuLinea && baja && abajo && cambia && enteras && cerrado && e1.m.equals(new THREE.Matrix4()) && e1.visible && e1.aparece === 1
+}
+afirmar(hundeBien(pose), `2 · se hunde: la placa baja por su hueco ${String(HUNDIMIENTO_DEL_PIE.espesores)} espesores sobre su plataforma, el piso se cierra, se cambian a cubierto (las dos abajo), se abre y la tarjeta sube hasta su lugar exacto; enteras`, `${String(CAMBIO_DEL_PIE.s)} s`)
+controlPositivo('2 · el detector VE el derretido de antes (quietas en su lugar)', ((t, e, q) => ({ ...pose(t, e, q), m: pose(t, e, q).m.clone().setPosition(e ? 0 : DESDE.dx, e ? 0 : -DESDE.dy, 0) })) as Pose, (p: Pose) => hundeBien(p))
+controlPositivo('  y un cambio con fundido (la mancha borrosa de PULIDO 22)', ((t, e, q) => ({ ...pose(t, e, q), aparece: Math.abs(t - 0.5) < 0.1 ? 0.5 : 1 })) as Pose, (p: Pose) => hundeBien(p))
+controlPositivo('  y un cambio a la vista (el piso sin cerrarse)', { cerrado: () => 0 }, (d: DelPiso) => hundeBien(pose, d))
 // [PULIDO 11] B1 · el hundido se borró (el humano eligió el volteo para los dos formularios).
 const fundidoBien = (p: Pose): boolean => [0, 0.3, 0.7, 1].every((t) => Math.abs(p(t, true, true).aparece + p(t, false, true).aparece - 1) < 1e-9) && p(0.5, true, true).m.equals(new THREE.Matrix4()) && p(1, false, true).aparece === 0
 afirmar(fundidoBien(pose), '  con movimiento reducido, un fundido: la saliente se va y la entrante aparece, quietas')

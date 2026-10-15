@@ -7,6 +7,7 @@ import { CORRIENTES_DE_LA_LUZ_GLSL, LECTURA_DE_LA_LUZ_GLSL, LUZ_DE_ABAJO, LUZ_DE
 import { FINAL_EN_EL_PISO } from './enElPiso'
 import { DISTANCIA_AL_LOGO_GLSL } from './hueco'
 import { DESCARGA_DEL_FILO_GLSL, FILO_EN_VIVO } from './filoConPoder'
+import { HUECOS_DEL_PIE, HUECOS_DEL_PIE_GLSL } from '../pie3d/huecos'
 
 /**
  * [PULIDO 2] 4 · EL PLANO QUE BRILLA DEBAJO DEL PISO: al pie de los bloques (sobre su zócalo), un disco que brilla donde hay
@@ -20,6 +21,8 @@ import { DESCARGA_DEL_FILO_GLSL, FILO_EN_VIVO } from './filoConPoder'
  * quedaba por ENCIMA de esos bloques y se veía de frente, oscuro en su borde (la luz se apaga hacia cero) y blanco en el medio:
  * una forma oscura ondulada (el frente de la onda) al lado del sector. Ahora, con energía, las tapas no bajan del piso blando
  * de la luz (`fondoDeLaLuz`, en la simulación: `enElPiso.ts`), por encima del plano.
+ * [PULIDO 28] AA2 · y no adentro de los huecos del pie: la placa del form que se hunde pasaba por debajo de él y lo que se veía en el
+ * pozo era el plano, con sus manchas de energía (el vacío con cosas borrosas). Ahí, las paredes, la placa y su plataforma.
  */
 const f = (n: number): string => (Number.isInteger(n) ? n.toFixed(1) : String(n))
 
@@ -27,7 +30,7 @@ export function crearElPlanoDeLaLuz(radio: number): THREE.Mesh {
   const geometria = new THREE.CircleGeometry(radio, 96)
   geometria.rotateX(-Math.PI / 2)
   const material = new THREE.ShaderMaterial({
-    uniforms: { ...LUZ_DE_ABAJO_EN_VIVO, ...PISO_EN_VIVO, uDistanciaAlLogo: FINAL_EN_EL_PISO.uDistanciaAlLogo, uMarcoDeLaDistancia: FINAL_EN_EL_PISO.uMarcoDeLaDistancia, uCajaDelLogo: FINAL_EN_EL_PISO.uCajaDelLogo, uDescargaDelFilo: FILO_EN_VIVO.uDescargaDelFilo },
+    uniforms: { ...LUZ_DE_ABAJO_EN_VIVO, ...PISO_EN_VIVO, uDistanciaAlLogo: FINAL_EN_EL_PISO.uDistanciaAlLogo, uMarcoDeLaDistancia: FINAL_EN_EL_PISO.uMarcoDeLaDistancia, uCajaDelLogo: FINAL_EN_EL_PISO.uCajaDelLogo, uDescargaDelFilo: FILO_EN_VIVO.uDescargaDelFilo, ...HUECOS_DEL_PIE, uBaseDelPie: FINAL_EN_EL_PISO.uBaseDelPie },
     vertexShader: /* glsl */ `
 varying vec2 vXZ;
 void main() {
@@ -45,7 +48,10 @@ ${CORRIENTES_DE_LA_LUZ_GLSL}
 uniform vec2 uCajaDelLogo;
 ${DISTANCIA_AL_LOGO_GLSL}
 ${DESCARGA_DEL_FILO_GLSL}
+uniform vec4 uBaseDelPie;
+${HUECOS_DEL_PIE_GLSL}
 void main() {
+	if ( huecoDelPie( vXZ ) < 0.0 ) discard;
 	float e = energiaEnElPiso( vXZ );
 	if ( e <= 0.0 ) discard;
 	float luz = e * brilloDeLaJunta( vXZ, uRelojDeLaLuz ) + ( corrientesDeLaLuz( vXZ, uGrillaDelPiso.y ) + descargaDelFilo( vXZ, uGrillaDelPiso.y ) ) * ( 0.4 + min( e, 1.0 ) );

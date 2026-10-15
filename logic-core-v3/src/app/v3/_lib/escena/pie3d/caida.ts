@@ -49,6 +49,8 @@ interface PiezaMutable {
   /** [PULIDO 23] U3 · el radio de sus esquinas (px: el hueco con su silueta) y si es texto (sin hueco: se apoya sobre el piso). */
   radioPx: number
   esTexto: boolean
+  /** [PULIDO 28] AA2 · el formulario: su hueco lleva la plataforma del hundimiento. */
+  esForm: boolean
 }
 
 /** Una columna: el cuerpo invisible que cae (`PiezaDePie`: su canto de abajo y de atrás en el mundo y sus medidas, u). */
@@ -114,7 +116,7 @@ const CAIDA_NULA = caidaIntegrada({ alto: 1, espesor: 0.1 })
 
 export function crearLaCaidaDelPie(): CaidaDelPie {
   const piezas: PiezaMutable[] = []
-  for (let k = 0; k < MAXIMO; k += 1) piezas.push({ ancho: 1, alto: 1, espesor: 0.1, anchoPx: 1, altoPx: 1, espesorPx: 1, columna: 0, dx: 0, dy: 0, conSombra: false, radioPx: 0, esTexto: false })
+  for (let k = 0; k < MAXIMO; k += 1) piezas.push({ ancho: 1, alto: 1, espesor: 0.1, anchoPx: 1, altoPx: 1, espesorPx: 1, columna: 0, dx: 0, dy: 0, conSombra: false, radioPx: 0, esTexto: false, esForm: false })
   const columnas: ColumnaMutable[] = []
   const lugares: LugarEnElPiso[] = []
   const caidas: CaidaIntegrada[] = []
@@ -227,6 +229,7 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
     // [PULIDO 28] AA4 · el radio de la placa 3D (sin el del DOM, el de reserva: `geometria.ts`): el hueco no deja ver el pozo en las esquinas.
     p.radioPx = caja.radio > 0 ? caja.radio : (a.pieza.forma === 'formulario' ? 2 : 1) * VOLUMEN_DEL_PIE.radio
     p.esTexto = a.pieza.forma === 'texto' || a.pieza.forma === 'enlace'
+    p.esForm = a.pieza.forma === 'formulario'
   }
   // Cada columna en el mundo: su canto (el medio de abajo y de atrás) y sus medidas (u); la caída de su tamaño.
   for (let k = 0; k < c.m; k += 1) {

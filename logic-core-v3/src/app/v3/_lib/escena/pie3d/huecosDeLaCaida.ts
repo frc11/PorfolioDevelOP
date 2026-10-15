@@ -6,6 +6,7 @@ import type { CaidaDelPie } from './caida'
 import { HUECOS_DEL_PIE, HUECO_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, QUIETUD, QUIETUD_DEL_PIE } from './huecos'
 import { SOMBRA_DEL_PIE } from './sombras'
 import { SALIDA_EN_VIVO, cerradoParaElViaje } from '../../pie3d/salidas'
+import { PLATAFORMA_EN_VIVO } from './transformacionDelPie'
 
 /**
  * [PULIDO 22] T3 · Los huecos de este cuadro (`huecos.ts`): por placa que cae, su huella en el piso, cuánto se abrió y [PULIDO 23] U3 · su
@@ -59,7 +60,8 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     const final = poseDeLaPiezaQueCae(col, l, l.incrustada + 1).a
     const a = poseDeLaPiezaQueCae(col, l, s).a
     const baja = Math.min(1, Math.max(0, a / Math.max(1e-3, final)))
-    const abre = 1 - cerradoParaElViaje(SALIDA_EN_VIVO.hunde)
+    // [PULIDO 28] AA2 · el del formulario, también cerrado sobre su placa hundida mientras se cambia (`transformacionDelPie.ts`).
+    const abre = (1 - cerradoParaElViaje(SALIDA_EN_VIVO.hunde)) * (p.esForm ? 1 - PLATAFORMA_EN_VIVO.cerrado : 1)
     // La columna acostada e incrustada (su esquina de arriba a la izquierda) y el canto de la pieza en ella.
     const fin = poseDeLaPiezaQueCae(col, l, l.incrustada + 1)
     Q.setFromRotationMatrix(BASE).multiply(Q_TIP.setFromAxisAngle(EJE_X, -fin.a))
@@ -87,7 +89,9 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     const lejos = ((col.y1 - col.y0) - p.dy) * col.mpp
     const cerca = lejos - p.altoPx * col.mpp
     const franja = abre < 1 ? 1 : Math.min(1, Math.max(0, (lejos * Math.sin(Math.min(a, Math.PI / 2)) - cerca) / Math.max(1e-3, lejos - cerca)))
-    formas[k].set(abre, p.radioPx * col.mpp * sobra, (p.espesor + HUECO_DEL_PIE.hondoDeMas) * baja, franja)
+    // [PULIDO 28] AA2 · el fondo del formulario, su plataforma: baja con la placa.
+    const plataforma = p.esForm ? PLATAFORMA_EN_VIVO.hundido * col.mpp : 0
+    formas[k].set(abre, p.radioPx * col.mpp * sobra, (p.espesor + HUECO_DEL_PIE.hondoDeMas) * baja + plataforma, franja)
     k += 1
   }
   QUIETUD_DEL_PIE.uCuantasQuietudes.value = q

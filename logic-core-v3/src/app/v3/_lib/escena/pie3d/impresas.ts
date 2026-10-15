@@ -2,18 +2,16 @@ import * as THREE from 'three'
 
 import type { MedidaDeLaPieza } from '../../pie3d/medida'
 import type { FormaDeLaPieza } from '../../pie3d/registro'
-import { DERRETIDO } from './derretido'
 import { COLORES_DEL_PIE, VOLUMEN_DEL_PIE, aLoAnchoDeLaTecla, baseDeLaLetra, deRotulo, pintar, sinLetra, type FuentesDelPie } from './geometria'
 import { materialDelPie } from './material'
 import type { UniformesDelPie } from './coreografia'
-import { teselar } from './teselado'
 
 /**
  * [PULIDO 28] AA1 · LAS LETRAS DEL FORMULARIO, IMPRESAS. La letra del form TITILABA al mover la cámara (quieta, no): no era el DOM (en
  * volumen los rótulos del DOM son transparentes) sino su relieve: letras de unos 10 px extruidas 2,5 px, cuyas caras y cantos caen en
  * otro píxel en cada cuadro de la órbita (medido en el sitio, cuadro a cuadro: la misma palabra con otro grosor de uno al otro). Ahora se
  * IMPRIMEN en la cara de la placa: los mismos glifos, en su lugar del DOM, en una textura a `escala` veces (con sus mipmaps y el filtro
- * anisótropo), sobre un plano apenas delante de la cara con el material de la pieza (su luz, su llegada, su disolución, su derretido):
+ * anisótropo), sobre un plano apenas delante de la cara con el material de la pieza (su luz, su llegada, su disolución):
  * la GPU la muestrea filtrada y la letra no cambia de grosor con la cámara. Los rótulos en la placa; el de la tecla (Enviar), en su cara
  * y con lo que la tecla le pide (el relleno del hover, sin dibujarse con el botón ocupado). Los renglones en Archivo, en relieve.
  * La escala, una potencia de dos: el nivel del mipmap que cae a 1:1 (dpr 1: el 2; dpr 2: el 1) es la letra entera, sin mezclarse con uno
@@ -78,7 +76,7 @@ export function imprimirLasLetras(m: MedidaDeLaPieza, fuentes: FuentesDelPie, en
   textura.anisotropy = IMPRESAS.anisotropia
   const pintado = pintar(plano, COLORES_DEL_PIE.claro)
   const conLetra = enLaTecla && m.tecla !== null ? aLoAnchoDeLaTecla(deRotulo(pintado), m.tecla) : sinLetra(pintado)
-  return { geometria: teselar(conLetra, DERRETIDO.lado), textura }
+  return { geometria: conLetra, textura }
 }
 
 /**
@@ -117,7 +115,7 @@ function colgarLasImpresas(impresas: LetrasImpresas, material: THREE.MeshStandar
   const malla = new THREE.Mesh(impresas.geometria, propio)
   malla.frustumCulled = false
   malla.name = 'letras impresas'
-  // La luz de la pieza (la acostada, la mojada del derretido): la de su material, en cada cuadro.
+  // La luz de la pieza (la acostada): la de su material, en cada cuadro.
   malla.onBeforeRender = () => {
     propio.envMapIntensity = material.envMapIntensity
     propio.roughness = material.roughness
