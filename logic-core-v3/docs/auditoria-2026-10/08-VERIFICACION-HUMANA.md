@@ -1558,3 +1558,12 @@
 - Resultado esperado: Slug no vacio (respaldo) o error de validacion claro.
 - Señal de falla: Slug vacio o '-1' y el embed no carga.
 - ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-174] ¿El lienzo del setter queda claro si se llega desde el home sin recargar?
+- Verifica: [DIS-003] · Prioridad: media
+- Entorno: el sitio desplegado (o local) con una cuenta SETTER de prueba, en desktop
+- Precondiciones: cuenta SETTER que pueda entrar; ninguna sesión abierta
+- Pasos: 1) Abrir el home (/) y esperar a que termine el intro 2) Entrar por «Acceder» del Navbar (no escribir la URL) 3) Iniciar sesión con la cuenta SETTER 4) Al llegar a /setter, mirar el fondo del panel y en DevTools el atributo data-theme del html 5) Recargar y comparar
+- Resultado esperado: el fondo del panel es oscuro antes y después de recargar; el html no tiene data-theme="light"
+- Señal de falla: antes de recargar el fondo es casi blanco (#fafafa) con texto claro, y el html tiene data-theme="light"
+- ¿Escribe en la base o manda emails?: no (solo un login)

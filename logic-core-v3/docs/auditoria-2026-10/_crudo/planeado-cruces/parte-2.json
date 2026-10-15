@@ -4490,6 +4490,519 @@
     "sentido": "no",
     "ciclo": "D9-c1, lector D9-L2"
    }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:5370",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Fuente :5366-5368: es un diagnóstico y dice «no se tocó». Desde entonces nada cambió: el último commit de HeroBackground.tsx es 267948ac (2026-05-12), anterior al diagnóstico. Sigue el FBM de 3 octavas (src/components/canvas/HeroBackground.tsx:46-49). El Canvas corre con frameloop=\"always\" (:291-293) y sin IntersectionObserver: el git grep de IntersectionObserver|useInView|frameloop en src/components/canvas/ solo da :293. Su dpr ya estaba acotado por niveles (≤1,2, y sin canvas por debajo de 768 px; :240, :262). DotMatrix sigue con dpr={[1, 2]} (DotMatrix.tsx:213), por encima del máximo [1,1.5] de CLAUDE.md. Lo montan /login (login/page.tsx:12), /forgot-password (forgot-password/page.tsx:10) y /accept-invite (InviteBackground.tsx:6). Interactive3DNetwork y ReactiveBackground tienen 0 importadores (git grep vacío; control: el mismo patrón encuentra DotMatrix). v3 no toca src/components/canvas (git diff --stat 57c421bc bead847c vacío). F3: el dpr 2 vive en las pantallas de entrada al portal.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Ideas de nuevas features.md:44",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Route B está hecha: Preloader.tsx:299-303 monta MarketingIntro sobre el allow-list de src/lib/marketing-routes.ts:1-12, creados en ff6871e4 (2026-06-02), antes de la nota del 06-20. Queda un comentario viejo en Preloader.tsx:58 («route B deferida»). El Paint sprint no existe: git grep clippingPlanes|THREE\\.Plane|localClippingEnabled en src da vacío en main y en bead847c (control: git grep \"new THREE.\" encuentra src/components/3d/HeroArtifact.tsx). Sentido: el clipping apuntaba al logo cromado del Hero clásico, y el home v3 no monta HeroArtifact (v3:src/app/v3/_lib/__tests__/s3-frontera.invariant.ts:74 lo lista como frontera; el intro es v3:src/app/v3/_intro/IntroDelHome.tsx).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:136",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/components/layout/EarlyScrollLock.tsx:26-38 usa useServerInsertedHTML y se monta en src/app/layout.tsx:50 y :80. useHydratedReducedMotion vive en src/components/sections/home/WhyDevelOP.tsx:202-208 (useSyncExternalStore con snapshot de servidor false) y se usa en :435, :789 y :920. Obsoleto en v3: HomeIntroBoot reemplazó a EarlyScrollLock (v3:src/app/layout.tsx:87-90 y :109), y EarlyScrollLock no tiene importadores en bead847c. WhyDevelOP no se monta (v3:src/app/page.tsx:119).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:PRODUCT.md:29",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "En main hay varios caminos y precios. /contact tiene un formulario de 6 campos: name, email, phone, company, service y message (src/app/contact/page.tsx:148-210). La misma página ofrece «WhatsApp, llamada o email» (:268). Hay pricing público en /web-development: PricingSection.tsx:25-50 ($490/$980/$1.690 USD), montado en web-development/page.tsx:288. El home también muestra precios (OurServices.tsx:70-124). v3 tampoco sostiene el «solo WhatsApp»: el gemelo del CTA, «Hablemos», abre un formulario (v3:src/app/v3/_secciones/hero/hero.invariant.tsx:230-231). Los formularios postean a /api/contacto y /api/newsletter (v3:src/app/v3/_lib/formularios/enviar.ts:2), y la ruta «hoy recibe y valida» sin enviar a ningún lado (v3:src/app/api/contacto/route.ts:15). La regla hay que reescribirla, no aplicarla.",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:PRODUCT.md:54",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Los tokens de src/app/globals.css:60-63 (web #06b6d4, ia #10b981, automation #f59e0b, software #8b5cf6) coinciden con CLAUDE.md:99-103. El «índigo» de PRODUCT.md:54 quedó desalineado: DESIGN.md:125 lo cerró como violeta. v3 lo reemplaza: pasa a tres acentos, el ámbar muere y cambian los hex (v3:src/app/theme-develop.css:51-52 y :326-328; v3:src/app/globals.css:96-117). Eso va contra el «do not change» que su propia rama conserva (bead847c:CLAUDE.md:99-103).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:PRODUCT.md:58",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "main sirve el home clásico: 11 bloques sin estructura de capítulos (src/app/page.tsx:25-42). v3 ya lo decidió con ocho secciones: hero, quienes-somos, numeros, trabajos, servicios, tu-panel, por-que-develop y cierre (v3:src/app/v3/_lib/secciones.ts:408-677; v3:src/app/v3/page.tsx:10).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:PRODUCT.md:64",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "Lo servido en main trae cifras sin fuente: OurServices.tsx:72 «+340% consultas promedio», :90 «94% respuesta automática» y :108 «23hs por semana ahorradas». WhyDevelOP.tsx:448 anima un contador a 76 días, cifra que docs/bitacora-rediseno.md:549 marca «sin verificar». Hay precios en OurServices.tsx:70-124 y PricingSection.tsx:25-50. El voseo y la jerga no se barrieron de forma exhaustiva. Sigue vigente en v3, que lo impone con un escáner de precios y cifras (v3:src/app/v3/_secciones/_contrato/escaneo.ts:133-143) y con un registro de relleno visible como pedido (v3:src/app/v3/_secciones/_contrato/inventado.ts:30-50).",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:PRODUCT.md:67",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "main usa Geist y Geist_Mono desde next/font/google (src/app/layout.tsx:2-13 y :74). v3 cambia el layout raíz a Chivo + Chivo_Mono (v3:src/app/layout.tsx:2-13 y :101-105) y suma Archivo como cara de display (v3:src/app/theme-develop.css:36). Pregunta F3: el layout raíz también envuelve /admin, /dashboard y /setter, y 22 archivos de src/app/(protected) usan font-sans/font-mono. ¿El portal hereda Chivo (una sola marca, a cambio de un cambio visual en pantallas ya cerradas) o fija Geist en su propio layout (cero regresión, a cambio de dos tipografías en el producto)?",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:PRODUCT.md:71",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Todo existe: src/components/design-system/ (ChapterLabel…Surface + index.ts), los tokens en globals.css (:60-63 y :158-207), /styleguide con noindex (src/app/styleguide/page.tsx:26) y docs/impeccable-baseline.md:3-8 (v3.5.0, 2026-07-31). Pero ninguna página servida importa el design-system: solo lo usan styleguide y los huérfanos cierre/*, nosotros/* y servicios/*. v3 lo reemplaza con su propio sistema (v3:src/app/theme-develop.css:36-56: Chivo, base clara y tres acentos) y sus componentes (v3:src/app/v3/_componentes/).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:DESIGN.md:92",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "git grep -c sobre la superficie pública de main (sections, layout, ia, automation, software, rutas de landing; incluye huérfanos) da 77 backdrop-blur, 38 bg-clip-text y 217 infinite/repeat: Infinity. Ejemplos: backdrop-blur en Navbar.tsx:222, :257 y :291; TypewriterText en Hero.tsx:14 y :694; cursor-none de vuelta (ver bitacora-beta-3.md:2671). v3 también abandona la lista: tiene cursor propio (v3:src/app/v3/_componentes/chrome/CursorPropio.tsx:14-19) y vidrio con backdrop-filter (v3:src/app/v3/_estilos/vidrio.css:41-42).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:DESIGN.md:125",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "En main: violeta #8b5cf6 en src/app/globals.css:63, con las dos permutaciones en src/app/styleguide/_components/AccentPermutations.tsx. v3 reabre el gate: redefine los mismos tokens --color-ds-accent-* a #1D5B8F/#1B6B4C/#57429E y borra automation (v3:src/app/globals.css:96-117). Su comentario dice «paleta congelada en CLAUDE.md» (:97), pero bead847c:CLAUDE.md:99-103 sigue con los cuatro hex viejos: contradicción interna de la rama.",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:DESIGN.md:141",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "La regla existe en el sistema: SectionShell escribe data-ds-theme (src/app/globals.css:272-297). Pero el home servido no usa SectionShell (src/app/page.tsx:1-42) desde 78b510ac, y ninguna página servida importa el design-system. v3 invierte la regla: base clara, el acento como texto sobre papel y, en la sección invertida, solo como relleno o subrayado (v3:src/app/theme-develop.css:42-49 y :311-321).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:DESIGN.md:190",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Está en tokens. lead clamp(1.25rem…) sobre body clamp(1rem…) da 1,25 (src/app/globals.css:170 y :173). data 1.5rem sobre display-lg 2.25rem da 0,67 (:158 y :180). Container 1240px (:187), prosa 65ch (:188) y bajada 42ch (:207). Ninguna página servida los consume. v3 trae su escala propia sobre Chivo (v3:src/app/theme-develop.css:36-40).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:DESIGN.md:215",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Está en el sistema. Sombra de dos capas para oscuro y crema (src/app/globals.css:253, :287 y :297). CtaButton sin whileTap/scale ni tracking animado, con el press por :active en CSS (src/components/design-system/CtaButton.tsx:46-61 y :94-96). Solo lo consumen styleguide y huérfanos (cierre/ContactoCta.tsx). v3 fija «El CTA es siempre tinta #111111» (v3:src/app/globals.css:82-91) y tiene CTA propio (v3:src/app/v3/_componentes/chrome/Cta.tsx). F3: «CTA siempre tinta» no se asume para el portal; es una pregunta abierta.",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:DESIGN.md:262",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "ChapterLabel solo aparece en huérfanos: cierre/Cierre.tsx:53, nosotros/Nosotros.tsx:118 y servicios/Servicios.tsx:90. Ninguna landing lo importa; web-development/page.tsx:245 solo lo nombra en un comentario. v3 lo descartó de forma explícita en B12, a pedido del humano: «el número y el rótulo se fueron» (v3:src/app/v3/_secciones/_contrato/Rotulo.tsx:14-23).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "raiz:DESIGN.md:271",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "Hay 217 infinite/repeat: Infinity en la superficie pública (mismo git grep -c), por ejemplo WebDevelopmentBento.tsx:171 y ComparadorSection.tsx:44. Los reveals ds-reveal/ds-rise de 0,9 s existen (src/app/globals.css:97-121), pero solo los usa el design-system. La dirección de v3 es una escena 3D permanente y coreografía por scroll (v3:src/app/v3/page.tsx:43), no motion escasa. Sí conserva la compuerta de reduced-motion (v3:src/app/v3/_componentes/CompuertaDelScrollSuave.tsx:20).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/sprints/sprint-b0-bis-cierre.md:25",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Se aplicó el plan B: BrandedIntroCanvas dinámico en src/components/ui/MarketingIntro.tsx:19-20 (commit a0d7875f). Preloader.tsx:10 sigue importando MarketingIntro en estático. En \"/\" three volvió al bundle inicial por otra cadena: page.tsx:7 importa Hero en estático y Hero.tsx:3-9 trae r3f, three, drei y postprocessing. Lo restauró 78b510ac desde 63a4e364, que no contiene a0d7875f. No hay medición de Lighthouse en el código. Obsoleto para \"/\" con v3: el árbol animado entra por import() perezoso detrás de la compuerta de 1025 (v3:src/app/v3/page.tsx:43).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/sprints/sprint-b0-bis-cierre.md:35",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "T3 está hecho, pero en el layout raíz (src/app/layout.tsx:22-24, a0d7875f) y no en la página. Por eso toda ruta sin canonical propio hereda el del home. Solo cinco layouts lo pisan: web-development/layout.tsx:39, ai-implementations/layout.tsx:39, process-automation/layout.tsx:39, software-development/layout.tsx:38 y contact/layout.tsx:23. T2 se revirtió: los tres badges usan guion simple (About.tsx:245, :280 y :294) y :294 muestra mojibake visible («TucumÃ¡n … paÃ­s»). 78b510ac restauró About.tsx desde 63a4e364, y git merge-base --is-ancestor a0d7875f 63a4e364 falla. El canonical sigue igual en v3 (v3:src/app/layout.tsx:22-24). T2 queda obsoleto con v3.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/sprints/sprint-b0-bis-cierre.md:20",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Preloader y MarketingIntro siguen y se montan (src/app/layout.tsx:44 y :123; Preloader.tsx:302-303). La decisión que se dejaba para B2 ya la tomó v3: conserva Preloader solo por su rama de marketing, con isHomePage={false} (v3:src/app/layout.tsx:151-156), y reemplaza el intro del home por IntroDelHome/HomeIntro.",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/sprints/sprint-b05-sanidad-sitio.md:22",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "El texto nuevo está en src/components/ia/VaultIA.tsx:185 y RubrosIA.tsx:318: «Automatizaciones funcionando en negocios del NOA». git grep \"+47\" en src da vacío (control: git log -S \"+47 negocios\" encuentra f5b298e5, el commit que lo sacó). Las landings no cambian en v3 (git diff 57c421bc bead847c -- src/components/ia vacío).",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/sprints/sprint-b05-sanidad-sitio.md:32",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Lo que se sostiene: «Tucuman» sin tilde, 0 (git grep \"Tucuman\\b\" vacío; control: About.tsx:245 «Tucumán»). Archivos .bak, 0 (git ls-files src | grep .bak vacío; control: f5b298e5 borra process-automation/page.tsx.bak). Preguntas sin «¿» en las landings, 0 por heurística (git grep -P \"[a-z]\\?['\\\"<]\" sin «¿»; control: FaqAutomation.tsx:14). Lo que se rompió: el chequeo de mojibake del propio sprint (LC_ALL=C git grep $'\\xc3\\x83') da 1, About.tsx:294, en copy visible, reintroducido por 78b510ac. Las 266 tildes no se reverificaron una por una.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/sprints/sprint-b05-sanidad-sitio.md:52",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/app/sitemap.ts:10-16 lista las 6 rutas públicas. src/app/robots.ts:11-26 bloquea /admin, /dashboard, /setter, /api/, /embed/, /login, /accept-invite, /forgot-password, /reset-password, /cambiar-password y /bienvenida. /styleguide queda fuera por noindex (styleguide/page.tsx:26).",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10910",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "rediseno/home ya absorbió main: el merge 7a0b3463 (2026-09-06) tiene como padre a 57c421bc, y git merge-base 57c421bc bead847c = 57c421bc (0 commits atrás, 596 adelante). Falta la otra dirección: la subida del carril a main. El carril del Motor sigue divergente: b0-isolation-motor-chatbot está 8 commits adelante y 211 atrás de 57c421bc.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10425",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "MARKETING_INTERACT_MS = 1000 (src/components/ui/MarketingIntro.tsx:32). willChange:\"transform\" en el contenedor (:371). La rama mobile non-reduced ya no tiene overlayOpacity.set(0) (:196-225); los dos que quedan son de las ramas reduced (:189 y :238). MarketingIntro sigue vivo en las landings, idéntico en v3.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10455",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Ninguna entrada posterior registra la verificación por grabación: git grep \"grabaci\" en las bitácoras termina en bitacora-roadmap.md:10526. Los tunables siguen sin tocar (IntroLockupText.tsx:31-32 con 0.4 y 0.42; MarketingIntro.tsx:32). El código no puede confirmarlo: el intro se saltea bajo automation (MarketingIntro.tsx:177-181). Vigente para las intros de marketing, iguales en v3.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10463",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/components/ui/LogoStrokeOverlay.tsx:20 deja constancia de que MASK_STROKE_WIDTH se eliminó. El stroke que queda (:130-131) es el del path animado (strokeColor), no el de la máscara. Lo siguen usando MarketingIntro y Hero.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10491",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/components/ui/IntroLockupText.tsx existe y lo importan Hero.tsx:13 y MarketingIntro.tsx:12. textReveal está en src/context/PreloaderContext.tsx:51 y :103, y Preloader.tsx:152-239 escribe y borra el texto. Vigente para marketing. El home v3 tiene su lockup propio (v3:src/components/layout/home-intro/IntroLockup.tsx).",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2671",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "El cursor-none volvió al home de main: About.tsx:93, Portfolio.tsx:239, :329, :481 y :488, y OurServices.tsx:9821 (cursor:'none' inline). 78b510ac restauró esos archivos desde 63a4e364 (2026-07-31), anterior al fix 5fb023e7 (2026-08-04); git merge-base --is-ancestor 5fb023e7 63a4e364 falla. Como no hay CustomCursor (layout.tsx:84-108), el puntero desaparece sin reemplazo. Landings y widget siguen limpios: la grep no los lista, y PortfolioWebCases.tsx:212 y :304 está en un huérfano. Es un defecto vivo en producción hasta que v3 reemplace el home; el cursor propio de v3 nunca oculta el nativo (v3:src/app/v3/_estilos/cursor.css:10-15).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3685",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Cerró sin cambios de código, y el chunk de motion sigue retenido por el layout raíz (PreloaderContext.tsx:4, Navbar.tsx:3). La premisa ya no vale en main: tras 78b510ac, About.tsx:3 y Portfolio.tsx:3 importan 'framer-motion' y OurServices.tsx:14 importa 'motion/react'. framer-motion es una dependencia fantasma: package.json:153 solo declara \"motion\". Es una medición sobre un home que main ya no sirve. v3 tiene sus propios invariantes de peso (v3:src/app/v3/_lib/__tests__/bundle.invariant.ts).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2772",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "data-cursor sigue en 13 elementos de 5 archivos: OurServices 5, Portfolio 4, About 2, automation/BentoAutomation 1 y modules/chatbot/components/LogicCompanion 1. Los cinco componentes muertos siguen con 0 importadores: PortfolioWebCases, ProcesoSoftware, ShowcaseSoftware, ComparativaAutomation y SocialProofAutomation. El span «Conversemos →» sigue sin role ni tabIndex (PortfolioWebCases.tsx:360-365), dentro de un componente muerto. Landings y widget siguen iguales en v3.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2766",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Las referencias siguen. noise.svg externo en process-automation/page.tsx:57 y software-development/page.tsx:61: es la fuente probable de los 404 de esas rutas, aunque la bitácora no la nombra. El iframe a template-zero.netlify.app (WebTemplatesImmersive.tsx:36) choca con una CSP report-only con default-src 'self' y sin frame-src (next.config.ts:72-80). No es verificable sin navegador.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3767",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/components/ui/Preloader.tsx:10 importa MarketingIntro en estático (antes :6). Footer.tsx tiene 924 líneas y se monta en el home (page.tsx:11 y :42). PreloaderContext.tsx:4 usa motion y está congelado. Vigente: v3 conserva el mismo import estático en Preloader.tsx:10 y monta Preloader en el layout raíz (v3:src/app/layout.tsx:156). La parte del Footer cae con v3.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3783",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "Los placeholders eran del home rediseñado. 78b510ac volvió al home clásico (src/app/page.tsx:1-42) y en lo servido no queda ninguno: git grep \"\\[RUBRO|\\[URL DEL CASO|\\[\\+00%\\]\" en src da vacío (control: a3a49231:src/components/sections/home/Portfolio.tsx:73). Lo absorbe v3, que tiene su propio pedido de contenido (v3:src/app/v3/_secciones/quienes-somos/contenido.ts:13-39).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:137",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/components/layout/SmoothScroll.tsx:78 crea Lenis sin mirar prefers-reduced-motion, y el rAF perpetuo sigue (:102-107). git grep \"reduce\" en ese archivo da vacío (control: WhyDevelOP.tsx:205 encuentra el patrón). v3 solo lo resolvió para /v3 (v3:src/app/v3/_componentes/CompuertaDelScrollSuave.tsx:20), y su SmoothScroll global admite que no tiene esa compuerta (v3:src/components/layout/SmoothScroll.tsx:28-29). F3: el efecto excluye /admin y /dashboard, pero no /setter (SmoothScroll.tsx:29-34), y scrollRestoration='manual' es global (:25-27).",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:509",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "La flecha quedó como icono por defecto, sin decisión registrada (CtaButton.tsx:72 withArrow=true; :86-87 ArrowRight). Contrastes y bios siguen en placeholder, en un huérfano (nosotros/data.ts:43, :47-48, :67 y :73). La revisión visual de Franco no tiene rastro. El sistema de B1/B2 quedó atrás: v3 sacó números y rótulos (v3:src/app/v3/_secciones/_contrato/Rotulo.tsx:14-23) y tiene CTA propio.",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:823",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "metricPills sigue igual (src/components/sections/web-development/WebDevelopmentBento.tsx:70) y los headlines de WebDevelopmentByRubro.tsx:30, :49, :68 y :87 están intactos. La landing no cambia en v3.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:951",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "El bug que destapó se cerró con la red de seguridad (MarketingIntro.tsx:46 y :345-359). La ceguera de los instrumentos sigue: EarlyScrollLock.tsx:27 se saltea con navigator.webdriver, PreloaderContext.tsx:125-127 salta a 'done' y MarketingIntro.tsx:177-181 se saltea bajo automation. Vigente para las landings; en v3, EarlyScrollLock no tiene importadores.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:1075",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "El texto sigue igual (VaultIA.tsx:185, RubrosIA.tsx:318) y no hay decisión registrada. Las landings de IA no cambian en v3.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:1323",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "MARKETING_SCROLL_SAFETY_MS = 6000, anclado al montaje (MarketingIntro.tsx:46 y :345-359), y el Hero con 6000 (Hero.tsx:512). No se aplicó ninguna de las salidas (a), (b) o (c). MarketingIntro sigue igual en v3.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:1444",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "setActiveTab dentro de useEffect sigue en src/components/layout/Navbar.tsx:183 y DynamicDock.tsx:460, sin eslint-disable. El layout raíz de v3 sigue montando Navbar para las landings (v3:src/app/layout.tsx:147).",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:1643",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "El float sigue en HeroArtifact.tsx:73; está congelado y es correcto no tocarlo. Pero el gateo por frameloop que lo compensaba vive solo en HeroCanvas.tsx:135-146, que en main es huérfano. El Canvas del Hero clásico que se sirve no lo tiene (Hero.tsx:385: sin prop frameloop ni IntersectionObserver). El home v3 no monta HeroArtifact (v3:src/app/v3/_lib/__tests__/s3-frontera.invariant.ts:74).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:1817",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "El número fijo sigue en src/components/ia/CalculadorIA.tsx:316 y lib/whatsapp.ts:15 lo documenta. Pero CalculadorIA no tiene importadores: git grep \"CalculadorIA\" solo da ese comentario. Lo desmontó c66310aa (2026-04-11), y el diff tiene «-import CalculadorIA» y «-<CalculadorIA />». La premisa de «único destino distinto en producción» es falsa. Es código muerto: borrarlo cierra el tema sin decidir destino.",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:1868",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "data-cursor sigue en 5 archivos, con 13 ocurrencias: About.tsx 2, OurServices.tsx 5, Portfolio.tsx 4, automation/BentoAutomation.tsx 1 y modules/chatbot/components/LogicCompanion.tsx 1. BentoAutomation y LogicCompanion siguen vivos en v3; los tres del home clásico caen con v3.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2156",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "El patrón que lo corrige (hook con useSyncExternalStore) existe solo en WhyDevelOP.tsx:202-208. Hay 59 archivos de la superficie pública que usan useReducedMotion de motion. Entre ellos DynamicDock.tsx:397, montado en todas las rutas públicas vía Navbar.tsx:211, que ramifica el initial del marcado (:289-296). El componente culpable sigue sin identificar, y no es verificable sin navegador.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2218",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "OurServices.tsx:7636-7639 anima width. VaultIA.tsx:226-227 anima padding. WebDevelopmentBento.tsx:171 y ComparadorSection.tsx:44 tienen bounce infinito. Los tres de landings siguen vigentes en v3; el de OurServices cae con v3.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2230",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "Lo servido trae pricing y cifras sin fuente: OurServices.tsx:70-126, PricingSection.tsx:25-50 y WhyDevelOP.tsx:448. El alcance «solo marketing» sí se respeta por escrito (PRODUCT.md:13). v3 lo sostiene con instrumentos (v3:src/app/v3/_secciones/_contrato/escaneo.ts:133-143; inventado.ts:30-50). F3: PRODUCT.md:13 deja el portal fuera; ninguna de estas decisiones se transfiere al dashboard sin preguntarlo antes.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2665",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Lo servido en main no muestra placeholders: git grep \"\\[RUBRO|\\[URL DEL CASO|\\[\\+00%\\]|\\[ENTREGA QUE ESPERA|\\[RESEÑA SIN\" en src da vacío (control: a3a49231:src/components/sections/home/Portfolio.tsx:73). Los 9 que quedan viven en huérfanos sin importadores: nosotros/data.ts:43-73, servicios/data.ts:64-66 y cierre/Cierre.tsx:46. Se llegó a esto por la vuelta al home clásico (78b510ac), después de que el PR #4 lo hubiera llevado a main (bitacora-rediseno.md:3606-3611). Vigente para la subida de v3, que muestra marcadores a propósito (v3:src/app/v3/_secciones/quienes-somos/contenido.ts:33-39) y redes provisorias (v3:src/app/v3/_secciones/cierre/contacto.ts:24-29).",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3323",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "De las 27 cadenas quedan 9, en archivos huérfanos: nosotros/data.ts:43, :47, :48, :67 y :73; servicios/data.ts:64-66; cierre/Cierre.tsx:46. Portfolio.tsx y portal-demo/data.ts volvieron a la versión clásica, sin marcadores (78b510ac). El inventario es del rediseño B. v3 lleva su propio pedido: v3:src/app/v3/_secciones/_contrato/inventado.ts, y quienes-somos/contenido.ts:33-39 sigue pidiendo el rol de cada uno.",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2976",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "El home de main muestra precios: OurServices.tsx:70, :88, :106 y :124 ($800/$300/$200/$1.500 USD), «DESDE» en :8285 y el render en :9851. ModuloActiveCard.tsx:250 muestra «USD/mes», con ModulosOpcionales montado en page.tsx:17 y :39. v3 lo hace cumplir (v3:src/app/v3/_secciones/_contrato/escaneo.ts:133-143).",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3405",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "El último cambio de src/app/web-development/page.tsx es f9a20b26 (2026-08-07). El h1 sigue con gradient-text (:165 y :174), no hay bloque de casos y los huérfanos siguen intactos. v3 no toca la landing (git diff --stat 57c421bc bead847c -- src/app/web-development vacío). Su dirección ya no sería la de DESIGN.md sino la de v3 (v3:src/app/theme-develop.css:36-56).",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3587",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Los cuatro siguen con 0 importadores: PortfolioWebCases, ShowcaseSection (con href=\"#\" en :580), WebDevelopmentObjections y WebDevelopmentSensory. Ninguna decisión de borrar o montar.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3579",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "/assets/templates/chatgpt/<slug>/mid.webp (WebTemplatesImmersive.tsx:25 y :196-197) no existe: git ls-files public/assets da vacío (control: git ls-files public lista public/video/Woman_engrossed_in_screen_delpmaspu_.mp4). El iframe a template-zero (:36) no tiene frame-src en la CSP report-only (next.config.ts:72-80). noise.svg sigue externo (web-development/page.tsx:87; preconnect en layout.tsx:78). El video sí existe (VideoCard.tsx:7), así que el ERR_ABORTED no es un 404.",
+    "sentido": "si",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3604",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/app/page.tsx:1-42 es el home clásico, con dynamic(). EarlyScrollLock está remontado (layout.tsx:50 y :80). PanelPlate.tsx no existe (git ls-files src | grep PanelPlate da 0; control: portal-demo/PortalDemo.tsx sí aparece). Hubo un efecto que no se declaró: la foto 63a4e364 no contiene fe099b9a, a0d7875f, f5b298e5 ni 5fb023e7 (merge-base --is-ancestor falla en las cuatro). Por eso revirtió el badge y metió el mojibake de About.tsx:294, devolvió el cursor-none y volvió a poner three estático en \"/\". El reemplazo del home es v3 (v3:src/app/v3/page.tsx:20).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3682",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Sigue vigente: dynamic() con placeholders en src/app/page.tsx:11-19; scroll-lock del intro (EarlyScrollLock.tsx:27, LOGO_READY_TIMEOUT_MS = 2500 en Preloader.tsx:27); Navbar con DynamicDock (Navbar.tsx:211) en todas las rutas públicas (layout.tsx:117-119). v3 lo deja atrás: sin scroll-lock (v3:src/app/layout.tsx:87-90), /v3 con scroll nativo (v3:src/components/layout/SmoothScroll.tsx:87-98) e imports estáticos (v3:src/app/page.tsx:7).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3724",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Hero.tsx:400 usa <Environment preset=\"studio\" />, que baja el HDRI de un CDN. El HDRI self-hosteado existe (public/hdri/studio_small_03_1k.hdr), pero solo lo usa HeroCanvas.tsx:16, huérfano. El home v3 no monta el Hero clásico: en bead847c, src/components/layout/Hero.tsx no tiene importadores.",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3726",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/app/page.tsx:11-19 sigue con dynamic(), y About.tsx:411 y :471 declaran id=\"nosotros\" dos veces. SmoothScroll.tsx:49-60 lo documenta como causa. v3 importa en estático (v3:src/app/page.tsx:7) y el home /v3 tiene un id único por sección (v3:src/app/v3/_lib/secciones.ts:408-677). Sigue vivo en producción hasta el reemplazo.",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3729",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Siguen huérfanos: HeroArtifactLayer (0 importadores), HeroCanvas (solo HeroArtifactLayer.tsx:10), cierre/*, nosotros/*, servicios/* y portal-demo/useEscenaCycle (0 importadores). design-system y /styleguide están intactos. La receta vuelve al rediseño B, que ya no es el destino: el rediseño vigente es /v3, con secciones propias (v3:src/app/v3/_secciones/). En bead847c esos archivos siguen huérfanos, salvo HeroArtifactLayer, que usa el \"/\" provisorio (v3:src/components/layout/HeroLogoSlot.tsx:6).",
+    "sentido": "no",
+    "ciclo": "F3, agente f3:plan-sitio-publico"
+   }
   }
  ]
 }

@@ -1,0 +1,2211 @@
+{
+ "escena": {
+  "se_lleva": [
+   {
+    "elemento": "Regla única de foco visible (el mecanismo, no el color)",
+    "detalle": "Una sola regla `:focus-visible` emitida antes que los componentes, con tres tokens (`--color-foco`, `--foco-grosor: 2px`, `--foco-desplazamiento: 2px`). No hay ningún `outline: none` en el árbol, y `s3-foco` lo afirma. Hay un anillo forzado para la galería. En el home mide ≥3:1 en las 15 paradas.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1349; v3:src/app/theme-develop.css:1466-1478, 1500-1503, 1282-1283; v3:src/app/v3/_estilos/foco.css:22-31",
+    "razon": "No depende de la paleta y el portal necesita foco visible igual (CLAUDE.md:35). El propio tema dice que una regla única sólo es barata si existe antes que los componentes (theme-develop.css:1475-1478). El valor del color se trata aparte, en se_adapta."
+   },
+   {
+    "elemento": "Enlace de salto, landmarks y orden de foco",
+    "detalle": "El salto es la parada 1 y se ve al enfocarlo (17,60:1). Se oculta con `clip-path`, no con `display:none`. `banner` es el propio envoltorio sticky, sin caja nueva. `navigation` queda fuera de `main` y cada sección lleva `aria-labelledby`, lo que la hace `region`. Hay un solo `h1`, ningún `tabindex` positivo y el `contentinfo` va fuera del `main`.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1356-1361, 1482-1483, 1611-1623; v3:src/app/v3/_estilos/foco.css:33-62",
+    "razon": "En el home bastaron cinco paradas de navegación antes del contenido para justificar el salto (DE:1358). Un portal con sidebar tiene muchas más."
+   },
+   {
+    "elemento": "Toda superficie que redefine el fondo redefine las tres tintas",
+    "detalle": "Es «la trampa del tema». La sección invertida redefinía `--color-tinta` pero no `-media` ni `-tenue`, y eso daba 2,80:1 (el único fallo de AA del home) y 2,51:1. Con el arreglo pasan a 7,21:1 y 6,44:1.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1360, 1484; v3:src/app/theme-develop.css:1386-1400",
+    "razon": "El portal va a tener más superficies que el home (tarjetas, modales, sidebar, toasts). Una superficie que redefine sólo la tinta primaria falla en silencio."
+   },
+   {
+    "elemento": "Una sola política de movimiento reducido",
+    "detalle": "Hay un único hook, `usePrefiereMenosMovimiento`, sobre `useSyncExternalStore`, con snapshot de servidor `true`. `ProveedorDeMovimiento` lo traduce a `MotionConfig` en el layout. Sin proveedor, `useReducedMotionConfig` cae al default `never` y la preferencia no se lee nunca. Con la preferencia puesta quedan 0 transformadas y el contenido entero sigue visible.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1854-1858, 1349; v3:src/app/v3/_lib/usePrefiereMenosMovimiento.ts:32, 51-52; v3:src/app/v3/layout.tsx:6",
+    "razon": "El portal usa Framer Motion con las convenciones de CLAUDE.md:80-96, y CLAUDE.md no menciona reduced-motion. Si el layout del portal no monta el proveedor, aparece el mismo defecto."
+   },
+   {
+    "elemento": "`cn()` (tailwind-merge) tiene que conocer los tokens propios",
+    "detalle": "`cn()` descartaba en silencio un `text-<tamaño>` frente a un `text-<color>`, y un `font-<familia>` frente a los pesos `medio`, `semi` y `fuerte`. El arreglo está en `src/lib/utils.ts`: `extendTailwindMerge` con los 14 `--text-*` en el grupo font-size y los 3 pesos en font-weight, verificado sobre un corpus de 5.775 cadenas.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:876-899",
+    "razon": "`cn()` es compartido con el portal. Ya pasó dos veces, con el sistema viejo y con v3 (DE:889). Todo nivel o peso nuevo del portal tiene que entrar a esas listas."
+   },
+   {
+    "elemento": "Piso tipográfico de 10 px",
+    "detalle": "Ningún nivel fluido baja de `--text-micro` = 10 px. `--text-fluido-micro` caía a 8 px a 375 y se subió a 10 px, a costa de dejar de ser fluido.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1323, 1485, 1529; v3:src/app/theme-develop.css:550",
+    "razon": "La densidad de tablas, badges y metadatos del portal empuja a bajar el tamaño. El piso vale igual."
+   },
+   {
+    "elemento": "Breakpoints como bandas, y decisiones de ancho en CSS",
+    "detalle": "Una clase que vale en una banda se escribe en par (`medio:x escritorio:x-neutro`). Un breakpoint es una pregunta con banda medida: si dos consumidores contestan bandas distintas, son dos cortes. Una celda de grilla vacía reserva ancho. La superficie por ancho va en media query y no en un hook de JS, porque `useAnchoMinimo` da `false` en el servidor y en la hidratación, y eso parpadea.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:2200, 2223, 2157, 2124",
+    "razon": "El portal colapsa sidebars, tablas y grillas por ancho, y tiene las mismas trampas."
+   },
+   {
+    "elemento": "Tokens con alfa: se transfiere la razón de contraste, no el alfa",
+    "detalle": "Copiar el alfa 0,38 de `--color-borde-fuerte` daba 2,37:1. Re-derivado a 0,47, da 3,01:1 sobre la peor superficie clara.",
+    "cita": "v3:src/app/theme-develop.css:268-286",
+    "razon": "El glass actual del portal es todo alfa (`bg-white/[0.04]`, `border-white/[0.08]`, CLAUDE.md:97). Su contraste depende del fondo y hay que derivarlo para cada superficie."
+   }
+  ],
+  "se_adapta": [
+   {
+    "elemento": "Color del anillo de foco",
+    "detalle": "En v3, `--color-foco` es `var(--color-tinta)` (#111111): 13,62:1 sobre claro y 18,00:1 en la invertida, donde se invierte solo. El propio tema acota la regla a `[data-v3]` porque sobre el zinc-950 del portal daría 1,0611:1, invisible. Deja escrito un disparador: «el día que el sistema gobierne el portal o exista un `--color-foco` del tema oscuro».",
+    "cita": "v3:src/app/theme-develop.css:296-305, 1485-1494",
+    "razon": "Que el foco sea la tinta por referencia sirve tal cual. El valor depende de la base del portal (pregunta 1). Volver global la regla sin un foco del tema oscuro deja el portal sin foco visible."
+   },
+   {
+    "elemento": "Acentos por servicio: se lleva el mecanismo contextual, los valores no están decididos",
+    "detalle": "v3 tiene TRES acentos oscuros: web `#1D5B8F`, IA+automatización `#1B6B4C` y software `#57429E`. Sobre claro pasan AA como texto (peor 4,65:1). Sobre la invertida dan 2,71, 2,99 y 2,46: sirven como relleno o subrayado, nunca como texto ni como único límite. Todo consume `--color-acento` y lo resuelve un ancestro con `[data-servicio]`. El §5.2 se contradice: la línea 299 dice azul, verde y violeta (tres), y la 301 dice que los valores son los cuatro de CLAUDE.md (cian, esmeralda, ámbar, violeta). Además, «páginas internas» en el doc quiere decir las landings de servicio, no el portal.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:283, 297-301; v3:src/app/theme-develop.css:306-344, 1326-1359; CLAUDE.md:100-103",
+    "razon": "El mecanismo es lo más transferible: tres reglas en vez de tres copias del sistema. El set y los valores dependen de la base clara u oscura (preguntas 1, 3 y 4)."
+   },
+   {
+    "elemento": "Un solo acento por cuadro",
+    "detalle": "«Lo que no puede haber son dos acentos en el mismo cuadro». Servicios pinta un servicio por vez.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1531",
+    "razon": "En el home el contexto es la página. En el portal un cliente puede tener varios servicios en la misma vista (resumen, vitrina), así que hay que decidir a qué se ata el acento (pregunta 4)."
+   },
+   {
+    "elemento": "Familias tipográficas",
+    "detalle": "Chivo para títulos y cuerpo, Chivo Mono en `--font-codigo` y Archivo en `--font-display`, auto-hospedadas con next/font/local en el envoltorio `[data-v3]`. §7.52: declarados en `:root`, los tokens resolvían vacíos y `/v3` pintaba con la Chivo de Google. La causa es que una custom property se resuelve donde se declara. Se arregló re-declarándolos en `[data-v3]`. Ningún instrumento afirma la familia computada. Archivo es un subset de sólo mayúsculas. El docblock de v3/layout.tsx todavía repite la premisa falsa.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1920-1926, 1930; v3:src/app/theme-develop.css:419-421, 443, 1506-1528, 1570-1575; v3:src/app/v3/layout.tsx:132-142",
+    "razon": "Si el portal adopta estas familias, las variables de next/font tienen que existir en un ancestro del portal o en `:root`. Si no, hereda la Chivo de Google sin que nada lo marque. Archivo no sirve para texto en mayúsculas y minúsculas."
+   },
+   {
+    "elemento": "Escala tipográfica fluida",
+    "detalle": "Los niveles son `clamp()` entre `--fluido-piso` 375 y `--fluido-techo` 1440. Deuda sin ejecutar: el techo se evalúa en 1920 pero la caja se congela en 1984 (+1,26 px). Además, el piso de un `clamp()` no manda donde la recta pasa por arriba.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1942-1946, 2159-2168; v3:src/app/theme-develop.css:1215, 1327-1328",
+    "razon": "Un portal de datos pide una escala densa y predecible. Conviene tomar los niveles chicos (micro, cuerpo) y dejar los display y su deuda (pregunta 6)."
+   },
+   {
+    "elemento": "Vocabulario cerrado de curvas",
+    "detalle": "Hay seis curvas con nombre en `curvas.ts` (principal, entrada, simetrica, salida-fuerte, lineal, simetrica-suave) y se importan, no se copian. El gesto y el viaje son dos curvas a propósito: `expoOut` arranca a velocidad máxima y `power1.inOut` arranca en cero.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:2265-2284; v3:src/app/v3/_lib/motion/curvas.ts:50-57, 151-157",
+    "razon": "Se lleva el principio: vocabulario nombrado, importado y medido. Los valores chocan con el ease y los springs de CLAUDE.md:80-91 (pregunta 7)."
+   },
+   {
+    "elemento": "Compuerta de motion: el contenido se escribe una vez",
+    "detalle": "`_contrato/coreografia.tsx` implementa las primitivas quietas y `coreografia-animada.tsx`, que es perezoso, las instala por contexto. Instala en vez de envolver, para no dejar la página en blanco mientras llega el chunk.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:921-933",
+    "razon": "El patrón sirve si el portal quiere animación sólo en escritorio sin escribir dos árboles. La coreografía de scroll no aplica."
+   },
+   {
+    "elemento": "Colores de estado",
+    "detalle": "El sistema es monocromo con una única excepción funcional: `--color-error` #E5484D y `--color-error-texto` #FF9592, siempre sobre tarjeta oscura. El semáforo (#FF5F57, #FEBC2E, #28C840) no es paleta del sistema: no tiene par de contraste y no se usa en texto.",
+    "cita": "v3:src/app/theme-develop.css:288-294, 346-358; v3:docs/rediseno/DIRECCION-ESCENA.md:234",
+    "razon": "El portal necesita estados (tickets, pipeline, éxito, advertencia, info) que el home no tiene. Hay que derivarlos con el mismo método, por razón de contraste en cada superficie, y no sacarlos del semáforo."
+   }
+  ],
+  "no_se_lleva": [
+   {
+    "elemento": "Escena 3D, luz y recorrido atado al scroll",
+    "detalle": "Incluye la celosía, el arco de luz con noche, las partículas, el anclaje de tramos a secciones y el apagado por visibilidad.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:313, 695-728, 1158-1199, 1898-1916, 2292-2303",
+    "razon": "El propio doc dice que las internas van «con movimientos y escenas propias». Además, una luz que cambia detrás del texto produjo 10 deudas de AA que hoy ningún instrumento cuenta."
+   },
+   {
+    "elemento": "Paleta de escena y excepción del cielo celeste",
+    "detalle": "Envolvente #3E3E40, niebla #EFEFEC, marcas de piso, partículas y el cielo #C8D5DF.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:226-236",
+    "razon": "Son colores de render, no de interfaz."
+   },
+   {
+    "elemento": "Composición del logo contra el texto y superficies papel-transparente/papel-opaco",
+    "detalle": "Incluye `travelX`, la superposición a 1,11:1, `superficieAngosta` y las anclas de progreso.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1376-1416, 1661-1705, 2111-2128",
+    "razon": "En el portal no hay logo detrás del texto, así que el problema no existe."
+   },
+   {
+    "elemento": "«Nunca un velo ni una superficie intermedia detrás del texto»",
+    "detalle": "Es una regla del home para preservar la escena.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1041",
+    "razon": "En el portal las superficies (tarjetas, glass) son la interfaz misma. Lo que sí se lleva es medir el contraste contra la superficie real."
+   },
+   {
+    "elemento": "Pastilla de navegación flotante y menú de posición variable",
+    "detalle": "Es un envoltorio sticky de alto 0, nace a `100svh − 72px` y cambia de lado según la composición.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:305-309, 935-937, 1305-1309, 1611-1621",
+    "razon": "El portal tiene navegación persistente (sidebar o dock). Un menú que se mueve sirve a un recorrido narrativo, no a una herramienta."
+   },
+   {
+    "elemento": "Cursor propio",
+    "detalle": "`CURSOR_PROPIO_EN_EL_HOME` está en `false`.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:937",
+    "razon": "Está apagado incluso en el home, y en una herramienta no tiene lugar."
+   },
+   {
+    "elemento": "Scroll suave, viaje programático y scroll-padding de la pastilla",
+    "detalle": "`scroll-padding-top` de 72 px derivado de la pastilla, viaje de 4,0 s (4,6 s desde el clic) y una luz al aterrizar que depende del alto de la ventana. El doc se contradice sobre si /v3 tiene Lenis: «construye Lenis» en la línea 1882 contra «no tiene Lenis» en la 2319.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1201-1220, 2237-2256, 2284, 1882, 2319",
+    "razon": "La navegación de un portal es instantánea, y 4,6 s no se puede aceptar ahí."
+   },
+   {
+    "elemento": "Bajadas que se encienden palabra por palabra, túnel de zoom y perspective/preserve-3d",
+    "detalle": "Bajada encendida palabra por palabra, túnel de capturas medido contra heatbureau y salida en z.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:2307-2321",
+    "razon": "Son ornamento de narrativa y tienen costo de render (CLAUDE.md:68-72)."
+   },
+   {
+    "elemento": "Marcadores de contenido inventado leídos en voz alta",
+    "detalle": "`[CIFRA]`, `[CAPTURA]` y similares, deliberadamente con cara de inventados.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1364-1374",
+    "razon": "En el portal los datos son reales: un dato ausente es un estado vacío con su texto (CLAUDE.md:31-34)."
+   }
+  ],
+  "preguntas_abiertas": [
+   {
+    "pregunta": "¿Qué base de color tiene el portal, y tiene dark mode?",
+    "opciones": "(a) Claro, papel #F7F7F5 con tinta #111111, como el home. (b) Oscuro, usando la sección invertida como base (#0E0E0E y #F7F7F5). (c) Los dos, con `prefers-color-scheme` o un toggle.",
+    "trade_off": "(a) Unifica la marca, y el foco y los acentos de v3 andan tal cual. A cambio cambia la piel de todo lo existente: el glass es blanco sobre oscuro, y hay usuarios que pasan horas en el panel. (b) Conserva la continuidad con el zinc-950 actual y el foco se invierte solo (18:1). A cambio, los tres acentos de v3 caen a 2,46–2,99:1 y sólo sirven de relleno. (c) Duplica la verificación de contraste en cada superficie, y hoy no hay instrumento que la haga: Modo pulido sacó la verificación de composición (DE:2286-2290). theme-develop.css no tiene ningún `prefers-color-scheme`.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:226-234; v3:src/app/theme-develop.css:176-179, 1386-1388, 1488-1489; CLAUDE.md:97"
+   },
+   {
+    "pregunta": "¿El CTA primario del portal es siempre tinta?",
+    "opciones": "(a) Tinta, como en el home. (b) Relleno con el acento del servicio. (c) Color semántico según la acción (primaria, destructiva).",
+    "trade_off": "Tinta da jerarquía sin color y AA garantizado, pero en un portal con varias acciones por pantalla cuesta separar primaria, secundaria y destructiva (CLAUDE.md:33 exige confirmación en las destructivas). El acento ayuda a orientarse, pero en base oscura no llega a 3:1 cuando es el único límite. El semántico exige crear tokens de estado que hoy no existen.",
+    "cita": "v3:src/app/v3/_estilos/cta.css:211-213; v3:src/app/theme-develop.css:314-323; CLAUDE.md:33"
+   },
+   {
+    "pregunta": "¿Qué set de acentos usa el portal?",
+    "opciones": "(a) Los tres de v3: azul, verde y violeta oscuros, con IA y automatización fusionadas. (b) Los cuatro de CLAUDE.md: cian, esmeralda, ámbar y violeta. (c) Un juego por cada base.",
+    "trade_off": "Cálculo propio con la fórmula WCAG, no publicado en el repo: sobre papel #F7F7F5, los cuatro de CLAUDE.md dan ≈2,3 (cian), 2,4 (esmeralda), 2,0 (ámbar) y 4,0 (violeta), así que fallan AA como texto en base clara. Sobre zinc-950 #09090B dan ≈8,2, 7,8, 9,3 y 4,7, y pasan. Los tres de v3 son el espejo: pasan en claro y fallan en oscuro. El set depende de la pregunta 1. Además hay que decidir si el portal separa Automatización (ámbar) de IA o adopta la fusión de v3. El doc mismo no lo resuelve: DE:299 contra DE:301.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:299-301; v3:src/app/theme-develop.css:326-328; CLAUDE.md:100-103"
+   },
+   {
+    "pregunta": "¿A qué se ata el acento: a la página, al módulo o al objeto?",
+    "opciones": "(a) Al servicio activo de la ruta, con `[data-servicio]` en un ancestro. (b) Portal neutro, con el acento sólo como etiqueta de servicio en las tarjetas. (c) Un único acento de marca, el azul por defecto.",
+    "trade_off": "(a) Hace del color una estructura, como pide §5.2, pero las vistas de resumen con varios servicios rompen «un acento por cuadro». (b) Respeta esa regla y el monocromo, pero pierde el «mundo por servicio». (c) Es simple, pero borra la estructura que §5.2 quiere.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:297-303, 1531; v3:src/app/theme-develop.css:1329-1340"
+   },
+   {
+    "pregunta": "¿Qué tipografía usa el portal: Chivo, Chivo Mono y Archivo auto-hospedadas, o la Chivo de Google que ya baja en el layout raíz?",
+    "opciones": "(a) Pasar next/font/local al layout raíz, que es el disparador que el propio tema deja escrito. (b) Re-declarar las familias en el envoltorio del portal. (c) Quedarse con Google.",
+    "trade_off": "(a) Hay una sola carga y los tokens resuelven en `:root`, pero toca el layout raíz del sitio vivo. (b) Queda aislado, pero si alguien se olvida repite el defecto de §7.52 sin que nada lo marque. (c) No cuesta trabajo, pero /v3 ya sirve dos familias casi iguales (doble peso). En los tres casos Archivo, que sólo trae mayúsculas, no sirve para tablas ni formularios.",
+    "cita": "v3:src/app/v3/layout.tsx:132-142; v3:src/app/theme-develop.css:1555-1575; v3:docs/rediseno/DIRECCION-ESCENA.md:1920-1930"
+   },
+   {
+    "pregunta": "¿La escala tipográfica del portal es fluida o fija?",
+    "opciones": "(a) Los mismos `clamp()` del home. (b) Niveles fijos y densos, tomando micro, cuerpo y caption.",
+    "trade_off": "La fluida es el mismo sistema que el home, pero en tablas un tamaño que cambia con el viewport mueve columnas y cortes de línea, y además arrastra la deuda del techo (1920 contra 1984). La fija es predecible, pero son dos escalas que mantener, y `cn()` tiene que conocer las dos.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:1942-1946, 1323, 893; v3:src/app/theme-develop.css:550, 1327-1328"
+   },
+   {
+    "pregunta": "¿El motion del portal usa las curvas de v3 o los springs de CLAUDE.md?",
+    "opciones": "(a) Las seis curvas de `curvas.ts`. (b) El ease [0.25,0.46,0.45,0.94] y los springs de CLAUDE.md. (c) Curvas de v3 para transiciones y springs sólo para la UI.",
+    "trade_off": "Unificar da un solo lenguaje de producto, pero las curvas de v3 se calibraron para un recorrido de scroll. Los springs de CLAUDE.md son de UI, y `AnimatePresence mode=\"wait\"` agrega latencia percibida en una herramienta. Cualquiera sea la opción, aplica la política única de reduced-motion.",
+    "cita": "v3:docs/rediseno/DIRECCION-ESCENA.md:2265-2284; v3:src/app/v3/_lib/motion/curvas.ts:50-57; CLAUDE.md:80-96"
+   },
+   {
+    "pregunta": "¿Sobrevive el glassmorphism?",
+    "opciones": "(a) Se mantiene el glass actual. (b) Superficies opacas con tokens. (c) Se adopta el vidrio de v3 (`_estilos/vidrio.css` existe en bead847c; no lo leí).",
+    "trade_off": "El glass sobre zinc oscuro es la identidad actual del portal. Sobre papel claro, `bg-white/[0.04]` no se ve. Con alfa, el contraste de bordes y texto hay que re-derivarlo en cada superficie.",
+    "cita": "CLAUDE.md:97; v3:src/app/theme-develop.css:268-286"
+   }
+  ],
+  "resumen": "Leí el §7 de v3:docs/rediseno/DIRECCION-ESCENA.md completo (líneas 690–2323, ítems 1 a 80), más §4 y §5 como contexto. DE es ese archivo en bead847c. Casi todo el §7 es escena, instrumentos o método. Para el portal sirven: accesibilidad (§7.39, §7.43, §7.46), movimiento reducido (§7.50), `cn()` (§7.19), dónde se resuelven los tokens de familia (§7.52), el piso tipográfico (§7.38 y §7.43), las reglas de breakpoints (§7.64 a §7.71) y el vocabulario de curvas (§7.74).\n\n1. **El sistema v3 no existe en main 57c421bc.** Ni `src/app/theme-develop.css` ni `src/app/v3` están ahí; vive sólo en rediseno/home. En bead847c, `globals.css:12` importa theme-develop.css. Al mergear, los tokens `@theme` llegan a toda ruta, portal incluido; las reglas de foco y de familias siguen acotadas a `[data-v3]`.\n\n2. **El tema ya anticipó el portal.** Acota el anillo de foco a `[data-v3]` porque el #111111 sobre el zinc-950 del portal da 1,0611:1, y deja escrito un disparador para volverlo global (theme-develop.css:1485-1494).\n\n3. **Los acentos están contradichos en tres lugares:**\n   - DE:299 dice tres colores (azul, verde, violeta).\n   - DE:301 dice que los valores son los cuatro de CLAUDE.md:100-103.\n   - theme-develop.css:326-328 implementa tres oscuros (#1D5B8F, #1B6B4C, #57429E): pasan AA sobre claro y fallan sobre oscuro.\n\n   Según mi cálculo (no está publicado en el repo), los de CLAUDE.md hacen lo contrario: fallan sobre papel (≈2,0 a 4,0:1) y pasan sobre zinc-950.\n\n4. **«Páginas internas» en el doc quiere decir las landings de servicio, no el portal** (DE:313; theme-develop.css:1329-1331).\n\nDecisiones del home que no deben asumirse para el portal, y que van como preguntas: base clara u oscura y dark mode, CTA siempre tinta, qué set de acentos y a qué se atan, fuentes y escala fluida, vocabulario de motion y glass.\n\nFuera del alcance pedido pero notado: el docblock de v3:src/app/v3/layout.tsx:136-138 todavía afirma la premisa falsa que §7.52 corrigió."
+ },
+ "tokens-motion": {
+  "tokens": [
+   {
+    "grupo": "color",
+    "nombre": "--color-fondo",
+    "valor": "#F7F7F5",
+    "rol": "el papel, fondo base claro; 17,60:1 con la tinta",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:179"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-superficie-1",
+    "valor": "#F1F1EF",
+    "rol": "panel elevado sobre el papel (1,0543:1)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:193"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-superficie-2",
+    "valor": "#E8E8E6",
+    "rol": "tarjeta sobre panel (1,1438:1)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:194"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-superficie-3",
+    "valor": "#DBDBD9",
+    "rol": "estado activo / hover (1,2925:1)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:195"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-superficie-translucida",
+    "valor": "rgba(247, 247, 245, 0.60)",
+    "rol": "papel translúcido para pastillas con --blur-panel; alfa 0,6 = --opacity-casi, AA en los dos temas",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:237"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-tinta",
+    "valor": "#111111",
+    "rol": "texto primario; peor caso 13,62:1",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:253"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-tinta-media",
+    "valor": "#535353",
+    "rol": "texto secundario (peor 5,55:1)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:254"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-tinta-tenue",
+    "valor": "#5A5A5A",
+    "rol": "texto terciario (peor 4,97:1); a 1,1153:1 de la media, casi indistinguibles",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:245-255"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-borde",
+    "valor": "rgba(17, 17, 17, 0.10)",
+    "rol": "separador decorativo, sin mínimo",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:285"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-borde-fuerte",
+    "valor": "rgba(17, 17, 17, 0.47)",
+    "rol": "límite de componente, peor caso 3,01:1",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:286"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-error",
+    "valor": "#E5484D",
+    "rol": "borde de la tarjeta de error; único color fuera del monocromo; pensado sobre fondo de tinta",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:288-293"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-error-texto",
+    "valor": "#FF9592",
+    "rol": "título del error sobre tinta (8,96:1); NO sirve como texto sobre papel",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:294"
+   },
+   {
+    "grupo": "foco",
+    "nombre": "--color-foco",
+    "valor": "var(--color-tinta)",
+    "rol": "color del anillo; se resuelve en :root a #111 y NO se invierte en la sección invertida (contra lo que dice el comentario)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:305; v3:src/app/v3/_estilos/foco.css:117-120"
+   },
+   {
+    "grupo": "color-acento",
+    "nombre": "--color-acento-web",
+    "valor": "#1D5B8F",
+    "rol": "azul, Desarrollo web; 6,65:1 sobre papel",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:326"
+   },
+   {
+    "grupo": "color-acento",
+    "nombre": "--color-acento-ia-automatizacion",
+    "valor": "#1B6B4C",
+    "rol": "verde, IA y Automatización (fusionadas, ámbar muerto); 6,02:1",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:51-52,327"
+   },
+   {
+    "grupo": "color-acento",
+    "nombre": "--color-acento-software",
+    "valor": "#57429E",
+    "rol": "violeta, Software a medida; 7,31:1",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:328"
+   },
+   {
+    "grupo": "color-acento",
+    "nombre": "--color-acento",
+    "valor": "var(--color-acento-web)",
+    "rol": "alias contextual que consume todo el sistema; defecto azul (home)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:330-344"
+   },
+   {
+    "grupo": "color-acento",
+    "nombre": "[data-servicio=web|ia-automatizacion|software] --color-acento",
+    "valor": "var(--color-acento-<servicio>)",
+    "rol": "override por atributo en un ancestro; retiñe utilidades bg-acento/text-acento sin clases condicionales (depende de @theme static, nunca inline)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1350-1360,80-89"
+   },
+   {
+    "grupo": "color",
+    "nombre": "--color-semaforo-rojo / -amarillo / -verde",
+    "valor": "#FF5F57 / #FEBC2E / #28C840",
+    "rol": "círculos de ventana macOS del CTA de Trabajos; fuera del sistema de color",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:346-358"
+   },
+   {
+    "grupo": "color-invertida",
+    "nombre": "[data-seccion=invertida] --color-fondo",
+    "valor": "#0E0E0E",
+    "rol": "banda oscura",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1387"
+   },
+   {
+    "grupo": "color-invertida",
+    "nombre": "[data-seccion=invertida] --color-tinta",
+    "valor": "#F7F7F5",
+    "rol": "el papel dado vuelta, 18,00:1",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1388"
+   },
+   {
+    "grupo": "color-invertida",
+    "nombre": "[data-seccion=invertida] --color-tinta-media",
+    "valor": "#9E9E9E",
+    "rol": "secundario invertido 7,21:1",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1421"
+   },
+   {
+    "grupo": "color-invertida",
+    "nombre": "[data-seccion=invertida] --color-tinta-tenue",
+    "valor": "#959595",
+    "rol": "terciario invertido 6,44:1",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1422"
+   },
+   {
+    "grupo": "color-invertida",
+    "nombre": "[data-seccion=invertida] --color-borde / --color-borde-fuerte",
+    "valor": "rgba(247,247,245,0.10) / rgba(247,247,245,0.47)",
+    "rol": "bordes invertidos; fuerte 4,62:1",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1424-1425"
+   },
+   {
+    "grupo": "color-invertida",
+    "nombre": "[data-seccion=invertida] --color-superficie-translucida",
+    "valor": "rgba(14, 14, 14, 0.60)",
+    "rol": "translúcida oscura 4,97:1",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1432"
+   },
+   {
+    "grupo": "color-invertida",
+    "nombre": "(no existen) superficies 1/2/3 oscuras y acentos claros",
+    "valor": "—",
+    "rol": "[pendiente] con disparador escrito: derivar con razones 1,0533·1,1483·1,2957 desde #0E0E0E; acentos claros con Y ≥ 0,19476",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1435-1464"
+   },
+   {
+    "grupo": "tipografia-familia",
+    "nombre": "--font-titulo",
+    "valor": "var(--font-v3-chivo), system-ui, sans-serif",
+    "rol": "títulos (Chivo)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:419"
+   },
+   {
+    "grupo": "tipografia-familia",
+    "nombre": "--font-cuerpo",
+    "valor": "var(--font-v3-chivo), system-ui, sans-serif",
+    "rol": "cuerpo (Chivo)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:420"
+   },
+   {
+    "grupo": "tipografia-familia",
+    "nombre": "--font-codigo",
+    "valor": "var(--font-v3-chivo-mono), ui-monospace, monospace",
+    "rol": "monoespaciada (Chivo Mono); renombrada para no pisar --font-mono del sitio",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:396-405,421"
+   },
+   {
+    "grupo": "tipografia-familia",
+    "nombre": "--font-display",
+    "valor": "var(--font-v3-archivo), system-ui, sans-serif",
+    "rol": "Archivo wdth 62 SOLO MAYÚSCULAS (68 puntos de código) para el titular del hero",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:423-443"
+   },
+   {
+    "grupo": "tipografia-peso",
+    "nombre": "--font-weight-liviano",
+    "valor": "300",
+    "rol": "Light (línea 2 del hero)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:460"
+   },
+   {
+    "grupo": "tipografia-peso",
+    "nombre": "--font-weight-normal",
+    "valor": "400",
+    "rol": "Regular",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:461"
+   },
+   {
+    "grupo": "tipografia-peso",
+    "nombre": "--font-weight-medio",
+    "valor": "500",
+    "rol": "Medium",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:462"
+   },
+   {
+    "grupo": "tipografia-peso",
+    "nombre": "--font-weight-semi",
+    "valor": "600",
+    "rol": "SemiBold (rótulo del CTA)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:463"
+   },
+   {
+    "grupo": "tipografia-peso",
+    "nombre": "--font-weight-fuerte",
+    "valor": "700",
+    "rol": "Bold",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:464"
+   },
+   {
+    "grupo": "tipografia-escala",
+    "nombre": "--text-micro",
+    "valor": "10px",
+    "rol": "etiquetas",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:550"
+   },
+   {
+    "grupo": "tipografia-escala",
+    "nombre": "--text-caption",
+    "valor": "12px",
+    "rol": "metadatos",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:551"
+   },
+   {
+    "grupo": "tipografia-escala",
+    "nombre": "--text-cuerpo",
+    "valor": "15px",
+    "rol": "párrafo",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:552"
+   },
+   {
+    "grupo": "tipografia-escala",
+    "nombre": "--text-base",
+    "valor": "1rem",
+    "rol": "base heredada (restituye el defecto de Tailwind)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:526-553"
+   },
+   {
+    "grupo": "tipografia-escala",
+    "nombre": "--text-titulo-s",
+    "valor": "20px",
+    "rol": "título chico",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:554"
+   },
+   {
+    "grupo": "tipografia-escala",
+    "nombre": "--text-titulo-m",
+    "valor": "32px",
+    "rol": "título medio",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:555"
+   },
+   {
+    "grupo": "tipografia-escala",
+    "nombre": "--text-titulo-l",
+    "valor": "44px",
+    "rol": "título grande",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:556"
+   },
+   {
+    "grupo": "tipografia-escala",
+    "nombre": "--text-titulo-xl",
+    "valor": "56px",
+    "rol": "título extra",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:557"
+   },
+   {
+    "grupo": "tipografia-display-hero",
+    "nombre": "--text-display",
+    "valor": "58px",
+    "rol": "línea 1 del titular del hero: techo derivado de la caja del titular y Archivo",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:559-582"
+   },
+   {
+    "grupo": "tipografia-display-hero",
+    "nombre": "--text-display-xl",
+    "valor": "104px",
+    "rol": "línea 2 del hero; margen de 18,25 px contra el borde seguro del logo 3D",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:584-608"
+   },
+   {
+    "grupo": "tipografia-display-hero",
+    "nombre": "--text-display-xl-angosto",
+    "valor": "55px",
+    "rol": "línea 2 en 320–374 px",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:610-660"
+   },
+   {
+    "grupo": "tipografia-display-hero",
+    "nombre": "--text-display-r1-papel",
+    "valor": "calc(var(--text-fluido-display-xl) * 1.11025)",
+    "rol": "registro 1 igualado al 2 en la banda de papel",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:722"
+   },
+   {
+    "grupo": "tipografia-display-hero",
+    "nombre": "--text-display-r1-papel-angosto",
+    "valor": "calc(var(--text-display-xl-angosto) * 1.11025)",
+    "rol": "ídem, banda angosta",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:723"
+   },
+   {
+    "grupo": "tipografia-display-hero",
+    "nombre": "--text-display-r1-portatil",
+    "valor": "clamp(67px, -1.0625rem + 10.9375vw, 95px)",
+    "rol": "techos medidos por superposición de la tinta con la masa negra del logo (768/1024)",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:725-785"
+   },
+   {
+    "grupo": "tipografia-display-hero",
+    "nombre": "--text-display-xl-columna",
+    "valor": "clamp(67px, -1.32625rem + 8.696vw, 120.6761px)",
+    "rol": "línea 2 atada a su columna",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:787-807"
+   },
+   {
+    "grupo": "tipografia-fluida",
+    "nombre": "--text-fluido-micro",
+    "valor": "clamp(10px, 0.625rem, 10px)",
+    "rol": "micro, ya no fluido (banda cero)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:843-852,908"
+   },
+   {
+    "grupo": "tipografia-fluida",
+    "nombre": "--text-fluido-caption",
+    "valor": "clamp(11px, 0.6655rem + 0.0939vw, 12.4509px)",
+    "rol": "caption fluido 375→1920",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:909"
+   },
+   {
+    "grupo": "tipografia-fluida",
+    "nombre": "--text-fluido-titulo-s",
+    "valor": "clamp(17px, 0.9965rem + 0.2817vw, 21.3526px)",
+    "rol": "titulo-s fluido",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:910"
+   },
+   {
+    "grupo": "tipografia-fluida",
+    "nombre": "--text-fluido-titulo-m",
+    "valor": "clamp(18px, 0.8169rem + 1.3146vw, 38.3107px)",
+    "rol": "titulo-m fluido",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:911"
+   },
+   {
+    "grupo": "tipografia-fluida",
+    "nombre": "--text-fluido-titulo-l",
+    "valor": "clamp(24px, 1.0599rem + 1.8779vw, 53.0141px)",
+    "rol": "titulo-l fluido",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:912"
+   },
+   {
+    "grupo": "tipografia-fluida",
+    "nombre": "--text-fluido-titulo-xl",
+    "valor": "clamp(36px, 1.8099rem + 1.8779vw, 65.0141px)",
+    "rol": "titulo-xl fluido; arriba de 1440 supera al fijo (65 vs 56)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:888-897,913"
+   },
+   {
+    "grupo": "tipografia-display-hero",
+    "nombre": "--text-fluido-display",
+    "valor": "clamp(37px, 1.8504rem + 1.9718vw, 67.4648px)",
+    "rol": "display fluido del hero (la línea 1 se parte entre 1025 y ~1426)",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:915-940"
+   },
+   {
+    "grupo": "tipografia-display-hero",
+    "nombre": "--text-fluido-display-xl",
+    "valor": "clamp(67px, 3.3732rem + 3.4742vw, 120.6761px)",
+    "rol": "display-xl fluido del hero",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:942-963"
+   },
+   {
+    "grupo": "interlineado",
+    "nombre": "--leading-texto",
+    "valor": "1.6",
+    "rol": "texto corrido",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:972"
+   },
+   {
+    "grupo": "interlineado",
+    "nombre": "--leading-titulo",
+    "valor": "1.09",
+    "rol": "títulos",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:973"
+   },
+   {
+    "grupo": "interlineado",
+    "nombre": "--leading-micro",
+    "valor": "1.1",
+    "rol": "etiquetas",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:974"
+   },
+   {
+    "grupo": "interlineado",
+    "nombre": "--leading-cartel",
+    "valor": "0.9",
+    "rol": "póster del CTA de Trabajos; nunca en texto corrido",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:975-980"
+   },
+   {
+    "grupo": "interletrado",
+    "nombre": "--tracking-titulo",
+    "valor": "-0.03em",
+    "rol": "títulos",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:988"
+   },
+   {
+    "grupo": "interletrado",
+    "nombre": "--tracking-display",
+    "valor": "-0.02em",
+    "rol": "display (Archivo)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:989"
+   },
+   {
+    "grupo": "interletrado",
+    "nombre": "--tracking-texto",
+    "valor": "-0.01em",
+    "rol": "el más usado",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:990"
+   },
+   {
+    "grupo": "interletrado",
+    "nombre": "--tracking-micro",
+    "valor": "0.025em",
+    "rol": "único positivo; etiquetas en mayúsculas",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:991"
+   },
+   {
+    "grupo": "espaciado",
+    "nombre": "--spacing-1",
+    "valor": "0.25rem",
+    "rol": "4 px, unidad base; pisa la fórmula de p-1 etc. en TODO el sitio (mismo px con raíz 16)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1007-1026"
+   },
+   {
+    "grupo": "espaciado",
+    "nombre": "--spacing-2",
+    "valor": "0.5rem",
+    "rol": "8 px",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1027"
+   },
+   {
+    "grupo": "espaciado",
+    "nombre": "--spacing-3",
+    "valor": "0.75rem",
+    "rol": "12 px",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1028"
+   },
+   {
+    "grupo": "espaciado",
+    "nombre": "--spacing-4",
+    "valor": "1rem",
+    "rol": "16 px",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1029"
+   },
+   {
+    "grupo": "espaciado",
+    "nombre": "--spacing-5",
+    "valor": "1.25rem",
+    "rol": "20 px",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1030"
+   },
+   {
+    "grupo": "espaciado",
+    "nombre": "--spacing-6",
+    "valor": "1.5rem",
+    "rol": "24 px",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1031"
+   },
+   {
+    "grupo": "espaciado",
+    "nombre": "--spacing-8",
+    "valor": "2rem",
+    "rol": "32 px",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1032"
+   },
+   {
+    "grupo": "espaciado",
+    "nombre": "--spacing-12",
+    "valor": "3rem",
+    "rol": "48 px",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1033"
+   },
+   {
+    "grupo": "espaciado",
+    "nombre": "--spacing-20",
+    "valor": "5rem",
+    "rol": "80 px",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1034"
+   },
+   {
+    "grupo": "radio",
+    "nombre": "--radius-sutil",
+    "valor": "4px",
+    "rol": "radio mínimo",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1040"
+   },
+   {
+    "grupo": "radio",
+    "nombre": "--radius-medio",
+    "valor": "8px",
+    "rol": "tarjetas, tarjeta de resultado",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1041"
+   },
+   {
+    "grupo": "radio",
+    "nombre": "--radius-fuerte",
+    "valor": "10px",
+    "rol": "el mayor no-pastilla",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1042"
+   },
+   {
+    "grupo": "radio",
+    "nombre": "--radius-pastilla-s",
+    "valor": "80px",
+    "rol": "píldoras (campos y chips del contacto)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1043"
+   },
+   {
+    "grupo": "radio",
+    "nombre": "--radius-pastilla-l",
+    "valor": "100px",
+    "rol": "pastilla flotante, salto al contenido",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1044"
+   },
+   {
+    "grupo": "radio",
+    "nombre": "--radius-circulo",
+    "valor": "50%",
+    "rol": "círculo",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1045"
+   },
+   {
+    "grupo": "sombra",
+    "nombre": "--shadow-flotante",
+    "valor": "0 0 16px -4px rgba(0, 0, 0, 0.45)",
+    "rol": "única sombra, uso puntual; alfa medida sobre base oscura, [pendiente] revisar sobre papel",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1047-1060"
+   },
+   {
+    "grupo": "desenfoque",
+    "nombre": "--blur-panel",
+    "valor": "12px",
+    "rol": "backdrop-filter de la pastilla sobre la superficie translúcida",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1066"
+   },
+   {
+    "grupo": "curva",
+    "nombre": "--ease-principal",
+    "valor": "cubic-bezier(0.77, 0, 0.175, 1)",
+    "rol": "curva CSS 1 (subrayado del CTA, hoja del contacto)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1068-1076"
+   },
+   {
+    "grupo": "curva",
+    "nombre": "--ease-salida",
+    "valor": "cubic-bezier(0.64, 0.1, 0, 1)",
+    "rol": "curva CSS 2 (intercambio del rollover, ventana del CTA)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1077"
+   },
+   {
+    "grupo": "breakpoint",
+    "nombre": "--breakpoint-angosto",
+    "valor": "375px",
+    "rol": "sólo hacia abajo; consumidor único: la línea 2 del hero a 55 px",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:1091-1119"
+   },
+   {
+    "grupo": "breakpoint",
+    "nombre": "--breakpoint-chico",
+    "valor": "390px",
+    "rol": "dónde deja de haber composición limpia sobre la escena (tinta sobre masa del logo 43,76 % → 2,71 %)",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:1121-1166"
+   },
+   {
+    "grupo": "breakpoint",
+    "nombre": "--breakpoint-movil",
+    "valor": "426px",
+    "rol": "max-movil: ≤ 425 (reparto del titular)",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:1168-1188"
+   },
+   {
+    "grupo": "breakpoint",
+    "nombre": "--breakpoint-hasta-tablet",
+    "valor": "769px",
+    "rol": "max-hasta-tablet: ≤ 768",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:1189"
+   },
+   {
+    "grupo": "breakpoint",
+    "nombre": "--breakpoint-tablet",
+    "valor": "768px",
+    "rol": "corte de grilla",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1191"
+   },
+   {
+    "grupo": "breakpoint",
+    "nombre": "--breakpoint-medio",
+    "valor": "860px",
+    "rol": "corte intermedio",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1192"
+   },
+   {
+    "grupo": "breakpoint",
+    "nombre": "--breakpoint-escritorio",
+    "valor": "1024px",
+    "rol": "composición de escritorio (la compuerta de montaje es 1025, aparte)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1079-1088,1193"
+   },
+   {
+    "grupo": "opacidad",
+    "nombre": "--opacity-tenue",
+    "valor": "0.3",
+    "rol": "opacidad baja",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1209"
+   },
+   {
+    "grupo": "opacidad",
+    "nombre": "--opacity-media",
+    "valor": "0.4",
+    "rol": "opacidad media",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1210"
+   },
+   {
+    "grupo": "opacidad",
+    "nombre": "--opacity-alta",
+    "valor": "0.5",
+    "rol": "control deshabilitado",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1211; v3:src/app/v3/_estilos/cta.css:362-365"
+   },
+   {
+    "grupo": "opacidad",
+    "nombre": "--opacity-casi",
+    "valor": "0.6",
+    "rol": "estado :active; alfa de la translúcida",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1212; v3:src/app/v3/_estilos/foco.css:142-147"
+   },
+   {
+    "grupo": "contenedor",
+    "nombre": "--container-dominante",
+    "valor": "100%",
+    "rol": "envoltorio a sangre",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1214"
+   },
+   {
+    "grupo": "contenedor",
+    "nombre": "--container-tope",
+    "valor": "1920px",
+    "rol": "tope del contenido (max-w-tope)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1215"
+   },
+   {
+    "grupo": "duracion",
+    "nombre": "--duracion-rapida",
+    "valor": "300ms",
+    "rol": "sin utilidad (namespace muerto, se usa con var()); transiciones narrativas, no de feedback",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1229-1235,1256-1258"
+   },
+   {
+    "grupo": "duracion",
+    "nombre": "--duracion-media",
+    "valor": "400ms",
+    "rol": "ídem",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1259"
+   },
+   {
+    "grupo": "duracion",
+    "nombre": "--duracion-lenta",
+    "valor": "500ms",
+    "rol": "ídem",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1260"
+   },
+   {
+    "grupo": "duracion",
+    "nombre": "--duracion-muy-lenta",
+    "valor": "700ms",
+    "rol": "subrayado del CTA; base del intercambio de 1,3 s",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1261; v3:src/app/v3/_estilos/cta.css:71-75"
+   },
+   {
+    "grupo": "z-index",
+    "nombre": "--z-base",
+    "valor": "0",
+    "rol": "sin utilidad (--z-* no es namespace; renombre propuesto --z-index-*)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1236-1240,1266"
+   },
+   {
+    "grupo": "z-index",
+    "nombre": "--z-elevado",
+    "valor": "1",
+    "rol": "elevado",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1267"
+   },
+   {
+    "grupo": "z-index",
+    "nombre": "--z-sticky",
+    "valor": "10",
+    "rol": "sticky",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1268"
+   },
+   {
+    "grupo": "z-index",
+    "nombre": "--z-cabecera",
+    "valor": "100",
+    "rol": "cabecera, salto al contenido",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1269"
+   },
+   {
+    "grupo": "z-index",
+    "nombre": "--z-overlay",
+    "valor": "10000",
+    "rol": "overlay; techo deliberado (no INT32_MAX)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1263-1270"
+   },
+   {
+    "grupo": "borde",
+    "nombre": "--border-hairline",
+    "valor": "1px",
+    "rol": "grosor binario (0 o este); sin utilidad",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1273"
+   },
+   {
+    "grupo": "mezcla",
+    "nombre": "--blend-inversion",
+    "valor": "difference",
+    "rol": "texto sobre el canvas de la escena; sólo desktop",
+    "depende_de_escena": true,
+    "cita": "v3:src/app/theme-develop.css:1275-1278"
+   },
+   {
+    "grupo": "foco",
+    "nombre": "--foco-grosor",
+    "valor": "2px",
+    "rol": "grosor del anillo",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1282"
+   },
+   {
+    "grupo": "foco",
+    "nombre": "--foco-desplazamiento",
+    "valor": "2px",
+    "rol": "outline-offset del anillo",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1283"
+   },
+   {
+    "grupo": "grilla",
+    "nombre": "--columna-lateral",
+    "valor": "140px",
+    "rol": "columna de la marca de sección; sostiene la composición del home contra el logo (B11)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1288; v3:src/app/v3/_secciones/_contrato/Rotulo.tsx:34-41"
+   },
+   {
+    "grupo": "grilla",
+    "nombre": "--pad-lateral-compacto",
+    "valor": "32px",
+    "rol": "padding lateral del Envoltorio",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1289"
+   },
+   {
+    "grupo": "grilla",
+    "nombre": "--grilla-canal-compacto",
+    "valor": "12px",
+    "rol": "gap de grilla < escritorio",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1290"
+   },
+   {
+    "grupo": "grilla",
+    "nombre": "--grilla-canal-amplio",
+    "valor": "16px",
+    "rol": "gap de grilla ≥ escritorio",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1291"
+   },
+   {
+    "grupo": "banda-fluida",
+    "nombre": "--fluido-piso",
+    "valor": "375px",
+    "rol": "ancho donde los niveles tocan su piso",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1327"
+   },
+   {
+    "grupo": "banda-fluida",
+    "nombre": "--fluido-techo",
+    "valor": "1440px",
+    "rol": "ancho donde cada nivel vale su token fijo (la recta sigue hasta 1920)",
+    "depende_de_escena": false,
+    "cita": "v3:src/app/theme-develop.css:1315-1328"
+   }
+  ],
+  "tipografia": "Familias: Chivo (títulos y cuerpo) y Chivo Mono (código), de Omnibus-Type, OFL 1.1, variables con un solo eje wght 100–900, métricas idénticas entre sí (x-height 511, cap 686) (v3:src/app/theme-develop.css:360-394,419-421). Cuarta familia Archivo wdth 62 sólo para el display del hero y sólo mayúsculas (68 puntos de código: cualquier minúscula cae al fallback) (v3:src/app/theme-develop.css:423-443); la itálica de Chivo también es un subset de mayúsculas, así que un `italic` con minúsculas cae al fallback (v3:src/app/v3/layout.tsx:234-237). Pesos: 300/400/500/600/700 como font-liviano…font-fuerte (v3:src/app/theme-develop.css:460-464). Escala fija de ocho niveles: micro 10, caption 12, cuerpo 15, base 1rem, titulo-s 20, titulo-m 32, titulo-l 44, titulo-xl 56 (v3:src/app/theme-develop.css:550-557), más seis fluidas con piso a 375, ancla a 1440 y techo a 1920 (v3:src/app/theme-develop.css:908-913). Ojo: arriba de 1440 el fluido supera al fijo (titulo-xl 65 contra 56) (v3:src/app/theme-develop.css:888-897). micro ya no es fluido (v3:src/app/theme-develop.css:843-852). Los niveles display/display-xl y sus variantes son del titular del hero, medidos contra su caja y el logo: no se transfieren. Interlineado: texto 1.6, titulo 1.09, micro 1.1, cartel 0.9 (sólo póster) (v3:src/app/theme-develop.css:972-980). Interletrado: titulo −0.03em, display −0.02em, texto −0.01em, micro +0.025em, el único positivo (v3:src/app/theme-develop.css:988-991). Cada nivel tiene interlineado e interletrado fijos en NIVELES_TIPOGRAFICOS (v3:src/app/v3/_lib/tipografia.ts:150-244), y lo consumen los componentes Titular y Textos (v3:src/app/v3/_componentes/tipografia/Titular.tsx:131-164; v3:src/app/v3/_componentes/tipografia/Textos.tsx:54-149). Requisito para transferirlo: el `cn()` de main no conoce estas clases, y `cn('text-fluido-micro','text-tinta-media')` se come el tamaño. En la rama, la lista de tamaños v3 está agregada a twMerge (v3:src/lib/utils.ts:40-87); en main no (src/lib/utils.ts:20-41). Queda abierta la compensación de cap height (720/686 = 1,0496) para los niveles de display (v3:src/app/theme-develop.css:497-523). Preguntas para el dashboard: (a) ¿tipografía fluida o fija? Fluida es coherente con el home; fija da densidad estable en tablas. Titular usa `fluido=true` por defecto (v3:src/app/v3/_componentes/tipografia/Titular.tsx:135). (b) ¿Cuerpo de 15 px o 14 px (text-sm) para tablas densas? 15 px es el token medido; 14 px obliga a agregar un nivel.",
+  "foco": "Tokens: --color-foco = var(--color-tinta), --foco-grosor 2px y --foco-desplazamiento 2px (v3:src/app/theme-develop.css:305,1282-1283). La regla es `[data-v3] :focus-visible { outline: var(--foco-grosor) solid var(--color-foco); outline-offset: var(--foco-desplazamiento) }`, sin @layer (v3:src/app/theme-develop.css:1500-1504). Está acotada a /v3 a propósito: el anillo #111111 sobre el zinc-950 del portal da 1,0611:1 (v3:src/app/theme-develop.css:1484-1494). DEFECTO DOCUMENTADO: el tema y el Panel dicen que el anillo se invierte solo en la sección invertida (v3:src/app/theme-develop.css:296-305,1374-1377; v3:src/app/v3/_componentes/Panel.tsx:110-112). Es falso. --color-foco se resuelve una vez en :root a #111 y se hereda ya resuelto; medido: 1,0:1 sobre la noche de Trabajos y 1,16:1 dentro de `difference` (v3:src/app/v3/_estilos/foco.css:117-120). Es el mismo mecanismo que dejaba vacías las familias (v3:src/app/theme-develop.css:1517-1523). El arreglo vigente es un anillo de dos tonos, técnica C40: outline con var(--color-tinta) resuelto en el elemento, más un box-shadow de papel de desplazamiento + 2×grosor (v3:src/app/v3/_estilos/foco.css:122-132). Se ve sobre claro, sobre oscuro y sobre mezcla, así que es la pieza que más transfiere al dashboard, sea claro u oscuro. Piezas reutilizables: (1) estado forzado `data-forzado~=foco` para galerías y capturas (v3:src/app/v3/_estilos/foco.css:28-31); (2) salto al contenido con píldora, sombra flotante y z-cabecera (v3:src/app/v3/_estilos/foco.css:90-112; v3:src/app/v3/_chrome/SaltarAlContenido.tsx:80-90); (3) chip con checkbox sr-only que pinta el anillo con :has(:focus-visible) (v3:src/app/v3/_estilos/foco.css:136-140); (4) campo cuyo foco dibuja la caja (`data-foco=pastilla`); el foco es borde liso y el error borde punteado, para que no se confundan (v3:src/app/v3/_chrome/contacto/CamposDelContacto.tsx:56,81-82); (5) :active a opacity-casi sin transición (v3:src/app/v3/_estilos/foco.css:142-147); (6) el rollover del CTA se dispara también con :focus-visible (v3:src/app/v3/_estilos/cta.css:241-249); (7) un invariante prohíbe outline:none en todo el árbol (v3:src/app/v3/_estilos/foco.css:22-25). Para sacar el alcance [data-v3] en el portal hay dos caminos: declarar el foco donde cambia la tinta, o usar directamente la regla de dos tonos.",
+  "acentos_servicio": "El v3 tiene TRES acentos: web #1D5B8F azul, ia-automatizacion #1B6B4C verde, software #57429E violeta. El ámbar está muerto: Automatización se pliega sobre IA (v3:src/app/theme-develop.css:51-52,326-328). Se consumen siempre por el alias --color-acento, con override por [data-servicio] en un ancestro (v3:src/app/theme-develop.css:344,1350-1360). El contrato de uso es relleno bg-acento, texto text-acento sólo sobre claro, y borde decorativo que nunca es el único límite (v3:src/app/v3/_secciones/_contrato/acento.ts:67-89). Reglas: una sola voz por vista y acento plano, sin gradiente, glow ni sombra de color (v3:src/app/theme-develop.css:159-167). Sobre claro los tres pasan AA como texto (peor 4,65:1). Sobre #0E0E0E dan 2,71, 2,99 y 2,46: no llegan ni a 3:1 de componente (v3:src/app/theme-develop.css:307-324,1446-1462). CONFLICTO A RESOLVER POR EL HUMANO: CLAUDE.md fija cuatro acentos (cyan #06b6d4, emerald #10b981, amber #f59e0b, violet #8b5cf6, \"do not change\"). main usa --color-accent #06b6d4 (main src/app/globals.css:301-319). Las demos del panel en el home copian ese look: fondo #080a0c, brillos cyan y emerald, ítem activo cyan, rótulo ámbar (v3:src/app/v3/_panel-vivo/MarcoDelPanel.tsx:11-15,22,65-76,128). Preguntas con trade-off: (1) ¿Paleta v3 o la de CLAUDE.md en el dashboard? La v3 está medida AA sobre claro y es coherente con el home, pero es otra marca que la de CLAUDE.md y que la que el home muestra en sus demos del panel. La de CLAUDE.md se ve más en oscuro, pero sus valores no tienen medición de contraste en el repo (estimo que cyan-500 sobre papel ronda 2,3:1 como texto; no medido). (2) Si el dashboard es oscuro, hay que emitir tres variantes claras con Y ≥ 0,19476 (el disparador [pendiente] escrito) (v3:src/app/theme-develop.css:1460-1464). (3) ¿\"Un acento por vista\" en un dashboard que lista los tres servicios? Opciones: un acento por pantalla (identifica, pero obliga a otra señal no cromática en vistas mixtas) o tinta + acento sólo como relleno de chips.",
+  "motion": [
+   {
+    "patron": "Política única de movimiento reducido: usePrefiereMenosMovimiento (matchMedia, snapshot de servidor true) traducido a MotionConfigContext 'always'/'never'",
+    "archivo": "v3:src/app/v3/_lib/motion/ProveedorDeMovimiento.tsx:111-142",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Montar <ProveedorDeMovimiento> en el layout de /admin, /dashboard y /setter. Así todo motion.* y useReducedMotionConfig leen la misma preferencia. Hay que traer v3:src/app/v3/_lib/usePrefiereMenosMovimiento.ts:32-52. El archivo explica por qué no usa reducedMotion='user' (líneas 68-85)."
+   },
+   {
+    "patron": "politicaDeMovimiento + useMovimientoReducido: con la preferencia no se monta el motor ni se escribe transform",
+    "archivo": "v3:src/app/v3/_lib/motion/reducido.ts:55-126",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Con `const r = useMovimientoReducido()`, en toasts, paneles y cambios de estado: transition r ? {duration:0} (o sólo opacity) : normal. Es el patrón que ya usan TarjetaDeResultado.tsx:94 y volteo.ts:51."
+   },
+   {
+    "patron": "Seis curvas power de GSAP como funciones JS (principal = power1.out, salida-fuerte = quíntica, etc.)",
+    "archivo": "v3:src/app/v3/_lib/motion/curvas.ts:107-120",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "transition={{ ease: CURVAS.principal, duration: 0.2 }} para feedback en JS; en CSS, --ease-salida y --ease-principal. Hay que decidir UNA familia: CLAUDE.md fija [0.25,0.46,0.45,0.94] para reveals y el v3 mezcla tres vocabularios."
+   },
+   {
+    "patron": "Cronograma: duracionAplicada, ventanaDeHijo, transicionEnTiempoReal (delay = i·escalonado)",
+    "archivo": "v3:src/app/v3/_lib/motion/cronograma.ts:65-131",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Escalonado de filas o tarjetas al montar: transition={transicionEnTiempoReal(i, {duracionDeclarada: 0.2, escalonado: 0.03, cantidad: n})} con opacity 0→1 e y 8→0, animando sólo las primeras ~10 filas."
+   },
+   {
+    "patron": "Progreso 0→1 por reloj disparado por useInView (once:false, vuelve a 0 al salir)",
+    "archivo": "v3:src/app/v3/_lib/motion/useProgresoEnTiempoReal.ts:61-91",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Contadores de KPI que entran a pantalla: animate(motionValue, valorFinal, {duration: 0.6}) con useInView({once: true}); con reducido, valor final directo."
+   },
+   {
+    "patron": "Motor de progreso por scroll (scrollY → rango por anclas → useSpring sin rebote)",
+    "archivo": "v3:src/app/v3/_lib/motion/useProgresoDePatron.ts:105-157",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "No aplica: un dashboard no tiene coreografía por scroll."
+   },
+   {
+    "patron": "Anclas de ScrollTrigger → rango en píxeles",
+    "archivo": "v3:src/app/v3/_lib/motion/anclas.ts:1-57,128-239",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "No aplica."
+   },
+   {
+    "patron": "Escenografía de la ruta de demostración /v3/motion (svh por patrón)",
+    "archivo": "v3:src/app/v3/_lib/motion/escenografia.ts:33-62",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "No aplica (geometría del instrumento)."
+   },
+   {
+    "patron": "Fotograma: progreso global → cronograma → tramo → curva → traducción por pieza",
+    "archivo": "v3:src/app/v3/_lib/motion/fotograma.ts:1-158",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "No aplica: motion/react ya compone x, y y opacity."
+   },
+   {
+    "patron": "Traducción de claves GSAP (autoAlpha, yPercent, translateZ) a transform en orden GSAP",
+    "archivo": "v3:src/app/v3/_lib/motion/traduccion.ts:1-46,232-300",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "No aplica. La lección útil: motion ordena scale antes que rotate (líneas 25-29)."
+   },
+   {
+    "patron": "Patrones de tipografía P1 (línea por línea yPercent 120), P2 (bloque yPercent 60, 0,5 s), P3 (encendido palabra por palabra 0,3→1), P6 (cruce x 140→−140)",
+    "archivo": "v3:src/app/v3/_lib/motion/patrones-tipografia.ts:28-118; v3:src/app/v3/_lib/motion/patrones.ts:54-152",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "Sólo como referencia: P2 inspira el reveal de un panel al montar (initial {opacity:0,y:12} → animate {opacity:1,y:0}, 0,3 s, CURVAS.principal), sin atarlo al scroll."
+   },
+   {
+    "patron": "Patrones de piezas P4 (li y 100→0 + opacity, quíntica, escalonado 0,2), P5 (scale 0,8 lineal), P7/P8 (planos 3D translateZ −3000), P9 (grilla scale 0,4)",
+    "archivo": "v3:src/app/v3/_lib/motion/patrones-piezas.ts:24-203",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "P4 en versión corta para listas al montar: y 8, escalonado 0,03, ease CURVAS['salida-fuerte']. P7, P8 y P9 no aplican: son 3D y teatrales."
+   },
+   {
+    "patron": "Familia de texto título, párrafo y etiqueta por línea o palabra con máscara",
+    "archivo": "v3:src/app/v3/_lib/motion/texto.ts:5-60",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "No aplica: no partir texto en un dashboard."
+   },
+   {
+    "patron": "Divisor de líneas con copia sr-only y piezas aria-hidden; medición en dos fases con offsetTop",
+    "archivo": "v3:src/app/v3/_lib/motion/lineas.ts:14-34; v3:src/app/v3/_lib/motion/useLineasMedidas.ts:8-65",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "El efecto no aplica. El contrato de a11y sí, para cualquier texto duplicado visualmente: copia accesible + duplicados aria-hidden."
+   },
+   {
+    "patron": "Época de medición (fuentes, resize con reposo de 150 ms, guardia de visibilityState)",
+    "archivo": "v3:src/app/v3/_lib/motion/epoca.ts:1-121,277-281",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "No aplica como módulo (es infraestructura del motor de scroll). La lección de no medir con la pestaña oculta (innerWidth = 0) es general."
+   },
+   {
+    "patron": "Lente: perspective CSS igual al FOV 35° de la cámara 3D",
+    "archivo": "v3:src/app/v3/_lib/motion/lente.ts:1-117",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "No aplica."
+   },
+   {
+    "patron": "Inercia: skewY de títulos según la velocidad de Lenis, con resorte exacto subamortiguado",
+    "archivo": "v3:src/app/v3/_lib/motion/inercia.ts:6-134",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "No aplica (el portal no usa Lenis)."
+   },
+   {
+    "patron": "Marca del chunk de coreografía",
+    "archivo": "v3:src/app/v3/_lib/motion/marcaMotion.ts:17",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "No aplica."
+   },
+   {
+    "patron": "Invariante cero color, tamaño o duración fuera de tokens",
+    "archivo": "v3:src/app/v3/_lib/motion/__tests__/tokens-de-uso.invariant.ts:1-15",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Reutilizable como lint del dashboard: correr la misma regla sobre components/dashboard y las rutas de los portales."
+   },
+   {
+    "patron": "«Verde por arnés»: afirmar que el camino de producción produce la preferencia, no sólo que el árbol la obedece",
+    "archivo": "v3:src/app/v3/_lib/motion/__tests__/reducido-produccion.tsx:1-15; v3:src/app/v3/_lib/motion/__tests__/reducido.invariant.tsx",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Método reutilizable al montar el proveedor en los portales."
+   },
+   {
+    "patron": "Resto de __tests__ (curvas, epoca, galeria, lineas, motion-bundle, motion-css, s19-lente, traduccion)",
+    "archivo": "v3:src/app/v3/_lib/motion/__tests__/",
+    "atado_a_scroll_o_escena": true,
+    "equivalente_dashboard": "Instrumentos del sistema de scroll; no se transfieren."
+   },
+   {
+    "patron": "[fuera de la carpeta] Rollover del CTA: dos copias (la B aria-hidden), ventana que crece 4 px, subrayado de dos capas, :hover y :focus-visible juntos; intercambio de 1,3 s",
+    "archivo": "v3:src/app/v3/_estilos/cta.css:55-319",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Hover y foco de acciones de texto. Se conserva la estructura (CtaEnlace, segunda copia aria-hidden). El intercambio de 1,3 s (cta.css:71) es narrativo: bajarlo a ≤ 250 ms o quedarse sólo con el subrayado scaleX 0→1 (whileHover/whileFocus en motion o transition CSS con --ease-principal)."
+   },
+   {
+    "patron": "[fuera de la carpeta] DosCopias: el mismo rollover en em para cualquier link",
+    "archivo": "v3:src/app/v3/_componentes/rollover/DosCopias.tsx:1-24; v3:src/app/v3/_estilos/rollover.css:4-50",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Items de navegación lateral, con la misma corrección de duración."
+   },
+   {
+    "patron": "[fuera de la carpeta] Estado apretado: :active a opacity 0,6 sin transición",
+    "archivo": "v3:src/app/v3/_estilos/foco.css:142-147",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Tal cual en CSS, o whileTap={{ opacity: 0.6 }} con transition {duration: 0}."
+   },
+   {
+    "patron": "[fuera de la carpeta] Volteo de estado con AnimatePresence mode='wait' (rotateX −90→0→90; reducido: opacity)",
+    "archivo": "v3:src/app/v3/_lib/formularios/volteo.ts:35-54; v3:src/app/v3/_chrome/contacto/FormularioDeContacto.tsx:274-281",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Transiciones de estado (formulario → enviando → resultado, vacío → datos): AnimatePresence mode='wait' con key por estado y opacity + y 4–8 px en 150–200 ms. El rotateX es teatral para un dashboard."
+   },
+   {
+    "patron": "[fuera de la carpeta] Hoja modal: velo de opacidad 400 ms + hoja en y 700 ms con [0.77,0,0.175,1]; foco atrapado, Esc, foco devuelto en onExitComplete",
+    "archivo": "v3:src/app/v3/_chrome/contacto/FormularioDeContacto.tsx:42-44,65,204-240; v3:src/app/v3/_secciones/trabajos/demos/dialogo.ts:44-76; v3:src/app/v3/_chrome/contacto/apertura.ts:53-60",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Apertura de paneles y drawers con la misma estructura, en ~150 ms (velo) y ~250 ms (panel); reducido duration 0 (FormularioDeContacto.tsx:204-205). La curva hoy es un literal duplicado de --ease-principal."
+   },
+   {
+    "patron": "[fuera de la carpeta] Tarjeta de resultado: texto con opacity + y 8 en 0,4 s [0.25,0.46,0.45,0.94]; barra de vida width 100→0 lineal; foco a Reintentar sólo si seguía en la tarjeta",
+    "archivo": "v3:src/app/v3/_componentes/formularios/TarjetaDeResultado.tsx:62-70,94,109-112",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Toasts (sonner ya está en las dependencias de main): misma entrada, barra de vida para el autocierre, y la regla de no robar el foco."
+   },
+   {
+    "patron": "[fuera de la carpeta] Carga: logo girando en CSS 3D (2,4 s por vuelta), textos que rotan cada 900 ms en role=status, mínimo de 1400 ms",
+    "archivo": "v3:src/app/v3/_componentes/carga/Carga.tsx:34-37,80-96",
+    "atado_a_scroll_o_escena": false,
+    "equivalente_dashboard": "Espera de mutaciones. El mínimo de 1400 ms es largo para un panel (pregunta abierta). Depende de @/components/ui/LogoMark, que no existe en main."
+   }
+  ],
+  "componentes_reutilizables": [
+   {
+    "elemento": "Botón / CTA (Cta y CtaEnlace)",
+    "detalle": "<button> y <a> separados, nunca anidados. Variantes medidas 'linea' y 'bloque'; registro 'cuerpo' (15 px semi) o 'rotulo' (mayúsculas + tracking-micro); deshabilitado con opacity-alta. Es texto con subrayado, sin relleno: no hay botón primario relleno ni destructivo.",
+    "cita": "v3:src/app/v3/_componentes/chrome/Cta.tsx:97-217; v3:src/app/v3/_lib/cta.ts:47-123; v3:src/app/v3/_estilos/cta.css:55-126,362-365",
+    "razon": "Reutilizable como acción secundaria o enlace de acción. Para el dashboard faltan variantes primaria rellena, destructiva y de ícono, y los selectores están atados a [data-v3]. «CTA siempre tinta» (cta.ts:26-27) es decisión del home: queda como pregunta."
+   },
+   {
+    "elemento": "Botón de pastilla de la tarjeta de resultado",
+    "detalle": "«Reintentar»: rounded pastilla-s, border-current, px-5 py-2, hover y focus-visible invierten fondo y tinta. «Enviar otro»: micro subrayado.",
+    "cita": "v3:src/app/v3/_componentes/formularios/TarjetaDeResultado.tsx:97-105",
+    "razon": "Es el único botón con borde y estado invertido del v3, la base más cercana a un botón secundario de dashboard. Hoy es inline, no es componente."
+   },
+   {
+    "elemento": "Tipografía (Titular, Cuerpo, Caption, Micro, TextoBase, EtiquetaDeSeccion)",
+    "detalle": "Prop `como` obligatoria en Titular; niveles con interlineado e interletrado del sistema; prop `fluido`; data-nivel para invariantes.",
+    "cita": "v3:src/app/v3/_componentes/tipografia/Titular.tsx:102-164; v3:src/app/v3/_componentes/tipografia/Textos.tsx:54-149; v3:src/app/v3/_lib/tipografia.ts:150-255",
+    "razon": "Reutilizable directo, siempre que se lleve la configuración de twMerge (v3:src/lib/utils.ts:40-87) y se defina el defecto de `fluido` para el dashboard."
+   },
+   {
+    "elemento": "Layout (Grilla y Envoltorio)",
+    "detalle": "Grilla de 1–5 columnas o 'lateral' (140 px + 1fr), canales de 12/16 px; Envoltorio a sangre con padding de 32 px y contenido topado en 1920.",
+    "cita": "v3:src/app/v3/_componentes/layout/Grilla.tsx:37-85; v3:src/app/v3/_componentes/layout/Envoltorio.tsx:55-79",
+    "razon": "Reutilizable. La columna 'lateral' es composición del home."
+   },
+   {
+    "elemento": "Campos de formulario (Pildora, chips, textarea)",
+    "detalle": "label que envuelve el input; aria-invalid y aria-describedby al error; error con borde punteado y foco liso; maxLength igual al del servidor (MAXIMOS); chips como checkbox sr-only dentro de fieldset con legend sr-only; textarea con field-sizing de 2 a 8 líneas; scrollIntoView del campo con foco en móvil.",
+    "cita": "v3:src/app/v3/_chrome/contacto/CamposDelContacto.tsx:26-187",
+    "razon": "El patrón es muy reutilizable. La forma de pastilla de 80 px y el layout de «preguntas numeradas» son del home (pregunta: densidad en formularios largos del admin)."
+   },
+   {
+    "elemento": "Flujo de formulario con validación",
+    "detalle": "noValidate; validación pura al lado; corrige mientras escribe tras el primer intento; foco al primer inválido; UNA región role=alert (no una por campo); fases formulario/enviando/exito/error; conDuracionMinima.",
+    "cita": "v3:src/app/v3/_chrome/contacto/FormularioDeContacto.tsx:92-191,291,308-312; v3:src/app/v3/_chrome/contacto/enviarContacto.ts:30-48",
+    "razon": "Reutilizable como patrón. El envío es fetch a /api (v3:src/app/v3/_lib/formularios/enviar.ts:27-46); en los portales, CLAUDE.md pide Server Actions con Zod."
+   },
+   {
+    "elemento": "Formulario de un campo (FormularioDeNovedades y NewsletterDelPanel)",
+    "detalle": "Input email + botón de ícono con aria-label; aria-busy y Loader2 con motion-reduce mientras envía; dos regiones vivas (alert y status) que existen desde el principio.",
+    "cita": "v3:src/app/v3/_componentes/chrome/Novedades.tsx:48-104; v3:src/app/v3/_secciones/tu-panel/NewsletterDelPanel.tsx:18-80",
+    "razon": "Reutilizable para búsquedas, invitaciones y filtros rápidos."
+   },
+   {
+    "elemento": "Tarjeta de resultado (éxito o error)",
+    "detalle": "Ocupa el alto del formulario; foco a Reintentar; título en font-display mayúsculas; barra de cuenta para el autocierre.",
+    "cita": "v3:src/app/v3/_componentes/formularios/TarjetaDeResultado.tsx:28-116; v3:src/app/v3/_estilos/resultado.css:14-31",
+    "razon": "Reutilizable si se desacopla de EncajeDelLogo (animación del logo) y de font-display (subset sólo mayúsculas). El rojo de error está pensado sobre tinta, no sobre papel."
+   },
+   {
+    "elemento": "Loader (Carga)",
+    "detalle": "Tres tamaños, tinta o filo, role=status, textos que rotan, reducido = logo quieto.",
+    "cita": "v3:src/app/v3/_componentes/carga/Carga.tsx:11-96",
+    "razon": "Reutilizable. Requiere traer LogoMark (no está en main) y decidir el mínimo de 1400 ms."
+   },
+   {
+    "elemento": "Cifra (KPI)",
+    "detalle": "Valor (Titular) y rótulo (Micro en text-tinta-media, mayúsculas) en un solo <p>; el rótulo no se atenúa con opacidad.",
+    "cita": "v3:src/app/v3/_secciones/numeros/Cifra.tsx:12-71",
+    "razon": "Es la base de una stat tile del dashboard. Hay que sacar el envoltorio Bloque P2 atado al scroll (Cifra.tsx:118-137)."
+   },
+   {
+    "elemento": "Marco de tarjeta flotante",
+    "detalle": "overflow-hidden, rounded radius-fuerte×1,6, sombra de dos capas con la tinta al 25 %, contain-layout y contain-paint.",
+    "cita": "v3:src/app/v3/_secciones/tu-panel/Tarjeta.tsx:58-63",
+    "razon": "La receta del marco es reutilizable. El componente no: se posiciona con TABLA_DEL_CAOS y P2 por scroll. Además la sombra se sale de los tokens (sólo existe --shadow-flotante)."
+   },
+   {
+    "elemento": "Diálogo (useDialogo y VentanaDeDemo)",
+    "detalle": "role=dialog y aria-modal en un portal; foco al primer control; Tab y Shift+Tab dan la vuelta; foco que se escapa vuelve; Esc cierra; html con overflow hidden; selector de focalizables que incluye campos.",
+    "cita": "v3:src/app/v3/_secciones/trabajos/demos/dialogo.ts:30-76; v3:src/app/v3/_secciones/trabajos/demos/VentanaDeDemo.tsx:17-24,196-205",
+    "razon": "El hook es reutilizable para modales y confirmaciones destructivas. La ventana con Genie es del home."
+   },
+   {
+    "elemento": "Salto al contenido",
+    "detalle": "Enlace oculto con clip-path que aparece fijo en :focus-visible, en píldora con sombra flotante.",
+    "cita": "v3:src/app/v3/_chrome/SaltarAlContenido.tsx:78-90; v3:src/app/v3/_estilos/foco.css:90-112",
+    "razon": "Reutilizable directo en los layouts de los portales."
+   },
+   {
+    "elemento": "Contrato de acento",
+    "detalle": "CLASES_DE_ACENTO (relleno, texto, borde), FORMAS_PERMITIDAS_SOBRE_OSCURO = sólo relleno, CLASE_TINTA_SOBRE_ACENTO = text-fondo.",
+    "cita": "v3:src/app/v3/_secciones/_contrato/acento.ts:47-89",
+    "razon": "La regla es reutilizable para badges y chips de servicio. El valor de los acentos está en conflicto con CLAUDE.md."
+   },
+   {
+    "elemento": "Tablas",
+    "detalle": "No hay ninguna tabla en _secciones ni en el sistema v3. La única <table> es la demo TablaDeConversaciones, con zinc-800/zinc-500 y estilo del dashboard viejo.",
+    "cita": "v3:src/app/v3/_panel-vivo/demos/chatbot/TablaDeConversaciones.tsx:41-57",
+    "razon": "No reutilizable como sistema v3: la tabla del dashboard hay que diseñarla con los tokens."
+   },
+   {
+    "elemento": "Marco del panel en el home (_panel-vivo)",
+    "detalle": "Carcasa del dashboard COPIADA, no importada, de components/dashboard/DashboardLayoutClient y SidebarNav: fondo #080a0c, cyan y emerald, rounded 28px.",
+    "cita": "v3:src/app/v3/_panel-vivo/MarcoDelPanel.tsx:11-22,65-76,86-131",
+    "razon": "No es v3. Consecuencia: si F3 cambia el look del dashboard, estas copias quedan desfasadas y el home sigue mostrando el panel viejo."
+   },
+   {
+    "elemento": "Secciones (Panel, Seccion, CabeceraDeSeccion, MarcaDeSeccion)",
+    "detalle": "<section> con aria-labelledby, superficies papel u oscuro, opaca o transparente, pinneo sticky y solape en svh.",
+    "cita": "v3:src/app/v3/_componentes/Panel.tsx:61-145; v3:src/app/v3/_secciones/_contrato/Seccion.tsx:184-239; v3:src/app/v3/_secciones/_contrato/Rotulo.tsx:71-103",
+    "razon": "No reutilizable: atado al registro SECCIONES, al scroll y a la escena (superficies transparentes). Sí transfiere el mecanismo data-seccion=invertida para paneles oscuros."
+   },
+   {
+    "elemento": "Piezas de coreografía (GraficoDeTorta, RodilloDeEstados, CtaQueRota, CtaTransformado, CtaDelFinal)",
+    "detalle": "Torta experimental con números a mano; rodillo de cuatro estados disparado por scroll; CTA cuyo rótulo rota con el servicio; CTA dibujado por la escena WebGL.",
+    "cita": "v3:src/app/v3/_secciones/servicios/GraficoDeTorta.tsx:10-16; v3:src/app/v3/_secciones/servicios/RodilloDeEstados.tsx:16-25; v3:src/app/v3/_secciones/servicios/CtaQueRota.tsx:18-30; v3:src/app/v3/_componentes/ctaDelFinal/CtaDelFinal.tsx:12-17",
+    "razon": "Atados al scroll o a la escena; no reutilizables."
+   },
+   {
+    "elemento": "Lector de tokens en JS",
+    "detalle": "leerToken, pixelesDe (rem → px) y milisegundosDe.",
+    "cita": "v3:src/app/v3/_secciones/tu-panel/tokens.ts:7-26",
+    "razon": "Utilidad mínima reutilizable para animaciones JS que leen duraciones y espacios del tema."
+   }
+  ],
+  "fuentes": "La rama v3 (bead847c) carga las fuentes en dos capas. (1) Layout raíz: next/font/google con Chivo y Chivo_Mono, subset latin, variables --font-chivo-sans y --font-chivo-mono en el <html> (v3:src/app/layout.tsx:2-13,94-104). globals.css las mapea a --font-sans, --font-mono y --font-ds-sans/mono para TODO el sitio, portales incluidos (v3:src/app/globals.css:15-17,374-391). (2) Layout de /v3: next/font/local con los binarios auto-hospedados en v3/_fuentes/. Son tres familias en cuatro archivos: chivo-latin.woff2 (33.252 B) + chivo-italic-latin.woff2 (11.172 B, subset de mayúsculas) en una familia, chivo-mono-latin.woff2 (26.380 B) y archivo-display-latin.woff2 (10.180 B), todas con weight '100 900' y display swap (v3:src/app/v3/layout.tsx:102-142,239-277). Las variables --font-v3-* van en el <div data-v3>, no en <html> (v3:src/app/v3/layout.tsx:132-138,284). Por eso los tokens --font-* del @theme, que se resuelven en :root, quedaban vacíos y /v3 pintaba con la Chivo de Google. El arreglo es redeclarar las cuatro familias en [data-v3] (v3:src/app/theme-develop.css:1506-1575), y el mismo archivo anota que /v3 baja las dos Chivo, la de Google y la local (v3:src/app/v3/layout.tsx:139-142). Los .json de _fuentes son datos de glifos para el texto 3D de la escena (v3:src/app/v3/_lib/escena/ctaDelFinal/armadoDelCta.ts:4-5; v3:src/app/v3/_lib/escena/pie3d/armadas.ts:4) y no hacen falta en el dashboard. Licencia OFL 1.1 verificada (v3:src/app/theme-develop.css:366-377; v3:src/app/v3/_fuentes/OFL-chivo.txt, OFL-archivo.txt). EN MAIN (57c421bc) NO ESTÁ NADA DE ESTO: el layout raíz carga Geist y Geist_Mono por next/font/google (src/app/layout.tsx:2-11) y globals mapea --font-sans/--font-mono/--font-ds-* a Geist (src/app/globals.css:5-6,266-267); no existen src/app/theme-develop.css ni src/app/v3/. Para el dashboard, lo más limpio es servir Chivo y Chivo Mono con next/font/local desde el layout raíz, con las variables en <html>. Eso hace resolver los tokens en :root y convierte el bloque [data-v3] de familias en peso muerto, que es su disparador de borrado escrito (v3:src/app/theme-develop.css:1563-1565). Archivo no hace falta salvo que el dashboard use display en mayúsculas.",
+  "resumen": "Qué transfiere. Casi todo el theme-develop.css de la rama v3 es independiente de la escena: papel, tres superficies, tres tintas, bordes, error, acento contextual, sección invertida, Chivo/Chivo Mono y su escala fija y fluida (micro…titulo-xl), interlineado, interletrado, espaciado de 4 px, radios, opacidades, curvas, duraciones, z y foco. Lo que depende de la escena es todo lo del titular del hero: los niveles display*, los breakpoints angosto, chico, movil y hasta-tablet, y --blend-inversion. No hay tokens de día o noche: la noche vive en la escena WebGL.\n\nYa está cargado en todo el sitio. En la rama, globals.css importa el tema (v3:src/app/globals.css:12), así que los tokens están en :root también para el portal. Los nueve --spacing-* ya pisan la fórmula de p-*/gap-* en admin y dashboard, con el mismo px a raíz 16 (v3:src/app/theme-develop.css:1007-1023).\n\nNada de esto está en main (57c421bc): ni el tema, ni /v3, ni Chivo. main usa Geist.\n\nCorrecciones para F3:\n- El encabezado dice 89 tokens (v3:src/app/theme-develop.css:108-111); en el bloque @theme static hay 111 declaraciones (contadas con awk).\n- El anillo de foco NO se invierte solo, contra lo que afirman el tema y el Panel. El arreglo real es el anillo de dos tonos de foco.css:122-132.\n- Las duraciones están declaradas como «narrativas, no de feedback», de 300 a 700 ms (v3:src/app/theme-develop.css:1256-1257). El rollover del CTA tarda 1,3 s.\n- --duracion-* y --z-* no generan utilidad (v3:src/app/theme-develop.css:1217-1254).\n- El cn() de main no conoce las clases de tamaño v3.\n\nMotion. Los 20 módulos de _lib/motion son, salvo cinco, el motor de coreografía por scroll (P1–P9 de la referencia GSAP) y no sirven en un dashboard. Los cinco que se reutilizan:\n- ProveedorDeMovimiento + reducido: política única de movimiento reducido.\n- curvas.\n- cronograma: escalonado por tiempo.\n- useProgresoEnTiempoReal: entrada por inView.\n\nLas micro-interacciones útiles están fuera de esa carpeta: estado :active, volteo de estado con AnimatePresence mode=wait, hoja modal con trampa de foco y devolución del foco, tarjeta de resultado con barra de vida y Carga.\n\nComponentes. Hay buen material de formularios (a11y sólida), diálogo, salto al contenido, tipografía, grilla, KPI (Cifra) y receta de tarjeta. No hay tablas ni botones rellenos en el sistema v3. Las demos del panel en el home son copias del dashboard viejo, oscuro y cyan, y quedarían desfasadas si F3 cambia el look.\n\nPreguntas para el humano, con trade-off (no se asumen las decisiones del home):\n- (1) Tema del dashboard. Claro papel reusa todo tal cual. Oscuro choca con tres huecos [pendiente]: no hay superficies oscuras, los acentos v3 fallan 3:1 sobre #0E0E0E, y el foco #111 queda en 1,06:1 sobre zinc-950. «Ambos» duplica la verificación AA, aunque main ya tiene data-theme light/dark (src/app/globals.css:308-319).\n- (2) Paleta de acentos. La v3 (3 acentos, medidos) o la de CLAUDE.md (4, «do not change», sin medición en el repo).\n- (3) Primario siempre tinta, o primario con acento. Choca con «una voz por vista» en pantallas multi-servicio.\n- (4) Duraciones de feedback. Agregar 150–200 ms es una decisión de sistema.\n- (5) Radios y sombras. El v3 topa en 10 px más pastillas y tiene una sola sombra; el dashboard actual usa 16–28 px y glass bg-white/[0.04] blur 20 px según CLAUDE.md, contra la translúcida 0,6 + blur 12 del v3.\n- (6) Tipografía fluida o fija, y cuerpo de 15 px o 14 px en tablas densas."
+ },
+ "destino": {
+  "ui_tematizable": "Conclusión: el kit src/components/ui/* (43 archivos en main 57c421bc) casi no tiene capa semántica. Lo cuenté con grep sin comentarios, mirando solo referencias de color: de 469, 12 son semánticas (var(--…) o tokens ds-* de @theme), el 2,6 %; 395 son clases de paleta de Tailwind (zinc/white/black/cyan/emerald/amber/rose/red/violet/blue/indigo), el 84,2 %; y 62 son literales hex/rgba en clases arbitrarias o en style, el 13,2 %. Las 12 semánticas están todas en Button.tsx, en las variantes ds-primary/ds-secondary y los tamaños ds/ds-compact (Button.tsx:53-70, :91-97). Esas variantes son del sitio público y el portal no las usa (Button.tsx:10-13). En lo que el portal pinta, la capa semántica es 0 %.\n\nSí hay un camino sin editar ui/*. Tailwind 4.3.1 declara su paleta, radios, sombras y blur en `@theme default`, sin inline (node_modules/tailwindcss/theme.css:1, :248, :322-323, :400-412, :476-482). Así, `bg-zinc-950` y `bg-white/[0.02]` consumen var(--color-zinc-950) y var(--color-white), y redefinir esas variables en un ancestro retiñe la utilidad. Está medido en v3:src/app/theme-develop.css:80-89.\n\nEl kit de portal son 27 archivos: los 26 con estilos que exporta el barrel más EmptyStateMuted. Con un \"puente de paleta\" de ese tipo se alcanza mecánicamente el 99,2 % de sus referencias de color (389 de 392). Lo único fuera de alcance son los 3 rgba cian de Card.tsx:31 y :57. Los radios de escala (rounded-lg/xl/2xl/3xl/full), shadow-lg/2xl y backdrop-blur-xl/2xl también son variables. No lo son el `rounded`, `shadow` y `backdrop-blur` sin sufijo, que son inline (theme.css:503-509), ni los valores arbitrarios (rounded-[28px], text-[10px], tracking-[0.2em], backdrop-blur-[20px]).\n\nEl problema es que el remapeo no es semántico. El mismo paso de paleta cumple roles opuestos: zinc-950 es texto sobre acento en Button.tsx:36, Badge.tsx:20 y Tabs.tsx:80, y es superficie en Modal.tsx:47, Card.tsx:32 y Toggle.tsx:40. Invertir los neutros obliga también a oscurecer los acentos, o se rompe el contraste.\n\nTipografía: ningún componente del kit de portal fija familia, salvo font-mono en SectionErrorBoundary.tsx:82 y :93. Heredan --font-sans, que es Geist en globals.css:5. Los tamaños son de escala más micro-tamaños arbitrarios.\n\nFuera del kit de portal quedan 13 archivos de marketing, casi todos literales, y 3 que no pintan nada (index.ts, skeletons/index.ts, field-context.ts). El barrel lo usan ~160 imports: admin 50, setter 43, dashboard 42, components/dashboard 14 y el módulo chatbot ~13. Ojo con la proporción: el kit es una porción chica del portal. Las pantallas fuera de ui/* suman ~7.600 referencias de paleta: admin 3.143, components/dashboard 1.571, chatbot 1.141, setter 928, dashboard 760 y components/admin 88. El 0,8 % de literales es solo del kit.",
+  "ui_por_componente": [
+   {
+    "componente": "Badge.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 81,
+    "nota": "7 tonos × solid/soft/outline + 6 semánticos, todo paleta (Badge.tsx:18-63); solid usa text-zinc-950 sobre acento (:20,:25,:30). Radio rounded-lg (:102), text-[9px]/[10px]/[11px] (:66-68). 18 imports del barrel. Re-tematizable solo con puente de paleta."
+   },
+   {
+    "componente": "BrandedIntroCanvas.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 5,
+    "nota": "Marketing 3D, color=\"#ffffff\" en props (:145-176). 0 consumidores. Literal."
+   },
+   {
+    "componente": "Button.tsx",
+    "tokens_var": 12,
+    "literales_o_paleta": 13,
+    "nota": "Los 12 semánticos (bg-ds-fg, text-ds-canvas, var(--shadow-ds-control), rounded-ds-control…) solo en ds-primary/ds-secondary/ds/ds-compact (:53-70, :91-97), que el portal no usa (:10-13). Lo que usa el portal: primary bg-cyan-400 text-zinc-950 (:36), secondary/ghost/danger con paleta (:37-39), radios rounded-xl/2xl (:87-89). Acepta className con cn(); buttonClasses() exportado (:110-120). 32 imports."
+   },
+   {
+    "componente": "Callout.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 36,
+    "nota": "6 tonos con paleta (Callout.tsx:25-62), rounded-xl text-xs (:71). className solo en la raíz; ícono y título de tono internos."
+   },
+   {
+    "componente": "Card.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 23,
+    "nota": "8 variantes white/zinc/cyan (Card.tsx:22-33); 3 rgba cian literales en el glow de highlighted y glow (:31, :57): no se alcanzan con el puente. Glass con backdrop-blur (:28-31; el `backdrop-blur` sin sufijo es inline). CardTitle text-[10px] tracking-[0.2em] (:82). rounded-2xl/3xl. 31 imports."
+   },
+   {
+    "componente": "EmptyState.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 11,
+    "nota": "rounded-3xl dashed border-white/10 (:53), glow cian (:60), CTA cian (:77). 5 imports; en listas lo reemplazó EmptyStateMuted."
+   },
+   {
+    "componente": "EmptyStateMuted.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 0,
+    "nota": "Re-export (:14-18) de src/components/dashboard/results/_shared/ResultEmptyState.tsx, que está FUERA de ui/ (paleta white/zinc en :39-47): se tematiza sin tocar ui/. 38 consumidores (30 de portal)."
+   },
+   {
+    "componente": "ErrorState.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 10,
+    "nota": "Ícono rose (:40), CTA border-white/10 bg-white/[0.03]. Sin consumidores directos de portal."
+   },
+   {
+    "componente": "Field.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 4,
+    "nota": "Label text-zinc-200 (:33), asterisco y error text-red-400 (:38, :49). 18 imports."
+   },
+   {
+    "componente": "HeroMetrics.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 21,
+    "nota": "Marketing (landing web): gradientes y sombras rgba en clases arbitrarias y en style (:226-249), rounded-[26px]. Literal."
+   },
+   {
+    "componente": "HeroTitle.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 11,
+    "nota": "Marketing: WebkitTextStroke rgba y gradiente #00e5ff/#7b2fff (:100-109). 0 consumidores."
+   },
+   {
+    "componente": "HyperText.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 0,
+    "nota": "Solo font-mono (:145), que va a --font-mono; color heredado. Marketing."
+   },
+   {
+    "componente": "Input.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 8,
+    "nota": "Un solo elemento: rounded-xl bg-white/[0.02] text-zinc-200 placeholder zinc-500 ring-cyan-400/50, borde white/10 o red (:33-36). Se sobrescribe entero por className. 25 imports."
+   },
+   {
+    "componente": "IntroLockupText.tsx",
+    "tokens_var": 1,
+    "literales_o_paleta": 1,
+    "nota": "fontFamily var(--font-geist-sans) inline (:122): saltea --font-sans (en v3 Geist ya no se carga). Scrim rgba calculado (:115). Marketing."
+   },
+   {
+    "componente": "KineticText.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 0,
+    "nota": "Solo motion (skewX, :38). Sin color propio."
+   },
+   {
+    "componente": "LoadingState.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 17,
+    "nota": "Spinner border-t-cyan-400 (:22), shimmer con gradientes white (:33, :58), usa Card subtle. `rounded` sin sufijo (inline). 34 imports."
+   },
+   {
+    "componente": "LogoStrokeOverlay.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 0,
+    "nota": "fill y stroke por props del caller (:124, :135). Marketing."
+   },
+   {
+    "componente": "MarketingIntro.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 2,
+    "nota": "Constantes #0a0a0a/#f4f4f5 (:25-26) en style (:371). 0 consumidores."
+   },
+   {
+    "componente": "Modal.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 11,
+    "nota": "solid bg-zinc-950 / glass bg-zinc-900/80 backdrop-blur-2xl (:44-47), backdrop bg-black/70 (:66), rounded-3xl (:75), header border-white/10 text-zinc-100/400 (:82-93). SIN prop className (:10-24). createPortal a document.body (:57, :109): un scope en el div del shell no lo alcanza. 6 imports."
+   },
+   {
+    "componente": "PageHeader.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 24,
+    "nota": "ACCENT_CLASSES de 6 tonos (:20-27), h1 text-white o gradiente white→cyan con bg-clip-text (:64-68), eyebrow text-[11px] text-zinc-600 (:59). className solo en la raíz. 19 imports."
+   },
+   {
+    "componente": "Preloader.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 1,
+    "nota": "bg-[#0a0a0a] (:323). Marketing (layout raíz)."
+   },
+   {
+    "componente": "Section.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 4,
+    "nota": "Caja de ícono cian (:41) + Typography. Sin consumidores de portal."
+   },
+   {
+    "componente": "SectionErrorBoundary.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 23,
+    "nota": "Tonos con paleta, rounded-3xl (:74), font-mono text-[10px] (:82, :93), botón zinc-800 (:109). 5 imports."
+   },
+   {
+    "componente": "Select.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 14,
+    "nota": "Trigger igual que Input (:331-334); dropdown bg-zinc-900/95 backdrop-blur-[20px] (literal) shadow-2xl (:370), portaleado a body (:353, :418), opción activa cian (:403). className solo en el trigger. 34 imports."
+   },
+   {
+    "componente": "Skeleton.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 1,
+    "nota": "bg-white/[0.04] rounded-lg (:11). Se sobrescribe por className."
+   },
+   {
+    "componente": "Spinner.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 0,
+    "nota": "Sin color: currentColor (:19). Hereda del contexto, así que ya es re-tematizable."
+   },
+   {
+    "componente": "Stat.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 27,
+    "nota": "TONE_STYLES de 7 tonos (:22-38), tendencia emerald/rose (:67-72), text-[10px]/[11px] (:41-44)."
+   },
+   {
+    "componente": "StatCard.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 33,
+    "nota": "accentColors de 7 tonos (:26-38), caja rounded-2xl border-white/10 bg-white/[0.02] (:71), tendencia emerald/amber (:104-108). 6 imports."
+   },
+   {
+    "componente": "Tabs.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 10,
+    "nota": "Activo text-white (:67), badge bg-cyan-500 text-zinc-950 text-[9px] (:78-80), indicador bg-cyan-400 (:90), borde white/10. 3 imports."
+   },
+   {
+    "componente": "Textarea.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 8,
+    "nota": "Espejo de Input (:28-31). Se sobrescribe por className. 9 imports."
+   },
+   {
+    "componente": "Toggle.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 5,
+    "nota": "Pista bg-cyan-400/bg-zinc-700 (:39), ring-offset-zinc-950 (:40), perilla bg-white shadow-lg (:53). Template string, SIN className (:5-17). 4 imports."
+   },
+   {
+    "componente": "TypewriterText.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 1,
+    "nota": "Cursor text-zinc-900 por defecto (:20). Marketing."
+   },
+   {
+    "componente": "Typography.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 6,
+    "nota": "Eyebrow text-[10px] tracking-[0.24em] zinc-500 (:11), Heading zinc-100/200 (:26-29), Muted zinc-400. No aparece en los imports del barrel del portal."
+   },
+   {
+    "componente": "VideoCard.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 0,
+    "nota": "Sin estilos de color. Marketing."
+   },
+   {
+    "componente": "buttons/ChargeTraceButton.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 17,
+    "nota": "Gradientes rgba, stops #22d3ee/#67e8f9/#ffffff (:73-89), rounded-[22px]. Marketing."
+   },
+   {
+    "componente": "buttons/MagneticCta.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 19,
+    "nota": "conic-gradient en hex (:130), rgba inline (:141-148). El var(--angle) es de animación, no de tema. Marketing."
+   },
+   {
+    "componente": "field-context.ts",
+    "tokens_var": 0,
+    "literales_o_paleta": 0,
+    "nota": "Contexto, no pinta."
+   },
+   {
+    "componente": "index.ts",
+    "tokens_var": 0,
+    "literales_o_paleta": 0,
+    "nota": "Barrel CONGELADO (docs/client-portal/lane-portal-pulido-log.md:106): los wrappers nuevos van por ruta directa."
+   },
+   {
+    "componente": "skeletons/CardSkeleton.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 2,
+    "nota": "rounded-[28px] literal (:11), border y bg white."
+   },
+   {
+    "componente": "skeletons/ListSkeleton.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 3,
+    "nota": "rounded-[28px] literal (:13)."
+   },
+   {
+    "componente": "skeletons/StatCardSkeleton.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 2,
+    "nota": "rounded-[26px] literal (:5)."
+   },
+   {
+    "componente": "skeletons/TableSkeleton.tsx",
+    "tokens_var": 0,
+    "literales_o_paleta": 4,
+    "nota": "rounded-[28px] literal (:10)."
+   },
+   {
+    "componente": "skeletons/index.ts",
+    "tokens_var": 0,
+    "literales_o_paleta": 0,
+    "nota": "Barrel de skeletons."
+   }
+  ],
+  "design_system_main": "Qué es src/components/design-system/ (13 archivos): las primitivas editoriales del sitio público B1. Son SectionShell, Eyebrow, ChapterLabel, DisplayHeading, Subhead, Lead, CtaButton, Surface, DataStat, MonoLabel, RuleDivider y accent.ts, más index.ts.\n- SectionShell escribe data-ds-theme en su <section> (SectionShell.tsx:84) y llama useThemeSectionOptional (:78).\n- CtaButton envuelve las variantes ds-* de ui/Button: importa en CtaButton.tsx:5, mapea en :80-81 y usa buttonClasses() en :105 y Button en :113.\n- accent.ts mapea text/bg/border-ds-accent-* (accent.ts:23-42).\n\nTokens que usa: solo los ds-* del @theme static de globals.css (:36-268). Son 52 usos, con 0 clases de paleta y 0 literales. Usa:\n- color de rol: bg-ds-canvas/panel, text-ds-fg/fg-muted, border-ds-rule, ds-control-stroke;\n- escala tipográfica editorial con clamp() (globals.css:154-182);\n- radio 0 en superficie y 9px en control (:69-70);\n- py-ds-section, px-ds-gutter, max-w-ds-page/lead.\n\nindex.ts:9 dice que no lo consume ninguna sección. En main lo importan sections/cierre/{Cierre,ContactoCta}.tsx, sections/nosotros/Nosotros.tsx y sections/servicios/{data.ts,Servicios.tsx}, pero ninguna está montada (src/app/page.tsx:1-46 no las importa). En la práctica solo se renderiza en /styleguide.\n\nsrc/app/styleguide/ (10 archivos):\n- Es una página interna noindex, sin auth y sin links entrantes (page.tsx:19-27), con data-ds-theme=\"dark\" en :39.\n- Muestra paleta, la decisión de acentos (AccentPermutations), tipografía, ComponentStates y esqueletos del home.\n- Son 220 usos ds-*, 0 paleta y 0 literales.\n- No importa ningún archivo de ui/*: ComponentStates solo usa design-system.\n\n¿Sirven como capa nueva sin tocar ui/*?\n- Como mecanismo, sí:\n  - dos capas, paleta literal → rol semántico (globals.css:222-235);\n  - inversión por atributo, con reglas sin @layer para ganarle al @layer theme (:270-298);\n  - `@theme static` contra el tree-shaking (:29-34);\n  - el patrón de wrapper fuera de ui/ que reusa una receta de ui (CtaButton);\n  - el aviso de registrar tamaños nuevos en twMerge (globals.css:135-138, src/lib/utils.ts:20-44).\n- Como inventario, no:\n  - no tiene input, select, textarea, toggle, tabla, badge, modal, tabs, toast ni estados vacío/carga/error;\n  - su escala es de display (clamp 3,25-7rem) y sus reglas son del sitio público (DESIGN.md:2), no de pantallas densas.\n- El styleguide tampoco sirve de banco del portal, porque no renderiza ui/*. El playground que sí lo hacía (/admin/_design) se borró en c3b150ab (2026-06-28).\n\nEn v3 (bead847c) cambian los valores:\n- base papel por defecto, Chivo y 3 acentos (v3:src/app/globals.css:30-117, :376-383);\n- se agregan design-system/motion/*;\n- aparece un archivo de 89 tokens aparte con roles de función: fondo, superficie-1..3, tinta, tinta-media, borde, borde-fuerte, error, foco y acento-* (v3:src/app/theme-develop.css:150-344).\n\nHoy lo consume solo /v3 (v3:src/app/globals.css:2-11), pero al ser @theme static emite en :root para todo el sitio. Es el candidato natural a fuente de valores de una capa de portal si se mergea v3.",
+  "docs_previos": [
+   {
+    "elemento": "raíz:DESIGN.md: qué decidió",
+    "detalle": "Su alcance es 'develOP — sitio público'. Decidió: monocromo cálido con inversión oscuro↔crema por sección; radio 0 en superficies y 9px en controles; sin glassmorphism ni backdrop-blur; CTA primario = tinta invertida con relieve de 2 capas; acento de servicio solo sobre oscuro y una sola voz por vista; Gate 1 cerrado con la permutación A; Geist + Geist Mono.",
+    "cita": "DESIGN.md:2, :97-101, :109, :125, :135-150, :211, :233, :242, :291-300",
+    "razon": "Es el único DESIGN.md y no menciona admin, dashboard ni setter. Sus reglas chocan con el lenguaje glass y de radios grandes que el portal declara (CLAUDE.md:97; logic-core-v3/AGENTS.md:45-51) y usa. En v3 el archivo no cambió (idéntico en bead847c), aunque v3 pasó a papel, Chivo y 3 acentos, así que quedó viejo también para el home."
+   },
+   {
+    "elemento": "raíz:DESIGN.md: qué sigue pidiendo",
+    "detalle": "Deja abierta la observación del violeta (4,64:1 sobre oscuro, desparejo contra 7,7-9,1). Pide 'agregar el token, no un valor suelto'.",
+    "cita": "DESIGN.md:158, :287",
+    "razon": "El portal no tiene ni un token de rol: todo es paleta o literal. Esa regla, aplicada al portal, es exactamente la capa que falta."
+   },
+   {
+    "elemento": "docs/design-system.md (v1.0, 2026-05-18): qué decidió",
+    "detalle": "Dark mode nativo con glass sutil, un único acento cian #06b6d4, radios de 16-24px (rounded-2xl/3xl), border-white/10. Tokens desde @/lib/design-tokens, componentes desde @/components/ui, patterns desde @/lib/design-patterns. Regla 'NO hardcodear colores'. Playground en /admin/_design.",
+    "cita": "logic-core-v3/docs/design-system.md:8-14, :18-22, :51-55, :156-175, :218-247",
+    "razon": "Es el único doc de diseño del portal y está desactualizado: el playground se borró (c3b150ab, 2026-06-28); design-patterns.ts no tiene consumidores; tailwind.config.ts, que mapea design-tokens a Tailwind, no se carga en Tailwind 4 porque no hay @config en ningún .css de src; el radio sm 8px (:44) choca con design-tokens.ts (0.375rem). La regla 'NO hardcodear colores' (:170) se incumple en ~8.000 referencias."
+   },
+   {
+    "elemento": "docs/design-system-audit.md (2026-05-18)",
+    "detalle": "Fija los valores canónicos: p-5 en cards, p-6 en secciones, rounded-2xl por defecto, rounded-3xl en hero, space-y-6/3, border-white/10 (énfasis /20), bg-white/[0.02] (hover /[0.04]). Lista duplicados de StatCard, Section y EmptyState.",
+    "cita": "logic-core-v3/docs/design-system-audit.md:36-52, :88-97",
+    "razon": "Es la gramática actual del kit oscuro. Sigue pendiente: los StatCard locales de dashboard/modules/agenda-inteligente/page.tsx y tienda-conectada/page.tsx siguen vivos (:41-42); los de admin ya no existen."
+   },
+   {
+    "elemento": "docs/admin-design-system-audit.md (2026-06-28)",
+    "detalle": "Auditó el playground /admin/_design: self-contained, solo para SUPER_ADMIN, consumidor de ui/*. Recomendó sacarlo del nav (Fase 2) y borrarlo con OK de Valentino (Fase 3).",
+    "cita": "logic-core-v3/docs/admin-design-system-audit.md:9-26, :65-78",
+    "razon": "La Fase 3 se ejecutó (c3b150ab). No queda nada abierto, pero la consecuencia para F3 es que hoy no existe ningún banco visual que renderice ui/*."
+   },
+   {
+    "elemento": "docs/diagnostico-visual-admin-2026-08/",
+    "detalle": "Es una corrida de capturas del admin, del lado de Franco (32 de 34 rutas). No opina. Deja el juicio visual a los humanos: 'El diseño del admin se decide mirando, con el mismo método que el del setter'. Cierra la evidencia de 3 decisiones: el check falsamente verde, dónde cargar las URLs de herramientas y Cal.com, y la forma de la cola (8.662 px, de los que se ven 756).",
+    "cita": "REPORTE.md:8-9, :384-391; MANIFIESTO.md:52-57; .gitignore:1-4 (los PNG no están en el repo)",
+    "razon": "No decidió nada de paleta ni de tokens. Pide una revisión visual humana del admin y aporta problemas de layout y densidad que un retema no resuelve."
+   },
+   {
+    "elemento": "logic-core-v3/AGENTS.md: convenciones del portal",
+    "detalle": "Toma glass como lenguaje base, fija como fondo del portal y del admin zinc-950/zinc-900 y lista una paleta por servicio.",
+    "cita": "logic-core-v3/AGENTS.md:45-51, :54-58, :60-62",
+    "razon": "El fondo real de los shells es bg-[#080a0c] (admin y dashboard) o var(--color-void) (setter), no zinc-950. La paleta por servicio está mal (ver colores_servicio)."
+   }
+  ],
+  "colores_servicio": {
+   "correcto": "Para main es correcto raíz:CLAUDE.md:99-103: Web = cian #06b6d4, IA = verde/esmeralda #10b981, Automatización = ámbar #f59e0b, Software = violeta #8b5cf6. Coincide con globals.css, con el home y con las cuatro landings, y es la 'permutación A' del Gate 1, ya cerrado (DESIGN.md:120-125; src/components/design-system/accent.ts:8-11). Matiz: la landing de Software usa sobre todo índigo #6366f1 y no el violeta #8b5cf6, y DESIGN.md:125 lo anota.",
+   "doc_equivocado": "Está mal logic-core-v3/AGENTS.md:54-58, que da IA = violeta #8b5cf6, Automatizaciones = esmeralda #10b981 y Software = ámbar #f59e0b. La misma permutación equivocada vive en código:\n- src/lib/design-tokens.ts:94-98 (colors.service, que solo lee zIndex);\n- src/modules/chatbot/prisma/seed.ts:222-226 (routeColorMap del bot: /ai-implementations → #8b5cf6, /process-automation → #10b981, /software-development → #f59e0b). Afecta al color del widget por landing.\n\nHay además un comentario viejo en globals.css:56-58 ('PENDIENTE GATE 1 … NO resolver acá') que contradice accent.ts:8-11.\n\nEn v3 (bead847c) quedan viejos los DOS docs. v3 mata el ámbar, junta IA y Automatización en verde y cambia todos los hex (v3:src/app/globals.css:96-117: web #1D5B8F, ia #1B6B4C, software #57429E; v3:src/app/theme-develop.css:326-328; v3:src/components/design-system/accent.ts). Sin embargo v3:CLAUDE.md:99-103 sigue con los 4 hex de main, y v3:accent.ts dice que los valores están 'congelados en CLAUDE.md'.",
+   "citas": "globals.css:60-63 (ds-accent-web #06b6d4, ia #10b981, automation #f59e0b, software #8b5cf6).\n\nsrc/components/sections/home/OurServices.tsx: :76-77 (/web-development #06b6d4), :94-95 (/ai-implementations #10b981), :112-113 (/process-automation #f59e0b), :130-131 (/software-development #8b5cf6).\n\nLandings (recuento con grep):\n- src/components/ia/*: verde (#00ff88 ×38, #34d399 ×22, emerald-300 ×20, #10b981 ×9; por ejemplo HeroIA.tsx:613 y :700). Cero violeta.\n- src/components/automation/*: ámbar (amber-500 ×83, #f59e0b ×63; HeroAutomation.tsx:44 y :1282). Esmeralda solo como 'ROI positivo' (CalculadoraAutomation.tsx:889).\n- src/components/software/*: índigo/violeta (#6366f1 ×53, #7b2fff ×30; HeroSoftware.tsx:346 y :378).\n- web: cian (src/app/web-development/page.tsx:118-120; sections/web-development cyan-300 ×49).\n\nDocs: DESIGN.md:17-20 y :120-125; accent.ts:8-11."
+  },
+  "ruta_sin_ui": [
+   {
+    "paso": "0. Decisiones de Valentino antes de cualquier token. Las cerradas del home NO se trasladan al portal. Preguntas con trade-off: (a) ¿oscuro, claro papel/tinta o ambos? El kit es solo oscuro; el claro obliga a invertir neutros Y oscurecer acentos; ambos duplica el QA. (b) ¿CTA siempre tinta? Ya existe sin editar ui/* vía ds-primary, pero pierde la señal cian de 'acción', que hoy comparten foco, tabs y selección. (c) ¿Voz única de acento? Choca con los estados semánticos que un dashboard necesita (éxito/atención/error/info, design-tokens.ts:6-16); v3 solo trae error y semáforo. (d) ¿Glass o plano? CLAUDE.md:97 lo prescribe; DESIGN.md:211 lo prohíbe en el sitio público. (e) ¿Chivo también en el portal? v3 lo da por aprobado (v3:src/app/globals.css:376-383); hay tablas densas (globals.css:478-482) y micro-textos de 9-11px. (f) ¿Radios 0/9 o los 16-28 actuales?",
+    "archivos": "Ninguno: solo decisiones.",
+    "riesgo": "Sin estas respuestas la capa no tiene valores; asumir las del home repite el error que la consigna prohíbe."
+   },
+   {
+    "paso": "1. Capa de roles del portal: `@theme static` con prefijo propio (canvas, panel, fg, fg-muted, rule, control-stroke, accent, on-accent, success, warning, danger, info, foco, radios y sombras), en dos capas paleta→rol como hace B1, con scopes `[data-portal-theme='…']` sin @layer. Si v3 se mergea, los valores pueden apuntar a sus tokens de función (fondo, superficie, tinta, borde).",
+    "archivos": "Nuevo src/app/portal-theme.css importado desde src/app/globals.css justo después de tailwindcss (el mismo patrón que v3:src/app/globals.css:2-12), o un bloque en globals.css. src/lib/utils.ts (DS_FONT_SIZE_CLASSES, :20) si se agregan tamaños --text-*.",
+    "riesgo": "Con `@theme` a secas se podan los tokens leídos por var() (globals.css:29-34). Con `@theme inline` el override no llega (v3:src/app/theme-develop.css:80-89). Un text-<nombre> nuevo colisiona en twMerge si no se registra (globals.css:135-138)."
+   },
+   {
+    "paso": "2. Puente de paleta, la única palanca que re-tematiza ui/* sin editarlo: dentro del scope, redefinir las variables de Tailwind que usa el kit (--color-white/black, --color-zinc-50…950, --color-cyan-100…500 y, si cambian los estados, red/rose/emerald/amber/blue/violet/indigo, más --radius-lg…3xl, --shadow-lg/2xl y --blur-xl/2xl) para que apunten a los roles.",
+    "archivos": "El mismo CSS del paso 1.",
+    "riesgo": "No es semántico. zinc-950 es texto sobre acento (Button.tsx:36, Badge.tsx:20, Tabs.tsx:80) y a la vez superficie (Modal.tsx:47, Card.tsx:32, Toggle.tsx:40). Un tema claro exige oscurecer los acentos o rompe el contraste. Retiñe también las ~7.600 referencias de las pantallas (deseable pero masivo). No alcanza los literales: Card.tsx:31 y :57, rounded-[28px] de los skeletons, y `rounded`, `shadow` y `backdrop-blur` sin sufijo, que son inline (theme.css:503-509). Remapear --radius-2xl cambia Card y Button juntos."
+   },
+   {
+    "paso": "3. Dónde vive el atributo: en <html>, puesto por un componente cliente que lo limpia al desmontar y que se monta en los 3 shells. El atributo se repite en la raíz del shell para el primer pintado SSR.",
+    "archivos": "Nuevo src/components/portal/PortalThemeScope.tsx. Montaje en src/app/(protected)/admin/_components/AdminLayoutClient.tsx, src/components/dashboard/DashboardLayoutClient.tsx y src/app/(protected)/setter/_components/setter-shell.tsx.",
+    "riesgo": "Modal y Select portalean a document.body (Modal.tsx:57,109; Select.tsx:353,418), igual que otros 24 archivos del portal con createPortal: un scope en el div del shell no los cubre. El ThemeProvider del home escribe data-theme en <html> sin limpiarlo (src/hooks/useThemeObserver.tsx:15-21); no repetir ese patrón. :has() en la raíz recalcula todo, así que no conviene. Tampoco importar overrides de :root por layout: posible fuga del CSS al volver al sitio público (no verificado acá)."
+   },
+   {
+    "paso": "4. Shells: reemplazar literales por roles (lienzo, velo de gradientes, panel glass, header, footer) y revisar el Toaster.",
+    "archivos": "AdminLayoutClient.tsx:30-41, :46, :97, :104; DashboardLayoutClient.tsx:51-62, :109, :124-127, :171, :179; setter-shell.tsx:28, :35, :69; src/app/(protected)/setter/layout.tsx:44-75; setter/_components/shortcuts-help.tsx:37, :80; admin-sidebar.tsx y admin-topbar.tsx (no leídos acá); src/app/layout.tsx:125-134 (Toaster con theme=\"dark\" y background #090a0f).",
+    "riesgo": "El Toaster es global y cualquier cambio afecta al sitio público (hay que condicionarlo). El setter depende hoy de --color-void legacy. El footer text-zinc-700 sobre #080a0c da ≈1,9:1 (calculado, no medido) y no pasa AA."
+   },
+   {
+    "paso": "5. Wrappers fuera de ui/ para lo que el puente no resuelve bien. Ejemplos: CTA tinta = buttonClasses({variant:'ds-primary', size:'ds-compact'}) (Button.tsx:53-58, :97, :110-120), como hace design-system/CtaButton.tsx:5 y :80-81. Card, Input, Textarea, Skeleton y Badge aceptan className y cn() resuelve los conflictos de la raíz.",
+    "archivos": "Nuevos src/components/portal/*, importados por ruta directa (el barrel ui/index.ts está congelado: docs/client-portal/lane-portal-pulido-log.md:106).",
+    "riesgo": "Solo se sobrescribe la raíz. Modal no tiene className (Modal.tsx:10-24) y Toggle tampoco (Toggle.tsx:38-40). Los internos (header del Modal :82-93, dropdown del Select :370, badge de Tabs :78-80, valores de Stat y StatCard) quedan con su paleta. Además duplica APIs."
+   },
+   {
+    "paso": "6. Aprovechar el precedente de EmptyStateMuted: su implementación está fuera de ui/.",
+    "archivos": "src/components/dashboard/results/_shared/ResultEmptyState.tsx:39-47, :61-66 (38 consumidores, 30 de portal).",
+    "riesgo": "Bajo: es editable y tiene una sola fuente."
+   },
+   {
+    "paso": "7. Migración por pantalla: pasar las clases de paleta a roles a medida que cada pantalla se rediseña, con visual-qa en desktop y mobile por pantalla (CLAUDE.md, Subagentes). Orden sugerido: setter (81 tsx, 928 refs, el shell ya lee una variable) → dashboard (81 tsx de app con 760 refs + 84 de components/dashboard con 1.571) → admin (191 tsx, 3.143) + módulo chatbot (96 tsx, 1.141).",
+    "archivos": "src/app/(protected)/{setter,dashboard,admin}/**, src/components/{dashboard,admin}/**, src/modules/chatbot/components/**.",
+    "riesgo": "Volumen alto. Durante la transición conviven pantallas con rol y con paleta. Sin un banco, cada remapeo es una regresión a ciegas. La zona setter/LeadOS es de Franco."
+   },
+   {
+    "paso": "8. Banco visual del kit: una página que renderice ui/* y los wrappers bajo cada tema, con chequeo de contraste por token.",
+    "archivos": "Nueva ruta, con auth, dentro de src/app/(protected)/admin/ o como extensión de src/app/styleguide/.",
+    "riesgo": "/styleguide es pública y sin auth (page.tsx:19-27) y hoy no renderiza ui/*. /admin/_design se borró (c3b150ab)."
+   },
+   {
+    "paso": "9. Higiene que bloquea decisiones (fuera de F3, para anotar).",
+    "archivos": "logic-core-v3/AGENTS.md:54-58 y :60-62; src/lib/design-tokens.ts:94-98; src/modules/chatbot/prisma/seed.ts:222-226; comentario de globals.css:56-58; docs/design-system.md; tailwind.config.ts (muerto: no hay @config).",
+    "riesgo": "Si no se corrigen, la capa nueva hereda la permutación equivocada y la falsa creencia de que design-tokens ya llega a Tailwind."
+   }
+  ],
+  "requiere_editar_ui": [
+   {
+    "elemento": "Kit semántico de verdad",
+    "detalle": "Migrar los internos de ui/* de clases de paleta a clases de rol: ~25 archivos, 377 referencias del kit de portal. Es el único camino para que claro/oscuro sea solo CSS y no dependa del puente de paleta.",
+    "cita": "Conteo: 12 de 469 referencias son semánticas, todas en Button.tsx:53-70 (variantes ds-*); ui/* es read-only según docs/client-portal/relevamiento-6-secciones.md:34",
+    "razon": "Descongelar ui/* es decisión de Valentino. Sin descongelarlo, el tema del portal queda atado a reinterpretar zinc, white y cyan."
+   },
+   {
+    "elemento": "Separar 'texto sobre acento' de 'superficie'",
+    "detalle": "zinc-950 cumple los dos roles. Un tema claro limpio necesita un rol on-accent propio.",
+    "cita": "Button.tsx:36; Badge.tsx:20, :25, :30; Tabs.tsx:80 (texto) contra Modal.tsx:47, Card.tsx:32, Toggle.tsx:40 (superficie)",
+    "razon": "El puente de paleta no puede mandar el mismo paso a dos valores distintos según el uso."
+   },
+   {
+    "elemento": "CTA primario por defecto",
+    "detalle": "variant 'primary' fija bg-cyan-400 text-zinc-950. Hacer tinta el default exige editar. La alternativa sin editar es usar ds-primary con un wrapper.",
+    "cita": "Button.tsx:36 contra :53-58",
+    "razon": "Si 'CTA siempre tinta' se adopta para el portal, conviene que sea el default del kit y no un wrapper paralelo (sus 32 imports seguirían en cian)."
+   },
+   {
+    "elemento": "Formas por componente",
+    "detalle": "Radios arbitrarios en los skeletons. Card y Button comparten rounded-2xl, así que remapear --radius-2xl los mueve juntos; un radio distinto por tipo (superficie contra control, como en B1) exige editar.",
+    "cita": "skeletons/CardSkeleton.tsx:11, ListSkeleton.tsx:13, TableSkeleton.tsx:10 (rounded-[28px]); StatCardSkeleton.tsx:5 (rounded-[26px]); Card.tsx:23; Button.tsx:88",
+    "razon": "Separar superficie de control es una decisión de forma, no de color."
+   },
+   {
+    "elemento": "Glow y brillo cian literal",
+    "detalle": "Las sombras rgba(6,182,212,…) de Card highlighted y glow no se alcanzan por variables.",
+    "cita": "Card.tsx:31, :57",
+    "razon": "Si el portal adopta 'acento plano, sin glow' (DESIGN.md:137), solo se logra editando."
+   },
+   {
+    "elemento": "Glass",
+    "detalle": "El blur de -xl/-2xl se puede anular remapeando --blur-*, pero no el `backdrop-blur` sin sufijo (inline en Tailwind) ni backdrop-blur-[20px].",
+    "cita": "Card.tsx:28-31; Modal.tsx:46; Select.tsx:370; node_modules/tailwindcss/theme.css:503-504",
+    "razon": "Si el portal pasa a plano, quedan restos de vidrio que no se pueden apagar desde fuera."
+   },
+   {
+    "elemento": "API de tematización",
+    "detalle": "Agregar className o surface a Modal y Toggle, y slots o className para los internos de Select y Tabs.",
+    "cita": "Modal.tsx:10-24; Toggle.tsx:5-17, :38-40; Select.tsx:330-335, :370",
+    "razon": "Sin esto, esos componentes no se pueden envolver: solo remapear o editar."
+   },
+   {
+    "elemento": "Escala tipográfica micro",
+    "detalle": "text-[9px], text-[10px] y text-[11px] más tracking-[…] arbitrarios, sin token.",
+    "cita": "Badge.tsx:66-68; Stat.tsx:41-44; Typography.tsx:11; Card.tsx:82; PageHeader.tsx:59; Tabs.tsx:78; SectionErrorBoundary.tsx:82, :93",
+    "razon": "Una escala de portal por tokens (o el cambio a Chivo con otras métricas) no corrige esos tamaños sin editar."
+   },
+   {
+    "elemento": "Título con gradiente",
+    "detalle": "La variante gradient de PageHeader pinta white→cyan con bg-clip-text.",
+    "cita": "PageHeader.tsx:64-68",
+    "razon": "Choca con 'no bg-clip-text con gradiente' (DESIGN.md:292) si esa regla se extiende al portal."
+   }
+  ],
+  "layouts_portales": "Base común (layout raíz):\n- <html> lleva las variables de Geist (src/app/layout.tsx:72-74) y <body> solo `antialiased` (:82).\n- globals.css:321-328 pinta el body con var(--color-void) y var(--color-obsidian).\n- La familia llega por el preflight: --default-font-family → --font-sans → Geist (globals.css:5).\n- Ningún shell fija familia, ninguno usa ds-* ni data-ds-theme, y los tres se montan `fixed inset-0` encima.\n- v3 cambia --font-sans a Chivo para todo el sitio, portal incluido (v3:src/app/globals.css:16-17, :376-383).\n\nADMIN:\n- src/app/(protected)/admin/layout.tsx es server: auth SUPER_ADMIN (:41-49), cuenta alertas y revisión (:52-55) y monta AdminLayoutClient + PageTransition (:57-66).\n- AdminLayoutClient.tsx:\n  - Lienzo: `fixed inset-0 z-[80] bg-[#080a0c] text-zinc-100` (:30). z-index literal, aunque design-tokens.ts:240 define appShell=80.\n  - Velo inline de 3 gradientes rgba, cian 0,08 y esmeralda 0,05 (:34-40).\n  - Hamburguesa glass bg-zinc-900/90 backdrop-blur (:46).\n  - Aside de 240px (:62).\n  - Panel principal glass en capa hermana: rounded-[28px], border-white/10, bg-white/[0.03], shadow rgba, backdrop-blur-md (:97); main con p-4/sm:p-6 (:99).\n  - Footer text-xs text-zinc-700 (:104): ≈1,9:1 sobre #080a0c, calculado; no pasa AA.\n- Impone: lienzo #080a0c literal, texto base zinc-100, lenguaje glass y radio 28px. Ninguna variable.\n\nDASHBOARD:\n- src/app/(protected)/dashboard/layout.tsx es server: org, preview, banners y onboarding (:65-129) y monta DashboardLayoutClient (:131-158).\n- src/components/dashboard/DashboardLayoutClient.tsx es copia del admin:\n  - Lienzo `bg-[#080a0c] text-zinc-100 selection:bg-cyan-500/30` (:51), con zIndex.appShell por style (:52).\n  - El mismo velo (:60-62).\n  - Header glass h-16, rounded-2xl, border-white/10, bg-white/5, backdrop-blur-xl (:109).\n  - Avatar cian con rgba inline (:124-127).\n  - Panel glass rounded-[28px] (:171).\n  - Footer text-zinc-700 (:179).\n- Impone lo mismo que el admin, todo literal.\n\nSETTER:\n- src/app/(protected)/setter/layout.tsx es server: solo rol SETTER (:32-34). El topbar se arma en el server: glass rounded-2xl, bg-white/5, backdrop-blur-xl (:44); marca cian (:46); 'LeadOS' text-white (:50-52); eyebrow text-[10px] tracking-[0.24em] zinc-600 (:53); badge bg-cyan-500 text-black (:68).\n- setter-shell.tsx:\n  - Lienzo `fixed inset-0 bg-[var(--color-void)] text-zinc-100` (:28). Es el ÚNICO shell que lee una variable, y es la legacy del sitio.\n  - Rail de 240px glass: border-r, bg-white/5, backdrop-blur-xl (:69).\n  - Contenido sin panel glass, max-w-6xl, py-8 (:75-78).\n  - shortcuts-help.tsx:37 y :80 también usan var(--color-void).\n- Riesgo PLAUSIBLE, a confirmar en runtime: --color-void cambia con [data-theme] en <html> (globals.css:301-319; light = #fafafa). El ThemeProvider del home lo escribe con 'light' por defecto y nunca lo limpia (src/hooks/useThemeObserver.tsx:15-21). El login redirige por server action (src/app/login/actions.ts:111), o sea con navegación blanda. Si se llega al setter desde el home sin recarga, el lienzo podría salir #fafafa con texto zinc-100.\n\nComún a los tres: modales y selects portaleados a <body> con zIndex.modal 10000 (design-tokens.ts:245; Modal.tsx:65), fuera de cualquier scope que se ponga en el shell.",
+  "resumen": "1. Re-temabilidad de ui/*: hoy, sin editarlo, solo se puede retemar redefiniendo las variables de paleta de Tailwind 4 en un scope. De 469 referencias de color del kit, apenas 12 son semánticas, todas en las variantes ds-* de Button, que el portal no usa. Hay 395 de paleta y 62 literales. En los 27 componentes que usa el portal, el puente de paleta alcanza el 99,2 % (389 de 392). Pero ese puente no es semántico: zinc-950 es a la vez texto sobre acento y superficie, así que un tema claro limpio exige editar ui/*. Además el kit es una porción chica del portal: las pantallas suman ~7.600 referencias de paleta propias.\n\n2. design-system/ y styleguide/: son 100 % tokens ds-*, pero son primitivas editoriales del sitio público. No hay controles, tabla, modal ni badge. Sirven como mecanismo y precedente (dos capas paleta→rol, scope por atributo, @theme static, wrapper CtaButton sobre ui/Button), no como inventario. design-system solo se renderiza en /styleguide, porque las secciones que lo importan no están montadas. /styleguide no renderiza ui/* y el playground del kit (/admin/_design) se borró en c3b150ab.\n\n3. Docs: DESIGN.md es solo del sitio público y quedó viejo frente a v3. docs/design-system.md, el único doc del portal, está desactualizado: playground borrado, patterns sin uso, tailwind.config.ts muerto en Tailwind 4. design-system-audit fija los valores canónicos del kit oscuro. El diagnóstico visual del admin no opina y pide juicio humano.\n\n4. Colores por servicio: en main es correcto raíz:CLAUDE.md:99-103 y está mal AGENTS.md:54-58, cuya permutación se repite en design-tokens.ts:94-98 y en el seed del chatbot (:222-226). En v3 los dos docs quedan viejos: hay 3 acentos y hex nuevos.\n\n5. Ruta sin tocar ui/*:\n   - decisiones primero;\n   - capa @theme static de roles;\n   - puente de paleta en <html> con un componente cliente que lo limpia, porque Modal y Select portalean a body;\n   - shells;\n   - wrappers por ruta directa;\n   - ResultEmptyState;\n   - migración pantalla por pantalla con banco visual.\n   Lo que solo se logra editando ui/* va como decisión para Valentino: roles on-accent, CTA tinta por defecto, radios por tipo, quitar glow y glass, API de Modal y Toggle, micro-tipografía.\n\n6. Shells: admin y dashboard imponen #080a0c, velo de gradientes cian y esmeralda, glass de 28px y texto zinc-100, todo literal. El setter lee var(--color-void) legacy, con un riesgo plausible de fondo claro tras navegar desde el home. Los tres heredan Geist, que v3 cambia a Chivo también en el portal."
+ },
+ "plan-publico": {
+  "cruces": [
+   {
+    "clave": "docs/bitacora-roadmap.md:5370",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "Fuente :5366-5368: es un diagnóstico y dice «no se tocó». Desde entonces nada cambió: el último commit de HeroBackground.tsx es 267948ac (2026-05-12), anterior al diagnóstico. Sigue el FBM de 3 octavas (src/components/canvas/HeroBackground.tsx:46-49). El Canvas corre con frameloop=\"always\" (:291-293) y sin IntersectionObserver: el git grep de IntersectionObserver|useInView|frameloop en src/components/canvas/ solo da :293. Su dpr ya estaba acotado por niveles (≤1,2, y sin canvas por debajo de 768 px; :240, :262). DotMatrix sigue con dpr={[1, 2]} (DotMatrix.tsx:213), por encima del máximo [1,1.5] de CLAUDE.md. Lo montan /login (login/page.tsx:12), /forgot-password (forgot-password/page.tsx:10) y /accept-invite (InviteBackground.tsx:6). Interactive3DNetwork y ReactiveBackground tienen 0 importadores (git grep vacío; control: el mismo patrón encuentra DotMatrix). v3 no toca src/components/canvas (git diff --stat 57c421bc bead847c vacío). F3: el dpr 2 vive en las pantallas de entrada al portal."
+   },
+   {
+    "clave": "_insumos/drive/Olme/Ideas de nuevas features.md:44",
+    "estado": "parcial",
+    "sentido": "no",
+    "evidencia": "Route B está hecha: Preloader.tsx:299-303 monta MarketingIntro sobre el allow-list de src/lib/marketing-routes.ts:1-12, creados en ff6871e4 (2026-06-02), antes de la nota del 06-20. Queda un comentario viejo en Preloader.tsx:58 («route B deferida»). El Paint sprint no existe: git grep clippingPlanes|THREE\\.Plane|localClippingEnabled en src da vacío en main y en bead847c (control: git grep \"new THREE.\" encuentra src/components/3d/HeroArtifact.tsx). Sentido: el clipping apuntaba al logo cromado del Hero clásico, y el home v3 no monta HeroArtifact (v3:src/app/v3/_lib/__tests__/s3-frontera.invariant.ts:74 lo lista como frontera; el intro es v3:src/app/v3/_intro/IntroDelHome.tsx)."
+   },
+   {
+    "clave": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:136",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "src/components/layout/EarlyScrollLock.tsx:26-38 usa useServerInsertedHTML y se monta en src/app/layout.tsx:50 y :80. useHydratedReducedMotion vive en src/components/sections/home/WhyDevelOP.tsx:202-208 (useSyncExternalStore con snapshot de servidor false) y se usa en :435, :789 y :920. Obsoleto en v3: HomeIntroBoot reemplazó a EarlyScrollLock (v3:src/app/layout.tsx:87-90 y :109), y EarlyScrollLock no tiene importadores en bead847c. WhyDevelOP no se monta (v3:src/app/page.tsx:119)."
+   },
+   {
+    "clave": "raiz:PRODUCT.md:29",
+    "estado": "contradicho",
+    "sentido": "no",
+    "evidencia": "En main hay varios caminos y precios. /contact tiene un formulario de 6 campos: name, email, phone, company, service y message (src/app/contact/page.tsx:148-210). La misma página ofrece «WhatsApp, llamada o email» (:268). Hay pricing público en /web-development: PricingSection.tsx:25-50 ($490/$980/$1.690 USD), montado en web-development/page.tsx:288. El home también muestra precios (OurServices.tsx:70-124). v3 tampoco sostiene el «solo WhatsApp»: el gemelo del CTA, «Hablemos», abre un formulario (v3:src/app/v3/_secciones/hero/hero.invariant.tsx:230-231). Los formularios postean a /api/contacto y /api/newsletter (v3:src/app/v3/_lib/formularios/enviar.ts:2), y la ruta «hoy recibe y valida» sin enviar a ningún lado (v3:src/app/api/contacto/route.ts:15). La regla hay que reescribirla, no aplicarla."
+   },
+   {
+    "clave": "raiz:PRODUCT.md:54",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "Los tokens de src/app/globals.css:60-63 (web #06b6d4, ia #10b981, automation #f59e0b, software #8b5cf6) coinciden con CLAUDE.md:99-103. El «índigo» de PRODUCT.md:54 quedó desalineado: DESIGN.md:125 lo cerró como violeta. v3 lo reemplaza: pasa a tres acentos, el ámbar muere y cambian los hex (v3:src/app/theme-develop.css:51-52 y :326-328; v3:src/app/globals.css:96-117). Eso va contra el «do not change» que su propia rama conserva (bead847c:CLAUDE.md:99-103)."
+   },
+   {
+    "clave": "raiz:PRODUCT.md:58",
+    "estado": "no empezado",
+    "sentido": "no",
+    "evidencia": "main sirve el home clásico: 11 bloques sin estructura de capítulos (src/app/page.tsx:25-42). v3 ya lo decidió con ocho secciones: hero, quienes-somos, numeros, trabajos, servicios, tu-panel, por-que-develop y cierre (v3:src/app/v3/_lib/secciones.ts:408-677; v3:src/app/v3/page.tsx:10)."
+   },
+   {
+    "clave": "raiz:PRODUCT.md:64",
+    "estado": "contradicho",
+    "sentido": "si",
+    "evidencia": "Lo servido en main trae cifras sin fuente: OurServices.tsx:72 «+340% consultas promedio», :90 «94% respuesta automática» y :108 «23hs por semana ahorradas». WhyDevelOP.tsx:448 anima un contador a 76 días, cifra que docs/bitacora-rediseno.md:549 marca «sin verificar». Hay precios en OurServices.tsx:70-124 y PricingSection.tsx:25-50. El voseo y la jerga no se barrieron de forma exhaustiva. Sigue vigente en v3, que lo impone con un escáner de precios y cifras (v3:src/app/v3/_secciones/_contrato/escaneo.ts:133-143) y con un registro de relleno visible como pedido (v3:src/app/v3/_secciones/_contrato/inventado.ts:30-50)."
+   },
+   {
+    "clave": "raiz:PRODUCT.md:67",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "main usa Geist y Geist_Mono desde next/font/google (src/app/layout.tsx:2-13 y :74). v3 cambia el layout raíz a Chivo + Chivo_Mono (v3:src/app/layout.tsx:2-13 y :101-105) y suma Archivo como cara de display (v3:src/app/theme-develop.css:36). Pregunta F3: el layout raíz también envuelve /admin, /dashboard y /setter, y 22 archivos de src/app/(protected) usan font-sans/font-mono. ¿El portal hereda Chivo (una sola marca, a cambio de un cambio visual en pantallas ya cerradas) o fija Geist en su propio layout (cero regresión, a cambio de dos tipografías en el producto)?"
+   },
+   {
+    "clave": "raiz:PRODUCT.md:71",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "Todo existe: src/components/design-system/ (ChapterLabel…Surface + index.ts), los tokens en globals.css (:60-63 y :158-207), /styleguide con noindex (src/app/styleguide/page.tsx:26) y docs/impeccable-baseline.md:3-8 (v3.5.0, 2026-07-31). Pero ninguna página servida importa el design-system: solo lo usan styleguide y los huérfanos cierre/*, nosotros/* y servicios/*. v3 lo reemplaza con su propio sistema (v3:src/app/theme-develop.css:36-56: Chivo, base clara y tres acentos) y sus componentes (v3:src/app/v3/_componentes/)."
+   },
+   {
+    "clave": "raiz:DESIGN.md:92",
+    "estado": "contradicho",
+    "sentido": "no",
+    "evidencia": "git grep -c sobre la superficie pública de main (sections, layout, ia, automation, software, rutas de landing; incluye huérfanos) da 77 backdrop-blur, 38 bg-clip-text y 217 infinite/repeat: Infinity. Ejemplos: backdrop-blur en Navbar.tsx:222, :257 y :291; TypewriterText en Hero.tsx:14 y :694; cursor-none de vuelta (ver bitacora-beta-3.md:2671). v3 también abandona la lista: tiene cursor propio (v3:src/app/v3/_componentes/chrome/CursorPropio.tsx:14-19) y vidrio con backdrop-filter (v3:src/app/v3/_estilos/vidrio.css:41-42)."
+   },
+   {
+    "clave": "raiz:DESIGN.md:125",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "En main: violeta #8b5cf6 en src/app/globals.css:63, con las dos permutaciones en src/app/styleguide/_components/AccentPermutations.tsx. v3 reabre el gate: redefine los mismos tokens --color-ds-accent-* a #1D5B8F/#1B6B4C/#57429E y borra automation (v3:src/app/globals.css:96-117). Su comentario dice «paleta congelada en CLAUDE.md» (:97), pero bead847c:CLAUDE.md:99-103 sigue con los cuatro hex viejos: contradicción interna de la rama."
+   },
+   {
+    "clave": "raiz:DESIGN.md:141",
+    "estado": "abandonado",
+    "sentido": "no",
+    "evidencia": "La regla existe en el sistema: SectionShell escribe data-ds-theme (src/app/globals.css:272-297). Pero el home servido no usa SectionShell (src/app/page.tsx:1-42) desde 78b510ac, y ninguna página servida importa el design-system. v3 invierte la regla: base clara, el acento como texto sobre papel y, en la sección invertida, solo como relleno o subrayado (v3:src/app/theme-develop.css:42-49 y :311-321)."
+   },
+   {
+    "clave": "raiz:DESIGN.md:190",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "Está en tokens. lead clamp(1.25rem…) sobre body clamp(1rem…) da 1,25 (src/app/globals.css:170 y :173). data 1.5rem sobre display-lg 2.25rem da 0,67 (:158 y :180). Container 1240px (:187), prosa 65ch (:188) y bajada 42ch (:207). Ninguna página servida los consume. v3 trae su escala propia sobre Chivo (v3:src/app/theme-develop.css:36-40)."
+   },
+   {
+    "clave": "raiz:DESIGN.md:215",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "Está en el sistema. Sombra de dos capas para oscuro y crema (src/app/globals.css:253, :287 y :297). CtaButton sin whileTap/scale ni tracking animado, con el press por :active en CSS (src/components/design-system/CtaButton.tsx:46-61 y :94-96). Solo lo consumen styleguide y huérfanos (cierre/ContactoCta.tsx). v3 fija «El CTA es siempre tinta #111111» (v3:src/app/globals.css:82-91) y tiene CTA propio (v3:src/app/v3/_componentes/chrome/Cta.tsx). F3: «CTA siempre tinta» no se asume para el portal; es una pregunta abierta."
+   },
+   {
+    "clave": "raiz:DESIGN.md:262",
+    "estado": "abandonado",
+    "sentido": "no",
+    "evidencia": "ChapterLabel solo aparece en huérfanos: cierre/Cierre.tsx:53, nosotros/Nosotros.tsx:118 y servicios/Servicios.tsx:90. Ninguna landing lo importa; web-development/page.tsx:245 solo lo nombra en un comentario. v3 lo descartó de forma explícita en B12, a pedido del humano: «el número y el rótulo se fueron» (v3:src/app/v3/_secciones/_contrato/Rotulo.tsx:14-23)."
+   },
+   {
+    "clave": "raiz:DESIGN.md:271",
+    "estado": "contradicho",
+    "sentido": "no",
+    "evidencia": "Hay 217 infinite/repeat: Infinity en la superficie pública (mismo git grep -c), por ejemplo WebDevelopmentBento.tsx:171 y ComparadorSection.tsx:44. Los reveals ds-reveal/ds-rise de 0,9 s existen (src/app/globals.css:97-121), pero solo los usa el design-system. La dirección de v3 es una escena 3D permanente y coreografía por scroll (v3:src/app/v3/page.tsx:43), no motion escasa. Sí conserva la compuerta de reduced-motion (v3:src/app/v3/_componentes/CompuertaDelScrollSuave.tsx:20)."
+   },
+   {
+    "clave": "docs/sprints/sprint-b0-bis-cierre.md:25",
+    "estado": "parcial",
+    "sentido": "no",
+    "evidencia": "Se aplicó el plan B: BrandedIntroCanvas dinámico en src/components/ui/MarketingIntro.tsx:19-20 (commit a0d7875f). Preloader.tsx:10 sigue importando MarketingIntro en estático. En \"/\" three volvió al bundle inicial por otra cadena: page.tsx:7 importa Hero en estático y Hero.tsx:3-9 trae r3f, three, drei y postprocessing. Lo restauró 78b510ac desde 63a4e364, que no contiene a0d7875f. No hay medición de Lighthouse en el código. Obsoleto para \"/\" con v3: el árbol animado entra por import() perezoso detrás de la compuerta de 1025 (v3:src/app/v3/page.tsx:43)."
+   },
+   {
+    "clave": "docs/sprints/sprint-b0-bis-cierre.md:35",
+    "estado": "parcial",
+    "sentido": "si",
+    "evidencia": "T3 está hecho, pero en el layout raíz (src/app/layout.tsx:22-24, a0d7875f) y no en la página. Por eso toda ruta sin canonical propio hereda el del home. Solo cinco layouts lo pisan: web-development/layout.tsx:39, ai-implementations/layout.tsx:39, process-automation/layout.tsx:39, software-development/layout.tsx:38 y contact/layout.tsx:23. T2 se revirtió: los tres badges usan guion simple (About.tsx:245, :280 y :294) y :294 muestra mojibake visible («TucumÃ¡n … paÃ­s»). 78b510ac restauró About.tsx desde 63a4e364, y git merge-base --is-ancestor a0d7875f 63a4e364 falla. El canonical sigue igual en v3 (v3:src/app/layout.tsx:22-24). T2 queda obsoleto con v3."
+   },
+   {
+    "clave": "docs/sprints/sprint-b0-bis-cierre.md:20",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "Preloader y MarketingIntro siguen y se montan (src/app/layout.tsx:44 y :123; Preloader.tsx:302-303). La decisión que se dejaba para B2 ya la tomó v3: conserva Preloader solo por su rama de marketing, con isHomePage={false} (v3:src/app/layout.tsx:151-156), y reemplaza el intro del home por IntroDelHome/HomeIntro."
+   },
+   {
+    "clave": "docs/sprints/sprint-b05-sanidad-sitio.md:22",
+    "estado": "hecho",
+    "sentido": "si",
+    "evidencia": "El texto nuevo está en src/components/ia/VaultIA.tsx:185 y RubrosIA.tsx:318: «Automatizaciones funcionando en negocios del NOA». git grep \"+47\" en src da vacío (control: git log -S \"+47 negocios\" encuentra f5b298e5, el commit que lo sacó). Las landings no cambian en v3 (git diff 57c421bc bead847c -- src/components/ia vacío)."
+   },
+   {
+    "clave": "docs/sprints/sprint-b05-sanidad-sitio.md:32",
+    "estado": "parcial",
+    "sentido": "si",
+    "evidencia": "Lo que se sostiene: «Tucuman» sin tilde, 0 (git grep \"Tucuman\\b\" vacío; control: About.tsx:245 «Tucumán»). Archivos .bak, 0 (git ls-files src | grep .bak vacío; control: f5b298e5 borra process-automation/page.tsx.bak). Preguntas sin «¿» en las landings, 0 por heurística (git grep -P \"[a-z]\\?['\\\"<]\" sin «¿»; control: FaqAutomation.tsx:14). Lo que se rompió: el chequeo de mojibake del propio sprint (LC_ALL=C git grep $'\\xc3\\x83') da 1, About.tsx:294, en copy visible, reintroducido por 78b510ac. Las 266 tildes no se reverificaron una por una."
+   },
+   {
+    "clave": "docs/sprints/sprint-b05-sanidad-sitio.md:52",
+    "estado": "hecho",
+    "sentido": "si",
+    "evidencia": "src/app/sitemap.ts:10-16 lista las 6 rutas públicas. src/app/robots.ts:11-26 bloquea /admin, /dashboard, /setter, /api/, /embed/, /login, /accept-invite, /forgot-password, /reset-password, /cambiar-password y /bienvenida. /styleguide queda fuera por noindex (styleguide/page.tsx:26)."
+   },
+   {
+    "clave": "docs/bitacora-beta-3.md:10910",
+    "estado": "parcial",
+    "sentido": "si",
+    "evidencia": "rediseno/home ya absorbió main: el merge 7a0b3463 (2026-09-06) tiene como padre a 57c421bc, y git merge-base 57c421bc bead847c = 57c421bc (0 commits atrás, 596 adelante). Falta la otra dirección: la subida del carril a main. El carril del Motor sigue divergente: b0-isolation-motor-chatbot está 8 commits adelante y 211 atrás de 57c421bc."
+   },
+   {
+    "clave": "docs/bitacora-roadmap.md:10425",
+    "estado": "hecho",
+    "sentido": "si",
+    "evidencia": "MARKETING_INTERACT_MS = 1000 (src/components/ui/MarketingIntro.tsx:32). willChange:\"transform\" en el contenedor (:371). La rama mobile non-reduced ya no tiene overlayOpacity.set(0) (:196-225); los dos que quedan son de las ramas reduced (:189 y :238). MarketingIntro sigue vivo en las landings, idéntico en v3."
+   },
+   {
+    "clave": "docs/bitacora-roadmap.md:10455",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "Ninguna entrada posterior registra la verificación por grabación: git grep \"grabaci\" en las bitácoras termina en bitacora-roadmap.md:10526. Los tunables siguen sin tocar (IntroLockupText.tsx:31-32 con 0.4 y 0.42; MarketingIntro.tsx:32). El código no puede confirmarlo: el intro se saltea bajo automation (MarketingIntro.tsx:177-181). Vigente para las intros de marketing, iguales en v3."
+   },
+   {
+    "clave": "docs/bitacora-roadmap.md:10463",
+    "estado": "hecho",
+    "sentido": "si",
+    "evidencia": "src/components/ui/LogoStrokeOverlay.tsx:20 deja constancia de que MASK_STROKE_WIDTH se eliminó. El stroke que queda (:130-131) es el del path animado (strokeColor), no el de la máscara. Lo siguen usando MarketingIntro y Hero."
+   },
+   {
+    "clave": "docs/bitacora-roadmap.md:10491",
+    "estado": "hecho",
+    "sentido": "si",
+    "evidencia": "src/components/ui/IntroLockupText.tsx existe y lo importan Hero.tsx:13 y MarketingIntro.tsx:12. textReveal está en src/context/PreloaderContext.tsx:51 y :103, y Preloader.tsx:152-239 escribe y borra el texto. Vigente para marketing. El home v3 tiene su lockup propio (v3:src/components/layout/home-intro/IntroLockup.tsx)."
+   },
+   {
+    "clave": "docs/bitacora-beta-3.md:2671",
+    "estado": "contradicho",
+    "sentido": "no",
+    "evidencia": "El cursor-none volvió al home de main: About.tsx:93, Portfolio.tsx:239, :329, :481 y :488, y OurServices.tsx:9821 (cursor:'none' inline). 78b510ac restauró esos archivos desde 63a4e364 (2026-07-31), anterior al fix 5fb023e7 (2026-08-04); git merge-base --is-ancestor 5fb023e7 63a4e364 falla. Como no hay CustomCursor (layout.tsx:84-108), el puntero desaparece sin reemplazo. Landings y widget siguen limpios: la grep no los lista, y PortfolioWebCases.tsx:212 y :304 está en un huérfano. Es un defecto vivo en producción hasta que v3 reemplace el home; el cursor propio de v3 nunca oculta el nativo (v3:src/app/v3/_estilos/cursor.css:10-15)."
+   },
+   {
+    "clave": "docs/bitacora-beta-3.md:3685",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "Cerró sin cambios de código, y el chunk de motion sigue retenido por el layout raíz (PreloaderContext.tsx:4, Navbar.tsx:3). La premisa ya no vale en main: tras 78b510ac, About.tsx:3 y Portfolio.tsx:3 importan 'framer-motion' y OurServices.tsx:14 importa 'motion/react'. framer-motion es una dependencia fantasma: package.json:153 solo declara \"motion\". Es una medición sobre un home que main ya no sirve. v3 tiene sus propios invariantes de peso (v3:src/app/v3/_lib/__tests__/bundle.invariant.ts)."
+   },
+   {
+    "clave": "docs/bitacora-beta-3.md:2772",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "data-cursor sigue en 13 elementos de 5 archivos: OurServices 5, Portfolio 4, About 2, automation/BentoAutomation 1 y modules/chatbot/components/LogicCompanion 1. Los cinco componentes muertos siguen con 0 importadores: PortfolioWebCases, ProcesoSoftware, ShowcaseSoftware, ComparativaAutomation y SocialProofAutomation. El span «Conversemos →» sigue sin role ni tabIndex (PortfolioWebCases.tsx:360-365), dentro de un componente muerto. Landings y widget siguen iguales en v3."
+   },
+   {
+    "clave": "docs/bitacora-beta-3.md:2766",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "Las referencias siguen. noise.svg externo en process-automation/page.tsx:57 y software-development/page.tsx:61: es la fuente probable de los 404 de esas rutas, aunque la bitácora no la nombra. El iframe a template-zero.netlify.app (WebTemplatesImmersive.tsx:36) choca con una CSP report-only con default-src 'self' y sin frame-src (next.config.ts:72-80). No es verificable sin navegador."
+   },
+   {
+    "clave": "docs/bitacora-beta-3.md:3767",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "src/components/ui/Preloader.tsx:10 importa MarketingIntro en estático (antes :6). Footer.tsx tiene 924 líneas y se monta en el home (page.tsx:11 y :42). PreloaderContext.tsx:4 usa motion y está congelado. Vigente: v3 conserva el mismo import estático en Preloader.tsx:10 y monta Preloader en el layout raíz (v3:src/app/layout.tsx:156). La parte del Footer cae con v3."
+   },
+   {
+    "clave": "docs/bitacora-beta-3.md:3783",
+    "estado": "abandonado",
+    "sentido": "no",
+    "evidencia": "Los placeholders eran del home rediseñado. 78b510ac volvió al home clásico (src/app/page.tsx:1-42) y en lo servido no queda ninguno: git grep \"\\[RUBRO|\\[URL DEL CASO|\\[\\+00%\\]\" en src da vacío (control: a3a49231:src/components/sections/home/Portfolio.tsx:73). Lo absorbe v3, que tiene su propio pedido de contenido (v3:src/app/v3/_secciones/quienes-somos/contenido.ts:13-39)."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:137",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "src/components/layout/SmoothScroll.tsx:78 crea Lenis sin mirar prefers-reduced-motion, y el rAF perpetuo sigue (:102-107). git grep \"reduce\" en ese archivo da vacío (control: WhyDevelOP.tsx:205 encuentra el patrón). v3 solo lo resolvió para /v3 (v3:src/app/v3/_componentes/CompuertaDelScrollSuave.tsx:20), y su SmoothScroll global admite que no tiene esa compuerta (v3:src/components/layout/SmoothScroll.tsx:28-29). F3: el efecto excluye /admin y /dashboard, pero no /setter (SmoothScroll.tsx:29-34), y scrollRestoration='manual' es global (:25-27)."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:509",
+    "estado": "no empezado",
+    "sentido": "no",
+    "evidencia": "La flecha quedó como icono por defecto, sin decisión registrada (CtaButton.tsx:72 withArrow=true; :86-87 ArrowRight). Contrastes y bios siguen en placeholder, en un huérfano (nosotros/data.ts:43, :47-48, :67 y :73). La revisión visual de Franco no tiene rastro. El sistema de B1/B2 quedó atrás: v3 sacó números y rótulos (v3:src/app/v3/_secciones/_contrato/Rotulo.tsx:14-23) y tiene CTA propio."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:823",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "metricPills sigue igual (src/components/sections/web-development/WebDevelopmentBento.tsx:70) y los headlines de WebDevelopmentByRubro.tsx:30, :49, :68 y :87 están intactos. La landing no cambia en v3."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:951",
+    "estado": "parcial",
+    "sentido": "si",
+    "evidencia": "El bug que destapó se cerró con la red de seguridad (MarketingIntro.tsx:46 y :345-359). La ceguera de los instrumentos sigue: EarlyScrollLock.tsx:27 se saltea con navigator.webdriver, PreloaderContext.tsx:125-127 salta a 'done' y MarketingIntro.tsx:177-181 se saltea bajo automation. Vigente para las landings; en v3, EarlyScrollLock no tiene importadores."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:1075",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "El texto sigue igual (VaultIA.tsx:185, RubrosIA.tsx:318) y no hay decisión registrada. Las landings de IA no cambian en v3."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:1323",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "MARKETING_SCROLL_SAFETY_MS = 6000, anclado al montaje (MarketingIntro.tsx:46 y :345-359), y el Hero con 6000 (Hero.tsx:512). No se aplicó ninguna de las salidas (a), (b) o (c). MarketingIntro sigue igual en v3."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:1444",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "setActiveTab dentro de useEffect sigue en src/components/layout/Navbar.tsx:183 y DynamicDock.tsx:460, sin eslint-disable. El layout raíz de v3 sigue montando Navbar para las landings (v3:src/app/layout.tsx:147)."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:1643",
+    "estado": "parcial",
+    "sentido": "no",
+    "evidencia": "El float sigue en HeroArtifact.tsx:73; está congelado y es correcto no tocarlo. Pero el gateo por frameloop que lo compensaba vive solo en HeroCanvas.tsx:135-146, que en main es huérfano. El Canvas del Hero clásico que se sirve no lo tiene (Hero.tsx:385: sin prop frameloop ni IntersectionObserver). El home v3 no monta HeroArtifact (v3:src/app/v3/_lib/__tests__/s3-frontera.invariant.ts:74)."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:1817",
+    "estado": "no empezado",
+    "sentido": "no",
+    "evidencia": "El número fijo sigue en src/components/ia/CalculadorIA.tsx:316 y lib/whatsapp.ts:15 lo documenta. Pero CalculadorIA no tiene importadores: git grep \"CalculadorIA\" solo da ese comentario. Lo desmontó c66310aa (2026-04-11), y el diff tiene «-import CalculadorIA» y «-<CalculadorIA />». La premisa de «único destino distinto en producción» es falsa. Es código muerto: borrarlo cierra el tema sin decidir destino."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:1868",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "data-cursor sigue en 5 archivos, con 13 ocurrencias: About.tsx 2, OurServices.tsx 5, Portfolio.tsx 4, automation/BentoAutomation.tsx 1 y modules/chatbot/components/LogicCompanion.tsx 1. BentoAutomation y LogicCompanion siguen vivos en v3; los tres del home clásico caen con v3."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:2156",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "El patrón que lo corrige (hook con useSyncExternalStore) existe solo en WhyDevelOP.tsx:202-208. Hay 59 archivos de la superficie pública que usan useReducedMotion de motion. Entre ellos DynamicDock.tsx:397, montado en todas las rutas públicas vía Navbar.tsx:211, que ramifica el initial del marcado (:289-296). El componente culpable sigue sin identificar, y no es verificable sin navegador."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:2218",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "OurServices.tsx:7636-7639 anima width. VaultIA.tsx:226-227 anima padding. WebDevelopmentBento.tsx:171 y ComparadorSection.tsx:44 tienen bounce infinito. Los tres de landings siguen vigentes en v3; el de OurServices cae con v3."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:2230",
+    "estado": "contradicho",
+    "sentido": "si",
+    "evidencia": "Lo servido trae pricing y cifras sin fuente: OurServices.tsx:70-126, PricingSection.tsx:25-50 y WhyDevelOP.tsx:448. El alcance «solo marketing» sí se respeta por escrito (PRODUCT.md:13). v3 lo sostiene con instrumentos (v3:src/app/v3/_secciones/_contrato/escaneo.ts:133-143; inventado.ts:30-50). F3: PRODUCT.md:13 deja el portal fuera; ninguna de estas decisiones se transfiere al dashboard sin preguntarlo antes."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:2665",
+    "estado": "hecho",
+    "sentido": "si",
+    "evidencia": "Lo servido en main no muestra placeholders: git grep \"\\[RUBRO|\\[URL DEL CASO|\\[\\+00%\\]|\\[ENTREGA QUE ESPERA|\\[RESEÑA SIN\" en src da vacío (control: a3a49231:src/components/sections/home/Portfolio.tsx:73). Los 9 que quedan viven en huérfanos sin importadores: nosotros/data.ts:43-73, servicios/data.ts:64-66 y cierre/Cierre.tsx:46. Se llegó a esto por la vuelta al home clásico (78b510ac), después de que el PR #4 lo hubiera llevado a main (bitacora-rediseno.md:3606-3611). Vigente para la subida de v3, que muestra marcadores a propósito (v3:src/app/v3/_secciones/quienes-somos/contenido.ts:33-39) y redes provisorias (v3:src/app/v3/_secciones/cierre/contacto.ts:24-29)."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:3323",
+    "estado": "abandonado",
+    "sentido": "no",
+    "evidencia": "De las 27 cadenas quedan 9, en archivos huérfanos: nosotros/data.ts:43, :47, :48, :67 y :73; servicios/data.ts:64-66; cierre/Cierre.tsx:46. Portfolio.tsx y portal-demo/data.ts volvieron a la versión clásica, sin marcadores (78b510ac). El inventario es del rediseño B. v3 lleva su propio pedido: v3:src/app/v3/_secciones/_contrato/inventado.ts, y quienes-somos/contenido.ts:33-39 sigue pidiendo el rol de cada uno."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:2976",
+    "estado": "contradicho",
+    "sentido": "si",
+    "evidencia": "El home de main muestra precios: OurServices.tsx:70, :88, :106 y :124 ($800/$300/$200/$1.500 USD), «DESDE» en :8285 y el render en :9851. ModuloActiveCard.tsx:250 muestra «USD/mes», con ModulosOpcionales montado en page.tsx:17 y :39. v3 lo hace cumplir (v3:src/app/v3/_secciones/_contrato/escaneo.ts:133-143)."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:3405",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "El último cambio de src/app/web-development/page.tsx es f9a20b26 (2026-08-07). El h1 sigue con gradient-text (:165 y :174), no hay bloque de casos y los huérfanos siguen intactos. v3 no toca la landing (git diff --stat 57c421bc bead847c -- src/app/web-development vacío). Su dirección ya no sería la de DESIGN.md sino la de v3 (v3:src/app/theme-develop.css:36-56)."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:3587",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "Los cuatro siguen con 0 importadores: PortfolioWebCases, ShowcaseSection (con href=\"#\" en :580), WebDevelopmentObjections y WebDevelopmentSensory. Ninguna decisión de borrar o montar."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:3579",
+    "estado": "no empezado",
+    "sentido": "si",
+    "evidencia": "/assets/templates/chatgpt/<slug>/mid.webp (WebTemplatesImmersive.tsx:25 y :196-197) no existe: git ls-files public/assets da vacío (control: git ls-files public lista public/video/Woman_engrossed_in_screen_delpmaspu_.mp4). El iframe a template-zero (:36) no tiene frame-src en la CSP report-only (next.config.ts:72-80). noise.svg sigue externo (web-development/page.tsx:87; preconnect en layout.tsx:78). El video sí existe (VideoCard.tsx:7), así que el ERR_ABORTED no es un 404."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:3604",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "src/app/page.tsx:1-42 es el home clásico, con dynamic(). EarlyScrollLock está remontado (layout.tsx:50 y :80). PanelPlate.tsx no existe (git ls-files src | grep PanelPlate da 0; control: portal-demo/PortalDemo.tsx sí aparece). Hubo un efecto que no se declaró: la foto 63a4e364 no contiene fe099b9a, a0d7875f, f5b298e5 ni 5fb023e7 (merge-base --is-ancestor falla en las cuatro). Por eso revirtió el badge y metió el mojibake de About.tsx:294, devolvió el cursor-none y volvió a poner three estático en \"/\". El reemplazo del home es v3 (v3:src/app/v3/page.tsx:20)."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:3682",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "Sigue vigente: dynamic() con placeholders en src/app/page.tsx:11-19; scroll-lock del intro (EarlyScrollLock.tsx:27, LOGO_READY_TIMEOUT_MS = 2500 en Preloader.tsx:27); Navbar con DynamicDock (Navbar.tsx:211) en todas las rutas públicas (layout.tsx:117-119). v3 lo deja atrás: sin scroll-lock (v3:src/app/layout.tsx:87-90), /v3 con scroll nativo (v3:src/components/layout/SmoothScroll.tsx:87-98) e imports estáticos (v3:src/app/page.tsx:7)."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:3724",
+    "estado": "no empezado",
+    "sentido": "no",
+    "evidencia": "Hero.tsx:400 usa <Environment preset=\"studio\" />, que baja el HDRI de un CDN. El HDRI self-hosteado existe (public/hdri/studio_small_03_1k.hdr), pero solo lo usa HeroCanvas.tsx:16, huérfano. El home v3 no monta el Hero clásico: en bead847c, src/components/layout/Hero.tsx no tiene importadores."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:3726",
+    "estado": "no empezado",
+    "sentido": "no",
+    "evidencia": "src/app/page.tsx:11-19 sigue con dynamic(), y About.tsx:411 y :471 declaran id=\"nosotros\" dos veces. SmoothScroll.tsx:49-60 lo documenta como causa. v3 importa en estático (v3:src/app/page.tsx:7) y el home /v3 tiene un id único por sección (v3:src/app/v3/_lib/secciones.ts:408-677). Sigue vivo en producción hasta el reemplazo."
+   },
+   {
+    "clave": "docs/bitacora-rediseno.md:3729",
+    "estado": "hecho",
+    "sentido": "no",
+    "evidencia": "Siguen huérfanos: HeroArtifactLayer (0 importadores), HeroCanvas (solo HeroArtifactLayer.tsx:10), cierre/*, nosotros/*, servicios/* y portal-demo/useEscenaCycle (0 importadores). design-system y /styleguide están intactos. La receta vuelve al rediseño B, que ya no es el destino: el rediseño vigente es /v3, con secciones propias (v3:src/app/v3/_secciones/). En bead847c esos archivos siguen huérfanos, salvo HeroArtifactLayer, que usa el \"/\" provisorio (v3:src/components/layout/HeroLogoSlot.tsx:6)."
+   }
+  ]
+ }
+}
