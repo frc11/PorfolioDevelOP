@@ -14,6 +14,7 @@ import { alCuadro, prepararLasTransformaciones, rearmar, soltar, type EstadoDelP
 import { crearLaCaidaDelPie } from './caida'
 import { CAJAS_DEL_PIE } from './cajasDelPolvo'
 import { HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
+import { crearLosPozosDelPie } from './pozos'
 import { SOMBRAS_DEL_PIE } from './sombras'
 
 /**
@@ -59,6 +60,8 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
   const raiz = useRef<THREE.Group>(null)
   // [PULIDO 26] X1 · la cámara de este cuadro, para el banco (`enPantalla`).
   const vivaDelBanco = useRef<THREE.Camera | null>(null)
+  // [PULIDO 27] Y2 a · el pozo liso de cada hueco del final (`pozos.ts`).
+  const pozos = useRef<ReturnType<typeof crearLosPozosDelPie> | null>(null)
   const m = useRef<EstadoDelPie>({ armadas: [], estudio: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, cuadrilatero: [], matriz: [], coreografia: { mostrado: 0, y: -1, cuando: 0 }, caida: crearLaCaidaDelPie() })
 
   useEffect(() => {
@@ -77,7 +80,13 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
     const rt = crearElEstudio(gl)
     s.estudio = rt.texture
     s.montado = true
+    const losPozos = crearLosPozosDelPie()
+    pozos.current = losPozos
+    raiz.current?.add(losPozos.grupo)
     return () => {
+      losPozos.grupo.removeFromParent()
+      losPozos.soltar()
+      pozos.current = null
       s.montado = false
       s.listo = false
       for (const a of s.armadas) soltar(a)
@@ -174,6 +183,7 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
   useFrame((state, delta) => {
     vivaDelBanco.current = state.camera
     alCuadro(m.current, state.camera, keyLightRef.current, { ancho: tam.width, alto: tam.height }, Math.min(delta, 0.1))
+    pozos.current?.alCuadro()
   })
 
   return <group ref={raiz} name="pie de volumen" />

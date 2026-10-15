@@ -16,7 +16,21 @@ export const HUECO_DEL_PIE = {
   margen: 0.03,
   labio: 0.05,
   oscuroDelLabio: 0.4,
+  /**
+   * [PULIDO 27] Y2 b · cuánto antes del contacto termina de abrirse (s), lo hondo que tiene de más que la placa (u) y desde dónde bajan
+   * los bloques de adentro (la parte de su camino del medio al borde: bajan antes de que llegue el corte).
+   */
+  antesDelContactoS: 0.08,
+  hondoDeMas: 0.04,
+  bajanAntes: 0.5,
 } as const
+
+/**
+ * [PULIDO 27] Y2 c · d · NINGÚN BLOQUE POR ENCIMA DE LO QUE ESTÁ ACOSTADO: alrededor de cada hueco (las placas, el form) y del logo, los
+ * bloques quedan a ras del labio o por debajo (`labio`, u respecto del piso) en una banda (`banda`, u desde el borde) y recién después
+ * vuelven a subir (`ancho`, u, con el borde irregular de la quietud). Los textos, igual con su techo bajo (`TECHO_DE_LOS_TEXTOS.banda`).
+ */
+export const TECHO_DE_LOS_HUECOS = { labio: -0.01, banda: 0.7, ancho: 2.5, alto: 9 } as const
 
 export const HUECOS_DEL_PIE = {
   /** (centro x, centro z, medio ancho a lo largo de `derecha`, medio fondo a lo largo de `atras`), en el mundo (la base del pie). */
@@ -43,7 +57,9 @@ export const QUIETUD = { margen: 0.4, borde: 3.5, irregular: 2.4, escala: 4, bri
  * un TECHO bajo (`bajo`, u: pueden quedar más abajo, con su variación) que sube hasta dejar de contar en `ancho` u por afuera de la huella
  * (más `margen`), con el borde irregular de la quietud: ninguna letra queda tapada y no se ve un rectángulo llano.
  */
-export const TECHO_DE_LOS_TEXTOS = { bajo: 0.22, alto: 9, margen: 0.25, ancho: 3, sube: 0.25 } as const
+// [PULIDO 27] Y2 d · con una banda plana (`banda`, u) antes de subir: a 0,5 u de un texto ya podía haber bloques de casi 0,9 u (la línea
+// legal quedaba tapada).
+export const TECHO_DE_LOS_TEXTOS = { bajo: 0.22, alto: 9, margen: 0.25, ancho: 3, sube: 0.25, banda: 0.7 } as const
 
 export const QUIETUD_DEL_PIE = {
   /** (centro x, centro z, medio ancho, medio fondo) en la base del pie y cuánto vale (0 a 1, con el vuelco). */
@@ -64,7 +80,6 @@ export const HUECOS_DEL_PIE_GLSL = /* glsl */ `
 uniform vec4 uHuecosDelPie[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
 uniform vec4 uFormaDeLosHuecosDelPie[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
 uniform int uCuantosHuecosDelPie;
-uniform vec4 uBaseDelPie;
 float huecoDelPie( vec2 xz ) {
 	float m = 1e4;
 	for ( int k = 0; k < ${String(MAXIMO_DE_HUECOS_DEL_PIE)}; k ++ ) {
@@ -143,7 +158,49 @@ float techoDeLosTextos( vec2 xz ) {
 		if ( uEsTextoLaQuietud[ k ] < 0.5 ) continue;
 		float afuera = afueraDeLaHuella( centro, uQuietudDelPie[ k ] ) - ${f(TECHO_DE_LOS_TEXTOS.margen)} - r * 0.5;
 		float bajo = mix( ${f(TECHO_DE_LOS_TEXTOS.alto)}, ${f(TECHO_DE_LOS_TEXTOS.bajo)}, uFuerzaDeLaQuietud[ k ] );
-		techo = min( techo, mix( bajo, ${f(TECHO_DE_LOS_TEXTOS.alto)}, smoothstep( 0.0, ${f(TECHO_DE_LOS_TEXTOS.ancho)} * ( 0.6 + 0.8 * r ), afuera ) ) );
+		techo = min( techo, mix( bajo, ${f(TECHO_DE_LOS_TEXTOS.alto)}, smoothstep( ${f(TECHO_DE_LOS_TEXTOS.banda)}, ${f(TECHO_DE_LOS_TEXTOS.banda)} + ${f(TECHO_DE_LOS_TEXTOS.ancho)} * ( 0.6 + 0.8 * r ), afuera ) ) );
+	}
+	return techo;
+}
+`
+
+/**
+ * [PULIDO 27] Y2 b · c · LO QUE LA SIMULACIÓN DEL PISO HACE CON LOS HUECOS (pide `HUECOS_DEL_PIE_GLSL`, `QUIETUD_DEL_PIE_GLSL`, `uBaseDelPie`,
+ * `uLado`): `bajaEnLosHuecos( xz )`, cuánto bajan los bloques de adentro de cada hueco que se abre (u: del medio hacia el borde, hasta su
+ * fondo, antes de que llegue el corte); `techoDeLosHuecos( xz )`, el techo de los bloques alrededor (a ras del labio en la banda y después,
+ * con el borde irregular, libres).
+ */
+export const BAJA_EN_LOS_HUECOS_GLSL = /* glsl */ `
+float bajaEnLosHuecos( vec2 xz ) {
+	float baja = 0.0;
+	for ( int k = 0; k < ${String(MAXIMO_DE_HUECOS_DEL_PIE)}; k ++ ) {
+		if ( k >= uCuantosHuecosDelPie ) break;
+		vec4 h = uHuecosDelPie[ k ];
+		vec4 forma = uFormaDeLosHuecosDelPie[ k ];
+		if ( forma.x <= 0.0 ) continue;
+		vec2 d = xz - h.xy;
+		vec2 q = vec2( abs( dot( d, uBaseDelPie.xy ) ), abs( dot( d, uBaseDelPie.zw ) ) ) / max( h.zw, vec2( 1e-3 ) );
+		float rho = max( q.x, q.y );
+		if ( rho >= 1.0 ) continue;
+		baja = max( baja, forma.z * smoothstep( max( 0.0, rho - ${f(HUECO_DEL_PIE.bajanAntes)} ), max( 0.05, rho - 0.05 ), forma.x ) );
+	}
+	return baja;
+}
+float techoDeLosHuecos( vec2 xz ) {
+	vec2 celda = floor( xz / uLado );
+	float r = ruidoDeLaQuietud( celda + 41.0 );
+	float techo = ${f(TECHO_DE_LOS_HUECOS.alto)};
+	for ( int k = 0; k < ${String(MAXIMO_DE_HUECOS_DEL_PIE)}; k ++ ) {
+		if ( k >= uCuantosHuecosDelPie ) break;
+		vec4 h = uHuecosDelPie[ k ];
+		vec4 forma = uFormaDeLosHuecosDelPie[ k ];
+		if ( forma.x <= 0.0 ) continue;
+		vec2 d = xz - h.xy;
+		float r0 = min( forma.y, min( h.z, h.w ) );
+		vec2 q = vec2( abs( dot( d, uBaseDelPie.xy ) ), abs( dot( d, uBaseDelPie.zw ) ) ) - h.zw + r0;
+		float afuera = length( max( q, 0.0 ) ) + min( max( q.x, q.y ), 0.0 ) - r0 - 0.7072 * uLado;
+		float bajo = mix( ${f(TECHO_DE_LOS_HUECOS.alto)}, ${f(TECHO_DE_LOS_HUECOS.labio)}, smoothstep( 0.0, 0.3, forma.x ) );
+		techo = min( techo, mix( bajo, ${f(TECHO_DE_LOS_HUECOS.alto)}, smoothstep( ${f(TECHO_DE_LOS_HUECOS.banda)}, ${f(TECHO_DE_LOS_HUECOS.banda)} + ${f(TECHO_DE_LOS_HUECOS.ancho)} * ( 0.6 + 0.8 * r ), afuera ) ) );
 	}
 	return techo;
 }
