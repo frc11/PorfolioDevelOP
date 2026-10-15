@@ -528,7 +528,8 @@ afirmar(medidoBien(MEDIDO), `  en el sitio, con el cristal ningún cuadro de má
 controlPositivo('  el detector VE un cuadro de 25 ms en el recorrido', { ...MEDIDO, '1440': { ...MEDIDO['1440'], 'recorrido-con-1': { ...(tanda(MEDIDO, '1440', 'recorrido-con-1') as Tanda), mayoresDe20: 1, maximo: 25 } } }, medidoBien)
 
 const MODULOS = ['cristal/cristal.ts', 'cristal/muro.ts', 'cristal/vidrio.ts', 'cristal/fondo.ts', 'cristal/CristalDeLaEscena.tsx'].map((m) => [m, ESCENA(m)] as const)
-afirmar(MODULOS.every(([, t]) => lineasDeCodigo(t) <= 300) && sinReservasEn(ESCENA('cristal/cristal.ts'), 'amplitudPorDonde'), '  los módulos del cristal, de menos de 300 líneas; la amplitud por dónde está la página, sin reservas')
+// [PULIDO 27] C3 · la amplitud ya no mira dónde está la página (siempre a la vista): la que queda, la del final, sin reservas.
+afirmar(MODULOS.every(([, t]) => lineasDeCodigo(t) <= 300) && sinReservasEn(ESCENA('cristal/cristal.ts'), 'amplitudDelCristal'), '  los módulos del cristal, de menos de 300 líneas; la amplitud (con el final), sin reservas')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('R3 · La red en reposo: rayos congelados (el arco del plasma, quebrado y con su rama), en un búfer estático; el corte abre desde el medio')

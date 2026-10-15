@@ -67,6 +67,7 @@ uniform vec4 uDeNoche;
 uniform vec4 uLucesVivas[ ${String(LUCES_VIVAS_MAXIMO)} ];
 uniform int uCuantasLucesVivas;
 uniform float uVitralFilo;
+uniform float uModoDelBrillo;
 varying vec3 vMundo;
 varying vec3 vNormal;
 varying float vInterior;
@@ -174,7 +175,11 @@ void main() {
 	float fresnel = uVidrio.w + ( 1.0 - uVidrio.w ) * pow( 1.0 - cosV, 3.0 );
 	color = mix( color, cielo( r ), clamp( fresnel * mix( uBrillo.w, uFilo.w, uNoche ), 0.0, 1.0 ) );
 	vec3 h = normalize( uLuz - v );
-	float especular = pow( max( 0.0, dot( n, h ) ), uBrillo.z ) * mix( uBrillo.x, uBrillo.y, uNoche ) * ( 0.4 + fresnel );
+	// [PULIDO 27] C2 · de noche, por celda (\`celdas\`), parejo (\`medio\`: con la normal del cilindro y el lóbulo de todas juntas) o ninguno.
+	float porCelda = pow( max( 0.0, dot( n, h ) ), uBrillo.z );
+	float parejo = ${f(CRISTAL.brilloDeNoche.escala)} * pow( max( 0.0, dot( nb, h ) ), ${f(CRISTAL.brilloDeNoche.dureza)} );
+	float deNoche = uModoDelBrillo < 0.5 ? porCelda : uModoDelBrillo < 1.5 ? parejo : 0.0;
+	float especular = mix( porCelda * uBrillo.x, deNoche * uBrillo.y, uNoche ) * ( 0.4 + fresnel );
 	color += vec3( especular + brillosDeNoche( nf, v, fresnel, bisel ) );
 	gl_FragColor = vec4( color * amp, amp );
 }
@@ -187,6 +192,7 @@ export function uniformesDelVidrio() {
     uFondo: { value: null as THREE.Texture | null },
     uFondoTam: { value: new THREE.Vector2(1, 1) },
     uVitralFilo: { value: 0 },
+    uModoDelBrillo: { value: C.brilloDeNoche.modos.indexOf(C.brilloDeNoche.porDefecto) },
     uAmplitud: { value: 0 },
     uNoche: { value: 0 },
     uPrisma: { value: 1 },

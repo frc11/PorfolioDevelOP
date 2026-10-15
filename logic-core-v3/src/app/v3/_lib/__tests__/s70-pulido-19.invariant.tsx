@@ -16,7 +16,7 @@ import { readFileSync } from 'node:fs'
 
 import * as THREE from 'three'
 
-import { CRISTAL, amplitudDelCristal, amplitudPorDonde } from '../escena/cristal/cristal'
+import { amplitudDelCristal } from '../escena/cristal/cristal'
 import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas, type Brasas } from '../escena/energia/brasas'
 import { CELDAS_DEL_REPARTO, DOMINIO, alfaDelDominio, armarElDominio, coordenadas, crearDominio, objetivosDelReparto, poblar, repartir, type Dominio } from '../escena/energia/dominio'
 import { pasoDeLasBrasas } from '../escena/energia/paso'
@@ -487,27 +487,18 @@ titulo('Q3 · El cristal de fondo: dónde se ve; [PULIDO 20] R2 · la malla de c
 // esquirlas en el borde (s71-pulido-20). Antes acá: las facetas justas alrededor del cilindro y el sombreador de pantalla entera (el
 // cilindro, Voronoi, la copia del cuadro sólo en el fondo); ahora: que esa malla ya no está y que el cristal nuevo se monta como el de
 // antes (siempre con movimiento; `cristal=no` y `fondo=moire` lo apagan). «Dónde se ve» sigue igual.
-// Dónde se ve: 1 lejos de las secciones apagadas, 0 con el medio de la pantalla adentro de una, el fundido entre medio; y se va con el final.
-const BANDAS = Float32Array.from([10000, 14000, 30000, 31000])
-const dondeBien = (f: typeof amplitudPorDonde, g: typeof amplitudDelCristal): boolean => {
-  const alto = 900
-  const lejos = f(5000, alto, BANDAS, 2)
-  const adentro = f(12000, alto, BANDAS, 2)
-  const borde = f(14000 + CRISTAL.donde.fundido * alto * 0.5, alto, BANDAS, 2)
-  const casi = f(14000 + CRISTAL.donde.fundido * alto + 1, alto, BANDAS, 2)
-  const otra = f(30500, alto, BANDAS, 2)
+// [PULIDO 27] C3 · el sentido cambió por pedido («que se vea SIEMPRE, en toda sección y durante cualquier viaje»): antes se apagaba con el
+// medio de la pantalla en el túnel de Trabajos y en Tu panel, y en un viaje del navbar desaparecía al pasar. Ahora la amplitud no depende de
+// dónde está la página (el componente no la mide): 1 en toda sección; se va sólo con la cámara del final, monótona.
+const CRISTAL_DEL_DONDE = leer('_lib/escena/cristal/CristalDeLaEscena.tsx').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+const siempreBien = (g: typeof amplitudDelCristal, componente: string): boolean => {
   let monotona = true
-  let antes = 0
-  for (let y = 14000; y <= 14000 + CRISTAL.donde.fundido * alto; y += 10) {
-    const v = f(y, alto, BANDAS, 2)
-    if (v < antes - 1e-9) monotona = false
-    antes = v
-  }
-  return lejos === 1 && adentro === 0 && borde > 0.3 && borde < 0.7 && casi === 1 && otra === 0 && monotona && g(1, 0) === 1 && g(1, 1) === 0 && g(0.5, 0.5) > 0 && g(0.5, 0.5) < 0.5 && g(1, 0.5) === 0.5
+  for (let c = 0.01; c <= 1; c += 0.01) if (g(c) > g(c - 0.01) + 1e-12) monotona = false
+  return g(0) === 1 && g(1) === 0 && g(0.5) > 0 && g(0.5) < 1 && monotona && componente.includes('amplitudDelCristal(EN_VIVO.camara)') && !/porDonde|getBoundingClientRect|scrollY/.test(componente)
 }
-afirmar(dondeBien(amplitudPorDonde, amplitudDelCristal), `  dónde: 1 lejos de ${CRISTAL.donde.apagadas.join(' y ')}, 0 adentro, el fundido de ${String(CRISTAL.donde.fundido)} pantallas monótono entre medio; y se va con la cámara del final`)
-controlPositivo('  el detector VE un cristal que no se apaga en el túnel', ((c: number, alto: number, b: ArrayLike<number>, n: number) => Math.max(0.2, amplitudPorDonde(c, alto, b, n))) as typeof amplitudPorDonde, (f: typeof amplitudPorDonde) => dondeBien(f, amplitudDelCristal))
-controlPositivo('  y uno que se queda en el final', ((p: number) => p) as typeof amplitudDelCristal, (g: typeof amplitudDelCristal) => dondeBien(amplitudPorDonde, g))
+afirmar(siempreBien(amplitudDelCristal, CRISTAL_DEL_DONDE), '  dónde: siempre (la amplitud no depende de dónde está la página: en toda sección y en cualquier viaje); se va sólo con la cámara del final')
+controlPositivo('  el detector VE el cristal de antes (que se apagaba en el túnel y en Tu panel)', CRISTAL_DEL_DONDE.replace('amplitudDelCristal(EN_VIVO.camara)', 'amplitudDelCristal(EN_VIVO.camara) * porDondeVa(m, performance.now())'), (c: string) => siempreBien(amplitudDelCristal, c))
+controlPositivo('  y uno que se queda en el final', ((): number => 1) as typeof amplitudDelCristal, (g: typeof amplitudDelCristal) => siempreBien(g, CRISTAL_DEL_DONDE))
 
 const VIDRIO_NUEVO = leer('_lib/escena/cristal/vidrio.ts')
 const CRISTAL_TSX = leer('_lib/escena/cristal/CristalDeLaEscena.tsx')

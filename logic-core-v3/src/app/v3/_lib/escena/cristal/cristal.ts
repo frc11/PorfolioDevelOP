@@ -1,8 +1,8 @@
 /**
- * [PULIDO 20] R2 · EL CRISTAL, LO PURO (`docs/rediseno/DIMENSION-ESPEJO.md`). [PULIDO 23] U1 · las esquirlas sueltas (con rendijas, de
+ * [PULIDO 20] R2 · EL CRISTAL, LO PURO (`docs/rediseno/DIMENSION-ESPEJO.md`). [PULIDO 23] U1 · las  * esquirlas sueltas (con rendijas, de
  * espaldas, y desvanecidas cerca de los textos y del logo) se borraron: ahora es UN MURO continuo, un vitral roto (`muro.ts`), que refracta
- * SÓLO EL FONDO (`fondo.ts`) y lo tapa sólo lo que de verdad está delante (la profundidad): sin máscaras. Puro (Node): las constantes,
- * dónde se apaga la página y el final.
+ * SÓLO EL FONDO (`fondo.ts`) y lo tapa sólo lo que de verdad está delante (la profundidad): sin máscaras. Puro (Node): las constantes y el
+ * final.
  */
 export const CRISTAL = {
   /**
@@ -20,8 +20,12 @@ export const CRISTAL = {
    * azul, un frío muy leve; en el bisel, `enElBisel` veces más denso).
    */
   cuerpo: { grosor: 1.8, bisel: 0.4, biselGrados: 12, absorcion: [0.022, 0.011, 0.006], enElBisel: 1.2 },
-  /** [PULIDO 26] X4 · algunas celdas esmeriladas: qué parte, cuánto (desde, hasta) y el radio del desenfoque (téxeles del fondo). */
-  esmerilado: { parte: 0.35, cuanto: [0.35, 1], texeles: 3.5 },
+  /**
+   * [PULIDO 26] X4 · algunas celdas esmeriladas: qué parte, cuánto (desde, hasta) y el radio del desenfoque (téxeles del fondo). [PULIDO 27] C1 ·
+   * NITIDEZ PAREJA: el 35 % esmerilado dejaba unas celdas mucho más borrosas que otras; ahora todas casi nítidas, con una variación mínima
+   * (de 0 a medio téxel).
+   */
+  esmerilado: { parte: 1, cuanto: [0, 0.15], texeles: 3.5 },
   /** [PULIDO 26] X4 · de noche el bisel atrapa las luces: el haz (cuánto y su radio, u) y las de la energía (cuánto y su dureza). */
   noche: { haz: 0.35, radioDelHaz: 2.4, luces: 1, dureza: 300 },
   /**
@@ -29,12 +33,17 @@ export const CRISTAL = {
    * de la luz de la sala en él; el filo (cuánto se aclara el canto de noche y se oscurece de día) y la tinta del cuerpo de día.
    */
   luz: { especular: [0.9, 1.6], dureza: 60, reflejo: [0.3, 0.38], lobulo: 0.08, filo: [0.65, 0.8], tinta: 0.06 },
+  /**
+   * [PULIDO 27] C2 · EL BRILLO DE NOCHE: con la luz de la sala por la cara de cada celda (inclinada a su modo), unas se ponían muy blancas y
+   * otras no. `?cristal-brillo=medio` (por defecto): todas con el promedio: el brillo con la normal del cilindro (sin la inclinación de la
+   * celda) y el lóbulo de todas juntas (más ancho y más bajo: la inclinación de ±9° sumada al lóbulo de 60); `no`: ninguna brilla de
+   * noche; `celdas`: el de antes (para comparar). De día, el de siempre.
+   */
+  brilloDeNoche: { dureza: 40, escala: 0.67, modos: ['celdas', 'medio', 'no'], porDefecto: 'medio' },
   /** [PULIDO 24] V1 · sin línea de quiebre: con `?vitral-filo=si`, un filo oscuro muy fino y tenue (cuánto oscurece, su ancho en px). */
   filo: { oscurece: 0.22, anchoPx: 0.8 },
   /** Aparece en (s). [PULIDO 23] U1 · quieto: sin giro ni respiración (sin temblor). */
   movimiento: { aparecenS: 2.5 },
-  /** Dónde se apaga la página (las secciones de papel opaco y el túnel) y el fundido alrededor (pantallas). */
-  donde: { apagadas: ['trabajos', 'tu-panel'], fundido: 0.35 },
   /**
    * El fondo que refractan, a esta fracción del búfer de dibujo. [PULIDO 24] V1 · con margen (`sobra`: el campo, tantas veces más ancho
    * y más alto): la refracción de los costados de la pantalla mira afuera del cuadro y ahí hay fondo (antes se desvanecía).
@@ -62,24 +71,18 @@ const suave = (x: number): number => {
 }
 
 /**
- * La amplitud por dónde está la página (0 a 1): 0 con el medio de la pantalla adentro de una sección apagada, 1 a más de `fundido`
- * pantallas de todas, el fundido entre medio. `bandas`: por sección apagada, su arriba y su abajo (px del documento); `centro`: el medio
- * de la pantalla (px del documento); `alto`: la pantalla (px).
+ * La amplitud del cuadro: se va con la cámara que sube en el final del pie (`camara` 0 a 1). [PULIDO 27] C3 · SIEMPRE A LA VISTA: antes
+ * también se apagaba con el medio de la pantalla cerca del túnel de Trabajos y de Tu panel (un fundido de 0,35 pantallas): en un viaje del
+ * navbar, con la página tapada por el velo y la escena a la vista, el cristal desaparecía al pasar por ahí (medido: a 0 desde ~4500 px yendo
+ * a Trabajos y en todo Tu panel). Ahora no depende de dónde está la página: en toda sección y en cualquier viaje.
  */
-export function amplitudPorDonde(centro: number, alto: number, bandas: ArrayLike<number>, cuantas: number): number {
-  let a = 1
-  const fundido = CRISTAL.donde.fundido * Math.max(1, alto)
-  for (let k = 0; k < cuantas; k += 1) {
-    const arriba = bandas[k * 2]
-    const abajo = bandas[k * 2 + 1]
-    if (!Number.isFinite(arriba) || !Number.isFinite(abajo)) continue
-    const fuera = centro < arriba ? arriba - centro : centro > abajo ? centro - abajo : 0
-    a = Math.min(a, suave(fuera / fundido))
-  }
-  return a
+export function amplitudDelCristal(camara: number): number {
+  return 1 - suave(camara)
 }
 
-/** La amplitud del cuadro: por dónde está la página y por el final del pie (se va con la cámara que sube, `camara` 0 a 1). */
-export function amplitudDelCristal(porDonde: number, camara: number): number {
-  return porDonde * (1 - suave(camara))
+/** [PULIDO 27] C2 · el modo del brillo de noche de la consulta (`?cristal-brillo=`): su lugar en `brilloDeNoche.modos`; si no, el por defecto. */
+export function modoDelBrilloDeNoche(valor: string | null): number {
+  const M = CRISTAL.brilloDeNoche
+  const k = (M.modos as readonly string[]).indexOf(valor ?? '')
+  return k >= 0 ? k : M.modos.indexOf(M.porDefecto)
 }

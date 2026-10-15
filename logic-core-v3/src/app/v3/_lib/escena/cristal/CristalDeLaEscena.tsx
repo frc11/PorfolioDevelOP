@@ -8,7 +8,7 @@ import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { VIVO } from '../entorno/vivo'
 import { EN_VIVO } from '../final/recorridoDelFinal'
 import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_FOLLOW_AZIMUTH_OFFSET_DEG } from '../probeLighting'
-import { CRISTAL, amplitudDelCristal, amplitudPorDonde } from './cristal'
+import { CRISTAL, amplitudDelCristal, modoDelBrilloDeNoche } from './cristal'
 import { crearElFondo, dibujarElFondo, soltarElFondo, type FondoDelCristal } from './fondo'
 import { armarElMuro, celdasDelMuro } from './muro'
 import { armarElVidrio, uniformesDelVidrio } from './vidrio'
@@ -18,7 +18,7 @@ const CELDAS = celdasDelMuro()
 
 /**
  * [PULIDO 20] R2 · EL CRISTAL EN LA ESCENA (`cristal.ts`, `muro.ts`, `vidrio.ts`, `fondo.ts`). Siempre, salvo `?cristal=no` o `?fondo=moire`
- * (el moiré solo) y con movimiento reducido; apagado en el túnel de Trabajos y en Tu panel (con un fundido) y con la cámara del final.
+ * (el moiré solo) y con movimiento reducido; se va con la cámara del final ([PULIDO 27] C3 · y nada más: en toda sección y en todo viaje).
  * Cada cuadro: la cámara de ESTE cuadro (el rig la mueve sin actualizar su matriz: el cristal de PULIDO 19 la leía del cuadro anterior y
  * vibraba), la luz de la sala y el fondo (sólo si se ve). [PULIDO 23] U1 · el muro continuo, sin máscaras: ni las cajas del texto ni el
  * rectángulo del logo (lo tapa la profundidad). Va al final del escenario: todo ya se movió.
@@ -29,12 +29,9 @@ interface Props {
   readonly logoGroupRef: React.RefObject<THREE.Group | null>
 }
 
-type VentanaDelBanco = Window & { __cristalDelBanco?: { estado: () => { amplitud: number; porDonde: number; celdas: number }; apagar: (apagado: boolean) => void } }
+type VentanaDelBanco = Window & { __cristalDelBanco?: { estado: () => { amplitud: number; celdas: number }; apagar: (apagado: boolean) => void } }
 
 interface Memoria {
-  readonly bandas: Float32Array
-  bandasEn: number
-  porDonde: number
   apagado: boolean
   aparece: number
 }
@@ -42,26 +39,6 @@ interface Memoria {
 const suave = (x: number): number => {
   const u = Math.min(1, Math.max(0, x))
   return u * u * (3 - 2 * u)
-}
-
-/** Dónde está la página: las bandas de las secciones apagadas (cada medio segundo) y la amplitud por el medio de la pantalla. */
-function porDondeVa(m: Memoria, ahora: number): number {
-  const S = CRISTAL.donde.apagadas
-  if (ahora - m.bandasEn > 500) {
-    m.bandasEn = ahora
-    for (let k = 0; k < S.length; k += 1) {
-      const el = document.getElementById(S[k])
-      if (el === null) {
-        m.bandas[k * 2] = Number.NaN
-        m.bandas[k * 2 + 1] = Number.NaN
-        continue
-      }
-      const r = el.getBoundingClientRect()
-      m.bandas[k * 2] = r.top + window.scrollY
-      m.bandas[k * 2 + 1] = r.bottom + window.scrollY
-    }
-  }
-  return amplitudPorDonde(window.scrollY + window.innerHeight / 2, window.innerHeight, m.bandas, S.length)
 }
 
 const NEGRO = new THREE.Color(0, 0, 0)
@@ -76,13 +53,16 @@ function CristalPrendido(): React.JSX.Element {
   const grupo = useRef<THREE.Group>(null)
   const uniformes = useRef(uniformesDelVidrio())
   const armado = useRef<{ readonly malla: THREE.Mesh; readonly fondo: FondoDelCristal } | null>(null)
-  const memoria = useRef<Memoria>({ bandas: new Float32Array(CRISTAL.donde.apagadas.length * 2).fill(Number.NaN), bandasEn: Number.NEGATIVE_INFINITY, porDonde: 1, apagado: false, aparece: 0 })
+  const memoria = useRef<Memoria>({ apagado: false, aparece: 0 })
   useEffect(() => {
     const g = grupo.current
     if (g === null) return undefined
     const u = uniformes.current
     // [PULIDO 24] V1 · `?vitral-filo=si`: el filo oscuro, muy fino, entre las celdas (para comparar; por defecto, sin línea).
-    u.uVitralFilo.value = new URLSearchParams(window.location.search).get('vitral-filo') === 'si' ? 1 : 0
+    const consulta = new URLSearchParams(window.location.search)
+    u.uVitralFilo.value = consulta.get('vitral-filo') === 'si' ? 1 : 0
+    // [PULIDO 27] C2 · `?cristal-brillo=medio|no|celdas`: el brillo de noche (por defecto, parejo).
+    u.uModoDelBrillo.value = modoDelBrilloDeNoche(consulta.get('cristal-brillo'))
     const malla = armarElVidrio(armarElMuro(CELDAS), u, CELDAS.length)
     const fondo = crearElFondo()
     armado.current = { malla, fondo }
@@ -90,7 +70,7 @@ function CristalPrendido(): React.JSX.Element {
     const ventana = window as VentanaDelBanco
     if (hayBanco()) {
       ventana.__cristalDelBanco = {
-        estado: () => ({ amplitud: u.uAmplitud.value, porDonde: memoria.current.porDonde, celdas: CELDAS.length }),
+        estado: () => ({ amplitud: u.uAmplitud.value, celdas: CELDAS.length }),
         apagar: (apagado) => {
           memoria.current.apagado = apagado
         },
@@ -111,10 +91,9 @@ function CristalPrendido(): React.JSX.Element {
     const m = memoria.current
     const u = uniformes.current
     const { malla, fondo } = a
-    // Aparece al montarse; después, la amplitud por dónde está la página y por el final.
+    // Aparece al montarse; después, la amplitud por el final.
     m.aparece = Math.min(1, m.aparece + Math.max(0, delta) / CRISTAL.movimiento.aparecenS)
-    m.porDonde = porDondeVa(m, performance.now())
-    const amplitud = m.apagado ? 0 : amplitudDelCristal(m.porDonde, EN_VIVO.camara) * suave(m.aparece)
+    const amplitud = m.apagado ? 0 : amplitudDelCristal(EN_VIVO.camara) * suave(m.aparece)
     u.uAmplitud.value = amplitud
     malla.visible = amplitud > 0.002
     if (!malla.visible) return
