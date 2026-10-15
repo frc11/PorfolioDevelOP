@@ -1030,8 +1030,8 @@
 - Nodo(s): h2.cli-resenas
 - Qué es: Botón self-service, wizard y selector para CONNECTED_NO_LOCATION('multiple'); P3-A.2 lo dejó diferido.
 - Referencias: tambien en :19 · docs/sprints/p3-a-2-venta.md:5, :134
-- Estado en código: **no empezado** — git grep -n "actions/gbp-connection'" origin/main -- src vacio; control: src/lib/actions/gbp-connection.ts:17 listAvailableLocations y :36 setActiveLocation existen (D2-c1, lector D2-L1)
-- ¿Sigue teniendo sentido?: si
+- Estado en código: **no empezado** — git grep -n "actions/gbp-connection" origin/main -- src -> vacio; control: git grep -n "actions/upsell'" origin/main -- src -> LockedView.tsx:27, seo/page.tsx:21, PremiumModuleCard.tsx:29. Las actions existen (src/lib/actions/gbp-connection.ts:17, :36) pero validan pertenencia contra el alcance del token (gbp-connection-logic.ts:263-264) y el OAuth es SUPER_ADMIN-only (google-business/start/route.ts:7). (D2-c2, lector D2-T1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-119] Venta y estados del Motor de Reseñas
 - Fuente: `docs/sprints/p3-a-2-venta.md:7` · tipo: hecho-declarado · estado declarado: hecho, verificación visual pendiente

@@ -937,6 +937,97 @@
    "patron": "Mutaciones del portal con dos resolvers de org (resolveOrgId en la página, session.user.organizationId en la action)",
    "como_buscarlo": "git grep -n \"session?.user?.organizationId\" origin/main -- logic-core-v3/src/lib/actions \"logic-core-v3/src/app/(protected)/dashboard\"",
    "donde_aparecio": "src/lib/actions/referrals.ts:14 vs referidos/page.tsx:27; src/lib/actions/upsell.ts:16"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "patron": "Texto de usuarios (clientes o anonimos) interpolado sin neutralizar en mensajeria con formato (Slack mrkdwn, Telegram Markdown/HTML, WhatsApp)",
+   "como_buscarlo": "git grep -n -E \"JSON.stringify\\(\\{ text|parse_mode|sendTelegram|hooks.slack|api.telegram.org\" origin/main -- src ; revisar si los campos de usuario se escapan antes",
+   "donde_aparecio": "src/lib/alerts.ts:64-65 y :134 (llamado desde tickets/actions.ts:92, messages.ts:160, upsell.ts:102, contact.ts:74). Cruzar con las alertas de Telegram del chatbot (D5, BUG-028)."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "patron": "Acciones que cambian estado en un GET disparado desde un link de email (baja, confirmacion, aprobacion)",
+   "como_buscarlo": "git grep -n \"export async function GET\" origin/main -- src/app/api y abrir los que hacen update/delete/create",
+   "donde_aparecio": "api/email/unsubscribe-executive/route.ts:103 y api/email/optout/[contactId]/route.ts:69; mismo patron que BUG-007 (magic link)."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "patron": "Funciones con costo de LLM sin gate de plan del lado server",
+   "como_buscarlo": "git grep -n -E \"generateText\\(|messages\\.create\\(|getLLMProvider\\(\" origin/main -- src y verificar planAllows/getPlanForOrg en el camino que las llama",
+   "donde_aparecio": "executive-brief.ts:96/:185/:237, results-insights.ts (traffic/seo), cron regenerate-briefs; control con gate: resultados/analisis/page.tsx:36, api/reports/client-monthly/route.ts:31."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "patron": "Pertenencia validada contra el alcance de un token OAuth que obtiene develOP, no contra la org",
+   "como_buscarlo": "git grep -n -E \"getAccessToken\\(orgId\\)|discoverLocations|getAuthedClient\\(\" origin/main -- src/lib/integrations y revisar quien inicia el OAuth (start routes)",
+   "donde_aparecio": "gbp-connection-logic.ts:263-264 con OAuth SUPER_ADMIN-only (google-business/start/route.ts:7). Cruzar en D7 con Tiendanube (tiendanube/start/route.ts SUPER_ADMIN-only) y Cal.com."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "patron": "Check-then-act en acciones de estado: lectura fuera de la transaccion y update sin condicion del estado esperado",
+   "como_buscarlo": "git grep -n -E \"Status !== '|status !== '\" origin/main -- src/actions src/lib/actions \"src/app/(protected)\" y mirar si el update siguiente repite la condicion en el where",
+   "donde_aparecio": "dashboard-actions.ts:39/:44 y :127/:132; antes SEC-043 (brief) y BUG-025 (envio de campana)."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "patron": "Escrituras a la base dentro de layouts/pages (camino de lectura) sin lector",
+   "como_buscarlo": "git grep -n -E \"prisma\\.[a-zA-Z]+\\.(update|upsert|create)\\(\" origin/main -- \"src/app/**/layout.tsx\" \"src/app/**/page.tsx\"",
+   "donde_aparecio": "dashboard/layout.tsx:80 (lastDashboardVisit); antes PERF-005 (getPlanForOrg escribe al leer)."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "patron": "Decisiones de control (dedup, rate, gates) tomadas sobre tablas globales que tambien escribe un formulario publico",
+   "como_buscarlo": "git grep -n -E \"contactSubmission\\.(findFirst|findMany|count)\" origin/main -- src",
+   "donde_aparecio": "upsell.ts:81-87 (dedup) y los conteos de SEC-048."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "patron": "Para D3: createClientAssetAction sin Zod (url, type y description sin validar) que el portal pinta como href en la Boveda",
+   "como_buscarlo": "leer src/actions/agency-actions.ts:94-111 y git grep -n \"createClientAssetAction\" origin/main -- src",
+   "donde_aparecio": "agency-actions.ts:103 escribe; cuenta/boveda/page.tsx:212 y VaultRevealButton.tsx:106 renderizan asset.url (React 19.2.3 neutraliza javascript:, pero acepta cualquier otra URL)."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "patron": "Texto de usuarios, visitantes o leads interpolado sin escapar en mensajes a canales con formato propio (Slack mrkdwn, Telegram HTML/Markdown)",
+   "como_buscarlo": "git grep -n -E \"sendAgencyAlert\\(|notifyTelegramOptional\\(|sendTelegram\\(\" origin/main -- logic-core-v3/src y revisar qué campos vienen de clientes, visitantes o leads. telegram.ts:86 usa parse_mode HTML por defecto y notifyTelegramOptional (:117) usa Markdown; os-follow-up/route.ts:82 sí escapa, que sirve de control.",
+   "donde_aparecio": "src/lib/alerts.ts:64-65, llamado desde tickets/actions.ts:92, messages.ts:157, upsell.ts:102, contact.ts:74, referrals.service.ts:144 y modules/chatbot/server/quota/upsellAlert.ts:69. Cruzar en D4 (lib/leados/notify.ts:67/114/160, ZONA-FRANCO) y en D5 (los llamadores de notifyTelegramOptional)."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "patron": "Cambios de estado en un GET que llega por link de email (bajas, tokens de un solo uso): los dispara el escáner del correo",
+   "como_buscarlo": "git grep -n -E \"export async function GET\" origin/main -- logic-core-v3/src/app/api y quedarse con los handlers que llaman a prisma.*.(update|updateMany|delete|create|upsert).",
+   "donde_aparecio": "src/app/api/email/unsubscribe-executive/route.ts:103 y src/app/api/email/optout/[contactId]/route.ts:69; antes, BUG-007 en el callback del magic link."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "patron": "Datos de terceros no confiables (chats de visitantes, reseñas de Google, consultas de Search Console, paths de GA4, webs que scrapea LeadOS) metidos en prompts de LLM cuya salida se muestra como recomendación o se publica",
+   "como_buscarlo": "git grep -n -E \"generateObject\\(|generateText\\(|streamText\\(|messages\\.create\\(\" origin/main -- logic-core-v3/src y, en cada llamada, mirar qué entra al prompt y dónde termina la salida.",
+   "donde_aparecio": "modules/chatbot/server/insights/generateInsights.ts:66/106 y lib/ai/results-insights.ts:82/133. Revisar en D5 (review-reply-draft, SEC-051) y en D4 (dossier y demos de LeadOS)."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "patron": "Tags de unstable_cache que ninguna mutación revalida: el dato queda viejo después de actuar (TTL de 5 min a 24 h)",
+   "como_buscarlo": "Comparar git grep -n \"tags: \\[\" origin/main -- logic-core-v3/src con git grep -n \"revalidateTag(\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "lib/dashboard/attention.ts:29: «Tenés N mensajes nuevos» y «Una entrega espera tu aprobación» siguen hasta 300 s después de leer o aprobar. También health-score.ts:63, week-results.ts:22, dashboard/layout.tsx:26/61 y results-insights.ts:40/50. Es un tema de UX/bug para otro ciclo."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "patron": "Firmas HMAC que caen a AUTH_SECRET cuando falta su env propia (sin separación de claves)",
+   "como_buscarlo": "git grep -n \"AUTH_SECRET\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/lib/email/unsubscribe-token.ts:7-9 (tokens de baja del reporte y de email marketing); el mismo patrón ya está registrado para la impersonación en SEC-020."
   }
  ]
 }

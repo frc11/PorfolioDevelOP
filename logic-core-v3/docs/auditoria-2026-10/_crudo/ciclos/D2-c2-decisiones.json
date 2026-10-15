@@ -1,0 +1,29 @@
+{
+ "D2-c2/D2-T1/H01": {
+  "decision": "aceptar", "verificado_padre": true, "caso_indice": 3, "relacionados_ids": ["SEC-051", "FAL-011"],
+  "nota_padre": "Muestreo DEC-37: se sostiene (google-business/start/route.ts:7 exige SUPER_ADMIN, así que el consentimiento de Google ocurre en la sesión del admin; listAvailableLocations y setActiveLocation, src/lib/actions/gbp-connection.ts:17-60, toman la org de la sesión y validan la ubicación contra lo que ve ese token; git grep de sus importadores: solo la definición y el invariante). Latente: hoy nadie las llama."
+ },
+ "D2-c2/D2-T1/H02": {
+  "decision": "aceptar", "caso_indice": 0,
+  "titulo": "Texto de clientes y de visitantes anónimos llega sin neutralizar al webhook de alertas (Slack): menciones <!channel>/<!here> y enlaces con texto engañoso en el canal interno de develOP"
+ },
+ "D2-c2/D2-T2/H01": {
+  "decision": "fusionar", "con": "D2-c2/D2-T1/H02", "verificado_padre": true,
+  "nota_padre": "Muestreo DEC-37: se sostiene (alerts.ts:59-66 interpola clientName y detail tal cual y :131-135 los manda como text del webhook; los llamadores pasan título de ticket, mensaje, featureName y los campos del formulario público). Mismo hallazgo que D2-T1/H02."
+ },
+ "D2-c2/D2-T1/H03": {
+  "decision": "aceptar", "prefijo": "BUG", "tipo": "bug", "caso_indice": 2, "relacionados_ids": ["SEC-043"],
+  "titulo": "El resumen ejecutivo IA y los insights IA de Tráfico y SEO no consultan el plan: Starter los recibe (y el cron los regenera) aunque la vitrina de planes los vende como mejora a Pro"
+ },
+ "D2-c2/D2-T1/H04": {
+  "decision": "aceptar", "caso_indice": 1, "relacionados_ids": ["BUG-007", "BUG-021"],
+  "titulo": "Las bajas de un clic se ejecutan en el GET: un escáner de enlaces del correo da de baja al dueño del reporte semanal y a los contactos de las campañas sin que nadie haga clic"
+ },
+ "D2-c2/D2-T2/H02": { "decision": "fusionar", "con": "D2-c2/D2-T1/H04", "nota_padre": "Mismo hallazgo (unsubscribe-executive y optout escriben en el GET)." },
+ "D2-c2/D2-T2/H03": { "decision": "aceptar", "dominio": "D5", "caso_indice": 2 },
+ "D2-c2/D2-T1/H06": {
+  "decision": "aceptar", "verificado_padre": true, "relacionados_ids": ["SEC-048", "SEC-047"],
+  "nota_padre": "Muestreo DEC-37: se sostiene (upsell.ts:81-87 deduplica por email y service contra ContactSubmission; contact.ts:62 crea ContactSubmission desde el formulario público con email y service libres, schemas.ts:61)."
+ },
+ "D2-c2/D2-T1/H07": { "decision": "fusionar", "con": "BUG-059", "nota_padre": "Misma causa que BUG-059 (URL base de los links de email tomada del entorno con un respaldo inseguro); suma que el pie de baja se congela en el borrador al crear la campaña." }
+}

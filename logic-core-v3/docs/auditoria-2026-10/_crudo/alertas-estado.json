@@ -428,6 +428,14 @@
    "alerta": "[D2-A7] Avatar en base64 en la base: ¿tamaño máximo validado en servidor?",
    "resultado": "parcial",
    "evidencia": "El avatar sigue como data URL en la base (no hay storage externo), pero el servidor lo acota: avatarImageUrlSchema.ts:10-23 (MAX_AVATAR_URL_LENGTH 600000 y tipos png/jpeg/webp), usado por updateBotAppearance.ts:36-38 del cliente. El riesgo de tamaño ilimitado queda descartado; la decisión de storage externo sigue abierta."
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "alerta": "Hipotesis de SEC-051: el token OAuth de GBP de cada org podria ser de una cuenta de agencia de develOP que administra varias fichas",
+   "resultado": "parcial",
+   "evidencia": "Sube de HIPOTESIS a PROBABLE por lectura: el start y el callback del OAuth exigen SUPER_ADMIN (src/app/api/auth/google-business/start/route.ts:7, callback/route.ts:15) y el callback guarda los tokens en la org del state (callback/route.ts:49-52), asi que el consentimiento de Google ocurre en el navegador del admin con la cuenta que el admin use. Falta confirmar en runtime que cuenta se usa (no hay cuenta GBP de prueba, PLAN-112/117).",
+   "hallazgo_titulo": "Acciones del motor de reseñas sin Zod ni rate limit: rating, nombre y texto que van al LLM los manda el navegador, reviewName se interpola en la URL de Google y los errores crudos vuelven al cliente"
   }
  ]
 }

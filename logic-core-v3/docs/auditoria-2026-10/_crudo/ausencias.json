@@ -1217,6 +1217,125 @@
    "afirmacion": "components/dashboard/TicketStatusSelector.tsx no tiene importadores",
    "comando": "git grep -n TicketStatusSelector origin/main -- logic-core-v3/src → solo su definición (TicketStatusSelector.tsx:16)",
    "control_positivo": "git grep -n \"ResolveTicketButton'\" origin/main -- logic-core-v3/src → soporte/[ticketId]/page.tsx:18"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "afirmacion": "src/lib/actions/gbp-connection.ts (listAvailableLocations, setActiveLocation) no tiene importadores en src",
+   "comando": "git grep -n \"actions/gbp-connection\" origin/main -- src ; git grep -n -E \"listAvailableLocations|setActiveLocation\\(\" origin/main -- src (filtrando el propio modulo, la logica y los invariantes) -> vacio",
+   "control_positivo": "git grep -n \"actions/upsell'\" origin/main -- src -> LockedView.tsx:27, seo/page.tsx:21, PremiumModuleCard.tsx:29"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "afirmacion": "El brief IA, su regeneracion, su cron y los insights IA de Trafico/SEO no consultan el plan",
+   "comando": "git grep -n -E \"planAllows|getPlanForOrg|reportEligiblePlan|insightEnabled|reportsEnabled\" origin/main -- src/lib/ai/executive-brief.ts src/lib/ai/results-insights.ts \"src/app/(protected)/dashboard/_actions/regenerate-brief.ts\" src/app/api/cron/regenerate-briefs/route.ts \"src/app/(protected)/dashboard/resultados/trafico/page.tsx\" \"src/app/(protected)/dashboard/resultados/seo/page.tsx\" -> vacio",
+   "control_positivo": "git grep -n planAllows origin/main -- \"src/app/(protected)/dashboard/resultados/analisis/page.tsx\" src/app/api/reports/client-monthly/route.ts -> analisis/page.tsx:6, :36 y client-monthly/route.ts:10"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "afirmacion": "src/lib/alerts.ts no escapa ni neutraliza el texto que manda al webhook",
+   "comando": "git grep -n -E \"&lt;|&amp;|escape|replace\\(\" origin/main -- src/lib/alerts.ts -> vacio",
+   "control_positivo": "git grep -n \"function escapeHtml\" origin/main -- src/lib/email/templates/executive-weekly.ts src/lib/client-notifications/templates.ts -> executive-weekly.ts:55, templates.ts:49"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "afirmacion": "Las rutas de baja no tienen paso de confirmacion: el GET escribe",
+   "comando": "git grep -n -i -E \"confirm|<form|method=\" origin/main -- src/app/api/email/unsubscribe-executive/route.ts \"src/app/api/email/optout/[contactId]/route.ts\" -> vacio",
+   "control_positivo": "git grep -n \"List-Unsubscribe-Post\" origin/main -- src/lib/reports/executive-weekly/send.ts -> send.ts:175"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "afirmacion": "User.lastDashboardVisit no tiene lector",
+   "comando": "git grep -n \"lastDashboardVisit\" origin/main -- . \":!docs\" -> solo AGENTS.md:120, la migracion 20260427194426, schema.prisma:299 y el escritor dashboard/layout.tsx:83/:86",
+   "control_positivo": "El mismo comando encuentra el escritor (layout.tsx:83), lo que prueba que el patron matchea codigo de src"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "afirmacion": "No hay dangerouslySetInnerHTML/innerHTML/srcDoc en el portal",
+   "comando": "git grep -n \"dangerouslySetInnerHTML\\|innerHTML\\|srcDoc\\|srcdoc\" origin/main -- src (sin __tests__)",
+   "control_positivo": "Unico resultado: src/components/layout/EarlyScrollLock.tsx:37 (script estatico), fuera del portal"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "afirmacion": "No hay asignacion masiva (spread de input/FormData a Prisma) en las actions del portal",
+   "comando": "git grep -n -E \"data: (input|params|formData|body|values|parsed\\.data)\\b|\\.\\.\\.(input|params|body|values|parsed\\.data)\\b\" origin/main -- src/lib/actions src/lib/tickets src/actions \"src/app/(protected)/dashboard\" src/app/bienvenida src/components/dashboard -> vacio",
+   "control_positivo": "grep -rn \"parsed\\.data\" src/lib/actions -> clients.ts:95, :100, :101"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "afirmacion": "Solo email-marketing escribe contactos en Brevo",
+   "comando": "git grep -n \"api.brevo.com\\|/v3/contacts\\|syncContact(\" origin/main -- src scripts -> email-marketing/_actions.ts:105 y la definicion en brevo.ts",
+   "control_positivo": "brevo.ts:1 (API_BASE) y brevo.ts:31 (syncContact) aparecen en el mismo resultado"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "afirmacion": "Notification.actionUrl solo se escribe con rutas literales (no hay URL dinamica de usuario que router.push pueda seguir)",
+   "comando": "git grep -n \"actionUrl\" origin/main -- src | grep -v \"__tests__\\|notif.actionUrl\\|actionUrl: '/\\|actionUrl: `/\\|actionUrl?:\\|actionUrl: string\" -> vacio",
+   "control_positivo": "Sin el filtro, git grep -n \"actionUrl: '/\" encuentra literales como dashboard-actions.ts:57"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T1",
+   "afirmacion": "Ningun codigo asigna el rol CLIENT",
+   "comando": "git grep -n \"'CLIENT'\\|\\\"CLIENT\\\"\\|Role.CLIENT\" origin/main -- src prisma scripts -> solo migraciones, projects-filters.ts (otro concepto) y auth.config.ts:4 (tipo)",
+   "control_positivo": "El mismo comando encuentra la migracion 20260519232631 que agrega el valor al enum"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "afirmacion": "Ninguna action ni ruta del portal pasa con spread el input del cliente a Prisma (asignación masiva)",
+   "comando": "git grep -n -E \"data: \\{?\\s*\\.\\.\\.(parsed|input|body|data|values|formData|params)|data: (parsed\\.data|input|body|values)\\b|Object\\.fromEntries\\(formData\" origin/main -- 'logic-core-v3/src/app/(protected)/dashboard' logic-core-v3/src/lib/actions logic-core-v3/src/actions logic-core-v3/src/app/bienvenida logic-core-v3/src/components/dashboard logic-core-v3/src/lib/tickets logic-core-v3/src/app/api/dashboard  → 0 resultados",
+   "control_positivo": "El mismo patrón sobre logic-core-v3/src encuentra src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts:74 (data: parsed.data) y src/lib/os-commercial.ts:138 (data: input)"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "afirmacion": "No hay HTML crudo ni markdown renderizado en el portal, en /bienvenida ni en los PDF del lote",
+   "comando": "git grep -n -E \"dangerouslySetInnerHTML|ReactMarkdown\" origin/main -- 'logic-core-v3/src/app/(protected)/dashboard' logic-core-v3/src/components/dashboard logic-core-v3/src/lib/reports logic-core-v3/src/app/bienvenida  → 0 resultados",
+   "control_positivo": "Sobre logic-core-v3/src aparecen src/components/layout/EarlyScrollLock.tsx:37 y src/modules/chatbot/components/admin/kb/MarkdownEditor.tsx:4"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "afirmacion": "El portal no redirige ni navega a destinos tomados de query params (next, returnTo, redirect, callbackUrl, url, to)",
+   "comando": "git grep -n -E \"searchParams\\.get\\(['\\\"](next|returnTo|redirect|redirectTo|callbackUrl|url|to)['\\\"]\\)|searchParams\\??\\.(next|returnTo|redirect|callbackUrl)\\b\" origin/main -- 'logic-core-v3/src/app/(protected)/dashboard' logic-core-v3/src/components/dashboard logic-core-v3/src/app/bienvenida  → 0 resultados",
+   "control_positivo": "Sobre logic-core-v3/src aparecen src/proxy.ts:80 (callbackUrl) y src/app/(protected)/admin/leads/_components/inbound-period-filter.tsx:54"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "afirmacion": "lib/alerts.ts no escapa ni neutraliza el texto que manda al webhook",
+   "comando": "git grep -n -i -E \"escape|&lt;|&amp;\" origin/main -- logic-core-v3/src/lib/alerts.ts  → 0 resultados",
+   "control_positivo": "git grep -n 'function escapeHtml' origin/main -- logic-core-v3/src/lib/email/templates/executive-weekly.ts → :55"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "afirmacion": "Los prompts de insights (chatbot y Resultados) no delimitan ni marcan como no confiables los datos de visitantes, GA4 y Search Console",
+   "comando": "git grep -n -i -E \"no confiable|untrusted|instrucciones (de|del|en) (los|las) (datos|mensajes|conversaciones)|ignor\" origin/main -- logic-core-v3/src/modules/chatbot/server/insights/generateInsights.ts logic-core-v3/src/lib/ai/results-insights.ts  → 0 resultados",
+   "control_positivo": "git grep -n 'NO inventes datos' origin/main -- logic-core-v3/src/modules/chatbot/server/insights/generateInsights.ts → :90 (el grep sí lee el texto del prompt)"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "afirmacion": "Las rutas de baja por email no tienen paso de confirmación antes de escribir",
+   "comando": "git grep -n -i \"confirm\" origin/main -- logic-core-v3/src/app/api/email  → 0 resultados",
+   "control_positivo": "git grep -n -i confirm origin/main -- logic-core-v3/src/app/api/auth → src/app/api/auth/tiendanube/callback/route.ts:14"
+  },
+  {
+   "ciclo": "D2-c2",
+   "lote": "D2-T2",
+   "afirmacion": "Ninguna mutación revalida los tags attention-items, health-score, week-results, org-meta, org-modules ni insights del portal",
+   "comando": "git grep -n -E \"revalidateTag\\(\\s*`(attention-items|health-score|week-results|org-meta|org-modules|insights)\" origin/main -- logic-core-v3/src  → 0 resultados",
+   "control_positivo": "git grep -n 'revalidateTag(`unread-messages' origin/main -- logic-core-v3/src → src/app/(protected)/dashboard/messages/_actions/mark-read.ts:20; hot-leads-count sí se revalida en src/modules/chatbot/server/admin/updateLeadStatus.ts:88"
   }
  ]
 }

@@ -317,6 +317,39 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h2.cli-resenas, int.gbp, int.anthropic, lib.ai, h2.cli-resenas.responder-resenas-con-ia, lib.rate-limit
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-056
 
+### [SEC-053] El selector de sucursal GBP 'self-service' valida la pertenencia contra lo que ve el token, y ese token lo obtiene un SUPER_ADMIN: con la cuenta de Google de develOP un cliente podria listar y adoptar fichas de otros clientes (latente, sin importadores)
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/api/auth/google-business/start/route.ts:7` — «if (!session?.user || session.user.role !== 'SUPER_ADMIN') {»; `src/app/api/auth/google-business/callback/route.ts:49` — «await prisma.organization.update({ where: { id: orgId }, data: { gbpAccessToken: tokens.access_token, ...»; `src/lib/actions/gbp-connection.ts:15` — «* SUPER_ADMIN no tiene organizationId → no puede usarlo; es self-service del dueño.»; `src/lib/integrations/gbp-connection-logic.ts:263` — «const { locations } = await discoverLocations(accessToken, deps) const hit = findLocationInList(locations, locationId)»; `src/lib/integrations/gbp-connection-logic.ts:241` — «return locations.map((l) => ({ ... title: l.title, address: l.address,»; `docs/sprints/p3-a-1-gbp-connection.md:116` — «tokens de la propia org) + persiste el compuesto + one-shot. Ninguna location cross-org es alcanzable.»; `src/lib/integrations/google-business-profile.ts:341` — «'https://mybusiness.googleapis.com/v4/${org.gbpLocationId}/reviews?pageSize=50',»
+- Impacto: Hoy no es explotable: listAvailableLocations y setActiveLocation no tienen importadores (POD-059) y el start del OAuth no esta enlazado (FAL-011). Pero el diseno afirma que ninguna ficha de otra org es alcanzable apoyandose en un supuesto que el codigo no garantiza: el consentimiento de Google ocurre en la sesion del SUPER_ADMIN, asi que si develOP conecta las fichas con su cuenta de agencia (la que administra las fichas de varios clientes), el token guardado en cada org ve todas esas fichas. El dia que P3-A.2 (PLAN-118) monte el selector self-service, el primer cliente real veria nombre y direccion de las fichas de los demas clientes y podria fijar una ajena como propia: su portal mostraria las resenas y metricas de otro negocio y publicaria respuestas en el Google de ese otro negocio.
+- Propuesta: Antes de construir el selector, decidir con que cuenta de Google se conecta cada org. Si es la de develOP: la ubicacion de cada org la fija solo el SUPER_ADMIN (action con requireSuperAdmin), el cliente no lista ubicaciones, y replyToReview/listReviews verifican que el recurso cuelgue de org.gbpLocationId. Si es la del cliente: el OAuth lo tiene que poder iniciar el dueno (hoy es SUPER_ADMIN-only) y el token deja de ser de develOP. Mientras tanto, podar gbp-connection.ts (POD-059) o marcarlo como no apto para el cliente.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-051], [FAL-011]
+- Nodo(s): h2.cli-resenas, h2.cli-resenas.publicar-respuesta, h2.cli-resultados.reputacion-gbp, int.gbp, lib.actions, modelo.Organization
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-060
+
+### [SEC-054] Texto de clientes y de visitantes anónimos llega sin neutralizar al webhook de alertas (Slack): menciones <!channel>/<!here> y enlaces con texto engañoso en el canal interno de develOP
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/alerts.ts:64` — «'🏢 Cliente: ${event.clientName}', '💬 ${event.detail}',»; `src/lib/alerts.ts:134` — «body: JSON.stringify({ text: formatAlertMessage(event) }),»; `src/lib/tickets/actions.ts:92` — «detail: ticket.title,»; `src/lib/actions/messages.ts:160` — «? '${parsedMessage.data.content.slice(0, 160)}...'»; `src/lib/actions/upsell.ts:102` — «detail: 'Solicitó activar ${parsed.data.featureName}. Contacto: ${user.email}.',»; `src/lib/actions/contact.ts:74` — «clientName: payload.company || payload.name,»; `src/app/(protected)/admin/settings/_components/settings-console.tsx:267` — «placeholder="https://hooks.slack.com/..."»; `src/lib/actions/messages.ts:157` — «clientName: org.companyName, detail: parsedMessage.data.content.length > 160»; `src/lib/actions/schemas.ts:16` — «companyName: z.string().trim().min(2, 'La empresa debe tener al menos 2 caracteres.'),»
+- Impacto: Con el webhook de Slack configurado (el destino que sugiere el panel), un cliente (titulo de ticket Alta/Urgente, mensaje, nombre del modulo pedido, nombre de empresa) o cualquier visitante anonimo del formulario publico (nombre, empresa, servicio) controla texto que Slack interpreta como formato: puede notificar a todo el canal con <!channel>/<!here> y publicar enlaces disfrazados (<https://sitio-falso|Abrir ticket en el admin>) dentro de una alerta que el equipo toma como del sistema. Es un vector de phishing contra quien tiene la cuenta SUPER_ADMIN y de ruido en el canal; ningun campo tiene tope de largo (SEC-047, SEC-032).
+- Propuesta: Decision para Valentino (src/lib/alerts.ts es congelado): escapar &, < y > en formatAlertMessage (formato de escape de Slack) o enviar los campos del usuario como texto plano en un bloque sin mrkdwn, y truncarlos. Alternativa en zona libre: neutralizar y truncar en los llamadores (tickets/actions.ts, messages.ts, upsell.ts, contact.ts) antes de llamar a sendAgencyAlert.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): h2.cli-soporte.crear-ticket, h2.cli-mensajes.enviar-mensaje, h2.cli-servicios.solicitar-modulo, h6.vis-contacto, h4.adm-config, lib.alerts, int.slack, h2.cli-soporte, h2.cli-mensajes, h2.cli-servicios, int.webhook-alertas
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-061
+
+### [SEC-056] Inyección indirecta de instrucciones: lo que un visitante escribe en el widget entra al prompt de los insights y vuelve al dueño como «Qué podés hacer», firmado por develOP y sin revisión
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/insights/generateInsights.ts:62` — «.filter((message) => message.role === 'USER') .map((message) => message.content)»; `src/modules/chatbot/server/insights/generateInsights.ts:66` — «return '[Conv ${index + 1}, path=${conversation.currentPath ?? '/'}, leadCaptured=${conversation.leadCaptured}]: ${userMessages.slice(0, 400)}'»; `src/modules/chatbot/server/insights/generateInsights.ts:106` — «prompt: 'Conversaciones a analizar:\n\n${conversationsSummary}',»; `src/modules/chatbot/server/insights/generateInsights.ts:123` — «suggestedAction: insight.suggestedAction, evidenceCount: insight.evidenceCount, status: 'PENDING',»; `src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts:62` — «where: { botConfigId, status: { in: ['PENDING', 'APPLIED'] } },»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:38` — «develOP revisa las conversaciones de tu asistente y te cuenta qué encontró»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:87` — «{insight.suggestedAction} (bajo el rótulo «Qué podés hacer», :84)»; `src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx:280` — «<Text>{insight.suggestedAction}</Text>»; `netlify.toml:25` — «[functions."generate-insights-cron"] schedule = "0 9 * * *"»; `src/lib/ai/results-insights.ts:133` — «'- "${q.query}": ${q.impressions} imp, ${q.clicks} clicks, posición ${q.position.toFixed(1)}' (mismo patrón con los pagePath de GA4 en :82)»
+- Impacto: Bloqueante para el primer cliente Pro o Business con el análisis activo. Un visitante anónimo que abra 10 o más conversaciones en el widget (el mínimo está en :45) puede dictarle al modelo el texto de los «descubrimientos». El cron diario los publica como PENDING, sin revisión humana, y el cliente los ve en Resultados > Análisis y en el PDF mensual bajo «Qué podés hacer», con un copy que asegura que develOP revisó las conversaciones. Ejemplos: «cambiá el WhatsApp de derivación al +54…», «agregá a la KB que los pagos van al alias X», «contactá a tal proveedor». Las respuestas del modelo admiten hasta 500 caracteres por campo (:17). Hoy está latente por la credencial de Vertex vencida.
+- Propuesta: Tratar como datos no confiables los mensajes de visitantes, el currentPath y las consultas y paths de GA4/Search Console: delimitarlos en un bloque etiquetado e instruir al modelo a no seguir instrucciones que vengan adentro. No mostrarle al cliente insights PENDING; publicar solo los que develOP revisó (hoy actOnInsight no tiene pantalla, BUG-023) o, al menos, filtrar en la salida teléfonos, URLs, CBU/alias y pedidos de cambio de contacto. Corregir el copy «develOP revisa» para que diga lo que realmente pasa. El generador es del dominio D5.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados, h3.vis-widget-cliente, lib.chatbot.insights, modelo.ChatbotInsight, int.vertex, int.cron.generate-insights
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-064
+
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -535,6 +568,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h2.cli-referidos, h6.vis-contacto, h6.vis-contacto.atribucion-de-referido, modelo.Referral, lib.referrals
+
+### [SEC-055] La deduplicacion del pedido de upsell consulta ContactSubmission, que tambien escribe el formulario publico anonimo: un visitante puede silenciar 24 h el aviso del pedido de un cliente
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/actions/upsell.ts:82` — «where: { email: user.email, service: parsed.data.featureKey },»; `src/lib/actions/upsell.ts:79` — «// así que la consulta queda auto-scopeada al propio cliente (no puede leer submissions»; `src/lib/actions/upsell.ts:87` — «if (shouldCreateUpsellSubmission(lastSubmission?.createdAt ?? null, new Date())) {»; `src/lib/actions/contact.ts:62` — «await prisma.contactSubmission.create({ // formulario publico, email y service libres»; `src/lib/actions/schemas.ts:61` — «service: z.string().trim().optional().nullable(),»
+- Impacto: Quien conozca el email de acceso de un cliente puede mandar el formulario publico con ese email y service igual al slug del modulo (por ejemplo 'motor-resenas'); durante 24 h los pedidos de ese cliente no crean el lead en /admin/leads, ni la alerta, ni las notificaciones (solo sube el contador de OrganizationModule). Impacto acotado, pero el comentario afirma un aislamiento que una tabla global escrita por anonimos no da.
+- Propuesta: Deduplicar contra la propia fila OrganizationModule (leer upsellLastRequestedAt antes del upsert) o marcar los ContactSubmission de upsell con un discriminador que solo escriba esta action (servicio con prefijo y organizacion), nunca por email libre.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-048], [SEC-047]
+- Nodo(s): h2.cli-servicios.solicitar-modulo, h6.vis-contacto, modelo.ContactSubmission, modelo.OrganizationModule, lib.actions
 
 ## Bugs latentes
 
@@ -936,6 +979,28 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h2.cli-reportes-email.reporte-semanal, h4.adm-clientes, modelo.ExecutiveBriefSnapshot, lib.reports, int.vertex
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-059
 
+### [BUG-060] El resumen ejecutivo IA y los insights IA de Tráfico y SEO no consultan el plan: Starter los recibe (y el cron los regenera) aunque la vitrina de planes los vende como mejora a Pro
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/page.tsx:193` — «brief = await getExecutiveBrief(organizationId) // sin planAllows; el semaforo si lo tiene en :121»; `src/lib/ai/executive-brief.ts:96` — «const generation = await generateBriefText( // cache vencido: llama al LLM sin mirar el plan»; `src/app/(protected)/dashboard/_actions/regenerate-brief.ts:19` — «const result = await regenerateExecutiveBrief(orgId.data)»; `src/app/api/cron/regenerate-briefs/route.ts:29` — «subscription: { is: { status: 'ACTIVE' } }, // unico filtro junto a onboardingCompleted»; `src/lib/plan/plan-presentation.ts:154` — «{ icon: Sparkles, label: 'Resumen ejecutivo de tu negocio' }, // nextTierTeaser de STARTER»; `prisma/seeds/sync-plans.ts:77` — «insightEnabled: false, // plan STARTER (reportsEnabled: false en :76)»; `src/app/(protected)/dashboard/resultados/trafico/page.tsx:168` — «: await getTrafficInsights({»; `src/app/(protected)/dashboard/resultados/analisis/page.tsx:36` — «const showAnalysis = planAllows(plan, 'insight') // control: aca si hay gate»
+- Impacto: Un primer cliente Starter ve en /dashboard/plan que el 'Resumen ejecutivo de tu negocio' es del plan siguiente, pero el Inicio se lo genera con LLM (gemini-2.5-flash), le deja regenerarlo 3 veces por semana y el cron semanal se lo rehace; Trafico y SEO le muestran insights de Claude Haiku. develOP paga el LLM de un beneficio que no cobra y el upsell a Pro pierde su argumento. El gate de 'analisis con IA' (insightEnabled) solo se aplica en Analisis y en el PDF mensual.
+- Propuesta: Decidir si el brief y los insights son de todos los planes (y corregir plan-presentation.ts) o de Pro/Business. En el segundo caso, gatear del lado server con planAllows(plan, 'insight') (o reportEligiblePlan) en getExecutiveBrief/BriefServerWrapper, regenerateBriefAction, el cron regenerate-briefs y antes de getTrafficInsights/getSeoInsights, mostrando un teaser como AnalysisTeaser.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-043]
+- Nodo(s): h2.cli-inicio.resumen-ejecutivo-ia, h2.cli-resultados.insights-ia, h2.cli-plan.vitrina-de-planes-y-upgrade, lib.plan, lib.ai, int.vertex, int.anthropic, int.cron.regenerate-briefs
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-062
+
+### [BUG-061] Las bajas de un clic se ejecutan en el GET: un escáner de enlaces del correo da de baja al dueño del reporte semanal y a los contactos de las campañas sin que nadie haga clic
+- Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/email/unsubscribe-executive/route.ts:103` — «export async function GET(request: Request) { return handle(request)»; `src/app/api/email/unsubscribe-executive/route.ts:77` — «data: { executiveReportOptOut: true },»; `src/app/api/email/optout/[contactId]/route.ts:93` — «data: { optedOut: true, optedOutAt: new Date() }, // dentro del GET de :69»; `src/lib/email/templates/executive-weekly.ts:289` — «<a href="${escapeHtml(input.unsubscribeUrl)}" ...>Dejar de recibir este reporte</a>»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:155` — «<a href="${appUrl}/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}"»; `src/lib/reports/executive-weekly/build.ts:99` — «if (org.executiveReportOptOut || org.executiveReportFrequency === 'DISABLED') {»; `src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts:41` — «...(parsed.data.frequency !== 'DISABLED' ? { executiveReportOptOut: false } : {}),»; `src/app/api/email/unsubscribe-executive/route.ts:75` — «await prisma.organization.update({ where: { id: orgId }, data: { executiveReportOptOut: true },»; `src/lib/reports/executive-weekly/build.ts:191` — «unsubscribeUrl: buildUnsubscribeUrl(organizationId),»; `src/app/api/email/optout/[contactId]/route.ts:91` — «await prisma.emailContact.updateMany({ where: { id: contactId }, data: { optedOut: true, optedOutAt: new Date() }, (dentro de GET, :69)»; `src/lib/email/unsubscribe-token.ts:63` — «return '${base}/api/email/unsubscribe-executive?org=${encodeURIComponent( organizationId, )}&token=${token}'»
+- Impacto: Los filtros de correo corporativos (Microsoft Defender Safe Links, Mimecast, Proofpoint) abren cada enlace del mail al recibirlo. Con el primer cliente PRO/BUSINESS que use un correo asi, el primer reporte semanal lo da de baja solo: el lunes siguiente build.ts lo saltea por OPTOUT y Perfil muestra 'No recibir' sin que lo haya pedido; si lo reactiva, el proximo mail lo vuelve a dar de baja. En email marketing, los destinatarios detras de esos filtros quedan como 'Bajas' tras la primera campana (hoy ensucia el conteo porque la baja no llega a Brevo, BUG-021; al arreglar BUG-021 dejarian de recibir sin haberlo pedido). El comentario de route.ts:107 cita RFC 8058, que recomienda confirmar en la pagina justamente porque el antispam hace GET automatico.
+- Propuesta: Separar los verbos en ambas rutas: el GET muestra una pagina con un boton 'Confirmar baja' (form POST) y no escribe; el POST (el que usan Gmail/Outlook con List-Unsubscribe-Post) hace la baja. Opcional: guardar fecha y origen de la baja para auditarla.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-007], [BUG-021]
+- Nodo(s): h2.cli-reportes-email.reporte-semanal, h2.cli-reportes-email.preferencias-reporte, h2.cli-email-mkt.baja-de-contactos, h6.vis-optout, int.brevo, modelo.Organization, modelo.EmailContact, h2.cli-reportes-email, h2.cli-email-mkt
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-063
+
 ### [BUG-004] El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
@@ -1093,12 +1158,22 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-059] Links de emails del lote con fallback a http://localhost:3000
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `src/lib/reports/executive-weekly/build.ts:187` — «dashboardUrl: '${(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(»; `src/lib/email/unsubscribe-token.ts:58` — «const base = (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace( (usado por build.ts:191)»; `src/lib/tickets/actions.ts:156` — «const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'»
+- Evidencia: `src/lib/reports/executive-weekly/build.ts:187` — «dashboardUrl: '${(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(»; `src/lib/email/unsubscribe-token.ts:58` — «const base = (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace( (usado por build.ts:191)»; `src/lib/tickets/actions.ts:156` — «const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:141` — «const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:155` — «<a href="${appUrl}/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}"»; `src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:165` — «htmlContent: htmlWithFooter,»
 - Impacto: Si falta la variable en producción, el reporte semanal y el aviso de ticket llevan links a localhost (incluido el de baja del reporte, que entonces no funciona).
 - Propuesta: Leer la URL base de un helper que falle en build/arranque si falta, sin fallback.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-reportes-email.reporte-semanal, h4.adm-tickets, lib.email
+- Nodo(s): h2.cli-reportes-email.reporte-semanal, h4.adm-tickets, lib.email, h2.cli-email-mkt.crear-y-enviar-campana, h2.cli-email-mkt.baja-de-contactos, h6.vis-optout
+
+### [BUG-062] Aprobar y pedir cambios en una entrega es check-then-act: el estado se lee fuera de la transaccion y el update no exige PENDING_APPROVAL
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/actions/dashboard-actions.ts:26` — «const task = await prisma.task.findUnique({ where: { id: parsed.data.taskId }, include: { project: true } })»; `src/actions/dashboard-actions.ts:39` — «if (task.approvalStatus !== 'PENDING_APPROVAL') {»; `src/actions/dashboard-actions.ts:44` — «await tx.task.update({ where: { id: parsed.data.taskId }, data: { approvalStatus: 'APPROVED' },»; `src/actions/dashboard-actions.ts:132` — «await tx.task.update({ where: { id: parsed.data.taskId }, // REJECTED, mismo patron»
+- Impacto: Dos pedidos casi simultaneos (aprobar en una pestana y pedir cambios en otra, o llamadas directas a la action) pasan los dos el control: quedan en Mensajes 'Aprobé la entrega' y 'Solicité cambios', dos tandas de notificaciones a todos los SUPER_ADMIN y un estado final que depende de cual escribio ultimo. Frente al primer cliente, el equipo no sabe si la entrega quedo aprobada.
+- Propuesta: Decision para Valentino (dashboard-actions.ts es congelado): dentro de la transaccion usar updateMany con where { id, approvalStatus: 'PENDING_APPROVAL', project: { organizationId } } y abortar si count === 0 antes de crear mensajes y notificaciones.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): h2.cli-proyecto.aprobar-o-pedir-cambios, modelo.Task, lib.actions
 
 ## Tecnología vieja
 
@@ -1175,6 +1250,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h2.cli-plan, h2.cli-inicio, lib.plan
+
+### [PERF-006] El layout del portal escribe User.lastDashboardVisit en cada render, sin esperar el resultado, y ningun codigo lo lee
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/layout.tsx:80` — «prisma.user .update({ where: { id: session.user.id }, data: { lastDashboardVisit: new Date() } })»; `src/app/(protected)/dashboard/layout.tsx:85` — «.catch((error) => { console.error('[lastDashboardVisit] update failed:', error)»; `prisma/schema.prisma:298` — «updatedAt DateTime @updatedAt lastDashboardVisit DateTime?»
+- Impacto: Cada render completo del layout (carga, navegacion dura y cada router.refresh que el portal hace tras sus mutaciones) dispara un UPDATE sobre User sin await, tambien en modo soporte sobre el usuario del SUPER_ADMIN, y mueve User.updatedAt. Es carga de escritura sin valor sobre la Neon compartida; si el dato se empezara a usar (ultimo acceso, churn), el fire-and-forget en serverless lo puede perder (mismo riesgo que BUG-052).
+- Propuesta: Quitar la escritura o, si se quiere el dato, escribirlo con await una vez por dia/sesion (solo si cambio) y darle un lector (ficha del cliente en el admin o detector de inactividad).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-shell.layout-y-navegacion, modelo.User, lib.prisma
 
 ## Deuda
 

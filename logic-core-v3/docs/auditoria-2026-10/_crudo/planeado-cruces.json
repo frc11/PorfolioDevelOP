@@ -694,9 +694,10 @@
  },
  "docs/sprints/p3-a-1-gbp-connection.md:150": {
   "estado": "no empezado",
-  "evidencia": "git grep -n \"actions/gbp-connection'\" origin/main -- src vacio; control: src/lib/actions/gbp-connection.ts:17 listAvailableLocations y :36 setActiveLocation existen",
-  "sentido": "si",
-  "ciclo": "D2-c1, lector D2-L1"
+  "evidencia": "git grep -n \"actions/gbp-connection\" origin/main -- src -> vacio; control: git grep -n \"actions/upsell'\" origin/main -- src -> LockedView.tsx:27, seo/page.tsx:21, PremiumModuleCard.tsx:29. Las actions existen (src/lib/actions/gbp-connection.ts:17, :36) pero validan pertenencia contra el alcance del token (gbp-connection-logic.ts:263-264) y el OAuth es SUPER_ADMIN-only (google-business/start/route.ts:7).",
+  "sentido": "decidir",
+  "nota": "Construirlo tal como esta disenado expone fichas de otros clientes si el token es de la cuenta de agencia de develOP (ver hallazgo del selector GBP). Decidir primero el modelo de cuenta y quien fija la ubicacion; recien despues el selector.",
+  "ciclo": "D2-c2, lector D2-T1"
  },
  "docs/bitacora-roadmap.md:12216": {
   "estado": "no empezado",

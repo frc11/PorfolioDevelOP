@@ -1,0 +1,1260 @@
+{
+ "dominio": "D2",
+ "ciclo": "D2-c2",
+ "lote": "D2-T1",
+ "run": "wf_503d957e-b04",
+ "fecha": "2026-10-15T00:21:32.083Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/actions/dashboard-actions.ts",
+    "lineas_total": 218,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/actions/onboarding-actions.ts",
+    "lineas_total": 148,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/_actions/business-profile.actions.ts",
+    "lineas_total": 40,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts",
+    "lineas_total": 47,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/_actions/executive-report-prefs.schemas.ts",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/_actions/regenerate-brief.ts",
+    "lineas_total": 26,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/layout.tsx",
+    "lineas_total": 160,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/page.tsx",
+    "lineas_total": 320,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/error.tsx",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/messages/page.tsx",
+    "lineas_total": 35,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/messages/_actions/mark-read.ts",
+    "lineas_total": 22,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/messages/_components/MarkReadOnMount.tsx",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/soporte/page.tsx",
+    "lineas_total": 106,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx",
+    "lineas_total": 316,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/project/page.tsx",
+    "lineas_total": 356,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/services/page.tsx",
+    "lineas_total": 363,
+    "leido_completo": false,
+    "rangos": "1-120, 160-363"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/plan/page.tsx",
+    "lineas_total": 64,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/referidos/page.tsx",
+    "lineas_total": 90,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/layout.tsx",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/page.tsx",
+    "lineas_total": 5,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/error.tsx",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/perfil/page.tsx",
+    "lineas_total": 337,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+    "lineas_total": 326,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+    "lineas_total": 338,
+    "leido_completo": false,
+    "rangos": "58-110, 225-275 + grep de prisma/href"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/layout.tsx",
+    "lineas_total": 11,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/page.tsx",
+    "lineas_total": 5,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/analisis/page.tsx",
+    "lineas_total": 102,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/reputacion/page.tsx",
+    "lineas_total": 56,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+    "lineas_total": 332,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
+    "lineas_total": 490,
+    "leido_completo": false,
+    "rangos": "93-230 + grep"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/error.tsx",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+    "lineas_total": 218,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx",
+    "lineas_total": 66,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/email-marketing/page.tsx",
+    "lineas_total": 5,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
+    "lineas_total": 166,
+    "leido_completo": false,
+    "rangos": "1-60 + grep href"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/new/page.tsx",
+    "lineas_total": 163,
+    "leido_completo": false,
+    "rangos": "1-80"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/[id]/send/page.tsx",
+    "lineas_total": 81,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/email-marketing/contactos/page.tsx",
+    "lineas_total": 153,
+    "leido_completo": false,
+    "rangos": "1-50"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/email-marketing/contactos/_components/ImportCSVButton.tsx",
+    "lineas_total": 70,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/motor-resenas/page.tsx",
+    "lineas_total": 166,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/motor-resenas/_components/ReviewItem.tsx",
+    "lineas_total": 239,
+    "leido_completo": false,
+    "rangos": "37-100 + grep"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/motor-resenas/_components/AskReviewSection.tsx",
+    "lineas_total": 139,
+    "leido_completo": false,
+    "rangos": "grep de URLs (42, 77, 108, 122)"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/motor-resenas/_components/LockedView.tsx",
+    "lineas_total": 239,
+    "leido_completo": false,
+    "rangos": "1-70 (grep de la action y hrefs)"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx",
+    "lineas_total": 342,
+    "leido_completo": false,
+    "rangos": "285-342 + grep"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx",
+    "lineas_total": 85,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
+    "lineas_total": 354,
+    "leido_completo": false,
+    "rangos": "120-200, 300-354 + grep"
+   },
+   {
+    "ruta": "src/app/api/dashboard/leads/recent/route.ts",
+    "lineas_total": 69,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/reports/client-monthly/route.ts",
+    "lineas_total": 64,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/reports/monthly/route.ts",
+    "lineas_total": 143,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/bienvenida/_actions/complete-onboarding.ts",
+    "lineas_total": 61,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/bienvenida/layout.tsx",
+    "lineas_total": 19,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/bienvenida/page.tsx",
+    "lineas_total": 43,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/bienvenida/_components/BienvenidaWizard.tsx",
+    "lineas_total": 128,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/bienvenida/_components/Step2Conexiones.tsx",
+    "lineas_total": 92,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/MessageThread.tsx",
+    "lineas_total": 188,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/ClientChatThread.tsx",
+    "lineas_total": 71,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/ClientChatComposer.tsx",
+    "lineas_total": 131,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/TaskApprovalButtons.tsx",
+    "lineas_total": 158,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/TicketReplyForm.tsx",
+    "lineas_total": 35,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/ResolveTicketButton.tsx",
+    "lineas_total": 33,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/NewTicketModal.tsx",
+    "lineas_total": 210,
+    "leido_completo": false,
+    "rangos": "1-80"
+   },
+   {
+    "ruta": "src/components/dashboard/ImpersonationBanner.tsx",
+    "lineas_total": 38,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/SubscriptionBanner.tsx",
+    "lineas_total": 26,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/OnboardingStatusCard.tsx",
+    "lineas_total": 106,
+    "leido_completo": false,
+    "rangos": "1-80"
+   },
+   {
+    "ruta": "src/components/dashboard/SoporteBoard.tsx",
+    "lineas_total": 354,
+    "leido_completo": false,
+    "rangos": "1-80 + grep href"
+   },
+   {
+    "ruta": "src/components/dashboard/NotificationCenter.tsx",
+    "lineas_total": 280,
+    "leido_completo": false,
+    "rangos": "95-135 + grep"
+   },
+   {
+    "ruta": "src/components/dashboard/NotificationHistoryModal.tsx",
+    "lineas_total": 163,
+    "leido_completo": false,
+    "rangos": "55-90 + grep"
+   },
+   {
+    "ruta": "src/components/dashboard/ProfileForms.tsx",
+    "lineas_total": 792,
+    "leido_completo": false,
+    "rangos": "615-690 + grep de upload/href"
+   },
+   {
+    "ruta": "src/components/dashboard/ReferralPanel.tsx",
+    "lineas_total": 129,
+    "leido_completo": false,
+    "rangos": "grep (25-38)"
+   },
+   {
+    "ruta": "src/components/dashboard/DashboardLayoutClient.tsx",
+    "lineas_total": 187,
+    "leido_completo": false,
+    "rangos": "grep de props"
+   },
+   {
+    "ruta": "src/components/dashboard/AnnouncementsFeed.tsx",
+    "lineas_total": 212,
+    "leido_completo": false,
+    "rangos": "grep de href/body"
+   },
+   {
+    "ruta": "src/components/dashboard/ChatBubble.tsx",
+    "lineas_total": 61,
+    "leido_completo": false,
+    "rangos": "grep (57)"
+   },
+   {
+    "ruta": "src/components/dashboard/PremiumModuleCard.tsx",
+    "lineas_total": 441,
+    "leido_completo": false,
+    "rangos": "grep (29, 197-215, 405)"
+   },
+   {
+    "ruta": "src/components/dashboard/AlertaMetrica.tsx",
+    "lineas_total": 119,
+    "leido_completo": false,
+    "rangos": "grep href (98) y orígenes en AnalyticsAlertas/SeoAlertas"
+   },
+   {
+    "ruta": "src/components/dashboard/VaultRevealButton.tsx",
+    "lineas_total": 148,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/preview.ts",
+    "lineas_total": 27,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/impersonation.ts",
+    "lineas_total": 90,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/proxy.ts",
+    "lineas_total": 173,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/auth.ts",
+    "lineas_total": 275,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/messages.ts",
+    "lineas_total": 208,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/notifications.ts",
+    "lineas_total": 93,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/announcements.ts",
+    "lineas_total": 52,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/announcements/get-announcements-for-org.ts",
+    "lineas_total": 69,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/upsell.ts",
+    "lineas_total": 156,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/profile.ts",
+    "lineas_total": 246,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/referrals.ts",
+    "lineas_total": 28,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/impersonation.ts",
+    "lineas_total": 80,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/gbp-connection.ts",
+    "lineas_total": 58,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/contact.ts",
+    "lineas_total": 133,
+    "leido_completo": false,
+    "rangos": "1-80"
+   },
+   {
+    "ruta": "src/lib/actions/schemas.ts",
+    "lineas_total": 112,
+    "leido_completo": false,
+    "rangos": "1-75"
+   },
+   {
+    "ruta": "src/lib/tickets/actions.ts",
+    "lineas_total": 222,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/tickets/schemas.ts",
+    "lineas_total": 23,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/dashboard/modules/motor-resenas/_actions.ts",
+    "lineas_total": 73,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/security/org-scope.ts",
+    "lineas_total": 27,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/modules/check-activation.ts",
+    "lineas_total": 15,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/brevo.ts",
+    "lineas_total": 166,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/gbp-connection.ts",
+    "lineas_total": 54,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/gbp-connection-logic.ts",
+    "lineas_total": 273,
+    "leido_completo": false,
+    "rangos": "186-273 + grep"
+   },
+   {
+    "ruta": "src/lib/integrations/google-business-profile.ts",
+    "lineas_total": 367,
+    "leido_completo": false,
+    "rangos": "1-60, 270-330 + grep"
+   },
+   {
+    "ruta": "src/app/api/auth/google-business/start/route.ts",
+    "lineas_total": 16,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/auth/google-business/callback/route.ts",
+    "lineas_total": 87,
+    "leido_completo": false,
+    "rangos": "1-80"
+   },
+   {
+    "ruta": "src/app/api/auth/tiendanube/start/route.ts",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/alerts.ts",
+    "lineas_total": 297,
+    "leido_completo": false,
+    "rangos": "1-160 + grep"
+   },
+   {
+    "ruta": "src/app/api/email/unsubscribe-executive/route.ts",
+    "lineas_total": 112,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+    "lineas_total": 105,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/unsubscribe-token.ts",
+    "lineas_total": 124,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/ai/executive-brief.ts",
+    "lineas_total": 389,
+    "leido_completo": false,
+    "rangos": "1-222"
+   },
+   {
+    "ruta": "src/lib/ai/results-insights.ts",
+    "lineas_total": 199,
+    "leido_completo": false,
+    "rangos": "1-140"
+   },
+   {
+    "ruta": "src/lib/ai/review-reply-draft.ts",
+    "lineas_total": 44,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/cron/regenerate-briefs/route.ts",
+    "lineas_total": 56,
+    "leido_completo": false,
+    "rangos": "20-45"
+   },
+   {
+    "ruta": "src/lib/plan/plan-presentation.ts",
+    "lineas_total": 291,
+    "leido_completo": false,
+    "rangos": "40-170"
+   },
+   {
+    "ruta": "prisma/seeds/sync-plans.ts",
+    "lineas_total": 199,
+    "leido_completo": false,
+    "rangos": "70-112"
+   },
+   {
+    "ruta": "src/lib/crypto/resolve-credential.ts",
+    "lineas_total": 25,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/actions/task-approvals.ts",
+    "lineas_total": 136,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/upsell/dedup.ts",
+    "lineas_total": 40,
+    "leido_completo": true
+   },
+   {
+    "ruta": "next.config.ts",
+    "lineas_total": 260,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/reports/executive-weekly/build.ts",
+    "lineas_total": 199,
+    "leido_completo": false,
+    "rangos": "88-106, 185-192"
+   },
+   {
+    "ruta": "src/lib/reports/executive-weekly/send.ts",
+    "lineas_total": 233,
+    "leido_completo": false,
+    "rangos": "165-178"
+   },
+   {
+    "ruta": "src/lib/email/templates/executive-weekly.ts",
+    "lineas_total": 322,
+    "leido_completo": false,
+    "rangos": "grep de escapeHtml, 284-292"
+   }
+  ],
+  "cobertura_lente": [
+   {
+    "que": "(1) Protocolo SEC en layout y 24 pages del portal (inicio, mensajes, soporte, soporte/[ticketId], proyecto, servicios, plan, referidos, cuenta/perfil|facturacion|boveda, resultados/analisis|trafico|seo|reputacion, modules/agenda|email-marketing|motor-resenas|tienda, bienvenida)",
+    "resultado": "Todas resuelven la org con resolveOrgId (preview.ts:6-20) antes de leer y filtran por organizationId o botConfig.organizationId; las dos pages client (campaigns/new, [id]/send) no leen datos. Sin desvio nuevo. El layout escribe User.lastDashboardVisit en cada render sin lector (nuevo, PERF BAJA)."
+   },
+   {
+    "que": "(1) Route handlers del tramo: api/dashboard/leads/recent, api/reports/client-monthly, api/reports/monthly",
+    "resultado": "Org de sesion en los tres; monthly acepta organizationId de query solo para SUPER_ADMIN y leads/recent esparce la fila completa (ambos ya en DEU-027, rutas huerfanas). Latente sin registrar: monthly arma Content-Disposition con companyName sin sanear (route.ts:125); queda cubierto por la poda de DEU-027."
+   },
+   {
+    "que": "(1) Server actions que llama el portal (dashboard-actions, lib/actions/{messages,notifications,announcements,upsell,profile,referrals,impersonation}, lib/tickets/actions, dashboard/_actions/*, mark-read, email-marketing/_actions, motor-resenas/_actions, bienvenida/complete-onboarding)",
+    "resultado": "Ninguna toma la org de params/body/FormData. motor-resenas recibe organizationId pero resolveScopedOrgId (org-scope.ts:20-27) exige que coincida con la sesion. Mezcla resolveOrgId/session.organizationId y ausencia de chequeo de rol = BUG-044/SEC-018 (no se repite). Nuevos: aprobar/pedir cambios check-then-act (BUG BAJA), dedup del upsell sobre tabla global (SEC BAJA)."
+   },
+   {
+    "que": "(1) Roles CLIENT, SETTER y SUPER_ADMIN impersonando llamando actions directo",
+    "resultado": "SETTER sin membresia: resolveOrgId y session.organizationId nulos, todas fallan. CLIENT: git grep sin escritores del rol (solo migraciones y auth.config.ts:4); las actions por session.organizationId no chequean rol pero hoy nadie tiene CLIENT. SUPER_ADMIN impersonando: BUG-044/SEC-029. Nada nuevo."
+   },
+   {
+    "que": "(2) IDOR por segmento dinamico e id que llega a actions (ticket, mensaje, campana, tarea/entrega, notificacion, referido, modulo, proyecto ?p=, reviewName)",
+    "resultado": "[ticketId] findUnique id+organizationId (page.tsx:60-61); reply con assertTicketBelongsToOrg; resolve con where id+organizationId; campana findFirst id+org (_actions.ts:177-179); taskId compara project.organizationId (dashboard-actions.ts:35); ?p= se elige en memoria sobre el set de la org (project/page.tsx:191-196); notificacion por org (SEC-038); featureKey sobre catalogo global (FAL-005); reviewName (SEC-051). Sin IDOR nuevo."
+   },
+   {
+    "que": "(3) Lo que viaja al navegador",
+    "resultado": "Notification completa (SEC-038), credencial descifrada en el payload RSC de la Boveda (FAL-009/SEC-036), filas completas en leads/recent (DEU-027), errores crudos (SEC-046/SEC-016). Message no tiene campos sensibles; tickets y tareas se mapean antes de llegar a client components. Unicos client components tipados con modelos Prisma: Notification (grep con control). Nada nuevo."
+   },
+   {
+    "que": "(4) Caches y agregados",
+    "resultado": "Todas las claves de unstable_cache del portal incluyen organizationId (layout.tsx:25/36/48/60, page.tsx:292, attention, week-results, health-score, cal-com, gbp, tiendanube, results-insights); pagespeed se cachea por URL (dato publico). revalidateTag con org. Agregados globales: ContactSubmission (SEC-048) y, nuevo, la dedup del upsell sobre esa misma tabla."
+   },
+   {
+    "que": "(5) Entradas: Zod, largos, archivos/CSV, asignacion masiva, rate limit en actions con costo",
+    "resultado": "Zod en tickets, mensajes, prefs, ticket promedio y onboarding; email-marketing sin Zod (SEC-044); sin asignacion masiva (git grep con control); CSV como texto con el limite por defecto de 1 MB de Next (next.config.ts sin bodySizeLimit); sin rate limit (SEC-047/043/051). Nuevo: las funciones con costo de LLM del Inicio y Resultados no consultan el plan (SEC MEDIA)."
+   },
+   {
+    "que": "(6) Render sin escapar, URLs de la base y redirecciones",
+    "resultado": "Sin dangerouslySetInnerHTML ni markdown en el portal (git grep, control EarlyScrollLock.tsx:37). hrefs desde la base: asset.url (solo lo escribe SUPER_ADMIN sin Zod; React 19.2.3 neutraliza javascript:), invoice.pdfUrl/paymentLink y calComEmbedUrl en iframe sin sandbox (sin escritor: FAL-006/FAL-004), actionUrl de notificaciones con escritores solo literales. Sin redirecciones abiertas propias del portal (callbackUrl = SEC-011). Emails al cliente escapan (executive-weekly.ts:55, client-notifications/templates.ts:49). Nuevos: texto de usuario sin neutralizar al webhook de Slack (SEC MEDIA) y bajas de un clic por GET (BUG MEDIA)."
+   },
+   {
+    "que": "Re-lectura de SEC-051 (motor de resenas) con la lente de aislamiento",
+    "resultado": "El OAuth de GBP solo lo completa un SUPER_ADMIN (start/route.ts:7, callback/route.ts:15): el token de cada org sale de la cuenta de Google con la que develOP inicia sesion, lo que sube a PROBABLE la hipotesis de cuenta de agencia de SEC-051. La causa raiz distinta (selector self-service que valida contra el alcance del token) se registra aparte."
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "El selector de sucursal GBP 'self-service' valida la pertenencia contra lo que ve el token, y ese token lo obtiene un SUPER_ADMIN: con la cuenta de Google de develOP un cliente podria listar y adoptar fichas de otros clientes (latente, sin importadores)",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/auth/google-business/start/route.ts",
+      "linea": 7,
+      "fragmento": "if (!session?.user || session.user.role !== 'SUPER_ADMIN') {"
+     },
+     {
+      "ruta": "src/app/api/auth/google-business/callback/route.ts",
+      "linea": 49,
+      "fragmento": "await prisma.organization.update({ where: { id: orgId }, data: { gbpAccessToken: tokens.access_token, ..."
+     },
+     {
+      "ruta": "src/lib/actions/gbp-connection.ts",
+      "linea": 15,
+      "fragmento": "* SUPER_ADMIN no tiene organizationId → no puede usarlo; es self-service del dueño."
+     },
+     {
+      "ruta": "src/lib/integrations/gbp-connection-logic.ts",
+      "linea": 263,
+      "fragmento": "const { locations } = await discoverLocations(accessToken, deps)\n  const hit = findLocationInList(locations, locationId)"
+     },
+     {
+      "ruta": "src/lib/integrations/gbp-connection-logic.ts",
+      "linea": 241,
+      "fragmento": "return locations.map((l) => ({ ... title: l.title, address: l.address,"
+     },
+     {
+      "ruta": "docs/sprints/p3-a-1-gbp-connection.md",
+      "linea": 116,
+      "fragmento": "tokens de la propia org) + persiste el compuesto + one-shot. Ninguna location cross-org es alcanzable."
+     },
+     {
+      "ruta": "src/lib/integrations/google-business-profile.ts",
+      "linea": 341,
+      "fragmento": "`https://mybusiness.googleapis.com/v4/${org.gbpLocationId}/reviews?pageSize=50`,"
+     }
+    ],
+    "impacto": "Hoy no es explotable: listAvailableLocations y setActiveLocation no tienen importadores (POD-059) y el start del OAuth no esta enlazado (FAL-011). Pero el diseno afirma que ninguna ficha de otra org es alcanzable apoyandose en un supuesto que el codigo no garantiza: el consentimiento de Google ocurre en la sesion del SUPER_ADMIN, asi que si develOP conecta las fichas con su cuenta de agencia (la que administra las fichas de varios clientes), el token guardado en cada org ve todas esas fichas. El dia que P3-A.2 (PLAN-118) monte el selector self-service, el primer cliente real veria nombre y direccion de las fichas de los demas clientes y podria fijar una ajena como propia: su portal mostraria las resenas y metricas de otro negocio y publicaria respuestas en el Google de ese otro negocio.",
+    "propuesta": "Antes de construir el selector, decidir con que cuenta de Google se conecta cada org. Si es la de develOP: la ubicacion de cada org la fija solo el SUPER_ADMIN (action con requireSuperAdmin), el cliente no lista ubicaciones, y replyToReview/listReviews verifican que el recurso cuelgue de org.gbpLocationId. Si es la del cliente: el OAuth lo tiene que poder iniciar el dueno (hoy es SUPER_ADMIN-only) y el token deja de ser de develOP. Mientras tanto, podar gbp-connection.ts (POD-059) o marcarlo como no apto para el cliente.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resenas",
+     "h2.cli-resenas.publicar-respuesta",
+     "h2.cli-resultados.reputacion-gbp",
+     "int.gbp",
+     "lib.actions",
+     "modelo.Organization"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "SEC-051 (reviewName sin verificar: este hallazgo vuelve PROBABLE su escenario de cuenta de agencia), FAL-011, POD-059, PLAN-118"
+   },
+   {
+    "titulo": "Texto de clientes y de visitantes anonimos llega sin neutralizar al webhook de alertas (Slack): menciones <!channel>/<!here> y enlaces con texto enganoso en el canal interno de develOP",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/alerts.ts",
+      "linea": 64,
+      "fragmento": "`🏢 Cliente: ${event.clientName}`,\n    `💬 ${event.detail}`,"
+     },
+     {
+      "ruta": "src/lib/alerts.ts",
+      "linea": 134,
+      "fragmento": "body: JSON.stringify({ text: formatAlertMessage(event) }),"
+     },
+     {
+      "ruta": "src/lib/tickets/actions.ts",
+      "linea": 92,
+      "fragmento": "detail: ticket.title,"
+     },
+     {
+      "ruta": "src/lib/actions/messages.ts",
+      "linea": 160,
+      "fragmento": "? `${parsedMessage.data.content.slice(0, 160)}...`"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 102,
+      "fragmento": "detail: `Solicitó activar ${parsed.data.featureName}. Contacto: ${user.email}.`,"
+     },
+     {
+      "ruta": "src/lib/actions/contact.ts",
+      "linea": 74,
+      "fragmento": "clientName: payload.company || payload.name,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+      "linea": 267,
+      "fragmento": "placeholder=\"https://hooks.slack.com/...\""
+     }
+    ],
+    "impacto": "Con el webhook de Slack configurado (el destino que sugiere el panel), un cliente (titulo de ticket Alta/Urgente, mensaje, nombre del modulo pedido, nombre de empresa) o cualquier visitante anonimo del formulario publico (nombre, empresa, servicio) controla texto que Slack interpreta como formato: puede notificar a todo el canal con <!channel>/<!here> y publicar enlaces disfrazados (<https://sitio-falso|Abrir ticket en el admin>) dentro de una alerta que el equipo toma como del sistema. Es un vector de phishing contra quien tiene la cuenta SUPER_ADMIN y de ruido en el canal; ningun campo tiene tope de largo (SEC-047, SEC-032).",
+    "propuesta": "Decision para Valentino (src/lib/alerts.ts es congelado): escapar &, < y > en formatAlertMessage (formato de escape de Slack) o enviar los campos del usuario como texto plano en un bloque sin mrkdwn, y truncarlos. Alternativa en zona libre: neutralizar y truncar en los llamadores (tickets/actions.ts, messages.ts, upsell.ts, contact.ts) antes de llamar a sendAgencyAlert.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "h2.cli-soporte.crear-ticket",
+     "h2.cli-mensajes.enviar-mensaje",
+     "h2.cli-servicios.solicitar-modulo",
+     "h6.vis-contacto",
+     "h4.adm-config",
+     "lib.alerts",
+     "int.slack"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "SEC-047, SEC-032, SEC-025 (rate limit del formulario publico esquivable)"
+   },
+   {
+    "titulo": "El resumen ejecutivo IA y los insights IA de Trafico y SEO no consultan el plan: Starter los recibe (y el cron los regenera) aunque la vitrina de planes los vende como mejora a Pro",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/page.tsx",
+      "linea": 193,
+      "fragmento": "brief = await getExecutiveBrief(organizationId)  // sin planAllows; el semaforo si lo tiene en :121"
+     },
+     {
+      "ruta": "src/lib/ai/executive-brief.ts",
+      "linea": 96,
+      "fragmento": "const generation = await generateBriefText(  // cache vencido: llama al LLM sin mirar el plan"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/_actions/regenerate-brief.ts",
+      "linea": 19,
+      "fragmento": "const result = await regenerateExecutiveBrief(orgId.data)"
+     },
+     {
+      "ruta": "src/app/api/cron/regenerate-briefs/route.ts",
+      "linea": 29,
+      "fragmento": "subscription: { is: { status: 'ACTIVE' } },  // unico filtro junto a onboardingCompleted"
+     },
+     {
+      "ruta": "src/lib/plan/plan-presentation.ts",
+      "linea": 154,
+      "fragmento": "{ icon: Sparkles, label: 'Resumen ejecutivo de tu negocio' },  // nextTierTeaser de STARTER"
+     },
+     {
+      "ruta": "prisma/seeds/sync-plans.ts",
+      "linea": 77,
+      "fragmento": "insightEnabled: false,  // plan STARTER (reportsEnabled: false en :76)"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+      "linea": 168,
+      "fragmento": ": await getTrafficInsights({"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/analisis/page.tsx",
+      "linea": 36,
+      "fragmento": "const showAnalysis = planAllows(plan, 'insight')  // control: aca si hay gate"
+     }
+    ],
+    "impacto": "Un primer cliente Starter ve en /dashboard/plan que el 'Resumen ejecutivo de tu negocio' es del plan siguiente, pero el Inicio se lo genera con LLM (gemini-2.5-flash), le deja regenerarlo 3 veces por semana y el cron semanal se lo rehace; Trafico y SEO le muestran insights de Claude Haiku. develOP paga el LLM de un beneficio que no cobra y el upsell a Pro pierde su argumento. El gate de 'analisis con IA' (insightEnabled) solo se aplica en Analisis y en el PDF mensual.",
+    "propuesta": "Decidir si el brief y los insights son de todos los planes (y corregir plan-presentation.ts) o de Pro/Business. En el segundo caso, gatear del lado server con planAllows(plan, 'insight') (o reportEligiblePlan) en getExecutiveBrief/BriefServerWrapper, regenerateBriefAction, el cron regenerate-briefs y antes de getTrafficInsights/getSeoInsights, mostrando un teaser como AnalysisTeaser.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-inicio.resumen-ejecutivo-ia",
+     "h2.cli-resultados.insights-ia",
+     "h2.cli-plan.vitrina-de-planes-y-upgrade",
+     "lib.plan",
+     "lib.ai",
+     "int.vertex",
+     "int.anthropic",
+     "int.cron.regenerate-briefs"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PERF-004, SEC-043, DEU-034, UX-011"
+   },
+   {
+    "titulo": "Las bajas de un clic se ejecutan en el GET: un escaner de enlaces del correo da de baja al dueno del reporte semanal y a los contactos de las campanas sin que nadie haga clic",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/email/unsubscribe-executive/route.ts",
+      "linea": 103,
+      "fragmento": "export async function GET(request: Request) {\n  return handle(request)"
+     },
+     {
+      "ruta": "src/app/api/email/unsubscribe-executive/route.ts",
+      "linea": 77,
+      "fragmento": "data: { executiveReportOptOut: true },"
+     },
+     {
+      "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+      "linea": 93,
+      "fragmento": "data: { optedOut: true, optedOutAt: new Date() },  // dentro del GET de :69"
+     },
+     {
+      "ruta": "src/lib/email/templates/executive-weekly.ts",
+      "linea": 289,
+      "fragmento": "<a href=\"${escapeHtml(input.unsubscribeUrl)}\" ...>Dejar de recibir este reporte</a>"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+      "linea": 155,
+      "fragmento": "<a href=\"${appUrl}/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}\""
+     },
+     {
+      "ruta": "src/lib/reports/executive-weekly/build.ts",
+      "linea": 99,
+      "fragmento": "if (org.executiveReportOptOut || org.executiveReportFrequency === 'DISABLED') {"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts",
+      "linea": 41,
+      "fragmento": "...(parsed.data.frequency !== 'DISABLED' ? { executiveReportOptOut: false } : {}),"
+     }
+    ],
+    "impacto": "Los filtros de correo corporativos (Microsoft Defender Safe Links, Mimecast, Proofpoint) abren cada enlace del mail al recibirlo. Con el primer cliente PRO/BUSINESS que use un correo asi, el primer reporte semanal lo da de baja solo: el lunes siguiente build.ts lo saltea por OPTOUT y Perfil muestra 'No recibir' sin que lo haya pedido; si lo reactiva, el proximo mail lo vuelve a dar de baja. En email marketing, los destinatarios detras de esos filtros quedan como 'Bajas' tras la primera campana (hoy ensucia el conteo porque la baja no llega a Brevo, BUG-021; al arreglar BUG-021 dejarian de recibir sin haberlo pedido). El comentario de route.ts:107 cita RFC 8058, que recomienda confirmar en la pagina justamente porque el antispam hace GET automatico.",
+    "propuesta": "Separar los verbos en ambas rutas: el GET muestra una pagina con un boton 'Confirmar baja' (form POST) y no escribe; el POST (el que usan Gmail/Outlook con List-Unsubscribe-Post) hace la baja. Opcional: guardar fecha y origen de la baja para auditarla.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-reportes-email.reporte-semanal",
+     "h2.cli-reportes-email.preferencias-reporte",
+     "h2.cli-email-mkt.baja-de-contactos",
+     "h6.vis-optout",
+     "int.brevo",
+     "modelo.Organization",
+     "modelo.EmailContact"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "BUG-007 (mismo patron en el magic link), BUG-021, SEC-039"
+   },
+   {
+    "titulo": "Aprobar y pedir cambios en una entrega es check-then-act: el estado se lee fuera de la transaccion y el update no exige PENDING_APPROVAL",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/actions/dashboard-actions.ts",
+      "linea": 26,
+      "fragmento": "const task = await prisma.task.findUnique({ where: { id: parsed.data.taskId }, include: { project: true } })"
+     },
+     {
+      "ruta": "src/actions/dashboard-actions.ts",
+      "linea": 39,
+      "fragmento": "if (task.approvalStatus !== 'PENDING_APPROVAL') {"
+     },
+     {
+      "ruta": "src/actions/dashboard-actions.ts",
+      "linea": 44,
+      "fragmento": "await tx.task.update({\n        where: { id: parsed.data.taskId },\n        data: { approvalStatus: 'APPROVED' },"
+     },
+     {
+      "ruta": "src/actions/dashboard-actions.ts",
+      "linea": 132,
+      "fragmento": "await tx.task.update({\n        where: { id: parsed.data.taskId },  // REJECTED, mismo patron"
+     }
+    ],
+    "impacto": "Dos pedidos casi simultaneos (aprobar en una pestana y pedir cambios en otra, o llamadas directas a la action) pasan los dos el control: quedan en Mensajes 'Aprobé la entrega' y 'Solicité cambios', dos tandas de notificaciones a todos los SUPER_ADMIN y un estado final que depende de cual escribio ultimo. Frente al primer cliente, el equipo no sabe si la entrega quedo aprobada.",
+    "propuesta": "Decision para Valentino (dashboard-actions.ts es congelado): dentro de la transaccion usar updateMany con where { id, approvalStatus: 'PENDING_APPROVAL', project: { organizationId } } y abortar si count === 0 antes de crear mensajes y notificaciones.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "h2.cli-proyecto.aprobar-o-pedir-cambios",
+     "modelo.Task",
+     "lib.actions"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-043 (mismo patron en el brief), BUG-045"
+   },
+   {
+    "titulo": "La deduplicacion del pedido de upsell consulta ContactSubmission, que tambien escribe el formulario publico anonimo: un visitante puede silenciar 24 h el aviso del pedido de un cliente",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 82,
+      "fragmento": "where: { email: user.email, service: parsed.data.featureKey },"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 79,
+      "fragmento": "// así que la consulta queda auto-scopeada al propio cliente (no puede leer submissions"
+     },
+     {
+      "ruta": "src/lib/actions/upsell.ts",
+      "linea": 87,
+      "fragmento": "if (shouldCreateUpsellSubmission(lastSubmission?.createdAt ?? null, new Date())) {"
+     },
+     {
+      "ruta": "src/lib/actions/contact.ts",
+      "linea": 62,
+      "fragmento": "await prisma.contactSubmission.create({  // formulario publico, email y service libres"
+     },
+     {
+      "ruta": "src/lib/actions/schemas.ts",
+      "linea": 61,
+      "fragmento": "service: z.string().trim().optional().nullable(),"
+     }
+    ],
+    "impacto": "Quien conozca el email de acceso de un cliente puede mandar el formulario publico con ese email y service igual al slug del modulo (por ejemplo 'motor-resenas'); durante 24 h los pedidos de ese cliente no crean el lead en /admin/leads, ni la alerta, ni las notificaciones (solo sube el contador de OrganizationModule). Impacto acotado, pero el comentario afirma un aislamiento que una tabla global escrita por anonimos no da.",
+    "propuesta": "Deduplicar contra la propia fila OrganizationModule (leer upsellLastRequestedAt antes del upsert) o marcar los ContactSubmission de upsell con un discriminador que solo escriba esta action (servicio con prefijo y organizacion), nunca por email libre.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-servicios.solicitar-modulo",
+     "h6.vis-contacto",
+     "modelo.ContactSubmission",
+     "modelo.OrganizationModule",
+     "lib.actions"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-048 (la misma tabla global contada como leads), BUG-002"
+   },
+   {
+    "titulo": "El link de baja de las campanas se arma con NEXT_PUBLIC_APP_URL ?? '': si falta la variable, el mail sale con un link relativo que no funciona y queda congelado en el borrador",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+      "linea": 141,
+      "fragmento": "const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+      "linea": 155,
+      "fragmento": "<a href=\"${appUrl}/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}\""
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+      "linea": 165,
+      "fragmento": "htmlContent: htmlWithFooter,"
+     }
+    ],
+    "impacto": "Si la variable falta en el entorno, cada campana guarda un pie con '/api/email/optout/...': en un cliente de correo no resuelve y el destinatario no tiene como darse de baja de un envio masivo (obligacion legal y causa tipica de suspension de la cuenta Brevo compartida). Como el pie se guarda en htmlContent al crear el borrador, corregir la variable despues no arregla las campanas ya creadas.",
+    "propuesta": "Tomar la URL base de un helper unico que falle al arrancar si falta (misma propuesta que BUG-059) y agregar el pie al enviar, no al crear el borrador.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-email-mkt.crear-y-enviar-campana",
+     "h2.cli-email-mkt.baja-de-contactos",
+     "h6.vis-optout"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "BUG-059 (mismo patron con fallback a localhost), BUG-021, SEC-044"
+   },
+   {
+    "titulo": "El layout del portal escribe User.lastDashboardVisit en cada render, sin esperar el resultado, y ningun codigo lo lee",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/layout.tsx",
+      "linea": 80,
+      "fragmento": "prisma.user\n      .update({ where: { id: session.user.id }, data: { lastDashboardVisit: new Date() } })"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/layout.tsx",
+      "linea": 85,
+      "fragmento": ".catch((error) => { console.error('[lastDashboardVisit] update failed:', error)"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 298,
+      "fragmento": "updatedAt             DateTime  @updatedAt\n  lastDashboardVisit    DateTime?"
+     }
+    ],
+    "impacto": "Cada render completo del layout (carga, navegacion dura y cada router.refresh que el portal hace tras sus mutaciones) dispara un UPDATE sobre User sin await, tambien en modo soporte sobre el usuario del SUPER_ADMIN, y mueve User.updatedAt. Es carga de escritura sin valor sobre la Neon compartida; si el dato se empezara a usar (ultimo acceso, churn), el fire-and-forget en serverless lo puede perder (mismo riesgo que BUG-052).",
+    "propuesta": "Quitar la escritura o, si se quiere el dato, escribirlo con await una vez por dia/sesion (solo si cambio) y darle un lector (ficha del cliente en el admin o detector de inactividad).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-shell.layout-y-navegacion",
+     "modelo.User",
+     "lib.prisma"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "BUG-052, PERF-005"
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-118",
+    "clave": "UI de conexion GBP y selector de sucursal (P3-A.2)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n \"actions/gbp-connection\" origin/main -- src -> vacio; control: git grep -n \"actions/upsell'\" origin/main -- src -> LockedView.tsx:27, seo/page.tsx:21, PremiumModuleCard.tsx:29. Las actions existen (src/lib/actions/gbp-connection.ts:17, :36) pero validan pertenencia contra el alcance del token (gbp-connection-logic.ts:263-264) y el OAuth es SUPER_ADMIN-only (google-business/start/route.ts:7).",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Construirlo tal como esta disenado expone fichas de otros clientes si el token es de la cuenta de agencia de develOP (ver hallazgo del selector GBP). Decidir primero el modelo de cuenta y quien fija la ubicacion; recien despues el selector."
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "Hipotesis de SEC-051: el token OAuth de GBP de cada org podria ser de una cuenta de agencia de develOP que administra varias fichas",
+    "resultado": "parcial",
+    "evidencia": "Sube de HIPOTESIS a PROBABLE por lectura: el start y el callback del OAuth exigen SUPER_ADMIN (src/app/api/auth/google-business/start/route.ts:7, callback/route.ts:15) y el callback guarda los tokens en la org del state (callback/route.ts:49-52), asi que el consentimiento de Google ocurre en el navegador del admin con la cuenta que el admin use. Falta confirmar en runtime que cuenta se usa (no hay cuenta GBP de prueba, PLAN-112/117).",
+    "hallazgo_titulo": "Acciones del motor de reseñas sin Zod ni rate limit: rating, nombre y texto que van al LLM los manda el navegador, reviewName se interpola en la URL de Google y los errores crudos vuelven al cliente"
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Alerta de Slack con formato inyectado desde un ticket urgente y desde el formulario publico",
+    "entorno": "dev local (npm run dev) con un webhook de Slack de un workspace de prueba",
+    "precondiciones": "Cliente de prueba ORG_MEMBER con onboarding completo; en /admin/settings el webhook de alertas apunta a un canal de prueba y estan activas las alertas de tickets y de leads.",
+    "pasos": [
+     "Entrar como el cliente de prueba a /dashboard/soporte y tocar 'Abrir Nuevo Ticket'.",
+     "Titulo: <!here> Prueba <https://example.com/x|Abrir ticket en el admin> ; prioridad Urgente; descripcion de al menos 10 caracteres; enviar.",
+     "Mirar el mensaje que llega al canal de Slack de prueba.",
+     "Cerrar sesion, ir al formulario publico de contacto y poner en Empresa el mismo texto; enviar.",
+     "Mirar el segundo mensaje en el canal."
+    ],
+    "esperado": "Los mensajes muestran el texto literal (con < y > visibles), sin mencion al canal ni enlace disfrazado.",
+    "senal_falla": "Slack notifica @here y/o muestra 'Abrir ticket en el admin' como enlace a example.com.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Texto de clientes y de visitantes anonimos llega sin neutralizar al webhook de alertas (Slack)"
+   },
+   {
+    "titulo": "La baja del reporte semanal y la de campanas se ejecutan con un GET sin confirmacion",
+    "entorno": "dev local",
+    "precondiciones": "Org de prueba con plan PRO y frecuencia del reporte distinta de 'No recibir' en /dashboard/cuenta/perfil; email marketing activo con una campana de prueba enviada a una casilla propia.",
+    "pasos": [
+     "Enviar el reporte semanal manual de esa org a una casilla de prueba desde el admin y copiar la URL de 'Dejar de recibir este reporte' sin abrirla.",
+     "Pedir esa URL desde una terminal sin navegador (curl -s -o NUL -w \"%{http_code}\" \"<url>\").",
+     "Volver a /dashboard/cuenta/perfil de esa org y mirar la frecuencia del reporte.",
+     "Repetir con el link 'Darme de baja' del mail de la campana y mirar el contador 'Bajas' en Contactos."
+    ],
+    "esperado": "El GET devuelve una pagina con un boton de confirmacion y no cambia nada; la baja solo ocurre al confirmar (POST).",
+    "senal_falla": "Despues del curl, Perfil muestra 'No recibir' o el contacto aparece como baja sin ninguna confirmacion.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Las bajas de un clic se ejecutan en el GET"
+   },
+   {
+    "titulo": "Resumen ejecutivo IA visible y regenerable con plan Starter",
+    "entorno": "dev local con una credencial de LLM valida (con Vertex vencido la generacion falla y se ve el estado vacio; igual se puede confirmar en el log '[Brief]' que la action intenta llamar al modelo)",
+    "precondiciones": "Org de prueba con suscripcion ACTIVE al plan STARTER y onboarding completo.",
+    "pasos": [
+     "Entrar como cliente de esa org a /dashboard y mirar la tarjeta 'Resumen Ejecutivo - IA'.",
+     "Tocar 'Regenerar' y mirar la respuesta y el log del servidor.",
+     "Ir a /dashboard/plan y verificar que Starter muestra 'Resumen ejecutivo de tu negocio' entre los beneficios del plan siguiente.",
+     "Con GA4 conectado, abrir /dashboard/resultados/trafico y mirar si aparece el bloque de insights."
+    ],
+    "esperado": "Segun la decision de producto: o Starter no recibe brief ni insights IA (teaser de upgrade), o la vitrina incluye el brief en Starter.",
+    "senal_falla": "El brief y/o los insights se generan para Starter mientras la vitrina dice que son del plan siguiente.",
+    "escribe_db_o_email": true,
+    "hallazgos": "El resumen ejecutivo IA y los insights IA de Trafico y SEO no consultan el plan"
+   },
+   {
+    "titulo": "Con que cuenta de Google se conectaria GBP para cada org",
+    "entorno": "cuenta real de Google Business Profile (no hay cuenta de prueba en el repo)",
+    "precondiciones": "Ninguna escritura: es una verificacion de proceso antes de construir P3-A.2.",
+    "pasos": [
+     "Definir con quien se completaria el OAuth de /api/auth/google-business/start (solo SUPER_ADMIN): la cuenta de develOP o la del cliente.",
+     "Si es la de develOP, contar en la consola de Google Business cuantas fichas administra esa cuenta.",
+     "Con ese dato, decidir si el selector puede ser self-service o si la ubicacion la fija solo el admin."
+    ],
+    "esperado": "Cada org queda atada a una unica ficha verificada contra la org, no contra el alcance del token.",
+    "senal_falla": "La cuenta usada administra fichas de mas de un cliente: listAvailableLocations devolveria fichas ajenas a cualquier cliente.",
+    "escribe_db_o_email": false,
+    "hallazgos": "El selector de sucursal GBP 'self-service' valida la pertenencia contra lo que ve el token"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "src/lib/actions/gbp-connection.ts (listAvailableLocations, setActiveLocation) no tiene importadores en src",
+    "comando": "git grep -n \"actions/gbp-connection\" origin/main -- src ; git grep -n -E \"listAvailableLocations|setActiveLocation\\(\" origin/main -- src (filtrando el propio modulo, la logica y los invariantes) -> vacio",
+    "control_positivo": "git grep -n \"actions/upsell'\" origin/main -- src -> LockedView.tsx:27, seo/page.tsx:21, PremiumModuleCard.tsx:29"
+   },
+   {
+    "afirmacion": "El brief IA, su regeneracion, su cron y los insights IA de Trafico/SEO no consultan el plan",
+    "comando": "git grep -n -E \"planAllows|getPlanForOrg|reportEligiblePlan|insightEnabled|reportsEnabled\" origin/main -- src/lib/ai/executive-brief.ts src/lib/ai/results-insights.ts \"src/app/(protected)/dashboard/_actions/regenerate-brief.ts\" src/app/api/cron/regenerate-briefs/route.ts \"src/app/(protected)/dashboard/resultados/trafico/page.tsx\" \"src/app/(protected)/dashboard/resultados/seo/page.tsx\" -> vacio",
+    "control_positivo": "git grep -n planAllows origin/main -- \"src/app/(protected)/dashboard/resultados/analisis/page.tsx\" src/app/api/reports/client-monthly/route.ts -> analisis/page.tsx:6, :36 y client-monthly/route.ts:10"
+   },
+   {
+    "afirmacion": "src/lib/alerts.ts no escapa ni neutraliza el texto que manda al webhook",
+    "comando": "git grep -n -E \"&lt;|&amp;|escape|replace\\(\" origin/main -- src/lib/alerts.ts -> vacio",
+    "control_positivo": "git grep -n \"function escapeHtml\" origin/main -- src/lib/email/templates/executive-weekly.ts src/lib/client-notifications/templates.ts -> executive-weekly.ts:55, templates.ts:49"
+   },
+   {
+    "afirmacion": "Las rutas de baja no tienen paso de confirmacion: el GET escribe",
+    "comando": "git grep -n -i -E \"confirm|<form|method=\" origin/main -- src/app/api/email/unsubscribe-executive/route.ts \"src/app/api/email/optout/[contactId]/route.ts\" -> vacio",
+    "control_positivo": "git grep -n \"List-Unsubscribe-Post\" origin/main -- src/lib/reports/executive-weekly/send.ts -> send.ts:175"
+   },
+   {
+    "afirmacion": "User.lastDashboardVisit no tiene lector",
+    "comando": "git grep -n \"lastDashboardVisit\" origin/main -- . \":!docs\" -> solo AGENTS.md:120, la migracion 20260427194426, schema.prisma:299 y el escritor dashboard/layout.tsx:83/:86",
+    "control_positivo": "El mismo comando encuentra el escritor (layout.tsx:83), lo que prueba que el patron matchea codigo de src"
+   },
+   {
+    "afirmacion": "No hay dangerouslySetInnerHTML/innerHTML/srcDoc en el portal",
+    "comando": "git grep -n \"dangerouslySetInnerHTML\\|innerHTML\\|srcDoc\\|srcdoc\" origin/main -- src (sin __tests__)",
+    "control_positivo": "Unico resultado: src/components/layout/EarlyScrollLock.tsx:37 (script estatico), fuera del portal"
+   },
+   {
+    "afirmacion": "No hay asignacion masiva (spread de input/FormData a Prisma) en las actions del portal",
+    "comando": "git grep -n -E \"data: (input|params|formData|body|values|parsed\\.data)\\b|\\.\\.\\.(input|params|body|values|parsed\\.data)\\b\" origin/main -- src/lib/actions src/lib/tickets src/actions \"src/app/(protected)/dashboard\" src/app/bienvenida src/components/dashboard -> vacio",
+    "control_positivo": "grep -rn \"parsed\\.data\" src/lib/actions -> clients.ts:95, :100, :101"
+   },
+   {
+    "afirmacion": "Solo email-marketing escribe contactos en Brevo",
+    "comando": "git grep -n \"api.brevo.com\\|/v3/contacts\\|syncContact(\" origin/main -- src scripts -> email-marketing/_actions.ts:105 y la definicion en brevo.ts",
+    "control_positivo": "brevo.ts:1 (API_BASE) y brevo.ts:31 (syncContact) aparecen en el mismo resultado"
+   },
+   {
+    "afirmacion": "Notification.actionUrl solo se escribe con rutas literales (no hay URL dinamica de usuario que router.push pueda seguir)",
+    "comando": "git grep -n \"actionUrl\" origin/main -- src | grep -v \"__tests__\\|notif.actionUrl\\|actionUrl: '/\\|actionUrl: `/\\|actionUrl?:\\|actionUrl: string\" -> vacio",
+    "control_positivo": "Sin el filtro, git grep -n \"actionUrl: '/\" encuentra literales como dashboard-actions.ts:57"
+   },
+   {
+    "afirmacion": "Ningun codigo asigna el rol CLIENT",
+    "comando": "git grep -n \"'CLIENT'\\|\\\"CLIENT\\\"\\|Role.CLIENT\" origin/main -- src prisma scripts -> solo migraciones, projects-filters.ts (otro concepto) y auth.config.ts:4 (tipo)",
+    "control_positivo": "El mismo comando encuentra la migracion 20260519232631 que agrega el valor al enum"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Texto de usuarios (clientes o anonimos) interpolado sin neutralizar en mensajeria con formato (Slack mrkdwn, Telegram Markdown/HTML, WhatsApp)",
+    "como_buscarlo": "git grep -n -E \"JSON.stringify\\(\\{ text|parse_mode|sendTelegram|hooks.slack|api.telegram.org\" origin/main -- src ; revisar si los campos de usuario se escapan antes",
+    "donde_aparecio": "src/lib/alerts.ts:64-65 y :134 (llamado desde tickets/actions.ts:92, messages.ts:160, upsell.ts:102, contact.ts:74). Cruzar con las alertas de Telegram del chatbot (D5, BUG-028)."
+   },
+   {
+    "patron": "Acciones que cambian estado en un GET disparado desde un link de email (baja, confirmacion, aprobacion)",
+    "como_buscarlo": "git grep -n \"export async function GET\" origin/main -- src/app/api y abrir los que hacen update/delete/create",
+    "donde_aparecio": "api/email/unsubscribe-executive/route.ts:103 y api/email/optout/[contactId]/route.ts:69; mismo patron que BUG-007 (magic link)."
+   },
+   {
+    "patron": "Funciones con costo de LLM sin gate de plan del lado server",
+    "como_buscarlo": "git grep -n -E \"generateText\\(|messages\\.create\\(|getLLMProvider\\(\" origin/main -- src y verificar planAllows/getPlanForOrg en el camino que las llama",
+    "donde_aparecio": "executive-brief.ts:96/:185/:237, results-insights.ts (traffic/seo), cron regenerate-briefs; control con gate: resultados/analisis/page.tsx:36, api/reports/client-monthly/route.ts:31."
+   },
+   {
+    "patron": "Pertenencia validada contra el alcance de un token OAuth que obtiene develOP, no contra la org",
+    "como_buscarlo": "git grep -n -E \"getAccessToken\\(orgId\\)|discoverLocations|getAuthedClient\\(\" origin/main -- src/lib/integrations y revisar quien inicia el OAuth (start routes)",
+    "donde_aparecio": "gbp-connection-logic.ts:263-264 con OAuth SUPER_ADMIN-only (google-business/start/route.ts:7). Cruzar en D7 con Tiendanube (tiendanube/start/route.ts SUPER_ADMIN-only) y Cal.com."
+   },
+   {
+    "patron": "Check-then-act en acciones de estado: lectura fuera de la transaccion y update sin condicion del estado esperado",
+    "como_buscarlo": "git grep -n -E \"Status !== '|status !== '\" origin/main -- src/actions src/lib/actions \"src/app/(protected)\" y mirar si el update siguiente repite la condicion en el where",
+    "donde_aparecio": "dashboard-actions.ts:39/:44 y :127/:132; antes SEC-043 (brief) y BUG-025 (envio de campana)."
+   },
+   {
+    "patron": "Escrituras a la base dentro de layouts/pages (camino de lectura) sin lector",
+    "como_buscarlo": "git grep -n -E \"prisma\\.[a-zA-Z]+\\.(update|upsert|create)\\(\" origin/main -- \"src/app/**/layout.tsx\" \"src/app/**/page.tsx\"",
+    "donde_aparecio": "dashboard/layout.tsx:80 (lastDashboardVisit); antes PERF-005 (getPlanForOrg escribe al leer)."
+   },
+   {
+    "patron": "Decisiones de control (dedup, rate, gates) tomadas sobre tablas globales que tambien escribe un formulario publico",
+    "como_buscarlo": "git grep -n -E \"contactSubmission\\.(findFirst|findMany|count)\" origin/main -- src",
+    "donde_aparecio": "upsell.ts:81-87 (dedup) y los conteos de SEC-048."
+   },
+   {
+    "patron": "Para D3: createClientAssetAction sin Zod (url, type y description sin validar) que el portal pinta como href en la Boveda",
+    "como_buscarlo": "leer src/actions/agency-actions.ts:94-111 y git grep -n \"createClientAssetAction\" origin/main -- src",
+    "donde_aparecio": "agency-actions.ts:103 escribe; cuenta/boveda/page.tsx:212 y VaultRevealButton.tsx:106 renderizan asset.url (React 19.2.3 neutraliza javascript:, pero acepta cualquier otra URL)."
+   }
+  ]
+ },
+ "verificacion": null
+}
