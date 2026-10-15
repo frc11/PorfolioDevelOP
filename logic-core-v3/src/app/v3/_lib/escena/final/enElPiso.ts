@@ -135,7 +135,8 @@ uniform vec2 uCajaDelLogo;
 uniform vec4 uCalmaDelPie;
 uniform vec4 uBaseDelPie;
 uniform float uCalmaDelPieFuerza;
-// [PULIDO 25] W2 a · la quietud debajo de las piezas acostadas (\`pie3d/huecos.ts\`).
+// [PULIDO 25] W2 a · la quietud debajo de las piezas acostadas (\`pie3d/huecos.ts\`). [PULIDO 28] AA6 · y el reposo mientras caen: la onda,
+// la luz y los pistones de la zona del pie, abajo.
 ${QUIETUD_DEL_PIE_GLSL}
 // [PULIDO 6] E2 · la distancia al logo, para medir desde el filo (\`hueco.ts\`).
 ${DISTANCIA_AL_LOGO_GLSL}
@@ -216,7 +217,7 @@ export function conElFinalEnLaSimulacion(glsl: string): string {
       ANCLAS_DEL_FINAL.empuje,
       `${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );\n\tfloat calmaAqui = calmaDelFinal( p * uLado );\n\tfuerza *= 1.0 - calmaAqui;\n\tamortigua += ${f(CALMA_EN_EL_PISO.amortigua)} * calmaAqui;`,
     )
-    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat pistonAqui;\n\tfloat energiaAqui = energiaDeLaLuz( xz, pistonAqui );\n\tfloat quietaAqui = quietudDelPie( xz );\n\tfloat pistonQuieto = ${f(QUIETUD.piston)} * azarDeLaQuietud( floor( floor( xz / uLado ) / 3.0 ) ) * min( 1.0, energiaAqui );\n\tpistonAqui = mix( pistonAqui, pistonQuieto, quietaAqui );\n\tdibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );\n\tdibujo = min( dibujo, min( techoDeLosTextos( xz ), techoDelLogo( xz ) ) ) - bajaEnLosHuecos( xz );\n\tenergiaAqui *= mix( 1.0, ${f(QUIETUD.brillo)}, quietaAqui );`)
+    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat pistonAqui;\n\tfloat energiaAqui = energiaDeLaLuz( xz, pistonAqui );\n\tfloat quietaAqui = quietudDelPie( xz );\n\tfloat pistonQuieto = ${f(QUIETUD.piston)} * azarDeLaQuietud( floor( floor( xz / uLado ) / 3.0 ) ) * min( 1.0, energiaAqui );\n\tpistonAqui = mix( pistonAqui, pistonQuieto, quietaAqui );\n\tdibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );\n\tdibujo *= 1.0 - reposoDelPie( xz );\n\tdibujo = min( dibujo, min( techoDeLosTextos( xz ), techoDelLogo( xz ) ) ) - bajaEnLosHuecos( xz );\n\tenergiaAqui *= mix( 1.0, ${f(QUIETUD.brillo)}, quietaAqui );`)
     .replace(ANCLAS_DEL_FINAL.salida, 'salida = vec4( nueva, h, dibujo, energiaAqui );')
     .replace(ANCLAS_DEL_FINAL.techo, 'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {')
     .replace(ONDA_CON_TOPE, 'float topeDeLaOnda = topeConElGolpe( $1 );\n\tfloat onda = topeDeLaOnda * tanh( nueva / topeDeLaOnda );')

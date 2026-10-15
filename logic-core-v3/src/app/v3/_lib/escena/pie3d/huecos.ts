@@ -52,7 +52,8 @@ export const HUECOS_DEL_PIE = {
  * grilla), con `margen` y `borde` (u) movidos por un ruido de baja frecuencia (`escala` bloques por onda, `irregular` u de más o de menos):
  * sin forma de rectángulo.
  */
-export const QUIETUD = { margen: 0.4, borde: 3.5, irregular: 2.4, escala: 4, brillo: 0.4, juntas: 0.75, nucleo: 0.2, piston: 0.35 } as const
+// [PULIDO 28] AA6 · `vuelveS`: después de que todo se asentó, en cuánto vuelve la energía a la zona del pie (s; mientras caen, en reposo).
+export const QUIETUD = { margen: 0.4, borde: 3.5, irregular: 2.4, escala: 4, brillo: 0.4, juntas: 0.75, nucleo: 0.2, piston: 0.35, vuelveS: 0.8 } as const
 
 /**
  * [PULIDO 26] X2 · debajo de un TEXTO acostado (sólo sus letras tapan el piso: entre ellas se ve) el piso no se aplana: los bloques tienen
@@ -70,6 +71,12 @@ export const QUIETUD_DEL_PIE = {
   /** [PULIDO 26] X2 · si es un texto (1: el techo bajo) o una placa (0: el núcleo, adentro de su hueco). */
   uEsTextoLaQuietud: { value: new Float32Array(MAXIMO_DE_HUECOS_DEL_PIE) },
   uCuantasQuietudes: { value: 0 },
+  /**
+   * [PULIDO 28] AA6 · EL REPOSO MIENTRAS CAEN (0 a 1): el © se tapaba mientras caía (los pistones y la luz de la energía subían los bloques
+   * a su alrededor antes de que la zona se calmara). Ahora, en toda la zona del pie (todas sus piezas, hayan volcado o no), los bloques
+   * quedan en reposo durante la caída y recién cuando todo se asentó vuelve la energía, con la quietud de siempre (`vuelveS`).
+   */
+  uReposoDelPie: { value: 0 },
 }
 
 const f = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
@@ -114,6 +121,7 @@ uniform vec4 uQuietudDelPie[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
 uniform float uFuerzaDeLaQuietud[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
 uniform float uEsTextoLaQuietud[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
 uniform int uCuantasQuietudes;
+uniform float uReposoDelPie;
 float azarDeLaQuietud( vec2 c ) {
 	return fract( sin( dot( c, vec2( 127.1, 311.7 ) ) ) * 43758.5453 );
 }
@@ -131,7 +139,7 @@ float afueraDeLaHuella( vec2 xz, vec4 h ) {
 	vec2 d = xz - h.xy;
 	return max( abs( dot( d, uBaseDelPie.xy ) ) - h.z, abs( dot( d, uBaseDelPie.zw ) ) - h.w );
 }
-float quietudDelPie( vec2 xz ) {
+float quietudDelPieCon( vec2 xz, float conFuerza ) {
 	vec2 celda = floor( xz / uLado );
 	vec2 centro = ( celda + 0.5 ) * uLado;
 	float r = ruidoDeLaQuietud( celda );
@@ -139,9 +147,16 @@ float quietudDelPie( vec2 xz ) {
 	for ( int k = 0; k < ${String(MAXIMO_DE_HUECOS_DEL_PIE)}; k ++ ) {
 		if ( k >= uCuantasQuietudes ) break;
 		float afuera = afueraDeLaHuella( centro, uQuietudDelPie[ k ] ) - ${f(QUIETUD.margen)} - ( r - 0.5 ) * ${f(QUIETUD.irregular)};
-		m = max( m, uFuerzaDeLaQuietud[ k ] * ( 1.0 - smoothstep( 0.0, ${f(QUIETUD.borde)} * ( 0.6 + 0.8 * r ), afuera ) ) );
+		m = max( m, mix( 1.0, uFuerzaDeLaQuietud[ k ], conFuerza ) * ( 1.0 - smoothstep( 0.0, ${f(QUIETUD.borde)} * ( 0.6 + 0.8 * r ), afuera ) ) );
 	}
 	return m;
+}
+float quietudDelPie( vec2 xz ) {
+	return quietudDelPieCon( xz, 1.0 );
+}
+// [PULIDO 28] AA6 · la zona del pie entera (sin la fuerza de cada pieza) en reposo mientras caen.
+float reposoDelPie( vec2 xz ) {
+	return uReposoDelPie <= 0.0 ? 0.0 : uReposoDelPie * quietudDelPieCon( xz, 0.0 );
 }
 float nucleoDeLaQuietud( vec2 xz ) {
 	float m = 0.0;

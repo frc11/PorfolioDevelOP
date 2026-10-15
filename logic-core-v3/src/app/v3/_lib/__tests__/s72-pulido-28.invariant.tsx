@@ -18,6 +18,8 @@
  *         pared del pozo cortada en el tope de cada bloque del borde: la cara del corte.
  *   AA5 · el piso se abre sólo en el encastre: debajo de la pieza (la franja de su silueta que su proyección ya tapa) y tan hondo como
  *         volcó (nada al empezar a inclinarse, entero al incrustarse); el fondo baja con ella.
+ *   AA6 · el © no se tapa mientras cae: en toda la zona del pie (todas sus piezas, hayan volcado o no) los bloques quedan en reposo
+ *         durante la caída y la energía vuelve recién cuando todo se asentó, con la quietud de siempre.
  */
 import { empiezaUnGesto, type GestoDeScroll } from '../gestosDelScroll'
 import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, pasoDeLaSalida, pedirLaSalida, type FaseDeLaSalida } from '../pie3d/salidas'
@@ -32,7 +34,7 @@ import { armarLosOrdenes, ponerElOrden, sectorDe } from '../escena/piso/ordenDeL
 import { DOM_QUE_SIGUE, fijarLaFase } from '../escena/pie3d/domQueSigue'
 import { IMPRESAS } from '../escena/pie3d/impresas'
 import { aplicar, homografia } from '../pie3d/homografia'
-import { HUECOS_DEL_PIE, HUECO_DEL_PIE, QUIETUD } from '../escena/pie3d/huecos'
+import { HUECOS_DEL_PIE, HUECO_DEL_PIE, QUIETUD, QUIETUD_DEL_PIE } from '../escena/pie3d/huecos'
 import { huecosDeLaCaida } from '../escena/pie3d/huecosDeLaCaida'
 import { poseDeLaPiezaQueCae } from '../escena/final/caidaDelPie'
 import { RELOJ_DEL_FINAL as RELOJ } from '../escena/final/recorridoDelFinal'
@@ -403,6 +405,40 @@ const APERTURA_DE_ANTES = correrLaApertura((c, s) => {
 })
 controlPositivo(`  el detector VE la de antes (al 10 % del vuelco, ${pct(APERTURA_DE_ANTES.alDiez[0])} de hondo y abierto el ${pct(APERTURA_DE_ANTES.alDiez[1])}, con la pieza tapando el ${pct(APERTURA_DE_ANTES.alDiez[2])})`, APERTURA_DE_ANTES, (a: DeLaApertura) => a.malos === 0)
 HUECOS_DEL_PIE.uCuantosHuecosDelPie.value = 0
+EN_VIVO.fin = 0
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('AA6 · El © no se tapa mientras cae: la zona del pie en reposo hasta que todo se asentó')
+
+/**
+ * La caída del pie de 1440 cuadro a cuadro: desde que arranca el final hasta que todo se asentó, el reposo entero y la zona del pie con
+ * todas sus piezas (hayan volcado o no); después, en `vuelveS`, el reposo se va (vuelve la energía, con la quietud de siempre). Cuántos
+ * cuadros no cumplen. Y en la simulación del piso, la altura de los bloques (la onda, la luz y los pistones) por el reposo de su lugar.
+ */
+function correrElReposo(): { readonly malos: number; readonly asentado: number } {
+  const c = crearLaCaidaDelPie()
+  SALIDA_EN_VIVO.hunde = 0
+  let malos = 0
+  for (let k = 1; k <= RELOJ.duracionS * 120; k += 1) {
+    const s = k / 120
+    EN_VIVO.fin = s / RELOJ.duracionS
+    armarLaCaida(c, ARMADAS, 0, 0, CAMARA_DEL_PIE, { ancho: PIE.ancho, alto: PIE.alto }, PIE.camara.d)
+    huecosDeLaCaida(c, s)
+    const reposo = QUIETUD_DEL_PIE.uReposoDelPie.value
+    const entera = QUIETUD_DEL_PIE.uCuantasQuietudes.value === c.n
+    if (!entera || (s < c.ultimaS && reposo < 1) || (s > c.ultimaS + QUIETUD.vuelveS && reposo > 0)) malos += 1
+  }
+  return { malos, asentado: c.ultimaS / RELOJ.duracionS }
+}
+const REPOSO = correrElReposo()
+const EN_EL_PISO_REPOSO = readFileSync('src/app/v3/_lib/escena/final/enElPiso.ts', 'utf8')
+const reposoBien = (malos: number, piso: string): boolean =>
+  malos === 0 && piso.includes(String.raw`clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );\n\tdibujo *= 1.0 - reposoDelPie( xz );`) && piso.indexOf('reposoDelPie( xz )') < piso.indexOf('techoDeLosTextos( xz ), techoDelLogo( xz )')
+afirmar(reposoBien(REPOSO.malos, EN_EL_PISO_REPOSO), `  la caída entera: la zona del pie con todas sus piezas y en reposo hasta que todo se asentó (${REPOSO.asentado.toFixed(3)} del final), la energía de vuelta en ${String(QUIETUD.vuelveS)} s; en el piso, la onda, la luz y los pistones por el reposo (${String(REPOSO.malos)} cuadros mal)`)
+controlPositivo('  el detector VE el piso sin el reposo (el de antes: los pistones subían alrededor del © mientras caía)', EN_EL_PISO_REPOSO.replace(String.raw`\n\tdibujo *= 1.0 - reposoDelPie( xz );`, ''), (p: string) => reposoBien(REPOSO.malos, p))
+controlPositivo('  y una zona sólo con las piezas que ya volcaron (la de antes)', 1, (m: number) => reposoBien(m, EN_EL_PISO_REPOSO))
+QUIETUD_DEL_PIE.uReposoDelPie.value = 0
+QUIETUD_DEL_PIE.uCuantasQuietudes.value = 0
 EN_VIVO.fin = 0
 
 cerrar('s72-pulido-28')

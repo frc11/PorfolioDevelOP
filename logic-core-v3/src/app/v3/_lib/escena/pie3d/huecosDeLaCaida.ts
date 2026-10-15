@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { POSE_DE_LA_PIEZA, poseDeLaPiezaQueCae, type PoseDeLaPieza } from '../final/caidaDelPie'
 import { sombraDeLaPiezaQueCae } from '../final/sombraDeLaPieza'
 import type { CaidaDelPie } from './caida'
-import { HUECOS_DEL_PIE, HUECO_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
+import { HUECOS_DEL_PIE, HUECO_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, QUIETUD, QUIETUD_DEL_PIE } from './huecos'
 import { SOMBRA_DEL_PIE } from './sombras'
 import { SALIDA_EN_VIVO, cerradoParaElViaje } from '../../pie3d/salidas'
 
@@ -60,7 +60,6 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     const a = poseDeLaPiezaQueCae(col, l, s).a
     const baja = Math.min(1, Math.max(0, a / Math.max(1e-3, final)))
     const abre = 1 - cerradoParaElViaje(SALIDA_EN_VIVO.hunde)
-    if (baja <= 0 || abre <= 0) continue
     // La columna acostada e incrustada (su esquina de arriba a la izquierda) y el canto de la pieza en ella.
     const fin = poseDeLaPiezaQueCae(col, l, l.incrustada + 1)
     Q.setFromRotationMatrix(BASE).multiply(Q_TIP.setFromAxisAngle(EJE_X, -fin.a))
@@ -74,14 +73,15 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     POSE.y = OFFSET.y
     POSE.z = OFFSET.z
     const huella = sombraDeLaPiezaQueCae(p, POSE, b)
-    // [PULIDO 25] W2 a · la quietud de la energía del piso debajo de toda pieza acostada (placas y textos).
+    // [PULIDO 25] W2 a · la quietud de la energía del piso debajo de toda pieza acostada (placas y textos). [PULIDO 28] AA6 · y de las
+    // que todavía no volcaron, con fuerza 0 (la zona del pie entera, en reposo mientras caen).
     if (q < MAXIMO_DE_HUECOS_DEL_PIE) {
       quietudes[q].set(huella.x, huella.z, huella.medioAncho - SOMBRA_DEL_PIE.sobra, huella.medioFondo - SOMBRA_DEL_PIE.sobra)
       fuerzas[q] = baja * abre
       QUIETUD_DEL_PIE.uEsTextoLaQuietud.value[q] = p.conSombra ? 0 : 1
       q += 1
     }
-    if (!p.conSombra) continue
+    if (!p.conSombra || baja <= 0 || abre <= 0) continue
     huecos[k].set(huella.x, huella.z, (huella.medioAncho - SOMBRA_DEL_PIE.sobra) * sobra, (huella.medioFondo - SOMBRA_DEL_PIE.sobra) * sobra)
     // (la silueta, el radio, lo hondo ahora y la franja debajo de la pieza: de su borde cercano al canto, la parte de su largo que ya tapa).
     const lejos = ((col.y1 - col.y0) - p.dy) * col.mpp
@@ -91,5 +91,8 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     k += 1
   }
   QUIETUD_DEL_PIE.uCuantasQuietudes.value = q
+  // [PULIDO 28] AA6 · en reposo hasta que todo se asentó; después vuelve la energía.
+  const vuelve = Math.min(1, Math.max(0, (s - c.ultimaS) / QUIETUD.vuelveS))
+  QUIETUD_DEL_PIE.uReposoDelPie.value = 1 - vuelve * vuelve * (3 - 2 * vuelve)
   return k
 }
