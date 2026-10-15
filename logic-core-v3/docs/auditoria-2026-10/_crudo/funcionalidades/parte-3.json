@@ -5394,6 +5394,171 @@
      "evidencia": "La carga incluye leads descartados (setter-carga.ts:65-67)."
     }
    }
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "herramienta": "h3.vis-widget-cliente",
+   "id": "h3.vis-widget-cliente.embed-enmarcable-en-sitio-del-cliente",
+   "nombre": "El sitio del cliente enmarca el widget (/embed y widget.js)",
+   "descripcion": "Headers que permiten que cualquier sitio cargue widget.js y enmarque /embed/[slug], y las fronteras raíz que atienden ese iframe.",
+   "archivos": [
+    "next.config.ts",
+    "src/app/not-found.tsx",
+    "src/app/error.tsx",
+    "src/app/embed/[slug]/page.tsx"
+   ],
+   "entradas": [
+    "src/app/not-found.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz trazado por D5 (public/widget.js:113 -> next.config.ts:126 -> src/app/embed/[slug]/page.tsx:29); headers en next.config.ts:117-134.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "next.config.ts:131 frame-ancestors * y el escape develop.com.ar de src/lib/security/validate-origin.ts:69-75 dejan allowedDomains sin efecto para el embed (S4-01 abierto)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin colecciones en este tramo"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "embed/[slug]/page.tsx:37 notFound() cae en not-found.tsx:145 (404 de marketing dentro del iframe); error.tsx:57-58 'Volver al inicio' a develOP"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "el estado de carga vive en ChatbotEmbed (flujo D5, fuera del lote)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "page.tsx:29-37 solo verifica que el bot exista; el chat valida origen en validate-origin (flujo D5)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "layout del widget fuera del lote"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "error.tsx:27-30 captureException en la frontera raíz que atiende /embed"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "next.config.ts:127-128 promesa 'R18 will restrict to a whitelist of allowed origins' sin cumplir"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "D5: la instalación pide cargar dominios en una sección que no existe"
+    }
+   }
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "herramienta": "h2.cli-shell",
+   "id": "h2.cli-shell.pagina-de-error-y-404",
+   "nombre": "Página de error y 404 cuando una ruta no tiene frontera propia",
+   "descripcion": "error.tsx, global-error.tsx y not-found.tsx raíz: atienden el sitio público, /login, /bienvenida, /embed y los notFound() de admin y dashboard.",
+   "archivos": [
+    "src/app/error.tsx",
+    "src/app/global-error.tsx",
+    "src/app/not-found.tsx"
+   ],
+   "entradas": [
+    "src/app/not-found.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "error.tsx:14-31 captura y registra -> :42-62 mensaje, digest y acciones; global-error.tsx:22-58; not-found.tsx:78-199.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "no leen datos"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin colecciones"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "error.tsx:42-49 mensaje útil sin stack y digest como referencia; global-error.tsx:41-49"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "páginas estáticas de cliente"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin entrada"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "not-found.tsx:164 flex-col sm:flex-row; error.tsx:34 px-6 y max-w-md"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "error.tsx:27-30 y global-error.tsx:24-27 captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "los tres archivos leídos completos sin TODO/FIXME ni datos inventados"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "admin y dashboard sin not-found.tsx: el 404 del portal manda a '/' y '/contact' (not-found.tsx:166-183) en vez de volver al panel"
+    }
+   }
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "herramienta": "h4.adm-shell",
+   "id": "h4.adm-shell.backup-diario-de-la-base",
+   "nombre": "Backup diario cifrado de la base con prueba de restore",
+   "descripcion": "Workflow programado que vuelca la Neon de producción, la cifra, la sube como artifact y prueba restaurarla.",
+   "archivos": [
+    ".github/workflows/db-backup.yml"
+   ],
+   "entradas": [],
+   "madurez": "L?",
+   "madurez_evidencia": "Código completo (db-backup.yml:39-41 -> :102-124 -> :180-218), pero que corra depende de secrets no verificables por lectura; ci.yml:120-121 registraba 0 secrets al 2026-08-25.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "respaldo global de develOP; cifrado AES256 por repo público (db-backup.yml:120-122)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no aplica"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "db-backup.yml:93-96, :107-110 y :191-195 fallan con mensaje visible en el run"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "no aplica"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "db-backup.yml:203-208 solo exige _prisma_migrations >= 1; el resto de las tablas es informativo (:210-215)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "no aplica"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Actions notifica por email los fallos programados"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "db-backup.yml:3-6 comentario viejo: e2e.yml 'pendiente moverlo' ya no existe"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna de develOP"
+    }
+   }
   }
  ]
 }

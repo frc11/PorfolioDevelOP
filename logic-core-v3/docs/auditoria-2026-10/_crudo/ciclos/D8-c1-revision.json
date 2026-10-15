@@ -1,0 +1,1284 @@
+{
+ "dominio": "D8",
+ "ciclo": "D8-c1",
+ "modo": "lector",
+ "run": "wf_007cc90d-e1e",
+ "fecha": "2026-10-15T22:12:01.414Z",
+ "lotes": [
+  {
+   "lote": "D8-L1",
+   "estado": "leido",
+   "archivos_leidos": 20,
+   "completos": 20,
+   "entradas": 3,
+   "funcionalidades": 3,
+   "planeado_cruzado": 94,
+   "alertas": 4,
+   "previas": 26,
+   "poda": 5,
+   "casos": 7,
+   "ausencias": 17,
+   "patrones": 8,
+   "verificador": "2 veredictos"
+  }
+ ],
+ "hallazgos": [
+  {
+   "decision": "aceptar",
+   "nota_padre": "Leído junto con el verificador: package.json:154-155 (rangos ^16.2.6 y ^5.0.0-beta.30), el lockfile fija next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2, y _crudo/npm-audit.json los marca críticos con arreglo disponible dentro del rango (npm-outdated: 16.4.0 y beta.32). El verificador la bajó a MEDIA y se le sigue: el aviso del normalizador homoglyph no da toma de cuenta porque el callback signIn (auth.ts:174-186) solo autoriza si el email existe en User y el mail sale a ese mismo identificador; el fail-open por error de configuración no aplica porque proxy y guards miran rol; la app no usa getToken de next-auth; el RCE de Image Optimization con AVIF y la SSRF de rewrites no aplican (sin formats avif, destinos internos fijos). Queda aplicable la DoS de Server Actions (alta, <16.2.11), alcanzable desde /login. Es deuda de actualización dentro del rango, bloqueante para el primer cliente, sin explotación trazada.",
+   "titulo": "next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2 con avisos críticos y el arreglo disponible dentro del rango declarado",
+   "prefijo": "SEC",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "package.json",
+     "linea": 154,
+     "fragmento": "\"next\": \"^16.2.6\","
+    },
+    {
+     "ruta": "package.json",
+     "linea": 155,
+     "fragmento": "\"next-auth\": \"^5.0.0-beta.30\","
+    },
+    {
+     "ruta": "docs/auditoria-2026-10/_crudo/npm-audit.json",
+     "linea": 13,
+     "fragmento": "\"title\": \"Auth.js: Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass\","
+    },
+    {
+     "ruta": "docs/auditoria-2026-10/_crudo/npm-audit.json",
+     "linea": 1333,
+     "fragmento": "\"title\": \"Auth.js: Configuration errors can cause existence-based auth checks to fail open (auth object populated with an error)\","
+    },
+    {
+     "ruta": "docs/auditoria-2026-10/_crudo/npm-audit.json",
+     "linea": 1061,
+     "fragmento": "\"title\": \"Next.js: Denial of Service in App Router using Server Actions\","
+    },
+    {
+     "ruta": "docs/auditoria-2026-10/_crudo/npm-outdated.json",
+     "linea": 226,
+     "fragmento": "\"next\": { \"current\": \"16.2.9\", \"wanted\": \"16.4.0\""
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 143,
+     "fragmento": "if (!email.includes('@') || email.length > 254) return 'Email inválido.'"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real: el login (magic link y credenciales), el proxy y las server actions corren sobre versiones con avisos críticos y altos publicados. El del normalizador de email de Auth.js es alcanzable por un anónimo: el magic link solo verifica que haya una '@' antes de llamar a signIn('resend') (login/actions.ts:143-146). No aplican en este despliegue: el RCE en servidores Windows (Netlify corre Linux), el bypass del proxy con Turbopack (el build usa --webpack, package.json:9) y el RCE de next/og (git grep 'next/og' sin usos). El aviso de fuga del endpoint MCP del servidor de desarrollo se agrava porque dev escucha en todas las interfaces (patrón D1-c2, package.json:7).",
+   "propuesta": "Subir next dentro del rango ya declarado (16.4.0 entra en ^16.2.6) y next-auth, @auth/core y @auth/prisma-adapter a las versiones con fix (beta.32 / 0.41.3 o superiores según npm audit). Después correr tipos, invariantes y la regresión de login (credenciales, magic link, Google), proxy e impersonación. Validar el email del magic link con Zod antes de signIn. Decidir la estrategia de salida de next-auth v5, que sigue en beta: el tag 'latest' de npm es 4.24.15. Coordinar con Franco porque toca la superficie de auth.ts y auth-cookies.ts (ZONA-FRANCO), aunque no hace falta editarlos.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "lib.deps",
+    "lib.auth",
+    "h1.auth-login",
+    "lib.proxy"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "SEC-DEP-01 (previo, sigue abierto); patrón D1-c2 servidores dev en todas las interfaces",
+   "tmp": "D8-c1/D8-L1/H01",
+   "lote": "D8-L1",
+   "verificador": {
+    "titulo": "next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2 con avisos críticos y el arreglo disponible dentro del rango declarado",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "Los hechos se confirman por lectura: package.json:154-155 declara next ^16.2.6 y next-auth ^5.0.0-beta.30. El lockfile de origin/main (package-lock.json:12171, :12224 y :293) y node_modules/*/package.json:3 fijan next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2; next-auth fija su @auth/core exacto en el lock, línea 12229. npm-audit.json marca los tres como críticos (:13, :1333, :1061) con fixAvailable, y npm-outdated.json:226-235 da wanted 16.4.0 y 5.0.0-beta.32, dentro del rango con caret. Lo que no se sostiene es la explotabilidad que justifica ALTA. (a) El aviso del normalizador homoglyph: el magic link es alcanzable por un anónimo (login/actions.ts:143-146), pero sendToken llama al callback signIn ANTES de crear el token y de mandar el mail (node_modules/@auth/core/lib/actions/signin/send-token.js:12-33). En src/auth.ts:174-186 el callback solo autoriza si prisma.user.findUnique({email: identificador normalizado}) encuentra un usuario. Después, el token se crea y el mail se manda a ese mismo identificador (send-token.js:48-63). Un identificador con '＠' homoglyph no coincide con ningún usuario y termina en AccessDenied; uno que sí coincide va al buzón del dueño. No hay camino de toma de cuenta. (b) El fail-open por error de configuración de next-auth: src/proxy.ts:75 usa Boolean(session?.user) y los guards chequean el rol (lib/auth-guards.ts:6 y :16, admin/layout.tsx:47, setter/layout.tsx:32), así que fallan cerrados. (c) La DoS de getToken: la app no llama al getToken de next-auth; git grep 'getToken' en src solo encuentra oauth2Client.getToken de google-auth-library. (d) Aparte de los tres que el auditor ya descartó, el RCE de Image Optimization con AVIF (npm-audit.json:1205, crítico, <16.3.3) tampoco se ve aplicable. next.config.ts:40-47 no declara formats avif, public/ no tiene ningún .avif (git ls-tree) y Netlify (netlify.toml:9-10, @netlify/plugin-nextjs) sirve /_next/image por su CDN; ese último eslabón es inferido. La SSRF en rewrites tampoco aplica: los destinos de next.config.ts:143-233 son rutas internas fijas. Lo que sí queda aplicable por título es la DoS de Server Actions en App Router (npm-audit.json:1061, high, <16.2.11), alcanzable desde /login; es de disponibilidad, no figura en los criterios de CRÍTICA/ALTA y se arregla con una actualización dentro del rango. Queda como MEDIA: deuda de actualización bloqueante para el primer cliente, sin explotación trazada.",
+    "evidencia_contra": [
+     "src/auth.ts:174-186 — el callback signIn con verificationRequest solo autoriza si el email normalizado existe en User (findUnique exacto); si no, AccessDenied antes de crear el token o mandar el mail",
+     "node_modules/@auth/core/lib/actions/signin/send-token.js:12-33 — normalizer → getUserByEmail → callbacks.signIn → si no hay autorización, throw AccessDenied; recién en :48-63 llama a sendVerificationRequest y createVerificationToken con el mismo identificador",
+     "src/proxy.ts:75 — const isAuthenticated = Boolean(session?.user): ante un objeto auth que trae un error y no tiene user, falla cerrado",
+     "src/lib/auth-guards.ts:6 y :16 — los guards comparan session?.user?.role, no la existencia de la sesión",
+     "git grep 'getToken' origin/main -- src: solo src/lib/integrations/google-business-profile.ts:51 (google-auth-library), no el getToken de next-auth",
+     "next.config.ts:40-47 — images solo con remotePatterns placehold.co, sin formats avif; git ls-tree de public/: 0 archivos .avif",
+     "netlify.toml:9-10 — @netlify/plugin-nextjs (la optimización de imágenes la sirve el CDN de Netlify; eslabón inferido)",
+     "Los destinos de redirects/rewrites en next.config.ts:143-233 son rutas internas fijas, sin hostname controlado por el atacante",
+     "Aplicable por título: solo la DoS de Server Actions (npm-audit.json:1061, high, CVSS no informado) y avisos moderate"
+    ]
+   },
+   "verificado_padre": true,
+   "confianza_padre": "PROBABLE",
+   "relacionados_ids": [
+    "SEC-005",
+    "SEC-009",
+    "TEC-001"
+   ],
+   "caso": {
+    "titulo": "Magic link con '@' homoglifo (aviso de Auth.js)",
+    "entorno": "dev local con base de desarrollo y Brevo de prueba (nunca producción)",
+    "precondiciones": "usuario seed con email conocido; casilla propia en un dominio que controle Valentino",
+    "pasos": [
+     "En /login pedir enlace mágico con el email del usuario seed, reemplazando '@' por '＠' (U+FF20) y agregando '@<dominio-propio>' al final",
+     "Mirar en Brevo a qué dirección salió el mail",
+     "Abrir el link y consultar /api/auth/session para ver con qué usuario quedó la sesión",
+     "Repetir después de subir next-auth y @auth/core a las versiones con fix"
+    ],
+    "esperado": "El pedido se rechaza, o el mail sale solo a la dirección legítima del usuario",
+    "senal_falla": "El mail llega a la casilla del dominio propio y la sesión queda a nombre del usuario seed",
+    "escribe_db_o_email": true,
+    "hallazgos": "next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2 con avisos críticos y el arreglo disponible dentro del rango declarado"
+   },
+   "id_asignado": "SEC-105",
+   "vh_asignado": "VH-158"
+  },
+  {
+   "decision": "fusionar",
+   "nota_padre": "Muestreado: package.json tiene 69 líneas con `npx tsx`/`tsx` y el lockfile no tiene \"node_modules/tsx\" (0 coincidencias); ci.yml:105 corre `npm run check:invariants`, que entra por `npx tsx`. DEU-016 ya registra los 67 scripts con tsx sin declarar; suma que el gate de invariantes del CI baja de npm una versión sin fijar en cada corrida (cadena de suministro y resultado no reproducible). Sube a MEDIA por esa parte de CI.",
+   "titulo": "67 scripts corren con 'npx tsx' y tsx no está en el lockfile: el CI baja de npm una versión sin fijar en cada corrida",
+   "prefijo": "TEC",
+   "severidad": "MEDIA",
+   "tipo": "tech-vieja",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "package.json",
+     "linea": 41,
+     "fragmento": "\"check:invariant:postergacion\": \"npx tsx src/lib/leados/postergacion.invariant.ts\","
+    },
+    {
+     "ruta": "package.json",
+     "linea": 117,
+     "fragmento": "\"seed:galeria\": \"tsx scripts/dev/m0-galeria-seed.ts\","
+    },
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 105,
+     "fragmento": "run: npm run check:invariants"
+    },
+    {
+     "ruta": "package.json",
+     "linea": 199,
+     "fragmento": "\"ts-node\": \"^10.9.2\","
+    }
+   ],
+   "impacto": "El gate de invariantes ejecuta lo que npm publique ese día como 'tsx' (no hay versión en package-lock: grep '\"node_modules/tsx\"' da 0). Es un riesgo de cadena de suministro y el resultado no es reproducible. En local las mismas 'npx tsx' corren con el .env que apunta a la Neon compartida. seed:galeria llama 'tsx' sin npx y falla si tsx no está instalado global.",
+   "propuesta": "Declarar tsx como devDependency con versión exacta y reemplazar 'npx tsx' por 'tsx' en los scripts. Planear la unificación ts-node/tsx sin perder el type-check que hoy da ts-node a 20 invariantes (ci.yml:52-58).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.github-actions",
+    "lib.deps"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "D6 'Los seeds del lote solo corren con tsx, que no está declarado' (misma causa raíz)",
+   "tmp": "D8-c1/D8-L1/H02",
+   "lote": "D8-L1",
+   "verificador": null,
+   "con": "DEU-016",
+   "verificado_padre": true,
+   "destino": {
+    "severidad": "MEDIA",
+    "titulo": "tsx no está declarado ni en el lockfile y 67 scripts lo usan con `npx tsx`: los seeds resuelven una versión sin fijar mientras DATABASE_URL apunta a prod y el gate de invariantes del CI baja una versión nueva en cada corrida"
+   },
+   "fusionado_en": "DEU-016"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "La CSP global sigue en Report-Only y sin destino de reportes: no bloquea nada ni junta los datos que el plan pedía para pasar a enforce",
+   "prefijo": "SEC",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "next.config.ts",
+     "linea": 66,
+     "fragmento": "// CSP in report-only mode while we audit violations.\n// Tighten to enforcement (Content-Security-Policy) after 1–2 weeks"
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 72,
+     "fragmento": "key: 'Content-Security-Policy-Report-Only',"
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 75,
+     "fragmento": "\"script-src 'self' 'unsafe-inline' 'unsafe-eval'\","
+    }
+   ],
+   "impacto": "El panel del cliente y el admin no tienen ninguna capa de mitigación de XSS más allá del escape de React. Sin report-uri ni report-to (git grep da 0), las violaciones solo aparecen en la consola de cada navegador. Por eso las '1–2 semanas' de observación nunca producen datos para pasar a enforce. frame-ancestors 'none' en Report-Only no protege del framing (D1 ya lo reportó para las páginas de auth) y en /embed genera ruido en cada carga del widget.",
+   "propuesta": "Agregar report-to/report-uri hacia un endpoint propio con rate limit o el endpoint de CSP de Sentry. Medir y pasar a enforce por rutas, portales primero, con nonce para sacar 'unsafe-inline'/'unsafe-eval'. Mantener /embed con su política aparte.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "lib.next-config",
+    "lib.security",
+    "h2.cli-shell",
+    "h4.adm-shell"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "D1 'Las páginas de auth y /bienvenida se pueden embeber en un iframe ajeno'; SEC-MISC-01; PLAN-1025; PLAN-991",
+   "tmp": "D8-c1/D8-L1/H03",
+   "lote": "D8-L1",
+   "verificador": null,
+   "relacionados_ids": [
+    "SEC-027"
+   ],
+   "id_asignado": "SEC-106",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Netlify no aplica los maxDuration de las rutas (30 s el chat, 300 s dos crons) y el presupuesto del chat está calibrado contra un techo que la plataforma probablemente no da",
+   "prefijo": "TEC",
+   "severidad": "MEDIA",
+   "tipo": "tech-vieja",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
+     "linea": 8,
+     "fragmento": "export const maxDuration = 30"
+    },
+    {
+     "ruta": "src/app/api/cron/send-executive-reports/route.ts",
+     "linea": 5,
+     "fragmento": "export const maxDuration = 300"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+     "linea": 116,
+     "fragmento": "export const ROUTE_MAX_DURATION_MS = 30_000"
+    },
+    {
+     "ruta": "netlify.toml",
+     "linea": 16,
+     "fragmento": "[functions]\n  node_bundler = \"esbuild\""
+    }
+   ],
+   "impacto": "maxDuration es configuración de segmento que lee Vercel. En Netlify el corte lo fija el plan de la función: la propia bitácora asume ~10 s (docs/bitacora-roadmap.md:13963, contexto, no evidencia) y ~26 s como tope duro. Con un techo menor que 30 s, un turno lento del bot muere antes de que reconcile.ts cierre la compensación de cupo y la persistencia, y el visitante del sitio del cliente ve el chat cortado. Los crons que corren dentro del servidor Next (send-weekly-reports, generate-insights) se cortan a mitad del lote.",
+   "propuesta": "Confirmar en Netlify el plan y el timeout real de la función del servidor. Alinear ROUTE_MAX_DURATION_MS y HOOK_SAFETY_MARGIN_MS a ese techo. Mover los trabajos largos a Background Functions o partirlos en lotes reanudables. Dejar el techo documentado junto a netlify.toml.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "int.netlify",
+    "h3.vis-api-chatbot",
+    "int.cron.send-executive-reports",
+    "int.cron.regenerate-briefs"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "D5 'El turno del chat no tiene techo absoluto...supera los 30 s de maxDuration'; D7 'generate-insights...dentro de un techo de ~20-26 s'",
+   "tmp": "D8-c1/D8-L1/H04",
+   "lote": "D8-L1",
+   "verificador": null,
+   "relacionados_ids": [
+    "BUG-092",
+    "BUG-105",
+    "PERF-010",
+    "SEC-099"
+   ],
+   "caso": {
+    "titulo": "Techo real de las funciones en Netlify frente a los maxDuration",
+    "entorno": "Netlify (configuración del sitio y logs de funciones de producción)",
+    "precondiciones": "acceso de lectura al sitio en Netlify",
+    "pasos": [
+     "En Site configuration > Functions anotar el plan y el timeout de funciones, si aparece",
+     "En Logs > Functions abrir la función del servidor de Next y buscar 'Task timed out' y las duraciones máximas",
+     "Abrir el log de send-weekly-reports-cron del último lunes 12:00 UTC y ver cuánto tardó el fetch a /api/cron/send-weekly-reports"
+    ],
+    "esperado": "Un techo >= 30 s para la función del servidor, o constancia de que el techo real coincide con ROUTE_MAX_DURATION_MS",
+    "senal_falla": "Timeouts a ~10 s o ~26 s ('Task timed out after 10.00 seconds') o crons cortados a mitad",
+    "escribe_db_o_email": false,
+    "hallazgos": "Netlify no aplica los maxDuration de las rutas (30 s el chat, 300 s dos crons) y el presupuesto del chat está calibrado contra un techo que la plataforma probablemente no da"
+   },
+   "id_asignado": "TEC-006",
+   "vh_asignado": "VH-159"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "El CI solo corre tipos e invariantes: no corre build, lint, npm audit ni las fronteras, y los jobs con base se saltean",
+   "prefijo": "DEU",
+   "severidad": "MEDIA",
+   "tipo": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 20,
+     "fragmento": "# ── Por qué el lint NO está acá ──"
+    },
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 97,
+     "fragmento": "- name: 'Tipos: tsc --noEmit'"
+    },
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 142,
+     "fragmento": "if [ -z \"$DB\" ]; then\n  echo \"listo=false\" >> \"$GITHUB_OUTPUT\""
+    },
+    {
+     "ruta": "scripts/run-invariants.mjs",
+     "linea": 107,
+     "fragmento": "(nombre) => nombre === 'check:invariant' || nombre.startsWith('check:invariant:'),"
+    },
+    {
+     "ruta": "package.json",
+     "linea": 55,
+     "fragmento": "\"test:ev1\": \"npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts\","
+    }
+   ],
+   "impacto": "Un build roto, un import que rompe la frontera de aislamiento chatbot/motor o una dependencia con aviso crítico llegan a main sin rojo. El build solo lo detecta Netlify al desplegar y el lint nadie, porque Next 16 ya no lintea en el build y no hay hooks versionados. Los 28 invariantes test:* del chatbot (package.json:55-82) no entran al agregado y no corren nunca en CI. Tampoco hay bloque permissions, así que el GITHUB_TOKEN queda con los permisos por defecto del repo.",
+   "propuesta": "Sumar al CI: un paso de build con el mismo heap que Netlify, eslint acotado a src/ con las reglas de frontera como error y el resto como baseline congelado, y npm audit --audit-level=critical. Agregar permissions: contents: read. Incluir los test:* en el runner, renombrándolos o ampliando el filtro.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "int.github-actions",
+    "lib.isolation"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "D6 'La frontera de aislamiento...la regla de eslint no corre en CI'; PLAN-1006; PLAN-1032; PLAN-1037",
+   "tmp": "D8-c1/D8-L1/H05",
+   "lote": "D8-L1",
+   "verificador": null,
+   "relacionados_ids": [
+    "DEU-017"
+   ],
+   "id_asignado": "DEU-090",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Verificado en GitHub (solo lectura, 2026-10-15 19:10): `gh run list --workflow db-backup.yml` da 140 corridas en «failure» y 1 «cancelled», ninguna exitosa; la del 15/10 (run 38724108093) corta en el paso «pg_dump + encrypt» con «secret faltante para target=prod» (db-backup.yml:93-97, exit 1), y `gh api repos/frc11/PorfolioDevelOP/actions/secrets` da total_count 0. Leído además ci.yml:120-127 (el comentario del 2026-08-25 ya decía 0 secrets). Verificado: no existe ningún respaldo hecho por el workflow y el restore nunca se probó; la única red es la retención propia de Neon, que es runtime (VH).",
+   "titulo": "El backup diario de la base nunca funcionó: las 140 corridas del workflow fallaron por falta del secret de la URL y el repo tiene 0 secrets de Actions",
+   "prefijo": "BUG",
+   "severidad": "ALTA",
+   "tipo": "bug",
+   "confianza": "CONFIRMADO",
+   "evidencia": [
+    {
+     "ruta": "raíz:.github/workflows/db-backup.yml",
+     "linea": 93,
+     "fragmento": "if [ -z \"$URL\" ]; then\n  echo \"ERROR: secret faltante para target=$TARGET\" >&2"
+    },
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 120,
+     "fragmento": "# Necesita una DB de test dedicada. Al 2026-08-25 el repo NO tiene ningún\n# secret configurado (`gh api .../actions/secrets` devuelve total_count: 0),"
+    },
+    {
+     "ruta": "raíz:.github/workflows/db-backup.yml",
+     "linea": 4,
+     "fragmento": "# GitHub Actions solo descubre workflows en <repo_root>/.github/workflows/. El\n# archivo logic-core-v3/.github/workflows/e2e.yml está MAL ubicado y nunca corrió"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real: el workflow de B14.3 (pg_dump cifrado con restore de prueba) nunca produjo un respaldo y el restore nunca se probó. La única red es la retención nativa de Neon, que el propio doc describe como corta y sin PITR en el plan Free (docs/operations/neon-backups.md:5). Pesa más con un historial de migraciones que ya borró y re-agregó columnas con datos de clientes (DEU-014). Nadie se entera: la falla diaria queda en la pestaña Actions sin aviso. El comentario de cabecera quedó viejo (e2e.yml ya no existe). Los mismos 0 secrets apagan los jobs de LeadOS y E2E del CI (DEU-017).",
+   "propuesta": "Verificar secrets y corridas (casos de prueba). Cargar DIRECT_DATABASE_URL_PROD y BACKUP_GPG_PASSPHRASE (lo hace Franco). Hacer visible el fallo, por ejemplo con un aviso al canal de alertas, y endurecer la validación con conteos mínimos de tablas críticas además de _prisma_migrations. Actualizar el comentario.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.github-actions",
+    "int.neon"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "PLAN-1034; PLAN-1118; D6 migraciones de reconciliación",
+   "tmp": "D8-c1/D8-L1/H06",
+   "lote": "D8-L1",
+   "verificador": {
+    "titulo": "El backup diario de la base probablemente falla todos los días: el workflow aborta sin el secret y el repo registraba 0 secrets",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "Se confirma por lectura. raíz:.github/workflows/db-backup.yml:39-41 agenda el cron diario; :84-97 resuelve DIRECT_DATABASE_URL_PROD y, si falta, hace exit 1 (:93-96); :105-110 aborta igual si falta BACKUP_GPG_PASSPHRASE. raíz:.github/workflows/ci.yml:120-121 registra que al 2026-08-25 la API de secrets devolvía total_count: 0. docs/bitacora-beta-3.md:5264-5272 lo confirma con permisos de admin y agrega textualmente que ese 0 «alcanza también a db-backup.yml, que usa tres secrets que tampoco existen» y que «explica el P0 del backup». docs/bitacora-roadmap.md:9533-9538 deja la carga de los secrets como pendiente bloqueante de Franco. Encaja en la rúbrica como ALTA, «integración crítica que no corre». El cabezal viejo también se confirma: db-backup.yml:3-6 dice que logic-core-v3/.github/workflows/e2e.yml está mal ubicado, pero ese archivo ya no existe en origin/main; git ls-tree solo muestra ci.yml y db-backup.yml. Queda en PROBABLE porque el eslabón de runtime (que los secrets sigan sin cargar después del 2026-08-25, con la base del 2026-09-06) no se puede verificar leyendo; requiere un gh secret list o gh run list del workflow, que va como verificación humana. Corrección de cita: los workflows están en la raíz del repo, no bajo logic-core-v3, así que la evidencia lleva el prefijo raíz: (raíz:.github/workflows/db-backup.yml:93, raíz:.github/workflows/ci.yml:120). Matiz del impacto: «no hay ningún respaldo» exagera un poco, porque Neon Free tiene una retención nativa corta. El propio doc lo describe como «sin PITR, retención corta» (docs/operations/neon-backups.md:5), así que no hay respaldo confiable ni restore probado.",
+    "evidencia_contra": [
+     "El estado de los secrets es del 2026-08-25 (ci.yml:120-121, bitacora-beta-3.md:5264); no se puede leer si se cargaron después: falta gh secret list / gh run list --workflow db-backup.yml (verificación humana)",
+     "docs/operations/neon-backups.md:5 — Neon Free conserva una retención nativa corta: 'ningún respaldo' es una exageración leve; lo que falta es un respaldo confiable y un restore probado",
+     "Las rutas citadas van con prefijo raíz: — .github/ está en la raíz del repo, no en logic-core-v3/ (validar.mjs la resolvería mal sin el prefijo)"
+    ]
+   },
+   "verificado_padre": true,
+   "confianza_padre": "CONFIRMADO",
+   "relacionados_ids": [
+    "DEU-014",
+    "DEU-017",
+    "BUG-014"
+   ],
+   "id_asignado": "BUG-171",
+   "vh_asignado": "VH-160"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Build de producción sin margen de memoria verificable: heap fijo de 4096 MB en Netlify, webpack forzado, type-check dentro del build y Tailwind escaneando docs/",
+   "prefijo": "TEC",
+   "severidad": "MEDIA",
+   "tipo": "tech-vieja",
+   "confianza": "HIPÓTESIS",
+   "evidencia": [
+    {
+     "ruta": "netlify.toml",
+     "linea": 7,
+     "fragmento": "NODE_OPTIONS = \"--max-old-space-size=4096\""
+    },
+    {
+     "ruta": "package.json",
+     "linea": 9,
+     "fragmento": "\"build\": \"next build --webpack\","
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 31,
+     "fragmento": "// Sin `typescript.ignoreBuildErrors`: el build vuelve a fallar ante un error de\n// tipos."
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 1,
+     "fragmento": "@import \"tailwindcss\";"
+    },
+    {
+     "ruta": "docs/bitacora-beta-3.md",
+     "linea": 3647,
+     "fragmento": "`bg-[url('https://grainy-gradients.vercel.app/noise.svg')]` de `web-development/page.tsx` ya"
+    }
+   ],
+   "impacto": "Los docs se contradicen: BP.4 dice que el build entra en el heap por defecto y P1.A, P5.3, UTM.1 y PRIVACIDAD que necesita 6-8 GB. Netlify fija 4096 MB, que en una máquina de 16 GB es más o menos el default, así que si el OOM local es real, el deploy de producción también debería morir. Un deploy que muere deja producción sin el arreglo urgente. El build ahora suma el type-check (CO-1 cerrado) y Tailwind escanea todo lo no ignorado: 7 MB de docs/ versionados y, en local, lo no versionado (docs/_insumos, .next-perf-*).",
+   "propuesta": "Medir el pico de memoria en el log del último deploy de Netlify y en un clon limpio con 4096 MB. Acotar el escaneo de Tailwind con source() o '@source not' sobre docs/ y los distDirs. Evaluar el build con Turbopack, que es el default estable de Next 16, comprobando la compatibilidad con withSentryConfig. Dejar el heap documentado.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "int.netlify",
+    "lib.tailwind"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "D8-A1; D8-A2; CO-1; PLAN-1062; PLAN-1132; PLAN-1079; PLAN-1054; PLAN-1021",
+   "tmp": "D8-c1/D8-L1/H07",
+   "lote": "D8-L1",
+   "verificador": null,
+   "caso": {
+    "titulo": "¿Entra el build en 4096 MB?",
+    "entorno": "Log del último deploy de Netlify y un clon limpio local",
+    "precondiciones": "clon nuevo del repo, sin docs/_insumos ni directorios .next-*",
+    "pasos": [
+     "En el log del último deploy de producción buscar 'JavaScript heap out of memory' y la duración de 'next build'",
+     "En el clon limpio: NODE_OPTIONS=--max-old-space-size=4096, npm ci y npm run build; anotar si termina",
+     "Repetir en el checkout de trabajo con lo no versionado presente y comparar"
+    ],
+    "esperado": "El build termina con 4096 MB en Netlify y en el clon limpio",
+    "senal_falla": "OOM en Netlify, o OOM solo en el checkout de trabajo (la causa es lo no versionado que Tailwind escanea)",
+    "escribe_db_o_email": false,
+    "hallazgos": "Build de producción sin margen de memoria verificable: heap fijo de 4096 MB en Netlify, webpack forzado, type-check dentro del build y Tailwind escaneando docs/"
+   },
+   "id_asignado": "TEC-007",
+   "vh_asignado": "VH-161"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Muestreado: globals.css:330-352 (bloque «Ghost Mode: Scrollbar Exterminated»: scrollbar-width none en html y body, y `::-webkit-scrollbar { display: none }` sin prefijo de elemento, que alcanza a todo contenedor desplazable en Chromium y Safari).",
+   "titulo": "Las barras de scroll están ocultas en toda la app, portales incluidos: las tablas y tiras desplazables no muestran que se pueden desplazar",
+   "prefijo": "A11Y",
+   "severidad": "MEDIA",
+   "tipo": "a11y",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 333,
+     "fragmento": "html,\n  body {\n    scrollbar-width: none;"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 350,
+     "fragmento": "::-webkit-scrollbar {\n    display: none;"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 480,
+     "fragmento": "min-width: 980px;"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx",
+     "linea": 88,
+     "fragmento": "<div className=\"overflow-x-auto\">"
+    }
+   ],
+   "impacto": "El selector ::-webkit-scrollbar sin prefijo alcanza a todo elemento desplazable en Chromium y Safari. En desktop con mouse, el cliente y el admin no ven que una tabla o una tira tiene contenido a la derecha (.admin-table exige 980 px) ni en qué parte de una página larga están. La barra fina que intenta .chat-messages-area (globals.css:647-659) nunca aparece porque hereda display:none. Ningún componente vuelve a habilitar barras (git grep de webkit-scrollbar solo encuentra más ocultamientos).",
+   "propuesta": "Limitar el ocultamiento al sitio público (o a contenedores con clase explícita) y restaurar barras finas estilizadas en /admin, /dashboard y /setter.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-shell",
+    "h4.adm-shell",
+    "lib.ui"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "",
+   "tmp": "D8-c1/D8-L1/H08",
+   "lote": "D8-L1",
+   "verificador": null,
+   "verificado_padre": true,
+   "caso": {
+    "titulo": "Barras de scroll en el portal (desktop con mouse)",
+    "entorno": "Chrome de escritorio, cuenta SUPER_ADMIN de prueba",
+    "precondiciones": "un cliente de prueba con plan asignado",
+    "pasos": [
+     "Entrar a /admin/clients/<cliente-de-prueba> y achicar la ventana a ~900 px de ancho",
+     "Ubicar la tabla de planes (PlanAssignmentCard) o la tira de tabs (ClientTabsNav)",
+     "Ver si aparece una barra horizontal o algún indicador de que hay más contenido"
+    ],
+    "esperado": "Barra visible o indicador de desplazamiento",
+    "senal_falla": "Contenido cortado a la derecha sin barra ni indicador",
+    "escribe_db_o_email": false,
+    "hallazgos": "Las barras de scroll están ocultas en toda la app, portales incluidos: las tablas y tiras desplazables no muestran que se pueden desplazar"
+   },
+   "id_asignado": "A11Y-033",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "El layout raíz carga el chrome de marketing (Navbar, Dock, Shutter, Preloader, Lenis) en todas las rutas, incluido el iframe /embed del widget en sitios de clientes",
+   "prefijo": "PERF",
+   "severidad": "MEDIA",
+   "tipo": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/layout.tsx",
+     "linea": 43,
+     "fragmento": "import { Navbar } from \"@/components/layout/Navbar\";\nimport Preloader from \"@/components/ui/Preloader\";"
+    },
+    {
+     "ruta": "src/app/layout.tsx",
+     "linea": 117,
+     "fragmento": "<PublicOnlyComponents>\n  <Navbar />\n</PublicOnlyComponents>"
+    },
+    {
+     "ruta": "src/components/layout/publicRoute.ts",
+     "linea": 16,
+     "fragmento": "export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed', '/setter'] as const"
+    },
+    {
+     "ruta": "src/app/layout.tsx",
+     "linea": 78,
+     "fragmento": "<link rel=\"preconnect\" href=\"https://grainy-gradients.vercel.app\" crossOrigin=\"anonymous\" />"
+    }
+   ],
+   "impacto": "PublicOnlyComponents solo evita el render. Los componentes cliente que el layout raíz pasa como children quedan referenciados en el payload RSC y en los chunks de la entrada del layout, así que el widget en el sitio del cliente (/embed) y los portales descargan JS del chrome público que nunca pintan (Navbar, DynamicDock, Shutter, Preloader, MarketingIntro, motion y Lenis). El widget carga más lento en mobile. PERF-01 quedó a medias: three.js ya va por next/dynamic (MarketingIntro.tsx:19-20).",
+   "propuesta": "Mover el chrome público a un route group del sitio de marketing con su propio layout y dejar el layout raíz mínimo. Es una decisión para Valentino porque reordena PreloaderProvider y TransitionProvider (FROZEN, no se editan). Antes, cablear @next/bundle-analyzer y medir /embed.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-widget-cliente",
+    "h2.cli-shell",
+    "lib.ui"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "PERF-01 (previo, parcial); PLAN-1020",
+   "tmp": "D8-c1/D8-L1/H09",
+   "lote": "D8-L1",
+   "verificador": null,
+   "caso": {
+    "titulo": "Peso del iframe /embed del widget",
+    "entorno": "producción o deploy preview, navegador con DevTools",
+    "precondiciones": "slug de un bot de prueba",
+    "pasos": [
+     "Abrir https://<host>/embed/<slug-de-prueba> con Network filtrado por JS y la cache deshabilitada",
+     "En Sources buscar 'DynamicDock', 'MarketingIntro', 'Shutter' y 'lenis'",
+     "Anotar el JS transferido total"
+    ],
+    "esperado": "Solo chunks del widget del chatbot",
+    "senal_falla": "Aparecen chunks del chrome público (Navbar, DynamicDock, MarketingIntro, Lenis)",
+    "escribe_db_o_email": false,
+    "hallazgos": "El layout raíz carga el chrome de marketing (Navbar, Dock, Shutter, Preloader, Lenis) en todas las rutas, incluido el iframe /embed del widget en sitios de clientes"
+   },
+   "id_asignado": "PERF-016",
+   "vh_asignado": "VH-162"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "tailwind.config.ts es código muerto: Tailwind 4 no lo carga (no hay @config) y su plugin ya está en globals.css",
+   "prefijo": "DEU",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "tailwind.config.ts",
+     "linea": 19,
+     "fragmento": "export default {"
+    },
+    {
+     "ruta": "tailwind.config.ts",
+     "linea": 36,
+     "fragmento": "plugins: [typographyPlugin],"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 2,
+     "fragmento": "@plugin \"@tailwindcss/typography\";"
+    }
+   ],
+   "impacto": "Quien edite el tema en ese archivo no ve ningún efecto. Ninguna clase develop-* lo usa (git grep da 0), así que hoy no rompe nada, pero suma un warning de eslint y confunde sobre de dónde salen los tokens.",
+   "propuesta": "Borrar tailwind.config.ts. design-tokens.ts NO se borra: tiene 5 consumidores (Modal, setter-shell, DashboardLayoutClient...) y es FROZEN-inferido (PLAN-1269).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.tailwind"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "PLAN-1275; PLAN-1269",
+   "tmp": "D8-c1/D8-L1/H10",
+   "lote": "D8-L1",
+   "verificador": null,
+   "id_asignado": "DEU-091",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "next.config.ts no está tipado (NextConfig se importa y no se usa) y @next/bundle-analyzer está instalado sin cablear",
+   "prefijo": "DEU",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "next.config.ts",
+     "linea": 1,
+     "fragmento": "import type { NextConfig } from \"next\";"
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 3,
+     "fragmento": "const nextConfig = {"
+    },
+    {
+     "ruta": "package.json",
+     "linea": 182,
+     "fragmento": "\"@next/bundle-analyzer\": \"^16.2.7\","
+    }
+   ],
+   "impacto": "Una clave mal escrita o deprecada en la config no da error de tipos, porque no hay chequeo de propiedades de más: el objeto solo se compara estructuralmente al pasarlo a withSentryConfig. Sin el analyzer cableado no hay forma de medir el peso de los bundles (ver el hallazgo del layout raíz).",
+   "propuesta": "Tipar el objeto como NextConfig (o con satisfies). Cablear el analyzer detrás de una variable ANALYZE, o quitarlo.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.next-config"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "PLAN-1153; PLAN-1020",
+   "tmp": "D8-c1/D8-L1/H11",
+   "lote": "D8-L1",
+   "verificador": null,
+   "id_asignado": "DEU-092",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "/api/version no identifica el deploy: la versión es un '1.0.0' fijo y builtAt es la hora del pedido",
+   "prefijo": "BUG",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/version/route.ts",
+     "linea": 5,
+     "fragmento": "version: '1.0.0',\nbuiltAt: process.env.NEXT_PUBLIC_BUILD_TIME ?? new Date().toISOString(),"
+    },
+    {
+     "ruta": ".env.example",
+     "linea": 295,
+     "fragmento": "# AUTOINYECTADA · Timestamp de build, inyectado por next.config.ts en build."
+    },
+    {
+     "ruta": "package.json",
+     "linea": 3,
+     "fragmento": "\"version\": \"0.1.0\","
+    }
+   ],
+   "impacto": "Ni el smoke de producción (scripts/_b14-4-smoke-prod.mjs:82) ni un monitoreo externo pueden confirmar qué commit está desplegado: el endpoint siempre dice '1.0.0' y la 'fecha de build' cambia en cada pedido. next.config.ts no inyecta ninguna variable env.",
+   "propuesta": "Exponer el SHA del commit que Netlify pasa al build y una fecha de build inyectada de verdad. Corregir .env.example y alinear la versión con package.json.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.netlify"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "OBS-03; PLAN-1125",
+   "tmp": "D8-c1/D8-L1/H12",
+   "lote": "D8-L1",
+   "verificador": null,
+   "id_asignado": "BUG-172",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Muestreado: layout.tsx:32 y contact/layout.tsx:14 declaran /og-image.png; `git ls-tree` de la base no tiene ningún og-image en public/ ni un opengraph-image en src/app.",
+   "titulo": "La imagen Open Graph del sitio (/og-image.png) no existe: las vistas previas al compartir salen sin imagen",
+   "prefijo": "BUG",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/layout.tsx",
+     "linea": 32,
+     "fragmento": "images: [{ url: \"/og-image.png\", width: 1200, height: 630, alt: \"develOP Agencia Digital\" }],"
+    },
+    {
+     "ruta": "src/app/contact/layout.tsx",
+     "linea": 14,
+     "fragmento": "images: [{ url: \"/og-image.png\", width: 1200, height: 630, alt: \"Contacto develOP\" }],"
+    }
+   ],
+   "impacto": "Al compartir develop.com.ar o /contact por WhatsApp o LinkedIn, la tarjeta sale sin imagen, porque public/ no tiene og-image ni hay un opengraph-image por ruta. Es la carta de presentación comercial de la agencia.",
+   "propuesta": "Agregar el asset de 1200×630 en public/ o un opengraph-image por ruta.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6.vis-contacto",
+    "lib.seo"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "SEO-01 (previo, sigue abierto)",
+   "tmp": "D8-c1/D8-L1/H13",
+   "lote": "D8-L1",
+   "verificador": null,
+   "verificado_padre": true,
+   "id_asignado": "BUG-173",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Recursos de terceros: noise.svg se hotlinkea de grainy-gradients.vercel.app en tres landings con preconnect en todas las rutas, y placehold.co está preconectado y permitido sin uso",
+   "prefijo": "PERF",
+   "severidad": "BAJA",
+   "tipo": "perf",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/layout.tsx",
+     "linea": 78,
+     "fragmento": "<link rel=\"preconnect\" href=\"https://grainy-gradients.vercel.app\" crossOrigin=\"anonymous\" />\n<link rel=\"preconnect\" href=\"https://placehold.co\" crossOrigin=\"anonymous\" />"
+    },
+    {
+     "ruta": "src/app/web-development/page.tsx",
+     "linea": 87,
+     "fragmento": "bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 41,
+     "fragmento": "remotePatterns: [\n  {\n    protocol: 'https',"
+    }
+   ],
+   "impacto": "Cada visita a /web-development, /software-development y /process-automation le pasa la IP del visitante a un tercero y depende de que un demo ajeno siga en línea. Los portales y el embed abren conexiones a dos dominios que no usan. placehold.co solo aparece en un comentario de ShowcaseSection.tsx:8, que es un componente huérfano.",
+   "propuesta": "Servir noise.svg desde public/. Quitar los dos preconnect del layout raíz y el remotePattern de placehold.co.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.ui",
+    "lib.next-config"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "",
+   "tmp": "D8-c1/D8-L1/H14",
+   "lote": "D8-L1",
+   "verificador": null,
+   "id_asignado": "PERF-017",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Redirects legacy: /dashboard/crm lleva a un módulo que ya no está en el catálogo y /dashboard/seo-avanzado encadena dos saltos",
+   "prefijo": "BUG",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "next.config.ts",
+     "linea": 158,
+     "fragmento": "source: '/dashboard/crm',\ndestination: '/dashboard/services?modulo=mini-crm',"
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 210,
+     "fragmento": "source: '/dashboard/seo-avanzado',\ndestination: '/dashboard/seo',"
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 244,
+     "fragmento": "source: '/dashboard/seo',\ndestination: '/dashboard/resultados/seo',"
+    }
+   ],
+   "impacto": "Un bookmark viejo de /dashboard/crm abre la vitrina con un modulo que no existe en src/lib/data/premium-modules.ts (solo queda en premium-features.ts:59), y es probable que no se resalte nada. /dashboard/seo-avanzado hace dos 308 seguidos.",
+   "propuesta": "Mandar /dashboard/crm a /dashboard/services sin parámetro y /dashboard/seo-avanzado directo a /dashboard/resultados/seo.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-servicios",
+    "h2.cli-resultados"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "PLAN-1131",
+   "tmp": "D8-c1/D8-L1/H15",
+   "lote": "D8-L1",
+   "verificador": null,
+   "id_asignado": "BUG-174",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Las fronteras raíz (error y 404) son de marketing y también atienden /embed y los notFound() de admin y dashboard",
+   "prefijo": "UX",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/embed/[slug]/page.tsx",
+     "linea": 37,
+     "fragmento": "if (!bot) notFound()"
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 145,
+     "fragmento": "Este rincón del internet<br />no existe todavía."
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 177,
+     "fragmento": "<Link\n    href=\"/contact\""
+    },
+    {
+     "ruta": "src/app/error.tsx",
+     "linea": 57,
+     "fragmento": "<a\n    href=\"/\""
+    }
+   ],
+   "impacto": "Si un cliente copia mal el snippet, o si su bot se borra, su propio sitio puede mostrar dentro del iframe del widget el 404 animado de develOP con 'Volver al inicio' y 'Contactarnos'; un error de render muestra 'Algo salió mal' con un link a develop.com.ar. Depende de si widget.js oculta el iframe sin señal de listo. En el panel, admin y dashboard no tienen not-found.tsx propio (hay 7 notFound() en esas ramas) y un recurso inexistente saca al usuario al sitio público.",
+   "propuesta": "Agregar not-found.tsx y error.tsx propios para /embed (silenciosos, que avisen al widget) y not-found.tsx en dashboard y admin con vuelta al panel.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-widget-cliente",
+    "h2.cli-shell",
+    "h4.adm-shell"
+   ],
+   "requiere_verificacion_humana": true,
+   "relacionados": "D5 'Degradado y errores visibles al visitante'",
+   "tmp": "D8-c1/D8-L1/H16",
+   "lote": "D8-L1",
+   "verificador": null,
+   "caso": {
+    "titulo": "404 dentro del widget en el sitio del cliente",
+    "entorno": "página HTML local con el snippet de widget.js",
+    "precondiciones": "ninguna (slug inexistente)",
+    "pasos": [
+     "Crear una página local con el snippet del widget apuntando a un slug que no existe",
+     "Abrirla y desplegar el widget",
+     "Abrir también https://<host>/embed/slug-que-no-existe directo"
+    ],
+    "esperado": "El widget no aparece o muestra un estado propio y discreto",
+    "senal_falla": "Se ve el 404 animado de develOP ('Este rincón del internet...', 'Contactarnos') dentro del iframe",
+    "escribe_db_o_email": false,
+    "hallazgos": "Las fronteras raíz (error y 404) son de marketing y también atienden /embed y los notFound() de admin y dashboard"
+   },
+   "id_asignado": "UX-057",
+   "vh_asignado": "VH-163"
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "La página 404 anima un canvas de pantalla completa en un bucle infinito sin respetar reduced-motion ni pausarse",
+   "prefijo": "A11Y",
+   "severidad": "BAJA",
+   "tipo": "a11y",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 58,
+     "fragmento": "time += 0.016\nanimId = requestAnimationFrame(draw)"
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 121,
+     "fragmento": "transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 673,
+     "fragmento": "Alcance: CSS. Las animaciones de Framer Motion ya se apagan por\n`useReducedMotion()` / `motion-reduce:` en los componentes que lo consumen."
+    }
+   ],
+   "impacto": "Quien pidió menos movimiento a nivel sistema igual recibe 1.120 puntos animados por cuadro y un pulso infinito. El bloque global de reduced-motion solo cubre CSS. En mobile también gasta batería mientras la pestaña está abierta. Incumple las reglas de CLAUDE.md sobre IntersectionObserver y reduced-motion.",
+   "propuesta": "Consultar prefers-reduced-motion (el hook use-reduced-motion existente) para dibujar un frame estático y pausar con visibilitychange o IntersectionObserver.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.ui"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "",
+   "tmp": "D8-c1/D8-L1/H17",
+   "lote": "D8-L1",
+   "verificador": null,
+   "id_asignado": "A11Y-034",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "Muestreado: .gitignore:16-25 cubre /.next/, /.next-galeria/ y /.next-setter/ (estas dos, repetidas) pero no .next-perf-* ni .next-corrida-visual; tsconfig.json:38-48 incluye los tipos de .next-perf-a, -b y -base.",
+   "titulo": "Los distDir alternativos no están excluidos de eslint ni de .gitignore (perf, corrida-visual) y tsconfig incluye tipos de builds de experimentos",
+   "prefijo": "DEU",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "eslint.config.mjs",
+     "linea": 9,
+     "fragmento": "globalIgnores([\n  // Default ignores of eslint-config-next:\n  \".next/**\","
+    },
+    {
+     "ruta": ".gitignore",
+     "linea": 17,
+     "fragmento": "/.next/\n/.next-galeria/\n/.next-setter/"
+    },
+    {
+     "ruta": "tsconfig.json",
+     "linea": 43,
+     "fragmento": "\".next-perf-a/types/**/*.ts\","
+    },
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 27,
+     "fragmento": "#   (Nota al pasar, sin arreglar: `npm run lint` a secas reporta ~108.000"
+    }
+   ],
+   "impacto": "'npm run lint' a secas lintea bundles minificados (~108.000 problemas), lo que vuelve inútil medir la deuda real. Los .next-perf-* y .next-corrida-visual no están en .gitignore: Tailwind los escanea en local y un 'git add' los tomaría. .gitignore repite las entradas de .next-setter y .next-galeria (:18-19 y :24-25) y la de vertex-credentials.json (:55 y :58).",
+   "propuesta": "Un patrón '.next*/' en globalIgnores y en .gitignore. Sacar de tsconfig los includes de .next-perf-*, que no tienen script que los genere. Limpiar los duplicados.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.github-actions",
+    "lib.next-config"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "PLAN-1022; PLAN-1037; PLAN-1008",
+   "tmp": "D8-c1/D8-L1/H18",
+   "lote": "D8-L1",
+   "verificador": null,
+   "verificado_padre": true,
+   "id_asignado": "DEU-093",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Repo público con datos de infraestructura y volcados de tablas versionados contra la regla del propio .gitignore",
+   "prefijo": "SEC",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": ".gitignore",
+     "linea": 64,
+     "fragmento": "# DB backups (B14.3) — contienen PII, NUNCA commitear."
+    },
+    {
+     "ruta": "prisma/backups/organization-module-pre-push.json",
+     "linea": 4,
+     "fragmento": "\"organizationId\": \"<cuid redactado>\","
+    },
+    {
+     "ruta": ".env.example",
+     "linea": 31,
+     "fragmento": "#     pooled:  ep-<id redactado>-pooler.sa-east-1.aws.neon.tech"
+    },
+    {
+     "ruta": "raíz:.github/workflows/db-backup.yml",
+     "linea": 21,
+     "fragmento": "#   El repo es PÚBLICO. Sin cifrado, cualquiera con el link al run podría descargar"
+    }
+   ],
+   "impacto": "Cualquiera puede leer el hostname del endpoint real de la Neon compartida (sin credenciales) y volcados de las tablas de catálogo y de activación de módulos con IDs internos (prisma/backups/*.json y backup.js, versionados aunque .gitignore:67 ignora backups/). Sumado al historial de origin/main, que conserva enviroment.env (commit 39535583; ya hay hallazgo de credenciales en el historial), facilita un ataque dirigido.",
+   "propuesta": "Reemplazar el hostname por un placeholder en .env.example. Quitar prisma/backups/ del repo (git rm --cached; queda en el historial). Decidir si el repo pasa a privado, coordinado con PLAN-1075.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.neon",
+    "modelo.OrganizationModule"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "D8-A4; PLAN-1075; D7 'Clave de Google AI con el valor completo en dos documentos y en el historial'",
+   "tmp": "D8-c1/D8-L1/H19",
+   "lote": "D8-L1",
+   "verificador": null,
+   "relacionados_ids": [
+    "SEC-001"
+   ],
+   "id_asignado": "SEC-107",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Stack con piezas en beta o una major atrás: next-auth 5 sigue en beta (el 'latest' de npm es 4.x), Prisma 6 con 7 estable, zod 3 con 4 estable, y Node desalineado entre CI (24), Netlify (22) y los tipos (20)",
+   "prefijo": "TEC",
+   "severidad": "MEDIA",
+   "tipo": "tech-vieja",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "docs/auditoria-2026-10/_crudo/npm-outdated.json",
+     "linea": 233,
+     "fragmento": "\"next-auth\": { \"current\": \"5.0.0-beta.31\", \"wanted\": \"5.0.0-beta.32\", \"latest\": \"4.24.15\""
+    },
+    {
+     "ruta": "docs/auditoria-2026-10/_crudo/npm-outdated.json",
+     "linea": 72,
+     "fragmento": "\"@prisma/client\": { \"current\": \"6.19.3\", \"latest\": \"7.10.0\""
+    },
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 87,
+     "fragmento": "node-version: '24'"
+    },
+    {
+     "ruta": "netlify.toml",
+     "linea": 6,
+     "fragmento": "NODE_VERSION = \"22\""
+    },
+    {
+     "ruta": "package.json",
+     "linea": 188,
+     "fragmento": "\"@types/node\": \"^20\","
+    }
+   ],
+   "impacto": "La autenticación depende de una línea beta sin release estable. Cada mes sin migrar encarece el salto: Prisma 7 cambia generator, driver adapters y configuración, y zod 4 cambia la API de errores. El CI valida con Node 24 lo que en producción corre con 22, y los tipos son de 20. No hay engines ni .nvmrc, y @netlify/plugin-nextjs no está fijado en package.json.",
+   "propuesta": "Un plan de upgrades por etapas, cada uno con su sprint: next-auth (seguridad primero), Prisma 7 y zod 4. Fijar engines y la versión de Node a la de Netlify, alinear @types/node y fijar el plugin de Netlify.",
+   "esfuerzo": "L",
+   "zona": "libre",
+   "nodos": [
+    "lib.deps",
+    "lib.auth",
+    "lib.prisma"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "hallazgo de avisos críticos de next/next-auth (este lote)",
+   "tmp": "D8-c1/D8-L1/H20",
+   "lote": "D8-L1",
+   "verificador": null,
+   "relacionados_ids": [
+    "TEC-001"
+   ],
+   "id_asignado": "TEC-008",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": "Dependencias fantasma y sin uso: framer-motion y three-stdlib se importan sin estar declaradas, y html2canvas y jspdf solo las usa un componente huérfano",
+   "prefijo": "DEU",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/components/sections/home/About.tsx",
+     "linea": 3,
+     "fragmento": "import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';"
+    },
+    {
+     "ruta": "src/components/layout/Hero.tsx",
+     "linea": 7,
+     "fragmento": "import { SVGLoader } from 'three-stdlib'"
+    },
+    {
+     "ruta": "src/components/dashboard/DownloadReportButton.tsx",
+     "linea": 44,
+     "fragmento": "const html2canvas = (await import('html2canvas')).default\nconst { jsPDF } = await import('jspdf')"
+    },
+    {
+     "ruta": "package.json",
+     "linea": 153,
+     "fragmento": "\"motion\": \"^12.36.0\","
+    }
+   ],
+   "impacto": "framer-motion (About.tsx, Portfolio.tsx, KineticText.tsx) y three-stdlib (Hero.tsx, HeroArtifact.tsx FROZEN, BrandedLogoWhite.tsx) resuelven por transitivas de motion y drei. Un cambio de versión de esas librerías puede romper el sitio público sin tocar package.json. html2canvas y jspdf solo los usa DownloadReportButton.tsx, que depcruise marca huérfano, y @types/three está en dependencies.",
+   "propuesta": "Migrar los imports de framer-motion a 'motion/react', o declararlo. Declarar three-stdlib, solo en package.json: HeroArtifact no se edita. Borrar DownloadReportButton junto con html2canvas y jspdf si se confirma que está muerto, y mover @types/three a devDependencies.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.deps",
+    "lib.ui"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "PLAN-1073",
+   "tmp": "D8-c1/D8-L1/H21",
+   "lote": "D8-L1",
+   "verificador": null,
+   "id_asignado": "DEU-094",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "",
+   "titulo": ".env.example desactualizado: falta OAUTH_STATE_SECRET, documenta RESEND_FROM_EMAIL sin lector y promete una NEXT_PUBLIC_BUILD_TIME inyectada que nadie inyecta",
+   "prefijo": "DEU",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": ".env.example",
+     "linea": 15,
+     "fragmento": "# Inventario verificado 2026-05-21 contra `process.env.*` en `src/`."
+    },
+    {
+     "ruta": "src/lib/security/oauth-state.ts",
+     "linea": 28,
+     "fragmento": "process.env.OAUTH_STATE_SECRET?.trim() ||"
+    },
+    {
+     "ruta": ".env.example",
+     "linea": 136,
+     "fragmento": "# OPCIONAL · Email remitente verificado en Resend\n# Default si vacía: 'develOP <onboarding@resend.dev>' (sandbox de Resend)\nRESEND_FROM_EMAIL="
+    }
+   ],
+   "impacto": "Quien prepare un entorno nuevo no sabe que OAUTH_STATE_SECRET existe, que cae a AUTH_SECRET (D7). Configura variables que no hacen nada: RESEND_FROM_EMAIL solo la lee scripts/check-env.js. Y el archivo presenta Resend como 'recomendado' (:132) cuando el transaccional real va por Brevo (D7).",
+   "propuesta": "Regenerar el inventario contra process.env de src y sumar OAUTH_STATE_SECRET. Marcar Resend como legado, borrar RESEND_FROM_EMAIL y corregir la nota de NEXT_PUBLIC_BUILD_TIME.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.brevo",
+    "lib.security"
+   ],
+   "requiere_verificacion_humana": false,
+   "relacionados": "D7 E10 · Resend (restos); hallazgo /api/version",
+   "tmp": "D8-c1/D8-L1/H22",
+   "lote": "D8-L1",
+   "verificador": null,
+   "relacionados_ids": [
+    "SEC-059"
+   ],
+   "id_asignado": "DEU-095",
+   "vh_asignado": null
+  },
+  {
+   "decision": "aceptar",
+   "nota_padre": "DEC-55: higiene de UI agrupada, sin verificación individual",
+   "tmp": "D8-c1/HIGIENE",
+   "lote": "todos",
+   "titulo": "Higiene de UI — D8: 17 detalles cosméticos (contraste 9, otro 5, inline 2, copy 1)",
+   "prefijo": "DEU",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/error.tsx",
+     "linea": 42,
+     "fragmento": "[contraste] Texto explicativo en text-zinc-500 sobre #070709 ≈ 4,2:1 (< 4,5:1)"
+    },
+    {
+     "ruta": "src/app/error.tsx",
+     "linea": 46,
+     "fragmento": "[contraste] Código de referencia (digest) en text-zinc-700 ≈ 1,9:1, y es el dato que se le pide al usuario para soporte"
+    },
+    {
+     "ruta": "src/app/error.tsx",
+     "linea": 36,
+     "fragmento": "[contraste] Rótulo de 10 px en amber-500/60 sobre fondo casi negro"
+    },
+    {
+     "ruta": "src/app/global-error.tsx",
+     "linea": 41,
+     "fragmento": "[contraste] Texto explicativo en text-zinc-500 ≈ 4,2:1"
+    },
+    {
+     "ruta": "src/app/global-error.tsx",
+     "linea": 46,
+     "fragmento": "[contraste] Digest en text-zinc-700 ≈ 1,9:1"
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 153,
+     "fragmento": "[contraste] Subtítulo en text-zinc-500 ≈ 4,2:1"
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 179,
+     "fragmento": "[contraste] Link 'Contactarnos' en text-zinc-500 en reposo"
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 132,
+     "fragmento": "[contraste] Rótulo de 10 px en amber-500/50"
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 87,
+     "fragmento": "[inline] Estilos inline (gradientes, bordes, letterSpacing) donde alcanzan clases Tailwind; también en :104-108, :114-119, :143, :169-173, :180 y :192-194"
+    },
+    {
+     "ruta": "src/app/layout.tsx",
+     "linea": 129,
+     "fragmento": "[inline] Estilo del Toaster en un objeto style (background, border, color) en vez de className"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 525,
+     "fragmento": "[contraste] Placeholder de .admin-input en rgb(82 82 91) ≈ 2,4:1 sobre el fondo del input"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 56,
+     "fragmento": "[otro] Comentario 'PENDIENTE GATE 1' desactualizado: CLAUDE.md ya fija la asignación de acentos que coincide con :60-63"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 604,
+     "fragmento": "[otro] @keyframes pulse redefine el de Tailwind (50% a 0.7 en vez de 0.5) y cambia todos los animate-pulse de los skeletons"
+    },
+    {
+     "ruta": "src/app/error.tsx",
+     "linea": 7,
+     "fragmento": "[otro] El componente de error.tsx se llama GlobalError, igual que el de global-error.tsx"
+    },
+    {
+     "ruta": "src/app/error.tsx",
+     "linea": 57,
+     "fragmento": "[otro] <a href='/'> dispara el error de lint @next/next/no-html-link-for-pages (uno de los 102 del baseline)"
+    },
+    {
+     "ruta": "src/app/error.tsx",
+     "linea": 39,
+     "fragmento": "[otro] La página de error usa h2 como único encabezado, sin h1 (igual global-error.tsx:38)"
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 145,
+     "fragmento": "[copy] 'Este rincón del internet no existe todavía' también lo ven clientes del portal y visitantes dentro del iframe del widget"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.",
+   "propuesta": "Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [],
+   "requiere_verificacion_humana": false,
+   "higiene": true,
+   "verificador": null,
+   "id_asignado": "DEU-096",
+   "vh_asignado": null
+  }
+ ]
+}

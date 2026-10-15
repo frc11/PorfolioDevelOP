@@ -1,0 +1,2544 @@
+{
+ "dominio": "D8",
+ "ciclo": "D8-c1",
+ "lote": "D8-L1",
+ "run": "wf_007cc90d-e1e",
+ "fecha": "2026-10-15T22:12:01.414Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": ".github/workflows/ci.yml",
+    "lineas_total": 236,
+    "leido_completo": true,
+    "rangos": "1-236 (vive en la raíz del repo: C:\\auditoria-2026-10\\.github\\workflows\\ci.yml)"
+   },
+   {
+    "ruta": ".github/workflows/db-backup.yml",
+    "lineas_total": 218,
+    "leido_completo": true,
+    "rangos": "1-218 (raíz del repo)"
+   },
+   {
+    "ruta": ".dependency-cruiser.cjs",
+    "lineas_total": 44,
+    "leido_completo": true
+   },
+   {
+    "ruta": ".env.example",
+    "lineas_total": 322,
+    "leido_completo": true
+   },
+   {
+    "ruta": ".gitattributes",
+    "lineas_total": 1,
+    "leido_completo": true
+   },
+   {
+    "ruta": ".gitignore",
+    "lineas_total": 88,
+    "leido_completo": true
+   },
+   {
+    "ruta": "eslint.config.mjs",
+    "lineas_total": 90,
+    "leido_completo": true
+   },
+   {
+    "ruta": "knip.ts",
+    "lineas_total": 25,
+    "leido_completo": true
+   },
+   {
+    "ruta": "netlify.toml",
+    "lineas_total": 32,
+    "leido_completo": true
+   },
+   {
+    "ruta": "next.config.ts",
+    "lineas_total": 260,
+    "leido_completo": true
+   },
+   {
+    "ruta": "package.json",
+    "lineas_total": 202,
+    "leido_completo": true
+   },
+   {
+    "ruta": "postcss.config.mjs",
+    "lineas_total": 7,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/version/route.ts",
+    "lineas_total": 9,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/error.tsx",
+    "lineas_total": 67,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/global-error.tsx",
+    "lineas_total": 61,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/globals.css",
+    "lineas_total": 693,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/layout.tsx",
+    "lineas_total": 142,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/not-found.tsx",
+    "lineas_total": 199,
+    "leido_completo": true
+   },
+   {
+    "ruta": "tailwind.config.ts",
+    "lineas_total": 37,
+    "leido_completo": true
+   },
+   {
+    "ruta": "tsconfig.json",
+    "lineas_total": 54,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/app/layout.tsx",
+    "simbolo": "RootLayout",
+    "tipo": "layout",
+    "url": "/ (envuelve todas las rutas: sitio público, /admin, /dashboard, /setter, /embed, /login)",
+    "auth": "no",
+    "evidencia_auth": "layout.tsx:53-142 no llama auth() ni require*; los guards de portal viven en (protected)/admin/layout.tsx:47, (protected)/setter/layout.tsx:32 y src/proxy.ts:154 (contexto fijo, no releídos)",
+    "rol": "ninguno (layout raíz público)",
+    "org_de": "no-aplica",
+    "evidencia_org": "layout.tsx no lee sesión ni base",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin entrada de usuario",
+    "rate_limit": "no-aplica",
+    "notas": "Monta PreloaderProvider, SmoothScroll (Lenis) y TransitionProvider (layout.tsx:110-121, contextos FROZEN), Toaster (:125-136) y ChatWidgetMount (:137) en TODAS las rutas; el chrome público (Shutter, Navbar, Preloader) solo se oculta por render en PublicOnlyComponents (:113-124), sus chunks igual se referencian."
+   },
+   {
+    "archivo": "src/app/api/version/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/version",
+    "auth": "no",
+    "evidencia_auth": "route.ts:3-9 sin auth(); el matcher de src/proxy.ts:172 no cubre /api",
+    "rol": "ninguno (público)",
+    "org_de": "no-aplica",
+    "evidencia_org": "route.ts:4-8 no lee la base ni datos de clientes",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "route.ts:3 GET sin parámetros",
+    "rate_limit": "no",
+    "notas": "Público y barato (sin DB ni costo), aceptable sin rate limit. Expone NODE_ENV (:7). version fija '1.0.0' (:5) y builtAt cae a new Date() porque NEXT_PUBLIC_BUILD_TIME no la inyecta nadie (:6). Único consumidor: scripts/_b14-4-smoke-prod.mjs:82."
+   },
+   {
+    "archivo": "src/app/not-found.tsx",
+    "simbolo": "NotFound",
+    "tipo": "page",
+    "url": "toda ruta inexistente y todo notFound() sin not-found.tsx más cercano (incluye /embed/[slug], /admin/* y /dashboard/*)",
+    "auth": "no",
+    "evidencia_auth": "not-found.tsx:1 'use client'; no usa sesión",
+    "rol": "ninguno",
+    "org_de": "no-aplica",
+    "evidencia_org": "no lee datos",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin entrada",
+    "rate_limit": "no-aplica",
+    "notas": "Archivo especial de Next. El único not-found.tsx de portal es (protected)/setter/not-found.tsx; embed/[slug]/page.tsx:37 llama notFound() y cae acá."
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Deploy a producción en Netlify (build y runtime)",
+    "pasos": [
+     "netlify.toml:2 command 'npx prisma generate && npm run build' (sin migrate deploy desde b85f791d; desemboca en el flujo D6 'Migraciones hacia producción')",
+     "netlify.toml:6-7 Node 22 y NODE_OPTIONS --max-old-space-size=4096",
+     "package.json:16 postinstall 'prisma generate' (npm ci ya lo corre: generate duplicado)",
+     "package.json:9 'next build --webpack' (webpack forzado; Turbopack es el default de Next 16)",
+     "next.config.ts:24 distDir '.next' (E2E_DIST_DIR solo en suites)",
+     "next.config.ts:31-39 build con type-check (ignoreBuildErrors retirado)",
+     "next.config.ts:254-260 withSentryConfig -> sale del lote: flujo D7 'Inicialización de Sentry'",
+     "netlify.toml:9-10 @netlify/plugin-nextjs (sin versión fijada en package.json)",
+     "netlify.toml:25-32 tres scheduled functions -> sale del lote: flujo D7 'Cron agendado en Netlify -> ruta Next'"
+    ]
+   },
+   {
+    "nombre": "CI en cada push y PR",
+    "pasos": [
+     ".github/workflows/ci.yml:65 on: [push, pull_request] (sin bloque permissions)",
+     ".github/workflows/ci.yml:70-72 working-directory logic-core-v3",
+     ".github/workflows/ci.yml:85-88 Node 24 (Netlify usa 22: netlify.toml:6)",
+     ".github/workflows/ci.yml:91 npm ci (dispara package.json:16) y :95 prisma generate otra vez",
+     ".github/workflows/ci.yml:97-100 check:types -> package.json:15 tsc --noEmit",
+     ".github/workflows/ci.yml:102-105 check:invariants -> package.json:21 -> sale del lote: scripts/run-invariants.mjs:107 (descubre solo check:invariant*, 56 esperados en :81)",
+     "package.json:41 (y 66 líneas más) 'npx tsx': tsx no está en el lockfile, npx baja la versión del registro",
+     ".github/workflows/ci.yml:109-117 veredicto consolidado",
+     ".github/workflows/ci.yml:137-147 y :186-197 jobs LeadOS y E2E salteados con warning si faltan secrets"
+    ]
+   },
+   {
+    "nombre": "Backup diario de la base (GitHub Actions)",
+    "pasos": [
+     ".github/workflows/db-backup.yml:39-41 cron 06:00 UTC",
+     ".github/workflows/db-backup.yml:81-100 resuelve DIRECT_DATABASE_URL_PROD; :93-96 exit 1 si falta",
+     ".github/workflows/db-backup.yml:102-124 pg_dump | gzip | gpg AES256 con BACKUP_GPG_PASSPHRASE",
+     ".github/workflows/db-backup.yml:126-132 artifact cifrado con retención de 30 días",
+     ".github/workflows/db-backup.yml:134-152 restore-test contra postgres:16 efímero",
+     ".github/workflows/db-backup.yml:180-196 descifra y restaura",
+     ".github/workflows/db-backup.yml:198-218 valida _prisma_migrations >= 1 y cuenta tablas core"
+    ]
+   },
+   {
+    "nombre": "Headers de seguridad y embebido del widget",
+    "pasos": [
+     "next.config.ts:54-87 HSTS, nosniff, Referrer-Policy, Permissions-Policy y CSP Report-Only en /:path*",
+     "next.config.ts:93-98 X-Frame-Options DENY solo en /(admin|dashboard|setter)",
+     "next.config.ts:110-115 CSP frame-ancestors 'none' enforce solo en /setter",
+     "next.config.ts:117-124 /widget.js con CORS * y cache 1 h",
+     "next.config.ts:126-134 /embed/:slug* con frame-ancestors * (cualquier sitio)",
+     "sale del lote: src/app/embed/[slug]/page.tsx:29 -> flujo D5 'Visitante en el sitio del cliente → widget embebido → respuesta del LLM'"
+    ]
+   },
+   {
+    "nombre": "Render raíz de cualquier ruta",
+    "pasos": [
+     "src/app/layout.tsx:5-13 fuentes Geist y Geist Mono",
+     "src/app/layout.tsx:72-76 <html lang='es'> con las variables de fuente",
+     "src/app/layout.tsx:78-79 preconnect a grainy-gradients.vercel.app y placehold.co en todas las rutas",
+     "src/app/layout.tsx:80 EarlyScrollLock",
+     "src/app/layout.tsx:110-121 PreloaderProvider > SmoothScroll > TransitionProvider (FROZEN)",
+     "src/app/layout.tsx:113-124 PublicOnlyComponents -> sale del lote: src/components/layout/PublicOnlyComponents.tsx:20 (usePathname + isChromeFreeRoute)",
+     "src/app/layout.tsx:125-136 Toaster",
+     "src/app/layout.tsx:137 ChatWidgetMount -> flujo D5 'Widget de develOP: de la carga del sitio a la respuesta del bot'",
+     "src/app/globals.css:1-2 Tailwind 4 + typography (sin @config: tailwind.config.ts no participa)"
+    ]
+   },
+   {
+    "nombre": "Error de render y 404",
+    "pasos": [
+     "src/app/error.tsx:14-22 logger.error con stack en el cliente",
+     "src/app/error.tsx:27-30 Sentry.captureException (tag boundary root)",
+     "src/app/error.tsx:45-49 muestra el digest como referencia",
+     "src/app/error.tsx:51-62 Reintentar o <a href='/'> al sitio público",
+     "src/app/global-error.tsx:22-28 captureException si cae el layout raíz; :31-58 html propio",
+     "src/app/not-found.tsx:78-199 404 de marketing; :32-62 canvas en requestAnimationFrame infinito",
+     "src/app/embed/[slug]/page.tsx:37 (lectura puntual) notFound() del embed cae en el not-found.tsx raíz"
+    ]
+   },
+   {
+    "nombre": "Versión del deploy",
+    "pasos": [
+     "src/app/api/version/route.ts:3-8 GET público",
+     "src/app/api/version/route.ts:5 version '1.0.0' fija (package.json:3 dice 0.1.0)",
+     "src/app/api/version/route.ts:6 builtAt cae a new Date() (NEXT_PUBLIC_BUILD_TIME sin escritor)",
+     "sale del lote: scripts/_b14-4-smoke-prod.mjs:82 (único consumidor)"
+    ]
+   },
+   {
+    "nombre": "Gates manuales de calidad (no corren en CI ni en hooks)",
+    "pasos": [
+     "package.json:14 'eslint' -> eslint.config.mjs:5-88 (fronteras de motor :16-47 y chatbot :48-87; globalIgnores :9-15 sin distDirs alternativos)",
+     ".dependency-cruiser.cjs:3-11 única regla no-circular en warn",
+     "knip.ts:10-22 entradas y proyecto",
+     ".github/workflows/ci.yml:20-26 deja el lint fuera del CI"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2 con avisos críticos y el arreglo disponible dentro del rango declarado",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "package.json",
+      "linea": 154,
+      "fragmento": "\"next\": \"^16.2.6\","
+     },
+     {
+      "ruta": "package.json",
+      "linea": 155,
+      "fragmento": "\"next-auth\": \"^5.0.0-beta.30\","
+     },
+     {
+      "ruta": "docs/auditoria-2026-10/_crudo/npm-audit.json",
+      "linea": 13,
+      "fragmento": "\"title\": \"Auth.js: Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass\","
+     },
+     {
+      "ruta": "docs/auditoria-2026-10/_crudo/npm-audit.json",
+      "linea": 1333,
+      "fragmento": "\"title\": \"Auth.js: Configuration errors can cause existence-based auth checks to fail open (auth object populated with an error)\","
+     },
+     {
+      "ruta": "docs/auditoria-2026-10/_crudo/npm-audit.json",
+      "linea": 1061,
+      "fragmento": "\"title\": \"Next.js: Denial of Service in App Router using Server Actions\","
+     },
+     {
+      "ruta": "docs/auditoria-2026-10/_crudo/npm-outdated.json",
+      "linea": 226,
+      "fragmento": "\"next\": { \"current\": \"16.2.9\", \"wanted\": \"16.4.0\""
+     },
+     {
+      "ruta": "src/app/login/actions.ts",
+      "linea": 143,
+      "fragmento": "if (!email.includes('@') || email.length > 254) return 'Email inválido.'"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real: el login (magic link y credenciales), el proxy y las server actions corren sobre versiones con avisos críticos y altos publicados. El del normalizador de email de Auth.js es alcanzable por un anónimo: el magic link solo verifica que haya una '@' antes de llamar a signIn('resend') (login/actions.ts:143-146). No aplican en este despliegue: el RCE en servidores Windows (Netlify corre Linux), el bypass del proxy con Turbopack (el build usa --webpack, package.json:9) y el RCE de next/og (git grep 'next/og' sin usos). El aviso de fuga del endpoint MCP del servidor de desarrollo se agrava porque dev escucha en todas las interfaces (patrón D1-c2, package.json:7).",
+    "propuesta": "Subir next dentro del rango ya declarado (16.4.0 entra en ^16.2.6) y next-auth, @auth/core y @auth/prisma-adapter a las versiones con fix (beta.32 / 0.41.3 o superiores según npm audit). Después correr tipos, invariantes y la regresión de login (credenciales, magic link, Google), proxy e impersonación. Validar el email del magic link con Zod antes de signIn. Decidir la estrategia de salida de next-auth v5, que sigue en beta: el tag 'latest' de npm es 4.24.15. Coordinar con Franco porque toca la superficie de auth.ts y auth-cookies.ts (ZONA-FRANCO), aunque no hace falta editarlos.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "lib.deps",
+     "lib.auth",
+     "h1.auth-login",
+     "lib.proxy"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "SEC-DEP-01 (previo, sigue abierto); patrón D1-c2 servidores dev en todas las interfaces"
+   },
+   {
+    "titulo": "67 scripts corren con 'npx tsx' y tsx no está en el lockfile: el CI baja de npm una versión sin fijar en cada corrida",
+    "prefijo": "TEC",
+    "severidad": "MEDIA",
+    "tipo": "tech-vieja",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "package.json",
+      "linea": 41,
+      "fragmento": "\"check:invariant:postergacion\": \"npx tsx src/lib/leados/postergacion.invariant.ts\","
+     },
+     {
+      "ruta": "package.json",
+      "linea": 117,
+      "fragmento": "\"seed:galeria\": \"tsx scripts/dev/m0-galeria-seed.ts\","
+     },
+     {
+      "ruta": ".github/workflows/ci.yml",
+      "linea": 105,
+      "fragmento": "run: npm run check:invariants"
+     },
+     {
+      "ruta": "package.json",
+      "linea": 199,
+      "fragmento": "\"ts-node\": \"^10.9.2\","
+     }
+    ],
+    "impacto": "El gate de invariantes ejecuta lo que npm publique ese día como 'tsx' (no hay versión en package-lock: grep '\"node_modules/tsx\"' da 0). Es un riesgo de cadena de suministro y el resultado no es reproducible. En local las mismas 'npx tsx' corren con el .env que apunta a la Neon compartida. seed:galeria llama 'tsx' sin npx y falla si tsx no está instalado global.",
+    "propuesta": "Declarar tsx como devDependency con versión exacta y reemplazar 'npx tsx' por 'tsx' en los scripts. Planear la unificación ts-node/tsx sin perder el type-check que hoy da ts-node a 20 invariantes (ci.yml:52-58).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.github-actions",
+     "lib.deps"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D6 'Los seeds del lote solo corren con tsx, que no está declarado' (misma causa raíz)"
+   },
+   {
+    "titulo": "La CSP global sigue en Report-Only y sin destino de reportes: no bloquea nada ni junta los datos que el plan pedía para pasar a enforce",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "next.config.ts",
+      "linea": 66,
+      "fragmento": "// CSP in report-only mode while we audit violations.\n// Tighten to enforcement (Content-Security-Policy) after 1–2 weeks"
+     },
+     {
+      "ruta": "next.config.ts",
+      "linea": 72,
+      "fragmento": "key: 'Content-Security-Policy-Report-Only',"
+     },
+     {
+      "ruta": "next.config.ts",
+      "linea": 75,
+      "fragmento": "\"script-src 'self' 'unsafe-inline' 'unsafe-eval'\","
+     }
+    ],
+    "impacto": "El panel del cliente y el admin no tienen ninguna capa de mitigación de XSS más allá del escape de React. Sin report-uri ni report-to (git grep da 0), las violaciones solo aparecen en la consola de cada navegador. Por eso las '1–2 semanas' de observación nunca producen datos para pasar a enforce. frame-ancestors 'none' en Report-Only no protege del framing (D1 ya lo reportó para las páginas de auth) y en /embed genera ruido en cada carga del widget.",
+    "propuesta": "Agregar report-to/report-uri hacia un endpoint propio con rate limit o el endpoint de CSP de Sentry. Medir y pasar a enforce por rutas, portales primero, con nonce para sacar 'unsafe-inline'/'unsafe-eval'. Mantener /embed con su política aparte.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "lib.next-config",
+     "lib.security",
+     "h2.cli-shell",
+     "h4.adm-shell"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D1 'Las páginas de auth y /bienvenida se pueden embeber en un iframe ajeno'; SEC-MISC-01; PLAN-1025; PLAN-991"
+   },
+   {
+    "titulo": "Netlify no aplica los maxDuration de las rutas (30 s el chat, 300 s dos crons) y el presupuesto del chat está calibrado contra un techo que la plataforma probablemente no da",
+    "prefijo": "TEC",
+    "severidad": "MEDIA",
+    "tipo": "tech-vieja",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
+      "linea": 8,
+      "fragmento": "export const maxDuration = 30"
+     },
+     {
+      "ruta": "src/app/api/cron/send-executive-reports/route.ts",
+      "linea": 5,
+      "fragmento": "export const maxDuration = 300"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+      "linea": 116,
+      "fragmento": "export const ROUTE_MAX_DURATION_MS = 30_000"
+     },
+     {
+      "ruta": "netlify.toml",
+      "linea": 16,
+      "fragmento": "[functions]\n  node_bundler = \"esbuild\""
+     }
+    ],
+    "impacto": "maxDuration es configuración de segmento que lee Vercel. En Netlify el corte lo fija el plan de la función: la propia bitácora asume ~10 s (docs/bitacora-roadmap.md:13963, contexto, no evidencia) y ~26 s como tope duro. Con un techo menor que 30 s, un turno lento del bot muere antes de que reconcile.ts cierre la compensación de cupo y la persistencia, y el visitante del sitio del cliente ve el chat cortado. Los crons que corren dentro del servidor Next (send-weekly-reports, generate-insights) se cortan a mitad del lote.",
+    "propuesta": "Confirmar en Netlify el plan y el timeout real de la función del servidor. Alinear ROUTE_MAX_DURATION_MS y HOOK_SAFETY_MARGIN_MS a ese techo. Mover los trabajos largos a Background Functions o partirlos en lotes reanudables. Dejar el techo documentado junto a netlify.toml.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "int.netlify",
+     "h3.vis-api-chatbot",
+     "int.cron.send-executive-reports",
+     "int.cron.regenerate-briefs"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5 'El turno del chat no tiene techo absoluto...supera los 30 s de maxDuration'; D7 'generate-insights...dentro de un techo de ~20-26 s'"
+   },
+   {
+    "titulo": "El CI solo corre tipos e invariantes: no corre build, lint, npm audit ni las fronteras, y los jobs con base se saltean",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": ".github/workflows/ci.yml",
+      "linea": 20,
+      "fragmento": "# ── Por qué el lint NO está acá ──"
+     },
+     {
+      "ruta": ".github/workflows/ci.yml",
+      "linea": 97,
+      "fragmento": "- name: 'Tipos: tsc --noEmit'"
+     },
+     {
+      "ruta": ".github/workflows/ci.yml",
+      "linea": 142,
+      "fragmento": "if [ -z \"$DB\" ]; then\n  echo \"listo=false\" >> \"$GITHUB_OUTPUT\""
+     },
+     {
+      "ruta": "scripts/run-invariants.mjs",
+      "linea": 107,
+      "fragmento": "(nombre) => nombre === 'check:invariant' || nombre.startsWith('check:invariant:'),"
+     },
+     {
+      "ruta": "package.json",
+      "linea": 55,
+      "fragmento": "\"test:ev1\": \"npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts\","
+     }
+    ],
+    "impacto": "Un build roto, un import que rompe la frontera de aislamiento chatbot/motor o una dependencia con aviso crítico llegan a main sin rojo. El build solo lo detecta Netlify al desplegar y el lint nadie, porque Next 16 ya no lintea en el build y no hay hooks versionados. Los 28 invariantes test:* del chatbot (package.json:55-82) no entran al agregado y no corren nunca en CI. Tampoco hay bloque permissions, así que el GITHUB_TOKEN queda con los permisos por defecto del repo.",
+    "propuesta": "Sumar al CI: un paso de build con el mismo heap que Netlify, eslint acotado a src/ con las reglas de frontera como error y el resto como baseline congelado, y npm audit --audit-level=critical. Agregar permissions: contents: read. Incluir los test:* en el runner, renombrándolos o ampliando el filtro.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "int.github-actions",
+     "lib.isolation"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D6 'La frontera de aislamiento...la regla de eslint no corre en CI'; PLAN-1006; PLAN-1032; PLAN-1037"
+   },
+   {
+    "titulo": "El backup diario de la base probablemente falla todos los días: el workflow aborta sin el secret y el repo registraba 0 secrets",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "HIPÓTESIS",
+    "evidencia": [
+     {
+      "ruta": ".github/workflows/db-backup.yml",
+      "linea": 93,
+      "fragmento": "if [ -z \"$URL\" ]; then\n  echo \"ERROR: secret faltante para target=$TARGET\" >&2"
+     },
+     {
+      "ruta": ".github/workflows/ci.yml",
+      "linea": 120,
+      "fragmento": "# Necesita una DB de test dedicada. Al 2026-08-25 el repo NO tiene ningún\n# secret configurado (`gh api .../actions/secrets` devuelve total_count: 0),"
+     },
+     {
+      "ruta": ".github/workflows/db-backup.yml",
+      "linea": 4,
+      "fragmento": "# GitHub Actions solo descubre workflows en <repo_root>/.github/workflows/. El\n# archivo logic-core-v3/.github/workflows/e2e.yml está MAL ubicado y nunca corrió"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real: si los secrets siguen sin cargarse, no hay ningún respaldo de la base de producción ni un restore probado. Eso pesa más con un historial de migraciones que ya borró y re-agregó columnas con datos de clientes (D6). El comentario de cabecera del workflow quedó viejo: e2e.yml ya no existe.",
+    "propuesta": "Verificar secrets y corridas (casos de prueba). Cargar DIRECT_DATABASE_URL_PROD y BACKUP_GPG_PASSPHRASE (lo hace Franco). Hacer visible el fallo, por ejemplo con un aviso al canal de alertas, y endurecer la validación con conteos mínimos de tablas críticas además de _prisma_migrations. Actualizar el comentario.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.github-actions",
+     "int.neon"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-1034; PLAN-1118; D6 migraciones de reconciliación"
+   },
+   {
+    "titulo": "Build de producción sin margen de memoria verificable: heap fijo de 4096 MB en Netlify, webpack forzado, type-check dentro del build y Tailwind escaneando docs/",
+    "prefijo": "TEC",
+    "severidad": "MEDIA",
+    "tipo": "tech-vieja",
+    "confianza": "HIPÓTESIS",
+    "evidencia": [
+     {
+      "ruta": "netlify.toml",
+      "linea": 7,
+      "fragmento": "NODE_OPTIONS = \"--max-old-space-size=4096\""
+     },
+     {
+      "ruta": "package.json",
+      "linea": 9,
+      "fragmento": "\"build\": \"next build --webpack\","
+     },
+     {
+      "ruta": "next.config.ts",
+      "linea": 31,
+      "fragmento": "// Sin `typescript.ignoreBuildErrors`: el build vuelve a fallar ante un error de\n// tipos."
+     },
+     {
+      "ruta": "src/app/globals.css",
+      "linea": 1,
+      "fragmento": "@import \"tailwindcss\";"
+     },
+     {
+      "ruta": "docs/bitacora-beta-3.md",
+      "linea": 3647,
+      "fragmento": "`bg-[url('https://grainy-gradients.vercel.app/noise.svg')]` de `web-development/page.tsx` ya"
+     }
+    ],
+    "impacto": "Los docs se contradicen: BP.4 dice que el build entra en el heap por defecto y P1.A, P5.3, UTM.1 y PRIVACIDAD que necesita 6-8 GB. Netlify fija 4096 MB, que en una máquina de 16 GB es más o menos el default, así que si el OOM local es real, el deploy de producción también debería morir. Un deploy que muere deja producción sin el arreglo urgente. El build ahora suma el type-check (CO-1 cerrado) y Tailwind escanea todo lo no ignorado: 7 MB de docs/ versionados y, en local, lo no versionado (docs/_insumos, .next-perf-*).",
+    "propuesta": "Medir el pico de memoria en el log del último deploy de Netlify y en un clon limpio con 4096 MB. Acotar el escaneo de Tailwind con source() o '@source not' sobre docs/ y los distDirs. Evaluar el build con Turbopack, que es el default estable de Next 16, comprobando la compatibilidad con withSentryConfig. Dejar el heap documentado.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "int.netlify",
+     "lib.tailwind"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D8-A1; D8-A2; CO-1; PLAN-1062; PLAN-1132; PLAN-1079; PLAN-1054; PLAN-1021"
+   },
+   {
+    "titulo": "Las barras de scroll están ocultas en toda la app, portales incluidos: las tablas y tiras desplazables no muestran que se pueden desplazar",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/globals.css",
+      "linea": 333,
+      "fragmento": "html,\n  body {\n    scrollbar-width: none;"
+     },
+     {
+      "ruta": "src/app/globals.css",
+      "linea": 350,
+      "fragmento": "::-webkit-scrollbar {\n    display: none;"
+     },
+     {
+      "ruta": "src/app/globals.css",
+      "linea": 480,
+      "fragmento": "min-width: 980px;"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx",
+      "linea": 88,
+      "fragmento": "<div className=\"overflow-x-auto\">"
+     }
+    ],
+    "impacto": "El selector ::-webkit-scrollbar sin prefijo alcanza a todo elemento desplazable en Chromium y Safari. En desktop con mouse, el cliente y el admin no ven que una tabla o una tira tiene contenido a la derecha (.admin-table exige 980 px) ni en qué parte de una página larga están. La barra fina que intenta .chat-messages-area (globals.css:647-659) nunca aparece porque hereda display:none. Ningún componente vuelve a habilitar barras (git grep de webkit-scrollbar solo encuentra más ocultamientos).",
+    "propuesta": "Limitar el ocultamiento al sitio público (o a contenedores con clase explícita) y restaurar barras finas estilizadas en /admin, /dashboard y /setter.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-shell",
+     "h4.adm-shell",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "El layout raíz carga el chrome de marketing (Navbar, Dock, Shutter, Preloader, Lenis) en todas las rutas, incluido el iframe /embed del widget en sitios de clientes",
+    "prefijo": "PERF",
+    "severidad": "MEDIA",
+    "tipo": "perf",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/layout.tsx",
+      "linea": 43,
+      "fragmento": "import { Navbar } from \"@/components/layout/Navbar\";\nimport Preloader from \"@/components/ui/Preloader\";"
+     },
+     {
+      "ruta": "src/app/layout.tsx",
+      "linea": 117,
+      "fragmento": "<PublicOnlyComponents>\n  <Navbar />\n</PublicOnlyComponents>"
+     },
+     {
+      "ruta": "src/components/layout/publicRoute.ts",
+      "linea": 16,
+      "fragmento": "export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed', '/setter'] as const"
+     },
+     {
+      "ruta": "src/app/layout.tsx",
+      "linea": 78,
+      "fragmento": "<link rel=\"preconnect\" href=\"https://grainy-gradients.vercel.app\" crossOrigin=\"anonymous\" />"
+     }
+    ],
+    "impacto": "PublicOnlyComponents solo evita el render. Los componentes cliente que el layout raíz pasa como children quedan referenciados en el payload RSC y en los chunks de la entrada del layout, así que el widget en el sitio del cliente (/embed) y los portales descargan JS del chrome público que nunca pintan (Navbar, DynamicDock, Shutter, Preloader, MarketingIntro, motion y Lenis). El widget carga más lento en mobile. PERF-01 quedó a medias: three.js ya va por next/dynamic (MarketingIntro.tsx:19-20).",
+    "propuesta": "Mover el chrome público a un route group del sitio de marketing con su propio layout y dejar el layout raíz mínimo. Es una decisión para Valentino porque reordena PreloaderProvider y TransitionProvider (FROZEN, no se editan). Antes, cablear @next/bundle-analyzer y medir /embed.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h2.cli-shell",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PERF-01 (previo, parcial); PLAN-1020"
+   },
+   {
+    "titulo": "tailwind.config.ts es código muerto: Tailwind 4 no lo carga (no hay @config) y su plugin ya está en globals.css",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "tailwind.config.ts",
+      "linea": 19,
+      "fragmento": "export default {"
+     },
+     {
+      "ruta": "tailwind.config.ts",
+      "linea": 36,
+      "fragmento": "plugins: [typographyPlugin],"
+     },
+     {
+      "ruta": "src/app/globals.css",
+      "linea": 2,
+      "fragmento": "@plugin \"@tailwindcss/typography\";"
+     }
+    ],
+    "impacto": "Quien edite el tema en ese archivo no ve ningún efecto. Ninguna clase develop-* lo usa (git grep da 0), así que hoy no rompe nada, pero suma un warning de eslint y confunde sobre de dónde salen los tokens.",
+    "propuesta": "Borrar tailwind.config.ts. design-tokens.ts NO se borra: tiene 5 consumidores (Modal, setter-shell, DashboardLayoutClient...) y es FROZEN-inferido (PLAN-1269).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.tailwind"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-1275; PLAN-1269"
+   },
+   {
+    "titulo": "next.config.ts no está tipado (NextConfig se importa y no se usa) y @next/bundle-analyzer está instalado sin cablear",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "next.config.ts",
+      "linea": 1,
+      "fragmento": "import type { NextConfig } from \"next\";"
+     },
+     {
+      "ruta": "next.config.ts",
+      "linea": 3,
+      "fragmento": "const nextConfig = {"
+     },
+     {
+      "ruta": "package.json",
+      "linea": 182,
+      "fragmento": "\"@next/bundle-analyzer\": \"^16.2.7\","
+     }
+    ],
+    "impacto": "Una clave mal escrita o deprecada en la config no da error de tipos, porque no hay chequeo de propiedades de más: el objeto solo se compara estructuralmente al pasarlo a withSentryConfig. Sin el analyzer cableado no hay forma de medir el peso de los bundles (ver el hallazgo del layout raíz).",
+    "propuesta": "Tipar el objeto como NextConfig (o con satisfies). Cablear el analyzer detrás de una variable ANALYZE, o quitarlo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.next-config"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-1153; PLAN-1020"
+   },
+   {
+    "titulo": "/api/version no identifica el deploy: la versión es un '1.0.0' fijo y builtAt es la hora del pedido",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/version/route.ts",
+      "linea": 5,
+      "fragmento": "version: '1.0.0',\nbuiltAt: process.env.NEXT_PUBLIC_BUILD_TIME ?? new Date().toISOString(),"
+     },
+     {
+      "ruta": ".env.example",
+      "linea": 295,
+      "fragmento": "# AUTOINYECTADA · Timestamp de build, inyectado por next.config.ts en build."
+     },
+     {
+      "ruta": "package.json",
+      "linea": 3,
+      "fragmento": "\"version\": \"0.1.0\","
+     }
+    ],
+    "impacto": "Ni el smoke de producción (scripts/_b14-4-smoke-prod.mjs:82) ni un monitoreo externo pueden confirmar qué commit está desplegado: el endpoint siempre dice '1.0.0' y la 'fecha de build' cambia en cada pedido. next.config.ts no inyecta ninguna variable env.",
+    "propuesta": "Exponer el SHA del commit que Netlify pasa al build y una fecha de build inyectada de verdad. Corregir .env.example y alinear la versión con package.json.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.netlify"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "OBS-03; PLAN-1125"
+   },
+   {
+    "titulo": "La imagen Open Graph del sitio (/og-image.png) no existe: las vistas previas al compartir salen sin imagen",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/layout.tsx",
+      "linea": 32,
+      "fragmento": "images: [{ url: \"/og-image.png\", width: 1200, height: 630, alt: \"develOP Agencia Digital\" }],"
+     },
+     {
+      "ruta": "src/app/contact/layout.tsx",
+      "linea": 14,
+      "fragmento": "images: [{ url: \"/og-image.png\", width: 1200, height: 630, alt: \"Contacto develOP\" }],"
+     }
+    ],
+    "impacto": "Al compartir develop.com.ar o /contact por WhatsApp o LinkedIn, la tarjeta sale sin imagen, porque public/ no tiene og-image ni hay un opengraph-image por ruta. Es la carta de presentación comercial de la agencia.",
+    "propuesta": "Agregar el asset de 1200×630 en public/ o un opengraph-image por ruta.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6.vis-contacto",
+     "lib.seo"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEO-01 (previo, sigue abierto)"
+   },
+   {
+    "titulo": "Recursos de terceros: noise.svg se hotlinkea de grainy-gradients.vercel.app en tres landings con preconnect en todas las rutas, y placehold.co está preconectado y permitido sin uso",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/layout.tsx",
+      "linea": 78,
+      "fragmento": "<link rel=\"preconnect\" href=\"https://grainy-gradients.vercel.app\" crossOrigin=\"anonymous\" />\n<link rel=\"preconnect\" href=\"https://placehold.co\" crossOrigin=\"anonymous\" />"
+     },
+     {
+      "ruta": "src/app/web-development/page.tsx",
+      "linea": 87,
+      "fragmento": "bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"
+     },
+     {
+      "ruta": "next.config.ts",
+      "linea": 41,
+      "fragmento": "remotePatterns: [\n  {\n    protocol: 'https',"
+     }
+    ],
+    "impacto": "Cada visita a /web-development, /software-development y /process-automation le pasa la IP del visitante a un tercero y depende de que un demo ajeno siga en línea. Los portales y el embed abren conexiones a dos dominios que no usan. placehold.co solo aparece en un comentario de ShowcaseSection.tsx:8, que es un componente huérfano.",
+    "propuesta": "Servir noise.svg desde public/. Quitar los dos preconnect del layout raíz y el remotePattern de placehold.co.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.ui",
+     "lib.next-config"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Redirects legacy: /dashboard/crm lleva a un módulo que ya no está en el catálogo y /dashboard/seo-avanzado encadena dos saltos",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "next.config.ts",
+      "linea": 158,
+      "fragmento": "source: '/dashboard/crm',\ndestination: '/dashboard/services?modulo=mini-crm',"
+     },
+     {
+      "ruta": "next.config.ts",
+      "linea": 210,
+      "fragmento": "source: '/dashboard/seo-avanzado',\ndestination: '/dashboard/seo',"
+     },
+     {
+      "ruta": "next.config.ts",
+      "linea": 244,
+      "fragmento": "source: '/dashboard/seo',\ndestination: '/dashboard/resultados/seo',"
+     }
+    ],
+    "impacto": "Un bookmark viejo de /dashboard/crm abre la vitrina con un modulo que no existe en src/lib/data/premium-modules.ts (solo queda en premium-features.ts:59), y es probable que no se resalte nada. /dashboard/seo-avanzado hace dos 308 seguidos.",
+    "propuesta": "Mandar /dashboard/crm a /dashboard/services sin parámetro y /dashboard/seo-avanzado directo a /dashboard/resultados/seo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-servicios",
+     "h2.cli-resultados"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-1131"
+   },
+   {
+    "titulo": "Las fronteras raíz (error y 404) son de marketing y también atienden /embed y los notFound() de admin y dashboard",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/embed/[slug]/page.tsx",
+      "linea": 37,
+      "fragmento": "if (!bot) notFound()"
+     },
+     {
+      "ruta": "src/app/not-found.tsx",
+      "linea": 145,
+      "fragmento": "Este rincón del internet<br />no existe todavía."
+     },
+     {
+      "ruta": "src/app/not-found.tsx",
+      "linea": 177,
+      "fragmento": "<Link\n    href=\"/contact\""
+     },
+     {
+      "ruta": "src/app/error.tsx",
+      "linea": 57,
+      "fragmento": "<a\n    href=\"/\""
+     }
+    ],
+    "impacto": "Si un cliente copia mal el snippet, o si su bot se borra, su propio sitio puede mostrar dentro del iframe del widget el 404 animado de develOP con 'Volver al inicio' y 'Contactarnos'; un error de render muestra 'Algo salió mal' con un link a develop.com.ar. Depende de si widget.js oculta el iframe sin señal de listo. En el panel, admin y dashboard no tienen not-found.tsx propio (hay 7 notFound() en esas ramas) y un recurso inexistente saca al usuario al sitio público.",
+    "propuesta": "Agregar not-found.tsx y error.tsx propios para /embed (silenciosos, que avisen al widget) y not-found.tsx en dashboard y admin con vuelta al panel.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h2.cli-shell",
+     "h4.adm-shell"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5 'Degradado y errores visibles al visitante'"
+   },
+   {
+    "titulo": "La página 404 anima un canvas de pantalla completa en un bucle infinito sin respetar reduced-motion ni pausarse",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/not-found.tsx",
+      "linea": 58,
+      "fragmento": "time += 0.016\nanimId = requestAnimationFrame(draw)"
+     },
+     {
+      "ruta": "src/app/not-found.tsx",
+      "linea": 121,
+      "fragmento": "transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}"
+     },
+     {
+      "ruta": "src/app/globals.css",
+      "linea": 673,
+      "fragmento": "Alcance: CSS. Las animaciones de Framer Motion ya se apagan por\n`useReducedMotion()` / `motion-reduce:` en los componentes que lo consumen."
+     }
+    ],
+    "impacto": "Quien pidió menos movimiento a nivel sistema igual recibe 1.120 puntos animados por cuadro y un pulso infinito. El bloque global de reduced-motion solo cubre CSS. En mobile también gasta batería mientras la pestaña está abierta. Incumple las reglas de CLAUDE.md sobre IntersectionObserver y reduced-motion.",
+    "propuesta": "Consultar prefers-reduced-motion (el hook use-reduced-motion existente) para dibujar un frame estático y pausar con visibilitychange o IntersectionObserver.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Los distDir alternativos no están excluidos de eslint ni de .gitignore (perf, corrida-visual) y tsconfig incluye tipos de builds de experimentos",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "eslint.config.mjs",
+      "linea": 9,
+      "fragmento": "globalIgnores([\n  // Default ignores of eslint-config-next:\n  \".next/**\","
+     },
+     {
+      "ruta": ".gitignore",
+      "linea": 17,
+      "fragmento": "/.next/\n/.next-galeria/\n/.next-setter/"
+     },
+     {
+      "ruta": "tsconfig.json",
+      "linea": 43,
+      "fragmento": "\".next-perf-a/types/**/*.ts\","
+     },
+     {
+      "ruta": ".github/workflows/ci.yml",
+      "linea": 27,
+      "fragmento": "#   (Nota al pasar, sin arreglar: `npm run lint` a secas reporta ~108.000"
+     }
+    ],
+    "impacto": "'npm run lint' a secas lintea bundles minificados (~108.000 problemas), lo que vuelve inútil medir la deuda real. Los .next-perf-* y .next-corrida-visual no están en .gitignore: Tailwind los escanea en local y un 'git add' los tomaría. .gitignore repite las entradas de .next-setter y .next-galeria (:18-19 y :24-25) y la de vertex-credentials.json (:55 y :58).",
+    "propuesta": "Un patrón '.next*/' en globalIgnores y en .gitignore. Sacar de tsconfig los includes de .next-perf-*, que no tienen script que los genere. Limpiar los duplicados.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.github-actions",
+     "lib.next-config"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-1022; PLAN-1037; PLAN-1008"
+   },
+   {
+    "titulo": "Repo público con datos de infraestructura y volcados de tablas versionados contra la regla del propio .gitignore",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": ".gitignore",
+      "linea": 64,
+      "fragmento": "# DB backups (B14.3) — contienen PII, NUNCA commitear."
+     },
+     {
+      "ruta": "prisma/backups/organization-module-pre-push.json",
+      "linea": 4,
+      "fragmento": "\"organizationId\": \"<cuid redactado>\","
+     },
+     {
+      "ruta": ".env.example",
+      "linea": 31,
+      "fragmento": "#     pooled:  ep-<id redactado>-pooler.sa-east-1.aws.neon.tech"
+     },
+     {
+      "ruta": ".github/workflows/db-backup.yml",
+      "linea": 21,
+      "fragmento": "#   El repo es PÚBLICO. Sin cifrado, cualquiera con el link al run podría descargar"
+     }
+    ],
+    "impacto": "Cualquiera puede leer el hostname del endpoint real de la Neon compartida (sin credenciales) y volcados de las tablas de catálogo y de activación de módulos con IDs internos (prisma/backups/*.json y backup.js, versionados aunque .gitignore:67 ignora backups/). Sumado al historial de origin/main, que conserva enviroment.env (commit 39535583; ya hay hallazgo de credenciales en el historial), facilita un ataque dirigido.",
+    "propuesta": "Reemplazar el hostname por un placeholder en .env.example. Quitar prisma/backups/ del repo (git rm --cached; queda en el historial). Decidir si el repo pasa a privado, coordinado con PLAN-1075.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.neon",
+     "modelo.OrganizationModule"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D8-A4; PLAN-1075; D7 'Clave de Google AI con el valor completo en dos documentos y en el historial'"
+   },
+   {
+    "titulo": "Stack con piezas en beta o una major atrás: next-auth 5 sigue en beta (el 'latest' de npm es 4.x), Prisma 6 con 7 estable, zod 3 con 4 estable, y Node desalineado entre CI (24), Netlify (22) y los tipos (20)",
+    "prefijo": "TEC",
+    "severidad": "MEDIA",
+    "tipo": "tech-vieja",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "docs/auditoria-2026-10/_crudo/npm-outdated.json",
+      "linea": 233,
+      "fragmento": "\"next-auth\": { \"current\": \"5.0.0-beta.31\", \"wanted\": \"5.0.0-beta.32\", \"latest\": \"4.24.15\""
+     },
+     {
+      "ruta": "docs/auditoria-2026-10/_crudo/npm-outdated.json",
+      "linea": 72,
+      "fragmento": "\"@prisma/client\": { \"current\": \"6.19.3\", \"latest\": \"7.10.0\""
+     },
+     {
+      "ruta": ".github/workflows/ci.yml",
+      "linea": 87,
+      "fragmento": "node-version: '24'"
+     },
+     {
+      "ruta": "netlify.toml",
+      "linea": 6,
+      "fragmento": "NODE_VERSION = \"22\""
+     },
+     {
+      "ruta": "package.json",
+      "linea": 188,
+      "fragmento": "\"@types/node\": \"^20\","
+     }
+    ],
+    "impacto": "La autenticación depende de una línea beta sin release estable. Cada mes sin migrar encarece el salto: Prisma 7 cambia generator, driver adapters y configuración, y zod 4 cambia la API de errores. El CI valida con Node 24 lo que en producción corre con 22, y los tipos son de 20. No hay engines ni .nvmrc, y @netlify/plugin-nextjs no está fijado en package.json.",
+    "propuesta": "Un plan de upgrades por etapas, cada uno con su sprint: next-auth (seguridad primero), Prisma 7 y zod 4. Fijar engines y la versión de Node a la de Netlify, alinear @types/node y fijar el plugin de Netlify.",
+    "esfuerzo": "L",
+    "zona": "libre",
+    "nodos": [
+     "lib.deps",
+     "lib.auth",
+     "lib.prisma"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "hallazgo de avisos críticos de next/next-auth (este lote)"
+   },
+   {
+    "titulo": "Dependencias fantasma y sin uso: framer-motion y three-stdlib se importan sin estar declaradas, y html2canvas y jspdf solo las usa un componente huérfano",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/sections/home/About.tsx",
+      "linea": 3,
+      "fragmento": "import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';"
+     },
+     {
+      "ruta": "src/components/layout/Hero.tsx",
+      "linea": 7,
+      "fragmento": "import { SVGLoader } from 'three-stdlib'"
+     },
+     {
+      "ruta": "src/components/dashboard/DownloadReportButton.tsx",
+      "linea": 44,
+      "fragmento": "const html2canvas = (await import('html2canvas')).default\nconst { jsPDF } = await import('jspdf')"
+     },
+     {
+      "ruta": "package.json",
+      "linea": 153,
+      "fragmento": "\"motion\": \"^12.36.0\","
+     }
+    ],
+    "impacto": "framer-motion (About.tsx, Portfolio.tsx, KineticText.tsx) y three-stdlib (Hero.tsx, HeroArtifact.tsx FROZEN, BrandedLogoWhite.tsx) resuelven por transitivas de motion y drei. Un cambio de versión de esas librerías puede romper el sitio público sin tocar package.json. html2canvas y jspdf solo los usa DownloadReportButton.tsx, que depcruise marca huérfano, y @types/three está en dependencies.",
+    "propuesta": "Migrar los imports de framer-motion a 'motion/react', o declararlo. Declarar three-stdlib, solo en package.json: HeroArtifact no se edita. Borrar DownloadReportButton junto con html2canvas y jspdf si se confirma que está muerto, y mover @types/three a devDependencies.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.deps",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-1073"
+   },
+   {
+    "titulo": ".env.example desactualizado: falta OAUTH_STATE_SECRET, documenta RESEND_FROM_EMAIL sin lector y promete una NEXT_PUBLIC_BUILD_TIME inyectada que nadie inyecta",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": ".env.example",
+      "linea": 15,
+      "fragmento": "# Inventario verificado 2026-05-21 contra `process.env.*` en `src/`."
+     },
+     {
+      "ruta": "src/lib/security/oauth-state.ts",
+      "linea": 28,
+      "fragmento": "process.env.OAUTH_STATE_SECRET?.trim() ||"
+     },
+     {
+      "ruta": ".env.example",
+      "linea": 136,
+      "fragmento": "# OPCIONAL · Email remitente verificado en Resend\n# Default si vacía: 'develOP <onboarding@resend.dev>' (sandbox de Resend)\nRESEND_FROM_EMAIL="
+     }
+    ],
+    "impacto": "Quien prepare un entorno nuevo no sabe que OAUTH_STATE_SECRET existe, que cae a AUTH_SECRET (D7). Configura variables que no hacen nada: RESEND_FROM_EMAIL solo la lee scripts/check-env.js. Y el archivo presenta Resend como 'recomendado' (:132) cuando el transaccional real va por Brevo (D7).",
+    "propuesta": "Regenerar el inventario contra process.env de src y sumar OAUTH_STATE_SECRET. Marcar Resend como legado, borrar RESEND_FROM_EMAIL y corregir la nota de NEXT_PUBLIC_BUILD_TIME.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.brevo",
+     "lib.security"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D7 E10 · Resend (restos); hallazgo /api/version"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h3.vis-widget-cliente",
+    "id": "h3.vis-widget-cliente.embed-enmarcable-en-sitio-del-cliente",
+    "nombre": "El sitio del cliente enmarca el widget (/embed y widget.js)",
+    "descripcion": "Headers que permiten que cualquier sitio cargue widget.js y enmarque /embed/[slug], y las fronteras raíz que atienden ese iframe.",
+    "archivos": [
+     "next.config.ts",
+     "src/app/not-found.tsx",
+     "src/app/error.tsx",
+     "src/app/embed/[slug]/page.tsx"
+    ],
+    "entradas": [
+     "src/app/not-found.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz trazado por D5 (public/widget.js:113 -> next.config.ts:126 -> src/app/embed/[slug]/page.tsx:29); headers en next.config.ts:117-134.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "next.config.ts:131 frame-ancestors * y el escape develop.com.ar de src/lib/security/validate-origin.ts:69-75 dejan allowedDomains sin efecto para el embed (S4-01 abierto)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "sin colecciones en este tramo"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "embed/[slug]/page.tsx:37 notFound() cae en not-found.tsx:145 (404 de marketing dentro del iframe); error.tsx:57-58 'Volver al inicio' a develOP"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "el estado de carga vive en ChatbotEmbed (flujo D5, fuera del lote)"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "page.tsx:29-37 solo verifica que el bot exista; el chat valida origen en validate-origin (flujo D5)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "layout del widget fuera del lote"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "error.tsx:27-30 captureException en la frontera raíz que atiende /embed"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "next.config.ts:127-128 promesa 'R18 will restrict to a whitelist of allowed origins' sin cumplir"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "D5: la instalación pide cargar dominios en una sección que no existe"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-shell",
+    "id": "h2.cli-shell.pagina-de-error-y-404",
+    "nombre": "Página de error y 404 cuando una ruta no tiene frontera propia",
+    "descripcion": "error.tsx, global-error.tsx y not-found.tsx raíz: atienden el sitio público, /login, /bienvenida, /embed y los notFound() de admin y dashboard.",
+    "archivos": [
+     "src/app/error.tsx",
+     "src/app/global-error.tsx",
+     "src/app/not-found.tsx"
+    ],
+    "entradas": [
+     "src/app/not-found.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "error.tsx:14-31 captura y registra -> :42-62 mensaje, digest y acciones; global-error.tsx:22-58; not-found.tsx:78-199.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "no leen datos"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "sin colecciones"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "error.tsx:42-49 mensaje útil sin stack y digest como referencia; global-error.tsx:41-49"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "páginas estáticas de cliente"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin entrada"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "not-found.tsx:164 flex-col sm:flex-row; error.tsx:34 px-6 y max-w-md"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "error.tsx:27-30 y global-error.tsx:24-27 captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "los tres archivos leídos completos sin TODO/FIXME ni datos inventados"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "admin y dashboard sin not-found.tsx: el 404 del portal manda a '/' y '/contact' (not-found.tsx:166-183) en vez de volver al panel"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-shell",
+    "id": "h4.adm-shell.backup-diario-de-la-base",
+    "nombre": "Backup diario cifrado de la base con prueba de restore",
+    "descripcion": "Workflow programado que vuelca la Neon de producción, la cifra, la sube como artifact y prueba restaurarla.",
+    "archivos": [
+     ".github/workflows/db-backup.yml"
+    ],
+    "entradas": [],
+    "madurez": "L?",
+    "madurez_evidencia": "Código completo (db-backup.yml:39-41 -> :102-124 -> :180-218), pero que corra depende de secrets no verificables por lectura; ci.yml:120-121 registraba 0 secrets al 2026-08-25.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "respaldo global de develOP; cifrado AES256 por repo público (db-backup.yml:120-122)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "no aplica"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "db-backup.yml:93-96, :107-110 y :191-195 fallan con mensaje visible en el run"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "no aplica"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "db-backup.yml:203-208 solo exige _prisma_migrations >= 1; el resto de las tablas es informativo (:210-215)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "no aplica"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Actions notifica por email los fallos programados"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "db-backup.yml:3-6 comentario viejo: e2e.yml 'pendiente moverlo' ya no existe"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna de develOP"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-1079",
+    "clave": "Pasar next build a Turbopack cuando sea estable",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "package.json:9 \"build\": \"next build --webpack\"; package.json:7 dev también --webpack",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Turbopack es el default estable de Next 16; validar compatibilidad con withSentryConfig y memoria del build"
+   },
+   {
+    "id": "PLAN-1082",
+    "clave": "@google-analytics/data a serverExternalPackages",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "next.config.ts:25-30 solo lista @react-pdf/renderer, @prisma/client, require-in-the-middle e import-in-the-middle; package.json:130",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "medir con el analyzer antes (no está cableado)"
+   },
+   {
+    "id": "PLAN-1104",
+    "clave": "2 advisories moderate de postcss vía next",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "package-lock (origin/main): node_modules/next/node_modules/postcss 8.4.31; _crudo/npm-audit.json:1413 PostCSS XSS",
+    "sigue_teniendo_sentido": "si",
+    "nota": "next wanted 16.4.0 (npm-outdated.json:226-229); re-correr npm audit tras subir"
+   },
+   {
+    "id": "PLAN-1054",
+    "clave": "Build envenenado por una clase Tailwind citada en la bitácora",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "docs/bitacora-beta-3.md:3647 sigue citando bg-[url(...)]; src/app/globals.css:1 '@import \"tailwindcss\"' sin source() ni '@source not' (git grep '@config\\|@source' en src/*.css = 0)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1115",
+    "clave": "Quitar cross-env si ya no se usa",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "package.json:8, :11-13 y :109 usan cross-env; devDependency en package.json:191",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1136",
+    "clave": "Aggregate check:invariants incompleto",
+    "estado_en_codigo": "hecho",
+    "evidencia": "scripts/run-invariants.mjs:107 descubre todo check:invariant*; dates-ar, lead-status y client-monthly-report son check:invariant:* (package.json:89-90, :104)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "quedan fuera los 28 test:* (PLAN-1032)"
+   },
+   {
+    "id": "PLAN-1153",
+    "clave": "typescript.ignoreBuildErrors activo en next.config.ts",
+    "estado_en_codigo": "parcial",
+    "evidencia": "next.config.ts:31-34 ya no lo tiene; next.config.ts:1 y :3 siguen sin tipar el objeto (NextConfig importado sin uso, warning de eslint)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1154",
+    "clave": "Pinear versión exacta del paquete ai",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "package.json:141 \"ai\": \"^6.0.177\"; lock 6.0.214; npm-outdated.json:149-152 latest 7.0.139",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1006",
+    "clave": "CI nunca corrió y no tiene secrets",
+    "estado_en_codigo": "parcial",
+    "evidencia": ".github/workflows/ci.yml:79-117 corre tipos e invariantes desde la raíz; jobs con DB salteados sin DATABASE_URL_TEST (ci.yml:137-147, :186-197)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "secrets no verificables sin gh"
+   },
+   {
+    "id": "PLAN-1008",
+    "clave": "Deuda de lint del repo",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "baseline 102 errores/111 warnings (_crudo/eslint-resumen.md); ci.yml:20-26 lint fuera; eslint.config.mjs:9-15 sin distDirs",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1009",
+    "clave": "Higiene de tooling: key eslint y type module",
+    "estado_en_codigo": "parcial",
+    "evidencia": "next.config.ts sin key eslint (leído completo); package.json sin campo \"type\" (git show origin/main:logic-core-v3/package.json | grep -c '\"type\"' = 0)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "type:module puede romper los scripts CJS de ts-node (package.json:172-177)"
+   },
+   {
+    "id": "PLAN-1010",
+    "clave": "Renormalización CRLF del repo",
+    "estado_en_codigo": "no empezado",
+    "evidencia": ".gitattributes:1 solo 'docs/bitacora-roadmap.md merge=union'",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "decisión de Franco"
+   },
+   {
+    "id": "PLAN-1020",
+    "clave": "@next/bundle-analyzer instalado sin cablear",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "package.json:182; next.config.ts no lo importa (git grep bundle-analyzer fuera de docs y lock = solo package.json:182)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1021",
+    "clave": "Tailwind escanea docs/ y distDirs",
+    "estado_en_codigo": "parcial",
+    "evidencia": ".gitignore:18-19 y :24-25 excluyen .next-setter/.next-galeria (Tailwind respeta .gitignore); docs/ sigue escaneado (globals.css:1 sin source); .next-perf-* y .next-corrida-visual no ignorados",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1022",
+    "clave": "tsconfig.json modificado por builds con distDir alternativo",
+    "estado_en_codigo": "parcial",
+    "evidencia": "tsconfig.json:39-48 quedó commiteado con includes de .next-setter, .next-galeria y .next-perf-a/b/base (sin script que genere los perf)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1025",
+    "clave": "CSP global sigue en Report-Only",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "next.config.ts:72 Content-Security-Policy-Report-Only, sin report-uri/report-to",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1032",
+    "clave": "Tests del chatbot fuera de agregados",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "package.json:55-82 (28 test:*) no matchean el filtro de scripts/run-invariants.mjs:107",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1034",
+    "clave": "db-backup.yml sin secrets",
+    "estado_en_codigo": "no empezado",
+    "evidencia": ".github/workflows/db-backup.yml:93-96 aborta sin secret; ci.yml:120-121 registra 0 secrets al 2026-08-25",
+    "sigue_teniendo_sentido": "si",
+    "nota": "HIPÓTESIS: no verificable sin gh"
+   },
+   {
+    "id": "PLAN-1001",
+    "clave": "Caveats del QA-login",
+    "estado_en_codigo": "parcial",
+    "evidencia": "src/app/api/qa/login/route.ts:186 secure: isSecure (cookie sin Secure en http); el bounce :3001->:3000 no es verificable por lectura",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1275",
+    "clave": "Eliminar tailwind.config.ts y design-tokens.ts y limpiar tokens viejos",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tailwind.config.ts existe y no se carga (sin @config); globals.css:300-319 conserva --color-void/obsidian/accent y [data-theme]; design-tokens.ts con 5 consumidores (Modal.tsx, setter-shell.tsx, DashboardLayoutClient.tsx...)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "borrar tailwind.config.ts sí; design-tokens.ts no (choca con PLAN-1269)"
+   },
+   {
+    "id": "PLAN-1065",
+    "clave": "next.config.ts ignora errores de tipos y lint en el build",
+    "estado_en_codigo": "hecho",
+    "evidencia": "next.config.ts:31-39 sin typescript.ignoreBuildErrors ni clave eslint",
+    "sigue_teniendo_sentido": "si",
+    "nota": "el lint igual queda sin gate: Next 16 no lintea en build y el CI lo excluye"
+   },
+   {
+    "id": "PLAN-1073",
+    "clave": "framer-motion y three-stdlib son dependencias fantasma",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "About.tsx:3, Portfolio.tsx:3 y KineticText.tsx:3 importan framer-motion; Hero.tsx:7, HeroArtifact.tsx:5 y BrandedLogoWhite.tsx:5 importan three-stdlib; package.json no declara ninguno",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1036",
+    "clave": "check:invariant:client-monthly-report-pdf sigue excluido",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "scripts/run-invariants.mjs:89-94 lo excluye; ci.yml no tiene job con DB para él (git grep client-monthly en ci.yml = 0)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1089",
+    "clave": "tsconfig: scripts/** fuera del typecheck y allowImportingTsExtensions",
+    "estado_en_codigo": "hecho",
+    "evidencia": "tsconfig.json:18 allowImportingTsExtensions; tsconfig.json:52 exclude scripts/**",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1274",
+    "clave": "Convenciones de tokens del design system",
+    "estado_en_codigo": "hecho",
+    "evidencia": "globals.css:36 '@theme static'; :39-63 prefijo ds; :683-685 1ms e iteration-count 1",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1092",
+    "clave": "MS-7 screenshot contra build de prod (start:qa)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "package.json:11 start:qa en :3001; logic-core-v3/.claude/launch.json next-prod-qa :3001; .claude/agents/visual-qa.md versionado",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1103",
+    "clave": "B-SEC.2 Next 16.2.1 a 16.2.6 + npm audit fix",
+    "estado_en_codigo": "hecho",
+    "evidencia": "lock next 16.2.9; pero _crudo/npm-audit.json:1036-1045 vuelve a marcar next crítico (rangos hasta <16.3.8)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "superado por avisos nuevos: repetir con 16.4"
+   },
+   {
+    "id": "PLAN-1152",
+    "clave": "H.4 quitar la key eslint de next.config.ts",
+    "estado_en_codigo": "hecho",
+    "evidencia": "next.config.ts leído completo, sin clave eslint",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1017",
+    "clave": "Suite del setter con distDir propio",
+    "estado_en_codigo": "hecho",
+    "evidencia": "next.config.ts:24; package.json:12 start:setter; .gitignore:19 y :24; playwright.setter.config.ts:20",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1033",
+    "clave": "C1 gate encendido: tipos, invariantes y ci.yml",
+    "estado_en_codigo": "hecho",
+    "evidencia": ".github/workflows/ci.yml:79-117; scripts/run-invariants.mjs:81 (56, ya no 43); next.config.ts:31-34",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1283",
+    "clave": "Layout raíz con html lang='es' y variables de Geist",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/app/layout.tsx:72-75",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1075",
+    "clave": "Force-push del history purgado (leak enviroment.env)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git log origin/main -- '*enviroment.env' -> 39535583 (2026-02-12) y c351b793 (2026-05-22): el archivo sigue en el historial",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "decisión de Franco; el repo es público"
+   },
+   {
+    "id": "PLAN-1083",
+    "clave": "Borrar scripts y logs throwaway de scripts/",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git ls-tree origin/main logic-core-v3/scripts: 37 entradas con prefijo _ (p. ej. _b13-latency-test.mjs, _b32-dev.log, _ms4-full-run.log)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1100",
+    "clave": "Rate-limit distribuido (Upstash Redis)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/rate-limit/limiter.ts:44 upsert atómico en Postgres; src/lib/security/auth-rate-limit.ts:3 lo usa; sin Upstash",
+    "sigue_teniendo_sentido": "no",
+    "nota": "resuelto por otra vía (Postgres)"
+   },
+   {
+    "id": "PLAN-1101",
+    "clave": "Borrar ts_errors.log versionado",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "logic-core-v3/ts_errors.log y ts_errors.txt siguen en origin/main",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1102",
+    "clave": "Push del tag v0.9.0-rc.1 al remoto",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git ls-remote --tags origin | grep -cE 'v0\\.9|v1\\.' = 0 (control: lista ajustes-finales y base-terminada)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1105",
+    "clave": "SEC-MISC-01 headers de seguridad globales",
+    "estado_en_codigo": "parcial",
+    "evidencia": "next.config.ts:59-85 HSTS, nosniff, Referrer-Policy, Permissions-Policy y CSP-RO; X-Frame-Options solo en :93-98",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-991",
+    "clave": "CSP de Report-Only a enforcement",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "next.config.ts:72",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-990",
+    "clave": "Invalidación de cache con varias instancias",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -i ttl origin/main -- logic-core-v3/src/modules/chatbot/shared/configCache.ts sin resultados; no se trazó el TTL de 60 s",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "HIPÓTESIS, fuera del lote"
+   },
+   {
+    "id": "PLAN-1159",
+    "clave": "Verificación visual automática bloqueada",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "sin huella en código; logic-core-v3/.claude/launch.json solo declara :3000 y :3001",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1335",
+    "clave": "Tests E2E rojos por login",
+    "estado_en_codigo": "no empezado",
+    "evidencia": ".github/workflows/ci.yml:186-197: el job e2e se saltea sin secrets; no se corre Playwright en esta auditoría",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "no verificable por lectura"
+   },
+   {
+    "id": "PLAN-1037",
+    "clave": "Lint fuera del gate y midiendo mal",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "eslint.config.mjs:9-15 solo ignora .next/**, out/**, build/**; ci.yml:27-31",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1265",
+    "clave": "excludeDqWhere sin ningún invariante",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -l excludeDqWhere origin/main -- 'logic-core-v3/src/**/*.invariant.ts' = 0 (control: 8 archivos lo referencian en src)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1050",
+    "clave": "Tres helpers de test muertos",
+    "estado_en_codigo": "parcial",
+    "evidencia": "qaLogout y logout solo aparecen en su definición (tests/helpers/auth.ts:28 para logout); setControlledInput tiene 6 apariciones en tests/",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1318",
+    "clave": "5 hallazgos P2 de seguridad sin atender",
+    "estado_en_codigo": "parcial",
+    "evidencia": "test:pii (package.json:80) cubre redacción de PII en consola; sin CAPTCHA (git grep -il 'captcha\\|turnstile' en src = 0); npm audit con 30 vulnerabilidades",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1106",
+    "clave": "Housekeeping de archivos sueltos del repo",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "raíz de logic-core-v3 con 19 sueltos: script.js, script2.js, script3.js, script_*.js, find_unused.js, replace_analytics.js, test-chat.mjs, ts_errors.*, unused_report*.txt, audit.txt, prisma_err.txt, .eslint_output.txt; *.bak = 0",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1118",
+    "clave": "Setear secrets del backup y validar primer run",
+    "estado_en_codigo": "no empezado",
+    "evidencia": ".github/workflows/db-backup.yml:84-85 y :105 leen secrets; ci.yml:120-121 registraba 0",
+    "sigue_teniendo_sentido": "si",
+    "nota": "HIPÓTESIS; ver caso de prueba del backup"
+   },
+   {
+    "id": "PLAN-1119",
+    "clave": "e2e.yml mal ubicado, nunca corrió",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git ls-tree -r origin/main | grep -c e2e.yml = 0; .github/workflows/ci.yml:3-11 y :70-72 lo reemplazan",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1126",
+    "clave": "Cache CDN agresiva en /",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "next.config.ts solo fija Cache-Control para /widget.js (:117-121); netlify.toml sin [[headers]]",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1131",
+    "clave": "Update manual de OrganizationModule mini-crm",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "next.config.ts:157-160 sigue mandando a ?modulo=mini-crm; src/lib/premium-features.ts:59 key mini-crm; premium-modules.ts sin ese slug",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "estado de la base no verificable"
+   },
+   {
+    "id": "PLAN-1132",
+    "clave": "Build local OOM con heap default",
+    "estado_en_codigo": "parcial",
+    "evidencia": "netlify.toml:7 fija 4096 MB; package.json:9 webpack; ver alerta D8-A1",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1329",
+    "clave": "requireSuperAdmin() sin tipo de retorno explícito",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/auth-guards.ts:3 'export async function requireSuperAdmin(): Promise<string>'",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1147",
+    "clave": "Rotar la key de Vertex expuesta en logs",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "la rotación no deja huella en código; la credencial vigente está vencida (contexto fijo), lo que no prueba que se haya rotado",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1156",
+    "clave": "Verificar la retención de logs de Netlify",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "sin huella en código (netlify.toml sin configuración de logs)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1003",
+    "clave": "E2E global roja en lanes dashboard/cliente/admin",
+    "estado_en_codigo": "no empezado",
+    "evidencia": ".github/workflows/ci.yml:186-197: e2e no corre en CI",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "no verificable por lectura"
+   },
+   {
+    "id": "PLAN-1014",
+    "clave": "QA_ALLOW_LOCALHOST abriría /api/qa/login en prod",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/lib/security/validate-origin.ts:49 sigue con la condición de una sola pata (env && (isLocalhost || !origin))",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1018",
+    "clave": "qa-persona y qa-walkthrough siguen en .next compartido",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "playwright.qa-persona.config.ts:44 y playwright.qa-walkthrough.config.ts:48 usan 'npm run start:qa'",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1272",
+    "clave": "Regenerar snapshots de regresión visual",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tests/e2e conserva 7 snapshots versionados; no se corre Playwright",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "no verificable por lectura"
+   },
+   {
+    "id": "PLAN-1062",
+    "clave": "next build se queda sin heap con el default",
+    "estado_en_codigo": "parcial",
+    "evidencia": "netlify.toml:7 NODE_OPTIONS=--max-old-space-size=4096 (no 6144/8192)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1063",
+    "clave": "Browsers de Playwright no llegan al server local",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "problema de entorno, sin huella en código",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1068",
+    "clave": "Borrar las ramas absorbidas por redesign/home",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git branch -r: origin/fix/fonts-geist-scope, origin/fix/home-sanidad y origin/fix/motion-sanidad-mobile siguen",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "decisión de Franco"
+   },
+   {
+    "id": "PLAN-1069",
+    "clave": "El subagente visual-qa no puede entregar reporte",
+    "estado_en_codigo": "parcial",
+    "evidencia": "logic-core-v3/.claude/launch.json solo con dev :3000 y next-prod-qa :3001 (sin :3003/:3004)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-985",
+    "clave": "Q1 batería de evals",
+    "estado_en_codigo": "hecho",
+    "evidencia": "package.json:83-86 (evals, evals:seed, evals:purge, evals:score) y :66 test:q12",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1112",
+    "clave": "Regla ESLint contra imports barrel de lucide-react",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "eslint.config.mjs sin regla de lucide (git grep lucide en el archivo = 0)",
+    "sigue_teniendo_sentido": "no",
+    "nota": "PLAN-1111: lucide ya es tree-shakeable"
+   },
+   {
+    "id": "PLAN-1120",
+    "clave": "Retención de backups >30 días y RPO menor",
+    "estado_en_codigo": "no empezado",
+    "evidencia": ".github/workflows/db-backup.yml:131 retention-days 30; :41 cron diario",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1243",
+    "clave": "Subida de imágenes en base64 en la DB",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/modules/chatbot/components/admin/config/tabs/AvatarUploader.tsx:7 y :35 canvas.toDataURL('image/webp')",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-986",
+    "clave": "GCP single-project: revisar con el cliente activo #5",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "decisión de no construir todavía; sin huella en código",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-966",
+    "clave": "Ultracode solo para builds arquitectónicos",
+    "estado_en_codigo": "hecho",
+    "evidencia": "regla de proceso sin huella en código; no verificable",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-987",
+    "clave": "Ratificar las decisiones A–D de Q1",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "sin huella en código",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1234",
+    "clave": "El reporte del agente no es el estado",
+    "estado_en_codigo": "hecho",
+    "evidencia": "regla de proceso (CLAUDE.md 'Never self-confirm'); sin huella verificable en código",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1040",
+    "clave": "Un invariante nuevo se prueba viendo que imprime",
+    "estado_en_codigo": "hecho",
+    "evidencia": "regla documental; scripts/run-invariants.mjs no la automatiza",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1043",
+    "clave": "Cuenta exacta de invariantes, con fallo en las dos direcciones",
+    "estado_en_codigo": "hecho",
+    "evidencia": "scripts/run-invariants.mjs:81 INVARIANTES_ESPERADOS = 56 y :110-116 aborta si difiere; package.json tiene 56 check:invariant*",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1117",
+    "clave": "Backups cifrados por ser repo público",
+    "estado_en_codigo": "hecho",
+    "evidencia": ".github/workflows/db-backup.yml:20-24 y :120-122 (gpg AES256 simétrico)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1125",
+    "clave": "Tag recomendado v1.0.0-rc.1",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "package.json:3 \"0.1.0\"; sin tags v1* en el remoto; src/app/api/version/route.ts:5 dice '1.0.0'",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-984",
+    "clave": "Regla de gates: uno por vez y sin pipes",
+    "estado_en_codigo": "hecho",
+    "evidencia": ".github/workflows/ci.yml:13-18 y :107-117 consolida sin cortar; la regla local no es verificable",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1269",
+    "clave": "Tier de z-index del chrome en design-tokens.ts",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/design-tokens.ts:240-242; consumidores setter-shell.tsx, Modal.tsx y DashboardLayoutClient.tsx",
+    "sigue_teniendo_sentido": "si",
+    "nota": "choca con PLAN-1275"
+   },
+   {
+    "id": "PLAN-1066",
+    "clave": "Cero merges a main hasta el final del rediseño",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "git log --merges origin/main: f4b16b6b 'Merge pull request #4 from frc11/redesign/home' y c7f0774c (#5)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1067",
+    "clave": "robots.ts bloquea rutas internas; sitemap solo con las públicas",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/app/robots.ts:32-33 (disallow de /admin, /dashboard, /setter, /api, /embed y rutas de sesión y alta); src/app/sitemap.ts:27",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1071",
+    "clave": "Impeccable aporta detección, no dirección estética",
+    "estado_en_codigo": "hecho",
+    "evidencia": ".github/skills/impeccable/ versionado; la dirección no deja huella",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1072",
+    "clave": "Reglas de uso de Impeccable mientras se construye",
+    "estado_en_codigo": "hecho",
+    "evidencia": ".github/hooks/impeccable.json versionado; el uso no es verificable",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "vigente hasta cerrar B2"
+   },
+   {
+    "id": "PLAN-1091",
+    "clave": "MS-6 bypass del preloader en automatización",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/context/PreloaderContext.tsx:70-75 isAutomationEnvironment() con navigator.webdriver",
+    "sigue_teniendo_sentido": "si",
+    "nota": "edición sobre archivo FROZEN"
+   },
+   {
+    "id": "PLAN-1304",
+    "clave": "B12.6 smoke de flujos críticos y re-tag v0.9.0-rc.1",
+    "estado_en_codigo": "parcial",
+    "evidencia": "el tag no está en el remoto (git ls-remote --tags origin); el smoke no es verificable",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1348",
+    "clave": "v1.0 funcional (STATUS.md)",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "STATUS.md:4 cita el tag v1.0.0, que no existe en el remoto; package.json:3 dice 0.1.0; los docs de OOM contradicen 'build pasa' (STATUS.md:19)",
+    "sigue_teniendo_sentido": "no",
+    "nota": "STATUS.md desactualizado"
+   },
+   {
+    "id": "PLAN-1349",
+    "clave": "AIExecutiveBrief con LLM real",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/ai/executive-brief.ts:19 'gemini-2.5-flash' y :299 provider.getModel",
+    "sigue_teniendo_sentido": "si",
+    "nota": "hoy no responde: credencial de Vertex vencida"
+   },
+   {
+    "id": "PLAN-1160",
+    "clave": "Alpha.0.6 legacy y env vars",
+    "estado_en_codigo": "hecho",
+    "evidencia": ".env.example, docs/env-vars.md y scripts/check-env.js existen; check-env no corre en el build (package.json:6, script manual)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1334",
+    "clave": "9 specs E2E nuevos",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git ls-tree origin/main logic-core-v3/tests/e2e | grep -E '/(0[6-9]|1[0-4])-' = 9",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1163",
+    "clave": "STATUS.md y smoke final",
+    "estado_en_codigo": "hecho",
+    "evidencia": "STATUS.md existe (STATUS.md:4), desactualizado",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1111",
+    "clave": "BP.3 Lucide ya tree-shakeable",
+    "estado_en_codigo": "hecho",
+    "evidencia": "sin cambio de código; lucide-react ^0.562.0 (package.json:151)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1124",
+    "clave": "B14.4 checklist de deploy y smoke de prod",
+    "estado_en_codigo": "hecho",
+    "evidencia": "docs/operations/b14-deploy-checklist.md y scripts/_b14-4-smoke-prod.mjs versionados; el smoke solo puede confirmar que /api/version existe (route.ts:5-6)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1134",
+    "clave": "D6 infra de tests de integración",
+    "estado_en_codigo": "hecho",
+    "evidencia": "playwright.integration.config.ts versionado; package.json:116 test:integration",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1031",
+    "clave": "C0 red de verificación sometida a sabotaje",
+    "estado_en_codigo": "hecho",
+    "evidencia": "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md versionado",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1271",
+    "clave": "Línea base e2e pre-rediseño",
+    "estado_en_codigo": "hecho",
+    "evidencia": "playwright.config.ts y tests/e2e (29 entradas) versionados",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "histórico, no verificable por lectura"
+   },
+   {
+    "id": "PLAN-1282",
+    "clave": "cn() con extendTailwindMerge para --text-ds-*",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/utils.ts:2, :20 (DS_FONT_SIZE_CLASSES) y :38",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1070",
+    "clave": "Instalación de Impeccable v3.5.0 y baseline del detector",
+    "estado_en_codigo": "hecho",
+    "evidencia": ".github/hooks/impeccable.json, .github/skills/impeccable/, PRODUCT.md, DESIGN.md y .impeccable/design.json en la raíz de origin/main",
+    "sigue_teniendo_sentido": "si"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D8-A1] Build: BP.4 dice que entra en el heap por defecto; P1.A, P5.3, UTM.1 y PRIVACIDAD dicen OOM sin 6-8 GB; cruza con CO-1",
+    "resultado": "parcial",
+    "evidencia": "El OOM no se puede reproducir por lectura (npm run build está prohibido). Hechos de código: netlify.toml:7 fija 4096 MB, que en una máquina de 16 GB es más o menos el default, así que si el build local necesita 6-8 GB, el de Netlify también debería morir. La alternativa es que el exceso local venga de lo no versionado y no ignorado que Tailwind escanea (globals.css:1 sin source(); docs/_insumos y .next-perf-* no están en .gitignore). package.json:9 fuerza webpack. CO-1 está cerrado: next.config.ts:31-39 ya no tiene ignoreBuildErrors ni eslint, y el build suma el type-check.",
+    "hallazgo_titulo": "Build de producción sin margen de memoria verificable: heap fijo de 4096 MB en Netlify, webpack forzado, type-check dentro del build y Tailwind escaneando docs/"
+   },
+   {
+    "alerta": "[D8-A2] Script dev: --turbopack (B1.2 :313) contra webpack por defecto (B3.3 :1369) y 'next dev --webpack' (MS-7 :5369)",
+    "resultado": "parcial",
+    "evidencia": "package.json:7 'next dev --webpack', :8 'next dev --webpack -p 3002' y :9 'next build --webpack'. MS-7 coincide con el código y B1.2 (turbopack) quedó superado. B3.3 dice 'webpack por defecto', lo que es inexacto en Next 16: el default es Turbopack y webpack exige el flag, que es lo que hace el repo.",
+    "hallazgo_titulo": "Build de producción sin margen de memoria verificable: heap fijo de 4096 MB en Netlify, webpack forzado, type-check dentro del build y Tailwind escaneando docs/"
+   },
+   {
+    "alerta": "[D8-A3] CI: el comentario de C1 sobre 'type-stripping nativo' en ci.yml es incorrecto según C1b",
+    "resultado": "descartada",
+    "evidencia": ".github/workflows/ci.yml:44-50 ya está corregido: 'NO los levanta el type-stripping nativo de Node — eso decía este comentario hasta C2 y es falso. Quien carga los .ts es el hook CJS de ts-node'. El comentario incorrecto ya no existe."
+   },
+   {
+    "alerta": "[D8-A4] Repo: B14.3 y PRIVACIDAD se apoyan en que el repo es público; sigue público (gh, 2026-10-13 y 2026-10-14; DEC-54): siguen vigentes",
+    "resultado": "confirmada",
+    "evidencia": "El código asume repo público: .github/workflows/db-backup.yml:20-24 cifra los artifacts por eso y ci.yml:125 nombra --repo frc11/PorfolioDevelOP. La publicidad la confirmó el padre con gh. Hoy queda público: .env.example:31-32 con el hostname del endpoint Neon, prisma/backups/*.json versionados contra .gitignore:64-67, y enviroment.env en el historial de origin/main (commit 39535583). B14.3 y PRIVACIDAD siguen vigentes.",
+    "hallazgo_titulo": "Repo público con datos de infraestructura y volcados de tablas versionados contra la regla del propio .gitignore"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "tailwind.config.ts",
+    "senales": [
+     "Tailwind 4 no lo carga: git grep '@config\\|@source' en src/*.css = 0",
+     "plugin typography duplicado en globals.css:2",
+     "ninguna clase develop-* en src (git grep = 0)",
+     "warning de eslint import/no-anonymous-default-export (tailwind.config.ts:19)",
+     "ningún archivo lo referencia (git grep 'tailwind.config' fuera de docs y lock = 0)"
+    ],
+    "que_rompe": "Nada en el build. Deja de importar design-tokens.ts, que sigue en uso por Modal, setter-shell y DashboardLayoutClient y NO se borra."
+   },
+   {
+    "archivo": "netlify.toml (bloque [[redirects]] :19-23)",
+    "senales": [
+     "rewrite 200 forzado de /api/chatbot/* a sí mismo",
+     "nació en b4a2a8a3 'Commit roadmap chatbot finalizado - sin funcionar'",
+     "src/proxy.ts:172 no incluye /api/chatbot, así que no sirve para saltear el proxy"
+    ],
+    "que_rompe": "HIPÓTESIS: nada. Verificar en un deploy preview que el chat y la config del widget siguen respondiendo."
+   },
+   {
+    "archivo": "package.json (@next/bundle-analyzer, html2canvas, jspdf)",
+    "senales": [
+     "@next/bundle-analyzer (package.json:182) no lo importa nadie",
+     "html2canvas y jspdf (package.json:148-149) solo los usa src/components/dashboard/DownloadReportButton.tsx:44-45",
+     "depcruise marca DownloadReportButton.tsx como huérfano (_crudo/depcruise-resumen.json)"
+    ],
+    "que_rompe": "DownloadReportButton.tsx deja de compilar: se borra junto. Mejor cablear el analyzer que quitarlo."
+   },
+   {
+    "archivo": "next.config.ts (images.remotePatterns de placehold.co :40-47)",
+    "senales": [
+     "placehold.co solo aparece en un comentario de src/components/sections/web-development/ShowcaseSection.tsx:8, componente huérfano",
+     "preconnect sin uso en src/app/layout.tsx:79"
+    ],
+    "que_rompe": "Nada. Un <Image> remoto de placehold.co dejaría de optimizarse, pero no hay ninguno."
+   },
+   {
+    "archivo": "src/app/api/version/route.ts",
+    "senales": [
+     "devuelve una versión fija y una fecha de build falsa (route.ts:5-6)",
+     "único consumidor: scripts/_b14-4-smoke-prod.mjs:82"
+    ],
+    "que_rompe": "El smoke de prod. Conviene arreglarlo (SHA del commit) en vez de borrarlo."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "¿Corre el backup diario de la base?",
+    "entorno": "GitHub, repo frc11/PorfolioDevelOP (solo lectura con gh)",
+    "precondiciones": "gh autenticado con acceso al repo",
+    "pasos": [
+     "gh secret list --repo frc11/PorfolioDevelOP",
+     "gh run list --repo frc11/PorfolioDevelOP --workflow 'DB backup' --limit 14",
+     "Abrir la última corrida y revisar el paso 'Resolve target URL' y el job 'Restore-test (validar dump)'"
+    ],
+    "esperado": "Corridas diarias en verde con artifact neon-prod-backup-* y restore-test en verde; DIRECT_DATABASE_URL_PROD y BACKUP_GPG_PASSPHRASE en la lista de secrets",
+    "senal_falla": "Corridas en rojo en 'Resolve target URL' con 'secret faltante para target=prod', o ninguna corrida",
+    "escribe_db_o_email": false,
+    "hallazgos": "El backup diario de la base probablemente falla todos los días: el workflow aborta sin el secret y el repo registraba 0 secrets"
+   },
+   {
+    "titulo": "Techo real de las funciones en Netlify frente a los maxDuration",
+    "entorno": "Netlify (configuración del sitio y logs de funciones de producción)",
+    "precondiciones": "acceso de lectura al sitio en Netlify",
+    "pasos": [
+     "En Site configuration > Functions anotar el plan y el timeout de funciones, si aparece",
+     "En Logs > Functions abrir la función del servidor de Next y buscar 'Task timed out' y las duraciones máximas",
+     "Abrir el log de send-weekly-reports-cron del último lunes 12:00 UTC y ver cuánto tardó el fetch a /api/cron/send-weekly-reports"
+    ],
+    "esperado": "Un techo >= 30 s para la función del servidor, o constancia de que el techo real coincide con ROUTE_MAX_DURATION_MS",
+    "senal_falla": "Timeouts a ~10 s o ~26 s ('Task timed out after 10.00 seconds') o crons cortados a mitad",
+    "escribe_db_o_email": false,
+    "hallazgos": "Netlify no aplica los maxDuration de las rutas (30 s el chat, 300 s dos crons) y el presupuesto del chat está calibrado contra un techo que la plataforma probablemente no da"
+   },
+   {
+    "titulo": "¿Entra el build en 4096 MB?",
+    "entorno": "Log del último deploy de Netlify y un clon limpio local",
+    "precondiciones": "clon nuevo del repo, sin docs/_insumos ni directorios .next-*",
+    "pasos": [
+     "En el log del último deploy de producción buscar 'JavaScript heap out of memory' y la duración de 'next build'",
+     "En el clon limpio: NODE_OPTIONS=--max-old-space-size=4096, npm ci y npm run build; anotar si termina",
+     "Repetir en el checkout de trabajo con lo no versionado presente y comparar"
+    ],
+    "esperado": "El build termina con 4096 MB en Netlify y en el clon limpio",
+    "senal_falla": "OOM en Netlify, o OOM solo en el checkout de trabajo (la causa es lo no versionado que Tailwind escanea)",
+    "escribe_db_o_email": false,
+    "hallazgos": "Build de producción sin margen de memoria verificable: heap fijo de 4096 MB en Netlify, webpack forzado, type-check dentro del build y Tailwind escaneando docs/"
+   },
+   {
+    "titulo": "Magic link con '@' homoglifo (aviso de Auth.js)",
+    "entorno": "dev local con base de desarrollo y Brevo de prueba (nunca producción)",
+    "precondiciones": "usuario seed con email conocido; casilla propia en un dominio que controle Valentino",
+    "pasos": [
+     "En /login pedir enlace mágico con el email del usuario seed, reemplazando '@' por '＠' (U+FF20) y agregando '@<dominio-propio>' al final",
+     "Mirar en Brevo a qué dirección salió el mail",
+     "Abrir el link y consultar /api/auth/session para ver con qué usuario quedó la sesión",
+     "Repetir después de subir next-auth y @auth/core a las versiones con fix"
+    ],
+    "esperado": "El pedido se rechaza, o el mail sale solo a la dirección legítima del usuario",
+    "senal_falla": "El mail llega a la casilla del dominio propio y la sesión queda a nombre del usuario seed",
+    "escribe_db_o_email": true,
+    "hallazgos": "next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2 con avisos críticos y el arreglo disponible dentro del rango declarado"
+   },
+   {
+    "titulo": "Peso del iframe /embed del widget",
+    "entorno": "producción o deploy preview, navegador con DevTools",
+    "precondiciones": "slug de un bot de prueba",
+    "pasos": [
+     "Abrir https://<host>/embed/<slug-de-prueba> con Network filtrado por JS y la cache deshabilitada",
+     "En Sources buscar 'DynamicDock', 'MarketingIntro', 'Shutter' y 'lenis'",
+     "Anotar el JS transferido total"
+    ],
+    "esperado": "Solo chunks del widget del chatbot",
+    "senal_falla": "Aparecen chunks del chrome público (Navbar, DynamicDock, MarketingIntro, Lenis)",
+    "escribe_db_o_email": false,
+    "hallazgos": "El layout raíz carga el chrome de marketing (Navbar, Dock, Shutter, Preloader, Lenis) en todas las rutas, incluido el iframe /embed del widget en sitios de clientes"
+   },
+   {
+    "titulo": "Barras de scroll en el portal (desktop con mouse)",
+    "entorno": "Chrome de escritorio, cuenta SUPER_ADMIN de prueba",
+    "precondiciones": "un cliente de prueba con plan asignado",
+    "pasos": [
+     "Entrar a /admin/clients/<cliente-de-prueba> y achicar la ventana a ~900 px de ancho",
+     "Ubicar la tabla de planes (PlanAssignmentCard) o la tira de tabs (ClientTabsNav)",
+     "Ver si aparece una barra horizontal o algún indicador de que hay más contenido"
+    ],
+    "esperado": "Barra visible o indicador de desplazamiento",
+    "senal_falla": "Contenido cortado a la derecha sin barra ni indicador",
+    "escribe_db_o_email": false,
+    "hallazgos": "Las barras de scroll están ocultas en toda la app, portales incluidos: las tablas y tiras desplazables no muestran que se pueden desplazar"
+   },
+   {
+    "titulo": "404 dentro del widget en el sitio del cliente",
+    "entorno": "página HTML local con el snippet de widget.js",
+    "precondiciones": "ninguna (slug inexistente)",
+    "pasos": [
+     "Crear una página local con el snippet del widget apuntando a un slug que no existe",
+     "Abrirla y desplegar el widget",
+     "Abrir también https://<host>/embed/slug-que-no-existe directo"
+    ],
+    "esperado": "El widget no aparece o muestra un estado propio y discreto",
+    "senal_falla": "Se ve el 404 animado de develOP ('Este rincón del internet...', 'Contactarnos') dentro del iframe",
+    "escribe_db_o_email": false,
+    "hallazgos": "Las fronteras raíz (error y 404) son de marketing y también atienden /embed y los notFound() de admin y dashboard"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "No hay @config ni @source en el CSS: Tailwind 4 no carga tailwind.config.ts y escanea todo lo no ignorado (docs/ incluido)",
+    "comando": "git grep -n \"@config\\|@source\" origin/main -- \"logic-core-v3/src/*.css\"  -> 0 resultados",
+    "control_positivo": "git grep -n \"@plugin\" origin/main -- logic-core-v3/src/app/globals.css -> globals.css:2"
+   },
+   {
+    "afirmacion": "NEXT_PUBLIC_BUILD_TIME no la escribe nadie (ni next.config.ts ni netlify.toml)",
+    "comando": "git grep -n NEXT_PUBLIC_BUILD_TIME origin/main -- logic-core-v3 ':!logic-core-v3/docs'  -> solo .env.example:297 (comentario) y src/app/api/version/route.ts:6 (lector)",
+    "control_positivo": "El mismo comando encuentra el lector route.ts:6"
+   },
+   {
+    "afirmacion": "/og-image.png no existe en public/ ni hay opengraph-image",
+    "comando": "git ls-tree -r --name-only origin/main logic-core-v3/public | grep -ci og-image  -> 0; git grep -n opengraph-image origin/main -- logic-core-v3/src -> 0",
+    "control_positivo": "git ls-tree -r --name-only origin/main logic-core-v3/public | grep -c logodevelOP.png -> 1"
+   },
+   {
+    "afirmacion": "tsx no está en el lockfile (npx tsx baja una versión sin fijar)",
+    "comando": "git show origin/main:logic-core-v3/package-lock.json | grep -c '\"node_modules/tsx\"'  -> 0 (tampoco anidado)",
+    "control_positivo": "git show origin/main:logic-core-v3/package-lock.json | grep -c '\"node_modules/ts-node\"' -> 1"
+   },
+   {
+    "afirmacion": "La CSP no declara report-uri ni report-to",
+    "comando": "git grep -n -i \"report-uri\\|report-to\" origin/main -- logic-core-v3/next.config.ts logic-core-v3/src  -> 0",
+    "control_positivo": "git grep -n \"Content-Security-Policy-Report-Only\" origin/main -- logic-core-v3/next.config.ts -> :72"
+   },
+   {
+    "afirmacion": "El CI no corre lint, build ni npm audit",
+    "comando": "git grep -n \"npm run lint\\|npm run build\\|npm audit\\|eslint \" origin/main -- .github/workflows  -> solo comentarios ci.yml:25, :27, :34",
+    "control_positivo": "git grep -n \"check:types\" origin/main -- .github/workflows/ci.yml -> :100"
+   },
+   {
+    "afirmacion": "No hay hooks de git versionados (husky, lint-staged, pre-commit)",
+    "comando": "git ls-tree -r --name-only origin/main | grep -ci \"husky\\|lint-staged\\|pre-commit\"  -> 0",
+    "control_positivo": "git ls-tree -r --name-only origin/main | grep -c \".github/workflows/ci.yml\" -> 1"
+   },
+   {
+    "afirmacion": "framer-motion y three-stdlib no están declarados en package.json",
+    "comando": "git show origin/main:logic-core-v3/package.json | grep -c \"framer-motion\\|three-stdlib\"  -> 0",
+    "control_positivo": "git grep -l \"from ['\\\"]framer-motion['\\\"]\" origin/main -- logic-core-v3/src -> 3 archivos; package.json:153 '\"motion\"'"
+   },
+   {
+    "afirmacion": "No existe not-found.tsx en dashboard, admin ni embed",
+    "comando": "git ls-tree -r --name-only origin/main logic-core-v3/src/app | grep -E '/not-found\\.tsx$'  -> solo src/app/not-found.tsx y (protected)/setter/not-found.tsx",
+    "control_positivo": "El mismo comando lista (protected)/setter/not-found.tsx"
+   },
+   {
+    "afirmacion": "Ninguna clase develop-* (las que aportaría tailwind.config.ts) se usa",
+    "comando": "git grep -n -E \"(bg|text|border|from|to|ring)-develop-\" origin/main -- logic-core-v3/src  -> 0",
+    "control_positivo": "git grep -l \"text-ds-\" origin/main -- logic-core-v3/src -> 25 archivos"
+   },
+   {
+    "afirmacion": "netlify.toml no fija timeout de funciones",
+    "comando": "git grep -n -i \"timeout\" origin/main -- logic-core-v3/netlify.toml  -> 0",
+    "control_positivo": "git grep -n \"schedule\" origin/main -- logic-core-v3/netlify.toml -> :26, :29, :32"
+   },
+   {
+    "afirmacion": "El e2e.yml anidado ya no existe",
+    "comando": "git ls-tree -r --name-only origin/main | grep -c \"e2e.yml\"  -> 0",
+    "control_positivo": "git ls-tree -r --name-only origin/main | grep -c \"workflows/ci.yml\" -> 1"
+   },
+   {
+    "afirmacion": "Los tags v0.9.0-rc.1 y v1.* no están en el remoto",
+    "comando": "git ls-remote --tags origin | grep -cE \"v0\\.9|v1\\.\"  -> 0",
+    "control_positivo": "git ls-remote --tags origin lista refs/tags/ajustes-finales y refs/tags/base-terminada"
+   },
+   {
+    "afirmacion": "Ninguno de los 20 archivos del lote tiene secrets con formato de proveedor",
+    "comando": "git grep -n -E 'AIza[0-9A-Za-z_-]{20}|sk-[A-Za-z0-9]{20}|xkeysib-|re_[A-Za-z0-9]{16}|-----BEGIN|ghp_[A-Za-z0-9]{20}|postgres(ql)?://[^:@ ]+:[^@ ]+@' origin/main -- <los 20 archivos del lote>  -> solo .github/workflows/db-backup.yml:152 (contraseña de un postgres efímero del job de restore-test, no es una credencial real)",
+    "control_positivo": "Ese mismo match de db-backup.yml:152 prueba que el patrón de URL con contraseña dispara"
+   },
+   {
+    "afirmacion": "No hay monitoreo de uptime ni dead-man switch de crons en el repo",
+    "comando": "git grep -n -i \"healthchecks\\.io\\|cronitor\\|betteruptime\\|uptimerobot\\|heartbeat\\|dead.man\" origin/main -- logic-core-v3/src logic-core-v3/netlify  -> solo src/lib/data/onboarding-tasks.ts:58/:60 (tarea manual) y un comentario en handleChatRequest.ts:1042",
+    "control_positivo": "git grep -c -i \"cron\" origin/main -- logic-core-v3/netlify.toml -> 3"
+   },
+   {
+    "afirmacion": "Ningún invariante cubre excludeDqWhere",
+    "comando": "git grep -l excludeDqWhere origin/main -- 'logic-core-v3/src/**/*.invariant.ts'  -> 0",
+    "control_positivo": "git grep -l excludeDqWhere origin/main -- logic-core-v3/src -> 8 archivos"
+   },
+   {
+    "afirmacion": "mini-crm no está en el catálogo de módulos premium",
+    "comando": "git grep -n \"mini-crm\" origin/main -- logic-core-v3/src/lib/data/premium-modules.ts  -> 0",
+    "control_positivo": "git grep -n \"slug: 'motor-resenas'\" origin/main -- logic-core-v3/src/lib/data/premium-modules.ts -> :24; next.config.ts:159 y premium-features.ts:59 sí mencionan mini-crm"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Import dinámico de @/lib/prisma (await import) que esquiva la regla no-restricted-imports de la frontera de aislamiento",
+    "como_buscarlo": "git grep -n \"import(['\\\"]@/lib/prisma\" origin/main -- logic-core-v3/src/modules logic-core-v3/src/app/api/chatbot",
+    "donde_aparecio": "src/modules/chatbot/server/conversation/__tests__/p2002-adopcion.invariant.ts:77 (test; eslint no revisa import())"
+   },
+   {
+    "patron": "canvas { touch-action: none } global: un canvas a pantalla completa con pointer events bloquea el scroll táctil de la página",
+    "como_buscarlo": "git grep -n \"<Canvas\\|<canvas\" origin/main -- logic-core-v3/src/components; cruzar con pointer-events-none, eventSource y touchAction en el mismo componente",
+    "donde_aparecio": "src/app/globals.css:357-359"
+   },
+   {
+    "patron": "Constantes que copian configuración de plataforma y asumen que la plataforma la respeta (espejo de maxDuration)",
+    "como_buscarlo": "git grep -n \"ESPEJO\\|maxDuration\\|_MAX_DURATION\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "src/modules/chatbot/server/chat/reconcile.ts:116 frente a netlify.toml (sin timeout)"
+   },
+   {
+    "patron": "Docs o .env.example que afirman una inyección o configuración que el código no tiene",
+    "como_buscarlo": "git grep -n -i \"autoinyectada\\|inyectad\\|verificado en\" origin/main -- logic-core-v3/.env.example logic-core-v3/docs/env-vars.md y verificar el escritor de cada variable con git grep",
+    "donde_aparecio": ".env.example:295-297 (NEXT_PUBLIC_BUILD_TIME)"
+   },
+   {
+    "patron": "Recursos de terceros hotlinkeados en className o style (url('https://...'))",
+    "como_buscarlo": "git grep -n \"url(['\\\"]\\?https://\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "src/app/web-development/page.tsx:87, src/app/software-development/page.tsx:61, src/app/process-automation/page.tsx:57"
+   },
+   {
+    "patron": "'npx <herramienta>' sin la herramienta en el lockfile (descarga sin versión fija)",
+    "como_buscarlo": "git grep -n -o \"npx [a-z@/-]*\" origin/main -- logic-core-v3/package.json logic-core-v3/prisma.config.ts logic-core-v3/netlify.toml .github/workflows | sort -u; verificar cada una en package-lock.json",
+    "donde_aparecio": "package.json (67 'npx tsx'); prisma.config.ts seed 'npx tsx prisma/seed.ts'"
+   },
+   {
+    "patron": "Archivos versionados que el propio .gitignore excluye",
+    "como_buscarlo": "cd logic-core-v3 && git ls-files -ci --exclude-standard",
+    "donde_aparecio": "prisma/backups/*.json y backup.js, .claude/launch.json, docs/audit/2026-04-dashboard-cleanup-audit.md"
+   },
+   {
+    "patron": "Rutas de producto sin error.tsx o not-found.tsx propios que caen en las fronteras de marketing",
+    "como_buscarlo": "git ls-tree -r --name-only origin/main logic-core-v3/src/app | grep -E '/(error|not-found)\\.tsx$' y cruzar con las ramas que llaman notFound() (git grep -c \"notFound()\")",
+    "donde_aparecio": "src/app/embed/[slug]/page.tsx:37; 7 notFound() en admin y dashboard"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/baselines/2026-07-auditoria-seguridad.md:2181",
+    "id_previo": "S4-01",
+    "estado": "abierto",
+    "evidencia": "src/lib/security/validate-origin.ts:69-75 sigue aceptando el Origin develop.com.ar antes del chequeo de allowedDomains; next.config.ts:129-131 frame-ancestors * en /embed (el iframe vive en develop.com.ar y sus pedidos salen con ese Origin)"
+   },
+   {
+    "doc": "docs/audit-repo-20260707.md:180",
+    "id_previo": "CO-1",
+    "estado": "parcial",
+    "evidencia": "Tipos cerrados: next.config.ts:31-34 sin ignoreBuildErrors y el build type-chequea. Lint abierto: no hay clave eslint, Next 16 no lintea en el build y .github/workflows/ci.yml:20-26 lo deja fuera del CI"
+   },
+   {
+    "doc": "docs/auditoria-seguridad-2026-05.md:72",
+    "id_previo": "SEC-DEP-01",
+    "estado": "abierto",
+    "evidencia": "El lock subió a next 16.2.9 (cierra lo de 16.2.1), pero _crudo/npm-audit.json:1036-1045 vuelve a marcar next como crítico con rangos hasta <16.3.8"
+   },
+   {
+    "doc": "docs/auditoria-seguridad-2026-05.md:217",
+    "id_previo": "SEC-MISC-01",
+    "estado": "parcial",
+    "evidencia": "next.config.ts:54-87 agrega HSTS, nosniff, Referrer-Policy, Permissions-Policy y CSP en Report-Only; X-Frame-Options solo en /(admin|dashboard|setter) (:93-98) y la CSP sigue en Report-Only sin reportes"
+   },
+   {
+    "doc": "docs/auditoria-total-pre-deploy.md:36",
+    "id_previo": "O-2",
+    "estado": "cerrado",
+    "evidencia": "package.json:131 declara @googleapis/webmasters y está instalada (_crudo/npm-ls.txt: @googleapis/webmasters@4.0.0); el baseline de tsc da 0 errores"
+   },
+   {
+    "doc": "docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md:202",
+    "id_previo": "sin-id",
+    "estado": "parcial",
+    "evidencia": "package.json:15 check:types y .github/workflows/ci.yml:97-105 en la raíz; next.config.ts sin ignoreBuildErrors; e2e.yml ya no existe; lint y e2e siguen sin gate (ci.yml:20-26, :186-197)"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:61",
+    "id_previo": "NUEVO-P0-2",
+    "estado": "cerrado",
+    "evidencia": "package.json:131 @googleapis/webmasters declarada e instalada (_crudo/npm-ls.txt)"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:197",
+    "id_previo": "SEC-DEP-01",
+    "estado": "abierto",
+    "evidencia": "_crudo/npm-audit.json:1036-1045 next crítico (4 críticas en total con next-auth y @auth/*)"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion.md:55",
+    "id_previo": "N-2",
+    "estado": "cerrado",
+    "evidencia": "El lock con next 16.2.9 satisface ^16.2.6 (package.json:154) y webmasters está declarada (package.json:131)"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion.md:90",
+    "id_previo": "SEC-DEP-01",
+    "estado": "abierto",
+    "evidencia": "_crudo/npm-audit.json:1036-1045"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:63",
+    "id_previo": "SEC-DEP-01",
+    "estado": "abierto",
+    "evidencia": "_crudo/npm-audit.json:1036-1045; next 16.2.9 en el lock"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:64",
+    "id_previo": "SEC-DEP-02",
+    "estado": "cerrado",
+    "evidencia": "protobufjs 7.6.4 en el lock (>7.5.5): el RCE quedó cerrado. _crudo/npm-audit.json:1550 marca ahora un aviso distinto (DoS)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:74",
+    "id_previo": "SEC-MISC-01",
+    "estado": "parcial",
+    "evidencia": "next.config.ts:54-98 (ver el SEC-MISC-01 de mayo)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:77",
+    "id_previo": "SEC-DEP-03",
+    "estado": "cerrado",
+    "evidencia": "El lock tiene defu 6.1.7 y effect 3.21.0; _crudo/npm-audit.json no lista ni defu ni effect"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:584",
+    "id_previo": "PERF-01",
+    "estado": "parcial",
+    "evidencia": "three.js ya no está en el grafo compartido: BrandedIntroCanvas se carga con next/dynamic (src/components/ui/MarketingIntro.tsx:19-20) y Preloader.tsx no lo importa estático. El layout raíz sigue cargando el resto del chrome en todas las rutas (src/app/layout.tsx:42-50, :113-124)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:585",
+    "id_previo": "PERF-02",
+    "estado": "parcial",
+    "evidencia": "src/components/sections/web-development/WebTemplatesImmersive.tsx:313-316 sigue con iframes vivos por template, ahora lazy salvo el primero; el peso no se puede medir por lectura"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:939",
+    "id_previo": "ARQ-01",
+    "estado": "abierto",
+    "evidencia": "_crudo/depcruise-resumen.json: 'ciclos' con 22 entradas; .dependency-cruiser.cjs:4-10 sigue en severity warn"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:952",
+    "id_previo": "ARQ-04",
+    "estado": "parcial",
+    "evidencia": "eslint.config.mjs:16-87 agrega fronteras de motor y chatbot, pero ningún gate las ejecuta (ci.yml:20-26, sin hooks); .dependency-cruiser.cjs:3-11 no tiene reglas de frontera"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1310",
+    "id_previo": "RESIL-03",
+    "estado": "parcial",
+    "evidencia": "netlify.toml:25-32 apunta a funciones que existen (netlify/functions/cleanup-old-events-cron.ts, generate-insights-cron.ts, send-weekly-reports-cron.ts); 5 rutas cron siguen sin disparador (flujo D7 'Crons sin disparador')"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1622",
+    "id_previo": "OBS-01",
+    "estado": "abierto",
+    "evidencia": "src/app/error.tsx:27 y src/app/global-error.tsx:24 capturan y .env.example:276 lo marca requerido en prod; que funcione en producción no es verificable por lectura (D7: depende de NEXT_PUBLIC_SENTRY_DSN en el build)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1624",
+    "id_previo": "OBS-02",
+    "estado": "abierto",
+    "evidencia": "No hay heartbeat ni dead-man switch: git grep de healthchecks, cronitor y heartbeat en src y netlify sin resultados reales; netlify.toml:25-32 agenda sin monitoreo"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1626",
+    "id_previo": "OBS-03",
+    "estado": "abierto",
+    "evidencia": "src/app/api/version/route.ts:3-8 no toca la base ni identifica el deploy; ningún monitor en el repo (src/lib/data/onboarding-tasks.ts:58 lo deja como tarea manual de UptimeRobot)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1913",
+    "id_previo": "SEO-01",
+    "estado": "abierto",
+    "evidencia": "src/app/layout.tsx:32 y :38 y src/app/contact/layout.tsx:14 y :20 referencian /og-image.png; public/ no lo tiene (git ls-tree)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1915",
+    "id_previo": "SEO-03",
+    "estado": "cerrado",
+    "evidencia": "src/app/layout.tsx:73 lang=\"es\""
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1917",
+    "id_previo": "A11Y-03",
+    "estado": "cerrado",
+    "evidencia": "Los tokens ds pasan AA por aritmética WCAG: globals.css:42 #A39C8F sobre :39 #0D0B09 ≈ 7,2:1 y globals.css:49 #6E675C sobre :46 #F2EEE6 ≈ 4,8:1. Siguen textos zinc-500 y zinc-700 bajo AA en las páginas de error y 404 (higiene)"
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:153",
+    "id_previo": "sin-id",
+    "estado": "parcial",
+    "evidencia": "El candado existe en parte: .github/workflows/ci.yml:79-117 corre tipos e invariantes y el build ya no ignora tipos. e2e depende de secrets (ci.yml:186-197) y el lint, con 102 errores, sigue fuera del gate (ci.yml:20-26)"
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/app/error.tsx",
+    "linea": 42,
+    "tipo": "contraste",
+    "detalle": "Texto explicativo en text-zinc-500 sobre #070709 ≈ 4,2:1 (< 4,5:1)"
+   },
+   {
+    "ruta": "src/app/error.tsx",
+    "linea": 46,
+    "tipo": "contraste",
+    "detalle": "Código de referencia (digest) en text-zinc-700 ≈ 1,9:1, y es el dato que se le pide al usuario para soporte"
+   },
+   {
+    "ruta": "src/app/error.tsx",
+    "linea": 36,
+    "tipo": "contraste",
+    "detalle": "Rótulo de 10 px en amber-500/60 sobre fondo casi negro"
+   },
+   {
+    "ruta": "src/app/global-error.tsx",
+    "linea": 41,
+    "tipo": "contraste",
+    "detalle": "Texto explicativo en text-zinc-500 ≈ 4,2:1"
+   },
+   {
+    "ruta": "src/app/global-error.tsx",
+    "linea": 46,
+    "tipo": "contraste",
+    "detalle": "Digest en text-zinc-700 ≈ 1,9:1"
+   },
+   {
+    "ruta": "src/app/not-found.tsx",
+    "linea": 153,
+    "tipo": "contraste",
+    "detalle": "Subtítulo en text-zinc-500 ≈ 4,2:1"
+   },
+   {
+    "ruta": "src/app/not-found.tsx",
+    "linea": 179,
+    "tipo": "contraste",
+    "detalle": "Link 'Contactarnos' en text-zinc-500 en reposo"
+   },
+   {
+    "ruta": "src/app/not-found.tsx",
+    "linea": 132,
+    "tipo": "contraste",
+    "detalle": "Rótulo de 10 px en amber-500/50"
+   },
+   {
+    "ruta": "src/app/not-found.tsx",
+    "linea": 87,
+    "tipo": "inline",
+    "detalle": "Estilos inline (gradientes, bordes, letterSpacing) donde alcanzan clases Tailwind; también en :104-108, :114-119, :143, :169-173, :180 y :192-194"
+   },
+   {
+    "ruta": "src/app/layout.tsx",
+    "linea": 129,
+    "tipo": "inline",
+    "detalle": "Estilo del Toaster en un objeto style (background, border, color) en vez de className"
+   },
+   {
+    "ruta": "src/app/globals.css",
+    "linea": 525,
+    "tipo": "contraste",
+    "detalle": "Placeholder de .admin-input en rgb(82 82 91) ≈ 2,4:1 sobre el fondo del input"
+   },
+   {
+    "ruta": "src/app/globals.css",
+    "linea": 56,
+    "tipo": "otro",
+    "detalle": "Comentario 'PENDIENTE GATE 1' desactualizado: CLAUDE.md ya fija la asignación de acentos que coincide con :60-63"
+   },
+   {
+    "ruta": "src/app/globals.css",
+    "linea": 604,
+    "tipo": "otro",
+    "detalle": "@keyframes pulse redefine el de Tailwind (50% a 0.7 en vez de 0.5) y cambia todos los animate-pulse de los skeletons"
+   },
+   {
+    "ruta": "src/app/error.tsx",
+    "linea": 7,
+    "tipo": "otro",
+    "detalle": "El componente de error.tsx se llama GlobalError, igual que el de global-error.tsx"
+   },
+   {
+    "ruta": "src/app/error.tsx",
+    "linea": 57,
+    "tipo": "otro",
+    "detalle": "<a href='/'> dispara el error de lint @next/next/no-html-link-for-pages (uno de los 102 del baseline)"
+   },
+   {
+    "ruta": "src/app/error.tsx",
+    "linea": 39,
+    "tipo": "otro",
+    "detalle": "La página de error usa h2 como único encabezado, sin h1 (igual global-error.tsx:38)"
+   },
+   {
+    "ruta": "src/app/not-found.tsx",
+    "linea": 145,
+    "tipo": "copy",
+    "detalle": "'Este rincón del internet no existe todavía' también lo ven clientes del portal y visitantes dentro del iframe del widget"
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2 con avisos críticos y el arreglo disponible dentro del rango declarado",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "Los hechos se confirman por lectura: package.json:154-155 declara next ^16.2.6 y next-auth ^5.0.0-beta.30. El lockfile de origin/main (package-lock.json:12171, :12224 y :293) y node_modules/*/package.json:3 fijan next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2; next-auth fija su @auth/core exacto en el lock, línea 12229. npm-audit.json marca los tres como críticos (:13, :1333, :1061) con fixAvailable, y npm-outdated.json:226-235 da wanted 16.4.0 y 5.0.0-beta.32, dentro del rango con caret. Lo que no se sostiene es la explotabilidad que justifica ALTA. (a) El aviso del normalizador homoglyph: el magic link es alcanzable por un anónimo (login/actions.ts:143-146), pero sendToken llama al callback signIn ANTES de crear el token y de mandar el mail (node_modules/@auth/core/lib/actions/signin/send-token.js:12-33). En src/auth.ts:174-186 el callback solo autoriza si prisma.user.findUnique({email: identificador normalizado}) encuentra un usuario. Después, el token se crea y el mail se manda a ese mismo identificador (send-token.js:48-63). Un identificador con '＠' homoglyph no coincide con ningún usuario y termina en AccessDenied; uno que sí coincide va al buzón del dueño. No hay camino de toma de cuenta. (b) El fail-open por error de configuración de next-auth: src/proxy.ts:75 usa Boolean(session?.user) y los guards chequean el rol (lib/auth-guards.ts:6 y :16, admin/layout.tsx:47, setter/layout.tsx:32), así que fallan cerrados. (c) La DoS de getToken: la app no llama al getToken de next-auth; git grep 'getToken' en src solo encuentra oauth2Client.getToken de google-auth-library. (d) Aparte de los tres que el auditor ya descartó, el RCE de Image Optimization con AVIF (npm-audit.json:1205, crítico, <16.3.3) tampoco se ve aplicable. next.config.ts:40-47 no declara formats avif, public/ no tiene ningún .avif (git ls-tree) y Netlify (netlify.toml:9-10, @netlify/plugin-nextjs) sirve /_next/image por su CDN; ese último eslabón es inferido. La SSRF en rewrites tampoco aplica: los destinos de next.config.ts:143-233 son rutas internas fijas. Lo que sí queda aplicable por título es la DoS de Server Actions en App Router (npm-audit.json:1061, high, <16.2.11), alcanzable desde /login; es de disponibilidad, no figura en los criterios de CRÍTICA/ALTA y se arregla con una actualización dentro del rango. Queda como MEDIA: deuda de actualización bloqueante para el primer cliente, sin explotación trazada.",
+    "evidencia_contra": [
+     "src/auth.ts:174-186 — el callback signIn con verificationRequest solo autoriza si el email normalizado existe en User (findUnique exacto); si no, AccessDenied antes de crear el token o mandar el mail",
+     "node_modules/@auth/core/lib/actions/signin/send-token.js:12-33 — normalizer → getUserByEmail → callbacks.signIn → si no hay autorización, throw AccessDenied; recién en :48-63 llama a sendVerificationRequest y createVerificationToken con el mismo identificador",
+     "src/proxy.ts:75 — const isAuthenticated = Boolean(session?.user): ante un objeto auth que trae un error y no tiene user, falla cerrado",
+     "src/lib/auth-guards.ts:6 y :16 — los guards comparan session?.user?.role, no la existencia de la sesión",
+     "git grep 'getToken' origin/main -- src: solo src/lib/integrations/google-business-profile.ts:51 (google-auth-library), no el getToken de next-auth",
+     "next.config.ts:40-47 — images solo con remotePatterns placehold.co, sin formats avif; git ls-tree de public/: 0 archivos .avif",
+     "netlify.toml:9-10 — @netlify/plugin-nextjs (la optimización de imágenes la sirve el CDN de Netlify; eslabón inferido)",
+     "Los destinos de redirects/rewrites en next.config.ts:143-233 son rutas internas fijas, sin hostname controlado por el atacante",
+     "Aplicable por título: solo la DoS de Server Actions (npm-audit.json:1061, high, CVSS no informado) y avisos moderate"
+    ]
+   },
+   {
+    "titulo": "El backup diario de la base probablemente falla todos los días: el workflow aborta sin el secret y el repo registraba 0 secrets",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "Se confirma por lectura. raíz:.github/workflows/db-backup.yml:39-41 agenda el cron diario; :84-97 resuelve DIRECT_DATABASE_URL_PROD y, si falta, hace exit 1 (:93-96); :105-110 aborta igual si falta BACKUP_GPG_PASSPHRASE. raíz:.github/workflows/ci.yml:120-121 registra que al 2026-08-25 la API de secrets devolvía total_count: 0. docs/bitacora-beta-3.md:5264-5272 lo confirma con permisos de admin y agrega textualmente que ese 0 «alcanza también a db-backup.yml, que usa tres secrets que tampoco existen» y que «explica el P0 del backup». docs/bitacora-roadmap.md:9533-9538 deja la carga de los secrets como pendiente bloqueante de Franco. Encaja en la rúbrica como ALTA, «integración crítica que no corre». El cabezal viejo también se confirma: db-backup.yml:3-6 dice que logic-core-v3/.github/workflows/e2e.yml está mal ubicado, pero ese archivo ya no existe en origin/main; git ls-tree solo muestra ci.yml y db-backup.yml. Queda en PROBABLE porque el eslabón de runtime (que los secrets sigan sin cargar después del 2026-08-25, con la base del 2026-09-06) no se puede verificar leyendo; requiere un gh secret list o gh run list del workflow, que va como verificación humana. Corrección de cita: los workflows están en la raíz del repo, no bajo logic-core-v3, así que la evidencia lleva el prefijo raíz: (raíz:.github/workflows/db-backup.yml:93, raíz:.github/workflows/ci.yml:120). Matiz del impacto: «no hay ningún respaldo» exagera un poco, porque Neon Free tiene una retención nativa corta. El propio doc lo describe como «sin PITR, retención corta» (docs/operations/neon-backups.md:5), así que no hay respaldo confiable ni restore probado.",
+    "evidencia_contra": [
+     "El estado de los secrets es del 2026-08-25 (ci.yml:120-121, bitacora-beta-3.md:5264); no se puede leer si se cargaron después: falta gh secret list / gh run list --workflow db-backup.yml (verificación humana)",
+     "docs/operations/neon-backups.md:5 — Neon Free conserva una retención nativa corta: 'ningún respaldo' es una exageración leve; lo que falta es un respaldo confiable y un restore probado",
+     "Las rutas citadas van con prefijo raíz: — .github/ está en la raíz del repo, no en logic-core-v3/ (validar.mjs la resolvería mal sin el prefijo)"
+    ]
+   }
+  ]
+ }
+}

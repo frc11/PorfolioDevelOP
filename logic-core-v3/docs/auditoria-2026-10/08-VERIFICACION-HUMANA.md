@@ -1414,3 +1414,57 @@
 - Resultado esperado: TTFB por debajo de 1-2 s y memoria estable con las dos carteras.
 - Señal de falla: El TTFB crece de forma lineal con la cartera (más de 3 s con 1.500 leads) o la memoria sube por varios cientos de MB por request.
 - ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-158] Magic link con '@' homoglifo (aviso de Auth.js)
+- Verifica: [SEC-105] · Prioridad: media
+- Entorno: dev local con base de desarrollo y Brevo de prueba (nunca producción)
+- Precondiciones: usuario seed con email conocido; casilla propia en un dominio que controle Valentino
+- Pasos: 1) En /login pedir enlace mágico con el email del usuario seed, reemplazando '@' por '＠' (U+FF20) y agregando '@<dominio-propio>' al final 2) Mirar en Brevo a qué dirección salió el mail 3) Abrir el link y consultar /api/auth/session para ver con qué usuario quedó la sesión 4) Repetir después de subir next-auth y @auth/core a las versiones con fix
+- Resultado esperado: El pedido se rechaza, o el mail sale solo a la dirección legítima del usuario
+- Señal de falla: El mail llega a la casilla del dominio propio y la sesión queda a nombre del usuario seed
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-159] Techo real de las funciones en Netlify frente a los maxDuration
+- Verifica: [TEC-006] · Prioridad: media
+- Entorno: Netlify (configuración del sitio y logs de funciones de producción)
+- Precondiciones: acceso de lectura al sitio en Netlify
+- Pasos: 1) En Site configuration > Functions anotar el plan y el timeout de funciones, si aparece 2) En Logs > Functions abrir la función del servidor de Next y buscar 'Task timed out' y las duraciones máximas 3) Abrir el log de send-weekly-reports-cron del último lunes 12:00 UTC y ver cuánto tardó el fetch a /api/cron/send-weekly-reports
+- Resultado esperado: Un techo >= 30 s para la función del servidor, o constancia de que el techo real coincide con ROUTE_MAX_DURATION_MS
+- Señal de falla: Timeouts a ~10 s o ~26 s ('Task timed out after 10.00 seconds') o crons cortados a mitad
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-160] ¿Corre el backup diario de la base?
+- Verifica: [BUG-171] · Prioridad: alta
+- Entorno: GitHub, repo frc11/PorfolioDevelOP (solo lectura con gh)
+- Precondiciones: gh autenticado con acceso al repo
+- Pasos: 1) gh secret list --repo frc11/PorfolioDevelOP 2) gh run list --repo frc11/PorfolioDevelOP --workflow 'DB backup' --limit 14 3) Abrir la última corrida y revisar el paso 'Resolve target URL' y el job 'Restore-test (validar dump)'
+- Resultado esperado: Corridas diarias en verde con artifact neon-prod-backup-* y restore-test en verde; DIRECT_DATABASE_URL_PROD y BACKUP_GPG_PASSPHRASE en la lista de secrets
+- Señal de falla: Corridas en rojo en 'Resolve target URL' con 'secret faltante para target=prod', o ninguna corrida
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-161] ¿Entra el build en 4096 MB?
+- Verifica: [TEC-007] · Prioridad: media
+- Entorno: Log del último deploy de Netlify y un clon limpio local
+- Precondiciones: clon nuevo del repo, sin docs/_insumos ni directorios .next-*
+- Pasos: 1) En el log del último deploy de producción buscar 'JavaScript heap out of memory' y la duración de 'next build' 2) En el clon limpio: NODE_OPTIONS=--max-old-space-size=4096, npm ci y npm run build; anotar si termina 3) Repetir en el checkout de trabajo con lo no versionado presente y comparar
+- Resultado esperado: El build termina con 4096 MB en Netlify y en el clon limpio
+- Señal de falla: OOM en Netlify, o OOM solo en el checkout de trabajo (la causa es lo no versionado que Tailwind escanea)
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-162] Peso del iframe /embed del widget
+- Verifica: [PERF-016] · Prioridad: media
+- Entorno: producción o deploy preview, navegador con DevTools
+- Precondiciones: slug de un bot de prueba
+- Pasos: 1) Abrir https://<host>/embed/<slug-de-prueba> con Network filtrado por JS y la cache deshabilitada 2) En Sources buscar 'DynamicDock', 'MarketingIntro', 'Shutter' y 'lenis' 3) Anotar el JS transferido total
+- Resultado esperado: Solo chunks del widget del chatbot
+- Señal de falla: Aparecen chunks del chrome público (Navbar, DynamicDock, MarketingIntro, Lenis)
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-163] 404 dentro del widget en el sitio del cliente
+- Verifica: [UX-057] · Prioridad: baja
+- Entorno: página HTML local con el snippet de widget.js
+- Precondiciones: ninguna (slug inexistente)
+- Pasos: 1) Crear una página local con el snippet del widget apuntando a un slug que no existe 2) Abrirla y desplegar el widget 3) Abrir también https://<host>/embed/slug-que-no-existe directo
+- Resultado esperado: El widget no aparece o muestra un estado propio y discreto
+- Señal de falla: Se ve el 404 animado de develOP ('Este rincón del internet...', 'Contactarnos') dentro del iframe
+- ¿Escribe en la base o manda emails?: no

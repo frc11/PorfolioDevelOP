@@ -564,6 +564,27 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): int.cron.generate-insights, int.cron.send-weekly-reports, int.cron.cleanup-old-events
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-140
 
+### [SEC-105] next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2 con avisos críticos y el arreglo disponible dentro del rango declarado
+- Dominio: D8  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `package.json:154` — «"next": "^16.2.6",»; `package.json:155` — «"next-auth": "^5.0.0-beta.30",»; dato de la auditoría, _crudo/npm-audit.json línea 13 — «"title": "Auth.js: Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass",»; dato de la auditoría, _crudo/npm-audit.json línea 1333 — «"title": "Auth.js: Configuration errors can cause existence-based auth checks to fail open (auth object populated with an error)",»; dato de la auditoría, _crudo/npm-audit.json línea 1061 — «"title": "Next.js: Denial of Service in App Router using Server Actions",»; dato de la auditoría, _crudo/npm-outdated.json línea 226 — «"next": { "current": "16.2.9", "wanted": "16.4.0"»; `src/app/login/actions.ts:143` — «if (!email.includes('@') || email.length > 254) return 'Email inválido.'»
+- Impacto: Bloqueante para el primer cliente real: el login (magic link y credenciales), el proxy y las server actions corren sobre versiones con avisos críticos y altos publicados. El del normalizador de email de Auth.js es alcanzable por un anónimo: el magic link solo verifica que haya una '@' antes de llamar a signIn('resend') (login/actions.ts:143-146). No aplican en este despliegue: el RCE en servidores Windows (Netlify corre Linux), el bypass del proxy con Turbopack (el build usa --webpack, package.json:9) y el RCE de next/og (git grep 'next/og' sin usos). El aviso de fuga del endpoint MCP del servidor de desarrollo se agrava porque dev escucha en todas las interfaces (patrón D1-c2, package.json:7).
+- Propuesta: Subir next dentro del rango ya declarado (16.4.0 entra en ^16.2.6) y next-auth, @auth/core y @auth/prisma-adapter a las versiones con fix (beta.32 / 0.41.3 o superiores según npm audit). Después correr tipos, invariantes y la regresión de login (credenciales, magic link, Google), proxy e impersonación. Validar el email del magic link con Zod antes de signIn. Decidir la estrategia de salida de next-auth v5, que sigue en beta: el tag 'latest' de npm es 4.24.15. Coordinar con Franco porque toca la superficie de auth.ts y auth-cookies.ts (ZONA-FRANCO), aunque no hace falta editarlos.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-005], [SEC-009], [TEC-001]
+- Nodo(s): lib.deps, lib.auth, h1.auth-login, lib.proxy
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-158
+
+### [SEC-106] La CSP global sigue en Report-Only y sin destino de reportes: no bloquea nada ni junta los datos que el plan pedía para pasar a enforce
+- Dominio: D8  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `next.config.ts:66` — «// CSP in report-only mode while we audit violations. // Tighten to enforcement (Content-Security-Policy) after 1–2 weeks»; `next.config.ts:72` — «key: 'Content-Security-Policy-Report-Only',»; `next.config.ts:75` — «"script-src 'self' 'unsafe-inline' 'unsafe-eval'",»
+- Impacto: El panel del cliente y el admin no tienen ninguna capa de mitigación de XSS más allá del escape de React. Sin report-uri ni report-to (git grep da 0), las violaciones solo aparecen en la consola de cada navegador. Por eso las '1–2 semanas' de observación nunca producen datos para pasar a enforce. frame-ancestors 'none' en Report-Only no protege del framing (D1 ya lo reportó para las páginas de auth) y en /embed genera ruido en cada carga del widget.
+- Propuesta: Agregar report-to/report-uri hacia un endpoint propio con rate limit o el endpoint de CSP de Sentry. Medir y pasar a enforce por rutas, portales primero, con nonce para sacar 'unsafe-inline'/'unsafe-eval'. Mantener /embed con su política aparte.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-027]
+- Nodo(s): lib.next-config, lib.security, h2.cli-shell, h4.adm-shell
+
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -1027,6 +1048,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): lib.cron, int.cron.alerts, int.cron.regenerate-briefs, int.cron.send-executive-reports
 
+### [SEC-107] Repo público con datos de infraestructura y volcados de tablas versionados contra la regla del propio .gitignore
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `.gitignore:64` — «# DB backups (B14.3) — contienen PII, NUNCA commitear.»; `prisma/backups/organization-module-pre-push.json:4` — «"organizationId": "<cuid redactado>",»; `.env.example:31` — «# pooled: ep-<id redactado>-pooler.sa-east-1.aws.neon.tech»; `raíz:.github/workflows/db-backup.yml:21` — «# El repo es PÚBLICO. Sin cifrado, cualquiera con el link al run podría descargar»
+- Impacto: Cualquiera puede leer el hostname del endpoint real de la Neon compartida (sin credenciales) y volcados de las tablas de catálogo y de activación de módulos con IDs internos (prisma/backups/*.json y backup.js, versionados aunque .gitignore:67 ignora backups/). Sumado al historial de origin/main, que conserva enviroment.env (commit 39535583; ya hay hallazgo de credenciales en el historial), facilita un ataque dirigido.
+- Propuesta: Reemplazar el hostname por un placeholder en .env.example. Quitar prisma/backups/ del repo (git rm --cached; queda en el historial). Decidir si el repo pasa a privado, coordinado con PLAN-1075.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-001]
+- Nodo(s): int.neon, modelo.OrganizationModule
+
 ## Bugs latentes
 
 ### [BUG-002] El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo
@@ -1146,6 +1177,17 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [BUG-063], [UX-025], [FAL-016], [SEC-064], [SEC-071]
 - Nodo(s): int.vertex, h3.vis-widget-develop, lib.chatbot.llm
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-141
+
+### [BUG-171] El backup diario de la base nunca funcionó: las 140 corridas del workflow fallaron por falta del secret de la URL y el repo tiene 0 secrets de Actions
+- Dominio: D8  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `raíz:.github/workflows/db-backup.yml:93` — «if [ -z "$URL" ]; then echo "ERROR: secret faltante para target=$TARGET" >&2»; `raíz:.github/workflows/ci.yml:120` — «# Necesita una DB de test dedicada. Al 2026-08-25 el repo NO tiene ningún # secret configurado ('gh api .../actions/secrets' devuelve total_count: 0),»; `raíz:.github/workflows/db-backup.yml:4` — «# GitHub Actions solo descubre workflows en <repo_root>/.github/workflows/. El # archivo logic-core-v3/.github/workflows/e2e.yml está MAL ubicado y nunca corrió»
+- Impacto: Bloqueante para el primer cliente real: el workflow de B14.3 (pg_dump cifrado con restore de prueba) nunca produjo un respaldo y el restore nunca se probó. La única red es la retención nativa de Neon, que el propio doc describe como corta y sin PITR en el plan Free (docs/operations/neon-backups.md:5). Pesa más con un historial de migraciones que ya borró y re-agregó columnas con datos de clientes (DEU-014). Nadie se entera: la falla diaria queda en la pestaña Actions sin aviso. El comentario de cabecera quedó viejo (e2e.yml ya no existe). Los mismos 0 secrets apagan los jobs de LeadOS y E2E del CI (DEU-017).
+- Propuesta: Verificar secrets y corridas (casos de prueba). Cargar DIRECT_DATABASE_URL_PROD y BACKUP_GPG_PASSPHRASE (lo hace Franco). Hacer visible el fallo, por ejemplo con un aviso al canal de alertas, y endurecer la validación con conteos mínimos de tablas críticas además de _prisma_migrations. Actualizar el comentario.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-014], [DEU-017], [BUG-014]
+- Nodo(s): int.github-actions, int.neon
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-160
 
 ### [BUG-001] Sesion invalidada en Node pero viva en el proxy: bucle /login <-> portal (ERR_TOO_MANY_REDIRECTS)
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -2489,6 +2531,36 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [UX-031]
 - Nodo(s): h6.vis-contacto.formulario-pie-home
 
+### [BUG-172] /api/version no identifica el deploy: la versión es un '1.0.0' fijo y builtAt es la hora del pedido
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/version/route.ts:5` — «version: '1.0.0', builtAt: process.env.NEXT_PUBLIC_BUILD_TIME ?? new Date().toISOString(),»; `.env.example:295` — «# AUTOINYECTADA · Timestamp de build, inyectado por next.config.ts en build.»; `package.json:3` — «"version": "0.1.0",»
+- Impacto: Ni el smoke de producción (scripts/_b14-4-smoke-prod.mjs:82) ni un monitoreo externo pueden confirmar qué commit está desplegado: el endpoint siempre dice '1.0.0' y la 'fecha de build' cambia en cada pedido. next.config.ts no inyecta ninguna variable env.
+- Propuesta: Exponer el SHA del commit que Netlify pasa al build y una fecha de build inyectada de verdad. Corregir .env.example y alinear la versión con package.json.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): int.netlify
+
+### [BUG-173] La imagen Open Graph del sitio (/og-image.png) no existe: las vistas previas al compartir salen sin imagen
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/layout.tsx:32` — «images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "develOP Agencia Digital" }],»; `src/app/contact/layout.tsx:14` — «images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Contacto develOP" }],»
+- Impacto: Al compartir develop.com.ar o /contact por WhatsApp o LinkedIn, la tarjeta sale sin imagen, porque public/ no tiene og-image ni hay un opengraph-image por ruta. Es la carta de presentación comercial de la agencia.
+- Propuesta: Agregar el asset de 1200×630 en public/ o un opengraph-image por ruta.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h6.vis-contacto, lib.seo
+
+### [BUG-174] Redirects legacy: /dashboard/crm lleva a un módulo que ya no está en el catálogo y /dashboard/seo-avanzado encadena dos saltos
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `next.config.ts:158` — «source: '/dashboard/crm', destination: '/dashboard/services?modulo=mini-crm',»; `next.config.ts:210` — «source: '/dashboard/seo-avanzado', destination: '/dashboard/seo',»; `next.config.ts:244` — «source: '/dashboard/seo', destination: '/dashboard/resultados/seo',»
+- Impacto: Un bookmark viejo de /dashboard/crm abre la vitrina con un modulo que no existe en src/lib/data/premium-modules.ts (solo queda en premium-features.ts:59), y es probable que no se resalte nada. /dashboard/seo-avanzado hace dos 308 seguidos.
+- Propuesta: Mandar /dashboard/crm a /dashboard/services sin parámetro y /dashboard/seo-avanzado directo a /dashboard/resultados/seo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-servicios, h2.cli-resultados
+
 ## Tecnología vieja
 
 ### [TEC-002] Agenda inteligente usa la API v1 de Cal.com, apagada segun el propio repo, con la API key en la query string
@@ -2512,6 +2584,38 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): int.vertex, int.anthropic, lib.chatbot.llm, lib.ai, lib.plan, h3.vis-api-chatbot
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-069
+
+### [TEC-006] Netlify no aplica los maxDuration de las rutas (30 s el chat, 300 s dos crons) y el presupuesto del chat está calibrado contra un techo que la plataforma probablemente no da
+- Dominio: D8  ·  Severidad: MEDIA  ·  Tipo: tech-vieja
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/chatbot/[slug]/chat/route.ts:8` — «export const maxDuration = 30»; `src/app/api/cron/send-executive-reports/route.ts:5` — «export const maxDuration = 300»; `src/modules/chatbot/server/chat/reconcile.ts:116` — «export const ROUTE_MAX_DURATION_MS = 30_000»; `netlify.toml:16` — «[functions] node_bundler = "esbuild"»
+- Impacto: maxDuration es configuración de segmento que lee Vercel. En Netlify el corte lo fija el plan de la función: la propia bitácora asume ~10 s (docs/bitacora-roadmap.md:13963, contexto, no evidencia) y ~26 s como tope duro. Con un techo menor que 30 s, un turno lento del bot muere antes de que reconcile.ts cierre la compensación de cupo y la persistencia, y el visitante del sitio del cliente ve el chat cortado. Los crons que corren dentro del servidor Next (send-weekly-reports, generate-insights) se cortan a mitad del lote.
+- Propuesta: Confirmar en Netlify el plan y el timeout real de la función del servidor. Alinear ROUTE_MAX_DURATION_MS y HOOK_SAFETY_MARGIN_MS a ese techo. Mover los trabajos largos a Background Functions o partirlos en lotes reanudables. Dejar el techo documentado junto a netlify.toml.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [BUG-092], [BUG-105], [PERF-010], [SEC-099]
+- Nodo(s): int.netlify, h3.vis-api-chatbot, int.cron.send-executive-reports, int.cron.regenerate-briefs
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-159
+
+### [TEC-007] Build de producción sin margen de memoria verificable: heap fijo de 4096 MB en Netlify, webpack forzado, type-check dentro del build y Tailwind escaneando docs/
+- Dominio: D8  ·  Severidad: MEDIA  ·  Tipo: tech-vieja
+- Confianza: HIPÓTESIS
+- Evidencia: `netlify.toml:7` — «NODE_OPTIONS = "--max-old-space-size=4096"»; `package.json:9` — «"build": "next build --webpack",»; `next.config.ts:31` — «// Sin 'typescript.ignoreBuildErrors': el build vuelve a fallar ante un error de // tipos.»; `src/app/globals.css:1` — «@import "tailwindcss";»; `docs/bitacora-beta-3.md:3647` — «'bg-[url('https://grainy-gradients.vercel.app/noise.svg')]' de 'web-development/page.tsx' ya»
+- Impacto: Los docs se contradicen: BP.4 dice que el build entra en el heap por defecto y P1.A, P5.3, UTM.1 y PRIVACIDAD que necesita 6-8 GB. Netlify fija 4096 MB, que en una máquina de 16 GB es más o menos el default, así que si el OOM local es real, el deploy de producción también debería morir. Un deploy que muere deja producción sin el arreglo urgente. El build ahora suma el type-check (CO-1 cerrado) y Tailwind escanea todo lo no ignorado: 7 MB de docs/ versionados y, en local, lo no versionado (docs/_insumos, .next-perf-*).
+- Propuesta: Medir el pico de memoria en el log del último deploy de Netlify y en un clon limpio con 4096 MB. Acotar el escaneo de Tailwind con source() o '@source not' sobre docs/ y los distDirs. Evaluar el build con Turbopack, que es el default estable de Next 16, comprobando la compatibilidad con withSentryConfig. Dejar el heap documentado.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): int.netlify, lib.tailwind
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-161
+
+### [TEC-008] Stack con piezas en beta o una major atrás: next-auth 5 sigue en beta (el 'latest' de npm es 4.x), Prisma 6 con 7 estable, zod 3 con 4 estable, y Node desalineado entre CI (24), Netlify (22) y los tipos (20)
+- Dominio: D8  ·  Severidad: MEDIA  ·  Tipo: tech-vieja
+- Confianza: PROBABLE
+- Evidencia: dato de la auditoría, _crudo/npm-outdated.json línea 233 — «"next-auth": { "current": "5.0.0-beta.31", "wanted": "5.0.0-beta.32", "latest": "4.24.15"»; dato de la auditoría, _crudo/npm-outdated.json línea 72 — «"@prisma/client": { "current": "6.19.3", "latest": "7.10.0"»; `raíz:.github/workflows/ci.yml:87` — «node-version: '24'»; `netlify.toml:6` — «NODE_VERSION = "22"»; `package.json:188` — «"@types/node": "^20",»
+- Impacto: La autenticación depende de una línea beta sin release estable. Cada mes sin migrar encarece el salto: Prisma 7 cambia generator, driver adapters y configuración, y zod 4 cambia la API de errores. El CI valida con Node 24 lo que en producción corre con 22, y los tipos son de 20. No hay engines ni .nvmrc, y @netlify/plugin-nextjs no está fijado en package.json.
+- Propuesta: Un plan de upgrades por etapas, cada uno con su sprint: next-auth (seguridad primero), Prisma 7 y zod 4. Fijar engines y la versión de Node a la de Netlify, alinear @types/node y fijar el plugin de Netlify.
+- Esfuerzo: L  ·  Zona: libre
+- Relacionado: [TEC-001]
+- Nodo(s): lib.deps, lib.auth, lib.prisma
 
 ### [TEC-001] Prisma 6.19 con 7.x disponible: el salto exige cambiar el schema congelado y la carga de .env de los seeds
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: tech-vieja
@@ -2610,6 +2714,17 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): int.cron.generate-insights, h3.adm-chatbots, int.vertex
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-136
 
+### [PERF-016] El layout raíz carga el chrome de marketing (Navbar, Dock, Shutter, Preloader, Lenis) en todas las rutas, incluido el iframe /embed del widget en sitios de clientes
+- Dominio: D8  ·  Severidad: MEDIA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/app/layout.tsx:43` — «import { Navbar } from "@/components/layout/Navbar"; import Preloader from "@/components/ui/Preloader";»; `src/app/layout.tsx:117` — «<PublicOnlyComponents> <Navbar /> </PublicOnlyComponents>»; `src/components/layout/publicRoute.ts:16` — «export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed', '/setter'] as const»; `src/app/layout.tsx:78` — «<link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />»
+- Impacto: PublicOnlyComponents solo evita el render. Los componentes cliente que el layout raíz pasa como children quedan referenciados en el payload RSC y en los chunks de la entrada del layout, así que el widget en el sitio del cliente (/embed) y los portales descargan JS del chrome público que nunca pintan (Navbar, DynamicDock, Shutter, Preloader, MarketingIntro, motion y Lenis). El widget carga más lento en mobile. PERF-01 quedó a medias: three.js ya va por next/dynamic (MarketingIntro.tsx:19-20).
+- Propuesta: Mover el chrome público a un route group del sitio de marketing con su propio layout y dejar el layout raíz mínimo. Es una decisión para Valentino porque reordena PreloaderProvider y TransitionProvider (FROZEN, no se editan). Antes, cablear @next/bundle-analyzer y medir /embed.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente, h2.cli-shell, lib.ui
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-162
+
 ### [PERF-001] FKs sin índice (Task.projectId, Notification.userId/taskId, ChatbotEvent.conversationId) e índices redundantes
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: perf
 - Confianza: PROBABLE
@@ -2680,6 +2795,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h6.vis-contacto
 
+### [PERF-017] Recursos de terceros: noise.svg se hotlinkea de grainy-gradients.vercel.app en tres landings con preconnect en todas las rutas, y placehold.co está preconectado y permitido sin uso
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/app/layout.tsx:78` — «<link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" /> <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />»; `src/app/web-development/page.tsx:87` — «bg-[url('https://grainy-gradients.vercel.app/noise.svg')]»; `next.config.ts:41` — «remotePatterns: [ { protocol: 'https',»
+- Impacto: Cada visita a /web-development, /software-development y /process-automation le pasa la IP del visitante a un tercero y depende de que un demo ajeno siga en línea. Los portales y el embed abren conexiones a dos dominios que no usan. placehold.co solo aparece en un comentario de ShowcaseSection.tsx:8, que es un componente huérfano.
+- Propuesta: Servir noise.svg desde public/. Quitar los dos preconnect del layout raíz y el remotePattern de placehold.co.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.ui, lib.next-config
+
 ## Deuda
 
 ### [DEU-005] Borrar un User borra en cascada los tickets que abrió y todas sus respuestas, en cualquier organización
@@ -2732,6 +2857,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): modelo.Organization, modelo.AgencySettings, modelo.ChatbotLead, lib.prisma, int.neon, lib.migraciones
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-030
+
+### [DEU-016] tsx no está declarado ni en el lockfile y 67 scripts lo usan con `npx tsx`: los seeds resuelven una versión sin fijar mientras DATABASE_URL apunta a prod y el gate de invariantes del CI baja una versión nueva en cada corrida
+- Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `prisma/seeds/sync-plans.ts:13` — «* DATABASE_URL=<prod> npx tsx prisma/seeds/sync-plans.ts»; `prisma/seeds/add-contact-tool.ts:88` — «if (import.meta.url === pathToFileURL(resolve(process.argv[1] ?? '')).href) {»; `package.json:172` — «"ts-node": { "compilerOptions": { "module": "CommonJS",»; `package.json:20` — «"seed:latency": "ts-node --transpile-only scripts/dev/seed-latency.ts",»; `prisma.config.ts:32` — «seed: 'npx tsx prisma/seed.ts',»; `package.json:17` — «"seed:agency-os": "ts-node prisma/seed-agency-os.ts",»; `package.json:18` — «"seed:agency-os-v2": "ts-node prisma/seed-agency-os.ts",»; `prisma/seed-agency-os.ts:26` — «import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'»; `tsconfig.json:18` — «"allowImportingTsExtensions": true,»; `package.json:41` — «"check:invariant:postergacion": "npx tsx src/lib/leados/postergacion.invariant.ts",»; `package.json:117` — «"seed:galeria": "tsx scripts/dev/m0-galeria-seed.ts",»; `raíz:.github/workflows/ci.yml:105` — «run: npm run check:invariants»; `package.json:199` — «"ts-node": "^10.9.2",»
+- Impacto: package.json tiene 67 líneas con `npx tsx` y 25 con ts-node; tsx no está en dependencies, devDependencies ni en el lockfile, así que cada corrida usa un binario global o descarga la última versión del registro, también al correr scripts contra prod. Los seeds con import.meta no corren con ts-node configurado en CommonJS (el runner que sí está declarado).
+- Propuesta: Declarar tsx con versión fija en devDependencies, exponer los seeds de prod como scripts de npm y unificar el runner.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.prisma, lib.seeds, int.github-actions, lib.deps
 
 ### [DEU-017] Sin base de test: las suites de integración, LeadOS y setter escriben en la Neon dev compartida y en CI no corren (falta DATABASE_URL_TEST)
 - Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: deuda
@@ -2863,6 +2998,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [BUG-037]
 - Nodo(s): int.brevo, int.resend, lib.email
 
+### [DEU-090] El CI solo corre tipos e invariantes: no corre build, lint, npm audit ni las fronteras, y los jobs con base se saltean
+- Dominio: D8  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `raíz:.github/workflows/ci.yml:20` — «# ── Por qué el lint NO está acá ──»; `raíz:.github/workflows/ci.yml:97` — «- name: 'Tipos: tsc --noEmit'»; `raíz:.github/workflows/ci.yml:142` — «if [ -z "$DB" ]; then echo "listo=false" >> "$GITHUB_OUTPUT"»; `scripts/run-invariants.mjs:107` — «(nombre) => nombre === 'check:invariant' || nombre.startsWith('check:invariant:'),»; `package.json:55` — «"test:ev1": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts",»
+- Impacto: Un build roto, un import que rompe la frontera de aislamiento chatbot/motor o una dependencia con aviso crítico llegan a main sin rojo. El build solo lo detecta Netlify al desplegar y el lint nadie, porque Next 16 ya no lintea en el build y no hay hooks versionados. Los 28 invariantes test:* del chatbot (package.json:55-82) no entran al agregado y no corren nunca en CI. Tampoco hay bloque permissions, así que el GITHUB_TOKEN queda con los permisos por defecto del repo.
+- Propuesta: Sumar al CI: un paso de build con el mismo heap que Netlify, eslint acotado a src/ con las reglas de frontera como error y el resto como baseline congelado, y npm audit --audit-level=critical. Agregar permissions: contents: read. Incluir los test:* en el runner, renombrándolos o ampliando el filtro.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [DEU-017]
+- Nodo(s): int.github-actions, lib.isolation
+
 ### [DEU-001] Flujo de invitacion huerfano: ninguna action viva emite links a /accept-invite (y la de clientes nunca los enviaba)
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: deuda
 - Confianza: PROBABLE
@@ -2952,16 +3097,6 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): modelo.Organization, h2.cli-resultados
-
-### [DEU-016] Los seeds del lote solo corren con tsx, que no está declarado: `npx tsx` resuelve una versión sin fijar mientras DATABASE_URL apunta a prod
-- Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
-- Confianza: PROBABLE
-- Evidencia: `prisma/seeds/sync-plans.ts:13` — «* DATABASE_URL=<prod> npx tsx prisma/seeds/sync-plans.ts»; `prisma/seeds/add-contact-tool.ts:88` — «if (import.meta.url === pathToFileURL(resolve(process.argv[1] ?? '')).href) {»; `package.json:172` — «"ts-node": { "compilerOptions": { "module": "CommonJS",»; `package.json:20` — «"seed:latency": "ts-node --transpile-only scripts/dev/seed-latency.ts",»; `prisma.config.ts:32` — «seed: 'npx tsx prisma/seed.ts',»; `package.json:17` — «"seed:agency-os": "ts-node prisma/seed-agency-os.ts",»; `package.json:18` — «"seed:agency-os-v2": "ts-node prisma/seed-agency-os.ts",»; `prisma/seed-agency-os.ts:26` — «import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'»; `tsconfig.json:18` — «"allowImportingTsExtensions": true,»
-- Impacto: package.json tiene 67 líneas con `npx tsx` y 25 con ts-node; tsx no está en dependencies, devDependencies ni en el lockfile, así que cada corrida usa un binario global o descarga la última versión del registro, también al correr scripts contra prod. Los seeds con import.meta no corren con ts-node configurado en CommonJS (el runner que sí está declarado).
-- Propuesta: Declarar tsx con versión fija en devDependencies, exponer los seeds de prod como scripts de npm y unificar el runner.
-- Esfuerzo: S  ·  Zona: libre
-- Relacionado: —
-- Nodo(s): lib.prisma, lib.seeds
 
 ### [DEU-018] Catálogo de tareas de onboarding huérfano: solo lo siembran módulos 'use server' sin importadores y sus títulos internos se mostrarían al cliente
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -3392,6 +3527,66 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h6.vis-contacto, int.email, h6.vis-optout
+
+### [DEU-091] tailwind.config.ts es código muerto: Tailwind 4 no lo carga (no hay @config) y su plugin ya está en globals.css
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `tailwind.config.ts:19` — «export default {»; `tailwind.config.ts:36` — «plugins: [typographyPlugin],»; `src/app/globals.css:2` — «@plugin "@tailwindcss/typography";»
+- Impacto: Quien edite el tema en ese archivo no ve ningún efecto. Ninguna clase develop-* lo usa (git grep da 0), así que hoy no rompe nada, pero suma un warning de eslint y confunde sobre de dónde salen los tokens.
+- Propuesta: Borrar tailwind.config.ts. design-tokens.ts NO se borra: tiene 5 consumidores (Modal, setter-shell, DashboardLayoutClient...) y es FROZEN-inferido (PLAN-1269).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.tailwind
+
+### [DEU-092] next.config.ts no está tipado (NextConfig se importa y no se usa) y @next/bundle-analyzer está instalado sin cablear
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `next.config.ts:1` — «import type { NextConfig } from "next";»; `next.config.ts:3` — «const nextConfig = {»; `package.json:182` — «"@next/bundle-analyzer": "^16.2.7",»
+- Impacto: Una clave mal escrita o deprecada en la config no da error de tipos, porque no hay chequeo de propiedades de más: el objeto solo se compara estructuralmente al pasarlo a withSentryConfig. Sin el analyzer cableado no hay forma de medir el peso de los bundles (ver el hallazgo del layout raíz).
+- Propuesta: Tipar el objeto como NextConfig (o con satisfies). Cablear el analyzer detrás de una variable ANALYZE, o quitarlo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.next-config
+
+### [DEU-093] Los distDir alternativos no están excluidos de eslint ni de .gitignore (perf, corrida-visual) y tsconfig incluye tipos de builds de experimentos
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `eslint.config.mjs:9` — «globalIgnores([ // Default ignores of eslint-config-next: ".next/**",»; `.gitignore:17` — «/.next/ /.next-galeria/ /.next-setter/»; `tsconfig.json:43` — «".next-perf-a/types/**/*.ts",»; `raíz:.github/workflows/ci.yml:27` — «# (Nota al pasar, sin arreglar: 'npm run lint' a secas reporta ~108.000»
+- Impacto: 'npm run lint' a secas lintea bundles minificados (~108.000 problemas), lo que vuelve inútil medir la deuda real. Los .next-perf-* y .next-corrida-visual no están en .gitignore: Tailwind los escanea en local y un 'git add' los tomaría. .gitignore repite las entradas de .next-setter y .next-galeria (:18-19 y :24-25) y la de vertex-credentials.json (:55 y :58).
+- Propuesta: Un patrón '.next*/' en globalIgnores y en .gitignore. Sacar de tsconfig los includes de .next-perf-*, que no tienen script que los genere. Limpiar los duplicados.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): int.github-actions, lib.next-config
+
+### [DEU-094] Dependencias fantasma y sin uso: framer-motion y three-stdlib se importan sin estar declaradas, y html2canvas y jspdf solo las usa un componente huérfano
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/components/sections/home/About.tsx:3` — «import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';»; `src/components/layout/Hero.tsx:7` — «import { SVGLoader } from 'three-stdlib'»; `src/components/dashboard/DownloadReportButton.tsx:44` — «const html2canvas = (await import('html2canvas')).default const { jsPDF } = await import('jspdf')»; `package.json:153` — «"motion": "^12.36.0",»
+- Impacto: framer-motion (About.tsx, Portfolio.tsx, KineticText.tsx) y three-stdlib (Hero.tsx, HeroArtifact.tsx FROZEN, BrandedLogoWhite.tsx) resuelven por transitivas de motion y drei. Un cambio de versión de esas librerías puede romper el sitio público sin tocar package.json. html2canvas y jspdf solo los usa DownloadReportButton.tsx, que depcruise marca huérfano, y @types/three está en dependencies.
+- Propuesta: Migrar los imports de framer-motion a 'motion/react', o declararlo. Declarar three-stdlib, solo en package.json: HeroArtifact no se edita. Borrar DownloadReportButton junto con html2canvas y jspdf si se confirma que está muerto, y mover @types/three a devDependencies.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.deps, lib.ui
+
+### [DEU-095] .env.example desactualizado: falta OAUTH_STATE_SECRET, documenta RESEND_FROM_EMAIL sin lector y promete una NEXT_PUBLIC_BUILD_TIME inyectada que nadie inyecta
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `.env.example:15` — «# Inventario verificado 2026-05-21 contra 'process.env.*' en 'src/'.»; `src/lib/security/oauth-state.ts:28` — «process.env.OAUTH_STATE_SECRET?.trim() ||»; `.env.example:136` — «# OPCIONAL · Email remitente verificado en Resend # Default si vacía: 'develOP <onboarding@resend.dev>' (sandbox de Resend) RESEND_FROM_EMAIL=»
+- Impacto: Quien prepare un entorno nuevo no sabe que OAUTH_STATE_SECRET existe, que cae a AUTH_SECRET (D7). Configura variables que no hacen nada: RESEND_FROM_EMAIL solo la lee scripts/check-env.js. Y el archivo presenta Resend como 'recomendado' (:132) cuando el transaccional real va por Brevo (D7).
+- Propuesta: Regenerar el inventario contra process.env de src y sumar OAUTH_STATE_SECRET. Marcar Resend como legado, borrar RESEND_FROM_EMAIL y corregir la nota de NEXT_PUBLIC_BUILD_TIME.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-059]
+- Nodo(s): int.brevo, lib.security
+
+### [DEU-096] Higiene de UI — D8: 17 detalles cosméticos (contraste 9, otro 5, inline 2, copy 1)
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/error.tsx:42` — «[contraste] Texto explicativo en text-zinc-500 sobre #070709 ≈ 4,2:1 (< 4,5:1)»; `src/app/error.tsx:46` — «[contraste] Código de referencia (digest) en text-zinc-700 ≈ 1,9:1, y es el dato que se le pide al usuario para soporte»; `src/app/error.tsx:36` — «[contraste] Rótulo de 10 px en amber-500/60 sobre fondo casi negro»; `src/app/global-error.tsx:41` — «[contraste] Texto explicativo en text-zinc-500 ≈ 4,2:1»; `src/app/global-error.tsx:46` — «[contraste] Digest en text-zinc-700 ≈ 1,9:1»; `src/app/not-found.tsx:153` — «[contraste] Subtítulo en text-zinc-500 ≈ 4,2:1»; `src/app/not-found.tsx:179` — «[contraste] Link 'Contactarnos' en text-zinc-500 en reposo»; `src/app/not-found.tsx:132` — «[contraste] Rótulo de 10 px en amber-500/50»; `src/app/not-found.tsx:87` — «[inline] Estilos inline (gradientes, bordes, letterSpacing) donde alcanzan clases Tailwind; también en :104-108, :114-119, :143, :169-173, :180 y :192-194»; `src/app/layout.tsx:129` — «[inline] Estilo del Toaster en un objeto style (background, border, color) en vez de className»; `src/app/globals.css:525` — «[contraste] Placeholder de .admin-input en rgb(82 82 91) ≈ 2,4:1 sobre el fondo del input»; `src/app/globals.css:56` — «[otro] Comentario 'PENDIENTE GATE 1' desactualizado: CLAUDE.md ya fija la asignación de acentos que coincide con :60-63»; `src/app/globals.css:604` — «[otro] @keyframes pulse redefine el de Tailwind (50% a 0.7 en vez de 0.5) y cambia todos los animate-pulse de los skeletons»; `src/app/error.tsx:7` — «[otro] El componente de error.tsx se llama GlobalError, igual que el de global-error.tsx»; `src/app/error.tsx:57` — «[otro] <a href='/'> dispara el error de lint @next/next/no-html-link-for-pages (uno de los 102 del baseline)»; `src/app/error.tsx:39` — «[otro] La página de error usa h2 como único encabezado, sin h1 (igual global-error.tsx:38)»; `src/app/not-found.tsx:145` — «[copy] 'Este rincón del internet no existe todavía' también lo ven clientes del portal y visitantes dentro del iframe del widget»
+- Impacto: Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.
+- Propuesta: Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.plataforma.app-raiz
 
 ## Calidad
 
@@ -3928,6 +4123,17 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [BUG-032]
 - Nodo(s): h2.cli-tienda.conectar-tienda, int.tiendanube
 
+### [UX-057] Las fronteras raíz (error y 404) son de marketing y también atienden /embed y los notFound() de admin y dashboard
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/embed/[slug]/page.tsx:37` — «if (!bot) notFound()»; `src/app/not-found.tsx:145` — «Este rincón del internet<br />no existe todavía.»; `src/app/not-found.tsx:177` — «<Link href="/contact"»; `src/app/error.tsx:57` — «<a href="/"»
+- Impacto: Si un cliente copia mal el snippet, o si su bot se borra, su propio sitio puede mostrar dentro del iframe del widget el 404 animado de develOP con 'Volver al inicio' y 'Contactarnos'; un error de render muestra 'Algo salió mal' con un link a develop.com.ar. Depende de si widget.js oculta el iframe sin señal de listo. En el panel, admin y dashboard no tienen not-found.tsx propio (hay 7 notFound() en esas ramas) y un recurso inexistente saca al usuario al sitio público.
+- Propuesta: Agregar not-found.tsx y error.tsx propios para /embed (silenciosos, que avisen al widget) y not-found.tsx en dashboard y admin con vuelta al panel.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente, h2.cli-shell, h4.adm-shell
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-163
+
 ## Observabilidad
 
 ## Accesibilidad
@@ -4035,6 +4241,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h6.vis-contacto.formulario-pie-home
+
+### [A11Y-033] Las barras de scroll están ocultas en toda la app, portales incluidos: las tablas y tiras desplazables no muestran que se pueden desplazar
+- Dominio: D8  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/globals.css:333` — «html, body { scrollbar-width: none;»; `src/app/globals.css:350` — «::-webkit-scrollbar { display: none;»; `src/app/globals.css:480` — «min-width: 980px;»; `src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx:88` — «<div className="overflow-x-auto">»
+- Impacto: El selector ::-webkit-scrollbar sin prefijo alcanza a todo elemento desplazable en Chromium y Safari. En desktop con mouse, el cliente y el admin no ven que una tabla o una tira tiene contenido a la derecha (.admin-table exige 980 px) ni en qué parte de una página larga están. La barra fina que intenta .chat-messages-area (globals.css:647-659) nunca aparece porque hereda display:none. Ningún componente vuelve a habilitar barras (git grep de webkit-scrollbar solo encuentra más ocultamientos).
+- Propuesta: Limitar el ocultamiento al sitio público (o a contenedores con clase explícita) y restaurar barras finas estilizadas en /admin, /dashboard y /setter.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-shell, h4.adm-shell, lib.ui
 
 ### [A11Y-004] Filas del dropdown de notificaciones no operables con teclado
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: a11y
@@ -4187,6 +4403,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [A11Y-006]
 - Nodo(s): h4.adm-clientes.listado, h4.adm-clientes.archivar, h4.adm-clientes.detalle
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-120
+
+### [A11Y-034] La página 404 anima un canvas de pantalla completa en un bucle infinito sin respetar reduced-motion ni pausarse
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/app/not-found.tsx:58` — «time += 0.016 animId = requestAnimationFrame(draw)»; `src/app/not-found.tsx:121` — «transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}»; `src/app/globals.css:673` — «Alcance: CSS. Las animaciones de Framer Motion ya se apagan por 'useReducedMotion()' / 'motion-reduce:' en los componentes que lo consumen.»
+- Impacto: Quien pidió menos movimiento a nivel sistema igual recibe 1.120 puntos animados por cuadro y un pulso infinito. El bloque global de reduced-motion solo cubre CSS. En mobile también gasta batería mientras la pestaña está abierta. Incumple las reglas de CLAUDE.md sobre IntersectionObserver y reduced-motion.
+- Propuesta: Consultar prefers-reduced-motion (el hook use-reduced-motion existente) para dibujar un frame estático y pausar con visibilitychange o IntersectionObserver.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.ui
 
 ## ZONA-FRANCO
 

@@ -1,7 +1,68 @@
 {
  "parte": 2,
- "partes": 5,
+ "partes": 6,
  "hallazgos": [
+  {
+   "id": "BUG-023",
+   "prefijo": "BUG",
+   "titulo": "Los insights del chatbot quedan PENDING para siempre: ninguna pantalla llama a actOnInsight y el cron deja de generar para ese bot al quinto pendiente",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/cron/generate-insights/route.ts",
+     "linea": 38,
+     "fragmento": "if (pendingCount >= 5) {\n        results.skipped_pending_overload++"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/insights/manageInsight.ts",
+     "linea": 15,
+     "fragmento": "export async function actOnInsight(input: z.infer<typeof InsightActionSchema>) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
+     "linea": 62,
+     "fragmento": "where: { botConfigId, status: { in: ['PENDING', 'APPLIED'] } },"
+    },
+    {
+     "ruta": "src/app/api/cron/generate-insights/route.ts",
+     "linea": 66,
+     "fragmento": "dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/chatbot`,"
+    },
+    {
+     "ruta": "netlify.toml",
+     "linea": 25,
+     "fragmento": "[functions.\"generate-insights-cron\"]\n  schedule = \"0 9 * * *\""
+    }
+   ],
+   "impacto": "Para un cliente Pro/Business: el cron diario genera insights con Vertex y le manda un email para verlos en /dashboard/chatbot, donde no aparecen (solo se listan, sin acciones, en Resultados > Análisis). Como nada los saca de PENDING (actOnInsight no tiene consumidores e IGNORED no tiene escritor), al juntar cinco el bot queda excluido del cron para siempre: los 'Insights semanales' que promete la landing se cortan a los pocos días.",
+   "propuesta": "Agregar en Análisis los botones Aplicar/Descartar que llamen a actOnInsight, o expirar a IGNORED los PENDING viejos dentro del cron; corregir el link del email a la página que los muestra.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "h2.cli-resultados",
+    "int.cron.generate-insights",
+    "int.vertex",
+    "modelo.ChatbotInsight"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "DEU-006 (retención); crons en D7",
+   "vh": null,
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H08",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene (actOnInsight solo se exporta: index.server.ts:73, insights/index.ts:2; ninguna pantalla lo llama; generate-insights/route.ts:36-40 saltea el bot con 5 o más PENDING).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
   {
    "id": "BUG-024",
    "prefijo": "BUG",

@@ -1,0 +1,126 @@
+{
+ "D8-c1/D8-L1/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído junto con el verificador: package.json:154-155 (rangos ^16.2.6 y ^5.0.0-beta.30), el lockfile fija next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2, y _crudo/npm-audit.json los marca críticos con arreglo disponible dentro del rango (npm-outdated: 16.4.0 y beta.32). El verificador la bajó a MEDIA y se le sigue: el aviso del normalizador homoglyph no da toma de cuenta porque el callback signIn (auth.ts:174-186) solo autoriza si el email existe en User y el mail sale a ese mismo identificador; el fail-open por error de configuración no aplica porque proxy y guards miran rol; la app no usa getToken de next-auth; el RCE de Image Optimization con AVIF y la SSRF de rewrites no aplican (sin formats avif, destinos internos fijos). Queda aplicable la DoS de Server Actions (alta, <16.2.11), alcanzable desde /login. Es deuda de actualización dentro del rango, bloqueante para el primer cliente, sin explotación trazada.",
+  "severidad": "MEDIA",
+  "confianza_padre": "PROBABLE",
+  "caso_indice": 3,
+  "relacionados_ids": [
+   "SEC-005",
+   "SEC-009",
+   "TEC-001"
+  ]
+ },
+ "D8-c1/D8-L1/H06": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Verificado en GitHub (solo lectura, 2026-10-15 19:10): `gh run list --workflow db-backup.yml` da 140 corridas en «failure» y 1 «cancelled», ninguna exitosa; la del 15/10 (run 38724108093) corta en el paso «pg_dump + encrypt» con «secret faltante para target=prod» (db-backup.yml:93-97, exit 1), y `gh api repos/frc11/PorfolioDevelOP/actions/secrets` da total_count 0. Leído además ci.yml:120-127 (el comentario del 2026-08-25 ya decía 0 secrets). Verificado: no existe ningún respaldo hecho por el workflow y el restore nunca se probó; la única red es la retención propia de Neon, que es runtime (VH).",
+  "titulo": "El backup diario de la base nunca funcionó: las 140 corridas del workflow fallaron por falta del secret de la URL y el repo tiene 0 secrets de Actions",
+  "relacionados_ids": [
+   "DEU-014",
+   "DEU-017",
+   "BUG-014"
+  ],
+  "impacto": "Bloqueante para el primer cliente real: el workflow de B14.3 (pg_dump cifrado con restore de prueba) nunca produjo un respaldo y el restore nunca se probó. La única red es la retención nativa de Neon, que el propio doc describe como corta y sin PITR en el plan Free (docs/operations/neon-backups.md:5). Pesa más con un historial de migraciones que ya borró y re-agregó columnas con datos de clientes (DEU-014). Nadie se entera: la falla diaria queda en la pestaña Actions sin aviso. El comentario de cabecera quedó viejo (e2e.yml ya no existe). Los mismos 0 secrets apagan los jobs de LeadOS y E2E del CI (DEU-017)."
+ },
+ "D8-c1/D8-L1/H02": {
+  "decision": "fusionar",
+  "con": "DEU-016",
+  "nota_padre": "Muestreado: package.json tiene 69 líneas con `npx tsx`/`tsx` y el lockfile no tiene \"node_modules/tsx\" (0 coincidencias); ci.yml:105 corre `npm run check:invariants`, que entra por `npx tsx`. DEU-016 ya registra los 67 scripts con tsx sin declarar; suma que el gate de invariantes del CI baja de npm una versión sin fijar en cada corrida (cadena de suministro y resultado no reproducible). Sube a MEDIA por esa parte de CI.",
+  "verificado_padre": true,
+  "destino": {
+   "severidad": "MEDIA",
+   "titulo": "tsx no está declarado ni en el lockfile y 67 scripts lo usan con `npx tsx`: los seeds resuelven una versión sin fijar mientras DATABASE_URL apunta a prod y el gate de invariantes del CI baja una versión nueva en cada corrida"
+  }
+ },
+ "D8-c1/D8-L1/H08": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: globals.css:330-352 (bloque «Ghost Mode: Scrollbar Exterminated»: scrollbar-width none en html y body, y `::-webkit-scrollbar { display: none }` sin prefijo de elemento, que alcanza a todo contenedor desplazable en Chromium y Safari).",
+  "caso_indice": 5
+ },
+ "D8-c1/D8-L1/H13": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: layout.tsx:32 y contact/layout.tsx:14 declaran /og-image.png; `git ls-tree` de la base no tiene ningún og-image en public/ ni un opengraph-image en src/app."
+ },
+ "D8-c1/D8-L1/H18": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: .gitignore:16-25 cubre /.next/, /.next-galeria/ y /.next-setter/ (estas dos, repetidas) pero no .next-perf-* ni .next-corrida-visual; tsconfig.json:38-48 incluye los tipos de .next-perf-a, -b y -base."
+ },
+ "D8-c1/D8-L1/H03": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-027"
+  ]
+ },
+ "D8-c1/D8-L1/H04": {
+  "decision": "aceptar",
+  "caso_indice": 1,
+  "relacionados_ids": [
+   "BUG-092",
+   "BUG-105",
+   "PERF-010",
+   "SEC-099"
+  ]
+ },
+ "D8-c1/D8-L1/H05": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "DEU-017"
+  ]
+ },
+ "D8-c1/D8-L1/H07": {
+  "decision": "aceptar",
+  "caso_indice": 2
+ },
+ "D8-c1/D8-L1/H09": {
+  "decision": "aceptar",
+  "caso_indice": 4
+ },
+ "D8-c1/D8-L1/H10": {
+  "decision": "aceptar"
+ },
+ "D8-c1/D8-L1/H11": {
+  "decision": "aceptar"
+ },
+ "D8-c1/D8-L1/H12": {
+  "decision": "aceptar"
+ },
+ "D8-c1/D8-L1/H14": {
+  "decision": "aceptar"
+ },
+ "D8-c1/D8-L1/H15": {
+  "decision": "aceptar"
+ },
+ "D8-c1/D8-L1/H17": {
+  "decision": "aceptar"
+ },
+ "D8-c1/D8-L1/H21": {
+  "decision": "aceptar"
+ },
+ "D8-c1/D8-L1/H16": {
+  "decision": "aceptar",
+  "caso_indice": 6
+ },
+ "D8-c1/D8-L1/H19": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-001"
+  ]
+ },
+ "D8-c1/D8-L1/H20": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "TEC-001"
+  ]
+ },
+ "D8-c1/D8-L1/H22": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-059"
+  ]
+ }
+}

@@ -1,0 +1,1064 @@
+{
+ "archivos": [
+  {
+   "ruta": "find_unused.js",
+   "nota": "Script suelto (mar-2026): busca componentes y deps sin uso por substring; solo lee src y package.json, no escribe ni toca DB ni red. Sin guard ni CI; nadie lo invoca. Resto muerto."
+  },
+  {
+   "ruta": "playwright.config.ts",
+   "nota": "Suite e2e (tests/e2e) contra localhost:3000 levantando npm run start (exige build previo); DB = DATABASE_URL del entorno (Neon dev compartida). Job e2e de CI gateado por secrets inexistentes: no corre."
+  },
+  {
+   "ruta": "playwright.galeria.config.ts",
+   "nota": "Captura de galeria (tests/galeria) desktop+mobile contra build propio .next-galeria en 127.0.0.1:3004 con .env.local (Neon dev). No afirma, fotografia. No esta en CI."
+  },
+  {
+   "ruta": "playwright.helpers-probe.config.ts",
+   "nota": "Suite de sabotaje de helpers (tests/helpers-probe) con page.setContent: sin server ni DB. Se declara apta para CI sin base, pero ci.yml no corre test:helpers."
+  },
+  {
+   "ruta": "playwright.integration.config.ts",
+   "nota": "Suite tests/integration in-process con Prisma contra DATABASE_URL de .env.local (Neon dev compartida), sin webServer; ignora alerts-detector y cita un spec inexistente. No esta en ci.yml: nunca corre en CI."
+  },
+  {
+   "ruta": "playwright.leados.config.ts",
+   "nota": "Suite tests/leados in-process (Prisma directo) contra .env.local o DATABASE_URL_TEST. Unica cableada a CI (job test-leados) pero se saltea: el secret DATABASE_URL_TEST no existe."
+  },
+  {
+   "ruta": "playwright.qa-persona.config.ts",
+   "nota": "Corridas QA-persona (tests/qa-persona) contra start:qa en 127.0.0.1:3001 con .env.local (Neon dev); reusa server fuera de CI. Captura screenshots, no es regresion. No esta en CI."
+  },
+  {
+   "ruta": "playwright.qa-walkthrough.config.ts",
+   "nota": "Auditoria perceptual (tests/qa-walkthrough) contra start:qa :3001 con .env.local (Neon dev), viewport 1440x5000. Script de captura, no regresion. No esta en CI."
+  },
+  {
+   "ruta": "playwright.setter.config.ts",
+   "nota": "Suite tests/setter (30 specs) contra build propio .next-setter en 127.0.0.1:3003 con .env.local (Neon dev compartida), sin reuso ciego de server. No esta en ci.yml: nunca corre en CI."
+  },
+  {
+   "ruta": "replace_analytics.js",
+   "nota": "Refactor one-shot (abr-2026) que reescribe src/components/sections/OurServices.tsx, archivo que ya no existe. Escribe solo en disco local; sin DB ni red. Sin guard, sin CI, nadie lo invoca. Muerto."
+  },
+  {
+   "ruta": "script.js",
+   "nota": "Refactor one-shot (abr-2026) que extrae funciones Sim de OurServices.tsx (inexistente hoy); escribe en disco local. Sin DB ni red. Sin CI. Muerto."
+  },
+  {
+   "ruta": "script2.js",
+   "nota": "Refactor one-shot (abr-2026) que reemplaza AIScene en OurServices.tsx (inexistente); escribe archivo local. Sin DB ni red. Sin CI. Muerto."
+  },
+  {
+   "ruta": "script3.js",
+   "nota": "Refactor one-shot (abr-2026) que reemplaza AutomationScene en OurServices.tsx (inexistente); escribe archivo local. Sin DB ni red. Sin CI. Muerto."
+  },
+  {
+   "ruta": "script_aiscene.js",
+   "nota": "Refactor one-shot (abr-2026) que parchea imports y AIScene de OurServices.tsx (inexistente); escribe local. Sin DB ni red. Sin CI. Muerto."
+  },
+  {
+   "ruta": "script_analytics.js",
+   "nota": "Refactor one-shot (abr-2026) guardado en UTF-16; corta OurServices.tsx (inexistente) en la linea 738 y escribe local. Sin DB ni red. Muerto."
+  },
+  {
+   "ruta": "script_leads.js",
+   "nota": "Refactor one-shot que reemplaza renderLeadsScene en OurServices.tsx (inexistente); datos demo ficticios. Escribe local. Sin DB ni red. Muerto."
+  },
+  {
+   "ruta": "script_magnetic.js",
+   "nota": "Refactor one-shot que inserta MagneticFlowPath en OurServices.tsx (inexistente). Escribe local. Sin DB ni red. Muerto."
+  },
+  {
+   "ruta": "script_maps.js",
+   "nota": "Refactor one-shot que reemplaza renderMapsScene por lineas fijas (1250-1572) en OurServices.tsx (inexistente). Escribe local. Muerto."
+  },
+  {
+   "ruta": "scripts/_b13-2-list-bots.mjs",
+   "nota": "Lista botConfig con Prisma contra DATABASE_URL de .env (sin dotenv; Prisma no lee .env.local). Solo lectura, imprime config de bots sin PII. Sin guard, sin refs. Resto de B1.3."
+  },
+  {
+   "ruta": "scripts/_b13-latency-analyze.mjs",
+   "nota": "Lee conversations y ChatbotEvent por prefijo de sesion b13- y calcula percentiles. Solo lectura contra DATABASE_URL; sin guard. Throwaway (borrar tras B1.3); nadie lo invoca."
+  },
+  {
+   "ruta": "scripts/_b13-latency-test.mjs",
+   "nota": "30 POST a /api/chatbot/develop/chat en B13_BASE_URL (default localhost:3000): crea conversaciones y gasta Vertex en el server apuntado; guarda JSON en scripts/ (uno commiteado). Sin guard. Throwaway."
+  },
+  {
+   "ruta": "scripts/_b14-2-prod-bot-latency.mjs",
+   "nota": "30 POST /chat contra PROD hardcodeada (develop-portfolio.netlify.app, bot bench-matsu): crea conversaciones en la base de prod y gasta Vertex. Sin guard ni confirmacion. Throwaway que sigue vivo."
+  },
+  {
+   "ruta": "scripts/_b14-2-prod-coldstart.mjs",
+   "nota": "GET /health de bench-matsu en PROD hardcodeada (10 hits o 3 ciclos de 20 min); sin Vertex, el health pinguea la DB. Sin escritura de negocio. Sin guard. Throwaway."
+  },
+  {
+   "ruta": "scripts/_b14-2-prod-pages-ttfb.mjs",
+   "nota": "GET de 7 paginas publicas de PROD hardcodeada, 5 muestras c/u; guarda JSON local (uno commiteado). Solo lectura. Sin guard. Throwaway."
+  },
+  {
+   "ruta": "scripts/_b14-4-smoke-prod.mjs",
+   "nota": "Smoke post-deploy contra PROD hardcodeada; dice no modificar DB (l.7) pero hace 32 POST /chat a bench-matsu (crea conversaciones, gasta Vertex) y pega /api/test-sentry. Sin guard."
+  },
+  {
+   "ruta": "scripts/_b14-5-scrub-smoke.mjs",
+   "nota": "Smoke puro de scrubPii con eventos falsos (PII inventada), sin DB ni red; sale 1 si falla y se declara apto para CI, pero no esta en package.json ni en ci.yml."
+  },
+  {
+   "ruta": "scripts/_b14-analyze.mjs",
+   "nota": "Lee ChatbotEvent.metadata.timings por runId b13- y reporta etapas. Solo lectura contra DATABASE_URL; sin guard. Throwaway (B1.4), sin refs."
+  },
+  {
+   "ruta": "scripts/_b52-test-scoring.ts",
+   "nota": "Test puro del motor de scoring (senales positivas), sin DB ni LLM; se declara apto para CI pero no esta en package.json ni ci.yml: nunca corre automatico."
+  },
+  {
+   "ruta": "scripts/_b53-test-scoring.ts",
+   "nota": "Test puro de scoring: DQ, penalidades y validador de telefono AR; sin DB. No cableado a package.json ni a CI."
+  },
+  {
+   "ruta": "scripts/_b54-test-scoring.ts",
+   "nota": "Test puro de scoring: combos, decaimiento temporal y explicabilidad; sin DB. No cableado a package.json ni a CI."
+  },
+  {
+   "ruta": "scripts/_db-cleanup-inspect.mjs",
+   "nota": "Inspeccion read-only de orgs duplicadas agency-os-* y bots; imprime host de DB y JSON con email y nombre de miembros (PII) por consola. Sin guard. Throwaway sin borrar."
+  },
+  {
+   "ruta": "scripts/_db-cleanup-inspect2.mjs",
+   "nota": "Segunda ronda read-only de la limpieza: vuelca orgs, bots y miembros con email, nombre y rol (PII) por consola. Sin guard. Throwaway."
+  },
+  {
+   "ruta": "scripts/_experimental/fg2-gen-prompts.ts",
+   "nota": "Experimental FG-2.0: genera markdown con 10 prompts desde CASOS_GASTRO a stdout. Sin DB ni red. Sin guard ni CI; descartable segun su propio encabezado."
+  },
+  {
+   "ruta": "scripts/b1-verify-setter-ownership.ts",
+   "nota": "Verifica getOwnedLead: upsert del setter QA reseteando su password a un literal, crea y borra un lead temporal (finally). Guard de host Neon dev si. Sin CI."
+  },
+  {
+   "ruta": "scripts/b2-verify-dossier.ts",
+   "nota": "Verifica dossier (unicidad, ownership, stage, gate); crea leads y limpia en finally; resetea password del setter QA a literal. Guard host dev si. Sin CI; reemplazado por dossier-gates."
+  },
+  {
+   "ruta": "scripts/b3-qa-assign-leads.ts",
+   "nota": "Seed QA idempotente: upsertea 2 leads QA-B3 asignados al setter QA. Guard de host Neon dev si. Sin limpieza (residuo deliberado). Sin CI ni script npm."
+  },
+  {
+   "ruta": "scripts/b4-qa-construccion.ts",
+   "nota": "Seed QA: deja el lead QA-B4 con dossier en BRIEF para recorrer construccion. Guard host dev si. Sin limpieza. Sin CI."
+  },
+  {
+   "ruta": "scripts/b5-qa-review-queue.ts",
+   "nota": "Seed QA: empuja dossiers QA a EN_REVISION, estampa fechas y crea lead QA-B5 para probar el Telegram de caliente en vivo. Guard host dev si. Sin limpieza. Sin CI."
+  },
+  {
+   "ruta": "scripts/b58-smoke.ts",
+   "nota": "Smoke puro de validateWebhookUrl (SSRF), encryptSecret/decryptSecret y estado de sync CRM; sin DB. No cableado a package.json ni a CI pese a cubrir controles de seguridad."
+  },
+  {
+   "ruta": "scripts/b59-smoke.ts",
+   "nota": "Smoke puro de CSV (anti formula-injection, BOM, headers, traduccion de intents); sin DB. No cableado a package.json ni a CI."
+  },
+  {
+   "ruta": "scripts/b6-qa-outreach.ts",
+   "nota": "Seed QA de outreach: leads QA-B6 (pizzeria, gimnasio) con dossier via transitionDossier. Guard host dev si. Sin limpieza. Sin CI."
+  },
+  {
+   "ruta": "scripts/b7-qa-agenda.ts",
+   "nota": "Seed QA de agenda: leads QA-B7 con dossier y contacto comercial; booking simulado (uid falso, no llama a Cal.com). Guard host dev si. Sin limpieza. Sin CI."
+  },
+  {
+   "ruta": "scripts/b7-smoke-calcom.ts",
+   "nota": "Crea y cancela un booking REAL en la cuenta Cal.com de Franco (calendario y mails reales); attendee por defecto = email personal hardcodeado. El guard solo mira el host de DB. Sin CI."
+  },
+  {
+   "ruta": "scripts/check-env.js",
+   "nota": "npm run check-env: carga .env y .env.local e imprime SOLO nombres de vars y presencia, nunca valores; exit 1 si faltan criticas. No imprime la credencial de Vertex. Sin CI."
+  },
+  {
+   "ruta": "scripts/db-backup-local.sh",
+   "nota": "pg_dump de DIRECT_DATABASE_URL cifrado con gpg (passphrase por fd, no en argv) a backups/ (gitignored). No imprime la URL. Escribe solo local. Sin CI (espejo de db-backup.yml)."
+  },
+  {
+   "ruta": "scripts/db-restore-local.sh",
+   "nota": "Restaura backup cifrado con psql a TARGET_URL; exige override salvo dev o localhost (deja volcar prod con PII en la Neon dev compartida). Imprime user:password de la URL (l.78 y l.92)."
+  },
+  {
+   "ruta": "scripts/demos-seed-review-queue.ts",
+   "nota": "Seed DEMOS: 6 leads DEMO Web con dossier en EN_REVISION via transitionDossier y reescribe draftUrl example.* de filas QA. Guard host dev si. Sin limpieza. Sin CI."
+  },
+  {
+   "ruta": "scripts/dev/_vseed.ts",
+   "nota": "Siembra bot QA, 3 conversaciones y 3 chatbotLead en la org san-miguel contra .env.local SIN guard de host; usa as any; qa-seed-leads-clean no borra ese residuo. Sin refs."
+  },
+  {
+   "ruta": "scripts/dev/m0-galeria-indice.ts",
+   "nota": "npm run galeria:indice: genera docs/manual-usuario/galeria/INDICE.md cruzando catalogo y PNGs. Solo FS local, sin DB ni red. Vivo. Sin CI."
+  },
+  {
+   "ruta": "scripts/dev/m0-galeria-seed.ts",
+   "nota": "npm run seed:galeria: borra y re-siembra leads M0-GAL y setters dedicados (deleteMany por prefijo exacto). Guard host Neon dev si. Vivo via npm run galeria. Sin CI."
+  },
+  {
+   "ruta": "scripts/dev/qa-manual-m5-m16.ts",
+   "nota": "Seed QA M5/M16: reconcilia 4 leads QA-M5/QA-M16 con dossier y recrea actividades (deleteMany+createMany). Guard host dev si. Sin limpieza. Sin CI."
+  },
+  {
+   "ruta": "scripts/dev/qa-seed-leads-clean.ts",
+   "nota": "Borra leads, conversaciones y bots qaseed-* en 3 orgs QA contra .env.local SIN guard de host. No cubre la org san-miguel que siembra _vseed. Sin CI."
+  },
+  {
+   "ruta": "scripts/dev/qa-seed-leads.ts",
+   "nota": "Siembra leads, conversaciones y bots qaseed-* en sigma-contable, sonrisa-norte y matsu contra .env.local SIN guard de host. Idempotente; limpieza en el -clean. Sin CI."
+  },
+  {
+   "ruta": "scripts/dev/seed-events.md",
+   "nota": "Doc del seed seed-events.ts: mapea filtros de Activity, documenta el bug de nivel (enum en mayusculas) ya corregido y la reversibilidad por marcador. Solo documentacion."
+  },
+  {
+   "ruta": "scripts/dev/seed-latency.md",
+   "nota": "Doc de npm run seed:latency: inserta ~96 ChatbotEvent marcados en el bot real develop de .env.local, sin guard de host; limpieza con --clean. Solo documentacion."
+  },
+  {
+   "ruta": "scripts/encode-vertex-creds.js",
+   "nota": "Lee vertex-credentials.json (gitignored) e imprime por consola el JSON entero de la service account, con su clave privada (l.10), para pegarlo en Netlify. Sin guard. Uso manual."
+  },
+  {
+   "ruta": "scripts/ev4-smoke.mjs",
+   "nota": "7 conversaciones reales POST /chat a EV4_BASE_URL (default localhost:3002) con LLM real; transcripts a docs/. Escribe en la DB del server apuntado. Sin guard de host. Sin CI."
+  },
+  {
+   "ruta": "scripts/ev5-smoke.mjs",
+   "nota": "Conversacion de captura de lead POST /chat a EV5_BASE_URL (default localhost:3002): crea ChatbotLead y CrmSyncAttempt reales (y n8n si esta configurado). Sin guard. Sin CI."
+  },
+  {
+   "ruta": "scripts/load-test/chatbot-baseline.ts",
+   "nota": "Carga concurrente (3x30) POST /chat a BASE_URL (default localhost:3000, bot develop) sin Origin: crea conversaciones y gasta LLM en el destino; BASE_URL libre sin guard. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/_p21-corrida.ts",
+   "nota": "Corrida P21: crea setters y leads P21-CORRIDA en .env.local SIN guard de host, mintea sesion con AUTH_SECRET y navega 127.0.0.1:3020; borra en finally. Captura. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/_p23/capturas.ts",
+   "nota": "Capturas P23: lee setter y leads de .env.local, mintea sesion JWT con AUTH_SECRET y fotografia 127.0.0.1:3023. Solo lectura de DB. Sin guard. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/_p23/censo-ubicaciones.ts",
+   "nota": "Censo P23 de frases de ubicacion: lee leads, mintea sesion con AUTH_SECRET y mide en 127.0.0.1:3023; escribe JSON local. Solo lectura de DB. Sin guard. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/_verify-b61.ts",
+   "nota": "Verificacion B6.1 del auto-scroll del wizard contra 127.0.0.1:3001 con sesion minteada; solo lee DB (leads QA-W). Sin guard de host. Sin CI ni refs."
+  },
+  {
+   "ruta": "scripts/qa-corridas/_verify-home-aviso.ts",
+   "nota": "Fuerza stage RECHAZADA en el dossier QA-W Construccion con update directo (sin guard de host) y lo restaura al final SIN try/finally: si falla queda mutado. Captura. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/_verify-scroll-gap.ts",
+   "nota": "Mismo patron: fuerza RECHAZADA en QA-W Construccion, mide el scroll y restaura al final sin try/finally ni guard de host. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/barrido-derivacion.ts",
+   "nota": "Barrido puro de las 373.248 combinaciones de derivarPantalla contra un oraculo; sin DB ni reloj; escribe JSON opcional. Sin CI (el invariante paso-admitido cubre parte)."
+  },
+  {
+   "ruta": "scripts/qa-corridas/capturar-franja.ts",
+   "nota": "Capturas P20 y censo de destinos /manual contra 127.0.0.1:3010 con sesion minteada; lee DB de .env.local, escribe JSON y PNG locales. Sin guard. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/medir-cartera.ts",
+   "nota": "Instrumento de medicion de la cartera de /setter contra 127.0.0.1:3022 con sesion minteada; lee DB y escribe JSON local. Sin guard. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/medir-panel-setter.ts",
+   "nota": "Instrumento de medicion del panel /setter (pliegue y bloques) contra 127.0.0.1:3020 con sesion minteada; lee DB. Sin guard. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/medir-pliegue-manual.ts",
+   "nota": "Instrumento que mide el primer pliegue de las 14 pantallas del manual a 1440 y 390 contra 127.0.0.1:3010 con sesion minteada. Sin guard. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/p19-capturas.ts",
+   "nota": "Siembra leads de los estados P19, captura y los borra en finally; contra .env.local SIN guard de host y app en 127.0.0.1:3030. Sin CI."
+  },
+  {
+   "ruta": "scripts/qa-corridas/rejection-reloop.ts",
+   "nota": "Guion de navegacion sin expect contra :3001: mueve el lead real QA-W Construccion por envio, rechazo y reenvio via UI; deja residuo en progresoJson. Sin guard de host. Sin CI."
+  },
+  {
+   "ruta": "scripts/regression/cases.ts",
+   "nota": "Casos de la bateria conversacional del bot de Matsu; el caso quota-exhausted escribe QuotaUsage en setup y en teardown lo pone en 0 en vez de restaurar el valor previo. Sin CI."
+  },
+  {
+   "ruta": "scripts/regression/diag-timings.ts",
+   "nota": "Lee ChatbotEvent.metadata.timings por RUN_TAG con DATABASE_URL o DIRECT_URL; solo lectura, sin guard. Tooling manual. Sin CI."
+  },
+  {
+   "ruta": "scripts/regression/run-baseline.ts",
+   "nota": "Bateria conversacional contra B32_BASE_URL (default localhost:3000) con LLM real; guard de host dev si (checkHost). Dice no escribir en DB pero los hooks escriben QuotaUsage. Sin CI."
+  },
+  {
+   "ruta": "scripts/run-invariants.mjs",
+   "nota": "npm run check:invariants (job de CI): corre los 56 check:invariant* sin cortar y excluye uno con DB. No descubre los 28 scripts test:* de package.json, que nunca corren en CI."
+  },
+  {
+   "ruta": "scripts/utm1-verify-attribution.ts",
+   "nota": "Verifica atribucion UTM first-touch: crea Conversation, ChatMessage y ChatbotLead y los borra en finally. Guard host dev si. Su par test:utm1 no corre en CI."
+  },
+  {
+   "ruta": "scripts/v1-qa-wizard-states.ts",
+   "nota": "Seed QA V-1: 14 leads QA-W, uno por estado del wizard, con upsert del dossier. Guard host dev si. Idempotente, sin limpieza. Fixture de qa-corridas. Sin CI."
+  },
+  {
+   "ruta": "src/lib/dates-ar.invariant.ts",
+   "nota": "Invariante puro del helper de fechas AR (borde de mes, salto UTC/AR, periodo anterior); sin DB. Corre en CI via check:invariants."
+  },
+  {
+   "ruta": "src/lib/mask-secret.invariant.ts",
+   "nota": "Invariante puro de maskSecret; sin DB, corre en CI. Fija como esperado que un secreto de menos de 4 caracteres se muestre entero tras los bullets."
+  },
+  {
+   "ruta": "test-chat.mjs",
+   "nota": "3 POST a localhost:3000/api/chatbot/develop/chat con sesiones fijas e imprime respuestas; crea conversaciones en el server local. Importa node-fetch no declarado. Sin guard. Muerto."
+  },
+  {
+   "ruta": "tests/e2e/01-landing.spec.ts",
+   "nota": "E2E: la landing carga titulo y avatar del chatbot; test.skip si el widget no monta (una regresion del widget da skip, no rojo). Sin DB. CI gateado: no corre."
+  },
+  {
+   "ruta": "tests/e2e/02-chat-flow.spec.ts",
+   "nota": "E2E: abre el chat y espera respuesta streameada (LLM real, crea conversacion en la DB del server). Skip si no hay avatar. No valida el contenido. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/03-lead-capture.spec.ts",
+   "nota": "E2E: captura de lead por chat con LLM real; verifica ChatbotLead por email y lo borra en finally, pero no la Conversation creada. Skip si no hay avatar. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/04-health.spec.ts",
+   "nota": "E2E: GET /api/chatbot/develop/health menor a 500 con ok y checks; depende del bot develop sembrado. Sin escritura. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/05-config-public.spec.ts",
+   "nota": "E2E: la config publica del bot develop no expone apiKey, llmProvider ni claves; solo lectura. Depende del bot develop. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/06-admin-login.spec.ts",
+   "nota": "E2E: login real de admin@develop.com con password literal del helper y redireccion a /login sin sesion. Sin escritura. CI: no corre (y sin seed fallaria)."
+  },
+  {
+   "ruta": "tests/e2e/07-admin-navigation.spec.ts",
+   "nota": "E2E: navega secciones admin; si un goto falla hace test.skip en vez de fallar (falso verde). Sin escritura. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/08-admin-onboarding.spec.ts",
+   "nota": "E2E: el wizard de onboarding crea una org real en la Neon compartida y la borra en finally; skip si el paso 1 no habilita (regresion de UI = skip). CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/09-admin-bot-config.spec.ts",
+   "nota": "E2E: edita el welcomeMessage del bot develop y lo restaura por UI fuera de finally (si algo falla queda Test edit); skip si no aparece el editor. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/10-admin-kb-edit.spec.ts",
+   "nota": "E2E: agrega un marcador al KB businessInfo del bot develop y lo restaura por Prisma solo si todo pasa (sin finally). Skip si no se habilita guardar. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/11-client-login.spec.ts",
+   "nota": "E2E: login real de cliente@sanmiguel.com con password literal y bloqueo de /admin. Sin escritura. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/12-client-chatbot-section.spec.ts",
+   "nota": "E2E: overview y navegacion del chatbot del cliente; crea bot fixture si falta y lo borra en afterAll. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/13-client-perf.spec.ts",
+   "nota": "E2E perf: /dashboard y /dashboard/chatbot bajo presupuesto; los tests llamados warm usan coldMs (5 s). Un solo goto local. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/14-e2e-critical-flow.spec.ts",
+   "nota": "E2E smoke: admin crea cliente por wizard y lo borra en finally; el titulo promete que el cliente ve el upsell pero nunca lo verifica; skip si el paso 1 no habilita. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/15-client-personalization.spec.ts",
+   "nota": "E2E: cambia color y welcomeMessage del bot real de sanmiguel y NO los restaura (solo borra el bot si lo creo): residuo en la Neon compartida. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/16-admin-bulk-actions.spec.ts",
+   "nota": "E2E: multiseleccion y export de clientes; skip si hay menos de 2 fixtures. Sin escritura. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/17-admin-alerts-triage.spec.ts",
+   "nota": "E2E: /admin/alerts muestra las 3 columnas. Solo render, sin escritura. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/18-admin-audit-log.spec.ts",
+   "nota": "E2E: carga del audit log y filtro por actionType (skip si no hay tipos). Sin escritura. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/19-security.spec.ts",
+   "nota": "E2E: redirecciones sin sesion y 401 del cron; el test de /api/admin/clients siempre hace skip (la ruta no existe, da 404) y el cron con secret dispara el detector real. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/20-idor-optout.spec.ts",
+   "nota": "E2E anti-IDOR de /api/email/optout con token HMAC; crea EmailContact en la primera org de la DB y borra por TAG en afterAll. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/20-mobile-responsive.spec.ts",
+   "nota": "E2E: dashboard de cliente y admin en viewport iPhone SE; skip si el drawer no abre. Sin escritura. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/21-performance.spec.ts",
+   "nota": "E2E perf: paginas admin y dashboard bajo warmMs con dos goto; saltea budgets con [param] y el de /chat. Crea bot fixture si falta. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/22-visual-regression.spec.ts",
+   "nota": "E2E visual: 7 toHaveScreenshot; solo hay baselines chromium-win32, en el runner ubuntu del CI fallarian todas. Crea bot fixture si falta. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/30-onboarding-e2e-complete.spec.ts",
+   "nota": "E2E: alta de cliente, login y cambio de password (limpia org y user). El caso re-enviar credenciales resetea la password de un usuario real y le manda mail; acepta Email fallo como verde."
+  },
+  {
+   "ruta": "tests/e2e/40-lead-capture-e2e.spec.ts",
+   "nota": "E2E: POST /chat con LLM real y lead visible en el dashboard; skip si el chat falla o el bot no captura (la regresion de captura nunca da rojo). Borra el lead, no la conversacion."
+  },
+  {
+   "ruta": "tests/e2e/41-admin-executive-report-send-now.spec.ts",
+   "nota": "E2E: boton enviar reporte ahora (guard, rate-limit, validacion) con org inexistente; borra buckets rate_limit por prefijo con raw parametrizado. No ejercita el motor del reporte. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/42-client-executive-report-prefs.spec.ts",
+   "nota": "E2E: preferencias del reporte ejecutivo de sanmiguel y anti-IDOR; muta la org y restaura en afterAll; las ramas por plan se skipean segun el plan real. CI: no corre."
+  },
+  {
+   "ruta": "tests/e2e/43-client-monthly-report-download.spec.ts",
+   "nota": "E2E: descarga del informe mensual; anti-IDOR por ausencia de parametro; la rama elegible o no elegible se skipea segun el plan real (una nunca corre). Solo lectura. CI: no corre."
+  },
+  {
+   "ruta": "tests/galeria/captura.spec.ts",
+   "nota": "Captura de galeria: no afirma, fotografia estados M0-GAL con sesion minteada; muta el stage de un dossier y lo restaura en finally. Requiere el seed previo. No es regresion; sin CI."
+  },
+  {
+   "ruta": "tests/helpers-probe/console-guard.probe.spec.ts",
+   "nota": "Sabotaje del guard de consola (pares conducta/sabotaje) con setContent; sin DB ni server. Podria correr en CI tal cual; no esta cableado."
+  },
+  {
+   "ruta": "tests/helpers-probe/setter-ui.probe.spec.ts",
+   "nota": "Sabotaje de los helpers de setter-ui (pickSelect, expectToast, cartera) con setContent; sin DB. No cubre form.ts ni auth.ts. Sin CI."
+  },
+  {
+   "ruta": "tests/helpers/auth.ts",
+   "nota": "Helper e2e de login real por formulario con passwords literales de admin@develop.com (SUPER_ADMIN) y cliente@sanmiguel.com (l.21 y l.25), cuando el seed ya exige passwords por env."
+  },
+  {
+   "ruta": "tests/helpers/chatbot-fixtures.ts",
+   "nota": "Helper: asegura un bot para la org de cliente@sanmiguel.com (lo crea si falta) y lo borra solo si lo creo. Escribe en la Neon compartida."
+  },
+  {
+   "ruta": "tests/helpers/form.ts",
+   "nota": "Helpers de inputs controlados: setControlledInput saltea readonly (sin call sites), typeControlledInput teclea y afirma, setControlledSelect. Sin DB."
+  },
+  {
+   "ruta": "tests/helpers/setter-auth.ts",
+   "nota": "Mintea el JWT de sesion con AUTH_SECRET de .env.local para personas seedeadas (incluido SUPER_ADMIN) sin pasar por login y con passwordResetRequired false: login y reset forzado no se cubren."
+  },
+  {
+   "ruta": "tests/helpers/setter-ui.ts",
+   "nota": "Helpers de UI del setter (vis, pickSelect con post-condicion, expectToast, expandir cartera). Sin DB. Probados por helpers-probe."
+  },
+  {
+   "ruta": "tests/integration/alerts-detector.spec.ts",
+   "nota": "Integracion R22 por HTTP al cron real: dispara el detector (mails y Telegram) y borra TODAS las alertas de un tipo del primer bot activo. Excluido por testIgnore: no corre en ninguna suite."
+  },
+  {
+   "ruta": "tests/integration/chatbot-isolation.spec.ts",
+   "nota": "Negativo real de aislamiento multi-tenant del chatbot con 2 orgs efimeras borradas por id; falla explicito si el seed falla. No corre en CI (test:integration no esta en ci.yml)."
+  },
+  {
+   "ruta": "tests/integration/cleanup-old-events-retention.spec.ts",
+   "nota": "Retencion del cron cleanup-old-events in-process: org y bot fijos (upsert, quedan) y eventos con TAG borrados en finally. No corre en CI."
+  },
+  {
+   "ruta": "tests/integration/executive-report-lead-count.spec.ts",
+   "nota": "getTopHotLeadsForWeek con N configurable: crea leads con TAG en el primer bot activo real y borra en finally; skip si no hay bot; instrucciones de corrida viejas. No corre en CI."
+  },
+  {
+   "ruta": "tests/integration/fix-origin-same-origin-config.spec.ts",
+   "nota": "isBotServable contra la Neon real con 2 orgs efimeras borradas por id; no cubre la composicion dentro del GET del route (lo admite). No corre en CI."
+  },
+  {
+   "ruta": "tests/integration/fixtures/motor-inbound-payloads.ts",
+   "nota": "Fixtures de payloads del webhook 360dialog/Cloud API parametrizados por el seed de cada corrida. Sin DB ni red."
+  },
+  {
+   "ruta": "tests/integration/generate-insights-pending-guard.spec.ts",
+   "nota": "Guard anti-spam del cron de insights: crea ChatbotInsight con TAG en el primer bot real y borra en finally; falla si no hay bot (sin skip). No corre en CI."
+  },
+  {
+   "ruta": "tests/integration/motor-health.spec.ts",
+   "nota": "Eventos de salud del webhook del motor via POST real del route; org efimera con cascade; falla si el seed falla. No corre en CI."
+  },
+  {
+   "ruta": "tests/integration/motor-inbound.spec.ts",
+   "nota": "Adaptador de entrada 360dialog via route real: 401 sin escritura, idempotencia por wamid, identidad BSUID; orgs efimeras borradas por id. No corre en CI."
+  },
+  {
+   "ruta": "tests/integration/motor-isolation.spec.ts",
+   "nota": "Negativo de aislamiento multi-tenant del motor con 2 orgs efimeras y datos solapados; teardown por id. No corre en CI."
+  },
+  {
+   "ruta": "tests/integration/motor-outbound.spec.ts",
+   "nota": "Envio 360dialog con fetch mockeado: ventana, plantillas, reintentos, la API key fuera de logs; fija una key de cifrado de test si falta. Org efimera. No corre en CI."
+  },
+  {
+   "ruta": "tests/integration/motor-window.spec.ts",
+   "nota": "Unitario puro de windowState (ventana de 24 h) sin DB; corre bajo test:integration, que no esta en CI."
+  },
+  {
+   "ruta": "tests/leados/alta-import.spec.ts",
+   "nota": "LeadOS in-process: alta e importacion anti cross-setter; replica el nucleo de las actions en vez de llamarlas (no cubre requireSetter ni zod de la action). Teardown. CI: job saltado."
+  },
+  {
+   "ruta": "tests/leados/campo-sin-herramienta.spec.ts",
+   "nota": "Puro: campos que transcriben una herramienta se exigen solo si la herramienta tiene link (schema del brief y bloques). Sin DB. CI: job leados saltado por falta de secret."
+  },
+  {
+   "ruta": "tests/leados/dossier-gates.spec.ts",
+   "nota": "LeadOS in-process: unicidad, ownership, maquina de stage y gate del brief contra DB; setter y leads SMOKE con teardown. CI: job saltado."
+  },
+  {
+   "ruta": "tests/leados/envio-demo-rechazo.spec.ts",
+   "nota": "LeadOS in-process: negativo de gateEnvioDemo y marcarDemoEnviadaOwned; teardown por tracker. CI: job saltado."
+  },
+  {
+   "ruta": "tests/leados/foco-no-miente.spec.ts",
+   "nota": "LeadOS in-process: el foco y la cartera owned reflejan registrarContactoComercial; teardown. CI: job saltado."
+  },
+  {
+   "ruta": "tests/leados/progreso-construccion.spec.ts",
+   "nota": "LeadOS in-process: saveOwnedProgreso y su aislamiento (lib directa, no la action guardarProgreso). Teardown. CI: job saltado."
+  },
+  {
+   "ruta": "tests/leados/selfcheck-anti-bypass.spec.ts",
+   "nota": "LeadOS in-process: el self-check no se bypassea (saveOwnedSelfCheck y transitionDossier); no cubre la action. Teardown. CI: job saltado."
+  },
+  {
+   "ruta": "tests/perf-budget.json",
+   "nota": "Presupuestos warm/cold por ruta para los specs 13 y 21; 3 de 7 nunca se usan (rutas con [param] y /api/chatbot/develop/chat). Solo datos."
+  },
+  {
+   "ruta": "tests/qa-persona/corrida-1-novato-frio.spec.ts",
+   "nota": "Corrida UX de setter novato con su primer prospecto frio: setter fresco con teardown en finally, sesion minteada, screenshots a docs/. Sin asserts de negocio. No es CI."
+  },
+  {
+   "ruta": "tests/qa-walkthrough/corrida-1.spec.ts",
+   "nota": "Recorrido perceptual de asignado a agendado con screenshots; setter y lead namespaced con teardown; muta el stage directo con Prisma en un tramo. No es CI."
+  },
+  {
+   "ruta": "tests/setter/00-surfaces.spec.ts",
+   "nota": "Setter: sesion minteada y carga de todas las superficies de la cabina con guard de consola; siembra cabina llena SMOKE con teardown (Neon dev). No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/01-flow.spec.ts",
+   "nota": "Setter: recorrido completo de un lead por la UI verificando el estado en DB tras cada accion; agenda solo por seed (sin Cal.com). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/02-isolation.spec.ts",
+   "nota": "Setter: aislamiento A/B (cartera, 404 sin leak, nota privada, novedades, reasignacion) con 2do setter por cookie minteada. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/03-cabina.spec.ts",
+   "nota": "Setter: cabina cross-lead, atajos de teclado, busqueda, pin, snooze y nota persistentes, timeline. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/04-admin.spec.ts",
+   "nota": "Setter: superficies admin de Franco (/admin/leados, /admin/leads) con sesion SUPER_ADMIN minteada; solo render. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/05-empty-mobile-a11y.spec.ts",
+   "nota": "Setter: estados vacios, mobile 390 y a11y basica (aria-labels, aria-current). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/06-claim-atomico.spec.ts",
+   "nota": "Setter in-process: claim atomico del envio de demo con 2 envios concurrentes contra DB real (un solo OsDemo). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/07-admin-assign-caliente.spec.ts",
+   "nota": "Setter: el admin asigna y marca caliente, B gana el lead y requireSuperAdmin bloquea al setter; dos actores minteados. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/08-m5-cadencia-agotada.spec.ts",
+   "nota": "Setter: con cadencia agotada M5 deja de ofrecer No respondio y el contador clampa. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/09-archivo-terminal.spec.ts",
+   "nota": "Setter: un lead PERDIDO deriva a /manual/archivo read-only sin form de toque. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/10-unsaved-guard.spec.ts",
+   "nota": "Setter: useUnsavedGuard intercepta beforeunload con evento sintetico (no el dialogo nativo). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/11-fase-disabled.spec.ts",
+   "nota": "Setter: el tilde de auto-reporte de fase se deshabilita fuera de CONSTRUCCION (solo presentacion). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/12-claim-agenda.spec.ts",
+   "nota": "Setter in-process: caracteriza el claim de agenda marcarAgendandoOwned; no llama a Cal.com ni a la action con requireSetter. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/13-m16-memoria.spec.ts",
+   "nota": "Setter: m16 recuerda los horarios tras cerrar la pestana; la oferta se siembra por el write-path (sin getSlots real de Cal.com). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/14-motivo-rechazo.spec.ts",
+   "nota": "Setter: la nota de rechazo de Franco queda a la vista en las pantallas donde se corrige. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/15-callejones-borrador-chequeo.spec.ts",
+   "nota": "Setter: los callejones de Borrador y Chequeo ofrecen la salida que nombran. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/16-municiones-salida.spec.ts",
+   "nota": "Setter: la salida de las herramientas sin link queda visible (pedirle el link a Franco). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/17-datos-que-viajan.spec.ts",
+   "nota": "Setter: datos que viajan entre pantallas (fecha de postergacion en tarjeta y cabecera, etc.). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/17-destinos-alcanzables.spec.ts",
+   "nota": "Setter: los destinos que una pantalla nombra son alcanzables desde ahi (un test por clase). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/18-quinta-superficie.spec.ts",
+   "nota": "Setter: un lead APROBADO sin finalUrl se distingue en tarjeta de cartera y contador del panel. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/19-config-que-falta.spec.ts",
+   "nota": "Setter: la configuracion faltante se comunica de forma accionable. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/20-veredicto-abre-construir.spec.ts",
+   "nota": "Setter: la fusion ficha+veredicto no deja llegar a construir sin pasar por EVALUADA. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/21-ficha-por-fuentes.spec.ts",
+   "nota": "Setter: ficha agrupada por fuentes, avance automatico y veredicto como ultimo bloque. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/22-cromo-primer-pliegue.spec.ts",
+   "nota": "Setter: algo accionable entra en el primer pliegue de las 14 pantallas del manual. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/23-accion-a-la-vista.spec.ts",
+   "nota": "Setter: la accion principal se ve sin scrollear en las pantallas de trabajo. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/24-paso-que-corresponde.spec.ts",
+   "nota": "Setter: la derivacion del manual senala el paso que corresponde (casos del barrido P19). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/25-franja-recorrido.spec.ts",
+   "nota": "Setter: franja del recorrido (nueve pasos, chips navegables, paso actual desde la posicion). Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/26-cola-de-trabajo.spec.ts",
+   "nota": "Setter: la cola de trabajo se ve como lista y no duplica avisos. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/27-cartera-agrupada.spec.ts",
+   "nota": "Setter: cartera agrupada con conteos reales y el grupo Para trabajar abierto. Teardown. No corre en CI."
+  },
+  {
+   "ruta": "tests/setter/28-veredicto-y-ciclo.spec.ts",
+   "nota": "Setter: ping-pong espera/m5 y defectos de la segunda corrida del novato, operando la app. Teardown. No corre en CI."
+  }
+ ],
+ "hallazgos": [
+  {
+   "titulo": "Credenciales literales de cuentas de prueba (incluido SUPER_ADMIN) en tests y scripts, que deshacen el blindaje del seed",
+   "severidad": "ALTA",
+   "tipo": "seguridad",
+   "evidencia": [
+    "tests/helpers/auth.ts:21",
+    "tests/helpers/auth.ts:25",
+    "scripts/b1-verify-setter-ownership.ts:44",
+    "scripts/b2-verify-dossier.ts:66",
+    "prisma/seed.ts:76"
+   ],
+   "impacto": "El seed C.0 exige passwords por env (seed.ts:76), pero la suite e2e solo anda si la Neon compartida conserva las passwords viejas literales de admin@develop.com y cliente@sanmiguel.com, y b1/b2 vuelven a poner la del setter QA en un literal en cada corrida. git log -S muestra el mismo literal de admin en la historia de prisma/seed.ts: si prod se sembro antes de C.0, el SUPER_ADMIN de prod podria tener una password que cualquiera con acceso al repo conoce (verificacion humana).",
+   "propuesta": "Leer las credenciales de prueba de env (E2E_ADMIN_PASSWORD, etc.) igual que el seed, rotar las de las cuentas que existan con ese literal y verificar que admin@develop.com en prod no use la password historica.",
+   "archivos": [
+    "tests/helpers/auth.ts",
+    "scripts/b1-verify-setter-ownership.ts",
+    "scripts/b2-verify-dossier.ts",
+    "tests/e2e/06-admin-login.spec.ts",
+    "tests/e2e/11-client-login.spec.ts"
+   ]
+  },
+  {
+   "titulo": "La red de verificacion pura que no necesita base nunca corre en CI: el runner no descubre test:* y los smokes de seguridad no estan cableados",
+   "severidad": "ALTA",
+   "tipo": "faltante",
+   "evidencia": [
+    "scripts/run-invariants.mjs:2",
+    "scripts/run-invariants.mjs:107",
+    "package.json:55",
+    "package.json:80",
+    "package.json:81",
+    "package.json:113",
+    "scripts/_b14-5-scrub-smoke.mjs:7",
+    "scripts/_b52-test-scoring.ts:6",
+    "scripts/b58-smoke.ts:4",
+    "playwright.helpers-probe.config.ts:16"
+   ],
+   "impacto": "run-invariants dice correr todos los invariantes, pero solo filtra check:invariant*. Los 28 scripts test:* de package.json (pii, iphash, fixorigin, contactpath, ev1-5, onf1...) no corren nunca en CI, y lo mismo pasa con los smokes puros de SSRF y cifrado (b58), CSV injection (b59), scrub de PII (_b14-5), scoring (_b52-54) y la suite helpers-probe, que no necesitan base. Una regresion en esos controles de seguridad pasa en verde.",
+   "propuesta": "Renombrar los test:* puros a check:invariant:* (ajustando INVARIANTES_ESPERADOS), sumar los smokes puros como invariantes y agregar npm run test:helpers al job sin base de ci.yml.",
+   "archivos": [
+    "scripts/run-invariants.mjs",
+    "scripts/_b14-5-scrub-smoke.mjs",
+    "scripts/_b52-test-scoring.ts",
+    "scripts/_b53-test-scoring.ts",
+    "scripts/_b54-test-scoring.ts",
+    "scripts/b58-smoke.ts",
+    "scripts/b59-smoke.ts",
+    "playwright.helpers-probe.config.ts",
+    "tests/helpers-probe/console-guard.probe.spec.ts",
+    "tests/helpers-probe/setter-ui.probe.spec.ts"
+   ]
+  },
+  {
+   "titulo": "Las suites con base no corren en CI: integration y setter no figuran, leados y e2e se saltean y alerts-detector esta excluido de todo runner",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "evidencia": [
+    "raíz:.github/workflows/ci.yml:128",
+    "raíz:.github/workflows/ci.yml:179",
+    "package.json:114",
+    "package.json:116",
+    "playwright.integration.config.ts:41",
+    "playwright.integration.config.ts:11"
+   ],
+   "impacto": "Los negativos de aislamiento multi-tenant (chatbot-isolation, motor-isolation), el webhook 360dialog y los 30 specs del setter solo corren a mano contra la Neon dev compartida. test:leados y test:e2e estan cableados pero se saltean por falta de secrets (ya conocido). alerts-detector no corre en ninguna config y la config de integration cita un spec que no existe.",
+   "propuesta": "Con una DB de test dedicada, sumar los jobs test:integration y test:setter a ci.yml y decidir si alerts-detector se arregla o se borra.",
+   "archivos": [
+    "playwright.integration.config.ts",
+    "playwright.setter.config.ts",
+    "playwright.leados.config.ts",
+    "tests/integration/alerts-detector.spec.ts",
+    "tests/integration/chatbot-isolation.spec.ts",
+    "tests/integration/motor-isolation.spec.ts",
+    "tests/integration/motor-inbound.spec.ts",
+    "tests/integration/motor-outbound.spec.ts",
+    "tests/integration/motor-health.spec.ts",
+    "tests/integration/motor-window.spec.ts",
+    "tests/integration/fix-origin-same-origin-config.spec.ts",
+    "tests/integration/generate-insights-pending-guard.spec.ts",
+    "tests/integration/executive-report-lead-count.spec.ts",
+    "tests/integration/cleanup-old-events-retention.spec.ts"
+   ]
+  },
+  {
+   "titulo": "El job E2E del CI no puede pasar aunque se carguen los secrets: no hay build ni seed, y las baselines visuales son solo de Windows",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "evidencia": [
+    "raíz:.github/workflows/ci.yml:206",
+    "raíz:.github/workflows/ci.yml:220",
+    "playwright.config.ts:29",
+    "tests/helpers/auth.ts:21",
+    "tests/e2e/22-visual-regression.spec.ts:50"
+   ],
+   "impacto": "El job hace npm ci, migrate deploy y test:e2e, pero el webServer levanta npm run start (next start) sin next build previo. La DB de test queda vacia, sin admin@develop.com, cliente@sanmiguel.com ni el bot develop que el suite asume, y 22-visual-regression solo tiene snapshots chromium-win32, que no sirven en el runner ubuntu. Cargar los secrets deja el job en rojo permanente.",
+   "propuesta": "Agregar npm run build y un seed de fixtures de test antes de test:e2e, y generar baselines de Linux o excluir el spec visual del CI.",
+   "archivos": [
+    "playwright.config.ts",
+    "tests/e2e/22-visual-regression.spec.ts",
+    "tests/helpers/auth.ts"
+   ]
+  },
+  {
+   "titulo": "Tests verdes por arnes: skips que convierten la regresion en verde y asserts que aceptan cualquier resultado",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "evidencia": [
+    "tests/e2e/19-security.spec.ts:22",
+    "tests/e2e/40-lead-capture-e2e.spec.ts:31",
+    "tests/e2e/40-lead-capture-e2e.spec.ts:42",
+    "tests/e2e/01-landing.spec.ts:9",
+    "tests/e2e/07-admin-navigation.spec.ts:8",
+    "tests/e2e/08-admin-onboarding.spec.ts:28",
+    "tests/e2e/14-e2e-critical-flow.spec.ts:11",
+    "tests/helpers/setter-auth.ts:42",
+    "tests/leados/alta-import.spec.ts:13"
+   ],
+   "impacto": "El test de que la API admin exige auth siempre hace skip, porque GET /api/admin/clients no existe (src/app/api/admin/clients solo tiene [organizationId]). La captura de lead, el widget, los pasos del wizard y la navegacion admin hacen skip justo cuando fallan. 14 promete verificar el upsell y no lo hace. Las suites del setter mintean la sesion con passwordResetRequired false, asi que el login y el reset forzado no se prueban. Los specs de leados replican el nucleo de las actions, asi que requireSetter y zod quedan sin cubrir.",
+   "propuesta": "Cambiar test.skip por fallos explicitos en los caminos del producto, apuntar 19 a una ruta admin real y sumar al menos un test por action que pase por su guard.",
+   "archivos": [
+    "tests/e2e/19-security.spec.ts",
+    "tests/e2e/40-lead-capture-e2e.spec.ts",
+    "tests/e2e/01-landing.spec.ts",
+    "tests/e2e/02-chat-flow.spec.ts",
+    "tests/e2e/03-lead-capture.spec.ts",
+    "tests/e2e/07-admin-navigation.spec.ts",
+    "tests/e2e/08-admin-onboarding.spec.ts",
+    "tests/e2e/14-e2e-critical-flow.spec.ts",
+    "tests/e2e/30-onboarding-e2e-complete.spec.ts",
+    "tests/helpers/setter-auth.ts",
+    "tests/leados/alta-import.spec.ts"
+   ]
+  },
+  {
+   "titulo": "El test de re-enviar credenciales resetea la password de un usuario real, le manda un mail real y da verde aunque el mail falle",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "evidencia": [
+    "tests/e2e/30-onboarding-e2e-complete.spec.ts:219",
+    "tests/e2e/30-onboarding-e2e-complete.spec.ts:241",
+    "tests/e2e/30-onboarding-e2e-complete.spec.ts:246",
+    "src/app/api/admin/users/[userId]/resend-credentials/route.ts:64",
+    "src/app/api/admin/users/[userId]/resend-credentials/route.ts:85"
+   ],
+   "impacto": "Elige la org mas vieja con miembros de la Neon compartida, confirma el reenvio y la ruta reescribe la password del usuario (passwordResetRequired, sesiones invalidadas) y le manda un mail por Brevo. Puede dejar sin acceso a una cuenta de fixture usada por otros tests o escribirle a una persona real. Aceptar Email fallo como valido no detecta que el envio este roto.",
+   "propuesta": "Crear un usuario propio del test con email de prueba, reenviarle a ese y afirmar un unico resultado esperado.",
+   "archivos": [
+    "tests/e2e/30-onboarding-e2e-complete.spec.ts"
+   ]
+  },
+  {
+   "titulo": "Tests que disparan el detector real de alertas (mails y Telegram) y borran alertas que no crearon",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "evidencia": [
+    "tests/e2e/19-security.spec.ts:35",
+    "tests/integration/alerts-detector.spec.ts:22",
+    "tests/integration/alerts-detector.spec.ts:44",
+    "src/modules/chatbot/server/admin/detectBotIssues.ts:267",
+    "src/modules/chatbot/server/admin/detectBotIssues.ts:274"
+   ],
+   "impacto": "Con CRON_SECRET en el entorno, 19-security llama a /api/cron/detect-bot-issues, que corre sobre todos los bots de la base y manda emails y Telegram. alerts-detector borra todas las BotAlert de un tipo del primer bot activo real, no solo las que crea (hoy esta excluido, pero queda listo para usarse).",
+   "propuesta": "Afirmar solo el 200 del cron con un detector sin notificaciones (flag o deps inyectadas) y limpiar alertas por id creado.",
+   "archivos": [
+    "tests/e2e/19-security.spec.ts",
+    "tests/integration/alerts-detector.spec.ts"
+   ]
+  },
+  {
+   "titulo": "Los e2e mutan los bots reales develop y sanmiguel de la Neon compartida sin restaurar, o restaurando fuera de finally",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "evidencia": [
+    "tests/e2e/15-client-personalization.spec.ts:59",
+    "tests/e2e/15-client-personalization.spec.ts:85",
+    "tests/e2e/09-admin-bot-config.spec.ts:29",
+    "tests/e2e/09-admin-bot-config.spec.ts:37",
+    "tests/e2e/10-admin-kb-edit.spec.ts:35",
+    "tests/e2e/10-admin-kb-edit.spec.ts:47"
+   ],
+   "impacto": "15 deja cambiados el color y el welcomeMessage del bot de sanmiguel en cada corrida. 09 y 10 escriben en el welcomeMessage y el KB del bot develop y solo restauran si todo sale bien: un fallo intermedio deja Test edit o un marcador HTML en el prompt vivo del bot en dev, que despues leen otros tests y smokes. Es un caso concreto de la ya conocida falta de base de test.",
+   "propuesta": "Guardar el valor original en beforeAll y restaurarlo por Prisma en afterAll o finally, o usar un bot efimero propio del test.",
+   "archivos": [
+    "tests/e2e/15-client-personalization.spec.ts",
+    "tests/e2e/09-admin-bot-config.spec.ts",
+    "tests/e2e/10-admin-kb-edit.spec.ts"
+   ]
+  },
+  {
+   "titulo": "Scripts descartables apuntan a PROD hardcodeada y escriben ahi sin guard; el smoke dice que no modifica la base y si lo hace",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "evidencia": [
+    "scripts/_b14-4-smoke-prod.mjs:7",
+    "scripts/_b14-4-smoke-prod.mjs:19",
+    "scripts/_b14-4-smoke-prod.mjs:136",
+    "scripts/_b14-4-smoke-prod.mjs:175",
+    "scripts/_b14-2-prod-bot-latency.mjs:15",
+    "scripts/_b14-2-prod-bot-latency.mjs:21",
+    "scripts/_b14-2-prod-coldstart.mjs:25",
+    "scripts/_b14-2-prod-pages-ttfb.mjs:17"
+   ],
+   "impacto": "Correr _b14-4 o _b14-2-prod-bot-latency por error crea conversaciones y mensajes en la base de prod (bot bench-matsu), consume Vertex y gasta el rate limit (hasta 30 llamadas). No piden confirmacion ni un flag de destino, y siguen en el repo aunque su encabezado dice borrar despues del sprint.",
+   "propuesta": "Borrar los _b14-2-* o moverlos a un archivo historico; si _b14-4 sigue vivo, exigir B14_BASE_URL explicito y un flag --confirm-prod, y corregir su encabezado.",
+   "archivos": [
+    "scripts/_b14-4-smoke-prod.mjs",
+    "scripts/_b14-2-prod-bot-latency.mjs",
+    "scripts/_b14-2-prod-coldstart.mjs",
+    "scripts/_b14-2-prod-pages-ttfb.mjs"
+   ]
+  },
+  {
+   "titulo": "/api/test-sentry es un GET publico en prod que lanza una excepcion por hit; el smoke de prod lo usa",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "evidencia": [
+    "src/app/api/test-sentry/route.ts:3",
+    "scripts/_b14-4-smoke-prod.mjs:214"
+   ],
+   "impacto": "Cualquiera puede martillar el endpoint y generar eventos de Sentry sin limite (cuota y ruido en la observabilidad). Esta fuera de D9 y puede estar ya reportado en otro dominio: el padre debe fusionarlo.",
+   "propuesta": "Borrar la ruta o protegerla con sesion SUPER_ADMIN o CRON_SECRET, y sacar el bloque sentry del smoke.",
+   "archivos": [
+    "scripts/_b14-4-smoke-prod.mjs"
+   ]
+  },
+  {
+   "titulo": "encode-vertex-creds.js imprime por consola la clave privada de la service account de Vertex (no check-env.js)",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "evidencia": [
+    "scripts/encode-vertex-creds.js:10",
+    "scripts/check-env.js:86",
+    "scripts/check-env.js:100"
+   ],
+   "impacto": "Ya conocido, pero atribuido a check-env.js. En origin/main check-env.js solo imprime nombres y presencia de variables. Quien vuelca el JSON entero de la service account, private_key incluida, a la terminal (scrollback, logs de sesion y transcripts de agentes) es encode-vertex-creds.js.",
+   "propuesta": "Copiar el valor al portapapeles o escribirlo a un archivo gitignored con permisos restringidos en vez de imprimirlo, y corregir la atribucion del hallazgo conocido.",
+   "archivos": [
+    "scripts/encode-vertex-creds.js",
+    "scripts/check-env.js"
+   ]
+  },
+  {
+   "titulo": "db-restore-local.sh imprime user:password de la URL destino creyendo que la enmascara",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "evidencia": [
+    "scripts/db-restore-local.sh:78",
+    "scripts/db-restore-local.sh:92",
+    "scripts/db-restore-local.sh:50"
+   ],
+   "impacto": "${TARGET_URL%%@*} conserva postgresql://usuario:password y oculta el host (al reves de lo buscado), y la ultima linea imprime la URL completa. Ademas, el restore a la Neon dev compartida no pide override, asi que un backup de prod con PII se puede volcar en dev sin confirmacion.",
+   "propuesta": "Enmascarar con ${TARGET_URL#*@} (solo host), no imprimir la URL en el mensaje final y exigir override tambien para restaurar sobre la branch dev compartida.",
+   "archivos": [
+    "scripts/db-restore-local.sh"
+   ]
+  },
+  {
+   "titulo": "Seeds y corridas de QA que escriben en la DB de .env.local sin guard de host",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "evidencia": [
+    "scripts/dev/_vseed.ts:1",
+    "scripts/dev/_vseed.ts:22",
+    "scripts/dev/qa-seed-leads.ts:17",
+    "scripts/dev/qa-seed-leads-clean.ts:13",
+    "scripts/qa-corridas/_verify-home-aviso.ts:30",
+    "scripts/qa-corridas/_verify-home-aviso.ts:99",
+    "scripts/qa-corridas/_verify-scroll-gap.ts:35",
+    "scripts/qa-corridas/_p21-corrida.ts:130",
+    "scripts/qa-corridas/p19-capturas.ts:66"
+   ],
+   "impacto": "A diferencia de los b*/v1/m0 (con guard ep-quiet-waterfall), estos crean o borran bots, conversaciones, leads, usuarios y stages contra lo que diga .env.local. _vseed usa as any y siembra en san-miguel, que el -clean no limpia. Los _verify mutan el stage sin finally. Complementa lo ya conocido del seed y update-proactive-prompts sin guard.",
+   "propuesta": "Reusar assertDevSeedTarget de prisma/seed-guard.ts como primera linea de todo script que escriba, y envolver las mutaciones temporales en try/finally.",
+   "archivos": [
+    "scripts/dev/_vseed.ts",
+    "scripts/dev/qa-seed-leads.ts",
+    "scripts/dev/qa-seed-leads-clean.ts",
+    "scripts/dev/seed-latency.md",
+    "scripts/qa-corridas/_verify-home-aviso.ts",
+    "scripts/qa-corridas/_verify-scroll-gap.ts",
+    "scripts/qa-corridas/_p21-corrida.ts",
+    "scripts/qa-corridas/p19-capturas.ts",
+    "scripts/qa-corridas/rejection-reloop.ts",
+    "scripts/ev5-smoke.mjs",
+    "scripts/load-test/chatbot-baseline.ts"
+   ]
+  },
+  {
+   "titulo": "PII en el codigo y en la salida de scripts: email personal hardcodeado como attendee de un booking real y volcado de emails de miembros",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "evidencia": [
+    "scripts/b7-smoke-calcom.ts:76",
+    "scripts/b7-smoke-calcom.ts:78",
+    "scripts/_db-cleanup-inspect.mjs:110",
+    "scripts/_db-cleanup-inspect.mjs:114",
+    "scripts/_db-cleanup-inspect2.mjs:81",
+    "scripts/_db-cleanup-inspect2.mjs:86"
+   ],
+   "impacto": "b7-smoke-calcom tiene un email personal versionado como default y crea un booking real en la cuenta Cal.com de Franco (el guard solo mira el host de la DB). Los _db-cleanup-inspect imprimen email y nombre de miembros de orgs a la consola.",
+   "propuesta": "Exigir B7_SMOKE_EMAIL sin default y borrar los _db-cleanup-inspect* (throwaway ya cumplido).",
+   "archivos": [
+    "scripts/b7-smoke-calcom.ts",
+    "scripts/_db-cleanup-inspect.mjs",
+    "scripts/_db-cleanup-inspect2.mjs"
+   ]
+  },
+  {
+   "titulo": "Scripts muertos y descartables que siguen en el repo",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "evidencia": [
+    "script.js:2",
+    "replace_analytics.js:2",
+    "script_maps.js:5",
+    "find_unused.js:17",
+    "test-chat.mjs:1",
+    "scripts/_b13-latency-test.mjs:5",
+    "scripts/_db-cleanup-inspect.mjs:3",
+    "scripts/_experimental/fg2-gen-prompts.ts:2"
+   ],
+   "impacto": "Nueve scripts sueltos en la raiz reescriben src/components/sections/OurServices.tsx, que ya no existe. test-chat.mjs importa node-fetch sin declararlo. Varios scripts _b13/_b14/_db-cleanup se declaran borrables tras su sprint y siguen ahi (con resultados JSON commiteados en scripts/), y algunos apuntan a prod. Suman superficie y confunden el inventario.",
+   "propuesta": "Borrar los sueltos de la raiz y los throwaway cumplidos (git conserva la historia) y dejar en scripts/ solo lo que nombra package.json o un doc vigente.",
+   "archivos": [
+    "find_unused.js",
+    "replace_analytics.js",
+    "script.js",
+    "script2.js",
+    "script3.js",
+    "script_aiscene.js",
+    "script_analytics.js",
+    "script_leads.js",
+    "script_magnetic.js",
+    "script_maps.js",
+    "test-chat.mjs",
+    "scripts/_b13-2-list-bots.mjs",
+    "scripts/_b13-latency-analyze.mjs",
+    "scripts/_b13-latency-test.mjs",
+    "scripts/_b14-analyze.mjs",
+    "scripts/_db-cleanup-inspect.mjs",
+    "scripts/_db-cleanup-inspect2.mjs",
+    "scripts/_experimental/fg2-gen-prompts.ts"
+   ]
+  },
+  {
+   "titulo": "El teardown de la bateria de regresion pisa QuotaUsage en 0 en vez de restaurarlo, y el runner dice no escribir en DB",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "evidencia": [
+    "scripts/regression/cases.ts:357",
+    "scripts/regression/cases.ts:367",
+    "scripts/regression/run-baseline.ts:11"
+   ],
+   "impacto": "Cada corrida completa borra el conteo real de conversaciones del mes del bot de Matsu en dev (afecta metricas y alertas de cuota que se miren despues), y el encabezado engana sobre los efectos del runner.",
+   "propuesta": "Leer el valor previo en setup y restaurarlo en teardown, y corregir el comentario del runner.",
+   "archivos": [
+    "scripts/regression/cases.ts",
+    "scripts/regression/run-baseline.ts"
+   ]
+  }
+ ],
+ "secrets": [
+  {
+   "ruta": "tests/helpers/auth.ts:21",
+   "tipo": "password en texto plano de la cuenta SUPER_ADMIN de prueba (admin@develop.com)"
+  },
+  {
+   "ruta": "tests/helpers/auth.ts:25",
+   "tipo": "password en texto plano de la cuenta cliente de prueba (cliente@sanmiguel.com)"
+  },
+  {
+   "ruta": "scripts/b1-verify-setter-ownership.ts:44",
+   "tipo": "password en texto plano de la cuenta setter QA (setter-qa@develop.test), aplicada a la DB en cada corrida"
+  },
+  {
+   "ruta": "scripts/b2-verify-dossier.ts:66",
+   "tipo": "password en texto plano de la cuenta setter QA (misma que b1)"
+  },
+  {
+   "ruta": "tests/integration/motor-outbound.spec.ts:23",
+   "tipo": "clave de cifrado determinista de test (solo fallback en el proceso de test, no productiva; riesgo bajo)"
+  }
+ ]
+}

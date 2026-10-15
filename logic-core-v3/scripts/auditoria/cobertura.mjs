@@ -47,7 +47,9 @@ if (args.includes('--marcar')) {
     process.exit(1)
   }
   const pedidas = readFileSync(path.resolve(appRoot, lista), 'utf8').replace(/^﻿/, '').split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
-  const normal = (r) => (r.startsWith('logic-core-v3/') || r.startsWith('.') || !existsSync(path.join(repoRoot, 'logic-core-v3', r)) ? r : `logic-core-v3/${r}`)
+  // «raíz:» marca una ruta de la raíz del repo (los workflows de .github/); sin prefijo, primero se busca en
+  // la app (los dotfiles como .gitignore o .env.example existen en las dos y la lista del lector es de la app)
+  const normal = (r) => (r.startsWith('raíz:') ? r.slice('raíz:'.length) : r.startsWith('logic-core-v3/') || !existsSync(path.join(repoRoot, 'logic-core-v3', r)) ? r : `logic-core-v3/${r}`)
   const objetivo = new Set(pedidas.map((r) => normal(r.replace(/\\/g, '/'))))
   const texto = readFileSync(OUT, 'utf8')
   const lineasCsv = texto.replace(/\r\n/g, '\n').split('\n')

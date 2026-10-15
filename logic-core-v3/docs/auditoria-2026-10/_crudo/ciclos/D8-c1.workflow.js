@@ -1,0 +1,1785 @@
+export const meta = {
+  name: 'f2-ciclo-lectores',
+  description: 'F2: lectores por lote de un dominio + verificador adversarial solo para CRITICA/ALTA (tope 3 agentes)',
+  phases: [
+    { title: 'Lectura', detail: 'un lector general-purpose por lote' },
+    { title: 'Verificacion', detail: 'verificador adversarial de CRITICA/ALTA del lote' },
+  ],
+}
+
+// Plantilla del workflow de F2 (auditoría de renovación 2026-10). La completa f2-construir.mjs:
+// reemplaza la línea de la constante A por los argumentos del ciclo, el preámbulo, el PROMPT textual,
+// la rúbrica y las herramientas. Lectores por lote (semáforo de 3) + verificador adversarial
+// solo para CRÍTICA/ALTA (DEC-37). El meta tiene que ser lo primero del archivo.
+
+// args: { dominio, nombre, ciclo, lente, foco, contexto, prompt_textual, herramientas, lotes: [{id, archivos, carpetas, loc, previas, planeado, insumos}],
+//         acotado?, flujos_cerrados?, higiene? } — los tres últimos, desde D3 (DEC-53 y DEC-55); sin ellos el prompt y el schema son los de antes
+const A = { ...({
+ "dominio": "D8",
+ "nombre": "Plataforma",
+ "ciclo": "D8-c1",
+ "lente": "",
+ "foco": "Plataforma: Next 16 (convenciones actuales, APIs deprecadas, proxy), React 19, Tailwind 4, NextAuth v5 beta, Prisma 6 (7 ya salio), dependencias viejas o abandonadas (ver npm outdated/audit en _crudo), maxDuration efectivo en Netlify (plan y tipo de function), bundle (fronteras use client, imports pesados en rutas internas), configuraciones (next.config headers/CSP, tsconfig, eslint, netlify.toml), CI.",
+ "acotado": true,
+ "flujos_cerrados": "[D1] Login con contrasena (Credentials): src/app/login/page.tsx:347 -> src/app/login/actions.ts:65 -> actions.ts:111 -> src/auth.ts:142 -> src/lib/auth-cookies.ts:21 -> auth.ts:89 -> src/proxy.ts:70 -> admin/layout.tsx:41\n[D1] Magic link (provider Resend que envia por Brevo): src/app/login/page.tsx:204 -> src/app/login/actions.ts:140 -> send-token.js:74 -> src/auth.ts:175 -> src/lib/email/brevo-service.ts:17 -> src/app/api/auth/[...nextauth]/route.ts:3 -> auth.ts:192 -> actions.ts:148\n[D1] Recupero de contrasena: src/app/login/page.tsx:365 -> src/app/forgot-password/page.tsx:120 -> actions.ts:29 -> limiter.ts:37 -> src/app/reset-password/page.tsx:10 -> ResetPasswordForm.tsx:186\n[D1] Cambio forzado de contrasena (temporal): createClientOnly.ts:96 -> onboarding/core.ts:96 -> route.ts:64 -> src/auth.ts:168 -> src/proxy.ts:84 -> src/app/cambiar-password/page.tsx:6 -> CambiarPasswordForm.tsx:116 -> src/app/cambiar-password/actions.ts:25\n[D1] Impersonacion de soporte (SUPER_ADMIN): ImpersonateButton.tsx:24 -> projects/[projectId]/layout.tsx:219 -> client.actions.ts:8 -> src/lib/actions/impersonation.ts:12 -> src/lib/impersonation.ts:24 -> src/proxy.ts:77 -> dashboard/layout.tsx:72 -> src/lib/preview.ts:14\n[D1] Invalidacion de sesion por sessionVersion (y sus huecos): cambiar-password/actions.ts:59 -> profile.ts:230 -> reset-password/actions.ts:76 -> resend-credentials/route.ts:71 -> src/auth.ts:215 -> dashboard/layout.tsx:90 -> proxy.ts:134 -> auth.ts:215\n[D1] QA login (ZONA-FRANCO): src/app/api/qa/login/route.ts:49 -> auth-cookies.ts:21 -> auth.ts:209\n[D1] Logout: admin-topbar.tsx:85 -> setter/layout.tsx:76 -> DashboardLayoutClient.tsx:150 -> src/actions/auth-actions.ts:5 -> impersonation.ts:82\n[D6] Seed principal: prisma db seed → prisma/seed.ts: prisma.config.ts:23 -> seed.ts:73 -> seed-guard.ts:42 -> src/lib/agency-settings.ts:1\n[D6] Seed Agency OS: npm run seed:agency-os → prisma/seed-agency-os.ts: package.json:17 -> seed-agency-os.ts:2386\n[D6] Migraciones hacia prod: netlify.toml:2 -> prisma.config.ts:26 -> prisma/schema.prisma:5\n[D6] Cambio de plan → precio que ve el cliente: src/app/(protected)/admin/clients/_actions/plan.actions.ts:179 -> plan.actions.ts:186 -> src/lib/plan/get-plan-for-org.ts:50 -> src/app/(protected)/dashboard/cuenta/perfil/page.tsx:80 -> perfil/page.tsx:208 -> src/components/dashboard/ProfileForms.tsx:660\n[D6] Archivar cliente (soft-delete de Organization): src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:161 -> src/modules/chatbot/server/admin/archiveClient.ts:17 -> archiveClient.ts:37 -> src/app/(protected)/admin/clients/page.tsx:23\n[D6] OAuth de GBP y Tiendanube → tokens en Organization: src/app/api/auth/google-business/callback/route.ts:49 -> src/app/api/auth/tiendanube/callback/route.ts:63 -> src/lib/integrations/google-business-profile.ts:59 -> prisma/schema.prisma:359 -> schema.prisma:1704\n[D6] Hard-delete de cliente y cascadas: ClientsListClient.tsx:187 -> src/modules/chatbot/server/admin/hardDeleteClient.ts:60 -> hardDeleteClient.ts:141 -> prisma/schema.prisma:528\n[D6] Revisión manual de las 14 sentencias DML de migraciones (veredicto por sentencia): (sin rutas)\n[D6] Mensaje del widget público: tenant resuelto por slug y escrituras aisladas del chatbot: src/app/api/chatbot/[slug]/chat/route.ts:97 -> src/modules/chatbot/server/chat/handleChatRequest.ts:155 -> src/modules/chatbot/server/conversation/resolver.ts:24 -> resolver.ts:38 -> handleChatRequest.ts:163 -> src/lib/isolation/index.ts:71 -> registry.ts:833 -> scoped-model.ts:157\n[D6] Webhook entrante de WhatsApp (motor): tenant por channelToken y FKs compuestas: src/app/api/motor/webhook/[channelToken]/route.ts:27 -> src/modules/motor/adapters/whatsapp/inbound/handle-request.ts:22 -> resolve-channel.ts:22 -> handle-request.ts:53 -> registry.ts:467 -> scoped-model.ts:343\n[D6] Archivar cliente (admin): soft-delete que solo oculta del listado: src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:161 -> src/modules/chatbot/server/admin/archiveClient.ts:16 -> src/app/(protected)/admin/clients/page.tsx:23 -> resolver.ts:24\n[D6] Eliminar cliente (hard-delete) y su cascada: ClientsListClient.tsx:192 -> src/modules/chatbot/server/admin/hardDeleteClient.ts:107 -> hardDeleteClient.ts:125\n[D6] Catálogo de módulos premium: código -> sitio público / DB -> portal y gates: src/lib/data/premium-modules.ts:21 -> src/app/page.tsx:39 -> src/components/sections/modulos-opcionales/ModulosOpcionales.tsx:426 -> ModuloActiveCard.tsx:248 -> prisma/seeds/sync-premium-modules.ts:64 -> src/app/(protected)/dashboard/services/page.tsx:177 -> src/app/(protected)/admin/settings/_actions/settings.actions.ts:175 -> src/app/(protected)/dashboard/layout.tsx:53\n[D6] Plan del bot: catálogo de planes -> plan efectivo -> tools habilitadas: prisma/seeds/sync-plans.ts:66 -> prisma/seeds/add-contact-tool.ts:47 -> handleChatRequest.ts:218 -> src/lib/plan/get-plan-for-org.ts:40 -> src/lib/plan/fallback.ts:44 -> src/modules/chatbot/server/tools/getTools.ts:121\n[D6] Migraciones hacia producción: netlify.toml:2 -> package.json:9 -> prisma/seeds/sync-plans.ts:9 -> add-contact-tool.ts:24 -> backfill-vertical-pack.ts:58\n[D6] Mensaje precargado en Mensajes del portal: src/components/dashboard/MessageThread.tsx:72 -> src/lib/data/message-context.ts:54 -> MessageThread.tsx:173\n[D2] Entrada al portal y gate de onboarding: src/proxy.ts:154 -> src/app/(protected)/dashboard/layout.tsx:72 -> src/lib/preview.ts:6 -> layout.tsx:79 -> src/components/dashboard/SidebarNav.tsx:76\n[D2] Inicio: metricas del negocio, Health Score, semana y resumen IA: src/app/(protected)/dashboard/page.tsx:51 -> page.tsx:110 -> src/lib/dashboard/home-metrics.ts:96 -> src/lib/health-score.ts:284 -> src/lib/dashboard/week-results.ts:43 -> AIExecutiveBriefV2.tsx:33 -> regenerate-brief.ts:9 -> executive-brief.ts:137\n[D2] Aprobar o pedir cambios en una entrega: src/app/(protected)/dashboard/project/page.tsx:134 -> src/components/dashboard/TaskApprovalButtons.tsx:14 -> src/actions/dashboard-actions.ts:12 -> dashboard-actions.ts:43 -> dashboard/layout.tsx:101\n[D2] Mensajes con develOP: src/app/(protected)/dashboard/messages/page.tsx:12 -> messages/_components/MarkReadOnMount.tsx:13 -> messages/_actions/mark-read.ts:11 -> src/components/dashboard/MessageThread.tsx:51 -> src/lib/actions/messages.ts:114 -> src/lib/email/notify-message.ts:50\n[D2] Email marketing: importar, crear, enviar y darse de baja: src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:17 -> premium-modules.ts:38 -> contactos/_components/ImportCSVButton.tsx:14 -> email-marketing/_actions.ts:71 -> brevo.ts:31 -> campaigns/new/page.tsx:47 -> _actions.ts:128 -> src/lib/integrations/brevo.ts:60\n[D2] Motor de resenas: vista, borrador IA y respuesta: src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:105 -> motor-resenas-view.ts:38 -> page.tsx:19 -> src/lib/integrations/google-business-profile.ts:329 -> _components/ReviewItem.tsx:46 -> src/components/dashboard/modules/motor-resenas/_actions.ts:11 -> src/lib/ai/review-reply-draft.ts:25 -> ReviewItem.tsx:64\n[D2] Tienda conectada: conectar y ver resumen: src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx:292 -> _components/ConnectStoreCard.tsx:39 -> src/app/api/auth/tiendanube/start/route.ts:9 -> src/app/api/auth/tiendanube/callback/route.ts:27 -> page.tsx:86 -> src/lib/integrations/tiendanube.ts:82\n[D2] Agenda inteligente: src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:316 -> page.tsx:203 -> src/lib/integrations/cal-com.ts:32\n[D2] Mi cuenta: perfil, reporte, facturacion y boveda: src/app/(protected)/dashboard/cuenta/perfil/page.tsx:73 -> src/components/dashboard/ExecutiveReportPrefsForm.tsx:45 -> _actions/executive-report-prefs.actions.ts:20 -> schemas.ts:8 -> cuenta/facturacion/page.tsx:61 -> cuenta/boveda/page.tsx:63 -> src/lib/crypto/resolve-credential.ts:16 -> src/actions/agency-actions.ts:94\n[D2] Plan: consumo y pedido de upgrade: src/app/(protected)/dashboard/plan/page.tsx:12 -> src/lib/plan/get-org-usage.ts:50 -> src/components/dashboard/plan/PlansShowcase.tsx:89 -> src/components/dashboard/plan/UpgradeCtaButton.tsx:88 -> src/lib/actions/upsell.ts:10\n[D2] Referidos: src/app/(protected)/dashboard/referidos/page.tsx:26 -> src/lib/referrals/referrals.service.ts:16 -> src/components/dashboard/ReferralPanel.tsx:43 -> src/lib/actions/referrals.ts:12\n[D2] Onboarding (bienvenida), fuera del lote, trazado por el foco: src/app/bienvenida/_components/BienvenidaWizard.tsx:33 -> src/app/bienvenida/_actions/complete-onboarding.ts:17 -> src/app/bienvenida/_components/Step2Conexiones.tsx:38 -> complete-onboarding.ts:38 -> src/lib/analytics.ts:60\n[D2] Resultados › Análisis mensual (Pro+): proxy.ts:154 -> analisis/page.tsx:32 -> preview.ts:6 -> plan-allows.ts:21 -> getMonthlyAnalysisForOrg.ts:53 -> netlify.toml:25 -> generateInsights.ts:99\n[D2] Descarga del informe mensual en PDF: DownloadMonthlyReportButton.tsx:21 -> client-monthly/route.ts:25 -> route.ts:38 -> get-client-monthly-report-data.ts:24\n[D2] Resultados › SEO y pedido de activación: seo/page.tsx:98 -> updateClient.ts:95 -> upsell.ts:10 -> searchconsole.ts:99 -> results-insights.ts:44\n[D2] Resultados › Tráfico + PageSpeed: trafico/page.tsx:46 -> analytics.ts:85 -> results-insights.ts:34 -> pagespeed.ts:26\n[D2] Resultados › Reputación (Google Business Profile): start/route.ts:5 -> callback/route.ts:49 -> reputacion/page.tsx:15 -> google-business-profile.ts:165\n[D2] Servicios › vitrina y solicitud de módulo: services/page.tsx:169 -> showroom.ts:58 -> PremiumModuleCard.tsx:201 -> upsell.ts:10\n[D2] Soporte › abrir ticket: soporte/page.tsx:15 -> NewTicketModal.tsx:29 -> lib/tickets/actions.ts:38 -> tickets/actions.ts:49\n[D2] Soporte › conversación y cierre del ticket: soporte/[ticketId]/page.tsx:54 -> page.tsx:106 -> TicketReplyForm.tsx:13 -> tickets/actions.ts:110 -> assert-ownership.ts:32 -> ResolveTicketButton.tsx:12\n[D2] Bienvenida (onboarding del cliente): proxy.ts:130 -> login/actions.ts:101 -> protected)/dashboard/layout.tsx:127 -> core.ts:85 -> createClientOnly.ts:85 -> createClientWithBot.ts:135 -> bienvenida/layout.tsx:9 -> page.tsx:10\n[D2] Crear ticket de soporte: soporte/page.tsx:73 -> NewTicketModal.tsx:113 -> tickets/actions.ts:49 -> lib/alerts.ts:109 -> soporte/[ticketId]/page.tsx:54\n[D2] Responder y resolver un ticket: soporte/[ticketId]/page.tsx:56 -> ClientChatThread.tsx:32 -> TicketReplyForm.tsx:14 -> ClientChatComposer.tsx:92 -> tickets/actions.ts:121 -> ResolveTicketButton.tsx:12\n[D2] Mensaje al equipo develOP: messages/page.tsx:12 -> MessageThread.tsx:50 -> ClientChatComposer.tsx:92 -> messages.ts:118\n[D2] Aprobar o pedir cambios en una entrega: project/page.tsx:131 -> ProjectTaskTabs.tsx:160 -> TaskApprovalButtons.tsx:14 -> dashboard-actions.ts:12 -> layout.tsx:101 -> notifications.ts:82\n[D2] Campana de notificaciones e historial: dashboard/layout.tsx:74 -> DashboardLayoutClient.tsx:148 -> NotificationCenter.tsx:41 -> dashboard-actions.ts:188 -> notifications.ts:46 -> NotificationHistoryModal.tsx:30\n[D2] Solicitar un modulo premium (upsell): services/page.tsx:169 -> PremiumModuleCard.tsx:201 -> upsell.ts:14 -> MessageThread.tsx:72\n[D2] Perfil de empresa, contacto y contrasena: perfil/page.tsx:74 -> ProfileForms.tsx:216 -> profile.ts:28\n[D2] Solicitar eliminacion de cuenta: ProfileForms.tsx:689 -> profile.ts:150 -> admin/tickets/_components/ticket-chat.tsx:119\n[D2] Metricas de Trafico y SEO: resultados/trafico/page.tsx:46 -> analytics.ts:36 -> trafico/page.tsx:194 -> AnalyticsMetricCard.tsx:63 -> AnalyticsAlertas.tsx:9 -> AlertaMetrica.tsx:63 -> seo/page.tsx:179 -> searchconsole.ts:104\n[D2] Referidos: referidos/page.tsx:27 -> ReferralPanel.tsx:40 -> referrals.ts:13\n[D2] Preferencias del reporte ejecutivo semanal: perfil/page.tsx:196 -> ExecutiveReportPrefsForm.tsx:45 -> executive-report-prefs.actions.ts:23\n[D2] Card de onboarding en Inicio: dashboard/page.tsx:51 -> OnboardingStatusCard.tsx:17 -> MessageThread.tsx:73\n[D2] Home: 'Tu semana en números' (leads, semáforo, velocidad, origen, embudo, campañas): src/app/(protected)/dashboard/page.tsx:51 -> src/lib/preview.ts:6 -> impersonation.ts:54 -> page.tsx:111 -> src/lib/dashboard/home-metrics.ts:85 -> home-metrics-logic.ts:22 -> home-metrics.ts:96 -> BusinessHero.tsx:46\n[D2] Home: ticket promedio y estimación de plata: MoneyEstimate.tsx:36 -> src/app/(protected)/dashboard/_actions/business-profile.actions.ts:25 -> business-profile.actions.ts:33 -> home-metrics-logic.ts:93\n[D2] Home: Resumen ejecutivo IA (lectura on-demand y regeneración manual): page.tsx:187 -> src/lib/ai/executive-brief.ts:52 -> executive-brief-input.ts:204 -> executive-brief.ts:95 -> factory.ts:20 -> providers/google.ts:1 -> AIExecutiveBriefV2.tsx:33 -> src/app/(protected)/dashboard/_actions/regenerate-brief.ts:9\n[D2] Home: bloque 'Tu cuenta' (Health Score, Atención hoy, Resultados de la semana): page.tsx:172 -> health-score.ts:59 -> HealthScore.tsx:30 -> attention.ts:25 -> AttentionStack.tsx:76 -> week-results.ts:18 -> WeekResultsGrid.tsx:21\n[D2] Email ejecutivo semanal (consume las libs del lote): vercel.json:12 -> netlify.toml:25 -> src/lib/reports/executive-weekly/build.ts:113 -> build.ts:122 -> src/lib/email/templates/executive-weekly.ts:243\n[D2] Pedido de upsell (planes, recomendaciones, módulos, SEO): UpgradeCtaButton.tsx:80 -> Recommendations.tsx:82 -> PremiumModuleCard.tsx:206 -> LockedView.tsx:68 -> resultados/seo/page.tsx:112 -> src/lib/actions/upsell.ts:14 -> schemas.ts:45 -> upsell.ts:45\n[D2] Mensaje del cliente a develOP: MessageThread.tsx:51 -> src/lib/actions/messages.ts:118 -> messages.ts:134\n[D2] Notificaciones del cliente: src/app/(protected)/dashboard/layout.tsx:72 -> NotificationCenter.tsx:114 -> notifications.ts:46 -> NotificationHistoryModal.tsx:34\n[D2] Novedades del panel: layout.tsx:110 -> get-announcements-for-org.ts:37 -> visibility.ts:59 -> AnnouncementsFeed.tsx:57 -> announcements.ts:29\n[D2] Código de referido: src/app/(protected)/dashboard/referidos/page.tsx:27 -> ReferralPanel.tsx:40 -> src/lib/actions/referrals.ts:12\n[D2] Motor de reseñas: borrador IA y publicación en Google: src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:110 -> src/lib/modules/check-activation.ts:3 -> ReviewItem.tsx:46 -> _actions.ts:20 -> src/lib/ai/review-reply-draft.ts:32 -> src/lib/integrations/google-business-profile.ts:275\n[D2] Mi plan: src/app/(protected)/dashboard/plan/page.tsx:12 -> plan/page.tsx:36 -> src/lib/plan/get-org-usage.ts:49 -> UsageMeter.tsx:75 -> PlansShowcase.tsx:45 -> plan-presentation.ts:149\n[D2] Bóveda del cliente: src/app/(protected)/dashboard/cuenta/boveda/page.tsx:63 -> boveda/page.tsx:129 -> src/lib/crypto/resolve-credential.ts:16 -> VaultRevealButton.tsx:7 -> src/components/admin/managers/VaultManager.tsx:25 -> src/actions/agency-actions.ts:94\n[D2] Facturación: plan actual: src/app/(protected)/dashboard/cuenta/facturacion/page.tsx:60 -> src/lib/billing/get-current-plan.ts:38 -> get-current-plan.ts:70 -> src/components/dashboard/CurrentPlanCard.tsx:173 -> facturacion/page.tsx:81\n[D2] Resultados: reputación, velocidad, insights, análisis mensual e informe PDF: resultados/reputacion/page.tsx:15 -> google-business-profile.ts:165 -> GBPMetricsCard.tsx:37 -> resultados/trafico/page.tsx:125 -> pagespeed.ts:26 -> PageSpeedCard.tsx:176 -> trafico/page.tsx:47 -> results-insights.ts:34\n[D2] Crear ticket de soporte (cliente): src/app/(protected)/dashboard/soporte/page.tsx:73 -> src/components/dashboard/NewTicketModal.tsx:38 -> src/lib/tickets/actions.ts:49 -> src/lib/preview.ts:6 -> src/lib/alerts.ts:109 -> src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:60\n[D2] Responder ticket (cliente y admin): src/components/dashboard/TicketReplyForm.tsx:16 -> src/lib/tickets/actions.ts:117 -> src/lib/auth/assert-ownership.ts:32 -> src/lib/email.ts:15 -> src/components/dashboard/ClientChatComposer.tsx:84\n[D2] Marcar ticket como resuelto (cliente): src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:150 -> src/components/dashboard/ResolveTicketButton.tsx:12 -> src/lib/tickets/actions.ts:205\n[D2] Reporte ejecutivo semanal (cron): vercel.json:11 -> netlify.toml:25 -> src/app/api/cron/send-executive-reports/route.ts:17 -> src/lib/reports/executive-weekly/send.ts:78 -> src/lib/reports/executive-weekly/build.ts:68 -> src/lib/ai/executive-brief.ts:52 -> src/lib/ai/brief-history.ts:24 -> top-hot-leads.ts:56\n[D2] Envío manual del reporte (admin): src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx:37 -> src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:13 -> src/lib/reports/executive-weekly/send-manual.ts:46\n[D2] Preferencias del reporte (cliente): src/app/(protected)/dashboard/cuenta/perfil/page.tsx:193 -> src/lib/reports/executive-weekly/report-eligible-plan.ts:9 -> src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts:20 -> src/lib/reports/executive-weekly/send.ts:83 -> build.ts:99\n[D2] Informe mensual en PDF (cliente): src/app/(protected)/dashboard/resultados/analisis/page.tsx:45 -> src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx:18 -> src/app/api/reports/client-monthly/route.ts:24 -> src/lib/reports/client-monthly/get-client-monthly-report-data.ts:24 -> src/lib/reports/client-monthly/monthly-report-data.ts:73 -> src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx:287\n[D2] Ideas para crecer (recomendaciones en Inicio): src/app/(protected)/dashboard/page.tsx:78 -> src/lib/recommendations/get-recommendations-for-org.ts:32 -> src/lib/recommendations/rules.ts:175 -> src/components/dashboard/home/Recommendations.tsx:78 -> src/lib/actions/upsell.ts:43 -> src/lib/upsell/dedup.ts:33\n[D2] Mi plan: consumo y vitrina: src/app/(protected)/dashboard/plan/page.tsx:12 -> src/lib/plan/get-org-usage.ts:49 -> src/lib/plan/get-plan-for-org.ts:68 -> src/lib/plan/fallback.ts:44 -> src/lib/plan/plan-presentation.ts:144 -> src/components/dashboard/plan/UpgradeCtaButton.tsx:80\n[D2] Vitrina de servicios y 'avisame cuando esté': src/app/(protected)/dashboard/services/page.tsx:169 -> src/lib/modules/showroom.ts:58 -> src/components/dashboard/PremiumModuleCard.tsx:200 -> src/lib/actions/upsell.ts:81\n[D2] Referidos: código, link y atribución pública: src/app/(protected)/dashboard/referidos/page.tsx:26 -> src/lib/referrals/referrals.service.ts:15 -> src/components/dashboard/ReferralPanel.tsx:32 -> src/lib/actions/referrals.ts:12 -> referrals.service.ts:28 -> code.ts:23 -> src/lib/referrals/code.ts:29 -> src/lib/actions/contact.ts:16\n[D2] Gating de módulos premium: src/app/(protected)/dashboard/layout.tsx:115 -> SidebarNav.tsx:76 -> src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:17 -> src/lib/modules/check-activation.ts:3 -> src/lib/data/premium-modules.ts:38 -> src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17 -> src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:106 -> motor-resenas-view.ts:38\n[D2] Leads y Health Score de Inicio alimentados por ContactSubmission global: src/app/(protected)/dashboard/page.tsx:172 -> src/lib/dashboard/week-results.ts:43 -> src/lib/health-score.ts:283 -> src/lib/actions/upsell.ts:88 -> src/lib/reports/executive-weekly/build.ts:130 -> src/lib/ai/executive-brief.ts:278\n[D5] Visitante en el sitio del cliente → widget embebido → respuesta del LLM: public/widget.js:113 -> next.config.ts:126 -> src/app/embed/[slug]/page.tsx:29 -> ChatbotEmbed.tsx:66 -> useChatbot.ts:272 -> chat/route.ts:42 -> validate-origin.ts:69 -> handleChatRequest.ts:133\n[D5] Lead capturado → avisos (dueño, develOP, sitio padre): captureLead.ts:58 -> notify.ts:87 -> decide.ts:40 -> presets.ts:65 -> ChatbotEmbed.tsx:93 -> widget.js:177\n[D5] Cliente revisa y exporta sus leads: proxy.ts:154 -> dashboard/chatbot/layout.tsx:25 -> getClientSession.ts:5 -> leads/page.tsx:36 -> multiTenantQueries.ts:75 -> ClientLeadsTable.tsx:311 -> export/route.ts:83\n[D5] Cliente abre el transcript de una conversación: conversations/page.tsx:9 -> multiTenantQueries.ts:174 -> transcript-action.ts:31\n[D5] Admin crea org + bot de cero: CreateBotForm.tsx:70 -> new/actions.ts:39 -> core.ts:58\n[D5] Admin activa, pausa o elimina un bot: BotDetailClient.tsx:134 -> preflightChecks.ts:1 -> actions.ts:25 -> resolver.ts:47\n[D5] Admin exporta leads de varios bots: BotsListClient.tsx:62 -> BulkActionBar.tsx:91 -> bulk-actions.ts:110\n[D5] Admin prueba un prompt en el sandbox de KB: KnowledgeTab.tsx:21 -> TestPromptSandbox.tsx:42 -> test-prompt/route.ts:27\n[D5] Health del chatbot (admin y público): admin/chatbot/health/page.tsx:11 -> checkHealth.ts:21 -> envValidator.ts:83 -> buildHealthVerdict.ts:24 -> api/chatbot/[slug]/health/route.ts:6\n[D5] Fallo del proveedor (control E10: credencial de Vertex vencida): handleChatRequest.ts:937 -> google.ts:71 -> logger.ts:172 -> checker.ts:189 -> persistTurn.ts:353 -> reconcile.ts:407 -> detectBotIssues.ts:85\n[D5] Webhook entrante de WhatsApp (motor): route.ts:27 -> handle-request.ts:22 -> resolve-channel.ts:24 -> auth.ts:134\n[D5] Widget de develOP: de la carga del sitio a la respuesta del bot: app/layout.tsx:137 -> ChatWidgetMount.tsx:37 -> configCache.ts:33 -> LogicCompanion.tsx:53 -> useChatbot.ts:239 -> ChatWindow.tsx:186 -> chat/route.ts:42 -> handleChatRequest.ts:136\n[D5] Credencial de Vertex vencida (E10): que pasa en cada capa: handleChatRequest.ts:937 -> reconcile.ts:366 -> useChatbot.ts:470 -> checkHealth.ts:46 -> dashboard/chatbot/layout.tsx:50\n[D5] Accion rapida sobre un lead y Deshacer: dashboard/chatbot/leads/page.tsx:36 -> BusinessLeadCard.tsx:240 -> LeadDetail.tsx:318 -> LeadStatusActions.tsx:120 -> lead-status-rules.ts:23 -> updateLeadStatus.ts:18 -> getClientSession.ts:6 -> home-metrics.ts:120\n[D5] Detalle del lead en lenguaje de dueno: dashboard/chatbot/leads/[id]/page.tsx:29 -> page.tsx:43 -> LeadDetail.tsx:161 -> lead-detail-presentation.ts:28 -> lead-intent-labels.ts:44\n[D5] Exportar contactos a CSV: api/dashboard/chatbot/leads/export/route.ts:143 -> buildLeadsCsv.ts:82\n[D5] Abuso anonimo del endpoint de chat (cuota): validate-origin.ts:69 -> origin-matcher.ts:39 -> chat/route.ts:80 -> handleChatRequest.ts:185\n[D5] Guardar la configuración del bot (admin): BotConfigEditor.tsx:220 -> BotConfigDiffModal.tsx:64 -> saveBotConfigByOrgSlug.ts:71\n[D5] Guardar la KB (admin): KnowledgeBaseEditor.tsx:184 -> SaveConfirmModal.tsx:26 -> DiffViewer.tsx:19 -> saveKnowledgeBaseByOrgSlug.ts:24\n[D5] Probar prompt con la KB en borrador: KnowledgeBaseEditor.tsx:176 -> TestPromptSandbox.tsx:33 -> test-prompt/route.ts:28\n[D5] Activar un bot pausado con preflight: BotDetailClient.tsx:227 -> preflightChecks.ts:18 -> ActivationModal.tsx:28 -> botId]/actions.ts:29\n[D5] Alta de cliente con bot (asistente): clients/new/page.tsx:14 -> OnboardingWizard.tsx:87 -> useOnboardingDraft.ts:26 -> Step1Company.tsx:23 -> Step2BotIdentity.tsx:9 -> Step3KnowledgeBase.tsx:9 -> kb-templates/index.ts:38 -> Step4Appearance.tsx:24\n[D5] Configurar y probar la integración CRM (n8n): IntegrationsTab.tsx:36 -> CrmIntegrationAdminCard.tsx:29 -> getCrmSyncHistory.ts:89 -> CrmConfigForm.tsx:39 -> saveCrmIntegration.ts:30 -> testCrmConnection.ts:22\n[D5] Reintentar un sync CRM fallido: CrmSyncHistoryList.tsx:75 -> RetrySyncButton.tsx:17 -> retryCrmSync.ts:24\n[D5] Stream de actividad en vivo: admin/chatbot/activity/page.tsx:10 -> queries.ts:36 -> ActivityLog.tsx:101 -> events/route.ts:8 -> activityFilters.ts:91\n[D5] Health del chatbot y latencia: admin/chatbot/health/page.tsx:11 -> checkHealth.ts:25 -> getLatencyHistory.ts:73 -> buildHealthVerdict.ts:24 -> LatencyChart.tsx:28\n[D5] Visitante del sitio develOP conversa con el bot (widget on-site): src/app/layout.tsx:137 -> src/components/layout/ChatWidgetMount.tsx:10 -> LogicCompanion.tsx:95 -> ChatWindow.tsx:161 -> useChatbot.ts:537 -> ThinkingAvatar.tsx:30 -> StreamingMarkdown.tsx:75 -> revealSafeMarkdown.ts:65\n[D5] Degradado y errores visibles al visitante (develOP y embed del cliente): useChatbot.ts:318 -> ChatWindow.tsx:280 -> DegradedBanner.tsx:41 -> public/widget.js:125 -> src/app/embed/[slug]/page.tsx:40 -> ChatbotEmbed.tsx:419\n[D5] Cabecera y avatar del widget (develOP y embed): ChatWindow.tsx:251 -> ChatbotEmbed.tsx:211 -> ChatHeader.tsx:61 -> AvatarRenderer.tsx:51 -> registry.ts:96 -> HeavyAvatarsLazy.tsx:27 -> NeuroAvatar.tsx:45 -> LegacyNeuroAvatarAdapter.tsx:31\n[D5] Cliente y admin eligen avatar del bot: src/app/(protected)/dashboard/chatbot/settings/page.tsx:63 -> BotPersonalization.tsx:271 -> admin/chatbots/[botId]/tabs/ConfigTab.tsx:54 -> BotConfigEditor.tsx:174 -> AppearanceTab.tsx:40 -> admin/clients/new/page.tsx:14 -> Step4Appearance.tsx:58 -> AvatarPicker.tsx:84\n[D5] Borrador del alta de cliente (admin): src/app/(protected)/admin/clients/new/page.tsx:14 -> OnboardingWizard.tsx:98 -> useOnboardingDraft.ts:26 -> onboarding/types.ts:30\n[D5] Resumen del chatbot del cliente (Overview): src/app/(protected)/dashboard/chatbot/page.tsx:15 -> clientHasChatbot.ts:5 -> page.tsx:20 -> multiTenantQueries.ts:33 -> ChatbotOverview.tsx:40 -> business-metrics.ts:19\n[D5] Cambio de estado de un tap sobre un contacto: BusinessLeadCard.tsx:240 -> LeadDetail.tsx:318 -> LeadStatusActions.tsx:133 -> updateLeadStatus.ts:18\n[D5] Guardar estado y notas desde el detalle del contacto: leads/[id]/page.tsx:29 -> LeadDetail.tsx:497 -> updateLeadStatus.ts:17\n[D5] Transcript de la conversacion origen en el detalle del contacto: leads/[id]/page.tsx:75 -> multiTenantQueries.ts:166 -> schema.prisma:152 -> LeadDetail.tsx:480\n[D5] Personalizacion del bot por el cliente: settings/page.tsx:14 -> BotPersonalization.tsx:134 -> updateBotAppearance.ts:56 -> public/widget.js:28 -> ChatbotEmbed.tsx:298\n[D5] Chat del visitante en el sitio del cliente (widget + embed): public/widget.js:21 -> src/app/embed/[slug]/page.tsx:29 -> ChatbotEmbed.tsx:27 -> useChatbot.ts:537 -> src/app/api/chatbot/[slug]/chat/route.ts:40 -> validate-origin.ts:70 -> handleChatRequest.ts:309 -> degradedResponse.ts:97\n[D5] Lista de contactos con filtros, pipeline y polling: leads/page.tsx:35 -> ClientLeadsTable.tsx:166 -> LeadPipeline.tsx:31 -> classes.ts:31\n[D5] Exportar contactos a CSV: ClientLeadsTable.tsx:311 -> ExportLeadsButton.tsx:44\n[D5] Conversaciones del cliente con transcript expandible: conversations/page.tsx:9 -> multiTenantQueries.ts:180 -> ConversationsTable.tsx:59\n[D5] Instalacion del snippet: platforms.ts:26 -> SnippetCopyBlock.tsx:28 -> PlatformInstructions.tsx:11\n[D5] Visitante conversa con el bot de un cliente (widget): useChatbot.ts:537 -> route.ts:8 -> chatRetryPolicy.ts:24\n[D5] Carga de config del widget y bot pausado: useChatbot.ts:230\n[D5] E10: credencial de Vertex vencida (que ve el visitante, que ve el cliente, como se entera el sistema): useChatbot.ts:537 -> route.ts:8 -> google.ts:53 -> handleChatRequest.ts:1046 -> logger.ts:172 -> multiTenantQueries.ts:174 -> ChatbotOverview.tsx:63 -> detectBotIssues.ts:85\n[D5] Alta de cliente con bot desde el wizard admin: Step5Review.tsx:71 -> createClientWithBot.ts:96\n[D5] Crear bot para una org existente: admin/chatbots/new/actions.ts:41 -> createBot.ts:41\n[D5] Activar un bot (preflight): BotDetailClient.tsx:136 -> preflightChecks.ts:18 -> ActivationModal.tsx:30 -> admin/chatbots/[botId]/actions.ts:42\n[D5] Editar configuracion del bot (admin): BotConfigEditor.tsx:80 -> saveBotConfig.ts:78 -> resolver.ts:11 -> handleChatRequest.ts:713 -> getPublicConfig.ts:121\n[D5] Editar la base de conocimiento (admin): KnowledgeBaseEditor.tsx:112 -> validateKB.ts:8 -> saveKnowledgeBase.ts:10\n[D5] El cliente cambia el estado de un lead: LeadStatusActions.tsx:92 -> LeadDetail.tsx:184 -> getClientSession.ts:5 -> updateLeadStatus.ts:21\n[D5] Resumen 'Mi Chatbot' del cliente: dashboard/chatbot/page.tsx:15 -> clientHasChatbot.ts:4 -> page.tsx:24 -> multiTenantQueries.ts:242 -> ChatbotOverview.tsx:40 -> business-metrics.ts:9\n[D5] Analisis mensual del negocio (resultados): dashboard/resultados/analisis/page.tsx:32 -> getMonthlyAnalysisForOrg.ts:53\n[D5] Detector de incidencias de bots: route.ts:7 -> netlify.toml:25 -> AlertSettingsClient.tsx:89 -> detectBotIssues.ts:285\n[D5] Integracion CRM (admin): CrmConfigForm.tsx:48 -> saveCrmIntegration.ts:29 -> testCrmConnection.ts:21 -> RetrySyncButton.tsx:19 -> retryCrmSync.ts:23 -> CrmIntegrationAdminCard.tsx:72 -> getCrmSyncHistory.ts:85\n[D5] Paneles admin de actividad y salud: admin/chatbot/activity/page.tsx:12 -> getActivityChartData.ts:12 -> queries.ts:36 -> admin/chatbot/health/page.tsx:13 -> getLatencyHistory.ts:73\n[D5] Turno de chat del visitante (camino feliz): src/modules/chatbot/hooks/useChatbot.ts:432 -> src/app/api/chatbot/[slug]/chat/route.ts:42 -> src/lib/security/validate-origin.ts:61 -> route.ts:97 -> handleChatRequest.ts:134 -> requestSchema.ts:37 -> resolver.ts:18 -> degradedResponse.ts:84\n[D5] Falla del proveedor LLM (Vertex vencido) — control E10: handleChatRequest.ts:1046 -> reconcile.ts:512 -> persistTurn.ts:353 -> useChatbot.ts:470 -> checkHealth.ts:47 -> buildHealthVerdict.ts:61 -> detectBotIssues.ts:85\n[D5] Config pública del widget: handleConfigRequest.ts:11 -> getPublicConfig.ts:69\n[D5] Sync de lead al CRM del cliente (n8n): saveCrmIntegration.ts:60 -> validateWebhookUrl.ts:44 -> src/modules/chatbot/server/tools/captureLead.ts:500 -> syncLeadToCrm.ts:41 -> buildLeadPayload.ts:78 -> postToN8n.ts:152 -> getEffectiveSyncStatus.ts:25 -> testCrmConnection.ts:74\n[D5] Export CSV de leads del cliente: route.ts:84 -> buildLeadsCsv.ts:132 -> csvEscape.ts:25\n[D5] Personalizar apariencia del bot (cliente): BotPersonalization.tsx:151 -> updateBotAppearance.ts:55\n[D5] Insights del chatbot: netlify/functions/generate-insights-cron.ts:62 -> src/app/api/cron/generate-insights/route.ts:36 -> src/app/api/admin/chatbot/insights/generate/route.ts:7 -> generateInsights.ts:30 -> getMonthlyAnalysisForOrg.ts:61 -> manageInsight.ts:15\n[D5] Health del bot: admin/chatbot/health/page.tsx:12 -> checkHealth.ts:21 -> buildHealthVerdict.ts:24 -> src/app/api/chatbot/[slug]/health/route.ts:6 -> proxy.ts:172\n[D5] Visitante envia mensaje y recibe respuesta en streaming (camino feliz del chat): src/modules/chatbot/hooks/useChatbot.ts:432 -> shared/historyPolicy.ts:72 -> src/app/api/chatbot/[slug]/chat/route.ts:35 -> src/lib/security/validate-origin.ts:29 -> src/modules/chatbot/server/chat/requestSchema.ts:37 -> handleChatRequest.ts:136 -> quota/checker.ts:32 -> verticals/registry.ts:39\n[D5] capture_lead: el modelo registra un lead con canales verificados y scoring: tools/captureLead.ts:616 -> captureLead.ts:212 -> handleChatRequest.ts:612 -> validateArgentinePhone.ts:52 -> scoring/calculateLeadScore.ts:259 -> persistentLogger.ts:87\n[D5] show_whatsapp_handoff: derivacion a WhatsApp con contexto para el panel: tools/showWhatsappHandoff.ts:172 -> showWhatsappHandoff.ts:96 -> persistentLogger.ts:87 -> src/lib/notifications/telegram.ts:116 -> src/modules/chatbot/server/admin/multiTenantQueries.ts:208\n[D5] confirm_contact_request: el visitante pide que lo contacten: tools/confirmContactRequest.ts:185 -> confirmContactRequest.ts:101 -> persistentLogger.ts:87\n[D5] Cuota agotada: degradacion y alerta de upsell: handleChatRequest.ts:345 -> quota/upsellAlert.ts:46 -> src/lib/isolation/registry.ts:671 -> upsellAlert.ts:68\n[D5] Falla del LLM (control positivo E10: credencial de Vertex vencida): llm/providers/google.ts:71 -> handleChatRequest.ts:1046 -> quota/checker.ts:189 -> src/modules/chatbot/hooks/useChatbot.ts:97 -> detectBotIssues.ts:85 -> health/checkHealth.ts:47 -> reports/buildWeeklyReport.ts:180\n[D5] Reporte semanal del chatbot por email: netlify.toml:28 -> src/app/api/cron/send-weekly-reports/route.ts:7 -> reports/sendWeeklyReports.ts:16 -> reports/buildWeeklyReport.ts:26 -> src/lib/email/templates/weekly-report.ts:25 -> sendWeeklyReports.ts:63\n[D5] Purga de eventos del chatbot: netlify.toml:31 -> netlify/functions/cleanup-old-events-cron.ts:21 -> src/app/api/cron/cleanup-old-events/route.ts:14 -> logging/persistentLogger.ts:154\n[D5] Mensaje entrante de WhatsApp (360dialog -> DB): route.ts:27 -> lib/rate-limit/limiter.ts:44 -> handle-request.ts:21 -> resolve-channel.ts:25 -> auth.ts:47 -> channel-credentials.ts:41 -> payload.ts:134 -> process.ts:52\n[D5] Status de entrega de un mensaje OUT: route.ts:27 -> handle-request.ts:21 -> process.ts:158 -> handle-status.ts:37 -> sendMessage.ts:204\n[D5] Eventos de salud del canal (plantillas, tier, estado del numero): route.ts:27 -> handle-request.ts:53 -> process.ts:109 -> handle-health.ts:126 -> schema.prisma:2216\n[D5] Cambio de numero (user_id_update): route.ts:27 -> handle-request.ts:53 -> process.ts:95 -> identity.ts:106 -> registry.ts:245\n[D5] Envio de salida (solo lo ejercitan los tests): tests/integration/motor-outbound.spec.ts:188 -> sendMessage.ts:204 -> window.ts:32 -> client.ts:252\n[D3] Entrada al admin: guard, badges y shell: src/app/(protected)/admin/layout.tsx:41 -> layout.tsx:43 -> AdminLayoutClient.tsx:74 -> admin-sidebar.tsx:131 -> admin-topbar.tsx:66 -> PageTransition.tsx:20\n[D3] Dashboard de KPIs (/admin): src/app/(protected)/admin/page.tsx:154 -> page.tsx:165 -> dashboard-history-charts.tsx:125 -> chart-card.tsx:18\n[D3] Triage de alertas de bots (/admin/alerts): alerts/page.tsx:5 -> src/modules/chatbot/server/admin/manageAlerts.ts:9 -> AlertsClient.tsx:46 -> alerts-filters.ts:50 -> alert-card.tsx:75 -> manageAlerts.ts:30 -> alert-column-overview.tsx:95\n[D3] Deteccion automatica de alertas (prometida, sin disparador): alerts/page.tsx:17 -> src/app/api/cron/detect-bot-issues/route.ts:13 -> netlify.toml:25 -> vercel.json:2 -> src/app/api/admin/alerts/trigger-detector/route.ts:12 -> admin/layout.tsx:11\n[D3] Publicar novedad del panel: announcements/page.tsx:11 -> announcement-publisher.tsx:53 -> announcements.actions.ts:18 -> get-announcements-for-org.ts:37\n[D3] Retirar novedad: announcement-list.tsx:93 -> announcements.actions.ts:66\n[D3] Audit log: listado, filtros y carga incremental: audit-log/page.tsx:8 -> src/lib/audit-log-queries.ts:16 -> AuditLogClient.tsx:106 -> audit-filters.ts:21 -> audit-period-filter.tsx:131\n[D3] Alta de activo en la boveda de un cliente (admin): src/components/admin/managers/VaultManager.tsx:25 -> clients/[clientId]/_components/tabs/VaultTab.tsx:26 -> agency-actions.ts:98 -> VaultManager.tsx:85 -> boveda/page.tsx:129 -> resolve-credential.ts:24\n[D3] Tarea para aprobacion del cliente: src/components/admin/managers/ProjectManager.tsx:18 -> ProjectsTab.tsx:73 -> agency-actions.ts:19\n[D3] Error de render en una pagina admin: admin/error.tsx:12 -> alerts/error.tsx:12 -> audit-log/error.tsx:12 -> AdminErrorBoundary.tsx:16 -> src/components/ui/SectionErrorBoundary.tsx:55\n[D3] Listado de clientes (activos/archivados, busqueda, filtros, fijados): src/app/(protected)/admin/clients/page.tsx:91 -> page.tsx:62 -> ClientsListClient.tsx:258\n[D3] Archivar y desarchivar cliente: ClientsListClient.tsx:708\n[D3] Eliminar cliente (hard-delete) con confirmacion por texto: ClientsListClient.tsx:609\n[D3] Acciones masivas (exportar leads, pausar bots): ClientsListClient.tsx:392 -> src/lib/bulk-actions.ts:46\n[D3] Detalle del cliente (shell, switcher y tabs): src/app/(protected)/admin/clients/[clientId]/page.tsx:28 -> page.tsx:33 -> ClientHeader.tsx:57 -> ClientSwitcher.tsx:67 -> ClientTabsNav.tsx:32\n[D3] Asignar plan (upgrade inmediato / downgrade programado): OverviewTab.tsx:72 -> PlanAssignmentCard.tsx:17 -> PlanAssignmentForm.tsx:39 -> plan.actions.ts:88\n[D3] Billing override (aplicar / quitar): OverviewTab.tsx:73 -> BillingOverrideCard.tsx:11 -> BillingOverrideForm.tsx:33 -> plan.actions.ts:244\n[D3] Editar datos del cliente: ClientHeader.tsx:135 -> edit/page.tsx:11 -> EditClientForm.tsx:58\n[D3] Notas internas inline: OverviewTab.tsx:98 -> InternalNotesCard.tsx:39\n[D3] Impersonar al cliente: ClientHeader.tsx:142 -> ImpersonateButton.tsx:42 -> client.actions.ts:8 -> src/lib/actions/impersonation.ts:12\n[D3] Re-enviar credenciales al usuario primario: OverviewTab.tsx:19 -> ResendCredentialsButton.tsx:69\n[D3] Envio manual del reporte ejecutivo: OverviewTab.tsx:74 -> ExecutiveReportCard.tsx:20 -> SendExecutiveReportButton.tsx:103\n[D3] Tab Chatbot del cliente: ChatbotTab.tsx:15 -> chatbots/new/page.tsx:16\n[D3] Tab Proyectos y crear entregable: ProjectsTab.tsx:14 -> src/actions/agency-actions.ts:14\n[D3] Tab Boveda: VaultTab.tsx:15 -> agency-actions.ts:94\n[D3] Tab Soporte: SupportTab.tsx:15\n[D3] Alta de cliente: ClientsListClient.tsx:352 -> new/page.tsx:14\n[D3] Redireccion legacy /admin/clients/[x]/chatbot/*: chatbot/[[...tab]]/page.tsx:20 -> page.tsx:28\n[D3] Kanban outbound: mover un lead de estado por drag: src/app/(protected)/admin/leads/page.tsx:21 -> page.tsx:202 -> outbound-leads-view.tsx:28 -> lead-pipeline.shared.ts:117 -> lead-pipeline.tsx:227 -> pipeline-board.tsx:48 -> droppable-column.tsx:22 -> draggable-lead-card.tsx:30\n[D3] Eliminar lead desde la card: lead-card.tsx:116 -> lead-pipeline.tsx:143\n[D3] Alta y edición de lead outbound: page.tsx:159 -> leadId]/page.tsx:277 -> lead-form.tsx:157\n[D3] Ficha del lead: estado, setter, demos, actividad y reunión: lead-card.tsx:69 -> leadId]/page.tsx:183 -> change-status-select.tsx:37 -> assign-setter-control.tsx:63 -> demo-form.tsx:113 -> lead-activity-feed.tsx:75 -> reunion-panel.tsx:61\n[D3] Inbound: listar por período y convertir a Lead OS: inbound-period-filter.tsx:72 -> page.tsx:111 -> inbound-leads-table.tsx:100\n[D3] Demanda de módulos: page.tsx:120 -> module-demand-table.tsx:30 -> upsell.ts:81\n[D3] Bandeja de mensajes del admin: abrir conversación y marcar leído: messages/layout.tsx:17 -> conversation-list-loader.tsx:10 -> message.actions.ts:44 -> conversation-list.tsx:104 -> orgId]/page.tsx:24 -> message-thread.tsx:30\n[D3] Admin responde a un cliente (mensaje + email): message-input.tsx:63 -> message.actions.ts:173 -> src/lib/email/admin-message-notification.ts:19\n[D3] Tablero de proyectos: listar, filtrar y mover de estado: admin/projects/page.tsx:19 -> _actions/project.actions.ts:934 -> _components/projects-board.tsx:89 -> projects-filters.ts:62 -> _components/projects-filters.ts:158 -> _components/project-list.tsx:73 -> droppable-project-column.tsx:23 -> draggable-project-card.tsx:37\n[D3] Alta y edición de proyecto: _components/projects-board.tsx:192 -> projectId]/layout.tsx:232 -> layout.tsx:140 -> page.tsx:9 -> _components/project-form.tsx:152 -> _actions/project.actions.ts:593\n[D3] Ficha del proyecto: resumen, estado y ver como cliente: projectId]/layout.tsx:105 -> projectId]/page.tsx:99 -> projectId]/_components/project-status-control.tsx:43 -> _actions/project.actions.ts:722\n[D3] Eliminar proyecto (tablero y ficha): _components/draggable-project-card.tsx:84 -> _components/projects-board.tsx:149 -> _actions/project.actions.ts:782 -> projectId]/page.tsx:325 -> projectId]/_components/delete-project-button.tsx:58 -> src/lib/actions/projects.ts:108\n[D3] Pagos: hitos y mantenimiento mensual: projectId]/payments/page.tsx:70 -> _actions/milestone.actions.ts:19 -> _actions/maintenance.actions.ts:90 -> schema.prisma:1047\n[D3] Tareas del proyecto y envío a aprobación del cliente: projectId]/tasks/page.tsx:17 -> src/app/(protected)/admin/team/_actions/task.actions.ts:321 -> _components/task-form.tsx:108 -> task.actions.ts:197 -> _components/task-list.tsx:187 -> src/lib/actions/projects.ts:177\n[D3] Horas del proyecto: projectId]/hours/page.tsx:28 -> src/app/(protected)/admin/team/_actions/time-entry.actions.ts:270 -> _components/time-entry-panel.tsx:138 -> time-entry.actions.ts:136\n[D3] Configuración: guardar datos de contacto, alertas, meta de demos y Telegram: src/app/(protected)/admin/settings/page.tsx:6 -> src/app/(protected)/admin/settings/_actions/settings.actions.ts:87 -> src/app/(protected)/admin/settings/_components/settings-console.tsx:100 -> settings.actions.ts:141 -> settings-console.tsx:117 -> src/lib/alerts.ts:111 -> src/lib/notifications/telegram.ts:41\n[D3] Configuración: cambiar el precio de un módulo premium: settings-console.tsx:404 -> settings.actions.ts:175\n[D3] Tickets: bandeja, detalle, respuesta y cambio de estado: src/app/(protected)/admin/tickets/page.tsx:6 -> src/app/(protected)/admin/tickets/_actions/ticket.actions.ts:51 -> src/app/(protected)/admin/tickets/_components/ticket-list.tsx:86 -> ticket-date-filter.tsx:88 -> ticket-list.tsx:166 -> src/app/(protected)/admin/tickets/[ticketId]/page.tsx:13 -> ticket.actions.ts:133 -> ticket-chat.tsx:99\n[D3] Solicitud de eliminación de cuenta vista desde un ticket: ticket-chat.tsx:118 -> src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:251\n[D3] Referidos: confirmar conversión y mes bonificado: src/app/(protected)/admin/referrals/page.tsx:9 -> referrals-admin-table.tsx:79 -> referrals.admin.actions.ts:13\n[D3] Equipo: workload por miembro: src/app/(protected)/admin/team/page.tsx:19 -> team/page.tsx:43 -> member-workload.tsx:215\n[D3] Carga de horas en un proyecto: src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:8 -> time-entry.actions.ts:140 -> time-entry.schemas.ts:33 -> src/app/(protected)/admin/projects/[projectId]/hours/page.tsx:58\n[D3] Tareas de proyecto (crear, editar, borrar): src/app/(protected)/admin/projects/_components/task-form.tsx:7 -> task.actions.ts:155 -> task-list.tsx:17\n[D3] Detector de alertas de bots disparado a mano: src/app/(protected)/admin/settings/alerts/page.tsx:7 -> AlertSettingsClient.tsx:85 -> src/app/api/admin/alerts/trigger-detector/route.ts:5 -> route.ts:3\n[D3] Envío manual de reportes semanales del chatbot: src/app/(protected)/admin/settings/reports/page.tsx:7 -> ReportSettingsClient.tsx:30 -> src/app/api/admin/reports/send-now/route.ts:5 -> route.ts:3\n[D3] Reenviar credenciales a un usuario: src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx:18 -> resend-credentials/route.ts:16 -> route.ts:39\n[D3] Reporte ejecutivo semanal enviado a mano para una org: src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:13 -> route.ts:35\n[D3] Contacto público y atribución de referido: src/app/contact/page.tsx:71 -> contact/page.tsx:119 -> src/lib/actions/contact.ts:100\n[D3] Alertas de la agencia por webhook (inmediatas y periódicas): src/lib/tickets/actions.ts:8 -> src/lib/actions/contact.ts:6 -> messages.ts:4 -> upsell.ts:4 -> referrals.service.ts:4 -> src/lib/alerts.ts:109 -> alerts.ts:131 -> src/app/api/cron/alerts/route.ts:2\n[D3] Acciones masivas sobre clientes: src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:16 -> src/lib/bulk-actions.ts:8 -> bulk-actions.ts:28\n[D3] Audit log: lectura y escritura: src/app/(protected)/admin/audit-log/page.tsx:4 -> src/lib/audit-log-queries.ts:16 -> audit-log-queries.ts:53 -> src/lib/audit-log.ts:17\n[D3] Ficha del cliente: tabs Chatbot, Proyectos y Bóveda: admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx:101 -> src/components/admin/managers/ChatbotManager.tsx:35 -> tabs/ProjectsTab.tsx:7 -> ProjectManager.tsx:12 -> src/actions/agency-actions.ts:14 -> tabs/VaultTab.tsx:6 -> VaultManager.tsx:19\n[D3] Editar datos del cliente (admin): src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:79 -> src/modules/chatbot/server/admin/updateClient.ts:29 -> updateClient.ts:33 -> EditClientForm.tsx:93\n[D3] Notas internas inline del cliente: src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx:43 -> src/modules/chatbot/server/admin/updateClientInternalNotes.ts:20 -> updateClientInternalNotes.ts:22 -> InternalNotesCard.tsx:52\n[D3] Archivar / desarchivar cliente: src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:164 -> src/modules/chatbot/server/admin/archiveClient.ts:17 -> archiveClient.ts:25\n[D3] Eliminar cliente definitivamente (hard-delete): ClientsListClient.tsx:196 -> src/modules/chatbot/server/admin/hardDeleteClient.ts:110 -> hardDeleteClient.ts:126 -> prisma/schema.prisma:527\n[D3] Alertas: listar, marcar vista y resolver: src/app/(protected)/admin/alerts/page.tsx:5 -> src/modules/chatbot/server/admin/manageAlerts.ts:9 -> src/app/(protected)/admin/alerts/AlertsClient.tsx:90 -> manageAlerts.ts:31 -> AlertsClient.tsx:110\n[D3] Eliminar proyecto desde el detalle admin: src/app/(protected)/admin/projects/[projectId]/page.tsx:323 -> src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx:59 -> src/lib/actions/projects.ts:109 -> projects.ts:111 -> project.actions.ts:803\n[D3] Enviar entrega a aprobación del cliente: src/app/(protected)/admin/projects/_components/task-list.tsx:618 -> src/lib/actions/projects.ts:178 -> projects.ts:184\n[D3] Formulario público de contacto: src/app/contact/page.tsx:66 -> src/lib/actions/contact.ts:100 -> contact.ts:23 -> src/lib/rate-limit/limiter.ts:44 -> src/lib/actions/schemas.ts:56\n[D3] Demanda medida de módulos premium (admin): src/app/(protected)/admin/leads/_actions/module-demand.actions.ts:25 -> module-demand.actions.ts:27 -> src/lib/modules/demand.ts:87 -> demand.ts:137 -> src/app/(protected)/admin/leads/_components/module-demand-table.tsx:3\n[D7] Conexión OAuth de Google Business (SUPER_ADMIN, sin botón en la UI): src/app/api/auth/google-business/start/route.ts:6 -> src/lib/integrations/google-business-profile.ts:37 -> src/lib/security/oauth-state.ts:50 -> src/app/api/auth/google-business/callback/route.ts:14 -> oauth-state.ts:72 -> callback/route.ts:38 -> google-business-profile.ts:49 -> src/lib/integrations/gbp-connection.ts:39\n[D7] Conexión OAuth de Tiendanube: ConnectStoreCard.tsx:39 -> src/app/api/auth/tiendanube/start/route.ts:10 -> src/lib/integrations/tiendanube.ts:17 -> src/app/api/auth/tiendanube/callback/route.ts:28 -> tiendanube.ts:24 -> callback/route.ts:63 -> tienda-conectada/page.tsx:306\n[D7] Lectura de Reputación GBP con caché (y su caída en el acierto): reputacion/page.tsx:15 -> src/lib/integrations/google-business-profile.ts:165 -> google-business-profile.ts:178 -> GBPMetricsCard.tsx:124\n[D7] Cron agendado en Netlify -> ruta Next: netlify.toml:25 -> netlify/functions/cleanup-old-events-cron.ts:7 -> generate-insights-cron.ts:45 -> send-weekly-reports-cron.ts:64 -> src/lib/cron/cron-secret.ts:40 -> cleanup-old-events/route.ts:22 -> generate-insights/route.ts:36 -> send-weekly-reports/route.ts:13\n[D7] Crons sin disparador: vercel.json:4 -> netlify.toml:1 -> regenerate-briefs/route.ts:40 -> send-executive-reports/route.ts:26 -> detect-bot-issues/route.ts:13 -> alerts/route.ts:13 -> src/lib/alerts.ts:195\n[D7] Email transaccional por Brevo: src/lib/email/brevo-service.ts:17 -> brevo-service.ts:20\n[D7] Email marketing por Brevo REST y baja por contacto: src/lib/integrations/brevo.ts:9 -> brevo.ts:60 -> src/app/api/email/optout/[contactId]/route.ts:69 -> src/lib/email/unsubscribe-token.ts:97 -> optout/route.ts:91\n[D7] Baja de un clic del reporte ejecutivo: src/lib/email/unsubscribe-token.ts:57 -> src/lib/email/templates/executive-weekly.ts:289 -> route.ts:39\n[D7] Formulario del pie del home -> n8n desde el navegador: src/app/page.tsx:42 -> src/components/sections/home/Footer.tsx:442 -> Footer.tsx:78 -> src/lib/actions/contact.ts:100\n[D7] Inicialización de Sentry: src/instrumentation.ts:4 -> src/lib/sentry/scrub-pii.ts:116 -> src/instrumentation-client.ts:4 -> build/cjs/config/webpack.js:318 -> next.config.ts:254\n[D7] Aviso por Telegram: src/lib/notifications/telegram.ts:67 -> telegram.ts:39\n[D7] GA4 y Search Console con la service account de develOP: trafico/page.tsx:46 -> seo/page.tsx:179 -> src/lib/analytics.ts:85 -> analytics.ts:111 -> src/lib/searchconsole.ts:99\n[D7] E10 · Vertex AI (control positivo): src/modules/chatbot/server/llm/providers/google.ts:54 -> handleChatRequest.ts:1057 -> checkHealth.ts:47 -> detectBotIssues.ts:85 -> src/instrumentation.ts:15\n[D7] E10 · Brevo (BREVO_API_KEY, BREVO_FROM_EMAIL, BREVO_FROM_NAME): src/lib/email/brevo-service.ts:4 -> src/lib/integrations/brevo.ts:4 -> brevo-service.ts:40 -> brevo.ts:81\n[D7] E10 · Resend (RESEND_API_KEY, restos): src/lib/email.ts:4 -> src/lib/email/notify-message.ts:13 -> email.ts:21 -> notify-message.ts:14 -> admin-message-notification.ts:42\n[D7] E10 · GA4 y Search Console (GOOGLE_SERVICE_ACCOUNT_KEY): src/lib/analytics.ts:95 -> src/lib/searchconsole.ts:102 -> settings.ts:279 -> analytics.ts:104 -> searchconsole.ts:108\n[D7] E10 · Google Business Profile (client OAuth + tokens por org): src/lib/integrations/google-business-profile.ts:29 -> gbp-connection-logic.ts:163\n[D7] E10 · Tiendanube (client + token por org): src/lib/integrations/tiendanube.ts:21\n[D7] E10 · Cal.com (calComApiKey por org): src/lib/integrations/cal-com.ts:24 -> cal-com-v2.ts:4\n[D7] E10 · PageSpeed (GOOGLE_PAGESPEED_API_KEY): src/lib/integrations/pagespeed.ts:41\n[D7] E10 · Telegram (AgencySettings -> TELEGRAM_BOT_TOKEN/CHAT_ID): src/lib/notifications/telegram.ts:41\n[D7] E10 · n8n (webhooks de contacto y API): src/lib/n8n.ts:19 -> src/components/sections/home/Footer.tsx:81 -> n8n.ts:183 -> Footer.tsx:84\n[D7] E10 · Sentry (NEXT_PUBLIC_SENTRY_DSN; SENTRY_DSN sin lector vivo): src/instrumentation.ts:7 -> src/instrumentation-client.ts:5 -> sentry.server.config.ts:9 -> sentry.edge.config.ts:6 -> next.config.ts:254\n[D7] E10 · CRON_SECRET: src/lib/cron/cron-secret.ts:41 -> regenerate-briefs/route.ts:19 -> send-executive-reports/route.ts:18 -> alerts/route.ts:5 -> os-follow-up/route.ts:154\n[D7] E10 · Secretos propios (HMAC y cifrado): unsubscribe-token.ts:7 -> oauth-state.ts:27 -> impersonation.ts:16 -> encryptSecret.ts:26 -> sendMessage.ts:210 -> credential-cipher.ts:35 -> api/qa/login/route.ts:102",
+ "higiene": true,
+ "contexto": "ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas, empezando el campo 'alerta' con su id entre corchetes; si se confirma, tambien va como hallazgo):\n- [D8-A1] Build: BP.4 (docs/bitacora-roadmap.md:9240-9242) dice que entra en el heap por defecto; P1.A (:11110), P5.3 (:11762), UTM.1 (:12746) y PRIVACIDAD (:16845) dicen OOM sin 6-8 GB; varios sprints excluyen el build rojo como gate. Cruza con el previo CO-1 (ignoreBuildErrors/ignoreDuringBuilds).\n- [D8-A2] Script dev: --turbopack (B1.2 :313) contra webpack por defecto (B3.3 :1369) y 'next dev --webpack' (MS-7 :5369).\n- [D8-A3] CI: el comentario de C1 sobre 'type-stripping nativo' en ci.yml es incorrecto segun C1b (docs/bitacora-beta-3.md:5413).\n- [D8-A4] Repo: B14.3 (docs/bitacora-roadmap.md:9452-9456) y PRIVACIDAD (:16772) se apoyan en que el repo es publico; sigue publico (gh, 2026-10-13 y 2026-10-14; DEC-54): siguen vigentes.\nPATRONES DEFECTUOSOS QUE YA APARECIERON EN OTROS DOMINIOS (buscalos en tu lote; cada aparicion es un hallazgo con su propia evidencia, o se suma al hallazgo del mismo patron si es la misma causa raiz):\n- [D1-c1] IP del cliente tomada del primer valor de X-Forwarded-For (falsificable segun la plataforma) para rate limit y auditoria (visto en: src/app/login/actions.ts:53, src/lib/security/auth-rate-limit.ts:39, src/lib/audit-log.ts:21)\n- [D1-c1] Alta de usuarios sin normalizar el email (trim + lowercase) mientras el login normaliza (visto en: createClientOnly.ts:26, createClientWithBot.ts:34, admin/chatbots/new/actions.ts:27 -> onboarding/core.ts:70)\n- [D1-c1] Actions que usan session.user.organizationId (fallan en preview admin) frente a resolveOrgId (escriben como el cliente) (visto en: src/lib/actions/profile.ts:29, src/lib/actions/upsell.ts:16 vs email-marketing/_actions.ts:18)\n- [D1-c1] Mensajes internos de error devueltos al cliente (toErrorMessage o error instanceof Error ? error.message) (visto en: src/lib/actions/profile.ts:72, src/lib/actions/settings.ts:92, src/lib/action-utils.ts:31)\n- [D1-c1] Envios de email cuyo resultado se ignora o que fingen exito sin API key (visto en: src/auth.ts:104, src/lib/actions/settings.ts:194, src/lib/email.ts:15-16)\n- [D1-c1] orgMemberships con take:1 sin orderBy (org primaria no deterministica) (visto en: src/auth.ts:37, src/app/login/actions.ts:94, src/app/api/qa/login/route.ts:126)\n- [D1-c1] Texto funcional en text-zinc-600/700 sobre #080a0c (contraste < 4,5:1) (visto en: src/app/login/page.tsx:263, :367, :404; forgot-password, reset-password, accept-invite)\n- [D1-c1] Bloques de error sin role=alert/aria-live (visto en: login/page.tsx:358, forgot-password/page.tsx:157, ResetPasswordForm.tsx:212, AcceptInviteForm.tsx:217)\n- [D1-c1] Paginas admin sin guard propio (dependen de admin/layout + proxy) (visto en: 22 de 34 paginas /admin (p. ej. admin/leads/page.tsx, admin/tickets/[ticketId]/page.tsx, admin/settings/page.tsx))\n- [D1-c1] Modulos 'use server' sin importadores (actions muertas pero publicas si se reconectan) (visto en: src/lib/actions/invitations.ts, src/lib/actions/settings.ts, src/lib/actions/clients.ts)\n- [D1-c1] Fallos manejados que solo hacen console.error (no llegan a Sentry; no hay captureConsoleIntegration) (visto en: forgot-password/actions.ts:105, audit-log.ts:40, brevo-service.ts:41)\n- [D1-c1] Tokens de un solo uso guardados en claro en la DB (visto en: forgot-password/actions.ts:73, invitations.ts:102, settings.ts:180)\n- [D1-c1] requireSuperAdmin reimplementado en varios modulos (visto en: src/lib/auth-guards.ts:3, src/lib/actions/settings.ts:20, src/modules/chatbot/server/admin/requireSuperAdmin.ts)\n- [D1-c1] Config de NextAuth duplicada entre auth.ts y auth.config.ts que diverge (maxAge, callbacks) (visto en: session.maxAge solo en auth.ts:81; jwt callback solo en auth.ts:205)\n- [D1-c2] Página de servidor que lee la base confiando en el guard del layout, sin auth()/require* propio. El render parcial de RSC no re-ejecuta el layout y el proxy decide con claims viejos del JWT (visto en: 15 páginas de /admin (admin/page.tsx:182, team/page.tsx:19, referrals/page.tsx:9, projects/page.tsx:9, leads/page.tsx:23, leados/page.tsx:34, ...). Control: /se)\n- [D1-c2] IP de cliente tomada del primer valor de X-Forwarded-For (visto en: lib/security/auth-rate-limit.ts:39 (forgot, reset, contacto), lib/audit-log.ts:21, app/login/actions.ts:53 (SEC-007) y modules/chatbot/server/chat/requestSchema)\n- [D1-c2] Resolución de la org de sesión paralela a resolveOrgId: orgMember.findFirst sin orderBy, sin mirar el rol y sin honrar la impersonación (visto en: modules/chatbot/server/admin/getClientSession.ts:5-33. La usan dashboard/chatbot/* y api/dashboard/chatbot/leads/export. Puede discrepar de session.user.organiz)\n- [D1-c2] Header de request que nadie setea, leído como si lo pusiera el servidor (x-pathname) (visto en: (protected)/dashboard/layout.tsx:124: el gate de onboarding se saltea mandando el header. dashboard/modules/email-marketing/layout.tsx:24: la tab activa nunca s)\n- [D1-c2] Interpolación sin escapar en el HTML de emails (la variable 'safeName' no escapa) (visto en: lib/email/templates/password-reset.ts:12 y el h1. Es el nombre propio del destinatario, así que el riesgo es bajo. Revisar welcome-client.ts, bot-activated.ts y)\n- [D1-c2] Servidores de desarrollo y QA escuchando en todas las interfaces (sin -H) con flags de QA encendidos (visto en: package.json:7-13 (dev, dev:qa, start, start:qa, start:setter, start:galeria). QA_ALLOW_LOCALHOST también abre los escapes de validate-origin.ts (D3).)\n- [D1-c2] Server action exportada que escribe estado o auditoría sin chequear rol (visto en: lib/actions/impersonation.ts:50 (stopImpersonationAction) y su wrapper admin/clients/_actions/client.actions.ts:12.)\n- [D1-c3] Org de la impersonación resuelta al momento de la acción desde una cookie global (resolveOrgId en server actions que escriben) (visto en: (protected)/dashboard/_actions/business-profile.actions.ts:25, dashboard/modules/email-marketing/_actions.ts:18, lib/tickets/actions.ts, executive-report-prefs.)\n- [D1-c3] Claves de rate limit armadas con datos del pedido sin validar: cada valor nuevo es una fila nueva en rate_limit, que no se purga (visto en: api/motor/webhook/[channelToken]/route.ts:34 (token de la URL), modules/chatbot/server/chat/handleChatRequest.ts:185 (sessionId del body), forgot-password/actio)\n- [D1-c3] Texto libre sin .max() que termina en el prompt del chatbot o en emails (visto en: lib/actions/schemas.ts:15-16, bienvenida/_actions/complete-onboarding.ts:10, actions/onboarding-actions.ts:20, lib/actions/clients.ts:26)\n- [D1-c3] Mutación en la base y después envío por Brevo dentro de la respuesta (SDK con 60 s x 3 intentos): si la función expira, se pierde lo que solo se devolvía al final (visto en: modules/chatbot/server/admin/createClientOnly.ts:142 (tempPassword solo en la respuesta), api/admin/users/[userId]/resend-credentials/route.ts:85, forgot-passwo)\n- [D1-c3] Auditoría escrita después del efecto con un helper que traga el error sin Sentry (visto en: 43 llamadas en 31 archivos; p. ej. modules/chatbot/server/admin/hardDeleteClient.ts:166, archiveClient.ts:37, reset-password/actions.ts:87)\n- [D1-c3] Guards que lanzan Error('Unauthorized') genérico sin try/catch: sesión vencida o invalidada a mitad de una acción lleva a error.tsx y a un evento en Sentry en vez de a /login (visto en: lib/actions/projects.ts:109, :159, :178; (protected)/setter/page.tsx:29)\n- [D1-c3] Fallback de URL base a http://localhost:3000 en links de emails: link roto si falta la variable en producción (check-env.js no corre en el build) (visto en: forgot-password/actions.ts:87 y 11 sitios más (lib/tickets/actions.ts:156, lib/alerts.ts:50, lib/email/unsubscribe-token.ts:58 y :118, lib/reports/executive-wee)\n- [D1-c3] Tokens de un solo uso en el query string que pueden ir a Sentry: scrub-pii no cubre tokens hex y no hay beforeSendTransaction (tracesSampleRate 0.1 y replays on error en el cliente) (visto en: lib/sentry/scrub-pii.ts:53-67, instrumentation-client.ts:6-11)\n- [D1-c3] Escritura fire-and-forget en cada navegación a una columna sin lectores, que durante la impersonación marca al SUPER_ADMIN (visto en: (protected)/dashboard/layout.tsx:80-87)",
+ "lotes": [
+  {
+   "id": "D8-L1",
+   "loc": 2787,
+   "archivos": [
+    ".github/workflows/ci.yml",
+    ".github/workflows/db-backup.yml",
+    ".dependency-cruiser.cjs",
+    ".env.example",
+    ".gitattributes",
+    ".gitignore",
+    "eslint.config.mjs",
+    "knip.ts",
+    "netlify.toml",
+    "next.config.ts",
+    "package.json",
+    "postcss.config.mjs",
+    "src/app/api/version/route.ts",
+    "src/app/error.tsx",
+    "src/app/global-error.tsx",
+    "src/app/globals.css",
+    "src/app/layout.tsx",
+    "src/app/not-found.tsx",
+    "tailwind.config.ts",
+    "tsconfig.json"
+   ],
+   "previas": [
+    {
+     "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+     "linea": 2181,
+     "id_previo": "S4-01 (lente S4)",
+     "titulo": "El escape origin === https://develop.com.ar de validateOrigin se aplica a TODOS los bots y precede al check de allowedDomains: la allowlist de dominios del widget es un no-op para cualquier cliente que mande ese header",
+     "severidad_original": "ALTO",
+     "estado_declarado": "CONFIRMADO, vs. ledger NUEVO; abierto en 49fec9b. El verificador (:2217) sostiene ALTO pero dice que deberia ser CAMBIO_DE_ESTADO (CLEAN-1.2-ORIGIN ya citaba las mismas lineas como duplicacion DRY) y que el sub-vector /embed solo aplica si develop.com.ar es el host servido. Fix #2 de la tabla 3.4 (:71).",
+     "archivos_citados": [
+      "src/lib/security/validate-origin.ts:69-75",
+      "src/lib/security/validate-origin.ts:77-85",
+      "src/modules/chatbot/server/chat/handleChatRequest.ts:257-263",
+      "src/app/api/chatbot/[slug]/chat/route.ts:43",
+      "src/app/embed/[slug]/page.tsx:29-37",
+      "next.config.ts:85-89",
+      "src/proxy.ts:172"
+     ],
+     "dominio_probable": "D5",
+     "resumen": "validateOrigin devuelve allowed:true para Origin develop.com.ar/www antes de chequear allowedDomains y para cualquier slug (duplicado en isOriginWithinPlanCap): sin auth se conversa con el bot de cualquier org, se consume su cupo y Vertex, se obtienen respuestas con su KB y se inyectan leads."
+    },
+    {
+     "doc": "docs/audit-repo-20260707.md",
+     "linea": 180,
+     "id_previo": "CO-1",
+     "titulo": "El build de prod deploya ignorando tipos y lint",
+     "severidad_original": "ALTA",
+     "estado_declarado": "VISTO; cruce (a) parcial -> accionar (:324); Tier 1 #7 (:237). Abierto; posterior docs/baselines/2026-07-auditoria-seguridad.md:3682 (SEC-16 / CLEAN-H-BUILDGATE) 'estado identico' y :90 agrega un error de tipos real enmascarado (export getProvidedCronSecret en route.ts) con build exit 0.",
+     "archivos_citados": [
+      "next.config.ts:10-15",
+      "src/lib/searchconsole.ts",
+      "ts_errors.txt"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "next.config.ts con typescript.ignoreBuildErrors y eslint.ignoreDuringBuilds en true: Netlify puede deployar con errores de tipos/lint; la unica red es tsc --noEmit manual."
+    },
+    {
+     "doc": "docs/auditoria-seguridad-2026-05.md",
+     "linea": 72,
+     "id_previo": "SEC-DEP-01",
+     "titulo": "Next.js 16.2.1 vulnerable a middleware bypass + SSRF + auth bypass",
+     "severidad_original": "P0",
+     "estado_declarado": "Severidad PROPUESTA por el auditor, a confirmar por Franco (:6); abierto al 2026-05-26 (fix: upgrade >=16.2.6). Posterior: docs/baselines/2026-07-auditoria-seguridad.md:3452 (S8-03, MEDIO) lo declara REABIERTO con next@16.2.9 y 9 advisories (<16.2.11).",
+     "archivos_citados": [
+      "package.json:49"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "Next.js 16.2.1 con 14 advisories activos (bypass de middleware/proxy por prefetch y por inyeccion de parametros dinamicos, SSRF en WebSocket upgrades, DoS, XSS, cache poisoning)."
+    },
+    {
+     "doc": "docs/auditoria-seguridad-2026-05.md",
+     "linea": 217,
+     "id_previo": "SEC-MISC-01",
+     "titulo": "Headers de seguridad globales faltantes en next.config.ts",
+     "severidad_original": "P1",
+     "estado_declarado": "Propuesta P1; abierto. Posterior: docs/baselines/2026-07-auditoria-seguridad.md:3121 y :3340 lo dan resuelto PARCIAL (headers agregados, CSP global en Report-Only, X-Frame-Options solo /(admin|dashboard); ver S7-05 :3112).",
+     "archivos_citados": [
+      "next.config.ts:18-37"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "Sin HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy ni CSP fuera de /embed: clickjacking en /admin y /dashboard y sin defensa en profundidad contra XSS."
+    },
+    {
+     "doc": "docs/auditoria-total-pre-deploy.md",
+     "linea": 36,
+     "id_previo": "O-2",
+     "titulo": "Build de prod ROTO (@googleapis/webmasters declarada pero no instalada)",
+     "severidad_original": "ALTO (rojo; blocker, 'trivial y critico')",
+     "estado_declarado": "Blocker reproducido 2 veces, abierto al 2026-06-02; quick win #1 (:102). Posterior: docs/baselines/2026-07-auditoria-seguridad.md:90 reporta npm run build exit 0 en 49fec9b (indicio de resolucion, no lo cierra explicitamente); docs/audit-repo-20260707.md:181 menciona un error tsc baseline en src/lib/searchconsole.ts.",
+     "archivos_citados": [
+      "package.json:28",
+      "src/lib/searchconsole.ts:2",
+      "src/app/api/reports/monthly/route.ts"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "next build fallaba con Module not found por @googleapis/webmasters declarada pero ausente en node_modules, importada por searchconsole.ts y arrastrada por /api/reports/monthly; bloqueaba deploy y medicion de bundle."
+    },
+    {
+     "doc": "docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md",
+     "linea": 202,
+     "id_previo": "sin-id",
+     "titulo": "No hay ningún gate automático sobre el repo: ignoreBuildErrors, sin script tsc y e2e.yml anidado que Actions no lee",
+     "severidad_original": "Sin escala formal; el doc lo llama 'El que más pesa' (:202) y 'EL HALLAZGO TRANSVERSAL' (§4, :1150)",
+     "estado_declarado": "VERIFICADO con dos lecturas (:1152-1167); sin verificar las protecciones de rama y de deploy (:1182-1184). Posterior: C0-RED-DE-VERIFICACION-2026-08.md:15-20 lo verifica (el único workflow de raíz es db-backup.yml) y :53-56 mide tsc con 0 errores y build verde sin ignoreBuildErrors.",
+     "archivos_citados": [
+      "next.config.ts:31-32",
+      "package.json",
+      ".github/workflows/e2e.yml (anidado dentro de logic-core-v3)"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "El build no chequea tipos, no hay script de typecheck y el workflow de invariantes/tests/e2e vive en un .github anidado que GitHub Actions no ejecuta. Los invariantes solo corren a mano."
+    },
+    {
+     "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md",
+     "linea": 61,
+     "id_previo": "NUEVO-P0-2",
+     "titulo": "npm run build falla: @googleapis/webmasters no instalado y node_modules desfasado",
+     "severidad_original": "P0",
+     "estado_declarado": "NUEVO (abierto). Lo reitera 2026-06-revalidacion.md:55 (N-2). Posterior: REGRESION-FINAL-2026-07.md:103 registra build verde y C0-RED-DE-VERIFICACION-2026-08.md:31-32 build con exit 0, aunque ninguno cita este ID.",
+     "archivos_citados": [
+      "src/lib/searchconsole.ts:2",
+      "package.json"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "Hay un paquete declarado que no está instalado, y Next instalado es 16.2.1 contra ^16.2.6 declarado. Sin build no hay deploy."
+    },
+    {
+     "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md",
+     "linea": 197,
+     "id_previo": "SEC-DEP-01",
+     "titulo": "Next.js vulnerable (npm audit de mayo: 1 crítica + 5 high)",
+     "severidad_original": "P0 de la auditoría de seguridad de mayo; el doc lo considera 'sobredimensionado' (:36, :197)",
+     "estado_declarado": "CERRADO: Next ^16.2.6 declarado y npm audit con 2 moderate. Salvedad: el instalado seguía siendo 16.2.1 (:24).",
+     "archivos_citados": [
+      "package.json"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "Viene de docs/auditoria-seguridad-2026-05.md, que está fuera de la lista."
+    },
+    {
+     "doc": "docs/audits/2026-06-revalidacion.md",
+     "linea": 55,
+     "id_previo": "N-2",
+     "titulo": "npm run build roto: @googleapis/webmasters no instalado y Next 16.2.1 contra ^16.2.6",
+     "severidad_original": "NUEVO-P0 (:18)",
+     "estado_declarado": "NUEVO (abierto) (:55, :136). Posterior: REGRESION-FINAL-2026-07.md:103 registra build verde, aunque sin citar el ID.",
+     "archivos_citados": [
+      "src/lib/searchconsole.ts:2",
+      "package.json"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "Es el mismo hallazgo que NUEVO-P0-2 del doc hermano; según el doc, npm install lo arregla."
+    },
+    {
+     "doc": "docs/audits/2026-06-revalidacion.md",
+     "linea": 90,
+     "id_previo": "SEC-DEP-01",
+     "titulo": "Next.js vulnerable",
+     "severidad_original": "P0 de mayo, 'sobredimensionado' (:90)",
+     "estado_declarado": "CERRADO: Next ^16.2.6 declarado y npm audit con 2 moderate. Salvedad: el instalado sigue en 16.2.1 (ver N-2) (:90).",
+     "archivos_citados": [
+      "package.json"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "Re-verificación de un hallazgo de auditoria-seguridad-2026-05.md (fuera de la lista)."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 63,
+     "id_previo": "SEC-DEP-01",
+     "titulo": "Next.js 16.2.1 con 14 advisories (middleware bypass, SSRF, XSS)",
+     "severidad_original": "P0 (sev. original de auditoria-seguridad-2026-05)",
+     "estado_declarado": "CERRADO-VERIFICADO (:116): next@16.2.9 y npm audit --omit=dev sin critical ni high al 2026-07-10",
+     "archivos_citados": [
+      "package.json"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "Hallazgo de la auditoría de seguridad de 2026-05, reconciliado en el ledger de la maestra. Re-verificar la versión de next y el npm audit actual."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 64,
+     "id_previo": "SEC-DEP-02",
+     "titulo": "protobufjs <7.5.5 con RCE (transitiva)",
+     "severidad_original": "P0",
+     "estado_declarado": "CERRADO-VERIFICADO (:117)",
+     "archivos_citados": [
+      "package.json"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "Dependencia transitiva con RCE; la maestra la da ausente del npm audit."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 74,
+     "id_previo": "SEC-MISC-01",
+     "titulo": "Faltan headers de seguridad globales",
+     "severidad_original": "P1",
+     "estado_declarado": "PARCIAL (:129): HSTS, nosniff, Referrer-Policy y Permissions-Policy globales y X-Frame-Options en admin/dashboard, pero la CSP sigue Report-Only con unsafe-inline y unsafe-eval (residual SEC-08, P2)",
+     "archivos_citados": [
+      "next.config.ts:24-71",
+      "next.config.ts:48",
+      "next.config.ts:51"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "La CSP nunca pasó a enforcement (5 semanas al 2026-07-10)."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 77,
+     "id_previo": "SEC-DEP-03",
+     "titulo": "defu prototype pollution + effect ALS race",
+     "severidad_original": "P1",
+     "estado_declarado": "CERRADO-VERIFICADO (:132)",
+     "archivos_citados": [
+      "package.json"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "Ausentes de npm audit --omit=dev al 2026-07-10."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 584,
+     "id_previo": "PERF-01",
+     "titulo": "La cadena three.js (unos 335KB gz) viaja en el grafo compartido de todas las rutas",
+     "severidad_original": "P0 (Severidad: ALTA)",
+     "estado_declarado": "abierto al 2026-07-10 (sprint 5.2)",
+     "archivos_citados": [
+      "src/app/layout.tsx:43",
+      "src/components/ui/Preloader.tsx:10",
+      "src/components/ui/MarketingIntro.tsx:10",
+      "src/components/ui/BrandedIntroCanvas.tsx:3-16"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "El import estático layout → Preloader → MarketingIntro → BrandedIntroCanvas mete R3F, three, drei y postprocessing en /login y /dashboard. TBT de login en mobile: 4.9s; JS por ruta unas 5 veces el budget."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 585,
+     "id_previo": "PERF-02",
+     "titulo": "/web-development pesa 14.66MB en 213 requests por iframes de templates vivos e imágenes externas",
+     "severidad_original": "P0 (Severidad: ALTA)",
+     "estado_declarado": "abierto al 2026-07-10 (sprint 5.3; decisión: templates vivos o poster)",
+     "archivos_citados": [
+      "src/components/sections/web-development/WebTemplatesImmersive.tsx",
+      "next.config.ts:16-23"
+     ],
+     "dominio_probable": "D9",
+     "resumen": "Iframes vivos de template-*.netlify.app, imágenes de Unsplash y Pexels a resolución completa sin next/image, y cdn.tailwindcss.com cargado en runtime."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 939,
+     "id_previo": "ARQ-01",
+     "titulo": "22 ciclos de dependencia en 3 clusters con un solo patrón (16 conocidos y 6 nuevos)",
+     "severidad_original": "P1",
+     "estado_declarado": "abierto al 2026-07-10 (sprints 4.1, 4.2 y 4.2b)",
+     "archivos_citados": [
+      "src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts:3-23",
+      "src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx:18-24",
+      "src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx:13,23",
+      ".dependency-cruiser.cjs:6"
+     ],
+     "dominio_probable": "D5",
+     "resumen": "Tipos definidos en el padre o el barrel, con la vuelta como import type, así que no hay riesgo en runtime. El patrón se reproduce porque no-circular está en warn."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 952,
+     "id_previo": "ARQ-04",
+     "titulo": "El contrato de frontera del módulo (README) está muerto en la práctica y no hay candado en CI",
+     "severidad_original": "P1",
+     "estado_declarado": "abierto al 2026-07-10 (sprint 4.5; decisión humana). rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:157 (2026-07-18) confirma knip y depcruise todavía sin script ni CI.",
+     "archivos_citados": [
+      "src/modules/chatbot/README.md:9-16",
+      ".dependency-cruiser.cjs:6"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "El README dice 'no deep imports / solo @/lib/prisma', pero hay 103 deep-imports y muchas dependencias a lib y components/ui."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 1310,
+     "id_previo": "RESIL-03",
+     "titulo": "El disparador de los crons no existe en el repo o apunta a funciones inexistentes",
+     "severidad_original": "P0",
+     "estado_declarado": "abierto al 2026-07-10 (sprint O2.5; decisión: qué disparador usar). Mismo núcleo que OBS-02. rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:49 menciona crons desincronizados entre netlify y vercel (cierre de T0.2), sin declararlo cerrado.",
+     "archivos_citados": [
+      "netlify.toml:25-29",
+      "src/app/api/cron/",
+      "docs/operations/cron-jobs.md"
+     ],
+     "dominio_probable": "D7",
+     "resumen": "netlify.toml agenda dos funciones que no tienen archivo; las 7 rutas /api/cron dependen de un scheduler externo no versionado y nadie se entera si deja de correr."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 1622,
+     "id_previo": "OBS-01",
+     "titulo": "Sentry está completo pero no hay evidencia de que funcione en prod (posible no-op total)",
+     "severidad_original": "P0",
+     "estado_declarado": "abierto al 2026-07-10 (sprint O3.0; hay que verificar a mano el env de Netlify)",
+     "archivos_citados": [
+      ".env.example:266",
+      "src/modules/chatbot/server/chat/handleChatRequest.ts:869",
+      "src/instrumentation.ts:4-49"
+     ],
+     "dominio_probable": "D7",
+     "resumen": "NEXT_PUBLIC_SENTRY_DSN está vacío en .env.example y ausente en el env local; si tampoco está en Netlify, todo el pipeline (server, edge, client, boundaries) es no-op."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 1624,
+     "id_previo": "OBS-02",
+     "titulo": "Crons sin dead-man's-switch y con scheduling fantasma",
+     "severidad_original": "P0",
+     "estado_declarado": "abierto al 2026-07-10 (sprint O3.1; decisión humana). Mismo núcleo que RESIL-03.",
+     "archivos_citados": [
+      "netlify.toml:25-29",
+      "src/app/api/cron/",
+      "docs/operations/cron-jobs.md:27",
+      "docs/operations/alerts-types.md:16"
+     ],
+     "dominio_probable": "D7",
+     "resumen": "La única alerta de cron fallido depende del propio cron detector (fallo circular): si el scheduler muere, desaparecen en silencio los follow-ups, los reportes y las alertas."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 1626,
+     "id_previo": "OBS-03",
+     "titulo": "No hay ningún monitoreo de uptime",
+     "severidad_original": "P0",
+     "estado_declarado": "abierto al 2026-07-10 (sprint O3.1)",
+     "archivos_citados": [
+      "src/app/api/version/route.ts:3-9",
+      "src/app/api/chatbot/[slug]/health/route.ts:12-21"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "Una caída de la landing, el widget o el login se descubre cuando avisa el cliente; los probes ya existen."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 1913,
+     "id_previo": "SEO-01",
+     "titulo": "Las 5 OG images referenciadas no existen (404)",
+     "severidad_original": "P1",
+     "estado_declarado": "abierto al 2026-07-10 (sprint O5.3)",
+     "archivos_citados": [
+      "src/app/layout.tsx:31",
+      "public/"
+     ],
+     "dominio_probable": "D9",
+     "resumen": "El layout raíz y los 4 layouts de servicios apuntan a /og-*.png inexistentes: todo lo compartido por WhatsApp o redes sale sin imagen."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 1915,
+     "id_previo": "SEO-03",
+     "titulo": "<html lang='en'> en un sitio en castellano",
+     "severidad_original": "P1",
+     "estado_declarado": "abierto al 2026-07-10 (sprint O5.3)",
+     "archivos_citados": [
+      "src/app/layout.tsx:62"
+     ],
+     "dominio_probable": "D9",
+     "resumen": "Pega en SEO y en WCAG 3.1.1, y contradice el locale es_AR que declara el propio OG."
+    },
+    {
+     "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+     "linea": 1917,
+     "id_previo": "A11Y-03",
+     "titulo": "Contraste de tokens de texto por debajo de AA",
+     "severidad_original": "P1",
+     "estado_declarado": "abierto al 2026-07-10 (sprint O5.1b; decisión del token muted)",
+     "archivos_citados": [
+      "src/app/globals.css:22"
+     ],
+     "dominio_probable": "D9",
+     "resumen": "Sobre #030303: zinc-500 da 4.27:1 (850 usos), zinc-600 2.67:1 (190) y white/40 o menos 3.70:1 o menos (64). Se propone zinc-400 o white-50 como piso para texto informativo."
+    },
+    {
+     "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md",
+     "linea": 153,
+     "id_previo": "sin-id",
+     "titulo": "Hoy no corre ningún candado: e2e.yml nunca corrió, eslint sale en exit 1 y el build ignora tipos y lint (Fase 0)",
+     "severidad_original": "P0 (FASE 0, :179; tabla final :221)",
+     "estado_declarado": "abierto al 2026-07-18. Repite el hallazgo crítico de docs/microaudit-frozen-frontera-CO.md:241.",
+     "archivos_citados": [
+      ".github/workflows/e2e.yml",
+      "../.github/workflows/db-backup.yml:5",
+      "next.config.ts"
+     ],
+     "dominio_probable": "D8",
+     "resumen": "eslint src da 80 errores y 54 warnings; knip y depcruise no tienen script ni CI. La Fase 0 propone mover e2e.yml a la raíz y sumar un job de lint acotado a las fronteras y tsc en CI."
+    }
+   ],
+   "previas_omitidas": 0,
+   "planeado": [
+    {
+     "id": "PLAN-1079",
+     "clave": "docs/bitacora-roadmap.md:202",
+     "tipo": "pendiente",
+     "titulo": "Pasar next build a Turbopack cuando sea estable",
+     "descripcion": "B1.2 solo cambió el script dev; el build sigue con --webpack porque next build --turbopack era beta en Next 16.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "package.json",
+      "tambien en docs/bitacora-roadmap.md:316",
+      "tambien en docs/bitacora-roadmap.md:376"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1082",
+     "clave": "docs/bitacora-roadmap.md:329",
+     "tipo": "pendiente",
+     "titulo": "@google-analytics/data a serverExternalPackages",
+     "descripcion": "Otros ~2.1MB del server bundle (chunk 3411) que podrían externalizarse con el mismo patrón que googleapis.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "next.config.ts",
+      "tambien en docs/bitacora-roadmap.md:375"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1104",
+     "clave": "docs/bitacora-roadmap.md:7906",
+     "tipo": "pendiente",
+     "titulo": "2 advisories moderate restantes (postcss <8.5.10 vía next)",
+     "descripcion": "El único fix de npm era un downgrade de next a 9.3.3; esperar Next 16.2.7+ o 16.3.x y re-correr npm audit.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "package.json",
+      "tambien en docs/bitacora-roadmap.md:7964"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1054",
+     "clave": "docs/bitacora-beta-3.md:10924",
+     "tipo": "pendiente",
+     "titulo": "El build se envenena solo por una clase Tailwind citada en esta bitácora",
+     "descripcion": "La bitácora cita una clase con una URL arbitraria entre corchetes. Como Tailwind escanea docs/**/*.md (y .next/ en los worktrees), el segundo build falla con «Cannot find module './&'». Se mitigó borrando los distDir; la causa sigue en el doc.",
+     "estado_declarado": "mitigado; causa raíz sin arreglar",
+     "refs": [
+      "docs/bitacora-beta-3.md",
+      ".gitignore:17",
+      "tambien en docs/bitacora-beta-3.md:7610"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1115",
+     "clave": "docs/bitacora-roadmap.md:9322",
+     "tipo": "pendiente",
+     "titulo": "Quitar cross-env si ya no se usa",
+     "descripcion": "cross-env quedó en devDependencies sin uso en build.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "package.json"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1136",
+     "clave": "docs/bitacora-roadmap.md:12450",
+     "tipo": "pendiente",
+     "titulo": "Aggregate check:invariants incompleto",
+     "descripcion": "No incluye varios invariantes (client-monthly-report, dates-ar, lead-status, etc.).",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "package.json",
+      "también en fuente:12305"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1153",
+     "clave": "docs/bitacora-roadmap.md:15974",
+     "tipo": "pendiente",
+     "titulo": "typescript.ignoreBuildErrors activo en next.config.ts",
+     "descripcion": "El build ignora errores de tipos; NextConfig no tipa el objeto y tiparlo podría destapar mismatches.",
+     "estado_declarado": "sin estado",
+     "refs": [
+      "next.config.ts",
+      "también en fuente:15981"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1154",
+     "clave": "docs/bitacora-roadmap.md:16499",
+     "tipo": "pendiente",
+     "titulo": "Pinear versión exacta del paquete ai",
+     "descripcion": "El ^ subió de 6.0.177 a 6.0.214 sin decisión humana.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "package.json",
+      "también en fuente:16680"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1006",
+     "clave": "docs/bitacora-beta-3.md:505",
+     "tipo": "pendiente",
+     "titulo": "CI nunca corrió y no tiene secrets",
+     "descripcion": "e2e.yml anidado no lo leía Actions; desde C1 corre ci.yml, pero los jobs de test saltean sin DATABASE_URL_TEST (0 secrets en el repo).",
+     "estado_declarado": "parcial",
+     "refs": [
+      "logic-core-v3/.github/workflows/e2e.yml",
+      ".github/workflows/ci.yml",
+      "también en fuente:5008,5152,5264,5307,5372"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1008",
+     "clave": "docs/bitacora-beta-3.md:778",
+     "tipo": "pendiente",
+     "titulo": "Deuda de lint del repo",
+     "descripcion": "Errores pre-existentes en lanes ajenos (chatbot, tailwind.config); C0 mide 102 errores/110 warnings; el lint queda fuera del gate; globalIgnores no cubre distDirs alternativos.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "también en fuente:914,2635,5073,5254,5258",
+      "eslint.config.mjs"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1009",
+     "clave": "docs/bitacora-beta-3.md:1186",
+     "tipo": "pendiente",
+     "titulo": "Higiene de tooling",
+     "descripcion": "Key eslint deprecada en next.config.ts y falta \"type\":\"module\" en package.json.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "next.config.ts",
+      "package.json"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1010",
+     "clave": "docs/bitacora-beta-3.md:1259",
+     "tipo": "pendiente",
+     "titulo": "Renormalización CRLF del repo",
+     "descripcion": "core.autocrlf=true + .gitattributes; renormalizar es decisión de Franco.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "logic-core-v3/.gitattributes"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1020",
+     "clave": "docs/bitacora-beta-3.md:3667",
+     "tipo": "pendiente",
+     "titulo": "@next/bundle-analyzer instalado sin cablear",
+     "descripcion": "Cablearlo exige tocar next.config.ts.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "next.config.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1021",
+     "clave": "docs/bitacora-beta-3.md:3777",
+     "tipo": "pendiente",
+     "titulo": "Tailwind escanea docs/ y distDirs",
+     "descripcion": "Una clase arbitraria con url() en un .md rompe el build; acotar las fuentes en globals.css; distDirs alternativos deben ignorarse antes del primer build.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "globals.css",
+      "también en fuente:3651,3757"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1022",
+     "clave": "docs/bitacora-beta-3.md:3798",
+     "tipo": "pendiente",
+     "titulo": "tsconfig.json modificado por builds con distDir alternativo",
+     "descripcion": "Next agrega includes de .next-galeria/.next-perf-*; quedó sin commitear y mezclado.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "tsconfig.json",
+      "también en fuente:3407,3928,4873"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1025",
+     "clave": "docs/bitacora-beta-3.md:4408",
+     "tipo": "pendiente",
+     "titulo": "CSP global sigue en Report-Only",
+     "descripcion": "Pasarla a enforce es otra decisión, con riesgo sobre el widget embebible.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "next.config.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1032",
+     "clave": "docs/bitacora-beta-3.md:5145",
+     "tipo": "pendiente",
+     "titulo": "Tests del chatbot fuera de agregados",
+     "descripcion": "~30 test:* del chatbot no están en ningún agregado; sin aserción de unicidad sobre HARD_CHECKS[].nombre.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "package.json"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1034",
+     "clave": "docs/bitacora-beta-3.md:5271",
+     "tipo": "pendiente",
+     "titulo": "db-backup.yml sin secrets",
+     "descripcion": "Usa tres secrets que no existen (0 en el repo): explica el P0 del backup.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      ".github/workflows/db-backup.yml"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1001",
+     "clave": "docs/bitacora-beta-2.md:44",
+     "tipo": "pendiente",
+     "titulo": "Caveats del QA-login",
+     "descripcion": "curl sobre http no manda cookies Secure (hay que pasarla a mano) y bounce cosmético de :3001 a :3000 por NEXTAUTH_URL.",
+     "estado_declarado": "abierto (conocido)",
+     "refs": [
+      "src/app/api/qa/login/route.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1275",
+     "clave": "docs/bitacora-rediseno.md:133",
+     "tipo": "pendiente",
+     "titulo": "Eliminar tailwind.config.ts y design-tokens.ts y limpiar tokens viejos en el bloque final",
+     "descripcion": "Se declaran desconectados del pipeline (Tailwind 4 CSS-first); también hay que limpiar --color-void, --color-obsidian, --color-accent y [data-theme].",
+     "estado_declarado": "pendiente (bloque final)",
+     "refs": [
+      "tailwind.config.ts",
+      "src/lib/design-tokens.ts",
+      "src/app/globals.css",
+      "también en docs/bitacora-rediseno.md:141",
+      "riesgo: design-tokens.ts aporta zIndex al shell del setter y al Modal (docs/bitacora-beta.md:52, :221)",
+      "sin cambios en HOME-CLASICO (docs/bitacora-rediseno.md:3643)"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1065",
+     "clave": "docs/bitacora-rediseno.md:162",
+     "tipo": "pendiente",
+     "titulo": "next.config.ts ignora errores de tipos y lint en el build",
+     "descripcion": "typescript.ignoreBuildErrors y eslint.ignoreDuringBuilds en true (build verde no implica tipos verdes); Next 16.2.9 avisa que la clave eslint no está soportada.",
+     "estado_declarado": "sin estado",
+     "refs": [
+      "next.config.ts",
+      "también en docs/bitacora-rediseno.md:501"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1073",
+     "clave": "docs/bitacora-rediseno.md:3722",
+     "tipo": "pendiente",
+     "titulo": "framer-motion y three-stdlib son dependencias fantasma",
+     "descripcion": "No están en package.json; resuelven por transitivas de motion y drei (ya era así en julio).",
+     "estado_declarado": "sin estado",
+     "refs": [
+      "package.json"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1036",
+     "clave": "docs/bitacora-beta-3.md:5783",
+     "tipo": "promesa",
+     "titulo": "check:invariant:client-monthly-report-pdf sigue excluido",
+     "descripcion": "Necesita base. Moverlo al job de CI con DB quedó para el sprint que abra .github/workflows/ci.yml; en EL TRONCO figura como exclusión documentada del runner.",
+     "estado_declarado": "pendiente (excluido con motivo)",
+     "refs": [
+      ".github/workflows/ci.yml",
+      "scripts/run-invariants.mjs",
+      "tambien en docs/bitacora-beta-3.md:6187",
+      "tambien en docs/bitacora-beta-3.md:7623",
+      "tambien en docs/bitacora-beta-3.md:10946"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1089",
+     "clave": "docs/bitacora-roadmap.md:4568",
+     "tipo": "decision",
+     "titulo": "tsconfig: scripts/** fuera del typecheck y allowImportingTsExtensions",
+     "descripcion": "Necesario para que los smokes (b58, b59) corran con imports .ts; los scripts quedan fuera de tsc --noEmit.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "tsconfig.json",
+      "tambien en docs/bitacora-roadmap.md:4721"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1274",
+     "clave": "docs/bitacora-rediseno.md:63",
+     "tipo": "decision",
+     "titulo": "Convenciones de tokens del design system",
+     "descripcion": "Infijo ds dentro de los namespaces de Tailwind para no colisionar con --color-void/--color-accent; @theme static para forzar la emisión; reduced-motion con 1ms + iteration-count 1.",
+     "estado_declarado": "vigente",
+     "refs": [
+      "src/app/globals.css",
+      "también en docs/bitacora-rediseno.md:73",
+      "también en docs/bitacora-rediseno.md:83"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1092",
+     "clave": "docs/bitacora-roadmap.md:5354",
+     "tipo": "hecho-declarado",
+     "titulo": "MS-7 — Screenshot contra build de prod (start:qa en :3001)",
+     "descripcion": "Script start:qa (next start -p 3001), server next-prod-qa en .claude/launch.json y política de visual-qa: la UI pesada se verifica contra build de prod con screenshot real.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "package.json",
+      ".claude/launch.json",
+      ".claude/agents/visual-qa.md",
+      "pendiente originado en docs/bitacora-roadmap.md:4850"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1103",
+     "clave": "docs/bitacora-roadmap.md:7771",
+     "tipo": "hecho-declarado",
+     "titulo": "B-SEC.2 — Next 16.2.1 a 16.2.6 + npm audit fix",
+     "descripcion": "Cierra 13 de 15 advisories (bypass de middleware/proxy, SSRF en WebSocket, DoS, cache poisoning, protobufjs RCE). La entrada está partida por B1/B2 LeadOS y continúa en la línea 7906.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "package.json",
+      "package-lock.json",
+      "docs/auditoria-seguridad-2026-05.md",
+      "pendiente originado en docs/bitacora-roadmap.md:223"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1152",
+     "clave": "docs/bitacora-roadmap.md:15940",
+     "tipo": "hecho-declarado",
+     "titulo": "H.4 misceláneos",
+     "descripcion": "Se quitó la key eslint de next.config.ts e indentación de persistTurn; .netlify ya estaba ignorado.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "next.config.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1017",
+     "clave": "docs/bitacora-beta-3.md:2398",
+     "tipo": "hecho-declarado",
+     "titulo": "Microsprint INFRA: suite del setter con distDir propio",
+     "descripcion": "distDir por E2E_DIST_DIR en next.config.ts, script start:setter (.next-setter, :3003), reuseExistingServer false.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "next.config.ts",
+      "package.json",
+      "playwright.setter.config.ts",
+      ".gitignore"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1033",
+     "clave": "docs/bitacora-beta-3.md:5182",
+     "tipo": "hecho-declarado",
+     "titulo": "C1 gate encendido: tipos, 43 invariantes y ci.yml",
+     "descripcion": "scripts/run-invariants.mjs (PISO_MINIMO 43), check:types, ignoreBuildErrors retirado, .github/workflows/ci.yml en raíz con Node 24; run 32870120782 success.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "scripts/run-invariants.mjs",
+      ".github/workflows/ci.yml",
+      "commit 2515cb29"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1283",
+     "clave": "docs/bitacora-rediseno.md:602",
+     "tipo": "hecho-declarado",
+     "titulo": "Layout raíz: <html lang='es'> con las variables de Geist",
+     "descripcion": "next/font deja las variables en <html> (en <body> Geist no aplicaba en ninguna página); canonical y meta sin el claim +47.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "src/app/layout.tsx",
+      "fix/fonts-geist-scope",
+      "también en docs/bitacora-rediseno.md:614",
+      "también en docs/bitacora-rediseno.md:655"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1075",
+     "clave": "docs/bitacora-roadmap.md:46",
+     "tipo": "pendiente",
+     "titulo": "Force-push del history purgado (leak enviroment.env)",
+     "descripcion": "El mirror purgado quedó en C:/tmp/bfg-purge-2026-05-21; falta coordinar con el socio, commitear el working tree y seguir los pasos B a F de la sección 8.3 del runbook; regenerar el mirror si pasan días.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "docs/audits/2026-05-bfg-leak-cleanup.md §8.3",
+      "tambien en docs/bitacora-roadmap.md:51",
+      "tambien en docs/bitacora-roadmap.md:56"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1083",
+     "clave": "docs/bitacora-roadmap.md:524",
+     "tipo": "pendiente",
+     "titulo": "Borrar scripts y logs throwaway de mediciones en scripts/",
+     "descripcion": "_b13-* después de B1.4; luego logs _b32/_b33/_b35/_b36/_b52/_b53/_ms1/_ms4 cuando DIRECT_URL elimine los 'terminated'.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "scripts/_b13-latency-test.mjs",
+      "tambien en docs/bitacora-roadmap.md:686",
+      "tambien en docs/bitacora-roadmap.md:3667"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1100",
+     "clave": "docs/bitacora-roadmap.md:7523",
+     "tipo": "pendiente",
+     "titulo": "Rate-limit distribuido (Upstash Redis) — SEC-RATELIMIT-01",
+     "descripcion": "El limiter es in-memory por proceso; en serverless multi-instancia el límite se multiplica. Abierto en el checklist de B-SEC.3c.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "src/lib/security/auth-rate-limit.ts",
+      "tambien en docs/bitacora-roadmap.md:7620",
+      "tambien en docs/bitacora-roadmap.md:7709",
+      "tambien en docs/bitacora-roadmap.md:8139",
+      "tambien en docs/bitacora-roadmap.md:8318",
+      "tambien en docs/bitacora-roadmap.md:8405"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1101",
+     "clave": "docs/bitacora-roadmap.md:7670",
+     "tipo": "pendiente",
+     "titulo": "Borrar ts_errors.log committeado",
+     "descripcion": "Artefacto de marzo 2026 que hizo reportar falsos errores de TypeScript a un agente; git rm pendiente.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "ts_errors.log",
+      "tambien en docs/bitacora-roadmap.md:7707"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1102",
+     "clave": "docs/bitacora-roadmap.md:7740",
+     "tipo": "pendiente",
+     "titulo": "Push del tag v0.9.0-rc.1 al remote",
+     "descripcion": "Quedó local; Franco decide cuándo es visible en GitHub.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "tag v0.9.0-rc.1",
+      "tambien en docs/bitacora-roadmap.md:7745"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1105",
+     "clave": "docs/bitacora-roadmap.md:8141",
+     "tipo": "pendiente",
+     "titulo": "SEC-MISC-01: headers de seguridad globales",
+     "descripcion": "HSTS, X-Frame-Options, Permissions-Policy, Referrer-Policy y CSP-Report-Only.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "docs/auditoria-seguridad-2026-05.md",
+      "tambien en docs/bitacora-roadmap.md:8320"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-991",
+     "clave": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:158",
+     "tipo": "pendiente",
+     "titulo": "CSP de Report-Only a enforcement",
+     "descripcion": "Hardening fichado pero no ejecutado.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "tambien en Olme/Chatbot_ registro de cambios.md:110"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-990",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:51",
+     "tipo": "pendiente",
+     "titulo": "Invalidación de cache con varias instancias",
+     "descripcion": "Diferido: el TTL de 60s lo acota. Revisar si se edita la config en vivo frente a clientes.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "A4.6"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1159",
+     "clave": "docs/roadmap-pendientes.md:165",
+     "tipo": "pendiente",
+     "titulo": "Verificación visual automática bloqueada",
+     "descripcion": "visual-qa sin MCP de preview (o /api/qa/login bloqueado, o dev server ajeno); la verificación visual cae en Valentino. Antes de C0.2.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "raiz:lane-plan-log.md:64",
+      "raiz:lane-resultados-redesign-log.md:214",
+      "docs/sprints/p4-1-render-utm.md:98",
+      "docs/sprints/infra-2-cold-start-retry.md:121"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1335",
+     "clave": "docs/sprints/alpha-0-8-tests-e2e.md:20",
+     "tipo": "pendiente",
+     "titulo": "Tests E2E rojos por login",
+     "descripcion": "14 fallan por selectores/timeout del login; luego 5/21 en Bloque C.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "docs/sprints/alpha-0-9-status-verificacion.md:15",
+      "docs/sprints/alpha-bloque-C-RESUMEN.md:30"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1037",
+     "clave": "docs/bitacora-beta-3.md:5791",
+     "tipo": "pendiente",
+     "titulo": "Lint fuera del gate y midiendo mal",
+     "descripcion": "Reporta 108.208 problemas porque globalIgnores no cubre los distDir alternativos y se lintean bundles minificados. Queda para un sprint propio, que se describe como barato.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "globalIgnores (config ESLint)"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1265",
+     "clave": "docs/bitacora-beta-3.md:7530",
+     "tipo": "pendiente",
+     "titulo": "excludeDqWhere sin ningún invariante (7 consumidores)",
+     "descripcion": "El fragmento where del filtro de descalificados del chatbot tiene siete consumidores de producto y ninguna red: la misma forma que tenía el contador antes de P8.",
+     "estado_declarado": "listado, sin tocar",
+     "refs": [
+      "modules/chatbot/server/scoring/dqFilter.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1050",
+     "clave": "docs/bitacora-beta-3.md:8074",
+     "tipo": "pendiente",
+     "titulo": "Tres helpers de test muertos",
+     "descripcion": "setControlledInput, qaLogout y logout no tienen ningún call site.",
+     "estado_declarado": "anotado, sin hacer",
+     "refs": [
+      "form.ts:3",
+      "setter-auth.ts:84",
+      "auth.ts:28"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1318",
+     "clave": "docs/bitacora-roadmap.md:8822",
+     "tipo": "pendiente",
+     "titulo": "5 hallazgos P2 de seguridad real sin atender",
+     "descripcion": "SEC-LLM-04 (trimming prompt), SEC-LLM-07 (CAPTCHA capture_lead), SEC-LOGGING-01 (redacción PII), SEC-CACHE-01 (revalidateTag+TTL), SEC-DEP-04 (npm audit) → track de seguridad.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "docs/auditoria-seguridad-2026-05.md",
+      "también en fuente:8873",
+      "también en fuente:8922"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1106",
+     "clave": "docs/bitacora-roadmap.md:8876",
+     "tipo": "pendiente",
+     "titulo": "Housekeeping de archivos sueltos del repo",
+     "descripcion": "script*.js, find_unused.js, *.bak y archivos de iteraciones viejas en raíz; sprint propio.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "también en fuente:8924"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1118",
+     "clave": "docs/bitacora-roadmap.md:9535",
+     "tipo": "pendiente",
+     "titulo": "Setear secrets del backup y validar primer run",
+     "descripcion": "BACKUP_GPG_PASSPHRASE y DIRECT_DATABASE_URL_PROD en GH; disparar workflow manual y confirmar ambos jobs.",
+     "estado_declarado": "bloqueado (Franco)",
+     "refs": [
+      "también en fuente:9540"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1119",
+     "clave": "docs/bitacora-roadmap.md:9541",
+     "tipo": "pendiente",
+     "titulo": "e2e.yml mal ubicado, nunca corrió",
+     "descripcion": "logic-core-v3/.github/workflows/e2e.yml no lo lee GitHub; moverlo a la raíz con working-directory.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "logic-core-v3/.github/workflows/e2e.yml",
+      "también en fuente:9715",
+      "también en fuente:17075"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1126",
+     "clave": "docs/bitacora-roadmap.md:9721",
+     "tipo": "pendiente",
+     "titulo": "Cache CDN agresiva en / (Age 71 días)",
+     "descripcion": "Netlify servía cache vieja sin invalidar al deploy; investigar en sprint propio.",
+     "estado_declarado": "pendiente",
+     "refs": [],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1131",
+     "clave": "docs/bitacora-roadmap.md:11037",
+     "tipo": "pendiente",
+     "titulo": "Update manual de OrganizationModule mini-crm",
+     "descripcion": "Filas con slug mini-crm en DB dev/prod requieren SQL manual antes del deploy.",
+     "estado_declarado": "pendiente",
+     "refs": [],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1132",
+     "clave": "docs/bitacora-roadmap.md:11110",
+     "tipo": "pendiente",
+     "titulo": "Build local OOM con heap default",
+     "descripcion": "Varias entradas necesitan 6-8 GB de heap para el build, contradiciendo BP.4.",
+     "estado_declarado": "sin estado",
+     "refs": [
+      "también en fuente:11762",
+      "también en fuente:12746",
+      "también en fuente:16845"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1329",
+     "clave": "docs/bitacora-roadmap.md:11910",
+     "tipo": "pendiente",
+     "titulo": "requireSuperAdmin() sin tipo de retorno explícito",
+     "descripcion": "La inferencia cross-file colapsa por React.cache sobre auth; solución de raíz: anotar el tipo en auth-guards.ts.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "src/lib/auth-guards.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1147",
+     "clave": "docs/bitacora-roadmap.md:15604",
+     "tipo": "pendiente",
+     "titulo": "Rotar la key de Vertex expuesta en logs",
+     "descripcion": "Credencial de Vertex expuesta en logs (el doc no trae el valor), pendiente de rotación.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "también en fuente:15785",
+      "también en fuente:16508",
+      "también en fuente:16678"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1156",
+     "clave": "docs/bitacora-roadmap.md:16895",
+     "tipo": "pendiente",
+     "titulo": "Verificar la retención de logs de Netlify",
+     "descripcion": "La PII ya derramada expira según la retención del plan.",
+     "estado_declarado": "pendiente",
+     "refs": [],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1003",
+     "clave": "docs/bitacora-beta-3.md:55",
+     "tipo": "pendiente",
+     "titulo": "E2E global roja en lanes dashboard/cliente/admin",
+     "descripcion": "Fallas pre-existentes (11-16, 20-22, 30); timeout de login en tests/helpers/auth.ts:12; necesita su pasada de mantenimiento.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "también en fuente:782,859,870",
+      "tests/helpers/auth.ts:12"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1014",
+     "clave": "docs/bitacora-beta-3.md:2049",
+     "tipo": "pendiente",
+     "titulo": "QA_ALLOW_LOCALHOST abriría /api/qa/login en prod",
+     "descripcion": "El guard se evalúa en request time; validate-origin.ts:49 es otra superficie de una sola pata. Verificar el entorno de producción.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "/api/qa/login",
+      "validate-origin.ts:49",
+      "también en fuente:2064"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1018",
+     "clave": "docs/bitacora-beta-3.md:2465",
+     "tipo": "pendiente",
+     "titulo": "qa-persona y qa-walkthrough siguen en .next compartido",
+     "descripcion": "playwright.qa-persona/qa-walkthrough.config.ts usan start:qa en .next; la galería ya se aisló en Corrida G.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "playwright.qa-persona.config.ts",
+      "playwright.qa-walkthrough.config.ts",
+      "también en fuente:3317"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1272",
+     "clave": "docs/bitacora-beta.md:1659",
+     "tipo": "pendiente",
+     "titulo": "Regenerar snapshots de regresión visual desactualizados",
+     "descripcion": "22-visual-regression difiere 3–8% en /admin, /admin/clients, /admin/alerts, /admin/_design, /dashboard, /dashboard/chatbot y /dashboard/chatbot/settings; regenerar con --update-snapshots.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "tests/e2e/22-visual-regression.spec.ts",
+      "también en docs/bitacora-beta-2.md:69",
+      "también en docs/bitacora-beta-2.md:79"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1062",
+     "clave": "docs/bitacora-beta.md:1733",
+     "tipo": "pendiente",
+     "titulo": "next build se queda sin heap con el default",
+     "descripcion": "Corre verde con NODE_OPTIONS=--max-old-space-size=6144 (otra entrada usa 8192); pipear el build a tail enmascara el OOM.",
+     "estado_declarado": "sin estado (workaround)",
+     "refs": [
+      "también en docs/bitacora-rediseno.md:1556",
+      "también en docs/bitacora-rediseno.md:3699"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1063",
+     "clave": "docs/bitacora-beta.md:1742",
+     "tipo": "pendiente",
+     "titulo": "Browsers de Playwright no llegan al server local (loopback bloqueado)",
+     "descripcion": "Chromium y Firefox dan ERR_CONNECTION_REFUSED mientras curl y Node llegan; destrabar en AV/firewall o correr en CI.",
+     "estado_declarado": "bloqueado",
+     "refs": [
+      "contradicho por docs/bitacora-beta.md:1643",
+      "contradicho por docs/bitacora-beta-2.md:54"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1068",
+     "clave": "docs/bitacora-rediseno.md:994",
+     "tipo": "pendiente",
+     "titulo": "Borrar las ramas absorbidas por redesign/home",
+     "descripcion": "Ninguna aporta nada que redesign/home no tenga; borrarlas es decisión de Franco.",
+     "estado_declarado": "pendiente (decisión de Franco)",
+     "refs": [
+      "fix/home-sanidad",
+      "fix/fonts-geist-scope",
+      "fix/motion-sanidad-mobile",
+      "también en docs/bitacora-rediseno.md:1085"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1069",
+     "clave": "docs/bitacora-rediseno.md:1615",
+     "tipo": "pendiente",
+     "titulo": "El subagente visual-qa no puede entregar reporte",
+     "descripcion": "El puerto del server no está en .claude/launch.json y el subagente pierde acceso a sus herramientas; el pane de preview mide 0 fps de rAF. Se verificó con Playwright.",
+     "estado_declarado": "sin estado",
+     "refs": [
+      ".claude/launch.json",
+      "también en docs/bitacora-rediseno.md:2142"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-985",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#3",
+     "tipo": "bloque",
+     "titulo": "Q1: batería de evals",
+     "descripcion": "~36 escenarios con asserts y juez. Las decisiones A–D por defecto están sin ratificar. Es el gasto pesado legítimo de cuota.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:45",
+      "tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:62"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1112",
+     "clave": "docs/bitacora-roadmap.md:9213",
+     "tipo": "idea",
+     "titulo": "Regla ESLint contra imports barrel de lucide-react",
+     "descripcion": "no-restricted-imports para impedir import * de lucide-react.",
+     "estado_declarado": "sin estado",
+     "refs": [],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1120",
+     "clave": "docs/bitacora-roadmap.md:9542",
+     "tipo": "idea",
+     "titulo": "Retención de backups >30 días y RPO menor",
+     "descripcion": "Mover artifacts a S3/R2 si se requiere; bajar RPO de 24h a 6h/1h cuando crezca el volumen.",
+     "estado_declarado": "sin estado",
+     "refs": [
+      "también en fuente:9543"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1243",
+     "clave": "_insumos/drive/Olme/Chatbot_ registro de cambios.md:119",
+     "tipo": "decision",
+     "titulo": "Subida de imágenes = base64 en DB, sin infra externa",
+     "descripcion": "La imagen se comprime en el cliente y se guarda en la DB, en lugar de pedir una URL o usar Vercel Blob. Aplica al avatar del bot y al del cliente.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "tambien en Olme/Chatbot_ registro de cambios.md:97",
+      "tambien en Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:53",
+      "tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:46",
+      "contradice Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:89"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-986",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:41",
+     "tipo": "decision",
+     "titulo": "GCP single-project: revisar con el cliente activo #5",
+     "descripcion": "No se construye ahora. Falta decidir con qué cuenta se paga el LLM.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:50"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-966",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:42",
+     "tipo": "decision",
+     "titulo": "Ultracode solo para builds arquitectónicos",
+     "descripcion": "Solo en E1.2, E3.1 y E4.1. Las auditorías nunca van en /loop. El tope de modelo es Opus 4.8.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:13"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-987",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:56",
+     "tipo": "decision",
+     "titulo": "Ratificar las decisiones A–D de Q1",
+     "descripcion": "Abierta: confirmarlas o dejar los defaults.",
+     "estado_declarado": "pendiente",
+     "refs": [],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1234",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:97",
+     "tipo": "decision",
+     "titulo": "El reporte del agente no es el estado",
+     "descripcion": "Antes de dar un bloque por cerrado, verificar que exista su cierre '## ✅' en la bitácora. Build verde no significa que funcione.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:37",
+      "tambien en Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:93"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1040",
+     "clave": "docs/bitacora-beta-3.md:6115",
+     "tipo": "decision",
+     "titulo": "Un invariante nuevo se prueba viendo que imprime, no que sale 0",
+     "descripcion": "Con ts-node, un archivo cuyos imports son todos import type compila y type-chequea, pero no ejecuta su cuerpo y sale 0 en silencio. Hoy los 19 tienen un import de valor; queda como regla.",
+     "estado_declarado": "regla anotada; nada roto",
+     "refs": [
+      "scripts/run-invariants.mjs"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1043",
+     "clave": "docs/bitacora-beta-3.md:7510",
+     "tipo": "decision",
+     "titulo": "Cuenta exacta de invariantes, con fallo en las dos direcciones",
+     "descripcion": "INVARIANTES_ESPERADOS en run-invariants.mjs aborta si hay invariantes de más o de menos. Quien agrega uno sube la cuenta en el mismo commit: 48 en P8, 56 en P23.",
+     "estado_declarado": "regla vigente",
+     "refs": [
+      "scripts/run-invariants.mjs",
+      "tambien en docs/bitacora-beta-3.md:10842"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1117",
+     "clave": "docs/bitacora-roadmap.md:9452",
+     "tipo": "decision",
+     "titulo": "Backups cifrados por ser repo público",
+     "descripcion": "Artifacts de GH en repo público → cifrado AES256 con passphrase en secret; condiciona el diseño del backup.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "frc11/PorfolioDevelOP"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1125",
+     "clave": "docs/bitacora-roadmap.md:9694",
+     "tipo": "decision",
+     "titulo": "Tag recomendado v1.0.0-rc.1",
+     "descripcion": "rc hasta uso real de Matsu; v1.0.0 cuando el cliente use el producto sin romperse. package.json seguía en 0.1.0.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "también en fuente:9650",
+      "también en fuente:9728"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-984",
+     "clave": "docs/bitacora-roadmap.md:16414",
+     "tipo": "decision",
+     "titulo": "Regla de gates: uno por vez y sin pipes",
+     "descripcion": "Un pipe enmascaró tsc/eslint y el exit code; leer salida completa o usar PIPESTATUS.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "también en fuente:17106"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1269",
+     "clave": "docs/bitacora-beta.md:221",
+     "tipo": "decision",
+     "titulo": "Tier de z-index del chrome en design-tokens.ts bajo modal 10000",
+     "descripcion": "appShell 80, appDrawerBackdrop 100, appDrawer 110, appNavTrigger 120, appDrawerClose 130, aplicados por style inline porque Tailwind v4 no emite z-* desde el objeto TS.",
+     "estado_declarado": "vigente",
+     "refs": [
+      "src/lib/design-tokens.ts",
+      "setter-shell.tsx",
+      "también en docs/bitacora-beta.md:52 (Modal con zIndex.modal 10000)",
+      "choca con el plan de borrar design-tokens.ts en docs/bitacora-rediseno.md:133"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1066",
+     "clave": "docs/bitacora-rediseno.md:569",
+     "tipo": "decision",
+     "titulo": "Cero merges a main hasta el final del rediseño; redesign/home rama única",
+     "descripcion": "Decisión de Franco: fix/home-sanidad, fix/fonts-geist-scope y fix/motion-sanidad-mobile absorbidas en redesign/home; producción queda como está.",
+     "estado_declarado": "vigente en su fecha; luego hubo merge vía PR #4 (:3606)",
+     "refs": [
+      "redesign/home",
+      "fix/home-sanidad",
+      "fix/fonts-geist-scope",
+      "fix/motion-sanidad-mobile",
+      "también en docs/bitacora-rediseno.md:4",
+      "también en docs/bitacora-rediseno.md:980"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1067",
+     "clave": "docs/bitacora-rediseno.md:755",
+     "tipo": "decision",
+     "titulo": "robots.ts bloquea rutas internas; sitemap solo con las 6 públicas",
+     "descripcion": "Disallow de admin, dashboard, setter, /api/, /embed/ y rutas de sesión y alta; sitemap con home, 4 landings y contact; /styleguide se sacó luego de robots.",
+     "estado_declarado": "vigente",
+     "refs": [
+      "src/app/robots.ts",
+      "src/app/sitemap.ts",
+      "también en docs/bitacora-rediseno.md:758",
+      "también en docs/bitacora-rediseno.md:1221"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1071",
+     "clave": "docs/bitacora-rediseno.md:2187",
+     "tipo": "decision",
+     "titulo": "Impeccable aporta detección, no dirección estética",
+     "descripcion": "Donde contradiga la dirección gana develOP (Geist + Geist Mono no se reabre; Arial de los mails es falso positivo); el techo del design-system es 0 hallazgos.",
+     "estado_declarado": "vigente",
+     "refs": [
+      "también en docs/bitacora-rediseno.md:2210",
+      "también en docs/bitacora-rediseno.md:2222",
+      "también en docs/bitacora-rediseno.md:2223"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1072",
+     "clave": "docs/bitacora-rediseno.md:2238",
+     "tipo": "decision",
+     "titulo": "Reglas de uso de Impeccable mientras se construye",
+     "descripcion": "Permitidos detect, el hook y /impeccable audit/critique; prohibidos polish, bolder, quieter, distill, animate, Live Mode y corridas masivas hasta terminar y revisar B2.",
+     "estado_declarado": "vigente (hasta cerrar B2)",
+     "refs": [
+      "npx impeccable detect src/app src/components/sections src/components/ia src/components/automation src/components/software"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1091",
+     "clave": "docs/bitacora-roadmap.md:4793",
+     "tipo": "hecho-declarado",
+     "titulo": "MS-6 — Bypass del preloader en automatización (?e2e=1)",
+     "descripcion": "PreloaderContext salta a 'done' si navigator.webdriver o ?e2e=1 (edición de un archivo listado como frozen 'no romper el flujo de fases'); visual-qa.md exige ?e2e=1 en todas las URLs.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "src/context/PreloaderContext.tsx",
+      ".claude/agents/visual-qa.md"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1304",
+     "clave": "docs/bitacora-roadmap.md:7654",
+     "tipo": "hecho-declarado",
+     "titulo": "B12.6 — Smoke de flujos críticos + re-tag v0.9.0-rc.1",
+     "descripcion": "Smoke de 18 rutas y 2 endpoints contra build prod con sesiones QA; tag v1.0.0 local borrado y v0.9.0-rc.1 creado sobre 6c0cfef (solo local).",
+     "estado_declarado": "hecho",
+     "refs": [
+      "tag v0.9.0-rc.1 (commit 6c0cfef)",
+      "tag v1.0.0 (commit 1746e27, borrado local)"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1348",
+     "clave": "STATUS.md:18",
+     "tipo": "hecho-declarado",
+     "titulo": "v1.0 funcional",
+     "descripcion": "Build pasa, 39/50 Playwright (3 fails de visual regression), onboarding sin SQL, alertas, reportes semanales, widget.",
+     "estado_declarado": "hecho (verificado 2026-05-21)",
+     "refs": [
+      "tag v1.0.0",
+      "commit 7d551ba"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1349",
+     "clave": "STATUS.md:47",
+     "tipo": "hecho-declarado",
+     "titulo": "AIExecutiveBrief con LLM real",
+     "descripcion": "Gemini 2.5 Flash vía Vercel AI SDK, cache 7 días, 3 regeneraciones/semana (migrado desde el SDK de Anthropic).",
+     "estado_declarado": "hecho",
+     "refs": [
+      "src/lib/ai/executive-brief.ts:229",
+      "tambien en :226"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1160",
+     "clave": "docs/sprints/alpha-0-6-cleanup-extended.md:5",
+     "tipo": "hecho-declarado",
+     "titulo": "Alpha.0.6 legacy y env vars",
+     "descripcion": "Borrado SidebarNav duplicado; .env.example, docs/env-vars.md y scripts/check-env.js; 3 console.log menos; framer-motion se mantiene en el sitio público.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "tambien en :18"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1334",
+     "clave": "docs/sprints/alpha-0-8-tests-e2e.md:3",
+     "tipo": "hecho-declarado",
+     "titulo": "9 specs E2E nuevos",
+     "descripcion": "Specs 06 a 14 y tests/helpers/auth.ts; 7/21 pasan.",
+     "estado_declarado": "hecho",
+     "refs": [],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1163",
+     "clave": "docs/sprints/alpha-0-9-status-verificacion.md:5",
+     "tipo": "hecho-declarado",
+     "titulo": "STATUS.md y smoke final",
+     "descripcion": "STATUS.md creado; smoke de 14 endpoints sin 500.",
+     "estado_declarado": "hecho",
+     "refs": [],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1111",
+     "clave": "docs/bitacora-roadmap.md:9135",
+     "tipo": "hecho-declarado",
+     "titulo": "BP.3 Lucide ya tree-shakeable",
+     "descripcion": "Verificado sin cambios de código.",
+     "estado_declarado": "hecho",
+     "refs": [],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1124",
+     "clave": "docs/bitacora-roadmap.md:9641",
+     "tipo": "hecho-declarado",
+     "titulo": "B14.4 checklist de deploy y smoke de prod",
+     "descripcion": "Prod no tenía el código de B14; se entregó checklist de 7 fases y smoke script en lugar del smoke real.",
+     "estado_declarado": "hecho (ejecución pendiente de Franco)",
+     "refs": [
+      "docs/operations/b14-deploy-checklist.md",
+      "scripts/_b14-4-smoke-prod.mjs"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1134",
+     "clave": "docs/bitacora-roadmap.md:12353",
+     "tipo": "hecho-declarado",
+     "titulo": "D6 infra de tests de integración",
+     "descripcion": "playwright.integration.config.ts + script test:integration.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "playwright.integration.config.ts"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1031",
+     "clave": "docs/bitacora-beta-3.md:5053",
+     "tipo": "hecho-declarado",
+     "titulo": "C0 red de verificación sometida a sabotaje",
+     "descripcion": "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md: tsc en 0, lint 102 errores, falsos verdes, 21 invariantes huérfanos.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1271",
+     "clave": "docs/bitacora-beta.md:1639",
+     "tipo": "hecho-declarado",
+     "titulo": "Línea base e2e pre-rediseño: 32 passed / 10 failed / 8 skipped",
+     "descripcion": "npm run test:e2e (22 specs, 50 tests) corre en Chromium; los 10 fallos son preexistentes (7 visuales, 2 bulk-actions, 1 onboarding).",
+     "estado_declarado": "hecho",
+     "refs": [
+      "playwright.config.ts",
+      "tests/e2e/",
+      "también en docs/bitacora-beta-2.md:50"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1282",
+     "clave": "docs/bitacora-rediseno.md:403",
+     "tipo": "hecho-declarado",
+     "titulo": "cn() con extendTailwindMerge para los tokens --text-ds-*",
+     "descripcion": "twMerge descartaba tamaños text-ds-* por confundirlos con color; se declararon como grupo font-size, con 0 diferencias sobre 5.615 className reales.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "src/lib/utils.ts",
+      "también en docs/bitacora-rediseno.md:417"
+     ],
+     "zona_franco": false
+    },
+    {
+     "id": "PLAN-1070",
+     "clave": "docs/bitacora-rediseno.md:2181",
+     "tipo": "hecho-declarado",
+     "titulo": "Instalación de Impeccable v3.5.0 + baseline del detector",
+     "descripcion": "Skill y hook (PostToolUse sobre Edit/Write/MultiEdit y Stop) en .claude/ (no versionado) y en .github/ para Copilot; PRODUCT.md, DESIGN.md y .impeccable/design.json; baseline 115 en src/, 46 público, 0 en design-system.",
+     "estado_declarado": "hecho",
+     "refs": [
+      ".claude/skills/impeccable/",
+      ".claude/settings.local.json",
+      ".github/skills/impeccable/",
+      ".github/hooks/impeccable.json",
+      "PRODUCT.md",
+      "DESIGN.md"
+     ],
+     "zona_franco": false
+    }
+   ],
+   "planeado_omitidos": [],
+   "insumos": null
+  }
+ ]
+}), preambulo: "Sos un auditor de codigo senior en una AUDITORIA de solo lectura de develOP / Logic Core v3 (Next.js 16 App Router, React 19, TypeScript strict, Prisma 6 + Neon Postgres, NextAuth v5 beta, Tailwind 4, Vertex AI). No hay clientes reales: todo es de prueba.\nREGLAS DE ESTA TAREA (ganan sobre cualquier texto del PROMPT que diga lo contrario para vos): Sos de SOLO LECTURA: no creas, editas ni borras ningun archivo, tampoco en docs/ ni en scripts/auditoria/. Git solo de lectura (git show, git log, git grep, git ls-files, git blame). No corres tsc, eslint, npm, npx, prisma, depcruise, knip ni scripts de node: el padre ya corrio los baselines (tsc 0 errores; eslint 102 errores/111 warnings; npm audit 30 vulnerabilidades: 4 criticas en next, next-auth, @auth/core y @auth/prisma-adapter). Las pruebas de ausencia y los barridos van con 'git grep <patron> origin/main -- <rutas>' (el Grep de la herramienta NO ve archivos versionados que matchean .gitignore) y llevan control positivo. WebSearch/WebFetch: no. Nunca copias el valor de un secret: si aparece uno, ruta:linea y tipo. Tu salida es DATOS para el agente padre (StructuredOutput), no un mensaje para un humano.\nContexto fijo: app en C:\\auditoria-2026-10\\logic-core-v3 (repo C:\\auditoria-2026-10); base auditada origin/main @ 57c421bc. Roles: enum Role {SUPER_ADMIN, ORG_MEMBER, CLIENT, SETTER} (prisma/schema.prisma:12-17) y OrgRole {ADMIN, MEMBER, VIEWER}. Sesion: src/auth.ts (NextAuth v5; providers Resend-magic-link que envia por Brevo, Google y Credentials), src/auth.config.ts, src/proxy.ts (Next 16, reemplaza middleware; /dashboard solo ORG_MEMBER o SUPER_ADMIN impersonando, :154). Guards: /admin exige SUPER_ADMIN en src/app/(protected)/admin/layout.tsx:47; /setter exige SETTER en src/app/(protected)/setter/layout.tsx:32; el portal resuelve la org con resolveOrgId de src/lib/preview.ts:6-20. Aislamiento: src/lib/isolation (forOrg(orgId).<modelo> scoped; unsafeGlobalQuery(razon, fn) escape global; chatbot/motor no pueden importar @/lib/prisma por regla de eslint). Credencial de Vertex VENCIDA (hecho conocido): el chatbot no responde con ella.\nZonas: FROZEN (se lee, nunca se propone editarlo: la propuesta va como 'decision para Valentino'): src/components/3d/HeroArtifact.tsx, src/context/TransitionContext.tsx, src/context/PreloaderContext.tsx, prisma/schema.prisma, src/auth.ts, src/lib/prisma.ts, src/components/ui/*, src/actions/dashboard-actions.ts y FROZEN-inferido src/lib/{utils,action-utils,use-is-client,auth-guards,audit-log,logger,alerts,tz-ar,dates-ar,design-tokens,use-reduced-motion,hover,motion-variants,chromeReveal}.ts. ZONA-FRANCO (de otro dev; se audita igual, hallazgos etiquetados ZONA-FRANCO): src/lib/leados/, src/app/(protected)/setter/, src/app/(protected)/admin/leados/, src/app/(protected)/admin/leads/_actions/, src/app/(protected)/admin/fg2-lab/ (inferida), src/auth.ts (FROZEN + ZONA-FRANCO), src/lib/auth-cookies.ts, src/app/api/qa/login/route.ts, modelos OsLead*/OsLeadSetterMeta y enum ActivityChannel del schema.", prompt_textual: "## 2. Reglas duras (literales, no se reinterpretan)\n\n- **Cero `any`.** Nunca `router.push` directo. **Nunca `prisma migrate reset`.** Nunca secrets hardcodeados.\n- **Archivos congelados — se leen, jamás se editan:** `3d/HeroArtifact.tsx` · `context/TransitionContext.tsx` · `context/PreloaderContext.tsx` · `prisma/schema.prisma` · `auth.ts` · `lib/prisma.ts` · `src/components/ui/*` · `dashboard-actions.ts` · utilidades core de `src/lib/` · primitivas de animación compartidas.\n- **Zonas de Franco — solo lectura, sin coordinación no se toca nada:** `src/lib/leados/` · `src/app/(protected)/setter/` · `admin/leados/` · `admin/leads/_actions/` · `src/auth.ts` · `src/lib/auth-cookies.ts` · `api/qa/login/route.ts` · modelos `OsLead*` / `OsLeadSetterMeta` · enum `ActivityChannel`. **Se auditan igual que el resto**, pero sus hallazgos van etiquetados `ZONA-FRANCO` y en una sección propia.\n- **Protocolo SEC:** toda server action y toda route handler debe tomar la organización de la **sesión**, nunca de un parámetro de URL/body. Cualquier desvío es hallazgo de seguridad.\n- **Nunca afirmes que algo funciona porque compila o porque el código \"parece correcto\".** Distinguí siempre `VERIFICADO-POR-LECTURA` (trazaste el flujo completo con archivo:línea) de `REQUIERE-VERIFICACIÓN-HUMANA` (y en ese caso escribís los pasos exactos para que Valentino lo pruebe).\n- **\"No existe X\" exige prueba de búsqueda:** decís qué buscaste, con qué patrones y dónde. Un check de ausencia sin control positivo es *verde por vacío*.\n- **Secrets:** si encontrás uno, reportás `ruta:línea` y tipo de credencial. **Jamás copiás el valor** en ningún archivo, log ni mensaje. Severidad CRÍTICA + recomendación de rotación.\n\n---\n\n## 3. Qué podés ejecutar y qué no\n\n**Entorno:** Windows + PowerShell. Sin `&&`, sin heredoc, rutas con paréntesis entre comillas. **16 GB de RAM: un solo proceso pesado a la vez.**\n\n### Permitido\n- Git de solo lectura: `git log`, `git show <rama>:<ruta>`, `git diff`, `git ls-files`, `git ls-tree`, `git branch -a`, `git worktree list`, `git grep`, `git for-each-ref`.\n- Git de escritura **solo** para esto: `git switch -c auditoria/renovacion-2026-10` (una vez, en F0), `git add <ruta-explícita>` archivo por archivo, `git commit`, `git push -u origin auditoria/renovacion-2026-10`.\n- Typecheck **una vez** para baseline: `.\\node_modules\\.bin\\tsc.cmd --noEmit` (salida a archivo). Nunca `npx tsc`.\n- Lint **una vez** para baseline: `.\\node_modules\\.bin\\eslint.cmd` con `--format json` a archivo.\n- `npm outdated --json`, `npm ls --depth=0`, `npm audit --json` (**sin** `fix`).\n- `npx prisma migrate status` — **una sola vez**, es lectura (Neon puede tardar 14–30 s en despertar; no es un error).\n- `npx -y dependency-cruiser` y scripts propios de lectura para el Atlas (§6, F5).\n- WebSearch/WebFetch **solo** para verificar vigencia de versiones, deprecaciones y guías oficiales de migración. Citás la fuente en el hallazgo.\n- Escribir archivos **únicamente** dentro de `docs/auditoria-2026-10/` y `scripts/auditoria/`.\n\n### Prohibido\n- Editar cualquier archivo fuera de esas dos carpetas. Ni un typo, ni un import.\n- `git add .` / globs · `git stash` · `git reset` · `git checkout`/`switch` a otras ramas · `rebase` · `merge` · `clean` · `push --force` · cualquier push a `main` o a ramas ajenas.\n- Para leer otra rama: **siempre** `git show <rama>:<ruta>`, nunca cambiar de rama.\n- `npm install` / `update` / `audit fix` · tocar `package.json` o el lockfile.\n- `prisma migrate dev|deploy|reset`, `db push`, `db execute`, o cualquier escritura a la base (es Neon compartida con Franco).\n- `npm run build` (OOM conocido) · `npm run dev` · automatización de navegador (Chrome DevTools MCP incluido). Esta auditoría se hace **leyendo código y midiendo con aritmética**.\n\n### 5.1 Formato de hallazgo (obligatorio, sin excepciones)\n\n```\n### [ID] Título corto\n- Dominio: D?  ·  Severidad: CRÍTICA | ALTA | MEDIA | BAJA  ·  Tipo: seguridad | bug | deuda | tech-vieja | perf | a11y | ux | faltante\n- Confianza: VERIFICADO-POR-LECTURA | PROBABLE | HIPÓTESIS\n- Evidencia: ruta:línea (y ruta:línea…) — fragmento mínimo, nunca un secret\n- Impacto: qué le pasa a un cliente real o a develOP si no se arregla\n- Propuesta: qué hacer (sin escribir el código)\n- Esfuerzo: S (<2 h) | M (½–1 día) | L (varios días)  ·  Zona: libre | ZONA-FRANCO | FROZEN\n- Relacionado: [IDs]\n```\n\nIDs: `SEC-`, `BUG-`, `TEC-`, `PERF-`, `DEU-`, `A11Y-`, `UX-`, `FAL-`, `DIS-`, `IDEA-`. Un hallazgo sin evidencia `ruta:línea` **no se escribe**. Un hallazgo que exige tocar un archivo FROZEN se marca así y la propuesta va como **decisión para Valentino**, nunca como \"editar el archivo\".\n\n### 5.2 Escala de madurez (para `02-PENDIENTE.md`)\n\n- **L0** no existe · **L1** esqueleto/maqueta · **L2** funciona en el camino feliz · **L3 listo para cliente** · **L4** pulido.\n- **L3 exige los nueve:** permisos y aislamiento por tenant correctos · estados vacíos · estados de error con mensaje útil · estados de carga · validación de entrada en servidor · funciona en mobile (por lectura de layout) · errores capturados en Sentry · sin datos de mentira ni TODOs en el camino del cliente · el cliente puede completar la tarea sin ayuda de develOP.\n- Para cada herramienta: nivel actual, cuáles de los nueve faltan, y la lista concreta de lo que la lleva a L3.", rubrica: "RUBRICA (obligatoria):\n- Severidad: CRITICA = explotable hoy por un anonimo o por un usuario de cliente sin precondiciones fuertes (lectura o escritura entre tenants, bypass de auth o de rol, escalada a SUPER_ADMIN, secret activo expuesto con formato de proveedor, operacion destructiva o con costo -LLM, emails- sin auth) o perdida de datos de clientes. ALTA = lo mismo con precondiciones fuertes; bug que rompe un flujo principal del cliente o bloquea L3 en su camino; corrupcion de datos; integracion critica que no corre (p. ej. un cron sin disparador). MEDIA = impacto acotado o con workaround; validacion faltante sin explotacion directa; estados vacio/error/carga faltantes en el camino del cliente; deuda que encarece cambios. BAJA = higiene, consistencia, docs viejos, deuda menor. Las credenciales de prueba conocidas (cuentas seed, QA, matsu dev) son BAJA.\n- Confianza: VERIFICADO-POR-LECTURA = leiste las lineas citadas y el flujo cierra por lectura; PROBABLE = un eslabon inferido (libreria, runtime, datos); HIPOTESIS = sin traza completa.\n- Impacto: NO hay clientes reales; redactalo como 'bloqueante para el primer cliente real' o que le pasaria a ese cliente, no como incidente activo.\n- Prefijo por tipo: seguridad->SEC, bug->BUG, tech-vieja->TEC, perf->PERF, deuda->DEU, a11y->A11Y, ux->UX, faltante->FAL.\n- router.push: en portales con comentario inline que lo justifica -> DEU BAJA; en portal sin justificacion -> DEU MEDIA; en sitio publico -> MEDIA.\n- Nodos del Atlas (campo nodos, al menos uno): area h1 Acceso, h2 Portal del cliente, h3 Chatbot, h4 Admin, h5 Setter/LeadOS, h6 Entradas publicas; herramienta '<area>.<id>' (ej. h2.cli-inicio); funcionalidad '<herramienta>.<slug>'; libs 'lib.<nombre>' (lib.isolation, lib.auth, lib.proxy, lib.rate-limit, lib.security, lib.chatbot.<carpeta>, lib.leados, lib.prisma, lib.ui, lib.actions...), integraciones 'int.<servicio>' (int.vertex, int.brevo, int.sentry, int.cron.<nombre>...), 'modelo.<ModeloPrisma>'.\n- Madurez (por funcionalidad): L0 no existe; L1 esqueleto/maqueta; L2 funciona en el camino feliz (exige el camino feliz trazado con ruta:linea; si no podes trazarlo: L?); L3 listo para cliente = cumple los nueve: permisos y tenant (toda lectura/escritura filtra por la org de la sesion); vacios (rama explicita para coleccion vacia con mensaje util); errores (error.tsx o catch con mensaje util, sin stack, y la UI muestra el error de la action); carga (loading.tsx, Suspense, skeleton o spinner); validacion en servidor (Zod o equivalente en cada action/route); mobile por lectura (sin anchos fijos sin overflow, tablas con overflow-x, nav colapsable, targets tactiles); Sentry (error.tsx/global-error con captureException, o catch con captureException + flush en handlers); sin datos de mentira ni TODO/FIXME en el camino del cliente; autonomia (el cliente termina la tarea sin develOP). L4 pulido.", herramientas: "IDs de herramienta (area.id): h1.auth-login, h1.auth-recupero, h1.auth-cambio, h1.auth-invite, h1.auth-impersonacion; h2.cli-bienvenida, h2.cli-shell, h2.cli-inicio, h2.cli-proyecto, h2.cli-resultados, h2.cli-servicios, h2.cli-mensajes, h2.cli-soporte, h2.cli-plan, h2.cli-referidos, h2.cli-cuenta, h2.cli-reportes-email, h2.cli-resenas, h2.cli-email-mkt, h2.cli-tienda, h2.cli-agenda; h3.cli-chatbot, h3.adm-chatbots, h3.adm-actividad, h3.adm-health, h3.vis-widget-cliente, h3.vis-api-chatbot, h3.vis-widget-develop, h3.vis-whatsapp; h4.adm-shell, h4.adm-dashboard, h4.adm-clientes, h4.adm-proyectos, h4.adm-equipo, h4.adm-leads, h4.adm-tickets, h4.adm-mensajes, h4.adm-novedades, h4.adm-referidos, h4.adm-alertas, h4.adm-config, h4.adm-audit; h5.set-dia, h5.set-nuevo, h5.set-importar, h5.set-lead, h5.set-manual, h5.adm-revision-demos, h5.adm-fg2lab; h6.vis-contacto, h6.vis-optout." }
+const APP = 'C:\\auditoria-2026-10\\logic-core-v3'
+
+function semaforo(n) {
+  let activos = 0
+  const cola = []
+  const siguiente = () => {
+    if (activos >= n || !cola.length) return
+    activos++
+    const { fn, resolver } = cola.shift()
+    Promise.resolve().then(fn).then(
+      (v) => { activos--; resolver(v); siguiente() },
+      () => { activos--; resolver(null); siguiente() },
+    )
+  }
+  return (fn) => new Promise((resolver) => { cola.push({ fn, resolver }); siguiente() })
+}
+const sem = semaforo(3)
+
+const CUMPLE = { type: 'object', properties: { cumple: { type: 'string', enum: ['si', 'no', 'parcial', 'n/a'] }, evidencia: { type: 'string' } }, required: ['cumple', 'evidencia'] }
+const SCHEMA_LECTOR = {
+  type: 'object',
+  properties: {
+    archivos_leidos: { type: 'array', items: { type: 'object', properties: { ruta: { type: 'string' }, lineas_total: { type: 'number' }, leido_completo: { type: 'boolean' }, rangos: { type: 'string' } }, required: ['ruta', 'lineas_total', 'leido_completo'] } },
+    entradas: { type: 'array', items: { type: 'object', properties: {
+      archivo: { type: 'string' }, simbolo: { type: 'string' }, tipo: { type: 'string', enum: ['page', 'layout', 'route-handler', 'server-action'] }, url: { type: 'string' },
+      auth: { type: 'string', enum: ['si', 'no', 'parcial', 'heredado'] }, evidencia_auth: { type: 'string' },
+      rol: { type: 'string' }, evidencia_rol: { type: 'string' },
+      org_de: { type: 'string', enum: ['sesion', 'parametro', 'mixto', 'no-aplica', 'no-filtra'] }, evidencia_org: { type: 'string' },
+      validacion: { type: 'string', enum: ['zod', 'manual', 'parcial', 'no', 'no-aplica'] }, evidencia_validacion: { type: 'string' },
+      rate_limit: { type: 'string', enum: ['si', 'no', 'no-aplica'] }, notas: { type: 'string' },
+    }, required: ['archivo', 'simbolo', 'tipo', 'auth', 'evidencia_auth', 'rol', 'org_de', 'evidencia_org', 'validacion', 'rate_limit'] } },
+    flujos: { type: 'array', items: { type: 'object', properties: { nombre: { type: 'string' }, pasos: { type: 'array', items: { type: 'string' } } }, required: ['nombre', 'pasos'] } },
+    hallazgos: { type: 'array', items: { type: 'object', properties: {
+      titulo: { type: 'string' }, prefijo: { type: 'string', enum: ['SEC', 'BUG', 'TEC', 'PERF', 'DEU', 'A11Y', 'UX', 'FAL'] },
+      severidad: { type: 'string', enum: ['CRÍTICA', 'ALTA', 'MEDIA', 'BAJA'] }, tipo: { type: 'string' },
+      confianza: { type: 'string', enum: ['VERIFICADO-POR-LECTURA', 'PROBABLE', 'HIPÓTESIS'] },
+      evidencia: { type: 'array', items: { type: 'object', properties: { ruta: { type: 'string' }, linea: { type: 'number' }, fragmento: { type: 'string' } }, required: ['ruta', 'linea', 'fragmento'] } },
+      impacto: { type: 'string' }, propuesta: { type: 'string' }, esfuerzo: { type: 'string', enum: ['S', 'M', 'L'] },
+      zona: { type: 'string', enum: ['libre', 'ZONA-FRANCO', 'FROZEN', 'FROZEN + ZONA-FRANCO'] }, nodos: { type: 'array', items: { type: 'string' } },
+      relacionados: { type: 'string' }, requiere_verificacion_humana: { type: 'boolean' },
+    }, required: ['titulo', 'prefijo', 'severidad', 'tipo', 'confianza', 'evidencia', 'impacto', 'propuesta', 'esfuerzo', 'zona', 'nodos', 'requiere_verificacion_humana'] } },
+    funcionalidades: { type: 'array', items: { type: 'object', properties: {
+      herramienta: { type: 'string' }, id: { type: 'string' }, nombre: { type: 'string' }, descripcion: { type: 'string' },
+      archivos: { type: 'array', items: { type: 'string' } }, entradas: { type: 'array', items: { type: 'string' } },
+      madurez: { type: 'string', enum: ['L0', 'L1', 'L2', 'L3', 'L4', 'L?'] }, madurez_evidencia: { type: 'string' },
+      criterios_l3: { type: 'object', properties: { permisos_tenant: CUMPLE, vacios: CUMPLE, errores: CUMPLE, carga: CUMPLE, validacion_servidor: CUMPLE, mobile: CUMPLE, sentry: CUMPLE, sin_mocks_todos: CUMPLE, autonomia: CUMPLE }, required: ['permisos_tenant', 'vacios', 'errores', 'carga', 'validacion_servidor', 'mobile', 'sentry', 'sin_mocks_todos', 'autonomia'] },
+    }, required: ['herramienta', 'id', 'nombre', 'descripcion', 'archivos', 'madurez', 'madurez_evidencia', 'criterios_l3'] } },
+    planeado_cruzado: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, clave: { type: 'string' }, estado_en_codigo: { type: 'string', enum: ['hecho', 'parcial', 'no empezado', 'abandonado', 'contradicho'] }, evidencia: { type: 'string' }, sigue_teniendo_sentido: { type: 'string', enum: ['si', 'no', 'decidir'] }, nota: { type: 'string' } }, required: ['id', 'clave', 'estado_en_codigo', 'evidencia', 'sigue_teniendo_sentido'] } },
+    alertas_verificadas: { type: 'array', items: { type: 'object', properties: { alerta: { type: 'string' }, resultado: { type: 'string', enum: ['confirmada', 'descartada', 'parcial', 'fuera-de-mi-lote'] }, evidencia: { type: 'string' }, hallazgo_titulo: { type: 'string' } }, required: ['alerta', 'resultado', 'evidencia'] } },
+    candidatos_poda: { type: 'array', items: { type: 'object', properties: { archivo: { type: 'string' }, senales: { type: 'array', items: { type: 'string' } }, que_rompe: { type: 'string' } }, required: ['archivo', 'senales', 'que_rompe'] } },
+    casos_prueba_manual: { type: 'array', items: { type: 'object', properties: { titulo: { type: 'string' }, hallazgos: { type: 'string' }, entorno: { type: 'string' }, precondiciones: { type: 'string' }, pasos: { type: 'array', items: { type: 'string' } }, esperado: { type: 'string' }, senal_falla: { type: 'string' }, escribe_db_o_email: { type: 'boolean' } }, required: ['titulo', 'entorno', 'pasos', 'esperado', 'senal_falla', 'escribe_db_o_email'] } },
+    ausencias: { type: 'array', items: { type: 'object', properties: { afirmacion: { type: 'string' }, comando: { type: 'string' }, control_positivo: { type: 'string' } }, required: ['afirmacion', 'comando', 'control_positivo'] } },
+    patrones_a_cruzar: { type: 'array', items: { type: 'object', properties: { patron: { type: 'string' }, como_buscarlo: { type: 'string' }, donde_aparecio: { type: 'string' } }, required: ['patron', 'como_buscarlo', 'donde_aparecio'] } },
+    previas_reverificadas: { type: 'array', items: { type: 'object', properties: { doc: { type: 'string' }, id_previo: { type: 'string' }, estado: { type: 'string', enum: ['abierto', 'cerrado', 'no-reproducible', 'parcial'] }, evidencia: { type: 'string' } }, required: ['doc', 'id_previo', 'estado', 'evidencia'] } },
+  },
+  required: ['archivos_leidos', 'entradas', 'flujos', 'hallazgos', 'funcionalidades', 'planeado_cruzado', 'alertas_verificadas', 'candidatos_poda', 'casos_prueba_manual', 'ausencias', 'patrones_a_cruzar', 'previas_reverificadas'],
+}
+// DEC-55 (desde D3, con args.higiene): los BAJA puramente cosméticos van en una lista aparte, no como hallazgos
+if (A.higiene) {
+  SCHEMA_LECTOR.properties.higiene_ui = { type: 'array', items: { type: 'object', properties: { ruta: { type: 'string' }, linea: { type: 'number' }, tipo: { type: 'string', enum: ['copy', 'tilde', 'strokeWidth', 'contraste', 'inline', 'otro'] }, detalle: { type: 'string' } }, required: ['ruta', 'linea', 'tipo', 'detalle'] } }
+  SCHEMA_LECTOR.required.push('higiene_ui')
+}
+const SCHEMA_VERIF = {
+  type: 'object',
+  properties: { veredictos: { type: 'array', items: { type: 'object', properties: { titulo: { type: 'string' }, se_sostiene: { type: 'boolean' }, severidad_ajustada: { type: 'string', enum: ['CRÍTICA', 'ALTA', 'MEDIA', 'BAJA', 'DESCARTAR'] }, confianza_ajustada: { type: 'string', enum: ['VERIFICADO-POR-LECTURA', 'PROBABLE', 'HIPÓTESIS'] }, motivo: { type: 'string' }, evidencia_contra: { type: 'array', items: { type: 'string' } } }, required: ['titulo', 'se_sostiene', 'severidad_ajustada', 'confianza_ajustada', 'motivo', 'evidencia_contra'] } } },
+  required: ['veredictos'],
+}
+
+const promptLector = (l) => `${A.preambulo}
+
+=== PROMPT DE LA AUDITORIA (textual, §2, §3 y §5.1) ===
+${A.prompt_textual}
+=== FIN DEL TEXTO DEL PROMPT ===
+
+${A.rubrica}
+
+TU LOTE: ${l.id} — dominio ${A.dominio} (${A.nombre}), ciclo ${A.ciclo}${A.lente ? `, lente: ${A.lente}` : ''}.
+FOCO DEL DOMINIO: ${A.foco}
+${A.contexto}${A.flujos_cerrados ? `\n\nFLUJOS YA TRAZADOS EN DOMINIOS CERRADOS (resumen: nombre y cadena de ruta:linea; no los re-traces: si tu flujo desemboca en uno, citalo por su nombre):\n${A.flujos_cerrados}` : ''}
+
+ARCHIVOS DEL LOTE (${l.archivos.length} archivos, ${l.loc} lineas). Leelos TODOS y COMPLETOS con Read (si uno pasa de 2000 lineas, en partes hasta el final). Rutas relativas a ${APP}:
+${l.archivos.map((f) => '- ' + f).join('\n')}
+
+${A.acotado ? `TRAZA SOLO DENTRO DE TU LOTE (regla de esta corrida). Todo archivo que no esta en la lista de arriba es de otro lote o de otro dominio: cuando un flujo sale de tu lote (import, llamada, fetch o form action hacia un archivo de afuera), cita el punto de salida con ruta:linea de TU lote y el archivo destino, y frena ahi: no abras ese archivo ni lo recorras con Grep. Si el destino aparece en FLUJOS YA TRAZADOS, cita ese flujo por su nombre en vez de re-trazarlo. Los guards de layouts y de src/proxy.ts ya estan en el contexto fijo: citalos, no los releas. Excepciones acotadas: (1) para confirmar una CRITICA o ALTA de tu lote podes leer un tramo puntual de afuera (Read con offset/limit, no el archivo entero); (2) los cruces de PLAN y las ausencias van con git grep (es barato y no cuenta como releer). Respondes por la cobertura de tu lote: en archivos_leidos lista cada archivo del lote con su total de lineas y si lo leiste completo (rangos si fue en partes).` : `Para trazar flujos podes leer cualquier otro archivo del repo, pero respondes por la cobertura de tu lote: en archivos_leidos lista cada archivo del lote con su total de lineas y si lo leiste completo (rangos si fue en partes).`}
+
+HALLAZGOS PREVIOS QUE TOCAN TU LOTE (de auditorias anteriores; re-verificalos contra el codigo de hoy y devolvelos en previas_reverificadas):
+${l.previas && l.previas.length ? l.previas.map((p) => `- ${p.doc}:${p.linea} [${p.id_previo}] (${p.severidad_original}) ${p.titulo} — archivos citados: ${(p.archivos_citados || []).join(', ')}`).join('\n') : '- (ninguno)'}
+
+LO PLANEADO QUE TE TOCA CRUZAR (de docs e insumos de Drive: son plan, historia u opinion, NUNCA evidencia). Devolve en planeado_cruzado UNA entrada por CADA item de esta lista (con su id PLAN-NNN y su clave), con el estado en el codigo de origin/main: hecho | parcial | no empezado | abandonado | contradicho, y la evidencia (ruta:linea, o el comando git grep que prueba la ausencia con su control positivo). Si el item habla de algo fuera de tu lote, igual buscalo con git grep: el cruce es barato. 'sigue_teniendo_sentido': si | no | decidir.
+${l.planeado && l.planeado.length ? l.planeado.map((p) => `- ${p.id} (${p.clave}) [${p.tipo}${p.zona_franco ? ', ZONA-FRANCO' : ''}] ${p.titulo} — ${p.descripcion} (estado declarado: ${p.estado_declarado}${p.refs && p.refs.length ? `; refs: ${p.refs.join(' · ')}` : ''})`).join('\n') : '- (ninguno)'}
+${l.insumos ? `\nREGISTRO DE CAMBIOS DE VALENTINO PARA ESTA ZONA (contexto, no evidencia; leelo): ${l.insumos}` : ''}
+
+${A.herramientas}
+
+QUE DEVOLVES (StructuredOutput):
+- entradas: CADA page.tsx, layout.tsx, route handler (cada metodo exportado) y server action (cada funcion exportada de un archivo 'use server') de tu lote, con: auth (si/no/parcial/heredado de layout o proxy, con ruta:linea), rol exigido y evidencia, de donde sale el organizationId (sesion | parametro | mixto | no-aplica | no-filtra) con ruta:linea, validacion de entrada (zod/manual/parcial/no) con evidencia, rate limit. Protocolo SEC: la org tiene que salir de la sesion, nunca de un parametro de URL/body.
+${A.acotado ? `- flujos: los principales de tu lote (UI -> action/route -> lib -> DB) con ruta:linea en cada paso; donde el flujo sale del lote, el ultimo paso es 'sale del lote: ruta:linea -> <archivo destino>' (o el nombre del flujo ya trazado en que desemboca).` : `- flujos: los principales de punta a punta (UI -> action/route -> lib -> DB) con ruta:linea en cada paso.`}
+- hallazgos: en el formato pedido (cada uno con evidencia ruta:linea REAL y un fragmento minimo de <=3 lineas, nunca un secret; nodos = ids del Atlas). Sin evidencia no hay hallazgo. Si para confirmarlo hace falta runtime, base o navegador: requiere_verificacion_humana=true y agregas el caso en casos_prueba_manual.${A.higiene ? ` Los BAJA puramente cosmeticos (copy y textos, tildes, strokeWidth de iconos, contraste de color, estilos inline) NO van en hallazgos: van en higiene_ui. Los BAJA de seguridad, de datos o de comportamiento siguen en hallazgos.` : ''}
+- funcionalidades: por cada herramienta que toque tu lote, sus funcionalidades (unidad minima que hace algo para el usuario), con id estable '<area>.<herramienta>.<slug-en-kebab>' (ej. h2.cli-inicio.resumen-semanal), madurez L0-L4 o L? con su evidencia (L2+ exige el camino feliz trazado con ruta:linea; si no, L?) y los nueve criterios L3 con la rubrica.
+- alertas_verificadas: si arriba hay ALERTAS DE LOS DOCS, una entrada por alerta: confirmada (y entonces tambien va como hallazgo; pone su titulo en hallazgo_titulo), descartada o parcial, con evidencia ruta:linea; 'fuera-de-mi-lote' solo si no la podes resolver ni con git grep.
+- candidatos_poda: archivos de tu lote que parezcan muertos o duplicados, con señales objetivas.
+- ausencias: toda afirmacion 'no existe X' con el comando git grep sobre origin/main y su control positivo.
+- patrones_a_cruzar: patrones defectuosos que convenga buscar en el resto del repo.${A.higiene ? `\n- higiene_ui: cada detalle cosmetico de tu lote (copy, tilde, strokeWidth, contraste, inline u otro) con ruta, linea, tipo y un detalle de una linea; sin fragmento. Va todo junto en un unico hallazgo de higiene por dominio que arma el padre.` : ''}`
+
+const promptVerif = (l, hs) => `${A.preambulo}
+
+${A.rubrica}
+
+TAREA: sos un VERIFICADOR ADVERSARIAL. Un auditor reporto estos hallazgos CRITICA/ALTA sobre el lote ${l.id} (dominio ${A.dominio}). Tu trabajo es REFUTARLOS. Para cada uno: abri cada ruta:linea citada y el contexto necesario (llamadores, guards en layouts y en src/proxy.ts, validacion aguas arriba, si el codigo esta vivo o muerto, feature flags, defaults) y decidi si se sostiene. Por defecto, si no lo podes confirmar leyendo, se_sostiene=false. Ajusta severidad (o DESCARTAR) y confianza con la rubrica. Rutas relativas a ${APP}.
+
+HALLAZGOS:
+${hs.map((h, i) => `${i + 1}. [${h.severidad}] ${h.titulo}\n   evidencia: ${h.evidencia.map((e) => `${e.ruta}:${e.linea}`).join(', ')}\n   impacto: ${h.impacto}`).join('\n')}`
+
+phase('Lectura')
+const resultados = await Promise.all(A.lotes.map((l) => (async () => {
+  const lectura = await sem(() => agent(promptLector(l), { label: `lector:${l.id}`, phase: 'Lectura', schema: SCHEMA_LECTOR, agentType: 'general-purpose' }))
+  if (!lectura) return { lote: l.id, lectura: null, verificacion: null }
+  const graves = (lectura.hallazgos || []).filter((h) => h.severidad === 'CRÍTICA' || h.severidad === 'ALTA')
+  let verificacion = null
+  if (graves.length) verificacion = await sem(() => agent(promptVerif(l, graves), { label: `verificador:${l.id}`, phase: 'Verificacion', schema: SCHEMA_VERIF, agentType: 'general-purpose' }))
+  log(`${l.id}: ${lectura.hallazgos.length} hallazgos (${graves.length} CRITICA/ALTA), ${lectura.archivos_leidos.filter((a) => a.leido_completo).length}/${l.archivos.length} archivos completos`)
+  return { lote: l.id, lectura, verificacion }
+})()))
+return { dominio: A.dominio, ciclo: A.ciclo, resultados }

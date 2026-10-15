@@ -3881,6 +3881,117 @@
     "sale del lote: setter-carga.ts:91 -> src/lib/leados/flow.ts (parseEvaluacion)",
     "setter-carga.ts:102-121 -> src/lib/leados/revision.ts:96 calcularRatioSetters, :137 pctDescarte, :143 alarmaNuncaDescarta"
    ]
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "nombre": "Deploy a producción en Netlify (build y runtime)",
+   "pasos": [
+    "netlify.toml:2 command 'npx prisma generate && npm run build' (sin migrate deploy desde b85f791d; desemboca en el flujo D6 'Migraciones hacia producción')",
+    "netlify.toml:6-7 Node 22 y NODE_OPTIONS --max-old-space-size=4096",
+    "package.json:16 postinstall 'prisma generate' (npm ci ya lo corre: generate duplicado)",
+    "package.json:9 'next build --webpack' (webpack forzado; Turbopack es el default de Next 16)",
+    "next.config.ts:24 distDir '.next' (E2E_DIST_DIR solo en suites)",
+    "next.config.ts:31-39 build con type-check (ignoreBuildErrors retirado)",
+    "next.config.ts:254-260 withSentryConfig -> sale del lote: flujo D7 'Inicialización de Sentry'",
+    "netlify.toml:9-10 @netlify/plugin-nextjs (sin versión fijada en package.json)",
+    "netlify.toml:25-32 tres scheduled functions -> sale del lote: flujo D7 'Cron agendado en Netlify -> ruta Next'"
+   ]
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "nombre": "CI en cada push y PR",
+   "pasos": [
+    ".github/workflows/ci.yml:65 on: [push, pull_request] (sin bloque permissions)",
+    ".github/workflows/ci.yml:70-72 working-directory logic-core-v3",
+    ".github/workflows/ci.yml:85-88 Node 24 (Netlify usa 22: netlify.toml:6)",
+    ".github/workflows/ci.yml:91 npm ci (dispara package.json:16) y :95 prisma generate otra vez",
+    ".github/workflows/ci.yml:97-100 check:types -> package.json:15 tsc --noEmit",
+    ".github/workflows/ci.yml:102-105 check:invariants -> package.json:21 -> sale del lote: scripts/run-invariants.mjs:107 (descubre solo check:invariant*, 56 esperados en :81)",
+    "package.json:41 (y 66 líneas más) 'npx tsx': tsx no está en el lockfile, npx baja la versión del registro",
+    ".github/workflows/ci.yml:109-117 veredicto consolidado",
+    ".github/workflows/ci.yml:137-147 y :186-197 jobs LeadOS y E2E salteados con warning si faltan secrets"
+   ]
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "nombre": "Backup diario de la base (GitHub Actions)",
+   "pasos": [
+    ".github/workflows/db-backup.yml:39-41 cron 06:00 UTC",
+    ".github/workflows/db-backup.yml:81-100 resuelve DIRECT_DATABASE_URL_PROD; :93-96 exit 1 si falta",
+    ".github/workflows/db-backup.yml:102-124 pg_dump | gzip | gpg AES256 con BACKUP_GPG_PASSPHRASE",
+    ".github/workflows/db-backup.yml:126-132 artifact cifrado con retención de 30 días",
+    ".github/workflows/db-backup.yml:134-152 restore-test contra postgres:16 efímero",
+    ".github/workflows/db-backup.yml:180-196 descifra y restaura",
+    ".github/workflows/db-backup.yml:198-218 valida _prisma_migrations >= 1 y cuenta tablas core"
+   ]
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "nombre": "Headers de seguridad y embebido del widget",
+   "pasos": [
+    "next.config.ts:54-87 HSTS, nosniff, Referrer-Policy, Permissions-Policy y CSP Report-Only en /:path*",
+    "next.config.ts:93-98 X-Frame-Options DENY solo en /(admin|dashboard|setter)",
+    "next.config.ts:110-115 CSP frame-ancestors 'none' enforce solo en /setter",
+    "next.config.ts:117-124 /widget.js con CORS * y cache 1 h",
+    "next.config.ts:126-134 /embed/:slug* con frame-ancestors * (cualquier sitio)",
+    "sale del lote: src/app/embed/[slug]/page.tsx:29 -> flujo D5 'Visitante en el sitio del cliente → widget embebido → respuesta del LLM'"
+   ]
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "nombre": "Render raíz de cualquier ruta",
+   "pasos": [
+    "src/app/layout.tsx:5-13 fuentes Geist y Geist Mono",
+    "src/app/layout.tsx:72-76 <html lang='es'> con las variables de fuente",
+    "src/app/layout.tsx:78-79 preconnect a grainy-gradients.vercel.app y placehold.co en todas las rutas",
+    "src/app/layout.tsx:80 EarlyScrollLock",
+    "src/app/layout.tsx:110-121 PreloaderProvider > SmoothScroll > TransitionProvider (FROZEN)",
+    "src/app/layout.tsx:113-124 PublicOnlyComponents -> sale del lote: src/components/layout/PublicOnlyComponents.tsx:20 (usePathname + isChromeFreeRoute)",
+    "src/app/layout.tsx:125-136 Toaster",
+    "src/app/layout.tsx:137 ChatWidgetMount -> flujo D5 'Widget de develOP: de la carga del sitio a la respuesta del bot'",
+    "src/app/globals.css:1-2 Tailwind 4 + typography (sin @config: tailwind.config.ts no participa)"
+   ]
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "nombre": "Error de render y 404",
+   "pasos": [
+    "src/app/error.tsx:14-22 logger.error con stack en el cliente",
+    "src/app/error.tsx:27-30 Sentry.captureException (tag boundary root)",
+    "src/app/error.tsx:45-49 muestra el digest como referencia",
+    "src/app/error.tsx:51-62 Reintentar o <a href='/'> al sitio público",
+    "src/app/global-error.tsx:22-28 captureException si cae el layout raíz; :31-58 html propio",
+    "src/app/not-found.tsx:78-199 404 de marketing; :32-62 canvas en requestAnimationFrame infinito",
+    "src/app/embed/[slug]/page.tsx:37 (lectura puntual) notFound() del embed cae en el not-found.tsx raíz"
+   ]
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "nombre": "Versión del deploy",
+   "pasos": [
+    "src/app/api/version/route.ts:3-8 GET público",
+    "src/app/api/version/route.ts:5 version '1.0.0' fija (package.json:3 dice 0.1.0)",
+    "src/app/api/version/route.ts:6 builtAt cae a new Date() (NEXT_PUBLIC_BUILD_TIME sin escritor)",
+    "sale del lote: scripts/_b14-4-smoke-prod.mjs:82 (único consumidor)"
+   ]
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "nombre": "Gates manuales de calidad (no corren en CI ni en hooks)",
+   "pasos": [
+    "package.json:14 'eslint' -> eslint.config.mjs:5-88 (fronteras de motor :16-47 y chatbot :48-87; globalIgnores :9-15 sin distDirs alternativos)",
+    ".dependency-cruiser.cjs:3-11 única regla no-circular en warn",
+    "knip.ts:10-22 entradas y proyecto",
+    ".github/workflows/ci.yml:20-26 deja el lint fuera del CI"
+   ]
   }
  ]
 }

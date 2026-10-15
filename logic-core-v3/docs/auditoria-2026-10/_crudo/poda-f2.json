@@ -1326,6 +1326,61 @@
     "ninguna pantalla del manual lo usa desde D15-bis (manual.ts:157-162)"
    ],
    "que_rompe": "Si se borra del union HerramientaId: revisar tool-guide.tsx y cualquier dondeSeUsa que lo nombre; sacarlo solo de HERRAMIENTAS_ORDEN no rompe tipos."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "archivo": "tailwind.config.ts",
+   "senales": [
+    "Tailwind 4 no lo carga: git grep '@config\\|@source' en src/*.css = 0",
+    "plugin typography duplicado en globals.css:2",
+    "ninguna clase develop-* en src (git grep = 0)",
+    "warning de eslint import/no-anonymous-default-export (tailwind.config.ts:19)",
+    "ningún archivo lo referencia (git grep 'tailwind.config' fuera de docs y lock = 0)"
+   ],
+   "que_rompe": "Nada en el build. Deja de importar design-tokens.ts, que sigue en uso por Modal, setter-shell y DashboardLayoutClient y NO se borra."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "archivo": "netlify.toml (bloque [[redirects]] :19-23)",
+   "senales": [
+    "rewrite 200 forzado de /api/chatbot/* a sí mismo",
+    "nació en b4a2a8a3 'Commit roadmap chatbot finalizado - sin funcionar'",
+    "src/proxy.ts:172 no incluye /api/chatbot, así que no sirve para saltear el proxy"
+   ],
+   "que_rompe": "HIPÓTESIS: nada. Verificar en un deploy preview que el chat y la config del widget siguen respondiendo."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "archivo": "package.json (@next/bundle-analyzer, html2canvas, jspdf)",
+   "senales": [
+    "@next/bundle-analyzer (package.json:182) no lo importa nadie",
+    "html2canvas y jspdf (package.json:148-149) solo los usa src/components/dashboard/DownloadReportButton.tsx:44-45",
+    "depcruise marca DownloadReportButton.tsx como huérfano (_crudo/depcruise-resumen.json)"
+   ],
+   "que_rompe": "DownloadReportButton.tsx deja de compilar: se borra junto. Mejor cablear el analyzer que quitarlo."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "archivo": "next.config.ts (images.remotePatterns de placehold.co :40-47)",
+   "senales": [
+    "placehold.co solo aparece en un comentario de src/components/sections/web-development/ShowcaseSection.tsx:8, componente huérfano",
+    "preconnect sin uso en src/app/layout.tsx:79"
+   ],
+   "que_rompe": "Nada. Un <Image> remoto de placehold.co dejaría de optimizarse, pero no hay ninguno."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "archivo": "src/app/api/version/route.ts",
+   "senales": [
+    "devuelve una versión fija y una fecha de build falsa (route.ts:5-6)",
+    "único consumidor: scripts/_b14-4-smoke-prod.mjs:82"
+   ],
+   "que_rompe": "El smoke de prod. Conviene arreglarlo (SHA del commit) en vez de borrarlo."
   }
  ]
 }

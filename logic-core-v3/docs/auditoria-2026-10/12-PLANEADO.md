@@ -7,7 +7,7 @@
 ## Resumen
 
 - Ítems: **1351** — por tipo: decision 212 · hecho-declarado 443 · idea 56 · pendiente 556 · promesa 6 · bloque 78.
-- Estado en código: hecho 515 · parcial 188 · no empezado 376 · abandonado 24 · contradicho 25 · por cruzar 223.
+- Estado en código: hecho 552 · parcial 201 · no empezado 417 · abandonado 25 · contradicho 27 · por cruzar 129.
 - ZONA-FRANCO: 361 ítems.
 - TODO/FIXME en el código de `origin/main`: 70 (`_crudo/todos-codigo.json`).
 
@@ -7810,8 +7810,8 @@
 - Nodo(s): lib.otro
 - Qué es: Solo en E1.2, E3.1 y E4.1. Las auditorías nunca van en /loop. El tope de modelo es Opus 4.8.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:13
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — regla de proceso sin huella en código; no verificable (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-967] Descargo contractual por alucinaciones
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:57` · tipo: decision · estado declarado: pendiente · fecha: 2026-07-06
@@ -7952,8 +7952,8 @@
 - Nodo(s): lib.otro
 - Qué es: Un pipe enmascaró tsc/eslint y el exit code; leer salida completa o usar PIPESTATUS.
 - Referencias: también en fuente:17106
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — .github/workflows/ci.yml:13-18 y :107-117 consolida sin cortar; la regla local no es verificable (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 ### lib.plataforma
 
@@ -7962,23 +7962,23 @@
 - Nodo(s): lib.plataforma
 - Qué es: ~36 escenarios con asserts y juez. Las decisiones A–D por defecto están sin ratificar. Es el gasto pesado legítimo de cuota.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:45 · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:62
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — package.json:83-86 (evals, evals:seed, evals:purge, evals:score) y :66 test:q12 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-986] GCP single-project: revisar con el cliente activo #5
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:41` · tipo: decision · estado declarado: hecho · fecha: 2026-07-06
 - Nodo(s): lib.plataforma
 - Qué es: No se construye ahora. Falta decidir con qué cuenta se paga el LLM.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:50
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — decisión de no construir todavía; sin huella en código (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-987] Ratificar las decisiones A–D de Q1
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:56` · tipo: decision · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): lib.plataforma
 - Qué es: Abierta: confirmarlas o dejar los defaults.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — sin huella en código (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-988] T0.2: cron de cleanupOldEvents
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:14` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
@@ -8001,16 +8001,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: Diferido: el TTL de 60s lo acota. Revisar si se edita la config en vivo frente a clientes.
 - Referencias: A4.6
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i ttl origin/main -- logic-core-v3/src/modules/chatbot/shared/configCache.ts sin resultados; no se trazó el TTL de 60 s (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-991] CSP de Report-Only a enforcement
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:158` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-12
 - Nodo(s): lib.plataforma
 - Qué es: Hardening fichado pero no ejecutado.
 - Referencias: tambien en Olme/Chatbot_ registro de cambios.md:110
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — next.config.ts:72 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-992] Infra: default 'generic', DIRECT_URL, main/prod y Vertex
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:167` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-12
@@ -8088,8 +8088,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: curl sobre http no manda cookies Secure (hay que pasarla a mano) y bounce cosmético de :3001 a :3000 por NEXTAUTH_URL.
 - Referencias: src/app/api/qa/login/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — src/app/api/qa/login/route.ts:186 secure: isSecure (cookie sin Secure en http); el bounce :3001->:3000 no es verificable por lectura (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1002] Comentario stale del campo caliente en schema.prisma:824-827
 - Fuente: `docs/bitacora-beta-2.md:292` · tipo: pendiente · estado declarado: pendiente (opcional) · fecha: 2026-06-29 · **ZONA-FRANCO**
@@ -8104,8 +8104,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Fallas pre-existentes (11-16, 20-22, 30); timeout de login en tests/helpers/auth.ts:12; necesita su pasada de mantenimiento.
 - Referencias: también en fuente:782,859,870 · tests/helpers/auth.ts:12
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — .github/workflows/ci.yml:186-197: e2e no corre en CI (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1004] dev:qa no hidrata pantallas LeadOS pesadas
 - Fuente: `docs/bitacora-beta-3.md:95` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-29 · **ZONA-FRANCO**
@@ -8128,8 +8128,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: e2e.yml anidado no lo leía Actions; desde C1 corre ci.yml, pero los jobs de test saltean sin DATABASE_URL_TEST (0 secrets en el repo).
 - Referencias: logic-core-v3/.github/workflows/e2e.yml · .github/workflows/ci.yml · también en fuente:5008,5152,5264,5307,5372
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — .github/workflows/ci.yml:79-117 corre tipos e invariantes desde la raíz; jobs con DB salteados sin DATABASE_URL_TEST (ci.yml:137-147, :186-197) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1007] Drift físico de 7 columnas del lane chatbot
 - Fuente: `docs/bitacora-beta-3.md:528` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-30
@@ -8144,24 +8144,24 @@
 - Nodo(s): lib.plataforma
 - Qué es: Errores pre-existentes en lanes ajenos (chatbot, tailwind.config); C0 mide 102 errores/110 warnings; el lint queda fuera del gate; globalIgnores no cubre distDirs alternativos.
 - Referencias: también en fuente:914,2635,5073,5254,5258 · eslint.config.mjs
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — baseline 102 errores/111 warnings (_crudo/eslint-resumen.md); ci.yml:20-26 lint fuera; eslint.config.mjs:9-15 sin distDirs (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1009] Higiene de tooling
 - Fuente: `docs/bitacora-beta-3.md:1186` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-04
 - Nodo(s): lib.plataforma
 - Qué es: Key eslint deprecada en next.config.ts y falta "type":"module" en package.json.
 - Referencias: next.config.ts · package.json
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — next.config.ts sin key eslint (leído completo); package.json sin campo "type" (git show origin/main:logic-core-v3/package.json | grep -c '"type"' = 0) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1010] Renormalización CRLF del repo
 - Fuente: `docs/bitacora-beta-3.md:1259` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-11
 - Nodo(s): lib.plataforma
 - Qué es: core.autocrlf=true + .gitattributes; renormalizar es decisión de Franco.
 - Referencias: logic-core-v3/.gitattributes
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — .gitattributes:1 solo 'docs/bitacora-roadmap.md merge=union' (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1011] Base del lane LeadOS en rama b1-s2-bsp-outbound
 - Fuente: `docs/bitacora-beta-3.md:1265` · tipo: decision · estado declarado: declarada · fecha: 2026-07-11 · **ZONA-FRANCO**
@@ -8192,8 +8192,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: El guard se evalúa en request time; validate-origin.ts:49 es otra superficie de una sola pata. Verificar el entorno de producción.
 - Referencias: /api/qa/login · validate-origin.ts:49 · también en fuente:2064
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/security/validate-origin.ts:49 sigue con la condición de una sola pata (env && (isLocalhost || !origin)) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1015] Endpoint test-sentry sin guard en producción
 - Fuente: `docs/bitacora-beta-3.md:2062` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-31
@@ -8216,16 +8216,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: distDir por E2E_DIST_DIR en next.config.ts, script start:setter (.next-setter, :3003), reuseExistingServer false.
 - Referencias: next.config.ts · package.json · playwright.setter.config.ts · .gitignore
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — next.config.ts:24; package.json:12 start:setter; .gitignore:19 y :24; playwright.setter.config.ts:20 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1018] qa-persona y qa-walkthrough siguen en .next compartido
 - Fuente: `docs/bitacora-beta-3.md:2465` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-03
 - Nodo(s): lib.plataforma
 - Qué es: playwright.qa-persona/qa-walkthrough.config.ts usan start:qa en .next; la galería ya se aisló en Corrida G.
 - Referencias: playwright.qa-persona.config.ts · playwright.qa-walkthrough.config.ts · también en fuente:3317
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — playwright.qa-persona.config.ts:44 y playwright.qa-walkthrough.config.ts:48 usan 'npm run start:qa' (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1019] Suite qa-persona recorre el wizard retirado
 - Fuente: `docs/bitacora-beta-3.md:3291` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-07 · **ZONA-FRANCO**
@@ -8240,24 +8240,24 @@
 - Nodo(s): lib.plataforma
 - Qué es: Cablearlo exige tocar next.config.ts.
 - Referencias: next.config.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — package.json:182; next.config.ts no lo importa (git grep bundle-analyzer fuera de docs y lock = solo package.json:182) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1021] Tailwind escanea docs/ y distDirs
 - Fuente: `docs/bitacora-beta-3.md:3777` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-10
 - Nodo(s): lib.plataforma
 - Qué es: Una clase arbitraria con url() en un .md rompe el build; acotar las fuentes en globals.css; distDirs alternativos deben ignorarse antes del primer build.
 - Referencias: globals.css · también en fuente:3651,3757
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — .gitignore:18-19 y :24-25 excluyen .next-setter/.next-galeria (Tailwind respeta .gitignore); docs/ sigue escaneado (globals.css:1 sin source); .next-perf-* y .next-corrida-visual no ignorados (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1022] tsconfig.json modificado por builds con distDir alternativo
 - Fuente: `docs/bitacora-beta-3.md:3798` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-10
 - Nodo(s): lib.plataforma
 - Qué es: Next agrega includes de .next-galeria/.next-perf-*; quedó sin commitear y mezclado.
 - Referencias: tsconfig.json · también en fuente:3407,3928,4873
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — tsconfig.json:39-48 quedó commiteado con includes de .next-setter, .next-galeria y .next-perf-a/b/base (sin script que genere los perf) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1023] F0 + Integración: ramas reconciliadas y carril F en leados/v1-integracion
 - Fuente: `docs/bitacora-beta-3.md:4046` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-12 · **ZONA-FRANCO**
@@ -8280,8 +8280,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Pasarla a enforce es otra decisión, con riesgo sobre el widget embebible.
 - Referencias: next.config.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — next.config.ts:72 Content-Security-Policy-Report-Only, sin report-uri/report-to (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1026] Verificar en prod los headers anti-clickjacking de /setter
 - Fuente: `docs/bitacora-beta-3.md:4447` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-15 · **ZONA-FRANCO**
@@ -8327,32 +8327,32 @@
 - Nodo(s): lib.plataforma
 - Qué es: docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md: tsc en 0, lint 102 errores, falsos verdes, 21 invariantes huérfanos.
 - Referencias: docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md versionado (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1032] Tests del chatbot fuera de agregados
 - Fuente: `docs/bitacora-beta-3.md:5145` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-25
 - Nodo(s): lib.plataforma
 - Qué es: ~30 test:* del chatbot no están en ningún agregado; sin aserción de unicidad sobre HARD_CHECKS[].nombre.
 - Referencias: package.json
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — package.json:55-82 (28 test:*) no matchean el filtro de scripts/run-invariants.mjs:107 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1033] C1 gate encendido: tipos, 43 invariantes y ci.yml
 - Fuente: `docs/bitacora-beta-3.md:5182` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-25
 - Nodo(s): lib.plataforma
 - Qué es: scripts/run-invariants.mjs (PISO_MINIMO 43), check:types, ignoreBuildErrors retirado, .github/workflows/ci.yml en raíz con Node 24; run 32870120782 success.
 - Referencias: scripts/run-invariants.mjs · .github/workflows/ci.yml · commit 2515cb29
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — .github/workflows/ci.yml:79-117; scripts/run-invariants.mjs:81 (56, ya no 43); next.config.ts:31-34 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1034] db-backup.yml sin secrets
 - Fuente: `docs/bitacora-beta-3.md:5271` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-25
 - Nodo(s): lib.plataforma
 - Qué es: Usa tres secrets que no existen (0 en el repo): explica el P0 del backup.
 - Referencias: .github/workflows/db-backup.yml
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — .github/workflows/db-backup.yml:93-96 aborta sin secret; ci.yml:120-121 registra 0 secrets al 2026-08-25 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1035] C1b invariantes que prueban lo que prometen (parcial en rango)
 - Fuente: `docs/bitacora-beta-3.md:5380` · tipo: hecho-declarado · estado declarado: hecho (detalle fuera de rango) · fecha: 2026-08-25 · **ZONA-FRANCO**
@@ -8367,16 +8367,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: Necesita base. Moverlo al job de CI con DB quedó para el sprint que abra .github/workflows/ci.yml; en EL TRONCO figura como exclusión documentada del runner.
 - Referencias: .github/workflows/ci.yml · scripts/run-invariants.mjs · tambien en docs/bitacora-beta-3.md:6187 · tambien en docs/bitacora-beta-3.md:7623 · tambien en docs/bitacora-beta-3.md:10946
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — scripts/run-invariants.mjs:89-94 lo excluye; ci.yml no tiene job con DB para él (git grep client-monthly en ci.yml = 0) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1037] Lint fuera del gate y midiendo mal
 - Fuente: `docs/bitacora-beta-3.md:5791` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-25
 - Nodo(s): lib.plataforma
 - Qué es: Reporta 108.208 problemas porque globalIgnores no cubre los distDir alternativos y se lintean bundles minificados. Queda para un sprint propio, que se describe como barato.
 - Referencias: globalIgnores (config ESLint)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — eslint.config.mjs:9-15 solo ignora .next/**, out/**, build/**; ci.yml:27-31 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1038] Base de test dedicada (DATABASE_URL_TEST / .env.test) para las suites de LeadOS
 - Fuente: `docs/bitacora-beta-3.md:5795` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-25 · **ZONA-FRANCO**
@@ -8399,8 +8399,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Con ts-node, un archivo cuyos imports son todos import type compila y type-chequea, pero no ejecuta su cuerpo y sale 0 en silencio. Hoy los 19 tienen un import de valor; queda como regla.
 - Referencias: scripts/run-invariants.mjs
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — regla documental; scripts/run-invariants.mjs no la automatiza (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1041] V1-A-MAIN: la rama de integración a salvo y el merge a main preparado
 - Fuente: `docs/bitacora-beta-3.md:6376` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-25/26 (inferida) · **ZONA-FRANCO**
@@ -8423,8 +8423,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: INVARIANTES_ESPERADOS en run-invariants.mjs aborta si hay invariantes de más o de menos. Quien agrega uno sube la cuenta en el mismo commit: 48 en P8, 56 en P23.
 - Referencias: scripts/run-invariants.mjs · tambien en docs/bitacora-beta-3.md:10842
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — scripts/run-invariants.mjs:81 INVARIANTES_ESPERADOS = 56 y :110-116 aborta si difiere; package.json tiene 56 check:invariant* (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1044] El cron os-follow-up escribe el status POSTERGADO inline
 - Fuente: `docs/bitacora-beta-3.md:7535` · tipo: pendiente · estado declarado: listado, sin tocar · fecha: 2026-08-27 · **ZONA-FRANCO**
@@ -8479,8 +8479,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: setControlledInput, qaLogout y logout no tienen ningún call site.
 - Referencias: form.ts:3 · setter-auth.ts:84 · auth.ts:28
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — qaLogout y logout solo aparecen en su definición (tests/helpers/auth.ts:28 para logout); setControlledInput tiene 6 apariciones en tests/ (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1051] LA CORRIDA: suites corridas con los helpers nuevos, 118/118 en verde
 - Fuente: `docs/bitacora-beta-3.md:8080` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-31 · **ZONA-FRANCO**
@@ -8511,8 +8511,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: La bitácora cita una clase con una URL arbitraria entre corchetes. Como Tailwind escanea docs/**/*.md (y .next/ en los worktrees), el segundo build falla con «Cannot find module './&'». Se mitigó borrando los distDir; la causa sigue en el doc.
 - Referencias: docs/bitacora-beta-3.md · .gitignore:17 · tambien en docs/bitacora-beta-3.md:7610
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — docs/bitacora-beta-3.md:3647 sigue citando bg-[url(...)]; src/app/globals.css:1 '@import "tailwindcss"' sin source() ni '@source not' (git grep '@config\|@source' en src/*.css = 0) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1055] C.0 Guard anti-prod en seeds + passwords a env
 - Fuente: `docs/bitacora-beta.md:11` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-17
@@ -8575,16 +8575,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: Corre verde con NODE_OPTIONS=--max-old-space-size=6144 (otra entrada usa 8192); pipear el build a tail enmascara el OOM.
 - Referencias: también en docs/bitacora-rediseno.md:1556 · también en docs/bitacora-rediseno.md:3699
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — netlify.toml:7 NODE_OPTIONS=--max-old-space-size=4096 (no 6144/8192) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1063] Browsers de Playwright no llegan al server local (loopback bloqueado)
 - Fuente: `docs/bitacora-beta.md:1742` · tipo: pendiente · estado declarado: bloqueado · fecha: 2026-06-22
 - Nodo(s): lib.plataforma
 - Qué es: Chromium y Firefox dan ERR_CONNECTION_REFUSED mientras curl y Node llegan; destrabar en AV/firewall o correr en CI.
 - Referencias: contradicho por docs/bitacora-beta.md:1643 · contradicho por docs/bitacora-beta-2.md:54
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — problema de entorno, sin huella en código (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1064] Drift de columnas de clientes: adoptarlas con migración aditiva
 - Fuente: `docs/bitacora-beta.md:1746` · tipo: decision · estado declarado: pendiente (decisión a confirmar por Franco) · fecha: 2026-06-22
@@ -8599,72 +8599,72 @@
 - Nodo(s): lib.plataforma
 - Qué es: typescript.ignoreBuildErrors y eslint.ignoreDuringBuilds en true (build verde no implica tipos verdes); Next 16.2.9 avisa que la clave eslint no está soportada.
 - Referencias: next.config.ts · también en docs/bitacora-rediseno.md:501
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — next.config.ts:31-39 sin typescript.ignoreBuildErrors ni clave eslint (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1066] Cero merges a main hasta el final del rediseño; redesign/home rama única
 - Fuente: `docs/bitacora-rediseno.md:569` · tipo: decision · estado declarado: vigente en su fecha; luego hubo merge vía PR #4 (:3606) · fecha: 2026-07-30
 - Nodo(s): lib.plataforma
 - Qué es: Decisión de Franco: fix/home-sanidad, fix/fonts-geist-scope y fix/motion-sanidad-mobile absorbidas en redesign/home; producción queda como está.
 - Referencias: redesign/home · fix/home-sanidad · fix/fonts-geist-scope · fix/motion-sanidad-mobile · también en docs/bitacora-rediseno.md:4 · también en docs/bitacora-rediseno.md:980
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — git log --merges origin/main: f4b16b6b 'Merge pull request #4 from frc11/redesign/home' y c7f0774c (#5) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1067] robots.ts bloquea rutas internas; sitemap solo con las 6 públicas
 - Fuente: `docs/bitacora-rediseno.md:755` · tipo: decision · estado declarado: vigente · fecha: 2026-07-30
 - Nodo(s): lib.plataforma
 - Qué es: Disallow de admin, dashboard, setter, /api/, /embed/ y rutas de sesión y alta; sitemap con home, 4 landings y contact; /styleguide se sacó luego de robots.
 - Referencias: src/app/robots.ts · src/app/sitemap.ts · también en docs/bitacora-rediseno.md:758 · también en docs/bitacora-rediseno.md:1221
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/app/robots.ts:32-33 (disallow de /admin, /dashboard, /setter, /api, /embed y rutas de sesión y alta); src/app/sitemap.ts:27 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1068] Borrar las ramas absorbidas por redesign/home
 - Fuente: `docs/bitacora-rediseno.md:994` · tipo: pendiente · estado declarado: pendiente (decisión de Franco) · fecha: 2026-07-30
 - Nodo(s): lib.plataforma
 - Qué es: Ninguna aporta nada que redesign/home no tenga; borrarlas es decisión de Franco.
 - Referencias: fix/home-sanidad · fix/fonts-geist-scope · fix/motion-sanidad-mobile · también en docs/bitacora-rediseno.md:1085
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git branch -r: origin/fix/fonts-geist-scope, origin/fix/home-sanidad y origin/fix/motion-sanidad-mobile siguen (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1069] El subagente visual-qa no puede entregar reporte
 - Fuente: `docs/bitacora-rediseno.md:1615` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-07-31
 - Nodo(s): lib.plataforma
 - Qué es: El puerto del server no está en .claude/launch.json y el subagente pierde acceso a sus herramientas; el pane de preview mide 0 fps de rAF. Se verificó con Playwright.
 - Referencias: .claude/launch.json · también en docs/bitacora-rediseno.md:2142
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — logic-core-v3/.claude/launch.json solo con dev :3000 y next-prod-qa :3001 (sin :3003/:3004) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1070] Instalación de Impeccable v3.5.0 + baseline del detector
 - Fuente: `docs/bitacora-rediseno.md:2181` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-31
 - Nodo(s): lib.plataforma
 - Qué es: Skill y hook (PostToolUse sobre Edit/Write/MultiEdit y Stop) en .claude/ (no versionado) y en .github/ para Copilot; PRODUCT.md, DESIGN.md y .impeccable/design.json; baseline 115 en src/, 46 público, 0 en design-system.
 - Referencias: .claude/skills/impeccable/ · .claude/settings.local.json · .github/skills/impeccable/ · .github/hooks/impeccable.json · PRODUCT.md · DESIGN.md +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — .github/hooks/impeccable.json, .github/skills/impeccable/, PRODUCT.md, DESIGN.md y .impeccable/design.json en la raíz de origin/main (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1071] Impeccable aporta detección, no dirección estética
 - Fuente: `docs/bitacora-rediseno.md:2187` · tipo: decision · estado declarado: vigente · fecha: 2026-07-31
 - Nodo(s): lib.plataforma
 - Qué es: Donde contradiga la dirección gana develOP (Geist + Geist Mono no se reabre; Arial de los mails es falso positivo); el techo del design-system es 0 hallazgos.
 - Referencias: también en docs/bitacora-rediseno.md:2210 · también en docs/bitacora-rediseno.md:2222 · también en docs/bitacora-rediseno.md:2223
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — .github/skills/impeccable/ versionado; la dirección no deja huella (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1072] Reglas de uso de Impeccable mientras se construye
 - Fuente: `docs/bitacora-rediseno.md:2238` · tipo: decision · estado declarado: vigente (hasta cerrar B2) · fecha: 2026-07-31
 - Nodo(s): lib.plataforma
 - Qué es: Permitidos detect, el hook y /impeccable audit/critique; prohibidos polish, bolder, quieter, distill, animate, Live Mode y corridas masivas hasta terminar y revisar B2.
 - Referencias: npx impeccable detect src/app src/components/sections src/components/ia src/components/automation src/components/software
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — .github/hooks/impeccable.json versionado; el uso no es verificable (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1073] framer-motion y three-stdlib son dependencias fantasma
 - Fuente: `docs/bitacora-rediseno.md:3722` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-08-12
 - Nodo(s): lib.plataforma
 - Qué es: No están en package.json; resuelven por transitivas de motion y drei (ya era así en julio).
 - Referencias: package.json
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — About.tsx:3, Portfolio.tsx:3 y KineticText.tsx:3 importan framer-motion; Hero.tsx:7, HeroArtifact.tsx:5 y BrandedLogoWhite.tsx:5 importan three-stdlib; package.json no declara ninguno (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1074] B0.6 — Build verde + purga del leak enviroment.env
 - Fuente: `docs/bitacora-roadmap.md:6` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-21
@@ -8679,8 +8679,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: El mirror purgado quedó en C:/tmp/bfg-purge-2026-05-21; falta coordinar con el socio, commitear el working tree y seguir los pasos B a F de la sección 8.3 del runbook; regenerar el mirror si pasan días.
 - Referencias: docs/audits/2026-05-bfg-leak-cleanup.md §8.3 · tambien en docs/bitacora-roadmap.md:51 · tambien en docs/bitacora-roadmap.md:56
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git log origin/main -- '*enviroment.env' -> 39535583 (2026-02-12) y c351b793 (2026-05-22): el archivo sigue en el historial (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1076] Warnings de Sentry en el build (onRequestError, global-error.js)
 - Fuente: `docs/bitacora-roadmap.md:52` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-21
@@ -8711,8 +8711,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: B1.2 solo cambió el script dev; el build sigue con --webpack porque next build --turbopack era beta en Next 16.
 - Referencias: package.json · tambien en docs/bitacora-roadmap.md:316 · tambien en docs/bitacora-roadmap.md:376
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — package.json:9 "build": "next build --webpack"; package.json:7 dev también --webpack (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1080] Mitigar la latencia de Neon en dev
 - Fuente: `docs/bitacora-roadmap.md:213` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-21
@@ -8734,16 +8734,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: Otros ~2.1MB del server bundle (chunk 3411) que podrían externalizarse con el mismo patrón que googleapis.
 - Referencias: next.config.ts · tambien en docs/bitacora-roadmap.md:375
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — next.config.ts:25-30 solo lista @react-pdf/renderer, @prisma/client, require-in-the-middle e import-in-the-middle; package.json:130 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1083] Borrar scripts y logs throwaway de mediciones en scripts/
 - Fuente: `docs/bitacora-roadmap.md:524` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): lib.plataforma
 - Qué es: _b13-* después de B1.4; luego logs _b32/_b33/_b35/_b36/_b52/_b53/_ms1/_ms4 cuando DIRECT_URL elimine los 'terminated'.
 - Referencias: scripts/_b13-latency-test.mjs · tambien en docs/bitacora-roadmap.md:686 · tambien en docs/bitacora-roadmap.md:3667
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git ls-tree origin/main logic-core-v3/scripts: 37 entradas con prefijo _ (p. ej. _b13-latency-test.mjs, _b32-dev.log, _ms4-full-run.log) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1084] Correr sync-plans.ts y migrate-subscriptions-to-plan-id.ts en prod
 - Fuente: `docs/bitacora-roadmap.md:2082` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
@@ -8790,8 +8790,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Necesario para que los smokes (b58, b59) corran con imports .ts; los scripts quedan fuera de tsc --noEmit.
 - Referencias: tsconfig.json · tambien en docs/bitacora-roadmap.md:4721
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — tsconfig.json:18 allowImportingTsExtensions; tsconfig.json:52 exclude scripts/** (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1090] Generar CRM_SECRET_KEY en .env.local
 - Fuente: `docs/bitacora-roadmap.md:4602` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
@@ -8806,16 +8806,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: PreloaderContext salta a 'done' si navigator.webdriver o ?e2e=1 (edición de un archivo listado como frozen 'no romper el flujo de fases'); visual-qa.md exige ?e2e=1 en todas las URLs.
 - Referencias: src/context/PreloaderContext.tsx · .claude/agents/visual-qa.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/context/PreloaderContext.tsx:70-75 isAutomationEnvironment() con navigator.webdriver (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1092] MS-7 — Screenshot contra build de prod (start:qa en :3001)
 - Fuente: `docs/bitacora-roadmap.md:5354` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): lib.plataforma
 - Qué es: Script start:qa (next start -p 3001), server next-prod-qa en .claude/launch.json y política de visual-qa: la UI pesada se verifica contra build de prod con screenshot real.
 - Referencias: package.json · .claude/launch.json · .claude/agents/visual-qa.md · pendiente originado en docs/bitacora-roadmap.md:4850
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — package.json:11 start:qa en :3001; logic-core-v3/.claude/launch.json next-prod-qa :3001; .claude/agents/visual-qa.md versionado (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1093] Tras el auto-suspend de Neon dev, reiniciar el server antes de declarar bloqueo
 - Fuente: `docs/bitacora-roadmap.md:5940` · tipo: decision · estado declarado: hecho · fecha: 2026-05-25
@@ -8878,56 +8878,56 @@
 - Nodo(s): lib.plataforma
 - Qué es: El limiter es in-memory por proceso; en serverless multi-instancia el límite se multiplica. Abierto en el checklist de B-SEC.3c.
 - Referencias: src/lib/security/auth-rate-limit.ts · tambien en docs/bitacora-roadmap.md:7620 · tambien en docs/bitacora-roadmap.md:7709 · tambien en docs/bitacora-roadmap.md:8139 · tambien en docs/bitacora-roadmap.md:8318 · tambien en docs/bitacora-roadmap.md:8405
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/rate-limit/limiter.ts:44 upsert atómico en Postgres; src/lib/security/auth-rate-limit.ts:3 lo usa; sin Upstash (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1101] Borrar ts_errors.log committeado
 - Fuente: `docs/bitacora-roadmap.md:7670` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): lib.plataforma
 - Qué es: Artefacto de marzo 2026 que hizo reportar falsos errores de TypeScript a un agente; git rm pendiente.
 - Referencias: ts_errors.log · tambien en docs/bitacora-roadmap.md:7707
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — logic-core-v3/ts_errors.log y ts_errors.txt siguen en origin/main (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1102] Push del tag v0.9.0-rc.1 al remote
 - Fuente: `docs/bitacora-roadmap.md:7740` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): lib.plataforma
 - Qué es: Quedó local; Franco decide cuándo es visible en GitHub.
 - Referencias: tag v0.9.0-rc.1 · tambien en docs/bitacora-roadmap.md:7745
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git ls-remote --tags origin | grep -cE 'v0\.9|v1\.' = 0 (control: lista ajustes-finales y base-terminada) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1103] B-SEC.2 — Next 16.2.1 a 16.2.6 + npm audit fix
 - Fuente: `docs/bitacora-roadmap.md:7771` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): lib.plataforma
 - Qué es: Cierra 13 de 15 advisories (bypass de middleware/proxy, SSRF en WebSocket, DoS, cache poisoning, protobufjs RCE). La entrada está partida por B1/B2 LeadOS y continúa en la línea 7906.
 - Referencias: package.json · package-lock.json · docs/auditoria-seguridad-2026-05.md · pendiente originado en docs/bitacora-roadmap.md:223
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — lock next 16.2.9; pero _crudo/npm-audit.json:1036-1045 vuelve a marcar next crítico (rangos hasta <16.3.8) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1104] 2 advisories moderate restantes (postcss <8.5.10 vía next)
 - Fuente: `docs/bitacora-roadmap.md:7906` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.plataforma
 - Qué es: El único fix de npm era un downgrade de next a 9.3.3; esperar Next 16.2.7+ o 16.3.x y re-correr npm audit.
 - Referencias: package.json · tambien en docs/bitacora-roadmap.md:7964
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — package-lock (origin/main): node_modules/next/node_modules/postcss 8.4.31; _crudo/npm-audit.json:1413 PostCSS XSS (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1105] SEC-MISC-01: headers de seguridad globales
 - Fuente: `docs/bitacora-roadmap.md:8141` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.plataforma
 - Qué es: HSTS, X-Frame-Options, Permissions-Policy, Referrer-Policy y CSP-Report-Only.
 - Referencias: docs/auditoria-seguridad-2026-05.md · tambien en docs/bitacora-roadmap.md:8320
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — next.config.ts:59-85 HSTS, nosniff, Referrer-Policy, Permissions-Policy y CSP-RO; X-Frame-Options solo en :93-98 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1106] Housekeeping de archivos sueltos del repo
 - Fuente: `docs/bitacora-roadmap.md:8876` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): lib.plataforma
 - Qué es: script*.js, find_unused.js, *.bak y archivos de iteraciones viejas en raíz; sprint propio.
 - Referencias: también en fuente:8924
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — raíz de logic-core-v3 con 19 sueltos: script.js, script2.js, script3.js, script_*.js, find_unused.js, replace_analytics.js, test-chat.mjs, ts_errors.*, unused_report*.txt, audit.txt, prisma_err.txt, .eslint_output.txt; *.bak = 0 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1107] BP.1 googleapis reemplazado por paquetes granulares
 - Fuente: `docs/bitacora-roadmap.md:8939` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
@@ -8964,15 +8964,15 @@
 - Fuente: `docs/bitacora-roadmap.md:9135` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
 - Nodo(s): lib.plataforma
 - Qué es: Verificado sin cambios de código.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — sin cambio de código; lucide-react ^0.562.0 (package.json:151) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1112] Regla ESLint contra imports barrel de lucide-react
 - Fuente: `docs/bitacora-roadmap.md:9213` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-26
 - Nodo(s): lib.plataforma
 - Qué es: no-restricted-imports para impedir import * de lucide-react.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — eslint.config.mjs sin regla de lucide (git grep lucide en el archivo = 0) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1113] BP.4 sin flag de heap + prisma.config.ts
 - Fuente: `docs/bitacora-roadmap.md:9220` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
@@ -8995,8 +8995,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: cross-env quedó en devDependencies sin uso en build.
 - Referencias: package.json
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — package.json:8, :11-13 y :109 usan cross-env; devDependency en package.json:191 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1116] B14.3 backups automatizados con restore-test
 - Fuente: `docs/bitacora-roadmap.md:9446` · tipo: hecho-declarado · estado declarado: hecho (primer run pendiente de Franco)
@@ -9011,32 +9011,32 @@
 - Nodo(s): lib.plataforma
 - Qué es: Artifacts de GH en repo público → cifrado AES256 con passphrase en secret; condiciona el diseño del backup.
 - Referencias: frc11/PorfolioDevelOP
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — .github/workflows/db-backup.yml:20-24 y :120-122 (gpg AES256 simétrico) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1118] Setear secrets del backup y validar primer run
 - Fuente: `docs/bitacora-roadmap.md:9535` · tipo: pendiente · estado declarado: bloqueado (Franco)
 - Nodo(s): lib.plataforma
 - Qué es: BACKUP_GPG_PASSPHRASE y DIRECT_DATABASE_URL_PROD en GH; disparar workflow manual y confirmar ambos jobs.
 - Referencias: también en fuente:9540
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — .github/workflows/db-backup.yml:84-85 y :105 leen secrets; ci.yml:120-121 registraba 0 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1119] e2e.yml mal ubicado, nunca corrió
 - Fuente: `docs/bitacora-roadmap.md:9541` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.plataforma
 - Qué es: logic-core-v3/.github/workflows/e2e.yml no lo lee GitHub; moverlo a la raíz con working-directory.
 - Referencias: logic-core-v3/.github/workflows/e2e.yml · también en fuente:9715 · también en fuente:17075
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git ls-tree -r origin/main | grep -c e2e.yml = 0; .github/workflows/ci.yml:3-11 y :70-72 lo reemplazan (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1120] Retención de backups >30 días y RPO menor
 - Fuente: `docs/bitacora-roadmap.md:9542` · tipo: idea · estado declarado: sin estado
 - Nodo(s): lib.plataforma
 - Qué es: Mover artifacts a S3/R2 si se requiere; bajar RPO de 24h a 6h/1h cuando crezca el volumen.
 - Referencias: también en fuente:9543
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — .github/workflows/db-backup.yml:131 retention-days 30; :41 cron diario (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1121] B14.5 Sentry cableado con scrubbing de PII
 - Fuente: `docs/bitacora-roadmap.md:9547` · tipo: hecho-declarado · estado declarado: hecho (DSN pendiente)
@@ -9067,23 +9067,23 @@
 - Nodo(s): lib.plataforma
 - Qué es: Prod no tenía el código de B14; se entregó checklist de 7 fases y smoke script en lugar del smoke real.
 - Referencias: docs/operations/b14-deploy-checklist.md · scripts/_b14-4-smoke-prod.mjs
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/operations/b14-deploy-checklist.md y scripts/_b14-4-smoke-prod.mjs versionados; el smoke solo puede confirmar que /api/version existe (route.ts:5-6) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1125] Tag recomendado v1.0.0-rc.1
 - Fuente: `docs/bitacora-roadmap.md:9694` · tipo: decision · estado declarado: pendiente
 - Nodo(s): lib.plataforma
 - Qué es: rc hasta uso real de Matsu; v1.0.0 cuando el cliente use el producto sin romperse. package.json seguía en 0.1.0.
 - Referencias: también en fuente:9650 · también en fuente:9728
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — package.json:3 "0.1.0"; sin tags v1* en el remoto; src/app/api/version/route.ts:5 dice '1.0.0' (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1126] Cache CDN agresiva en / (Age 71 días)
 - Fuente: `docs/bitacora-roadmap.md:9721` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.plataforma
 - Qué es: Netlify servía cache vieja sin invalidar al deploy; investigar en sprint propio.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — next.config.ts solo fija Cache-Control para /widget.js (:117-121); netlify.toml sin [[headers]] (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1127] Activar módulos premium en el seed de QA
 - Fuente: `docs/bitacora-roadmap.md:10353` · tipo: pendiente · estado declarado: pendiente
@@ -9121,16 +9121,16 @@
 - Fuente: `docs/bitacora-roadmap.md:11037` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-29
 - Nodo(s): lib.plataforma
 - Qué es: Filas con slug mini-crm en DB dev/prod requieren SQL manual antes del deploy.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — next.config.ts:157-160 sigue mandando a ?modulo=mini-crm; src/lib/premium-features.ts:59 key mini-crm; premium-modules.ts sin ese slug (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1132] Build local OOM con heap default
 - Fuente: `docs/bitacora-roadmap.md:11110` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-06-30
 - Nodo(s): lib.plataforma
 - Qué es: Varias entradas necesitan 6-8 GB de heap para el build, contradiciendo BP.4.
 - Referencias: también en fuente:11762 · también en fuente:12746 · también en fuente:16845
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — netlify.toml:7 fija 4096 MB; package.json:9 webpack; ver alerta D8-A1 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1133] Aplicar migración ExecutiveReportFrequency
 - Fuente: `docs/bitacora-roadmap.md:11989` · tipo: pendiente · estado declarado: pendiente
@@ -9145,8 +9145,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: playwright.integration.config.ts + script test:integration.
 - Referencias: playwright.integration.config.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — playwright.integration.config.ts versionado; package.json:116 test:integration (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1135] D7 test del PDF P2.C movido a Node puro
 - Fuente: `docs/bitacora-roadmap.md:12405` · tipo: hecho-declarado · estado declarado: hecho
@@ -9161,8 +9161,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: No incluye varios invariantes (client-monthly-report, dates-ar, lead-status, etc.).
 - Referencias: package.json · también en fuente:12305
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — scripts/run-invariants.mjs:107 descubre todo check:invariant*; dates-ar, lead-status y client-monthly-report son check:invariant:* (package.json:89-90, :104) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1137] Seed QA sin utmCampaign
 - Fuente: `docs/bitacora-roadmap.md:12836` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-04
@@ -9249,8 +9249,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Credencial de Vertex expuesta en logs (el doc no trae el valor), pendiente de rotación.
 - Referencias: también en fuente:15785 · también en fuente:16508 · también en fuente:16678
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — la rotación no deja huella en código; la credencial vigente está vencida (contexto fijo), lo que no prueba que se haya rotado (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1148] D.3 cron real de generate-insights
 - Fuente: `docs/bitacora-roadmap.md:15685` · tipo: hecho-declarado · estado declarado: hecho (verificación en prod pendiente)
@@ -9288,24 +9288,24 @@
 - Nodo(s): lib.plataforma
 - Qué es: Se quitó la key eslint de next.config.ts e indentación de persistTurn; .netlify ya estaba ignorado.
 - Referencias: next.config.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — next.config.ts leído completo, sin clave eslint (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1153] typescript.ignoreBuildErrors activo en next.config.ts
 - Fuente: `docs/bitacora-roadmap.md:15974` · tipo: pendiente · estado declarado: sin estado
 - Nodo(s): lib.plataforma
 - Qué es: El build ignora errores de tipos; NextConfig no tipa el objeto y tiparlo podría destapar mismatches.
 - Referencias: next.config.ts · también en fuente:15981
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — next.config.ts:31-34 ya no lo tiene; next.config.ts:1 y :3 siguen sin tipar el objeto (NextConfig importado sin uso, warning de eslint) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1154] Pinear versión exacta del paquete ai
 - Fuente: `docs/bitacora-roadmap.md:16499` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.plataforma
 - Qué es: El ^ subió de 6.0.177 a 6.0.214 sin decisión humana.
 - Referencias: package.json · también en fuente:16680
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — package.json:141 "ai": "^6.0.177"; lock 6.0.214; npm-outdated.json:149-152 latest 7.0.139 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1155] Env vars faltantes en el worktree de dev
 - Fuente: `docs/bitacora-roadmap.md:16884` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-11
@@ -9319,8 +9319,8 @@
 - Fuente: `docs/bitacora-roadmap.md:16895` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-11
 - Nodo(s): lib.plataforma
 - Qué es: La PII ya derramada expira según la retención del plan.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — sin huella en código (netlify.toml sin configuración de logs) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1157] Drop de 6 índices con 0 scans
 - Fuente: `docs/roadmap-pendientes.md:97` · tipo: pendiente · estado declarado: diferido · fecha: 2026-05-25
@@ -9343,16 +9343,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: visual-qa sin MCP de preview (o /api/qa/login bloqueado, o dev server ajeno); la verificación visual cae en Valentino. Antes de C0.2.
 - Referencias: raiz:lane-plan-log.md:64 · raiz:lane-resultados-redesign-log.md:214 · docs/sprints/p4-1-render-utm.md:98 · docs/sprints/infra-2-cold-start-retry.md:121
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — sin huella en código; logic-core-v3/.claude/launch.json solo declara :3000 y :3001 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1160] Alpha.0.6 legacy y env vars
 - Fuente: `docs/sprints/alpha-0-6-cleanup-extended.md:5` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): lib.plataforma
 - Qué es: Borrado SidebarNav duplicado; .env.example, docs/env-vars.md y scripts/check-env.js; 3 console.log menos; framer-motion se mantiene en el sitio público.
 - Referencias: tambien en :18
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — .env.example, docs/env-vars.md y scripts/check-env.js existen; check-env no corre en el build (package.json:6, script manual) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1161] Baseline y observabilidad
 - Fuente: `docs/sprints/alpha-0-7-baseline-observability.md:5` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-17
@@ -9374,8 +9374,8 @@
 - Fuente: `docs/sprints/alpha-0-9-status-verificacion.md:5` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-17
 - Nodo(s): lib.plataforma
 - Qué es: STATUS.md creado; smoke de 14 endpoints sin 500.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — STATUS.md existe (STATUS.md:4), desactualizado (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1164] Env vars críticas faltantes en .env local
 - Fuente: `docs/sprints/alpha-pre-cierre-RESUMEN.md:61` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-17
@@ -9939,8 +9939,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Antes de dar un bloque por cerrado, verificar que exista su cierre '## ✅' en la bitácora. Build verde no significa que funcione.
 - Referencias: tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:37 · tambien en Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:93
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — regla de proceso (CLAUDE.md 'Never self-confirm'); sin huella verificable en código (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1235] Contrato de scoping explícito en helpers
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:48` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-06
@@ -10011,8 +10011,8 @@
 - Nodo(s): lib.transversal
 - Qué es: La imagen se comprime en el cliente y se guarda en la DB, en lugar de pedir una URL o usar Vercel Blob. Aplica al avatar del bot y al del cliente.
 - Referencias: tambien en Olme/Chatbot_ registro de cambios.md:97 · tambien en Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:53 · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:46 · contradice Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:89
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/modules/chatbot/components/admin/config/tabs/AvatarUploader.tsx:7 y :35 canvas.toDataURL('image/webp') (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1244] Merges y seeds los hace Valentino, no CC
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/General_ registro de cambios.md:76` · tipo: decision · estado declarado: hecho
@@ -10186,8 +10186,8 @@
 - Nodo(s): lib.transversal
 - Qué es: El fragmento where del filtro de descalificados del chatbot tiene siete consumidores de producto y ninguna red: la misma forma que tenía el contador antes de P8.
 - Referencias: modules/chatbot/server/scoring/dqFilter.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -l excludeDqWhere origin/main -- 'logic-core-v3/src/**/*.invariant.ts' = 0 (control: 8 archivos lo referencian en src) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1266] Helpers de filtro por fecha sin zona horaria en admin y chatbot
 - Fuente: `docs/bitacora-beta-3.md:7537#2` · tipo: pendiente · estado declarado: listado, sin tocar · fecha: 2026-08-27
@@ -10218,8 +10218,8 @@
 - Nodo(s): lib.transversal
 - Qué es: appShell 80, appDrawerBackdrop 100, appDrawer 110, appNavTrigger 120, appDrawerClose 130, aplicados por style inline porque Tailwind v4 no emite z-* desde el objeto TS.
 - Referencias: src/lib/design-tokens.ts · setter-shell.tsx · también en docs/bitacora-beta.md:52 (Modal con zIndex.modal 10000) · choca con el plan de borrar design-tokens.ts en docs/bitacora-rediseno.md:133
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/design-tokens.ts:240-242; consumidores setter-shell.tsx, Modal.tsx y DashboardLayoutClient.tsx (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1270] Sender único de Telegram (sendTelegram + resolveTelegramCredentials)
 - Fuente: `docs/bitacora-beta.md:418` · tipo: hecho-declarado · estado declarado: hecho (verificación en uso real por Franco) · fecha: 2026-06-19
@@ -10234,16 +10234,16 @@
 - Nodo(s): lib.transversal
 - Qué es: npm run test:e2e (22 specs, 50 tests) corre en Chromium; los 10 fallos son preexistentes (7 visuales, 2 bulk-actions, 1 onboarding).
 - Referencias: playwright.config.ts · tests/e2e/ · también en docs/bitacora-beta-2.md:50
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — playwright.config.ts y tests/e2e (29 entradas) versionados (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1272] Regenerar snapshots de regresión visual desactualizados
 - Fuente: `docs/bitacora-beta.md:1659` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-25
 - Nodo(s): lib.transversal
 - Qué es: 22-visual-regression difiere 3–8% en /admin, /admin/clients, /admin/alerts, /admin/_design, /dashboard, /dashboard/chatbot y /dashboard/chatbot/settings; regenerar con --update-snapshots.
 - Referencias: tests/e2e/22-visual-regression.spec.ts · también en docs/bitacora-beta-2.md:69 · también en docs/bitacora-beta-2.md:79
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/e2e conserva 7 snapshots versionados; no se corre Playwright (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1273] B1-S1 Tokens ds-* en @theme static + escala tipográfica + reduced-motion global
 - Fuente: `docs/bitacora-rediseno.md:31` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-30
@@ -10258,16 +10258,16 @@
 - Nodo(s): lib.transversal
 - Qué es: Infijo ds dentro de los namespaces de Tailwind para no colisionar con --color-void/--color-accent; @theme static para forzar la emisión; reduced-motion con 1ms + iteration-count 1.
 - Referencias: src/app/globals.css · también en docs/bitacora-rediseno.md:73 · también en docs/bitacora-rediseno.md:83
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — globals.css:36 '@theme static'; :39-63 prefijo ds; :683-685 1ms e iteration-count 1 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1275] Eliminar tailwind.config.ts y design-tokens.ts y limpiar tokens viejos en el bloque final
 - Fuente: `docs/bitacora-rediseno.md:133` · tipo: pendiente · estado declarado: pendiente (bloque final) · fecha: 2026-07-30
 - Nodo(s): lib.transversal
 - Qué es: Se declaran desconectados del pipeline (Tailwind 4 CSS-first); también hay que limpiar --color-void, --color-obsidian, --color-accent y [data-theme].
 - Referencias: tailwind.config.ts · src/lib/design-tokens.ts · src/app/globals.css · también en docs/bitacora-rediseno.md:141 · riesgo: design-tokens.ts aporta zIndex al shell del setter y al Modal (docs/bitacora-beta.md:52, :221) · sin cambios en HOME-CLASICO (docs/bitacora-rediseno.md:3643)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tailwind.config.ts existe y no se carga (sin @config); globals.css:300-319 conserva --color-void/obsidian/accent y [data-theme]; design-tokens.ts con 5 consumidores (Modal.tsx, setter-shell.tsx, DashboardLayoutClient.tsx...) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1276] Asignación de acentos por servicio: opción A
 - Fuente: `docs/bitacora-rediseno.md:172` · tipo: decision · estado declarado: cerrada (opción A) · fecha: 2026-08-04
@@ -10322,16 +10322,16 @@
 - Nodo(s): lib.transversal
 - Qué es: twMerge descartaba tamaños text-ds-* por confundirlos con color; se declararon como grupo font-size, con 0 diferencias sobre 5.615 className reales.
 - Referencias: src/lib/utils.ts · también en docs/bitacora-rediseno.md:417
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/utils.ts:2, :20 (DS_FONT_SIZE_CLASSES) y :38 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1283] Layout raíz: <html lang='es'> con las variables de Geist
 - Fuente: `docs/bitacora-rediseno.md:602` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-30
 - Nodo(s): lib.transversal
 - Qué es: next/font deja las variables en <html> (en <body> Geist no aplicaba en ninguna página); canonical y meta sin el claim +47.
 - Referencias: src/app/layout.tsx · fix/fonts-geist-scope · también en docs/bitacora-rediseno.md:614 · también en docs/bitacora-rediseno.md:655
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/app/layout.tsx:72-75 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1284] Regla para pasadas masivas sobre copy
 - Fuente: `docs/bitacora-rediseno.md:814` · tipo: decision · estado declarado: vigente · fecha: 2026-07-30
@@ -10497,8 +10497,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Smoke de 18 rutas y 2 endpoints contra build prod con sesiones QA; tag v1.0.0 local borrado y v0.9.0-rc.1 creado sobre 6c0cfef (solo local).
 - Referencias: tag v0.9.0-rc.1 (commit 6c0cfef) · tag v1.0.0 (commit 1746e27, borrado local)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — el tag no está en el remoto (git ls-remote --tags origin); el smoke no es verificable (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1305] Camino a v1.0.0
 - Fuente: `docs/bitacora-roadmap.md:7744` · tipo: bloque · estado declarado: pendiente · fecha: 2026-05-25
@@ -10608,8 +10608,8 @@
 - Nodo(s): lib.transversal
 - Qué es: SEC-LLM-04 (trimming prompt), SEC-LLM-07 (CAPTCHA capture_lead), SEC-LOGGING-01 (redacción PII), SEC-CACHE-01 (revalidateTag+TTL), SEC-DEP-04 (npm audit) → track de seguridad.
 - Referencias: docs/auditoria-seguridad-2026-05.md · también en fuente:8873 · también en fuente:8922
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — test:pii (package.json:80) cubre redacción de PII en consola; sin CAPTCHA (git grep -il 'captcha\|turnstile' en src = 0); npm audit con 30 vulnerabilidades (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1319] Cierre del bloque B13 (design system)
 - Fuente: `docs/bitacora-roadmap.md:8887` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
@@ -10692,8 +10692,8 @@
 - Nodo(s): lib.transversal
 - Qué es: La inferencia cross-file colapsa por React.cache sobre auth; solución de raíz: anotar el tipo en auth-guards.ts.
 - Referencias: src/lib/auth-guards.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/auth-guards.ts:3 'export async function requireSuperAdmin(): Promise<string>' (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1330] Familia date-preset-filter divergente a propósito
 - Fuente: `docs/bitacora-roadmap.md:12312` · tipo: decision · estado declarado: hecho
@@ -10730,16 +10730,16 @@
 - Fuente: `docs/sprints/alpha-0-8-tests-e2e.md:3` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): lib.transversal
 - Qué es: Specs 06 a 14 y tests/helpers/auth.ts; 7/21 pasan.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git ls-tree origin/main logic-core-v3/tests/e2e | grep -E '/(0[6-9]|1[0-4])-' = 9 (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1335] Tests E2E rojos por login
 - Fuente: `docs/sprints/alpha-0-8-tests-e2e.md:20` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.transversal
 - Qué es: 14 fallan por selectores/timeout del login; luego 5/21 en Bloque C.
 - Referencias: docs/sprints/alpha-0-9-status-verificacion.md:15 · docs/sprints/alpha-bloque-C-RESUMEN.md:30
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — .github/workflows/ci.yml:186-197: el job e2e se saltea sin secrets; no se corre Playwright en esta auditoría (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1336] Fase Alpha en 6 bloques
 - Fuente: `docs/sprints/alpha-pre-cierre-RESUMEN.md:107` · tipo: bloque · estado declarado: planificado · fecha: 2026-05-17
@@ -10839,16 +10839,16 @@
 - Nodo(s): lib.transversal
 - Qué es: Build pasa, 39/50 Playwright (3 fails de visual regression), onboarding sin SQL, alertas, reportes semanales, widget.
 - Referencias: tag v1.0.0 · commit 7d551ba
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — STATUS.md:4 cita el tag v1.0.0, que no existe en el remoto; package.json:3 dice 0.1.0; los docs de OOM contradicen 'build pasa' (STATUS.md:19) (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1349] AIExecutiveBrief con LLM real
 - Fuente: `STATUS.md:47` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-21
 - Nodo(s): lib.transversal
 - Qué es: Gemini 2.5 Flash vía Vercel AI SDK, cache 7 días, 3 regeneraciones/semana (migrado desde el SDK de Anthropic).
 - Referencias: src/lib/ai/executive-brief.ts:229 · tambien en :226
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/ai/executive-brief.ts:19 'gemini-2.5-flash' y :299 provider.getModel (D8-c1, lector D8-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1350] Visual regression: re-baseline o investigar
 - Fuente: `STATUS.md:112` · tipo: decision · estado declarado: pendiente · fecha: 2026-05-21

@@ -2662,6 +2662,41 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - Propuesta: moverlo junto a los invariantes, fuera de src/lib, con la ficha de la forma nueva (decidir (Franco))
 - Zona: ZONA-FRANCO
 
+### [POD-375] tailwind.config.ts (D8-c1)
+- Hallado en F2 (D8-L1) · `tailwind.config.ts` · Nodo(s): lib.plataforma.tailwind-config · Alcance: el archivo entero — Tailwind 4 no lo carga (globals.css no tiene @config) y su plugin typography ya está en globals.css:2; ninguna clase develop-* en src (DEU-091) · Señales: Tailwind 4 no lo carga: git grep '@config\|@source' en src/*.css = 0; plugin typography duplicado en globals.css:2; ninguna clase develop-* en src (git grep = 0); warning de eslint import/no-anonymous-default-export (tailwind.config.ts:19); ningún archivo lo referencia (git grep 'tailwind.config' fuera de docs y lock = 0)
+- Qué rompe si se borra: Nada en el build. Deja de importar design-tokens.ts, que sigue en uso por Modal, setter-shell y DashboardLayoutClient y NO se borra.
+- Confianza de poda: MEDIA
+- Propuesta: borrar; design-tokens.ts sigue en uso por otros importadores y se queda
+- Zona: libre
+
+### [POD-376] netlify.toml (D8-c1)
+- Hallado en F2 (D8-L1) · `netlify.toml` · Nodo(s): lib.plataforma.netlify · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — el rewrite forzado de /api/chatbot/* a sí mismo (nació en b4a2a8a3 «sin funcionar»); el proxy no cubre /api/chatbot, así que no saltea nada · Señales: rewrite 200 forzado de /api/chatbot/* a sí mismo; nació en b4a2a8a3 'Commit roadmap chatbot finalizado - sin funcionar'; src/proxy.ts:172 no incluye /api/chatbot, así que no sirve para saltear el proxy
+- Qué rompe si se borra: HIPÓTESIS: nada. Verificar en un deploy preview que el chat y la config del widget siguen respondiendo.
+- Confianza de poda: MEDIA
+- Propuesta: borrar el rewrite y probar en un deploy preview que el chat y la config del widget siguen respondiendo
+- Zona: libre
+
+### [POD-377] package.json (D8-c1)
+- Hallado en F2 (D8-L1) · `package.json` · Nodo(s): lib.plataforma.package · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — dependencias sin uso: @next/bundle-analyzer instalado sin cablear en next.config.ts; html2canvas y jspdf solo los usa DownloadReportButton.tsx (POD-016, huérfano) (DEU-094) · Señales: @next/bundle-analyzer (package.json:182) no lo importa nadie; html2canvas y jspdf (package.json:148-149) solo los usa src/components/dashboard/DownloadReportButton.tsx:44-45; depcruise marca DownloadReportButton.tsx como huérfano (_crudo/depcruise-resumen.json)
+- Qué rompe si se borra: DownloadReportButton.tsx deja de compilar: se borra junto. Mejor cablear el analyzer que quitarlo.
+- Confianza de poda: MEDIA
+- Propuesta: quitar html2canvas y jspdf al borrar POD-016; cablear el analyzer detrás de ANALYZE=true o quitarlo
+- Zona: libre
+
+### [POD-378] next.config.ts (D8-c1)
+- Hallado en F2 (D8-L1) · `next.config.ts` · Nodo(s): lib.plataforma.next-config · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — placehold.co en images.remotePatterns sin ningún <Image> que lo use (solo un comentario de ShowcaseSection.tsx, POD-039) y su preconnect en layout.tsx:79 (PERF-017) · Señales: placehold.co solo aparece en un comentario de src/components/sections/web-development/ShowcaseSection.tsx:8, componente huérfano; preconnect sin uso en src/app/layout.tsx:79
+- Qué rompe si se borra: Nada. Un <Image> remoto de placehold.co dejaría de optimizarse, pero no hay ninguno.
+- Confianza de poda: MEDIA
+- Propuesta: quitar el remotePattern y el preconnect
+- Zona: libre
+
+### [POD-379] src/app/api/version/route.ts (D8-c1)
+- Hallado en F2 (D8-L1) · `src/app/api/version/route.ts` · Nodo(s): lib.plataforma.version · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — la ruta tiene un consumidor (scripts/_b14-4-smoke-prod.mjs:82); lo muerto es el valor: version fija 1.0.0 y builtAt con la hora del pedido (BUG-172) · Señales: devuelve una versión fija y una fecha de build falsa (route.ts:5-6); único consumidor: scripts/_b14-4-smoke-prod.mjs:82
+- Qué rompe si se borra: El smoke de prod. Conviene arreglarlo (SHA del commit) en vez de borrarlo.
+- Confianza de poda: MEDIA
+- Propuesta: no borrar la ruta: devolver el SHA y la fecha del commit del deploy
+- Zona: libre
+
 ### Refuerzos de F2 sobre fichas de F1
 
 - [POD-046] `src/lib/actions/invitations.ts` (D1-c1): inviteClientAction sin callers (git grep inviteClient -> solo :43); Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116). Qué rompe: Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)

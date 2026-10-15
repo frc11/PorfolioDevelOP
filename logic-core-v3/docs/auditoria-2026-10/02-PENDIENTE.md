@@ -7,9 +7,9 @@
 | Área | Herramientas medidas | Funcionalidades | En L3 o más | Faltantes de L3 más comunes | FAL |
 |---|---:|---:|---:|---|---:|
 | h1 · Acceso | 5 / 5 | 15 | 0 | Sentry (11), autonomía (9), errores (8) | 3 |
-| h2 · Portal del cliente | 16 / 16 | 109 | 12 | Sentry (72), sin mocks ni TODO (54), errores (53) | 11 |
-| h3 · Chatbot centralizado | 8 / 8 | 111 | 3 | Sentry (66), errores (63), autonomía (51) | 6 |
-| h4 · Panel de admin | 13 / 13 | 114 | 3 | Sentry (82), errores (69), autonomía (41) | 8 |
+| h2 · Portal del cliente | 16 / 16 | 110 | 12 | Sentry (72), sin mocks ni TODO (54), errores (53) | 11 |
+| h3 · Chatbot centralizado | 8 / 8 | 112 | 3 | Sentry (66), errores (64), autonomía (52) | 6 |
+| h4 · Panel de admin | 13 / 13 | 115 | 3 | Sentry (82), errores (69), validación en servidor (42) | 8 |
 | h5 · Setter y LeadOS | 7 / 7 | 76 | 0 | autonomía (38), Sentry (37), permisos y tenant (26) | 3 |
 | h6 · Entradas públicas que alimentan lo interno | 2 / 2 | 8 | 0 | Sentry (6), errores (5), autonomía (4) | 0 |
 
@@ -94,7 +94,7 @@
 
 ### h2.cli-shell — Shell del portal (sidebar, notificaciones, novedades)
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 6 funcionalidades: 1×L3, 5×L2).
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 7 funcionalidades: 1×L3, 6×L2).
 - Criterios de L3 que faltan en alguna funcionalidad: mobile, sin mocks ni TODO, autonomía, permisos y tenant, errores, validación en servidor, Sentry.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
@@ -105,6 +105,7 @@
 | `h2.cli-shell.navegacion-sidebar` Navegacion del portal (sidebar y drawer mobile) | L2 | mobile, sin mocks ni TODO, autonomía | Camino feliz: layout.tsx:74 resolveOrgId -> :115 activeModuleSlugs -> DashboardLayoutClient.tsx:94-100 -> SidebarNav.tsx:101-103, :123-172. No L3: item de Email marketing con slug que no coincide con el catalogo (SidebarNav.tsx:78) y drawer cerrado enfocable. |
 | `h2.cli-shell.notificaciones` Centro de notificaciones | L2 | permisos y tenant, mobile, Sentry, sin mocks ni TODO | layout.tsx:101-105 → NotificationCenter.tsx:114 → notifications.ts:46-66; historial NotificationHistoryModal.tsx:34 → notifications.ts:73-93. |
 | `h2.cli-shell.novedades` Novedades del panel | L2 | errores, mobile, Sentry | layout.tsx:110-112 → get-announcements-for-org.ts:31-69 → AnnouncementsFeed.tsx:57-66 → announcements.ts:17-52. |
+| `h2.cli-shell.pagina-de-error-y-404` Página de error y 404 cuando una ruta no tiene frontera propia | L2 | autonomía | error.tsx:14-31 captura y registra -> :42-62 mensaje, digest y acciones; global-error.tsx:22-58; not-found.tsx:78-199. |
 
 ### h2.cli-inicio — Inicio
 
@@ -565,8 +566,8 @@
 
 ### h3.vis-widget-cliente — Widget embebible en el sitio del cliente
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 7 funcionalidades: 6×L2, 1×L1).
-- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, Sentry, autonomía, errores, sin mocks ni TODO, vacíos, mobile.
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 8 funcionalidades: 7×L2, 1×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, Sentry, autonomía, errores, sin mocks ni TODO, vacíos, mobile, validación en servidor.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
@@ -575,6 +576,7 @@
 | `h3.vis-widget-cliente.chat-embebido` Chat embebido en el sitio del cliente | L2 | permisos y tenant, Sentry, sin mocks ni TODO | widget.js:115-131 -> embed/[slug]/page.tsx:25-44 -> ChatbotEmbed.tsx:27,119-133 -> chat/route.ts:40-110. |
 | `h3.vis-widget-cliente.conversar` Conversar con el bot desde el widget | L2 | permisos y tenant, vacíos, errores, Sentry, autonomía | Camino feliz por codigo: sendMessage useChatbot.ts:537-549 -> transport :269-305 -> route.ts:8 -> handleChatRequest (entrada) -> stream al SDK :356. Hoy no responde en produccion por la credencial de Vertex vencida (hecho conocido). |
 | `h3.vis-widget-cliente.embed-chat` Widget embebido en el sitio del cliente | L2 | permisos y tenant, Sentry, autonomía | widget.js:99-153 → embed/[slug]/page.tsx:25-44 → ChatbotEmbed → /api/chatbot/<slug>/chat |
+| `h3.vis-widget-cliente.embed-enmarcable-en-sitio-del-cliente` El sitio del cliente enmarca el widget (/embed y widget.js) | L2 | permisos y tenant, errores, validación en servidor, sin mocks ni TODO, autonomía | Camino feliz trazado por D5 (public/widget.js:113 -> next.config.ts:126 -> src/app/embed/[slug]/page.tsx:29); headers en next.config.ts:117-134. |
 | `h3.vis-widget-cliente.estados-degradados` Banners de degradado en el widget embebido del cliente | L2 | errores, Sentry, autonomía | ChatbotEmbed.tsx:419 <DegradedBanner info={chatbot.degradedInfo}> con el mismo hook (useChatbot); ramas en DegradedBanner.tsx:41-215. |
 | `h3.vis-widget-cliente.tarjetas-derivacion` Tarjetas de derivacion (WhatsApp / que me contacten) | L2 | vacíos | ChatbotEmbed.tsx:398-409 -> renderToolCall.tsx:47-84 -> HandoffOptionsCard.tsx:22-69 / WhatsappHandoffCard.tsx:12-58. |
 
@@ -670,12 +672,13 @@
 
 ### h4.adm-shell — Shell del admin
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 3 funcionalidades: 2×L2, 1×L3).
-- Criterios de L3 que faltan en alguna funcionalidad: mobile.
+- Madurez de la herramienta: **L?** (la de su funcionalidad más floja; 4 funcionalidades: 2×L2, 1×L3, 1×L?).
+- Criterios de L3 que faltan en alguna funcionalidad: mobile, validación en servidor, sin mocks ni TODO.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h4.adm-shell.acceso-y-layout` Guard SUPER_ADMIN y shell del admin | L2 | mobile | Camino feliz: layout.tsx:41-49 (auth + rol) -> :52-55 badges -> AdminLayoutClient.tsx:74-101 (sidebar + main). No llega a L3 por mobile parcial (hamburguesa sobre el drawer, AdminLayoutClient.tsx:43-46). |
+| `h4.adm-shell.backup-diario-de-la-base` Backup diario cifrado de la base con prueba de restore | L? | validación en servidor, sin mocks ni TODO | Código completo (db-backup.yml:39-41 -> :102-124 -> :180-218), pero que corra depende de secrets no verificables por lectura; ci.yml:120-121 registraba 0 secrets al 2026-08-25. |
 | `h4.adm-shell.confirmaciones` Confirmaciones de acciones destructivas | L3 | — | Consumidores fuera del lote (ClientsListClient, BotDetailClient, BulkActionBar, ImpersonateButton, BillingOverrideForm por git grep) -> confirm-dialog.tsx:42 portal a body -> :85-96 confirmar con isPending; type-to-confirm-dialog.tsx:41, :107 exige la frase. F |
 | `h4.adm-shell.navegacion` Sidebar, topbar y volver | L2 | mobile | admin-sidebar.tsx:57-100 secciones -> :131-195 Link con activo y badge (datos de layout.tsx:11, :21) -> admin-topbar.tsx:66-77 breadcrumb/título -> :85 signOutAction (flujo D1 'Logout'). Título 'Detalle' en Novedades (admin-topbar.tsx:12-13) y mobile parcial. |
 

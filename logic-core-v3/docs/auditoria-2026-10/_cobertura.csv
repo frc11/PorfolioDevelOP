@@ -1,8 +1,8 @@
 ruta,dominio,alcance,estado,ciclo,notas
-.claude/agents/visual-qa.md,D8,superficial,pendiente,,tooling-agentes
-.claude/launch.json,D8,superficial,pendiente,,tooling-agentes
-.claudeignore,D8,superficial,pendiente,,config-repo
-.github/hooks/impeccable.json,D8,superficial,pendiente,,tooling
+.claude/agents/visual-qa.md,D8,superficial,superficial,D8-c1,tooling-agentes | subagente de QA visual que pide CLAUDE.md: solo lectura mas las herramientas de Claude Preview, fijado a claude-haiku-4-5-20251001; versionado aunque el .gitignore raiz ignora .claude/ (entro antes de la regla)
+.claude/launch.json,D8,superficial,superficial,D8-c1,tooling-agentes | tres servidores de Claude Preview desde la raiz (next-dev 3000, next-dev-qa 3002, next-prod-qa 3001 con start:qa); los de QA son los que exponen /api/qa/login en toda la red (SEC-024)
+.claudeignore,D8,superficial,superficial,D8-c1,config-repo | oculta a Claude Code prisma/migrations/, netlify/ (las scheduled functions donde viven los crons de Netlify: BUG-047, SEC-099), lockfiles, imagenes y SVG; ayuda a explicar crons registrados solo en vercel.json
+.github/hooks/impeccable.json,D8,superficial,superficial,D8-c1,tooling | hook postToolUse de la skill impeccable (edit/create/apply_patch, 5 s); tooling de agentes, sin efecto en la app ni en CI
 .github/skills/impeccable/SKILL.md,-,fuera,excluido-generado,,vendorizado: skill impeccable
 .github/skills/impeccable/reference/adapt.md,-,fuera,excluido-generado,,vendorizado: skill impeccable
 .github/skills/impeccable/reference/adapt.native.md,-,fuera,excluido-generado,,vendorizado: skill impeccable
@@ -146,10 +146,10 @@ ruta,dominio,alcance,estado,ciclo,notas
 .github/skills/impeccable/scripts/pin.mjs,-,fuera,excluido-generado,,vendorizado: skill impeccable
 .github/skills/impeccable/scripts/serve-question.mjs,-,fuera,excluido-generado,,vendorizado: skill impeccable
 .github/skills/impeccable/scripts/surface-brief.mjs,-,fuera,excluido-generado,,vendorizado: skill impeccable
-.github/workflows/ci.yml,D8,profundo,pendiente,,ci
-.github/workflows/db-backup.yml,D8,profundo,pendiente,,ci
-.gitignore,D8,superficial,pendiente,,config-repo
-.impeccable/design.json,D8,superficial,pendiente,,tooling: config de skill impeccable
+.github/workflows/ci.yml,D8,profundo,leído,D8-c1,ci
+.github/workflows/db-backup.yml,D8,profundo,leído,D8-c1,ci
+.gitignore,D8,superficial,superficial,D8-c1,config-repo | raiz: ignora .claude/, .agents/, audit/, .netlify y los worktrees anidados (audit-clean/, logic-core-runtime/); no cubre los distDir .next-perf-* ni .next-corrida-visual de la app (D8-L1/H18)
+.impeccable/design.json,D8,superficial,superficial,D8-c1,tooling: config de skill impeccable | tokens del sitio publico para la skill impeccable (paleta Vacio Calido, Tinta Hueso, Papel); insumo de F3: comparar con globals.css y el home v3
 AUDITORIA-VS-BRIEF-2026-07.md,DOC,superficial,superficial,F1,doc-raiz-repo
 CLAUDE.md,DOC,superficial,superficial,F1,doc-raiz-repo
 DESIGN.md,DOC,superficial,superficial,F1,doc-raiz-repo
@@ -160,12 +160,12 @@ lane-LOG.md,DOC,superficial,superficial,F1,doc-raiz-repo
 lane-dashboard-log.md,DOC,superficial,superficial,F1,doc-raiz-repo
 lane-plan-log.md,DOC,superficial,superficial,F1,doc-raiz-repo
 lane-resultados-redesign-log.md,DOC,superficial,superficial,F1,doc-raiz-repo
-logic-core-v3/.claude/launch.json,D8,superficial,pendiente,,tooling-agentes
-logic-core-v3/.dependency-cruiser.cjs,D8,profundo,pendiente,,config
-logic-core-v3/.env.example,D8,profundo,pendiente,,config
+logic-core-v3/.claude/launch.json,D8,superficial,superficial,D8-c1,tooling-agentes | dos servidores de Claude Preview desde la app (dev 3000, next-prod-qa 3001); duplica la config de la raiz con otros nombres
+logic-core-v3/.dependency-cruiser.cjs,D8,profundo,leído,D8-c1,config
+logic-core-v3/.env.example,D8,profundo,leído,D8-c1,config
 logic-core-v3/.eslint_output.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
-logic-core-v3/.gitattributes,D8,profundo,pendiente,,config
-logic-core-v3/.gitignore,D8,profundo,pendiente,,config
+logic-core-v3/.gitattributes,D8,profundo,leído,D8-c1,config
+logic-core-v3/.gitignore,D8,profundo,leído,D8-c1,config
 logic-core-v3/AGENTS.md,DOC,superficial,superficial,F1,doc-raiz-app
 logic-core-v3/CHANGELOG-cuenta.md,DOC,superficial,superficial,F1,doc-raiz-app
 logic-core-v3/CHANGELOG.md,DOC,superficial,superficial,F1,doc-raiz-app
@@ -422,17 +422,17 @@ logic-core-v3/docs/sprints/utm-1-captura.md,DOC,superficial,superficial,F1,doc
 logic-core-v3/docs/testing-strategy.md,DOC,superficial,superficial,F1,doc
 logic-core-v3/docs/v1.0-smoke-test-checklist.md,DOC,superficial,superficial,F1,doc
 logic-core-v3/docs/verificacion-arranque-oslead-vii.md,DOC,superficial,superficial,F1,doc
-logic-core-v3/eslint.config.mjs,D8,profundo,pendiente,,config
+logic-core-v3/eslint.config.mjs,D8,profundo,leído,D8-c1,config
 logic-core-v3/find_unused.js,D9,superficial,pendiente,,script-suelto-raiz-app
 logic-core-v3/instrumentation.ts,D7,profundo,leído,D7-c1,sentry
-logic-core-v3/knip.ts,D8,profundo,pendiente,,config
-logic-core-v3/netlify.toml,D8,profundo,pendiente,,config; crons
+logic-core-v3/knip.ts,D8,profundo,leído,D8-c1,config
+logic-core-v3/netlify.toml,D8,profundo,leído,D8-c1,config; crons
 logic-core-v3/netlify/functions/cleanup-old-events-cron.ts,D7,profundo,leído,D7-c1,cron; guard-indirecto
 logic-core-v3/netlify/functions/generate-insights-cron.ts,D7,profundo,leído,D7-c1,cron; guard-indirecto
 logic-core-v3/netlify/functions/send-weekly-reports-cron.ts,D7,profundo,leído,D7-c1,cron; guard-indirecto
-logic-core-v3/next.config.ts,D8,profundo,pendiente,,config
+logic-core-v3/next.config.ts,D8,profundo,leído,D8-c1,config
 logic-core-v3/package-lock.json,D8,fuera,excluido-generado,,lockfile (se analiza con npm ls / npm audit)
-logic-core-v3/package.json,D8,profundo,pendiente,,dependencias
+logic-core-v3/package.json,D8,profundo,leído,D8-c1,dependencias
 logic-core-v3/playwright.config.ts,D9,superficial,pendiente,,config-tests
 logic-core-v3/playwright.galeria.config.ts,D9,superficial,pendiente,,config-tests
 logic-core-v3/playwright.helpers-probe.config.ts,D9,superficial,pendiente,,config-tests
@@ -441,7 +441,7 @@ logic-core-v3/playwright.leados.config.ts,D9,superficial,pendiente,,config-tests
 logic-core-v3/playwright.qa-persona.config.ts,D9,superficial,pendiente,,config-tests
 logic-core-v3/playwright.qa-walkthrough.config.ts,D9,superficial,pendiente,,config-tests
 logic-core-v3/playwright.setter.config.ts,D9,superficial,pendiente,,config-tests
-logic-core-v3/postcss.config.mjs,D8,profundo,pendiente,,config
+logic-core-v3/postcss.config.mjs,D8,profundo,leído,D8-c1,config
 logic-core-v3/prisma.config.ts,D6,profundo,leído,D6-c1,config-prisma
 logic-core-v3/prisma/backups/backup.js,D6,superficial,superficial,D6-c1,volcado de catalogo commiteado (revisar PII); toca-db | script de solo lectura contra la base del .env (backup.js vuelca 3 tablas a JSON; migrate-os-to-unified cuenta filas); sin guard de entorno
 logic-core-v3/prisma/backups/module-pricing-legacy.json,D6,superficial,superficial,D6-c1,"volcado de catalogo commiteado (revisar PII) | dump de catalogo sin PII (0 emails, 0 telefonos); organization-module trae organizationId internos"
@@ -1169,7 +1169,7 @@ logic-core-v3/src/app/api/reports/client-monthly/route.ts,D2,profundo,leído,D2-
 logic-core-v3/src/app/api/reports/monthly/route.ts,D2,profundo,leído,D2-c1,api-dashboard; toca-db; usa-auth; route-handler
 logic-core-v3/src/app/api/test-sentry/route.ts,D7,profundo,leído,D7-c1,api-integracion; route-handler
 logic-core-v3/src/app/api/track/route.ts,D7,profundo,leído,D7-c1,endpoint-publico; toca-db; usa-auth; route-handler; escribe-db
-logic-core-v3/src/app/api/version/route.ts,D8,profundo,pendiente,,api; route-handler
+logic-core-v3/src/app/api/version/route.ts,D8,profundo,leído,D8-c1,api; route-handler
 logic-core-v3/src/app/bienvenida/_actions/complete-onboarding.ts,D2,profundo,leído,D2-c1,onboarding-cliente; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/app/bienvenida/_components/BienvenidaWizard.tsx,D2,profundo,leído,D2-c1,onboarding-cliente; client-component
 logic-core-v3/src/app/bienvenida/_components/Step1Empresa.tsx,D2,profundo,leído,D2-c1,onboarding-cliente; client-component
@@ -1184,16 +1184,16 @@ logic-core-v3/src/app/contact/layout.tsx,PUB,superficial,superficial,F1,sitio-pu
 logic-core-v3/src/app/contact/page.tsx,D3,profundo,leído,D3-c1,UI del endpoint publico submitContactForm; captura ?ref=; client-component
 logic-core-v3/src/app/embed/[slug]/page.tsx,D5,profundo,leído,D5-c1,embed; toca-db
 logic-core-v3/src/app/embed/layout.tsx,D5,profundo,leído,D5-c1,embed
-logic-core-v3/src/app/error.tsx,D8,profundo,pendiente,,raiz-app; client-component
+logic-core-v3/src/app/error.tsx,D8,profundo,leído,D8-c1,raiz-app; client-component
 logic-core-v3/src/app/favicon.ico,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/src/app/forgot-password/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; escribe-db
 logic-core-v3/src/app/forgot-password/page.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
-logic-core-v3/src/app/global-error.tsx,D8,profundo,pendiente,,raiz-app; client-component
-logic-core-v3/src/app/globals.css,D8,profundo,pendiente,,raiz-app
-logic-core-v3/src/app/layout.tsx,D8,profundo,pendiente,,raiz-app
+logic-core-v3/src/app/global-error.tsx,D8,profundo,leído,D8-c1,raiz-app; client-component
+logic-core-v3/src/app/globals.css,D8,profundo,leído,D8-c1,raiz-app
+logic-core-v3/src/app/layout.tsx,D8,profundo,leído,D8-c1,raiz-app
 logic-core-v3/src/app/login/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/app/login/page.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
-logic-core-v3/src/app/not-found.tsx,D8,profundo,pendiente,,raiz-app; client-component
+logic-core-v3/src/app/not-found.tsx,D8,profundo,leído,D8-c1,raiz-app; client-component
 logic-core-v3/src/app/page.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/process-automation/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/process-automation/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
@@ -2099,7 +2099,7 @@ logic-core-v3/src/modules/motor/domain/window.ts,D5,profundo,leído,D5-c1,motor
 logic-core-v3/src/modules/motor/services/sendMessage.ts,D5,profundo,leído,D5-c1,motor; toca-db; escribe-db
 logic-core-v3/src/proxy.ts,D1,profundo,leído,D1-c1,auth
 logic-core-v3/src/types/next-auth.d.ts,D1,profundo,leído,D1-c1,tipos-sesion
-logic-core-v3/tailwind.config.ts,D8,profundo,pendiente,,config
+logic-core-v3/tailwind.config.ts,D8,profundo,leído,D8-c1,config
 logic-core-v3/test-chat.mjs,D9,superficial,pendiente,,script-suelto-raiz-app
 logic-core-v3/tests/e2e/01-landing.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
 logic-core-v3/tests/e2e/02-chat-flow.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
@@ -2201,7 +2201,7 @@ logic-core-v3/tests/setter/28-veredicto-y-ciclo.spec.ts,D9,superficial,pendiente
 logic-core-v3/ts_errors.log,D9,fuera,excluido-generado,,salida-generada-commiteada
 logic-core-v3/ts_errors.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
 logic-core-v3/ts_prune_output.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
-logic-core-v3/tsconfig.json,D8,profundo,pendiente,,config
+logic-core-v3/tsconfig.json,D8,profundo,leído,D8-c1,config
 logic-core-v3/unused_report.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
 logic-core-v3/unused_report_utf8.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
 logic-core-v3/vercel.json,D7,profundo,leído,D7-c1,crons

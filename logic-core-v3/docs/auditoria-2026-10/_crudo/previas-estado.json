@@ -1911,6 +1911,214 @@
    "id_previo": "A-10",
    "estado": "cerrado",
    "evidencia": "FASE_PROMPTS/promptsParaFase (prompts-disenio.ts:179-197) se renderizan dentro de la fase (m-construccion.tsx:79); checklist-construccion.tsx y construccion-step.tsx ya no están en origin/main (ls-tree)."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md:2181",
+   "id_previo": "S4-01",
+   "estado": "abierto",
+   "evidencia": "src/lib/security/validate-origin.ts:69-75 sigue aceptando el Origin develop.com.ar antes del chequeo de allowedDomains; next.config.ts:129-131 frame-ancestors * en /embed (el iframe vive en develop.com.ar y sus pedidos salen con ese Origin)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "docs/audit-repo-20260707.md:180",
+   "id_previo": "CO-1",
+   "estado": "parcial",
+   "evidencia": "Tipos cerrados: next.config.ts:31-34 sin ignoreBuildErrors y el build type-chequea. Lint abierto: no hay clave eslint, Next 16 no lintea en el build y .github/workflows/ci.yml:20-26 lo deja fuera del CI"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "docs/auditoria-seguridad-2026-05.md:72",
+   "id_previo": "SEC-DEP-01",
+   "estado": "abierto",
+   "evidencia": "El lock subió a next 16.2.9 (cierra lo de 16.2.1), pero _crudo/npm-audit.json:1036-1045 vuelve a marcar next como crítico con rangos hasta <16.3.8"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "docs/auditoria-seguridad-2026-05.md:217",
+   "id_previo": "SEC-MISC-01",
+   "estado": "parcial",
+   "evidencia": "next.config.ts:54-87 agrega HSTS, nosniff, Referrer-Policy, Permissions-Policy y CSP en Report-Only; X-Frame-Options solo en /(admin|dashboard|setter) (:93-98) y la CSP sigue en Report-Only sin reportes"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "docs/auditoria-total-pre-deploy.md:36",
+   "id_previo": "O-2",
+   "estado": "cerrado",
+   "evidencia": "package.json:131 declara @googleapis/webmasters y está instalada (_crudo/npm-ls.txt: @googleapis/webmasters@4.0.0); el baseline de tsc da 0 errores"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md:202",
+   "id_previo": "sin-id",
+   "estado": "parcial",
+   "evidencia": "package.json:15 check:types y .github/workflows/ci.yml:97-105 en la raíz; next.config.ts sin ignoreBuildErrors; e2e.yml ya no existe; lint y e2e siguen sin gate (ci.yml:20-26, :186-197)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:61",
+   "id_previo": "NUEVO-P0-2",
+   "estado": "cerrado",
+   "evidencia": "package.json:131 @googleapis/webmasters declarada e instalada (_crudo/npm-ls.txt)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:197",
+   "id_previo": "SEC-DEP-01",
+   "estado": "abierto",
+   "evidencia": "_crudo/npm-audit.json:1036-1045 next crítico (4 críticas en total con next-auth y @auth/*)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "docs/audits/2026-06-revalidacion.md:55",
+   "id_previo": "N-2",
+   "estado": "cerrado",
+   "evidencia": "El lock con next 16.2.9 satisface ^16.2.6 (package.json:154) y webmasters está declarada (package.json:131)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "docs/audits/2026-06-revalidacion.md:90",
+   "id_previo": "SEC-DEP-01",
+   "estado": "abierto",
+   "evidencia": "_crudo/npm-audit.json:1036-1045"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:63",
+   "id_previo": "SEC-DEP-01",
+   "estado": "abierto",
+   "evidencia": "_crudo/npm-audit.json:1036-1045; next 16.2.9 en el lock"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:64",
+   "id_previo": "SEC-DEP-02",
+   "estado": "cerrado",
+   "evidencia": "protobufjs 7.6.4 en el lock (>7.5.5): el RCE quedó cerrado. _crudo/npm-audit.json:1550 marca ahora un aviso distinto (DoS)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:74",
+   "id_previo": "SEC-MISC-01",
+   "estado": "parcial",
+   "evidencia": "next.config.ts:54-98 (ver el SEC-MISC-01 de mayo)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:77",
+   "id_previo": "SEC-DEP-03",
+   "estado": "cerrado",
+   "evidencia": "El lock tiene defu 6.1.7 y effect 3.21.0; _crudo/npm-audit.json no lista ni defu ni effect"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:584",
+   "id_previo": "PERF-01",
+   "estado": "parcial",
+   "evidencia": "three.js ya no está en el grafo compartido: BrandedIntroCanvas se carga con next/dynamic (src/components/ui/MarketingIntro.tsx:19-20) y Preloader.tsx no lo importa estático. El layout raíz sigue cargando el resto del chrome en todas las rutas (src/app/layout.tsx:42-50, :113-124)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:585",
+   "id_previo": "PERF-02",
+   "estado": "parcial",
+   "evidencia": "src/components/sections/web-development/WebTemplatesImmersive.tsx:313-316 sigue con iframes vivos por template, ahora lazy salvo el primero; el peso no se puede medir por lectura"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:939",
+   "id_previo": "ARQ-01",
+   "estado": "abierto",
+   "evidencia": "_crudo/depcruise-resumen.json: 'ciclos' con 22 entradas; .dependency-cruiser.cjs:4-10 sigue en severity warn"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:952",
+   "id_previo": "ARQ-04",
+   "estado": "parcial",
+   "evidencia": "eslint.config.mjs:16-87 agrega fronteras de motor y chatbot, pero ningún gate las ejecuta (ci.yml:20-26, sin hooks); .dependency-cruiser.cjs:3-11 no tiene reglas de frontera"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1310",
+   "id_previo": "RESIL-03",
+   "estado": "parcial",
+   "evidencia": "netlify.toml:25-32 apunta a funciones que existen (netlify/functions/cleanup-old-events-cron.ts, generate-insights-cron.ts, send-weekly-reports-cron.ts); 5 rutas cron siguen sin disparador (flujo D7 'Crons sin disparador')"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1622",
+   "id_previo": "OBS-01",
+   "estado": "abierto",
+   "evidencia": "src/app/error.tsx:27 y src/app/global-error.tsx:24 capturan y .env.example:276 lo marca requerido en prod; que funcione en producción no es verificable por lectura (D7: depende de NEXT_PUBLIC_SENTRY_DSN en el build)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1624",
+   "id_previo": "OBS-02",
+   "estado": "abierto",
+   "evidencia": "No hay heartbeat ni dead-man switch: git grep de healthchecks, cronitor y heartbeat en src y netlify sin resultados reales; netlify.toml:25-32 agenda sin monitoreo"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1626",
+   "id_previo": "OBS-03",
+   "estado": "abierto",
+   "evidencia": "src/app/api/version/route.ts:3-8 no toca la base ni identifica el deploy; ningún monitor en el repo (src/lib/data/onboarding-tasks.ts:58 lo deja como tarea manual de UptimeRobot)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1913",
+   "id_previo": "SEO-01",
+   "estado": "abierto",
+   "evidencia": "src/app/layout.tsx:32 y :38 y src/app/contact/layout.tsx:14 y :20 referencian /og-image.png; public/ no lo tiene (git ls-tree)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1915",
+   "id_previo": "SEO-03",
+   "estado": "cerrado",
+   "evidencia": "src/app/layout.tsx:73 lang=\"es\""
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1917",
+   "id_previo": "A11Y-03",
+   "estado": "cerrado",
+   "evidencia": "Los tokens ds pasan AA por aritmética WCAG: globals.css:42 #A39C8F sobre :39 #0D0B09 ≈ 7,2:1 y globals.css:49 #6E675C sobre :46 #F2EEE6 ≈ 4,8:1. Siguen textos zinc-500 y zinc-700 bajo AA en las páginas de error y 404 (higiene)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:153",
+   "id_previo": "sin-id",
+   "estado": "parcial",
+   "evidencia": "El candado existe en parte: .github/workflows/ci.yml:79-117 corre tipos e invariantes y el build ya no ignora tipos. e2e depende de secrets (ci.yml:186-197) y el lint, con 102 errores, sigue fuera del gate (ci.yml:20-26)"
   }
  ]
 }

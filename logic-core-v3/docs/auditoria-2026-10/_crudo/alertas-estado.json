@@ -1473,6 +1473,37 @@
    "alerta": "[D4-A6] EL TRONCO deja el push a main a Franco pero origin/main @ 57c421bc ya es 'docs(tronco): EL TRONCO'",
    "resultado": "descartada",
    "evidencia": "No hay contradicción. 57c421bc tiene autor y committer Franco <francopizzi2003@gmail.com>, 2026-09-06 03:13 -0300. En el reflog local de refs/remotes/origin/main entró como 'fetch origin: fast-forward' el 2026-09-06 20:14 -0300, no como 'update by push' desde este checkout (los últimos push locales son del 2026-08-12). Lo movió Franco desde su máquina, como dice bitacora-beta-3.md:10975. Dato para 09."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "alerta": "[D8-A1] Build: BP.4 dice que entra en el heap por defecto; P1.A, P5.3, UTM.1 y PRIVACIDAD dicen OOM sin 6-8 GB; cruza con CO-1",
+   "resultado": "parcial",
+   "evidencia": "El OOM no se puede reproducir por lectura (npm run build está prohibido). Hechos de código: netlify.toml:7 fija 4096 MB, que en una máquina de 16 GB es más o menos el default, así que si el build local necesita 6-8 GB, el de Netlify también debería morir. La alternativa es que el exceso local venga de lo no versionado y no ignorado que Tailwind escanea (globals.css:1 sin source(); docs/_insumos y .next-perf-* no están en .gitignore). package.json:9 fuerza webpack. CO-1 está cerrado: next.config.ts:31-39 ya no tiene ignoreBuildErrors ni eslint, y el build suma el type-check.",
+   "hallazgo_titulo": "Build de producción sin margen de memoria verificable: heap fijo de 4096 MB en Netlify, webpack forzado, type-check dentro del build y Tailwind escaneando docs/"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "alerta": "[D8-A2] Script dev: --turbopack (B1.2 :313) contra webpack por defecto (B3.3 :1369) y 'next dev --webpack' (MS-7 :5369)",
+   "resultado": "parcial",
+   "evidencia": "package.json:7 'next dev --webpack', :8 'next dev --webpack -p 3002' y :9 'next build --webpack'. MS-7 coincide con el código y B1.2 (turbopack) quedó superado. B3.3 dice 'webpack por defecto', lo que es inexacto en Next 16: el default es Turbopack y webpack exige el flag, que es lo que hace el repo.",
+   "hallazgo_titulo": "Build de producción sin margen de memoria verificable: heap fijo de 4096 MB en Netlify, webpack forzado, type-check dentro del build y Tailwind escaneando docs/"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "alerta": "[D8-A3] CI: el comentario de C1 sobre 'type-stripping nativo' en ci.yml es incorrecto según C1b",
+   "resultado": "descartada",
+   "evidencia": ".github/workflows/ci.yml:44-50 ya está corregido: 'NO los levanta el type-stripping nativo de Node — eso decía este comentario hasta C2 y es falso. Quien carga los .ts es el hook CJS de ts-node'. El comentario incorrecto ya no existe."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "alerta": "[D8-A4] Repo: B14.3 y PRIVACIDAD se apoyan en que el repo es público; sigue público (gh, 2026-10-13 y 2026-10-14; DEC-54): siguen vigentes",
+   "resultado": "confirmada",
+   "evidencia": "El código asume repo público: .github/workflows/db-backup.yml:20-24 cifra los artifacts por eso y ci.yml:125 nombra --repo frc11/PorfolioDevelOP. La publicidad la confirmó el padre con gh. Hoy queda público: .env.example:31-32 con el hostname del endpoint Neon, prisma/backups/*.json versionados contra .gitignore:64-67, y enviroment.env en el historial de origin/main (commit 39535583). B14.3 y PRIVACIDAD siguen vigentes.",
+   "hallazgo_titulo": "Repo público con datos de infraestructura y volcados de tablas versionados contra la regla del propio .gitignore"
   }
  ]
 }

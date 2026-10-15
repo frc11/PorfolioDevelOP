@@ -2957,6 +2957,879 @@
     "sentido": "si",
     "ciclo": "D4-c1, lector D4-L6"
    }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:202",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "package.json:9 \"build\": \"next build --webpack\"; package.json:7 dev también --webpack",
+    "sentido": "decidir",
+    "nota": "Turbopack es el default estable de Next 16; validar compatibilidad con withSentryConfig y memoria del build",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:329",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "next.config.ts:25-30 solo lista @react-pdf/renderer, @prisma/client, require-in-the-middle e import-in-the-middle; package.json:130",
+    "sentido": "decidir",
+    "nota": "medir con el analyzer antes (no está cableado)",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7906",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "package-lock (origin/main): node_modules/next/node_modules/postcss 8.4.31; _crudo/npm-audit.json:1413 PostCSS XSS",
+    "sentido": "si",
+    "nota": "next wanted 16.4.0 (npm-outdated.json:226-229); re-correr npm audit tras subir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10924",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "docs/bitacora-beta-3.md:3647 sigue citando bg-[url(...)]; src/app/globals.css:1 '@import \"tailwindcss\"' sin source() ni '@source not' (git grep '@config\\|@source' en src/*.css = 0)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:9322",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "package.json:8, :11-13 y :109 usan cross-env; devDependency en package.json:191",
+    "sentido": "no",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:12450",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "scripts/run-invariants.mjs:107 descubre todo check:invariant*; dates-ar, lead-status y client-monthly-report son check:invariant:* (package.json:89-90, :104)",
+    "sentido": "si",
+    "nota": "quedan fuera los 28 test:* (PLAN-1032)",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:15974",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "next.config.ts:31-34 ya no lo tiene; next.config.ts:1 y :3 siguen sin tipar el objeto (NextConfig importado sin uso, warning de eslint)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:16499",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "package.json:141 \"ai\": \"^6.0.177\"; lock 6.0.214; npm-outdated.json:149-152 latest 7.0.139",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:505",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": ".github/workflows/ci.yml:79-117 corre tipos e invariantes desde la raíz; jobs con DB salteados sin DATABASE_URL_TEST (ci.yml:137-147, :186-197)",
+    "sentido": "si",
+    "nota": "secrets no verificables sin gh",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:778",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "baseline 102 errores/111 warnings (_crudo/eslint-resumen.md); ci.yml:20-26 lint fuera; eslint.config.mjs:9-15 sin distDirs",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1186",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "next.config.ts sin key eslint (leído completo); package.json sin campo \"type\" (git show origin/main:logic-core-v3/package.json | grep -c '\"type\"' = 0)",
+    "sentido": "decidir",
+    "nota": "type:module puede romper los scripts CJS de ts-node (package.json:172-177)",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1259",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": ".gitattributes:1 solo 'docs/bitacora-roadmap.md merge=union'",
+    "sentido": "decidir",
+    "nota": "decisión de Franco",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3667",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "package.json:182; next.config.ts no lo importa (git grep bundle-analyzer fuera de docs y lock = solo package.json:182)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3777",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": ".gitignore:18-19 y :24-25 excluyen .next-setter/.next-galeria (Tailwind respeta .gitignore); docs/ sigue escaneado (globals.css:1 sin source); .next-perf-* y .next-corrida-visual no ignorados",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3798",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "tsconfig.json:39-48 quedó commiteado con includes de .next-setter, .next-galeria y .next-perf-a/b/base (sin script que genere los perf)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4408",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "next.config.ts:72 Content-Security-Policy-Report-Only, sin report-uri/report-to",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5145",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "package.json:55-82 (28 test:*) no matchean el filtro de scripts/run-invariants.mjs:107",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5271",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": ".github/workflows/db-backup.yml:93-96 aborta sin secret; ci.yml:120-121 registra 0 secrets al 2026-08-25",
+    "sentido": "si",
+    "nota": "HIPÓTESIS: no verificable sin gh",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:44",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "src/app/api/qa/login/route.ts:186 secure: isSecure (cookie sin Secure en http); el bounce :3001->:3000 no es verificable por lectura",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:133",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "tailwind.config.ts existe y no se carga (sin @config); globals.css:300-319 conserva --color-void/obsidian/accent y [data-theme]; design-tokens.ts con 5 consumidores (Modal.tsx, setter-shell.tsx, DashboardLayoutClient.tsx...)",
+    "sentido": "decidir",
+    "nota": "borrar tailwind.config.ts sí; design-tokens.ts no (choca con PLAN-1269)",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:162",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "next.config.ts:31-39 sin typescript.ignoreBuildErrors ni clave eslint",
+    "sentido": "si",
+    "nota": "el lint igual queda sin gate: Next 16 no lintea en build y el CI lo excluye",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3722",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "About.tsx:3, Portfolio.tsx:3 y KineticText.tsx:3 importan framer-motion; Hero.tsx:7, HeroArtifact.tsx:5 y BrandedLogoWhite.tsx:5 importan three-stdlib; package.json no declara ninguno",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5783",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "scripts/run-invariants.mjs:89-94 lo excluye; ci.yml no tiene job con DB para él (git grep client-monthly en ci.yml = 0)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:4568",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "tsconfig.json:18 allowImportingTsExtensions; tsconfig.json:52 exclude scripts/**",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:63",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "globals.css:36 '@theme static'; :39-63 prefijo ds; :683-685 1ms e iteration-count 1",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:5354",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "package.json:11 start:qa en :3001; logic-core-v3/.claude/launch.json next-prod-qa :3001; .claude/agents/visual-qa.md versionado",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7771",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "lock next 16.2.9; pero _crudo/npm-audit.json:1036-1045 vuelve a marcar next crítico (rangos hasta <16.3.8)",
+    "sentido": "si",
+    "nota": "superado por avisos nuevos: repetir con 16.4",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:15940",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "next.config.ts leído completo, sin clave eslint",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2398",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "next.config.ts:24; package.json:12 start:setter; .gitignore:19 y :24; playwright.setter.config.ts:20",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5182",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": ".github/workflows/ci.yml:79-117; scripts/run-invariants.mjs:81 (56, ya no 43); next.config.ts:31-34",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:602",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/app/layout.tsx:72-75",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:46",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git log origin/main -- '*enviroment.env' -> 39535583 (2026-02-12) y c351b793 (2026-05-22): el archivo sigue en el historial",
+    "sentido": "decidir",
+    "nota": "decisión de Franco; el repo es público",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:524",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git ls-tree origin/main logic-core-v3/scripts: 37 entradas con prefijo _ (p. ej. _b13-latency-test.mjs, _b32-dev.log, _ms4-full-run.log)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7523",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/lib/rate-limit/limiter.ts:44 upsert atómico en Postgres; src/lib/security/auth-rate-limit.ts:3 lo usa; sin Upstash",
+    "sentido": "no",
+    "nota": "resuelto por otra vía (Postgres)",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7670",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "logic-core-v3/ts_errors.log y ts_errors.txt siguen en origin/main",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7740",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git ls-remote --tags origin | grep -cE 'v0\\.9|v1\\.' = 0 (control: lista ajustes-finales y base-terminada)",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:8141",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "next.config.ts:59-85 HSTS, nosniff, Referrer-Policy, Permissions-Policy y CSP-RO; X-Frame-Options solo en :93-98",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:158",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "next.config.ts:72",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:51",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -n -i ttl origin/main -- logic-core-v3/src/modules/chatbot/shared/configCache.ts sin resultados; no se trazó el TTL de 60 s",
+    "sentido": "decidir",
+    "nota": "HIPÓTESIS, fuera del lote",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/roadmap-pendientes.md:165",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "sin huella en código; logic-core-v3/.claude/launch.json solo declara :3000 y :3001",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/sprints/alpha-0-8-tests-e2e.md:20",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": ".github/workflows/ci.yml:186-197: el job e2e se saltea sin secrets; no se corre Playwright en esta auditoría",
+    "sentido": "decidir",
+    "nota": "no verificable por lectura",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5791",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "eslint.config.mjs:9-15 solo ignora .next/**, out/**, build/**; ci.yml:27-31",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7530",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -l excludeDqWhere origin/main -- 'logic-core-v3/src/**/*.invariant.ts' = 0 (control: 8 archivos lo referencian en src)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8074",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "qaLogout y logout solo aparecen en su definición (tests/helpers/auth.ts:28 para logout); setControlledInput tiene 6 apariciones en tests/",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:8822",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "test:pii (package.json:80) cubre redacción de PII en consola; sin CAPTCHA (git grep -il 'captcha\\|turnstile' en src = 0); npm audit con 30 vulnerabilidades",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:8876",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "raíz de logic-core-v3 con 19 sueltos: script.js, script2.js, script3.js, script_*.js, find_unused.js, replace_analytics.js, test-chat.mjs, ts_errors.*, unused_report*.txt, audit.txt, prisma_err.txt, .eslint_output.txt; *.bak = 0",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:9535",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": ".github/workflows/db-backup.yml:84-85 y :105 leen secrets; ci.yml:120-121 registraba 0",
+    "sentido": "si",
+    "nota": "HIPÓTESIS; ver caso de prueba del backup",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:9541",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "git ls-tree -r origin/main | grep -c e2e.yml = 0; .github/workflows/ci.yml:3-11 y :70-72 lo reemplazan",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:9721",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "next.config.ts solo fija Cache-Control para /widget.js (:117-121); netlify.toml sin [[headers]]",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:11037",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "next.config.ts:157-160 sigue mandando a ?modulo=mini-crm; src/lib/premium-features.ts:59 key mini-crm; premium-modules.ts sin ese slug",
+    "sentido": "decidir",
+    "nota": "estado de la base no verificable",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:11110",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "netlify.toml:7 fija 4096 MB; package.json:9 webpack; ver alerta D8-A1",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:11910",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/lib/auth-guards.ts:3 'export async function requireSuperAdmin(): Promise<string>'",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:15604",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "la rotación no deja huella en código; la credencial vigente está vencida (contexto fijo), lo que no prueba que se haya rotado",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:16895",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "sin huella en código (netlify.toml sin configuración de logs)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:55",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": ".github/workflows/ci.yml:186-197: e2e no corre en CI",
+    "sentido": "decidir",
+    "nota": "no verificable por lectura",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2049",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/lib/security/validate-origin.ts:49 sigue con la condición de una sola pata (env && (isLocalhost || !origin))",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2465",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "playwright.qa-persona.config.ts:44 y playwright.qa-walkthrough.config.ts:48 usan 'npm run start:qa'",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1659",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "tests/e2e conserva 7 snapshots versionados; no se corre Playwright",
+    "sentido": "decidir",
+    "nota": "no verificable por lectura",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1733",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "netlify.toml:7 NODE_OPTIONS=--max-old-space-size=4096 (no 6144/8192)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1742",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "problema de entorno, sin huella en código",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:994",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git branch -r: origin/fix/fonts-geist-scope, origin/fix/home-sanidad y origin/fix/motion-sanidad-mobile siguen",
+    "sentido": "decidir",
+    "nota": "decisión de Franco",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:1615",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "logic-core-v3/.claude/launch.json solo con dev :3000 y next-prod-qa :3001 (sin :3003/:3004)",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#3",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "package.json:83-86 (evals, evals:seed, evals:purge, evals:score) y :66 test:q12",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:9213",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "eslint.config.mjs sin regla de lucide (git grep lucide en el archivo = 0)",
+    "sentido": "no",
+    "nota": "PLAN-1111: lucide ya es tree-shakeable",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:9542",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": ".github/workflows/db-backup.yml:131 retention-days 30; :41 cron diario",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Chatbot_ registro de cambios.md:119",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/modules/chatbot/components/admin/config/tabs/AvatarUploader.tsx:7 y :35 canvas.toDataURL('image/webp')",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:41",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "decisión de no construir todavía; sin huella en código",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:42",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "regla de proceso sin huella en código; no verificable",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:56",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "sin huella en código",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:97",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "regla de proceso (CLAUDE.md 'Never self-confirm'); sin huella verificable en código",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:6115",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "regla documental; scripts/run-invariants.mjs no la automatiza",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7510",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "scripts/run-invariants.mjs:81 INVARIANTES_ESPERADOS = 56 y :110-116 aborta si difiere; package.json tiene 56 check:invariant*",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:9452",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": ".github/workflows/db-backup.yml:20-24 y :120-122 (gpg AES256 simétrico)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:9694",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "package.json:3 \"0.1.0\"; sin tags v1* en el remoto; src/app/api/version/route.ts:5 dice '1.0.0'",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:16414",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": ".github/workflows/ci.yml:13-18 y :107-117 consolida sin cortar; la regla local no es verificable",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:221",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/lib/design-tokens.ts:240-242; consumidores setter-shell.tsx, Modal.tsx y DashboardLayoutClient.tsx",
+    "sentido": "si",
+    "nota": "choca con PLAN-1275",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:569",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "git log --merges origin/main: f4b16b6b 'Merge pull request #4 from frc11/redesign/home' y c7f0774c (#5)",
+    "sentido": "no",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:755",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/app/robots.ts:32-33 (disallow de /admin, /dashboard, /setter, /api, /embed y rutas de sesión y alta); src/app/sitemap.ts:27",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2187",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": ".github/skills/impeccable/ versionado; la dirección no deja huella",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2238",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": ".github/hooks/impeccable.json versionado; el uso no es verificable",
+    "sentido": "decidir",
+    "nota": "vigente hasta cerrar B2",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:4793",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/context/PreloaderContext.tsx:70-75 isAutomationEnvironment() con navigator.webdriver",
+    "sentido": "si",
+    "nota": "edición sobre archivo FROZEN",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7654",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "el tag no está en el remoto (git ls-remote --tags origin); el smoke no es verificable",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "STATUS.md:18",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "STATUS.md:4 cita el tag v1.0.0, que no existe en el remoto; package.json:3 dice 0.1.0; los docs de OOM contradicen 'build pasa' (STATUS.md:19)",
+    "sentido": "no",
+    "nota": "STATUS.md desactualizado",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "STATUS.md:47",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/lib/ai/executive-brief.ts:19 'gemini-2.5-flash' y :299 provider.getModel",
+    "sentido": "si",
+    "nota": "hoy no responde: credencial de Vertex vencida",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/sprints/alpha-0-6-cleanup-extended.md:5",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": ".env.example, docs/env-vars.md y scripts/check-env.js existen; check-env no corre en el build (package.json:6, script manual)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/sprints/alpha-0-8-tests-e2e.md:3",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "git ls-tree origin/main logic-core-v3/tests/e2e | grep -E '/(0[6-9]|1[0-4])-' = 9",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/sprints/alpha-0-9-status-verificacion.md:5",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "STATUS.md existe (STATUS.md:4), desactualizado",
+    "sentido": "decidir",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:9135",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "sin cambio de código; lucide-react ^0.562.0 (package.json:151)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:9641",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "docs/operations/b14-deploy-checklist.md y scripts/_b14-4-smoke-prod.mjs versionados; el smoke solo puede confirmar que /api/version existe (route.ts:5-6)",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:12353",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "playwright.integration.config.ts versionado; package.json:116 test:integration",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5053",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md versionado",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1639",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "playwright.config.ts y tests/e2e (29 entradas) versionados",
+    "sentido": "decidir",
+    "nota": "histórico, no verificable por lectura",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:403",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/lib/utils.ts:2, :20 (DS_FONT_SIZE_CLASSES) y :38",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2181",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": ".github/hooks/impeccable.json, .github/skills/impeccable/, PRODUCT.md, DESIGN.md y .impeccable/design.json en la raíz de origin/main",
+    "sentido": "si",
+    "ciclo": "D8-c1, lector D8-L1"
+   }
   }
  ]
 }

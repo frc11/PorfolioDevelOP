@@ -2848,6 +2848,62 @@
    "patron": "Relaciones onDelete: SetNull en tablas de avisos que nadie purga",
    "como_buscarlo": "git grep -n \"onDelete: SetNull\" origin/main -- prisma/schema.prisma y buscar purga del modelo en src",
    "donde_aparecio": "prisma/schema.prisma:950 (OsSetterNotice.lead)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "patron": "Import dinámico de @/lib/prisma (await import) que esquiva la regla no-restricted-imports de la frontera de aislamiento",
+   "como_buscarlo": "git grep -n \"import(['\\\"]@/lib/prisma\" origin/main -- logic-core-v3/src/modules logic-core-v3/src/app/api/chatbot",
+   "donde_aparecio": "src/modules/chatbot/server/conversation/__tests__/p2002-adopcion.invariant.ts:77 (test; eslint no revisa import())"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "patron": "canvas { touch-action: none } global: un canvas a pantalla completa con pointer events bloquea el scroll táctil de la página",
+   "como_buscarlo": "git grep -n \"<Canvas\\|<canvas\" origin/main -- logic-core-v3/src/components; cruzar con pointer-events-none, eventSource y touchAction en el mismo componente",
+   "donde_aparecio": "src/app/globals.css:357-359"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "patron": "Constantes que copian configuración de plataforma y asumen que la plataforma la respeta (espejo de maxDuration)",
+   "como_buscarlo": "git grep -n \"ESPEJO\\|maxDuration\\|_MAX_DURATION\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/modules/chatbot/server/chat/reconcile.ts:116 frente a netlify.toml (sin timeout)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "patron": "Docs o .env.example que afirman una inyección o configuración que el código no tiene",
+   "como_buscarlo": "git grep -n -i \"autoinyectada\\|inyectad\\|verificado en\" origin/main -- logic-core-v3/.env.example logic-core-v3/docs/env-vars.md y verificar el escritor de cada variable con git grep",
+   "donde_aparecio": ".env.example:295-297 (NEXT_PUBLIC_BUILD_TIME)"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "patron": "Recursos de terceros hotlinkeados en className o style (url('https://...'))",
+   "como_buscarlo": "git grep -n \"url(['\\\"]\\?https://\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/app/web-development/page.tsx:87, src/app/software-development/page.tsx:61, src/app/process-automation/page.tsx:57"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "patron": "'npx <herramienta>' sin la herramienta en el lockfile (descarga sin versión fija)",
+   "como_buscarlo": "git grep -n -o \"npx [a-z@/-]*\" origin/main -- logic-core-v3/package.json logic-core-v3/prisma.config.ts logic-core-v3/netlify.toml .github/workflows | sort -u; verificar cada una en package-lock.json",
+   "donde_aparecio": "package.json (67 'npx tsx'); prisma.config.ts seed 'npx tsx prisma/seed.ts'"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "patron": "Archivos versionados que el propio .gitignore excluye",
+   "como_buscarlo": "cd logic-core-v3 && git ls-files -ci --exclude-standard",
+   "donde_aparecio": "prisma/backups/*.json y backup.js, .claude/launch.json, docs/audit/2026-04-dashboard-cleanup-audit.md"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "patron": "Rutas de producto sin error.tsx o not-found.tsx propios que caen en las fronteras de marketing",
+   "como_buscarlo": "git ls-tree -r --name-only origin/main logic-core-v3/src/app | grep -E '/(error|not-found)\\.tsx$' y cruzar con las ramas que llaman notFound() (git grep -c \"notFound()\")",
+   "donde_aparecio": "src/app/embed/[slug]/page.tsx:37; 7 notFound() en admin y dashboard"
   }
  ]
 }

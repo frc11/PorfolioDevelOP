@@ -3695,6 +3695,125 @@
    "afirmacion": "El panel de horas del equipo no incluye a los setters.",
    "comando": "git grep -n -i setter origin/main -- \"src/app/(protected)/admin/team/page.tsx\"",
    "control_positivo": "git grep -c -i setter origin/main -- \"src/app/(protected)/admin/leados/page.tsx\" -> 21"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "No hay @config ni @source en el CSS: Tailwind 4 no carga tailwind.config.ts y escanea todo lo no ignorado (docs/ incluido)",
+   "comando": "git grep -n \"@config\\|@source\" origin/main -- \"logic-core-v3/src/*.css\"  -> 0 resultados",
+   "control_positivo": "git grep -n \"@plugin\" origin/main -- logic-core-v3/src/app/globals.css -> globals.css:2"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "NEXT_PUBLIC_BUILD_TIME no la escribe nadie (ni next.config.ts ni netlify.toml)",
+   "comando": "git grep -n NEXT_PUBLIC_BUILD_TIME origin/main -- logic-core-v3 ':!logic-core-v3/docs'  -> solo .env.example:297 (comentario) y src/app/api/version/route.ts:6 (lector)",
+   "control_positivo": "El mismo comando encuentra el lector route.ts:6"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "/og-image.png no existe en public/ ni hay opengraph-image",
+   "comando": "git ls-tree -r --name-only origin/main logic-core-v3/public | grep -ci og-image  -> 0; git grep -n opengraph-image origin/main -- logic-core-v3/src -> 0",
+   "control_positivo": "git ls-tree -r --name-only origin/main logic-core-v3/public | grep -c logodevelOP.png -> 1"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "tsx no está en el lockfile (npx tsx baja una versión sin fijar)",
+   "comando": "git show origin/main:logic-core-v3/package-lock.json | grep -c '\"node_modules/tsx\"'  -> 0 (tampoco anidado)",
+   "control_positivo": "git show origin/main:logic-core-v3/package-lock.json | grep -c '\"node_modules/ts-node\"' -> 1"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "La CSP no declara report-uri ni report-to",
+   "comando": "git grep -n -i \"report-uri\\|report-to\" origin/main -- logic-core-v3/next.config.ts logic-core-v3/src  -> 0",
+   "control_positivo": "git grep -n \"Content-Security-Policy-Report-Only\" origin/main -- logic-core-v3/next.config.ts -> :72"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "El CI no corre lint, build ni npm audit",
+   "comando": "git grep -n \"npm run lint\\|npm run build\\|npm audit\\|eslint \" origin/main -- .github/workflows  -> solo comentarios ci.yml:25, :27, :34",
+   "control_positivo": "git grep -n \"check:types\" origin/main -- .github/workflows/ci.yml -> :100"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "No hay hooks de git versionados (husky, lint-staged, pre-commit)",
+   "comando": "git ls-tree -r --name-only origin/main | grep -ci \"husky\\|lint-staged\\|pre-commit\"  -> 0",
+   "control_positivo": "git ls-tree -r --name-only origin/main | grep -c \".github/workflows/ci.yml\" -> 1"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "framer-motion y three-stdlib no están declarados en package.json",
+   "comando": "git show origin/main:logic-core-v3/package.json | grep -c \"framer-motion\\|three-stdlib\"  -> 0",
+   "control_positivo": "git grep -l \"from ['\\\"]framer-motion['\\\"]\" origin/main -- logic-core-v3/src -> 3 archivos; package.json:153 '\"motion\"'"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "No existe not-found.tsx en dashboard, admin ni embed",
+   "comando": "git ls-tree -r --name-only origin/main logic-core-v3/src/app | grep -E '/not-found\\.tsx$'  -> solo src/app/not-found.tsx y (protected)/setter/not-found.tsx",
+   "control_positivo": "El mismo comando lista (protected)/setter/not-found.tsx"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "Ninguna clase develop-* (las que aportaría tailwind.config.ts) se usa",
+   "comando": "git grep -n -E \"(bg|text|border|from|to|ring)-develop-\" origin/main -- logic-core-v3/src  -> 0",
+   "control_positivo": "git grep -l \"text-ds-\" origin/main -- logic-core-v3/src -> 25 archivos"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "netlify.toml no fija timeout de funciones",
+   "comando": "git grep -n -i \"timeout\" origin/main -- logic-core-v3/netlify.toml  -> 0",
+   "control_positivo": "git grep -n \"schedule\" origin/main -- logic-core-v3/netlify.toml -> :26, :29, :32"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "El e2e.yml anidado ya no existe",
+   "comando": "git ls-tree -r --name-only origin/main | grep -c \"e2e.yml\"  -> 0",
+   "control_positivo": "git ls-tree -r --name-only origin/main | grep -c \"workflows/ci.yml\" -> 1"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "Los tags v0.9.0-rc.1 y v1.* no están en el remoto",
+   "comando": "git ls-remote --tags origin | grep -cE \"v0\\.9|v1\\.\"  -> 0",
+   "control_positivo": "git ls-remote --tags origin lista refs/tags/ajustes-finales y refs/tags/base-terminada"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "Ninguno de los 20 archivos del lote tiene secrets con formato de proveedor",
+   "comando": "git grep -n -E 'AIza[0-9A-Za-z_-]{20}|sk-[A-Za-z0-9]{20}|xkeysib-|re_[A-Za-z0-9]{16}|-----BEGIN|ghp_[A-Za-z0-9]{20}|postgres(ql)?://[^:@ ]+:[^@ ]+@' origin/main -- <los 20 archivos del lote>  -> solo .github/workflows/db-backup.yml:152 (contraseña de un postgres efímero del job de restore-test, no es una credencial real)",
+   "control_positivo": "Ese mismo match de db-backup.yml:152 prueba que el patrón de URL con contraseña dispara"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "No hay monitoreo de uptime ni dead-man switch de crons en el repo",
+   "comando": "git grep -n -i \"healthchecks\\.io\\|cronitor\\|betteruptime\\|uptimerobot\\|heartbeat\\|dead.man\" origin/main -- logic-core-v3/src logic-core-v3/netlify  -> solo src/lib/data/onboarding-tasks.ts:58/:60 (tarea manual) y un comentario en handleChatRequest.ts:1042",
+   "control_positivo": "git grep -c -i \"cron\" origin/main -- logic-core-v3/netlify.toml -> 3"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "Ningún invariante cubre excludeDqWhere",
+   "comando": "git grep -l excludeDqWhere origin/main -- 'logic-core-v3/src/**/*.invariant.ts'  -> 0",
+   "control_positivo": "git grep -l excludeDqWhere origin/main -- logic-core-v3/src -> 8 archivos"
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "afirmacion": "mini-crm no está en el catálogo de módulos premium",
+   "comando": "git grep -n \"mini-crm\" origin/main -- logic-core-v3/src/lib/data/premium-modules.ts  -> 0",
+   "control_positivo": "git grep -n \"slug: 'motor-resenas'\" origin/main -- logic-core-v3/src/lib/data/premium-modules.ts -> :24; next.config.ts:159 y premium-features.ts:59 sí mencionan mini-crm"
   }
  ]
 }

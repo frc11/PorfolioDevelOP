@@ -6388,6 +6388,57 @@
    "evidencia_validacion": "no recibe body ni query",
    "rate_limit": "no-aplica",
    "notas": "Comparacion con !== (no constante) y parser propio en vez de src/lib/cron/cron-secret.ts:40. Solo agendado en vercel.json:4; netlify.toml no lo agenda."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "archivo": "src/app/layout.tsx",
+   "simbolo": "RootLayout",
+   "tipo": "layout",
+   "url": "/ (envuelve todas las rutas: sitio público, /admin, /dashboard, /setter, /embed, /login)",
+   "auth": "no",
+   "evidencia_auth": "layout.tsx:53-142 no llama auth() ni require*; los guards de portal viven en (protected)/admin/layout.tsx:47, (protected)/setter/layout.tsx:32 y src/proxy.ts:154 (contexto fijo, no releídos)",
+   "rol": "ninguno (layout raíz público)",
+   "org_de": "no-aplica",
+   "evidencia_org": "layout.tsx no lee sesión ni base",
+   "validacion": "no-aplica",
+   "evidencia_validacion": "sin entrada de usuario",
+   "rate_limit": "no-aplica",
+   "notas": "Monta PreloaderProvider, SmoothScroll (Lenis) y TransitionProvider (layout.tsx:110-121, contextos FROZEN), Toaster (:125-136) y ChatWidgetMount (:137) en TODAS las rutas; el chrome público (Shutter, Navbar, Preloader) solo se oculta por render en PublicOnlyComponents (:113-124), sus chunks igual se referencian."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "archivo": "src/app/api/version/route.ts",
+   "simbolo": "GET",
+   "tipo": "route-handler",
+   "url": "/api/version",
+   "auth": "no",
+   "evidencia_auth": "route.ts:3-9 sin auth(); el matcher de src/proxy.ts:172 no cubre /api",
+   "rol": "ninguno (público)",
+   "org_de": "no-aplica",
+   "evidencia_org": "route.ts:4-8 no lee la base ni datos de clientes",
+   "validacion": "no-aplica",
+   "evidencia_validacion": "route.ts:3 GET sin parámetros",
+   "rate_limit": "no",
+   "notas": "Público y barato (sin DB ni costo), aceptable sin rate limit. Expone NODE_ENV (:7). version fija '1.0.0' (:5) y builtAt cae a new Date() porque NEXT_PUBLIC_BUILD_TIME no la inyecta nadie (:6). Único consumidor: scripts/_b14-4-smoke-prod.mjs:82."
+  },
+  {
+   "ciclo": "D8-c1",
+   "lote": "D8-L1",
+   "archivo": "src/app/not-found.tsx",
+   "simbolo": "NotFound",
+   "tipo": "page",
+   "url": "toda ruta inexistente y todo notFound() sin not-found.tsx más cercano (incluye /embed/[slug], /admin/* y /dashboard/*)",
+   "auth": "no",
+   "evidencia_auth": "not-found.tsx:1 'use client'; no usa sesión",
+   "rol": "ninguno",
+   "org_de": "no-aplica",
+   "evidencia_org": "no lee datos",
+   "validacion": "no-aplica",
+   "evidencia_validacion": "sin entrada",
+   "rate_limit": "no-aplica",
+   "notas": "Archivo especial de Next. El único not-found.tsx de portal es (protected)/setter/not-found.tsx; embed/[slug]/page.tsx:37 llama notFound() y cae acá."
   }
  ]
 }
