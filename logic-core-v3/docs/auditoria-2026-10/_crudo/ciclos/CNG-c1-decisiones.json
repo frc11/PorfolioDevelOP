@@ -1,0 +1,51 @@
+{
+ "CNG-c1/CNG-A/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo A). Leído: SectionErrorBoundary.tsx:107-108 (<a href=\"/dashboard\"> fijo); AdminErrorBoundary lo usa en los error.tsx del admin."
+ },
+ "CNG-c1/CNG-A/H02": {
+  "decision": "aceptar",
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo A); no muestreado por el padre (PROBABLE)."
+ },
+ "CNG-c1/CNG-A/H03": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo A). Leído: dashboard-actions.ts:188-196 (sin Zod; notificationId.trim() fuera de cualquier try)."
+ },
+ "CNG-c1/CNG-A/H04": {
+  "decision": "aceptar",
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo A); no muestreado por el padre (PROBABLE)."
+ },
+ "CNG-c1/CNG-A/H05": {
+  "decision": "aceptar",
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo A); no muestreado por el padre (PROBABLE)."
+ },
+ "CNG-c1/CNG-A/H06": {
+  "decision": "aceptar",
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo A); no muestreado por el padre (PROBABLE)."
+ },
+ "CNG-c1/CNG-A/H07": {
+  "decision": "aceptar",
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo A); no muestreado por el padre (PROBABLE)."
+ },
+ "CNG-c1/CNG-B/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo B). Leído: use-reduced-motion.ts:5-18 (useState(false) y el valor real recién en el efecto)."
+ },
+ "CNG-c1/CNG-B/H02": {
+  "decision": "aceptar",
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo B); no muestreado por el padre (PROBABLE)."
+ },
+ "CNG-c1/CNG-B/H03": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo B). Leído: alerts.ts:80-90 (setHours y setDate en la zona del proceso)."
+ },
+ "CNG-c1/CNG-B/H04": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Defecto que trajo el analista de congelados (grupo B). Leído: 22-visual-regression.spec.ts:74-78 navega a /admin/_design, y git ls-tree de (protected)/admin no tiene ninguna carpeta _design."
+ }
+}

@@ -1,0 +1,467 @@
+{
+ "grupos": [
+  {
+   "id": "A",
+   "resultado": {
+    "items": [
+     {
+      "ruta": "src/components/3d/HeroArtifact.tsx",
+      "origen": "Último cambio de código: b498f478 (2026-03-30, Franco). Tres semanas después se lo declaró INTOCABLE en el primer CLAUDE.md raíz: 8566d946 (2026-04-21, Franco: «src/components/3d/HeroArtifact.tsx es INTOCABLE. Nunca modificar.»). La regla siguió en la v3 del CLAUDE.md, 7d551ba1 (2026-05-20), hoy en CLAUDE.md:11 y CLAUDE.md:167. La única razón escrita está en logic-core-v3/AGENTS.md:76 (3464fc82, 2026-05-04): «está optimizado y cualquier cambio rompe la experiencia visual del landing». Por inferencia, protege el arreglo de la lección CLAUDE.md:179-180 (escala 0→0.007 en useFrame): el grupo interno nace con escala 0.007 fija (HeroArtifact.tsx:121). Ningún commit nombra el congelamiento.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "En main, el único consumidor vivo es el home clásico restaurado en 78b510ac (2026-08-12), por la cadena src/app/page.tsx:7 → src/components/layout/Hero.tsx:10,300. La otra cadena (HeroCanvas.tsx:7,105) está huérfana: HeroArtifactLayer no tiene importador (POD-022). El propio equipo ya juzgó deficiente la «experiencia optimizada». HeroCanvas.tsx:162-170 documenta que el material congelado (HeroArtifact.tsx:143,147-148: color #000 con metalness 1) deja el logo «como un fantasma», y se compensó con un rig de luz externo. BrandedLogoWhite.tsx:8-23 copia la misma geometría para poder cambiar el material. En rediseno/home@bead847c, /v3 no lo importa: tiene su propio logo (src/app/v3/_componentes/marca/Marca.tsx). docs/probe-b2-hero-nav.md:64-67 concluye que, para sacar el 3D del home, alcanza con dejar de importarlo.",
+      "bloquea": "Ningún hallazgo del registro tiene evidencia en este archivo. Bloquea cuatro cosas. (1) El arreglo del material ilegible, que se rodeó con luces (HeroCanvas.tsx:160-180, B2-S4) y con una copia (BrandedLogoWhite.tsx:8-23). (2) El defecto nuevo de reconstrucción de la geometría (ver defectos). (3) Achicar PreloaderPhase después del merge, porque HeroArtifact.tsx:8 importa ese tipo. (4) La poda de POD-022 (HeroArtifactLayer, «esperar merge»). Sobre el merge: en rediseno/home el / interino lo monta por HeroSection → HeroLogoSlot.tsx:6 → HeroArtifactLayer → HeroCanvas, y /v3 no lo usa. Además, la rama fija su sha256 en carga-diferida/contrato.ts:239 (s8-diferido.invariant.ts:260-263), así que después del merge cualquier edición pone rojo ese invariante. F3 no aplica.",
+      "riesgo_soltar": "bajo",
+      "riesgo_detalle": "Tiene 2 importadores, ambos PUB: Hero.tsx:10 (vivo por page.tsx:7) y HeroCanvas.tsx:7 (huérfano en main). Tests en main: ninguno (git grep HeroArtifact en tests/, __tests__ y *.invariant.ts @57c421bc devuelve 0; tests/e2e/01-landing.spec.ts:3-11 solo carga / y mira el avatar del chatbot). En rediseno/home lo cubren la huella de contrato.ts:239 y la lista de s3-frontera.invariant.ts:74, ambas manuales (no están en check:invariants). No toca ZONA-FRANCO. Sí toca el sitio público: es el hero del home clásico.",
+      "recomendacion": "después del merge de rediseno/home",
+      "razon_recomendacion": "Si /v3 reemplaza a /, la cadena Hero.tsx/HeroCanvas/HeroArtifactLayer/HeroLogoSlot queda sin consumidores. El archivo se borra con ella, junto con su entrada en contrato.ts:239. Hasta entonces no hay nada que valga la pena proteger con un gate: solo lo usa un home que se va. Si hubiera que tocarlo antes (por ejemplo, por el defecto de la geometría), se trata como libre, con visual-qa del hero.",
+      "nivel_propuesto": "borrar",
+      "gate_propuesto": ""
+     },
+     {
+      "ruta": "src/context/TransitionContext.tsx",
+      "origen": "Creado en 6a823670 (2026-02-10, Valentino). La regla nació como regla de USO, no de edición: «Navegación: siempre triggerTransition(). Nunca router.push() directo», en 8566d946 (2026-04-21). La fila de la tabla (7d551ba1, 2026-05-20) dice «Always use triggerTransition()» (CLAUDE.md:168); después se acotó al sitio público (CLAUDE.md:12-20). Recién CLAUDE.md:133 (629fe016, 2026-06-29, Franco) convierte la tabla en «no se toca». Se editó dos veces después de la fila: 0c9d22a7 (2026-05-27) y bd198842 (2026-05-30, +32/−9: la apertura del shutter con useTransition/isPending, TransitionContext.tsx:111-128 y 148-160). Ningún commit nombra el congelamiento y no hay razón escrita para prohibir editarlo.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "La regla de uso sigue vigente en el sitio público: dependen de triggerTransition Navbar.tsx:343 y 377, DynamicDock.tsx:237, ContactoCta.tsx:19 y el Shutter (layout.tsx:112-115). No hay motivo para no editar el archivo: su último cambio (bd198842) fue una mejora. La regla se viola en los portales (EditClientForm.tsx:40 y 92, Step5Review.tsx:60, setter-nav.tsx:43-45). El archivo NO muere con v3: /v3 no lo importa, pero el layout raíz de rediseno/home sigue montando Navbar y Shutter para las landings.",
+      "bloquea": "DEU-039 y DEU-082. Los dos se arreglan sin editar el archivo, cambiando el uso en EditClientForm.tsx:92, Step5Review.tsx y setter-nav.tsx:45. Lo que sí bloquea: (1) el arreglo de la rama de hash (TransitionContext.tsx:91-103, defecto nuevo); (2) la estructura de las páginas, porque los ids 'servicios' y 'caracteristicas' están hardcodeados (TransitionContext.tsx:28 y 41). Eso forzó Nosotros.tsx:28-31 y que rediseno/home escriba «#servicios — frozen, no se renombra» (rediseno page.tsx:31, 51 y 103). Sobre el merge: la rama no modifica el archivo, pero fija su sha256 (contrato.ts:238), y v3/_intro/contrato.ts:51-54 lo declara «se lee, se consume y jamás se edita». No hay poda. F3 no aplica (es del sitio público).",
+      "riesgo_soltar": "medio",
+      "riesgo_detalle": "Tiene 9 importadores: PUB 3, D9 2, D3 1 (EditClientForm), D5 1 (Step5Review), D4 1 (setter-nav, ZONA-FRANCO) y D8 1 (layout.tsx:46 y 112: envuelve todas las rutas, portales incluidos). Tests: ninguno (git grep TransitionContext|triggerTransition|Shutter en tests/ devuelve 0, y 01-landing.spec.ts no navega). Toca el sitio público, porque maneja toda la navegación de Navbar y Dock, y una pantalla de la zona de Franco.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "La fila de la tabla es una regla de uso que CLAUDE.md:12-20 ya expresa mejor. Prohibir la edición no protege nada medible y deja un bug sin arreglar. Pasa a protegido porque envuelve todas las rutas y no tiene ningún test.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "(1) Un invariante nuevo en check:invariants: ningún archivo de src/app/(protected)/** ni de src/modules/**/admin/** importa '@/context/TransitionContext'. Las excepciones van listadas con su motivo (hoy setter-nav.tsx:7, hasta que se decida DEU-082) y el invariante lleva control positivo. (2) tsc --noEmit y check:invariants en verde. (3) visual-qa en desktop y mobile de: una ruta (/ → /contact), un hash desde una landing (/web-development → /#servicios: el shutter no se abre antes de que se pinte el destino), back/forward, y que /admin y /dashboard no monten el Shutter. (4) Después del merge, actualizar la huella de carga-diferida/contrato.ts:238 en el mismo commit, con test:s8-diferido en verde. Revisa Valentino; si el cambio toca setter-nav, también Franco."
+     },
+     {
+      "ruta": "src/context/PreloaderContext.tsx",
+      "origen": "Creado en b498f478 (2026-03-30, Franco). La fila «Do not break the phase flow» llega en 7d551ba1 (2026-05-20, CLAUDE.md:169): protege el orden de fases (PreloaderContext.tsx:6-13), no prohíbe editar. Se editó dos veces después. fff3b24e (2026-05-25) agrega isAutomationEnvironment (PreloaderContext.tsx:65-85 y 124-128) para destrabar visual-qa en /dashboard (docs/bitacora-roadmap.md:4795-4825). ff6871e4 (2026-06-02) suma 5 MotionValues «aditivas, NO tocan el enum/flujo» (PreloaderContext.tsx:34-51). Ningún commit nombra el congelamiento.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "En main, el flujo de 7 fases sigue vivo en el home clásico: ui/Preloader.tsx:118-269 recorre drawing→…→swapping. Después del merge deja de correr. rediseno/home monta <Preloader isHomePage={false} /> (rediseno layout.tsx:156) y HomeIntro.tsx:122 salta directo a 'done'. Las fases intermedias y los MotionValues quedan sin escritor fuera de Hero.tsx, que en la rama está huérfano. El problema de QA de /dashboard que cita la ENMIENDA ya está resuelto desde el 2026-05-24 (PreloaderContext.tsx:75-81). Además, en los portales el Preloader no se monta (layout.tsx:122-124, publicRoute.ts:16).",
+      "bloquea": "Ningún hallazgo del registro. Bloquea tres cosas. (1) Sacar motion/react del layout raíz: los 7 useMotionValue (PreloaderContext.tsx:96-103) son uno de los tres motivos por los que el chunk de motion (42,5 kB gz) carga también en /login y en los portales (docs/bitacora-beta-3.md:3721-3747). (2) Reducir el contexto a lo que v3 usa (isDone y setPhase) después del merge. (3) El value sin memoizar (PreloaderContext.tsx:141-157, O-11 de docs/auditoria-total-pre-deploy.md:59) re-renderiza a todos los consumidores en cada cambio de fase. Sobre el merge: la rama no lo modifica, pero lo fija por sha256 (contrato.ts:237) y por identidad (v3/_intro/__tests__/s8-intro.invariant.ts:179-185). F3 no aplica. No hay poda.",
+      "riesgo_soltar": "medio",
+      "riesgo_detalle": "Tiene 6 importadores. D8 1: layout.tsx:45 y 110, que envuelve todas las rutas, portales y setter incluidos. D5 1. D9 2: ui/Preloader.tsx:7 y ui/MarketingIntro.tsx:9, que importa isAutomationEnvironment. PUB 2: Hero.tsx:16 y HeroArtifact.tsx:8, que importa el tipo PreloaderPhase. Tests directos: ninguno. Pero todo Playwright depende del bypass por navigator.webdriver (PreloaderContext.tsx:75-77) y visual-qa depende de ?e2e=1 (:80-81): si se rompe, las e2e quedan atrapadas bajo el velo negro. Toca el sitio público (intro del home y de las 5 landings), no ZONA-FRANCO.",
+      "recomendacion": "después del merge de rediseno/home",
+      "razon_recomendacion": "Hasta el merge, su flujo protege el home clásico, que está vivo. Después, el flujo que custodia la fila deja de correr. Ahí conviene reemplazar el archivo por un provider mínimo (isDone, setPhase('done') y el flag de automatización movido a lib/), en el mismo cambio que borra HeroArtifact, que importa su tipo.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "(1) test:s8-diferido en verde: el árbol de layout.tsx conserva sus piezas y su orden, y la huella de contrato.ts:237 se actualiza en el mismo commit. (2) Peso: los chunks iniciales de /login no crecen, medidos con el método de docs/bitacora-beta-3.md:3721-3735 (los script src del HTML prerenderizado, en gzip). (3) La e2e smoke 01-landing.spec.ts pasa bajo Playwright (bypass por navigator.webdriver), y visual-qa con ?e2e=1 en /, en una landing con MarketingIntro y en /dashboard. (4) tsc --noEmit en verde (HeroArtifact.tsx:8, Hero.tsx:16). Revisa Valentino."
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "origen": "No está congelado por ninguna regla del repo. La fila (7d551ba1, 2026-05-20, CLAUDE.md:170) prohíbe solo `migrate reset`, por la lección de abril (CLAUDE.md:176-177: 5 h de recuperación), y logic-core-v3/AGENTS.md:143-148 manda editar el schema como paso 1. La extensión a «no se toca» llega con CLAUDE.md:133 (629fe016, 2026-06-29) y, para esta corrida, con PROMPT.md:36; ENMIENDA-01.md P2 la deja como restricción de escritura solo de la corrida. Tiene 50 commits (33 de Franco, 17 de Valentino); el último es 62994be5 (2026-07-15). 9 son posteriores a la cláusula del 29-06 (por ejemplo 947fe052, a69c47de y cf77397b), todos con migraciones aditivas. Ningún commit nombra el congelamiento.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "La prohibición de reset sigue vigente: hay seeds en Neon y migraciones escritas a mano (docs/admin-changelog/Clientes rdc.md:77; docs/operations/00-entornos.md:143-148). El congelamiento total no: hay 88 entradas en prisma/migrations y 49 hallazgos que piden cambiar modelos. La convención real es «migración aditiva con el SQL a la vista» (docs/admin-changelog/Operaciones rdc.md:103).",
+      "bloquea": "De los 49 IDs del contexto, 10 están marcados Zona FROZEN porque el arreglo exige editar el schema: BUG-020, TEC-001, PERF-001, DEU-005, DEU-007, DEU-008, DEU-010, DEU-011, DEU-012 y DEU-084, más BUG-005 en parte. Poda bloqueada: POD-203 y POD-204 (valores de enum sin uso) y POD-178 (__diff_check.sql). Sobre el merge: rediseno/home no cambia el schema, pero lo fija por sha256 en carga-diferida/contrato.ts:242. Después del merge, cada migración pone en rojo test:s8-diferido, que es un test de peso del home. F3 no aplica.",
+      "riesgo_soltar": "alto",
+      "riesgo_detalle": "No tiene importadores TS directos (no está en depcruise), pero 266 archivos importan el @prisma/client que se genera desde él, y define 63 modelos y 62 enums. Tests que lo leen: dossier-stage.invariant.ts:140 y copy-sin-jerga.invariant.ts:78, ambos en check:invariants (CI). test:leados corre `prisma migrate deploy` (.github/workflows/ci.yml:162), pero el job se saltea sin DATABASE_URL_TEST (ci.yml:118-127). Toca ZONA-FRANCO: los modelos OsLead*/OsSetterNotice y los enums ActivityChannel/DossierStage (schema.prisma:862-1134).",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "Hay que formalizar lo que ya se practica: se edita con una migración aditiva revisada y nunca se hace reset. El congelamiento total solo convierte 10 hallazgos en «decisión para Valentino» y frena la poda de enums.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "(1) La migración nueva se genera sin aplicar y Valentino revisa su SQL; también Franco si toca schema.prisma:862-1134. Solo aditiva, o con un plan de datos si borra algo. (2) `npx prisma validate` y `npx prisma migrate status` sin drift contra la base de test; se aplica con `migrate deploy`, nunca con `migrate reset` ni con `migrate dev` sobre una base con drift. (3) tsc --noEmit y check:invariants en verde (dossier-stage y copy-sin-jerga leen el schema), y test:leados contra DATABASE_URL_TEST si toca OsLead*. (4) Después del merge, sacar schema.prisma de CONGELADOS_DEL_LAYOUT (contrato.ts:242): no es parte del layout."
+     },
+     {
+      "ruta": "src/auth.ts",
+      "origen": "No figura en CLAUDE.md (docs/microaudit-frozen-frontera-CO.md:50 y 65-76, 2026-07-09). Por convención de los lanes se lo trata como «FROZEN, sólo lectura» desde f0b6c774 (2026-06-26: _lane-cuenta-plan.md:367; CHANGELOG-cuenta.md:362 y 438), sin razón escrita. Es zona de Franco (PROMPT.md:37). Tiene 14 commits, dos de ellos posteriores a la etiqueta: 629fe016 (2026-06-29, Franco: rama SETTER, auth.ts:193-201) y 9cfa58cf (2026-07-03, Valentino: magic link por Brevo, auth.ts:97-121). Ningún commit nombra el congelamiento.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "La razón implícita sigue siendo cierta: es un archivo de seguridad compartido, con 70 importadores y dueño Franco. Pero el congelamiento no se cumplió y hoy el archivo concentra hallazgos de seguridad sin arreglar. Ningún test protege su comportamiento (ver riesgo).",
+      "bloquea": "Lo tocan 19 IDs del contexto. 6 exigen editarlo y quedaron como decisión: SEC-006 (ALTA, FROZEN + ZONA-FRANCO), BUG-003, BUG-005, BUG-006, BUG-007 y DEU-002. SEC-008 pide limitar trustHost (auth.ts:78). Otros se rodean por fuera, duplicando lógica: SEC-005 (CRÍTICA) y SEC-007 (ALTA) proponen envolver handlers.POST en route.ts, y SEC-010 propone duplicar maxAge en auth.config.ts. Poda: POD-283 (getPostLoginPath en auth.ts:65-74, las constantes de :15-17 y userExists en :61). Sobre el merge: la rama fija su sha256 (contrato.ts:241) y lo lista en s3-frontera.invariant.ts:78 con una ruta que no existe (ver defectos). F3 no aplica.",
+      "riesgo_soltar": "alto",
+      "riesgo_detalle": "Tiene 70 importadores: D2 21, D3 20, D5 13, D1 9, D7 6 y D4 1. Tests: ningún invariante ni unitario (git grep sessionVersion|getUserAccessState|from '@/auth' en tests/, __tests__ y *.invariant.ts devuelve 0). Solo hay e2e smoke, fuera del CI: 06-admin-login.spec.ts:5-15, 11-client-login.spec.ts:5-14 y 19-security.spec.ts:4-31. tests/helpers/setter-auth.ts:9 depende del nombre de cookie que resuelve auth.ts:89-94. Es ZONA-FRANCO explícita (PROMPT.md:37).",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "Es el archivo con más hallazgos de seguridad bloqueados, una ALTA entre ellos. Además, la convención de no tocarlo empujó los arreglos a envoltorios (route.ts, auth.config.ts) que duplican lógica. Debe quedar protegido, pero su gate exige escribir primero el test que hoy no existe.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "(1) Antes del primer cambio, extraer los callbacks (auth.ts:173-270) a un módulo puro y agregar check:invariant:auth-sesion con un prisma doble que pruebe cuatro cosas, con controles positivos: un sessionVersion distinto devuelve null también con trigger 'update' (SEC-006); un error de base no equivale a «sin sesión» (BUG-006); la membresía es determinística (BUG-005); un SETTER sin org pasa signIn (auth.ts:193-201). (2) e2e 06-admin-login, 11-client-login, 19-security y tests/setter/00-surfaces.spec.ts en verde contra la base de test. (3) Revisión de Franco (es su zona) y de Valentino. (4) Después del merge, actualizar la huella de contrato.ts:241."
+     },
+     {
+      "ruta": "src/lib/prisma.ts",
+      "origen": "Tiene un solo commit, a3c3888c (2026-03-18, Franco), y nunca se editó. No figura en CLAUDE.md. Aparece como «PROHIBIDO» en el scope de los lanes paralelos: raíz:lane-dashboard-log.md:12 (0e6d8686, 2026-06-14) y docs/admin-changelog/Configuracion rdc.md:99 (0d9e53ad, 2026-06-22). Figura como «COMPARTIDOS-READ» en docs/client-portal/relevamiento-6-secciones.md:44 y 55, y docs/bitacora-roadmap.md:13070 dice «config de conexión intacta, como manda el scope». No hay razón escrita; por inferencia, se buscaba evitar choques entre worktrees sobre el cliente único.",
+      "razon_vigente": "sin razón registrada",
+      "razon_vigente_detalle": "La inferencia sigue siendo cierta: tiene 183 importadores. Pero ningún documento dice por qué no se puede cambiar, y el único arreglo pendiente que lo toca es justamente de configuración de conexión: BUG-020, sin connect_timeout/pool_timeout ni reintento (prisma.ts:5-6). El patrón globalThis (prisma.ts:3-8) es el estándar y no necesita cambios.",
+      "bloquea": "BUG-020, en Zona FROZEN (timeouts y reintento en el cliente compartido). BUG-139 es libre (contact.ts:24-61) y no lo bloquea. Sobre el merge: la rama fija su sha256 (contrato.ts:240) y lo lista en s3-frontera.invariant.ts:80. No hay poda y F3 no aplica.",
+      "riesgo_soltar": "alto",
+      "riesgo_detalle": "Tiene 183 importadores: D2 57, D3 52, D4 26 (ZONA-FRANCO), D5 18, D7 14, D1 12, D6 2 y tests 2. src/lib/isolation/index.ts:49 y registry.ts:37 lo envuelven para el chatbot y el motor. Tests que importan el cliente real: get-client-monthly-report-data.invariant.ts:46 (check:invariant:client-monthly-report-pdf, en CI) y p2002-adopcion.invariant.ts:77 (test:p2002, fuera del CI). tests/integration/chatbot-isolation.spec.ts y motor-isolation.spec.ts lo usan a través del helper de aislamiento, también fuera del CI.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "Son 8 líneas sin razón registrada. Lo que importa no es el archivo sino que cualquier cambio de conexión se mida. Queda protegido con un gate de medición, no congelado.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "(1) tsc --noEmit y check:invariants en verde. (2) test:p2002 y test:integration (chatbot-isolation, motor-isolation) en verde contra DATABASE_URL_TEST. (3) Si cambia timeouts o reintentos (BUG-020): medir el primer request después del reposo de Neon, antes y después, y anotarlo en el commit. (4) Después del merge, actualizar la huella de contrato.ts:240. Revisa Valentino, con aviso a Franco por los 26 importadores de D4."
+     },
+     {
+      "ruta": "src/actions/dashboard-actions.ts",
+      "origen": "Creado en 35933244 (2026-03-23, Franco); último cambio en f8a4525f (2026-05-15). Ningún documento lo etiqueta congelado: docs/microaudit-frozen-frontera-CO.md:78 lo verificó («ninguna cita lo etiqueta frozen, ni siquiera informalmente»). En los lanes figura como «COMPARTIDOS-READ» (docs/client-portal/relevamiento-6-secciones.md:44, dd0a3c46, 2026-06-24). Aparece congelado por primera vez en PROMPT.md:36. No hay razón registrada; por inferencia, se heredó de la lista de compartidos de lectura de los lanes del portal.",
+      "razon_vigente": "sin razón registrada",
+      "razon_vigente_detalle": "Tiene 3 importadores, todos en un mismo dominio: NotificationCenter.tsx:7, NotificationHistoryModal.tsx:9 y TaskApprovalButtons.tsx:5. No es zona de Franco ni del sitio público. Tiene una copia muerta (src/actions/task-approvals.ts, POD-003) y un gemelo validado que nadie usa (src/lib/actions/notifications.ts:19, POD-078).",
+      "bloquea": "SEC-038 (las notificaciones al SUPER_ADMIN llevan el organizationId del cliente: dashboard-actions.ts:61-72 y 152-163), BUG-044 (:14, :102 y :190, Zona FROZEN), BUG-062 (check-then-act en :26-47, Zona FROZEN) y BUG-127 (el admin no puede reenviar una entrega REJECTED; :135). Bloquea también la consolidación con notifications.ts: POD-078 propone borrar el gemelo que valida con Zod porque el que está en uso es el congelado. Merge y F3 no aplican.",
+      "riesgo_soltar": "medio",
+      "riesgo_detalle": "Tiene 3 importadores, todos D2. Tests: ninguno (git grep approveTask|rejectTask|markNotification en tests/, __tests__ y *.invariant.ts devuelve 0). Escribe Task, Notification y Message de un tenant, con scoping por session.user.organizationId (:14-18 y :35). No toca ZONA-FRANCO ni el sitio público.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "No tiene razón registrada, su radio es chico, y cuatro hallazgos (dos de seguridad y aislamiento) esperan una «decisión» que solo existe por la etiqueta. Queda libre, con las reglas comunes de las server actions (Zod, sesión y rol).",
+      "nivel_propuesto": "libre",
+      "gate_propuesto": ""
+     },
+     {
+      "ruta": "src/components/ui/*",
+      "origen": "No está en CLAUDE.md; logic-core-v3/AGENTS.md:27 solo fija desde dónde se importa. La etiqueta nació en los lanes paralelos de junio. docs/b9-plan-visual.md:154 (99d3d0f8, 2026-06-13, Franco) lo declara SENSIBLE: se cambia en un commit aparte y marcado, prefiriendo variantes aditivas. raíz:lane-dashboard-log.md:12 (0e6d8686, 2026-06-14, Valentino) lo pone en PROHIBIDO, «frozen». docs/client-portal/relevamiento-6-secciones.md:34 (2026-06-24) lo declara «siempre read-only», porque escribir un compartido genera choques entre lanes. docs/client-portal/lane-portal-pulido-log.md:106 extiende la etiqueta al barrel. PROMPT.md:36 y 173 lo congelan para esta corrida. Desde el 2026-06-13 recibió 17 commits de los dos dueños (12 de Franco, 5 de Valentino), por ejemplo 8f5f67e9 y 09374e7a (Modal), b25b7a40 (StatCard), fecda1b3 (Field/Input/Select), df62c74c (Button) y a2004edb (Toggle).",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "La razón registrada (radio de impacto compartido, choques entre lanes) es cierta para el kit: index.ts tiene 163 dependientes, EmptyStateMuted 38, Skeleton 31, y Button y Card 17 cada uno. No lo es para el resto del directorio. 13 archivos son del intro y del home clásico (BrandedIntroCanvas, HeroMetrics, HyperText, IntroLockupText, KineticText, LogoStrokeOverlay, MarketingIntro, Preloader, TypewriterText, VideoCard y buttons/*), con 1 a 3 importadores públicos cada uno, y HeroTitle no tiene importadores. Además, rediseno/home agrega un archivo al directorio (src/components/ui/LogoMark.tsx) y /v3 importa 9 módulos del kit desde 14 archivos de _panel-vivo.",
+      "bloquea": "Del contexto: A11Y-010, que se resuelve sin editar el kit (POD-319 y POD-320 pasan los tabs al Field y al Input del kit). Del registro, con evidencia en ui/* y Zona FROZEN: BUG-185 (StatCard.tsx:58), A11Y-037 (Modal.tsx:60), A11Y-038 (TypewriterText.tsx:57 y 77), A11Y-039 (LoadingState.tsx:19, Spinner.tsx:18, Tabs.tsx:108), DEU-101 (Select.tsx:368), DEU-102 (LogoStrokeOverlay.tsx:30, IntroLockupText.tsx:46), PERF-020 (VideoCard.tsx:6) y PERF-021 (MarketingIntro.tsx:46, 175 y 233). BUG-179 depende de MagneticCta. Poda bloqueada: POD-045 (HeroTitle), POD-381 (ErrorState), POD-382 (HyperText) y POD-386 (MagneticCta); POD-355 (modal paralelo) se mantiene por decisión del lane. F3: PROMPT.md:173 exige re-tematizar sin tocar ui/*, pero las 22 primitivas del kit usan 343 clases de color literales de la paleta de Tailwind contra 12 usos de tokens, todos en las variantes ds-* de Button.tsx. Solo se pueden re-tematizar pisando variables de la paleta por scope. Merge: v3 consume Card, PageHeader, Tabs, Button, Badge, StatCard, Section, EmptyStateMuted y LogoMark, así que después del merge un cambio en el kit cambia la sección «Tu panel vivo» del home público.",
+      "riesgo_soltar": "alto",
+      "riesgo_detalle": "Tiene 344 dependientes en 8 dominios: D2 79, D5 78, D3 76, D4 53 (setter y LeadOS, ZONA-FRANCO), D9 44, PUB 10, D1 3 y D8 1. Tests: ninguno unitario. tests/e2e/22-visual-regression.spec.ts:50-121 compara capturas de 2026-05-20 (1d51c7ab) y no corre en CI. tests/setter/01-flow.spec.ts:279 y tests/qa-walkthrough/corrida-1.spec.ts:234 usan el role=switch de Toggle.tsx:43; también tests/galeria/captura.spec.ts:296. En rediseno/home, s45-nocturno.invariant.tsx:206-221 exige que las primitivas que importa el panel vivo no traigan next/link (salvo Tabs en modo valor), actions, prisma ni auth. Toca el sitio público: Button (variantes ds-*), el intro de las 5 landings y, después del merge, /v3.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "Hay que reemplazar la regla de directorio por niveles por archivo. El kit queda protegido (ver gate). Los archivos del intro y del home clásico quedan libres; los del home clásico (TypewriterText, MagneticCta, KineticText) se van con el merge. HeroTitle (POD-045) y ErrorState (POD-381) se borran. La práctica ya es esa: 17 commits desde que se lo llamó frozen, siempre aditivos o marcados.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "Aplica a las primitivas del kit: index.ts y lo que exporta, EmptyStateMuted, Skeleton, skeletons/* y field-context. (1) Commit aparte con prefijo ui/ (la regla SENSIBLE de docs/b9-plan-visual.md:154). Los cambios de API son aditivos, con un default idéntico (como hizo 8f5f67e9 con Modal), o migran todos los call sites en el mismo commit. (2) tsc --noEmit, lint de los archivos tocados y check:invariants en verde. (3) visual-qa en desktop y mobile de una pantalla por cada dominio consumidor (admin, portal, setter, admin de chatbots y, después del merge, «Tu panel vivo» en /v3), y regenerar las capturas de tests/e2e/22-visual-regression como nueva línea de base. (4) tests/setter/01-flow.spec.ts en verde si el cambio toca Toggle, Field o Input; después del merge, también s45-nocturno.invariant.tsx en verde. (5) Revisión cruzada del otro dueño: Franco, por los 53 importadores de D4."
+     }
+    ],
+    "defectos": [
+     {
+      "titulo": "El error de cualquier sección del admin ofrece «Volver al inicio» hacia el portal del cliente (/dashboard)",
+      "severidad": "BAJA",
+      "tipo": "UX / navegación",
+      "evidencia": [
+       "src/components/ui/SectionErrorBoundary.tsx:107-108",
+       "src/app/(protected)/admin/_components/AdminErrorBoundary.tsx:16-23",
+       "src/proxy.ts:154-155",
+       "src/app/(protected)/setter/error.tsx:12-14"
+      ],
+      "impacto": "Los 15 error.tsx del admin usan AdminErrorBoundary, que delega en SectionErrorBoundary, y ahí el enlace está fijo a /dashboard con un <a> que recarga la página entera. Un SUPER_ADMIN sin impersonación rebota por el proxy hasta /admin. Con la cookie de impersonación activa (proxy.ts:154), en cambio, aterriza en el portal del cliente. El setter tuvo que duplicar el boundary para esquivar este enlace (setter/error.tsx:12-14).",
+      "propuesta": "Agregar una prop homeHref a SectionErrorBoundary (default '/dashboard'), pasar '/admin' desde AdminErrorBoundary y usar <Link>. Hoy exige editar ui/*, que está congelado."
+     },
+     {
+      "titulo": "El kit tiene dos empty states incompatibles, y EmptyStateMuted re-exporta un componente de una carpeta de feature del portal",
+      "severidad": "BAJA",
+      "tipo": "deuda / arquitectura",
+      "evidencia": [
+       "src/components/ui/EmptyState.tsx:1",
+       "src/components/ui/EmptyState.tsx:12",
+       "src/components/ui/EmptyStateMuted.tsx:10-18",
+       "raíz:_lane-services-log.md:140",
+       "src/app/(protected)/dashboard/resultados/trafico/page.tsx:106",
+       "src/components/dashboard/home/SectionEmptyState.tsx:28"
+      ],
+      "impacto": "EmptyState es 'use client' y exige icon: LucideIcon, así que no se puede usar desde un Server Component: rompió /dashboard/services (_lane-services-log.md:140). Como estaba congelado, en vez de arreglarlo se creó EmptyStateMuted (63c455f3). Ese archivo re-exporta src/components/dashboard/results/_shared/ResultEmptyState, de modo que la capa de primitivas, con 38 importadores, depende de una carpeta de feature. Conviven además al menos 7 empty states locales (BriefEmptyState, ReputationEmptyState, AnalyticsEmptyState, ProjectEmptyState, SectionEmptyState, ChartEmptyState y el de LatencyChart).",
+      "propuesta": "Mover la implementación de ResultEmptyState a ui/ como primitiva universal, sin 'use client', y hacer que ResultEmptyState la consuma. EmptyState queda como variante o se borra: sus 5 usos están todos en el setter."
+     },
+     {
+      "titulo": "markNotificationAsRead no valida con Zod y llama a .trim() fuera del try, mientras su gemelo validado no se usa",
+      "severidad": "BAJA",
+      "tipo": "validación",
+      "evidencia": [
+       "src/actions/dashboard-actions.ts:188-196",
+       "src/actions/dashboard-actions.ts:199-210",
+       "src/lib/actions/notifications.ts:19-36",
+       "src/components/dashboard/NotificationCenter.tsx:106",
+       "src/components/dashboard/NotificationHistoryModal.tsx:72"
+      ],
+      "impacto": "La server action acepta cualquier valor serializable. Un argumento que no es string lanza TypeError en :194, fuera del try, y la respuesta no cumple el contrato ActionResult; CLAUDE.md exige Zod en toda server action. Además lee y después escribe (check-then-act). Ya existe markNotificationReadAction, que valida con NotificationIdSchema y hace un updateMany atómico por organizationId (notifications.ts:19-36), pero no tiene importadores, y POD-078 y DEU-030 proponen borrar justamente ese.",
+      "propuesta": "Apuntar NotificationCenter.tsx:106 y NotificationHistoryModal.tsx:72 a markNotificationReadAction (filtrando también por userId, por SEC-038) y borrar markNotificationAsRead. No ejecutar POD-078 como está escrito."
+     },
+     {
+      "titulo": "La navegación con hash hacia otra página abre el shutter a los 700 ms fijos, haya cargado o no el destino",
+      "severidad": "BAJA",
+      "tipo": "bug (sitio público)",
+      "evidencia": [
+       "src/context/TransitionContext.tsx:91-103",
+       "src/context/TransitionContext.tsx:111-128",
+       "src/context/TransitionContext.tsx:137-146",
+       "src/components/layout/Navbar.tsx:26-30",
+       "src/components/layout/Navbar.tsx:343",
+       "src/components/layout/DynamicDock.tsx:35"
+      ],
+      "impacto": "Desde una landing, los ítems «Inicio», «Nosotros», «Portfolio» y «Servicios» (/#…) hacen router.push sin startTransition. Reintentan el scroll a los 10, 150 y 300 ms, antes de que el home, que es pesado, termine de renderizar en una carga en frío, y cierran isAnimating a los 400 ms. El shutter se abre sobre la página anterior o sobre un home a medio pintar, y el ancla queda librada al comportamiento por defecto. La rama de rutas (:111-128) ya espera isPending; la de hash no. isManualTransition (:16, :73, :137-146) es código muerto.",
+      "propuesta": "Aplicar a la rama de hash el mismo esquema que a la de rutas (startTransition más pendingRouteReveal) y hacer el scroll al ancla cuando isPending cae. Borrar isManualTransition."
+     },
+     {
+      "titulo": "TransitionContext fija los ids de sección 'servicios' y 'caracteristicas', que tienen tratamiento especial",
+      "severidad": "BAJA",
+      "tipo": "deuda / acoplamiento",
+      "evidencia": [
+       "src/context/TransitionContext.tsx:28",
+       "src/context/TransitionContext.tsx:41",
+       "src/components/sections/nosotros/Nosotros.tsx:28-31",
+       "rediseno/home@bead847c:logic-core-v3/src/app/page.tsx:103"
+      ],
+      "impacto": "El centrado del destino depende de dos strings escritos en el contexto global. Cualquier rediseño tiene que conservar esos ids como contenedores grandes (Nosotros.tsx:28-31), y rediseno/home ya declara #servicios «frozen, no se renombra» por esta razón.",
+      "propuesta": "Que el destino declare su propia alineación (un data-atributo, o scroll-margin/scroll-snap-align en CSS) y que el contexto la lea, sin ids fijos."
+     },
+     {
+      "titulo": "HeroArtifact reconstruye la geometría extruida en cada render, porque las opciones del extrude son un literal",
+      "severidad": "BAJA",
+      "tipo": "rendimiento",
+      "evidencia": [
+       "src/components/3d/HeroArtifact.tsx:125-135",
+       "node_modules/@react-three/fiber/dist/events-b389eeca.esm.js:15356-15360",
+       "src/components/layout/Hero.tsx:279",
+       "src/components/layout/HeroCanvas.tsx:98",
+       "src/components/3d/BrandedLogoWhite.tsx:10-16",
+       "src/components/3d/HeroArtifact.tsx:28-35"
+      ],
+      "impacto": "R3F 9.6.1 reconstruye la instancia si algún elemento de args cambia por referencia. El objeto {depth, bevel…} es nuevo en cada render, y los padres (HeroLogo en Hero.tsx:279 y en HeroCanvas.tsx:98) se suscriben a useThree() y re-renderizan en cada resize. Resultado: cada resize vuelve a extruir el logo con bevelSegments 5. La copia en BrandedLogoWhite.tsx:10-16 ya lo resolvió con una constante de módulo, pero el original no se puede tocar. Además, el componente se pausa según scrollY (:28-35) y no con IntersectionObserver, como pide CLAUDE.md.",
+      "propuesta": "Si sobrevive al merge, pasar las opciones a una constante de módulo. Si no, se borra junto con la cadena del hero viejo."
+     },
+     {
+      "titulo": "rediseno/home fija por huella auth.ts, schema.prisma y prisma.ts dentro de un test del layout del home, y su check de frontera busca auth.ts en una ruta que no existe",
+      "severidad": "BAJA",
+      "tipo": "gate / test",
+      "evidencia": [
+       "rediseno/home@bead847c:logic-core-v3/src/components/layout/carga-diferida/contrato.ts:236-243",
+       "rediseno/home@bead847c:logic-core-v3/src/components/layout/carga-diferida/__tests__/s8-diferido.invariant.ts:260-263",
+       "rediseno/home@bead847c:logic-core-v3/src/app/v3/_lib/__tests__/s3-frontera.invariant.ts:78",
+       "rediseno/home@bead847c:logic-core-v3/src/app/v3/_lib/__tests__/s3-git.ts:42-45"
+      ],
+      "impacto": "CONGELADOS_DEL_LAYOUT guarda el sha256 de 6 archivos, que coinciden byte a byte con 57c421bc; tres de ellos no son del layout (auth.ts, schema.prisma y prisma.ts). Después del merge, arreglar SEC-006 o aplicar cualquier migración pone en rojo test:s8-diferido, que es un test de peso del home. En s3-frontera, 'auth.ts' se resuelve a logic-core-v3/auth.ts (PREFIJO + ruta), que no existe, así que el check no ve los cambios en src/auth.ts.",
+      "propuesta": "Antes del merge, dejar en CONGELADOS_DEL_LAYOUT solo los archivos que el layout monta (o ninguno, si se adopta la política de niveles) y corregir la ruta a 'src/auth.ts' en s3-frontera.invariant.ts:78."
+     }
+    ],
+    "observaciones_politica": "1) «Congelado» nunca fue una sola regla. De las 8 entradas, solo HeroArtifact tiene una prohibición de edición con razón escrita (AGENTS.md:76). Las otras tres filas de CLAUDE.md (:168-170) son reglas de USO: usar triggerTransition, no romper el flujo de fases, no hacer migrate reset. Las convirtió en prohibición de edición la cláusula CLAUDE.md:133 (629fe016, 2026-06-29), que contradice a CLAUDE.md:170 y a AGENTS.md:145. auth.ts, prisma.ts y ui/* vienen de reglas de choque de escritura entre lanes paralelos de junio (lane-dashboard-log.md:12, relevamiento-6-secciones.md:34, b9-plan-visual.md:154). dashboard-actions no viene de ningún lado (microaudit:78). La política nueva tiene que nombrar la propiedad que protege cada archivo, no una etiqueta.\n\n2) El cumplimiento medido muestra que «congelado» ya funciona como «cambio deliberado». Después de recibir la etiqueta se editaron TransitionContext (2 veces), PreloaderContext (2), auth.ts (2), schema (9 veces después de la cláusula del 29-06) y ui/* (17 commits desde el 13-06), siempre con cambios aditivos o marcados. Solo se respetaron, de hecho, HeroArtifact, prisma.ts y dashboard-actions, que nadie necesitaba tocar.\n\n3) El costo depende del tipo de archivo. De 527 hallazgos, 33 están en Zona FROZEN. En este grupo, 10 son de schema, 8 de ui/*, 6 de auth.ts, 2 de dashboard-actions y 1 de prisma.ts. Ninguno es de HeroArtifact, TransitionContext ni PreloaderContext. Esos tres no bloquean hallazgos sino diseño, con rodeos medidos: la geometría copiada en BrandedLogoWhite.tsx:8-23, el rig de luz de HeroCanvas.tsx:162-170, los ids impuestos en Nosotros.tsx:28-31 y el «#servicios frozen» de rediseno, el chunk de motion de 42,5 kB gz en el layout raíz (bitacora-beta-3.md:3741-3747), la inversión de capas de EmptyStateMuted y el boundary duplicado del setter. Con auth.ts, el congelamiento empujó los arreglos a envoltorios que duplican lógica (route.ts para SEC-005 y SEC-007, auth.config.ts para SEC-010). Y con dashboard-actions, la poda propone borrar el gemelo correcto (POD-078).\n\n4) En main no hay ningún mecanismo: ni CODEOWNERS, ni hook, ni marcador en los archivos, ni test en CI que cubra auth.ts, los dos contextos, dashboard-actions o ui/*. Solo dos invariantes leen el texto del schema. Por eso un nivel «protegido» no puede apoyarse en «que pasen los tests existentes»: para auth.ts y TransitionContext, el gate empieza por escribir el test. El único congelamiento mecanizado está en rediseno/home (sha256 en contrato.ts:236-243, fuera de check:invariants). Mide contenido, que es lo correcto, pero mezcla archivos cuyo comportamiento no depende del layout. Regla que se desprende: cada archivo protegido se fija solo en el test cuya propiedad depende de él.\n\n5) La granularidad tiene que ser por archivo. ui/* mezcla 22 primitivas del kit (344 dependientes, 53 de ellos en la zona de Franco y, después del merge, también en el home público) con 13 componentes del intro y del home clásico y con huérfanos (HeroTitle, ErrorState, HyperText). El congelamiento por directorio protegió código muerto y no impidió que la rama agregara LogoMark.tsx.\n\n6) Los gates que salen de lo medido son de cuatro tipos: migración revisada (schema); comportamiento con un test nuevo (auth.ts, TransitionContext); medición (cold start para prisma.ts, peso de /login para PreloaderContext); visual multidominio con línea de base regenerada (el kit, cuyas capturas son del 2026-05-20). Se suma la revisión de Franco cuando hay importadores en D4 o modelos OsLead*.\n\n7) Corrige dos premisas de la ENMIENDA: el QA de /dashboard ya no falla por PreloaderContext (está resuelto desde el 2026-05-24), y TransitionContext no muere con el home viejo, porque Navbar, Dock y Shutter de las landings siguen en el layout de rediseno. Lo que sí muere con el merge es HeroArtifact, y el flujo de fases de PreloaderContext queda vestigial.\n\n8) F3 no puede re-tematizar el kit «sin tocar ui/*» de forma limpia: hay 343 colores literales contra 12 tokens en las 22 primitivas."
+   }
+  },
+  {
+   "id": "B",
+   "resultado": {
+    "items": [
+     {
+      "ruta": "src/lib/utils.ts",
+      "origen": "Lo congeló esta auditoría el 2026-10-13 con DEC-10 (commit ec0f5678, docs/auditoria-2026-10/00-PLAN-Y-LOG.md:101). DEC-10 traduce la categoría genérica «utilidades core de src/lib/» de docs/auditoria-2026-10/PROMPT.md:36 con el criterio (a): importado desde 3 dominios o más. No hay rastro anterior: 0 commits nombran el congelamiento, el archivo no está en la tabla de raíz:CLAUDE.md:163-170 y logic-core-v3/AGENTS.md:29 solo lo nombra como convención de import. Historia: lo crea 9a8a360f (2026-04-28); 2106e088 (2026-07-30) y df62c74c (2026-08-03, Franco) le agregan DS_FONT_SIZE_CLASSES porque twMerge descartaba en silencio las clases text-ds-* (utils.ts:8-18). Inferencia: lo delicado es ese modo de falla silencioso, no una decisión de congelarlo.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "Sigue vigente el riesgo: utils.ts:8-18 documenta una pérdida de clases medida en runtime, sin error de build ni de tipos, y en main ningún test lo cubre (git grep 'lib/utils' en tests/, __tests__ y *.invariant.ts: 0 resultados). Sigue vigente también la coordinación: rediseno/home lo modifica (+100/−1: bead847c:logic-core-v3/src/lib/utils.ts:61-140, commits 09113f42…0c3c1a55), y lo mismo hacen más de 20 ramas (v3/*, respaldo/*, rediseno/deslizar*). Editarlo en main antes del merge provoca conflictos. Lo que no sigue vigente es la parte absoluta del congelamiento: el propio arreglo del defecto obliga a editarlo.",
+      "bloquea": "Bloquea el merge de rediseno/home: la rama necesita su cambio (V3_FONT_SIZE_CLASSES y el grupo font-weight, bead847c utils.ts:61-140), y /v3 importa cn en 59 archivos. Bloquea DEU-102: hay cn locales que ignoran la config DS (src/components/ui/buttons/MagneticCta.tsx:9 y src/app/(protected)/admin/settings/_components/settings-console.tsx:56). Bloquea POD-048: src/lib/cn.ts:1-6 es una copia sin la config y sin importadores. En F3, cada token tipográfico nuevo de las pantallas internas hay que agregarlo a esta lista (utils.ts:16-18).",
+      "riesgo_soltar": "alto",
+      "riesgo_detalle": "Tiene 89 importadores: D9 22 (21 son components/ui), D4 21 (17 en ZONA-FRANCO, bajo (protected)/setter), D2 18, D3 13, PUB 10 (components/design-system/* y brand/BrandMark.tsx) y D5 5. Después del merge suma 59 de /v3. En main no hay tests. En rediseno/home existe src/app/v3/_lib/__tests__/s7-cn.invariant.ts (package.json:183): saca el corpus de clases del propio código y exige que la config vieja y la nueva den la misma salida sobre el sitio vivo, con control positivo en /v3. Ese test lo encuentra `npm run verificar` (s4-suites.ts:43, RE_INVARIANTE /^test:(s\\d+)…/), pero no check:invariants, que filtra check:invariant:* (scripts/run-invariants.mjs:106). Por eso el CI (raíz:.github/workflows/ci.yml:100,105) no lo corre. Si falla, se pierde en silencio el tamaño, la familia o el color de una clase.",
+      "recomendacion": "después del merge de rediseno/home",
+      "razon_recomendacion": "El cambio pendiente vive en la rama y llega con su propio instrumento (s7-cn). Tocarlo antes en main solo suma conflictos con más de 20 ramas. Después del merge pasa a protegido.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "(1) `test:s7-cn` en verde y registrado como `check:invariant:cn`, subiendo INVARIANTES_ESPERADOS de scripts/run-invariants.mjs:81, para que corra en raíz:.github/workflows/ci.yml:105. (2) Toda clase --text-* o de peso nueva en globals.css o theme-develop.css entra a la lista en el mismo commit; s7-cn §1 lo exige leyendo el tema. (3) tsc --noEmit. Revisa Valentino. Si el diff cambia la salida de alguna clase del corpus de (protected)/setter (17 importadores ZONA-FRANCO), se avisa a Franco."
+     },
+     {
+      "ruta": "src/lib/action-utils.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678, 00-PLAN-Y-LOG.md:101). Antes figuraba como «compartido/prohibido» en los lanes paralelos de junio: docs/admin-changelog/Configuracion rdc.md:95-99 y COMPARTIDOS-READ en docs/client-portal/relevamiento-6-secciones.md:66 (commit 0d9e53ad, 2026-06-22). Esa era una regla para coordinar worktrees en paralelo (docs/admin-changelog/Operaciones rdc.md:11), no una señal de fragilidad. Commits: 29ebe8ee (2026-04-04, Franco) crea ok/fail; 5e337337 (2026-06-19) agrega toErrorMessage contra el leak de ZodError; b6b21326 (2026-07-23, Franco) agrega `code` para LeadOS. Siguió cambiando después de quedar como «prohibido».",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "Sigue vigente que ActionResult (action-utils.ts:3-5) es un contrato que leen 33 archivos, y que `code` (:11-18) lo consume LeadOS (src/lib/leados/action-codes.ts, agregado en b6b21326). Ya no aplica la coordinación de lanes. Además, el congelamiento impide cerrar la fuga de :31-33: cualquier Error devuelve su message crudo, lo que viola raíz:CLAUDE.md:24.",
+      "bloquea": "Bloquea SEC-092, cuyo arreglo está en :31-33 (pasar solo el message de una clase de error pensada para el usuario). Es además la frontera natural para SEC-016, SEC-062 y SEC-101: los callers pasan por toErrorMessage, por ejemplo admin/settings/_actions/settings.actions.ts:171 y setter/_actions/prospecto.actions.ts:41. rediseno/home no lo toca. F3 no aplica.",
+      "riesgo_soltar": "medio",
+      "riesgo_detalle": "Tiene 33 importadores: D4 16, D3 11, D2 2, D9 2, D1 1 y D5 1. Nueve están en ZONA-FRANCO: setter/_actions/{agenda,cartera,dossier,foco,novedades,outreach,prospecto,prospecto-bulk}.actions.ts y setter/leads/[leadId]/_components/brief-form.tsx. Ningún test lo ejercita directamente (git grep en tests/, __tests__ y *.invariant.ts: 0). tests/leados/dossier-gates.spec.ts:119-125 mira el P2002 de Prisma, no el ActionResult, y necesita DB (el job test-leados se saltea sin secret, ci.yml:120-127). Cambiar toErrorMessage cambia el texto que hoy ven todas las pantallas que muestran error.message, incluidos los `throw new Error('…')` escritos para el usuario.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "El arreglo de SEC-092 es de esfuerzo S y vive acá. Mantenerlo congelado deja abierta una fuga que viola una regla no negociable. Después del arreglo queda protegido por ser un contrato con 33 lectores.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "(1) Invariante nuevo `check:invariant:action-utils` (tsx, sin DB) que fije: ZodError devuelve issues[0].message; Error genérico y PrismaClientKnownRequestError devuelven el fallback; un error marcado para el usuario devuelve su message; fail(e, code) conserva el code. (2) tsc --noEmit (el union ActionResult lo leen 33 archivos). (3) Listar en el PR los `throw new Error(` de los callers cuyo texto hoy llega a la UI. Revisan Valentino y Franco (9 importadores ZONA-FRANCO y el `code` de LeadOS)."
+     },
+     {
+      "ruta": "src/lib/use-is-client.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (a): 5 dominios. Lo crea 8247460f (2026-06-11, «listbox custom … en Select») como copia 1:1 del hook del chatbot, para que components/ui no importe de un módulo de feature (use-is-client.ts:12-13). En los lanes de junio solo aparece como «consumido» (Configuracion rdc.md:101). No hay razón registrada para congelarlo.",
+      "razon_vigente": "no",
+      "razon_vigente_detalle": "Son 21 líneas sin estado sobre useSyncExternalStore (:15-21), con un solo commit en 4 meses. Ningún doc declara fragilidad.",
+      "bloquea": "Bloquea DEU-102: hay 4 implementaciones de «estoy en cliente» y la consolidación va acá. Bloquea las podas POD-326 (src/modules/chatbot/components/admin/useIsClient.ts, copia 1:1 con 4 imports) y POD-355 (copia local en admin/projects/_components/overlay-modal.tsx:14-23). rediseno/home no lo cambia y v3 no lo importa (0 archivos). F3 no aplica.",
+      "riesgo_soltar": "bajo",
+      "riesgo_detalle": "Tiene 17 importadores: D3 12 (confirm-dialog, type-to-confirm-dialog, leads, projects, audit-log, tickets), D5 2, D9 1 (src/components/ui/Select.tsx), D4 1 (admin/leados/[leadId]/_components/decision-bar.tsx) y D2 1 (dashboard/ServiceDetailModal.tsx). Ninguno está en ZONA-FRANCO ni en el sitio público, y no hay tests. El único error posible es invertir el server snapshot (:19) y romper la hidratación de los portales, algo que se ve al abrir cualquier modal.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "No tiene razón vigente, y el congelamiento solo frena la consolidación que pide DEU-102.",
+      "nivel_propuesto": "libre",
+      "gate_propuesto": ""
+     },
+     {
+      "ruta": "src/lib/auth-guards.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678). Antes figuraba como «prohibido» en los lanes de junio (Configuracion rdc.md:99; 0d9e53ad, 2026-06-22). Commits: 29ebe8ee (2026-04-04, Franco) con requireSuperAdmin, y 40853cd3 (2026-06-12, Franco), que agrega requireSetter (:13-21) dentro del baseline B1-B7 de LeadOS. Ningún texto explica el congelamiento. Inferencia: entró por ser el guard de autorización de admin y setter.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "Sigue vigente que decide la autorización de 38 archivos (auth-guards.ts:6 y :16) y que requireSetter pertenece a LeadOS (docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:200). No se sostiene como congelado: su contrato de error está roto y el arreglo va acá (`throw new Error('Unauthorized')` en :7 y :17). Además no es la única puerta: hay seis dialectos de «soy SUPER_ADMIN» (docs/baselines/2026-07-auditoria-seguridad.md:109), entre ellos src/modules/chatbot/server/admin/requireSuperAdmin.ts:7 y src/lib/actions/settings.ts:20. Congelar este archivo no protege la autorización.",
+      "bloquea": "Bloquea BUG-136: send-executive-report espera 'UNAUTHORIZED' y el guard lanza 'Unauthorized' (:7). Bloquea DEU-083 (ZONA-FRANCO): las páginas del setter terminan en error.tsx y Sentry por el throw de :17. Toca a SEC-023 (ALTA): las páginas de /admin no tienen guard propio, y la salida natural es una variante de página que redirija, que hoy no se puede agregar acá. rediseno/home no lo cambia. F3 no aplica.",
+      "riesgo_soltar": "alto",
+      "riesgo_detalle": "Tiene 38 importadores: D4 19, D3 17, D5 1 y D2 1. Doce están en ZONA-FRANCO: setter/_actions/*.actions.ts, setter/page.tsx, setter/nuevo/page.tsx, setter/nuevo/importar/page.tsx y setter/leads/[leadId]/manual/_data.ts. No hay ningún test sin DB. tests/setter/02-isolation.spec.ts:88,118 acuña una sesión SETTER y solo cubre el camino positivo. tests/e2e/19-security.spec.ts:23 acepta [401,403,307] (DEU-104). Los dos usan Playwright con DB y se saltean en CI (ci.yml:120-127). Un error acá abre o cierra todo /admin y todo el setter.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "Los arreglos de BUG-136 y DEU-083 son de esfuerzo S y van en este archivo: un error tipado y una variante de página que redirija. Por el modo de falla (autorización) queda protegido con gate.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "(1) Extraer la decisión a una función pura (session → ok | 'UNAUTHENTICATED' | 'FORBIDDEN') y cubrirla con `check:invariant:auth-guards` (tsx, sin DB) para anónimo, ORG_MEMBER, CLIENT, SETTER, SUPER_ADMIN sin id y SUPER_ADMIN con id, en las dos funciones. (2) tsc --noEmit. (3) tests/setter/02-isolation.spec.ts en verde contra la DB de test, más un caso negativo nuevo: una sesión ORG_MEMBER contra una action del setter y otra del admin. Esto exige cargar DATABASE_URL_TEST (ci.yml:120-127). (4) Cualquier cambio en requireSetter lo revisa Franco (autor de 40853cd3, 12 importadores ZONA-FRANCO); los de requireSuperAdmin, Valentino."
+     },
+     {
+      "ruta": "src/lib/audit-log.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (a): D1, D3, D5 y D7. Un único commit lo crea: 6b66835f (2026-05-17, «audit logging integrated into critical server actions»). No hay rastro de congelamiento. Inferencia: entró por ser el registro de auditoría de 31 actions.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "Sigue vigente que es el único escritor de AdminAuditLog (:24-38) y que 31 actions dependen de su firma (:5-15). No se sostiene como congelado: tiene dos defectos de seguridad registrados que solo se arreglan acá, en :20-21 (IP tomada de X-Forwarded-For) y :39-41 (traga el error sin Sentry).",
+      "bloquea": "Bloquea SEC-030 (Sentry en el catch de :39-41 y una variante que reciba el cliente de transacción) y SEC-026 (IP desde XFF[0], :20-21). Bloquea en parte DEU-012 y FAL-001, que además exigen tocar el schema, que también está congelado. La rama abandonada b0-isolation-motor-chatbot (2d8701ef, 2026-07-13) agrega logAdminActionsBatch copiando el mismo XFF. rediseno/home no lo cambia. F3 no aplica.",
+      "riesgo_soltar": "medio",
+      "riesgo_detalle": "Tiene 31 importadores: D5 17 (actions del admin del chatbot), D3 9, D1 3 (impersonación y contraseñas) y D7 2. Ninguno está en ZONA-FRANCO ni en el sitio público. Ningún test cubre logAdminAction, computeDiff ni omitAuditNoise. tests/e2e/18-admin-audit-log.spec.ts solo carga /admin/audit-log, se saltea el filtro si hay menos de 2 tipos (:21) y necesita DB. Si se suelta sin gate, el riesgo es que un cambio lance una excepción y tumbe las 31 actions (hoy traga todo) o que cambie el formato del diff que lee la UI de auditoría.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "Los dos arreglos (uno S, uno M) viven acá, y el riesgo se controla con un gate chico.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "(1) Invariante `check:invariant:audit-log` (sin DB) para computeDiff y omitAuditNoise (solo las claves cambiadas; createdAt y updatedAt quedan afuera) y para la extracción de IP como función pura que prefiera el header del proveedor sobre XFF[0]. (2) logAdminAction no propaga excepciones (contrato de :17-42), salvo en la variante de falla cerrada que pida el llamador. (3) tsc. (4) Cuando exista DATABASE_URL_TEST, un caso de integración que verifique que un fallo de auditoría dentro de $transaction revierte el cambio. Revisa Valentino."
+     },
+     {
+      "ruta": "src/lib/logger.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (a): D4, D5, D8 y D9. Commits: b7d97e4c (2026-02-06), 3cdcc55e (2026-04-06) y 76baeb77 (2026-05-30). No hay razón registrada.",
+      "razon_vigente": "no",
+      "razon_vigente_detalle": "Son 75 líneas que escriben a stdout (:6-12, :41-50), y ningún doc lo declara intocable. El método ai() (:69-72) no tiene usos (10-PODA.md:2736).",
+      "bloquea": "Bloquea BUG-183: la meta se esparce sobre el objeto y pisa message y level (:41-49), y JSON.stringify puede lanzar dentro de un catch. Bloquea DEU-051: los errores van solo a stdout, sin Sentry. Poda: ai(). rediseno/home no lo cambia. F3 no aplica.",
+      "riesgo_soltar": "bajo",
+      "riesgo_detalle": "Tiene 10 importadores: D5 5 (api/motor/webhook/[channelToken]/route.ts:17, los adapters inbound de whatsapp y crm/syncLeadToCrm.ts), D4 3 en ZONA-FRANCO (setter/error.tsx:7, setter/leads/[leadId]/error.tsx:8, setter/leads/[leadId]/manual/error.tsx:8), D9 1 (ui/SectionErrorBoundary.tsx:6) y D8 1 (src/app/error.tsx:5, el boundary raíz que también cubre el sitio público). No hay tests. Los boundaries llaman además a Sentry.captureException (app/error.tsx:27), así que un cambio de formato no pierde el reporte. El único riesgo real es que el logger lance dentro de un boundary.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "No tiene razón vigente, y BUG-183 se arregla acá con esfuerzo S. Conviene que ese arreglo traiga un invariante que confirme que logger.error no lanza con meta circular o BigInt en NODE_ENV=production.",
+      "nivel_propuesto": "libre",
+      "gate_propuesto": ""
+     },
+     {
+      "ruta": "src/lib/alerts.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (a): D2, D3, D5 y D7. Lo crea 1c252a50 (2026-03-27, Franco, «… cron alerts»); 8e0bd3ab (2026-06-05) pasa a leer plan.name por relación. No hay razón registrada.",
+      "razon_vigente": "no",
+      "razon_vigente_detalle": "Es un adaptador de notificaciones internas (webhook a Slack o Telegram, :109-147). Si falla, solo hace console.error (:139-146). La mitad del archivo está muerta o sin disparador: sendTestAgencyAlert (:149-193) solo la llama src/lib/actions/settings.ts, que no tiene importadores (POD-357, POD-062), y runPeriodicAgencyAlerts (:195-297) no tiene disparador (FAL-026).",
+      "bloquea": "Bloquea estos hallazgos, que se arreglan en el archivo: SEC-054 (escapar en formatAlertMessage, :59-78), SEC-089 (URL sin restricción, :131 y :163), BUG-137 (solo console.error, :139-146), DEU-062 (links con cuid, :278 y :288) y PERF-011 (barrido sin tope, :205-240). Toca además FAL-026, FAL-006 (renewalDate sin escritor, :241-260), FAL-014, BUG-056 y FAL-022, y BUG-052 en los callers (contact.ts:72, upsell.ts:99, messages.ts:155, tickets/actions.ts:89). Poda: POD-357 y POD-062. rediseno/home no lo cambia. F3 no aplica.",
+      "riesgo_soltar": "bajo",
+      "riesgo_detalle": "Tiene 8 importadores: D2 4 (lib/actions/messages.ts, lib/actions/upsell.ts, lib/tickets/actions.ts, lib/referrals/referrals.service.ts), D3 2 (api/cron/alerts/route.ts y lib/actions/settings.ts, que está muerto), D5 1 (chatbot/server/quota/upsellAlert.ts) y D7 1 (lib/actions/contact.ts, el formulario público, que lo llama sin esperar y con .catch en :72-77). No hay tests: tests/integration/alerts-detector.spec.ts es del BotAlert del chatbot, no de este archivo. No toca ZONA-FRANCO.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "Concentra 10 hallazgos registrados de esfuerzo S, y congelado no se puede arreglar ninguno. La alternativa en los callers que propone SEC-054 duplica la neutralización en 5 lugares. Cuando se arregle SEC-054, conviene sumar un invariante sobre formatAlertMessage.",
+      "nivel_propuesto": "libre",
+      "gate_propuesto": ""
+     },
+     {
+      "ruta": "src/lib/tz-ar.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (a): D2, D5 y D9. Lo crea fff3b24e (2026-05-25, Franco) como «helper TZ AR centralizado — previene tercer bug de TZ» (docs/bitacora-roadmap.md:4154, 4238); getISOWeekKeyAR se agrega después (bitacora-roadmap.md:4928). No hay rastro de congelamiento. La intención documentada es ser fuente única, no intocable: tz-ar.ts:3-5 pide hacer acá el cambio si algún día llega la TZ por organización.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "Sigue vigente que startOfTodayInAR (:18-30) es la primitiva de «qué día es en Argentina» que reusa dates-ar (dates-ar.ts:10-11, 19, 65-67): un error desplaza en silencio todos los rangos. No sigue vigente el congelamiento como protección: un test protege mejor. Además hay dos módulos para lo mismo (docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:252).",
+      "bloquea": "No bloquea ningún hallazgo directo del registro. BUG-034, BUG-113, BUG-151, BUG-152 y BUG-159 son llamadores que no usan estos helpers: arreglarlos los consume, no los edita. Lo que sí bloquea es fundir tz-ar en dates-ar. rediseno/home no lo cambia. F3 no aplica.",
+      "riesgo_soltar": "medio",
+      "riesgo_detalle": "Tiene 12 importadores: D5 6 (chatbot/server/admin/multiTenantQueries.ts:95, analysis/getMonthlyAnalysisForOrg.ts:58, components/dashboard/ClientLeadsTable.tsx:188, ExportLeadsButton.tsx), D2 5 (reports/executive-weekly/{build,send,send-manual}.ts, ai/executive-brief.ts, DiscoveriesSection.tsx) y D9 1. Ninguno en ZONA-FRANCO ni en el sitio público. startOfTodayInAR queda cubierto en forma indirecta por src/lib/dates-ar.invariant.ts (vía startOfDayAR), que corre en CI (package.json:89; ci.yml:105). Nada cubre getISOWeekKeyAR (:69-97), que es la periodKey del envío semanal (reports/executive-weekly/send.ts:76) y del brief (ai/executive-brief.ts:288), ni startOfDateRange o withinDateRange (:36-59).",
+      "recomendacion": "reemplazar",
+      "razon_recomendacion": "Fundirlo en dates-ar.ts (re-exportar desde allí y repuntar los 12 imports) deja una sola fuente de fechas argentinas con un solo invariante. Hasta que se funda, queda protegido.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "`check:invariant:dates-ar` en verde (corre en ci.yml:105), extendido en el mismo commit con getISOWeekKeyAR en los bordes ISO, medidos con la misma aritmética: 2025-12-29 da 2026-W01, 2026-12-31 da 2026-W53, 2027-01-01 da 2026-W53 y 2027-01-04 da 2027-W01. También con startOfDateRange y withinDateRange para today, 7d y 30d justo en el borde de las 00:00 en Argentina, corridos con TZ=UTC. Revisa Valentino."
+     },
+     {
+      "ruta": "src/lib/dates-ar.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (a): D2, D4 y D5. Lo crea ab8de0d6 (2026-06-30, Valentino, «P1.A helper fechas AR»). 34e15156 (2026-08-12, Franco) agrega parseCalendarDayAR (:107-130) para el bug de postergación del setter (docs/bitacora-beta-3.md:4169, 6483). No hay rastro de congelamiento. El encabezado lo define como «Helper único» (:1): fuente única, no intocable.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "Sigue vigente que es la fuente única de los rangos en hora argentina para queries gte/lt (:26-36) y del formateo (:221-245), y que un desvío sería silencioso. Pero ya lo protegen cuatro invariantes en CI, y creció dos veces por arreglos (ab8de0d6, 34e15156): congelarlo frena el próximo.",
+      "bloquea": "Bloquea BUG-049: previousRangeForPeriod (:202-217) no ofrece «el mismo tramo» del período anterior, y el arreglo natural es un helper acá más un caso en el invariante de home-metrics. Bloquea DEU-081 (ZONA-FRANCO): LeadOS reimplementa el día argentino y debería consolidarse acá. BUG-034 y BUG-113 se arreglan en los llamadores consumiendo formatDateAR y TZ_AR. rediseno/home no lo cambia. F3 no aplica.",
+      "riesgo_soltar": "medio",
+      "riesgo_detalle": "Tiene 13 dependientes: D2 6 (lib/dashboard/home-metrics.ts, home-metrics-logic.ts, components/dashboard/home/BusinessHero.tsx, reports/client-monthly/*, recommendations/get-recommendations-for-org.ts), D4 2 en ZONA-FRANCO (setter/_actions/cartera.schemas.ts y outreach.schemas.ts), D5 1 (LeadDetail.tsx) y 4 tests. Los tests son src/lib/dates-ar.invariant.ts, src/lib/dashboard/home-metrics-logic.invariant.ts, src/app/(protected)/setter/_actions/pausa-dia-ar.invariant.ts y src/lib/leados/postergacion.invariant.ts. Los cuatro están registrados (package.json:41, 89, 91, 109) y corren en CI (ci.yml:105). pausa-dia corre con TZ=UTC, que es el caso de Netlify. También lo usa scripts/dev/qa-seed-leads.ts.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "Es el mejor cubierto de los 14 y el vehículo de los arreglos de fechas. El gate ya existe y corre en CI.",
+      "nivel_propuesto": "protegido",
+      "gate_propuesto": "`npm run check:invariants` en verde con los cuatro invariantes que lo ejercitan (check:invariant:dates-ar, :home-metrics, :pausa-dia con TZ=UTC y :postergacion), más un caso nuevo por cada función que se agregue o cambie en el mismo commit, y tsc. Revisa Valentino. Si el diff toca parseCalendarDayAR o algo que importen setter/_actions/*.schemas.ts, revisa también Franco."
+     },
+     {
+      "ruta": "src/lib/design-tokens.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (a): D2, D4 y D9. Lo crea 53789b5c (2026-05-17, Franco). Tiene cuatro commits más, todos de Franco: 6f657493 (2026-05-26), 09374e7a (2026-06-14, zIndex sobre el chrome), 4148e32d (2026-06-20) y 596b74eb (2026-08-04). Antes figuraba como «NO tocar» del lane cliente por riesgo de regresión en el admin (docs/client-portal/relevamiento-global.md:471, 697; 0d9e53ad, 2026-06-22). Igual se editó dos veces después.",
+      "razon_vigente": "no",
+      "razon_vigente_detalle": "Solo zIndex (:227-248) tiene consumidores. colors, spacing, radii, typography, shadows, motion y breakpoints (:22-213) no tienen ninguno (DEU-100; 10-PODA.md:2722). colors.service (:94-99) contradice raíz:CLAUDE.md:101-103 y globals.css:61. El rediseño ya lo declaró «desconectado del pipeline» (docs/bitacora-rediseno.md:133).",
+      "bloquea": "Bloquea DEU-100 y DEU-101: los popovers usan zIndex 210, fuera de la escala, así que ui/Select.tsx:368 queda debajo del modal (10000, :245). A11Y-003 se arregla en zona libre usando zIndex.modal a través del Modal. En F3, la renovación de las pantallas internas trae los tokens de v3 (theme-develop.css de rediseno/home, PROMPT.md:170-173), y este archivo es un sistema paralelo sin consumidores con los colores de servicio invertidos. rediseno/home no lo cambia y v3 no lo importa (0 archivos). Poda: los exports muertos (10-PODA.md:2722).",
+      "riesgo_soltar": "bajo",
+      "riesgo_detalle": "Tiene 5 importadores y todos traen solo `{ zIndex }`: components/ui/Modal.tsx:7 (ui congelado), components/dashboard/DashboardLayoutClient.tsx:12 (D2), y en ZONA-FRANCO setter/_components/setter-shell.tsx:6, setter/_components/shortcuts-help.tsx:5 y setter/leads/[leadId]/manual/_components/barra-accion.tsx:15. No hay tests vigentes. El único que miraba la página de tokens, tests/e2e/22-visual-regression.spec.ts:75, visita /admin/_design, una ruta que borró c3b150ab (2026-06-28).",
+      "recomendacion": "reemplazar",
+      "razon_recomendacion": "Hay que mover zIndex a un módulo propio, porque la escala sí es un contrato entre el Modal (10000), el preloader (9999) y el chrome de los portales (80 a 130, :218-248), y borrar el resto. Fuera de zIndex no hay nada que proteger.",
+      "nivel_propuesto": "libre",
+      "gate_propuesto": ""
+     },
+     {
+      "ruta": "src/lib/use-reduced-motion.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (b), como primitiva de animación. Lo crea 9c60088b (2026-05-18, Franco, «motion variants library + reduced-motion hook»), en un único commit. En los lanes de junio solo figura como «consumido» (Configuracion rdc.md:101). No hay razón registrada.",
+      "razon_vigente": "no",
+      "razon_vigente_detalle": "Son 19 líneas y nada lo declara intocable. Convive con el useReducedMotion de motion/react, que 57 archivos importan, y la semántica es distinta. motion@12.42.0 lo resuelve en el primer render del cliente (node_modules/framer-motion/dist/es/utils/reduced-motion/use-reduced-motion.mjs:32-38). Este arranca en false (:6) y se corrige en un efecto (:8-10).",
+      "bloquea": "Bloquea el arreglo del defecto nuevo reportado abajo: los PageTransition remontan la página, y las animaciones de entrada corren igual para quien pidió menos movimiento. En F3, adaptar el motion a micro-interacciones (PROMPT.md:172) exige decidir un solo hook. Con el merge, v3 lo importa en bead847c:logic-core-v3/src/app/v3/_lib/escena/EscenaDelHome.tsx:5 y :119 (la escena 3D del home apaga inercia y mouse con él, :96-98), así que entra al sitio público.",
+      "riesgo_soltar": "medio",
+      "riesgo_detalle": "Tiene 25 importadores: D3 14 (los dos PageTransition, admin-sidebar, alerts, leads, projects, clients…), D2 4 (components/dashboard/PageTransition.tsx, SidebarNav.tsx, ServiceDetailModal.tsx, results/_shared/chartTheme.ts:13), D5 3, D4 2 (admin/leados/[leadId]/_components/ficha-accordion.tsx y setter/_components/setter-nav.tsx, este en ZONA-FRANCO) y D9 2 (ui/Button.tsx y ui/EmptyState.tsx). Con el merge suma uno público. No hay tests. Si falla, se ve como movimiento de más o de menos, sin error.",
+      "recomendacion": "reemplazar",
+      "razon_recomendacion": "Conviene cambiar la implementación sin cambiar el nombre exportado, así el import de v3 sigue valiendo: un valor correcto desde el primer render del cliente, o directamente motion/react con MotionConfig reducedMotion=\"user\". Y los PageTransition no deben cambiar la forma del árbol según el flag.",
+      "nivel_propuesto": "libre",
+      "gate_propuesto": ""
+     },
+     {
+      "ruta": "src/lib/hover.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (b): D2, D3, D4 y D5. Lo crea 96deb5f8 (2026-06-17, Valentino), que extrae los dos strings compartidos. c127467d (2026-06-18) le saca will-change-transform porque borroneaba el texto al escalar. Antes figuraba como «NO tocar» en los lanes del cliente y del admin (relevamiento-global.md:471, 697; Configuracion rdc.md:99; Inteligencia rdc.md:71). Era la regla de coordinación de lanes paralelos (Operaciones rdc.md:11).",
+      "razon_vigente": "no",
+      "razon_vigente_detalle": "La coordinación de lanes ya no aplica. El congelamiento de hecho produjo variantes locales en vez de ampliar el compartido: chartCardHoverCls en results/_shared/chartHover.ts y en LatencyChart.tsx (docs/client-portal/changelog/resultados.md:49, 108, 168). Además, c127467d contradice con medición la regla general de raíz:CLAUDE.md:68 (will-change en todo elemento animado).",
+      "bloquea": "Bloquea F3: los valores están calibrados para fondo oscuro (sombra blanca 0,12 y ring-white/15, hover.ts:6 y :10). Con la paleta papel y tinta de v3 no se ven, y un solo string pinta 41 pantallas. Con el merge, v3 lo importa en 8 demos de _panel-vivo (bead847c:logic-core-v3/src/app/v3/_panel-vivo/demos/{chatbot/LoQueSabe,leads/DetalleDelLead,proyecto/Proyecto,proyecto/TareasDelProyecto,servicios/Servicios,servicios/TarjetaDeModulo,tickets/TableroDeSoporte,tickets/Tickets}.tsx, líneas 7 a 12). Desde ahí, cambiar el hover del portal cambia también el home público. Poda: adminHoverAmplifiedCls (:9-10) no tiene consumidores (10-PODA.md:2729).",
+      "riesgo_soltar": "bajo",
+      "riesgo_detalle": "Tiene 41 importadores: D2 19, D3 10, D5 10 y D4 2 (admin/leados). Ninguno está en ZONA-FRANCO. Con el merge suma 8 del sitio público. No hay tests. Si falla, se ve en pantalla; no es una falla silenciosa.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "Es la palanca de una línea que necesita F3. El riesgo es visual, y lo cubre la verificación de UI que raíz:CLAUDE.md:158 ya exige en todo sprint que toque pantallas.",
+      "nivel_propuesto": "libre",
+      "gate_propuesto": ""
+     },
+     {
+      "ruta": "src/lib/motion-variants.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (b): D2, D3, D5 y D9. Lo crea 9c60088b (2026-05-18, Franco), en un único commit. En los lanes solo figura como «consumido» (Configuracion rdc.md:101). No hay razón registrada.",
+      "razon_vigente": "no",
+      "razon_vigente_detalle": "Sus valores no siguen raíz:CLAUDE.md:80-90: fadeUp usa y:12 y 0,4 s (:6-14) contra y:20 y 0,6 s, y springConfig usa 300/30 (:63-67) contra 380/38/0,9. Los mismos valores están duplicados sin consumidores en design-tokens.ts:187-202. `fade` (:17-20) y `scaleIn` (:48-60) no tienen ningún import (git grep de imports: 0).",
+      "bloquea": "Bloquea F3: «se adapta: micro-interacciones con motion/react» (PROMPT.md:172), y este es el lugar natural de esas variantes en los portales. rediseno/home ya trae otro sistema (bead847c:logic-core-v3/src/components/design-system/motion/tokens.ts:70-90 y src/app/v3/motion), así que F3 tiene que elegir uno. v3 no importa este archivo (0). Poda: fade y scaleIn.",
+      "riesgo_soltar": "bajo",
+      "riesgo_detalle": "Tiene 14 importadores, todos de portales: D3 9 (admin/_components/PageTransition.tsx:5, AuditLogClient, BotsListClient, ClientTabsNav, QuickActionMotion, TabContentTransition, ClientsListClient, conversation-list, project-list, ticket-list), D5 3, D2 1 (components/dashboard/PageTransition.tsx:5) y D9 1 (ui/Button.tsx:5, buttonPress). No toca ZONA-FRANCO ni el sitio público, y no hay tests. Si falla, se ve.",
+      "recomendacion": "descongelar",
+      "razon_recomendacion": "No tiene razón vigente. Es una pieza que F3 tiene que poder reemplazar o alinear con el motion de v3.",
+      "nivel_propuesto": "libre",
+      "gate_propuesto": ""
+     },
+     {
+      "ruta": "src/lib/chromeReveal.ts",
+      "origen": "Lo congeló DEC-10 el 2026-10-13 (ec0f5678) por el criterio (b): 2 dominios, PUB y D5. Lo crea f25f6d6d (2026-06-08). 9a18efb0 (2026-07-31) solo le cambia los comentarios al purgar Navbar y DynamicDock. Esa purga la revirtió 78b510ac (2026-08-12, que restaura la home clásica desde 63a4e364), pero el comentario nuevo quedó (docs/bitacora-rediseno.md:3641, «diff solo comentarios»). La única razón de diseño registrada está en el propio archivo: ser fuente única para que el chrome y el widget aparezcan sincronizados (:1-5). No hay registro de congelamiento.",
+      "razon_vigente": "en parte",
+      "razon_vigente_detalle": "El acoplamiento existe: DynamicDock.tsx:25 y LogicCompanion.tsx:21 leen las mismas constantes. Pero eso pide una fuente única, no un congelamiento.",
+      "bloquea": "No bloquea ningún hallazgo del registro. rediseno/home no lo cambia. El layout raíz de la rama sigue montando Navbar (con DynamicDock) y ChatWidgetMount para las rutas públicas (bead847c:logic-core-v3/src/app/layout.tsx:147 y :170), y v3 tiene su propio chrome (src/app/v3/_chrome) que no lo importa. Cuando v3 reemplace la home y muera DynamicDock, queda un solo consumidor (LogicCompanion) y el archivo se puede inlinear o borrar.",
+      "riesgo_soltar": "bajo",
+      "riesgo_detalle": "Tiene 2 importadores, los dos del sitio público: src/components/layout/DynamicDock.tsx:25, montado desde Navbar.tsx:211, y src/modules/chatbot/components/LogicCompanion.tsx:21 (D5, el widget público). No hay tests. No toca ZONA-FRANCO.",
+      "recomendacion": "después del merge de rediseno/home",
+      "razon_recomendacion": "Su destino depende de que v3 reemplace la home clásica. Mientras tanto, son 27 líneas de constantes con dos consumidores y no hay nada que justifique congelarlas.",
+      "nivel_propuesto": "libre",
+      "gate_propuesto": ""
+     }
+    ],
+    "defectos": [
+     {
+      "titulo": "useReducedMotion devuelve false en el primer render: los PageTransition de los dos portales remontan la página y las entradas animan igual para quien pidió menos movimiento",
+      "severidad": "BAJA",
+      "tipo": "bug / accesibilidad",
+      "evidencia": [
+       "src/lib/use-reduced-motion.ts:6",
+       "src/lib/use-reduced-motion.ts:8",
+       "src/app/(protected)/admin/_components/PageTransition.tsx:15",
+       "src/app/(protected)/admin/_components/PageTransition.tsx:20",
+       "src/components/dashboard/PageTransition.tsx:11",
+       "src/app/(protected)/admin/layout.tsx:65",
+       "src/components/dashboard/DashboardLayoutClient.tsx:175",
+       "src/components/ui/EmptyState.tsx:47"
+      ],
+      "impacto": "Afecta a quien tiene prefers-reduced-motion: reduce. El SSR y la hidratación renderizan <motion.div> con initial='hidden'. Después el efecto pone reduced=true, PageTransition pasa a devolver un fragment y React desmonta y vuelve a montar todo el árbol de la página en /admin/* y /dashboard/*: se pierde el estado local y los efectos de los client components corren dos veces. En los 25 consumidores que hacen `initial={reduced ? false : …}`, como ui/EmptyState.tsx:47-48, motion lee initial solo al montar, así que la entrada (y:12) se anima igual. No es DEU-057, que trata de que el layout no se remonte por navegación.",
+      "propuesta": "Hacer que el hook devuelva el valor real desde el primer render del cliente, como el de motion/react, o usar MotionConfig reducedMotion=\"user\". En los PageTransition, renderizar siempre el motion.div y pasar `initial={reduced ? false : 'hidden'}` en vez de cambiar la forma del árbol. Hoy el hook es congelado inferido, así que es decisión para Valentino; el cambio de los PageTransition es libre."
+     },
+     {
+      "titulo": "Comentarios falsos en dos congelados: chromeReveal nombra a Navbar como consumidor y da por reemplazado a DynamicDock, y design-tokens dice que no hay nada por encima de su escala",
+      "severidad": "BAJA",
+      "tipo": "deuda / documentación",
+      "evidencia": [
+       "src/lib/chromeReveal.ts:2",
+       "src/lib/chromeReveal.ts:7",
+       "src/components/layout/DynamicDock.tsx:25",
+       "src/components/layout/Navbar.tsx:211",
+       "src/lib/design-tokens.ts:223",
+       "src/lib/design-tokens.ts:245",
+       "src/modules/chatbot/shared/zIndex.ts:19"
+      ],
+      "impacto": "chromeReveal.ts:2-10 sigue el estado de 9a18efb0, que se revirtió en 78b510ac (2026-08-12). En main, el consumidor es DynamicDock (Navbar.tsx:211 lo monta) y Navbar no lo importa: quien siga el comentario para mantener la sincronía edita el componente equivocado. design-tokens.ts:223-224 dice que ya no hay nada por encima de la escala y :245 habla de un cursor que ya no existe. Pero el widget del chatbot vive en 2_147_000_000 o más (zIndex.ts:19-25) y en el sitio público queda por encima de modal (10000).",
+      "propuesta": "Corregir los dos comentarios: en chromeReveal, consumidores DynamicDock y LogicCompanion; en design-tokens, mencionar que el widget del chatbot está por encima. Si design-tokens se reemplaza por un módulo de zIndex (ver el ítem), el comentario se corrige ahí."
+     },
+     {
+      "title_placeholder_removed": "",
+      "titulo": "alerts.ts calcula «hoy» y formatea fechas con la zona horaria del servidor (UTC en Netlify): ventana de vencimientos y «último movimiento» corridos",
+      "severidad": "BAJA",
+      "tipo": "bug (latente)",
+      "evidencia": [
+       "src/lib/alerts.ts:80",
+       "src/lib/alerts.ts:86",
+       "src/lib/alerts.ts:200",
+       "src/lib/alerts.ts:277",
+       "src/lib/alerts.ts:287"
+      ],
+      "impacto": "startOfDay y addDays usan setHours y setDate (:80-90) en la TZ del proceso, así que «hoy» empieza a las 21:00 del día anterior en hora argentina. toLocaleDateString('es-AR') no lleva timeZone (:277, :287): una actividad entre las 21 y las 24 h en Argentina figura con el día siguiente. Es el mismo patrón que BUG-113, en otro archivo. Hoy está latente porque runPeriodicAgencyAlerts no tiene disparador (FAL-026) y renewalDate no tiene escritor (FAL-006).",
+      "propuesta": "Usar startOfDayAR, dayRangeAR y formatDateAR de src/lib/dates-ar.ts. Hoy alerts.ts es congelado inferido, así que es decisión para Valentino. Si se resuelve FAL-026 dándole disparador, va junto."
+     },
+     {
+      "titulo": "La única prueba que miraba los design tokens apunta a una página borrada",
+      "severidad": "BAJA",
+      "tipo": "test",
+      "evidencia": [
+       "tests/e2e/22-visual-regression.spec.ts:75",
+       "tests/e2e/22-visual-regression.spec.ts:77"
+      ],
+      "impacto": "La prueba navega a /admin/_design y compara contra admin-design-tokens-chromium-win32.png. La feature «Design system» del admin, con la ruta %5Fdesign, la borró c3b150ab (2026-06-28). Si el job E2E llegara a correr, ese caso no mide nada vigente, y design-tokens.ts queda sin ninguna cobertura. BUG-186 cubre que el job no puede pasar, pero no esta ruta muerta.",
+      "propuesta": "Borrar el caso y su baseline. Si se quiere cobertura de la escala zIndex, que sea un invariante tsx sobre el orden de la escala (appShell < … < modal > 9999 < toast < tooltip), no un screenshot."
+     }
+    ],
+    "observaciones_politica": "1) Ninguno de los 14 estaba congelado antes de esta auditoría. 0 commits lo nombran, ninguno está en la tabla de raíz:CLAUDE.md:163-170, y logic-core-v3/AGENTS.md:29 solo nombra utils como convención. El congelamiento es DEC-10 (ec0f5678, 2026-10-13), un criterio de alcance: importado desde 3 dominios o más (2 para animación). Los «NO tocar» y «prohibidos» anteriores son de junio y servían para coordinar lanes paralelos en worktrees (docs/admin-changelog/Operaciones rdc.md:11; Configuracion rdc.md:95-101; docs/client-portal/relevamiento-global.md:471). Aun así, 6 de los 14 se editaron después en main por arreglos: action-utils (b6b21326), dates-ar (34e15156), design-tokens (09374e7a, 4148e32d, 596b74eb), utils (2106e088, df62c74c), hover (c127467d) y alerts (8e0bd3ab). En la práctica funcionaron como «revisado», no como congelado.\n\n2) Costo medido del congelamiento: 26 hallazgos del registro citan estos archivos con ruta:línea, y 12 terminaron como «Decisión para Valentino» por estar congelados: SEC-016, SEC-026, SEC-030, SEC-054, SEC-092, SEC-101, BUG-136, BUG-183, DEU-083, DEU-100, DEU-101 y DEU-102. Once de esos doce son de esfuerzo S. Los defectos de seguridad más claros de estos archivos están en código congelado: la fuga de toErrorMessage, la auditoría perdida en silencio, el contrato roto del guard y la falta de neutralización hacia Slack. La etiqueta no los evitó y ahora frena su arreglo.\n\n3) Que un archivo tenga muchos importadores no predice su riesgo. hover tiene 41 y falla de forma visible. tz-ar tiene 12 y falla en silencio en los rangos y en la clave de idempotencia del reporte semanal (reports/executive-weekly/send.ts:76). Lo que separa a los archivos son dos cosas: si la falla es silenciosa o visible, y si existe un gate automático que corra en CI.\n\n4) La cobertura real es casi nula. Solo dates-ar tiene tests que corren en CI (4 invariantes vía check:invariants, raíz:.github/workflows/ci.yml:105), y tz-ar los tiene en forma indirecta. utils tiene un instrumento fuerte (s7-cn), pero vive solo en rediseno/home y fuera del CI: lo encuentra `npm run verificar`, no check:invariants (scripts/run-invariants.mjs:106). auth-guards y audit-log solo los ejercita Playwright con DB, y ese job se saltea en CI por falta de secret (ci.yml:120-127). Los otros 9 tienen 0 tests. Un gate que no corre en CI no es un gate, así que cada gate protegido tiene que ser un invariante tsx sin DB registrado como check:invariant:*. El runner exige el número exacto (INVARIANTES_ESPERADOS, run-invariants.mjs:81) y eso obliga a declararlo.\n\n5) Niveles que salen de lo medido. Protegido es para falla silenciosa con alcance amplio o para autorización y auditoría: utils (después del merge), auth-guards, action-utils, audit-log, dates-ar y tz-ar (hasta fundirse en dates-ar). Cada uno lleva su invariante y un revisor con nombre. Franco revisa como segundo cuando el archivo tiene importadores en ZONA-FRANCO: auth-guards 12 (requireSetter es suyo, 40853cd3), utils 17, action-utils 9 (`code` es suyo, b6b21326), dates-ar 2 más el invariante de leados, design-tokens 3, logger 3 y use-reduced-motion 1. Libre es para falla visible o pocos importadores, cubiertos por tsc y por la verificación de UI obligatoria (raíz:CLAUDE.md:158): use-is-client, logger, alerts, design-tokens (después de sacar zIndex a su módulo), use-reduced-motion, hover, motion-variants y chromeReveal. Ninguno de los 14 justifica «congelado» como nivel.\n\n6) El merge de rediseno/home cambia el mapa en tres archivos. utils es el único de los 14 que la rama modifica y suma 59 importadores de /v3. hover (+8 demos de _panel-vivo) y use-reduced-motion (+1, la escena 3D) pasan a tener consumidores en el sitio público. Esos tres conviene reclasificarlos después del merge. Los otros 11 no cambian (diff vacío entre 57c421bc y bead847c)."
+   }
+  }
+ ]
+}

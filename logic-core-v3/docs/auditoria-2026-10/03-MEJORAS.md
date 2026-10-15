@@ -1068,6 +1068,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): lib.scripts, int.calcom
 
+### [SEC-109] markNotificationAsRead no valida con Zod y llama a .trim() fuera del try, mientras su gemelo validado no se usa
+- Dominio: D2  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/actions/dashboard-actions.ts:188-196`; `src/actions/dashboard-actions.ts:199-210`; `src/lib/actions/notifications.ts:19-36`; `src/components/dashboard/NotificationCenter.tsx:106`; `src/components/dashboard/NotificationHistoryModal.tsx:72`
+- Impacto: La server action acepta cualquier valor serializable. Un argumento que no es string lanza TypeError en :194, fuera del try, y la respuesta no cumple el contrato ActionResult; CLAUDE.md exige Zod en toda server action. Además lee y después escribe (check-then-act). Ya existe markNotificationReadAction, que valida con NotificationIdSchema y hace un updateMany atómico por organizationId (notifications.ts:19-36), pero no tiene importadores, y POD-078 y DEU-030 proponen borrar justamente ese.
+- Propuesta: Decisión para Valentino (archivo congelado; ver 11-CONGELADOS.md): Apuntar NotificationCenter.tsx:106 y NotificationHistoryModal.tsx:72 a markNotificationReadAction (filtrando también por userId, por SEC-038) y borrar markNotificationAsRead. No ejecutar POD-078 como está escrito.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [SEC-038]
+- Nodo(s): lib.actions, h2.cli-shell, lib.componentes-dashboard
+
 ## Bugs latentes
 
 ### [BUG-002] El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo
@@ -2708,6 +2718,26 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): lib.scripts, modelo.QuotaUsage
 
+### [BUG-189] La navegación con hash hacia otra página abre el shutter a los 700 ms fijos, haya cargado o no el destino
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/context/TransitionContext.tsx:91-103`; `src/context/TransitionContext.tsx:111-128`; `src/context/TransitionContext.tsx:137-146`; `src/components/layout/Navbar.tsx:26-30`; `src/components/layout/Navbar.tsx:343`; `src/components/layout/DynamicDock.tsx:35`
+- Impacto: Desde una landing, los ítems «Inicio», «Nosotros», «Portfolio» y «Servicios» (/#…) hacen router.push sin startTransition. Reintentan el scroll a los 10, 150 y 300 ms, antes de que el home, que es pesado, termine de renderizar en una carga en frío, y cierran isAnimating a los 400 ms. El shutter se abre sobre la página anterior o sobre un home a medio pintar, y el ancla queda librada al comportamiento por defecto. La rama de rutas (:111-128) ya espera isPending; la de hash no. isManualTransition (:16, :73, :137-146) es código muerto.
+- Propuesta: Decisión para Valentino (archivo congelado; ver 11-CONGELADOS.md): Aplicar a la rama de hash el mismo esquema que a la de rutas (startTransition más pendingRouteReveal) y hacer el scroll al ancla cuando isPending cae. Borrar isManualTransition.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [DEU-039]
+- Nodo(s): lib.context, lib.sitio-publico
+
+### [BUG-190] alerts.ts calcula «hoy» y formatea fechas con la zona horaria del servidor (UTC en Netlify): ventana de vencimientos y «último movimiento» corridos
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/alerts.ts:80`; `src/lib/alerts.ts:86`; `src/lib/alerts.ts:200`; `src/lib/alerts.ts:277`; `src/lib/alerts.ts:287`
+- Impacto: startOfDay y addDays usan setHours y setDate (:80-90) en la TZ del proceso, así que «hoy» empieza a las 21:00 del día anterior en hora argentina. toLocaleDateString('es-AR') no lleva timeZone (:277, :287): una actividad entre las 21 y las 24 h en Argentina figura con el día siguiente. Es el mismo patrón que BUG-113, en otro archivo. Hoy está latente porque runPeriodicAgencyAlerts no tiene disparador (FAL-026) y renewalDate no tiene escritor (FAL-006).
+- Propuesta: Decisión para Valentino (archivo congelado; ver 11-CONGELADOS.md): Usar startOfDayAR, dayRangeAR y formatDateAR de src/lib/dates-ar.ts. Hoy alerts.ts es congelado inferido, así que es decisión para Valentino. Si se resuelve FAL-026 dándole disparador, va junto.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [BUG-113], [BUG-034]
+- Nodo(s): lib.alerts
+
 ## Tecnología vieja
 
 ### [TEC-002] Agenda inteligente usa la API v1 de Cal.com, apagada segun el propio repo, con la API key en la query string
@@ -2992,6 +3022,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h6, lib.smooth-scroll
+
+### [PERF-022] HeroArtifact reconstruye la geometría extruida en cada render, porque las opciones del extrude son un literal
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/components/3d/HeroArtifact.tsx:125-135`; librería @react-three/fiber@9.6.1, dist/events-b389eeca.esm.js línea 15356; `src/components/layout/Hero.tsx:279`; `src/components/layout/HeroCanvas.tsx:98`; `src/components/3d/BrandedLogoWhite.tsx:10-16`; `src/components/3d/HeroArtifact.tsx:28-35`
+- Impacto: R3F 9.6.1 reconstruye la instancia si algún elemento de args cambia por referencia. El objeto {depth, bevel…} es nuevo en cada render, y los padres (HeroLogo en Hero.tsx:279 y en HeroCanvas.tsx:98) se suscriben a useThree() y re-renderizan en cada resize. Resultado: cada resize vuelve a extruir el logo con bevelSegments 5. La copia en BrandedLogoWhite.tsx:10-16 ya lo resolvió con una constante de módulo, pero el original no se puede tocar. Además, el componente se pausa según scrollY (:28-35) y no con IntersectionObserver, como pide CLAUDE.md.
+- Propuesta: Decisión para Valentino (archivo congelado; ver 11-CONGELADOS.md): Si sobrevive al merge, pasar las opciones a una constante de módulo. Si no, se borra junto con la cadena del hero viejo.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.sitio-publico, lib.raiz-repo.node-modules-react-three-fiber-dist-events-b389eeca-esm
 
 ## Deuda
 
@@ -3876,6 +3916,56 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): lib.scripts
 
+### [DEU-107] El kit tiene dos empty states incompatibles, y EmptyStateMuted re-exporta un componente de una carpeta de feature del portal
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/components/ui/EmptyState.tsx:1`; `src/components/ui/EmptyState.tsx:12`; `src/components/ui/EmptyStateMuted.tsx:10-18`; `_lane-services-log.md:140`; `src/app/(protected)/dashboard/resultados/trafico/page.tsx:106`; `src/components/dashboard/home/SectionEmptyState.tsx:28`
+- Impacto: EmptyState es 'use client' y exige icon: LucideIcon, así que no se puede usar desde un Server Component: rompió /dashboard/services (_lane-services-log.md:140). Como estaba congelado, en vez de arreglarlo se creó EmptyStateMuted (63c455f3). Ese archivo re-exporta src/components/dashboard/results/_shared/ResultEmptyState, de modo que la capa de primitivas, con 38 importadores, depende de una carpeta de feature. Conviven además al menos 7 empty states locales (BriefEmptyState, ReputationEmptyState, AnalyticsEmptyState, ProjectEmptyState, SectionEmptyState, ChartEmptyState y el de LatencyChart).
+- Propuesta: Decisión para Valentino (archivo congelado; ver 11-CONGELADOS.md): Mover la implementación de ResultEmptyState a ui/ como primitiva universal, sin 'use client', y hacer que ResultEmptyState la consuma. EmptyState queda como variante o se borra: sus 5 usos están todos en el setter.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.ui, doc.ra-z-lane-services-log, h2.cli-resultados, h2.cli-inicio
+
+### [DEU-108] TransitionContext fija los ids de sección 'servicios' y 'caracteristicas', que tienen tratamiento especial
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/context/TransitionContext.tsx:28`; `src/context/TransitionContext.tsx:41`; `src/components/sections/nosotros/Nosotros.tsx:28-31`; `rama:bead847c:src/app/page.tsx:103`
+- Impacto: El centrado del destino depende de dos strings escritos en el contexto global. Cualquier rediseño tiene que conservar esos ids como contenedores grandes (Nosotros.tsx:28-31), y rediseno/home ya declara #servicios «frozen, no se renombra» por esta razón.
+- Propuesta: Decisión para Valentino (archivo congelado; ver 11-CONGELADOS.md): Que el destino declare su propia alineación (un data-atributo, o scroll-margin/scroll-snap-align en CSS) y que el contexto la lea, sin ids fijos.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.context, lib.sitio-publico, lib.raiz-repo.rama-bead847c-src-app-page
+
+### [DEU-109] rediseno/home fija por huella auth.ts, schema.prisma y prisma.ts dentro de un test del layout del home, y su check de frontera busca auth.ts en una ruta que no existe
+- Dominio: D8  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `rama:bead847c:src/components/layout/carga-diferida/contrato.ts:236-243`; `rama:bead847c:src/components/layout/carga-diferida/__tests__/s8-diferido.invariant.ts:260-263`; `rama:bead847c:src/app/v3/_lib/__tests__/s3-frontera.invariant.ts:78`; `rama:bead847c:src/app/v3/_lib/__tests__/s3-git.ts:42-45`
+- Impacto: CONGELADOS_DEL_LAYOUT guarda el sha256 de 6 archivos, que coinciden byte a byte con 57c421bc; tres de ellos no son del layout (auth.ts, schema.prisma y prisma.ts). Después del merge, arreglar SEC-006 o aplicar cualquier migración pone en rojo test:s8-diferido, que es un test de peso del home. En s3-frontera, 'auth.ts' se resuelve a logic-core-v3/auth.ts (PREFIJO + ruta), que no existe, así que el check no ve los cambios en src/auth.ts.
+- Propuesta: Antes del merge, dejar en CONGELADOS_DEL_LAYOUT solo los archivos que el layout monta (o ninguno, si se adopta la política de niveles) y corregir la ruta a 'src/auth.ts' en s3-frontera.invariant.ts:78.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-006]
+- Nodo(s): lib.raiz-repo.rama-bead847c-src-components-layout-carga-diferida-contrato, lib.raiz-repo.rama-bead847c-src-components-layout-carga-diferida-tests-s8-diferido-invariant, lib.raiz-repo.rama-bead847c-src-app-v3-lib-tests-s3-frontera-invariant, lib.raiz-repo.rama-bead847c-src-app-v3-lib-tests-s3-git
+
+### [DEU-110] Comentarios falsos en dos congelados: chromeReveal nombra a Navbar como consumidor y da por reemplazado a DynamicDock, y design-tokens dice que no hay nada por encima de su escala
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/chromeReveal.ts:2`; `src/lib/chromeReveal.ts:7`; `src/components/layout/DynamicDock.tsx:25`; `src/components/layout/Navbar.tsx:211`; `src/lib/design-tokens.ts:223`; `src/lib/design-tokens.ts:245`; `src/modules/chatbot/shared/zIndex.ts:19`
+- Impacto: chromeReveal.ts:2-10 sigue el estado de 9a18efb0, que se revirtió en 78b510ac (2026-08-12). En main, el consumidor es DynamicDock (Navbar.tsx:211 lo monta) y Navbar no lo importa: quien siga el comentario para mantener la sincronía edita el componente equivocado. design-tokens.ts:223-224 dice que ya no hay nada por encima de la escala y :245 habla de un cursor que ya no existe. Pero el widget del chatbot vive en 2_147_000_000 o más (zIndex.ts:19-25) y en el sitio público queda por encima de modal (10000).
+- Propuesta: Decisión para Valentino (archivo congelado; ver 11-CONGELADOS.md): Corregir los dos comentarios: en chromeReveal, consumidores DynamicDock y LogicCompanion; en design-tokens, mencionar que el widget del chatbot está por encima. Si design-tokens se reemplaza por un módulo de zIndex (ver el ítem), el comentario se corrige ahí.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [DEU-100]
+- Nodo(s): lib.chromereveal, lib.sitio-publico, lib.design-tokens, lib.chatbot.shared
+
+### [DEU-111] La única prueba que miraba los design tokens apunta a una página borrada
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `tests/e2e/22-visual-regression.spec.ts:75`; `tests/e2e/22-visual-regression.spec.ts:77`
+- Impacto: La prueba navega a /admin/_design y compara contra admin-design-tokens-chromium-win32.png. La feature «Design system» del admin, con la ruta %5Fdesign, la borró c3b150ab (2026-06-28). Si el job E2E llegara a correr, ese caso no mide nada vigente, y design-tokens.ts queda sin ninguna cobertura. BUG-186 cubre que el job no puede pasar, pero no esta ruta muerta.
+- Propuesta: Borrar el caso y su baseline. Si se quiere cobertura de la escala zIndex, que sea un invariante tsx sobre el orden de la escala (appShell < … < modal > 9999 < toast < tooltip), no un screenshot.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-186]
+- Nodo(s): lib.tests
+
 ## Calidad
 
 ### [UX-001] El exito del magic link le dice al cliente que el link 'fue impreso en la consola del servidor'
@@ -4422,6 +4512,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h3.vis-widget-cliente, h2.cli-shell, h4.adm-shell
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-163
 
+### [UX-058] El error de cualquier sección del admin ofrece «Volver al inicio» hacia el portal del cliente (/dashboard)
+- Dominio: D3  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/components/ui/SectionErrorBoundary.tsx:107-108`; `src/app/(protected)/admin/_components/AdminErrorBoundary.tsx:16-23`; `src/proxy.ts:154-155`; `src/app/(protected)/setter/error.tsx:12-14`
+- Impacto: Los 15 error.tsx del admin usan AdminErrorBoundary, que delega en SectionErrorBoundary, y ahí el enlace está fijo a /dashboard con un <a> que recarga la página entera. Un SUPER_ADMIN sin impersonación rebota por el proxy hasta /admin. Con la cookie de impersonación activa (proxy.ts:154), en cambio, aterriza en el portal del cliente. El setter tuvo que duplicar el boundary para esquivar este enlace (setter/error.tsx:12-14).
+- Propuesta: Decisión para Valentino (archivo congelado; ver 11-CONGELADOS.md): Agregar una prop homeHref a SectionErrorBoundary (default '/dashboard'), pasar '/admin' desde AdminErrorBoundary y usar <Link>. Hoy exige editar ui/*, que está congelado.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.ui, h4.adm-shell, lib.proxy, h5.set-dia
+
 ## Observabilidad
 
 ## Accesibilidad
@@ -4753,6 +4853,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: FROZEN
 - Relacionado: —
 - Nodo(s): lib.ui, h2.cli-cuenta, h2.cli-resultados, h2.cli-proyecto
+
+### [A11Y-040] useReducedMotion devuelve false en el primer render: los PageTransition de los dos portales remontan la página y las entradas animan igual para quien pidió menos movimiento
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/use-reduced-motion.ts:6`; `src/lib/use-reduced-motion.ts:8`; `src/app/(protected)/admin/_components/PageTransition.tsx:15`; `src/app/(protected)/admin/_components/PageTransition.tsx:20`; `src/components/dashboard/PageTransition.tsx:11`; `src/app/(protected)/admin/layout.tsx:65`; `src/components/dashboard/DashboardLayoutClient.tsx:175`; `src/components/ui/EmptyState.tsx:47`
+- Impacto: Afecta a quien tiene prefers-reduced-motion: reduce. El SSR y la hidratación renderizan <motion.div> con initial='hidden'. Después el efecto pone reduced=true, PageTransition pasa a devolver un fragment y React desmonta y vuelve a montar todo el árbol de la página en /admin/* y /dashboard/*: se pierde el estado local y los efectos de los client components corren dos veces. En los 25 consumidores que hacen `initial={reduced ? false : …}`, como ui/EmptyState.tsx:47-48, motion lee initial solo al montar, así que la entrada (y:12) se anima igual. No es DEU-057, que trata de que el layout no se remonte por navegación.
+- Propuesta: Decisión para Valentino (archivo congelado; ver 11-CONGELADOS.md): Hacer que el hook devuelva el valor real desde el primer render del cliente, como el de motion/react, o usar MotionConfig reducedMotion="user". En los PageTransition, renderizar siempre el motion.div y pasar `initial={reduced ? false : 'hidden'}` en vez de cambiar la forma del árbol. Hoy el hook es congelado inferido, así que es decisión para Valentino; el cambio de los PageTransition es libre.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [DEU-057]
+- Nodo(s): lib.use-reduced-motion, h4.adm-shell, lib.componentes-dashboard, lib.ui
 
 ## ZONA-FRANCO
 
