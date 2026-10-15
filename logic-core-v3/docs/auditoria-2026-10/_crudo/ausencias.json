@@ -3814,6 +3814,181 @@
    "afirmacion": "mini-crm no está en el catálogo de módulos premium",
    "comando": "git grep -n \"mini-crm\" origin/main -- logic-core-v3/src/lib/data/premium-modules.ts  -> 0",
    "control_positivo": "git grep -n \"slug: 'motor-resenas'\" origin/main -- logic-core-v3/src/lib/data/premium-modules.ts -> :24; next.config.ts:159 y premium-features.ts:59 sí mencionan mini-crm"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "No hay MotionConfig global (reducedMotion='user') en src",
+   "comando": "git grep -n MotionConfig origin/main -- logic-core-v3/src  -> 0 resultados",
+   "control_positivo": "git grep -n useReducedMotion origin/main -- logic-core-v3/src/components/layout/DynamicDock.tsx -> :3 y :397"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "Ningún contenedor del setter lleva data-lenis-prevent",
+   "comando": "git grep -n \"data-lenis-prevent\" origin/main -- logic-core-v3/src -> solo ChatWindow.tsx:266, ChatbotEmbed.tsx:234 y 4 CTAs con -touch; nada bajo (protected)/setter",
+   "control_positivo": "El mismo comando encuentra ChatWindow.tsx:266 y ChatbotEmbed.tsx:234"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "SmoothScroll no pasa allowNestedScroll a Lenis",
+   "comando": "git grep -n allowNestedScroll origin/main -- logic-core-v3/src -> 0",
+   "control_positivo": "grep -n allowNestedScroll logic-core-v3/node_modules/lenis/dist/lenis.mjs -> :433, :466, :607"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "SmoothScroll no cancela el rAF ni usa autoRaf",
+   "comando": "git grep -n -E \"cancelAnimationFrame|_rafId|autoRaf\" origin/main -- logic-core-v3/src/components/layout/SmoothScroll.tsx -> 0",
+   "control_positivo": "git grep -n \"requestAnimationFrame(raf)\" origin/main -- logic-core-v3/src/components/layout/SmoothScroll.tsx -> :104 y :107"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "No hay tags v1.0.0 ni v0.9.0-rc.1 (en los tags locales)",
+   "comando": "git tag -l '*rc*' '*1.0*' '*0.9*' -> solo 'nocturno-parcial'",
+   "control_positivo": "El glob '*rc*' matchea 'nocturno-parcial'; hay 53 tags locales (git tag -l | wc -l). No se consultó el remoto"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "No queda el slug 'aki' de bot en el repo",
+   "comando": "git grep -n -E \"['\\\"/=]aki(['\\\"/ ]|$)\" origin/main -- logic-core-v3 -> 0",
+   "control_positivo": "git grep -n \"BOT_SLUG = 'develop'\" origin/main -- logic-core-v3/scripts -> seed-alerts.ts:43, seed-events.ts:34"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "seed-events, seed-latency, admin-1a-backfill-caliente y cleanup-messages-demo no tienen guard de host",
+   "comando": "git grep -l EXPECTED_DEV_HOST origin/main -- logic-core-v3/scripts logic-core-v3/prisma -> 8 archivos, ninguno de esos 4",
+   "control_positivo": "La lista incluye scripts/dev/seed-alerts.ts y scripts/regression/purge.ts; git grep -l \"new PrismaClient\" origin/main -- logic-core-v3/scripts -> 28"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "Login, forgot-password y accept-invite no tienen error.tsx propio ni ErrorBoundary alrededor de DotMatrix",
+   "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/login logic-core-v3/src/app/forgot-password logic-core-v3/src/app/accept-invite | grep error -> 0; git grep -n ErrorBoundary en login/page.tsx, forgot-password/page.tsx, accept-invite/InviteBackground.tsx -> 0",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep /error.tsx -> admin/alerts/error.tsx, admin/audit-log/error.tsx, ..."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "framer-motion no es dependencia directa (y 3 archivos lo importan)",
+   "comando": "git grep -n '\"framer-motion\"' origin/main -- logic-core-v3/package.json -> 0",
+   "control_positivo": "git grep -n '\"motion\"' origin/main -- logic-core-v3/package.json -> :153"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "Ningún archivo del lote usa router.push",
+   "comando": "git grep -n router.push origin/main -- logic-core-v3/src/components/layout logic-core-v3/src/components/brand logic-core-v3/src/components/canvas/DotMatrix.tsx logic-core-v3/src/components/3d/BrandedLogoWhite.tsx -> 0",
+   "control_positivo": "git grep -n router.push origin/main -- logic-core-v3/src | wc -l -> 33"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "DotMatrix y HeroBackground no detectan WebGL ni tienen poster",
+   "comando": "git grep -n -i -E \"webgl|getContext\\(|poster\" origin/main -- logic-core-v3/src/components/canvas/DotMatrix.tsx logic-core-v3/src/components/canvas/HeroBackground.tsx -> 0",
+   "control_positivo": "El mismo patrón sobre Hero.tsx y HeroArtifactLayer.tsx encuentra Hero.tsx:313 getContext('2d') y HeroArtifactLayer.tsx:14"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "afirmacion": "El setter no renderiza BrandMark ni el logo",
+   "comando": "git grep -n \"logodevelOP\\|BrandMark\" origin/main -- 'logic-core-v3/src/app/(protected)/setter' -> 0",
+   "control_positivo": "git grep -n \"brand/BrandMark\" origin/main -- logic-core-v3/src -> admin-sidebar.tsx:27, SidebarNav.tsx:23"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "El Modal compartido no tiene role=dialog, aria-modal, manejo de Escape ni manejo de foco",
+   "comando": "git grep -nE \"role=|aria-modal|Escape|keydown|focus\" origin/main -- logic-core-v3/src/components/ui/Modal.tsx",
+   "control_positivo": "git grep -c \"role=\" origin/main -- logic-core-v3/src/components/ui/Select.tsx -> 2"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "Los componentes de carga del kit no anuncian estado (sin role/aria-busy/aria-live/sr-only)",
+   "comando": "git grep -nE \"role=|aria-busy|aria-live|sr-only\" origin/main -- logic-core-v3/src/components/ui/Spinner.tsx logic-core-v3/src/components/ui/LoadingState.tsx logic-core-v3/src/components/ui/Skeleton.tsx logic-core-v3/src/components/ui/skeletons",
+   "control_positivo": "git grep -n \"role=\" origin/main -- logic-core-v3/src/components/ui/SectionErrorBoundary.tsx -> :75 role=\"alert\""
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "Tabs no marca la pestana activa (sin role=tab, aria-selected ni aria-current)",
+   "comando": "git grep -nE \"role=|aria-selected|aria-current\" origin/main -- logic-core-v3/src/components/ui/Tabs.tsx",
+   "control_positivo": "git grep -n \"aria-current\" origin/main -- logic-core-v3/src -> setter-nav.tsx:98, dashboard/project/page.tsx:269 (6 archivos)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "ErrorState no tiene consumidores",
+   "comando": "git grep -n \"ErrorState\" origin/main -- logic-core-v3/src logic-core-v3/tests",
+   "control_positivo": "El mismo comando con EmptyState devuelve 5 importadores en src/app/(protected)/setter/"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "Interactive3DNetwork (unico consumidor de HyperText) no tiene importadores",
+   "comando": "git grep -n \"Interactive3DNetwork\" origin/main -- logic-core-v3/src",
+   "control_positivo": "git grep -n \"HeroMetrics\" origin/main -- logic-core-v3/src -> src/app/web-development/page.tsx:6"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "El helper de la suite del setter no tiene guard de destino de base",
+   "comando": "git grep -nE \"DEV_BRANCH_HOST|seed-guard|assertSafe|neon\" origin/main -- logic-core-v3/tests/helpers/setter-db.ts",
+   "control_positivo": "El mismo patron sobre logic-core-v3/scripts/dev/m0-galeria-seed.ts devuelve el guard en :53-57"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "Los CTA del hero del home no pasan href ni onClick a MagneticCta",
+   "comando": "git grep -n -A2 \"<MagneticCta\" origin/main -- logic-core-v3/src/components/layout/Hero.tsx",
+   "control_positivo": "git grep -n -A2 \"<ChargeTraceButton\" origin/main -- logic-core-v3/src/app/web-development/page.tsx -> onClick en :203"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "framer-motion no esta declarado en package.json",
+   "comando": "git show origin/main:logic-core-v3/package.json | grep -n '\"framer-motion\"'",
+   "control_positivo": "git show origin/main:logic-core-v3/package.json | grep -n '\"motion\"' -> :153"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "No existe un badge 'Generado por IA' / DataOriginBadge",
+   "comando": "git grep -nE \"Generado por IA|DataOriginBadge\" origin/main -- logic-core-v3/src",
+   "control_positivo": "git grep -l \"PreviewBanner\" origin/main -- logic-core-v3/src -> 3 archivos"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "LegacyNeuroAvatar no pausa fuera de viewport (sin IntersectionObserver ni frameloop)",
+   "comando": "git show origin/main:logic-core-v3/src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx | grep -nE \"IntersectionObserver|useInView|frameloop\"",
+   "control_positivo": "git grep -n \"dpr=\" en el mismo archivo devuelve :940"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "La TextArea local del setter ya no existe",
+   "comando": "git ls-files -- \"logic-core-v3/src/app/(protected)/setter/_components/text-area.tsx\"",
+   "control_positivo": "git ls-files -- logic-core-v3/src/components/ui/Textarea.tsx -> listado"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "La ruta publica /smoke ya no existe",
+   "comando": "git ls-files -- logic-core-v3/src/app | grep -ciE \"/smoke\"",
+   "control_positivo": "git ls-files -- logic-core-v3/src/app | grep -c \"/embed/\" -> 2"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "afirmacion": "Los formateos de fecha del server citados en CLEAN-R2 no pasan timeZone",
+   "comando": "git grep -nE \"timeZone|TZ_AR|formatDateAR\" origin/main -- \"logic-core-v3/src/app/(protected)/dashboard/page.tsx\" logic-core-v3/src/modules/chatbot/server/admin/getActivityChartData.ts logic-core-v3/src/modules/chatbot/server/admin/getLatencyHistory.ts logic-core-v3/src/lib/email/templates/weekly-report.ts",
+   "control_positivo": "git grep -n \"timeZone: TZ_AR\" origin/main -- logic-core-v3/src/lib/dates-ar.ts -> :49, :225, :235"
   }
  ]
 }

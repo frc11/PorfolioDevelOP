@@ -3992,6 +3992,274 @@
     "knip.ts:10-22 entradas y proyecto",
     ".github/workflows/ci.yml:20-26 deja el lint fuera del CI"
    ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Chrome publico por ruta (gate de Navbar, Shutter y Preloader)",
+   "pasos": [
+    "src/app/layout.tsx:111-121 monta SmoothScroll > TransitionProvider > PublicOnlyComponents(Shutter) + {children} + PublicOnlyComponents(Navbar)",
+    "src/components/layout/PublicOnlyComponents.tsx:20-22 usePathname + isChromeFreeRoute -> null en portales y /styleguide",
+    "src/components/layout/publicRoute.ts:16 PORTAL_PREFIXES (/admin, /dashboard, /embed, /setter); :26 CHROME_FREE_PREFIXES (/styleguide); :39-43 isChromeFreeRoute",
+    "src/components/layout/Shutter.tsx:7-14 overlay fijo con opacidad atada a isAnimating",
+    "sale del lote: src/components/layout/Shutter.tsx:4 -> src/context/TransitionContext.tsx (useTransitionContext)",
+    "sale del lote: src/components/layout/Navbar.tsx:211 -> src/components/layout/DynamicDock.tsx (barra desktop); desemboca en [D8] Render raiz de cualquier ruta"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Menu mobile del sitio publico -> navegacion con transicion",
+   "pasos": [
+    "src/components/layout/Navbar.tsx:213 contenedor md:hidden",
+    "Navbar.tsx:232-245 boton flotante (solo icono, sin aria-label) alterna isMobileMenuOpen",
+    "Navbar.tsx:191-197 bloquea body overflow mientras el menu esta abierto",
+    "Navbar.tsx:321-345 items: Servicios expande (:336-339); el resto llama triggerTransition(item.href) y cierra a los 250 ms (:343-344)",
+    "Navbar.tsx:371-379 submenu de servicios con precio literal (:35-38)",
+    "Navbar.tsx:95 Acceder -> triggerTransition('/login')",
+    "sale del lote: Navbar.tsx:343 -> src/context/TransitionContext.tsx (triggerTransition); Acceder desemboca en [D1] Login con contrasena (Credentials)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Scroll suave por ruta (Lenis)",
+   "pasos": [
+    "src/app/layout.tsx:111 SmoothScroll envuelve {children} en TODAS las rutas",
+    "src/components/layout/SmoothScroll.tsx:25-27 history.scrollRestoration='manual' global (portales incluidos)",
+    "SmoothScroll.tsx:30-34 solo sale en /admin y /dashboard (no /setter ni /embed)",
+    "SmoothScroll.tsx:65-69 home sin ancla -> scrollTo(0,0)",
+    "SmoothScroll.tsx:71-76 dispositivo tactil -> scroll nativo",
+    "SmoothScroll.tsx:78-91 new Lenis (smoothWheel, overscroll:false, sin allowNestedScroll) y setLenisInstance",
+    "SmoothScroll.tsx:102-107 loop rAF manual que el cleanup (:109-112) no cancela",
+    "node_modules/lenis/dist/lenis.mjs:607-625 (lenis 1.3.25, package-lock.json:10549) cancela el wheel si el camino no tiene data-lenis-prevent",
+    "sale del lote: SmoothScroll.tsx:15-16 useLenis -> src/context/TransitionContext.tsx:19, src/components/layout/Hero.tsx:443, src/components/ui/MarketingIntro.tsx:95"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Scroll-lock temprano del home",
+   "pasos": [
+    "src/app/layout.tsx:80 <EarlyScrollLock /> en <head>",
+    "src/components/layout/EarlyScrollLock.tsx:33-38 useServerInsertedHTML one-shot inyecta el <script> en el stream SSR",
+    "EarlyScrollLock.tsx:27 si pathname es '/' y no hay webdriver -> documentElement overflow hidden antes del primer paint",
+    "sale del lote: src/components/layout/Hero.tsx:486-489 libera en phase 'done'; Hero.tsx:497-503 libera al desmontar (sin timeout de seguridad)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Fondo animado de las pantallas de acceso (DotMatrix)",
+   "pasos": [
+    "entra desde fuera del lote: src/app/login/page.tsx:11-12 dynamic(ssr:false) y :479 <DotMatrix />; tambien forgot-password/page.tsx:239 y accept-invite/InviteBackground.tsx:13",
+    "src/components/canvas/DotMatrix.tsx:209-221 Canvas 100vw x 100vh con dpr [1,2]",
+    "DotMatrix.tsx:59-62 sin progress -> grilla 50x50 (2500 instancias)",
+    "DotMatrix.tsx:99-110 'pausa' segun scrollY (en login la ventana no scrollea)",
+    "DotMatrix.tsx:112-194 por frame: ola, influencia del mouse, setMatrixAt y setColorAt de cada instancia",
+    "sale del lote: DotMatrixMesh tambien lo usan src/components/layout/Hero.tsx:11 y src/components/ui/BrandedIntroCanvas.tsx:16 (con progress/revealProgress)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Intro de marketing: logo 3D blanco",
+   "pasos": [
+    "entra desde fuera del lote: src/components/ui/Preloader.tsx:303 -> MarketingIntro -> src/components/ui/BrandedIntroCanvas.tsx:89 <BrandedLogoWhite mouseFollowEnabled>",
+    "src/components/3d/BrandedLogoWhite.tsx:36-44 carga /logodevelOP.svg y arma shapes (params de extrude copiados de HeroArtifact, :10-16)",
+    "BrandedLogoWhite.tsx:46-62 useFrame: con mouseFollowEnabled=false pisa state.pointer a (0,0), store compartido con DotMatrixMesh del mismo Canvas"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Marca y version en los shells de admin y cliente",
+   "pasos": [
+    "entra desde fuera del lote: src/app/(protected)/admin/_components/admin-sidebar.tsx:27 y src/components/dashboard/SidebarNav.tsx:23 importan BrandMark",
+    "src/components/brand/BrandMark.tsx:18-65 logo (Image priority + filtro inline :30-38), 'develOP' y tagline; Link si hay href",
+    "entra desde fuera del lote: AdminLayoutClient.tsx:106 y DashboardLayoutClient.tsx:181 renderizan VersionBadge",
+    "src/components/layout/VersionBadge.tsx:1-8 imprime el literal 'v1.0.0'"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Bench de latencia en prod (seed -> medicion -> cleanup)",
+   "pasos": [
+    "scripts/_b14-2-seed-bench-prod.ts:57-87 preflight (--confirm, host distinto de dev, sin localhost, neon.tech)",
+    "_b14-2-seed-bench-prod.ts:105-133 upsert Organization bench-matsu, User ORG_MEMBER (password aleatoria, passwordResetRequired) y OrgMember ADMIN",
+    "_b14-2-seed-bench-prod.ts:139-197 upsert BotConfig isActive=true (cuota 1000, gemini-2.5-flash) y KnowledgeBase",
+    "sale del lote: medicion en scripts/_b14-2-prod-bot-latency.mjs:22 y smoke scripts/_b14-4-smoke-prod.mjs:20 con Origin develop.com.ar (src/lib/security/validate-origin.ts:71); desemboca en [D5] Abuso anonimo del endpoint de chat (cuota)",
+    "scripts/_b14-2-cleanup-bench-prod.ts:34-60 preflight; :88-92 borra ChatbotEvent y ChatbotLead fuera de transaccion",
+    "_b14-2-cleanup-bench-prod.ts:102 prisma.message.deleteMany({ where: { conversationId } }) -> Message no tiene ese campo (prisma/schema.prisma:593-603) -> aborta; :105-130 nunca corren"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Seeds de desarrollo de Inteligencia (alertas, actividad, latencia)",
+   "pasos": [
+    "scripts/dev/seed-alerts.ts:214-227 guard host == dev (fail-closed) -> :275-277 borra por metadata._seed -> :285-293 bot 'develop' -> :308 createMany de 14 alertas",
+    "scripts/dev/seed-events.ts:25-29 solo exige DATABASE_URL -> :117-125 clean por _seed y prefijo de sessionId -> :146-153 crea 3 conversaciones -> :179 createMany de eventos",
+    "scripts/dev/seed-latency.ts:61-63 solo exige DATABASE_URL -> :67 deleteMany por _seed -> :75-77 bot 'develop' o el primer BotConfig de la base -> :118 createMany de ~96 eventos (npm run seed:latency, package.json:20)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Purga de la bateria de regresion (dev)",
+   "pasos": [
+    "scripts/regression/purge.ts:27-36 guard host == dev",
+    "purge.ts:47-64 conversaciones con prefijo regression-test- y re-chequeo por fila",
+    "purge.ts:69-73 conteos",
+    "purge.ts:86-100 $transaction: events -> leads -> conversations (doble filtro por prefijo)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Seed de Matsu (dev)",
+   "pasos": [
+    "scripts/seed-matsu.ts:51-59 guard host == dev",
+    "seed-matsu.ts:66-113 upsert org matsu, user matsu-admin@dev.local (ORG_MEMBER) y OrgMember ADMIN",
+    "seed-matsu.ts:116-176 upsert BotConfig 'matsu' activo y KB con scaffolding"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Backfill de OsLead.caliente (one-shot, ZONA-FRANCO)",
+   "pasos": [
+    "scripts/admin-1a-backfill-caliente.ts:36-37 carga .env.local y .env",
+    "admin-1a-backfill-caliente.ts:42-44 solo exige DATABASE_URL (sin guard de host ni --confirm)",
+    "admin-1a-backfill-caliente.ts:49-56 lee todos los OsLead con dossier",
+    "admin-1a-backfill-caliente.ts:63-76 recalcula caliente por score y actualiza si difiere",
+    "choca con la marca manual: src/app/(protected)/admin/leads/_actions/lead.actions.ts:165 (fuera del lote)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "nombre": "Limpieza de mensajes demo del inbox admin",
+   "pasos": [
+    "scripts/cleanup-messages-demo.ts:24-29 exige --confirm",
+    "cleanup-messages-demo.ts:30-44 exige DATABASE_URL e imprime el host (sin guard)",
+    "cleanup-messages-demo.ts:50 deleteMany de Message con el marcador zero-width en todas las orgs (par: scripts/seed-messages-demo.ts)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "nombre": "Intro branded de marketing (hard-load de /contact y las 4 landings de servicio)",
+   "pasos": [
+    "sale del lote: src/app/layout.tsx:123 monta <Preloader/> para todas las rutas (fuera del lote, citado)",
+    "src/components/ui/Preloader.tsx:302 shouldRunMarketingIntro(pathname) -> <MarketingIntro/>",
+    "src/lib/marketing-routes.ts:54-62 allow-list + ENTRY_PATHNAME (solo hard-load, no client-nav)",
+    "src/components/ui/MarketingIntro.tsx:175 lockScroll() (html+body overflow hidden + lenis.stop)",
+    "src/components/ui/MarketingIntro.tsx:19-22 BrandedIntroCanvas en chunk dinamico ssr:false (three/r3f/postprocessing fuera del bundle inicial)",
+    "src/components/ui/MarketingIntro.tsx:233 espera readiness del SVG (LogoReadySignal BrandedIntroCanvas.tsx:54-70) o 2500 ms",
+    "src/components/ui/MarketingIntro.tsx:250-306 settle 420 ms -> trazo 0,85 s -> relleno 0,45 s -> crossfade 0,4 s -> 1 s interactivo -> toldo 0,8 s (LogoStrokeOverlay.tsx:124-136, IntroLockupText.tsx:183-253)",
+    "src/components/ui/MarketingIntro.tsx:309-310 unlockScroll() + finish() -> marketing-routes.ts:75-80 evento chrome:revealed",
+    "src/components/ui/MarketingIntro.tsx:345-359 red de seguridad: a los 6000 ms libera el scroll y desmonta aunque la coreografia no haya terminado"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "nombre": "Intro del home (hard-load de /)",
+   "pasos": [
+    "src/components/ui/Preloader.tsx:82-88 solo home y si no esta done",
+    "src/lib/home-routes.ts:21-26 shouldRunHomeIntro (HOME_ENTRY_PATHNAME === '/')",
+    "src/components/ui/Preloader.tsx:118-119 setPhase('drawing') + race waitForLogoReady (PreloaderContext.tsx:114-122) / 2500 ms",
+    "src/components/ui/Preloader.tsx:124-200 velo 1,4 s, trazo, relleno, crossfade, hold 1,5 s, borrado 1,5 s",
+    "src/components/ui/Preloader.tsx:258-264 flying: introProgress 0->1 en 0,78 s",
+    "src/components/ui/Preloader.tsx:269-274 swapping 240 ms -> markHomeIntroConsumed -> setPhase('done') (PreloaderContext.tsx:130-138)",
+    "sale del lote: el scroll lock del home lo posee Hero (src/components/layout/Hero.tsx, segun Preloader.tsx:55-56)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "nombre": "Navegacion por triggerTransition (sitio publico y, de hecho, portales)",
+   "pasos": [
+    "consumidores fuera del lote: src/app/(protected)/setter/_components/setter-nav.tsx:49 y src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:92 llaman triggerTransition(href)",
+    "src/context/TransitionContext.tsx:72 si isAnimating el click se descarta",
+    "src/context/TransitionContext.tsx:76-104 rama hash: scroll en la misma pagina o router.push + 3 reintentos de offset",
+    "src/context/TransitionContext.tsx:108-129 rama ruta: setIsAnimating(true), router.push dentro de startTransition a los 300 ms, red de seguridad a los 8000 ms",
+    "src/context/TransitionContext.tsx:152-160 reabre (isAnimating=false) cuando isPending vuelve a false",
+    "desemboca en el flujo ya trazado [D4] Rail del setter: navegacion interna y herramientas externas"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "nombre": "Error de render en un segmento del portal del cliente",
+   "pasos": [
+    "sale del lote: src/app/(protected)/dashboard/error.tsx:13 (y chatbot/, cuenta/, modules/, resultados/) renderiza SectionErrorBoundary",
+    "src/components/ui/SectionErrorBoundary.tsx:52-59 logger.error con nombre, mensaje y stack (consola)",
+    "src/components/ui/SectionErrorBoundary.tsx:64-67 Sentry.captureException con tag section",
+    "src/components/ui/SectionErrorBoundary.tsx:85-96 mensaje sin detalles tecnicos + digest",
+    "src/components/ui/SectionErrorBoundary.tsx:101 reset() / :108 enlace duro a /dashboard",
+    "desemboca en [D3] Error de render en una pagina admin (AdminErrorBoundary.tsx:16 reusa este componente)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "nombre": "Campo de formulario accesible (Field + controles del kit)",
+   "pasos": [
+    "src/components/ui/Field.tsx:19-27 useId + contexto {controlId, describedBy, invalid}",
+    "src/components/ui/Field.tsx:31-32 label htmlFor={fieldId}",
+    "src/components/ui/field-context.ts:23-28 FieldControlProvider / useFieldControl",
+    "src/components/ui/Input.tsx:25-31, Textarea.tsx:21-26, Select.tsx:121,319,327 toman id, aria-describedby y aria-invalid del contexto",
+    "src/components/ui/Field.tsx:46-51 error con role=alert e id enlazado"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "nombre": "Autosave del trabajo escrito del setter",
+   "pasos": [
+    "sale del lote: formularios del manual del setter (ficha/brief) llaman useAutosave y useUnsavedGuard",
+    "src/lib/use-autosave.ts:148-157 agenda segun ensuciamiento; cleanup cancela el timer al desmontar",
+    "src/lib/use-autosave.ts:131-140 debounce 1200 ms con tope 8000 ms",
+    "src/lib/use-autosave.ts:91-128 flush -> saveRef.current(snapshot.value) (server action de dominio, sale del lote) -> phase saved/error",
+    "src/lib/use-unsaved-guard.ts:81-93 beforeunload mientras isDirty; :99-113 aviso de salida interna solo opt-in (formularios sin autosave)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "nombre": "Ciclo submit de los pasos del manual",
+   "pasos": [
+    "sale del lote: steps del setter llaman useStepAction().run(action)",
+    "src/lib/use-step-action.ts:53-54 startTransition(async) -> await action() (server action, sale del lote)",
+    "src/lib/use-step-action.ts:55-59 fallo: onError + toast.error(result.error)",
+    "src/lib/use-step-action.ts:60-66 exito: onSuccess + toast.success + router.refresh()"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "nombre": "Suite Playwright del setter que escribe en la base",
+   "pasos": [
+    "sale del lote: tests/setter/*.spec.ts (40+ specs) y scripts/dev/m0-galeria-seed.ts:94 importan tests/helpers/setter-db.ts",
+    "tests/helpers/setter-db.ts:8 dotenv.config({ path: '.env.local' })",
+    "tests/helpers/setter-db.ts:19 new PrismaClient() con ese DATABASE_URL, sin chequeo de host",
+    "tests/helpers/setter-db.ts:158-167 crea User SETTER; :268-301 crea OsLead + dossier + setterMetas",
+    "tests/helpers/setter-db.ts:364-378 teardown por id exacto (notices -> leads -> users)"
+   ]
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "nombre": "CTA de WhatsApp del sitio publico",
+   "pasos": [
+    "sale del lote: src/app/contact/page.tsx:96 getWhatsappHref(WHATSAPP_PREFILL_CONTACTO) (y 13 componentes de landings)",
+    "src/lib/whatsapp.ts:55-57 arma https://wa.me/<digitos>?text=<prefill codificado>",
+    "src/lib/whatsapp.ts:41-45 NEXT_PUBLIC_WHATSAPP_NUMBER o fallback literal (:21), solo digitos",
+    "fuera del modulo quedan destinos propios: Footer.tsx:8, CalculadorIA.tsx:316, ChatbotUpsellLanding.tsx:15, PortalDemoCTA.tsx:235"
+   ]
   }
  ]
 }

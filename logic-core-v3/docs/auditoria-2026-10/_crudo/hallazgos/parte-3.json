@@ -3,6 +3,258 @@
  "partes": 6,
  "hallazgos": [
   {
+   "id": "SEC-053",
+   "prefijo": "SEC",
+   "titulo": "El selector de sucursal GBP 'self-service' valida la pertenencia contra lo que ve el token, y ese token lo obtiene un SUPER_ADMIN: con la cuenta de Google de develOP un cliente podria listar y adoptar fichas de otros clientes (latente, sin importadores)",
+   "dominio": "D2",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/auth/google-business/start/route.ts",
+     "linea": 7,
+     "fragmento": "if (!session?.user || session.user.role !== 'SUPER_ADMIN') {"
+    },
+    {
+     "ruta": "src/app/api/auth/google-business/callback/route.ts",
+     "linea": 49,
+     "fragmento": "await prisma.organization.update({ where: { id: orgId }, data: { gbpAccessToken: tokens.access_token, ..."
+    },
+    {
+     "ruta": "src/lib/actions/gbp-connection.ts",
+     "linea": 15,
+     "fragmento": "* SUPER_ADMIN no tiene organizationId → no puede usarlo; es self-service del dueño."
+    },
+    {
+     "ruta": "src/lib/integrations/gbp-connection-logic.ts",
+     "linea": 263,
+     "fragmento": "const { locations } = await discoverLocations(accessToken, deps)\n  const hit = findLocationInList(locations, locationId)"
+    },
+    {
+     "ruta": "src/lib/integrations/gbp-connection-logic.ts",
+     "linea": 241,
+     "fragmento": "return locations.map((l) => ({ ... title: l.title, address: l.address,"
+    },
+    {
+     "ruta": "docs/sprints/p3-a-1-gbp-connection.md",
+     "linea": 116,
+     "fragmento": "tokens de la propia org) + persiste el compuesto + one-shot. Ninguna location cross-org es alcanzable."
+    },
+    {
+     "ruta": "src/lib/integrations/google-business-profile.ts",
+     "linea": 341,
+     "fragmento": "`https://mybusiness.googleapis.com/v4/${org.gbpLocationId}/reviews?pageSize=50`,"
+    }
+   ],
+   "impacto": "Hoy no es explotable: listAvailableLocations y setActiveLocation no tienen importadores (POD-059) y el start del OAuth no esta enlazado (FAL-011). Pero el diseno afirma que ninguna ficha de otra org es alcanzable apoyandose en un supuesto que el codigo no garantiza: el consentimiento de Google ocurre en la sesion del SUPER_ADMIN, asi que si develOP conecta las fichas con su cuenta de agencia (la que administra las fichas de varios clientes), el token guardado en cada org ve todas esas fichas. El dia que P3-A.2 (PLAN-118) monte el selector self-service, el primer cliente real veria nombre y direccion de las fichas de los demas clientes y podria fijar una ajena como propia: su portal mostraria las resenas y metricas de otro negocio y publicaria respuestas en el Google de ese otro negocio.",
+   "propuesta": "Antes de construir el selector, decidir con que cuenta de Google se conecta cada org. Si es la de develOP: la ubicacion de cada org la fija solo el SUPER_ADMIN (action con requireSuperAdmin), el cliente no lista ubicaciones, y replyToReview/listReviews verifican que el recurso cuelgue de org.gbpLocationId. Si es la del cliente: el OAuth lo tiene que poder iniciar el dueno (hoy es SUPER_ADMIN-only) y el token deja de ser de develOP. Mientras tanto, podar gbp-connection.ts (POD-059) o marcarlo como no apto para el cliente.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-resenas",
+    "h2.cli-resenas.publicar-respuesta",
+    "h2.cli-resultados.reputacion-gbp",
+    "int.gbp",
+    "lib.actions",
+    "modelo.Organization"
+   ],
+   "relacionados_ids": [
+    "SEC-051",
+    "FAL-011"
+   ],
+   "previas": [],
+   "relacionados_texto": "SEC-051 (reviewName sin verificar: este hallazgo vuelve PROBABLE su escenario de cuenta de agencia), FAL-011, POD-059, PLAN-118",
+   "vh": "VH-060",
+   "origen": {
+    "ciclo": "D2-c2",
+    "lote": "D2-T1",
+    "tmp": "D2-c2/D2-T1/H01",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene (google-business/start/route.ts:7 exige SUPER_ADMIN, así que el consentimiento de Google ocurre en la sesión del admin; listAvailableLocations y setActiveLocation, src/lib/actions/gbp-connection.ts:17-60, toman la org de la sesión y validan la ubicación contra lo que ve ese token; git grep de sus importadores: solo la definición y el invariante). Latente: hoy nadie las llama.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-054",
+   "prefijo": "SEC",
+   "titulo": "Texto de clientes y de visitantes anónimos llega sin neutralizar al webhook de alertas (Slack): menciones <!channel>/<!here> y enlaces con texto engañoso en el canal interno de develOP",
+   "dominio": "D2",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/alerts.ts",
+     "linea": 64,
+     "fragmento": "`🏢 Cliente: ${event.clientName}`,\n    `💬 ${event.detail}`,"
+    },
+    {
+     "ruta": "src/lib/alerts.ts",
+     "linea": 134,
+     "fragmento": "body: JSON.stringify({ text: formatAlertMessage(event) }),"
+    },
+    {
+     "ruta": "src/lib/tickets/actions.ts",
+     "linea": 92,
+     "fragmento": "detail: ticket.title,"
+    },
+    {
+     "ruta": "src/lib/actions/messages.ts",
+     "linea": 160,
+     "fragmento": "? `${parsedMessage.data.content.slice(0, 160)}...`"
+    },
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 102,
+     "fragmento": "detail: `Solicitó activar ${parsed.data.featureName}. Contacto: ${user.email}.`,"
+    },
+    {
+     "ruta": "src/lib/actions/contact.ts",
+     "linea": 74,
+     "fragmento": "clientName: payload.company || payload.name,"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "linea": 267,
+     "fragmento": "placeholder=\"https://hooks.slack.com/...\""
+    },
+    {
+     "ruta": "src/lib/actions/messages.ts",
+     "linea": 157,
+     "fragmento": "clientName: org.companyName,\n          detail:\n            parsedMessage.data.content.length > 160"
+    },
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 16,
+     "fragmento": "companyName: z.string().trim().min(2, 'La empresa debe tener al menos 2 caracteres.'),"
+    }
+   ],
+   "impacto": "Con el webhook de Slack configurado (el destino que sugiere el panel), un cliente (titulo de ticket Alta/Urgente, mensaje, nombre del modulo pedido, nombre de empresa) o cualquier visitante anonimo del formulario publico (nombre, empresa, servicio) controla texto que Slack interpreta como formato: puede notificar a todo el canal con <!channel>/<!here> y publicar enlaces disfrazados (<https://sitio-falso|Abrir ticket en el admin>) dentro de una alerta que el equipo toma como del sistema. Es un vector de phishing contra quien tiene la cuenta SUPER_ADMIN y de ruido en el canal; ningun campo tiene tope de largo (SEC-047, SEC-032).",
+   "propuesta": "Decision para Valentino (src/lib/alerts.ts es congelado): escapar &, < y > en formatAlertMessage (formato de escape de Slack) o enviar los campos del usuario como texto plano en un bloque sin mrkdwn, y truncarlos. Alternativa en zona libre: neutralizar y truncar en los llamadores (tickets/actions.ts, messages.ts, upsell.ts, contact.ts) antes de llamar a sendAgencyAlert.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "h2.cli-soporte.crear-ticket",
+    "h2.cli-mensajes.enviar-mensaje",
+    "h2.cli-servicios.solicitar-modulo",
+    "h6.vis-contacto",
+    "h4.adm-config",
+    "lib.alerts",
+    "int.slack",
+    "h2.cli-soporte",
+    "h2.cli-mensajes",
+    "h2.cli-servicios",
+    "int.webhook-alertas"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-047, SEC-032, SEC-025 (rate limit del formulario publico esquivable)",
+   "vh": "VH-061",
+   "origen": {
+    "ciclo": "D2-c2",
+    "lote": "D2-T1",
+    "tmp": "D2-c2/D2-T1/H02",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c2",
+      "tmp": "D2-c2/D2-T2/H01",
+      "titulo": "El texto que escriben clientes y visitantes anónimos llega sin escapar al webhook de alertas de develOP (Slack): puede mencionar a todo el canal y meter links con texto falso",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreo DEC-37: se sostiene (alerts.ts:59-66 interpola clientName y detail tal cual y :131-135 los manda como text del webhook; los llamadores pasan título de ticket, mensaje, featureName y los campos del formulario público). Mismo hallazgo que D2-T1/H02."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-060",
+   "prefijo": "BUG",
+   "titulo": "El resumen ejecutivo IA y los insights IA de Tráfico y SEO no consultan el plan: Starter los recibe (y el cron los regenera) aunque la vitrina de planes los vende como mejora a Pro",
+   "dominio": "D2",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/dashboard/page.tsx",
+     "linea": 193,
+     "fragmento": "brief = await getExecutiveBrief(organizationId)  // sin planAllows; el semaforo si lo tiene en :121"
+    },
+    {
+     "ruta": "src/lib/ai/executive-brief.ts",
+     "linea": 96,
+     "fragmento": "const generation = await generateBriefText(  // cache vencido: llama al LLM sin mirar el plan"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/_actions/regenerate-brief.ts",
+     "linea": 19,
+     "fragmento": "const result = await regenerateExecutiveBrief(orgId.data)"
+    },
+    {
+     "ruta": "src/app/api/cron/regenerate-briefs/route.ts",
+     "linea": 29,
+     "fragmento": "subscription: { is: { status: 'ACTIVE' } },  // unico filtro junto a onboardingCompleted"
+    },
+    {
+     "ruta": "src/lib/plan/plan-presentation.ts",
+     "linea": 154,
+     "fragmento": "{ icon: Sparkles, label: 'Resumen ejecutivo de tu negocio' },  // nextTierTeaser de STARTER"
+    },
+    {
+     "ruta": "prisma/seeds/sync-plans.ts",
+     "linea": 77,
+     "fragmento": "insightEnabled: false,  // plan STARTER (reportsEnabled: false en :76)"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+     "linea": 168,
+     "fragmento": ": await getTrafficInsights({"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/resultados/analisis/page.tsx",
+     "linea": 36,
+     "fragmento": "const showAnalysis = planAllows(plan, 'insight')  // control: aca si hay gate"
+    }
+   ],
+   "impacto": "Un primer cliente Starter ve en /dashboard/plan que el 'Resumen ejecutivo de tu negocio' es del plan siguiente, pero el Inicio se lo genera con LLM (gemini-2.5-flash), le deja regenerarlo 3 veces por semana y el cron semanal se lo rehace; Trafico y SEO le muestran insights de Claude Haiku. develOP paga el LLM de un beneficio que no cobra y el upsell a Pro pierde su argumento. El gate de 'analisis con IA' (insightEnabled) solo se aplica en Analisis y en el PDF mensual.",
+   "propuesta": "Decidir si el brief y los insights son de todos los planes (y corregir plan-presentation.ts) o de Pro/Business. En el segundo caso, gatear del lado server con planAllows(plan, 'insight') (o reportEligiblePlan) en getExecutiveBrief/BriefServerWrapper, regenerateBriefAction, el cron regenerate-briefs y antes de getTrafficInsights/getSeoInsights, mostrando un teaser como AnalysisTeaser.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-inicio.resumen-ejecutivo-ia",
+    "h2.cli-resultados.insights-ia",
+    "h2.cli-plan.vitrina-de-planes-y-upgrade",
+    "lib.plan",
+    "lib.ai",
+    "int.vertex",
+    "int.anthropic",
+    "int.cron.regenerate-briefs"
+   ],
+   "relacionados_ids": [
+    "SEC-043"
+   ],
+   "previas": [],
+   "relacionados_texto": "PERF-004, SEC-043, DEU-034, UX-011",
+   "vh": "VH-062",
+   "origen": {
+    "ciclo": "D2-c2",
+    "lote": "D2-T1",
+    "tmp": "D2-c2/D2-T1/H03",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "BUG-061",
    "prefijo": "BUG",
    "titulo": "Las bajas de un clic se ejecutan en el GET: un escáner de enlaces del correo da de baja al dueño del reporte semanal y a los contactos de las campañas sin que nadie haga clic",
@@ -3780,6 +4032,21 @@
      "ruta": "src/app/layout.tsx",
      "linea": 114,
      "fragmento": "<Shutter />"
+    },
+    {
+     "ruta": "src/context/TransitionContext.tsx",
+     "linea": 72,
+     "fragmento": "if (isAnimating) return;"
+    },
+    {
+     "ruta": "src/context/TransitionContext.tsx",
+     "linea": 116,
+     "fragmento": "setTimeout(() => {\n                startTransition(() => {\n                    router.push(target);"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+     "linea": 49,
+     "fragmento": "triggerTransition(href)"
     }
    ],
    "impacto": "CLAUDE.md reserva triggerTransition para el sitio público (el Shutter no existe en portales); acá navega al bot recién creado con 300 ms de demora y un router.push sin comentario que lo justifique. Funciona, pero rompe la convención de navegación del portal y arrastra el estado de animación del sitio.",
@@ -3789,7 +4056,10 @@
    "nodos": [
     "h4.adm-clientes.alta-cliente-con-bot",
     "lib.ui",
-    "h4.adm-clientes.editar-datos"
+    "h4.adm-clientes.editar-datos",
+    "lib.transition",
+    "h5.set-dia",
+    "h4.adm-clientes"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -3809,6 +4079,13 @@
       "titulo": "Editar datos usa triggerTransition (shutter del sitio publico) dentro del admin",
       "severidad": "BAJA",
       "nota_padre": "Muestreado: EditClientForm.tsx:92 (y :232) llama triggerTransition dentro del admin; el Shutter está en el layout raíz (layout.tsx:114). Mismo defecto que DEU-039 en otro formulario."
+     },
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/D9-L2/H16",
+      "titulo": "triggerTransition usado en portales: 300 ms de demora fija y clicks descartados mientras isAnimating (hasta 8 s)",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo uso de triggerTransition en portales; suma la demora fija de 300 ms y los clicks descartados mientras isAnimating."
      }
     ],
     "cambios": [
@@ -4790,6 +5067,16 @@
      "ruta": "src/modules/chatbot/components/admin/config/tabs/AppearanceTab.tsx",
      "linea": 40,
      "fragmento": "<AvatarPicker"
+    },
+    {
+     "ruta": "src/components/canvas/DotMatrix.tsx",
+     "linea": 213,
+     "fragmento": "dpr={[1, 2]} // Optimize for retina displays while limiting max resolution"
+    },
+    {
+     "ruta": "src/components/ui/BrandedIntroCanvas.tsx",
+     "linea": 122,
+     "fragmento": "dpr={[1, 1.5]}"
     }
    ],
    "impacto": "Viola reglas de CLAUDE.md (dpr max 1.5, IntersectionObserver en animaciones pesadas). Nadie pasa frameloop (git grep 'frameloop=' solo encuentra NeuroAvatar.tsx:54). En la config del admin y del cliente conviven 2 canvas del picker + los de la preview, a 60 fps; el changelog admin registra 'Freeze del AvatarPicker' como pendiente. ParticleSphere asigna 120 Vector3 por frame y rota sin delta (:35), mas rapido en 120 Hz.",
@@ -4803,7 +5090,8 @@
     "lib.chatbot.components",
     "h3.adm-chatbots.editar-config-bot",
     "h4.adm-clientes.alta-cliente-con-bot",
-    "lib.chatbot.avatar"
+    "lib.chatbot.avatar",
+    "h3.vis-widget-develop"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -4823,6 +5111,13 @@
       "titulo": "El selector de avatar monta todos los avatares 3D a la vez",
       "severidad": "BAJA",
       "nota_padre": "Mismo selector que monta todos los avatares 3D."
+     },
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/D9-L2/H19",
+      "titulo": "Canvas 3D del avatar del chatbot con dpr [1,2] y sin pausa fuera de viewport",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo defecto (canvas del avatar con dpr hasta 2 y sin pausa fuera de viewport)."
      }
     ]
    },
@@ -6297,7 +6592,7 @@
   {
    "id": "SEC-071",
    "prefijo": "SEC",
-   "titulo": "Script que imprime la credencial completa de Vertex por stdout",
+   "titulo": "Scripts que imprimen credenciales completas por stdout: encode-vertex-creds.js vuelca la service account de Vertex y db-restore-local.sh el usuario y la contraseña de la base destino, creyendo enmascararlos",
    "dominio": "D5",
    "severidad": "BAJA",
    "tipo": "seguridad",
@@ -6313,6 +6608,16 @@
      "ruta": "scripts/encode-vertex-creds.js",
      "linea": 10,
      "fragmento": "console.log(JSON.stringify(parsed))"
+    },
+    {
+     "ruta": "scripts/db-restore-local.sh",
+     "linea": 78,
+     "fragmento": "${TARGET_URL%%@*} conserva esquema, usuario y contraseña y oculta el host"
+    },
+    {
+     "ruta": "scripts/db-restore-local.sh",
+     "linea": 92,
+     "fragmento": "la línea final imprime la URL completa en el comando psql sugerido"
     }
    ],
    "impacto": "El helper lee vertex-credentials.json y vuelca la cuenta de servicio entera (incluida la clave privada) a la terminal. Corrido dentro de una sesion de agente o de CI, la credencial queda en transcripts o logs: es un vector plausible de la 'key expuesta en logs' de la bitacora. El archivo nunca fue commiteado (.gitignore:55). No se copio ningun valor.",
@@ -6321,7 +6626,9 @@
    "zona": "libre",
    "nodos": [
     "int.vertex",
-    "lib.chatbot.llm"
+    "lib.chatbot.llm",
+    "lib.scripts",
+    "int.neon"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -6333,7 +6640,26 @@
     "tmp": "D5-c1/D5-L6/H20",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/PADRE/H09",
+      "titulo": "db-restore-local.sh imprime el usuario y la contraseña de la base destino creyendo que los enmascara",
+      "severidad": "BAJA",
+      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: db-restore-local.sh:74-94 (${TARGET_URL%%@*} deja usuario y contraseña; la última línea imprime la URL entera). El barrido también señaló que el caso de VH-141 atribuía el volcado de Vertex a check-env.js, que solo lista nombres (check-env.js:85-104): se corrigió en 08. Misma clase que SEC-071 (scripts que imprimen credenciales completas por stdout)."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/PADRE/H09",
+      "antes": {
+       "titulo": "Script que imprime la credencial completa de Vertex por stdout"
+      },
+      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: db-restore-local.sh:74-94 (${TARGET_URL%%@*} deja usuario y contraseña; la última línea imprime la URL entera). El barrido también señaló que el caso de VH-141 atribuía el volcado de Vertex a check-env.js, que solo lista nombres (check-env.js:85-104): se corrigió en 08. Misma clase que SEC-071 (scripts que imprimen credenciales completas por stdout)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6949,446 +7275,6 @@
     "tmp": "D5-c1/D5-L8/H05",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "UX-032",
-   "prefijo": "UX",
-   "titulo": "Prompt y tools con la filosofia de consultora de develOP y vocabulario de concesionaria para todos los rubros (incluye 'SLA <4hs')",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "ux",
-   "tipo_detalle": "ux",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/prompts/sections.ts",
-     "linea": 47,
-     "fragmento": "Precios y plazos: si te los piden sin diagnóstico, NO tirás número"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/verticals/packs/usados.ts",
-     "linea": 183,
-     "fragmento": "'El visitante preguntó el precio. Si tenés el precio publicado, dalo; ..."
-    },
-    {
-     "ruta": "src/modules/chatbot/server/tools/offerHandoffOptions.ts",
-     "linea": 24,
-     "fragmento": "- \"Que me contacten\" (asíncrono, SLA <4hs)"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
-     "linea": 89,
-     "fragmento": "'true SOLO si mencionó entregar un usado en parte de pago/tasación. false si nunca lo dijo.'"
-    }
-   ],
-   "impacto": "Seccion 2 (fija para todos los tenants) manda diagnosticar 'tamano, rubro, como operan hoy' y no dar precios; el pack usados manda dar el precio publicado; un gimnasio o una clinica reciben un bot que interroga como consultora B2B. La descripcion de offer_handoff_options le ensena al modelo un SLA de 4 h que el cliente no prometio. Los flags de capture_lead (usado, test drive, financiacion) son de autos para todos.",
-   "propuesta": "Mover la mision y la regla de precios al pack vertical (o a la KB) y dejar en sections.ts solo reglas universales; sacar el SLA de la description; parametrizar las descripciones de flags por pack.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h3.vis-api-chatbot",
-    "lib.chatbot.prompts",
-    "lib.chatbot.verticals",
-    "lib.chatbot.tools"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-378; D5-A5",
-   "vh": null,
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H06",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "FAL-019",
-   "prefijo": "FAL",
-   "titulo": "El cliente no recibe aviso de cuota (ni al 80% ni al agotarse): alert80Sent no se usa",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "faltante",
-   "tipo_detalle": "faltante",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 1587,
-     "fragmento": "alert80Sent   Boolean   @default(false)"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/quota/upsellAlert.ts",
-     "linea": 68,
-     "fragmento": "await Promise.allSettled([ sendAgencyAlert({ type: 'LEAD_UPSELL', ..."
-    },
-    {
-     "ruta": "src/modules/chatbot/server/quota/upsellAlert.ts",
-     "linea": 80,
-     "fragmento": "notifyTelegramOptional("
-    }
-   ],
-   "impacto": "Al agotar la cuota solo se avisa a develOP (webhook de agencia + Telegram). El dueno del negocio no se entera de que sus visitantes reciben 'alcanzamos el limite de atencion automatica' hasta que mire el panel; no hay preaviso al 80% pese a la columna.",
-   "propuesta": "Email al leadNotificationEmail del cliente al 80% (usando alert80Sent con UPDATE condicional) y al degradar (degradedAt).",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h3.cli-chatbot",
-    "lib.chatbot.quota",
-    "int.brevo",
-    "modelo.QuotaUsage"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-383",
-   "vh": null,
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H08",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-098",
-   "prefijo": "BUG",
-   "titulo": "confirm_contact_request registra un evento que ninguna pantalla lee: el cliente no se entera del pedido de contacto",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/tools/confirmContactRequest.ts",
-     "linea": 85,
-     "fragmento": "export const CONTACT_REQUEST_EVENT_TYPE = 'handoff.callback'"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/multiTenantQueries.ts",
-     "linea": 218,
-     "fragmento": "type: 'handoff.whatsapp',"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/logging/persistentLogger.ts",
-     "linea": 160,
-     "fragmento": "(c) => c.chatbotEvent.deleteMany({ where: { createdAt: { lt: threshold } } }),"
-    }
-   ],
-   "impacto": "El bot le confirma al visitante que 'el equipo se va a comunicar', pero el pedido y el canal preferido viven solo en chatbot_events (que se purgan a 30 dias) y ningun listado los muestra. El dueno recibe el email del lead sin saber que pidio que lo llamen.",
-   "propuesta": "Marcar el pedido en el lead (columna o metadata en ChatbotLead) o listar handoff.callback junto a las derivaciones, y destacarlo en el email del lead.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h3.vis-api-chatbot",
-    "h3.cli-chatbot",
-    "lib.chatbot.tools",
-    "modelo.ChatbotEvent"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-444",
-   "vh": null,
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H11",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-099",
-   "prefijo": "BUG",
-   "titulo": "Avisos post-lead fire-and-forget en serverless (email al cliente, CRM n8n, Telegram) sin outbox",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
-     "linea": 493,
-     "fragmento": "void notifyClient()"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
-     "linea": 500,
-     "fragmento": "void syncLeadToCrm({ leadId: result.id, trigger: 'auto' }).catch((err: unknown) => {"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts",
-     "linea": 164,
-     "fragmento": "void notifyTelegramOptional(tgMsg).catch((err: unknown) => {"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/chatbots/[botId]/actions.ts",
-     "linea": 75,
-     "fragmento": "sendTransactionalEmail({"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/chatbots/[botId]/actions.ts",
-     "linea": 83,
-     "fragmento": "}).catch((err: unknown) => {"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
-     "linea": 455,
-     "fragmento": "void notifyTelegramOptional(telegramMsg).catch((err: unknown) => {"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
-     "linea": 73,
-     "fragmento": "void syncLeadToCrm({ leadId, trigger: 'manual' }).catch((err: unknown) => {"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
-     "linea": 79,
-     "fragmento": "return { ok: true as const }"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/admin/integrations/RetrySyncButton.tsx",
-     "linea": 21,
-     "fragmento": "toast.success('Reintento disparado. En unos segundos se actualiza el historial.')"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts",
-     "linea": 6,
-     "fragmento": "* Si el proceso muere entre crear un CrmSyncAttempt PENDING y marcar SUCCESS/FAILED"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/crm/postToN8n.ts",
-     "linea": 7,
-     "fragmento": "Tiempo total peor caso: ~33s (3 × 10s + 1s + 3s). Como se corre en\n * fire-and-forget post-respuesta del bot, no impacta UX."
-    },
-    {
-     "ruta": "src/modules/chatbot/server/crm/syncLeadToCrm.ts",
-     "linea": 85,
-     "fragmento": "const attempt = await scope.crmSyncAttempt.create({"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts",
-     "linea": 33,
-     "fragmento": "if (elapsed > SYNC_STALE_THRESHOLD_MS) {\n    return 'FAILED'"
-    }
-   ],
-   "impacto": "Si el stream termina antes de que Brevo/n8n respondan (Brevo con reintentos largos), la plataforma congela la function y el email de nuevo lead al cliente o el sync al CRM pueden no salir nunca, sin reintento. El lead queda en el panel, pero el aviso que el cliente paga no.",
-   "propuesta": "Outbox transaccional (fila escrita en la misma tx del lead) + cron con reintentos, o al menos await acotado antes de cerrar el step.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h3.vis-api-chatbot",
-    "lib.chatbot.tools",
-    "int.brevo",
-    "int.n8n",
-    "int.telegram",
-    "h3.adm-chatbots.activar-pausar-eliminar",
-    "h3.adm-chatbots.historial-sync-crm",
-    "lib.chatbot.crm",
-    "modelo.CrmSyncAttempt",
-    "h3.adm-chatbots.integracion-crm",
-    "h3.cli-chatbot"
-   ],
-   "relacionados_ids": [
-    "BUG-052"
-   ],
-   "previas": [],
-   "relacionados_texto": "RESIL-02 (previo, abierto); PLAN-466; patron D1-c3",
-   "vh": "VH-101",
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H12",
-    "verificado_padre": true,
-    "nota_padre": "Muestreado: captureLead.ts:493 (void notifyClient()) y :500 (void syncLeadToCrm) y showWhatsappHandoff.ts:164 (void notifyTelegramOptional): avisos sin await en una función serverless, sin outbox. Mismo patrón que BUG-052 (D2).",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L1/H32",
-      "titulo": "Envíos fire-and-forget en serverless: el mail de bot activado y el aviso de Telegram pueden perderse",
-      "severidad": "BAJA",
-      "nota_padre": "Mismo patrón fire-and-forget en serverless (mail de bot activado y Telegram)."
-     },
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L3/H15",
-      "titulo": "Reintento de sync CRM disparado sin esperar en una función serverless",
-      "severidad": "MEDIA",
-      "nota_padre": "Mismo patrón fire-and-forget (reintento de sync CRM)."
-     },
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L6/H19",
-      "titulo": "retryCrmSync dispara el sync sin esperar y responde ok",
-      "severidad": "BAJA",
-      "nota_padre": "Muestreado: retryCrmSync.ts:73-79 lanza el sync con void y responde ok. Mismo patrón."
-     },
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L7/H09",
-      "titulo": "El sync al CRM corre fire-and-forget en serverless: con n8n lento, o en el reintento manual, puede no ejecutarse y queda FAILED a los 5 min sin motivo",
-      "severidad": "MEDIA",
-      "nota_padre": "Mismo patrón fire-and-forget (sync al CRM)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-100",
-   "prefijo": "BUG",
-   "titulo": "Telegram en Markdown legado con datos sin escapar y link relativo: avisos que Telegram rechaza en silencio",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/notifications/telegram.ts",
-     "linea": 117,
-     "fragmento": "await sendTelegram(message, { parseMode: 'Markdown' })"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
-     "linea": 449,
-     "fragmento": "email ? `Email: ${email}` : '',"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/quota/upsellAlert.ts",
-     "linea": 82,
-     "fragmento": "(input.adminLinkPath ? `\\n[Ver cliente](${input.adminLinkPath})` : ''),"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-     "linea": 383,
-     "fragmento": "adminLinkPath: `/admin/clients/${bot.organization.id}`,"
-    }
-   ],
-   "impacto": "Un email con guion bajo (juan_perez@...) o un nombre/resumen con * o _ rompe el parseo de entidades de Telegram (400) y el aviso de nuevo lead o de handoff al equipo se pierde, solo con console.error. El link de upsell es relativo, inutil fuera del sitio.",
-   "propuesta": "Usar parse_mode HTML con escape (ya es el default de sendTelegram) o escapar Markdown; links absolutos con NEXT_PUBLIC_APP_URL.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.chatbot.tools",
-    "lib.chatbot.quota",
-    "int.telegram"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-389; PLAN-377",
-   "vh": "VH-102",
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H13",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-073",
-   "prefijo": "SEC",
-   "titulo": "Datos personales de visitantes de todos los clientes se envian al Telegram del equipo de develOP",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
-     "linea": 444,
-     "fragmento": "// Telegram — always fires for the develOP team when configured (env-based)"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
-     "linea": 450,
-     "fragmento": "phone ? `Tel: ${phone}` : '',"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts",
-     "linea": 157,
-     "fragmento": "input.visitorContact ? `Contacto: ${input.visitorContact}` : '',"
-    }
-   ],
-   "impacto": "Nombre, email, telefono y resumen de cada lead de cada cliente salen a un chat de Telegram de develOP sin opcion por cliente. Con el primer cliente real, develOP actua como encargado de datos de terceros y esa transferencia tendria que estar declarada y acotada (Ley 25.326). Decision para Valentino.",
-   "propuesta": "Gate por cliente (opt-in) o mandar solo identificadores y link al panel; documentar el tratamiento en la politica y el contrato.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.chatbot.tools",
-    "int.telegram",
-    "modelo.ChatbotLead"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "bitacora: 'PII en stderr de show_whatsapp_handoff' (stderr ya filtrado por allowlist en persistentLogger.ts:32-76)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H14",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "TEC-004",
-   "prefijo": "TEC",
-   "titulo": "El cierre del stream depende de internals de ai@6 citados por numero de linea, con rango ^ en package.json",
-   "dominio": "D5",
-   "severidad": "BAJA",
-   "tipo": "tech-vieja",
-   "tipo_detalle": "tech-vieja",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "package.json",
-     "linea": 141,
-     "fragmento": "\"ai\": \"^6.0.177\","
-    },
-    {
-     "ruta": "src/modules/chatbot/server/llm/providerStreamClose.ts",
-     "linea": 186,
-     "fragmento": "// @ai-sdk/google/dist/internal/index.js:1650"
-    }
-   ],
-   "impacto": "PROVIDER-CLOSE, el watchdog y los hooks se calibraron contra el comportamiento interno de una version concreta (flush, tee, onAbort sin await). Un npm install que suba la minor puede romper el cierre del stream sin que compile distinto. El pin exacto ya figura como deuda en la bitacora.",
-   "propuesta": "Pin exacto de ai y @ai-sdk/google-vertex y un invariante de version que falle si cambia.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.chatbot.llm",
-    "int.vertex"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "bitacora-roadmap.md:16678 (pin exacto de ai)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H17",
-    "verificado_padre": true,
-    "nota_padre": "Muestreado: package.json:141 («ai»: «^6.0.177») y providerStreamClose.ts:186 (cita internals de @ai-sdk/google por número de línea).",
     "verificador": null
    },
    "estado": "vigente"

@@ -3,6 +3,160 @@
  "partes": 6,
  "hallazgos": [
   {
+   "id": "UX-057",
+   "prefijo": "UX",
+   "titulo": "Las fronteras raíz (error y 404) son de marketing y también atienden /embed y los notFound() de admin y dashboard",
+   "dominio": "D8",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/embed/[slug]/page.tsx",
+     "linea": 37,
+     "fragmento": "if (!bot) notFound()"
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 145,
+     "fragmento": "Este rincón del internet<br />no existe todavía."
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 177,
+     "fragmento": "<Link\n    href=\"/contact\""
+    },
+    {
+     "ruta": "src/app/error.tsx",
+     "linea": 57,
+     "fragmento": "<a\n    href=\"/\""
+    }
+   ],
+   "impacto": "Si un cliente copia mal el snippet, o si su bot se borra, su propio sitio puede mostrar dentro del iframe del widget el 404 animado de develOP con 'Volver al inicio' y 'Contactarnos'; un error de render muestra 'Algo salió mal' con un link a develop.com.ar. Depende de si widget.js oculta el iframe sin señal de listo. En el panel, admin y dashboard no tienen not-found.tsx propio (hay 7 notFound() en esas ramas) y un recurso inexistente saca al usuario al sitio público.",
+   "propuesta": "Agregar not-found.tsx y error.tsx propios para /embed (silenciosos, que avisen al widget) y not-found.tsx en dashboard y admin con vuelta al panel.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-widget-cliente",
+    "h2.cli-shell",
+    "h4.adm-shell"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "D5 'Degradado y errores visibles al visitante'",
+   "vh": "VH-163",
+   "origen": {
+    "ciclo": "D8-c1",
+    "lote": "D8-L1",
+    "tmp": "D8-c1/D8-L1/H16",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-034",
+   "prefijo": "A11Y",
+   "titulo": "La página 404 anima un canvas de pantalla completa en un bucle infinito sin respetar reduced-motion ni pausarse",
+   "dominio": "D8",
+   "severidad": "BAJA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 58,
+     "fragmento": "time += 0.016\nanimId = requestAnimationFrame(draw)"
+    },
+    {
+     "ruta": "src/app/not-found.tsx",
+     "linea": 121,
+     "fragmento": "transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 673,
+     "fragmento": "Alcance: CSS. Las animaciones de Framer Motion ya se apagan por\n`useReducedMotion()` / `motion-reduce:` en los componentes que lo consumen."
+    }
+   ],
+   "impacto": "Quien pidió menos movimiento a nivel sistema igual recibe 1.120 puntos animados por cuadro y un pulso infinito. El bloque global de reduced-motion solo cubre CSS. En mobile también gasta batería mientras la pestaña está abierta. Incumple las reglas de CLAUDE.md sobre IntersectionObserver y reduced-motion.",
+   "propuesta": "Consultar prefers-reduced-motion (el hook use-reduced-motion existente) para dibujar un frame estático y pausar con visibilitychange o IntersectionObserver.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.ui"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D8-c1",
+    "lote": "D8-L1",
+    "tmp": "D8-c1/D8-L1/H17",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-093",
+   "prefijo": "DEU",
+   "titulo": "Los distDir alternativos no están excluidos de eslint ni de .gitignore (perf, corrida-visual) y tsconfig incluye tipos de builds de experimentos",
+   "dominio": "D8",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "eslint.config.mjs",
+     "linea": 9,
+     "fragmento": "globalIgnores([\n  // Default ignores of eslint-config-next:\n  \".next/**\","
+    },
+    {
+     "ruta": ".gitignore",
+     "linea": 17,
+     "fragmento": "/.next/\n/.next-galeria/\n/.next-setter/"
+    },
+    {
+     "ruta": "tsconfig.json",
+     "linea": 43,
+     "fragmento": "\".next-perf-a/types/**/*.ts\","
+    },
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 27,
+     "fragmento": "#   (Nota al pasar, sin arreglar: `npm run lint` a secas reporta ~108.000"
+    }
+   ],
+   "impacto": "'npm run lint' a secas lintea bundles minificados (~108.000 problemas), lo que vuelve inútil medir la deuda real. Los .next-perf-* y .next-corrida-visual no están en .gitignore: Tailwind los escanea en local y un 'git add' los tomaría. .gitignore repite las entradas de .next-setter y .next-galeria (:18-19 y :24-25) y la de vertex-credentials.json (:55 y :58).",
+   "propuesta": "Un patrón '.next*/' en globalIgnores y en .gitignore. Sacar de tsconfig los includes de .next-perf-*, que no tienen script que los genere. Limpiar los duplicados.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.github-actions",
+    "lib.next-config"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-1022; PLAN-1037; PLAN-1008",
+   "vh": null,
+   "origen": {
+    "ciclo": "D8-c1",
+    "lote": "D8-L1",
+    "tmp": "D8-c1/D8-L1/H18",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: .gitignore:16-25 cubre /.next/, /.next-galeria/ y /.next-setter/ (estas dos, repetidas) pero no .next-perf-* ni .next-corrida-visual; tsconfig.json:38-48 incluye los tipos de .next-perf-a, -b y -base.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "SEC-107",
    "prefijo": "SEC",
    "titulo": "Repo público con datos de infraestructura y volcados de tablas versionados contra la regla del propio .gitignore",
@@ -31,6 +185,21 @@
      "ruta": "raíz:.github/workflows/db-backup.yml",
      "linea": 21,
      "fragmento": "#   El repo es PÚBLICO. Sin cifrado, cualquiera con el link al run podría descargar"
+    },
+    {
+     "ruta": "scripts/_b14-2-seed-bench-prod.ts",
+     "linea": 93,
+     "fragmento": "console.log(`  Host detectado:   ${host}`)"
+    },
+    {
+     "ruta": "scripts/dev/seed-alerts.ts",
+     "linea": 302,
+     "fragmento": "? `✓ Actor (acknowledgedBy/resolvedBy): SUPER_ADMIN ${admin.email}`"
+    },
+    {
+     "ruta": "scripts/regression/purge.ts",
+     "linea": 25,
+     "fragmento": "const EXPECTED_DEV_HOST = 'ep-…-pooler.sa-east-1.aws.neon.tech'  // host literal, no es credencial"
     }
    ],
    "impacto": "Cualquiera puede leer el hostname del endpoint real de la Neon compartida (sin credenciales) y volcados de las tablas de catálogo y de activación de módulos con IDs internos (prisma/backups/*.json y backup.js, versionados aunque .gitignore:67 ignora backups/). Sumado al historial de origin/main, que conserva enviroment.env (commit 39535583; ya hay hallazgo de credenciales en el historial), facilita un ataque dirigido.",
@@ -39,7 +208,9 @@
    "zona": "libre",
    "nodos": [
     "int.neon",
-    "modelo.OrganizationModule"
+    "modelo.OrganizationModule",
+    "lib.prisma",
+    "modelo.User"
    ],
    "relacionados_ids": [
     "SEC-001"
@@ -53,7 +224,16 @@
     "tmp": "D8-c1/D8-L1/H19",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/D9-L1/H12",
+      "titulo": "Scripts imprimen el host de DATABASE_URL y el email del SUPER_ADMIN; host de la rama dev de Neon versionado",
+      "severidad": "BAJA",
+      "nota_padre": "Muestreado: _b14-2-seed-bench-prod.ts:93 imprime el host y seed-alerts.ts:302 el email del SUPER_ADMIN; regression/purge.ts:25 versiona el host de la rama dev de Neon. Es dato de infraestructura en un repo público, la misma clase que SEC-107."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -147,6 +327,11 @@
      "ruta": "package.json",
      "linea": 153,
      "fragmento": "\"motion\": \"^12.36.0\","
+    },
+    {
+     "ruta": "src/components/ui/KineticText.tsx",
+     "linea": 3,
+     "fragmento": "import { motion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';"
     }
    ],
    "impacto": "framer-motion (About.tsx, Portfolio.tsx, KineticText.tsx) y three-stdlib (Hero.tsx, HeroArtifact.tsx FROZEN, BrandedLogoWhite.tsx) resuelven por transitivas de motion y drei. Un cambio de versión de esas librerías puede romper el sitio público sin tocar package.json. html2canvas y jspdf solo los usa DownloadReportButton.tsx, que depcruise marca huérfano, y @types/three está en dependencies.",
@@ -155,7 +340,8 @@
    "zona": "libre",
    "nodos": [
     "lib.deps",
-    "lib.ui"
+    "lib.ui",
+    "h6"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -167,7 +353,16 @@
     "tmp": "D8-c1/D8-L1/H21",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/D9-L2/H18",
+      "titulo": "Dependencia fantasma: 3 archivos importan 'framer-motion', que no esta en package.json",
+      "severidad": "BAJA",
+      "nota_padre": "Misma dependencia fantasma (framer-motion importado sin declarar)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -334,6 +529,2205 @@
     "tmp": "D8-c1/HIGIENE",
     "verificado_padre": false,
     "nota_padre": "DEC-55: higiene de UI agrupada, sin verificación individual",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-175",
+   "prefijo": "BUG",
+   "titulo": "Lenis sigue activo en /setter: la rueda no scrollea el panel del setter en desktop",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/components/layout/SmoothScroll.tsx",
+     "linea": 30,
+     "fragmento": "const isPortal = pathname && (pathname.startsWith('/admin') || pathname.startsWith('/dashboard'));"
+    },
+    {
+     "ruta": "src/components/layout/publicRoute.ts",
+     "linea": 16,
+     "fragmento": "export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed', '/setter'] as const"
+    },
+    {
+     "ruta": "src/components/layout/SmoothScroll.tsx",
+     "linea": 83,
+     "fragmento": "smoothWheel: true,"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+     "linea": 28,
+     "fragmento": "className=\"fixed inset-0 bg-[var(--color-void)] text-zinc-100\""
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+     "linea": 78,
+     "fragmento": "<main className=\"relative mt-4 min-h-0 flex-1 overflow-y-auto py-8\">"
+    },
+    {
+     "ruta": "node_modules/lenis/dist/lenis.mjs",
+     "linea": 625,
+     "fragmento": "if (event.cancelable) event.preventDefault();  // lenis 1.3.25 (package-lock.json:10549); solo se salta con data-lenis-prevent o allowNestedScroll (:607)"
+    },
+    {
+     "ruta": "src/app/layout.tsx",
+     "linea": 111,
+     "fragmento": "<SmoothScroll>"
+    },
+    {
+     "ruta": "docs/bitacora-roadmap.md",
+     "linea": 5798,
+     "fragmento": "`data-lenis-prevent` en el contenedor que evita que el smooth-scroller del sitio capture el wheel."
+    }
+   ],
+   "impacto": "Bloqueante para el uso diario del setter en desktop: Lenis se crea en /setter (SmoothScroll arma su propia lista de portales y deja afuera /setter y /embed), escucha el wheel en window sin passive y lo cancela con preventDefault porque ningún nodo del setter tiene data-lenis-prevent. El documento no tiene scroll propio (shell fixed inset-0), así que Tu día, la cartera y el manual no se mueven con mouse ni trackpad; solo queda arrastrar la barra o usar el teclado. Con la misma raíz, scrollRestoration='manual' (SmoothScroll.tsx:26) también se aplica en admin y dashboard.",
+   "propuesta": "En SmoothScroll.tsx usar isChromeFreeRoute/isPortalRoute de publicRoute.ts (una sola lista) para no crear Lenis fuera del sitio público y, como defensa, pasar allowNestedScroll: true. El arreglo va en SmoothScroll.tsx (libre); no hace falta tocar el shell del setter (ZONA-FRANCO). Confirmar antes con el caso de prueba manual.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h5.set-dia",
+    "h5.set-manual",
+    "h5.set-lead",
+    "lib.smooth-scroll"
+   ],
+   "relacionados_ids": [
+    "DEU-082",
+    "PERF-016"
+   ],
+   "previas": [],
+   "relacionados_texto": "PLAN-1294 (SmoothScroll conservado); mismo archivo que el loop de rAF sin cancelar; patrón 'chequeo de portal reimplementado'",
+   "vh": "VH-164",
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H01",
+    "verificado_padre": true,
+    "nota_padre": "Leído: SmoothScroll.tsx:30 (isPortal propio con solo /admin y /dashboard) contra publicRoute.ts:16 (PORTAL_PREFIXES con /embed y /setter; isPortalRoute en :28-30), setter-shell.tsx:28 (fixed inset-0) y :78 (el scroll vive en <main>), y git grep de lenis-prevent en setter/ sin resultados. El verificador la bajó a MEDIA (rol interno, workaround con la barra y el teclado, táctiles sin Lenis) y se le sigue. El arreglo está en SmoothScroll.tsx (libre); la superficie es la del setter (DEU-082: CLAUDE.md no clasifica /setter como portal).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-176",
+   "prefijo": "BUG",
+   "titulo": "El cleanup del bench de prod aborta a mitad: borra prisma.message por un conversationId que Message no tiene",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "scripts/_b14-2-cleanup-bench-prod.ts",
+     "linea": 102,
+     "fragmento": "const msgs = await prisma.message.deleteMany({ where: { conversationId: { in: convoIds } } })"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 593,
+     "fragmento": "model Message {  // id, content, fromAdmin, read, createdAt, organizationId: sin conversationId"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1420,
+     "fragmento": "conversationId String  // en model ChatMessage (:1417)"
+    },
+    {
+     "ruta": "scripts/_b14-2-cleanup-bench-prod.ts",
+     "linea": 88,
+     "fragmento": "const events = await prisma.chatbotEvent.deleteMany({ where: { botConfigId: bot.id } })"
+    },
+    {
+     "ruta": "tsconfig.json",
+     "linea": 52,
+     "fragmento": "\"scripts/**\"  // dentro de exclude: los scripts no pasan por tsc"
+    },
+    {
+     "ruta": "scripts/_b14-2-seed-bench-prod.ts",
+     "linea": 144,
+     "fragmento": "isActive: true,"
+    },
+    {
+     "ruta": "docs/operations/b14-deploy-checklist.md",
+     "linea": 309,
+     "fragmento": "- **Borrar el bot bench-matsu de prod** una vez que Matsu real esté seedeado:"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real si el bench sigue en prod. Corrido como manda el checklist, el cleanup borra eventos y leads del bot bench y aborta en :102, porque Prisma rechaza el where antes de ejecutar y todo va fuera de transacción. Conversaciones, KB, el bot bench-matsu (activo, cuota 1000, Gemini), el usuario ORG_MEMBER verificado y la org quedan vivos, y cada corrida siguiente vuelve a abortar en el mismo punto. La org aparece en el listado de clientes, en los crons y en las métricas. scripts/** está excluido de tsc, por eso el error de tipos nunca saltó.",
+   "propuesta": "Cambiar a chatMessage (o confiar en el cascade de Conversation) y envolver el borrado en $transaction; alternativa: eliminar la org bench con el hard-delete del admin. Sumar un tsconfig para scripts/ al gate de calidad. Verificar el estado de bench-matsu en prod sin correr el cleanup.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-api-chatbot",
+    "h4.adm-clientes",
+    "modelo.Message",
+    "modelo.ChatMessage",
+    "modelo.BotConfig",
+    "modelo.Organization"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "[D6] Eliminar cliente (hard-delete) y su cascada; [D8] Versión del deploy (_b14-4-smoke-prod.mjs depende de bench-matsu)",
+   "vh": "VH-165",
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H02",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: _b14-2-cleanup-bench-prod.ts:100-103 (prisma.message.deleteMany por conversationId) y schema.prisma:593-603 (Message no tiene conversationId): el cleanup aborta antes de borrar conversaciones, bot y org.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-177",
+   "prefijo": "BUG",
+   "titulo": "Re-correr el backfill de caliente pisa las marcas manuales de Franco (sin guard ni dry-run)",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "scripts/admin-1a-backfill-caliente.ts",
+     "linea": 20,
+     "fragmento": "* Idempotente: setea `caliente` al valor calculado para TODOS los leads (true a"
+    },
+    {
+     "ruta": "scripts/admin-1a-backfill-caliente.ts",
+     "linea": 72,
+     "fragmento": "if (lead.caliente !== objetivo) {\n      await prisma.osLead.update({"
+    },
+    {
+     "ruta": "scripts/admin-1a-backfill-caliente.ts",
+     "linea": 42,
+     "fragmento": "if (!process.env.DATABASE_URL) {"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+     "linea": 165,
+     "fragmento": "data: { assignedToId: parsed.setterId, caliente: parsed.caliente },"
+    }
+   ],
+   "impacto": "admin-1b ya convirtió caliente en una marca manual del admin, pero el script sigue en el repo presentado como idempotente. Quien lo corra (sin --confirm, sin chequeo de host, cargando .env.local) devuelve en silencio cada marca manual a la regla de score, en la base a la que apunte. El efecto es que se pierden decisiones comerciales sin dejar rastro.",
+   "propuesta": "Coordinar con Franco: borrar el script (el one-shot ya se aplicó) o hacerlo abortar si existe algún lead cuyo caliente difiere de la regla, con --confirm y dry-run.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h4.adm-leads",
+    "h5.adm-revision-demos",
+    "modelo.OsLead"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "[D4] Admin: asignacion de lead a setter y aviso de handoff",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H04",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "PERF-018",
+   "prefijo": "PERF",
+   "titulo": "DotMatrix (fondo de login, recupero e invitación) con dpr [1,2], sin IntersectionObserver ni pausa real",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "perf",
+   "tipo_detalle": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/canvas/DotMatrix.tsx",
+     "linea": 213,
+     "fragmento": "dpr={[1, 2]} // Optimize for retina displays while limiting max resolution"
+    },
+    {
+     "ruta": "src/components/canvas/DotMatrix.tsx",
+     "linea": 199,
+     "fragmento": "<sphereGeometry args={[0.025, 16, 16]} />"
+    },
+    {
+     "ruta": "src/components/canvas/DotMatrix.tsx",
+     "linea": 101,
+     "fragmento": "if (window.scrollY > window.innerHeight + 200) {"
+    },
+    {
+     "ruta": "src/components/canvas/DotMatrix.tsx",
+     "linea": 130,
+     "fragmento": "baseGrid.forEach((cell, i) => {"
+    },
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 479,
+     "fragmento": "<DotMatrix />"
+    },
+    {
+     "ruta": "raíz:CLAUDE.md",
+     "linea": 71,
+     "fragmento": "Three.js: `dpr={[1, 1.5]}` max. Never `dpr={2}` in production."
+    },
+    {
+     "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+     "linea": 940,
+     "fragmento": "dpr={[1, 2]}"
+    }
+   ],
+   "impacto": "La primera pantalla del cliente (login) dibuja a pantalla completa, con hasta 2x de densidad, 2.500 esferas de ~480 triángulos, y recalcula matriz y color de cada una en cada frame. La pausa depende del scroll de la ventana, que en login no existe, así que nunca se activa. En celulares de gama media eso es batería, calor y tirones al tipear. Viola CLAUDE.md:70-71 (alerta D9-A4); la misma desviación de dpr está en LegacyNeuroAvatar.tsx:940, aunque la bitácora la declara en [1,1.5]. Si falta WebGL no hay fallback: el fallo queda como promesa rechazada sin manejar.",
+   "propuesta": "Bajar a dpr [1,1.5] y a esferas de 6-8 segmentos. Pausar con IntersectionObserver/document.hidden o usar frameloop='demand', y mostrar un frame estático con prefers-reduced-motion. Sin WebGL, no montar el Canvas.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h1.auth-login",
+    "h1.auth-recupero",
+    "h1.auth-invite"
+   ],
+   "relacionados_ids": [
+    "PERF-009",
+    "A11Y-034"
+   ],
+   "previas": [],
+   "relacionados_texto": "D9-A4; previa COMP-01; animaciones sin prefers-reduced-motion",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-035",
+   "prefijo": "A11Y",
+   "titulo": "Menú mobile del sitio: botón solo-ícono sin nombre accesible ni aria-expanded; la hoja no es diálogo ni cierra con Escape",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 232,
+     "fragmento": "<motion.button\n                    type=\"button\"\n                    onClick={() => {  // :232-258 sin aria-label ni aria-expanded"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 278,
+     "fragmento": "<Grid2x2 size={16} color=\"rgba(255,255,255,0.74)\" />"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 286,
+     "fragmento": "<motion.div  // hoja del menú: sin role=dialog, aria-modal ni manejo de foco"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 333,
+     "fragmento": "<button\n                                                type=\"button\"  // Servicios: sin aria-expanded"
+    }
+   ],
+   "impacto": "En el celular, un usuario de lector de pantalla oye «botón» sin nombre en el único acceso a la navegación y a Acceder. Al abrir, el foco no entra al menú, Escape no lo cierra y Servicios no anuncia si está expandido. Incumple la quality baseline de CLAUDE.md (aria-label en todo ícono) y mantiene abierta la previa A11Y-02.",
+   "propuesta": "aria-label que alterne «Abrir menú»/«Cerrar menú», aria-expanded y aria-controls en el botón. La hoja con role='dialog' y aria-modal, foco al primer ítem y vuelta al botón al cerrar, más Escape. aria-expanded en Servicios.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6",
+    "h6.vis-contacto",
+    "h1.auth-login"
+   ],
+   "relacionados_ids": [
+    "UX-035"
+   ],
+   "previas": [],
+   "relacionados_texto": "previa A11Y-02",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H06",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-036",
+   "prefijo": "A11Y",
+   "titulo": "Scroll suave de Lenis y animaciones perpetuas del chrome público ignoran prefers-reduced-motion",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/components/layout/SmoothScroll.tsx",
+     "linea": 79,
+     "fragmento": "duration: 1.5,"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 675,
+     "fragmento": "PENDIENTE (fuera del scope de S1, que es solo tokens): el scroll suave de\n   Lenis (SmoothScroll.tsx) es JS y no se neutraliza desde CSS."
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 75,
+     "fragmento": "transition={{ duration: 2.8, repeat: Infinity, ease: \"easeInOut\" }}"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 107,
+     "fragmento": "transition={{ duration: 1.05, repeat: Infinity, repeatDelay: 3.95, ease: \"easeInOut\" }}"
+    },
+    {
+     "ruta": "src/components/canvas/DotMatrix.tsx",
+     "linea": 115,
+     "fragmento": "const time = state.clock.getElapsedTime() * 0.5; // Velocidad de la onda"
+    },
+    {
+     "ruta": "raíz:DESIGN.md",
+     "linea": 271,
+     "fragmento": "Todo respeta `prefers-reduced-motion` (`motion-reduce:transition-none`)."
+    }
+   ],
+   "impacto": "Un visitante que pidió menos movimiento recibe igual el scroll inercial de 1,5 s, un logo que late sin fin, un brillo que cruza Acceder cada 5 s y la ola de puntos en login. Incumple WCAG 2.2.2 (movimiento de más de 5 s sin pausa) y la regla de DESIGN.md. No hay MotionConfig reducedMotion global.",
+   "propuesta": "No crear Lenis si matchMedia('(prefers-reduced-motion: reduce)') es true. useReducedMotion en BrandLogo y AccederButton (sin repeat) y DotMatrix en frame estático. Evaluar <MotionConfig reducedMotion='user'> en el layout raíz.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6",
+    "h1.auth-login",
+    "lib.smooth-scroll"
+   ],
+   "relacionados_ids": [
+    "A11Y-016",
+    "A11Y-034",
+    "UX-014",
+    "A11Y-038"
+   ],
+   "previas": [],
+   "relacionados_texto": "PLAN-1273 (reduced-motion global solo CSS)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H07",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: Navbar.tsx:75 (repeat: Infinity) y SmoothScroll.tsx sin ninguna mención de reduce.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "PERF-019",
+   "prefijo": "PERF",
+   "titulo": "SmoothScroll no cancela su loop de requestAnimationFrame: cada navegación pública suma un loop perpetuo",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "perf",
+   "tipo_detalle": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/layout/SmoothScroll.tsx",
+     "linea": 102,
+     "fragmento": "function raf(time: number) {\n            lenis.raf(time);\n            requestAnimationFrame(raf);"
+    },
+    {
+     "ruta": "src/components/layout/SmoothScroll.tsx",
+     "linea": 109,
+     "fragmento": "return () => {\n            lenis.destroy();\n            setLenisInstance(null);  // sin cancelAnimationFrame"
+    },
+    {
+     "ruta": "node_modules/lenis/dist/lenis.mjs",
+     "linea": 500,
+     "fragmento": "if (this._rafId) cancelAnimationFrame(this._rafId);  // solo con autoRaf"
+    }
+   ],
+   "impacto": "Después de N cambios de ruta en el sitio público quedan N loops por frame que llaman raf() sobre instancias destruidas (y las retienen en memoria) hasta recargar, también dentro de los portales. El costo por loop es chico, pero no tiene techo.",
+   "propuesta": "Guardar el id del rAF y cancelarlo en el cleanup, o pasar a autoRaf: true (Lenis lo cancela en destroy).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6",
+    "lib.smooth-scroll"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "Lenis sigue activo en /setter (mismo archivo)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H08",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-178",
+   "prefijo": "BUG",
+   "titulo": "El scroll-lock temprano del home no tiene red de seguridad: si el Hero no llega a 'done', la home queda sin scroll",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/layout/EarlyScrollLock.tsx",
+     "linea": 27,
+     "fragmento": "\"try{if(location.pathname==='/'&&navigator.webdriver!==true){document.documentElement.style.overflow='hidden'}}catch(e){}\""
+    },
+    {
+     "ruta": "src/components/layout/Hero.tsx",
+     "linea": 486,
+     "fragmento": "if (phase === 'done') {\n            html.style.overflow = ''"
+    },
+    {
+     "ruta": "src/components/layout/HeroArtifactLayer.tsx",
+     "linea": 29,
+     "fragmento": "// Red de seguridad del reveal. MISMO mecanismo y MISMO umbral que la red del\n// scroll de `MarketingIntro` (`MARKETING_SCROLL_SAFETY_MS`)"
+    }
+   ],
+   "impacto": "El lock se aplica antes del primer paint y solo lo deshace el Hero, al llegar a 'done' o al desmontarse. Si el bundle no carga o no hidrata (red mala, chunk que falla, error de render en '/'), el visitante ve la home por SSR pero no puede scrollear y no recibe ningún aviso. El repo ya tiene un timeout de seguridad para el mismo problema en MarketingIntro.",
+   "propuesta": "Agregar al script inline un setTimeout que libere el html si el Hero no tomó el control (mismo umbral que MARKETING_SCROLL_SAFETY_MS), o liberar desde CSS con una animación con delay.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "patrón 'scroll locks sin red de seguridad'",
+   "vh": "VH-166",
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H09",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-097",
+   "prefijo": "DEU",
+   "titulo": "Precios de servicios duplicados como literales en el menú mobile, sin moneda",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 35,
+     "fragmento": "{ href: \"/web-development\", label: \"Sitio Web\", subLabel: \"Presencia profesional\", price: \"$800\" },"
+    },
+    {
+     "ruta": "src/components/sections/home/OurServices.tsx",
+     "linea": 70,
+     "fragmento": "price: '$800 USD',"
+    }
+   ],
+   "impacto": "Hay dos fuentes de precio para lo mismo: si cambia el precio en la home, el menú no se entera. El menú omite «USD» y en Argentina «$» se lee como pesos.",
+   "propuesta": "Sacar los precios a un único módulo de datos de servicios, con la moneda explícita, que consuman la home y el menú.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "higiene copy Navbar.tsx:35",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H11",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-098",
+   "prefijo": "DEU",
+   "titulo": "Convenciones de diseño contradictorias entre CLAUDE.md, DESIGN.md y PRODUCT.md; el Navbar público usa lo que DESIGN.md prohíbe",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "raíz:CLAUDE.md",
+     "linea": 97,
+     "fragmento": "Glassmorphism: `bg-white/[0.04] backdrop-blur-[20px] backdrop-saturate-[180%] border border-white/[0.08]`"
+    },
+    {
+     "ruta": "raíz:DESIGN.md",
+     "linea": 291,
+     "fragmento": "- **Don't** usar `backdrop-blur` ni glassmorphism en ninguna superficie."
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 257,
+     "fragmento": "... bg-[#030305]/80 shadow-2xl shadow-black/50 backdrop-blur-2xl"
+    },
+    {
+     "ruta": "raíz:CLAUDE.md",
+     "linea": 84,
+     "fragmento": "transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}"
+    },
+    {
+     "ruta": "raíz:DESIGN.md",
+     "linea": 271,
+     "fragmento": "Reveals de sección: `opacity` + `translateY`, ~0.9s, `once`"
+    },
+    {
+     "ruta": "raíz:PRODUCT.md",
+     "linea": 54,
+     "fragmento": "| Software a medida | `/software-development` | índigo |"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 63,
+     "fragmento": "--color-ds-accent-software: #8b5cf6;"
+    },
+    {
+     "ruta": "raíz:CLAUDE.md",
+     "linea": 97,
+     "fragmento": "Glassmorphism: `bg-white/[0.04] backdrop-blur-[20px] backdrop-saturate-[180%] ...`"
+    },
+    {
+     "ruta": "raíz:DESIGN.md",
+     "linea": 291,
+     "fragmento": "- **Don't** usar `backdrop-blur` ni glassmorphism en ninguna superficie."
+    },
+    {
+     "ruta": "raíz:PRODUCT.md",
+     "linea": 54,
+     "fragmento": "| Software a medida | `/software-development` | índigo |"
+    },
+    {
+     "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+     "linea": 121,
+     "fragmento": "\"backdrop-blur-3xl rounded-none md:rounded-[2rem] animate-border-spin\","
+    }
+   ],
+   "impacto": "Quien siga CLAUDE.md (agente o dev) va a meter glassmorphism y reveals de 0,6 s en el sitio público que DESIGN.md prohíbe. El Navbar mobile ya usa backdrop-blur, sombra de color en Acceder y motion perpetuo. PRODUCT.md pide índigo para Software; el código y la decisión opción A usan violeta.",
+   "propuesta": "Decisión para Valentino: declarar qué documento manda en cada superficie (CLAUDE.md para portales, DESIGN.md para el sitio público) y alinear PRODUCT.md:54 con violeta.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6",
+    "lib.ui"
+   ],
+   "relacionados_ids": [
+    "DEU-028"
+   ],
+   "previas": [],
+   "relacionados_texto": "D9-A2; PLAN-1276; PLAN-1347",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H13",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/D9-L2/H09",
+      "titulo": "Convenciones contradictorias entre CLAUDE.md, DESIGN.md y PRODUCT.md (glassmorphism, duracion de reveals, acento de Software)",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo hallazgo (convenciones contradictorias entre CLAUDE.md, DESIGN.md y PRODUCT.md)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-099",
+   "prefijo": "DEU",
+   "titulo": "Regla «cero any» incumplida: any explícitos en src (pagespeed, ClientSettingsForm, LegacyNeuroAvatar y otros) y en scripts y seeds, contra un CLAUDE.md que la da por cumplida",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "docs/sprints/alpha-RESUMEN-FINAL.md",
+     "linea": 41,
+     "fragmento": "- **100% type coverage** (zero `any` types)"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+     "linea": 36,
+     "fragmento": "accentColor: accentColor as any,"
+    },
+    {
+     "ruta": "src/lib/integrations/pagespeed.ts",
+     "linea": 77,
+     "fragmento": "data: any,"
+    },
+    {
+     "ruta": "src/components/canvas/LiquidProject.tsx",
+     "linea": 8,
+     "fragmento": "const materialRef = useRef<any>(null);"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+     "linea": 601,
+     "fragmento": "ref={bufferAttrRef as any}"
+    },
+    {
+     "ruta": "prisma/seeds/init-data-connections.ts",
+     "linea": 18,
+     "fragmento": "where: { dataConnections: { equals: null as any } },"
+    }
+   ],
+   "impacto": "La regla no negociable de CLAUDE.md está rota en 9 lugares de src (pagespeed.ts:77/129/132, ClientSettingsForm.tsx:26/36/37, LiquidProject.tsx:8, LegacyNeuroAvatar.tsx:601) y en 4 más de scripts/prisma, y eslint no corre en CI. Los any sobre la respuesta de PageSpeed y sobre la apariencia del bot apagan el chequeo justo donde entra data externa o del cliente. El lote no tiene any (usa dobles casts 'as unknown as object').",
+   "propuesta": "Tipar con zod/unknown los 9 de src (PageSpeed con su schema de respuesta, ClientSettingsForm con los enums de Prisma) y sumar eslint como gate en CI.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.pagespeed",
+    "h3.cli-chatbot",
+    "lib.ui"
+   ],
+   "relacionados_ids": [
+    "DEU-071",
+    "DEU-015",
+    "DEU-046",
+    "DEU-043"
+   ],
+   "previas": [],
+   "relacionados_texto": "D9-A5; [D8] Gates manuales de calidad",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L1",
+    "tmp": "D9-c1/D9-L1/H15",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/D9-L2/H17",
+      "titulo": "Regla 'cero any' incumplida: 6 any explicitos en src y 5 en scripts/seeds",
+      "severidad": "BAJA",
+      "nota_padre": "Muestreado: git grep de any explícitos en src da 6 líneas (pagespeed.ts:77, ClientSettingsForm.tsx:36, LegacyNeuroAvatar.tsx:601 y más). Mismo hallazgo."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-179",
+   "prefijo": "BUG",
+   "titulo": "Los dos CTA principales del hero del home no hacen nada (MagneticCta sin href ni onClick)",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/components/layout/Hero.tsx",
+     "linea": 731,
+     "fragmento": "<MagneticCta className=\"w-full px-8 py-3.5 text-[9px] ...\">\n    Quiero una demo gratis\n</MagneticCta>"
+    },
+    {
+     "ruta": "src/components/layout/Hero.tsx",
+     "linea": 734,
+     "fragmento": "<MagneticCta className=\"w-full px-8 py-3.5 ...\">\n    Ver nuestros trabajos"
+    },
+    {
+     "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+     "linea": 106,
+     "fragmento": "if (onClick) onClick();"
+    },
+    {
+     "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+     "linea": 195,
+     "fragmento": "<motion.button ref={ref as ...} ... onClick={handleTrigger}"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real que llegue por la home: el boton 'Quiero una demo gratis' y 'Ver nuestros trabajos' solo dibujan una onda; no navegan a contacto, WhatsApp ni a la seccion de trabajos. La conversion principal del hero queda muerta.",
+   "propuesta": "En Hero.tsx (libre) pasar destino a cada CTA: href a /contact o getWhatsappHref() para la demo, y triggerTransition('/#portfolio') (o el ancla real) para trabajos. Decision para Valentino sobre MagneticCta (FROZEN): exigir por tipos href|onClick para que no pueda renderizarse inerte.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6",
+    "h6.vis-contacto",
+    "lib.ui"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-1286",
+   "vh": "VH-167",
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H01",
+    "verificado_padre": true,
+    "nota_padre": "Leído: Hero.tsx:731-736 (dos MagneticCta sin href ni onClick) y MagneticCta.tsx:97-107 (handleTrigger solo agrega el ripple y llama a un onClick indefinido). El verificador la bajó a MEDIA (el Navbar, el Footer y PortalDemoCTA ofrecen contacto y Portfolio está abajo) y se le sigue. Se arregla en Hero.tsx sin tocar ui/* (MagneticCta ya acepta href y onClick); el home v3 de rediseno/home reemplaza este Hero.",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "MEDIA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-037",
+   "prefijo": "A11Y",
+   "titulo": "Modal compartido sin semantica de dialogo, sin Escape y sin foco atrapado ni devuelto",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/components/ui/Modal.tsx",
+     "linea": 60,
+     "fragmento": "<motion.div initial={{ opacity: 0 }} ... className=\"fixed inset-0 flex items-center justify-center bg-black/70 ...\" onClick={closeOnBackdrop ? onClose : undefined}>"
+    },
+    {
+     "ruta": "src/components/ui/Modal.tsx",
+     "linea": 81,
+     "fragmento": "{(title || description) && ("
+    },
+    {
+     "ruta": "src/components/dashboard/VaultRequestModal.tsx",
+     "linea": 66,
+     "fragmento": "<Modal open={open} onClose={handleClose} title=\"Solicitar documento\""
+    }
+   ],
+   "impacto": "En el portal del cliente (boveda, historial de notificaciones, tablero de soporte) y en el setter, un usuario de teclado o lector de pantalla no sabe que se abrio un dialogo, el Tab sigue recorriendo la pagina de atras, Escape no cierra y al cerrar el foco no vuelve al disparador. Sin title/description tampoco hay boton de cierre.",
+   "propuesta": "Decision para Valentino (archivo FROZEN): agregar role=dialog, aria-modal y aria-labelledby/aria-describedby, cierre con Escape, foco inicial dentro, trampa de foco y retorno al disparador; boton de cierre siempre presente. Alternativa sin tocar el frozen: wrapper accesible propio y migrar los 8 consumidores.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "lib.ui",
+    "h2.cli-cuenta",
+    "h2.cli-shell",
+    "h2.cli-soporte",
+    "h5.set-manual"
+   ],
+   "relacionados_ids": [
+    "A11Y-003",
+    "A11Y-011",
+    "A11Y-019",
+    "A11Y-026"
+   ],
+   "previas": [],
+   "relacionados_texto": "PLAN-1268",
+   "vh": "VH-168",
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H02",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: ui/Modal.tsx sin role, aria-modal, manejo de Escape ni keydown (git grep sin resultados). Archivo congelado: el arreglo es decisión para Valentino (11-CONGELADOS.md).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-180",
+   "prefijo": "BUG",
+   "titulo": "CTA de WhatsApp con numeros hardcodeados y divergentes, incluido un numero de relleno en el upsell del portal",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+     "linea": 15,
+     "fragmento": "const WHATSAPP_URL = 'https://wa.me/5493815555555?text=Hola%2C+quiero+saber+...'"
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 8,
+     "fragmento": "const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493815000000';"
+    },
+    {
+     "ruta": "src/components/ia/CalculadorIA.tsx",
+     "linea": 316,
+     "fragmento": "href={`https://wa.me/5493815674738?text=${encodeURIComponent("
+    },
+    {
+     "ruta": "src/lib/whatsapp.ts",
+     "linea": 21,
+     "fragmento": "const FALLBACK_WHATSAPP_NUMBER = '5493816223508'"
+    },
+    {
+     "ruta": "src/lib/whatsapp.ts",
+     "linea": 12,
+     "fragmento": "* y cuatro call-sites SIN fallback, que servían `https://wa.me/undefined` si la\n * variable faltaba. Todos apuntan ahora acá."
+    }
+   ],
+   "impacto": "El cliente que mira la landing de upsell del chatbot en su portal y toca WhatsApp va a un numero con forma de relleno (…5555555), no a develOP. En el sitio publico conviven 4 destinos distintos segun el componente y, si falta la variable en Netlify, el pie usa un fallback distinto al de lib/whatsapp.",
+   "propuesta": "Migrar ChatbotUpsellLanding, Footer, CalculadorIA y PortalDemoCTA a getWhatsappHref(); decidir con una persona cual es el numero de CalculadorIA (whatsapp.ts:15-19 lo dejo a proposito); confirmar que NEXT_PUBLIC_WHATSAPP_NUMBER esta seteada en produccion.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "h6",
+    "lib.whatsapp"
+   ],
+   "relacionados_ids": [
+    "BUG-144",
+    "BUG-054"
+   ],
+   "previas": [],
+   "relacionados_texto": "D9-A6, PLAN-1286",
+   "vh": "VH-169",
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H03",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/D9-L1/H16",
+      "titulo": "Migración de WhatsApp a lib/whatsapp.ts incompleta: Footer con fallback propio y CalculadorIA con número fijo",
+      "severidad": "BAJA",
+      "nota_padre": "Misma causa (números de WhatsApp fuera de lib/whatsapp.ts)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "PERF-020",
+   "prefijo": "PERF",
+   "titulo": "/web-development descarga 12,6 MB de video en autoplay sin preload ni poster",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "perf",
+   "tipo_detalle": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/ui/VideoCard.tsx",
+     "linea": 6,
+     "fragmento": "<video src=\"/video/Woman_engrossed_in_screen_delpmaspu_.mp4\" autoPlay muted loop playsInline"
+    },
+    {
+     "ruta": "src/components/sections/web-development/WebDevelopmentSensory.tsx",
+     "linea": 124,
+     "fragmento": "<video autoPlay loop muted playsInline"
+    },
+    {
+     "ruta": "src/components/sections/web-development/WebDevelopmentSensory.tsx",
+     "linea": 138,
+     "fragmento": "src=\"/video/Male_business_owner_opens_laptop_delpmaspu_.mp4\""
+    }
+   ],
+   "impacto": "Un prospecto que entra desde el celular a la landing de Web Development baja 5,7 MB + 6,9 MB (git ls-tree de public/video) sin poster ni carga diferida: LCP y datos moviles penalizados en la pagina que vende velocidad.",
+   "propuesta": "Decision para Valentino (VideoCard FROZEN): preload='none' + poster + carga al entrar en viewport, y recodificar a <1,5 MB (H.264/WebM). En WebDevelopmentSensory (libre) aplicar lo mismo.",
+   "esfuerzo": "M",
+   "zona": "FROZEN",
+   "nodos": [
+    "h6",
+    "lib.ui"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "O-1, PERF-09",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H04",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "PERF-021",
+   "prefijo": "PERF",
+   "titulo": "El intro de marketing bloquea el scroll hasta 6 s en cada hard-load de las 5 landings (desktop) y el home sigue en 7,3-9,8 s",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "perf",
+   "tipo_detalle": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/ui/MarketingIntro.tsx",
+     "linea": 175,
+     "fragmento": "lockScroll();"
+    },
+    {
+     "ruta": "src/components/ui/MarketingIntro.tsx",
+     "linea": 233,
+     "fragmento": "await Promise.race([waitForLogoReady(), wait(MARKETING_READY_TIMEOUT_MS)]);"
+    },
+    {
+     "ruta": "src/components/ui/MarketingIntro.tsx",
+     "linea": 46,
+     "fragmento": "const MARKETING_SCROLL_SAFETY_MS = 6000;"
+    },
+    {
+     "ruta": "src/components/ui/Preloader.tsx",
+     "linea": 24,
+     "fragmento": "const VEIL_FADE_SECONDS = 1.4;"
+    }
+   ],
+   "impacto": "Aritmetica (desktop, sin reduced-motion): marketing = readiness (hasta 2,5 s) + 0,42 + 0,85 + 0,45 + 0,4 + 1,0 + 0,8 = 3,92 s; tope 6 s por la red de seguridad, que si dispara antes desmonta el velo de golpe en medio del toldo. Home = readiness + 1,4 + 0,15 + 0,85 + 0,45 + 0,4 + 1,5 + 1,5 + 0,78 + 0,24 = 7,27 s (hasta 9,77 s). Al ser ahora dinamico el chunk 3D, la readiness tiende al tope en redes lentas. El visitante que llega por un anuncio no puede scrollear durante ese tiempo.",
+   "propuesta": "Decision para Valentino (components/ui FROZEN): no bloquear el scroll durante el intro (o liberarlo al terminar el trazo), acortar la ventana interactiva y bajar el tope de readiness; correr el intro solo en la primera visita de la sesion.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "h6",
+    "h6.vis-contacto",
+    "lib.ui"
+   ],
+   "relacionados_ids": [
+    "PERF-016"
+   ],
+   "previas": [],
+   "relacionados_texto": "PERF-06",
+   "vh": "VH-170",
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-100",
+   "prefijo": "DEU",
+   "titulo": "design-tokens.ts: solo zIndex tiene consumidores (Modal, setter-shell, DashboardLayoutClient), sus colores por servicio contradicen CLAUDE.md y globals.css, y el plan de borrarlo como «desconectado» rompería esos consumidores",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/design-tokens.ts",
+     "linea": 96,
+     "fragmento": "ia: '#8b5cf6', // violet-500 — IA / Chatbots\n    automation: '#10b981', // emerald-500 — Automation\n    software: '#f59e0b', // amber-500 — Software / Custom"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 61,
+     "fragmento": "--color-ds-accent-ia: #10b981;\n  --color-ds-accent-automation: #f59e0b;\n  --color-ds-accent-software: #8b5cf6;"
+    },
+    {
+     "ruta": "src/components/ui/Modal.tsx",
+     "linea": 7,
+     "fragmento": "import { zIndex } from '@/lib/design-tokens'"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+     "linea": 28,
+     "fragmento": "className=\"fixed inset-0 bg-[var(--color-void)] text-zinc-100\""
+    },
+    {
+     "ruta": "docs/bitacora-rediseno.md",
+     "linea": 133,
+     "fragmento": "**No se tocaron `tailwind.config.ts` ni `src/lib/design-tokens.ts`.** Confirmado que\nestán desconectados del pipeline"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+     "linea": 6,
+     "fragmento": "import { zIndex } from '@/lib/design-tokens'"
+    },
+    {
+     "ruta": "src/components/dashboard/DashboardLayoutClient.tsx",
+     "linea": 12,
+     "fragmento": "import { zIndex } from '@/lib/design-tokens'"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 308,
+     "fragmento": "[data-theme='light'] {\n  --color-void: #fafafa;"
+    }
+   ],
+   "impacto": "Los 5 importadores (Modal FROZEN, DashboardLayoutClient, setter-shell, shortcuts-help, barra-accion) usan solo zIndex; colors, spacing, radii, typography, shadows, motion y breakpoints no tienen consumidores y el mapa de servicio invierte IA/Automatizacion/Software. Borrar el archivo como planea el rediseno rompe el Modal y el shell del setter; usar sus colores pinta mal los servicios. rediseno/home ademas reescribe utils.ts (+100 lineas) y usa --color-void en 9 sitios.",
+   "propuesta": "Decision para Valentino (FROZEN-inferido): mover zIndex a un modulo propio y borrar o corregir el resto; si se conserva colors.service, alinearlo con globals.css y CLAUDE.md. Coordinar con la rama rediseno/home antes de tocar utils.ts o --color-void.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "lib.design-tokens",
+    "lib.ui",
+    "h5.set-dia",
+    "h2.cli-shell"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "D9-A1, D9-A2, PLAN-1312",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H08",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/D9-L1/H14",
+      "titulo": "design-tokens.ts y --color-void están planeados para borrarse como 'desconectados' pero tienen consumidores vivos",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo archivo y misma conclusión: design-tokens.ts tiene consumidores vivos de zIndex, así que el plan de borrarlo como desconectado rompe Modal, setter-shell y DashboardLayoutClient."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-038",
+   "prefijo": "A11Y",
+   "titulo": "Texto rotativo infinito en el titular del home sin pausa ni prefers-reduced-motion",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/ui/TypewriterText.tsx",
+     "linea": 57,
+     "fragmento": "useEffect(() => {\n        const speed = isDeleting ? deletingSpeed : typingSpeed;"
+    },
+    {
+     "ruta": "src/components/ui/TypewriterText.tsx",
+     "linea": 77,
+     "fragmento": "style={{ animation: 'blink-cursor 1s steps(1) infinite' }}"
+    },
+    {
+     "ruta": "src/components/layout/Hero.tsx",
+     "linea": 694,
+     "fragmento": "<TypewriterText words={HERO_KEYWORDS} typingSpeed={70} deletingSpeed={40}"
+    }
+   ],
+   "impacto": "El titular del home escribe y borra palabras para siempre y el cursor parpadea sin fin; no hay control para pausar (WCAG 2.2.2, nivel A) y no respeta 'reducir movimiento'. Un lector de pantalla lee palabras a medio escribir.",
+   "propuesta": "Decision para Valentino (FROZEN): respetar useReducedMotion mostrando la palabra estatica, exponer el texto completo con aria-label/sr-only y el animado con aria-hidden, y detener el ciclo tras una vuelta o con un control de pausa. Alternativa libre: el Hero gatea el componente con reduced-motion.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "h6",
+    "lib.ui"
+   ],
+   "relacionados_ids": [
+    "A11Y-036"
+   ],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": "VH-171",
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H10",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-039",
+   "prefijo": "A11Y",
+   "titulo": "Kit UI: estados que no se anuncian (carga sin role=status, Tabs sin aria-current, invalid sin aria-invalid fuera de Field)",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/ui/LoadingState.tsx",
+     "linea": 19,
+     "fragmento": "<div className={cn('flex flex-col items-center justify-center gap-3 py-12', className)}>"
+    },
+    {
+     "ruta": "src/components/ui/Spinner.tsx",
+     "linea": 18,
+     "fragmento": "<Loader2 className={cn(sizes[size], 'animate-spin', className)} strokeWidth={1.5} />"
+    },
+    {
+     "ruta": "src/components/ui/Tabs.tsx",
+     "linea": 108,
+     "fragmento": "<Link key={key} href={(item as NavTabItem).href} className={baseClasses}>"
+    },
+    {
+     "ruta": "src/components/ui/Input.tsx",
+     "linea": 31,
+     "fragmento": "aria-invalid={ariaInvalid ?? (field.invalid ? true : undefined)}"
+    }
+   ],
+   "impacto": "En 35 usos de LoadingState, Spinner y los skeletons el lector de pantalla no anuncia que algo carga; las tabs de Cuenta, Resultados y Proyecto no marcan la pestana activa; un <Input invalid> fuera de Field se ve rojo pero no se anuncia invalido. Control positivo: setter-nav.tsx:98 usa aria-current y autosave-status.tsx:73 role=status.",
+   "propuesta": "Decision para Valentino (FROZEN): role=status + aria-live=polite + texto sr-only en LoadingState/Spinner/skeletons, aria-current='page' en Tabs modo nav y role=tablist/tab/aria-selected en modo value, y mapear la prop invalid a aria-invalid en Input/TextArea/Select.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "lib.ui",
+    "h2.cli-cuenta",
+    "h2.cli-resultados",
+    "h2.cli-proyecto"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H11",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-181",
+   "prefijo": "BUG",
+   "titulo": "use-step-action no captura excepciones de la action: un throw va al error boundary en vez del toast",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/use-step-action.ts",
+     "linea": 53,
+     "fragmento": "startTransition(async () => {\n      const result = await action()\n      if (!result.success) {"
+    }
+   ],
+   "impacto": "Si la server action lanza (guard que tira Error generico, red caida, timeout), React 19 propaga el error de la transicion al error.tsx del setter: el setter pierde la pantalla del paso y ve el boundary en vez de un toast con reintento.",
+   "propuesta": "Envolver el await en try/catch: toast.error con copy generico + onError, y Sentry.captureException para lo inesperado.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h5.set-manual",
+    "lib.actions"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "patron D1-c3 guards que lanzan Error('Unauthorized')",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H12",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: use-step-action.ts:53-58 (await action() dentro de startTransition sin try/catch).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-182",
+   "prefijo": "BUG",
+   "titulo": "use-autosave cancela el guardado pendiente al desmontar: navegar dentro del debounce pierde lo ultimo tipeado",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/use-autosave.ts",
+     "linea": 154,
+     "fragmento": "if (!enabled) return\n    scheduleRef.current()\n    return clearTimer"
+    },
+    {
+     "ruta": "src/lib/use-autosave.ts",
+     "linea": 44,
+     "fragmento": "const DEFAULT_DELAY_MS = 1200"
+    },
+    {
+     "ruta": "src/lib/use-unsaved-guard.ts",
+     "linea": 16,
+     "fragmento": "Por eso el aviso de salida interna es OPT-IN (`avisaEnSalidaInterna`): lo pide\n * el formulario que no tiene autosave detrás."
+    }
+   ],
+   "impacto": "El setter que tipea en la ficha o el brief y en menos de 1,2 s toca un enlace interno pierde esas ultimas teclas sin aviso: el cleanup cancela el timer y la guardia interna no esta activa para formularios con autosave.",
+   "propuesta": "En el cleanup de desmontaje hacer flush del valor pendiente (fire-and-forget) en lugar de solo cancelar, o activar avisaEnSalidaInterna mientras haya timer pendiente.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h5.set-manual"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": "VH-172",
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H13",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-183",
+   "prefijo": "BUG",
+   "titulo": "logger en produccion: la meta se esparce sobre el objeto y pisa message/level; un Error como meta borra el mensaje de contexto",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/logger.ts",
+     "linea": 42,
+     "fragmento": "JSON.stringify({ level, timestamp, message,\n        ...(typeof serializedMeta === 'object' && serializedMeta !== null ? serializedMeta"
+    },
+    {
+     "ruta": "src/lib/logger.ts",
+     "linea": 33,
+     "fragmento": "meta instanceof Error ? { name: meta.name, message: meta.message, stack: meta.stack, }"
+    },
+    {
+     "ruta": "src/app/api/motor/webhook/[channelToken]/route.ts",
+     "linea": 52,
+     "fragmento": "logger.error('motor-inbound: error de infraestructura procesando el webhook', error)"
+    }
+   ],
+   "impacto": "En los logs de Netlify el error del webhook de WhatsApp queda solo con el message de la excepcion: se pierde 'motor-inbound: error de infraestructura...'. Una meta con clave level/message/timestamp falsea el registro; una meta con BigInt o ciclos hace tirar al logger dentro de un catch. Ademas todo va a stdout y nada a Sentry.",
+   "propuesta": "Decision para Valentino (FROZEN-inferido): anidar la meta bajo una clave (meta/err), serializar con try/catch y mandar error/warn a stderr.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "lib.logger",
+    "h3.vis-whatsapp",
+    "int.sentry"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "patron D1-c1 console.error sin Sentry",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H14",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-184",
+   "prefijo": "BUG",
+   "titulo": "slugify devuelve cadena vacia para nombres sin caracteres latinos y 2 de 3 llamadores no tienen respaldo",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/slugify.ts",
+     "linea": 6,
+     "fragmento": ".replace(/[^a-z0-9]+/g, '-')\n    .replace(/^-+|-+$/g, '')"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createBot.ts",
+     "linea": 57,
+     "fragmento": "const slug = await findUniqueBotSlug(slugify(input.botName))"
+    },
+    {
+     "ruta": "src/lib/onboarding/core.ts",
+     "linea": 26,
+     "fragmento": "let candidate = base"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+     "linea": 32,
+     "fragmento": "const safeBase = base || 'cliente'"
+    }
+   ],
+   "impacto": "Un bot llamado con emojis o en otro alfabeto obtiene slug '' (y luego '-1'): la URL del widget y del embed queda vacia o rota para ese cliente. createClientOnly ya tiene el respaldo (control positivo); createBot y onboarding/core no.",
+   "propuesta": "Hacer que slugify o los dos findUnique* apliquen un respaldo ('bot'/'cliente' + sufijo) y validar en Zod que el slug resultante no quede vacio.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.adm-chatbots",
+    "h4.adm-clientes",
+    "lib.slugify",
+    "modelo.BotConfig",
+    "modelo.Organization"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": "VH-173",
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H15",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-101",
+   "prefijo": "DEU",
+   "titulo": "zIndex 210 hardcodeado en Select y 10 popovers, fuera de la escala de design-tokens: un Select dentro de un Modal quedaria tapado",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/ui/Select.tsx",
+     "linea": 368,
+     "fragmento": "zIndex: 210,"
+    },
+    {
+     "ruta": "src/lib/design-tokens.ts",
+     "linea": 245,
+     "fragmento": "modal: 10000, // diálogos portaleados a <body>"
+    },
+    {
+     "ruta": "src/components/dashboard/NotificationCenter.tsx",
+     "linea": 186,
+     "fragmento": "zIndex: 210,"
+    }
+   ],
+   "impacto": "Ambos portalean a <body>: el panel del Select (210) queda debajo del backdrop del Modal (10000). Hoy ningun Select vive dentro de un Modal (evaluacion-form.tsx tiene el Select en :223 y el Modal en :267-300), asi que es latente; el primer formulario dentro de un Modal con Select mostraria un desplegable invisible.",
+   "propuesta": "Agregar un tier 'popover' en la escala (por encima de modal) y consumirlo desde Select y los popovers en vez del literal 210 (Select es FROZEN: decision para Valentino).",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "lib.ui",
+    "lib.design-tokens"
+   ],
+   "relacionados_ids": [
+    "UX-020"
+   ],
+   "previas": [],
+   "relacionados_texto": "D9-A1",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H20",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-185",
+   "prefijo": "BUG",
+   "titulo": "StatCard formatea numeros con el locale del runtime y compact en ingles en paginas server del portal",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/ui/StatCard.tsx",
+     "linea": 58,
+     "fragmento": "? `$${value.toFixed(4)}`\n      : format === 'compact' ? new Intl.NumberFormat('en', { notation: 'compact' }).format(value)\n        : value.toLocaleString()"
+    }
+   ],
+   "impacto": "En las paginas server del portal que lo usan (modules/agenda-inteligente/page.tsx, modules/tienda-conectada/page.tsx, soporte/page.tsx, GBPMetricsCard.tsx) un valor de 1234 sale '1,234' con el locale por defecto de Node en vez de '1.234'; dentro de un client component puede dar hydration mismatch.",
+   "propuesta": "Decision para Valentino (FROZEN): fijar 'es-AR' en toLocaleString e Intl.NumberFormat.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "lib.ui",
+    "h2.cli-agenda",
+    "h2.cli-tienda",
+    "h2.cli-soporte"
+   ],
+   "relacionados_ids": [
+    "BUG-034"
+   ],
+   "previas": [],
+   "relacionados_texto": "PLAN-1343",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H21",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-102",
+   "prefijo": "DEU",
+   "titulo": "Duplicacion en primitivas compartidas: useIsClient en 4 versiones, cn local y constantes de footprint 'mantener en sync'",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/use-is-client.ts",
+     "linea": 12,
+     "fragmento": " * Copia 1:1 de `src/modules/chatbot/components/admin/useIsClient.ts`"
+    },
+    {
+     "ruta": "src/components/ui/LogoStrokeOverlay.tsx",
+     "linea": 30,
+     "fragmento": "function useIsClient(): boolean {\n    const [client, setClient] = useState(false);"
+    },
+    {
+     "ruta": "src/components/ui/IntroLockupText.tsx",
+     "linea": 46,
+     "fragmento": "// Mismos tunables de footprint que LogoStrokeOverlay — mantener en sync.\nconst FOOTPRINT_CALIB = 1.0;"
+    },
+    {
+     "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+     "linea": 9,
+     "fragmento": "function cn(...inputs: ClassValue[]) {\n    return twMerge(clsx(inputs));"
+    }
+   ],
+   "impacto": "Hay 4 implementaciones de 'estoy en el cliente' (lib, chatbot, LogoStrokeOverlay, IntroLockupText; MarketingIntro.tsx:88 suma un useMediaQuery('(min-width: 1px)')), un cn que ignora la config DS de lib/utils.ts y constantes duplicadas a mano: un ajuste en una copia desalinea el logo 2D del 3D.",
+   "propuesta": "Decision para Valentino (FROZEN): consolidar en lib/use-is-client.ts, importar cn de lib/utils y mover FOOTPRINT_CALIB/LOGO_Y_WORLD a lib/logo-footprint.ts.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "lib.ui"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "D9-L2",
+    "tmp": "D9-c1/D9-L2/H22",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: use-is-client.ts:12 se declara copia 1:1 de la del módulo del chatbot; LogoStrokeOverlay y MagneticCta tienen su propia copia de useIsClient y de cn.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-103",
+   "prefijo": "DEU",
+   "titulo": "Higiene de UI — D9: 44 detalles cosméticos (contraste 12, otro 10, strokeWidth 9, inline 7, tilde 3, copy 3)",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 227,
+     "fragmento": "[tilde] aria-label 'Cerrar menu' sin tilde (menú)"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 268,
+     "fragmento": "[strokeWidth] <X> sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 278,
+     "fragmento": "[strokeWidth] <Grid2x2> sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 356,
+     "fragmento": "[strokeWidth] <ChevronDown> sin strokeWidth={1.5}"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 356,
+     "fragmento": "[contraste] ChevronDown en rgba(255,255,255,0.28) sobre #030305: ~2,4:1, bajo el 3:1 de un ícono informativo"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 301,
+     "fragmento": "[contraste] 'develOP' en text-white/38 a 10px: ~3,5:1"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 386,
+     "fragmento": "[contraste] subLabel de servicios en text-white/34 a 11px: ~3:1"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 404,
+     "fragmento": "[contraste] 'Tucumán, Argentina' en text-white/24: ~2:1"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 35,
+     "fragmento": "[copy] Precios '$800', '$300', '$1.500', '$200' sin 'USD' (en Argentina '$' se lee como pesos); la home dice '$800 USD'"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 256,
+     "fragmento": "[inline] style pointerEvents en vez de clases pointer-events-auto/none"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 68,
+     "fragmento": "[otro] Ternario con ramas idénticas: SERVICE_ROUTE_SET.has(pathname) ? 'Inicio' : 'Inicio'"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 183,
+     "fragmento": "[otro] Error de eslint react-hooks/set-state-in-effect (baseline) por setActiveTab dentro del efecto"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 114,
+     "fragmento": "[otro] Componente Navbar de ~300 líneas (114-413) que mezcla scroll, IntersectionObserver y menú (anti-vibecode >300)"
+    },
+    {
+     "ruta": "src/components/layout/Navbar.tsx",
+     "linea": 344,
+     "fragmento": "[otro] setTimeout de cierre (también :378) sin limpiar al desmontar"
+    },
+    {
+     "ruta": "src/components/brand/BrandMark.tsx",
+     "linea": 37,
+     "fragmento": "[inline] filter brightness(0) invert(1) inline; existen las clases brightness-0 invert (como Navbar.tsx:83)"
+    },
+    {
+     "ruta": "src/components/brand/BrandMark.tsx",
+     "linea": 45,
+     "fragmento": "[contraste] tagline text-zinc-500 a 10px sobre fondo oscuro del shell: ~4,1:1"
+    },
+    {
+     "ruta": "src/components/layout/VersionBadge.tsx",
+     "linea": 5,
+     "fragmento": "[contraste] text-zinc-700 sobre el fondo del shell: ~1,9:1"
+    },
+    {
+     "ruta": "src/components/canvas/DotMatrix.tsx",
+     "linea": 215,
+     "fragmento": "[inline] style width 100vw/height 100vh/pointerEvents; existen w-screen h-screen pointer-events-none, y 100vw suma el ancho de la barra de scroll"
+    },
+    {
+     "ruta": "scripts/seed-matsu.ts",
+     "linea": 134,
+     "fragmento": "[otro] Doble cast 'as unknown as object' para quickReplies (también :154 y _b14-2-seed-bench-prod.ts:156/:176); esquiva el tipo sin any"
+    },
+    {
+     "ruta": "src/components/ui/ErrorState.tsx",
+     "linea": 24,
+     "fragmento": "[tilde] 'Algo salio mal' sin tilde (salió)."
+    },
+    {
+     "ruta": "src/components/ui/ErrorState.tsx",
+     "linea": 25,
+     "fragmento": "[tilde] 'seccion', 'Proba', 'contacta' sin tildes (sección, Probá, contactá)."
+    },
+    {
+     "ruta": "src/components/ui/ErrorState.tsx",
+     "linea": 41,
+     "fragmento": "[strokeWidth] AlertCircle con strokeWidth 1.75 (regla 1.5)."
+    },
+    {
+     "ruta": "src/components/ui/ErrorState.tsx",
+     "linea": 58,
+     "fragmento": "[strokeWidth] RefreshCw con strokeWidth 1.75."
+    },
+    {
+     "ruta": "src/components/ui/Section.tsx",
+     "linea": 42,
+     "fragmento": "[strokeWidth] Icono de seccion con strokeWidth 1.75."
+    },
+    {
+     "ruta": "src/components/ui/Stat.tsx",
+     "linea": 84,
+     "fragmento": "[strokeWidth] Icono con strokeWidth 1.75."
+    },
+    {
+     "ruta": "src/components/ui/Stat.tsx",
+     "linea": 93,
+     "fragmento": "[strokeWidth] TrendIcon con strokeWidth 2.5."
+    },
+    {
+     "ruta": "src/components/ui/StatCard.tsx",
+     "linea": 111,
+     "fragmento": "[strokeWidth] TrendIcon con strokeWidth 1.75 y sin aria-hidden."
+    },
+    {
+     "ruta": "src/components/ui/EmptyState.tsx",
+     "linea": 69,
+     "fragmento": "[contraste] Descripcion en text-zinc-600 sobre fondo oscuro (<4,5:1)."
+    },
+    {
+     "ruta": "src/components/ui/PageHeader.tsx",
+     "linea": 59,
+     "fragmento": "[contraste] Eyebrow en text-zinc-600 a 11px."
+    },
+    {
+     "ruta": "src/components/ui/Stat.tsx",
+     "linea": 99,
+     "fragmento": "[contraste] Caption text-zinc-600 a 10px."
+    },
+    {
+     "ruta": "src/components/ui/SectionErrorBoundary.tsx",
+     "linea": 93,
+     "fragmento": "[contraste] Digest de referencia en text-zinc-700 a 10px."
+    },
+    {
+     "ruta": "src/components/ui/Card.tsx",
+     "linea": 82,
+     "fragmento": "[contraste] CardTitle text-[10px] text-zinc-500: tamano y contraste al limite."
+    },
+    {
+     "ruta": "src/components/ui/Textarea.tsx",
+     "linea": 28,
+     "fragmento": "[contraste] Placeholder zinc-600 mientras Input usa zinc-500 (gemelos que divergen)."
+    },
+    {
+     "ruta": "src/components/ui/Badge.tsx",
+     "linea": 66,
+     "fragmento": "[otro] Tamano xs a 9px en mayusculas: legibilidad baja."
+    },
+    {
+     "ruta": "src/components/ui/Tabs.tsx",
+     "linea": 78,
+     "fragmento": "[otro] Contador de tab a 9px."
+    },
+    {
+     "ruta": "src/components/ui/SectionErrorBoundary.tsx",
+     "linea": 75,
+     "fragmento": "[otro] role=alert junto a aria-live=polite (señales contradictorias)."
+    },
+    {
+     "ruta": "src/components/ui/SectionErrorBoundary.tsx",
+     "linea": 108,
+     "fragmento": "[otro] 'Volver al inicio' apunta fijo a /dashboard aun en boundaries de admin (depende del redirect del proxy)."
+    },
+    {
+     "ruta": "src/components/ui/Modal.tsx",
+     "linea": 90,
+     "fragmento": "[otro] Boton cerrar sin estilo focus-visible."
+    },
+    {
+     "ruta": "src/components/ui/TypewriterText.tsx",
+     "linea": 67,
+     "fragmento": "[inline] <style> con @keyframes inline y animation por style en :77 en vez de clase Tailwind."
+    },
+    {
+     "ruta": "src/components/ui/IntroLockupText.tsx",
+     "linea": 251,
+     "fragmento": "[inline] <style> con @keyframes inline del cursor."
+    },
+    {
+     "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+     "linea": 128,
+     "fragmento": "[inline] Borde conic-gradient y fondo por style inline."
+    },
+    {
+     "ruta": "src/components/ui/HeroMetrics.tsx",
+     "linea": 238,
+     "fragmento": "[inline] radial-gradient por style inline."
+    },
+    {
+     "ruta": "src/components/ui/HeroMetrics.tsx",
+     "linea": 14,
+     "fragmento": "[copy] Promesas sin respaldo ('2 segundos de carga máximo', '#1 en Google local')."
+    },
+    {
+     "ruta": "src/components/ui/IntroLockupText.tsx",
+     "linea": 25,
+     "fragmento": "[copy] Slogan 'Construimos lo que imaginas' sin voseo (imaginás) frente al resto del copy rioplatense."
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.",
+   "propuesta": "Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist. 25 entradas están en src/components/ui/* (FROZEN): esas quedan como decisión para Valentino.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "lib.sitio-publico",
+    "lib.scripts",
+    "lib.ui"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "todos",
+    "tmp": "D9-c1/HIGIENE",
+    "verificado_padre": false,
+    "nota_padre": "DEC-55: higiene de UI agrupada, sin verificación individual",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-186",
+   "prefijo": "BUG",
+   "titulo": "El job E2E del CI no puede pasar aunque se carguen los secrets: levanta next start sin build, la base queda sin las cuentas que asume y las baselines visuales son solo de Windows",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 206,
+     "fragmento": "npm ci, prisma generate y migrate deploy: ningún next build ni seed antes de test:e2e"
+    },
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 220,
+     "fragmento": "npm run test:e2e"
+    },
+    {
+     "ruta": "playwright.config.ts",
+     "linea": 29,
+     "fragmento": "webServer: npm run start, que exige un build previo"
+    },
+    {
+     "ruta": "tests/e2e/22-visual-regression.spec.ts",
+     "linea": 50,
+     "fragmento": "toHaveScreenshot contra baselines que solo existen como chromium-win32"
+    }
+   ],
+   "impacto": "Cargar DATABASE_URL_TEST y AUTH_SECRET, que es la salida de DEU-017 y BUG-171, deja el job en rojo permanente: next start sin .next, login contra una base vacía y screenshots sin baseline de Linux. Es lo que el propio ci.yml dice que enseña a ignorar el CI.",
+   "propuesta": "Agregar npm run build y un seed de fixtures antes de test:e2e; generar baselines de Linux o sacar el spec visual del CI.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.github-actions",
+    "lib.tests"
+   ],
+   "relacionados_ids": [
+    "DEU-017",
+    "BUG-171"
+   ],
+   "previas": [],
+   "relacionados_texto": [],
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "PADRE",
+    "tmp": "D9-c1/PADRE/H04",
+    "verificado_padre": true,
+    "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: ci.yml:180-236 (el job E2E hace npm ci, generate, migrate deploy, playwright install y test:e2e, sin build ni seed), playwright.config.ts:29-34 (webServer npm run start) y git ls-tree de tests/e2e/22-visual-regression.spec.ts-snapshots (solo chromium-win32).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-104",
+   "prefijo": "DEU",
+   "titulo": "Tests verdes por arnés: skips que vuelven verde una regresión y asserts que aceptan cualquier resultado",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "tests/e2e/19-security.spec.ts",
+     "linea": 22,
+     "fragmento": "test.skip si GET /api/admin/clients da 404: esa ruta no existe, así que el test de auth del admin siempre se saltea"
+    },
+    {
+     "ruta": "tests/e2e/40-lead-capture-e2e.spec.ts",
+     "linea": 31,
+     "fragmento": "skip justo cuando la captura falla"
+    },
+    {
+     "ruta": "tests/e2e/14-e2e-critical-flow.spec.ts",
+     "linea": 11,
+     "fragmento": "promete verificar el upsell y no lo afirma"
+    },
+    {
+     "ruta": "tests/helpers/setter-auth.ts",
+     "linea": 42,
+     "fragmento": "la sesión del setter se mintea con passwordResetRequired false: el login y el reset forzado no se prueban"
+    },
+    {
+     "ruta": "tests/leados/alta-import.spec.ts",
+     "linea": 13,
+     "fragmento": "replica el núcleo de la action en vez de llamarla: requireSetter y Zod quedan sin cubrir"
+    }
+   ],
+   "impacto": "La suite reporta verde en los caminos del producto que más importan (auth del admin, captura de leads, wizard, navegación) aunque estén rotos; el número de tests pasados sobreestima la cobertura real.",
+   "propuesta": "Cambiar test.skip por fallos explícitos en los caminos del producto, apuntar el test de auth a una ruta admin real y sumar al menos un test por action que pase por su guard.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.tests"
+   ],
+   "relacionados_ids": [
+    "DEU-032"
+   ],
+   "previas": [],
+   "relacionados_texto": [],
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "PADRE",
+    "tmp": "D9-c1/PADRE/H05",
+    "verificado_padre": true,
+    "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Muestreado: 19-security.spec.ts:20-24 (skip con 404 sobre una ruta que no existe).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-187",
+   "prefijo": "BUG",
+   "titulo": "Los e2e tienen efectos reales en la base compartida: reenvían credenciales a un usuario existente con mail por Brevo, disparan el detector de alertas con mails y Telegram, y dejan editados los bots develop y sanmiguel",
+   "dominio": "D9",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "tests/e2e/30-onboarding-e2e-complete.spec.ts",
+     "linea": 219,
+     "fragmento": "toma la org más vieja con miembros de la base y le reenvía credenciales"
+    },
+    {
+     "ruta": "tests/e2e/30-onboarding-e2e-complete.spec.ts",
+     "linea": 246,
+     "fragmento": "acepta «Credenciales enviadas» o «Email falló»: verde aunque el envío esté roto"
+    },
+    {
+     "ruta": "src/app/api/admin/users/[userId]/resend-credentials/route.ts",
+     "linea": 64,
+     "fragmento": "la ruta reescribe la contraseña del usuario"
+    },
+    {
+     "ruta": "tests/e2e/19-security.spec.ts",
+     "linea": 35,
+     "fragmento": "con CRON_SECRET llama al detect-bot-issues real, que notifica por email y Telegram"
+    },
+    {
+     "ruta": "tests/integration/alerts-detector.spec.ts",
+     "linea": 44,
+     "fragmento": "borra todas las BotAlert de un tipo del primer bot activo, no solo las que creó"
+    },
+    {
+     "ruta": "tests/e2e/15-client-personalization.spec.ts",
+     "linea": 85,
+     "fragmento": "cambia color y bienvenida del bot de sanmiguel sin restaurar"
+    },
+    {
+     "ruta": "tests/e2e/09-admin-bot-config.spec.ts",
+     "linea": 37,
+     "fragmento": "restaura el welcomeMessage del bot develop solo si todo sale bien (fuera de finally)"
+    }
+   ],
+   "impacto": "Correr la suite deja sin acceso a una cuenta de fixture (contraseña nueva, sesiones invalidadas), le escribe a quien sea el titular de esa org, manda alertas reales a develOP y deja texto de prueba en el prompt vivo de los bots de dev, que después leen otros tests y smokes. Es la forma concreta de la falta de base de test (DEU-017).",
+   "propuesta": "Crear usuarios y bots efímeros propios de cada test; afirmar un único resultado; correr el detector sin notificaciones (flag o dependencias inyectadas); restaurar en afterAll o finally y limpiar por id creado.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.tests",
+    "h4.adm-clientes.reenviar-credenciales",
+    "h4.adm-alertas.detector-incidencias"
+   ],
+   "relacionados_ids": [
+    "DEU-017",
+    "SEC-087"
+   ],
+   "previas": [],
+   "relacionados_texto": [],
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "PADRE",
+    "tmp": "D9-c1/PADRE/H06",
+    "verificado_padre": true,
+    "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: 30-onboarding-e2e-complete.spec.ts:217-247 (org más vieja con miembros, reenvío confirmado, acepta éxito o «Email falló») y 19-security.spec.ts:29-40 (con CRON_SECRET llama al detect-bot-issues real). Junta tres hallazgos del barrido con la misma causa (tests sin aislamiento sobre la base compartida).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-105",
+   "prefijo": "DEU",
+   "titulo": "Scripts descartables de B14 golpean producción (chat del bot bench-matsu, hasta 31 pedidos por corrida) aunque el encabezado del smoke dice que no modifica la base",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "scripts/_b14-4-smoke-prod.mjs",
+     "linea": 7,
+     "fragmento": "el encabezado dice «NO crea recursos, NO modifica DB»"
+    },
+    {
+     "ruta": "scripts/_b14-4-smoke-prod.mjs",
+     "linea": 19,
+     "fragmento": "BASE_URL por defecto: el sitio de producción en Netlify"
+    },
+    {
+     "ruta": "scripts/_b14-4-smoke-prod.mjs",
+     "linea": 136,
+     "fragmento": "POST al chat del bot bench-matsu: crea conversación y mensajes y llama a Vertex"
+    },
+    {
+     "ruta": "scripts/_b14-4-smoke-prod.mjs",
+     "linea": 175,
+     "fragmento": "bucle de 31 POST al chat para provocar el rate limit"
+    },
+    {
+     "ruta": "scripts/_b14-2-prod-bot-latency.mjs",
+     "linea": 21,
+     "fragmento": "otro script de B14 que conversa con el bot de producción"
+    }
+   ],
+   "impacto": "Correrlos por error suma conversaciones a las métricas de un bot de producción, consume Vertex y llena rate_limit. No piden confirmación ni un destino explícito, y su encabezado dice que se borran después de v1.0.0.",
+   "propuesta": "Borrar los _b14-2-*; si _b14-4 sigue, exigir B14_BASE_URL explícito y un --confirm-prod, y corregir el encabezado. El bloque de Sentry del smoke depende de /api/test-sentry (SEC-093).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.scripts"
+   ],
+   "relacionados_ids": [
+    "SEC-093"
+   ],
+   "previas": [],
+   "relacionados_texto": [],
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "PADRE",
+    "tmp": "D9-c1/PADRE/H07",
+    "verificado_padre": true,
+    "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: _b14-4-smoke-prod.mjs:1-22 (encabezado «NO modifica DB», BASE_URL de producción), :130-140 y :170-180 (POST al chat; bucle de rate limit) y :210-216. El barrido la marcó MEDIA de seguridad; queda BAJA de deuda porque son scripts que el equipo corre a conciencia sobre un bot de demo, sin exposición a terceros.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-108",
+   "prefijo": "SEC",
+   "titulo": "PII en scripts: un email personal versionado como asistente por defecto de una reserva real en Cal.com y volcados de emails y nombres de miembros",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "scripts/b7-smoke-calcom.ts",
+     "linea": 76,
+     "fragmento": "B7_SMOKE_EMAIL con un email personal como valor por defecto (omitido)"
+    },
+    {
+     "ruta": "scripts/b7-smoke-calcom.ts",
+     "linea": 78,
+     "fragmento": "crea una reserva real en la cuenta de Cal.com"
+    },
+    {
+     "ruta": "scripts/_db-cleanup-inspect.mjs",
+     "linea": 110,
+     "fragmento": "selecciona email y nombre de los miembros de cada org"
+    },
+    {
+     "ruta": "scripts/_db-cleanup-inspect.mjs",
+     "linea": 114,
+     "fragmento": "los imprime a la consola"
+    }
+   ],
+   "impacto": "Un dato personal queda en un repo público y en cada reserva de prueba; los scripts de limpieza vuelcan datos de miembros a la terminal y a los transcripts.",
+   "propuesta": "Exigir B7_SMOKE_EMAIL sin valor por defecto y borrar los _db-cleanup-inspect* (su tarea ya se cumplió).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.scripts",
+    "int.calcom"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": [],
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "PADRE",
+    "tmp": "D9-c1/PADRE/H11",
+    "verificado_padre": true,
+    "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: b7-smoke-calcom.ts:74-79 y _db-cleanup-inspect.mjs:108-115 (sin copiar el email).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-106",
+   "prefijo": "DEU",
+   "titulo": "Scripts muertos y descartables que siguen en el repo: los sueltos de la raíz de la app reescriben un componente que ya no existe y varios de sprint ya cumplidos apuntan a producción",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "script.js",
+     "linea": 2,
+     "fragmento": "reescribe src/components/sections/OurServices.tsx, que ya no existe"
+    },
+    {
+     "ruta": "replace_analytics.js",
+     "linea": 2,
+     "fragmento": "script suelto de reemplazo de texto"
+    },
+    {
+     "ruta": "script_maps.js",
+     "linea": 5,
+     "fragmento": "script suelto de reemplazo de texto"
+    },
+    {
+     "ruta": "find_unused.js",
+     "linea": 17,
+     "fragmento": "buscador de componentes sin uso por substring; nadie lo invoca"
+    },
+    {
+     "ruta": "test-chat.mjs",
+     "linea": 1,
+     "fragmento": "importa node-fetch sin declararlo"
+    },
+    {
+     "ruta": "scripts/_b13-latency-test.mjs",
+     "linea": 5,
+     "fragmento": "descartable de B13 que se declara borrable"
+    },
+    {
+     "ruta": "scripts/_db-cleanup-inspect.mjs",
+     "linea": 3,
+     "fragmento": "descartable de limpieza ya cumplida"
+    },
+    {
+     "ruta": "scripts/_experimental/fg2-gen-prompts.ts",
+     "linea": 2,
+     "fragmento": "experimento de FG2"
+    }
+   ],
+   "impacto": "Suman superficie (algunos apuntan a producción, DEU de B14) y confunden el inventario: no se sabe qué script sigue vigente.",
+   "propuesta": "Borrar los sueltos de la raíz de la app y los descartables cumplidos (git conserva la historia); dejar en scripts/ solo lo que nombra package.json o un doc vigente. Ver 10-PODA.md.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.scripts"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": [],
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "PADRE",
+    "tmp": "D9-c1/PADRE/H12",
+    "verificado_padre": true,
+    "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Muestreado: los sueltos de la raíz de la app (script.js, replace_analytics.js, script_maps.js) y find_unused.js figuran en el inventario superficial sin consumidores.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-188",
+   "prefijo": "BUG",
+   "titulo": "El teardown de la batería de regresión pone QuotaUsage en 0 en lugar de restaurarlo, y el runner dice que no escribe en la base",
+   "dominio": "D9",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "scripts/regression/cases.ts",
+     "linea": 357,
+     "fragmento": "teardown: «restaurar contador a 0»"
+    },
+    {
+     "ruta": "scripts/regression/cases.ts",
+     "linea": 367,
+     "fragmento": "conversationsCount: 0"
+    },
+    {
+     "ruta": "scripts/regression/run-baseline.ts",
+     "linea": 11,
+     "fragmento": "«Este script NO escribe en DB»"
+    }
+   ],
+   "impacto": "Cada corrida borra el conteo real de conversaciones del mes del bot de Matsu en dev (métricas y alertas de cuota posteriores salen mal) y el encabezado engaña sobre sus efectos.",
+   "propuesta": "Leer el valor previo en el setup, restaurarlo en el teardown y corregir el comentario del runner.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.scripts",
+    "modelo.QuotaUsage"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": [],
+   "vh": null,
+   "origen": {
+    "ciclo": "D9-c1",
+    "lote": "PADRE",
+    "tmp": "D9-c1/PADRE/H13",
+    "verificado_padre": true,
+    "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: regression/cases.ts:352-370 (teardown con conversationsCount: 0) y run-baseline.ts:8-14.",
     "verificador": null
    },
    "estado": "vigente"

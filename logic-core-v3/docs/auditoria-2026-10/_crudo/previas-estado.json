@@ -2119,6 +2119,94 @@
    "id_previo": "sin-id",
    "estado": "parcial",
    "evidencia": "El candado existe en parte: .github/workflows/ci.yml:79-117 corre tipos e invariantes y el build ya no ignora tipos. e2e depende de secrets (ci.yml:186-197) y el lint, con 102 errores, sigue fuera del gate (ci.yml:20-26)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:593",
+   "id_previo": "PERF-08",
+   "estado": "parcial",
+   "evidencia": "Navbar.tsx ya no usa <Link>: navega con botones y triggerTransition (Navbar.tsx:333-344, :371-379), sin prefetch. DynamicDock.tsx:15 y :232 siguen usando <Link> sin prefetch={false} (fuera del lote). No se volvieron a medir los ~287 KB."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1916",
+   "id_previo": "A11Y-02",
+   "estado": "abierto",
+   "evidencia": "El botón citado (Navbar.tsx:232-258, className en :257) sigue sin aria-label ni aria-expanded; los íconos :268/:278 no tienen nombre. Portfolio.tsx, contact/page.tsx y CalculadoraAutomation están fuera del lote y no se re-verificaron."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1918",
+   "id_previo": "COMP-01",
+   "estado": "parcial",
+   "evidencia": "DotMatrix.tsx:209-221 sigue sin detectar WebGL ni tener poster (git grep webgl/getContext/poster -> 0, igual en HeroBackground.tsx). Si falla WebGL, no tumba la página: R3F 9.6.1 crea el renderer dentro de un configure async (events-b389eeca.esm.js:15589) que se llama sin catch (react-three-fiber.esm.js:62-110), así que queda una promesa rechazada sin manejar y el fondo vacío. HeroArtifactLayer.tsx:14 documenta una mitigación propia."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "doc": "docs/auditoria-total-pre-deploy.md:35",
+   "id_previo": "O-1",
+   "estado": "abierto",
+   "evidencia": "VideoCard.tsx:6-13 sigue con autoPlay muted loop sin preload ni poster; WebDevelopmentSensory.tsx:124-138 igual. Tamanos por git ls-tree: Woman_engrossed 5,7 MB + Male_business_owner 6,9 MB = 12,6 MB en /web-development."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "doc": "docs/auditoria-consistencia-setter.md:114",
+   "id_previo": "sin-id (TextArea local gemelo de Input)",
+   "estado": "cerrado",
+   "evidencia": "setter/_components/text-area.tsx no existe en main (git ls-files vacio); TextArea vive en src/components/ui/Textarea.tsx:12 y se exporta en index.ts:19. Queda un drift menor: placeholder zinc-600 (Textarea.tsx:28) vs zinc-500 (Input.tsx:33)."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "doc": "docs/auditoria-consistencia-setter.md:184",
+   "id_previo": "sin-id (Field: label no asociado)",
+   "estado": "cerrado",
+   "evidencia": "Field.tsx:19 useId y :31-32 label htmlFor={fieldId}; Input.tsx:29, Textarea.tsx:24 y Select.tsx:319 toman el id del contexto."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "doc": "docs/auditoria-consistencia-setter.md:185",
+   "id_previo": "sin-id (Field: error solo visual)",
+   "estado": "cerrado",
+   "evidencia": "Field.tsx:49 <p id={errorId} role=\"alert\">; Input.tsx:30-31 aria-describedby y aria-invalid desde el contexto. Fuera de Field la prop invalid sigue sin setear aria-invalid (Input.tsx:31)."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:584",
+   "id_previo": "PERF-01",
+   "estado": "cerrado",
+   "evidencia": "MarketingIntro.tsx:19-22 carga BrandedIntroCanvas con next/dynamic ssr:false; Preloader.tsx:10 importa MarketingIntro, que solo arrastra motion (LogoStrokeOverlay, IntroLockupText) y no three. El 3D del home sigue en Hero (solo ruta /)."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:591",
+   "id_previo": "PERF-06",
+   "estado": "parcial",
+   "evidencia": "Aritmetica con las constantes actuales (Preloader.tsx:24-34, IntroLockupText.tsx:19-22): readiness hasta 2,5 s + 1,4 + 0,15 + 0,85 + 0,45 + 0,4 + 1,5 + 1,5 + 0,78 + 0,24 = 7,27 s (hasta 9,77 s), contra 12,6 s medidos antes. El lock lo posee Hero (Preloader.tsx:55-56)."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:594",
+   "id_previo": "PERF-09",
+   "estado": "abierto",
+   "evidencia": "Mismo estado que O-1: VideoCard.tsx:6-13 y WebDevelopmentSensory.tsx:124-138 sin preload='none' ni poster."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:74",
+   "id_previo": "CLEAN-R2",
+   "estado": "abierto",
+   "evidencia": "Sin timeZone: dashboard/page.tsx:40-45, getActivityChartData.ts:25,30, getLatencyHistory.ts:25, alerts.ts:277,287, weekly-report.ts:12, sendLeadNotification.ts:74. dates-ar.ts:222-245 ofrece formatDateAR/formatTimeAR con TZ_AR pero no se usa ahi."
   }
  ]
 }

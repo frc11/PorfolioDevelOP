@@ -1,8 +1,8 @@
 ruta,dominio,alcance,estado,ciclo,notas
-.claude/agents/visual-qa.md,D8,superficial,superficial,D8-c1,tooling-agentes | subagente de QA visual que pide CLAUDE.md: solo lectura mas las herramientas de Claude Preview, fijado a claude-haiku-4-5-20251001; versionado aunque el .gitignore raiz ignora .claude/ (entro antes de la regla)
-.claude/launch.json,D8,superficial,superficial,D8-c1,tooling-agentes | tres servidores de Claude Preview desde la raiz (next-dev 3000, next-dev-qa 3002, next-prod-qa 3001 con start:qa); los de QA son los que exponen /api/qa/login en toda la red (SEC-024)
-.claudeignore,D8,superficial,superficial,D8-c1,config-repo | oculta a Claude Code prisma/migrations/, netlify/ (las scheduled functions donde viven los crons de Netlify: BUG-047, SEC-099), lockfiles, imagenes y SVG; ayuda a explicar crons registrados solo en vercel.json
-.github/hooks/impeccable.json,D8,superficial,superficial,D8-c1,tooling | hook postToolUse de la skill impeccable (edit/create/apply_patch, 5 s); tooling de agentes, sin efecto en la app ni en CI
+.claude/agents/visual-qa.md,D8,superficial,superficial,D8-c1,"tooling-agentes | subagente de QA visual que pide CLAUDE.md: solo lectura mas las herramientas de Claude Preview, fijado a claude-haiku-4-5-20251001; versionado aunque el .gitignore raiz ignora .claude/ (entro antes de la regla)"
+.claude/launch.json,D8,superficial,superficial,D8-c1,"tooling-agentes | tres servidores de Claude Preview desde la raiz (next-dev 3000, next-dev-qa 3002, next-prod-qa 3001 con start:qa); los de QA son los que exponen /api/qa/login en toda la red (SEC-024)"
+.claudeignore,D8,superficial,superficial,D8-c1,"config-repo | oculta a Claude Code prisma/migrations/, netlify/ (las scheduled functions donde viven los crons de Netlify: BUG-047, SEC-099), lockfiles, imagenes y SVG; ayuda a explicar crons registrados solo en vercel.json"
+.github/hooks/impeccable.json,D8,superficial,superficial,D8-c1,"tooling | hook postToolUse de la skill impeccable (edit/create/apply_patch, 5 s); tooling de agentes, sin efecto en la app ni en CI"
 .github/skills/impeccable/SKILL.md,-,fuera,excluido-generado,,vendorizado: skill impeccable
 .github/skills/impeccable/reference/adapt.md,-,fuera,excluido-generado,,vendorizado: skill impeccable
 .github/skills/impeccable/reference/adapt.native.md,-,fuera,excluido-generado,,vendorizado: skill impeccable
@@ -148,8 +148,8 @@ ruta,dominio,alcance,estado,ciclo,notas
 .github/skills/impeccable/scripts/surface-brief.mjs,-,fuera,excluido-generado,,vendorizado: skill impeccable
 .github/workflows/ci.yml,D8,profundo,leído,D8-c1,ci
 .github/workflows/db-backup.yml,D8,profundo,leído,D8-c1,ci
-.gitignore,D8,superficial,superficial,D8-c1,config-repo | raiz: ignora .claude/, .agents/, audit/, .netlify y los worktrees anidados (audit-clean/, logic-core-runtime/); no cubre los distDir .next-perf-* ni .next-corrida-visual de la app (D8-L1/H18)
-.impeccable/design.json,D8,superficial,superficial,D8-c1,tooling: config de skill impeccable | tokens del sitio publico para la skill impeccable (paleta Vacio Calido, Tinta Hueso, Papel); insumo de F3: comparar con globals.css y el home v3
+.gitignore,D8,superficial,superficial,D8-c1,"config-repo | raiz: ignora .claude/, .agents/, audit/, .netlify y los worktrees anidados (audit-clean/, logic-core-runtime/); no cubre los distDir .next-perf-* ni .next-corrida-visual de la app (D8-L1/H18)"
+.impeccable/design.json,D8,superficial,superficial,D8-c1,"tooling: config de skill impeccable | tokens del sitio publico para la skill impeccable (paleta Vacio Calido, Tinta Hueso, Papel); insumo de F3: comparar con globals.css y el home v3"
 AUDITORIA-VS-BRIEF-2026-07.md,DOC,superficial,superficial,F1,doc-raiz-repo
 CLAUDE.md,DOC,superficial,superficial,F1,doc-raiz-repo
 DESIGN.md,DOC,superficial,superficial,F1,doc-raiz-repo
@@ -160,7 +160,7 @@ lane-LOG.md,DOC,superficial,superficial,F1,doc-raiz-repo
 lane-dashboard-log.md,DOC,superficial,superficial,F1,doc-raiz-repo
 lane-plan-log.md,DOC,superficial,superficial,F1,doc-raiz-repo
 lane-resultados-redesign-log.md,DOC,superficial,superficial,F1,doc-raiz-repo
-logic-core-v3/.claude/launch.json,D8,superficial,superficial,D8-c1,tooling-agentes | dos servidores de Claude Preview desde la app (dev 3000, next-prod-qa 3001); duplica la config de la raiz con otros nombres
+logic-core-v3/.claude/launch.json,D8,superficial,superficial,D8-c1,"tooling-agentes | dos servidores de Claude Preview desde la app (dev 3000, next-prod-qa 3001); duplica la config de la raiz con otros nombres"
 logic-core-v3/.dependency-cruiser.cjs,D8,profundo,leído,D8-c1,config
 logic-core-v3/.env.example,D8,profundo,leído,D8-c1,config
 logic-core-v3/.eslint_output.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
@@ -423,7 +423,7 @@ logic-core-v3/docs/testing-strategy.md,DOC,superficial,superficial,F1,doc
 logic-core-v3/docs/v1.0-smoke-test-checklist.md,DOC,superficial,superficial,F1,doc
 logic-core-v3/docs/verificacion-arranque-oslead-vii.md,DOC,superficial,superficial,F1,doc
 logic-core-v3/eslint.config.mjs,D8,profundo,leído,D8-c1,config
-logic-core-v3/find_unused.js,D9,superficial,pendiente,,script-suelto-raiz-app
+logic-core-v3/find_unused.js,D9,superficial,superficial,D9-c1,"script-suelto-raiz-app | Script suelto (mar-2026): busca componentes y deps sin uso por substring; solo lee src y package.json, no escribe ni toca DB ni red. Sin guard ni CI; nadie lo invoca. Resto muerto."
 logic-core-v3/instrumentation.ts,D7,profundo,leído,D7-c1,sentry
 logic-core-v3/knip.ts,D8,profundo,leído,D8-c1,config
 logic-core-v3/netlify.toml,D8,profundo,leído,D8-c1,config; crons
@@ -433,14 +433,14 @@ logic-core-v3/netlify/functions/send-weekly-reports-cron.ts,D7,profundo,leído,D
 logic-core-v3/next.config.ts,D8,profundo,leído,D8-c1,config
 logic-core-v3/package-lock.json,D8,fuera,excluido-generado,,lockfile (se analiza con npm ls / npm audit)
 logic-core-v3/package.json,D8,profundo,leído,D8-c1,dependencias
-logic-core-v3/playwright.config.ts,D9,superficial,pendiente,,config-tests
-logic-core-v3/playwright.galeria.config.ts,D9,superficial,pendiente,,config-tests
-logic-core-v3/playwright.helpers-probe.config.ts,D9,superficial,pendiente,,config-tests
-logic-core-v3/playwright.integration.config.ts,D9,superficial,pendiente,,config-tests
-logic-core-v3/playwright.leados.config.ts,D9,superficial,pendiente,,config-tests
-logic-core-v3/playwright.qa-persona.config.ts,D9,superficial,pendiente,,config-tests
-logic-core-v3/playwright.qa-walkthrough.config.ts,D9,superficial,pendiente,,config-tests
-logic-core-v3/playwright.setter.config.ts,D9,superficial,pendiente,,config-tests
+logic-core-v3/playwright.config.ts,D9,superficial,superficial,D9-c1,config-tests | Suite e2e (tests/e2e) contra localhost:3000 levantando npm run start (exige build previo); DB = DATABASE_URL del entorno (Neon dev compartida). Job e2e de CI gateado por secrets inexistentes: no corre.
+logic-core-v3/playwright.galeria.config.ts,D9,superficial,superficial,D9-c1,"config-tests | Captura de galeria (tests/galeria) desktop+mobile contra build propio .next-galeria en 127.0.0.1:3004 con .env.local (Neon dev). No afirma, fotografia. No esta en CI."
+logic-core-v3/playwright.helpers-probe.config.ts,D9,superficial,superficial,D9-c1,"config-tests | Suite de sabotaje de helpers (tests/helpers-probe) con page.setContent: sin server ni DB. Se declara apta para CI sin base, pero ci.yml no corre test:helpers."
+logic-core-v3/playwright.integration.config.ts,D9,superficial,superficial,D9-c1,"config-tests | Suite tests/integration in-process con Prisma contra DATABASE_URL de .env.local (Neon dev compartida), sin webServer; ignora alerts-detector y cita un spec inexistente. No esta en ci.yml: nunca corre en CI."
+logic-core-v3/playwright.leados.config.ts,D9,superficial,superficial,D9-c1,config-tests | Suite tests/leados in-process (Prisma directo) contra .env.local o DATABASE_URL_TEST. Unica cableada a CI (job test-leados) pero se saltea: el secret DATABASE_URL_TEST no existe.
+logic-core-v3/playwright.qa-persona.config.ts,D9,superficial,superficial,D9-c1,"config-tests | Corridas QA-persona (tests/qa-persona) contra start:qa en 127.0.0.1:3001 con .env.local (Neon dev); reusa server fuera de CI. Captura screenshots, no es regresion. No esta en CI."
+logic-core-v3/playwright.qa-walkthrough.config.ts,D9,superficial,superficial,D9-c1,"config-tests | Auditoria perceptual (tests/qa-walkthrough) contra start:qa :3001 con .env.local (Neon dev), viewport 1440x5000. Script de captura, no regresion. No esta en CI."
+logic-core-v3/playwright.setter.config.ts,D9,superficial,superficial,D9-c1,"config-tests | Suite tests/setter (30 specs) contra build propio .next-setter en 127.0.0.1:3003 con .env.local (Neon dev compartida), sin reuso ciego de server. No esta en ci.yml: nunca corre en CI."
 logic-core-v3/postcss.config.mjs,D8,profundo,leído,D8-c1,config
 logic-core-v3/prisma.config.ts,D6,profundo,leído,D6-c1,config-prisma
 logic-core-v3/prisma/backups/backup.js,D6,superficial,superficial,D6-c1,volcado de catalogo commiteado (revisar PII); toca-db | script de solo lectura contra la base del .env (backup.js vuelca 3 tablas a JSON; migrate-os-to-unified cuenta filas); sin guard de entorno
@@ -573,114 +573,114 @@ logic-core-v3/public/videos/ia-ingenieria-aplicada-demo.mp4,-,fuera,excluido-gen
 logic-core-v3/public/videos/software-development-hero-intro.mp4,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/public/widget.js,D5,profundo,leído,D5-c1,widget-embebible
 logic-core-v3/public/window.svg,-,fuera,excluido-generado,,asset-binario
-logic-core-v3/replace_analytics.js,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/script.js,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/script2.js,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/script3.js,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/script_aiscene.js,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/script_analytics.js,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/script_leads.js,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/script_magnetic.js,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/script_maps.js,D9,superficial,pendiente,,script-suelto-raiz-app
+logic-core-v3/replace_analytics.js,D9,superficial,superficial,D9-c1,"script-suelto-raiz-app | Refactor one-shot (abr-2026) que reescribe src/components/sections/OurServices.tsx, archivo que ya no existe. Escribe solo en disco local; sin DB ni red. Sin guard, sin CI, nadie lo invoca. Muerto."
+logic-core-v3/script.js,D9,superficial,superficial,D9-c1,script-suelto-raiz-app | Refactor one-shot (abr-2026) que extrae funciones Sim de OurServices.tsx (inexistente hoy); escribe en disco local. Sin DB ni red. Sin CI. Muerto.
+logic-core-v3/script2.js,D9,superficial,superficial,D9-c1,script-suelto-raiz-app | Refactor one-shot (abr-2026) que reemplaza AIScene en OurServices.tsx (inexistente); escribe archivo local. Sin DB ni red. Sin CI. Muerto.
+logic-core-v3/script3.js,D9,superficial,superficial,D9-c1,script-suelto-raiz-app | Refactor one-shot (abr-2026) que reemplaza AutomationScene en OurServices.tsx (inexistente); escribe archivo local. Sin DB ni red. Sin CI. Muerto.
+logic-core-v3/script_aiscene.js,D9,superficial,superficial,D9-c1,script-suelto-raiz-app | Refactor one-shot (abr-2026) que parchea imports y AIScene de OurServices.tsx (inexistente); escribe local. Sin DB ni red. Sin CI. Muerto.
+logic-core-v3/script_analytics.js,D9,superficial,superficial,D9-c1,script-suelto-raiz-app | Refactor one-shot (abr-2026) guardado en UTF-16; corta OurServices.tsx (inexistente) en la linea 738 y escribe local. Sin DB ni red. Muerto.
+logic-core-v3/script_leads.js,D9,superficial,superficial,D9-c1,script-suelto-raiz-app | Refactor one-shot que reemplaza renderLeadsScene en OurServices.tsx (inexistente); datos demo ficticios. Escribe local. Sin DB ni red. Muerto.
+logic-core-v3/script_magnetic.js,D9,superficial,superficial,D9-c1,script-suelto-raiz-app | Refactor one-shot que inserta MagneticFlowPath en OurServices.tsx (inexistente). Escribe local. Sin DB ni red. Muerto.
+logic-core-v3/script_maps.js,D9,superficial,superficial,D9-c1,script-suelto-raiz-app | Refactor one-shot que reemplaza renderMapsScene por lineas fijas (1250-1572) en OurServices.tsx (inexistente). Escribe local. Muerto.
 logic-core-v3/scripts/_b13-2-fix-demo-bots.mjs,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
-logic-core-v3/scripts/_b13-2-list-bots.mjs,D9,superficial,pendiente,,script-operativo; toca-db
+logic-core-v3/scripts/_b13-2-list-bots.mjs,D9,superficial,superficial,D9-c1,"script-operativo; toca-db | Lista botConfig con Prisma contra DATABASE_URL de .env (sin dotenv; Prisma no lee .env.local). Solo lectura, imprime config de bots sin PII. Sin guard, sin refs. Resto de B1.3."
 logic-core-v3/scripts/_b13-dev.log,D9,fuera,excluido-generado,,log-commiteado
-logic-core-v3/scripts/_b13-latency-analyze.mjs,D9,superficial,pendiente,,script-operativo; toca-db
+logic-core-v3/scripts/_b13-latency-analyze.mjs,D9,superficial,superficial,D9-c1,script-operativo; toca-db | Lee conversations y ChatbotEvent por prefijo de sesion b13- y calcula percentiles. Solo lectura contra DATABASE_URL; sin guard. Throwaway (borrar tras B1.3); nadie lo invoca.
 logic-core-v3/scripts/_b13-latency-b13-1779420902364.json,D9,fuera,excluido-generado,,salida-de-bench-commiteada
 logic-core-v3/scripts/_b13-latency-stdout.log,D9,fuera,excluido-generado,,log-commiteado
-logic-core-v3/scripts/_b13-latency-test.mjs,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/_b14-2-cleanup-bench-prod.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/_b13-latency-test.mjs,D9,superficial,superficial,D9-c1,script-operativo | 30 POST a /api/chatbot/develop/chat en B13_BASE_URL (default localhost:3000): crea conversaciones y gasta Vertex en el server apuntado; guarda JSON en scripts/ (uno commiteado). Sin guard. Throwaway.
+logic-core-v3/scripts/_b14-2-cleanup-bench-prod.ts,D9,profundo,leído,D9-c1,script-operativo; toca-db; escribe-db; promovido: escribe en la base
 logic-core-v3/scripts/_b14-2-pages-b14-2-pages-1779840621756.json,D9,fuera,excluido-generado,,salida-de-bench-commiteada
-logic-core-v3/scripts/_b14-2-prod-bot-latency.mjs,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/_b14-2-prod-coldstart.mjs,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/_b14-2-prod-pages-ttfb.mjs,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/_b14-2-seed-bench-prod.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/_b14-4-smoke-prod.mjs,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/_b14-5-scrub-smoke.mjs,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/_b14-analyze.mjs,D9,superficial,pendiente,,script-operativo; toca-db
+logic-core-v3/scripts/_b14-2-prod-bot-latency.mjs,D9,superficial,superficial,D9-c1,"script-operativo | 30 POST /chat contra PROD hardcodeada (develop-portfolio.netlify.app, bot bench-matsu): crea conversaciones en la base de prod y gasta Vertex. Sin guard ni confirmacion. Throwaway que sigue vivo."
+logic-core-v3/scripts/_b14-2-prod-coldstart.mjs,D9,superficial,superficial,D9-c1,"script-operativo | GET /health de bench-matsu en PROD hardcodeada (10 hits o 3 ciclos de 20 min); sin Vertex, el health pinguea la DB. Sin escritura de negocio. Sin guard. Throwaway."
+logic-core-v3/scripts/_b14-2-prod-pages-ttfb.mjs,D9,superficial,superficial,D9-c1,"script-operativo | GET de 7 paginas publicas de PROD hardcodeada, 5 muestras c/u; guarda JSON local (uno commiteado). Solo lectura. Sin guard. Throwaway."
+logic-core-v3/scripts/_b14-2-seed-bench-prod.ts,D9,profundo,leído,D9-c1,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/_b14-4-smoke-prod.mjs,D9,superficial,superficial,D9-c1,"script-operativo | Smoke post-deploy contra PROD hardcodeada; dice no modificar DB (l.7) pero hace 32 POST /chat a bench-matsu (crea conversaciones, gasta Vertex) y pega /api/test-sentry. Sin guard."
+logic-core-v3/scripts/_b14-5-scrub-smoke.mjs,D9,superficial,superficial,D9-c1,"script-operativo | Smoke puro de scrubPii con eventos falsos (PII inventada), sin DB ni red; sale 1 si falla y se declara apto para CI, pero no esta en package.json ni en ci.yml."
+logic-core-v3/scripts/_b14-analyze.mjs,D9,superficial,superficial,D9-c1,"script-operativo; toca-db | Lee ChatbotEvent.metadata.timings por runId b13- y reporta etapas. Solo lectura contra DATABASE_URL; sin guard. Throwaway (B1.4), sin refs."
 logic-core-v3/scripts/_b14-dev.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_b32-baseline-run.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_b32-dev.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_b33-dev.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_b35-dev.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_b36-dev.log,D9,fuera,excluido-generado,,log-commiteado
-logic-core-v3/scripts/_b52-test-scoring.ts,D9,superficial,pendiente,,script-operativo
+logic-core-v3/scripts/_b52-test-scoring.ts,D9,superficial,superficial,D9-c1,"script-operativo | Test puro del motor de scoring (senales positivas), sin DB ni LLM; se declara apto para CI pero no esta en package.json ni ci.yml: nunca corre automatico."
 logic-core-v3/scripts/_b53-baseline-run.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_b53-baseline-run2.log,D9,fuera,excluido-generado,,log-commiteado
-logic-core-v3/scripts/_b53-test-scoring.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/_b54-test-scoring.ts,D9,superficial,pendiente,,script-operativo
+logic-core-v3/scripts/_b53-test-scoring.ts,D9,superficial,superficial,D9-c1,"script-operativo | Test puro de scoring: DQ, penalidades y validador de telefono AR; sin DB. No cableado a package.json ni a CI."
+logic-core-v3/scripts/_b54-test-scoring.ts,D9,superficial,superficial,D9-c1,"script-operativo | Test puro de scoring: combos, decaimiento temporal y explicabilidad; sin DB. No cableado a package.json ni a CI."
 logic-core-v3/scripts/_db-cleanup-execute.mjs,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
-logic-core-v3/scripts/_db-cleanup-inspect.mjs,D9,superficial,pendiente,,script-operativo; toca-db
-logic-core-v3/scripts/_db-cleanup-inspect2.mjs,D9,superficial,pendiente,,script-operativo; toca-db
-logic-core-v3/scripts/_experimental/fg2-gen-prompts.ts,D9,superficial,pendiente,,script-operativo
+logic-core-v3/scripts/_db-cleanup-inspect.mjs,D9,superficial,superficial,D9-c1,script-operativo; toca-db | Inspeccion read-only de orgs duplicadas agency-os-* y bots; imprime host de DB y JSON con email y nombre de miembros (PII) por consola. Sin guard. Throwaway sin borrar.
+logic-core-v3/scripts/_db-cleanup-inspect2.mjs,D9,superficial,superficial,D9-c1,"script-operativo; toca-db | Segunda ronda read-only de la limpieza: vuelca orgs, bots y miembros con email, nombre y rol (PII) por consola. Sin guard. Throwaway."
+logic-core-v3/scripts/_experimental/fg2-gen-prompts.ts,D9,superficial,superficial,D9-c1,script-operativo | Experimental FG-2.0: genera markdown con 10 prompts desde CASOS_GASTRO a stdout. Sin DB ni red. Sin guard ni CI; descartable segun su propio encabezado.
 logic-core-v3/scripts/_ms1-dev.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_ms4-dev.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_ms4-full-run.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_ms4-full-run2.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_ms4-smoke-run.log,D9,fuera,excluido-generado,,log-commiteado
 logic-core-v3/scripts/_ms4-smoke-run2.log,D9,fuera,excluido-generado,,log-commiteado
-logic-core-v3/scripts/admin-1a-backfill-caliente.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/b1-verify-setter-ownership.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/b2-verify-dossier.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/b3-qa-assign-leads.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/b4-qa-construccion.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/b5-qa-review-queue.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/b58-smoke.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/b59-smoke.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/b6-qa-outreach.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/b7-qa-agenda.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/b7-smoke-calcom.ts,D9,superficial,pendiente,,script-operativo
+logic-core-v3/scripts/admin-1a-backfill-caliente.ts,D9,profundo,leído,D9-c1,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/b1-verify-setter-ownership.ts,D9,superficial,superficial,D9-c1,"script-operativo | Verifica getOwnedLead: upsert del setter QA reseteando su password a un literal, crea y borra un lead temporal (finally). Guard de host Neon dev si. Sin CI."
+logic-core-v3/scripts/b2-verify-dossier.ts,D9,superficial,superficial,D9-c1,"script-operativo | Verifica dossier (unicidad, ownership, stage, gate); crea leads y limpia en finally; resetea password del setter QA a literal. Guard host dev si. Sin CI; reemplazado por dossier-gates."
+logic-core-v3/scripts/b3-qa-assign-leads.ts,D9,superficial,superficial,D9-c1,script-operativo | Seed QA idempotente: upsertea 2 leads QA-B3 asignados al setter QA. Guard de host Neon dev si. Sin limpieza (residuo deliberado). Sin CI ni script npm.
+logic-core-v3/scripts/b4-qa-construccion.ts,D9,superficial,superficial,D9-c1,script-operativo | Seed QA: deja el lead QA-B4 con dossier en BRIEF para recorrer construccion. Guard host dev si. Sin limpieza. Sin CI.
+logic-core-v3/scripts/b5-qa-review-queue.ts,D9,superficial,superficial,D9-c1,"script-operativo | Seed QA: empuja dossiers QA a EN_REVISION, estampa fechas y crea lead QA-B5 para probar el Telegram de caliente en vivo. Guard host dev si. Sin limpieza. Sin CI."
+logic-core-v3/scripts/b58-smoke.ts,D9,superficial,superficial,D9-c1,"script-operativo | Smoke puro de validateWebhookUrl (SSRF), encryptSecret/decryptSecret y estado de sync CRM; sin DB. No cableado a package.json ni a CI pese a cubrir controles de seguridad."
+logic-core-v3/scripts/b59-smoke.ts,D9,superficial,superficial,D9-c1,"script-operativo | Smoke puro de CSV (anti formula-injection, BOM, headers, traduccion de intents); sin DB. No cableado a package.json ni a CI."
+logic-core-v3/scripts/b6-qa-outreach.ts,D9,superficial,superficial,D9-c1,"script-operativo | Seed QA de outreach: leads QA-B6 (pizzeria, gimnasio) con dossier via transitionDossier. Guard host dev si. Sin limpieza. Sin CI."
+logic-core-v3/scripts/b7-qa-agenda.ts,D9,superficial,superficial,D9-c1,"script-operativo | Seed QA de agenda: leads QA-B7 con dossier y contacto comercial; booking simulado (uid falso, no llama a Cal.com). Guard host dev si. Sin limpieza. Sin CI."
+logic-core-v3/scripts/b7-smoke-calcom.ts,D9,superficial,superficial,D9-c1,script-operativo | Crea y cancela un booking REAL en la cuenta Cal.com de Franco (calendario y mails reales); attendee por defecto = email personal hardcodeado. El guard solo mira el host de DB. Sin CI.
 logic-core-v3/scripts/b9-4-dedupe-kb-develop.mjs,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
-logic-core-v3/scripts/check-env.js,D9,superficial,pendiente,,script-operativo; guard-indirecto
-logic-core-v3/scripts/cleanup-messages-demo.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/db-backup-local.sh,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/db-restore-local.sh,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/demos-seed-review-queue.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/dev/_vseed.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/dev/m0-galeria-indice.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/dev/m0-galeria-seed.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/dev/qa-manual-m5-m16.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/dev/qa-seed-leads-clean.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/dev/qa-seed-leads.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/dev/seed-alerts.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/dev/seed-events.md,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/dev/seed-events.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/dev/seed-latency.md,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/dev/seed-latency.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/encode-vertex-creds.js,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/ev4-smoke.mjs,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/ev5-smoke.mjs,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/load-test/chatbot-baseline.ts,D9,superficial,pendiente,,script-operativo
+logic-core-v3/scripts/check-env.js,D9,superficial,superficial,D9-c1,"script-operativo; guard-indirecto | npm run check-env: carga .env y .env.local e imprime SOLO nombres de vars y presencia, nunca valores; exit 1 si faltan criticas. No imprime la credencial de Vertex. Sin CI."
+logic-core-v3/scripts/cleanup-messages-demo.ts,D9,profundo,leído,D9-c1,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/db-backup-local.sh,D9,superficial,superficial,D9-c1,"script-operativo | pg_dump de DIRECT_DATABASE_URL cifrado con gpg (passphrase por fd, no en argv) a backups/ (gitignored). No imprime la URL. Escribe solo local. Sin CI (espejo de db-backup.yml)."
+logic-core-v3/scripts/db-restore-local.sh,D9,superficial,superficial,D9-c1,script-operativo | Restaura backup cifrado con psql a TARGET_URL; exige override salvo dev o localhost (deja volcar prod con PII en la Neon dev compartida). Imprime user:password de la URL (l.78 y l.92).
+logic-core-v3/scripts/demos-seed-review-queue.ts,D9,superficial,superficial,D9-c1,script-operativo | Seed DEMOS: 6 leads DEMO Web con dossier en EN_REVISION via transitionDossier y reescribe draftUrl example.* de filas QA. Guard host dev si. Sin limpieza. Sin CI.
+logic-core-v3/scripts/dev/_vseed.ts,D9,superficial,superficial,D9-c1,"script-operativo | Siembra bot QA, 3 conversaciones y 3 chatbotLead en la org san-miguel contra .env.local SIN guard de host; usa as any; qa-seed-leads-clean no borra ese residuo. Sin refs."
+logic-core-v3/scripts/dev/m0-galeria-indice.ts,D9,superficial,superficial,D9-c1,"script-operativo | npm run galeria:indice: genera docs/manual-usuario/galeria/INDICE.md cruzando catalogo y PNGs. Solo FS local, sin DB ni red. Vivo. Sin CI."
+logic-core-v3/scripts/dev/m0-galeria-seed.ts,D9,superficial,superficial,D9-c1,script-operativo | npm run seed:galeria: borra y re-siembra leads M0-GAL y setters dedicados (deleteMany por prefijo exacto). Guard host Neon dev si. Vivo via npm run galeria. Sin CI.
+logic-core-v3/scripts/dev/qa-manual-m5-m16.ts,D9,superficial,superficial,D9-c1,script-operativo | Seed QA M5/M16: reconcilia 4 leads QA-M5/QA-M16 con dossier y recrea actividades (deleteMany+createMany). Guard host dev si. Sin limpieza. Sin CI.
+logic-core-v3/scripts/dev/qa-seed-leads-clean.ts,D9,superficial,superficial,D9-c1,"script-operativo | Borra leads, conversaciones y bots qaseed-* en 3 orgs QA contra .env.local SIN guard de host. No cubre la org san-miguel que siembra _vseed. Sin CI."
+logic-core-v3/scripts/dev/qa-seed-leads.ts,D9,superficial,superficial,D9-c1,"script-operativo | Siembra leads, conversaciones y bots qaseed-* en sigma-contable, sonrisa-norte y matsu contra .env.local SIN guard de host. Idempotente; limpieza en el -clean. Sin CI."
+logic-core-v3/scripts/dev/seed-alerts.ts,D9,profundo,leído,D9-c1,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/dev/seed-events.md,D9,superficial,superficial,D9-c1,"script-operativo | Doc del seed seed-events.ts: mapea filtros de Activity, documenta el bug de nivel (enum en mayusculas) ya corregido y la reversibilidad por marcador. Solo documentacion."
+logic-core-v3/scripts/dev/seed-events.ts,D9,profundo,leído,D9-c1,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/dev/seed-latency.md,D9,superficial,superficial,D9-c1,"script-operativo | Doc de npm run seed:latency: inserta ~96 ChatbotEvent marcados en el bot real develop de .env.local, sin guard de host; limpieza con --clean. Solo documentacion."
+logic-core-v3/scripts/dev/seed-latency.ts,D9,profundo,leído,D9-c1,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/encode-vertex-creds.js,D9,superficial,superficial,D9-c1,"script-operativo | Lee vertex-credentials.json (gitignored) e imprime por consola el JSON entero de la service account, con su clave privada (l.10), para pegarlo en Netlify. Sin guard. Uso manual."
+logic-core-v3/scripts/ev4-smoke.mjs,D9,superficial,superficial,D9-c1,script-operativo | 7 conversaciones reales POST /chat a EV4_BASE_URL (default localhost:3002) con LLM real; transcripts a docs/. Escribe en la DB del server apuntado. Sin guard de host. Sin CI.
+logic-core-v3/scripts/ev5-smoke.mjs,D9,superficial,superficial,D9-c1,script-operativo | Conversacion de captura de lead POST /chat a EV5_BASE_URL (default localhost:3002): crea ChatbotLead y CrmSyncAttempt reales (y n8n si esta configurado). Sin guard. Sin CI.
+logic-core-v3/scripts/load-test/chatbot-baseline.ts,D9,superficial,superficial,D9-c1,"script-operativo | Carga concurrente (3x30) POST /chat a BASE_URL (default localhost:3000, bot develop) sin Origin: crea conversaciones y gasta LLM en el destino; BASE_URL libre sin guard. Sin CI."
 logic-core-v3/scripts/p41-inject-campaigns.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
-logic-core-v3/scripts/qa-corridas/_p21-corrida.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/qa-corridas/_p23/capturas.ts,D9,superficial,pendiente,,script-operativo; toca-db
-logic-core-v3/scripts/qa-corridas/_p23/censo-ubicaciones.ts,D9,superficial,pendiente,,script-operativo; toca-db
-logic-core-v3/scripts/qa-corridas/_verify-b61.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/qa-corridas/_verify-home-aviso.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/qa-corridas/_verify-scroll-gap.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/qa-corridas/barrido-derivacion.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/qa-corridas/capturar-franja.ts,D9,superficial,pendiente,,script-operativo
+logic-core-v3/scripts/qa-corridas/_p21-corrida.ts,D9,superficial,superficial,D9-c1,"script-operativo | Corrida P21: crea setters y leads P21-CORRIDA en .env.local SIN guard de host, mintea sesion con AUTH_SECRET y navega 127.0.0.1:3020; borra en finally. Captura. Sin CI."
+logic-core-v3/scripts/qa-corridas/_p23/capturas.ts,D9,superficial,superficial,D9-c1,"script-operativo; toca-db | Capturas P23: lee setter y leads de .env.local, mintea sesion JWT con AUTH_SECRET y fotografia 127.0.0.1:3023. Solo lectura de DB. Sin guard. Sin CI."
+logic-core-v3/scripts/qa-corridas/_p23/censo-ubicaciones.ts,D9,superficial,superficial,D9-c1,"script-operativo; toca-db | Censo P23 de frases de ubicacion: lee leads, mintea sesion con AUTH_SECRET y mide en 127.0.0.1:3023; escribe JSON local. Solo lectura de DB. Sin guard. Sin CI."
+logic-core-v3/scripts/qa-corridas/_verify-b61.ts,D9,superficial,superficial,D9-c1,script-operativo | Verificacion B6.1 del auto-scroll del wizard contra 127.0.0.1:3001 con sesion minteada; solo lee DB (leads QA-W). Sin guard de host. Sin CI ni refs.
+logic-core-v3/scripts/qa-corridas/_verify-home-aviso.ts,D9,superficial,superficial,D9-c1,script-operativo | Fuerza stage RECHAZADA en el dossier QA-W Construccion con update directo (sin guard de host) y lo restaura al final SIN try/finally: si falla queda mutado. Captura. Sin CI.
+logic-core-v3/scripts/qa-corridas/_verify-scroll-gap.ts,D9,superficial,superficial,D9-c1,"script-operativo | Mismo patron: fuerza RECHAZADA en QA-W Construccion, mide el scroll y restaura al final sin try/finally ni guard de host. Sin CI."
+logic-core-v3/scripts/qa-corridas/barrido-derivacion.ts,D9,superficial,superficial,D9-c1,script-operativo | Barrido puro de las 373.248 combinaciones de derivarPantalla contra un oraculo; sin DB ni reloj; escribe JSON opcional. Sin CI (el invariante paso-admitido cubre parte).
+logic-core-v3/scripts/qa-corridas/capturar-franja.ts,D9,superficial,superficial,D9-c1,"script-operativo | Capturas P20 y censo de destinos /manual contra 127.0.0.1:3010 con sesion minteada; lee DB de .env.local, escribe JSON y PNG locales. Sin guard. Sin CI."
 logic-core-v3/scripts/qa-corridas/corrida-1-import-csv.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
-logic-core-v3/scripts/qa-corridas/medir-cartera.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/qa-corridas/medir-panel-setter.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/qa-corridas/medir-pliegue-manual.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/qa-corridas/p19-capturas.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/qa-corridas/rejection-reloop.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/regression/cases.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/regression/diag-timings.ts,D9,superficial,pendiente,,script-operativo; toca-db
-logic-core-v3/scripts/regression/purge.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/scripts/regression/run-baseline.ts,D9,superficial,pendiente,,script-operativo; toca-db
-logic-core-v3/scripts/run-invariants.mjs,D9,superficial,pendiente,,script-operativo
+logic-core-v3/scripts/qa-corridas/medir-cartera.ts,D9,superficial,superficial,D9-c1,script-operativo | Instrumento de medicion de la cartera de /setter contra 127.0.0.1:3022 con sesion minteada; lee DB y escribe JSON local. Sin guard. Sin CI.
+logic-core-v3/scripts/qa-corridas/medir-panel-setter.ts,D9,superficial,superficial,D9-c1,script-operativo | Instrumento de medicion del panel /setter (pliegue y bloques) contra 127.0.0.1:3020 con sesion minteada; lee DB. Sin guard. Sin CI.
+logic-core-v3/scripts/qa-corridas/medir-pliegue-manual.ts,D9,superficial,superficial,D9-c1,script-operativo | Instrumento que mide el primer pliegue de las 14 pantallas del manual a 1440 y 390 contra 127.0.0.1:3010 con sesion minteada. Sin guard. Sin CI.
+logic-core-v3/scripts/qa-corridas/p19-capturas.ts,D9,superficial,superficial,D9-c1,"script-operativo | Siembra leads de los estados P19, captura y los borra en finally; contra .env.local SIN guard de host y app en 127.0.0.1:3030. Sin CI."
+logic-core-v3/scripts/qa-corridas/rejection-reloop.ts,D9,superficial,superficial,D9-c1,"script-operativo | Guion de navegacion sin expect contra :3001: mueve el lead real QA-W Construccion por envio, rechazo y reenvio via UI; deja residuo en progresoJson. Sin guard de host. Sin CI."
+logic-core-v3/scripts/regression/cases.ts,D9,superficial,superficial,D9-c1,script-operativo | Casos de la bateria conversacional del bot de Matsu; el caso quota-exhausted escribe QuotaUsage en setup y en teardown lo pone en 0 en vez de restaurar el valor previo. Sin CI.
+logic-core-v3/scripts/regression/diag-timings.ts,D9,superficial,superficial,D9-c1,"script-operativo; toca-db | Lee ChatbotEvent.metadata.timings por RUN_TAG con DATABASE_URL o DIRECT_URL; solo lectura, sin guard. Tooling manual. Sin CI."
+logic-core-v3/scripts/regression/purge.ts,D9,profundo,leído,D9-c1,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/regression/run-baseline.ts,D9,superficial,superficial,D9-c1,script-operativo; toca-db | Bateria conversacional contra B32_BASE_URL (default localhost:3000) con LLM real; guard de host dev si (checkHost). Dice no escribir en DB pero los hooks escriben QuotaUsage. Sin CI.
+logic-core-v3/scripts/run-invariants.mjs,D9,superficial,superficial,D9-c1,"script-operativo | npm run check:invariants (job de CI): corre los 56 check:invariant* sin cortar y excluye uno con DB. No descubre los 28 scripts test:* de package.json, que nunca corren en CI."
 logic-core-v3/scripts/seed-matsu-chatbot.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/seed-matsu-notifications.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/seed-matsu-onboarding.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/seed-matsu-week-results.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
-logic-core-v3/scripts/seed-matsu.ts,D9,profundo,pendiente,,script-operativo; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/scripts/seed-matsu.ts,D9,profundo,leído,D9-c1,script-operativo; toca-db; escribe-db; promovido: escribe en la base
 logic-core-v3/scripts/seed-messages-demo.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/set-matsu-password.ts,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/utm1-smoke.mjs,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
-logic-core-v3/scripts/utm1-verify-attribution.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/scripts/v1-qa-wizard-states.ts,D9,superficial,pendiente,,script-operativo
+logic-core-v3/scripts/utm1-verify-attribution.ts,D9,superficial,superficial,D9-c1,"script-operativo | Verifica atribucion UTM first-touch: crea Conversation, ChatMessage y ChatbotLead y los borra en finally. Guard host dev si. Su par test:utm1 no corre en CI."
+logic-core-v3/scripts/v1-qa-wizard-states.ts,D9,superficial,superficial,D9-c1,"script-operativo | Seed QA V-1: 14 leads QA-W, uno por estado del wizard, con upsert del dossier. Guard host dev si. Idempotente, sin limpieza. Fixture de qa-corridas. Sin CI."
 logic-core-v3/sentry.edge.config.ts,D7,profundo,leído,D7-c1,sentry
 logic-core-v3/sentry.server.config.ts,D7,profundo,leído,D7-c1,sentry
 logic-core-v3/src/actions/admin/onboarding-tasks.ts,D3,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
@@ -1218,7 +1218,7 @@ logic-core-v3/src/app/web-development/layout.tsx,PUB,superficial,superficial,F1,
 logic-core-v3/src/app/web-development/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
 logic-core-v3/src/auth.config.ts,D1,profundo,leído,D1-c1,auth
 logic-core-v3/src/auth.ts,D1,profundo,leído,D1-c1,auth; toca-db; FROZEN; ZONA-FRANCO
-logic-core-v3/src/components/3d/BrandedLogoWhite.tsx,D9,profundo,pendiente,,compartido: lo importa components/ui (FROZEN) (src/components/ui/BrandedIntroCanvas.tsx); componentes-sitio-publico; client-component
+logic-core-v3/src/components/3d/BrandedLogoWhite.tsx,D9,profundo,leído,D9-c1,compartido: lo importa components/ui (FROZEN) (src/components/ui/BrandedIntroCanvas.tsx); componentes-sitio-publico; client-component
 logic-core-v3/src/components/3d/HeroArtifact.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component; FROZEN
 logic-core-v3/src/components/admin/MessagesScrollAnchor.tsx,D3,profundo,leído,D3-c1,componentes-admin; client-component
 logic-core-v3/src/components/admin/managers/ChatbotManager.tsx,D3,profundo,leído,D3-c1,componentes-admin; client-component
@@ -1237,9 +1237,9 @@ logic-core-v3/src/components/automation/ProcesoAutomation.tsx,PUB,superficial,su
 logic-core-v3/src/components/automation/RubrosAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/automation/SocialProofAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/automation/VaultAutomation.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
-logic-core-v3/src/components/brand/BrandMark.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/admin-sidebar.tsx, src/components/dashboard/SidebarNav.tsx); componentes-sitio-publico"
+logic-core-v3/src/components/brand/BrandMark.tsx,D9,profundo,leído,D9-c1,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/admin-sidebar.tsx, src/components/dashboard/SidebarNav.tsx); componentes-sitio-publico"
 logic-core-v3/src/components/canvas/AuroraBackground.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
-logic-core-v3/src/components/canvas/DotMatrix.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/accept-invite/InviteBackground.tsx, src/app/forgot-password/page.tsx +2); componentes-sitio-publico; client-component"
+logic-core-v3/src/components/canvas/DotMatrix.tsx,D9,profundo,leído,D9-c1,"compartido: lo importa codigo interno (src/app/accept-invite/InviteBackground.tsx, src/app/forgot-password/page.tsx +2); componentes-sitio-publico; client-component"
 logic-core-v3/src/components/canvas/HeroBackground.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/canvas/Interactive3DNetwork.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/canvas/LiquidProject.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
@@ -1359,18 +1359,18 @@ logic-core-v3/src/components/ia/TestimoniosIA.tsx,PUB,superficial,superficial,F1
 logic-core-v3/src/components/ia/VaultIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/ChatWidgetMount.tsx,D5,profundo,leído,D5-c1,monta-widget-en-sitio-publico; client-component
 logic-core-v3/src/components/layout/DynamicDock.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/EarlyScrollLock.tsx,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
+logic-core-v3/src/components/layout/EarlyScrollLock.tsx,D9,profundo,leído,D9-c1,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/Hero.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/HeroArtifactLayer.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/HeroCanvas.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/HomeWrapper.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/Navbar.tsx,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/PublicOnlyComponents.tsx,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
+logic-core-v3/src/components/layout/Navbar.tsx,D9,profundo,leído,D9-c1,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
+logic-core-v3/src/components/layout/PublicOnlyComponents.tsx,D9,profundo,leído,D9-c1,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/SectionWrapper.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/Shutter.tsx,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/SmoothScroll.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/layout.tsx, src/components/ui/MarketingIntro.tsx); componentes-sitio-publico; client-component"
-logic-core-v3/src/components/layout/VersionBadge.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/AdminLayoutClient.tsx, src/components/dashboard/DashboardLayoutClient.tsx); componentes-sitio-publico"
-logic-core-v3/src/components/layout/publicRoute.ts,D9,profundo,pendiente,,decide donde se montan el chrome publico y el widget
+logic-core-v3/src/components/layout/Shutter.tsx,D9,profundo,leído,D9-c1,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
+logic-core-v3/src/components/layout/SmoothScroll.tsx,D9,profundo,leído,D9-c1,"compartido: lo importa codigo interno (src/app/layout.tsx, src/components/ui/MarketingIntro.tsx); componentes-sitio-publico; client-component"
+logic-core-v3/src/components/layout/VersionBadge.tsx,D9,profundo,leído,D9-c1,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/AdminLayoutClient.tsx, src/components/dashboard/DashboardLayoutClient.tsx); componentes-sitio-publico"
+logic-core-v3/src/components/layout/publicRoute.ts,D9,profundo,leído,D9-c1,decide donde se montan el chrome publico y el widget
 logic-core-v3/src/components/layout/useChromeRevealed.ts,D5,profundo,leído,D5-c1,decide cuando aparece el widget; client-component
 logic-core-v3/src/components/onboarding/OnboardingWizard.tsx,D3,profundo,superficial,F1.11,componentes-admin; client-component | PODA-ALTA
 logic-core-v3/src/components/sections/AILargeCta.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
@@ -1438,57 +1438,57 @@ logic-core-v3/src/components/software/ShowcaseSoftware.tsx,PUB,superficial,super
 logic-core-v3/src/components/software/SocialProofSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/software/StatementSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/software/VaultSoftware.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
-logic-core-v3/src/components/ui/Badge.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/BrandedIntroCanvas.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Button.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Callout.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/Card.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/EmptyState.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/EmptyStateMuted.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/ErrorState.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Field.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/HeroMetrics.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Badge.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/BrandedIntroCanvas.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Button.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Callout.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/Card.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/EmptyState.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/EmptyStateMuted.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/ErrorState.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Field.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/HeroMetrics.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
 logic-core-v3/src/components/ui/HeroTitle.tsx,D9,profundo,superficial,F1.11,ui-base; client-component; FROZEN | PODA-ALTA
-logic-core-v3/src/components/ui/HyperText.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Input.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/IntroLockupText.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/KineticText.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/LoadingState.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/LogoStrokeOverlay.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/MarketingIntro.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Modal.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/PageHeader.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/Preloader.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Section.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/SectionErrorBoundary.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Select.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Skeleton.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/Spinner.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/Stat.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/StatCard.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/Tabs.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Textarea.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Toggle.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/TypewriterText.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/Typography.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/VideoCard.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/buttons/ChargeTraceButton.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/buttons/MagneticCta.tsx,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/field-context.ts,D9,profundo,pendiente,,ui-base; client-component; FROZEN
-logic-core-v3/src/components/ui/index.ts,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/skeletons/CardSkeleton.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/skeletons/ListSkeleton.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/skeletons/StatCardSkeleton.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/skeletons/TableSkeleton.tsx,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/components/ui/skeletons/index.ts,D9,profundo,pendiente,,ui-base; FROZEN
-logic-core-v3/src/context/PreloaderContext.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/layout.tsx, src/components/layout/useChromeRevealed.ts +2); contexto-sitio-publico; client-component; FROZEN"
-logic-core-v3/src/context/TransitionContext.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx, src/app/(protected)/setter/_components/setter-nav.tsx +2); contexto-sitio-publico; client-component; FROZEN"
+logic-core-v3/src/components/ui/HyperText.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Input.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/IntroLockupText.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/KineticText.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/LoadingState.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/LogoStrokeOverlay.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/MarketingIntro.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Modal.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/PageHeader.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/Preloader.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Section.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/SectionErrorBoundary.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Select.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Skeleton.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/Spinner.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/Stat.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/StatCard.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/Tabs.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Textarea.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Toggle.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/TypewriterText.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/Typography.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/VideoCard.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/buttons/ChargeTraceButton.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/buttons/MagneticCta.tsx,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/field-context.ts,D9,profundo,leído,D9-c1,ui-base; client-component; FROZEN
+logic-core-v3/src/components/ui/index.ts,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/skeletons/CardSkeleton.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/skeletons/ListSkeleton.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/skeletons/StatCardSkeleton.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/skeletons/TableSkeleton.tsx,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/components/ui/skeletons/index.ts,D9,profundo,leído,D9-c1,ui-base; FROZEN
+logic-core-v3/src/context/PreloaderContext.tsx,D9,profundo,leído,D9-c1,"compartido: lo importa codigo interno (src/app/layout.tsx, src/components/layout/useChromeRevealed.ts +2); contexto-sitio-publico; client-component; FROZEN"
+logic-core-v3/src/context/TransitionContext.tsx,D9,profundo,leído,D9-c1,"compartido: lo importa codigo interno (src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx, src/app/(protected)/setter/_components/setter-nav.tsx +2); contexto-sitio-publico; client-component; FROZEN"
 logic-core-v3/src/emails/ActionRequiredEmail.tsx,D7,profundo,leído,D7-c1,emails
 logic-core-v3/src/emails/TicketReplyEmail.tsx,D7,profundo,leído,D7-c1,emails
 logic-core-v3/src/hooks/useThemeObserver.tsx,PUB,superficial,superficial,F1,hook del home publico; client-component
 logic-core-v3/src/instrumentation-client.ts,D7,profundo,leído,D7-c1,sentry
 logic-core-v3/src/instrumentation.ts,D7,profundo,leído,D7-c1,sentry
-logic-core-v3/src/lib/action-utils.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
+logic-core-v3/src/lib/action-utils.ts,D9,profundo,leído,D9-c1,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/actions/announcements.ts,D2,profundo,leído,D2-c1,server-actions del cliente; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/clients.ts,D3,profundo,leído,D3-c1,server-actions; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/contact.ts,D3,profundo,leído,D3-c1,server-actions; endpoint-publico; toca-db; server-action; guard-indirecto; escribe-db
@@ -1525,7 +1525,7 @@ logic-core-v3/src/lib/auth-guards.ts,D1,profundo,leído,D1-c1,auth; usa-auth; gu
 logic-core-v3/src/lib/auth/assert-ownership.ts,D1,profundo,leído,D1-c1,auth; toca-db; escribe-db
 logic-core-v3/src/lib/billing/get-current-plan.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/bulk-actions.ts,D3,profundo,leído,D3-c1,logica-admin; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/lib/chromeReveal.ts,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/modules/chatbot/components/LogicCompanion.tsx); lib-sitio-publico; FROZEN-inferido
+logic-core-v3/src/lib/chromeReveal.ts,D9,profundo,leído,D9-c1,compartido: lo importa codigo interno (src/modules/chatbot/components/LogicCompanion.tsx); lib-sitio-publico; FROZEN-inferido
 logic-core-v3/src/lib/client-health.ts,D3,profundo,superficial,F1.11,logica-admin | PODA-ALTA
 logic-core-v3/src/lib/client-notifications/client-notifications.invariant.ts,D5,superficial,superficial,D5-c1,aviso de lead al cliente (lo dispara captureLead); test | test sin DB ni server: aviso de lead al cliente (P2.A) que dispara captureLead; modos de notificacion y armado del mail
 logic-core-v3/src/lib/client-notifications/decide.ts,D5,profundo,leído,D5-c1,aviso de lead al cliente (lo dispara captureLead)
@@ -1535,7 +1535,7 @@ logic-core-v3/src/lib/client-notifications/templates.ts,D5,profundo,leído,D5-c1
 logic-core-v3/src/lib/cn.ts,D9,profundo,superficial,F1.11,lib-transversal | PODA-ALTA
 logic-core-v3/src/lib/cron/cron-secret.invariant.ts,D7,superficial,superficial,D7-c1,integracion; test; guard-indirecto | test sin DB: isAuthorizedCronRequest rechaza sin CRON_SECRET (incluido Bearer undefined); no cubre las 4 copias inline del chequeo ni la comparacion con === (SEC-098)
 logic-core-v3/src/lib/cron/cron-secret.ts,D7,profundo,leído,D7-c1,integracion; guard-indirecto
-logic-core-v3/src/lib/crypto/__tests__/credential-cipher.test.ts,D7,superficial,superficial,D7-c1,integracion; test | test sin DB del cifrador de credenciales (round-trip, tamper, key ausente); verde por arnes respecto del uso: encryptCredential no tiene llamadores de produccion (SEC-036)
+logic-core-v3/src/lib/crypto/__tests__/credential-cipher.test.ts,D7,superficial,superficial,D7-c1,"integracion; test | test sin DB del cifrador de credenciales (round-trip, tamper, key ausente); verde por arnes respecto del uso: encryptCredential no tiene llamadores de produccion (SEC-036)"
 logic-core-v3/src/lib/crypto/credential-cipher.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/crypto/resolve-credential.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/crypto/secret-box.ts,D7,profundo,leído,D7-c1,integracion
@@ -1548,10 +1548,10 @@ logic-core-v3/src/lib/dashboard/week-results.ts,D2,profundo,leído,D2-c1,logica-
 logic-core-v3/src/lib/data/message-context.ts,D6,profundo,leído,D6-c1,catalogos
 logic-core-v3/src/lib/data/onboarding-tasks.ts,D6,profundo,leído,D6-c1,catalogos
 logic-core-v3/src/lib/data/premium-modules.ts,D6,profundo,leído,D6-c1,catalogos
-logic-core-v3/src/lib/dates-ar.invariant.ts,D9,superficial,pendiente,,lib-transversal; test
-logic-core-v3/src/lib/dates-ar.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
+logic-core-v3/src/lib/dates-ar.invariant.ts,D9,superficial,superficial,D9-c1,"lib-transversal; test | Invariante puro del helper de fechas AR (borde de mes, salto UTC/AR, periodo anterior); sin DB. Corre en CI via check:invariants."
+logic-core-v3/src/lib/dates-ar.ts,D9,profundo,leído,D9-c1,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/design-patterns.ts,D9,profundo,superficial,F1.11,lib-transversal | PODA-ALTA
-logic-core-v3/src/lib/design-tokens.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
+logic-core-v3/src/lib/design-tokens.ts,D9,profundo,leído,D9-c1,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/email.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/email/admin-message-notification.ts,D7,profundo,leído,D7-c1,integracion; toca-db
 logic-core-v3/src/lib/email/brevo-service.ts,D7,profundo,leído,D7-c1,integracion
@@ -1564,15 +1564,15 @@ logic-core-v3/src/lib/email/templates/welcome-client.ts,D7,profundo,leído,D7-c1
 logic-core-v3/src/lib/email/unsubscribe-token.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/follow-up.ts,D4,profundo,leído,D4-c1,leados-libre
 logic-core-v3/src/lib/health-score.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
-logic-core-v3/src/lib/home-routes.ts,D9,profundo,pendiente,,compartido: lo importa components/ui (FROZEN) (src/components/ui/Preloader.tsx); lib-sitio-publico
-logic-core-v3/src/lib/hover.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/alerts/AlertsClient.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +39); lib-sitio-publico; FROZEN-inferido"
+logic-core-v3/src/lib/home-routes.ts,D9,profundo,leído,D9-c1,compartido: lo importa components/ui (FROZEN) (src/components/ui/Preloader.tsx); lib-sitio-publico
+logic-core-v3/src/lib/hover.ts,D9,profundo,leído,D9-c1,"compartido: lo importa codigo interno (src/app/(protected)/admin/alerts/AlertsClient.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +39); lib-sitio-publico; FROZEN-inferido"
 logic-core-v3/src/lib/impersonation-constants.ts,D1,profundo,leído,D1-c1,auth
 logic-core-v3/src/lib/impersonation.ts,D1,profundo,leído,D1-c1,auth; usa-auth
 logic-core-v3/src/lib/integrations/brevo.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/integrations/cal-com-v2.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/integrations/cal-com.ts,D7,profundo,leído,D7-c1,integracion; toca-db
 logic-core-v3/src/lib/integrations/gbp-connection-logic.ts,D7,profundo,leído,D7-c1,integracion
-logic-core-v3/src/lib/integrations/gbp-connection.invariant.ts,D7,superficial,superficial,D7-c1,integracion; test | test sin DB ni red de la conexion GBP (cardinalidad, aislamiento por org, reemplazo, puente v1-v4); no cubre la falta de entrada en la UI (FAL-011) ni el crash del acierto de cache de Reputacion (BUG-141)
+logic-core-v3/src/lib/integrations/gbp-connection.invariant.ts,D7,superficial,superficial,D7-c1,"integracion; test | test sin DB ni red de la conexion GBP (cardinalidad, aislamiento por org, reemplazo, puente v1-v4); no cubre la falta de entrada en la UI (FAL-011) ni el crash del acierto de cache de Reputacion (BUG-141)"
 logic-core-v3/src/lib/integrations/gbp-connection.ts,D7,profundo,leído,D7-c1,integracion; toca-db; escribe-db
 logic-core-v3/src/lib/integrations/gbp-discovery.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/integrations/google-business-profile.ts,D7,profundo,leído,D7-c1,integracion; toca-db; escribe-db
@@ -1593,7 +1593,7 @@ logic-core-v3/src/lib/leados/assignment-trail.invariant.ts,D4,superficial,superf
 logic-core-v3/src/lib/leados/assignment-trail.ts,D4,profundo,leído,D4-c1,leados; toca-db; guard-indirecto; escribe-db; ZONA-FRANCO
 logic-core-v3/src/lib/leados/cola.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: la cola de trabajo no duplica leads y el foco es su primer item; no cubre que un CERRADO vuelva a la cola (BUG-147)
 logic-core-v3/src/lib/leados/cola.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/contador-dms.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el contador de DMs del dia cuenta mensajes mandados, no filas
+logic-core-v3/src/lib/leados/contador-dms.invariant.ts,D4,superficial,superficial,D4-c1,"leados; test; ZONA-FRANCO | test sin DB: el contador de DMs del dia cuenta mensajes mandados, no filas"
 logic-core-v3/src/lib/leados/contracts.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/copy-blocks.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/copy-sin-jerga.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: ninguna copy del setter nombra codigos de sprint ni columnas
@@ -1609,7 +1609,7 @@ logic-core-v3/src/lib/leados/ficha-bloques.invariant.ts,D4,superficial,superfici
 logic-core-v3/src/lib/leados/ficha-bloques.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/ficha-calidad.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/flow-content.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/flow.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: clasificacion del home (postergado vencido accionable); no cubre CERRADO, que no va al archivo (BUG-147)
+logic-core-v3/src/lib/leados/flow.invariant.ts,D4,superficial,superficial,D4-c1,"leados; test; ZONA-FRANCO | test sin DB: clasificacion del home (postergado vencido accionable); no cubre CERRADO, que no va al archivo (BUG-147)"
 logic-core-v3/src/lib/leados/flow.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/foco-cookie.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/foco.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el foco sticky y la cima de la cola
@@ -1619,7 +1619,7 @@ logic-core-v3/src/lib/leados/guidance-content.ts,D4,profundo,leído,D4-c1,leados
 logic-core-v3/src/lib/leados/herramientas.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/home.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/isolation.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/manual.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: un lead terminal deriva a archivo; no cubre CERRADO, que el manual sigue trabajando (BUG-147)
+logic-core-v3/src/lib/leados/manual.invariant.ts,D4,superficial,superficial,D4-c1,"leados; test; ZONA-FRANCO | test sin DB: un lead terminal deriva a archivo; no cubre CERRADO, que el manual sigue trabajando (BUG-147)"
 logic-core-v3/src/lib/leados/manual.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/mis-numeros.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el setter ve solo sus numeros; no cubre que los descartados cuenten como activos (BUG-168)
 logic-core-v3/src/lib/leados/mis-numeros.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
@@ -1637,7 +1637,7 @@ logic-core-v3/src/lib/leados/paso-admitido.invariant.ts,D4,superficial,superfici
 logic-core-v3/src/lib/leados/paso-admitido.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/paso.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/pipeline.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/postergacion.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el dia elegido es el que se guarda, se muestra y reactiva; no cubre la fecha minima del picker en UTC (BUG-152)
+logic-core-v3/src/lib/leados/postergacion.invariant.ts,D4,superficial,superficial,D4-c1,"leados; test; ZONA-FRANCO | test sin DB: el dia elegido es el que se guarda, se muestra y reactiva; no cubre la fecha minima del picker en UTC (BUG-152)"
 logic-core-v3/src/lib/leados/progreso-isolation.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: las piezas puras del write de progresoJson (aislamiento por duenio); no cubre la carrera de varios tildes seguidos
 logic-core-v3/src/lib/leados/progreso.ts,D4,profundo,leído,D4-c1,leados; toca-db; ZONA-FRANCO
 logic-core-v3/src/lib/leados/prompts-disenio.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
@@ -1649,17 +1649,17 @@ logic-core-v3/src/lib/leados/reloop-selfcheck-reset.invariant.ts,D4,superficial,
 logic-core-v3/src/lib/leados/revision.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/self-check-gate.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: selfCheckAprobado valida contra HARD_CHECKS vigentes; el emparejamiento sigue siendo por texto visible (DEU-086)
 logic-core-v3/src/lib/leados/setter-carga.ts,D4,profundo,leído,D4-c1,leados; toca-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/setter-meta.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: pin, snooze y nota del setter se filtran por setterId
+logic-core-v3/src/lib/leados/setter-meta.invariant.ts,D4,superficial,superficial,D4-c1,"leados; test; ZONA-FRANCO | test sin DB: pin, snooze y nota del setter se filtran por setterId"
 logic-core-v3/src/lib/leados/setter-meta.ts,D4,profundo,leído,D4-c1,leados; toca-db; escribe-db; ZONA-FRANCO
 logic-core-v3/src/lib/leados/timeline.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el timeline del lead solo lo ve su setter (despues del gate de ownership)
 logic-core-v3/src/lib/leados/timeline.ts,D4,profundo,leído,D4-c1,leados; toca-db; ZONA-FRANCO
 logic-core-v3/src/lib/leados/turno.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: las pantallas no muestran la misma frase para dos turnos distintos
 logic-core-v3/src/lib/leados/turno.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
 logic-core-v3/src/lib/leados/vista-cartera.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: pausa personal y postergacion comercial son conceptos y escrituras distintos
-logic-core-v3/src/lib/logger.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
-logic-core-v3/src/lib/logo-footprint.ts,D9,profundo,pendiente,,"compartido: lo importa components/ui (FROZEN) (src/components/ui/BrandedIntroCanvas.tsx, src/components/ui/IntroLockupText.tsx +1); lib-sitio-publico"
-logic-core-v3/src/lib/marketing-routes.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/components/layout/useChromeRevealed.ts, src/components/ui/MarketingIntro.tsx +1); lib-sitio-publico"
-logic-core-v3/src/lib/mask-secret.invariant.ts,D9,superficial,pendiente,,lib-transversal; test
+logic-core-v3/src/lib/logger.ts,D9,profundo,leído,D9-c1,lib-transversal; FROZEN-inferido
+logic-core-v3/src/lib/logo-footprint.ts,D9,profundo,leído,D9-c1,"compartido: lo importa components/ui (FROZEN) (src/components/ui/BrandedIntroCanvas.tsx, src/components/ui/IntroLockupText.tsx +1); lib-sitio-publico"
+logic-core-v3/src/lib/marketing-routes.ts,D9,profundo,leído,D9-c1,"compartido: lo importa codigo interno (src/components/layout/useChromeRevealed.ts, src/components/ui/MarketingIntro.tsx +1); lib-sitio-publico"
+logic-core-v3/src/lib/mask-secret.invariant.ts,D9,superficial,superficial,D9-c1,"lib-transversal; test | Invariante puro de maskSecret; sin DB, corre en CI. Fija como esperado que un secreto de menos de 4 caracteres se muestre entero tras los bullets."
 logic-core-v3/src/lib/mask-secret.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/modules/check-activation.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/modules/demand.ts,D3,profundo,leído,D3-c1,logica-admin (cruza orgs a proposito); guard-indirecto
@@ -1667,7 +1667,7 @@ logic-core-v3/src/lib/modules/modules.invariant.ts,D2,superficial,superficial,D2
 logic-core-v3/src/lib/modules/motor-resenas-view.invariant.ts,D2,superficial,superficial,D2-c1,logica-dashboard; test | test sin DB: vista del motor de resenas (locked/connecting/operational por modulo x conexion)
 logic-core-v3/src/lib/modules/motor-resenas-view.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/modules/showroom.ts,D2,profundo,leído,D2-c1,logica-dashboard
-logic-core-v3/src/lib/motion-variants.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/PageTransition.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +12); lib-sitio-publico; FROZEN-inferido"
+logic-core-v3/src/lib/motion-variants.ts,D9,profundo,leído,D9-c1,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/PageTransition.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +12); lib-sitio-publico; FROZEN-inferido"
 logic-core-v3/src/lib/n8n.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/notifications/telegram.ts,D7,profundo,leído,D7-c1,integracion; toca-db
 logic-core-v3/src/lib/onboarding/core.ts,D5,profundo,leído,D5-c1,alta de cliente (unico llamador: admin/chatbots/new); toca-db; escribe-db
@@ -1716,22 +1716,22 @@ logic-core-v3/src/lib/security/org-scope.ts,D2,profundo,leído,D2-c1,tenant-scop
 logic-core-v3/src/lib/security/origin-matcher.ts,D5,profundo,leído,D5-c1,origen-widget
 logic-core-v3/src/lib/security/validate-origin.ts,D5,profundo,leído,D5-c1,origen-widget; toca-db
 logic-core-v3/src/lib/sentry/scrub-pii.ts,D7,profundo,leído,D7-c1,integracion
-logic-core-v3/src/lib/slugify.ts,D9,profundo,pendiente,,lib-transversal
+logic-core-v3/src/lib/slugify.ts,D9,profundo,leído,D9-c1,lib-transversal
 logic-core-v3/src/lib/subscription.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/tickets/actions.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/lib/tickets/schemas.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/tokens-estimate.ts,D5,profundo,leído,D5-c1,chatbot
-logic-core-v3/src/lib/types/data-connections.ts,D9,profundo,pendiente,,lib-transversal
-logic-core-v3/src/lib/tz-ar.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
+logic-core-v3/src/lib/types/data-connections.ts,D9,profundo,leído,D9-c1,lib-transversal
+logic-core-v3/src/lib/tz-ar.ts,D9,profundo,leído,D9-c1,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/upsell/dedup.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: dedup de pedidos de upsell en ventana (crea, idempotente, renovado, rage-clicks)"
 logic-core-v3/src/lib/upsell/dedup.ts,D2,profundo,leído,D2-c1,logica-dashboard
-logic-core-v3/src/lib/use-autosave.ts,D9,profundo,pendiente,,lib-transversal
-logic-core-v3/src/lib/use-is-client.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
-logic-core-v3/src/lib/use-reduced-motion.ts,D9,profundo,pendiente,,lib-transversal; client-component; FROZEN-inferido
-logic-core-v3/src/lib/use-step-action.ts,D9,profundo,pendiente,,lib-transversal
-logic-core-v3/src/lib/use-unsaved-guard.ts,D9,profundo,pendiente,,lib-transversal
-logic-core-v3/src/lib/utils.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
-logic-core-v3/src/lib/whatsapp.ts,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/contact/page.tsx); links wa.me del sitio publico
+logic-core-v3/src/lib/use-autosave.ts,D9,profundo,leído,D9-c1,lib-transversal
+logic-core-v3/src/lib/use-is-client.ts,D9,profundo,leído,D9-c1,lib-transversal; FROZEN-inferido
+logic-core-v3/src/lib/use-reduced-motion.ts,D9,profundo,leído,D9-c1,lib-transversal; client-component; FROZEN-inferido
+logic-core-v3/src/lib/use-step-action.ts,D9,profundo,leído,D9-c1,lib-transversal
+logic-core-v3/src/lib/use-unsaved-guard.ts,D9,profundo,leído,D9-c1,lib-transversal
+logic-core-v3/src/lib/utils.ts,D9,profundo,leído,D9-c1,lib-transversal; FROZEN-inferido
+logic-core-v3/src/lib/whatsapp.ts,D9,profundo,leído,D9-c1,compartido: lo importa codigo interno (src/app/contact/page.tsx); links wa.me del sitio publico
 logic-core-v3/src/modules/chatbot/README.md,DOC,superficial,superficial,F1,doc-de-modulo
 logic-core-v3/src/modules/chatbot/components/.gitkeep,-,fuera,excluido-generado,,placeholder
 logic-core-v3/src/modules/chatbot/components/LogicCompanion.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
@@ -2100,30 +2100,30 @@ logic-core-v3/src/modules/motor/services/sendMessage.ts,D5,profundo,leído,D5-c1
 logic-core-v3/src/proxy.ts,D1,profundo,leído,D1-c1,auth
 logic-core-v3/src/types/next-auth.d.ts,D1,profundo,leído,D1-c1,tipos-sesion
 logic-core-v3/tailwind.config.ts,D8,profundo,leído,D8-c1,config
-logic-core-v3/test-chat.mjs,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/tests/e2e/01-landing.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/02-chat-flow.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/03-lead-capture.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/e2e/04-health.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/05-config-public.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/06-admin-login.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/07-admin-navigation.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/08-admin-onboarding.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/e2e/09-admin-bot-config.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/10-admin-kb-edit.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/e2e/11-client-login.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/12-client-chatbot-section.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db
-logic-core-v3/tests/e2e/13-client-perf.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/14-e2e-critical-flow.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/e2e/15-client-personalization.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/e2e/16-admin-bulk-actions.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/17-admin-alerts-triage.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/18-admin-audit-log.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/19-security.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; guard-indirecto
-logic-core-v3/tests/e2e/20-idor-optout.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/e2e/20-mobile-responsive.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/e2e/21-performance.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db
-logic-core-v3/tests/e2e/22-visual-regression.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db
+logic-core-v3/test-chat.mjs,D9,superficial,superficial,D9-c1,script-suelto-raiz-app | 3 POST a localhost:3000/api/chatbot/develop/chat con sesiones fijas e imprime respuestas; crea conversaciones en el server local. Importa node-fetch no declarado. Sin guard. Muerto.
+logic-core-v3/tests/e2e/01-landing.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | E2E: la landing carga titulo y avatar del chatbot; test.skip si el widget no monta (una regresion del widget da skip, no rojo). Sin DB. CI gateado: no corre."
+logic-core-v3/tests/e2e/02-chat-flow.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | E2E: abre el chat y espera respuesta streameada (LLM real, crea conversacion en la DB del server). Skip si no hay avatar. No valida el contenido. CI: no corre."
+logic-core-v3/tests/e2e/03-lead-capture.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; toca-db; escribe-db | E2E: captura de lead por chat con LLM real; verifica ChatbotLead por email y lo borra en finally, pero no la Conversation creada. Skip si no hay avatar. CI: no corre."
+logic-core-v3/tests/e2e/04-health.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | E2E: GET /api/chatbot/develop/health menor a 500 con ok y checks; depende del bot develop sembrado. Sin escritura. CI: no corre.
+logic-core-v3/tests/e2e/05-config-public.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | E2E: la config publica del bot develop no expone apiKey, llmProvider ni claves; solo lectura. Depende del bot develop. CI: no corre."
+logic-core-v3/tests/e2e/06-admin-login.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | E2E: login real de admin@develop.com con password literal del helper y redireccion a /login sin sesion. Sin escritura. CI: no corre (y sin seed fallaria).
+logic-core-v3/tests/e2e/07-admin-navigation.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | E2E: navega secciones admin; si un goto falla hace test.skip en vez de fallar (falso verde). Sin escritura. CI: no corre.
+logic-core-v3/tests/e2e/08-admin-onboarding.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | E2E: el wizard de onboarding crea una org real en la Neon compartida y la borra en finally; skip si el paso 1 no habilita (regresion de UI = skip). CI: no corre.
+logic-core-v3/tests/e2e/09-admin-bot-config.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | E2E: edita el welcomeMessage del bot develop y lo restaura por UI fuera de finally (si algo falla queda Test edit); skip si no aparece el editor. CI: no corre.
+logic-core-v3/tests/e2e/10-admin-kb-edit.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | E2E: agrega un marcador al KB businessInfo del bot develop y lo restaura por Prisma solo si todo pasa (sin finally). Skip si no se habilita guardar. CI: no corre.
+logic-core-v3/tests/e2e/11-client-login.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | E2E: login real de cliente@sanmiguel.com con password literal y bloqueo de /admin. Sin escritura. CI: no corre.
+logic-core-v3/tests/e2e/12-client-chatbot-section.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db | E2E: overview y navegacion del chatbot del cliente; crea bot fixture si falta y lo borra en afterAll. CI: no corre.
+logic-core-v3/tests/e2e/13-client-perf.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | E2E perf: /dashboard y /dashboard/chatbot bajo presupuesto; los tests llamados warm usan coldMs (5 s). Un solo goto local. CI: no corre.
+logic-core-v3/tests/e2e/14-e2e-critical-flow.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | E2E smoke: admin crea cliente por wizard y lo borra en finally; el titulo promete que el cliente ve el upsell pero nunca lo verifica; skip si el paso 1 no habilita. CI: no corre.
+logic-core-v3/tests/e2e/15-client-personalization.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | E2E: cambia color y welcomeMessage del bot real de sanmiguel y NO los restaura (solo borra el bot si lo creo): residuo en la Neon compartida. CI: no corre.
+logic-core-v3/tests/e2e/16-admin-bulk-actions.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | E2E: multiseleccion y export de clientes; skip si hay menos de 2 fixtures. Sin escritura. CI: no corre.
+logic-core-v3/tests/e2e/17-admin-alerts-triage.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | E2E: /admin/alerts muestra las 3 columnas. Solo render, sin escritura. CI: no corre."
+logic-core-v3/tests/e2e/18-admin-audit-log.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | E2E: carga del audit log y filtro por actionType (skip si no hay tipos). Sin escritura. CI: no corre.
+logic-core-v3/tests/e2e/19-security.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; guard-indirecto | E2E: redirecciones sin sesion y 401 del cron; el test de /api/admin/clients siempre hace skip (la ruta no existe, da 404) y el cron con secret dispara el detector real. CI: no corre."
+logic-core-v3/tests/e2e/20-idor-optout.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | E2E anti-IDOR de /api/email/optout con token HMAC; crea EmailContact en la primera org de la DB y borra por TAG en afterAll. CI: no corre.
+logic-core-v3/tests/e2e/20-mobile-responsive.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | E2E: dashboard de cliente y admin en viewport iPhone SE; skip si el drawer no abre. Sin escritura. CI: no corre.
+logic-core-v3/tests/e2e/21-performance.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db | E2E perf: paginas admin y dashboard bajo warmMs con dos goto; saltea budgets con [param] y el de /chat. Crea bot fixture si falta. CI: no corre.
+logic-core-v3/tests/e2e/22-visual-regression.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; toca-db | E2E visual: 7 toHaveScreenshot; solo hay baselines chromium-win32, en el runner ubuntu del CI fallarian todas. Crea bot fixture si falta. CI: no corre."
 logic-core-v3/tests/e2e/22-visual-regression.spec.ts-snapshots/admin-alerts-chromium-win32.png,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/tests/e2e/22-visual-regression.spec.ts-snapshots/admin-clients-chromium-win32.png,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/tests/e2e/22-visual-regression.spec.ts-snapshots/admin-design-tokens-chromium-win32.png,-,fuera,excluido-generado,,asset-binario
@@ -2131,73 +2131,73 @@ logic-core-v3/tests/e2e/22-visual-regression.spec.ts-snapshots/admin-home-chromi
 logic-core-v3/tests/e2e/22-visual-regression.spec.ts-snapshots/dashboard-chatbot-chromium-win32.png,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/tests/e2e/22-visual-regression.spec.ts-snapshots/dashboard-home-chromium-win32.png,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/tests/e2e/22-visual-regression.spec.ts-snapshots/dashboard-settings-chromium-win32.png,-,fuera,excluido-generado,,asset-binario
-logic-core-v3/tests/e2e/30-onboarding-e2e-complete.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/e2e/40-lead-capture-e2e.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/e2e/41-admin-executive-report-send-now.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/e2e/42-client-executive-report-prefs.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/e2e/43-client-monthly-report-download.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; guard-indirecto
+logic-core-v3/tests/e2e/30-onboarding-e2e-complete.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; toca-db; escribe-db | E2E: alta de cliente, login y cambio de password (limpia org y user). El caso re-enviar credenciales resetea la password de un usuario real y le manda mail; acepta Email fallo como verde."
+logic-core-v3/tests/e2e/40-lead-capture-e2e.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; toca-db; escribe-db | E2E: POST /chat con LLM real y lead visible en el dashboard; skip si el chat falla o el bot no captura (la regresion de captura nunca da rojo). Borra el lead, no la conversacion."
+logic-core-v3/tests/e2e/41-admin-executive-report-send-now.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; toca-db; escribe-db | E2E: boton enviar reporte ahora (guard, rate-limit, validacion) con org inexistente; borra buckets rate_limit por prefijo con raw parametrizado. No ejercita el motor del reporte. CI: no corre."
+logic-core-v3/tests/e2e/42-client-executive-report-prefs.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | E2E: preferencias del reporte ejecutivo de sanmiguel y anti-IDOR; muta la org y restaura en afterAll; las ramas por plan se skipean segun el plan real. CI: no corre.
+logic-core-v3/tests/e2e/43-client-monthly-report-download.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; guard-indirecto | E2E: descarga del informe mensual; anti-IDOR por ausencia de parametro; la rama elegible o no elegible se skipea segun el plan real (una nunca corre). Solo lectura. CI: no corre.
 logic-core-v3/tests/full-run.log,D9,fuera,excluido-generado,,log-commiteado
-logic-core-v3/tests/galeria/captura.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/helpers-probe/console-guard.probe.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/helpers-probe/setter-ui.probe.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/helpers/auth.ts,D9,superficial,pendiente,,test-e2e/integracion
-logic-core-v3/tests/helpers/chatbot-fixtures.ts,D9,superficial,pendiente,,test-e2e/integracion
-logic-core-v3/tests/helpers/form.ts,D9,superficial,pendiente,,test-e2e/integracion
-logic-core-v3/tests/helpers/setter-auth.ts,D9,superficial,pendiente,,test-e2e/integracion
-logic-core-v3/tests/helpers/setter-db.ts,D9,profundo,pendiente,,test-e2e/integracion; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/tests/helpers/setter-ui.ts,D9,superficial,pendiente,,test-e2e/integracion
-logic-core-v3/tests/integration/alerts-detector.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; guard-indirecto; escribe-db
-logic-core-v3/tests/integration/chatbot-isolation.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/integration/cleanup-old-events-retention.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; guard-indirecto; escribe-db
-logic-core-v3/tests/integration/executive-report-lead-count.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/integration/fix-origin-same-origin-config.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/integration/fixtures/motor-inbound-payloads.ts,D9,superficial,pendiente,,test-e2e/integracion
-logic-core-v3/tests/integration/generate-insights-pending-guard.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/integration/motor-health.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/integration/motor-inbound.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/integration/motor-isolation.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/integration/motor-outbound.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; toca-db; escribe-db
-logic-core-v3/tests/integration/motor-window.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/leados/alta-import.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; guard-indirecto
-logic-core-v3/tests/leados/campo-sin-herramienta.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/leados/dossier-gates.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/leados/envio-demo-rechazo.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; guard-indirecto
-logic-core-v3/tests/leados/foco-no-miente.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/leados/progreso-construccion.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; guard-indirecto
-logic-core-v3/tests/leados/selfcheck-anti-bypass.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; guard-indirecto
-logic-core-v3/tests/perf-budget.json,D9,superficial,pendiente,,test-e2e/integracion
-logic-core-v3/tests/qa-persona/corrida-1-novato-frio.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/qa-walkthrough/corrida-1.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/00-surfaces.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/01-flow.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/02-isolation.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/03-cabina.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/04-admin.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/05-empty-mobile-a11y.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/06-claim-atomico.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; guard-indirecto
-logic-core-v3/tests/setter/07-admin-assign-caliente.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; guard-indirecto
-logic-core-v3/tests/setter/08-m5-cadencia-agotada.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/09-archivo-terminal.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/10-unsaved-guard.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/11-fase-disabled.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/12-claim-agenda.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test; guard-indirecto
-logic-core-v3/tests/setter/13-m16-memoria.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/14-motivo-rechazo.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/15-callejones-borrador-chequeo.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/16-municiones-salida.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/17-datos-que-viajan.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/17-destinos-alcanzables.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/18-quinta-superficie.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/19-config-que-falta.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/20-veredicto-abre-construir.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/21-ficha-por-fuentes.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/22-cromo-primer-pliegue.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/23-accion-a-la-vista.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/24-paso-que-corresponde.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/25-franja-recorrido.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/26-cola-de-trabajo.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/27-cartera-agrupada.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
-logic-core-v3/tests/setter/28-veredicto-y-ciclo.spec.ts,D9,superficial,pendiente,,test-e2e/integracion; test
+logic-core-v3/tests/galeria/captura.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Captura de galeria: no afirma, fotografia estados M0-GAL con sesion minteada; muta el stage de un dossier y lo restaura en finally. Requiere el seed previo. No es regresion; sin CI."
+logic-core-v3/tests/helpers-probe/console-guard.probe.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Sabotaje del guard de consola (pares conducta/sabotaje) con setContent; sin DB ni server. Podria correr en CI tal cual; no esta cableado.
+logic-core-v3/tests/helpers-probe/setter-ui.probe.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Sabotaje de los helpers de setter-ui (pickSelect, expectToast, cartera) con setContent; sin DB. No cubre form.ts ni auth.ts. Sin CI."
+logic-core-v3/tests/helpers/auth.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion | Helper e2e de login real por formulario con passwords literales de admin@develop.com (SUPER_ADMIN) y cliente@sanmiguel.com (l.21 y l.25), cuando el seed ya exige passwords por env."
+logic-core-v3/tests/helpers/chatbot-fixtures.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion | Helper: asegura un bot para la org de cliente@sanmiguel.com (lo crea si falta) y lo borra solo si lo creo. Escribe en la Neon compartida.
+logic-core-v3/tests/helpers/form.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion | Helpers de inputs controlados: setControlledInput saltea readonly (sin call sites), typeControlledInput teclea y afirma, setControlledSelect. Sin DB."
+logic-core-v3/tests/helpers/setter-auth.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion | Mintea el JWT de sesion con AUTH_SECRET de .env.local para personas seedeadas (incluido SUPER_ADMIN) sin pasar por login y con passwordResetRequired false: login y reset forzado no se cubren.
+logic-core-v3/tests/helpers/setter-db.ts,D9,profundo,leído,D9-c1,test-e2e/integracion; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/tests/helpers/setter-ui.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion | Helpers de UI del setter (vis, pickSelect con post-condicion, expectToast, expandir cartera). Sin DB. Probados por helpers-probe."
+logic-core-v3/tests/integration/alerts-detector.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; guard-indirecto; escribe-db | Integracion R22 por HTTP al cron real: dispara el detector (mails y Telegram) y borra TODAS las alertas de un tipo del primer bot activo. Excluido por testIgnore: no corre en ninguna suite.
+logic-core-v3/tests/integration/chatbot-isolation.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | Negativo real de aislamiento multi-tenant del chatbot con 2 orgs efimeras borradas por id; falla explicito si el seed falla. No corre en CI (test:integration no esta en ci.yml).
+logic-core-v3/tests/integration/cleanup-old-events-retention.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; toca-db; guard-indirecto; escribe-db | Retencion del cron cleanup-old-events in-process: org y bot fijos (upsert, quedan) y eventos con TAG borrados en finally. No corre en CI."
+logic-core-v3/tests/integration/executive-report-lead-count.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | getTopHotLeadsForWeek con N configurable: crea leads con TAG en el primer bot activo real y borra en finally; skip si no hay bot; instrucciones de corrida viejas. No corre en CI.
+logic-core-v3/tests/integration/fix-origin-same-origin-config.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | isBotServable contra la Neon real con 2 orgs efimeras borradas por id; no cubre la composicion dentro del GET del route (lo admite). No corre en CI.
+logic-core-v3/tests/integration/fixtures/motor-inbound-payloads.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion | Fixtures de payloads del webhook 360dialog/Cloud API parametrizados por el seed de cada corrida. Sin DB ni red.
+logic-core-v3/tests/integration/generate-insights-pending-guard.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | Guard anti-spam del cron de insights: crea ChatbotInsight con TAG en el primer bot real y borra en finally; falla si no hay bot (sin skip). No corre en CI.
+logic-core-v3/tests/integration/motor-health.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | Eventos de salud del webhook del motor via POST real del route; org efimera con cascade; falla si el seed falla. No corre en CI.
+logic-core-v3/tests/integration/motor-inbound.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; toca-db; escribe-db | Adaptador de entrada 360dialog via route real: 401 sin escritura, idempotencia por wamid, identidad BSUID; orgs efimeras borradas por id. No corre en CI."
+logic-core-v3/tests/integration/motor-isolation.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; toca-db; escribe-db | Negativo de aislamiento multi-tenant del motor con 2 orgs efimeras y datos solapados; teardown por id. No corre en CI.
+logic-core-v3/tests/integration/motor-outbound.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; toca-db; escribe-db | Envio 360dialog con fetch mockeado: ventana, plantillas, reintentos, la API key fuera de logs; fija una key de cifrado de test si falta. Org efimera. No corre en CI."
+logic-core-v3/tests/integration/motor-window.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Unitario puro de windowState (ventana de 24 h) sin DB; corre bajo test:integration, que no esta en CI."
+logic-core-v3/tests/leados/alta-import.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; guard-indirecto | LeadOS in-process: alta e importacion anti cross-setter; replica el nucleo de las actions en vez de llamarlas (no cubre requireSetter ni zod de la action). Teardown. CI: job saltado.
+logic-core-v3/tests/leados/campo-sin-herramienta.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Puro: campos que transcriben una herramienta se exigen solo si la herramienta tiene link (schema del brief y bloques). Sin DB. CI: job leados saltado por falta de secret.
+logic-core-v3/tests/leados/dossier-gates.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | LeadOS in-process: unicidad, ownership, maquina de stage y gate del brief contra DB; setter y leads SMOKE con teardown. CI: job saltado."
+logic-core-v3/tests/leados/envio-demo-rechazo.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; guard-indirecto | LeadOS in-process: negativo de gateEnvioDemo y marcarDemoEnviadaOwned; teardown por tracker. CI: job saltado.
+logic-core-v3/tests/leados/foco-no-miente.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | LeadOS in-process: el foco y la cartera owned reflejan registrarContactoComercial; teardown. CI: job saltado.
+logic-core-v3/tests/leados/progreso-construccion.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; guard-indirecto | LeadOS in-process: saveOwnedProgreso y su aislamiento (lib directa, no la action guardarProgreso). Teardown. CI: job saltado."
+logic-core-v3/tests/leados/selfcheck-anti-bypass.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; guard-indirecto | LeadOS in-process: el self-check no se bypassea (saveOwnedSelfCheck y transitionDossier); no cubre la action. Teardown. CI: job saltado.
+logic-core-v3/tests/perf-budget.json,D9,superficial,superficial,D9-c1,test-e2e/integracion | Presupuestos warm/cold por ruta para los specs 13 y 21; 3 de 7 nunca se usan (rutas con [param] y /api/chatbot/develop/chat). Solo datos.
+logic-core-v3/tests/qa-persona/corrida-1-novato-frio.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Corrida UX de setter novato con su primer prospecto frio: setter fresco con teardown en finally, sesion minteada, screenshots a docs/. Sin asserts de negocio. No es CI."
+logic-core-v3/tests/qa-walkthrough/corrida-1.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Recorrido perceptual de asignado a agendado con screenshots; setter y lead namespaced con teardown; muta el stage directo con Prisma en un tramo. No es CI.
+logic-core-v3/tests/setter/00-surfaces.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: sesion minteada y carga de todas las superficies de la cabina con guard de consola; siembra cabina llena SMOKE con teardown (Neon dev). No corre en CI.
+logic-core-v3/tests/setter/01-flow.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: recorrido completo de un lead por la UI verificando el estado en DB tras cada accion; agenda solo por seed (sin Cal.com). Teardown. No corre en CI.
+logic-core-v3/tests/setter/02-isolation.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Setter: aislamiento A/B (cartera, 404 sin leak, nota privada, novedades, reasignacion) con 2do setter por cookie minteada. Teardown. No corre en CI."
+logic-core-v3/tests/setter/03-cabina.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Setter: cabina cross-lead, atajos de teclado, busqueda, pin, snooze y nota persistentes, timeline. Teardown. No corre en CI."
+logic-core-v3/tests/setter/04-admin.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Setter: superficies admin de Franco (/admin/leados, /admin/leads) con sesion SUPER_ADMIN minteada; solo render. Teardown. No corre en CI."
+logic-core-v3/tests/setter/05-empty-mobile-a11y.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Setter: estados vacios, mobile 390 y a11y basica (aria-labels, aria-current). Teardown. No corre en CI."
+logic-core-v3/tests/setter/06-claim-atomico.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; guard-indirecto | Setter in-process: claim atomico del envio de demo con 2 envios concurrentes contra DB real (un solo OsDemo). Teardown. No corre en CI.
+logic-core-v3/tests/setter/07-admin-assign-caliente.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test; guard-indirecto | Setter: el admin asigna y marca caliente, B gana el lead y requireSuperAdmin bloquea al setter; dos actores minteados. Teardown. No corre en CI."
+logic-core-v3/tests/setter/08-m5-cadencia-agotada.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: con cadencia agotada M5 deja de ofrecer No respondio y el contador clampa. Teardown. No corre en CI.
+logic-core-v3/tests/setter/09-archivo-terminal.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: un lead PERDIDO deriva a /manual/archivo read-only sin form de toque. Teardown. No corre en CI.
+logic-core-v3/tests/setter/10-unsaved-guard.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: useUnsavedGuard intercepta beforeunload con evento sintetico (no el dialogo nativo). Teardown. No corre en CI.
+logic-core-v3/tests/setter/11-fase-disabled.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: el tilde de auto-reporte de fase se deshabilita fuera de CONSTRUCCION (solo presentacion). Teardown. No corre en CI.
+logic-core-v3/tests/setter/12-claim-agenda.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test; guard-indirecto | Setter in-process: caracteriza el claim de agenda marcarAgendandoOwned; no llama a Cal.com ni a la action con requireSetter. Teardown. No corre en CI.
+logic-core-v3/tests/setter/13-m16-memoria.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: m16 recuerda los horarios tras cerrar la pestana; la oferta se siembra por el write-path (sin getSlots real de Cal.com). Teardown. No corre en CI.
+logic-core-v3/tests/setter/14-motivo-rechazo.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: la nota de rechazo de Franco queda a la vista en las pantallas donde se corrige. Teardown. No corre en CI.
+logic-core-v3/tests/setter/15-callejones-borrador-chequeo.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: los callejones de Borrador y Chequeo ofrecen la salida que nombran. Teardown. No corre en CI.
+logic-core-v3/tests/setter/16-municiones-salida.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: la salida de las herramientas sin link queda visible (pedirle el link a Franco). Teardown. No corre en CI.
+logic-core-v3/tests/setter/17-datos-que-viajan.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Setter: datos que viajan entre pantallas (fecha de postergacion en tarjeta y cabecera, etc.). Teardown. No corre en CI."
+logic-core-v3/tests/setter/17-destinos-alcanzables.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: los destinos que una pantalla nombra son alcanzables desde ahi (un test por clase). Teardown. No corre en CI.
+logic-core-v3/tests/setter/18-quinta-superficie.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: un lead APROBADO sin finalUrl se distingue en tarjeta de cartera y contador del panel. Teardown. No corre en CI.
+logic-core-v3/tests/setter/19-config-que-falta.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: la configuracion faltante se comunica de forma accionable. Teardown. No corre en CI.
+logic-core-v3/tests/setter/20-veredicto-abre-construir.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: la fusion ficha+veredicto no deja llegar a construir sin pasar por EVALUADA. Teardown. No corre en CI.
+logic-core-v3/tests/setter/21-ficha-por-fuentes.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Setter: ficha agrupada por fuentes, avance automatico y veredicto como ultimo bloque. Teardown. No corre en CI."
+logic-core-v3/tests/setter/22-cromo-primer-pliegue.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: algo accionable entra en el primer pliegue de las 14 pantallas del manual. Teardown. No corre en CI.
+logic-core-v3/tests/setter/23-accion-a-la-vista.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: la accion principal se ve sin scrollear en las pantallas de trabajo. Teardown. No corre en CI.
+logic-core-v3/tests/setter/24-paso-que-corresponde.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: la derivacion del manual senala el paso que corresponde (casos del barrido P19). Teardown. No corre en CI.
+logic-core-v3/tests/setter/25-franja-recorrido.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Setter: franja del recorrido (nueve pasos, chips navegables, paso actual desde la posicion). Teardown. No corre en CI."
+logic-core-v3/tests/setter/26-cola-de-trabajo.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: la cola de trabajo se ve como lista y no duplica avisos. Teardown. No corre en CI.
+logic-core-v3/tests/setter/27-cartera-agrupada.spec.ts,D9,superficial,superficial,D9-c1,test-e2e/integracion; test | Setter: cartera agrupada con conteos reales y el grupo Para trabajar abierto. Teardown. No corre en CI.
+logic-core-v3/tests/setter/28-veredicto-y-ciclo.spec.ts,D9,superficial,superficial,D9-c1,"test-e2e/integracion; test | Setter: ping-pong espera/m5 y defectos de la segunda corrida del novato, operando la app. Teardown. No corre en CI."
 logic-core-v3/ts_errors.log,D9,fuera,excluido-generado,,salida-generada-commiteada
 logic-core-v3/ts_errors.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
 logic-core-v3/ts_prune_output.txt,D9,fuera,excluido-generado,,salida-generada-commiteada

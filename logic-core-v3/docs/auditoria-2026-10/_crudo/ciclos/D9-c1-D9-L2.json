@@ -1,0 +1,2375 @@
+{
+ "dominio": "D9",
+ "ciclo": "D9-c1",
+ "lote": "D9-L2",
+ "run": "wf_e7a51166-ef5",
+ "fecha": "2026-10-15T22:44:53.696Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/components/ui/Badge.tsx",
+    "lineas_total": 132,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/BrandedIntroCanvas.tsx",
+    "lineas_total": 200,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Button.tsx",
+    "lineas_total": 157,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Callout.tsx",
+    "lineas_total": 93,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Card.tsx",
+    "lineas_total": 97,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/EmptyState.tsx",
+    "lineas_total": 92,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/EmptyStateMuted.tsx",
+    "lineas_total": 18,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/ErrorState.tsx",
+    "lineas_total": 64,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Field.tsx",
+    "lineas_total": 59,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/HeroMetrics.tsx",
+    "lineas_total": 267,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/HyperText.tsx",
+    "lineas_total": 149,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Input.tsx",
+    "lineas_total": 45,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/IntroLockupText.tsx",
+    "lineas_total": 256,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/KineticText.tsx",
+    "lineas_total": 43,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/LoadingState.tsx",
+    "lineas_total": 93,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/LogoStrokeOverlay.tsx",
+    "lineas_total": 142,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/MarketingIntro.tsx",
+    "lineas_total": 409,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Modal.tsx",
+    "lineas_total": 111,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/PageHeader.tsx",
+    "lineas_total": 80,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Preloader.tsx",
+    "lineas_total": 326,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Section.tsx",
+    "lineas_total": 57,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/SectionErrorBoundary.tsx",
+    "lineas_total": 126,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Select.tsx",
+    "lineas_total": 425,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Skeleton.tsx",
+    "lineas_total": 16,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Spinner.tsx",
+    "lineas_total": 23,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Stat.tsx",
+    "lineas_total": 102,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/StatCard.tsx",
+    "lineas_total": 131,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Tabs.tsx",
+    "lineas_total": 128,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Textarea.tsx",
+    "lineas_total": 37,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Toggle.tsx",
+    "lineas_total": 59,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/TypewriterText.tsx",
+    "lineas_total": 84,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/Typography.tsx",
+    "lineas_total": 42,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/VideoCard.tsx",
+    "lineas_total": 15,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/buttons/ChargeTraceButton.tsx",
+    "lineas_total": 124,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+    "lineas_total": 207,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/field-context.ts",
+    "lineas_total": 28,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/index.ts",
+    "lineas_total": 22,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/skeletons/CardSkeleton.tsx",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/skeletons/ListSkeleton.tsx",
+    "lineas_total": 31,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/skeletons/StatCardSkeleton.tsx",
+    "lineas_total": 14,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/skeletons/TableSkeleton.tsx",
+    "lineas_total": 32,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/ui/skeletons/index.ts",
+    "lineas_total": 4,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/context/PreloaderContext.tsx",
+    "lineas_total": 172,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/context/TransitionContext.tsx",
+    "lineas_total": 175,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/action-utils.ts",
+    "lineas_total": 35,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/chromeReveal.ts",
+    "lineas_total": 27,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/dates-ar.ts",
+    "lineas_total": 283,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/design-tokens.ts",
+    "lineas_total": 248,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/home-routes.ts",
+    "lineas_total": 34,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/hover.ts",
+    "lineas_total": 10,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/logger.ts",
+    "lineas_total": 75,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/logo-footprint.ts",
+    "lineas_total": 44,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/marketing-routes.ts",
+    "lineas_total": 84,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/motion-variants.ts",
+    "lineas_total": 79,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/slugify.ts",
+    "lineas_total": 9,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/types/data-connections.ts",
+    "lineas_total": 67,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/tz-ar.ts",
+    "lineas_total": 97,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/use-autosave.ts",
+    "lineas_total": 167,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/use-is-client.ts",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/use-reduced-motion.ts",
+    "lineas_total": 19,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/use-step-action.ts",
+    "lineas_total": 87,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/use-unsaved-guard.ts",
+    "lineas_total": 127,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/utils.ts",
+    "lineas_total": 48,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/whatsapp.ts",
+    "lineas_total": 57,
+    "leido_completo": true
+   },
+   {
+    "ruta": "tests/helpers/setter-db.ts",
+    "lineas_total": 382,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [],
+  "flujos": [
+   {
+    "nombre": "Intro branded de marketing (hard-load de /contact y las 4 landings de servicio)",
+    "pasos": [
+     "sale del lote: src/app/layout.tsx:123 monta <Preloader/> para todas las rutas (fuera del lote, citado)",
+     "src/components/ui/Preloader.tsx:302 shouldRunMarketingIntro(pathname) -> <MarketingIntro/>",
+     "src/lib/marketing-routes.ts:54-62 allow-list + ENTRY_PATHNAME (solo hard-load, no client-nav)",
+     "src/components/ui/MarketingIntro.tsx:175 lockScroll() (html+body overflow hidden + lenis.stop)",
+     "src/components/ui/MarketingIntro.tsx:19-22 BrandedIntroCanvas en chunk dinamico ssr:false (three/r3f/postprocessing fuera del bundle inicial)",
+     "src/components/ui/MarketingIntro.tsx:233 espera readiness del SVG (LogoReadySignal BrandedIntroCanvas.tsx:54-70) o 2500 ms",
+     "src/components/ui/MarketingIntro.tsx:250-306 settle 420 ms -> trazo 0,85 s -> relleno 0,45 s -> crossfade 0,4 s -> 1 s interactivo -> toldo 0,8 s (LogoStrokeOverlay.tsx:124-136, IntroLockupText.tsx:183-253)",
+     "src/components/ui/MarketingIntro.tsx:309-310 unlockScroll() + finish() -> marketing-routes.ts:75-80 evento chrome:revealed",
+     "src/components/ui/MarketingIntro.tsx:345-359 red de seguridad: a los 6000 ms libera el scroll y desmonta aunque la coreografia no haya terminado"
+    ]
+   },
+   {
+    "nombre": "Intro del home (hard-load de /)",
+    "pasos": [
+     "src/components/ui/Preloader.tsx:82-88 solo home y si no esta done",
+     "src/lib/home-routes.ts:21-26 shouldRunHomeIntro (HOME_ENTRY_PATHNAME === '/')",
+     "src/components/ui/Preloader.tsx:118-119 setPhase('drawing') + race waitForLogoReady (PreloaderContext.tsx:114-122) / 2500 ms",
+     "src/components/ui/Preloader.tsx:124-200 velo 1,4 s, trazo, relleno, crossfade, hold 1,5 s, borrado 1,5 s",
+     "src/components/ui/Preloader.tsx:258-264 flying: introProgress 0->1 en 0,78 s",
+     "src/components/ui/Preloader.tsx:269-274 swapping 240 ms -> markHomeIntroConsumed -> setPhase('done') (PreloaderContext.tsx:130-138)",
+     "sale del lote: el scroll lock del home lo posee Hero (src/components/layout/Hero.tsx, segun Preloader.tsx:55-56)"
+    ]
+   },
+   {
+    "nombre": "Navegacion por triggerTransition (sitio publico y, de hecho, portales)",
+    "pasos": [
+     "consumidores fuera del lote: src/app/(protected)/setter/_components/setter-nav.tsx:49 y src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:92 llaman triggerTransition(href)",
+     "src/context/TransitionContext.tsx:72 si isAnimating el click se descarta",
+     "src/context/TransitionContext.tsx:76-104 rama hash: scroll en la misma pagina o router.push + 3 reintentos de offset",
+     "src/context/TransitionContext.tsx:108-129 rama ruta: setIsAnimating(true), router.push dentro de startTransition a los 300 ms, red de seguridad a los 8000 ms",
+     "src/context/TransitionContext.tsx:152-160 reabre (isAnimating=false) cuando isPending vuelve a false",
+     "desemboca en el flujo ya trazado [D4] Rail del setter: navegacion interna y herramientas externas"
+    ]
+   },
+   {
+    "nombre": "Error de render en un segmento del portal del cliente",
+    "pasos": [
+     "sale del lote: src/app/(protected)/dashboard/error.tsx:13 (y chatbot/, cuenta/, modules/, resultados/) renderiza SectionErrorBoundary",
+     "src/components/ui/SectionErrorBoundary.tsx:52-59 logger.error con nombre, mensaje y stack (consola)",
+     "src/components/ui/SectionErrorBoundary.tsx:64-67 Sentry.captureException con tag section",
+     "src/components/ui/SectionErrorBoundary.tsx:85-96 mensaje sin detalles tecnicos + digest",
+     "src/components/ui/SectionErrorBoundary.tsx:101 reset() / :108 enlace duro a /dashboard",
+     "desemboca en [D3] Error de render en una pagina admin (AdminErrorBoundary.tsx:16 reusa este componente)"
+    ]
+   },
+   {
+    "nombre": "Campo de formulario accesible (Field + controles del kit)",
+    "pasos": [
+     "src/components/ui/Field.tsx:19-27 useId + contexto {controlId, describedBy, invalid}",
+     "src/components/ui/Field.tsx:31-32 label htmlFor={fieldId}",
+     "src/components/ui/field-context.ts:23-28 FieldControlProvider / useFieldControl",
+     "src/components/ui/Input.tsx:25-31, Textarea.tsx:21-26, Select.tsx:121,319,327 toman id, aria-describedby y aria-invalid del contexto",
+     "src/components/ui/Field.tsx:46-51 error con role=alert e id enlazado"
+    ]
+   },
+   {
+    "nombre": "Autosave del trabajo escrito del setter",
+    "pasos": [
+     "sale del lote: formularios del manual del setter (ficha/brief) llaman useAutosave y useUnsavedGuard",
+     "src/lib/use-autosave.ts:148-157 agenda segun ensuciamiento; cleanup cancela el timer al desmontar",
+     "src/lib/use-autosave.ts:131-140 debounce 1200 ms con tope 8000 ms",
+     "src/lib/use-autosave.ts:91-128 flush -> saveRef.current(snapshot.value) (server action de dominio, sale del lote) -> phase saved/error",
+     "src/lib/use-unsaved-guard.ts:81-93 beforeunload mientras isDirty; :99-113 aviso de salida interna solo opt-in (formularios sin autosave)"
+    ]
+   },
+   {
+    "nombre": "Ciclo submit de los pasos del manual",
+    "pasos": [
+     "sale del lote: steps del setter llaman useStepAction().run(action)",
+     "src/lib/use-step-action.ts:53-54 startTransition(async) -> await action() (server action, sale del lote)",
+     "src/lib/use-step-action.ts:55-59 fallo: onError + toast.error(result.error)",
+     "src/lib/use-step-action.ts:60-66 exito: onSuccess + toast.success + router.refresh()"
+    ]
+   },
+   {
+    "nombre": "Suite Playwright del setter que escribe en la base",
+    "pasos": [
+     "sale del lote: tests/setter/*.spec.ts (40+ specs) y scripts/dev/m0-galeria-seed.ts:94 importan tests/helpers/setter-db.ts",
+     "tests/helpers/setter-db.ts:8 dotenv.config({ path: '.env.local' })",
+     "tests/helpers/setter-db.ts:19 new PrismaClient() con ese DATABASE_URL, sin chequeo de host",
+     "tests/helpers/setter-db.ts:158-167 crea User SETTER; :268-301 crea OsLead + dossier + setterMetas",
+     "tests/helpers/setter-db.ts:364-378 teardown por id exacto (notices -> leads -> users)"
+    ]
+   },
+   {
+    "nombre": "CTA de WhatsApp del sitio publico",
+    "pasos": [
+     "sale del lote: src/app/contact/page.tsx:96 getWhatsappHref(WHATSAPP_PREFILL_CONTACTO) (y 13 componentes de landings)",
+     "src/lib/whatsapp.ts:55-57 arma https://wa.me/<digitos>?text=<prefill codificado>",
+     "src/lib/whatsapp.ts:41-45 NEXT_PUBLIC_WHATSAPP_NUMBER o fallback literal (:21), solo digitos",
+     "fuera del modulo quedan destinos propios: Footer.tsx:8, CalculadorIA.tsx:316, ChatbotUpsellLanding.tsx:15, PortalDemoCTA.tsx:235"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Los dos CTA principales del hero del home no hacen nada (MagneticCta sin href ni onClick)",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/layout/Hero.tsx",
+      "linea": 731,
+      "fragmento": "<MagneticCta className=\"w-full px-8 py-3.5 text-[9px] ...\">\n    Quiero una demo gratis\n</MagneticCta>"
+     },
+     {
+      "ruta": "src/components/layout/Hero.tsx",
+      "linea": 734,
+      "fragmento": "<MagneticCta className=\"w-full px-8 py-3.5 ...\">\n    Ver nuestros trabajos"
+     },
+     {
+      "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+      "linea": 106,
+      "fragmento": "if (onClick) onClick();"
+     },
+     {
+      "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+      "linea": 195,
+      "fragmento": "<motion.button ref={ref as ...} ... onClick={handleTrigger}"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real que llegue por la home: el boton 'Quiero una demo gratis' y 'Ver nuestros trabajos' solo dibujan una onda; no navegan a contacto, WhatsApp ni a la seccion de trabajos. La conversion principal del hero queda muerta.",
+    "propuesta": "En Hero.tsx (libre) pasar destino a cada CTA: href a /contact o getWhatsappHref() para la demo, y triggerTransition('/#portfolio') (o el ancla real) para trabajos. Decision para Valentino sobre MagneticCta (FROZEN): exigir por tipos href|onClick para que no pueda renderizarse inerte.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6",
+     "h6.vis-contacto",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-1286"
+   },
+   {
+    "titulo": "Modal compartido sin semantica de dialogo, sin Escape y sin foco atrapado ni devuelto",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/ui/Modal.tsx",
+      "linea": 60,
+      "fragmento": "<motion.div initial={{ opacity: 0 }} ... className=\"fixed inset-0 flex items-center justify-center bg-black/70 ...\" onClick={closeOnBackdrop ? onClose : undefined}>"
+     },
+     {
+      "ruta": "src/components/ui/Modal.tsx",
+      "linea": 81,
+      "fragmento": "{(title || description) && ("
+     },
+     {
+      "ruta": "src/components/dashboard/VaultRequestModal.tsx",
+      "linea": 66,
+      "fragmento": "<Modal open={open} onClose={handleClose} title=\"Solicitar documento\""
+     }
+    ],
+    "impacto": "En el portal del cliente (boveda, historial de notificaciones, tablero de soporte) y en el setter, un usuario de teclado o lector de pantalla no sabe que se abrio un dialogo, el Tab sigue recorriendo la pagina de atras, Escape no cierra y al cerrar el foco no vuelve al disparador. Sin title/description tampoco hay boton de cierre.",
+    "propuesta": "Decision para Valentino (archivo FROZEN): agregar role=dialog, aria-modal y aria-labelledby/aria-describedby, cierre con Escape, foco inicial dentro, trampa de foco y retorno al disparador; boton de cierre siempre presente. Alternativa sin tocar el frozen: wrapper accesible propio y migrar los 8 consumidores.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.ui",
+     "h2.cli-cuenta",
+     "h2.cli-shell",
+     "h2.cli-soporte",
+     "h5.set-manual"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-1268"
+   },
+   {
+    "titulo": "CTA de WhatsApp con numeros hardcodeados y divergentes, incluido un numero de relleno en el upsell del portal",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+      "linea": 15,
+      "fragmento": "const WHATSAPP_URL = 'https://wa.me/5493815555555?text=Hola%2C+quiero+saber+...'"
+     },
+     {
+      "ruta": "src/components/sections/home/Footer.tsx",
+      "linea": 8,
+      "fragmento": "const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493815000000';"
+     },
+     {
+      "ruta": "src/components/ia/CalculadorIA.tsx",
+      "linea": 316,
+      "fragmento": "href={`https://wa.me/5493815674738?text=${encodeURIComponent("
+     },
+     {
+      "ruta": "src/lib/whatsapp.ts",
+      "linea": 21,
+      "fragmento": "const FALLBACK_WHATSAPP_NUMBER = '5493816223508'"
+     }
+    ],
+    "impacto": "El cliente que mira la landing de upsell del chatbot en su portal y toca WhatsApp va a un numero con forma de relleno (…5555555), no a develOP. En el sitio publico conviven 4 destinos distintos segun el componente y, si falta la variable en Netlify, el pie usa un fallback distinto al de lib/whatsapp.",
+    "propuesta": "Migrar ChatbotUpsellLanding, Footer, CalculadorIA y PortalDemoCTA a getWhatsappHref(); decidir con una persona cual es el numero de CalculadorIA (whatsapp.ts:15-19 lo dejo a proposito); confirmar que NEXT_PUBLIC_WHATSAPP_NUMBER esta seteada en produccion.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot",
+     "h6",
+     "lib.whatsapp"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D9-A6, PLAN-1286"
+   },
+   {
+    "titulo": "/web-development descarga 12,6 MB de video en autoplay sin preload ni poster",
+    "prefijo": "PERF",
+    "severidad": "MEDIA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/ui/VideoCard.tsx",
+      "linea": 6,
+      "fragmento": "<video src=\"/video/Woman_engrossed_in_screen_delpmaspu_.mp4\" autoPlay muted loop playsInline"
+     },
+     {
+      "ruta": "src/components/sections/web-development/WebDevelopmentSensory.tsx",
+      "linea": 124,
+      "fragmento": "<video autoPlay loop muted playsInline"
+     },
+     {
+      "ruta": "src/components/sections/web-development/WebDevelopmentSensory.tsx",
+      "linea": 138,
+      "fragmento": "src=\"/video/Male_business_owner_opens_laptop_delpmaspu_.mp4\""
+     }
+    ],
+    "impacto": "Un prospecto que entra desde el celular a la landing de Web Development baja 5,7 MB + 6,9 MB (git ls-tree de public/video) sin poster ni carga diferida: LCP y datos moviles penalizados en la pagina que vende velocidad.",
+    "propuesta": "Decision para Valentino (VideoCard FROZEN): preload='none' + poster + carga al entrar en viewport, y recodificar a <1,5 MB (H.264/WebM). En WebDevelopmentSensory (libre) aplicar lo mismo.",
+    "esfuerzo": "M",
+    "zona": "FROZEN",
+    "nodos": [
+     "h6",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "O-1, PERF-09"
+   },
+   {
+    "titulo": "El intro de marketing bloquea el scroll hasta 6 s en cada hard-load de las 5 landings (desktop) y el home sigue en 7,3-9,8 s",
+    "prefijo": "PERF",
+    "severidad": "MEDIA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/ui/MarketingIntro.tsx",
+      "linea": 175,
+      "fragmento": "lockScroll();"
+     },
+     {
+      "ruta": "src/components/ui/MarketingIntro.tsx",
+      "linea": 233,
+      "fragmento": "await Promise.race([waitForLogoReady(), wait(MARKETING_READY_TIMEOUT_MS)]);"
+     },
+     {
+      "ruta": "src/components/ui/MarketingIntro.tsx",
+      "linea": 46,
+      "fragmento": "const MARKETING_SCROLL_SAFETY_MS = 6000;"
+     },
+     {
+      "ruta": "src/components/ui/Preloader.tsx",
+      "linea": 24,
+      "fragmento": "const VEIL_FADE_SECONDS = 1.4;"
+     }
+    ],
+    "impacto": "Aritmetica (desktop, sin reduced-motion): marketing = readiness (hasta 2,5 s) + 0,42 + 0,85 + 0,45 + 0,4 + 1,0 + 0,8 = 3,92 s; tope 6 s por la red de seguridad, que si dispara antes desmonta el velo de golpe en medio del toldo. Home = readiness + 1,4 + 0,15 + 0,85 + 0,45 + 0,4 + 1,5 + 1,5 + 0,78 + 0,24 = 7,27 s (hasta 9,77 s). Al ser ahora dinamico el chunk 3D, la readiness tiende al tope en redes lentas. El visitante que llega por un anuncio no puede scrollear durante ese tiempo.",
+    "propuesta": "Decision para Valentino (components/ui FROZEN): no bloquear el scroll durante el intro (o liberarlo al terminar el trazo), acortar la ventana interactiva y bajar el tope de readiness; correr el intro solo en la primera visita de la sesion.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "h6",
+     "h6.vis-contacto",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PERF-06"
+   },
+   {
+    "titulo": "Fechas formateadas en el server sin timeZone: dates-ar existe pero no se adopta (CLEAN-R2 abierto)",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/page.tsx",
+      "linea": 40,
+      "fragmento": "return new Date()\n    .toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/notifications/sendLeadNotification.ts",
+      "linea": 74,
+      "fragmento": "<strong>Fecha:</strong> ${escapeHtml(lead.createdAt.toLocaleString('es-AR'))}"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+      "linea": 25,
+      "fragmento": "return d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit',"
+     },
+     {
+      "ruta": "src/lib/dates-ar.ts",
+      "linea": 225,
+      "fragmento": "timeZone: TZ_AR,"
+     }
+    ],
+    "impacto": "Con el runtime en UTC, entre las 21:00 y las 24:00 AR el encabezado del Inicio del cliente muestra la fecha de manana y el email de lead nuevo informa la hora con +3 h. Tambien los buckets de getActivityChartData.ts:25,30, alerts.ts:277,287 y weekly-report.ts:12.",
+    "propuesta": "Reemplazar esos formateos por formatDateAR / formatDateTimeAR de src/lib/dates-ar.ts (o pasar timeZone: TZ_AR); agregar una regla de lint/invariante que prohiba toLocale*String sin timeZone en codigo server.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-inicio",
+     "h3.cli-chatbot",
+     "int.brevo",
+     "lib.dates-ar"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "CLEAN-R2"
+   },
+   {
+    "titulo": "tests/helpers/setter-db.ts escribe en la base de .env.local sin guard de destino (40+ specs y el seed de galeria lo usan)",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "tests/helpers/setter-db.ts",
+      "linea": 8,
+      "fragmento": "dotenv.config({ path: '.env.local' })"
+     },
+     {
+      "ruta": "tests/helpers/setter-db.ts",
+      "linea": 19,
+      "fragmento": "export const prisma = new PrismaClient()"
+     },
+     {
+      "ruta": "tests/helpers/setter-db.ts",
+      "linea": 162,
+      "fragmento": "const user = await prisma.user.create({\n    data: { email, name, role: 'SETTER' },"
+     },
+     {
+      "ruta": "scripts/dev/m0-galeria-seed.ts",
+      "linea": 55,
+      "fragmento": "if (!process.env.DATABASE_URL?.includes(DEV_BRANCH_HOST)) {"
+     }
+    ],
+    "impacto": "Si .env.local apunta a la Neon de produccion (compartida con Franco), correr la suite del setter crea usuarios SETTER, OsLeads, dossiers y notices en produccion; un test que aborta antes del teardown deja residuos. El mismo repo ya tiene el guard en seeds (prisma/seed-guard.ts) y en m0-galeria-seed.ts:53-57, pero no en el helper que importan los 40+ specs.",
+    "propuesta": "Agregar al helper el mismo chequeo de host de branch dev (o reusar seed-guard) antes de instanciar PrismaClient; fallar con mensaje claro.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h5.set-manual",
+     "lib.prisma",
+     "modelo.OsLead",
+     "modelo.User"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "[D6] Seed principal (seed-guard.ts:42)"
+   },
+   {
+    "titulo": "design-tokens.ts: solo zIndex tiene consumidores y los colores por servicio contradicen CLAUDE.md y globals.css",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/design-tokens.ts",
+      "linea": 96,
+      "fragmento": "ia: '#8b5cf6', // violet-500 — IA / Chatbots\n    automation: '#10b981', // emerald-500 — Automation\n    software: '#f59e0b', // amber-500 — Software / Custom"
+     },
+     {
+      "ruta": "src/app/globals.css",
+      "linea": 61,
+      "fragmento": "--color-ds-accent-ia: #10b981;\n  --color-ds-accent-automation: #f59e0b;\n  --color-ds-accent-software: #8b5cf6;"
+     },
+     {
+      "ruta": "src/components/ui/Modal.tsx",
+      "linea": 7,
+      "fragmento": "import { zIndex } from '@/lib/design-tokens'"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+      "linea": 28,
+      "fragmento": "className=\"fixed inset-0 bg-[var(--color-void)] text-zinc-100\""
+     }
+    ],
+    "impacto": "Los 5 importadores (Modal FROZEN, DashboardLayoutClient, setter-shell, shortcuts-help, barra-accion) usan solo zIndex; colors, spacing, radii, typography, shadows, motion y breakpoints no tienen consumidores y el mapa de servicio invierte IA/Automatizacion/Software. Borrar el archivo como planea el rediseno rompe el Modal y el shell del setter; usar sus colores pinta mal los servicios. rediseno/home ademas reescribe utils.ts (+100 lineas) y usa --color-void en 9 sitios.",
+    "propuesta": "Decision para Valentino (FROZEN-inferido): mover zIndex a un modulo propio y borrar o corregir el resto; si se conserva colors.service, alinearlo con globals.css y CLAUDE.md. Coordinar con la rama rediseno/home antes de tocar utils.ts o --color-void.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.design-tokens",
+     "lib.ui",
+     "h5.set-dia"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D9-A1, D9-A2, PLAN-1312"
+   },
+   {
+    "titulo": "Convenciones contradictorias entre CLAUDE.md, DESIGN.md y PRODUCT.md (glassmorphism, duracion de reveals, acento de Software)",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "raiz:CLAUDE.md",
+      "linea": 97,
+      "fragmento": "Glassmorphism: `bg-white/[0.04] backdrop-blur-[20px] backdrop-saturate-[180%] ...`"
+     },
+     {
+      "ruta": "raiz:DESIGN.md",
+      "linea": 291,
+      "fragmento": "- **Don't** usar `backdrop-blur` ni glassmorphism en ninguna superficie."
+     },
+     {
+      "ruta": "raiz:PRODUCT.md",
+      "linea": 54,
+      "fragmento": "| Software a medida | `/software-development` | índigo |"
+     },
+     {
+      "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+      "linea": 121,
+      "fragmento": "\"backdrop-blur-3xl rounded-none md:rounded-[2rem] animate-border-spin\","
+     }
+    ],
+    "impacto": "Quien implemente siguiendo CLAUDE.md (glass, reveals de 0,6 s en :84, Software violeta en :103) contradice DESIGN.md (sin blur, reveals ~0,9 s en :271) y PRODUCT.md (Software indigo). El hero del home ya usa backdrop-blur-3xl; chromeReveal.ts:23 usa 900 ms. Cada sprint decide distinto.",
+    "propuesta": "Decision de Valentino: declarar una fuente de verdad por ambito (sitio publico vs portales) y corregir las otras dos; el acento de Software debe ser uno solo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.ui",
+     "h6"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D9-A2, PLAN-1289"
+   },
+   {
+    "titulo": "Texto rotativo infinito en el titular del home sin pausa ni prefers-reduced-motion",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/ui/TypewriterText.tsx",
+      "linea": 57,
+      "fragmento": "useEffect(() => {\n        const speed = isDeleting ? deletingSpeed : typingSpeed;"
+     },
+     {
+      "ruta": "src/components/ui/TypewriterText.tsx",
+      "linea": 77,
+      "fragmento": "style={{ animation: 'blink-cursor 1s steps(1) infinite' }}"
+     },
+     {
+      "ruta": "src/components/layout/Hero.tsx",
+      "linea": 694,
+      "fragmento": "<TypewriterText words={HERO_KEYWORDS} typingSpeed={70} deletingSpeed={40}"
+     }
+    ],
+    "impacto": "El titular del home escribe y borra palabras para siempre y el cursor parpadea sin fin; no hay control para pausar (WCAG 2.2.2, nivel A) y no respeta 'reducir movimiento'. Un lector de pantalla lee palabras a medio escribir.",
+    "propuesta": "Decision para Valentino (FROZEN): respetar useReducedMotion mostrando la palabra estatica, exponer el texto completo con aria-label/sr-only y el animado con aria-hidden, y detener el ciclo tras una vuelta o con un control de pausa. Alternativa libre: el Hero gatea el componente con reduced-motion.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "h6",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Kit UI: estados que no se anuncian (carga sin role=status, Tabs sin aria-current, invalid sin aria-invalid fuera de Field)",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/ui/LoadingState.tsx",
+      "linea": 19,
+      "fragmento": "<div className={cn('flex flex-col items-center justify-center gap-3 py-12', className)}>"
+     },
+     {
+      "ruta": "src/components/ui/Spinner.tsx",
+      "linea": 18,
+      "fragmento": "<Loader2 className={cn(sizes[size], 'animate-spin', className)} strokeWidth={1.5} />"
+     },
+     {
+      "ruta": "src/components/ui/Tabs.tsx",
+      "linea": 108,
+      "fragmento": "<Link key={key} href={(item as NavTabItem).href} className={baseClasses}>"
+     },
+     {
+      "ruta": "src/components/ui/Input.tsx",
+      "linea": 31,
+      "fragmento": "aria-invalid={ariaInvalid ?? (field.invalid ? true : undefined)}"
+     }
+    ],
+    "impacto": "En 35 usos de LoadingState, Spinner y los skeletons el lector de pantalla no anuncia que algo carga; las tabs de Cuenta, Resultados y Proyecto no marcan la pestana activa; un <Input invalid> fuera de Field se ve rojo pero no se anuncia invalido. Control positivo: setter-nav.tsx:98 usa aria-current y autosave-status.tsx:73 role=status.",
+    "propuesta": "Decision para Valentino (FROZEN): role=status + aria-live=polite + texto sr-only en LoadingState/Spinner/skeletons, aria-current='page' en Tabs modo nav y role=tablist/tab/aria-selected en modo value, y mapear la prop invalid a aria-invalid en Input/TextArea/Select.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.ui",
+     "h2.cli-cuenta",
+     "h2.cli-resultados",
+     "h2.cli-proyecto"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "use-step-action no captura excepciones de la action: un throw va al error boundary en vez del toast",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/use-step-action.ts",
+      "linea": 53,
+      "fragmento": "startTransition(async () => {\n      const result = await action()\n      if (!result.success) {"
+     }
+    ],
+    "impacto": "Si la server action lanza (guard que tira Error generico, red caida, timeout), React 19 propaga el error de la transicion al error.tsx del setter: el setter pierde la pantalla del paso y ve el boundary en vez de un toast con reintento.",
+    "propuesta": "Envolver el await en try/catch: toast.error con copy generico + onError, y Sentry.captureException para lo inesperado.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h5.set-manual",
+     "lib.actions"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "patron D1-c3 guards que lanzan Error('Unauthorized')"
+   },
+   {
+    "titulo": "use-autosave cancela el guardado pendiente al desmontar: navegar dentro del debounce pierde lo ultimo tipeado",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/use-autosave.ts",
+      "linea": 154,
+      "fragmento": "if (!enabled) return\n    scheduleRef.current()\n    return clearTimer"
+     },
+     {
+      "ruta": "src/lib/use-autosave.ts",
+      "linea": 44,
+      "fragmento": "const DEFAULT_DELAY_MS = 1200"
+     },
+     {
+      "ruta": "src/lib/use-unsaved-guard.ts",
+      "linea": 16,
+      "fragmento": "Por eso el aviso de salida interna es OPT-IN (`avisaEnSalidaInterna`): lo pide\n * el formulario que no tiene autosave detrás."
+     }
+    ],
+    "impacto": "El setter que tipea en la ficha o el brief y en menos de 1,2 s toca un enlace interno pierde esas ultimas teclas sin aviso: el cleanup cancela el timer y la guardia interna no esta activa para formularios con autosave.",
+    "propuesta": "En el cleanup de desmontaje hacer flush del valor pendiente (fire-and-forget) en lugar de solo cancelar, o activar avisaEnSalidaInterna mientras haya timer pendiente.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h5.set-manual"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "logger en produccion: la meta se esparce sobre el objeto y pisa message/level; un Error como meta borra el mensaje de contexto",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/logger.ts",
+      "linea": 42,
+      "fragmento": "JSON.stringify({ level, timestamp, message,\n        ...(typeof serializedMeta === 'object' && serializedMeta !== null ? serializedMeta"
+     },
+     {
+      "ruta": "src/lib/logger.ts",
+      "linea": 33,
+      "fragmento": "meta instanceof Error ? { name: meta.name, message: meta.message, stack: meta.stack, }"
+     },
+     {
+      "ruta": "src/app/api/motor/webhook/[channelToken]/route.ts",
+      "linea": 52,
+      "fragmento": "logger.error('motor-inbound: error de infraestructura procesando el webhook', error)"
+     }
+    ],
+    "impacto": "En los logs de Netlify el error del webhook de WhatsApp queda solo con el message de la excepcion: se pierde 'motor-inbound: error de infraestructura...'. Una meta con clave level/message/timestamp falsea el registro; una meta con BigInt o ciclos hace tirar al logger dentro de un catch. Ademas todo va a stdout y nada a Sentry.",
+    "propuesta": "Decision para Valentino (FROZEN-inferido): anidar la meta bajo una clave (meta/err), serializar con try/catch y mandar error/warn a stderr.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.logger",
+     "h3.vis-whatsapp",
+     "int.sentry"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patron D1-c1 console.error sin Sentry"
+   },
+   {
+    "titulo": "slugify devuelve cadena vacia para nombres sin caracteres latinos y 2 de 3 llamadores no tienen respaldo",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/slugify.ts",
+      "linea": 6,
+      "fragmento": ".replace(/[^a-z0-9]+/g, '-')\n    .replace(/^-+|-+$/g, '')"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createBot.ts",
+      "linea": 57,
+      "fragmento": "const slug = await findUniqueBotSlug(slugify(input.botName))"
+     },
+     {
+      "ruta": "src/lib/onboarding/core.ts",
+      "linea": 26,
+      "fragmento": "let candidate = base"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+      "linea": 32,
+      "fragmento": "const safeBase = base || 'cliente'"
+     }
+    ],
+    "impacto": "Un bot llamado con emojis o en otro alfabeto obtiene slug '' (y luego '-1'): la URL del widget y del embed queda vacia o rota para ese cliente. createClientOnly ya tiene el respaldo (control positivo); createBot y onboarding/core no.",
+    "propuesta": "Hacer que slugify o los dos findUnique* apliquen un respaldo ('bot'/'cliente' + sufijo) y validar en Zod que el slug resultante no quede vacio.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots",
+     "h4.adm-clientes",
+     "lib.slugify",
+     "modelo.BotConfig",
+     "modelo.Organization"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "triggerTransition usado en portales: 300 ms de demora fija y clicks descartados mientras isAnimating (hasta 8 s)",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/context/TransitionContext.tsx",
+      "linea": 72,
+      "fragmento": "if (isAnimating) return;"
+     },
+     {
+      "ruta": "src/context/TransitionContext.tsx",
+      "linea": 116,
+      "fragmento": "setTimeout(() => {\n                startTransition(() => {\n                    router.push(target);"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+      "linea": 49,
+      "fragmento": "triggerTransition(href)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx",
+      "linea": 92,
+      "fragmento": "triggerTransition(detailHref)"
+     }
+    ],
+    "impacto": "CLAUDE.md dice que triggerTransition no aplica en portales (no hay Shutter). En el rail del setter y al guardar un cliente cada navegacion espera 300 ms sin feedback y, mientras la ruta nueva carga (en dev, compilando), todo click se ignora en silencio hasta 8 s. HIPOTESIS: explica el 'click-nav trabado en dev' que la bitacora atribuye a un hydration mismatch.",
+    "propuesta": "Usar <Link> en setter-nav y redirect/router.refresh en EditClientForm segun CLAUDE.md; si se mantiene, saltear el delay cuando no hay Shutter montado (decision para Valentino: TransitionContext es FROZEN y setter-nav es de Franco).",
+    "esfuerzo": "S",
+    "zona": "FROZEN + ZONA-FRANCO",
+    "nodos": [
+     "lib.transition",
+     "h5.set-dia",
+     "h4.adm-clientes"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-1324"
+   },
+   {
+    "titulo": "Regla 'cero any' incumplida: 6 any explicitos en src y 5 en scripts/seeds",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/integrations/pagespeed.ts",
+      "linea": 77,
+      "fragmento": "data: any,"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+      "linea": 36,
+      "fragmento": "accentColor: accentColor as any,"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+      "linea": 601,
+      "fragmento": "ref={bufferAttrRef as any}"
+     },
+     {
+      "ruta": "prisma/seeds/init-data-connections.ts",
+      "linea": 18,
+      "fragmento": "where: { dataConnections: { equals: null as any } },"
+     }
+    ],
+    "impacto": "Contradice la regla no negociable y el 'cero any' declarado en alpha-RESUMEN-FINAL.md:41. Tambien src/components/canvas/LiquidProject.tsx:8, ClientSettingsForm.tsx:26,37, scripts/dev/_vseed.ts:22 (x3) y scripts/p41-inject-campaigns.ts:37. En el lote, tests/helpers/setter-db.ts:336 escapa tipos con 'kind as never'.",
+    "propuesta": "Tipar cada caso (Prisma.JsonNull para el seed, tipos de respuesta de PageSpeed, union de accentColor/position) y activar no-explicit-any como error en scripts/ y prisma/.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.ui",
+     "int.pagespeed",
+     "h3.cli-chatbot"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D9-A5"
+   },
+   {
+    "titulo": "Dependencia fantasma: 3 archivos importan 'framer-motion', que no esta en package.json",
+    "prefijo": "TEC",
+    "severidad": "BAJA",
+    "tipo": "tech-vieja",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/ui/KineticText.tsx",
+      "linea": 3,
+      "fragmento": "import { motion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';"
+     },
+     {
+      "ruta": "src/components/sections/home/About.tsx",
+      "linea": 3,
+      "fragmento": "import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';"
+     },
+     {
+      "ruta": "package.json",
+      "linea": 153,
+      "fragmento": "\"motion\": \"^12.36.0\","
+     }
+    ],
+    "impacto": "Funciona solo porque 'motion' trae framer-motion como transitiva (package-lock.json:8622). Un cambio de hoisting o de gestor rompe el build del home; 215 archivos usan motion/react y 3 no.",
+    "propuesta": "Cambiar los 3 imports a 'motion/react' (KineticText es FROZEN: decision para Valentino; About.tsx y Portfolio.tsx son libres).",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.ui",
+     "h6"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Canvas 3D del avatar del chatbot con dpr [1,2] y sin pausa fuera de viewport",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+      "linea": 940,
+      "fragmento": "dpr={[1, 2]}"
+     },
+     {
+      "ruta": "src/components/canvas/DotMatrix.tsx",
+      "linea": 213,
+      "fragmento": "dpr={[1, 2]} // Optimize for retina displays while limiting max resolution"
+     },
+     {
+      "ruta": "src/components/ui/BrandedIntroCanvas.tsx",
+      "linea": 122,
+      "fragmento": "dpr={[1, 1.5]}"
+     }
+    ],
+    "impacto": "CLAUDE.md fija dpr maximo [1, 1.5] e IntersectionObserver en animaciones pesadas. El avatar legacy (vivo via LegacyNeuroAvatarAdapter en el widget del cliente y de develOP) renderiza a dpr 2 y no pausa (sin IntersectionObserver ni frameloop en el archivo): costo de GPU/bateria en moviles del visitante. DotMatrix.tsx:213 es un export sin importadores.",
+    "propuesta": "Bajar a dpr [1, 1.5] y pausar con frameloop='demand' o IntersectionObserver; borrar el default export muerto de DotMatrix. LegacyNeuroAvatar se trata como frozen en la bitacora: decision para Valentino.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.vis-widget-develop"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D9-A4"
+   },
+   {
+    "titulo": "zIndex 210 hardcodeado en Select y 10 popovers, fuera de la escala de design-tokens: un Select dentro de un Modal quedaria tapado",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/components/ui/Select.tsx",
+      "linea": 368,
+      "fragmento": "zIndex: 210,"
+     },
+     {
+      "ruta": "src/lib/design-tokens.ts",
+      "linea": 245,
+      "fragmento": "modal: 10000, // diálogos portaleados a <body>"
+     },
+     {
+      "ruta": "src/components/dashboard/NotificationCenter.tsx",
+      "linea": 186,
+      "fragmento": "zIndex: 210,"
+     }
+    ],
+    "impacto": "Ambos portalean a <body>: el panel del Select (210) queda debajo del backdrop del Modal (10000). Hoy ningun Select vive dentro de un Modal (evaluacion-form.tsx tiene el Select en :223 y el Modal en :267-300), asi que es latente; el primer formulario dentro de un Modal con Select mostraria un desplegable invisible.",
+    "propuesta": "Agregar un tier 'popover' en la escala (por encima de modal) y consumirlo desde Select y los popovers en vez del literal 210 (Select es FROZEN: decision para Valentino).",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.ui",
+     "lib.design-tokens"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D9-A1"
+   },
+   {
+    "titulo": "StatCard formatea numeros con el locale del runtime y compact en ingles en paginas server del portal",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/components/ui/StatCard.tsx",
+      "linea": 58,
+      "fragmento": "? `$${value.toFixed(4)}`\n      : format === 'compact' ? new Intl.NumberFormat('en', { notation: 'compact' }).format(value)\n        : value.toLocaleString()"
+     }
+    ],
+    "impacto": "En las paginas server del portal que lo usan (modules/agenda-inteligente/page.tsx, modules/tienda-conectada/page.tsx, soporte/page.tsx, GBPMetricsCard.tsx) un valor de 1234 sale '1,234' con el locale por defecto de Node en vez de '1.234'; dentro de un client component puede dar hydration mismatch.",
+    "propuesta": "Decision para Valentino (FROZEN): fijar 'es-AR' en toLocaleString e Intl.NumberFormat.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.ui",
+     "h2.cli-agenda",
+     "h2.cli-tienda",
+     "h2.cli-soporte"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-1343"
+   },
+   {
+    "titulo": "Duplicacion en primitivas compartidas: useIsClient en 4 versiones, cn local y constantes de footprint 'mantener en sync'",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/use-is-client.ts",
+      "linea": 12,
+      "fragmento": " * Copia 1:1 de `src/modules/chatbot/components/admin/useIsClient.ts`"
+     },
+     {
+      "ruta": "src/components/ui/LogoStrokeOverlay.tsx",
+      "linea": 30,
+      "fragmento": "function useIsClient(): boolean {\n    const [client, setClient] = useState(false);"
+     },
+     {
+      "ruta": "src/components/ui/IntroLockupText.tsx",
+      "linea": 46,
+      "fragmento": "// Mismos tunables de footprint que LogoStrokeOverlay — mantener en sync.\nconst FOOTPRINT_CALIB = 1.0;"
+     },
+     {
+      "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+      "linea": 9,
+      "fragmento": "function cn(...inputs: ClassValue[]) {\n    return twMerge(clsx(inputs));"
+     }
+    ],
+    "impacto": "Hay 4 implementaciones de 'estoy en el cliente' (lib, chatbot, LogoStrokeOverlay, IntroLockupText; MarketingIntro.tsx:88 suma un useMediaQuery('(min-width: 1px)')), un cn que ignora la config DS de lib/utils.ts y constantes duplicadas a mano: un ajuste en una copia desalinea el logo 2D del 3D.",
+    "propuesta": "Decision para Valentino (FROZEN): consolidar en lib/use-is-client.ts, importar cn de lib/utils y mover FOOTPRINT_CALIB/LOGO_Y_WORLD a lib/logo-footprint.ts.",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h6.vis-contacto",
+    "id": "h6.vis-contacto.intro-branded",
+    "nombre": "Intro branded de marketing",
+    "descripcion": "Al entrar por URL directa a /contact o a una de las 4 landings de servicio se muestra un velo con el logo que se dibuja, el lockup de texto y el logo 3D, y despues el toldo sube.",
+    "archivos": [
+     "src/components/ui/Preloader.tsx",
+     "src/components/ui/MarketingIntro.tsx",
+     "src/components/ui/BrandedIntroCanvas.tsx",
+     "src/components/ui/LogoStrokeOverlay.tsx",
+     "src/components/ui/IntroLockupText.tsx",
+     "src/lib/marketing-routes.ts",
+     "src/lib/logo-footprint.ts"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz: Preloader.tsx:302 -> marketing-routes.ts:54 -> MarketingIntro.tsx:172-310 -> marketing-routes.ts:75. Bloquea el scroll hasta 6 s (MarketingIntro.tsx:46,175) y no reporta fallas a Sentry.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Superficie publica sin datos de tenant."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No muestra colecciones."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Red de seguridad MarketingIntro.tsx:345-359 libera el scroll si el rAF se cuelga; solo console.warn (:350)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "El velo va en SSR (MarketingIntro.tsx:365-372) y la readiness tiene tope (:233)."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada de usuario."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Rama mobile sin 3D MarketingIntro.tsx:185-229; logo-footprint.ts:41-43 ajusta al ancho."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "El timeout de seguridad solo hace console.warn (MarketingIntro.tsx:350)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos de mentira ni TODO en los archivos."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "El visitante no puede scrollear 3,9-6 s en desktop (aritmetica en el hallazgo PERF)."
+     }
+    }
+   },
+   {
+    "herramienta": "h6.vis-contacto",
+    "id": "h6.vis-contacto.cta-hero-home",
+    "nombre": "CTA del hero del home",
+    "descripcion": "Botones 'Quiero una demo gratis' y 'Ver nuestros trabajos' del hero de la home clasica.",
+    "archivos": [
+     "src/components/ui/buttons/MagneticCta.tsx",
+     "src/components/layout/Hero.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L1",
+    "madurez_evidencia": "Hero.tsx:731-736 renderiza MagneticCta sin href ni onClick; MagneticCta.tsx:97-107 solo agrega una onda: el boton existe pero no lleva a ningun lado (maqueta).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Publico."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Sin colecciones."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Sin llamada a servidor."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin carga asincrona."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Hero.tsx:731 w-full en mobile; MagneticCta.tsx:70 ignora el efecto magnetico en touch."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin camino de error."
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "CTA sin destino (Hero.tsx:731-736)."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "El visitante no puede pedir la demo desde el hero."
+     }
+    }
+   },
+   {
+    "herramienta": "h6.vis-contacto",
+    "id": "h6.vis-contacto.cta-whatsapp",
+    "nombre": "CTA de WhatsApp centralizado",
+    "descripcion": "Arma el enlace wa.me con el numero de entorno y el prefill para /contact y las landings.",
+    "archivos": [
+     "src/lib/whatsapp.ts"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "contact/page.tsx:96 -> whatsapp.ts:55-57 -> :41-45. Quedan 4 destinos fuera del modulo (Footer.tsx:8, CalculadorIA.tsx:316, ChatbotUpsellLanding.tsx:15, PortalDemoCTA.tsx:235).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Publico."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Sin colecciones."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Sin variable cae al fallback (whatsapp.ts:42) y no sirve wa.me/undefined."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sincrono."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "wa.me abre la app en movil; digitos limpios whatsapp.ts:44."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin camino de error."
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Fallback literal whatsapp.ts:21 y destinos divergentes fuera del modulo."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "El visitante abre el chat sin ayuda."
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-shell",
+    "id": "h2.cli-shell.boundary-de-error",
+    "nombre": "Pantalla de error por seccion del portal",
+    "descripcion": "Cuando un segmento del portal falla al renderizar muestra un mensaje sin detalles tecnicos, registra en Sentry y ofrece reintentar o volver al inicio.",
+    "archivos": [
+     "src/components/ui/SectionErrorBoundary.tsx",
+     "src/lib/logger.ts"
+    ],
+    "entradas": [],
+    "madurez": "L3",
+    "madurez_evidencia": "dashboard/error.tsx:13 -> SectionErrorBoundary.tsx:52-68 (logger + Sentry.captureException) -> :85-96 copy util + digest -> :101 reset.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "No lee datos."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No lista colecciones."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Mensaje util sin stack (SectionErrorBoundary.tsx:85-90), solo digest (:92-96)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Estado terminal."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Botones flex-col en mobile (SectionErrorBoundary.tsx:98)."
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "Sentry.captureException con tag section (SectionErrorBoundary.tsx:64-67)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos de mentira."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Reintentar (:101) y volver (:108) sin ayuda; desde admin /dashboard redirige a /admin via proxy.ts:155."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-manual",
+    "id": "h5.set-manual.autosave-del-trabajo-escrito",
+    "nombre": "Autosave y guardia de salida del trabajo escrito",
+    "descripcion": "Guarda en pausa la ficha y el brief del setter y avisa al cerrar la pestana con cambios sin guardar.",
+    "archivos": [
+     "src/lib/use-autosave.ts",
+     "src/lib/use-unsaved-guard.ts"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "use-autosave.ts:148-157 -> :131-140 -> :91-128 -> save (server action de dominio, fuera del lote); use-unsaved-guard.ts:81-93 beforeunload.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Delegado a la action (use-autosave.ts:24-26); fuera del lote."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Sin colecciones."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "phase 'error' (use-autosave.ts:115-119) sin reintento hasta una nueva edicion (:122-127)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "phase 'saving' (use-autosave.ts:98)."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Vive en la action."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "Hook sin UI."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch sin captureException (use-autosave.ts:118)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos de mentira."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Navegar en <1,2 s pierde lo ultimo tipeado (use-autosave.ts:156)."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-manual",
+    "id": "h5.set-manual.ciclo-submit-de-pasos",
+    "nombre": "Ciclo submit de los pasos del manual",
+    "descripcion": "Ejecuta la server action del paso, muestra toast de error o exito y refresca el wizard.",
+    "archivos": [
+     "src/lib/use-step-action.ts",
+     "src/lib/action-utils.ts"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "use-step-action.ts:53-66 (action fuera del lote -> toast -> router.refresh).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Delegado a la action; fuera del lote."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Sin colecciones."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "toast.error con result.error (use-step-action.ts:57); un throw no se captura (:53-54)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "isPending (use-step-action.ts:46)."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Zod queda en el step y la action (comentario :18-21)."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "Hook sin UI."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captureException en el hook."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos de mentira."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "El setter recibe feedback y el wizard se re-deriva."
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-1251",
+    "clave": "Subir chartCardHoverCls a lib/hover.ts",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/lib/hover.ts:5,9 solo exporta adminHoverCls/adminHoverAmplifiedCls; chartCardHoverCls sigue en src/components/dashboard/results/_shared/chartHover.ts (usado en resultados/seo/page.tsx:14 y trafico/page.tsx:17). git grep -n chartCardHoverCls origin/main -- logic-core-v3/src/lib/hover.ts -> vacio.",
+    "nota": "adminHoverAmplifiedCls tiene 0 consumidores.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1343",
+    "clave": "StatCard frozen: typo y a11y",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Tilde corregida StatCard.tsx:127 'Requiere atención'; icono principal aria-hidden :79; TrendIcon :111 sin aria-hidden ni strokeWidth 1.5; prop format en uso (admin/chatbots/[botId]/tabs/OverviewTab.tsx:110,120); transition-[width] sigue en :94 (con motion-reduce).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1333",
+    "clave": "ui/EmptyState.tsx posible huerfano",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "Lo importan 5 archivos del setter: setter/_components/home-empty.tsx:5, setter/error.tsx:6, setter/leads/[leadId]/error.tsx:7, manual/error.tsx:7, setter/not-found.tsx:6.",
+    "nota": "El que no tiene consumidores es ErrorState.tsx (solo index.ts:6).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1324",
+    "clave": "Hydration mismatch en TransitionContext/preloader",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "TransitionContext.tsx no renderiza markup que difiera entre server y cliente (:162-166); bitacora-roadmap.md:10522 atribuye el mismatch al scroll-lock del <html> del layout. TransitionContext.tsx:72 descarta clicks mientras isAnimating (hasta 8 s, :123-128), causa alternativa del click-nav trabado.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1278",
+    "clave": "Extender ui/Button en vez de envolverlo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Button.tsx:110-120 buttonClasses() exportada, :82-84 hasFramerPress(), :97 tamano ds-compact, :53-70 variantes ds-*; design-system/CtaButton.tsx:5 importa Button y buttonClasses.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1303",
+    "clave": "B12.1 Error boundaries + loading skeletons",
+    "estado_en_codigo": "hecho",
+    "evidencia": "SectionErrorBoundary.tsx:55 logger + :64 Sentry.captureException; index.ts:10; usado por dashboard/error.tsx, chatbot/, cuenta/, modules/, resultados/error.tsx y AdminErrorBoundary.tsx:18; 24 error.tsx y 54 loading.tsx en src/app (git ls-files).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1312",
+    "clave": "B13.1 Tokens, BrandMark, sidebar/tabs/breadcrumb",
+    "estado_en_codigo": "hecho",
+    "evidencia": "design-tokens.ts:7-17 regla de color y :94-99 service; src/components/brand/BrandMark.tsx existe (3 referencias); Tabs.tsx:15-39 API dual href/value; index.ts:18.",
+    "nota": "Los colores por servicio de design-tokens.ts:96-98 contradicen CLAUDE.md:101-103 y globals.css:61-63, y no tienen consumidores.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1246",
+    "clave": "EmptyStateMuted como estado vacio canonico",
+    "estado_en_codigo": "hecho",
+    "evidencia": "EmptyStateMuted.tsx:14-18 re-export de ResultEmptyState; 38 archivos lo importan (git grep).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1260",
+    "clave": "B1.A TextArea promovida al kit UI",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/components/ui/Textarea.tsx:12 TextArea; index.ts:19; git ls-files -- 'src/app/(protected)/setter/_components/text-area.tsx' -> vacio (control: Textarea.tsx listado).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1262",
+    "clave": "7.2 accesibilidad sistemica de Field.tsx",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Field.tsx:19-27 useId + contexto, :31-32 htmlFor, :49 role=alert con id; field-context.ts:21-28; Input.tsx:25-31; Textarea.tsx:21-26; Select.tsx:121,319,327.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1277",
+    "clave": "B1-S2 componentes base del design system + ui/Button extendido",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Button.tsx:19-20 ds-primary/ds-secondary, :22 tamanos ds y ds-compact; src/components/design-system/ con 13 entradas (git ls-tree).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1286",
+    "clave": "Numeros de WhatsApp centralizados en src/lib/whatsapp.ts",
+    "estado_en_codigo": "parcial",
+    "evidencia": "14 consumidores de lib/whatsapp (contact/page.tsx:8, CtaIA.tsx:6, PricingSection.tsx:5, ...); siguen fuera Footer.tsx:8 (fallback 5493815000000), PortalDemoCTA.tsx:235, CalculadorIA.tsx:316 y ChatbotUpsellLanding.tsx:15.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1306",
+    "clave": "Smoke runtime de la proteccion de rutas post-upgrade",
+    "estado_en_codigo": "parcial",
+    "evidencia": "tests/e2e/19-security.spec.ts:4-18 cubre anonimo -> /login en /admin y /dashboard; tests/e2e/11-client-login.spec.ts:16 cliente -> /admin. No consta que corra en CI (dominio D8).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1255",
+    "clave": "date-preset-filter compartido",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Siguen 4 mapeos replicados: admin/alerts/_components/alerts-filters.ts:62-63, admin/audit-log/_components/audit-filters.ts:43-44, admin/leads/_components/lead-filters.ts:140-141, modules/chatbot/components/admin/activity/activityFilters.ts:69 (su :5 dice 'replica el patron de presets de Leads').",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1258",
+    "clave": "Dos helpers AES-GCM conviviendo",
+    "estado_en_codigo": "parcial",
+    "evidencia": "encrypt-for-storage.ts ya no existe (git ls-files src/lib/crypto); conviven credential-cipher.ts:18 y secret-box.ts:22, ambos 'aes-256-gcm'.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1249",
+    "clave": "Barrido de pb-20 en todo el portal",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -c pb-20 en src/app/(protected)/dashboard y src/components/dashboard -> 20 ocurrencias.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1235",
+    "clave": "Contrato de scoping explicito en helpers",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Fuera del lote. Existe src/lib/isolation (forOrg/unsafeGlobalQuery, contexto fijo) y multiTenantQueries.ts:95 usa startOfDateRange de tz-ar; no se verifico el contrato helper por helper.",
+    "nota": "Cruce de D5/D6.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1332",
+    "clave": "Badge 'Generado por IA'",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -nE 'Generado por IA|DataOriginBadge' origin/main -- logic-core-v3/src -> vacio; control: PreviewBanner aparece en 3 archivos.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1345",
+    "clave": "error.message al cliente en actions",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "action-utils.ts:31-33 'if (error instanceof Error) { return error.message }'; 6 archivos consumen toErrorMessage.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1341",
+    "clave": "Commits delegados al humano",
+    "estado_en_codigo": "hecho",
+    "evidencia": "El trabajo de esos sprints esta en main: src/lib/integrations/gbp-connection.ts (P3-A.1) y modules/chatbot/server/chat/__tests__/utm-attribution.invariant.ts (UTM) en git ls-files.",
+    "nota": "Es proceso; no hay artefacto de codigo que verificar mas alla de que el trabajo quedo commiteado.",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1266",
+    "clave": "Helpers de filtro por fecha sin zona horaria",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "alerts-filters.ts:62 new Date(`${filter.from}T00:00:00.000`) y equivalentes en audit-filters.ts:43, lead-filters.ts:140, activityFilters.ts:69: hora local del navegador, sin tz-ar/dates-ar.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1268",
+    "clave": "El Modal compartido no declara role=dialog ni aria-modal",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -nE 'role=|aria-modal|Escape|keydown|focus' origin/main -- logic-core-v3/src/components/ui/Modal.tsx -> vacio; control: Select.tsx tiene 2 role=.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1317",
+    "clave": "Tokenizar 124 radios hardcodeados",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -cE 'rounded-\\[(28|24)px\\]' en src -> 159 ocurrencias en 86 archivos (crecio desde 124); incluye skeletons CardSkeleton.tsx:11, ListSkeleton.tsx:13, TableSkeleton.tsx:10.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1291",
+    "clave": "Clases cursor-none esconden el cursor sin reemplazo",
+    "estado_en_codigo": "parcial",
+    "evidencia": "layout.tsx:103 declara la limpieza, pero quedan cursor-none en components/sections/home/Portfolio.tsx:239,329 y About.tsx:93 (home clasica restaurada).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1292",
+    "clave": "Techo de FCP/LCP: scripts async del head",
+    "estado_en_codigo": "parcial",
+    "evidencia": "MarketingIntro.tsx:19-22 saco three/r3f/postprocessing del bundle inicial (dynamic ssr:false); sin build no se puede medir el resto.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1339",
+    "clave": "Proximos pasos mayo-agosto",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Existen docs/demo-guion.md y public/widget.js (git ls-files) y el cron de reportes semanales (flujo [D5] Reporte semanal del chatbot por email); no hay clientes reales (contexto fijo).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1245",
+    "clave": "Estado vacio en paginas server: armado a mano",
+    "estado_en_codigo": "hecho",
+    "evidencia": "EmptyState.tsx:1 'use client' e :12 icon: LucideIcon; EmptyStateMuted.tsx:7-8 lo resuelve como componente universal sin 'use client'.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1230",
+    "clave": "Frontera de chats por superficie",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Decision organizativa; la unica barrera en codigo es la regla de eslint que impide a chatbot/motor importar @/lib/prisma (contexto fijo). No hay CODEOWNERS que la haga cumplir.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-967",
+    "clave": "Descargo contractual por alucinaciones",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "No hay descargo en src (git grep -niE 'alucina|puede cometer errores|puede equivocarse'); en cambio src/components/ia/GarantiaIA.tsx:410 promete 'Cero alucinaciones.' en el sitio publico.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1326",
+    "clave": "Definir eyebrow canonico",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Typography.tsx:11 'text-[10px] uppercase tracking-[0.24em] text-zinc-500' vs PageHeader.tsx:59 'text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-600'; design-patterns.ts:52 usa 0.24em.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1279",
+    "clave": "Theming local por seccion (data-ds-theme)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/components/design-system/SectionShell.tsx:84 data-ds-theme={theme}; :42 documenta el tema local.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1284",
+    "clave": "Regla para pasadas masivas sobre copy",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Regla de proceso sin artefacto verificable en codigo (no hay script ni invariante que la aplique).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1289",
+    "clave": "Los acentos de servicio viven solo sobre lienzo oscuro",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Tokens globals.css:61-63 (--color-ds-accent-*); no se verifico cada uso. design-tokens.ts:96-98 define otro mapa de acentos sin consumidores.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1296",
+    "clave": "B9.3 Honestidad de datos demo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git grep 'Insights AI' en ChatbotOverview.tsx -> vacio; dashboard/project/page.tsx:108-117 deriva la fecha de inicio de paymentMilestones reales (sin milestone hardcodeado); PreviewBanner en 3 archivos.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1232",
+    "clave": "Auditorias I-III: aislamiento sin rojos; /smoke publico",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git ls-files src/app | grep -i /smoke -> 0 (control: /embed/ -> 2 archivos): la ruta /smoke publica ya no existe.",
+    "sigue_teniendo_sentido": "no"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D9-A1] design-tokens.ts desconectado vs consumido por Modal y shell del setter; --color-void; riesgo cruzado con rediseno/home",
+    "resultado": "confirmada",
+    "evidencia": "Solo zIndex se importa (Modal.tsx:7, DashboardLayoutClient.tsx:12, setter-shell.tsx:6, shortcuts-help.tsx:5, barra-accion.tsx:15); el resto de design-tokens no tiene consumidores. --color-void se usa en setter-shell.tsx:28 y shortcuts-help.tsx:37,80 (dossier-stepper ya no existe). rediseno/home modifica utils.ts (+100/-1 vs origin/main) y usa --color-void en 9 sitios.",
+    "hallazgo_titulo": "design-tokens.ts: solo zIndex tiene consumidores y los colores por servicio contradicen CLAUDE.md y globals.css"
+   },
+   {
+    "alerta": "[D9-A2] Convenciones contradichas: glassmorphism, reveals 0.9 s vs 0.6 s, acento de Software indigo vs violeta",
+    "resultado": "confirmada",
+    "evidencia": "raiz:DESIGN.md:211,291 prohiben backdrop-blur/glass y :271 fija ~0,9 s; raiz:CLAUDE.md:97 da glass como convencion y :84 0,6 s; raiz:PRODUCT.md:54 Software indigo vs CLAUDE.md:103 y globals.css:63 violeta #8b5cf6; ademas design-tokens.ts:98 dice Software ambar.",
+    "hallazgo_titulo": "Convenciones contradictorias entre CLAUDE.md, DESIGN.md y PRODUCT.md (glassmorphism, duracion de reveals, acento de Software)"
+   },
+   {
+    "alerta": "[D9-A3] Congelados extra declarados por los lanes (components/ui/*, lib/plan/*, upsell.ts, lib/hover.ts, LatencyChart.tsx) y LegacyNeuroAvatar como FROZEN",
+    "resultado": "parcial",
+    "evidencia": "Todos existen en main: src/lib/plan/ (7 archivos), src/lib/actions/upsell.ts, src/lib/hover.ts (41 importadores), modules/chatbot/components/admin/health/LatencyChart.tsx, modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx. Es insumo para 11-CONGELADOS: no son defectos; la lista oficial (CLAUDE.md tabla Frozen files) no los incluye."
+   },
+   {
+    "alerta": "[D9-A4] B13.0 sin IntersectionObserver en el Canvas 3D del preview; MS-7 dpr [1,2]; MS-6 edito PreloaderContext",
+    "resultado": "parcial",
+    "evidencia": "dpr [1,2] sigue en LegacyNeuroAvatar.tsx:940 (vivo) y DotMatrix.tsx:213 (export muerto); LegacyNeuroAvatar sin IntersectionObserver ni frameloop (git grep vacio); la decision de no usar IO consta en bitacora-roadmap.md:8562. PreloaderContext.tsx tiene commits fff3b24e (2026-05-25) y ff6871e4 (2026-06-02) posteriores a declararlo frozen.",
+    "hallazgo_titulo": "Canvas 3D del avatar del chatbot con dpr [1,2] y sin pausa fuera de viewport"
+   },
+   {
+    "alerta": "[D9-A5] 'Cero any' declarado vs any encontrados despues; baseline 13 no-explicit-any",
+    "resultado": "confirmada",
+    "evidencia": "6 any en src (pagespeed.ts:77, ClientSettingsForm.tsx:26,36,37, LegacyNeuroAvatar.tsx:601, LiquidProject.tsx:8) y 5 en scripts/prisma (init-data-connections.ts:18, _vseed.ts:22 x3, p41-inject-campaigns.ts:37); 0 eslint-disable de no-explicit-any.",
+    "hallazgo_titulo": "Regla 'cero any' incumplida: 6 any explicitos en src y 5 en scripts/seeds"
+   },
+   {
+    "alerta": "[D9-A6] Numeros de WhatsApp hardcodeados (bitacora-rediseno.md:1628-1630, :1817)",
+    "resultado": "parcial",
+    "evidencia": "lib/whatsapp.ts centraliza 14 consumidores, pero quedan Footer.tsx:8 (fallback 5493815000000), CalculadorIA.tsx:316 (5493815674738), ChatbotUpsellLanding.tsx:15 (5493815555555, portal del cliente) y PortalDemoCTA.tsx:235; el propio modulo trae fallback literal whatsapp.ts:21.",
+    "hallazgo_titulo": "CTA de WhatsApp con numeros hardcodeados y divergentes, incluido un numero de relleno en el upsell del portal"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/components/ui/ErrorState.tsx",
+    "senales": [
+     "Unica referencia fuera de su archivo: export en src/components/ui/index.ts:6",
+     "git grep -n ErrorState en src y tests: solo definicion + barrel",
+     "Copy sin tildes (:24-25) y strokeWidth 1.75 (:41,:58): nadie lo mantiene"
+    ],
+    "que_rompe": "Nada en runtime; quitar tambien la linea 6 de index.ts (FROZEN: decision para Valentino)."
+   },
+   {
+    "archivo": "src/components/ui/HyperText.tsx",
+    "senales": [
+     "Unico importador: src/components/canvas/Interactive3DNetwork.tsx:7",
+     "Interactive3DNetwork no tiene importadores (git grep solo encuentra docs y su propio archivo; ya marcado muerto en auditoria-total-pre-deploy.md:56)",
+     "Comentarios de agente sin resolver (:140-142) y limpieza de intervalos rota (:121-137)"
+    ],
+    "que_rompe": "Nada en runtime si se borra junto con Interactive3DNetwork."
+   },
+   {
+    "archivo": "src/lib/design-tokens.ts",
+    "senales": [
+     "5 importadores, todos import { zIndex }",
+     "colors, spacing, radii, typography, shadows, motion y breakpoints sin consumidores",
+     "colors.service contradice CLAUDE.md:101-103"
+    ],
+    "que_rompe": "Borrar el archivo entero rompe Modal.tsx:7 (FROZEN), DashboardLayoutClient.tsx:12 y tres archivos del setter; solo las exportaciones distintas de zIndex son podables."
+   },
+   {
+    "archivo": "src/lib/hover.ts",
+    "senales": [
+     "adminHoverAmplifiedCls: 0 consumidores (git grep)",
+     "adminHoverCls si se usa (41 archivos)"
+    ],
+    "que_rompe": "Solo el export adminHoverAmplifiedCls; nada."
+   },
+   {
+    "archivo": "src/lib/logger.ts",
+    "senales": [
+     "Metodo ai() (:69-72) con 0 usos (git grep 'logger.ai(' -> 0)"
+    ],
+    "que_rompe": "Nada."
+   },
+   {
+    "archivo": "src/components/ui/buttons/MagneticCta.tsx",
+    "senales": [
+     "Rama href con <Link legacyBehavior passHref> (:176-191) sin usos: el unico consumidor (Hero.tsx:731,734) no pasa href",
+     "cn local duplicado (:9-11)"
+    ],
+    "que_rompe": "Nada si se quita la rama href; conviene reemplazarla por <Link> moderno en vez de borrarla, porque el hero la necesita (hallazgo de CTA inerte)."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "CTA del hero del home",
+    "entorno": "produccion o deploy preview",
+    "precondiciones": "Navegador desktop y movil sin sesion.",
+    "pasos": [
+     "Abrir / por URL directa y esperar a que termine el intro.",
+     "Click en 'Quiero una demo gratis'.",
+     "Volver y click en 'Ver nuestros trabajos'.",
+     "Repetir en movil (390 px)."
+    ],
+    "esperado": "El primero lleva a contacto o WhatsApp; el segundo a la seccion de trabajos.",
+    "senal_falla": "Solo aparece la onda blanca y la URL/scroll no cambian.",
+    "escribe_db_o_email": false,
+    "hallazgos": "Los dos CTA principales del hero del home no hacen nada"
+   },
+   {
+    "titulo": "Modal accesible en el portal del cliente",
+    "entorno": "deploy preview con cuenta QA de cliente",
+    "precondiciones": "Cliente QA logueado; lector de pantalla NVDA o VoiceOver activo.",
+    "pasos": [
+     "Ir a /dashboard/cuenta/boveda y abrir 'Solicitar documento'.",
+     "Escuchar que anuncia el lector al abrir.",
+     "Presionar Tab 10 veces.",
+     "Presionar Escape.",
+     "Cerrar con la X y ver donde queda el foco.",
+     "No enviar el formulario."
+    ],
+    "esperado": "Se anuncia 'dialogo, Solicitar documento'; el foco queda dentro; Escape cierra; el foco vuelve al boton que lo abrio.",
+    "senal_falla": "No se anuncia dialogo, el Tab llega a elementos detras del velo, Escape no cierra o el foco queda en el body.",
+    "escribe_db_o_email": false,
+    "hallazgos": "Modal compartido sin semantica de dialogo"
+   },
+   {
+    "titulo": "Fecha del encabezado del Inicio entre 21:00 y 24:00 AR",
+    "entorno": "produccion (Netlify)",
+    "precondiciones": "Cliente QA; reloj en hora Argentina.",
+    "pasos": [
+     "Entre las 21:00 y las 23:59 AR abrir /dashboard.",
+     "Leer la fecha larga del encabezado.",
+     "Abrir /admin/chatbot/health y comparar la hora de las ultimas muestras de latencia con la hora real."
+    ],
+    "esperado": "Fecha de hoy en AR y horas en AR.",
+    "senal_falla": "El encabezado muestra el dia siguiente o las horas aparecen +3 h.",
+    "escribe_db_o_email": false,
+    "hallazgos": "Fechas formateadas en el server sin timeZone"
+   },
+   {
+    "titulo": "Destinos de WhatsApp",
+    "entorno": "produccion",
+    "precondiciones": "Acceso a las variables de entorno de Netlify; cliente QA sin chatbot activo.",
+    "pasos": [
+     "Verificar en Netlify que NEXT_PUBLIC_WHATSAPP_NUMBER esta seteada.",
+     "En /dashboard/chatbot (landing de upsell) tocar el CTA de WhatsApp y anotar el numero.",
+     "En / tocar el WhatsApp del pie; en /ai-implementations la calculadora; en /contact el boton de WhatsApp.",
+     "Comparar los cuatro numeros."
+    ],
+    "esperado": "Los cuatro abren el mismo numero real de develOP.",
+    "senal_falla": "Alguno abre 5493815555555, 5493815000000 u otro numero distinto.",
+    "escribe_db_o_email": false,
+    "hallazgos": "CTA de WhatsApp con numeros hardcodeados y divergentes"
+   },
+   {
+    "titulo": "Tiempo de scroll bloqueado por el intro",
+    "entorno": "produccion",
+    "precondiciones": "Chrome desktop con cache vacia; DevTools > Network en 'Fast 4G'.",
+    "pasos": [
+     "Abrir /web-development por URL directa.",
+     "Intentar scrollear con la rueda desde el primer frame.",
+     "Cronometrar hasta que el scroll responde.",
+     "Repetir con /.",
+     "Repetir con 'Reducir movimiento' activado en el sistema."
+    ],
+    "esperado": "El scroll responde en menos de ~2 s, o el intro no bloquea.",
+    "senal_falla": "La pagina no scrollea durante 4-6 s en marketing o 7-10 s en el home; el velo desaparece de golpe sin subir.",
+    "escribe_db_o_email": false,
+    "hallazgos": "El intro de marketing bloquea el scroll hasta 6 s"
+   },
+   {
+    "titulo": "Ultima edicion del autosave al salir rapido",
+    "entorno": "local o preview contra la branch Neon dev",
+    "precondiciones": "Setter QA con un lead de prueba en FICHA.",
+    "pasos": [
+     "Abrir el manual del lead en el paso de ficha.",
+     "Escribir una palabra en un campo y, antes de 1 segundo, tocar 'Volver a tu dia'.",
+     "Volver a abrir el mismo lead.",
+     "Revisar el campo."
+    ],
+    "esperado": "La palabra quedo guardada o se pidio confirmacion antes de salir.",
+    "senal_falla": "La palabra no esta y no hubo aviso.",
+    "escribe_db_o_email": true,
+    "hallazgos": "use-autosave cancela el guardado pendiente al desmontar"
+   },
+   {
+    "titulo": "Slug vacio al crear un bot",
+    "entorno": "local contra la branch Neon dev (nunca produccion)",
+    "precondiciones": "SUPER_ADMIN de prueba; org de prueba existente.",
+    "pasos": [
+     "En /admin/chatbots/new crear un bot con nombre '日本語' o solo emojis.",
+     "Ver el slug resultante en el detalle del bot.",
+     "Abrir /embed/<slug>."
+    ],
+    "esperado": "Slug no vacio (respaldo) o error de validacion claro.",
+    "senal_falla": "Slug vacio o '-1' y el embed no carga.",
+    "escribe_db_o_email": true,
+    "hallazgos": "slugify devuelve cadena vacia para nombres sin caracteres latinos"
+   },
+   {
+    "titulo": "A que base escribe la suite del setter",
+    "entorno": "local",
+    "precondiciones": "Repo con .env.local.",
+    "pasos": [
+     "Abrir .env.local y leer el host de DATABASE_URL (sin copiar la credencial).",
+     "Compararlo con el host de la branch dev que exige scripts/dev/m0-galeria-seed.ts:53-57.",
+     "Si no coincide, no correr playwright.setter.config."
+    ],
+    "esperado": "El host es el de la branch dev.",
+    "senal_falla": "El host es el de produccion: la suite crearia usuarios y leads alli.",
+    "escribe_db_o_email": false,
+    "hallazgos": "tests/helpers/setter-db.ts escribe en la base sin guard"
+   },
+   {
+    "titulo": "Titular del home con 'reducir movimiento'",
+    "entorno": "produccion",
+    "precondiciones": "Activar 'Reducir movimiento' en el sistema operativo.",
+    "pasos": [
+     "Abrir / y esperar el intro.",
+     "Observar el titular durante 10 segundos.",
+     "Con lector de pantalla, leer el h1."
+    ],
+    "esperado": "Palabra estatica; el lector lee la frase completa.",
+    "senal_falla": "El texto se sigue escribiendo y borrando o el lector lee una palabra a medias.",
+    "escribe_db_o_email": false,
+    "hallazgos": "Texto rotativo infinito en el titular del home"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "El Modal compartido no tiene role=dialog, aria-modal, manejo de Escape ni manejo de foco",
+    "comando": "git grep -nE \"role=|aria-modal|Escape|keydown|focus\" origin/main -- logic-core-v3/src/components/ui/Modal.tsx",
+    "control_positivo": "git grep -c \"role=\" origin/main -- logic-core-v3/src/components/ui/Select.tsx -> 2"
+   },
+   {
+    "afirmacion": "Los componentes de carga del kit no anuncian estado (sin role/aria-busy/aria-live/sr-only)",
+    "comando": "git grep -nE \"role=|aria-busy|aria-live|sr-only\" origin/main -- logic-core-v3/src/components/ui/Spinner.tsx logic-core-v3/src/components/ui/LoadingState.tsx logic-core-v3/src/components/ui/Skeleton.tsx logic-core-v3/src/components/ui/skeletons",
+    "control_positivo": "git grep -n \"role=\" origin/main -- logic-core-v3/src/components/ui/SectionErrorBoundary.tsx -> :75 role=\"alert\""
+   },
+   {
+    "afirmacion": "Tabs no marca la pestana activa (sin role=tab, aria-selected ni aria-current)",
+    "comando": "git grep -nE \"role=|aria-selected|aria-current\" origin/main -- logic-core-v3/src/components/ui/Tabs.tsx",
+    "control_positivo": "git grep -n \"aria-current\" origin/main -- logic-core-v3/src -> setter-nav.tsx:98, dashboard/project/page.tsx:269 (6 archivos)"
+   },
+   {
+    "afirmacion": "ErrorState no tiene consumidores",
+    "comando": "git grep -n \"ErrorState\" origin/main -- logic-core-v3/src logic-core-v3/tests",
+    "control_positivo": "El mismo comando con EmptyState devuelve 5 importadores en src/app/(protected)/setter/"
+   },
+   {
+    "afirmacion": "Interactive3DNetwork (unico consumidor de HyperText) no tiene importadores",
+    "comando": "git grep -n \"Interactive3DNetwork\" origin/main -- logic-core-v3/src",
+    "control_positivo": "git grep -n \"HeroMetrics\" origin/main -- logic-core-v3/src -> src/app/web-development/page.tsx:6"
+   },
+   {
+    "afirmacion": "El helper de la suite del setter no tiene guard de destino de base",
+    "comando": "git grep -nE \"DEV_BRANCH_HOST|seed-guard|assertSafe|neon\" origin/main -- logic-core-v3/tests/helpers/setter-db.ts",
+    "control_positivo": "El mismo patron sobre logic-core-v3/scripts/dev/m0-galeria-seed.ts devuelve el guard en :53-57"
+   },
+   {
+    "afirmacion": "Los CTA del hero del home no pasan href ni onClick a MagneticCta",
+    "comando": "git grep -n -A2 \"<MagneticCta\" origin/main -- logic-core-v3/src/components/layout/Hero.tsx",
+    "control_positivo": "git grep -n -A2 \"<ChargeTraceButton\" origin/main -- logic-core-v3/src/app/web-development/page.tsx -> onClick en :203"
+   },
+   {
+    "afirmacion": "framer-motion no esta declarado en package.json",
+    "comando": "git show origin/main:logic-core-v3/package.json | grep -n '\"framer-motion\"'",
+    "control_positivo": "git show origin/main:logic-core-v3/package.json | grep -n '\"motion\"' -> :153"
+   },
+   {
+    "afirmacion": "No existe un badge 'Generado por IA' / DataOriginBadge",
+    "comando": "git grep -nE \"Generado por IA|DataOriginBadge\" origin/main -- logic-core-v3/src",
+    "control_positivo": "git grep -l \"PreviewBanner\" origin/main -- logic-core-v3/src -> 3 archivos"
+   },
+   {
+    "afirmacion": "LegacyNeuroAvatar no pausa fuera de viewport (sin IntersectionObserver ni frameloop)",
+    "comando": "git show origin/main:logic-core-v3/src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx | grep -nE \"IntersectionObserver|useInView|frameloop\"",
+    "control_positivo": "git grep -n \"dpr=\" en el mismo archivo devuelve :940"
+   },
+   {
+    "afirmacion": "La TextArea local del setter ya no existe",
+    "comando": "git ls-files -- \"logic-core-v3/src/app/(protected)/setter/_components/text-area.tsx\"",
+    "control_positivo": "git ls-files -- logic-core-v3/src/components/ui/Textarea.tsx -> listado"
+   },
+   {
+    "afirmacion": "La ruta publica /smoke ya no existe",
+    "comando": "git ls-files -- logic-core-v3/src/app | grep -ciE \"/smoke\"",
+    "control_positivo": "git ls-files -- logic-core-v3/src/app | grep -c \"/embed/\" -> 2"
+   },
+   {
+    "afirmacion": "Los formateos de fecha del server citados en CLEAN-R2 no pasan timeZone",
+    "comando": "git grep -nE \"timeZone|TZ_AR|formatDateAR\" origin/main -- \"logic-core-v3/src/app/(protected)/dashboard/page.tsx\" logic-core-v3/src/modules/chatbot/server/admin/getActivityChartData.ts logic-core-v3/src/modules/chatbot/server/admin/getLatencyHistory.ts logic-core-v3/src/lib/email/templates/weekly-report.ts",
+    "control_positivo": "git grep -n \"timeZone: TZ_AR\" origin/main -- logic-core-v3/src/lib/dates-ar.ts -> :49, :225, :235"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Overlays/modales propios que replican el Modal compartido sin role=dialog ni Escape",
+    "como_buscarlo": "git grep -nE \"fixed inset-0\" origin/main -- logic-core-v3/src | grep -v components/ui; luego git grep -L \"role=\\\"dialog\\\"\" sobre esos archivos",
+    "donde_aparecio": "admin/leados/[leadId]/_components/decision-bar.tsx:60 (Overlay local, comentario :13 desactualizado: el Modal ya portalea), admin/_components/confirm-dialog.tsx:44, type-to-confirm-dialog.tsx:45"
+   },
+   {
+    "patron": "z-index magico 210 fuera de la escala de design-tokens",
+    "como_buscarlo": "git grep -nE \"zIndex: 210|z-\\[210\\]\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "Select.tsx:368 y 10 popovers (NotificationCenter.tsx:186, AnnouncementsFeed.tsx:150, EmojiPopover.tsx:122, audit-period-filter.tsx:193, ...)"
+   },
+   {
+    "patron": "toLocaleString/toLocaleDateString sin timeZone (o sin locale) en codigo que corre en el server",
+    "como_buscarlo": "git grep -nE \"toLocale(Date|Time)?String\\(\" origin/main -- logic-core-v3/src | grep -v timeZone",
+    "donde_aparecio": "dashboard/page.tsx:41, sendLeadNotification.ts:74, getLatencyHistory.ts:25, alerts.ts:277, StatCard.tsx:61"
+   },
+   {
+    "patron": "CTA o botones renderizados sin destino (sin href ni onClick)",
+    "como_buscarlo": "git grep -n -A2 \"<MagneticCta\\|<ChargeTraceButton\\|<CtaButton\" origin/main -- logic-core-v3/src y revisar props",
+    "donde_aparecio": "Hero.tsx:731,734"
+   },
+   {
+    "patron": "Animaciones infinitas sin prefers-reduced-motion",
+    "como_buscarlo": "git grep -nE \"infinite|animate-ping|animate-border-spin|setInterval\" origin/main -- logic-core-v3/src/components | luego git grep -L \"useReducedMotion|motion-reduce\" sobre esos archivos",
+    "donde_aparecio": "TypewriterText.tsx:57-77, HyperText.tsx:95, MagneticCta.tsx:121 (animate-border-spin), Badge.tsx:113 (animate-ping)"
+   },
+   {
+    "patron": "startTransition(async) que espera una server action sin try/catch",
+    "como_buscarlo": "git grep -nE \"startTransition\\(async\" origin/main -- logic-core-v3/src y revisar si el await esta dentro de try",
+    "donde_aparecio": "src/lib/use-step-action.ts:53"
+   },
+   {
+    "patron": "PrismaClient instanciado en tests/scripts con .env.local sin guard de host",
+    "como_buscarlo": "git grep -lE \"new PrismaClient\\(\" origin/main -- logic-core-v3/tests logic-core-v3/scripts | xargs git grep -L \"DEV_BRANCH_HOST\\|seed-guard\"",
+    "donde_aparecio": "tests/helpers/setter-db.ts:19"
+   },
+   {
+    "patron": "Imports de 'framer-motion' (dependencia no declarada)",
+    "como_buscarlo": "git grep -n \"from 'framer-motion'\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "KineticText.tsx:3, sections/home/About.tsx:3, sections/home/Portfolio.tsx:3"
+   },
+   {
+    "patron": "triggerTransition usado dentro de /admin, /dashboard o /setter",
+    "como_buscarlo": "git grep -nE \"triggerTransition|useTransitionContext\" origin/main -- \"logic-core-v3/src/app/(protected)\" logic-core-v3/src/components/dashboard logic-core-v3/src/components/admin",
+    "donde_aparecio": "setter-nav.tsx:49, admin/clients/[clientId]/edit/EditClientForm.tsx:92,232"
+   },
+   {
+    "patron": "Generadores de slug sin respaldo para base vacia",
+    "como_buscarlo": "git grep -n -A3 \"function findUnique\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "createBot.ts:12-22, lib/onboarding/core.ts:25-33 (control: createClientOnly.ts:32 si tiene respaldo)"
+   },
+   {
+    "patron": "Hooks utilitarios reimplementados (useIsClient, useReducedMotion, cn)",
+    "como_buscarlo": "git grep -nE \"function (useIsClient|useMediaQuery|useReducedMotion|cn)\\(\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "LogoStrokeOverlay.tsx:30, IntroLockupText.tsx:64, MarketingIntro.tsx:53, MagneticCta.tsx:9, modules/chatbot/components/admin/useIsClient.ts"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/auditoria-total-pre-deploy.md:35",
+    "id_previo": "O-1",
+    "estado": "abierto",
+    "evidencia": "VideoCard.tsx:6-13 sigue con autoPlay muted loop sin preload ni poster; WebDevelopmentSensory.tsx:124-138 igual. Tamanos por git ls-tree: Woman_engrossed 5,7 MB + Male_business_owner 6,9 MB = 12,6 MB en /web-development."
+   },
+   {
+    "doc": "docs/auditoria-consistencia-setter.md:114",
+    "id_previo": "sin-id (TextArea local gemelo de Input)",
+    "estado": "cerrado",
+    "evidencia": "setter/_components/text-area.tsx no existe en main (git ls-files vacio); TextArea vive en src/components/ui/Textarea.tsx:12 y se exporta en index.ts:19. Queda un drift menor: placeholder zinc-600 (Textarea.tsx:28) vs zinc-500 (Input.tsx:33)."
+   },
+   {
+    "doc": "docs/auditoria-consistencia-setter.md:184",
+    "id_previo": "sin-id (Field: label no asociado)",
+    "estado": "cerrado",
+    "evidencia": "Field.tsx:19 useId y :31-32 label htmlFor={fieldId}; Input.tsx:29, Textarea.tsx:24 y Select.tsx:319 toman el id del contexto."
+   },
+   {
+    "doc": "docs/auditoria-consistencia-setter.md:185",
+    "id_previo": "sin-id (Field: error solo visual)",
+    "estado": "cerrado",
+    "evidencia": "Field.tsx:49 <p id={errorId} role=\"alert\">; Input.tsx:30-31 aria-describedby y aria-invalid desde el contexto. Fuera de Field la prop invalid sigue sin setear aria-invalid (Input.tsx:31)."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:584",
+    "id_previo": "PERF-01",
+    "estado": "cerrado",
+    "evidencia": "MarketingIntro.tsx:19-22 carga BrandedIntroCanvas con next/dynamic ssr:false; Preloader.tsx:10 importa MarketingIntro, que solo arrastra motion (LogoStrokeOverlay, IntroLockupText) y no three. El 3D del home sigue en Hero (solo ruta /)."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:591",
+    "id_previo": "PERF-06",
+    "estado": "parcial",
+    "evidencia": "Aritmetica con las constantes actuales (Preloader.tsx:24-34, IntroLockupText.tsx:19-22): readiness hasta 2,5 s + 1,4 + 0,15 + 0,85 + 0,45 + 0,4 + 1,5 + 1,5 + 0,78 + 0,24 = 7,27 s (hasta 9,77 s), contra 12,6 s medidos antes. El lock lo posee Hero (Preloader.tsx:55-56)."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:594",
+    "id_previo": "PERF-09",
+    "estado": "abierto",
+    "evidencia": "Mismo estado que O-1: VideoCard.tsx:6-13 y WebDevelopmentSensory.tsx:124-138 sin preload='none' ni poster."
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:74",
+    "id_previo": "CLEAN-R2",
+    "estado": "abierto",
+    "evidencia": "Sin timeZone: dashboard/page.tsx:40-45, getActivityChartData.ts:25,30, getLatencyHistory.ts:25, alerts.ts:277,287, weekly-report.ts:12, sendLeadNotification.ts:74. dates-ar.ts:222-245 ofrece formatDateAR/formatTimeAR con TZ_AR pero no se usa ahi."
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/components/ui/ErrorState.tsx",
+    "linea": 24,
+    "tipo": "tilde",
+    "detalle": "'Algo salio mal' sin tilde (salió)."
+   },
+   {
+    "ruta": "src/components/ui/ErrorState.tsx",
+    "linea": 25,
+    "tipo": "tilde",
+    "detalle": "'seccion', 'Proba', 'contacta' sin tildes (sección, Probá, contactá)."
+   },
+   {
+    "ruta": "src/components/ui/ErrorState.tsx",
+    "linea": 41,
+    "tipo": "strokeWidth",
+    "detalle": "AlertCircle con strokeWidth 1.75 (regla 1.5)."
+   },
+   {
+    "ruta": "src/components/ui/ErrorState.tsx",
+    "linea": 58,
+    "tipo": "strokeWidth",
+    "detalle": "RefreshCw con strokeWidth 1.75."
+   },
+   {
+    "ruta": "src/components/ui/Section.tsx",
+    "linea": 42,
+    "tipo": "strokeWidth",
+    "detalle": "Icono de seccion con strokeWidth 1.75."
+   },
+   {
+    "ruta": "src/components/ui/Stat.tsx",
+    "linea": 84,
+    "tipo": "strokeWidth",
+    "detalle": "Icono con strokeWidth 1.75."
+   },
+   {
+    "ruta": "src/components/ui/Stat.tsx",
+    "linea": 93,
+    "tipo": "strokeWidth",
+    "detalle": "TrendIcon con strokeWidth 2.5."
+   },
+   {
+    "ruta": "src/components/ui/StatCard.tsx",
+    "linea": 111,
+    "tipo": "strokeWidth",
+    "detalle": "TrendIcon con strokeWidth 1.75 y sin aria-hidden."
+   },
+   {
+    "ruta": "src/components/ui/EmptyState.tsx",
+    "linea": 69,
+    "tipo": "contraste",
+    "detalle": "Descripcion en text-zinc-600 sobre fondo oscuro (<4,5:1)."
+   },
+   {
+    "ruta": "src/components/ui/PageHeader.tsx",
+    "linea": 59,
+    "tipo": "contraste",
+    "detalle": "Eyebrow en text-zinc-600 a 11px."
+   },
+   {
+    "ruta": "src/components/ui/Stat.tsx",
+    "linea": 99,
+    "tipo": "contraste",
+    "detalle": "Caption text-zinc-600 a 10px."
+   },
+   {
+    "ruta": "src/components/ui/SectionErrorBoundary.tsx",
+    "linea": 93,
+    "tipo": "contraste",
+    "detalle": "Digest de referencia en text-zinc-700 a 10px."
+   },
+   {
+    "ruta": "src/components/ui/Card.tsx",
+    "linea": 82,
+    "tipo": "contraste",
+    "detalle": "CardTitle text-[10px] text-zinc-500: tamano y contraste al limite."
+   },
+   {
+    "ruta": "src/components/ui/Textarea.tsx",
+    "linea": 28,
+    "tipo": "contraste",
+    "detalle": "Placeholder zinc-600 mientras Input usa zinc-500 (gemelos que divergen)."
+   },
+   {
+    "ruta": "src/components/ui/Badge.tsx",
+    "linea": 66,
+    "tipo": "otro",
+    "detalle": "Tamano xs a 9px en mayusculas: legibilidad baja."
+   },
+   {
+    "ruta": "src/components/ui/Tabs.tsx",
+    "linea": 78,
+    "tipo": "otro",
+    "detalle": "Contador de tab a 9px."
+   },
+   {
+    "ruta": "src/components/ui/SectionErrorBoundary.tsx",
+    "linea": 75,
+    "tipo": "otro",
+    "detalle": "role=alert junto a aria-live=polite (señales contradictorias)."
+   },
+   {
+    "ruta": "src/components/ui/SectionErrorBoundary.tsx",
+    "linea": 108,
+    "tipo": "otro",
+    "detalle": "'Volver al inicio' apunta fijo a /dashboard aun en boundaries de admin (depende del redirect del proxy)."
+   },
+   {
+    "ruta": "src/components/ui/Modal.tsx",
+    "linea": 90,
+    "tipo": "otro",
+    "detalle": "Boton cerrar sin estilo focus-visible."
+   },
+   {
+    "ruta": "src/components/ui/TypewriterText.tsx",
+    "linea": 67,
+    "tipo": "inline",
+    "detalle": "<style> con @keyframes inline y animation por style en :77 en vez de clase Tailwind."
+   },
+   {
+    "ruta": "src/components/ui/IntroLockupText.tsx",
+    "linea": 251,
+    "tipo": "inline",
+    "detalle": "<style> con @keyframes inline del cursor."
+   },
+   {
+    "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+    "linea": 128,
+    "tipo": "inline",
+    "detalle": "Borde conic-gradient y fondo por style inline."
+   },
+   {
+    "ruta": "src/components/ui/HeroMetrics.tsx",
+    "linea": 238,
+    "tipo": "inline",
+    "detalle": "radial-gradient por style inline."
+   },
+   {
+    "ruta": "src/components/ui/HeroMetrics.tsx",
+    "linea": 14,
+    "tipo": "copy",
+    "detalle": "Promesas sin respaldo ('2 segundos de carga máximo', '#1 en Google local')."
+   },
+   {
+    "ruta": "src/components/ui/IntroLockupText.tsx",
+    "linea": 25,
+    "tipo": "copy",
+    "detalle": "Slogan 'Construimos lo que imaginas' sin voseo (imaginás) frente al resto del copy rioplatense."
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "Los dos CTA principales del hero del home no hacen nada (MagneticCta sin href ni onClick)",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Confirmado leyendo origin/main. src/components/layout/Hero.tsx:731-736 monta dos <MagneticCta> que solo reciben className y children, sin href ni onClick. En src/components/ui/buttons/MagneticCta.tsx, sin href se renderiza la rama <motion.button> (:194-206). Su onClick=handleTrigger (:97-107) solo agrega un ripple y llama a onClick, que aca es undefined (:106). No hay navegacion. El Hero esta vivo: src/app/page.tsx:7 y :25 lo montan en '/'. Ningun redirect de next.config.ts (:137+) ni de src/proxy.ts desvia '/'. Hero.tsx no tiene ningun href, onClick ni triggerTransition (git grep sin resultados; el control positivo con MagneticCta si encuentra las lineas). HomeWrapper no tiene handlers de click. El defecto viene de la restauracion 78b510ac: la version 63a4e364 tenia las mismas lineas sin destino. Bajo de ALTA a MEDIA porque hay alternativas en la misma pagina. El Navbar se monta en el layout raiz para las paginas publicas (src/app/layout.tsx:117-119) con un link a /contact (Navbar.tsx:31/49, via triggerTransition :343). PortalDemoCTA tiene un boton de WhatsApp (PortalDemoCTA.tsx:321) y el Footer otro (Footer.tsx:352). La seccion Portfolio esta justo debajo del hero (page.tsx:27), asi que se llega con scroll. El defecto existe y degrada la conversion del primer prospecto, pero no bloquea el contacto. Rubrica: 'impacto acotado o con workaround'. Para el arreglo: MagneticCta esta bajo src/components/ui/*, que es FROZEN, pero no hace falta tocarlo. Ya acepta href y onClick, y basta con pasarlos desde Hero.tsx, que no es FROZEN. En el sitio publico, segun CLAUDE.md, la navegacion debe usar onClick con triggerTransition.",
+    "evidencia_contra": [
+     "Hay alternativas de conversion en la misma home: el link Contacto del Navbar en el layout publico (src/app/layout.tsx:117-119; src/components/layout/Navbar.tsx:31,49,343), WhatsApp en PortalDemoCTA (PortalDemoCTA.tsx:321) y en el Footer (Footer.tsx:352). Por eso no es un bloqueante total.",
+     "'Ver nuestros trabajos' tiene sustituto con scroll: Portfolio se monta justo despues de About (src/app/page.tsx:27).",
+     "Es una conversion de prospectos en el sitio publico, no un flujo del portal del cliente. La ALTA de la rubrica ('rompe un flujo principal del cliente') aplica solo de forma laxa."
+    ]
+   }
+  ]
+ }
+}

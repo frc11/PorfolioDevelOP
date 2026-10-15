@@ -2697,6 +2697,55 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - Propuesta: no borrar la ruta: devolver el SHA y la fecha del commit del deploy
 - Zona: libre
 
+### [POD-380] scripts/admin-1a-backfill-caliente.ts (D9-c1)
+- Hallado en F2 (D9-L1) · `scripts/admin-1a-backfill-caliente.ts` · Nodo(s): lib.scripts · Alcance: el archivo entero — one-shot ya aplicado; re-correrlo pisa las marcas manuales de caliente (ZONA-FRANCO) · Señales: One-shot ya aplicado: admin-1b escribe caliente a mano (lead.actions.ts:165); Re-correrlo es dañino (pisa marcas manuales); Sin importadores ni entrada en package.json (git grep 'admin-1a' -> 0)
+- Qué rompe si se borra: Nada; coordinar con Franco (ZONA-FRANCO)
+- Confianza de poda: MEDIA
+- Propuesta: borrar, con el visto bueno de Franco
+- Zona: libre
+
+### [POD-381] src/components/ui/ErrorState.tsx (D9-c1)
+- Hallado en F2 (D9-L2) · `src/components/ui/ErrorState.tsx` · Nodo(s): lib.ui · Alcance: el archivo entero — congelado (ui/*): su única referencia es el barrel index.ts:6; nadie lo mantiene · Señales: Unica referencia fuera de su archivo: export en src/components/ui/index.ts:6; git grep -n ErrorState en src y tests: solo definicion + barrel; Copy sin tildes (:24-25) y strokeWidth 1.75 (:41,:58): nadie lo mantiene
+- Qué rompe si se borra: Nada en runtime; quitar tambien la linea 6 de index.ts (FROZEN: decision para Valentino).
+- Confianza de poda: MEDIA
+- Propuesta: decisión para Valentino (11-CONGELADOS.md): borrar con su línea del barrel (decidir (Valentino): archivo congelado)
+- Zona: congelado
+
+### [POD-382] src/components/ui/HyperText.tsx (D9-c1)
+- Hallado en F2 (D9-L2) · `src/components/ui/HyperText.tsx` · Nodo(s): lib.ui · Alcance: el archivo entero — congelado (ui/*): su único importador es Interactive3DNetwork.tsx, que no tiene importadores · Señales: Unico importador: src/components/canvas/Interactive3DNetwork.tsx:7; Interactive3DNetwork no tiene importadores (git grep solo encuentra docs y su propio archivo; ya marcado muerto en auditoria-total-pre-deploy.md:56); Comentarios de agente sin resolver (:140-142) y limpieza de intervalos rota (:121-137)
+- Qué rompe si se borra: Nada en runtime si se borra junto con Interactive3DNetwork.
+- Confianza de poda: MEDIA
+- Propuesta: decisión para Valentino (11-CONGELADOS.md): borrar junto con Interactive3DNetwork.tsx (decidir (Valentino): archivo congelado)
+- Zona: congelado
+
+### [POD-383] src/lib/design-tokens.ts (D9-c1)
+- Hallado en F2 (D9-L2) · `src/lib/design-tokens.ts` · Nodo(s): lib.design-tokens · Alcance: exports sueltos (el archivo sigue vivo) — congelado inferido (DEC-10): solo zIndex tiene consumidores (Modal, DashboardLayoutClient y tres del setter); colors, spacing, radii, typography, shadows, motion y breakpoints no tienen ninguno (DEU-100) · Señales: 5 importadores, todos import { zIndex }; colors, spacing, radii, typography, shadows, motion y breakpoints sin consumidores; colors.service contradice CLAUDE.md:101-103
+- Qué rompe si se borra: Borrar el archivo entero rompe Modal.tsx:7 (FROZEN), DashboardLayoutClient.tsx:12 y tres archivos del setter; solo las exportaciones distintas de zIndex son podables.
+- Confianza de poda: MEDIA
+- Propuesta: decisión para Valentino (11-CONGELADOS.md): dejar solo zIndex o moverlo a un token de globals.css (decidir (Valentino): archivo congelado)
+- Zona: congelado
+
+### [POD-384] src/lib/hover.ts (D9-c1)
+- Hallado en F2 (D9-L2) · `src/lib/hover.ts` · Nodo(s): lib.hover · Alcance: exports sueltos (el archivo sigue vivo) — congelado inferido (DEC-10): adminHoverAmplifiedCls sin consumidores; adminHoverCls se usa en 41 archivos · Señales: adminHoverAmplifiedCls: 0 consumidores (git grep); adminHoverCls si se usa (41 archivos)
+- Qué rompe si se borra: Solo el export adminHoverAmplifiedCls; nada.
+- Confianza de poda: MEDIA
+- Propuesta: decisión para Valentino (11-CONGELADOS.md): quitar el export sin uso (decidir (Valentino): archivo congelado)
+- Zona: congelado
+
+### [POD-385] src/lib/logger.ts (D9-c1)
+- Hallado en F2 (D9-L2) · `src/lib/logger.ts` · Nodo(s): lib.logger · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — congelado inferido (DEC-10): el método ai() (:69-72) no tiene usos · Señales: Metodo ai() (:69-72) con 0 usos (git grep 'logger.ai(' -> 0)
+- Qué rompe si se borra: Nada.
+- Confianza de poda: MEDIA
+- Propuesta: decisión para Valentino (11-CONGELADOS.md): quitarlo al tocar el logger por su bug de meta (BUG-183) (decidir (Valentino): archivo congelado)
+- Zona: congelado
+
+### [POD-386] src/components/ui/buttons/MagneticCta.tsx (D9-c1)
+- Hallado en F2 (D9-L2) · `src/components/ui/buttons/MagneticCta.tsx` · Nodo(s): lib.ui · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — congelado (ui/*): la rama href con Link legacyBehavior (:176-191) no tiene usos y hay un cn local duplicado (:9-11) · Señales: Rama href con <Link legacyBehavior passHref> (:176-191) sin usos: el unico consumidor (Hero.tsx:731,734) no pasa href; cn local duplicado (:9-11)
+- Qué rompe si se borra: Nada si se quita la rama href; conviene reemplazarla por <Link> moderno en vez de borrarla, porque el hero la necesita (hallazgo de CTA inerte).
+- Confianza de poda: MEDIA
+- Propuesta: no borrar la rama: el hero la necesita para que sus CTA naveguen (BUG-179); reemplazarla por un Link moderno y usar el cn de lib/utils (decidir (Valentino): archivo congelado)
+- Zona: congelado
+
 ### Refuerzos de F2 sobre fichas de F1
 
 - [POD-046] `src/lib/actions/invitations.ts` (D1-c1): inviteClientAction sin callers (git grep inviteClient -> solo :43); Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116). Qué rompe: Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)
@@ -2728,6 +2777,9 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - [POD-070] `src/app/(protected)/admin/leads/_actions/lead.actions.ts` (D4-c1): git grep -w listLeads|getLeadById: solo las definiciones (control: assignLeadSetter tiene 2 importadores); Devuelven error.message crudo y en inglés. Qué rompe: Nada; los tipos LeadListItem/SerializedLeadDetail (:22-50) quedarían sin uso.
 - [POD-063] `src/lib/leados/_experimental/fg2-brief-lab.ts` (D4-c1): Encabezado 'EXPERIMENTAL / DESCARTABLE … BORRAR tras la decisión del experimento' (fg2-brief-lab.ts:2-8); No está conectado al flujo del setter; consumidores: solo admin/fg2-lab (page.tsx:17, fg2-lab-client.tsx:28, medicion-panel.tsx:19) y scripts/_experimental/fg2-gen-prompts.ts:12. Qué rompe: La ruta /admin/fg2-lab y el script de generación de prompts: hay que borrarlos juntos
 - [POD-064] `src/lib/leados/_experimental/fg2-casos-gastro.ts` (D4-c1): 'BORRAR junto con el resto del prototipo tras la decisión' (fg2-casos-gastro.ts:9); Datos representativos y WhatsApp de ejemplo (fg2-casos-gastro.ts:43-44). Qué rompe: fg2-lab-client.tsx:29 y scripts/_experimental/fg2-gen-prompts.ts:13
+- [POD-160] `scripts/_b14-2-seed-bench-prod.ts` (D9-c1): Cabecera :19 'Throwaway — borrar después del sprint B14.2'; Sin importadores ni entrada en package.json; Crea un bot activo en PROD (:139-180). Qué rompe: _b14-4-smoke-prod.mjs:20 y _b14-2-prod-bot-latency.mjs:22 usan bench-matsu por defecto (el smoke saltea el bloque si el bot no existe, bitacora-roadmap.md:9692)
+- [POD-159] `scripts/_b14-2-cleanup-bench-prod.ts` (D9-c1): Cabecera :20 'Throwaway — borrar después del sprint B14.2'; Roto: :102 usa prisma.message con conversationId (Message no lo tiene); Sin importadores ni entrada en package.json. Qué rompe: Nada en código; si bench-matsu sigue en prod, la limpieza tiene que hacerse por otra vía (hard-delete del admin)
+- [POD-164] `scripts/cleanup-messages-demo.ts` (D9-c1): Fuera de package.json; Par de scripts/seed-messages-demo.ts (existe); Borra en todas las orgs con solo --confirm (:50). Qué rompe: El camino de reversión de seed-messages-demo.ts: podar los dos juntos o ninguno
 
 ## §docs
 

@@ -3,6 +3,446 @@
  "partes": 6,
  "hallazgos": [
   {
+   "id": "UX-032",
+   "prefijo": "UX",
+   "titulo": "Prompt y tools con la filosofia de consultora de develOP y vocabulario de concesionaria para todos los rubros (incluye 'SLA <4hs')",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/prompts/sections.ts",
+     "linea": 47,
+     "fragmento": "Precios y plazos: si te los piden sin diagnóstico, NO tirás número"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/verticals/packs/usados.ts",
+     "linea": 183,
+     "fragmento": "'El visitante preguntó el precio. Si tenés el precio publicado, dalo; ..."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/offerHandoffOptions.ts",
+     "linea": 24,
+     "fragmento": "- \"Que me contacten\" (asíncrono, SLA <4hs)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 89,
+     "fragmento": "'true SOLO si mencionó entregar un usado en parte de pago/tasación. false si nunca lo dijo.'"
+    }
+   ],
+   "impacto": "Seccion 2 (fija para todos los tenants) manda diagnosticar 'tamano, rubro, como operan hoy' y no dar precios; el pack usados manda dar el precio publicado; un gimnasio o una clinica reciben un bot que interroga como consultora B2B. La descripcion de offer_handoff_options le ensena al modelo un SLA de 4 h que el cliente no prometio. Los flags de capture_lead (usado, test drive, financiacion) son de autos para todos.",
+   "propuesta": "Mover la mision y la regla de precios al pack vertical (o a la KB) y dejar en sections.ts solo reglas universales; sacar el SLA de la description; parametrizar las descripciones de flags por pack.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-api-chatbot",
+    "lib.chatbot.prompts",
+    "lib.chatbot.verticals",
+    "lib.chatbot.tools"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-378; D5-A5",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H06",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "FAL-019",
+   "prefijo": "FAL",
+   "titulo": "El cliente no recibe aviso de cuota (ni al 80% ni al agotarse): alert80Sent no se usa",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1587,
+     "fragmento": "alert80Sent   Boolean   @default(false)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/quota/upsellAlert.ts",
+     "linea": 68,
+     "fragmento": "await Promise.allSettled([ sendAgencyAlert({ type: 'LEAD_UPSELL', ..."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/quota/upsellAlert.ts",
+     "linea": 80,
+     "fragmento": "notifyTelegramOptional("
+    }
+   ],
+   "impacto": "Al agotar la cuota solo se avisa a develOP (webhook de agencia + Telegram). El dueno del negocio no se entera de que sus visitantes reciben 'alcanzamos el limite de atencion automatica' hasta que mire el panel; no hay preaviso al 80% pese a la columna.",
+   "propuesta": "Email al leadNotificationEmail del cliente al 80% (usando alert80Sent con UPDATE condicional) y al degradar (degradedAt).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "lib.chatbot.quota",
+    "int.brevo",
+    "modelo.QuotaUsage"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-383",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H08",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-098",
+   "prefijo": "BUG",
+   "titulo": "confirm_contact_request registra un evento que ninguna pantalla lee: el cliente no se entera del pedido de contacto",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/tools/confirmContactRequest.ts",
+     "linea": 85,
+     "fragmento": "export const CONTACT_REQUEST_EVENT_TYPE = 'handoff.callback'"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/multiTenantQueries.ts",
+     "linea": 218,
+     "fragmento": "type: 'handoff.whatsapp',"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/logging/persistentLogger.ts",
+     "linea": 160,
+     "fragmento": "(c) => c.chatbotEvent.deleteMany({ where: { createdAt: { lt: threshold } } }),"
+    }
+   ],
+   "impacto": "El bot le confirma al visitante que 'el equipo se va a comunicar', pero el pedido y el canal preferido viven solo en chatbot_events (que se purgan a 30 dias) y ningun listado los muestra. El dueno recibe el email del lead sin saber que pidio que lo llamen.",
+   "propuesta": "Marcar el pedido en el lead (columna o metadata en ChatbotLead) o listar handoff.callback junto a las derivaciones, y destacarlo en el email del lead.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-api-chatbot",
+    "h3.cli-chatbot",
+    "lib.chatbot.tools",
+    "modelo.ChatbotEvent"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-444",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H11",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-099",
+   "prefijo": "BUG",
+   "titulo": "Avisos post-lead fire-and-forget en serverless (email al cliente, CRM n8n, Telegram) sin outbox",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 493,
+     "fragmento": "void notifyClient()"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 500,
+     "fragmento": "void syncLeadToCrm({ leadId: result.id, trigger: 'auto' }).catch((err: unknown) => {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts",
+     "linea": 164,
+     "fragmento": "void notifyTelegramOptional(tgMsg).catch((err: unknown) => {"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbots/[botId]/actions.ts",
+     "linea": 75,
+     "fragmento": "sendTransactionalEmail({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbots/[botId]/actions.ts",
+     "linea": 83,
+     "fragmento": "}).catch((err: unknown) => {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 455,
+     "fragmento": "void notifyTelegramOptional(telegramMsg).catch((err: unknown) => {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+     "linea": 73,
+     "fragmento": "void syncLeadToCrm({ leadId, trigger: 'manual' }).catch((err: unknown) => {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+     "linea": 79,
+     "fragmento": "return { ok: true as const }"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/integrations/RetrySyncButton.tsx",
+     "linea": 21,
+     "fragmento": "toast.success('Reintento disparado. En unos segundos se actualiza el historial.')"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts",
+     "linea": 6,
+     "fragmento": "* Si el proceso muere entre crear un CrmSyncAttempt PENDING y marcar SUCCESS/FAILED"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/crm/postToN8n.ts",
+     "linea": 7,
+     "fragmento": "Tiempo total peor caso: ~33s (3 × 10s + 1s + 3s). Como se corre en\n * fire-and-forget post-respuesta del bot, no impacta UX."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/crm/syncLeadToCrm.ts",
+     "linea": 85,
+     "fragmento": "const attempt = await scope.crmSyncAttempt.create({"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts",
+     "linea": 33,
+     "fragmento": "if (elapsed > SYNC_STALE_THRESHOLD_MS) {\n    return 'FAILED'"
+    }
+   ],
+   "impacto": "Si el stream termina antes de que Brevo/n8n respondan (Brevo con reintentos largos), la plataforma congela la function y el email de nuevo lead al cliente o el sync al CRM pueden no salir nunca, sin reintento. El lead queda en el panel, pero el aviso que el cliente paga no.",
+   "propuesta": "Outbox transaccional (fila escrita en la misma tx del lead) + cron con reintentos, o al menos await acotado antes de cerrar el step.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-api-chatbot",
+    "lib.chatbot.tools",
+    "int.brevo",
+    "int.n8n",
+    "int.telegram",
+    "h3.adm-chatbots.activar-pausar-eliminar",
+    "h3.adm-chatbots.historial-sync-crm",
+    "lib.chatbot.crm",
+    "modelo.CrmSyncAttempt",
+    "h3.adm-chatbots.integracion-crm",
+    "h3.cli-chatbot"
+   ],
+   "relacionados_ids": [
+    "BUG-052"
+   ],
+   "previas": [],
+   "relacionados_texto": "RESIL-02 (previo, abierto); PLAN-466; patron D1-c3",
+   "vh": "VH-101",
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H12",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: captureLead.ts:493 (void notifyClient()) y :500 (void syncLeadToCrm) y showWhatsappHandoff.ts:164 (void notifyTelegramOptional): avisos sin await en una función serverless, sin outbox. Mismo patrón que BUG-052 (D2).",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L1/H32",
+      "titulo": "Envíos fire-and-forget en serverless: el mail de bot activado y el aviso de Telegram pueden perderse",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo patrón fire-and-forget en serverless (mail de bot activado y Telegram)."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L3/H15",
+      "titulo": "Reintento de sync CRM disparado sin esperar en una función serverless",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo patrón fire-and-forget (reintento de sync CRM)."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L6/H19",
+      "titulo": "retryCrmSync dispara el sync sin esperar y responde ok",
+      "severidad": "BAJA",
+      "nota_padre": "Muestreado: retryCrmSync.ts:73-79 lanza el sync con void y responde ok. Mismo patrón."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L7/H09",
+      "titulo": "El sync al CRM corre fire-and-forget en serverless: con n8n lento, o en el reintento manual, puede no ejecutarse y queda FAILED a los 5 min sin motivo",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo patrón fire-and-forget (sync al CRM)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-100",
+   "prefijo": "BUG",
+   "titulo": "Telegram en Markdown legado con datos sin escapar y link relativo: avisos que Telegram rechaza en silencio",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/notifications/telegram.ts",
+     "linea": 117,
+     "fragmento": "await sendTelegram(message, { parseMode: 'Markdown' })"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 449,
+     "fragmento": "email ? `Email: ${email}` : '',"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/quota/upsellAlert.ts",
+     "linea": 82,
+     "fragmento": "(input.adminLinkPath ? `\\n[Ver cliente](${input.adminLinkPath})` : ''),"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 383,
+     "fragmento": "adminLinkPath: `/admin/clients/${bot.organization.id}`,"
+    }
+   ],
+   "impacto": "Un email con guion bajo (juan_perez@...) o un nombre/resumen con * o _ rompe el parseo de entidades de Telegram (400) y el aviso de nuevo lead o de handoff al equipo se pierde, solo con console.error. El link de upsell es relativo, inutil fuera del sitio.",
+   "propuesta": "Usar parse_mode HTML con escape (ya es el default de sendTelegram) o escapar Markdown; links absolutos con NEXT_PUBLIC_APP_URL.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.chatbot.tools",
+    "lib.chatbot.quota",
+    "int.telegram"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-389; PLAN-377",
+   "vh": "VH-102",
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H13",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-073",
+   "prefijo": "SEC",
+   "titulo": "Datos personales de visitantes de todos los clientes se envian al Telegram del equipo de develOP",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 444,
+     "fragmento": "// Telegram — always fires for the develOP team when configured (env-based)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 450,
+     "fragmento": "phone ? `Tel: ${phone}` : '',"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts",
+     "linea": 157,
+     "fragmento": "input.visitorContact ? `Contacto: ${input.visitorContact}` : '',"
+    }
+   ],
+   "impacto": "Nombre, email, telefono y resumen de cada lead de cada cliente salen a un chat de Telegram de develOP sin opcion por cliente. Con el primer cliente real, develOP actua como encargado de datos de terceros y esa transferencia tendria que estar declarada y acotada (Ley 25.326). Decision para Valentino.",
+   "propuesta": "Gate por cliente (opt-in) o mandar solo identificadores y link al panel; documentar el tratamiento en la politica y el contrato.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.chatbot.tools",
+    "int.telegram",
+    "modelo.ChatbotLead"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "bitacora: 'PII en stderr de show_whatsapp_handoff' (stderr ya filtrado por allowlist en persistentLogger.ts:32-76)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H14",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "TEC-004",
+   "prefijo": "TEC",
+   "titulo": "El cierre del stream depende de internals de ai@6 citados por numero de linea, con rango ^ en package.json",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "tech-vieja",
+   "tipo_detalle": "tech-vieja",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "package.json",
+     "linea": 141,
+     "fragmento": "\"ai\": \"^6.0.177\","
+    },
+    {
+     "ruta": "src/modules/chatbot/server/llm/providerStreamClose.ts",
+     "linea": 186,
+     "fragmento": "// @ai-sdk/google/dist/internal/index.js:1650"
+    }
+   ],
+   "impacto": "PROVIDER-CLOSE, el watchdog y los hooks se calibraron contra el comportamiento interno de una version concreta (flush, tee, onAbort sin await). Un npm install que suba la minor puede romper el cierre del stream sin que compile distinto. El pin exacto ya figura como deuda en la bitacora.",
+   "propuesta": "Pin exacto de ai y @ai-sdk/google-vertex y un invariante de version que falle si cambia.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.chatbot.llm",
+    "int.vertex"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "bitacora-roadmap.md:16678 (pin exacto de ai)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H17",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: package.json:141 («ai»: «^6.0.177») y providerStreamClose.ts:186 (cita internals de @ai-sdk/google por número de línea).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "FAL-020",
    "prefijo": "FAL",
    "titulo": "Reporte semanal del chatbot sin forma de darse de baja (el link de preferencias lleva a una ruta que no existe, sin List-Unsubscribe ni opt-out), con destinatario no determinístico y link con fallback a localhost",
@@ -6679,103 +7119,6 @@
     "verificado_padre": false,
     "nota_padre": "",
     "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-092",
-   "prefijo": "SEC",
-   "titulo": "toErrorMessage (action-utils, FROZEN-inferido) devuelve al cliente el message crudo de cualquier Error: la alerta D3-A4 quedó resuelta solo para ZodError (configuración, novedades, tareas, horas, tickets) y dos rutas devuelven String(error)",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
-     "linea": 171,
-     "fragmento": "return fail(toErrorMessage(error, 'No se pudo actualizar la configuracion.'))"
-    },
-    {
-     "ruta": "src/lib/action-utils.ts",
-     "linea": 31,
-     "fragmento": "if (error instanceof Error) {\n    return error.message\n  }"
-    },
-    {
-     "ruta": "src/lib/action-utils.ts",
-     "linea": 28,
-     "fragmento": "if (error instanceof ZodError) {\n    return error.issues[0]?.message ?? fallback"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
-     "linea": 56,
-     "fragmento": "return fail(toErrorMessage(error, 'No se pudo publicar la novedad.'))"
-    },
-    {
-     "ruta": "src/lib/action-utils.ts",
-     "linea": 32,
-     "fragmento": "return error.message"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx",
-     "linea": 178,
-     "fragmento": "{serverError}"
-    },
-    {
-     "ruta": "src/app/api/admin/alerts/trigger-detector/route.ts",
-     "linea": 15,
-     "fragmento": "return NextResponse.json({ ok: false, error: String(error) }, { status: 500 })"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/team/_actions/task.actions.ts",
-     "linea": 193,
-     "fragmento": "return fail(error instanceof Error ? error.message : 'Failed to create task')"
-    }
-   ],
-   "impacto": "El fix 5e33733 resolvió el ZodError (action-utils.ts:28-29). Sin embargo, un error de ensureAgencySettingsRecord o de agencySettings.update (settings.actions.ts:145-166), por ejemplo un PrismaClientKnownRequestError o un fallo de conexión, devuelve su message completo a la UI: invocación de Prisma, modelo, campo y posiblemente el host. Solo lo ve un SUPER_ADMIN, pero viola 'Never expose internal error messages'. Lo mismo pasa en project.actions.ts:829.",
-   "propuesta": "Decisión para Valentino (action-utils.ts es FROZEN-inferido): que toErrorMessage solo pase el message de una clase UserFacingError, y fallback para el resto. Mientras tanto, los callers pueden mapear errores de Prisma a fallback.",
-   "esfuerzo": "S",
-   "zona": "FROZEN",
-   "nodos": [
-    "h4.adm-config",
-    "lib.action-utils",
-    "h4.adm-novedades.publicar",
-    "lib.actions",
-    "int.sentry",
-    "h4.adm-alertas",
-    "h4.adm-proyectos.tareas",
-    "h4.adm-tickets"
-   ],
-   "relacionados_ids": [
-    "SEC-062"
-   ],
-   "previas": [],
-   "relacionados_texto": "D3-A4; PLAN-552; patrón D1-c1 'Mensajes internos de error devueltos al cliente'",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L6",
-    "tmp": "D3-c1/D3-L6/H17",
-    "verificado_padre": true,
-    "nota_padre": "Muestreado: action-utils.ts:24-34 (toErrorMessage: el ZodError se resolvió en 5e33733, pero cualquier Error devuelve su message) y settings.actions.ts:168-171 (updateSettings le pasa el error de Prisma). action-utils.ts es FROZEN-inferido (DEC-10): el cambio del helper es decisión para Valentino; los llamadores pueden mapear a mensajes fijos.",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D3-c1",
-      "tmp": "D3-c1/D3-L1/H14",
-      "titulo": "Actions de novedades devuelven error.message crudo a la UI (D3-A4 resuelto solo para ZodError)",
-      "severidad": "BAJA",
-      "nota_padre": "Misma causa: announcements.actions.ts:56 pasa el error a toErrorMessage, que devuelve error.message de cualquier Error (action-utils.ts:31-32)."
-     },
-     {
-      "ciclo": "D3-c1",
-      "tmp": "D3-c1/D3-L5/H15",
-      "titulo": "Errores internos devueltos al admin: String(error) en trigger-detector y send-now, y error.message de Prisma en las actions de tareas, horas, tickets y configuración",
-      "severidad": "BAJA",
-      "nota_padre": "Misma causa (toErrorMessage en tareas, horas, tickets y configuración); suma String(error) en trigger-detector y send-now."
-     }
-    ]
    },
    "estado": "vigente"
   }

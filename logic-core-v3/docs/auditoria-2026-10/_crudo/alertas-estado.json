@@ -1504,6 +1504,100 @@
    "resultado": "confirmada",
    "evidencia": "El código asume repo público: .github/workflows/db-backup.yml:20-24 cifra los artifacts por eso y ci.yml:125 nombra --repo frc11/PorfolioDevelOP. La publicidad la confirmó el padre con gh. Hoy queda público: .env.example:31-32 con el hostname del endpoint Neon, prisma/backups/*.json versionados contra .gitignore:64-67, y enviroment.env en el historial de origin/main (commit 39535583). B14.3 y PRIVACIDAD siguen vigentes.",
    "hallazgo_titulo": "Repo público con datos de infraestructura y volcados de tablas versionados contra la regla del propio .gitignore"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "alerta": "[D9-A1] design-tokens.ts planeado para eliminar por desconectado y --color-void para limpiar, pero con consumidores",
+   "resultado": "confirmada",
+   "evidencia": "bitacora-rediseno.md:133-135 lo declara desconectado; tiene 5 consumidores por import: ui/Modal.tsx:7 (FROZEN), setter-shell.tsx:6, shortcuts-help.tsx:5, barra-accion.tsx:15, DashboardLayoutClient.tsx:12. var(--color-void) en setter-shell.tsx:28 y shortcuts-help.tsx; globals.css:303/309 lo hace depender de data-theme. dossier-stepper ya no lo usa (solo aparece en un comentario, lib/leados/paso.ts:5).",
+   "hallazgo_titulo": "design-tokens.ts y --color-void están planeados para borrarse como 'desconectados' pero tienen consumidores vivos"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "alerta": "[D9-A2] Convenciones contradichas: glassmorphism, duración de reveals y acento de Software",
+   "resultado": "confirmada",
+   "evidencia": "CLAUDE.md:97 da glassmorphism como convención y DESIGN.md:92/:211/:291 lo prohíbe; CLAUDE.md:84 0.6 s contra DESIGN.md:271 ~0.9 s; PRODUCT.md:54 índigo contra globals.css:63 #8b5cf6 y CLAUDE.md:103 violeta. En código, Navbar.tsx:222/:257/:291 usa backdrop-blur en el sitio público.",
+   "hallazgo_titulo": "Convenciones de diseño contradictorias entre CLAUDE.md, DESIGN.md y PRODUCT.md; el Navbar público usa lo que DESIGN.md prohíbe"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "alerta": "[D9-A3] Congelados extra declarados por los lanes y LegacyNeuroAvatar como FROZEN",
+   "resultado": "parcial",
+   "evidencia": "Los archivos existen (git ls-tree): lib/plan/* (7), lib/actions/upsell.ts, lib/hover.ts, chatbot/admin/health/LatencyChart.tsx, avatar/LegacyNeuroAvatar.tsx. Declarados en lane-dashboard-log.md:12, lane-plan-log.md:15, lane-resultados-redesign-log.md:21, lane-LOG.md:33 y bitacora-roadmap.md:8526; la tabla Frozen de CLAUDE.md:163-170 lista solo 4. Es insumo para 11-CONGELADOS, no un defecto de código."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "alerta": "[D9-A4] B13.0 sin IntersectionObserver en el Canvas del preview; MS-7 dpr [1,2]; MS-6 editó PreloaderContext",
+   "resultado": "confirmada",
+   "evidencia": "bitacora-roadmap.md:8562 decide no agregar IntersectionObserver al Canvas del preview. dpr [1,2] sigue en DotMatrix.tsx:213 (lote) y en LegacyNeuroAvatar.tsx:940, aunque bitacora-roadmap.md:8526 afirma [1,1.5]. El commit fff3b24e (2026-05-25) editó src/context/PreloaderContext.tsx (+29/-1, bypass de automatización, bitacora-roadmap.md:4814).",
+   "hallazgo_titulo": "DotMatrix (fondo de login, recupero e invitación) con dpr [1,2], sin IntersectionObserver ni pausa real"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "alerta": "[D9-A5] 'Cero any' declarado contra any encontrados; baseline con 13 no-explicit-any",
+   "resultado": "confirmada",
+   "evidencia": "alpha-RESUMEN-FINAL.md:41 'zero any types'. El baseline _crudo/eslint.json tiene 13: pagespeed.ts:77/129/132, ClientSettingsForm.tsx:26/36/37, LiquidProject.tsx:8, LegacyNeuroAvatar.tsx:601, más 4 en scripts/dev/_vseed.ts, scripts/p41-inject-campaigns.ts y prisma/seeds/init-data-connections.ts. Ninguno en el lote.",
+   "hallazgo_titulo": "13 any explícitos contra la regla 'cero any' declarada como cumplida"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "alerta": "[D9-A6] Números de WhatsApp hardcodeados (bitacora-rediseno.md:1628-1630, :1817)",
+   "resultado": "parcial",
+   "evidencia": "Migración parcial a lib/whatsapp.ts (10 consumidores). Quedan Footer.tsx:8 con fallback propio '5493815000000' (whatsapp.ts:9-13 lo da por migrado), CalculadorIA.tsx:316 con número fijo sin env (decisión pendiente, bitacora-rediseno.md:1817-1821) y ChatbotUpsellLanding.tsx:15 en el portal (ya en D2). PortalDemoCTA.tsx:235 lee la env con fallback a mailto (correcto).",
+   "hallazgo_titulo": "Migración de WhatsApp a lib/whatsapp.ts incompleta: Footer con fallback propio y CalculadorIA con número fijo"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "alerta": "[D9-A1] design-tokens.ts desconectado vs consumido por Modal y shell del setter; --color-void; riesgo cruzado con rediseno/home",
+   "resultado": "confirmada",
+   "evidencia": "Solo zIndex se importa (Modal.tsx:7, DashboardLayoutClient.tsx:12, setter-shell.tsx:6, shortcuts-help.tsx:5, barra-accion.tsx:15); el resto de design-tokens no tiene consumidores. --color-void se usa en setter-shell.tsx:28 y shortcuts-help.tsx:37,80 (dossier-stepper ya no existe). rediseno/home modifica utils.ts (+100/-1 vs origin/main) y usa --color-void en 9 sitios.",
+   "hallazgo_titulo": "design-tokens.ts: solo zIndex tiene consumidores y los colores por servicio contradicen CLAUDE.md y globals.css"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "alerta": "[D9-A2] Convenciones contradichas: glassmorphism, reveals 0.9 s vs 0.6 s, acento de Software indigo vs violeta",
+   "resultado": "confirmada",
+   "evidencia": "raiz:DESIGN.md:211,291 prohiben backdrop-blur/glass y :271 fija ~0,9 s; raiz:CLAUDE.md:97 da glass como convencion y :84 0,6 s; raiz:PRODUCT.md:54 Software indigo vs CLAUDE.md:103 y globals.css:63 violeta #8b5cf6; ademas design-tokens.ts:98 dice Software ambar.",
+   "hallazgo_titulo": "Convenciones contradictorias entre CLAUDE.md, DESIGN.md y PRODUCT.md (glassmorphism, duracion de reveals, acento de Software)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "alerta": "[D9-A3] Congelados extra declarados por los lanes (components/ui/*, lib/plan/*, upsell.ts, lib/hover.ts, LatencyChart.tsx) y LegacyNeuroAvatar como FROZEN",
+   "resultado": "parcial",
+   "evidencia": "Todos existen en main: src/lib/plan/ (7 archivos), src/lib/actions/upsell.ts, src/lib/hover.ts (41 importadores), modules/chatbot/components/admin/health/LatencyChart.tsx, modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx. Es insumo para 11-CONGELADOS: no son defectos; la lista oficial (CLAUDE.md tabla Frozen files) no los incluye."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "alerta": "[D9-A4] B13.0 sin IntersectionObserver en el Canvas 3D del preview; MS-7 dpr [1,2]; MS-6 edito PreloaderContext",
+   "resultado": "parcial",
+   "evidencia": "dpr [1,2] sigue en LegacyNeuroAvatar.tsx:940 (vivo) y DotMatrix.tsx:213 (export muerto); LegacyNeuroAvatar sin IntersectionObserver ni frameloop (git grep vacio); la decision de no usar IO consta en bitacora-roadmap.md:8562. PreloaderContext.tsx tiene commits fff3b24e (2026-05-25) y ff6871e4 (2026-06-02) posteriores a declararlo frozen.",
+   "hallazgo_titulo": "Canvas 3D del avatar del chatbot con dpr [1,2] y sin pausa fuera de viewport"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "alerta": "[D9-A5] 'Cero any' declarado vs any encontrados despues; baseline 13 no-explicit-any",
+   "resultado": "confirmada",
+   "evidencia": "6 any en src (pagespeed.ts:77, ClientSettingsForm.tsx:26,36,37, LegacyNeuroAvatar.tsx:601, LiquidProject.tsx:8) y 5 en scripts/prisma (init-data-connections.ts:18, _vseed.ts:22 x3, p41-inject-campaigns.ts:37); 0 eslint-disable de no-explicit-any.",
+   "hallazgo_titulo": "Regla 'cero any' incumplida: 6 any explicitos en src y 5 en scripts/seeds"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "alerta": "[D9-A6] Numeros de WhatsApp hardcodeados (bitacora-rediseno.md:1628-1630, :1817)",
+   "resultado": "parcial",
+   "evidencia": "lib/whatsapp.ts centraliza 14 consumidores, pero quedan Footer.tsx:8 (fallback 5493815000000), CalculadorIA.tsx:316 (5493815674738), ChatbotUpsellLanding.tsx:15 (5493815555555, portal del cliente) y PortalDemoCTA.tsx:235; el propio modulo trae fallback literal whatsapp.ts:21.",
+   "hallazgo_titulo": "CTA de WhatsApp con numeros hardcodeados y divergentes, incluido un numero de relleno en el upsell del portal"
   }
  ]
 }

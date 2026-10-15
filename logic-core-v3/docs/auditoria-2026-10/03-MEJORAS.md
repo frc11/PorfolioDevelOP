@@ -25,6 +25,17 @@
 - Nodo(s): h3.vis-api-chatbot, h3.vis-widget-cliente, lib.security, lib.rate-limit, lib.chatbot.chat, lib.chatbot.quota, int.vertex, modelo.QuotaUsage, modelo.Conversation
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-065
 
+### [SEC-002] Email y contraseña de las cuentas de prueba (SUPER_ADMIN y cliente) escritos en el repo público: el seed los usó de marzo a junio de 2026 y la suite e2e depende de que sigan vigentes
+- Dominio: D1  ·  Severidad: ALTA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `README.md:29-30`, `STATUS.md:258-259`, `docs/demo-guion.md:15-16`, `docs/bitacora-beta.md:15`, `docs/bitacora-roadmap.md:6375-6377` (tabla de MS-8: super-admin, client-a y client-b) y `:10534`, `tests/helpers/auth.ts:21` y `:25` — patrón «email / contraseña» (valores omitidos); el seed actual ya no los usa: `prisma/seed.ts:76-79` — `bcrypt.hash(requireSeedPassword('SEED_ADMIN_PASSWORD'), 12)`.; `prisma/seed.ts` usó el literal del SUPER_ADMIN del 2026-03-18 (`a3c3888c`) al 2026-06-20 (`4148e32d`) según `git log -S` (corrido sin imprimir el valor); `scripts/b1-verify-setter-ownership.ts:44` y `scripts/b2-verify-dossier.ts:66` reescriben la del setter QA en cada corrida ([SEC-003]).
+- Impacto: bloqueante para el primer cliente real: si la base de producción se siembra —o se sembró antes del cambio— con esas contraseñas, queda un SUPER_ADMIN con contraseña conocida por cualquiera que lea el repo. El repo sigue público ([SEC-107]) y la suite e2e solo anda si la base conserva esas contraseñas. C16 (barrido de D9): sube de BAJA a ALTA por la rúbrica DEC-23 (escalada a SUPER_ADMIN con una precondición fuerte, que producción se haya sembrado en esa ventana); queda PROBABLE porque ese eslabón es de datos y lo cierra VH-002.
+- Propuesta: sacar los literales de docs y del helper de tests (que lea de entorno, como el seed), sembrar producción limpia y confirmar que ninguna base expuesta conserva esas contraseñas.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-001], [SEC-003]
+- Nodo(s): lib.auth, lib.prisma.seeds, lib.tests
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-002
+
 ### [SEC-007] Fuerza bruta de login sin freno real: el limite vive solo en loginAction (memoria por lambda) y el endpoint nativo de Credentials no tiene ninguno
 - Dominio: D1  ·  Severidad: ALTA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -297,15 +308,15 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h4.adm-clientes, h3.vis-widget-cliente, modelo.ChatbotLead, lib.actions, h3.adm-chatbots, h3.adm-chatbots.acciones-bulk, lib.chatbot.leads
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-040
 
-### [SEC-041] El seed del chatbot y update-proactive-prompts escriben en cualquier DATABASE_URL sin guard, aunque el escape los rotula 'script de dev' y ese seed define el bot de producción de develOP
+### [SEC-041] Scripts y seeds que escriben en cualquier DATABASE_URL sin guard de destino: el seed del chatbot, update-proactive-prompts, seed-latency (cae en cualquier bot), los seeds de scripts/dev y las corridas de QA
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/modules/chatbot/prisma/seed.ts:272` — «const botConfig = await unsafeGlobalQuery('SEED: upsert del bot develOP (script de dev)', (c) =>»; `src/modules/chatbot/prisma/seed.ts:275` — «update: { // Update mantiene el id pero refresca todo el contenido»; `src/modules/chatbot/prisma/seed.ts:342` — «const kb = await unsafeGlobalQuery('SEED: upsert de la KB del bot develOP (script de dev)', (c) =>»; `src/modules/chatbot/prisma/update-proactive-prompts.ts:23` — «'SEED: update de proactivePrompts del bot develOP por slug (script de dev)',»; `docs/bitacora-roadmap.md:10815` — «- **Bot de la agencia**: vive en 'src/modules/chatbot/prisma/seed.ts' (org 'develop', slug 'develop'), no en el seed principal.»; `prisma/seed.ts:20` — «import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'»
+- Evidencia: `src/modules/chatbot/prisma/seed.ts:272` — «const botConfig = await unsafeGlobalQuery('SEED: upsert del bot develOP (script de dev)', (c) =>»; `src/modules/chatbot/prisma/seed.ts:275` — «update: { // Update mantiene el id pero refresca todo el contenido»; `src/modules/chatbot/prisma/seed.ts:342` — «const kb = await unsafeGlobalQuery('SEED: upsert de la KB del bot develOP (script de dev)', (c) =>»; `src/modules/chatbot/prisma/update-proactive-prompts.ts:23` — «'SEED: update de proactivePrompts del bot develOP por slug (script de dev)',»; `docs/bitacora-roadmap.md:10815` — «- **Bot de la agencia**: vive en 'src/modules/chatbot/prisma/seed.ts' (org 'develop', slug 'develop'), no en el seed principal.»; `prisma/seed.ts:20` — «import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'»; `scripts/dev/seed-events.ts:25` — «if (!process.env.DATABASE_URL) { // único chequeo antes de borrar y crear»; `scripts/dev/seed-events.ts:146` — «const created = await prisma.conversation.create({»; `scripts/dev/seed-latency.ts:75` — «const bot = (await prisma.botConfig.findFirst({ where: { slug: 'develop' } })) ?? (await prisma.botConfig.findFirst())»; `package.json:20` — «"seed:latency": "ts-node --transpile-only scripts/dev/seed-latency.ts",»; `scripts/cleanup-messages-demo.ts:50` — «const res = await prisma.message.deleteMany({ where: { content: { contains: SEED_MARKER } } })»; `scripts/dev/seed-alerts.ts:217` — «if (host !== EXPECTED_DEV_HOST) { // control: el guard que los otros no tienen»; `scripts/dev/_vseed.ts:1` — «carga .env.local y escribe sin assertDevSeedTarget»; `scripts/dev/_vseed.ts:22` — «upsert de conversaciones y leads en la org san-miguel (con as any)»; `scripts/dev/qa-seed-leads.ts:17` — «carga .env.local sin guard de host»; `scripts/qa-corridas/_verify-home-aviso.ts:99` — «muta el stage del lead sin finally»
 - Impacto: Correr 'npx tsx src/modules/chatbot/prisma/seed.ts' con el .env apuntando a prod (es el camino documentado para el bot de la agencia) pisa sin dry-run ni confirmación toda la config del bot público de develOP (activo, bienvenida, quick replies, WhatsApp, modelo, cuota) y las siete secciones de su knowledge base con los valores del código, borrando cualquier ajuste hecho desde el admin. La razón 'script de dev' de los cuatro escapes SEED es falsa: no hay guard y el script es la fuente del bot de producción.
 - Propuesta: Agregar assertDevSeedTarget o un flag explícito de destino más un dry-run con diff antes de escribir; corregir las razones de los escapes SEED para que digan mantenimiento de prod; separar la provisión del bot de prod en un script con confirmación.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [SEC-034]
-- Nodo(s): lib.seeds, lib.isolation, modelo.BotConfig, modelo.KnowledgeBase, int.neon
+- Nodo(s): lib.seeds, lib.isolation, modelo.BotConfig, modelo.KnowledgeBase, int.neon, h3.adm-actividad, h3.adm-health, h4.adm-alertas, h4.adm-mensajes, modelo.ChatbotEvent, modelo.Conversation, modelo.Message, lib.scripts, lib.prisma.seeds
 
 ### [SEC-044] Email marketing: las 3 server actions no verifican el módulo contratado, no validan con Zod ni tienen rate limit, y mandan el remitente y el HTML del formulario por la cuenta Brevo de develOP
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: seguridad
@@ -534,7 +545,7 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [SEC-093] /api/test-sentry es público: cada pedido anónimo produce un 500 y un evento de Sentry
 - Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `src/app/api/test-sentry/route.ts:3` — «export async function GET() { throw new Error('Test Sentry — esto debería aparecer en el dashboard de Sentry')»; `src/proxy.ts:172` — «matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password'],»; `src/instrumentation.ts:49` — «export const onRequestError = Sentry.captureRequestError»
+- Evidencia: `src/app/api/test-sentry/route.ts:3` — «export async function GET() { throw new Error('Test Sentry — esto debería aparecer en el dashboard de Sentry')»; `src/proxy.ts:172` — «matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password'],»; `src/instrumentation.ts:49` — «export const onRequestError = Sentry.captureRequestError»; `scripts/_b14-4-smoke-prod.mjs:214` — «el bloque 6 del smoke espera un 500 de /api/test-sentry»
 - Impacto: Con Sentry activo, un loop de curl anónimo llena la cuota de eventos y tapa los errores reales de los clientes; además es una ruta 500 permanente en producción.
 - Propuesta: Borrar la ruta o exigir SUPER_ADMIN y NODE_ENV distinto de production.
 - Esfuerzo: S  ·  Zona: libre
@@ -595,17 +606,6 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [SEC-002], [SEC-003], [SEC-004]
 - Nodo(s): int.google-ai, doc.audits-2026-05-bfg-leak-cleanup, doc.bitacora-roadmap
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-001
-
-### [SEC-002] Email y contraseña de las cuentas del seed (SUPER_ADMIN y cliente) escritos en el repo
-- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad
-- Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `README.md:29-30`, `STATUS.md:258-259`, `docs/demo-guion.md:15-16`, `docs/bitacora-beta.md:15`, `docs/bitacora-roadmap.md:6375-6377` (tabla de MS-8: super-admin, client-a y client-b) y `:10534`, `tests/helpers/auth.ts:21` y `:25` — patrón «email / contraseña» (valores omitidos); el seed actual ya no los usa: `prisma/seed.ts:76-79` — `bcrypt.hash(requireSeedPassword('SEED_ADMIN_PASSWORD'), 12)`.
-- Impacto: bloqueante para el primer cliente real: si la base de producción se siembra —o se sembró antes del cambio— con esas contraseñas, queda un SUPER_ADMIN con contraseña conocida por cualquiera que lea el repo.
-- Propuesta: sacar los literales de docs y del helper de tests (que lea de entorno, como el seed), sembrar producción limpia y confirmar que ninguna base expuesta conserva esas contraseñas.
-- Esfuerzo: S  ·  Zona: libre
-- Relacionado: [SEC-001], [SEC-003]
-- Nodo(s): lib.auth, lib.prisma.seeds, lib.tests
-- REQUIERE-VERIFICACIÓN-HUMANA: VH-002
 
 ### [SEC-003] Contraseña de la cuenta QA de setter en docs y como literal en dos scripts
 - Dominio: D4  ·  Severidad: BAJA  ·  Tipo: seguridad
@@ -886,15 +886,15 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h3.vis-widget-cliente.chat-embebido, lib.security
 
-### [SEC-071] Script que imprime la credencial completa de Vertex por stdout
+### [SEC-071] Scripts que imprimen credenciales completas por stdout: encode-vertex-creds.js vuelca la service account de Vertex y db-restore-local.sh el usuario y la contraseña de la base destino, creyendo enmascararlos
 - Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `scripts/encode-vertex-creds.js:8` — «console.log('--- Pegar este VALOR en Netlify como GOOGLE_VERTEX_CREDENTIALS_JSON ---')»; `scripts/encode-vertex-creds.js:10` — «console.log(JSON.stringify(parsed))»
+- Evidencia: `scripts/encode-vertex-creds.js:8` — «console.log('--- Pegar este VALOR en Netlify como GOOGLE_VERTEX_CREDENTIALS_JSON ---')»; `scripts/encode-vertex-creds.js:10` — «console.log(JSON.stringify(parsed))»; `scripts/db-restore-local.sh:78` — «${TARGET_URL%%@*} conserva esquema, usuario y contraseña y oculta el host»; `scripts/db-restore-local.sh:92` — «la línea final imprime la URL completa en el comando psql sugerido»
 - Impacto: El helper lee vertex-credentials.json y vuelca la cuenta de servicio entera (incluida la clave privada) a la terminal. Corrido dentro de una sesion de agente o de CI, la credencial queda en transcripts o logs: es un vector plausible de la 'key expuesta en logs' de la bitacora. El archivo nunca fue commiteado (.gitignore:55). No se copio ningun valor.
 - Propuesta: Escribir el resultado a un archivo local ignorado o al portapapeles, nunca a stdout; al rotar la credencial vencida, no reutilizar este flujo.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): int.vertex, lib.chatbot.llm
+- Nodo(s): int.vertex, lib.chatbot.llm, lib.scripts, int.neon
 
 ### [SEC-077] El scoring de leads que el plan Starter no incluye viaja igual al navegador: las paginas de contactos pasan la fila completa de ChatbotLead (score, scoreSignals, internalNotes, notificationSent) a componentes cliente
 - Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
@@ -1051,12 +1051,22 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [SEC-107] Repo público con datos de infraestructura y volcados de tablas versionados contra la regla del propio .gitignore
 - Dominio: D8  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `.gitignore:64` — «# DB backups (B14.3) — contienen PII, NUNCA commitear.»; `prisma/backups/organization-module-pre-push.json:4` — «"organizationId": "<cuid redactado>",»; `.env.example:31` — «# pooled: ep-<id redactado>-pooler.sa-east-1.aws.neon.tech»; `raíz:.github/workflows/db-backup.yml:21` — «# El repo es PÚBLICO. Sin cifrado, cualquiera con el link al run podría descargar»
+- Evidencia: `.gitignore:64` — «# DB backups (B14.3) — contienen PII, NUNCA commitear.»; `prisma/backups/organization-module-pre-push.json:4` — «"organizationId": "<cuid redactado>",»; `.env.example:31` — «# pooled: ep-<id redactado>-pooler.sa-east-1.aws.neon.tech»; `raíz:.github/workflows/db-backup.yml:21` — «# El repo es PÚBLICO. Sin cifrado, cualquiera con el link al run podría descargar»; `scripts/_b14-2-seed-bench-prod.ts:93` — «console.log(' Host detectado: ${host}')»; `scripts/dev/seed-alerts.ts:302` — «? '✓ Actor (acknowledgedBy/resolvedBy): SUPER_ADMIN ${admin.email}'»; `scripts/regression/purge.ts:25` — «const EXPECTED_DEV_HOST = 'ep-…-pooler.sa-east-1.aws.neon.tech' // host literal, no es credencial»
 - Impacto: Cualquiera puede leer el hostname del endpoint real de la Neon compartida (sin credenciales) y volcados de las tablas de catálogo y de activación de módulos con IDs internos (prisma/backups/*.json y backup.js, versionados aunque .gitignore:67 ignora backups/). Sumado al historial de origin/main, que conserva enviroment.env (commit 39535583; ya hay hallazgo de credenciales en el historial), facilita un ataque dirigido.
 - Propuesta: Reemplazar el hostname por un placeholder en .env.example. Quitar prisma/backups/ del repo (git rm --cached; queda en el historial). Decidir si el repo pasa a privado, coordinado con PLAN-1075.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [SEC-001]
-- Nodo(s): int.neon, modelo.OrganizationModule
+- Nodo(s): int.neon, modelo.OrganizationModule, lib.prisma, modelo.User
+
+### [SEC-108] PII en scripts: un email personal versionado como asistente por defecto de una reserva real en Cal.com y volcados de emails y nombres de miembros
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `scripts/b7-smoke-calcom.ts:76` — «B7_SMOKE_EMAIL con un email personal como valor por defecto (omitido)»; `scripts/b7-smoke-calcom.ts:78` — «crea una reserva real en la cuenta de Cal.com»; `scripts/_db-cleanup-inspect.mjs:110` — «selecciona email y nombre de los miembros de cada org»; `scripts/_db-cleanup-inspect.mjs:114` — «los imprime a la consola»
+- Impacto: Un dato personal queda en un repo público y en cada reserva de prueba; los scripts de limpieza vuelcan datos de miembros a la terminal y a los transcripts.
+- Propuesta: Exigir B7_SMOKE_EMAIL sin valor por defecto y borrar los _db-cleanup-inspect* (su tarea ya se cumplió).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.scripts, int.calcom
 
 ## Bugs latentes
 
@@ -1381,12 +1391,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-034] Fechas y horas del portal formateadas sin zona horaria: turnos corridos 3 h, saludo y fecha del Inicio, Timeline del ticket, tooltip de sesiones un día antes y horas del chat distintas entre servidor y navegador
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `src/app/(protected)/dashboard/page.tsx:33` — «const hour = new Date().getHours()»; `src/app/(protected)/dashboard/page.tsx:41` — «.toLocaleDateString('es-AR', { weekday: 'long', ... // sin timeZone»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:18` — «return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:98` — «const day = start.getDate()»; `src/lib/dates-ar.ts:233` — «export function formatTimeAR(date: Date): string { // helper disponible y sin usar aca»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:41` — «return d.toLocaleDateString('es-AR', {»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:304` — «{ticket.createdAt.toLocaleDateString('es-AR', {»; `src/app/(protected)/dashboard/services/page.tsx:149` — «{startDate.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:25` — «timeZone: TZ_AR,»; `src/components/dashboard/SessionsChart.tsx:47` — «{new Date(label).toLocaleDateString('es-AR', {»; `src/lib/analytics.ts:171` — «const date = '${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}'»; `src/components/dashboard/ChatBubble.tsx:19` — «return new Date(date).toLocaleString('es-AR', {»; `src/components/dashboard/ImpersonationTimer.tsx:20` — «const [remaining, setRemaining] = useState(() => new Date(expiresAt).getTime() - Date.now())»; `src/components/dashboard/CurrentPlanCard.tsx:17` — «return date.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/PageSpeedCard.tsx:60` — «return date.toLocaleString('es-AR', {»; `src/components/dashboard/results/GBPMetricsCard.tsx:13` — «return date.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:24` — «const DATE_FMT = new Intl.DateTimeFormat('es-AR', { timeZone: TZ_AR,»; `src/modules/chatbot/components/dashboards/ConversationsTable.tsx:45` — «return new Date(d).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:206` — «{new Date(h.createdAt).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', ...»; `src/modules/chatbot/components/dashboards/LeadsTable.tsx:37` — «// timeZone fijo (AR): sin esto el server (Netlify = UTC) y el cliente (UTC-3) ... → hydration mismatch.»
+- Evidencia: `src/app/(protected)/dashboard/page.tsx:33` — «const hour = new Date().getHours()»; `src/app/(protected)/dashboard/page.tsx:41` — «.toLocaleDateString('es-AR', { weekday: 'long', ... // sin timeZone»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:18` — «return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:98` — «const day = start.getDate()»; `src/lib/dates-ar.ts:233` — «export function formatTimeAR(date: Date): string { // helper disponible y sin usar aca»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:41` — «return d.toLocaleDateString('es-AR', {»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:304` — «{ticket.createdAt.toLocaleDateString('es-AR', {»; `src/app/(protected)/dashboard/services/page.tsx:149` — «{startDate.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:25` — «timeZone: TZ_AR,»; `src/components/dashboard/SessionsChart.tsx:47` — «{new Date(label).toLocaleDateString('es-AR', {»; `src/lib/analytics.ts:171` — «const date = '${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}'»; `src/components/dashboard/ChatBubble.tsx:19` — «return new Date(date).toLocaleString('es-AR', {»; `src/components/dashboard/ImpersonationTimer.tsx:20` — «const [remaining, setRemaining] = useState(() => new Date(expiresAt).getTime() - Date.now())»; `src/components/dashboard/CurrentPlanCard.tsx:17` — «return date.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/PageSpeedCard.tsx:60` — «return date.toLocaleString('es-AR', {»; `src/components/dashboard/results/GBPMetricsCard.tsx:13` — «return date.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:24` — «const DATE_FMT = new Intl.DateTimeFormat('es-AR', { timeZone: TZ_AR,»; `src/modules/chatbot/components/dashboards/ConversationsTable.tsx:45` — «return new Date(d).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:206` — «{new Date(h.createdAt).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', ...»; `src/modules/chatbot/components/dashboards/LeadsTable.tsx:37` — «// timeZone fijo (AR): sin esto el server (Netlify = UTC) y el cliente (UTC-3) ... → hydration mismatch.»; `src/app/(protected)/dashboard/page.tsx:40` — «return new Date() .toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',»; `src/modules/chatbot/server/notifications/sendLeadNotification.ts:74` — «<strong>Fecha:</strong> ${escapeHtml(lead.createdAt.toLocaleString('es-AR'))}»; `src/modules/chatbot/server/admin/getLatencyHistory.ts:25` — «return d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit',»; `src/lib/dates-ar.ts:225` — «timeZone: TZ_AR,»
 - Impacto: Con el server en UTC (no hay TZ en vercel.json ni netlify.toml; el repo corre sus invariantes con TZ=UTC) un turno de las 10:00 de Buenos Aires se muestra 13:00; entre las 21 y las 24 h el Inicio muestra la fecha de manana y el saludo es incorrecto en franjas de 3 h (ademas 'Buenos dias' sin tilde, page.tsx:34). Igual en facturacion (:88-94), boveda (:202-206), referidos (:22-24) y proyecto (:70-76).
 - Propuesta: Usar formatDateAR/formatTimeAR/TZ_AR de dates-ar (o timeZone 'America/Argentina/Buenos_Aires') en todos los formateos de server components y agregar un invariante que lo exija.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-inicio, h2.cli-agenda.panel-de-agenda, h2.cli-cuenta, lib.dates-ar, h2.cli-soporte.conversacion-ticket, h2.cli-servicios.servicios-contratados, lib.tz-ar, h2.cli-mensajes, h2.cli-soporte, h2.cli-resultados.trafico, h1.auth-impersonacion, h2.cli-resultados, h3.cli-chatbot.conversaciones, h3.cli-chatbot.resumen
+- Nodo(s): h2.cli-inicio, h2.cli-agenda.panel-de-agenda, h2.cli-cuenta, lib.dates-ar, h2.cli-soporte.conversacion-ticket, h2.cli-servicios.servicios-contratados, lib.tz-ar, h2.cli-mensajes, h2.cli-soporte, h2.cli-resultados.trafico, h1.auth-impersonacion, h2.cli-resultados, h3.cli-chatbot.conversaciones, h3.cli-chatbot.resumen, h3.cli-chatbot, int.brevo
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-047
 
 ### [BUG-035] El onboarding pide el 'ID de medicion (G-XXXX)' y lo guarda como Property ID, que la lectura de GA4 rechaza
@@ -2029,6 +2039,70 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h2.cli-tienda.resumen-tienda, h2.cli-resultados.velocidad-sitio, h2.cli-resultados.reputacion-gbp, h2.cli-agenda, lib.integrations
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-137
 
+### [BUG-175] Lenis sigue activo en /setter: la rueda no scrollea el panel del setter en desktop
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/components/layout/SmoothScroll.tsx:30` — «const isPortal = pathname && (pathname.startsWith('/admin') || pathname.startsWith('/dashboard'));»; `src/components/layout/publicRoute.ts:16` — «export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed', '/setter'] as const»; `src/components/layout/SmoothScroll.tsx:83` — «smoothWheel: true,»; `src/app/(protected)/setter/_components/setter-shell.tsx:28` — «className="fixed inset-0 bg-[var(--color-void)] text-zinc-100"»; `src/app/(protected)/setter/_components/setter-shell.tsx:78` — «<main className="relative mt-4 min-h-0 flex-1 overflow-y-auto py-8">»; librería lenis@1.3.25, dist/lenis.mjs línea 625 — «if (event.cancelable) event.preventDefault(); // lenis 1.3.25 (package-lock.json:10549); solo se salta con data-lenis-prevent o allowNestedScroll (:607)»; `src/app/layout.tsx:111` — «<SmoothScroll>»; `docs/bitacora-roadmap.md:5798` — «'data-lenis-prevent' en el contenedor que evita que el smooth-scroller del sitio capture el wheel.»
+- Impacto: Bloqueante para el uso diario del setter en desktop: Lenis se crea en /setter (SmoothScroll arma su propia lista de portales y deja afuera /setter y /embed), escucha el wheel en window sin passive y lo cancela con preventDefault porque ningún nodo del setter tiene data-lenis-prevent. El documento no tiene scroll propio (shell fixed inset-0), así que Tu día, la cartera y el manual no se mueven con mouse ni trackpad; solo queda arrastrar la barra o usar el teclado. Con la misma raíz, scrollRestoration='manual' (SmoothScroll.tsx:26) también se aplica en admin y dashboard.
+- Propuesta: En SmoothScroll.tsx usar isChromeFreeRoute/isPortalRoute de publicRoute.ts (una sola lista) para no crear Lenis fuera del sitio público y, como defensa, pasar allowNestedScroll: true. El arreglo va en SmoothScroll.tsx (libre); no hace falta tocar el shell del setter (ZONA-FRANCO). Confirmar antes con el caso de prueba manual.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-082], [PERF-016]
+- Nodo(s): h5.set-dia, h5.set-manual, h5.set-lead, lib.smooth-scroll
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-164
+
+### [BUG-176] El cleanup del bench de prod aborta a mitad: borra prisma.message por un conversationId que Message no tiene
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `scripts/_b14-2-cleanup-bench-prod.ts:102` — «const msgs = await prisma.message.deleteMany({ where: { conversationId: { in: convoIds } } })»; `prisma/schema.prisma:593` — «model Message { // id, content, fromAdmin, read, createdAt, organizationId: sin conversationId»; `prisma/schema.prisma:1420` — «conversationId String // en model ChatMessage (:1417)»; `scripts/_b14-2-cleanup-bench-prod.ts:88` — «const events = await prisma.chatbotEvent.deleteMany({ where: { botConfigId: bot.id } })»; `tsconfig.json:52` — «"scripts/**" // dentro de exclude: los scripts no pasan por tsc»; `scripts/_b14-2-seed-bench-prod.ts:144` — «isActive: true,»; `docs/operations/b14-deploy-checklist.md:309` — «- **Borrar el bot bench-matsu de prod** una vez que Matsu real esté seedeado:»
+- Impacto: Bloqueante para el primer cliente real si el bench sigue en prod. Corrido como manda el checklist, el cleanup borra eventos y leads del bot bench y aborta en :102, porque Prisma rechaza el where antes de ejecutar y todo va fuera de transacción. Conversaciones, KB, el bot bench-matsu (activo, cuota 1000, Gemini), el usuario ORG_MEMBER verificado y la org quedan vivos, y cada corrida siguiente vuelve a abortar en el mismo punto. La org aparece en el listado de clientes, en los crons y en las métricas. scripts/** está excluido de tsc, por eso el error de tipos nunca saltó.
+- Propuesta: Cambiar a chatMessage (o confiar en el cascade de Conversation) y envolver el borrado en $transaction; alternativa: eliminar la org bench con el hard-delete del admin. Sumar un tsconfig para scripts/ al gate de calidad. Verificar el estado de bench-matsu en prod sin correr el cleanup.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, h4.adm-clientes, modelo.Message, modelo.ChatMessage, modelo.BotConfig, modelo.Organization
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-165
+
+### [BUG-179] Los dos CTA principales del hero del home no hacen nada (MagneticCta sin href ni onClick)
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/components/layout/Hero.tsx:731` — «<MagneticCta className="w-full px-8 py-3.5 text-[9px] ..."> Quiero una demo gratis </MagneticCta>»; `src/components/layout/Hero.tsx:734` — «<MagneticCta className="w-full px-8 py-3.5 ..."> Ver nuestros trabajos»; `src/components/ui/buttons/MagneticCta.tsx:106` — «if (onClick) onClick();»; `src/components/ui/buttons/MagneticCta.tsx:195` — «<motion.button ref={ref as ...} ... onClick={handleTrigger}»
+- Impacto: Bloqueante para el primer cliente real que llegue por la home: el boton 'Quiero una demo gratis' y 'Ver nuestros trabajos' solo dibujan una onda; no navegan a contacto, WhatsApp ni a la seccion de trabajos. La conversion principal del hero queda muerta.
+- Propuesta: En Hero.tsx (libre) pasar destino a cada CTA: href a /contact o getWhatsappHref() para la demo, y triggerTransition('/#portfolio') (o el ancla real) para trabajos. Decision para Valentino sobre MagneticCta (FROZEN): exigir por tipos href|onClick para que no pueda renderizarse inerte.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h6, h6.vis-contacto, lib.ui
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-167
+
+### [BUG-180] CTA de WhatsApp con numeros hardcodeados y divergentes, incluido un numero de relleno en el upsell del portal
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:15` — «const WHATSAPP_URL = 'https://wa.me/5493815555555?text=Hola%2C+quiero+saber+...'»; `src/components/sections/home/Footer.tsx:8` — «const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493815000000';»; `src/components/ia/CalculadorIA.tsx:316` — «href={'https://wa.me/5493815674738?text=${encodeURIComponent(»; `src/lib/whatsapp.ts:21` — «const FALLBACK_WHATSAPP_NUMBER = '5493816223508'»; `src/lib/whatsapp.ts:12` — «* y cuatro call-sites SIN fallback, que servían 'https://wa.me/undefined' si la * variable faltaba. Todos apuntan ahora acá.»
+- Impacto: El cliente que mira la landing de upsell del chatbot en su portal y toca WhatsApp va a un numero con forma de relleno (…5555555), no a develOP. En el sitio publico conviven 4 destinos distintos segun el componente y, si falta la variable en Netlify, el pie usa un fallback distinto al de lib/whatsapp.
+- Propuesta: Migrar ChatbotUpsellLanding, Footer, CalculadorIA y PortalDemoCTA a getWhatsappHref(); decidir con una persona cual es el numero de CalculadorIA (whatsapp.ts:15-19 lo dejo a proposito); confirmar que NEXT_PUBLIC_WHATSAPP_NUMBER esta seteada en produccion.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-144], [BUG-054]
+- Nodo(s): h3.cli-chatbot, h6, lib.whatsapp
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-169
+
+### [BUG-186] El job E2E del CI no puede pasar aunque se carguen los secrets: levanta next start sin build, la base queda sin las cuentas que asume y las baselines visuales son solo de Windows
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `raíz:.github/workflows/ci.yml:206` — «npm ci, prisma generate y migrate deploy: ningún next build ni seed antes de test:e2e»; `raíz:.github/workflows/ci.yml:220` — «npm run test:e2e»; `playwright.config.ts:29` — «webServer: npm run start, que exige un build previo»; `tests/e2e/22-visual-regression.spec.ts:50` — «toHaveScreenshot contra baselines que solo existen como chromium-win32»
+- Impacto: Cargar DATABASE_URL_TEST y AUTH_SECRET, que es la salida de DEU-017 y BUG-171, deja el job en rojo permanente: next start sin .next, login contra una base vacía y screenshots sin baseline de Linux. Es lo que el propio ci.yml dice que enseña a ignorar el CI.
+- Propuesta: Agregar npm run build y un seed de fixtures antes de test:e2e; generar baselines de Linux o sacar el spec visual del CI.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-017], [BUG-171]
+- Nodo(s): int.github-actions, lib.tests
+
+### [BUG-187] Los e2e tienen efectos reales en la base compartida: reenvían credenciales a un usuario existente con mail por Brevo, disparan el detector de alertas con mails y Telegram, y dejan editados los bots develop y sanmiguel
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `tests/e2e/30-onboarding-e2e-complete.spec.ts:219` — «toma la org más vieja con miembros de la base y le reenvía credenciales»; `tests/e2e/30-onboarding-e2e-complete.spec.ts:246` — «acepta «Credenciales enviadas» o «Email falló»: verde aunque el envío esté roto»; `src/app/api/admin/users/[userId]/resend-credentials/route.ts:64` — «la ruta reescribe la contraseña del usuario»; `tests/e2e/19-security.spec.ts:35` — «con CRON_SECRET llama al detect-bot-issues real, que notifica por email y Telegram»; `tests/integration/alerts-detector.spec.ts:44` — «borra todas las BotAlert de un tipo del primer bot activo, no solo las que creó»; `tests/e2e/15-client-personalization.spec.ts:85` — «cambia color y bienvenida del bot de sanmiguel sin restaurar»; `tests/e2e/09-admin-bot-config.spec.ts:37` — «restaura el welcomeMessage del bot develop solo si todo sale bien (fuera de finally)»
+- Impacto: Correr la suite deja sin acceso a una cuenta de fixture (contraseña nueva, sesiones invalidadas), le escribe a quien sea el titular de esa org, manda alertas reales a develOP y deja texto de prueba en el prompt vivo de los bots de dev, que después leen otros tests y smokes. Es la forma concreta de la falta de base de test (DEU-017).
+- Propuesta: Crear usuarios y bots efímeros propios de cada test; afirmar un único resultado; correr el detector sin notificaciones (flag o dependencias inyectadas); restaurar en afterAll o finally y limpiar por id creado.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-017], [SEC-087]
+- Nodo(s): lib.tests, h4.adm-clientes.reenviar-credenciales, h4.adm-alertas.detector-incidencias
+
 ### [BUG-004] El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
@@ -2534,12 +2608,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-172] /api/version no identifica el deploy: la versión es un '1.0.0' fijo y builtAt es la hora del pedido
 - Dominio: D8  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `src/app/api/version/route.ts:5` — «version: '1.0.0', builtAt: process.env.NEXT_PUBLIC_BUILD_TIME ?? new Date().toISOString(),»; `.env.example:295` — «# AUTOINYECTADA · Timestamp de build, inyectado por next.config.ts en build.»; `package.json:3` — «"version": "0.1.0",»
+- Evidencia: `src/app/api/version/route.ts:5` — «version: '1.0.0', builtAt: process.env.NEXT_PUBLIC_BUILD_TIME ?? new Date().toISOString(),»; `.env.example:295` — «# AUTOINYECTADA · Timestamp de build, inyectado por next.config.ts en build.»; `package.json:3` — «"version": "0.1.0",»; `src/components/layout/VersionBadge.tsx:1` — «const APP_VERSION = 'v1.0.0'»; `src/components/dashboard/DashboardLayoutClient.tsx:181` — «<VersionBadge />»
 - Impacto: Ni el smoke de producción (scripts/_b14-4-smoke-prod.mjs:82) ni un monitoreo externo pueden confirmar qué commit está desplegado: el endpoint siempre dice '1.0.0' y la 'fecha de build' cambia en cada pedido. next.config.ts no inyecta ninguna variable env.
 - Propuesta: Exponer el SHA del commit que Netlify pasa al build y una fecha de build inyectada de verdad. Corregir .env.example y alinear la versión con package.json.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): int.netlify
+- Nodo(s): int.netlify, h2.cli-shell, h4.adm-shell
 
 ### [BUG-173] La imagen Open Graph del sitio (/og-image.png) no existe: las vistas previas al compartir salen sin imagen
 - Dominio: D8  ·  Severidad: BAJA  ·  Tipo: bug
@@ -2560,6 +2634,79 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h2.cli-servicios, h2.cli-resultados
+
+### [BUG-178] El scroll-lock temprano del home no tiene red de seguridad: si el Hero no llega a 'done', la home queda sin scroll
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/components/layout/EarlyScrollLock.tsx:27` — «"try{if(location.pathname==='/'&&navigator.webdriver!==true){document.documentElement.style.overflow='hidden'}}catch(e){}"»; `src/components/layout/Hero.tsx:486` — «if (phase === 'done') { html.style.overflow = ''»; `src/components/layout/HeroArtifactLayer.tsx:29` — «// Red de seguridad del reveal. MISMO mecanismo y MISMO umbral que la red del // scroll de 'MarketingIntro' ('MARKETING_SCROLL_SAFETY_MS')»
+- Impacto: El lock se aplica antes del primer paint y solo lo deshace el Hero, al llegar a 'done' o al desmontarse. Si el bundle no carga o no hidrata (red mala, chunk que falla, error de render en '/'), el visitante ve la home por SSR pero no puede scrollear y no recibe ningún aviso. El repo ya tiene un timeout de seguridad para el mismo problema en MarketingIntro.
+- Propuesta: Agregar al script inline un setTimeout que libere el html si el Hero no tomó el control (mismo umbral que MARKETING_SCROLL_SAFETY_MS), o liberar desde CSS con una animación con delay.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h6
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-166
+
+### [BUG-181] use-step-action no captura excepciones de la action: un throw va al error boundary en vez del toast
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/use-step-action.ts:53` — «startTransition(async () => { const result = await action() if (!result.success) {»
+- Impacto: Si la server action lanza (guard que tira Error generico, red caida, timeout), React 19 propaga el error de la transicion al error.tsx del setter: el setter pierde la pantalla del paso y ve el boundary en vez de un toast con reintento.
+- Propuesta: Envolver el await en try/catch: toast.error con copy generico + onError, y Sentry.captureException para lo inesperado.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h5.set-manual, lib.actions
+
+### [BUG-182] use-autosave cancela el guardado pendiente al desmontar: navegar dentro del debounce pierde lo ultimo tipeado
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/use-autosave.ts:154` — «if (!enabled) return scheduleRef.current() return clearTimer»; `src/lib/use-autosave.ts:44` — «const DEFAULT_DELAY_MS = 1200»; `src/lib/use-unsaved-guard.ts:16` — «Por eso el aviso de salida interna es OPT-IN ('avisaEnSalidaInterna'): lo pide * el formulario que no tiene autosave detrás.»
+- Impacto: El setter que tipea en la ficha o el brief y en menos de 1,2 s toca un enlace interno pierde esas ultimas teclas sin aviso: el cleanup cancela el timer y la guardia interna no esta activa para formularios con autosave.
+- Propuesta: En el cleanup de desmontaje hacer flush del valor pendiente (fire-and-forget) en lugar de solo cancelar, o activar avisaEnSalidaInterna mientras haya timer pendiente.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h5.set-manual
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-172
+
+### [BUG-183] logger en produccion: la meta se esparce sobre el objeto y pisa message/level; un Error como meta borra el mensaje de contexto
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/logger.ts:42` — «JSON.stringify({ level, timestamp, message, ...(typeof serializedMeta === 'object' && serializedMeta !== null ? serializedMeta»; `src/lib/logger.ts:33` — «meta instanceof Error ? { name: meta.name, message: meta.message, stack: meta.stack, }»; `src/app/api/motor/webhook/[channelToken]/route.ts:52` — «logger.error('motor-inbound: error de infraestructura procesando el webhook', error)»
+- Impacto: En los logs de Netlify el error del webhook de WhatsApp queda solo con el message de la excepcion: se pierde 'motor-inbound: error de infraestructura...'. Una meta con clave level/message/timestamp falsea el registro; una meta con BigInt o ciclos hace tirar al logger dentro de un catch. Ademas todo va a stdout y nada a Sentry.
+- Propuesta: Decision para Valentino (FROZEN-inferido): anidar la meta bajo una clave (meta/err), serializar con try/catch y mandar error/warn a stderr.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.logger, h3.vis-whatsapp, int.sentry
+
+### [BUG-184] slugify devuelve cadena vacia para nombres sin caracteres latinos y 2 de 3 llamadores no tienen respaldo
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/slugify.ts:6` — «.replace(/[^a-z0-9]+/g, '-') .replace(/^-+|-+$/g, '')»; `src/modules/chatbot/server/admin/createBot.ts:57` — «const slug = await findUniqueBotSlug(slugify(input.botName))»; `src/lib/onboarding/core.ts:26` — «let candidate = base»; `src/modules/chatbot/server/admin/createClientOnly.ts:32` — «const safeBase = base || 'cliente'»
+- Impacto: Un bot llamado con emojis o en otro alfabeto obtiene slug '' (y luego '-1'): la URL del widget y del embed queda vacia o rota para ese cliente. createClientOnly ya tiene el respaldo (control positivo); createBot y onboarding/core no.
+- Propuesta: Hacer que slugify o los dos findUnique* apliquen un respaldo ('bot'/'cliente' + sufijo) y validar en Zod que el slug resultante no quede vacio.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots, h4.adm-clientes, lib.slugify, modelo.BotConfig, modelo.Organization
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-173
+
+### [BUG-185] StatCard formatea numeros con el locale del runtime y compact en ingles en paginas server del portal
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/components/ui/StatCard.tsx:58` — «? '$${value.toFixed(4)}' : format === 'compact' ? new Intl.NumberFormat('en', { notation: 'compact' }).format(value) : value.toLocaleString()»
+- Impacto: En las paginas server del portal que lo usan (modules/agenda-inteligente/page.tsx, modules/tienda-conectada/page.tsx, soporte/page.tsx, GBPMetricsCard.tsx) un valor de 1234 sale '1,234' con el locale por defecto de Node en vez de '1.234'; dentro de un client component puede dar hydration mismatch.
+- Propuesta: Decision para Valentino (FROZEN): fijar 'es-AR' en toLocaleString e Intl.NumberFormat.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [BUG-034]
+- Nodo(s): lib.ui, h2.cli-agenda, h2.cli-tienda, h2.cli-soporte
+
+### [BUG-188] El teardown de la batería de regresión pone QuotaUsage en 0 en lugar de restaurarlo, y el runner dice que no escribe en la base
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `scripts/regression/cases.ts:357` — «teardown: «restaurar contador a 0»»; `scripts/regression/cases.ts:367` — «conversationsCount: 0»; `scripts/regression/run-baseline.ts:11` — ««Este script NO escribe en DB»»
+- Impacto: Cada corrida borra el conteo real de conversaciones del mes del bot de Matsu en dev (métricas y alertas de cuota posteriores salen mal) y el encabezado engaña sobre sus efectos.
+- Propuesta: Leer el valor previo en el setup, restaurarlo en el teardown y corregir el comentario del runner.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.scripts, modelo.QuotaUsage
 
 ## Tecnología vieja
 
@@ -2695,12 +2842,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [PERF-009] Avatares 3D siempre renderizando (sin pausa fuera de viewport), LegacyNeuroAvatar con dpr hasta 2 y AvatarPicker que monta los dos canvas pesados a la vez
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: perf
 - Confianza: PROBABLE
-- Evidencia: `src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:940` — «dpr={[1, 2]}»; `src/modules/chatbot/components/avatar/NeuroAvatar.tsx:33` — «frameloop = 'always',»; `src/modules/chatbot/components/avatar/AvatarPicker.tsx:84` — «{AVATAR_REGISTRY.map((entry) => (»; `src/modules/chatbot/components/avatar/ParticleSphere.tsx:42` — «const pos = basePos.clone().multiplyScalar(radius)»; `src/modules/chatbot/components/avatar/AvatarPicker.tsx:211` — «<AvatarRenderer»; `src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx:76` — «avatarStyle: 'legacy_neuro',»; `src/modules/chatbot/components/admin/config/tabs/AppearanceTab.tsx:40` — «<AvatarPicker»
+- Evidencia: `src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:940` — «dpr={[1, 2]}»; `src/modules/chatbot/components/avatar/NeuroAvatar.tsx:33` — «frameloop = 'always',»; `src/modules/chatbot/components/avatar/AvatarPicker.tsx:84` — «{AVATAR_REGISTRY.map((entry) => (»; `src/modules/chatbot/components/avatar/ParticleSphere.tsx:42` — «const pos = basePos.clone().multiplyScalar(radius)»; `src/modules/chatbot/components/avatar/AvatarPicker.tsx:211` — «<AvatarRenderer»; `src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx:76` — «avatarStyle: 'legacy_neuro',»; `src/modules/chatbot/components/admin/config/tabs/AppearanceTab.tsx:40` — «<AvatarPicker»; `src/components/canvas/DotMatrix.tsx:213` — «dpr={[1, 2]} // Optimize for retina displays while limiting max resolution»; `src/components/ui/BrandedIntroCanvas.tsx:122` — «dpr={[1, 1.5]}»
 - Impacto: Viola reglas de CLAUDE.md (dpr max 1.5, IntersectionObserver en animaciones pesadas). Nadie pasa frameloop (git grep 'frameloop=' solo encuentra NeuroAvatar.tsx:54). En la config del admin y del cliente conviven 2 canvas del picker + los de la preview, a 60 fps; el changelog admin registra 'Freeze del AvatarPicker' como pendiente. ParticleSphere asigna 120 Vector3 por frame y rota sin delta (:35), mas rapido en 120 Hz.
 - Propuesta: dpr [1,1.5]; frameloop 'demand' o pausa por IntersectionObserver/visibilitychange; en el picker mostrar thumbnail estatico y montar el canvas solo en hover/seleccion; reutilizar un Vector3 y escalar la rotacion por delta.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h3.adm-chatbots, h3.cli-chatbot, h3.vis-widget-cliente, lib.chatbot.components, h3.adm-chatbots.editar-config-bot, h4.adm-clientes.alta-cliente-con-bot, lib.chatbot.avatar
+- Nodo(s): h3.adm-chatbots, h3.cli-chatbot, h3.vis-widget-cliente, lib.chatbot.components, h3.adm-chatbots.editar-config-bot, h4.adm-clientes.alta-cliente-con-bot, lib.chatbot.avatar, h3.vis-widget-develop
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-083
 
 ### [PERF-012] generate-insights recorre todos los bots en serie con una llamada al LLM cada uno, sin orden ni reanudación, dentro de un techo de ~20-26 s
@@ -2724,6 +2871,37 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h3.vis-widget-cliente, h2.cli-shell, lib.ui
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-162
+
+### [PERF-018] DotMatrix (fondo de login, recupero e invitación) con dpr [1,2], sin IntersectionObserver ni pausa real
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/components/canvas/DotMatrix.tsx:213` — «dpr={[1, 2]} // Optimize for retina displays while limiting max resolution»; `src/components/canvas/DotMatrix.tsx:199` — «<sphereGeometry args={[0.025, 16, 16]} />»; `src/components/canvas/DotMatrix.tsx:101` — «if (window.scrollY > window.innerHeight + 200) {»; `src/components/canvas/DotMatrix.tsx:130` — «baseGrid.forEach((cell, i) => {»; `src/app/login/page.tsx:479` — «<DotMatrix />»; `raíz:CLAUDE.md:71` — «Three.js: 'dpr={[1, 1.5]}' max. Never 'dpr={2}' in production.»; `src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:940` — «dpr={[1, 2]}»
+- Impacto: La primera pantalla del cliente (login) dibuja a pantalla completa, con hasta 2x de densidad, 2.500 esferas de ~480 triángulos, y recalcula matriz y color de cada una en cada frame. La pausa depende del scroll de la ventana, que en login no existe, así que nunca se activa. En celulares de gama media eso es batería, calor y tirones al tipear. Viola CLAUDE.md:70-71 (alerta D9-A4); la misma desviación de dpr está en LegacyNeuroAvatar.tsx:940, aunque la bitácora la declara en [1,1.5]. Si falta WebGL no hay fallback: el fallo queda como promesa rechazada sin manejar.
+- Propuesta: Bajar a dpr [1,1.5] y a esferas de 6-8 segmentos. Pausar con IntersectionObserver/document.hidden o usar frameloop='demand', y mostrar un frame estático con prefers-reduced-motion. Sin WebGL, no montar el Canvas.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [PERF-009], [A11Y-034]
+- Nodo(s): h1.auth-login, h1.auth-recupero, h1.auth-invite
+
+### [PERF-020] /web-development descarga 12,6 MB de video en autoplay sin preload ni poster
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/components/ui/VideoCard.tsx:6` — «<video src="/video/Woman_engrossed_in_screen_delpmaspu_.mp4" autoPlay muted loop playsInline»; `src/components/sections/web-development/WebDevelopmentSensory.tsx:124` — «<video autoPlay loop muted playsInline»; `src/components/sections/web-development/WebDevelopmentSensory.tsx:138` — «src="/video/Male_business_owner_opens_laptop_delpmaspu_.mp4"»
+- Impacto: Un prospecto que entra desde el celular a la landing de Web Development baja 5,7 MB + 6,9 MB (git ls-tree de public/video) sin poster ni carga diferida: LCP y datos moviles penalizados en la pagina que vende velocidad.
+- Propuesta: Decision para Valentino (VideoCard FROZEN): preload='none' + poster + carga al entrar en viewport, y recodificar a <1,5 MB (H.264/WebM). En WebDevelopmentSensory (libre) aplicar lo mismo.
+- Esfuerzo: M  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): h6, lib.ui
+
+### [PERF-021] El intro de marketing bloquea el scroll hasta 6 s en cada hard-load de las 5 landings (desktop) y el home sigue en 7,3-9,8 s
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/components/ui/MarketingIntro.tsx:175` — «lockScroll();»; `src/components/ui/MarketingIntro.tsx:233` — «await Promise.race([waitForLogoReady(), wait(MARKETING_READY_TIMEOUT_MS)]);»; `src/components/ui/MarketingIntro.tsx:46` — «const MARKETING_SCROLL_SAFETY_MS = 6000;»; `src/components/ui/Preloader.tsx:24` — «const VEIL_FADE_SECONDS = 1.4;»
+- Impacto: Aritmetica (desktop, sin reduced-motion): marketing = readiness (hasta 2,5 s) + 0,42 + 0,85 + 0,45 + 0,4 + 1,0 + 0,8 = 3,92 s; tope 6 s por la red de seguridad, que si dispara antes desmonta el velo de golpe en medio del toldo. Home = readiness + 1,4 + 0,15 + 0,85 + 0,45 + 0,4 + 1,5 + 1,5 + 0,78 + 0,24 = 7,27 s (hasta 9,77 s). Al ser ahora dinamico el chunk 3D, la readiness tiende al tope en redes lentas. El visitante que llega por un anuncio no puede scrollear durante ese tiempo.
+- Propuesta: Decision para Valentino (components/ui FROZEN): no bloquear el scroll durante el intro (o liberarlo al terminar el trazo), acortar la ventana interactiva y bajar el tope de readiness; correr el intro solo en la primera visita de la sesion.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [PERF-016]
+- Nodo(s): h6, h6.vis-contacto, lib.ui
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-170
 
 ### [PERF-001] FKs sin índice (Task.projectId, Notification.userId/taskId, ChatbotEvent.conversationId) e índices redundantes
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: perf
@@ -2805,6 +2983,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): lib.ui, lib.next-config
 
+### [PERF-019] SmoothScroll no cancela su loop de requestAnimationFrame: cada navegación pública suma un loop perpetuo
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/components/layout/SmoothScroll.tsx:102` — «function raf(time: number) { lenis.raf(time); requestAnimationFrame(raf);»; `src/components/layout/SmoothScroll.tsx:109` — «return () => { lenis.destroy(); setLenisInstance(null); // sin cancelAnimationFrame»; librería lenis@1.3.25, dist/lenis.mjs línea 500 — «if (this._rafId) cancelAnimationFrame(this._rafId); // solo con autoRaf»
+- Impacto: Después de N cambios de ruta en el sitio público quedan N loops por frame que llaman raf() sobre instancias destruidas (y las retienen en memoria) hasta recargar, también dentro de los portales. El costo por loop es chico, pero no tiene techo.
+- Propuesta: Guardar el id del rAF y cancelarlo en el cleanup, o pasar a autoRaf: true (Lenis lo cancela en destroy).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h6, lib.smooth-scroll
+
 ## Deuda
 
 ### [DEU-005] Borrar un User borra en cascada los tickets que abrió y todas sus respuestas, en cualquier organización
@@ -2871,12 +3059,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [DEU-017] Sin base de test: las suites de integración, LeadOS y setter escriben en la Neon dev compartida y en CI no corren (falta DATABASE_URL_TEST)
 - Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: deuda
 - Confianza: PROBABLE
-- Evidencia: `playwright.integration.config.ts:37` — «dotenv.config({ path: '.env.local' })»; `playwright.leados.config.ts:25` — «dotenv.config({ path: '.env.local' })»; `raíz:.github/workflows/ci.yml:144` — «echo "::warning::DATABASE_URL_TEST no está configurado — los tests de LeadOS NO corrieron.»; `raíz:.github/workflows/ci.yml:174` — «# del workflow anidado que este archivo reemplaza; ninguno existe hoy.»; `playwright.integration.config.ts:15` — «* globalSetup separado) para que DATABASE_URL esté disponible antes de que»; `tests/e2e/30-onboarding-e2e-complete.spec.ts:153` — «await prisma.organization.delete({ where: { slug: createdOrgSlug } }).catch(() => undefined)»; `tests/e2e/30-onboarding-e2e-complete.spec.ts:156` — «await prisma.user.delete({ where: { email: testEmail } }).catch(() => undefined)»; `tests/helpers/setter-db.ts:376` — «await prisma.user.deleteMany({ where: { id: { in: tracker.userIds } } })»
+- Evidencia: `playwright.integration.config.ts:37` — «dotenv.config({ path: '.env.local' })»; `playwright.leados.config.ts:25` — «dotenv.config({ path: '.env.local' })»; `raíz:.github/workflows/ci.yml:144` — «echo "::warning::DATABASE_URL_TEST no está configurado — los tests de LeadOS NO corrieron.»; `raíz:.github/workflows/ci.yml:174` — «# del workflow anidado que este archivo reemplaza; ninguno existe hoy.»; `playwright.integration.config.ts:15` — «* globalSetup separado) para que DATABASE_URL esté disponible antes de que»; `tests/e2e/30-onboarding-e2e-complete.spec.ts:153` — «await prisma.organization.delete({ where: { slug: createdOrgSlug } }).catch(() => undefined)»; `tests/e2e/30-onboarding-e2e-complete.spec.ts:156` — «await prisma.user.delete({ where: { email: testEmail } }).catch(() => undefined)»; `tests/helpers/setter-db.ts:376` — «await prisma.user.deleteMany({ where: { id: { in: tracker.userIds } } })»; `tests/helpers/setter-db.ts:8` — «dotenv.config({ path: '.env.local' })»; `tests/helpers/setter-db.ts:19` — «export const prisma = new PrismaClient()»; `tests/helpers/setter-db.ts:162` — «const user = await prisma.user.create({ data: { email, name, role: 'SETTER' },»; `scripts/dev/m0-galeria-seed.ts:55` — «if (!process.env.DATABASE_URL?.includes(DEV_BRANCH_HOST)) {»; `raíz:.github/workflows/ci.yml:128` — «el CI solo tiene los jobs de tipos e invariantes, LeadOS y E2E»; `playwright.integration.config.ts:41` — «la config de integración ignora alerts-detector»; `playwright.integration.config.ts:11` — «la config cita un spec que no existe»
 - Impacto: Los tests negativos de aislamiento (motor-isolation, chatbot-isolation) y los de LeadOS nunca corren en CI, y a mano siembran y limpian datos en la misma base dev que usa Franco. Una regresión de aislamiento puede entrar a main sin alarma antes del primer cliente.
 - Propuesta: Crear una branch de Neon dedicada a tests (efímera o recreada por branching, nunca migrate reset), cargar DATABASE_URL_TEST en GitHub y apuntar los configs de Playwright a esa variable.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): lib.isolation, int.neon, lib.prisma, modelo.Organization, modelo.User
+- Nodo(s): lib.isolation, int.neon, lib.prisma, modelo.Organization, modelo.User, h5.set-manual, modelo.OsLead, int.github-actions, lib.tests
 
 ### [DEU-023] /bienvenida es inalcanzable para altas reales y arrastra defectos latentes
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: deuda
@@ -2921,12 +3109,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [DEU-039] triggerTransition del sitio público usado en el portal admin (alta de bot y edición de cliente)
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
 - Confianza: PROBABLE
-- Evidencia: `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:11` — «import { useTransitionContext } from '@/context/TransitionContext'»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:183` — «triggerTransition(»; `src/context/TransitionContext.tsx:118` — «router.push(target);»; `src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:92` — «triggerTransition(detailHref)»; `src/context/TransitionContext.tsx:111` — «setIsAnimating(true); // cierra shutter (0.3s)»; `src/app/layout.tsx:114` — «<Shutter />»
+- Evidencia: `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:11` — «import { useTransitionContext } from '@/context/TransitionContext'»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:183` — «triggerTransition(»; `src/context/TransitionContext.tsx:118` — «router.push(target);»; `src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:92` — «triggerTransition(detailHref)»; `src/context/TransitionContext.tsx:111` — «setIsAnimating(true); // cierra shutter (0.3s)»; `src/app/layout.tsx:114` — «<Shutter />»; `src/context/TransitionContext.tsx:72` — «if (isAnimating) return;»; `src/context/TransitionContext.tsx:116` — «setTimeout(() => { startTransition(() => { router.push(target);»; `src/app/(protected)/setter/_components/setter-nav.tsx:49` — «triggerTransition(href)»
 - Impacto: CLAUDE.md reserva triggerTransition para el sitio público (el Shutter no existe en portales); acá navega al bot recién creado con 300 ms de demora y un router.push sin comentario que lo justifique. Funciona, pero rompe la convención de navegación del portal y arrastra el estado de animación del sitio.
 - Propuesta: Usar <Link> a /admin/chatbots/[id] (o router.push con comentario si se quiere imperativo post-submit).
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h4.adm-clientes.alta-cliente-con-bot, lib.ui, h4.adm-clientes.editar-datos
+- Nodo(s): h4.adm-clientes.alta-cliente-con-bot, lib.ui, h4.adm-clientes.editar-datos, lib.transition, h5.set-dia, h4.adm-clientes
 
 ### [DEU-042] Tres implementaciones paralelas del panel de chat (ChatWindow 694 lineas, ChatbotEmbed 559, BotConfigPreview) con paridad mantenida a mano y estilos inline
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
@@ -2998,15 +3186,25 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [BUG-037]
 - Nodo(s): int.brevo, int.resend, lib.email
 
-### [DEU-090] El CI solo corre tipos e invariantes: no corre build, lint, npm audit ni las fronteras, y los jobs con base se saltean
+### [DEU-090] El CI solo corre tipos y los check:invariant*: no corre build, lint, npm audit, las fronteras, los 35 test:* puros ni los smokes de seguridad, y los jobs con base se saltean
 - Dominio: D8  ·  Severidad: MEDIA  ·  Tipo: deuda
 - Confianza: PROBABLE
-- Evidencia: `raíz:.github/workflows/ci.yml:20` — «# ── Por qué el lint NO está acá ──»; `raíz:.github/workflows/ci.yml:97` — «- name: 'Tipos: tsc --noEmit'»; `raíz:.github/workflows/ci.yml:142` — «if [ -z "$DB" ]; then echo "listo=false" >> "$GITHUB_OUTPUT"»; `scripts/run-invariants.mjs:107` — «(nombre) => nombre === 'check:invariant' || nombre.startsWith('check:invariant:'),»; `package.json:55` — «"test:ev1": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts",»
+- Evidencia: `raíz:.github/workflows/ci.yml:20` — «# ── Por qué el lint NO está acá ──»; `raíz:.github/workflows/ci.yml:97` — «- name: 'Tipos: tsc --noEmit'»; `raíz:.github/workflows/ci.yml:142` — «if [ -z "$DB" ]; then echo "listo=false" >> "$GITHUB_OUTPUT"»; `scripts/run-invariants.mjs:107` — «(nombre) => nombre === 'check:invariant' || nombre.startsWith('check:invariant:'),»; `package.json:55` — «"test:ev1": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts",»; `package.json:68` — «test:t02: el invariante de auth del cron cleanup-old-events tampoco corre»; `playwright.helpers-probe.config.ts:16` — «la suite de sabotaje de helpers se declara apta para CI sin base, y ci.yml no la corre»
 - Impacto: Un build roto, un import que rompe la frontera de aislamiento chatbot/motor o una dependencia con aviso crítico llegan a main sin rojo. El build solo lo detecta Netlify al desplegar y el lint nadie, porque Next 16 ya no lintea en el build y no hay hooks versionados. Los 28 invariantes test:* del chatbot (package.json:55-82) no entran al agregado y no corren nunca en CI. Tampoco hay bloque permissions, así que el GITHUB_TOKEN queda con los permisos por defecto del repo.
 - Propuesta: Sumar al CI: un paso de build con el mismo heap que Netlify, eslint acotado a src/ con las reglas de frontera como error y el resto como baseline congelado, y npm audit --audit-level=critical. Agregar permissions: contents: read. Incluir los test:* en el runner, renombrándolos o ampliando el filtro.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: [DEU-017]
-- Nodo(s): int.github-actions, lib.isolation
+- Nodo(s): int.github-actions, lib.isolation, lib.tests
+
+### [DEU-104] Tests verdes por arnés: skips que vuelven verde una regresión y asserts que aceptan cualquier resultado
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `tests/e2e/19-security.spec.ts:22` — «test.skip si GET /api/admin/clients da 404: esa ruta no existe, así que el test de auth del admin siempre se saltea»; `tests/e2e/40-lead-capture-e2e.spec.ts:31` — «skip justo cuando la captura falla»; `tests/e2e/14-e2e-critical-flow.spec.ts:11` — «promete verificar el upsell y no lo afirma»; `tests/helpers/setter-auth.ts:42` — «la sesión del setter se mintea con passwordResetRequired false: el login y el reset forzado no se prueban»; `tests/leados/alta-import.spec.ts:13` — «replica el núcleo de la action en vez de llamarla: requireSetter y Zod quedan sin cubrir»
+- Impacto: La suite reporta verde en los caminos del producto que más importan (auth del admin, captura de leads, wizard, navegación) aunque estén rotos; el número de tests pasados sobreestima la cobertura real.
+- Propuesta: Cambiar test.skip por fallos explícitos en los caminos del producto, apuntar el test de auth a una ruta admin real y sumar al menos un test por action que pase por su guard.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-032]
+- Nodo(s): lib.tests
 
 ### [DEU-001] Flujo de invitacion huerfano: ninguna action viva emite links a /accept-invite (y la de clientes nunca los enviaba)
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -3561,12 +3759,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [DEU-094] Dependencias fantasma y sin uso: framer-motion y three-stdlib se importan sin estar declaradas, y html2canvas y jspdf solo las usa un componente huérfano
 - Dominio: D8  ·  Severidad: BAJA  ·  Tipo: deuda
 - Confianza: PROBABLE
-- Evidencia: `src/components/sections/home/About.tsx:3` — «import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';»; `src/components/layout/Hero.tsx:7` — «import { SVGLoader } from 'three-stdlib'»; `src/components/dashboard/DownloadReportButton.tsx:44` — «const html2canvas = (await import('html2canvas')).default const { jsPDF } = await import('jspdf')»; `package.json:153` — «"motion": "^12.36.0",»
+- Evidencia: `src/components/sections/home/About.tsx:3` — «import { motion, useInView, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';»; `src/components/layout/Hero.tsx:7` — «import { SVGLoader } from 'three-stdlib'»; `src/components/dashboard/DownloadReportButton.tsx:44` — «const html2canvas = (await import('html2canvas')).default const { jsPDF } = await import('jspdf')»; `package.json:153` — «"motion": "^12.36.0",»; `src/components/ui/KineticText.tsx:3` — «import { motion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';»
 - Impacto: framer-motion (About.tsx, Portfolio.tsx, KineticText.tsx) y three-stdlib (Hero.tsx, HeroArtifact.tsx FROZEN, BrandedLogoWhite.tsx) resuelven por transitivas de motion y drei. Un cambio de versión de esas librerías puede romper el sitio público sin tocar package.json. html2canvas y jspdf solo los usa DownloadReportButton.tsx, que depcruise marca huérfano, y @types/three está en dependencies.
 - Propuesta: Migrar los imports de framer-motion a 'motion/react', o declararlo. Declarar three-stdlib, solo en package.json: HeroArtifact no se edita. Borrar DownloadReportButton junto con html2canvas y jspdf si se confirma que está muerto, y mover @types/three a devDependencies.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): lib.deps, lib.ui
+- Nodo(s): lib.deps, lib.ui, h6
 
 ### [DEU-095] .env.example desactualizado: falta OAUTH_STATE_SECRET, documenta RESEND_FROM_EMAIL sin lector y promete una NEXT_PUBLIC_BUILD_TIME inyectada que nadie inyecta
 - Dominio: D8  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -3587,6 +3785,96 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): lib.plataforma.app-raiz
+
+### [DEU-097] Precios de servicios duplicados como literales en el menú mobile, sin moneda
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/components/layout/Navbar.tsx:35` — «{ href: "/web-development", label: "Sitio Web", subLabel: "Presencia profesional", price: "$800" },»; `src/components/sections/home/OurServices.tsx:70` — «price: '$800 USD',»
+- Impacto: Hay dos fuentes de precio para lo mismo: si cambia el precio en la home, el menú no se entera. El menú omite «USD» y en Argentina «$» se lee como pesos.
+- Propuesta: Sacar los precios a un único módulo de datos de servicios, con la moneda explícita, que consuman la home y el menú.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h6
+
+### [DEU-098] Convenciones de diseño contradictorias entre CLAUDE.md, DESIGN.md y PRODUCT.md; el Navbar público usa lo que DESIGN.md prohíbe
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `raíz:CLAUDE.md:97` — «Glassmorphism: 'bg-white/[0.04] backdrop-blur-[20px] backdrop-saturate-[180%] border border-white/[0.08]'»; `raíz:DESIGN.md:291` — «- **Don't** usar 'backdrop-blur' ni glassmorphism en ninguna superficie.»; `src/components/layout/Navbar.tsx:257` — «... bg-[#030305]/80 shadow-2xl shadow-black/50 backdrop-blur-2xl»; `raíz:CLAUDE.md:84` — «transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}»; `raíz:DESIGN.md:271` — «Reveals de sección: 'opacity' + 'translateY', ~0.9s, 'once'»; `raíz:PRODUCT.md:54` — «| Software a medida | '/software-development' | índigo |»; `src/app/globals.css:63` — «--color-ds-accent-software: #8b5cf6;»; `raíz:CLAUDE.md:97` — «Glassmorphism: 'bg-white/[0.04] backdrop-blur-[20px] backdrop-saturate-[180%] ...'»; `raíz:DESIGN.md:291` — «- **Don't** usar 'backdrop-blur' ni glassmorphism en ninguna superficie.»; `raíz:PRODUCT.md:54` — «| Software a medida | '/software-development' | índigo |»; `src/components/ui/buttons/MagneticCta.tsx:121` — «"backdrop-blur-3xl rounded-none md:rounded-[2rem] animate-border-spin",»
+- Impacto: Quien siga CLAUDE.md (agente o dev) va a meter glassmorphism y reveals de 0,6 s en el sitio público que DESIGN.md prohíbe. El Navbar mobile ya usa backdrop-blur, sombra de color en Acceder y motion perpetuo. PRODUCT.md pide índigo para Software; el código y la decisión opción A usan violeta.
+- Propuesta: Decisión para Valentino: declarar qué documento manda en cada superficie (CLAUDE.md para portales, DESIGN.md para el sitio público) y alinear PRODUCT.md:54 con violeta.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-028]
+- Nodo(s): h6, lib.ui
+
+### [DEU-099] Regla «cero any» incumplida: any explícitos en src (pagespeed, ClientSettingsForm, LegacyNeuroAvatar y otros) y en scripts y seeds, contra un CLAUDE.md que la da por cumplida
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `docs/sprints/alpha-RESUMEN-FINAL.md:41` — «- **100% type coverage** (zero 'any' types)»; `src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx:36` — «accentColor: accentColor as any,»; `src/lib/integrations/pagespeed.ts:77` — «data: any,»; `src/components/canvas/LiquidProject.tsx:8` — «const materialRef = useRef<any>(null);»; `src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:601` — «ref={bufferAttrRef as any}»; `prisma/seeds/init-data-connections.ts:18` — «where: { dataConnections: { equals: null as any } },»
+- Impacto: La regla no negociable de CLAUDE.md está rota en 9 lugares de src (pagespeed.ts:77/129/132, ClientSettingsForm.tsx:26/36/37, LiquidProject.tsx:8, LegacyNeuroAvatar.tsx:601) y en 4 más de scripts/prisma, y eslint no corre en CI. Los any sobre la respuesta de PageSpeed y sobre la apariencia del bot apagan el chequeo justo donde entra data externa o del cliente. El lote no tiene any (usa dobles casts 'as unknown as object').
+- Propuesta: Tipar con zod/unknown los 9 de src (PageSpeed con su schema de respuesta, ClientSettingsForm con los enums de Prisma) y sumar eslint como gate en CI.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-071], [DEU-015], [DEU-046], [DEU-043]
+- Nodo(s): int.pagespeed, h3.cli-chatbot, lib.ui
+
+### [DEU-100] design-tokens.ts: solo zIndex tiene consumidores (Modal, setter-shell, DashboardLayoutClient), sus colores por servicio contradicen CLAUDE.md y globals.css, y el plan de borrarlo como «desconectado» rompería esos consumidores
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/design-tokens.ts:96` — «ia: '#8b5cf6', // violet-500 — IA / Chatbots automation: '#10b981', // emerald-500 — Automation software: '#f59e0b', // amber-500 — Software / Custom»; `src/app/globals.css:61` — «--color-ds-accent-ia: #10b981; --color-ds-accent-automation: #f59e0b; --color-ds-accent-software: #8b5cf6;»; `src/components/ui/Modal.tsx:7` — «import { zIndex } from '@/lib/design-tokens'»; `src/app/(protected)/setter/_components/setter-shell.tsx:28` — «className="fixed inset-0 bg-[var(--color-void)] text-zinc-100"»; `docs/bitacora-rediseno.md:133` — «**No se tocaron 'tailwind.config.ts' ni 'src/lib/design-tokens.ts'.** Confirmado que están desconectados del pipeline»; `src/app/(protected)/setter/_components/setter-shell.tsx:6` — «import { zIndex } from '@/lib/design-tokens'»; `src/components/dashboard/DashboardLayoutClient.tsx:12` — «import { zIndex } from '@/lib/design-tokens'»; `src/app/globals.css:308` — «[data-theme='light'] { --color-void: #fafafa;»
+- Impacto: Los 5 importadores (Modal FROZEN, DashboardLayoutClient, setter-shell, shortcuts-help, barra-accion) usan solo zIndex; colors, spacing, radii, typography, shadows, motion y breakpoints no tienen consumidores y el mapa de servicio invierte IA/Automatizacion/Software. Borrar el archivo como planea el rediseno rompe el Modal y el shell del setter; usar sus colores pinta mal los servicios. rediseno/home ademas reescribe utils.ts (+100 lineas) y usa --color-void en 9 sitios.
+- Propuesta: Decision para Valentino (FROZEN-inferido): mover zIndex a un modulo propio y borrar o corregir el resto; si se conserva colors.service, alinearlo con globals.css y CLAUDE.md. Coordinar con la rama rediseno/home antes de tocar utils.ts o --color-void.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.design-tokens, lib.ui, h5.set-dia, h2.cli-shell
+
+### [DEU-101] zIndex 210 hardcodeado en Select y 10 popovers, fuera de la escala de design-tokens: un Select dentro de un Modal quedaria tapado
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/components/ui/Select.tsx:368` — «zIndex: 210,»; `src/lib/design-tokens.ts:245` — «modal: 10000, // diálogos portaleados a <body>»; `src/components/dashboard/NotificationCenter.tsx:186` — «zIndex: 210,»
+- Impacto: Ambos portalean a <body>: el panel del Select (210) queda debajo del backdrop del Modal (10000). Hoy ningun Select vive dentro de un Modal (evaluacion-form.tsx tiene el Select en :223 y el Modal en :267-300), asi que es latente; el primer formulario dentro de un Modal con Select mostraria un desplegable invisible.
+- Propuesta: Agregar un tier 'popover' en la escala (por encima de modal) y consumirlo desde Select y los popovers en vez del literal 210 (Select es FROZEN: decision para Valentino).
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [UX-020]
+- Nodo(s): lib.ui, lib.design-tokens
+
+### [DEU-102] Duplicacion en primitivas compartidas: useIsClient en 4 versiones, cn local y constantes de footprint 'mantener en sync'
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/use-is-client.ts:12` — «* Copia 1:1 de 'src/modules/chatbot/components/admin/useIsClient.ts'»; `src/components/ui/LogoStrokeOverlay.tsx:30` — «function useIsClient(): boolean { const [client, setClient] = useState(false);»; `src/components/ui/IntroLockupText.tsx:46` — «// Mismos tunables de footprint que LogoStrokeOverlay — mantener en sync. const FOOTPRINT_CALIB = 1.0;»; `src/components/ui/buttons/MagneticCta.tsx:9` — «function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs));»
+- Impacto: Hay 4 implementaciones de 'estoy en el cliente' (lib, chatbot, LogoStrokeOverlay, IntroLockupText; MarketingIntro.tsx:88 suma un useMediaQuery('(min-width: 1px)')), un cn que ignora la config DS de lib/utils.ts y constantes duplicadas a mano: un ajuste en una copia desalinea el logo 2D del 3D.
+- Propuesta: Decision para Valentino (FROZEN): consolidar en lib/use-is-client.ts, importar cn de lib/utils y mover FOOTPRINT_CALIB/LOGO_Y_WORLD a lib/logo-footprint.ts.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.ui
+
+### [DEU-103] Higiene de UI — D9: 44 detalles cosméticos (contraste 12, otro 10, strokeWidth 9, inline 7, tilde 3, copy 3)
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/components/layout/Navbar.tsx:227` — «[tilde] aria-label 'Cerrar menu' sin tilde (menú)»; `src/components/layout/Navbar.tsx:268` — «[strokeWidth] <X> sin strokeWidth={1.5}»; `src/components/layout/Navbar.tsx:278` — «[strokeWidth] <Grid2x2> sin strokeWidth={1.5}»; `src/components/layout/Navbar.tsx:356` — «[strokeWidth] <ChevronDown> sin strokeWidth={1.5}»; `src/components/layout/Navbar.tsx:356` — «[contraste] ChevronDown en rgba(255,255,255,0.28) sobre #030305: ~2,4:1, bajo el 3:1 de un ícono informativo»; `src/components/layout/Navbar.tsx:301` — «[contraste] 'develOP' en text-white/38 a 10px: ~3,5:1»; `src/components/layout/Navbar.tsx:386` — «[contraste] subLabel de servicios en text-white/34 a 11px: ~3:1»; `src/components/layout/Navbar.tsx:404` — «[contraste] 'Tucumán, Argentina' en text-white/24: ~2:1»; `src/components/layout/Navbar.tsx:35` — «[copy] Precios '$800', '$300', '$1.500', '$200' sin 'USD' (en Argentina '$' se lee como pesos); la home dice '$800 USD'»; `src/components/layout/Navbar.tsx:256` — «[inline] style pointerEvents en vez de clases pointer-events-auto/none»; `src/components/layout/Navbar.tsx:68` — «[otro] Ternario con ramas idénticas: SERVICE_ROUTE_SET.has(pathname) ? 'Inicio' : 'Inicio'»; `src/components/layout/Navbar.tsx:183` — «[otro] Error de eslint react-hooks/set-state-in-effect (baseline) por setActiveTab dentro del efecto»; `src/components/layout/Navbar.tsx:114` — «[otro] Componente Navbar de ~300 líneas (114-413) que mezcla scroll, IntersectionObserver y menú (anti-vibecode >300)»; `src/components/layout/Navbar.tsx:344` — «[otro] setTimeout de cierre (también :378) sin limpiar al desmontar»; `src/components/brand/BrandMark.tsx:37` — «[inline] filter brightness(0) invert(1) inline; existen las clases brightness-0 invert (como Navbar.tsx:83)»; `src/components/brand/BrandMark.tsx:45` — «[contraste] tagline text-zinc-500 a 10px sobre fondo oscuro del shell: ~4,1:1»; `src/components/layout/VersionBadge.tsx:5` — «[contraste] text-zinc-700 sobre el fondo del shell: ~1,9:1»; `src/components/canvas/DotMatrix.tsx:215` — «[inline] style width 100vw/height 100vh/pointerEvents; existen w-screen h-screen pointer-events-none, y 100vw suma el ancho de la barra de scroll»; `scripts/seed-matsu.ts:134` — «[otro] Doble cast 'as unknown as object' para quickReplies (también :154 y _b14-2-seed-bench-prod.ts:156/:176); esquiva el tipo sin any»; `src/components/ui/ErrorState.tsx:24` — «[tilde] 'Algo salio mal' sin tilde (salió).»; `src/components/ui/ErrorState.tsx:25` — «[tilde] 'seccion', 'Proba', 'contacta' sin tildes (sección, Probá, contactá).»; `src/components/ui/ErrorState.tsx:41` — «[strokeWidth] AlertCircle con strokeWidth 1.75 (regla 1.5).»; `src/components/ui/ErrorState.tsx:58` — «[strokeWidth] RefreshCw con strokeWidth 1.75.»; `src/components/ui/Section.tsx:42` — «[strokeWidth] Icono de seccion con strokeWidth 1.75.»; `src/components/ui/Stat.tsx:84` — «[strokeWidth] Icono con strokeWidth 1.75.»; `src/components/ui/Stat.tsx:93` — «[strokeWidth] TrendIcon con strokeWidth 2.5.»; `src/components/ui/StatCard.tsx:111` — «[strokeWidth] TrendIcon con strokeWidth 1.75 y sin aria-hidden.»; `src/components/ui/EmptyState.tsx:69` — «[contraste] Descripcion en text-zinc-600 sobre fondo oscuro (<4,5:1).»; `src/components/ui/PageHeader.tsx:59` — «[contraste] Eyebrow en text-zinc-600 a 11px.»; `src/components/ui/Stat.tsx:99` — «[contraste] Caption text-zinc-600 a 10px.»; `src/components/ui/SectionErrorBoundary.tsx:93` — «[contraste] Digest de referencia en text-zinc-700 a 10px.»; `src/components/ui/Card.tsx:82` — «[contraste] CardTitle text-[10px] text-zinc-500: tamano y contraste al limite.»; `src/components/ui/Textarea.tsx:28` — «[contraste] Placeholder zinc-600 mientras Input usa zinc-500 (gemelos que divergen).»; `src/components/ui/Badge.tsx:66` — «[otro] Tamano xs a 9px en mayusculas: legibilidad baja.»; `src/components/ui/Tabs.tsx:78` — «[otro] Contador de tab a 9px.»; `src/components/ui/SectionErrorBoundary.tsx:75` — «[otro] role=alert junto a aria-live=polite (señales contradictorias).»; `src/components/ui/SectionErrorBoundary.tsx:108` — «[otro] 'Volver al inicio' apunta fijo a /dashboard aun en boundaries de admin (depende del redirect del proxy).»; `src/components/ui/Modal.tsx:90` — «[otro] Boton cerrar sin estilo focus-visible.»; `src/components/ui/TypewriterText.tsx:67` — «[inline] <style> con @keyframes inline y animation por style en :77 en vez de clase Tailwind.»; `src/components/ui/IntroLockupText.tsx:251` — «[inline] <style> con @keyframes inline del cursor.»; `src/components/ui/buttons/MagneticCta.tsx:128` — «[inline] Borde conic-gradient y fondo por style inline.»; `src/components/ui/HeroMetrics.tsx:238` — «[inline] radial-gradient por style inline.»; `src/components/ui/HeroMetrics.tsx:14` — «[copy] Promesas sin respaldo ('2 segundos de carga máximo', '#1 en Google local').»; `src/components/ui/IntroLockupText.tsx:25` — «[copy] Slogan 'Construimos lo que imaginas' sin voseo (imaginás) frente al resto del copy rioplatense.»
+- Impacto: Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.
+- Propuesta: Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist. 25 entradas están en src/components/ui/* (FROZEN): esas quedan como decisión para Valentino.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.sitio-publico, lib.scripts, lib.ui
+
+### [DEU-105] Scripts descartables de B14 golpean producción (chat del bot bench-matsu, hasta 31 pedidos por corrida) aunque el encabezado del smoke dice que no modifica la base
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `scripts/_b14-4-smoke-prod.mjs:7` — «el encabezado dice «NO crea recursos, NO modifica DB»»; `scripts/_b14-4-smoke-prod.mjs:19` — «BASE_URL por defecto: el sitio de producción en Netlify»; `scripts/_b14-4-smoke-prod.mjs:136` — «POST al chat del bot bench-matsu: crea conversación y mensajes y llama a Vertex»; `scripts/_b14-4-smoke-prod.mjs:175` — «bucle de 31 POST al chat para provocar el rate limit»; `scripts/_b14-2-prod-bot-latency.mjs:21` — «otro script de B14 que conversa con el bot de producción»
+- Impacto: Correrlos por error suma conversaciones a las métricas de un bot de producción, consume Vertex y llena rate_limit. No piden confirmación ni un destino explícito, y su encabezado dice que se borran después de v1.0.0.
+- Propuesta: Borrar los _b14-2-*; si _b14-4 sigue, exigir B14_BASE_URL explícito y un --confirm-prod, y corregir el encabezado. El bloque de Sentry del smoke depende de /api/test-sentry (SEC-093).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-093]
+- Nodo(s): lib.scripts
+
+### [DEU-106] Scripts muertos y descartables que siguen en el repo: los sueltos de la raíz de la app reescriben un componente que ya no existe y varios de sprint ya cumplidos apuntan a producción
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `script.js:2` — «reescribe src/components/sections/OurServices.tsx, que ya no existe»; `replace_analytics.js:2` — «script suelto de reemplazo de texto»; `script_maps.js:5` — «script suelto de reemplazo de texto»; `find_unused.js:17` — «buscador de componentes sin uso por substring; nadie lo invoca»; `test-chat.mjs:1` — «importa node-fetch sin declararlo»; `scripts/_b13-latency-test.mjs:5` — «descartable de B13 que se declara borrable»; `scripts/_db-cleanup-inspect.mjs:3` — «descartable de limpieza ya cumplida»; `scripts/_experimental/fg2-gen-prompts.ts:2` — «experimento de FG2»
+- Impacto: Suman superficie (algunos apuntan a producción, DEU de B14) y confunden el inventario: no se sabe qué script sigue vigente.
+- Propuesta: Borrar los sueltos de la raíz de la app y los descartables cumplidos (git conserva la historia); dejar en scripts/ solo lo que nombra package.json o un doc vigente. Ver 10-PODA.md.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.scripts
 
 ## Calidad
 
@@ -4252,6 +4540,48 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h2.cli-shell, h4.adm-shell, lib.ui
 
+### [A11Y-035] Menú mobile del sitio: botón solo-ícono sin nombre accesible ni aria-expanded; la hoja no es diálogo ni cierra con Escape
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/components/layout/Navbar.tsx:232` — «<motion.button type="button" onClick={() => { // :232-258 sin aria-label ni aria-expanded»; `src/components/layout/Navbar.tsx:278` — «<Grid2x2 size={16} color="rgba(255,255,255,0.74)" />»; `src/components/layout/Navbar.tsx:286` — «<motion.div // hoja del menú: sin role=dialog, aria-modal ni manejo de foco»; `src/components/layout/Navbar.tsx:333` — «<button type="button" // Servicios: sin aria-expanded»
+- Impacto: En el celular, un usuario de lector de pantalla oye «botón» sin nombre en el único acceso a la navegación y a Acceder. Al abrir, el foco no entra al menú, Escape no lo cierra y Servicios no anuncia si está expandido. Incumple la quality baseline de CLAUDE.md (aria-label en todo ícono) y mantiene abierta la previa A11Y-02.
+- Propuesta: aria-label que alterne «Abrir menú»/«Cerrar menú», aria-expanded y aria-controls en el botón. La hoja con role='dialog' y aria-modal, foco al primer ítem y vuelta al botón al cerrar, más Escape. aria-expanded en Servicios.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [UX-035]
+- Nodo(s): h6, h6.vis-contacto, h1.auth-login
+
+### [A11Y-036] Scroll suave de Lenis y animaciones perpetuas del chrome público ignoran prefers-reduced-motion
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/components/layout/SmoothScroll.tsx:79` — «duration: 1.5,»; `src/app/globals.css:675` — «PENDIENTE (fuera del scope de S1, que es solo tokens): el scroll suave de Lenis (SmoothScroll.tsx) es JS y no se neutraliza desde CSS.»; `src/components/layout/Navbar.tsx:75` — «transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}»; `src/components/layout/Navbar.tsx:107` — «transition={{ duration: 1.05, repeat: Infinity, repeatDelay: 3.95, ease: "easeInOut" }}»; `src/components/canvas/DotMatrix.tsx:115` — «const time = state.clock.getElapsedTime() * 0.5; // Velocidad de la onda»; `raíz:DESIGN.md:271` — «Todo respeta 'prefers-reduced-motion' ('motion-reduce:transition-none').»
+- Impacto: Un visitante que pidió menos movimiento recibe igual el scroll inercial de 1,5 s, un logo que late sin fin, un brillo que cruza Acceder cada 5 s y la ola de puntos en login. Incumple WCAG 2.2.2 (movimiento de más de 5 s sin pausa) y la regla de DESIGN.md. No hay MotionConfig reducedMotion global.
+- Propuesta: No crear Lenis si matchMedia('(prefers-reduced-motion: reduce)') es true. useReducedMotion en BrandLogo y AccederButton (sin repeat) y DotMatrix en frame estático. Evaluar <MotionConfig reducedMotion='user'> en el layout raíz.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [A11Y-016], [A11Y-034], [UX-014], [A11Y-038]
+- Nodo(s): h6, h1.auth-login, lib.smooth-scroll
+
+### [A11Y-037] Modal compartido sin semantica de dialogo, sin Escape y sin foco atrapado ni devuelto
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/components/ui/Modal.tsx:60` — «<motion.div initial={{ opacity: 0 }} ... className="fixed inset-0 flex items-center justify-center bg-black/70 ..." onClick={closeOnBackdrop ? onClose : undefined}>»; `src/components/ui/Modal.tsx:81` — «{(title || description) && (»; `src/components/dashboard/VaultRequestModal.tsx:66` — «<Modal open={open} onClose={handleClose} title="Solicitar documento"»
+- Impacto: En el portal del cliente (boveda, historial de notificaciones, tablero de soporte) y en el setter, un usuario de teclado o lector de pantalla no sabe que se abrio un dialogo, el Tab sigue recorriendo la pagina de atras, Escape no cierra y al cerrar el foco no vuelve al disparador. Sin title/description tampoco hay boton de cierre.
+- Propuesta: Decision para Valentino (archivo FROZEN): agregar role=dialog, aria-modal y aria-labelledby/aria-describedby, cierre con Escape, foco inicial dentro, trampa de foco y retorno al disparador; boton de cierre siempre presente. Alternativa sin tocar el frozen: wrapper accesible propio y migrar los 8 consumidores.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [A11Y-003], [A11Y-011], [A11Y-019], [A11Y-026]
+- Nodo(s): lib.ui, h2.cli-cuenta, h2.cli-shell, h2.cli-soporte, h5.set-manual
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-168
+
+### [A11Y-038] Texto rotativo infinito en el titular del home sin pausa ni prefers-reduced-motion
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/components/ui/TypewriterText.tsx:57` — «useEffect(() => { const speed = isDeleting ? deletingSpeed : typingSpeed;»; `src/components/ui/TypewriterText.tsx:77` — «style={{ animation: 'blink-cursor 1s steps(1) infinite' }}»; `src/components/layout/Hero.tsx:694` — «<TypewriterText words={HERO_KEYWORDS} typingSpeed={70} deletingSpeed={40}»
+- Impacto: El titular del home escribe y borra palabras para siempre y el cursor parpadea sin fin; no hay control para pausar (WCAG 2.2.2, nivel A) y no respeta 'reducir movimiento'. Un lector de pantalla lee palabras a medio escribir.
+- Propuesta: Decision para Valentino (FROZEN): respetar useReducedMotion mostrando la palabra estatica, exponer el texto completo con aria-label/sr-only y el animado con aria-hidden, y detener el ciclo tras una vuelta o con un control de pausa. Alternativa libre: el Hero gatea el componente con reduced-motion.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: [A11Y-036]
+- Nodo(s): h6, lib.ui
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-171
+
 ### [A11Y-004] Filas del dropdown de notificaciones no operables con teclado
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: a11y
 - Confianza: PROBABLE
@@ -4413,6 +4743,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): lib.ui
+
+### [A11Y-039] Kit UI: estados que no se anuncian (carga sin role=status, Tabs sin aria-current, invalid sin aria-invalid fuera de Field)
+- Dominio: D9  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/components/ui/LoadingState.tsx:19` — «<div className={cn('flex flex-col items-center justify-center gap-3 py-12', className)}>»; `src/components/ui/Spinner.tsx:18` — «<Loader2 className={cn(sizes[size], 'animate-spin', className)} strokeWidth={1.5} />»; `src/components/ui/Tabs.tsx:108` — «<Link key={key} href={(item as NavTabItem).href} className={baseClasses}>»; `src/components/ui/Input.tsx:31` — «aria-invalid={ariaInvalid ?? (field.invalid ? true : undefined)}»
+- Impacto: En 35 usos de LoadingState, Spinner y los skeletons el lector de pantalla no anuncia que algo carga; las tabs de Cuenta, Resultados y Proyecto no marcan la pestana activa; un <Input invalid> fuera de Field se ve rojo pero no se anuncia invalido. Control positivo: setter-nav.tsx:98 usa aria-current y autosave-status.tsx:73 role=status.
+- Propuesta: Decision para Valentino (FROZEN): role=status + aria-live=polite + texto sr-only en LoadingState/Spinner/skeletons, aria-current='page' en Tabs modo nav y role=tablist/tab/aria-selected en modo value, y mapear la prop invalid a aria-invalid en Input/TextArea/Select.
+- Esfuerzo: S  ·  Zona: FROZEN
+- Relacionado: —
+- Nodo(s): lib.ui, h2.cli-cuenta, h2.cli-resultados, h2.cli-proyecto
 
 ## ZONA-FRANCO
 
@@ -4631,6 +4971,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: ZONA-FRANCO
 - Relacionado: —
 - Nodo(s): h5.set-dia.mis-numeros, h4.adm-leads.carga-por-setter, lib.leados, modelo.OsLead, modelo.OsLeadDossier
+
+### [BUG-177] Re-correr el backfill de caliente pisa las marcas manuales de Franco (sin guard ni dry-run)
+- Dominio: D9  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `scripts/admin-1a-backfill-caliente.ts:20` — «* Idempotente: setea 'caliente' al valor calculado para TODOS los leads (true a»; `scripts/admin-1a-backfill-caliente.ts:72` — «if (lead.caliente !== objetivo) { await prisma.osLead.update({»; `scripts/admin-1a-backfill-caliente.ts:42` — «if (!process.env.DATABASE_URL) {»; `src/app/(protected)/admin/leads/_actions/lead.actions.ts:165` — «data: { assignedToId: parsed.setterId, caliente: parsed.caliente },»
+- Impacto: admin-1b ya convirtió caliente en una marca manual del admin, pero el script sigue en el repo presentado como idempotente. Quien lo corra (sin --confirm, sin chequeo de host, cargando .env.local) devuelve en silencio cada marca manual a la regla de score, en la base a la que apunte. El efecto es que se pierden decisiones comerciales sin dejar rastro.
+- Propuesta: Coordinar con Franco: borrar el script (el one-shot ya se aplicó) o hacerlo abortar si existe algún lead cuyo caliente difiere de la regla, con --confirm y dry-run.
+- Esfuerzo: S  ·  Zona: ZONA-FRANCO
+- Relacionado: —
+- Nodo(s): h4.adm-leads, h5.adm-revision-demos, modelo.OsLead
 
 ### [DEU-074] deleteLead borra en cascada el trabajo del setter sin auditoría ni aviso
 - Dominio: D4  ·  Severidad: MEDIA  ·  Tipo: deuda

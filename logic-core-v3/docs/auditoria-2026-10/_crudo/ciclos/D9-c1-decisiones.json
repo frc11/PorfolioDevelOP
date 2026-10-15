@@ -1,0 +1,288 @@
+{
+ "D9-c1/PADRE/H01": {
+  "decision": "fusionar",
+  "con": "SEC-002",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: tests/helpers/auth.ts:21-25 (literales del SUPER_ADMIN y del cliente de prueba), prisma/seed.ts:76-79 (el seed actual usa entorno), b1:44 y b2:66 (SEC-003). git log -S del literal, corrido por un script que no lo imprime: entró a prisma/seed.ts en a3c3888c (2026-03-18) y salió en 4148e32d (2026-06-20); hoy sigue en README, STATUS, docs/bitacora-beta.md, docs/bitacora-roadmap.md, docs/demo-guion.md y el helper de e2e. Sube a ALTA por la rúbrica DEC-23 (escalada a SUPER_ADMIN con precondición fuerte: que la base de producción se haya sembrado en esa ventana) con el repo público (SEC-107); PROBABLE porque ese eslabón es de datos y lo cierra VH-002. SEC-002 es un bloque escrito a mano en F1: la severidad, el título y el impacto se corrigen en el registro después de f2-escribir (sec002.mjs)."
+ },
+ "D9-c1/PADRE/H02": {
+  "decision": "fusionar",
+  "con": "DEU-090",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: run-invariants.mjs:100-107 (filtra check:invariant y check:invariant:*) y package.json:55-74 (35 scripts test:*, ninguno lo corre ci.yml). Misma falta de cobertura del CI que DEU-090; suma la red de invariantes puros que existe y no corre.",
+  "destino": {
+   "titulo": "El CI solo corre tipos y los check:invariant*: no corre build, lint, npm audit, las fronteras, los 35 test:* puros ni los smokes de seguridad, y los jobs con base se saltean"
+  }
+ },
+ "D9-c1/PADRE/H03": {
+  "decision": "fusionar",
+  "con": "DEU-017",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Misma falta (sin base de test, las suites con base no corren en CI); suma que integration y setter ni siquiera figuran en ci.yml y que alerts-detector está excluida de todo runner."
+ },
+ "D9-c1/PADRE/H04": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: ci.yml:180-236 (el job E2E hace npm ci, generate, migrate deploy, playwright install y test:e2e, sin build ni seed), playwright.config.ts:29-34 (webServer npm run start) y git ls-tree de tests/e2e/22-visual-regression.spec.ts-snapshots (solo chromium-win32)."
+ },
+ "D9-c1/PADRE/H05": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Muestreado: 19-security.spec.ts:20-24 (skip con 404 sobre una ruta que no existe)."
+ },
+ "D9-c1/PADRE/H06": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: 30-onboarding-e2e-complete.spec.ts:217-247 (org más vieja con miembros, reenvío confirmado, acepta éxito o «Email falló») y 19-security.spec.ts:29-40 (con CRON_SECRET llama al detect-bot-issues real). Junta tres hallazgos del barrido con la misma causa (tests sin aislamiento sobre la base compartida)."
+ },
+ "D9-c1/PADRE/H07": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: _b14-4-smoke-prod.mjs:1-22 (encabezado «NO modifica DB», BASE_URL de producción), :130-140 y :170-180 (POST al chat; bucle de rate limit) y :210-216. El barrido la marcó MEDIA de seguridad; queda BAJA de deuda porque son scripts que el equipo corre a conciencia sobre un bot de demo, sin exposición a terceros."
+ },
+ "D9-c1/PADRE/H08": {
+  "decision": "fusionar",
+  "con": "SEC-093",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Mismo endpoint; suma que el smoke de producción depende de él (_b14-4-smoke-prod.mjs:214)."
+ },
+ "D9-c1/PADRE/H09": {
+  "decision": "fusionar",
+  "con": "SEC-071",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: db-restore-local.sh:74-94 (${TARGET_URL%%@*} deja usuario y contraseña; la última línea imprime la URL entera). El barrido también señaló que el caso de VH-141 atribuía el volcado de Vertex a check-env.js, que solo lista nombres (check-env.js:85-104): se corrigió en 08. Misma clase que SEC-071 (scripts que imprimen credenciales completas por stdout).",
+  "destino": {
+   "titulo": "Scripts que imprimen credenciales completas por stdout: encode-vertex-creds.js vuelca la service account de Vertex y db-restore-local.sh el usuario y la contraseña de la base destino, creyendo enmascararlos"
+  }
+ },
+ "D9-c1/PADRE/H10": {
+  "decision": "fusionar",
+  "con": "SEC-041",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: scripts/dev/_vseed.ts:1-24 (carga .env.local y escribe sin guard) y qa-seed-leads.ts:16-17. Misma causa que SEC-041 (escrituras sin guard de destino); suma los seeds y corridas de QA de scripts/dev y scripts/qa-corridas."
+ },
+ "D9-c1/PADRE/H11": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: b7-smoke-calcom.ts:74-79 y _db-cleanup-inspect.mjs:108-115 (sin copiar el email)."
+ },
+ "D9-c1/PADRE/H12": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Muestreado: los sueltos de la raíz de la app (script.js, replace_analytics.js, script_maps.js) y find_unused.js figuran en el inventario superficial sin consumidores."
+ },
+ "D9-c1/PADRE/H13": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: regression/cases.ts:352-370 (teardown con conversationsCount: 0) y run-baseline.ts:8-14."
+ },
+ "D9-c1/D9-L1/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: SmoothScroll.tsx:30 (isPortal propio con solo /admin y /dashboard) contra publicRoute.ts:16 (PORTAL_PREFIXES con /embed y /setter; isPortalRoute en :28-30), setter-shell.tsx:28 (fixed inset-0) y :78 (el scroll vive en <main>), y git grep de lenis-prevent en setter/ sin resultados. El verificador la bajó a MEDIA (rol interno, workaround con la barra y el teclado, táctiles sin Lenis) y se le sigue. El arreglo está en SmoothScroll.tsx (libre); la superficie es la del setter (DEU-082: CLAUDE.md no clasifica /setter como portal).",
+  "severidad": "MEDIA",
+  "relacionados_ids": [
+   "DEU-082",
+   "PERF-016"
+  ]
+ },
+ "D9-c1/D9-L2/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: Hero.tsx:731-736 (dos MagneticCta sin href ni onClick) y MagneticCta.tsx:97-107 (handleTrigger solo agrega el ripple y llama a un onClick indefinido). El verificador la bajó a MEDIA (el Navbar, el Footer y PortalDemoCTA ofrecen contacto y Portfolio está abajo) y se le sigue. Se arregla en Hero.tsx sin tocar ui/* (MagneticCta ya acepta href y onClick); el home v3 de rediseno/home reemplaza este Hero.",
+  "severidad": "MEDIA"
+ },
+ "D9-c1/D9-L1/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: _b14-2-cleanup-bench-prod.ts:100-103 (prisma.message.deleteMany por conversationId) y schema.prisma:593-603 (Message no tiene conversationId): el cleanup aborta antes de borrar conversaciones, bot y org."
+ },
+ "D9-c1/D9-L1/H07": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: Navbar.tsx:75 (repeat: Infinity) y SmoothScroll.tsx sin ninguna mención de reduce.",
+  "relacionados_ids": [
+   "A11Y-016",
+   "A11Y-034",
+   "UX-014"
+  ]
+ },
+ "D9-c1/D9-L2/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: ui/Modal.tsx sin role, aria-modal, manejo de Escape ni keydown (git grep sin resultados). Archivo congelado: el arreglo es decisión para Valentino (11-CONGELADOS.md).",
+  "relacionados_ids": [
+   "A11Y-003",
+   "A11Y-011",
+   "A11Y-019",
+   "A11Y-026"
+  ]
+ },
+ "D9-c1/D9-L2/H12": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: use-step-action.ts:53-58 (await action() dentro de startTransition sin try/catch)."
+ },
+ "D9-c1/D9-L2/H22": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: use-is-client.ts:12 se declara copia 1:1 de la del módulo del chatbot; LogoStrokeOverlay y MagneticCta tienen su propia copia de useIsClient y de cn."
+ },
+ "D9-c1/D9-L1/H03": {
+  "decision": "fusionar",
+  "con": "SEC-041",
+  "nota_padre": "Misma causa que SEC-041 (escrituras sin guard de destino); suma seed-latency (cae en cualquier bot), seed-events y cleanup-messages-demo. El barrido de superficiales trajo los seeds de scripts/dev y las corridas de QA (PADRE/H10).",
+  "destino": {
+   "titulo": "Scripts y seeds que escriben en cualquier DATABASE_URL sin guard de destino: el seed del chatbot, update-proactive-prompts, seed-latency (cae en cualquier bot), los seeds de scripts/dev y las corridas de QA"
+  }
+ },
+ "D9-c1/D9-L1/H10": {
+  "decision": "fusionar",
+  "con": "BUG-172",
+  "nota_padre": "Misma versión fija; suma el VersionBadge con «v1.0.0» literal en el pie de los portales (VersionBadge.tsx:1-8)."
+ },
+ "D9-c1/D9-L1/H12": {
+  "decision": "fusionar",
+  "con": "SEC-107",
+  "nota_padre": "Muestreado: _b14-2-seed-bench-prod.ts:93 imprime el host y seed-alerts.ts:302 el email del SUPER_ADMIN; regression/purge.ts:25 versiona el host de la rama dev de Neon. Es dato de infraestructura en un repo público, la misma clase que SEC-107.",
+  "verificado_padre": true
+ },
+ "D9-c1/D9-L2/H06": {
+  "decision": "fusionar",
+  "con": "BUG-034",
+  "nota_padre": "Misma causa (fechas formateadas en el servidor sin timeZone; dates-ar existe y no se adopta); suma los componentes compartidos del lote."
+ },
+ "D9-c1/D9-L2/H07": {
+  "decision": "fusionar",
+  "con": "DEU-017",
+  "nota_padre": "Muestreado: tests/helpers/setter-db.ts:3 carga .env.local y :14 crea un PrismaClient sin guard de host; DEU-017 ya lo cita (:376) como parte de la falta de base de test. Suma que el seed de galería también lo usa.",
+  "verificado_padre": true
+ },
+ "D9-c1/D9-L2/H16": {
+  "decision": "fusionar",
+  "con": "DEU-039",
+  "nota_padre": "Mismo uso de triggerTransition en portales; suma la demora fija de 300 ms y los clicks descartados mientras isAnimating."
+ },
+ "D9-c1/D9-L2/H18": {
+  "decision": "fusionar",
+  "con": "DEU-094",
+  "nota_padre": "Misma dependencia fantasma (framer-motion importado sin declarar)."
+ },
+ "D9-c1/D9-L2/H19": {
+  "decision": "fusionar",
+  "con": "PERF-009",
+  "nota_padre": "Mismo defecto (canvas del avatar con dpr hasta 2 y sin pausa fuera de viewport)."
+ },
+ "D9-c1/D9-L2/H09": {
+  "decision": "fusionar",
+  "con": "D9-c1/D9-L1/H13",
+  "nota_padre": "Mismo hallazgo (convenciones contradictorias entre CLAUDE.md, DESIGN.md y PRODUCT.md)."
+ },
+ "D9-c1/D9-L2/H17": {
+  "decision": "fusionar",
+  "con": "D9-c1/D9-L1/H15",
+  "nota_padre": "Muestreado: git grep de any explícitos en src da 6 líneas (pagespeed.ts:77, ClientSettingsForm.tsx:36, LegacyNeuroAvatar.tsx:601 y más). Mismo hallazgo.",
+  "verificado_padre": true
+ },
+ "D9-c1/D9-L1/H14": {
+  "decision": "fusionar",
+  "con": "D9-c1/D9-L2/H08",
+  "nota_padre": "Mismo archivo y misma conclusión: design-tokens.ts tiene consumidores vivos de zIndex, así que el plan de borrarlo como desconectado rompe Modal, setter-shell y DashboardLayoutClient."
+ },
+ "D9-c1/D9-L1/H16": {
+  "decision": "fusionar",
+  "con": "D9-c1/D9-L2/H03",
+  "nota_padre": "Misma causa (números de WhatsApp fuera de lib/whatsapp.ts)."
+ },
+ "D9-c1/D9-L1/H04": {
+  "decision": "aceptar"
+ },
+ "D9-c1/D9-L1/H05": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "PERF-009",
+   "A11Y-034"
+  ]
+ },
+ "D9-c1/D9-L1/H06": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "UX-035"
+  ]
+ },
+ "D9-c1/D9-L1/H08": {
+  "decision": "aceptar"
+ },
+ "D9-c1/D9-L1/H09": {
+  "decision": "aceptar"
+ },
+ "D9-c1/D9-L1/H11": {
+  "decision": "aceptar"
+ },
+ "D9-c1/D9-L2/H04": {
+  "decision": "aceptar"
+ },
+ "D9-c1/D9-L2/H11": {
+  "decision": "aceptar"
+ },
+ "D9-c1/D9-L2/H13": {
+  "decision": "aceptar"
+ },
+ "D9-c1/D9-L2/H14": {
+  "decision": "aceptar"
+ },
+ "D9-c1/D9-L2/H15": {
+  "decision": "aceptar"
+ },
+ "D9-c1/D9-L1/H13": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "DEU-028"
+  ]
+ },
+ "D9-c1/D9-L1/H15": {
+  "decision": "aceptar",
+  "titulo": "Regla «cero any» incumplida: any explícitos en src (pagespeed, ClientSettingsForm, LegacyNeuroAvatar y otros) y en scripts y seeds, contra un CLAUDE.md que la da por cumplida",
+  "relacionados_ids": [
+   "DEU-071",
+   "DEU-015",
+   "DEU-046",
+   "DEU-043"
+  ]
+ },
+ "D9-c1/D9-L2/H03": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-144",
+   "BUG-054"
+  ]
+ },
+ "D9-c1/D9-L2/H05": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "PERF-016"
+  ]
+ },
+ "D9-c1/D9-L2/H08": {
+  "decision": "aceptar",
+  "titulo": "design-tokens.ts: solo zIndex tiene consumidores (Modal, setter-shell, DashboardLayoutClient), sus colores por servicio contradicen CLAUDE.md y globals.css, y el plan de borrarlo como «desconectado» rompería esos consumidores"
+ },
+ "D9-c1/D9-L2/H10": {
+  "decision": "aceptar",
+  "relacionados_tmp": [
+   "D9-L1/H07"
+  ]
+ },
+ "D9-c1/D9-L2/H20": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "UX-020"
+  ]
+ },
+ "D9-c1/D9-L2/H21": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-034"
+  ]
+ }
+}

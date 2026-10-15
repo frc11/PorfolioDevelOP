@@ -7,11 +7,11 @@
 | Área | Herramientas medidas | Funcionalidades | En L3 o más | Faltantes de L3 más comunes | FAL |
 |---|---:|---:|---:|---|---:|
 | h1 · Acceso | 5 / 5 | 15 | 0 | Sentry (11), autonomía (9), errores (8) | 3 |
-| h2 · Portal del cliente | 16 / 16 | 110 | 12 | Sentry (72), sin mocks ni TODO (54), errores (53) | 11 |
+| h2 · Portal del cliente | 16 / 16 | 112 | 13 | Sentry (72), sin mocks ni TODO (55), errores (53) | 11 |
 | h3 · Chatbot centralizado | 8 / 8 | 112 | 3 | Sentry (66), errores (64), autonomía (52) | 6 |
 | h4 · Panel de admin | 13 / 13 | 115 | 3 | Sentry (82), errores (69), validación en servidor (42) | 8 |
-| h5 · Setter y LeadOS | 7 / 7 | 76 | 0 | autonomía (38), Sentry (37), permisos y tenant (26) | 3 |
-| h6 · Entradas públicas que alimentan lo interno | 2 / 2 | 8 | 0 | Sentry (6), errores (5), autonomía (4) | 0 |
+| h5 · Setter y LeadOS | 7 / 7 | 78 | 0 | autonomía (39), Sentry (39), permisos y tenant (26) | 3 |
+| h6 · Entradas públicas que alimentan lo interno | 3 / 2 | 13 | 0 | Sentry (7), errores (7), autonomía (7) | 0 |
 
 ## h1 · Acceso
 
@@ -94,14 +94,16 @@
 
 ### h2.cli-shell — Shell del portal (sidebar, notificaciones, novedades)
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 7 funcionalidades: 1×L3, 6×L2).
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 9 funcionalidades: 2×L3, 7×L2).
 - Criterios de L3 que faltan en alguna funcionalidad: mobile, sin mocks ni TODO, autonomía, permisos y tenant, errores, validación en servidor, Sentry.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h2.cli-shell.banner-suscripcion-vencida` Banner de suscripcion vencida | L2 | errores, Sentry, autonomía | layout.tsx:147 -> SubscriptionBanner.tsx:5-10 -> subscription.ts:4-12 (findUnique por organizationId). |
+| `h2.cli-shell.boundary-de-error` Pantalla de error por seccion del portal | L3 | — | dashboard/error.tsx:13 -> SectionErrorBoundary.tsx:52-68 (logger + Sentry.captureException) -> :85-96 copy util + digest -> :101 reset. |
 | `h2.cli-shell.campana-notificaciones` Campana de notificaciones e historial | L2 | permisos y tenant, errores, validación en servidor, Sentry, autonomía | layout.tsx:101-105 -> DashboardLayoutClient.tsx:148 -> NotificationCenter.tsx:41-127 -> dashboard-actions.ts:188-218 / notifications.ts:46-93. No L3 por scoping sin userId y errores ignorados. |
 | `h2.cli-shell.layout-y-navegacion` Shell del portal y gate de onboarding | L3 | — | proxy.ts:154 -> layout.tsx:72-113 -> DashboardLayoutClient; cumple los nueve. Deuda: gate salteable por header (layout.tsx:123-129) y lastDashboardVisit del admin en soporte (:79-88). |
+| `h2.cli-shell.marca-y-version` Marca y versión en el shell (cliente y admin) | L2 | sin mocks ni TODO | SidebarNav.tsx:23 y admin-sidebar.tsx:27 -> BrandMark.tsx:18-65; DashboardLayoutClient.tsx:181 y AdminLayoutClient.tsx:106 -> VersionBadge.tsx:1-8. La versión mostrada es un literal sin release (VersionBadge.tsx:1). |
 | `h2.cli-shell.navegacion-sidebar` Navegacion del portal (sidebar y drawer mobile) | L2 | mobile, sin mocks ni TODO, autonomía | Camino feliz: layout.tsx:74 resolveOrgId -> :115 activeModuleSlugs -> DashboardLayoutClient.tsx:94-100 -> SidebarNav.tsx:101-103, :123-172. No L3: item de Email marketing con slug que no coincide con el catalogo (SidebarNav.tsx:78) y drawer cerrado enfocable. |
 | `h2.cli-shell.notificaciones` Centro de notificaciones | L2 | permisos y tenant, mobile, Sentry, sin mocks ni TODO | layout.tsx:101-105 → NotificationCenter.tsx:114 → notifications.ts:46-66; historial NotificationHistoryModal.tsx:34 → notifications.ts:73-93. |
 | `h2.cli-shell.novedades` Novedades del panel | L2 | errores, mobile, Sentry | layout.tsx:110-112 → get-announcements-for-org.ts:31-69 → AnnouncementsFeed.tsx:57-66 → announcements.ts:17-52. |
@@ -1048,7 +1050,7 @@
 
 ### h5.set-manual — Manual del lead
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 27 funcionalidades: 2×L1, 23×L2, 2×L?).
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 29 funcionalidades: 2×L1, 25×L2, 2×L?).
 - Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, errores, Sentry, autonomía, vacíos, sin mocks ni TODO, validación en servidor, carga, mobile.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
@@ -1056,12 +1058,14 @@
 | `h5.set-manual.agenda` Agendar la reunión en Cal.com (m16) | L2 | permisos y tenant, validación en servidor, Sentry, autonomía | m16-agenda.tsx:236-244 -> agenda-form.tsx:107-119 ofrecerHorarios -> :122-137 ConfirmarReunionSchema -> :139-155 confirmarReunion -> agenda.actions.ts:185 getCalConfigLeadOS -> agenda.ts:57-97. Necesita Cal.com configurado; si no, devuelve AGENDA_NO_CONECTADA  |
 | `h5.set-manual.agenda-reunion` Ofrecer horarios y agendar la reunión (Cal.com) | L1 | permisos y tenant, errores, Sentry, autonomía | Código completo (agenda.actions.ts:125-271) pero inoperante: ninguna org tiene Cal.com y no hay camino de escritura de la config (agenda.ts:63-69, git grep sin writes); nunca se ejecutó (PLAN-931) |
 | `h5.set-manual.aterrizaje-y-guardia` Pantalla del manual con guardia de servidor | L2 | mobile, autonomía | [paso]/page.tsx:64 -> _data.ts:145-234 -> [paso]/page.tsx:69-73 guardia -> :213-438 slots -> :442 PantallaManual. Falla L3 por autonomía (herramientas sin URL) y por mobile no verificable dentro del lote. |
+| `h5.set-manual.autosave-del-trabajo-escrito` Autosave y guardia de salida del trabajo escrito | L2 | errores, Sentry, autonomía | use-autosave.ts:148-157 -> :131-140 -> :91-128 -> save (server action de dominio, fuera del lote); use-unsaved-guard.ts:81-93 beforeunload. |
 | `h5.set-manual.ayudas-de-paso` Ayudas de paso: TeachPanel, ejemplos ideales, bloques copiables, guardrail de rol y cartel del canal | L2 | errores | copy-block.tsx:64 -> :37 -> :50; teach-panel.tsx:100-148 desde GUIA_PASOS; ejemplo-ideal.tsx:79-131; guardrail-rol.tsx:35-39 monta CopyBlock; canal-seguridad.tsx:11-56 lee CANAL_INSTAGRAM (flow-content.ts:317). |
 | `h5.set-manual.borrador` Publicar y registrar el borrador (m13) | L2 | permisos y tenant, Sentry | m13-borrador.tsx:147 -> borrador-form.tsx:54-92 guardarDraftUrl -> router.refresh en :90 -> estado publicado en :112-150 con el enlace al chequeo (enlace-chequeo.tsx:63-66). |
 | `h5.set-manual.brief` Decidir cómo va a ser la demo (m6) | L2 | errores, Sentry, sin mocks ni TODO, autonomía | m6-brief.tsx:90 -> brief-form.tsx:131-147 -> dossier.actions.ts:186-216 (requireSetter :191, BriefInputSchema :196, getOwnedDossier :201, transición :208-209). |
 | `h5.set-manual.cabecera-e-historial` Cabecera del lead e historial al pie | L2 | vacíos, mobile, autonomía | _data.ts:236-293 serializa -> [paso]/page.tsx:99-116 cabecera e historial -> :139/:170/:450 |
 | `h5.set-manual.cadencia-follow-up` Cadencia +2/+2/+3 y corte | L2 | errores, Sentry, autonomía | follow-up.ts:3-13 -> os-commercial.ts:68-82 (null limpia el toque) -> _data.ts:182 -> seguimiento-form.tsx:87-89 |
 | `h5.set-manual.chequeo-final` Chequeo final y envío a revisión (m14) | L2 | permisos y tenant, mobile, Sentry | m14-chequeo.tsx:147 -> chequeo-form.tsx:146-157 autoguardado -> :160-181 guardarSelfCheck + enviarARevision; el server re-valida con selfCheckAprobado (flow.ts:204-209). |
+| `h5.set-manual.ciclo-submit-de-pasos` Ciclo submit de los pasos del manual | L2 | errores, Sentry | use-step-action.ts:53-66 (action fuera del lote -> toast -> router.refresh). |
 | `h5.set-manual.construccion` Construcción de la demo (mc1/mc2) | L2 | permisos y tenant, errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | m-construccion.tsx:271-278 -> construccion-ctas.tsx:28-38 iniciarConstruccion; tildes en m-construccion.tsx:302-313 -> fase-auto-reporte.tsx:67-81 guardarProgreso. Hay una carrera conocida cuando se tilda en ráfaga. |
 | `h5.set-manual.derivacion-de-pantalla` Pantalla actual del manual | L2 | autonomía | manual/_data.ts:213 -> manual.ts:687 -> :446 completadasDe -> :509 posicionDe (:520, :542, :552 -> paso.ts:251, :656 -> flow.ts:92) -> :691-697 -> [paso]/page.tsx:69-73 guard. No llega a L3: APROBADA con toque vencido y CERRADO dan órdenes contradictorias (hal |
 | `h5.set-manual.envio-demo` Mandar el link aprobado (m15) | L2 | permisos y tenant, Sentry, autonomía | m15-envio.tsx:97-102 gateEnvioDemo -> envio-form.tsx:52-57 barra -> :37-46 enviarDemoAprobada (idempotente según el toast de :42-44). |
@@ -1109,7 +1113,7 @@
 
 ### h6.vis-contacto — Formulario de contacto público
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 7 funcionalidades: 7×L2).
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 10 funcionalidades: 9×L2, 1×L1).
 - Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, Sentry, errores, mobile, sin mocks ni TODO, autonomía, validación en servidor.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
@@ -1118,9 +1122,12 @@
 | `h6.vis-contacto.atribucion-referido` Atribución de referido desde /contact?ref= | L2 | errores, Sentry | contact.ts:49 → :68-70 → flujo D2 'Referidos: código, link y atribución pública' |
 | `h6.vis-contacto.canales-directos` Canales directos: WhatsApp, llamada y email | L2 | sin mocks ni TODO | contact/page.tsx:96-103 (getWhatsappHref de lib/whatsapp) → :281-334 y :336-341. |
 | `h6.vis-contacto.captura-referido` Captura del código de referido en /contact?ref= | L2 | mobile, autonomía | contact/page.tsx:71-75 → :149 → contact.ts:42, :68-69. Solo en desktop. |
+| `h6.vis-contacto.cta-hero-home` CTA del hero del home | L1 | sin mocks ni TODO, autonomía | Hero.tsx:731-736 renderiza MagneticCta sin href ni onClick; MagneticCta.tsx:97-107 solo agrega una onda: el boton existe pero no lleva a ningun lado (maqueta). |
+| `h6.vis-contacto.cta-whatsapp` CTA de WhatsApp centralizado | L2 | sin mocks ni TODO | contact/page.tsx:96 -> whatsapp.ts:55-57 -> :41-45. Quedan 4 destinos fuera del modulo (Footer.tsx:8, CalculadorIA.tsx:316, ChatbotUpsellLanding.tsx:15, PortalDemoCTA.tsx:235). |
 | `h6.vis-contacto.enviar-formulario` Enviar formulario de contacto | L2 | errores, validación en servidor, Sentry | contact/page.tsx:66 → contact.ts:100-105 → :23-33 → :35-47 → :62-64 → :72-85 → contact/page.tsx:212-213 |
 | `h6.vis-contacto.formulario` Formulario de contacto público | L2 | errores, mobile, Sentry, sin mocks ni TODO, autonomía | En desktop: contact/page.tsx:66, :148-224 → submitContactForm (src/lib/actions/contact.ts:100). En mobile no existe (:119). |
 | `h6.vis-contacto.formulario-pie-home` Formulario de contacto del pie del home | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | page.tsx:42 -> Footer.tsx:446 -> :589 -> :78-89 POST al webhook de n8n y pantalla de éxito. |
+| `h6.vis-contacto.intro-branded` Intro branded de marketing | L2 | errores, Sentry, autonomía | Camino feliz: Preloader.tsx:302 -> marketing-routes.ts:54 -> MarketingIntro.tsx:172-310 -> marketing-routes.ts:75. Bloquea el scroll hasta 6 s (MarketingIntro.tsx:46,175) y no reporta fallas a Sentry. |
 
 ### h6.vis-optout — Baja de emails de marketing
 

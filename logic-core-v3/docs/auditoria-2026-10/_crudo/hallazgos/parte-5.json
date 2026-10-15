@@ -3,6 +3,103 @@
  "partes": 6,
  "hallazgos": [
   {
+   "id": "SEC-092",
+   "prefijo": "SEC",
+   "titulo": "toErrorMessage (action-utils, FROZEN-inferido) devuelve al cliente el message crudo de cualquier Error: la alerta D3-A4 quedó resuelta solo para ZodError (configuración, novedades, tareas, horas, tickets) y dos rutas devuelven String(error)",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+     "linea": 171,
+     "fragmento": "return fail(toErrorMessage(error, 'No se pudo actualizar la configuracion.'))"
+    },
+    {
+     "ruta": "src/lib/action-utils.ts",
+     "linea": 31,
+     "fragmento": "if (error instanceof Error) {\n    return error.message\n  }"
+    },
+    {
+     "ruta": "src/lib/action-utils.ts",
+     "linea": 28,
+     "fragmento": "if (error instanceof ZodError) {\n    return error.issues[0]?.message ?? fallback"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/announcements/_actions/announcements.actions.ts",
+     "linea": 56,
+     "fragmento": "return fail(toErrorMessage(error, 'No se pudo publicar la novedad.'))"
+    },
+    {
+     "ruta": "src/lib/action-utils.ts",
+     "linea": 32,
+     "fragmento": "return error.message"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/announcements/_components/announcement-publisher.tsx",
+     "linea": 178,
+     "fragmento": "{serverError}"
+    },
+    {
+     "ruta": "src/app/api/admin/alerts/trigger-detector/route.ts",
+     "linea": 15,
+     "fragmento": "return NextResponse.json({ ok: false, error: String(error) }, { status: 500 })"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/_actions/task.actions.ts",
+     "linea": 193,
+     "fragmento": "return fail(error instanceof Error ? error.message : 'Failed to create task')"
+    }
+   ],
+   "impacto": "El fix 5e33733 resolvió el ZodError (action-utils.ts:28-29). Sin embargo, un error de ensureAgencySettingsRecord o de agencySettings.update (settings.actions.ts:145-166), por ejemplo un PrismaClientKnownRequestError o un fallo de conexión, devuelve su message completo a la UI: invocación de Prisma, modelo, campo y posiblemente el host. Solo lo ve un SUPER_ADMIN, pero viola 'Never expose internal error messages'. Lo mismo pasa en project.actions.ts:829.",
+   "propuesta": "Decisión para Valentino (action-utils.ts es FROZEN-inferido): que toErrorMessage solo pase el message de una clase UserFacingError, y fallback para el resto. Mientras tanto, los callers pueden mapear errores de Prisma a fallback.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "h4.adm-config",
+    "lib.action-utils",
+    "h4.adm-novedades.publicar",
+    "lib.actions",
+    "int.sentry",
+    "h4.adm-alertas",
+    "h4.adm-proyectos.tareas",
+    "h4.adm-tickets"
+   ],
+   "relacionados_ids": [
+    "SEC-062"
+   ],
+   "previas": [],
+   "relacionados_texto": "D3-A4; PLAN-552; patrón D1-c1 'Mensajes internos de error devueltos al cliente'",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L6",
+    "tmp": "D3-c1/D3-L6/H17",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: action-utils.ts:24-34 (toErrorMessage: el ZodError se resolvió en 5e33733, pero cualquier Error devuelve su message) y settings.actions.ts:168-171 (updateSettings le pasa el error de Prisma). action-utils.ts es FROZEN-inferido (DEC-10): el cambio del helper es decisión para Valentino; los llamadores pueden mapear a mensajes fijos.",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L1/H14",
+      "titulo": "Actions de novedades devuelven error.message crudo a la UI (D3-A4 resuelto solo para ZodError)",
+      "severidad": "BAJA",
+      "nota_padre": "Misma causa: announcements.actions.ts:56 pasa el error a toErrorMessage, que devuelve error.message de cualquier Error (action-utils.ts:31-32)."
+     },
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L5/H15",
+      "titulo": "Errores internos devueltos al admin: String(error) en trigger-detector y send-now, y error.message de Prisma en las actions de tareas, horas, tickets y configuración",
+      "severidad": "BAJA",
+      "nota_padre": "Misma causa (toErrorMessage en tareas, horas, tickets y configuración); suma String(error) en trigger-detector y send-now."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "DEU-069",
    "prefijo": "DEU",
    "titulo": "Higiene de UI — D3: 180 detalles cosméticos (tilde 54, copy 51, strokeWidth 30, contraste 23, inline 11, otro 11)",
@@ -1361,6 +1458,11 @@
      "ruta": "src/instrumentation.ts",
      "linea": 49,
      "fragmento": "export const onRequestError = Sentry.captureRequestError"
+    },
+    {
+     "ruta": "scripts/_b14-4-smoke-prod.mjs",
+     "linea": 214,
+     "fragmento": "el bloque 6 del smoke espera un 500 de /api/test-sentry"
     }
    ],
    "impacto": "Con Sentry activo, un loop de curl anónimo llena la cuota de eventos y tapa los errores reales de los clientes; además es una ruta 500 permanente en producción.",
@@ -1383,7 +1485,16 @@
     "tmp": "D7-c1/D7-L1/H08",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/PADRE/H08",
+      "titulo": "/api/test-sentry lo usa además el smoke de producción",
+      "severidad": "MEDIA",
+      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Mismo endpoint; suma que el smoke de producción depende de él (_b14-4-smoke-prod.mjs:214)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6592,7 +6703,7 @@
   {
    "id": "DEU-090",
    "prefijo": "DEU",
-   "titulo": "El CI solo corre tipos e invariantes: no corre build, lint, npm audit ni las fronteras, y los jobs con base se saltean",
+   "titulo": "El CI solo corre tipos y los check:invariant*: no corre build, lint, npm audit, las fronteras, los 35 test:* puros ni los smokes de seguridad, y los jobs con base se saltean",
    "dominio": "D8",
    "severidad": "MEDIA",
    "tipo": "deuda",
@@ -6623,6 +6734,16 @@
      "ruta": "package.json",
      "linea": 55,
      "fragmento": "\"test:ev1\": \"npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts\","
+    },
+    {
+     "ruta": "package.json",
+     "linea": 68,
+     "fragmento": "test:t02: el invariante de auth del cron cleanup-old-events tampoco corre"
+    },
+    {
+     "ruta": "playwright.helpers-probe.config.ts",
+     "linea": 16,
+     "fragmento": "la suite de sabotaje de helpers se declara apta para CI sin base, y ci.yml no la corre"
     }
    ],
    "impacto": "Un build roto, un import que rompe la frontera de aislamiento chatbot/motor o una dependencia con aviso crítico llegan a main sin rojo. El build solo lo detecta Netlify al desplegar y el lint nadie, porque Next 16 ya no lintea en el build y no hay hooks versionados. Los 28 invariantes test:* del chatbot (package.json:55-82) no entran al agregado y no corren nunca en CI. Tampoco hay bloque permissions, así que el GITHUB_TOKEN queda con los permisos por defecto del repo.",
@@ -6631,7 +6752,8 @@
    "zona": "libre",
    "nodos": [
     "int.github-actions",
-    "lib.isolation"
+    "lib.isolation",
+    "lib.tests"
    ],
    "relacionados_ids": [
     "DEU-017"
@@ -6645,7 +6767,26 @@
     "tmp": "D8-c1/D8-L1/H05",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/PADRE/H02",
+      "titulo": "El runner de invariantes no descubre los 35 scripts test:* ni los smokes de seguridad: la red de verificación pura nunca corre en CI",
+      "severidad": "MEDIA",
+      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: run-invariants.mjs:100-107 (filtra check:invariant y check:invariant:*) y package.json:55-74 (35 scripts test:*, ninguno lo corre ci.yml). Misma falta de cobertura del CI que DEU-090; suma la red de invariantes puros que existe y no corre."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/PADRE/H02",
+      "antes": {
+       "titulo": "El CI solo corre tipos e invariantes: no corre build, lint, npm audit ni las fronteras, y los jobs con base se saltean"
+      },
+      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: run-invariants.mjs:100-107 (filtra check:invariant y check:invariant:*) y package.json:55-74 (35 scripts test:*, ninguno lo corre ci.yml). Misma falta de cobertura del CI que DEU-090; suma la red de invariantes puros que existe y no corre."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6988,6 +7129,16 @@
      "ruta": "package.json",
      "linea": 3,
      "fragmento": "\"version\": \"0.1.0\","
+    },
+    {
+     "ruta": "src/components/layout/VersionBadge.tsx",
+     "linea": 1,
+     "fragmento": "const APP_VERSION = 'v1.0.0'"
+    },
+    {
+     "ruta": "src/components/dashboard/DashboardLayoutClient.tsx",
+     "linea": 181,
+     "fragmento": "<VersionBadge />"
     }
    ],
    "impacto": "Ni el smoke de producción (scripts/_b14-4-smoke-prod.mjs:82) ni un monitoreo externo pueden confirmar qué commit está desplegado: el endpoint siempre dice '1.0.0' y la 'fecha de build' cambia en cada pedido. next.config.ts no inyecta ninguna variable env.",
@@ -6995,7 +7146,9 @@
    "esfuerzo": "S",
    "zona": "libre",
    "nodos": [
-    "int.netlify"
+    "int.netlify",
+    "h2.cli-shell",
+    "h4.adm-shell"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -7007,7 +7160,16 @@
     "tmp": "D8-c1/D8-L1/H12",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/D9-L1/H10",
+      "titulo": "Versión 'v1.0.0' fija en el pie de los portales y en /api/version, sin release que la respalde",
+      "severidad": "BAJA",
+      "nota_padre": "Misma versión fija; suma el VersionBadge con «v1.0.0» literal en el pie de los portales (VersionBadge.tsx:1-8)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -7146,160 +7308,6 @@
     "tmp": "D8-c1/D8-L1/H15",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "UX-057",
-   "prefijo": "UX",
-   "titulo": "Las fronteras raíz (error y 404) son de marketing y también atienden /embed y los notFound() de admin y dashboard",
-   "dominio": "D8",
-   "severidad": "BAJA",
-   "tipo": "ux",
-   "tipo_detalle": "ux",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/embed/[slug]/page.tsx",
-     "linea": 37,
-     "fragmento": "if (!bot) notFound()"
-    },
-    {
-     "ruta": "src/app/not-found.tsx",
-     "linea": 145,
-     "fragmento": "Este rincón del internet<br />no existe todavía."
-    },
-    {
-     "ruta": "src/app/not-found.tsx",
-     "linea": 177,
-     "fragmento": "<Link\n    href=\"/contact\""
-    },
-    {
-     "ruta": "src/app/error.tsx",
-     "linea": 57,
-     "fragmento": "<a\n    href=\"/\""
-    }
-   ],
-   "impacto": "Si un cliente copia mal el snippet, o si su bot se borra, su propio sitio puede mostrar dentro del iframe del widget el 404 animado de develOP con 'Volver al inicio' y 'Contactarnos'; un error de render muestra 'Algo salió mal' con un link a develop.com.ar. Depende de si widget.js oculta el iframe sin señal de listo. En el panel, admin y dashboard no tienen not-found.tsx propio (hay 7 notFound() en esas ramas) y un recurso inexistente saca al usuario al sitio público.",
-   "propuesta": "Agregar not-found.tsx y error.tsx propios para /embed (silenciosos, que avisen al widget) y not-found.tsx en dashboard y admin con vuelta al panel.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h3.vis-widget-cliente",
-    "h2.cli-shell",
-    "h4.adm-shell"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "D5 'Degradado y errores visibles al visitante'",
-   "vh": "VH-163",
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H16",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "A11Y-034",
-   "prefijo": "A11Y",
-   "titulo": "La página 404 anima un canvas de pantalla completa en un bucle infinito sin respetar reduced-motion ni pausarse",
-   "dominio": "D8",
-   "severidad": "BAJA",
-   "tipo": "a11y",
-   "tipo_detalle": "a11y",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/not-found.tsx",
-     "linea": 58,
-     "fragmento": "time += 0.016\nanimId = requestAnimationFrame(draw)"
-    },
-    {
-     "ruta": "src/app/not-found.tsx",
-     "linea": 121,
-     "fragmento": "transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}"
-    },
-    {
-     "ruta": "src/app/globals.css",
-     "linea": 673,
-     "fragmento": "Alcance: CSS. Las animaciones de Framer Motion ya se apagan por\n`useReducedMotion()` / `motion-reduce:` en los componentes que lo consumen."
-    }
-   ],
-   "impacto": "Quien pidió menos movimiento a nivel sistema igual recibe 1.120 puntos animados por cuadro y un pulso infinito. El bloque global de reduced-motion solo cubre CSS. En mobile también gasta batería mientras la pestaña está abierta. Incumple las reglas de CLAUDE.md sobre IntersectionObserver y reduced-motion.",
-   "propuesta": "Consultar prefers-reduced-motion (el hook use-reduced-motion existente) para dibujar un frame estático y pausar con visibilitychange o IntersectionObserver.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.ui"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H17",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-093",
-   "prefijo": "DEU",
-   "titulo": "Los distDir alternativos no están excluidos de eslint ni de .gitignore (perf, corrida-visual) y tsconfig incluye tipos de builds de experimentos",
-   "dominio": "D8",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "eslint.config.mjs",
-     "linea": 9,
-     "fragmento": "globalIgnores([\n  // Default ignores of eslint-config-next:\n  \".next/**\","
-    },
-    {
-     "ruta": ".gitignore",
-     "linea": 17,
-     "fragmento": "/.next/\n/.next-galeria/\n/.next-setter/"
-    },
-    {
-     "ruta": "tsconfig.json",
-     "linea": 43,
-     "fragmento": "\".next-perf-a/types/**/*.ts\","
-    },
-    {
-     "ruta": "raíz:.github/workflows/ci.yml",
-     "linea": 27,
-     "fragmento": "#   (Nota al pasar, sin arreglar: `npm run lint` a secas reporta ~108.000"
-    }
-   ],
-   "impacto": "'npm run lint' a secas lintea bundles minificados (~108.000 problemas), lo que vuelve inútil medir la deuda real. Los .next-perf-* y .next-corrida-visual no están en .gitignore: Tailwind los escanea en local y un 'git add' los tomaría. .gitignore repite las entradas de .next-setter y .next-galeria (:18-19 y :24-25) y la de vertex-credentials.json (:55 y :58).",
-   "propuesta": "Un patrón '.next*/' en globalIgnores y en .gitignore. Sacar de tsconfig los includes de .next-perf-*, que no tienen script que los genere. Limpiar los duplicados.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "int.github-actions",
-    "lib.next-config"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-1022; PLAN-1037; PLAN-1008",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H18",
-    "verificado_padre": true,
-    "nota_padre": "Muestreado: .gitignore:16-25 cubre /.next/, /.next-galeria/ y /.next-setter/ (estas dos, repetidas) pero no .next-perf-* ni .next-corrida-visual; tsconfig.json:38-48 incluye los tipos de .next-perf-a, -b y -base.",
     "verificador": null
    },
    "estado": "vigente"

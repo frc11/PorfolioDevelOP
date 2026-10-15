@@ -1,0 +1,1597 @@
+{
+ "generado": "2026-10-15",
+ "base": "57c421bc",
+ "rediseno": "bead847c @ bead847c (merge-base 57c421bc)",
+ "items": [
+  {
+   "grupo": "PROMPT + CLAUDE.md",
+   "ruta": "src/components/3d/HeroArtifact.tsx",
+   "lineas": 161,
+   "commits": 5,
+   "ultimos_90_dias": 0,
+   "primero": "cb21742d|2026-01-08|Commit 1: ananashe",
+   "ultimo": "b498f478|2026-03-30|feat: enhance preloader functionality and UI",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 2,
+   "por_dominio": {
+    "PUB": 2
+   },
+   "en_depcruise": true,
+   "hallazgos": [],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 7,
+    "reglas": [
+     "CLAUDE.md:11:Never modify `src/components/3d/HeroArtifact.tsx`. It is frozen.",
+     "CLAUDE.md:167:| `src/components/3d/HeroArtifact.tsx` | Never modify |",
+     "AGENTS.md:76:🔴 **NUNCA modificar `src/components/3d/HeroArtifact.tsx`** — es intocable. El artefacto 3D del hero está optimizado y cualquier cambio rompe la experiencia visual del landing."
+    ],
+    "ejemplos": [
+     "docs/metodo/MAPA-LEADOS.md:361:| **`src/components/3d/HeroArtifact.tsx`** | — | Frozen (ajeno a LeadOS, pero rige en el repo). |",
+     "docs/microaudit-frozen-frontera-CO.md:20:Never modify `src/components/3d/HeroArtifact.tsx`. It is frozen.",
+     "docs/microaudit-frozen-frontera-CO.md:44:| `src/components/3d/HeroArtifact.tsx` | Never modify |",
+     "docs/probe-b2-hero-nav.md:64:- **Definición:** `src/components/3d/HeroArtifact.tsx:14`."
+    ]
+   }
+  },
+  {
+   "grupo": "PROMPT + CLAUDE.md",
+   "ruta": "src/context/TransitionContext.tsx",
+   "lineas": 175,
+   "commits": 6,
+   "ultimos_90_dias": 0,
+   "primero": "6a823670|2026-02-10|commit menu terminado",
+   "ultimo": "bd198842|2026-05-30|cambiado el navbar y la transicion, falta el preloader",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 9,
+   "por_dominio": {
+    "D3": 1,
+    "D5": 1,
+    "D4": 1,
+    "D8": 1,
+    "D9": 2,
+    "PUB": 3
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "DEU-039 MEDIA",
+    "DEU-082 BAJA"
+   ],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 7,
+    "reglas": [
+     "CLAUDE.md:168:| `src/context/TransitionContext.tsx` | Always use `triggerTransition()` |"
+    ],
+    "ejemplos": [
+     "docs/auditoria-total-pre-deploy.md:59:| **O-11** | **Value de contexts sin memoizar.** `value={{...}}` crea objeto nuevo en cada render → consumidores re-render",
+     "docs/client-portal/lane-inicio-explore.md:385:- `src/context/TransitionContext.tsx`, `PreloaderContext.tsx`",
+     "docs/client-portal/relevamiento-6-secciones.md:55:- **COMPARTIDOS-READ:** `FadeIn.tsx`, `StaggerWrapper.tsx`, `components/ui/*`, `lib/actions/upsell.ts` (solo l",
+     "docs/microaudit-frozen-frontera-CO.md:45:| `src/context/TransitionContext.tsx` | Always use `triggerTransition()` |"
+    ]
+   }
+  },
+  {
+   "grupo": "PROMPT + CLAUDE.md",
+   "ruta": "src/context/PreloaderContext.tsx",
+   "lineas": 172,
+   "commits": 3,
+   "ultimos_90_dias": 0,
+   "primero": "b498f478|2026-03-30|feat: enhance preloader functionality and UI",
+   "ultimo": "ff6871e4|2026-06-02|comot preloader hecho, pagina base terminada, optimizar y actualizar contenido",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 6,
+   "por_dominio": {
+    "D8": 1,
+    "D5": 1,
+    "D9": 2,
+    "PUB": 2
+   },
+   "en_depcruise": true,
+   "hallazgos": [],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 12,
+    "reglas": [
+     "CLAUDE.md:169:| `src/context/PreloaderContext.tsx` | Do not break the phase flow |"
+    ],
+    "ejemplos": [
+     "docs/auditoria-total-pre-deploy.md:59:| **O-11** | **Value de contexts sin memoizar.** `value={{...}}` crea objeto nuevo en cada render → consumidores re-render",
+     "docs/bitacora-beta-3.md:3704:| `context/PreloaderContext.tsx:4` | 7× `useMotionValue` | No — y el archivo está **congelado** |",
+     "docs/bitacora-roadmap.md:4803:**Archivos leídos:** `src/context/PreloaderContext.tsx`, `src/components/ui/Preloader.tsx` (líneas 216-590), `src/components/layou",
+     "docs/bitacora-roadmap.md:4815:**Archivo modificado:** `src/context/PreloaderContext.tsx` (única edición)."
+    ]
+   }
+  },
+  {
+   "grupo": "PROMPT + CLAUDE.md",
+   "ruta": "prisma/schema.prisma",
+   "lineas": 2247,
+   "commits": 50,
+   "ultimos_90_dias": 0,
+   "primero": "a3c3888c|2026-03-18|feat: enhance VaultAutomation component styles and layout",
+   "ultimo": "62994be5|2026-07-15|Merge branch 'b1-s2-bsp-outbound'",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 0,
+   "por_dominio": {},
+   "en_depcruise": false,
+   "hallazgos": [
+    "BUG-002 ALTA",
+    "SEC-014 MEDIA",
+    "BUG-004 BAJA",
+    "SEC-018 BAJA",
+    "BUG-005 BAJA",
+    "FAL-001 BAJA",
+    "SEC-031 MEDIA",
+    "BUG-010 MEDIA",
+    "FAL-004 MEDIA",
+    "DEU-005 MEDIA",
+    "DEU-006 MEDIA",
+    "DEU-007 MEDIA",
+    "PERF-001 BAJA",
+    "DEU-008 BAJA",
+    "DEU-010 BAJA",
+    "DEU-011 BAJA",
+    "DEU-012 BAJA",
+    "TEC-001 BAJA",
+    "SEC-035 MEDIA",
+    "BUG-013 MEDIA",
+    "BUG-015 MEDIA",
+    "SEC-036 ALTA",
+    "BUG-018 BAJA",
+    "BUG-020 MEDIA",
+    "SEC-037 ALTA",
+    "FAL-005 MEDIA",
+    "FAL-006 MEDIA",
+    "SEC-038 MEDIA",
+    "SEC-039 MEDIA",
+    "BUG-024 MEDIA",
+    "FAL-007 MEDIA",
+    "BUG-025 MEDIA",
+    "DEU-021 BAJA",
+    "SEC-048 ALTA",
+    "DEU-034 BAJA",
+    "PERF-006 BAJA",
+    "FAL-017 MEDIA",
+    "BUG-084 MEDIA",
+    "SEC-069 BAJA",
+    "UX-028 BAJA",
+    "BUG-089 BAJA",
+    "FAL-019 MEDIA",
+    "FAL-020 MEDIA",
+    "BUG-101 BAJA",
+    "FAL-022 MEDIA",
+    "DEU-053 BAJA",
+    "DEU-074 MEDIA",
+    "DEU-084 BAJA",
+    "BUG-170 BAJA"
+   ],
+   "pod": [
+    "POD-203",
+    "POD-204"
+   ],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 148,
+    "reglas": [
+     "CLAUDE.md:170:| `prisma/schema.prisma` | `migrate reset` is prohibited |",
+     "AGENTS.md:145:1. Editar `prisma/schema.prisma`"
+    ],
+    "ejemplos": [
+     "docs/admin-changelog/Configuracion rdc.md:99:`src/components/ui/*` · `prisma/schema.prisma` · `@/lib/prisma` · `@/auth` · `@/lib/auth-guards` · `@/lib/action-ut",
+     "docs/audit-chatbot-runtime.md:69:- Schema: `sessionId String @unique` en `Conversation` ([schema.prisma:1358](../prisma/schema.prisma#L1358)). Resolver: `findFi",
+     "docs/audit-repo-20260707.md:26:`prisma/schema.prisma:1358` + `server/conversation/resolver.ts:70-108`. El lookup es `findFirst({ botConfigId, sessionId })` pero",
+     "docs/audit-repo-20260707.md:193:`prisma/schema.prisma:528-536, 584-593, 659-673`: `Service`, `Message` e `Invoice` sin `@@index([organizationId])` mientras todo"
+    ]
+   }
+  },
+  {
+   "grupo": "PROMPT",
+   "ruta": "src/auth.ts",
+   "lineas": 275,
+   "commits": 14,
+   "ultimos_90_dias": 0,
+   "primero": "a3c3888c|2026-03-18|feat: enhance VaultAutomation component styles and layout",
+   "ultimo": "9cfa58cf|2026-07-03|fix(auth): magic link funcional por Brevo + fix extraccion de email en v5",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 70,
+   "por_dominio": {
+    "D3": 20,
+    "D1": 9,
+    "D2": 21,
+    "D5": 13,
+    "D4": 1,
+    "D7": 6
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "SEC-005 CRÍTICA",
+    "SEC-006 ALTA",
+    "BUG-001 MEDIA",
+    "SEC-007 ALTA",
+    "BUG-002 ALTA",
+    "SEC-008 BAJA",
+    "SEC-009 MEDIA",
+    "SEC-010 MEDIA",
+    "BUG-003 MEDIA",
+    "UX-002 MEDIA",
+    "SEC-014 MEDIA",
+    "DEU-002 BAJA",
+    "SEC-018 BAJA",
+    "BUG-005 BAJA",
+    "FAL-001 BAJA",
+    "BUG-006 MEDIA",
+    "BUG-007 MEDIA",
+    "FAL-003 MEDIA",
+    "SEC-033 BAJA"
+   ],
+   "pod": [
+    "POD-283"
+   ],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 161,
+    "reglas": [],
+    "ejemplos": [
+     "docs/admin-changelog/Inteligencia rdc.md:71:- **Compartidos NO tocados (verificado):** `lib/hover.ts`, `ui/*`, `prisma.ts`, `auth.ts`, `schema.prisma`, `queries",
+     "docs/audit-repo-20260707.md:184:`src/auth.ts:205-231`. `getUserAccessState()` (join a memberships+organization) corre en CADA request con `!user`, no solo en si",
+     "docs/audit-repo-20260707.md:187:`src/auth.ts:26-37, 146-149`: `orgMemberships: { take: 1 }` sin `orderBy` (×2). El schema permite N memberships y nada lo impide",
+     "docs/auditoria-seguridad-2026-05.md:64:| **JWT post-reset** | Tokens viejos válidos tras cambio de password | **ABIERTO** | `src/app/reset-password/actions.ts` "
+    ]
+   }
+  },
+  {
+   "grupo": "PROMPT",
+   "ruta": "src/lib/prisma.ts",
+   "lineas": 8,
+   "commits": 1,
+   "ultimos_90_dias": 0,
+   "primero": "a3c3888c|2026-03-18|feat: enhance VaultAutomation component styles and layout",
+   "ultimo": "a3c3888c|2026-03-18|feat: enhance VaultAutomation component styles and layout",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 183,
+   "por_dominio": {
+    "D3": 52,
+    "D1": 12,
+    "D2": 57,
+    "D6": 2,
+    "D5": 18,
+    "D7": 14,
+    "D4": 26,
+    "tests": 2
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "BUG-020 MEDIA",
+    "BUG-139 MEDIA"
+   ],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 36,
+    "reglas": [],
+    "ejemplos": [
+     "docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:225:`src/lib/prisma.ts` (285 bytes). Un solo `PrismaClient`, un solo `DATABASE_URL`, un solo `schema.prisma` de ",
+     "docs/bitacora-roadmap.md:238:git diff next.config.ts src/components/ui/Button.tsx src/app/page.tsx src/lib/cn.ts src/lib/prisma.ts",
+     "docs/bitacora-roadmap.md:12427:  primer caso de un tsx puro contra la Neon real, y `src/lib/prisma.ts` construye",
+     "docs/bitacora-roadmap.md:13070:- `git diff`: 5 archivos, **`lib/prisma.ts` NO tocado** (config de conexión intacta, como manda el scope)."
+    ]
+   }
+  },
+  {
+   "grupo": "PROMPT",
+   "ruta": "src/actions/dashboard-actions.ts",
+   "lineas": 218,
+   "commits": 5,
+   "ultimos_90_dias": 0,
+   "primero": "35933244|2026-03-23|feat: Introduce `logic-core-v3` application with new dashboard, admin, onboarding, and support modules, and remove legacy documentation files.",
+   "ultimo": "f8a4525f|2026-05-15|feat: implement comprehensive chatbot module with intent detection, logging, and admin dashboard integration",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 3,
+   "por_dominio": {
+    "D2": 3
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "SEC-038 MEDIA",
+    "BUG-044 MEDIA",
+    "BUG-062 BAJA",
+    "BUG-127 MEDIA"
+   ],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 18,
+    "reglas": [],
+    "ejemplos": [
+     "docs/audit-repo-20260707.md:132:`src/actions/dashboard-actions.ts:188-218`. Valida org pero no destinatario: cualquier miembro marca leídas notificaciones de ot",
+     "docs/baselines/2026-07-auditoria-seguridad.md:283:| approveTaskAction / rejectTaskAction | action | auth + session.user.organizationId + Zod + task.project.orga",
+     "docs/baselines/2026-07-auditoria-seguridad.md:284:| markNotificationAsRead | action | auth + session.user.organizationId + comparación de org | src/actions/dash",
+     "docs/baselines/2026-07-auditoria-seguridad.md:361:actions/dashboard-actions.ts:12 | approveTaskAction | taskId | ORG-SESSION(ciego) | scope :35"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/utils.ts",
+   "lineas": 48,
+   "commits": 3,
+   "ultimos_90_dias": 2,
+   "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+   "ultimo": "df62c74c|2026-08-03|fix(design-system): calibración del piso móvil, acentos, CTA e índice",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 89,
+   "por_dominio": {
+    "D3": 13,
+    "D9": 22,
+    "D2": 18,
+    "D4": 21,
+    "D5": 5,
+    "PUB": 10
+   },
+   "en_depcruise": true,
+   "hallazgos": [],
+   "pod": [],
+   "rediseno_home": "100/1",
+   "menciones": {
+    "total": 4,
+    "reglas": [],
+    "ejemplos": [
+     "docs/bitacora-rediseno.md:438:| `npx eslint` sobre `src/app/styleguide/`, `design-system/`, `lib/utils.ts` | ✅ 0 problemas |",
+     "docs/bitacora-rediseno.md:3643:  `lib/utils.ts`, `lib/design-tokens.ts`: sin cambios.",
+     "docs/probe-monolito-censo.md:775:`sections/AIBentoGrid.tsx` · `sections/ROICalculator.tsx` **[verificado en esta sesión]** · `sections/AIPipelineSection.tsx` (s",
+     "docs/probe-monolito-censo.md:795:| `lib/utils.ts` (`cn`) | **No** | 🔒 76 importadores repo-wide |"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/action-utils.ts",
+   "lineas": 35,
+   "commits": 3,
+   "ultimos_90_dias": 1,
+   "primero": "29ebe8ee|2026-04-04|Commit AGENCY OS V0",
+   "ultimo": "b6b21326|2026-07-23|sprint 4.1 — errores persistentes y en criollo, sin jerga de motor (B-08/C-10/C-12/C-13/C-23)",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 33,
+   "por_dominio": {
+    "D3": 11,
+    "D5": 1,
+    "D4": 16,
+    "D2": 2,
+    "D1": 1,
+    "D9": 2
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "SEC-016 MEDIA",
+    "SEC-062 BAJA",
+    "SEC-092 BAJA",
+    "SEC-101 MEDIA"
+   ],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 4,
+    "reglas": [],
+    "ejemplos": [
+     "docs/baselines/2026-07-auditoria-seguridad.md:3195:**Mecanismo.** El patrón es doble. Por un lado están las copias inline `catch (error) { return fail(error ins",
+     "docs/baselines/2026-07-auditoria-seguridad.md:3199:- `src/lib/action-utils.ts:19-31`",
+     "docs/baselines/2026-07-auditoria-seguridad.md:3214:**Fix.** Convertir `toErrorMessage` en la frontera de saneamiento en vez del canal de fuga. En `src/lib/actio",
+     "docs/client-portal/relevamiento-6-secciones.md:66:- **COMPARTIDOS-READ:** `FadeIn.tsx`, `StaggerWrapper.tsx`, `components/ui/*`, `lib/actions/messages.ts` (Vaul"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/use-is-client.ts",
+   "lineas": 21,
+   "commits": 1,
+   "ultimos_90_dias": 0,
+   "primero": "8247460f|2026-06-11|feat(ui): listbox custom con estética develOP en Select",
+   "ultimo": "8247460f|2026-06-11|feat(ui): listbox custom con estética develOP en Select",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 17,
+   "por_dominio": {
+    "D3": 12,
+    "D9": 1,
+    "D5": 2,
+    "D4": 1,
+    "D2": 1
+   },
+   "en_depcruise": true,
+   "hallazgos": [],
+   "pod": [
+    "POD-326",
+    "POD-355"
+   ],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 1,
+    "reglas": [],
+    "ejemplos": [
+     "docs/admin-changelog/Chatbot rdc.md:68:- Portal a `document.body` (por el trap del `backdrop-filter`), flip-up cerca del borde, close-on-scroll con filtro `pane"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/auth-guards.ts",
+   "lineas": 21,
+   "commits": 2,
+   "ultimos_90_dias": 0,
+   "primero": "29ebe8ee|2026-04-04|Commit AGENCY OS V0",
+   "ultimo": "40853cd3|2026-06-12|chore(b8a): baseline — estado B1-B7 heredado sin commitear (pre-auditoria)",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 38,
+   "por_dominio": {
+    "D3": 17,
+    "D5": 1,
+    "D4": 19,
+    "D2": 1
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "BUG-136 BAJA",
+    "DEU-083 BAJA"
+   ],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 21,
+    "reglas": [],
+    "ejemplos": [
+     "docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:200:- `requireSetter()` vive en `src/lib/auth-guards.ts:13-21`, **en el mismo archivo que `requireSuperAdmin()`*",
+     "docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:239:`src/lib/auth-guards.ts` — `requireSuperAdmin` y `requireSetter` juntos.",
+     "docs/auditorias/A2-SETTER-DOCS-VIABILIDAD-2026-08.md:99:`src/lib/auth-guards.ts:13-21`:",
+     "docs/baselines/2026-07-auditoria-seguridad.md:109:LOS TRES DIALECTOS DE \"SOY SUPER-ADMIN\" (respuesta directa a la consigna). Son SEIS, no tres, y **ninguno es m"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/audit-log.ts",
+   "lineas": 66,
+   "commits": 1,
+   "ultimos_90_dias": 0,
+   "primero": "6b66835f|2026-05-17|feat: audit logging integrated into critical server actions",
+   "ultimo": "6b66835f|2026-05-17|feat: audit logging integrated into critical server actions",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 31,
+   "por_dominio": {
+    "D3": 9,
+    "D5": 17,
+    "D1": 3,
+    "D7": 2
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "SEC-026 BAJA",
+    "SEC-030 MEDIA"
+   ],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 3,
+    "reglas": [],
+    "ejemplos": [
+     "docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md:876:| 3 | **El audit log es genérico** | `prisma/schema.prisma:1652-1677`: `targetType`/`targetId` son `Stri",
+     "docs/baselines/2026-07-auditoria-seguridad.md:2039:- `src/lib/audit-log.ts:5-14`",
+     "docs/baselines/2026-07-auditoria-seguridad.md:2050:**Qué encontró el verificador.** Verifiqué los tres huecos por separado. (1) src/actions/auth-actions.ts tien"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/logger.ts",
+   "lineas": 75,
+   "commits": 3,
+   "ultimos_90_dias": 0,
+   "primero": "b7d97e4c|2026-02-06|Commit: IA ANDANDO",
+   "ultimo": "76baeb77|2026-05-30|commit our services terminada",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 10,
+   "por_dominio": {
+    "D9": 1,
+    "D5": 5,
+    "D4": 3,
+    "D8": 1
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "DEU-051 MEDIA"
+   ],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 1,
+    "reglas": [],
+    "ejemplos": [
+     "docs/bitacora-roadmap.md:7362:- **Logger existente**: [src/lib/logger.ts](src/lib/logger.ts) con API `logger.error(msg, meta?)`. **Ninguno** de los error.tsx ex"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/alerts.ts",
+   "lineas": 297,
+   "commits": 2,
+   "ultimos_90_dias": 0,
+   "primero": "1c252a50|2026-03-27|feat(logic-core-v3): add impersonation, leads CRM, agency settings, client health, premium modules, and cron alerts",
+   "ultimo": "8e0bd3ab|2026-06-05|refactor(subscription): leer plan.name via relacion (FASE 1 drop planName)",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 8,
+   "por_dominio": {
+    "D5": 1,
+    "D2": 4,
+    "D7": 1,
+    "D3": 2
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "FAL-006 MEDIA",
+    "FAL-014 MEDIA",
+    "BUG-056 BAJA",
+    "SEC-054 MEDIA",
+    "DEU-062 BAJA",
+    "FAL-026 MEDIA",
+    "SEC-089 BAJA",
+    "BUG-137 BAJA",
+    "PERF-011 BAJA"
+   ],
+   "pod": [
+    "POD-062",
+    "POD-357"
+   ],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 6,
+    "reglas": [],
+    "ejemplos": [
+     "docs/baselines/2026-07-auditoria-seguridad.md:2775:- `src/lib/alerts.ts:131`",
+     "docs/baselines/2026-07-auditoria-seguridad.md:2777:- `src/lib/alerts.ts:163`",
+     "docs/baselines/2026-07-auditoria-seguridad.md:2779:- `src/lib/alerts.ts:64`",
+     "docs/bitacora-roadmap.md:2762:3. **Alerta upsell mapea a `LEAD_UPSELL` (toggle `alertOnLeads`)**, no agregué `QUOTA_EXHAUSTED` como type nuevo. Razón: una cuota"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/tz-ar.ts",
+   "lineas": 97,
+   "commits": 1,
+   "ultimos_90_dias": 0,
+   "primero": "fff3b24e|2026-05-25|feat(chatbot): add CRM sync retry functionality and integration management",
+   "ultimo": "fff3b24e|2026-05-25|feat(chatbot): add CRM sync retry functionality and integration management",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 12,
+   "por_dominio": {
+    "D5": 6,
+    "D2": 5,
+    "D9": 1
+   },
+   "en_depcruise": true,
+   "hallazgos": [],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 4,
+    "reglas": [],
+    "ejemplos": [
+     "docs/bitacora-roadmap.md:4154:- Nuevo helper `src/lib/tz-ar.ts` con `startOfTodayInAR()`, `startOfDateRange(range)`, `withinDateRange()`. Compartible server+cli",
+     "docs/bitacora-roadmap.md:4202:- **+** `src/lib/tz-ar.ts` — nuevo helper centralizado (`TZ_AR`, `startOfTodayInAR`, `startOfDateRange`, `withinDateRange`, type `",
+     "docs/bitacora-roadmap.md:4238:- ✅ Helper TZ AR centralizado (`src/lib/tz-ar.ts`) — previene tercer bug de TZ.",
+     "docs/bitacora-roadmap.md:4928:`src/lib/tz-ar.ts` — nuevo helper `getISOWeekKeyAR(now)`. Devuelve `YYYY-Www`. Lógica:"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/dates-ar.ts",
+   "lineas": 283,
+   "commits": 2,
+   "ultimos_90_dias": 1,
+   "primero": "ab8de0d6|2026-06-30|feat(dashboard): P1.A helper fechas AR + averageTicketUsd",
+   "ultimo": "34e15156|2026-08-12|fix(leados): F1 — la fecha de postergación es un día del calendario, y el contador cuenta mensajes",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 13,
+   "por_dominio": {
+    "D5": 1,
+    "D2": 6,
+    "D4": 2,
+    "tests": 4
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "BUG-034 MEDIA",
+    "BUG-049 MEDIA",
+    "DEU-081 BAJA"
+   ],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 6,
+    "reglas": [],
+    "ejemplos": [
+     "docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:252:| `src/lib/dates-ar.ts` + `tz-ar.ts` | 2 | Utilidades puras, copiables |",
+     "docs/bitacora-beta-3.md:4169:canónico `src/lib/dates-ar.ts` (que ya modela AR = UTC-3 fijo) suma `parseCalendarDayAR`:",
+     "docs/bitacora-beta-3.md:4715:tres invariantes nuevos y `src/lib/dates-ar.ts`. El merge **no tocó** `prisma/schema.prisma`,",
+     "docs/bitacora-beta-3.md:6483:- **F1-a, la postergación es un día de calendario.** `parseCalendarDayAR` en `src/lib/dates-ar.ts`"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/design-tokens.ts",
+   "lineas": 248,
+   "commits": 5,
+   "ultimos_90_dias": 1,
+   "primero": "53789b5c|2026-05-17|feat: design tokens + canonical Tailwind patterns",
+   "ultimo": "596b74eb|2026-08-04|fix(home): legibilidad del artefacto 3D y limpieza de muertos",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 5,
+   "por_dominio": {
+    "D9": 1,
+    "D2": 1,
+    "D4": 3
+   },
+   "en_depcruise": true,
+   "hallazgos": [
+    "A11Y-003 MEDIA"
+   ],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 13,
+    "reglas": [],
+    "ejemplos": [
+     "docs/auditoria-consistencia-setter.md:7:**Fecha:** 2026-06-23 · **Zona:** `src/app/(protected)/setter/**` + primitivas compartidas de `src/components/ui/**` que",
+     "docs/b9-changelog.md:72:Toca el kit compartido (`src/components/ui/Modal.tsx` + token `zIndex` en `src/lib/design-tokens.ts`). Lo usan dashboard/admin/setter/de",
+     "docs/b9-plan-visual.md:24:LeadOS **ya** tiene un lenguaje propio y coherente; no está roto ni feo. Vive en `src/lib/design-tokens.ts`, `src/lib/design-patterns.",
+     "docs/bitacora-beta.md:235:- `src/lib/design-tokens.ts` (tier `app*` en `zIndex`)"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/use-reduced-motion.ts",
+   "lineas": 19,
+   "commits": 1,
+   "ultimos_90_dias": 0,
+   "primero": "9c60088b|2026-05-18|feat: motion variants library + reduced-motion hook",
+   "ultimo": "9c60088b|2026-05-18|feat: motion variants library + reduced-motion hook",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 25,
+   "por_dominio": {
+    "D3": 14,
+    "D9": 2,
+    "D4": 2,
+    "D5": 3,
+    "D2": 4
+   },
+   "en_depcruise": true,
+   "hallazgos": [],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 2,
+    "reglas": [],
+    "ejemplos": [
+     "docs/bitacora-roadmap.md:8711:- `useReducedMotion` (hook local en `src/lib/use-reduced-motion.ts`): importado en 67 archivos. ✅",
+     "docs/probe-monolito-censo.md:794:| `lib/use-reduced-motion.ts` | **No** | SIGUE EN USO — 25 importadores |"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/hover.ts",
+   "lineas": 10,
+   "commits": 2,
+   "ultimos_90_dias": 0,
+   "primero": "96deb5f8|2026-06-17|feat(chatbots): hover uniforme en tabs",
+   "ultimo": "c127467d|2026-06-18|fix(hover): quitar will-change-transform de todos los hovers del admin",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 41,
+   "por_dominio": {
+    "D3": 10,
+    "D5": 10,
+    "D4": 2,
+    "D2": 19
+   },
+   "en_depcruise": true,
+   "hallazgos": [],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 15,
+    "reglas": [],
+    "ejemplos": [
+     "docs/admin-changelog/Configuracion rdc.md:99:`src/components/ui/*` · `prisma/schema.prisma` · `@/lib/prisma` · `@/auth` · `@/lib/auth-guards` · `@/lib/action-ut",
+     "docs/admin-changelog/Inteligencia rdc.md:71:- **Compartidos NO tocados (verificado):** `lib/hover.ts`, `ui/*`, `prisma.ts`, `auth.ts`, `schema.prisma`, `queries",
+     "docs/admin-changelog/Inteligencia rdc.md:75:- `chartCardHoverCls` local (no se agregó al `lib/hover.ts` compartido — es específico del caso recharts).  ",
+     "docs/bitacora-roadmap.md:11318:Se reusó **`adminHoverCls`** (`src/lib/hover.ts`) — el mismo hover que ya usan las cards hermanas del home (`WeekResultsGrid`, `A"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/motion-variants.ts",
+   "lineas": 79,
+   "commits": 1,
+   "ultimos_90_dias": 0,
+   "primero": "9c60088b|2026-05-18|feat: motion variants library + reduced-motion hook",
+   "ultimo": "9c60088b|2026-05-18|feat: motion variants library + reduced-motion hook",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 14,
+   "por_dominio": {
+    "D3": 9,
+    "D9": 1,
+    "D5": 3,
+    "D2": 1
+   },
+   "en_depcruise": true,
+   "hallazgos": [],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 7,
+    "reglas": [],
+    "ejemplos": [
+     "docs/bitacora-beta-3.md:3699:Doce consumidores reales de `motion/react` más uno type-only (`lib/motion-variants.ts:1`, que se borra",
+     "docs/probe-monolito-censo.md:790:| `lib/motion-variants.ts` | **No** | SIGUE EN USO — 14 importadores, todos portales |",
+     "docs/probe-motion-sitio.md:51:- [src/lib/motion-variants.ts](../src/lib/motion-variants.ts) define `standardEase`, `fadeUp`, `staggerContainer`, `buttonPress` (",
+     "docs/probe-motion-sitio.md:168:| **A16** | Botón de submit de contacto — [contact/page.tsx:217-221](../src/app/contact/page.tsx#L217) | Agregar `whileTap={{ sca"
+    ]
+   }
+  },
+  {
+   "grupo": "DEC-10 (inferido)",
+   "ruta": "src/lib/chromeReveal.ts",
+   "lineas": 27,
+   "commits": 2,
+   "ultimos_90_dias": 1,
+   "primero": "f25f6d6d|2026-06-08|commit estetica chatbot terminada",
+   "ultimo": "9a18efb0|2026-07-31|refactor(home): purga del intro, el 3D y la navegacion vieja",
+   "commits_que_nombran_congelamiento": [],
+   "dependientes": 2,
+   "por_dominio": {
+    "D5": 1,
+    "PUB": 1
+   },
+   "en_depcruise": true,
+   "hallazgos": [],
+   "pod": [],
+   "rediseno_home": "sin cambios",
+   "menciones": {
+    "total": 3,
+    "reglas": [],
+    "ejemplos": [
+     "docs/bitacora-rediseno.md:1882:`src/lib/whatsapp.ts` · `src/lib/chromeReveal.ts` ·",
+     "docs/bitacora-rediseno.md:3641:- `layout/ChatWidgetMount.tsx`, `lib/chromeReveal.ts` (diff solo comentarios),",
+     "docs/probe-monolito-censo.md:791:| `lib/chromeReveal.ts` | **No** | SIGUE EN USO — `LogicCompanion`, `DynamicDock` |"
+    ]
+   }
+  },
+  {
+   "grupo": "PROMPT (src/components/ui/* como grupo)",
+   "ruta": "src/components/ui/*",
+   "archivos": 43,
+   "lineas": 4710,
+   "commits": 126,
+   "ultimos_90_dias": 15,
+   "dependientes": 344,
+   "por_dominio": {
+    "D9": 44,
+    "D5": 78,
+    "D2": 79,
+    "D4": 53,
+    "D1": 3,
+    "PUB": 10,
+    "D3": 76,
+    "D8": 1
+   },
+   "sin_importadores": [
+    "src/components/ui/HeroTitle.tsx"
+   ],
+   "hallazgos": [
+    "A11Y-010 MEDIA"
+   ],
+   "pod": [
+    "POD-319",
+    "POD-045",
+    "POD-320",
+    "POD-355"
+   ],
+   "rediseno_home": [],
+   "menciones": {
+    "total": 183,
+    "reglas": [
+     "AGENTS.md:27:- Componentes UI base: `@/components/ui` (Card, Stat, Badge, EmptyState, LoadingState, ErrorState, Section, PageHeader, Tabs)"
+    ],
+    "ejemplos": [
+     "docs/admin-changelog/Admin Completo rdc.md:18:(El sector Configuración tenía una 3ª lane, `config-design` / `/admin/_design`, descartada como no-go: requería to",
+     "docs/admin-changelog/Chatbot rdc.md:54:`src/components/ui/Select.tsx` — primitiva usada en \\~26 archivos del admin/dashboard (42 usos).",
+     "docs/admin-changelog/Configuracion rdc.md:99:`src/components/ui/*` · `prisma/schema.prisma` · `@/lib/prisma` · `@/auth` · `@/lib/auth-guards` · `@/lib/action-ut",
+     "docs/admin-changelog/Configuracion rdc.md:101:Solo se **consumieron** (import, sin editar): `@/lib/hover`, `@/lib/use-is-client`, `@/lib/motion-variants`, `@/li"
+    ]
+   },
+   "detalle": [
+    {
+     "ruta": "src/components/ui/Badge.tsx",
+     "lineas": 132,
+     "commits": 2,
+     "ultimos_90_dias": 0,
+     "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "ultimo": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 7,
+     "por_dominio": {
+      "D9": 2,
+      "D5": 5
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/BrandedIntroCanvas.tsx",
+     "lineas": 200,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "ff6871e4|2026-06-02|comot preloader hecho, pagina base terminada, optimizar y actualizar contenido",
+     "ultimo": "ff6871e4|2026-06-02|comot preloader hecho, pagina base terminada, optimizar y actualizar contenido",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Button.tsx",
+     "lineas": 157,
+     "commits": 6,
+     "ultimos_90_dias": 4,
+     "primero": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "ultimo": "df62c74c|2026-08-03|fix(design-system): calibración del piso móvil, acentos, CTA e índice",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 17,
+     "por_dominio": {
+      "D9": 2,
+      "D5": 11,
+      "D2": 1,
+      "D4": 1,
+      "D1": 1,
+      "PUB": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Callout.tsx",
+     "lineas": 93,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "8f5f67e9|2026-06-13|feat(b9/sensible): foundations del refresh — Callout, Modal glass, STAGE_TONE",
+     "ultimo": "8f5f67e9|2026-06-13|feat(b9/sensible): foundations del refresh — Callout, Modal glass, STAGE_TONE",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Card.tsx",
+     "lineas": 97,
+     "commits": 3,
+     "ultimos_90_dias": 0,
+     "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "ultimo": "1e299238|2026-05-18|feat: animations and micro-interactions polish admin",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 17,
+     "por_dominio": {
+      "D9": 2,
+      "D5": 11,
+      "D2": 3,
+      "D1": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/EmptyState.tsx",
+     "lineas": 92,
+     "commits": 5,
+     "ultimos_90_dias": 0,
+     "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "ultimo": "1e299238|2026-05-18|feat: animations and micro-interactions polish admin",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/EmptyStateMuted.tsx",
+     "lineas": 18,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "63c455f3|2026-06-28|feat(ui): EmptyStateMuted, canon unico de empty state para listas vacias",
+     "ultimo": "63c455f3|2026-06-28|feat(ui): EmptyStateMuted, canon unico de empty state para listas vacias",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 38,
+     "por_dominio": {
+      "D3": 17,
+      "D5": 10,
+      "D2": 11
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/ErrorState.tsx",
+     "lineas": 64,
+     "commits": 2,
+     "ultimos_90_dias": 0,
+     "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "ultimo": "267948ac|2026-05-12|feat: bootstrap core application infrastructure with comprehensive dashboard components, chatbot module architecture, and modernized landing page sections.",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Field.tsx",
+     "lineas": 59,
+     "commits": 3,
+     "ultimos_90_dias": 0,
+     "primero": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "ultimo": "fecda1b3|2026-07-04|fix(a11y): Field accesible por teclado y lector (pendiente 5.6)",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 5,
+     "por_dominio": {
+      "D9": 1,
+      "D5": 3,
+      "D1": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [
+      "A11Y-010 MEDIA"
+     ],
+     "pod": [
+      "POD-319"
+     ],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/HeroMetrics.tsx",
+     "lineas": 267,
+     "commits": 5,
+     "ultimos_90_dias": 0,
+     "primero": "b846992b|2026-03-09|Commit intermedio casi terminado webdevelop",
+     "ultimo": "267948ac|2026-05-12|feat: bootstrap core application infrastructure with comprehensive dashboard components, chatbot module architecture, and modernized landing page sections.",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "PUB": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/HeroTitle.tsx",
+     "lineas": 150,
+     "commits": 4,
+     "ultimos_90_dias": 0,
+     "primero": "b846992b|2026-03-09|Commit intermedio casi terminado webdevelop",
+     "ultimo": "267948ac|2026-05-12|feat: bootstrap core application infrastructure with comprehensive dashboard components, chatbot module architecture, and modernized landing page sections.",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 0,
+     "por_dominio": {},
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [
+      "POD-045"
+     ],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/HyperText.tsx",
+     "lineas": 149,
+     "commits": 4,
+     "ultimos_90_dias": 0,
+     "primero": "03f3e6b2|2026-02-02|Commit 2",
+     "ultimo": "267948ac|2026-05-12|feat: bootstrap core application infrastructure with comprehensive dashboard components, chatbot module architecture, and modernized landing page sections.",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "PUB": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Input.tsx",
+     "lineas": 45,
+     "commits": 2,
+     "ultimos_90_dias": 0,
+     "primero": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "ultimo": "fecda1b3|2026-07-04|fix(a11y): Field accesible por teclado y lector (pendiente 5.6)",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 5,
+     "por_dominio": {
+      "D9": 1,
+      "D5": 4
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [
+      "POD-320"
+     ],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/IntroLockupText.tsx",
+     "lineas": 256,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "ff6871e4|2026-06-02|comot preloader hecho, pagina base terminada, optimizar y actualizar contenido",
+     "ultimo": "ff6871e4|2026-06-02|comot preloader hecho, pagina base terminada, optimizar y actualizar contenido",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 3,
+     "por_dominio": {
+      "D9": 2,
+      "PUB": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/KineticText.tsx",
+     "lineas": 43,
+     "commits": 10,
+     "ultimos_90_dias": 2,
+     "primero": "1bf4c4bd|2026-02-03|commit estructura definida, hero arreglado, colores de seccion definidos",
+     "ultimo": "78b510ac|2026-08-12|feat(home): restaura la home clasica pre-rediseno desde 63a4e364",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "PUB": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/LoadingState.tsx",
+     "lineas": 93,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "ultimo": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/LogoStrokeOverlay.tsx",
+     "lineas": 142,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "ff6871e4|2026-06-02|comot preloader hecho, pagina base terminada, optimizar y actualizar contenido",
+     "ultimo": "ff6871e4|2026-06-02|comot preloader hecho, pagina base terminada, optimizar y actualizar contenido",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 2,
+     "por_dominio": {
+      "D9": 1,
+      "PUB": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/MarketingIntro.tsx",
+     "lineas": 409,
+     "commits": 4,
+     "ultimos_90_dias": 2,
+     "primero": "ff6871e4|2026-06-02|comot preloader hecho, pagina base terminada, optimizar y actualizar contenido",
+     "ultimo": "c0037a0b|2026-07-30|fix(intro): red de seguridad del scroll en MarketingIntro + loops sin gate",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Modal.tsx",
+     "lineas": 111,
+     "commits": 3,
+     "ultimos_90_dias": 0,
+     "primero": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "ultimo": "09374e7a|2026-06-14|fix(b9/sensible): modal portal a body + z-index sobre el chrome del app",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 2,
+     "por_dominio": {
+      "D9": 1,
+      "D2": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [
+      "POD-355"
+     ],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/PageHeader.tsx",
+     "lineas": 80,
+     "commits": 2,
+     "ultimos_90_dias": 0,
+     "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "ultimo": "01a469e8|2026-05-27|chore: commit all pending changes from chatbot refactor and dashboard updates",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Preloader.tsx",
+     "lineas": 326,
+     "commits": 12,
+     "ultimos_90_dias": 2,
+     "primero": "cb21742d|2026-01-08|Commit 1: ananashe",
+     "ultimo": "78b510ac|2026-08-12|feat(home): restaura la home clasica pre-rediseno desde 63a4e364",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D8": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Section.tsx",
+     "lineas": 57,
+     "commits": 2,
+     "ultimos_90_dias": 0,
+     "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "ultimo": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 5,
+     "por_dominio": {
+      "D9": 1,
+      "D5": 4
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/SectionErrorBoundary.tsx",
+     "lineas": 126,
+     "commits": 2,
+     "ultimos_90_dias": 0,
+     "primero": "7f213607|2026-05-26|chore: consolidate working tree backlog (B11 + B12 + B-SEC)",
+     "ultimo": "ef6dd076|2026-05-26|chore(B14): rate-limit atomico, backups, Sentry, latencias + deploy checklist",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 2,
+     "por_dominio": {
+      "D3": 1,
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Select.tsx",
+     "lineas": 425,
+     "commits": 5,
+     "ultimos_90_dias": 0,
+     "primero": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "ultimo": "fecda1b3|2026-07-04|fix(a11y): Field accesible por teclado y lector (pendiente 5.6)",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 3,
+     "por_dominio": {
+      "D9": 1,
+      "D5": 2
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Skeleton.tsx",
+     "lineas": 16,
+     "commits": 2,
+     "ultimos_90_dias": 0,
+     "primero": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "ultimo": "b25b7a40|2026-06-16|fix(ui): tilde en StatCard + a11y/reduced-motion en StatCard y Skeleton",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 31,
+     "por_dominio": {
+      "D9": 5,
+      "D3": 12,
+      "D5": 3,
+      "D4": 2,
+      "D2": 9
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Spinner.tsx",
+     "lineas": 23,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "1e299238|2026-05-18|feat: animations and micro-interactions polish admin",
+     "ultimo": "1e299238|2026-05-18|feat: animations and micro-interactions polish admin",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 2,
+     "por_dominio": {
+      "D9": 2
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Stat.tsx",
+     "lineas": 102,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "ultimo": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/StatCard.tsx",
+     "lineas": 131,
+     "commits": 4,
+     "ultimos_90_dias": 0,
+     "primero": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "ultimo": "b25b7a40|2026-06-16|fix(ui): tilde en StatCard + a11y/reduced-motion en StatCard y Skeleton",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 3,
+     "por_dominio": {
+      "D9": 1,
+      "D5": 2
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Tabs.tsx",
+     "lineas": 128,
+     "commits": 3,
+     "ultimos_90_dias": 0,
+     "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "ultimo": "6f657493|2026-05-26|Refactor StatCard and Tabs components for improved styling and functionality; update design tokens for color and radius consistency; enhance BotConfigPreview with view mode and avatar state options; integrate ChatHeader into ChatbotEmbed for unified header experience; update ColorPicker and MarkdownEditor for better UX; synchronize Prisma enums for client-side usage; clean up unused imports and seed data.",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Textarea.tsx",
+     "lineas": 37,
+     "commits": 2,
+     "ultimos_90_dias": 0,
+     "primero": "70c28a3b|2026-07-02|feat(leados): catch-up B1.A/B6.1-B6.3/B6.5 setter + AUD-1 auditoria vs brief",
+     "ultimo": "fecda1b3|2026-07-04|fix(a11y): Field accesible por teclado y lector (pendiente 5.6)",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Toggle.tsx",
+     "lineas": 59,
+     "commits": 2,
+     "ultimos_90_dias": 1,
+     "primero": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "ultimo": "a2004edb|2026-08-26|fix(leados): los tres callejones — el error del borrador, el rechazo congelado y el chequeo sin link",
+     "commits_que_nombran_congelamiento": [
+      "a2004edb|2026-08-26|fix(leados): los tres callejones — el error del borrador, el rechazo congelado y el chequeo sin link"
+     ],
+     "dependientes": 2,
+     "por_dominio": {
+      "D9": 1,
+      "D5": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/TypewriterText.tsx",
+     "lineas": 84,
+     "commits": 4,
+     "ultimos_90_dias": 2,
+     "primero": "30401849|2026-03-05|Commit optimizacion y +",
+     "ultimo": "78b510ac|2026-08-12|feat(home): restaura la home clasica pre-rediseno desde 63a4e364",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "PUB": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/Typography.tsx",
+     "lineas": 42,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "ultimo": "7c100bf6|2026-05-17|feat: consolidated UI components library with design tokens",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 3,
+     "por_dominio": {
+      "D9": 2,
+      "D5": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/VideoCard.tsx",
+     "lineas": 15,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "b846992b|2026-03-09|Commit intermedio casi terminado webdevelop",
+     "ultimo": "b846992b|2026-03-09|Commit intermedio casi terminado webdevelop",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "PUB": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/buttons/ChargeTraceButton.tsx",
+     "lineas": 123,
+     "commits": 2,
+     "ultimos_90_dias": 0,
+     "primero": "03e1cc02|2026-04-01|commit web development pulido con mobile responsive hasta la seccion casos reales,",
+     "ultimo": "267948ac|2026-05-12|feat: bootstrap core application infrastructure with comprehensive dashboard components, chatbot module architecture, and modernized landing page sections.",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "PUB": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/buttons/MagneticCta.tsx",
+     "lineas": 207,
+     "commits": 7,
+     "ultimos_90_dias": 2,
+     "primero": "03f3e6b2|2026-02-02|Commit 2",
+     "ultimo": "78b510ac|2026-08-12|feat(home): restaura la home clasica pre-rediseno desde 63a4e364",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "PUB": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/field-context.ts",
+     "lineas": 28,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "fecda1b3|2026-07-04|fix(a11y): Field accesible por teclado y lector (pendiente 5.6)",
+     "ultimo": "fecda1b3|2026-07-04|fix(a11y): Field accesible por teclado y lector (pendiente 5.6)",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 4,
+     "por_dominio": {
+      "D9": 4
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/index.ts",
+     "lineas": 22,
+     "commits": 8,
+     "ultimos_90_dias": 0,
+     "primero": "9a8a360f|2026-04-28|commit prompts aplicados",
+     "ultimo": "70c28a3b|2026-07-02|feat(leados): catch-up B1.A/B6.1-B6.3/B6.5 setter + AUD-1 auditoria vs brief",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 163,
+     "por_dominio": {
+      "D3": 42,
+      "D5": 21,
+      "D4": 50,
+      "D2": 50
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/skeletons/CardSkeleton.tsx",
+     "lineas": 21,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "ultimo": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/skeletons/ListSkeleton.tsx",
+     "lineas": 31,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "ultimo": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/skeletons/StatCardSkeleton.tsx",
+     "lineas": 14,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "ultimo": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/skeletons/TableSkeleton.tsx",
+     "lineas": 32,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "ultimo": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 1,
+     "por_dominio": {
+      "D9": 1
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    },
+    {
+     "ruta": "src/components/ui/skeletons/index.ts",
+     "lineas": 4,
+     "commits": 1,
+     "ultimos_90_dias": 0,
+     "primero": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "ultimo": "b561f6dc|2026-05-18|feat: skeleton loading states across admin pages (Alpha.14)",
+     "commits_que_nombran_congelamiento": [],
+     "dependientes": 8,
+     "por_dominio": {
+      "D3": 4,
+      "D2": 4
+     },
+     "en_depcruise": true,
+     "hallazgos": [],
+     "pod": [],
+     "rediseno_home": "sin cambios"
+    }
+   ]
+  }
+ ]
+}

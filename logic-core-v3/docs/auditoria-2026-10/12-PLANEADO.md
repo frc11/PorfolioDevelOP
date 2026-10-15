@@ -7,7 +7,7 @@
 ## Resumen
 
 - Ítems: **1351** — por tipo: decision 212 · hecho-declarado 443 · idea 56 · pendiente 556 · promesa 6 · bloque 78.
-- Estado en código: hecho 552 · parcial 201 · no empezado 417 · abandonado 25 · contradicho 27 · por cruzar 129.
+- Estado en código: hecho 583 · parcial 219 · no empezado 435 · abandonado 25 · contradicho 32 · por cruzar 57.
 - ZONA-FRANCO: 361 ítems.
 - TODO/FIXME en el código de `origin/main`: 70 (`_crudo/todos-codigo.json`).
 
@@ -7817,8 +7817,8 @@
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:57` · tipo: decision · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): lib.otro
 - Qué es: Abierta, precedente Air Canada. No bloquea, pero tiene que estar antes del primer contrato nuevo.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — No hay descargo en src (git grep -niE 'alucina|puede cometer errores|puede equivocarse'); en cambio src/components/ia/GarantiaIA.tsx:410 promete 'Cero alucinaciones.' en el sitio publico. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-968] Integrar T0/MH/RB al índice y generar sus hojas
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:70` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-06
@@ -7833,8 +7833,8 @@
 - Nodo(s): lib.otro
 - Qué es: Hallazgos de las Auditorías I-III y absorciones (scoping, event-types, LEAD_INTENTS, cache, gate GCP).
 - Referencias: docs/roadmap-pendientes.md · pendientes-delta-evolucion.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i -E "delta|LEAD_INTENTS|event-types" origin/main -- logic-core-v3/docs/roadmap-pendientes.md -> 0; control: el archivo existe (git ls-tree) (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-970] Documentos de referencia que no existen en el repo
 - Fuente: `docs/bitacora-beta-3.md:1103` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-04 · **ZONA-FRANCO**
@@ -7920,8 +7920,8 @@
 - Fuente: `docs/bitacora-roadmap.md:5936` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): lib.otro
 - Qué es: Corregir snippets o docs que hardcodeen 'aki'.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep -n -E "['\"/=]aki(['\"/ ]|$)" origin/main -- logic-core-v3 -> 0; control: BOT_SLUG = 'develop' en scripts/dev/seed-alerts.ts:43 y seed-events.ts:34. 'Aki' queda solo como nombre (seed-matsu.ts:29) (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-981] getN8nMetrics (src/lib/n8n.ts) mock sin call sites
 - Fuente: `docs/bitacora-roadmap.md:6166` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-05-25
@@ -9899,40 +9899,40 @@
 - Nodo(s): lib.transversal
 - Qué es: Revisar todo conteo de conversaciones del panel para que diga 'atendidas' y no mezcle las degradadas.
 - Referencias: MH.2 · tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:28
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ChatbotOverview.tsx:99 'Personas atendidas'; MonthTrendSection.tsx:40; MonthlyConversationsChart.tsx:44 (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1230] Frontera de chats por superficie
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:29` · tipo: decision · estado declarado: hecho · fecha: 2026-07-06
 - Nodo(s): lib.transversal
 - Qué es: Runtime, widget, KB y motor son del chat Chatbot; /admin y /dashboard, del chat Panel. Tocar src/modules/chatbot/server/* exige coordinar.
 - Referencias: src/modules/chatbot/server/* · tambien en Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:32 · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:95 · tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:39
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Decision organizativa; la unica barrera en codigo es la regla de eslint que impide a chatbot/motor importar @/lib/prisma (contexto fijo). No hay CODEOWNERS que la haga cumplir. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1231] Estado del producto: v0.9.0-rc.1 sin producción
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:9` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-06
 - Nodo(s): lib.transversal
 - Qué es: Feature-complete, no está en producción y Matsu no siguió. El repo en HEAD affa06a está antes de EV; nada del plan se ejecutó.
 - Referencias: tag v0.9.0-rc.1 · affa06a · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:17
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — affa06a es ancestro de origin/main y después se ejecutó EV (verticalPack en schema) y MH.2 (handleChatRequest.ts:104); no hay tag v0.9.0-rc.1 local (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1232] Auditorías I-III: aislamiento multi-tenant sin rojos
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:28` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-06
 - Nodo(s): lib.transversal
 - Qué es: Las tres fueron read-only. La III barrió todas las queries del dominio chatbot y dio 0 rojos. El hallazgo más grave fue /smoke público.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:64
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git ls-files src/app | grep -i /smoke -> 0 (control: /embed/ -> 2 archivos): la ruta /smoke publica ya no existe. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1233] MH es la apuesta comercial #1 y prerrequisito de R1
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:39` · tipo: decision · estado declarado: hecho · fecha: 2026-07-06
 - Nodo(s): lib.transversal
 - Qué es: Un ROI calculado sobre métricas sucias se vuelve en contra.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — MH.2 en código (handleChatRequest.ts:104, :261, :449); R1 (ROI) sin rastro: git grep -l -i -E "calculateRoi|roiEstimate" -> 0 (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1234] El reporte del agente no es el estado
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:97` · tipo: decision · estado declarado: hecho · fecha: 2026-07-06
@@ -9947,16 +9947,16 @@
 - Nodo(s): lib.transversal
 - Qué es: Helpers que confían en el parámetro que reciben. Consolidar sobre el patrón relacional de multiTenantQueries.
 - Referencias: multiTenantQueries · A5.4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Fuera del lote. Existe src/lib/isolation (forOrg/unsafeGlobalQuery, contexto fijo) y multiTenantQueries.ts:95 usa startOfDateRange de tz-ar; no se verifico el contrato helper por helper. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1236] Orden de ejecución de la evolución
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:57` · tipo: decision · estado declarado: hecho · fecha: 2026-07-06
 - Nodo(s): lib.transversal
 - Qué es: T0 → EV → UTM.1 → Q1 → MH → RB → E1 → R1 (exige MH) → resto. MH y RB pueden permutar.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:59
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — EV: verticalPack en schema.prisma; UTM.1: utmSource en Conversation (schema.prisma:1381-1388); MH.2 en handleChatRequest.ts:104; R1 no encontrado (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1237] Cuatro frentes F1-F4
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:645` · tipo: hecho-declarado · estado declarado: hecho · **ZONA-FRANCO**
@@ -9979,8 +9979,8 @@
 - Nodo(s): lib.transversal
 - Qué es: alert-column-overview.tsx copia 1:1 el patrón de Leads. Extraerlo a un componente compartido.
 - Referencias: alerts/_components/alert-column-overview.tsx · admin/leads/_components/column-overview.tsx · tambien en Olme/Ideas de nuevas features.md:65 · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:70
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Conviven admin/alerts/_components/alert-column-overview.tsx y admin/leads/_components/column-overview.tsx (git ls-tree) (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1240] Select compartido con listbox propio
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:52` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-12
@@ -10027,55 +10027,55 @@
 - Nodo(s): lib.transversal
 - Qué es: EmptyState es 'use client' y recibe el ícono como componente, que no puede cruzar el boundary RSC. En páginas server se arma en JSX.
 - Referencias: EmptyState · tambien en Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:153
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — EmptyState.tsx:1 'use client' e :12 icon: LucideIcon; EmptyStateMuted.tsx:7-8 lo resuelve como componente universal sin 'use client'. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1246] Tarea 3: EmptyStateMuted como estado vacío canónico
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:36` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): lib.transversal
 - Qué es: Re-export de ResultEmptyState. Migra los estados vacíos de listas en el cliente (módulos, soporte, project, services, chatbot) y en el admin (~20 archivos). Mergeado.
 - Referencias: 63c455f · 79ce485 · 211672f · 565afb1 · ea8c5ff · 7e1ac3d +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — EmptyStateMuted.tsx:14-18 re-export de ResultEmptyState; 38 archivos lo importan (git grep). (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1247] Bloque A cosmético (Batch 2)
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:52` · tipo: hecho-declarado · estado declarado: hecho (sin mergear)
 - Nodo(s): lib.transversal
 - Qué es: Loadings a ancho completo, empty 'sin proyectos', hover en los tiles de proyecto, empties del chatbot overview y Mi plan de pb-20 a pb-6.
 - Referencias: f3c2b32 · ab111c4 · 82aed0e · 6ea7df9 · 713c203 · lane/portal-pulido
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git merge-base --is-ancestor: f3c2b32, ab111c4, 82aed0e, 6ea7df9 y 713c203 están en origin/main (ya no 'sin mergear') (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1248] Solo los vacíos de lista se aplanan; los heroes conservan su marca
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:81` · tipo: decision · estado declarado: hecho
 - Nodo(s): lib.transversal
 - Qué es: Los heroes de venta, conexión y bienvenida mantienen su diseño. variant=dashed se unifica a EmptyStateMuted. Excepción: ProjectsTab:76.
 - Referencias: ChatbotUpsellLanding · tambien en Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:82
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — EmptyStateMuted en 40 archivos; además de la excepción ProjectsTab.tsx:75, sigue un vacío con Card variant='dashed' en dashboard/cuenta/boveda/page.tsx:99-102 (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1249] Barrido de pb-20 en todo el portal
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:88` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.transversal
 - Qué es: pb-20 es el valor de todo el portal. Solo se alineó Mi plan; el barrido completo queda para una lane aparte.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -c pb-20 en src/app/(protected)/dashboard y src/components/dashboard -> 20 ocurrencias. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1250] Deuda previa del portal
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:168` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.transversal
 - Qué es: set-state-in-effect en conversation-list (L57), deps del useMemo en ClientLeadsTable (L186), formAction muerto en campaigns/new, <Field> sin htmlFor.
 - Referencias: admin/messages/_components/conversation-list.tsx:57 · ClientLeadsTable.tsx:186 · campaigns/new · Field
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Hecho: ui/Field.tsx:31-32 label htmlFor. Pendiente: eslint baseline conversation-list.tsx:57 react-hooks/set-state-in-effect, ClientLeadsTable.tsx:186 exhaustive-deps; campaigns/new/page.tsx:34 declara formAction y no lo usa (única ocurrencia) (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1251] Subir chartCardHoverCls a lib/hover.ts
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:176` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.transversal
 - Qué es: Variante sin scale para recharts. Hoy existe como copia local; subirla al shared es un follow-up aditivo.
 - Referencias: src/lib/hover.ts · results/_shared/chartHover.ts · LatencyChart.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/hover.ts:5,9 solo exporta adminHoverCls/adminHoverAmplifiedCls; chartCardHoverCls sigue en src/components/dashboard/results/_shared/chartHover.ts (usado en resultados/seo/page.tsx:14 y trafico/page.tsx:17). git grep -n chartCardHoverCls origin/main -- logic-core-v3/src/lib/hover.ts -> vacio. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1252] Bug latente: EmptyState con ícono Lucide en páginas server
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md:218` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-25
@@ -10090,8 +10090,8 @@
 - Nodo(s): lib.transversal
 - Qué es: ClientChatThread, ChatBubble y ClientChatComposer. Se borró AnimatedChatBubble. Mensajes quedó byte-idéntico.
 - Referencias: ClientChatThread.tsx · ChatBubble.tsx · ClientChatComposer.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Existen components/dashboard/ClientChatThread.tsx, ChatBubble.tsx y ClientChatComposer.tsx; AnimatedChatBubble sin archivo (git ls-tree) (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1254] Chat compartido: solo la UI
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Soporte_ registro de cambios.md:66` · tipo: decision · estado declarado: hecho
@@ -10106,8 +10106,8 @@
 - Nodo(s): lib.transversal
 - Qué es: El mapeo preset→rango de fechas está reimplementado 4 veces (Leads, Alertas, Actividad, Audit). Extraer un util compartido. Es deuda de consolidación.
 - Referencias: tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:70 · tambien en Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:91
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Siguen 4 mapeos replicados: admin/alerts/_components/alerts-filters.ts:62-63, admin/audit-log/_components/audit-filters.ts:43-44, admin/leads/_components/lead-filters.ts:140-141, modules/chatbot/components/admin/activity/activityFilters.ts:69 (su :5 dice 'replica el patron de presets de Leads'). (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1256] csv-escape duplicado a propósito
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:34` · tipo: decision · estado declarado: hecho · fecha: 2026-07-13
@@ -10130,8 +10130,8 @@
 - Nodo(s): lib.transversal
 - Qué es: secret-box.ts (del motor) y credential-cipher/encrypt-for-storage (del panel). Evaluar si se consolidan.
 - Referencias: src/lib/crypto/secret-box.ts · src/lib/crypto/credential-cipher.ts · src/lib/crypto/encrypt-for-storage.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — encrypt-for-storage.ts ya no existe (git ls-files src/lib/crypto); conviven credential-cipher.ts:18 y secret-box.ts:22, ambos 'aes-256-gcm'. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1259] SectionErrorBoundary no sirve fuera del portal cliente
 - Fuente: `docs/bitacora-beta-2.md:489` · tipo: decision · estado declarado: vigente · fecha: 2026-06-29
@@ -10146,8 +10146,8 @@
 - Nodo(s): lib.transversal
 - Qué es: setter/_components/text-area.tsx movido a components/ui/Textarea.tsx y exportado en el barrel; 9 consumidores repuntados.
 - Referencias: src/components/ui/Textarea.tsx · src/components/ui/index.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/components/ui/Textarea.tsx:12 TextArea; index.ts:19; git ls-files -- 'src/app/(protected)/setter/_components/text-area.tsx' -> vacio (control: Textarea.tsx listado). (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1261] AUD-1 auditoría del setter vs Brief de Visión v2
 - Fuente: `docs/bitacora-beta-3.md:669` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-02 · **ZONA-FRANCO**
@@ -10162,8 +10162,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Field con useId + FieldControlProvider (field-context.ts): label htmlFor, aria-describedby, aria-invalid en Input/TextArea, focus-visible; confirmado en browser en 7.3.
 - Referencias: components/ui/Field.tsx · field-context.ts · también en fuente:982,1184
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Field.tsx:19-27 useId + contexto, :31-32 htmlFor, :49 role=alert con id; field-context.ts:21-28; Input.tsx:25-31; Textarea.tsx:21-26; Select.tsx:121,319,327. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1263] AUD-2 auditoría de cierre
 - Fuente: `docs/bitacora-beta-3.md:1200` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-07 · **ZONA-FRANCO**
@@ -10178,8 +10178,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Lo más urgente: M-01/M-02, un worktree por sesión y exclusividad de commit.
 - Referencias: docs/metodo/PROPUESTA-CIMIENTO.md · también en fuente:1835
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — docs/metodo/PROPUESTA-CIMIENTO.md existe; se trabaja con git worktrees (esta auditoría corre en uno); M-01/M-02 no son verificables en código (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1265] excludeDqWhere sin ningún invariante (7 consumidores)
 - Fuente: `docs/bitacora-beta-3.md:7530` · tipo: pendiente · estado declarado: listado, sin tocar · fecha: 2026-08-27
@@ -10194,24 +10194,24 @@
 - Nodo(s): lib.transversal
 - Qué es: Cuatro helpers del lado del cliente tienen la misma forma sin zona horaria: admin/alerts, admin/audit-log, admin/leads y chatbot/activity.
 - Referencias: admin/alerts · admin/audit-log · admin/leads · chatbot/activity
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — alerts-filters.ts:62 new Date(`${filter.from}T00:00:00.000`) y equivalentes en audit-filters.ts:43, lead-filters.ts:140, activityFilters.ts:69: hora local del navegador, sin tz-ar/dates-ar. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1267] El <Select> compartido se cierra solo de forma intermitente
 - Fuente: `docs/bitacora-beta-3.md:9167` · tipo: pendiente · estado declarado: anotado, no tocado · fecha: 2026-09-01
 - Nodo(s): lib.transversal
 - Qué es: Se cierra ante cualquier scroll de la página (listener en fase de captura) y al abrirse enfoca su listbox sin preventScroll, lo que puede provocar justo ese scroll. Ya estaba antes de P16 y no se tocó.
 - Referencias: <Select> compartido
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/components/ui/Select.tsx:213 window.addEventListener('scroll', handleScroll, true); :189 listboxRef.current?.focus() sin preventScroll (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1268] El Modal compartido no declara role=dialog ni aria-modal
 - Fuente: `docs/bitacora-beta-3.md:10858` · tipo: pendiente · estado declarado: anotado, no hecho · fecha: 2026-09-03/06 (inferida)
 - Nodo(s): lib.transversal
 - Qué es: Afecta a todos los modales de la app: el diálogo de salida de P23 funciona, pero no se anuncia como diálogo. Son dos atributos y quedan para un sprint propio.
 - Referencias: Modal compartido
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -nE 'role=|aria-modal|Escape|keydown|focus' origin/main -- logic-core-v3/src/components/ui/Modal.tsx -> vacio; control: Select.tsx tiene 2 role=. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1269] Tier de z-index del chrome en design-tokens.ts bajo modal 10000
 - Fuente: `docs/bitacora-beta.md:221` · tipo: decision · estado declarado: vigente · fecha: 2026-06-18
@@ -10250,8 +10250,8 @@
 - Nodo(s): lib.transversal
 - Qué es: 37 tokens con infijo ds en globals.css y el primer bloque prefers-reduced-motion del sitio (1ms, una iteración), que aplica a toda la app.
 - Referencias: src/app/globals.css · commit feat(design-system): tokens base, escala tipográfica y reduced-motion global
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — globals.css:678 @media (prefers-reduced-motion: reduce); tokens ds-* (globals.css:63) (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1274] Convenciones de tokens del design system
 - Fuente: `docs/bitacora-rediseno.md:63` · tipo: decision · estado declarado: vigente · fecha: 2026-07-30
@@ -10274,48 +10274,48 @@
 - Nodo(s): lib.transversal
 - Qué es: Web cyan #06b6d4, IA verde #10b981, Automation ámbar #f59e0b, Software violeta #8b5cf6; CLAUDE.md alineado con A en B0.5 y Gate 1 cerrado con A en DESIGN.md y accent.ts.
 - Referencias: src/app/globals.css · CLAUDE.md · DESIGN.md · src/components/design-system/accent.ts · también en docs/bitacora-rediseno.md:515 · también en docs/bitacora-rediseno.md:763 +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — globals.css:63 --color-ds-accent-software: #8b5cf6; design-system/accent.ts:9; CLAUDE.md:103 (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1277] B1-S2 Componentes base del design system + ui/Button extendido
 - Fuente: `docs/bitacora-rediseno.md:182` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-30
 - Nodo(s): lib.transversal
 - Qué es: 10 componentes en src/components/design-system/, capa semántica por sección y variantes ds-primary/ds-secondary/ds en ui/Button (sus 19 consumidores intactos).
 - Referencias: src/components/design-system/ · src/components/ui/Button.tsx · src/hooks/useThemeObserver.tsx · src/app/globals.css · commit feat(design-system): componentes base del sistema visual
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Button.tsx:19-20 ds-primary/ds-secondary, :22 tamanos ds y ds-compact; src/components/design-system/ con 13 entradas (git ls-tree). (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1278] Extender ui/Button en vez de envolverlo (y sus agregados posteriores)
 - Fuente: `docs/bitacora-rediseno.md:233` · tipo: decision · estado declarado: vigente (ui/Button sin cambios en HOME-CLASICO) · fecha: 2026-07-30
 - Nodo(s): lib.transversal
 - Qué es: twMerge no colapsa rounded-ds-*/text-ds-*, por eso se extiende; luego se exporta buttonClasses() (CtaButton con href = <a>), tamaño ds-compact y hasFramerPress() del lado de la variante.
 - Referencias: src/components/ui/Button.tsx · src/components/design-system/CtaButton.tsx · también en docs/bitacora-rediseno.md:1515 · también en docs/bitacora-rediseno.md:1798 · también en docs/bitacora-rediseno.md:2331 · también en docs/bitacora-rediseno.md:3642
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Button.tsx:110-120 buttonClasses() exportada, :82-84 hasFramerPress(), :97 tamano ds-compact, :53-70 variantes ds-*; design-system/CtaButton.tsx:5 importa Button y buttonClasses. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1279] Theming local por sección (data-ds-theme) junto al data-theme global
 - Fuente: `docs/bitacora-rediseno.md:257` · tipo: decision · estado declarado: vigente · fecha: 2026-07-30
 - Nodo(s): lib.transversal
 - Qué es: SectionShell escribe data-ds-theme en su <section> y avisa al ThemeProvider viejo con useThemeSectionOptional (no tira sin provider); atributos distintos en elementos distintos.
 - Referencias: src/components/design-system/SectionShell.tsx · src/hooks/useThemeObserver.tsx · también en docs/bitacora-rediseno.md:266 · también en docs/bitacora-rediseno.md:275
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/components/design-system/SectionShell.tsx:84 data-ds-theme={theme}; :42 documenta el tema local. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1280] B1-S3 Styleguide /styleguide (noindex), cierre de B1
 - Fuente: `docs/bitacora-rediseno.md:361` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-30
 - Nodo(s): lib.transversal
 - Qué es: Página interna con paleta, acentos, tipografía, componentes con estados y el esqueleto de las 6 secciones; sin links entrantes.
 - Referencias: src/app/styleguide/ · commit feat(design-system): styleguide con las 6 secciones y opciones para Gate 1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/app/styleguide/page.tsx:26 robots: { index: false, follow: false, nocache: true }; sin chrome por publicRoute.ts:26 (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1281] Fuente de prueba Space Grotesk en el styleguide
 - Fuente: `docs/bitacora-rediseno.md:387` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-07-30
 - Nodo(s): lib.transversal
 - Qué es: Declarada solo en TypographyBlock.tsx; si se descarta se borra el archivo (la dirección fijó Geist + Geist Mono).
 - Referencias: src/app/styleguide/_components/TypographyBlock.tsx · relacionado docs/bitacora-rediseno.md:2223
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/app/styleguide/_components/TypographyBlock.tsx:1 import { Space_Grotesk } y :19 displayCandidate (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1282] cn() con extendTailwindMerge para los tokens --text-ds-*
 - Fuente: `docs/bitacora-rediseno.md:403` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-30
@@ -10337,88 +10337,88 @@
 - Fuente: `docs/bitacora-rediseno.md:814` · tipo: decision · estado declarado: vigente · fecha: 2026-07-30
 - Nodo(s): lib.transversal
 - Qué es: Distinguir string de texto vs string de clave o tipo y saltear interpolaciones de template literals (una pasada rompió claves de lookup e interfaces).
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Regla de proceso sin artefacto verificable en codigo (no hay script ni invariante que la aplique). (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1285] CustomCursor y NoiseOverlay fuera del layout raíz (todas las superficies)
 - Fuente: `docs/bitacora-rediseno.md:1737` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-31
 - Nodo(s): lib.transversal
 - Qué es: Desconectados en B2-S2 (cursor:none global y grano infinito en toda ruta) y borrados después; HOME-CLASICO los deja afuera explícitamente.
 - Referencias: src/app/layout.tsx · también en docs/bitacora-rediseno.md:1870 · también en docs/bitacora-rediseno.md:2379 · también en docs/bitacora-rediseno.md:2520 · también en docs/bitacora-rediseno.md:3656
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/app/layout.tsx:84-96 documenta el desmontaje; git ls-tree sin NoiseOverlay ni CustomCursor (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1286] Números de WhatsApp centralizados en src/lib/whatsapp.ts
 - Fuente: `docs/bitacora-rediseno.md:1801` · tipo: hecho-declarado · estado declarado: hecho en redesign/home; verificar en main tras HOME-CLASICO · fecha: 2026-07-31
 - Nodo(s): lib.transversal
 - Qué es: 15 call-sites migrados (incluye /contact con getWhatsappDigits) y 6 que servían wa.me/undefined; HOME-CLASICO restauró Footer.tsx y PortalDemoCTA.tsx a la versión previa.
 - Referencias: src/lib/whatsapp.ts · src/app/contact/page.tsx · también en docs/bitacora-rediseno.md:1628 · relacionado docs/bitacora-rediseno.md:3615
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — 14 consumidores de lib/whatsapp (contact/page.tsx:8, CtaIA.tsx:6, PricingSection.tsx:5, ...); siguen fuera Footer.tsx:8 (fallback 5493815000000), PortalDemoCTA.tsx:235, CalculadorIA.tsx:316 y ChatbotUpsellLanding.tsx:15. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1287] gray-on-color (contraste) diferido en portal y chatbot
 - Fuente: `docs/bitacora-rediseno.md:2224` · tipo: pendiente · estado declarado: diferido · fecha: 2026-07-31
 - Nodo(s): lib.transversal
 - Qué es: El detector marca 56 casos de gris sobre color en src/; solo 3 caen en la superficie pública, el resto es portal y chatbot.
 - Referencias: docs/impeccable-baseline.md · también en docs/bitacora-rediseno.md:2208
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — docs/impeccable-baseline.md:24 y :108 (56 casos, 3 públicos) sin cierre registrado (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1288] Calibración del design system (B1-S5)
 - Fuente: `docs/bitacora-rediseno.md:2256` · tipo: hecho-declarado · estado declarado: hecho (T8 del 3D cerrado en B2-S4) · fecha: 2026-08-03
 - Nodo(s): lib.transversal
 - Qué es: Escala tipográfica re-elegida (--text-ds-subhead, medida en ch), acento por área, CTA sin canto con un solo press y borde 3:1, sombra por tema, capítulos 01–06, isChromeFreeRoute y NoiseOverlay borrado.
 - Referencias: src/app/globals.css · src/components/ui/Button.tsx · src/components/layout/publicRoute.ts · DESIGN.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — --text-ds-subhead en globals.css (3 usos) y design-system/Subhead.tsx; isChromeFreeRoute en publicRoute.ts:39; NoiseOverlay sin archivo (git ls-tree sin match) y documentado en layout.tsx:95 (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1289] Los acentos de servicio viven solo sobre lienzo oscuro
 - Fuente: `docs/bitacora-rediseno.md:2309` · tipo: decision · estado declarado: vigente · fecha: 2026-08-03
 - Nodo(s): lib.transversal
 - Qué es: Tres de cuatro no llegan a 3:1 sobre crema; la distinguibilidad depende del área (se pinta el nombre del frente); sobre oscuro se aclara para subir contraste.
 - Referencias: DESIGN.md · también en docs/bitacora-rediseno.md:2504 · también en docs/bitacora-rediseno.md:2511
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Tokens globals.css:61-63 (--color-ds-accent-*); no se verifico cada uso. design-tokens.ts:96-98 define otro mapa de acentos sin consumidores. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1290] Rutas sin chrome: CHROME_FREE_PREFIXES + isChromeFreeRoute()
 - Fuente: `docs/bitacora-rediseno.md:2369` · tipo: decision · estado declarado: vigente · fecha: 2026-08-03
 - Nodo(s): lib.transversal
 - Qué es: Separado de isPortalRoute (que responde si es producto); /styleguide sin Navbar ni launcher; se conserva en HOME-CLASICO porque ChatWidgetMount lo necesita.
 - Referencias: src/components/layout/publicRoute.ts · ChatWidgetMount.tsx · también en docs/bitacora-rediseno.md:3635
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/components/layout/publicRoute.ts:26 CHROME_FREE_PREFIXES=['/styleguide'], :39-43 isChromeFreeRoute; PublicOnlyComponents.tsx:21; ChatWidgetMount.tsx:30 (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1291] Clases cursor-none esconden el cursor sin reemplazo
 - Fuente: `docs/bitacora-rediseno.md:2539` · tipo: pendiente · estado declarado: parcial · fecha: 2026-08-04
 - Nodo(s): lib.transversal
 - Qué es: Regresión de accesibilidad en elementos interactivos de Portfolio, About, CalculadoraAutomation, FlujoAutomation, PortfolioWebCases, LogicCompanion y ChatWindow:695; HOME-CLASICO dice que Franco limpió los de ChatWindow y LogicCompanion.
 - Referencias: src/modules/chatbot/components/LogicCompanion.tsx · ChatWindow.tsx:695 · también en docs/bitacora-rediseno.md:3661
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — layout.tsx:103 declara la limpieza, pero quedan cursor-none en components/sections/home/Portfolio.tsx:239,329 y About.tsx:93 (home clasica restaurada). (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1292] Techo de FCP/LCP: los 19 scripts async del <head>
 - Fuente: `docs/bitacora-rediseno.md:3573` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-08-07
 - Nodo(s): lib.transversal
 - Qué es: 1,1 MB raw / 356,5 KB gz con 1.078 ms de long tasks retrasan el primer paint; bajar LCP a menos de 2,5 s pide trabajar el bundle, no el hero.
 - Referencias: también en docs/bitacora-rediseno.md:3292
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — MarketingIntro.tsx:19-22 saco three/r3f/postprocessing del bundle inicial (dynamic ssr:false); sin build no se puede medir el resto. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1293] Contenido crítico va en ds-rise, no en ds-reveal
 - Fuente: `docs/bitacora-rediseno.md:3595` · tipo: decision · estado declarado: vigente · fecha: 2026-08-07
 - Nodo(s): lib.transversal
 - Qué es: Un ancestro en opacity 0 saca al h1 de la carrera de LCP; regla escrita en globals.css. Portfolio, PortalDemo, Nosotros, Servicios y Cierre todavía envuelven su titular en ds-reveal.
 - Referencias: src/app/globals.css · src/components/layout/Hero.tsx · también en docs/bitacora-rediseno.md:3482
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — ds-reveal sigue en Cierre.tsx:51 (animate-ds-reveal), Nosotros.tsx y Servicios.tsx (git grep -l); Portfolio y PortalDemo ya no aparecen (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1294] HOME-CLASICO: qué conserva la versión del rediseño
 - Fuente: `docs/bitacora-rediseno.md:3633` · tipo: decision · estado declarado: vigente · fecha: 2026-08-12
 - Nodo(s): lib.transversal
 - Qué es: Se conservan publicRoute.ts (superset), PublicOnlyComponents, SmoothScroll, ChatWidgetMount, chromeReveal, useThemeObserver, MarketingIntro, ui/Button, lib/utils, design-tokens y globals.css (+322 ds-*); useChromeRevealed vuelve al viejo (espera phase 'done').
 - Referencias: src/components/layout/publicRoute.ts · src/components/layout/PublicOnlyComponents.tsx · src/components/layout/SmoothScroll.tsx · src/components/layout/useChromeRevealed.ts · src/app/globals.css
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git ls-tree origin/main: publicRoute.ts, PublicOnlyComponents.tsx, SmoothScroll.tsx, ChatWidgetMount.tsx, lib/chromeReveal.ts, hooks/useThemeObserver.tsx, ui/MarketingIntro.tsx, ui/Button.tsx, lib/utils.ts, lib/design-tokens.ts existen; useChromeRevealed.ts:10 y :20 esperan phase 'done' en '/' (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1295] B4.1 — Modelo Plan + seed lockeado + fallback Starter
 - Fuente: `docs/bitacora-roadmap.md:1977` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
@@ -10433,16 +10433,16 @@
 - Nodo(s): lib.transversal
 - Qué es: SEO y Analytics ya tenían PreviewBanner condicional; se removieron del render la card 'Insights AI' placeholder y el milestone hardcodeado de /dashboard/project; 3 pendientes anotados en roadmap-pendientes.
 - Referencias: src/app/(protected)/dashboard/project/page.tsx · src/modules/chatbot/components/dashboard/ChatbotOverview.tsx · src/components/dashboard/PreviewBanner.tsx · docs/roadmap-pendientes.md · docs/audits/2026-05-auditoria-profunda.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep 'Insights AI' en ChatbotOverview.tsx -> vacio; dashboard/project/page.tsx:108-117 deriva la fecha de inicio de paymentMilestones reales (sin milestone hardcodeado); PreviewBanner en 3 archivos. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1297] Toda pantalla con datos mock usa PreviewBanner condicional
 - Fuente: `docs/bitacora-roadmap.md:6180` · tipo: decision · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): lib.transversal
 - Qué es: Mismo componente que SEO y Analytics, condicionado a data.isMockData; ningún dato de ejemplo sin marca.
 - Referencias: src/components/dashboard/PreviewBanner.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — resultados/seo/page.tsx:226 y trafico/page.tsx:188 {data.isMockData && !hideBanner && <PreviewBanner}; lib/analytics.ts:54 (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1298] B11.0 — Probe multi-tenant: mapa de fugas
 - Fuente: `docs/bitacora-roadmap.md:6453` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
@@ -10489,8 +10489,8 @@
 - Nodo(s): lib.transversal
 - Qué es: SectionErrorBoundary compartido que loguea con logger y no muestra mensajes técnicos; 5 error.tsx en dashboard y 4 nuevos en admin, AdminErrorBoundary refactorizado y app/error.tsx con logger; 8 loading.tsx nuevos.
 - Referencias: src/components/ui/SectionErrorBoundary.tsx · src/components/ui/index.ts · src/app/(protected)/admin/_components/AdminErrorBoundary.tsx · src/app/error.tsx · src/app/(protected)/dashboard/error.tsx · src/app/(protected)/dashboard/loading.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — SectionErrorBoundary.tsx:55 logger + :64 Sentry.captureException; index.ts:10; usado por dashboard/error.tsx, chatbot/, cuenta/, modules/, resultados/error.tsx y AdminErrorBoundary.tsx:18; 24 error.tsx y 54 loading.tsx en src/app (git ls-files). (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1304] B12.6 — Smoke de flujos críticos + re-tag v0.9.0-rc.1
 - Fuente: `docs/bitacora-roadmap.md:7654` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
@@ -10505,24 +10505,24 @@
 - Nodo(s): lib.transversal
 - Qué es: Matsu en prod con v0.9.0-rc.1 durante un período acordado; si no rompe se tagea v1.0.0, si rompe fix + v0.9.0-rc.2.
 - Referencias: tambien en docs/bitacora-roadmap.md:7767
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — VersionBadge.tsx:1 'v1.0.0' y api/version/route.ts:5 '1.0.0' ya anuncian 1.0.0; package.json:3 '0.1.0'; git tag -l '*rc*' '*1.0*' '*0.9*' -> solo 'nocturno-parcial' (tags locales) (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1306] Smoke runtime con browser de la protección de rutas post-upgrade
 - Fuente: `docs/bitacora-roadmap.md:7934` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.transversal
 - Qué es: Confirmar 307 a /login para anónimos en /admin y /dashboard y la separación SUPER_ADMIN / ORG_MEMBER (lo corre Franco).
 - Referencias: src/app/(protected)/admin/layout.tsx · src/app/(protected)/dashboard/layout.tsx · tambien en docs/bitacora-roadmap.md:7962
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — tests/e2e/19-security.spec.ts:4-18 cubre anonimo -> /login en /admin y /dashboard; tests/e2e/11-client-login.spec.ts:16 cliente -> /admin. No consta que corra en CI (dominio D8). (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1307] SEC-AUTH-04: middleware/proxy global como defense-in-depth
 - Fuente: `docs/bitacora-roadmap.md:8138` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.transversal
 - Qué es: Reducir la superficie si un layout futuro olvida auth().
 - Referencias: docs/auditoria-seguridad-2026-05.md · tambien en docs/bitacora-roadmap.md:8317
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/proxy.ts:171-173 matcher ['/admin/:path*','/dashboard/:path*','/setter/:path*','/login','/bienvenida','/cambiar-password'] (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1308] B-SEC.3b — state OAuth firmado con HMAC (Tiendanube + Google Business)
 - Fuente: `docs/bitacora-roadmap.md:8145` · tipo: hecho-declarado · estado declarado: hecho
@@ -10561,8 +10561,8 @@
 - Nodo(s): lib.transversal
 - Qué es: design-tokens con regla de color y colores por servicio, componente BrandMark nuevo, pill activo idéntico en ambos sidebars, Tabs único con API dual (href/value), breadcrumb en sentence case y barrido de 'Agency OS' / 'Logic Core' visibles.
 - Referencias: src/lib/design-tokens.ts · src/components/brand/BrandMark.tsx · src/app/(protected)/admin/_components/admin-sidebar.tsx · src/components/dashboard/SidebarNav.tsx · src/components/ui/Tabs.tsx · src/components/ui/index.ts +5
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — design-tokens.ts:7-17 regla de color y :94-99 service; src/components/brand/BrandMark.tsx existe (3 referencias); Tabs.tsx:15-39 API dual href/value; index.ts:18. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1313] Bloque B13: 'Profundizar es DEFINIR, no AGREGAR'
 - Fuente: `docs/bitacora-roadmap.md:8411` · tipo: decision · estado declarado: hecho · fecha: 2026-05-26
@@ -10576,8 +10576,8 @@
 - Fuente: `docs/bitacora-roadmap.md:8503` · tipo: decision · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): lib.transversal
 - Qué es: Decisión que afecta toda la app, a tomar en B13.2 al unificar el patrón kicker + H1 + subtitle.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/components/ui/PageHeader.tsx:59 eyebrow 'uppercase tracking-[0.28em] text-zinc-600' (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1315] B13.2 — Aplicación de tokens + quick wins (inventario dentro del rango)
 - Fuente: `docs/bitacora-roadmap.md:8585` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
@@ -10592,16 +10592,16 @@
 - Nodo(s): lib.transversal
 - Qué es: Solo se corrigieron los 15 eyebrows con marca develOP; pasar el resto a sentence case es un sprint dedicado si Franco lo pide.
 - Referencias: también en fuente:8680 · también en fuente:8920
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -c -E "uppercase tracking-..." origin/main -- logic-core-v3/src -> 614 líneas; PageHeader.tsx:59 uppercase (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1317] Tokenizar 124 radios hardcodeados
 - Fuente: `docs/bitacora-roadmap.md:8666` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): lib.transversal
 - Qué es: 124 rounded-[28px]/[24px] en 30+ archivos; tokenizarlos a rounded-2xl/3xl es un sprint dedicado.
 - Referencias: también en fuente:8682
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -cE 'rounded-\[(28|24)px\]' en src -> 159 ocurrencias en 86 archivos (crecio desde 124); incluye skeletons CardSkeleton.tsx:11, ListSkeleton.tsx:13, TableSkeleton.tsx:10. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1318] 5 hallazgos P2 de seguridad real sin atender
 - Fuente: `docs/bitacora-roadmap.md:8822` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
@@ -10615,8 +10615,8 @@
 - Fuente: `docs/bitacora-roadmap.md:8887` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
 - Nodo(s): lib.transversal
 - Qué es: B13.0-B13.5: BrandMark único, tabs/sidebar unificados, KPIs neutros, placeholders KB visibles, embed unificado.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — BrandMark.tsx consumido por admin-sidebar.tsx:27 y SidebarNav.tsx:23; el setter no muestra marca (git grep 'logodevelOP|BrandMark' en (protected)/setter -> 0) (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1320] Verificar GBP OAuth y Search Console con credenciales reales
 - Fuente: `docs/bitacora-roadmap.md:9002` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
@@ -10653,24 +10653,24 @@
 - Nodo(s): lib.transversal
 - Qué es: Bloquea click-nav del sidebar en dev (prod OK según el doc); sprint propio.
 - Referencias: src/context/TransitionContext.tsx · también en fuente:9973 · también en fuente:10354 · también en fuente:10797
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — TransitionContext.tsx no renderiza markup que difiera entre server y cliente (:162-166); bitacora-roadmap.md:10522 atribuye el mismatch al scroll-lock del <html> del layout. TransitionContext.tsx:72 descarta clicks mientras isAnimating (hasta 8 s, :123-128), causa alternativa del click-nav trabado. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1325] B15 consolidación design system en el portal
 - Fuente: `docs/bitacora-roadmap.md:10367` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-30
 - Nodo(s): lib.transversal
 - Qué es: Headers outliers alineados y stagger reveal en listas admin; intento V4 revertido.
 - Referencias: f2f36af · 9628b80 · 47b6721 · e5702e3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — f2f36af, 9628b80, 47b6721 y e5702e3 son ancestros de origin/main (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1326] Definir eyebrow canónico
 - Fuente: `docs/bitacora-roadmap.md:10376` · tipo: decision · estado declarado: pendiente (decisión de Franco) · fecha: 2026-05-30
 - Nodo(s): lib.transversal
 - Qué es: El sistema se contradice (Eyebrow 0.24em vs PageHeader 0.28em semibold y dispersos); Franco define el valor.
 - Referencias: src/lib/design-patterns.ts · también en fuente:10400
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Typography.tsx:11 'text-[10px] uppercase tracking-[0.24em] text-zinc-500' vs PageHeader.tsx:59 'text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-600'; design-patterns.ts:52 usa 0.24em. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1327] P1.A helper de fechas AR + averageTicketUsd
 - Fuente: `docs/bitacora-roadmap.md:11057` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30
@@ -10700,8 +10700,8 @@
 - Nodo(s): lib.transversal
 - Qué es: 6 copias de filtro de fecha/período se mantienen separadas por diseño; no consolidar.
 - Referencias: audit-period-filter.tsx · projects-period-dropdown.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Siguen separados audit-log/_components/audit-period-filter.tsx y projects/_components/projects-period-dropdown.tsx (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1331] Tokens OAuth guardados en claro
 - Fuente: `docs/bitacora-roadmap.md:12527` · tipo: pendiente · estado declarado: pendiente
@@ -10715,16 +10715,16 @@
 - Nodo(s): lib.transversal
 - Qué es: Disclaimer en AIExecutiveBrief e insights LLM; considerar DataOriginBadge demo|ai-generated|real-time.
 - Referencias: AIExecutiveBrief · PreviewBanner
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -nE 'Generado por IA|DataOriginBadge' origin/main -- logic-core-v3/src -> vacio; control: PreviewBanner aparece en 3 archivos. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1333] ui/EmptyState.tsx posible huérfano
 - Fuente: `docs/sprints/alpha-0-6-cleanup-extended.md:21` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.transversal
 - Qué es: Pendiente de decisión.
 - Referencias: src/components/ui/EmptyState.tsx · docs/sprints/alpha-pre-cierre-RESUMEN.md:64
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — Lo importan 5 archivos del setter: setter/_components/home-empty.tsx:5, setter/error.tsx:6, setter/leads/[leadId]/error.tsx:7, manual/error.tsx:7, setter/not-found.tsx:6. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1334] 9 specs E2E nuevos
 - Fuente: `docs/sprints/alpha-0-8-tests-e2e.md:3` · tipo: hecho-declarado · estado declarado: hecho
@@ -10746,16 +10746,16 @@
 - Nodo(s): lib.transversal
 - Qué es: Alpha.1-21 en bloques A-F (alpha-bloque-A ... F); en docs/sprints solo está el resumen del bloque C.
 - Referencias: alpha-bloque-A-admin-funcional.md · alpha-bloque-F-cierre.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — En docs/sprints solo están alpha-bloque-C-RESUMEN.md, alpha-pre-cierre-RESUMEN.md y alpha-RESUMEN-FINAL.md (git ls-tree) (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1337] develOP v1.0 released
 - Fuente: `docs/sprints/alpha-RESUMEN-FINAL.md:21` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05
 - Nodo(s): lib.transversal
 - Qué es: 22 specs E2E, design system, audit log, alertas, bulk, command palette, dashboard cliente en formato negocio, mobile, 5 workflows, changelog.
 - Referencias: tambien en :92
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — Sin tag v1.0.0 (git tag -l); package.json:3 '0.1.0'; el '1.0.0' solo existe como literal en VersionBadge.tsx:1 y api/version/route.ts:5 (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1338] Decisiones clave de Alpha
 - Fuente: `docs/sprints/alpha-RESUMEN-FINAL.md:45` · tipo: decision · estado declarado: decidido · fecha: 2026-05
@@ -10770,8 +10770,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Grabar demo (docs/demo-guion.md), activar primer cliente real, monitorear baseline; Beta: 8 features, widget embebible, reportes semanales AI.
 - Referencias: tambien en :67, :68, :71-:73
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Existen docs/demo-guion.md y public/widget.js (git ls-files) y el cron de reportes semanales (flujo [D5] Reporte semanal del chatbot por email); no hay clientes reales (contexto fijo). (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1340] Tokens OAuth y credenciales en claro
 - Fuente: `docs/sprints/p3-a-1-gbp-connection.md:92` · tipo: pendiente · estado declarado: pendiente
@@ -10786,53 +10786,53 @@
 - Nodo(s): lib.transversal
 - Qué es: Varios sprints cierran con 'commitear cuando revises' (P3-A.1/A.2, P4.1, Q1.1, Q1.2, UTM.1).
 - Referencias: docs/sprints/p3-a-2-venta.md:154, :229 · docs/sprints/p4-1-render-utm.md:124 · docs/sprints/q1-1-harness.md:99 · docs/sprints/utm-1-captura.md:259
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — El trabajo de esos sprints esta en main: src/lib/integrations/gbp-connection.ts (P3-A.1) y modules/chatbot/server/chat/__tests__/utm-attribution.invariant.ts (UTM) en git ls-files. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1342] B0.5 T6: mapeo de colores en CLAUDE.md
 - Fuente: `docs/sprints/sprint-b05-sanidad-sitio.md:58` · tipo: bloque · estado declarado: plan
 - Nodo(s): lib.transversal
 - Qué es: web cyan, IA verde, automatización ámbar, software 'índigo/violeta'.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — CLAUDE.md:103 'Software → Violet `#8b5cf6`'; globals.css:63 (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1343] StatCard frozen: typo y a11y
 - Fuente: `raiz:lane-dashboard-log.md:65` · tipo: pendiente · estado declarado: pendiente de coordinación
 - Nodo(s): lib.transversal
 - Qué es: 'Requiere atencion' sin tilde, íconos sin aria, prop format sin uso, transition-[width].
 - Referencias: src/components/ui/StatCard.tsx:126 · tambien en :86, :103, :176, :177
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Tilde corregida StatCard.tsx:127 'Requiere atención'; icono principal aria-hidden :79; TrendIcon :111 sin aria-hidden ni strokeWidth 1.5; prop format en uso (admin/chatbots/[botId]/tabs/OverviewTab.tsx:110,120); transition-[width] sigue en :94 (con motion-reduce). (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1344] Skeleton animate-pulse sin motion-reduce
 - Fuente: `raiz:lane-dashboard-log.md:104` · tipo: pendiente · estado declarado: pendiente de coordinación
 - Nodo(s): lib.transversal
 - Qué es: Componente compartido Skeleton.tsx.
 - Referencias: tambien en :178
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/components/ui/Skeleton.tsx:11 'animate-pulse motion-reduce:animate-none' (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1345] error.message al cliente en actions
 - Fuente: `raiz:lane-LOG.md:153` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.transversal
 - Qué es: Convención repo-wide; endurecer en commit aparte.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — action-utils.ts:31-33 'if (error instanceof Error) { return error.message }'; 6 archivos consumen toErrorMessage. (D9-c1, lector D9-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1346] Subir chartCardHoverCls a lib/hover.ts
 - Fuente: `raiz:lane-resultados-redesign-log.md:131` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-25
 - Nodo(s): lib.transversal
 - Qué es: Follow-up aditivo; hoy duplicado en results/_shared y LatencyChart.
 - Referencias: tambien en :185
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Definido en src/components/dashboard/results/_shared/chartHover.ts:10 y consumido desde ahí (seo/page.tsx:14, trafico/page.tsx:17); lib/hover.ts no lo exporta (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1347] Portal fuera del rediseño
 - Fuente: `raiz:PRODUCT.md:13` · tipo: decision · estado declarado: decidido
 - Nodo(s): lib.transversal
 - Qué es: Admin, dashboard, LeadOS y chatbot tienen lenguaje visual cerrado y no están en agenda de rediseño.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — PRODUCT.md:13; el portal conserva su lenguaje (p. ej. setter-shell.tsx:69 backdrop-blur-xl, design-tokens en Modal.tsx:7) (D9-c1, lector D9-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1348] v1.0 funcional
 - Fuente: `STATUS.md:18` · tipo: hecho-declarado · estado declarado: hecho (verificado 2026-05-21) · fecha: 2026-05-21

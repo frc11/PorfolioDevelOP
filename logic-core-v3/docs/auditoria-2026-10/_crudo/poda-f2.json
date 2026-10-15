@@ -1381,6 +1381,112 @@
     "único consumidor: scripts/_b14-4-smoke-prod.mjs:82"
    ],
    "que_rompe": "El smoke de prod. Conviene arreglarlo (SHA del commit) en vez de borrarlo."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "archivo": "scripts/_b14-2-seed-bench-prod.ts",
+   "senales": [
+    "Cabecera :19 'Throwaway — borrar después del sprint B14.2'",
+    "Sin importadores ni entrada en package.json",
+    "Crea un bot activo en PROD (:139-180)"
+   ],
+   "que_rompe": "_b14-4-smoke-prod.mjs:20 y _b14-2-prod-bot-latency.mjs:22 usan bench-matsu por defecto (el smoke saltea el bloque si el bot no existe, bitacora-roadmap.md:9692)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "archivo": "scripts/_b14-2-cleanup-bench-prod.ts",
+   "senales": [
+    "Cabecera :20 'Throwaway — borrar después del sprint B14.2'",
+    "Roto: :102 usa prisma.message con conversationId (Message no lo tiene)",
+    "Sin importadores ni entrada en package.json"
+   ],
+   "que_rompe": "Nada en código; si bench-matsu sigue en prod, la limpieza tiene que hacerse por otra vía (hard-delete del admin)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "archivo": "scripts/admin-1a-backfill-caliente.ts",
+   "senales": [
+    "One-shot ya aplicado: admin-1b escribe caliente a mano (lead.actions.ts:165)",
+    "Re-correrlo es dañino (pisa marcas manuales)",
+    "Sin importadores ni entrada en package.json (git grep 'admin-1a' -> 0)"
+   ],
+   "que_rompe": "Nada; coordinar con Franco (ZONA-FRANCO)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "archivo": "scripts/cleanup-messages-demo.ts",
+   "senales": [
+    "Fuera de package.json",
+    "Par de scripts/seed-messages-demo.ts (existe)",
+    "Borra en todas las orgs con solo --confirm (:50)"
+   ],
+   "que_rompe": "El camino de reversión de seed-messages-demo.ts: podar los dos juntos o ninguno"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "archivo": "src/components/ui/ErrorState.tsx",
+   "senales": [
+    "Unica referencia fuera de su archivo: export en src/components/ui/index.ts:6",
+    "git grep -n ErrorState en src y tests: solo definicion + barrel",
+    "Copy sin tildes (:24-25) y strokeWidth 1.75 (:41,:58): nadie lo mantiene"
+   ],
+   "que_rompe": "Nada en runtime; quitar tambien la linea 6 de index.ts (FROZEN: decision para Valentino)."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "archivo": "src/components/ui/HyperText.tsx",
+   "senales": [
+    "Unico importador: src/components/canvas/Interactive3DNetwork.tsx:7",
+    "Interactive3DNetwork no tiene importadores (git grep solo encuentra docs y su propio archivo; ya marcado muerto en auditoria-total-pre-deploy.md:56)",
+    "Comentarios de agente sin resolver (:140-142) y limpieza de intervalos rota (:121-137)"
+   ],
+   "que_rompe": "Nada en runtime si se borra junto con Interactive3DNetwork."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "archivo": "src/lib/design-tokens.ts",
+   "senales": [
+    "5 importadores, todos import { zIndex }",
+    "colors, spacing, radii, typography, shadows, motion y breakpoints sin consumidores",
+    "colors.service contradice CLAUDE.md:101-103"
+   ],
+   "que_rompe": "Borrar el archivo entero rompe Modal.tsx:7 (FROZEN), DashboardLayoutClient.tsx:12 y tres archivos del setter; solo las exportaciones distintas de zIndex son podables."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "archivo": "src/lib/hover.ts",
+   "senales": [
+    "adminHoverAmplifiedCls: 0 consumidores (git grep)",
+    "adminHoverCls si se usa (41 archivos)"
+   ],
+   "que_rompe": "Solo el export adminHoverAmplifiedCls; nada."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "archivo": "src/lib/logger.ts",
+   "senales": [
+    "Metodo ai() (:69-72) con 0 usos (git grep 'logger.ai(' -> 0)"
+   ],
+   "que_rompe": "Nada."
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "archivo": "src/components/ui/buttons/MagneticCta.tsx",
+   "senales": [
+    "Rama href con <Link legacyBehavior passHref> (:176-191) sin usos: el unico consumidor (Hero.tsx:731,734) no pasa href",
+    "cn local duplicado (:9-11)"
+   ],
+   "que_rompe": "Nada si se quita la rama href; conviene reemplazarla por <Link> moderno en vez de borrarla, porque el hero la necesita (hallazgo de CTA inerte)."
   }
  ]
 }

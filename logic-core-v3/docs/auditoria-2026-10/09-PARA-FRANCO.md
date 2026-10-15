@@ -184,6 +184,15 @@
 - Coordinación: ninguna fuera de la zona
 - Ficha completa: BUG-168 en 03-MEJORAS.md
 
+### BUG-177 · Re-correr el backfill de caliente pisa las marcas manuales de Franco (sin guard ni dry-run)
+- Contexto: D9 · h4.adm-leads, h5.adm-revision-demos, modelo.OsLead. MEDIA, PROBABLE.
+- Evidencia: `scripts/admin-1a-backfill-caliente.ts:20` — «* Idempotente: setea 'caliente' al valor calculado para TODOS los leads (true a»; `scripts/admin-1a-backfill-caliente.ts:72` — «if (lead.caliente !== objetivo) { await prisma.osLead.update({»; `scripts/admin-1a-backfill-caliente.ts:42` — «if (!process.env.DATABASE_URL) {»; `src/app/(protected)/admin/leads/_actions/lead.actions.ts:165` — «data: { assignedToId: parsed.setterId, caliente: parsed.caliente },»
+- Impacto: admin-1b ya convirtió caliente en una marca manual del admin, pero el script sigue en el repo presentado como idempotente. Quien lo corra (sin --confirm, sin chequeo de host, cargando .env.local) devuelve en silencio cada marca manual a la regla de score, en la base a la que apunte. El efecto es que se pierden decisiones comerciales sin dejar rastro.
+- Propuesta: Coordinar con Franco: borrar el script (el one-shot ya se aplicó) o hacerlo abortar si existe algún lead cuyo caliente difiere de la regla, con --confirm y dry-run.
+- Cómo verificar: leer las líneas citadas en origin/main
+- Coordinación: ninguna fuera de la zona
+- Ficha completa: BUG-177 en 03-MEJORAS.md
+
 ### DEU-074 · deleteLead borra en cascada el trabajo del setter sin auditoría ni aviso
 - Contexto: D4 · h4.adm-leads.crud-y-estado, modelo.OsLead, modelo.OsLeadDossier. MEDIA, PROBABLE.
 - Evidencia: `src/app/(protected)/admin/leads/_actions/lead.actions.ts:237` — «await prisma.osLead.delete({ where: { id: parsedLeadId },»; `prisma/schema.prisma:919` — «lead OsLead @relation(fields: [leadId], references: [id], onDelete: Cascade)»

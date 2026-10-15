@@ -3830,6 +3830,666 @@
     "sentido": "si",
     "ciclo": "D8-c1, lector D8-L1"
    }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2369",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/components/layout/publicRoute.ts:26 CHROME_FREE_PREFIXES=['/styleguide'], :39-43 isChromeFreeRoute; PublicOnlyComponents.tsx:21; ChatWidgetMount.tsx:30",
+    "sentido": "si",
+    "nota": "SmoothScroll.tsx:30 no usa esta fuente única (lista propia sin /setter ni /embed)",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3633",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "git ls-tree origin/main: publicRoute.ts, PublicOnlyComponents.tsx, SmoothScroll.tsx, ChatWidgetMount.tsx, lib/chromeReveal.ts, hooks/useThemeObserver.tsx, ui/MarketingIntro.tsx, ui/Button.tsx, lib/utils.ts, lib/design-tokens.ts existen; useChromeRevealed.ts:10 y :20 esperan phase 'done' en '/'",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2256",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "--text-ds-subhead en globals.css (3 usos) y design-system/Subhead.tsx; isChromeFreeRoute en publicRoute.ts:39; NoiseOverlay sin archivo (git ls-tree sin match) y documentado en layout.tsx:95",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:5936",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "git grep -n -E \"['\\\"/=]aki(['\\\"/ ]|$)\" origin/main -- logic-core-v3 -> 0; control: BOT_SLUG = 'develop' en scripts/dev/seed-alerts.ts:43 y seed-events.ts:34. 'Aki' queda solo como nombre (seed-matsu.ts:29)",
+    "sentido": "no",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:8138",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/proxy.ts:171-173 matcher ['/admin/:path*','/dashboard/:path*','/setter/:path*','/login','/bienvenida','/cambiar-password']",
+    "sentido": "si",
+    "nota": "D1-c2 marcó que las páginas confían en el layout y el proxy decide con claims del JWT",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:52",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Conviven admin/alerts/_components/alert-column-overview.tsx y admin/leads/_components/column-overview.tsx (git ls-tree)",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:168",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Hecho: ui/Field.tsx:31-32 label htmlFor. Pendiente: eslint baseline conversation-list.tsx:57 react-hooks/set-state-in-effect, ClientLeadsTable.tsx:186 exhaustive-deps; campaigns/new/page.tsx:34 declara formAction y no lo usa (única ocurrencia)",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:93",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -n -i -E \"delta|LEAD_INTENTS|event-types\" origin/main -- logic-core-v3/docs/roadmap-pendientes.md -> 0; control: el archivo existe (git ls-tree)",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "raiz:lane-dashboard-log.md:104",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/components/ui/Skeleton.tsx:11 'animate-pulse motion-reduce:animate-none'",
+    "sentido": "no",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "raiz:lane-resultados-redesign-log.md:131",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Definido en src/components/dashboard/results/_shared/chartHover.ts:10 y consumido desde ahí (seo/page.tsx:14, trafico/page.tsx:17); lib/hover.ts no lo exporta",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9167",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/components/ui/Select.tsx:213 window.addEventListener('scroll', handleScroll, true); :189 listboxRef.current?.focus() sin preventScroll",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:387",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/app/styleguide/_components/TypographyBlock.tsx:1 import { Space_Grotesk } y :19 displayCandidate",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2224",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "docs/impeccable-baseline.md:24 y :108 (56 casos, 3 públicos) sin cierre registrado",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7744",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "VersionBadge.tsx:1 'v1.0.0' y api/version/route.ts:5 '1.0.0' ya anuncian 1.0.0; package.json:3 '0.1.0'; git tag -l '*rc*' '*1.0*' '*0.9*' -> solo 'nocturno-parcial' (tags locales)",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:13",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "ChatbotOverview.tsx:99 'Personas atendidas'; MonthTrendSection.tsx:40; MonthlyConversationsChart.tsx:44",
+    "sentido": "no",
+    "nota": "No se barrió cada contador del panel",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/sprints/alpha-pre-cierre-RESUMEN.md:107",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "En docs/sprints solo están alpha-bloque-C-RESUMEN.md, alpha-pre-cierre-RESUMEN.md y alpha-RESUMEN-FINAL.md (git ls-tree)",
+    "sentido": "no",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/sprints/sprint-b05-sanidad-sitio.md:58",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "CLAUDE.md:103 'Software → Violet `#8b5cf6`'; globals.css:63",
+    "sentido": "no",
+    "nota": "PRODUCT.md:54 sigue diciendo índigo",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1778",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "docs/metodo/PROPUESTA-CIMIENTO.md existe; se trabaja con git worktrees (esta auditoría corre en uno); M-01/M-02 no son verificables en código",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:6180",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "resultados/seo/page.tsx:226 y trafico/page.tsx:188 {data.isMockData && !hideBanner && <PreviewBanner}; lib/analytics.ts:54",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:8503",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/components/ui/PageHeader.tsx:59 eyebrow 'uppercase tracking-[0.28em] text-zinc-600'",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:81",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "EmptyStateMuted en 40 archivos; además de la excepción ProjectsTab.tsx:75, sigue un vacío con Card variant='dashed' en dashboard/cuenta/boveda/page.tsx:99-102",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:39",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "MH.2 en código (handleChatRequest.ts:104, :261, :449); R1 (ROI) sin rastro: git grep -l -i -E \"calculateRoi|roiEstimate\" -> 0",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:57",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "EV: verticalPack en schema.prisma; UTM.1: utmSource en Conversation (schema.prisma:1381-1388); MH.2 en handleChatRequest.ts:104; R1 no encontrado",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "raiz:PRODUCT.md:13",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "PRODUCT.md:13; el portal conserva su lenguaje (p. ej. setter-shell.tsx:69 backdrop-blur-xl, design-tokens en Modal.tsx:7)",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:8662",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -c -E \"uppercase tracking-...\" origin/main -- logic-core-v3/src -> 614 líneas; PageHeader.tsx:59 uppercase",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:12312",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Siguen separados audit-log/_components/audit-period-filter.tsx y projects/_components/projects-period-dropdown.tsx",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:172",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "globals.css:63 --color-ds-accent-software: #8b5cf6; design-system/accent.ts:9; CLAUDE.md:103",
+    "sentido": "si",
+    "nota": "PRODUCT.md:54 (índigo) contradice la decisión",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3595",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "ds-reveal sigue en Cierre.tsx:51 (animate-ds-reveal), Nosotros.tsx y Servicios.tsx (git grep -l); Portfolio y PortalDemo ya no aparecen",
+    "sentido": "si",
+    "nota": "No se verificó si lo que envuelve es el titular",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:52",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "git merge-base --is-ancestor: f3c2b32, ab111c4, 82aed0e, 6ea7df9 y 713c203 están en origin/main (ya no 'sin mergear')",
+    "sentido": "no",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Soporte_ registro de cambios.md:49",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Existen components/dashboard/ClientChatThread.tsx, ChatBubble.tsx y ClientChatComposer.tsx; AnimatedChatBubble sin archivo (git ls-tree)",
+    "sentido": "no",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:9",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "affa06a es ancestro de origin/main y después se ejecutó EV (verticalPack en schema) y MH.2 (handleChatRequest.ts:104); no hay tag v0.9.0-rc.1 local",
+    "sentido": "no",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/sprints/alpha-RESUMEN-FINAL.md:21",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "Sin tag v1.0.0 (git tag -l); package.json:3 '0.1.0'; el '1.0.0' solo existe como literal en VersionBadge.tsx:1 y api/version/route.ts:5",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:8887",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "BrandMark.tsx consumido por admin-sidebar.tsx:27 y SidebarNav.tsx:23; el setter no muestra marca (git grep 'logodevelOP|BrandMark' en (protected)/setter -> 0)",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10367",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "f2f36af, 9628b80, 47b6721 y e5702e3 son ancestros de origin/main",
+    "sentido": "no",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:31",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "globals.css:678 @media (prefers-reduced-motion: reduce); tokens ds-* (globals.css:63)",
+    "sentido": "si",
+    "nota": "globals.css:674-676 deja pendiente Lenis (JS)",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:361",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/app/styleguide/page.tsx:26 robots: { index: false, follow: false, nocache: true }; sin chrome por publicRoute.ts:26",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:1737",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/app/layout.tsx:84-96 documenta el desmontaje; git ls-tree sin NoiseOverlay ni CustomCursor",
+    "sentido": "no",
+    "ciclo": "D9-c1, lector D9-L1"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md:176",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/lib/hover.ts:5,9 solo exporta adminHoverCls/adminHoverAmplifiedCls; chartCardHoverCls sigue en src/components/dashboard/results/_shared/chartHover.ts (usado en resultados/seo/page.tsx:14 y trafico/page.tsx:17). git grep -n chartCardHoverCls origin/main -- logic-core-v3/src/lib/hover.ts -> vacio.",
+    "sentido": "decidir",
+    "nota": "adminHoverAmplifiedCls tiene 0 consumidores.",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "raiz:lane-dashboard-log.md:65",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Tilde corregida StatCard.tsx:127 'Requiere atención'; icono principal aria-hidden :79; TrendIcon :111 sin aria-hidden ni strokeWidth 1.5; prop format en uso (admin/chatbots/[botId]/tabs/OverviewTab.tsx:110,120); transition-[width] sigue en :94 (con motion-reduce).",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/sprints/alpha-0-6-cleanup-extended.md:21",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "Lo importan 5 archivos del setter: setter/_components/home-empty.tsx:5, setter/error.tsx:6, setter/leads/[leadId]/error.tsx:7, manual/error.tsx:7, setter/not-found.tsx:6.",
+    "sentido": "no",
+    "nota": "El que no tiene consumidores es ErrorState.tsx (solo index.ts:6).",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10021",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "TransitionContext.tsx no renderiza markup que difiera entre server y cliente (:162-166); bitacora-roadmap.md:10522 atribuye el mismatch al scroll-lock del <html> del layout. TransitionContext.tsx:72 descarta clicks mientras isAnimating (hasta 8 s, :123-128), causa alternativa del click-nav trabado.",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:233",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Button.tsx:110-120 buttonClasses() exportada, :82-84 hasFramerPress(), :97 tamano ds-compact, :53-70 variantes ds-*; design-system/CtaButton.tsx:5 importa Button y buttonClasses.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7351",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "SectionErrorBoundary.tsx:55 logger + :64 Sentry.captureException; index.ts:10; usado por dashboard/error.tsx, chatbot/, cuenta/, modules/, resultados/error.tsx y AdminErrorBoundary.tsx:18; 24 error.tsx y 54 loading.tsx en src/app (git ls-files).",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:8409",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "design-tokens.ts:7-17 regla de color y :94-99 service; src/components/brand/BrandMark.tsx existe (3 referencias); Tabs.tsx:15-39 API dual href/value; index.ts:18.",
+    "sentido": "decidir",
+    "nota": "Los colores por servicio de design-tokens.ts:96-98 contradicen CLAUDE.md:101-103 y globals.css:61-63, y no tienen consumidores.",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:36",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "EmptyStateMuted.tsx:14-18 re-export de ResultEmptyState; 38 archivos lo importan (git grep).",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:538",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/components/ui/Textarea.tsx:12 TextArea; index.ts:19; git ls-files -- 'src/app/(protected)/setter/_components/text-area.tsx' -> vacio (control: Textarea.tsx listado).",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1146",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Field.tsx:19-27 useId + contexto, :31-32 htmlFor, :49 role=alert con id; field-context.ts:21-28; Input.tsx:25-31; Textarea.tsx:21-26; Select.tsx:121,319,327.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:182",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Button.tsx:19-20 ds-primary/ds-secondary, :22 tamanos ds y ds-compact; src/components/design-system/ con 13 entradas (git ls-tree).",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:1801",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "14 consumidores de lib/whatsapp (contact/page.tsx:8, CtaIA.tsx:6, PricingSection.tsx:5, ...); siguen fuera Footer.tsx:8 (fallback 5493815000000), PortalDemoCTA.tsx:235, CalculadorIA.tsx:316 y ChatbotUpsellLanding.tsx:15.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7934",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "tests/e2e/19-security.spec.ts:4-18 cubre anonimo -> /login en /admin y /dashboard; tests/e2e/11-client-login.spec.ts:16 cliente -> /admin. No consta que corra en CI (dominio D8).",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Ideas de nuevas features.md:64",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Siguen 4 mapeos replicados: admin/alerts/_components/alerts-filters.ts:62-63, admin/audit-log/_components/audit-filters.ts:43-44, admin/leads/_components/lead-filters.ts:140-141, modules/chatbot/components/admin/activity/activityFilters.ts:69 (su :5 dice 'replica el patron de presets de Leads').",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:88",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "encrypt-for-storage.ts ya no existe (git ls-files src/lib/crypto); conviven credential-cipher.ts:18 y secret-box.ts:22, ambos 'aes-256-gcm'.",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md:88",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -c pb-20 en src/app/(protected)/dashboard y src/components/dashboard -> 20 ocurrencias.",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:48",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Fuera del lote. Existe src/lib/isolation (forOrg/unsafeGlobalQuery, contexto fijo) y multiTenantQueries.ts:95 usa startOfDateRange de tz-ar; no se verifico el contrato helper por helper.",
+    "sentido": "decidir",
+    "nota": "Cruce de D5/D6.",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/roadmap-pendientes.md:72",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -nE 'Generado por IA|DataOriginBadge' origin/main -- logic-core-v3/src -> vacio; control: PreviewBanner aparece en 3 archivos.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "raiz:lane-LOG.md:153",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "action-utils.ts:31-33 'if (error instanceof Error) { return error.message }'; 6 archivos consumen toErrorMessage.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/sprints/p3-a-1-gbp-connection.md:148",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "El trabajo de esos sprints esta en main: src/lib/integrations/gbp-connection.ts (P3-A.1) y modules/chatbot/server/chat/__tests__/utm-attribution.invariant.ts (UTM) en git ls-files.",
+    "sentido": "no",
+    "nota": "Es proceso; no hay artefacto de codigo que verificar mas alla de que el trabajo quedo commiteado.",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7537#2",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "alerts-filters.ts:62 new Date(`${filter.from}T00:00:00.000`) y equivalentes en audit-filters.ts:43, lead-filters.ts:140, activityFilters.ts:69: hora local del navegador, sin tz-ar/dates-ar.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10858",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -nE 'role=|aria-modal|Escape|keydown|focus' origin/main -- logic-core-v3/src/components/ui/Modal.tsx -> vacio; control: Select.tsx tiene 2 role=.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:8666",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -cE 'rounded-\\[(28|24)px\\]' en src -> 159 ocurrencias en 86 archivos (crecio desde 124); incluye skeletons CardSkeleton.tsx:11, ListSkeleton.tsx:13, TableSkeleton.tsx:10.",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2539",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "layout.tsx:103 declara la limpieza, pero quedan cursor-none en components/sections/home/Portfolio.tsx:239,329 y About.tsx:93 (home clasica restaurada).",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:3573",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "MarketingIntro.tsx:19-22 saco three/r3f/postprocessing del bundle inicial (dynamic ssr:false); sin build no se puede medir el resto.",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/sprints/alpha-RESUMEN-FINAL.md:66",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Existen docs/demo-guion.md y public/widget.js (git ls-files) y el cron de reportes semanales (flujo [D5] Reporte semanal del chatbot por email); no hay clientes reales (contexto fijo).",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md:402",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "EmptyState.tsx:1 'use client' e :12 icon: LucideIcon; EmptyStateMuted.tsx:7-8 lo resuelve como componente universal sin 'use client'.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:29",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Decision organizativa; la unica barrera en codigo es la regla de eslint que impide a chatbot/motor importar @/lib/prisma (contexto fijo). No hay CODEOWNERS que la haga cumplir.",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:57",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "No hay descargo en src (git grep -niE 'alucina|puede cometer errores|puede equivocarse'); en cambio src/components/ia/GarantiaIA.tsx:410 promete 'Cero alucinaciones.' en el sitio publico.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10376",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Typography.tsx:11 'text-[10px] uppercase tracking-[0.24em] text-zinc-500' vs PageHeader.tsx:59 'text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-600'; design-patterns.ts:52 usa 0.24em.",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:257",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/components/design-system/SectionShell.tsx:84 data-ds-theme={theme}; :42 documenta el tema local.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:814",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Regla de proceso sin artefacto verificable en codigo (no hay script ni invariante que la aplique).",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-rediseno.md:2309",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Tokens globals.css:61-63 (--color-ds-accent-*); no se verifico cada uso. design-tokens.ts:96-98 define otro mapa de acentos sin consumidores.",
+    "sentido": "decidir",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:6152",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "git grep 'Insights AI' en ChatbotOverview.tsx -> vacio; dashboard/project/page.tsx:108-117 deriva la fecha de inicio de paymentMilestones reales (sin milestone hardcodeado); PreviewBanner en 3 archivos.",
+    "sentido": "si",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:28",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "git ls-files src/app | grep -i /smoke -> 0 (control: /embed/ -> 2 archivos): la ruta /smoke publica ya no existe.",
+    "sentido": "no",
+    "ciclo": "D9-c1, lector D9-L2"
+   }
   }
  ]
 }

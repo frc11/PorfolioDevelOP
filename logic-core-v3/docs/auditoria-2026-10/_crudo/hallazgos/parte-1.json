@@ -26,9 +26,9 @@
   {
    "id": "SEC-002",
    "prefijo": "SEC",
-   "titulo": "Email y contraseña de las cuentas del seed (SUPER_ADMIN y cliente) escritos en el repo",
-   "bloque_md": "### [SEC-002] Email y contraseña de las cuentas del seed (SUPER_ADMIN y cliente) escritos en el repo\n- Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad\n- Confianza: VERIFICADO-POR-LECTURA\n- Evidencia: `README.md:29-30`, `STATUS.md:258-259`, `docs/demo-guion.md:15-16`, `docs/bitacora-beta.md:15`, `docs/bitacora-roadmap.md:6375-6377` (tabla de MS-8: super-admin, client-a y client-b) y `:10534`, `tests/helpers/auth.ts:21` y `:25` — patrón «email / contraseña» (valores omitidos); el seed actual ya no los usa: `prisma/seed.ts:76-79` — `bcrypt.hash(requireSeedPassword('SEED_ADMIN_PASSWORD'), 12)`.\n- Impacto: bloqueante para el primer cliente real: si la base de producción se siembra —o se sembró antes del cambio— con esas contraseñas, queda un SUPER_ADMIN con contraseña conocida por cualquiera que lea el repo.\n- Propuesta: sacar los literales de docs y del helper de tests (que lea de entorno, como el seed), sembrar producción limpia y confirmar que ninguna base expuesta conserva esas contraseñas.\n- Esfuerzo: S  ·  Zona: libre\n- Relacionado: [SEC-001], [SEC-003]\n- Nodo(s): lib.auth, lib.prisma.seeds, lib.tests\n- REQUIERE-VERIFICACIÓN-HUMANA: VH-002",
-   "severidad": "BAJA",
+   "titulo": "Email y contraseña de las cuentas de prueba (SUPER_ADMIN y cliente) escritos en el repo público: el seed los usó de marzo a junio de 2026 y la suite e2e depende de que sigan vigentes",
+   "bloque_md": "### [SEC-002] Email y contraseña de las cuentas de prueba (SUPER_ADMIN y cliente) escritos en el repo público: el seed los usó de marzo a junio de 2026 y la suite e2e depende de que sigan vigentes\n- Dominio: D1  ·  Severidad: ALTA  ·  Tipo: seguridad\n- Confianza: PROBABLE\n- Evidencia: `README.md:29-30`, `STATUS.md:258-259`, `docs/demo-guion.md:15-16`, `docs/bitacora-beta.md:15`, `docs/bitacora-roadmap.md:6375-6377` (tabla de MS-8: super-admin, client-a y client-b) y `:10534`, `tests/helpers/auth.ts:21` y `:25` — patrón «email / contraseña» (valores omitidos); el seed actual ya no los usa: `prisma/seed.ts:76-79` — `bcrypt.hash(requireSeedPassword('SEED_ADMIN_PASSWORD'), 12)`.; `prisma/seed.ts` usó el literal del SUPER_ADMIN del 2026-03-18 (`a3c3888c`) al 2026-06-20 (`4148e32d`) según `git log -S` (corrido sin imprimir el valor); `scripts/b1-verify-setter-ownership.ts:44` y `scripts/b2-verify-dossier.ts:66` reescriben la del setter QA en cada corrida ([SEC-003]).\n- Impacto: bloqueante para el primer cliente real: si la base de producción se siembra —o se sembró antes del cambio— con esas contraseñas, queda un SUPER_ADMIN con contraseña conocida por cualquiera que lea el repo. El repo sigue público ([SEC-107]) y la suite e2e solo anda si la base conserva esas contraseñas. C16 (barrido de D9): sube de BAJA a ALTA por la rúbrica DEC-23 (escalada a SUPER_ADMIN con una precondición fuerte, que producción se haya sembrado en esa ventana); queda PROBABLE porque ese eslabón es de datos y lo cierra VH-002.\n- Propuesta: sacar los literales de docs y del helper de tests (que lea de entorno, como el seed), sembrar producción limpia y confirmar que ninguna base expuesta conserva esas contraseñas.\n- Esfuerzo: S  ·  Zona: libre\n- Relacionado: [SEC-001], [SEC-003]\n- Nodo(s): lib.auth, lib.prisma.seeds, lib.tests\n- REQUIERE-VERIFICACIÓN-HUMANA: VH-002",
+   "severidad": "ALTA",
    "zona": "libre",
    "dominio": "D1",
    "nodos": [
@@ -51,10 +51,29 @@
       "titulo": "Contraseñas literales de seed del historial siguen válidas en toda base sembrada antes del 20/06/2026",
       "severidad": "BAJA",
       "nota_padre": "Mismo riesgo que SEC-002 (contraseñas de seed); suma el ángulo del historial (válidas en toda base sembrada antes del 20/06/2026)."
+     },
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/PADRE/H01",
+      "titulo": "Contraseñas literales de las cuentas de prueba (SUPER_ADMIN incluido) en tests, scripts y docs del repo público",
+      "severidad": "ALTA",
+      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: tests/helpers/auth.ts:21-25 (literales del SUPER_ADMIN y del cliente de prueba), prisma/seed.ts:76-79 (el seed actual usa entorno), b1:44 y b2:66 (SEC-003). git log -S del literal, corrido por un script que no lo imprime: entró a prisma/seed.ts en a3c3888c (2026-03-18) y salió en 4148e32d (2026-06-20); hoy sigue en README, STATUS, docs/bitacora-beta.md, docs/bitacora-roadmap.md, docs/demo-guion.md y el helper de e2e. Sube a ALTA por la rúbrica DEC-23 (escalada a SUPER_ADMIN con precondición fuerte: que la base de producción se haya sembrado en esa ventana) con el repo público (SEC-107); PROBABLE porque ese eslabón es de datos y lo cierra VH-002. SEC-002 es un bloque escrito a mano en F1: la severidad, el título y el impacto se corrigen en el registro después de f2-escribir (sec002.mjs)."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/PADRE/H01",
+      "antes": {
+       "severidad": "BAJA",
+       "titulo": "Email y contraseña de las cuentas del seed (SUPER_ADMIN y cliente) escritos en el repo"
+      },
+      "nota_padre": "Barrido de superficiales de D9: historia del literal en prisma/seed.ts y repo público; sube a ALTA (DEC-23)."
      }
     ]
    },
-   "estado": "vigente"
+   "estado": "vigente",
+   "confianza": "PROBABLE"
   },
   {
    "id": "SEC-003",
@@ -5486,6 +5505,41 @@
      "ruta": "tests/helpers/setter-db.ts",
      "linea": 376,
      "fragmento": "await prisma.user.deleteMany({ where: { id: { in: tracker.userIds } } })"
+    },
+    {
+     "ruta": "tests/helpers/setter-db.ts",
+     "linea": 8,
+     "fragmento": "dotenv.config({ path: '.env.local' })"
+    },
+    {
+     "ruta": "tests/helpers/setter-db.ts",
+     "linea": 19,
+     "fragmento": "export const prisma = new PrismaClient()"
+    },
+    {
+     "ruta": "tests/helpers/setter-db.ts",
+     "linea": 162,
+     "fragmento": "const user = await prisma.user.create({\n    data: { email, name, role: 'SETTER' },"
+    },
+    {
+     "ruta": "scripts/dev/m0-galeria-seed.ts",
+     "linea": 55,
+     "fragmento": "if (!process.env.DATABASE_URL?.includes(DEV_BRANCH_HOST)) {"
+    },
+    {
+     "ruta": "raíz:.github/workflows/ci.yml",
+     "linea": 128,
+     "fragmento": "el CI solo tiene los jobs de tipos e invariantes, LeadOS y E2E"
+    },
+    {
+     "ruta": "playwright.integration.config.ts",
+     "linea": 41,
+     "fragmento": "la config de integración ignora alerts-detector"
+    },
+    {
+     "ruta": "playwright.integration.config.ts",
+     "linea": 11,
+     "fragmento": "la config cita un spec que no existe"
     }
    ],
    "impacto": "Los tests negativos de aislamiento (motor-isolation, chatbot-isolation) y los de LeadOS nunca corren en CI, y a mano siembran y limpian datos en la misma base dev que usa Franco. Una regresión de aislamiento puede entrar a main sin alarma antes del primer cliente.",
@@ -5497,7 +5551,11 @@
     "int.neon",
     "lib.prisma",
     "modelo.Organization",
-    "modelo.User"
+    "modelo.User",
+    "h5.set-manual",
+    "modelo.OsLead",
+    "int.github-actions",
+    "lib.tests"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5517,6 +5575,20 @@
       "titulo": "Los tests e2e e integración escriben y borran en la branch Neon dev compartida, sin base de test ni guard de entorno",
       "severidad": "MEDIA",
       "nota_padre": "Misma causa raíz que D6-L2/H15 (sin base de test)."
+     },
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/D9-L2/H07",
+      "titulo": "tests/helpers/setter-db.ts escribe en la base de .env.local sin guard de destino (40+ specs y el seed de galeria lo usan)",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: tests/helpers/setter-db.ts:3 carga .env.local y :14 crea un PrismaClient sin guard de host; DEU-017 ya lo cita (:376) como parte de la falta de base de test. Suma que el seed de galería también lo usa."
+     },
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/PADRE/H03",
+      "titulo": "Las suites con base tampoco están cableadas: integration y setter no figuran en ci.yml y alerts-detector está excluida de todo runner",
+      "severidad": "MEDIA",
+      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Misma falta (sin base de test, las suites con base no corren en CI); suma que integration y setter ni siquiera figuran en ci.yml y que alerts-detector está excluida de todo runner."
      }
     ]
    },
@@ -6634,122 +6706,6 @@
       "titulo": "Contactos de Brevo compartidos entre clientes: CONTACT_ID, OPTOUT_TOKEN y nombre de un contacto se pisan entre organizaciones",
       "severidad": "MEDIA",
       "nota_padre": "Muestreo DEC-37: se sostiene (brevo.ts:39-51 POST /contacts con updateEnabled: true pisa los atributos globales; _actions.ts:113-117 CONTACT_ID y OPTOUT_TOKEN por import). Misma causa que SEC-039 (D6-c2)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-022",
-   "prefijo": "BUG",
-   "titulo": "Mi Chatbot resuelve la organización con su propia consulta (orgMember.findFirst sin orderBy) e ignora resolveOrgId: la vista previa del admin no ve el bot del cliente y con dos membresías muestra otra org",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/admin/getClientSession.ts",
-     "linea": 15,
-     "fragmento": "c.orgMember.findFirst({\n        where: { userId: session.user.id },"
-    },
-    {
-     "ruta": "src/lib/preview.ts",
-     "linea": 14,
-     "fragmento": "if (role === 'SUPER_ADMIN') {\n    const impersonation = await getImpersonationSession()\n    return impersonation?.orgId ?? null"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
-     "linea": 24,
-     "fragmento": "const session = await getClientChatbotSession()\n  if (!session) return <ChatbotUpsellLanding />"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/chatbot/leads/page.tsx",
-     "linea": 36,
-     "fragmento": "const session = await getClientChatbotSession()\n  if (!session) redirect('/dashboard')"
-    },
-    {
-     "ruta": "src/app/api/dashboard/chatbot/leads/export/route.ts",
-     "linea": 84,
-     "fragmento": "const session = await getClientChatbotSession()"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
-     "linea": 61,
-     "fragmento": "const orgId = await resolveOrgId()"
-    },
-    {
-     "ruta": "prisma/seed.ts",
-     "linea": 82,
-     "fragmento": "const admin = await prisma.user.upsert({"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/chatbot/conversations/page.tsx",
-     "linea": 9,
-     "fragmento": "const session = await getClientChatbotSession()\n  if (!session) redirect('/dashboard')"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/chatbot/settings/page.tsx",
-     "linea": 17,
-     "fragmento": "const orgId = await resolveOrgId()"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
-     "linea": 15,
-     "fragmento": "const orgId = await resolveOrgId()  ... :24 const session = await getClientChatbotSession()"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
-     "linea": 18,
-     "fragmento": "const session = await getClientChatbotSession()"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx",
-     "linea": 21,
-     "fragmento": "const organizationId = await resolveOrgId()"
-    }
-   ],
-   "impacto": "Soporte no puede revisar el chatbot de un cliente impersonándolo: con un SUPER_ADMIN sin OrgMember (así lo siembra el seed) /dashboard/chatbot muestra la landing de 'activá tu chatbot' aunque checkClientHasChatbot (con resolveOrgId, page.tsx:15-18) dijo que hay bot, leads y conversaciones redirigen a /dashboard y el CSV da 401, mientras la apariencia sí se edita sobre el cliente. Si un usuario tiene membresías en dos orgs, esta sección puede mostrar y modificar (estado de leads, insights) una org distinta de la del resto del portal en el mismo request.",
-   "propuesta": "Que getClientChatbotSession derive la org de resolveOrgId() (o reciba el orgId) y lea org y bot con select acotado; agregar un invariante que prohíba orgMember.findFirst sin orderBy como resolución de tenant. Verificar en prod (solo lectura) si los SUPER_ADMIN tienen OrgMember.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h3.cli-chatbot",
-    "h1.auth-impersonacion",
-    "lib.chatbot.admin",
-    "modelo.OrgMember",
-    "lib.preview",
-    "lib.isolation"
-   ],
-   "relacionados_ids": [
-    "BUG-005",
-    "SEC-029"
-   ],
-   "previas": [],
-   "relacionados_texto": "BUG-005 (org primaria no determinística en auth.ts); SEC-029; patrón D1-c2 'resolución de org paralela a resolveOrgId'",
-   "vh": "VH-038",
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H07",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L1/H11",
-      "titulo": "El chatbot del portal resuelve la org por OrgMember e ignora impersonación y rol: en 'ver como cliente' el admin ve la landing de venta o rebota, y un usuario con varias orgs puede ver otra",
-      "severidad": "MEDIA",
-      "nota_padre": "Misma resolución de org propia en Mi Chatbot; suma el rol y el rebote en «ver como cliente»."
-     },
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L5/H23",
-      "titulo": "La org del chatbot del cliente se resuelve por dos caminos distintos en la misma seccion (resolveOrgId vs getClientChatbotSession)",
-      "severidad": "MEDIA",
-      "nota_padre": "Misma resolución doble de la org en Mi Chatbot (resolveOrgId frente a getClientChatbotSession)."
      }
     ]
    },

@@ -5559,6 +5559,489 @@
      "evidencia": "herramienta interna de develOP"
     }
    }
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "herramienta": "h6.vis-sitio",
+   "id": "h6.vis-sitio.menu-mobile",
+   "nombre": "Menú mobile del sitio público",
+   "descripcion": "Botón flotante y hoja inferior con navegación a secciones, servicios (con precio), Contacto y Acceder. Herramienta no listada en el Atlas (chrome del sitio público); el padre puede reasignarla.",
+   "archivos": [
+    "src/components/layout/Navbar.tsx",
+    "src/components/layout/PublicOnlyComponents.tsx",
+    "src/components/layout/publicRoute.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: Navbar.tsx:232-245 abre/cierra; :321-345 ítem -> triggerTransition(item.href) y cierre; :371-379 servicios; :95 Acceder -> /login. No llega a L3/L4 por a11y (botón sin nombre :232-258, sin Escape ni foco) y precios literales sin moneda (:35-38).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Público, sin datos de tenant"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Lista estática (Navbar.tsx:25-39)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin I/O; errores de render van al error.tsx raíz ([D8] Error de render y 404)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin fetch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada del usuario"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Navbar.tsx:213 md:hidden; :292 safe-area-inset-bottom; :346 targets de 54 px"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin I/O propio"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Precios literales duplicados y sin moneda en Navbar.tsx:35-38 (la home dice USD); sin TODO/FIXME"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Navegación completa sin ayuda (Navbar.tsx:321-345)"
+    }
+   }
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "herramienta": "h6.vis-sitio",
+   "id": "h6.vis-sitio.scroll-y-transicion",
+   "nombre": "Scroll suave, transición de ruta y bloqueo de scroll del intro",
+   "descripcion": "Lenis en rutas no-portal, Shutter durante la transición y lock de scroll del home antes del primer paint.",
+   "archivos": [
+    "src/components/layout/SmoothScroll.tsx",
+    "src/components/layout/Shutter.tsx",
+    "src/components/layout/EarlyScrollLock.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: SmoothScroll.tsx:78-107 crea Lenis y su loop; Shutter.tsx:7-14 cubre en isAnimating; EarlyScrollLock.tsx:27 y :34-38 bloquean '/' hasta Hero.tsx:486-489. Defectos: Lenis activo en /setter (SmoothScroll.tsx:30), rAF sin cancelar (:102-112), sin red de seguridad del lock y sin reduced-motion.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Sin datos"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Si el Hero no llega a 'done' el lock de EarlyScrollLock.tsx:27 no se libera (sin timeout)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin fetch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "SmoothScroll.tsx:71-76 deja scroll nativo en dispositivos táctiles"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin I/O"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos de ejemplo ni TODO en los 3 archivos"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "En /setter desktop la rueda queda capturada por Lenis (SmoothScroll.tsx:30 + setter-shell.tsx:78)"
+    }
+   }
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "herramienta": "h2.cli-shell",
+   "id": "h2.cli-shell.marca-y-version",
+   "nombre": "Marca y versión en el shell (cliente y admin)",
+   "descripcion": "BrandMark en las sidebars de dashboard y admin, y VersionBadge en el pie de ambos shells.",
+   "archivos": [
+    "src/components/brand/BrandMark.tsx",
+    "src/components/layout/VersionBadge.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "SidebarNav.tsx:23 y admin-sidebar.tsx:27 -> BrandMark.tsx:18-65; DashboardLayoutClient.tsx:181 y AdminLayoutClient.tsx:106 -> VersionBadge.tsx:1-8. La versión mostrada es un literal sin release (VersionBadge.tsx:1).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Sin datos de tenant"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin I/O"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Logo con priority (BrandMark.tsx:35)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "BrandMark.tsx:40-46 min-w-0 + truncate"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin I/O"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "VersionBadge.tsx:1 'v1.0.0' fijo; package.json:3 dice 0.1.0 y no hay tag"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Informativo"
+    }
+   }
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "herramienta": "h6.vis-contacto",
+   "id": "h6.vis-contacto.intro-branded",
+   "nombre": "Intro branded de marketing",
+   "descripcion": "Al entrar por URL directa a /contact o a una de las 4 landings de servicio se muestra un velo con el logo que se dibuja, el lockup de texto y el logo 3D, y despues el toldo sube.",
+   "archivos": [
+    "src/components/ui/Preloader.tsx",
+    "src/components/ui/MarketingIntro.tsx",
+    "src/components/ui/BrandedIntroCanvas.tsx",
+    "src/components/ui/LogoStrokeOverlay.tsx",
+    "src/components/ui/IntroLockupText.tsx",
+    "src/lib/marketing-routes.ts",
+    "src/lib/logo-footprint.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: Preloader.tsx:302 -> marketing-routes.ts:54 -> MarketingIntro.tsx:172-310 -> marketing-routes.ts:75. Bloquea el scroll hasta 6 s (MarketingIntro.tsx:46,175) y no reporta fallas a Sentry.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Superficie publica sin datos de tenant."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No muestra colecciones."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Red de seguridad MarketingIntro.tsx:345-359 libera el scroll si el rAF se cuelga; solo console.warn (:350)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "El velo va en SSR (MarketingIntro.tsx:365-372) y la readiness tiene tope (:233)."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada de usuario."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Rama mobile sin 3D MarketingIntro.tsx:185-229; logo-footprint.ts:41-43 ajusta al ancho."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "El timeout de seguridad solo hace console.warn (MarketingIntro.tsx:350)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos de mentira ni TODO en los archivos."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "El visitante no puede scrollear 3,9-6 s en desktop (aritmetica en el hallazgo PERF)."
+    }
+   }
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "herramienta": "h6.vis-contacto",
+   "id": "h6.vis-contacto.cta-hero-home",
+   "nombre": "CTA del hero del home",
+   "descripcion": "Botones 'Quiero una demo gratis' y 'Ver nuestros trabajos' del hero de la home clasica.",
+   "archivos": [
+    "src/components/ui/buttons/MagneticCta.tsx",
+    "src/components/layout/Hero.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L1",
+   "madurez_evidencia": "Hero.tsx:731-736 renderiza MagneticCta sin href ni onClick; MagneticCta.tsx:97-107 solo agrega una onda: el boton existe pero no lleva a ningun lado (maqueta).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Publico."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin llamada a servidor."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin carga asincrona."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Hero.tsx:731 w-full en mobile; MagneticCta.tsx:70 ignora el efecto magnetico en touch."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin camino de error."
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "CTA sin destino (Hero.tsx:731-736)."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "El visitante no puede pedir la demo desde el hero."
+    }
+   }
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "herramienta": "h6.vis-contacto",
+   "id": "h6.vis-contacto.cta-whatsapp",
+   "nombre": "CTA de WhatsApp centralizado",
+   "descripcion": "Arma el enlace wa.me con el numero de entorno y el prefill para /contact y las landings.",
+   "archivos": [
+    "src/lib/whatsapp.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "contact/page.tsx:96 -> whatsapp.ts:55-57 -> :41-45. Quedan 4 destinos fuera del modulo (Footer.tsx:8, CalculadorIA.tsx:316, ChatbotUpsellLanding.tsx:15, PortalDemoCTA.tsx:235).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Publico."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Sin variable cae al fallback (whatsapp.ts:42) y no sirve wa.me/undefined."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sincrono."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "wa.me abre la app en movil; digitos limpios whatsapp.ts:44."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin camino de error."
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Fallback literal whatsapp.ts:21 y destinos divergentes fuera del modulo."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El visitante abre el chat sin ayuda."
+    }
+   }
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "herramienta": "h2.cli-shell",
+   "id": "h2.cli-shell.boundary-de-error",
+   "nombre": "Pantalla de error por seccion del portal",
+   "descripcion": "Cuando un segmento del portal falla al renderizar muestra un mensaje sin detalles tecnicos, registra en Sentry y ofrece reintentar o volver al inicio.",
+   "archivos": [
+    "src/components/ui/SectionErrorBoundary.tsx",
+    "src/lib/logger.ts"
+   ],
+   "entradas": [],
+   "madurez": "L3",
+   "madurez_evidencia": "dashboard/error.tsx:13 -> SectionErrorBoundary.tsx:52-68 (logger + Sentry.captureException) -> :85-96 copy util + digest -> :101 reset.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "No lee datos."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No lista colecciones."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Mensaje util sin stack (SectionErrorBoundary.tsx:85-90), solo digest (:92-96)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Estado terminal."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Botones flex-col en mobile (SectionErrorBoundary.tsx:98)."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Sentry.captureException con tag section (SectionErrorBoundary.tsx:64-67)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos de mentira."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Reintentar (:101) y volver (:108) sin ayuda; desde admin /dashboard redirige a /admin via proxy.ts:155."
+    }
+   }
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.autosave-del-trabajo-escrito",
+   "nombre": "Autosave y guardia de salida del trabajo escrito",
+   "descripcion": "Guarda en pausa la ficha y el brief del setter y avisa al cerrar la pestana con cambios sin guardar.",
+   "archivos": [
+    "src/lib/use-autosave.ts",
+    "src/lib/use-unsaved-guard.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "use-autosave.ts:148-157 -> :131-140 -> :91-128 -> save (server action de dominio, fuera del lote); use-unsaved-guard.ts:81-93 beforeunload.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Delegado a la action (use-autosave.ts:24-26); fuera del lote."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "phase 'error' (use-autosave.ts:115-119) sin reintento hasta una nueva edicion (:122-127)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "phase 'saving' (use-autosave.ts:98)."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Vive en la action."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Hook sin UI."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captureException (use-autosave.ts:118)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos de mentira."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Navegar en <1,2 s pierde lo ultimo tipeado (use-autosave.ts:156)."
+    }
+   }
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.ciclo-submit-de-pasos",
+   "nombre": "Ciclo submit de los pasos del manual",
+   "descripcion": "Ejecuta la server action del paso, muestra toast de error o exito y refresca el wizard.",
+   "archivos": [
+    "src/lib/use-step-action.ts",
+    "src/lib/action-utils.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "use-step-action.ts:53-66 (action fuera del lote -> toast -> router.refresh).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Delegado a la action; fuera del lote."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "toast.error con result.error (use-step-action.ts:57); un throw no se captura (:53-54)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPending (use-step-action.ts:46)."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Zod queda en el step y la action (comentario :18-21)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Hook sin UI."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captureException en el hook."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos de mentira."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El setter recibe feedback y el wizard se re-deriva."
+    }
+   }
   }
  ]
 }

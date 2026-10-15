@@ -2904,6 +2904,167 @@
    "patron": "Rutas de producto sin error.tsx o not-found.tsx propios que caen en las fronteras de marketing",
    "como_buscarlo": "git ls-tree -r --name-only origin/main logic-core-v3/src/app | grep -E '/(error|not-found)\\.tsx$' y cruzar con las ramas que llaman notFound() (git grep -c \"notFound()\")",
    "donde_aparecio": "src/app/embed/[slug]/page.tsx:37; 7 notFound() en admin y dashboard"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Scripts que escriben en la base sin guard de entorno (fail-closed)",
+   "como_buscarlo": "git grep -l \"new PrismaClient\" origin/main -- logic-core-v3/scripts logic-core-v3/prisma y restar git grep -l EXPECTED_DEV_HOST (28 contra 8); revisar los que usan deleteMany/update/create",
+   "donde_aparecio": "scripts/dev/seed-events.ts:25, scripts/dev/seed-latency.ts:61, scripts/admin-1a-backfill-caliente.ts:42, scripts/cleanup-messages-demo.ts:30"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Scripts sin typecheck (scripts/** fuera de tsc) con llamadas Prisma a campos o modelos equivocados",
+   "como_buscarlo": "Correr tsc con un tsconfig que incluya scripts/ (padre), o git grep -n -E \"prisma\\.(message|chatMessage)\\.\" origin/main -- logic-core-v3/scripts y cotejar los campos con schema.prisma",
+   "donde_aparecio": "scripts/_b14-2-cleanup-bench-prod.ts:102 (tsconfig.json:52)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Chequeo de 'es portal' reimplementado en vez de usar publicRoute.ts",
+   "como_buscarlo": "git grep -n -E \"startsWith\\('/(admin|dashboard|setter|embed)'\\)\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/components/layout/SmoothScroll.tsx:30"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Contenedores con overflow-y-auto en rutas no-portal sin data-lenis-prevent (rueda capturada por Lenis)",
+   "como_buscarlo": "git grep -n -E \"overflow-y-auto|overflow-auto\" origin/main -- logic-core-v3/src fuera de (protected)/admin y (protected)/dashboard; cotejar con data-lenis-prevent",
+   "donde_aparecio": "src/app/(protected)/setter/_components/setter-shell.tsx:78"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Loops de requestAnimationFrame sin cancelAnimationFrame en el cleanup",
+   "como_buscarlo": "git grep -n -E \"requestAnimationFrame\\((raf|loop|tick)\\)\" origin/main -- logic-core-v3/src y mirar el return del efecto",
+   "donde_aparecio": "src/components/layout/SmoothScroll.tsx:102-112"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Canvas R3F con dpr máximo 2",
+   "como_buscarlo": "git grep -n \"dpr={\\[1, 2\\]}\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/components/canvas/DotMatrix.tsx:213, src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:940"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Animaciones motion con repeat: Infinity sin useReducedMotion",
+   "como_buscarlo": "git grep -n \"repeat: Infinity\" origin/main -- logic-core-v3/src y descartar los archivos con useReducedMotion/motion-reduce",
+   "donde_aparecio": "src/components/layout/Navbar.tsx:75 y :107"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Imports de 'framer-motion' sin dependencia directa (dependencia fantasma)",
+   "como_buscarlo": "git grep -n -E \"from ['\\\"]framer-motion['\\\"]\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/components/sections/home/About.tsx, src/components/sections/home/Portfolio.tsx, src/components/ui/KineticText.tsx"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Mutación del store compartido de R3F (state.pointer) desde un componente",
+   "como_buscarlo": "git grep -n -E \"state\\.pointer\\.[xy] =\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/components/3d/BrandedLogoWhite.tsx:53-54 (comparte Canvas con DotMatrixMesh en BrandedIntroCanvas)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Versión o release como literal",
+   "como_buscarlo": "git grep -n -E \"'v?1\\.0\\.0'|APP_VERSION\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/components/layout/VersionBadge.tsx:1, src/app/api/version/route.ts:5"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Scroll locks sobre <html>/<body> sin red de seguridad por timeout",
+   "como_buscarlo": "git grep -n -E \"(documentElement|body)\\.style\\.overflow\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "src/components/layout/EarlyScrollLock.tsx:27 (MarketingIntro sí tiene MARKETING_SCROLL_SAFETY_MS); src/app/contact/page.tsx:83"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L1",
+   "patron": "Tokens dependientes de data-theme (--color-void) usados como fondo de portales",
+   "como_buscarlo": "git grep -n \"var(--color-void)\" origin/main -- 'logic-core-v3/src/app/(protected)' logic-core-v3/src/components/dashboard; revisar si useThemeObserver (hooks/useThemeObserver.tsx:20) limpia data-theme al salir del sitio público",
+   "donde_aparecio": "src/app/(protected)/setter/_components/setter-shell.tsx:28"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "Overlays/modales propios que replican el Modal compartido sin role=dialog ni Escape",
+   "como_buscarlo": "git grep -nE \"fixed inset-0\" origin/main -- logic-core-v3/src | grep -v components/ui; luego git grep -L \"role=\\\"dialog\\\"\" sobre esos archivos",
+   "donde_aparecio": "admin/leados/[leadId]/_components/decision-bar.tsx:60 (Overlay local, comentario :13 desactualizado: el Modal ya portalea), admin/_components/confirm-dialog.tsx:44, type-to-confirm-dialog.tsx:45"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "z-index magico 210 fuera de la escala de design-tokens",
+   "como_buscarlo": "git grep -nE \"zIndex: 210|z-\\[210\\]\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "Select.tsx:368 y 10 popovers (NotificationCenter.tsx:186, AnnouncementsFeed.tsx:150, EmojiPopover.tsx:122, audit-period-filter.tsx:193, ...)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "toLocaleString/toLocaleDateString sin timeZone (o sin locale) en codigo que corre en el server",
+   "como_buscarlo": "git grep -nE \"toLocale(Date|Time)?String\\(\" origin/main -- logic-core-v3/src | grep -v timeZone",
+   "donde_aparecio": "dashboard/page.tsx:41, sendLeadNotification.ts:74, getLatencyHistory.ts:25, alerts.ts:277, StatCard.tsx:61"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "CTA o botones renderizados sin destino (sin href ni onClick)",
+   "como_buscarlo": "git grep -n -A2 \"<MagneticCta\\|<ChargeTraceButton\\|<CtaButton\" origin/main -- logic-core-v3/src y revisar props",
+   "donde_aparecio": "Hero.tsx:731,734"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "Animaciones infinitas sin prefers-reduced-motion",
+   "como_buscarlo": "git grep -nE \"infinite|animate-ping|animate-border-spin|setInterval\" origin/main -- logic-core-v3/src/components | luego git grep -L \"useReducedMotion|motion-reduce\" sobre esos archivos",
+   "donde_aparecio": "TypewriterText.tsx:57-77, HyperText.tsx:95, MagneticCta.tsx:121 (animate-border-spin), Badge.tsx:113 (animate-ping)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "startTransition(async) que espera una server action sin try/catch",
+   "como_buscarlo": "git grep -nE \"startTransition\\(async\" origin/main -- logic-core-v3/src y revisar si el await esta dentro de try",
+   "donde_aparecio": "src/lib/use-step-action.ts:53"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "PrismaClient instanciado en tests/scripts con .env.local sin guard de host",
+   "como_buscarlo": "git grep -lE \"new PrismaClient\\(\" origin/main -- logic-core-v3/tests logic-core-v3/scripts | xargs git grep -L \"DEV_BRANCH_HOST\\|seed-guard\"",
+   "donde_aparecio": "tests/helpers/setter-db.ts:19"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "Imports de 'framer-motion' (dependencia no declarada)",
+   "como_buscarlo": "git grep -n \"from 'framer-motion'\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "KineticText.tsx:3, sections/home/About.tsx:3, sections/home/Portfolio.tsx:3"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "triggerTransition usado dentro de /admin, /dashboard o /setter",
+   "como_buscarlo": "git grep -nE \"triggerTransition|useTransitionContext\" origin/main -- \"logic-core-v3/src/app/(protected)\" logic-core-v3/src/components/dashboard logic-core-v3/src/components/admin",
+   "donde_aparecio": "setter-nav.tsx:49, admin/clients/[clientId]/edit/EditClientForm.tsx:92,232"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "Generadores de slug sin respaldo para base vacia",
+   "como_buscarlo": "git grep -n -A3 \"function findUnique\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "createBot.ts:12-22, lib/onboarding/core.ts:25-33 (control: createClientOnly.ts:32 si tiene respaldo)"
+  },
+  {
+   "ciclo": "D9-c1",
+   "lote": "D9-L2",
+   "patron": "Hooks utilitarios reimplementados (useIsClient, useReducedMotion, cn)",
+   "como_buscarlo": "git grep -nE \"function (useIsClient|useMediaQuery|useReducedMotion|cn)\\(\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "LogoStrokeOverlay.tsx:30, IntroLockupText.tsx:64, MarketingIntro.tsx:53, MagneticCta.tsx:9, modules/chatbot/components/admin/useIsClient.ts"
   }
  ]
 }

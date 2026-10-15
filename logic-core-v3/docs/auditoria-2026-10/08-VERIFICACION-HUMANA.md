@@ -12,7 +12,7 @@
 - ¿Escribe en la base o manda emails?: no.
 
 ### [VH-002] Ninguna base expuesta conserva las contraseñas de prueba del repo
-- Verifica: [SEC-002], [SEC-003], [SEC-004] · Prioridad: baja (ENMIENDA-01 P1)
+- Verifica: [SEC-002], [SEC-003], [SEC-004] · Prioridad: alta (SEC-002 subió a ALTA en C16; antes baja por ENMIENDA-01 P1)
 - Entorno: la base de producción (y la de dev) en modo lectura, o la pantalla de login de cada entorno desplegado.
 - Precondiciones: conocer las cuentas de `README.md:29-30`, `docs/leados-alta-setter.md:25` y `scripts/set-matsu-password.ts:16-17`.
 - Pasos: 1) En cada entorno desplegado (prod y previews), intentar el login con cada par email/contraseña del repo. 2) Si hay acceso de lectura a la base: confirmar si esas cuentas existen (`SELECT email, role FROM "User" WHERE email IN (…)`), sin modificar nada.
@@ -1265,7 +1265,7 @@
 ### [VH-141] Renovar la credencial de Vertex y confirmar que el chatbot vuelve a responder
 - Verifica: [BUG-145] · Prioridad: alta
 - Entorno: Consola de Google Cloud (proyecto del chatbot), Netlify (variables del sitio) y el sitio en producción; en local, cada worktree
-- Precondiciones: Acceso de owner a la service account del chatbot en Google Cloud y al sitio en Netlify. No imprimir la credencial: scripts/check-env.js la vuelca entera por stdout (SEC-071)
+- Precondiciones: Acceso de owner a la service account del chatbot en Google Cloud y al sitio en Netlify. No imprimir la credencial: scripts/encode-vertex-creds.js la vuelca entera por stdout (SEC-071; corregido en C16: decía check-env.js, que solo lista nombres de variables)
 - Pasos: 1) Google Cloud → IAM → Service accounts → la cuenta que usa el chatbot → Keys: ver la fecha de la key actual y si la organización tiene una política de vencimiento de keys 2) Crear una key nueva (JSON) y cargarla en Netlify como GOOGLE_VERTEX_CREDENTIALS_JSON; redeploy 3) Abrir el widget en develop.com.ar y mandar un mensaje; repetir en el bot de un cliente de prueba 4) Con el chatbot respondiendo, borrar la key vieja en Google Cloud 5) En local: reemplazar vertex-credentials.json en cada worktree que lo use (GOOGLE_APPLICATION_CREDENTIALS)
 - Resultado esperado: El bot responde en el sitio y en el bot de prueba; /api/chatbot/[slug]/health sigue en verde
 - Señal de falla: «Se cortó la respuesta / Escribí de nuevo y seguimos» (UX-025) o un error de permisos de Vertex en Sentry
@@ -1468,3 +1468,93 @@
 - Resultado esperado: El widget no aparece o muestra un estado propio y discreto
 - Señal de falla: Se ve el 404 animado de develOP ('Este rincón del internet...', 'Contactarnos') dentro del iframe
 - ¿Escribe en la base o manda emails?: no
+
+### [VH-164] Rueda del mouse en el panel del setter (desktop)
+- Verifica: [BUG-175] · Prioridad: media
+- Entorno: Producción o build local; navegador desktop con mouse o trackpad (no táctil)
+- Precondiciones: Usuario SETTER con suficientes leads para que el contenido de /setter exceda la pantalla
+- Pasos: 1) Iniciar sesión como SETTER y abrir /setter 2) Con el puntero sobre la columna principal (cola/cartera), girar la rueda hacia abajo 3) Repetir en /setter/leads/<id>/manual con el puntero sobre el contenido 4) En DevTools > Elements, ver si <html> tiene la clase 'lenis' 5) Comparar arrastrando la barra de scroll del <main>
+- Resultado esperado: El contenido principal scrollea con la rueda igual que con la barra
+- Señal de falla: La rueda no mueve nada (o el movimiento es nulo/raro) mientras la barra sí funciona y <html> tiene la clase 'lenis': confirma el hallazgo de Lenis en /setter
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-165] ¿Sigue vivo el bot bench-matsu en producción? (solo lectura)
+- Verifica: [BUG-176] · Prioridad: media
+- Entorno: Producción (develop-portfolio.netlify.app)
+- Precondiciones: Cuenta SUPER_ADMIN. No correr _b14-2-cleanup-bench-prod.ts
+- Pasos: 1) Abrir /admin/clients y buscar 'Bench Matsu' en activos y archivados 2) Abrir /admin/chatbots y buscar el slug bench-matsu 3) Opcional: GET https://develop-portfolio.netlify.app/api/chatbot/bench-matsu/health 4) Si existe, mirar en su ficha si tiene conversaciones pero 0 leads/eventos (señal de un cleanup corrido a medias)
+- Resultado esperado: La org y el bot bench no existen (404 en health)
+- Señal de falla: Aparece 'Bench Matsu (B14.2)' o health responde 200: el bench sigue en prod y el cleanup documentado no sirve para borrarlo
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-166] Home sin scroll cuando el bundle no hidrata
+- Verifica: [BUG-178] · Prioridad: baja
+- Entorno: Build local de producción o prod; Chrome desktop
+- Precondiciones: Ninguna
+- Pasos: 1) Abrir DevTools > Network > Network request blocking y agregar el patrón '*main-app*' (o '/_next/static/chunks/*') 2) Cargar '/' en una pestaña nueva 3) Intentar scrollear con rueda, teclado y barra 4) En la consola: getComputedStyle(document.documentElement).overflow
+- Resultado esperado: Aunque falle el JS, la página se puede scrollear (o hay un mensaje)
+- Señal de falla: Se ve el HTML del home pero no se puede scrollear y overflow del html es 'hidden'
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-167] CTA del hero del home
+- Verifica: [BUG-179] · Prioridad: media
+- Entorno: produccion o deploy preview
+- Precondiciones: Navegador desktop y movil sin sesion.
+- Pasos: 1) Abrir / por URL directa y esperar a que termine el intro. 2) Click en 'Quiero una demo gratis'. 3) Volver y click en 'Ver nuestros trabajos'. 4) Repetir en movil (390 px).
+- Resultado esperado: El primero lleva a contacto o WhatsApp; el segundo a la seccion de trabajos.
+- Señal de falla: Solo aparece la onda blanca y la URL/scroll no cambian.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-168] Modal accesible en el portal del cliente
+- Verifica: [A11Y-037] · Prioridad: media
+- Entorno: deploy preview con cuenta QA de cliente
+- Precondiciones: Cliente QA logueado; lector de pantalla NVDA o VoiceOver activo.
+- Pasos: 1) Ir a /dashboard/cuenta/boveda y abrir 'Solicitar documento'. 2) Escuchar que anuncia el lector al abrir. 3) Presionar Tab 10 veces. 4) Presionar Escape. 5) Cerrar con la X y ver donde queda el foco. 6) No enviar el formulario.
+- Resultado esperado: Se anuncia 'dialogo, Solicitar documento'; el foco queda dentro; Escape cierra; el foco vuelve al boton que lo abrio.
+- Señal de falla: No se anuncia dialogo, el Tab llega a elementos detras del velo, Escape no cierra o el foco queda en el body.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-169] Destinos de WhatsApp
+- Verifica: [BUG-180] · Prioridad: media
+- Entorno: produccion
+- Precondiciones: Acceso a las variables de entorno de Netlify; cliente QA sin chatbot activo.
+- Pasos: 1) Verificar en Netlify que NEXT_PUBLIC_WHATSAPP_NUMBER esta seteada. 2) En /dashboard/chatbot (landing de upsell) tocar el CTA de WhatsApp y anotar el numero. 3) En / tocar el WhatsApp del pie; en /ai-implementations la calculadora; en /contact el boton de WhatsApp. 4) Comparar los cuatro numeros.
+- Resultado esperado: Los cuatro abren el mismo numero real de develOP.
+- Señal de falla: Alguno abre 5493815555555, 5493815000000 u otro numero distinto.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-170] Tiempo de scroll bloqueado por el intro
+- Verifica: [PERF-021] · Prioridad: media
+- Entorno: produccion
+- Precondiciones: Chrome desktop con cache vacia; DevTools > Network en 'Fast 4G'.
+- Pasos: 1) Abrir /web-development por URL directa. 2) Intentar scrollear con la rueda desde el primer frame. 3) Cronometrar hasta que el scroll responde. 4) Repetir con /. 5) Repetir con 'Reducir movimiento' activado en el sistema.
+- Resultado esperado: El scroll responde en menos de ~2 s, o el intro no bloquea.
+- Señal de falla: La pagina no scrollea durante 4-6 s en marketing o 7-10 s en el home; el velo desaparece de golpe sin subir.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-171] Titular del home con 'reducir movimiento'
+- Verifica: [A11Y-038] · Prioridad: media
+- Entorno: produccion
+- Precondiciones: Activar 'Reducir movimiento' en el sistema operativo.
+- Pasos: 1) Abrir / y esperar el intro. 2) Observar el titular durante 10 segundos. 3) Con lector de pantalla, leer el h1.
+- Resultado esperado: Palabra estatica; el lector lee la frase completa.
+- Señal de falla: El texto se sigue escribiendo y borrando o el lector lee una palabra a medias.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-172] Ultima edicion del autosave al salir rapido
+- Verifica: [BUG-182] · Prioridad: baja
+- Entorno: local o preview contra la branch Neon dev
+- Precondiciones: Setter QA con un lead de prueba en FICHA.
+- Pasos: 1) Abrir el manual del lead en el paso de ficha. 2) Escribir una palabra en un campo y, antes de 1 segundo, tocar 'Volver a tu dia'. 3) Volver a abrir el mismo lead. 4) Revisar el campo.
+- Resultado esperado: La palabra quedo guardada o se pidio confirmacion antes de salir.
+- Señal de falla: La palabra no esta y no hubo aviso.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-173] Slug vacio al crear un bot
+- Verifica: [BUG-184] · Prioridad: baja
+- Entorno: local contra la branch Neon dev (nunca produccion)
+- Precondiciones: SUPER_ADMIN de prueba; org de prueba existente.
+- Pasos: 1) En /admin/chatbots/new crear un bot con nombre '日本語' o solo emojis. 2) Ver el slug resultante en el detalle del bot. 3) Abrir /embed/<slug>.
+- Resultado esperado: Slug no vacio (respaldo) o error de validacion claro.
+- Señal de falla: Slug vacio o '-1' y el embed no carga.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
