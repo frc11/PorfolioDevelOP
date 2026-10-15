@@ -2228,6 +2228,209 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - Propuesta: fusionar con getActiveModuleSlugs en un helper con slugs tipados desde el catálogo (BUG-012)
 - Zona: libre
 
+### [POD-313] src/app/api/admin/chatbot/insights/generate/route.ts (D5-c1)
+- Hallado en F2 (D5-L1) · `src/app/api/admin/chatbot/insights/generate/route.ts` · Nodo(s): h3.adm-chatbots · Alcance: el archivo entero — la ruta entera: sin consumidores en src, tests ni scripts; llama al LLM sin try/catch ni rate limit · Señales: git grep 'insights/generate' en origin/main fuera de docs → sin consumidores en src, tests ni scripts; Llama al LLM (generateInsightsForBot) sin try/catch ni rate limit; La generación diaria la cubre el cron generate-insights
+- Qué rompe si se borra: Nada en la UI; solo se pierde la invocación manual por HTTP
+- Confianza de poda: MEDIA
+- Propuesta: borrar la ruta (la generación diaria la hace el cron generate-insights)
+- Zona: libre
+
+### [POD-314] src/app/api/admin/chatbot/demo-chat/[slug]/route.ts (D5-c1)
+- Hallado en F2 (D5-L1) · `src/app/api/admin/chatbot/demo-chat/[slug]/route.ts` · Nodo(s): h3.adm-chatbots · Alcance: el archivo entero — la ruta, su invariante demo-chat-model-resolution.invariant.ts y el script test:cost2b de package.json · Señales: Sin consumidores en src: solo su invariant y el script test:cost2b (package.json:70); Usa bot.llmModel/temperature/maxOutputTokens, que no son los de producción (route.ts:57,112-113)
+- Qué rompe si se borra: El invariant demo-chat-model-resolution.invariant.ts y el script test:cost2b
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino): borrarla, o conectarla como preview del admin con la misma config que producción (BUG-024)
+- Zona: libre
+
+### [POD-315] src/modules/chatbot/index.ts (D5-c1)
+- Hallado en F2 (D5-L2) · `src/modules/chatbot/index.ts` · Nodo(s): lib.chatbot · Alcance: exports sueltos (el archivo sigue vivo) — los re-exports sin consumidores (ChatMessages, ChatMessage, ChatInput, QuickReplyChips, saveClientSettings y los tipos de shared/types.ts); quedan los 3 que se importan · Señales: Solo 3 de 52 exports se consumen via el barrel (LogicCompanion en ChatWidgetMount.tsx:13; ChatbotUpsellLanding y ChatbotOverview en dashboard/chatbot/page.tsx:9); Reexporta ChatMessages, ChatMessage, ChatInput y QuickReplyChips (index.ts:40-43), que no importa nadie (git grep de su uso -> solo los barrels y ChatMessages.tsx:4); Reexporta saveClientSettings (index.ts:89), cuya unica UI (ClientSettingsForm) no se monta; Arrastra editores admin, tablas y server actions al chunk del widget publico (index.ts:74-89)
+- Qué rompe si se borra: ChatWidgetMount.tsx:13 y dashboard/chatbot/page.tsx:9 deben pasar a imports directos; el README del modulo documenta el barrel.
+- Confianza de poda: MEDIA
+- Propuesta: podar el barrel o pasar los 2 importadores (ChatWidgetMount.tsx:13, dashboard/chatbot/page.tsx:9) a imports directos (DEU-036)
+- Zona: libre
+
+### [POD-316] src/modules/chatbot/index.server.ts (D5-c1)
+- Hallado en F2 (D5-L2) · `src/modules/chatbot/index.server.ts` · Nodo(s): lib.chatbot · Alcance: exports sueltos (el archivo sigue vivo) — los nombres sin consumidores por el barrel (5 server actions de admin, getLLMProvider, resetProviderCache, calculateCost, getTools, requireChatbotEnv y otros); quedan los 20 que se importan · Señales: 85 nombres exportados, 20 importados via '@/modules/chatbot/index.server'; Reexporta 5 server actions de admin (index.server.ts:80-86) que nadie importa por esta via; getLLMProvider, resetProviderCache, calculateCost, getTools y otros sin consumidores por el barrel
+- Qué rompe si se borra: Los importadores actuales (dashboard/chatbot/*, api/chatbot/*, cron e insights, tests/integration/fix-origin-same-origin-config.spec.ts) usan 20 nombres: hay que conservarlos o pasar a imports directos.
+- Confianza de poda: MEDIA
+- Propuesta: podar los re-exports sin uso (DEU-036)
+- Zona: libre
+
+### [POD-317] src/modules/chatbot/lead-detail-presentation.ts (D5-c1)
+- Hallado en F2 (D5-L2) · `src/modules/chatbot/lead-detail-presentation.ts` · Nodo(s): lib.chatbot · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — channelLabel y su mapa CHANNEL_LABELS: ChatbotLead.channel nunca se escribe · Señales: ChatbotLead.channel no se escribe en el unico create (captureLead.ts:381-413); channelLabel siempre devuelve null en LeadDetail.tsx:162
+- Qué rompe si se borra: lead-detail-presentation.invariant.ts:16 y :65 testean channelLabel; LeadDetail.tsx:162 lo usa.
+- Confianza de poda: MEDIA
+- Propuesta: decidir: escribir channel al capturar el lead o borrar channelLabel y sus casos del invariante (DEU-037)
+- Zona: libre
+
+### [POD-318] src/modules/chatbot/components/admin/index.ts (D5-c1)
+- Hallado en F2 (D5-L3) · `src/modules/chatbot/components/admin/index.ts` · Nodo(s): h3.adm-chatbots · Alcance: el archivo entero — el barrel entero (su único importador es el re-export de modules/chatbot/index.ts:75-77) · Señales: Su único importador es src/modules/chatbot/index.ts:75-77 (re-export); Ningún archivo importa KnowledgeBaseEditor/BotConfigEditor/ActivityLog/OnboardingWizard desde '@/modules/chatbot': el único import del barrel es dashboard/chatbot/page.tsx:9 (ChatbotUpsellLanding, ChatbotOverview); ARQ-02 de la auditoría maestra: barrel cliente con 1 consumidor
+- Qué rompe si se borra: Nada en runtime; hay que borrar también las 3 líneas de re-export de src/modules/chatbot/index.ts:75-77.
+- Confianza de poda: MEDIA
+- Propuesta: borrarlo junto con las 3 líneas de re-export (DEU-036)
+- Zona: libre
+
+### [POD-319] src/modules/chatbot/components/admin/config/Field.tsx (D5-c1)
+- Hallado en F2 (D5-L3) · `src/modules/chatbot/components/admin/config/Field.tsx` · Nodo(s): h3.adm-chatbots · Alcance: fusión con otra implementación (no se borra sin consolidar) — duplica src/components/ui/Field.tsx sin asociar label y control · Señales: Duplica src/components/ui/Field.tsx sin asociar label y control (sin htmlFor ni FieldControlProvider); Sólo lo usan los 5 tabs de config/tabs
+- Qué rompe si se borra: Nada funcional si los tabs pasan al Field del kit; gana la asociación accesible.
+- Confianza de poda: MEDIA
+- Propuesta: pasar los 5 tabs de config al Field del kit y borrar este (A11Y-010)
+- Zona: libre
+
+### [POD-320] src/modules/chatbot/components/admin/config/Input.tsx (D5-c1)
+- Hallado en F2 (D5-L3) · `src/modules/chatbot/components/admin/config/Input.tsx` · Nodo(s): h3.adm-chatbots · Alcance: fusión con otra implementación (no se borra sin consolidar) — duplica src/components/ui/Input.tsx sin leer el contexto de Field · Señales: Duplica src/components/ui/Input.tsx (mismos estilos) sin leer el contexto de Field; Usado sólo por AdvancedTab, BehaviorTab e IdentityTab
+- Qué rompe si se borra: Nada funcional; cambian ids/aria a los del kit.
+- Confianza de poda: MEDIA
+- Propuesta: pasar AdvancedTab, BehaviorTab e IdentityTab al Input del kit y borrar este (A11Y-010)
+- Zona: libre
+
+### [POD-321] src/modules/chatbot/components/chat/QuickReplyChips.tsx (D5-c1)
+- Hallado en F2 (D5-L4) · `src/modules/chatbot/components/chat/QuickReplyChips.tsx` · Nodo(s): h3.vis-widget-cliente · Alcance: el archivo entero — el archivo y sus re-exports en chat/index.ts:6 y modules/chatbot/index.ts:43 · Señales: Sin importadores fuera de los barrels chat/index.ts:6 y modules/chatbot/index.ts:43 (git grep -w); El changelog de Valentino lo declara muerto; Duplica los chips inline de ChatWindow.tsx:467-489
+- Qué rompe si se borra: Solo los exports de los dos barrels.
+- Confianza de poda: MEDIA
+- Propuesta: borrar (DEU-036)
+- Zona: libre
+
+### [POD-322] src/modules/chatbot/components/chat/ChatMessages.tsx (D5-c1)
+- Hallado en F2 (D5-L4) · `src/modules/chatbot/components/chat/ChatMessages.tsx` · Nodo(s): h3.vis-widget-cliente · Alcance: el archivo entero — el archivo y sus re-exports en chat/index.ts:3 y modules/chatbot/index.ts:40 · Señales: Sin consumidores fuera de los barrels; ChatWindow implementa su propia lista (ChatWindow.tsx:326-403)
+- Qué rompe si se borra: Exports en chat/index.ts:3 y modules/chatbot/index.ts:40.
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con ChatMessage.tsx (DEU-036)
+- Zona: libre
+
+### [POD-323] src/modules/chatbot/components/chat/ChatMessage.tsx (D5-c1)
+- Hallado en F2 (D5-L4) · `src/modules/chatbot/components/chat/ChatMessage.tsx` · Nodo(s): h3.vis-widget-cliente · Alcance: el archivo entero — el archivo (solo lo importa ChatMessages.tsx, también muerto) y sus re-exports · Señales: Solo lo importa ChatMessages.tsx (tambien muerto) y los barrels; Sin markdown ni streaming, no se usa en ninguna superficie
+- Qué rompe si se borra: Exports en chat/index.ts:4 y modules/chatbot/index.ts:41.
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con ChatMessages.tsx (DEU-036)
+- Zona: libre
+
+### [POD-324] src/modules/chatbot/components/chat/ChatInput.tsx (D5-c1)
+- Hallado en F2 (D5-L4) · `src/modules/chatbot/components/chat/ChatInput.tsx` · Nodo(s): h3.vis-widget-cliente · Alcance: el archivo entero — el archivo y sus re-exports en chat/index.ts:5 y modules/chatbot/index.ts:42 · Señales: Sin consumidores fuera de los barrels; ChatWindow y ChatbotEmbed tienen input propio
+- Qué rompe si se borra: Exports en chat/index.ts:5 y modules/chatbot/index.ts:42.
+- Confianza de poda: MEDIA
+- Propuesta: borrar (DEU-036)
+- Zona: libre
+
+### [POD-325] src/modules/chatbot/components/chat/types.ts (D5-c1)
+- Hallado en F2 (D5-L4) · `src/modules/chatbot/components/chat/types.ts` · Nodo(s): h3.vis-widget-cliente · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — solo ChatWindowProps (:22-35), que contradice al real de ChatWindow.tsx:71-93; UIChatMessage y ToolCallInUIMessage siguen en uso · Señales: ChatWindowProps (:22-35) duplica y contradice al real de ChatWindow.tsx:71-93 (degradedMode inexistente); El barrel exporta el desfasado (chat/index.ts:8)
+- Qué rompe si se borra: Quitar solo ChatWindowProps; UIChatMessage y ToolCallInUIMessage se siguen usando.
+- Confianza de poda: MEDIA
+- Propuesta: borrar ChatWindowProps y que el barrel exporte el de ChatWindow (DEU-036)
+- Zona: libre
+
+### [POD-326] src/modules/chatbot/components/admin/useIsClient.ts (D5-c1)
+- Hallado en F2 (D5-L4) · `src/modules/chatbot/components/admin/useIsClient.ts` · Nodo(s): h3.adm-chatbots · Alcance: fusión con otra implementación (no se borra sin consolidar) — copia 1:1 de src/lib/use-is-client.ts (FROZEN-inferido) · Señales: Copia 1:1 de src/lib/use-is-client.ts (git diff solo difiere en el comentario); El propio lib lo documenta como copia
+- Qué rompe si se borra: 4 imports: BotConfigEditor.tsx:7, ActivationModal.tsx:6, BotConfigDiffModal.tsx:6, EmojiPickerField.tsx:9 (repuntar a @/lib/use-is-client).
+- Confianza de poda: MEDIA
+- Propuesta: repuntar los 4 imports a @/lib/use-is-client y borrar la copia
+- Zona: libre
+
+### [POD-327] src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx (D5-c1)
+- Hallado en F2 (D5-L5) · `src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx` · Nodo(s): h3.cli-chatbot · Alcance: el archivo entero — el archivo entero y su re-export en components/dashboard/index.ts:3; arrastra saveClientSettings.ts · Señales: git grep -l ClientSettingsForm origin/main -- src tests: solo el archivo y components/dashboard/index.ts:3; modules/chatbot/index.ts:85 re-exporta del barrel solo ClientDashboardTabs, ClientLeadsTable, ChatbotUpsellLanding y ChatbotOverview; settings/page.tsx:8 usa BotPersonalization (reemplazo); 3 errores no-explicit-any y 1 warning en el baseline de eslint (lineas 26, 36, 37, 51)
+- Qué rompe si se borra: Nada en runtime. Arrastra la server action saveClientSettings (server/admin/saveClientSettings.ts, re-export modules/chatbot/index.ts:89), que tambien queda sin consumidor y conviene borrar junto.
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con saveClientSettings.ts (DEU-046)
+- Zona: libre
+
+### [POD-328] src/modules/chatbot/server/admin/saveClientSettings.ts (D5-c1)
+- Hallado en F2 (D5-L5, D5-L6) · `src/modules/chatbot/server/admin/saveClientSettings.ts` · Nodo(s): lib.chatbot.admin · Alcance: el archivo entero — el archivo entero: su único importador es ClientSettingsForm.tsx:5, también muerto; acepta isActive y lo descarta · Señales: fuera del lote; unico importador ClientSettingsForm.tsx:5 (muerto); acepta isActive (:21) y lo descarta (:40-47); Unico importador: components/dashboard/ClientSettingsForm.tsx:5; git grep -n '<ClientSettingsForm' origin/main -- src vacio (control: '<ChatbotOverview' en dashboard/chatbot/page.tsx:46); Acepta isActive (:21) y no lo pasa a updateBotAppearance (:40-47): toggle falso; Re-export en modules/chatbot/index.ts:89 y components/dashboard/index.ts:3
+- Qué rompe si se borra: Nada; quitar tambien el re-export de modules/chatbot/index.ts:89. / Nada en runtime; borrar tambien ClientSettingsForm.tsx y los dos re-exports
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con ClientSettingsForm.tsx y el re-export de modules/chatbot/index.ts:89 (DEU-046)
+- Zona: libre
+
+### [POD-329] src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts (D5-c1)
+- Hallado en F2 (D5-L6) · `src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts` · Nodo(s): lib.chatbot.admin · Alcance: exports sueltos (el archivo sigue vivo) — solo getLeadSyncHistory (:59-76), sin llamadores; getOrgSyncHistory sigue en uso · Señales: getLeadSyncHistory (:59-76) sin llamadores: git grep -n getLeadSyncHistory origin/main -- src solo la definicion; Control: getOrgSyncHistory se usa en CrmIntegrationAdminCard.tsx:72
+- Qué rompe si se borra: Nada; borrar solo getLeadSyncHistory
+- Confianza de poda: MEDIA
+- Propuesta: borrar getLeadSyncHistory
+- Zona: libre
+
+### [POD-330] src/modules/chatbot/server/admin/preflightChecks.ts (D5-c1)
+- Hallado en F2 (D5-L6) · `src/modules/chatbot/server/admin/preflightChecks.ts` · Nodo(s): lib.chatbot.admin · Alcance: exports sueltos (el archivo sigue vivo) — solo canActivate (:170-172), exportada en un módulo «use server» sin importadores · Señales: canActivate (:170-172) exportada en modulo 'use server' sin importadores (git grep 'canActivate(' fuera del archivo vacio); ActivationModal.tsx:30 calcula su propia variable canActivate
+- Qué rompe si se borra: Nada; reduce la superficie de server actions
+- Confianza de poda: MEDIA
+- Propuesta: borrarla: reduce la superficie de server actions (SEC-065)
+- Zona: libre
+
+### [POD-331] src/modules/chatbot/server/admin/createClientWithBot.ts (D5-c1)
+- Hallado en F2 (D5-L6) · `src/modules/chatbot/server/admin/createClientWithBot.ts` · Nodo(s): lib.chatbot.admin · Alcance: fusión con otra implementación (no se borra sin consolidar) — slugify local (:70-78) y findUniqueSlug duplican @/lib/slugify y los de createClientOnly.ts y lib/onboarding/core.ts · Señales: slugify local (:70-78) duplica @/lib/slugify que usa createClientOnly.ts:12; findUniqueSlug duplicado en createClientOnly.ts:31-45 y lib/onboarding/core.ts
+- Qué rompe si se borra: Podria cambiar los slugs generados si @/lib/slugify difiere; verificar con los mismos casos antes de unificar
+- Confianza de poda: MEDIA
+- Propuesta: unificar en @/lib/slugify después de comparar los slugs generados con los mismos casos
+- Zona: libre
+
+### [POD-332] src/modules/chatbot/server/insights/manageInsight.ts (D5-c1)
+- Hallado en F2 (D5-L7) · `src/modules/chatbot/server/insights/manageInsight.ts` · Nodo(s): lib.chatbot.insights · Alcance: el archivo entero — el módulo entero no tiene importadores, pero es la única transición de estado de ChatbotInsight · Señales: Módulo 'use server' sin importadores: git grep actOnInsight -> solo insights/index.ts:2 e index.server.ts:73; Es la única transición de estado de ChatbotInsight (BUG-023)
+- Qué rompe si se borra: Nada hoy. Conviene cablearlo, no borrarlo: sin él los insights quedan PENDING para siempre y el cron deja de generar.
+- Confianza de poda: MEDIA
+- Propuesta: NO podar: cablearlo a una pantalla (BUG-023)
+- Zona: libre
+
+### [POD-333] src/modules/chatbot/server/insights/queries.ts (D5-c1)
+- Hallado en F2 (D5-L7) · `src/modules/chatbot/server/insights/queries.ts` · Nodo(s): lib.chatbot.insights · Alcance: exports sueltos (el archivo sigue vivo) — getPendingInsightsByOrgSlug y getInsightHistoryByOrgSlug, sin consumidores; getInsightsCountForBot la usa el cron · Señales: getPendingInsightsByOrgSlug y getInsightHistoryByOrgSlug sin consumidores (solo index.server.ts:74-75); getInsightsCountForBot sí lo usa el cron (api/cron/generate-insights/route.ts:36)
+- Qué rompe si se borra: Borrar las dos funciones sin uso no rompe nada; getInsightsCountForBot debe quedar.
+- Confianza de poda: MEDIA
+- Propuesta: borrar las dos funciones sin uso (o usarlas al cablear BUG-023)
+- Zona: libre
+
+### [POD-334] src/modules/chatbot/server/config/envValidator.ts (D5-c1)
+- Hallado en F2 (D5-L7) · `src/modules/chatbot/server/config/envValidator.ts` · Nodo(s): lib.chatbot.config · Alcance: exports sueltos (el archivo sigue vivo) — requireChatbotEnv, sin consumidores; checkChatbotEnv lo usa el health (y exige una variable que prod no usa, BUG-063) · Señales: requireChatbotEnv sin consumidores (git grep: solo la definición e index.server.ts:104); GOOGLE_APPLICATION_CREDENTIALS marcado required aunque prod usa GOOGLE_VERTEX_CREDENTIALS_JSON (google.ts:62-68)
+- Qué rompe si se borra: Borrar requireChatbotEnv no rompe nada; checkChatbotEnv lo usa el health.
+- Confianza de poda: MEDIA
+- Propuesta: borrar requireChatbotEnv y corregir la variable requerida al arreglar BUG-063
+- Zona: libre
+
+### [POD-335] src/modules/chatbot/server/chat/reconcile.ts (D5-c1)
+- Hallado en F2 (D5-L7) · `src/modules/chatbot/server/chat/reconcile.ts` · Nodo(s): lib.chatbot.chat · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — INFRA3_CONNECTION_RETRY (:547-551), definido y sin uso, con su TODO(INFRA.3) · Señales: INFRA3_CONNECTION_RETRY (:547-551) definido y sin uso (git grep: 1 archivo); TODO(INFRA.3) en :540
+- Qué rompe si se borra: Nada; es un placeholder documentado de INFRA.3.
+- Confianza de poda: MEDIA
+- Propuesta: borrarlo o resolver INFRA.3
+- Zona: libre
+
+### [POD-336] src/modules/chatbot/server/chat/handleChatRequest.ts (D5-c1)
+- Hallado en F2 (D5-L7) · `src/modules/chatbot/server/chat/handleChatRequest.ts` · Nodo(s): lib.chatbot.chat · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — la rama «Bot misconfigured» (:166-169), inalcanzable porque resolveBotBySlug ya devuelve null sin KB · Señales: Rama 'Bot misconfigured' (:166-169) inalcanzable: resolveBotBySlug ya devuelve null sin KB (resolver.ts:38)
+- Qué rompe si se borra: Nada; quitar la rama o mover el chequeo de KB acá para devolver un error más claro.
+- Confianza de poda: MEDIA
+- Propuesta: quitarla o mover el chequeo de KB acá para devolver un error más claro
+- Zona: libre
+
+### [POD-337] src/modules/chatbot/server/notifications/sendLeadNotification.ts (D5-c1)
+- Hallado en F2 (D5-L8) · `src/modules/chatbot/server/notifications/sendLeadNotification.ts` · Nodo(s): lib.chatbot.notifications · Alcance: fusión con otra implementación (no se borra sin consolidar) — segunda plantilla del aviso de lead que solo usa el botón de prueba del admin; producción usa renderLeadEmail de lib/client-notifications/templates.ts · Señales: Unico consumidor: el boton admin sendTestNotification.ts:46 (y su invariante); Produccion avisa leads con lib/client-notifications/templates.ts (renderLeadEmail), otra plantilla; Fecha sin timeZone en :74
+- Qué rompe si se borra: sendTestNotification.ts y notifications-brevo.invariant.ts: hay que migrarlos a renderLeadEmail antes de borrar
+- Confianza de poda: MEDIA
+- Propuesta: migrar sendTestNotification y su invariante a renderLeadEmail y borrar esta
+- Zona: libre
+
+### [POD-338] src/modules/chatbot/shared/types.ts (D5-c1)
+- Hallado en F2 (D5-L8) · `src/modules/chatbot/shared/types.ts` · Nodo(s): lib.chatbot.shared · Alcance: exports sueltos (el archivo sigue vivo) — ChatbotOrganization, AvatarStyle, ChatbotLeadStatus, BotTone y BotIndustry: solo re-exportados, sin consumidores, y dos contradicen el enum de Prisma · Señales: ChatbotOrganization, AvatarStyle, ChatbotLeadStatus, BotTone y BotIndustry solo se reexportan en src/modules/chatbot/index.ts:14-24, sin consumidores; ChatbotLeadStatus y AvatarStyle contradicen el enum Prisma y CLIENT_AVATAR_STYLES
+- Qué rompe si se borra: Nada en runtime; ajustar el barrel index.ts (QuickReply, ProactivePromptsMap, RouteColorMap y LLMProviderName si se usan)
+- Confianza de poda: MEDIA
+- Propuesta: borrarlos y ajustar el barrel (DEU-050)
+- Zona: libre
+
+### [POD-339] src/modules/chatbot/server/scoring/calculateLeadScore.ts (D5-c1)
+- Hallado en F2 (D5-L8) · `src/modules/chatbot/server/scoring/calculateLeadScore.ts` · Nodo(s): lib.chatbot.scoring · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — el scoring v1 que el motor ya no consume (comentario :146-150); lo usan el invariante de paridad ev3 y scripts de prueba B5 · Señales: El propio comentario :146-150 dice que el motor ya no los consume; Consumidores: scripts/_b52/_b53/_b54-test-scoring.ts y ev3.invariant.ts
+- Qué rompe si se borra: Invariante de paridad ev3 y scripts de prueba B5; getEffectiveScore usa classifyScore con umbrales fijos (habria que pasarle los del pack)
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino): conservarlo como referencia de paridad o borrarlo con ev3 y los scripts _b52/_b53/_b54
+- Zona: libre
+
+### [POD-340] src/modules/chatbot/server/llm/providers/anthropic.ts y openai.ts (D5-c1)
+- Hallado en F2 (D5-L8) · `src/modules/chatbot/server/llm/providers/anthropic.ts y openai.ts` · Nodo(s): lib.chatbot.llm · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — getModel siempre lanza ProviderNotImplementedError; solo sirven de tabla de precios y para el switch exhaustivo de factory.ts · Señales: getModel lanza ProviderNotImplementedError siempre; Solo sirven de tabla de precios y para el switch exhaustivo de factory.ts
+- Qué rompe si se borra: factory.ts:32-37 y el mapping LlmProvider (providerMapper.ts); conservar si se mantiene el enum de 3 providers
+- Confianza de poda: MEDIA
+- Propuesta: decidir (Valentino): mantener el enum de 3 proveedores o reducirlo a GOOGLE y borrar los stubs (TEC-003)
+- Zona: libre
+
+### [POD-341] src/modules/motor/domain/prisma-errors.ts (D5-c1)
+- Hallado en F2 (D5-L9) · `src/modules/motor/domain/prisma-errors.ts` · Nodo(s): h3.vis-whatsapp · Alcance: fusión con otra implementación (no se borra sin consolidar) — isUniqueViolation duplica isUniqueConstraintError de src/lib/isolation/scoped-model.ts:60-62 (PLAN-483) · Señales: Duplica isUniqueConstraintError de src/lib/isolation/scoped-model.ts:60-62; El propio isolation lo anota como deuda de consolidacion (scoped-model.ts:56-58); PLAN-483 pendiente
+- Qué rompe si se borra: 3 importadores: handle-message.ts:18, identity.ts:24 y sendMessage.ts:24. Hay que mover la variante con field a isolation antes de borrarlo.
+- Confianza de poda: MEDIA
+- Propuesta: mover la variante con field a isolation y repuntar los 3 importadores
+- Zona: libre
+
 ### Refuerzos de F2 sobre fichas de F1
 
 - [POD-046] `src/lib/actions/invitations.ts` (D1-c1): inviteClientAction sin callers (git grep inviteClient -> solo :43); Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116). Qué rompe: Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)
@@ -2237,6 +2440,8 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - [POD-078] `src/lib/actions/notifications.ts` (D2-c1): la funcion exportada markNotificationReadAction (:19) no tiene importadores (git grep markNotificationReadAction → solo su definicion); duplica markNotificationAsRead de src/actions/dashboard-actions.ts:188 (FROZEN); markNotificationReadAction sin importadores; revalidateAll repite revalidatePath('/dashboard') dos veces (:15-16). Qué rompe: Nada; es una server action publica sin uso (el resto del archivo si se usa). / Nada.
 - [POD-077] `src/lib/actions/messages.ts` (D2-c1): sendMessageAction, markAdminMessagesAsReadAction y markMessagesAsReadAction sin importadores; la vía viva del admin es src/app/(protected)/admin/messages/_actions/message.actions.ts:177. Qué rompe: Nada si se borran esas tres; sendClientMessageAction sigue usada por MessageThread.tsx, VaultRequestModal.tsx y OportunidadSEO.tsx.
 - [POD-023] `src/components/onboarding/OnboardingWizard.tsx` (D2-c1): no lo importa ningún archivo (git grep 'components/onboarding' origin/main -- src → 0); única vía a saveOnboardingProfile (src/actions/onboarding-actions.ts), que escribe credenciales en claro con url 'ENCRIPTADO_EN_TEXTO'; el onboarding vivo es src/app/bienvenida. Qué rompe: Nada (fuera del lote; ligado a D2-A5).
+- [POD-050] `src/modules/chatbot/components/admin/config/Toggle.tsx` (D5-c1): Fuera del lote listado pero en la misma carpeta; 0 importadores: git grep "Toggle['\"]" sólo muestra el import del kit en CrmConfigForm.tsx:9 y el export de components/ui/index.ts:20. Qué rompe: Nada.
+- [POD-069] `src/modules/motor/services/sendMessage.ts` (D5-c1): Sin llamadores en src/ ni scripts/: git grep sendMotorMessage solo encuentra la definicion (sendMessage.ts:204); Solo lo ejercitan tests/integration/motor-outbound.spec.ts y motor-window.spec.ts. Qué rompe: Esas dos specs de integracion. NO podar: es una base pasiva planificada para B2 (PLAN-482). Solo seria candidato si Valentino abandona el motor.
 
 ## §docs
 

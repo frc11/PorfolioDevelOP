@@ -504,7 +504,7 @@
     "10803 declara este archivo 'histórico' (la beta de LeadOS sigue en bitacora-beta.md), pero recibe entradas del chatbot y el panel hasta 2026-08-12.",
     "Diagnósticos que se contradicen en serie: STREAM-TIMEOUT F1/F2, WATCHDOG y PROVIDER-CLOSE culpan a Gemini por no cerrar el stream. DEADLOCK-FINISH-STEP (15120-15130) prueba que Gemini estaba sano y que el culpable era el transform propio de ONF-1 (commit 644b2b7, 2026-07-14). Además, DEADLINE-ONFINISH aparece como 'ONF-2' en 14393 y 14660.",
     "Contradicción con la regla 'cero any': D3' (12213) llama 'excepción sancionada' al any de generate-insights/route.ts:58, y H.2 (15907) lo quita.",
-    "Repo público: B14.3 (9452-9456) y PRIVACIDAD (16772) apoyan decisiones en que el repo es público. El usuario indica que pasa a privado (DEC-34/R15 cerrados), así que esas restricciones quedan como contexto histórico.",
+    "Repo público: B14.3 (9452-9456) y PRIVACIDAD (16772) apoyan decisiones en que el repo es público. El usuario indicó que pasaba a privado, pero sigue público (verificado con gh el 2026-10-13 y el 2026-10-14; DEC-54): esas restricciones siguen vigentes.",
     "Sentry: B14.5 (9630) planea activarlo, pero INFRA.1 (13036) y PRIVACIDAD (16738) confirman que a 2026-08 no hay DSN en Netlify (inactivo en prod).",
     "Varias entradas no tienen fecha en el encabezado: quedaron con '' o con una fecha inferida de evidencia interna (ONF-1 = 2026-07-14 por 15167; UTM.1 por el smoke del 2026-07-04).",
     "El encabezado de B13.2 está antes de la línea 8601 (rango del otro agente); de esa sección solo extraje sus flags pendientes (8636-8684).",

@@ -1,0 +1,838 @@
+{
+ "D5-c1/D5-L1/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: route.ts:79-80 (la clave del rate limit de la ruta es origin + hash de IP: 30/min por cada Origin distinto), validate-origin.ts:72-77 (https://develop.com.ar y www valen para cualquier bot activo, antes de mirar allowedDomains), origin-matcher.ts:38-39 (cualquier subdominio del dominio permitido), handleChatRequest.ts:183-186 (el segundo límite es slug + sessionId, que manda el cliente), requestSchema.ts:55 (sessionId: string libre de 1 a 200), handleChatRequest.ts:345 y :398-400 (cada conversación nueva reserva 1 cupo) y sync-plans.ts:72 (Starter: 500 por mes). Desde una sola IP con el Origin de develOP: 30 conversaciones nuevas por minuto, 500 en ≈ 17 min; después el bot responde «alcanzamos el límite del mes» a todos los visitantes reales y dispara el aviso de upsell. Rúbrica: anónimo, sin precondiciones, operación con costo de LLM. Verificadores: L1 la sostiene CRÍTICA; L2, L7 y L8 la sostienen ALTA y agregan que el Origin también rota con http/https y con sufijos de path (la clave del rate limit usa el header crudo y validateOrigin solo mira el host). Se sigue la rúbrica DEC-23 (anónimo, sin precondiciones, costo de LLM sin auth): CRÍTICA. Mismo escape que D5-L5/H01 (develop.com.ar siempre permitido).",
+  "titulo": "Un anónimo agota en minutos el cupo mensual de conversaciones de cualquier bot de cliente (y el gasto de Vertex): el Origin de develop.com.ar vale para todos los bots y cada sessionId nuevo reserva un cupo",
+  "caso_indice": 1,
+  "relacionados_tmp": [
+   "D5-L5/H01"
+  ]
+ },
+ "D5-c1/D5-L2/H02": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H01",
+  "nota_padre": "Misma causa raíz (rate limit por Origin + sessionId del cliente; develop.com.ar y subdominios aceptados); se suma su evidencia."
+ },
+ "D5-c1/D5-L1/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: checkHealth.ts:39-58 (el chequeo del LLM solo instancia el provider y lista modelos: con la credencial presente pero vencida da ok) y handleChatRequest.ts:1046-1075 (onError: log a stderr y Sentry, y devuelve el cupo si no llegó ningún chunk). Que la llamada real falle con la credencial vencida y lo que ve el dueño dependen del runtime de Vertex → PROBABLE con su VH (control positivo de E10).",
+  "confianza_padre": "PROBABLE",
+  "caso_indice": 0
+ },
+ "D5-c1/D5-L2/H01": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H02",
+  "nota_padre": "Misma causa (health que no prueba el proveedor y caída invisible); suma el panel del dueño «respondiendo» y envValidator."
+ },
+ "D5-c1/D5-L3/H03": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H02",
+  "nota_padre": "Mismo síntoma (health en verde con la credencial vencida)."
+ },
+ "D5-c1/D5-L1/H03": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: netlify.toml:24-31 (solo generate-insights, send-weekly-reports y cleanup), vercel.json:2-15 (os-follow-up, regenerate-briefs, send-executive-reports), netlify/functions/ (3 archivos: los mismos tres) y .github/workflows/ (solo db-backup.yml tiene schedule, :39). git grep de detect-bot-issues en todo el repo: solo la ruta, tests y docs (control positivo: aparece en tests/integration/alerts-detector.spec.ts). La UI promete «el cron de 15 minutos» (AlertSettingsClient.tsx:124). Rúbrica: integración crítica que no corre.",
+  "relacionados_ids": [
+   "BUG-047"
+  ],
+  "caso_indice": 3
+ },
+ "D5-c1/D5-L3/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: kb-templates/generico.ts:4-10 y :28-35 (placeholders {{…}} y promesas genéricas: envíos a todo el país, cuotas con MercadoPago), restaurant.ts:33 (cocina aislada para celíacos), Step3KnowledgeBase.tsx:26-33 (el paso solo exige largos mínimos), createClientWithBot.ts:165 (el bot nace isActive: true), preflightChecks.ts:43-49 (solo mide largo ≥ 20) y prompts/helpers.ts:48-54 (la sección entra tal cual al prompt). Rúbrica: rompe el flujo principal del cliente (el bot afirma políticas falsas a sus visitantes). El verificador la sostiene y la baja a MEDIA: la precondición es que develOP no reescriba la plantilla en el alta (hay workaround: editar la KB). Se sigue al verificador; el texto falso sobre celíacos queda en el Impacto.",
+  "caso_indice": 1,
+  "severidad": "MEDIA"
+ },
+ "D5-c1/D5-L1/H13": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L3/H01",
+  "nota_padre": "Mismo flujo (alta org + bot activo con la KB de plantilla, preflight que no detecta placeholders)."
+ },
+ "D5-c1/D5-L1/H07": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L3/H02",
+  "nota_padre": "Misma server action sin sesión (preflightChecks.ts:1, :13)."
+ },
+ "D5-c1/D5-L2/H10": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H17",
+  "nota_padre": "Mismo faltante: verticalPack no asignable."
+ },
+ "D5-c1/D5-L3/H09": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H17",
+  "nota_padre": "Mismo faltante: verticalPack no asignable."
+ },
+ "D5-c1/D5-L2/H05": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H06",
+  "nota_padre": "Mismo endpoint público /api/chatbot/[slug]/health."
+ },
+ "D5-c1/D5-L3/H17": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H06",
+  "nota_padre": "Mismo endpoint público; muestreado: route.ts:10-19 sin sesión ni rate limit, proxy.ts:172 no cubre /api, checkHealth.ts:35 y :74 devuelven mensajes internos.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L2/H14": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H27",
+  "nota_padre": "Mismo saludo del widget de develOP; suma «WhatsApp no configurado.» y textos en inglés."
+ },
+ "D5-c1/D5-L3/H29": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H27",
+  "nota_padre": "Mismo saludo del widget de develOP."
+ },
+ "D5-c1/D5-L2/H11": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H05",
+  "nota_padre": "Mismo vector: el historial «assistant» lo arma el navegador."
+ },
+ "D5-c1/D5-L2/H12": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H20",
+  "nota_padre": "Mismo problema: modelos fijados a mano sin control de vigencia."
+ },
+ "D5-c1/D5-L1/H04": {
+  "decision": "fusionar",
+  "con": "BUG-024",
+  "nota_padre": "Muestreado: AdvancedTab.tsx:56 edita la temperatura; handleChatRequest.ts:713 usa plan.llmModel; core.ts:134 deja monthlyQuota 1000 frente a fallback.ts:50 (500). Es la causa raíz de BUG-024 (dos fuentes de verdad); suma el «Digest diario» sin efecto.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L3/H05": {
+  "decision": "fusionar",
+  "con": "BUG-024",
+  "nota_padre": "Misma causa (el resumen del alta muestra modelo, temperatura y cuota que el runtime ignora)."
+ },
+ "D5-c1/D5-L1/H10": {
+  "decision": "fusionar",
+  "con": "SEC-040",
+  "nota_padre": "Mismo export masivo de leads del admin sin neutralizar fórmulas; suma las columnas rotas."
+ },
+ "D5-c1/D5-L1/H11": {
+  "decision": "fusionar",
+  "con": "BUG-022",
+  "nota_padre": "Misma resolución de org propia en Mi Chatbot; suma el rol y el rebote en «ver como cliente»."
+ },
+ "D5-c1/D5-L1/H19": {
+  "decision": "fusionar",
+  "con": "SEC-051",
+  "nota_padre": "Muestreado: motor-resenas/_actions.ts:11 sin Zod ni rate limit y :43 devuelve err.message; review-reply-draft.ts:28 interpola el comentario. Es SEC-051; suma el costo por llamada a Haiku.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L1/H12": {
+  "decision": "fusionar",
+  "con": "BUG-054",
+  "nota_padre": "Misma landing con WhatsApp de relleno (CLEAN-H1); suma que también se muestra con el bot pausado."
+ },
+ "D5-c1/D5-L1/H26": {
+  "decision": "fusionar",
+  "con": "DEU-019",
+  "nota_padre": "Mismo escape PENDIENTE-DECISIÓN (métricas del bot de develOP que agregan todas las orgs); suma las instrucciones viejas de la API key de Gemini."
+ },
+ "D5-c1/D5-L2/H16": {
+  "decision": "fusionar",
+  "con": "DEU-019",
+  "nota_padre": "Mismo escape PENDIENTE-DECISIÓN; suma las horas en la zona del servidor."
+ },
+ "D5-c1/D5-L3/H23": {
+  "decision": "fusionar",
+  "con": "DEU-019",
+  "nota_padre": "Mismo escape PENDIENTE-DECISIÓN; suma el corte en UTC y el muestreo arbitrario."
+ },
+ "D5-c1/D5-L3/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: preflightChecks.ts:1 («use server») y :13-24 (exportada, sin auth() ni chequeo de rol; lee el bot por id con unsafeGlobalQuery); la importa BotDetailClient.tsx:140, un client component."
+ },
+ "D5-c1/D5-L3/H07": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L5/H01",
+  "nota_padre": "MUESTRA FALLIDA (DEC-37): el hecho se sostiene (el alta no carga allowedDomains: createClientWithBot.ts:134), pero el impacto no: el widget embebido sí carga sin dominios, porque llama desde el iframe en develop.com.ar (D5-L5/H01). Lo que queda es parte de la allowlist que no protege nada.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L3/H12": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: createClientWithBot.ts:116 lanza con throw un error de negocio y Step5Review.tsx:111 muestra err.message; en build de producción Next reemplaza el mensaje de los errores lanzados en server actions (eslabón de librería → PROBABLE).",
+  "confianza_padre": "PROBABLE"
+ },
+ "D5-c1/D5-L3/H22": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: ActivityLog.tsx:116 toma serverTime como próximo since; events/route.ts:35 lo calcula después de la consulta; queries.ts:54-56 filtra createdAt > since con take."
+ },
+ "D5-c1/D5-L3/H27": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: CrmConfigForm.tsx:37 habilita la prueba con la URL del input; testCrmConnection.ts:75 prueba la URL guardada."
+ },
+ "D5-c1/D5-L3/H32": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: createClientWithBot.ts:34 (email sin normalizar) y :57 (avatarImageUrl: z.string() sin el schema ni el tope del avatar del cliente)."
+ },
+ "D5-c1/D5-L2/H03": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L4/H01",
+  "nota_padre": "Muestreado (se sostiene): mismo launcher sin teclado; el de L4 suma Escape y foco.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L2/H08": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: buildLeadsCsv.ts:37 (mapa con claves en minúscula) y :82-84 (devuelve el valor crudo si no está en el mapa); export/route.ts:156 pasa l.intent, el enum en mayúsculas."
+ },
+ "D5-c1/D5-L2/H13": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: useChatbot.ts:456 recrea el transport con currentPath, pero useChat conserva la instancia del primer render (eslabón de librería @ai-sdk/react → PROBABLE).",
+  "confianza_padre": "PROBABLE"
+ },
+ "D5-c1/D5-L2/H18": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: lead-intent-labels.ts:45 usa «in» sobre un objeto plano; lead-detail-presentation.ts:71 indexa sin hasOwn; channel no se escribe en el create de captureLead.ts."
+ },
+ "D5-c1/D5-L1/H09": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: route.ts:42 valida el origen, :55-57 escribe el ChatbotEvent del 403 y el rate limit recién está en :79."
+ },
+ "D5-c1/D5-L1/H14": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: core.ts:198 devuelve emailSent, y new/actions.ts:86 responde ok sin mirarlo."
+ },
+ "D5-c1/D5-L1/H24": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: [botId]/actions.ts:96, bulk-actions.ts:55 y new/actions.ts:91 devuelven error.message."
+ },
+ "D5-c1/D5-L1/H29": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: BotDetailClient.tsx:257 (tabs sin role ni aria-selected) y OverviewTab.tsx:174 (text-zinc-700 sobre fondo oscuro)."
+ },
+ "D5-c1/D5-L7/H01": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H01",
+  "nota_padre": "Misma causa raíz; suma la rotación por subdominios del cliente y el slice maxDomains que también los acepta."
+ },
+ "D5-c1/D5-L8/H01": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H01",
+  "nota_padre": "Misma causa raíz; suma que no hay captcha (git grep turnstile|captcha = 0, con control positivo)."
+ },
+ "D5-c1/D5-L7/H02": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H02",
+  "nota_padre": "Misma causa; suma que envValidator exige GOOGLE_APPLICATION_CREDENTIALS y deja el health en «Problema» permanente en prod (falso negativo que tapa el real) y que los turnos fallidos se borran o quedan como message_completed."
+ },
+ "D5-c1/D5-L6/H04": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H02",
+  "nota_padre": "Muestreado: detectBotIssues.ts:89-93 busca eventos con llm/provider/unhandled y handleChatRequest.ts:1052 + logger.ts:177 solo escriben en stderr: el detector no puede verla. Misma causa.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L8/H04": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H02",
+  "nota_padre": "Misma causa: LLM_PROVIDER_ERROR y LEAD_CAPTURE_FAILURE buscan eventos que el runtime no persiste."
+ },
+ "D5-c1/D5-L8/H15": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H02",
+  "nota_padre": "Mismo health: falso positivo con la credencial vencida y falso negativo en prod; lo de exponer mensajes internos a un anónimo queda en D5-L1/H06."
+ },
+ "D5-c1/D5-L5/H10": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H02",
+  "nota_padre": "Muestreado: ChatbotOverview.tsx:63 («atendiendo consultas las 24 horas») y :109 («24/7») sin mirar la salud; layout.tsx:51 «Activo · respondiendo». Es la cara del dueño de la misma causa.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L6/H02": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H03",
+  "nota_padre": "Mismo detector sin disparador; el verificador revisó también .github/workflows (ci.yml y db-backup.yml)."
+ },
+ "D5-c1/D5-L5/H03": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: dashboard/chatbot/page.tsx:28-31 (listLeadsByOrgSlug con 5), multiTenantQueries.ts (server/admin) :34-36 (orderBy capturedAt desc, take: limit, sin filtro de mes ni excludeDqWhere), ChatbotOverview.tsx:40-45 (capturedLeads = recentLeads.length, leadValueUSD 50 y successRate 0.97 fijos, sin avgLatencyMs) y lib/business-metrics.ts:19-23 (valor = leads × 50; 1,5 s constante). «Oportunidades este mes» nunca pasa de 5 y mezcla meses. Los dos verificadores la sostienen ALTA: rompe la verdad del tablero principal del cliente (criterio L3 «sin datos de mentira»)."
+ },
+ "D5-c1/D5-L6/H03": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L5/H03",
+  "nota_padre": "Mismas métricas; el verificador de L6 suma que el filtro excludeDqWhere está importado y no se usa."
+ },
+ "D5-c1/D5-L6/H07": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L3/H01",
+  "nota_padre": "Mismo flujo (bots nuevos con la KB de plantilla y {{PLACEHOLDERS}})."
+ },
+ "D5-c1/D5-L4/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: LogicCompanion.tsx:177-183 (motion.div role=button, tabIndex 0, onClick, sin onKeyDown en el archivo). El verificador confirma con motion-dom 12.42.0 que Enter solo despacha pointer events sintéticos y que el panel no cierra con Escape; la baja a MEDIA (a11y del widget de develOP, con el contacto alternativo del sitio). Se sigue al verificador.",
+  "severidad": "MEDIA"
+ },
+ "D5-c1/D5-L4/H20": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: git ls-tree de src/app no tiene ninguna ruta privac|legal|termin|terms|cookie|politic|policy (control positivo: 86 page.tsx) y git grep de privacidad en src/modules/chatbot/components y public/widget.js da 0. captureLead pide nombre, teléfono y email y los reenvía a n8n. El verificador la baja a MEDIA (no es un flujo roto ni un acceso indebido: es un faltante de cumplimiento). Se sigue al verificador.",
+  "severidad": "MEDIA"
+ },
+ "D5-c1/D5-L5/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: public/widget.js:21-24 (BASE_URL = origen del script, develop.com.ar) y :125-131 (iframe en BASE_URL/embed/<slug>), useChatbot.ts:272 (POST relativo: el Origin es el del iframe), validate-origin.ts:72-77 (develop.com.ar pasa siempre, antes de allowedDomains), degradedResponse.ts:97-103 (exento del tope de dominios), next.config.ts (/embed/* con frame-ancestors *) y embed/[slug]/page.tsx:31-37 (solo 404 si el bot no existe). La allowlist de dominios no protege nada del widget embebido: cualquier sitio puede montar el bot de cualquier cliente y gastar su cupo. El verificador la deja MEDIA y PROBABLE (impacto acotado por el cupo, que ya cubre la CRÍTICA). Se sigue al verificador.",
+  "severidad": "MEDIA",
+  "confianza_padre": "PROBABLE",
+  "relacionados_tmp": [
+   "D5-L1/H01",
+   "D5-L1/H15"
+  ]
+ },
+ "D5-c1/D5-L5/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: LeadDetail.tsx:544-546 filtra role === user/assistant; getConversationMessagesForOrg (server/admin/multiTenantQueries.ts:161-171) devuelve role del enum ChatMessageRole USER/ASSISTANT/SYSTEM (schema.prisma:152-156) sin mapear: el hilo siempre queda vacío. El verificador la baja a MEDIA (workaround: la pestaña Conversaciones). Se sigue al verificador.",
+  "severidad": "MEDIA"
+ },
+ "D5-c1/D5-L5/H04": {
+  "decision": "fusionar",
+  "con": "BUG-054",
+  "nota_padre": "Misma landing (CLEAN-H1): ChatbotUpsellLanding.tsx:15 con wa.me de relleno y $150/1.000 que no coincide con PLANS_CATALOG; el verificador la baja a MEDIA, que es la severidad de BUG-054. Suma que se muestra también con el bot pausado (clientHasChatbot filtra isActive)."
+ },
+ "D5-c1/D5-L6/H01": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L3/H02",
+  "nota_padre": "Misma server action sin sesión. El verificador la baja a MEDIA: Next 16.2.9 solo ejecuta una action en las páginas cuyo bundle la incluye (aquí, solo el detalle del bot en /admin), así que no la explota un anónimo; sigue violando la regla de verificar sesión y rol en cada action."
+ },
+ "D5-c1/D5-L9/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: handle-message.ts:41-58 (guarda el MotorMessage IN y termina) y git grep sendMotorMessage sobre src: solo la definición (sendMessage.ts:204). El verificador la baja a MEDIA (el canal todavía no se vende ni tiene alta; es un faltante, no un flujo roto). Se sigue al verificador.",
+  "severidad": "MEDIA"
+ },
+ "D5-c1/D5-L1/H18": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L9/H01",
+  "nota_padre": "Mismo faltante del bot de WhatsApp (motor)."
+ },
+ "D5-c1/D5-L4/H05": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H27",
+  "nota_padre": "Mismo estado vacío del widget («Protocolo de consultoría iniciado…», alerta D5-A5)."
+ },
+ "D5-c1/D5-L5/H21": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H27",
+  "nota_padre": "Mismo estado vacío del widget («Protocolo de consultoría iniciado…», alerta D5-A5)."
+ },
+ "D5-c1/D5-L6/H17": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H27",
+  "nota_padre": "Mismo estado vacío del widget («Protocolo de consultoría iniciado…», alerta D5-A5)."
+ },
+ "D5-c1/D5-L7/H15": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H27",
+  "nota_padre": "Mismo estado vacío del widget («Protocolo de consultoría iniciado…», alerta D5-A5)."
+ },
+ "D5-c1/D5-L8/H23": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H27",
+  "nota_padre": "Mismo estado vacío del widget («Protocolo de consultoría iniciado…», alerta D5-A5)."
+ },
+ "D5-c1/D5-L4/H03": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H16",
+  "nota_padre": "Misma causa: la configuración visual y de comportamiento del bot no llega al widget embebido de los clientes (colores, posición, prompts proactivos, mapa de color por ruta)."
+ },
+ "D5-c1/D5-L5/H06": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H16",
+  "nota_padre": "Misma causa: la configuración visual y de comportamiento del bot no llega al widget embebido de los clientes (colores, posición, prompts proactivos, mapa de color por ruta)."
+ },
+ "D5-c1/D5-L3/H06": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H16",
+  "nota_padre": "Misma causa: la configuración visual y de comportamiento del bot no llega al widget embebido de los clientes (colores, posición, prompts proactivos, mapa de color por ruta)."
+ },
+ "D5-c1/D5-L5/H09": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L2/H07",
+  "nota_padre": "Mismo «Guardado» falso en el detalle del contacto."
+ },
+ "D5-c1/D5-L6/H12": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L2/H07",
+  "nota_padre": "Mismo «Guardado» falso en el detalle del contacto."
+ },
+ "D5-c1/D5-L7/H12": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L2/H08",
+  "nota_padre": "Mismo CSV con el intent crudo; suma que el test lo da por bueno porque alimenta minúsculas."
+ },
+ "D5-c1/D5-L1/H32": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L8/H12",
+  "nota_padre": "Mismo patrón fire-and-forget en serverless (mail de bot activado y Telegram)."
+ },
+ "D5-c1/D5-L3/H15": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L8/H12",
+  "nota_padre": "Mismo patrón fire-and-forget (reintento de sync CRM)."
+ },
+ "D5-c1/D5-L6/H19": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L8/H12",
+  "nota_padre": "Muestreado: retryCrmSync.ts:73-79 lanza el sync con void y responde ok. Mismo patrón.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L7/H09": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L8/H12",
+  "nota_padre": "Mismo patrón fire-and-forget (sync al CRM)."
+ },
+ "D5-c1/D5-L2/H15": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L7/H07",
+  "nota_padre": "Mismo turno sin techo absoluto contra maxDuration 30 s."
+ },
+ "D5-c1/D5-L8/H10": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L7/H07",
+  "nota_padre": "Mismo turno sin presupuesto global contra maxDuration 30 s."
+ },
+ "D5-c1/D5-L6/H11": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L3/H12",
+  "nota_padre": "Mismos errores del alta lanzados con throw."
+ },
+ "D5-c1/D5-L6/H15": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L3/H11",
+  "nota_padre": "Mismas acciones gemelas por id y por slug que divergieron."
+ },
+ "D5-c1/D5-L4/H14": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L2/H17",
+  "nota_padre": "Mismos barrels con componentes muertos."
+ },
+ "D5-c1/D5-L3/H28": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L4/H09",
+  "nota_padre": "Mismo selector que monta todos los avatares 3D."
+ },
+ "D5-c1/D5-L2/H20": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L4/H10",
+  "nota_padre": "Misma falta de error boundary propio en el widget."
+ },
+ "D5-c1/D5-L6/H06": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L5/H05",
+  "nota_padre": "Mismo bot pausado que muestra la landing de venta."
+ },
+ "D5-c1/D5-L6/H05": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L4/H02",
+  "nota_padre": "Misma experiencia del visitante con el proveedor caído (sin derivación a WhatsApp)."
+ },
+ "D5-c1/D5-L8/H16": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H20",
+  "nota_padre": "Mismo modelo fijado sin control de vigencia."
+ },
+ "D5-c1/D5-L6/H08": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H17",
+  "nota_padre": "Mismo faltante: verticalPack no asignable."
+ },
+ "D5-c1/D5-L8/H07": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H17",
+  "nota_padre": "Muestreado: schema.prisma:1329 (default «base»), backfill-vertical-pack.ts:71 (solo por script) y captureLead.ts:343. Mismo faltante.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L7/H03": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H05",
+  "nota_padre": "Muestreado: requestSchema.ts:56 y handleChatRequest.ts:651 (currentPath crudo al prompt, sections.ts:200) y :946-947 (los turnos assistant del cliente pasan sin wrapUntrusted). Mismo vector.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L8/H02": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H05",
+  "nota_padre": "Muestreado: mismas líneas (requestSchema.ts:56, handleChatRequest.ts:651 y :947, sections.ts:200). Mismo vector.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L7/H04": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L1/H06",
+  "nota_padre": "Mismo health público."
+ },
+ "D5-c1/D5-L6/H16": {
+  "decision": "fusionar",
+  "con": "DEU-019",
+  "nota_padre": "Mismo escape PENDIENTE-DECISIÓN de los paneles de actividad y latencia."
+ },
+ "D5-c1/D5-L6/H09": {
+  "decision": "fusionar",
+  "con": "BUG-024",
+  "nota_padre": "Muestreado: saveBotConfig.ts:47 (maxOutputTokens editable), handleChatRequest.ts:713 (plan.llmModel) y :952 (temperature 0.7 fija), getPublicConfig.ts:121. Es BUG-024; suma el proveedor y los colores por ruta.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L8/H09": {
+  "decision": "fusionar",
+  "con": "BUG-024",
+  "nota_padre": "Misma causa; suma que el demo del admin sí aplica la config del bot y el chat de producción no (preview distinta de prod)."
+ },
+ "D5-c1/D5-L7/H14": {
+  "decision": "fusionar",
+  "con": "SEC-018",
+  "nota_padre": "Mismo OrgRole que ningún guard lee; suma que un VIEWER edita el saludo, las quick replies y el avatar públicos del bot."
+ },
+ "D5-c1/D5-L5/H18": {
+  "decision": "fusionar",
+  "con": "BUG-034",
+  "nota_padre": "Mismo patrón de fechas sin zona horaria, ahora en el chatbot del cliente (hydration mismatch)."
+ },
+ "D5-c1/D5-L5/H17": {
+  "decision": "fusionar",
+  "con": "BUG-046",
+  "nota_padre": "Mismos CTAs hacia Mensajes con un contexto que Mensajes ignora (Información y CRM)."
+ },
+ "D5-c1/D5-L5/H23": {
+  "decision": "fusionar",
+  "con": "BUG-022",
+  "nota_padre": "Misma resolución doble de la org en Mi Chatbot (resolveOrgId frente a getClientChatbotSession)."
+ },
+ "D5-c1/D5-L6/H10": {
+  "decision": "fusionar",
+  "con": "BUG-018",
+  "nota_padre": "Mismo sessionId global por origen: dos bots en el mismo origen chocan."
+ },
+ "D5-c1/D5-L9/H08": {
+  "decision": "fusionar",
+  "con": "BUG-027",
+  "nota_padre": "Misma causa (el wamid se guarda después del envío): un status que llega antes se descarta con 200."
+ },
+ "D5-c1/D5-L4/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: useChatbot.ts:473-477 (stream_interrupted con whatsappNumber null) y DegradedBanner.tsx:25 («Escribí de nuevo y seguimos»)."
+ },
+ "D5-c1/D5-L4/H07": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: ChatWindow.tsx:585 y ChatbotEmbed.tsx:510 (fontSize 13px) con el viewport de embed/[slug]/page.tsx:13-17 sin maximumScale; el zoom de Safari al enfocar es comportamiento del navegador → PROBABLE.",
+  "confianza_padre": "PROBABLE"
+ },
+ "D5-c1/D5-L4/H12": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: LegacyNeuroAvatar.tsx:54 (color compartido a nivel módulo) y :157 (lerp sobre esa referencia).",
+  "caso": {
+   "titulo": "Rostro Neural con varias instancias",
+   "hallazgos": "LegacyNeuroAvatar comparte color entre instancias",
+   "entorno": "sitio de develOP con el avatar «Rostro Neural»",
+   "precondiciones": "",
+   "pasos": [
+    "Abrir el chat y mandar un mensaje.",
+    "Mirar el avatar del header y el indicador «pensando» a la vez.",
+    "Probar un bot con accent fuera de las 4 paletas."
+   ],
+   "esperado": "Cada avatar mantiene su color y el accent del bot se respeta.",
+   "senal_falla": "Los colores se mezclan o parpadean, o el accent sale cyan.",
+   "escribe_db_o_email": false
+  }
+ },
+ "D5-c1/D5-L4/H17": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: useOnboardingDraft.ts:6 (clave global) y :70 (localStorage.setItem del borrador con el email, el nombre y el teléfono del contacto)."
+ },
+ "D5-c1/D5-L5/H05": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: clientHasChatbot.ts:5-7 (solo bots activos), chatbot/page.tsx:20-21 (sin bot activo muestra la landing) y saveClientSettings.ts:21 (isActive en el schema, descartado al guardar)."
+ },
+ "D5-c1/D5-L5/H15": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: updateBotAppearance.ts:40 (mínimo 10 en el servidor) y BotPersonalization.tsx:311 (el cliente solo corta en 200)."
+ },
+ "D5-c1/D5-L5/H20": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: ChatbotEmbed.tsx:29 (parentOrigin «*» hasta el handshake) y :67-68 (acepta develop:init de cualquier ventana); widget.js:165 sí valida el origen."
+ },
+ "D5-c1/D5-L6/H14": {
+  "decision": "fusionar",
+  "con": "D5-c1/D5-L3/H32",
+  "nota_padre": "Muestreado (se sostiene): createClientWithBot.ts:44 y :57 frente a saveKnowledgeBase.ts:12. Misma validación laxa del alta.",
+  "verificado_padre": true
+ },
+ "D5-c1/D5-L7/H08": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: historyPolicy.ts:42-48 documenta que un mensaje del historial de más de 4000 caracteres deja la conversación en 400; requestSchema.ts:48 aplica el tope también a los turnos assistant; handleChatRequest.ts:140 responde 400.",
+  "caso": {
+   "titulo": "Respuesta larga del bot",
+   "hallazgos": "Una respuesta de más de 4000 caracteres deja la conversación en 400",
+   "entorno": "preview con el bot de prueba y el proveedor activo",
+   "precondiciones": "",
+   "pasos": [
+    "Pedirle al bot un listado largo (todos los servicios con detalle) hasta que responda más de 4000 caracteres.",
+    "Mandar un mensaje más.",
+    "Mirar la respuesta del POST al chat."
+   ],
+   "esperado": "El siguiente turno responde normal.",
+   "senal_falla": "Cada mensaje siguiente devuelve 400 «Invalid request body».",
+   "escribe_db_o_email": true
+  }
+ },
+ "D5-c1/D5-L7/H13": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: validateWebhookUrl.ts:86-90 compara el hostname con startsWith fc/fd (un dominio como fdsa.com cae)."
+ },
+ "D5-c1/D5-L8/H12": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: captureLead.ts:493 (void notifyClient()) y :500 (void syncLeadToCrm) y showWhatsappHandoff.ts:164 (void notifyTelegramOptional): avisos sin await en una función serverless, sin outbox. Mismo patrón que BUG-052 (D2).",
+  "relacionados_ids": [
+   "BUG-052"
+  ],
+  "caso": {
+   "titulo": "Avisos post-lead con Brevo o n8n lentos",
+   "hallazgos": "Avisos post-lead fire-and-forget en serverless",
+   "entorno": "preview en Netlify con un lead de prueba",
+   "precondiciones": "",
+   "pasos": [
+    "Configurar un webhook de n8n que tarde 20 s en responder.",
+    "Dejar un lead por el widget.",
+    "Mirar si llegan el mail al cliente, el sync al CRM y el aviso de Telegram."
+   ],
+   "esperado": "Los tres avisos salen o quedan registrados para reintentar.",
+   "senal_falla": "Alguno no sale nunca y solo queda un console.error o un FAILED.",
+   "escribe_db_o_email": true
+  }
+ },
+ "D5-c1/D5-L8/H17": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: package.json:141 («ai»: «^6.0.177») y providerStreamClose.ts:186 (cita internals de @ai-sdk/google por número de línea)."
+ },
+ "D5-c1/D5-L8/H22": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: dqFilter.ts:21-24 (NOT classification = dq) con el campo opcional de schema.prisma:1493: en SQL el NOT sobre NULL también excluye (eslabón de Prisma/Postgres → PROBABLE).",
+  "confianza_padre": "PROBABLE",
+  "caso": {
+   "titulo": "Leads sin clasificar en las métricas",
+   "hallazgos": "excludeDqWhere excluye los leads con classification NULL",
+   "entorno": "base dev",
+   "precondiciones": "",
+   "pasos": [
+    "Contar en la base los ChatbotLead de un bot con classification NULL.",
+    "Comparar el conteo del panel o del reporte semanal con un count que incluya NULL."
+   ],
+   "esperado": "Los leads sin clasificar cuentan.",
+   "senal_falla": "Los leads con classification NULL no aparecen.",
+   "escribe_db_o_email": false
+  }
+ },
+ "D5-c1/D5-L9/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: identity.ts:57-69 (busca la identidad legacy por teléfono sin reconciliar y le pisa el externalId con el BSUID nuevo); que un número reciclado llegue así depende de los datos de Meta → PROBABLE.",
+  "confianza_padre": "PROBABLE"
+ },
+ "D5-c1/D5-L9/H07": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: outbound/client.ts:94-95 (timeout 10 s y reintentos a 1 y 3 s) y :233 (el timeout es reintentable aunque el envío pudo haber salido)."
+ },
+ "D5-c1/D5-L9/H12": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: handle-message.ts:72-75 (siempre reusa la conversación OPEN) y schema.prisma:2097 (default OPEN); git grep no muestra ninguna escritura de otro estado de MotorConversation."
+ },
+ "D5-c1/D5-L8/H05": {
+  "decision": "aceptar",
+  "requiere_verificacion_humana": false,
+  "nota_padre": "Sin VH: el desajuste entre el prompt (sections.ts:80-84) y plan.tools (sync-plans.ts:60) se confirma leyendo; cómo responde el modelo a la contradicción no cambia el arreglo."
+ },
+ "D5-c1/D5-L8/H06": {
+  "decision": "aceptar",
+  "requiere_verificacion_humana": false,
+  "nota_padre": "Sin VH: el texto del prompt y de las tools se confirma leyendo (sections.ts:47, usados.ts:183, offerHandoffOptions.ts:24)."
+ },
+ "D5-c1/D5-L8/H14": {
+  "decision": "aceptar",
+  "requiere_verificacion_humana": false,
+  "nota_padre": "Sin VH: el envío se confirma leyendo (captureLead.ts:444-450, showWhatsappHandoff.ts:157); lo que falta es una decisión de Valentino sobre la transferencia de datos de terceros, no una verificación."
+ },
+ "D5-c1/D5-L1/H08": {
+  "decision": "aceptar",
+  "caso": {
+   "titulo": "Rutas de IA del admin sin sesión",
+   "hallazgos": "Las rutas de IA del admin responden 500 por cada pedido anónimo",
+   "entorno": "local con next start (o preview)",
+   "precondiciones": "",
+   "pasos": [
+    "Sin cookie de sesión, POST a /api/admin/chatbot/test-prompt con un JSON cualquiera.",
+    "Repetir con /api/admin/chatbot/demo-chat/<slug>.",
+    "Mirar el status y Sentry (o la consola del servidor)."
+   ],
+   "esperado": "401 o 403 con JSON y sin evento en Sentry.",
+   "senal_falla": "Responde 500 y queda un evento de error por pedido.",
+   "escribe_db_o_email": false
+  }
+ },
+ "D5-c1/D5-L1/H16": {
+  "decision": "aceptar",
+  "caso": {
+   "titulo": "Posición y color del widget en el sitio del cliente",
+   "hallazgos": "La burbuja ignora la posición y el color configurados",
+   "entorno": "preview con un bot de prueba y una página HTML que pegue el snippet",
+   "precondiciones": "Bot de prueba con dominios cargados.",
+   "pasos": [
+    "En Mi Chatbot → Personalización elegir posición abajo a la izquierda y otro color; guardar.",
+    "Abrir la página que tiene el snippet.",
+    "Mirar la burbuja y el atributo title del iframe."
+   ],
+   "esperado": "La burbuja sale a la izquierda con el color elegido y el iframe se anuncia con el nombre del bot.",
+   "senal_falla": "La burbuja sigue abajo a la derecha y cyan, y el iframe dice «Chat develOP».",
+   "escribe_db_o_email": true
+  }
+ },
+ "D5-c1/D5-L1/H28": {
+  "decision": "aceptar",
+  "caso": {
+   "titulo": "Teclado en el widget embebido",
+   "hallazgos": "Widget embebido: foco, orden de tabulación y Esc",
+   "entorno": "página de prueba con el snippet",
+   "precondiciones": "",
+   "pasos": [
+    "Llegar a la burbuja con Tab y abrir con Enter.",
+    "Ver dónde queda el foco; apretar Esc; cerrar con el botón.",
+    "Seguir con Tab después de cerrar."
+   ],
+   "esperado": "Al abrir el foco entra al chat, Esc cierra y el foco vuelve a la burbuja.",
+   "senal_falla": "El foco queda en un botón invisible, Esc no cierra o el foco se pierde al cerrar.",
+   "escribe_db_o_email": false
+  }
+ },
+ "D5-c1/D5-L2/H19": {
+  "decision": "aceptar",
+  "caso": {
+   "titulo": "Widget a 390 px y sobre modales",
+   "hallazgos": "z-index del widget y superposición en mobile",
+   "entorno": "sitio de develOP en un teléfono o emulación de 390 px",
+   "precondiciones": "",
+   "pasos": [
+    "Abrir una página con un modal o menú del sitio.",
+    "Abrir el menú y el modal con el widget visible.",
+    "Recorrer la página a 390 px."
+   ],
+   "esperado": "Los modales y menús del sitio quedan encima del launcher y la burbuja no tapa texto.",
+   "senal_falla": "El launcher o el teaser quedan encima del modal o tapan contenido.",
+   "escribe_db_o_email": false
+  }
+ },
+ "D5-c1/D5-L3/H13": {
+  "decision": "aceptar",
+  "caso": {
+   "titulo": "Alta con bot con Brevo lento",
+   "hallazgos": "La contraseña temporal solo vuelve después del envío por Brevo",
+   "entorno": "preview con una clave de Brevo inválida o bloqueada",
+   "precondiciones": "",
+   "pasos": [
+    "Crear un cliente con bot desde el asistente.",
+    "Mirar qué devuelve el alta si Brevo falla o tarda.",
+    "Reintentar el alta con el mismo email."
+   ],
+   "esperado": "El admin ve la contraseña temporal (o un aviso claro) aunque falle el mail, y puede reenviar.",
+   "senal_falla": "Error genérico, el cliente queda creado con una contraseña que nadie conoce y el reintento falla por email duplicado.",
+   "escribe_db_o_email": true
+  }
+ },
+ "D5-c1/D5-L3/H25": {
+  "decision": "aceptar",
+  "caso": {
+   "titulo": "Borrador vacío del alta",
+   "hallazgos": "El borrador del alta se guarda vacío",
+   "entorno": "local o preview, navegador limpio",
+   "precondiciones": "",
+   "pasos": [
+    "Abrir /admin/clients/new y esperar 2 s sin escribir.",
+    "Salir y volver a entrar.",
+    "Apretar «Descartar» y volver a entrar."
+   ],
+   "esperado": "No aparece el banner de onboarding sin terminar.",
+   "senal_falla": "Aparece el banner sobre un formulario vacío, también después de descartar.",
+   "escribe_db_o_email": false
+  }
+ },
+ "D5-c1/D5-L7/H05": {
+  "decision": "aceptar",
+  "caso": {
+   "titulo": "SSRF del webhook CRM en un entorno de prueba",
+   "hallazgos": "SSRF del webhook CRM",
+   "entorno": "local o preview propio, nunca contra terceros",
+   "precondiciones": "",
+   "pasos": [
+    "En la integración CRM de un cliente de prueba, cargar una URL https propia que responda 302 hacia http://127.0.0.1:<puerto de un servicio local de prueba>.",
+    "Apretar «Probar conexión».",
+    "Repetir con https://[::ffff:7f00:1]/."
+   ],
+   "esperado": "El validador rechaza la redirección y la IPv6 mapeada; no se hace el pedido interno.",
+   "senal_falla": "El servidor sigue la redirección o acepta la IPv6 y «Probar conexión» muestra el status o el inicio de la respuesta interna.",
+   "escribe_db_o_email": true
+  }
+ },
+ "D5-c1/D5-L8/H13": {
+  "decision": "aceptar",
+  "caso": {
+   "titulo": "Telegram con datos que rompen Markdown",
+   "hallazgos": "Telegram en Markdown legado con datos sin escapar",
+   "entorno": "preview con el bot de Telegram de prueba",
+   "precondiciones": "",
+   "pasos": [
+    "Dejar un lead de prueba con email juan_perez@ejemplo.com y un nombre con asterisco.",
+    "Mirar el chat de Telegram del equipo y los logs del servidor."
+   ],
+   "esperado": "El aviso llega con los datos bien escritos.",
+   "senal_falla": "Telegram responde 400 y el aviso no llega.",
+   "escribe_db_o_email": true
+  }
+ },
+ "D5-c1/D5-L8/H19": {
+  "decision": "aceptar",
+  "caso": {
+   "titulo": "Reporte semanal con el proveedor caído",
+   "hallazgos": "Con cero conversaciones el reporte culpa al cliente",
+   "entorno": "preview con la credencial de Vertex vencida y un bot de prueba",
+   "precondiciones": "",
+   "pasos": [
+    "Mandar mensajes al bot durante la semana (fallan antes del primer token).",
+    "Disparar el reporte semanal del bot.",
+    "Leer el mail."
+   ],
+   "esperado": "El reporte avisa que el bot tuvo fallas de develOP.",
+   "senal_falla": "El mail dice 0 conversaciones y le pide al cliente revisar su instalación.",
+   "escribe_db_o_email": true
+  }
+ }
+}

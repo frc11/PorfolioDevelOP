@@ -1,0 +1,2869 @@
+{
+ "dominio": "D5",
+ "ciclo": "D5-c1",
+ "lote": "D5-L5",
+ "run": "wf_b0489c11-132",
+ "fecha": "2026-10-15T13:01:58.672Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/BotPersonalization.tsx",
+    "lineas_total": 554,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx",
+    "lineas_total": 264,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/BusinessStatCard.tsx",
+    "lineas_total": 52,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+    "lineas_total": 222,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+    "lineas_total": 193,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/ClientDashboardTabs.tsx",
+    "lineas_total": 99,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx",
+    "lineas_total": 181,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx",
+    "lineas_total": 374,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+    "lineas_total": 187,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx",
+    "lineas_total": 139,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/ExportLeadsButton.tsx",
+    "lineas_total": 89,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+    "lineas_total": 611,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/LeadScoringTeaser.tsx",
+    "lineas_total": 29,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx",
+    "lineas_total": 146,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/index.ts",
+    "lineas_total": 7,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/lead-pipeline/LeadColumnOverview.tsx",
+    "lineas_total": 168,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/lead-pipeline/LeadPipeline.tsx",
+    "lineas_total": 81,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/lead-pipeline/LeadPipelineColumn.tsx",
+    "lineas_total": 110,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/lead-pipeline/classes.ts",
+    "lineas_total": 39,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboards/ConversationsTable.tsx",
+    "lineas_total": 247,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboards/LeadsTable.tsx",
+    "lineas_total": 98,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboards/index.ts",
+    "lineas_total": 2,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+    "lineas_total": 559,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/installation/PlatformInstructions.tsx",
+    "lineas_total": 126,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/installation/SnippetCopyBlock.tsx",
+    "lineas_total": 53,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/installation/index.ts",
+    "lineas_total": 8,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/installation/platforms.ts",
+    "lineas_total": 28,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/preview/BotConfigPreview.tsx",
+    "lineas_total": 282,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/preview/index.ts",
+    "lineas_total": 2,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/preview/types.ts",
+    "lineas_total": 42,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tool-cards/HandoffOptionsCard.tsx",
+    "lineas_total": 70,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tool-cards/NavigateToPageCard.tsx",
+    "lineas_total": 48,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tool-cards/WhatsappHandoffCard.tsx",
+    "lineas_total": 59,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tool-cards/index.ts",
+    "lineas_total": 5,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tool-cards/renderToolCall.tsx",
+    "lineas_total": 86,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+    "lineas_total": 176,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tooltip/index.ts",
+    "lineas_total": 3,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tooltip/types.ts",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tooltip/useTooltipTriggers.ts",
+    "lineas_total": 92,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/evals/cleanup.ts",
+    "lineas_total": 155,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/evals/seed-eval-bots.ts",
+    "lineas_total": 223,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
+    "simbolo": "updateBotAppearance",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "updateBotAppearance.ts:56-59 auth() y 'No autenticado' si no hay session.user",
+    "rol": "ninguno: no mira Role ni OrgRole (cualquier usuario con org resuelta; VIEWER nunca se chequea en src, solo aparece en auth.config.ts:5)",
+    "evidencia_rol": "updateBotAppearance.ts:56-64 solo session.user y orgId",
+    "org_de": "sesion",
+    "evidencia_org": "updateBotAppearance.ts:61 resolveOrgId() (cookie de impersonacion: en preview escribe como el cliente); :75-77 forOrg(orgId).botConfig.findFirst()",
+    "validacion": "zod",
+    "evidencia_validacion": "updateBotAppearance.ts:24-43 schema .strict(); :66 safeParse; devuelve details que la UI no muestra",
+    "rate_limit": "no",
+    "notas": "Fuera del lote; invocada desde BotPersonalization.tsx:151 y saveClientSettings.ts:40. Audit con logAdminAction :111-133."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveClientSettings.ts",
+    "simbolo": "saveClientSettings",
+    "tipo": "server-action",
+    "auth": "heredado",
+    "evidencia_auth": "saveClientSettings.ts:40 delega en updateBotAppearance (auth en updateBotAppearance.ts:56-59)",
+    "rol": "ninguno (igual que updateBotAppearance)",
+    "evidencia_rol": "saveClientSettings.ts:34-48 sin chequeo propio",
+    "org_de": "sesion",
+    "evidencia_org": "via updateBotAppearance.ts:61 resolveOrgId",
+    "validacion": "zod",
+    "evidencia_validacion": "saveClientSettings.ts:20-28 y :35 safeParse; isActive se acepta (:21) y se descarta (:40-47)",
+    "rate_limit": "no",
+    "notas": "Fuera del lote. Unico importador vivo: ClientSettingsForm.tsx:5 (componente muerto) + re-export modules/chatbot/index.ts:89. Action publica sin consumidor."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+    "simbolo": "updateLeadStatus",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "updateLeadStatus.ts:18-19 getClientChatbotSession(); 'No session' si null",
+    "rol": "miembro de la org via getClientChatbotSession (orgMember.findFirst sin orderBy ni rol, patron D1-c2); no mira OrgRole",
+    "evidencia_rol": "updateLeadStatus.ts:18-23",
+    "org_de": "sesion",
+    "evidencia_org": "updateLeadStatus.ts:23 forOrg(session.organization.id); :27-34 findFirst scoped + leadBelongsToOrg",
+    "validacion": "zod",
+    "evidencia_validacion": "updateLeadStatus.ts:11-15 schema; :21 .parse() lanza (no safeParse); leadId z.string() sin formato",
+    "rate_limit": "no",
+    "notas": "Fuera del lote; invocada desde LeadStatusActions.tsx:92 y LeadDetail.tsx:184. Errores devueltos en ingles tecnico ('No session', 'Lead not found or unauthorized') que LeadStatusActions.tsx:99 muestra en toast."
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Resumen del chatbot del cliente (Overview)",
+    "pasos": [
+     "src/app/(protected)/dashboard/chatbot/page.tsx:15-18 resolveOrgId + checkClientHasChatbot (clientHasChatbot.ts:5-7 exige isActive:true)",
+     "page.tsx:20-25 sin bot activo o sin getClientChatbotSession -> ChatbotUpsellLanding",
+     "page.tsx:28-32 getUsageByOrgSlug + listLeadsByOrgSlug(orgSlug, 5) + listRecentHandoffsByOrgSlug(orgSlug, 10)",
+     "multiTenantQueries.ts:33-36 forOrg(...).chatbotLead.findMany sin filtro de mes ni de DQ, take 5",
+     "ChatbotOverview.tsx:40-45 toBusinessMetrics con capturedLeads=recentLeads.length, leadValueUSD 50, successRate 0.97",
+     "business-metrics.ts:19,21 valor = leads*50; tiempo de respuesta = default 1500 ms",
+     "ChatbotOverview.tsx:61-113 render de hero y 4 stat cards; :116-218 leads recientes y derivaciones"
+    ]
+   },
+   {
+    "nombre": "Cambio de estado de un tap sobre un contacto",
+    "pasos": [
+     "BusinessLeadCard.tsx:240-245 o LeadDetail.tsx:318 montan LeadStatusActions",
+     "LeadStatusActions.tsx:133-137 onClick -> applyStatus (optimista :86-89)",
+     "LeadStatusActions.tsx:92 updateLeadStatus({leadId, status})",
+     "updateLeadStatus.ts:18 getClientChatbotSession -> :21 zod parse -> :27-34 forOrg findFirst -> :42-47 update (sella firstContactedAt :40)",
+     "updateLeadStatus.ts:51-76 logAdminAction + logChatbotEvent; :78-92 revalidatePath + revalidateTag hot-leads-count",
+     "LeadStatusActions.tsx:95-113 revierte en error o toast con Deshacer"
+    ]
+   },
+   {
+    "nombre": "Guardar estado y notas desde el detalle del contacto",
+    "pasos": [
+     "leads/[id]/page.tsx:29-35 getClientChatbotSession + getLeadByIdForOrg (notFound si es de otra org)",
+     "LeadDetail.tsx:497-520 Select de estado + textarea de notas (maxLength 2000)",
+     "LeadDetail.tsx:182-186 handleSave -> await updateLeadStatus(...) sin mirar res.ok -> setSavedAt",
+     "updateLeadStatus.ts:17-94 (ver flujo anterior)",
+     "LeadDetail.tsx:525-527 muestra 'Guardado' siempre"
+    ]
+   },
+   {
+    "nombre": "Transcript de la conversacion origen en el detalle del contacto",
+    "pasos": [
+     "leads/[id]/page.tsx:75-77 getConversationMessagesForOrg(conversationId, orgId, 50)",
+     "multiTenantQueries.ts:166-170 select role (enum ChatMessageRole USER/ASSISTANT, schema.prisma:152-156)",
+     "LeadDetail.tsx:480 ConversationThread",
+     "LeadDetail.tsx:546 filtro m.role === 'user' || 'assistant' -> lista vacia -> :548-552 mensaje 'mensajes tecnicos'"
+    ]
+   },
+   {
+    "nombre": "Personalizacion del bot por el cliente",
+    "pasos": [
+     "settings/page.tsx:14-49 auth + resolveOrgId + prisma.botConfig.findUnique cacheado (unstable_cache, tag chatbot-config:orgId)",
+     "BotPersonalization.tsx:134-170 estado local + dirty-state :147 + handleSave",
+     "updateBotAppearance.ts:56 auth, :61 resolveOrgId, :66 zod strict, :75-107 forOrg botConfig.update, :109 invalidateBotCache, :111 audit, :135-136 revalidatePath",
+     "Widget del cliente: public/widget.js:28 posicion por data-position y :64 boton #06b6d4 fijo; ChatbotEmbed.tsx:298-301,339-353,534-537 colores cyan fijos -> la personalizacion no llega"
+    ]
+   },
+   {
+    "nombre": "Chat del visitante en el sitio del cliente (widget + embed)",
+    "pasos": [
+     "public/widget.js:21-28 BASE_URL develop.com.ar, data-bot, data-theme, data-position",
+     "public/widget.js:115-131 crea iframe BASE_URL/embed/<slug>?theme=",
+     "src/app/embed/[slug]/page.tsx:29-43 findUnique por slug (404 solo si no existe) -> ChatbotEmbed",
+     "ChatbotEmbed.tsx:27 useChatbot({slug, currentPath:'/', attribution}); :65-91 handshake develop:init (acepta cualquier origen)",
+     "ChatbotEmbed.tsx:119-133 send -> useChatbot.sendMessage (useChatbot.ts:537-546)",
+     "src/app/api/chatbot/[slug]/chat/route.ts:40-42 validateOrigin: Origin develop.com.ar siempre permitido (validate-origin.ts:70-76) -> rate limit :79-85 -> handleChatRequest (otro lote; plan cap isOriginWithinPlanCap handleChatRequest.ts:309 tambien deja pasar develop.com.ar degradedResponse.ts:97-103)"
+    ]
+   },
+   {
+    "nombre": "Lista de contactos con filtros, pipeline y polling",
+    "pasos": [
+     "leads/page.tsx:35-59 getClientChatbotSession + parseStatus/parseRange + listLeadsForDashboard(orgId, filters, 200) + countDqLeadsForOrg + getPlanForOrg",
+     "ClientLeadsTable.tsx:166-182 updateParams -> router.replace con status/range/view",
+     "ClientLeadsTable.tsx:138-164 router.refresh cada 30 s, pausado con la pestana oculta",
+     "ClientLeadsTable.tsx:333-334 LeadPipeline (plan con scoring) o :336-368 grilla plana",
+     "LeadPipeline.tsx:31 groupByClassification (classes.ts:31-39) -> LeadPipelineColumn (max 2 cards) + LeadColumnOverview portaleado"
+    ]
+   },
+   {
+    "nombre": "Exportar contactos a CSV",
+    "pasos": [
+     "ClientLeadsTable.tsx:311-317 ExportLeadsButton con filtros activos",
+     "ExportLeadsButton.tsx:44-64 arma /api/dashboard/chatbot/leads/export?status&range&view y dispara <a download>",
+     "ExportLeadsButton.tsx:66-70 toast de exito sin saber el resultado",
+     "src/app/api/dashboard/chatbot/leads/export/route.ts (otro lote): EXPORT_LIMIT 10_000 :48, text/csv :203"
+    ]
+   },
+   {
+    "nombre": "Conversaciones del cliente con transcript expandible",
+    "pasos": [
+     "conversations/page.tsx:9-12 getClientChatbotSession + listConversationsByOrgSlug(slug, 100)",
+     "multiTenantQueries.ts:180-187 conversation.findMany con include y sin select (todas las columnas, incluido ipHash/userAgent)",
+     "conversations/page.tsx:17-22 ConversationsTable expandable + fetchTranscript=getClientConversationTranscriptAction (otro lote)",
+     "ConversationsTable.tsx:59-73 toggle -> fetchTranscript; :183-246 TranscriptDetail normaliza rol a mayuscula"
+    ]
+   },
+   {
+    "nombre": "Instalacion del snippet",
+    "pasos": [
+     "install/ClientInstallView.tsx (otro lote) -> buildEmbedSnippet(slug) platforms.ts:26-28 con data-theme dark fijo y sin data-position",
+     "SnippetCopyBlock.tsx:28-33 navigator.clipboard.writeText sin await ni catch + toast.success",
+     "PlatformInstructions.tsx:11-125 instrucciones por plataforma"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "El widget de cualquier cliente corre desde cualquier sitio: el embed vive en develop.com.ar, que la allowlist deja pasar siempre",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "next.config.ts",
+      "linea": 129,
+      "fragmento": "source: '/embed/:slug*', ... { key: 'Content-Security-Policy', value: \"frame-ancestors *;\" }  (comentario :127-128: 'R18 will restrict to a whitelist')"
+     },
+     {
+      "ruta": "src/lib/security/validate-origin.ts",
+      "linea": 71,
+      "fragmento": "origin === 'https://develop.com.ar' ||\n    origin === 'https://www.develop.com.ar'  -> return { allowed: true, ... }"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/degradedResponse.ts",
+      "linea": 97,
+      "fragmento": "// develop.com.ar nunca cae al cap"
+     },
+     {
+      "ruta": "public/widget.js",
+      "linea": 125,
+      "fragmento": "iframe.src = ... '/embed/' + ...   (BASE_URL = 'https://develop.com.ar' en :21)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 67,
+      "fragmento": "if (event.data?.type === 'develop:init') {\n        parentOriginRef.current = event.origin"
+     }
+    ],
+    "impacto": "Todo el trafico del widget sale del iframe /embed alojado en develop.com.ar, asi que el POST a /chat lleva Origin develop.com.ar y validateOrigin lo acepta para cualquier bot; el tope de dominios del plan tampoco aplica. Bloqueante para el primer cliente real: cualquier tercero puede pegar el snippet con su slug (o un iframe a /embed/<slug>) en otro sitio y agotar su cupo mensual (el bot queda degradado para sus visitantes reales) y el costo de Vertex de develOP; un cliente Starter (maxDomains 1) puede instalarlo en dominios ilimitados.",
+    "propuesta": "Decidir el modelo de confianza: que widget.js pase el origen del host, que el embed lo valide (event.origin del handshake) y lo reenvie a /config y /chat, y que el servidor lo contraste contra allowedDomains y el tope del plan; frame-ancestors dinamico por bot desde allowedDomains (el R18 pendiente). Documentar que Origin se puede forjar fuera del navegador: el limite real de costo siguen siendo rate limit y cupo.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.vis-widget-cliente.chat-embebido",
+     "lib.security",
+     "int.vertex",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "validate-origin.ts tambien asignado a D3; PLAN-277"
+   },
+   {
+    "titulo": "El detalle del contacto nunca muestra la conversacion: filtra roles en minuscula contra el enum USER/ASSISTANT",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+      "linea": 546,
+      "fragmento": "const visible = messages.filter((m) => m.role === 'user' || m.role === 'assistant')"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 152,
+      "fragmento": "enum ChatMessageRole {\n  USER\n  ASSISTANT"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/multiTenantQueries.ts",
+      "linea": 170,
+      "fragmento": "select: { id: true, role: true, content: true, createdAt: true },"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboards/ConversationsTable.tsx",
+      "linea": 204,
+      "fragmento": "// NO replicamos el filtro lowercase de LeadDetail (bug preexistente fuera de scope)."
+     }
+    ],
+    "impacto": "En todo lead con conversacion guardada la seccion 'De que hablaron' muestra 'Esta conversacion tiene mensajes tecnicos pero ninguno del visitante...'. El dueno no puede leer que pidio el contacto antes de llamarlo, que es el corazon del detalle.",
+    "propuesta": "Comparar contra el enum (normalizar a mayuscula como TranscriptDetail) o reusar TranscriptDetail; tipar role como ChatMessageRole para que el compilador lo atrape.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot",
+     "h3.cli-chatbot.contacto-detalle",
+     "modelo.ChatMessage"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-306, PLAN-261"
+   },
+   {
+    "titulo": "Las metricas del resumen del chatbot son constantes o estan mal calculadas (oportunidades, valor estimado, tiempo de respuesta)",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+      "linea": 42,
+      "fragmento": "capturedLeads: recentLeads.length,\n    leadValueUSD: 50,\n    successRate: 0.97,"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+      "linea": 30,
+      "fragmento": "listLeadsByOrgSlug(orgSlug, 5),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/multiTenantQueries.ts",
+      "linea": 34,
+      "fragmento": "where: { botConfigId: botInfo.bot.id },\n        orderBy: { capturedAt: 'desc' },\n        take: limit,"
+     },
+     {
+      "ruta": "src/modules/chatbot/lib/business-metrics.ts",
+      "linea": 21,
+      "fragmento": "avgResponseSeconds: Math.round((input.avgLatencyMs ?? 1500) / 100) / 10,"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+      "linea": 110,
+      "fragmento": "description={`Responde en ~${formatResponseTime(metrics.avgResponseSeconds)}`}"
+     }
+    ],
+    "impacto": "'Oportunidades este mes' es como maximo 5 y son los ultimos 5 leads de toda la historia, descartados incluidos; 'Valor estimado' es 5 x US$50 fijo; 'Responde en ~1,5 s' es una constante. El primer cliente real ve numeros inventados en la portada de su chatbot (falla 'sin datos de mentira' de L3).",
+    "propuesta": "Contar leads del mes en curso excluyendo DQ con una query de conteo scoped; quitar el valor estimado o basarlo en un ticket declarado por el cliente y rotularlo como estimacion; calcular la latencia con datos reales o sacar la linea.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.resumen",
+     "modelo.ChatbotLead",
+     "modelo.QuotaUsage"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "patron: constantes presentadas como dato"
+   },
+   {
+    "titulo": "La landing de activacion promete un precio que no existe y manda a un WhatsApp placeholder (CLEAN-H1 sigue abierto)",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+      "linea": 15,
+      "fragmento": "const WHATSAPP_URL = 'https://wa.me/5493815555555?text=...'"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+      "linea": 148,
+      "fragmento": "$150 USD ... Incluye 1.000 conversaciones · reportes semanales · soporte directo"
+     },
+     {
+      "ruta": "prisma/seeds/sync-plans.ts",
+      "linea": 70,
+      "fragmento": "monthlyPrice: new Prisma.Decimal('49'), ... quota: 500, (Starter); Business :102 '150', quota 5000 :104"
+     },
+     {
+      "ruta": "src/lib/whatsapp.ts",
+      "linea": 41,
+      "fragmento": "export function getWhatsappDigits(): string { ... NEXT_PUBLIC_WHATSAPP_NUMBER || FALLBACK_WHATSAPP_NUMBER"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+      "linea": 105,
+      "fragmento": "title=\"Insights semanales\" ... 'Te llega un email todos los lunes' (Starter reportsEnabled: false, sync-plans.ts:76)"
+     }
+    ],
+    "impacto": "Un cliente sin chatbot (o con el bot pausado, ver hallazgo del bot pausado) que toca 'Quiero activarlo' o 'Hablar con un asesor' escribe a un numero que no es de develOP: venta perdida y la intencion del prospecto va a un tercero. 'Desde $150, 1.000 conversaciones' no coincide con ningun plan (Starter $49/500, Business $150/5000).",
+    "propuesta": "Usar getWhatsappHref() de lib/whatsapp.ts y derivar precio y cupo del catalogo de planes (o linkear a /dashboard/plan); no prometer features que no estan en todos los planes.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.upsell-activacion",
+     "modelo.Plan"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "CLEAN-H1"
+   },
+   {
+    "titulo": "Bot pausado: el cliente ve el header 'Pausado' y debajo la landing de venta, y no tiene como reactivarlo",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/clientHasChatbot.ts",
+      "linea": 5,
+      "fragmento": "const bot = await forOrg(orgId).botConfig.findFirst({\n    where: { isActive: true },"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+      "linea": 20,
+      "fragmento": "if (!hasActiveChatbot) {\n    return <ChatbotUpsellLanding />"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/layout.tsx",
+      "linea": 52,
+      "fragmento": ": 'Pausado · no responde hasta que lo reactives'"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveClientSettings.ts",
+      "linea": 21,
+      "fragmento": "isActive: z.boolean().optional(),  (se descarta: no se pasa en :40-47)"
+     }
+    ],
+    "impacto": "Un cliente cuyo bot se pausa (por develOP o por falta de pago) pierde su resumen y ve 'Un empleado virtual... Quiero activarlo' con precio falso, bajo un header que le dice 'Pausado... hasta que lo reactives', pero ningun control vivo permite reactivarlo (el unico toggle esta en ClientSettingsForm, muerto).",
+    "propuesta": "Gatear el resumen por existencia de BotConfig (no por isActive) y mostrar un estado 'pausado' con motivo y CTA de contacto; ajustar el copy del layout a lo que el cliente realmente puede hacer.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.resumen",
+     "h3.cli-chatbot.upsell-activacion",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "La personalizacion del cliente no llega al widget instalado (posicion, color del boton y del chat)",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "public/widget.js",
+      "linea": 28,
+      "fragmento": "var position = scriptTag.getAttribute('data-position') || 'bottom-right'"
+     },
+     {
+      "ruta": "public/widget.js",
+      "linea": 64,
+      "fragmento": "'background:#06b6d4;cursor:pointer;z-index:' + Z_BUBBLE + ';' +"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/installation/platforms.ts",
+      "linea": 27,
+      "fragmento": "return `<script src=\"${WIDGET_APP_URL}/widget.js\" data-bot=\"${botSlug}\" data-theme=\"dark\"></script>`"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 298,
+      "fragmento": "background: 'rgba(6,182,212,0.08)',\n                        border: '1px solid rgba(6,182,212,0.22)',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 117,
+      "fragmento": "const secondaryRgb = config.accentSecondary ? hexToRgb(config.accentSecondary) : null  (control: el widget de develOP si los aplica)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/BotPersonalization.tsx",
+      "linea": 165,
+      "fragmento": "toast.success('Cambios guardados. Tu chatbot ya se ve asi.')"
+     }
+    ],
+    "impacto": "El cliente elige posicion, color, color secundario y tinte, los ve en la preview y recibe 'Tu chatbot ya se ve asi', pero en su sitio el boton sigue cyan abajo a la derecha y las burbujas del chat siguen cyan. La leccion 'paridad config-widget' del registro de cambios se aplico a ChatWindow (sitio de develOP) y no al embed que usan los clientes.",
+    "propuesta": "Que widget.js lea la config publica (posicion, accent, avatar) o que el snippet incluya data-position derivado de BotConfig; portar el cableado de accent/tint/secondary de ChatWindow al embed (o que el embed reuse ChatWindow).",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente.chat-embebido",
+     "h3.cli-chatbot.personalizacion",
+     "h3.cli-chatbot.instalacion"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-252, PLAN-277"
+   },
+   {
+    "titulo": "El embed manda siempre currentPath '/': ruta del lead, conversacion y prompt quedan en la home",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 27,
+      "fragmento": "const chatbot = useChatbot({ slug, currentPath: '/', attribution })"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/conversation/resolver.ts",
+      "linea": 101,
+      "fragmento": "currentPath: input.currentPath ?? null,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/prompts/sections.ts",
+      "linea": 200,
+      "fragmento": "- Ruta del usuario: ${context.currentPath ?? 'no determinada'}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+      "linea": 360,
+      "fragmento": "<dt ...>Estaba viendo</dt> ... {lead.conversation.currentPath}"
+     }
+    ],
+    "impacto": "Para todos los visitantes de sitios de clientes el dueno ve '/' en 'Estaba viendo' y en la columna 'Ruta', y el modelo recibe 'Ruta del usuario: /' aunque el visitante este en la pagina de precios. El parentUrl ya llega en el handshake (ChatbotEmbed.tsx:79-80) y solo se usa para UTM.",
+    "propuesta": "Derivar currentPath del pathname de parentUrl en el handshake y actualizarlo con mensajes de navegacion del host.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente.chat-embebido",
+     "h3.cli-chatbot.contacto-detalle",
+     "h3.cli-chatbot.conversaciones"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-509, PLAN-516"
+   },
+   {
+    "titulo": "Con el bot pausado, el embed muestra saludo y respuestas rapidas que mandan mensajes igual",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 248,
+      "fragmento": "if (data?.paused) { ... reason: 'bot_paused',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 240,
+      "fragmento": "{chatbot.messages.length === 0 ? ("
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 296,
+      "fragmento": "onClick={() => chatbot.sendMessage(qr.promptToSend)}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 285,
+      "fragmento": "{messages.length === 0 && !degraded ? (   (control: el widget de develOP si gatea)"
+     }
+    ],
+    "impacto": "En el sitio de un cliente pausado el visitante ve saludo, chips y la tarjeta offline a la vez; tocar un chip manda un mensaje que el servidor rechaza (validate-origin.ts:67 bot_inactive). El arreglo A6 'offline muestra solo WhatsApp' no se porto al embed.",
+    "propuesta": "Mismo gate que ChatWindow (!chatbot.degradedInfo) para el empty-state y los chips, y bloquear sendMessage cuando inputLockedByDegrade.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente.chat-embebido"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "'Guardar' en el detalle del contacto muestra 'Guardado' aunque el servidor rechace",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+      "linea": 184,
+      "fragmento": "await updateLeadStatus({ leadId: lead.id, status, notes })\n      setSavedAt(Date.now())"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+      "linea": 19,
+      "fragmento": "if (!session) return { ok: false, error: 'No session' }"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx",
+      "linea": 99,
+      "fragmento": "toast.error(res.error ?? 'No se pudo guardar el cambio')  (muestra 'No session' / 'Lead not found or unauthorized')"
+     }
+    ],
+    "impacto": "Con sesion vencida, en preview admin o con un lead ajeno, las notas y el estado no se guardan pero la UI dice 'Guardado': el dueno pierde sus notas sin enterarse. Las acciones de un tap si revierten, pero muestran mensajes internos en ingles.",
+    "propuesta": "Mirar res.ok, revertir y mostrar un error util en castellano; mapear los errores de la action a mensajes de dueno.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.contacto-detalle",
+     "h3.cli-chatbot.acciones-rapidas-lead"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "patron D1-c1 mensajes internos"
+   },
+   {
+    "titulo": "El panel del cliente afirma que el bot atiende 24/7 sin mirar su salud (credencial de Vertex vencida)",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+      "linea": 63,
+      "fragmento": "{session.bot.botName} está atendiendo consultas las 24 horas."
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+      "linea": 109,
+      "fragmento": "value=\"24/7\""
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/layout.tsx",
+      "linea": 51,
+      "fragmento": "? 'Activo · respondiendo a tus visitantes'"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 418,
+      "fragmento": "{chatbot.degradedInfo && (\n            <DegradedBanner key=\"degraded-banner\" info={chatbot.degradedInfo} />"
+     }
+    ],
+    "impacto": "Con la credencial de Vertex vencida (hecho conocido) el visitante ve, a lo sumo, el banner degradado; el cliente en su panel lee 'Activo, respondiendo' y 'atendiendo 24 horas' y se entera por los leads que no llegan. Control positivo de E10: el copy no depende de ningun dato de salud.",
+    "propuesta": "Mostrar en el resumen un estado de salud derivado de los errores del proveedor (ChatbotEvent de las ultimas 24 h) y condicionar el copy; alerta a develOP cuando la tasa de fallos supera un umbral.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.resumen",
+     "int.vertex",
+     "h3.adm-health"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5-A4"
+   },
+   {
+    "titulo": "Conversaciones del cliente: todas las columnas de Conversation (ipHash, userAgent) viajan al navegador y la tabla muestra tokens y costo de develOP",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/multiTenantQueries.ts",
+      "linea": 180,
+      "fragmento": "scope.conversation.findMany({ where: { botConfigId: botInfo.bot.id }, ... include: { lead: {...}, _count: {...} } })"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1376,
+      "fragmento": "ipHash      String?\n  userAgent   String? @db.Text"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/conversations/page.tsx",
+      "linea": 17,
+      "fragmento": "<ConversationsTable\n      conversations={items}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboards/ConversationsTable.tsx",
+      "linea": 102,
+      "fragmento": "<th ...>Tokens (in / out)</th>\n              <th ...>Costo</th>"
+     }
+    ],
+    "impacto": "El payload RSC de la pagina lleva ipHash (salado), userAgent, sessionId y referrer de cada visitante al navegador del dueno; ademas le mostramos tokens y costo en USD por conversacion, jerga tecnica y base de costos de develOP.",
+    "propuesta": "select explicito con solo lo que la tabla usa; decision para Valentino: ocultar tokens y costo en la vista del cliente.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.conversaciones",
+     "modelo.Conversation"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-296"
+   },
+   {
+    "titulo": "La intencion del lead aparece como enum crudo (PURCHASE_READY) y los colores de intencion nunca matchean",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+      "linea": 158,
+      "fragmento": "{lead.intent ?? '—'} ·{' '}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboards/ConversationsTable.tsx",
+      "linea": 150,
+      "fragmento": "✓ {c.lead.name} ({c.lead.intent})"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboards/LeadsTable.tsx",
+      "linea": 28,
+      "fragmento": "const INTENT_COLORS: Record<string, string> = {\n  quote: ..., demo: ..., info: ..."
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 158,
+      "fragmento": "enum ChatbotLeadIntent {\n  PURCHASE_READY"
+     }
+    ],
+    "impacto": "El cliente lee 'PURCHASE_READY' en su resumen y en conversaciones; en el admin todos los chips de intencion salen del color 'other'. Es el mismo bug que P1-fix corrigio en lead-intent-labels.ts pero quedo en tres sitios.",
+    "propuesta": "Usar intentLabel() de lead-intent-labels.ts y keys del enum real para los colores.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.resumen",
+     "h3.cli-chatbot.conversaciones",
+     "h3.adm-chatbots.leads-del-bot"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Texto funcional en text-zinc-600 sobre fondo oscuro en el chatbot del cliente (contraste < 4,5:1)",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+      "linea": 279,
+      "fragmento": "... px-3 py-2 text-sm text-zinc-600\">  ('Sin telefono'; igual :293 'Sin email', :521 contador, :381, :589)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+      "linea": 205,
+      "fragmento": "<span className=\"shrink-0 text-xs text-zinc-600\">  (fecha de derivacion)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx",
+      "linea": 123,
+      "fragmento": "<span className=\"text-zinc-600\"> · {decayTierLabel}</span>"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboards/LeadsTable.tsx",
+      "linea": 90,
+      "fragmento": "<div className=\"mt-1 text-zinc-600\">desde {lead.conversation.currentPath}</div>"
+     }
+    ],
+    "impacto": "zinc-600 (#52525b) sobre el fondo casi negro da ~2,5:1: datos utiles (fecha de derivacion, 'Sin telefono', antiguedad del lead) ilegibles con baja vision o pantalla al sol. Falla WCAG AA del quality baseline.",
+    "propuesta": "Subir a zinc-400 o al token de texto secundario con contraste AA.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.contacto-detalle",
+     "h3.cli-chatbot.resumen",
+     "h3.cli-chatbot.contactos-lista"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patron D1-c1 text-zinc-600/700"
+   },
+   {
+    "titulo": "Controles del chatbot sin estado o nombre accesible (chips, labels, tooltip, pestanas, error del transcript)",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx",
+      "linea": 272,
+      "fragmento": "<button key={key} onClick={...} className={chipClass(initialRange === key)}>  (sin aria-pressed; igual :222-234, :284-298)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+      "linea": 496,
+      "fragmento": "<label className=\"mb-1 block text-xs text-zinc-500\">Estado</label>  (sin htmlFor; igual :512)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+      "linea": 129,
+      "fragmento": "onClick={(e) => { ... onAccept(currentPrompt) }}  (div sin role, tabIndex ni onKeyDown)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboards/ConversationsTable.tsx",
+      "linea": 201,
+      "fragmento": "return <p className=\"text-xs text-red-300\">No se pudo cargar el transcript. Probá de nuevo.</p>"
+     }
+    ],
+    "impacto": "Con lector de pantalla no se sabe que filtro esta activo ni a que campo corresponde cada control; el teaser proactivo del sitio de develOP no se puede aceptar con teclado; el error del transcript no se anuncia.",
+    "propuesta": "aria-pressed en chips, htmlFor/id en labels, convertir el tooltip en button, aria-current en la pestana activa, role=alert en el error.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.contactos-lista",
+     "h3.cli-chatbot.contacto-detalle",
+     "h3.vis-widget-develop.tooltip-proactivo"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patron D1-c1 role=alert"
+   },
+   {
+    "titulo": "Personalizacion: sin validacion de largo minimo en el cliente y error generico 'Datos invalidos'",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
+      "linea": 40,
+      "fragmento": "welcomeMessage: z.string().trim().min(10).max(200).optional(),"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/BotPersonalization.tsx",
+      "linea": 311,
+      "fragmento": "update('welcomeMessage', event.target.value.slice(0, 200))  (solo tope maximo)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/BotPersonalization.tsx",
+      "linea": 167,
+      "fragmento": "toast.error(`Error: ${result.error}`)"
+     }
+    ],
+    "impacto": "Un mensaje de bienvenida de menos de 10 caracteres (o vacio, aunque el campo dice 'required') termina en 'Error: Datos invalidos' sin decir que campo; el cliente queda sin saber que corregir. Los details del servidor (:66-72) no se usan.",
+    "propuesta": "Validar min 10 en el cliente con mensaje en el campo y mapear details del Zod a errores por campo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.personalizacion"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Copiar snippet y Exportar CSV anuncian exito sin saber el resultado",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/installation/SnippetCopyBlock.tsx",
+      "linea": 29,
+      "fragmento": "navigator.clipboard.writeText(snippet)\n    setCopied(true)\n    toast.success(toastMessage)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ExportLeadsButton.tsx",
+      "linea": 63,
+      "fragmento": "a.click()\n    document.body.removeChild(a)  ... toast.success(... 'Exportando tus contactos…')"
+     }
+    ],
+    "impacto": "Si el portapapeles esta bloqueado (permisos, iframe) el cliente pega nada en su sitio creyendo que copio el snippet; si el export falla (sesion vencida, 500) el toast igual dice que exporta.",
+    "propuesta": "await + catch del clipboard con fallback de seleccion; export via fetch con chequeo de status y blob, o al menos sin toast de exito.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.instalacion",
+     "h3.cli-chatbot.exportar-csv"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patron: exito optimista sin resultado"
+   },
+   {
+    "titulo": "Los CTA 'Pedinos el cambio' de Informacion y CRM llevan un contexto que Mensajes no conoce: el mensaje llega vacio",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx",
+      "linea": 157,
+      "fragmento": "href=\"/dashboard/messages?context=knowledge\""
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx",
+      "linea": 55,
+      "fragmento": "href=\"/dashboard/messages?context=crm\"  (igual :92, :127)"
+     },
+     {
+      "ruta": "src/lib/data/message-context.ts",
+      "linea": 56,
+      "fragmento": "let template = MESSAGE_CONTEXTS[context] ?? ''  (claves :2-50: activacion, modulo, facturacion, bug, mejora, proyecto, gbp, plan-*)"
+     }
+    ],
+    "impacto": "'Pedinos el cambio desde Mensajes y lo aplicamos por vos' deja al cliente en un compositor vacio (MessageThread.tsx:78-87 no prellena y borra el parametro): el pedido de cambio de KB o CRM pierde su contexto.",
+    "propuesta": "Agregar claves knowledge y crm a MESSAGE_CONTEXTS con un texto guia.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.base-conocimiento",
+     "h3.cli-chatbot.estado-crm",
+     "h2.cli-mensajes"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-283"
+   },
+   {
+    "titulo": "Fechas sin timeZone en client components con SSR: hydration mismatch y horas en UTC",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboards/ConversationsTable.tsx",
+      "linea": 45,
+      "fragmento": "return new Date(d).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+      "linea": 206,
+      "fragmento": "{new Date(h.createdAt).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', ..."
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboards/LeadsTable.tsx",
+      "linea": 37,
+      "fragmento": "// timeZone fijo (AR): sin esto el server (Netlify = UTC) y el cliente (UTC-3) ... → hydration mismatch."
+     }
+    ],
+    "impacto": "Cada carga de Conversaciones y del resumen renderiza horas en UTC en el servidor y en hora local en el navegador: error de hidratacion recuperable y horas que saltan 3 h. LeadsTable ya lo corrigio; estos dos no.",
+    "propuesta": "timeZone 'America/Argentina/Buenos_Aires' (o helper de dates-ar) en ambos.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.conversaciones",
+     "h3.cli-chatbot.resumen"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "ClientSettingsForm muerto, con tres any y un toggle 'Activar Chatbot' que no hace nada",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+      "linea": 26,
+      "fragmento": "(bot.quickReplies as any[]) ?? []"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+      "linea": 36,
+      "fragmento": "accentColor: accentColor as any,\n        position: position as any,"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/index.ts",
+      "linea": 3,
+      "fragmento": "export { ClientSettingsForm } from './ClientSettingsForm'  (unico importador; modules/chatbot/index.ts:85 no lo re-exporta)"
+     },
+     {
+      "ruta": "src/modules/chatbot/index.ts",
+      "linea": 89,
+      "fragmento": "export { saveClientSettings } from './server/admin/saveClientSettings'"
+     }
+    ],
+    "impacto": "Viola la regla 'cero any' (3 errores del baseline de eslint), mantiene viva una server action publica sin consumidor y un toggle que el servidor ignora; cualquiera que lo reconecte creeria que el cliente puede activar su bot.",
+    "propuesta": "Borrar ClientSettingsForm, su export y saveClientSettings (BotPersonalization lo reemplaza).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.personalizacion",
+     "lib.actions"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Handshake del embed sin validar la ventana emisora; antes del handshake los eventos salen a '*'",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 29,
+      "fragmento": "const parentOriginRef = useRef<string>('*')"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 67,
+      "fragmento": "if (event.data?.type === 'develop:init') {\n        parentOriginRef.current = event.origin"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 103,
+      "fragmento": "notifyParent('lead-captured', tc.input)"
+     },
+     {
+      "ruta": "public/widget.js",
+      "linea": 165,
+      "fragmento": "if (event.origin !== BASE_URL) return  (control: el host si valida)"
+     }
+    ],
+    "impacto": "Cualquier otro frame del sitio del cliente con referencia al iframe puede fijar la atribucion UTM del visitante y cortar los eventos al host; con un widget.js viejo sin handshake, el lead capturado (nombre, telefono, email) se postea a '*'. Riesgo bajo: el destinatario sigue siendo el padre.",
+    "propuesta": "Aceptar develop:init solo si event.source === window.parent y el origen esta en allowedDomains; no postear PII hasta tener origen confirmado.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente.chat-embebido",
+     "lib.security"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Literal 'Protocolo de consultoria iniciado. ¿Como puedo asistirle hoy?' en el widget de develOP (alerta D5-A5)",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 321,
+      "fragmento": "Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 311,
+      "fragmento": "Sistema Listo"
+     }
+    ],
+    "impacto": "El estado vacio del chat del sitio publico habla en 'usted' y en tono de terminal, contra el rioplatense del resto; B13.5 afirmaba que el literal no existia y el codigo de hoy lo tiene.",
+    "propuesta": "Reemplazar por el welcomeMessage del bot o un copy de voz develOP.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A5"
+   },
+   {
+    "titulo": "Errores de eslint de reglas del React Compiler en el embed y el tooltip proactivo",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/tooltip/useTooltipTriggers.ts",
+      "linea": 31,
+      "fragmento": "const lastActivityRef = useRef<number>(Date.now())  (react-hooks/purity)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+      "linea": 79,
+      "fragmento": "setCurrentPrompt(prompt)  (react-hooks/set-state-in-effect)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 317,
+      "fragmento": "chatbot.messages.map((m) => (  (react-hooks/refs)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/tooltip/useTooltipTriggers.ts",
+      "linea": 89,
+      "fragmento": "const reset = () => setTrigger(null)  (nueva identidad en cada render: re-dispara los effects que la usan)"
+     }
+    ],
+    "impacto": "Errores del baseline de eslint en codigo publico; con el React Compiler activo pueden producir renders inconsistentes. reset sin useCallback hace que ProactiveTooltip re-ejecute su effect en cada render.",
+    "propuesta": "useCallback para reset, inicializar lastActivityRef en el effect, derivar el prompt sin setState en effect; revisar el falso positivo de refs en el embed.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop.tooltip-proactivo",
+     "h3.vis-widget-cliente.chat-embebido"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "La org del chatbot del cliente se resuelve por dos caminos distintos en la misma seccion (resolveOrgId vs getClientChatbotSession)",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+      "linea": 15,
+      "fragmento": "const orgId = await resolveOrgId()  ... :24 const session = await getClientChatbotSession()"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
+      "linea": 61,
+      "fragmento": "const orgId = await resolveOrgId()"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+      "linea": 18,
+      "fragmento": "const session = await getClientChatbotSession()"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx",
+      "linea": 21,
+      "fragmento": "const organizationId = await resolveOrgId()"
+     }
+    ],
+    "impacto": "En la vista previa del admin, Configuracion y el indicador CRM operan sobre el cliente impersonado (y escriben como el), mientras Resumen, Contactos, Conversaciones e Informacion usan la membresia propia del usuario (o nada, y muestran la landing de venta); para un usuario con varias orgs, el gate y los datos pueden salir de orgs distintas. Se suma a los patrones D1-c2/D1-c3.",
+    "propuesta": "Una sola puerta de resolucion de org para todo /dashboard/chatbot (lectura y escritura), con la impersonacion explicita y de solo lectura donde corresponda.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot",
+     "h1.auth-impersonacion",
+     "lib.isolation"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "patrones D1-c2 (getClientSession.ts:5-33) y D1-c3 (resolveOrgId en actions que escriben)"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.resumen",
+    "nombre": "Resumen del chatbot",
+    "descripcion": "Portada de Mi Chatbot: hero, 4 metricas, leads recientes y derivaciones a WhatsApp.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+     "src/modules/chatbot/components/dashboard/BusinessStatCard.tsx",
+     "src/app/(protected)/dashboard/chatbot/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz: page.tsx:15-32 -> multiTenantQueries.ts:27-53 -> ChatbotOverview.tsx:38-221. Metricas inventadas impiden L3.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "gate por resolveOrgId (page.tsx:15-18) y datos por getClientChatbotSession (page.tsx:24-32); queries forOrg (multiTenantQueries.ts:33)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ChatbotOverview.tsx:133-139 y :183-189 EmptyStateMuted; business-metrics.ts:45-46"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "dashboard/chatbot/error.tsx -> SectionErrorBoundary"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "dashboard/chatbot/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "solo lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "ChatbotOverview.tsx:68 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4; truncate en derivaciones :198"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary.tsx:64 captureException; instrumentation.ts:49 onRequestError"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "ChatbotOverview.tsx:42-44 leadValueUSD 50 / successRate 0.97; business-metrics.ts:21 latencia default 1500 ms"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "bot pausado cae en la landing de venta (clientHasChatbot.ts:5-7, page.tsx:20-22)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.upsell-activacion",
+    "nombre": "Landing de activacion del chatbot",
+    "descripcion": "Pantalla de venta para orgs sin bot activo con CTA a WhatsApp y precio.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "Maqueta: WhatsApp placeholder (ChatbotUpsellLanding.tsx:15) y precio que no coincide con el catalogo (:148-152 vs sync-plans.ts:70,102).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "contenido estatico"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "sin datos"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "sin fetch"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "estatico"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap :47, grid-cols-1 sm:grid-cols-2 :72, flex-col sm:flex-row :142"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "estatico"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "ChatbotUpsellLanding.tsx:15 numero 5493815555555; :148 '$150 USD'"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "el CTA no llega a develOP"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.contactos-lista",
+    "nombre": "Lista de contactos (pipeline y filtros)",
+    "descripcion": "Contactos del bot con filtros de fecha/estado, toggle Descartados, pipeline por clasificacion, chip Nuevo y polling de 30 s.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx",
+     "src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx",
+     "src/modules/chatbot/components/dashboard/lead-pipeline/LeadPipeline.tsx",
+     "src/modules/chatbot/components/dashboard/lead-pipeline/LeadPipelineColumn.tsx",
+     "src/modules/chatbot/components/dashboard/lead-pipeline/LeadColumnOverview.tsx",
+     "src/modules/chatbot/components/dashboard/lead-pipeline/classes.ts",
+     "src/modules/chatbot/components/dashboard/LeadScoringTeaser.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "leads/page.tsx:35-59 -> ClientLeadsTable.tsx:90-374 -> LeadPipeline.tsx:29-80 / BusinessLeadCard.tsx:77-252; filtros via URL ClientLeadsTable.tsx:166-182.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "getClientChatbotSession (leads/page.tsx:36) con el patron D1-c2; listLeadsForDashboard por session.organization.id :56"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ClientLeadsTable.tsx:238-261 (sin contactos / solo DQ / DQ) y :322-332 (filtro vacio); LeadPipelineColumn.tsx:90-95"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "boundary si; errores de acciones en ingles tecnico (LeadStatusActions.tsx:99)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "leads/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "parseStatus/parseRange leads/page.tsx:40-41; zod en updateLeadStatus.ts:11-21"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 :337; chips min-h-[44px] :58; flex-wrap :69"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary + onRequestError"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos de DB; sin TODO en el lote"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "acciones de un tap + detalle por card (BusinessLeadCard.tsx:211-217)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.contacto-detalle",
+    "nombre": "Detalle del contacto",
+    "descripcion": "Ruta dedicada con datos, clasificacion, origen, campana, transcript, WhatsApp pre-armado y seguimiento.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+     "src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "[id]/page.tsx:29-101 -> LeadDetail.tsx:150-542; transcript roto (LeadDetail.tsx:546) y guardado sin chequear resultado (:182-186).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "getLeadByIdForOrg y getConversationMessagesForOrg filtran por la org de getClientChatbotSession ([id]/page.tsx:29-35,75-77); patron D1-c2"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "LeadDetail.tsx:467-473 sin conversacion; :279-296 sin telefono/email"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "LeadDetail.tsx:184-185 ignora res.ok y muestra 'Guardado'"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "leads/[id]/loading.tsx; boton 'Guardando...' :529-531"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "updateLeadStatus.ts:11-15 (notes max 2000)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 sm:grid-cols-2 :269, :327; targets min-h-[44px]"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "boundary si; fallos de la action devueltos como ok:false no se capturan"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos reales"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "no puede leer la conversacion (LeadDetail.tsx:546)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.acciones-rapidas-lead",
+    "nombre": "Acciones de un tap sobre el contacto",
+    "descripcion": "Lo contacte / Vendido / No avanzo con optimismo, deshacer y sellado de primer contacto.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "LeadStatusActions.tsx:78-115 -> updateLeadStatus.ts:17-94 (seal :40-46, revalidateTag :84-92).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "forOrg(session.organization.id) updateLeadStatus.ts:23 con org de getClientChatbotSession"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "accion"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "revierte y avisa (LeadStatusActions.tsx:95-101) pero con texto interno en ingles"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "loading/disabled LeadStatusActions.tsx:129-130"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "updateLeadStatus.ts:11-21"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap y min-h-[44px] :118, :138"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "ok:false no se reporta; throw de parse va a onRequestError"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "escritura real"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "deshacer en el toast :108-113"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.exportar-csv",
+    "nombre": "Exportar contactos a CSV",
+    "descripcion": "Boton que descarga el CSV con los filtros activos.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/ExportLeadsButton.tsx"
+    ],
+    "madurez": "L?",
+    "madurez_evidencia": "El boton arma la URL (ExportLeadsButton.tsx:44-64); la route (export/route.ts) es de otro lote y no se re-trazo.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "se decide en la route (otro lote)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "deshabilitado sin leads ExportLeadsButton.tsx:41,82"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "toast de exito sin chequear respuesta :66-70"
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "'Exportando…' 1,5 s fijo :74,86"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "en la route"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "boton sm"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "en la route"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos fijos"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "descarga directa"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.conversaciones",
+    "nombre": "Conversaciones con transcript",
+    "descripcion": "Tabla de conversaciones del bot con transcript expandible.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboards/ConversationsTable.tsx",
+     "src/app/(protected)/dashboard/chatbot/conversations/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "conversations/page.tsx:9-23 -> multiTenantQueries.ts:174-197 -> ConversationsTable.tsx:48-180.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "getClientChatbotSession; manda columnas internas al navegador (multiTenantQueries.ts:180-187)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ConversationsTable.tsx:75-87"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "transcript :200-202; boundary"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "conversations/loading.tsx; Loader2 :192-198"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "overflow-x-auto :95"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "boundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos reales"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "lee transcripts solo"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.base-conocimiento",
+    "nombre": "Lo que sabe tu chatbot (KB de solo lectura)",
+    "descripcion": "Muestra los 7 campos de la KB y guia para pedir cambios.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx",
+     "src/app/(protected)/dashboard/chatbot/knowledge/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "knowledge/page.tsx:10-21 -> ClientKnowledgeView.tsx:116-180.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "knowledgeBase por session.bot.id (knowledge/page.tsx:14) via getClientChatbotSession"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "campo vacio con hint ClientKnowledgeView.tsx:94-95; KB inexistente redirige (knowledge/page.tsx:19)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "boundary"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "knowledge/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "solo lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap :81; pre whitespace-pre-wrap break-words :97"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "boundary"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos reales"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "el CTA ?context=knowledge no prellena (message-context.ts:56)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.personalizacion",
+    "nombre": "Personalizacion del bot",
+    "descripcion": "Color, colores avanzados, posicion, avatar (incl. imagen base64), bienvenida y respuestas rapidas con preview.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/BotPersonalization.tsx",
+     "src/modules/chatbot/components/preview/BotConfigPreview.tsx",
+     "src/modules/chatbot/components/preview/types.ts",
+     "src/app/(protected)/dashboard/chatbot/settings/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "settings/page.tsx:13-60 -> BotPersonalization.tsx:149-169 -> updateBotAppearance.ts:55-138. Varios campos no llegan al widget instalado.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "resolveOrgId + forOrg (updateBotAppearance.ts:61,75); escribe como el cliente en preview"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "settings/page.tsx:51-58 sin bot"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "toast 'Error: Datos invalidos' sin campo (BotPersonalization.tsx:167)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "settings/loading.tsx; Button loading :338"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "updateBotAppearance.ts:24-43 strict"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 lg:grid-cols-[...] :173; colores grid-cols-4 :183"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "ok:false no se reporta"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos reales"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "posicion/color no se aplican en el widget (widget.js:28,64)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.estado-crm",
+    "nombre": "Estado de la integracion CRM",
+    "descripcion": "Indicador de solo lectura: sin integracion, pausada o conectada.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx"
+    ],
+    "madurez": "L3",
+    "madurez_evidencia": "CrmStatusIndicator.tsx:20-31 resolveOrgId + planAllows + forOrg crmIntegration; tres estados :33-138.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "forOrg(organizationId).crmIntegration (CrmStatusIndicator.tsx:29)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": ":33-67 sin integracion"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "boundary de dashboard/chatbot"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "settings/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex items-start, texto fluido"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "boundary + onRequestError"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos reales"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "la conexion la hace develOP por diseno"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.instalacion",
+    "nombre": "Instalacion del snippet",
+    "descripcion": "Snippet copiable e instrucciones por plataforma (compartido con el admin).",
+    "archivos": [
+     "src/modules/chatbot/components/installation/platforms.ts",
+     "src/modules/chatbot/components/installation/SnippetCopyBlock.tsx",
+     "src/modules/chatbot/components/installation/PlatformInstructions.tsx",
+     "src/modules/chatbot/components/installation/index.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "buildEmbedSnippet platforms.ts:26-28 -> SnippetCopyBlock.tsx:28-33; ClientInstallView (otro lote) los consume.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "la pagina install no se re-leyo (otro lote); el snippet usa el slug recibido"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "clipboard sin await/catch SnippetCopyBlock.tsx:29"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "install/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "pre whitespace-pre-wrap break-all overflow-x-auto :37"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "slug real"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "snippet sin data-position y con data-theme fijo (platforms.ts:27)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.pestanas",
+    "nombre": "Pestanas de Mi Chatbot",
+    "descripcion": "Navegacion entre Overview, Leads, Conversaciones, Informacion, Configuracion e Instalacion con punto de calientes.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/ClientDashboardTabs.tsx"
+    ],
+    "madurez": "L3",
+    "madurez_evidencia": "layout.tsx:57 -> ClientDashboardTabs.tsx:21-98 con Link y fades de overflow.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "navegacion"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "overflow-x-auto + fades :49-64"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "-"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "-"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-cliente",
+    "id": "h3.vis-widget-cliente.chat-embebido",
+    "nombre": "Chat embebido en el sitio del cliente",
+    "descripcion": "Iframe /embed que carga la config, conversa por streaming, muestra tool cards y estados degradados.",
+    "archivos": [
+     "src/modules/chatbot/components/embed/ChatbotEmbed.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "widget.js:115-131 -> embed/[slug]/page.tsx:25-44 -> ChatbotEmbed.tsx:27,119-133 -> chat/route.ts:40-110.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "bot por slug; allowlist de dominios no aplica desde develop.com.ar (validate-origin.ts:70-76)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ChatbotEmbed.tsx:240-315"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "ConfigLoadError :177-192; DegradedBanner :418-420"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "spinner :148-172; puntos de pensando :428-450"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "requestSchema.ts:56 y MAX_MESSAGE_CHARS :499"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "100dvh :202; viewport-fit embed/[slug]/page.tsx:13-18"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "global-error; errores de stream no trazados en este lote"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "currentPath '/' fijo :27"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "el visitante conversa o deriva solo"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-cliente",
+    "id": "h3.vis-widget-cliente.tarjetas-derivacion",
+    "nombre": "Tarjetas de derivacion (WhatsApp / que me contacten)",
+    "descripcion": "Tool cards validadas con zod en cliente y deshabilitadas con el turno en vuelo.",
+    "archivos": [
+     "src/modules/chatbot/components/tool-cards/renderToolCall.tsx",
+     "src/modules/chatbot/components/tool-cards/HandoffOptionsCard.tsx",
+     "src/modules/chatbot/components/tool-cards/WhatsappHandoffCard.tsx",
+     "src/modules/chatbot/components/tool-cards/index.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ChatbotEmbed.tsx:398-409 -> renderToolCall.tsx:47-84 -> HandoffOptionsCard.tsx:22-69 / WhatsappHandoffCard.tsx:12-58.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "presentacional"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "sin numero muestra 'WhatsApp no configurado.' al visitante (WhatsappHandoffCard.tsx:17-23)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "input invalido -> null (renderToolCall.tsx:49-50)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "disabled={busy} HandoffOptionsCard.tsx:44,56"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "tools del servidor en otro lote"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-2 compacto"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "-"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "abre WhatsApp directo"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.tooltip-proactivo",
+    "nombre": "Teaser proactivo del widget de develOP",
+    "descripcion": "Pregunta rotativa sobre el lanzador disparada por montaje, inactividad o scroll.",
+    "archivos": [
+     "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+     "src/modules/chatbot/components/tooltip/useTooltipTriggers.ts",
+     "src/modules/chatbot/components/tooltip/types.ts",
+     "src/modules/chatbot/components/tooltip/index.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "LogicCompanion monta ProactiveTooltip; useTooltipTriggers.ts:33-87 -> ProactiveTooltip.tsx:71-94 -> onAccept :137.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "publico"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "sin prompts no se muestra (ProactiveTooltip.tsx:74-77)"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "openers validados server-side segun comentario :14-16"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "maxWidth min(190px, 38vw) :119"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "prompts de DB"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "no aceptable con teclado (:122-139)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.navegar-a-pagina",
+    "nombre": "Tarjeta 'Llevame ahi'",
+    "descripcion": "Tool card navigate_to_page solo para el bot propio de develOP.",
+    "archivos": [
+     "src/modules/chatbot/components/tool-cards/NavigateToPageCard.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "renderToolCall.tsx:71-81 -> NavigateToPageCard.tsx:35-45; gate solo bot develop (navigate-to-page-gate.invariant.ts:41-53).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "tool solo para botSlug develop (invariant :41-53)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "zod renderToolCall.tsx:72-73"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "VALID_PATHS server-side segun invariant :7"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "-"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "-"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "-"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.leads-del-bot",
+    "nombre": "Tabla de leads del bot (admin)",
+    "descripcion": "LeadsTable compartida en el tab de leads del admin con accion por fila opcional.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboards/LeadsTable.tsx",
+     "src/modules/chatbot/components/dashboards/index.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "admin/chatbots/[botId]/tabs/LeadsTab.tsx -> LeadsTable.tsx:46-97.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "lo decide el admin (otro lote)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "LeadsTable.tsx:48-56"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "presentacional"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "del padre"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "flex justify-between sin wrap :66"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "-"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "-"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.vista-previa-config",
+    "nombre": "Preview vivo de la configuracion",
+    "descripcion": "BotConfigPreview compartido entre el editor admin, el onboarding y la personalizacion del cliente.",
+    "archivos": [
+     "src/modules/chatbot/components/preview/BotConfigPreview.tsx",
+     "src/modules/chatbot/components/preview/index.ts",
+     "src/modules/chatbot/components/preview/types.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "BotPersonalization.tsx:347 y BotConfigEditor -> BotConfigPreview.tsx:65-244; no es espejo del embed (ChatbotEmbed no usa accent/tint).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "presentacional"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "fallbacks 'Asistente' / 'Mensaje de bienvenida' :198,218"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "ancho fluido, h-96"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "-"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "la preview muestra lo que el widget del cliente no aplica"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "-"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-280",
+    "clave": "Reactivar 'Insights AI' real en el dashboard del chatbot",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Placeholder removido de ChatbotOverview (sin 'insight' en components/dashboard). Insights reales se muestran en /dashboard/resultados/analisis (analisis/page.tsx:60,73 via getMonthlyAnalysisForOrg.ts:61-62 PENDING+APPLIED). getPendingInsightsByOrgSlug sin consumidores (git grep -ln en src: solo index.server.ts e insights/index.ts).",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "La superficie existe en Analisis; decidir si tambien va en el resumen del chatbot."
+   },
+   {
+    "id": "PLAN-303",
+    "clave": "Insights AI reales en ChatbotOverview",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Igual que PLAN-280: ChatbotOverview.tsx no renderiza insights; existen en resultados/analisis/page.tsx:73.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-516",
+    "clave": "UTM perdido en /embed abierto top-level",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "ChatbotEmbed.tsx:26-27 attribution queda undefined sin handshake; :64-91 sin fallback. git grep -n 'location.search' origin/main -- src/modules/chatbot/components/embed src/modules/chatbot/hooks -> vacio (control: aparece en src/app/contact/page.tsx).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-306",
+    "clave": "Roles en minuscula en LeadDetail",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "LeadDetail.tsx:546 sigue filtrando 'user'/'assistant'; enum USER/ASSISTANT schema.prisma:152-156.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Hallazgo ALTA en este lote."
+   },
+   {
+    "id": "PLAN-509",
+    "clave": "ChatbotEmbed hardcodea currentPath '/'",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "ChatbotEmbed.tsx:27 currentPath: '/'.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-257",
+    "clave": "Mostrar en el dashboard el contexto nuevo del handoff",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "HandoffEvent solo visitorName/reason (multiTenantQueries.ts:200-206, :233-237); ChatbotOverview.tsx:198-203.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-502",
+    "clave": "Telemetria del estado degradado del widget",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "notifyParent solo 'lead-captured' :103, 'navigate' :115, 'message-sent' :128, 'close' :216; git grep -n 'degraded' origin/main -- public/widget.js -> vacio.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-277",
+    "clave": "Exponer data-theme y data-position en el snippet",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "platforms.ts:27 data-theme dark fijo y sin data-position; widget.js:27-28 los soporta; ChatbotEmbed.tsx:21 ignora theme.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "data-position es necesario para que la posicion elegida por el cliente tenga efecto."
+   },
+   {
+    "id": "PLAN-259",
+    "clave": "B5.5 Vista de leads priorizada por score efectivo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ClientLeadsTable.tsx:238-261 empty states diferenciados, :322-332 filtro vacio, :187-189 withinDateRange TZ AR.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-261",
+    "clave": "B5.6 Detalle de lead en ruta dedicada",
+    "estado_en_codigo": "parcial",
+    "evidencia": "leads/[id]/page.tsx:29-35 notFound anti-IDOR; LeadDetail completo, pero la conversacion no se ve (LeadDetail.tsx:546).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-262",
+    "clave": "B5.7 Aviso de leads calientes (badge, dot y ring)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "BusinessLeadCard.tsx:204-209 ring; ClientDashboardTabs.tsx:67,77-85 dot; chatbot/layout.tsx:15-16 cache 30 s tag hot-leads-count; ClientLeadsTable.tsx:153-156 polling pausado.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-264",
+    "clave": "B5.5 iteracion 2: filtros DB-side + toggle Descartados",
+    "estado_en_codigo": "hecho",
+    "evidencia": "leads/page.tsx:40-56 filtros en DB; ClientLeadsTable.tsx:166-182 URL, :220-236 toggle, :141-143 router.refresh.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-267",
+    "clave": "B5.6 iteracion 2: detalle para casos DQ",
+    "estado_en_codigo": "hecho",
+    "evidencia": "LeadDetail.tsx:223-233 hero Descartado, :372-385 por que, :302 sin acciones, :491-509 'Notas' sin select.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-269",
+    "clave": "B5.7 iteracion 2: revalidateTag del badge + chip Nuevo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "captureLead.ts:436-438 revalidateTag hot-leads-count; updateLeadStatus.ts:84-92; ClientLeadsTable.tsx:109-133 + BusinessLeadCard.tsx:106-117 chip 6 s.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-274",
+    "clave": "B5.9 Exportar leads a CSV",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ExportLeadsButton.tsx:40-75; export/route.ts:48 EXPORT_LIMIT 10_000, :203 text/csv.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Boton anuncia exito sin chequear respuesta."
+   },
+   {
+    "id": "PLAN-276",
+    "clave": "B8.5 Vista de instalacion compartida",
+    "estado_en_codigo": "hecho",
+    "evidencia": "buildEmbedSnippet unica fuente platforms.ts:26-28; consumido por ClientInstallView e InstallTab (git grep -l buildEmbedSnippet).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-282",
+    "clave": "CC.3 KB del cliente solo lectura",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ClientKnowledgeView.tsx:76-103 sin inputs; saveClientKnowledgeBase solo aparece en un comentario (modules/chatbot/index.ts:90).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-284",
+    "clave": "CC.4 preview vivo compartido admin/cliente",
+    "estado_en_codigo": "hecho",
+    "evidencia": "preview/BotConfigPreview.tsx usado por BotConfigEditor, OnboardingWizard y BotPersonalization.tsx:27,347.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "No es espejo del embed de clientes."
+   },
+   {
+    "id": "PLAN-288",
+    "clave": "P1.B acciones de un tap sobre el lead",
+    "estado_en_codigo": "hecho",
+    "evidencia": "LeadStatusActions.tsx:43-65 acciones, :103-113 deshacer; updateLeadStatus.ts:40-46 sello de firstContactedAt.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-515",
+    "clave": "CARRERAS R3: botBusy en HandoffOptionsCard",
+    "estado_en_codigo": "hecho",
+    "evidencia": "HandoffOptionsCard.tsx:44,56 disabled; renderToolCall.tsx:45,57; ChatbotEmbed.tsx:408 isStreaming.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-260",
+    "clave": "Verificacion visual pendiente de leads, CRM y export",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "No verificable por codigo; no hay artefacto en el repo. Casos manuales propuestos en este lote.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-255",
+    "clave": "Uploader de avatar con storage externo",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "BotPersonalization.tsx:298 AvatarUploader -> data URL; updateBotAppearance.ts:39,102 avatarImageUrlSchema guarda base64 en BotConfig.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-297",
+    "clave": "Cron de retry de CrmSyncAttempt FAILED",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -i 'crmSyncAttempt' origin/main -- src/app/api/cron -> vacio (control: git ls-tree lista 9 archivos en src/app/api/cron).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-298",
+    "clave": "Proteccion DNS rebinding en webhook n8n",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n 'dns\\|lookup(' origin/main -- src/modules/chatbot/server/crm src/lib/security -> vacio (control: postToN8n.ts:67 singlePost, :87 fetch).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-299",
+    "clave": "Nota legal de PII en CrmConfigForm",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -i 'personal\\|privacidad\\|terceros\\|PII' origin/main -- src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx -> vacio (control: el archivo existe).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-300",
+    "clave": "Header Idempotency-Key a n8n",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -i 'idempotency-key' origin/main -- src -> vacio (control: postToN8n.ts:76 arma headers).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-301",
+    "clave": "Export CSV de leads por streaming (>10k)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "export/route.ts:48 const EXPORT_LIMIT = 10_000.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-296",
+    "clave": "S7-09 ipHash llega al browser del cliente",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "multiTenantQueries.ts:180-187 findMany con include sin select -> conversations/page.tsx:17-22 -> ConversationsTable ('use client').",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-256",
+    "clave": "e2e 15-client-personalization intermitente",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tests/e2e/15-client-personalization.spec.ts existe; la intermitencia no es verificable por lectura.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-246",
+    "clave": "E1: superficie de gaps de KB y aprobacion (panel)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "schema.prisma: el unico modelo que matchea gap|proposal|unanswer|insight es ChatbotInsight (:1554); git grep 'KbProposal\\|knowledgeGap\\|unanswered' en src sin superficie de panel.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-250",
+    "clave": "Derivacion al panel: consultas sin responder y memoria",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Mismo grep que PLAN-246; ClientKnowledgeView es solo lectura y los cambios van por Mensajes.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-295",
+    "clave": "E1: insights del bot para el dueno",
+    "estado_en_codigo": "parcial",
+    "evidencia": "resultados/analisis/page.tsx:36,60,73 DiscoveriesSection con insights PENDING+APPLIED (getMonthlyAnalysisForOrg.ts:61-62), gateado por planAllows 'insight'.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-263",
+    "clave": "Push real / web push para leads calientes",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -i 'PushManager\\|web-push\\|pushSubscription' origin/main -- src package.json -> vacio (control: visibilitychange en ClientLeadsTable.tsx:159).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-302",
+    "clave": "Export .xlsx y plantillas por CRM",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -i 'xlsx\\|exceljs' origin/main -- src package.json -> vacio (control: text/csv en export/route.ts:203).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-305",
+    "clave": "Mas atribucion por campana",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Filtros del cliente solo status/range/view (ClientLeadsTable.tsx:166-182); utm solo como campaignLabel en leads/[id]/page.tsx:90.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-281",
+    "clave": "Sync automatica KB - Sanity",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n -i 'sanity' origin/main -- src/modules/chatbot -> vacio (control: el mismo grep sobre src encuentra archivos del setter).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-283",
+    "clave": "Flujo dedicado de solicitud de cambio de KB",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "ClientKnowledgeView.tsx:157 linkea a Mensajes con ?context=knowledge, que no existe en MESSAGE_CONTEXTS (message-context.ts:2-50,56): ni siquiera prellena.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-249",
+    "clave": "Dual-write de las senales legacy sin fecha de salida",
+    "estado_en_codigo": "hecho",
+    "evidencia": "captureLead.ts:363-365 snapshot + columnas legacy; calculateLeadScore.ts:332-336.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-252",
+    "clave": "Config acotada del cliente (BotPersonalization)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "UI y guardado: BotPersonalization.tsx:225-245, :292-301, :428-431, :147; el embed de clientes no aplica accentSecondary ni chatSurfaceTint (sin referencias en ChatbotEmbed.tsx; control ChatWindow.tsx:48,117).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-307",
+    "clave": "Portal cliente v1.0",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Lo del lote: polling 30 s ClientLeadsTable.tsx:146, personalizacion limitada BotPersonalization.tsx, snippet platforms.ts:26-28.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Credenciales temporales, email por lead y reporte semanal no se re-leyeron (otro lote)."
+   },
+   {
+    "id": "PLAN-286",
+    "clave": "P0.3 gate de priorizacion de leads",
+    "estado_en_codigo": "hecho",
+    "evidencia": "leads/[id]/page.tsx:39-40 planAllows leadScoring; ClientLeadsTable.tsx:306 teaser; LeadDetail.tsx:255-256; chatbot/layout.tsx:42; src/lib/plan/lead-scoring-gate.invariant.ts existe.",
+    "sigue_teniendo_sentido": "si"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction; C3.4 quiere paralelizar los 3 writes",
+    "resultado": "descartada",
+    "evidencia": "persistTurn.ts:412-470: chatMessage.create, conversation.update e incrementQuota(..., tx) dentro de un unico scope.$transaction, secuencial (RB.3 hecho; C3.4 no y es incompatible con una transaccion interactiva). Si uno falla, rollback completo y reintento acotado (reconcile.ts:25,32; persistTurn.ts:562 'intentos agotados del $transaction')."
+   },
+   {
+    "alerta": "[D5-A2] /smoke: GET publico sin auth ni rate limit que quema tokens (RT-2)",
+    "resultado": "descartada",
+    "evidencia": "git ls-tree -r --name-only origin/main -- src/app | grep -i smoke -> vacio; git grep -i smoke en route.ts -> vacio (control: el mismo ls-tree lista src/app/api/chatbot/[slug]/chat/route.ts). La ruta no existe en origin/main."
+   },
+   {
+    "alerta": "[D5-A3] Stream: el transform propio no puede colgar el stream ni pasar maxDuration 30 s",
+    "resultado": "fuera-de-mi-lote",
+    "evidencia": "Puntos de entrada: chat/route.ts:8 maxDuration = 30; reconcile.ts:218 STREAM_WATCHDOG_IDLE_MS = 3_000; handleChatRequest.ts:718-720 (consumo del stream) y :1155 onFinish. Probar que no cuelga exige leer handleChatRequest (otro lote)."
+   },
+   {
+    "alerta": "[D5-A4] Vertex: key expuesta en logs pendiente de rotacion; credencial vencida como control de E10",
+    "resultado": "parcial",
+    "evidencia": "Codigo: git grep de console.* con credential|private_key|GOOGLE_APPLICATION|VERTEX en src solo da tests (credential-cipher.test.ts) -> el codigo de hoy no loguea la credencial; la exposicion historica y la rotacion no son verificables por lectura. E10 lado cliente (este lote): ChatbotOverview.tsx:63 y layout.tsx:51 afirman que el bot responde sin mirar salud; lado visitante: DegradedBanner ChatbotEmbed.tsx:418-420.",
+    "hallazgo_titulo": "El panel del cliente afirma que el bot atiende 24/7 sin mirar su salud (credencial de Vertex vencida)"
+   },
+   {
+    "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que no existia; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+    "resultado": "confirmada",
+    "evidencia": "ChatWindow.tsx:321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' bajo 'Sistema Listo' (:311). La afirmacion de B13.5 es falsa para el codigo de hoy.",
+    "hallazgo_titulo": "Literal 'Protocolo de consultoria iniciado. ¿Como puedo asistirle hoy?' en el widget de develOP (alerta D5-A5)"
+   },
+   {
+    "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; backfill de verticalPack cambia de bot segun la fuente",
+    "resultado": "parcial",
+    "evidencia": "prisma/seeds/backfill-vertical-pack.ts:71-74 mapea develop->agencia, sanmiguel->usados y matsu->usados (cubre ambos); migracion 20260629195726_ev2_vertical_pack_signals_utm agrega la columna con default 'base'. Si el backfill se corrio y si los smokes se leyeron no es verificable por lectura."
+   },
+   {
+    "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+    "resultado": "descartada",
+    "evidencia": "git grep -n -i 'GDPR' origin/main -- src -> vacio (control: git grep -n -i 'friendly' origin/main -- src/modules/chatbot src/lib -> 5 resultados). El docstring ya no esta."
+   },
+   {
+    "alerta": "[D5-A8] getLatencyHistory asignado al panel y tambien al runtime",
+    "resultado": "descartada",
+    "evidencia": "Una sola definicion (server/admin/getLatencyHistory.ts:63) consumida por el panel admin (admin/chatbot/health/page.tsx:3,13) y un import de tipo en health/buildHealthVerdict.ts:2. No hay uso en el runtime del chat: vive en el panel."
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+    "senales": [
+     "git grep -l ClientSettingsForm origin/main -- src tests: solo el archivo y components/dashboard/index.ts:3",
+     "modules/chatbot/index.ts:85 re-exporta del barrel solo ClientDashboardTabs, ClientLeadsTable, ChatbotUpsellLanding y ChatbotOverview",
+     "settings/page.tsx:8 usa BotPersonalization (reemplazo)",
+     "3 errores no-explicit-any y 1 warning en el baseline de eslint (lineas 26, 36, 37, 51)"
+    ],
+    "que_rompe": "Nada en runtime. Arrastra la server action saveClientSettings (server/admin/saveClientSettings.ts, re-export modules/chatbot/index.ts:89), que tambien queda sin consumidor y conviene borrar junto."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveClientSettings.ts",
+    "senales": [
+     "fuera del lote; unico importador ClientSettingsForm.tsx:5 (muerto)",
+     "acepta isActive (:21) y lo descarta (:40-47)"
+    ],
+    "que_rompe": "Nada; quitar tambien el re-export de modules/chatbot/index.ts:89."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "El detalle del contacto muestra la conversacion",
+    "entorno": "local con Neon dev y seed de Matsu (scripts/seed-matsu-chatbot.ts) o preview con un bot de prueba",
+    "precondiciones": "Un lead con conversationId y mensajes USER/ASSISTANT",
+    "pasos": [
+     "Entrar como el cliente de prueba a /dashboard/chatbot/leads",
+     "Abrir un contacto que tenga conversacion",
+     "Mirar la seccion 'De que hablaron'"
+    ],
+    "esperado": "Burbujas del visitante y del bot en orden",
+    "senal_falla": "Texto 'Esta conversacion tiene mensajes tecnicos pero ninguno del visitante o del bot...'",
+    "escribe_db_o_email": false,
+    "hallazgos": "El detalle del contacto nunca muestra la conversacion"
+   },
+   {
+    "titulo": "El widget de un cliente responde desde un dominio no autorizado",
+    "entorno": "preview o produccion con un bot de prueba (nunca uno de cliente)",
+    "precondiciones": "Bot de prueba activo con allowedDomains que NO incluya el dominio de prueba; cupo disponible",
+    "pasos": [
+     "Crear un HTML en un dominio propio no listado (o un host local servido por otro origen) con el snippet <script src='https://develop.com.ar/widget.js' data-bot='<slug-de-prueba>'>",
+     "Abrir la pagina, abrir el chat y mandar 'hola'",
+     "Revisar en el admin si se creo la conversacion y sumo cupo"
+    ],
+    "esperado": "El bot no responde (dominio no permitido) o responde con el estado degradado de dominio",
+    "senal_falla": "El bot responde normalmente y la conversacion aparece en el admin",
+    "escribe_db_o_email": true,
+    "hallazgos": "El widget de cualquier cliente corre desde cualquier sitio"
+   },
+   {
+    "titulo": "La posicion y el color elegidos por el cliente se ven en su sitio",
+    "entorno": "preview con un bot de prueba",
+    "precondiciones": "Pagina de prueba con el snippet copiado desde /dashboard/chatbot/install",
+    "pasos": [
+     "En /dashboard/chatbot/settings elegir 'Abajo a la izquierda' y color Violeta; guardar",
+     "Recargar la pagina de prueba con el snippet",
+     "Abrir el chat y mandar un mensaje"
+    ],
+    "esperado": "Boton a la izquierda y en violeta; burbujas con el acento violeta",
+    "senal_falla": "Boton cyan abajo a la derecha y burbujas cyan",
+    "escribe_db_o_email": true,
+    "hallazgos": "La personalizacion del cliente no llega al widget instalado"
+   },
+   {
+    "titulo": "Metricas del resumen del chatbot",
+    "entorno": "local con seed de Matsu (9 leads, 1 DQ)",
+    "precondiciones": "Org con mas de 5 leads historicos",
+    "pasos": [
+     "Entrar a /dashboard/chatbot como el cliente",
+     "Leer 'Oportunidades', 'Valor estimado' y 'Responde en ~'"
+    ],
+    "esperado": "Leads del mes sin descartados; valor real o ausente; tiempo de respuesta medido",
+    "senal_falla": "Oportunidades = 5, Valor estimado $250, 'Responde en ~1.5s'",
+    "escribe_db_o_email": false,
+    "hallazgos": "Las metricas del resumen del chatbot son constantes o estan mal calculadas"
+   },
+   {
+    "titulo": "Cliente con el bot pausado",
+    "entorno": "preview con org de prueba",
+    "precondiciones": "Pausar el bot de prueba desde el admin",
+    "pasos": [
+     "Entrar como ese cliente a /dashboard/chatbot",
+     "Leer header y contenido",
+     "Abrir el widget del bot en una pagina de prueba y tocar una respuesta rapida"
+    ],
+    "esperado": "Estado 'pausado' explicado sin landing de venta; widget solo con la tarjeta de WhatsApp",
+    "senal_falla": "Header 'Pausado' + landing 'Quiero activarlo'; en el widget saludo y chips clickeables que fallan",
+    "escribe_db_o_email": true,
+    "hallazgos": "Bot pausado: el cliente ve la landing de venta; Con el bot pausado, el embed muestra saludo y respuestas rapidas"
+   },
+   {
+    "titulo": "Guardar notas con la sesion vencida",
+    "entorno": "local",
+    "precondiciones": "Lead de prueba abierto en /dashboard/chatbot/leads/<id>",
+    "pasos": [
+     "En otra pestana cerrar sesion",
+     "Volver, escribir una nota y tocar Guardar",
+     "Volver a iniciar sesion y recargar el detalle"
+    ],
+    "esperado": "Error visible y la nota no se marca como guardada",
+    "senal_falla": "Aparece 'Guardado' y tras recargar la nota no esta",
+    "escribe_db_o_email": false,
+    "hallazgos": "'Guardar' en el detalle del contacto muestra 'Guardado' aunque el servidor rechace"
+   },
+   {
+    "titulo": "CTA de la landing de activacion",
+    "entorno": "local o preview, org sin bot",
+    "precondiciones": "Org de prueba sin BotConfig activo",
+    "pasos": [
+     "Entrar a /dashboard/chatbot",
+     "Pasar el mouse o copiar el enlace de 'Quiero activarlo' (NO enviar mensajes)",
+     "Comparar el precio mostrado con /dashboard/plan"
+    ],
+    "esperado": "Numero de WhatsApp de develOP y precio del catalogo",
+    "senal_falla": "wa.me/5493815555555 y 'Desde $150 USD, 1.000 conversaciones'",
+    "escribe_db_o_email": false,
+    "hallazgos": "La landing de activacion promete un precio que no existe"
+   },
+   {
+    "titulo": "E10: que ve el cliente con la credencial de Vertex vencida",
+    "entorno": "produccion o preview con la credencial actual (vencida)",
+    "precondiciones": "Bot de prueba activo",
+    "pasos": [
+     "Abrir el widget del bot de prueba y mandar un mensaje; anotar que ve el visitante",
+     "Entrar como el cliente a /dashboard/chatbot y leer el header y el hero",
+     "Revisar en el admin /admin/chatbot/health si hay alerta"
+    ],
+    "esperado": "El panel del cliente avisa que el bot tiene problemas",
+    "senal_falla": "'Activo · respondiendo a tus visitantes' y 'atendiendo consultas las 24 horas' mientras el visitante no recibe respuesta",
+    "escribe_db_o_email": true,
+    "hallazgos": "El panel del cliente afirma que el bot atiende 24/7 sin mirar su salud"
+   },
+   {
+    "titulo": "Columnas internas en el payload de Conversaciones",
+    "entorno": "local o preview",
+    "precondiciones": "Bot de prueba con conversaciones",
+    "pasos": [
+     "Abrir /dashboard/chatbot/conversations",
+     "Ver codigo fuente o la respuesta RSC en DevTools > Network",
+     "Buscar 'ipHash' y 'userAgent'"
+    ],
+    "esperado": "No aparecen",
+    "senal_falla": "Aparecen ipHash y userAgent de cada visitante",
+    "escribe_db_o_email": false,
+    "hallazgos": "Conversaciones del cliente: todas las columnas de Conversation viajan al navegador"
+   },
+   {
+    "titulo": "Hidratacion de fechas en Conversaciones y Resumen",
+    "entorno": "build de produccion local o preview",
+    "precondiciones": "Conversaciones y derivaciones con hora",
+    "pasos": [
+     "Abrir /dashboard/chatbot/conversations y /dashboard/chatbot con la consola abierta",
+     "Comparar la hora mostrada en el primer pintado con la final"
+    ],
+    "esperado": "Sin error de hidratacion; hora de Argentina",
+    "senal_falla": "Error 'Hydration failed' o la hora cambia 3 h",
+    "escribe_db_o_email": false,
+    "hallazgos": "Fechas sin timeZone en client components con SSR"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "No existe ruta /smoke en origin/main",
+    "comando": "git ls-tree -r --name-only origin/main -- src/app | grep -i smoke",
+    "control_positivo": "El mismo ls-tree sobre src/app/api/chatbot lista src/app/api/chatbot/[slug]/chat/route.ts"
+   },
+   {
+    "afirmacion": "No existe el docstring 'GDPR-friendly' en src",
+    "comando": "git grep -n -i \"GDPR\" origin/main -- src",
+    "control_positivo": "git grep -n -i \"friendly\" origin/main -- src/modules/chatbot src/lib -> 5 resultados (p. ej. LogicCompanion.tsx:31)"
+   },
+   {
+    "afirmacion": "ClientSettingsForm no tiene importadores vivos",
+    "comando": "git grep -l \"ClientSettingsForm\" origin/main -- src tests",
+    "control_positivo": "git grep -l \"BotPersonalization\" origin/main -- src encuentra settings/page.tsx"
+   },
+   {
+    "afirmacion": "No hay cron de reintento de CrmSyncAttempt",
+    "comando": "git grep -n -i \"crmSyncAttempt\" origin/main -- src/app/api/cron netlify.toml vercel.json",
+    "control_positivo": "git ls-tree -r --name-only origin/main -- src/app/api/cron lista 9 archivos (alerts, cleanup-old-events, generate-insights, ...)"
+   },
+   {
+    "afirmacion": "postToN8n no resuelve DNS antes del POST",
+    "comando": "git grep -n \"dns\\|lookup(\" origin/main -- src/modules/chatbot/server/crm src/lib/security",
+    "control_positivo": "git grep -n \"singlePost\\|fetch(\" origin/main -- src/modules/chatbot/server/crm/postToN8n.ts -> :67, :87, :156"
+   },
+   {
+    "afirmacion": "No se manda Idempotency-Key a n8n",
+    "comando": "git grep -n -i \"idempotency-key\" origin/main -- src",
+    "control_positivo": "git grep -n \"headers\" origin/main -- src/modules/chatbot/server/crm/postToN8n.ts -> :76, :84, :89"
+   },
+   {
+    "afirmacion": "CrmConfigForm no tiene nota legal de PII",
+    "comando": "git grep -n -i \"personal\\|privacidad\\|terceros\\|PII\" origin/main -- src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx",
+    "control_positivo": "git grep -ln \"CrmConfigForm\" origin/main -- src -> CrmConfigForm.tsx y CrmIntegrationAdminCard.tsx"
+   },
+   {
+    "afirmacion": "No hay web push",
+    "comando": "git grep -n -i \"PushManager\\|web-push\\|pushSubscription\" origin/main -- src package.json",
+    "control_positivo": "git grep -n \"visibilitychange\" origin/main -- src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx -> :159, :162"
+   },
+   {
+    "afirmacion": "No hay export xlsx",
+    "comando": "git grep -n -i \"xlsx\\|exceljs\" origin/main -- src package.json",
+    "control_positivo": "git grep -n \"text/csv\" origin/main -- src/app/api/dashboard -> export/route.ts:203"
+   },
+   {
+    "afirmacion": "El embed no tiene fallback de UTM con location.search",
+    "comando": "git grep -n \"location.search\" origin/main -- src/modules/chatbot/components/embed src/modules/chatbot/hooks",
+    "control_positivo": "git grep -ln \"location.search\" origin/main -- src -> src/app/contact/page.tsx, src/context/PreloaderContext.tsx"
+   },
+   {
+    "afirmacion": "El widget no recibe aviso de estado degradado",
+    "comando": "git grep -n \"degraded\" origin/main -- public/widget.js",
+    "control_positivo": "git grep -n \"notifyParent('\" origin/main -- src/modules/chatbot/components/embed/ChatbotEmbed.tsx -> :103, :115, :128, :216"
+   },
+   {
+    "afirmacion": "MESSAGE_CONTEXTS no tiene claves knowledge ni crm",
+    "comando": "git grep -n \"knowledge\\|crm\" origin/main -- src/lib/data/message-context.ts",
+    "control_positivo": "git show origin/main:./src/lib/data/message-context.ts muestra las claves activacion, modulo, facturacion, bug, mejora, proyecto, gbp y plan-*"
+   },
+   {
+    "afirmacion": "getPendingInsightsByOrgSlug no tiene consumidores en paginas",
+    "comando": "git grep -ln \"getPendingInsightsByOrgSlug\" origin/main -- src",
+    "control_positivo": "El mismo comando devuelve sus definiciones (index.server.ts, server/insights/index.ts, server/insights/queries.ts)"
+   },
+   {
+    "afirmacion": "El embed no consume accentColor, accentSecondary, chatSurfaceTint ni bubbleStyle",
+    "comando": "git grep -c \"accentColor\\|accentSecondary\\|chatSurfaceTint\\|bubbleStyle\" origin/main -- src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+    "control_positivo": "git grep -n \"accentSecondary\\|chatSurfaceTint\" origin/main -- src/modules/chatbot/components/chat/ChatWindow.tsx -> :48, :57, :117, :119"
+   },
+   {
+    "afirmacion": "OrgRole VIEWER nunca se chequea en src",
+    "comando": "git grep -n \"'VIEWER'\\|OrgRole.VIEWER\" origin/main -- src",
+    "control_positivo": "El mismo grep encuentra la definicion del tipo en src/auth.config.ts:5"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Literales en minuscula comparados contra enums Prisma en MAYUSCULA (roles, intents) o enum crudo renderizado al usuario",
+    "como_buscarlo": "git grep -n \"=== 'user'\\|=== 'assistant'\\|quote:\\|{lead.intent}\\|\\.intent ??\" origin/main -- src",
+    "donde_aparecio": "LeadDetail.tsx:546, LeadsTable.tsx:28-34 y :76, ChatbotOverview.tsx:158, ConversationsTable.tsx:150"
+   },
+   {
+    "patron": "Allowlist de origen con escape 'siempre permitido' para el dominio propio mientras el producto corre en un iframe de ese dominio",
+    "como_buscarlo": "git grep -n \"develop.com.ar'\" origin/main -- src/lib/security src/modules/chatbot/server src/app/api; revisar frame-ancestors en next.config.ts",
+    "donde_aparecio": "validate-origin.ts:70-76, degradedResponse.ts:97-103, next.config.ts:129-131"
+   },
+   {
+    "patron": "Campos de config editables que el widget real no consume (paridad config-widget)",
+    "como_buscarlo": "Para cada campo de BotConfig editable, git grep -n \"<campo>\" origin/main -- src/modules/chatbot/components/embed public/widget.js",
+    "donde_aparecio": "BotPersonalization (position, accentColor, accentSecondary, chatSurfaceTint) vs ChatbotEmbed.tsx y widget.js:28,64"
+   },
+   {
+    "patron": "Metricas con constantes presentadas como dato real",
+    "como_buscarlo": "git grep -n \"leadValueUSD\\|successRate:\\|avgLatencyMs ??\\|?? 1500\\|?? 50)\" origin/main -- src",
+    "donde_aparecio": "ChatbotOverview.tsx:42-44, business-metrics.ts:19-21"
+   },
+   {
+    "patron": "Resultado de server action ignorado o exito anunciado antes del resultado",
+    "como_buscarlo": "git grep -n -B1 -A2 \"await update\\|await save\" origin/main -- src/modules src/components | grep -v \"ok\"; git grep -n \"clipboard.writeText(\" origin/main -- src",
+    "donde_aparecio": "LeadDetail.tsx:184-185, SnippetCopyBlock.tsx:29-31, ExportLeadsButton.tsx:63-70"
+   },
+   {
+    "patron": "toLocaleString/toLocaleDateString sin timeZone en client components con SSR (hydration mismatch)",
+    "como_buscarlo": "git grep -n \"toLocale\\(Date\\)\\?String('es-AR'\" origin/main -- src | grep -v timeZone",
+    "donde_aparecio": "ConversationsTable.tsx:45, ChatbotOverview.tsx:159 y :206"
+   },
+   {
+    "patron": "findMany con include y sin select cuyo resultado se pasa a un client component (columnas internas al navegador)",
+    "como_buscarlo": "git grep -n \"include:\" origin/main -- src/modules/*/server src/lib y cruzar con los consumidores 'use client'",
+    "donde_aparecio": "multiTenantQueries.ts:180-187 -> ConversationsTable"
+   },
+   {
+    "patron": "Gate de 'tiene el servicio' que usa isActive y confunde pausado con no contratado",
+    "como_buscarlo": "git grep -n \"isActive: true\" origin/main -- src/modules/*/server src/lib",
+    "donde_aparecio": "clientHasChatbot.ts:5-7 -> chatbot/page.tsx:20-22"
+   },
+   {
+    "patron": "Numeros de WhatsApp o precios hardcodeados fuera de lib/whatsapp.ts y del catalogo de planes",
+    "como_buscarlo": "git grep -n \"wa.me/[0-9]\" origin/main -- src | grep -v lib/whatsapp.ts; git grep -n \"USD\" origin/main -- src/components src/modules",
+    "donde_aparecio": "ChatbotUpsellLanding.tsx:15 y :148"
+   },
+   {
+    "patron": "Links ?context= hacia Mensajes sin clave en MESSAGE_CONTEXTS",
+    "como_buscarlo": "git grep -n \"messages?context=\" origin/main -- src y comparar con las claves de src/lib/data/message-context.ts",
+    "donde_aparecio": "ClientKnowledgeView.tsx:157 (knowledge), CrmStatusIndicator.tsx:55,92,127 (crm)"
+   },
+   {
+    "patron": "OrgRole (ADMIN/MEMBER/VIEWER) nunca usado para autorizar escrituras del portal",
+    "como_buscarlo": "git grep -n \"VIEWER\\|orgRole\\|OrgRole\" origin/main -- src",
+    "donde_aparecio": "updateBotAppearance.ts:56-64 y updateLeadStatus.ts:18-23 escriben sin mirar el rol de la membresia; VIEWER solo existe en auth.config.ts:5"
+   },
+   {
+    "patron": "Handlers de postMessage que aceptan mensajes sin validar event.source/origin",
+    "como_buscarlo": "git grep -n \"addEventListener('message'\" origin/main -- src public",
+    "donde_aparecio": "ChatbotEmbed.tsx:65-90 (control: widget.js:165 si valida)"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/audits/2026-05-auditoria-profunda.md:53",
+    "id_previo": "P1-10",
+    "estado": "cerrado",
+    "evidencia": "ChatbotOverview.tsx ya no tiene la card 'Insights AI': la ultima seccion es 'Derivaciones a WhatsApp' (:174-218); git grep -n -i 'insight' en components/dashboard sin resultados en ChatbotOverview."
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:84",
+    "id_previo": "P1-10",
+    "estado": "cerrado",
+    "evidencia": "Mismo cierre: sin placeholder en ChatbotOverview.tsx; los insights reales viven en /dashboard/resultados/analisis (page.tsx:73)."
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:17",
+    "id_previo": "CLEAN-H1",
+    "estado": "abierto",
+    "evidencia": "ChatbotUpsellLanding.tsx:15 sigue con wa.me/5493815555555 y :148-152 con '$150 USD /mes, 1.000 conversaciones' frente a sync-plans.ts:70,72 (Starter 49/500) y :102,104 (Business 150/5000); la page la sigue montando (chatbot/page.tsx:21,25)."
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "El widget de cualquier cliente corre desde cualquier sitio: el embed vive en develop.com.ar, que la allowlist deja pasar siempre",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "El defecto central se confirma por lectura: la allowlist mira el origen equivocado. public/widget.js:20-24 toma BASE_URL del src del script (el snippet usa WIDGET_APP_URL = NEXT_PUBLIC_APP_URL ?? 'https://develop.com.ar', platforms.ts:19-28; metadataBase en src/app/layout.tsx:16). widget.js:125-131 carga el iframe BASE_URL/embed/<slug>. useChatbot.ts:272 hace POST relativo a /api/chatbot/<slug>/chat, así que el POST es same-origin y lleva Origin del iframe, nunca el del sitio anfitrión. validate-origin.ts:70-75 deja pasar https://develop.com.ar y www ANTES del chequeo de allowedDomains, incluso con la lista vacía (:78). isOriginWithinPlanCap (degradedResponse.ts:97-101) también exime ese origen, así que maxDomains no aplica. ChatbotEmbed.tsx:66-86 acepta develop:init de cualquier event.origin sin compararlo con los dominios. next.config.ts:127-131 pone frame-ancestors * y lo documenta como pendiente ('R18 will restrict'). Resultado: allowedDomains y maxDomains son decorativos para el camino oficial del widget, y cualquier sitio puede pegar el snippet de otro cliente. Bajo a MEDIA porque Origin se falsifica trivialmente fuera del navegador: con curl y 'Origin: https://develop.com.ar' (o el dominio del cliente) ya se pasa validateOrigin. Agotar el cupo o el costo de Vertex no depende de este bug: las barreras reales son el rate limit por IP (route.ts:79-95) y la cuota mensual. Lo que este bug agrega es el bypass comercial del tope de dominios por plan (un Starter usa dominios ilimitados) y que un tercero aloje el bot ajeno en su sitio con tráfico de navegador legítimo, lo que mete leads de otro sitio en la lista del cliente. No hay lectura entre tenants ni bypass de auth. Queda en PROBABLE por dos eslabones de runtime: que el navegador mande Origin en el POST same-origin (estándar Fetch, y coherente con que el arreglo same-origin.ts solo fue necesario para el GET de config) y que NEXT_PUBLIC_APP_URL en producción sea develop.com.ar. Si fuera otro host, el efecto se invierte: el widget quedaría bloqueado para todos los clientes que no carguen ese host. En ambos casos allowedDomains valida el origen equivocado.",
+    "evidencia_contra": [
+     "Origin se falsifica fuera del navegador (curl): la allowlist nunca fue barrera de costo o cuota; agotar el cupo ya era posible sin este bug, acotado por el rate limit de route.ts:79-95 (origen + hash de IP) y la cuota mensual",
+     "next.config.ts:127-128 documenta frame-ancestors * como decisión temporal conocida ('R18 will restrict to a whitelist')",
+     "El valor real de NEXT_PUBLIC_APP_URL en producción no se puede leer: si no es develop.com.ar, el síntoma es otro (widget bloqueado), no 'pasa siempre'",
+     "Sin lectura ni escritura entre tenants: los leads capturados desde el sitio ajeno caen en la org dueña del bot"
+    ]
+   },
+   {
+    "titulo": "El detalle del contacto nunca muestra la conversacion: filtra roles en minuscula contra el enum USER/ASSISTANT",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Se confirma. dashboard/chatbot/leads/[id]/page.tsx:75-77 pasa a LeadDetail las filas crudas de getConversationMessagesForOrg (multiTenantQueries.ts:161-171, select role), sin mapear el rol. El enum ChatMessageRole es USER/ASSISTANT/SYSTEM (schema.prisma:152-156), y la escritura persiste 'USER'/'ASSISTANT' (handleChatRequest.ts:614, persistTurn.ts:421/436). LeadDetail.tsx:546 filtra m.role === 'user' || 'assistant', así que el filtro siempre queda vacío. Con messages.length > 0 (:467-480) siempre se ve el texto de :549-551. El propio código lo reconoce como bug preexistente en ConversationsTable.tsx:203-204. Bajo de ALTA a MEDIA porque hay workaround en el mismo portal: la pestaña Conversaciones (ClientDashboardTabs.tsx:11 → conversations/page.tsx) muestra el transcript bien, porque normaliza a mayúsculas. Además la tarjeta muestra lead.message, 'Mensaje al dejar los datos' (LeadDetail.tsx:458-465), y el resto del detalle (datos, WhatsApp, estado, notas) funciona. El flujo principal no se rompe: se degrada una sección.",
+    "evidencia_contra": [
+     "Workaround en el portal: /dashboard/chatbot/conversations muestra el transcript correcto (ConversationsTable.tsx:205-209 normaliza con toUpperCase), aunque limitado a las últimas 100 conversaciones",
+     "LeadDetail.tsx:458-465 muestra igual el mensaje que el contacto dejó al capturar sus datos"
+    ]
+   },
+   {
+    "titulo": "Las metricas del resumen del chatbot son constantes o estan mal calculadas (oportunidades, valor estimado, tiempo de respuesta)",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Se confirma cada número. chatbot/page.tsx:30 llama listLeadsByOrgSlug(orgSlug, 5). Esa query (multiTenantQueries.ts:27-54) ordena por capturedAt desc con take 5, sin filtro de fecha ni excludeDqWhere: son los últimos 5 leads de toda la historia, descartados incluidos. ChatbotOverview.tsx:40-45 usa capturedLeads = recentLeads.length (tope 5) y leadValueUSD 50 fijo, y no pasa avgLatencyMs. business-metrics.ts:19-21 da entonces estimatedValue = leads×50 (tope US$250) y avgResponseSeconds = 1500/1000 = 1,5, constante. En la UI: 'Oportunidades' con contexto 'este mes' (:69-81), 'Personas listas para comprar' (:75), 'Valor estimado ... este mes' (:83-95), 'Responde en ~1.5s' (:110). El titular generateBusinessSummary (business-metrics.ts:51) afirma 'Tu bot capturó N oportunidades este mes' con ese N. Un cliente sin leads este mes pero con 5 viejos ve '5 oportunidades / $250 este mes'; uno con 40 este mes ve 5. Solo 'Personas atendidas' sale de un dato real (usage.conversationsCount). Mantengo ALTA por consistencia con el precedente BUG-039 (03-MEJORAS.md:625, tendencias inventadas presentadas como medición = ALTA): es dato inventado en la portada del chatbot del cliente y bloquea L3 ('sin datos de mentira').",
+    "evidencia_contra": [
+     "'Valor estimado' está rotulado como estimación; un valor por lead fijo podría defenderse como heurística, pero el conteo de base está mal igual",
+     "El listado real y completo está en /dashboard/chatbot/leads, enlazado desde la misma tarjeta (ChatbotOverview.tsx:122-130)"
+    ]
+   },
+   {
+    "titulo": "La landing de activacion promete un precio que no existe y manda a un WhatsApp placeholder (CLEAN-H1 sigue abierto)",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Los hechos se confirman. ChatbotUpsellLanding.tsx:15 fija WHATSAPP_URL a wa.me/5493815555555, distinto del número de develOP FALLBACK_WHATSAPP_NUMBER '5493816223508' (src/lib/whatsapp.ts:21, que la landing no usa). Ese número es el mismo placeholder del input de AdvancedTab.tsx:91 y del fallback del seed (chatbot/prisma/seed.ts:231). Lo usan los dos CTA: 'Quiero activarlo' (:49-55) y 'Hablar con un asesor' (:156-161). El texto ':148-152 $150 USD / 1.000 conversaciones' no coincide con PLANS_CATALOG (sync-plans.ts:66-113: Starter 49/500, Pro 90/3000, Business 150/5000). La landing se ve sin bot activo y también con el bot pausado, porque checkClientHasChatbot filtra isActive: true (clientHasChatbot.ts:5-8; chatbot/page.tsx:18-22). Sin embargo, es DUPLICADO de [BUG-054] ya registrado en 03-MEJORAS.md:961-968 (D5, MEDIA, VERIFICADO-POR-LECTURA) con la misma evidencia: corresponde fusionarlo ahí, no abrir uno nuevo. Mantengo la severidad MEDIA del registro existente: es el camino de venta, no un flujo del cliente que ya paga, y no hay dato del cliente expuesto. 'La intención va a un tercero' no se puede verificar: el número parece un placeholder, no se sabe si existe o de quién es.",
+    "evidencia_contra": [
+     "Duplicado de [BUG-054] (03-MEJORAS.md:961), ya clasificado MEDIA en D5 con la misma evidencia",
+     "No se puede verificar que 5493815555555 pertenezca a un tercero real; es un placeholder reutilizado en AdvancedTab.tsx:91 y en el seed",
+     "Afecta al prospecto o cliente sin chatbot activo (camino de upsell), no a la operación de un cliente que ya usa el bot"
+    ]
+   }
+  ]
+ }
+}

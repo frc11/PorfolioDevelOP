@@ -1,7 +1,399 @@
 {
  "parte": 2,
- "partes": 2,
+ "partes": 4,
  "hallazgos": [
+  {
+   "id": "BUG-025",
+   "prefijo": "BUG",
+   "titulo": "EmailCampaign sin estado intermedio ni métricas: SENDING y SCHEDULED no se escriben (doble envío posible), FAILED no tiene reintento y aperturas y clics nunca se actualizan",
+   "dominio": "D2",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 181,
+     "fragmento": "if (campaign.status !== 'DRAFT') return { error: 'Solo podés enviar campañas en estado DRAFT.' }"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 205,
+     "fragmento": "const sent = await brevoSendCampaign(brevoResult.campaignId)"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 210,
+     "fragmento": "status: sent ? 'SENT' : 'FAILED',"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1141,
+     "fragmento": "enum EmailCampaignStatus {\n  DRAFT\n  SCHEDULED"
+    },
+    {
+     "ruta": "src/lib/integrations/brevo.ts",
+     "linea": 143,
+     "fragmento": "export async function getCampaignStats(campaignId: number): Promise<{"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
+     "linea": 110,
+     "fragmento": "{pct(campaign.openedCount, campaign.recipientCount)}"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx",
+     "linea": 31,
+     "fragmento": "Envia campanas de email a tus contactos y segui los resultados en tiempo real."
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 148,
+     "fragmento": "const recipientCount = activeContacts.length  // al crear el borrador"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 217,
+     "fragmento": "return { ok: true }  // tambien con sent === false y status FAILED"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
+     "linea": 144,
+     "fragmento": "El envio fallo. Revisa la configuracion e intenta de nuevo.  // sin accion de reintento"
+    }
+   ],
+   "impacto": "Cuando el módulo se habilite: dos envíos concurrentes de la misma campaña (dos pestañas, un reintento) pasan el control de DRAFT y Brevo crea y manda dos campañas a toda la lista; una campaña FAILED (por ejemplo Brevo la creó pero sendNow falló) no se puede reintentar y queda huérfana en Brevo; y la tabla de campañas muestra 0% de aperturas y clics para siempre porque getCampaignStats no tiene llamadores (dato falso en el camino del cliente).",
+   "propuesta": "Pasar DRAFT a SENDING con updateMany condicional (where status DRAFT) antes de llamar a Brevo y abortar si no afectó filas; permitir reintento de FAILED reusando el brevoCampaignId guardado; traer las métricas con getCampaignStats (cron o al abrir la tabla) o webhook de Brevo, u ocultar las columnas.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-email-mkt",
+    "int.brevo",
+    "modelo.EmailCampaign",
+    "h2.cli-email-mkt.metricas-de-campana",
+    "h2.cli-email-mkt.crear-y-enviar-campana"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "BUG-012; previa S2b-01",
+   "vh": "VH-039",
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H11",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H05",
+      "titulo": "Metricas de campanas que nunca se actualizan: aperturas, clicks y bajas quedan en 0 y 'Enviados' es el conteo previsto del borrador",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismas métricas de EmailCampaign que nunca se actualizan (BUG-025, D6-c2); se suma la evidencia de la pantalla."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H06",
+      "titulo": "sendCampaignAction informa exito aunque Brevo no haya enviado, y una campana FAILED no se puede reintentar",
+      "severidad": "MEDIA",
+      "nota_padre": "BUG-025 ya cubre FAILED sin reintento; se suma que sendCampaignAction devuelve ok aunque sendNow falle (_actions.ts:205-217)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-040",
+   "prefijo": "SEC",
+   "titulo": "El export masivo de leads del admin no neutraliza fórmulas: un visitante anónimo del widget puede inyectar una fórmula en un CSV que junta leads de varias organizaciones",
+   "dominio": "D3",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/bulk-actions.ts",
+     "linea": 50,
+     "fragmento": "const leads = await prisma.chatbotLead.findMany({\n    where: { botConfig: { organizationId: { in: uniqueOrgIds } } },"
+    },
+    {
+     "ruta": "src/lib/bulk-actions.ts",
+     "linea": 74,
+     "fragmento": ".map((value) => `\"${String(value).replace(/\"/g, '\"\"')}\"`)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/leads/csv/csvEscape.ts",
+     "linea": 22,
+     "fragmento": "const DANGEROUS_PREFIX = /^[=+\\-@\\t\\r]/"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 59,
+     "fragmento": "name: z.string().min(2).max(100).describe("
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 121,
+     "fragmento": "const result = await bulkExportLeads([...selected])"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbots/bulk-actions.ts",
+     "linea": 139,
+     "fragmento": "(lead.intent ?? '').replace(/\"/g, '\"\"'),"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbots/bulk-actions.ts",
+     "linea": 144,
+     "fragmento": "const csv = [headers.join(','), ...rows.map(r => r.map(v => `\"${v}\"`).join(','))].join('\\n')"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/leads/csv/csvEscape.ts",
+     "linea": 25,
+     "fragmento": "export function csvEscape(value: string | number | null | undefined): string {"
+    }
+   ],
+   "impacto": "El export del cliente ya prefija las celdas peligrosas (csvEscape.ts:5-10 documenta este mismo ataque), pero el export del admin no: un visitante que deja como nombre '=HYPERLINK(...)' o una fórmula IMPORT convierte el CSV que develOP abre en Excel o Google Sheets en un vector para mandar a un tercero nombres, emails y teléfonos de los leads de todas las orgs seleccionadas.",
+   "propuesta": "Reusar rowToCsv/csvEscape de modules/chatbot/server/leads/csv en bulkExportLeads (y en cualquier otro CSV del admin); agregar un invariante que busque armados de CSV con join(',') fuera de ese helper.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-clientes",
+    "h3.vis-widget-cliente",
+    "modelo.ChatbotLead",
+    "lib.actions",
+    "h3.adm-chatbots",
+    "h3.adm-chatbots.acciones-bulk",
+    "lib.chatbot.leads"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "B5.9 (csvEscape del export del cliente)",
+   "vh": "VH-040",
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H12",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L1/H10",
+      "titulo": "El export bulk de leads del admin arma el CSV a mano: inyección de fórmulas y columnas rotas (el fix PA-2 no está en main)",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo export masivo de leads del admin sin neutralizar fórmulas; suma las columnas rotas."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-041",
+   "prefijo": "SEC",
+   "titulo": "El seed del chatbot y update-proactive-prompts escriben en cualquier DATABASE_URL sin guard, aunque el escape los rotula 'script de dev' y ese seed define el bot de producción de develOP",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/prisma/seed.ts",
+     "linea": 272,
+     "fragmento": "const botConfig = await unsafeGlobalQuery('SEED: upsert del bot develOP (script de dev)', (c) =>"
+    },
+    {
+     "ruta": "src/modules/chatbot/prisma/seed.ts",
+     "linea": 275,
+     "fragmento": "update: {\n      // Update mantiene el id pero refresca todo el contenido"
+    },
+    {
+     "ruta": "src/modules/chatbot/prisma/seed.ts",
+     "linea": 342,
+     "fragmento": "const kb = await unsafeGlobalQuery('SEED: upsert de la KB del bot develOP (script de dev)', (c) =>"
+    },
+    {
+     "ruta": "src/modules/chatbot/prisma/update-proactive-prompts.ts",
+     "linea": 23,
+     "fragmento": "'SEED: update de proactivePrompts del bot develOP por slug (script de dev)',"
+    },
+    {
+     "ruta": "docs/bitacora-roadmap.md",
+     "linea": 10815,
+     "fragmento": "- **Bot de la agencia**: vive en `src/modules/chatbot/prisma/seed.ts` (org `develop`, slug `develop`), no en el seed principal."
+    },
+    {
+     "ruta": "prisma/seed.ts",
+     "linea": 20,
+     "fragmento": "import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'"
+    }
+   ],
+   "impacto": "Correr 'npx tsx src/modules/chatbot/prisma/seed.ts' con el .env apuntando a prod (es el camino documentado para el bot de la agencia) pisa sin dry-run ni confirmación toda la config del bot público de develOP (activo, bienvenida, quick replies, WhatsApp, modelo, cuota) y las siete secciones de su knowledge base con los valores del código, borrando cualquier ajuste hecho desde el admin. La razón 'script de dev' de los cuatro escapes SEED es falsa: no hay guard y el script es la fuente del bot de producción.",
+   "propuesta": "Agregar assertDevSeedTarget o un flag explícito de destino más un dry-run con diff antes de escribir; corregir las razones de los escapes SEED para que digan mantenimiento de prod; separar la provisión del bot de prod en un script con confirmación.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.seeds",
+    "lib.isolation",
+    "modelo.BotConfig",
+    "modelo.KnowledgeBase",
+    "int.neon"
+   ],
+   "relacionados_ids": [
+    "SEC-034"
+   ],
+   "previas": [],
+   "relacionados_texto": "SEC-034 (guard por substring); DEU-016 (tsx sin fijar); DEU-020",
+   "vh": null,
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H13",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene (src/modules/chatbot/prisma/seed.ts y update-proactive-prompts.ts no importan seed-guard ni llaman assertDevSeedTarget; el seed principal sí, prisma/seed.ts:20).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-026",
+   "prefijo": "BUG",
+   "titulo": "El reporte ejecutivo semanal no usa PENDING como cerrojo: el cron y el envío manual concurrentes mandan el mail dos veces",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/reports/executive-weekly/send.ts",
+     "linea": 109,
+     "fragmento": "if (existing?.status === 'SENT') {"
+    },
+    {
+     "ruta": "src/lib/reports/executive-weekly/send.ts",
+     "linea": 149,
+     "fragmento": "status: 'PENDING',"
+    },
+    {
+     "ruta": "src/lib/reports/executive-weekly/send-manual.ts",
+     "linea": 50,
+     "fragmento": "if (existing?.status === 'SENT') {"
+    },
+    {
+     "ruta": "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts",
+     "linea": 57,
+     "fragmento": "const result = await sendExecutiveWeeklyReportManual(organizationId)"
+    }
+   ],
+   "impacto": "Si el admin dispara el envío manual mientras corre el cron (o hace dos clics, o el scheduler reintenta), ambos leen un estado distinto de SENT, ambos marcan PENDING y ambos mandan: el cliente recibe el mismo reporte dos veces; si la función muere después de Brevo y antes de marcar SENT, la próxima corrida lo reenvía.",
+   "propuesta": "Reservar la fila con un update o insert condicional (status distinto de SENT y sin PENDING reciente) y seguir solo si la reserva afectó una fila; expirar PENDING viejos.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-reportes-email",
+    "h4.adm-clientes",
+    "int.brevo",
+    "modelo.WeeklyReportLog"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "send-executive-reports registrado solo en vercel.json (D7)",
+   "vh": "VH-041",
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H14",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-027",
+   "prefijo": "BUG",
+   "titulo": "Salida del motor de WhatsApp (latente): el estado se escribe sin condición, el wamid se guarda después del envío y el estado del canal no frena la salida",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
+     "linea": 53,
+     "fragmento": "const currentRank = STATUS_RANK[message.status]"
+    },
+    {
+     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
+     "linea": 58,
+     "fragmento": "await scope.motorMessage.update(message.id, { status: next })"
+    },
+    {
+     "ruta": "src/modules/motor/services/sendMessage.ts",
+     "linea": 248,
+     "fragmento": "await scope.motorMessage.update(messageId, { status: 'SENT', providerMessageId: result.wamid })"
+    },
+    {
+     "ruta": "src/modules/motor/adapters/whatsapp/inbound/process.ts",
+     "linea": 163,
+     "fragmento": "next = addTo(next, 'statusesSkipped')"
+    },
+    {
+     "ruta": "src/modules/motor/services/sendMessage.ts",
+     "linea": 113,
+     "fragmento": "if (channel === null || channel.apiKeyEncrypted === null || channel.apiKeyIv === null || channel.apiKeyTag === null) {"
+    },
+    {
+     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-request.ts",
+     "linea": 39,
+     "fragmento": "if (channel.status === 'INACTIVE') {"
+    },
+    {
+     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
+     "linea": 41,
+     "fragmento": "const message = await scope.motorMessage.findFirst({\n  where: { providerMessageId: status.id, direction: 'OUT' },"
+    }
+   ],
+   "impacto": "Hoy latente: sendMotorMessage no tiene llamadores hasta B2. Cuando se conecte: dos webhooks concurrentes (delivered y read) pueden dejar el mensaje en DELIVERED después de READ o pisar un FAILED; un status que llega antes de que se guarde el wamid se descarta como unknown-message sin reintento; si la función muere entre la aceptación del BSP y el update, el mensaje queda PENDING para siempre con la clave de idempotencia quemada; y un canal INACTIVE (solo se chequea en la entrada) o reportado BANNED/RESTRICTED sigue despachando, justo lo que la alerta de calidad de Meta quería evitar.",
+   "propuesta": "Aplicar el status con updateMany condicional (where status en rangos menores y distinto de FAILED); correlacionar el wamid antes del despacho o reintentar el lookup; marcar como desconocidos los PENDING viejos; chequear status y channelStatus en resolveTargets antes de enviar.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-whatsapp",
+    "modelo.MotorMessage",
+    "modelo.WabaChannel",
+    "lib.motor",
+    "h3.vis-whatsapp.estados-entrega"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-035 (registro del motor)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H15",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L9/H08",
+      "titulo": "Un status que llega antes de que el OUT tenga su wamid se descarta con 200 y no se reintenta",
+      "severidad": "BAJA",
+      "nota_padre": "Misma causa (el wamid se guarda después del envío): un status que llega antes se descarta con 200."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
   {
    "id": "DEU-021",
    "prefijo": "DEU",
@@ -765,6 +1157,21 @@
      "ruta": "src/components/dashboard/results/analysis/DiscoveriesSection.tsx",
      "linea": 24,
      "fragmento": "const DATE_FMT = new Intl.DateTimeFormat('es-AR', {\n  timeZone: TZ_AR,"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboards/ConversationsTable.tsx",
+     "linea": 45,
+     "fragmento": "return new Date(d).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+     "linea": 206,
+     "fragmento": "{new Date(h.createdAt).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', ..."
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboards/LeadsTable.tsx",
+     "linea": 37,
+     "fragmento": "// timeZone fijo (AR): sin esto el server (Netlify = UTC) y el cliente (UTC-3) ... → hydration mismatch."
     }
    ],
    "impacto": "Con el server en UTC (no hay TZ en vercel.json ni netlify.toml; el repo corre sus invariantes con TZ=UTC) un turno de las 10:00 de Buenos Aires se muestra 13:00; entre las 21 y las 24 h el Inicio muestra la fecha de manana y el saludo es incorrecto en franjas de 3 h (ademas 'Buenos dias' sin tilde, page.tsx:34). Igual en facturacion (:88-94), boveda (:202-206), referidos (:22-24) y proyecto (:70-76).",
@@ -783,7 +1190,9 @@
     "h2.cli-soporte",
     "h2.cli-resultados.trafico",
     "h1.auth-impersonacion",
-    "h2.cli-resultados"
+    "h2.cli-resultados",
+    "h3.cli-chatbot.conversaciones",
+    "h3.cli-chatbot.resumen"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -817,6 +1226,13 @@
       "titulo": "Fechas y horas formateadas en server components sin zona AR",
       "severidad": "BAJA",
       "nota_padre": "Muestreo DEC-37: se sostiene (PageSpeedCard.tsx:59-65 y GBPMetricsCard.tsx:12-17 toLocaleString sin timeZone). Misma causa que D2-L1/H14."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L5/H18",
+      "titulo": "Fechas sin timeZone en client components con SSR: hydration mismatch y horas en UTC",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo patrón de fechas sin zona horaria, ahora en el chatbot del cliente (hydration mismatch)."
      }
     ]
    },
@@ -4047,6 +4463,16 @@
      "ruta": "src/lib/data/message-context.ts",
      "linea": 56,
      "fragmento": "let template = MESSAGE_CONTEXTS[context] ?? ''"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx",
+     "linea": 157,
+     "fragmento": "href=\"/dashboard/messages?context=knowledge\""
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx",
+     "linea": 55,
+     "fragmento": "href=\"/dashboard/messages?context=crm\"  (igual :92, :127)"
     }
    ],
    "impacto": "El cliente en onboarding llega a Mensajes con el composer vacio en lugar del mensaje preparado sobre sus conexiones.",
@@ -4056,7 +4482,9 @@
    "nodos": [
     "h2.cli-inicio.estado-onboarding",
     "h2.cli-mensajes",
-    "h2.cli-plan"
+    "h2.cli-plan",
+    "h3.cli-chatbot.base-conocimiento",
+    "h3.cli-chatbot.estado-crm"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -4076,6 +4504,13 @@
       "titulo": "CTA 'Activá tu vendedor virtual' lleva a Mensajes con el composer vacío (contexto 'bot-activation' inexistente)",
       "severidad": "BAJA",
       "nota_padre": "Misma causa (Mensajes ignora el contexto o el prefill que mandan los CTA)."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L5/H17",
+      "titulo": "Los CTA 'Pedinos el cambio' de Informacion y CRM llevan un contexto que Mensajes no conoce: el mensaje llega vacio",
+      "severidad": "BAJA",
+      "nota_padre": "Mismos CTAs hacia Mensajes con un contexto que Mensajes ignora (Información y CRM)."
      }
     ]
    },
@@ -4805,6 +5240,13 @@
       "titulo": "Borrador de respuesta con IA: rating, nombre y texto de la resena llegan del cliente sin Zod ni tope al prompt, y sin rate limit",
       "severidad": "MEDIA",
       "nota_padre": "Mismo defecto (borrador con IA sin Zod ni tope al prompt)."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L1/H19",
+      "titulo": "Borrador de respuesta a reseñas: el texto llega del navegador sin tope al prompt de Anthropic y el error del proveedor vuelve tal cual",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: motor-resenas/_actions.ts:11 sin Zod ni rate limit y :43 devuelve err.message; review-reply-draft.ts:28 interpola el comentario. Es SEC-051; suma el costo por llamada a Haiku."
      }
     ]
    },
@@ -5307,6 +5749,41 @@
      "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
      "linea": 21,
      "fragmento": "return <ChatbotUpsellLanding />"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+     "linea": 49,
+     "fragmento": "href={WHATSAPP_URL}"
+    },
+    {
+     "ruta": "src/lib/whatsapp.ts",
+     "linea": 21,
+     "fragmento": "const FALLBACK_WHATSAPP_NUMBER = '5493816223508'"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/clientHasChatbot.ts",
+     "linea": 6,
+     "fragmento": "where: { isActive: true },"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/layout.tsx",
+     "linea": 52,
+     "fragmento": ": 'Pausado · no responde hasta que lo reactives'"
+    },
+    {
+     "ruta": "prisma/seeds/sync-plans.ts",
+     "linea": 70,
+     "fragmento": "monthlyPrice: new Prisma.Decimal('49'), ... quota: 500, (Starter); Business :102 '150', quota 5000 :104"
+    },
+    {
+     "ruta": "src/lib/whatsapp.ts",
+     "linea": 41,
+     "fragmento": "export function getWhatsappDigits(): string { ... NEXT_PUBLIC_WHATSAPP_NUMBER || FALLBACK_WHATSAPP_NUMBER"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
+     "linea": 105,
+     "fragmento": "title=\"Insights semanales\" ... 'Te llega un email todos los lunes' (Starter reportsEnabled: false, sync-plans.ts:76)"
     }
    ],
    "impacto": "Todo cliente sin chatbot activo ve 'Desde $150 USD / 1.000 conversaciones' (catálogo real: Starter USD 49 con 500, Business USD 150 con 5.000, prisma/seeds/sync-plans.ts:68-111) y el único CTA lleva a un número inexistente: el camino de venta del producto principal está roto y miente el precio. Bloquea L3 del chatbot ('sin datos de mentira').",
@@ -5316,7 +5793,11 @@
    "nodos": [
     "h3.cli-chatbot",
     "h2.cli-plan",
-    "lib.plan"
+    "lib.plan",
+    "h3.cli-chatbot.activacion-upsell",
+    "lib.chatbot.admin",
+    "h3.cli-chatbot.upsell-activacion",
+    "modelo.Plan"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5331,7 +5812,23 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "MEDIA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L1/H12",
+      "titulo": "La landing de activación del chatbot manda a un WhatsApp de relleno (5493815555555) y también se muestra a clientes con el bot pausado",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma landing con WhatsApp de relleno (CLEAN-H1); suma que también se muestra con el bot pausado."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L5/H04",
+      "titulo": "La landing de activacion promete un precio que no existe y manda a un WhatsApp placeholder (CLEAN-H1 sigue abierto)",
+      "severidad": "ALTA",
+      "nota_padre": "Misma landing (CLEAN-H1): ChatbotUpsellLanding.tsx:15 con wa.me de relleno y $150/1.000 que no coincide con PLANS_CATALOG; el verificador la baja a MEDIA, que es la severidad de BUG-054. Suma que se muestra también con el bot pausado (clientHasChatbot filtra isActive)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6705,6 +7202,169 @@
     "verificado_padre": false,
     "nota_padre": "",
     "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-057",
+   "prefijo": "SEC",
+   "titulo": "Un anónimo agota en minutos el cupo mensual de conversaciones de cualquier bot de cliente (y el gasto de Vertex): el Origin de develop.com.ar vale para todos los bots y cada sessionId nuevo reserva un cupo",
+   "dominio": "D5",
+   "severidad": "CRÍTICA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 400,
+     "fragmento": "if (isNewConversation) {\n    const reserve = await tryReserveConversation(orgId, bot.id, plan.quota)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/requestSchema.ts",
+     "linea": 55,
+     "fragmento": "sessionId: z.string().min(1).max(200),"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 185,
+     "fragmento": "key: `chatbotPerBotSession:${slug}:${body.sessionId}`,"
+    },
+    {
+     "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
+     "linea": 80,
+     "fragmento": "const rateKey = `chatbotPerSession:${origin ?? 'no-origin'}:${ipHash}`"
+    },
+    {
+     "ruta": "src/lib/rate-limit/presets.ts",
+     "linea": 27,
+     "fragmento": "chatbotPerSession: { limit: 30, windowMs: 60_000 },"
+    },
+    {
+     "ruta": "src/lib/security/validate-origin.ts",
+     "linea": 70,
+     "fragmento": "if (\n    origin === 'https://develop.com.ar' ||\n    origin === 'https://www.develop.com.ar'"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/degradedResponse.ts",
+     "linea": 97,
+     "fragmento": "// develop.com.ar nunca cae al cap"
+    },
+    {
+     "ruta": "src/lib/security/origin-matcher.ts",
+     "linea": 40,
+     "fragmento": "if (originHost.endsWith('.' + clean)) return true"
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 131,
+     "fragmento": "{ key: 'Content-Security-Policy', value: \"frame-ancestors *;\" },"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+     "linea": 67,
+     "fragmento": "if (event.data?.type === 'develop:init') {\n        parentOriginRef.current = event.origin"
+    },
+    {
+     "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+     "linea": 272,
+     "fragmento": "api: `/api/chatbot/${slug}/chat`,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 952,
+     "fragmento": "temperature: 0.7,\n    stopWhen: stepCountIs(3),"
+    },
+    {
+     "ruta": "src/lib/security/origin-matcher.ts",
+     "linea": 39,
+     "fragmento": "if (originHost === clean) return true\nif (originHost.endsWith('.' + clean)) return true"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 345,
+     "fragmento": "if (quota.conversationsUsed >= plan.quota) {"
+    },
+    {
+     "ruta": "prisma/seeds/sync-plans.ts",
+     "linea": 72,
+     "fragmento": "quota: 500,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/requestSchema.ts",
+     "linea": 111,
+     "fragmento": "if (forwarded) return forwarded.split(',')[0].trim()"
+    },
+    {
+     "ruta": "src/lib/security/validate-origin.ts",
+     "linea": 71,
+     "fragmento": "origin === 'https://develop.com.ar' ||"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 401,
+     "fragmento": "const reserve = await tryReserveConversation(orgId, bot.id, plan.quota)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/quota/checker.ts",
+     "linea": 137,
+     "fragmento": "const { reserved, conversationsUsed } = await forOrg(organizationId).quotaUsage.reserveConversation({"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real. Cualquier script sin login que conozca el slug (está en el snippet público del sitio del cliente) manda POST con Origin https://develop.com.ar (permitido para todos los bots y exento del tope de dominios del plan) y un sessionId nuevo por pedido: cada pedido crea una conversación y reserva 1 cupo del mes, que no se devuelve si el LLM respondió. Con el tope de 30/min por (origin, IP) y los dos orígenes de develOP son 60 conversaciones/min desde una sola IP: Starter (500) se agota en ~8 min, Pro (3000) en ~50 min y Business (5000) en ~83 min; rotando subdominios del cliente o el esquema como Origin cada variante abre un balde nuevo. Desde ahí todo visitante real recibe 'alcanzamos el límite de atención automática del mes' hasta fin de mes, y develOP paga cada llamada (hasta ~30 mensajes de 4000 caracteres de entrada y salida sin maxOutputTokens). La allowlist tampoco protege el widget oficial: /embed se deja enmarcar por cualquier sitio y llama same-origin con Origin develop.com.ar, así que un tercero puede embeber el bot de un cliente, consumir su cupo y recibir los leads por postMessage. Hoy queda enmascarado por la credencial de Vertex vencida (cada fallo devuelve el cupo); se activa al renovarla.",
+   "propuesta": "Decisión de diseño en tres partes: (1) rate limit por la IP confiable de la plataforma (no por el header Origin ni por sessionId) más un techo de conversaciones nuevas por IP/hora y por bot/hora; (2) cobrar el cupo cuando hay intercambio real (p. ej. primer turno respondido o segundo mensaje), no al crear la conversación; (3) hacer cumplir allowedDomains en el embed: frame-ancestors por bot y validar el origin del padre en el handshake, dejando develop.com.ar exento solo para el bot propio. Además fijar maxOutputTokens y alertar por velocidad de consumo del cupo.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-api-chatbot",
+    "h3.vis-widget-cliente",
+    "lib.security",
+    "lib.rate-limit",
+    "lib.chatbot.chat",
+    "lib.chatbot.quota",
+    "int.vertex",
+    "modelo.QuotaUsage",
+    "modelo.Conversation"
+   ],
+   "relacionados_ids": [
+    "SEC-068"
+   ],
+   "previas": [],
+   "relacionados_texto": "S4-01 (previa, sigue abierta); SEC-RATELIMIT-01; patrón D1-c1/D1-c2 IP del primer X-Forwarded-For (requestSchema.ts:109-111); patrón D1-c3 claves de rate limit con datos del pedido; PLAN-400; PLAN-381",
+   "vh": "VH-065",
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L1",
+    "tmp": "D5-c1/D5-L1/H01",
+    "verificado_padre": true,
+    "nota_padre": "Leído: route.ts:79-80 (la clave del rate limit de la ruta es origin + hash de IP: 30/min por cada Origin distinto), validate-origin.ts:72-77 (https://develop.com.ar y www valen para cualquier bot activo, antes de mirar allowedDomains), origin-matcher.ts:38-39 (cualquier subdominio del dominio permitido), handleChatRequest.ts:183-186 (el segundo límite es slug + sessionId, que manda el cliente), requestSchema.ts:55 (sessionId: string libre de 1 a 200), handleChatRequest.ts:345 y :398-400 (cada conversación nueva reserva 1 cupo) y sync-plans.ts:72 (Starter: 500 por mes). Desde una sola IP con el Origin de develOP: 30 conversaciones nuevas por minuto, 500 en ≈ 17 min; después el bot responde «alcanzamos el límite del mes» a todos los visitantes reales y dispara el aviso de upsell. Rúbrica: anónimo, sin precondiciones, operación con costo de LLM. Verificadores: L1 la sostiene CRÍTICA; L2, L7 y L8 la sostienen ALTA y agregan que el Origin también rota con http/https y con sufijos de path (la clave del rate limit usa el header crudo y validateOrigin solo mira el host). Se sigue la rúbrica DEC-23 (anónimo, sin precondiciones, costo de LLM sin auth): CRÍTICA. Mismo escape que D5-L5/H01 (develop.com.ar siempre permitido).",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "CRÍTICA"
+    },
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L2/H02",
+      "titulo": "Cuota mensual del bot de cualquier cliente agotable por un anonimo: el rate limit se esquiva rotando el Origin",
+      "severidad": "ALTA",
+      "nota_padre": "Misma causa raíz (rate limit por Origin + sessionId del cliente; develop.com.ar y subdominios aceptados); se suma su evidencia."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L7/H01",
+      "titulo": "Ningún límite protege el cupo mensual del bot: un script anónimo lo agota abriendo conversaciones nuevas (y más rápido rotando el Origin por subdominios)",
+      "severidad": "ALTA",
+      "nota_padre": "Misma causa raíz; suma la rotación por subdominios del cliente y el slice maxDomains que también los acepta."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L8/H01",
+      "titulo": "Cualquier anonimo puede agotar la cuota mensual de conversaciones de cualquier bot",
+      "severidad": "ALTA",
+      "nota_padre": "Misma causa raíz; suma que no hay captcha (git grep turnstile|captcha = 0, con control positivo)."
+     }
+    ]
    },
    "estado": "vigente"
   }

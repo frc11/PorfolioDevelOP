@@ -1,0 +1,2125 @@
+{
+ "dominio": "D5",
+ "ciclo": "D5-c1",
+ "lote": "D5-L4",
+ "run": "wf_b0489c11-132",
+ "fecha": "2026-10-15T13:01:58.672Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts",
+    "lineas_total": 107,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/useIsClient.ts",
+    "lineas_total": 18,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/AvatarPicker.tsx",
+    "lineas_total": 320,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/AvatarRenderer.tsx",
+    "lineas_total": 132,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/CanvasAutoResize.tsx",
+    "lineas_total": 38,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/CentralCore.tsx",
+    "lineas_total": 42,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/CoreHalo.tsx",
+    "lineas_total": 113,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/GeometricAvatar.tsx",
+    "lineas_total": 221,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/HeavyAvatarsLazy.module.css",
+    "lineas_total": 14,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/HeavyAvatarsLazy.tsx",
+    "lineas_total": 89,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+    "lineas_total": 1050,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatarAdapter.module.css",
+    "lineas_total": 15,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatarAdapter.tsx",
+    "lineas_total": 35,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/MonogramAvatar.tsx",
+    "lineas_total": 187,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/NeuroAvatar.tsx",
+    "lineas_total": 67,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/ParticleSphere.tsx",
+    "lineas_total": 62,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/PulseAvatar.tsx",
+    "lineas_total": 133,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/avatarStyleSchema.ts",
+    "lineas_total": 61,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/fibonacciSphere.ts",
+    "lineas_total": 23,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/frameDelta.ts",
+    "lineas_total": 18,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/index.ts",
+    "lineas_total": 40,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/legacyStateMapper.ts",
+    "lineas_total": 78,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/registry.ts",
+    "lineas_total": 127,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/avatar/types.ts",
+    "lineas_total": 163,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/ChatHeader.tsx",
+    "lineas_total": 114,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/ChatInput.tsx",
+    "lineas_total": 69,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/ChatMessage.tsx",
+    "lineas_total": 57,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/ChatMessages.tsx",
+    "lineas_total": 42,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+    "lineas_total": 694,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/ConfigLoadError.tsx",
+    "lineas_total": 73,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/DegradedBanner.tsx",
+    "lineas_total": 217,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/QuickReplyChips.tsx",
+    "lineas_total": 35,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/StreamingMarkdown.tsx",
+    "lineas_total": 191,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/ThinkingAvatar.tsx",
+    "lineas_total": 44,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/index.ts",
+    "lineas_total": 8,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/revealSafeMarkdown.ts",
+    "lineas_total": 76,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/types.ts",
+    "lineas_total": 35,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [],
+  "flujos": [
+   {
+    "nombre": "Visitante del sitio develOP conversa con el bot (widget on-site)",
+    "pasos": [
+     "src/app/layout.tsx:137 monta <ChatWidgetMount/> en el layout raiz (toda ruta publica)",
+     "src/components/layout/ChatWidgetMount.tsx:10,42 slug fijo 'develop' -> <LogicCompanion slug='develop'/> (fuera de lote)",
+     "LogicCompanion.tsx:95 return null mientras carga /config; :103-120 ConfigLoadError si agoto reintentos; :147-168 monta <ChatWindow> con onSendMessage=chatbot.sendMessage",
+     "ChatWindow.tsx:161-163 foco al textarea; :540-546 Enter -> form.requestSubmit(); :185-198 handleFormSubmit -> onSendMessage(input)",
+     "useChatbot.ts:537 sendMessage -> transport DefaultChatTransport api `/api/chatbot/${slug}/chat` (useChatbot.ts:272) [FRENO: servidor fuera de lote, entrada handleChatRequest.ts; onError con Sentry en :1046-1057, respuesta toUIMessageStreamResponse en :1186]",
+     "ChatWindow.tsx:143 showThinking (isStreaming && !isTyping) -> indicador 'pensando' :409-462 con ThinkingAvatar (ThinkingAvatar.tsx:30-43)",
+     "ChatWindow.tsx:369-381 ultimo mensaje del asistente -> StreamingMarkdown(streaming) ; StreamingMarkdown.tsx:75-121 loop rAF revela caracteres; :143 revealSafeMarkdown(prefijo) (revealSafeMarkdown.ts:65-76); :97 onTypingStart / :109 onTypingDone",
+     "ChatHeader.tsx:88 'Escribiendo…' mientras isTyping; ChatWindow.tsx:172-177 re-foco al terminar si el usuario seguia en el input"
+    ]
+   },
+   {
+    "nombre": "Degradado y errores visibles al visitante (develOP y embed del cliente)",
+    "pasos": [
+     "useChatbot.ts:318-340 /chat responde JSON mode:'degraded' -> reason quota_exhausted|domain_overflow|conversation_limit con whatsappNumber del server",
+     "useChatbot.ts:383-398 4xx -> rate_limited|chat_unavailable con whatsappNumber null; useChatbot.ts:284-291 5xx/red agotados -> connection_failed (null); useChatbot.ts:470-478 frame de error en stream -> stream_interrupted (null)",
+     "useChatbot.ts:248-256 /config con paused -> bot_paused (datos de WhatsApp del config)",
+     "useChatbot.ts:623-624 inputLockedByDegrade = degradado no incluido en NON_LOCKING_DEGRADES (useChatbot.ts:139-144)",
+     "ChatWindow.tsx:280 <DegradedBanner info>; :115 inputLocked; :570 textarea disabled; :467 quick replies ocultos",
+     "DegradedBanner.tsx:41-98 variante ambar (sin CTA de WhatsApp) para connection_failed/rate_limited/chat_unavailable/stream_interrupted; :101-215 variante verde con wa.me si hay numero, o texto 'Volve a probar mas tarde' si no",
+     "Embed del cliente: public/widget.js:125-127 iframe /embed/<slug> -> src/app/embed/[slug]/page.tsx:40 <ChatbotEmbed> -> ChatbotEmbed.tsx:419 <DegradedBanner> (resto del embed fuera de lote)"
+    ]
+   },
+   {
+    "nombre": "Cabecera y avatar del widget (develOP y embed)",
+    "pasos": [
+     "ChatWindow.tsx:251-260 y ChatbotEmbed.tsx:211 montan <ChatHeader config ...>",
+     "ChatHeader.tsx:61-72 <AvatarRenderer style=config.avatarStyle size=getAvatarRenderSize(...)>",
+     "AvatarRenderer.tsx:51-85 escotillas 'image' (img con data-URI/URL) y 'emoji'; :87-89 getAvatarOrDefault(style) (registry.ts:96-104, default 'neuro' registry.ts:11)",
+     "registry.ts:33-79 neuro/legacy_neuro -> HeavyAvatarsLazy.tsx:27-35 next/dynamic ssr:false -> NeuroAvatar.tsx:45-64 <Canvas> (ParticleSphere, CentralCore, CoreHalo) o LegacyNeuroAvatarAdapter.tsx:31 -> LegacyNeuroAvatar.tsx:936-1018 <Canvas dpr=[1,2]>",
+     "Livianos: MonogramAvatar.tsx:24-124, PulseAvatar.tsx:18-91, GeometricAvatar.tsx:22-96 (SVG + motion, animaciones infinitas)"
+    ]
+   },
+   {
+    "nombre": "Cliente y admin eligen avatar del bot",
+    "pasos": [
+     "Cliente: src/app/(protected)/dashboard/chatbot/settings/page.tsx:63 <BotPersonalization> -> BotPersonalization.tsx:271-278 <AvatarPicker escapeHatches=['image','emoji']>",
+     "Admin: admin/chatbots/[botId]/tabs/ConfigTab.tsx:54 -> BotConfigEditor.tsx:174 -> AppearanceTab.tsx:40-45 <AvatarPicker includeEscapeHatches>; alta: admin/clients/new/page.tsx:14 -> Step4Appearance.tsx:58-63",
+     "AvatarPicker.tsx:84-95 monta el componente REAL de cada entrada del registry (incluye los 2 canvas 3D) + escotillas :97-158; onChange(id)",
+     "Validacion server: CLIENT_AVATAR_STYLE_SCHEMA (avatarStyleSchema.ts:48-52) en updateBotAppearance.ts:32 y saveClientSettings.ts:25; AVATAR_STYLE_SCHEMA (avatarStyleSchema.ts:38-42) en saveBotConfig.ts:30, saveBotConfigByOrgSlug.ts:28, createClientWithBot.ts:56 [FRENO: actions fuera de lote]"
+    ]
+   },
+   {
+    "nombre": "Borrador del alta de cliente (admin)",
+    "pasos": [
+     "src/app/(protected)/admin/clients/new/page.tsx:14 <OnboardingWizard/>",
+     "OnboardingWizard.tsx:98 useOnboardingDraft(INITIAL_STATE)",
+     "useOnboardingDraft.ts:26-56 restaura de localStorage['develop:onboarding:draft'] si version==1 y <7 dias; merge sobre initialState",
+     "useOnboardingDraft.ts:59-78 autosave con debounce 1 s de {step,state} (incluye userEmail/userPhone/whatsappNumber/KB, onboarding/types.ts:30-52)",
+     "OnboardingWizard.tsx:115-119 banner de borrador (discardDraft); :140 Step5Review onCreated=clearDraft -> useOnboardingDraft.ts:80-84 removeItem"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Widget de develOP no operable por teclado: el launcher no abre con Enter/Espacio y el panel no cierra con Escape ni retiene el foco",
+    "prefijo": "A11Y",
+    "severidad": "ALTA",
+    "tipo": "a11y",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/LogicCompanion.tsx",
+      "linea": 180,
+      "fragmento": "role=\"button\"\ntabIndex={0}\nonClick={handleToggle}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 247,
+      "fragmento": "role=\"dialog\"\naria-label={`Consultor ${config.botName}`}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 210,
+      "fragmento": "onClick={onClose}"
+     }
+    ],
+    "impacto": "Un visitante que navega con teclado o lector de pantalla puede enfocar el launcher pero no abrir el chat (un div con role=button no recibe click con Enter/Espacio; motion 12 solo dispara gestos tap con Enter, no onClick, y con reduced-motion whileTap queda undefined). Si lo abre, no hay Escape, ni aria-modal, ni trampa de foco, ni devolucion del foco. WCAG 2.1.1 (A). Bloqueante para L3 del widget que se usa como demo del producto.",
+    "propuesta": "Usar un <button> real para el launcher (o onKeyDown Enter/Espacio), cerrar con Escape en el panel, aria-modal=true, trampa de foco y devolver el foco al launcher al cerrar. Revisar el mismo patron en el bubble de public/widget.js.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "lib.chatbot.components"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "A11Y-01 (auditoria-maestra 2026-07), ausencia de onKeyDown/Escape probada por git grep"
+   },
+   {
+    "titulo": "Con el proveedor caido (Vertex vencida) el visitante ve 'Se corto la respuesta / Escribi de nuevo y seguimos' en cada intento, sin derivacion a WhatsApp",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 475,
+      "fragmento": "reason: 'stream_interrupted',\nmessage: STREAM_INTERRUPTED_MESSAGE,\nwhatsappNumber: null,"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/DegradedBanner.tsx",
+      "linea": 41,
+      "fragmento": "if (AMBER_REASONS.has(info.reason)) {"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/DegradedBanner.tsx",
+      "linea": 25,
+      "fragmento": "stream_interrupted: 'Escribí de nuevo y seguimos.',"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 1057,
+      "fragmento": "Sentry.captureException(error, {"
+     }
+    ],
+    "impacto": "Una falla persistente del proveedor (hoy la credencial vencida) se presenta como transitoria: el visitante del sitio del cliente reintenta en loop y el lead se pierde, aunque el bot tenga whatsappNumber configurado (PublicBotConfig.whatsappNumber). La variante ambar nunca ofrece WhatsApp; connection_failed tampoco (useChatbot.ts:286-290). El sistema se entera solo por Sentry del server.",
+    "propuesta": "Contar fallas consecutivas de proveedor por sesion y, desde la segunda, escalar a la variante verde con el whatsappNumber del config y copy honesto ('el asistente no esta disponible'). Decidir con Valentino si connection_failed persistente tambien deriva.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.vis-widget-develop",
+     "int.vertex",
+     "int.sentry"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5-A4, PLAN-500 (provider_error reemplazado por connection_failed), PLAN-521"
+   },
+   {
+    "titulo": "El widget del cliente (embed) ignora accentColor, accentSecondary y chatSurfaceTint: el cableado de colores se hizo solo en ChatWindow (widget de develOP)",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 269,
+      "fragmento": "<Sparkles size={20} strokeWidth={1.5} style={{ color: 'rgba(6,182,212,0.8)' }} />"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 537,
+      "fragmento": ": 'linear-gradient(135deg, rgba(6,182,212,0.85), rgba(6,182,212,0.65))',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 116,
+      "fragmento": "const [ar, ag, ab] = hexToRgb(config.accentColor) ?? ACCENT_FALLBACK"
+     },
+     {
+      "ruta": "public/widget.js",
+      "linea": 125,
+      "fragmento": "iframe.src ="
+     }
+    ],
+    "impacto": "El cliente personaliza colores en /dashboard/chatbot/settings y los ve en la preview, pero en su sitio (iframe /embed/<slug>, widget.js:125-127) burbujas, boton enviar, dots, chips y foco siguen en cyan: 'lo configuro y no se aplica'. git grep de accentColor|accentSecondary|chatSurfaceTint en ChatbotEmbed.tsx = 0 (control: quickReplies si aparece en :283). Los changelogs dan el cableado por hecho.",
+    "propuesta": "Cablear el accent en ChatbotEmbed con el mismo seam [ar,ag,ab] de ChatWindow o, mejor, extraer el shell comun (EST.0) y usarlo en ambos.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.cli-chatbot"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-488, PLAN-489, PLAN-491, PLAN-499, PLAN-485"
+   },
+   {
+    "titulo": "Tres implementaciones paralelas del panel de chat (ChatWindow 694 lineas, ChatbotEmbed 559, BotConfigPreview) con paridad mantenida a mano y estilos inline",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 43,
+      "fragmento": "// Fondo del panel — paridad WYSIWYG con la preview del admin (BotConfigPreview,\n// `surfaceBg`): mismo mapeo intensityLevel → opacidad y mismo `tint + alpha hex`.\n// Si esa fórmula cambia allá, cambiar acá también."
+     },
+     {
+      "ruta": "src/modules/chatbot/components/preview/BotConfigPreview.tsx",
+      "linea": 92,
+      "fragmento": "// ── accentSecondary visual knobs — mismos valores que ChatWindow ──────────"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 203,
+      "fragmento": "{true && ("
+     }
+    ],
+    "impacto": "Cada cambio de UI del chat se hace 2-3 veces y ya divergen: colores (hallazgo del embed en cyan), mensaje de bienvenida, typewriter (StreamingMarkdown solo lo usa ChatWindow). ChatWindow viola la politica anti-vibecode (>300 lineas, CSS inline masivo, condicional muerto {true && ...}).",
+    "propuesta": "Ejecutar EST.0: extraer un ChatShell comun (header, lista con StreamingMarkdown, input, banners) parametrizado por config, consumido por LogicCompanion, ChatbotEmbed y BotConfigPreview; mover estilos a clases/tokens.",
+    "esfuerzo": "L",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "h3.vis-widget-cliente",
+     "h3.adm-chatbots",
+     "lib.chatbot.components"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-499, PLAN-485"
+   },
+   {
+    "titulo": "Estado vacio del widget de develOP ignora welcomeMessage: muestra 'Sistema Listo / Protocolo de consultoria iniciado. ¿Como puedo asistirle hoy?'",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 321,
+      "fragmento": "Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 280,
+      "fragmento": "{config.welcomeMessage}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/preview/BotConfigPreview.tsx",
+      "linea": 218,
+      "fragmento": "{state.welcomeMessage || 'Mensaje de bienvenida'}"
+     }
+    ],
+    "impacto": "El welcomeMessage configurado (y mostrado en la preview) no aparece en el widget del sitio de develOP; el copy es robotico y en 'usted', contra el tono rioplatense del producto. Rompe el WYSIWYG config-preview-widget.",
+    "propuesta": "Renderizar config.welcomeMessage en el empty state de ChatWindow (como el embed) y quitar el literal.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A5"
+   },
+   {
+    "titulo": "Card de degradado promete WhatsApp sin numero: titulo 'Te seguimos por WhatsApp' con input bloqueado y sin CTA; el mensaje puede llegar vacio",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/DegradedBanner.tsx",
+      "linea": 155,
+      "fragmento": "Te seguimos por WhatsApp"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/DegradedBanner.tsx",
+      "linea": 212,
+      "fragmento": "Volvé a probar más tarde y vamos a poder seguir ayudándote."
+     },
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 332,
+      "fragmento": "message: typeof data.message === 'string' ? data.message : '',"
+     }
+    ],
+    "impacto": "Bot pausado / cuota agotada / tope de conversacion sin whatsappNumber (campo opcional en el alta): el visitante lee que sigue por WhatsApp, no hay boton y el input queda bloqueado; si el server no manda message, el parrafo sale vacio.",
+    "propuesta": "Titulo condicional a cleanNumber (p. ej. 'El chat no esta disponible ahora') y copy por defecto cuando message viene vacio.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.vis-widget-develop"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-495, PLAN-500"
+   },
+   {
+    "titulo": "iOS: textarea del widget a 13px sin maximum-scale en el viewport, Safari hace zoom al enfocar",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 585,
+      "fragmento": "fontSize: '13px',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 510,
+      "fragmento": "fontSize: '13px',"
+     },
+     {
+      "ruta": "src/app/embed/[slug]/page.tsx",
+      "linea": 13,
+      "fragmento": "export const viewport: Viewport = {"
+     }
+    ],
+    "impacto": "En iPhone, enfocar el input con fuente <16px dispara auto-zoom: el panel fijo queda desencuadrado y el visitante tiene que hacer pinch. src/app/layout.tsx no exporta viewport (git grep 'export const viewport' = 0; control: embed/[slug]/page.tsx:13) y el del embed no fija maximumScale. Afecta el criterio mobile de L3 en ambos widgets.",
+    "propuesta": "Subir la fuente del textarea a 16px en mobile (font-size: max(16px, ...)) en vez de bloquear el zoom; verificar en iOS Safari real (PLAN-505).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "h3.vis-widget-cliente"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-505"
+   },
+   {
+    "titulo": "La region aria-live (role=log) envuelve el texto que el typewriter reescribe por frame: el lector de pantalla anuncia fragmentos",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 277,
+      "fragmento": "role=\"log\"\naria-live=\"polite\""
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/StreamingMarkdown.tsx",
+      "linea": 99,
+      "fragmento": "setRevealed(next)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/StreamingMarkdown.tsx",
+      "linea": 143,
+      "fragmento": "const body = settled ? text : revealSafeMarkdown(text.slice(0, revealedCount))"
+     }
+    ],
+    "impacto": "Cada avance del revelado (hasta ~60/s) muta el texto dentro de la region viva; NVDA/VoiceOver suelen anunciar trozos repetidos o cortados en vez de la respuesta completa.",
+    "propuesta": "Marcar el bubble en revelado con aria-hidden/aria-busy y anunciar el mensaje completo una vez en onTypingDone (region sr-only separada).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Avatares 3D siempre renderizando (sin pausa fuera de viewport), LegacyNeuroAvatar con dpr hasta 2 y AvatarPicker que monta los dos canvas pesados a la vez",
+    "prefijo": "PERF",
+    "severidad": "MEDIA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+      "linea": 940,
+      "fragmento": "dpr={[1, 2]}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/NeuroAvatar.tsx",
+      "linea": 33,
+      "fragmento": "frameloop = 'always',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/AvatarPicker.tsx",
+      "linea": 84,
+      "fragmento": "{AVATAR_REGISTRY.map((entry) => ("
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/ParticleSphere.tsx",
+      "linea": 42,
+      "fragmento": "const pos = basePos.clone().multiplyScalar(radius)"
+     }
+    ],
+    "impacto": "Viola reglas de CLAUDE.md (dpr max 1.5, IntersectionObserver en animaciones pesadas). Nadie pasa frameloop (git grep 'frameloop=' solo encuentra NeuroAvatar.tsx:54). En la config del admin y del cliente conviven 2 canvas del picker + los de la preview, a 60 fps; el changelog admin registra 'Freeze del AvatarPicker' como pendiente. ParticleSphere asigna 120 Vector3 por frame y rota sin delta (:35), mas rapido en 120 Hz.",
+    "propuesta": "dpr [1,1.5]; frameloop 'demand' o pausa por IntersectionObserver/visibilitychange; en el picker mostrar thumbnail estatico y montar el canvas solo en hover/seleccion; reutilizar un Vector3 y escalar la rotacion por delta.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots",
+     "h3.cli-chatbot",
+     "h3.vis-widget-cliente",
+     "lib.chatbot.components"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Sin error boundary local para los avatares 3D: un fallo de WebGL o del chunk diferido tumba el widget o la pagina, aunque AvatarRenderer documenta 'never throws'",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/avatar/AvatarRenderer.tsx",
+      "linea": 38,
+      "fragmento": " * Guarantee: this component never throws and never renders nothing."
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/HeavyAvatarsLazy.tsx",
+      "linea": 27,
+      "fragmento": "const NeuroAvatarImpl = dynamic(() => import('./NeuroAvatar').then((m) => m.NeuroAvatar), {"
+     },
+     {
+      "ruta": "src/app/layout.tsx",
+      "linea": 137,
+      "fragmento": "<ChatWidgetMount />"
+     }
+    ],
+    "impacto": "git grep de ErrorBoundary/getDerivedStateFromError en modules/chatbot, ChatWidgetMount y app/embed = 0 (control: AdminErrorBoundary.tsx existe). Con WebGL deshabilitado/bloqueado o ChunkLoadError, R3F/next-dynamic propagan el error: en el embed cae a app/error.tsx (iframe con pagina de error), en la config del admin/cliente al error.tsx del segmento; en el sitio de develOP el widget vive en el layout raiz (escalaria a global-error) aunque hoy su avatar es 'image' (HeavyAvatarsLazy.tsx:13-15).",
+    "propuesta": "Envolver AvatarRenderer (o los wrappers Lazy) en un ErrorBoundary que caiga al Monograma, con captureException; detectar WebGL antes de montar el canvas.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.cli-chatbot",
+     "h3.adm-chatbots",
+     "int.sentry"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Estilo 'image'/'emoji' sin URL o emoji cae al avatar 3D pesado por defecto ('neuro') y descarga three + R3F",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/avatar/AvatarRenderer.tsx",
+      "linea": 51,
+      "fragmento": "if (style === 'image' && avatarImageUrl) {"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/AvatarRenderer.tsx",
+      "linea": 87,
+      "fragmento": "const resolved = getAvatarOrDefault(style)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/registry.ts",
+      "linea": 11,
+      "fragmento": "export const DEFAULT_AVATAR_ID = 'neuro'"
+     }
+    ],
+    "impacto": "Si el cliente elige 'Imagen custom' o 'Emoji' y no completa el valor, cada visitante ve el Orbe Neural y baja ~230 kB gz de three/R3F (HeavyAvatarsLazy.tsx:12-13), solo con un console.warn.",
+    "propuesta": "Fallback de escotilla incompleta a un avatar liviano (monograma) y/o validar en el server que style=image exige avatarImageUrl y style=emoji exige avatarEmoji.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.cli-chatbot"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "LegacyNeuroAvatar comparte color y mouse a nivel modulo entre instancias y reduce el accent del tenant a 4 paletas",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+      "linea": 54,
+      "fragmento": "const activeColorRef = { current: new THREE.Color('#06b6d4') };"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+      "linea": 157,
+      "fragmento": "activeColorRef.current.lerp(targetColor.current, lerpFactor);"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/legacyStateMapper.ts",
+      "linea": 35,
+      "fragmento": "return 'cyan'"
+     }
+    ],
+    "impacto": "Con 'Rostro Neural', el header (idle), el indicador 'pensando' (thinking, violeta) y el launcher montan instancias cuyos ColorController escriben el mismo color global cada frame: los colores se mezclan/parpadean. Ademas cualquier accent fuera de 4 prefijos se pinta cyan.",
+    "propuesta": "Mover activeColorRef/mouseRef a refs por instancia (contexto del Canvas) y derivar el color del accent real en vez de la paleta fija.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.vis-widget-develop"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "LegacyNeuroAvatar.tsx acumula 6 errores de eslint del baseline (incluido un 'any' explicito) y 25 lineas con mojibake",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+      "linea": 601,
+      "fragmento": "ref={bufferAttrRef as any}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+      "linea": 523,
+      "fragmento": "const r = 1.05 + Math.random() * 0.3;"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+      "linea": 114,
+      "fragmento": "// Avanzar transici├│n de contexto"
+     }
+    ],
+    "impacto": "Rompe la regla dura 'cero any' y suma errores de react-hooks/purity (:523,:525,:532) y react-hooks/refs (:603 x2) al baseline de 102. Los comentarios con mojibake no se leen. Los comentarios del adapter lo tratan como FROZEN (LegacyNeuroAvatarAdapter.tsx:10) aunque no esta en la lista de congelados.",
+    "propuesta": "Decision para Valentino: confirmar si LegacyNeuroAvatar esta congelado. Si no: tipar el ref como THREE.BufferAttribute, generar los random en un useState lazy, y re-guardar los comentarios en UTF-8.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.chatbot.components"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-512"
+   },
+   {
+    "titulo": "Componentes de chat muertos exportados por los barrels y un ChatWindowProps duplicado y desfasado que el barrel publica en lugar del real",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/index.ts",
+      "linea": 3,
+      "fragmento": "export { ChatMessages } from './ChatMessages'\nexport { ChatMessage } from './ChatMessage'\nexport { ChatInput } from './ChatInput'"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/index.ts",
+      "linea": 8,
+      "fragmento": "export type { ChatWindowProps, UIChatMessage, ToolCallInUIMessage } from './types'"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/types.ts",
+      "linea": 34,
+      "fragmento": "degradedMode?: boolean"
+     }
+    ],
+    "impacto": "ChatMessages, ChatMessage, ChatInput y QuickReplyChips no tienen consumidores fuera de los barrels (git grep); el changelog cuenta fixes aterrizados en codigo muerto. El tipo exportado no coincide con las props reales (ChatWindow.tsx:71-93).",
+    "propuesta": "Borrar los 4 componentes, quitar sus exports de chat/index.ts y modules/chatbot/index.ts:40-43, y re-exportar ChatWindowProps desde ChatWindow.tsx.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.chatbot.components"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-490"
+   },
+   {
+    "titulo": "revealSafeMarkdown.ts contiene un byte NUL literal: git trata el archivo como binario",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/revealSafeMarkdown.ts",
+      "linea": 15,
+      "fragmento": "const PH = '<byte NUL>' // placeholder de 1 char (preserva longitudes → índices 1:1)"
+     }
+    ],
+    "impacto": "git log --numstat muestra '-\\t-' para el archivo (commit 3bc2349a): los diffs y revisiones de PR no muestran cambios en la logica que limpia el markdown parcial; las herramientas de edicion lo rechazan.",
+    "propuesta": "Reemplazar el literal por el escape '\\u0000' (mismo valor en runtime).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.chatbot.components"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "avatarStyleSchema: el schema del cliente se documenta 'sin escape hatches' pero es identico al del admin, y la validacion server importa el registry de componentes cliente",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/avatar/avatarStyleSchema.ts",
+      "linea": 45,
+      "fragmento": " * Zod schema for CLIENT-side mutations (dashboard). Same surface but\n * without the escape hatches."
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/avatarStyleSchema.ts",
+      "linea": 31,
+      "fragmento": "return [...AVATAR_IDS, 'emoji', 'image']"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/avatarStyleSchema.ts",
+      "linea": 2,
+      "fragmento": "import { AVATAR_IDS } from './registry'"
+     }
+    ],
+    "impacto": "Doc que contradice el codigo en una regla de validacion; dos schemas redundantes; las server actions (updateBotAppearance.ts:10, saveBotConfig.ts:6) arrastran el registry que importa modulos 'use client' (HeavyAvatarsLazy) solo para leer ids.",
+    "propuesta": "Unificar en un solo schema con los ids en una constante pura (sin importar componentes), y corregir el docstring.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot",
+     "h3.adm-chatbots",
+     "lib.chatbot.components"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "El borrador del alta de cliente guarda PII del contacto y la KB en localStorage 7 dias bajo una clave global, aunque no se edite nada, y falla en silencio",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts",
+      "linea": 6,
+      "fragmento": "const DRAFT_KEY = 'develop:onboarding:draft'"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts",
+      "linea": 70,
+      "fragmento": "localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/types.ts",
+      "linea": 50,
+      "fragmento": "userEmail: string\nuserName: string\nuserPhone: string"
+     }
+    ],
+    "impacto": "Email, telefono y WhatsApp del cliente, mas avatares en data-URI y la KB, quedan en el navegador del SUPER_ADMIN sin borrarse al hacer logout; la clave no se separa por usuario. Con data-URIs grandes, setItem puede exceder la cuota y el borrador se pierde sin aviso (catch vacio :72-74). Se graba el estado inicial al abrir la pagina, asi que la proxima visita muestra 'borrador' aunque no se haya escrito nada. Errores de eslint en :49 (set-state-in-effect) y :56 (exhaustive-deps).",
+    "propuesta": "Excluir de la persistencia los campos de contacto y los data-URI (o usar sessionStorage), namespacing por usuario, limpiar al logout, guardar solo despues del primer cambio y avisar si falla.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Panel del chat: textarea sin label accesible, boton enviar etiquetado en ingles y textos con contraste de ~2,6:1 y ~2,2:1",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 305,
+      "fragmento": "color: 'rgba(255,255,255,0.3)',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 612,
+      "fragmento": "color: 'rgba(255,255,255,0.25)',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 659,
+      "fragmento": "aria-label=\"Send message\""
+     }
+    ],
+    "impacto": "'Sistema Listo' (11px, blanco 0.3 sobre el panel aprox. #0a0c18) da ~2,6:1 y el hint 'Enter para enviar' (9px, 0.25) ~2,2:1, ambos por debajo de 4,5:1. El textarea (:527-594) solo tiene placeholder como nombre accesible y el boton enviar se anuncia en ingles en una UI en castellano.",
+    "propuesta": "aria-label='Escribi tu consulta' en el textarea, 'Enviar mensaje' en el boton, y subir la opacidad de esos textos a 0.6 o mas.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patron D1-c1 contraste"
+   },
+   {
+    "titulo": "Animaciones infinitas de avatares e indicador 'pensando' que no respetan prefers-reduced-motion",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 445,
+      "fragmento": "repeat: Infinity,"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/PulseAvatar.tsx",
+      "linea": 64,
+      "fragmento": "repeat: Infinity,"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/MonogramAvatar.tsx",
+      "linea": 81,
+      "fragmento": "transition={{ duration: pulseDuration, repeat: Infinity, ease: 'easeInOut' }}"
+     }
+    ],
+    "impacto": "El launcher anima sin parar en toda pagina publica (y en el sitio del cliente). git grep de useReducedMotion/prefers-reduced-motion en components/avatar = 0 (control: StreamingMarkdown.tsx:5,47 si lo usa) y no hay MotionConfig global. WCAG 2.2.2 / 2.3.3.",
+    "propuesta": "Leer useReducedMotion en AvatarRenderer y pasar un estado estatico a los avatares; detener los dots con reduced motion.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "h3.vis-widget-cliente",
+     "lib.chatbot.components"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "El widget no avisa que la conversacion la procesa un proveedor de IA ni enlaza una politica de privacidad, y la app no tiene paginas legales",
+    "prefijo": "FAL",
+    "severidad": "ALTA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 311,
+      "fragmento": "Sistema Listo"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 280,
+      "fragmento": "{config.welcomeMessage}"
+     }
+    ],
+    "impacto": "El bot captura nombre, telefono y email del visitante en el sitio del cliente y los manda a Vertex y a n8n, sin aviso ni link a una politica (Ley 25.326). git grep de vertex|n8n|privacidad|disclaimer en chat/, embed/ y LogicCompanion = 0 (control: 'PRIVACIDAD' aparece en api/chatbot/[slug]/chat/route.ts:75), y ls-tree de src/app no tiene rutas privac|legal|termin|terms|cookies (control: 86 page.tsx listados). Bloqueante para el primer cliente real.",
+    "propuesta": "Decision para Valentino (texto legal): aviso breve en el empty state y en el primer mensaje del widget ('Este chat usa IA de Google; ver politica') con link a una pagina de privacidad publicada en el sitio de develOP y configurable por cliente.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.vis-widget-develop",
+     "int.vertex"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-07, LEG-01, PLAN-508"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.conversar-en-streaming",
+    "nombre": "Conversar con el bot de develOP con respuesta revelada en vivo",
+    "descripcion": "El visitante escribe, ve 'pensando', y la respuesta aparece con typewriter y markdown seguro.",
+    "archivos": [
+     "src/modules/chatbot/components/chat/ChatWindow.tsx",
+     "src/modules/chatbot/components/chat/StreamingMarkdown.tsx",
+     "src/modules/chatbot/components/chat/revealSafeMarkdown.ts",
+     "src/modules/chatbot/components/chat/ChatHeader.tsx",
+     "src/modules/chatbot/components/chat/ThinkingAvatar.tsx"
+    ],
+    "entradas": [
+     "POST /api/chatbot/[slug]/chat (fuera de lote)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz en UI trazado: ChatWidgetMount.tsx:42 -> LogicCompanion.tsx:147-152 -> ChatWindow.tsx:540-546,185-198 -> useChatbot.ts:537,272 -> render ChatWindow.tsx:369-381 -> StreamingMarkdown.tsx:75-121. El tramo server queda en otro lote; en runtime hoy no responde por la credencial de Vertex vencida (E10).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Slug fijo 'develop' (ChatWidgetMount.tsx:10); el aislamiento se resuelve en el server (otro lote)."
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "Empty state ChatWindow.tsx:285-324, pero ignora welcomeMessage (:321)."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "DegradedBanner para 4xx/5xx/stream (ChatWindow.tsx:280); una falla persistente se muestra como transitoria y sin WhatsApp (DegradedBanner.tsx:41-98)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Indicador 'pensando' ChatWindow.tsx:409-462; 'Conectando…' ChatHeader.tsx:88."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "El lote solo espeja el tope (maxLength MAX_MESSAGE_CHARS, ChatWindow.tsx:574); la validacion es del server."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Panel responsive (ChatWindow.tsx:223, maxHeight 72dvh :245); textarea 13px con probable zoom en iOS (:585)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "El server captura onError (handleChatRequest.ts:1057); el cliente no reporta degradados y no hay boundary local."
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Sin TODO (git grep); copy placeholder 'Protocolo de consultoria iniciado' (ChatWindow.tsx:321)."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "El visitante termina solo si el proveedor responde; sin teclado no puede abrir el launcher (LogicCompanion.tsx:180-182)."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.estados-degradados",
+    "nombre": "Banners de degradado y derivacion a WhatsApp en el widget de develOP",
+    "descripcion": "Muestra cuota agotada, bot pausado, rate limit, corte de stream o falla de conexion, con CTA a WhatsApp cuando corresponde.",
+    "archivos": [
+     "src/modules/chatbot/components/chat/DegradedBanner.tsx",
+     "src/modules/chatbot/components/chat/ChatWindow.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "useChatbot.ts:318-340/383-398/470-478 -> degradedInfo -> ChatWindow.tsx:280 -> DegradedBanner.tsx:41-98 (ambar) / :101-215 (verde con wa.me :106-109).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Solo renderiza el payload recibido."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Offline sin mensajes muestra solo el card (ChatWindow.tsx:282-285)."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Titulo 'Te seguimos por WhatsApp' sin numero (DegradedBanner.tsx:155, :203-213); message vacio posible (useChatbot.ts:332)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Estado terminal, sin carga."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Allowlist de copy en useChatbot.ts:126-134 (fuera de lote)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "CTA con minHeight 44px (DegradedBanner.tsx:182), maxWidth 90%."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Ningun degradado se reporta desde el cliente (git grep Sentry en hooks/ y chat/ = 0)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Copys reales por reason (DegradedBanner.tsx:21-26)."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Sin WhatsApp configurado el visitante queda sin salida."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.reintento-de-config",
+    "nombre": "Reintento manual cuando /config no carga",
+    "descripcion": "Si la config del bot no carga tras los reintentos automaticos, el widget muestra 'No pudimos conectar' con boton Reintentar.",
+    "archivos": [
+     "src/modules/chatbot/components/chat/ConfigLoadError.tsx"
+    ],
+    "entradas": [
+     "GET /api/chatbot/[slug]/config (fuera de lote)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "LogicCompanion.tsx:103-120 -> ConfigLoadError.tsx:17-73 onRetry=chatbot.retryLoadConfig; mismo componente en ChatbotEmbed.tsx:189.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Sin datos."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No aplica."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Mensaje util y accion (ConfigLoadError.tsx:52,54-70), role=status."
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "Mientras carga, el launcher no se muestra (LogicCompanion.tsx:95 return null), decision PLAN-519."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "No envia datos."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Boton minHeight 36px, maxWidth 240px (LogicCompanion.tsx:111)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "El agotamiento de reintentos no se reporta (fuera de lote: configCache)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin placeholders."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "El visitante reintenta solo."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.respuestas-rapidas",
+    "nombre": "Chips de respuestas rapidas",
+    "descripcion": "Con el chat vacio se ofrecen chips configurados que envian un prompt.",
+    "archivos": [
+     "src/modules/chatbot/components/chat/ChatWindow.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "ChatWindow.tsx:467-489 onClick -> onQuickReply(qr.promptToSend) = chatbot.sendMessage (LogicCompanion.tsx:154). QuickReplyChips.tsx es codigo muerto.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Config publica del bot."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Sin quickReplies no renderiza (:467)."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Delegado al envio."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin carga propia."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Server valida el mensaje."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap (:468)."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin errores propios."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Datos del config."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Un click."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-cliente",
+    "id": "h3.vis-widget-cliente.estados-degradados",
+    "nombre": "Banners de degradado en el widget embebido del cliente",
+    "descripcion": "El embed reutiliza DegradedBanner para cuota, pausa, rate limit, cortes y fallas de conexion.",
+    "archivos": [
+     "src/modules/chatbot/components/chat/DegradedBanner.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "ChatbotEmbed.tsx:419 <DegradedBanner info={chatbot.degradedInfo}> con el mismo hook (useChatbot); ramas en DegradedBanner.tsx:41-215.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Solo renderiza."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No aplica."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Proveedor caido se muestra como transitorio sin WhatsApp (DegradedBanner.tsx:41-98)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No aplica."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "No aplica."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "CTA 44px."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin reporte cliente."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Copys reales."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Sin numero de WhatsApp no hay salida."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-cliente",
+    "id": "h3.vis-widget-cliente.apariencia-de-marca",
+    "nombre": "Colores de marca del cliente en el widget embebido",
+    "descripcion": "accentColor, accentSecondary y chatSurfaceTint configurados por el cliente deberian pintar el widget de su sitio.",
+    "archivos": [
+     "src/modules/chatbot/components/chat/ChatHeader.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L1",
+    "madurez_evidencia": "Solo ChatHeader (ChatHeader.tsx:67,83) y el avatar usan accentColor; el resto del embed es cyan fijo (ChatbotEmbed.tsx:269, :537; git grep accentColor|accentSecondary|chatSurfaceTint en ChatbotEmbed = 0).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Config publica por slug."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No aplica."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "No aplica."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No aplica."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Hex de 6 digitos en updateBotAppearance.ts:29-30 (fuera de lote)."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "No aplica."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "No aplica."
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Color hardcodeado en lugar del configurado."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "El cliente configura y no ve el cambio en su sitio."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-cliente",
+    "id": "h3.vis-widget-cliente.avatar-del-bot",
+    "nombre": "Avatar animado del bot en cabecera y launcher",
+    "descripcion": "Renderiza el avatar elegido (3D, SVG, imagen o emoji) con estados idle/thinking/speaking.",
+    "archivos": [
+     "src/modules/chatbot/components/avatar/AvatarRenderer.tsx",
+     "src/modules/chatbot/components/avatar/registry.ts",
+     "src/modules/chatbot/components/avatar/HeavyAvatarsLazy.tsx",
+     "src/modules/chatbot/components/avatar/NeuroAvatar.tsx",
+     "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+     "src/modules/chatbot/components/avatar/MonogramAvatar.tsx",
+     "src/modules/chatbot/components/avatar/PulseAvatar.tsx",
+     "src/modules/chatbot/components/avatar/GeometricAvatar.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "ChatHeader.tsx:61-72 -> AvatarRenderer.tsx:51-101 -> registry.ts:96-104 -> HeavyAvatarsLazy.tsx:27-35 -> NeuroAvatar.tsx:45-64 / LegacyNeuroAvatarAdapter.tsx:31.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Config publica."
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "Escotilla sin valor cae al 3D pesado (AvatarRenderer.tsx:51,87)."
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Sin error boundary para WebGL/chunk (git grep ErrorBoundary = 0)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Placeholder del tamano final (HeavyAvatarsLazy.tsx:62-89)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "AVATAR_STYLE_SCHEMA/CLIENT_AVATAR_STYLE_SCHEMA en las actions."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "dpr hasta 2 y frameloop always (LegacyNeuroAvatar.tsx:940, NeuroAvatar.tsx:33)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Estilo desconocido solo console.warn (AvatarRenderer.tsx:122-129)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Automatico."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.elegir-avatar",
+    "nombre": "El cliente elige el avatar de su bot",
+    "descripcion": "Grilla de avatares con preview animada, mas imagen custom y emoji.",
+    "archivos": [
+     "src/modules/chatbot/components/avatar/AvatarPicker.tsx",
+     "src/modules/chatbot/components/avatar/avatarStyleSchema.ts"
+    ],
+    "entradas": [
+     "updateBotAppearance (server action, fuera de lote)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "dashboard/chatbot/settings/page.tsx:63 -> BotPersonalization.tsx:271-278 -> AvatarPicker.tsx:58-161 onChange -> updateBotAppearance.ts:32 CLIENT_AVATAR_STYLE_SCHEMA (persistencia en otro lote).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Lo resuelve la action (otro lote)."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Registry estatico (AvatarPicker.tsx:56)."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Sin boundary si falla WebGL en los canvas del picker."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Placeholder de avatares pesados."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "avatarStyleSchema.ts:48-52 en updateBotAppearance.ts:32."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "grid-cols-2 sm:grid-cols-3 (AvatarPicker.tsx:79), pero 2 canvas 3D simultaneos."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Delegado a error.tsx del segmento."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Autoservicio."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.elegir-avatar",
+    "nombre": "El admin elige el avatar del bot",
+    "descripcion": "Mismo AvatarPicker con escotillas imagen y emoji en la config del bot y en el alta.",
+    "archivos": [
+     "src/modules/chatbot/components/avatar/AvatarPicker.tsx",
+     "src/modules/chatbot/components/avatar/avatarStyleSchema.ts"
+    ],
+    "entradas": [
+     "saveBotConfig / saveBotConfigByOrgSlug / createClientWithBot (fuera de lote)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "AppearanceTab.tsx:40-45 y Step4Appearance.tsx:58-63 -> AvatarPicker -> AVATAR_STYLE_SCHEMA en saveBotConfig.ts:30, createClientWithBot.ts:56.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "SUPER_ADMIN, resuelto en las actions."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Registry estatico."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Sin boundary local para WebGL."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Placeholder."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "AVATAR_STYLE_SCHEMA."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Grilla responsive; costo de 2 canvas."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "error.tsx de admin/chatbots."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Interno."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.borrador-del-alta",
+    "nombre": "Borrador persistente del alta de cliente",
+    "descripcion": "El wizard de alta guarda y restaura el progreso en localStorage por 7 dias.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "admin/clients/new/page.tsx:14 -> OnboardingWizard.tsx:98 -> useOnboardingDraft.ts:26-56 restore, :59-78 autosave, OnboardingWizard.tsx:140 clearDraft al crear.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Solo navegador del admin."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Sin borrador arranca de INITIAL_STATE."
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Fallos de storage silenciosos (useOnboardingDraft.ts:53-55, 72-74)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sincrono."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "No envia datos."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "Sin UI propia."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Catch vacio."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Interno."
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-499",
+    "clave": "Unificar ChatWindow y ChatbotEmbed",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Comparten ChatHeader/DegradedBanner/ConfigLoadError (ChatbotEmbed.tsx:10-12, :211, :419, :189) pero cada uno mantiene su lista e input (ChatbotEmbed.tsx:493 onKeyDown propio) y StreamingMarkdown solo lo usa ChatWindow (git grep StreamingMarkdown -> ChatWindow.tsx).",
+    "sigue_teniendo_sentido": "si",
+    "nota": "La divergencia ya produce bugs (embed en cyan, bienvenida distinta)."
+   },
+   {
+    "id": "PLAN-489",
+    "clave": "Cyan hardcodeado en el widget",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Hecho en ChatWindow (boton enviar :643-655, Sparkles :296-300; thinkPulse ausente: git grep 0, control chatbotCaretBlink presente). El widget del cliente sigue cyan: ChatbotEmbed.tsx:269, :340-351, :437, :537.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El changelog lo da por resuelto, pero solo para el widget de develOP."
+   },
+   {
+    "id": "PLAN-490",
+    "clave": "QuickReplyChips.tsx muerto",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "QuickReplyChips.tsx sigue existiendo y solo lo exportan chat/index.ts:6 y modules/chatbot/index.ts:43 (git grep -w QuickReplyChips fuera de components/chat = solo el barrel).",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Borrar."
+   },
+   {
+    "id": "PLAN-492",
+    "clave": "Color de acento por ruta en el widget (resolveAccentColor)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep resolveAccentColor = 0; routeColorMap llega a getPublicConfig.ts:121 y publicConfig.ts:50 (control) pero ningun archivo de hooks/, chat/, embed/ ni LogicCompanion lo lee.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-495",
+    "clave": "MS-2 widget degradado con derivacion a WhatsApp en /embed",
+    "estado_en_codigo": "hecho",
+    "evidencia": "DegradedBanner.tsx:101-109 arma wa.me, :170-202 CTA; montado en ChatbotEmbed.tsx:419; DegradedInfo en useChatbot.ts:112-118.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-496",
+    "clave": "B8.1 aislamiento CSS, z-index, avatar",
+    "estado_en_codigo": "hecho",
+    "evidencia": "CHATBOT_Z_INDEX en ChatWindow.tsx:11,212,226; ChatHeader con AvatarRenderer (ChatHeader.tsx:61-72) usado en ChatWindow.tsx:251; Canvas con dimensiones NeuroAvatar.tsx:41,46; public/widget.js:61 'all:initial;'.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-498",
+    "clave": "B8.2 sonidos y mute persistente",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Toggle de mute en ChatHeader.tsx:91-104; useChatbotSounds.ts:67 lee localStorage; AudioContext presente.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-500",
+    "clave": "B8.3 degradacion elegante (pausado, provider_error, cuota)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Pausado -> bot_paused (useChatbot.ts:248-256) + banner y bloqueo (ChatWindow.tsx:115, :280, :570). '5xx -> provider_error' ya no existe: DegradedReason (useChatbot.ts:102-110) no lo tiene; INFRA.2 lo reemplazo por connection_failed sin WhatsApp (useChatbot.ts:86, :284-291).",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Con Vertex vencida, ver hallazgo de falla persistente sin WhatsApp."
+   },
+   {
+    "id": "PLAN-488",
+    "clave": "Widget: colores, avatar 3D y modo offline",
+    "estado_en_codigo": "parcial",
+    "evidencia": "ChatWindow cablea chatSurfaceTint/accent/accentSecondary (ChatWindow.tsx:47-58, 116-119, 235-237); EffectComposer fuera (NeuroAvatar.tsx:18-20; git grep EffectComposer en modules/chatbot solo ese comentario, control: Hero.tsx); dispose en CoreHalo.tsx:69; offline solo WhatsApp (ChatWindow.tsx:285, :467). El embed del cliente no lee esos colores.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-491",
+    "clave": "Accent del widget en los 3 puntos",
+    "estado_en_codigo": "parcial",
+    "evidencia": "ChatWindow: Sparkles con strokeWidth 1.5 y accent (ChatWindow.tsx:296-300), boton con accent (:650), thinkPulse borrado (git grep 0). ChatbotEmbed.tsx:269 y :537 siguen en cyan.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-507",
+    "clave": "B13.4 header de ChatbotEmbed unificado y avatar que respeta size",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ChatbotEmbed.tsx:211 <ChatHeader>; LegacyNeuroAvatarAdapter.tsx:31 caja de size + LegacyNeuroAvatarAdapter.module.css:12-15.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El CSS depende del aria-label 'AI Assistant Avatar' del componente legacy (LegacyNeuroAvatar.tsx:934)."
+   },
+   {
+    "id": "PLAN-511",
+    "clave": "RE-2 widget no muere si /config falla",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ConfigLoadError.tsx:17-73 usado en LogicCompanion.tsx:118 y ChatbotEmbed.tsx:189; existe src/modules/chatbot/shared/configCache.ts (git ls-files).",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Verificacion humana pendiente (PLAN-518)."
+   },
+   {
+    "id": "PLAN-513",
+    "clave": "WATCHDOG-2 cursor de tipeo inline",
+    "estado_en_codigo": "hecho",
+    "evidencia": "StreamingMarkdown.tsx:166-168 '[&>p:nth-last-child(2)]:inline' y caret :172-186.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-514",
+    "clave": "BLOQUE VOZ banners rate_limited, chat_unavailable, stream_interrupted",
+    "estado_en_codigo": "hecho",
+    "evidencia": "DegradedBanner.tsx:14-26, :41-98; useChatbot.ts:383-398, :470-478.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-196",
+    "clave": "Matsu sin allowedDomains ni embed configurados",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -E 'allowedDomains|embed' en scripts/seed-matsu*.ts = 0 (control: allowedDomains en scripts/ev4-smoke.mjs). El estado real en la base no se puede ver desde el codigo.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-505",
+    "clave": "Verificar teclado virtual y safe-area en telefonos reales",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Sin evidencia de verificacion. Codigo: ChatWindow.tsx:245 maxHeight 72dvh; :585 textarea 13px; src/app/layout.tsx sin export viewport (git grep = 0; control: embed/[slug]/page.tsx:13).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-506",
+    "clave": "legacy_neuro ignora el size",
+    "estado_en_codigo": "hecho",
+    "evidencia": "LegacyNeuroAvatarAdapter.tsx:31 fija width/height=size y el module.css :12-15 fuerza al wrapper legacy a 100%.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-517",
+    "clave": "Sin tests del camino de atribucion del cliente",
+    "estado_en_codigo": "parcial",
+    "evidencia": "parseAttribution cubierto por src/modules/chatbot/server/chat/__tests__/utm-attribution.invariant.ts (punto 6). Handshake/firstTouchRef sin tests: git grep firstTouchRef|handshake en tests/ y __tests__ = 0 (control: firstTouchRef en useChatbot.ts).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-518",
+    "clave": "RE-2 verificacion con Neon dormida",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Sin registro de verificacion en el repo; la implementacion existe (ConfigLoadError.tsx:17-73).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-525",
+    "clave": "Color por ruta en el widget",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Igual que PLAN-492: git grep resolveAccentColor = 0; el widget no lee routeColorMap.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-225",
+    "clave": "'as any' en config del bot",
+    "estado_en_codigo": "hecho",
+    "evidencia": "La ruta ahora es admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx; git grep 'as any' en admin/clients y admin/chatbots = 0. Persisten otros: ClientSettingsForm.tsx:26,36,37 y LegacyNeuroAvatar.tsx:601.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-522",
+    "clave": "Verificar retry simulando 5xx",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Sin evidencia de la prueba; 'Conectando…' existe (ChatHeader.tsx:88) y el retry en useChatbot.ts:269-300.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-524",
+    "clave": "ChatbotEmbed hardcodea currentPath '/'",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "ChatbotEmbed.tsx:27 useChatbot({ slug, currentPath: '/', attribution }).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-508",
+    "clave": "Disclaimers PII (Vertex + n8n) en el widget",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -i -E 'vertex|n8n|privacidad|privacy|disclaimer|datos personales' en components/chat, components/embed y LogicCompanion = 0 (control: 'PRIVACIDAD' en api/chatbot/[slug]/chat/route.ts:75).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-512",
+    "clave": "Errores ESLint preexistentes en el widget",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Baseline _crudo/eslint.json: ChatbotEmbed.tsx:317 react-hooks/refs; useChatbot.ts:496 y useChatbotSounds.ts:68 set-state-in-effect; tambien LegacyNeuroAvatar.tsx:523/525/532/601/603.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-484",
+    "clave": "M1 audio en el widget y costos WABA",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep MediaRecorder|getUserMedia|audio/webm en modules/chatbot = 0 (control: AudioContext en useChatbotSounds.ts).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-485",
+    "clave": "EST estetica por vertical / EST.0 extraer shell",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Shell sin extraer: ChatWindow.tsx (694 lineas) y ChatbotEmbed.tsx (559) siguen separados.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-487",
+    "clave": "C2.2 catalogo visual en el chat",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tool-cards solo tiene HandoffOptionsCard, NavigateToPageCard, WhatsappHandoffCard (git ls-files); git grep catalog|ProductCard en tool-cards = 0.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-494",
+    "clave": "Test automatico de percepcion del widget (Playwright)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tests/e2e/02-chat-flow.spec.ts:17 solo presiona Enter; ninguna medicion keydown -> 'pensando' (git grep pensando|thinking en tests/e2e = 0).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-486",
+    "clave": "Direccion estetica por vertical",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Sin paletas ni avatares por vertical en components/; los colores salen solo del BotConfig.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-519",
+    "clave": "Sin microcopy durante retry de /config",
+    "estado_en_codigo": "hecho",
+    "evidencia": "LogicCompanion.tsx:95 return null mientras carga; ChatbotEmbed.tsx:148 spinner sin texto.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-527",
+    "clave": "Arquitectura del widget iframe + script vanilla",
+    "estado_en_codigo": "hecho",
+    "evidencia": "public/widget.js:125-127 iframe a /embed/<slug>; validate-origin en src/lib/security/validate-origin.ts.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-521",
+    "clave": "Politica de reintento INFRA.2",
+    "estado_en_codigo": "hecho",
+    "evidencia": "useChatbot.ts:269-300 retry acotado y connection_failed con input habilitado (NON_LOCKING_DEGRADES :139-144); sin timeout de cliente.",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Sin timeout de cliente, un stream colgado deja botBusy hasta que la conexion cierre (ChatWindow.tsx:143-144, :569)."
+   },
+   {
+    "id": "PLAN-526",
+    "clave": "Widget para visitantes (~5KB, tool calling, handoff, whitelist)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "public/widget.js pesa 7530 bytes (git show | wc -c), no ~5KB; handoff WhatsappHandoffCard en tool-cards; iframe en widget.js:125-127.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-223",
+    "clave": "Alpha.0 cleanup",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ls-tree de src/app sin rutas /os/ (control: 34 page.tsx en admin); api/admin/chatbot/events/route.ts:9 exige SUPER_ADMIN.",
+    "sigue_teniendo_sentido": "no"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D5-A1] onFinish en $transaction (RB.3) vs paralelizar writes (C3.4)",
+    "resultado": "parcial",
+    "evidencia": "Hoy persiste en un $transaction: persistTurn.ts:412 'scope.$transaction(async (tx) => {', reconcile.ts:25 '1 intento + 1 retry', handleChatRequest.ts:47 ONF-1. Gano RB.3; C3.4 no se aplico. Que pasa si un write falla queda para el lote del server (entrada persistTurn.ts:412, :562)."
+   },
+   {
+    "alerta": "[D5-A2] /smoke GET publico que quema tokens",
+    "resultado": "descartada",
+    "evidencia": "El endpoint se elimino: server/health/index.ts:1-2 ('runLLMSmokeTest/SmokeTestResult eliminados junto con el endpoint /smoke'). git ls-tree de src/app/api | grep -i smoke = 0 (control: 36 route.ts listados)."
+   },
+   {
+    "alerta": "[D5-A3] El transform propio de ONF-1 no puede colgar el stream ni pasar maxDuration 30 s",
+    "resultado": "fuera-de-mi-lote",
+    "evidencia": "El transform vive en el server (entradas: handleChatRequest.ts:56 DEADLINE-ONFINISH, :1046-1066 onError dentro del transform, :1186 toUIMessageStreamResponse). Desde el lote: el typewriter no puede colgar el stream (StreamingMarkdown.tsx:59-64 solo lee refs), pero sin timeout de cliente un stream colgado deja el input en readOnly (ChatWindow.tsx:143-144, :569) hasta que la plataforma corte la conexion."
+   },
+   {
+    "alerta": "[D5-A4] Credencial de Vertex vencida: que ve el visitante, que ve el cliente, como se entera el sistema",
+    "resultado": "parcial",
+    "evidencia": "Visitante (por lectura): el error del proveedor llega como frame de error -> useChatbot.ts:470-478 stream_interrupted -> DegradedBanner ambar 'Se corto la respuesta. / Escribi de nuevo y seguimos.' (DegradedBanner.tsx:25, :41-98), sin WhatsApp; si es 5xx antes del stream -> connection_failed (useChatbot.ts:284-291). Sistema: Sentry.captureException en handleChatRequest.ts:1057. Cliente (panel): fuera de lote. 'Key expuesta en logs' no es verificable en codigo.",
+    "hallazgo_titulo": "Con el proveedor caido (Vertex vencida) el visitante ve 'Se corto la respuesta / Escribi de nuevo y seguimos' en cada intento, sin derivacion a WhatsApp"
+   },
+   {
+    "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que no existia, BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+    "resultado": "confirmada",
+    "evidencia": "ChatWindow.tsx:321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' (unica aparicion en src segun git grep -i). B13.5 estaba equivocado. Ademas ignora welcomeMessage, que el embed (ChatbotEmbed.tsx:280) y la preview (BotConfigPreview.tsx:218) si usan.",
+    "hallazgo_titulo": "Estado vacio del widget de develOP ignora welcomeMessage: muestra 'Sistema Listo / Protocolo de consultoria iniciado. ¿Como puedo asistirle hoy?'"
+   },
+   {
+    "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; backfill de verticalPack cambia de bot segun la fuente",
+    "resultado": "parcial",
+    "evidencia": "El backfill cubre ambos: prisma/seeds/backfill-vertical-pack.ts:71-75 {develop:'agencia', sanmiguel:'usados', matsu:'usados'} (coincide con bitacora :15656). EV.5: scripts/ev5-smoke.mjs escribe en docs/ev5-transcripts, que no existe en origin/main (ls-tree = 0; control: docs/ev4-transcripts/*.md presentes). Es consistente con un cierre sin smokes."
+   },
+   {
+    "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+    "resultado": "descartada",
+    "evidencia": "git grep -i gdpr en src, public, scripts y prisma = 0 (control: aparece en docs/baselines/2026-07-auditoria-seguridad.md:55). La causa de fondo (salt literal) tambien parece cerrada: ip-hash.invariant.ts:7 documenta que en produccion sin CHATBOT_IP_HASH_SALT hashIp aborta."
+   },
+   {
+    "alerta": "[D5-A8] getLatencyHistory asignado al panel y al runtime",
+    "resultado": "parcial",
+    "evidencia": "Definido en server/admin/getLatencyHistory.ts:63 y usado solo por el panel: admin/chatbot/health/page.tsx:13, LatencyChart.tsx:16 y buildHealthVerdict.ts:2 (tipo). Ningun uso en server/chat (git grep): la asignacion de DERIVACION coincide con el codigo y la de MH.1 (runtime) no."
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/modules/chatbot/components/chat/QuickReplyChips.tsx",
+    "senales": [
+     "Sin importadores fuera de los barrels chat/index.ts:6 y modules/chatbot/index.ts:43 (git grep -w)",
+     "El changelog de Valentino lo declara muerto",
+     "Duplica los chips inline de ChatWindow.tsx:467-489"
+    ],
+    "que_rompe": "Solo los exports de los dos barrels."
+   },
+   {
+    "archivo": "src/modules/chatbot/components/chat/ChatMessages.tsx",
+    "senales": [
+     "Sin consumidores fuera de los barrels",
+     "ChatWindow implementa su propia lista (ChatWindow.tsx:326-403)"
+    ],
+    "que_rompe": "Exports en chat/index.ts:3 y modules/chatbot/index.ts:40."
+   },
+   {
+    "archivo": "src/modules/chatbot/components/chat/ChatMessage.tsx",
+    "senales": [
+     "Solo lo importa ChatMessages.tsx (tambien muerto) y los barrels",
+     "Sin markdown ni streaming, no se usa en ninguna superficie"
+    ],
+    "que_rompe": "Exports en chat/index.ts:4 y modules/chatbot/index.ts:41."
+   },
+   {
+    "archivo": "src/modules/chatbot/components/chat/ChatInput.tsx",
+    "senales": [
+     "Sin consumidores fuera de los barrels",
+     "ChatWindow y ChatbotEmbed tienen input propio"
+    ],
+    "que_rompe": "Exports en chat/index.ts:5 y modules/chatbot/index.ts:42."
+   },
+   {
+    "archivo": "src/modules/chatbot/components/chat/types.ts",
+    "senales": [
+     "ChatWindowProps (:22-35) duplica y contradice al real de ChatWindow.tsx:71-93 (degradedMode inexistente)",
+     "El barrel exporta el desfasado (chat/index.ts:8)"
+    ],
+    "que_rompe": "Quitar solo ChatWindowProps; UIChatMessage y ToolCallInUIMessage se siguen usando."
+   },
+   {
+    "archivo": "src/modules/chatbot/components/admin/useIsClient.ts",
+    "senales": [
+     "Copia 1:1 de src/lib/use-is-client.ts (git diff solo difiere en el comentario)",
+     "El propio lib lo documenta como copia"
+    ],
+    "que_rompe": "4 imports: BotConfigEditor.tsx:7, ActivationModal.tsx:6, BotConfigDiffModal.tsx:6, EmojiPickerField.tsx:9 (repuntar a @/lib/use-is-client)."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Widget de develOP operable solo con teclado",
+    "entorno": "local :3000 (servidor levantado por Valentino), Chrome desktop",
+    "pasos": [
+     "Abrir http://localhost:3000/ y esperar a que aparezca el launcher del chat",
+     "Sin mouse, presionar Tab hasta que el foco quede en el launcher (aria-label 'Abrir chat')",
+     "Presionar Enter y despues Espacio",
+     "Si se abre, presionar Escape",
+     "Con el panel abierto, presionar Tab varias veces y ver si el foco sale del panel hacia la pagina de atras"
+    ],
+    "esperado": "Enter/Espacio abren el chat, Escape lo cierra y devuelve el foco al launcher, y el foco no sale del panel mientras esta abierto.",
+    "senal_falla": "Enter/Espacio no hacen nada, Escape no cierra, o el foco sale del panel hacia la pagina.",
+    "escribe_db_o_email": false,
+    "precondiciones": "Bot 'develop' activo.",
+    "hallazgos": "Widget de develOP no operable por teclado"
+   },
+   {
+    "titulo": "Que ve el visitante con la credencial de Vertex vencida (control positivo de E10)",
+    "entorno": "local :3000 contra la Neon de desarrollo",
+    "pasos": [
+     "Abrir http://localhost:3000/ y abrir el chat",
+     "Escribir 'hola' y enviar",
+     "Anotar el banner que aparece y su texto",
+     "Escribir de nuevo y enviar 2 veces mas",
+     "Repetir en /embed/matsu (o el slug de un bot con WhatsApp configurado)",
+     "Revisar en Sentry si aparece un evento por cada intento"
+    ],
+    "esperado": "Despues de 1-2 fallas, el visitante recibe una derivacion a WhatsApp o un mensaje honesto de 'no disponible'.",
+    "senal_falla": "Cada intento muestra 'Se corto la respuesta. Escribi de nuevo y seguimos.' (o 'No pudimos conectar') sin boton de WhatsApp, aunque el bot tenga numero.",
+    "escribe_db_o_email": true,
+    "precondiciones": "Credencial de Vertex vencida (estado actual). Puede crear filas de Conversation/ChatMessage y consumir cuota de prueba.",
+    "hallazgos": "Con el proveedor caido (Vertex vencida) el visitante ve 'Se corto la respuesta...' sin derivacion a WhatsApp"
+   },
+   {
+    "titulo": "Colores del cliente en el widget embebido",
+    "entorno": "local :3000, sesion de cliente ORG_MEMBER de prueba",
+    "pasos": [
+     "Entrar como cliente de prueba a /dashboard/chatbot/settings",
+     "Elegir un color de acento no cyan (p. ej. violeta) y un tinte de chat, y guardar",
+     "Abrir /embed/<slug-del-bot> en otra pestana",
+     "Mirar la burbuja del usuario tras enviar un mensaje, el boton enviar, los dots de 'pensando' y el icono del estado vacio"
+    ],
+    "esperado": "Todo el widget usa el color elegido, como en la preview.",
+    "senal_falla": "Burbujas, boton, dots o icono siguen en cyan (#06b6d4).",
+    "escribe_db_o_email": true,
+    "precondiciones": "Bot de prueba activo. Guarda la config del bot.",
+    "hallazgos": "El widget del cliente (embed) ignora accentColor, accentSecondary y chatSurfaceTint"
+   },
+   {
+    "titulo": "Zoom de iOS al enfocar el input",
+    "entorno": "iPhone con Safari, contra la URL de preview o la IP local",
+    "pasos": [
+     "Abrir el sitio de develOP en Safari iOS",
+     "Abrir el chat y tocar el campo de texto",
+     "Repetir en una pagina que embebe /embed/<slug>"
+    ],
+    "esperado": "El teclado aparece sin que la pagina haga zoom y el panel queda entero.",
+    "senal_falla": "La pagina hace zoom al tocar el input y el panel queda cortado o desplazado.",
+    "escribe_db_o_email": false,
+    "precondiciones": "Dispositivo iOS real (no es emulable).",
+    "hallazgos": "iOS: textarea del widget a 13px sin maximum-scale"
+   },
+   {
+    "titulo": "Lector de pantalla durante la respuesta",
+    "entorno": "local :3000, Windows con NVDA o macOS con VoiceOver",
+    "pasos": [
+     "Activar el lector de pantalla",
+     "Abrir el chat y enviar una pregunta (con un proveedor que responda)",
+     "Escuchar que anuncia mientras se revela la respuesta"
+    ],
+    "esperado": "Se anuncia la respuesta completa una sola vez.",
+    "senal_falla": "Anuncia fragmentos repetidos o cortados mientras el texto se va revelando.",
+    "escribe_db_o_email": true,
+    "precondiciones": "Requiere un proveedor que responda (hoy Vertex esta vencida).",
+    "hallazgos": "La region aria-live envuelve el texto del typewriter"
+   },
+   {
+    "titulo": "Avatar 3D sin WebGL",
+    "entorno": "local :3000, Chrome con la aceleracion por hardware desactivada (Configuracion > Sistema)",
+    "pasos": [
+     "Desactivar la aceleracion por hardware y reiniciar Chrome",
+     "Entrar como cliente a /dashboard/chatbot/settings (picker con los avatares 3D)",
+     "Abrir /embed/<slug> de un bot con avatarStyle 'neuro' o 'legacy_neuro'"
+    ],
+    "esperado": "Los avatares 3D caen a un avatar liviano y la pagina sigue funcionando.",
+    "senal_falla": "La pagina o el iframe muestran la pantalla de error, o el widget desaparece.",
+    "escribe_db_o_email": false,
+    "precondiciones": "Un bot de prueba con avatar 3D.",
+    "hallazgos": "Sin error boundary local para los avatares 3D"
+   },
+   {
+    "titulo": "Rendimiento del selector de avatar",
+    "entorno": "local :3000, Chrome DevTools > Performance",
+    "pasos": [
+     "Entrar como SUPER_ADMIN a /admin/chatbots/<botId>, tab Configuracion > Apariencia",
+     "Grabar 10 s en el panel Performance sin tocar nada",
+     "Pasar el mouse por las tarjetas de avatar y grabar otros 10 s"
+    ],
+    "esperado": "La pagina en reposo no mantiene la GPU/CPU ocupadas y no se traba al pasar el mouse.",
+    "senal_falla": "Frames constantes a 60 fps en reposo, CPU/GPU altos o tirones visibles (el 'freeze' del changelog).",
+    "escribe_db_o_email": false,
+    "precondiciones": "Sesion SUPER_ADMIN de prueba.",
+    "hallazgos": "Avatares 3D siempre renderizando y AvatarPicker con dos canvas pesados"
+   },
+   {
+    "titulo": "Degradado sin numero de WhatsApp",
+    "entorno": "local :3000",
+    "pasos": [
+     "Con un bot de prueba sin whatsappNumber, pausarlo desde el admin (isActive=false)",
+     "Abrir /embed/<slug> de ese bot",
+     "Leer el card que aparece y probar el input"
+    ],
+    "esperado": "Un mensaje coherente ('el chat no esta disponible') sin prometer WhatsApp.",
+    "senal_falla": "Titulo 'Te seguimos por WhatsApp' sin boton y con el input bloqueado.",
+    "escribe_db_o_email": true,
+    "precondiciones": "Bot de prueba sin WhatsApp. Pausarlo escribe en BotConfig.",
+    "hallazgos": "Card de degradado promete WhatsApp sin numero"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "El lote no tiene page, layout, route handler ni server action (entradas vacias)",
+    "comando": "git grep -n -E \"^['\\\"]use server['\\\"]\" origin/main -- logic-core-v3/src/modules/chatbot/components/chat logic-core-v3/src/modules/chatbot/components/avatar logic-core-v3/src/modules/chatbot/components/admin/useIsClient.ts logic-core-v3/src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts",
+    "control_positivo": "El mismo patron sobre logic-core-v3/src/modules/chatbot/server/dashboard encuentra updateBotAppearance.ts"
+   },
+   {
+    "afirmacion": "El lote no accede a la base ni hace fetch (no hay forOrg/unsafeGlobalQuery/prisma)",
+    "comando": "git grep -n -E \"fetch\\(|prisma|@/lib/prisma|forOrg|unsafeGlobalQuery\" origin/main -- <rutas del lote>",
+    "control_positivo": "git grep -c fetch origin/main -- logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts = 8"
+   },
+   {
+    "afirmacion": "Ni el launcher ni el panel del widget de develOP manejan teclado (salvo Enter en el textarea) y no hay Escape",
+    "comando": "git grep -n -E \"onKey(Down|Up|Press)|keydown|'Enter'|Escape\" origin/main -- logic-core-v3/src/modules/chatbot/components/LogicCompanion.tsx logic-core-v3/src/modules/chatbot/components/chat/ChatWindow.tsx logic-core-v3/src/modules/chatbot/hooks/",
+    "control_positivo": "El mismo comando devuelve ChatWindow.tsx:540-541 (onKeyDown del textarea); ChatbotEmbed.tsx tiene 1 onKeyDown"
+   },
+   {
+    "afirmacion": "El widget no tiene aviso de IA/privacidad ni link a politica",
+    "comando": "git grep -n -i -E \"vertex|n8n|privacidad|privacy|datos personales|disclaimer|términos\" origin/main -- logic-core-v3/src/modules/chatbot/components/chat/ logic-core-v3/src/modules/chatbot/components/embed/ logic-core-v3/src/modules/chatbot/components/LogicCompanion.tsx",
+    "control_positivo": "git grep -l -i privacidad origin/main -- logic-core-v3/src/app encuentra api/chatbot/[slug]/chat/route.ts (:75)"
+   },
+   {
+    "afirmacion": "No hay paginas legales (privacidad/terminos/cookies) en la app",
+    "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep -i -E \"privac|legal|termin|terms|cookies\"",
+    "control_positivo": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep -c page.tsx = 86"
+   },
+   {
+    "afirmacion": "resolveAccentColor no existe y el widget no lee routeColorMap",
+    "comando": "git grep -n resolveAccentColor origin/main -- logic-core-v3/src ; git grep -n routeColorMap origin/main -- logic-core-v3/src",
+    "control_positivo": "routeColorMap aparece en getPublicConfig.ts:121, publicConfig.ts:50, saveBotConfig.ts:55 y otros, pero en ningun archivo de hooks/, chat/, embed/ ni LogicCompanion"
+   },
+   {
+    "afirmacion": "ChatbotEmbed no lee accentColor, accentSecondary ni chatSurfaceTint",
+    "comando": "git grep -n -E \"accentColor|accentSecondary|chatSurfaceTint|quickReplies\" origin/main -- logic-core-v3/src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+    "control_positivo": "El mismo grep devuelve quickReplies en :283 y :293"
+   },
+   {
+    "afirmacion": "No hay ErrorBoundary alrededor de los avatares ni del widget",
+    "comando": "git grep -n -E \"ErrorBoundary|componentDidCatch|getDerivedStateFromError\" origin/main -- logic-core-v3/src/modules/chatbot logic-core-v3/src/components/layout/ChatWidgetMount.tsx logic-core-v3/src/app/embed",
+    "control_positivo": "git grep -l -E \"ErrorBoundary|getDerivedStateFromError\" origin/main -- logic-core-v3/src encuentra admin/_components/AdminErrorBoundary.tsx"
+   },
+   {
+    "afirmacion": "Los avatares no se pausan fuera del viewport y ningun consumidor pasa frameloop",
+    "comando": "git grep -n -E \"IntersectionObserver|useInView|visibilitychange\" origin/main -- logic-core-v3/src/modules/chatbot/components/avatar ; git grep -n \"frameloop=\" origin/main -- logic-core-v3/src/modules/chatbot",
+    "control_positivo": "IntersectionObserver aparece en src/components/layout/HeroArtifactLayer.tsx y Navbar.tsx; frameloop= solo en NeuroAvatar.tsx:54"
+   },
+   {
+    "afirmacion": "El layout raiz no exporta viewport (sin maximumScale)",
+    "comando": "git grep -n -E \"export const viewport|generateViewport\" origin/main -- logic-core-v3/src/app/layout.tsx",
+    "control_positivo": "git grep -n \"export const viewport\" origin/main -- logic-core-v3/src/app encuentra embed/[slug]/page.tsx:13"
+   },
+   {
+    "afirmacion": "Avatares e indicador 'pensando' no consultan prefers-reduced-motion",
+    "comando": "git grep -n -E \"useReducedMotion|prefers-reduced-motion\" origin/main -- logic-core-v3/src/modules/chatbot/components/avatar logic-core-v3/src/modules/chatbot/components/chat ; git grep -n -E \"MotionConfig\" origin/main -- logic-core-v3/src",
+    "control_positivo": "El primer grep devuelve StreamingMarkdown.tsx:5 y :47"
+   },
+   {
+    "afirmacion": "ChatMessages, ChatInput y QuickReplyChips no tienen consumidores fuera de los barrels",
+    "comando": "git grep -n -E \"\\b(ChatMessages|ChatInput|QuickReplyChips)\\b\" origin/main -- logic-core-v3/src | grep -v components/chat/",
+    "control_positivo": "Solo devuelve modules/chatbot/index.ts:40,42,43; el mismo metodo encuentra ChatWindow importado en LogicCompanion.tsx:9"
+   },
+   {
+    "afirmacion": "No existe ruta /smoke en la API",
+    "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/api | grep -i smoke",
+    "control_positivo": "git ls-tree ... | grep -c route.ts = 36"
+   },
+   {
+    "afirmacion": "No queda la docstring 'GDPR-friendly' en el codigo",
+    "comando": "git grep -n -i gdpr origin/main -- logic-core-v3/src logic-core-v3/public logic-core-v3/scripts logic-core-v3/prisma",
+    "control_positivo": "git grep -n -i gdpr origin/main -- logic-core-v3/docs encuentra docs/baselines/2026-07-auditoria-seguridad.md:55"
+   },
+   {
+    "afirmacion": "No hay transcripts de EV.5 en el repo",
+    "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/docs | grep -i ev5-transcripts",
+    "control_positivo": "El mismo comando con ev4-transcripts lista README.md y 4 transcripts"
+   },
+   {
+    "afirmacion": "No hay TODO/FIXME/mocks en el lote",
+    "comando": "git grep -n -E \"TODO|FIXME|HACK|XXX|lorem|mock\" origin/main -- <rutas del lote>",
+    "control_positivo": "Matchea StreamingMarkdown.tsx:73 (la palabra castellana 'TODO'), lo que prueba que el grep recorre el lote"
+   },
+   {
+    "afirmacion": "No hay captura de audio (M1) en el modulo",
+    "comando": "git grep -n -E \"MediaRecorder|getUserMedia|audio/webm\" origin/main -- logic-core-v3/src/modules/chatbot",
+    "control_positivo": "git grep -c AudioContext origin/main -- logic-core-v3/src/modules/chatbot/hooks/useChatbotSounds.ts = 8"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Campos de estilo que la preview interpreta pero una superficie real ignora (paridad config-widget a mano)",
+    "como_buscarlo": "git grep -n -E \"6,182,212|#06b6d4\" origin/main -- logic-core-v3/src/modules/chatbot ; comparar los campos de PublicBotConfig leidos en BotConfigPreview vs ChatbotEmbed vs ChatWindow",
+    "donde_aparecio": "ChatbotEmbed.tsx:269/:537 (cyan fijo) vs ChatWindow.tsx:116 (accent); welcomeMessage en ChatbotEmbed.tsx:280 pero no en ChatWindow.tsx:321"
+   },
+   {
+    "patron": "role=\"button\" con tabIndex pero sin handler de teclado",
+    "como_buscarlo": "git grep -n 'role=\"button\"' origin/main -- logic-core-v3/src y verificar onKeyDown en el mismo elemento",
+    "donde_aparecio": "LogicCompanion.tsx:180-182"
+   },
+   {
+    "patron": "Inputs/textarea con font-size < 16px en superficies mobile (zoom de iOS)",
+    "como_buscarlo": "git grep -n -E \"fontSize: '1[0-5]px'\" origin/main -- logic-core-v3/src y revisar si estan en textarea/input; tambien clases text-sm/text-xs en <input>",
+    "donde_aparecio": "ChatWindow.tsx:585, ChatbotEmbed.tsx:510"
+   },
+   {
+    "patron": "Canvas R3F con dpr > 1.5 o sin pausa fuera de viewport",
+    "como_buscarlo": "git grep -n -E \"dpr=\\{\\[1, ?2\\]\\}|<Canvas\" origin/main -- logic-core-v3/src y revisar frameloop/IntersectionObserver",
+    "donde_aparecio": "LegacyNeuroAvatar.tsx:940, NeuroAvatar.tsx:33"
+   },
+   {
+    "patron": "Region aria-live que envuelve texto que cambia por frame (streaming/typewriter)",
+    "como_buscarlo": "git grep -n 'aria-live' origin/main -- logic-core-v3/src y revisar si el contenido se actualiza en rAF/stream",
+    "donde_aparecio": "ChatWindow.tsx:277-278 con StreamingMarkdown.tsx:99"
+   },
+   {
+    "patron": "Falla persistente de un proveedor presentada como transitoria ('proba de nuevo') sin canal alternativo",
+    "como_buscarlo": "Revisar banners/estados de error de integraciones (Vertex, Brevo, n8n) en el panel del cliente y el admin: git grep -n -i -E \"proba de nuevo|probá de nuevo|intentá de nuevo\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "DegradedBanner.tsx:21-26 con useChatbot.ts:470-478"
+   },
+   {
+    "patron": "Archivos fuente con byte NUL (git los trata como binarios y oculta diffs)",
+    "como_buscarlo": "git log --numstat origin/main -- logic-core-v3/src | grep -P '^-\\t-\\t.*\\.(ts|tsx)$'",
+    "donde_aparecio": "revealSafeMarkdown.ts:15 (commit 3bc2349a)"
+   },
+   {
+    "patron": "avatarImageUrl / imagenes data-URI sin tope de tamano que viajan en la config publica",
+    "como_buscarlo": "git grep -n -E \"avatarImageUrl\\s*:\\s*z\" origin/main -- logic-core-v3/src y revisar .max(); comparar con avatarImageUrlSchema",
+    "donde_aparecio": "createClientWithBot.ts:57 'avatarImageUrl: z.string().nullable()' (fuera de lote), consumido por AvatarRenderer.tsx:53-63"
+   },
+   {
+    "patron": "Animaciones infinitas sin prefers-reduced-motion",
+    "como_buscarlo": "git grep -n \"repeat: Infinity\" origin/main -- logic-core-v3/src y verificar useReducedMotion en el componente",
+    "donde_aparecio": "ChatWindow.tsx:445, PulseAvatar.tsx:64, MonogramAvatar.tsx:81, GeometricAvatar.tsx:123"
+   },
+   {
+    "patron": "Hooks utilitarios duplicados 1:1 entre lib y modulos de feature",
+    "como_buscarlo": "git grep -n useSyncExternalStore origin/main -- logic-core-v3/src y comparar contenidos",
+    "donde_aparecio": "src/modules/chatbot/components/admin/useIsClient.ts vs src/lib/use-is-client.ts"
+   },
+   {
+    "patron": "Docstrings que garantizan algo que el codigo no cumple ('never throws', 'sin escape hatches')",
+    "como_buscarlo": "git grep -n -i -E \"never throws|guarantee|garantiza\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "AvatarRenderer.tsx:38, avatarStyleSchema.ts:45-46"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:288",
+    "id_previo": "SEC-07",
+    "estado": "abierto",
+    "evidencia": "Sigue sin aviso en el widget: git grep -i -E 'vertex|n8n|privacidad|disclaimer' en components/chat, components/embed y LogicCompanion = 0 (control: route.ts:75). El empty state ChatWindow.tsx:311-321 no informa nada. La redaccion de PII hacia Vertex no esta en este lote: scrub-pii solo se usa para Sentry/logs (handleChatRequest.ts:1388, persistTurn.ts:620)."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1908",
+    "id_previo": "LEG-01",
+    "estado": "abierto",
+    "evidencia": "origin/main no tiene paginas legales: git ls-tree de src/app | grep -i -E 'privac|legal|termin|terms|cookies' = 0 (control: 86 page.tsx). El widget no enlaza ninguna (git grep '/privacidad|/privacy|/legal' en modules/chatbot y widget.js = 0)."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1909",
+    "id_previo": "A11Y-01",
+    "estado": "parcial",
+    "evidencia": "El input del panel ya es operable con teclado (Enter en ChatWindow.tsx:540-546; readOnly en vez de disabled mientras responde, :569, con re-foco :172-177), y ChatInput.tsx quedo como codigo muerto. Sigue abierto lo principal: el launcher (LogicCompanion.tsx:180-182, div role=button con onClick y sin handler de teclado) y no hay Escape, aria-modal ni trampa de foco."
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "Widget de develOP no operable por teclado: el launcher no abre con Enter/Espacio y el panel no cierra con Escape ni retiene el foco",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Los hechos se confirman leyendo origin/main @ 57c421bc. LogicCompanion.tsx:177-221: el launcher es un <motion.div role=\"button\" tabIndex={0} onClick={handleToggle}> sin onKeyDown. Según node_modules/motion-dom (12.42.0) dist/es/gestures/press/utils/keyboard.mjs, el press de teclado de motion solo filtra 'Enter' (Espacio no) y despacha PointerEvent sintéticos pointerdown/pointerup. Esos eventos no generan 'click', así que el onClick de React no se dispara. Con reducedMotion, whileTap queda undefined (:215). La burbuja proactiva tampoco sirve como alternativa: ProactiveTooltip.tsx:121-138 acepta con un div onClick que no es enfocable. El evento 'open-mascot-chat' que despachan los FAQ no tiene ningún listener en src (git grep sin coincidencias). ChatWindow.tsx:247 tiene role=\"dialog\" sin aria-modal; git grep de escape|onKeyDown|keydown|aria-modal en chat/, hooks/ y LogicCompanion solo da el onKeyDown del textarea (ChatWindow.tsx:540); no hay trampa de foco ni devolución del foco. El componente está vivo: lo monta ChatWidgetMount (layout.tsx:137) en todas las rutas públicas. Bajo a MEDIA porque el alcance es menor de lo que dice el hallazgo: LogicCompanion es solo el widget del sitio propio de develOP (WIDGET_SLUG='develop', ChatWidgetMount.tsx:10). El launcher del embed que reciben los sitios de clientes es un <button> nativo (public/widget.js:100-102), así que el primer cliente real no hereda el problema de abrir el chat. Por esa razón no corresponde «bloqueante para L3»: la a11y no está entre los nueve criterios de L3 y el camino del cliente queda fuera del defecto. La falla de WCAG 2.1.1 (A) en el sitio propio sí es real.",
+    "evidencia_contra": [
+     "public/widget.js:100-102 — el launcher del embed para sitios de clientes es un <button> nativo con aria-label: el defecto de abrir el chat no llega al producto del cliente",
+     "src/components/layout/ChatWidgetMount.tsx:10,42 — LogicCompanion solo se monta con slug 'develop' (sitio propio)",
+     "src/modules/chatbot/components/chat/ChatHeader.tsx:105-107 — cerrar con teclado es posible con Tab hasta el <button aria-label=\"Cerrar chat\">: falta Escape, pero se puede cerrar",
+     "ChatWindow.tsx:161-163 — al abrir, el foco va al input (manejo parcial del foco)"
+    ]
+   },
+   {
+    "titulo": "El widget no avisa que la conversacion la procesa un proveedor de IA ni enlaza una politica de privacidad, y la app no tiene paginas legales",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Confirmado leyendo origin/main. Busqué con git grep inteligencia artificial|asistente virtual|IA|vertex|n8n|privacidad|disclaimer|política|términos|consentimiento|tus datos en components/chat, components/embed, LogicCompanion.tsx, tool-cards y public/widget.js: solo aparecen comentarios de código (HandoffOptionsCard.tsx:17, renderToolCall.tsx:44); control positivo: 'Sistema Listo' en ChatWindow.tsx. El listado de src/app (86 page.tsx) no tiene rutas privac|legal|termin|terms|cookie|politic|policy, y no hay links legales en src/components ni en src/app. captureLead.ts:58-70 pide name/phone/email, y crm/postToN8n los reenvía a n8n. Bajo a MEDIA porque no encaja en ALTA según la rúbrica: no es una vulnerabilidad explotable, no rompe un flujo principal y los avisos legales no están entre los nueve criterios de L3. Es un faltante (FAL) de cumplimiento con la Ley 25.326 que hay que resolver antes del primer cliente real, no un bug. Además el envío a n8n es opcional y depende del plan (crm/index.ts:7, plan.crmEnabled), y va al CRM del propio cliente.",
+    "evidencia_contra": [
+     "src/modules/chatbot/server/verticals/packs/base.ts:93 — el welcomeMessage por defecto del pack base dice 'Soy el asistente virtual', y ChatbotEmbed.tsx:280 lo muestra: hay un aviso parcial de que es un bot (sin nombrar al proveedor ni la política)",
+     "src/modules/chatbot/server/crm/index.ts:7 — el sync a n8n depende de plan.crmEnabled y va al CRM del cliente, no a un tercero de develOP",
+     "El sitio del cliente que embebe el widget puede tener su propia política; la ausencia de páginas legales en develOP afecta sobre todo al sitio propio"
+    ]
+   }
+  ]
+ }
+}

@@ -12,7 +12,8 @@ export const meta = {
 // la rúbrica y las herramientas. Lectores por lote (semáforo de 3) + verificador adversarial
 // solo para CRÍTICA/ALTA (DEC-37). El meta tiene que ser lo primero del archivo.
 
-// args: { dominio, nombre, ciclo, lente, foco, contexto, prompt_textual, herramientas, lotes: [{id, archivos, carpetas, loc, previas, planeado, insumos}] }
+// args: { dominio, nombre, ciclo, lente, foco, contexto, prompt_textual, herramientas, lotes: [{id, archivos, carpetas, loc, previas, planeado, insumos}],
+//         acotado?, flujos_cerrados?, higiene? } — los tres últimos, desde D3 (DEC-53 y DEC-55); sin ellos el prompt y el schema son los de antes
 const A = args
 const APP = 'C:\\auditoria-2026-10\\logic-core-v3'
 
@@ -71,6 +72,11 @@ const SCHEMA_LECTOR = {
   },
   required: ['archivos_leidos', 'entradas', 'flujos', 'hallazgos', 'funcionalidades', 'planeado_cruzado', 'alertas_verificadas', 'candidatos_poda', 'casos_prueba_manual', 'ausencias', 'patrones_a_cruzar', 'previas_reverificadas'],
 }
+// DEC-55 (desde D3, con args.higiene): los BAJA puramente cosméticos van en una lista aparte, no como hallazgos
+if (A.higiene) {
+  SCHEMA_LECTOR.properties.higiene_ui = { type: 'array', items: { type: 'object', properties: { ruta: { type: 'string' }, linea: { type: 'number' }, tipo: { type: 'string', enum: ['copy', 'tilde', 'strokeWidth', 'contraste', 'inline', 'otro'] }, detalle: { type: 'string' } }, required: ['ruta', 'linea', 'tipo', 'detalle'] } }
+  SCHEMA_LECTOR.required.push('higiene_ui')
+}
 const SCHEMA_VERIF = {
   type: 'object',
   properties: { veredictos: { type: 'array', items: { type: 'object', properties: { titulo: { type: 'string' }, se_sostiene: { type: 'boolean' }, severidad_ajustada: { type: 'string', enum: ['CRÍTICA', 'ALTA', 'MEDIA', 'BAJA', 'DESCARTAR'] }, confianza_ajustada: { type: 'string', enum: ['VERIFICADO-POR-LECTURA', 'PROBABLE', 'HIPÓTESIS'] }, motivo: { type: 'string' }, evidencia_contra: { type: 'array', items: { type: 'string' } } }, required: ['titulo', 'se_sostiene', 'severidad_ajustada', 'confianza_ajustada', 'motivo', 'evidencia_contra'] } } },
@@ -87,12 +93,12 @@ ${A.rubrica}
 
 TU LOTE: ${l.id} — dominio ${A.dominio} (${A.nombre}), ciclo ${A.ciclo}${A.lente ? `, lente: ${A.lente}` : ''}.
 FOCO DEL DOMINIO: ${A.foco}
-${A.contexto}
+${A.contexto}${A.flujos_cerrados ? `\n\nFLUJOS YA TRAZADOS EN DOMINIOS CERRADOS (resumen: nombre y cadena de ruta:linea; no los re-traces: si tu flujo desemboca en uno, citalo por su nombre):\n${A.flujos_cerrados}` : ''}
 
 ARCHIVOS DEL LOTE (${l.archivos.length} archivos, ${l.loc} lineas). Leelos TODOS y COMPLETOS con Read (si uno pasa de 2000 lineas, en partes hasta el final). Rutas relativas a ${APP}:
 ${l.archivos.map((f) => '- ' + f).join('\n')}
 
-Para trazar flujos podes leer cualquier otro archivo del repo, pero respondes por la cobertura de tu lote: en archivos_leidos lista cada archivo del lote con su total de lineas y si lo leiste completo (rangos si fue en partes).
+${A.acotado ? `TRAZA SOLO DENTRO DE TU LOTE (regla de esta corrida). Todo archivo que no esta en la lista de arriba es de otro lote o de otro dominio: cuando un flujo sale de tu lote (import, llamada, fetch o form action hacia un archivo de afuera), cita el punto de salida con ruta:linea de TU lote y el archivo destino, y frena ahi: no abras ese archivo ni lo recorras con Grep. Si el destino aparece en FLUJOS YA TRAZADOS, cita ese flujo por su nombre en vez de re-trazarlo. Los guards de layouts y de src/proxy.ts ya estan en el contexto fijo: citalos, no los releas. Excepciones acotadas: (1) para confirmar una CRITICA o ALTA de tu lote podes leer un tramo puntual de afuera (Read con offset/limit, no el archivo entero); (2) los cruces de PLAN y las ausencias van con git grep (es barato y no cuenta como releer). Respondes por la cobertura de tu lote: en archivos_leidos lista cada archivo del lote con su total de lineas y si lo leiste completo (rangos si fue en partes).` : `Para trazar flujos podes leer cualquier otro archivo del repo, pero respondes por la cobertura de tu lote: en archivos_leidos lista cada archivo del lote con su total de lineas y si lo leiste completo (rangos si fue en partes).`}
 
 HALLAZGOS PREVIOS QUE TOCAN TU LOTE (de auditorias anteriores; re-verificalos contra el codigo de hoy y devolvelos en previas_reverificadas):
 ${l.previas && l.previas.length ? l.previas.map((p) => `- ${p.doc}:${p.linea} [${p.id_previo}] (${p.severidad_original}) ${p.titulo} — archivos citados: ${(p.archivos_citados || []).join(', ')}`).join('\n') : '- (ninguno)'}
@@ -105,13 +111,13 @@ ${A.herramientas}
 
 QUE DEVOLVES (StructuredOutput):
 - entradas: CADA page.tsx, layout.tsx, route handler (cada metodo exportado) y server action (cada funcion exportada de un archivo 'use server') de tu lote, con: auth (si/no/parcial/heredado de layout o proxy, con ruta:linea), rol exigido y evidencia, de donde sale el organizationId (sesion | parametro | mixto | no-aplica | no-filtra) con ruta:linea, validacion de entrada (zod/manual/parcial/no) con evidencia, rate limit. Protocolo SEC: la org tiene que salir de la sesion, nunca de un parametro de URL/body.
-- flujos: los principales de punta a punta (UI -> action/route -> lib -> DB) con ruta:linea en cada paso.
-- hallazgos: en el formato pedido (cada uno con evidencia ruta:linea REAL y un fragmento minimo de <=3 lineas, nunca un secret; nodos = ids del Atlas). Sin evidencia no hay hallazgo. Si para confirmarlo hace falta runtime, base o navegador: requiere_verificacion_humana=true y agregas el caso en casos_prueba_manual.
+${A.acotado ? `- flujos: los principales de tu lote (UI -> action/route -> lib -> DB) con ruta:linea en cada paso; donde el flujo sale del lote, el ultimo paso es 'sale del lote: ruta:linea -> <archivo destino>' (o el nombre del flujo ya trazado en que desemboca).` : `- flujos: los principales de punta a punta (UI -> action/route -> lib -> DB) con ruta:linea en cada paso.`}
+- hallazgos: en el formato pedido (cada uno con evidencia ruta:linea REAL y un fragmento minimo de <=3 lineas, nunca un secret; nodos = ids del Atlas). Sin evidencia no hay hallazgo. Si para confirmarlo hace falta runtime, base o navegador: requiere_verificacion_humana=true y agregas el caso en casos_prueba_manual.${A.higiene ? ` Los BAJA puramente cosmeticos (copy y textos, tildes, strokeWidth de iconos, contraste de color, estilos inline) NO van en hallazgos: van en higiene_ui. Los BAJA de seguridad, de datos o de comportamiento siguen en hallazgos.` : ''}
 - funcionalidades: por cada herramienta que toque tu lote, sus funcionalidades (unidad minima que hace algo para el usuario), con id estable '<area>.<herramienta>.<slug-en-kebab>' (ej. h2.cli-inicio.resumen-semanal), madurez L0-L4 o L? con su evidencia (L2+ exige el camino feliz trazado con ruta:linea; si no, L?) y los nueve criterios L3 con la rubrica.
 - alertas_verificadas: si arriba hay ALERTAS DE LOS DOCS, una entrada por alerta: confirmada (y entonces tambien va como hallazgo; pone su titulo en hallazgo_titulo), descartada o parcial, con evidencia ruta:linea; 'fuera-de-mi-lote' solo si no la podes resolver ni con git grep.
 - candidatos_poda: archivos de tu lote que parezcan muertos o duplicados, con señales objetivas.
 - ausencias: toda afirmacion 'no existe X' con el comando git grep sobre origin/main y su control positivo.
-- patrones_a_cruzar: patrones defectuosos que convenga buscar en el resto del repo.`
+- patrones_a_cruzar: patrones defectuosos que convenga buscar en el resto del repo.${A.higiene ? `\n- higiene_ui: cada detalle cosmetico de tu lote (copy, tilde, strokeWidth, contraste, inline u otro) con ruta, linea, tipo y un detalle de una linea; sin fragmento. Va todo junto en un unico hallazgo de higiene por dominio que arma el padre.` : ''}`
 
 const promptVerif = (l, hs) => `${A.preambulo}
 

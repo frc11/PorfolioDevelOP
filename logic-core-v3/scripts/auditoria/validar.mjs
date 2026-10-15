@@ -138,11 +138,17 @@ for (const f of todos) {
 // Lo que pasa el tope queda local (no se commitea) y se anota en el plan; lo que la corrida
 // necesita para regenerar va partido con crudo-partes.mjs.
 const LOCALES = new Set(['_crudo/depcruise.json'])
+// El script de un workflow de F2 (_crudo/ciclos/<ciclo>.workflow.js) se regenera igual con
+// f2-construir.mjs desde <ciclo>.args.json + plantilla + PROMPT.md: si pasa el tope queda local
+// (aviso) mientras no esté en el índice de git; si alguien lo stageó, es error como cualquier otro.
+const enIndice = new Set(execFileSync('git', ['-c', 'core.quotepath=off', 'ls-files', '--', path.join(DIR, '_crudo')], { cwd: repoRoot, encoding: 'utf8', maxBuffer: 1 << 24 }).split('\n').filter(Boolean).map((p) => p.replace(/^.*?docs\/auditoria-2026-10\//, '')))
 for (const f of todos) {
   const rel = path.relative(DIR, f).split(path.sep).join('/')
   if (!rel.startsWith('_crudo/') || LOCALES.has(rel)) continue
   const bytes = statSync(f).size
-  if (bytes > 300 * 1024) err(rel, `pesa ${Math.round(bytes / 1024)} KB: el tope de lo crudo es 300 KB (partirlo con crudo-partes.mjs o dejarlo local)`)
+  if (bytes <= 300 * 1024) continue
+  if (/^_crudo\/ciclos\/[^/]+\.workflow\.js$/.test(rel) && !enIndice.has(rel)) aviso(rel, `pesa ${Math.round(bytes / 1024)} KB: queda local (se regenera con f2-construir.mjs desde ${rel.replace(/\.workflow\.js$/, '.args.json').replace(/^_crudo\/ciclos\//, '')})`)
+  else err(rel, `pesa ${Math.round(bytes / 1024)} KB: el tope de lo crudo es 300 KB (partirlo con crudo-partes.mjs o dejarlo local)`)
 }
 
 if (args.includes('--emitir')) {

@@ -436,6 +436,541 @@
    "resultado": "parcial",
    "evidencia": "Sube de HIPOTESIS a PROBABLE por lectura: el start y el callback del OAuth exigen SUPER_ADMIN (src/app/api/auth/google-business/start/route.ts:7, callback/route.ts:15) y el callback guarda los tokens en la org del state (callback/route.ts:49-52), asi que el consentimiento de Google ocurre en el navegador del admin con la cuenta que el admin use. Falta confirmar en runtime que cuenta se usa (no hay cuenta GBP de prueba, PLAN-112/117).",
    "hallazgo_titulo": "Acciones del motor de reseñas sin Zod ni rate limit: rating, nombre y texto que van al LLM los manda el navegador, reviewName se interpola en la URL de Google y los errores crudos vuelven al cliente"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction (mensaje, conversación, cuota) y C3.4 quiere paralelizar esos 3 writes; ver qué hace hoy y qué pasa si uno falla",
+   "resultado": "descartada",
+   "evidencia": "Los tres writes van en una sola scope.$transaction, en orden mensaje → conversación → cupo (persistTurn.ts:412-472): RB.3 está hecho y C3.4 queda contradicho a propósito (orden anti-deadlock, persistTurn.ts:379-388). Si uno falla: rollback completo, un reintento con dedup del ASSISTANT (persistTurn.ts:413-431; reconcile.ts:30 PERSIST_TX_MAX_ATTEMPTS = 2), sin reintento ante deadline o falta de presupuesto (persistTurn.ts:485-503); al agotarse se pierde el registro del turno (no hay estado parcial) con rastro en stderr, ChatbotEvent chat.persist_error y Sentry (persistTurn.ts:552-624). El USER se persiste antes, fuera de la tx (handleChatRequest.ts:606-617)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "alerta": "[D5-A2] /smoke: T0.1 inmediato vs carril de seguridad de Franco; el previo RT-2 dice GET público sin auth ni rate limit que quema tokens",
+   "resultado": "descartada",
+   "evidencia": "El endpoint ya no existe: git ls-tree -r --name-only origin/main -- src/app/api/chatbot lista solo chat, config y health; health/index.ts:1-4 documenta el borrado (CARRERAS commit 3). Queda el /health público, que no llama al LLM pero expone detalles internos (hallazgo aparte)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "alerta": "[D5-A3] Stream: verificar que el transform actual no puede colgar el stream ni pasar el maxDuration de 30 s",
+   "resultado": "parcial",
+   "evidencia": "El transform ya no retiene chunks: encola cada uno en la misma invocación y no tiene flush (reconcile.ts:514-531), así que no puede reproducir el DEADLOCK-FINISH-STEP. Pero no hay reloj de pared: el streamText de producción no fija maxOutputTokens (handleChatRequest.ts:937-953) y los watchdogs son de inactividad (reconcile.ts:218, 236, 252, 267, 281), así que una generación larga puede superar los 30 s; en ese caso computeHookBudgetMs da 0 (reconcile.ts:137-145) y el turno se abandona sin persistir ni contar costo.",
+   "hallazgo_titulo": "El tab Avanzado del bot edita modelo, temperatura, tokens máximos, cuota y 'Digest diario', y el runtime no usa ninguno"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "alerta": "[D5-A4] Vertex: la bitácora dice 'key de Vertex expuesta en logs, pendiente de rotación'; la credencial vencida es el control positivo de E10",
+   "resultado": "parcial",
+   "evidencia": "No hay credenciales de cuenta de servicio versionadas en origin/main (ver ausencias). La rotación no es verificable desde el repo. Existe una vía de fuga plausible: google.ts:72-82 reintenta JSON.parse de la credencial en cada pedido y el mensaje del error termina en ChatbotEvent y Sentry (handleChatRequest.ts:1376-1392). Para E10: el sistema no se entera (health OK, sin evento ERROR, conversación borrada; ver hallazgo).",
+   "hallazgo_titulo": "Con Vertex caído (hoy, credencial vencida) nadie se entera: el health dice 'Todo OK', no queda error en la base y el cliente ve su bot 'Activo' sin conversaciones"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "alerta": "[D5-A5] 'Protocolo de consultoría': B13.5 dice que el literal no existía; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+   "resultado": "confirmada",
+   "evidencia": "src/modules/chatbot/components/chat/ChatWindow.tsx:321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' en el estado vacío; ChatWindow solo lo usa LogicCompanion (widget del sitio de develOP).",
+   "hallazgo_titulo": "El widget de develOP saluda con 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?'"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "alerta": "[D5-A6] EV.5 se cerró con los smokes sin correr; el backfill de verticalPack cambia de bot según la fuente (sanmiguel, matsu, ambos)",
+   "resultado": "parcial",
+   "evidencia": "El script cubre los tres bots: develop → agencia, sanmiguel → usados, matsu → usados (prisma/seeds/backfill-vertical-pack.ts:72-74), con dry-run. Si se corrió y si se hicieron los smokes no es verificable desde el código. Además ningún alta ni editor escribe verticalPack, así que los bots nuevos quedan en 'base'.",
+   "hallazgo_titulo": "El pack vertical (EV) no se puede asignar a un bot nuevo desde ningún lado"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el propio handoff declara falsa",
+   "resultado": "descartada",
+   "evidencia": "git grep -n -i gdpr origin/main -- src prisma public → vacío; el commit 819b9e0e (en main) reescribió ipHash.ts: la doc describe los usos reales y hashIp aborta sin salt en producción (ipHash.ts:20-33)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "alerta": "[D5-A8] getLatencyHistory asignado al panel (DERIVACION) y también al runtime (MH.1)",
+   "resultado": "parcial",
+   "evidencia": "En código es una función del panel admin: su único consumidor es /admin/chatbot/health (health/page.tsx:3,13) y buildHealthVerdict la tipa; agrega latencia de todas las orgs con una PENDIENTE-DECISIÓN explícita (getLatencyHistory.ts:68-74). El conflicto de dueño sigue abierto como decisión.",
+   "hallazgo_titulo": "El health 'del bot develOP' mezcla la latencia de todas las orgs y da instrucciones viejas (API key de Gemini)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction; C3.4 quiere paralelizar los 3 writes",
+   "resultado": "parcial",
+   "evidencia": "persistTurn.ts:379-472: ChatMessage ASSISTANT -> Conversation -> QuotaUsage (incrementQuota con tx) van en UN scope.$transaction (RB.3 hecho), con retry acotado (PERSIST_TX_MAX_ATTEMPTS=2, reconcile.ts:30) y dedup del commit fantasma (:413-431). C3.4 no se aplico y es incompatible con la tx interactiva. Si uno falla: rollback de los tres; agotado el retry -> chat.persist_failed a stderr, chat.persist_error best-effort y Sentry sin flush (:552-624); el visitante ya vio la respuesta, el USER queda persistido (handleChatRequest.ts:612) y se pierde el turno ASSISTANT. messageCount suma +2 fijo (persistTurn.ts:447)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "alerta": "[D5-A2] /smoke: GET publico sin auth ni rate limit que quema tokens (RT-2)",
+   "resultado": "parcial",
+   "evidencia": "/smoke borrado (commit 02a2f812; server/health/index.ts:1-5; api/chatbot solo tiene chat, config y health; git grep -i smoke en src/app -> 0). Queda GET /api/chatbot/[slug]/health publico sin auth ni rate limit (health/route.ts:6-19; proxy.ts:172 no cubre /api): no quema tokens pero expone configuracion y pega a Neon.",
+   "hallazgo_titulo": "GET /api/chatbot/[slug]/health es publico, sin rate limit, y expone el estado de configuracion"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "alerta": "[D5-A3] Stream: el transform propio no debe poder colgar el stream ni pasar el maxDuration de 30 s",
+   "resultado": "parcial",
+   "evidencia": "El transform actual (reconcile.ts:484-534) reenvia cada chunk en la misma invocacion y no tiene flush: no puede repetir el deadlock de 644b2b7. Pero no hay techo absoluto: ventanas de inactividad de 12 s re-armadas por step (reconcile.ts:267; handleChatRequest.ts:987-989) + 15 s de tool (reconcile.ts:281) + pre-LLM en frio suman ~45 s contra maxDuration 30 (chat/route.ts:8).",
+   "hallazgo_titulo": "El stream no tiene techo absoluto: el peor caso de ventanas suma ~45 s contra maxDuration 30 s"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "alerta": "[D5-A4] Vertex: key expuesta en logs pendiente de rotacion; credencial vencida como control positivo de E10",
+   "resultado": "confirmada",
+   "evidencia": "No hay credencial versionada (git grep de private_key / BEGIN PRIVATE KEY / AIza -> solo placeholders en .env.example:103 y :170 y docs); la exposicion 'en logs' esta fuera del repo y no se puede verificar por codigo. Con la credencial vencida: el health solo instancia el provider y da OK (checkHealth.ts:46-58); onError deja stderr + Sentry sin flush (handleChatRequest.ts:1046-1060) y descarta la conversacion nueva con el cupo devuelto (:1070-1109; reconcile.ts:366-370); el visitante ve 'Se corto la respuesta.' (useChatbot.ts:470-482; ai/dist/index.mjs:13787-13811 corta en el chunk de error); el dueno ve 'Activo · respondiendo a tus visitantes' (dashboard/chatbot/layout.tsx:50-52).",
+   "hallazgo_titulo": "La caida de Vertex no se detecta: health en verde, panel del dueno 'respondiendo' y sin alerta"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que el literal no existia; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+   "resultado": "confirmada",
+   "evidencia": "ChatWindow.tsx:311 'Sistema Listo' y :321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' en el empty-state del widget on-site. B13.5 (bitacora-roadmap.md:8905) estaba equivocado; BLOQUE VOZ (:16584) tenia razon.",
+   "hallazgo_titulo": "Copy del widget: 'Protocolo de consultoria iniciado' en usted y jerga, 'WhatsApp no configurado.' al visitante y textos en ingles"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; el backfill de verticalPack cambia de bot segun la fuente",
+   "resultado": "parcial",
+   "evidencia": "El codigo resuelve la contradiccion de fuentes: prisma/seeds/backfill-vertical-pack.ts:71-75 mapea develop->agencia, sanmiguel->usados y matsu->usados; si se corrio contra Neon es estado de la base. Gate sin cumplir: los 4 transcripts de usados (docs/ev4-transcripts/usados-*.md) dicen 'HTTP 404 — Bot not found or inactive' y ev5-transcripts/README.md deja sanmiguel PENDIENTE. Ademas los bots nuevos nacen en 'base' (onboarding/core.ts:128-136; createClientWithBot.ts:159-185).",
+   "hallazgo_titulo": "Los bots nuevos nacen con verticalPack 'base' y no hay forma de asignarles el pack de su rubro"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el propio handoff declara falsa",
+   "resultado": "descartada",
+   "evidencia": "git grep -i gdpr en src -> 0; git log -S GDPR muestra que 819b9e0e (P2 privacidad) la quito. ipHash.ts:3-19 describe hoy los usos reales y que la no-reversibilidad depende del salt, obligatorio en prod (:21-27)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "alerta": "[D5-A8] getLatencyHistory asignado al panel (DERIVACION-chat-panel) y al runtime (MH.1)",
+   "resultado": "confirmada",
+   "evidencia": "getLatencyHistory solo lo consumen /admin/chatbot/health (page.tsx:3, :13), LatencyChart y buildHealthVerdict; no esta en el panel del cliente ni en el runtime. El propio codigo deja la decision abierta: unsafeGlobalQuery 'PENDIENTE-DECISION' que agrega todas las orgs (getLatencyHistory.ts:68-84).",
+   "hallazgo_titulo": "La latencia del Health Score mezcla todas las orgs en una pagina del bot develOP, con horas en la zona del servidor"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "alerta": "[D5-A1] onFinish: RB.3 quiere $transaction (mensaje, conversación, cuota); C3.4 quiere paralelizar los 3 writes",
+   "resultado": "parcial",
+   "evidencia": "Hoy los 3 writes van juntos y en serie en un único scope.$transaction (persistTurn.ts:412; chatMessage.create :434, conversation.update :446, incrementQuota :460) con retry acotado (reconcile.ts:30 PERSIST_TX_MAX_ATTEMPTS=2) y guard de idempotencia (persistTurn.ts:418-430). Si uno falla, rollback de los tres; agotado el retry, catch con Sentry.captureException (:552, :621) y se pierde el registro del turno (la respuesta ya salió). RB.3 está hecho; C3.4 no se aplicó y contradiría la transacción interactiva. Sin hallazgo nuevo en el lote."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "alerta": "[D5-A2] /smoke: GET público sin auth ni rate limit que quema tokens (RT-2)",
+   "resultado": "parcial",
+   "evidencia": "/smoke ya no existe: git ls-tree -r --name-only origin/main -- src/app | grep -i smoke -> vacío; commit 02a2f812 'deprecar el endpoint smoke publico'; health/index.ts:1-5 lo documenta. RT-2 cerrado. Queda el hermano GET /api/chatbot/[slug]/health público (route.ts:6-19; proxy.ts:172 no matchea /api) sin auth ni rate limit, que devuelve variables de entorno y errores internos.",
+   "hallazgo_titulo": "/api/chatbot/[slug]/health es público y expone variables de entorno y errores internos"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "alerta": "[D5-A3] Stream: verificar que el transform actual no puede colgar el stream ni pasar los 30 s",
+   "resultado": "parcial",
+   "evidencia": "createEmptyResponseFallbackTransform (reconcile.ts:484-535) no retiene chunks: encola todo en la misma invocación y no tiene flush, así que el cuelgue de 644b2b7 no puede volver por construcción. El techo de 30 s depende de watchdogs por inactividad (reconcile.ts:218 3000 ms, :267 12000 ms, :281 15000 ms para tools) y de presupuestos de hooks contra ROUTE_MAX_DURATION_MS (reconcile.ts:115, espejo manual del maxDuration de chat/route.ts:8). No hay reloj global sobre el stream: un proveedor que gotee un chunk cada <3 s, o la suma 12+15+12 s en 3 pasos, puede llegar al kill de la plataforma (HIPÓTESIS, requiere runtime). Fuera del lote; sin hallazgo."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "alerta": "[D5-A4] Vertex: 'key de Vertex expuesta en logs, pendiente de rotación'; credencial vencida como control positivo de E10",
+   "resultado": "parcial",
+   "evidencia": "No hay credenciales versionadas: git grep de marcadores de clave privada sólo encuentra placeholders comentados en .env.example:103,170 y patrones en docs (control: GOOGLE_VERTEX_CREDENTIALS_JSON aparece en .github/workflows/ci.yml, .env.example y docs). Lo de 'expuesta en logs' no se puede verificar leyendo; la rotación es operativa. Cómo se entera el sistema con la credencial vencida: el health da verde (checkHealth.ts:46-58, buildHealthVerdict.ts:120-125); el sandbox del admin muestra una burbuja vacía (test-prompt/route.ts:99, TestPromptSandbox.tsx:160); el visitante ve 'Se cortó la respuesta.' y 'Escribí de nuevo y seguimos.' (useChatbot.ts:133, DegradedBanner.tsx:25, PROBABLE). Vía de fuga posible (HIPÓTESIS): google.ts:82 hace JSON.parse del env y en Node 20+ el SyntaxError incluye un fragmento del texto.",
+   "hallazgo_titulo": "Health del chatbot en verde con la credencial de Vertex vencida"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "alerta": "[D5-A5] 'Protocolo de consultoría': B13.5 dice que no existía; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+   "resultado": "confirmada",
+   "evidencia": "El literal está en src/modules/chatbot/components/chat/ChatWindow.tsx:321 ('Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?') con 'Sistema Listo' en :311; B13.5 (bitácora:8905) se equivocó y BLOQUE VOZ (:16584) tenía razón.",
+   "hallazgo_titulo": "El widget de develOP saluda con 'Protocolo de consultoría iniciado… ¿Cómo puedo asistirle?'"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "alerta": "[D5-A6] EV.5 cerrado sin smokes; backfill de verticalPack cambia de bot según la fuente",
+   "resultado": "parcial",
+   "evidencia": "prisma/seeds/backfill-vertical-pack.ts:71-75 cubre los tres slugs de ambas fuentes (develop->agencia, sanmiguel->usados, matsu->usados): la discrepancia documental queda resuelta en código; si corrió en producción no se puede verificar leyendo. El cierre de EV.5 sin smokes es de proceso. En el producto no hay forma de asignar pack a bots nuevos (git grep verticalPack en admin/onboarding -> 0).",
+   "hallazgo_titulo": "verticalPack no se puede asignar desde el producto: todo bot nuevo queda en 'base'"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+   "resultado": "descartada",
+   "evidencia": "git grep -n -i gdpr origin/main -- src -> vacío; git log -S 'GDPR-friendly' muestra la remoción en 819b9e0e ('P2 unifica el hash de IP y aborta sin salt en prod'). Control positivo: hashIp sigue en src/modules/chatbot/server/safety/ipHash.ts:20 y 'GDPR' aparece en docs (2 archivos)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "alerta": "[D5-A8] getLatencyHistory asignado al panel y al runtime (MH.1)",
+   "resultado": "confirmada",
+   "evidencia": "getLatencyHistory.ts:76-82 sigue con take: 2000 sin orderBy y agrega todas las orgs (:68-74 PENDIENTE-DECISIÓN). Su único consumidor es la página admin de health (health/page.tsx:3,13; LatencyChart.tsx y buildHealthVerdict.ts sólo importan el tipo), así que la doble asignación es irrelevante: MH.1 no se hizo.",
+   "hallazgo_titulo": "Gráficos de actividad y latencia mezclan todas las orgs, cortan en UTC y muestrean filas arbitrarias"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "alerta": "[D5-A1] onFinish en $transaction (RB.3) vs paralelizar writes (C3.4)",
+   "resultado": "parcial",
+   "evidencia": "Hoy persiste en un $transaction: persistTurn.ts:412 'scope.$transaction(async (tx) => {', reconcile.ts:25 '1 intento + 1 retry', handleChatRequest.ts:47 ONF-1. Gano RB.3; C3.4 no se aplico. Que pasa si un write falla queda para el lote del server (entrada persistTurn.ts:412, :562)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "alerta": "[D5-A2] /smoke GET publico que quema tokens",
+   "resultado": "descartada",
+   "evidencia": "El endpoint se elimino: server/health/index.ts:1-2 ('runLLMSmokeTest/SmokeTestResult eliminados junto con el endpoint /smoke'). git ls-tree de src/app/api | grep -i smoke = 0 (control: 36 route.ts listados)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "alerta": "[D5-A3] El transform propio de ONF-1 no puede colgar el stream ni pasar maxDuration 30 s",
+   "resultado": "fuera-de-mi-lote",
+   "evidencia": "El transform vive en el server (entradas: handleChatRequest.ts:56 DEADLINE-ONFINISH, :1046-1066 onError dentro del transform, :1186 toUIMessageStreamResponse). Desde el lote: el typewriter no puede colgar el stream (StreamingMarkdown.tsx:59-64 solo lee refs), pero sin timeout de cliente un stream colgado deja el input en readOnly (ChatWindow.tsx:143-144, :569) hasta que la plataforma corte la conexion."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "alerta": "[D5-A4] Credencial de Vertex vencida: que ve el visitante, que ve el cliente, como se entera el sistema",
+   "resultado": "parcial",
+   "evidencia": "Visitante (por lectura): el error del proveedor llega como frame de error -> useChatbot.ts:470-478 stream_interrupted -> DegradedBanner ambar 'Se corto la respuesta. / Escribi de nuevo y seguimos.' (DegradedBanner.tsx:25, :41-98), sin WhatsApp; si es 5xx antes del stream -> connection_failed (useChatbot.ts:284-291). Sistema: Sentry.captureException en handleChatRequest.ts:1057. Cliente (panel): fuera de lote. 'Key expuesta en logs' no es verificable en codigo.",
+   "hallazgo_titulo": "Con el proveedor caido (Vertex vencida) el visitante ve 'Se corto la respuesta / Escribi de nuevo y seguimos' en cada intento, sin derivacion a WhatsApp"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que no existia, BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+   "resultado": "confirmada",
+   "evidencia": "ChatWindow.tsx:321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' (unica aparicion en src segun git grep -i). B13.5 estaba equivocado. Ademas ignora welcomeMessage, que el embed (ChatbotEmbed.tsx:280) y la preview (BotConfigPreview.tsx:218) si usan.",
+   "hallazgo_titulo": "Estado vacio del widget de develOP ignora welcomeMessage: muestra 'Sistema Listo / Protocolo de consultoria iniciado. ¿Como puedo asistirle hoy?'"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; backfill de verticalPack cambia de bot segun la fuente",
+   "resultado": "parcial",
+   "evidencia": "El backfill cubre ambos: prisma/seeds/backfill-vertical-pack.ts:71-75 {develop:'agencia', sanmiguel:'usados', matsu:'usados'} (coincide con bitacora :15656). EV.5: scripts/ev5-smoke.mjs escribe en docs/ev5-transcripts, que no existe en origin/main (ls-tree = 0; control: docs/ev4-transcripts/*.md presentes). Es consistente con un cierre sin smokes."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+   "resultado": "descartada",
+   "evidencia": "git grep -i gdpr en src, public, scripts y prisma = 0 (control: aparece en docs/baselines/2026-07-auditoria-seguridad.md:55). La causa de fondo (salt literal) tambien parece cerrada: ip-hash.invariant.ts:7 documenta que en produccion sin CHATBOT_IP_HASH_SALT hashIp aborta."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "alerta": "[D5-A8] getLatencyHistory asignado al panel y al runtime",
+   "resultado": "parcial",
+   "evidencia": "Definido en server/admin/getLatencyHistory.ts:63 y usado solo por el panel: admin/chatbot/health/page.tsx:13, LatencyChart.tsx:16 y buildHealthVerdict.ts:2 (tipo). Ningun uso en server/chat (git grep): la asignacion de DERIVACION coincide con el codigo y la de MH.1 (runtime) no."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction; C3.4 quiere paralelizar los 3 writes",
+   "resultado": "descartada",
+   "evidencia": "persistTurn.ts:412-470: chatMessage.create, conversation.update e incrementQuota(..., tx) dentro de un unico scope.$transaction, secuencial (RB.3 hecho; C3.4 no y es incompatible con una transaccion interactiva). Si uno falla, rollback completo y reintento acotado (reconcile.ts:25,32; persistTurn.ts:562 'intentos agotados del $transaction')."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "alerta": "[D5-A2] /smoke: GET publico sin auth ni rate limit que quema tokens (RT-2)",
+   "resultado": "descartada",
+   "evidencia": "git ls-tree -r --name-only origin/main -- src/app | grep -i smoke -> vacio; git grep -i smoke en route.ts -> vacio (control: el mismo ls-tree lista src/app/api/chatbot/[slug]/chat/route.ts). La ruta no existe en origin/main."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "alerta": "[D5-A3] Stream: el transform propio no puede colgar el stream ni pasar maxDuration 30 s",
+   "resultado": "fuera-de-mi-lote",
+   "evidencia": "Puntos de entrada: chat/route.ts:8 maxDuration = 30; reconcile.ts:218 STREAM_WATCHDOG_IDLE_MS = 3_000; handleChatRequest.ts:718-720 (consumo del stream) y :1155 onFinish. Probar que no cuelga exige leer handleChatRequest (otro lote)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "alerta": "[D5-A4] Vertex: key expuesta en logs pendiente de rotacion; credencial vencida como control de E10",
+   "resultado": "parcial",
+   "evidencia": "Codigo: git grep de console.* con credential|private_key|GOOGLE_APPLICATION|VERTEX en src solo da tests (credential-cipher.test.ts) -> el codigo de hoy no loguea la credencial; la exposicion historica y la rotacion no son verificables por lectura. E10 lado cliente (este lote): ChatbotOverview.tsx:63 y layout.tsx:51 afirman que el bot responde sin mirar salud; lado visitante: DegradedBanner ChatbotEmbed.tsx:418-420.",
+   "hallazgo_titulo": "El panel del cliente afirma que el bot atiende 24/7 sin mirar su salud (credencial de Vertex vencida)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que no existia; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+   "resultado": "confirmada",
+   "evidencia": "ChatWindow.tsx:321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' bajo 'Sistema Listo' (:311). La afirmacion de B13.5 es falsa para el codigo de hoy.",
+   "hallazgo_titulo": "Literal 'Protocolo de consultoria iniciado. ¿Como puedo asistirle hoy?' en el widget de develOP (alerta D5-A5)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; backfill de verticalPack cambia de bot segun la fuente",
+   "resultado": "parcial",
+   "evidencia": "prisma/seeds/backfill-vertical-pack.ts:71-74 mapea develop->agencia, sanmiguel->usados y matsu->usados (cubre ambos); migracion 20260629195726_ev2_vertical_pack_signals_utm agrega la columna con default 'base'. Si el backfill se corrio y si los smokes se leyeron no es verificable por lectura."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+   "resultado": "descartada",
+   "evidencia": "git grep -n -i 'GDPR' origin/main -- src -> vacio (control: git grep -n -i 'friendly' origin/main -- src/modules/chatbot src/lib -> 5 resultados). El docstring ya no esta."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "alerta": "[D5-A8] getLatencyHistory asignado al panel y tambien al runtime",
+   "resultado": "descartada",
+   "evidencia": "Una sola definicion (server/admin/getLatencyHistory.ts:63) consumida por el panel admin (admin/chatbot/health/page.tsx:3,13) y un import de tipo en health/buildHealthVerdict.ts:2. No hay uso en el runtime del chat: vive en el panel."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction; C3.4 quiere paralelizar los 3 writes",
+   "resultado": "descartada",
+   "evidencia": "persistTurn.ts:412 scope.$transaction envuelve chatMessage.create (:434), conversation.update (:446) e incrementQuota(..., tx) (:460): RB.3 esta hecho. Si uno falla, rollback completo y reintento acotado (PERSIST_TX_MAX_ATTEMPTS, gate :476-500); agotado, se loguea chat.persist_error (:613) y se pierde el registro del turno (decision documentada :400-404). C3.4 no se aplico y es incompatible con una tx interactiva."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "alerta": "[D5-A2] /smoke: GET publico sin auth ni rate limit que quema tokens (RT-2)",
+   "resultado": "descartada",
+   "evidencia": "git ls-tree -r --name-only origin/main -- src/app/api/chatbot lista solo [slug]/chat, [slug]/config y [slug]/health; git grep -n smoke origin/main -- src/app/api vacio (control: el mismo listado muestra chat/route.ts)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "alerta": "[D5-A3] El transform propio no puede colgar el stream ni pasar el maxDuration de 30 s",
+   "resultado": "parcial",
+   "evidencia": "route.ts:8 maxDuration 30; watchdog con ventanas y suspension por tools (handleChatRequest.ts:852, :964-970, :1027); hooks de onError con presupuesto (:1066-1080); reconcile.ts:109-112 espeja el maxDuration. No trace el transform completo (fuera del lote). Del lado del cliente no hay timeout por intento (useChatbot.ts:305): si la plataforma corta a los 30 s con 5xx, el widget hace 3 intentos (chatRetryPolicy.ts:24,27) -> peor caso 3x30 + 2 + 4 = 96 s de 'Conectando'."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "alerta": "[D5-A4] Key de Vertex expuesta en logs, pendiente de rotacion; credencial vencida como control positivo de E10",
+   "resultado": "parcial",
+   "evidencia": "Sin secret en el repo: vertex-credentials.json en .gitignore:55 y nunca commiteado (git log --all vacio; control: scripts/encode-vertex-creds.js en ls-tree). Vector plausible: encode-vertex-creds.js:10 imprime la credencial completa. E10: el error de Vertex ocurre dentro del stream y solo va a stderr/Sentry (handleChatRequest.ts:1052-1060), el detector cuenta chatbot_events (detectBotIssues.ts:85-98) y no tiene scheduler (netlify.toml:25-32): el sistema no se entera; el visitante ve 'Se corto la respuesta.' sin WhatsApp (useChatbot.ts:470-482).",
+   "hallazgo_titulo": "El detector no puede ver la caida del proveedor LLM (credencial de Vertex vencida)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que el literal no existia; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+   "resultado": "confirmada",
+   "evidencia": "ChatWindow.tsx:311 'Sistema Listo' y :321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' en el empty state (:285). B13.5 se equivoco.",
+   "hallazgo_titulo": "Empty state del widget con copy tecnico en usted igual para todos los tenants y 'WhatsApp no configurado.' al visitante"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; backfill de verticalPack cambia de bot segun la fuente",
+   "resultado": "parcial",
+   "evidencia": "EV.5 esta en codigo (api/dashboard/chatbot/leads/export/route.ts:143-162). El backfill no es verificable por codigo: no hay migracion de datos ni escritor de verticalPack fuera de evals (seed-eval-bots.ts:180,198); ev5-smoke.mjs:212 pide un UPDATE manual sobre 'develop' y ev4-smoke.mjs:15-16 espera develop=agencia y sanmiguel=usados.",
+   "hallazgo_titulo": "verticalPack no se puede asignar desde la app: solo por SQL manual"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+   "resultado": "descartada",
+   "evidencia": "git grep -niE gdpr origin/main -- . ':!docs' vacio (control: git grep -c PRIVACIDAD en saveBotConfig.ts = 1). La IP se guarda hasheada (chat/route.ts:79 hashIp; Conversation.ipHash)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "alerta": "[D5-A8] getLatencyHistory asignado al panel (DERIVACION) y al runtime (MH.1)",
+   "resultado": "parcial",
+   "evidencia": "En codigo solo lo consume el admin (admin/chatbot/health/page.tsx:13) y su tipo buildHealthVerdict.ts:2. Ninguno de los dos duenos lo corrigio: take 2000 sin orderBy (getLatencyHistory.ts:82) y ventana/buckets desalineados (:35-38 vs :66).",
+   "hallazgo_titulo": "Paneles admin de actividad y latencia: datos de todas las orgs, muestra truncada sin orden, ventana corrida y fechas sin zona"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction; C3.4 quiere paralelizar los 3 writes",
+   "resultado": "descartada",
+   "evidencia": "Ganó RB.3: mensaje -> conversación -> cupo en una tx scoped (persistTurn.ts:405-472); dentro de una tx interactiva no se pueden paralelizar, así que C3.4 quedó sin hacer. Si un write falla: rollback total y 1 reintento (reconcile.ts:30, persistTurn.ts:474-513) salvo deadline o presupuesto; después persist_failed a stderr + ChatbotEvent + Sentry (persistTurn.ts:557-624). Con deadline el desenlace es desconocido (puede commitear tarde, :570-600)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "alerta": "[D5-A2] /smoke: T0.1 inmediato vs carril de Franco; RT-2 GET público que quema tokens",
+   "resultado": "descartada",
+   "evidencia": "El endpoint se borró (health/index.ts:1-5 'runLLMSmokeTest/SmokeTestResult eliminados junto con el endpoint /smoke'); git ls-tree de src/app/api | grep -i smoke -> 0 (control: 1 ruta health). Queda el GET público /api/chatbot/[slug]/health, que no llama al LLM pero expone detalles (hallazgo aparte)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "alerta": "[D5-A3] Stream: verificar que el transform actual no puede colgar el stream ni pasar el maxDuration de 30 s",
+   "resultado": "parcial",
+   "evidencia": "El transform ya no retiene chunks: los encola en la misma invocación y sin flush (reconcile.ts:503-533). Pero no hay techo absoluto: ventanas de inactividad de 12 s por step (reconcile.ts:252, :267), 15 s de tool (:281), sin timeout (handleChatRequest.ts:954) y sin maxOutputTokens (:937-953); el turno puede pasar los 30 s (route.ts:8).",
+   "hallazgo_titulo": "El turno del chat no tiene techo absoluto ni de salida: sin maxOutputTokens ni timeout total, dos arranques en frío más un tool o una respuesta larga superan los 30 s de maxDuration"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "alerta": "[D5-A4] Vertex: 'key expuesta en logs, pendiente de rotación'; credencial vencida como control E10",
+   "resultado": "confirmada",
+   "evidencia": "E10: visitante -> aviso 'stream_interrupted' sin WhatsApp (useChatbot.ts:470-480); cliente -> conversación nueva compensada y borrada (handleChatRequest.ts:1070-1080, persistTurn.ts:353-365) o disculpa canned contada como chat.message_completed (persistTurn.ts:533-551); sistema -> solo stderr + Sentry (handleChatRequest.ts:1052-1060), health en OK (checkHealth.ts:47-54) y detector ciego (detectBotIssues.ts:85-100). Sobre la key en logs: en el lote no se loguea ninguna credencial; HIPÓTESIS fuera del lote: el JSON.parse de GOOGLE_VERTEX_CREDENTIALS_JSON (llm/providers/google.ts:82) en Node reciente incluye un fragmento del input en el mensaje de SyntaxError, que viaja a logPersistFailure y Sentry. No verificable sin runtime.",
+   "hallazgo_titulo": "Con Vertex vencido nadie se entera: el health dice OK, el detector de alertas no ve errores y los turnos fallidos se borran o quedan como 'message_completed'"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "alerta": "[D5-A5] 'Protocolo de consultoría': B13.5 dice que no existía; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+   "resultado": "confirmada",
+   "evidencia": "git grep -n -i \"protocolo de consultor\" origin/main -- logic-core-v3/src -> ChatWindow.tsx:321 (estado vacío junto a 'Sistema Listo' :311). B13.5 estaba equivocado.",
+   "hallazgo_titulo": "El estado vacío del widget dice 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' en el bot de todos los clientes"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; el backfill de verticalPack cambia de bot según la fuente",
+   "resultado": "parcial",
+   "evidencia": "El script mapea sanmiguel Y matsu a 'usados' y develop a 'agencia' (prisma/seeds/backfill-vertical-pack.ts:72-74), coincide con la fuente :15656. El default es 'base' (schema.prisma:1329): si no se corrió, el bot de develOP usa intents genéricos. Si se corrió y si se leyeron los transcripts de EV.4 no es verificable por código."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+   "resultado": "descartada",
+   "evidencia": "git grep -n -i gdpr origin/main -- logic-core-v3/src -> 0 resultados; control: git grep -l -i gdpr origin/main -- logic-core-v3/docs -> 2 archivos. El docstring ya no existe."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "alerta": "[D5-A8] getLatencyHistory asignado al panel y también al runtime (MH.1)",
+   "resultado": "parcial",
+   "evidencia": "Solo lo usan el panel admin (admin/chatbot/health/page.tsx:3, :13) y el tipo en buildHealthVerdict.ts:2 / LatencyChart.tsx:16; no hay consumidor de runtime (MH.1 no hecho). La doble asignación es de planificación, no de código."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction; C3.4 quiere paralelizar los 3 writes",
+   "resultado": "parcial",
+   "evidencia": "Hoy rige RB.3: persistTurn.ts:405-473 hace chatMessage.create -> conversation.update -> incrementQuota dentro de scope.$transaction, en serie (C3.4 contradicho). Si un write falla, rollback de los tres, reintento acotado con dedup (:406-431) y al agotar evento chat.persist_error (persistTurn.ts:613-614): el turno queda sin registrar pero sin contadores parciales. El USER se persiste fuera de la tx (handleChatRequest.ts:612-616) y queda como cola sin respuesta. Sin hallazgo nuevo."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "alerta": "[D5-A2] /smoke: T0.1 inmediato vs carril de Franco; RT-2 GET publico que quema tokens",
+   "resultado": "descartada",
+   "evidencia": "Ruta eliminada en commit 02a2f812 (ancestro de origin/main); git ls-files 'src/app/api/chatbot/[slug]/smoke/*' vacio; src/modules/chatbot/README.md:175 y server/health/index.ts:1-2 lo documentan. Control positivo: src/app/api/chatbot/[slug]/health/route.ts existe (publico, sin LLM; ver hallazgo de health)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "alerta": "[D5-A3] Stream: verificar que el transform actual no cuelga el stream ni pasa los 30 s",
+   "resultado": "parcial",
+   "hallazgo_titulo": "El peor caso por request supera los 30 s de maxDuration: sin presupuesto global, el turno se descarta sin registrar",
+   "evidencia": "El transform no puede colgar: start arma el timer (providerStreamClose.ts:170-174), cada chunk lo rearma (:205), idle -> controller.terminate (:147-165), flush/cancel liquidan una sola vez (:124-145, :207-213). Pero await doStream() (:100) queda fuera de ese timer (lo cubre el watchdog via abortSignal, handleChatRequest.ts:935-939) y la suma de ventanas (12 s inicial reconcile.ts:252/267 + tool 15 s :281, hasta 3 steps handleChatRequest.ts:953) supera maxDuration 30 (route.ts:8)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "alerta": "[D5-A4] Vertex: 'key expuesta en logs, pendiente de rotacion'; credencial vencida como control positivo de E10",
+   "resultado": "parcial",
+   "hallazgo_titulo": "Los detectores LLM_PROVIDER_ERROR y LEAD_CAPTURE_FAILURE buscan eventos que el runtime nunca persiste",
+   "evidencia": "La exposicion en logs es un hecho historico no verificable en codigo; no hay claves commiteadas (ver ausencias). E10 por lectura: sistema -> onError escribe stderr chat.stream_error + Sentry (handleChatRequest.ts:1052-1060), sin chatbotEvent, asi que detectBotIssues.ts:85-93 no dispara y health da llmProvider ok sin llamar a Vertex (checkHealth.ts:47-54). Visitante -> estado stream_interrupted (useChatbot.ts:97-98). Cliente -> nada; la conversacion nueva se borra en la compensacion (checker.ts:196-211) y el reporte semanal dice 'Verifica que el script este instalado' (buildWeeklyReport.ts:181)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que no existia; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+   "resultado": "confirmada",
+   "hallazgo_titulo": "Estado vacio del widget de develOP y del preview admin: 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?'",
+   "evidencia": "src/modules/chatbot/components/chat/ChatWindow.tsx:321 contiene el literal; ChatWindow lo usan LogicCompanion.tsx y BotConfigPreview.tsx (no el embed del cliente). B13.5 queda contradicho."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "alerta": "[D5-A6] EV.5 cerrado sin smokes; el backfill de verticalPack cambia de bot segun la fuente",
+   "resultado": "parcial",
+   "hallazgo_titulo": "verticalPack no se puede asignar desde la app: todo bot nuevo queda en 'base'",
+   "evidencia": "prisma/seeds/backfill-vertical-pack.ts:71-75 mapea develop->agencia, sanmiguel->usados y matsu->usados (vale la version ':15656 ambos'); prisma/seed.ts:784,809 usados. scripts/ev5-smoke.mjs existe; su corrida y la del backfill en prod no son verificables en codigo. Ningun camino de la app escribe verticalPack (git grep en src/app y server/admin solo encuentra la lectura del export)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "alerta": "[D5-A7] Docstring 'GDPR-friendly' declarada falsa por el handoff",
+   "resultado": "descartada",
+   "evidencia": "git grep -i gdpr origin/main -- src prisma = 0; el literal salio en 819b9e0e (git log -S 'GDPR-friendly'). ipHash.ts:3-19 hoy describe sin promesas la dependencia del salt y aborta sin salt en produccion (:22-27)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "alerta": "[D5-A8] getLatencyHistory asignado al panel (DERIVACION) y al runtime (MH.1)",
+   "resultado": "parcial",
+   "evidencia": "Solo lo usa el admin: src/app/(protected)/admin/chatbot/health/page.tsx:3,13 y el tipo en buildHealthVerdict.ts:2; ni panel del cliente ni runtime. Las dos asignaciones de los docs son plan no ejecutado. Ademas bucketKey usa toLocaleString sin timeZone (getLatencyHistory.ts:24-31, patron CLEAN-R2)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction; C3.4 quiere paralelizar los 3 writes",
+   "resultado": "fuera-de-mi-lote",
+   "evidencia": "El motor no tiene onFinish ni LLM (git grep -i 'vertex|streamText|generateText|anthropic' en src/modules/motor y src/app/api/motor: 0; control: streamText aparece en src/modules/chatbot/server/chat). Punto de entrada para el lote del chat: src/modules/chatbot/server/chat/handleChatRequest.ts (onFinish). No lo trace."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "alerta": "[D5-A2] /smoke: GET publico sin auth ni rate limit que quema tokens (RT-2)",
+   "resultado": "descartada",
+   "evidencia": "El endpoint ya no existe en origin/main. git ls-tree -r --name-only origin/main -- src/app/api/chatbot lista solo [slug]/chat, [slug]/config y [slug]/health (control positivo: la misma lista). git grep -n -i smoke origin/main -- src/app da 0, y smokeTest/runSmoke no se referencia en src. La contradiccion entre roadmaps queda sin objeto. El lote de rutas del chatbot deberia revisar si [slug]/health/route.ts reproduce el mismo costo."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "alerta": "[D5-A3] Stream: el cuelgue era del transform propio de ONF-1; verificar que el transform actual no cuelgue ni pase los 30 s",
+   "resultado": "fuera-de-mi-lote",
+   "evidencia": "Fuera del motor. Puntos de entrada: src/app/api/chatbot/[slug]/chat/route.ts:8 (maxDuration = 30) y createEmptyResponseFallbackTransform (usado con experimental_transform, ver __tests__/empty-fallback-pipeline.invariant.ts:183). No lo trace."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "alerta": "[D5-A4] Key de Vertex expuesta en logs, pendiente de rotacion; credencial vencida como control de E10",
+   "resultado": "fuera-de-mi-lote",
+   "evidencia": "Dato verificado para E10: el motor de WhatsApp no depende de Vertex ni de ningun LLM (git grep -i 'vertex|streamText|generateText|ai-sdk|anthropic' en src/modules/motor y src/app/api/motor: 0). La credencial vencida no cambia nada en el canal WhatsApp, que hoy no responde por diseno (route.ts:9-10). La exposicion en logs no se puede resolver con git grep."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que el literal no existia; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+   "resultado": "parcial",
+   "evidencia": "El literal existe: src/modules/chatbot/components/chat/ChatWindow.tsx:321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' (git grep -n -i 'protocolo de consultor' -- src). BLOQUE VOZ tiene razon y B13.5 queda contradicho. El juicio sobre el copy (registro de usted y tono robotico) le corresponde al lote del widget."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; el backfill de verticalPack cambia de bot segun la fuente",
+   "resultado": "parcial",
+   "evidencia": "El codigo resuelve la discrepancia de fuentes: prisma/seeds/backfill-vertical-pack.ts:73-74 mapea sanmiguel: 'usados' y matsu: 'usados' (cubre los dos, como dice :15656). Los smokes existen como scripts (scripts/ev4-smoke.mjs, scripts/ev5-smoke.mjs). Si se corrieron o no, no se puede verificar por codigo."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+   "resultado": "descartada",
+   "evidencia": "git grep -n -i GDPR origin/main -- src da 0 (control positivo: git grep -n -i friendly -- src/modules/chatbot encuentra LogicCompanion.tsx:31 y otros). La docstring ya no esta. El hash de IP tiene invariante propio (src/modules/chatbot/server/safety/__tests__/ip-hash.invariant.ts:2 'PRIVACIDAD — S7-03') y se usa en handleChatRequest.ts:183."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "alerta": "[D5-A8] getLatencyHistory asignado al panel (DERIVACION) y al runtime (MH.1)",
+   "resultado": "parcial",
+   "evidencia": "Hoy vive solo en el panel admin: definicion en src/modules/chatbot/server/admin/getLatencyHistory.ts:63, consumida por src/app/(protected)/admin/chatbot/health/page.tsx:13 y como tipo en server/health/buildHealthVerdict.ts:2. No hay uso en runtime (git grep getLatencyHistory -- src). DERIVACION describe el estado actual; MH.1 no esta hecho."
   }
  ]
 }

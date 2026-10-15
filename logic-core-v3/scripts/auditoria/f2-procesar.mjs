@@ -9,7 +9,8 @@
 //      «leer-refutada»  CRÍTICA/ALTA que el verificador refutó: el padre lee líneas y
 //                       motivo antes de descartarla (DEC-31)
 //      «muestrear»      1 de cada 5 MEDIA/BAJA por lote (mínimo 1): el padre la lee
-//      «aceptar»        el resto de MEDIA/BAJA, que entra como PROBABLE
+//      «aceptar»        el resto de MEDIA/BAJA, que entra como PROBABLE; y, desde D3 (DEC-55), el
+//                       hallazgo único «Higiene de UI — Dx» que junta los higiene_ui de todos los lotes
 //    El padre deja cada una en «aceptar» (con verificado_padre: true si leyó las líneas)
 //    o «descartar» (con nota_padre = motivo), ajusta campos si hace falta y corre
 //    f2-escribir.mjs. Si la revisión ya existe, NO se pisa (usar --forzar).
@@ -75,6 +76,24 @@ for (const r of res.resultados) {
     ausencias: (L.ausencias ?? []).length,
     patrones: (L.patrones_a_cruzar ?? []).length,
     verificador: r.verificacion ? `${veredictos.length} veredictos` : 'no corrió',
+  })
+}
+
+// DEC-55 (desde D3): los BAJA cosméticos que los lectores dejaron en higiene_ui van en un único hallazgo
+// «Higiene de UI — Dx» por dominio, con la lista de ruta:línea y sin verificación individual (no entra al muestreo)
+const higiene = res.resultados.flatMap((r) => (r.lectura?.higiene_ui ?? []).map((x) => ({ ...x, lote: r.lote })))
+if (higiene.length) {
+  const porTipo = {}
+  for (const x of higiene) porTipo[x.tipo] = (porTipo[x.tipo] ?? 0) + 1
+  const enUi = higiene.filter((x) => /(^|\/)src\/components\/ui\//.test(String(x.ruta).replace(/\\/g, '/'))).length
+  revision.hallazgos.push({
+    decision: 'aceptar', nota_padre: 'DEC-55: higiene de UI agrupada, sin verificación individual', tmp: `${ciclo}/HIGIENE`, lote: 'todos',
+    titulo: `Higiene de UI — ${dominio}: ${higiene.length} detalles cosméticos (${Object.entries(porTipo).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(', ')})`,
+    prefijo: 'DEU', severidad: 'BAJA', tipo: 'deuda', confianza: 'PROBABLE',
+    evidencia: higiene.map((x) => ({ ruta: x.ruta, linea: x.linea, fragmento: `[${x.tipo}] ${String(x.detalle).slice(0, 160)}` })),
+    impacto: 'Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.',
+    propuesta: `Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist.${enUi ? ` ${enUi} entradas están en src/components/ui/* (FROZEN): esas quedan como decisión para Valentino.` : ''}`,
+    esfuerzo: higiene.length > 40 ? 'M' : 'S', zona: dominio === 'D4' ? 'ZONA-FRANCO' : 'libre', nodos: [], requiere_verificacion_humana: false, higiene: true, verificador: null,
   })
 }
 

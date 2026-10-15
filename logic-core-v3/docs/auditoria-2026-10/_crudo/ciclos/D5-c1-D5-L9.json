@@ -1,0 +1,1284 @@
+{
+ "dominio": "D5",
+ "ciclo": "D5-c1",
+ "lote": "D5-L9",
+ "run": "wf_b0489c11-132",
+ "fecha": "2026-10-15T13:01:58.672Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/auth.ts",
+    "lineas_total": 62,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-health.ts",
+    "lineas_total": 255,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-message.ts",
+    "lineas_total": 81,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-request.ts",
+    "lineas_total": 87,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
+    "lineas_total": 72,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/index.ts",
+    "lineas_total": 6,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/payload.ts",
+    "lineas_total": 251,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/process.ts",
+    "lineas_total": 167,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/resolve-channel.ts",
+    "lineas_total": 38,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/outbound/client.ts",
+    "lineas_total": 290,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/domain/bsuid.ts",
+    "lineas_total": 38,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/domain/channel-credentials.ts",
+    "lineas_total": 46,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/domain/identity.ts",
+    "lineas_total": 155,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/domain/prisma-errors.ts",
+    "lineas_total": 19,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/domain/window.ts",
+    "lineas_total": 39,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/services/sendMessage.ts",
+    "lineas_total": 256,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/motor/webhook/[channelToken]/route.ts (fuera del lote, punto de entrada)",
+    "lineas_total": 58,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/isolation/registry.ts (fuera del lote)",
+    "lineas_total": 847,
+    "leido_completo": false,
+    "rangos": "205-299, 450-519"
+   },
+   {
+    "ruta": "src/lib/isolation/scoped-model.ts (fuera del lote)",
+    "lineas_total": 397,
+    "leido_completo": false,
+    "rangos": "1-120"
+   },
+   {
+    "ruta": "prisma/schema.prisma (fuera del lote, FROZEN)",
+    "lineas_total": 0,
+    "leido_completo": false,
+    "rangos": "1885-2248 (modelos del motor)"
+   },
+   {
+    "ruta": "docs/_insumos/drive/Olme/Chatbot_ registro de cambios.md",
+    "lineas_total": 122,
+    "leido_completo": true
+   },
+   {
+    "ruta": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md",
+    "lineas_total": 193,
+    "leido_completo": false,
+    "rangos": "grep whatsapp|motor|360|bsuid|plantilla: solo menciones al card de WhatsApp del widget (:73, :109-110), nada del motor"
+   },
+   {
+    "ruta": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md",
+    "lineas_total": 98,
+    "leido_completo": false,
+    "rangos": "grep idem: solo :67 (seed handoff.whatsapp), nada del motor"
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/app/api/motor/webhook/[channelToken]/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/motor/webhook/[channelToken]",
+    "auth": "si",
+    "evidencia_auth": "route.ts:50 delega en handle-request.ts:21. Primero resuelve el canal por el token (resolve-channel.ts:25-37: patron de 64 hex y despues findUnique) y despues verifica el Bearer secret por canal (auth.ts:47-62, comparacion timing-safe de hashes en channel-credentials.ts:41-46). Falla cerrado si falta el hash (auth.ts:51-53). Un canal INACTIVE da 401 (handle-request.ts:39-42).",
+    "rol": "no-aplica (maquina a maquina: el BSP 360dialog)",
+    "evidencia_rol": "No hay sesion de usuario. La credencial es el par channelToken (URL) + webhookSecret (header Authorization) del canal (channel-credentials.ts:4-10).",
+    "org_de": "parametro",
+    "evidencia_org": "handle-request.ts:53 forOrg(channel.organizationId): la org sale del canal que resuelve el token de la URL (resolve-channel.ts:26-36), y solo despues de verificar el secret (handle-request.ts:30-37). Es una credencial, no un id que el emisor pueda elegir. Se cruza con metadata.phone_number_id (process.ts:96 y :142). No viola el protocolo SEC: sin el secret del canal no se escribe nada.",
+    "validacion": "zod",
+    "evidencia_validacion": "Envelope en payload.ts:134-142. Un schema por change en payload.ts:39-130, despachados por classifyChange en payload.ts:172-215. Techo de 1 MB en handle-request.ts:66. user_id_update valida el patron BSUID (payload.ts:98-106); los mensajes no lo validan (payload.ts:40).",
+    "rate_limit": "si",
+    "notas": "La route esta fuera del lote; toda su logica vive en el lote. Rate limit de 600/min por hash del token (route.ts:33-37, presets.ts:58), aplicado ANTES de validar el token: es el patron D1-c3/S4-04 (una fila nueva en rate_limit por cada token inventado, sin purga). Los 500 de infraestructura van solo a stdout (route.ts:52) y no llegan a Sentry."
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Mensaje entrante de WhatsApp (360dialog -> DB)",
+    "pasos": [
+     "360dialog POST /api/motor/webhook/<token> -> route.ts:27",
+     "Rate limit por hash del token -> route.ts:32-47 -> lib/rate-limit/limiter.ts:44 (UPSERT rate_limit)",
+     "handleInboundWebhookRequest -> handle-request.ts:21",
+     "Resolucion pre-tenant del canal -> resolve-channel.ts:25-37 (unsafeGlobalQuery 'TENANT-RESOLUTION', findUnique por channelToken)",
+     "Auth Bearer -> handle-request.ts:30 -> auth.ts:47-62 -> channel-credentials.ts:41-46 (timingSafeEqual sobre SHA-256)",
+     "Canal INACTIVE -> 401 en handle-request.ts:39-42; body con techo -> handle-request.ts:59-72; zod del envelope -> payload.ts:134",
+     "processInboundPayload(forOrg(org)) -> handle-request.ts:53 -> process.ts:52-73 (object whatsapp_business_account, recorrido secuencial de entry/changes)",
+     "classifyChange -> payload.ts:172-177 -> applyMessagesEvent -> process.ts:136-157 (cross-check phone_number_id en :142)",
+     "handleInboundMessage -> handle-message.ts:24: contactRefForMessage en payload.ts:228-236; pre-check del wamid en handle-message.ts:35-39",
+     "$transaction scoped -> handle-message.ts:42-53: resolveInboundIdentity (identity.ts:40-76) -> upsertOpenConversation (handle-message.ts:67-81) -> motorMessage.create IN/RECEIVED (handle-message.ts:45-52)",
+     "P2002 sobre providerMessageId -> 'duplicate' (handle-message.ts:54-56 -> prisma-errors.ts:10-19); 200 {ok:true} en handle-request.ts:55",
+     "FIN: nada consume la fila IN; no hay respuesta automatica (route.ts:9-10 'nada de LLM — eso es B2')"
+    ]
+   },
+   {
+    "nombre": "Status de entrega de un mensaje OUT",
+    "pasos": [
+     "route.ts:27 -> handle-request.ts:21-53 (igual que arriba)",
+     "process.ts:158-165 recorre value.statuses",
+     "handleStatusUpdate -> handle-status.ts:37-60: busca el OUT por providerMessageId en el scope de la org (:41-44); 'unknown-message' si no existe (:45)",
+     "FAILED es terminal (:46, :48-51, detalle truncado en :62-72); progresion monotona SENT<DELIVERED<READ (:53-58)",
+     "Solo aplica a filas OUT; en produccion no se crea ninguna porque sendMotorMessage no tiene llamadores (sendMessage.ts:204)"
+    ]
+   },
+   {
+    "nombre": "Eventos de salud del canal (plantillas, tier, estado del numero)",
+    "pasos": [
+     "route.ts:27 -> handle-request.ts:53 -> process.ts:109-132",
+     "message_template_status_update -> handle-health.ts:126-194: mapeo en :45-50; plantilla por providerTemplateId o name+language (:143-162); update de estado (:176); alerta si REJECTED (:178-192)",
+     "phone_number_quality_update -> handle-health.ts:201-223: solo el tier, con whitelist en :54-62",
+     "account_update -> handle-health.ts:226-255: whitelist en :68-75; wabaChannel.update channelStatus (:243); alerta si RESTRICTED/BANNED (:245-253)",
+     "createAlertIfFresh -> handle-health.ts:100-123: dedupe por (canal, tipo) en 24 h y despues motorAlert.create",
+     "FIN: MotorAlert no tiene lectores ni transporte (schema.prisma:2216-2218, transporte en B3)"
+    ]
+   },
+   {
+    "nombre": "Cambio de numero (user_id_update)",
+    "pasos": [
+     "route.ts:27 -> handle-request.ts:53 -> process.ts:95-107 (descarta si phone_number_id es ajeno, :96-101)",
+     "applyUserIdUpdate -> identity.ts:106-140, sin transaccion: busca la identidad vieja (:110-116), pre-check de conflicto (:117-124), update externalId + waId null (:130), P2002 como respaldo (:131-137)",
+     "recordTransition -> identity.ts:142-155 -> contactIdentityTransition.create (parentCheck del registry.ts:245-251)"
+    ]
+   },
+   {
+    "nombre": "Envio de salida (solo lo ejercitan los tests)",
+    "pasos": [
+     "Llamador: ninguno en src/ ni scripts/; solo tests/integration/motor-outbound.spec.ts:188",
+     "sendMotorMessage -> sendMessage.ts:204-256: forOrg(input.orgId) en :208",
+     "Pre-check de idempotencia (:213-218) -> resolveTargets (:105-131: conversacion, canal con API key y destinatario waId o BSUID)",
+     "checkSendable (:134-151): texto libre solo con la ventana abierta (window.ts:32-39); plantilla solo si esta APPROVED",
+     "Decrypt de la API key con secret-box (:232-237) -> reserveOutbound PENDING (:158-183)",
+     "sendViaProvider -> client.ts:252-290: POST /messages con D360-API-KEY, timeout de 10 s y reintentos [1 s, 3 s] ante red, timeout o 5xx",
+     "Update a SENT con el wamid o a FAILED con el error redactado (sendMessage.ts:247-255)"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "El bot de WhatsApp no responde ni se puede dar de alta: nada consume los mensajes entrantes, sendMotorMessage no tiene llamadores y no hay alta de canal",
+    "prefijo": "FAL",
+    "severidad": "ALTA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/motor/webhook/[channelToken]/route.ts",
+      "linea": 9,
+      "fragmento": " * Contrato de respuesta: 200 rápido y sin trabajo lento (nada de LLM — eso\n * es B2); 401 auth; 400 shape; 429 rate limit; 500 SOLO errores de"
+     },
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-message.ts",
+      "linea": 45,
+      "fragmento": "await tx.motorMessage.create({\n  conversationId: conversation.id,\n  direction: 'IN',"
+     },
+     {
+      "ruta": "src/modules/motor/services/sendMessage.ts",
+      "linea": 204,
+      "fragmento": "export async function sendMotorMessage("
+     },
+     {
+      "ruta": "src/modules/motor/domain/channel-credentials.ts",
+      "linea": 30,
+      "fragmento": "export function generateChannelWebhookCredentials(): ChannelWebhookCredentials {"
+     }
+    ],
+    "impacto": "Bloquea al primer negocio cliente. Si le vendemos el bot de WhatsApp, sus clientes escriben, el mensaje se guarda y nadie contesta. El negocio tampoco puede ver esas conversaciones: ningun archivo fuera de src/modules/motor y src/lib/isolation lee las tablas motor_*. Ademas, no hay forma de dar de alta el canal sin escribir a mano en la base (no hay ninguna escritura de WabaChannel fuera de tests; ver S6-08).",
+    "propuesta": "Decision para Valentino: si el motor es producto vendible, planificar B2 (consumidor de los IN que genera la respuesta, con llamador de sendMotorMessage que derive la org del canal autenticado), el alta y rotacion del canal (script o pantalla admin, S6-08) y una vista del negocio sobre sus conversaciones. Si no lo es, dejar documentado en la oferta comercial que hoy lo vende BotZ (repo aparte).",
+    "esfuerzo": "L",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp",
+     "h3.vis-whatsapp.respuesta-automatica",
+     "h3.vis-whatsapp.alta-canal",
+     "modelo.MotorMessage",
+     "modelo.WabaChannel",
+     "int.360dialog"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "S6-08 (docs/baselines/2026-07-auditoria-seguridad.md:2798), PLAN-482"
+   },
+   {
+    "titulo": "La reconciliacion por telefono pisa identidades que nacieron con BSUID: un numero reciclado hereda la identidad y la conversacion de otra persona",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/motor/domain/identity.ts",
+      "linea": 57,
+      "fragmento": "const legacy = await db.contactIdentity.findFirst({\n  where: { channelType: 'WHATSAPP', waId: ref.phone, reconciledAt: null },\n})"
+     },
+     {
+      "ruta": "src/modules/motor/domain/identity.ts",
+      "linea": 61,
+      "fragmento": "const updated = await db.contactIdentity.update(legacy.id, {\n  externalId: ref.bsuid,\n  reconciledAt: new Date(),"
+     },
+     {
+      "ruta": "src/modules/motor/domain/identity.ts",
+      "linea": 69,
+      "fragmento": "const created = await db.contactIdentity.upsertByExternalId({\n  channelType: 'WHATSAPP',\n  externalId: ref.bsuid,"
+     },
+     {
+      "ruta": "tests/integration/motor-inbound.spec.ts",
+      "linea": 239,
+      "fragmento": "expect(identity?.waId).toBe(phone)\nexpect(identity?.reconciledAt).toBeNull()"
+     },
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-message.ts",
+      "linea": 72,
+      "fragmento": "const existing = await tx.motorConversation.findFirst({\n  where: { wabaChannelId, contactIdentityId, status: 'OPEN' },"
+     }
+    ],
+    "impacto": "Afecta al primer negocio cliente. La identidad que se crea por la via normal queda con externalId=BSUID A, waId=P y reconciledAt=null (identity.ts:69-74; lo fija el test en spec:239-240). Si despues llega un BSUID B distinto con el mismo telefono P (numero reciclado, el caso que el docstring en identity.ts:11-13 dice cubrir), el paso 2 trata esa fila como legacy y le reescribe el externalId a B. Los mensajes de la persona nueva se suman a la conversacion OPEN de la anterior (handle-message.ts:72-80). Cuando exista B2, el bot le contestaria con el historial de otra persona. La persona original, si vuelve con su BSUID A, queda como identidad nueva y pierde su historial. Ademas, findFirst sin orderBy hace que la eleccion no sea deterministica si hay varias filas con ese waId.",
+    "propuesta": "Tratar como legacy solo las filas cuyo externalId no sea un BSUID (por ejemplo !isBsuid(externalId) o externalId === waId), o marcar las altas nativas. Agregar a motor-inbound.spec.ts un caso: identidad nativa A con telefono P, despues B con telefono P; se espera que queden dos identidades.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp.identidad-bsuid",
+     "modelo.ContactIdentity",
+     "modelo.MotorConversation"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "S7-01"
+   },
+   {
+    "titulo": "Las alertas de salud del canal (numero baneado o restringido, plantilla rechazada) se guardan en MotorAlert y nadie las lee ni las envia",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-health.ts",
+      "linea": 115,
+      "fragmento": "await scope.motorAlert.create({\n  wabaChannelId: channel.id,\n  type: input.type,"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 2216,
+      "fragmento": "// premortem de ban de Meta por calidad: enterarse ANTES del ban). Solo\n// REGISTRO consultable acá — el transporte (email/WhatsApp al equipo) es B3,"
+     },
+     {
+      "ruta": "src/modules/motor/services/sendMessage.ts",
+      "linea": 113,
+      "fragmento": "if (channel === null || channel.apiKeyEncrypted === null || channel.apiKeyIv === null || channel.apiKeyTag === null) {"
+     }
+    ],
+    "impacto": "El objetivo de B1-S3 era enterarse antes del baneo de Meta, y con este codigo no pasa: la alerta CRITICAL de numero baneado queda en una tabla que ninguna pantalla, cron ni email lee. channelStatus=BANNED tampoco frena el envio (resolveTargets solo mira la API key). El primer negocio cliente podria quedar baneado sin que develOP se entere.",
+    "propuesta": "Cablear el transporte (B3): email o Telegram de agencia por las alertas CRITICAL/HIGH, reusando src/lib/alerts.ts, y mostrarlas en /admin/chatbot/health o en una vista del motor. Que sendMotorMessage rechace con un motivo tipado cuando channelStatus sea BANNED o RESTRICTED.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp.salud-canal",
+     "modelo.MotorAlert",
+     "modelo.WabaChannel",
+     "h3.adm-health"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "FAL-bot-whatsapp-sin-respuesta"
+   },
+   {
+    "titulo": "El dedupe de alertas por (canal, tipo) en 24 h hace que pasar de restringido a baneado no genere alerta nueva y que el rechazo de una plantilla tape el de otras",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-health.ts",
+      "linea": 106,
+      "fragmento": "const recent = await scope.motorAlert.findFirst({\n  where: { wabaChannelId: channel.id, type: input.type, createdAt: { gte: since } },"
+     },
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-health.ts",
+      "linea": 247,
+      "fragmento": "type: 'PHONE_RESTRICTED_OR_BANNED',\nseverity: nextStatus === 'BANNED' ? 'CRITICAL' : 'HIGH',"
+     }
+    ],
+    "impacto": "Si Meta restringe el numero y lo banea dentro de las 24 h, la unica alerta que queda es 'Número restringido' con severidad HIGH; el baneo CRITICAL se descarta. Un segundo template rechazado ese dia no deja rastro. Hoy es latente porque las alertas no tienen lector (ver la FAL de alertas).",
+    "propuesta": "Deduplicar por (canal, tipo, severidad) para la alerta del numero y por (canal, tipo, templateId) para las plantillas, o dejar que una severidad mayor siempre genere su alerta.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp.salud-canal",
+     "modelo.MotorAlert"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "FAL-alertas-sin-lector"
+   },
+   {
+    "titulo": "Los errores de infraestructura del webhook del motor solo van a stdout y los fallos de envio no se loguean (logger NOOP por default)",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/motor/webhook/[channelToken]/route.ts",
+      "linea": 51,
+      "fragmento": "} catch (error) {\n  logger.error('motor-inbound: error de infraestructura procesando el webhook', error)"
+     },
+     {
+      "ruta": "src/lib/logger.ts",
+      "linea": 61,
+      "fragmento": "error(msg: string, meta?: unknown) {\n  this.format('error', msg, meta)\n}"
+     },
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/outbound/client.ts",
+      "linea": 257,
+      "fragmento": "const logger = deps.logger ?? NOOP_LOGGER"
+     }
+    ],
+    "impacto": "La route atrapa la excepcion y devuelve 500, asi que onRequestError (instrumentation.ts:49) no se dispara, y el logger solo escribe a stdout (no hay captureConsoleIntegration). El BSP reintenta hasta 7 dias y despues descarta. Una falla persistente (drift de schema, Neon caido) haria perder todos los mensajes del primer cliente sin que nadie se entere. Del lado de salida, sendMotorMessage no pasa logger, asi que reintentos y fallos del BSP no dejan ninguna traza.",
+    "propuesta": "Agregar Sentry.captureException (con flush) en el catch de la route y cablear un logger real por default en sendMotorMessage/sendViaProvider. Es el mismo patron que D1-c1 'Fallos manejados que solo hacen console.error'.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp",
+     "int.sentry",
+     "lib.logger"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patron D1-c1 (forgot-password/actions.ts:105, audit-log.ts:40)"
+   },
+   {
+    "titulo": "La clave de idempotencia de salida queda quemada por un despacho fallido o colgado: el reintento devuelve 'deduped' y el mensaje nunca sale",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/motor/services/sendMessage.ts",
+      "linea": 213,
+      "fragmento": "if (input.idempotencyKey !== undefined) {\n  const existing = await findByIdempotencyKey(scope, input.idempotencyKey)\n  if (existing !== null) {"
+     },
+     {
+      "ruta": "src/modules/motor/services/sendMessage.ts",
+      "linea": 190,
+      "fragmento": "where: { direction: 'OUT', outboundIdempotencyKey: key },\nselect: { id: true, providerMessageId: true },"
+     },
+     {
+      "ruta": "src/modules/motor/services/sendMessage.ts",
+      "linea": 251,
+      "fragmento": "await scope.motorMessage.update(messageId, {\n  status: 'FAILED',"
+     }
+    ],
+    "impacto": "Latente porque no hay llamador. Cuando B2 reintente un envio que fallo (red agotada, 5xx) o que quedo PENDING porque la funcion expiro entre la reserva y el despacho, va a recibir 'deduped' con wamid null, igual que un exito, y la respuesta del bot nunca le llega al cliente final. El docstring (:17) cuida no quemar la clave en el decrypt, pero no en el despacho.",
+    "propuesta": "Leer tambien el status en findByIdempotencyKey: si la fila esta FAILED (o PENDING vencida), re-despachar sobre esa misma fila o devolver un resultado distinto ('previously_failed'). Agregar un test que reintente con la misma clave despues de un 5xx agotado.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp.envio-mensajes",
+     "modelo.MotorMessage"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "El reintento ante timeout o 5xx puede duplicar el mensaje al cliente final, y el peor caso (unos 34 s) supera el maxDuration de las rutas",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/outbound/client.ts",
+      "linea": 233,
+      "fragmento": "const isTimeout = error instanceof Error && error.name === 'AbortError'\nreturn {\n  outcome: 'retryable',"
+     },
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/outbound/client.ts",
+      "linea": 94,
+      "fragmento": "const DEFAULT_TIMEOUT_MS = 10_000\nconst DEFAULT_RETRY_DELAYS_MS = [1_000, 3_000] as const"
+     }
+    ],
+    "impacto": "Latente. Un timeout del lado cliente despues de que 360dialog ya acepto el POST reenvia el mismo texto: la Cloud API no tiene clave de idempotencia, asi que el usuario recibe el mensaje dos veces. El codigo evita reintentar el 2xx sin wamid (:205-206) pero no este caso. Tres intentos de 10 s mas 4 s de espera suman unos 34 s, por encima del maxDuration=15 del webhook y de 30 en el chat, si B2 lo llama de forma sincronica. Eslabon inferido: el comportamiento del BSP ante POSTs duplicados.",
+    "propuesta": "No reintentar ante timeout (solo ante errores de conexion antes de enviar), o bajar el timeout y los intentos para que entren en el presupuesto del llamador. Llevar el envio a una cola o funcion de fondo cuando B2 lo cablee.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp.envio-mensajes",
+     "int.360dialog"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patron postToN8n.ts (estructura calcada, client.ts:16)"
+   },
+   {
+    "titulo": "Un status que llega antes de que el OUT tenga su wamid se descarta con 200 y no se reintenta",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
+      "linea": 41,
+      "fragmento": "const message = await scope.motorMessage.findFirst({\n  where: { providerMessageId: status.id, direction: 'OUT' },"
+     },
+     {
+      "ruta": "src/modules/motor/services/sendMessage.ts",
+      "linea": 248,
+      "fragmento": "await scope.motorMessage.update(messageId, { status: 'SENT', providerMessageId: result.wamid })"
+     }
+    ],
+    "impacto": "Latente. El wamid se persiste recien cuando el fetch al BSP vuelve. Si un 'failed' asincronico llega antes de ese update (o si el update falla), handle-status devuelve 'unknown-message', el batch responde 200 y el BSP no reintenta. La fila queda SENT para siempre aunque el mensaje no se entrego. La ventana de carrera es inferida.",
+    "propuesta": "Ante 'unknown-message' de un failed o delivered, responder de forma que el BSP reintente (o guardar el status huerfano en una tabla de pendientes y reconciliarlo cuando aparezca el wamid).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp.estados-entrega",
+     "modelo.MotorMessage"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "PAUSED queda terminal en el espejo local de plantillas: los eventos de reactivacion o deshabilitacion no tienen mapeo",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-health.ts",
+      "linea": 45,
+      "fragmento": "const TEMPLATE_STATUS_MAP: Readonly<Record<string, MotorTemplateStatus>> = {\n  APPROVED: 'APPROVED',\n  REJECTED: 'REJECTED',"
+     },
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-health.ts",
+      "linea": 132,
+      "fragmento": "if (nextStatus === undefined) {\n  logger.debug("
+     },
+     {
+      "ruta": "src/modules/motor/services/sendMessage.ts",
+      "linea": 150,
+      "fragmento": "return template === null || template.status !== 'APPROVED' ? 'template_not_approved' : null"
+     }
+    ],
+    "impacto": "Si Meta reactiva una plantilla pausada (evento REINSTATED) o la deshabilita (DISABLED/FLAGGED), el mapeo no lo cubre y solo deja un debug. La plantilla queda PAUSED para siempre: el envio la rechaza aunque Meta la haya vuelto a habilitar. Una plantilla DISABLED que seguia APPROVED localmente sale y falla en el BSP. Eslabon inferido: la lista de valores de event viene de la doc de Meta, que no se verifico en este lote.",
+    "propuesta": "Confirmar contra el sandbox de 360dialog la lista de event, mapear REINSTATED a APPROVED y DISABLED a un estado no enviable, y pasar el log de 'unmapped-event' a warn para que se vea.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp.salud-canal",
+     "modelo.MotorTemplate"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Clasificador de P2002 duplicado: el motor mantiene su propio isUniqueViolation en vez del guard de la frontera de aislamiento (PLAN-483)",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/motor/domain/prisma-errors.ts",
+      "linea": 10,
+      "fragmento": "export function isUniqueViolation(error: unknown, field?: string): boolean {\n  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {"
+     },
+     {
+      "ruta": "src/lib/isolation/scoped-model.ts",
+      "linea": 56,
+      "fragmento": " * El motor tiene su clasificador local equivalente (motor/domain/\n * prisma-errors.ts, isUniqueViolation): NO se consolida acá para no estrenar\n * un import cruzado entre módulos — queda anotado como deuda de consolidación."
+     }
+    ],
+    "impacto": "Son dos clasificadores que pueden divergir. El del motor es mas preciso (mira meta.target por campo) y el de isolation no. Cualquier cambio de formato del error en Prisma hay que arreglarlo en dos lugares.",
+    "propuesta": "Mover la variante con parametro field a src/lib/isolation/scoped-model.ts (export desde @/lib/isolation, que el motor ya puede importar) y borrar motor/domain/prisma-errors.ts, migrando sus 3 importadores (handle-message.ts:18, identity.ts:24, sendMessage.ts:24).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.isolation",
+     "h3.vis-whatsapp"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-483"
+   },
+   {
+    "titulo": "El reintento de un batch reprocesa user_id_update y deja transiciones 'unknown-identity' falsas",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/motor/domain/identity.ts",
+      "linea": 110,
+      "fragmento": "const identity = await db.contactIdentity.findFirst({\n  where: { channelType: 'WHATSAPP', externalId: input.oldExternalId },\n})"
+     },
+     {
+      "ruta": "src/modules/motor/domain/identity.ts",
+      "linea": 113,
+      "fragmento": "if (identity === null) {\n  await recordTransition(db, input, null, 'user_id_update:unknown-identity')"
+     },
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/inbound/process.ts",
+      "linea": 67,
+      "fragmento": "for (const entry of envelope.entry) {\n  for (const change of entry.changes ?? []) {\n    summary = await applyEvent(scope, channel, classifyChange(change), summary)"
+     }
+    ],
+    "impacto": "Los changes de un batch se aplican en orden y sin atomicidad. Si un change posterior falla por infraestructura, el route devuelve 500 y el BSP reenvia todo el batch. El user_id_update que ya habia migrado no encuentra el ID viejo y graba una segunda transicion 'unknown-identity'. El rastro de auditoria de reconciliacion queda con filas que dicen que la identidad era desconocida cuando no lo era.",
+    "propuesta": "Antes de grabar 'unknown-identity', chequear si ya existe una transicion (from, to) para esa org, o si existe una identidad con el newExternalId, y en ese caso devolver 'migrated' sin escribir.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp.identidad-bsuid",
+     "modelo.ContactIdentityTransition"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Las conversaciones del motor nunca se cierran: una sola conversacion OPEN perpetua por contacto y canal",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-message.ts",
+      "linea": 72,
+      "fragmento": "const existing = await tx.motorConversation.findFirst({\n  where: { wabaChannelId, contactIdentityId, status: 'OPEN' },\n  orderBy: { createdAt: 'asc' },"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 2097,
+      "fragmento": "status        MotorConversationStatus @default(OPEN)"
+     }
+    ],
+    "impacto": "Ningun codigo escribe status CLOSED: es una columna sin escritor. Cuando B2 use la conversacion como contexto o mida conversaciones (cuota, costo, metricas del negocio), cada contacto va a tener un hilo infinito, el contexto va a crecer sin limite y las metricas por conversacion no van a significar nada.",
+    "propuesta": "Definir en B2 la politica de cierre (por inactividad o al vencer la ventana de 24 h) y aplicarla al reutilizar la conversacion en upsertOpenConversation.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-whatsapp",
+     "modelo.MotorConversation"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "FAL-bot-whatsapp-sin-respuesta"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h3.vis-whatsapp",
+    "id": "h3.vis-whatsapp.recepcion-mensajes",
+    "nombre": "Recepcion autenticada de mensajes entrantes",
+    "descripcion": "El webhook de 360dialog autentica por canal y persiste identidad, conversacion y mensaje IN de forma idempotente.",
+    "archivos": [
+     "src/app/api/motor/webhook/[channelToken]/route.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/handle-request.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/auth.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/resolve-channel.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/payload.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/process.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/handle-message.ts",
+     "src/modules/motor/domain/channel-credentials.ts",
+     "src/modules/motor/domain/prisma-errors.ts"
+    ],
+    "entradas": [
+     "POST /api/motor/webhook/[channelToken]"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz trazado: route.ts:27 -> handle-request.ts:21-55 -> process.ts:136-157 -> handle-message.ts:24-58 (con un test de integracion en motor-inbound.spec.ts:214). No llega a L3: no hay forma de dar de alta un canal fuera de los tests (channel-credentials.ts:30), no hay Sentry y nadie consume ni muestra lo que se guarda.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "La unica lectura global es la resolucion pre-tenant por token (resolve-channel.ts:26). Todo lo demas corre con forOrg(channel.organizationId) en handle-request.ts:53, el registry scopea por organizationId (registry.ts:269-276) y phone_number_id se cruza en process.ts:142."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI: es un webhook maquina a maquina."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Devuelve 401/400 genericos sin detalle (handle-request.ts:74-80). Los errores de infraestructura dan 500 para que el BSP reintente (route.ts:51-56), pero sin alertar a nadie."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod del envelope (payload.ts:134-142) y de cada change (payload.ts:39-130), mas techo de 1 MB (handle-request.ts:66)."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "route.ts:52 usa logger.error, que solo escribe a stdout (src/lib/logger.ts:61-63). No hay captureException."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Lei los 9 archivos inbound: no hay datos falsos ni TODO/FIXME en el camino."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "El negocio no puede conectar su numero: no hay alta de canal (no existe escritura de WabaChannel en src/scripts/prisma) ni vista de conversaciones."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-whatsapp",
+    "id": "h3.vis-whatsapp.identidad-bsuid",
+    "nombre": "Identidad BSUID-first del contacto y cambio de numero",
+    "descripcion": "Resuelve el contacto por BSUID, reconcilia filas legacy por telefono y aplica user_id_update con historial de transiciones.",
+    "archivos": [
+     "src/modules/motor/domain/identity.ts",
+     "src/modules/motor/domain/bsuid.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/payload.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/process.ts"
+    ],
+    "entradas": [
+     "POST /api/motor/webhook/[channelToken]"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz trazado: identity.ts:40-76 (bsuid, reconciled, created) y :106-140 (user_id_update), con los tests (b), (d), (e) e (i) de motor-inbound.spec.ts. Tiene un bug de mezcla de identidades por telefono (identity.ts:56-65).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Unique compuesto (org, canal, externalId) en schema.prisma:2076, upsert scoped en registry.ts:467-496 y parentCheck de la transicion en registry.ts:245-251."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "El conflicto se registra como transicion (identity.ts:121-124). Otros errores llegan como 500 sin Sentry (route.ts:52)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "user_id_update valida el patron BSUID (payload.ts:98-106). En la ruta de mensajes, user_id es solo z.string().min(1) (payload.ts:40)."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "No hay captureException en el motor ni en la route."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "identity.ts y bsuid.ts no tienen mocks ni TODO."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Proceso interno sin interaccion del negocio."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-whatsapp",
+    "id": "h3.vis-whatsapp.estados-entrega",
+    "nombre": "Estados de entrega de mensajes salientes",
+    "descripcion": "Aplica los statuses sent/delivered/read/failed del BSP sobre los mensajes OUT, de forma monotona.",
+    "archivos": [
+     "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/process.ts"
+    ],
+    "entradas": [
+     "POST /api/motor/webhook/[channelToken]"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "El handler es correcto (handle-status.ts:37-60), pero en produccion no existe ninguna fila OUT: sendMotorMessage (sendMessage.ts:204) solo lo llaman los tests.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "findFirst scoped por org y direction OUT en handle-status.ts:41-44."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Un status desconocido o sin mensaje se saltea con debug (process.ts:160-164); el status huerfano se pierde."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "statusSchema en payload.ts:70-79."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captureException."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "handle-status.ts no tiene mocks ni TODO."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Depende de un envio que no esta cableado."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-whatsapp",
+    "id": "h3.vis-whatsapp.salud-canal",
+    "nombre": "Salud del canal y alertas operativas",
+    "descripcion": "Refleja el estado de plantillas, el tier y el estado del numero, y registra alertas ante plantilla rechazada o numero restringido/baneado.",
+    "archivos": [
+     "src/modules/motor/adapters/whatsapp/inbound/handle-health.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/payload.ts",
+     "src/modules/motor/adapters/whatsapp/inbound/process.ts"
+    ],
+    "entradas": [
+     "POST /api/motor/webhook/[channelToken]"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "Escribe estado y alertas (handle-health.ts:176, :219, :243, :115), pero nadie las lee ni hay transporte (schema.prisma:2216-2218; git grep motorAlert fuera del motor: 0). El dedupe pierde el escalado a baneado (handle-health.ts:106-113).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Todo se aplica sobre el canal resuelto por token con el scope de la org (handle-health.ts:7-11; registry.ts:278-294)."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Un evento sin mapeo o una plantilla inexistente solo dejan debug o warn (handle-health.ts:132-141, :163-174)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Schemas en payload.ts:111-130 y whitelists en handle-health.ts:45-75."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Las alertas no llegan a Sentry ni a ningun canal."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "No hay mocks. qualityRating queda en UNKNOWN de forma deliberada (handle-health.ts:15-18)."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Nadie se entera de las alertas."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-whatsapp",
+    "id": "h3.vis-whatsapp.envio-mensajes",
+    "nombre": "Envio de mensajes (texto en ventana de 24 h y plantillas aprobadas)",
+    "descripcion": "Unica puerta de salida del motor: aplica la ventana de 24 h, idempotencia, cifrado de la API key y despacho a 360dialog.",
+    "archivos": [
+     "src/modules/motor/services/sendMessage.ts",
+     "src/modules/motor/adapters/whatsapp/outbound/client.ts",
+     "src/modules/motor/domain/window.ts"
+    ],
+    "entradas": [],
+    "madurez": "L1",
+    "madurez_evidencia": "El servicio esta completo (sendMessage.ts:204-256 -> client.ts:252-290), pero no tiene llamadores en src ni scripts (solo tests/integration/motor-outbound.spec.ts:188) y tampoco hay forma de cargar la API key cifrada del canal.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Todo lo de adentro esta scoped por forOrg(input.orgId) (sendMessage.ts:208), pero el orgId lo pasa el llamador: B2 tiene que derivarlo del canal autenticado o de la sesion."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Errores tipados (client.ts:46-66; sendMessage.ts:59-71), pero los fallos de despacho quedan con la clave quemada (sendMessage.ts:213-217)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Ventana y plantilla APPROVED (sendMessage.ts:134-151). El body no tiene limite de longitud."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "No tiene UI."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "El logger es NOOP por default (client.ts:75-79, :257)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "El logger NOOP lleva el comentario 'B2 cablea el real' (client.ts:68)."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Nada lo invoca."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-whatsapp",
+    "id": "h3.vis-whatsapp.respuesta-automatica",
+    "nombre": "Respuesta automatica del bot a los mensajes entrantes",
+    "descripcion": "Que el bot conteste al cliente final del negocio.",
+    "archivos": [
+     "src/app/api/motor/webhook/[channelToken]/route.ts"
+    ],
+    "entradas": [],
+    "madurez": "L0",
+    "madurez_evidencia": "No existe: route.ts:9-10 la difiere a B2. No hay llamador de sendMotorMessage (git grep en src y scripts: solo la definicion en sendMessage.ts:204) ni llamadas a LLM en el motor (git grep vertex|streamText|generateText: 0).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "sin_mocks_todos": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "No existe."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-whatsapp",
+    "id": "h3.vis-whatsapp.alta-canal",
+    "nombre": "Alta y rotacion del canal de WhatsApp de un negocio",
+    "descripcion": "Generar channelToken y webhookSecret, cifrar la API key de 360dialog y crear el WabaChannel.",
+    "archivos": [
+     "src/modules/motor/domain/channel-credentials.ts"
+    ],
+    "entradas": [],
+    "madurez": "L0",
+    "madurez_evidencia": "Las piezas existen (channel-credentials.ts:30-38; secret-box), pero no hay script, action ni pantalla: git grep 'wabaChannel.(create|upsert|createMany)' en src/scripts/prisma da 0 (control: tests/integration/motor-inbound.spec.ts:113).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "sin_mocks_todos": {
+      "cumple": "n/a",
+      "evidencia": "No existe."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Hoy el alta requiere escribir a mano en la base."
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-483",
+    "clave": "Clasificador P2002 duplicado en el motor WhatsApp",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/modules/motor/domain/prisma-errors.ts:10 sigue existiendo y se usa en handle-message.ts:18, identity.ts:24 y sendMessage.ts:24. El guard de la frontera esta en src/lib/isolation/scoped-model.ts:60-62 y su comentario :56-58 anota la consolidacion como deuda. Comando: MSYS_NO_PATHCONV=1 git grep -n isUniqueViolation origin/main -- src.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Al consolidar, llevar a isolation la variante con parametro field: la del motor es mas precisa."
+   },
+   {
+    "id": "PLAN-482",
+    "clave": "WhatsApp directo queda fuera de la evolucion",
+    "estado_en_codigo": "hecho",
+    "evidencia": "La decision se respeta en el codigo. El motor tiene solo bases pasivas (inbound y servicio de salida sin llamadores, sendMessage.ts:204). No hay acople chatbot-motor: git grep -n 'modules/chatbot' origin/main -- src/modules/motor/adapters src/modules/motor/domain src/modules/motor/services solo encuentra un comentario (client.ts:16); control positivo: git grep -n 'motor/domain/identity' -- src/modules/motor da 2 hits. La unica importacion de modules/motor fuera del modulo es la route (route.ts:18). El barrel chatbot/public-api 'se creará en B2' (src/modules/motor/README.md:17-18).",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "El trigger de reapertura ('primer vertical facturando') choca con FAL ALTA: si el motor se vende, falta todo el lazo de respuesta y el alta del canal. Lo decide Valentino."
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction; C3.4 quiere paralelizar los 3 writes",
+    "resultado": "fuera-de-mi-lote",
+    "evidencia": "El motor no tiene onFinish ni LLM (git grep -i 'vertex|streamText|generateText|anthropic' en src/modules/motor y src/app/api/motor: 0; control: streamText aparece en src/modules/chatbot/server/chat). Punto de entrada para el lote del chat: src/modules/chatbot/server/chat/handleChatRequest.ts (onFinish). No lo trace."
+   },
+   {
+    "alerta": "[D5-A2] /smoke: GET publico sin auth ni rate limit que quema tokens (RT-2)",
+    "resultado": "descartada",
+    "evidencia": "El endpoint ya no existe en origin/main. git ls-tree -r --name-only origin/main -- src/app/api/chatbot lista solo [slug]/chat, [slug]/config y [slug]/health (control positivo: la misma lista). git grep -n -i smoke origin/main -- src/app da 0, y smokeTest/runSmoke no se referencia en src. La contradiccion entre roadmaps queda sin objeto. El lote de rutas del chatbot deberia revisar si [slug]/health/route.ts reproduce el mismo costo."
+   },
+   {
+    "alerta": "[D5-A3] Stream: el cuelgue era del transform propio de ONF-1; verificar que el transform actual no cuelgue ni pase los 30 s",
+    "resultado": "fuera-de-mi-lote",
+    "evidencia": "Fuera del motor. Puntos de entrada: src/app/api/chatbot/[slug]/chat/route.ts:8 (maxDuration = 30) y createEmptyResponseFallbackTransform (usado con experimental_transform, ver __tests__/empty-fallback-pipeline.invariant.ts:183). No lo trace."
+   },
+   {
+    "alerta": "[D5-A4] Key de Vertex expuesta en logs, pendiente de rotacion; credencial vencida como control de E10",
+    "resultado": "fuera-de-mi-lote",
+    "evidencia": "Dato verificado para E10: el motor de WhatsApp no depende de Vertex ni de ningun LLM (git grep -i 'vertex|streamText|generateText|ai-sdk|anthropic' en src/modules/motor y src/app/api/motor: 0). La credencial vencida no cambia nada en el canal WhatsApp, que hoy no responde por diseno (route.ts:9-10). La exposicion en logs no se puede resolver con git grep."
+   },
+   {
+    "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que el literal no existia; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+    "resultado": "parcial",
+    "evidencia": "El literal existe: src/modules/chatbot/components/chat/ChatWindow.tsx:321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' (git grep -n -i 'protocolo de consultor' -- src). BLOQUE VOZ tiene razon y B13.5 queda contradicho. El juicio sobre el copy (registro de usted y tono robotico) le corresponde al lote del widget."
+   },
+   {
+    "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; el backfill de verticalPack cambia de bot segun la fuente",
+    "resultado": "parcial",
+    "evidencia": "El codigo resuelve la discrepancia de fuentes: prisma/seeds/backfill-vertical-pack.ts:73-74 mapea sanmiguel: 'usados' y matsu: 'usados' (cubre los dos, como dice :15656). Los smokes existen como scripts (scripts/ev4-smoke.mjs, scripts/ev5-smoke.mjs). Si se corrieron o no, no se puede verificar por codigo."
+   },
+   {
+    "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+    "resultado": "descartada",
+    "evidencia": "git grep -n -i GDPR origin/main -- src da 0 (control positivo: git grep -n -i friendly -- src/modules/chatbot encuentra LogicCompanion.tsx:31 y otros). La docstring ya no esta. El hash de IP tiene invariante propio (src/modules/chatbot/server/safety/__tests__/ip-hash.invariant.ts:2 'PRIVACIDAD — S7-03') y se usa en handleChatRequest.ts:183."
+   },
+   {
+    "alerta": "[D5-A8] getLatencyHistory asignado al panel (DERIVACION) y al runtime (MH.1)",
+    "resultado": "parcial",
+    "evidencia": "Hoy vive solo en el panel admin: definicion en src/modules/chatbot/server/admin/getLatencyHistory.ts:63, consumida por src/app/(protected)/admin/chatbot/health/page.tsx:13 y como tipo en server/health/buildHealthVerdict.ts:2. No hay uso en runtime (git grep getLatencyHistory -- src). DERIVACION describe el estado actual; MH.1 no esta hecho."
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/modules/motor/domain/prisma-errors.ts",
+    "senales": [
+     "Duplica isUniqueConstraintError de src/lib/isolation/scoped-model.ts:60-62",
+     "El propio isolation lo anota como deuda de consolidacion (scoped-model.ts:56-58)",
+     "PLAN-483 pendiente"
+    ],
+    "que_rompe": "3 importadores: handle-message.ts:18, identity.ts:24 y sendMessage.ts:24. Hay que mover la variante con field a isolation antes de borrarlo."
+   },
+   {
+    "archivo": "src/modules/motor/services/sendMessage.ts (+ outbound/client.ts, domain/window.ts)",
+    "senales": [
+     "Sin llamadores en src/ ni scripts/: git grep sendMotorMessage solo encuentra la definicion (sendMessage.ts:204)",
+     "Solo lo ejercitan tests/integration/motor-outbound.spec.ts y motor-window.spec.ts"
+    ],
+    "que_rompe": "Esas dos specs de integracion. NO podar: es una base pasiva planificada para B2 (PLAN-482). Solo seria candidato si Valentino abandona el motor."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Numero reciclado: un BSUID nuevo con el mismo telefono no debe heredar la identidad anterior",
+    "entorno": "Neon de desarrollo con la suite de integracion (tests/integration/motor-inbound.spec.ts como base). Nunca produccion.",
+    "pasos": [
+     "Sembrar org y canal con el helper de la spec (motor-inbound.spec.ts:113, generateChannelWebhookCredentials).",
+     "POST al webhook con inboundTextMessagePayload({ address: P, bsuid: A, wamid: w1 }).",
+     "POST al webhook con inboundTextMessagePayload({ address: P, bsuid: B, wamid: w2 }).",
+     "Con forOrg(org), consultar contactIdentity where externalId in [A, B], y motorMessage de w1 y w2 con su conversationId."
+    ],
+    "esperado": "Dos identidades (una con externalId A y otra con B), y w1 y w2 en conversaciones distintas.",
+    "senal_falla": "Hay una sola identidad, con externalId=B y reconciledAt no null; no queda ninguna fila con A; w1 y w2 comparten conversationId.",
+    "escribe_db_o_email": true,
+    "precondiciones": "DATABASE_URL de dev y suite de integracion configurada.",
+    "hallazgos": "La reconciliacion por telefono pisa identidades que nacieron con BSUID"
+   },
+   {
+    "titulo": "Escalado de restringido a baneado dentro de las 24 h",
+    "entorno": "Neon de desarrollo con la suite de integracion (motor-health.spec.ts como base).",
+    "pasos": [
+     "Sembrar el canal como en motor-health.spec.ts:90.",
+     "POST con change field=account_update, value { event: 'ACCOUNT_RESTRICTION' }.",
+     "POST con change field=account_update, value { event: 'ACCOUNT_DELETED' }.",
+     "Contar motorAlert del canal y leer su severity y title."
+    ],
+    "esperado": "Dos alertas: HIGH 'Número restringido' y CRITICAL 'Número baneado'.",
+    "senal_falla": "Una sola alerta HIGH 'Número restringido', con el canal en channelStatus=BANNED.",
+    "escribe_db_o_email": true,
+    "precondiciones": "Igual que el caso anterior.",
+    "hallazgos": "El dedupe de alertas por (canal, tipo) en 24 h hace que pasar de restringido a baneado no genere alerta nueva"
+   },
+   {
+    "titulo": "Webhook real de 360dialog contra un entorno de dev (pendiente desde B1-S1)",
+    "entorno": "Dev con URL publica (tunel) y numero de prueba o sandbox de 360dialog.",
+    "pasos": [
+     "Crear a mano el WabaChannel en dev con generateChannelWebhookCredentials() (no hay script: S6-08) y guardar el channelToken y el webhookSecret.",
+     "Configurar el webhook en 360dialog: POST /v1/configs/webhook con url https://<host>/api/motor/webhook/<channelToken> y headers Authorization: Bearer <webhookSecret>.",
+     "Mandar un WhatsApp de texto al numero de prueba.",
+     "Mirar los logs (motor-inbound: webhook procesado) y la fila motor_message IN."
+    ],
+    "esperado": "200 y una fila IN/RECEIVED con el texto; identidad con BSUID real y teléfono clasificado.",
+    "senal_falla": "401 (header no reenviado), 400 (shape distinto al fixture) o summary con skipped>0.",
+    "escribe_db_o_email": true,
+    "precondiciones": "Cuenta de 360dialog con API key de prueba; no usar Neon compartido de produccion.",
+    "hallazgos": "El bot de WhatsApp no responde ni se puede dar de alta"
+   },
+   {
+    "titulo": "Valores reales de event en message_template_status_update",
+    "entorno": "Sandbox de 360dialog sobre el canal de dev del caso anterior.",
+    "pasos": [
+     "Crear una plantilla de utilidad y esperar la aprobacion.",
+     "Provocar o simular la pausa y la reactivacion (o la deshabilitacion) de la plantilla.",
+     "Buscar en los logs 'message_template_status_update con event sin mapeo' y anotar el valor de event.",
+     "Consultar motor_template.status."
+    ],
+    "esperado": "Cada transicion de Meta queda reflejada en status: tambien REINSTATED vuelve a APPROVED.",
+    "senal_falla": "Log de 'unmapped-event' con REINSTATED, DISABLED o FLAGGED, y status local trabado en PAUSED o APPROVED.",
+    "escribe_db_o_email": true,
+    "precondiciones": "Canal de dev conectado (caso anterior).",
+    "hallazgos": "PAUSED queda terminal en el espejo local de plantillas"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "sendMotorMessage no tiene llamadores de produccion",
+    "comando": "git grep -n sendMotorMessage origin/main -- src scripts",
+    "control_positivo": "La misma busqueda con -- tests encuentra tests/integration/motor-outbound.spec.ts:18 y :188; en src solo aparece la definicion sendMessage.ts:204"
+   },
+   {
+    "afirmacion": "No hay alta de WabaChannel en src, scripts ni prisma",
+    "comando": "git grep -n \"wabaChannel\\.\\(create\\|upsert\\|createMany\\)\\|motor_waba_channel\" origin/main -- src scripts prisma tests | grep -v migration.sql",
+    "control_positivo": "Solo devuelve tests (motor-inbound.spec.ts:113, motor-health.spec.ts:91, motor-outbound.spec.ts:122, motor-isolation.spec.ts:82) y el @@map del schema (schema.prisma:2052)"
+   },
+   {
+    "afirmacion": "Nadie lee las tablas del motor (MotorAlert, MotorMessage, etc.) fuera del modulo y de isolation",
+    "comando": "git grep -n -i \"wabaChannel\\|motorAlert\\|motorMessage\\|motorConversation\\|motorTemplate\\|contactIdentity\" origin/main -- 'src/**' | grep -v src/modules/motor/ | grep -v src/lib/isolation",
+    "control_positivo": "Sin el filtro aparecen handle-health.ts:106 y :115 (scope.motorAlert) y el resto del motor"
+   },
+   {
+    "afirmacion": "No hay captureConsoleIntegration: logger.error no llega a Sentry",
+    "comando": "git grep -n \"captureConsoleIntegration\" origin/main -- . \":!docs\"",
+    "control_positivo": "git grep -n \"Sentry.init\" origin/main encuentra src/instrumentation.ts:6 y :33, sentry.server.config.ts:8 y src/instrumentation-client.ts:4"
+   },
+   {
+    "afirmacion": "No se purga la tabla rate_limit (la clave del webhook del motor sale del token de la URL)",
+    "comando": "git grep -n -i \"DELETE FROM rate_limit\\|rateLimit\\.deleteMany\" origin/main -- src scripts prisma netlify",
+    "control_positivo": "git grep -n \"INSERT INTO rate_limit\" origin/main -- src encuentra src/lib/rate-limit/limiter.ts:46"
+   },
+   {
+    "afirmacion": "Ningun codigo cierra una MotorConversation (status CLOSED)",
+    "comando": "git grep -n \"status: 'CLOSED'\" origin/main -- src/modules/motor",
+    "control_positivo": "git grep -n \"status: 'OPEN'\" origin/main -- src/modules/motor encuentra handle-message.ts:73"
+   },
+   {
+    "afirmacion": "El motor no llama a ningun LLM (la credencial vencida de Vertex no lo afecta)",
+    "comando": "git grep -n -i \"vertex\\|streamText\\|generateText\\|ai-sdk\\|anthropic\" origin/main -- src/modules/motor src/app/api/motor",
+    "control_positivo": "git grep -l -i streamText origin/main -- src/modules/chatbot/server/chat encuentra empty-fallback-pipeline.invariant.ts"
+   },
+   {
+    "afirmacion": "El motor no importa del modulo chatbot",
+    "comando": "git grep -n \"modules/chatbot\" origin/main -- src/modules/motor/adapters src/modules/motor/domain src/modules/motor/services",
+    "control_positivo": "Solo encuentra el comentario client.ts:16; git grep -n \"motor/domain/identity\" origin/main -- src/modules/motor encuentra handle-message.ts:17 y process.ts:16"
+   },
+   {
+    "afirmacion": "Ya no existe la ruta /api/chatbot/[slug]/smoke (RT-2)",
+    "comando": "git ls-tree -r --name-only origin/main -- src/app/api/chatbot ; git grep -n -i smoke origin/main -- src/app",
+    "control_positivo": "El ls-tree lista [slug]/chat/route.ts, [slug]/config/route.ts y [slug]/health/route.ts"
+   },
+   {
+    "afirmacion": "No queda la docstring 'GDPR-friendly' en src",
+    "comando": "git grep -n -i GDPR origin/main -- src",
+    "control_positivo": "git grep -n -i friendly origin/main -- src/modules/chatbot encuentra LogicCompanion.tsx:31, GeometricAvatar.tsx:11 y otros"
+   },
+   {
+    "afirmacion": "No hay beforeSendTransaction ni patron de token hex en el scrubber de Sentry (el channelToken va en el path)",
+    "comando": "git grep -n \"beforeSendTransaction\" origin/main -- src/lib/sentry src/instrumentation.ts sentry.server.config.ts",
+    "control_positivo": "Solo aparece el comentario en scrub-pii.ts:115; beforeSend existe en src/instrumentation.ts:11 y sentry.server.config.ts:13"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Herramienta: Git Bash (MSYS) convierte los patrones que empiezan con '@/' y git grep devuelve vacio. Es un 'no existe' falso, verde por vacio, en las pruebas de ausencia de imports con alias.",
+    "como_buscarlo": "Correr git grep con MSYS_NO_PATHCONV=1 delante, o sacar el '@' del patron, y repetir las pruebas de ausencia ya hechas con patrones '@/...'.",
+    "donde_aparecio": "Control positivo de este lote: git grep -F '@/modules/motor/domain' -- src/modules/motor dio 0 sin la variable y 3 hits con MSYS_NO_PATHCONV=1"
+   },
+   {
+    "patron": "Dedupe de alertas por (entidad, tipo) que ignora el sujeto y la severidad: una alerta menor tapa a una mayor del mismo tipo",
+    "como_buscarlo": "git grep -n -i \"dedupe\\|DEDUPE_WINDOW\\|createdAt: { gte\" origin/main -- src/modules/chatbot/server src/lib/alerts.ts",
+    "donde_aparecio": "src/modules/motor/adapters/whatsapp/inbound/handle-health.ts:105-114"
+   },
+   {
+    "patron": "Pre-check de idempotencia que devuelve el registro existente sin mirar su estado (FAILED o PENDING colgado cuentan como exito)",
+    "como_buscarlo": "git grep -n -i \"idempotencyKey\\|IdempotencyKey\\|idempotency\" origin/main -- src",
+    "donde_aparecio": "src/modules/motor/services/sendMessage.ts:213-217 y :185-193"
+   },
+   {
+    "patron": "Reintento de POST no idempotente ante timeout (AbortError marcado como retryable)",
+    "como_buscarlo": "git grep -n \"AbortError\" origin/main -- src (client.ts dice estar calcado de postToN8n.ts)",
+    "donde_aparecio": "src/modules/motor/adapters/whatsapp/outbound/client.ts:231-241; plantilla en src/modules/chatbot/server/crm/postToN8n.ts:61"
+   },
+   {
+    "patron": "Logger inyectable con default NOOP en codigo productivo: fallos sin traza",
+    "como_buscarlo": "git grep -n -i \"NOOP_LOGGER\\|noop\" origin/main -- src",
+    "donde_aparecio": "src/modules/motor/adapters/whatsapp/outbound/client.ts:75-79, :257"
+   },
+   {
+    "patron": "Registros operativos (alertas, estado de salud) que se escriben y no tienen ningun lector",
+    "como_buscarlo": "Por modelo de alertas o salud: git grep -n '<modelo>\\.\\(findMany\\|findFirst\\|count\\)' fuera del modulo que escribe (BotAlert, CrmSyncAttempt, etc.)",
+    "donde_aparecio": "MotorAlert: handle-health.ts:115, sin lectores fuera del motor"
+   },
+   {
+    "patron": "Route que atrapa la excepcion, devuelve 500 y solo loguea: onRequestError de Sentry no se dispara",
+    "como_buscarlo": "git grep -n -B1 \"status: 500\" origin/main -- 'src/app/api/**/route.ts' y revisar si el catch llama a captureException",
+    "donde_aparecio": "src/app/api/motor/webhook/[channelToken]/route.ts:51-56"
+   },
+   {
+    "patron": "Reconciliacion de identidad por un dato secundario (telefono o email) que no distingue filas legacy de filas nativas",
+    "como_buscarlo": "git grep -n \"reconciledAt\\|waId:\\|email: .*toLowerCase\" origin/main -- src/modules src/lib/leados",
+    "donde_aparecio": "src/modules/motor/domain/identity.ts:56-65"
+   },
+   {
+    "patron": "Servicio que recibe orgId como parametro (no de la sesion): el protocolo SEC se traslada al llamador",
+    "como_buscarlo": "git grep -n \"orgId: string\" origin/main -- src/modules/*/services src/lib/**/service*.ts",
+    "donde_aparecio": "src/modules/motor/services/sendMessage.ts:51, :208"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+    "id_previo": "S6-08",
+    "estado": "abierto",
+    "evidencia": "Sigue sin haber alta ni rotacion: git grep \"wabaChannel\\.\\(create\\|upsert\\|createMany\\)\" -- src scripts prisma da 0 (control: tests/integration/motor-inbound.spec.ts:113). generateChannelWebhookCredentials (channel-credentials.ts:30) solo la llaman los tests. Sigue fallando cerrado: auth.ts:51-53 y sendMessage.ts:113."
+   },
+   {
+    "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+    "id_previo": "S4-04",
+    "estado": "abierto",
+    "evidencia": "La clave de rate limit del webhook del motor sigue saliendo del token de la URL antes de validar su forma (route.ts:32-37; la validacion recien esta en resolve-channel.ts:25). Sigue sin haber purga de rate_limit (git grep 'DELETE FROM rate_limit|rateLimit.deleteMany' da 0; control limiter.ts:46)."
+   },
+   {
+    "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+    "id_previo": "S6-07",
+    "estado": "abierto",
+    "evidencia": "El channelToken sigue en el path (route.ts:28). scrub-pii.ts:53-66 no tiene patron para hex de 64 y beforeSendTransaction no esta implementado (solo el comentario en scrub-pii.ts:115). tracesSampleRate es 0.1 en el servidor (sentry.server.config.ts:10, instrumentation.ts:8)."
+   },
+   {
+    "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+    "id_previo": "S7-01",
+    "estado": "abierto",
+    "evidencia": "Parte motor: el cuerpo del mensaje (handle-message.ts:48) y el telefono (identity.ts:72, waId) se guardan en claro, y no hay purga de las tablas motor_* (git grep -i 'motorMessage.deleteMany|motor_message' -- src scripts solo encuentra registry.ts:50-51 y :127)."
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "El bot de WhatsApp no responde ni se puede dar de alta: nada consume los mensajes entrantes, sendMotorMessage no tiene llamadores y no hay alta de canal",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Los hechos se confirman leyendo origin/main @ 57c421bc. (1) La entrada solo guarda: handle-request.ts:22-55 resuelve el canal, autentica, parsea y llama a processInboundPayload. process.ts:149-157 llama a handleInboundMessage, y handle-message.ts:41-58 guarda el MotorMessage IN (:45) y devuelve 'persisted'. Ninguna rama encola, llama a un LLM ni responde. (2) 'git grep sendMotorMessage origin/main' da solo la definición (sendMessage.ts:204), tests/integration/motor-outbound.spec.ts y la bitácora: cero llamadores en src/. (3) wabaChannel.create aparece solo en 4 specs de integración. En src/ las únicas escrituras son dos update de salud (handle-health.ts:219 y :243), y generateChannelWebhookCredentials (channel-credentials.ts:30) solo se llama desde tests. (4) Fuera de src/modules/motor y src/lib/isolation no hay accesos a motorConversation, motorMessage, wabaChannel ni las demás tablas motor_* (control positivo: handle-message.ts, handle-status.ts y sendMessage.ts sí matchean). Lo que NO se sostiene es la severidad ALTA ni el encuadre de 'bug que bloquea al primer cliente'. El motor es un módulo a medio construir y así está declarado. El producto no se vende: el catálogo vivo lo marca como 'Próximamente (5 módulos en construcción)' con status COMING_SOON (src/lib/data/premium-modules.ts:82-95; src/lib/modules/modules.invariant.ts:46). Ningún flujo del cliente se rompe porque ese flujo todavía no existe. Corresponde reclasificarlo como FAL (no BUG), con madurez L1 de la funcionalidad WhatsApp Autopilot / int.360dialog: B1 hecho (adaptadores de entrada, salida y salud); B2 sin hacer (la orquestación y el LLM que consumen sendMotorMessage, más el alta del canal); B3 sin hacer (el transporte de alertas). Queda en MEDIA porque condiciona vender el módulo y porque un endpoint público vivo escribe en la base sin consumidor ni UI. La parte del alta del canal duplica S6-08 del baseline de julio (calificado BAJO) y conviene fusionarla con ese hallazgo, no contarla como nueva. Redacción sugerida del impacto: 'antes de pasar WhatsApp Autopilot de COMING_SOON a ACTIVE hace falta B2 (consumidor de los entrantes que llame a sendMotorMessage con validación Zod), un camino de alta y rotación de WabaChannel (S6-08) y una vista para el negocio de las conversaciones motor_*'.",
+    "evidencia_contra": [
+     "src/lib/data/premium-modules.ts:82-95: whatsapp-autopilot está bajo el comentario 'Próximamente (5 módulos en construcción)' con status 'COMING_SOON'. No se vende como disponible; src/lib/modules/modules.invariant.ts:46 fija el mismo estado",
+     "src/modules/motor/README.md:8-9: 'La lógica de negocio se agrega en sprints posteriores'; :47-63 el Estado documenta solo B0-S1 y B1-S1/S2/S3",
+     "src/app/api/motor/webhook/[channelToken]/route.ts:9-10: 'nada de LLM — eso es B2'. Que no haya respuesta es una decisión de diseño de esta etapa, no una regresión",
+     "src/modules/motor/services/sendMessage.ts:200-202: 'Punto único de salida del motor — B2 lo consume'. Que hoy no tenga llamadores es lo que se espera en B1",
+     "docs/motor-whatsapp/bitacora.md:564-572: la reconciliación de PENDING y la Server Action con Zod 'es problema de B2'. Alta de la API key: 'hoy se siembra a mano ... B2/admin'",
+     "docs/baselines/2026-07-auditoria-seguridad.md:2798-2808: S6-08 ya reporta la falta de alta y rotación de WabaChannel (severidad BAJO, CONFIRMADO). La mitad del hallazgo está duplicada",
+     "El webhook no está roto: handle-request.ts:22-55 autentica, rechaza canales INACTIVE y guarda de forma idempotente. Según S6-08, la autenticación falla cerrada si no hay webhookSecretHash (auth.ts:51-53)"
+    ]
+   }
+  ]
+ }
+}

@@ -563,7 +563,7 @@ logic-core-v3/public/logodevelOP.svg,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/public/maps/argentina.svg,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/public/maps/tucuman-googlemaps.png,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/public/next.svg,-,fuera,excluido-generado,,asset-binario
-logic-core-v3/public/test-widget.html,D5,superficial,pendiente,,pagina-de-prueba-del-widget
+logic-core-v3/public/test-widget.html,D5,superficial,superficial,D5-c1,pagina-de-prueba-del-widget | pagina estatica de prueba servida en produccion (/test-widget.html): carga widget.js del bot develop y expone botones de window.develOP; sin datos ni secretos; candidata a poda o a sacar de public/
 logic-core-v3/public/vercel.svg,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/public/video/Male_business_owner_opens_laptop_delpmaspu_.mp4,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/public/video/Man_sips_coffee_scrolls_phone_delpmaspu_.mp4,-,fuera,excluido-generado,,asset-binario
@@ -571,7 +571,7 @@ logic-core-v3/public/video/Muestra-pagina-ejemplo.mp4,-,fuera,excluido-generado,
 logic-core-v3/public/video/Woman_engrossed_in_screen_delpmaspu_.mp4,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/public/videos/ia-ingenieria-aplicada-demo.mp4,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/public/videos/software-development-hero-intro.mp4,-,fuera,excluido-generado,,asset-binario
-logic-core-v3/public/widget.js,D5,profundo,pendiente,,widget-embebible
+logic-core-v3/public/widget.js,D5,profundo,leído,D5-c1,widget-embebible
 logic-core-v3/public/window.svg,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/replace_analytics.js,D9,superficial,pendiente,,script-suelto-raiz-app
 logic-core-v3/script.js,D9,superficial,pendiente,,script-suelto-raiz-app
@@ -722,37 +722,37 @@ logic-core-v3/src/app/(protected)/admin/audit-log/_components/audit-period-filte
 logic-core-v3/src/app/(protected)/admin/audit-log/error.tsx,D3,profundo,pendiente,,admin; client-component
 logic-core-v3/src/app/(protected)/admin/audit-log/loading.tsx,D3,profundo,pendiente,,admin
 logic-core-v3/src/app/(protected)/admin/audit-log/page.tsx,D3,profundo,pendiente,,admin; usa-auth
-logic-core-v3/src/app/(protected)/admin/chatbot/activity/loading.tsx,D5,profundo,pendiente,,admin-chatbot
-logic-core-v3/src/app/(protected)/admin/chatbot/activity/page.tsx,D5,profundo,pendiente,,admin-chatbot; toca-db
-logic-core-v3/src/app/(protected)/admin/chatbot/health/loading.tsx,D5,profundo,pendiente,,admin-chatbot
-logic-core-v3/src/app/(protected)/admin/chatbot/health/page.tsx,D5,profundo,pendiente,,admin-chatbot
-logic-core-v3/src/app/(protected)/admin/chatbots/BotsListClient.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/BulkActionBar.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/actions.ts,D5,profundo,pendiente,,admin-chatbot; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/error.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/loading.tsx,D5,profundo,pendiente,,admin-chatbot
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/page.tsx,D5,profundo,pendiente,,admin-chatbot; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs.ts,D5,profundo,pendiente,,admin-chatbot
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/ActivityTab.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/ConfigTab.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/ConversationsTab.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/ConvertChatbotLeadButton.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/InstallTab.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/IntegrationsTab.tsx,D5,profundo,pendiente,,admin-chatbot
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/KnowledgeTab.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/LeadsTab.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/transcript-action.ts,D5,profundo,pendiente,,admin-chatbot; toca-db; server-action; usa-auth
-logic-core-v3/src/app/(protected)/admin/chatbots/_actions/convert-chatbot-lead.actions.ts,D5,profundo,pendiente,,admin-chatbot; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/app/(protected)/admin/chatbots/_actions/convert-chatbot-lead.schemas.ts,D5,profundo,pendiente,,admin-chatbot
-logic-core-v3/src/app/(protected)/admin/chatbots/bulk-actions.ts,D5,profundo,pendiente,,admin-chatbot; toca-db; server-action; usa-auth; escribe-db
-logic-core-v3/src/app/(protected)/admin/chatbots/error.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/loading.tsx,D5,profundo,pendiente,,admin-chatbot
-logic-core-v3/src/app/(protected)/admin/chatbots/new/CreateBotForm.tsx,D5,profundo,pendiente,,admin-chatbot; client-component
-logic-core-v3/src/app/(protected)/admin/chatbots/new/actions.ts,D5,profundo,pendiente,,admin-chatbot; toca-db; server-action; usa-auth
-logic-core-v3/src/app/(protected)/admin/chatbots/new/page.tsx,D5,profundo,pendiente,,admin-chatbot; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/chatbots/page.tsx,D5,profundo,pendiente,,admin-chatbot; usa-auth
+logic-core-v3/src/app/(protected)/admin/chatbot/activity/loading.tsx,D5,profundo,leído,D5-c1,admin-chatbot
+logic-core-v3/src/app/(protected)/admin/chatbot/activity/page.tsx,D5,profundo,leído,D5-c1,admin-chatbot; toca-db
+logic-core-v3/src/app/(protected)/admin/chatbot/health/loading.tsx,D5,profundo,leído,D5-c1,admin-chatbot
+logic-core-v3/src/app/(protected)/admin/chatbot/health/page.tsx,D5,profundo,leído,D5-c1,admin-chatbot
+logic-core-v3/src/app/(protected)/admin/chatbots/BotsListClient.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/BulkActionBar.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/actions.ts,D5,profundo,leído,D5-c1,admin-chatbot; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/error.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/loading.tsx,D5,profundo,leído,D5-c1,admin-chatbot
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/page.tsx,D5,profundo,leído,D5-c1,admin-chatbot; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs.ts,D5,profundo,leído,D5-c1,admin-chatbot
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/ActivityTab.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/ConfigTab.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/ConversationsTab.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/ConvertChatbotLeadButton.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/InstallTab.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/IntegrationsTab.tsx,D5,profundo,leído,D5-c1,admin-chatbot
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/KnowledgeTab.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/LeadsTab.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/[botId]/transcript-action.ts,D5,profundo,leído,D5-c1,admin-chatbot; toca-db; server-action; usa-auth
+logic-core-v3/src/app/(protected)/admin/chatbots/_actions/convert-chatbot-lead.actions.ts,D5,profundo,leído,D5-c1,admin-chatbot; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/app/(protected)/admin/chatbots/_actions/convert-chatbot-lead.schemas.ts,D5,profundo,leído,D5-c1,admin-chatbot
+logic-core-v3/src/app/(protected)/admin/chatbots/bulk-actions.ts,D5,profundo,leído,D5-c1,admin-chatbot; toca-db; server-action; usa-auth; escribe-db
+logic-core-v3/src/app/(protected)/admin/chatbots/error.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/loading.tsx,D5,profundo,leído,D5-c1,admin-chatbot
+logic-core-v3/src/app/(protected)/admin/chatbots/new/CreateBotForm.tsx,D5,profundo,leído,D5-c1,admin-chatbot; client-component
+logic-core-v3/src/app/(protected)/admin/chatbots/new/actions.ts,D5,profundo,leído,D5-c1,admin-chatbot; toca-db; server-action; usa-auth
+logic-core-v3/src/app/(protected)/admin/chatbots/new/page.tsx,D5,profundo,leído,D5-c1,admin-chatbot; toca-db; usa-auth
+logic-core-v3/src/app/(protected)/admin/chatbots/page.tsx,D5,profundo,leído,D5-c1,admin-chatbot; usa-auth
 logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideCard.tsx,D3,profundo,pendiente,,admin; toca-db
 logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/BillingOverrideForm.tsx,D3,profundo,pendiente,,admin; client-component
 logic-core-v3/src/app/(protected)/admin/clients/[clientId]/_components/ClientHeader.tsx,D3,profundo,pendiente,,admin
@@ -940,24 +940,24 @@ logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.acti
 logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.invariant.ts,D2,superficial,superficial,D2-c1,dashboard; test | test sin DB: ExecutiveReportPrefsSchema acepta solo 3 frecuencias x 3 cantidades (preferencias del reporte ejecutivo)
 logic-core-v3/src/app/(protected)/dashboard/_actions/executive-report-prefs.schemas.ts,D2,profundo,leído,D2-c1,dashboard
 logic-core-v3/src/app/(protected)/dashboard/_actions/regenerate-brief.ts,D2,profundo,leído,D2-c1,dashboard; server-action; usa-auth; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/chatbot/conversations/loading.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/conversations/page.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/conversations/transcript-action.ts,D5,profundo,pendiente,,dashboard-chatbot; server-action
-logic-core-v3/src/app/(protected)/dashboard/chatbot/error.tsx,D5,profundo,pendiente,,dashboard-chatbot; client-component
-logic-core-v3/src/app/(protected)/dashboard/chatbot/install/ClientInstallView.tsx,D5,profundo,pendiente,,dashboard-chatbot; client-component
-logic-core-v3/src/app/(protected)/dashboard/chatbot/install/loading.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/install/page.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/knowledge/loading.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/knowledge/page.tsx,D5,profundo,pendiente,,dashboard-chatbot; toca-db
-logic-core-v3/src/app/(protected)/dashboard/chatbot/layout.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/leads/[id]/loading.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/leads/loading.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/leads/page.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/loading.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/page.tsx,D5,profundo,pendiente,,dashboard-chatbot; guard-indirecto
-logic-core-v3/src/app/(protected)/dashboard/chatbot/settings/loading.tsx,D5,profundo,pendiente,,dashboard-chatbot
-logic-core-v3/src/app/(protected)/dashboard/chatbot/settings/page.tsx,D5,profundo,pendiente,,dashboard-chatbot; toca-db; usa-auth; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/chatbot/conversations/loading.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/conversations/page.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/conversations/transcript-action.ts,D5,profundo,leído,D5-c1,dashboard-chatbot; server-action
+logic-core-v3/src/app/(protected)/dashboard/chatbot/error.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot; client-component
+logic-core-v3/src/app/(protected)/dashboard/chatbot/install/ClientInstallView.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot; client-component
+logic-core-v3/src/app/(protected)/dashboard/chatbot/install/loading.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/install/page.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/knowledge/loading.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/knowledge/page.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot; toca-db
+logic-core-v3/src/app/(protected)/dashboard/chatbot/layout.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/leads/[id]/loading.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/leads/loading.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/leads/page.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/loading.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/page.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot; guard-indirecto
+logic-core-v3/src/app/(protected)/dashboard/chatbot/settings/loading.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot
+logic-core-v3/src/app/(protected)/dashboard/chatbot/settings/page.tsx,D5,profundo,leído,D5-c1,dashboard-chatbot; toca-db; usa-auth; guard-indirecto
 logic-core-v3/src/app/(protected)/dashboard/cuenta/boveda/loading.tsx,D2,profundo,leído,D2-c1,dashboard
 logic-core-v3/src/app/(protected)/dashboard/cuenta/boveda/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; guard-indirecto
 logic-core-v3/src/app/(protected)/dashboard/cuenta/error.tsx,D2,profundo,leído,D2-c1,dashboard; client-component
@@ -1131,11 +1131,11 @@ logic-core-v3/src/app/accept-invite/page.tsx,D1,profundo,leído,D1-c1,auth-ui
 logic-core-v3/src/app/ai-implementations/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/ai-implementations/page.tsx,PUB,superficial,superficial,F1,sitio-publico; client-component
 logic-core-v3/src/app/api/admin/alerts/trigger-detector/route.ts,D3,profundo,pendiente,,api-admin; usa-auth; route-handler
-logic-core-v3/src/app/api/admin/chatbot/demo-chat/[slug]/__tests__/demo-chat-model-resolution.invariant.ts,D5,superficial,pendiente,,api-admin-chatbot; test
-logic-core-v3/src/app/api/admin/chatbot/demo-chat/[slug]/route.ts,D5,profundo,pendiente,,api-admin-chatbot; toca-db; guard-indirecto; route-handler
-logic-core-v3/src/app/api/admin/chatbot/events/route.ts,D5,profundo,pendiente,,api-admin-chatbot; toca-db; usa-auth; route-handler
-logic-core-v3/src/app/api/admin/chatbot/insights/generate/route.ts,D5,profundo,pendiente,,api-admin-chatbot; toca-db; usa-auth; route-handler
-logic-core-v3/src/app/api/admin/chatbot/test-prompt/route.ts,D5,profundo,pendiente,,api-admin-chatbot; guard-indirecto; route-handler
+logic-core-v3/src/app/api/admin/chatbot/demo-chat/[slug]/__tests__/demo-chat-model-resolution.invariant.ts,D5,superficial,superficial,D5-c1,"api-admin-chatbot; test | test sin DB: resolucion modelo/provider del demo-chat del admin (COST-2b, resolveEffectiveModel con bot.llmModel); no cubre que el chat publico use plan.llmModel (BUG-024)"
+logic-core-v3/src/app/api/admin/chatbot/demo-chat/[slug]/route.ts,D5,profundo,leído,D5-c1,api-admin-chatbot; toca-db; guard-indirecto; route-handler
+logic-core-v3/src/app/api/admin/chatbot/events/route.ts,D5,profundo,leído,D5-c1,api-admin-chatbot; toca-db; usa-auth; route-handler
+logic-core-v3/src/app/api/admin/chatbot/insights/generate/route.ts,D5,profundo,leído,D5-c1,api-admin-chatbot; toca-db; usa-auth; route-handler
+logic-core-v3/src/app/api/admin/chatbot/test-prompt/route.ts,D5,profundo,leído,D5-c1,api-admin-chatbot; guard-indirecto; route-handler
 logic-core-v3/src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts,D3,profundo,pendiente,,api-admin; usa-auth; guard-indirecto; route-handler
 logic-core-v3/src/app/api/admin/reports/send-now/route.ts,D3,profundo,pendiente,,api-admin; usa-auth; route-handler
 logic-core-v3/src/app/api/admin/users/[userId]/resend-credentials/route.ts,D3,profundo,pendiente,,api-admin; toca-db; usa-auth; route-handler; escribe-db
@@ -1144,11 +1144,11 @@ logic-core-v3/src/app/api/auth/google-business/callback/route.ts,D7,profundo,pen
 logic-core-v3/src/app/api/auth/google-business/start/route.ts,D7,profundo,pendiente,,oauth; usa-auth; route-handler
 logic-core-v3/src/app/api/auth/tiendanube/callback/route.ts,D7,profundo,pendiente,,oauth; toca-db; usa-auth; route-handler; escribe-db
 logic-core-v3/src/app/api/auth/tiendanube/start/route.ts,D7,profundo,pendiente,,oauth; usa-auth; route-handler
-logic-core-v3/src/app/api/chatbot/[slug]/chat/route.ts,D5,profundo,pendiente,,api-chatbot-publica; toca-db; route-handler; escribe-db
-logic-core-v3/src/app/api/chatbot/[slug]/config/__tests__/fix-origin-same-origin.invariant.ts,D5,superficial,pendiente,,api-chatbot-publica; test
-logic-core-v3/src/app/api/chatbot/[slug]/config/route.ts,D5,profundo,pendiente,,api-chatbot-publica; route-handler
-logic-core-v3/src/app/api/chatbot/[slug]/config/same-origin.ts,D5,profundo,pendiente,,api-chatbot-publica; toca-db
-logic-core-v3/src/app/api/chatbot/[slug]/health/route.ts,D5,profundo,pendiente,,api-chatbot-publica; route-handler
+logic-core-v3/src/app/api/chatbot/[slug]/chat/route.ts,D5,profundo,leído,D5-c1,api-chatbot-publica; toca-db; route-handler; escribe-db
+logic-core-v3/src/app/api/chatbot/[slug]/config/__tests__/fix-origin-same-origin.invariant.ts,D5,superficial,superficial,D5-c1,"api-chatbot-publica; test | test sin DB: decision same-origin del GET de config sin header Origin (isSameOriginBypassApplicable, isTrustedSameOrigin); no cubre el escape de develop.com.ar para todos los bots"
+logic-core-v3/src/app/api/chatbot/[slug]/config/route.ts,D5,profundo,leído,D5-c1,api-chatbot-publica; route-handler
+logic-core-v3/src/app/api/chatbot/[slug]/config/same-origin.ts,D5,profundo,leído,D5-c1,api-chatbot-publica; toca-db
+logic-core-v3/src/app/api/chatbot/[slug]/health/route.ts,D5,profundo,leído,D5-c1,api-chatbot-publica; route-handler
 logic-core-v3/src/app/api/cron/alerts/route.ts,D7,profundo,pendiente,,cron; guard-indirecto; route-handler
 logic-core-v3/src/app/api/cron/cleanup-old-events/__tests__/cleanup-old-events-auth.invariant.ts,D7,superficial,pendiente,,cron; test; guard-indirecto
 logic-core-v3/src/app/api/cron/cleanup-old-events/route.ts,D7,profundo,pendiente,,cron; route-handler
@@ -1158,12 +1158,12 @@ logic-core-v3/src/app/api/cron/os-follow-up/route.ts,D4,profundo,pendiente,,cron
 logic-core-v3/src/app/api/cron/regenerate-briefs/route.ts,D7,profundo,pendiente,,cron; toca-db; guard-indirecto; route-handler
 logic-core-v3/src/app/api/cron/send-executive-reports/route.ts,D7,profundo,pendiente,,cron; guard-indirecto; route-handler
 logic-core-v3/src/app/api/cron/send-weekly-reports/route.ts,D7,profundo,pendiente,,cron; route-handler
-logic-core-v3/src/app/api/dashboard/chatbot/leads/export/route.ts,D5,profundo,pendiente,,api-dashboard-chatbot; toca-db; route-handler
+logic-core-v3/src/app/api/dashboard/chatbot/leads/export/route.ts,D5,profundo,leído,D5-c1,api-dashboard-chatbot; toca-db; route-handler
 logic-core-v3/src/app/api/dashboard/leads/recent/route.ts,D2,profundo,leído,D2-c1,api-dashboard; toca-db; usa-auth; guard-indirecto; route-handler
 logic-core-v3/src/app/api/dev/email-preview/executive-weekly/route.ts,D7,profundo,pendiente,,api-integracion; route-handler
 logic-core-v3/src/app/api/email/optout/[contactId]/route.ts,D7,profundo,pendiente,,api-integracion; toca-db; route-handler; escribe-db
 logic-core-v3/src/app/api/email/unsubscribe-executive/route.ts,D7,profundo,pendiente,,api-integracion; toca-db; route-handler; escribe-db
-logic-core-v3/src/app/api/motor/webhook/[channelToken]/route.ts,D5,profundo,pendiente,,motor; webhook; route-handler
+logic-core-v3/src/app/api/motor/webhook/[channelToken]/route.ts,D5,profundo,leído,D5-c1,motor; webhook; route-handler
 logic-core-v3/src/app/api/qa/login/route.ts,D1,profundo,leído,D1-c1,qa-login; toca-db; route-handler; escribe-db; ZONA-FRANCO
 logic-core-v3/src/app/api/reports/client-monthly/route.ts,D2,profundo,leído,D2-c1,api-dashboard; guard-indirecto; route-handler
 logic-core-v3/src/app/api/reports/monthly/route.ts,D2,profundo,leído,D2-c1,api-dashboard; toca-db; usa-auth; route-handler
@@ -1182,8 +1182,8 @@ logic-core-v3/src/app/cambiar-password/actions.ts,D1,profundo,leído,D1-c1,auth-
 logic-core-v3/src/app/cambiar-password/page.tsx,D1,profundo,leído,D1-c1,auth-ui; usa-auth
 logic-core-v3/src/app/contact/layout.tsx,PUB,superficial,superficial,F1,sitio-publico
 logic-core-v3/src/app/contact/page.tsx,D3,profundo,pendiente,,UI del endpoint publico submitContactForm; captura ?ref=; client-component
-logic-core-v3/src/app/embed/[slug]/page.tsx,D5,profundo,pendiente,,embed; toca-db
-logic-core-v3/src/app/embed/layout.tsx,D5,profundo,pendiente,,embed
+logic-core-v3/src/app/embed/[slug]/page.tsx,D5,profundo,leído,D5-c1,embed; toca-db
+logic-core-v3/src/app/embed/layout.tsx,D5,profundo,leído,D5-c1,embed
 logic-core-v3/src/app/error.tsx,D8,profundo,pendiente,,raiz-app; client-component
 logic-core-v3/src/app/favicon.ico,-,fuera,excluido-generado,,asset-binario
 logic-core-v3/src/app/forgot-password/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; escribe-db
@@ -1357,7 +1357,7 @@ logic-core-v3/src/components/ia/PipelineIA.tsx,PUB,superficial,superficial,F1,co
 logic-core-v3/src/components/ia/RubrosIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/ia/TestimoniosIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/ia/VaultIA.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
-logic-core-v3/src/components/layout/ChatWidgetMount.tsx,D5,profundo,pendiente,,monta-widget-en-sitio-publico; client-component
+logic-core-v3/src/components/layout/ChatWidgetMount.tsx,D5,profundo,leído,D5-c1,monta-widget-en-sitio-publico; client-component
 logic-core-v3/src/components/layout/DynamicDock.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/EarlyScrollLock.tsx,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/layout.tsx); componentes-sitio-publico; client-component
 logic-core-v3/src/components/layout/Hero.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
@@ -1371,7 +1371,7 @@ logic-core-v3/src/components/layout/Shutter.tsx,D9,profundo,pendiente,,compartid
 logic-core-v3/src/components/layout/SmoothScroll.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/layout.tsx, src/components/ui/MarketingIntro.tsx); componentes-sitio-publico; client-component"
 logic-core-v3/src/components/layout/VersionBadge.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/AdminLayoutClient.tsx, src/components/dashboard/DashboardLayoutClient.tsx); componentes-sitio-publico"
 logic-core-v3/src/components/layout/publicRoute.ts,D9,profundo,pendiente,,decide donde se montan el chrome publico y el widget
-logic-core-v3/src/components/layout/useChromeRevealed.ts,D5,profundo,pendiente,,decide cuando aparece el widget; client-component
+logic-core-v3/src/components/layout/useChromeRevealed.ts,D5,profundo,leído,D5-c1,decide cuando aparece el widget; client-component
 logic-core-v3/src/components/onboarding/OnboardingWizard.tsx,D3,profundo,superficial,F1.11,componentes-admin; client-component | PODA-ALTA
 logic-core-v3/src/components/sections/AILargeCta.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/sections/AIPipelineSection.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
@@ -1511,8 +1511,8 @@ logic-core-v3/src/lib/ai/brief-history.ts,D2,profundo,leído,D2-c1,ia-llm; toca-
 logic-core-v3/src/lib/ai/executive-brief-input.invariant.ts,D2,superficial,superficial,D2-c1,"ia-llm; test | test sin DB/LLM: input del brief ejecutivo (delta = card, sin crecimiento con delta negativo, sin metricas fuera de las cards, reglas anti-invencion, corte de cache); no cubre el conteo de leads global"
 logic-core-v3/src/lib/ai/executive-brief-input.ts,D2,profundo,leído,D2-c1,ia-llm
 logic-core-v3/src/lib/ai/executive-brief.ts,D2,profundo,leído,D2-c1,ia-llm; toca-db; escribe-db
-logic-core-v3/src/lib/ai/results-insights.ts,D5,profundo,pendiente,,proveedor-ia: Anthropic directo fuera del modulo chatbot
-logic-core-v3/src/lib/ai/review-reply-draft.ts,D5,profundo,pendiente,,proveedor-ia: Anthropic directo fuera del modulo chatbot
+logic-core-v3/src/lib/ai/results-insights.ts,D5,profundo,leído,D5-c1,proveedor-ia: Anthropic directo fuera del modulo chatbot
+logic-core-v3/src/lib/ai/review-reply-draft.ts,D5,profundo,leído,D5-c1,proveedor-ia: Anthropic directo fuera del modulo chatbot
 logic-core-v3/src/lib/alerts.ts,D3,profundo,pendiente,,logica-admin; toca-db; FROZEN-inferido
 logic-core-v3/src/lib/analytics.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/announcements/announcements.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: visibilidad de novedades (ALL a todas las orgs, ORG solo a la suya, caducidad, no leidas)"
@@ -1527,11 +1527,11 @@ logic-core-v3/src/lib/billing/get-current-plan.ts,D2,profundo,leído,D2-c1,logic
 logic-core-v3/src/lib/bulk-actions.ts,D3,profundo,pendiente,,logica-admin; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/chromeReveal.ts,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/modules/chatbot/components/LogicCompanion.tsx); lib-sitio-publico; FROZEN-inferido
 logic-core-v3/src/lib/client-health.ts,D3,profundo,superficial,F1.11,logica-admin | PODA-ALTA
-logic-core-v3/src/lib/client-notifications/client-notifications.invariant.ts,D5,superficial,pendiente,,aviso de lead al cliente (lo dispara captureLead); test
-logic-core-v3/src/lib/client-notifications/decide.ts,D5,profundo,pendiente,,aviso de lead al cliente (lo dispara captureLead)
-logic-core-v3/src/lib/client-notifications/index.ts,D5,profundo,pendiente,,aviso de lead al cliente (lo dispara captureLead)
-logic-core-v3/src/lib/client-notifications/notify.ts,D5,profundo,pendiente,,aviso de lead al cliente (lo dispara captureLead); toca-db; escribe-db
-logic-core-v3/src/lib/client-notifications/templates.ts,D5,profundo,pendiente,,aviso de lead al cliente (lo dispara captureLead)
+logic-core-v3/src/lib/client-notifications/client-notifications.invariant.ts,D5,superficial,superficial,D5-c1,aviso de lead al cliente (lo dispara captureLead); test | test sin DB ni server: aviso de lead al cliente (P2.A) que dispara captureLead; modos de notificacion y armado del mail
+logic-core-v3/src/lib/client-notifications/decide.ts,D5,profundo,leído,D5-c1,aviso de lead al cliente (lo dispara captureLead)
+logic-core-v3/src/lib/client-notifications/index.ts,D5,profundo,leído,D5-c1,aviso de lead al cliente (lo dispara captureLead)
+logic-core-v3/src/lib/client-notifications/notify.ts,D5,profundo,leído,D5-c1,aviso de lead al cliente (lo dispara captureLead); toca-db; escribe-db
+logic-core-v3/src/lib/client-notifications/templates.ts,D5,profundo,leído,D5-c1,aviso de lead al cliente (lo dispara captureLead)
 logic-core-v3/src/lib/cn.ts,D9,profundo,superficial,F1.11,lib-transversal | PODA-ALTA
 logic-core-v3/src/lib/cron/cron-secret.invariant.ts,D7,superficial,pendiente,,integracion; test; guard-indirecto
 logic-core-v3/src/lib/cron/cron-secret.ts,D7,profundo,pendiente,,integracion; guard-indirecto
@@ -1670,7 +1670,7 @@ logic-core-v3/src/lib/modules/showroom.ts,D2,profundo,leído,D2-c1,logica-dashbo
 logic-core-v3/src/lib/motion-variants.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/PageTransition.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +12); lib-sitio-publico; FROZEN-inferido"
 logic-core-v3/src/lib/n8n.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/notifications/telegram.ts,D7,profundo,pendiente,,integracion; toca-db
-logic-core-v3/src/lib/onboarding/core.ts,D5,profundo,pendiente,,alta de cliente (unico llamador: admin/chatbots/new); toca-db; escribe-db
+logic-core-v3/src/lib/onboarding/core.ts,D5,profundo,leído,D5-c1,alta de cliente (unico llamador: admin/chatbots/new); toca-db; escribe-db
 logic-core-v3/src/lib/onboarding/seed-tasks-for-org.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
 logic-core-v3/src/lib/os-commercial.ts,D4,profundo,pendiente,,leados-libre; toca-db; guard-indirecto; escribe-db
 logic-core-v3/src/lib/plan/fallback.ts,D2,profundo,leído,D2-c1,logica-dashboard
@@ -1713,14 +1713,14 @@ logic-core-v3/src/lib/security/generate-temp-password.ts,D1,profundo,leído,D1-c
 logic-core-v3/src/lib/security/idor-tokens.invariant.ts,D1,superficial,superficial,D1-c1,"seguridad; test | test: cubre el token firmado del opt-out por contacto (/api/email/optout, D7) y resolveScopedOrgId (org-scope.ts); sin DB"
 logic-core-v3/src/lib/security/oauth-state.ts,D7,profundo,pendiente,,oauth
 logic-core-v3/src/lib/security/org-scope.ts,D2,profundo,leído,D2-c1,tenant-scope; guard-indirecto
-logic-core-v3/src/lib/security/origin-matcher.ts,D5,profundo,pendiente,,origen-widget
-logic-core-v3/src/lib/security/validate-origin.ts,D5,profundo,pendiente,,origen-widget; toca-db
+logic-core-v3/src/lib/security/origin-matcher.ts,D5,profundo,leído,D5-c1,origen-widget
+logic-core-v3/src/lib/security/validate-origin.ts,D5,profundo,leído,D5-c1,origen-widget; toca-db
 logic-core-v3/src/lib/sentry/scrub-pii.ts,D7,profundo,pendiente,,integracion
 logic-core-v3/src/lib/slugify.ts,D9,profundo,pendiente,,lib-transversal
 logic-core-v3/src/lib/subscription.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/tickets/actions.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/lib/tickets/schemas.ts,D2,profundo,leído,D2-c1,logica-dashboard
-logic-core-v3/src/lib/tokens-estimate.ts,D5,profundo,pendiente,,chatbot
+logic-core-v3/src/lib/tokens-estimate.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/lib/types/data-connections.ts,D9,profundo,pendiente,,lib-transversal
 logic-core-v3/src/lib/tz-ar.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/upsell/dedup.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: dedup de pedidos de upsell en ventana (crea, idempotente, renovado, rage-clicks)"
@@ -1734,369 +1734,369 @@ logic-core-v3/src/lib/utils.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-in
 logic-core-v3/src/lib/whatsapp.ts,D9,profundo,pendiente,,compartido: lo importa codigo interno (src/app/contact/page.tsx); links wa.me del sitio publico
 logic-core-v3/src/modules/chatbot/README.md,DOC,superficial,superficial,F1,doc-de-modulo
 logic-core-v3/src/modules/chatbot/components/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/chatbot/components/LogicCompanion.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/ActivityLog.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/BotConfigEditor.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/KnowledgeBaseEditor.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/activation/ActivationModal.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/activity/ActivityChart.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/activity/ActivityDateFilter.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/activity/activityFilters.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/client-avatar/ClientAvatar.tsx,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/client-avatar/ClientAvatarField.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/BotConfigDiffModal.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/ColorPicker.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/ConfigTabs.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/EmojiPickerField.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/EmojiPickerPanel.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/Field.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/Input.tsx,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/config/Slider.tsx,D5,profundo,pendiente,,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/LogicCompanion.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/ActivityLog.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/BotConfigEditor.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/KnowledgeBaseEditor.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/activation/ActivationModal.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/activity/ActivityChart.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/activity/ActivityDateFilter.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/activity/activityFilters.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/client-avatar/ClientAvatar.tsx,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/client-avatar/ClientAvatarField.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/BotConfigDiffModal.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/ColorPicker.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/ConfigTabs.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/EmojiPickerField.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/EmojiPickerPanel.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/Field.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/Input.tsx,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/config/Slider.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
 logic-core-v3/src/modules/chatbot/components/admin/config/Toggle.tsx,D5,profundo,superficial,F1.11,chatbot; client-component | PODA-ALTA
-logic-core-v3/src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/tabs/AppearanceTab.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/tabs/AvatarUploader.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/tabs/IdentityTab.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/tabs/StyleTab.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/config/types.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/health/LatencyChart.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard.tsx,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/components/admin/integrations/CrmSyncBadge.tsx,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/integrations/CrmSyncHistoryList.tsx,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/integrations/RetrySyncButton.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/kb/DiffViewer.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/kb/KBSearch.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/kb/KBValidation.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/kb/MarkdownEditor.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/kb/SaveConfirmModal.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/DraftBanner.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/ExpandableTextField.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/ProgressBar.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/Step1Company.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/Step2BotIdentity.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/Step4Appearance.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/Step5Review.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/field-styles.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/industries.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/constructora.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/contable.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/distribuidora.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/generico.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/gimnasio.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/inmobiliaria.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/legal.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/medico.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/restaurant.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/suggestions.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/types.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/admin/useIsClient.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/avatar/AvatarPicker.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/AvatarRenderer.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/CanvasAutoResize.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/CentralCore.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/CoreHalo.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/GeometricAvatar.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/HeavyAvatarsLazy.module.css,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/avatar/HeavyAvatarsLazy.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/LegacyNeuroAvatarAdapter.module.css,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/avatar/LegacyNeuroAvatarAdapter.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/MonogramAvatar.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/NeuroAvatar.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/ParticleSphere.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/PulseAvatar.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/avatar/avatarStyleSchema.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/avatar/fibonacciSphere.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/avatar/frameDelta.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/avatar/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/avatar/legacyStateMapper.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/avatar/registry.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/avatar/types.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/chat/ChatHeader.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/chat/ChatInput.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/chat/ChatMessage.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/chat/ChatMessages.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/chat/ChatWindow.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/chat/ConfigLoadError.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/chat/DegradedBanner.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/chat/QuickReplyChips.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/chat/StreamingMarkdown.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/chat/ThinkingAvatar.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/chat/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/chat/revealSafeMarkdown.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/chat/types.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/dashboard/BotPersonalization.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/BusinessStatCard.tsx,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/dashboard/ChatbotOverview.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/ClientDashboardTabs.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx,D5,profundo,pendiente,,chatbot; toca-db; guard-indirecto
-logic-core-v3/src/modules/chatbot/components/dashboard/ExportLeadsButton.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/LeadDetail.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/LeadScoringTeaser.tsx,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/dashboard/LeadStatusActions.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/dashboard/lead-pipeline/LeadColumnOverview.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/lead-pipeline/LeadPipeline.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/lead-pipeline/LeadPipelineColumn.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboard/lead-pipeline/classes.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/dashboards/ConversationsTable.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboards/LeadsTable.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/dashboards/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/embed/ChatbotEmbed.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/installation/PlatformInstructions.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/installation/SnippetCopyBlock.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/installation/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/installation/platforms.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/preview/BotConfigPreview.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/preview/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/preview/types.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/tool-cards/HandoffOptionsCard.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/tool-cards/NavigateToPageCard.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/tool-cards/WhatsappHandoffCard.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/tool-cards/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/tool-cards/renderToolCall.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/components/tooltip/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/tooltip/types.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/components/tooltip/useTooltipTriggers.ts,D5,profundo,pendiente,,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/tabs/AppearanceTab.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/tabs/AvatarUploader.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/tabs/IdentityTab.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/tabs/StyleTab.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/config/types.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/health/LatencyChart.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard.tsx,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/components/admin/integrations/CrmSyncBadge.tsx,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/integrations/CrmSyncHistoryList.tsx,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/integrations/RetrySyncButton.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/kb/DiffViewer.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/kb/KBSearch.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/kb/KBValidation.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/kb/MarkdownEditor.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/kb/SaveConfirmModal.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/DraftBanner.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/ExpandableTextField.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/ProgressBar.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/Step1Company.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/Step2BotIdentity.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/Step4Appearance.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/Step5Review.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/field-styles.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/industries.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/constructora.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/contable.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/distribuidora.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/generico.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/gimnasio.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/inmobiliaria.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/legal.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/medico.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/kb-templates/restaurant.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/suggestions.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/types.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/admin/useIsClient.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/avatar/AvatarPicker.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/AvatarRenderer.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/CanvasAutoResize.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/CentralCore.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/CoreHalo.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/GeometricAvatar.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/HeavyAvatarsLazy.module.css,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/avatar/HeavyAvatarsLazy.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/LegacyNeuroAvatarAdapter.module.css,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/avatar/LegacyNeuroAvatarAdapter.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/MonogramAvatar.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/NeuroAvatar.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/ParticleSphere.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/PulseAvatar.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/avatar/avatarStyleSchema.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/avatar/fibonacciSphere.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/avatar/frameDelta.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/avatar/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/avatar/legacyStateMapper.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/avatar/registry.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/avatar/types.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/chat/ChatHeader.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/chat/ChatInput.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/chat/ChatMessage.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/chat/ChatMessages.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/chat/ChatWindow.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/chat/ConfigLoadError.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/chat/DegradedBanner.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/chat/QuickReplyChips.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/chat/StreamingMarkdown.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/chat/ThinkingAvatar.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/chat/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/chat/revealSafeMarkdown.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/chat/types.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/dashboard/BotPersonalization.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/BusinessStatCard.tsx,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/dashboard/ChatbotOverview.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/ClientDashboardTabs.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx,D5,profundo,leído,D5-c1,chatbot; toca-db; guard-indirecto
+logic-core-v3/src/modules/chatbot/components/dashboard/ExportLeadsButton.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/LeadDetail.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/LeadScoringTeaser.tsx,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/dashboard/LeadStatusActions.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/dashboard/lead-pipeline/LeadColumnOverview.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/lead-pipeline/LeadPipeline.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/lead-pipeline/LeadPipelineColumn.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboard/lead-pipeline/classes.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/dashboards/ConversationsTable.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboards/LeadsTable.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/dashboards/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/embed/ChatbotEmbed.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/installation/PlatformInstructions.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/installation/SnippetCopyBlock.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/installation/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/installation/platforms.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/preview/BotConfigPreview.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/preview/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/preview/types.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/tool-cards/HandoffOptionsCard.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/tool-cards/NavigateToPageCard.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/tool-cards/WhatsappHandoffCard.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/tool-cards/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/tool-cards/renderToolCall.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/components/tooltip/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/tooltip/types.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/components/tooltip/useTooltipTriggers.ts,D5,profundo,leído,D5-c1,chatbot; client-component
 logic-core-v3/src/modules/chatbot/evals/README.md,DOC,superficial,superficial,F1,doc-de-modulo
-logic-core-v3/src/modules/chatbot/evals/__tests__/q1-2.invariant.ts,D5,superficial,pendiente,,evals; test
-logic-core-v3/src/modules/chatbot/evals/capture.ts,D5,superficial,pendiente,,evals; toca-db
-logic-core-v3/src/modules/chatbot/evals/cleanup.ts,D5,profundo,pendiente,,evals; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/src/modules/chatbot/evals/client.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/runner.ts,D5,superficial,pendiente,,evals; toca-db
-logic-core-v3/src/modules/chatbot/evals/scenarios/agencia.json,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scenarios/base.json,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scenarios/usados.json,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scoring/evaluate.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scoring/hard-asserts.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scoring/judge.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scoring/load.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scoring/parse-verdict.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scoring/report.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scoring/resolve.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scoring/rubric.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/scoring/types.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/seed-eval-bots.ts,D5,profundo,pendiente,,evals; toca-db; escribe-db; promovido: escribe en la base
-logic-core-v3/src/modules/chatbot/evals/shared.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/evals/types.ts,D5,superficial,pendiente,,evals
-logic-core-v3/src/modules/chatbot/hooks/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/hooks/useChatbotSounds.ts,D5,profundo,pendiente,,chatbot; client-component
-logic-core-v3/src/modules/chatbot/index.server.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/index.ts,D5,profundo,pendiente,,chatbot; guard-indirecto
-logic-core-v3/src/modules/chatbot/lead-detail-presentation.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/lead-detail-presentation.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/lead-intent-labels.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/lead-status-rules.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/lead-status-rules.ts,D5,profundo,pendiente,,chatbot
+logic-core-v3/src/modules/chatbot/evals/__tests__/q1-2.invariant.ts,D5,superficial,superficial,D5-c1,"evals; test | test sin DB: bateria del evaluador de evals (Q1.2: asserts duros, parseo del veredicto del juez)"
+logic-core-v3/src/modules/chatbot/evals/capture.ts,D5,superficial,superficial,D5-c1,"evals; toca-db | harness de evals dev-only: solo lee conversation/lead por sessionId con unsafeGlobalQuery (capture.ts:66, :94); guardDevHost del runner aborta si DATABASE_URL no es la branch dev"
+logic-core-v3/src/modules/chatbot/evals/cleanup.ts,D5,profundo,leído,D5-c1,evals; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/src/modules/chatbot/evals/client.ts,D5,superficial,superficial,D5-c1,"evals | harness de evals: cliente HTTP del chat contra EVALS_BASE_URL (localhost:3002 por defecto, shared.ts:44)"
+logic-core-v3/src/modules/chatbot/evals/runner.ts,D5,superficial,superficial,D5-c1,evals; toca-db | harness de evals dev-only: corre escenarios por pack contra el chat local; lee el bot QA por slug (runner.ts:84) tras guardDevHost (shared.ts:48)
+logic-core-v3/src/modules/chatbot/evals/scenarios/agencia.json,D5,superficial,superficial,D5-c1,evals | escenarios de evals del pack agencia (datos de prueba)
+logic-core-v3/src/modules/chatbot/evals/scenarios/base.json,D5,superficial,superficial,D5-c1,evals | escenarios de evals del pack base (datos de prueba)
+logic-core-v3/src/modules/chatbot/evals/scenarios/usados.json,D5,superficial,superficial,D5-c1,evals | escenarios de evals del pack usados (datos de prueba)
+logic-core-v3/src/modules/chatbot/evals/scoring/evaluate.ts,D5,superficial,superficial,D5-c1,evals | evals: evaluacion de una conversacion (asserts + juez)
+logic-core-v3/src/modules/chatbot/evals/scoring/hard-asserts.ts,D5,superficial,superficial,D5-c1,evals | evals: asserts deterministas sobre tools y lead
+logic-core-v3/src/modules/chatbot/evals/scoring/judge.ts,D5,superficial,superficial,D5-c1,evals | evals: juez LLM de las conversaciones (solo en corridas manuales de evals)
+logic-core-v3/src/modules/chatbot/evals/scoring/load.ts,D5,superficial,superficial,D5-c1,evals | evals: carga de resultados de corridas
+logic-core-v3/src/modules/chatbot/evals/scoring/parse-verdict.ts,D5,superficial,superficial,D5-c1,evals | evals: parseo del veredicto del juez
+logic-core-v3/src/modules/chatbot/evals/scoring/report.ts,D5,superficial,superficial,D5-c1,evals | evals: reporte de la corrida
+logic-core-v3/src/modules/chatbot/evals/scoring/resolve.ts,D5,superficial,superficial,D5-c1,evals | evals: resolucion de escenarios y packs
+logic-core-v3/src/modules/chatbot/evals/scoring/rubric.ts,D5,superficial,superficial,D5-c1,evals | evals: rubrica del juez
+logic-core-v3/src/modules/chatbot/evals/scoring/types.ts,D5,superficial,superficial,D5-c1,evals | evals: tipos del scoring
+logic-core-v3/src/modules/chatbot/evals/seed-eval-bots.ts,D5,profundo,leído,D5-c1,evals; toca-db; escribe-db; promovido: escribe en la base
+logic-core-v3/src/modules/chatbot/evals/shared.ts,D5,superficial,superficial,D5-c1,"evals | evals: constantes (packs, slugs QA, EVALS_BASE_URL) y guardDevHost (:48), el guard de host exacto que reusan los invariantes con DB"
+logic-core-v3/src/modules/chatbot/evals/types.ts,D5,superficial,superficial,D5-c1,evals | evals: tipos de escenarios y resultados
+logic-core-v3/src/modules/chatbot/hooks/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/hooks/useChatbotSounds.ts,D5,profundo,leído,D5-c1,chatbot; client-component
+logic-core-v3/src/modules/chatbot/index.server.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/index.ts,D5,profundo,leído,D5-c1,chatbot; guard-indirecto
+logic-core-v3/src/modules/chatbot/lead-detail-presentation.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: presentacion del detalle del lead (P1.D); no cubre channelLabel sin datos ni el uso de in sobre objetos planos (D5-c1)
+logic-core-v3/src/modules/chatbot/lead-detail-presentation.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/lead-intent-labels.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/lead-status-rules.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: reglas de estado de leads (P1.B); no cubre que Deshacer no revierta el primer contacto (D5-c1)
+logic-core-v3/src/modules/chatbot/lead-status-rules.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/lib/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/chatbot/lib/business-metrics.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/lib/monthly-analysis.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/prisma/developProactivePrompts.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/prisma/seed.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/prisma/update-proactive-prompts.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/lib/business-metrics.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/lib/monthly-analysis.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/prisma/developProactivePrompts.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/prisma/seed.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/prisma/update-proactive-prompts.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
 logic-core-v3/src/modules/chatbot/server/admin/archiveClient.ts,D3,profundo,pendiente,,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/avatarImageUrlSchema.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/admin/clientHasChatbot.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/admin/createBot.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/createClientOnly.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/createClientWithBot.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/detectBotIssues.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/getActivityChartData.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/admin/getClientSession.ts,D5,profundo,pendiente,,chatbot; toca-db; usa-auth
-logic-core-v3/src/modules/chatbot/server/admin/getGlobalBotsOverviewStats.ts,D5,profundo,pendiente,,chatbot; toca-db; guard-indirecto
-logic-core-v3/src/modules/chatbot/server/admin/getLatencyHistory.ts,D5,profundo,pendiente,,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/admin/avatarImageUrlSchema.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/admin/clientHasChatbot.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/admin/createBot.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/createClientOnly.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/createClientWithBot.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/detectBotIssues.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/getActivityChartData.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/admin/getClientSession.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; usa-auth
+logic-core-v3/src/modules/chatbot/server/admin/getGlobalBotsOverviewStats.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; guard-indirecto
+logic-core-v3/src/modules/chatbot/server/admin/getLatencyHistory.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
 logic-core-v3/src/modules/chatbot/server/admin/hardDeleteClient.ts,D3,profundo,pendiente,,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts,D5,profundo,pendiente,,chatbot; toca-db; guard-indirecto
-logic-core-v3/src/modules/chatbot/server/admin/integrations/retryCrmSync.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; guard-indirecto
-logic-core-v3/src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; guard-indirecto
-logic-core-v3/src/modules/chatbot/server/admin/integrations/testCrmConnection.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; guard-indirecto
-logic-core-v3/src/modules/chatbot/server/admin/listAllBots.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/admin/manageAlerts.schemas.ts,D5,profundo,pendiente,,chatbot
+logic-core-v3/src/modules/chatbot/server/admin/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; guard-indirecto
+logic-core-v3/src/modules/chatbot/server/admin/integrations/retryCrmSync.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto
+logic-core-v3/src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto
+logic-core-v3/src/modules/chatbot/server/admin/integrations/testCrmConnection.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto
+logic-core-v3/src/modules/chatbot/server/admin/listAllBots.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/admin/manageAlerts.schemas.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/server/admin/manageAlerts.ts,D3,profundo,pendiente,,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/multiTenantQueries.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/admin/preflightChecks.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action
-logic-core-v3/src/modules/chatbot/server/admin/queries.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/admin/requireSuperAdmin.ts,D5,profundo,pendiente,,chatbot; usa-auth; guard-indirecto
-logic-core-v3/src/modules/chatbot/server/admin/saveBotConfig.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/saveClientSettings.ts,D5,profundo,pendiente,,chatbot; server-action
-logic-core-v3/src/modules/chatbot/server/admin/saveKnowledgeBase.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/sendTestNotification.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; guard-indirecto
+logic-core-v3/src/modules/chatbot/server/admin/multiTenantQueries.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/admin/preflightChecks.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action
+logic-core-v3/src/modules/chatbot/server/admin/queries.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/admin/requireSuperAdmin.ts,D5,profundo,leído,D5-c1,chatbot; usa-auth; guard-indirecto
+logic-core-v3/src/modules/chatbot/server/admin/saveBotConfig.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/saveClientSettings.ts,D5,profundo,leído,D5-c1,chatbot; server-action
+logic-core-v3/src/modules/chatbot/server/admin/saveKnowledgeBase.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/sendTestNotification.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; guard-indirecto
 logic-core-v3/src/modules/chatbot/server/admin/updateClient.ts,D3,profundo,pendiente,,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/modules/chatbot/server/admin/updateClientInternalNotes.ts,D3,profundo,pendiente,,server-actions de Admin > Clientes / Alertas; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/updateLeadStatus.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; escribe-db
-logic-core-v3/src/modules/chatbot/server/admin/validateKB.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/chat/__tests__/deadline.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/chat/__tests__/empty-fallback-pipeline.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/chat/__tests__/history-window.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/chat/__tests__/mudez-net.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/chat/__tests__/onf1-reconcile.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/chat/__tests__/stream-watchdog.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/chat/__tests__/user-persist-dedup.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/chat/__tests__/utm-attribution.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/chat/chunkTally.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/dedup.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/degradedResponse.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/chat/hookOps.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/persistTurn.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/chat/reconcile.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/requestSchema.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/silenceFrames.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/streamProbe.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/streamWatchdog.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/toolSuspension.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/chat/withDeadline.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/config/envValidator.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/config/getPublicConfig.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/config/handleConfigRequest.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/config/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/conversation/__tests__/p2002-adopcion.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/conversation/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/conversation/resolver.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/crm/buildLeadPayload.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/crm/encryptSecret.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/crm/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/crm/postToN8n.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/crm/syncLeadToCrm.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/crm/validateWebhookUrl.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/dashboard/updateBotAppearance.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
-logic-core-v3/src/modules/chatbot/server/health/buildHealthVerdict.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/health/checkHealth.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/health/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/insights/generateInsights.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/insights/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/insights/manageInsight.ts,D5,profundo,pendiente,,chatbot; toca-db; server-action; escribe-db
-logic-core-v3/src/modules/chatbot/server/insights/queries.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/intent/detectIntent.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/intent/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/leads/csv/csvEscape.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/leads/csv/index.ts,D5,profundo,pendiente,,chatbot
+logic-core-v3/src/modules/chatbot/server/admin/updateLeadStatus.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; escribe-db
+logic-core-v3/src/modules/chatbot/server/admin/validateKB.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/chat/__tests__/deadline.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB ni red: techo de tiempo de los hooks del stream (DEADLINE-ONFINISH)
+logic-core-v3/src/modules/chatbot/server/chat/__tests__/empty-fallback-pipeline.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: pipeline del fallback vacio (DEADLOCK-FINISH-STEP)
+logic-core-v3/src/modules/chatbot/server/chat/__tests__/history-window.invariant.ts,D5,superficial,superficial,D5-c1,"chatbot; test | test sin DB: ventana de historial (C0.2, recorte y forma); no cubre que los turnos assistant los arma el navegador"
+logic-core-v3/src/modules/chatbot/server/chat/__tests__/mudez-net.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: un turno produce texto o queda registrado con su costo (MUDEZ)
+logic-core-v3/src/modules/chatbot/server/chat/__tests__/onf1-reconcile.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: reconcile transaccional del onFinish (ONF-1) y devolucion de cupo
+logic-core-v3/src/modules/chatbot/server/chat/__tests__/stream-watchdog.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB ni red: cierre del stream desde el borde (WATCHDOG)
+logic-core-v3/src/modules/chatbot/server/chat/__tests__/user-persist-dedup.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: dedup del mensaje del usuario ante el reintento del widget (INFRA.2)
+logic-core-v3/src/modules/chatbot/server/chat/__tests__/utm-attribution.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: sanitizacion de UTM y referrer (UTM.1)
+logic-core-v3/src/modules/chatbot/server/chat/chunkTally.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/dedup.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/degradedResponse.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/chat/hookOps.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/persistTurn.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/chat/reconcile.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/requestSchema.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/silenceFrames.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/streamProbe.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/streamWatchdog.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/toolSuspension.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/chat/withDeadline.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/config/envValidator.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/config/getPublicConfig.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/config/handleConfigRequest.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/config/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/conversation/__tests__/p2002-adopcion.invariant.ts,D5,superficial,superficial,D5-c1,"chatbot; test | test CON DB: rafagas concurrentes contra la Neon dev (crea conversaciones y leads de prueba) detras de guardDevHost (:43, :75); pinnea una sola reserva de cupo por sessionId, no la rotacion de sessionId del anonimo"
+logic-core-v3/src/modules/chatbot/server/conversation/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/conversation/resolver.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/crm/buildLeadPayload.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/crm/encryptSecret.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/crm/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/crm/postToN8n.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/crm/syncLeadToCrm.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/crm/validateWebhookUrl.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/dashboard/updateBotAppearance.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
+logic-core-v3/src/modules/chatbot/server/health/buildHealthVerdict.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/health/checkHealth.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/health/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/insights/generateInsights.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/insights/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/insights/manageInsight.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; server-action; escribe-db
+logic-core-v3/src/modules/chatbot/server/insights/queries.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/intent/detectIntent.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/intent/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/leads/csv/csvEscape.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/leads/csv/index.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/server/llm/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/chatbot/server/llm/__tests__/provider-stream-close.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/llm/__tests__/resolve-effective-model.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/llm/factory.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/llm/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/llm/providerMapper.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/llm/providerStreamClose.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/llm/providers/anthropic.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/llm/providers/google.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/llm/providers/openai.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/llm/resolveEffectiveModel.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/llm/types.ts,D5,profundo,pendiente,,chatbot
+logic-core-v3/src/modules/chatbot/server/llm/__tests__/provider-stream-close.invariant.ts,D5,superficial,superficial,D5-c1,"chatbot; test | test sin DB, red ni credenciales: cierre del stream crudo del provider (PROVIDER-CLOSE)"
+logic-core-v3/src/modules/chatbot/server/llm/__tests__/resolve-effective-model.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: resolucion unica de modelo/provider efectivo para ejecucion y costo (COST-1)
+logic-core-v3/src/modules/chatbot/server/llm/factory.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/llm/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/llm/providerMapper.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/llm/providerStreamClose.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/llm/providers/anthropic.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/llm/providers/google.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/llm/providers/openai.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/llm/resolveEffectiveModel.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/llm/types.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/server/logging/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/chatbot/server/logging/__tests__/console-pii.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/logging/__tests__/persist-failure-sink.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/logging/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/logging/logger.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/logging/persistentLogger.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/notifications/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/notifications/notifications-brevo.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/notifications/sendInsightsNotification.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/notifications/sendLeadNotification.ts,D5,profundo,pendiente,,chatbot
+logic-core-v3/src/modules/chatbot/server/logging/__tests__/console-pii.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: ninguna clave de PII de visitantes sale por consola (PRIVACIDAD)
+logic-core-v3/src/modules/chatbot/server/logging/__tests__/persist-failure-sink.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: el sink off-Neon de logPersistFailure sobrevive a la caida de la base (INFRA.1)
+logic-core-v3/src/modules/chatbot/server/logging/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/logging/logger.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/logging/persistentLogger.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/notifications/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/notifications/notifications-brevo.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: contenido y motor de los mails del chatbot migrados a Brevo (D3')
+logic-core-v3/src/modules/chatbot/server/notifications/sendInsightsNotification.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/notifications/sendLeadNotification.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/server/pricing/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/chatbot/server/pricing/__tests__/cost-breakdown.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/pricing/costs.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/pricing/index.ts,D5,profundo,pendiente,,chatbot
+logic-core-v3/src/modules/chatbot/server/pricing/__tests__/cost-breakdown.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: el breakdown de costo no pisa un total autoritativo con 0 (COST-2)
+logic-core-v3/src/modules/chatbot/server/pricing/costs.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/pricing/index.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/server/prompts/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/chatbot/server/prompts/buildSystemPrompt.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/prompts/helpers.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/prompts/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/prompts/sections.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/prompts/types.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/quota/checker.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/quota/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/quota/upsellAlert.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/reports/buildWeeklyReport.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/reports/sendWeeklyReports.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/prompts/buildSystemPrompt.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/prompts/helpers.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/prompts/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/prompts/sections.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/prompts/types.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/quota/checker.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/quota/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/quota/upsellAlert.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/reports/buildWeeklyReport.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/reports/sendWeeklyReports.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
 logic-core-v3/src/modules/chatbot/server/safety/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/chatbot/server/safety/__tests__/ip-hash.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/safety/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/safety/ipHash.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/safety/validateOutput.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/scoring/calculateLeadScore.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/scoring/dqFilter.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/scoring/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/scoring/validateArgentinePhone.ts,D5,profundo,pendiente,,chatbot
+logic-core-v3/src/modules/chatbot/server/safety/__tests__/ip-hash.invariant.ts,D5,superficial,superficial,D5-c1,"chatbot; test | test sin DB: hash de IP salado (S7-03), el que usa la clave del rate limit de la ruta"
+logic-core-v3/src/modules/chatbot/server/safety/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/safety/ipHash.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/safety/validateOutput.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/scoring/calculateLeadScore.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/scoring/dqFilter.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/scoring/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/scoring/validateArgentinePhone.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/server/tools/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/chatbot/server/tools/__tests__/confirm-contact-request.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/tools/__tests__/navigate-to-page-gate.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/tools/captureLead.ts,D5,profundo,pendiente,,chatbot; toca-db; escribe-db
-logic-core-v3/src/modules/chatbot/server/tools/confirmContactRequest.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/tools/getTools.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/tools/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/tools/navigateToPage.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/tools/offerHandoffOptions.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/tools/showWhatsappHandoff.ts,D5,profundo,pendiente,,chatbot; toca-db
-logic-core-v3/src/modules/chatbot/server/tools/types.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev2.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev3.generate-fixture.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev3.golden-fixture.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev3.golden.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev3.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev4.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev5.superset.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/server/verticals/index.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/verticals/packs/agencia.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/verticals/packs/base.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/verticals/packs/usados.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/verticals/registry.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/server/verticals/types.ts,D5,profundo,pendiente,,chatbot
+logic-core-v3/src/modules/chatbot/server/tools/__tests__/confirm-contact-request.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: camino que me contacten (CONTACT-PATH)
+logic-core-v3/src/modules/chatbot/server/tools/__tests__/navigate-to-page-gate.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: tools de navegacion restringidas al bot de develOP (C0.1)
+logic-core-v3/src/modules/chatbot/server/tools/captureLead.ts,D5,profundo,leído,D5-c1,chatbot; toca-db; escribe-db
+logic-core-v3/src/modules/chatbot/server/tools/confirmContactRequest.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/tools/getTools.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/tools/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/tools/navigateToPage.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/tools/offerHandoffOptions.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/tools/showWhatsappHandoff.ts,D5,profundo,leído,D5-c1,chatbot; toca-db
+logic-core-v3/src/modules/chatbot/server/tools/types.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: modulo verticals (EV.1)
+logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev2.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: aislamiento multi-tenant de packs verticales (EV.2); no cubre que verticalPack no sea asignable desde el producto
+logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev3.generate-fixture.ts,D5,superficial,superficial,D5-c1,chatbot; test | generador de la fixture dorada de paridad del scoring (EV.3)
+logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev3.golden-fixture.ts,D5,superficial,superficial,D5-c1,chatbot; test | fixture dorada auto-generada de paridad del scoring (EV.3)
+logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev3.golden.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: suite dorada de paridad del scoring (EV.3)
+logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev3.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: scoring desde pack vertical (EV.3)
+logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev4.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: deteccion de intent desde packs verticales (EV.4)
+logic-core-v3/src/modules/chatbot/server/verticals/__tests__/ev5.superset.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: superset v1 en v2 del payload de n8n (EV.5)
+logic-core-v3/src/modules/chatbot/server/verticals/index.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/verticals/packs/agencia.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/verticals/packs/base.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/verticals/packs/usados.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/verticals/registry.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/server/verticals/types.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/shared/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/chatbot/shared/__tests__/chat-retry-policy.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/shared/__tests__/config-cache.invariant.ts,D5,superficial,pendiente,,chatbot; test
-logic-core-v3/src/modules/chatbot/shared/appearance.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/shared/attribution.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/shared/businessInitials.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/shared/chatRetryPolicy.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/shared/configCache.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/shared/field-normalize.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/shared/historyPolicy.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/shared/publicConfig.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/shared/types.ts,D5,profundo,pendiente,,chatbot
-logic-core-v3/src/modules/chatbot/shared/zIndex.ts,D5,profundo,pendiente,,chatbot
+logic-core-v3/src/modules/chatbot/shared/__tests__/chat-retry-policy.invariant.ts,D5,superficial,superficial,D5-c1,"chatbot; test | test sin DB ni red: politica de reintento del widget (INFRA.2: solo transitorios, 2s/4s, 3 intentos)"
+logic-core-v3/src/modules/chatbot/shared/__tests__/config-cache.invariant.ts,D5,superficial,superficial,D5-c1,chatbot; test | test sin DB: el cache de config del widget no se envenena con un fallo y reusa chatRetryPolicy (RE-2)
+logic-core-v3/src/modules/chatbot/shared/appearance.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/shared/attribution.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/shared/businessInitials.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/shared/chatRetryPolicy.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/shared/configCache.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/shared/field-normalize.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/shared/historyPolicy.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/shared/publicConfig.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/shared/types.ts,D5,profundo,leído,D5-c1,chatbot
+logic-core-v3/src/modules/chatbot/shared/zIndex.ts,D5,profundo,leído,D5-c1,chatbot
 logic-core-v3/src/modules/chatbot/templates/.gitkeep,-,fuera,excluido-generado,,placeholder
 logic-core-v3/src/modules/motor/README.md,DOC,superficial,superficial,F1,doc-de-modulo
 logic-core-v3/src/modules/motor/adapters/.gitkeep,-,fuera,excluido-generado,,placeholder
-logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/auth.ts,D5,profundo,pendiente,,motor
-logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/handle-health.ts,D5,profundo,pendiente,,motor; toca-db; escribe-db
-logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/handle-message.ts,D5,profundo,pendiente,,motor; toca-db; escribe-db
-logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/handle-request.ts,D5,profundo,pendiente,,motor; toca-db
-logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/handle-status.ts,D5,profundo,pendiente,,motor; toca-db; escribe-db
-logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/index.ts,D5,profundo,pendiente,,motor
-logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/payload.ts,D5,profundo,pendiente,,motor
-logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/process.ts,D5,profundo,pendiente,,motor; toca-db
-logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/resolve-channel.ts,D5,profundo,pendiente,,motor; toca-db
-logic-core-v3/src/modules/motor/adapters/whatsapp/outbound/client.ts,D5,profundo,pendiente,,motor
-logic-core-v3/src/modules/motor/domain/bsuid.ts,D5,profundo,pendiente,,motor
-logic-core-v3/src/modules/motor/domain/channel-credentials.ts,D5,profundo,pendiente,,motor
-logic-core-v3/src/modules/motor/domain/identity.ts,D5,profundo,pendiente,,motor; toca-db; escribe-db
-logic-core-v3/src/modules/motor/domain/prisma-errors.ts,D5,profundo,pendiente,,motor
-logic-core-v3/src/modules/motor/domain/window.ts,D5,profundo,pendiente,,motor
-logic-core-v3/src/modules/motor/services/sendMessage.ts,D5,profundo,pendiente,,motor; toca-db; escribe-db
+logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/auth.ts,D5,profundo,leído,D5-c1,motor
+logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/handle-health.ts,D5,profundo,leído,D5-c1,motor; toca-db; escribe-db
+logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/handle-message.ts,D5,profundo,leído,D5-c1,motor; toca-db; escribe-db
+logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/handle-request.ts,D5,profundo,leído,D5-c1,motor; toca-db
+logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/handle-status.ts,D5,profundo,leído,D5-c1,motor; toca-db; escribe-db
+logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/index.ts,D5,profundo,leído,D5-c1,motor
+logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/payload.ts,D5,profundo,leído,D5-c1,motor
+logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/process.ts,D5,profundo,leído,D5-c1,motor; toca-db
+logic-core-v3/src/modules/motor/adapters/whatsapp/inbound/resolve-channel.ts,D5,profundo,leído,D5-c1,motor; toca-db
+logic-core-v3/src/modules/motor/adapters/whatsapp/outbound/client.ts,D5,profundo,leído,D5-c1,motor
+logic-core-v3/src/modules/motor/domain/bsuid.ts,D5,profundo,leído,D5-c1,motor
+logic-core-v3/src/modules/motor/domain/channel-credentials.ts,D5,profundo,leído,D5-c1,motor
+logic-core-v3/src/modules/motor/domain/identity.ts,D5,profundo,leído,D5-c1,motor; toca-db; escribe-db
+logic-core-v3/src/modules/motor/domain/prisma-errors.ts,D5,profundo,leído,D5-c1,motor
+logic-core-v3/src/modules/motor/domain/window.ts,D5,profundo,leído,D5-c1,motor
+logic-core-v3/src/modules/motor/services/sendMessage.ts,D5,profundo,leído,D5-c1,motor; toca-db; escribe-db
 logic-core-v3/src/proxy.ts,D1,profundo,leído,D1-c1,auth
 logic-core-v3/src/types/next-auth.d.ts,D1,profundo,leído,D1-c1,tipos-sesion
 logic-core-v3/tailwind.config.ts,D8,profundo,pendiente,,config

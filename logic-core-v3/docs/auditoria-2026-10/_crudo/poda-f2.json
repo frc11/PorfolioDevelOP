@@ -435,6 +435,337 @@
     "slugs como string suelto sin tipo compartido con el catálogo"
    ],
    "que_rompe": "5 importadores (módulos y motor-resenas/_actions.ts). Consolidar en un helper tipado, no borrar."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "archivo": "src/app/api/admin/chatbot/insights/generate/route.ts",
+   "senales": [
+    "git grep 'insights/generate' en origin/main fuera de docs → sin consumidores en src, tests ni scripts",
+    "Llama al LLM (generateInsightsForBot) sin try/catch ni rate limit",
+    "La generación diaria la cubre el cron generate-insights"
+   ],
+   "que_rompe": "Nada en la UI; solo se pierde la invocación manual por HTTP"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "archivo": "src/app/api/admin/chatbot/demo-chat/[slug]/route.ts",
+   "senales": [
+    "Sin consumidores en src: solo su invariant y el script test:cost2b (package.json:70)",
+    "Usa bot.llmModel/temperature/maxOutputTokens, que no son los de producción (route.ts:57,112-113)"
+   ],
+   "que_rompe": "El invariant demo-chat-model-resolution.invariant.ts y el script test:cost2b"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "archivo": "src/modules/chatbot/index.ts",
+   "senales": [
+    "Solo 3 de 52 exports se consumen via el barrel (LogicCompanion en ChatWidgetMount.tsx:13; ChatbotUpsellLanding y ChatbotOverview en dashboard/chatbot/page.tsx:9)",
+    "Reexporta ChatMessages, ChatMessage, ChatInput y QuickReplyChips (index.ts:40-43), que no importa nadie (git grep de su uso -> solo los barrels y ChatMessages.tsx:4)",
+    "Reexporta saveClientSettings (index.ts:89), cuya unica UI (ClientSettingsForm) no se monta",
+    "Arrastra editores admin, tablas y server actions al chunk del widget publico (index.ts:74-89)"
+   ],
+   "que_rompe": "ChatWidgetMount.tsx:13 y dashboard/chatbot/page.tsx:9 deben pasar a imports directos; el README del modulo documenta el barrel."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "archivo": "src/modules/chatbot/index.server.ts",
+   "senales": [
+    "85 nombres exportados, 20 importados via '@/modules/chatbot/index.server'",
+    "Reexporta 5 server actions de admin (index.server.ts:80-86) que nadie importa por esta via",
+    "getLLMProvider, resetProviderCache, calculateCost, getTools y otros sin consumidores por el barrel"
+   ],
+   "que_rompe": "Los importadores actuales (dashboard/chatbot/*, api/chatbot/*, cron e insights, tests/integration/fix-origin-same-origin-config.spec.ts) usan 20 nombres: hay que conservarlos o pasar a imports directos."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "archivo": "src/modules/chatbot/lead-detail-presentation.ts (solo channelLabel y CHANNEL_LABELS)",
+   "senales": [
+    "ChatbotLead.channel no se escribe en el unico create (captureLead.ts:381-413)",
+    "channelLabel siempre devuelve null en LeadDetail.tsx:162"
+   ],
+   "que_rompe": "lead-detail-presentation.invariant.ts:16 y :65 testean channelLabel; LeadDetail.tsx:162 lo usa."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "archivo": "src/modules/chatbot/components/admin/index.ts",
+   "senales": [
+    "Su único importador es src/modules/chatbot/index.ts:75-77 (re-export)",
+    "Ningún archivo importa KnowledgeBaseEditor/BotConfigEditor/ActivityLog/OnboardingWizard desde '@/modules/chatbot': el único import del barrel es dashboard/chatbot/page.tsx:9 (ChatbotUpsellLanding, ChatbotOverview)",
+    "ARQ-02 de la auditoría maestra: barrel cliente con 1 consumidor"
+   ],
+   "que_rompe": "Nada en runtime; hay que borrar también las 3 líneas de re-export de src/modules/chatbot/index.ts:75-77."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "archivo": "src/modules/chatbot/components/admin/config/Field.tsx",
+   "senales": [
+    "Duplica src/components/ui/Field.tsx sin asociar label y control (sin htmlFor ni FieldControlProvider)",
+    "Sólo lo usan los 5 tabs de config/tabs"
+   ],
+   "que_rompe": "Nada funcional si los tabs pasan al Field del kit; gana la asociación accesible."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "archivo": "src/modules/chatbot/components/admin/config/Input.tsx",
+   "senales": [
+    "Duplica src/components/ui/Input.tsx (mismos estilos) sin leer el contexto de Field",
+    "Usado sólo por AdvancedTab, BehaviorTab e IdentityTab"
+   ],
+   "que_rompe": "Nada funcional; cambian ids/aria a los del kit."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "archivo": "src/modules/chatbot/components/admin/config/Toggle.tsx",
+   "senales": [
+    "Fuera del lote listado pero en la misma carpeta",
+    "0 importadores: git grep \"Toggle['\\\"]\" sólo muestra el import del kit en CrmConfigForm.tsx:9 y el export de components/ui/index.ts:20"
+   ],
+   "que_rompe": "Nada."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "archivo": "src/modules/chatbot/components/chat/QuickReplyChips.tsx",
+   "senales": [
+    "Sin importadores fuera de los barrels chat/index.ts:6 y modules/chatbot/index.ts:43 (git grep -w)",
+    "El changelog de Valentino lo declara muerto",
+    "Duplica los chips inline de ChatWindow.tsx:467-489"
+   ],
+   "que_rompe": "Solo los exports de los dos barrels."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "archivo": "src/modules/chatbot/components/chat/ChatMessages.tsx",
+   "senales": [
+    "Sin consumidores fuera de los barrels",
+    "ChatWindow implementa su propia lista (ChatWindow.tsx:326-403)"
+   ],
+   "que_rompe": "Exports en chat/index.ts:3 y modules/chatbot/index.ts:40."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "archivo": "src/modules/chatbot/components/chat/ChatMessage.tsx",
+   "senales": [
+    "Solo lo importa ChatMessages.tsx (tambien muerto) y los barrels",
+    "Sin markdown ni streaming, no se usa en ninguna superficie"
+   ],
+   "que_rompe": "Exports en chat/index.ts:4 y modules/chatbot/index.ts:41."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "archivo": "src/modules/chatbot/components/chat/ChatInput.tsx",
+   "senales": [
+    "Sin consumidores fuera de los barrels",
+    "ChatWindow y ChatbotEmbed tienen input propio"
+   ],
+   "que_rompe": "Exports en chat/index.ts:5 y modules/chatbot/index.ts:42."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "archivo": "src/modules/chatbot/components/chat/types.ts",
+   "senales": [
+    "ChatWindowProps (:22-35) duplica y contradice al real de ChatWindow.tsx:71-93 (degradedMode inexistente)",
+    "El barrel exporta el desfasado (chat/index.ts:8)"
+   ],
+   "que_rompe": "Quitar solo ChatWindowProps; UIChatMessage y ToolCallInUIMessage se siguen usando."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "archivo": "src/modules/chatbot/components/admin/useIsClient.ts",
+   "senales": [
+    "Copia 1:1 de src/lib/use-is-client.ts (git diff solo difiere en el comentario)",
+    "El propio lib lo documenta como copia"
+   ],
+   "que_rompe": "4 imports: BotConfigEditor.tsx:7, ActivationModal.tsx:6, BotConfigDiffModal.tsx:6, EmojiPickerField.tsx:9 (repuntar a @/lib/use-is-client)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "archivo": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+   "senales": [
+    "git grep -l ClientSettingsForm origin/main -- src tests: solo el archivo y components/dashboard/index.ts:3",
+    "modules/chatbot/index.ts:85 re-exporta del barrel solo ClientDashboardTabs, ClientLeadsTable, ChatbotUpsellLanding y ChatbotOverview",
+    "settings/page.tsx:8 usa BotPersonalization (reemplazo)",
+    "3 errores no-explicit-any y 1 warning en el baseline de eslint (lineas 26, 36, 37, 51)"
+   ],
+   "que_rompe": "Nada en runtime. Arrastra la server action saveClientSettings (server/admin/saveClientSettings.ts, re-export modules/chatbot/index.ts:89), que tambien queda sin consumidor y conviene borrar junto."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "archivo": "src/modules/chatbot/server/admin/saveClientSettings.ts",
+   "senales": [
+    "fuera del lote; unico importador ClientSettingsForm.tsx:5 (muerto)",
+    "acepta isActive (:21) y lo descarta (:40-47)"
+   ],
+   "que_rompe": "Nada; quitar tambien el re-export de modules/chatbot/index.ts:89."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "archivo": "src/modules/chatbot/server/admin/saveClientSettings.ts",
+   "senales": [
+    "Unico importador: components/dashboard/ClientSettingsForm.tsx:5",
+    "git grep -n '<ClientSettingsForm' origin/main -- src vacio (control: '<ChatbotOverview' en dashboard/chatbot/page.tsx:46)",
+    "Acepta isActive (:21) y no lo pasa a updateBotAppearance (:40-47): toggle falso",
+    "Re-export en modules/chatbot/index.ts:89 y components/dashboard/index.ts:3"
+   ],
+   "que_rompe": "Nada en runtime; borrar tambien ClientSettingsForm.tsx y los dos re-exports"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "archivo": "src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts",
+   "senales": [
+    "getLeadSyncHistory (:59-76) sin llamadores: git grep -n getLeadSyncHistory origin/main -- src solo la definicion",
+    "Control: getOrgSyncHistory se usa en CrmIntegrationAdminCard.tsx:72"
+   ],
+   "que_rompe": "Nada; borrar solo getLeadSyncHistory"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "archivo": "src/modules/chatbot/server/admin/preflightChecks.ts",
+   "senales": [
+    "canActivate (:170-172) exportada en modulo 'use server' sin importadores (git grep 'canActivate(' fuera del archivo vacio)",
+    "ActivationModal.tsx:30 calcula su propia variable canActivate"
+   ],
+   "que_rompe": "Nada; reduce la superficie de server actions"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "archivo": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+   "senales": [
+    "slugify local (:70-78) duplica @/lib/slugify que usa createClientOnly.ts:12",
+    "findUniqueSlug duplicado en createClientOnly.ts:31-45 y lib/onboarding/core.ts"
+   ],
+   "que_rompe": "Podria cambiar los slugs generados si @/lib/slugify difiere; verificar con los mismos casos antes de unificar"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "archivo": "src/modules/chatbot/server/insights/manageInsight.ts",
+   "senales": [
+    "Módulo 'use server' sin importadores: git grep actOnInsight -> solo insights/index.ts:2 e index.server.ts:73",
+    "Es la única transición de estado de ChatbotInsight (BUG-023)"
+   ],
+   "que_rompe": "Nada hoy. Conviene cablearlo, no borrarlo: sin él los insights quedan PENDING para siempre y el cron deja de generar."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "archivo": "src/modules/chatbot/server/insights/queries.ts",
+   "senales": [
+    "getPendingInsightsByOrgSlug y getInsightHistoryByOrgSlug sin consumidores (solo index.server.ts:74-75)",
+    "getInsightsCountForBot sí lo usa el cron (api/cron/generate-insights/route.ts:36)"
+   ],
+   "que_rompe": "Borrar las dos funciones sin uso no rompe nada; getInsightsCountForBot debe quedar."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "archivo": "src/modules/chatbot/server/config/envValidator.ts",
+   "senales": [
+    "requireChatbotEnv sin consumidores (git grep: solo la definición e index.server.ts:104)",
+    "GOOGLE_APPLICATION_CREDENTIALS marcado required aunque prod usa GOOGLE_VERTEX_CREDENTIALS_JSON (google.ts:62-68)"
+   ],
+   "que_rompe": "Borrar requireChatbotEnv no rompe nada; checkChatbotEnv lo usa el health."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "archivo": "src/modules/chatbot/server/chat/reconcile.ts",
+   "senales": [
+    "INFRA3_CONNECTION_RETRY (:547-551) definido y sin uso (git grep: 1 archivo)",
+    "TODO(INFRA.3) en :540"
+   ],
+   "que_rompe": "Nada; es un placeholder documentado de INFRA.3."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "archivo": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+   "senales": [
+    "Rama 'Bot misconfigured' (:166-169) inalcanzable: resolveBotBySlug ya devuelve null sin KB (resolver.ts:38)"
+   ],
+   "que_rompe": "Nada; quitar la rama o mover el chequeo de KB acá para devolver un error más claro."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "archivo": "src/modules/chatbot/server/notifications/sendLeadNotification.ts",
+   "senales": [
+    "Unico consumidor: el boton admin sendTestNotification.ts:46 (y su invariante)",
+    "Produccion avisa leads con lib/client-notifications/templates.ts (renderLeadEmail), otra plantilla",
+    "Fecha sin timeZone en :74"
+   ],
+   "que_rompe": "sendTestNotification.ts y notifications-brevo.invariant.ts: hay que migrarlos a renderLeadEmail antes de borrar"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "archivo": "src/modules/chatbot/shared/types.ts",
+   "senales": [
+    "ChatbotOrganization, AvatarStyle, ChatbotLeadStatus, BotTone y BotIndustry solo se reexportan en src/modules/chatbot/index.ts:14-24, sin consumidores",
+    "ChatbotLeadStatus y AvatarStyle contradicen el enum Prisma y CLIENT_AVATAR_STYLES"
+   ],
+   "que_rompe": "Nada en runtime; ajustar el barrel index.ts (QuickReply, ProactivePromptsMap, RouteColorMap y LLMProviderName si se usan)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "archivo": "src/modules/chatbot/server/scoring/calculateLeadScore.ts (SCORING_TABLE, COMBO_BONUSES, POSTVENTA_PENALTY, INVALID_PHONE_PENALTY, classifyScore)",
+   "senales": [
+    "El propio comentario :146-150 dice que el motor ya no los consume",
+    "Consumidores: scripts/_b52/_b53/_b54-test-scoring.ts y ev3.invariant.ts"
+   ],
+   "que_rompe": "Invariante de paridad ev3 y scripts de prueba B5; getEffectiveScore usa classifyScore con umbrales fijos (habria que pasarle los del pack)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "archivo": "src/modules/chatbot/server/llm/providers/anthropic.ts y openai.ts",
+   "senales": [
+    "getModel lanza ProviderNotImplementedError siempre",
+    "Solo sirven de tabla de precios y para el switch exhaustivo de factory.ts"
+   ],
+   "que_rompe": "factory.ts:32-37 y el mapping LlmProvider (providerMapper.ts); conservar si se mantiene el enum de 3 providers"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "archivo": "src/modules/motor/domain/prisma-errors.ts",
+   "senales": [
+    "Duplica isUniqueConstraintError de src/lib/isolation/scoped-model.ts:60-62",
+    "El propio isolation lo anota como deuda de consolidacion (scoped-model.ts:56-58)",
+    "PLAN-483 pendiente"
+   ],
+   "que_rompe": "3 importadores: handle-message.ts:18, identity.ts:24 y sendMessage.ts:24. Hay que mover la variante con field a isolation antes de borrarlo."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "archivo": "src/modules/motor/services/sendMessage.ts (+ outbound/client.ts, domain/window.ts)",
+   "senales": [
+    "Sin llamadores en src/ ni scripts/: git grep sendMotorMessage solo encuentra la definicion (sendMessage.ts:204)",
+    "Solo lo ejercitan tests/integration/motor-outbound.spec.ts y motor-window.spec.ts"
+   ],
+   "que_rompe": "Esas dos specs de integracion. NO podar: es una base pasiva planificada para B2 (PLAN-482). Solo seria candidato si Valentino abandona el motor."
   }
  ]
 }

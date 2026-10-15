@@ -1,12 +1,12 @@
 {
  "parte": 1,
- "partes": 2,
+ "partes": 4,
  "hallazgos": [
   {
    "id": "SEC-001",
    "prefijo": "SEC",
    "titulo": "Clave de Google AI con el valor completo en dos documentos y en el historial",
-   "bloque_md": "### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial\n- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad\n- Confianza: VERIFICADO-POR-LECTURA\n- Evidencia: `docs/audits/2026-05-bfg-leak-cleanup.md:94` y `docs/bitacora-roadmap.md:36` — valor completo de una `GOOGLE_GENERATIVE_AI_API_KEY` (omitido); historial: `logic-core-v3/enviroment.env` agregado en `3953558312` (2026-02-12) y alcanzable desde 116 refs (`_crudo/secrets-historial.json`); `docs/audits/2026-05-bfg-leak-cleanup.md:193-197` — «### 8.2 Lo que NO se hizo … ❌ `git push --force` al remote»; `:204` — «La key `…` sigue deshabilitada en Google Cloud (Franco ya rotó — confirmado)».\n- Impacto: bloqueante para el primer cliente real solo si la clave siguiera viva: cualquiera con un clon (el repo pasó a privado, pero estuvo público según `docs/baselines/2026-07-auditoria-seguridad.md:3360`) podría consumir la cuota de Google AI a nombre de develOP. Valentino confirma que las credenciales del repo son de prueba (ENMIENDA-01 P1).\n- Propuesta: borrar el valor de los dos documentos (dejar solo un prefijo), confirmar en Google Cloud que la clave está revocada y decidir si se purga el historial (`git-filter-repo` + force-push coordinado) o se acepta como clave muerta.\n- Esfuerzo: S  ·  Zona: libre\n- Relacionado: [SEC-002], [SEC-003], [SEC-004]\n- Nodo(s): int.google-ai, doc.audits-2026-05-bfg-leak-cleanup, doc.bitacora-roadmap\n- REQUIERE-VERIFICACIÓN-HUMANA: VH-001",
+   "bloque_md": "### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial\n- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad\n- Confianza: VERIFICADO-POR-LECTURA\n- Evidencia: `docs/audits/2026-05-bfg-leak-cleanup.md:94` y `docs/bitacora-roadmap.md:36` — valor completo de una `GOOGLE_GENERATIVE_AI_API_KEY` (omitido); historial: `logic-core-v3/enviroment.env` agregado en `3953558312` (2026-02-12) y alcanzable desde 116 refs (`_crudo/secrets-historial.json`); `docs/audits/2026-05-bfg-leak-cleanup.md:193-197` — «### 8.2 Lo que NO se hizo … ❌ `git push --force` al remote»; `:204` — «La key `…` sigue deshabilitada en Google Cloud (Franco ya rotó — confirmado)».\n- Impacto: bloqueante para el primer cliente real solo si la clave siguiera viva: cualquiera con un clon (el repo sigue público: `gh repo view frc11/PorfolioDevelOP --json visibility` devolvió `PUBLIC` el 2026-10-13 y el 2026-10-14, y ya lo era según `docs/baselines/2026-07-auditoria-seguridad.md:3360`) podría consumir la cuota de Google AI a nombre de develOP. Valentino confirma que las credenciales del repo son de prueba (ENMIENDA-01 P1).\n- Propuesta: borrar el valor de los dos documentos (dejar solo un prefijo), confirmar en Google Cloud que la clave está revocada y decidir si se purga el historial (`git-filter-repo` + force-push coordinado) o se acepta como clave muerta.\n- Esfuerzo: S  ·  Zona: libre\n- Relacionado: [SEC-002], [SEC-003], [SEC-004]\n- Nodo(s): int.google-ai, doc.audits-2026-05-bfg-leak-cleanup, doc.bitacora-roadmap\n- REQUIERE-VERIFICACIÓN-HUMANA: VH-001",
    "severidad": "BAJA",
    "zona": "libre",
    "dominio": "D7",
@@ -1511,6 +1511,16 @@
      "ruta": "src/components/dashboard/modules/motor-resenas/_actions.ts",
      "linea": 55,
      "fragmento": "const organizationId = resolveScopedOrgId(await resolveOrgId(), params.organizationId)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
+     "linea": 61,
+     "fragmento": "const orgId = await resolveOrgId()"
+    },
+    {
+     "ruta": "src/auth.config.ts",
+     "linea": 5,
+     "fragmento": "type OrgRole = 'ADMIN' | 'MEMBER' | 'VIEWER'"
     }
    ],
    "impacto": "Latente: hoy todas las membresias se crean ADMIN; el dia que se invite a un VIEWER podra cambiar nombre de empresa, contacto, preferencias de toda la org y pedir la baja de la cuenta (profile.ts solo exige organizationId).",
@@ -1524,7 +1534,8 @@
     "h2.cli-shell",
     "h2.cli-resenas",
     "h2.cli-email-mkt",
-    "lib.preview"
+    "lib.preview",
+    "h3.cli-chatbot"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -1544,6 +1555,13 @@
       "titulo": "OrgRole (ADMIN/MEMBER/VIEWER) existe en el schema y en la sesión pero ninguna acción del portal lo aplica",
       "severidad": "MEDIA",
       "nota_padre": "Muestreo DEC-37: se sostiene (git grep orgRole en dashboard, lib/actions, components/dashboard y bienvenida = 0; control: auth.config.ts:34 lo pone en la sesión). Es SEC-018 (D1); queda BAJA porque hoy las orgs tienen un solo miembro y la invitación está huérfana (DEU-001)."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L7/H14",
+      "titulo": "OrgRole VIEWER no se aplica en ningún lado: cualquier miembro puede editar el saludo, las quick replies y el avatar públicos del bot",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo OrgRole que ningún guard lee; suma que un VIEWER edita el saludo, las quick replies y el avatar públicos del bot."
      }
     ]
    },
@@ -5228,6 +5246,16 @@
      "ruta": "src/modules/chatbot/server/conversation/resolver.ts",
      "linea": 133,
      "fragmento": "// p.ej. la colisión cross-bot del sessionId global (@unique sin"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1375,
+     "fragmento": "sessionId   String  @unique"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/conversation/resolver.ts",
+     "linea": 137,
+     "fragmento": "if (!adopted) throw error"
     }
    ],
    "impacto": "Si alguien usa el chat de un bot y después el de otro bajo el mismo origen (por ejemplo, el equipo probando /embed/<slug> de dos clientes en la misma pestaña), el segundo create da P2002, la adopción scopeada no encuentra fila (resolver.ts:137 relanza) y el chat del segundo bot falla. No mezcla datos entre tenants.",
@@ -5237,7 +5265,10 @@
    "nodos": [
     "modelo.Conversation",
     "h3.vis-widget-cliente",
-    "h3.vis-api-chatbot"
+    "h3.vis-api-chatbot",
+    "h3.vis-widget-develop",
+    "lib.chatbot.hooks",
+    "lib.chatbot.conversation"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5249,7 +5280,16 @@
     "tmp": "D6-c1/D6-L2/H17",
     "verificado_padre": true,
     "nota_padre": "Muestreo DEC-37: se sostiene. chatbot_init/migration.sql:142 índice único global sobre sessionId; useChatbot.ts:27 una sola clave 'chatbot:sessionId' por origen en sessionStorage.",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L6/H10",
+      "titulo": "Clave de sesion del widget global por origen: dos bots en el mismo origen chocan y el segundo da 500",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo sessionId global por origen: dos bots en el mismo origen chocan."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -5520,6 +5560,71 @@
      "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
      "linea": 73,
      "fragmento": "const events = await unsafeGlobalQuery(\n    'PENDIENTE-DECISIÓN: latencia P50/P95 agrega eventos de todas las orgs"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+     "linea": 68,
+     "fragmento": "// PENDIENTE-DECISIÓN: agrega latencia (chat.message_completed) de TODAS las"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+     "linea": 82,
+     "fragmento": "take: 2000,"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbot/health/page.tsx",
+     "linea": 146,
+     "fragmento": "Verificar que CHATBOT_GOOGLE_API_KEY sea válida y la Generative Language API esté"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/health/buildHealthVerdict.ts",
+     "linea": 65,
+     "fragmento": "hint: health.checks.llmProvider.error ?? 'Revisá la API key y que la API esté habilitada.',"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/config/envValidator.ts",
+     "linea": 35,
+     "fragmento": "name: 'GOOGLE_APPLICATION_CREDENTIALS',\n    required: true,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+     "linea": 25,
+     "fragmento": "return d.toLocaleString('es-AR', {\n  day: '2-digit',"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbot/health/page.tsx",
+     "linea": 12,
+     "fragmento": "checkChatbotHealth('develop'),\ngetLatencyHistory(24),"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/getActivityChartData.ts",
+     "linea": 30,
+     "fragmento": "const key = new Date(event.createdAt).toLocaleDateString('es-AR', {"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbot/activity/page.tsx",
+     "linea": 34,
+     "fragmento": "slug=\"develop\""
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/health/LatencyChart.tsx",
+     "linea": 160,
+     "fragmento": "Datos reales"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+     "linea": 37,
+     "fragmento": "d.setHours(d.getHours() - i, 0, 0, 0)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+     "linea": 66,
+     "fragmento": "const since = new Date(Date.now() - hoursBack * 60 * 60 * 1000)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/getActivityChartData.ts",
+     "linea": 25,
+     "fragmento": "const key = d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })"
     }
    ],
    "impacto": "De los 68 escapes globales del repo (37 archivos), estos dos son los únicos sin justificación de plataforma: /admin/chatbot/activity y /admin/chatbot/health muestran números de todos los clientes como si fueran del bot propio, y el de actividad trae sin límite todos los eventos de 7 días. Solo afecta al admin, sin fuga hacia clientes.",
@@ -5529,7 +5634,14 @@
    "nodos": [
     "h3.adm-actividad",
     "h3.adm-health",
-    "lib.isolation"
+    "lib.isolation",
+    "lib.chatbot.health",
+    "lib.chatbot.admin",
+    "h3.adm-actividad.grafico-semanal",
+    "h3.adm-health.latencia-p50-p95",
+    "h3.adm-health.latencia",
+    "h3.adm-actividad.grafico-7-dias",
+    "modelo.ChatbotEvent"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5541,7 +5653,37 @@
     "tmp": "D6-c1/D6-L2/H22",
     "verificado_padre": true,
     "nota_padre": "Muestreo DEC-37: se sostiene (git grep 'PENDIENTE-DECISI' en src: getActivityChartData.ts:6,13 y getLatencyHistory.ts:68,74).",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L1/H26",
+      "titulo": "El health 'del bot develOP' mezcla la latencia de todas las orgs y da instrucciones viejas (API key de Gemini)",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo escape PENDIENTE-DECISIÓN (métricas del bot de develOP que agregan todas las orgs); suma las instrucciones viejas de la API key de Gemini."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L2/H16",
+      "titulo": "La latencia del Health Score mezcla todas las orgs en una pagina del bot develOP, con horas en la zona del servidor",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo escape PENDIENTE-DECISIÓN; suma las horas en la zona del servidor."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L3/H23",
+      "titulo": "Gráficos de actividad y latencia mezclan todas las orgs, cortan en UTC y muestrean filas arbitrarias",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo escape PENDIENTE-DECISIÓN; suma el corte en UTC y el muestreo arbitrario."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L6/H16",
+      "titulo": "Paneles admin de actividad y latencia: datos de todas las orgs, muestra truncada sin orden, ventana corrida y fechas sin zona",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo escape PENDIENTE-DECISIÓN de los paneles de actividad y latencia."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6205,6 +6347,31 @@
      "ruta": "prisma/seed.ts",
      "linea": 82,
      "fragmento": "const admin = await prisma.user.upsert({"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/conversations/page.tsx",
+     "linea": 9,
+     "fragmento": "const session = await getClientChatbotSession()\n  if (!session) redirect('/dashboard')"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/settings/page.tsx",
+     "linea": 17,
+     "fragmento": "const orgId = await resolveOrgId()"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+     "linea": 15,
+     "fragmento": "const orgId = await resolveOrgId()  ... :24 const session = await getClientChatbotSession()"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+     "linea": 18,
+     "fragmento": "const session = await getClientChatbotSession()"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx",
+     "linea": 21,
+     "fragmento": "const organizationId = await resolveOrgId()"
     }
    ],
    "impacto": "Soporte no puede revisar el chatbot de un cliente impersonándolo: con un SUPER_ADMIN sin OrgMember (así lo siembra el seed) /dashboard/chatbot muestra la landing de 'activá tu chatbot' aunque checkClientHasChatbot (con resolveOrgId, page.tsx:15-18) dijo que hay bot, leads y conversaciones redirigen a /dashboard y el CSV da 401, mientras la apariencia sí se edita sobre el cliente. Si un usuario tiene membresías en dos orgs, esta sección puede mostrar y modificar (estado de leads, insights) una org distinta de la del resto del portal en el mismo request.",
@@ -6215,7 +6382,9 @@
     "h3.cli-chatbot",
     "h1.auth-impersonacion",
     "lib.chatbot.admin",
-    "modelo.OrgMember"
+    "modelo.OrgMember",
+    "lib.preview",
+    "lib.isolation"
    ],
    "relacionados_ids": [
     "BUG-005",
@@ -6230,7 +6399,23 @@
     "tmp": "D6-c2/D6-T1/H07",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L1/H11",
+      "titulo": "El chatbot del portal resuelve la org por OrgMember e ignora impersonación y rol: en 'ver como cliente' el admin ve la landing de venta o rebota, y un usuario con varias orgs puede ver otra",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma resolución de org propia en Mi Chatbot; suma el rol y el rebote en «ver como cliente»."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L5/H23",
+      "titulo": "La org del chatbot del cliente se resuelve por dos caminos distintos en la misma seccion (resolveOrgId vs getClientChatbotSession)",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma resolución doble de la org en Mi Chatbot (resolveOrgId frente a getClientChatbotSession)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6339,6 +6524,86 @@
      "ruta": "src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx",
      "linea": 98,
      "fragmento": "value={`${quotaUsed.toLocaleString('es-AR')} / ${bot.monthlyQuota.toLocaleString('es-AR')}`}"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+     "linea": 56,
+     "fragmento": "<Field label=\"Temperature\" hint=\"0 es mas determinista, 2 es mas creativo\">"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 713,
+     "fragmento": "const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx",
+     "linea": 46,
+     "fragmento": "bot.monthlyQuota > 0 ? Math.min(100, (quotaUsed / bot.monthlyQuota) * 100) : 0"
+    },
+    {
+     "ruta": "src/lib/onboarding/core.ts",
+     "linea": 134,
+     "fragmento": "monthlyQuota: 1000,"
+    },
+    {
+     "ruta": "src/lib/plan/fallback.ts",
+     "linea": 50,
+     "fragmento": "quota: 500,"
+    },
+    {
+     "ruta": "src/app/api/admin/chatbot/demo-chat/[slug]/route.ts",
+     "linea": 57,
+     "fragmento": "const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+     "linea": 120,
+     "fragmento": "{ value: 'DAILY_DIGEST', label: 'Digest diario' },"
+    },
+    {
+     "ruta": "src/lib/client-notifications/notify.ts",
+     "linea": 94,
+     "fragmento": "if (org.leadNotificationMode === 'DISABLED') return"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+     "linea": 77,
+     "fragmento": "<Field label=\"Quota mensual\">"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/llm/providers/anthropic.ts",
+     "linea": 18,
+     "fragmento": "throw new ProviderNotImplementedError('anthropic')"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+     "linea": 304,
+     "fragmento": "<LlmFact label=\"Quota\" value=\"1000 conv/mes\" />"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+     "linea": 151,
+     "fragmento": "if (bot.monthlyQuota > 0) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+     "linea": 47,
+     "fragmento": "maxOutputTokens: z.number().int().min(100).max(8192),"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/config/getPublicConfig.ts",
+     "linea": 121,
+     "fragmento": "routeColorMap: (bot.routeColorMap as unknown as RouteColorMap) ?? {},"
+    },
+    {
+     "ruta": "src/app/api/admin/chatbot/demo-chat/[slug]/route.ts",
+     "linea": 113,
+     "fragmento": "maxOutputTokens: bot.maxOutputTokens,"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1315,
+     "fragmento": "maxOutputTokens Int         @default(800)"
     }
    ],
    "impacto": "Con el primer cliente Starter el bot se corta a 500 conversaciones pero la alerta QUOTA_EXHAUSTED compara contra 1000 y nunca dispara; con Pro o Business (3000/5000, sync-plans.ts:88 y :104) dispara a 1000 aunque el bot sigue funcionando. El admin ve '500 / 1000' y el cliente ve el límite del plan. Editar modelo, temperatura, tope de salida o cuota en el admin no cambia nada en runtime, y como streamText no recibe maxOutputTokens, cada uno de los hasta 3 pasos de un turno puede generar el máximo del modelo: el costo por turno de un visitante anónimo no tiene tope configurable.",
@@ -6352,7 +6617,15 @@
     "modelo.BotConfig",
     "modelo.Plan",
     "lib.plan",
-    "int.vertex"
+    "int.vertex",
+    "h3.adm-chatbots.config-llm-y-cuota",
+    "h3.adm-chatbots.detalle-overview",
+    "lib.chatbot.chat",
+    "lib.client-notifications",
+    "h3.adm-chatbots.editar-config-bot",
+    "h4.adm-clientes.alta-cliente-con-bot",
+    "lib.chatbot.llm",
+    "h3.adm-chatbots.editar-config"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -6364,7 +6637,37 @@
     "tmp": "D6-c2/D6-T1/H09",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L1/H04",
+      "titulo": "El tab Avanzado del bot edita modelo, temperatura, tokens máximos, cuota y 'Digest diario', y el runtime no usa ninguno",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: AdvancedTab.tsx:56 edita la temperatura; handleChatRequest.ts:713 usa plan.llmModel; core.ts:134 deja monthlyQuota 1000 frente a fallback.ts:50 (500). Es la causa raíz de BUG-024 (dos fuentes de verdad); suma el «Digest diario» sin efecto."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L3/H05",
+      "titulo": "Avanzado y resumen del alta muestran modelo, temperatura, tokens y cuota que el runtime ignora",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma causa (el resumen del alta muestra modelo, temperatura y cuota que el runtime ignora)."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L6/H09",
+      "titulo": "Controles del admin que el runtime ignora: modelo, temperatura, tope de tokens, proveedor y colores por ruta",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: saveBotConfig.ts:47 (maxOutputTokens editable), handleChatRequest.ts:713 (plan.llmModel) y :952 (temperature 0.7 fija), getPublicConfig.ts:121. Es BUG-024; suma el proveedor y los colores por ruta."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L8/H09",
+      "titulo": "El chat de produccion no aplica maxOutputTokens ni la temperatura del BotConfig; el demo del admin si (preview distinta de prod)",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma causa; suma que el demo del admin sí aplica la config del bot y el chat de producción no (preview distinta de prod)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6427,356 +6730,6 @@
     "ciclo": "D6-c2",
     "lote": "D6-T1",
     "tmp": "D6-c2/D6-T1/H10",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-025",
-   "prefijo": "BUG",
-   "titulo": "EmailCampaign sin estado intermedio ni métricas: SENDING y SCHEDULED no se escriben (doble envío posible), FAILED no tiene reintento y aperturas y clics nunca se actualizan",
-   "dominio": "D2",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 181,
-     "fragmento": "if (campaign.status !== 'DRAFT') return { error: 'Solo podés enviar campañas en estado DRAFT.' }"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 205,
-     "fragmento": "const sent = await brevoSendCampaign(brevoResult.campaignId)"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 210,
-     "fragmento": "status: sent ? 'SENT' : 'FAILED',"
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 1141,
-     "fragmento": "enum EmailCampaignStatus {\n  DRAFT\n  SCHEDULED"
-    },
-    {
-     "ruta": "src/lib/integrations/brevo.ts",
-     "linea": 143,
-     "fragmento": "export async function getCampaignStats(campaignId: number): Promise<{"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
-     "linea": 110,
-     "fragmento": "{pct(campaign.openedCount, campaign.recipientCount)}"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/layout.tsx",
-     "linea": 31,
-     "fragmento": "Envia campanas de email a tus contactos y segui los resultados en tiempo real."
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 148,
-     "fragmento": "const recipientCount = activeContacts.length  // al crear el borrador"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 217,
-     "fragmento": "return { ok: true }  // tambien con sent === false y status FAILED"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
-     "linea": 144,
-     "fragmento": "El envio fallo. Revisa la configuracion e intenta de nuevo.  // sin accion de reintento"
-    }
-   ],
-   "impacto": "Cuando el módulo se habilite: dos envíos concurrentes de la misma campaña (dos pestañas, un reintento) pasan el control de DRAFT y Brevo crea y manda dos campañas a toda la lista; una campaña FAILED (por ejemplo Brevo la creó pero sendNow falló) no se puede reintentar y queda huérfana en Brevo; y la tabla de campañas muestra 0% de aperturas y clics para siempre porque getCampaignStats no tiene llamadores (dato falso en el camino del cliente).",
-   "propuesta": "Pasar DRAFT a SENDING con updateMany condicional (where status DRAFT) antes de llamar a Brevo y abortar si no afectó filas; permitir reintento de FAILED reusando el brevoCampaignId guardado; traer las métricas con getCampaignStats (cron o al abrir la tabla) o webhook de Brevo, u ocultar las columnas.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-email-mkt",
-    "int.brevo",
-    "modelo.EmailCampaign",
-    "h2.cli-email-mkt.metricas-de-campana",
-    "h2.cli-email-mkt.crear-y-enviar-campana"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "BUG-012; previa S2b-01",
-   "vh": "VH-039",
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H11",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D2-c1",
-      "tmp": "D2-c1/D2-L1/H05",
-      "titulo": "Metricas de campanas que nunca se actualizan: aperturas, clicks y bajas quedan en 0 y 'Enviados' es el conteo previsto del borrador",
-      "severidad": "MEDIA",
-      "nota_padre": "Mismas métricas de EmailCampaign que nunca se actualizan (BUG-025, D6-c2); se suma la evidencia de la pantalla."
-     },
-     {
-      "ciclo": "D2-c1",
-      "tmp": "D2-c1/D2-L1/H06",
-      "titulo": "sendCampaignAction informa exito aunque Brevo no haya enviado, y una campana FAILED no se puede reintentar",
-      "severidad": "MEDIA",
-      "nota_padre": "BUG-025 ya cubre FAILED sin reintento; se suma que sendCampaignAction devuelve ok aunque sendNow falle (_actions.ts:205-217)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-040",
-   "prefijo": "SEC",
-   "titulo": "El export masivo de leads del admin no neutraliza fórmulas: un visitante anónimo del widget puede inyectar una fórmula en un CSV que junta leads de varias organizaciones",
-   "dominio": "D3",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/bulk-actions.ts",
-     "linea": 50,
-     "fragmento": "const leads = await prisma.chatbotLead.findMany({\n    where: { botConfig: { organizationId: { in: uniqueOrgIds } } },"
-    },
-    {
-     "ruta": "src/lib/bulk-actions.ts",
-     "linea": 74,
-     "fragmento": ".map((value) => `\"${String(value).replace(/\"/g, '\"\"')}\"`)"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/leads/csv/csvEscape.ts",
-     "linea": 22,
-     "fragmento": "const DANGEROUS_PREFIX = /^[=+\\-@\\t\\r]/"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
-     "linea": 59,
-     "fragmento": "name: z.string().min(2).max(100).describe("
-    },
-    {
-     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
-     "linea": 121,
-     "fragmento": "const result = await bulkExportLeads([...selected])"
-    }
-   ],
-   "impacto": "El export del cliente ya prefija las celdas peligrosas (csvEscape.ts:5-10 documenta este mismo ataque), pero el export del admin no: un visitante que deja como nombre '=HYPERLINK(...)' o una fórmula IMPORT convierte el CSV que develOP abre en Excel o Google Sheets en un vector para mandar a un tercero nombres, emails y teléfonos de los leads de todas las orgs seleccionadas.",
-   "propuesta": "Reusar rowToCsv/csvEscape de modules/chatbot/server/leads/csv en bulkExportLeads (y en cualquier otro CSV del admin); agregar un invariante que busque armados de CSV con join(',') fuera de ese helper.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-clientes",
-    "h3.vis-widget-cliente",
-    "modelo.ChatbotLead",
-    "lib.actions"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "B5.9 (csvEscape del export del cliente)",
-   "vh": "VH-040",
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H12",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-041",
-   "prefijo": "SEC",
-   "titulo": "El seed del chatbot y update-proactive-prompts escriben en cualquier DATABASE_URL sin guard, aunque el escape los rotula 'script de dev' y ese seed define el bot de producción de develOP",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/prisma/seed.ts",
-     "linea": 272,
-     "fragmento": "const botConfig = await unsafeGlobalQuery('SEED: upsert del bot develOP (script de dev)', (c) =>"
-    },
-    {
-     "ruta": "src/modules/chatbot/prisma/seed.ts",
-     "linea": 275,
-     "fragmento": "update: {\n      // Update mantiene el id pero refresca todo el contenido"
-    },
-    {
-     "ruta": "src/modules/chatbot/prisma/seed.ts",
-     "linea": 342,
-     "fragmento": "const kb = await unsafeGlobalQuery('SEED: upsert de la KB del bot develOP (script de dev)', (c) =>"
-    },
-    {
-     "ruta": "src/modules/chatbot/prisma/update-proactive-prompts.ts",
-     "linea": 23,
-     "fragmento": "'SEED: update de proactivePrompts del bot develOP por slug (script de dev)',"
-    },
-    {
-     "ruta": "docs/bitacora-roadmap.md",
-     "linea": 10815,
-     "fragmento": "- **Bot de la agencia**: vive en `src/modules/chatbot/prisma/seed.ts` (org `develop`, slug `develop`), no en el seed principal."
-    },
-    {
-     "ruta": "prisma/seed.ts",
-     "linea": 20,
-     "fragmento": "import { assertDevSeedTarget, requireSeedPassword } from './seed-guard.ts'"
-    }
-   ],
-   "impacto": "Correr 'npx tsx src/modules/chatbot/prisma/seed.ts' con el .env apuntando a prod (es el camino documentado para el bot de la agencia) pisa sin dry-run ni confirmación toda la config del bot público de develOP (activo, bienvenida, quick replies, WhatsApp, modelo, cuota) y las siete secciones de su knowledge base con los valores del código, borrando cualquier ajuste hecho desde el admin. La razón 'script de dev' de los cuatro escapes SEED es falsa: no hay guard y el script es la fuente del bot de producción.",
-   "propuesta": "Agregar assertDevSeedTarget o un flag explícito de destino más un dry-run con diff antes de escribir; corregir las razones de los escapes SEED para que digan mantenimiento de prod; separar la provisión del bot de prod en un script con confirmación.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.seeds",
-    "lib.isolation",
-    "modelo.BotConfig",
-    "modelo.KnowledgeBase",
-    "int.neon"
-   ],
-   "relacionados_ids": [
-    "SEC-034"
-   ],
-   "previas": [],
-   "relacionados_texto": "SEC-034 (guard por substring); DEU-016 (tsx sin fijar); DEU-020",
-   "vh": null,
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H13",
-    "verificado_padre": true,
-    "nota_padre": "Muestreo DEC-37: se sostiene (src/modules/chatbot/prisma/seed.ts y update-proactive-prompts.ts no importan seed-guard ni llaman assertDevSeedTarget; el seed principal sí, prisma/seed.ts:20).",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-026",
-   "prefijo": "BUG",
-   "titulo": "El reporte ejecutivo semanal no usa PENDING como cerrojo: el cron y el envío manual concurrentes mandan el mail dos veces",
-   "dominio": "D7",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/reports/executive-weekly/send.ts",
-     "linea": 109,
-     "fragmento": "if (existing?.status === 'SENT') {"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/send.ts",
-     "linea": 149,
-     "fragmento": "status: 'PENDING',"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/send-manual.ts",
-     "linea": 50,
-     "fragmento": "if (existing?.status === 'SENT') {"
-    },
-    {
-     "ruta": "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts",
-     "linea": 57,
-     "fragmento": "const result = await sendExecutiveWeeklyReportManual(organizationId)"
-    }
-   ],
-   "impacto": "Si el admin dispara el envío manual mientras corre el cron (o hace dos clics, o el scheduler reintenta), ambos leen un estado distinto de SENT, ambos marcan PENDING y ambos mandan: el cliente recibe el mismo reporte dos veces; si la función muere después de Brevo y antes de marcar SENT, la próxima corrida lo reenvía.",
-   "propuesta": "Reservar la fila con un update o insert condicional (status distinto de SENT y sin PENDING reciente) y seguir solo si la reserva afectó una fila; expirar PENDING viejos.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-reportes-email",
-    "h4.adm-clientes",
-    "int.brevo",
-    "modelo.WeeklyReportLog"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "send-executive-reports registrado solo en vercel.json (D7)",
-   "vh": "VH-041",
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H14",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-027",
-   "prefijo": "BUG",
-   "titulo": "Salida del motor de WhatsApp (latente): el estado se escribe sin condición, el wamid se guarda después del envío y el estado del canal no frena la salida",
-   "dominio": "D5",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
-     "linea": 53,
-     "fragmento": "const currentRank = STATUS_RANK[message.status]"
-    },
-    {
-     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
-     "linea": 58,
-     "fragmento": "await scope.motorMessage.update(message.id, { status: next })"
-    },
-    {
-     "ruta": "src/modules/motor/services/sendMessage.ts",
-     "linea": 248,
-     "fragmento": "await scope.motorMessage.update(messageId, { status: 'SENT', providerMessageId: result.wamid })"
-    },
-    {
-     "ruta": "src/modules/motor/adapters/whatsapp/inbound/process.ts",
-     "linea": 163,
-     "fragmento": "next = addTo(next, 'statusesSkipped')"
-    },
-    {
-     "ruta": "src/modules/motor/services/sendMessage.ts",
-     "linea": 113,
-     "fragmento": "if (channel === null || channel.apiKeyEncrypted === null || channel.apiKeyIv === null || channel.apiKeyTag === null) {"
-    },
-    {
-     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-request.ts",
-     "linea": 39,
-     "fragmento": "if (channel.status === 'INACTIVE') {"
-    }
-   ],
-   "impacto": "Hoy latente: sendMotorMessage no tiene llamadores hasta B2. Cuando se conecte: dos webhooks concurrentes (delivered y read) pueden dejar el mensaje en DELIVERED después de READ o pisar un FAILED; un status que llega antes de que se guarde el wamid se descarta como unknown-message sin reintento; si la función muere entre la aceptación del BSP y el update, el mensaje queda PENDING para siempre con la clave de idempotencia quemada; y un canal INACTIVE (solo se chequea en la entrada) o reportado BANNED/RESTRICTED sigue despachando, justo lo que la alerta de calidad de Meta quería evitar.",
-   "propuesta": "Aplicar el status con updateMany condicional (where status en rangos menores y distinto de FAILED); correlacionar el wamid antes del despacho o reintentar el lookup; marcar como desconocidos los PENDING viejos; chequear status y channelStatus en resolveTargets antes de enviar.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h3.vis-whatsapp",
-    "modelo.MotorMessage",
-    "modelo.WabaChannel",
-    "lib.motor"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "SEC-035 (registro del motor)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H15",
     "verificado_padre": false,
     "nota_padre": "",
     "verificador": null

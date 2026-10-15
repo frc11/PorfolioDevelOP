@@ -93,7 +93,22 @@ for (const h of rev.hallazgos) {
     if (!descartados.items.some((d) => d.tmp === h.tmp)) descartados.items.push({ ciclo, lote: h.lote, tmp: h.tmp, titulo: h.titulo, severidad: h.severidad, prefijo: h.prefijo, motivo_padre: h.nota_padre || '(sin motivo)', verificador: h.verificador ? { se_sostiene: h.verificador.se_sostiene, severidad_ajustada: h.verificador.severidad_ajustada, motivo: h.verificador.motivo } : null, evidencia: (h.evidencia ?? []).map((e) => `${normRuta(e.ruta)}:${e.linea}`) })
     continue
   }
-  if (h.decision !== 'aceptar' || h.id_asignado) continue
+  if (h.decision !== 'aceptar') continue
+  if (h.id_asignado) {
+    // VH tardía: un hallazgo ya escrito que pedía verificación humana sin caso de prueba y que ahora lo
+    // trae (el padre lo agregó en las decisiones y re-corrió f2-decidir): se le crea la VH y se completa su entrada
+    const ent = reg.hallazgos.find((x) => x.id === h.id_asignado)
+    if (ent && !ent.vh && h.requiere_verificacion_humana && h.caso) {
+      const clave = JSON.stringify(h.caso)
+      if (!vhPorCaso.has(clave)) vhPorCaso.set(clave, { caso: h.caso, vh: siguiente('VH'), ids: [], prioridad: 3 })
+      const e = vhPorCaso.get(clave)
+      e.ids.push(ent.id)
+      e.prioridad = Math.min(e.prioridad, SEV[ent.severidad] ?? 3)
+      ent.vh = e.vh
+      h.vh_asignado = e.vh
+    }
+    continue
+  }
   if (!PREFIJOS.includes(h.prefijo)) { console.error(`${h.tmp}: prefijo inválido ${h.prefijo}`); process.exit(1) }
   const id = siguiente(h.prefijo)
   const evidencia = (h.evidencia ?? []).map((e) => ({ ruta: normRuta(e.ruta), linea: e.linea, ...(e.linea_fin ? { linea_fin: e.linea_fin } : {}), fragmento: e.fragmento }))

@@ -527,6 +527,646 @@
    "id_previo": "CLEAN-H1",
    "estado": "abierto",
    "evidencia": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:15 sigue con WHATSAPP_URL 'https://wa.me/5493815555555...' (usado en :49 y :156); :148 '$150 USD' y :152 'Incluye 1.000 conversaciones', contra el catálogo real de src/lib/plan/plan-presentation.ts:149-150 (Starter USD 49, 500) y prisma/seeds/sync-plans.ts:68-111 (Business USD 150, 5.000). Se muestra a todo cliente sin chatbot activo (src/app/(protected)/dashboard/chatbot/page.tsx:20-21)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md:2181",
+   "id_previo": "S4-01",
+   "estado": "abierto",
+   "evidencia": "validate-origin.ts:69-75 sigue eximiendo develop.com.ar antes de allowedDomains; degradedResponse.ts:97-103 lo exime del tope del plan. Es más amplio que lo reportado: el widget oficial siempre llama con Origin develop.com.ar (iframe same-origin, useChatbot.ts:272) y /embed acepta cualquier padre (next.config.ts:131; ChatbotEmbed.tsx:66-68)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "docs/auditoria-seguridad-2026-05.md:144",
+   "id_previo": "SEC-RATELIMIT-01",
+   "estado": "cerrado",
+   "evidencia": "No existe inMemoryLimiter; el limiter es un UPSERT atómico en Neon (src/lib/rate-limit/limiter.ts:37-84). Queda otra debilidad: las claves las controla el cliente (chat/route.ts:80; handleChatRequest.ts:185)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "docs/auditoria-seguridad-2026-05.md:177",
+   "id_previo": "SEC-LLM-02",
+   "estado": "abierto",
+   "evidencia": "Sin aviso de privacidad en embed, chat ni widget.js (ausencia con control positivo); la conversación completa va a Vertex (handleChatRequest.ts:941-950)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "docs/audits/2026-05-auditoria-profunda.md:37",
+   "id_previo": "P0-6",
+   "estado": "cerrado",
+   "evidencia": "[botId]/page.tsx:58-63 aplica callerCanAccessOrg + notFound; listAllBots.ts:6 es global por diseño del admin con razón declarada"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:67",
+   "id_previo": "P0-6",
+   "estado": "cerrado",
+   "evidencia": "admin/chatbots/[botId]/page.tsx:61 y admin/projects/[projectId]/page.tsx:165 usan callerCanAccessOrg"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "docs/audits/2026-06-revalidacion.md:68",
+   "id_previo": "P0-6",
+   "estado": "cerrado",
+   "evidencia": "admin/chatbots/[botId]/page.tsx:61; admin/projects/[projectId]/page.tsx:165"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:71",
+   "id_previo": "SEC-LLM-02",
+   "estado": "abierto",
+   "evidencia": "Igual que la entrada de 2026-05: sin disclosure en widget ni embed"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:105",
+   "id_previo": "P1-12",
+   "estado": "cerrado",
+   "evidencia": "admin/chatbots/[botId]/actions.ts:16-23,36-39,120-123 con Zod; regenerate-brief.ts, onboarding-actions.ts y lib/actions/clients.ts importan zod/parse"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:288",
+   "id_previo": "SEC-07",
+   "estado": "abierto",
+   "evidencia": "Sin disclosure ni redaction; además el lead completo va por Telegram interno (captureLead.ts:445-452) y por postMessage al sitio padre (ChatbotEmbed.tsx:103)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:939",
+   "id_previo": "ARQ-01",
+   "estado": "abierto",
+   "evidencia": "docs/auditoria-2026-10/_crudo/depcruise-resumen.json lista 6 ciclos BotDetailClient.tsx ↔ tabs/*.tsx (imports de tipos desde BotDetailClient) y los de kb-templates/index.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:944",
+   "id_previo": "ARQ-02",
+   "estado": "parcial",
+   "evidencia": "Ahora dos consumidores: dashboard/chatbot/page.tsx:9 y la carga dinámica de ChatWidgetMount.tsx:13; el barrel sigue reexportando UI admin y server actions (modules/chatbot/index.ts:76-90)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1626",
+   "id_previo": "OBS-03",
+   "estado": "abierto",
+   "evidencia": "Sin configuración de monitoreo en el repo; /api/chatbot/[slug]/health no detecta el proveedor caído (checkHealth.ts:46-58) y el detector de alertas no tiene disparador (netlify.toml:25-32)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1914",
+   "id_previo": "SEO-02",
+   "estado": "cerrado",
+   "evidencia": "Existen src/app/robots.ts y src/app/sitemap.ts; embed/layout.tsx:3-6 robots noindex"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:944",
+   "id_previo": "ARQ-02",
+   "estado": "parcial",
+   "evidencia": "Hoy tiene 2 consumidores (ChatWidgetMount.tsx:13, import dinamico, y dashboard/chatbot/page.tsx:9) y solo 3 de sus 52 exports se usan por el barrel (LogicCompanion, ChatbotUpsellLanding, ChatbotOverview). index.ts:74-89 sigue reexportando editores admin, tablas y 3 server actions."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:948",
+   "id_previo": "ARQ-03",
+   "estado": "parcial",
+   "evidencia": "Re-medido solo index.server.ts: 85 nombres exportados, 20 importados via '@/modules/chatbot/index.server' (65 sin consumidor por el barrel). Los otros 24 barrels no se recontaron en este lote."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1321",
+   "id_previo": "RESIL-06",
+   "estado": "cerrado",
+   "evidencia": "RE-2: configCache.ts:43-64 reintenta con chatRetryPolicy y borra la entrada fallida (:58-61); LogicCompanion.tsx:97-121 muestra ConfigLoadError con 'Reintentar'; useChatbot.ts:192-196 retryLoadConfig."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1909",
+   "id_previo": "A11Y-01",
+   "estado": "parcial",
+   "evidencia": "El input real ya envia con Enter (ChatWindow.tsx:540-547) y ChatInput.tsx no se monta (codigo muerto). Sigue abierto lo principal: el launcher es un div role=button sin teclado (LogicCompanion.tsx:180-182), el teaser es un div clickeable (ProactiveTooltip.tsx:123-138) y el panel no cierra con Escape."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:71",
+   "id_previo": "CLEAN-R1",
+   "estado": "abierto",
+   "evidencia": "buildLeadsCsv.ts:37-50 mapa con claves en minuscula y :82-84 fallback al valor crudo; export/route.ts:156 pasa l.intent (enum en mayuscula). El mapa correcto existe en lead-intent-labels.ts:15-25 y no se usa."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:939",
+   "id_previo": "ARQ-01",
+   "estado": "abierto",
+   "evidencia": "La corrida de depcruise del padre (docs/auditoria-2026-10/_crudo/depcruise.json, bloque summary) sigue en 22 violaciones 'cycle': 10 de kb-templates (kb-templates/index.ts:14-23 importa los templates y cada uno hace import type de './index', p. ej. concesionaria.ts:1), las de BotDetailClient.tsx:18-24 con sus tabs (ConfigTab.tsx:4 import type de '../BotDetailClient') y las de lead-pipeline/ClientLeadsTable. Todas de tipos; .dependency-cruiser.cjs:27 tsPreCompilationDeps: true las cuenta. Mismo número y mismo patrón que en la auditoría maestra."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:288",
+   "id_previo": "SEC-07",
+   "estado": "abierto",
+   "evidencia": "Sigue sin aviso en el widget: git grep -i -E 'vertex|n8n|privacidad|disclaimer' en components/chat, components/embed y LogicCompanion = 0 (control: route.ts:75). El empty state ChatWindow.tsx:311-321 no informa nada. La redaccion de PII hacia Vertex no esta en este lote: scrub-pii solo se usa para Sentry/logs (handleChatRequest.ts:1388, persistTurn.ts:620)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1908",
+   "id_previo": "LEG-01",
+   "estado": "abierto",
+   "evidencia": "origin/main no tiene paginas legales: git ls-tree de src/app | grep -i -E 'privac|legal|termin|terms|cookies' = 0 (control: 86 page.tsx). El widget no enlaza ninguna (git grep '/privacidad|/privacy|/legal' en modules/chatbot y widget.js = 0)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1909",
+   "id_previo": "A11Y-01",
+   "estado": "parcial",
+   "evidencia": "El input del panel ya es operable con teclado (Enter en ChatWindow.tsx:540-546; readOnly en vez de disabled mientras responde, :569, con re-foco :172-177), y ChatInput.tsx quedo como codigo muerto. Sigue abierto lo principal: el launcher (LogicCompanion.tsx:180-182, div role=button con onClick y sin handler de teclado) y no hay Escape, aria-modal ni trampa de foco."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "doc": "docs/audits/2026-05-auditoria-profunda.md:53",
+   "id_previo": "P1-10",
+   "estado": "cerrado",
+   "evidencia": "ChatbotOverview.tsx ya no tiene la card 'Insights AI': la ultima seccion es 'Derivaciones a WhatsApp' (:174-218); git grep -n -i 'insight' en components/dashboard sin resultados en ChatbotOverview."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:84",
+   "id_previo": "P1-10",
+   "estado": "cerrado",
+   "evidencia": "Mismo cierre: sin placeholder en ChatbotOverview.tsx; los insights reales viven en /dashboard/resultados/analisis (page.tsx:73)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:17",
+   "id_previo": "CLEAN-H1",
+   "estado": "abierto",
+   "evidencia": "ChatbotUpsellLanding.tsx:15 sigue con wa.me/5493815555555 y :148-152 con '$150 USD /mes, 1.000 conversaciones' frente a sync-plans.ts:70,72 (Starter 49/500) y :102,104 (Business 150/5000); la page la sigue montando (chatbot/page.tsx:21,25)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "docs/audit-repo-20260707.md",
+   "id_previo": "PA-1",
+   "estado": "abierto",
+   "evidencia": "preflightChecks.ts:1 'use server' y :13-25 sin auth; llamada desde client component BotDetailClient.tsx:1, :140"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "docs/audit-chatbot-runtime.md",
+   "id_previo": "C-1",
+   "estado": "cerrado",
+   "evidencia": "Ventana de 30 mensajes en el widget (useChatbot.ts:432-440; historyPolicy.ts:31) y en el schema (requestSchema.ts:53-54); tope duro 40 mensajes con degradado conversation_limit (historyPolicy.ts:61; handleChatRequest.ts:547; useChatbot.ts:327-328)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "docs/audit-chatbot-runtime.md",
+   "id_previo": "C-4",
+   "estado": "cerrado",
+   "evidencia": "getTools.ts:82 restringe navigate_to_page al bot de la agencia; VALID_PATHS sigue hardcodeado (navigateToPage.ts:25-33) hasta allowedNavigationPaths"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "docs/audit-chatbot-runtime.md",
+   "id_previo": "P-2",
+   "estado": "parcial",
+   "evidencia": "Ventana de 30 mensajes (useChatbot.ts:432-440; requestSchema.ts:54); el historial sigue siendo del cliente: los mensajes 'assistant' van al modelo sin envolver (handleChatRequest.ts:946-947)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "docs/audits/2026-05-auditoria-profunda.md",
+   "id_previo": "P0-6",
+   "estado": "parcial",
+   "evidencia": "Detalle del bot con guard y callerCanAccessOrg (admin/chatbots/[botId]/page.tsx:28-31, :61); queries.ts todo forOrg; listAllBots global explicito (listAllBots.ts:5-6); preflightChecks.ts:18-25 sigue global y sin guard"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "docs/audits/2026-05-auditoria-db.md",
+   "id_previo": "DB-P1-7",
+   "estado": "cerrado",
+   "evidencia": "schema.prisma:1413 @@index([botConfigId, lastMessageAt(sort: Desc)])"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "docs/audits/2026-05-auditoria-db.md",
+   "id_previo": "DB-P1-8",
+   "estado": "cerrado",
+   "evidencia": "schema.prisma:1617 @@index([botConfigId, type, createdAt(sort: Desc)])"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+   "id_previo": "P0-6",
+   "estado": "parcial",
+   "evidencia": "Igual que P0-6 de 2026-05: page de detalle protegida; preflightChecks.ts:13-25 sigue sin scoping ni guard"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+   "id_previo": "SEC-02",
+   "estado": "abierto",
+   "evidencia": "preflightChecks.ts:13-19 sin guard; :55-60 y :117-123 siguen devolviendo datos del bot"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+   "id_previo": "RESIL-01",
+   "estado": "parcial",
+   "evidencia": "Servidor con watchdog y presupuestos (handleChatRequest.ts:964-970, :1027, :1066-1080) y maxDuration 30 (route.ts:8); el cliente sigue con 3 intentos sin timeout por intento (useChatbot.ts:299-413; chatRetryPolicy.ts:24,27)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md",
+   "id_previo": "CLEAN-R2",
+   "estado": "abierto",
+   "evidencia": "getActivityChartData.ts:25,:30 y getLatencyHistory.ts:25-30 formatean sin timeZone"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md",
+   "id_previo": "CLEAN-R5",
+   "estado": "parcial",
+   "evidencia": "La divergencia de whatsappNumber ya no existe (saveBotConfig.ts:41 y saveBotConfigByOrgSlug.ts:38 ambos .max(30)); el schema sigue duplicado linea por linea y divergio el manejo de errores (saveBotConfigByOrgSlug.ts:139 crudo vs saveBotConfig.ts:155 sanitizado)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md:2181",
+   "id_previo": "S4-01",
+   "estado": "abierto",
+   "evidencia": "El escape de develop.com.ar sigue antes del check de allowedDomains para todos los bots (validate-origin.ts:69-75) y se replica en el cap del plan (degradedResponse.ts:97-103). En navegador el Origin no se falsifica; fuera del navegador ningún origin protege (ver hallazgo de cupo)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "docs/audit-repo-20260707.md:19",
+   "id_previo": "RT-1",
+   "estado": "cerrado",
+   "evidencia": "El costo usa el par efectivo resuelto una sola vez: handleChatRequest.ts:713 y persistTurn.ts:372-377 (effectiveModel.provider/modelId)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "docs/auditoria-seguridad-2026-05.md:164",
+   "id_previo": "SEC-LLM-01",
+   "estado": "parcial",
+   "evidencia": "Spotlighting con nonce (handleChatRequest.ts:877-889, :941-950); esquivable por currentPath crudo (sections.ts:200) y por turnos 'assistant' del cliente (:946-947)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "docs/auditoria-seguridad-2026-05.md:177",
+   "id_previo": "SEC-LLM-02",
+   "estado": "abierto",
+   "evidencia": "El contenido del visitante va completo a Vertex (handleChatRequest.ts:941-950); git grep de anonimización/redacción en server/chat y server/prompts -> 0. El aviso en el widget no se verificó (fuera del lote)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "docs/auditoria-seguridad-2026-05.md:204",
+   "id_previo": "SEC-SSRF-01",
+   "estado": "abierto",
+   "evidencia": "validateWebhookUrl.ts:11-13 (deuda declarada); postToN8n.ts:87-92 fetch sin resolución ni control de redirects."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "docs/audit-chatbot-runtime.md:62",
+   "id_previo": "C-1",
+   "estado": "cerrado",
+   "evidencia": "Recorte a 30 mensajes en vez de 400 (requestSchema.ts:45-54) y gate de 40 mensajes con derivación (handleChatRequest.ts:547-579). Reaparece por otra vía: respuesta de más de 4000 caracteres (requestSchema.ts:49), hallazgo aparte."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "docs/audit-chatbot-runtime.md:113",
+   "id_previo": "P-2",
+   "estado": "parcial",
+   "evidencia": "Ventana de 30 mensajes y 4000 caracteres (historyPolicy.ts:31, :50; requestSchema.ts:49-54), pero el historial sigue siendo el del cliente (handleChatRequest.ts:941-950)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "docs/audit-chatbot-runtime.md:118",
+   "id_previo": "P-3",
+   "estado": "abierto",
+   "evidencia": "El nonce se genera por request y envuelve todos los mensajes user del historial (handleChatRequest.ts:883-889, :949)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:70",
+   "id_previo": "SEC-LLM-01",
+   "estado": "parcial",
+   "evidencia": "Igual que SEC-LLM-01 de 2026-05: spotlighting presente (handleChatRequest.ts:877-889) con dos vías de escape (sections.ts:200; handleChatRequest.ts:946-947)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:73",
+   "id_previo": "SEC-SSRF-01",
+   "estado": "abierto",
+   "evidencia": "validateWebhookUrl.ts:11-13; postToN8n.ts:87-92."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:287",
+   "id_previo": "SEC-06",
+   "estado": "abierto",
+   "evidencia": "Sin redirect:'manual' ni resolución DNS (git grep de redirect/dns en server/crm -> 0); además IPv6 mapeada no bloqueada (validateWebhookUrl.ts:86-93)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1304",
+   "id_previo": "RESIL-01",
+   "estado": "parcial",
+   "evidencia": "Hay cierre del stream del provider, watchdog y abort (handleChatRequest.ts:728-761, :935-939, :1187-1341); el widget reintenta solo en estados transitorios (chatRetryPolicy.ts:24-27). Sigue sin techo de pared ni maxOutputTokens (:937-954)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1307",
+   "id_previo": "RESIL-02",
+   "estado": "parcial",
+   "evidencia": "El zombie PENDING se resuelve en lectura (getEffectiveSyncStatus.ts:25-37), pero el sync sigue fire-and-forget (captureLead.ts:500, retryCrmSync.ts:73) sin outbox ni after()."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1622",
+   "id_previo": "OBS-01",
+   "estado": "parcial",
+   "evidencia": "Las capturas están (handleChatRequest.ts:1057, :1389-1400; persistTurn.ts:621-624) pero si hay DSN en prod no se verifica por código; requiere ver Sentry."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1630",
+   "id_previo": "OBS-04",
+   "estado": "abierto",
+   "evidencia": "Tags solo module/stage, conversationId en extra (handleChatRequest.ts:1057-1060, persistTurn.ts:621-624); git grep correlationId/requestId en server -> 0."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1632",
+   "id_previo": "OBS-05",
+   "estado": "abierto",
+   "evidencia": "generateInsights ignora usage (generateInsights.ts:102-108); el watchdog persiste 0 tokens (handleChatRequest.ts:1230-1232); sin tope de gasto (git grep spendLimit/costCap -> 0)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:71",
+   "id_previo": "CLEAN-R1",
+   "estado": "abierto",
+   "evidencia": "buildLeadsCsv.ts:37-50 sigue con keys en minúscula y :84 cae al valor crudo; el enum es MAYÚSCULA (captureLead.ts:371, schema.prisma:1454) y el export pasa l.intent (export/route.ts:156)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audit-repo-20260707.md:19",
+   "id_previo": "RT-1",
+   "estado": "cerrado",
+   "evidencia": "El costo usa el mismo par que ejecuta: persistTurn.ts:372-377 (effectiveModel.provider/modelId) resuelto en handleChatRequest.ts:713 con plan.llmModel"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/auditoria-seguridad-2026-05.md:164",
+   "id_previo": "SEC-LLM-01",
+   "estado": "parcial",
+   "evidencia": "Spotlighting con nonce handleChatRequest.ts:877-889, 941-950; regla en sections.ts:150-151; eco detectado validateOutput.ts:67-75. Quedan fuera currentPath (requestSchema.ts:56 -> sections.ts:200) y el historial assistant del cliente (handleChatRequest.ts:946-948)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/auditoria-seguridad-2026-05.md:190",
+   "id_previo": "SEC-LLM-03",
+   "estado": "parcial",
+   "evidencia": "capture_lead verifica formato y pertenencia de phone/email contra los mensajes USER persistidos (captureLead.ts:241-261, el USER del turno se guarda antes en handleChatRequest.ts:612); show_whatsapp_handoff acepta visitorContact sin verificar (showWhatsappHandoff.ts:50-52, :140, :157)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audit-chatbot-runtime.md:62",
+   "id_previo": "C-1",
+   "estado": "cerrado",
+   "evidencia": "Ventana de 30 (historyPolicy.ts:31, requestSchema.ts:46-55, useChatbot.ts:432), tope de forma 50 y hard-cap degradado en 40 (handleChatRequest.ts:547)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audit-chatbot-runtime.md:81",
+   "id_previo": "C-4",
+   "estado": "cerrado",
+   "evidencia": "navigate_to_page solo para el bot develop (getTools.ts:82-123); residual: la seccion 4 del prompt la sigue mencionando a todos (sections.ts:87)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audit-chatbot-runtime.md:113",
+   "id_previo": "P-2",
+   "estado": "parcial",
+   "evidencia": "Recorte server-side a 30 mensajes (requestSchema.ts:53-55); el historial sigue siendo client-authoritative (handleChatRequest.ts:941-950)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audits/2026-05-auditoria-profunda.md:38",
+   "id_previo": "P0-7",
+   "estado": "cerrado",
+   "evidencia": "Ambos canales al create: captureLead.ts:385-386"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audits/2026-05-auditoria-profunda.md:56",
+   "id_previo": "P1-13",
+   "estado": "cerrado",
+   "evidencia": "captureLead.ts:500 syncLeadToCrm -> crm/syncLeadToCrm.ts:6 postToN8nWithRetry (sigue fire-and-forget: ver RESIL-02)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:60",
+   "id_previo": "NUEVO-P0-1",
+   "estado": "cerrado",
+   "evidencia": "providerMapper.ts:14-28 traduce GOOGLE->google sin cast; usado en handleChatRequest.ts:713 y demo-chat/[slug]/route.ts:57"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:74",
+   "id_previo": "NUEVO-P1-1",
+   "estado": "parcial",
+   "evidencia": "Ya no exige la API key legacy, pero envValidator.ts:34-39 exige GOOGLE_APPLICATION_CREDENTIALS mientras prod usa GOOGLE_VERTEX_CREDENTIALS_JSON (google.ts:62-63), y el chequeo LLM no llama a Vertex (checkHealth.ts:47-54)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:87",
+   "id_previo": "P1-13",
+   "estado": "cerrado",
+   "evidencia": "captureLead.ts:500"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audits/2026-06-revalidacion.md:54",
+   "id_previo": "N-1",
+   "estado": "cerrado",
+   "evidencia": "providerMapper.ts:14-28; handleChatRequest.ts:713"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audits/2026-06-revalidacion.md:56",
+   "id_previo": "N-3",
+   "estado": "parcial",
+   "evidencia": "Igual que NUEVO-P1-1: envValidator.ts:35 required:true sobre la variable de archivo; checkHealth.ts:47-54 sin llamada real"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audits/2026-06-revalidacion.md:69",
+   "id_previo": "P0-7",
+   "estado": "cerrado",
+   "evidencia": "captureLead.ts:250-261, :385-386"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "docs/audits/2026-06-revalidacion.md:74",
+   "id_previo": "P1-13",
+   "estado": "cerrado",
+   "evidencia": "captureLead.ts:500"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:70",
+   "id_previo": "SEC-LLM-01",
+   "estado": "parcial",
+   "evidencia": "Igual que la entrada de 2026-05: spotlighting presente; currentPath y turnos assistant del cliente sin envolver"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:72",
+   "id_previo": "SEC-LLM-03 / P0-7",
+   "estado": "parcial",
+   "evidencia": "P0-7 cerrado (captureLead.ts:385-386); pertenencia verificada en capture_lead (:241-261) pero no en show_whatsapp_handoff (showWhatsappHandoff.ts:140,157)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1304",
+   "id_previo": "RESIL-01",
+   "estado": "parcial",
+   "evidencia": "Hay techos por step (providerStreamClose.ts:92-224; reconcile.ts:218-281) y el widget reintenta solo red/5xx (chatRetryPolicy.ts:24-44); falta un deadline global: el peor caso supera 30 s"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1307",
+   "id_previo": "RESIL-02",
+   "estado": "abierto",
+   "evidencia": "captureLead.ts:493 void notifyClient(), :500 void syncLeadToCrm; showWhatsappHandoff.ts:164; sin outbox (git grep -i outbox = 0)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1321",
+   "id_previo": "RESIL-06",
+   "estado": "cerrado",
+   "evidencia": "configCache.ts:43-64 reintenta y borra la entrada fallida; LogicCompanion.tsx:103-120 muestra ConfigLoadError con reintento manual"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1634",
+   "id_previo": "OBS-06",
+   "estado": "parcial",
+   "evidencia": "Retencion de chatbot_events a 30 dias cableada (netlify.toml:31-32; cleanup-old-events/route.ts:14,22; persistentLogger.ts:154-163); Conversation/ChatMessage sin retencion y eventos de negocio (handoff) purgados igual"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:74",
+   "id_previo": "CLEAN-R2",
+   "estado": "abierto",
+   "evidencia": "Siguen sin timeZone: sendLeadNotification.ts:74, getLatencyHistory.ts:24-31, getActivityChartData.ts:25, dashboard/page.tsx:41, weekly-report.ts:12, alerts.ts:277,287"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+   "id_previo": "S6-08",
+   "estado": "abierto",
+   "evidencia": "Sigue sin haber alta ni rotacion: git grep \"wabaChannel\\.\\(create\\|upsert\\|createMany\\)\" -- src scripts prisma da 0 (control: tests/integration/motor-inbound.spec.ts:113). generateChannelWebhookCredentials (channel-credentials.ts:30) solo la llaman los tests. Sigue fallando cerrado: auth.ts:51-53 y sendMessage.ts:113."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+   "id_previo": "S4-04",
+   "estado": "abierto",
+   "evidencia": "La clave de rate limit del webhook del motor sigue saliendo del token de la URL antes de validar su forma (route.ts:32-37; la validacion recien esta en resolve-channel.ts:25). Sigue sin haber purga de rate_limit (git grep 'DELETE FROM rate_limit|rateLimit.deleteMany' da 0; control limiter.ts:46)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+   "id_previo": "S6-07",
+   "estado": "abierto",
+   "evidencia": "El channelToken sigue en el path (route.ts:28). scrub-pii.ts:53-66 no tiene patron para hex de 64 y beforeSendTransaction no esta implementado (solo el comentario en scrub-pii.ts:115). tracesSampleRate es 0.1 en el servidor (sentry.server.config.ts:10, instrumentation.ts:8)."
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+   "id_previo": "S7-01",
+   "estado": "abierto",
+   "evidencia": "Parte motor: el cuerpo del mensaje (handle-message.ts:48) y el telefono (identity.ts:72, waId) se guardan en claro, y no hay purga de las tablas motor_* (git grep -i 'motorMessage.deleteMany|motor_message' -- src scripts solo encuentra registry.ts:50-51 y :127)."
   }
  ]
 }

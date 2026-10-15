@@ -60,7 +60,7 @@
    "Build: BP.4 (docs/bitacora-roadmap.md:9240-9242) dice que entra en el heap por defecto; P1.A (:11110), P5.3 (:11762), UTM.1 (:12746) y PRIVACIDAD (:16845) dicen OOM sin 6-8 GB; varios sprints excluyen el build rojo como gate. Cruza con el previo CO-1 (ignoreBuildErrors/ignoreDuringBuilds).",
    "Script dev: --turbopack (B1.2 :313) contra webpack por defecto (B3.3 :1369) y 'next dev --webpack' (MS-7 :5369).",
    "CI: el comentario de C1 sobre 'type-stripping nativo' en ci.yml es incorrecto segun C1b (docs/bitacora-beta-3.md:5413).",
-   "Repo: B14.3 (docs/bitacora-roadmap.md:9452-9456) y PRIVACIDAD (:16772) se apoyan en que el repo es publico; pasa a privado (DEC-34 cerrado): contexto historico."
+   "Repo: B14.3 (docs/bitacora-roadmap.md:9452-9456) y PRIVACIDAD (:16772) se apoyan en que el repo es publico; sigue publico (gh, 2026-10-13 y 2026-10-14; DEC-54): siguen vigentes."
   ],
   "D9": [
    "design-tokens.ts: el rediseno planea eliminarlo por desconectado (docs/bitacora-rediseno.md:133-135) y limpiar --color-void (:141), pero el Modal (zIndex.modal) y el shell del setter lo consumen por style inline (docs/bitacora-beta.md:52, :221-222) y dossier-stepper usa var(--color-void) (:230). Riesgo cruzado con rediseno/home (que modifica utils.ts y globals.css).",

@@ -1,0 +1,2345 @@
+{
+ "dominio": "D5",
+ "ciclo": "D5-c1",
+ "lote": "D5-L2",
+ "run": "wf_b0489c11-132",
+ "fecha": "2026-10-15T13:01:58.672Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/modules/chatbot/components/LogicCompanion.tsx",
+    "lineas_total": 300,
+    "leido_completo": true,
+    "rangos": "1-300"
+   },
+   {
+    "ruta": "src/modules/chatbot/index.server.ts",
+    "lineas_total": 105,
+    "leido_completo": true,
+    "rangos": "1-105"
+   },
+   {
+    "ruta": "src/modules/chatbot/index.ts",
+    "lineas_total": 90,
+    "leido_completo": true,
+    "rangos": "1-90"
+   },
+   {
+    "ruta": "src/modules/chatbot/lead-detail-presentation.ts",
+    "lineas_total": 87,
+    "leido_completo": true,
+    "rangos": "1-87"
+   },
+   {
+    "ruta": "src/modules/chatbot/lead-intent-labels.ts",
+    "lineas_total": 57,
+    "leido_completo": true,
+    "rangos": "1-57"
+   },
+   {
+    "ruta": "src/modules/chatbot/lead-status-rules.ts",
+    "lineas_total": 72,
+    "leido_completo": true,
+    "rangos": "1-72"
+   },
+   {
+    "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+    "lineas_total": 638,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+    "lineas_total": 1412,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+    "lineas_total": 679,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+    "lineas_total": 551,
+    "leido_completo": false,
+    "rangos": "95-300, 330-551"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/requestSchema.ts",
+    "lineas_total": 115,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/historyPolicy.ts",
+    "lineas_total": 104,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/configCache.ts",
+    "lineas_total": 65,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/layout/ChatWidgetMount.tsx",
+    "lineas_total": 43,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/ConfigLoadError.tsx",
+    "lineas_total": 73,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/zIndex.ts",
+    "lineas_total": 28,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+    "lineas_total": 694,
+    "leido_completo": false,
+    "rangos": "1-16, 140-330, 500-600, 640-694"
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+    "lineas_total": 176,
+    "leido_completo": false,
+    "rangos": "60-176"
+   },
+   {
+    "ruta": "src/modules/chatbot/components/tool-cards/renderToolCall.tsx",
+    "lineas_total": 86,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+    "lineas_total": 95,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/getClientSession.ts",
+    "lineas_total": 34,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx",
+    "lineas_total": 146,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+    "lineas_total": 611,
+    "leido_completo": false,
+    "rangos": "140-200, 425-540"
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx",
+    "lineas_total": 103,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/dashboard/chatbot/layout.tsx",
+    "lineas_total": 62,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
+    "lineas_total": 111,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/chatbot/[slug]/health/route.ts",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/health/checkHealth.ts",
+    "lineas_total": 99,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/config/envValidator.ts",
+    "lineas_total": 125,
+    "leido_completo": false,
+    "rangos": "1-120"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/conversation/resolver.ts",
+    "lineas_total": 145,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/providers/google.ts",
+    "lineas_total": 112,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/factory.ts",
+    "lineas_total": 54,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+    "lineas_total": 144,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/security/validate-origin.ts",
+    "lineas_total": 88,
+    "leido_completo": false,
+    "rangos": "29-88"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts",
+    "lineas_total": 208,
+    "leido_completo": false,
+    "rangos": "1-85"
+   },
+   {
+    "ruta": "src/lib/dashboard/home-metrics-logic.ts",
+    "lineas_total": 234,
+    "leido_completo": false,
+    "rangos": "50-135"
+   },
+   {
+    "ruta": "docs/_insumos/drive/Olme/Chatbot_ registro de cambios.md",
+    "lineas_total": 122,
+    "leido_completo": true
+   },
+   {
+    "ruta": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md",
+    "lineas_total": 193,
+    "leido_completo": true
+   },
+   {
+    "ruta": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md",
+    "lineas_total": 98,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+    "simbolo": "updateLeadStatus",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "updateLeadStatus.ts:18-19 getClientChatbotSession() -> getClientSession.ts:6-7 auth(); sin sesion devuelve {ok:false, error:'No session'}",
+    "rol": "Cualquier usuario con una fila OrgMember; no exige Role ni OrgRole (VIEWER puede escribir)",
+    "evidencia_rol": "getClientSession.ts:12-25 orgMember.findFirst por userId sin filtro de rol; git grep \"'VIEWER'\" en src solo aparece en auth.config.ts:5 (tipo)",
+    "org_de": "sesion",
+    "evidencia_org": "updateLeadStatus.ts:23 forOrg(session.organization.id); la org sale de getClientSession.ts:15-17 (findFirst sin orderBy, no honra la impersonacion). leadId del body queda acotado por forOrg (scoped-model.ts:235 updateMany con where de org) y leadBelongsToOrg (lead-status-rules.ts:66-72)",
+    "validacion": "zod",
+    "evidencia_validacion": "updateLeadStatus.ts:11-15 schema + :21 UpdateLeadStatusSchema.parse (lanza en input invalido en vez de devolver error)",
+    "rate_limit": "no",
+    "notas": "Re-exportada por el barrel cliente del lote (src/modules/chatbot/index.ts:88), que el widget publico importa entero (ChatWidgetMount.tsx:13). Sella firstContactedAt con lead-status-rules.ts:51-56 y nunca lo limpia. Devuelve errores en ingles que la UI muestra tal cual (LeadStatusActions.tsx:99)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveClientSettings.ts",
+    "simbolo": "saveClientSettings",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveClientSettings.ts:40 delega en updateBotAppearance.ts:56-58 (auth(); sin sesion devuelve 'No autenticado')",
+    "rol": "Cualquier usuario autenticado con org resuelta; sin chequeo de rol",
+    "evidencia_rol": "updateBotAppearance.ts:56-64 solo auth() + resolveOrgId()",
+    "org_de": "sesion",
+    "evidencia_org": "updateBotAppearance.ts:61 resolveOrgId() (lib/preview.ts) + :75 forOrg(orgId); no recibe org por parametro",
+    "validacion": "zod",
+    "evidencia_validacion": "saveClientSettings.ts:20-38 safeParse; updateBotAppearance.ts:66-73 segundo safeParse que devuelve parsed.error.format() al cliente",
+    "rate_limit": "no",
+    "notas": "Sin UI viva: su unico importador, ClientSettingsForm.tsx:5, no se monta en ninguna pagina (git grep ClientSettingsForm -> solo su definicion y components/dashboard/index.ts). Sigue invocable porque index.ts:89 la mete en el grafo cliente. El campo isActive del schema se descarta en silencio."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+    "simbolo": "createClientWithBot",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "createClientWithBot.ts:96 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "createClientWithBot.ts:96 requireSuperAdmin (reimplementado en server/admin/requireSuperAdmin.ts, patron D1-c1)",
+    "org_de": "no-aplica",
+    "evidencia_org": "Crea una org nueva (slug derivado de orgName, :106-107); no escribe en una org existente",
+    "validacion": "zod",
+    "evidencia_validacion": "createClientWithBot.ts:99-105 safeParse con normalizacion previa; si falla lanza Error con mensaje legible",
+    "rate_limit": "no",
+    "notas": "Re-exportada por index.ts:80 (barrel cliente) y por eso viaja al chunk del widget publico. userEmail z.string().email() sin trim/lowercase (:34, patron D1-c1 ya registrado). Crea el bot (:159-185) con llmModel fijo 'gemini-2.5-flash' y sin verticalPack (queda 'base')."
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Widget de develOP: de la carga del sitio a la respuesta del bot",
+    "pasos": [
+     "app/layout.tsx:137 monta <ChatWidgetMount /> en el layout raiz, fuera de {children} y sin error boundary",
+     "ChatWidgetMount.tsx:37-39 prefetchBotConfig('develop') durante el intro; :12-15 import dinamico del barrel completo '@/modules/chatbot'; :41-42 monta LogicCompanion al revelarse el chrome",
+     "configCache.ts:33 GET /api/chatbot/develop/config con reintentos (chatRetryPolicy) y borrado del cache si falla (:58-61)",
+     "LogicCompanion.tsx:53 useChatbot -> useChatbot.ts:239-263 config/paused/error; LogicCompanion.tsx:95 null mientras carga; :103-121 ConfigLoadError con Reintentar",
+     "LogicCompanion.tsx:177-182 click en el launcher -> handleToggle :68-80 -> open; ChatWindow.tsx:186-197 submit -> useChatbot.ts:537-549 sendMessage",
+     "useChatbot.ts:271-414 transport POST /api/chatbot/develop/chat (reintenta 5xx, degrada 4xx); :415-453 body con ventana de 30 mensajes, sessionId de sessionStorage y currentPath del primer render",
+     "chat/route.ts:42 validateOrigin; :79-85 rate limit por origin+IP; :97 handleChatRequest",
+     "handleChatRequest.ts:136 zod; :155 resolveBotBySlug (unsafeGlobalQuery, cache 60 s); :184-188 rate limit por sessionId; :215-247 plan + cuota + conversacion en paralelo; :345 y :400 gating y reserva de cupo; :612 persiste el USER; :635 system prompt",
+     "handleChatRequest.ts:937-1179 streamText contra Vertex (gemini-2.5-flash) con transform de respuesta vacia y hooks onError/onAbort/onFinish; :1186-1358 watchdog del borde",
+     "persistTurn.ts:412-472 $transaction mensaje -> conversacion -> cupo; :533 chat.message_completed",
+     "useChatbot.ts:502-529 mapea partes; ChatWindow renderiza; renderToolCall.tsx:47-85 tarjetas (handoff, WhatsApp, navegar)"
+    ]
+   },
+   {
+    "nombre": "Credencial de Vertex vencida (E10): que pasa en cada capa",
+    "pasos": [
+     "handleChatRequest.ts:937 streamText: el doStream de Vertex falla al pedir el token -> parte de error dentro de un stream HTTP 200",
+     "handleChatRequest.ts:1046-1060 onError: logPersistFailure a stderr + Sentry.captureException sin flush; no se escribe ChatbotEvent",
+     "handleChatRequest.ts:1070-1109 + reconcile.ts:366-370: sin primer token se devuelve el cupo y se descarta la conversacion nueva (el dueno no la ve)",
+     "handleChatRequest.ts:1265-1277 onSilentClose: si la conversacion ya existia persiste un canned de derivacion y encola sus frames despues del error (probable)",
+     "node_modules/ai/dist/index.mjs:13787-13811 useChat deja de procesar en el chunk de error -> useChatbot.ts:470-482 banner 'Se corto la respuesta.' con el input habilitado",
+     "checkHealth.ts:46-58 el health solo instancia el provider -> /admin/chatbot/health y GET /api/chatbot/[slug]/health no lo detectan",
+     "dashboard/chatbot/layout.tsx:50-52 el dueno ve 'Activo · respondiendo a tus visitantes'"
+    ]
+   },
+   {
+    "nombre": "Accion rapida sobre un lead y Deshacer",
+    "pasos": [
+     "dashboard/chatbot/leads/page.tsx:36 getClientChatbotSession -> ClientLeadsTable -> BusinessLeadCard.tsx:240 / LeadDetail.tsx:318 <LeadStatusActions>",
+     "LeadStatusActions.tsx:120 OWNER_ACTION_STATUS (lead-status-rules.ts:23-27) -> :87-89 cambio optimista -> :92 updateLeadStatus",
+     "updateLeadStatus.ts:18 getClientChatbotSession (getClientSession.ts:6-25) -> :21 zod -> :27-30 forOrg.chatbotLead.findFirst -> :32 leadBelongsToOrg (lead-status-rules.ts:66-72)",
+     "updateLeadStatus.ts:40 shouldSealFirstContact (lead-status-rules.ts:51-56) -> :42-47 update scoped con firstContactedAt solo si no habia",
+     "updateLeadStatus.ts:51-67 logAdminAction; :69-76 logChatbotEvent; :78 revalidatePath; :84-92 revalidateTag del badge",
+     "LeadStatusActions.tsx:95-100 error -> toast con res.error; :108-113 toast con Deshacer -> applyStatus(previous) -> mismo action, el sello queda",
+     "home-metrics.ts:120-125 -> home-metrics-logic.ts:69-79 velocidad y :117-127 embudo usan firstContactedAt; monthly-report-data.ts:95 reusa buildFunnel"
+    ]
+   },
+   {
+    "nombre": "Detalle del lead en lenguaje de dueno",
+    "pasos": [
+     "dashboard/chatbot/leads/[id]/page.tsx:29-30 getClientChatbotSession / redirect('/dashboard'); :34 getLeadByIdForOrg (anti-IDOR); :39-40 plan -> showScoring",
+     "page.tsx:43-70 score efectivo con decay sobre capturedAt; :75-77 mensajes de la conversacion scoped; :82-90 origen y campana",
+     "LeadDetail.tsx:161-169 categoryLabel / channelLabel / collectInterestSignals / formatChatDuration (lead-detail-presentation.ts:28-87) e intentLabel (lead-intent-labels.ts:44-57)",
+     "LeadDetail.tsx:436 shouldShowInterestSignals (Pro+, no DQ, al menos una senal); :467-470 vacio 'Sin conversacion guardada'",
+     "LeadDetail.tsx:182-186 Guardar notas/estado -> updateLeadStatus con el resultado ignorado -> :526 'Guardado'"
+    ]
+   },
+   {
+    "nombre": "Exportar contactos a CSV",
+    "pasos": [
+     "api/dashboard/chatbot/leads/export/route.ts:143-166 arma las filas; :156 intent: l.intent (enum de Prisma en mayuscula)",
+     "buildLeadsCsv.ts:82-84 labelIntent busca en INTENT_LABELS con claves en minuscula (:37-50) y cae al valor crudo"
+    ]
+   },
+   {
+    "nombre": "Abuso anonimo del endpoint de chat (cuota)",
+    "pasos": [
+     "Script con Origin https://<n>.<dominio permitido del bot> (o https://develop.com.ar) -> validate-origin.ts:69-74 y :83-84 + origin-matcher.ts:39-40 lo aceptan",
+     "chat/route.ts:80 la clave del rate limit incluye el origin -> bucket nuevo por subdominio",
+     "handleChatRequest.ts:185 clave por sessionId del body -> bucket nuevo por sessionId",
+     "handleChatRequest.ts:215-247 conversacion nueva por sessionId -> :400-401 tryReserveConversation consume un cupo",
+     "handleChatRequest.ts:345-395 con la cuota agotada todos los pedidos del bot (tambien conversaciones en curso) reciben la respuesta degradada"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "La caida de Vertex no se detecta: health en verde, panel del dueno 'respondiendo' y sin alerta",
+    "prefijo": "FAL",
+    "severidad": "ALTA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/health/checkHealth.ts",
+      "linea": 48,
+      "fragmento": "const provider = getLLMProvider()\nconst models = provider.listModels()\nllmCheck = { ok: true, provider: provider.name, ..."
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 1052,
+      "fragmento": "logPersistFailure('chat.stream_error', error, {\n...\nSentry.captureException(error, {"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/layout.tsx",
+      "linea": 50,
+      "fragmento": "session.bot.isActive\n  ? 'Activo · respondiendo a tus visitantes'"
+     },
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 470,
+      "fragmento": "onError: () => {\n  setDegradedInfo((prev) => ... reason: 'stream_interrupted',"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+      "linea": 366,
+      "fragmento": "case 'stream_error':\ncase 'stream_abort':\n  return !input.firstTokenDelivered"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/config/envValidator.ts",
+      "linea": 35,
+      "fragmento": "name: 'GOOGLE_APPLICATION_CREDENTIALS',\nrequired: true,"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real: si la credencial o el modelo de Vertex fallan (hoy la credencial esta vencida), el bot de todos los clientes queda mudo y nadie se entera. El health de admin y el publico solo instancian el provider y dan OK (o rojo por otra causa: envValidator exige GOOGLE_APPLICATION_CREDENTIALS aunque prod usa GOOGLE_VERTEX_CREDENTIALS_JSON, google.ts:62-63); el dueno ve 'Activo · respondiendo a tus visitantes'; las conversaciones nuevas se descartan con el cupo devuelto, asi que en su panel no queda rastro; el visitante ve 'Se corto la respuesta.' en cada intento. El unico rastro es stderr y un captureException sin flush.",
+    "propuesta": "Agregar al health un chequeo real del proveedor (autenticado, cacheado y con techo de tiempo) o derivarlo de la tasa de chat.stream_error vs chat.message_completed de las ultimas horas; persistir un ChatbotEvent en onError y alertar (email/Telegram) al cruzar un umbral; que el estado del panel del dueno refleje la salud real del bot; alinear envValidator con GOOGLE_VERTEX_CREDENTIALS_JSON. Decision para Valentino/Franco: rotar o reemplazar la credencial.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-health",
+     "h3.cli-chatbot",
+     "h3.vis-widget-develop",
+     "int.vertex",
+     "int.sentry",
+     "lib.chatbot.health"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5-A4 (control E10); PLAN-241; PLAN-243; PLAN-244; PLAN-350"
+   },
+   {
+    "titulo": "Cuota mensual del bot de cualquier cliente agotable por un anonimo: el rate limit se esquiva rotando el Origin",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
+      "linea": 80,
+      "fragmento": "const rateKey = `chatbotPerSession:${origin ?? 'no-origin'}:${ipHash}`"
+     },
+     {
+      "ruta": "src/lib/security/origin-matcher.ts",
+      "linea": 39,
+      "fragmento": "if (originHost === clean) return true\nif (originHost.endsWith('.' + clean)) return true"
+     },
+     {
+      "ruta": "src/lib/security/validate-origin.ts",
+      "linea": 70,
+      "fragmento": "origin === 'https://develop.com.ar' ||\norigin === 'https://www.develop.com.ar'"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 185,
+      "fragmento": "key: `chatbotPerBotSession:${slug}:${body.sessionId}`,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 400,
+      "fragmento": "if (isNewConversation) {\n  const reserve = await tryReserveConversation(orgId, bot.id, plan.quota)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 345,
+      "fragmento": "if (quota.conversationsUsed >= plan.quota) {"
+     },
+     {
+      "ruta": "prisma/seeds/sync-plans.ts",
+      "linea": 72,
+      "fragmento": "quota: 500,"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real. Con el slug (publico en el snippet del widget) y el dominio del cliente, un script sin auth manda Origin https://<n>.dominio-del-cliente (se aceptan subdominios) o https://develop.com.ar (aceptado para cualquier bot) y un sessionId nuevo por pedido: cada combinacion es un bucket nuevo de los dos rate limits (30/min y 10/min) y una conversacion nueva que reserva cupo. El Starter (500 conversaciones/mes) se agota en minutos; desde ahi el gate de cuota degrada TODOS los pedidos del bot, tambien las conversaciones en curso, hasta fin de mes. develOP paga el LLM de cada conversacion aceptada (con historial de hasta 30x4000 caracteres que tambien arma el cliente) y cada clave nueva deja una fila en rate_limit.",
+    "propuesta": "Sacar el Origin de la clave y usar la IP que fija la plataforma (x-nf-client-connection-ip) en lugar del primer valor de X-Forwarded-For; sumar un tope por bot (conversaciones nuevas por minuto/hora) y uno diario por IP; no tratar el Origin como control anti-abuso (es forjable fuera del navegador); evaluar un token de sesion firmado emitido por /config o un desafio tipo Turnstile para abrir conversacion; alertar consumo anomalo de cupo.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-api-chatbot",
+     "h3.vis-widget-cliente",
+     "lib.rate-limit",
+     "lib.security",
+     "modelo.QuotaUsage",
+     "int.vertex"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "[D1-c1]/[D1-c2] IP desde X-Forwarded-For (requestSchema.ts:109-115, reexportada en index.server.ts:51); [D1-c3] claves de rate limit con datos del pedido; PLAN-355"
+   },
+   {
+    "titulo": "El launcher del chat de develOP no se abre con el teclado (A11Y-01 sigue abierto)",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/LogicCompanion.tsx",
+      "linea": 180,
+      "fragmento": "role=\"button\"\ntabIndex={0}\nonClick={handleToggle}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/LogicCompanion.tsx",
+      "linea": 215,
+      "fragmento": "whileTap={reducedMotion ? undefined : { scale: 0.95 }}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+      "linea": 129,
+      "fragmento": "onClick={(e) => {\n  // Stop the click bubbling to the launcher's onClick"
+     },
+     {
+      "ruta": "node_modules/motion-dom/dist/es/gestures/press/utils/keyboard.mjs",
+      "linea": 14,
+      "fragmento": "target.dispatchEvent(new PointerEvent(\"pointer\" + type, { isPrimary: true, bubbles: true }));"
+     }
+    ],
+    "impacto": "Un visitante con teclado o lector de pantalla llega al launcher (tabIndex 0, aria-label 'Abrir chat') pero Enter y Espacio no abren el chat: con movimiento normal Enter solo dispara pointerdown/pointerup sinteticos de Motion (animacion de tap, nunca 'click'); con reduced-motion ni eso. El teaser es un div clickeable sin rol ni teclado dentro de un role=button (controles anidados) y el panel abierto no cierra con Escape ni devuelve el foco (git grep 'Escape' en components del chat -> 0). Falla WCAG 2.1.1 (nivel A) en el canal de conversion del sitio.",
+    "propuesta": "Convertir el launcher en motion.button type='button' (o manejar Enter/Espacio), sacar el teaser fuera del boton con su propio boton accesible, cerrar el dialogo con Escape, aria-modal y devolver el foco al launcher al cerrar.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "lib.chatbot.components"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "A11Y-01 (auditoria maestra :1909)"
+   },
+   {
+    "titulo": "Ir a una seccion desde el chat recarga la pagina: la charla desaparece y el bot pierde el contexto",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/LogicCompanion.tsx",
+      "linea": 165,
+      "fragmento": "onNavigate: chatbot.navigateTo,"
+     },
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 583,
+      "fragmento": "const navigateTo = useCallback((path: string) => {\n  if (typeof window === 'undefined') return\n  window.location.href = path"
+     },
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 160,
+      "fragmento": "(proactive-* teaser bubbles don't count). In-memory only — resets on reload."
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 941,
+      "fragmento": "messages: body.messages.map((m): ModelMessage => {"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/tool-cards/renderToolCall.tsx",
+      "linea": 22,
+      "fragmento": "const navigateToPageSchema = z.object({\n  path: z.string(),"
+     }
+    ],
+    "impacto": "En el sitio de develOP, cuando el bot ofrece 'te llevo a la seccion de IA' y el visitante toca el boton, la pagina se recarga entera sin la transicion del Shutter que CLAUDE.md exige para el sitio publico: el chat vuelve cerrado y vacio y reaparece el teaser; como el server arma el contexto con el historial que manda el widget, el siguiente mensaje llega sin historia aunque la conversacion siga en la base con el mismo sessionId. Ademas el cliente acepta cualquier string como destino (no espeja VALID_PATHS) y lo pasa a window.location.href (un 'javascript:' inyectado seria solo self-XSS).",
+    "propuesta": "Navegar con triggerTransition() (sitio publico) manteniendo el widget montado; espejar VALID_PATHS en el validador del cliente; a mediano plazo historial autoritativo desde ChatMessage (PLAN-426).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "lib.chatbot.hooks"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-426; regla de navegacion del sitio publico (CLAUDE.md)"
+   },
+   {
+    "titulo": "GET /api/chatbot/[slug]/health es publico, sin rate limit, y expone el estado de configuracion",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/chatbot/[slug]/health/route.ts",
+      "linea": 12,
+      "fragmento": "const health = await checkChatbotHealth(slug)\n\nreturn Response.json(health, {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/config/envValidator.ts",
+      "linea": 84,
+      "fragmento": "const vars: EnvVarStatus[] = ENV_VARS.map((v) => {\n  const value = process.env[v.name]\n  const present = !!value && value.length > 0"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/health/checkHealth.ts",
+      "linea": 35,
+      "fragmento": "dbCheck = { ok: false, error: error instanceof Error ? error.message : 'unknown' }"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/health/checkHealth.ts",
+      "linea": 76,
+      "fragmento": "botCheck = { ok: false, slug: bot.slug, botName: bot.botName, error: 'Bot is inactive' }"
+     },
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 172,
+      "fragmento": "matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', ...]"
+     }
+    ],
+    "impacto": "Cualquiera puede consultar, para cualquier slug, que variables criticas estan cargadas (DATABASE_URL, credenciales de Vertex, CHATBOT_IP_HASH_SALT, AUTH_SECRET) con sus hints, el mensaje crudo de error de la base si falla, y el nombre y estado de cada bot; cada hit hace SELECT 1 y un findUnique contra Neon sin rate limit (mantiene despierta la base). Ya no quema tokens (el /smoke se borro), pero viola 'rate-limit all public endpoints' y 'never expose internal error messages'.",
+    "propuesta": "Dejar publico solo un liveness minimo ({ok}) con rate limit, o exigir un token de monitoreo; el detalle completo solo en /admin/chatbot/health.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-api-chatbot",
+     "h3.adm-health",
+     "lib.chatbot.health",
+     "lib.rate-limit"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A2; RT-2 (cerrado por 02a2f812); PLAN-355"
+   },
+   {
+    "titulo": "'Deshacer' no deshace el primer contacto: velocidad de respuesta y embudo cuentan contactos que no ocurrieron",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx",
+      "linea": 8,
+      "fragmento": "// optimista (...) y un \"Deshacer\" inmediato\n// en el toast por si se equivoco de boton."
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx",
+      "linea": 104,
+      "fragmento": "toast.success('Lo dejamos como estaba')"
+     },
+     {
+      "ruta": "src/modules/chatbot/lead-status-rules.ts",
+      "linea": 55,
+      "fragmento": "return statusImpliesContact(nextStatus) && currentFirstContactedAt == null"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+      "linea": 46,
+      "fragmento": "...(sealFirstContact ? { firstContactedAt: new Date() } : {}),"
+     },
+     {
+      "ruta": "src/lib/dashboard/home-metrics-logic.ts",
+      "linea": 121,
+      "fragmento": "const wasContacted = statusImpliesContact(l.status) || l.firstContactedAt != null"
+     },
+     {
+      "ruta": "src/lib/dashboard/home-metrics-logic.ts",
+      "linea": 71,
+      "fragmento": "(s) => s.firstContactedAt != null && s.firstContactedAt.getTime() >= s.capturedAt.getTime(),"
+     }
+    ],
+    "impacto": "Si el dueno toca 'Lo contacte' por error y aprieta 'Deshacer' (el toast le dice 'Lo dejamos como estaba'), el lead vuelve a NEW pero queda sellado: el inicio y el reporte mensual (monthly-report-data.ts:95 reusa buildFunnel) lo cuentan como contactado y la velocidad de respuesta promedia un 'contacto' de segundos que no existio. Con pocos leads una sola equivocacion distorsiona la metrica que se le vende al cliente. El invariant lead-status-rules.invariant.ts:100-103 fija este comportamiento como deseado.",
+    "propuesta": "Que el deshacer inmediato restaure el firstContactedAt previo (el action puede devolver el valor anterior y aceptar un flag de undo) o sellar con ventana de gracia; o decidir explicitamente la semantica y alinear el embudo (decision de producto).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot",
+     "h2.cli-inicio",
+     "h2.cli-reportes-email",
+     "lib.chatbot.lead-status-rules",
+     "modelo.ChatbotLead"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-247"
+   },
+   {
+    "titulo": "Cambio de estado del lead: 'Guardado' falso en el detalle y errores tecnicos en ingles en el toast",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+      "linea": 183,
+      "fragmento": "startTransition(async () => {\n  await updateLeadStatus({ leadId: lead.id, status, notes })\n  setSavedAt(Date.now())"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+      "linea": 526,
+      "fragmento": "{savedAt && !isPending ? 'Guardado' : ''}"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+      "linea": 19,
+      "fragmento": "if (!session) return { ok: false, error: 'No session' }"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+      "linea": 33,
+      "fragmento": "return { ok: false, error: 'Lead not found or unauthorized' }"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx",
+      "linea": 99,
+      "fragmento": "toast.error(res.error ?? 'No se pudo guardar el cambio')"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+      "linea": 21,
+      "fragmento": "const parsed = UpdateLeadStatusSchema.parse(input)"
+     }
+    ],
+    "impacto": "En el detalle, si la sesion vencio o el lead no pertenece a la org resuelta (p. ej. admin impersonando, porque getClientChatbotSession no honra la impersonacion), el boton dice 'Guardado' y las notas no se guardaron: el dueno pierde notas sin enterarse. En la lista, el toast le muestra 'No session' o 'Lead not found or unauthorized'. Un input invalido o un error de DB lanza dentro de la transicion y termina en el error boundary de la seccion en lugar de un mensaje.",
+    "propuesta": "Chequear res.ok en LeadDetail y mostrar el error; mapear los errores del action a textos en castellano para el dueno; safeParse y try/catch con captureException en updateLeadStatus.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot",
+     "lib.chatbot.admin"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "[D1-c1] mensajes internos al cliente; [D1-c2] getClientSession sin impersonacion; [D1-c3] guards que lanzan"
+   },
+   {
+    "titulo": "El CSV de leads exporta la intencion como enum crudo (CLEAN-R1 sigue abierto) y con otro vocabulario que el panel",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts",
+      "linea": 37,
+      "fragmento": "const INTENT_LABELS: Record<string, string> = {\n  // B5.1+ canon\n  purchase_ready: 'Quiere comprar',"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts",
+      "linea": 82,
+      "fragmento": "function labelIntent(intent: string | null): string {\n  if (!intent) return 'Sin especificar'\n  return INTENT_LABELS[intent] ?? intent"
+     },
+     {
+      "ruta": "src/app/api/dashboard/chatbot/leads/export/route.ts",
+      "linea": 156,
+      "fragmento": "intent: l.intent,"
+     },
+     {
+      "ruta": "src/modules/chatbot/lead-intent-labels.ts",
+      "linea": 15,
+      "fragmento": "const INTENT_LABELS: Record<ChatbotLeadIntent, string> = {\n  PURCHASE_READY: 'Listo para comprar',"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts",
+      "linea": 54,
+      "fragmento": "postventa: 'Postventa',"
+     }
+    ],
+    "impacto": "El dueno que descarga sus contactos ve 'PURCHASE_READY' o 'QUOTE_REQUEST' en la columna de intencion (el propio builder promete 'frase legible') y etiquetas distintas a las del panel ('Postventa'/'Otro' frente a 'Posventa'/'Otra consulta' de lead-detail-presentation.ts:48,52). Es el mismo bug que P1-fix arreglo en el panel, vivo en el export.",
+    "propuesta": "Usar intentLabel() de lead-intent-labels.ts y categoryLabel() de lead-detail-presentation.ts en buildLeadsCsv, borrar los mapas locales y agregar el caso al invariant del CSV.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot",
+     "lib.chatbot.leads",
+     "lib.chatbot.lead-presentation"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "CLEAN-R1; PLAN-290; PLAN-336"
+   },
+   {
+    "titulo": "El widget publico importa el barrel cliente completo: editores de admin, onboarding, tablas y server actions viajan a todo el sitio",
+    "prefijo": "PERF",
+    "severidad": "MEDIA",
+    "tipo": "perf",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/components/layout/ChatWidgetMount.tsx",
+      "linea": 12,
+      "fragmento": "const LogicCompanion = dynamic(\n  () => import('@/modules/chatbot').then((m) => ({ default: m.LogicCompanion })),"
+     },
+     {
+      "ruta": "src/modules/chatbot/index.ts",
+      "linea": 75,
+      "fragmento": "export { KnowledgeBaseEditor, BotConfigEditor } from './components/admin'\nexport { ActivityLog } from './components/admin'\nexport { OnboardingWizard } from './components/admin'"
+     },
+     {
+      "ruta": "src/modules/chatbot/index.ts",
+      "linea": 88,
+      "fragmento": "export { updateLeadStatus } from './server/admin/updateLeadStatus'\nexport { saveClientSettings } from './server/admin/saveClientSettings'"
+     },
+     {
+      "ruta": "src/modules/chatbot/index.ts",
+      "linea": 30,
+      "fragmento": "// Diferido: este barrel lo importa entero `ChatWidgetMount` en toda ruta\n// publica. Reexportar el avatar 3D eager metia `three` + R3F (225 kB gz) en el\n// bundle del widget aunque nadie lo monte."
+     }
+    ],
+    "impacto": "Cada visita publica descarga y evalua, para mostrar un boton de 56 px, codigo del panel admin y del dashboard que nunca monta: los propios devs midieron que el barrel no se poda (asi entraba three+R3F) y la bitacora deja ~202 kB gz de widget. Peor TBT/INP en mobile y los ids de tres server actions del panel quedan en el JS publico.",
+    "propuesta": "Importar LogicCompanion por ruta directa en ChatWidgetMount; partir index.ts por superficie (widget, dashboard, admin) o eliminarlo; medir con @next/bundle-analyzer (instalado y sin cablear).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "lib.chatbot.barrel"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "ARQ-02; PLAN-529"
+   },
+   {
+    "titulo": "Los bots nuevos nacen con verticalPack 'base' y no hay forma de asignarles el pack de su rubro",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/onboarding/core.ts",
+      "linea": 133,
+      "fragmento": "llmModel: 'gemini-2.5-flash',\nmonthlyQuota: 1000,\n... industry: resolvedIndustry,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 159,
+      "fragmento": "const bot = await tx.botConfig.create({"
+     },
+     {
+      "ruta": "prisma/seeds/backfill-vertical-pack.ts",
+      "linea": 71,
+      "fragmento": "export const VERTICAL_PACK_BACKFILL_MAP: Readonly<Record<string, string>> = {\n  develop: 'agencia',\n  sanmiguel: 'usados',"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+      "linea": 340,
+      "fragmento": "// `base` (distinta). REQUERIDO antes de produccion: backfillear los bots"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1329,
+      "fragmento": "verticalPack String @default(\"base\")"
+     }
+    ],
+    "impacto": "Un concesionario que se de de alta por cualquiera de los dos caminos de onboarding (createClientWithBot o onboardClientCore) puntua leads e interpreta intenciones con el pack generico 'base' en vez de 'usados', sin que nadie lo vea: no hay campo en el admin (git grep verticalPack en components, server/admin y lib -> 0). La temperatura y el score que se le muestran al dueno no son los disenados para su rubro; hoy solo se corrige con un script de slugs fijos.",
+    "propuesta": "Derivar verticalPack de industry al crear el bot en los dos caminos (sin tocar el schema) y exponerlo como campo editable en el admin del bot; cubrirlo con el invariant de EV.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots",
+     "lib.chatbot.verticals",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A6; PLAN-308; PLAN-403"
+   },
+   {
+    "titulo": "El historial lo arma el widget: turnos 'assistant' inventados por el visitante entran al modelo como propios",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/chat/requestSchema.ts",
+      "linea": 48,
+      "fragmento": "role: z.enum(['user', 'assistant', 'system']),\ncontent: z.string().max(MAX_MESSAGE_CHARS),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 946,
+      "fragmento": "if (m.role === 'assistant') {\n  return { role: 'assistant', content: [{ type: 'text', text: m.content }] }"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+      "linea": 279,
+      "fragmento": "const warnings = validateAssistantOutput(text)"
+     }
+    ],
+    "impacto": "Un visitante puede mandar un historial con respuestas del bot que nunca existieron ('te confirme el 30% de descuento') y el modelo las toma como compromisos propios; la respuesta siguiente se persiste y aparece en el transcript del dueno, y la captura sirve de 'prueba' contra el negocio. El spotlighting cubre user/system pero no los turnos assistant, y validateAssistantOutput solo registra. Tambien permite inflar cada request con hasta 30x4000 caracteres pagados por develOP.",
+    "propuesta": "Reconstruir el historial server-side desde ChatMessage de la conversacion y usar del body solo el ultimo mensaje del usuario (PLAN-426); mientras tanto descartar turnos assistant que no coincidan con los persistidos.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-api-chatbot",
+     "lib.chatbot.chat",
+     "int.vertex"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-426; PLAN-355"
+   },
+   {
+    "titulo": "Todos los planes, el fallback y los dos onboardings fijan 'gemini-2.5-flash' sin control de vigencia del modelo",
+    "prefijo": "TEC",
+    "severidad": "MEDIA",
+    "tipo": "tech-vieja",
+    "confianza": "HIPÓTESIS",
+    "evidencia": [
+     {
+      "ruta": "prisma/seeds/sync-plans.ts",
+      "linea": 73,
+      "fragmento": "llmModel: 'gemini-2.5-flash',"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/llm/resolveEffectiveModel.ts",
+      "linea": 21,
+      "fragmento": "export const FALLBACK_MODEL_ID = 'gemini-2.5-flash'"
+     },
+     {
+      "ruta": "src/lib/onboarding/core.ts",
+      "linea": 133,
+      "fragmento": "llmModel: 'gemini-2.5-flash',"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/llm/providers/google.ts",
+      "linea": 14,
+      "fragmento": "id: 'gemini-2.5-flash',"
+     }
+    ],
+    "impacto": "Si Google discontinuo o discontinua gemini-2.5-flash en Vertex, el bot de todos los clientes deja de responder igual que con la credencial vencida y el fallback apunta al mismo id: no hay modelo de reemplazo ni aviso. Sin acceso a la web no se pudo confirmar la fecha de retiro; si se confirma que ya paso, sube a ALTA.",
+    "propuesta": "Verificar en Vertex/Model Garden el estado y la fecha de discontinuacion de los tres ids de google.ts; mantener el id solo en Plan.llmModel, con un fallback distinto y un check de vigencia en el health.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.vertex",
+     "lib.chatbot.llm",
+     "h3.vis-api-chatbot"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5-A4"
+   },
+   {
+    "titulo": "currentPath queda congelado en la primera pagina: el bot de develOP infiere la seccion equivocada tras navegar",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 456,
+      "fragmento": "[slug, currentPath]"
+     },
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 459,
+      "fragmento": "const { messages: sdkMessages, sendMessage: sdkSendMessage, setMessages, status } = useChat({"
+     },
+     {
+      "ruta": "node_modules/@ai-sdk/react/dist/index.mjs",
+      "linea": 184,
+      "fragmento": "const chatRef = useRef(\n  \"chat\" in options ? options.chat : new Chat(optionsWithCallbacks)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/prompts/sections.ts",
+      "linea": 200,
+      "fragmento": "- Ruta del usuario: ${context.currentPath ?? 'no determinada'}"
+     }
+    ],
+    "impacto": "El widget sigue montado al navegar (layout raiz), pero useChat conserva la instancia y el transport del primer render (solo se recrea si cambia chat o id): todos los turnos mandan la ruta donde se abrio el sitio. El prompt usa esa ruta para 'inferir interes segun la seccion' (sections.ts:205), asi que en /ai-implementations el bot puede seguir creyendo que el visitante esta en el home; tambien se persiste la ruta vieja en Conversation.currentPath (resolver.ts:90-93).",
+    "propuesta": "Leer currentPath desde un ref dentro de prepareSendMessagesRequest (como sessionId y el opener) o pasarlo en el body de sendMessage.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "lib.chatbot.hooks"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-426"
+   },
+   {
+    "titulo": "Copy del widget: 'Protocolo de consultoria iniciado' en usted y jerga, 'WhatsApp no configurado.' al visitante y textos en ingles",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 311,
+      "fragmento": "Sistema Listo"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 321,
+      "fragmento": "Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 305,
+      "fragmento": "color: 'rgba(255,255,255,0.3)',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/tool-cards/WhatsappHandoffCard.tsx",
+      "linea": 17,
+      "fragmento": "if (!whatsappUrl) {\n  return (\n    <div className=\"rounded-xl border border-red-500/30 ...\">WhatsApp no configurado."
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 659,
+      "fragmento": "aria-label=\"Send message\"\n>\n  <Send size={15} strokeWidth={2.25} />"
+     }
+    ],
+    "impacto": "El primer contacto con el bot (develOP y clientes) abre con jerga de sistema en 'usted' que contradice el voseo del resto; 'Sistema Listo' en blanco al 30% sobre el panel oscuro queda por debajo de 4,5:1; si un bot sin WhatsApp llama al handoff (la tool no se gatea por numero en getTools.ts), el visitante ve en rojo un problema de configuracion del dueno. B13.5 afirmo que el literal no existia: existe.",
+    "propuesta": "Sprint de copy: empty-state en voseo con el nombre del bot, sacar 'Sistema Listo' o subir contraste, no ofrecer show_whatsapp_handoff a bots sin numero y ocultar la tarjeta en ese caso; aria-label en castellano y strokeWidth 1.5 (regla del repo).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "h3.vis-widget-cliente"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A5"
+   },
+   {
+    "titulo": "El stream no tiene techo absoluto: el peor caso de ventanas suma ~45 s contra maxDuration 30 s",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
+      "linea": 8,
+      "fragmento": "export const maxDuration = 30"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+      "linea": 267,
+      "fragmento": "export const STREAM_WATCHDOG_INITIAL_IDLE_MS = 12_000"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+      "linea": 281,
+      "fragmento": "export const STREAM_WATCHDOG_TOOL_MAX_MS = 15_000"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 987,
+      "fragmento": "experimental_onStepStart: () => {\n  watchdogRef.current?.beginStep()"
+     }
+    ],
+    "impacto": "Cuenta: pre-LLM en frio (~5-6 s medidos) + 12 s sin primer chunk + 15 s de tool colgado + 12 s de arranque del step 2 ~= 45 s. Todas son ventanas de inactividad; ninguna mira el reloj del request, solo los hooks de persistencia (computeHookBudgetMs). En ese peor caso la plataforma mata la funcion, el turno no se persiste y el visitante ve 'Se corto la respuesta.'. El transform actual ya no retiene chunks: el deadlock de ONF-1 esta cerrado.",
+    "propuesta": "Agregar un deadline absoluto del request (p. ej. 25 s desde startTime) que dispare el mismo cierre del watchdog con persistencia y canned, y acotar las ventanas restantes con el tiempo que queda.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-api-chatbot",
+     "lib.chatbot.chat",
+     "int.vertex"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A3; PLAN-440"
+   },
+   {
+    "titulo": "La latencia del Health Score mezcla todas las orgs en una pagina del bot develOP, con horas en la zona del servidor",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+      "linea": 68,
+      "fragmento": "// PENDIENTE-DECISION: agrega latencia (chat.message_completed) de TODAS las\n// orgs, pero su unica pagina (/admin/chatbot/health) esta enmarcada como el"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+      "linea": 82,
+      "fragmento": "take: 2000,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+      "linea": 25,
+      "fragmento": "return d.toLocaleString('es-AR', {\n  day: '2-digit',"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbot/health/page.tsx",
+      "linea": 12,
+      "fragmento": "checkChatbotHealth('develop'),\ngetLatencyHistory(24),"
+     }
+    ],
+    "impacto": "El veredicto de salud del bot develOP usa la latencia de todos los clientes (o el SLO de plataforma se presenta como el de develOP); las horas del grafico salen en UTC en Netlify (3 h corridas para Argentina) y con mas de 2000 eventos en 24 h el percentil sale de un subconjunto sin orden. Los docs le asignan la funcion al panel del cliente y al runtime a la vez (D5-A8); en el codigo vive solo en admin.",
+    "propuesta": "Decision para Valentino/Franco: SLO de plataforma o salud del bot develop; segun eso scopear por botConfigId o renombrar; formatear con timeZone 'America/Argentina/Buenos_Aires' y ordenar por createdAt.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-health",
+     "lib.chatbot.admin"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A8; PLAN-244"
+   },
+   {
+    "titulo": "Los barrels del chatbot exportan componentes que nadie monta y nombres que nadie importa",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/index.ts",
+      "linea": 40,
+      "fragmento": "ChatMessages,\nChatMessage,\nChatInput,"
+     },
+     {
+      "ruta": "src/modules/chatbot/index.ts",
+      "linea": 89,
+      "fragmento": "export { saveClientSettings } from './server/admin/saveClientSettings'"
+     },
+     {
+      "ruta": "src/modules/chatbot/index.server.ts",
+      "linea": 13,
+      "fragmento": "export {\n  ProviderNotImplementedError,\n  ModelNotSupportedError,"
+     }
+    ],
+    "impacto": "Del barrel cliente se consumen 3 de 52 exports y del server 20 de 85 nombres. ChatMessages, ChatMessage, ChatInput y QuickReplyChips no los monta nadie (el registro de Valentino cuenta fixes que 'aterrizaron en codigo muerto'), A11Y-01 citaba ChatInput, que no se renderiza, y saveClientSettings sigue publicada sin UI. Encarece cambios y confunde auditorias.",
+    "propuesta": "Borrar los componentes muertos y recortar los barrels a lo consumido, o reemplazarlos por imports directos.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.chatbot.barrel"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "ARQ-02; ARQ-03"
+   },
+   {
+    "titulo": "Las etiquetas del lead buscan con 'in'/indice sobre objetos planos y channelLabel nunca recibe datos",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/lead-intent-labels.ts",
+      "linea": 45,
+      "fragmento": "if (intent != null && intent in INTENT_LABELS) {\n  return INTENT_LABELS[intent as ChatbotLeadIntent]"
+     },
+     {
+      "ruta": "src/modules/chatbot/lead-detail-presentation.ts",
+      "linea": 71,
+      "fragmento": "return CHANNEL_LABELS[channel.toLowerCase()] ?? null"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+      "linea": 381,
+      "fragmento": "const lead = await tx.chatbotLead.create({\n  botConfigId: ctx.botConfigId,"
+     }
+    ],
+    "impacto": "Hoy los callers pasan valores del enum de Prisma, pero la firma acepta cualquier string: 'constructor' o 'toString' devolverian una funcion (React no la renderiza). channelLabel y su mapa (incluye WhatsApp e Instagram) no tienen datos: el unico create de ChatbotLead no escribe channel, asi que la fila 'Canal' del detalle nunca aparece, tampoco para un bot vendido por WhatsApp.",
+    "propuesta": "Usar Object.hasOwn o Map; escribir channel en capture_lead ('widget'/'embed') o quitar la fila 'Canal' del detalle.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.chatbot.lead-presentation",
+     "h3.cli-chatbot",
+     "modelo.ChatbotLead"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-289"
+   },
+   {
+    "titulo": "Los z-index del widget contradicen su propio contrato y el launcher tapa contenido en mobile",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/shared/zIndex.ts",
+      "linea": 9,
+      "fragmento": "* Do NOT raise these to int32 max (2_147_483_647). A widget that always wins\n* blocks legitimate host UI and is hostile to the embedder."
+     },
+     {
+      "ruta": "src/modules/chatbot/shared/zIndex.ts",
+      "linea": 19,
+      "fragmento": "backdrop: 2_147_000_000,\n/** Floating bubble ... */\nbubble: 2_147_000_100,"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/LogicCompanion.tsx",
+      "linea": 191,
+      "fragmento": "position: 'fixed',\n...position,\nzIndex: CHATBOT_Z_INDEX.bubble,"
+     }
+    ],
+    "impacto": "El docstring promete dejar lugar para modales del sitio host (rango 100-9999) pero los valores quedan a ~480 mil de int32: launcher, teaser y backdrop ganan sobre cualquier menu, modal o banner del sitio de develOP y de los clientes. Sin ajuste para pantallas angostas, a 390 px la burbuja fija pisa contenido y microcopy (PLAN-533, observado en bitacora).",
+    "propuesta": "Bajar los tokens a un rango documentado (alto solo para el panel abierto), reducir o desplazar el launcher y ocultar el teaser bajo cierto ancho; verificar a 390 px.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "h3.vis-widget-cliente"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-533"
+   },
+   {
+    "titulo": "El widget no tiene error boundary propio: un error de render del chat tumba la pagina publica entera",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/layout.tsx",
+      "linea": 137,
+      "fragmento": "<ChatWidgetMount />"
+     },
+     {
+      "ruta": "src/components/layout/ChatWidgetMount.tsx",
+      "linea": 41,
+      "fragmento": "if (isChromeFree || !revealed) return null\nreturn <LogicCompanion slug={WIDGET_SLUG} />"
+     }
+    ],
+    "impacto": "El widget cuelga del layout raiz fuera del segmento de la pagina: una excepcion de render en LogicCompanion, ChatWindow o las tarjetas no la atrapa app/error.tsx sino global-error.tsx, que reemplaza el documento entero. Un problema del chat deja sin sitio a quien navega develOP.",
+    "propuesta": "Envolver ChatWidgetMount en un ErrorBoundary silencioso que reporte a Sentry y oculte el widget.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "int.sentry"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "CLAUDE.md 'No blank screens'"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.abrir-y-cerrar-chat",
+    "nombre": "Abrir y cerrar el chat desde la burbuja",
+    "descripcion": "Launcher flotante del sitio de develOP (slug develop) que abre y cierra la ventana del chat, con badge de conversacion activa, sonido y estado de error de config con reintento.",
+    "archivos": [
+     "src/modules/chatbot/components/LogicCompanion.tsx",
+     "src/components/layout/ChatWidgetMount.tsx",
+     "src/modules/chatbot/hooks/useChatbot.ts",
+     "src/modules/chatbot/shared/configCache.ts",
+     "src/modules/chatbot/components/chat/ConfigLoadError.tsx"
+    ],
+    "entradas": [
+     "GET /api/chatbot/develop/config"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz trazado: app/layout.tsx:137 -> ChatWidgetMount.tsx:37-42 -> LogicCompanion.tsx:53, :95, :143-221 -> handleToggle :68-80 -> ChatWindow montado :146-173; cierre por chatbot.close :153.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Superficie publica: solo lee la config publica del bot develop (ChatWidgetMount.tsx:10; configCache.ts:33)."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "El launcher no lista colecciones."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Si /config agota reintentos muestra ConfigLoadError con Reintentar (LogicCompanion.tsx:103-121; useChatbot.ts:192-196; configCache.ts:58-61)."
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "Mientras carga devuelve null sin placeholder (LogicCompanion.tsx:95); lo mitiga el prefetch durante el intro (ChatWidgetMount.tsx:37-39)."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "No envia datos."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Respeta safe-area (LogicCompanion.tsx:127-136) pero sin ajuste por ancho y con z-index ~int32 (zIndex.ts:19-21); superposicion a 390 px reportada (PLAN-533)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin error boundary propio (app/layout.tsx:137; ChatWidgetMount.tsx:41-42) ni captura cliente de fallos de /config."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "git grep TODO|FIXME en LogicCompanion.tsx y useChatbot.ts -> 0."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Con teclado no se abre: div role=button sin onKeyDown (LogicCompanion.tsx:180-182)."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.conversar-con-el-bot",
+    "nombre": "Conversar con el bot en streaming",
+    "descripcion": "El visitante escribe, ve 'Pensando' y recibe la respuesta del modelo en streaming, con degradados honestos ante cuota, red o corte.",
+    "archivos": [
+     "src/modules/chatbot/hooks/useChatbot.ts",
+     "src/modules/chatbot/components/chat/ChatWindow.tsx",
+     "src/app/api/chatbot/[slug]/chat/route.ts",
+     "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "src/modules/chatbot/server/chat/persistTurn.ts"
+    ],
+    "entradas": [
+     "POST /api/chatbot/develop/chat"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz trazado en codigo: ChatWindow.tsx:186-197 -> useChatbot.ts:537-549 -> transport :271-272 -> chat/route.ts:35-110 -> handleChatRequest.ts:136, :155, :215-247, :612, :937 -> persistTurn.ts:412-472. Hoy no responde en runtime por la credencial de Vertex vencida (hecho conocido).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Org del bot resuelta por slug y todo el request bajo forOrg (handleChatRequest.ts:155-164)."
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "Hay estado vacio (ChatWindow.tsx:285-323) pero con 'Sistema Listo / Protocolo de consultoria' en usted y bajo contraste."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Degradados con copy canned, nunca el body crudo (useChatbot.ts:102-133, :359-399, :470-482); 500 generico del server (handleChatRequest.ts:1401-1410)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "'Pensando' en el mismo frame del Enter (useChatbot.ts:485-500; ChatWindow.tsx:143)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "requestBodySchema con zod (requestSchema.ts:37-67; handleChatRequest.ts:133-141)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Panel con inset de 16 px y maxHeight 72dvh (ChatWindow.tsx:223, :245)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "captureException en onError sin flush (handleChatRequest.ts:1057-1060); flush solo en el 500 (:1389-1400); el health no alerta."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO/FIXME en el camino (git grep -> 0)."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Depende de Vertex vivo (hoy vencida); la navegacion del bot recarga y borra la charla (useChatbot.ts:583-586); currentPath congelado (useChatbot.ts:456-459)."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.teaser-y-retomar",
+    "nombre": "Burbuja proactiva y burbuja 'retomar'",
+    "descripcion": "Sobre el launcher rota una pregunta configurada (teaser) o, si ya hay conversacion, mensajes para retomarla; al aceptar el teaser se abre el chat con esa pregunta como contexto.",
+    "archivos": [
+     "src/modules/chatbot/components/LogicCompanion.tsx",
+     "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+     "src/modules/chatbot/hooks/useChatbot.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "LogicCompanion.tsx:263-282 -> ProactiveTooltip.tsx:71-80 (trigger) -> :129-138 onAccept -> useChatbot.ts:551-572 acceptProactivePrompt -> transport :420-443 proactiveOpener -> handleChatRequest.ts:811-824 (opener validado al system prompt).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Usa solo la config publica del bot."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Sin prompts configurados no se muestra (ProactiveTooltip.tsx:74-77)."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Sin I/O propio; oculto en degradado (LogicCompanion.tsx:263-264)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin carga propia."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "El opener solo se acepta si coincide exacto con un prompt configurado (handleChatRequest.ts:811-815; requestSchema.ts:78-90)."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "maxWidth min(190px, 38vw) (ProactiveTooltip.tsx:119); superposicion a 390 px reportada (PLAN-533)."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin I/O."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Los mensajes de 'retomar' usan el nombre configurado (LogicCompanion.tsx:85-93)."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "El teaser es un div clickeable dentro de un role=button, sin teclado (ProactiveTooltip.tsx:123-138)."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.ir-a-una-seccion",
+    "nombre": "Tarjeta del bot para ir a una seccion del sitio",
+    "descripcion": "El bot de develOP invoca navigate_to_page y el widget muestra una tarjeta con boton para ir a la landing o ancla sugerida.",
+    "archivos": [
+     "src/modules/chatbot/server/tools/getTools.ts",
+     "src/modules/chatbot/components/tool-cards/renderToolCall.tsx",
+     "src/modules/chatbot/components/tool-cards/NavigateToPageCard.tsx",
+     "src/modules/chatbot/hooks/useChatbot.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "getTools.ts:121 (solo bot develop) -> renderToolCall.tsx:71-81 -> NavigateToPageCard.tsx:35-36 -> LogicCompanion.tsx:165 -> useChatbot.ts:583-586 window.location.href.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "La tool solo se ofrece al bot develop (getTools.ts:82, :121)."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No lista colecciones."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Input invalido -> la tarjeta no se renderiza, sin aviso (renderToolCall.tsx:72-73)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin carga propia."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "El server valida z.enum(VALID_PATHS) (navigateToPage.ts:39) pero el cliente acepta cualquier string y navega con window.location.href (renderToolCall.tsx:22-25; useChatbot.ts:585)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Boton dentro de la tarjeta (NavigateToPageCard.tsx:35-40)."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin I/O."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Destinos reales (navigateToPage.ts:25-34)."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "La recarga borra el chat y el contexto del modelo (useChatbot.ts:160, :583-586; handleChatRequest.ts:941)."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.detalle-de-lead",
+    "nombre": "Ficha del contacto en lenguaje de dueno",
+    "descripcion": "Detalle del lead con intencion, categoria, canal, senales de interes (Pro+), duracion de la charla, conversacion origen, notas y estado.",
+    "archivos": [
+     "src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx",
+     "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+     "src/modules/chatbot/lead-detail-presentation.ts",
+     "src/modules/chatbot/lead-intent-labels.ts"
+    ],
+    "entradas": [
+     "page /dashboard/chatbot/leads/[id]",
+     "server-action updateLeadStatus"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "leads/[id]/page.tsx:29-34 -> :39-90 -> LeadDetail.tsx:161-169 (lead-detail-presentation.ts:28-87; lead-intent-labels.ts:44-57) -> :436 senales -> :467-470 vacio -> :182-186 guardar.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Anti-IDOR por org en la query (leads/[id]/page.tsx:34) pero la org sale de getClientChatbotSession: OrgMember.findFirst sin orderBy ni impersonacion (getClientSession.ts:12-25)."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "'Sin conversacion guardada' (LeadDetail.tsx:467-470); senales solo si hay alguna (lead-detail-presentation.ts:37-43)."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx de la seccion con Sentry (dashboard/chatbot/error.tsx:13-18) pero 'Guardar' muestra 'Guardado' aunque falle (LeadDetail.tsx:182-186, :526)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "dashboard/chatbot/leads/[id]/loading.tsx existe (git ls-tree)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "UpdateLeadStatusSchema (updateLeadStatus.ts:11-15, :21)."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Acciones con flex-wrap y min-h 44 px (LeadStatusActions.tsx:118, :138); el resto del layout del detalle no se leyo completo."
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary.tsx:64 captureException."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO; la fila 'Canal' nunca aparece porque ChatbotLead.channel no se escribe (captureLead.ts:381-413)."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "El dueno ve intencion, categoria, senales y conversacion y actua desde la ficha (LeadDetail.tsx:161-169, :318)."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.acciones-rapidas-de-lead",
+    "nombre": "Acciones de un tap sobre el lead (Lo contacte / Vendido / No avanzo)",
+    "descripcion": "Botones optimistas con Deshacer que cambian el estado del lead y sellan el primer contacto para la metrica de velocidad.",
+    "archivos": [
+     "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx",
+     "src/modules/chatbot/lead-status-rules.ts",
+     "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+     "src/lib/dashboard/home-metrics-logic.ts"
+    ],
+    "entradas": [
+     "server-action updateLeadStatus"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "LeadStatusActions.tsx:120-136 -> :92 updateLeadStatus -> updateLeadStatus.ts:18-47 -> :78 revalidatePath; metricas en home-metrics.ts:120-125.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "forOrg + leadBelongsToOrg (updateLeadStatus.ts:23-34) con la org de getClientChatbotSession (sin impersonacion ni rol; OrgRole VIEWER no se aplica en ningun lado)."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No lista colecciones."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Revierte el optimismo pero muestra res.error en ingles ('No session', 'Lead not found or unauthorized') (LeadStatusActions.tsx:95-100; updateLeadStatus.ts:19, :33); parse/DB lanzan dentro de la transicion."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner por boton y disabled mientras isPending (LeadStatusActions.tsx:129-130)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "zod (updateLeadStatus.ts:11-15)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap y min-h-[44px] (LeadStatusActions.tsx:118, :138)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Los ok:false no se reportan; revalidateTag fallido solo console.error (updateLeadStatus.ts:89-91)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO/FIXME (git grep -> 0)."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "'Deshacer' no deshace el sello del primer contacto (lead-status-rules.ts:51-56; home-metrics-logic.ts:121)."
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-530",
+    "clave": "Launcher del chat en opacity 0 con animacion perpetua",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "LogicCompanion.tsx:201-204 aplica una animacion one-shot (`chatbotLauncherReveal ${CHROME_REVEAL_DURATION_MS}ms ... both`, sin infinite) y :286-297 keyframe opacidad 0->1; git diff a2acc395..origin/main no toco esas lineas desde la nota (d63d8aa6, 2026-07-30).",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Por lectura no hay causa de opacidad 0 perpetua: probable artefacto del banco que congela animaciones. Verificar en navegador real."
+   },
+   {
+    "id": "PLAN-533",
+    "clave": "Launcher del chatbot se superpone a contenido a 390px",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "LogicCompanion.tsx:127-136 solo safe-area, sin ajuste por ancho; zIndex.ts:19-21 valores ~int32; ProactiveTooltip.tsx:119 maxWidth min(190px, 38vw).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-536",
+    "clave": "NeuroAvatar: lazy load y cold start del launcher 3D",
+    "estado_en_codigo": "parcial",
+    "evidencia": "HeavyAvatarsLazy.tsx:27-35 dynamic(ssr:false) con placeholder para neuro y legacy_neuro; index.ts:30-33 reexporta NeuroAvatarLazy. El cold start solo aplica si un bot elige avatar 3D; develop usa 'image' (HeavyAvatarsLazy.tsx:12-14).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-289",
+    "clave": "P1.D vista de leads unificada",
+    "estado_en_codigo": "hecho",
+    "evidencia": "next.config.ts:139-145 redirect permanente /dashboard/leads -> /dashboard/chatbot/leads; LeadDetail.tsx:161-169 usa lead-detail-presentation; leads/[id]/page.tsx:82-90 origen y campana.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El canal nunca se muestra: ChatbotLead.channel no se escribe (captureLead.ts:381-413)."
+   },
+   {
+    "id": "PLAN-290",
+    "clave": "P1-fix correctivos visuales + labels de intent",
+    "estado_en_codigo": "parcial",
+    "evidencia": "lead-intent-labels.ts:15-57 mapa unico usado por BusinessHero.tsx:15, BusinessLeadCard.tsx:10 y LeadDetail.tsx:42; card clickeable BusinessLeadCard.tsx:212-213; pero buildLeadsCsv.ts:37-50 conserva un mapa propio en minuscula (CLEAN-R1).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-382",
+    "clave": "Criterio PASS de lead-capture-chain segun el plan",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "scripts/regression/cases.ts:199-209 sigue exigiendo expectedTools ['capture_lead','offer_handoff_options'] sin aceptar la ruta por WhatsApp.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-537",
+    "clave": "Recuperar el look del header del chat del sitio",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "ChatHeader.tsx:88 muestra 'Conectando…/Escribiendo…/En linea'; :64 el 'pensando' vive inline; sin linea decorativa.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-355",
+    "clave": "Endpoints publicos sin rate-limit y guard del primer mensaje",
+    "estado_en_codigo": "parcial",
+    "evidencia": "chat/route.ts:81-85 y handleChatRequest.ts:184-188 tienen rate limit (esquivable rotando Origin/sessionId); config/route.ts y health/route.ts no (git grep checkRateLimit -> 0); el user-led solo se fuerza al recortar (historyPolicy.ts:76, :99-101): un array de 30 o menos que empieza en assistant pasa.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-336",
+    "clave": "Constantes de event-types y LEAD_INTENTS unificado",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "captureLead.ts:36 LEAD_INTENTS y showWhatsappHandoff.ts:30 HANDOFF_INTENTS siguen separados; los tipos de evento son literales ('chat.message_completed') en handleChatRequest, persistTurn y getLatencyHistory; git grep EVENT_TYPES|ChatbotEventType -> 0.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-468",
+    "clave": "C3.6 logChatbotEvent fire-and-forget",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "persistTurn.ts:533-551 y :609-618 lo awaitean con techo (EVENT_LOG_DEADLINE_MS 700 ms, reconcile.ts:103); handleChatRequest.ts:322, :359, :414, :559 await directo; chat/route.ts:50-54 explica que sin await el freeze de la lambda pierde el write.",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-481",
+    "clave": "Features del chatbot pospuestas a Beta",
+    "estado_en_codigo": "parcial",
+    "evidencia": "STATUS.md:192-197 las da por pospuestas, pero el scoring con clasificacion existe (calculateLeadScore.ts:68-86; ChatbotLead.score/classification) y hay sugerencias al dueno (insights/generateInsights.ts:24); cards ricos, KB con review queue y memoria por cookies no existen (identidad en sessionStorage, useChatbot.ts:24-35).",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "STATUS.md desactualizado."
+   },
+   {
+    "id": "PLAN-473",
+    "clave": "Lint preexistente del runtime del chatbot",
+    "estado_en_codigo": "parcial",
+    "evidencia": "onFinish ya no desestructura toolResults (handleChatRequest.ts:1155); siguen react-hooks/refs en ChatbotEmbed.tsx:317 y set-state-in-effect en useChatbot.ts:496 (baseline eslint del padre).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-539",
+    "clave": "Decidir tamano del avatar de Lucia en el launcher",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "registry.ts:48-56 legacy_neuro conserva fillScale 1.3, pero el bot develop usa avatarStyle 'image' (HeavyAvatarsLazy.tsx:12-14) y LogicCompanion.tsx:141 resuelve 56 px para avatares livianos.",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-403",
+    "clave": "Smoke y 7 transcripts de EV.4",
+    "estado_en_codigo": "parcial",
+    "evidencia": "docs/ev4-transcripts/agencia-1..3.md tienen respuestas del bot; los 4 usados-*.md registran 'HTTP 404 — Bot not found or inactive' en cada turno; el README sigue diciendo PENDIENTE.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-408",
+    "clave": "providedEmail ausente de LeadSignals",
+    "estado_en_codigo": "parcial",
+    "evidencia": "calculateLeadScore.ts:68-74 LeadSignals sigue sin providedEmail, pero el scoring por pack lo recibe (captureLead.ts:349-356) y el pack base lo puntua (verticals/packs/base.ts:38); usados no.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-423",
+    "clave": "Verificar costos reales en prod",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Operativo (SELECT en prod, no verificable por codigo); el codigo emite chat.cost_model_unknown (handleChatRequest.ts:767-785) y calcula costo con el modelo efectivo (persistTurn.ts:372-377).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-426",
+    "clave": "E2 historial autoritativo desde ChatMessage",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "handleChatRequest.ts:941-950 arma los mensajes del modelo desde body.messages (incluye assistant del cliente); messageCount +2 fijo (persistTurn.ts:447).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-431",
+    "clave": "Test de carga y review completo de ONF-1",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tests/integration/chatbot-isolation.spec.ts existe; no hay test de concurrencia del chatbot (git grep -il 'concurren|ultimo cupo' en tests -> solo tests/setter/06 y 12).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-440",
+    "clave": "Peor caso de tool colgado + step 2 lento supera 30s",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "reconcile.ts:267 (12 s) y :281 (15 s) + beginStep por step (handleChatRequest.ts:987-989) sin deadline absoluto contra chat/route.ts:8 maxDuration 30; cuenta ~45 s.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-452",
+    "clave": "e2e 40-lead-capture-e2e.spec.ts no confiable",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tests/e2e/40-lead-capture-e2e.spec.ts:31 y :42 siguen con test.skip condicional.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-458",
+    "clave": "Limpiar ipHash historicos con salt publico",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "No hay script (git grep -il ipHash en scripts -> 0; control: 10 scripts con 'purge'); hashIp ya aborta sin salt en prod (ipHash.ts:21-27).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-244",
+    "clave": "Widget 'Salud del bot' en el dashboard del dueno",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -i 'salud del bot|botHealth' en src -> 0; solo existe /admin/chatbot/health (page.tsx:10-16); el dueno ve 'Activo · respondiendo a tus visitantes' por isActive (dashboard/chatbot/layout.tsx:50-52).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-247",
+    "clave": "firstContactedAt y decay del scoring",
+    "estado_en_codigo": "parcial",
+    "evidencia": "El panel sella firstContactedAt (updateLeadStatus.ts:40-46; lead-status-rules.ts:51-56); el decay sigue usando capturedAt (leads/[id]/page.tsx:57), no lastStatusChangeAt; el comentario EV.2 del schema (primer mensaje del visitante) quedo contradicho.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-308",
+    "clave": "EV: packs verticales (la base de todo)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "verticals/packs/{base,usados,agencia}.ts; dual-write de senales (captureLead.ts:364-366, :404); migracion 20260629195726_ev2_vertical_pack_signals_utm; compuertas EV.3/EV.4 sin cumplir (transcripts de usados con 404) y bots nuevos sin pack (onboarding/core.ts:128-136; createClientWithBot.ts:159-185).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-312",
+    "clave": "E0: identidad persistente y cierre/timeout de conversacion",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Conversation.endedAt no se escribe en el modulo (git grep endedAt en src/modules/chatbot -> 0; control: aparece en project.actions.ts:582); identidad = sessionId en sessionStorage (useChatbot.ts:24-35).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-316",
+    "clave": "Microsprints E5-E6 (carril rapido)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "MS-E6.2 costuras A/B/C hechas (requestSchema.ts:1-8, toolSuspension.ts, persistTurn.ts:21-24) pero el handler sigue en 1412 lineas; MS-E6.3: salt obligatorio en prod y docstring honesta (ipHash.ts:3-27).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-328",
+    "clave": "MH.3: contadores consistentes",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "persistTurn.ts:447 messageCount { increment: 2 } fijo aunque el USER se haya deduplicado; generateInsights.ts:30-42 trae 200 conversaciones con todos sus mensajes y recorta a 50 en memoria.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-332",
+    "clave": "RB.3: cierre sin huecos (onFinish transaccional + derivacion fija)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "persistTurn.ts:379-472 $transaction mensaje -> conversacion -> cupo con retry deduplicado; derivacion fija ante respuesta vacia (reconcile.ts:407-411, :484-534).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-345",
+    "clave": "C1.2: ventana de historial y caps realistas",
+    "estado_en_codigo": "hecho",
+    "evidencia": "historyPolicy.ts:31 ventana 30, :50 4000 caracteres; :39 MAX_MESSAGES_SHAPE 50 queda como validacion de forma.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-350",
+    "clave": "C3.1: corte del proveedor a mitad del stream",
+    "estado_en_codigo": "parcial",
+    "evidencia": "onError compensa el cupo si no hubo primer token (handleChatRequest.ts:1070-1109) y reporta a stderr + Sentry (:1052-1060), pero no persiste un ChatbotEvent y el borde puede persistir un canned que el visitante no ve (:1265-1277).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-241",
+    "clave": "Health: tasa de error/5xx y alertas push",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "buildHealthVerdict.ts:20-22 solo latencia y DB; git grep alert|error_rate|5xx|stream_error en server/health -> solo el comentario de index.ts:4.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-380",
+    "clave": "Respuesta deterministica post-capture_lead",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "handleChatRequest.ts:953 stopWhen stepCountIs(3) sigue; capture_lead devuelve su resultado al modelo (captureLead.ts:552).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-392",
+    "clave": "recalculateLeadScore para leads que vuelven",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep recalculateLeadScore en src -> 0 (control: getEffectiveScore en scoring/calculateLeadScore.ts).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-396",
+    "clave": "ChatbotLead.lastUserMessageAt",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep lastUserMessageAt en src y schema -> 0 (control: lastMessageAt aparece 3 veces en schema.prisma).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-268",
+    "clave": "Boton 'Reportar mal clasificado'",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -i 'mal clasificado|misclassif' en src -> 0 (control: 'classification' en LeadDetail.tsx).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-356",
+    "clave": "Sistema de leads consolidado (deviceId)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep deviceId en src y schema -> 0; identidad por sessionId de sessionStorage (useChatbot.ts:27-31).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-448",
+    "clave": "Detectar en runtime cuando el bot admite no saber",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Sin detector en server/chat; 'admite no saber' solo aparece como ejemplo de prompt en src/modules/chatbot/prisma/seed.ts:149.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-243",
+    "clave": "Monitor automatico del camino LLM",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "No existe monitor; /smoke borrado (server/health/index.ts:1-5, commit 02a2f812); el health solo instancia el provider (checkHealth.ts:46-58).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-529",
+    "clave": "Diferir el widget de chat entero",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "ChatWidgetMount.tsx:12-15 importa el barrel completo al revelarse el chrome; prefetch de config durante el intro (:37-39).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-320",
+    "clave": "Frontera conversacion/cuota con memoria",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "La cuota se reserva por conversacion nueva = sessionId nuevo (handleChatRequest.ts:400-401; useChatbot.ts:24-35, sessionStorage por pestana): decision abierta.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-324",
+    "clave": "Descartados: no volver a proponer",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "git grep -i 'embedding|fine-tun|pgvector' en src/modules/chatbot y schema -> 0; Instagram no esta en el runtime (solo como etiqueta en lead-detail-presentation.ts:63).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-340",
+    "clave": "Secuencia de los bloques C",
+    "estado_en_codigo": "parcial",
+    "evidencia": "C0 (historyPolicy.ts; getTools.ts:82 C0.1) y C1.2 hechos; C3.1 parcial; C3.4 no aplicado (persistTurn secuencial dentro de la tx) y C3.6 contradicho (eventos await-eados).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-455",
+    "clave": "Turno canned: cobrar y persistir",
+    "estado_en_codigo": "hecho",
+    "evidencia": "handleChatRequest.ts:1210-1257 persistTurn(watchdog_canned) antes de runAbortController.abort(), con el comentario 'NO REORDENAR'.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-367",
+    "clave": "B3.2 Shell de Matsu + bateria de regresion + baseline",
+    "estado_en_codigo": "hecho",
+    "evidencia": "scripts/seed-matsu.ts:24-33; scripts/regression/{cases,run-baseline,purge}.ts; docs/regression/baseline-2026-05-22T22-00-07-164Z.md.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-278",
+    "clave": "B7 visual-qa retroactivo de avatares",
+    "estado_en_codigo": "parcial",
+    "evidencia": "registry.ts:35-73 cinco entradas (neuro, legacy_neuro, monograma, onda, geometrico); la verificacion visual es humana.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-188",
+    "clave": "B4: avatar del bot en base64 en DB",
+    "estado_en_codigo": "hecho",
+    "evidencia": "avatarImageUrlSchema.ts:10-23 acepta data:image/(png|jpeg|webp) con tope de 600k caracteres; @vercel/blob ausente (git grep en package.json y src -> 0; control: 'resend' en package.json:166).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-174",
+    "clave": "Lane Actividad",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ActivityLog.tsx:113 y :300 'Cargar mas' sobre un pool de 250.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-253",
+    "clave": "Leads en pipeline y conversaciones expandibles",
+    "estado_en_codigo": "hecho",
+    "evidencia": "components/dashboard/lead-pipeline/{LeadPipeline,LeadPipelineColumn,LeadColumnOverview,classes}; dashboard/chatbot/conversations/transcript-action.ts:31 getClientConversationTranscriptAction.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-476",
+    "clave": "Q1.1 corredor de conversaciones doradas",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/modules/chatbot/evals/runner.ts; package.json:83-85 evals, evals:seed, evals:purge.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "La corrida contra Gemini real hoy falla por la credencial vencida."
+   },
+   {
+    "id": "PLAN-416",
+    "clave": "Q1.2 evaluacion con asserts duros + juez LLM",
+    "estado_en_codigo": "hecho",
+    "evidencia": "evals/scoring/{hard-asserts,judge,evaluate}.ts; package.json:86 evals:score.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-434",
+    "clave": "STREAM-TIMEOUT fase 1 (chunkMs)",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "reconcile.ts:147-172 documenta la remocion de chunkMs (bloque MUDEZ); handleChatRequest.ts:954-963 streamText sin timeout.",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-436",
+    "clave": "STREAM-TIMEOUT fase 2 (stepMs + persistTurn)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "persistTurn.ts:177-186 guard turnPersisted; invocado desde onAbort, onFinish y el watchdog (handleChatRequest.ts:1142, :1162, :1211); stepMs removido (reconcile.ts:283-300).",
+    "sigue_teniendo_sentido": "si"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction; C3.4 quiere paralelizar los 3 writes",
+    "resultado": "parcial",
+    "evidencia": "persistTurn.ts:379-472: ChatMessage ASSISTANT -> Conversation -> QuotaUsage (incrementQuota con tx) van en UN scope.$transaction (RB.3 hecho), con retry acotado (PERSIST_TX_MAX_ATTEMPTS=2, reconcile.ts:30) y dedup del commit fantasma (:413-431). C3.4 no se aplico y es incompatible con la tx interactiva. Si uno falla: rollback de los tres; agotado el retry -> chat.persist_failed a stderr, chat.persist_error best-effort y Sentry sin flush (:552-624); el visitante ya vio la respuesta, el USER queda persistido (handleChatRequest.ts:612) y se pierde el turno ASSISTANT. messageCount suma +2 fijo (persistTurn.ts:447)."
+   },
+   {
+    "alerta": "[D5-A2] /smoke: GET publico sin auth ni rate limit que quema tokens (RT-2)",
+    "resultado": "parcial",
+    "evidencia": "/smoke borrado (commit 02a2f812; server/health/index.ts:1-5; api/chatbot solo tiene chat, config y health; git grep -i smoke en src/app -> 0). Queda GET /api/chatbot/[slug]/health publico sin auth ni rate limit (health/route.ts:6-19; proxy.ts:172 no cubre /api): no quema tokens pero expone configuracion y pega a Neon.",
+    "hallazgo_titulo": "GET /api/chatbot/[slug]/health es publico, sin rate limit, y expone el estado de configuracion"
+   },
+   {
+    "alerta": "[D5-A3] Stream: el transform propio no debe poder colgar el stream ni pasar el maxDuration de 30 s",
+    "resultado": "parcial",
+    "evidencia": "El transform actual (reconcile.ts:484-534) reenvia cada chunk en la misma invocacion y no tiene flush: no puede repetir el deadlock de 644b2b7. Pero no hay techo absoluto: ventanas de inactividad de 12 s re-armadas por step (reconcile.ts:267; handleChatRequest.ts:987-989) + 15 s de tool (reconcile.ts:281) + pre-LLM en frio suman ~45 s contra maxDuration 30 (chat/route.ts:8).",
+    "hallazgo_titulo": "El stream no tiene techo absoluto: el peor caso de ventanas suma ~45 s contra maxDuration 30 s"
+   },
+   {
+    "alerta": "[D5-A4] Vertex: key expuesta en logs pendiente de rotacion; credencial vencida como control positivo de E10",
+    "resultado": "confirmada",
+    "evidencia": "No hay credencial versionada (git grep de private_key / BEGIN PRIVATE KEY / AIza -> solo placeholders en .env.example:103 y :170 y docs); la exposicion 'en logs' esta fuera del repo y no se puede verificar por codigo. Con la credencial vencida: el health solo instancia el provider y da OK (checkHealth.ts:46-58); onError deja stderr + Sentry sin flush (handleChatRequest.ts:1046-1060) y descarta la conversacion nueva con el cupo devuelto (:1070-1109; reconcile.ts:366-370); el visitante ve 'Se corto la respuesta.' (useChatbot.ts:470-482; ai/dist/index.mjs:13787-13811 corta en el chunk de error); el dueno ve 'Activo · respondiendo a tus visitantes' (dashboard/chatbot/layout.tsx:50-52).",
+    "hallazgo_titulo": "La caida de Vertex no se detecta: health en verde, panel del dueno 'respondiendo' y sin alerta"
+   },
+   {
+    "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que el literal no existia; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+    "resultado": "confirmada",
+    "evidencia": "ChatWindow.tsx:311 'Sistema Listo' y :321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' en el empty-state del widget on-site. B13.5 (bitacora-roadmap.md:8905) estaba equivocado; BLOQUE VOZ (:16584) tenia razon.",
+    "hallazgo_titulo": "Copy del widget: 'Protocolo de consultoria iniciado' en usted y jerga, 'WhatsApp no configurado.' al visitante y textos en ingles"
+   },
+   {
+    "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; el backfill de verticalPack cambia de bot segun la fuente",
+    "resultado": "parcial",
+    "evidencia": "El codigo resuelve la contradiccion de fuentes: prisma/seeds/backfill-vertical-pack.ts:71-75 mapea develop->agencia, sanmiguel->usados y matsu->usados; si se corrio contra Neon es estado de la base. Gate sin cumplir: los 4 transcripts de usados (docs/ev4-transcripts/usados-*.md) dicen 'HTTP 404 — Bot not found or inactive' y ev5-transcripts/README.md deja sanmiguel PENDIENTE. Ademas los bots nuevos nacen en 'base' (onboarding/core.ts:128-136; createClientWithBot.ts:159-185).",
+    "hallazgo_titulo": "Los bots nuevos nacen con verticalPack 'base' y no hay forma de asignarles el pack de su rubro"
+   },
+   {
+    "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el propio handoff declara falsa",
+    "resultado": "descartada",
+    "evidencia": "git grep -i gdpr en src -> 0; git log -S GDPR muestra que 819b9e0e (P2 privacidad) la quito. ipHash.ts:3-19 describe hoy los usos reales y que la no-reversibilidad depende del salt, obligatorio en prod (:21-27)."
+   },
+   {
+    "alerta": "[D5-A8] getLatencyHistory asignado al panel (DERIVACION-chat-panel) y al runtime (MH.1)",
+    "resultado": "confirmada",
+    "evidencia": "getLatencyHistory solo lo consumen /admin/chatbot/health (page.tsx:3, :13), LatencyChart y buildHealthVerdict; no esta en el panel del cliente ni en el runtime. El propio codigo deja la decision abierta: unsafeGlobalQuery 'PENDIENTE-DECISION' que agrega todas las orgs (getLatencyHistory.ts:68-84).",
+    "hallazgo_titulo": "La latencia del Health Score mezcla todas las orgs en una pagina del bot develOP, con horas en la zona del servidor"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/modules/chatbot/index.ts",
+    "senales": [
+     "Solo 3 de 52 exports se consumen via el barrel (LogicCompanion en ChatWidgetMount.tsx:13; ChatbotUpsellLanding y ChatbotOverview en dashboard/chatbot/page.tsx:9)",
+     "Reexporta ChatMessages, ChatMessage, ChatInput y QuickReplyChips (index.ts:40-43), que no importa nadie (git grep de su uso -> solo los barrels y ChatMessages.tsx:4)",
+     "Reexporta saveClientSettings (index.ts:89), cuya unica UI (ClientSettingsForm) no se monta",
+     "Arrastra editores admin, tablas y server actions al chunk del widget publico (index.ts:74-89)"
+    ],
+    "que_rompe": "ChatWidgetMount.tsx:13 y dashboard/chatbot/page.tsx:9 deben pasar a imports directos; el README del modulo documenta el barrel."
+   },
+   {
+    "archivo": "src/modules/chatbot/index.server.ts",
+    "senales": [
+     "85 nombres exportados, 20 importados via '@/modules/chatbot/index.server'",
+     "Reexporta 5 server actions de admin (index.server.ts:80-86) que nadie importa por esta via",
+     "getLLMProvider, resetProviderCache, calculateCost, getTools y otros sin consumidores por el barrel"
+    ],
+    "que_rompe": "Los importadores actuales (dashboard/chatbot/*, api/chatbot/*, cron e insights, tests/integration/fix-origin-same-origin-config.spec.ts) usan 20 nombres: hay que conservarlos o pasar a imports directos."
+   },
+   {
+    "archivo": "src/modules/chatbot/lead-detail-presentation.ts (solo channelLabel y CHANNEL_LABELS)",
+    "senales": [
+     "ChatbotLead.channel no se escribe en el unico create (captureLead.ts:381-413)",
+     "channelLabel siempre devuelve null en LeadDetail.tsx:162"
+    ],
+    "que_rompe": "lead-detail-presentation.invariant.ts:16 y :65 testean channelLabel; LeadDetail.tsx:162 lo usa."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "E10 — credencial de Vertex vencida: que ven el visitante, el dueno y el health",
+    "entorno": "local con npm run dev:qa (puerto 3002) o deploy preview con la credencial actual; DB de desarrollo",
+    "precondiciones": "Credencial de Vertex vencida (hecho conocido). Un SUPER_ADMIN y un dueno de prueba con bot.",
+    "pasos": [
+     "Abrir http://localhost:3002/ y esperar la burbuja del chat.",
+     "Abrir el chat y mandar 'Hola, quiero una web'. Anotar que se ve y cuanto tarda.",
+     "Mandar un segundo mensaje en la misma pestana.",
+     "Entrar a /admin/chatbot/health como SUPER_ADMIN y anotar el veredicto y el check del proveedor.",
+     "GET http://localhost:3002/api/chatbot/develop/health y guardar el JSON.",
+     "Entrar como dueno (o impersonar) a /dashboard/chatbot: anotar el texto bajo el titulo y si la conversacion aparece en Conversaciones.",
+     "Buscar chat.stream_error en la consola del server y en Sentry."
+    ],
+    "esperado": "El visitante ve un mensaje claro con alternativa (WhatsApp/contacto); el health marca el proveedor caido; el dueno ve que su bot no responde; queda un evento o alerta.",
+    "senal_falla": "El visitante solo ve 'Se corto la respuesta.'; el health da OK en el proveedor; el panel dice 'Activo · respondiendo a tus visitantes'; la conversacion nueva no aparece; solo hay rastro en stderr/Sentry.",
+    "escribe_db_o_email": true,
+    "hallazgos": "La caida de Vertex no se detecta (FAL ALTA)"
+   },
+   {
+    "titulo": "Rate limit del chat esquivable rotando el Origin",
+    "entorno": "local npm run dev:qa o preview; DB de desarrollo; bot QA con allowedDomains=['ejemplo-qa.com'] (nunca un bot de cliente)",
+    "precondiciones": "Bot QA activo con plan de cuota baja. Con la credencial vencida el cupo se compensa: para ver el consumo de cupo hace falta una credencial valida en ese entorno.",
+    "pasos": [
+     "Con curl, 35 POST en menos de 60 s a /api/chatbot/<slug-qa>/chat desde la misma IP, Origin: https://ejemplo-qa.com y sessionId distinto cada vez; contar los 429.",
+     "Repetir con Origin: https://r<N>.ejemplo-qa.com (N=1..35) y sessionId distinto.",
+     "Contar en la DB las filas nuevas de rate_limit y cuanto subio QuotaUsage.conversationsCount del bot QA."
+    ],
+    "esperado": "En ambos casos, desde el pedido 31 la respuesta es 429.",
+    "senal_falla": "Con Origin rotado pasan los 35 pedidos sin ningun 429 y cada uno crea una conversacion y una fila de rate_limit nueva.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Cuota mensual agotable por un anonimo (SEC ALTA)"
+   },
+   {
+    "titulo": "Vigencia de gemini-2.5-flash en Vertex",
+    "entorno": "consola de Google Cloud del proyecto CHATBOT_GCP_PROJECT_ID",
+    "precondiciones": "Acceso de lectura al proyecto de GCP.",
+    "pasos": [
+     "Abrir Vertex AI -> Model Garden / versiones de modelos y buscar gemini-2.5-flash.",
+     "Anotar estado y fecha de discontinuacion; repetir para gemini-2.5-flash-lite y gemini-2.5-pro (google.ts:12-42).",
+     "Con una credencial valida, mandar un mensaje al bot develop y confirmar que responde."
+    ],
+    "esperado": "Modelo GA sin fecha de retiro vencida.",
+    "senal_falla": "Fecha de discontinuacion anterior a hoy o error NOT_FOUND del modelo.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Modelo fijo gemini-2.5-flash sin control de vigencia (TEC)"
+   },
+   {
+    "titulo": "Teclado sobre el launcher del chat",
+    "entorno": "sitio publico local (npm run dev), Chrome escritorio, con y sin 'reducir movimiento' del SO",
+    "precondiciones": "Ninguna.",
+    "pasos": [
+     "Cargar / y esperar la burbuja.",
+     "Tab hasta el launcher (un lector debe anunciar 'Abrir chat').",
+     "Presionar Enter; despues Espacio.",
+     "Si abre, presionar Escape.",
+     "Activar 'reducir movimiento' en el SO y repetir."
+    ],
+    "esperado": "Enter y Espacio abren el chat; Escape lo cierra y el foco vuelve al launcher.",
+    "senal_falla": "Enter solo anima el tap y no abre; Espacio no hace nada; Escape no cierra.",
+    "escribe_db_o_email": false,
+    "hallazgos": "El launcher no se abre con el teclado (A11Y)"
+   },
+   {
+    "titulo": "Tarjeta 'ir a una seccion' del bot de develOP",
+    "entorno": "local con credencial de Vertex valida; DB de desarrollo",
+    "precondiciones": "Bot develop activo.",
+    "pasos": [
+     "En /, abrir el chat y pedir 'mostrame lo de inteligencia artificial'.",
+     "Cuando aparezca la tarjeta de navegacion, tocar el boton.",
+     "Observar si la pagina recarga (preloader/intro) y como queda el chat.",
+     "Mandar '¿y cuanto sale eso?'."
+    ],
+    "esperado": "Navega con la transicion del sitio, el chat sigue con el historial y el bot responde sobre IA.",
+    "senal_falla": "Recarga completa, chat cerrado y vacio, y el bot responde sin contexto.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Ir a una seccion recarga la pagina (BUG)"
+   },
+   {
+    "titulo": "currentPath tras navegar sin recargar",
+    "entorno": "local, Chrome DevTools -> Network",
+    "precondiciones": "Ninguna (con la credencial vencida igual se ve el body del POST).",
+    "pasos": [
+     "Abrir / y el chat; mandar un mensaje y mirar currentPath en el body del POST a /chat.",
+     "Cerrar el chat y navegar con el menu del sitio a /ai-implementations sin recargar.",
+     "Abrir el chat, mandar otro mensaje y mirar currentPath."
+    ],
+    "esperado": "currentPath = /ai-implementations.",
+    "senal_falla": "Sigue '/'.",
+    "escribe_db_o_email": true,
+    "hallazgos": "currentPath congelado (BUG BAJA)"
+   },
+   {
+    "titulo": "Peso del widget en el sitio publico",
+    "entorno": "build local de produccion (lo corre Valentino), Chrome DevTools",
+    "precondiciones": "Maquina con RAM suficiente para el build.",
+    "pasos": [
+     "npm run build && npm run start (o cablear @next/bundle-analyzer).",
+     "Abrir / en ventana privada, DevTools -> Network -> JS.",
+     "Esperar la burbuja y filtrar los chunks pedidos despues.",
+     "Buscar en esos chunks 'OnboardingWizard', 'KnowledgeBaseEditor', 'BotConfigEditor' o textos del onboarding."
+    ],
+    "esperado": "Los chunks del widget no contienen codigo del panel admin ni del dashboard.",
+    "senal_falla": "Aparecen strings de los editores/onboarding o ids de server actions del panel.",
+    "escribe_db_o_email": false,
+    "hallazgos": "El widget publico importa el barrel completo (PERF)"
+   },
+   {
+    "titulo": "Launcher y teaser a 390 px",
+    "entorno": "sitio publico local, DevTools en 390x844",
+    "precondiciones": "Ninguna.",
+    "pasos": [
+     "Recorrer /, las 4 landings y /contacto con la burbuja visible.",
+     "Esperar el teaser.",
+     "Abrir un menu o modal del sitio."
+    ],
+    "esperado": "La burbuja y el teaser no tapan CTAs, microcopy ni modales.",
+    "senal_falla": "Se superponen a contenido o quedan por encima de un modal del sitio.",
+    "escribe_db_o_email": false,
+    "hallazgos": "z-index del widget y superposicion en mobile (UX)"
+   },
+   {
+    "titulo": "Error de render del widget",
+    "entorno": "rama local descartable (no commitear)",
+    "precondiciones": "Ninguna.",
+    "pasos": [
+     "Agregar temporalmente un throw en el render de LogicCompanion.",
+     "Cargar /."
+    ],
+    "esperado": "Solo desaparece el widget; el sitio sigue.",
+    "senal_falla": "Aparece la pantalla de global-error y el sitio entero queda inutilizable.",
+    "escribe_db_o_email": false,
+    "hallazgos": "Widget sin error boundary propio (BUG BAJA)"
+   },
+   {
+    "titulo": "Deshacer de 'Lo contacte' y metricas del inicio",
+    "entorno": "dashboard local con org QA y DB de desarrollo",
+    "precondiciones": "Un lead NEW sin firstContactedAt en la org QA.",
+    "pasos": [
+     "En /dashboard/chatbot/leads tocar 'Lo contacte' en el lead y enseguida 'Deshacer'.",
+     "Consultar en la DB status y firstContactedAt del lead.",
+     "Abrir /dashboard y mirar el embudo (contactados / sin actualizar) y la velocidad de respuesta."
+    ],
+    "esperado": "El lead queda como estaba: NEW, sin firstContactedAt y contado como 'sin actualizar'.",
+    "senal_falla": "firstContactedAt queda seteado y el inicio lo cuenta como contactado con una velocidad de segundos.",
+    "escribe_db_o_email": true,
+    "hallazgos": "'Deshacer' no deshace el primer contacto (BUG)"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "El launcher del widget no maneja teclado (no hay onKeyDown)",
+    "comando": "git grep -n \"onKeyDown\" origin/main -- logic-core-v3/src/modules/chatbot/components/LogicCompanion.tsx  -> 0 resultados",
+    "control_positivo": "git grep -n \"onKeyDown\" origin/main -- logic-core-v3/src/modules/chatbot/components/chat/ChatWindow.tsx -> :540"
+   },
+   {
+    "afirmacion": "Ningun componente del chat (ventana, launcher, teaser) cierra con Escape",
+    "comando": "git grep -n \"'Escape'\" origin/main -- logic-core-v3/src/modules/chatbot/components -> solo admin/config/EmojiPickerField.tsx:130 y dashboard/lead-pipeline/LeadColumnOverview.tsx:59",
+    "control_positivo": "Los dos hits del mismo barrido prueban que el patron matchea dentro de components/"
+   },
+   {
+    "afirmacion": "ChatMessages, ChatMessage, ChatInput y QuickReplyChips no se montan en ningun lado",
+    "comando": "git grep -nE \"<ChatMessages[ />]|<ChatInput[ />]|<QuickReplyChips[ />]|from '\\./ChatInput'|from '\\./QuickReplyChips'|from '\\./ChatMessages'\" origin/main -- logic-core-v3/src -> 0; los unicos usos son los barrels (index.ts:40-43, components/chat/index.ts) y ChatMessages.tsx:4",
+    "control_positivo": "git grep -n \"from './ChatHeader'\" origin/main -- logic-core-v3/src/modules/chatbot/components/chat/ChatWindow.tsx -> :13"
+   },
+   {
+    "afirmacion": "No existe el endpoint /api/chatbot/[slug]/smoke",
+    "comando": "git grep -n -i \"smoke\" origin/main -- logic-core-v3/src/app -> 0; git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/api/chatbot -> solo chat, config y health",
+    "control_positivo": "git grep -n -i \"smoke\" origin/main -- logic-core-v3/src/modules/chatbot/server/health/index.ts -> :1-2"
+   },
+   {
+    "afirmacion": "Ningun flujo de alta ni del admin asigna verticalPack",
+    "comando": "git grep -n \"verticalPack\" origin/main -- logic-core-v3/src/modules/chatbot/components logic-core-v3/src/modules/chatbot/server/admin logic-core-v3/src/lib -> 0",
+    "control_positivo": "git grep -c \"verticalPack\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> 4"
+   },
+   {
+    "afirmacion": "ChatbotLead.channel no se escribe en ningun create",
+    "comando": "git grep -n \"chatbotLead.create\" origin/main -- logic-core-v3/src -> solo captureLead.ts:381 (fuera de tests); git show origin/main:logic-core-v3/src/modules/chatbot/server/tools/captureLead.ts | sed -n '381,413p' | grep -c channel -> 0",
+    "control_positivo": "Mismo rango: grep -c utmSource -> 1"
+   },
+   {
+    "afirmacion": "No queda docstring 'GDPR-friendly' en el codigo",
+    "comando": "git grep -n -i \"gdpr\" origin/main -- logic-core-v3/src -> 0",
+    "control_positivo": "git log --oneline -S \"GDPR\" origin/main -- logic-core-v3/src -> 819b9e0e (la quito) y f8a4525f (la agrego)"
+   },
+   {
+    "afirmacion": "No hay credencial de Google versionada en el repo",
+    "comando": "git grep -n -I -l \"BEGIN PRIVATE KEY|private_key|service_account\" (con -E) origin/main -> solo .env.example (:103, :170 con '...'), docs/onboarding-data-connections.md:107 (placeholder) y una nota de auditoria; git grep -c -E \"AIza[0-9A-Za-z_-]{35}\" origin/main -> 0",
+    "control_positivo": "git grep -c \"GOOGLE_VERTEX_CREDENTIALS_JSON\" origin/main -- logic-core-v3/src/modules/chatbot/server/llm/providers/google.ts -> 3"
+   },
+   {
+    "afirmacion": "Los endpoints publicos health y config del chatbot no tienen rate limit",
+    "comando": "git grep -n \"checkRateLimit\" origin/main -- \"logic-core-v3/src/app/api/chatbot/[slug]/health/route.ts\" \"logic-core-v3/src/app/api/chatbot/[slug]/config/route.ts\" -> 0",
+    "control_positivo": "Mismo grep en logic-core-v3/src/app/api/chatbot/[slug]/chat/route.ts -> :3 y :81"
+   },
+   {
+    "afirmacion": "El health del chatbot no mide tasa de error ni dispara alertas",
+    "comando": "git grep -n -i -E \"error_rate|errorRate|5xx|stream_error|sendAlert|alert\" origin/main -- logic-core-v3/src/modules/chatbot/server/health -> solo el comentario de index.ts:4",
+    "control_positivo": "git grep -n \"CHAT_P95_WARN_MS\" origin/main -- logic-core-v3/src/modules/chatbot/server/health -> buildHealthVerdict.ts:21"
+   },
+   {
+    "afirmacion": "No hay widget 'Salud del bot' para el dueno",
+    "comando": "git grep -n -i -E \"salud del bot|botHealth\" origin/main -- logic-core-v3/src -> 0",
+    "control_positivo": "git grep -n \"Health Score\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/chatbot/health/page.tsx\" -> :22"
+   },
+   {
+    "afirmacion": "No hay constantes para los tipos de evento del chatbot",
+    "comando": "git grep -n -i -E \"EVENT_TYPES|ChatbotEventType\\b\" origin/main -- logic-core-v3/src/modules/chatbot logic-core-v3/src/lib -> 0",
+    "control_positivo": "git grep -c \"type: 'chat\\.\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> 7"
+   },
+   {
+    "afirmacion": "Conversation.endedAt no se escribe en el modulo chatbot",
+    "comando": "git grep -n \"endedAt\" origin/main -- logic-core-v3/src/modules/chatbot -> 0",
+    "control_positivo": "git grep -n \"endedAt\" origin/main -- logic-core-v3/src -> admin/projects/_actions/project.actions.ts:582"
+   },
+   {
+    "afirmacion": "OrgRole VIEWER no se hace cumplir en ninguna accion",
+    "comando": "git grep -n -E \"'VIEWER'|\\\"VIEWER\\\"|OrgRole.VIEWER\" origin/main -- logic-core-v3/src -> solo auth.config.ts:5 (tipo)",
+    "control_positivo": "git grep -n \"OrgRole\" origin/main -- logic-core-v3/src -> auth.ts:9, :251; types/next-auth.d.ts:2"
+   },
+   {
+    "afirmacion": "No hay error boundary alrededor del widget de chat",
+    "comando": "git grep -n \"ErrorBoundary\" origin/main -- logic-core-v3/src/app/layout.tsx logic-core-v3/src/components/layout/ChatWidgetMount.tsx -> 0",
+    "control_positivo": "git grep -n \"captureException\" origin/main -- logic-core-v3/src/app/global-error.tsx -> :24"
+   },
+   {
+    "afirmacion": "No hay test de carga o concurrencia del chatbot",
+    "comando": "git grep -l -i -E \"concurren|ultimo cupo|último cupo\" origin/main -- logic-core-v3/tests -> solo tests/setter/06-claim-atomico.spec.ts y tests/setter/12-claim-agenda.spec.ts",
+    "control_positivo": "git grep -c \"chatbot\" origin/main -- logic-core-v3/tests/integration/chatbot-isolation.spec.ts -> 22"
+   },
+   {
+    "afirmacion": "No existe recalculateLeadScore",
+    "comando": "git grep -n \"recalculateLeadScore\" origin/main -- logic-core-v3/src -> 0",
+    "control_positivo": "git grep -c \"getEffectiveScore\" origin/main -- logic-core-v3/src/modules/chatbot/server/scoring -> 3 (calculateLeadScore.ts)"
+   },
+   {
+    "afirmacion": "No existe ChatbotLead.lastUserMessageAt",
+    "comando": "git grep -n \"lastUserMessageAt\" origin/main -- logic-core-v3/src logic-core-v3/prisma/schema.prisma -> 0",
+    "control_positivo": "git show origin/main:logic-core-v3/prisma/schema.prisma | grep -c lastMessageAt -> 3"
+   },
+   {
+    "afirmacion": "No existe deviceId para identificar visitantes",
+    "comando": "git grep -n \"deviceId\" origin/main -- logic-core-v3/src logic-core-v3/prisma/schema.prisma -> 0",
+    "control_positivo": "git grep -c \"sessionId\" origin/main -- logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts -> 4"
+   },
+   {
+    "afirmacion": "No existe el boton 'Reportar mal clasificado'",
+    "comando": "git grep -n -i -E \"mal clasificado|misclassif\" origin/main -- logic-core-v3/src -> 0",
+    "control_positivo": "git grep -c \"classification\" origin/main -- logic-core-v3/src/modules/chatbot/components/dashboard/LeadDetail.tsx -> 1"
+   },
+   {
+    "afirmacion": "No hay script de limpieza de ipHash historicos",
+    "comando": "git grep -l -i \"ipHash\" origin/main -- logic-core-v3/scripts -> 0",
+    "control_positivo": "git grep -l -i \"purge\" origin/main -- logic-core-v3/scripts -> 10 archivos"
+   },
+   {
+    "afirmacion": "@vercel/blob ya no es dependencia",
+    "comando": "git grep -n \"@vercel/blob\" origin/main -- logic-core-v3/package.json logic-core-v3/src -> 0",
+    "control_positivo": "git grep -n '\"resend\"' origin/main -- logic-core-v3/package.json -> :166"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Clave de rate limit con una dimension que elige el atacante (Origin, sessionId, token de URL): cada valor nuevo es un bucket y una fila nuevos",
+    "como_buscarlo": "git grep -n -A3 \"checkRateLimit({\" origin/main -- logic-core-v3/src y revisar si la key incluye headers o campos del body",
+    "donde_aparecio": "api/chatbot/[slug]/chat/route.ts:80 (origin); modules/chatbot/server/chat/handleChatRequest.ts:185 (sessionId)"
+   },
+   {
+    "patron": "Origin tratado como control anti-abuso (forjable fuera del navegador) con match por subdominio",
+    "como_buscarlo": "git grep -n \"validateOrigin(\\|originMatchesAllowed(\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "lib/security/validate-origin.ts:69-84; lib/security/origin-matcher.ts:39-40"
+   },
+   {
+    "patron": "Endpoint de diagnostico publico que devuelve detalle interno (variables de entorno, error.message)",
+    "como_buscarlo": "git grep -n \"error instanceof Error ? error.message\" origin/main -- logic-core-v3/src/app/api logic-core-v3/src/modules y cruzar con rutas fuera del matcher del proxy",
+    "donde_aparecio": "api/chatbot/[slug]/health/route.ts:12-14; server/health/checkHealth.ts:35, :56; server/config/envValidator.ts:84-110"
+   },
+   {
+    "patron": "Resultado {ok:false} de una server action ignorado por el caller (exito falso en la UI)",
+    "como_buscarlo": "git grep -n -A2 \"await [a-zA-Z]*(\" dentro de startTransition y revisar si se chequea .ok antes de setSaved/toast.success",
+    "donde_aparecio": "modules/chatbot/components/dashboard/LeadDetail.tsx:183-185"
+   },
+   {
+    "patron": "Navegacion dura (window.location.href) en el sitio publico en lugar de triggerTransition()",
+    "como_buscarlo": "git grep -n -E \"window.location.href\\s*=\" origin/main -- logic-core-v3/src/components logic-core-v3/src/modules logic-core-v3/src/app",
+    "donde_aparecio": "modules/chatbot/hooks/useChatbot.ts:585"
+   },
+   {
+    "patron": "useChat({ transport }) con transport memoizado sobre valores que cambian (closure congelada: useChat no recrea el Chat)",
+    "como_buscarlo": "git grep -n \"new DefaultChatTransport\" origin/main -- logic-core-v3/src y revisar las deps del useMemo",
+    "donde_aparecio": "modules/chatbot/hooks/useChatbot.ts:269-272, :456, :459"
+   },
+   {
+    "patron": "Mapas de etiquetas de enums de Prisma duplicados, con otro casing u otra ortografia",
+    "como_buscarlo": "git grep -n -E \"(INTENT|STATUS|CATEGORY)_LABELS\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "server/leads/csv/buildLeadsCsv.ts:37-59 vs lead-intent-labels.ts:15 y lead-detail-presentation.ts:46; STATUS_LABELS repetido en ClientLeadsTable.tsx:30, LeadDetail.tsx:103, BusinessLeadCard.tsx:18"
+   },
+   {
+    "patron": "div con role=button y onClick sin manejo de teclado",
+    "como_buscarlo": "git grep -n 'role=\"button\"' origin/main -- logic-core-v3/src y verificar onKeyDown en el mismo elemento",
+    "donde_aparecio": "modules/chatbot/components/LogicCompanion.tsx:180-182"
+   },
+   {
+    "patron": "Health que solo instancia el proveedor sin una llamada real",
+    "como_buscarlo": "git grep -n \"listModels()\\|getLLMProvider()\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "modules/chatbot/server/health/checkHealth.ts:48-49"
+   },
+   {
+    "patron": "Estado 'activo/respondiendo' mostrado desde un flag de DB sin chequear la salud real",
+    "como_buscarlo": "git grep -n -i -E \"respondiendo|en línea|online\" origin/main -- \"logic-core-v3/src/app/(protected)/dashboard\" logic-core-v3/src/components/dashboard",
+    "donde_aparecio": "(protected)/dashboard/chatbot/layout.tsx:50-52"
+   },
+   {
+    "patron": "Lookup con 'in' o indice sobre objeto plano con string externo (devuelve miembros del prototipo)",
+    "como_buscarlo": "git grep -n -E \" in [A-Z_]+(LABELS|MAP)\\b|_LABELS\\[[a-z]\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "modules/chatbot/lead-intent-labels.ts:45, :53; lead-detail-presentation.ts:71"
+   },
+   {
+    "patron": "Componente montado en el layout raiz fuera de {children} sin ErrorBoundary (su crash va a global-error)",
+    "como_buscarlo": "Leer app/layout.tsx y listar los hermanos de {children}",
+    "donde_aparecio": "app/layout.tsx:137 (ChatWidgetMount)"
+   },
+   {
+    "patron": "Id de modelo LLM hardcodeado en varios lugares (planes, fallback, onboarding, provider)",
+    "como_buscarlo": "git grep -n -E \"gemini-2\\.5|claude-|gpt-\" origin/main -- logic-core-v3/src logic-core-v3/prisma",
+    "donde_aparecio": "prisma/seeds/sync-plans.ts:73, :89, :105; llm/resolveEffectiveModel.ts:21; lib/onboarding/core.ts:133; server/admin/createClientWithBot.ts:185; llm/providers/google.ts:14"
+   },
+   {
+    "patron": "Dos caminos de alta de cliente+bot que divergen (campos que uno setea y el otro no)",
+    "como_buscarlo": "git grep -n \"botConfig.create\" origin/main -- logic-core-v3/src",
+    "donde_aparecio": "modules/chatbot/server/admin/createClientWithBot.ts:159-185 vs lib/onboarding/core.ts:128-136"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:944",
+    "id_previo": "ARQ-02",
+    "estado": "parcial",
+    "evidencia": "Hoy tiene 2 consumidores (ChatWidgetMount.tsx:13, import dinamico, y dashboard/chatbot/page.tsx:9) y solo 3 de sus 52 exports se usan por el barrel (LogicCompanion, ChatbotUpsellLanding, ChatbotOverview). index.ts:74-89 sigue reexportando editores admin, tablas y 3 server actions."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:948",
+    "id_previo": "ARQ-03",
+    "estado": "parcial",
+    "evidencia": "Re-medido solo index.server.ts: 85 nombres exportados, 20 importados via '@/modules/chatbot/index.server' (65 sin consumidor por el barrel). Los otros 24 barrels no se recontaron en este lote."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1321",
+    "id_previo": "RESIL-06",
+    "estado": "cerrado",
+    "evidencia": "RE-2: configCache.ts:43-64 reintenta con chatRetryPolicy y borra la entrada fallida (:58-61); LogicCompanion.tsx:97-121 muestra ConfigLoadError con 'Reintentar'; useChatbot.ts:192-196 retryLoadConfig."
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1909",
+    "id_previo": "A11Y-01",
+    "estado": "parcial",
+    "evidencia": "El input real ya envia con Enter (ChatWindow.tsx:540-547) y ChatInput.tsx no se monta (codigo muerto). Sigue abierto lo principal: el launcher es un div role=button sin teclado (LogicCompanion.tsx:180-182), el teaser es un div clickeable (ProactiveTooltip.tsx:123-138) y el panel no cierra con Escape."
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:71",
+    "id_previo": "CLEAN-R1",
+    "estado": "abierto",
+    "evidencia": "buildLeadsCsv.ts:37-50 mapa con claves en minuscula y :82-84 fallback al valor crudo; export/route.ts:156 pasa l.intent (enum en mayuscula). El mapa correcto existe en lead-intent-labels.ts:15-25 y no se usa."
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "La caida de Vertex no se detecta: health en verde, panel del dueno 'respondiendo' y sin alerta",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Intenté refutarlo y no pude: cada eslabón cierra leyendo el código. (1) checkHealth.ts:47-54 solo instancia el provider y llama a listModels(), sin pedido real a Vertex. GoogleProvider (src/modules/chatbot/server/llm/providers/google.ts, constructor) solo mira si las env vars existen, y createVertex no autentica al construirse. Con una credencial vencida, llmProvider.ok=true. Lo usan /admin/chatbot/health/page.tsx:12 y la ruta pública /api/chatbot/[slug]/health/route.ts:12. (2) El detector de alertas sí tiene la regla LLM_PROVIDER_ERROR (detectBotIssues.ts:85-115), pero exige ChatbotEvent con level ERROR y un type que contenga llm, provider o unhandled. El único evento que cumple eso es 'chat.unhandled_error' (handleChatRequest.ts:1376-1384), y sale del catch externo, que solo atrapa fallos antes de devolver el stream. (3) Un fallo del provider dentro de doStream no llega a ese catch. Lo confirmé en ai@6.0.214 (node_modules/ai/dist/index.js:8128-8138): el error se encola como chunk 'error' y se llama a onError (:7108-7113). El onError del handler (handleChatRequest.ts:1046-1110) solo hace logPersistFailure a stderr (logger.ts:172-186, no toca la DB) y Sentry.captureException sin flush; el único flush está en el catch externo, :1400. (4) Sin primer token, la cuota se compensa (reconcile.ts:366-370) y la conversación nueva se borra (handleChatRequest.ts:483-490). En ese camino no se escribe chat.message_completed, así que la latencia (getLatencyHistory) y la regla LATENCY_DEGRADED tampoco lo ven. (5) El panel del dueño muestra 'Activo · respondiendo a tus visitantes' según bot.isActive y nada más (dashboard/chatbot/layout.tsx:50-52). (6) El visitante ve STREAM_INTERRUPTED_MESSAGE 'Se cortó la respuesta.' (useChatbot.ts:133, :470-482). Además, envValidator.ts:34-39 exige GOOGLE_APPLICATION_CREDENTIALS como requerida y no acepta GOOGLE_VERTEX_CREDENTIALS_JSON, que es lo que usa prod según google.ts. Por eso el health de prod puede quedar en rojo de forma permanente y por la causa equivocada: ruido que tapa el problema real. Mantengo ALTA: es la integración central del producto, cae para todos los clientes y la alerta pensada para este caso no puede dispararse. El hecho conocido de la credencial vencida que nadie detectó lo confirma.",
+    "evidencia_contra": [
+     "La afirmación 'el único rastro es stderr y Sentry' es exagerada. Con cada conversación nueva compensada se persiste un ChatbotEvent 'chat.quota_compensated' con level warn y el mensaje 'Cupo devuelto (stream_error)...' (handleChatRequest.ts:503-521), y se ve en /admin/chatbot/activity vía listRecentEvents (server/admin/queries.ts:36-45). Es un rastro en el feed de admin, aunque no dispara ninguna alerta. En conversaciones ya existentes no se compensa nada y no queda ningún evento en la DB.",
+     "Que el health de admin salga 'en verde' depende del entorno. Si en prod falta GOOGLE_APPLICATION_CREDENTIALS, envValidator lo pone en rojo ('Faltan variables esenciales'), y el propio hallazgo lo reconoce. En ninguno de los dos casos detecta Vertex.",
+     "El eslabón 'el error de auth de Vertex nace dentro de doStream' lo infiero de @ai-sdk/google-vertex, que no leí. Leí el lado de ai, que atrapa cualquier error de doStream y lo convierte en onError. Si la credencial estuviera mal formada (JSON.parse en getClient), el error sí podría caer en el catch externo y en la regla del detector. Una credencial vencida no está mal formada.",
+     "Que Sentry tenga DSN configurado en prod no se puede verificar por lectura (handleChatRequest.ts:619 avisa que es no-op sin NEXT_PUBLIC_SENTRY_DSN)."
+    ]
+   },
+   {
+    "titulo": "Cuota mensual del bot de cualquier cliente agotable por un anonimo: el rate limit se esquiva rotando el Origin",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Se sostiene, y el vector es más fácil de lo que se describe. Rate limit de la ruta: la clave es `chatbotPerSession:${origin}:${ipHash}` (route.ts:80) con 30 pedidos por minuto (presets.ts:27), y usa el string CRUDO del header Origin. validateOrigin acepta cualquier subdominio (origin-matcher.ts:40) sin mirar el esquema, porque compara solo URL.host, y acepta https://develop.com.ar y www para cualquier bot (validate-origin.ts:70-75; isOriginWithinPlanCap lo replica en degradedResponse.ts:98-103). Un script puede variar el Origin sin límite con subdominios, http o https, o un sufijo de path ('https://cliente.com/1': URL.host sigue dando cliente.com, pero la clave del rate limit cambia). Así cada variante es un bucket nuevo. Rate limit interno: la clave es `chatbotPerBotSession:${slug}:${body.sessionId}` (handleChatRequest.ts:185), y el sessionId lo elige el cliente, con z.string().min(1).max(200) (requestSchema.ts:55). Un sessionId nuevo crea una conversación nueva (resolver.ts:80-114) y reserva cupo (handleChatRequest.ts:400-401, checker.ts:126-151). Ni siquiera hace falta rotar el Origin: con una sola IP y un solo Origin, rotando el sessionId salen 30 conversaciones nuevas por minuto, y el Starter (quota 500, sync-plans.ts:72) se agota en unos 17 minutos; rotando el Origin, en segundos. Agotado el cupo, el gate de handleChatRequest.ts:345 compara quota.conversationsUsed >= plan.quota sin mirar isNewConversation y degrada también las conversaciones en curso hasta fin de mes. El historial lo arma el cliente y va al LLM (handleChatRequest.ts:941-950; hasta 30 mensajes de 4000 caracteres según historyPolicy.ts:31,50), con hasta 3 steps por pedido (stopWhen stepCountIs(3), :953). proxy.ts no cubre /api/chatbot (matcher en :172) y netlify.toml no define otro límite. No hace falta precondición fuerte: el slug y el dominio son públicos. El impacto es denegación de servicio del bot de un cliente pago durante el mes, más costo de LLM para develOP. Mantengo ALTA y no CRÍTICA porque el endpoint es anónimo por diseño y el costo está acotado por la cuota mensual del plan; el daño principal es de disponibilidad.",
+    "evidencia_contra": [
+     "Hoy, con la credencial de Vertex vencida, todo turno muere antes del primer token y la cuota se devuelve (reconcile.ts:366-370; compensación en handleChatRequest.ts:1070-1109). El ataque solo agota cupo cuando Vertex funciona, que es justo el escenario del primer cliente real.",
+     "El costo de LLM está acotado por la cuota mensual del plan (más el tope de mensajes por conversación de C0.2), no es ilimitado. Lo ilimitado es la tasa a la que se consume, no el total.",
+     "El título atribuye el bypass a la rotación del Origin, pero la causa suficiente es el sessionId elegido por el cliente sumado a un límite por Origin+IP de 30 por minuto. Rotar el Origin solo saca el techo de tasa."
+    ]
+   }
+  ]
+ }
+}

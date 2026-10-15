@@ -1558,5 +1558,2264 @@
   "evidencia": "Commits 90a202e, 37609b5, 3ee97f0, df4fbe8, 0e1d35f y 5f7989e están en origin/main (git merge-base --is-ancestor).",
   "sentido": "si",
   "ciclo": "D2-c1, lector D2-L5"
+ },
+ "docs/bitacora-roadmap.md:2297": {
+  "estado": "no empezado",
+  "evidencia": "OverviewTab.tsx:44-46,98 sigue usando bot.monthlyQuota; AdvancedTab.tsx:77-85 lo edita; el runtime usa plan.quota (handleChatRequest.ts:345)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:4699": {
+  "estado": "no empezado",
+  "evidencia": "export/route.ts:48 EXPORT_LIMIT = 10_000; respuesta armada en memoria (:200-207)",
+  "sentido": "decidir",
+  "nota": "Hoy trunca en silencio a 10.000",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:5539": {
+  "estado": "no empezado",
+  "evidencia": "public/widget.js:55-57 comentario '🔴 Pending'",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:5935": {
+  "estado": "parcial",
+  "evidencia": "BotPersonalization.tsx:173 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px]",
+  "sentido": "decidir",
+  "nota": "Por lectura parece resuelto; requiere verificación visual a 1280 px",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:111": {
+  "estado": "no empezado",
+  "evidencia": "[botId]/page.tsx:80 level: (e.level ?? 'info') as MappedEvent['level'] sin toLowerCase (activity/page.tsx:38 sí lo baja)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:9439": {
+  "estado": "no empezado",
+  "evidencia": "chat/route.ts:80-85 y handleChatRequest.ts:184-188 siguen en serie; presets.ts:28-33",
+  "sentido": "si",
+  "nota": "Rediseñar la clave (hallazgo CRÍTICA): ambas las controla el cliente",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:10386": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n 'prefetch={false}' origin/main -- src → vacío; BotDetailClient.tsx ya no usa Link",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:11591": {
+  "estado": "hecho",
+  "evidencia": "ExportLeadsButton.tsx:52; ClientLeadsTable.tsx:311",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-rediseno.md:1409": {
+  "estado": "no empezado",
+  "evidencia": "useChatbot.ts:584-585 window.location.href = path",
+  "sentido": "decidir",
+  "nota": "Se eligió dejarlo",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Olme/Ideas de nuevas features.md:28": {
+  "estado": "no empezado",
+  "evidencia": "activity/page.tsx:11 y health/page.tsx:12 con slug 'develop'; ChatbotEvent y BotAlert sin organizationId ni latencyMs (schema.prisma:1599-1625)",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:4181": {
+  "estado": "hecho",
+  "evidencia": "Sin consumidores en src; tests/e2e/40-lead-capture-e2e.spec.ts:50 lo usa",
+  "sentido": "decidir",
+  "nota": "Superficie de API sin uso de producto",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:792": {
+  "estado": "parcial",
+  "evidencia": "getLatencyHistory.ts (sin mocks), buildHealthVerdict.ts:24-133, health/page.tsx:26-30; el veredicto no detecta el proveedor caído (checkHealth.ts:46-58)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:2146": {
+  "estado": "parcial",
+  "evidencia": "get-plan-for-org.ts:68-125, checker.ts:126-151, handleChatRequest.ts:309-341, :675-702, :713; el tope de dominios no aplica al widget oficial (degradedResponse.ts:97-103)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:5738": {
+  "estado": "hecho",
+  "evidencia": "widget.js:86-94; embed/[slug]/page.tsx:13-18 y :34-37",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:5948": {
+  "estado": "hecho",
+  "evidencia": "admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:38 permanentRedirect; ClientChatbotTabs sin rastro (git grep vacío)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:6067": {
+  "estado": "hecho",
+  "evidencia": "multiTenantQueries.ts:174-198 {items,total}; ConversationsTable.tsx:176",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:30": {
+  "estado": "contradicho",
+  "evidencia": "Commit eb3b0d0e solo en origin/b0-isolation-motor-chatbot (merge-base --is-ancestor → no está en main); src/lib/csv no existe; bulk-actions.ts:133-144 sin escape",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:9881": {
+  "estado": "hecho",
+  "evidencia": "IntegrationsTab.tsx:36-39; saveCrmIntegration.ts:30 requireSuperAdmin; CrmStatusIndicator.tsx:21 solo lectura",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:11846": {
+  "estado": "hecho",
+  "evidencia": "notify.ts:87-177 llamado desde captureLead.ts:7",
+  "sentido": "si",
+  "nota": "DAILY_DIGEST no implementado (notify.ts:91-94); link relativo sin NEXT_PUBLIC_APP_URL",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:12143": {
+  "estado": "hecho",
+  "evidencia": "cron/generate-insights/route.ts:36-38 getInsightsCountForBot",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:12672": {
+  "estado": "hecho",
+  "evidencia": "widget.js:138 referrer; schema.prisma:1384 utmSource; requestSchema.ts:57-66",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:13743": {
+  "estado": "hecho",
+  "evidencia": "admin/chatbot/demo-chat/[slug]/route.ts:57",
+  "sentido": "decidir",
+  "nota": "La ruta usa bot.llmModel (≠ producción) y no tiene consumidores",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:14132": {
+  "estado": "hecho",
+  "evidencia": "config/route.ts:51-59; same-origin.ts:45-73",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:17125": {
+  "estado": "hecho",
+  "evidencia": "chat/route.ts:55-63 await; handleChatRequest.ts:1400 Sentry.flush(2000)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-beta-3.md:3529": {
+  "estado": "hecho",
+  "evidencia": "HeavyAvatarsLazy.tsx:27-32 dynamic; modules/chatbot/index.ts:30-34",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:531": {
+  "estado": "parcial",
+  "evidencia": "scripts/_b13-latency-test.mjs existe; la corrida en prod no es verificable desde el repo",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:642": {
+  "estado": "no empezado",
+  "evidencia": "modules/chatbot/README.md:41 solo menciona cache HTTP; caches por instancia en resolver.ts:10-12 y get-plan-for-org.ts:21-22",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:4536": {
+  "estado": "no empezado",
+  "evidencia": "git grep sin aviso en components/admin/integrations ni CrmStatusIndicator (ver ausencias)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "STATUS.md:67": {
+  "estado": "no empezado",
+  "evidencia": "tests/e2e/02-chat-flow.spec.ts:8 y 40-lead-capture-e2e.spec.ts:31,42 con test.skip condicionales",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/sprints/infra-1-observabilidad.md:75": {
+  "estado": "no empezado",
+  "evidencia": "captureLead.ts:486, :501 siguen con console.error",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/sprints/infra-2-cold-start-retry.md:134": {
+  "estado": "no empezado",
+  "evidencia": "ChatMessage solo con @@index([conversationId, createdAt]) (schema.prisma:1433)",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/sprints/utm-1-captura.md:236": {
+  "estado": "no empezado",
+  "evidencia": "schema.prisma:1375 sessionId String @unique; resolver.ts:132-137 relanza P2002 cross-bot",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:16149": {
+  "estado": "no empezado",
+  "evidencia": "Ningún test llama handleChatRequest( ni createPersistTurn( (ver ausencias)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:3665": {
+  "estado": "no empezado",
+  "evidencia": "scripts/regression/run-baseline.ts:229, :352, :384 sleeps secuenciales",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#5": {
+  "estado": "no empezado",
+  "evidencia": "git grep calculatePotentialValue → vacío",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#11": {
+  "estado": "no empezado",
+  "evidencia": "verticals/packs: agencia.ts, base.ts, usados.ts",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:24": {
+  "estado": "hecho",
+  "evidencia": "handleChatRequest.ts:274-301 discardNewConversation; :467-534 compensación; reconcile.ts:363-383",
+  "sentido": "si",
+  "nota": "Pero el cupo se cobra por sessionId nuevo (hallazgo CRÍTICA)",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:37": {
+  "estado": "hecho",
+  "evidencia": "requestSchema.ts:45-54 trimHistory a 30; HARD_CAP 40 con respuesta degradada (handleChatRequest.ts:547-579)",
+  "sentido": "si",
+  "nota": "Más de 50 mensajes en el body sigue siendo 400 (forma)",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:47": {
+  "estado": "no empezado",
+  "evidencia": "leads/page.tsx:87, leads/[id]/page.tsx:57, export/route.ts:126 usan capturedAt; lastStatusChangeAt existe (schema.prisma:1503)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:52": {
+  "estado": "no empezado",
+  "evidencia": "handleChatRequest.ts:883 randomUUID por request",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:63": {
+  "estado": "no empezado",
+  "evidencia": "git grep sin rastro en server (ver ausencias)",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:74": {
+  "estado": "parcial",
+  "evidencia": "persistTurn extraído (persistTurn.ts); logChatbotEvent sigue con await (handleChatRequest.ts:322,359); checkQuota sin renombrar (checker.ts:32)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:1223": {
+  "estado": "parcial",
+  "evidencia": "scripts/regression/run-baseline.ts existe; .github/workflows/ci.yml no la corre",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:51": {
+  "estado": "no empezado",
+  "evidencia": "Solo chatbot_events a 30 días (cleanup-old-events/route.ts:14); Conversation/ChatMessage/ChatbotLead sin retención",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:58": {
+  "estado": "hecho",
+  "evidencia": "ipHash.ts:20-33 aborta sin salt en prod; sin 'GDPR' en src (commit 819b9e0e)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:15": {
+  "estado": "abandonado",
+  "evidencia": "anthropic.ts:18 stub ProviderNotImplementedError; resolveEffectiveModel.ts:37-63 degrada a Google",
+  "sentido": "decidir",
+  "nota": "Coherente con la decisión; con Vertex caído la única red es la derivación canned",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:16866": {
+  "estado": "no empezado",
+  "evidencia": "captureLead.ts:445-452 manda nombre, email y teléfono para todos los bots",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:11564": {
+  "estado": "parcial",
+  "evidencia": "Registry + packs + columnas EV.5 en export (export/route.ts:143-163); no hay forma de asignar el pack a bots nuevos",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:14861": {
+  "estado": "hecho",
+  "evidencia": "handleChatRequest.ts:987-989 beginStep()",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:15616": {
+  "estado": "hecho",
+  "evidencia": "prisma/seeds/backfill-vertical-pack.ts:72-74 (develop, sanmiguel, matsu)",
+  "sentido": "si",
+  "nota": "La corrida no es verificable desde el repo",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:16314": {
+  "estado": "hecho",
+  "evidencia": "reconcile.ts §1.c (chunkMs removido); handleChatRequest.ts:1192-1277 red canned; package.json:78 test:mudez",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-roadmap.md:17070": {
+  "estado": "hecho",
+  "evidencia": "git ls-tree de src/app/api/chatbot sin smoke; health/index.ts:1-4",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L1"
+ },
+ "docs/bitacora-rediseno.md:154": {
+  "estado": "no empezado",
+  "evidencia": "LogicCompanion.tsx:201-204 aplica una animacion one-shot (`chatbotLauncherReveal ${CHROME_REVEAL_DURATION_MS}ms ... both`, sin infinite) y :286-297 keyframe opacidad 0->1; git diff a2acc395..origin/main no toco esas lineas desde la nota (d63d8aa6, 2026-07-30).",
+  "sentido": "decidir",
+  "nota": "Por lectura no hay causa de opacidad 0 perpetua: probable artefacto del banco que congela animaciones. Verificar en navegador real.",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-rediseno.md:1459": {
+  "estado": "no empezado",
+  "evidencia": "LogicCompanion.tsx:127-136 solo safe-area, sin ajuste por ancho; zIndex.ts:19-21 valores ~int32; ProactiveTooltip.tsx:119 maxWidth min(190px, 38vw).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:325": {
+  "estado": "parcial",
+  "evidencia": "HeavyAvatarsLazy.tsx:27-35 dynamic(ssr:false) con placeholder para neuro y legacy_neuro; index.ts:30-33 reexporta NeuroAvatarLazy. El cold start solo aplica si un bot elige avatar 3D; develop usa 'image' (HeavyAvatarsLazy.tsx:12-14).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:11225": {
+  "estado": "hecho",
+  "evidencia": "next.config.ts:139-145 redirect permanente /dashboard/leads -> /dashboard/chatbot/leads; LeadDetail.tsx:161-169 usa lead-detail-presentation; leads/[id]/page.tsx:82-90 origen y campana.",
+  "sentido": "si",
+  "nota": "El canal nunca se muestra: ChatbotLead.channel no se escribe (captureLead.ts:381-413).",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:11339": {
+  "estado": "parcial",
+  "evidencia": "lead-intent-labels.ts:15-57 mapa unico usado por BusinessHero.tsx:15, BusinessLeadCard.tsx:10 y LeadDetail.tsx:42; card clickeable BusinessLeadCard.tsx:212-213; pero buildLeadsCsv.ts:37-50 conserva un mapa propio en minuscula (CLEAN-R1).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:2294": {
+  "estado": "no empezado",
+  "evidencia": "scripts/regression/cases.ts:199-209 sigue exigiendo expectedTools ['capture_lead','offer_handoff_options'] sin aceptar la ruta por WhatsApp.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:5504": {
+  "estado": "no empezado",
+  "evidencia": "ChatHeader.tsx:88 muestra 'Conectando…/Escribiendo…/En linea'; :64 el 'pensando' vive inline; sin linea decorativa.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:159": {
+  "estado": "parcial",
+  "evidencia": "chat/route.ts:81-85 y handleChatRequest.ts:184-188 tienen rate limit (esquivable rotando Origin/sessionId); config/route.ts y health/route.ts no (git grep checkRateLimit -> 0); el user-led solo se fuerza al recortar (historyPolicy.ts:76, :99-101): un array de 30 o menos que empieza en assistant pasa.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:49": {
+  "estado": "no empezado",
+  "evidencia": "captureLead.ts:36 LEAD_INTENTS y showWhatsappHandoff.ts:30 HANDOFF_INTENTS siguen separados; los tipos de evento son literales ('chat.message_completed') en handleChatRequest, persistTurn y getLatencyHistory; git grep EVENT_TYPES|ChatbotEventType -> 0.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/roadmap-pendientes.md:156": {
+  "estado": "contradicho",
+  "evidencia": "persistTurn.ts:533-551 y :609-618 lo awaitean con techo (EVENT_LOG_DEADLINE_MS 700 ms, reconcile.ts:103); handleChatRequest.ts:322, :359, :414, :559 await directo; chat/route.ts:50-54 explica que sin await el freeze de la lambda pierde el write.",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "STATUS.md:193": {
+  "estado": "parcial",
+  "evidencia": "STATUS.md:192-197 las da por pospuestas, pero el scoring con clasificacion existe (calculateLeadScore.ts:68-86; ChatbotLead.score/classification) y hay sugerencias al dueno (insights/generateInsights.ts:24); cards ricos, KB con review queue y memoria por cookies no existen (identidad en sessionStorage, useChatbot.ts:24-35).",
+  "sentido": "decidir",
+  "nota": "STATUS.md desactualizado.",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/sprints/infra-1-observabilidad.md:76": {
+  "estado": "parcial",
+  "evidencia": "onFinish ya no desestructura toolResults (handleChatRequest.ts:1155); siguen react-hooks/refs en ChatbotEmbed.tsx:317 y set-state-in-effect en useChatbot.ts:496 (baseline eslint del padre).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:8801": {
+  "estado": "abandonado",
+  "evidencia": "registry.ts:48-56 legacy_neuro conserva fillScale 1.3, pero el bot develop usa avatarStyle 'image' (HeavyAvatarsLazy.tsx:12-14) y LogicCompanion.tsx:141 resuelve 56 px para avatares livianos.",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:10843": {
+  "estado": "parcial",
+  "evidencia": "docs/ev4-transcripts/agencia-1..3.md tienen respuestas del bot; los 4 usados-*.md registran 'HTTP 404 — Bot not found or inactive' en cada turno; el README sigue diciendo PENDIENTE.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:10990": {
+  "estado": "parcial",
+  "evidencia": "calculateLeadScore.ts:68-74 LeadSignals sigue sin providedEmail, pero el scoring por pack lo recibe (captureLead.ts:349-356) y el pack base lo puntua (verticals/packs/base.ts:38); usados no.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:13249": {
+  "estado": "no empezado",
+  "evidencia": "Operativo (SELECT en prod, no verificable por codigo); el codigo emite chat.cost_model_unknown (handleChatRequest.ts:767-785) y calcula costo con el modelo efectivo (persistTurn.ts:372-377).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:13491": {
+  "estado": "no empezado",
+  "evidencia": "handleChatRequest.ts:941-950 arma los mensajes del modelo desde body.messages (incluye assistant del cliente); messageCount +2 fijo (persistTurn.ts:447).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:14126": {
+  "estado": "no empezado",
+  "evidencia": "tests/integration/chatbot-isolation.spec.ts existe; no hay test de concurrencia del chatbot (git grep -il 'concurren|ultimo cupo' en tests -> solo tests/setter/06 y 12).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:14929": {
+  "estado": "no empezado",
+  "evidencia": "reconcile.ts:267 (12 s) y :281 (15 s) + beginStep por step (handleChatRequest.ts:987-989) sin deadline absoluto contra chat/route.ts:8 maxDuration 30; cuenta ~45 s.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:16170": {
+  "estado": "no empezado",
+  "evidencia": "tests/e2e/40-lead-capture-e2e.spec.ts:31 y :42 siguen con test.skip condicional.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:16869": {
+  "estado": "no empezado",
+  "evidencia": "No hay script (git grep -il ipHash en scripts -> 0; control: 10 scripts con 'purge'); hashIp ya aborta sin salt en prod (ipHash.ts:21-27).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:11": {
+  "estado": "no empezado",
+  "evidencia": "git grep -i 'salud del bot|botHealth' en src -> 0; solo existe /admin/chatbot/health (page.tsx:10-16); el dueno ve 'Activo · respondiendo a tus visitantes' por isActive (dashboard/chatbot/layout.tsx:50-52).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:20": {
+  "estado": "parcial",
+  "evidencia": "El panel sella firstContactedAt (updateLeadStatus.ts:40-46; lead-status-rules.ts:51-56); el decay sigue usando capturedAt (leads/[id]/page.tsx:57), no lastStatusChangeAt; el comentario EV.2 del schema (primer mensaje del visitante) quedo contradicho.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23": {
+  "estado": "parcial",
+  "evidencia": "verticals/packs/{base,usados,agencia}.ts; dual-write de senales (captureLead.ts:364-366, :404); migracion 20260629195726_ev2_vertical_pack_signals_utm; compuertas EV.3/EV.4 sin cumplir (transcripts de usados con 404) y bots nuevos sin pack (onboarding/core.ts:128-136; createClientWithBot.ts:159-185).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#8": {
+  "estado": "no empezado",
+  "evidencia": "Conversation.endedAt no se escribe en el modulo (git grep endedAt en src/modules/chatbot -> 0; control: aparece en project.actions.ts:582); identidad = sessionId en sessionStorage (useChatbot.ts:24-35).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:25": {
+  "estado": "parcial",
+  "evidencia": "MS-E6.2 costuras A/B/C hechas (requestSchema.ts:1-8, toolSuspension.ts, persistTurn.ts:21-24) pero el handler sigue en 1412 lineas; MS-E6.3: salt obligatorio en prod y docstring honesta (ipHash.ts:3-27).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:25": {
+  "estado": "no empezado",
+  "evidencia": "persistTurn.ts:447 messageCount { increment: 2 } fijo aunque el USER se haya deduplicado; generateInsights.ts:30-42 trae 200 conversaciones con todos sus mensajes y recorta a 50 en memoria.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:38": {
+  "estado": "hecho",
+  "evidencia": "persistTurn.ts:379-472 $transaction mensaje -> conversacion -> cupo con retry deduplicado; derivacion fija ante respuesta vacia (reconcile.ts:407-411, :484-534).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:53": {
+  "estado": "hecho",
+  "evidencia": "historyPolicy.ts:31 ventana 30, :50 4000 caracteres; :39 MAX_MESSAGES_SHAPE 50 queda como validacion de forma.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:69": {
+  "estado": "parcial",
+  "evidencia": "onError compensa el cupo si no hubo primer token (handleChatRequest.ts:1070-1109) y reporta a stderr + Sentry (:1052-1060), pero no persiste un ChatbotEvent y el borde puede persistir un canned que el visitante no ve (:1265-1277).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:923": {
+  "estado": "no empezado",
+  "evidencia": "buildHealthVerdict.ts:20-22 solo latencia y DB; git grep alert|error_rate|5xx|stream_error en server/health -> solo el comentario de index.ts:4.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:1961": {
+  "estado": "no empezado",
+  "evidencia": "handleChatRequest.ts:953 stopWhen stepCountIs(3) sigue; capture_lead devuelve su resultado al modelo (captureLead.ts:552).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:3516": {
+  "estado": "no empezado",
+  "evidencia": "git grep recalculateLeadScore en src -> 0 (control: getEffectiveScore en scoring/calculateLeadScore.ts).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:3807": {
+  "estado": "no empezado",
+  "evidencia": "git grep lastUserMessageAt en src y schema -> 0 (control: lastMessageAt aparece 3 veces en schema.prisma).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:4325": {
+  "estado": "no empezado",
+  "evidencia": "git grep -i 'mal clasificado|misclassif' en src -> 0 (control: 'classification' en LeadDetail.tsx).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:172": {
+  "estado": "no empezado",
+  "evidencia": "git grep deviceId en src y schema -> 0; identidad por sessionId de sessionStorage (useChatbot.ts:27-31).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:15781": {
+  "estado": "no empezado",
+  "evidencia": "Sin detector en server/chat; 'admite no saber' solo aparece como ejemplo de prompt en src/modules/chatbot/prisma/seed.ts:149.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:17096": {
+  "estado": "no empezado",
+  "evidencia": "No existe monitor; /smoke borrado (server/health/index.ts:1-5, commit 02a2f812); el health solo instancia el provider (checkHealth.ts:46-58).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-beta-3.md:3663": {
+  "estado": "no empezado",
+  "evidencia": "ChatWidgetMount.tsx:12-15 importa el barrel completo al revelarse el chrome; prefetch de config durante el intro (:37-39).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:52": {
+  "estado": "no empezado",
+  "evidencia": "La cuota se reserva por conversacion nueva = sessionId nuevo (handleChatRequest.ts:400-401; useChatbot.ts:24-35, sessionStorage por pestana): decision abierta.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:63": {
+  "estado": "abandonado",
+  "evidencia": "git grep -i 'embedding|fine-tun|pgvector' en src/modules/chatbot y schema -> 0; Instagram no esta en el runtime (solo como etiqueta en lead-detail-presentation.ts:63).",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:36": {
+  "estado": "parcial",
+  "evidencia": "C0 (historyPolicy.ts; getTools.ts:82 C0.1) y C1.2 hechos; C3.1 parcial; C3.4 no aplicado (persistTurn secuencial dentro de la tx) y C3.6 contradicho (eventos await-eados).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:16378": {
+  "estado": "hecho",
+  "evidencia": "handleChatRequest.ts:1210-1257 persistTurn(watchdog_canned) antes de runAbortController.abort(), con el comentario 'NO REORDENAR'.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:1091": {
+  "estado": "hecho",
+  "evidencia": "scripts/seed-matsu.ts:24-33; scripts/regression/{cases,run-baseline,purge}.ts; docs/regression/baseline-2026-05-22T22-00-07-164Z.md.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:5909": {
+  "estado": "parcial",
+  "evidencia": "registry.ts:35-73 cinco entradas (neuro, legacy_neuro, monograma, onda, geometrico); la verificacion visual es humana.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Olme/Chatbot_ registro de cambios.md:93": {
+  "estado": "hecho",
+  "evidencia": "avatarImageUrlSchema.ts:10-23 acepta data:image/(png|jpeg|webp) con tope de 600k caracteres; @vercel/blob ausente (git grep en package.json y src -> 0; control: 'resend' en package.json:166).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:84": {
+  "estado": "hecho",
+  "evidencia": "ActivityLog.tsx:113 y :300 'Cargar mas' sobre un pool de 250.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:38": {
+  "estado": "hecho",
+  "evidencia": "components/dashboard/lead-pipeline/{LeadPipeline,LeadPipelineColumn,LeadColumnOverview,classes}; dashboard/chatbot/conversations/transcript-action.ts:31 getClientConversationTranscriptAction.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/sprints/q1-1-harness.md:3": {
+  "estado": "hecho",
+  "evidencia": "src/modules/chatbot/evals/runner.ts; package.json:83-85 evals, evals:seed, evals:purge.",
+  "sentido": "si",
+  "nota": "La corrida contra Gemini real hoy falla por la credencial vencida.",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:12904": {
+  "estado": "hecho",
+  "evidencia": "evals/scoring/{hard-asserts,judge,evaluate}.ts; package.json:86 evals:score.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:14370": {
+  "estado": "abandonado",
+  "evidencia": "reconcile.ts:147-172 documenta la remocion de chunkMs (bloque MUDEZ); handleChatRequest.ts:954-963 streamText sin timeout.",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:14470": {
+  "estado": "hecho",
+  "evidencia": "persistTurn.ts:177-186 guard turnPersisted; invocado desde onAbort, onFinish y el watchdog (handleChatRequest.ts:1142, :1162, :1211); stepMs removido (reconcile.ts:283-300).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L2"
+ },
+ "docs/bitacora-roadmap.md:8636": {
+  "estado": "no empezado",
+  "evidencia": "preflightChecks.ts:13-168 sin chequeo de placeholders; MarkdownEditor.tsx:48-63 sólo banda visual; git grep -nF '{{' origin/main -- src/modules/chatbot/server src/lib/onboarding src/modules/chatbot/shared -> vacío (control: 10 archivos de kb-templates con '{{').",
+  "sentido": "si",
+  "nota": "Además el asistente crea el bot activo (createClientWithBot.ts:165).",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:1104": {
+  "estado": "no empezado",
+  "evidencia": "scripts/seed-matsu.ts:27-45 sigue con USER_NAME '(scaffolding)', BOT_NAME 'Aki' y el objeto SCAFFOLDING.",
+  "sentido": "decidir",
+  "nota": "Los datos reales pueden estar en la base (no verificable leyendo).",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:2295": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n maxDomains -- src/app src/modules/chatbot/components -> sólo PlanAssignmentCard.tsx:112 (selector de plan); AdvancedTab.tsx:164-179 sin contador.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:2298": {
+  "estado": "no empezado",
+  "evidencia": "AdvancedTab.tsx:48-54 sigue editable; handleChatRequest.ts:713 usa plan.llmModel.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:5927": {
+  "estado": "parcial",
+  "evidencia": "El código existe (AppearanceTab.tsx:36-67, BotConfigPreview.tsx:162,186); la verificación humana no deja rastro en código.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:6269": {
+  "estado": "parcial",
+  "evidencia": "scripts/b9-4-dedupe-kb-develop.mjs está versionado; si corrió no se puede verificar leyendo.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:8572": {
+  "estado": "no empezado",
+  "evidencia": "admin-topbar.tsx:12-13 devuelve 'Detalle' para segmentos tipo cuid; :40-41 lo usa como título.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:161": {
+  "estado": "no empezado",
+  "evidencia": "AvatarPicker.tsx:84-93 y :211-217 montan todos los avatares; LegacyNeuroAvatar.tsx:940 dpr [1,2]; git grep IntersectionObserver en avatar/preview -> vacío.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/roadmap-pendientes.md:24": {
+  "estado": "contradicho",
+  "evidencia": "CrmIntegrationAdminCard.tsx:63-137 es una vista admin editable (CC.2) con historial de 10 intentos y reintento, no read-only de 20.",
+  "sentido": "no",
+  "nota": "Superado por la decisión de que develOP configure el CRM.",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "raiz:lane-LOG.md:76": {
+  "estado": "no empezado",
+  "evidencia": "BotsListClient.tsx:4 useReducedMotion de motion/react, :35, :159 initial={reduce ? false : 'hidden'}.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "raiz:lane-LOG.md:118": {
+  "estado": "abandonado",
+  "evidencia": "Reemplazado por base64 en DB comprimido en el navegador (AvatarUploader.tsx:6-39, avatarImageUrlSchema.ts:3-24); no existe /api/admin/chatbot/avatar-upload (ls-tree).",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/sprints/alpha-1-reaudit.md:226": {
+  "estado": "no empezado",
+  "evidencia": "[botId]/page.tsx:67-70 listRecentEvents/listLeadsForBot/listConversationsForBot con 100 fijo, sin cursor.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/sprints/q1-1-harness.md:103": {
+  "estado": "parcial",
+  "evidencia": "prisma/seeds/backfill-vertical-pack.ts:71-75 (develop->agencia, sanmiguel->usados, matsu->usados); ejecución no verificable; los caminos de alta no asignan pack.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:8678": {
+  "estado": "no empezado",
+  "evidencia": "kb-templates/concesionaria.ts:63-68 sigue con quick replies temáticos; scripts/_b13-2-fix-demo-bots.mjs sin cambios.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:9713": {
+  "estado": "no empezado",
+  "evidencia": "Siguen versionados scripts/_b14-2-cleanup-bench-prod.ts, _b14-2-*.mjs, _b14-analyze.mjs, _b14-dev.log y un JSON de corrida (ls-tree).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:13257": {
+  "estado": "no empezado",
+  "evidencia": "AdvancedTab.tsx:48-85 (modelo, temperatura, tokens, cuota) vs handleChatRequest.ts:713, :952, :345.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:13794": {
+  "estado": "no empezado",
+  "evidencia": "git grep demo-chat fuera de su carpeta -> sólo un comentario en test-prompt/route.ts:45; demo-chat/[slug]/route.ts:14,44 usa prisma directo.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:16510": {
+  "estado": "parcial",
+  "evidencia": "Hay guard anti-spam de PENDING (tests/integration/generate-insights-pending-guard.spec.ts) pero generateInsights.ts:118-125 crea sin dedup y netlify/functions/generate-insights-cron.ts:33 sigue en 20_000 ms.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-beta-2.md:173": {
+  "estado": "no empezado",
+  "evidencia": "tests/e2e/07-admin-navigation.spec.ts:4-8 test.skip si la navegación no estabiliza; :38 sigue navegando la ruta deprecada /admin/clients/[slug]/chatbot.",
+  "sentido": "si",
+  "nota": "El self-skip vuelve verde un fallo real.",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:71": {
+  "estado": "no empezado",
+  "evidencia": "handleChatRequest.ts:952 temperature fija 0.7, sin maxOutputTokens; AdvancedTab.tsx:56-85 sin rótulo legacy.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:6976": {
+  "estado": "no empezado",
+  "evidencia": "prisma/schema.prisma:1293-1297 borderRadius/surfaceStyle/position/fontStyle/bubbleStyle siguen String.",
+  "sentido": "decidir",
+  "nota": "schema.prisma es FROZEN.",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "raiz:lane-LOG.md:81": {
+  "estado": "no empezado",
+  "evidencia": "IdentityTab.tsx:32-38 Select plano; LocationTypeahead sólo en admin/leads/_components; OverviewTab.tsx:119 sólo costo mensual total.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:8562": {
+  "estado": "hecho",
+  "evidencia": "BotConfigPreview.tsx:162,186 montan AvatarRenderer sin IntersectionObserver (decisión aplicada).",
+  "sentido": "decidir",
+  "nota": "Contradice la regla de CLAUDE.md de IntersectionObserver en animaciones pesadas.",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:36": {
+  "estado": "hecho",
+  "evidencia": "git grep de knowledgeBase.update/create/upsert: sólo alta (core.ts:140, createBot.ts:93, createClientWithBot.ts:192), seeds y acciones SUPER_ADMIN (saveKnowledgeBase.ts:52, saveKnowledgeBaseByOrgSlug.ts:48); insights no escriben la KB.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "STATUS.md:216": {
+  "estado": "hecho",
+  "evidencia": "admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:15-38 hace permanentRedirect a /admin/chatbots/[id].",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:8515": {
+  "estado": "hecho",
+  "evidencia": "BotConfigPreview.tsx:162,186 AvatarRenderer; BotConfigEditor.tsx:185-187; metadata técnica en AdvancedTab.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:43": {
+  "estado": "contradicho",
+  "evidencia": "bulk-actions.ts:18-62 y :64-108 siguen en loop serial con logAdminAction por bot; logAdminActionsBatch no existe en main (sólo en origin/b0-isolation-motor-chatbot).",
+  "sentido": "decidir",
+  "nota": "El registro lo da por hecho; el trabajo vive en una rama sin mergear.",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "_insumos/drive/Olme/Chatbot_ registro de cambios.md:58": {
+  "estado": "hecho",
+  "evidencia": "[botId]/actions.ts:110-174 (SUPER_ADMIN + Zod + audit BOT_DELETED); bulk-actions.ts:163-175 (Zod BulkBotIdsSchema); BulkActionBar.tsx:9,180-202 ConfirmDialog.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "_insumos/drive/Olme/Chatbot_ registro de cambios.md:85": {
+  "estado": "hecho",
+  "evidencia": "schema.prisma:192 BOT_DELETED, :1510 convertedToOsLeadId; actions.ts:146; ConvertChatbotLeadButton.tsx:20.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "STATUS.md:32": {
+  "estado": "hecho",
+  "evidencia": "Asistente (OnboardingWizard.tsx), /admin/chatbots/new (CreateBotForm), detalle con 8 tabs (BotDetailClient.tsx:91-100) y config de 5 tabs (ConfigTabs.tsx:6-12), KB con preview (MarkdownEditor.tsx:65-85), Instalación, dominios (AdvancedTab.tsx:126-180), bulk, alertas (detectBotIssues.ts:55-227).",
+  "sentido": "si",
+  "nota": "'5 tabs' hoy son 8 en el detalle.",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "raiz:lane-LOG.md:16": {
+  "estado": "hecho",
+  "evidencia": "BulkActionBar.tsx:9,180 ConfirmDialog; deleteBotAction/bulkDeleteBotsAction con audit.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "raiz:lane-LOG.md:103": {
+  "estado": "hecho",
+  "evidencia": "KBValidation.tsx:13,69 glass; BehaviorTab.tsx:84-87 emoji en respuestas; BotConfigEditor.tsx:185 preview sticky; ActivityLog.tsx:224-242 metadata togglable.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "raiz:lane-LOG.md:129": {
+  "estado": "hecho",
+  "evidencia": "[botId]/transcript-action.ts:23 getConversationTranscriptAction; components/dashboards/ConversationsTable.tsx con expandable.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "raiz:lane-LOG.md:168": {
+  "estado": "hecho",
+  "evidencia": "components/dashboards/LeadsTable.tsx usa America/Argentina/Buenos_Aires; KnowledgeBaseEditor.tsx:166 header glass sticky.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:12185": {
+  "estado": "hecho",
+  "evidencia": "sendLeadNotification.ts:1,21 y sendInsightsNotification.ts:1,12 usan sendTransactionalEmail de brevo-service.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:17035": {
+  "estado": "hecho",
+  "evidencia": "test-prompt/route.ts:50-66 (wrapLanguageModel + createProviderStreamCloseMiddleware) y :100-110 (error genérico); demo-chat route.ts:7,72.",
+  "sentido": "si",
+  "nota": "Los errores dentro del stream siguen sin manejo (ver hallazgo del sandbox).",
+  "ciclo": "D5-c1, lector D5-L3"
+ },
+ "docs/bitacora-roadmap.md:5620": {
+  "estado": "parcial",
+  "evidencia": "Comparten ChatHeader/DegradedBanner/ConfigLoadError (ChatbotEmbed.tsx:10-12, :211, :419, :189) pero cada uno mantiene su lista e input (ChatbotEmbed.tsx:493 onKeyDown propio) y StreamingMarkdown solo lo usa ChatWindow (git grep StreamingMarkdown -> ChatWindow.tsx).",
+  "sentido": "si",
+  "nota": "La divergencia ya produce bugs (embed en cyan, bienvenida distinta).",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:93": {
+  "estado": "parcial",
+  "evidencia": "Hecho en ChatWindow (boton enviar :643-655, Sparkles :296-300; thinkPulse ausente: git grep 0, control chatbotCaretBlink presente). El widget del cliente sigue cyan: ChatbotEmbed.tsx:269, :340-351, :437, :537.",
+  "sentido": "si",
+  "nota": "El changelog lo da por resuelto, pero solo para el widget de develOP.",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:165": {
+  "estado": "no empezado",
+  "evidencia": "QuickReplyChips.tsx sigue existiendo y solo lo exportan chat/index.ts:6 y modules/chatbot/index.ts:43 (git grep -w QuickReplyChips fuera de components/chat = solo el barrel).",
+  "sentido": "si",
+  "nota": "Borrar.",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "_insumos/drive/Olme/Ideas de nuevas features.md:34": {
+  "estado": "no empezado",
+  "evidencia": "git grep resolveAccentColor = 0; routeColorMap llega a getPublicConfig.ts:121 y publicConfig.ts:50 (control) pero ningun archivo de hooks/, chat/, embed/ ni LogicCompanion lo lee.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:3009": {
+  "estado": "hecho",
+  "evidencia": "DegradedBanner.tsx:101-109 arma wa.me, :170-202 CTA; montado en ChatbotEmbed.tsx:419; DegradedInfo en useChatbot.ts:112-118.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:5451": {
+  "estado": "hecho",
+  "evidencia": "CHATBOT_Z_INDEX en ChatWindow.tsx:11,212,226; ChatHeader con AvatarRenderer (ChatHeader.tsx:61-72) usado en ChatWindow.tsx:251; Canvas con dimensiones NeuroAvatar.tsx:41,46; public/widget.js:61 'all:initial;'.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:5557": {
+  "estado": "hecho",
+  "evidencia": "Toggle de mute en ChatHeader.tsx:91-104; useChatbotSounds.ts:67 lee localStorage; AudioContext presente.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:5650": {
+  "estado": "parcial",
+  "evidencia": "Pausado -> bot_paused (useChatbot.ts:248-256) + banner y bloqueo (ChatWindow.tsx:115, :280, :570). '5xx -> provider_error' ya no existe: DegradedReason (useChatbot.ts:102-110) no lo tiene; INFRA.2 lo reemplazo por connection_failed sin WhatsApp (useChatbot.ts:86, :284-291).",
+  "sentido": "decidir",
+  "nota": "Con Vertex vencida, ver hallazgo de falla persistente sin WhatsApp.",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:84": {
+  "estado": "parcial",
+  "evidencia": "ChatWindow cablea chatSurfaceTint/accent/accentSecondary (ChatWindow.tsx:47-58, 116-119, 235-237); EffectComposer fuera (NeuroAvatar.tsx:18-20; git grep EffectComposer en modules/chatbot solo ese comentario, control: Hero.tsx); dispose en CoreHalo.tsx:69; offline solo WhatsApp (ChatWindow.tsx:285, :467). El embed del cliente no lee esos colores.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:55": {
+  "estado": "parcial",
+  "evidencia": "ChatWindow: Sparkles con strokeWidth 1.5 y accent (ChatWindow.tsx:296-300), boton con accent (:650), thinkPulse borrado (git grep 0). ChatbotEmbed.tsx:269 y :537 siguen en cyan.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:8694": {
+  "estado": "hecho",
+  "evidencia": "ChatbotEmbed.tsx:211 <ChatHeader>; LegacyNeuroAvatarAdapter.tsx:31 caja de size + LegacyNeuroAvatarAdapter.module.css:12-15.",
+  "sentido": "si",
+  "nota": "El CSS depende del aria-label 'AI Assistant Avatar' del componente legacy (LegacyNeuroAvatar.tsx:934).",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:13276": {
+  "estado": "hecho",
+  "evidencia": "ConfigLoadError.tsx:17-73 usado en LogicCompanion.tsx:118 y ChatbotEmbed.tsx:189; existe src/modules/chatbot/shared/configCache.ts (git ls-files).",
+  "sentido": "si",
+  "nota": "Verificacion humana pendiente (PLAN-518).",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:14826": {
+  "estado": "hecho",
+  "evidencia": "StreamingMarkdown.tsx:166-168 '[&>p:nth-last-child(2)]:inline' y caret :172-186.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:16526": {
+  "estado": "hecho",
+  "evidencia": "DegradedBanner.tsx:14-26, :41-98; useChatbot.ts:383-398, :470-478.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:1106": {
+  "estado": "no empezado",
+  "evidencia": "git grep -E 'allowedDomains|embed' en scripts/seed-matsu*.ts = 0 (control: allowedDomains en scripts/ev4-smoke.mjs). El estado real en la base no se puede ver desde el codigo.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:5820": {
+  "estado": "no empezado",
+  "evidencia": "Sin evidencia de verificacion. Codigo: ChatWindow.tsx:245 maxHeight 72dvh; :585 textarea 13px; src/app/layout.tsx sin export viewport (git grep = 0; control: embed/[slug]/page.tsx:13).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:8570": {
+  "estado": "hecho",
+  "evidencia": "LegacyNeuroAvatarAdapter.tsx:31 fija width/height=size y el module.css :12-15 fuerza al wrapper legacy a 100%.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/roadmap-pendientes.md:111": {
+  "estado": "parcial",
+  "evidencia": "parseAttribution cubierto por src/modules/chatbot/server/chat/__tests__/utm-attribution.invariant.ts (punto 6). Handshake/firstTouchRef sin tests: git grep firstTouchRef|handshake en tests/ y __tests__ = 0 (control: firstTouchRef en useChatbot.ts).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/roadmap-pendientes.md:136": {
+  "estado": "no empezado",
+  "evidencia": "Sin registro de verificacion en el repo; la implementacion existe (ConfigLoadError.tsx:17-73).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "raiz:lane-LOG.md:115": {
+  "estado": "no empezado",
+  "evidencia": "Igual que PLAN-492: git grep resolveAccentColor = 0; el widget no lee routeColorMap.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/sprints/alpha-1-reaudit.md:229": {
+  "estado": "hecho",
+  "evidencia": "La ruta ahora es admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx; git grep 'as any' en admin/clients y admin/chatbots = 0. Persisten otros: ClientSettingsForm.tsx:26,36,37 y LegacyNeuroAvatar.tsx:601.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/sprints/infra-2-cold-start-retry.md:124": {
+  "estado": "no empezado",
+  "evidencia": "Sin evidencia de la prueba; 'Conectando…' existe (ChatHeader.tsx:88) y el retry en useChatbot.ts:269-300.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/sprints/utm-1-captura.md:233": {
+  "estado": "no empezado",
+  "evidencia": "ChatbotEmbed.tsx:27 useChatbot({ slug, currentPath: '/', attribution }).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:8871": {
+  "estado": "no empezado",
+  "evidencia": "git grep -i -E 'vertex|n8n|privacidad|privacy|disclaimer|datos personales' en components/chat, components/embed y LogicCompanion = 0 (control: 'PRIVACIDAD' en api/chatbot/[slug]/chat/route.ts:75).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:13349": {
+  "estado": "no empezado",
+  "evidencia": "Baseline _crudo/eslint.json: ChatbotEmbed.tsx:317 react-hooks/refs; useChatbot.ts:496 y useChatbotSounds.ts:68 set-state-in-effect; tambien LegacyNeuroAvatar.tsx:523/525/532/601/603.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#6": {
+  "estado": "no empezado",
+  "evidencia": "git grep MediaRecorder|getUserMedia|audio/webm en modules/chatbot = 0 (control: AudioContext en useChatbotSounds.ts).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#7": {
+  "estado": "no empezado",
+  "evidencia": "Shell sin extraer: ChatWindow.tsx (694 lineas) y ChatbotEmbed.tsx (559) siguen separados.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:62": {
+  "estado": "no empezado",
+  "evidencia": "tool-cards solo tiene HandoffOptionsCard, NavigateToPageCard, WhatsappHandoffCard (git ls-files); git grep catalog|ProductCard en tool-cards = 0.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:1803": {
+  "estado": "no empezado",
+  "evidencia": "tests/e2e/02-chat-flow.spec.ts:17 solo presiona Enter; ninguna medicion keydown -> 'pensando' (git grep pensando|thinking en tests/e2e = 0).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:55": {
+  "estado": "no empezado",
+  "evidencia": "Sin paletas ni avatares por vertical en components/; los colores salen solo del BotConfig.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/roadmap-pendientes.md:142": {
+  "estado": "hecho",
+  "evidencia": "LogicCompanion.tsx:95 return null mientras carga; ChatbotEmbed.tsx:148 spinner sin texto.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "STATUS.md:217": {
+  "estado": "hecho",
+  "evidencia": "public/widget.js:125-127 iframe a /embed/<slug>; validate-origin en src/lib/security/validate-origin.ts.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/sprints/infra-2-cold-start-retry.md:41": {
+  "estado": "hecho",
+  "evidencia": "useChatbot.ts:269-300 retry acotado y connection_failed con input habilitado (NON_LOCKING_DEGRADES :139-144); sin timeout de cliente.",
+  "sentido": "decidir",
+  "nota": "Sin timeout de cliente, un stream colgado deja botBusy hasta que la conexion cierre (ChatWindow.tsx:143-144, :569).",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "STATUS.md:60": {
+  "estado": "hecho",
+  "evidencia": "public/widget.js pesa 7530 bytes (git show | wc -c), no ~5KB; handoff WhatsappHandoffCard en tool-cards; iframe en widget.js:125-127.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/sprints/alpha-0-cleanup.md:4": {
+  "estado": "hecho",
+  "evidencia": "ls-tree de src/app sin rutas /os/ (control: 34 page.tsx en admin); api/admin/chatbot/events/route.ts:9 exige SUPER_ADMIN.",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L4"
+ },
+ "docs/bitacora-roadmap.md:6194": {
+  "estado": "parcial",
+  "evidencia": "Placeholder removido de ChatbotOverview (sin 'insight' en components/dashboard). Insights reales se muestran en /dashboard/resultados/analisis (analisis/page.tsx:60,73 via getMonthlyAnalysisForOrg.ts:61-62 PENDING+APPLIED). getPendingInsightsByOrgSlug sin consumidores (git grep -ln en src: solo index.server.ts e insights/index.ts).",
+  "sentido": "decidir",
+  "nota": "La superficie existe en Analisis; decidir si tambien va en el resumen del chatbot.",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/roadmap-pendientes.md:78": {
+  "estado": "parcial",
+  "evidencia": "Igual que PLAN-280: ChatbotOverview.tsx no renderiza insights; existen en resultados/analisis/page.tsx:73.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/roadmap-pendientes.md:107": {
+  "estado": "no empezado",
+  "evidencia": "ChatbotEmbed.tsx:26-27 attribution queda undefined sin handshake; :64-91 sin fallback. git grep -n 'location.search' origin/main -- src/modules/chatbot/components/embed src/modules/chatbot/hooks -> vacio (control: aparece en src/app/contact/page.tsx).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "raiz:lane-LOG.md:146": {
+  "estado": "no empezado",
+  "evidencia": "LeadDetail.tsx:546 sigue filtrando 'user'/'assistant'; enum USER/ASSISTANT schema.prisma:152-156.",
+  "sentido": "si",
+  "nota": "Hallazgo ALTA en este lote.",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:12753": {
+  "estado": "no empezado",
+  "evidencia": "ChatbotEmbed.tsx:27 currentPath: '/'.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:1648": {
+  "estado": "no empezado",
+  "evidencia": "HandoffEvent solo visitorName/reason (multiTenantQueries.ts:200-206, :233-237); ChatbotOverview.tsx:198-203.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:5723": {
+  "estado": "no empezado",
+  "evidencia": "notifyParent solo 'lead-captured' :103, 'navigate' :115, 'message-sent' :128, 'close' :216; git grep -n 'degraded' origin/main -- public/widget.js -> vacio.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:5888": {
+  "estado": "no empezado",
+  "evidencia": "platforms.ts:27 data-theme dark fijo y sin data-position; widget.js:27-28 los soporta; ChatbotEmbed.tsx:21 ignora theme.",
+  "sentido": "si",
+  "nota": "data-position es necesario para que la posicion elegida por el cliente tenga efecto.",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:3822": {
+  "estado": "hecho",
+  "evidencia": "ClientLeadsTable.tsx:238-261 empty states diferenciados, :322-332 filtro vacio, :187-189 withinDateRange TZ AR.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:3912": {
+  "estado": "parcial",
+  "evidencia": "leads/[id]/page.tsx:29-35 notFound anti-IDOR; LeadDetail completo, pero la conversacion no se ve (LeadDetail.tsx:546).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:4027": {
+  "estado": "hecho",
+  "evidencia": "BusinessLeadCard.tsx:204-209 ring; ClientDashboardTabs.tsx:67,77-85 dot; chatbot/layout.tsx:15-16 cache 30 s tag hot-leads-count; ClientLeadsTable.tsx:153-156 polling pausado.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:4131": {
+  "estado": "hecho",
+  "evidencia": "leads/page.tsx:40-56 filtros en DB; ClientLeadsTable.tsx:166-182 URL, :220-236 toggle, :141-143 router.refresh.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:4247": {
+  "estado": "hecho",
+  "evidencia": "LeadDetail.tsx:223-233 hero Descartado, :372-385 por que, :302 sin acciones, :491-509 'Notas' sin select.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:4350": {
+  "estado": "hecho",
+  "evidencia": "captureLead.ts:436-438 revalidateTag hot-leads-count; updateLeadStatus.ts:84-92; ClientLeadsTable.tsx:109-133 + BusinessLeadCard.tsx:106-117 chip 6 s.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:4625": {
+  "estado": "hecho",
+  "evidencia": "ExportLeadsButton.tsx:40-75; export/route.ts:48 EXPORT_LIMIT 10_000, :203 text/csv.",
+  "sentido": "si",
+  "nota": "Boton anuncia exito sin chequear respuesta.",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:5836": {
+  "estado": "hecho",
+  "evidencia": "buildEmbedSnippet unica fuente platforms.ts:26-28; consumido por ClientInstallView e InstallTab (git grep -l buildEmbedSnippet).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:10036": {
+  "estado": "hecho",
+  "evidencia": "ClientKnowledgeView.tsx:76-103 sin inputs; saveClientKnowledgeBase solo aparece en un comentario (modules/chatbot/index.ts:90).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:10133": {
+  "estado": "hecho",
+  "evidencia": "preview/BotConfigPreview.tsx usado por BotConfigEditor, OnboardingWizard y BotPersonalization.tsx:27,347.",
+  "sentido": "si",
+  "nota": "No es espejo del embed de clientes.",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:11115": {
+  "estado": "hecho",
+  "evidencia": "LeadStatusActions.tsx:43-65 acciones, :103-113 deshacer; updateLeadStatus.ts:40-46 sello de firstContactedAt.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:17004": {
+  "estado": "hecho",
+  "evidencia": "HandoffOptionsCard.tsx:44,56 disabled; renderToolCall.tsx:45,57; ChatbotEmbed.tsx:408 isStreaming.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:3897": {
+  "estado": "no empezado",
+  "evidencia": "No verificable por codigo; no hay artefacto en el repo. Casos manuales propuestos en este lote.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:89": {
+  "estado": "no empezado",
+  "evidencia": "BotPersonalization.tsx:298 AvatarUploader -> data URL; updateBotAppearance.ts:39,102 avatarImageUrlSchema guarda base64 en BotConfig.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/roadmap-pendientes.md:10": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -i 'crmSyncAttempt' origin/main -- src/app/api/cron -> vacio (control: git ls-tree lista 9 archivos en src/app/api/cron).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/roadmap-pendientes.md:16": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n 'dns\\|lookup(' origin/main -- src/modules/chatbot/server/crm src/lib/security -> vacio (control: postToN8n.ts:67 singlePost, :87 fetch).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/roadmap-pendientes.md:31": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -i 'personal\\|privacidad\\|terceros\\|PII' origin/main -- src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx -> vacio (control: el archivo existe).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/roadmap-pendientes.md:38": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -i 'idempotency-key' origin/main -- src -> vacio (control: postToN8n.ts:76 arma headers).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/roadmap-pendientes.md:48": {
+  "estado": "no empezado",
+  "evidencia": "export/route.ts:48 const EXPORT_LIMIT = 10_000.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:16871": {
+  "estado": "no empezado",
+  "evidencia": "multiTenantQueries.ts:180-187 findMany con include sin select -> conversations/page.tsx:17-22 -> ConversationsTable ('use client').",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-beta-2.md:256": {
+  "estado": "no empezado",
+  "evidencia": "tests/e2e/15-client-personalization.spec.ts existe; la intermitencia no es verificable por lectura.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:19": {
+  "estado": "no empezado",
+  "evidencia": "schema.prisma: el unico modelo que matchea gap|proposal|unanswer|insight es ChatbotInsight (:1554); git grep 'KbProposal\\|knowledgeGap\\|unanswered' en src sin superficie de panel.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:88": {
+  "estado": "no empezado",
+  "evidencia": "Mismo grep que PLAN-246; ClientKnowledgeView es solo lectura y los cambios van por Mensajes.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:15704": {
+  "estado": "parcial",
+  "evidencia": "resultados/analisis/page.tsx:36,60,73 DiscoveriesSection con insights PENDING+APPLIED (getMonthlyAnalysisForOrg.ts:61-62), gateado por planAllows 'insight'.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:4101": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -i 'PushManager\\|web-push\\|pushSubscription' origin/main -- src package.json -> vacio (control: visibilitychange en ClientLeadsTable.tsx:159).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/roadmap-pendientes.md:55": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -i 'xlsx\\|exceljs' origin/main -- src package.json -> vacio (control: text/csv en export/route.ts:203).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/sprints/p4-1-render-utm.md:111": {
+  "estado": "no empezado",
+  "evidencia": "Filtros del cliente solo status/range/view (ClientLeadsTable.tsx:166-182); utm solo como campaignLabel en leads/[id]/page.tsx:90.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:9779": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -i 'sanity' origin/main -- src/modules/chatbot -> vacio (control: el mismo grep sobre src encuentra archivos del setter).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:10122": {
+  "estado": "no empezado",
+  "evidencia": "ClientKnowledgeView.tsx:157 linkea a Mensajes con ?context=knowledge, que no existe en MESSAGE_CONTEXTS (message-context.ts:2-50,56): ni siquiera prellena.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:35": {
+  "estado": "hecho",
+  "evidencia": "captureLead.ts:363-365 snapshot + columnas legacy; calculateLeadScore.ts:332-336.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:15": {
+  "estado": "parcial",
+  "evidencia": "UI y guardado: BotPersonalization.tsx:225-245, :292-301, :428-431, :147; el embed de clientes no aplica accentSecondary ni chatSurfaceTint (sin referencias en ChatbotEmbed.tsx; control ChatWindow.tsx:48,117).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "STATUS.md:49": {
+  "estado": "hecho",
+  "evidencia": "Lo del lote: polling 30 s ClientLeadsTable.tsx:146, personalizacion limitada BotPersonalization.tsx, snippet platforms.ts:26-28.",
+  "sentido": "si",
+  "nota": "Credenciales temporales, email por lead y reporte semanal no se re-leyeron (otro lote).",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "docs/bitacora-roadmap.md:11040": {
+  "estado": "hecho",
+  "evidencia": "leads/[id]/page.tsx:39-40 planAllows leadScoring; ClientLeadsTable.tsx:306 teaser; LeadDetail.tsx:255-256; chatbot/layout.tsx:42; src/lib/plan/lead-scoring-gate.invariant.ts existe.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L5"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:80": {
+  "estado": "no empezado",
+  "evidencia": "getLatencyHistory.ts:66 since = ahora-24h vs buckets desde la hora redondeada de hace 23 h (:35-38); eventos fuera de bucket se descartan (:101-105)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:110": {
+  "estado": "no empezado",
+  "evidencia": "admin/chatbot/activity/page.tsx:19 listRecentEvents(..., 250); queries.ts:36-45 sin cursor",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:15478": {
+  "estado": "no empezado",
+  "evidencia": "multiTenantQueries.ts:218 filtra type 'handoff.whatsapp'; el callback existe como 'handoff.callback' (confirmContactRequest.ts:85)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:8457": {
+  "estado": "parcial",
+  "evidencia": "seed.ts sin {{ }} (git grep -nE '\\{\\{' origin/main -- src/modules/chatbot/prisma vacio; control: kb-templates/concesionaria.ts tiene 6 lineas con {{); pero createBot.ts:58 y lib/onboarding/core.ts:65 siguen sembrando KB con placeholders",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:5673": {
+  "estado": "contradicho",
+  "evidencia": "useChatbot.ts:81-86 provider_error reemplazado; connection_failed (:284-291) y stream_interrupted (:470-482) sin WhatsApp",
+  "sentido": "decidir",
+  "nota": "Con Vertex vencido nadie deriva a WhatsApp",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:695": {
+  "estado": "parcial",
+  "evidencia": "10 callers (admin/chatbots/[botId]/actions.ts:69,162; bulk-actions.ts:37,83,199; saveBotConfig.ts:133; saveBotConfigByOrgSlug.ts:119; saveKnowledgeBase.ts:62; saveKnowledgeBaseByOrgSlug.ts:50; updateBotAppearance.ts:109) pero lib/bulk-actions.ts:23 bulkPauseBots hace updateMany sin invalidar, y el cache es un Map por instancia (resolver.ts:11-12)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:1684": {
+  "estado": "hecho",
+  "evidencia": "useChatbot.ts:490-500, :531-535, :545",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:6833": {
+  "estado": "hecho",
+  "evidencia": "prisma/migrations/20260525190000_b11_4a_create_enum_types y 20260525190100_b11_4b_promote_columns_to_enum; schema.prisma:152-184 enums; saveBotConfig.ts:39,44 transform a mayusculas",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:9": {
+  "estado": "hecho",
+  "evidencia": "Casing saveBotConfig.ts:39,44,66-75; sendTestNotification.ts:23-31 rate limit y :79 mensaje 'skipped'; TestEndpointModal en BotDetailClient.tsx; EmojiPickerField.tsx",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:114": {
+  "estado": "hecho",
+  "evidencia": "IdentityTab.tsx:15-17 tres tonos; INDUSTRIES_LABELS en onboarding/industries.ts; el server sigue aceptando tone e industry como texto libre (saveBotConfig.ts:23-24)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/sprints/alpha-0-5-cleanup.md:6": {
+  "estado": "hecho",
+  "evidencia": "clientHasChatbot.ts:4-10 con cache; filtra isActive (:6), lo que causa la landing de venta con bot pausado",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/sprints/infra-2-cold-start-retry.md:3": {
+  "estado": "hecho",
+  "evidencia": "dedup.ts:32,53; chatRetryPolicy.ts:24,27; useChatbot.ts:299-413 (Conectando y connection_failed)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:1218": {
+  "estado": "no empezado",
+  "evidencia": "Tarea humana sin huella en codigo; no verificable por lectura",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:3243": {
+  "estado": "no empezado",
+  "evidencia": "Campo channel String? en ChatbotLead (schema); captureLead.ts:381-414 no lo setea (git grep -nE '^\\s+channel:' en captureLead.ts vacio); buildLeadPayload.ts:107 lo reenvia null",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:4161": {
+  "estado": "no empezado",
+  "evidencia": "multiTenantQueries.ts:101-114 take 200 y orden por score efectivo en memoria (comentario :103-106)",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:4531": {
+  "estado": "no empezado",
+  "evidencia": "git ls-tree -r --name-only origin/main -- src/app/api/cron sin ruta crm (control: lista detect-bot-issues, generate-insights)",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:5534": {
+  "estado": "no empezado",
+  "evidencia": "git grep forceContextLoss|lose_context|webglcontextlost en src/modules/chatbot y src/components vacio (control: <Canvas en avatar/LegacyNeuroAvatar.tsx)",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:24": {
+  "estado": "no empezado",
+  "evidencia": "getActivityChartData.ts:15-18 sin take; getLatencyHistory.ts:76-83 take 2000 sin orderBy",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/roadmap-pendientes.md:175": {
+  "estado": "parcial",
+  "evidencia": "RT-2 cerrado: /smoke no existe (src/app/api/chatbot solo chat, config, health); RE-13: health/route.ts sigue; RT-13: sessionId UUID en cliente (useChatbot.ts:29) pero el server acepta cualquier string (requestSchema.ts:55)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:9440": {
+  "estado": "no empezado",
+  "evidencia": "git grep checkRateLimit en config/route.ts y health/route.ts vacio; control chat/route.ts:81",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:12755": {
+  "estado": "no empezado",
+  "evidencia": "schema.prisma:1375 sessionId @unique global; useChatbot.ts:27 clave global; resolver.ts:132-137 relanza P2002 cross-bot",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:12951": {
+  "estado": "parcial",
+  "evidencia": "evals/scoring/evaluate.ts:47,66 omite el juez sin key; la corrida no es verificable en codigo",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:13259": {
+  "estado": "no empezado",
+  "evidencia": "'gemini-2.5-flash' literal en 13 sitios no-test: createBot.ts:88, createClientWithBot.ts:185, seed.ts:236, onboarding/core.ts:133, plan/fallback.ts:51, resolveEffectiveModel.ts:21, BotConfigEditor.tsx:43, AdvancedTab.tsx:12, test-prompt/route.ts:50, generateInsights.ts:100, executive-brief.ts:19, sync-plans.ts:73,89,105",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:13673": {
+  "estado": "no empezado",
+  "evidencia": "providers/anthropic.ts:18 y openai.ts:12 lanzan ProviderNotImplementedError; resolveEffectiveModel.ts:52-63 degrada a Google",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:14395": {
+  "estado": "no empezado",
+  "evidencia": "captureLead.ts:493 void notifyClient(), :500 void syncLeadToCrm; sin after()/waitUntil en el repo; mismo patron en retryCrmSync.ts:73",
+  "sentido": "decidir",
+  "nota": "Aceptado sin outbox por PLAN-465",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:16284": {
+  "estado": "no empezado",
+  "evidencia": "handleChatRequest.ts:447 quota_reserve_ms sin mark(); :787-793 chat.llm_request_start loguea bot.llmProvider/plan.llmModel (par solicitado)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:16582": {
+  "estado": "no empezado",
+  "evidencia": "ChatWindow.tsx:311,321 'Sistema Listo / Protocolo de consultoria'; WhatsappHandoffCard.tsx:20 'WhatsApp no configurado.'",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:16876": {
+  "estado": "parcial",
+  "evidencia": "lib/alerts.ts:145 sigue logueando el Error crudo; chat.bad_request loguea msg (handleChatRequest.ts:139)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#2": {
+  "estado": "hecho",
+  "evidencia": "useChatbot.ts:37-59, :205-220, :448-451; requestSchema.ts:57,64; resolver.ts:56,60",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#9": {
+  "estado": "parcial",
+  "evidencia": "Truncado minimo hecho (historyPolicy.ts:31,61; useChatbot.ts:432-440); memoria entre conversaciones no existe",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:26": {
+  "estado": "no empezado",
+  "evidencia": "git grep -nliE 'salud del bot|getBotHealth|uptime' en src/modules/chatbot y src/lib sin servicio por org (control: checkChatbotHealth en server/health/checkHealth.ts)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:45": {
+  "estado": "no empezado",
+  "evidencia": "schema.prisma:1375 sessionId @unique",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:43": {
+  "estado": "hecho",
+  "evidencia": "getTools.ts:82 TOOLS_RESTRICTED_TO_AGENCY_BOT = ['navigate_to_page']",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:54": {
+  "estado": "hecho",
+  "evidencia": "historyPolicy.ts:61 HARD_CAP_MESSAGES=40; handleChatRequest.ts:547; degradado conversation_limit useChatbot.ts:327-328",
+  "sentido": "si",
+  "nota": "El tope es 40 mensajes (~20 turnos), no 40 turnos",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:70": {
+  "estado": "no empezado",
+  "evidencia": "useChatbot.ts:27 clave 'chatbot:sessionId' sin slug; schema.prisma:1375",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:10991": {
+  "estado": "no empezado",
+  "evidencia": "captureLead.ts:73,84 y showWhatsappHandoff.ts:32,76 mencionan test drive; sin override por pack en verticals",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:623": {
+  "estado": "hecho",
+  "evidencia": "Regla de proceso sin huella en codigo; el tooling existe (scripts/regression/diag-timings.ts)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:33": {
+  "estado": "parcial",
+  "evidencia": "verticals/packs/ tiene agencia.ts, base.ts y usados.ts; faltan salud e inmobiliarias",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:53": {
+  "estado": "no empezado",
+  "evidencia": "git grep -nliE 'inventory|inventario|catalogo' en server de chatbot y motor: solo comentarios de 'catalogo de tools'",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:64": {
+  "estado": "parcial",
+  "evidencia": "/smoke eliminado; /api/chatbot/[slug]/health/route.ts sigue",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:12": {
+  "estado": "parcial",
+  "evidencia": "Deteccion de consultas sin responder via insights KB_GAP (monthly-analysis.ts:178); catalogo y memoria no",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:10858": {
+  "estado": "contradicho",
+  "evidencia": "EV.5 esta en codigo (api/dashboard/chatbot/leads/export/route.ts:143-162; verticals/__tests__/ev5.superset.invariant.ts) sin huella de la compuerta",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:14334": {
+  "estado": "parcial",
+  "evidencia": "Compensacion del cupo si no hubo primer chunk (handleChatRequest.ts:1070-1080, :1119); con entrega parcial se cobra; decision comercial pendiente",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:17138": {
+  "estado": "hecho",
+  "evidencia": "captureLead.ts:493,500 y retryCrmSync.ts:73 siguen detached",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:3537": {
+  "estado": "hecho",
+  "evidencia": "scripts/regression/cases.ts:78,116 smoke:true y :295 long-session-soft-cap; run-baseline.ts:27; diag-timings.ts",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/sprints/q1-2-scoring.md:3": {
+  "estado": "hecho",
+  "evidencia": "src/modules/chatbot/evals/scoring/ (evaluate.ts, hard-asserts.ts, judge.ts, rubric.ts)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:11433": {
+  "estado": "hecho",
+  "evidencia": "LeadDetail.tsx usa adminHoverCls 9 veces (git grep -c)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:14735": {
+  "estado": "hecho",
+  "evidencia": "handleChatRequest.ts:852, :964-970",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:15235": {
+  "estado": "hecho",
+  "evidencia": "handleChatRequest.ts:1027 watchdogRef.current?.markContent()",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-rediseno.md:1340": {
+  "estado": "hecho",
+  "evidencia": "navigateToPage.ts:31-32 '/#portfolio' y '/process-automation#calculadora'",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L6"
+ },
+ "docs/bitacora-roadmap.md:741": {
+  "estado": "parcial",
+  "evidencia": "invalidateBotCache llamado en saveBotConfig.ts:133, saveBotConfigByOrgSlug.ts:119, saveKnowledgeBase.ts:62, saveKnowledgeBaseByOrgSlug.ts:50, admin/chatbots/[botId]/actions.ts:69/:162, bulk-actions.ts:37/:83/:199, updateBotAppearance.ts:109; falta en src/lib/bulk-actions.ts:23 (bulkPauseBots updateMany), mitigado porque validateOrigin lee isActive en vivo (validate-origin.ts:67). Sin lint; la invalidación es solo de la instancia local (resolver.ts:11, :47-49).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:4483": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -i \"dns\\.\\|lookup(\\|redirect\" origin/main -- logic-core-v3/src/modules/chatbot/server/crm -> 0; control: postToN8n.ts:91 'signal: controller.signal'. Deuda declarada en validateWebhookUrl.ts:11-13.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:11383": {
+  "estado": "parcial",
+  "evidencia": "Panel migrado (BusinessLeadCard.tsx:10, LeadDetail.tsx:42, BusinessHero.tsx:15 usan lead-intent-labels); siguen propios buildLeadsCsv.ts:37-50 (keys en minúscula) y LeadsTable.tsx:28.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:1963": {
+  "estado": "no empezado",
+  "evidencia": "step_count se persiste (persistTurn.ts:205) pero buildHealthVerdict.ts:24-133 no lo lee; git grep step_count solo da handleChatRequest/persistTurn/reconcile.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:629": {
+  "estado": "hecho",
+  "evidencia": "Cache en memoria por instancia con TTL 60 s (resolver.ts:10-44); el caveat sin invalidación cruzada sigue (resolver.ts:47-49).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:1070": {
+  "estado": "no empezado",
+  "evidencia": "Sigue apendeado fuera del builder: handleChatRequest.ts:817-827.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:385": {
+  "estado": "hecho",
+  "evidencia": "mark() handleChatRequest.ts:122-128; TTFB en onChunk :1030-1035; timings y latencyMs en chat.message_completed persistTurn.ts:541-549.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:539": {
+  "estado": "hecho",
+  "evidencia": "Rate limit por sessionId handleChatRequest.ts:184-188; Promise.all pre-LLM :215-247; getOrCreateConversation devuelve isNew (resolver.ts:65-68); cache resolver.ts:10-44; invalidateBotCache ya tiene callers.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:1819": {
+  "estado": "hecho",
+  "evidencia": "handleChatRequest.ts:953 stopWhen: stepCountIs(3); toolCalls y usage agregados desde steps :1161-1176; persistTurn.ts:205 step_count.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:4443": {
+  "estado": "hecho",
+  "evidencia": "crm/index.ts:14-49; syncLeadToCrm.ts:34-158; encryptSecret.ts:65-98; getEffectiveSyncStatus.ts:25-37. Con deudas: fire-and-forget y SSRF por redirect/DNS.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:11465": {
+  "estado": "hecho",
+  "evidencia": "verticals/types.ts:111/:153 toolCopy; captureLead.ts:104; buildLeadPayload.ts:18, :45-51, :109-113; buildLeadsCsv.ts:147-148, :169-170.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:13090": {
+  "estado": "hecho",
+  "evidencia": "dedup.ts:53-63 usado en handleChatRequest.ts:606-617; reintentos del widget chatRetryPolicy.ts:24-27. La verificación humana sigue pendiente.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:13953": {
+  "estado": "hecho",
+  "evidencia": "$transaction persistTurn.ts:412-472; compensación handleChatRequest.ts:467-534; fallback de respuesta vacía reconcile.ts:484-535.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:14238": {
+  "estado": "hecho",
+  "evidencia": "withDeadline.ts:82-134; computeHookBudgetMs reconcile.ts:137-145; chat.onfinish_phases persistTurn.ts:646-676.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:14609": {
+  "estado": "hecho",
+  "evidencia": "streamWatchdog.ts:260-478 cableado en handleChatRequest.ts:1187-1358.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:15113": {
+  "estado": "hecho",
+  "evidencia": "El transform encola cada chunk en la misma invocación, sin flush, y decide en 'finish' (reconcile.ts:503-533).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:16020": {
+  "estado": "hecho",
+  "evidencia": "chunkTally.ts:4-10 separado; probe gated por env (streamProbe.ts:88-92); telemetría permanente provider.stream_chunks y watchdog_settled (handleChatRequest.ts:746-758, :1329-1339).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:16133": {
+  "estado": "hecho",
+  "evidencia": "Costuras extraídas: requestSchema.ts, degradedResponse.ts, hookOps.ts, toolSuspension.ts, persistTurn.ts. El archivo volvió a crecer a 1412 líneas (no 1297).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:16916": {
+  "estado": "hecho",
+  "evidencia": "resolver.ts:115-144; captureLead.ts:230 alreadyCaptured:true; package.json:82 test:p2002.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:8140": {
+  "estado": "parcial",
+  "evidencia": "Spotlighting handleChatRequest.ts:877-889, :941-950; pero currentPath crudo (sections.ts:200) y 'assistant' del cliente sin envolver (:946-947). Sin anonimización: git grep -n -i \"anonymi\\|anonimi\\|redact\" en server/chat y server/prompts -> 0 (control: wrapUntrusted en handleChatRequest.ts:884).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:118": {
+  "estado": "no empezado",
+  "evidencia": "formatTone sigue con 3 tonos (prompts/helpers.ts:10-21); git grep -i agencia en components/admin/onboarding/industries.ts -> 0 (control: 'concesionaria' 1 hit).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:87": {
+  "estado": "parcial",
+  "evidencia": "El cliente solo edita apariencia, saludo y quick replies (updateBotAppearance.ts:24-43); sin nombre, tono, prompts ni colores por ruta.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:25": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n \"\\.signals\\b\" origin/main -- logic-core-v3/src/modules/chatbot/components -> 0; las señales v2 solo viajan en CSV y payload (buildLeadsCsv.ts:170, buildLeadPayload.ts:113).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/sprints/alpha-1-reaudit.md:230": {
+  "estado": "hecho",
+  "evidencia": "components/admin/activity/activityFilters.ts:13, :21, :36 (ACTIVITY_LEVEL_OPTIONS).",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/sprints/q1-2-scoring.md:89": {
+  "estado": "parcial",
+  "evidencia": "El juez existe y se omite sin ANTHROPIC_API_KEY (evals/scoring/evaluate.ts:21, :47); la corrida depende del entorno.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:10918": {
+  "estado": "parcial",
+  "evidencia": "Script listo: prisma/seeds/backfill-vertical-pack.ts:72-74 (develop->agencia, sanmiguel y matsu->usados); default 'base' (schema.prisma:1329). Si corrió en la base no se ve por código.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:11112": {
+  "estado": "parcial",
+  "evidencia": "El gate existe en código (export/route.ts:95 planAllows leadScoring; buildLeadsCsv.ts:137, :158); la verificación visual es humana.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:13799": {
+  "estado": "parcial",
+  "evidencia": "smokeTest borrado (health/index.ts:1-5); generateInsights no calcula costo (generateInsights.ts:102-108); calculateCost solo en persistTurn.ts:372.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-rediseno.md:1588": {
+  "estado": "parcial",
+  "evidencia": "Avatares pesados con dynamic import: components/avatar/HeavyAvatarsLazy.tsx:12, :27, :32; se siguen bajando si el bot usa un avatar 3D.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:17": {
+  "estado": "no empezado",
+  "evidencia": "utmSource solo se usa en el detalle de un lead (dashboard/chatbot/leads/[id]/page.tsx:83); sin panel agregado.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#4": {
+  "estado": "parcial",
+  "evidencia": "Se generan insights KB_GAP (generateInsights.ts:9, :116-128) pero la aprobación humana no está cableada (actOnInsight sin consumidores, manageInsight.ts:15).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#10": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -i \"inventario\\|inventory\" origin/main -- logic-core-v3/src/modules/chatbot -> 0 (control: packs agencia/base/usados en git ls-tree).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:13": {
+  "estado": "hecho",
+  "evidencia": "El endpoint se borró (health/index.ts:1-5); git ls-tree de src/app/api | grep -i smoke -> 0 (control: 1 ruta health).",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:36": {
+  "estado": "hecho",
+  "evidencia": "resolver.ts:115-144 adopta la fila; captureLead.ts:230 alreadyCaptured:true.",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:46": {
+  "estado": "parcial",
+  "evidencia": "Tres costuras extraídas (persistTurn.ts, toolSuspension.ts, requestSchema/degradedResponse/hookOps) pero el handler sigue en 1412 líneas.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:44": {
+  "estado": "parcial",
+  "evidencia": "Recorte en vez de 400 (requestSchema.ts:45-54) y gate de 40 mensajes con derivación (handleChatRequest.ts:547-579); sigue muriendo en 400 si una respuesta del bot supera 4000 caracteres (requestSchema.ts:49).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:55": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -i \"cachedContentTokenCount\\|cachedInputTokens\\|cacheReadTokens\" origin/main -- logic-core-v3/src -> solo fixture onf1-reconcile.invariant.ts:263 (control: inputTokens 3 hits en handleChatRequest.ts). Además el nonce por request (handleChatRequest.ts:883) reescribe el historial.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:72": {
+  "estado": "no empezado",
+  "evidencia": "Doble rate limit sigue (route.ts:81 y handleChatRequest.ts:184); validateOrigin hace su propia query (validate-origin.ts:61); los writes de onFinish van en tx secuencial (persistTurn.ts:412-472), lo que contradice paralelizarlos.",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/sprints/infra-2-cold-start-retry.md:14": {
+  "estado": "no empezado",
+  "evidencia": "INFRA3_CONNECTION_RETRY definido sin uso (reconcile.ts:537-551; git grep: 1 solo archivo).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:16903": {
+  "estado": "hecho",
+  "evidencia": "P2002 adopta (resolver.ts:115-144); /smoke borrado (health/index.ts:1-5); provider-close en admin (api/admin/chatbot/demo-chat/[slug]/route.ts:72, test-prompt/route.ts:55); botBusy en ChatWindow.tsx:86-90; flush con techo (handleChatRequest.ts:1393-1400).",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:10229": {
+  "estado": "hecho",
+  "evidencia": "BotPersonalization.tsx:23 EmojiPickerField y :63 emoji por quick reply; server lo acepta (updateBotAppearance.ts:19-22).",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:12959": {
+  "estado": "no empezado",
+  "evidencia": "Sigue por substring (evals/__tests__/q1-2.invariant.ts:201).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:34": {
+  "estado": "hecho",
+  "evidencia": "server/verticals/packs/agencia.ts, base.ts, usados.ts y registry.ts.",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:54": {
+  "estado": "no empezado",
+  "evidencia": "git ls-tree de verticals/packs -> agencia.ts, base.ts, usados.ts (sin salud).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:13": {
+  "estado": "contradicho",
+  "evidencia": "El tope es de 40 MENSAJES, unos 20 turnos (historyPolicy.ts:52-61; handleChatRequest.ts:547).",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/roadmap-pendientes.md:176": {
+  "estado": "parcial",
+  "evidencia": "T0.1 resuelto borrando /smoke (health/index.ts:1-5); C0.2 implementado (requestSchema.ts:45-54); INFRA.3 sigue sin cablear (reconcile.ts:537-551).",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Olme/Chatbot_ registro de cambios.md:68": {
+  "estado": "hecho",
+  "evidencia": "admin/chatbots/_actions/convert-chatbot-lead.actions.ts:17 convertChatbotLeadToOsLead.",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:56": {
+  "estado": "hecho",
+  "evidencia": "components/admin/health/LatencyChart.tsx; scripts/dev/seed-latency.ts.",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:9": {
+  "estado": "hecho",
+  "evidencia": "dashboard/chatbot/page.tsx:43 Number(usage.costUsd); :21 y :25 ChatbotUpsellLanding.",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:16711": {
+  "estado": "hecho",
+  "evidencia": "hashIp aborta en prod sin salt (safety/ipHash.ts:21-24); envValidator.ts:60-66 la declara obligatoria en prod.",
+  "sentido": "no",
+  "ciclo": "D5-c1, lector D5-L7"
+ },
+ "docs/bitacora-roadmap.md:1032": {
+  "estado": "parcial",
+  "evidencia": "Rutas fijas navigateToPage.ts:25-34; contencion C0.1 getTools.ts:82-123; allowedNavigationPaths no existe (git grep -c allowedNavigationPaths origin/main -- prisma/schema.prisma = 0; control allowedDomains = 1)",
+  "sentido": "si",
+  "nota": "El riesgo de fuga de trafico quedo contenido; el fix real sigue pendiente",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:1055": {
+  "estado": "parcial",
+  "evidencia": "saveKnowledgeBase.ts:12-18 y saveKnowledgeBaseByOrgSlug.ts:12-18 con .max por campo (total 220k caracteres, ~55k tokens por request); sin aviso de costo/TTFB",
+  "sentido": "decidir",
+  "nota": "Topes demasiado altos para el costo por mensaje",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:1179": {
+  "estado": "parcial",
+  "evidencia": "Nota anti-loreteo sections.ts:115-116; los ejemplos literales siguen en sections.ts:138-140 y :156",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:1334": {
+  "estado": "hecho",
+  "evidencia": "sections.ts:43 'Cerrás casi siempre con una pregunta abierta que invite a profundizar.' (introducida en a3180600)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:1672": {
+  "estado": "no empezado",
+  "evidencia": "showWhatsappHandoff.ts:152-167 manda Telegram para cualquier intent si no hubo lead",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:2789": {
+  "estado": "no empezado",
+  "evidencia": "scripts/load-test/chatbot-baseline.ts solo mide latencia (CONCURRENT=3); git grep reserveConversation en scripts = 0",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:3320": {
+  "estado": "no empezado",
+  "evidencia": "captureLead.ts:445-452 arma el mensaje sin score ni classification",
+  "sentido": "decidir",
+  "nota": "Ver hallazgo de PII a Telegram antes de agregar mas datos",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:3808": {
+  "estado": "no empezado",
+  "evidencia": "DECAY_CURVE heuristica sin cambios calculateLeadScore.ts:361-374",
+  "sentido": "si",
+  "nota": "Requiere 200+ leads reales",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/roadmap-pendientes.md:119": {
+  "estado": "parcial",
+  "evidencia": "Runtime alineado persistTurn.ts:372-377; demo-chat usa bot.llmModel (demo-chat/[slug]/route.ts:57); generateInsights.ts:99-100 y executive-brief.ts:298-299 sin calculateCost",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:13083": {
+  "estado": "no empezado",
+  "evidencia": "captureLead.ts:440, :456, :487, :501",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:15597": {
+  "estado": "no empezado",
+  "evidencia": "git grep -c allowedNavigationPaths origin/main -- prisma/schema.prisma = 0 (control allowedDomains = 1)",
+  "sentido": "decidir",
+  "nota": "Solo tiene sentido si se ofrece navegacion a clientes",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:3348": {
+  "estado": "hecho",
+  "evidencia": "dqFilter.ts:21-25; calculateLeadScore.ts:192-196, :263-278; scripts/_b53-test-scoring.ts presente",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:494": {
+  "estado": "no empezado",
+  "evidencia": "Planes en gemini-2.5-flash (sync-plans.ts:73,89,105); sin cachedContent ni thinkingBudget (git grep thinkingBudget en src/modules/chatbot/server/chat = 0)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:5724": {
+  "estado": "no empezado",
+  "evidencia": "publicConfig.ts:28-62 solo trae companyName dentro de PausedInfo (:15); useChatbot.ts:290 pone companyName null",
+  "sentido": "decidir",
+  "nota": "provider_error fue reemplazado por connection_failed/stream_interrupted (useChatbot.ts:81-86)",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:1268": {
+  "estado": "hecho",
+  "evidencia": "sections.ts:132-148 (regla maestra, rol, KB, acciones, lenguaje) independientes de forbiddenStatements :122-126",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:1667": {
+  "estado": "hecho",
+  "evidencia": "sections.ts:85 y SHOW_WHATSAPP_HANDOFF_DESCRIPTION showWhatsappHandoff.ts:85; sin enforce en el handler :116-170",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:1674": {
+  "estado": "contradicho",
+  "evidencia": "Absoluta en sections.ts:99, pero el ejemplo de la tool dice '¡Listo Juan!' (offerHandoffOptions.ts:16)",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:2692": {
+  "estado": "hecho",
+  "evidencia": "sections.ts:189-211 (SOFT_CAP_THRESHOLD=15) + hard-cap handleChatRequest.ts:547",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:3207": {
+  "estado": "hecho",
+  "evidencia": "LEAD_INTENTS captureLead.ts:36-43; toUpperCase a ChatbotLeadIntent :371",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:3712": {
+  "estado": "hecho",
+  "evidencia": "getEffectiveScore calculateLeadScore.ts:461-474 devuelve el snapshot DQ sin decay",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-rediseno.md:2988": {
+  "estado": "hecho",
+  "evidencia": "navigateToPage.ts:33 '/#servicios'; TransitionContext.tsx:28,41; ids presentes en OurServices.tsx y WhyDevelOP.tsx/Nosotros.tsx",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:957": {
+  "estado": "hecho",
+  "evidencia": "buildSystemPrompt.ts:33-47 (9 secciones) + bloque de intent/opener handleChatRequest.ts:817-827",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:1233": {
+  "estado": "hecho",
+  "evidencia": "Off-topic sections.ts:111-113, anti-loreteo :115-116, regla maestra :132-142",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:1388": {
+  "estado": "hecho",
+  "evidencia": "phone/email opcionales captureLead.ts:66-71; ambos al create :385-386; el refine 'al menos uno' se reemplazo por el chequeo en execute :99-102, :283-314",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:1523": {
+  "estado": "hecho",
+  "evidencia": "showWhatsappHandoff.ts:42-67 (intent, topicSummary, purchaseSignals, visitorContact); Telegram solo sin lead :152",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:2638": {
+  "estado": "hecho",
+  "evidencia": "upsellAlert.ts:46-91 (degradedAt atomico via registry.ts:671-684); handleChatRequest.ts:345-396; sections.ts:189-211",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:3196": {
+  "estado": "hecho",
+  "evidencia": "captureLead.ts:36-52, :79-95; providedPhone/Email derivados :328-329",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:3353": {
+  "estado": "hecho",
+  "evidencia": "calculateLeadScore.ts:259-329; persistido captureLead.ts:406-412 (hoy lee la tabla del pack, EV.3)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:3681": {
+  "estado": "hecho",
+  "evidencia": "DECAY_CURVE :361-374, getEffectiveScore :461-485, getScoreExplanation :517-528, combos en packs (usados.ts:43-56)",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/sprints/infra-1-observabilidad.md:3": {
+  "estado": "hecho",
+  "evidencia": "logPersistFailure/extractDbErrorInfo logger.ts:123-186; onError handleChatRequest.ts:1046-1060; chat.unhandled_failed :1363",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/sprints/utm-1-captura.md:3": {
+  "estado": "hecho",
+  "evidencia": "attribution.ts:29-72; requestSchema.ts:23-27, 57-67; captureLead.ts:400-402",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:10806": {
+  "estado": "hecho",
+  "evidencia": "agencia.ts:29-80; usados.ts:87-200 (7 intents); handleChatRequest.ts:625-626",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:10862": {
+  "estado": "hecho",
+  "evidencia": "calculateLeadScore.ts:259-262; dual-write captureLead.ts:365, :405; backfill prisma/seeds/backfill-vertical-pack.ts:71-75 (ejecucion en prod no verificable)",
+  "sentido": "si",
+  "nota": "La app no setea verticalPack para bots nuevos (hallazgo FAL)",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:10932": {
+  "estado": "hecho",
+  "evidencia": "verticals/types.ts:142-155; registry.ts:26-53; packs/base.ts",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:13021": {
+  "estado": "hecho",
+  "evidencia": "logger.ts:172-186",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:13155": {
+  "estado": "hecho",
+  "evidencia": "resolveEffectiveModel.ts:37-65; handleChatRequest.ts:713, :767-785 (chat.cost_model_unknown); persistTurn.ts:372-377",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:13387": {
+  "estado": "hecho",
+  "evidencia": "historyPolicy.ts:31-104; requestSchema.ts:46-55; handleChatRequest.ts:547; useChatbot.ts:432",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:13630": {
+  "estado": "hecho",
+  "evidencia": "costs.ts:31-41; Record derivado de id google.ts:45-47, anthropic.ts:58-60, openai.ts:52-54",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:14967": {
+  "estado": "hecho",
+  "evidencia": "providerStreamClose.ts:92-224; handleChatRequest.ts:735-760",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:15344": {
+  "estado": "hecho",
+  "evidencia": "confirmContactRequest.ts:185-200; getTools.ts:21; sync-plans.ts:41-64; prisma/seeds/add-contact-tool.ts para prod (no verificable)",
+  "sentido": "si",
+  "nota": "El evento handoff.callback no tiene lector (hallazgo BUG)",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:15489": {
+  "estado": "hecho",
+  "evidencia": "getTools.ts:82-123",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/sprints/alpha-pre-cierre-RESUMEN.md:65": {
+  "estado": "no empezado",
+  "evidencia": "src/app/ai-implementations/page.tsx:217 'TODO S16: Reintegrar chatbot nuevo'; contactEmail solo en AgencySettings (schema.prisma:825), no en Organization (:332)",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:11536": {
+  "estado": "parcial",
+  "evidencia": "scripts/ev5-smoke.mjs existe; la corrida y la lectura de transcripts no son verificables en codigo",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:16986": {
+  "estado": "no empezado",
+  "evidencia": "Tarea de proceso: no hay artefacto de revision en el repo (no verificable por codigo)",
+  "sentido": "decidir",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:17155": {
+  "estado": "no empezado",
+  "evidencia": "git grep -n -i outbox origin/main -- src prisma/schema.prisma = 0; control: syncLeadToCrm en captureLead.ts:500",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:45": {
+  "estado": "hecho",
+  "evidencia": "persistTurn.ts:372-377 usa effectiveModel; degradacion con WARN resolveEffectiveModel.ts:52-63 + handleChatRequest.ts:767-785",
+  "sentido": "si",
+  "nota": "demo-chat sigue con bot.llmModel (route.ts:57)",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:61": {
+  "estado": "parcial",
+  "evidencia": "Solo retrospectivo via insights KB_GAP (generateInsights.ts:80; schema.prisma:227); sin marca por turno",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:73": {
+  "estado": "hecho",
+  "evidencia": "discardNewConversation handleChatRequest.ts:261-279; compensacion checker.ts:189-212",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:12843": {
+  "estado": "hecho",
+  "evidencia": "src/modules/chatbot/evals/scenarios/{agencia,base,usados}.json con 12 escenarios cada uno; runner.ts",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:12967": {
+  "estado": "hecho",
+  "evidencia": "src/modules/chatbot/evals/capture.ts:51 ASSISTANT_MESSAGE_POLL_TIMEOUT_MS = 10_000",
+  "sentido": "si",
+  "ciclo": "D5-c1, lector D5-L8"
+ },
+ "docs/bitacora-roadmap.md:16992": {
+  "estado": "no empezado",
+  "evidencia": "src/modules/motor/domain/prisma-errors.ts:10 sigue existiendo y se usa en handle-message.ts:18, identity.ts:24 y sendMessage.ts:24. El guard de la frontera esta en src/lib/isolation/scoped-model.ts:60-62 y su comentario :56-58 anota la consolidacion como deuda. Comando: MSYS_NO_PATHCONV=1 git grep -n isUniqueViolation origin/main -- src.",
+  "sentido": "si",
+  "nota": "Al consolidar, llevar a isolation la variante con parametro field: la del motor es mas precisa.",
+  "ciclo": "D5-c1, lector D5-L9"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:37": {
+  "estado": "hecho",
+  "evidencia": "La decision se respeta en el codigo. El motor tiene solo bases pasivas (inbound y servicio de salida sin llamadores, sendMessage.ts:204). No hay acople chatbot-motor: git grep -n 'modules/chatbot' origin/main -- src/modules/motor/adapters src/modules/motor/domain src/modules/motor/services solo encuentra un comentario (client.ts:16); control positivo: git grep -n 'motor/domain/identity' -- src/modules/motor da 2 hits. La unica importacion de modules/motor fuera del modulo es la route (route.ts:18). El barrel chatbot/public-api 'se creará en B2' (src/modules/motor/README.md:17-18).",
+  "sentido": "decidir",
+  "nota": "El trigger de reapertura ('primer vertical facturando') choca con FAL ALTA: si el motor se vende, falta todo el lazo de respuesta y el alta del canal. Lo decide Valentino.",
+  "ciclo": "D5-c1, lector D5-L9"
  }
 }

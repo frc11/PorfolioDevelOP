@@ -1,0 +1,4018 @@
+{
+ "parte": 2,
+ "partes": 2,
+ "items": [
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "herramienta": "h3.vis-widget-develop",
+   "id": "h3.vis-widget-develop.reintento-de-config",
+   "nombre": "Reintento manual cuando /config no carga",
+   "descripcion": "Si la config del bot no carga tras los reintentos automaticos, el widget muestra 'No pudimos conectar' con boton Reintentar.",
+   "archivos": [
+    "src/modules/chatbot/components/chat/ConfigLoadError.tsx"
+   ],
+   "entradas": [
+    "GET /api/chatbot/[slug]/config (fuera de lote)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "LogicCompanion.tsx:103-120 -> ConfigLoadError.tsx:17-73 onRetry=chatbot.retryLoadConfig; mismo componente en ChatbotEmbed.tsx:189.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Sin datos."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No aplica."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Mensaje util y accion (ConfigLoadError.tsx:52,54-70), role=status."
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "Mientras carga, el launcher no se muestra (LogicCompanion.tsx:95 return null), decision PLAN-519."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "No envia datos."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Boton minHeight 36px, maxWidth 240px (LogicCompanion.tsx:111)."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "El agotamiento de reintentos no se reporta (fuera de lote: configCache)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin placeholders."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El visitante reintenta solo."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "herramienta": "h3.vis-widget-develop",
+   "id": "h3.vis-widget-develop.respuestas-rapidas",
+   "nombre": "Chips de respuestas rapidas",
+   "descripcion": "Con el chat vacio se ofrecen chips configurados que envian un prompt.",
+   "archivos": [
+    "src/modules/chatbot/components/chat/ChatWindow.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "ChatWindow.tsx:467-489 onClick -> onQuickReply(qr.promptToSend) = chatbot.sendMessage (LogicCompanion.tsx:154). QuickReplyChips.tsx es codigo muerto.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Config publica del bot."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Sin quickReplies no renderiza (:467)."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Delegado al envio."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin carga propia."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Server valida el mensaje."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap (:468)."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin errores propios."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Datos del config."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Un click."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "herramienta": "h3.vis-widget-cliente",
+   "id": "h3.vis-widget-cliente.estados-degradados",
+   "nombre": "Banners de degradado en el widget embebido del cliente",
+   "descripcion": "El embed reutiliza DegradedBanner para cuota, pausa, rate limit, cortes y fallas de conexion.",
+   "archivos": [
+    "src/modules/chatbot/components/chat/DegradedBanner.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "ChatbotEmbed.tsx:419 <DegradedBanner info={chatbot.degradedInfo}> con el mismo hook (useChatbot); ramas en DegradedBanner.tsx:41-215.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Solo renderiza."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No aplica."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Proveedor caido se muestra como transitorio sin WhatsApp (DegradedBanner.tsx:41-98)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No aplica."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "No aplica."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "CTA 44px."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin reporte cliente."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Copys reales."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Sin numero de WhatsApp no hay salida."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "herramienta": "h3.vis-widget-cliente",
+   "id": "h3.vis-widget-cliente.apariencia-de-marca",
+   "nombre": "Colores de marca del cliente en el widget embebido",
+   "descripcion": "accentColor, accentSecondary y chatSurfaceTint configurados por el cliente deberian pintar el widget de su sitio.",
+   "archivos": [
+    "src/modules/chatbot/components/chat/ChatHeader.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L1",
+   "madurez_evidencia": "Solo ChatHeader (ChatHeader.tsx:67,83) y el avatar usan accentColor; el resto del embed es cyan fijo (ChatbotEmbed.tsx:269, :537; git grep accentColor|accentSecondary|chatSurfaceTint en ChatbotEmbed = 0).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Config publica por slug."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No aplica."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "No aplica."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No aplica."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Hex de 6 digitos en updateBotAppearance.ts:29-30 (fuera de lote)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No aplica."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "No aplica."
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Color hardcodeado en lugar del configurado."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "El cliente configura y no ve el cambio en su sitio."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "herramienta": "h3.vis-widget-cliente",
+   "id": "h3.vis-widget-cliente.avatar-del-bot",
+   "nombre": "Avatar animado del bot en cabecera y launcher",
+   "descripcion": "Renderiza el avatar elegido (3D, SVG, imagen o emoji) con estados idle/thinking/speaking.",
+   "archivos": [
+    "src/modules/chatbot/components/avatar/AvatarRenderer.tsx",
+    "src/modules/chatbot/components/avatar/registry.ts",
+    "src/modules/chatbot/components/avatar/HeavyAvatarsLazy.tsx",
+    "src/modules/chatbot/components/avatar/NeuroAvatar.tsx",
+    "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+    "src/modules/chatbot/components/avatar/MonogramAvatar.tsx",
+    "src/modules/chatbot/components/avatar/PulseAvatar.tsx",
+    "src/modules/chatbot/components/avatar/GeometricAvatar.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "ChatHeader.tsx:61-72 -> AvatarRenderer.tsx:51-101 -> registry.ts:96-104 -> HeavyAvatarsLazy.tsx:27-35 -> NeuroAvatar.tsx:45-64 / LegacyNeuroAvatarAdapter.tsx:31.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Config publica."
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "Escotilla sin valor cae al 3D pesado (AvatarRenderer.tsx:51,87)."
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Sin error boundary para WebGL/chunk (git grep ErrorBoundary = 0)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Placeholder del tamano final (HeavyAvatarsLazy.tsx:62-89)."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "AVATAR_STYLE_SCHEMA/CLIENT_AVATAR_STYLE_SCHEMA en las actions."
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "dpr hasta 2 y frameloop always (LegacyNeuroAvatar.tsx:940, NeuroAvatar.tsx:33)."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Estilo desconocido solo console.warn (AvatarRenderer.tsx:122-129)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Automatico."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.elegir-avatar",
+   "nombre": "El cliente elige el avatar de su bot",
+   "descripcion": "Grilla de avatares con preview animada, mas imagen custom y emoji.",
+   "archivos": [
+    "src/modules/chatbot/components/avatar/AvatarPicker.tsx",
+    "src/modules/chatbot/components/avatar/avatarStyleSchema.ts"
+   ],
+   "entradas": [
+    "updateBotAppearance (server action, fuera de lote)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "dashboard/chatbot/settings/page.tsx:63 -> BotPersonalization.tsx:271-278 -> AvatarPicker.tsx:58-161 onChange -> updateBotAppearance.ts:32 CLIENT_AVATAR_STYLE_SCHEMA (persistencia en otro lote).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Lo resuelve la action (otro lote)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Registry estatico (AvatarPicker.tsx:56)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Sin boundary si falla WebGL en los canvas del picker."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Placeholder de avatares pesados."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "avatarStyleSchema.ts:48-52 en updateBotAppearance.ts:32."
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "grid-cols-2 sm:grid-cols-3 (AvatarPicker.tsx:79), pero 2 canvas 3D simultaneos."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Delegado a error.tsx del segmento."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Autoservicio."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.elegir-avatar",
+   "nombre": "El admin elige el avatar del bot",
+   "descripcion": "Mismo AvatarPicker con escotillas imagen y emoji en la config del bot y en el alta.",
+   "archivos": [
+    "src/modules/chatbot/components/avatar/AvatarPicker.tsx",
+    "src/modules/chatbot/components/avatar/avatarStyleSchema.ts"
+   ],
+   "entradas": [
+    "saveBotConfig / saveBotConfigByOrgSlug / createClientWithBot (fuera de lote)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "AppearanceTab.tsx:40-45 y Step4Appearance.tsx:58-63 -> AvatarPicker -> AVATAR_STYLE_SCHEMA en saveBotConfig.ts:30, createClientWithBot.ts:56.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "SUPER_ADMIN, resuelto en las actions."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Registry estatico."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Sin boundary local para WebGL."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Placeholder."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "AVATAR_STYLE_SCHEMA."
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "Grilla responsive; costo de 2 canvas."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "error.tsx de admin/chatbots."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Interno."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.borrador-del-alta",
+   "nombre": "Borrador persistente del alta de cliente",
+   "descripcion": "El wizard de alta guarda y restaura el progreso en localStorage por 7 dias.",
+   "archivos": [
+    "src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "admin/clients/new/page.tsx:14 -> OnboardingWizard.tsx:98 -> useOnboardingDraft.ts:26-56 restore, :59-78 autosave, OnboardingWizard.tsx:140 clearDraft al crear.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Solo navegador del admin."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Sin borrador arranca de INITIAL_STATE."
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "Fallos de storage silenciosos (useOnboardingDraft.ts:53-55, 72-74)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sincrono."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "No envia datos."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI propia."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Catch vacio."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Interno."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.upsell-activacion",
+   "nombre": "Landing de activacion del chatbot",
+   "descripcion": "Pantalla de venta para orgs sin bot activo con CTA a WhatsApp y precio.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Maqueta: WhatsApp placeholder (ChatbotUpsellLanding.tsx:15) y precio que no coincide con el catalogo (:148-152 vs sync-plans.ts:70,102).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "contenido estatico"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin datos"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "sin fetch"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "estatico"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap :47, grid-cols-1 sm:grid-cols-2 :72, flex-col sm:flex-row :142"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "estatico"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "ChatbotUpsellLanding.tsx:15 numero 5493815555555; :148 '$150 USD'"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "el CTA no llega a develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.contactos-lista",
+   "nombre": "Lista de contactos (pipeline y filtros)",
+   "descripcion": "Contactos del bot con filtros de fecha/estado, toggle Descartados, pipeline por clasificacion, chip Nuevo y polling de 30 s.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx",
+    "src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx",
+    "src/modules/chatbot/components/dashboard/lead-pipeline/LeadPipeline.tsx",
+    "src/modules/chatbot/components/dashboard/lead-pipeline/LeadPipelineColumn.tsx",
+    "src/modules/chatbot/components/dashboard/lead-pipeline/LeadColumnOverview.tsx",
+    "src/modules/chatbot/components/dashboard/lead-pipeline/classes.ts",
+    "src/modules/chatbot/components/dashboard/LeadScoringTeaser.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "leads/page.tsx:35-59 -> ClientLeadsTable.tsx:90-374 -> LeadPipeline.tsx:29-80 / BusinessLeadCard.tsx:77-252; filtros via URL ClientLeadsTable.tsx:166-182.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "getClientChatbotSession (leads/page.tsx:36) con el patron D1-c2; listLeadsForDashboard por session.organization.id :56"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "ClientLeadsTable.tsx:238-261 (sin contactos / solo DQ / DQ) y :322-332 (filtro vacio); LeadPipelineColumn.tsx:90-95"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "boundary si; errores de acciones en ingles tecnico (LeadStatusActions.tsx:99)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "leads/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "parseStatus/parseRange leads/page.tsx:40-41; zod en updateLeadStatus.ts:11-21"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 :337; chips min-h-[44px] :58; flex-wrap :69"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "SectionErrorBoundary + onRequestError"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos de DB; sin TODO en el lote"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "acciones de un tap + detalle por card (BusinessLeadCard.tsx:211-217)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.contacto-detalle",
+   "nombre": "Detalle del contacto",
+   "descripcion": "Ruta dedicada con datos, clasificacion, origen, campana, transcript, WhatsApp pre-armado y seguimiento.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+    "src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "[id]/page.tsx:29-101 -> LeadDetail.tsx:150-542; transcript roto (LeadDetail.tsx:546) y guardado sin chequear resultado (:182-186).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "getLeadByIdForOrg y getConversationMessagesForOrg filtran por la org de getClientChatbotSession ([id]/page.tsx:29-35,75-77); patron D1-c2"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "LeadDetail.tsx:467-473 sin conversacion; :279-296 sin telefono/email"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "LeadDetail.tsx:184-185 ignora res.ok y muestra 'Guardado'"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "leads/[id]/loading.tsx; boton 'Guardando...' :529-531"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "updateLeadStatus.ts:11-15 (notes max 2000)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 sm:grid-cols-2 :269, :327; targets min-h-[44px]"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "boundary si; fallos de la action devueltos como ok:false no se capturan"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "no puede leer la conversacion (LeadDetail.tsx:546)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.acciones-rapidas-lead",
+   "nombre": "Acciones de un tap sobre el contacto",
+   "descripcion": "Lo contacte / Vendido / No avanzo con optimismo, deshacer y sellado de primer contacto.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "LeadStatusActions.tsx:78-115 -> updateLeadStatus.ts:17-94 (seal :40-46, revalidateTag :84-92).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "forOrg(session.organization.id) updateLeadStatus.ts:23 con org de getClientChatbotSession"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "accion"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "revierte y avisa (LeadStatusActions.tsx:95-101) pero con texto interno en ingles"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading/disabled LeadStatusActions.tsx:129-130"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "updateLeadStatus.ts:11-21"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap y min-h-[44px] :118, :138"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "ok:false no se reporta; throw de parse va a onRequestError"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "escritura real"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "deshacer en el toast :108-113"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.exportar-csv",
+   "nombre": "Exportar contactos a CSV",
+   "descripcion": "Boton que descarga el CSV con los filtros activos.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboard/ExportLeadsButton.tsx"
+   ],
+   "madurez": "L?",
+   "madurez_evidencia": "El boton arma la URL (ExportLeadsButton.tsx:44-64); la route (export/route.ts) es de otro lote y no se re-trazo.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "se decide en la route (otro lote)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "deshabilitado sin leads ExportLeadsButton.tsx:41,82"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "toast de exito sin chequear respuesta :66-70"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "'Exportando…' 1,5 s fijo :74,86"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "en la route"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "boton sm"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "en la route"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "descarga directa"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.conversaciones",
+   "nombre": "Conversaciones con transcript",
+   "descripcion": "Tabla de conversaciones del bot con transcript expandible.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboards/ConversationsTable.tsx",
+    "src/app/(protected)/dashboard/chatbot/conversations/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "conversations/page.tsx:9-23 -> multiTenantQueries.ts:174-197 -> ConversationsTable.tsx:48-180.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "getClientChatbotSession; manda columnas internas al navegador (multiTenantQueries.ts:180-187)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "ConversationsTable.tsx:75-87"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "transcript :200-202; boundary"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "conversations/loading.tsx; Loader2 :192-198"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "overflow-x-auto :95"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lee transcripts solo"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.base-conocimiento",
+   "nombre": "Lo que sabe tu chatbot (KB de solo lectura)",
+   "descripcion": "Muestra los 7 campos de la KB y guia para pedir cambios.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx",
+    "src/app/(protected)/dashboard/chatbot/knowledge/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "knowledge/page.tsx:10-21 -> ClientKnowledgeView.tsx:116-180.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "knowledgeBase por session.bot.id (knowledge/page.tsx:14) via getClientChatbotSession"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "campo vacio con hint ClientKnowledgeView.tsx:94-95; KB inexistente redirige (knowledge/page.tsx:19)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "boundary"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "knowledge/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap :81; pre whitespace-pre-wrap break-words :97"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "el CTA ?context=knowledge no prellena (message-context.ts:56)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.personalizacion",
+   "nombre": "Personalizacion del bot",
+   "descripcion": "Color, colores avanzados, posicion, avatar (incl. imagen base64), bienvenida y respuestas rapidas con preview.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboard/BotPersonalization.tsx",
+    "src/modules/chatbot/components/preview/BotConfigPreview.tsx",
+    "src/modules/chatbot/components/preview/types.ts",
+    "src/app/(protected)/dashboard/chatbot/settings/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "settings/page.tsx:13-60 -> BotPersonalization.tsx:149-169 -> updateBotAppearance.ts:55-138. Varios campos no llegan al widget instalado.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "resolveOrgId + forOrg (updateBotAppearance.ts:61,75); escribe como el cliente en preview"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "settings/page.tsx:51-58 sin bot"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "toast 'Error: Datos invalidos' sin campo (BotPersonalization.tsx:167)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "settings/loading.tsx; Button loading :338"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "updateBotAppearance.ts:24-43 strict"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-1 lg:grid-cols-[...] :173; colores grid-cols-4 :183"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "ok:false no se reporta"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "posicion/color no se aplican en el widget (widget.js:28,64)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.estado-crm",
+   "nombre": "Estado de la integracion CRM",
+   "descripcion": "Indicador de solo lectura: sin integracion, pausada o conectada.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "CrmStatusIndicator.tsx:20-31 resolveOrgId + planAllows + forOrg crmIntegration; tres estados :33-138.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "forOrg(organizationId).crmIntegration (CrmStatusIndicator.tsx:29)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": ":33-67 sin integracion"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "boundary de dashboard/chatbot"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "settings/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex items-start, texto fluido"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary + onRequestError"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "la conexion la hace develOP por diseno"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.instalacion",
+   "nombre": "Instalacion del snippet",
+   "descripcion": "Snippet copiable e instrucciones por plataforma (compartido con el admin).",
+   "archivos": [
+    "src/modules/chatbot/components/installation/platforms.ts",
+    "src/modules/chatbot/components/installation/SnippetCopyBlock.tsx",
+    "src/modules/chatbot/components/installation/PlatformInstructions.tsx",
+    "src/modules/chatbot/components/installation/index.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "buildEmbedSnippet platforms.ts:26-28 -> SnippetCopyBlock.tsx:28-33; ClientInstallView (otro lote) los consume.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "la pagina install no se re-leyo (otro lote); el snippet usa el slug recibido"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "clipboard sin await/catch SnippetCopyBlock.tsx:29"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "install/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "pre whitespace-pre-wrap break-all overflow-x-auto :37"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "slug real"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "snippet sin data-position y con data-theme fijo (platforms.ts:27)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.pestanas",
+   "nombre": "Pestanas de Mi Chatbot",
+   "descripcion": "Navegacion entre Overview, Leads, Conversaciones, Informacion, Configuracion e Instalacion con punto de calientes.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboard/ClientDashboardTabs.tsx"
+   ],
+   "madurez": "L3",
+   "madurez_evidencia": "layout.tsx:57 -> ClientDashboardTabs.tsx:21-98 con Link y fades de overflow.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "navegacion"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "overflow-x-auto + fades :49-64"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "-"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "-"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.vis-widget-cliente",
+   "id": "h3.vis-widget-cliente.chat-embebido",
+   "nombre": "Chat embebido en el sitio del cliente",
+   "descripcion": "Iframe /embed que carga la config, conversa por streaming, muestra tool cards y estados degradados.",
+   "archivos": [
+    "src/modules/chatbot/components/embed/ChatbotEmbed.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "widget.js:115-131 -> embed/[slug]/page.tsx:25-44 -> ChatbotEmbed.tsx:27,119-133 -> chat/route.ts:40-110.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "bot por slug; allowlist de dominios no aplica desde develop.com.ar (validate-origin.ts:70-76)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "ChatbotEmbed.tsx:240-315"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "ConfigLoadError :177-192; DegradedBanner :418-420"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "spinner :148-172; puntos de pensando :428-450"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "requestSchema.ts:56 y MAX_MESSAGE_CHARS :499"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "100dvh :202; viewport-fit embed/[slug]/page.tsx:13-18"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "global-error; errores de stream no trazados en este lote"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "currentPath '/' fijo :27"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "el visitante conversa o deriva solo"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.vis-widget-cliente",
+   "id": "h3.vis-widget-cliente.tarjetas-derivacion",
+   "nombre": "Tarjetas de derivacion (WhatsApp / que me contacten)",
+   "descripcion": "Tool cards validadas con zod en cliente y deshabilitadas con el turno en vuelo.",
+   "archivos": [
+    "src/modules/chatbot/components/tool-cards/renderToolCall.tsx",
+    "src/modules/chatbot/components/tool-cards/HandoffOptionsCard.tsx",
+    "src/modules/chatbot/components/tool-cards/WhatsappHandoffCard.tsx",
+    "src/modules/chatbot/components/tool-cards/index.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "ChatbotEmbed.tsx:398-409 -> renderToolCall.tsx:47-84 -> HandoffOptionsCard.tsx:22-69 / WhatsappHandoffCard.tsx:12-58.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "presentacional"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "sin numero muestra 'WhatsApp no configurado.' al visitante (WhatsappHandoffCard.tsx:17-23)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "input invalido -> null (renderToolCall.tsx:49-50)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "disabled={busy} HandoffOptionsCard.tsx:44,56"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "tools del servidor en otro lote"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid-cols-2 compacto"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "-"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "abre WhatsApp directo"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.vis-widget-develop",
+   "id": "h3.vis-widget-develop.tooltip-proactivo",
+   "nombre": "Teaser proactivo del widget de develOP",
+   "descripcion": "Pregunta rotativa sobre el lanzador disparada por montaje, inactividad o scroll.",
+   "archivos": [
+    "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+    "src/modules/chatbot/components/tooltip/useTooltipTriggers.ts",
+    "src/modules/chatbot/components/tooltip/types.ts",
+    "src/modules/chatbot/components/tooltip/index.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "LogicCompanion monta ProactiveTooltip; useTooltipTriggers.ts:33-87 -> ProactiveTooltip.tsx:71-94 -> onAccept :137.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "publico"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "sin prompts no se muestra (ProactiveTooltip.tsx:74-77)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "openers validados server-side segun comentario :14-16"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "maxWidth min(190px, 38vw) :119"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "prompts de DB"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "no aceptable con teclado (:122-139)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.vis-widget-develop",
+   "id": "h3.vis-widget-develop.navegar-a-pagina",
+   "nombre": "Tarjeta 'Llevame ahi'",
+   "descripcion": "Tool card navigate_to_page solo para el bot propio de develOP.",
+   "archivos": [
+    "src/modules/chatbot/components/tool-cards/NavigateToPageCard.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "renderToolCall.tsx:71-81 -> NavigateToPageCard.tsx:35-45; gate solo bot develop (navigate-to-page-gate.invariant.ts:41-53).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "tool solo para botSlug develop (invariant :41-53)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "zod renderToolCall.tsx:72-73"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "VALID_PATHS server-side segun invariant :7"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "-"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "-"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "-"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.leads-del-bot",
+   "nombre": "Tabla de leads del bot (admin)",
+   "descripcion": "LeadsTable compartida en el tab de leads del admin con accion por fila opcional.",
+   "archivos": [
+    "src/modules/chatbot/components/dashboards/LeadsTable.tsx",
+    "src/modules/chatbot/components/dashboards/index.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "admin/chatbots/[botId]/tabs/LeadsTab.tsx -> LeadsTable.tsx:46-97.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "lo decide el admin (otro lote)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "LeadsTable.tsx:48-56"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "presentacional"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "del padre"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "flex justify-between sin wrap :66"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "-"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "-"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.vista-previa-config",
+   "nombre": "Preview vivo de la configuracion",
+   "descripcion": "BotConfigPreview compartido entre el editor admin, el onboarding y la personalizacion del cliente.",
+   "archivos": [
+    "src/modules/chatbot/components/preview/BotConfigPreview.tsx",
+    "src/modules/chatbot/components/preview/index.ts",
+    "src/modules/chatbot/components/preview/types.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "BotPersonalization.tsx:347 y BotConfigEditor -> BotConfigPreview.tsx:65-244; no es espejo del embed (ChatbotEmbed no usa accent/tint).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "presentacional"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "fallbacks 'Asistente' / 'Mensaje de bienvenida' :198,218"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "ancho fluido, h-96"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "-"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "la preview muestra lo que el widget del cliente no aplica"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "-"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.vis-widget-cliente",
+   "id": "h3.vis-widget-cliente.conversar",
+   "nombre": "Conversar con el bot desde el widget",
+   "descripcion": "Hook useChatbot: carga la config, envia turnos con ventana de historial, reintenta 5xx/red y traduce cuota, dominio, tope, pausa, 429, 4xx y error de stream a banners.",
+   "archivos": [
+    "src/modules/chatbot/hooks/useChatbot.ts",
+    "src/modules/chatbot/hooks/index.ts",
+    "src/modules/chatbot/hooks/useChatbotSounds.ts"
+   ],
+   "entradas": [
+    "POST /api/chatbot/[slug]/chat (fuera del lote)",
+    "GET /api/chatbot/[slug]/config (fuera del lote)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz por codigo: sendMessage useChatbot.ts:537-549 -> transport :269-305 -> route.ts:8 -> handleChatRequest (entrada) -> stream al SDK :356. Hoy no responde en produccion por la credencial de Vertex vencida (hecho conocido).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "El tenant sale del slug de la URL (useChatbot.ts:272); el sessionId usa clave global 'chatbot:sessionId' compartida entre bots del mismo origen (:27)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "Empty state existe (ChatWindow.tsx:285) pero con copy generico 'Sistema Listo / Protocolo de consultoria' (:311, :321)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "8 degradados con mensajes para el visitante (useChatbot.ts:102-144); stream_interrupted y connection_failed sin WhatsApp (:284-291, :470-482)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "pendingSubmit/isStreaming/avatar thinking y reconnecting (useChatbot.ts:490-500, :531-535, :405)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "requestSchema.ts:45-61 (fuera del lote) valida roles, largos, ventana y sessionId"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Hook sin layout; el layout vive en ChatWindow.tsx (otro lote)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Servidor captura (handleChatRequest.ts:1057); el onError del cliente solo setea banner (useChatbot.ts:470-482)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME ni datos fijos en useChatbot.ts"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Con el proveedor caido el visitante no recibe derivacion a WhatsApp (useChatbot.ts:475-479)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.vis-widget-develop",
+   "id": "h3.vis-widget-develop.contenido-bot-develop",
+   "nombre": "Contenido del bot publico de develOP (seed y preguntas proactivas)",
+   "descripcion": "Seed idempotente de org, bot y KB de develOP, set de preguntas proactivas por ruta y script que actualiza solo proactivePrompts.",
+   "archivos": [
+    "src/modules/chatbot/prisma/seed.ts",
+    "src/modules/chatbot/prisma/developProactivePrompts.ts",
+    "src/modules/chatbot/prisma/update-proactive-prompts.ts"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "seed.ts:252-369 upsert org (:259-268), bot (:272-338) y KB (:342-365) via unsafeGlobalQuery con razon SEED; prompts fuente unica developProactivePrompts.ts:21-57 escritos por update-proactive-prompts.ts:22-32",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Script de dev con escape SEED explicito (seed.ts:259)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No es UI"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "catch con console.error y exit (seed.ts:372-375; update-proactive-prompts.ts:48-57)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No es UI"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Datos constantes"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No es UI"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Script local"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "WhatsApp de fallback inventado (seed.ts:231), colores por servicio cruzados (:224-226, :51, :57, :62)"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.resumen",
+   "nombre": "Resumen del chatbot del cliente",
+   "descripcion": "Hero y 4 tarjetas (oportunidades, valor estimado, personas atendidas, disponibilidad), leads recientes y derivaciones recientes.",
+   "archivos": [
+    "src/modules/chatbot/lib/business-metrics.ts",
+    "src/modules/chatbot/server/admin/clientHasChatbot.ts",
+    "src/modules/chatbot/server/admin/getClientSession.ts",
+    "src/modules/chatbot/server/admin/multiTenantQueries.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/chatbot/page.tsx",
+    "src/app/(protected)/dashboard/chatbot/layout.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:15-31 -> getUsageByOrgSlug/listLeadsByOrgSlug/listRecentHandoffsByOrgSlug (multiTenantQueries.ts:27-54, :208-258) -> ChatbotOverview.tsx:40-111",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Gate con resolveOrgId (page.tsx:15) y datos con getClientChatbotSession por OrgMember sin orderBy (getClientSession.ts:15-16); lecturas por forOrg"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "generateBusinessSummary con 0 conversaciones y 0 leads (business-metrics.ts:45-50)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "dashboard/chatbot/error.tsx existe pero sin captureException"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "dashboard/chatbot/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Solo lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Grilla grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 en ChatbotOverview.tsx"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captureException en error.tsx del segmento"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "leadValueUSD 50 y latencia por defecto 1500 ms (ChatbotOverview.tsx:43; business-metrics.ts:19-21); 'Oportunidades' = 5 leads recientes (page.tsx:30)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Bot pausado muestra la landing de venta (clientHasChatbot.ts:6; page.tsx:20-22)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.estado-lead",
+   "nombre": "Cambiar estado y notas de un lead",
+   "descripcion": "El dueno mueve el lead entre NEW, CONTACTED, IN_NEGOTIATION, WON y LOST con notas; sella el primer contacto.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+    "src/modules/chatbot/server/admin/getClientSession.ts"
+   ],
+   "entradas": [
+    "src/modules/chatbot/server/admin/updateLeadStatus.ts#updateLeadStatus"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "LeadStatusActions.tsx:92 -> updateLeadStatus.ts:17-21 -> getClientSession.ts:6-25 -> forOrg findFirst :27-30 -> update :42-47 -> revalidatePath :78",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "forOrg con la org de getClientChatbotSession (orgMember.findFirst sin orderBy ni impersonacion, getClientSession.ts:15-16)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Accion puntual"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "LeadStatusActions muestra res.error (:99-103); LeadDetail.tsx:184-185 ignora ok:false; mensajes en ingles (updateLeadStatus.ts:19, :33)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "pendingAction / isPending en LeadStatusActions y LeadDetail"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod .parse que lanza (updateLeadStatus.ts:21); leadId sin formato (:12)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Falla de revalidateTag solo a console.error (:90)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El cliente lo completa solo"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.leads-y-conversaciones",
+   "nombre": "Listas de leads y conversaciones del cliente",
+   "descripcion": "Leads con filtros de estado, rango y DQ (orden por score efectivo en memoria) y conversaciones con conteo de mensajes.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/multiTenantQueries.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/chatbot/leads/page.tsx",
+    "src/app/(protected)/dashboard/chatbot/conversations/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "leads/page.tsx:36,56 -> listLeadsForDashboard multiTenantQueries.ts:75-122; conversations/page.tsx:9-12 -> listConversationsByOrgSlug :174-198",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "forOrg con la org de sesion (multiTenantQueries.ts:101, :178); salvedad de getClientSession sin orderBy"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Render fuera del lote"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "dashboard/chatbot/error.tsx sin captureException"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "leads/loading.tsx y conversations/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Lectura; filtros tipados"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captura en el segmento"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "'Sin nombre' como fallback honesto (multiTenantQueries.ts:118)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "take 200 y 100 sin paginacion (multiTenantQueries.ts:78; conversations/page.tsx:12)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.analisis-mensual",
+   "nombre": "Analisis mensual del negocio",
+   "descripcion": "Serie de conversaciones por mes, top de categorias de consultas y descubrimientos del mes.",
+   "archivos": [
+    "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
+    "src/modules/chatbot/lib/monthly-analysis.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/dashboard/resultados/analisis/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "analisis/page.tsx:32-33,60 -> getMonthlyAnalysisForOrg.ts:48-106 -> monthly-analysis.ts:63-209",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "resolveOrgId (page.tsx:32) + forOrg (getMonthlyAnalysisForOrg.ts:53); solo conteos de QuotaUsage (:81)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "EMPTY con hasBot false (:37-43, :56) y sufficient con muestra minima 10 (monthly-analysis.ts:125, :156)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "resultados/error.tsx sin captureException"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "resultados/analisis/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Solo lectura"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captura en el segmento"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Datos reales pero la serie salta meses sin fila (monthly-analysis.ts:63-85)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Lectura autoservicio"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.alta-cliente-con-bot",
+   "nombre": "Alta de cliente con bot (wizard)",
+   "descripcion": "Crea org, usuario admin con password temporal, membresia, bot activo y KB; envia email de bienvenida.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/createClientWithBot.ts",
+    "src/modules/chatbot/server/admin/avatarImageUrlSchema.ts",
+    "src/modules/chatbot/server/admin/requireSuperAdmin.ts"
+   ],
+   "entradas": [
+    "src/modules/chatbot/server/admin/createClientWithBot.ts#createClientWithBot"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Step5Review.tsx:71 -> createClientWithBot.ts:96-207 (tx) -> :229-243 email -> :261-273 respuesta",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin (:96); crea tenant nuevo"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Errores esperables por throw (:104, :116) que Next redacta en produccion"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isSubmitting en Step5Review.tsx:61, :67"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod (:22-68) sin tope en KB (:44-50) ni esquema de avatar (:57); email sin normalizar"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captureException; logAdminAction traga errores"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "KB prellenada desde plantillas con {{PLACEHOLDERS}} (Step3KnowledgeBase.tsx:11)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Colision de slug de bot (:162) termina en error generico"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.alta-sin-bot",
+   "nombre": "Alta de cliente sin chatbot",
+   "descripcion": "Crea org, usuario admin con password temporal y membresia; envia email de bienvenida.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/createClientOnly.ts"
+   ],
+   "entradas": [
+    "src/modules/chatbot/server/admin/createClientOnly.ts#createClientOnly"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Step5Review.tsx:87 -> createClientOnly.ts:48-111 -> :132-147 email -> :165-175",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin (:48)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "throw en validacion y email duplicado (:55, :66)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isSubmitting en Step5Review"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod :19-29 con avatarImageUrlSchema (:22); email sin normalizar"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos salvo fallback de loginUrl (:132)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Mensajes de error redactados en produccion"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.crear-bot-org-existente",
+   "nombre": "Crear bot para una org existente",
+   "descripcion": "Crea un bot inactivo con KB y quick replies de la plantilla de la industria.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/createBot.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/chatbots/new/actions.ts#createBotAction"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "new/actions.ts:41-66 -> createBot.ts:41-123 (tx bot + KB :62-105, audit :107-120)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "createBotAction exige SUPER_ADMIN (actions.ts:42-47); forOrg para el bot (createBot.ts:49)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "throw generico 'Organization no encontrada' / 'Cannot find unique bot slug' (createBot.ts:24, :47)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod discriminado en new/actions.ts:15-36"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "KB de plantilla con {{PLACEHOLDERS}} (createBot.ts:58, :93-102)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Hay que reemplazar la KB a mano antes de activar"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.preflight-activacion",
+   "nombre": "Preflight y activacion del bot",
+   "descripcion": "Checks de KB, bienvenida, quick replies, WhatsApp, color y cuota antes de activar.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/preflightChecks.ts"
+   ],
+   "entradas": [
+    "src/modules/chatbot/server/admin/preflightChecks.ts#runPreflightChecks"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "BotDetailClient.tsx:140 -> preflightChecks.ts:13-168 -> ActivationModal.tsx:30",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "no",
+     "evidencia": "Server action sin auth con lectura global por id (preflightChecks.ts:13-25)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Bot no encontrado (:27-34), KB ausente (:74-81)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast en BotDetailClient.tsx:143 (con String(error))"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "startToggle en BotDetailClient.tsx:139"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "botId sin schema (:13)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Checks reales"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "No detecta placeholders (:45-48)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.editar-config",
+   "nombre": "Editar configuracion del bot",
+   "descripcion": "Identidad, apariencia, comportamiento, LLM, cuota, quick replies, prompts proactivos, dominios y notificaciones.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/saveBotConfig.ts",
+    "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+    "src/modules/chatbot/server/admin/index.ts"
+   ],
+   "entradas": [
+    "src/modules/chatbot/server/admin/saveBotConfig.ts#saveBotConfig",
+    "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts#saveBotConfigByOrgSlug"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "BotConfigEditor.tsx:80-81 -> saveBotConfig.ts:77-131 -> invalidateBotCache :133 -> audit :135-148",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin (:78; ByOrgSlug :71)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "ByOrgSlug devuelve err.message crudo (:139); Zod crudo (:81)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "toast.promise en BotConfigEditor"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod :19-64 (tone/industry libres)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "chatbotLog sin captureException (:156)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Campos sin efecto en runtime (llmModel/temperature/maxOutputTokens/routeColorMap)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "verticalPack no editable"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.editar-kb",
+   "nombre": "Editar base de conocimiento",
+   "descripcion": "7 secciones de KB con validacion de largos y contradicciones en cliente y topes en servidor.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/saveKnowledgeBase.ts",
+    "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts",
+    "src/modules/chatbot/server/admin/validateKB.ts"
+   ],
+   "entradas": [
+    "src/modules/chatbot/server/admin/saveKnowledgeBase.ts#saveKnowledgeBase",
+    "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts#saveKnowledgeBaseByOrgSlug"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "KnowledgeBaseEditor.tsx:112, :132-133 -> saveKnowledgeBase.ts:23-62 -> audit :64-82",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin (:24) + forOrg (:44)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Warnings de seccion vacia (validateKB.ts:19-29)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "ByOrgSlug devuelve err.message crudo (saveKnowledgeBaseByOrgSlug.ts:70)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Topes 50k/20k/10k (saveKnowledgeBase.ts:10-19)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin datos fijos"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "validateKB no detecta placeholders (validateKB.ts:19-29)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.email-prueba",
+   "nombre": "Email de prueba de notificacion de leads",
+   "descripcion": "Envia un email de lead ficticio a una casilla para probar la entrega.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/sendTestNotification.ts"
+   ],
+   "entradas": [
+    "src/modules/chatbot/server/admin/sendTestNotification.ts#sendTestNotification"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "BotConfigEditor.tsx:118 -> sendTestNotification.ts:16-83",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin (:17)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Accion puntual"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Mensajes utiles incluido 'Email no configurado' (:76-81)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "toast.promise en BotConfigEditor.tsx:118"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod :11-14 + rate limit :23-31"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Datos de prueba declarados como tales (:50-57)"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Herramienta de admin autosuficiente"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.integracion-crm",
+   "nombre": "Integracion CRM por webhook (n8n)",
+   "descripcion": "Guardar URL y secret cifrado, probar conexion, reintentar sync de un lead e historial paginado.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts",
+    "src/modules/chatbot/server/admin/integrations/testCrmConnection.ts",
+    "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+    "src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts"
+   ],
+   "entradas": [
+    "saveCrmIntegration",
+    "testCrmConnection",
+    "retryCrmSync"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "CrmConfigForm.tsx:48 -> saveCrmIntegration.ts:29-182; :70 -> testCrmConnection.ts:21-118; RetrySyncButton.tsx:19 -> retryCrmSync.ts:23-79; CrmIntegrationAdminCard.tsx:72 -> getCrmSyncHistory.ts:85-127",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin + forOrg en las 4 funciones"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'Todavia no hay integracion guardada' (testCrmConnection.ts:53-58)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Mensajes utiles (saveCrmIntegration.ts:65-78)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod strict + validateWebhookUrl (saveCrmIntegration.ts:17-25, :60)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Fallo del reintento solo a console.error (retryCrmSync.ts:74)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Payload de prueba declarado (testCrmConnection.ts:60-66)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Reintento detached puede no completarse (retryCrmSync.ts:73)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.listado-bots",
+   "nombre": "Listado de bots y estadisticas globales",
+   "descripcion": "Todos los bots de todas las orgs con conteos y KPIs de 30 dias.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/listAllBots.ts",
+    "src/modules/chatbot/server/admin/getGlobalBotsOverviewStats.ts",
+    "src/modules/chatbot/server/admin/queries.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/chatbots/page.tsx",
+    "src/app/(protected)/admin/chatbots/[botId]/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "admin/chatbots/page.tsx:19 -> listAllBots.ts:4-34 + getGlobalBotsOverviewStats.ts:22-51; detalle [botId]/page.tsx:28-71 -> queries.ts:6-61",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Global explicito PLATFORM-AGG bajo admin; detalle con guard propio ([botId]/page.tsx:28-31, :61)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Render fuera del lote"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "admin/chatbots/error.tsx sin captureException"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "admin/chatbots/loading.tsx y [botId]/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Lectura"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Conteos reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.adm-actividad",
+   "id": "h3.adm-actividad.grafico-7-dias",
+   "nombre": "Grafico de actividad de 7 dias",
+   "descripcion": "Conteo diario de ChatbotEvent de los ultimos 7 dias.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/getActivityChartData.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/chatbot/activity/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "activity/page.tsx:12 -> getActivityChartData.ts:3-38",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Agrega todas las orgs en pagina del bot develOP (getActivityChartData.ts:6-19)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "Serie de 7 dias en cero (:21-27)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Solo admin/error.tsx, sin captureException"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "admin/chatbot/activity/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Lectura"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Datos reales"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h3.adm-health",
+   "id": "h3.adm-health.latencia",
+   "nombre": "Latencia p50/p95 por hora",
+   "descripcion": "Percentiles de duracion de chat.message_completed en 24 h con estados vacio e insuficiente.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/getLatencyHistory.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/chatbot/health/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "health/page.tsx:13 -> getLatencyHistory.ts:63-144",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Global en pagina del bot develOP (:68-84)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "status empty/insufficient (:123-125, :137)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Solo admin/error.tsx sin captura"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "admin/chatbot/health/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Lectura"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "'Never fabricates data' cumplido (:58-62)"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.detector-incidencias",
+   "nombre": "Detector de incidencias de bots",
+   "descripcion": "Detecta 9 tipos de incidencia por bot, crea BotAlert deduplicada y notifica por email y Telegram.",
+   "archivos": [
+    "src/modules/chatbot/server/admin/detectBotIssues.ts",
+    "src/modules/chatbot/server/admin/manageAlerts.schemas.ts"
+   ],
+   "entradas": [
+    "GET /api/cron/detect-bot-issues",
+    "POST /api/admin/alerts/trigger-detector"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Funciona solo a mano: AlertSettingsClient.tsx:89 -> trigger-detector/route.ts:5-16 -> detectBotIssues.ts:285-297; sin scheduler (netlify.toml:25-32) y ciego a errores de stream",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Escrituras forOrg por org del bot (detectBotIssues.ts:43, :245)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Proceso batch"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Sin try por issue (:242-280); rutas devuelven String(error)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Proceso batch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Proceso batch"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Senales reales"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "No corre solo (sin disparador programado)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "herramienta": "h3.vis-api-chatbot",
+   "id": "h3.vis-api-chatbot.responder-turno",
+   "nombre": "Responder un turno del visitante",
+   "descripcion": "POST /api/chatbot/[slug]/chat: valida, resuelve bot y conversación, aplica gates, llama al LLM en streaming con tools y persiste el turno.",
+   "archivos": [
+    "src/modules/chatbot/server/chat/handleChatRequest.ts",
+    "src/modules/chatbot/server/chat/persistTurn.ts",
+    "src/modules/chatbot/server/chat/reconcile.ts",
+    "src/modules/chatbot/server/chat/streamWatchdog.ts",
+    "src/modules/chatbot/server/chat/requestSchema.ts",
+    "src/modules/chatbot/server/chat/toolSuspension.ts",
+    "src/modules/chatbot/server/chat/withDeadline.ts",
+    "src/modules/chatbot/server/chat/hookOps.ts",
+    "src/modules/chatbot/server/chat/dedup.ts",
+    "src/modules/chatbot/server/chat/silenceFrames.ts",
+    "src/modules/chatbot/server/chat/chunkTally.ts",
+    "src/modules/chatbot/server/chat/streamProbe.ts",
+    "src/modules/chatbot/server/conversation/resolver.ts",
+    "src/modules/chatbot/server/intent/detectIntent.ts"
+   ],
+   "entradas": [
+    "POST /api/chatbot/[slug]/chat"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz trazado: route.ts:42 -> :81 -> :97; handleChatRequest.ts:134-136, :155, :215-247, :612-616, :635, :937-1179; persistTurn.ts:412-472. Por código es L2; hoy no responde por la credencial de Vertex vencida (hecho conocido).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Org derivada del bot por slug (resolver.ts:24-36, unsafeGlobalQuery justificado) y toda escritura por forOrg(orgId): handleChatRequest.ts:163-164, :278, :606-616; persistTurn.ts:412."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Endpoint de API sin colecciones que mostrar."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Degradado con CTA WhatsApp (degradedResponse.ts:30-48), disculpa canned (reconcile.ts:407-411), 500 genérico (handleChatRequest.ts:1401-1410); pero queda en 400 permanente tras una respuesta de más de 4000 caracteres (requestSchema.ts:49) y el error del stream termina en un aviso sin WhatsApp (useChatbot.ts:470-480)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Estados de carga en el widget (lote D5-L4)."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod en requestSchema.ts:37-67 y opener validado (handleChatRequest.ts:811-815); currentPath entra crudo al system prompt (sections.ts:200)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Lógica de servidor."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "captureException en onError (handleChatRequest.ts:1057), en persist (persistTurn.ts:621-624) y en unhandled con flush (handleChatRequest.ts:1389-1400)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "TODO(INFRA.3) en reconcile.ts:540 y constante sin uso :547; instrumento temporal streamProbe.ts (apagado por env)."
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Lo usa el visitante anónimo, no el cliente."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "herramienta": "h3.vis-api-chatbot",
+   "id": "h3.vis-api-chatbot.gating-degradado",
+   "nombre": "Respuesta degradada por cupo, dominio o tope de conversación",
+   "descripcion": "Cuando el plan o el cupo bloquean, devuelve JSON canned con CTA a WhatsApp sin llamar al LLM.",
+   "archivos": [
+    "src/modules/chatbot/server/chat/handleChatRequest.ts",
+    "src/modules/chatbot/server/chat/degradedResponse.ts"
+   ],
+   "entradas": [
+    "POST /api/chatbot/[slug]/chat"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "handleChatRequest.ts:309-341 (dominio), :345-395 (cupo), :400-446 (reserva atómica), :547-579 (tope de 40 mensajes) -> degradedResponse.ts:30-48. Con el bug de cupo para conversaciones existentes (:345).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Cupo y eventos por orgId del bot: handleChatRequest.ts:226, :359-372, :401."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Mensajes útiles con CTA de WhatsApp: handleChatRequest.ts:332-340, :386-394, :568-578."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Respuesta JSON inmediata."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Body ya validado por zod (requestSchema.ts:37-67) antes de los gates."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Servidor."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "No son errores; quedan como ChatbotEvent warn (handleChatRequest.ts:322-330, :359-372)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO ni datos de prueba en degradedResponse.ts."
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Visitante."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "herramienta": "h3.vis-api-chatbot",
+   "id": "h3.vis-api-chatbot.config-publica",
+   "nombre": "Config pública del widget",
+   "descripcion": "GET /api/chatbot/[slug]/config: apariencia, saludo, quick replies y estado pausado del bot.",
+   "archivos": [
+    "src/modules/chatbot/server/config/getPublicConfig.ts",
+    "src/modules/chatbot/server/config/handleConfigRequest.ts"
+   ],
+   "entradas": [
+    "GET /api/chatbot/[slug]/config"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "handleConfigRequest.ts:11-25 -> getPublicConfig.ts:69-126 (select acotado :76-98, pausado :124).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Público por diseño con select de campos no sensibles: getPublicConfig.ts:72-99."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "404 si no existe (handleConfigRequest.ts:14-17) y tarjeta de pausado con WhatsApp (getPublicConfig.ts:8-22, :124)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Sin try/catch: una falla de DB sube como 500 de Next (handleConfigRequest.ts:12)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "API."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Solo slug de la URL."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "API."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Sin captureException propio; depende de la instrumentación global."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Widget."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.personalizar-apariencia",
+   "nombre": "Personalizar apariencia del bot (cliente)",
+   "descripcion": "El cliente cambia colores, posición, avatar, saludo y quick replies de su bot.",
+   "archivos": [
+    "src/modules/chatbot/server/dashboard/updateBotAppearance.ts"
+   ],
+   "entradas": [
+    "server action updateBotAppearance"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "BotPersonalization.tsx:151 -> updateBotAppearance.ts:56-66 -> :77 -> :95-107 -> :109 -> :135-136.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Org de la sesión por resolveOrgId y forOrg (updateBotAppearance.ts:61-77); no mira OrgRole."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'No tenes bot configurado' (updateBotAppearance.ts:79-81)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Devuelve {ok:false,error} en auth/validación (:57-73), pero el update (:95) no tiene try/catch."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI en BotPersonalization.tsx (lote D5-L5)."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod strict (updateBotAppearance.ts:24-43, :66)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Sin captura propia; un throw depende de error.tsx."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO ni datos falsos."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El cliente guarda sin intervención de develOP."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.exportar-leads-csv",
+   "nombre": "Exportar leads a CSV",
+   "descripcion": "Descarga de leads en lenguaje de dueño, con escape anti-fórmulas.",
+   "archivos": [
+    "src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts",
+    "src/modules/chatbot/server/leads/csv/csvEscape.ts"
+   ],
+   "entradas": [
+    "GET /api/dashboard/chatbot/leads/export"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "export/route.ts:84 -> :156 -> :166 buildLeadsCsv.ts:132-208 -> csvEscape.ts:25-42.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "La org sale de getClientChatbotSession (export/route.ts:84), resolución paralela sin impersonación (BUG-022)."
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "Sin leads devuelve solo encabezados (buildLeadsCsv.ts:165-207)."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Función pura."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Descarga."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input del usuario en esta función."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Archivo."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Función pura."
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "El intent sale crudo (buildLeadsCsv.ts:37-50, :84)."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El cliente descarga solo."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.sync-crm",
+   "nombre": "Enviar leads al CRM del cliente (n8n)",
+   "descripcion": "Al capturar un lead se hace POST a la URL de n8n del cliente, con reintentos y secreto cifrado.",
+   "archivos": [
+    "src/modules/chatbot/server/crm/syncLeadToCrm.ts",
+    "src/modules/chatbot/server/crm/postToN8n.ts",
+    "src/modules/chatbot/server/crm/buildLeadPayload.ts",
+    "src/modules/chatbot/server/crm/encryptSecret.ts",
+    "src/modules/chatbot/server/crm/validateWebhookUrl.ts",
+    "src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts"
+   ],
+   "entradas": [
+    "captureLead (tool) y retryCrmSync (server action, lote D5-L6)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "captureLead.ts:500 -> syncLeadToCrm.ts:41-133 -> postToN8n.ts:152-199 (fetch :87-92).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Org derivada del lead y todo scoped (syncLeadToCrm.ts:41-65, :75, :85, :121)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Sin colecciones."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Guarda httpStatus y lastErrorMessage (syncLeadToCrm.ts:121-133), pero el PENDING congelado pasa a FAILED sin motivo (getEffectiveSyncStatus.ts:33-35)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Proceso de fondo."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "validateWebhookUrl solo valida la URL inicial (validateWebhookUrl.ts:11-13, :86-93)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Servidor."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "El catch solo usa logger.error (syncLeadToCrm.ts:147-156)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Las fallas silenciosas del fire-and-forget obligan a soporte."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.gestionar-insights",
+   "nombre": "Aplicar o descartar insights del bot",
+   "descripcion": "El dueño marca un insight como aplicado o descartado.",
+   "archivos": [
+    "src/modules/chatbot/server/insights/manageInsight.ts",
+    "src/modules/chatbot/server/insights/queries.ts"
+   ],
+   "entradas": [
+    "server action actOnInsight (sin consumidores)"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "La action existe (manageInsight.ts:15-53) pero ninguna UI la llama (git grep actOnInsight: solo index.server.ts:73 e insights/index.ts:2).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "forOrg + doble chequeo (manageInsight.ts:21-32) con org de getClientChatbotSession (BUG-022)."
+    },
+    "vacios": {
+     "cumple": "no",
+     "evidencia": "Sin UI."
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "InsightActionSchema.parse lanza (manageInsight.ts:19)."
+    },
+    "carga": {
+     "cumple": "no",
+     "evidencia": "Sin UI."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod (manageInsight.ts:9-13)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captura."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "El cliente no tiene cómo actuar sobre los insights (BUG-023)."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.generar-insights",
+   "nombre": "Generar insights con IA",
+   "descripcion": "Cron diario y botón admin que analizan conversaciones y crean ChatbotInsight PENDING.",
+   "archivos": [
+    "src/modules/chatbot/server/insights/generateInsights.ts",
+    "src/modules/chatbot/server/insights/queries.ts"
+   ],
+   "entradas": [
+    "POST /api/admin/chatbot/insights/generate",
+    "POST /api/cron/generate-insights"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "insights/generate/route.ts:24 y cron route.ts:43 -> generateInsights.ts:30-130. Hoy falla por Vertex vencido.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "forOrg(organizationId) en todas las lecturas y escrituras (generateInsights.ts:26, :30, :50, :118)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Menos de 10 conversaciones -> insufficient (generateInsights.ts:45-47)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "catch con 'Failed to generate insights' (generateInsights.ts:131-134)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Proceso de fondo."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Salida del LLM validada con zod (generateInsights.ts:7-23); entrada del admin manual (route.ts:12-13)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Servidor."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "chatbotError -> Sentry (logging/logger.ts:103)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Operación de develOP."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "herramienta": "h3.adm-health",
+   "id": "h3.adm-health.veredicto-salud",
+   "nombre": "Veredicto de salud del bot",
+   "descripcion": "Chequea variables de entorno, DB, provider LLM y bot, y arma un veredicto con latencia.",
+   "archivos": [
+    "src/modules/chatbot/server/health/checkHealth.ts",
+    "src/modules/chatbot/server/health/buildHealthVerdict.ts",
+    "src/modules/chatbot/server/config/envValidator.ts"
+   ],
+   "entradas": [
+    "/admin/chatbot/health",
+    "GET /api/chatbot/[slug]/health (público)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "health/page.tsx:12-16 -> checkHealth.ts:21-98 -> buildHealthVerdict.ts:24-133. El veredicto no detecta un provider caído y valida la variable de credenciales equivocada.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "no",
+     "evidencia": "El mismo chequeo se sirve público y completo por /api/chatbot/[slug]/health (route.ts:6-19)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Latencia con pocos datos (buildHealthVerdict.ts:123-124)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Falso OK del LLM (checkHealth.ts:47-54) y falsa alarma de env (envValidator.ts:35-36)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "loading.tsx de admin/chatbot/health en el lote D5-L1."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "chatbotError en DB y LLM (checkHealth.ts:36, :57)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "Slug 'develop' fijo (checkHealth.ts:21)."
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Herramienta de develOP."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.vis-api-chatbot",
+   "id": "h3.vis-api-chatbot.respuesta-llm-streaming",
+   "nombre": "Respuesta del bot en streaming",
+   "descripcion": "Resolver provider/modelo efectivo, cerrar el stream mudo de Gemini y devolver la respuesta al visitante.",
+   "archivos": [
+    "src/modules/chatbot/server/llm/factory.ts",
+    "src/modules/chatbot/server/llm/providerMapper.ts",
+    "src/modules/chatbot/server/llm/resolveEffectiveModel.ts",
+    "src/modules/chatbot/server/llm/providers/google.ts",
+    "src/modules/chatbot/server/llm/providerStreamClose.ts"
+   ],
+   "entradas": [
+    "src/app/api/chatbot/[slug]/chat/route.ts:POST"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: handleChatRequest.ts:713 -> resolveEffectiveModel.ts:37-51 -> google.ts:91-97 -> wrapLanguageModel handleChatRequest.ts:735-760 -> streamText :937 -> persistTurn.ts:372-473. Bloqueado operativamente hoy por la credencial de Vertex vencida.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "org del bot resuelto por slug (handleChatRequest.ts:163-164), todo por forOrg"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no es coleccion"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "onError -> widget stream_interrupted (useChatbot.ts:97-98); sin evento persistido (handleChatRequest.ts:1052)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "lado servidor; el widget muestra thinking"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod requestSchema.ts:37-67, pero currentPath sin sanitizar (:56)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "handleChatRequest.ts:1057 y :1388 con flush"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO en el lote llm"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "sin tope global de 30 s (reconcile.ts:252,281)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.vis-api-chatbot",
+   "id": "h3.vis-api-chatbot.prompt-sistema",
+   "nombre": "Armado del system prompt",
+   "descripcion": "9 secciones con KB, tono, reglas anti-alucinacion, contexto dinamico y soft-cap.",
+   "archivos": [
+    "src/modules/chatbot/server/prompts/buildSystemPrompt.ts",
+    "src/modules/chatbot/server/prompts/sections.ts",
+    "src/modules/chatbot/server/prompts/helpers.ts",
+    "src/modules/chatbot/server/prompts/types.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "handleChatRequest.ts:635-658 -> buildSystemPrompt.ts:33-47 -> sections.ts:20-223; extras :817-827.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "KB del bot del tenant (handleChatRequest.ts:640-648)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "kbSection placeholder helpers.ts:43-49"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "funcion pura"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "currentPath interpolado sin sanitizar sections.ts:200"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "servidor; sections.ts:104 pide formato mobile"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "puro"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "mision develOP-centrica y tools que el plan no tiene (sections.ts:36-47,80-87)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "el cliente no puede ajustar mision/reglas; solo KB"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.vis-api-chatbot",
+   "id": "h3.vis-api-chatbot.captura-lead",
+   "nombre": "Captura de lead (capture_lead)",
+   "descripcion": "Guarda nombre y canales verificados contra lo que escribio el visitante, con scoring del pack.",
+   "archivos": [
+    "src/modules/chatbot/server/tools/captureLead.ts",
+    "src/modules/chatbot/server/scoring/calculateLeadScore.ts",
+    "src/modules/chatbot/server/scoring/validateArgentinePhone.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "captureLead.ts:212-233 -> :241-261 -> :358-361 -> :379-419 -> :521-550 (flujo trazado).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "forOrg(ctx.organizationId) captureLead.ts:206; ctx armado en servidor"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no es coleccion"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "re-ask :310-313 y mensaje al visitante :606-609, pero capture_lead.error solo a console :599-605"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod :57-97 + formato y pertenencia :253-261"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "ningun captureException en captureLead.ts"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "probe temporal gated (streamProbe) pero sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "aviso al cliente fire-and-forget :493"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.vis-api-chatbot",
+   "id": "h3.vis-api-chatbot.derivacion-whatsapp",
+   "nombre": "Derivacion a WhatsApp con contexto",
+   "descripcion": "Tarjeta con mensaje prellenado y evento con resumen para el panel.",
+   "archivos": [
+    "src/modules/chatbot/server/tools/showWhatsappHandoff.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "showWhatsappHandoff.ts:172-185 -> :96-114 -> :127-147 -> panel multiTenantQueries.ts:208-240.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "forOrg :105,:128"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "tool"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Telegram solo console :165"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Zod :42-67; visitorContact sin verificar pertenencia"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "description con frases de autos para todos :74-80"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "panel solo muestra visitorName y reason (multiTenantQueries.ts:230-238)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.vis-api-chatbot",
+   "id": "h3.vis-api-chatbot.pedido-contacto",
+   "nombre": "Pedido de contacto (confirm_contact_request)",
+   "descripcion": "Cierra el camino 'que me contacten' con texto y registra el pedido.",
+   "archivos": [
+    "src/modules/chatbot/server/tools/confirmContactRequest.ts"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "El lado visitante funciona (confirmContactRequest.ts:185-200), pero el registro handoff.callback (:112-124) no tiene lector: el camino no llega al cliente.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "forOrg :102"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "tool"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "nunca relanza :161-174, solo console"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod :55-63"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "el cliente no ve el pedido (git grep handoff.callback sin lectores)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.vis-widget-develop",
+   "id": "h3.vis-widget-develop.navegacion-sitio",
+   "nombre": "Navegar a seccion del sitio de develOP",
+   "descripcion": "Tool client-side con rutas fijas, solo para el bot develop.",
+   "archivos": [
+    "src/modules/chatbot/server/tools/navigateToPage.ts",
+    "src/modules/chatbot/server/tools/getTools.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "getTools.ts:121 gate por slug; navigateToPage.ts:25-43 z.enum de rutas cuyos anchors existen (OurServices.tsx id=servicios, Portfolio.tsx, About.tsx).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "restringida al bot develop getTools.ts:82-95"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "tool"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "z.enum rechaza rutas inventadas :39"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "cliente"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "z.enum :38-43"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "abre pestana"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "sin execute"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "rutas reales"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "no requiere develOP"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.vis-api-chatbot",
+   "id": "h3.vis-api-chatbot.cuota-mensual",
+   "nombre": "Cuota mensual de conversaciones",
+   "descripcion": "Reserva atomica por conversacion nueva, compensacion si no se entrego respuesta y degradacion a WhatsApp.",
+   "archivos": [
+    "src/modules/chatbot/server/quota/checker.ts",
+    "src/modules/chatbot/server/quota/upsellAlert.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "handleChatRequest.ts:345 / :401 -> checker.ts:126-151; compensacion checker.ts:189-212; upsell upsellAlert.ts:46-91.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "forOrg con guard de org en SQL (checker.ts:133-142)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "contador"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "degradedResponse con WhatsApp (handleChatRequest.ts:385-395)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "sessionId sin limite de conversaciones nuevas por IP (hallazgo SEC)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "chatbotError en upsell (upsellAlert.ts:75-87); compensacion solo stderr"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "el cliente no recibe aviso (alert80Sent sin uso)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.scoring-leads",
+   "nombre": "Scoring, decay y explicacion del score",
+   "descripcion": "Puntaje heuristico por pack vertical, DQ, decaimiento en lectura y explicacion en lenguaje PyME.",
+   "archivos": [
+    "src/modules/chatbot/server/scoring/calculateLeadScore.ts",
+    "src/modules/chatbot/server/scoring/dqFilter.ts",
+    "src/modules/chatbot/server/verticals/registry.ts",
+    "src/modules/chatbot/server/verticals/packs/base.ts",
+    "src/modules/chatbot/server/verticals/packs/usados.ts",
+    "src/modules/chatbot/server/verticals/packs/agencia.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "captureLead.ts:343-361 -> calculateLeadScore.ts:259-329 -> persistido :406-412; lectura getEffectiveScore :461-485.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "funciones puras"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "puro"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "registry nunca lanza (registry.ts:39-48); decay tolera fechas invalidas :404-415"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "puro"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "categorias/flags por Zod en captureLead.ts:72-95"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "puro"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "puro"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "todo bot nuevo queda en pack base (schema.prisma:1329)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "el pack no se puede elegir desde la app"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.vis-api-chatbot",
+   "id": "h3.vis-api-chatbot.costo-por-turno",
+   "nombre": "Costo estimado por turno",
+   "descripcion": "Costo en USD con el par provider/modelo efectivo, acumulado en Conversation y QuotaUsage.",
+   "archivos": [
+    "src/modules/chatbot/server/pricing/costs.ts",
+    "src/modules/chatbot/server/llm/providers/google.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "persistTurn.ts:372-377 -> costs.ts:21-51 -> google.ts:99-106; acumulado persistTurn.ts:450,468.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "acumulado dentro de la tx scoped persistTurn.ts:412"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "numero"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "costs.ts:32-41 no pisa el total con 0"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "interno"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "puro"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "precios de lista 2.5 Flash 0.30/2.50"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "insights y executive-brief no registran costo (generateInsights.ts:99-100)"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.reporte-semanal-email",
+   "nombre": "Reporte semanal del chatbot por email",
+   "descripcion": "Conversaciones, leads, consultas frecuentes y tiempo de respuesta de la semana.",
+   "archivos": [
+    "src/modules/chatbot/server/reports/buildWeeklyReport.ts",
+    "src/modules/chatbot/server/reports/sendWeeklyReports.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "netlify.toml:28-29 -> route.ts:7-14 -> sendWeeklyReports.ts:14-93 -> buildWeeklyReport.ts:26-139 -> Brevo :63-67.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "forOrg por bot (buildWeeklyReport.ts:27); barrido global con razon (sendWeeklyReports.ts:16)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "mensaje para 0 conversaciones culpa al cliente (:181)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "errores acumulados en la respuesta del cron (:84-88); sin Sentry"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "email"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "isAuthorizedCronRequest route.ts:8"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "email"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captureException (sendWeeklyReports.ts:84-89)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "total de leads con tope 10 (:67,:120)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "sin opt-out"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.email-insights",
+   "nombre": "Email de insights nuevos",
+   "descripcion": "Aviso al cliente cuando el cron genera insights del bot.",
+   "archivos": [
+    "src/modules/chatbot/server/notifications/sendInsightsNotification.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "src/app/api/cron/generate-insights/route.ts:61-66 -> sendInsightsNotification.ts:11-24 -> Brevo.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "destinatario org.leadNotificationEmail (route.ts:62)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "email"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "devuelve ok:false y console.error (:18-21)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "email"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "interno"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "max-width 560px; sin viewport meta"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error :19"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "botName sin escapar :36; URL puede ser 'undefined'"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "link al panel"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.alerta-upsell-cuota",
+   "nombre": "Alerta de upsell al agotar cuota",
+   "descripcion": "Una alerta por bot y mes a develOP (webhook y Telegram).",
+   "archivos": [
+    "src/modules/chatbot/server/quota/upsellAlert.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "handleChatRequest.ts:374 -> upsellAlert.ts:52-58 (markDegradedIfFirst) -> :68-88.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "forOrg :52"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "alerta"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "allSettled + chatbotError :68-88"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "interno"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Telegram"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "chatbotError -> Sentry (logger.ts:103)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "link relativo en Telegram (handleChatRequest.ts:383)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "dispara tambien ante agotamiento malicioso"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.vis-widget-develop",
+   "id": "h3.vis-widget-develop.carga-config-reintento",
+   "nombre": "Carga de la config del widget con reintento",
+   "descripcion": "Prefetch con cache por slug, reintento 2s/4s y estado de error con reintento manual.",
+   "archivos": [
+    "src/modules/chatbot/shared/configCache.ts",
+    "src/modules/chatbot/shared/chatRetryPolicy.ts",
+    "src/modules/chatbot/shared/publicConfig.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "useChatbot.ts:239 -> configCache.ts:54-65 -> fetchConfigWithRetry :43-52; error LogicCompanion.tsx:103-120.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "config publica por slug"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "config"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "ConfigLoadError con reintento LogicCompanion.tsx:103-120"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "isLoading devuelve null, sin indicador (LogicCompanion.tsx:95)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "safe-area en LogicCompanion.tsx:107-108"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "fetch fallido sin reporte"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "reintento manual"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.adm-actividad",
+   "id": "h3.adm-actividad.registro-eventos",
+   "nombre": "Registro de eventos del chatbot",
+   "descripcion": "Eventos por tenant en chatbot_events con allowlist de claves hacia consola y purga a 30 dias.",
+   "archivos": [
+    "src/modules/chatbot/server/logging/persistentLogger.ts",
+    "src/modules/chatbot/server/logging/logger.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "logChatbotEvent persistentLogger.ts:87-148 (forOrg create :129); purga :154-163 via cron netlify.toml:31-32.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "create scoped verifica bot y conversacion de la org (:113-136)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "escritura"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "falla de persistencia solo console (:137-147)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "interno"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "servidor"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "logger.persist_failed solo console"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "eventos de negocio (handoff) purgados a 30 dias"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.email-prueba-notificacion",
+   "nombre": "Email de prueba de notificacion de leads",
+   "descripcion": "Boton admin que manda un lead de prueba al email del cliente.",
+   "archivos": [
+    "src/modules/chatbot/server/notifications/sendLeadNotification.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "sendTestNotification.ts:16-58 -> sendLeadNotification.ts:18-39 -> Brevo.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin sendTestNotification.ts:17"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "accion"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "contrato skipped/error sendLeadNotification.ts:27-36"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "lado admin fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod en sendTestNotification (fuera del lote)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "tablas role=presentation, viewport meta :55"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error :34"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "plantilla distinta de la real (lib/client-notifications/templates.ts)"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna"
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "herramienta": "h3.vis-whatsapp",
+   "id": "h3.vis-whatsapp.recepcion-mensajes",
+   "nombre": "Recepcion autenticada de mensajes entrantes",
+   "descripcion": "El webhook de 360dialog autentica por canal y persiste identidad, conversacion y mensaje IN de forma idempotente.",
+   "archivos": [
+    "src/app/api/motor/webhook/[channelToken]/route.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/handle-request.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/auth.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/resolve-channel.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/payload.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/process.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/handle-message.ts",
+    "src/modules/motor/domain/channel-credentials.ts",
+    "src/modules/motor/domain/prisma-errors.ts"
+   ],
+   "entradas": [
+    "POST /api/motor/webhook/[channelToken]"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz trazado: route.ts:27 -> handle-request.ts:21-55 -> process.ts:136-157 -> handle-message.ts:24-58 (con un test de integracion en motor-inbound.spec.ts:214). No llega a L3: no hay forma de dar de alta un canal fuera de los tests (channel-credentials.ts:30), no hay Sentry y nadie consume ni muestra lo que se guarda.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "La unica lectura global es la resolucion pre-tenant por token (resolve-channel.ts:26). Todo lo demas corre con forOrg(channel.organizationId) en handle-request.ts:53, el registry scopea por organizationId (registry.ts:269-276) y phone_number_id se cruza en process.ts:142."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI: es un webhook maquina a maquina."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Devuelve 401/400 genericos sin detalle (handle-request.ts:74-80). Los errores de infraestructura dan 500 para que el BSP reintente (route.ts:51-56), pero sin alertar a nadie."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Zod del envelope (payload.ts:134-142) y de cada change (payload.ts:39-130), mas techo de 1 MB (handle-request.ts:66)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "route.ts:52 usa logger.error, que solo escribe a stdout (src/lib/logger.ts:61-63). No hay captureException."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Lei los 9 archivos inbound: no hay datos falsos ni TODO/FIXME en el camino."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "El negocio no puede conectar su numero: no hay alta de canal (no existe escritura de WabaChannel en src/scripts/prisma) ni vista de conversaciones."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "herramienta": "h3.vis-whatsapp",
+   "id": "h3.vis-whatsapp.identidad-bsuid",
+   "nombre": "Identidad BSUID-first del contacto y cambio de numero",
+   "descripcion": "Resuelve el contacto por BSUID, reconcilia filas legacy por telefono y aplica user_id_update con historial de transiciones.",
+   "archivos": [
+    "src/modules/motor/domain/identity.ts",
+    "src/modules/motor/domain/bsuid.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/payload.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/process.ts"
+   ],
+   "entradas": [
+    "POST /api/motor/webhook/[channelToken]"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz trazado: identity.ts:40-76 (bsuid, reconciled, created) y :106-140 (user_id_update), con los tests (b), (d), (e) e (i) de motor-inbound.spec.ts. Tiene un bug de mezcla de identidades por telefono (identity.ts:56-65).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Unique compuesto (org, canal, externalId) en schema.prisma:2076, upsert scoped en registry.ts:467-496 y parentCheck de la transicion en registry.ts:245-251."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "El conflicto se registra como transicion (identity.ts:121-124). Otros errores llegan como 500 sin Sentry (route.ts:52)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "user_id_update valida el patron BSUID (payload.ts:98-106). En la ruta de mensajes, user_id es solo z.string().min(1) (payload.ts:40)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "No hay captureException en el motor ni en la route."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "identity.ts y bsuid.ts no tienen mocks ni TODO."
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "Proceso interno sin interaccion del negocio."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "herramienta": "h3.vis-whatsapp",
+   "id": "h3.vis-whatsapp.estados-entrega",
+   "nombre": "Estados de entrega de mensajes salientes",
+   "descripcion": "Aplica los statuses sent/delivered/read/failed del BSP sobre los mensajes OUT, de forma monotona.",
+   "archivos": [
+    "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/process.ts"
+   ],
+   "entradas": [
+    "POST /api/motor/webhook/[channelToken]"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "El handler es correcto (handle-status.ts:37-60), pero en produccion no existe ninguna fila OUT: sendMotorMessage (sendMessage.ts:204) solo lo llaman los tests.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "findFirst scoped por org y direction OUT en handle-status.ts:41-44."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Un status desconocido o sin mensaje se saltea con debug (process.ts:160-164); el status huerfano se pierde."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "statusSchema en payload.ts:70-79."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Sin captureException."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "handle-status.ts no tiene mocks ni TODO."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Depende de un envio que no esta cableado."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "herramienta": "h3.vis-whatsapp",
+   "id": "h3.vis-whatsapp.salud-canal",
+   "nombre": "Salud del canal y alertas operativas",
+   "descripcion": "Refleja el estado de plantillas, el tier y el estado del numero, y registra alertas ante plantilla rechazada o numero restringido/baneado.",
+   "archivos": [
+    "src/modules/motor/adapters/whatsapp/inbound/handle-health.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/payload.ts",
+    "src/modules/motor/adapters/whatsapp/inbound/process.ts"
+   ],
+   "entradas": [
+    "POST /api/motor/webhook/[channelToken]"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Escribe estado y alertas (handle-health.ts:176, :219, :243, :115), pero nadie las lee ni hay transporte (schema.prisma:2216-2218; git grep motorAlert fuera del motor: 0). El dedupe pierde el escalado a baneado (handle-health.ts:106-113).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Todo se aplica sobre el canal resuelto por token con el scope de la org (handle-health.ts:7-11; registry.ts:278-294)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Un evento sin mapeo o una plantilla inexistente solo dejan debug o warn (handle-health.ts:132-141, :163-174)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "Schemas en payload.ts:111-130 y whitelists en handle-health.ts:45-75."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Las alertas no llegan a Sentry ni a ningun canal."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "No hay mocks. qualityRating queda en UNKNOWN de forma deliberada (handle-health.ts:15-18)."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Nadie se entera de las alertas."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "herramienta": "h3.vis-whatsapp",
+   "id": "h3.vis-whatsapp.envio-mensajes",
+   "nombre": "Envio de mensajes (texto en ventana de 24 h y plantillas aprobadas)",
+   "descripcion": "Unica puerta de salida del motor: aplica la ventana de 24 h, idempotencia, cifrado de la API key y despacho a 360dialog.",
+   "archivos": [
+    "src/modules/motor/services/sendMessage.ts",
+    "src/modules/motor/adapters/whatsapp/outbound/client.ts",
+    "src/modules/motor/domain/window.ts"
+   ],
+   "entradas": [],
+   "madurez": "L1",
+   "madurez_evidencia": "El servicio esta completo (sendMessage.ts:204-256 -> client.ts:252-290), pero no tiene llamadores en src ni scripts (solo tests/integration/motor-outbound.spec.ts:188) y tampoco hay forma de cargar la API key cifrada del canal.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Todo lo de adentro esta scoped por forOrg(input.orgId) (sendMessage.ts:208), pero el orgId lo pasa el llamador: B2 tiene que derivarlo del canal autenticado o de la sesion."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Errores tipados (client.ts:46-66; sendMessage.ts:59-71), pero los fallos de despacho quedan con la clave quemada (sendMessage.ts:213-217)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Ventana y plantilla APPROVED (sendMessage.ts:134-151). El body no tiene limite de longitud."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No tiene UI."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "El logger es NOOP por default (client.ts:75-79, :257)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "El logger NOOP lleva el comentario 'B2 cablea el real' (client.ts:68)."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Nada lo invoca."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "herramienta": "h3.vis-whatsapp",
+   "id": "h3.vis-whatsapp.respuesta-automatica",
+   "nombre": "Respuesta automatica del bot a los mensajes entrantes",
+   "descripcion": "Que el bot conteste al cliente final del negocio.",
+   "archivos": [
+    "src/app/api/motor/webhook/[channelToken]/route.ts"
+   ],
+   "entradas": [],
+   "madurez": "L0",
+   "madurez_evidencia": "No existe: route.ts:9-10 la difiere a B2. No hay llamador de sendMotorMessage (git grep en src y scripts: solo la definicion en sendMessage.ts:204) ni llamadas a LLM en el motor (git grep vertex|streamText|generateText: 0).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "sin_mocks_todos": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "No existe."
+    }
+   }
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "herramienta": "h3.vis-whatsapp",
+   "id": "h3.vis-whatsapp.alta-canal",
+   "nombre": "Alta y rotacion del canal de WhatsApp de un negocio",
+   "descripcion": "Generar channelToken y webhookSecret, cifrar la API key de 360dialog y crear el WabaChannel.",
+   "archivos": [
+    "src/modules/motor/domain/channel-credentials.ts"
+   ],
+   "entradas": [],
+   "madurez": "L0",
+   "madurez_evidencia": "Las piezas existen (channel-credentials.ts:30-38; secret-box), pero no hay script, action ni pantalla: git grep 'wabaChannel.(create|upsert|createMany)' en src/scripts/prisma da 0 (control: tests/integration/motor-inbound.spec.ts:113).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "sin_mocks_todos": {
+     "cumple": "n/a",
+     "evidencia": "No existe."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Hoy el alta requiere escribir a mano en la base."
+    }
+   }
+  }
+ ]
+}

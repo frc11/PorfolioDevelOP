@@ -14,6 +14,17 @@
 - Relacionado: —
 - Nodo(s): h1.auth-login.magic-link, int.brevo, lib.rate-limit, lib.auth
 
+### [SEC-057] Un anónimo agota en minutos el cupo mensual de conversaciones de cualquier bot de cliente (y el gasto de Vertex): el Origin de develop.com.ar vale para todos los bots y cada sessionId nuevo reserva un cupo
+- Dominio: D5  ·  Severidad: CRÍTICA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:400` — «if (isNewConversation) { const reserve = await tryReserveConversation(orgId, bot.id, plan.quota)»; `src/modules/chatbot/server/chat/requestSchema.ts:55` — «sessionId: z.string().min(1).max(200),»; `src/modules/chatbot/server/chat/handleChatRequest.ts:185` — «key: 'chatbotPerBotSession:${slug}:${body.sessionId}',»; `src/app/api/chatbot/[slug]/chat/route.ts:80` — «const rateKey = 'chatbotPerSession:${origin ?? 'no-origin'}:${ipHash}'»; `src/lib/rate-limit/presets.ts:27` — «chatbotPerSession: { limit: 30, windowMs: 60_000 },»; `src/lib/security/validate-origin.ts:70` — «if ( origin === 'https://develop.com.ar' || origin === 'https://www.develop.com.ar'»; `src/modules/chatbot/server/chat/degradedResponse.ts:97` — «// develop.com.ar nunca cae al cap»; `src/lib/security/origin-matcher.ts:40` — «if (originHost.endsWith('.' + clean)) return true»; `next.config.ts:131` — «{ key: 'Content-Security-Policy', value: "frame-ancestors *;" },»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:67` — «if (event.data?.type === 'develop:init') { parentOriginRef.current = event.origin»; `src/modules/chatbot/hooks/useChatbot.ts:272` — «api: '/api/chatbot/${slug}/chat',»; `src/modules/chatbot/server/chat/handleChatRequest.ts:952` — «temperature: 0.7, stopWhen: stepCountIs(3),»; `src/lib/security/origin-matcher.ts:39` — «if (originHost === clean) return true if (originHost.endsWith('.' + clean)) return true»; `src/modules/chatbot/server/chat/handleChatRequest.ts:345` — «if (quota.conversationsUsed >= plan.quota) {»; `prisma/seeds/sync-plans.ts:72` — «quota: 500,»; `src/modules/chatbot/server/chat/requestSchema.ts:111` — «if (forwarded) return forwarded.split(',')[0].trim()»; `src/lib/security/validate-origin.ts:71` — «origin === 'https://develop.com.ar' ||»; `src/modules/chatbot/server/chat/handleChatRequest.ts:401` — «const reserve = await tryReserveConversation(orgId, bot.id, plan.quota)»; `src/modules/chatbot/server/quota/checker.ts:137` — «const { reserved, conversationsUsed } = await forOrg(organizationId).quotaUsage.reserveConversation({»
+- Impacto: Bloqueante para el primer cliente real. Cualquier script sin login que conozca el slug (está en el snippet público del sitio del cliente) manda POST con Origin https://develop.com.ar (permitido para todos los bots y exento del tope de dominios del plan) y un sessionId nuevo por pedido: cada pedido crea una conversación y reserva 1 cupo del mes, que no se devuelve si el LLM respondió. Con el tope de 30/min por (origin, IP) y los dos orígenes de develOP son 60 conversaciones/min desde una sola IP: Starter (500) se agota en ~8 min, Pro (3000) en ~50 min y Business (5000) en ~83 min; rotando subdominios del cliente o el esquema como Origin cada variante abre un balde nuevo. Desde ahí todo visitante real recibe 'alcanzamos el límite de atención automática del mes' hasta fin de mes, y develOP paga cada llamada (hasta ~30 mensajes de 4000 caracteres de entrada y salida sin maxOutputTokens). La allowlist tampoco protege el widget oficial: /embed se deja enmarcar por cualquier sitio y llama same-origin con Origin develop.com.ar, así que un tercero puede embeber el bot de un cliente, consumir su cupo y recibir los leads por postMessage. Hoy queda enmascarado por la credencial de Vertex vencida (cada fallo devuelve el cupo); se activa al renovarla.
+- Propuesta: Decisión de diseño en tres partes: (1) rate limit por la IP confiable de la plataforma (no por el header Origin ni por sessionId) más un techo de conversaciones nuevas por IP/hora y por bot/hora; (2) cobrar el cupo cuando hay intercambio real (p. ej. primer turno respondido o segundo mensaje), no al crear la conversación; (3) hacer cumplir allowedDomains en el embed: frame-ancestors por bot y validar el origin del padre en el handshake, dejando develop.com.ar exento solo para el bot propio. Además fijar maxOutputTokens y alertar por velocidad de consumo del cupo.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-068]
+- Nodo(s): h3.vis-api-chatbot, h3.vis-widget-cliente, lib.security, lib.rate-limit, lib.chatbot.chat, lib.chatbot.quota, int.vertex, modelo.QuotaUsage, modelo.Conversation
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-065
+
 ### [SEC-007] Fuerza bruta de login sin freno real: el limite vive solo en loginAction (memoria por lambda) y el endpoint nativo de Credentials no tiene ninguno
 - Dominio: D1  ·  Severidad: ALTA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -267,12 +278,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [SEC-040] El export masivo de leads del admin no neutraliza fórmulas: un visitante anónimo del widget puede inyectar una fórmula en un CSV que junta leads de varias organizaciones
 - Dominio: D3  ·  Severidad: MEDIA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `src/lib/bulk-actions.ts:50` — «const leads = await prisma.chatbotLead.findMany({ where: { botConfig: { organizationId: { in: uniqueOrgIds } } },»; `src/lib/bulk-actions.ts:74` — «.map((value) => '"${String(value).replace(/"/g, '""')}"')»; `src/modules/chatbot/server/leads/csv/csvEscape.ts:22` — «const DANGEROUS_PREFIX = /^[=+\-@\t\r]/»; `src/modules/chatbot/server/tools/captureLead.ts:59` — «name: z.string().min(2).max(100).describe(»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:121` — «const result = await bulkExportLeads([...selected])»
+- Evidencia: `src/lib/bulk-actions.ts:50` — «const leads = await prisma.chatbotLead.findMany({ where: { botConfig: { organizationId: { in: uniqueOrgIds } } },»; `src/lib/bulk-actions.ts:74` — «.map((value) => '"${String(value).replace(/"/g, '""')}"')»; `src/modules/chatbot/server/leads/csv/csvEscape.ts:22` — «const DANGEROUS_PREFIX = /^[=+\-@\t\r]/»; `src/modules/chatbot/server/tools/captureLead.ts:59` — «name: z.string().min(2).max(100).describe(»; `src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:121` — «const result = await bulkExportLeads([...selected])»; `src/app/(protected)/admin/chatbots/bulk-actions.ts:139` — «(lead.intent ?? '').replace(/"/g, '""'),»; `src/app/(protected)/admin/chatbots/bulk-actions.ts:144` — «const csv = [headers.join(','), ...rows.map(r => r.map(v => '"${v}"').join(','))].join('\n')»; `src/modules/chatbot/server/leads/csv/csvEscape.ts:25` — «export function csvEscape(value: string | number | null | undefined): string {»
 - Impacto: El export del cliente ya prefija las celdas peligrosas (csvEscape.ts:5-10 documenta este mismo ataque), pero el export del admin no: un visitante que deja como nombre '=HYPERLINK(...)' o una fórmula IMPORT convierte el CSV que develOP abre en Excel o Google Sheets en un vector para mandar a un tercero nombres, emails y teléfonos de los leads de todas las orgs seleccionadas.
 - Propuesta: Reusar rowToCsv/csvEscape de modules/chatbot/server/leads/csv en bulkExportLeads (y en cualquier otro CSV del admin); agregar un invariante que busque armados de CSV con join(',') fuera de ese helper.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h4.adm-clientes, h3.vis-widget-cliente, modelo.ChatbotLead, lib.actions
+- Nodo(s): h4.adm-clientes, h3.vis-widget-cliente, modelo.ChatbotLead, lib.actions, h3.adm-chatbots, h3.adm-chatbots.acciones-bulk, lib.chatbot.leads
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-040
 
 ### [SEC-041] El seed del chatbot y update-proactive-prompts escriben en cualquier DATABASE_URL sin guard, aunque el escape los rotula 'script de dev' y ese seed define el bot de producción de develOP
@@ -350,11 +361,96 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h2.cli-resultados, h3.vis-widget-cliente, lib.chatbot.insights, modelo.ChatbotInsight, int.vertex, int.cron.generate-insights
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-064
 
+### [SEC-058] Texto del visitante entra al system prompt sin delimitar (currentPath) y el historial 'assistant' que manda el navegador se acepta tal cual
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/chat/requestSchema.ts:56` — «currentPath: z.string().max(500).optional(),»; `src/modules/chatbot/server/chat/handleChatRequest.ts:651` — «currentPath: body.currentPath,»; `src/modules/chatbot/server/prompts/sections.ts:200` — «- Ruta del usuario: ${context.currentPath ?? 'no determinada'}»; `src/modules/chatbot/server/chat/handleChatRequest.ts:946` — «if (m.role === 'assistant') { return { role: 'assistant', content: [{ type: 'text', text: m.content }] }»; `src/modules/chatbot/server/chat/requestSchema.ts:48` — «role: z.enum(['user', 'assistant', 'system']), content: z.string().max(MAX_MESSAGE_CHARS),»; `src/modules/chatbot/server/chat/persistTurn.ts:279` — «const warnings = validateAssistantOutput(text)»; `src/modules/chatbot/server/chat/handleChatRequest.ts:947` — «return { role: 'assistant', content: [{ type: 'text', text: m.content }] }»
+- Impacto: El spotlighting con nonce (SEC-LLM-01) envuelve solo los mensajes 'user'. Por currentPath (500 caracteres libres, con saltos de línea) un visitante escribe dentro del system prompt con autoridad de operador, y con turnos 'assistant' falsos arma un historial a medida. Puede hacer que el bot prometa precios o condiciones falsas a nombre del cliente (capturas), disparar capture_lead con datos inventados (mails al cliente y sync al CRM) o sacar la guía de ventas interna (salesGuidance/forbiddenStatements). El daño queda en la conversación del atacante y en las tools de ese tenant.
+- Propuesta: Validar currentPath como ruta (regex de path, sin saltos de línea, ≤200) o pasarlo por el canal no confiable; reconstruir el historial 'assistant' desde los ChatMessage persistidos (o firmarlo con HMAC) en vez de confiar en el body.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, lib.chatbot.prompts, lib.chatbot.chat, int.vertex
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-068
+
+### [SEC-059] El health público del chatbot devuelve el mapa de variables de entorno, errores internos y la existencia de bots, sin rate limit
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/chatbot/[slug]/health/route.ts:12` — «const health = await checkChatbotHealth(slug) return Response.json(health, {»; `src/modules/chatbot/server/health/checkHealth.ts:93` — «env: { ok: envResult.allCriticalPresent, details: envResult },»; `src/modules/chatbot/server/config/envValidator.ts:84` — «const vars: EnvVarStatus[] = ENV_VARS.map((v) => {»; `src/modules/chatbot/server/health/checkHealth.ts:35` — «dbCheck = { ok: false, error: error instanceof Error ? error.message : 'unknown' }»; `src/modules/chatbot/server/health/checkHealth.ts:74` — «botCheck = { ok: false, error: 'Bot with slug "${slug}" not found' }»; `src/modules/chatbot/server/health/checkHealth.ts:76` — «botCheck = { ok: false, slug: bot.slug, botName: bot.botName, error: 'Bot is inactive' }»; `src/proxy.ts:172` — «matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', ...]»; `src/modules/chatbot/server/health/index.ts:2` — «// endpoint /smoke (GET público que quemaba una llamada real a Vertex por hit,»
+- Impacto: Cualquiera sin login obtiene qué secretos están configurados (si falta CHATBOT_IP_HASH_SALT, todas las conversaciones dan 500 en prod), el texto crudo del error de la base o del proveedor cuando fallan (puede incluir host o proyecto GCP) y puede enumerar qué slugs existen y están activos. Cada pedido hace dos queries a Neon sin freno. Contradice 'Never expose internal error messages'.
+- Propuesta: Que el endpoint público devuelva solo {ok} (o exija CRON_SECRET/admin) y tenga rate limit; el detalle queda en /admin/chatbot/health y en logs.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, h3.vis-api-chatbot.health-publico, lib.chatbot.health, lib.security, h3.adm-health, lib.rate-limit, lib.proxy, int.neon, lib.prisma
+
+### [SEC-060] Las rutas de IA del admin (test-prompt, demo-chat) responden 500 y generan un evento de Sentry por cada pedido anónimo
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/admin/chatbot/test-prompt/route.ts:28` — «await requireSuperAdmin()»; `src/app/api/admin/chatbot/demo-chat/[slug]/route.ts:32` — «await requireSuperAdmin()»; `src/modules/chatbot/server/admin/requireSuperAdmin.ts:10` — «if (!session?.user) { throw new Error('UNAUTHORIZED: no active session')»; `src/instrumentation.ts:49` — «export const onRequestError = Sentry.captureRequestError»; `src/proxy.ts:172` — «matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password'],»
+- Impacto: Un script anónimo en bucle no llega al LLM (bien), pero cada pedido es un 500 y un evento en Sentry: se puede gastar la cuota de Sentry y tapar errores reales. /api no pasa por el proxy, así que no hay otra barrera.
+- Propuesta: Chequear la sesión y devolver 401/403 JSON sin throw en los route handlers (o envolver el guard en try/catch).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.kb-y-sandbox, int.sentry, lib.chatbot.admin
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-092
+
+### [SEC-061] Cada 403 de origen escribe un ChatbotEvent antes de cualquier rate limit
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/api/chatbot/[slug]/chat/route.ts:42` — «const validation = await validateOrigin({ origin, botSlug: slug })»; `src/app/api/chatbot/[slug]/chat/route.ts:55` — «await forOrg(validation.organizationId) .chatbotEvent.create({»; `src/app/api/chatbot/[slug]/chat/route.ts:79` — «const ipHash = hashIp(extractClientIp(request))»
+- Impacto: Para cualquier bot activo, un anónimo con un Origin no permitido genera una lectura y una escritura en Neon por pedido, sin tope: infla chatbot_events (30 días de retención), ensucia el log de actividad del admin y fabrica picos de 'dominio no autorizado'.
+- Propuesta: Rate limit por IP antes de validateOrigin y registrar los bloqueos agregados (uno por origin por ventana) en vez de uno por pedido.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, modelo.ChatbotEvent, lib.rate-limit
+
+### [SEC-065] runPreflightChecks: server action exportada sin sesión ni rol
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/admin/preflightChecks.ts:1` — «'use server'»; `src/modules/chatbot/server/admin/preflightChecks.ts:13` — «export async function runPreflightChecks(botId: string): Promise<PreflightCheck[]> {»; `src/modules/chatbot/server/admin/preflightChecks.ts:19` — «'ADMIN: preflight — lectura del bot por id (super-admin, cualquier org)',»; `src/modules/chatbot/server/admin/preflightChecks.ts:123` — «message: 'Numero: +${bot.whatsappNumber}',»; `src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx:140` — «const checks = await runPreflightChecks(bot.id)»; `src/app/(protected)/admin/chatbots/[botId]/actions.ts:30` — «if (!session?.user || session.user.role !== 'SUPER_ADMIN') {»; `src/modules/chatbot/server/admin/preflightChecks.ts:18` — «const bot = await unsafeGlobalQuery(»
+- Impacto: La función se importa desde un client component, así que es un endpoint público: quien tenga el id de la action (está en el JS de /admin/chatbots/[botId]) y el cuid de un bot puede leer sin sesión el estado de configuración de un bot de cualquier organización (completitud de la KB, número de WhatsApp, color, cuota). El escape unsafeGlobalQuery dice 'super-admin' pero nada lo exige. Viola la regla 'verificar sesión y rol en cada Server Action'. Las precondiciones (id de la action y del bot) lo dejan en MEDIA.
+- Propuesta: Llamar requireSuperAdmin() al inicio y validar botId con Zod; sacar canActivate del archivo 'use server' (es una función pura); repetir el preflight en el servidor dentro de la action que activa.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.activar-bot-preflight, lib.chatbot.admin, lib.isolation, modelo.BotConfig, h3.adm-chatbots, h3.adm-chatbots.activar-pausar-eliminar, h3.adm-chatbots.preflight-activacion
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-073
+
+### [SEC-068] El widget de cualquier cliente corre desde cualquier sitio: el embed vive en develop.com.ar, que la allowlist deja pasar siempre
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `next.config.ts:129` — «source: '/embed/:slug*', ... { key: 'Content-Security-Policy', value: "frame-ancestors *;" } (comentario :127-128: 'R18 will restrict to a whitelist')»; `src/lib/security/validate-origin.ts:71` — «origin === 'https://develop.com.ar' || origin === 'https://www.develop.com.ar' -> return { allowed: true, ... }»; `src/modules/chatbot/server/chat/degradedResponse.ts:97` — «// develop.com.ar nunca cae al cap»; `public/widget.js:125` — «iframe.src = ... '/embed/' + ... (BASE_URL = 'https://develop.com.ar' en :21)»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:67` — «if (event.data?.type === 'develop:init') { parentOriginRef.current = event.origin»; `src/modules/chatbot/components/admin/onboarding/Step1Company.tsx:115` — «<label className="block text-sm text-zinc-400 mb-1">URL del sitio web (opcional)</label>»; `src/modules/chatbot/server/admin/createClientWithBot.ts:134` — «siteUrl: parsed.websiteUrl,»; `src/modules/chatbot/server/admin/createClientWithBot.ts:165` — «isActive: true,»; `src/lib/security/validate-origin.ts:78` — «if (bot.allowedDomains.length === 0) {»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:350` — «? 'El cliente se creará y el bot quedará activo inmediatamente.'»
+- Impacto: Todo el trafico del widget sale del iframe /embed alojado en develop.com.ar, asi que el POST a /chat lleva Origin develop.com.ar y validateOrigin lo acepta para cualquier bot; el tope de dominios del plan tampoco aplica. Bloqueante para el primer cliente real: cualquier tercero puede pegar el snippet con su slug (o un iframe a /embed/<slug>) en otro sitio y agotar su cupo mensual (el bot queda degradado para sus visitantes reales) y el costo de Vertex de develOP; un cliente Starter (maxDomains 1) puede instalarlo en dominios ilimitados.
+- Propuesta: Decidir el modelo de confianza: que widget.js pase el origen del host, que el embed lo valide (event.origin del handshake) y lo reenvie a /config y /chat, y que el servidor lo contraste contra allowedDomains y el tope del plan; frame-ancestors dinamico por bot desde allowedDomains (el R18 pendiente). Documentar que Origin se puede forjar fuera del navegador: el limite real de costo siguen siendo rate limit y cupo.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-057], [UX-017]
+- Nodo(s): h3.vis-widget-cliente, h3.vis-widget-cliente.chat-embebido, lib.security, int.vertex, modelo.BotConfig, h4.adm-clientes.alta-cliente-con-bot
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-085
+
+### [SEC-072] SSRF del webhook CRM: solo se valida la URL inicial (pasan redirects, DNS e IPv6 mapeada) y 'Probar conexión' le devuelve al cliente hasta 200 caracteres de la respuesta
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/crm/validateWebhookUrl.ts:11` — «Deuda conocida (roadmap-pendientes): DNS rebinding.»; `src/modules/chatbot/server/crm/validateWebhookUrl.ts:87` — «hostname === '::1' || hostname.startsWith('fe80:') ||»; `src/modules/chatbot/server/crm/postToN8n.ts:87` — «const response = await fetch(input.webhookUrl, { method: 'POST',»; `src/modules/chatbot/server/crm/postToN8n.ts:117` — «errorMessage: sanitizeSnippet('HTTP ${response.status}: ${errorBody}'),»; `src/modules/chatbot/server/admin/integrations/testCrmConnection.ts:115` — «error: result.errorMessage ?? 'Falló la conexión',»
+- Impacto: Un usuario de un cliente con CRM habilitado puede hacer que el servidor de develOP pegue a destinos internos: con una URL https propia que redirige (301/302/307) a http://127.0.0.1:<puerto> o 169.254.169.254, o con https://[::ffff:7f00:1]/ (loopback IPv4 mapeado, que el validador no reconoce), o con un dominio que resuelve a IP privada. Con 'Probar conexión' lee el status y los primeros 200 caracteres de las respuestas de error. Precondición: cuenta de cliente con plan CRM.
+- Propuesta: fetch con redirect:'manual' (o validar cada salto); resolver DNS justo antes del POST y bloquear rangos privados, incluidos ::ffff:0:0/96, ::, 0.0.0.0/8 y 100.64.0.0/10; conectar a la IP validada; en 'Probar conexión' devolver solo un estado genérico (ok / código HTTP).
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, lib.chatbot.crm, int.n8n
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-099
+
+### [SEC-073] Datos personales de visitantes de todos los clientes se envian al Telegram del equipo de develOP
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/tools/captureLead.ts:444` — «// Telegram — always fires for the develOP team when configured (env-based)»; `src/modules/chatbot/server/tools/captureLead.ts:450` — «phone ? 'Tel: ${phone}' : '',»; `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:157` — «input.visitorContact ? 'Contacto: ${input.visitorContact}' : '',»
+- Impacto: Nombre, email, telefono y resumen de cada lead de cada cliente salen a un chat de Telegram de develOP sin opcion por cliente. Con el primer cliente real, develOP actua como encargado de datos de terceros y esa transferencia tendria que estar declarada y acotada (Ley 25.326). Decision para Valentino.
+- Propuesta: Gate por cliente (opt-in) o mandar solo identificadores y link al panel; documentar el tratamiento en la politica y el contrato.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.chatbot.tools, int.telegram, modelo.ChatbotLead
+
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
 - Evidencia: `docs/audits/2026-05-bfg-leak-cleanup.md:94` y `docs/bitacora-roadmap.md:36` — valor completo de una `GOOGLE_GENERATIVE_AI_API_KEY` (omitido); historial: `logic-core-v3/enviroment.env` agregado en `3953558312` (2026-02-12) y alcanzable desde 116 refs (`_crudo/secrets-historial.json`); `docs/audits/2026-05-bfg-leak-cleanup.md:193-197` — «### 8.2 Lo que NO se hizo … ❌ `git push --force` al remote»; `:204` — «La key `…` sigue deshabilitada en Google Cloud (Franco ya rotó — confirmado)».
-- Impacto: bloqueante para el primer cliente real solo si la clave siguiera viva: cualquiera con un clon (el repo pasó a privado, pero estuvo público según `docs/baselines/2026-07-auditoria-seguridad.md:3360`) podría consumir la cuota de Google AI a nombre de develOP. Valentino confirma que las credenciales del repo son de prueba (ENMIENDA-01 P1).
+- Impacto: bloqueante para el primer cliente real solo si la clave siguiera viva: cualquiera con un clon (el repo sigue público: `gh repo view frc11/PorfolioDevelOP --json visibility` devolvió `PUBLIC` el 2026-10-13 y el 2026-10-14, y ya lo era según `docs/baselines/2026-07-auditoria-seguridad.md:3360`) podría consumir la cuota de Google AI a nombre de develOP. Valentino confirma que las credenciales del repo son de prueba (ENMIENDA-01 P1).
 - Propuesta: borrar el valor de los dos documentos (dejar solo un prefijo), confirmar en Google Cloud que la clave está revocada y decidir si se purga el historial (`git-filter-repo` + force-push coordinado) o se acepta como clave muerta.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [SEC-002], [SEC-003], [SEC-004]
@@ -418,12 +514,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [SEC-018] OrgRole (ADMIN/MEMBER/VIEWER) viaja en la sesion pero ningun guard lo lee
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: PROBABLE
-- Evidencia: `src/auth.ts:227` — «token.orgRole = accessState.orgRole»; `src/lib/actions/profile.ts:29` — «const organizationId = session?.user?.organizationId»; `prisma/schema.prisma:523` — «role OrgRole @default(ADMIN)»; `prisma/schema.prisma:19` — «enum OrgRole { ADMIN MEMBER VIEWER»; `src/auth.ts:251` — «session.user.orgRole = token.orgRole as OrgRole | undefined»; `src/lib/actions/upsell.ts:14` — «const session = await auth() const userId = session?.user?.id const organizationId = session?.user?.organizationId»; `src/components/dashboard/modules/motor-resenas/_actions.ts:55` — «const organizationId = resolveScopedOrgId(await resolveOrgId(), params.organizationId)»
+- Evidencia: `src/auth.ts:227` — «token.orgRole = accessState.orgRole»; `src/lib/actions/profile.ts:29` — «const organizationId = session?.user?.organizationId»; `prisma/schema.prisma:523` — «role OrgRole @default(ADMIN)»; `prisma/schema.prisma:19` — «enum OrgRole { ADMIN MEMBER VIEWER»; `src/auth.ts:251` — «session.user.orgRole = token.orgRole as OrgRole | undefined»; `src/lib/actions/upsell.ts:14` — «const session = await auth() const userId = session?.user?.id const organizationId = session?.user?.organizationId»; `src/components/dashboard/modules/motor-resenas/_actions.ts:55` — «const organizationId = resolveScopedOrgId(await resolveOrgId(), params.organizationId)»; `src/modules/chatbot/server/dashboard/updateBotAppearance.ts:61` — «const orgId = await resolveOrgId()»; `src/auth.config.ts:5` — «type OrgRole = 'ADMIN' | 'MEMBER' | 'VIEWER'»
 - Impacto: Latente: hoy todas las membresias se crean ADMIN; el dia que se invite a un VIEWER podra cambiar nombre de empresa, contacto, preferencias de toda la org y pedir la baja de la cuenta (profile.ts solo exige organizationId).
 - Propuesta: Definir el modelo de permisos por OrgRole antes de habilitar miembros no-ADMIN; helper requireOrgRole en las actions de cuenta.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): lib.auth, h2.cli-cuenta, modelo.OrgMember, h2.cli-shell, h2.cli-resenas, h2.cli-email-mkt, lib.preview
+- Nodo(s): lib.auth, h2.cli-cuenta, modelo.OrgMember, h2.cli-shell, h2.cli-resenas, h2.cli-email-mkt, lib.preview, h3.cli-chatbot
 
 ### [SEC-019] Contrasena temporal de 8 caracteres con estructura fija (~34 bits) y sin vencimiento
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: seguridad
@@ -579,6 +675,88 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [SEC-048], [SEC-047]
 - Nodo(s): h2.cli-servicios.solicitar-modulo, h6.vis-contacto, modelo.ContactSubmission, modelo.OrganizationModule, lib.actions
 
+### [SEC-062] Las acciones del admin de chatbots devuelven el mensaje crudo del error (Prisma/SDK) a la UI
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/chatbots/[botId]/actions.ts:96` — «error: error instanceof Error ? error.message : 'unknown',»; `src/app/(protected)/admin/chatbots/[botId]/transcript-action.ts:61` — «error: error instanceof Error ? error.message : 'No se pudo cargar el transcript.',»; `src/app/(protected)/admin/chatbots/bulk-actions.ts:55` — «error: error instanceof Error ? error.message : 'unknown',»; `src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx:144` — «toast.error('No se pudieron correr los checks: ${String(error)}')»; `src/app/(protected)/admin/chatbots/new/actions.ts:91` — «error: error instanceof Error ? error.message : 'Error desconocido',»
+- Impacto: Solo lo ve un SUPER_ADMIN, pero expone nombres de tablas, constraints y mensajes del SDK en toasts; contradice 'Never expose internal error messages'.
+- Propuesta: Mapear errores conocidos a mensajes y loguear el resto con captureException.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots
+
+### [SEC-063] Las páginas de Inteligencia del chatbot (actividad y health) no tienen guard propio
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/chatbot/activity/page.tsx:9` — «export default async function ActivityPage() { const [bot, chartData] = await Promise.all([»; `src/app/(protected)/admin/chatbot/health/page.tsx:10` — «export default async function HealthPage() { const [health, latencyHistory] = await Promise.all([»
+- Impacto: Dependen del guard de admin/layout.tsx y del proxy; si el layout no se re-ejecuta en un render parcial y el JWT tiene claims viejos, leen eventos del bot de develOP y el mapa de variables de entorno.
+- Propuesta: auth() + rol SUPER_ADMIN al inicio de cada página (mismo patrón que chatbots/page.tsx:14-17).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-actividad, h3.adm-health
+
+### [SEC-064] Si el JSON de la credencial de Vertex está mal formado, el parseo se reintenta en cada pedido y su mensaje de error se guarda en la base y va a Sentry
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: HIPÓTESIS
+- Evidencia: `src/modules/chatbot/server/llm/providers/google.ts:72` — «if (!this.client) {»; `src/modules/chatbot/server/llm/providers/google.ts:82` — «credentials: JSON.parse(credJson),»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1383` — «message: unhandledError instanceof Error ? unhandledError.message : 'unknown',»
+- Impacto: El SyntaxError de V8 puede citar un fragmento del texto alrededor del error; si cae dentro de private_key, ese fragmento queda en ChatbotEvent (visible en el log de actividad del admin), en stderr y en Sentry, una vez por pedido. No hay ninguna credencial versionada en origin/main (ver ausencias). La rotación de la key que la bitácora da por expuesta no es verificable desde el repo; hoy la credencial está vencida.
+- Propuesta: Parsear la credencial una vez, dentro de try/catch, con un mensaje genérico ('credencial de Vertex inválida') sin el texto del error; confirmar la rotación de la key reportada como expuesta.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): int.vertex, lib.chatbot.llm, modelo.ChatbotEvent, int.sentry
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-070
+
+### [SEC-066] Validación del alta y del sandbox inconsistente con el resto de las acciones
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/admin/createClientWithBot.ts:34` — «userEmail: z.string().email(),»; `src/modules/chatbot/server/admin/createClientWithBot.ts:44` — «businessInfo: z.string().min(20),»; `src/modules/chatbot/server/admin/createClientWithBot.ts:57` — «avatarImageUrl: z.string().nullable(),»; `src/modules/chatbot/server/admin/createClientWithBot.ts:28` — «clientAvatarImageUrl: avatarImageUrlSchema,»; `src/app/api/admin/chatbot/test-prompt/route.ts:21` — «kbDraft: z.record(z.string(), z.string()),»; `src/modules/chatbot/server/admin/saveKnowledgeBase.ts:12` — «businessInfo: z.string().max(50_000),»; `src/modules/chatbot/server/admin/createClientWithBot.ts:70` — «function slugify(s: string): string {»
+- Impacto: El email no se normaliza (el login sí); el teléfono y las 7 secciones de KB no tienen máximo (saveKnowledgeBase sí: 10.000–50.000); el avatar del bot acepta cualquier string sin el schema de URL/data-URL ni el tope de 600 KB que la misma acción aplica al avatar del cliente; el teléfono vacío se guarda como '' y el paso 2 muestra '/500' sin limitar el textarea. Es entrada de SUPER_ADMIN, por eso BAJA.
+- Propuesta: Reusar avatarImageUrlSchema, los máximos de saveKnowledgeBase y la normalización de email del login en createClientWithBot/createClientOnly y en el sandbox.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.alta-cliente-con-bot, h3.adm-chatbots.probar-prompt, lib.chatbot.admin, h3.adm-chatbots.alta-cliente-con-bot
+
+### [SEC-067] El borrador del alta de cliente guarda PII del contacto y la KB en localStorage 7 dias bajo una clave global, aunque no se edite nada, y falla en silencio
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts:6` — «const DRAFT_KEY = 'develop:onboarding:draft'»; `src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts:70` — «localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))»; `src/modules/chatbot/components/admin/onboarding/types.ts:50` — «userEmail: string userName: string userPhone: string»
+- Impacto: Email, telefono y WhatsApp del cliente, mas avatares en data-URI y la KB, quedan en el navegador del SUPER_ADMIN sin borrarse al hacer logout; la clave no se separa por usuario. Con data-URIs grandes, setItem puede exceder la cuota y el borrador se pierde sin aviso (catch vacio :72-74). Se graba el estado inicial al abrir la pagina, asi que la proxima visita muestra 'borrador' aunque no se haya escrito nada. Errores de eslint en :49 (set-state-in-effect) y :56 (exhaustive-deps).
+- Propuesta: Excluir de la persistencia los campos de contacto y los data-URI (o usar sessionStorage), namespacing por usuario, limpiar al logout, guardar solo despues del primer cambio y avisar si falla.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes
+
+### [SEC-069] Conversaciones del cliente: todas las columnas de Conversation (ipHash, userAgent) viajan al navegador y la tabla muestra tokens y costo de develOP
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/multiTenantQueries.ts:180` — «scope.conversation.findMany({ where: { botConfigId: botInfo.bot.id }, ... include: { lead: {...}, _count: {...} } })»; `prisma/schema.prisma:1376` — «ipHash String? userAgent String? @db.Text»; `src/app/(protected)/dashboard/chatbot/conversations/page.tsx:17` — «<ConversationsTable conversations={items}»; `src/modules/chatbot/components/dashboards/ConversationsTable.tsx:102` — «<th ...>Tokens (in / out)</th> <th ...>Costo</th>»
+- Impacto: El payload RSC de la pagina lleva ipHash (salado), userAgent, sessionId y referrer de cada visitante al navegador del dueno; ademas le mostramos tokens y costo en USD por conversacion, jerga tecnica y base de costos de develOP.
+- Propuesta: select explicito con solo lo que la tabla usa; decision para Valentino: ocultar tokens y costo en la vista del cliente.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot.conversaciones, modelo.Conversation
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-089
+
+### [SEC-070] Handshake del embed sin validar la ventana emisora; antes del handshake los eventos salen a '*'
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:29` — «const parentOriginRef = useRef<string>('*')»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:67` — «if (event.data?.type === 'develop:init') { parentOriginRef.current = event.origin»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:103` — «notifyParent('lead-captured', tc.input)»; `public/widget.js:165` — «if (event.origin !== BASE_URL) return (control: el host si valida)»
+- Impacto: Cualquier otro frame del sitio del cliente con referencia al iframe puede fijar la atribucion UTM del visitante y cortar los eventos al host; con un widget.js viejo sin handshake, el lead capturado (nombre, telefono, email) se postea a '*'. Riesgo bajo: el destinatario sigue siendo el padre.
+- Propuesta: Aceptar develop:init solo si event.source === window.parent y el origen esta en allowedDomains; no postear PII hasta tener origen confirmado.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente.chat-embebido, lib.security
+
+### [SEC-071] Script que imprime la credencial completa de Vertex por stdout
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `scripts/encode-vertex-creds.js:8` — «console.log('--- Pegar este VALOR en Netlify como GOOGLE_VERTEX_CREDENTIALS_JSON ---')»; `scripts/encode-vertex-creds.js:10` — «console.log(JSON.stringify(parsed))»
+- Impacto: El helper lee vertex-credentials.json y vuelca la cuenta de servicio entera (incluida la clave privada) a la terminal. Corrido dentro de una sesion de agente o de CI, la credencial queda en transcripts o logs: es un vector plausible de la 'key expuesta en logs' de la bitacora. El archivo nunca fue commiteado (.gitignore:55). No se copio ningun valor.
+- Propuesta: Escribir el resultado a un archivo local ignorado o al portapapeles, nunca a stdout; al rotar la credencial vencida, no reutilizar este flujo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): int.vertex, lib.chatbot.llm
+
 ## Bugs latentes
 
 ### [BUG-002] El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo
@@ -654,6 +832,28 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): int.cron.regenerate-briefs, int.cron.send-executive-reports, h2.cli-inicio.resumen-ia, h2.cli-reportes-email, h2.cli-reportes-email.reporte-semanal, int.brevo, modelo.WeeklyReportLog, lib.reports
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-055
+
+### [BUG-063] Con Vertex caído (hoy, credencial vencida) nadie se entera: el health dice 'Todo OK', no queda error en la base y el cliente ve su bot 'Activo' sin conversaciones
+- Dominio: D5  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/health/checkHealth.ts:48` — «const provider = getLLMProvider() const models = provider.listModels()»; `src/modules/chatbot/server/llm/providers/google.ts:108` — «listModels(): ModelInfo[] { return Object.values(GOOGLE_MODELS).map(({ apiModelId: _omit, ...rest }) => rest)»; `src/modules/chatbot/server/health/buildHealthVerdict.ts:125` — «: 'Todos los sistemas responden. El bot está listo para recibir consultas.'»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1052` — «logPersistFailure('chat.stream_error', error, {»; `src/modules/chatbot/server/logging/logger.ts:177` — «console.error( JSON.stringify({»; `src/modules/chatbot/server/admin/detectBotIssues.ts:88` — «level: 'ERROR', createdAt: { gte: oneHourAgo }, OR: [»; `src/modules/chatbot/server/quota/checker.ts:197` — «const discarded = await tx.conversation.deleteMany({»; `src/modules/chatbot/server/chat/persistTurn.ts:353` — «if (getConversationDiscarded()) {»; `src/app/(protected)/dashboard/chatbot/layout.tsx:51` — «? 'Activo · respondiendo a tus visitantes'»; `src/instrumentation.ts:15` — «if (error.message?.includes('RESOURCE_EXHAUSTED')) return null»; `src/app/(protected)/dashboard/chatbot/layout.tsx:50` — «session.bot.isActive ? 'Activo · respondiendo a tus visitantes'»; `src/modules/chatbot/hooks/useChatbot.ts:470` — «onError: () => { setDegradedInfo((prev) => ... reason: 'stream_interrupted',»; `src/modules/chatbot/server/chat/reconcile.ts:366` — «case 'stream_error': case 'stream_abort': return !input.firstTokenDelivered»; `src/modules/chatbot/server/config/envValidator.ts:35` — «name: 'GOOGLE_APPLICATION_CREDENTIALS', required: true,»; `src/modules/chatbot/server/health/checkHealth.ts:49` — «const models = provider.listModels()»; `src/modules/chatbot/server/llm/providers/google.ts:63` — «if (!credPath && !credJson) {»; `src/app/(protected)/admin/chatbot/health/page.tsx:146` — «Verificar que CHATBOT_GOOGLE_API_KEY sea válida y la Generative Language API esté»; `src/modules/chatbot/components/admin/health/LatencyChart.tsx:144` — «: 'El gráfico se llena automáticamente con cada conversación. Aún no hay respuestas medidas en las últimas 24h.'»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:63` — «{session.bot.botName} está atendiendo consultas las 24 horas.»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:109` — «value="24/7"»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:418` — «{chatbot.degradedInfo && ( <DegradedBanner key="degraded-banner" info={chatbot.degradedInfo} />»; `src/modules/chatbot/server/admin/detectBotIssues.ts:91` — «{ type: { contains: 'llm' } },»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1369` — «// devolver el stream (este catch solo alcanza fallos pre-return), el»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1265` — «onSilentClose: async () => { if (accumulatedAssistantText.trim().length > 0) return null»; `src/modules/chatbot/server/chat/persistTurn.ts:537` — «type: 'chat.message_completed',»; `src/modules/chatbot/server/llm/providers/google.ts:62` — «// En production (Netlify) usamos JSON inline. En development local, file path.»; `src/modules/chatbot/server/admin/detectBotIssues.ts:219` — «type: 'capture_lead.error',»; `src/modules/chatbot/server/tools/captureLead.ts:601` — «type: 'capture_lead.error', (dentro de console.error(JSON.stringify(...)), sin logChatbotEvent ni Sentry)»; `src/modules/chatbot/server/health/checkHealth.ts:35` — «dbCheck = { ok: false, error: error instanceof Error ? error.message : 'unknown' }»
+- Impacto: Bloqueante para el primer cliente real. Con la credencial vencida (o cualquier caída del proveedor) el visitante recibe la derivación canned ('Se me complicó generar una respuesta ahora...'); como no llegó ningún chunk, la compensación devuelve el cupo y BORRA la conversación con el mensaje del visitante: el cliente no ve conversaciones ni leads y su encabezado sigue diciendo 'Activo · respondiendo a tus visitantes'. El error solo va a stderr y a Sentry (si hay DSN); no queda ChatbotEvent ERROR, así que el detector de alertas no podría verlo aunque corriera. /admin/chatbot/health y /api/chatbot/[slug]/health solo miran variables y que el constructor no tire: con latencia 'empty' muestran 'Todo OK'. Los runbooks (docs/operations/04-responder-alerta.md:18) mandan a mirar justo esa página. Además Sentry descarta los errores de cuota de Vertex (RESOURCE_EXHAUSTED).
+- Propuesta: Registrar el fallo del proveedor como ChatbotEvent ERROR (p. ej. chat.provider_error) en onError; que el health haga una llamada real mínima, cacheada y con techo, o lea la tasa de errores reciente; que el veredicto pase a 'Problema' si hubo fallos del proveedor y cero respuestas; no descartar RESOURCE_EXHAUSTED en Sentry (bajarle el nivel); y mostrarle al cliente un estado honesto cuando su bot no responde.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-health, h3.vis-api-chatbot, h3.cli-chatbot, int.vertex, int.sentry, lib.chatbot.health, lib.chatbot.chat, lib.chatbot.quota, modelo.ChatbotEvent, h3.vis-widget-develop, h3.adm-health.latencia-p50-p95, h3.cli-chatbot.resumen, h4.adm-alertas.detector-incidencias, h3.vis-widget-cliente, lib.chatbot.admin, h3.adm-actividad, lib.chatbot.logging, lib.chatbot.tools, lib.chatbot.llm
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-066
+
+### [BUG-085] Las metricas del resumen del chatbot son constantes o estan mal calculadas (oportunidades, valor estimado, tiempo de respuesta)
+- Dominio: D5  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:42` — «capturedLeads: recentLeads.length, leadValueUSD: 50, successRate: 0.97,»; `src/app/(protected)/dashboard/chatbot/page.tsx:30` — «listLeadsByOrgSlug(orgSlug, 5),»; `src/modules/chatbot/server/admin/multiTenantQueries.ts:34` — «where: { botConfigId: botInfo.bot.id }, orderBy: { capturedAt: 'desc' }, take: limit,»; `src/modules/chatbot/lib/business-metrics.ts:21` — «avgResponseSeconds: Math.round((input.avgLatencyMs ?? 1500) / 100) / 10,»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:110` — «description={'Responde en ~${formatResponseTime(metrics.avgResponseSeconds)}'}»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:43` — «leadValueUSD: 50,»
+- Impacto: 'Oportunidades este mes' es como maximo 5 y son los ultimos 5 leads de toda la historia, descartados incluidos; 'Valor estimado' es 5 x US$50 fijo; 'Responde en ~1,5 s' es una constante. El primer cliente real ve numeros inventados en la portada de su chatbot (falla 'sin datos de mentira' de L3).
+- Propuesta: Contar leads del mes en curso excluyendo DQ con una query de conteo scoped; quitar el valor estimado o basarlo en un ticket declarado por el cliente y rotularlo como estimacion; calcular la latencia con datos reales o sacar la linea.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot.resumen, modelo.ChatbotLead, modelo.QuotaUsage, h3.cli-chatbot, lib.chatbot.lib
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-087
 
 ### [BUG-001] Sesion invalidada en Node pero viva en el proxy: bucle /login <-> portal (ERR_TOO_MANY_REDIRECTS)
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -763,12 +963,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-022] Mi Chatbot resuelve la organización con su propia consulta (orgMember.findFirst sin orderBy) e ignora resolveOrgId: la vista previa del admin no ve el bot del cliente y con dos membresías muestra otra org
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `src/modules/chatbot/server/admin/getClientSession.ts:15` — «c.orgMember.findFirst({ where: { userId: session.user.id },»; `src/lib/preview.ts:14` — «if (role === 'SUPER_ADMIN') { const impersonation = await getImpersonationSession() return impersonation?.orgId ?? null»; `src/app/(protected)/dashboard/chatbot/page.tsx:24` — «const session = await getClientChatbotSession() if (!session) return <ChatbotUpsellLanding />»; `src/app/(protected)/dashboard/chatbot/leads/page.tsx:36` — «const session = await getClientChatbotSession() if (!session) redirect('/dashboard')»; `src/app/api/dashboard/chatbot/leads/export/route.ts:84` — «const session = await getClientChatbotSession()»; `src/modules/chatbot/server/dashboard/updateBotAppearance.ts:61` — «const orgId = await resolveOrgId()»; `prisma/seed.ts:82` — «const admin = await prisma.user.upsert({»
+- Evidencia: `src/modules/chatbot/server/admin/getClientSession.ts:15` — «c.orgMember.findFirst({ where: { userId: session.user.id },»; `src/lib/preview.ts:14` — «if (role === 'SUPER_ADMIN') { const impersonation = await getImpersonationSession() return impersonation?.orgId ?? null»; `src/app/(protected)/dashboard/chatbot/page.tsx:24` — «const session = await getClientChatbotSession() if (!session) return <ChatbotUpsellLanding />»; `src/app/(protected)/dashboard/chatbot/leads/page.tsx:36` — «const session = await getClientChatbotSession() if (!session) redirect('/dashboard')»; `src/app/api/dashboard/chatbot/leads/export/route.ts:84` — «const session = await getClientChatbotSession()»; `src/modules/chatbot/server/dashboard/updateBotAppearance.ts:61` — «const orgId = await resolveOrgId()»; `prisma/seed.ts:82` — «const admin = await prisma.user.upsert({»; `src/app/(protected)/dashboard/chatbot/conversations/page.tsx:9` — «const session = await getClientChatbotSession() if (!session) redirect('/dashboard')»; `src/app/(protected)/dashboard/chatbot/settings/page.tsx:17` — «const orgId = await resolveOrgId()»; `src/app/(protected)/dashboard/chatbot/page.tsx:15` — «const orgId = await resolveOrgId() ... :24 const session = await getClientChatbotSession()»; `src/modules/chatbot/server/admin/updateLeadStatus.ts:18` — «const session = await getClientChatbotSession()»; `src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx:21` — «const organizationId = await resolveOrgId()»
 - Impacto: Soporte no puede revisar el chatbot de un cliente impersonándolo: con un SUPER_ADMIN sin OrgMember (así lo siembra el seed) /dashboard/chatbot muestra la landing de 'activá tu chatbot' aunque checkClientHasChatbot (con resolveOrgId, page.tsx:15-18) dijo que hay bot, leads y conversaciones redirigen a /dashboard y el CSV da 401, mientras la apariencia sí se edita sobre el cliente. Si un usuario tiene membresías en dos orgs, esta sección puede mostrar y modificar (estado de leads, insights) una org distinta de la del resto del portal en el mismo request.
 - Propuesta: Que getClientChatbotSession derive la org de resolveOrgId() (o reciba el orgId) y lea org y bot con select acotado; agregar un invariante que prohíba orgMember.findFirst sin orderBy como resolución de tenant. Verificar en prod (solo lectura) si los SUPER_ADMIN tienen OrgMember.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [BUG-005], [SEC-029]
-- Nodo(s): h3.cli-chatbot, h1.auth-impersonacion, lib.chatbot.admin, modelo.OrgMember
+- Nodo(s): h3.cli-chatbot, h1.auth-impersonacion, lib.chatbot.admin, modelo.OrgMember, lib.preview, lib.isolation
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-038
 
 ### [BUG-023] Los insights del chatbot quedan PENDING para siempre: ninguna pantalla llama a actOnInsight y el cron deja de generar para ese bot al quinto pendiente
@@ -784,12 +984,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-024] El plan y BotConfig son dos fuentes de verdad: el chat corta por Plan.quota y usa el modelo del plan con temperatura fija, pero el admin edita y el detector de alertas lee BotConfig.monthlyQuota (1000) y maxOutputTokens no se aplica
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:345` — «if (quota.conversationsUsed >= plan.quota) {»; `src/modules/chatbot/server/chat/handleChatRequest.ts:952` — «temperature: 0.7,»; `src/modules/chatbot/server/admin/detectBotIssues.ts:68` — «if (usage && usage.conversationsCount >= bot.monthlyQuota) {»; `src/modules/chatbot/server/admin/createClientWithBot.ts:186` — «monthlyQuota: 1000,»; `prisma/seeds/sync-plans.ts:72` — «quota: 500,»; `src/modules/chatbot/server/admin/saveBotConfig.ts:45` — «llmModel: z.string().min(1).max(80), temperature: z.number().min(0).max(2), maxOutputTokens: z.number().int().min(100).max(8192),»; `src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx:98` — «value={'${quotaUsed.toLocaleString('es-AR')} / ${bot.monthlyQuota.toLocaleString('es-AR')}'}»
+- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:345` — «if (quota.conversationsUsed >= plan.quota) {»; `src/modules/chatbot/server/chat/handleChatRequest.ts:952` — «temperature: 0.7,»; `src/modules/chatbot/server/admin/detectBotIssues.ts:68` — «if (usage && usage.conversationsCount >= bot.monthlyQuota) {»; `src/modules/chatbot/server/admin/createClientWithBot.ts:186` — «monthlyQuota: 1000,»; `prisma/seeds/sync-plans.ts:72` — «quota: 500,»; `src/modules/chatbot/server/admin/saveBotConfig.ts:45` — «llmModel: z.string().min(1).max(80), temperature: z.number().min(0).max(2), maxOutputTokens: z.number().int().min(100).max(8192),»; `src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx:98` — «value={'${quotaUsed.toLocaleString('es-AR')} / ${bot.monthlyQuota.toLocaleString('es-AR')}'}»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:56` — «<Field label="Temperature" hint="0 es mas determinista, 2 es mas creativo">»; `src/modules/chatbot/server/chat/handleChatRequest.ts:713` — «const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)»; `src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx:46` — «bot.monthlyQuota > 0 ? Math.min(100, (quotaUsed / bot.monthlyQuota) * 100) : 0»; `src/lib/onboarding/core.ts:134` — «monthlyQuota: 1000,»; `src/lib/plan/fallback.ts:50` — «quota: 500,»; `src/app/api/admin/chatbot/demo-chat/[slug]/route.ts:57` — «const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:120` — «{ value: 'DAILY_DIGEST', label: 'Digest diario' },»; `src/lib/client-notifications/notify.ts:94` — «if (org.leadNotificationMode === 'DISABLED') return»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:77` — «<Field label="Quota mensual">»; `src/modules/chatbot/server/llm/providers/anthropic.ts:18` — «throw new ProviderNotImplementedError('anthropic')»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:304` — «<LlmFact label="Quota" value="1000 conv/mes" />»; `src/modules/chatbot/server/admin/preflightChecks.ts:151` — «if (bot.monthlyQuota > 0) {»; `src/modules/chatbot/server/admin/saveBotConfig.ts:47` — «maxOutputTokens: z.number().int().min(100).max(8192),»; `src/modules/chatbot/server/config/getPublicConfig.ts:121` — «routeColorMap: (bot.routeColorMap as unknown as RouteColorMap) ?? {},»; `src/app/api/admin/chatbot/demo-chat/[slug]/route.ts:113` — «maxOutputTokens: bot.maxOutputTokens,»; `prisma/schema.prisma:1315` — «maxOutputTokens Int @default(800)»
 - Impacto: Con el primer cliente Starter el bot se corta a 500 conversaciones pero la alerta QUOTA_EXHAUSTED compara contra 1000 y nunca dispara; con Pro o Business (3000/5000, sync-plans.ts:88 y :104) dispara a 1000 aunque el bot sigue funcionando. El admin ve '500 / 1000' y el cliente ve el límite del plan. Editar modelo, temperatura, tope de salida o cuota en el admin no cambia nada en runtime, y como streamText no recibe maxOutputTokens, cada uno de los hasta 3 pasos de un turno puede generar el máximo del modelo: el costo por turno de un visitante anónimo no tiene tope configurable.
 - Propuesta: Sacar del editor del admin los campos legacy (o mostrarlos solo lectura con el valor del plan); que detector, preflight y fichas del admin usen getPlanForOrg().quota; pasar maxOutputTokens explícito en streamText. Decisión para Valentino (schema FROZEN): borrar las columnas legacy de BotConfig.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h3.adm-chatbots, h4.adm-alertas, h3.vis-api-chatbot, modelo.BotConfig, modelo.Plan, lib.plan, int.vertex
+- Nodo(s): h3.adm-chatbots, h4.adm-alertas, h3.vis-api-chatbot, modelo.BotConfig, modelo.Plan, lib.plan, int.vertex, h3.adm-chatbots.config-llm-y-cuota, h3.adm-chatbots.detalle-overview, lib.chatbot.chat, lib.client-notifications, h3.adm-chatbots.editar-config-bot, h4.adm-clientes.alta-cliente-con-bot, lib.chatbot.llm, h3.adm-chatbots.editar-config
 
 ### [BUG-025] EmailCampaign sin estado intermedio ni métricas: SENDING y SCHEDULED no se escriben (doble envío posible), FAILED no tiene reintento y aperturas y clics nunca se actualizan
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -847,12 +1047,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-034] Fechas y horas del portal formateadas sin zona horaria: turnos corridos 3 h, saludo y fecha del Inicio, Timeline del ticket, tooltip de sesiones un día antes y horas del chat distintas entre servidor y navegador
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `src/app/(protected)/dashboard/page.tsx:33` — «const hour = new Date().getHours()»; `src/app/(protected)/dashboard/page.tsx:41` — «.toLocaleDateString('es-AR', { weekday: 'long', ... // sin timeZone»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:18` — «return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:98` — «const day = start.getDate()»; `src/lib/dates-ar.ts:233` — «export function formatTimeAR(date: Date): string { // helper disponible y sin usar aca»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:41` — «return d.toLocaleDateString('es-AR', {»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:304` — «{ticket.createdAt.toLocaleDateString('es-AR', {»; `src/app/(protected)/dashboard/services/page.tsx:149` — «{startDate.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:25` — «timeZone: TZ_AR,»; `src/components/dashboard/SessionsChart.tsx:47` — «{new Date(label).toLocaleDateString('es-AR', {»; `src/lib/analytics.ts:171` — «const date = '${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}'»; `src/components/dashboard/ChatBubble.tsx:19` — «return new Date(date).toLocaleString('es-AR', {»; `src/components/dashboard/ImpersonationTimer.tsx:20` — «const [remaining, setRemaining] = useState(() => new Date(expiresAt).getTime() - Date.now())»; `src/components/dashboard/CurrentPlanCard.tsx:17` — «return date.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/PageSpeedCard.tsx:60` — «return date.toLocaleString('es-AR', {»; `src/components/dashboard/results/GBPMetricsCard.tsx:13` — «return date.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:24` — «const DATE_FMT = new Intl.DateTimeFormat('es-AR', { timeZone: TZ_AR,»
+- Evidencia: `src/app/(protected)/dashboard/page.tsx:33` — «const hour = new Date().getHours()»; `src/app/(protected)/dashboard/page.tsx:41` — «.toLocaleDateString('es-AR', { weekday: 'long', ... // sin timeZone»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:18` — «return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })»; `src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:98` — «const day = start.getDate()»; `src/lib/dates-ar.ts:233` — «export function formatTimeAR(date: Date): string { // helper disponible y sin usar aca»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:41` — «return d.toLocaleDateString('es-AR', {»; `src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:304` — «{ticket.createdAt.toLocaleDateString('es-AR', {»; `src/app/(protected)/dashboard/services/page.tsx:149` — «{startDate.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:25` — «timeZone: TZ_AR,»; `src/components/dashboard/SessionsChart.tsx:47` — «{new Date(label).toLocaleDateString('es-AR', {»; `src/lib/analytics.ts:171` — «const date = '${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}'»; `src/components/dashboard/ChatBubble.tsx:19` — «return new Date(date).toLocaleString('es-AR', {»; `src/components/dashboard/ImpersonationTimer.tsx:20` — «const [remaining, setRemaining] = useState(() => new Date(expiresAt).getTime() - Date.now())»; `src/components/dashboard/CurrentPlanCard.tsx:17` — «return date.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/PageSpeedCard.tsx:60` — «return date.toLocaleString('es-AR', {»; `src/components/dashboard/results/GBPMetricsCard.tsx:13` — «return date.toLocaleDateString('es-AR', {»; `src/components/dashboard/results/analysis/DiscoveriesSection.tsx:24` — «const DATE_FMT = new Intl.DateTimeFormat('es-AR', { timeZone: TZ_AR,»; `src/modules/chatbot/components/dashboards/ConversationsTable.tsx:45` — «return new Date(d).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:206` — «{new Date(h.createdAt).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', ...»; `src/modules/chatbot/components/dashboards/LeadsTable.tsx:37` — «// timeZone fijo (AR): sin esto el server (Netlify = UTC) y el cliente (UTC-3) ... → hydration mismatch.»
 - Impacto: Con el server en UTC (no hay TZ en vercel.json ni netlify.toml; el repo corre sus invariantes con TZ=UTC) un turno de las 10:00 de Buenos Aires se muestra 13:00; entre las 21 y las 24 h el Inicio muestra la fecha de manana y el saludo es incorrecto en franjas de 3 h (ademas 'Buenos dias' sin tilde, page.tsx:34). Igual en facturacion (:88-94), boveda (:202-206), referidos (:22-24) y proyecto (:70-76).
 - Propuesta: Usar formatDateAR/formatTimeAR/TZ_AR de dates-ar (o timeZone 'America/Argentina/Buenos_Aires') en todos los formateos de server components y agregar un invariante que lo exija.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-inicio, h2.cli-agenda.panel-de-agenda, h2.cli-cuenta, lib.dates-ar, h2.cli-soporte.conversacion-ticket, h2.cli-servicios.servicios-contratados, lib.tz-ar, h2.cli-mensajes, h2.cli-soporte, h2.cli-resultados.trafico, h1.auth-impersonacion, h2.cli-resultados
+- Nodo(s): h2.cli-inicio, h2.cli-agenda.panel-de-agenda, h2.cli-cuenta, lib.dates-ar, h2.cli-soporte.conversacion-ticket, h2.cli-servicios.servicios-contratados, lib.tz-ar, h2.cli-mensajes, h2.cli-soporte, h2.cli-resultados.trafico, h1.auth-impersonacion, h2.cli-resultados, h3.cli-chatbot.conversaciones, h3.cli-chatbot.resumen
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-047
 
 ### [BUG-035] El onboarding pide el 'ID de medicion (G-XXXX)' y lo guarda como Property ID, que la lectura de GA4 rechaza
@@ -961,12 +1161,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-054] La landing de upsell del chatbot sigue con precio falso y WhatsApp placeholder (CLEAN-H1 abierto)
 - Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:15` — «const WHATSAPP_URL = 'https://wa.me/5493815555555?text=Hola%2C+quiero+saber+m%C3%A1s+sobre+el+chatbot'»; `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:148` — «$150 USD»; `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:152` — «Incluye 1.000 conversaciones · reportes semanales · soporte directo»; `src/lib/plan/plan-presentation.ts:149` — «monthlyPriceUsd: 49, customersPerMonth: 500,»; `src/app/(protected)/dashboard/chatbot/page.tsx:21` — «return <ChatbotUpsellLanding />»
+- Evidencia: `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:15` — «const WHATSAPP_URL = 'https://wa.me/5493815555555?text=Hola%2C+quiero+saber+m%C3%A1s+sobre+el+chatbot'»; `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:148` — «$150 USD»; `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:152` — «Incluye 1.000 conversaciones · reportes semanales · soporte directo»; `src/lib/plan/plan-presentation.ts:149` — «monthlyPriceUsd: 49, customersPerMonth: 500,»; `src/app/(protected)/dashboard/chatbot/page.tsx:21` — «return <ChatbotUpsellLanding />»; `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:49` — «href={WHATSAPP_URL}»; `src/lib/whatsapp.ts:21` — «const FALLBACK_WHATSAPP_NUMBER = '5493816223508'»; `src/modules/chatbot/server/admin/clientHasChatbot.ts:6` — «where: { isActive: true },»; `src/app/(protected)/dashboard/chatbot/layout.tsx:52` — «: 'Pausado · no responde hasta que lo reactives'»; `prisma/seeds/sync-plans.ts:70` — «monthlyPrice: new Prisma.Decimal('49'), ... quota: 500, (Starter); Business :102 '150', quota 5000 :104»; `src/lib/whatsapp.ts:41` — «export function getWhatsappDigits(): string { ... NEXT_PUBLIC_WHATSAPP_NUMBER || FALLBACK_WHATSAPP_NUMBER»; `src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx:105` — «title="Insights semanales" ... 'Te llega un email todos los lunes' (Starter reportsEnabled: false, sync-plans.ts:76)»
 - Impacto: Todo cliente sin chatbot activo ve 'Desde $150 USD / 1.000 conversaciones' (catálogo real: Starter USD 49 con 500, Business USD 150 con 5.000, prisma/seeds/sync-plans.ts:68-111) y el único CTA lleva a un número inexistente: el camino de venta del producto principal está roto y miente el precio. Bloquea L3 del chatbot ('sin datos de mentira').
 - Propuesta: Leer precio y cupo de PLAN_PRESENTATIONS (o del Plan en base) y mandar el CTA a /dashboard/messages?context=activacion vía requestUpsellAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h3.cli-chatbot, h2.cli-plan, lib.plan
+- Nodo(s): h3.cli-chatbot, h2.cli-plan, lib.plan, h3.cli-chatbot.activacion-upsell, lib.chatbot.admin, h3.cli-chatbot.upsell-activacion, modelo.Plan
 
 ### [BUG-055] El reporte semanal puede mandar un brief y métricas de semanas viejas con la etiqueta de la última semana
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -1000,6 +1200,269 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [BUG-007], [BUG-021]
 - Nodo(s): h2.cli-reportes-email.reporte-semanal, h2.cli-reportes-email.preferencias-reporte, h2.cli-email-mkt.baja-de-contactos, h6.vis-optout, int.brevo, modelo.Organization, modelo.EmailContact, h2.cli-reportes-email, h2.cli-email-mkt
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-063
+
+### [BUG-064] El alta 'org + bot' no mira si salió el mail de bienvenida, que es la única copia de la contraseña temporal
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/onboarding/core.ts:75` — «const tempPassword = generateTempPassword()»; `src/lib/onboarding/core.ts:198` — «emailSent: emailResult.ok,»; `src/app/(protected)/admin/chatbots/new/actions.ts:69` — «const result = await onboardClientCore({»; `src/app/(protected)/admin/chatbots/new/actions.ts:86` — «return { ok: true, botId: bot.id }»; `src/app/(protected)/admin/chatbots/new/CreateBotForm.tsx:79` — «toast.success('Chatbot creado')»
+- Impacto: Si Brevo falla, el admin ve 'Chatbot creado' y el cliente no puede entrar: nadie conoce la contraseña. Reintentar el alta falla con 'El email ... ya está registrado' (core.ts:73). Si la función expira durante los reintentos de Brevo, la org quedó creada y el admin ve un error genérico.
+- Propuesta: Propagar emailSent a la UI con aviso y botón de reenvío de credenciales; sacar el envío del camino crítico (cola o after()) con estado persistido.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.crear-bot, int.brevo, lib.onboarding
+
+### [BUG-065] La burbuja del widget en el sitio del cliente ignora la posición y el color que el cliente configura, y el iframe se anuncia como 'Chat develOP'
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `public/widget.js:28` — «var position = scriptTag.getAttribute('data-position') || 'bottom-right'»; `public/widget.js:64` — «'background:#06b6d4;cursor:pointer;z-index:' + Z_BUBBLE + ';' +»; `src/modules/chatbot/components/installation/platforms.ts:27` — «return '<script src="${WIDGET_APP_URL}/widget.js" data-bot="${botSlug}" data-theme="dark"></script>'»; `src/modules/chatbot/server/dashboard/updateBotAppearance.ts:31` — «position: z.enum(BOT_POSITIONS).optional(),»; `public/widget.js:117` — «iframe.title = 'Chat develOP'»; `src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx:34` — «<Field label="Prompts proactivos" hint="Mensajes por ruta. Usa / como default visual general.">»; `src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx:41` — «<Field label="Mapa de color por ruta" hint="Permite contextualizar el color del widget por pagina">»; `src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx:22` — «if (proactivePrompts['default']?.length) return proactivePrompts['default']»; `src/modules/chatbot/server/config/getPublicConfig.ts:121` — «routeColorMap: (bot.routeColorMap as unknown as RouteColorMap) ?? {},»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:296` — «onClick={() => chatbot.sendMessage(qr.promptToSend)}»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:269` — «<Sparkles size={20} strokeWidth={1.5} style={{ color: 'rgba(6,182,212,0.8)' }} />»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:537` — «: 'linear-gradient(135deg, rgba(6,182,212,0.85), rgba(6,182,212,0.65))',»; `src/modules/chatbot/components/chat/ChatWindow.tsx:116` — «const [ar, ag, ab] = hexToRgb(config.accentColor) ?? ACCENT_FALLBACK»; `public/widget.js:125` — «iframe.src =»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:298` — «background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.22)',»; `src/modules/chatbot/components/chat/ChatWindow.tsx:117` — «const secondaryRgb = config.accentSecondary ? hexToRgb(config.accentSecondary) : null (control: el widget de develOP si los aplica)»; `src/modules/chatbot/components/dashboard/BotPersonalization.tsx:165` — «toast.success('Cambios guardados. Tu chatbot ya se ve asi.')»
+- Impacto: El cliente cambia la posición o el color en Mi Chatbot → Configuración, guarda, y en su sitio la burbuja sigue abajo a la derecha y cyan (solo cambia el contenido del iframe). Los lectores de pantalla anuncian 'Chat develOP' en el sitio del cliente. Es el patrón 'lo configuro y no se aplica' de los changelogs.
+- Propuesta: Que widget.js lea position y accentColor de /config (o que el snippet incluya data-position) y use el nombre del bot o de la empresa como title.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente, h3.cli-chatbot.personalizacion, h3.adm-chatbots.editar-config-bot, modelo.BotConfig, h3.cli-chatbot, h3.vis-widget-cliente.chat-embebido, h3.cli-chatbot.instalacion
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-093
+
+### [BUG-068] Ir a una seccion desde el chat recarga la pagina: la charla desaparece y el bot pierde el contexto
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/LogicCompanion.tsx:165` — «onNavigate: chatbot.navigateTo,»; `src/modules/chatbot/hooks/useChatbot.ts:583` — «const navigateTo = useCallback((path: string) => { if (typeof window === 'undefined') return window.location.href = path»; `src/modules/chatbot/hooks/useChatbot.ts:160` — «(proactive-* teaser bubbles don't count). In-memory only — resets on reload.»; `src/modules/chatbot/server/chat/handleChatRequest.ts:941` — «messages: body.messages.map((m): ModelMessage => {»; `src/modules/chatbot/components/tool-cards/renderToolCall.tsx:22` — «const navigateToPageSchema = z.object({ path: z.string(),»
+- Impacto: En el sitio de develOP, cuando el bot ofrece 'te llevo a la seccion de IA' y el visitante toca el boton, la pagina se recarga entera sin la transicion del Shutter que CLAUDE.md exige para el sitio publico: el chat vuelve cerrado y vacio y reaparece el teaser; como el server arma el contexto con el historial que manda el widget, el siguiente mensaje llega sin historia aunque la conversacion siga en la base con el mismo sessionId. Ademas el cliente acepta cualquier string como destino (no espeja VALID_PATHS) y lo pasa a window.location.href (un 'javascript:' inyectado seria solo self-XSS).
+- Propuesta: Navegar con triggerTransition() (sitio publico) manteniendo el widget montado; espejar VALID_PATHS en el validador del cliente; a mediano plazo historial autoritativo desde ChatMessage (PLAN-426).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop, lib.chatbot.hooks
+
+### [BUG-069] 'Deshacer' no deshace el primer contacto: velocidad de respuesta y embudo cuentan contactos que no ocurrieron
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/dashboard/LeadStatusActions.tsx:8` — «// optimista (...) y un "Deshacer" inmediato // en el toast por si se equivoco de boton.»; `src/modules/chatbot/components/dashboard/LeadStatusActions.tsx:104` — «toast.success('Lo dejamos como estaba')»; `src/modules/chatbot/lead-status-rules.ts:55` — «return statusImpliesContact(nextStatus) && currentFirstContactedAt == null»; `src/modules/chatbot/server/admin/updateLeadStatus.ts:46` — «...(sealFirstContact ? { firstContactedAt: new Date() } : {}),»; `src/lib/dashboard/home-metrics-logic.ts:121` — «const wasContacted = statusImpliesContact(l.status) || l.firstContactedAt != null»; `src/lib/dashboard/home-metrics-logic.ts:71` — «(s) => s.firstContactedAt != null && s.firstContactedAt.getTime() >= s.capturedAt.getTime(),»
+- Impacto: Si el dueno toca 'Lo contacte' por error y aprieta 'Deshacer' (el toast le dice 'Lo dejamos como estaba'), el lead vuelve a NEW pero queda sellado: el inicio y el reporte mensual (monthly-report-data.ts:95 reusa buildFunnel) lo cuentan como contactado y la velocidad de respuesta promedia un 'contacto' de segundos que no existio. Con pocos leads una sola equivocacion distorsiona la metrica que se le vende al cliente. El invariant lead-status-rules.invariant.ts:100-103 fija este comportamiento como deseado.
+- Propuesta: Que el deshacer inmediato restaure el firstContactedAt previo (el action puede devolver el valor anterior y aceptar un flag de undo) o sellar con ventana de gracia; o decidir explicitamente la semantica y alinear el embudo (decision de producto).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, h2.cli-inicio, h2.cli-reportes-email, lib.chatbot.lead-status-rules, modelo.ChatbotLead
+
+### [BUG-070] Cambio de estado del lead: 'Guardado' falso en el detalle y errores tecnicos en ingles en el toast
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/dashboard/LeadDetail.tsx:183` — «startTransition(async () => { await updateLeadStatus({ leadId: lead.id, status, notes }) setSavedAt(Date.now())»; `src/modules/chatbot/components/dashboard/LeadDetail.tsx:526` — «{savedAt && !isPending ? 'Guardado' : ''}»; `src/modules/chatbot/server/admin/updateLeadStatus.ts:19` — «if (!session) return { ok: false, error: 'No session' }»; `src/modules/chatbot/server/admin/updateLeadStatus.ts:33` — «return { ok: false, error: 'Lead not found or unauthorized' }»; `src/modules/chatbot/components/dashboard/LeadStatusActions.tsx:99` — «toast.error(res.error ?? 'No se pudo guardar el cambio')»; `src/modules/chatbot/server/admin/updateLeadStatus.ts:21` — «const parsed = UpdateLeadStatusSchema.parse(input)»; `src/modules/chatbot/components/dashboard/LeadDetail.tsx:184` — «await updateLeadStatus({ leadId: lead.id, status, notes }) setSavedAt(Date.now())»; `src/modules/chatbot/components/dashboard/LeadDetail.tsx:185` — «setSavedAt(Date.now())»
+- Impacto: En el detalle, si la sesion vencio o el lead no pertenece a la org resuelta (p. ej. admin impersonando, porque getClientChatbotSession no honra la impersonacion), el boton dice 'Guardado' y las notas no se guardaron: el dueno pierde notas sin enterarse. En la lista, el toast le muestra 'No session' o 'Lead not found or unauthorized'. Un input invalido o un error de DB lanza dentro de la transicion y termina en el error boundary de la seccion en lugar de un mensaje.
+- Propuesta: Chequear res.ok en LeadDetail y mostrar el error; mapear los errores del action a textos en castellano para el dueno; safeParse y try/catch con captureException en updateLeadStatus.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, lib.chatbot.admin, h3.cli-chatbot.contacto-detalle, h3.cli-chatbot.acciones-rapidas-lead, h3.cli-chatbot.estado-lead, modelo.ChatbotLead
+
+### [BUG-071] El CSV de leads exporta la intencion como enum crudo (CLEAN-R1 sigue abierto) y con otro vocabulario que el panel
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts:37` — «const INTENT_LABELS: Record<string, string> = { // B5.1+ canon purchase_ready: 'Quiere comprar',»; `src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts:82` — «function labelIntent(intent: string | null): string { if (!intent) return 'Sin especificar' return INTENT_LABELS[intent] ?? intent»; `src/app/api/dashboard/chatbot/leads/export/route.ts:156` — «intent: l.intent,»; `src/modules/chatbot/lead-intent-labels.ts:15` — «const INTENT_LABELS: Record<ChatbotLeadIntent, string> = { PURCHASE_READY: 'Listo para comprar',»; `src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts:54` — «postventa: 'Postventa',»; `src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts:39` — «purchase_ready: 'Quiere comprar',»; `src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts:84` — «return INTENT_LABELS[intent] ?? intent»; `src/modules/chatbot/server/tools/captureLead.ts:371` — «const intentEnum = input.intent.toUpperCase() as ChatbotLeadIntent»; `src/lib/plan/lead-scoring-gate.invariant.ts:112` — «intent: 'purchase_ready',»
+- Impacto: El dueno que descarga sus contactos ve 'PURCHASE_READY' o 'QUOTE_REQUEST' en la columna de intencion (el propio builder promete 'frase legible') y etiquetas distintas a las del panel ('Postventa'/'Otro' frente a 'Posventa'/'Otra consulta' de lead-detail-presentation.ts:48,52). Es el mismo bug que P1-fix arreglo en el panel, vivo en el export.
+- Propuesta: Usar intentLabel() de lead-intent-labels.ts y categoryLabel() de lead-detail-presentation.ts en buildLeadsCsv, borrar los mapas locales y agregar el caso al invariant del CSV.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, lib.chatbot.leads, lib.chatbot.lead-presentation, modelo.ChatbotLead
+
+### [BUG-073] Plantillas de KB con datos inventados y {{placeholders}} pasan el alta y el bot sale activo
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/admin/onboarding/kb-templates/generico.ts:28` — «Aceptamos efectivo, transferencia bancaria, tarjetas de débito y crédito. Para cuotas, usamos MercadoPago.»; `src/modules/chatbot/components/admin/onboarding/kb-templates/restaurant.ts:33` — «Sí, contamos con opciones vegetarianas y menú apto celíacos (cruzado en cocina aislada). Consultar al mozo.»; `src/modules/chatbot/components/admin/onboarding/kb-templates/generico.ts:4` — «businessInfo: '# {{NOMBRE_EMPRESA}}»; `src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx:26` — «state.businessInfo.length >= 20 &&»; `src/modules/chatbot/server/admin/createClientWithBot.ts:165` — «isActive: true,»; `src/modules/chatbot/server/admin/preflightChecks.ts:47` — «return !value || value.trim().length < 20»; `src/modules/chatbot/server/prompts/helpers.ts:48` — «return trimmed»; `src/lib/onboarding/core.ts:115` — «isActive: true,»; `src/modules/chatbot/server/admin/createBot.ts:73` — «isActive: false,»; `src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts:10` — «**Dirección:** {{DIRECCION_COMPLETA}}',»; `src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts:19` — «- Autos revisados por nuestro taller oficial, con garantía de 3 meses en motor y caja.»; `src/modules/chatbot/server/admin/createBot.ts:58` — «const template = getTemplate(resolvedIndustry)»; `src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts:4` — «businessInfo: '# {{NOMBRE_CONCESIONARIA}}»
+- Impacto: Bloqueante para el primer cliente real: si develOP crea el bot con el asistente y no reescribe a mano las 7 secciones, el bot queda activo y afirma a los visitantes políticas que el negocio no tiene (envíos a todo el país, 30 días de cambio, factura A y B, cocina aislada para celíacos, recargo del 10 %, cargo del 50 % por cancelar) o devuelve literales como {{DIRECCION_COMPLETA}}. El gate del paso 3 y el preflight sólo miden largo, y el armado del prompt pasa el texto tal cual. Riesgo comercial y legal (alérgenos, salud) sobre respuestas que el dueño no autorizó.
+- Propuesta: Separar en las plantillas los ejemplos (guía, comentarios) del contenido afirmativo; bloquear en servidor la activación (createClientWithBot, toggleBotActiveAction, bulk y preflight) mientras queden {{...}} o secciones idénticas a la plantilla; crear el bot pausado desde el asistente y forzar el preflight; marcar en el paso 3 qué frases son de ejemplo.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.alta-cliente-con-bot, h4.adm-clientes.plantilla-kb-industria, h3.adm-chatbots.activar-bot-preflight, lib.chatbot.prompts, modelo.KnowledgeBase, h3.adm-chatbots.crear-bot, h3.adm-chatbots.activar-pausar-eliminar, lib.onboarding, modelo.BotConfig, h3.adm-chatbots, h3.adm-chatbots.crear-bot-org-existente, h3.adm-chatbots.preflight-activacion, lib.chatbot.admin
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-072
+
+### [BUG-074] Sandbox 'Probar prompt': burbuja vacía si falla el proveedor y prueba distinta de producción
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx:46` — «message: userMsg.content,»; `src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx:160` — «{message.content || (streaming && index === messages.length - 1 ? '...' : '')}»; `src/app/api/admin/chatbot/test-prompt/route.ts:50` — «const rawModel = provider.getModel('gemini-2.5-flash')»; `src/app/api/admin/chatbot/test-prompt/route.ts:99` — «return result.toTextStreamResponse()»; librería ai@6.0.214, dist/index.mjs línea 6826 — «onError = ({ error }) => {»; librería ai@6.0.214, dist/index.mjs línea 8156 — «if (part.type === "text-delta") {»
+- Impacto: Los errores que llegan dentro del stream (credencial vencida, cuota de Vertex, timeout) se descartan: textStream sólo deja pasar text-delta y el onError por defecto hace console.error crudo, fuera de Sentry. El admin ve una burbuja vacía. Además el sandbox manda sólo el último mensaje, fija proveedor y modelo, no pasa tools ni pack vertical: lo que se prueba no es lo que contesta el bot en producción.
+- Propuesta: Pasar onError a streamText (Sentry + sanitizado) y devolver un marcador de error que el cliente muestre; enviar el historial de la prueba; resolver modelo, tools y pack con la misma lógica que el runtime.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.probar-prompt, lib.chatbot.llm, int.vertex, int.sentry
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-074
+
+### [BUG-075] El preflight de activación sólo se respeta en el cliente: toggle, bulk y alta activan sin chequeos
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/activation/ActivationModal.tsx:137` — «disabled={!canActivate || loading}»; `src/app/(protected)/admin/chatbots/[botId]/actions.ts:44` — «data: { isActive: newActive },»; `src/app/(protected)/admin/chatbots/bulk-actions.ts:80` — «data: { isActive: true },»; `src/modules/chatbot/server/admin/preflightChecks.ts:170` — «export async function canActivate(checks: PreflightCheck[]): Promise<boolean> {»; `src/modules/chatbot/server/admin/createClientWithBot.ts:165` — «isActive: true,»
+- Impacto: El modal deshabilita el botón con checks en rojo, pero toggleBotActiveAction no vuelve a correr el preflight, bulkActivateBotsAction activa en lote sin chequeos y el asistente crea el bot ya activo. Un bot sin KB o con bienvenida vacía puede quedar respondiendo en producción; canActivate no se usa del lado servidor.
+- Propuesta: Mover la decisión al servidor: toggleBotActiveAction y bulkActivateBotsAction corren runPreflightChecks y rechazan con 'fail'; el asistente crea el bot pausado o pasa por el mismo preflight.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.activar-bot-preflight, lib.chatbot.admin, modelo.BotConfig
+
+### [BUG-076] Alta de cliente: en producción el admin ve un error genérico en vez del motivo
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/createClientWithBot.ts:116` — «if (existingUser) throw new Error('El email ingresado ya está registrado en el sistema.')»; `src/modules/chatbot/server/admin/createClientWithBot.ts:104` — «if (!result.success) throw new Error(zodErrorToMessage(result.error))»; `src/modules/chatbot/server/admin/createClientOnly.ts:66` — «if (existingUser) throw new Error('El email ingresado ya está registrado en el sistema.')»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:111` — «setError(err instanceof Error ? err.message : 'Error al crear el cliente.')»; librería next@16.2.9, dist/compiled/next-server/app-page.runtime.prod.js línea 2 — «An error occurred in the Server Components render. The specific message is omitted in production builds»
+- Impacto: Las acciones del alta lanzan con throw errores de negocio esperados; en un build de producción el mensaje llega reemplazado por uno genérico con digest. Con un email repetido o un dato inválido develOP ve 'An error occurred in the Server Components render…' y no sabe qué corregir; cada intento además cuenta como error.
+- Propuesta: Devolver { ok: false, error } para los casos esperados (email existente, validación) y reservar throw para lo inesperado; el paso 5 ya muestra el texto.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.alta-cliente-con-bot, h4.adm-clientes.alta-cliente-sin-bot, lib.chatbot.admin, h3.adm-chatbots.alta-cliente-con-bot, h4.adm-clientes.alta-sin-bot
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-075
+
+### [BUG-077] Alta con bot: la contraseña temporal sólo vuelve después del envío por Brevo
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/createClientWithBot.ts:123` — «const created = await unsafeGlobalQuery(»; `src/modules/chatbot/server/admin/createClientWithBot.ts:238` — «const emailResult = await sendTransactionalEmail({»; `src/modules/chatbot/server/admin/createClientWithBot.ts:265` — «tempPassword,»; `src/lib/email/brevo-service.ts:27` — «const result = await client.transactionalEmails.sendTransacEmail({»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:140` — «Password temporal — cópiala ahora, no se vuelve a mostrar»
+- Impacto: La transacción ya commiteó org, usuario y bot; recién después se espera a Brevo (sin timeout propio) y a dos auditorías. Si la función expira o Brevo cuelga, el admin recibe un error, el cliente existe con una contraseña que nadie conoce y reintentar el alta falla por email duplicado. Nueva aparición del patrón ya visto en createClientOnly.
+- Propuesta: Devolver las credenciales antes del email (enviarlo con after() o una cola) o acotar el envío con timeout; ofrecer 'reenviar credenciales' si falló.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.alta-cliente-con-bot, int.brevo
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-096
+
+### [BUG-081] Sin error boundary local para los avatares 3D: un fallo de WebGL o del chunk diferido tumba el widget o la pagina, aunque AvatarRenderer documenta 'never throws'
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/avatar/AvatarRenderer.tsx:38` — «* Guarantee: this component never throws and never renders nothing.»; `src/modules/chatbot/components/avatar/HeavyAvatarsLazy.tsx:27` — «const NeuroAvatarImpl = dynamic(() => import('./NeuroAvatar').then((m) => m.NeuroAvatar), {»; `src/app/layout.tsx:137` — «<ChatWidgetMount />»; `src/components/layout/ChatWidgetMount.tsx:41` — «if (isChromeFree || !revealed) return null return <LogicCompanion slug={WIDGET_SLUG} />»
+- Impacto: git grep de ErrorBoundary/getDerivedStateFromError en modules/chatbot, ChatWidgetMount y app/embed = 0 (control: AdminErrorBoundary.tsx existe). Con WebGL deshabilitado/bloqueado o ChunkLoadError, R3F/next-dynamic propagan el error: en el embed cae a app/error.tsx (iframe con pagina de error), en la config del admin/cliente al error.tsx del segmento; en el sitio de develOP el widget vive en el layout raiz (escalaria a global-error) aunque hoy su avatar es 'image' (HeavyAvatarsLazy.tsx:13-15).
+- Propuesta: Envolver AvatarRenderer (o los wrappers Lazy) en un ErrorBoundary que caiga al Monograma, con captureException; detectar WebGL antes de montar el canvas.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente, h3.cli-chatbot, h3.adm-chatbots, int.sentry, h3.vis-widget-develop
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-084
+
+### [BUG-084] El detalle del contacto nunca muestra la conversacion: filtra roles en minuscula contra el enum USER/ASSISTANT
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/dashboard/LeadDetail.tsx:546` — «const visible = messages.filter((m) => m.role === 'user' || m.role === 'assistant')»; `prisma/schema.prisma:152` — «enum ChatMessageRole { USER ASSISTANT»; `src/modules/chatbot/server/admin/multiTenantQueries.ts:170` — «select: { id: true, role: true, content: true, createdAt: true },»; `src/modules/chatbot/components/dashboards/ConversationsTable.tsx:204` — «// NO replicamos el filtro lowercase de LeadDetail (bug preexistente fuera de scope).»
+- Impacto: En todo lead con conversacion guardada la seccion 'De que hablaron' muestra 'Esta conversacion tiene mensajes tecnicos pero ninguno del visitante...'. El dueno no puede leer que pidio el contacto antes de llamarlo, que es el corazon del detalle.
+- Propuesta: Comparar contra el enum (normalizar a mayuscula como TranscriptDetail) o reusar TranscriptDetail; tipar role como ChatMessageRole para que el compilador lo atrape.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, h3.cli-chatbot.contacto-detalle, modelo.ChatMessage
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-086
+
+### [BUG-086] Bot pausado: el cliente ve el header 'Pausado' y debajo la landing de venta, y no tiene como reactivarlo
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/admin/clientHasChatbot.ts:5` — «const bot = await forOrg(orgId).botConfig.findFirst({ where: { isActive: true },»; `src/app/(protected)/dashboard/chatbot/page.tsx:20` — «if (!hasActiveChatbot) { return <ChatbotUpsellLanding />»; `src/app/(protected)/dashboard/chatbot/layout.tsx:52` — «: 'Pausado · no responde hasta que lo reactives'»; `src/modules/chatbot/server/admin/saveClientSettings.ts:21` — «isActive: z.boolean().optional(), (se descarta: no se pasa en :40-47)»; `src/modules/chatbot/server/admin/clientHasChatbot.ts:6` — «where: { isActive: true },»
+- Impacto: Un cliente cuyo bot se pausa (por develOP o por falta de pago) pierde su resumen y ve 'Un empleado virtual... Quiero activarlo' con precio falso, bajo un header que le dice 'Pausado... hasta que lo reactives', pero ningun control vivo permite reactivarlo (el unico toggle esta en ClientSettingsForm, muerto).
+- Propuesta: Gatear el resumen por existencia de BotConfig (no por isActive) y mostrar un estado 'pausado' con motivo y CTA de contacto; ajustar el copy del layout a lo que el cliente realmente puede hacer.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot.resumen, h3.cli-chatbot.upsell-activacion, modelo.BotConfig, h3.cli-chatbot, lib.chatbot.admin, lib.preview
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-088
+
+### [BUG-087] El embed manda siempre currentPath '/': ruta del lead, conversacion y prompt quedan en la home
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:27` — «const chatbot = useChatbot({ slug, currentPath: '/', attribution })»; `src/modules/chatbot/server/conversation/resolver.ts:101` — «currentPath: input.currentPath ?? null,»; `src/modules/chatbot/server/prompts/sections.ts:200` — «- Ruta del usuario: ${context.currentPath ?? 'no determinada'}»; `src/modules/chatbot/components/dashboard/LeadDetail.tsx:360` — «<dt ...>Estaba viendo</dt> ... {lead.conversation.currentPath}»
+- Impacto: Para todos los visitantes de sitios de clientes el dueno ve '/' en 'Estaba viendo' y en la columna 'Ruta', y el modelo recibe 'Ruta del usuario: /' aunque el visitante este en la pagina de precios. El parentUrl ya llega en el handshake (ChatbotEmbed.tsx:79-80) y solo se usa para UTM.
+- Propuesta: Derivar currentPath del pathname de parentUrl en el handshake y actualizarlo con mensajes de navegacion del host.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente.chat-embebido, h3.cli-chatbot.contacto-detalle, h3.cli-chatbot.conversaciones
+
+### [BUG-088] Con el bot pausado, el embed muestra saludo y respuestas rapidas que mandan mensajes igual
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/hooks/useChatbot.ts:248` — «if (data?.paused) { ... reason: 'bot_paused',»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:240` — «{chatbot.messages.length === 0 ? (»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:296` — «onClick={() => chatbot.sendMessage(qr.promptToSend)}»; `src/modules/chatbot/components/chat/ChatWindow.tsx:285` — «{messages.length === 0 && !degraded ? ( (control: el widget de develOP si gatea)»
+- Impacto: En el sitio de un cliente pausado el visitante ve saludo, chips y la tarjeta offline a la vez; tocar un chip manda un mensaje que el servidor rechaza (validate-origin.ts:67 bot_inactive). El arreglo A6 'offline muestra solo WhatsApp' no se porto al embed.
+- Propuesta: Mismo gate que ChatWindow (!chatbot.degradedInfo) para el empty-state y los chips, y bloquear sendMessage cuando inputLockedByDegrade.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente.chat-embebido
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-088
+
+### [BUG-091] Al llenarse el cupo se cortan también las conversaciones en curso, y la que tomó el último cupo recibe una sola respuesta
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:345` — «if (quota.conversationsUsed >= plan.quota) {»; `src/modules/chatbot/server/chat/handleChatRequest.ts:397` — «// Atomic reserve: solo para conversación nueva (mensaje en // convo existente no incrementa el contador, así que no necesita reserve).»; `src/modules/chatbot/server/quota/checker.ts:41` — «const conversationsUsed = usage?.conversationsCount ?? 0»
+- Impacto: El gate optimista no distingue conversaciones nuevas de existentes. A fin de mes, un visitante en medio de una consulta que ya consumió su cupo recibe de golpe 'alcanzamos el límite del mes'; la conversación que reservó el último cupo (contador == cupo) se degrada en su segundo mensaje, así que el cliente paga un cupo por una sola respuesta.
+- Propuesta: Aplicar el gate de cupo solo cuando isNewConversation; las conversaciones existentes siguen hasta el tope de 40 mensajes.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, modelo.QuotaUsage
+
+### [BUG-092] El turno del chat no tiene techo absoluto ni de salida: sin maxOutputTokens ni timeout total, dos arranques en frío más un tool o una respuesta larga superan los 30 s de maxDuration
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:952` — «temperature: 0.7, stopWhen: stepCountIs(3),»; `src/modules/chatbot/server/chat/handleChatRequest.ts:954` — «// MUDEZ (commit 1) — SIN 'timeout'.»; `src/modules/chatbot/server/chat/reconcile.ts:252` — «export const PROVIDER_STREAM_INITIAL_IDLE_MS = 12_000»; `src/modules/chatbot/server/chat/reconcile.ts:281` — «export const STREAM_WATCHDOG_TOOL_MAX_MS = 15_000»; `src/app/api/chatbot/[slug]/chat/route.ts:8` — «export const maxDuration = 30»; `src/modules/chatbot/server/chat/reconcile.ts:115` — «export const ROUTE_MAX_DURATION_MS = 30_000»; `src/modules/chatbot/server/chat/persistTurn.ts:389` — «// Ante un corte de Netlify (~10s) a mitad de la transacción, la»; `src/modules/chatbot/server/chat/reconcile.ts:267` — «export const STREAM_WATCHDOG_INITIAL_IDLE_MS = 12_000»; `src/modules/chatbot/server/chat/handleChatRequest.ts:987` — «experimental_onStepStart: () => { watchdogRef.current?.beginStep()»; `src/modules/chatbot/server/chat/handleChatRequest.ts:953` — «stopWhen: stepCountIs(3),»
+- Impacto: Todas las ventanas son de inactividad, no relojes: hasta 12 s de silencio inicial por step, más hasta 15 s de tool, más otro arranque de 12 s, ya superan 30 s sin que nada corte. Sin maxOutputTokens, un pedido de respuesta larga (o una inyección) genera texto continuo que no dispara ningún idle. Si la plataforma mata la función, el turno no se persiste, el costo no se registra y la reserva de cupo no se compensa. Los comentarios no coinciden sobre el límite real (persistTurn habla de ~10 s, reconcile asume 30 s) y la constante está copiada a mano.
+- Propuesta: Fijar maxOutputTokens (por plan, ver BUG-024) y un techo de pared global del run (AbortSignal con ROUTE_MAX_DURATION menos margen) que dispare el mismo camino del watchdog (persistir lo visto y la derivación); mover maxDuration a una constante compartida importable; verificar el timeout real de la función en Netlify.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, lib.chatbot.chat, int.vertex, lib.chatbot.llm
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-090
+
+### [BUG-093] Una respuesta del bot de más de 4000 caracteres deja la conversación en 400 en todos los turnos siguientes
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/chat/requestSchema.ts:48` — «role: z.enum(['user', 'assistant', 'system']), content: z.string().max(MAX_MESSAGE_CHARS),»; `src/modules/chatbot/hooks/useChatbot.ts:432` — «messages: trimHistory( msgs»; `src/modules/chatbot/shared/historyPolicy.ts:45` — «mensaje del historial que exceda el cap deja la conversación en 400 hasta que»; `src/modules/chatbot/server/chat/handleChatRequest.ts:140` — «return Response.json({ error: 'Invalid request body' }, { status: 400 })»
+- Impacto: El tope de 4000 caracteres pensado para el input del visitante se aplica también a los turnos 'assistant' que el widget reenvía completos. Como el modelo no tiene maxOutputTokens, una respuesta larga (listado de servicios, comparación) hace que cada mensaje siguiente devuelva 400 hasta salir de la ventana de 30 mensajes, es decir, por el resto de la conversación (que se cierra a los 40). Es la 'conversación que muere' de C-1 por otra puerta.
+- Propuesta: Validar el largo solo en mensajes 'user' y truncar (no rechazar) los 'assistant' en el server o en el widget; fijar maxOutputTokens acorde.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, h3.vis-widget-cliente
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-100
+
+### [BUG-096] Reporte semanal: el total de leads tiene tope 10 y el delta se calcula contra un conteo sin tope
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/reports/buildWeeklyReport.ts:67` — «take: 10,»; `src/modules/chatbot/server/reports/buildWeeklyReport.ts:120` — «total: leadsThisWeek.length,»; `src/modules/chatbot/server/reports/buildWeeklyReport.ts:121` — «deltaFromPrevWeek: percentChange(leadsLastWeekCount, leadsThisWeek.length),»
+- Impacto: Un cliente con 25 leads esta semana y 25 la anterior recibe 'N=10 leads, -60%' y el resumen generado tambien usa 10. El primer cliente real veria su metrica principal subreportada justo cuando el bot rinde.
+- Propuesta: Separar el count (scope.chatbotLead.count con el mismo where) de la lista de 10 items para el detalle.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, lib.chatbot.reports, int.cron.send-weekly-reports, modelo.ChatbotLead
+
+### [BUG-097] El system prompt describe tools que el plan no habilita (Starter sin offer_handoff_options; '5 tools' vs '4 tools')
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/prompts/sections.ts:84` — «- offer_handoff_options se invoca SIEMPRE inmediatamente después de capture_lead exitoso.»; `prisma/seeds/sync-plans.ts:60` — «const STARTER_TOOLS = [ 'capture_lead', 'show_whatsapp_handoff', 'confirm_contact_request' ]»; `src/modules/chatbot/server/prompts/sections.ts:80` — «Tenés 5 tools — el SDK te pasa la descripción detallada de cada una»; `src/modules/chatbot/server/prompts/sections.ts:147` — «Tus únicas acciones reales son las 4 tools de la sección 4.»
+- Impacto: buildToolsOverview ignora plan.tools y el gate C0.1: un bot Starter recibe la orden de invocar SIEMPRE una tool que no tiene, y todos los bots de clientes leen reglas de navigate_to_page. Con el modelo obedeciendo instrucciones contradictorias, el cierre tras capturar el lead puede quedar sin la tarjeta o sin texto para el plan de entrada.
+- Propuesta: Pasar a buildSystemPrompt la lista efectiva de tools (Object.keys(tools)) y generar la seccion 4 solo con las presentes; unificar el conteo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, lib.chatbot.prompts, lib.chatbot.tools
+
+### [BUG-098] confirm_contact_request registra un evento que ninguna pantalla lee: el cliente no se entera del pedido de contacto
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/tools/confirmContactRequest.ts:85` — «export const CONTACT_REQUEST_EVENT_TYPE = 'handoff.callback'»; `src/modules/chatbot/server/admin/multiTenantQueries.ts:218` — «type: 'handoff.whatsapp',»; `src/modules/chatbot/server/logging/persistentLogger.ts:160` — «(c) => c.chatbotEvent.deleteMany({ where: { createdAt: { lt: threshold } } }),»
+- Impacto: El bot le confirma al visitante que 'el equipo se va a comunicar', pero el pedido y el canal preferido viven solo en chatbot_events (que se purgan a 30 dias) y ningun listado los muestra. El dueno recibe el email del lead sin saber que pidio que lo llamen.
+- Propuesta: Marcar el pedido en el lead (columna o metadata en ChatbotLead) o listar handoff.callback junto a las derivaciones, y destacarlo en el email del lead.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, h3.cli-chatbot, lib.chatbot.tools, modelo.ChatbotEvent
+
+### [BUG-099] Avisos post-lead fire-and-forget en serverless (email al cliente, CRM n8n, Telegram) sin outbox
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/tools/captureLead.ts:493` — «void notifyClient()»; `src/modules/chatbot/server/tools/captureLead.ts:500` — «void syncLeadToCrm({ leadId: result.id, trigger: 'auto' }).catch((err: unknown) => {»; `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:164` — «void notifyTelegramOptional(tgMsg).catch((err: unknown) => {»; `src/app/(protected)/admin/chatbots/[botId]/actions.ts:75` — «sendTransactionalEmail({»; `src/app/(protected)/admin/chatbots/[botId]/actions.ts:83` — «}).catch((err: unknown) => {»; `src/modules/chatbot/server/tools/captureLead.ts:455` — «void notifyTelegramOptional(telegramMsg).catch((err: unknown) => {»; `src/modules/chatbot/server/admin/integrations/retryCrmSync.ts:73` — «void syncLeadToCrm({ leadId, trigger: 'manual' }).catch((err: unknown) => {»; `src/modules/chatbot/server/admin/integrations/retryCrmSync.ts:79` — «return { ok: true as const }»; `src/modules/chatbot/components/admin/integrations/RetrySyncButton.tsx:21` — «toast.success('Reintento disparado. En unos segundos se actualiza el historial.')»; `src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts:6` — «* Si el proceso muere entre crear un CrmSyncAttempt PENDING y marcar SUCCESS/FAILED»; `src/modules/chatbot/server/crm/postToN8n.ts:7` — «Tiempo total peor caso: ~33s (3 × 10s + 1s + 3s). Como se corre en * fire-and-forget post-respuesta del bot, no impacta UX.»; `src/modules/chatbot/server/crm/syncLeadToCrm.ts:85` — «const attempt = await scope.crmSyncAttempt.create({»; `src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts:33` — «if (elapsed > SYNC_STALE_THRESHOLD_MS) { return 'FAILED'»
+- Impacto: Si el stream termina antes de que Brevo/n8n respondan (Brevo con reintentos largos), la plataforma congela la function y el email de nuevo lead al cliente o el sync al CRM pueden no salir nunca, sin reintento. El lead queda en el panel, pero el aviso que el cliente paga no.
+- Propuesta: Outbox transaccional (fila escrita en la misma tx del lead) + cron con reintentos, o al menos await acotado antes de cerrar el step.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [BUG-052]
+- Nodo(s): h3.vis-api-chatbot, lib.chatbot.tools, int.brevo, int.n8n, int.telegram, h3.adm-chatbots.activar-pausar-eliminar, h3.adm-chatbots.historial-sync-crm, lib.chatbot.crm, modelo.CrmSyncAttempt, h3.adm-chatbots.integracion-crm, h3.cli-chatbot
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-101
+
+### [BUG-100] Telegram en Markdown legado con datos sin escapar y link relativo: avisos que Telegram rechaza en silencio
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/notifications/telegram.ts:117` — «await sendTelegram(message, { parseMode: 'Markdown' })»; `src/modules/chatbot/server/tools/captureLead.ts:449` — «email ? 'Email: ${email}' : '',»; `src/modules/chatbot/server/quota/upsellAlert.ts:82` — «(input.adminLinkPath ? '\n[Ver cliente](${input.adminLinkPath})' : ''),»; `src/modules/chatbot/server/chat/handleChatRequest.ts:383` — «adminLinkPath: '/admin/clients/${bot.organization.id}',»
+- Impacto: Un email con guion bajo (juan_perez@...) o un nombre/resumen con * o _ rompe el parseo de entidades de Telegram (400) y el aviso de nuevo lead o de handoff al equipo se pierde, solo con console.error. El link de upsell es relativo, inutil fuera del sitio.
+- Propuesta: Usar parse_mode HTML con escape (ya es el default de sendTelegram) o escapar Markdown; links absolutos con NEXT_PUBLIC_APP_URL.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.chatbot.tools, lib.chatbot.quota, int.telegram
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-102
+
+### [BUG-102] La reconciliacion por telefono pisa identidades que nacieron con BSUID: un numero reciclado hereda la identidad y la conversacion de otra persona
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/motor/domain/identity.ts:57` — «const legacy = await db.contactIdentity.findFirst({ where: { channelType: 'WHATSAPP', waId: ref.phone, reconciledAt: null }, })»; `src/modules/motor/domain/identity.ts:61` — «const updated = await db.contactIdentity.update(legacy.id, { externalId: ref.bsuid, reconciledAt: new Date(),»; `src/modules/motor/domain/identity.ts:69` — «const created = await db.contactIdentity.upsertByExternalId({ channelType: 'WHATSAPP', externalId: ref.bsuid,»; `tests/integration/motor-inbound.spec.ts:239` — «expect(identity?.waId).toBe(phone) expect(identity?.reconciledAt).toBeNull()»; `src/modules/motor/adapters/whatsapp/inbound/handle-message.ts:72` — «const existing = await tx.motorConversation.findFirst({ where: { wabaChannelId, contactIdentityId, status: 'OPEN' },»
+- Impacto: Afecta al primer negocio cliente. La identidad que se crea por la via normal queda con externalId=BSUID A, waId=P y reconciledAt=null (identity.ts:69-74; lo fija el test en spec:239-240). Si despues llega un BSUID B distinto con el mismo telefono P (numero reciclado, el caso que el docstring en identity.ts:11-13 dice cubrir), el paso 2 trata esa fila como legacy y le reescribe el externalId a B. Los mensajes de la persona nueva se suman a la conversacion OPEN de la anterior (handle-message.ts:72-80). Cuando exista B2, el bot le contestaria con el historial de otra persona. La persona original, si vuelve con su BSUID A, queda como identidad nueva y pierde su historial. Ademas, findFirst sin orderBy hace que la eleccion no sea deterministica si hay varias filas con ese waId.
+- Propuesta: Tratar como legacy solo las filas cuyo externalId no sea un BSUID (por ejemplo !isBsuid(externalId) o externalId === waId), o marcar las altas nativas. Agregar a motor-inbound.spec.ts un caso: identidad nativa A con telefono P, despues B con telefono P; se espera que queden dos identidades.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp.identidad-bsuid, modelo.ContactIdentity, modelo.MotorConversation
 
 ### [BUG-004] El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
@@ -1035,12 +1498,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-018] chatbot_conversation.sessionId es único global y el widget guarda un solo sessionId por origen: dos bots bajo el mismo origen chocan (P2002 sin adopción)
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `prisma/migrations/20260512150823_chatbot_init/migration.sql:142` — «CREATE UNIQUE INDEX "chatbot_conversation_sessionId_key" ON "chatbot_conversation"("sessionId");»; `src/modules/chatbot/hooks/useChatbot.ts:27` — «const existing = window.sessionStorage.getItem('chatbot:sessionId')»; `src/modules/chatbot/server/conversation/resolver.ts:133` — «// p.ej. la colisión cross-bot del sessionId global (@unique sin»
+- Evidencia: `prisma/migrations/20260512150823_chatbot_init/migration.sql:142` — «CREATE UNIQUE INDEX "chatbot_conversation_sessionId_key" ON "chatbot_conversation"("sessionId");»; `src/modules/chatbot/hooks/useChatbot.ts:27` — «const existing = window.sessionStorage.getItem('chatbot:sessionId')»; `src/modules/chatbot/server/conversation/resolver.ts:133` — «// p.ej. la colisión cross-bot del sessionId global (@unique sin»; `prisma/schema.prisma:1375` — «sessionId String @unique»; `src/modules/chatbot/server/conversation/resolver.ts:137` — «if (!adopted) throw error»
 - Impacto: Si alguien usa el chat de un bot y después el de otro bajo el mismo origen (por ejemplo, el equipo probando /embed/<slug> de dos clientes en la misma pestaña), el segundo create da P2002, la adopción scopeada no encuentra fila (resolver.ts:137 relanza) y el chat del segundo bot falla. No mezcla datos entre tenants.
 - Propuesta: Guardar el sessionId por slug en el widget (clave con el slug) como arreglo libre; a mediano plazo unique compuesto (botConfigId, sessionId) (schema FROZEN, decisión para Valentino).
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): modelo.Conversation, h3.vis-widget-cliente, h3.vis-api-chatbot
+- Nodo(s): modelo.Conversation, h3.vis-widget-cliente, h3.vis-api-chatbot, h3.vis-widget-develop, lib.chatbot.hooks, lib.chatbot.conversation
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-032
 
 ### [BUG-026] El reporte ejecutivo semanal no usa PENDING como cerrojo: el cron y el envío manual concurrentes mandan el mail dos veces
@@ -1057,12 +1520,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-027] Salida del motor de WhatsApp (latente): el estado se escribe sin condición, el wamid se guarda después del envío y el estado del canal no frena la salida
 - Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `src/modules/motor/adapters/whatsapp/inbound/handle-status.ts:53` — «const currentRank = STATUS_RANK[message.status]»; `src/modules/motor/adapters/whatsapp/inbound/handle-status.ts:58` — «await scope.motorMessage.update(message.id, { status: next })»; `src/modules/motor/services/sendMessage.ts:248` — «await scope.motorMessage.update(messageId, { status: 'SENT', providerMessageId: result.wamid })»; `src/modules/motor/adapters/whatsapp/inbound/process.ts:163` — «next = addTo(next, 'statusesSkipped')»; `src/modules/motor/services/sendMessage.ts:113` — «if (channel === null || channel.apiKeyEncrypted === null || channel.apiKeyIv === null || channel.apiKeyTag === null) {»; `src/modules/motor/adapters/whatsapp/inbound/handle-request.ts:39` — «if (channel.status === 'INACTIVE') {»
+- Evidencia: `src/modules/motor/adapters/whatsapp/inbound/handle-status.ts:53` — «const currentRank = STATUS_RANK[message.status]»; `src/modules/motor/adapters/whatsapp/inbound/handle-status.ts:58` — «await scope.motorMessage.update(message.id, { status: next })»; `src/modules/motor/services/sendMessage.ts:248` — «await scope.motorMessage.update(messageId, { status: 'SENT', providerMessageId: result.wamid })»; `src/modules/motor/adapters/whatsapp/inbound/process.ts:163` — «next = addTo(next, 'statusesSkipped')»; `src/modules/motor/services/sendMessage.ts:113` — «if (channel === null || channel.apiKeyEncrypted === null || channel.apiKeyIv === null || channel.apiKeyTag === null) {»; `src/modules/motor/adapters/whatsapp/inbound/handle-request.ts:39` — «if (channel.status === 'INACTIVE') {»; `src/modules/motor/adapters/whatsapp/inbound/handle-status.ts:41` — «const message = await scope.motorMessage.findFirst({ where: { providerMessageId: status.id, direction: 'OUT' },»
 - Impacto: Hoy latente: sendMotorMessage no tiene llamadores hasta B2. Cuando se conecte: dos webhooks concurrentes (delivered y read) pueden dejar el mensaje en DELIVERED después de READ o pisar un FAILED; un status que llega antes de que se guarde el wamid se descarta como unknown-message sin reintento; si la función muere entre la aceptación del BSP y el update, el mensaje queda PENDING para siempre con la clave de idempotencia quemada; y un canal INACTIVE (solo se chequea en la entrada) o reportado BANNED/RESTRICTED sigue despachando, justo lo que la alerta de calidad de Meta quería evitar.
 - Propuesta: Aplicar el status con updateMany condicional (where status en rangos menores y distinto de FAILED); correlacionar el wamid antes del despacho o reintentar el lookup; marcar como desconocidos los PENDING viejos; chequear status y channelStatus en resolveTargets antes de enviar.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h3.vis-whatsapp, modelo.MotorMessage, modelo.WabaChannel, lib.motor
+- Nodo(s): h3.vis-whatsapp, modelo.MotorMessage, modelo.WabaChannel, lib.motor, h3.vis-whatsapp.estados-entrega
 
 ### [BUG-028] Reconocer una alerta del chatbot no la silencia: el detector solo deduplica contra PENDING de las últimas 24 h y la vuelve a crear con email y Telegram
 - Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
@@ -1087,12 +1550,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [BUG-046] CTAs que llevan a Mensajes con un contexto que Mensajes ignora (?prefill=conexiones, context=bot-activation): el composer queda vacío
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: PROBABLE
-- Evidencia: `src/components/dashboard/OnboardingStatusCard.tsx:97` — «href="/dashboard/messages?prefill=conexiones"»; `src/components/dashboard/MessageThread.tsx:73` — «const context = searchParams.get('context')»; `src/lib/data/message-context.ts:2` — «activacion:»; `src/components/dashboard/plan/UsageMeter.tsx:119` — «featureKey="bot-activation"»; `src/components/dashboard/plan/UpgradeCtaButton.tsx:82` — «const targetHref = '/dashboard/messages?context=${resolvedFeatureKey}'»; `src/lib/data/message-context.ts:56` — «let template = MESSAGE_CONTEXTS[context] ?? ''»
+- Evidencia: `src/components/dashboard/OnboardingStatusCard.tsx:97` — «href="/dashboard/messages?prefill=conexiones"»; `src/components/dashboard/MessageThread.tsx:73` — «const context = searchParams.get('context')»; `src/lib/data/message-context.ts:2` — «activacion:»; `src/components/dashboard/plan/UsageMeter.tsx:119` — «featureKey="bot-activation"»; `src/components/dashboard/plan/UpgradeCtaButton.tsx:82` — «const targetHref = '/dashboard/messages?context=${resolvedFeatureKey}'»; `src/lib/data/message-context.ts:56` — «let template = MESSAGE_CONTEXTS[context] ?? ''»; `src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx:157` — «href="/dashboard/messages?context=knowledge"»; `src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx:55` — «href="/dashboard/messages?context=crm" (igual :92, :127)»
 - Impacto: El cliente en onboarding llega a Mensajes con el composer vacio en lugar del mensaje preparado sobre sus conexiones.
 - Propuesta: Cambiar a ?context=activacion (la clave existente).
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h2.cli-inicio.estado-onboarding, h2.cli-mensajes, h2.cli-plan
+- Nodo(s): h2.cli-inicio.estado-onboarding, h2.cli-mensajes, h2.cli-plan, h3.cli-chatbot.base-conocimiento, h3.cli-chatbot.estado-crm
 
 ### [BUG-051] 'Resultados de la semana': visitas fijas en 0, ventanas en milisegundos y centinela +100 % que el LLM narra como suba
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: bug
@@ -1175,6 +1638,191 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h2.cli-proyecto.aprobar-o-pedir-cambios, modelo.Task, lib.actions
 
+### [BUG-066] Insights de Resultados: un fallo de Anthropic se cachea 24 h como 'sin insights' y no llega a Sentry
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/ai/results-insights.ts:37` — «return unstable_cache( async () => generateTrafficInsights(input),»; `src/lib/ai/results-insights.ts:102` — «} catch (err) { console.error('[Traffic Insights] Generation failed:', err) return []»
+- Impacto: Un 429 o un timeout transitorio deja al cliente sin insights por un día entero (el [] queda en cache) y nadie se entera.
+- Propuesta: Ante error, lanzar o devolver un valor que no se cachee; captureException.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados, int.anthropic, lib.ai
+
+### [BUG-067] Aviso de lead al cliente: links relativos si falta NEXT_PUBLIC_APP_URL y los fallos solo van a console.error
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/client-notifications/notify.ts:135` — «const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? '').replace(/\/$/, '')»; `src/lib/client-notifications/notify.ts:169` — «leadUrl: '${appUrl}/dashboard/chatbot/leads/${input.leadId}',»; `src/lib/client-notifications/notify.ts:175` — «console.error('[client-notifications] notifyClientOfLead failed (lead ya guardado):', err)»
+- Impacto: Sin la variable, 'Ver este lead en mi panel' lleva a un link roto. Un fallo de Brevo o de la base en el aviso no deja rastro en Sentry: el dueño no recibe el aviso y nadie lo sabe.
+- Propuesta: Fallback a la URL de producción o validar la variable al arrancar; captureException en los catch.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot.aviso-lead-email, int.brevo, lib.client-notifications
+
+### [BUG-072] currentPath queda congelado en la primera pagina: el bot de develOP infiere la seccion equivocada tras navegar
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/hooks/useChatbot.ts:456` — «[slug, currentPath]»; `src/modules/chatbot/hooks/useChatbot.ts:459` — «const { messages: sdkMessages, sendMessage: sdkSendMessage, setMessages, status } = useChat({»; librería @ai-sdk/react@3.0.216, dist/index.mjs línea 184 — «const chatRef = useRef( "chat" in options ? options.chat : new Chat(optionsWithCallbacks)»; `src/modules/chatbot/server/prompts/sections.ts:200` — «- Ruta del usuario: ${context.currentPath ?? 'no determinada'}»
+- Impacto: El widget sigue montado al navegar (layout raiz), pero useChat conserva la instancia y el transport del primer render (solo se recrea si cambia chat o id): todos los turnos mandan la ruta donde se abrio el sitio. El prompt usa esa ruta para 'inferir interes segun la seccion' (sections.ts:205), asi que en /ai-implementations el bot puede seguir creyendo que el visitante esta en el home; tambien se persiste la ruta vieja en Conversation.currentPath (resolver.ts:90-93).
+- Propuesta: Leer currentPath desde un ref dentro de prepareSendMessagesRequest (como sessionId y el opener) o pasarlo en el body de sendMessage.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop, lib.chatbot.hooks
+
+### [BUG-078] El stream de actividad puede perder eventos entre consultas
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/admin/ActivityLog.tsx:116` — «lastFetchRef.current = data.serverTime ?? new Date().toISOString()»; `src/app/api/admin/chatbot/events/route.ts:21` — «? await listEventsSince(bot.organizationId, bot.id, new Date(since))»; `src/app/api/admin/chatbot/events/route.ts:35` — «serverTime: new Date().toISOString(),»; `src/modules/chatbot/server/admin/queries.ts:54` — «where: { botConfigId, createdAt: { gt: since } },»; `src/modules/chatbot/server/admin/queries.ts:56` — «take: limit,»
+- Impacto: El próximo 'since' es la hora del servidor tomada después de la query, no el createdAt del último evento: lo creado entre la query y ese instante, o lo que pase de 50 en una ráfaga de 3 s, no aparece nunca en vivo (sólo al recargar). Un 'since' inválido da un 500 sin manejar.
+- Propuesta: Usar como cursor el createdAt (e id) del último evento recibido, paginar hasta vaciar y validar 'since' con Zod.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-actividad.stream-eventos, lib.chatbot.admin, modelo.ChatbotEvent
+
+### [BUG-079] El editor marca 'cambios sin guardar' al abrir bots con respuestas rápidas sin id
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/BotConfigEditor.tsx:52` — «const [initialState, setInitialState] = useState<BotConfigEditorState>(() => normalizeInitial(initial))»; `src/modules/chatbot/components/admin/BotConfigEditor.tsx:53` — «const [state, setState] = useState<BotConfigEditorState>(() => normalizeInitial(initial))»; `src/modules/chatbot/components/admin/BotConfigEditor.tsx:288` — «id: typeof record.id === 'string' ? record.id : crypto.randomUUID(),»; `src/modules/chatbot/components/admin/BotConfigEditor.tsx:61` — «() => JSON.stringify(state) !== JSON.stringify(initialState),»; `src/modules/chatbot/server/dashboard/updateBotAppearance.ts:48` — «return replies.map((reply) => ({»
+- Impacto: Dos normalizaciones independientes generan UUID distintos para cada respuesta rápida sin id (las que guarda el cliente desde su panel y las del seed del bot develop): la barra 'Tenés cambios sin guardar' aparece al abrir el editor y el diff muestra 'Respuestas rápidas' modificadas sin que nadie tocara nada.
+- Propuesta: Normalizar una sola vez y reusar el objeto para ambos estados, o derivar ids determinísticos; que updateBotAppearance preserve o genere ids.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.editar-config-bot, h3.cli-chatbot
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-078
+
+### [BUG-080] El borrador del alta se guarda vacío y muestra 'onboarding sin terminar' sin haber empezado
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts:28` — «didRestore.current = true»; `src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts:60` — «if (!didRestore.current) return»; `src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts:70` — «localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))»; `src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx:115` — «{hasDraft && (»
+- Impacto: El efecto de restauración marca didRestore antes de que corra el de autoguardado en el mismo commit, así que abrir /admin/clients/new y quedarse un segundo guarda el estado inicial como borrador; 'Descartar' también lo vuelve a guardar. En la visita siguiente aparece el banner de onboarding sin terminar sobre un formulario vacío.
+- Propuesta: Guardar sólo si el estado difiere de INITIAL_STATE (o tras una edición del usuario) y no re-guardar tras descartar.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.borrador-alta
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-097
+
+### [BUG-082] Estilo 'image'/'emoji' sin URL o emoji cae al avatar 3D pesado por defecto ('neuro') y descarga three + R3F
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/avatar/AvatarRenderer.tsx:51` — «if (style === 'image' && avatarImageUrl) {»; `src/modules/chatbot/components/avatar/AvatarRenderer.tsx:87` — «const resolved = getAvatarOrDefault(style)»; `src/modules/chatbot/components/avatar/registry.ts:11` — «export const DEFAULT_AVATAR_ID = 'neuro'»
+- Impacto: Si el cliente elige 'Imagen custom' o 'Emoji' y no completa el valor, cada visitante ve el Orbe Neural y baja ~230 kB gz de three/R3F (HeavyAvatarsLazy.tsx:12-13), solo con un console.warn.
+- Propuesta: Fallback de escotilla incompleta a un avatar liviano (monograma) y/o validar en el server que style=image exige avatarImageUrl y style=emoji exige avatarEmoji.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente, h3.cli-chatbot
+
+### [BUG-083] LegacyNeuroAvatar comparte color y mouse a nivel modulo entre instancias y reduce el accent del tenant a 4 paletas
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:54` — «const activeColorRef = { current: new THREE.Color('#06b6d4') };»; `src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:157` — «activeColorRef.current.lerp(targetColor.current, lerpFactor);»; `src/modules/chatbot/components/avatar/legacyStateMapper.ts:35` — «return 'cyan'»
+- Impacto: Con 'Rostro Neural', el header (idle), el indicador 'pensando' (thinking, violeta) y el launcher montan instancias cuyos ColorController escriben el mismo color global cada frame: los colores se mezclan/parpadean. Ademas cualquier accent fuera de 4 prefijos se pinta cyan.
+- Propuesta: Mover activeColorRef/mouseRef a refs por instancia (contexto del Canvas) y derivar el color del accent real en vez de la paleta fija.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente, h3.vis-widget-develop
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-098
+
+### [BUG-089] Alta con bot: el slug del bot se toma del de la org sin verificar unicidad en BotConfig
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/createClientWithBot.ts:85` — «c.organization.findUnique({ where: { slug: candidate } }),»; `src/modules/chatbot/server/admin/createClientWithBot.ts:162` — «slug: uniqueSlug,»; `src/modules/chatbot/server/admin/createBot.ts:57` — «const slug = await findUniqueBotSlug(slugify(input.botName))»; `prisma/schema.prisma:1278` — «slug String @unique»
+- Impacto: createBot deriva slugs de bot desde el nombre del bot, asi que puede existir un bot 'sofia' sin org 'sofia'. Si despues se da de alta la org 'Sofia', su slug esta libre en Organization pero choca en BotConfig: P2002, rollback de toda la tx y error generico. Mismo patron en lib/onboarding/core.ts:66 y :111.
+- Propuesta: Calcular el slug del bot con findUniqueBotSlug (createBot.ts:12-27) en ambas altas.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.alta-cliente-con-bot, lib.chatbot.admin, modelo.BotConfig
+
+### [BUG-090] Analisis mensual: la serie salta meses sin fila y compara contra el ultimo mes con datos
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/lib/monthly-analysis.ts:73` — «const current = points.length > 0 ? points[points.length - 1] : null»; `src/modules/chatbot/lib/monthly-analysis.ts:74` — «const prev = points.length > 1 ? points[points.length - 2] : null»; `src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts:79` — «take: SERIES_MONTHS,»
+- Impacto: La serie son las ultimas 6 filas de QuotaUsage, no los ultimos 6 meses: un mes sin conversaciones no tiene fila y desaparece del grafico, y la variacion compara con el ultimo mes con datos. Mientras el mes en curso no tenga su primera conversacion, 'como viene tu mes' muestra el mes anterior.
+- Propuesta: Generar los 6 meses calendario (en hora AR) y rellenar con 0 los que no tengan fila.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados, h2.cli-resultados.analisis-mensual, modelo.QuotaUsage
+
+### [BUG-094] Cuando actúa el watchdog el turno queda con 0 tokens, costo 0 y sin toolCalls: onFinish no 'recupera la contabilidad' como dice el comentario
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:1250` — «// registrado, onFinish recupera la contabilidad del turno // (persistTurn es idempotente — el primero en llegar gana).»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1230` — «toolCalls: [], tokensIn: 0, tokensOut: 0,»; `src/modules/chatbot/server/chat/persistTurn.ts:181` — «if (turnPersisted) { streamProbe.mark('persistTurn_skipped', { source: input.source }) return»
+- Impacto: El watchdog persiste primero con 0 tokens y sin toolCalls; cuando después llega onFinish con el usage real, persistTurn lo saltea. Subreporta costo en el panel de uso y pierde las tarjetas de tools (handoff, lead) en el transcript de los turnos que cierra el watchdog.
+- Propuesta: Si onFinish llega después de un cierre del watchdog, actualizar tokens, costo y toolCalls del mensaje ya persistido (update dirigido) o, como mínimo, corregir el comentario y medir cuántos turnos cierran por watchdog.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, modelo.ChatMessage, modelo.QuotaUsage
+
+### [BUG-095] El validador del webhook rechaza dominios legítimos que empiezan con 'fc' o 'fd'
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/crm/validateWebhookUrl.ts:89` — «hostname.startsWith('fc') || hostname.startsWith('fd')»
+- Impacto: Un cliente cuyo n8n vive en un dominio como fdn8n.cliente.com o fc-automatizaciones.com no puede configurar el CRM: recibe 'No se pueden usar IPs privadas o de loopback'.
+- Propuesta: Aplicar los prefijos IPv6 solo cuando el hostname es un literal IPv6 (contiene ':').
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, lib.chatbot.crm
+
+### [BUG-101] excludeDqWhere excluye tambien los leads con classification NULL
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/scoring/dqFilter.ts:23` — «NOT: { classification: 'dq' },»; `prisma/schema.prisma:1493` — «classification LeadClassification?»
+- Impacto: Con la semantica de NULL de SQL que usa Prisma, los leads sin clasificar (legacy o creados por scripts) desaparecen de metricas y del reporte semanal. Hoy el camino de produccion siempre clasifica, por eso BAJA.
+- Propuesta: OR: [{ classification: null }, { classification: { not: 'dq' } }].
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.chatbot.scoring, h3.cli-chatbot, modelo.ChatbotLead
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-104
+
+### [BUG-103] El dedupe de alertas por (canal, tipo) en 24 h hace que pasar de restringido a baneado no genere alerta nueva y que el rechazo de una plantilla tape el de otras
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/motor/adapters/whatsapp/inbound/handle-health.ts:106` — «const recent = await scope.motorAlert.findFirst({ where: { wabaChannelId: channel.id, type: input.type, createdAt: { gte: since } },»; `src/modules/motor/adapters/whatsapp/inbound/handle-health.ts:247` — «type: 'PHONE_RESTRICTED_OR_BANNED', severity: nextStatus === 'BANNED' ? 'CRITICAL' : 'HIGH',»
+- Impacto: Si Meta restringe el numero y lo banea dentro de las 24 h, la unica alerta que queda es 'Número restringido' con severidad HIGH; el baneo CRITICAL se descarta. Un segundo template rechazado ese dia no deja rastro. Hoy es latente porque las alertas no tienen lector (ver la FAL de alertas).
+- Propuesta: Deduplicar por (canal, tipo, severidad) para la alerta del numero y por (canal, tipo, templateId) para las plantillas, o dejar que una severidad mayor siempre genere su alerta.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp.salud-canal, modelo.MotorAlert
+
+### [BUG-104] La clave de idempotencia de salida queda quemada por un despacho fallido o colgado: el reintento devuelve 'deduped' y el mensaje nunca sale
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/motor/services/sendMessage.ts:213` — «if (input.idempotencyKey !== undefined) { const existing = await findByIdempotencyKey(scope, input.idempotencyKey) if (existing !== null) {»; `src/modules/motor/services/sendMessage.ts:190` — «where: { direction: 'OUT', outboundIdempotencyKey: key }, select: { id: true, providerMessageId: true },»; `src/modules/motor/services/sendMessage.ts:251` — «await scope.motorMessage.update(messageId, { status: 'FAILED',»
+- Impacto: Latente porque no hay llamador. Cuando B2 reintente un envio que fallo (red agotada, 5xx) o que quedo PENDING porque la funcion expiro entre la reserva y el despacho, va a recibir 'deduped' con wamid null, igual que un exito, y la respuesta del bot nunca le llega al cliente final. El docstring (:17) cuida no quemar la clave en el decrypt, pero no en el despacho.
+- Propuesta: Leer tambien el status en findByIdempotencyKey: si la fila esta FAILED (o PENDING vencida), re-despachar sobre esa misma fila o devolver un resultado distinto ('previously_failed'). Agregar un test que reintente con la misma clave despues de un 5xx agotado.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp.envio-mensajes, modelo.MotorMessage
+
+### [BUG-105] El reintento ante timeout o 5xx puede duplicar el mensaje al cliente final, y el peor caso (unos 34 s) supera el maxDuration de las rutas
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/motor/adapters/whatsapp/outbound/client.ts:233` — «const isTimeout = error instanceof Error && error.name === 'AbortError' return { outcome: 'retryable',»; `src/modules/motor/adapters/whatsapp/outbound/client.ts:94` — «const DEFAULT_TIMEOUT_MS = 10_000 const DEFAULT_RETRY_DELAYS_MS = [1_000, 3_000] as const»
+- Impacto: Latente. Un timeout del lado cliente despues de que 360dialog ya acepto el POST reenvia el mismo texto: la Cloud API no tiene clave de idempotencia, asi que el usuario recibe el mensaje dos veces. El codigo evita reintentar el 2xx sin wamid (:205-206) pero no este caso. Tres intentos de 10 s mas 4 s de espera suman unos 34 s, por encima del maxDuration=15 del webhook y de 30 en el chat, si B2 lo llama de forma sincronica. Eslabon inferido: el comportamiento del BSP ante POSTs duplicados.
+- Propuesta: No reintentar ante timeout (solo ante errores de conexion antes de enviar), o bajar el timeout y los intentos para que entren en el presupuesto del llamador. Llevar el envio a una cola o funcion de fondo cuando B2 lo cablee.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp.envio-mensajes, int.360dialog
+
+### [BUG-106] PAUSED queda terminal en el espejo local de plantillas: los eventos de reactivacion o deshabilitacion no tienen mapeo
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/motor/adapters/whatsapp/inbound/handle-health.ts:45` — «const TEMPLATE_STATUS_MAP: Readonly<Record<string, MotorTemplateStatus>> = { APPROVED: 'APPROVED', REJECTED: 'REJECTED',»; `src/modules/motor/adapters/whatsapp/inbound/handle-health.ts:132` — «if (nextStatus === undefined) { logger.debug(»; `src/modules/motor/services/sendMessage.ts:150` — «return template === null || template.status !== 'APPROVED' ? 'template_not_approved' : null»
+- Impacto: Si Meta reactiva una plantilla pausada (evento REINSTATED) o la deshabilita (DISABLED/FLAGGED), el mapeo no lo cubre y solo deja un debug. La plantilla queda PAUSED para siempre: el envio la rechaza aunque Meta la haya vuelto a habilitar. Una plantilla DISABLED que seguia APPROVED localmente sale y falla en el BSP. Eslabon inferido: la lista de valores de event viene de la doc de Meta, que no se verifico en este lote.
+- Propuesta: Confirmar contra el sandbox de 360dialog la lista de event, mapear REINSTATED a APPROVED y DISABLED a un estado no enviable, y pasar el log de 'unmapped-event' a warn para que se vea.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp.salud-canal, modelo.MotorTemplate
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-091
+
+### [BUG-107] El reintento de un batch reprocesa user_id_update y deja transiciones 'unknown-identity' falsas
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/motor/domain/identity.ts:110` — «const identity = await db.contactIdentity.findFirst({ where: { channelType: 'WHATSAPP', externalId: input.oldExternalId }, })»; `src/modules/motor/domain/identity.ts:113` — «if (identity === null) { await recordTransition(db, input, null, 'user_id_update:unknown-identity')»; `src/modules/motor/adapters/whatsapp/inbound/process.ts:67` — «for (const entry of envelope.entry) { for (const change of entry.changes ?? []) { summary = await applyEvent(scope, channel, classifyChange(change), summary)»
+- Impacto: Los changes de un batch se aplican en orden y sin atomicidad. Si un change posterior falla por infraestructura, el route devuelve 500 y el BSP reenvia todo el batch. El user_id_update que ya habia migrado no encuentra el ID viejo y graba una segunda transicion 'unknown-identity'. El rastro de auditoria de reconciliacion queda con filas que dicen que la identidad era desconocida cuando no lo era.
+- Propuesta: Antes de grabar 'unknown-identity', chequear si ya existe una transicion (from, to) para esa org, o si existe una identidad con el newExternalId, y en ese caso devolver 'migrated' sin escribir.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp.identidad-bsuid, modelo.ContactIdentityTransition
+
 ## Tecnología vieja
 
 ### [TEC-002] Agenda inteligente usa la API v1 de Cal.com, apagada segun el propio repo, con la API key en la query string
@@ -1188,6 +1836,17 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h2.cli-agenda.panel-de-agenda, int.calcom, modelo.Organization
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-046
 
+### [TEC-003] Modelos LLM fijados a mano en 14 lugares y sin chequeo de vigencia; lib/ai usa Haiku 4.5 de generación anterior
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: tech-vieja
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/llm/providers/google.ts:14` — «id: 'gemini-2.5-flash',»; `src/lib/plan/fallback.ts:51` — «llmModel: 'gemini-2.5-flash',»; `src/app/api/admin/chatbot/test-prompt/route.ts:50` — «const rawModel = provider.getModel('gemini-2.5-flash')»; `src/lib/ai/results-insights.ts:4` — «const CLAUDE_MODEL = 'claude-haiku-4-5-20251001'»; `src/lib/ai/review-reply-draft.ts:33` — «model: 'claude-haiku-4-5-20251001',»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:17` — «{ value: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5' },»; `prisma/seeds/sync-plans.ts:73` — «llmModel: 'gemini-2.5-flash',»; `src/modules/chatbot/server/llm/resolveEffectiveModel.ts:21` — «export const FALLBACK_MODEL_ID = 'gemini-2.5-flash'»; `src/lib/onboarding/core.ts:133` — «llmModel: 'gemini-2.5-flash',»
+- Impacto: Si Google discontinúa gemini-2.5-flash en Vertex, caen todos los bots a la vez y el health sigue en 'Todo OK' (solo mira una lista estática). Cambiar de modelo exige tocar seeds de planes, fallback, provider, rutas y lib/ai. claude-haiku-4-5-20251001 sigue activo pero es la generación anterior (USD 1/5 por millón contra 0,10/0,50 de Haiku 5.5); las opciones Anthropic del admin no coinciden con la lista del provider, que además es un stub. La vigencia de Gemini en Vertex no se pudo verificar (WebSearch no permitido en esta tarea).
+- Propuesta: Un registro único de modelos por uso; chequear la fecha de discontinuación en Vertex; una llamada real mínima en el health; evaluar Haiku 5.5 para lib/ai.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): int.vertex, int.anthropic, lib.chatbot.llm, lib.ai, lib.plan, h3.vis-api-chatbot
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-069
+
 ### [TEC-001] Prisma 6.19 con 7.x disponible: el salto exige cambiar el schema congelado y la carga de .env de los seeds
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: tech-vieja
 - Confianza: PROBABLE
@@ -1197,6 +1856,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: M  ·  Zona: FROZEN
 - Relacionado: —
 - Nodo(s): lib.prisma, lib.seeds, lib.migraciones
+
+### [TEC-004] El cierre del stream depende de internals de ai@6 citados por numero de linea, con rango ^ en package.json
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: tech-vieja
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `package.json:141` — «"ai": "^6.0.177",»; `src/modules/chatbot/server/llm/providerStreamClose.ts:186` — «// @ai-sdk/google/dist/internal/index.js:1650»
+- Impacto: PROVIDER-CLOSE, el watchdog y los hooks se calibraron contra el comportamiento interno de una version concreta (flush, tee, onAbort sin await). Un npm install que suba la minor puede romper el cierre del stream sin que compile distinto. El pin exacto ya figura como deuda en la bitacora.
+- Propuesta: Pin exacto de ai y @ai-sdk/google-vertex y un invariante de version que falle si cambia.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.chatbot.llm, int.vertex
 
 ## Rendimiento
 
@@ -1220,6 +1889,39 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [SEC-043]
 - Nodo(s): h2.cli-inicio.resumen-ia, int.vertex, lib.ai
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-057
+
+### [PERF-007] El widget publico importa el barrel cliente completo: editores de admin, onboarding, tablas y server actions viajan a todo el sitio
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/components/layout/ChatWidgetMount.tsx:12` — «const LogicCompanion = dynamic( () => import('@/modules/chatbot').then((m) => ({ default: m.LogicCompanion })),»; `src/modules/chatbot/index.ts:75` — «export { KnowledgeBaseEditor, BotConfigEditor } from './components/admin' export { ActivityLog } from './components/admin' export { OnboardingWizard } from './components/admin'»; `src/modules/chatbot/index.ts:88` — «export { updateLeadStatus } from './server/admin/updateLeadStatus' export { saveClientSettings } from './server/admin/saveClientSettings'»; `src/modules/chatbot/index.ts:30` — «// Diferido: este barrel lo importa entero 'ChatWidgetMount' en toda ruta // publica. Reexportar el avatar 3D eager metia 'three' + R3F (225 kB gz) en el // bundle del widget aunque nadie lo monte.»
+- Impacto: Cada visita publica descarga y evalua, para mostrar un boton de 56 px, codigo del panel admin y del dashboard que nunca monta: los propios devs midieron que el barrel no se poda (asi entraba three+R3F) y la bitacora deja ~202 kB gz de widget. Peor TBT/INP en mobile y los ids de tres server actions del panel quedan en el JS publico.
+- Propuesta: Importar LogicCompanion por ruta directa en ChatWidgetMount; partir index.ts por superficie (widget, dashboard, admin) o eliminarlo; medir con @next/bundle-analyzer (instalado y sin cablear).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop, lib.chatbot.barrel
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-071
+
+### [PERF-008] ActivityLog consulta cada 3 s aunque la pestaña esté oculta
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/ActivityLog.tsx:103` — «const interval = setInterval(async () => {»; `src/modules/chatbot/components/admin/ActivityLog.tsx:123` — «}, 3000)»; `src/app/api/admin/chatbot/events/route.ts:8` — «const session = await auth()»; `src/app/api/admin/chatbot/events/route.ts:17` — «const bot = await prisma.botConfig.findUnique({ where: { slug }, select: { id: true, organizationId: true } })»
+- Impacto: Cada pestaña abierta en Actividad (global o por bot) hace 20 invocaciones por minuto (28.800 por día) con auth y dos queries a Neon, aunque esté en segundo plano: mantiene la base despierta y consume cuota de invocaciones de Netlify. Una pestaña olvidada un fin de semana suma más de 80.000 llamadas. Además los 401 por sesión vencida se ignoran en silencio.
+- Propuesta: Pausar con document.visibilityState, backoff cuando no hay eventos y cortar ante 401 con aviso; o revalidar a demanda.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-actividad.stream-eventos, h3.adm-chatbots.actividad-por-bot, int.neon
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-076
+
+### [PERF-009] Avatares 3D siempre renderizando (sin pausa fuera de viewport), LegacyNeuroAvatar con dpr hasta 2 y AvatarPicker que monta los dos canvas pesados a la vez
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:940` — «dpr={[1, 2]}»; `src/modules/chatbot/components/avatar/NeuroAvatar.tsx:33` — «frameloop = 'always',»; `src/modules/chatbot/components/avatar/AvatarPicker.tsx:84` — «{AVATAR_REGISTRY.map((entry) => (»; `src/modules/chatbot/components/avatar/ParticleSphere.tsx:42` — «const pos = basePos.clone().multiplyScalar(radius)»; `src/modules/chatbot/components/avatar/AvatarPicker.tsx:211` — «<AvatarRenderer»; `src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx:76` — «avatarStyle: 'legacy_neuro',»; `src/modules/chatbot/components/admin/config/tabs/AppearanceTab.tsx:40` — «<AvatarPicker»
+- Impacto: Viola reglas de CLAUDE.md (dpr max 1.5, IntersectionObserver en animaciones pesadas). Nadie pasa frameloop (git grep 'frameloop=' solo encuentra NeuroAvatar.tsx:54). En la config del admin y del cliente conviven 2 canvas del picker + los de la preview, a 60 fps; el changelog admin registra 'Freeze del AvatarPicker' como pendiente. ParticleSphere asigna 120 Vector3 por frame y rota sin delta (:35), mas rapido en 120 Hz.
+- Propuesta: dpr [1,1.5]; frameloop 'demand' o pausa por IntersectionObserver/visibilitychange; en el picker mostrar thumbnail estatico y montar el canvas solo en hover/seleccion; reutilizar un Vector3 y escalar la rotacion por delta.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots, h3.cli-chatbot, h3.vis-widget-cliente, lib.chatbot.components, h3.adm-chatbots.editar-config-bot, h4.adm-clientes.alta-cliente-con-bot, lib.chatbot.avatar
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-083
 
 ### [PERF-001] FKs sin índice (Task.projectId, Notification.userId/taskId, ChatbotEvent.conversationId) e índices redundantes
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: perf
@@ -1260,6 +1962,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h2.cli-shell.layout-y-navegacion, modelo.User, lib.prisma
+
+### [PERF-010] Detector de incidencias secuencial N+1 sin maxDuration
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/detectBotIssues.ts:28` — «const bots = await unsafeGlobalQuery(»; `src/modules/chatbot/server/admin/detectBotIssues.ts:38` — «for (const bot of bots) {»; `src/modules/chatbot/server/admin/detectBotIssues.ts:267` — «const emailResult = await sendAlertEmail(issue)»
+- Impacto: Por bot activo hace hasta 8 consultas en serie (:66-221) y por alerta nueva findFirst + create + email + update + Telegram en serie (:242-280). Aritmetica: 50 bots activos x 8 consultas x ~20 ms ~= 8 s antes de mandar un solo email, contra el timeout por defecto de las funciones sincronicas de Netlify (10 s). La ruta del cron no declara maxDuration (route.ts:5-20). Hoy no corre (no tiene scheduler); importa al arreglar eso.
+- Propuesta: Agregados con groupBy por botConfigId en una consulta por tipo de senal, emails al final en lote, y maxDuration explicito en la ruta.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-alertas.detector-incidencias, int.cron.detect-bot-issues, lib.chatbot.admin, modelo.ChatbotEvent
 
 ## Deuda
 
@@ -1343,6 +2055,66 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [DEU-003]
 - Nodo(s): h2.cli-bienvenida.wizard-3-pasos, h2.cli-soporte.crear-ticket, h2.cli-email-mkt.crear-y-enviar-campana, h2.cli-email-mkt
+
+### [DEU-035] router.push sin justificación en el alta de bot del admin
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/chatbots/new/CreateBotForm.tsx:80` — «router.push('/admin/chatbots/${result.botId}')»
+- Impacto: Contradice la regla de navegación de portales (redirect() en la server action o comentario inline que justifique el push).
+- Propuesta: redirect() en createBotAction tras el éxito, o documentar el motivo inline.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.crear-bot
+
+### [DEU-038] Acciones gemelas por id y por slug divergieron: la que usa la UI devuelve err.message crudo
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/saveKnowledgeBase.ts:86` — «// PRIVACIDAD: sanitizado — el try cubre knowledgeBase.update con la KB»; `src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts:70` — «const msg = err instanceof Error ? err.message : 'Unknown error'»; `src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts:139` — «const msg = err instanceof Error ? err.message : 'Unknown error'»; `src/app/(protected)/admin/chatbots/[botId]/tabs/KnowledgeTab.tsx:25` — «orgSlug={bot.organization.slug}»; `src/modules/chatbot/components/admin/BotConfigEditor.tsx:79` — «const result = orgSlug»; `src/modules/chatbot/server/admin/saveBotConfig.ts:155` — «const msg = sanitizeErrorMessage(error)»; `src/modules/chatbot/server/admin/saveBotConfig.ts:81` — «return { success: false, error: 'Invalid input: ' + parsed.error.message }»
+- Impacto: Las acciones por id sanitizan y loguean; las por slug (las únicas que alcanza la UI, porque ConfigTab y KnowledgeTab siempre pasan orgSlug) devuelven el mensaje crudo de Prisma —que según el propio comentario puede ecoar la KB o el email de notificaciones— y no dejan rastro. Hay dos schemas Zod copiados que ya pueden divergir y dos endpoints públicos para lo mismo.
+- Propuesta: Una sola action por recurso (resolver por slug o id dentro), con sanitizeErrorMessage y chatbotLog; borrar las ramas muertas del editor.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.editar-config-bot, h3.adm-chatbots.editar-kb, lib.chatbot.admin, h3.adm-chatbots.editar-config
+
+### [DEU-039] triggerTransition del sitio público usado en el portal admin
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:11` — «import { useTransitionContext } from '@/context/TransitionContext'»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:183` — «triggerTransition(»; `src/context/TransitionContext.tsx:118` — «router.push(target);»
+- Impacto: CLAUDE.md reserva triggerTransition para el sitio público (el Shutter no existe en portales); acá navega al bot recién creado con 300 ms de demora y un router.push sin comentario que lo justifique. Funciona, pero rompe la convención de navegación del portal y arrastra el estado de animación del sitio.
+- Propuesta: Usar <Link> a /admin/chatbots/[id] (o router.push con comentario si se quiere imperativo post-submit).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.alta-cliente-con-bot, lib.ui
+
+### [DEU-042] Tres implementaciones paralelas del panel de chat (ChatWindow 694 lineas, ChatbotEmbed 559, BotConfigPreview) con paridad mantenida a mano y estilos inline
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/chat/ChatWindow.tsx:43` — «// Fondo del panel — paridad WYSIWYG con la preview del admin (BotConfigPreview, // 'surfaceBg'): mismo mapeo intensityLevel → opacidad y mismo 'tint + alpha hex'. // Si esa fórmula cambia allá, cambiar acá también.»; `src/modules/chatbot/components/preview/BotConfigPreview.tsx:92` — «// ── accentSecondary visual knobs — mismos valores que ChatWindow ──────────»; `src/modules/chatbot/components/chat/ChatWindow.tsx:203` — «{true && (»
+- Impacto: Cada cambio de UI del chat se hace 2-3 veces y ya divergen: colores (hallazgo del embed en cyan), mensaje de bienvenida, typewriter (StreamingMarkdown solo lo usa ChatWindow). ChatWindow viola la politica anti-vibecode (>300 lineas, CSS inline masivo, condicional muerto {true && ...}).
+- Propuesta: Ejecutar EST.0: extraer un ChatShell comun (header, lista con StreamingMarkdown, input, banners) parametrizado por config, consumido por LogicCompanion, ChatbotEmbed y BotConfigPreview; mover estilos a clases/tokens.
+- Esfuerzo: L  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop, h3.vis-widget-cliente, h3.adm-chatbots, lib.chatbot.components
+
+### [DEU-048] Insights del chatbot: costo de LLM invisible y carga de 200 conversaciones completas para usar 50 × 400 caracteres
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/insights/generateInsights.ts:102` — «const { object } = await generateObject({ model, schema: InsightsResponseSchema,»; `src/modules/chatbot/server/insights/generateInsights.ts:35` — «include: { messages: { select: { role: true, content: true, createdAt: true },»; `src/modules/chatbot/server/insights/generateInsights.ts:59` — «.slice(0, 50)»; `src/modules/chatbot/server/insights/generateInsights.ts:99` — «const provider = getLLMProvider('google') const model = provider.getModel('gemini-2.5-flash')»; `netlify/functions/generate-insights-cron.ts:5` — «// Agendada vía netlify.toml: [functions."generate-insights-cron"] schedule = "0 9 * * *".»
+- Impacto: Todos los días, por cada bot activo con al menos 10 conversaciones, se llama a Gemini y el uso no queda en QuotaUsage ni en ningún evento: develOP no ve ese costo ni tiene tope de gasto. Además la query trae todos los mensajes de hasta 200 conversaciones (hasta 40 mensajes de 4000 caracteres cada una) para mandar 50 resúmenes de 400 caracteres; el modelo está fijo y no hay timeout.
+- Propuesta: Registrar result.usage (tokens y costo con calculateCost) en un ChatbotEvent o en QuotaUsage; limitar la query a 50 conversaciones y a mensajes USER con take; usar el modelo del plan; pasar abortSignal con timeout.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots, int.vertex, int.cron.generate-insights, modelo.ChatbotInsight
+
+### [DEU-051] Los errores de infraestructura del webhook del motor solo van a stdout y los fallos de envio no se loguean (logger NOOP por default)
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/motor/webhook/[channelToken]/route.ts:51` — «} catch (error) { logger.error('motor-inbound: error de infraestructura procesando el webhook', error)»; `src/lib/logger.ts:61` — «error(msg: string, meta?: unknown) { this.format('error', msg, meta) }»; `src/modules/motor/adapters/whatsapp/outbound/client.ts:257` — «const logger = deps.logger ?? NOOP_LOGGER»
+- Impacto: La route atrapa la excepcion y devuelve 500, asi que onRequestError (instrumentation.ts:49) no se dispara, y el logger solo escribe a stdout (no hay captureConsoleIntegration). El BSP reintenta hasta 7 dias y despues descarta. Una falla persistente (drift de schema, Neon caido) haria perder todos los mensajes del primer cliente sin que nadie se entere. Del lado de salida, sendMotorMessage no pasa logger, asi que reintentos y fallos del BSP no dejan ninguna traza.
+- Propuesta: Agregar Sentry.captureException (con flush) en el catch de la route y cablear un logger real por default en sendMotorMessage/sendViaProvider. Es el mismo patron que D1-c1 'Fallos manejados que solo hacen console.error'.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp, int.sentry, lib.logger
 
 ### [DEU-001] Flujo de invitacion huerfano: ninguna action viva emite links a /accept-invite (y la de clientes nunca los enviaba)
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -1457,12 +2229,12 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 ### [DEU-019] Dos escapes unsafeGlobalQuery quedaron con razón 'PENDIENTE-DECISIÓN': métricas del admin rotuladas como del bot de develOP agregan todas las orgs
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/modules/chatbot/server/admin/getActivityChartData.ts:12` — «const events = await unsafeGlobalQuery( 'PENDIENTE-DECISIÓN: chart de actividad agrega eventos de todas las orgs en una página enmarcada como el bot develOP»; `src/modules/chatbot/server/admin/getActivityChartData.ts:15` — «c.chatbotEvent.findMany({ where: { createdAt: { gte: sevenDaysAgo } },»; `src/modules/chatbot/server/admin/getLatencyHistory.ts:73` — «const events = await unsafeGlobalQuery( 'PENDIENTE-DECISIÓN: latencia P50/P95 agrega eventos de todas las orgs»
+- Evidencia: `src/modules/chatbot/server/admin/getActivityChartData.ts:12` — «const events = await unsafeGlobalQuery( 'PENDIENTE-DECISIÓN: chart de actividad agrega eventos de todas las orgs en una página enmarcada como el bot develOP»; `src/modules/chatbot/server/admin/getActivityChartData.ts:15` — «c.chatbotEvent.findMany({ where: { createdAt: { gte: sevenDaysAgo } },»; `src/modules/chatbot/server/admin/getLatencyHistory.ts:73` — «const events = await unsafeGlobalQuery( 'PENDIENTE-DECISIÓN: latencia P50/P95 agrega eventos de todas las orgs»; `src/modules/chatbot/server/admin/getLatencyHistory.ts:68` — «// PENDIENTE-DECISIÓN: agrega latencia (chat.message_completed) de TODAS las»; `src/modules/chatbot/server/admin/getLatencyHistory.ts:82` — «take: 2000,»; `src/app/(protected)/admin/chatbot/health/page.tsx:146` — «Verificar que CHATBOT_GOOGLE_API_KEY sea válida y la Generative Language API esté»; `src/modules/chatbot/server/health/buildHealthVerdict.ts:65` — «hint: health.checks.llmProvider.error ?? 'Revisá la API key y que la API esté habilitada.',»; `src/modules/chatbot/server/config/envValidator.ts:35` — «name: 'GOOGLE_APPLICATION_CREDENTIALS', required: true,»; `src/modules/chatbot/server/admin/getLatencyHistory.ts:25` — «return d.toLocaleString('es-AR', { day: '2-digit',»; `src/app/(protected)/admin/chatbot/health/page.tsx:12` — «checkChatbotHealth('develop'), getLatencyHistory(24),»; `src/modules/chatbot/server/admin/getActivityChartData.ts:30` — «const key = new Date(event.createdAt).toLocaleDateString('es-AR', {»; `src/app/(protected)/admin/chatbot/activity/page.tsx:34` — «slug="develop"»; `src/modules/chatbot/components/admin/health/LatencyChart.tsx:160` — «Datos reales»; `src/modules/chatbot/server/admin/getLatencyHistory.ts:37` — «d.setHours(d.getHours() - i, 0, 0, 0)»; `src/modules/chatbot/server/admin/getLatencyHistory.ts:66` — «const since = new Date(Date.now() - hoursBack * 60 * 60 * 1000)»; `src/modules/chatbot/server/admin/getActivityChartData.ts:25` — «const key = d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })»
 - Impacto: De los 68 escapes globales del repo (37 archivos), estos dos son los únicos sin justificación de plataforma: /admin/chatbot/activity y /admin/chatbot/health muestran números de todos los clientes como si fueran del bot propio, y el de actividad trae sin límite todos los eventos de 7 días. Solo afecta al admin, sin fuga hacia clientes.
 - Propuesta: Decidir: scopear a forOrg(<org de develOP>) o re-rotular ambas páginas como métricas de plataforma y agregar en SQL (groupBy) en vez de traer filas.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h3.adm-actividad, h3.adm-health, lib.isolation
+- Nodo(s): h3.adm-actividad, h3.adm-health, lib.isolation, lib.chatbot.health, lib.chatbot.admin, h3.adm-actividad.grafico-semanal, h3.adm-health.latencia-p50-p95, h3.adm-health.latencia, h3.adm-actividad.grafico-7-dias, modelo.ChatbotEvent
 
 ### [DEU-020] sync-plans.ts sigue indicando cómo correrlo en prod aunque pisa las 13 columnas del catálogo, y todavía ofrece navigate_to_page a Pro/Business
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -1594,6 +2366,136 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [FAL-006]
 - Nodo(s): h2.cli-plan, h3.cli-chatbot, lib.plan, modelo.Subscription
 
+### [DEU-036] Los barrels del chatbot exportan componentes que nadie monta y nombres que nadie importa
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/index.ts:40` — «ChatMessages, ChatMessage, ChatInput,»; `src/modules/chatbot/index.ts:89` — «export { saveClientSettings } from './server/admin/saveClientSettings'»; `src/modules/chatbot/index.server.ts:13` — «export { ProviderNotImplementedError, ModelNotSupportedError,»; `src/modules/chatbot/components/chat/index.ts:3` — «export { ChatMessages } from './ChatMessages' export { ChatMessage } from './ChatMessage' export { ChatInput } from './ChatInput'»; `src/modules/chatbot/components/chat/index.ts:8` — «export type { ChatWindowProps, UIChatMessage, ToolCallInUIMessage } from './types'»; `src/modules/chatbot/components/chat/types.ts:34` — «degradedMode?: boolean»
+- Impacto: Del barrel cliente se consumen 3 de 52 exports y del server 20 de 85 nombres. ChatMessages, ChatMessage, ChatInput y QuickReplyChips no los monta nadie (el registro de Valentino cuenta fixes que 'aterrizaron en codigo muerto'), A11Y-01 citaba ChatInput, que no se renderiza, y saveClientSettings sigue publicada sin UI. Encarece cambios y confunde auditorias.
+- Propuesta: Borrar los componentes muertos y recortar los barrels a lo consumido, o reemplazarlos por imports directos.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.chatbot.barrel, lib.chatbot.components
+
+### [DEU-037] Las etiquetas del lead buscan con 'in'/indice sobre objetos planos y channelLabel nunca recibe datos
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/lead-intent-labels.ts:45` — «if (intent != null && intent in INTENT_LABELS) { return INTENT_LABELS[intent as ChatbotLeadIntent]»; `src/modules/chatbot/lead-detail-presentation.ts:71` — «return CHANNEL_LABELS[channel.toLowerCase()] ?? null»; `src/modules/chatbot/server/tools/captureLead.ts:381` — «const lead = await tx.chatbotLead.create({ botConfigId: ctx.botConfigId,»
+- Impacto: Hoy los callers pasan valores del enum de Prisma, pero la firma acepta cualquier string: 'constructor' o 'toString' devolverian una funcion (React no la renderiza). channelLabel y su mapa (incluye WhatsApp e Instagram) no tienen datos: el unico create de ChatbotLead no escribe channel, asi que la fila 'Canal' del detalle nunca aparece, tampoco para un bot vendido por WhatsApp.
+- Propuesta: Usar Object.hasOwn o Map; escribir channel en capture_lead ('widget'/'embed') o quitar la fila 'Canal' del detalle.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.chatbot.lead-presentation, h3.cli-chatbot, modelo.ChatbotLead
+
+### [DEU-040] Ciclos de dependencia de sólo tipos en plantillas de KB y detalle del bot
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts:3` — «export interface KBTemplate {»; `src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts:14` — «import { legalTemplate } from './legal'»; `src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts:1` — «import type { KBTemplate } from './index'»; `src/app/(protected)/admin/chatbots/[botId]/tabs/ConfigTab.tsx:4` — «import type { BotWithDetails } from '../BotDetailClient'»; `.dependency-cruiser.cjs:27` — «tsPreCompilationDeps: true,»
+- Impacto: depcruise sigue en 22 ciclos (10 de kb-templates, los del detalle del bot y los de lead-pipeline). Son de tipos, sin efecto en runtime, pero ensucian el reporte y traban extraer el módulo.
+- Propuesta: Mover KBTemplate y BotWithDetails/MappedEvent a sus propios types.ts.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.plantilla-kb-industria, h3.adm-chatbots
+
+### [DEU-041] Higiene del editor: contador fijo, label faltante, industria no canónica y ramas muertas
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/BotConfigEditor.tsx:318` — «return 28»; `src/modules/chatbot/components/admin/BotConfigEditor.tsx:47` — «industry: 'generic',»; `src/modules/chatbot/components/admin/config/BotConfigDiffModal.tsx:37` — «leadNotificationMode: 'Modo de notificación',»; `src/modules/chatbot/components/admin/BotConfigEditor.tsx:72` — «if (onSave) {»
+- Impacto: '28 campos editables expuestos' es un número fijo (hoy son 29); el diff muestra 'allowedDomains' crudo porque falta en FIELD_LABELS; el default 'generic' no existe en el vocabulario canónico (industries.ts:11 'generico'); onSave y la rama sin orgSlug nunca se usan.
+- Propuesta: Borrar o calcular el contador, completar FIELD_LABELS, usar 'generico' y eliminar onSave y las ramas por id.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.editar-config-bot
+
+### [DEU-043] LegacyNeuroAvatar.tsx acumula 6 errores de eslint del baseline (incluido un 'any' explicito) y 25 lineas con mojibake
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:601` — «ref={bufferAttrRef as any}»; `src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:523` — «const r = 1.05 + Math.random() * 0.3;»; `src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:114` — «// Avanzar transici├│n de contexto»
+- Impacto: Rompe la regla dura 'cero any' y suma errores de react-hooks/purity (:523,:525,:532) y react-hooks/refs (:603 x2) al baseline de 102. Los comentarios con mojibake no se leen. Los comentarios del adapter lo tratan como FROZEN (LegacyNeuroAvatarAdapter.tsx:10) aunque no esta en la lista de congelados.
+- Propuesta: Decision para Valentino: confirmar si LegacyNeuroAvatar esta congelado. Si no: tipar el ref como THREE.BufferAttribute, generar los random en un useState lazy, y re-guardar los comentarios en UTF-8.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.chatbot.components
+
+### [DEU-044] revealSafeMarkdown.ts contiene un byte NUL literal: git trata el archivo como binario
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/chat/revealSafeMarkdown.ts:15` — «const PH = '<byte NUL>' // placeholder de 1 char (preserva longitudes → índices 1:1)»
+- Impacto: git log --numstat muestra '-\t-' para el archivo (commit 3bc2349a): los diffs y revisiones de PR no muestran cambios en la logica que limpia el markdown parcial; las herramientas de edicion lo rechazan.
+- Propuesta: Reemplazar el literal por el escape '\u0000' (mismo valor en runtime).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.chatbot.components
+
+### [DEU-045] avatarStyleSchema: el schema del cliente se documenta 'sin escape hatches' pero es identico al del admin, y la validacion server importa el registry de componentes cliente
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/avatar/avatarStyleSchema.ts:45` — «* Zod schema for CLIENT-side mutations (dashboard). Same surface but * without the escape hatches.»; `src/modules/chatbot/components/avatar/avatarStyleSchema.ts:31` — «return [...AVATAR_IDS, 'emoji', 'image']»; `src/modules/chatbot/components/avatar/avatarStyleSchema.ts:2` — «import { AVATAR_IDS } from './registry'»
+- Impacto: Doc que contradice el codigo en una regla de validacion; dos schemas redundantes; las server actions (updateBotAppearance.ts:10, saveBotConfig.ts:6) arrastran el registry que importa modulos 'use client' (HeavyAvatarsLazy) solo para leer ids.
+- Propuesta: Unificar en un solo schema con los ids en una constante pura (sin importar componentes), y corregir el docstring.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, h3.adm-chatbots, lib.chatbot.components
+
+### [DEU-046] ClientSettingsForm muerto, con tres any y un toggle 'Activar Chatbot' que no hace nada
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx:26` — «(bot.quickReplies as any[]) ?? []»; `src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx:36` — «accentColor: accentColor as any, position: position as any,»; `src/modules/chatbot/components/dashboard/index.ts:3` — «export { ClientSettingsForm } from './ClientSettingsForm' (unico importador; modules/chatbot/index.ts:85 no lo re-exporta)»; `src/modules/chatbot/index.ts:89` — «export { saveClientSettings } from './server/admin/saveClientSettings'»
+- Impacto: Viola la regla 'cero any' (3 errores del baseline de eslint), mantiene viva una server action publica sin consumidor y un toggle que el servidor ignora; cualquiera que lo reconecte creeria que el cliente puede activar su bot.
+- Propuesta: Borrar ClientSettingsForm, su export y saveClientSettings (BotPersonalization lo reemplaza).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot.personalizacion, lib.actions
+
+### [DEU-047] Errores de eslint de reglas del React Compiler en el embed y el tooltip proactivo
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/tooltip/useTooltipTriggers.ts:31` — «const lastActivityRef = useRef<number>(Date.now()) (react-hooks/purity)»; `src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx:79` — «setCurrentPrompt(prompt) (react-hooks/set-state-in-effect)»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:317` — «chatbot.messages.map((m) => ( (react-hooks/refs)»; `src/modules/chatbot/components/tooltip/useTooltipTriggers.ts:89` — «const reset = () => setTrigger(null) (nueva identidad en cada render: re-dispara los effects que la usan)»
+- Impacto: Errores del baseline de eslint en codigo publico; con el React Compiler activo pueden producir renders inconsistentes. reset sin useCallback hace que ProactiveTooltip re-ejecute su effect en cada render.
+- Propuesta: useCallback para reset, inicializar lastActivityRef en el effect, derivar el prompt sin setState en effect; revisar el falso positivo de refs en el embed.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop.tooltip-proactivo, h3.vis-widget-cliente.chat-embebido
+
+### [DEU-049] Email de insights sin escapar botName/companyName y con URL que puede quedar 'undefined'; el email de prueba de leads usa otra plantilla que la real
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/notifications/sendInsightsNotification.ts:36` — «para ${botName} en ${organizationName}</p>»; `src/app/api/cron/generate-insights/route.ts:66` — «dashboardUrl: '${process.env.NEXT_PUBLIC_APP_URL}/dashboard/chatbot',»; `src/modules/chatbot/server/admin/sendTestNotification.ts:46` — «const result = await sendLeadNotificationEmail({»; `src/modules/chatbot/server/notifications/sendLeadNotification.ts:74` — «${escapeHtml(lead.createdAt.toLocaleString('es-AR'))}»
+- Impacto: Un nombre de bot con HTML se inyecta en el mail del propio cliente (riesgo bajo, mismo tenant). El boton 'probar notificacion' del admin manda una plantilla que produccion no usa (produccion usa lib/client-notifications/templates.ts) y con la hora en UTC: la prueba no representa lo que recibe el cliente.
+- Propuesta: Escapar con el helper de sendLeadNotification; fallback explicito de URL; que sendTestNotification use renderLeadEmail de client-notifications y borrar sendLeadNotification.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots, h3.cli-chatbot, lib.chatbot.notifications, int.brevo
+
+### [DEU-050] Contratos muertos o desfasados: messagesAdded ignorado, checkQuota con MAX_SAFE_INTEGER y tipos publicos que no coinciden con Prisma
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/quota/checker.ts:56` — «messagesAdded: number (no se usa en upsertPeriod :76-92)»; `src/modules/chatbot/server/chat/handleChatRequest.ts:226` — «const r = await checkQuota(orgId, bot.id, Number.MAX_SAFE_INTEGER)»; `src/modules/chatbot/shared/types.ts:50` — «export type ChatbotLeadStatus = 'new' | 'contacted' | 'qualified' | 'lost' | 'converted'»; `src/modules/chatbot/shared/types.ts:40` — «export type AvatarStyle = 'neuro' | 'legacy_neuro' | 'simple' | 'custom_image' | 'emoji' | 'none'»
+- Impacto: El barrel publico exporta tipos que contradicen el enum real (Prisma usa NEW/CONTACTED/IN_NEGOTIATION/WON/LOST; el avatar real usa monograma/onda/geometrico/image): quien los use compila contra valores que no existen. withinQuota de checkQuota siempre es true y confunde.
+- Propuesta: Borrar los tipos sin consumidores, quitar messagesAdded y dejar checkQuota como lectura de uso con nombre propio.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.chatbot.shared, lib.chatbot.quota
+
+### [DEU-052] Clasificador de P2002 duplicado: el motor mantiene su propio isUniqueViolation en vez del guard de la frontera de aislamiento (PLAN-483)
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/modules/motor/domain/prisma-errors.ts:10` — «export function isUniqueViolation(error: unknown, field?: string): boolean { if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {»; `src/lib/isolation/scoped-model.ts:56` — «* El motor tiene su clasificador local equivalente (motor/domain/ * prisma-errors.ts, isUniqueViolation): NO se consolida acá para no estrenar * un import cruzado entre módulos — queda anotado como deuda de consolidación»
+- Impacto: Son dos clasificadores que pueden divergir. El del motor es mas preciso (mira meta.target por campo) y el de isolation no. Cualquier cambio de formato del error en Prisma hay que arreglarlo en dos lugares.
+- Propuesta: Mover la variante con parametro field a src/lib/isolation/scoped-model.ts (export desde @/lib/isolation, que el motor ya puede importar) y borrar motor/domain/prisma-errors.ts, migrando sus 3 importadores (handle-message.ts:18, identity.ts:24, sendMessage.ts:24).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.isolation, h3.vis-whatsapp
+
+### [DEU-053] Las conversaciones del motor nunca se cierran: una sola conversacion OPEN perpetua por contacto y canal
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/motor/adapters/whatsapp/inbound/handle-message.ts:72` — «const existing = await tx.motorConversation.findFirst({ where: { wabaChannelId, contactIdentityId, status: 'OPEN' }, orderBy: { createdAt: 'asc' },»; `prisma/schema.prisma:2097` — «status MotorConversationStatus @default(OPEN)»
+- Impacto: Ningun codigo escribe status CLOSED: es una columna sin escritor. Cuando B2 use la conversacion como contexto o mida conversaciones (cuota, costo, metricas del negocio), cada contacto va a tener un hilo infinito, el contexto va a crecer sin limite y las metricas por conversacion no van a significar nada.
+- Propuesta: Definir en B2 la politica de cierre (por inactividad o al vencer la ventana de 24 h) y aplicarla al reutilizar la conversacion en upsertOpenConversation.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp, modelo.MotorConversation
+
 ## Calidad
 
 ### [UX-001] El exito del magic link le dice al cliente que el link 'fue impreso en la consola del servidor'
@@ -1667,6 +2569,79 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h2.cli-resultados, h2.cli-resultados.oportunidades-seo
+
+### [UX-017] La instalación le pide al cliente cargar dominios en una sección que no existe y le dice que sin eso el widget no carga (falso)
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/chatbot/install/ClientInstallView.tsx:50` — «Cargá los dominios de tu sitio en Configuración → Dominios permitidos. Sin esto, el widget no va a cargar en tu web aunque pegues el snippet.»; `src/app/(protected)/dashboard/chatbot/settings/page.tsx:22` — «prisma.botConfig.findUnique({ where: { organizationId: orgId },»; `src/app/(protected)/admin/chatbots/[botId]/tabs/InstallTab.tsx:51` — «Configurá los dominios del cliente en Config → Dominios permitidos. Sin esto, el widget no va a cargar.»; `src/lib/security/validate-origin.ts:69` — «// Dominio de develOP siempre permitido (antes del check de allowedDomains)»
+- Impacto: El cliente no puede completar la instalación solo (su Configuración no tiene campo de dominios) y depende de develOP; y la advertencia es falsa: el widget oficial llama desde develop.com.ar y carga igual. Admin y cliente creen tener una protección que no existe.
+- Propuesta: Alinear el texto con el comportamiento real (o hacer cumplir allowedDomains en el embed, ver hallazgo del cupo) y dar al cliente un campo de dominios validado, o decir que lo carga develOP.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-068]
+- Nodo(s): h3.cli-chatbot.instalacion, h3.adm-chatbots.instalacion, h3.vis-widget-cliente
+
+### [UX-021] Editor de config sin validación en el cliente: el error vuelve como JSON crudo de Zod
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx:65` — «label: '',»; `src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx:136` — «onChange({ ...value, [key]: [''] })»; `src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts:15` — «label: z.string().min(1).max(40),»; `src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts:74` — «return { success: false, error: 'Invalid input: ' + parsed.error.message }»; `src/modules/chatbot/components/admin/BotConfigEditor.tsx:100` — «error: (error: Error) => 'Error: ${error.message}',»; `src/modules/chatbot/components/admin/onboarding/Step4Appearance.tsx:16` — «const optHexValid = (color: string | null) => !color || HEX_RE.test(color)»
+- Impacto: 'Agregar respuesta' y 'Agregar ruta' crean filas vacías que el servidor rechaza, igual que un color tipeado a medias (el asistente sí lo valida, el editor no). El admin recibe un toast con el JSON de issues de Zod, sin campo marcado, y el modal de diff queda abierto. Viola 'validación en cliente y servidor con feedback visible'.
+- Propuesta: Validar en el cliente con el mismo schema antes de abrir el diff, marcar los campos inválidos y devolver desde el servidor un mensaje legible (como zodErrorToMessage del alta).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.editar-config-bot, lib.chatbot.admin
+
+### [UX-022] Dominios permitidos sin normalizar ni tope visible del plan
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:142` — «next[idx] = e.target.value»; `src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts:56` — «allowedDomains: z.array(z.string().max(253)).max(50),»; `src/lib/security/origin-matcher.ts:39` — «if (originHost === clean) return true»; `src/modules/chatbot/server/chat/degradedResponse.ts:68` — «effective: botAllowedDomains.slice(0, planMaxDomains),»; `src/lib/plan/fallback.ts:57` — «maxDomains: 1,»
+- Impacto: Un dominio con mayúscula, espacio final o ruta ('Cliente.com.ar ', 'cliente.com.ar/contacto') nunca matchea el host del Origin y el widget queda bloqueado sin aviso; las filas vacías se guardan y ocupan cupo. El editor deja cargar 50 dominios sin mostrar que el plan (1 en fallback) sólo habilita los primeros N: el resto queda degradado en silencio.
+- Propuesta: Normalizar en servidor (trim, minúsculas, sin esquema, ruta ni vacíos) y validar formato de host; mostrar 'X de N dominios del plan' y marcar los excedentes.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.editar-config-bot, lib.security, modelo.BotConfig
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-077
+
+### [UX-025] Con el proveedor caido (Vertex vencida) el visitante ve 'Se corto la respuesta / Escribi de nuevo y seguimos' en cada intento, sin derivacion a WhatsApp
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/hooks/useChatbot.ts:475` — «reason: 'stream_interrupted', message: STREAM_INTERRUPTED_MESSAGE, whatsappNumber: null,»; `src/modules/chatbot/components/chat/DegradedBanner.tsx:41` — «if (AMBER_REASONS.has(info.reason)) {»; `src/modules/chatbot/components/chat/DegradedBanner.tsx:25` — «stream_interrupted: 'Escribí de nuevo y seguimos.',»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1057` — «Sentry.captureException(error, {»; `src/modules/chatbot/hooks/useChatbot.ts:86` — «// Supersede al viejo 'provider_error' (que degradaba a WhatsApp al primer fallo).»; `src/modules/chatbot/hooks/useChatbot.ts:288` — «whatsappNumber: null,»; `src/modules/chatbot/hooks/useChatbot.ts:575` — «if (!config?.whatsappNumber) return»
+- Impacto: Una falla persistente del proveedor (hoy la credencial vencida) se presenta como transitoria: el visitante del sitio del cliente reintenta en loop y el lead se pierde, aunque el bot tenga whatsappNumber configurado (PublicBotConfig.whatsappNumber). La variante ambar nunca ofrece WhatsApp; connection_failed tampoco (useChatbot.ts:286-290). El sistema se entera solo por Sentry del server.
+- Propuesta: Contar fallas consecutivas de proveedor por sesion y, desde la segunda, escalar a la variante verde con el whatsappNumber del config y copy honesto ('el asistente no esta disponible'). Decidir con Valentino si connection_failed persistente tambien deriva.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente, h3.vis-widget-develop, int.vertex, int.sentry, h3.vis-widget-cliente.conversar, h3.vis-whatsapp, lib.chatbot.hooks
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-080
+
+### [UX-027] iOS: textarea del widget a 13px sin maximum-scale en el viewport, Safari hace zoom al enfocar
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/chat/ChatWindow.tsx:585` — «fontSize: '13px',»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:510` — «fontSize: '13px',»; `src/app/embed/[slug]/page.tsx:13` — «export const viewport: Viewport = {»
+- Impacto: En iPhone, enfocar el input con fuente <16px dispara auto-zoom: el panel fijo queda desencuadrado y el visitante tiene que hacer pinch. src/app/layout.tsx no exporta viewport (git grep 'export const viewport' = 0; control: embed/[slug]/page.tsx:13) y el del embed no fija maximumScale. Afecta el criterio mobile de L3 en ambos widgets.
+- Propuesta: Subir la fuente del textarea a 16px en mobile (font-size: max(16px, ...)) en vez de bloquear el zoom; verificar en iOS Safari real (PLAN-505).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop, h3.vis-widget-cliente
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-081
+
+### [UX-029] Personalizacion: sin validacion de largo minimo en el cliente y error generico 'Datos invalidos'
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/dashboard/updateBotAppearance.ts:40` — «welcomeMessage: z.string().trim().min(10).max(200).optional(),»; `src/modules/chatbot/components/dashboard/BotPersonalization.tsx:311` — «update('welcomeMessage', event.target.value.slice(0, 200)) (solo tope maximo)»; `src/modules/chatbot/components/dashboard/BotPersonalization.tsx:167` — «toast.error('Error: ${result.error}')»
+- Impacto: Un mensaje de bienvenida de menos de 10 caracteres (o vacio, aunque el campo dice 'required') termina en 'Error: Datos invalidos' sin decir que campo; el cliente queda sin saber que corregir. Los details del servidor (:66-72) no se usan.
+- Propuesta: Validar min 10 en el cliente con mensaje en el campo y mapear details del Zod a errores por campo.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot.personalizacion
+
+### [UX-032] Prompt y tools con la filosofia de consultora de develOP y vocabulario de concesionaria para todos los rubros (incluye 'SLA <4hs')
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/prompts/sections.ts:47` — «Precios y plazos: si te los piden sin diagnóstico, NO tirás número»; `src/modules/chatbot/server/verticals/packs/usados.ts:183` — «'El visitante preguntó el precio. Si tenés el precio publicado, dalo; ...»; `src/modules/chatbot/server/tools/offerHandoffOptions.ts:24` — «- "Que me contacten" (asíncrono, SLA <4hs)»; `src/modules/chatbot/server/tools/captureLead.ts:89` — «'true SOLO si mencionó entregar un usado en parte de pago/tasación. false si nunca lo dijo.'»
+- Impacto: Seccion 2 (fija para todos los tenants) manda diagnosticar 'tamano, rubro, como operan hoy' y no dar precios; el pack usados manda dar el precio publicado; un gimnasio o una clinica reciben un bot que interroga como consultora B2B. La descripcion de offer_handoff_options le ensena al modelo un SLA de 4 h que el cliente no prometio. Los flags de capture_lead (usado, test drive, financiacion) son de autos para todos.
+- Propuesta: Mover la mision y la regla de precios al pack vertical (o a la KB) y dejar en sections.ts solo reglas universales; sacar el SLA de la description; parametrizar las descripciones de flags por pack.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, lib.chatbot.prompts, lib.chatbot.verticals, lib.chatbot.tools
 
 ### [UX-003] Cambio forzado sin salida si el cliente no tiene la temporal, y copy de 'forzado' tambien en cambio voluntario
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: ux
@@ -1759,6 +2734,108 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h2.cli-inicio.semana-en-numeros
 
+### [UX-018] El widget de develOP saluda con 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?'
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/chat/ChatWindow.tsx:321` — «Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?»; `src/modules/chatbot/components/chat/ChatWindow.tsx:305` — «color: 'rgba(255,255,255,0.3)',»; `src/modules/chatbot/components/chat/ChatWindow.tsx:311` — «Sistema Listo»; `src/modules/chatbot/components/tool-cards/WhatsappHandoffCard.tsx:17` — «if (!whatsappUrl) { return ( <div className="rounded-xl border border-red-500/30 ...">WhatsApp no configurado.»; `src/modules/chatbot/components/chat/ChatWindow.tsx:659` — «aria-label="Send message" > <Send size={15} strokeWidth={2.25} />»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:280` — «{config.welcomeMessage}»; `src/modules/chatbot/components/preview/BotConfigPreview.tsx:218` — «{state.welcomeMessage || 'Mensaje de bienvenida'}»; `src/modules/chatbot/components/tool-cards/WhatsappHandoffCard.tsx:20` — «WhatsApp no configurado.»; `src/modules/chatbot/components/chat/ChatWindow.tsx:315` — «color: 'rgba(255,255,255,0.5)',»
+- Impacto: Copy de 'usted' y tono robótico en el estado vacío del widget del sitio de develOP, contra el tono rioplatense del bot; el rótulo 'Sistema Listo' va en blanco al 30 % (contraste bajo). Solo afecta al widget de develOP (LogicCompanion); el embed de clientes no usa ChatWindow.
+- Propuesta: Reemplazar por un saludo en vos y subir el contraste.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop, h3.vis-widget-cliente, h3.vis-widget-cliente.conversar, lib.chatbot.components, h3.adm-chatbots
+
+### [UX-019] El curl de 'Test endpoint' apunta al dominio del cliente, donde no vive la API
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx:415` — «const urlBase = domain ? 'https://${domain}' : 'https://[your-domain]'»; `src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx:417` — «'curl -X POST ${urlBase}/api/chatbot/${slug}/chat \\',»
+- Impacto: El admin copia el curl y le pega a https://<dominio-del-cliente>/api/chatbot/..., que no existe (la API está en develop.com.ar): la prueba falla y despista.
+- Propuesta: URL base = NEXT_PUBLIC_APP_URL y Origin = dominio del cliente.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots
+
+### [UX-020] Los z-index del widget contradicen su propio contrato y el launcher tapa contenido en mobile
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/shared/zIndex.ts:9` — «* Do NOT raise these to int32 max (2_147_483_647). A widget that always wins * blocks legitimate host UI and is hostile to the embedder.»; `src/modules/chatbot/shared/zIndex.ts:19` — «backdrop: 2_147_000_000, /** Floating bubble ... */ bubble: 2_147_000_100,»; `src/modules/chatbot/components/LogicCompanion.tsx:191` — «position: 'fixed', ...position, zIndex: CHATBOT_Z_INDEX.bubble,»
+- Impacto: El docstring promete dejar lugar para modales del sitio host (rango 100-9999) pero los valores quedan a ~480 mil de int32: launcher, teaser y backdrop ganan sobre cualquier menu, modal o banner del sitio de develOP y de los clientes. Sin ajuste para pantallas angostas, a 390 px la burbuja fija pisa contenido y microcopy (PLAN-533, observado en bitacora).
+- Propuesta: Bajar los tokens a un rango documentado (alto solo para el panel abierto), reducir o desplazar el launcher y ocultar el teaser bajo cierto ancho; verificar a 390 px.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop, h3.vis-widget-cliente
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-095
+
+### [UX-023] Paso 3 del alta: la plantilla no cambia si después se cambia la industria
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx:10` — «if (!state.businessInfo) {»; `src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx:23` — «}, [state.industry]) // Only run if industry changes or on mount (if empty)»
+- Impacto: Si se visita el paso 3 y se vuelve al 1 a corregir la industria, la KB y las respuestas rápidas siguen siendo de la industria anterior (sólo se aplica con businessInfo vacío) y nada lo avisa; el comentario promete lo contrario.
+- Propuesta: Al cambiar la industria con KB cargada, ofrecer reemplazar la plantilla con confirmación o marcar la diferencia.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h4.adm-clientes.plantilla-kb-industria
+
+### [UX-024] 'Probar conexión' del CRM prueba la URL guardada, no la que se está editando
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx:37` — «const canTest = hasIntegration && webhookUrl.length > 0»; `src/modules/chatbot/server/admin/integrations/testCrmConnection.ts:51` — «const integration = await forOrg(organizationId).crmIntegration.findFirst()»; `src/modules/chatbot/server/admin/integrations/testCrmConnection.ts:75` — «webhookUrl: integration.webhookUrl,»
+- Impacto: El botón se habilita con la URL del input pero la prueba usa la de la base: si develOP cambia la URL y prueba antes de guardar, ve 'Conexión OK' de la URL vieja.
+- Propuesta: Deshabilitar la prueba con cambios sin guardar o mandar la URL editada (validada) a testCrmConnection.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.integracion-crm, int.n8n
+
+### [UX-026] Card de degradado promete WhatsApp sin numero: titulo 'Te seguimos por WhatsApp' con input bloqueado y sin CTA; el mensaje puede llegar vacio
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/chat/DegradedBanner.tsx:155` — «Te seguimos por WhatsApp»; `src/modules/chatbot/components/chat/DegradedBanner.tsx:212` — «Volvé a probar más tarde y vamos a poder seguir ayudándote.»; `src/modules/chatbot/hooks/useChatbot.ts:332` — «message: typeof data.message === 'string' ? data.message : '',»
+- Impacto: Bot pausado / cuota agotada / tope de conversacion sin whatsappNumber (campo opcional en el alta): el visitante lee que sigue por WhatsApp, no hay boton y el input queda bloqueado; si el server no manda message, el parrafo sale vacio.
+- Propuesta: Titulo condicional a cleanNumber (p. ej. 'El chat no esta disponible ahora') y copy por defecto cuando message viene vacio.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente, h3.vis-widget-develop
+
+### [UX-028] La intencion del lead aparece como enum crudo (PURCHASE_READY) y los colores de intencion nunca matchean
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:158` — «{lead.intent ?? '—'} ·{' '}»; `src/modules/chatbot/components/dashboards/ConversationsTable.tsx:150` — «✓ {c.lead.name} ({c.lead.intent})»; `src/modules/chatbot/components/dashboards/LeadsTable.tsx:28` — «const INTENT_COLORS: Record<string, string> = { quote: ..., demo: ..., info: ...»; `prisma/schema.prisma:158` — «enum ChatbotLeadIntent { PURCHASE_READY»
+- Impacto: El cliente lee 'PURCHASE_READY' en su resumen y en conversaciones; en el admin todos los chips de intencion salen del color 'other'. Es el mismo bug que P1-fix corrigio en lead-intent-labels.ts pero quedo en tres sitios.
+- Propuesta: Usar intentLabel() de lead-intent-labels.ts y keys del enum real para los colores.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot.resumen, h3.cli-chatbot.conversaciones, h3.adm-chatbots.leads-del-bot
+
+### [UX-030] Copiar snippet y Exportar CSV anuncian exito sin saber el resultado
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/installation/SnippetCopyBlock.tsx:29` — «navigator.clipboard.writeText(snippet) setCopied(true) toast.success(toastMessage)»; `src/modules/chatbot/components/dashboard/ExportLeadsButton.tsx:63` — «a.click() document.body.removeChild(a) ... toast.success(... 'Exportando tus contactos…')»
+- Impacto: Si el portapapeles esta bloqueado (permisos, iframe) el cliente pega nada en su sitio creyendo que copio el snippet; si el export falla (sesion vencida, 500) el toast igual dice que exporta.
+- Propuesta: await + catch del clipboard con fallback de seleccion; export via fetch con chequeo de status y blob, o al menos sin toast de exito.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot.instalacion, h3.cli-chatbot.exportar-csv
+
+### [UX-031] Seed del bot develOP con WhatsApp ficticio de fallback, colores de servicio invertidos y sin verticalPack
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/prisma/seed.ts:231` — «whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '5493815555555',»; `src/modules/chatbot/prisma/seed.ts:224` — «'/ai-implementations': '#8b5cf6',»; `src/app/globals.css:61` — «--color-ds-accent-ia: #10b981;»; `src/modules/chatbot/prisma/seed.ts:51` — «- Color de marca: violeta»
+- Impacto: Si se corre el seed sin la variable, el bot publico de develOP deriva a un numero inventado. Los colores por ruta y los 'Color de marca' de la KB estan cruzados respecto de la paleta canonica (IA verde, automatizacion ambar, software violeta, globals.css:61-63), asi que el bot puede decirle a un prospecto el color equivocado. El seed tampoco deja verticalPack en 'agencia'.
+- Propuesta: Fallar el seed si falta NEXT_PUBLIC_WHATSAPP_NUMBER, corregir routeColorMap y el texto de la KB a la paleta canonica, y fijar verticalPack 'agencia'.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop, h3.vis-widget-develop.contenido-bot-develop, modelo.BotConfig, modelo.KnowledgeBase
+
+### [UX-033] Con cero conversaciones el reporte semanal culpa al cliente ('verifica el script'), aunque la causa sea el LLM caido
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/reports/buildWeeklyReport.ts:181` — «return 'Esta semana no hubo actividad en tu chatbot. Verificá que el script esté instalado.'»; `src/modules/chatbot/server/quota/checker.ts:197` — «const discarded = await tx.conversation.deleteMany({»
+- Impacto: Cuando Vertex falla antes del primer token, la compensacion borra la Conversation nueva; la semana queda con 0 conversaciones y el mail le pide al cliente revisar su instalacion mientras el problema es de develOP.
+- Propuesta: Antes de ese mensaje, mirar eventos de error del bot en la semana y usar un texto neutro o avisar a develOP.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, lib.chatbot.reports, lib.chatbot.quota
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-103
+
 ## Observabilidad
 
 ## Accesibilidad
@@ -1793,6 +2870,48 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h2.cli-soporte, h2.cli-soporte.crear-ticket, lib.ui
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-054
+
+### [A11Y-010] Campos del editor y del alta sin etiqueta asociada ni errores anunciados
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/config/Field.tsx:15` — «<label className="flex items-center gap-1 text-sm font-medium text-zinc-200">»; `src/components/ui/Field.tsx:32` — «htmlFor={fieldId}»; `src/modules/chatbot/components/admin/config/ColorPicker.tsx:27` — «type="color"»; `src/modules/chatbot/components/admin/onboarding/Step1Company.tsx:74` — «<label className="block text-sm text-zinc-400 mb-1">Nombre de la empresa</label>»; `src/modules/chatbot/components/admin/onboarding/Step5Review.tsx:312` — «<div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">»; `src/modules/chatbot/components/admin/config/tabs/AvatarUploader.tsx:96` — «{error && <p className="mt-1.5 text-xs text-red-400">{error}</p>}»
+- Impacto: El editor usa un Field local que no vincula el label (sin htmlFor ni contexto) mientras el del kit sí; Inputs, Selects, ColorPicker y Slider de los 5 tabs quedan sin nombre accesible. En el alta los labels tampoco apuntan a sus inputs, y los errores (paso 5, inline y del uploader, que se reusa en el portal del cliente) no tienen role=alert. Con lector de pantalla no se puede completar la configuración.
+- Propuesta: Reemplazar config/Field y config/Input por los del kit (asocian label y describedby), envolver los inputs del alta en Field del kit y agregar role=alert/aria-live a los errores.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.editar-config-bot, h4.adm-clientes.alta-cliente-con-bot, lib.ui
+
+### [A11Y-013] Widget de develOP no operable por teclado: el launcher no abre con Enter/Espacio y el panel no cierra con Escape ni retiene el foco
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/LogicCompanion.tsx:180` — «role="button" tabIndex={0} onClick={handleToggle}»; `src/modules/chatbot/components/chat/ChatWindow.tsx:247` — «role="dialog" aria-label={'Consultor ${config.botName}'}»; `src/modules/chatbot/components/chat/ChatWindow.tsx:210` — «onClick={onClose}»; `src/modules/chatbot/components/LogicCompanion.tsx:215` — «whileTap={reducedMotion ? undefined : { scale: 0.95 }}»; `src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx:129` — «onClick={(e) => { // Stop the click bubbling to the launcher's onClick»; librería motion-dom@12.42.0, dist/es/gestures/press/utils/keyboard.mjs línea 14 — «target.dispatchEvent(new PointerEvent("pointer" + type, { isPrimary: true, bubbles: true }));»
+- Impacto: Un visitante que navega con teclado o lector de pantalla puede enfocar el launcher pero no abrir el chat (un div con role=button no recibe click con Enter/Espacio; motion 12 solo dispara gestos tap con Enter, no onClick, y con reduced-motion whileTap queda undefined). Si lo abre, no hay Escape, ni aria-modal, ni trampa de foco, ni devolucion del foco. WCAG 2.1.1 (A). Bloqueante para L3 del widget que se usa como demo del producto.
+- Propuesta: Usar un <button> real para el launcher (o onKeyDown Enter/Espacio), cerrar con Escape en el panel, aria-modal=true, trampa de foco y devolver el foco al launcher al cerrar. Revisar el mismo patron en el bubble de public/widget.js.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop, lib.chatbot.components
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-079
+
+### [A11Y-014] La region aria-live (role=log) envuelve el texto que el typewriter reescribe por frame: el lector de pantalla anuncia fragmentos
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/chat/ChatWindow.tsx:277` — «role="log" aria-live="polite"»; `src/modules/chatbot/components/chat/StreamingMarkdown.tsx:99` — «setRevealed(next)»; `src/modules/chatbot/components/chat/StreamingMarkdown.tsx:143` — «const body = settled ? text : revealSafeMarkdown(text.slice(0, revealedCount))»
+- Impacto: Cada avance del revelado (hasta ~60/s) muta el texto dentro de la region viva; NVDA/VoiceOver suelen anunciar trozos repetidos o cortados en vez de la respuesta completa.
+- Propuesta: Marcar el bubble en revelado con aria-hidden/aria-busy y anunciar el mensaje completo una vez en onTypingDone (region sr-only separada).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-082
+
+### [A11Y-017] Texto funcional en text-zinc-600 sobre fondo oscuro en el chatbot del cliente (contraste < 4,5:1)
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/dashboard/LeadDetail.tsx:279` — «... px-3 py-2 text-sm text-zinc-600"> ('Sin telefono'; igual :293 'Sin email', :521 contador, :381, :589)»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:205` — «<span className="shrink-0 text-xs text-zinc-600"> (fecha de derivacion)»; `src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx:123` — «<span className="text-zinc-600"> · {decayTierLabel}</span>»; `src/modules/chatbot/components/dashboards/LeadsTable.tsx:90` — «<div className="mt-1 text-zinc-600">desde {lead.conversation.currentPath}</div>»
+- Impacto: zinc-600 (#52525b) sobre el fondo casi negro da ~2,5:1: datos utiles (fecha de derivacion, 'Sin telefono', antiguedad del lead) ilegibles con baja vision o pantalla al sol. Falla WCAG AA del quality baseline.
+- Propuesta: Subir a zinc-400 o al token de texto secundario con contraste AA.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot.contacto-detalle, h3.cli-chatbot.resumen, h3.cli-chatbot.contactos-lista
 
 ### [A11Y-004] Filas del dropdown de notificaciones no operables con teclado
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: a11y
@@ -1833,6 +2952,77 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h2.cli-resultados.informe-mensual-pdf, lib.reports
+
+### [A11Y-008] Widget embebido: al abrir no mueve el foco, la burbuja oculta sigue en el orden de tabulación y Esc no cierra
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `public/widget.js:150` — «bubble.style.opacity = '0' bubble.style.pointerEvents = 'none'»; `public/widget.js:158` — «if (iframe) iframe.classList.remove('dvlp-open')»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:216` — «onClose={() => notifyParent('close')}»
+- Impacto: Un visitante con teclado o lector de pantalla queda con el foco en un botón invisible al abrir, y al cerrar el foco no vuelve a la burbuja; no hay cierre con Esc.
+- Propuesta: Mover el foco al iframe al abrir y devolverlo al cerrar, sacar la burbuja del tab order mientras está abierto y escuchar Escape.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-094
+
+### [A11Y-009] Detalle del bot (admin): tabs sin semántica ARIA, botón de cierre sin etiqueta y textos en zinc-600/700 sobre fondo oscuro
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx:257` — «<button key={tab.id} onClick={() => changeTab(tab.id)}»; `src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx:356` — «<button type="button" onClick={() => setShowPauseConfirm(false)}»; `src/app/(protected)/admin/chatbots/[botId]/tabs/OverviewTab.tsx:174` — «<p className="text-xs text-zinc-700">»; `src/app/(protected)/admin/chatbot/health/page.tsx:28` — «<p className="text-[11px] font-mono text-zinc-600">Checked at: {health.timestamp}</p>»
+- Impacto: Las pestañas no anuncian estado (sin role=tab/aria-selected), el botón X del modal de pausa no tiene aria-label y hay texto con contraste menor a 4,5:1.
+- Propuesta: role=tablist/tab + aria-selected, aria-label en el botón de cierre y grises a zinc-400.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots, h3.adm-health
+
+### [A11Y-011] Modales propios sin semántica de diálogo y botones solo-ícono sin aria-label
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/activation/ActivationModal.tsx:71` — «<button type="button" onClick={onClose} className="rounded-xl p-2 hover:bg-white/[0.05]">»; `src/modules/chatbot/components/admin/activation/ActivationModal.tsx:54` — «className="w-full max-w-xl overflow-hidden rounded-3xl border border-white/10 bg-zinc-950"»; `src/modules/chatbot/components/admin/kb/SaveConfirmModal.tsx:35` — «className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"»; `src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx:188` — «<Send className="h-4 w-4" strokeWidth={1.5} />»; `src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx:99` — «<Trash2 className="h-4 w-4" strokeWidth={1.5} />»; `src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:158` — «<Trash2 size={13} strokeWidth={1.5} />»
+- Impacto: ActivationModal, BotConfigDiffModal, SaveConfirmModal y TestPromptSandbox no tienen role=dialog/aria-modal, Escape ni manejo de foco; 9 botones de cerrar, enviar, limpiar y borrar no tienen aria-label. SaveConfirmModal y el sandbox no van por portal y su z-50 queda debajo de la sidebar (z-110). ActivationModal no tiene max-h ni scroll: en pantallas bajas 'Activar bot' puede quedar fuera de vista.
+- Propuesta: Unificar en un modal accesible (role=dialog, aria-modal, foco inicial y Escape) y agregar aria-label a los botones solo-ícono. El Modal del kit tampoco tiene role=dialog ni Escape y es FROZEN: decisión para Valentino.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots.activar-bot-preflight, h3.adm-chatbots.editar-kb, h3.adm-chatbots.probar-prompt, lib.ui
+
+### [A11Y-012] Texto funcional en zinc-600 y zinc-500 por debajo de AA
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/admin/ActivityLog.tsx:209` — «<div className="rounded-[28px] border border-white/10 bg-white/[0.02] py-16 text-center text-sm text-zinc-600">»; `src/modules/chatbot/components/admin/ActivityLog.tsx:194` — «<span className="hidden text-[11px] text-zinc-600 sm:inline">»; `src/modules/chatbot/components/admin/onboarding/Step2BotIdentity.tsx:56` — «<p className="text-xs text-zinc-600 mt-1">»; `src/modules/chatbot/components/admin/BotConfigEditor.tsx:144` — «<span className="ml-3 text-xs text-zinc-600">{exposedCount} campos editables expuestos</span>»; `src/modules/chatbot/components/admin/config/ColorPicker.tsx:51` — «<p className="mb-2 text-xs text-zinc-500">Sugerencias</p>»
+- Impacto: Cuenta: luminancia de #52525b 0,0859, de #71717a 0,1673 y del fondo #080a0c 0,0029 -> zinc-600 ≈2,6:1 y zinc-500 ≈4,1:1, contra 4,5:1 de AA. Quedan bajo el umbral el estado vacío del stream, el aviso de pausa, el contador de caracteres y las ayudas; ColorPicker y el uploader se reusan en el portal del cliente.
+- Propuesta: Texto funcional en zinc-400 (≈7,7:1); 500/600 sólo decorativo. Revisar el token en el design system.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-actividad.stream-eventos, h4.adm-clientes.alta-cliente-con-bot, lib.ui
+
+### [A11Y-015] Panel del chat: textarea sin label accesible, boton enviar etiquetado en ingles y textos con contraste de ~2,6:1 y ~2,2:1
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/chat/ChatWindow.tsx:305` — «color: 'rgba(255,255,255,0.3)',»; `src/modules/chatbot/components/chat/ChatWindow.tsx:612` — «color: 'rgba(255,255,255,0.25)',»; `src/modules/chatbot/components/chat/ChatWindow.tsx:659` — «aria-label="Send message"»
+- Impacto: 'Sistema Listo' (11px, blanco 0.3 sobre el panel aprox. #0a0c18) da ~2,6:1 y el hint 'Enter para enviar' (9px, 0.25) ~2,2:1, ambos por debajo de 4,5:1. El textarea (:527-594) solo tiene placeholder como nombre accesible y el boton enviar se anuncia en ingles en una UI en castellano.
+- Propuesta: aria-label='Escribi tu consulta' en el textarea, 'Enviar mensaje' en el boton, y subir la opacidad de esos textos a 0.6 o mas.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop
+
+### [A11Y-016] Animaciones infinitas de avatares e indicador 'pensando' que no respetan prefers-reduced-motion
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/chat/ChatWindow.tsx:445` — «repeat: Infinity,»; `src/modules/chatbot/components/avatar/PulseAvatar.tsx:64` — «repeat: Infinity,»; `src/modules/chatbot/components/avatar/MonogramAvatar.tsx:81` — «transition={{ duration: pulseDuration, repeat: Infinity, ease: 'easeInOut' }}»
+- Impacto: El launcher anima sin parar en toda pagina publica (y en el sitio del cliente). git grep de useReducedMotion/prefers-reduced-motion en components/avatar = 0 (control: StreamingMarkdown.tsx:5,47 si lo usa) y no hay MotionConfig global. WCAG 2.2.2 / 2.3.3.
+- Propuesta: Leer useReducedMotion en AvatarRenderer y pasar un estado estatico a los avatares; detener los dots con reduced motion.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-develop, h3.vis-widget-cliente, lib.chatbot.components
+
+### [A11Y-018] Controles del chatbot sin estado o nombre accesible (chips, labels, tooltip, pestanas, error del transcript)
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: a11y
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx:272` — «<button key={key} onClick={...} className={chipClass(initialRange === key)}> (sin aria-pressed; igual :222-234, :284-298)»; `src/modules/chatbot/components/dashboard/LeadDetail.tsx:496` — «<label className="mb-1 block text-xs text-zinc-500">Estado</label> (sin htmlFor; igual :512)»; `src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx:129` — «onClick={(e) => { ... onAccept(currentPrompt) }} (div sin role, tabIndex ni onKeyDown)»; `src/modules/chatbot/components/dashboards/ConversationsTable.tsx:201` — «return <p className="text-xs text-red-300">No se pudo cargar el transcript. Probá de nuevo.</p>»
+- Impacto: Con lector de pantalla no se sabe que filtro esta activo ni a que campo corresponde cada control; el teaser proactivo del sitio de develOP no se puede aceptar con teclado; el error del transcript no se anuncia.
+- Propuesta: aria-pressed en chips, htmlFor/id en labels, convertir el tooltip en button, aria-current en la pestana activa, role=alert en el error.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot.contactos-lista, h3.cli-chatbot.contacto-detalle, h3.vis-widget-develop.tooltip-proactivo
 
 ## ZONA-FRANCO
 

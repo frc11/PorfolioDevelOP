@@ -1,0 +1,49 @@
+{
+ "parte": 4,
+ "partes": 4,
+ "hallazgos": [
+  {
+   "id": "DEU-053",
+   "prefijo": "DEU",
+   "titulo": "Las conversaciones del motor nunca se cierran: una sola conversacion OPEN perpetua por contacto y canal",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-message.ts",
+     "linea": 72,
+     "fragmento": "const existing = await tx.motorConversation.findFirst({\n  where: { wabaChannelId, contactIdentityId, status: 'OPEN' },\n  orderBy: { createdAt: 'asc' },"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 2097,
+     "fragmento": "status        MotorConversationStatus @default(OPEN)"
+    }
+   ],
+   "impacto": "Ningun codigo escribe status CLOSED: es una columna sin escritor. Cuando B2 use la conversacion como contexto o mida conversaciones (cuota, costo, metricas del negocio), cada contacto va a tener un hilo infinito, el contexto va a crecer sin limite y las metricas por conversacion no van a significar nada.",
+   "propuesta": "Definir en B2 la politica de cierre (por inactividad o al vencer la ventana de 24 h) y aplicarla al reutilizar la conversacion en upsertOpenConversation.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-whatsapp",
+    "modelo.MotorConversation"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "FAL-bot-whatsapp-sin-respuesta",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L9",
+    "tmp": "D5-c1/D5-L9/H12",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: handle-message.ts:72-75 (siempre reusa la conversación OPEN) y schema.prisma:2097 (default OPEN); git grep no muestra ninguna escritura de otro estado de MotorConversation.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  }
+ ]
+}

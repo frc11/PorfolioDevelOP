@@ -1,0 +1,3138 @@
+{
+ "dominio": "D5",
+ "ciclo": "D5-c1",
+ "lote": "D5-L6",
+ "run": "wf_b0489c11-132",
+ "fecha": "2026-10-15T13:01:58.672Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/modules/chatbot/hooks/index.ts",
+    "lineas_total": 2,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+    "lineas_total": 638,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/hooks/useChatbotSounds.ts",
+    "lineas_total": 162,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/lib/business-metrics.ts",
+    "lineas_total": 52,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/lib/monthly-analysis.ts",
+    "lineas_total": 209,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/prisma/developProactivePrompts.ts",
+    "lineas_total": 57,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/prisma/seed.ts",
+    "lineas_total": 378,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/prisma/update-proactive-prompts.ts",
+    "lineas_total": 60,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/avatarImageUrlSchema.ts",
+    "lineas_total": 24,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/clientHasChatbot.ts",
+    "lineas_total": 10,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/createBot.ts",
+    "lineas_total": 123,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+    "lineas_total": 176,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+    "lineas_total": 274,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+    "lineas_total": 352,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/getActivityChartData.ts",
+    "lineas_total": 38,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/getClientSession.ts",
+    "lineas_total": 34,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/getGlobalBotsOverviewStats.ts",
+    "lineas_total": 51,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+    "lineas_total": 144,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/index.ts",
+    "lineas_total": 7,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts",
+    "lineas_total": 127,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+    "lineas_total": 80,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts",
+    "lineas_total": 183,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/integrations/testCrmConnection.ts",
+    "lineas_total": 119,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/listAllBots.ts",
+    "lineas_total": 36,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/manageAlerts.schemas.ts",
+    "lineas_total": 3,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/multiTenantQueries.ts",
+    "lineas_total": 258,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+    "lineas_total": 172,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/queries.ts",
+    "lineas_total": 61,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/requireSuperAdmin.ts",
+    "lineas_total": 19,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+    "lineas_total": 159,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+    "lineas_total": 142,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/saveClientSettings.ts",
+    "lineas_total": 48,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/saveKnowledgeBase.ts",
+    "lineas_total": 93,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts",
+    "lineas_total": 73,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/sendTestNotification.ts",
+    "lineas_total": 84,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+    "lineas_total": 95,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/admin/validateKB.ts",
+    "lineas_total": 77,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
+    "lineas_total": 106,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/modules/chatbot/server/admin/createClientOnly.ts",
+    "simbolo": "createClientOnly",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "createClientOnly.ts:48 requireSuperAdmin() -> requireSuperAdmin.ts:8-16 (auth() y role !== 'SUPER_ADMIN' lanzan)",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "requireSuperAdmin.ts:14",
+    "org_de": "no-aplica",
+    "evidencia_org": "Crea un tenant nuevo (org+user+OrgMember) en tx global TENANT-MGMT createClientOnly.ts:73-111",
+    "validacion": "zod",
+    "evidencia_validacion": "CreateClientOnlyInputSchema createClientOnly.ts:19-29, safeParse :51-55; email sin trim/lowercase (patron D1-c1)",
+    "rate_limit": "no",
+    "notas": "Errores de validacion y email duplicado salen por throw (:55, :66): en produccion Next redacta el mensaje. tempPassword solo en la respuesta (:169, patron D1-c3). Llamada desde Step5Review.tsx:87."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+    "simbolo": "createClientWithBot",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "createClientWithBot.ts:96 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "requireSuperAdmin.ts:14",
+    "org_de": "no-aplica",
+    "evidencia_org": "Alta de tenant nuevo con bot y KB en tx global createClientWithBot.ts:123-207",
+    "validacion": "parcial",
+    "evidencia_validacion": "Zod :22-68 pero avatarImageUrl del bot es z.string().nullable() sin esquema ni tope (:57), KB sin .max (:44-50), email sin normalizar (:34)",
+    "rate_limit": "no",
+    "notas": "Slug del bot = slug de org verificado solo contra Organization (:80-93, :162). throw en validacion (:104, :116). Llamada desde Step5Review.tsx:71."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/preflightChecks.ts",
+    "simbolo": "runPreflightChecks",
+    "tipo": "server-action",
+    "auth": "no",
+    "evidencia_auth": "preflightChecks.ts:1 'use server'; :13-25 lee el bot por id con unsafeGlobalQuery sin auth() ni requireSuperAdmin; importada por un client component (BotDetailClient.tsx:1 'use client', :140)",
+    "rol": "ninguno",
+    "evidencia_rol": "sin chequeo de rol en preflightChecks.ts:13-168",
+    "org_de": "no-filtra",
+    "evidencia_org": "botId del parametro, findUnique global preflightChecks.ts:18-25",
+    "validacion": "no",
+    "evidencia_validacion": "botId: string sin schema (:13)",
+    "rate_limit": "no",
+    "notas": "Devuelve numero de WhatsApp (:123), cuota (:156), color y secciones de KB faltantes de cualquier org. Hallazgo SEC abierto desde PA-1/SEC-02."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/preflightChecks.ts",
+    "simbolo": "canActivate",
+    "tipo": "server-action",
+    "auth": "no",
+    "evidencia_auth": "preflightChecks.ts:170-172 export async en modulo 'use server' sin auth",
+    "rol": "ninguno",
+    "evidencia_rol": "funcion pura sobre el input",
+    "org_de": "no-aplica",
+    "evidencia_org": "no toca la base",
+    "validacion": "no",
+    "evidencia_validacion": "checks: PreflightCheck[] sin schema",
+    "rate_limit": "no",
+    "notas": "Sin importadores (ActivationModal.tsx:30 calcula su propia variable). Inofensiva pero superficie de action innecesaria."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+    "simbolo": "saveBotConfig",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveBotConfig.ts:78 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "requireSuperAdmin.ts:14",
+    "org_de": "parametro",
+    "evidencia_org": "botConfigId del body -> bot -> organizationId (saveBotConfig.ts:85-96, :120-121). SUPER_ADMIN cross-org por diseno: el parametro identifica el tenant objetivo, no el del actor",
+    "validacion": "zod",
+    "evidencia_validacion": "botConfigInputSchema :19-64 (tone/industry texto libre :23-24; llmProvider acepta stubs :44)",
+    "rate_limit": "no",
+    "notas": "Error de Zod crudo al cliente (:81). Persiste llmModel/temperature/maxOutputTokens que el runtime ignora."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+    "simbolo": "saveBotConfigByOrgSlug",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveBotConfigByOrgSlug.ts:71 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "requireSuperAdmin.ts:14",
+    "org_de": "parametro",
+    "evidencia_org": "orgSlug del body -> organization.findUnique (:80-83). SUPER_ADMIN cross-org por diseno",
+    "validacion": "zod",
+    "evidencia_validacion": "SaveBotConfigInputSchema :19-57 (identico a saveBotConfig salvo la clave)",
+    "rate_limit": "no",
+    "notas": "catch devuelve err.message crudo (:139-140), a diferencia del gemelo sanitizado."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveClientSettings.ts",
+    "simbolo": "saveClientSettings",
+    "tipo": "server-action",
+    "auth": "heredado",
+    "evidencia_auth": "No autentica; delega en updateBotAppearance (saveClientSettings.ts:40) que llama auth() en updateBotAppearance.ts:56 (fuera del lote, se frena aca)",
+    "rol": "heredado de updateBotAppearance",
+    "evidencia_rol": "updateBotAppearance.ts:55-61 (entrada fuera del lote)",
+    "org_de": "sesion",
+    "evidencia_org": "updateBotAppearance.ts:61 resolveOrgId() (honra la cookie de impersonacion)",
+    "validacion": "zod",
+    "evidencia_validacion": "ClientSettingsSchema :20-28; isActive se acepta (:21) y se descarta (:40-47)",
+    "rate_limit": "no",
+    "notas": "Codigo muerto: su unico importador ClientSettingsForm no se renderiza en ninguna pagina."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveKnowledgeBase.ts",
+    "simbolo": "saveKnowledgeBase",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveKnowledgeBase.ts:24 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "requireSuperAdmin.ts:14",
+    "org_de": "parametro",
+    "evidencia_org": "botConfigId del body -> bot.organizationId (:32-39) -> forOrg (:44). SUPER_ADMIN cross-org",
+    "validacion": "zod",
+    "evidencia_validacion": "knowledgeBaseInputSchema :10-19 con topes 50k/20k/10k",
+    "rate_limit": "no",
+    "notas": "Error sanitizado (:89)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts",
+    "simbolo": "saveKnowledgeBaseByOrgSlug",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveKnowledgeBaseByOrgSlug.ts:24 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "requireSuperAdmin.ts:14",
+    "org_de": "parametro",
+    "evidencia_org": "orgSlug del body (:33-40) -> forOrg(org.id) (:48)",
+    "validacion": "zod",
+    "evidencia_validacion": "SaveKBInputSchema :10-19",
+    "rate_limit": "no",
+    "notas": "catch devuelve err.message crudo (:70-71)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/sendTestNotification.ts",
+    "simbolo": "sendTestNotification",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "sendTestNotification.ts:17 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "requireSuperAdmin.ts:14",
+    "org_de": "parametro",
+    "evidencia_org": "orgSlug solo para armar el preview del email (:37-44)",
+    "validacion": "zod",
+    "evidencia_validacion": "SendTestNotificationSchema :11-14",
+    "rate_limit": "si",
+    "notas": "checkRateLimit testNotificationPerAdmin :23-31. dashboardUrl con fallback '' si falta NEXT_PUBLIC_APP_URL (:58)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+    "simbolo": "updateLeadStatus",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "updateLeadStatus.ts:18-19 getClientChatbotSession() -> getClientSession.ts:6-7 auth()",
+    "rol": "cualquier usuario con OrgMember (sin Role ni OrgRole)",
+    "evidencia_rol": "getClientSession.ts:12-27 no mira session.user.role ni membership.role",
+    "org_de": "sesion",
+    "evidencia_org": "getClientSession.ts:15-16 orgMember.findFirst sin orderBy ni impersonacion (patron D1-c2); forOrg(session.organization.id) :23",
+    "validacion": "zod",
+    "evidencia_validacion": "UpdateLeadStatusSchema :11-15 con .parse que lanza (:21); leadId sin formato",
+    "rate_limit": "no",
+    "notas": "Devuelve {ok:false} en ingles (:19, :33); LeadDetail.tsx:184-185 ignora el resultado."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+    "simbolo": "retryCrmSync",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "retryCrmSync.ts:24 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "requireSuperAdmin.ts:14",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del body (:30) -> forOrg (:53). SUPER_ADMIN cross-org",
+    "validacion": "zod",
+    "evidencia_validacion": "RetryCrmSyncSchema strict :14-19",
+    "rate_limit": "si",
+    "notas": "crmRetryPerOrg :40-51. El sync se dispara con void sin esperar (:73-75)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts",
+    "simbolo": "saveCrmIntegration",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveCrmIntegration.ts:30 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "requireSuperAdmin.ts:14",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del body (:40) verificado (:44-50) -> forOrg upsertForScope (:80, :128)",
+    "validacion": "zod",
+    "evidencia_validacion": "SaveCrmIntegrationSchema strict :17-25 + validateWebhookUrl :60-63 (fuera del lote)",
+    "rate_limit": "no",
+    "notas": "Secret cifrado (encryptSecret :113); audit sin el valor del secret (:159-164)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/integrations/testCrmConnection.ts",
+    "simbolo": "testCrmConnection",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "testCrmConnection.ts:22 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "requireSuperAdmin.ts:14",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del body (:28) -> forOrg (:51)",
+    "validacion": "zod",
+    "evidencia_validacion": "TestCrmConnectionSchema strict :13-17",
+    "rate_limit": "si",
+    "notas": "crmTestPerOrg :38-49."
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Visitante conversa con el bot de un cliente (widget)",
+    "pasos": [
+     "useChatbot.sendMessage limpia degradados reactivos y marca pendingSubmit (useChatbot.ts:537-549)",
+     "prepareSendMessagesRequest arma body con ventana trimHistory(30), sessionId de sessionStorage 'chatbot:sessionId', currentPath, opener proactivo y UTM first-touch (useChatbot.ts:415-454; :24-35)",
+     "fetch wrapper: POST /api/chatbot/[slug]/chat (useChatbot.ts:272, :305) -> route.ts:8 maxDuration 30, rate limit por sesion route.ts:81 -> handleChatRequest (entrada fuera del lote; se frena aca)",
+     "200 stream -> SDK (useChatbot.ts:356); 200 JSON mode:'degraded' -> quota/domain/conversation_limit con WhatsApp (:316-351)",
+     "4xx -> rate_limited o chat_unavailable sin WhatsApp (:372-399); 5xx/red -> reintentos 2 s y 4 s, 3 intentos (:404-408; chatRetryPolicy.ts:24,27) -> connection_failed sin WhatsApp (:410-412, :284-296)",
+     "error dentro del stream -> onError -> stream_interrupted 'Se corto la respuesta.' sin WhatsApp (:470-482)"
+    ]
+   },
+   {
+    "nombre": "Carga de config del widget y bot pausado",
+    "pasos": [
+     "Efecto de carga prefetchBotConfig(slug) (useChatbot.ts:230-239; shared/configCache fuera del lote) -> GET /api/chatbot/[slug]/config (entrada fuera del lote)",
+     "data.paused -> degradado bot_paused con WhatsApp del config (useChatbot.ts:248-256)",
+     "Reintentos agotados -> configError y retryLoadConfig manual (useChatbot.ts:186-196, :243, :259-263)"
+    ]
+   },
+   {
+    "nombre": "E10: credencial de Vertex vencida (que ve el visitante, que ve el cliente, como se entera el sistema)",
+    "pasos": [
+     "Visitante envia mensaje: useChatbot.ts:537-549 -> POST /api/chatbot/[slug]/chat (route.ts:8)",
+     "GoogleProvider solo valida presencia de env vars al construir (google.ts:53-66); la credencial se usa recien en la llamada (google.ts:71-96): la falla aparece dentro del stream (PROBABLE)",
+     "Servidor: onError del stream -> logPersistFailure a stderr + Sentry.captureException (handleChatRequest.ts:1046-1060), compensa el cupo si no hubo primer chunk (:1070-1080); no escribe chatbot_events (logger.ts:172-186)",
+     "Visitante: 'Se corto la respuesta.' con input habilitado y sin WhatsApp (useChatbot.ts:470-482, :133)",
+     "Cliente: ve conversaciones sin respuesta (multiTenantQueries.ts:174-198) y el resumen sigue diciendo 'esta atendiendo consultas las 24 horas' y 'Responde en ~1.5s' (ChatbotOverview.tsx:63, :109-110)",
+     "Sistema: detectBotIssues cuenta solo filas de chatbot_events (detectBotIssues.ts:85-98, :162-166) -> no ve la falla; y el detector no tiene scheduler (netlify.toml:25-32). Unico canal: Sentry, si el DSN esta configurado"
+    ]
+   },
+   {
+    "nombre": "Alta de cliente con bot desde el wizard admin",
+    "pasos": [
+     "Step5Review.tsx:71 createClientWithBot({...state})",
+     "requireSuperAdmin (createClientWithBot.ts:96) -> normaliza url/whatsapp y Zod (:99-105)",
+     "findUniqueSlug contra Organization (:80-93, :107-108) -> unicidad de email (:110-116)",
+     "tx global TENANT-MGMT: Organization, User ORG_MEMBER con passwordResetRequired, OrgMember ADMIN, BotConfig isActive true con slug = slug de org, KnowledgeBase (:123-207)",
+     "logAdminAction CLIENT_CREATED (:209-227) -> email de bienvenida por Brevo con tempPassword (:229-243) -> logAdminAction EMAIL_SENT (:245-259)",
+     "Respuesta con tempPassword (:261-273) -> UI la muestra (Step5Review.tsx:76-85); errores por throw -> Step5Review.tsx:110-112"
+    ]
+   },
+   {
+    "nombre": "Crear bot para una org existente",
+    "pasos": [
+     "admin/chatbots/new/actions.ts:41-47 createBotAction (auth SUPER_ADMIN) -> zod :15-36",
+     "createBot.ts:41 -> existencia de org (:43-47) -> un bot por org (:49-51)",
+     "slug unico desde el nombre del bot (createBot.ts:12-27, :57)",
+     "tx scoped: BotConfig isActive false + KB desde getTemplate(industria) con {{PLACEHOLDERS}} (createBot.ts:58, :62-105)",
+     "logAdminAction BOT_CREATED (:107-120)"
+    ]
+   },
+   {
+    "nombre": "Activar un bot (preflight)",
+    "pasos": [
+     "BotDetailClient.tsx:136-145 handleToggleActive -> runPreflightChecks(bot.id) (server action sin auth)",
+     "preflightChecks.ts:18-25 lectura global del bot + KB + org; checks de KB por largo >= 20 (:38-81), bienvenida (:83-98), quick replies (:100-116), WhatsApp (:118-133), color (:135-149), cuota (:151-165)",
+     "ActivationModal decide por fails (ActivationModal.tsx:30) -> action de activacion (admin/chatbots/[botId]/actions.ts:42, fuera del lote) -> invalidateBotCache (:69)"
+    ]
+   },
+   {
+    "nombre": "Editar configuracion del bot (admin)",
+    "pasos": [
+     "BotConfigEditor.tsx:80-81 saveBotConfigByOrgSlug o saveBotConfig",
+     "requireSuperAdmin + Zod (saveBotConfig.ts:78-82)",
+     "tx global BotConfig + Organization.leadNotification* (saveBotConfig.ts:105-131)",
+     "invalidateBotCache(after.slug) (:133) -> Map en memoria por instancia con TTL 60 s (resolver.ts:11-12, :47)",
+     "Runtime: modelo de plan.llmModel (handleChatRequest.ts:713), temperature 0.7 fija (:952), sin maxOutputTokens; routeColorMap viaja en publicConfig (getPublicConfig.ts:121) sin consumidor en el widget"
+    ]
+   },
+   {
+    "nombre": "Editar la base de conocimiento (admin)",
+    "pasos": [
+     "KnowledgeBaseEditor.tsx:112 validateKB en cliente (validateKB.ts:8-77, solo largos y 3 contradicciones por regex)",
+     "KnowledgeBaseEditor.tsx:132-133 saveKnowledgeBaseByOrgSlug o saveKnowledgeBase",
+     "requireSuperAdmin + Zod con topes (saveKnowledgeBase.ts:10-28) -> resolver org del bot (:32-39) -> forOrg.knowledgeBase.update (:44-60)",
+     "invalidateBotCache (:62) -> audit KB_UPDATED (:64-82) -> el prompt la toma (prompts/sections.ts, fuera del lote)"
+    ]
+   },
+   {
+    "nombre": "El cliente cambia el estado de un lead",
+    "pasos": [
+     "LeadStatusActions.tsx:92 o LeadDetail.tsx:184 updateLeadStatus",
+     "getClientChatbotSession: auth() + orgMember.findFirst sin orderBy (getClientSession.ts:5-34)",
+     "Zod .parse (updateLeadStatus.ts:21) -> forOrg findFirst del lead (:27-30) -> sello de primer contacto (:40) -> update (:42-47)",
+     "logAdminAction LEAD_STATUS_CHANGED (:51-67) + logChatbotEvent (:69-76) -> revalidatePath (:78) y revalidateTag del badge (:84-92)"
+    ]
+   },
+   {
+    "nombre": "Resumen 'Mi Chatbot' del cliente",
+    "pasos": [
+     "dashboard/chatbot/page.tsx:15 resolveOrgId -> :18 checkClientHasChatbot (clientHasChatbot.ts:4-10, exige isActive) -> si no, ChatbotUpsellLanding (:20-22)",
+     "page.tsx:24 getClientChatbotSession (org por OrgMember del usuario, no por resolveOrgId)",
+     "page.tsx:28-31 getUsageByOrgSlug (multiTenantQueries.ts:242-258, mes UTC), listLeadsByOrgSlug(slug, 5) (:27-54, sin excluir DQ), listRecentHandoffsByOrgSlug (:208-240, solo handoff.whatsapp)",
+     "ChatbotOverview.tsx:40-45 toBusinessMetrics con leadValueUSD 50 y sin latencia real (business-metrics.ts:9-23) -> tarjetas (:69-111)"
+    ]
+   },
+   {
+    "nombre": "Analisis mensual del negocio (resultados)",
+    "pasos": [
+     "dashboard/resultados/analisis/page.tsx:32-33 resolveOrgId -> :60 getMonthlyAnalysisForOrg",
+     "getMonthlyAnalysisForOrg.ts:53-56 bot de la org via forOrg; sin bot -> EMPTY",
+     "Promise.all: insights PENDING/APPLIED take 20 (:61-75), QuotaUsage ultimos 6 registros (:76-82), groupBy categoria 30 dias (:83-90)",
+     "monthly-analysis.ts: buildConversationSeries (:63-85), summarizeCategories con muestra minima 10 (:131-157), rankInsights (:193-209)"
+    ]
+   },
+   {
+    "nombre": "Detector de incidencias de bots",
+    "pasos": [
+     "Disparo: GET /api/cron/detect-bot-issues con CRON_SECRET (route.ts:7-20) sin scheduler en netlify.toml:25-32 ni vercel.json; o POST /api/admin/alerts/trigger-detector (route.ts:5-16) desde AlertSettingsClient.tsx:89",
+     "runAlertDetector (detectBotIssues.ts:285-297) -> detectBotIssues: todos los bots global (:28-36) y hasta 8 consultas secuenciales por bot activo (:38-234)",
+     "persistAndNotifyIssues: dedup por PENDING 24 h (:246-255) -> BotAlert (:257-264) -> email Brevo a DEVELOP_ALERTS_EMAIL (:299-323) -> Telegram en HIGH/CRITICAL (:272-279)"
+    ]
+   },
+   {
+    "nombre": "Integracion CRM (admin)",
+    "pasos": [
+     "CrmConfigForm.tsx:48 saveCrmIntegration -> requireSuperAdmin, plan, validateWebhookUrl, cifrado del secret, upsertForScope, audit (saveCrmIntegration.ts:29-182)",
+     "CrmConfigForm.tsx:70 testCrmConnection -> rate limit -> testN8nConnection con payload de prueba (testCrmConnection.ts:21-118)",
+     "RetrySyncButton.tsx:19 retryCrmSync -> rate limit -> lead en la org -> void syncLeadToCrm (retryCrmSync.ts:23-79)",
+     "CrmIntegrationAdminCard.tsx:72 getOrgSyncHistory keyset scoped (getCrmSyncHistory.ts:85-127)"
+    ]
+   },
+   {
+    "nombre": "Paneles admin de actividad y salud",
+    "pasos": [
+     "admin/chatbot/activity/page.tsx:12 getActivityChartData: eventos 7 dias de todas las orgs (getActivityChartData.ts:12-19) agrupados por dia sin timeZone (:22-35); :19 listRecentEvents del bot develop take 250 (queries.ts:36-45)",
+     "admin/chatbot/health/page.tsx:13 getLatencyHistory(24): chat.message_completed de todas las orgs take 2000 sin orden (getLatencyHistory.ts:73-84) -> buckets por hora sin timeZone (:24-41) -> p50/p95 (:110-133)"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "runPreflightChecks: server action sin autenticacion que lee cualquier bot por id",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 1,
+      "fragmento": "'use server'"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 13,
+      "fragmento": "export async function runPreflightChecks(botId: string): Promise<PreflightCheck[]> {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 18,
+      "fragmento": "const bot = await unsafeGlobalQuery("
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx",
+      "linea": 140,
+      "fragmento": "const checks = await runPreflightChecks(bot.id)"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real: la action la importa un client component (BotDetailClient.tsx:1), asi que su id queda en el JS publico. Cualquiera sin sesion que tenga el id de un bot (cuid) obtiene de cualquier tenant el WhatsApp (:123), la cuota mensual contratada (:156), el color y que secciones de la KB faltan, y la usa como oraculo de existencia de ids. Los datos son de baja sensibilidad; lo grave es el bypass de auth.",
+    "propuesta": "Agregar requireSuperAdmin() como primera linea y validar botId con z.string().cuid(). Sacar canActivate (funcion pura sin importadores) del modulo 'use server'.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots",
+     "h3.adm-chatbots.preflight-activacion",
+     "lib.chatbot.admin",
+     "lib.isolation",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PA-1 (audit-repo-20260707), SEC-02 y P0-6 (auditoria-maestra)"
+   },
+   {
+    "titulo": "El detector de incidencias de bots no tiene disparador programado",
+    "prefijo": "FAL",
+    "severidad": "ALTA",
+    "tipo": "faltante",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "netlify.toml",
+      "linea": 25,
+      "fragmento": "[functions.\"generate-insights-cron\"]"
+     },
+     {
+      "ruta": "netlify.toml",
+      "linea": 31,
+      "fragmento": "[functions.\"cleanup-old-events-cron\"]"
+     },
+     {
+      "ruta": "src/app/api/cron/detect-bot-issues/route.ts",
+      "linea": 13,
+      "fragmento": "const result = await runAlertDetector()"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+      "linea": 89,
+      "fragmento": "const res = await fetch('/api/admin/alerts/trigger-detector', { method: 'POST' })"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real: ninguna de las 9 alertas (cuota agotada, errores LLM, latencia, bot inactivo con trafico, fallas de captura de leads, picos de origen bloqueado) se genera sola. netlify.toml solo agenda 3 funciones y vercel.json agenda otras 3 que no corren en Netlify. develOP se entera de que el bot de un cliente dejo de responder solo si un SUPER_ADMIN aprieta el boton en /admin/settings/alerts. PROBABLE porque no se puede descartar un cron externo fuera del repo.",
+    "propuesta": "Crear netlify/functions/detect-bot-issues-cron.ts (espejo de cleanup-old-events-cron.ts) con su entrada schedule en netlify.toml (por ejemplo cada hora), y documentar o quitar de vercel.json las entradas que no corren en Netlify.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas",
+     "h4.adm-alertas.detector-incidencias",
+     "int.cron.detect-bot-issues",
+     "lib.chatbot.admin",
+     "modelo.BotAlert"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5-A4, E10; hallazgo 'El detector no puede ver la caida del proveedor LLM'"
+   },
+   {
+    "titulo": "El resumen 'Mi Chatbot' del cliente muestra metricas inventadas o truncadas",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+      "linea": 43,
+      "fragmento": "leadValueUSD: 50,"
+     },
+     {
+      "ruta": "src/modules/chatbot/lib/business-metrics.ts",
+      "linea": 21,
+      "fragmento": "avgResponseSeconds: Math.round((input.avgLatencyMs ?? 1500) / 100) / 10,"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+      "linea": 30,
+      "fragmento": "listLeadsByOrgSlug(orgSlug, 5),"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+      "linea": 42,
+      "fragmento": "capturedLeads: recentLeads.length,"
+     }
+    ],
+    "impacto": "Bloquea L3 (sin datos de mentira): el primer cliente real ve 'Responde en ~1.5s' siempre (avgLatencyMs nunca se pasa), un 'Valor estimado' de leads x USD 50 inventado, y 'Oportunidades este mes / Personas listas para comprar' que son los 5 leads mas recientes de toda la historia, con tope 5 e incluyendo descartados (listLeadsByOrgSlug no aplica excludeDqWhere, multiTenantQueries.ts:33-36). Ademas 'Disponibilidad 24/7' y 'esta atendiendo consultas las 24 horas' (:63, :109) aunque el bot este pausado o el proveedor caido.",
+    "propuesta": "Calcular leads del mes real con excludeDqWhere y rango del mes; quitar 'Valor estimado' o tomarlo de un valor por lead configurado por el cliente; mostrar latencia real (p50 de chat.message_completed de la org) o quitar el dato; condicionar '24/7' a isActive y a la salud del bot.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot",
+     "h3.cli-chatbot.resumen",
+     "lib.chatbot.lib",
+     "modelo.ChatbotLead",
+     "modelo.QuotaUsage"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "criterio L3 sin datos de mentira; PLAN-329 (MH.4 salud del bot)"
+   },
+   {
+    "titulo": "El detector no puede ver la caida del proveedor LLM (credencial de Vertex vencida)",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 1052,
+      "fragmento": "logPersistFailure('chat.stream_error', error, {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/logging/logger.ts",
+      "linea": 177,
+      "fragmento": "console.error("
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+      "linea": 91,
+      "fragmento": "{ type: { contains: 'llm' } },"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 1369,
+      "fragmento": "// devolver el stream (este catch solo alcanza fallos pre-return), el"
+     }
+    ],
+    "impacto": "Con la credencial de Vertex vencida (hecho conocido) el error ocurre dentro del stream: onError solo escribe a stderr y Sentry, nunca una fila en chatbot_events. LLM_PROVIDER_ERROR (detectBotIssues.ts:85-98) y ACTIVITY_ERRORS_SPIKE (:162-166) cuentan filas de chatbot_events; la unica que matchea es chat.unhandled_error, que solo cubre fallos previos al stream. Aunque el detector corriera, no alertaria la falla mas probable del producto. El eslabon inferido es que el SDK de Vertex falla en la llamada y no al construir (google.ts:53-66 solo valida env vars).",
+    "propuesta": "En el onError del stream, ademas del sink off-Neon, escribir un logChatbotEvent best-effort con type 'chat.llm_stream_error' y level 'error' (con techo de tiempo como los demas hooks), o hacer que el detector lea tambien una senal de Sentry/stderr agregada. Agregar un check activo de credencial (llamada minima a Vertex) al health.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas.detector-incidencias",
+     "h3.vis-widget-cliente",
+     "int.vertex",
+     "int.sentry",
+     "lib.chatbot.admin",
+     "lib.chatbot.chat",
+     "modelo.ChatbotEvent"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5-A4, E10, hallazgo 'El detector de incidencias de bots no tiene disparador programado'"
+   },
+   {
+    "titulo": "Con el proveedor caido el widget no ofrece WhatsApp: el visitante queda en 'Se corto la respuesta.'",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 86,
+      "fragmento": "//    Supersede al viejo `provider_error` (que degradaba a WhatsApp al primer fallo)."
+     },
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 288,
+      "fragmento": "whatsappNumber: null,"
+     },
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 475,
+      "fragmento": "reason: 'stream_interrupted',"
+     },
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 575,
+      "fragmento": "if (!config?.whatsappNumber) return"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real mientras la credencial siga vencida: todo visitante de todo cliente que escriba recibe 'Se corto la respuesta.' con el input habilitado, puede reintentar sin fin y nunca ve la tarjeta de WhatsApp, aunque el bot la tenga configurada (el hook ya tiene config.whatsappNumber). Se pierden los leads justo cuando el bot no puede capturarlos. Contradice la decision PLAN-501.",
+    "propuesta": "En stream_interrupted y connection_failed, poblar whatsappNumber/whatsappMessage/companyName desde config y mostrar la derivacion como CTA secundario; tras N fallos seguidos en la misma sesion, pasar a un degradado que priorice WhatsApp.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.vis-widget-cliente.conversar",
+     "h3.vis-whatsapp",
+     "int.vertex",
+     "lib.chatbot.hooks"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-501 (contradicho), E10, D5-A4"
+   },
+   {
+    "titulo": "Bot pausado: la pestana Mi Chatbot del cliente muestra la landing de venta del chatbot",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/clientHasChatbot.ts",
+      "linea": 6,
+      "fragmento": "where: { isActive: true },"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+      "linea": 20,
+      "fragmento": "if (!hasActiveChatbot) {"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/chatbot/layout.tsx",
+      "linea": 52,
+      "fragmento": ": 'Pausado · no responde hasta que lo reactives'"
+     }
+    ],
+    "impacto": "Un cliente cuyo bot fue pausado por develOP (bulkPauseBots o el toggle del admin) entra a /dashboard/chatbot y ve el header 'Pausado' y debajo la oferta para comprar el chatbot que ya tiene, en vez de su resumen. Ademas, en preview de admin la page resuelve la org con resolveOrgId pero los datos con getClientChatbotSession (page.tsx:15 vs :24), asi que el admin tambien ve la landing.",
+    "propuesta": "Separar 'tiene bot' de 'bot activo': checkClientHasChatbot sin filtro de isActive para decidir la landing, y un estado 'pausado' explicito en el resumen. Usar la misma resolucion de org (resolveOrgId) en layout y page.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot",
+     "h3.cli-chatbot.resumen",
+     "lib.chatbot.admin",
+     "lib.preview",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-304; patron D1-c2 (getClientSession paralela a resolveOrgId)"
+   },
+   {
+    "titulo": "Bots nuevos nacen con la KB de plantilla llena de {{PLACEHOLDERS}} y nada lo detecta",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/createBot.ts",
+      "linea": 58,
+      "fragmento": "const template = getTemplate(resolvedIndustry)"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts",
+      "linea": 4,
+      "fragmento": "businessInfo: `# {{NOMBRE_CONCESIONARIA}}"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 47,
+      "fragmento": "return !value || value.trim().length < 20"
+     },
+     {
+      "ruta": "src/lib/onboarding/core.ts",
+      "linea": 115,
+      "fragmento": "isActive: true,"
+     }
+    ],
+    "impacto": "createBot guarda la KB de la plantilla tal cual (createBot.ts:93-102) y el alta 'new_org' de lib/onboarding/core.ts (entrada fuera del lote, :65 y :115) crea el bot ya activo con esa KB. El preflight y validateKB solo miden largo (preflightChecks.ts:45-48, validateKB.ts:21), asi que un bot con '{{DIRECCION_COMPLETA}}' pasa la activacion y el modelo responde con el literal o inventa. Las 10 plantillas tienen entre 6 y 15 lineas con placeholders.",
+    "propuesta": "Rechazar en preflight (fail) y en validateKB (error) cualquier seccion que matchee /\\{\\{[A-Z_]+\\}\\}/; en el alta new_org crear el bot inactivo hasta pasar el preflight.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots",
+     "h3.adm-chatbots.crear-bot-org-existente",
+     "h3.adm-chatbots.preflight-activacion",
+     "lib.chatbot.admin",
+     "modelo.KnowledgeBase"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-205 (B13.3)"
+   },
+   {
+    "titulo": "verticalPack no se puede asignar desde la app: solo por SQL manual",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1329,
+      "fragmento": "verticalPack String @default(\"base\")"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 625,
+      "fragmento": "const verticalPack = getVerticalPack(bot.verticalPack)"
+     },
+     {
+      "ruta": "scripts/ev5-smoke.mjs",
+      "linea": 212,
+      "fragmento": "\"#    UPDATE chatbot_bot_config SET \\\"verticalPack\\\"='agencia' WHERE slug='develop';\","
+     }
+    ],
+    "impacto": "El pack vertical cambia intents y comportamiento del bot que se vende a negocios, pero ningun alta (createBot, createClientWithBot, onboarding/core) ni la edicion (saveBotConfig.ts:19-64) lo setea: el unico escritor fuera de evals es un UPDATE a mano contra Neon. Una concesionaria nueva queda con el pack 'base' aunque su industria sea 'concesionaria'. El seed del bot develOP tampoco lo fija (seed.ts:185-246).",
+    "propuesta": "Agregar verticalPack (enum de packs registrados en verticals/registry.ts) al schema de saveBotConfig y al alta, con default derivado de la industria; dejar el seed de develop en 'agencia'.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config",
+     "h3.vis-whatsapp",
+     "lib.chatbot.verticals",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A6, PLAN-404, PLAN-317"
+   },
+   {
+    "titulo": "Controles del admin que el runtime ignora: modelo, temperatura, tope de tokens, proveedor y colores por ruta",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+      "linea": 47,
+      "fragmento": "maxOutputTokens: z.number().int().min(100).max(8192),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 713,
+      "fragmento": "const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 952,
+      "fragmento": "temperature: 0.7,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/config/getPublicConfig.ts",
+      "linea": 121,
+      "fragmento": "routeColorMap: (bot.routeColorMap as unknown as RouteColorMap) ?? {},"
+     }
+    ],
+    "impacto": "El admin edita llmModel, temperature y maxOutputTokens (saveBotConfig.ts:45-47) y el chat usa el modelo del plan, temperatura fija 0.7 y ningun tope de salida: cree que acoto costo o tono y no paso nada. llmProvider acepta 'anthropic'/'openai' (:44) que degradan en silencio a Google (resolveEffectiveModel.ts:52-63). routeColorMap viaja en la config publica sin ningun consumidor en el widget. Encarece cualquier cambio y confunde la operacion.",
+    "propuesta": "Decidir por campo: cablearlo al runtime (maxOutputTokens y temperature a streamText) o quitarlo del editor y del schema de la action. Restringir llmProvider a los implementados.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config",
+     "lib.chatbot.llm",
+     "lib.chatbot.chat",
+     "int.vertex",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-424, PLAN-428; registro de cambios de Valentino 'Color por ruta no llega al widget runtime'"
+   },
+   {
+    "titulo": "Clave de sesion del widget global por origen: dos bots en el mismo origen chocan y el segundo da 500",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+      "linea": 27,
+      "fragmento": "const existing = window.sessionStorage.getItem('chatbot:sessionId')"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1375,
+      "fragmento": "sessionId   String  @unique"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/conversation/resolver.ts",
+      "linea": 137,
+      "fragmento": "if (!adopted) throw error"
+     }
+    ],
+    "impacto": "El sessionId se guarda con una clave fija por origen y la columna es unica global. Si en la misma pestana el visitante habla con dos bots servidos desde el mismo origen (sitio de develOP y un embed /embed/<slug> de demo, o un cliente con dos bots), el segundo create da P2002 sin fila que adoptar, el server responde 500, el widget reintenta 3 veces y muestra 'No pudimos conectar'. El eslabon inferido es el comportamiento de sessionStorage compartido en la misma pestana/origen.",
+    "propuesta": "Clave por slug en el widget ('chatbot:sessionId:<slug>') ya mismo, y la migracion aditiva @@unique([botConfigId, sessionId]) planificada (C3.2).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.vis-widget-develop",
+     "lib.chatbot.hooks",
+     "lib.chatbot.conversation",
+     "modelo.Conversation"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-351, PLAN-414, PLAN-333"
+   },
+   {
+    "titulo": "Errores del alta de cliente lanzados con throw: en produccion el admin ve un mensaje generico",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 104,
+      "fragmento": "if (!result.success) throw new Error(zodErrorToMessage(result.error))"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 116,
+      "fragmento": "if (existingUser) throw new Error('El email ingresado ya está registrado en el sistema.')"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+      "linea": 111,
+      "fragmento": "setError(err instanceof Error ? err.message : 'Error al crear el cliente.')"
+     }
+    ],
+    "impacto": "Next.js omite el mensaje de los errores lanzados por server actions en builds de produccion; el wizard muestra err.message, asi que el admin ve un texto generico en ingles en vez de 'El email ingresado ya esta registrado' o el error de validacion. Mismo patron en createClientOnly.ts:55 y :66. Frena el alta del primer cliente sin explicar por que.",
+    "propuesta": "Devolver { ok: false, error } en vez de throw para errores esperables (validacion, email duplicado) y dejar throw solo para lo inesperado.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.alta-cliente-con-bot",
+     "h4.adm-clientes.alta-sin-bot",
+     "lib.chatbot.admin"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "patron D1-c3 (guards que lanzan Error generico)"
+   },
+   {
+    "titulo": "LeadDetail muestra 'Guardado' aunque updateLeadStatus devuelva ok:false",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+      "linea": 184,
+      "fragmento": "await updateLeadStatus({ leadId: lead.id, status, notes })"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/dashboard/LeadDetail.tsx",
+      "linea": 185,
+      "fragmento": "setSavedAt(Date.now())"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+      "linea": 33,
+      "fragmento": "return { ok: false, error: 'Lead not found or unauthorized' }"
+     }
+    ],
+    "impacto": "Si la action rechaza (sin sesion de chatbot, lead de otra org u OrgMember ambiguo), el detalle del lead dice 'Guardado' (LeadDetail.tsx:526) y el cliente pierde el estado y las notas sin saberlo. Ademas la action usa .parse (updateLeadStatus.ts:21), que lanza en vez de devolver error, y los mensajes estan en ingles.",
+    "propuesta": "Leer el resultado y mostrar el error (como LeadStatusActions.tsx:99-103); cambiar .parse por safeParse con mensaje en espanol.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.cli-chatbot.estado-lead",
+     "lib.chatbot.admin",
+     "modelo.ChatbotLead"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patron D1-c2 (getClientSession.ts:5-33)"
+   },
+   {
+    "titulo": "Alta con bot: el slug del bot se toma del de la org sin verificar unicidad en BotConfig",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 85,
+      "fragmento": "c.organization.findUnique({ where: { slug: candidate } }),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 162,
+      "fragmento": "slug: uniqueSlug,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createBot.ts",
+      "linea": 57,
+      "fragmento": "const slug = await findUniqueBotSlug(slugify(input.botName))"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1278,
+      "fragmento": "slug     String  @unique"
+     }
+    ],
+    "impacto": "createBot deriva slugs de bot desde el nombre del bot, asi que puede existir un bot 'sofia' sin org 'sofia'. Si despues se da de alta la org 'Sofia', su slug esta libre en Organization pero choca en BotConfig: P2002, rollback de toda la tx y error generico. Mismo patron en lib/onboarding/core.ts:66 y :111.",
+    "propuesta": "Calcular el slug del bot con findUniqueBotSlug (createBot.ts:12-27) en ambas altas.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.alta-cliente-con-bot",
+     "lib.chatbot.admin",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Validacion del alta con bot mas laxa que la de edicion",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 57,
+      "fragmento": "avatarImageUrl: z.string().nullable(),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 44,
+      "fragmento": "businessInfo: z.string().min(20),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveKnowledgeBase.ts",
+      "linea": 12,
+      "fragmento": "businessInfo: z.string().max(50_000),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 70,
+      "fragmento": "function slugify(s: string): string {"
+     }
+    ],
+    "impacto": "El avatar del bot en el alta acepta cualquier string sin esquema ni tope (la edicion usa avatarImageUrlSchema con tope de 600 KB, saveBotConfig.ts:31) y viaja en la config publica del widget; la KB no tiene .max y termina en el prompt (patron D1-c3); slugify local duplica @/lib/slugify. Solo lo usa un SUPER_ADMIN.",
+    "propuesta": "Reusar avatarImageUrlSchema y los topes de knowledgeBaseInputSchema en el alta; importar slugify de @/lib/slugify.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.alta-cliente-con-bot",
+     "lib.chatbot.admin"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patron D1-c3 (texto libre sin .max al prompt)"
+   },
+   {
+    "titulo": "Schema de BotConfig duplicado y manejo de errores divergente entre las variantes por id y por slug",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+      "linea": 139,
+      "fragmento": "const msg = err instanceof Error ? err.message : 'Unknown error'"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+      "linea": 155,
+      "fragmento": "const msg = sanitizeErrorMessage(error)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts",
+      "linea": 70,
+      "fragmento": "const msg = err instanceof Error ? err.message : 'Unknown error'"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+      "linea": 81,
+      "fragmento": "return { success: false, error: 'Invalid input: ' + parsed.error.message }"
+     }
+    ],
+    "impacto": "Los dos schemas son identicos linea por linea salvo botConfigId/orgSlug (saveBotConfig.ts:19-64 vs saveBotConfigByOrgSlug.ts:19-57): cualquier cambio hay que hacerlo dos veces. Las variantes por slug devuelven el mensaje crudo de Prisma, que su gemela sanitiza porque puede ecoar leadNotificationEmail o la KB (saveBotConfig.ts:152-154). Solo lo ve un SUPER_ADMIN.",
+    "propuesta": "Extraer el schema a un modulo compartido y una sola funcion interna que reciba el bot ya resuelto; sanitizar en ambas variantes y no devolver parsed.error.message crudo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config",
+     "h3.adm-chatbots.editar-kb",
+     "lib.chatbot.admin"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "CLEAN-R5; patron D1-c1 (mensajes internos al cliente)"
+   },
+   {
+    "titulo": "Paneles admin de actividad y latencia: datos de todas las orgs, muestra truncada sin orden, ventana corrida y fechas sin zona",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+      "linea": 82,
+      "fragmento": "take: 2000,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+      "linea": 37,
+      "fragmento": "d.setHours(d.getHours() - i, 0, 0, 0)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+      "linea": 66,
+      "fragmento": "const since = new Date(Date.now() - hoursBack * 60 * 60 * 1000)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/getActivityChartData.ts",
+      "linea": 25,
+      "fragmento": "const key = d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })"
+     }
+    ],
+    "impacto": "Ambas paginas estan enmarcadas como el bot de develOP pero agregan eventos de todas las orgs (PENDIENTE-DECISION :68-74 y :6-13). Con mas de 2000 eventos en 24 h la muestra es arbitraria (sin orderBy). La consulta trae 24 h pero los buckets arrancan en la hora redondeada de hace 23 h: hasta 1 h de borde queda afuera. Con el servidor en UTC, los dias y horas salen corridos 3 h respecto de Argentina.",
+    "propuesta": "Decidir alcance (bot develop o plataforma) y scopear; orderBy createdAt desc; alinear since al primer bucket; formatear con timeZone 'America/Argentina/Buenos_Aires' via dates-ar.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-health",
+     "h3.adm-health.latencia",
+     "h3.adm-actividad",
+     "h3.adm-actividad.grafico-7-dias",
+     "lib.chatbot.admin",
+     "modelo.ChatbotEvent"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-239, PLAN-173, D5-A8, CLEAN-R2"
+   },
+   {
+    "titulo": "Empty state del widget con copy tecnico en usted igual para todos los tenants y 'WhatsApp no configurado.' al visitante",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 311,
+      "fragmento": "Sistema Listo"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 321,
+      "fragmento": "Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/tool-cards/WhatsappHandoffCard.tsx",
+      "linea": 20,
+      "fragmento": "WhatsApp no configurado."
+     }
+    ],
+    "impacto": "El primer mensaje que ve el visitante de cualquier cliente (chat vacio, ChatWindow.tsx:285) es jerga en usted que no respeta el tono del bot ni su welcomeMessage, en 11-12 px con alfa 0,3/0,5 (contraste bajo). Si la tool de handoff corre sin numero, el visitante ve un error rojo interno.",
+    "propuesta": "Usar el welcomeMessage del bot en el empty state y ocultar la tarjeta (o mostrar la alternativa de callback) cuando no hay WhatsApp.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-cliente",
+     "h3.vis-widget-cliente.conversar",
+     "lib.chatbot.components"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A5, PLAN-541"
+   },
+   {
+    "titulo": "Detector de incidencias secuencial N+1 sin maxDuration",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+      "linea": 28,
+      "fragmento": "const bots = await unsafeGlobalQuery("
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+      "linea": 38,
+      "fragmento": "for (const bot of bots) {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+      "linea": 267,
+      "fragmento": "const emailResult = await sendAlertEmail(issue)"
+     }
+    ],
+    "impacto": "Por bot activo hace hasta 8 consultas en serie (:66-221) y por alerta nueva findFirst + create + email + update + Telegram en serie (:242-280). Aritmetica: 50 bots activos x 8 consultas x ~20 ms ~= 8 s antes de mandar un solo email, contra el timeout por defecto de las funciones sincronicas de Netlify (10 s). La ruta del cron no declara maxDuration (route.ts:5-20). Hoy no corre (no tiene scheduler); importa al arreglar eso.",
+    "propuesta": "Agregados con groupBy por botConfigId en una consulta por tipo de senal, emails al final en lote, y maxDuration explicito en la ruta.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-alertas.detector-incidencias",
+     "int.cron.detect-bot-issues",
+     "lib.chatbot.admin",
+     "modelo.ChatbotEvent"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "hallazgo 'El detector de incidencias de bots no tiene disparador programado'"
+   },
+   {
+    "titulo": "retryCrmSync dispara el sync sin esperar y responde ok",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+      "linea": 73,
+      "fragmento": "void syncLeadToCrm({ leadId, trigger: 'manual' }).catch((err: unknown) => {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+      "linea": 79,
+      "fragmento": "return { ok: true as const }"
+     }
+    ],
+    "impacto": "El reintento manual corre despues de devolver la respuesta, sin after() ni waitUntil (no hay usos en el repo): si la funcion se congela, el sync no se completa y el admin vio 'ok'. El fallo solo va a console.error (:74). Ningun tenant tiene CRM hoy.",
+    "propuesta": "Esperar el sync con un techo de tiempo o usar after() de next/server; capturar en Sentry.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.integracion-crm",
+     "int.n8n",
+     "lib.chatbot.crm"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-435, PLAN-465"
+   },
+   {
+    "titulo": "Script que imprime la credencial completa de Vertex por stdout",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "scripts/encode-vertex-creds.js",
+      "linea": 8,
+      "fragmento": "console.log('--- Pegar este VALOR en Netlify como GOOGLE_VERTEX_CREDENTIALS_JSON ---')"
+     },
+     {
+      "ruta": "scripts/encode-vertex-creds.js",
+      "linea": 10,
+      "fragmento": "console.log(JSON.stringify(parsed))"
+     }
+    ],
+    "impacto": "El helper lee vertex-credentials.json y vuelca la cuenta de servicio entera (incluida la clave privada) a la terminal. Corrido dentro de una sesion de agente o de CI, la credencial queda en transcripts o logs: es un vector plausible de la 'key expuesta en logs' de la bitacora. El archivo nunca fue commiteado (.gitignore:55). No se copio ningun valor.",
+    "propuesta": "Escribir el resultado a un archivo local ignorado o al portapapeles, nunca a stdout; al rotar la credencial vencida, no reutilizar este flujo.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.vertex",
+     "lib.chatbot.llm"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A4"
+   },
+   {
+    "titulo": "Analisis mensual: la serie salta meses sin fila y compara contra el ultimo mes con datos",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/lib/monthly-analysis.ts",
+      "linea": 73,
+      "fragmento": "const current = points.length > 0 ? points[points.length - 1] : null"
+     },
+     {
+      "ruta": "src/modules/chatbot/lib/monthly-analysis.ts",
+      "linea": 74,
+      "fragmento": "const prev = points.length > 1 ? points[points.length - 2] : null"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
+      "linea": 79,
+      "fragmento": "take: SERIES_MONTHS,"
+     }
+    ],
+    "impacto": "La serie son las ultimas 6 filas de QuotaUsage, no los ultimos 6 meses: un mes sin conversaciones no tiene fila y desaparece del grafico, y la variacion compara con el ultimo mes con datos. Mientras el mes en curso no tenga su primera conversacion, 'como viene tu mes' muestra el mes anterior.",
+    "propuesta": "Generar los 6 meses calendario (en hora AR) y rellenar con 0 los que no tengan fila.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados",
+     "h2.cli-resultados.analisis-mensual",
+     "modelo.QuotaUsage"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Seed del bot develOP con WhatsApp ficticio de fallback, colores de servicio invertidos y sin verticalPack",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/prisma/seed.ts",
+      "linea": 231,
+      "fragmento": "whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '5493815555555',"
+     },
+     {
+      "ruta": "src/modules/chatbot/prisma/seed.ts",
+      "linea": 224,
+      "fragmento": "'/ai-implementations': '#8b5cf6',"
+     },
+     {
+      "ruta": "src/app/globals.css",
+      "linea": 61,
+      "fragmento": "--color-ds-accent-ia: #10b981;"
+     },
+     {
+      "ruta": "src/modules/chatbot/prisma/seed.ts",
+      "linea": 51,
+      "fragmento": "- Color de marca: violeta"
+     }
+    ],
+    "impacto": "Si se corre el seed sin la variable, el bot publico de develOP deriva a un numero inventado. Los colores por ruta y los 'Color de marca' de la KB estan cruzados respecto de la paleta canonica (IA verde, automatizacion ambar, software violeta, globals.css:61-63), asi que el bot puede decirle a un prospecto el color equivocado. El seed tampoco deja verticalPack en 'agencia'.",
+    "propuesta": "Fallar el seed si falta NEXT_PUBLIC_WHATSAPP_NUMBER, corregir routeColorMap y el texto de la KB a la paleta canonica, y fijar verticalPack 'agencia'.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop",
+     "h3.vis-widget-develop.contenido-bot-develop",
+     "modelo.BotConfig",
+     "modelo.KnowledgeBase"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "hallazgo verticalPack"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h3.vis-widget-cliente",
+    "id": "h3.vis-widget-cliente.conversar",
+    "nombre": "Conversar con el bot desde el widget",
+    "descripcion": "Hook useChatbot: carga la config, envia turnos con ventana de historial, reintenta 5xx/red y traduce cuota, dominio, tope, pausa, 429, 4xx y error de stream a banners.",
+    "archivos": [
+     "src/modules/chatbot/hooks/useChatbot.ts",
+     "src/modules/chatbot/hooks/index.ts",
+     "src/modules/chatbot/hooks/useChatbotSounds.ts"
+    ],
+    "entradas": [
+     "POST /api/chatbot/[slug]/chat (fuera del lote)",
+     "GET /api/chatbot/[slug]/config (fuera del lote)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz por codigo: sendMessage useChatbot.ts:537-549 -> transport :269-305 -> route.ts:8 -> handleChatRequest (entrada) -> stream al SDK :356. Hoy no responde en produccion por la credencial de Vertex vencida (hecho conocido).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "El tenant sale del slug de la URL (useChatbot.ts:272); el sessionId usa clave global 'chatbot:sessionId' compartida entre bots del mismo origen (:27)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "Empty state existe (ChatWindow.tsx:285) pero con copy generico 'Sistema Listo / Protocolo de consultoria' (:311, :321)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "8 degradados con mensajes para el visitante (useChatbot.ts:102-144); stream_interrupted y connection_failed sin WhatsApp (:284-291, :470-482)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "pendingSubmit/isStreaming/avatar thinking y reconnecting (useChatbot.ts:490-500, :531-535, :405)"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "requestSchema.ts:45-61 (fuera del lote) valida roles, largos, ventana y sessionId"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "Hook sin layout; el layout vive en ChatWindow.tsx (otro lote)"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Servidor captura (handleChatRequest.ts:1057); el onError del cliente solo setea banner (useChatbot.ts:470-482)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO/FIXME ni datos fijos en useChatbot.ts"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Con el proveedor caido el visitante no recibe derivacion a WhatsApp (useChatbot.ts:475-479)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.vis-widget-develop",
+    "id": "h3.vis-widget-develop.contenido-bot-develop",
+    "nombre": "Contenido del bot publico de develOP (seed y preguntas proactivas)",
+    "descripcion": "Seed idempotente de org, bot y KB de develOP, set de preguntas proactivas por ruta y script que actualiza solo proactivePrompts.",
+    "archivos": [
+     "src/modules/chatbot/prisma/seed.ts",
+     "src/modules/chatbot/prisma/developProactivePrompts.ts",
+     "src/modules/chatbot/prisma/update-proactive-prompts.ts"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "seed.ts:252-369 upsert org (:259-268), bot (:272-338) y KB (:342-365) via unsafeGlobalQuery con razon SEED; prompts fuente unica developProactivePrompts.ts:21-57 escritos por update-proactive-prompts.ts:22-32",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Script de dev con escape SEED explicito (seed.ts:259)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "No es UI"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "catch con console.error y exit (seed.ts:372-375; update-proactive-prompts.ts:48-57)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "No es UI"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Datos constantes"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "No es UI"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Script local"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "WhatsApp de fallback inventado (seed.ts:231), colores por servicio cruzados (:224-226, :51, :57, :62)"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.resumen",
+    "nombre": "Resumen del chatbot del cliente",
+    "descripcion": "Hero y 4 tarjetas (oportunidades, valor estimado, personas atendidas, disponibilidad), leads recientes y derivaciones recientes.",
+    "archivos": [
+     "src/modules/chatbot/lib/business-metrics.ts",
+     "src/modules/chatbot/server/admin/clientHasChatbot.ts",
+     "src/modules/chatbot/server/admin/getClientSession.ts",
+     "src/modules/chatbot/server/admin/multiTenantQueries.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/chatbot/page.tsx",
+     "src/app/(protected)/dashboard/chatbot/layout.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:15-31 -> getUsageByOrgSlug/listLeadsByOrgSlug/listRecentHandoffsByOrgSlug (multiTenantQueries.ts:27-54, :208-258) -> ChatbotOverview.tsx:40-111",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Gate con resolveOrgId (page.tsx:15) y datos con getClientChatbotSession por OrgMember sin orderBy (getClientSession.ts:15-16); lecturas por forOrg"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "generateBusinessSummary con 0 conversaciones y 0 leads (business-metrics.ts:45-50)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "dashboard/chatbot/error.tsx existe pero sin captureException"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "dashboard/chatbot/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Solo lectura"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Grilla grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 en ChatbotOverview.tsx"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captureException en error.tsx del segmento"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "leadValueUSD 50 y latencia por defecto 1500 ms (ChatbotOverview.tsx:43; business-metrics.ts:19-21); 'Oportunidades' = 5 leads recientes (page.tsx:30)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Bot pausado muestra la landing de venta (clientHasChatbot.ts:6; page.tsx:20-22)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.estado-lead",
+    "nombre": "Cambiar estado y notas de un lead",
+    "descripcion": "El dueno mueve el lead entre NEW, CONTACTED, IN_NEGOTIATION, WON y LOST con notas; sella el primer contacto.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/updateLeadStatus.ts",
+     "src/modules/chatbot/server/admin/getClientSession.ts"
+    ],
+    "entradas": [
+     "src/modules/chatbot/server/admin/updateLeadStatus.ts#updateLeadStatus"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "LeadStatusActions.tsx:92 -> updateLeadStatus.ts:17-21 -> getClientSession.ts:6-25 -> forOrg findFirst :27-30 -> update :42-47 -> revalidatePath :78",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "forOrg con la org de getClientChatbotSession (orgMember.findFirst sin orderBy ni impersonacion, getClientSession.ts:15-16)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Accion puntual"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "LeadStatusActions muestra res.error (:99-103); LeadDetail.tsx:184-185 ignora ok:false; mensajes en ingles (updateLeadStatus.ts:19, :33)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "pendingAction / isPending en LeadStatusActions y LeadDetail"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod .parse que lanza (updateLeadStatus.ts:21); leadId sin formato (:12)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Falla de revalidateTag solo a console.error (:90)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "El cliente lo completa solo"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.leads-y-conversaciones",
+    "nombre": "Listas de leads y conversaciones del cliente",
+    "descripcion": "Leads con filtros de estado, rango y DQ (orden por score efectivo en memoria) y conversaciones con conteo de mensajes.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/multiTenantQueries.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/chatbot/leads/page.tsx",
+     "src/app/(protected)/dashboard/chatbot/conversations/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "leads/page.tsx:36,56 -> listLeadsForDashboard multiTenantQueries.ts:75-122; conversations/page.tsx:9-12 -> listConversationsByOrgSlug :174-198",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "forOrg con la org de sesion (multiTenantQueries.ts:101, :178); salvedad de getClientSession sin orderBy"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Render fuera del lote"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "dashboard/chatbot/error.tsx sin captureException"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "leads/loading.tsx y conversations/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Lectura; filtros tipados"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captura en el segmento"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "'Sin nombre' como fallback honesto (multiTenantQueries.ts:118)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "take 200 y 100 sin paginacion (multiTenantQueries.ts:78; conversations/page.tsx:12)"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.analisis-mensual",
+    "nombre": "Analisis mensual del negocio",
+    "descripcion": "Serie de conversaciones por mes, top de categorias de consultas y descubrimientos del mes.",
+    "archivos": [
+     "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
+     "src/modules/chatbot/lib/monthly-analysis.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/dashboard/resultados/analisis/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "analisis/page.tsx:32-33,60 -> getMonthlyAnalysisForOrg.ts:48-106 -> monthly-analysis.ts:63-209",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "resolveOrgId (page.tsx:32) + forOrg (getMonthlyAnalysisForOrg.ts:53); solo conteos de QuotaUsage (:81)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "EMPTY con hasBot false (:37-43, :56) y sufficient con muestra minima 10 (monthly-analysis.ts:125, :156)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "resultados/error.tsx sin captureException"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "resultados/analisis/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Solo lectura"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captura en el segmento"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Datos reales pero la serie salta meses sin fila (monthly-analysis.ts:63-85)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Lectura autoservicio"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.alta-cliente-con-bot",
+    "nombre": "Alta de cliente con bot (wizard)",
+    "descripcion": "Crea org, usuario admin con password temporal, membresia, bot activo y KB; envia email de bienvenida.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/createClientWithBot.ts",
+     "src/modules/chatbot/server/admin/avatarImageUrlSchema.ts",
+     "src/modules/chatbot/server/admin/requireSuperAdmin.ts"
+    ],
+    "entradas": [
+     "src/modules/chatbot/server/admin/createClientWithBot.ts#createClientWithBot"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Step5Review.tsx:71 -> createClientWithBot.ts:96-207 (tx) -> :229-243 email -> :261-273 respuesta",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (:96); crea tenant nuevo"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Errores esperables por throw (:104, :116) que Next redacta en produccion"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "isSubmitting en Step5Review.tsx:61, :67"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod (:22-68) sin tope en KB (:44-50) ni esquema de avatar (:57); email sin normalizar"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captureException; logAdminAction traga errores"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "KB prellenada desde plantillas con {{PLACEHOLDERS}} (Step3KnowledgeBase.tsx:11)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Colision de slug de bot (:162) termina en error generico"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.alta-sin-bot",
+    "nombre": "Alta de cliente sin chatbot",
+    "descripcion": "Crea org, usuario admin con password temporal y membresia; envia email de bienvenida.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/createClientOnly.ts"
+    ],
+    "entradas": [
+     "src/modules/chatbot/server/admin/createClientOnly.ts#createClientOnly"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Step5Review.tsx:87 -> createClientOnly.ts:48-111 -> :132-147 email -> :165-175",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (:48)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "throw en validacion y email duplicado (:55, :66)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "isSubmitting en Step5Review"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod :19-29 con avatarImageUrlSchema (:22); email sin normalizar"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos salvo fallback de loginUrl (:132)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Mensajes de error redactados en produccion"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.crear-bot-org-existente",
+    "nombre": "Crear bot para una org existente",
+    "descripcion": "Crea un bot inactivo con KB y quick replies de la plantilla de la industria.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/createBot.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/chatbots/new/actions.ts#createBotAction"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "new/actions.ts:41-66 -> createBot.ts:41-123 (tx bot + KB :62-105, audit :107-120)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "createBotAction exige SUPER_ADMIN (actions.ts:42-47); forOrg para el bot (createBot.ts:49)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "throw generico 'Organization no encontrada' / 'Cannot find unique bot slug' (createBot.ts:24, :47)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod discriminado en new/actions.ts:15-36"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "KB de plantilla con {{PLACEHOLDERS}} (createBot.ts:58, :93-102)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Hay que reemplazar la KB a mano antes de activar"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.preflight-activacion",
+    "nombre": "Preflight y activacion del bot",
+    "descripcion": "Checks de KB, bienvenida, quick replies, WhatsApp, color y cuota antes de activar.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/preflightChecks.ts"
+    ],
+    "entradas": [
+     "src/modules/chatbot/server/admin/preflightChecks.ts#runPreflightChecks"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "BotDetailClient.tsx:140 -> preflightChecks.ts:13-168 -> ActivationModal.tsx:30",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "no",
+      "evidencia": "Server action sin auth con lectura global por id (preflightChecks.ts:13-25)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Bot no encontrado (:27-34), KB ausente (:74-81)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "toast en BotDetailClient.tsx:143 (con String(error))"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "startToggle en BotDetailClient.tsx:139"
+     },
+     "validacion_servidor": {
+      "cumple": "no",
+      "evidencia": "botId sin schema (:13)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Checks reales"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "No detecta placeholders (:45-48)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.editar-config",
+    "nombre": "Editar configuracion del bot",
+    "descripcion": "Identidad, apariencia, comportamiento, LLM, cuota, quick replies, prompts proactivos, dominios y notificaciones.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/saveBotConfig.ts",
+     "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+     "src/modules/chatbot/server/admin/index.ts"
+    ],
+    "entradas": [
+     "src/modules/chatbot/server/admin/saveBotConfig.ts#saveBotConfig",
+     "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts#saveBotConfigByOrgSlug"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "BotConfigEditor.tsx:80-81 -> saveBotConfig.ts:77-131 -> invalidateBotCache :133 -> audit :135-148",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (:78; ByOrgSlug :71)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "ByOrgSlug devuelve err.message crudo (:139); Zod crudo (:81)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "toast.promise en BotConfigEditor"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod :19-64 (tone/industry libres)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "chatbotLog sin captureException (:156)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Campos sin efecto en runtime (llmModel/temperature/maxOutputTokens/routeColorMap)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "verticalPack no editable"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.editar-kb",
+    "nombre": "Editar base de conocimiento",
+    "descripcion": "7 secciones de KB con validacion de largos y contradicciones en cliente y topes en servidor.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/saveKnowledgeBase.ts",
+     "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts",
+     "src/modules/chatbot/server/admin/validateKB.ts"
+    ],
+    "entradas": [
+     "src/modules/chatbot/server/admin/saveKnowledgeBase.ts#saveKnowledgeBase",
+     "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts#saveKnowledgeBaseByOrgSlug"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "KnowledgeBaseEditor.tsx:112, :132-133 -> saveKnowledgeBase.ts:23-62 -> audit :64-82",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (:24) + forOrg (:44)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Warnings de seccion vacia (validateKB.ts:19-29)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "ByOrgSlug devuelve err.message crudo (saveKnowledgeBaseByOrgSlug.ts:70)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Topes 50k/20k/10k (saveKnowledgeBase.ts:10-19)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "validateKB no detecta placeholders (validateKB.ts:19-29)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.email-prueba",
+    "nombre": "Email de prueba de notificacion de leads",
+    "descripcion": "Envia un email de lead ficticio a una casilla para probar la entrega.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/sendTestNotification.ts"
+    ],
+    "entradas": [
+     "src/modules/chatbot/server/admin/sendTestNotification.ts#sendTestNotification"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "BotConfigEditor.tsx:118 -> sendTestNotification.ts:16-83",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (:17)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Accion puntual"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Mensajes utiles incluido 'Email no configurado' (:76-81)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "toast.promise en BotConfigEditor.tsx:118"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod :11-14 + rate limit :23-31"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Datos de prueba declarados como tales (:50-57)"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Herramienta de admin autosuficiente"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.integracion-crm",
+    "nombre": "Integracion CRM por webhook (n8n)",
+    "descripcion": "Guardar URL y secret cifrado, probar conexion, reintentar sync de un lead e historial paginado.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts",
+     "src/modules/chatbot/server/admin/integrations/testCrmConnection.ts",
+     "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+     "src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts"
+    ],
+    "entradas": [
+     "saveCrmIntegration",
+     "testCrmConnection",
+     "retryCrmSync"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "CrmConfigForm.tsx:48 -> saveCrmIntegration.ts:29-182; :70 -> testCrmConnection.ts:21-118; RetrySyncButton.tsx:19 -> retryCrmSync.ts:23-79; CrmIntegrationAdminCard.tsx:72 -> getCrmSyncHistory.ts:85-127",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin + forOrg en las 4 funciones"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "'Todavia no hay integracion guardada' (testCrmConnection.ts:53-58)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Mensajes utiles (saveCrmIntegration.ts:65-78)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod strict + validateWebhookUrl (saveCrmIntegration.ts:17-25, :60)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Fallo del reintento solo a console.error (retryCrmSync.ts:74)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Payload de prueba declarado (testCrmConnection.ts:60-66)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Reintento detached puede no completarse (retryCrmSync.ts:73)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.listado-bots",
+    "nombre": "Listado de bots y estadisticas globales",
+    "descripcion": "Todos los bots de todas las orgs con conteos y KPIs de 30 dias.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/listAllBots.ts",
+     "src/modules/chatbot/server/admin/getGlobalBotsOverviewStats.ts",
+     "src/modules/chatbot/server/admin/queries.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/chatbots/page.tsx",
+     "src/app/(protected)/admin/chatbots/[botId]/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "admin/chatbots/page.tsx:19 -> listAllBots.ts:4-34 + getGlobalBotsOverviewStats.ts:22-51; detalle [botId]/page.tsx:28-71 -> queries.ts:6-61",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Global explicito PLATFORM-AGG bajo admin; detalle con guard propio ([botId]/page.tsx:28-31, :61)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Render fuera del lote"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "admin/chatbots/error.tsx sin captureException"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "admin/chatbots/loading.tsx y [botId]/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Lectura"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Conteos reales"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-actividad",
+    "id": "h3.adm-actividad.grafico-7-dias",
+    "nombre": "Grafico de actividad de 7 dias",
+    "descripcion": "Conteo diario de ChatbotEvent de los ultimos 7 dias.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/getActivityChartData.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/chatbot/activity/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "activity/page.tsx:12 -> getActivityChartData.ts:3-38",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Agrega todas las orgs en pagina del bot develOP (getActivityChartData.ts:6-19)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "Serie de 7 dias en cero (:21-27)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Solo admin/error.tsx, sin captureException"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "admin/chatbot/activity/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Lectura"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Datos reales"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-health",
+    "id": "h3.adm-health.latencia",
+    "nombre": "Latencia p50/p95 por hora",
+    "descripcion": "Percentiles de duracion de chat.message_completed en 24 h con estados vacio e insuficiente.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/getLatencyHistory.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/chatbot/health/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "health/page.tsx:13 -> getLatencyHistory.ts:63-144",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Global en pagina del bot develOP (:68-84)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "status empty/insufficient (:123-125, :137)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Solo admin/error.tsx sin captura"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "admin/chatbot/health/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Lectura"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "UI fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "'Never fabricates data' cumplido (:58-62)"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-alertas",
+    "id": "h4.adm-alertas.detector-incidencias",
+    "nombre": "Detector de incidencias de bots",
+    "descripcion": "Detecta 9 tipos de incidencia por bot, crea BotAlert deduplicada y notifica por email y Telegram.",
+    "archivos": [
+     "src/modules/chatbot/server/admin/detectBotIssues.ts",
+     "src/modules/chatbot/server/admin/manageAlerts.schemas.ts"
+    ],
+    "entradas": [
+     "GET /api/cron/detect-bot-issues",
+     "POST /api/admin/alerts/trigger-detector"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "Funciona solo a mano: AlertSettingsClient.tsx:89 -> trigger-detector/route.ts:5-16 -> detectBotIssues.ts:285-297; sin scheduler (netlify.toml:25-32) y ciego a errores de stream",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Escrituras forOrg por org del bot (detectBotIssues.ts:43, :245)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Proceso batch"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Sin try por issue (:242-280); rutas devuelven String(error)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Proceso batch"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin input"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "Proceso batch"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Sin captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Senales reales"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "No corre solo (sin disparador programado)"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-239",
+    "clave": "getLatencyHistory: ventana y buckets desalineados",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "getLatencyHistory.ts:66 since = ahora-24h vs buckets desde la hora redondeada de hace 23 h (:35-38); eventos fuera de bucket se descartan (:101-105)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-175",
+    "clave": "Actividad: take 250 fijo",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "admin/chatbot/activity/page.tsx:19 listRecentEvents(..., 250); queries.ts:36-45 sin cursor",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-294",
+    "clave": "handoff.callback no aparece en 'Derivaciones recientes'",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "multiTenantQueries.ts:218 filtra type 'handoff.whatsapp'; el callback existe como 'handoff.callback' (confirmContactRequest.ts:85)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-205",
+    "clave": "B13.3 Pulir copy y contenido del bot demo",
+    "estado_en_codigo": "parcial",
+    "evidencia": "seed.ts sin {{ }} (git grep -nE '\\{\\{' origin/main -- src/modules/chatbot/prisma vacio; control: kb-templates/concesionaria.ts tiene 6 lineas con {{); pero createBot.ts:58 y lib/onboarding/core.ts:65 siguen sembrando KB con placeholders",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-501",
+    "clave": "Sin kill switch: 5xx/red de /chat se muestra como provider_error con WhatsApp",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "useChatbot.ts:81-86 provider_error reemplazado; connection_failed (:284-291) y stream_interrupted (:470-482) sin WhatsApp",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Con Vertex vencido nadie deriva a WhatsApp"
+   },
+   {
+    "id": "PLAN-192",
+    "clave": "B1.5 invalidateBotCache cableado en 8 callers",
+    "estado_en_codigo": "parcial",
+    "evidencia": "10 callers (admin/chatbots/[botId]/actions.ts:69,162; bulk-actions.ts:37,83,199; saveBotConfig.ts:133; saveBotConfigByOrgSlug.ts:119; saveKnowledgeBase.ts:62; saveKnowledgeBaseByOrgSlug.ts:50; updateBotAppearance.ts:109) pero lib/bulk-actions.ts:23 bulkPauseBots hace updateMany sin invalidar, y el cache es un Map por instancia (resolver.ts:11-12)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-493",
+    "clave": "B3.7 'Pensando' en el mismo frame del Enter",
+    "estado_en_codigo": "hecho",
+    "evidencia": "useChatbot.ts:490-500, :531-535, :545",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-398",
+    "clave": "B11.4 5 campos string a enum del modulo chatbot",
+    "estado_en_codigo": "hecho",
+    "evidencia": "prisma/migrations/20260525190000_b11_4a_create_enum_types y 20260525190100_b11_4b_promote_columns_to_enum; schema.prisma:152-184 enums; saveBotConfig.ts:39,44 transform a mayusculas",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-181",
+    "clave": "Panel de configuracion del bot: bugs, UX y emoji picker",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Casing saveBotConfig.ts:39,44,66-75; sendTestNotification.ts:23-31 rate limit y :79 mensaje 'skipped'; TestEndpointModal en BotDetailClient.tsx; EmojiPickerField.tsx",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-182",
+    "clave": "Auditoria de datos Industria/Tono",
+    "estado_en_codigo": "hecho",
+    "evidencia": "IdentityTab.tsx:15-17 tres tonos; INDUSTRIES_LABELS en onboarding/industries.ts; el server sigue aceptando tone e industry como texto libre (saveBotConfig.ts:23-24)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-304",
+    "clave": "Alpha.0.5 fixes post test manual (checkClientHasChatbot)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "clientHasChatbot.ts:4-10 con cache; filtra isActive (:6), lo que causa la landing de venta con bot pausado",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-520",
+    "clave": "INFRA.2 dedup y retry del widget",
+    "estado_en_codigo": "hecho",
+    "evidencia": "dedup.ts:32,53; chatRetryPolicy.ts:24,27; useChatbot.ts:299-413 (Conectando y connection_failed)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-369",
+    "clave": "Lectura comercial de los baselines por Franco",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Tarea humana sin huella en codigo; no verificable por lectura",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-388",
+    "clave": "ChatbotLead.channel reservado sin uso",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Campo channel String? en ChatbotLead (schema); captureLead.ts:381-414 no lo setea (git grep -nE '^\\s+channel:' en captureLead.ts vacio); buildLeadPayload.ts:107 lo reenvia null",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-265",
+    "clave": "Paginacion + materializacion del score efectivo",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "multiTenantQueries.ts:101-114 take 200 y orden por score efectivo en memoria (comentario :103-106)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-272",
+    "clave": "Cron diario para syncs CRM FAILED",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git ls-tree -r --name-only origin/main -- src/app/api/cron sin ruta crm (control: lista detect-bot-issues, generate-insights)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-538",
+    "clave": "THREE.WebGLRenderer Context Lost con varios Canvas",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep forceContextLoss|lose_context|webglcontextlost en src/modules/chatbot y src/components vacio (control: <Canvas en avatar/LegacyNeuroAvatar.tsx)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-173",
+    "clave": "Queries de las vistas admin de actividad y latencia",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "getActivityChartData.ts:15-18 sin take; getLatencyHistory.ts:76-83 take 2000 sin orderBy",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-469",
+    "clave": "Carril de seguridad de Franco (RT-2, RE-13, RE-7, RT-13, A.4)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "RT-2 cerrado: /smoke no existe (src/app/api/chatbot solo chat, config, health); RE-13: health/route.ts sigue; RT-13: sessionId UUID en cliente (useChatbot.ts:29) pero el server acepta cualquier string (requestSchema.ts:55)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-401",
+    "clave": "Rate-limit en endpoints publicos config/health",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep checkRateLimit en config/route.ts y health/route.ts vacio; control chat/route.ts:81",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-414",
+    "clave": "C3.2 sessionId unico compuesto por bot",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "schema.prisma:1375 sessionId @unique global; useChatbot.ts:27 clave global; resolver.ts:132-137 relanza P2002 cross-bot",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-417",
+    "clave": "Correr el juez de evals con ANTHROPIC_API_KEY",
+    "estado_en_codigo": "parcial",
+    "evidencia": "evals/scoring/evaluate.ts:47,66 omite el juez sin key; la corrida no es verificable en codigo",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-424",
+    "clave": "CO-9 unificar el default de modelo",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "'gemini-2.5-flash' literal en 13 sitios no-test: createBot.ts:88, createClientWithBot.ts:185, seed.ts:236, onboarding/core.ts:133, plan/fallback.ts:51, resolveEffectiveModel.ts:21, BotConfigEditor.tsx:43, AdvancedTab.tsx:12, test-prompt/route.ts:50, generateInsights.ts:100, executive-brief.ts:19, sync-plans.ts:73,89,105",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-428",
+    "clave": "getModel real de Anthropic/OpenAI",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "providers/anthropic.ts:18 y openai.ts:12 lanzan ProviderNotImplementedError; resolveEffectiveModel.ts:52-63 degrada a Google",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-435",
+    "clave": "Promesas detached de captureLead",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "captureLead.ts:493 void notifyClient(), :500 void syncLeadToCrm; sin after()/waitUntil en el repo; mismo patron en retryCrmSync.ts:73",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Aceptado sin outbox por PLAN-465"
+   },
+   {
+    "id": "PLAN-453",
+    "clave": "4 bugs menores de MS-E6.2",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "handleChatRequest.ts:447 quota_reserve_ms sin mark(); :787-793 chat.llm_request_start loguea bot.llmProvider/plan.llmModel (par solicitado)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-541",
+    "clave": "Sprint de copy del widget",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "ChatWindow.tsx:311,321 'Sistema Listo / Protocolo de consultoria'; WhatsappHandoffCard.tsx:20 'WhatsApp no configurado.'",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-459",
+    "clave": "Sinks de log con datos crudos",
+    "estado_en_codigo": "parcial",
+    "evidencia": "lib/alerts.ts:145 sigue logueando el Error crudo; chat.bad_request loguea msg (handleChatRequest.ts:139)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-309",
+    "clave": "UTM.1 captura viva de UTM",
+    "estado_en_codigo": "hecho",
+    "evidencia": "useChatbot.ts:37-59, :205-220, :448-451; requestSchema.ts:57,64; resolver.ts:56,60",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-313",
+    "clave": "E2 memoria y refinamiento del historial",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Truncado minimo hecho (historyPolicy.ts:31,61; useChatbot.ts:432-440); memoria entre conversaciones no existe",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-329",
+    "clave": "MH.4 servicio 'Salud del bot'",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -nliE 'salud del bot|getBotHealth|uptime' en src/modules/chatbot y src/lib sin servicio por org (control: checkChatbotHealth en server/health/checkHealth.ts)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-333",
+    "clave": "Unique compuesto (botConfigId, sessionId)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "schema.prisma:1375 sessionId @unique",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-341",
+    "clave": "C0.1 navigate_to_page fuera de PRO/BUSINESS",
+    "estado_en_codigo": "hecho",
+    "evidencia": "getTools.ts:82 TOOLS_RESTRICTED_TO_AGENCY_BOT = ['navigate_to_page']",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-346",
+    "clave": "C1.3 cap duro de turnos",
+    "estado_en_codigo": "hecho",
+    "evidencia": "historyPolicy.ts:61 HARD_CAP_MESSAGES=40; handleChatRequest.ts:547; degradado conversation_limit useChatbot.ts:327-328",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El tope es 40 mensajes (~20 turnos), no 40 turnos"
+   },
+   {
+    "id": "PLAN-351",
+    "clave": "C3.2 sessionId compuesto y key por slug en el widget",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "useChatbot.ts:27 clave 'chatbot:sessionId' sin slug; schema.prisma:1375",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-409",
+    "clave": "Override de descripciones de tools con sesgo automotriz",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "captureLead.ts:73,84 y showWhatsappHandoff.ts:32,76 mencionan test drive; sin override por pack en verticals",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-361",
+    "clave": "Optimizaciones de Vertex se evaluan con N>=3 corridas",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Regla de proceso sin huella en codigo; el tooling existe (scripts/regression/diag-timings.ts)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-317",
+    "clave": "Secuencia de verticales: usados, salud, inmobiliarias",
+    "estado_en_codigo": "parcial",
+    "evidencia": "verticals/packs/ tiene agencia.ts, base.ts y usados.ts; faltan salud e inmobiliarias",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-321",
+    "clave": "Fuente de inventario previa a Sanity",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -nliE 'inventory|inventario|catalogo' en server de chatbot y motor: solo comentarios de 'catalogo de tools'",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-325",
+    "clave": "Carril de seguridad aparte (Opus)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "/smoke eliminado; /api/chatbot/[slug]/health/route.ts sigue",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-337",
+    "clave": "D-C1 orden de C2",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Deteccion de consultas sin responder via insights KB_GAP (monthly-analysis.ts:178); catalogo y memoria no",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-404",
+    "clave": "Compuerta: EV.5 tras revision de transcripts por Franco",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "EV.5 esta en codigo (api/dashboard/chatbot/leads/export/route.ts:143-162; verticals/__tests__/ev5.superset.invariant.ts) sin huella de la compuerta",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-433",
+    "clave": "Cupo y costo de turnos abandonados o abortados",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Compensacion del cupo si no hubo primer chunk (handleChatRequest.ts:1070-1080, :1119); con entrega parcial se cobra; decision comercial pendiente",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-465",
+    "clave": "Aceptar trabajo detached sin outbox por ahora",
+    "estado_en_codigo": "hecho",
+    "evidencia": "captureLead.ts:493,500 y retryCrmSync.ts:73 siguen detached",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-393",
+    "clave": "MS-4 bateria usable: smoke set + retry de 'terminated'",
+    "estado_en_codigo": "hecho",
+    "evidencia": "scripts/regression/cases.ts:78,116 smoke:true y :295 long-session-soft-cap; run-baseline.ts:27; diag-timings.ts",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-477",
+    "clave": "Q1.2 evaluacion de la bateria",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/modules/chatbot/evals/scoring/ (evaluate.ts, hard-asserts.ts, judge.ts, rubric.ts)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-291",
+    "clave": "P1-fix2 hovers del detalle de lead",
+    "estado_en_codigo": "hecho",
+    "evidencia": "LeadDetail.tsx usa adminHoverCls 9 veces (git grep -c)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-438",
+    "clave": "WATCHDOG-2 dos ventanas + suspension durante tools",
+    "estado_en_codigo": "hecho",
+    "evidencia": "handleChatRequest.ts:852, :964-970",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-443",
+    "clave": "WATCHDOG-4 ventana decidida por contenido",
+    "estado_en_codigo": "hecho",
+    "evidencia": "handleChatRequest.ts:1027 watchdogRef.current?.markContent()",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-531",
+    "clave": "B0.8 anclas rotas del chatbot y del menu mobile",
+    "estado_en_codigo": "hecho",
+    "evidencia": "navigateToPage.ts:31-32 '/#portfolio' y '/process-automation#calculadora'",
+    "sigue_teniendo_sentido": "si"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D5-A1] onFinish: RB.3 lo quiere en $transaction; C3.4 quiere paralelizar los 3 writes",
+    "resultado": "descartada",
+    "evidencia": "persistTurn.ts:412 scope.$transaction envuelve chatMessage.create (:434), conversation.update (:446) e incrementQuota(..., tx) (:460): RB.3 esta hecho. Si uno falla, rollback completo y reintento acotado (PERSIST_TX_MAX_ATTEMPTS, gate :476-500); agotado, se loguea chat.persist_error (:613) y se pierde el registro del turno (decision documentada :400-404). C3.4 no se aplico y es incompatible con una tx interactiva."
+   },
+   {
+    "alerta": "[D5-A2] /smoke: GET publico sin auth ni rate limit que quema tokens (RT-2)",
+    "resultado": "descartada",
+    "evidencia": "git ls-tree -r --name-only origin/main -- src/app/api/chatbot lista solo [slug]/chat, [slug]/config y [slug]/health; git grep -n smoke origin/main -- src/app/api vacio (control: el mismo listado muestra chat/route.ts)."
+   },
+   {
+    "alerta": "[D5-A3] El transform propio no puede colgar el stream ni pasar el maxDuration de 30 s",
+    "resultado": "parcial",
+    "evidencia": "route.ts:8 maxDuration 30; watchdog con ventanas y suspension por tools (handleChatRequest.ts:852, :964-970, :1027); hooks de onError con presupuesto (:1066-1080); reconcile.ts:109-112 espeja el maxDuration. No trace el transform completo (fuera del lote). Del lado del cliente no hay timeout por intento (useChatbot.ts:305): si la plataforma corta a los 30 s con 5xx, el widget hace 3 intentos (chatRetryPolicy.ts:24,27) -> peor caso 3x30 + 2 + 4 = 96 s de 'Conectando'."
+   },
+   {
+    "alerta": "[D5-A4] Key de Vertex expuesta en logs, pendiente de rotacion; credencial vencida como control positivo de E10",
+    "resultado": "parcial",
+    "evidencia": "Sin secret en el repo: vertex-credentials.json en .gitignore:55 y nunca commiteado (git log --all vacio; control: scripts/encode-vertex-creds.js en ls-tree). Vector plausible: encode-vertex-creds.js:10 imprime la credencial completa. E10: el error de Vertex ocurre dentro del stream y solo va a stderr/Sentry (handleChatRequest.ts:1052-1060), el detector cuenta chatbot_events (detectBotIssues.ts:85-98) y no tiene scheduler (netlify.toml:25-32): el sistema no se entera; el visitante ve 'Se corto la respuesta.' sin WhatsApp (useChatbot.ts:470-482).",
+    "hallazgo_titulo": "El detector no puede ver la caida del proveedor LLM (credencial de Vertex vencida)"
+   },
+   {
+    "alerta": "[D5-A5] 'Protocolo de consultoria': B13.5 dice que el literal no existia; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+    "resultado": "confirmada",
+    "evidencia": "ChatWindow.tsx:311 'Sistema Listo' y :321 'Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?' en el empty state (:285). B13.5 se equivoco.",
+    "hallazgo_titulo": "Empty state del widget con copy tecnico en usted igual para todos los tenants y 'WhatsApp no configurado.' al visitante"
+   },
+   {
+    "alerta": "[D5-A6] EV.5 cerrado con smokes sin correr; backfill de verticalPack cambia de bot segun la fuente",
+    "resultado": "parcial",
+    "evidencia": "EV.5 esta en codigo (api/dashboard/chatbot/leads/export/route.ts:143-162). El backfill no es verificable por codigo: no hay migracion de datos ni escritor de verticalPack fuera de evals (seed-eval-bots.ts:180,198); ev5-smoke.mjs:212 pide un UPDATE manual sobre 'develop' y ev4-smoke.mjs:15-16 espera develop=agencia y sanmiguel=usados.",
+    "hallazgo_titulo": "verticalPack no se puede asignar desde la app: solo por SQL manual"
+   },
+   {
+    "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+    "resultado": "descartada",
+    "evidencia": "git grep -niE gdpr origin/main -- . ':!docs' vacio (control: git grep -c PRIVACIDAD en saveBotConfig.ts = 1). La IP se guarda hasheada (chat/route.ts:79 hashIp; Conversation.ipHash)."
+   },
+   {
+    "alerta": "[D5-A8] getLatencyHistory asignado al panel (DERIVACION) y al runtime (MH.1)",
+    "resultado": "parcial",
+    "evidencia": "En codigo solo lo consume el admin (admin/chatbot/health/page.tsx:13) y su tipo buildHealthVerdict.ts:2. Ninguno de los dos duenos lo corrigio: take 2000 sin orderBy (getLatencyHistory.ts:82) y ventana/buckets desalineados (:35-38 vs :66).",
+    "hallazgo_titulo": "Paneles admin de actividad y latencia: datos de todas las orgs, muestra truncada sin orden, ventana corrida y fechas sin zona"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveClientSettings.ts",
+    "senales": [
+     "Unico importador: components/dashboard/ClientSettingsForm.tsx:5",
+     "git grep -n '<ClientSettingsForm' origin/main -- src vacio (control: '<ChatbotOverview' en dashboard/chatbot/page.tsx:46)",
+     "Acepta isActive (:21) y no lo pasa a updateBotAppearance (:40-47): toggle falso",
+     "Re-export en modules/chatbot/index.ts:89 y components/dashboard/index.ts:3"
+    ],
+    "que_rompe": "Nada en runtime; borrar tambien ClientSettingsForm.tsx y los dos re-exports"
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts",
+    "senales": [
+     "getLeadSyncHistory (:59-76) sin llamadores: git grep -n getLeadSyncHistory origin/main -- src solo la definicion",
+     "Control: getOrgSyncHistory se usa en CrmIntegrationAdminCard.tsx:72"
+    ],
+    "que_rompe": "Nada; borrar solo getLeadSyncHistory"
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/preflightChecks.ts",
+    "senales": [
+     "canActivate (:170-172) exportada en modulo 'use server' sin importadores (git grep 'canActivate(' fuera del archivo vacio)",
+     "ActivationModal.tsx:30 calcula su propia variable canActivate"
+    ],
+    "que_rompe": "Nada; reduce la superficie de server actions"
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+    "senales": [
+     "slugify local (:70-78) duplica @/lib/slugify que usa createClientOnly.ts:12",
+     "findUniqueSlug duplicado en createClientOnly.ts:31-45 y lib/onboarding/core.ts"
+    ],
+    "que_rompe": "Podria cambiar los slugs generados si @/lib/slugify difiere; verificar con los mismos casos antes de unificar"
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "E10: widget con la credencial de Vertex vencida",
+    "entorno": "Produccion (sitio publico de develOP) o deploy preview con la misma credencial",
+    "precondiciones": "Bot develop activo; ventana privada sin sesion",
+    "pasos": [
+     "Abrir el sitio y el chat del bot",
+     "Escribir 'hola, quiero una web' y enviar",
+     "Esperar 30 s y anotar exactamente que muestra el panel",
+     "Reenviar el mismo mensaje una vez"
+    ],
+    "esperado": "Segun el codigo: banner 'Se cortó la respuesta.' con el input habilitado y sin tarjeta de WhatsApp; no aparece 'Conectando…' porque el error llega dentro de un 200",
+    "senal_falla": "Si aparece la tarjeta de WhatsApp, una respuesta del bot o 'No pudimos conectar', la hipotesis de los hallazgos del detector y del widget cambia",
+    "escribe_db_o_email": true,
+    "hallazgos": "Con el proveedor caido el widget no ofrece WhatsApp; El detector no puede ver la caida del proveedor LLM"
+   },
+   {
+    "titulo": "El detector frente a la falla real del proveedor",
+    "entorno": "Produccion, logueado como SUPER_ADMIN",
+    "precondiciones": "Caso E10 repetido 3 veces en la misma hora",
+    "pasos": [
+     "Ir a /admin/settings/alerts y disparar el detector con el boton",
+     "Ir a /admin/alerts y filtrar por el bot develop"
+    ],
+    "esperado": "Ninguna alerta LLM_PROVIDER_ERROR ni ACTIVITY_ERRORS_SPIKE para el bot",
+    "senal_falla": "Si aparece LLM_PROVIDER_ERROR, existe otra via que escribe chatbot_events con level ERROR y el hallazgo se descarta",
+    "escribe_db_o_email": true,
+    "hallazgos": "El detector no puede ver la caida del proveedor LLM"
+   },
+   {
+    "titulo": "Scheduler del detector de incidencias",
+    "entorno": "Panel de Netlify del sitio y cualquier servicio de cron externo",
+    "precondiciones": "Acceso al panel de Netlify",
+    "pasos": [
+     "Site configuration -> Functions: listar las funciones con schedule",
+     "Buscar en los logs de funciones de los ultimos 7 dias invocaciones a /api/cron/detect-bot-issues",
+     "Revisar si hay un cron externo (cron-job.org u otro) apuntando a esa ruta"
+    ],
+    "esperado": "Solo generate-insights-cron, send-weekly-reports-cron y cleanup-old-events-cron; ninguna invocacion periodica de detect-bot-issues",
+    "senal_falla": "Invocaciones periodicas de detect-bot-issues: el hallazgo del disparador se descarta",
+    "escribe_db_o_email": false,
+    "hallazgos": "El detector de incidencias de bots no tiene disparador programado"
+   },
+   {
+    "titulo": "Dos bots en el mismo origen y la misma pestana",
+    "entorno": "Deploy con dos bots activos (develop y otro, por ejemplo sanmiguel)",
+    "precondiciones": "Conocer el slug del segundo bot",
+    "pasos": [
+     "En una pestana abrir https://<sitio>/ y mandar un mensaje al bot de develOP",
+     "Sin cerrar la pestana, navegar a https://<sitio>/embed/<slug del otro bot>",
+     "Mandar un mensaje en ese embed"
+    ],
+    "esperado": "'Conectando…' y despues 'No pudimos conectar. Probá de nuevo en un momento.'; en logs, P2002 en conversation.create",
+    "senal_falla": "El segundo bot responde normal: la colision no ocurre en ese escenario",
+    "escribe_db_o_email": true,
+    "hallazgos": "Clave de sesion del widget global por origen"
+   },
+   {
+    "titulo": "Alta de cliente con email ya registrado (build de produccion)",
+    "entorno": "Produccion o next start de un build de produccion (en dev el mensaje si pasa)",
+    "precondiciones": "SUPER_ADMIN; un email de usuario existente",
+    "pasos": [
+     "Abrir el wizard de nuevo cliente",
+     "Completar con el email existente y llegar al paso de revision",
+     "Apretar Crear"
+    ],
+    "esperado": "El hallazgo predice un mensaje generico en ingles de Next en vez de 'El email ingresado ya está registrado en el sistema.'",
+    "senal_falla": "Si se ve el mensaje en espanol, el hallazgo se descarta",
+    "escribe_db_o_email": false,
+    "hallazgos": "Errores del alta de cliente lanzados con throw"
+   },
+   {
+    "titulo": "Cliente con bot pausado abre Mi Chatbot",
+    "entorno": "Staging o produccion con un cliente de prueba",
+    "precondiciones": "Cliente de prueba con bot activo y credenciales",
+    "pasos": [
+     "Como SUPER_ADMIN pausar el bot del cliente en /admin/chatbots/<botId>",
+     "Loguearse como el cliente y abrir /dashboard/chatbot",
+     "Reactivar el bot al terminar"
+    ],
+    "esperado": "Header 'Pausado · no responde hasta que lo reactives' y debajo la landing de venta del chatbot",
+    "senal_falla": "Se ve el resumen con el estado pausado: el hallazgo se descarta",
+    "escribe_db_o_email": true,
+    "hallazgos": "Bot pausado: la pestana Mi Chatbot del cliente muestra la landing de venta"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "No hay scheduler para /api/cron/detect-bot-issues en el repo",
+    "comando": "git grep -n detect-bot-issues origin/main -- netlify.toml vercel.json netlify .github",
+    "control_positivo": "git grep -n cleanup-old-events origin/main -- netlify.toml -> netlify.toml:31"
+   },
+   {
+    "afirmacion": "Ni la activacion ni la validacion de KB detectan {{PLACEHOLDERS}}",
+    "comando": "git grep -nE \"placeholder|\\{\\{\" origin/main -- src/modules/chatbot/server src/modules/chatbot/components/admin/activation src/modules/chatbot/components/admin/kb src/modules/chatbot/components/admin/KnowledgeBaseEditor.tsx (solo atributos placeholder= y objetos de estilo JSX)",
+    "control_positivo": "git grep -c \"{{\" origin/main -- src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts -> 6"
+   },
+   {
+    "afirmacion": "Ningun componente del widget lee routeColorMap",
+    "comando": "git grep -nE \"config\\.routeColorMap|\\.routeColorMap\\b|routeColorMap\\[\" origin/main -- src/modules/chatbot/components src/components | grep -v /admin/",
+    "control_positivo": "git grep -c routeColorMap origin/main -- src/modules/chatbot/server/config/getPublicConfig.ts -> 2"
+   },
+   {
+    "afirmacion": "No hay escritor de verticalPack en la app fuera de evals",
+    "comando": "git grep -nE verticalPack origin/main -- src | grep -vE \"__tests__|\\.invariant\\.\"",
+    "control_positivo": "Lectura en handleChatRequest.ts:625 y escritura en evals/seed-eval-bots.ts:180"
+   },
+   {
+    "afirmacion": "El onError del stream no escribe chatbot_events",
+    "comando": "git grep -n -A25 \"export function logPersistFailure\" origin/main -- src/modules/chatbot/server (solo console.error)",
+    "control_positivo": "logChatbotEvent con type 'chat.unhandled_error' en handleChatRequest.ts:1381"
+   },
+   {
+    "afirmacion": "No se usa after() ni waitUntil en el repo",
+    "comando": "git grep -nE \"import \\{ after|waitUntil\" origin/main -- src",
+    "control_positivo": "git grep -n \"void syncLeadToCrm\" origin/main -- src -> captureLead.ts:500 y retryCrmSync.ts:73"
+   },
+   {
+    "afirmacion": "Los error.tsx del chatbot, resultados y admin no capturan en Sentry",
+    "comando": "git grep -ln captureException origin/main -- \"src/app/**/error.tsx\"",
+    "control_positivo": "Devuelve setter/error.tsx y sus hijos; global-error.tsx tambien captura"
+   },
+   {
+    "afirmacion": "La ruta /smoke del chatbot ya no existe",
+    "comando": "git ls-tree -r --name-only origin/main -- src/app/api/chatbot ; git grep -n smoke origin/main -- src/app/api",
+    "control_positivo": "El listado incluye src/app/api/chatbot/[slug]/chat/route.ts"
+   },
+   {
+    "afirmacion": "No existe la docstring 'GDPR-friendly'",
+    "comando": "git grep -niE gdpr origin/main -- . \":!docs\"",
+    "control_positivo": "git grep -c PRIVACIDAD origin/main -- src/modules/chatbot/server/admin/saveBotConfig.ts -> 1"
+   },
+   {
+    "afirmacion": "vertex-credentials.json nunca fue commiteado",
+    "comando": "git log --all --oneline -- logic-core-v3/vertex-credentials.json vertex-credentials.json",
+    "control_positivo": "git ls-tree -r --name-only origin/main | grep encode-vertex-creds -> logic-core-v3/scripts/encode-vertex-creds.js"
+   },
+   {
+    "afirmacion": "OrgRole nunca se usa para autorizar",
+    "comando": "git grep -nE \"'VIEWER'|OrgRole\\.VIEWER|orgRole\" origin/main -- src (solo auth.ts, auth.config.ts, api/qa/login y types)",
+    "control_positivo": "auth.ts:46 asigna orgRole desde la membresia"
+   },
+   {
+    "afirmacion": "Las rutas publicas config y health del chatbot no tienen rate limit",
+    "comando": "git grep -nE \"checkRateLimit|rateLimit\" origin/main -- \"src/app/api/chatbot/[slug]/config/route.ts\" \"src/app/api/chatbot/[slug]/health/route.ts\"",
+    "control_positivo": "chat/route.ts:81 checkRateLimit"
+   },
+   {
+    "afirmacion": "No hay cron para reintentar syncs CRM fallidos",
+    "comando": "git ls-tree -r --name-only origin/main -- src/app/api/cron ; git grep -niE crm origin/main -- netlify.toml vercel.json src/app/api/cron",
+    "control_positivo": "El listado muestra detect-bot-issues/route.ts y generate-insights/route.ts"
+   },
+   {
+    "afirmacion": "ChatbotLead.channel no se escribe al capturar un lead",
+    "comando": "git grep -nE \"^\\s+channel:\" origin/main -- src/modules/chatbot/server/tools/captureLead.ts",
+    "control_positivo": "captureLead.ts:381 tx.chatbotLead.create"
+   },
+   {
+    "afirmacion": "ClientSettingsForm no se renderiza en ninguna pagina",
+    "comando": "git grep -n \"<ClientSettingsForm\" origin/main -- src",
+    "control_positivo": "git grep -n \"<ChatbotOverview\" origin/main -- src -> dashboard/chatbot/page.tsx:46"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Campos de configuracion que se persisten y que el runtime ignora (controles falsos)",
+    "como_buscarlo": "Por cada campo de los schemas Zod de save*Config, git grep -nE \"bot\\.<campo>|resolvedBot\\.<campo>|config\\.<campo>\" origin/main -- src/modules/*/server src/modules/*/components; un campo sin lector en runtime es control falso",
+    "donde_aparecio": "saveBotConfig.ts:45-47 (llmModel, temperature, maxOutputTokens), getPublicConfig.ts:121 (routeColorMap), saveClientSettings.ts:21 (isActive)"
+   },
+   {
+    "patron": "Metricas con valores por defecto inventados en vistas del cliente",
+    "como_buscarlo": "git grep -nE \"\\?\\? 0\\.9[0-9]|\\?\\? [0-9]{3,}|ValueUSD: [0-9]+|successRate: 0\\.\" origin/main -- src/modules src/app/(protected)/dashboard src/lib/dashboard",
+    "donde_aparecio": "business-metrics.ts:19-21, ChatbotOverview.tsx:42-44"
+   },
+   {
+    "patron": "Fallas que solo van a stderr/Sentry mientras los detectores y paneles cuentan filas en la base",
+    "como_buscarlo": "git grep -n \"logPersistFailure(\" origin/main -- src y contrastar con lo que cuentan detectBotIssues.ts y los paneles de salud; repetir en src/modules/motor",
+    "donde_aparecio": "handleChatRequest.ts:1052 vs detectBotIssues.ts:85-98"
+   },
+   {
+    "patron": "Rutas /api/cron/* sin disparador en netlify.toml",
+    "como_buscarlo": "git ls-tree -r --name-only origin/main -- src/app/api/cron y comparar con [functions.*] schedule de netlify.toml y netlify/functions/*",
+    "donde_aparecio": "detect-bot-issues (y alerts, os-follow-up, regenerate-briefs, send-executive-reports solo en vercel.json)"
+   },
+   {
+    "patron": "Cache en memoria por instancia invalidada solo en la instancia que escribe, y escritores que no invalidan",
+    "como_buscarlo": "git grep -nE \"new Map<.*expiresAt\" origin/main -- src; luego todos los escritores del modelo cacheado (botConfig.update|updateMany)",
+    "donde_aparecio": "resolver.ts:11-12, :47; lib/bulk-actions.ts:23 sin invalidateBotCache"
+   },
+   {
+    "patron": "Errores esperables lanzados con throw dentro de server actions (Next los redacta en produccion) y mostrados con err.message",
+    "como_buscarlo": "git grep -nE \"throw new Error\\('[A-ZÁÉÍÓÚ][a-záéíóú]\" origin/main -- src en archivos 'use server' + git grep -n \"err instanceof Error ? err.message\" en componentes cliente",
+    "donde_aparecio": "createClientWithBot.ts:104,116; createClientOnly.ts:55,66; Step5Review.tsx:111"
+   },
+   {
+    "patron": "Resultado de server action ignorado en el cliente (exito falso)",
+    "como_buscarlo": "git grep -nE \"^\\s+await [a-zA-Z]+\\(\\{.*\\}\\)$\" origin/main -- \"src/**/components/**\" \"src/app/**/_components/**\" y revisar si la action devuelve {ok:false}",
+    "donde_aparecio": "LeadDetail.tsx:184-185"
+   },
+   {
+    "patron": "Plantillas con {{PLACEHOLDERS}} que llegan a datos productivos sin validacion",
+    "como_buscarlo": "git grep -n \"getTemplate(\" origin/main -- src y seguir cada consumidor hasta el create",
+    "donde_aparecio": "createBot.ts:58, lib/onboarding/core.ts:65 (bot activo), Step3KnowledgeBase.tsx:11"
+   },
+   {
+    "patron": "Claves de sessionStorage/localStorage globales en widgets multi-tenant",
+    "como_buscarlo": "git grep -nE \"sessionStorage|localStorage\" origin/main -- src/modules/chatbot src/modules/motor",
+    "donde_aparecio": "useChatbot.ts:27 ('chatbot:sessionId'), :37 ('chatbot:firstTouch'), useChatbotSounds.ts:5"
+   },
+   {
+    "patron": "Slugs derivados verificados contra una tabla y usados en otra con @unique propio",
+    "como_buscarlo": "git grep -n \"slug: uniqueSlug\" origin/main -- src y verificar contra que tabla se calculo uniqueSlug",
+    "donde_aparecio": "createClientWithBot.ts:162, lib/onboarding/core.ts:111"
+   },
+   {
+    "patron": "Dos implementaciones de sendTransactionalEmail (Brevo)",
+    "como_buscarlo": "git grep -n \"export async function sendTransactionalEmail\" origin/main -- src",
+    "donde_aparecio": "lib/email/brevo-service.ts:17 y lib/integrations/brevo.ts:105 (detectBotIssues.ts:3 usa la segunda, createClient*.ts la primera)"
+   },
+   {
+    "patron": "Fallback de URL base vacio o localhost en links de emails y notificaciones (suma ocurrencias al patron D1-c3)",
+    "como_buscarlo": "git grep -nE \"NEXT_PUBLIC_APP_URL \\?\\? ('|\\\")\" origin/main -- src",
+    "donde_aparecio": "detectBotIssues.ts:273,303 (localhost), sendTestNotification.ts:58 ('')"
+   },
+   {
+    "patron": "Scripts de desarrollo que imprimen secretos por stdout",
+    "como_buscarlo": "git grep -nE \"console\\.log\\(.*(JSON\\.stringify\\(parsed\\)|process\\.env\\.[A-Z_]*(KEY|SECRET|TOKEN|CREDENTIALS))\" origin/main -- scripts",
+    "donde_aparecio": "scripts/encode-vertex-creds.js:10"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/audit-repo-20260707.md",
+    "id_previo": "PA-1",
+    "estado": "abierto",
+    "evidencia": "preflightChecks.ts:1 'use server' y :13-25 sin auth; llamada desde client component BotDetailClient.tsx:1, :140"
+   },
+   {
+    "doc": "docs/audit-chatbot-runtime.md",
+    "id_previo": "C-1",
+    "estado": "cerrado",
+    "evidencia": "Ventana de 30 mensajes en el widget (useChatbot.ts:432-440; historyPolicy.ts:31) y en el schema (requestSchema.ts:53-54); tope duro 40 mensajes con degradado conversation_limit (historyPolicy.ts:61; handleChatRequest.ts:547; useChatbot.ts:327-328)"
+   },
+   {
+    "doc": "docs/audit-chatbot-runtime.md",
+    "id_previo": "C-4",
+    "estado": "cerrado",
+    "evidencia": "getTools.ts:82 restringe navigate_to_page al bot de la agencia; VALID_PATHS sigue hardcodeado (navigateToPage.ts:25-33) hasta allowedNavigationPaths"
+   },
+   {
+    "doc": "docs/audit-chatbot-runtime.md",
+    "id_previo": "P-2",
+    "estado": "parcial",
+    "evidencia": "Ventana de 30 mensajes (useChatbot.ts:432-440; requestSchema.ts:54); el historial sigue siendo del cliente: los mensajes 'assistant' van al modelo sin envolver (handleChatRequest.ts:946-947)"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-profunda.md",
+    "id_previo": "P0-6",
+    "estado": "parcial",
+    "evidencia": "Detalle del bot con guard y callerCanAccessOrg (admin/chatbots/[botId]/page.tsx:28-31, :61); queries.ts todo forOrg; listAllBots global explicito (listAllBots.ts:5-6); preflightChecks.ts:18-25 sigue global y sin guard"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md",
+    "id_previo": "DB-P1-7",
+    "estado": "cerrado",
+    "evidencia": "schema.prisma:1413 @@index([botConfigId, lastMessageAt(sort: Desc)])"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-db.md",
+    "id_previo": "DB-P1-8",
+    "estado": "cerrado",
+    "evidencia": "schema.prisma:1617 @@index([botConfigId, type, createdAt(sort: Desc)])"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+    "id_previo": "P0-6",
+    "estado": "parcial",
+    "evidencia": "Igual que P0-6 de 2026-05: page de detalle protegida; preflightChecks.ts:13-25 sigue sin scoping ni guard"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+    "id_previo": "SEC-02",
+    "estado": "abierto",
+    "evidencia": "preflightChecks.ts:13-19 sin guard; :55-60 y :117-123 siguen devolviendo datos del bot"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md",
+    "id_previo": "RESIL-01",
+    "estado": "parcial",
+    "evidencia": "Servidor con watchdog y presupuestos (handleChatRequest.ts:964-970, :1027, :1066-1080) y maxDuration 30 (route.ts:8); el cliente sigue con 3 intentos sin timeout por intento (useChatbot.ts:299-413; chatRetryPolicy.ts:24,27)"
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md",
+    "id_previo": "CLEAN-R2",
+    "estado": "abierto",
+    "evidencia": "getActivityChartData.ts:25,:30 y getLatencyHistory.ts:25-30 formatean sin timeZone"
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md",
+    "id_previo": "CLEAN-R5",
+    "estado": "parcial",
+    "evidencia": "La divergencia de whatsappNumber ya no existe (saveBotConfig.ts:41 y saveBotConfigByOrgSlug.ts:38 ambos .max(30)); el schema sigue duplicado linea por linea y divergio el manejo de errores (saveBotConfigByOrgSlug.ts:139 crudo vs saveBotConfig.ts:155 sanitizado)"
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "runPreflightChecks: server action sin autenticacion que lee cualquier bot por id",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Se confirma el defecto: preflightChecks.ts:1 es 'use server', exporta runPreflightChecks (:13) sin auth()/requireSuperAdmin y lee el bot por PK con unsafeGlobalQuery (:18-25). BotDetailClient.tsx:16 y :140 la importan y la llaman desde un client component, así que es un endpoint de server action. Su vecina toggleBotActiveAction sí exige SUPER_ADMIN (actions.ts:29-32). Esto incumple la regla del repo de verificar sesión y rol en cada Server Action, y requireSuperAdmin.ts existe en la misma carpeta. Lo que NO se sostiene es la explotación por un anónimo o un cliente. Next 16.2.9 instalado solo ejecuta una action en las páginas cuyo bundle la incluye, y esta solo la incluye app/(protected)/admin/chatbots/[botId]/page. Un POST directo a /admin/* pasa por src/proxy.ts (matcher '/admin/:path*', :172): al anónimo lo redirige a /login (:104-108) y a cualquier rol que no sea SUPER_ADMIN lo saca de /admin (:117-121 y :148-152). Un POST con Next-Action a otra ruta (p. ej. '/') no ejecuta la action ahí: node_modules/next/dist/server/app-render/action-handler.js:453-466 la reenvía por fetch HTTP a la ruta de la página que la tiene (manifests-singleton.js:200-214), con las mismas cookies y redirect:'manual' (:171-180). Ese fetch vuelve a cruzar el proxy, recibe un redirect sin contenido RSC y la action no corre. Hoy solo un SUPER_ADMIN alcanza la action, y ese rol ya está autorizado. Queda un defecto de defensa en profundidad: se explota solo si el proxy se saltea (o si se cambia el matcher, o si otra página fuera de /admin importa la action), y los datos expuestos son de baja sensibilidad. Por la rúbrica es MEDIA: control faltante sin explotación directa.",
+    "evidencia_contra": [
+     "src/proxy.ts:104-108 redirige al anónimo en /admin/*, y :148-152 y :117-121 sacan de /admin a todo rol distinto de SUPER_ADMIN; el matcher en :172 cubre '/admin/:path*'",
+     "node_modules/next/dist/server/app-render/action-handler.js:453-466 y :127-180: una action pedida desde otra ruta se reenvía por HTTP con redirect:'manual' a la página que la contiene, y el proxy vuelve a filtrar ese reenvío",
+     "node_modules/next/dist/server/app-render/manifests-singleton.js:150-214: el mapa de módulos resuelve la action solo para la página que la incluye",
+     "git grep: el único importador del valor es BotDetailClient.tsx:16, que vive bajo /admin; ActivationModal.tsx:7 importa solo el tipo",
+     "Datos de baja sensibilidad: WhatsApp del bot (público en el widget), color, cuota y qué secciones de la KB faltan"
+    ]
+   },
+   {
+    "titulo": "El detector de incidencias de bots no tiene disparador programado",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "Confirmado por lectura. netlify.toml:25-32 agenda solo generate-insights-cron, send-weekly-reports-cron y cleanup-old-events-cron, y logic-core-v3/netlify/functions/ contiene solo esos 3 archivos. vercel.json:2-15 agenda os-follow-up, regenerate-briefs y send-executive-reports, que no corren en un deploy de Netlify. En .github/workflows solo están ci.yml y db-backup.yml, y ninguno toca el detector. git grep de 'runAlertDetector|detect-bot-issues' fuera de docs y tests devuelve solo dos llamadores: la ruta de cron (route.ts:13), que nada agenda, y el botón manual /api/admin/alerts/trigger-detector (route.ts:12), que dispara AlertSettingsClient.tsx:89. detectBotIssues.ts define 9 tipos de alerta (:55, :72, :104, :136, :154, :172, :189, :208, :227), así que la cuenta de 9 del hallazgo es correcta. Los docs prometen que corre cada 15 minutos (docs/operations/alerts-types.md:5, cron-jobs.md:4-6). La rúbrica pone el 'cron sin disparador' de integración crítica como ALTA. Queda PROBABLE porque un cron externo fuera del repo no se puede descartar, y los propios docs lo sugieren.",
+    "evidencia_contra": [
+     "docs/operations/cron-jobs.md:10-27 y alerts-types.md:41-44 instruyen configurar una Netlify Scheduled Function o un cron externo (cron-job.org, EasyCron) cada 15 min: puede existir un disparador fuera del repo",
+     "Existe un disparo manual autenticado (/api/admin/alerts/trigger-detector), así que la funcionalidad no está muerta, solo depende de una persona"
+    ]
+   },
+   {
+    "titulo": "El resumen 'Mi Chatbot' del cliente muestra metricas inventadas o truncadas",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Confirmado por lectura. La cadena de render es: dashboard/chatbot/page.tsx:28-32 llama listLeadsByOrgSlug(orgSlug, 5) y pasa recentLeads a ChatbotOverview (:46-51). ChatbotOverview.tsx:40-45 llama toBusinessMetrics con capturedLeads = recentLeads.length (tope 5), leadValueUSD fijo en 50 y sin avgLatencyMs. Por eso business-metrics.ts:21 siempre da 1,5 s ('Responde en ~1.5s', :110) y :19 calcula el valor como leads x 50. Las tarjetas dicen 'Oportunidades… este mes' y 'Personas listas para comprar' (:71-80) y 'Valor estimado… este mes' (:85-94), pero multiTenantQueries.ts:33-36 trae los 5 leads más recientes de toda la historia, sin filtro de mes y sin excludeDqWhere. Ese filtro está importado en :4 pero solo se usa en listLeadsForDashboard (:87), así que los descartados (DQ) también cuentan. Las tarjetas '24/7' (:108-109) y 'está atendiendo consultas las 24 horas' (:63) no dependen del estado del proveedor, y la credencial de Vertex está vencida. La calibración es coherente con BUG-039 de D2 (tendencias inventadas en Tráfico/SEO, ALTA): dato inventado presentado como medición en la pantalla principal del producto, que bloquea L3.",
+    "evidencia_contra": [
+     "La parte 'aunque el bot esté pausado' no se sostiene: page.tsx:18-22 muestra ChatbotUpsellLanding si checkClientHasChatbot da false, y clientHasChatbot.ts:5-8 exige isActive:true, así que con el bot pausado el cliente nunca ve ChatbotOverview",
+     "'Personas atendidas este mes' usa el dato real usage.conversationsCount (ChatbotOverview.tsx:41, :97-104)",
+     "Las listas de leads y derivaciones están scopeadas por org (forOrg en multiTenantQueries.ts:33) y tienen estado vacío (:133-139, :183-189); el cliente ve los leads reales en /dashboard/chatbot/leads, que es un camino alternativo"
+    ]
+   }
+  ]
+ }
+}

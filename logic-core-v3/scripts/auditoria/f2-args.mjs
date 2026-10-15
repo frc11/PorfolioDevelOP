@@ -22,8 +22,14 @@
 // títulos ya registrados del dominio (vigentes y descartados), lo planeado que sigue sin
 // cruce y las alertas sin resolver. Las alertas llevan id [Dx-An] para seguirlas entre ciclos.
 //
+// Desde D3 (DEC-53 y DEC-55), en modo lectores salen además `acotado: true` (cada lector traza
+// solo dentro de su lote y frena en el punto de salida), `flujos_cerrados` (el resumen de los
+// flujos ya trazados en los otros dominios, desde _crudo/flujos.json: nombre y cadena de
+// ruta:línea) y `higiene: true` (los BAJA cosméticos van a `higiene_ui` y el padre los junta en
+// un único hallazgo «Higiene de UI — Dx»). `--sin-acotar` y `--sin-higiene` los apagan.
+//
 // Uso (desde logic-core-v3):
-//   node scripts/auditoria/f2-args.mjs <D1..D9> <ciclo> <salida.json> [--lotes D2-L1,D2-L3] [--tope 80]
+//   node scripts/auditoria/f2-args.mjs <D1..D9> <ciclo> <salida.json> [--lotes D2-L1,D2-L3] [--tope 80] [--sin-acotar] [--sin-higiene]
 //   node scripts/auditoria/f2-args.mjs <D1..D9> <ciclo> <salida.json> --cazadores --lente "<texto>"
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -176,12 +182,35 @@ if (CAZA) {
   process.exit(0)
 }
 
+// DEC-53: resumen de los flujos de los otros dominios (los cerrados), una línea por flujo
+const flujosCerrados = (() => {
+  const RE = /([\w.][\w./()[\]@-]*\.(?:tsx?|mjs|js|prisma|toml|json|css)):(\d+)/g
+  return leerPartido(CRUDO, 'flujos', { items: [] }).items
+    .filter((f) => !String(f.ciclo).startsWith(`${DOM}-`))
+    .map((f) => {
+      const vistos = new Set()
+      const cadena = []
+      for (const m of (f.pasos ?? []).join(' ').matchAll(RE)) {
+        const ruta = m[1].replace(/^logic-core-v3\//, '')
+        if (vistos.has(ruta) || ruta.startsWith('node_modules/')) continue
+        vistos.add(ruta)
+        cadena.push(`${ruta}:${m[2]}`)
+        if (cadena.length >= 8) break
+      }
+      return `[${String(f.ciclo).split('-')[0]}] ${String(f.nombre).slice(0, 110)}: ${cadena.join(' -> ') || '(sin rutas)'}`
+    })
+})()
+const ACOTADO = !args.includes('--sin-acotar')
+const HIGIENE = !args.includes('--sin-higiene')
+
 const salida = {
   dominio: DOM,
   nombre: NOMBRE,
   ciclo: CICLO,
   lente: LENTE,
   foco: FOCO[DOM],
+  ...(ACOTADO ? { acotado: true, flujos_cerrados: flujosCerrados.join('\n') } : {}),
+  ...(HIGIENE ? { higiene: true } : {}),
   contexto: `${alertas.length ? `ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas, empezando el campo 'alerta' con su id entre corchetes; si se confirma, tambien va como hallazgo):\n- ${alertas.join('\n- ')}` : ''}${textoDml}${textoPatrones}`,
   lotes: info.filter((x) => lotes.includes(x.l)).map((x) => {
     const prev = previas.filter((p) => (p.archivos_citados ?? []).some((c) => x.set.has(c.replace(/:\d+(-\d+)?$/, '').replace(/^logic-core-v3\//, ''))))

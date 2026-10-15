@@ -1336,6 +1336,993 @@
    "afirmacion": "Ninguna mutación revalida los tags attention-items, health-score, week-results, org-meta, org-modules ni insights del portal",
    "comando": "git grep -n -E \"revalidateTag\\(\\s*`(attention-items|health-score|week-results|org-meta|org-modules|insights)\" origin/main -- logic-core-v3/src  → 0 resultados",
    "control_positivo": "git grep -n 'revalidateTag(`unread-messages' origin/main -- logic-core-v3/src → src/app/(protected)/dashboard/messages/_actions/mark-read.ts:20; hot-leads-count sí se revalida en src/modules/chatbot/server/admin/updateLeadStatus.ts:88"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "El endpoint /api/chatbot/[slug]/smoke ya no existe",
+   "comando": "git ls-tree -r --name-only origin/main -- src/app/api/chatbot",
+   "control_positivo": "El mismo listado devuelve chat/route.ts, config/route.ts, config/same-origin.ts y health/route.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "No queda la docstring 'GDPR-friendly' en el código",
+   "comando": "git grep -n -i gdpr origin/main -- src prisma public",
+   "control_positivo": "git grep -n -i gdpr origin/main → docs/baselines/2026-07-auditoria-seguridad.md:55"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "El widget y el embed no muestran aviso de privacidad o datos personales",
+   "comando": "git grep -n -i 'privacidad\\|datos personales\\|politica de datos\\|política de datos' origin/main -- src/modules/chatbot/components/embed src/modules/chatbot/components/chat public/widget.js src/modules/chatbot/components/LogicCompanion.tsx",
+   "control_positivo": "git grep -l -i privacidad origin/main -- src/app → src/app/api/chatbot/[slug]/chat/route.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "El cliente no tiene campo para cargar dominios permitidos",
+   "comando": "git grep -n -i 'allowedDomains\\|dominio' origin/main -- src/modules/chatbot/components/dashboard/BotPersonalization.tsx src/modules/chatbot/server/dashboard/updateBotAppearance.ts src/modules/chatbot/server/admin/saveClientSettings.ts 'src/app/(protected)/dashboard/chatbot/settings/page.tsx'",
+   "control_positivo": "git grep -n allowedDomains origin/main -- src/modules/chatbot/server/admin/saveBotConfig.ts → :63, :84, :113"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "Ninguna UI ni acción escribe BotConfig.verticalPack",
+   "comando": "git grep -n verticalPack origin/main -- src/app src/modules/chatbot/components src/modules/chatbot/server/admin src/lib",
+   "control_positivo": "git grep -n verticalPack origin/main -- src/modules/chatbot/server/chat/handleChatRequest.ts → :623-625; el primer comando solo devuelve lecturas en export/route.ts:143-162"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "/api/cron/detect-bot-issues no está agendado en netlify.toml, netlify/functions ni vercel.json",
+   "comando": "git grep -n 'detect-bot-issues' origin/main -- . ':!docs'",
+   "control_positivo": "git grep -n cleanup-old-events origin/main -- netlify netlify.toml → netlify.toml:31 y netlify/functions/cleanup-old-events-cron.ts:1-2"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "Las rutas admin demo-chat e insights/generate no tienen consumidores en la app",
+   "comando": "git grep -n 'insights/generate\\|admin/chatbot/demo-chat' origin/main -- . ':!docs'",
+   "control_positivo": "git grep -c api/admin/chatbot/events origin/main -- src/modules/chatbot/components/admin/ActivityLog.tsx → 1"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "No hay credenciales de cuenta de servicio de GCP versionadas",
+   "comando": "git grep -n -l 'BEGIN PRIVATE KEY\\|\"private_key\"\\|private_key_id\\|\"type\": \"service_account\"' origin/main -- .",
+   "control_positivo": "grep -rl private_key node_modules/google-auth-library/build/src → credentials.d.ts; el único hit versionado es docs/baselines/2026-07-auditoria-seguridad.md (describe patrones de grep, sin valores)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "Ningún test invoca handleChatRequest ni persistTurn",
+   "comando": "git grep -n 'handleChatRequest(' origin/main -- src tests (excluyendo handleChatRequest.ts y src/app/api/chatbot) ; git grep -n 'createPersistTurn(\\|persistTurn(' origin/main -- src/modules/chatbot/server/chat/__tests__ tests",
+   "control_positivo": "git grep -n handleChatRequest origin/main -- src/modules/chatbot/server/chat/__tests__/mudez-net.invariant.ts → :23, :279 (solo comentarios)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "El streamText de producción no fija maxOutputTokens",
+   "comando": "git grep -n maxOutputTokens origin/main -- src/modules/chatbot/server/chat/handleChatRequest.ts",
+   "control_positivo": "git grep -n maxOutputTokens origin/main -- 'src/app/api/admin/chatbot/demo-chat/[slug]/route.ts' → :113"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "El helper csv-escape de PA-2 no está en main",
+   "comando": "git ls-files src/lib/csv ; git merge-base --is-ancestor eb3b0d0e origin/main",
+   "control_positivo": "git branch -a --contains eb3b0d0e → origin/b0-isolation-motor-chatbot; git show --stat eb3b0d0e lista src/lib/csv/csv-escape.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "No existe alta de canales de WhatsApp (WabaChannel) en código ni scripts",
+   "comando": "git grep -n 'wabaChannel\\.\\(create\\|upsert\\)' origin/main -- src scripts prisma",
+   "control_positivo": "git grep -n wabaChannel.findUnique origin/main -- src/modules/motor → resolve-channel.ts:27"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "La UI de integración CRM no avisa sobre envío de datos personales a terceros",
+   "comando": "git grep -n -i 'datos personales\\|PII\\|aviso legal\\|consentimiento\\|terceros' origin/main -- src/modules/chatbot/components/admin/integrations src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx",
+   "control_positivo": "git grep -c -i webhook origin/main -- src/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard.tsx → 6"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "No hay prefetch={false} en el código (PLAN-213)",
+   "comando": "git grep -n 'prefetch={false}' origin/main -- src",
+   "control_positivo": "git grep -n prefetch origin/main -- src → ChatWidgetMount.tsx:8, :38"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "La batería de regresión no corre en CI",
+   "comando": "git grep -n -i 'regression\\|run-baseline' origin/main -- .github/workflows/ci.yml",
+   "control_positivo": "git grep -n 'run:' origin/main -- .github/workflows/ci.yml → :71, :91, :95, :100, :105"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "No hay retención para Conversation, ChatMessage ni ChatbotLead (solo chatbot_events)",
+   "comando": "git grep -n -i 'retention\\|retención\\|deleteMany.*conversation' origin/main -- src/app/api/cron",
+   "control_positivo": "El mismo comando encuentra cleanup-old-events/route.ts:7 y :14 (RETENTION_DAYS = 30 para chatbot_events)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "No existe calculatePotentialValue (PLAN-311)",
+   "comando": "git grep -n calculatePotentialValue origin/main -- src",
+   "control_positivo": "git grep -n calculateLeadScore origin/main -- src/modules/chatbot/server/scoring/index.ts → :2, :15"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "No hay pack vertical de salud (PLAN-315)",
+   "comando": "git ls-files src/modules/chatbot/server/verticals/packs",
+   "control_positivo": "El listado devuelve agencia.ts, base.ts y usados.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "No existe readQuotaUsage (PLAN-354)",
+   "comando": "git grep -n readQuotaUsage origin/main -- src",
+   "control_positivo": "git grep -n 'export async function checkQuota' origin/main -- src/modules/chatbot/server/quota/checker.ts → :32"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "No hay memoria de visitante entre sesiones (PLAN-349)",
+   "comando": "git grep -n -i 'visitorMemory\\|memoria del visitante\\|returning visitor\\|retomar' origin/main -- src/modules/chatbot/server",
+   "control_positivo": "git grep -n 'export async function getOrCreateConversation' origin/main -- src/modules/chatbot/server/conversation/resolver.ts → :75"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "afirmacion": "ChatMessage no tiene @@unique (PLAN-475)",
+   "comando": "git grep -n -A25 '^model ChatMessage ' origin/main -- prisma/schema.prisma | grep '@@unique\\|@@index'",
+   "control_positivo": "Devuelve schema.prisma:1433 @@index([conversationId, createdAt])"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "El launcher del widget no maneja teclado (no hay onKeyDown)",
+   "comando": "git grep -n \"onKeyDown\" origin/main -- logic-core-v3/src/modules/chatbot/components/LogicCompanion.tsx  -> 0 resultados",
+   "control_positivo": "git grep -n \"onKeyDown\" origin/main -- logic-core-v3/src/modules/chatbot/components/chat/ChatWindow.tsx -> :540"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "Ningun componente del chat (ventana, launcher, teaser) cierra con Escape",
+   "comando": "git grep -n \"'Escape'\" origin/main -- logic-core-v3/src/modules/chatbot/components -> solo admin/config/EmojiPickerField.tsx:130 y dashboard/lead-pipeline/LeadColumnOverview.tsx:59",
+   "control_positivo": "Los dos hits del mismo barrido prueban que el patron matchea dentro de components/"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "ChatMessages, ChatMessage, ChatInput y QuickReplyChips no se montan en ningun lado",
+   "comando": "git grep -nE \"<ChatMessages[ />]|<ChatInput[ />]|<QuickReplyChips[ />]|from '\\./ChatInput'|from '\\./QuickReplyChips'|from '\\./ChatMessages'\" origin/main -- logic-core-v3/src -> 0; los unicos usos son los barrels (index.ts:40-43, components/chat/index.ts) y ChatMessages.tsx:4",
+   "control_positivo": "git grep -n \"from './ChatHeader'\" origin/main -- logic-core-v3/src/modules/chatbot/components/chat/ChatWindow.tsx -> :13"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No existe el endpoint /api/chatbot/[slug]/smoke",
+   "comando": "git grep -n -i \"smoke\" origin/main -- logic-core-v3/src/app -> 0; git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/api/chatbot -> solo chat, config y health",
+   "control_positivo": "git grep -n -i \"smoke\" origin/main -- logic-core-v3/src/modules/chatbot/server/health/index.ts -> :1-2"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "Ningun flujo de alta ni del admin asigna verticalPack",
+   "comando": "git grep -n \"verticalPack\" origin/main -- logic-core-v3/src/modules/chatbot/components logic-core-v3/src/modules/chatbot/server/admin logic-core-v3/src/lib -> 0",
+   "control_positivo": "git grep -c \"verticalPack\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> 4"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "ChatbotLead.channel no se escribe en ningun create",
+   "comando": "git grep -n \"chatbotLead.create\" origin/main -- logic-core-v3/src -> solo captureLead.ts:381 (fuera de tests); git show origin/main:logic-core-v3/src/modules/chatbot/server/tools/captureLead.ts | sed -n '381,413p' | grep -c channel -> 0",
+   "control_positivo": "Mismo rango: grep -c utmSource -> 1"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No queda docstring 'GDPR-friendly' en el codigo",
+   "comando": "git grep -n -i \"gdpr\" origin/main -- logic-core-v3/src -> 0",
+   "control_positivo": "git log --oneline -S \"GDPR\" origin/main -- logic-core-v3/src -> 819b9e0e (la quito) y f8a4525f (la agrego)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No hay credencial de Google versionada en el repo",
+   "comando": "git grep -n -I -l \"BEGIN PRIVATE KEY|private_key|service_account\" (con -E) origin/main -> solo .env.example (:103, :170 con '...'), docs/onboarding-data-connections.md:107 (placeholder) y una nota de auditoria; git grep -c -E \"AIza[0-9A-Za-z_-]{35}\" origin/main -> 0",
+   "control_positivo": "git grep -c \"GOOGLE_VERTEX_CREDENTIALS_JSON\" origin/main -- logic-core-v3/src/modules/chatbot/server/llm/providers/google.ts -> 3"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "Los endpoints publicos health y config del chatbot no tienen rate limit",
+   "comando": "git grep -n \"checkRateLimit\" origin/main -- \"logic-core-v3/src/app/api/chatbot/[slug]/health/route.ts\" \"logic-core-v3/src/app/api/chatbot/[slug]/config/route.ts\" -> 0",
+   "control_positivo": "Mismo grep en logic-core-v3/src/app/api/chatbot/[slug]/chat/route.ts -> :3 y :81"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "El health del chatbot no mide tasa de error ni dispara alertas",
+   "comando": "git grep -n -i -E \"error_rate|errorRate|5xx|stream_error|sendAlert|alert\" origin/main -- logic-core-v3/src/modules/chatbot/server/health -> solo el comentario de index.ts:4",
+   "control_positivo": "git grep -n \"CHAT_P95_WARN_MS\" origin/main -- logic-core-v3/src/modules/chatbot/server/health -> buildHealthVerdict.ts:21"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No hay widget 'Salud del bot' para el dueno",
+   "comando": "git grep -n -i -E \"salud del bot|botHealth\" origin/main -- logic-core-v3/src -> 0",
+   "control_positivo": "git grep -n \"Health Score\" origin/main -- \"logic-core-v3/src/app/(protected)/admin/chatbot/health/page.tsx\" -> :22"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No hay constantes para los tipos de evento del chatbot",
+   "comando": "git grep -n -i -E \"EVENT_TYPES|ChatbotEventType\\b\" origin/main -- logic-core-v3/src/modules/chatbot logic-core-v3/src/lib -> 0",
+   "control_positivo": "git grep -c \"type: 'chat\\.\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> 7"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "Conversation.endedAt no se escribe en el modulo chatbot",
+   "comando": "git grep -n \"endedAt\" origin/main -- logic-core-v3/src/modules/chatbot -> 0",
+   "control_positivo": "git grep -n \"endedAt\" origin/main -- logic-core-v3/src -> admin/projects/_actions/project.actions.ts:582"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "OrgRole VIEWER no se hace cumplir en ninguna accion",
+   "comando": "git grep -n -E \"'VIEWER'|\\\"VIEWER\\\"|OrgRole.VIEWER\" origin/main -- logic-core-v3/src -> solo auth.config.ts:5 (tipo)",
+   "control_positivo": "git grep -n \"OrgRole\" origin/main -- logic-core-v3/src -> auth.ts:9, :251; types/next-auth.d.ts:2"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No hay error boundary alrededor del widget de chat",
+   "comando": "git grep -n \"ErrorBoundary\" origin/main -- logic-core-v3/src/app/layout.tsx logic-core-v3/src/components/layout/ChatWidgetMount.tsx -> 0",
+   "control_positivo": "git grep -n \"captureException\" origin/main -- logic-core-v3/src/app/global-error.tsx -> :24"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No hay test de carga o concurrencia del chatbot",
+   "comando": "git grep -l -i -E \"concurren|ultimo cupo|último cupo\" origin/main -- logic-core-v3/tests -> solo tests/setter/06-claim-atomico.spec.ts y tests/setter/12-claim-agenda.spec.ts",
+   "control_positivo": "git grep -c \"chatbot\" origin/main -- logic-core-v3/tests/integration/chatbot-isolation.spec.ts -> 22"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No existe recalculateLeadScore",
+   "comando": "git grep -n \"recalculateLeadScore\" origin/main -- logic-core-v3/src -> 0",
+   "control_positivo": "git grep -c \"getEffectiveScore\" origin/main -- logic-core-v3/src/modules/chatbot/server/scoring -> 3 (calculateLeadScore.ts)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No existe ChatbotLead.lastUserMessageAt",
+   "comando": "git grep -n \"lastUserMessageAt\" origin/main -- logic-core-v3/src logic-core-v3/prisma/schema.prisma -> 0",
+   "control_positivo": "git show origin/main:logic-core-v3/prisma/schema.prisma | grep -c lastMessageAt -> 3"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No existe deviceId para identificar visitantes",
+   "comando": "git grep -n \"deviceId\" origin/main -- logic-core-v3/src logic-core-v3/prisma/schema.prisma -> 0",
+   "control_positivo": "git grep -c \"sessionId\" origin/main -- logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts -> 4"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No existe el boton 'Reportar mal clasificado'",
+   "comando": "git grep -n -i -E \"mal clasificado|misclassif\" origin/main -- logic-core-v3/src -> 0",
+   "control_positivo": "git grep -c \"classification\" origin/main -- logic-core-v3/src/modules/chatbot/components/dashboard/LeadDetail.tsx -> 1"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "No hay script de limpieza de ipHash historicos",
+   "comando": "git grep -l -i \"ipHash\" origin/main -- logic-core-v3/scripts -> 0",
+   "control_positivo": "git grep -l -i \"purge\" origin/main -- logic-core-v3/scripts -> 10 archivos"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "afirmacion": "@vercel/blob ya no es dependencia",
+   "comando": "git grep -n \"@vercel/blob\" origin/main -- logic-core-v3/package.json logic-core-v3/src -> 0",
+   "control_positivo": "git grep -n '\"resend\"' origin/main -- logic-core-v3/package.json -> :166"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "runPreflightChecks no verifica sesión ni rol",
+   "comando": "git grep -n \"requireSuperAdmin\\|auth()\" origin/main -- src/modules/chatbot/server/admin/preflightChecks.ts  (vacío)",
+   "control_positivo": "El mismo patrón sobre src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts devuelve :30 requireSuperAdmin()"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "El servidor no trata los {{placeholders}} de la KB (ni al guardar ni al armar el prompt)",
+   "comando": "git grep -nF \"{{\" origin/main -- src/modules/chatbot/server src/lib/onboarding src/modules/chatbot/shared  (vacío)",
+   "control_positivo": "git grep -cF \"{{\" origin/main -- src/modules/chatbot/components/admin/onboarding/kb-templates -> 10 archivos (6 a 15 por archivo)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "Ningún camino del producto asigna verticalPack",
+   "comando": "git grep -c verticalPack origin/main -- src/modules/chatbot/components/admin src/modules/chatbot/server/admin src/lib/onboarding \"src/app/(protected)/admin\"  (vacío)",
+   "control_positivo": "El mismo comando sobre src/modules/chatbot/server/chat/handleChatRequest.ts y prisma/schema.prisma devuelve 4 y 1"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "Ningún componente del widget lee routeColorMap",
+   "comando": "git grep -n routeColorMap origin/main -- src/modules/chatbot/components/chat src/modules/chatbot/components/embed src/modules/chatbot/hooks src/modules/chatbot/components/LogicCompanion.tsx src/modules/chatbot/components/tooltip src/app/embed  (vacío)",
+   "control_positivo": "git grep -c proactivePrompts origin/main -- src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx -> 5; getPublicConfig.ts:121 sí expone routeColorMap"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "El embed de clientes no usa prompts proactivos",
+   "comando": "git grep -n \"ProactiveTooltip\\|proactive\" origin/main -- src/modules/chatbot/components/embed src/app/embed  (vacío)",
+   "control_positivo": "git grep -ln ProactiveTooltip origin/main -- src -> LogicCompanion.tsx, tooltip/*, index.ts; ChatbotEmbed.tsx:296 sí usa quickReplies"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "El endpoint /smoke ya no existe",
+   "comando": "git ls-tree -r --name-only origin/main -- src/app | grep -i smoke  (vacío)",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- src/app/api/chatbot lista chat, config y health; git log muestra 02a2f812 'deprecar el endpoint smoke publico'"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "No queda la docstring 'GDPR-friendly' en src",
+   "comando": "git grep -n -i gdpr origin/main -- src  (vacío)",
+   "control_positivo": "git grep -c -i gdpr origin/main -- docs -> 2 archivos; git log -S 'GDPR-friendly' origin/main -- src -> 819b9e0e"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "El polling de ActivityLog no se pausa con la pestaña oculta",
+   "comando": "git grep -n \"visibilityState\\|visibilitychange\\|document.hidden\" origin/main -- src/modules/chatbot/components/admin  (vacío)",
+   "control_positivo": "El mismo patrón sobre src encuentra src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "AvatarPicker y BotConfigPreview no usan IntersectionObserver",
+   "comando": "git grep -n IntersectionObserver origin/main -- src/modules/chatbot/components/avatar src/modules/chatbot/components/preview  (vacío)",
+   "control_positivo": "git grep -ln IntersectionObserver origin/main -- src -> HeroArtifactLayer.tsx, Navbar.tsx, InfiniteReviews.tsx, entre otros"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "No hay una clave de cuenta de servicio versionada",
+   "comando": "git grep -c -E \"BEGIN (RSA )?PRIVATE KEY|\\\"private_key\\\"\\s*:|\\\"type\\\"\\s*:\\s*\\\"service_account\\\"\" origin/main -- . ':!**/node_modules/**'  (sólo .env.example con 2 placeholders comentados y docs con listas de patrones)",
+   "control_positivo": "git grep -c GOOGLE_VERTEX_CREDENTIALS_JSON origin/main -- . -> .github/workflows/ci.yml, .env.example, docs/env-vars.md y otros"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "logAdminActionsBatch no está en main",
+   "comando": "git grep -n logAdminActionsBatch origin/main -- .  (vacío)",
+   "control_positivo": "Existe en origin/b0-isolation-motor-chatbot:src/app/(protected)/admin/chatbots/bulk-actions.ts; logAdminAction sí está en src/lib/audit-log.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "El alta no crea Subscription (el cliente queda en PLAN_FALLBACK)",
+   "comando": "git grep -n -i subscription origin/main -- src/modules/chatbot/server/admin/createClientWithBot.ts src/modules/chatbot/server/admin/createClientOnly.ts  (vacío)",
+   "control_positivo": "src/lib/plan/get-plan-for-org.ts:40 y :74 leen prisma.subscription"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "No hay indicador 'X de N dominios' en admin ni en el portal",
+   "comando": "git grep -n maxDomains origin/main -- src/app src/modules/chatbot/components  (sólo PlanAssignmentCard.tsx:112, el selector de plan)",
+   "control_positivo": "git grep -n maxDomains origin/main -- src/lib/plan -> fallback.ts:34,57; get-plan-for-org.ts:87,111"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "El endpoint demo-chat no tiene llamadores",
+   "comando": "git grep -n demo-chat origin/main -- src | grep -v src/app/api/admin/chatbot/demo-chat/  (sólo un comentario en test-prompt/route.ts:45)",
+   "control_positivo": "git grep -n api/admin/chatbot/test-prompt origin/main -- src -> TestPromptSandbox.tsx:42"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "afirmacion": "Ningún camino usa waitUntil para trabajo en segundo plano",
+   "comando": "git grep -n waitUntil origin/main -- src  (vacío)",
+   "control_positivo": "git grep -n \"void syncLeadToCrm\" origin/main -- src -> retryCrmSync.ts:73 y captureLead.ts:500"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "El lote no tiene page, layout, route handler ni server action (entradas vacias)",
+   "comando": "git grep -n -E \"^['\\\"]use server['\\\"]\" origin/main -- logic-core-v3/src/modules/chatbot/components/chat logic-core-v3/src/modules/chatbot/components/avatar logic-core-v3/src/modules/chatbot/components/admin/useIsClient.ts logic-core-v3/src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts",
+   "control_positivo": "El mismo patron sobre logic-core-v3/src/modules/chatbot/server/dashboard encuentra updateBotAppearance.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "El lote no accede a la base ni hace fetch (no hay forOrg/unsafeGlobalQuery/prisma)",
+   "comando": "git grep -n -E \"fetch\\(|prisma|@/lib/prisma|forOrg|unsafeGlobalQuery\" origin/main -- <rutas del lote>",
+   "control_positivo": "git grep -c fetch origin/main -- logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts = 8"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "Ni el launcher ni el panel del widget de develOP manejan teclado (salvo Enter en el textarea) y no hay Escape",
+   "comando": "git grep -n -E \"onKey(Down|Up|Press)|keydown|'Enter'|Escape\" origin/main -- logic-core-v3/src/modules/chatbot/components/LogicCompanion.tsx logic-core-v3/src/modules/chatbot/components/chat/ChatWindow.tsx logic-core-v3/src/modules/chatbot/hooks/",
+   "control_positivo": "El mismo comando devuelve ChatWindow.tsx:540-541 (onKeyDown del textarea); ChatbotEmbed.tsx tiene 1 onKeyDown"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "El widget no tiene aviso de IA/privacidad ni link a politica",
+   "comando": "git grep -n -i -E \"vertex|n8n|privacidad|privacy|datos personales|disclaimer|términos\" origin/main -- logic-core-v3/src/modules/chatbot/components/chat/ logic-core-v3/src/modules/chatbot/components/embed/ logic-core-v3/src/modules/chatbot/components/LogicCompanion.tsx",
+   "control_positivo": "git grep -l -i privacidad origin/main -- logic-core-v3/src/app encuentra api/chatbot/[slug]/chat/route.ts (:75)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "No hay paginas legales (privacidad/terminos/cookies) en la app",
+   "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep -i -E \"privac|legal|termin|terms|cookies\"",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep -c page.tsx = 86"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "resolveAccentColor no existe y el widget no lee routeColorMap",
+   "comando": "git grep -n resolveAccentColor origin/main -- logic-core-v3/src ; git grep -n routeColorMap origin/main -- logic-core-v3/src",
+   "control_positivo": "routeColorMap aparece en getPublicConfig.ts:121, publicConfig.ts:50, saveBotConfig.ts:55 y otros, pero en ningun archivo de hooks/, chat/, embed/ ni LogicCompanion"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "ChatbotEmbed no lee accentColor, accentSecondary ni chatSurfaceTint",
+   "comando": "git grep -n -E \"accentColor|accentSecondary|chatSurfaceTint|quickReplies\" origin/main -- logic-core-v3/src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+   "control_positivo": "El mismo grep devuelve quickReplies en :283 y :293"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "No hay ErrorBoundary alrededor de los avatares ni del widget",
+   "comando": "git grep -n -E \"ErrorBoundary|componentDidCatch|getDerivedStateFromError\" origin/main -- logic-core-v3/src/modules/chatbot logic-core-v3/src/components/layout/ChatWidgetMount.tsx logic-core-v3/src/app/embed",
+   "control_positivo": "git grep -l -E \"ErrorBoundary|getDerivedStateFromError\" origin/main -- logic-core-v3/src encuentra admin/_components/AdminErrorBoundary.tsx"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "Los avatares no se pausan fuera del viewport y ningun consumidor pasa frameloop",
+   "comando": "git grep -n -E \"IntersectionObserver|useInView|visibilitychange\" origin/main -- logic-core-v3/src/modules/chatbot/components/avatar ; git grep -n \"frameloop=\" origin/main -- logic-core-v3/src/modules/chatbot",
+   "control_positivo": "IntersectionObserver aparece en src/components/layout/HeroArtifactLayer.tsx y Navbar.tsx; frameloop= solo en NeuroAvatar.tsx:54"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "El layout raiz no exporta viewport (sin maximumScale)",
+   "comando": "git grep -n -E \"export const viewport|generateViewport\" origin/main -- logic-core-v3/src/app/layout.tsx",
+   "control_positivo": "git grep -n \"export const viewport\" origin/main -- logic-core-v3/src/app encuentra embed/[slug]/page.tsx:13"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "Avatares e indicador 'pensando' no consultan prefers-reduced-motion",
+   "comando": "git grep -n -E \"useReducedMotion|prefers-reduced-motion\" origin/main -- logic-core-v3/src/modules/chatbot/components/avatar logic-core-v3/src/modules/chatbot/components/chat ; git grep -n -E \"MotionConfig\" origin/main -- logic-core-v3/src",
+   "control_positivo": "El primer grep devuelve StreamingMarkdown.tsx:5 y :47"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "ChatMessages, ChatInput y QuickReplyChips no tienen consumidores fuera de los barrels",
+   "comando": "git grep -n -E \"\\b(ChatMessages|ChatInput|QuickReplyChips)\\b\" origin/main -- logic-core-v3/src | grep -v components/chat/",
+   "control_positivo": "Solo devuelve modules/chatbot/index.ts:40,42,43; el mismo metodo encuentra ChatWindow importado en LogicCompanion.tsx:9"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "No existe ruta /smoke en la API",
+   "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/api | grep -i smoke",
+   "control_positivo": "git ls-tree ... | grep -c route.ts = 36"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "No queda la docstring 'GDPR-friendly' en el codigo",
+   "comando": "git grep -n -i gdpr origin/main -- logic-core-v3/src logic-core-v3/public logic-core-v3/scripts logic-core-v3/prisma",
+   "control_positivo": "git grep -n -i gdpr origin/main -- logic-core-v3/docs encuentra docs/baselines/2026-07-auditoria-seguridad.md:55"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "No hay transcripts de EV.5 en el repo",
+   "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/docs | grep -i ev5-transcripts",
+   "control_positivo": "El mismo comando con ev4-transcripts lista README.md y 4 transcripts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "No hay TODO/FIXME/mocks en el lote",
+   "comando": "git grep -n -E \"TODO|FIXME|HACK|XXX|lorem|mock\" origin/main -- <rutas del lote>",
+   "control_positivo": "Matchea StreamingMarkdown.tsx:73 (la palabra castellana 'TODO'), lo que prueba que el grep recorre el lote"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "afirmacion": "No hay captura de audio (M1) en el modulo",
+   "comando": "git grep -n -E \"MediaRecorder|getUserMedia|audio/webm\" origin/main -- logic-core-v3/src/modules/chatbot",
+   "control_positivo": "git grep -c AudioContext origin/main -- logic-core-v3/src/modules/chatbot/hooks/useChatbotSounds.ts = 8"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "No existe ruta /smoke en origin/main",
+   "comando": "git ls-tree -r --name-only origin/main -- src/app | grep -i smoke",
+   "control_positivo": "El mismo ls-tree sobre src/app/api/chatbot lista src/app/api/chatbot/[slug]/chat/route.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "No existe el docstring 'GDPR-friendly' en src",
+   "comando": "git grep -n -i \"GDPR\" origin/main -- src",
+   "control_positivo": "git grep -n -i \"friendly\" origin/main -- src/modules/chatbot src/lib -> 5 resultados (p. ej. LogicCompanion.tsx:31)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "ClientSettingsForm no tiene importadores vivos",
+   "comando": "git grep -l \"ClientSettingsForm\" origin/main -- src tests",
+   "control_positivo": "git grep -l \"BotPersonalization\" origin/main -- src encuentra settings/page.tsx"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "No hay cron de reintento de CrmSyncAttempt",
+   "comando": "git grep -n -i \"crmSyncAttempt\" origin/main -- src/app/api/cron netlify.toml vercel.json",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- src/app/api/cron lista 9 archivos (alerts, cleanup-old-events, generate-insights, ...)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "postToN8n no resuelve DNS antes del POST",
+   "comando": "git grep -n \"dns\\|lookup(\" origin/main -- src/modules/chatbot/server/crm src/lib/security",
+   "control_positivo": "git grep -n \"singlePost\\|fetch(\" origin/main -- src/modules/chatbot/server/crm/postToN8n.ts -> :67, :87, :156"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "No se manda Idempotency-Key a n8n",
+   "comando": "git grep -n -i \"idempotency-key\" origin/main -- src",
+   "control_positivo": "git grep -n \"headers\" origin/main -- src/modules/chatbot/server/crm/postToN8n.ts -> :76, :84, :89"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "CrmConfigForm no tiene nota legal de PII",
+   "comando": "git grep -n -i \"personal\\|privacidad\\|terceros\\|PII\" origin/main -- src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx",
+   "control_positivo": "git grep -ln \"CrmConfigForm\" origin/main -- src -> CrmConfigForm.tsx y CrmIntegrationAdminCard.tsx"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "No hay web push",
+   "comando": "git grep -n -i \"PushManager\\|web-push\\|pushSubscription\" origin/main -- src package.json",
+   "control_positivo": "git grep -n \"visibilitychange\" origin/main -- src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx -> :159, :162"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "No hay export xlsx",
+   "comando": "git grep -n -i \"xlsx\\|exceljs\" origin/main -- src package.json",
+   "control_positivo": "git grep -n \"text/csv\" origin/main -- src/app/api/dashboard -> export/route.ts:203"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "El embed no tiene fallback de UTM con location.search",
+   "comando": "git grep -n \"location.search\" origin/main -- src/modules/chatbot/components/embed src/modules/chatbot/hooks",
+   "control_positivo": "git grep -ln \"location.search\" origin/main -- src -> src/app/contact/page.tsx, src/context/PreloaderContext.tsx"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "El widget no recibe aviso de estado degradado",
+   "comando": "git grep -n \"degraded\" origin/main -- public/widget.js",
+   "control_positivo": "git grep -n \"notifyParent('\" origin/main -- src/modules/chatbot/components/embed/ChatbotEmbed.tsx -> :103, :115, :128, :216"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "MESSAGE_CONTEXTS no tiene claves knowledge ni crm",
+   "comando": "git grep -n \"knowledge\\|crm\" origin/main -- src/lib/data/message-context.ts",
+   "control_positivo": "git show origin/main:./src/lib/data/message-context.ts muestra las claves activacion, modulo, facturacion, bug, mejora, proyecto, gbp y plan-*"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "getPendingInsightsByOrgSlug no tiene consumidores en paginas",
+   "comando": "git grep -ln \"getPendingInsightsByOrgSlug\" origin/main -- src",
+   "control_positivo": "El mismo comando devuelve sus definiciones (index.server.ts, server/insights/index.ts, server/insights/queries.ts)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "El embed no consume accentColor, accentSecondary, chatSurfaceTint ni bubbleStyle",
+   "comando": "git grep -c \"accentColor\\|accentSecondary\\|chatSurfaceTint\\|bubbleStyle\" origin/main -- src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+   "control_positivo": "git grep -n \"accentSecondary\\|chatSurfaceTint\" origin/main -- src/modules/chatbot/components/chat/ChatWindow.tsx -> :48, :57, :117, :119"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "afirmacion": "OrgRole VIEWER nunca se chequea en src",
+   "comando": "git grep -n \"'VIEWER'\\|OrgRole.VIEWER\" origin/main -- src",
+   "control_positivo": "El mismo grep encuentra la definicion del tipo en src/auth.config.ts:5"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "No hay scheduler para /api/cron/detect-bot-issues en el repo",
+   "comando": "git grep -n detect-bot-issues origin/main -- netlify.toml vercel.json netlify .github",
+   "control_positivo": "git grep -n cleanup-old-events origin/main -- netlify.toml -> netlify.toml:31"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "Ni la activacion ni la validacion de KB detectan {{PLACEHOLDERS}}",
+   "comando": "git grep -nE \"placeholder|\\{\\{\" origin/main -- src/modules/chatbot/server src/modules/chatbot/components/admin/activation src/modules/chatbot/components/admin/kb src/modules/chatbot/components/admin/KnowledgeBaseEditor.tsx (solo atributos placeholder= y objetos de estilo JSX)",
+   "control_positivo": "git grep -c \"{{\" origin/main -- src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts -> 6"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "Ningun componente del widget lee routeColorMap",
+   "comando": "git grep -nE \"config\\.routeColorMap|\\.routeColorMap\\b|routeColorMap\\[\" origin/main -- src/modules/chatbot/components src/components | grep -v /admin/",
+   "control_positivo": "git grep -c routeColorMap origin/main -- src/modules/chatbot/server/config/getPublicConfig.ts -> 2"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "No hay escritor de verticalPack en la app fuera de evals",
+   "comando": "git grep -nE verticalPack origin/main -- src | grep -vE \"__tests__|\\.invariant\\.\"",
+   "control_positivo": "Lectura en handleChatRequest.ts:625 y escritura en evals/seed-eval-bots.ts:180"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "El onError del stream no escribe chatbot_events",
+   "comando": "git grep -n -A25 \"export function logPersistFailure\" origin/main -- src/modules/chatbot/server (solo console.error)",
+   "control_positivo": "logChatbotEvent con type 'chat.unhandled_error' en handleChatRequest.ts:1381"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "No se usa after() ni waitUntil en el repo",
+   "comando": "git grep -nE \"import \\{ after|waitUntil\" origin/main -- src",
+   "control_positivo": "git grep -n \"void syncLeadToCrm\" origin/main -- src -> captureLead.ts:500 y retryCrmSync.ts:73"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "Los error.tsx del chatbot, resultados y admin no capturan en Sentry",
+   "comando": "git grep -ln captureException origin/main -- \"src/app/**/error.tsx\"",
+   "control_positivo": "Devuelve setter/error.tsx y sus hijos; global-error.tsx tambien captura"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "La ruta /smoke del chatbot ya no existe",
+   "comando": "git ls-tree -r --name-only origin/main -- src/app/api/chatbot ; git grep -n smoke origin/main -- src/app/api",
+   "control_positivo": "El listado incluye src/app/api/chatbot/[slug]/chat/route.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "No existe la docstring 'GDPR-friendly'",
+   "comando": "git grep -niE gdpr origin/main -- . \":!docs\"",
+   "control_positivo": "git grep -c PRIVACIDAD origin/main -- src/modules/chatbot/server/admin/saveBotConfig.ts -> 1"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "vertex-credentials.json nunca fue commiteado",
+   "comando": "git log --all --oneline -- logic-core-v3/vertex-credentials.json vertex-credentials.json",
+   "control_positivo": "git ls-tree -r --name-only origin/main | grep encode-vertex-creds -> logic-core-v3/scripts/encode-vertex-creds.js"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "OrgRole nunca se usa para autorizar",
+   "comando": "git grep -nE \"'VIEWER'|OrgRole\\.VIEWER|orgRole\" origin/main -- src (solo auth.ts, auth.config.ts, api/qa/login y types)",
+   "control_positivo": "auth.ts:46 asigna orgRole desde la membresia"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "Las rutas publicas config y health del chatbot no tienen rate limit",
+   "comando": "git grep -nE \"checkRateLimit|rateLimit\" origin/main -- \"src/app/api/chatbot/[slug]/config/route.ts\" \"src/app/api/chatbot/[slug]/health/route.ts\"",
+   "control_positivo": "chat/route.ts:81 checkRateLimit"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "No hay cron para reintentar syncs CRM fallidos",
+   "comando": "git ls-tree -r --name-only origin/main -- src/app/api/cron ; git grep -niE crm origin/main -- netlify.toml vercel.json src/app/api/cron",
+   "control_positivo": "El listado muestra detect-bot-issues/route.ts y generate-insights/route.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "ChatbotLead.channel no se escribe al capturar un lead",
+   "comando": "git grep -nE \"^\\s+channel:\" origin/main -- src/modules/chatbot/server/tools/captureLead.ts",
+   "control_positivo": "captureLead.ts:381 tx.chatbotLead.create"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "afirmacion": "ClientSettingsForm no se renderiza en ninguna pagina",
+   "comando": "git grep -n \"<ClientSettingsForm\" origin/main -- src",
+   "control_positivo": "git grep -n \"<ChatbotOverview\" origin/main -- src -> dashboard/chatbot/page.tsx:46"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "El POST al webhook CRM no resuelve DNS ni desactiva los redirects",
+   "comando": "git grep -n -i \"dns\\.\\|lookup(\\|redirect\" origin/main -- logic-core-v3/src/modules/chatbot/server/crm",
+   "control_positivo": "git grep -n \"signal: controller.signal\" origin/main -- logic-core-v3/src/modules/chatbot/server/crm/postToN8n.ts -> :91"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "Nadie llama a actOnInsight",
+   "comando": "git grep -n \"actOnInsight\" origin/main -- logic-core-v3/src -> solo manageInsight.ts:15, insights/index.ts:2, index.server.ts:73",
+   "control_positivo": "git grep -n \"generateInsightsForBot\" origin/main -- logic-core-v3/src -> api/admin/chatbot/insights/generate/route.ts:24 y api/cron/generate-insights/route.ts:43"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "El streamText del chat no fija maxOutputTokens",
+   "comando": "git grep -n \"maxOutputTokens\\|maxTokens\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat -> 0",
+   "control_positivo": "git grep -n \"temperature:\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> :952"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "El onError del stream no escribe ChatbotEvent",
+   "comando": "git grep -n \"logChatbotEvent(\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> :322, :359, :414, :503, :559, :768, :1376 (ninguno entre :1046 y :1110)",
+   "control_positivo": "El mismo comando devuelve 7 llamadas en el archivo"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "OrgRole VIEWER no se aplica en ningún lado",
+   "comando": "git grep -n \"VIEWER\" origin/main -- logic-core-v3/src -> solo src/auth.config.ts:5",
+   "control_positivo": "git grep -n \"enum OrgRole\" origin/main -- logic-core-v3/prisma/schema.prisma -> :19"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "El docstring 'GDPR-friendly' ya no existe en src",
+   "comando": "git grep -n -i \"gdpr\" origin/main -- logic-core-v3/src -> 0",
+   "control_positivo": "git grep -l -i \"gdpr\" origin/main -- logic-core-v3/docs -> docs/auditoria-seguridad-2026-05.md y docs/baselines/2026-07-auditoria-seguridad.md"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "La ruta /smoke ya no existe",
+   "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/api | grep -i smoke -> 0",
+   "control_positivo": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app/api | grep -c health -> 1"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "El chatbot no tiene correlationId ni requestId",
+   "comando": "git grep -n -i \"correlationId\\|requestId\" origin/main -- logic-core-v3/src/modules/chatbot/server -> 0",
+   "control_positivo": "git grep -c \"conversationId\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> 31"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "No se mide el cache de tokens en producción",
+   "comando": "git grep -n -i \"cachedContentTokenCount\\|cachedInputTokens\\|cacheReadTokens\" origin/main -- logic-core-v3/src -> solo un fixture de test (onf1-reconcile.invariant.ts:263)",
+   "control_positivo": "git grep -c \"inputTokens\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> 3"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "No hay anonimización de PII antes de mandar a Vertex",
+   "comando": "git grep -n -i \"anonymi\\|anonimi\\|redact\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat logic-core-v3/src/modules/chatbot/server/prompts -> 0",
+   "control_positivo": "wrapUntrusted presente en handleChatRequest.ts:884 y :949 (git grep -n wrapUntrusted)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "No hay tope de gasto de LLM",
+   "comando": "git grep -n -i \"spendLimit\\|costCap\\|maxCostUsd\\|budgetUsd\" origin/main -- logic-core-v3/src -> 0",
+   "control_positivo": "git grep -n \"costUsd\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/persistTurn.ts -> :468, :523, :544"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "No hay pack vertical 'salud' ni inventario",
+   "comando": "git ls-tree --name-only origin/main -- logic-core-v3/src/modules/chatbot/server/verticals/packs/ ; git grep -n -i \"inventario\\|inventory\" origin/main -- logic-core-v3/src/modules/chatbot -> 0",
+   "control_positivo": "El ls-tree lista agencia.ts, base.ts, usados.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "afirmacion": "Las regex de intents de los packs no usan flag g (detectIntent no tiene el bug de lastIndex)",
+   "comando": "git grep -n -E \"/[gimsuy]*g[gimsuy]*[,\\]]\" origin/main -- logic-core-v3/src/modules/chatbot/server/verticals/packs -> 0",
+   "control_positivo": "packs/agencia.ts:33-34 tienen regex con /i (p. ej. /precio/i)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "No existe BotConfig.allowedNavigationPaths en el schema",
+   "comando": "git grep -c allowedNavigationPaths origin/main -- prisma/schema.prisma",
+   "control_positivo": "git grep -c allowedDomains origin/main -- prisma/schema.prisma = 1"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "No existe la ruta /api/chatbot/[slug]/smoke en main",
+   "comando": "git ls-files 'src/app/api/chatbot/[slug]/smoke/*' (vacio); git log --oneline --all --diff-filter=D -- 'src/app/api/chatbot/[slug]/smoke/route.ts' -> 02a2f812; git merge-base --is-ancestor 02a2f812 origin/main -> true",
+   "control_positivo": "src/app/api/chatbot/[slug]/health/route.ts listado por git ls-files"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "QuotaUsage.alert80Sent no se lee ni se escribe en src",
+   "comando": "git grep -n alert80Sent origin/main -- src",
+   "control_positivo": "git grep -n degradedAt origin/main -- src -> src/lib/isolation/registry.ts:671-684"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "Ningun codigo lee los eventos handoff.callback de confirm_contact_request",
+   "comando": "git grep -n \"handoff.callback\\|CONTACT_REQUEST_EVENT_TYPE\" origin/main -- src (solo server/tools/confirmContactRequest.ts y sus tests)",
+   "control_positivo": "git grep -n \"'handoff.whatsapp'\" origin/main -- src -> server/admin/multiTenantQueries.ts:218"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "La app no escribe BotConfig.verticalPack (alta, editor, onboarding)",
+   "comando": "git grep -n verticalPack origin/main -- src | grep -v '__tests__\\|server/tools/\\|server/verticals/\\|scoring/calculateLeadScore' (solo lecturas: leads/export/route.ts:143-162, handleChatRequest.ts:625,687, evals)",
+   "control_positivo": "handleChatRequest.ts:625 const verticalPack = getVerticalPack(bot.verticalPack)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "No hay outbox para el trabajo post-turno",
+   "comando": "git grep -n -i outbox origin/main -- src prisma/schema.prisma",
+   "control_positivo": "git grep -n syncLeadToCrm origin/main -- src/modules/chatbot/server/tools/captureLead.ts -> :500"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "El streamText del chat de produccion no fija maxOutputTokens ni configuracion de thinking",
+   "comando": "git grep -n \"thinkingConfig\\|thinkingBudget\\|providerOptions\\|maxOutputTokens\" origin/main -- src/modules/chatbot/server/chat",
+   "control_positivo": "La misma busqueda sobre src/app/api/admin/chatbot encuentra demo-chat/[slug]/route.ts:113 y test-prompt/route.ts:96"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "Ningun logChatbotEvent persiste capture_lead.error ni chat.stream_error",
+   "comando": "git grep -n -A6 \"logChatbotEvent({\" origin/main -- src | grep \"type: '\" (tipos: handoff.whatsapp, tool.lead_captured, tool.lead_reask, chat.persist_error, chat.message_completed, chat.unhandled_error, ...)",
+   "control_positivo": "la misma busqueda devuelve type: 'tool.lead_captured' en captureLead.ts:525"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "No hay claves de cuenta de servicio commiteadas",
+   "comando": "git grep -l -E \"BEGIN (RSA )?PRIVATE KEY|\\\"private_key_id\\\"\" origin/main (solo .env.example con placeholders y un doc de auditoria que lista patrones)",
+   "control_positivo": "git grep -l GOOGLE_VERTEX_CREDENTIALS_JSON origin/main -> .env.example:103 (placeholder '{\"type\":\"service_account\",...}')"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "El reporte semanal del chatbot no tiene link de baja",
+   "comando": "git grep -n -i unsubscribe origin/main -- src/lib/email/templates/weekly-report.ts src/modules/chatbot/server/reports",
+   "control_positivo": "git grep -n -i unsubscribe origin/main -- src/lib/email/templates/executive-weekly.ts -> :52, :289, :317"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "La docstring 'GDPR-friendly' ya no existe",
+   "comando": "git grep -n -i gdpr origin/main -- src prisma",
+   "control_positivo": "git log --oneline origin/main -S 'GDPR-friendly' -> 819b9e0e, 392dad80, b4a2a8a3"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "afirmacion": "No hay emails al cliente por cuota",
+   "comando": "git grep -n -i \"cuota\\|quota\" origin/main -- 'src/lib/client-notifications/*.ts' 'src/lib/email/templates/*.ts'",
+   "control_positivo": "upsellAlert.ts:68-88 (sendAgencyAlert + Telegram) encontrado por git grep triggerUpsellAlertIfFirst"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "sendMotorMessage no tiene llamadores de produccion",
+   "comando": "git grep -n sendMotorMessage origin/main -- src scripts",
+   "control_positivo": "La misma busqueda con -- tests encuentra tests/integration/motor-outbound.spec.ts:18 y :188; en src solo aparece la definicion sendMessage.ts:204"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "No hay alta de WabaChannel en src, scripts ni prisma",
+   "comando": "git grep -n \"wabaChannel\\.\\(create\\|upsert\\|createMany\\)\\|motor_waba_channel\" origin/main -- src scripts prisma tests | grep -v migration.sql",
+   "control_positivo": "Solo devuelve tests (motor-inbound.spec.ts:113, motor-health.spec.ts:91, motor-outbound.spec.ts:122, motor-isolation.spec.ts:82) y el @@map del schema (schema.prisma:2052)"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "Nadie lee las tablas del motor (MotorAlert, MotorMessage, etc.) fuera del modulo y de isolation",
+   "comando": "git grep -n -i \"wabaChannel\\|motorAlert\\|motorMessage\\|motorConversation\\|motorTemplate\\|contactIdentity\" origin/main -- 'src/**' | grep -v src/modules/motor/ | grep -v src/lib/isolation",
+   "control_positivo": "Sin el filtro aparecen handle-health.ts:106 y :115 (scope.motorAlert) y el resto del motor"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "No hay captureConsoleIntegration: logger.error no llega a Sentry",
+   "comando": "git grep -n \"captureConsoleIntegration\" origin/main -- . \":!docs\"",
+   "control_positivo": "git grep -n \"Sentry.init\" origin/main encuentra src/instrumentation.ts:6 y :33, sentry.server.config.ts:8 y src/instrumentation-client.ts:4"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "No se purga la tabla rate_limit (la clave del webhook del motor sale del token de la URL)",
+   "comando": "git grep -n -i \"DELETE FROM rate_limit\\|rateLimit\\.deleteMany\" origin/main -- src scripts prisma netlify",
+   "control_positivo": "git grep -n \"INSERT INTO rate_limit\" origin/main -- src encuentra src/lib/rate-limit/limiter.ts:46"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "Ningun codigo cierra una MotorConversation (status CLOSED)",
+   "comando": "git grep -n \"status: 'CLOSED'\" origin/main -- src/modules/motor",
+   "control_positivo": "git grep -n \"status: 'OPEN'\" origin/main -- src/modules/motor encuentra handle-message.ts:73"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "El motor no llama a ningun LLM (la credencial vencida de Vertex no lo afecta)",
+   "comando": "git grep -n -i \"vertex\\|streamText\\|generateText\\|ai-sdk\\|anthropic\" origin/main -- src/modules/motor src/app/api/motor",
+   "control_positivo": "git grep -l -i streamText origin/main -- src/modules/chatbot/server/chat encuentra empty-fallback-pipeline.invariant.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "El motor no importa del modulo chatbot",
+   "comando": "git grep -n \"modules/chatbot\" origin/main -- src/modules/motor/adapters src/modules/motor/domain src/modules/motor/services",
+   "control_positivo": "Solo encuentra el comentario client.ts:16; git grep -n \"motor/domain/identity\" origin/main -- src/modules/motor encuentra handle-message.ts:17 y process.ts:16"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "Ya no existe la ruta /api/chatbot/[slug]/smoke (RT-2)",
+   "comando": "git ls-tree -r --name-only origin/main -- src/app/api/chatbot ; git grep -n -i smoke origin/main -- src/app",
+   "control_positivo": "El ls-tree lista [slug]/chat/route.ts, [slug]/config/route.ts y [slug]/health/route.ts"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "No queda la docstring 'GDPR-friendly' en src",
+   "comando": "git grep -n -i GDPR origin/main -- src",
+   "control_positivo": "git grep -n -i friendly origin/main -- src/modules/chatbot encuentra LogicCompanion.tsx:31, GeometricAvatar.tsx:11 y otros"
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "afirmacion": "No hay beforeSendTransaction ni patron de token hex en el scrubber de Sentry (el channelToken va en el path)",
+   "comando": "git grep -n \"beforeSendTransaction\" origin/main -- src/lib/sentry src/instrumentation.ts sentry.server.config.ts",
+   "control_positivo": "Solo aparece el comentario en scrub-pii.ts:115; beforeSend existe en src/instrumentation.ts:11 y sentry.server.config.ts:13"
   }
  ]
 }

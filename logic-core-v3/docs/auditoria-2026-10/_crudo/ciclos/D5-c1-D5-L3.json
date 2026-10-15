@@ -1,0 +1,3605 @@
+{
+ "dominio": "D5",
+ "ciclo": "D5-c1",
+ "lote": "D5-L3",
+ "run": "wf_b0489c11-132",
+ "fecha": "2026-10-15T13:01:58.672Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/modules/chatbot/components/admin/ActivityLog.tsx",
+    "lineas_total": 305,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+    "lineas_total": 345,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/KnowledgeBaseEditor.tsx",
+    "lineas_total": 252,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/activation/ActivationModal.tsx",
+    "lineas_total": 173,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/activity/ActivityChart.tsx",
+    "lineas_total": 80,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/activity/ActivityDateFilter.tsx",
+    "lineas_total": 69,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/activity/activityFilters.ts",
+    "lineas_total": 116,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/client-avatar/ClientAvatar.tsx",
+    "lineas_total": 76,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/client-avatar/ClientAvatarField.tsx",
+    "lineas_total": 84,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/BotConfigDiffModal.tsx",
+    "lineas_total": 162,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/ColorPicker.tsx",
+    "lineas_total": 72,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/ConfigTabs.tsx",
+    "lineas_total": 55,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/EmojiPickerField.tsx",
+    "lineas_total": 211,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/EmojiPickerPanel.tsx",
+    "lineas_total": 55,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/Field.tsx",
+    "lineas_total": 23,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/Input.tsx",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/Slider.tsx",
+    "lineas_total": 33,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+    "lineas_total": 183,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/tabs/AppearanceTab.tsx",
+    "lineas_total": 71,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/tabs/AvatarUploader.tsx",
+    "lineas_total": 99,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx",
+    "lineas_total": 298,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/tabs/IdentityTab.tsx",
+    "lineas_total": 49,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/tabs/StyleTab.tsx",
+    "lineas_total": 82,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/config/types.ts",
+    "lineas_total": 15,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/health/LatencyChart.tsx",
+    "lineas_total": 175,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/index.ts",
+    "lineas_total": 4,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx",
+    "lineas_total": 210,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard.tsx",
+    "lineas_total": 141,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/integrations/CrmSyncBadge.tsx",
+    "lineas_total": 61,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/integrations/CrmSyncHistoryList.tsx",
+    "lineas_total": 82,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/integrations/RetrySyncButton.tsx",
+    "lineas_total": 45,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/kb/DiffViewer.tsx",
+    "lineas_total": 46,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/kb/KBSearch.tsx",
+    "lineas_total": 122,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/kb/KBValidation.tsx",
+    "lineas_total": 79,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/kb/MarkdownEditor.tsx",
+    "lineas_total": 115,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/kb/SaveConfirmModal.tsx",
+    "lineas_total": 100,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx",
+    "lineas_total": 196,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/DraftBanner.tsx",
+    "lineas_total": 43,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/ExpandableTextField.tsx",
+    "lineas_total": 89,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx",
+    "lineas_total": 161,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/ProgressBar.tsx",
+    "lineas_total": 34,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/Step1Company.tsx",
+    "lineas_total": 204,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/Step2BotIdentity.tsx",
+    "lineas_total": 110,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx",
+    "lineas_total": 104,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/Step4Appearance.tsx",
+    "lineas_total": 130,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+    "lineas_total": 418,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/field-styles.ts",
+    "lineas_total": 6,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/industries.ts",
+    "lineas_total": 12,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts",
+    "lineas_total": 69,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/constructora.ts",
+    "lineas_total": 69,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/contable.ts",
+    "lineas_total": 69,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/distribuidora.ts",
+    "lineas_total": 68,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/generico.ts",
+    "lineas_total": 69,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/gimnasio.ts",
+    "lineas_total": 72,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts",
+    "lineas_total": 40,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/inmobiliaria.ts",
+    "lineas_total": 68,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/legal.ts",
+    "lineas_total": 70,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/medico.ts",
+    "lineas_total": 82,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/restaurant.ts",
+    "lineas_total": 74,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/suggestions.ts",
+    "lineas_total": 53,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/components/admin/onboarding/types.ts",
+    "lineas_total": 60,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+    "simbolo": "saveBotConfigByOrgSlug",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveBotConfigByOrgSlug.ts:71 const user = await requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "orgSlug del body -> organization.findUnique por slug (:77-83). Cross-org por diseño de admin, con rol verificado.",
+    "validacion": "zod",
+    "evidencia_validacion": "Schema :19-57, safeParse :72. allowedDomains sin normalizar (:56).",
+    "rate_limit": "no",
+    "notas": "Fuera del lote; la invoca BotConfigEditor.tsx:80 (rama viva: ConfigTab.tsx:54 siempre pasa orgSlug). Devuelve err.message crudo (:139) y 'Invalid input: '+JSON de Zod (:74)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveBotConfig.ts",
+    "simbolo": "saveBotConfig",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveBotConfig.ts:78 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "botConfigId del body -> botConfig.findUnique (:84-96); org derivada del bot (:120-123)",
+    "validacion": "zod",
+    "evidencia_validacion": ":19-64, safeParse :79",
+    "rate_limit": "no",
+    "notas": "Fuera del lote. Importada por BotConfigEditor.tsx:9 pero rama muerta desde la UI (:79-81 sólo se usa sin orgSlug, que nunca ocurre). Sí sanitiza errores (:151-157)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/sendTestNotification.ts",
+    "simbolo": "sendTestNotification",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "sendTestNotification.ts:17 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "orgSlug del body sólo para armar el preview (:37-44)",
+    "validacion": "zod",
+    "evidencia_validacion": ":11-14, safeParse :18",
+    "rate_limit": "si",
+    "notas": "Rate limit por admin :23-31. Invocada por BotConfigEditor.tsx:118 (fallback orgSlug 'develop' :119). dashboardUrl con fallback '' (:58)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts",
+    "simbolo": "saveKnowledgeBaseByOrgSlug",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveKnowledgeBaseByOrgSlug.ts:24 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "orgSlug del body -> org (:33-40); escritura scoped forOrg(org.id) (:48)",
+    "validacion": "zod",
+    "evidencia_validacion": ":10-19 con máximos 10k-50k",
+    "rate_limit": "no",
+    "notas": "Invocada por KnowledgeBaseEditor.tsx:132 (rama viva). Devuelve err.message crudo (:70)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/saveKnowledgeBase.ts",
+    "simbolo": "saveKnowledgeBase",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveKnowledgeBase.ts:24 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "botConfigId -> bot.organizationId (:32-39), forOrg (:44-52)",
+    "validacion": "zod",
+    "evidencia_validacion": ":10-19",
+    "rate_limit": "no",
+    "notas": "Rama muerta desde la UI (KnowledgeTab.tsx:25 siempre pasa orgSlug); sanitiza errores (:85-91)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/preflightChecks.ts",
+    "simbolo": "runPreflightChecks",
+    "tipo": "server-action",
+    "auth": "no",
+    "evidencia_auth": "Archivo 'use server' (:1) sin auth()/requireSuperAdmin en :13-168 (git grep vacío)",
+    "rol": "ninguno",
+    "org_de": "no-filtra",
+    "evidencia_org": "botId del caller -> botConfig.findUnique global por id con include organization (:18-25)",
+    "validacion": "no",
+    "evidencia_validacion": "botId string sin Zod (:13)",
+    "rate_limit": "no",
+    "notas": "Importada por un client component (BotDetailClient.tsx:1,16,140): es endpoint público. Devuelve WhatsApp, cuota, color, estado de la KB (:118-123, :151-157). ActivationModal.tsx:7 importa su tipo."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/preflightChecks.ts",
+    "simbolo": "canActivate",
+    "tipo": "server-action",
+    "auth": "no",
+    "evidencia_auth": "preflightChecks.ts:170-172 función pura exportada en archivo 'use server'",
+    "rol": "ninguno",
+    "org_de": "no-aplica",
+    "evidencia_org": "No toca la base",
+    "validacion": "no",
+    "evidencia_validacion": "Recibe checks del caller sin validar",
+    "rate_limit": "no-aplica",
+    "notas": "Sin importadores (git grep): no se registra en el manifest hoy; nadie la usa del lado servidor para frenar la activación."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+    "simbolo": "createClientWithBot",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "createClientWithBot.ts:96 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Crea el tenant (org+user+orgMember+botConfig+KB) en $transaction :123-207",
+    "validacion": "parcial",
+    "evidencia_validacion": "Zod :22-68 + safeParse :99-104; KB sin max (:44-50), userPhone sin max (:36), avatar del bot z.string() sin avatarImageUrlSchema (:57), email sin normalizar (:34)",
+    "rate_limit": "no",
+    "notas": "Invocada por Step5Review.tsx:71. Errores esperados con throw (:104, :116). Crea el bot isActive:true (:165) sin dominios ni Subscription."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/createClientOnly.ts",
+    "simbolo": "createClientOnly",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "createClientOnly.ts:48 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "Crea org+user+orgMember en $transaction :73-111",
+    "validacion": "parcial",
+    "evidencia_validacion": "Zod :19-29 (+ normalizeWebsiteUrl :51-55); email sin normalizar, teléfono sin max",
+    "rate_limit": "no",
+    "notas": "Invocada por Step5Review.tsx:87. Throw de errores esperados (:55, :66)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts",
+    "simbolo": "saveCrmIntegration",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "saveCrmIntegration.ts:30 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del body (:40), existencia (:44-47), upsert scoped forOrg (:80, :128)",
+    "validacion": "zod",
+    "evidencia_validacion": "Schema strict :17-25; validateWebhookUrl :60-63 (HTTPS, bloquea IPs privadas)",
+    "rate_limit": "no",
+    "notas": "Invocada por CrmConfigForm.tsx:48. organizationId llega como prop del server component (CrmIntegrationAdminCard.tsx:110)."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/integrations/testCrmConnection.ts",
+    "simbolo": "testCrmConnection",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "testCrmConnection.ts:22 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del body (:28), integración scoped forOrg (:51)",
+    "validacion": "zod",
+    "evidencia_validacion": ":13-17 strict",
+    "rate_limit": "si",
+    "notas": "Rate limit por org :38-49. Prueba la URL guardada, no la editada (:75). Invocada por CrmConfigForm.tsx:70."
+   },
+   {
+    "archivo": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+    "simbolo": "retryCrmSync",
+    "tipo": "server-action",
+    "auth": "si",
+    "evidencia_auth": "retryCrmSync.ts:24 requireSuperAdmin()",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "organizationId del body (:30), lead verificado dentro de la org con forOrg (:53-56)",
+    "validacion": "zod",
+    "evidencia_validacion": ":14-19 strict",
+    "rate_limit": "si",
+    "notas": "Rate limit :40-51. Sync fire-and-forget (:73-75). Invocada por RetrySyncButton.tsx:19."
+   },
+   {
+    "archivo": "src/app/api/admin/chatbot/events/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "auth": "si",
+    "evidencia_auth": "route.ts:8-11 auth() + role SUPER_ADMIN, 401 JSON",
+    "rol": "SUPER_ADMIN",
+    "org_de": "parametro",
+    "evidencia_org": "slug de la query (default 'develop', :14) -> bot por slug (:17) -> listEventsSince/listRecentEvents scoped con forOrg (queries.ts:36-60)",
+    "validacion": "parcial",
+    "evidencia_validacion": "since sin validar: new Date(since) (:15, :21); slug sin validar",
+    "rate_limit": "no",
+    "url": "/api/admin/chatbot/events",
+    "notas": "Consumida por ActivityLog.tsx:105-107 cada 3 s. serverTime calculado después de la query (:35)."
+   },
+   {
+    "archivo": "src/app/api/admin/chatbot/test-prompt/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "auth": "si",
+    "evidencia_auth": "route.ts:28 await requireSuperAdmin() (lanza: sin sesión responde 500, no 401)",
+    "rol": "SUPER_ADMIN",
+    "org_de": "no-aplica",
+    "evidencia_org": "No lee la base; usa el kbDraft del body",
+    "validacion": "parcial",
+    "evidencia_validacion": "Zod :19-25 sin max en kbDraft/botName/companyName; req.json() fuera de try (:30)",
+    "rate_limit": "no",
+    "url": "/api/admin/chatbot/test-prompt",
+    "notas": "Sin rate limit a propósito (:47-48). Proveedor y modelo fijos (:42, :50). Consumida por TestPromptSandbox.tsx:42."
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Guardar la configuración del bot (admin)",
+    "pasos": [
+     "UI: BotConfigEditor.tsx:220-227 'Revisar y guardar' abre BotConfigDiffModal (campos cambiados BotConfigDiffModal.tsx:64-66)",
+     "Confirmar: BotConfigDiffModal.tsx:146-149 -> BotConfigEditor.tsx:87-110 handleConfirmSave",
+     "Action: BotConfigEditor.tsx:79-80 -> saveBotConfigByOrgSlug.ts:71 requireSuperAdmin, :72 Zod",
+     "Lib/DB: saveBotConfigByOrgSlug.ts:80-83 org+bot por slug (unsafeGlobalQuery) -> :95-117 $transaction botConfig.update + organization.update",
+     "Post: :119 invalidateBotCache, :121-134 logAdminAction, :136 revalidatePath; UI: toast.promise BotConfigEditor.tsx:97-101"
+    ]
+   },
+   {
+    "nombre": "Guardar la KB (admin)",
+    "pasos": [
+     "UI: KnowledgeBaseEditor.tsx:184-192 'Guardar cambios' -> SaveConfirmModal.tsx:26 secciones cambiadas + DiffViewer.tsx:19 diffWordsWithSpace",
+     "Confirmar: SaveConfirmModal.tsx:85-88 -> KnowledgeBaseEditor.tsx:127-141",
+     "Action: saveKnowledgeBaseByOrgSlug.ts:24 requireSuperAdmin, :25 Zod, :33-40 org+bot+KB por slug",
+     "DB: :48 forOrg(org.id).knowledgeBase.update -> :50 invalidateBotCache -> :52-65 audit -> :67 revalidatePath"
+    ]
+   },
+   {
+    "nombre": "Probar prompt con la KB en borrador",
+    "pasos": [
+     "UI: KnowledgeBaseEditor.tsx:176-183 abre TestPromptSandbox; TestPromptSandbox.tsx:33-52 POST con el último mensaje y kbDraft (sin historial)",
+     "Route: test-prompt/route.ts:28 requireSuperAdmin, :31 Zod",
+     "LLM: :42 getLLMProvider('google'), :50 getModel('gemini-2.5-flash'), :51-66 provider-close, :68-97 streamText con buildSystemPrompt(kbDraft), sin tools",
+     "Respuesta: :99 toTextStreamResponse -> TestPromptSandbox.tsx:64-83 lee texto; errores dentro del stream se descartan (node_modules/ai/dist/index.mjs:8151-8162) y sólo van a console.error (:6826-6828)"
+    ]
+   },
+   {
+    "nombre": "Activar un bot pausado con preflight",
+    "pasos": [
+     "UI: BotDetailClient.tsx:227 'Activar bot' -> :134-147 handleToggleActive -> :140 runPreflightChecks(bot.id) (server action sin auth)",
+     "Lib: preflightChecks.ts:18-25 findUnique global por id -> :36-165 checks (KB >=20 chars, bienvenida, quick replies, WhatsApp, color, cuota legacy)",
+     "UI: ActivationModal.tsx:28-30 canActivate en el cliente -> :136 onConfirm -> BotDetailClient.tsx:163-174",
+     "Action/DB: [botId]/actions.ts:29-39 SUPER_ADMIN + Zod -> :42-56 botConfig.update isActive sin re-correr el preflight -> :69 invalidateBotCache -> :75-85 email de bot activado sin await"
+    ]
+   },
+   {
+    "nombre": "Alta de cliente con bot (asistente)",
+    "pasos": [
+     "UI: clients/new/page.tsx:14 -> OnboardingWizard.tsx:87-98 (borrador en localStorage, useOnboardingDraft.ts:26-78)",
+     "Pasos 1-4: Step1Company.tsx:23-28 validación; Step2BotIdentity.tsx:9; Step3KnowledgeBase.tsx:9-23 prellena con getTemplate (kb-templates/index.ts:38-40) y :25-32 gate sólo por largo; Step4Appearance.tsx:24-28",
+     "Paso 5: Step5Review.tsx:66-86 -> createClientWithBot.ts:96 requireSuperAdmin, :99-104 Zod, :107-116 slug y email únicos, :118-119 contraseña temporal",
+     "DB: createClientWithBot.ts:123-207 $transaction organization + user + orgMember + botConfig (isActive true :165, sin allowedDomains ni verticalPack) + knowledgeBase",
+     "Post: :209-227 audit -> :229-243 email de bienvenida por Brevo (await) -> :245-259 audit -> :261-273 devuelve tempPassword -> Step5Review.tsx:123-193 credenciales y triggerTransition"
+    ]
+   },
+   {
+    "nombre": "Configurar y probar la integración CRM (n8n)",
+    "pasos": [
+     "Server component: IntegrationsTab.tsx:36 -> CrmIntegrationAdminCard.tsx:29-31 plan; :63-73 forOrg crmIntegration + getOrgSyncHistory (requireSuperAdmin getCrmSyncHistory.ts:89)",
+     "Guardar: CrmConfigForm.tsx:39-66 -> saveCrmIntegration.ts:30-71 SUPER_ADMIN, Zod strict, org, plan, validateWebhookUrl, cifrado -> :128-139 upsertForScope -> :151-168 audit + revalidatePath",
+     "Probar: CrmConfigForm.tsx:68-79 -> testCrmConnection.ts:22-58 SUPER_ADMIN, plan, rate limit, integración guardada -> :74-87 testN8nConnection -> :89-105 audit"
+    ]
+   },
+   {
+    "nombre": "Reintentar un sync CRM fallido",
+    "pasos": [
+     "UI: CrmSyncHistoryList.tsx:75-77 (fila FAILED) -> RetrySyncButton.tsx:17-25",
+     "Action: retryCrmSync.ts:24-51 SUPER_ADMIN, Zod, plan, rate limit -> :53-60 lead scoped -> :62-71 audit",
+     "Lib: :73-75 void syncLeadToCrm (sin esperar) -> :79 devuelve ok; UI toast 'Reintento disparado' (RetrySyncButton.tsx:21)"
+    ]
+   },
+   {
+    "nombre": "Stream de actividad en vivo",
+    "pasos": [
+     "Página: admin/chatbot/activity/page.tsx:10-19 bot 'develop' + listRecentEvents(...,250) (queries.ts:36-45 forOrg); sin auth propia",
+     "UI: ActivityLog.tsx:101-125 setInterval 3 s -> GET /api/admin/chatbot/events?slug&since",
+     "Route: events/route.ts:8-11 SUPER_ADMIN -> :17 bot por slug -> :20-22 listEventsSince (queries.ts:47-60 gt since, take 50) -> :35 serverTime",
+     "UI: ActivityLog.tsx:110-118 merge (máx 300) y since=serverTime; filtros client-side activityFilters.ts:91-106"
+    ]
+   },
+   {
+    "nombre": "Health del chatbot y latencia",
+    "pasos": [
+     "Página: admin/chatbot/health/page.tsx:11-14 checkChatbotHealth('develop') + getLatencyHistory(24); sin auth propia",
+     "Lib: checkHealth.ts:25 env, :28-37 SELECT 1, :46-58 instancia el proveedor y cuenta modelos (no autentica contra Vertex), :60-82 bot",
+     "Lib: getLatencyHistory.ts:73-84 eventos chat.message_completed de todas las orgs (take 2000 sin orderBy) -> :86-143 P50/P95 por hora en zona del servidor",
+     "Veredicto: buildHealthVerdict.ts:24-132 -> UI LatencyChart.tsx:28-59 (EmptyState :124-148)"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Plantillas de KB con datos inventados y {{placeholders}} pasan el alta y el bot sale activo",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/generico.ts",
+      "linea": 28,
+      "fragmento": "Aceptamos efectivo, transferencia bancaria, tarjetas de débito y crédito. Para cuotas, usamos MercadoPago."
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/restaurant.ts",
+      "linea": 33,
+      "fragmento": "Sí, contamos con opciones vegetarianas y menú apto celíacos (cruzado en cocina aislada). Consultar al mozo."
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/generico.ts",
+      "linea": 4,
+      "fragmento": "businessInfo: `# {{NOMBRE_EMPRESA}}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx",
+      "linea": 26,
+      "fragmento": "state.businessInfo.length >= 20 &&"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 165,
+      "fragmento": "isActive: true,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 47,
+      "fragmento": "return !value || value.trim().length < 20"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/prompts/helpers.ts",
+      "linea": 48,
+      "fragmento": "return trimmed"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real: si develOP crea el bot con el asistente y no reescribe a mano las 7 secciones, el bot queda activo y afirma a los visitantes políticas que el negocio no tiene (envíos a todo el país, 30 días de cambio, factura A y B, cocina aislada para celíacos, recargo del 10 %, cargo del 50 % por cancelar) o devuelve literales como {{DIRECCION_COMPLETA}}. El gate del paso 3 y el preflight sólo miden largo, y el armado del prompt pasa el texto tal cual. Riesgo comercial y legal (alérgenos, salud) sobre respuestas que el dueño no autorizó.",
+    "propuesta": "Separar en las plantillas los ejemplos (guía, comentarios) del contenido afirmativo; bloquear en servidor la activación (createClientWithBot, toggleBotActiveAction, bulk y preflight) mientras queden {{...}} o secciones idénticas a la plantilla; crear el bot pausado desde el asistente y forzar el preflight; marcar en el paso 3 qué frases son de ejemplo.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "h4.adm-clientes.plantilla-kb-industria",
+     "h3.adm-chatbots.activar-bot-preflight",
+     "lib.chatbot.prompts",
+     "modelo.KnowledgeBase"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-209; 'El preflight de activación sólo se respeta en el cliente'; 'El alta con chatbot no carga dominios'"
+   },
+   {
+    "titulo": "runPreflightChecks: server action exportada sin sesión ni rol",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 1,
+      "fragmento": "'use server'"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 13,
+      "fragmento": "export async function runPreflightChecks(botId: string): Promise<PreflightCheck[]> {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 19,
+      "fragmento": "'ADMIN: preflight — lectura del bot por id (super-admin, cualquier org)',"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 123,
+      "fragmento": "message: `Numero: +${bot.whatsappNumber}`,"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx",
+      "linea": 140,
+      "fragmento": "const checks = await runPreflightChecks(bot.id)"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbots/[botId]/actions.ts",
+      "linea": 30,
+      "fragmento": "if (!session?.user || session.user.role !== 'SUPER_ADMIN') {"
+     }
+    ],
+    "impacto": "La función se importa desde un client component, así que es un endpoint público: quien tenga el id de la action (está en el JS de /admin/chatbots/[botId]) y el cuid de un bot puede leer sin sesión el estado de configuración de un bot de cualquier organización (completitud de la KB, número de WhatsApp, color, cuota). El escape unsafeGlobalQuery dice 'super-admin' pero nada lo exige. Viola la regla 'verificar sesión y rol en cada Server Action'. Las precondiciones (id de la action y del bot) lo dejan en MEDIA.",
+    "propuesta": "Llamar requireSuperAdmin() al inicio y validar botId con Zod; sacar canActivate del archivo 'use server' (es una función pura); repetir el preflight en el servidor dentro de la action que activa.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.activar-bot-preflight",
+     "lib.chatbot.admin",
+     "lib.isolation",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "[D1-c2] Server action exportada que escribe estado o auditoría sin chequear rol"
+   },
+   {
+    "titulo": "Health del chatbot en verde con la credencial de Vertex vencida",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/health/checkHealth.ts",
+      "linea": 48,
+      "fragmento": "const provider = getLLMProvider()"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/health/checkHealth.ts",
+      "linea": 49,
+      "fragmento": "const models = provider.listModels()"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/llm/providers/google.ts",
+      "linea": 63,
+      "fragmento": "if (!credPath && !credJson) {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/health/buildHealthVerdict.ts",
+      "linea": 125,
+      "fragmento": ": 'Todos los sistemas responden. El bot está listo para recibir consultas.'"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/config/envValidator.ts",
+      "linea": 35,
+      "fragmento": "name: 'GOOGLE_APPLICATION_CREDENTIALS',"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbot/health/page.tsx",
+      "linea": 146,
+      "fragmento": "Verificar que CHATBOT_GOOGLE_API_KEY sea válida y la Generative Language API esté"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/health/LatencyChart.tsx",
+      "linea": 144,
+      "fragmento": ": 'El gráfico se llena automáticamente con cada conversación. Aún no hay respuestas medidas en las últimas 24h.'"
+     }
+    ],
+    "impacto": "Con la credencial vencida (hecho conocido) el chequeo de LLM sólo instancia el proveedor (que mira si la variable existe) y cuenta modelos: /admin/chatbot/health dice 'Todo OK — el bot está listo' y el gráfico de latencia muestra un 'Sin datos aún' neutro. develOP no se entera por esta pantalla de que ningún bot responde. Además el validador marca obligatoria GOOGLE_APPLICATION_CREDENTIALS aunque producción usa GOOGLE_VERTEX_CREDENTIALS_JSON (falso rojo si falta) y la acción sugerida apunta a una API key legacy.",
+    "propuesta": "Sumar al health (sólo SUPER_ADMIN, cacheada) una prueba autenticada barata contra Vertex, marcar la credencial como 'una de dos', corregir el texto de la acción y tratar 'cero respuestas en 24 h con conversaciones abiertas' como advertencia.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-health.latencia-p50-p95",
+     "lib.chatbot.health",
+     "int.vertex"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5-A4; 'Sandbox Probar prompt: burbuja vacía'"
+   },
+   {
+    "titulo": "Sandbox 'Probar prompt': burbuja vacía si falla el proveedor y prueba distinta de producción",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx",
+      "linea": 46,
+      "fragmento": "message: userMsg.content,"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx",
+      "linea": 160,
+      "fragmento": "{message.content || (streaming && index === messages.length - 1 ? '...' : '')}"
+     },
+     {
+      "ruta": "src/app/api/admin/chatbot/test-prompt/route.ts",
+      "linea": 50,
+      "fragmento": "const rawModel = provider.getModel('gemini-2.5-flash')"
+     },
+     {
+      "ruta": "src/app/api/admin/chatbot/test-prompt/route.ts",
+      "linea": 99,
+      "fragmento": "return result.toTextStreamResponse()"
+     },
+     {
+      "ruta": "node_modules/ai/dist/index.mjs",
+      "linea": 6826,
+      "fragmento": "onError = ({ error }) => {"
+     },
+     {
+      "ruta": "node_modules/ai/dist/index.mjs",
+      "linea": 8156,
+      "fragmento": "if (part.type === \"text-delta\") {"
+     }
+    ],
+    "impacto": "Los errores que llegan dentro del stream (credencial vencida, cuota de Vertex, timeout) se descartan: textStream sólo deja pasar text-delta y el onError por defecto hace console.error crudo, fuera de Sentry. El admin ve una burbuja vacía. Además el sandbox manda sólo el último mensaje, fija proveedor y modelo, no pasa tools ni pack vertical: lo que se prueba no es lo que contesta el bot en producción.",
+    "propuesta": "Pasar onError a streamText (Sentry + sanitizado) y devolver un marcador de error que el cliente muestre; enviar el historial de la prueba; resolver modelo, tools y pack con la misma lógica que el runtime.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.probar-prompt",
+     "lib.chatbot.llm",
+     "int.vertex",
+     "int.sentry"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5-A4; PLAN-221"
+   },
+   {
+    "titulo": "Avanzado y resumen del alta muestran modelo, temperatura, tokens y cuota que el runtime ignora",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+      "linea": 56,
+      "fragmento": "<Field label=\"Temperature\" hint=\"0 es mas determinista, 2 es mas creativo\">"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+      "linea": 77,
+      "fragmento": "<Field label=\"Quota mensual\">"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 713,
+      "fragmento": "const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 952,
+      "fragmento": "temperature: 0.7,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 345,
+      "fragmento": "if (quota.conversationsUsed >= plan.quota) {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/llm/providers/anthropic.ts",
+      "linea": 18,
+      "fragmento": "throw new ProviderNotImplementedError('anthropic')"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+      "linea": 304,
+      "fragmento": "<LlmFact label=\"Quota\" value=\"1000 conv/mes\" />"
+     },
+     {
+      "ruta": "src/lib/plan/fallback.ts",
+      "linea": 50,
+      "fragmento": "quota: 500,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 151,
+      "fragmento": "if (bot.monthlyQuota > 0) {"
+     }
+    ],
+    "impacto": "develOP edita modelo, temperatura, tokens máximos y cuota y los ve guardados, pero el runtime usa plan.llmModel, temperatura fija 0,7, el máximo por defecto del proveedor y plan.quota. Elegir Anthropic u OpenAI degrada en silencio a Gemini. Un cliente creado con el asistente no tiene Subscription y corre en PLAN_FALLBACK (500 conversaciones, 1 dominio, sin CRM) mientras el resumen y el preflight le muestran 1000 conv/mes; las alertas de cuota también usan el campo legacy (detectBotIssues.ts:68).",
+    "propuesta": "Por campo: honrar temperature y maxOutputTokens en streamText o mostrarlos como sólo lectura con el valor efectivo; reemplazar 'Quota mensual' por la cuota del plan; ocultar proveedores no implementados; mostrar en el alta el plan efectivo y ofrecer asignarlo.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config-bot",
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "lib.chatbot.llm",
+     "lib.plan",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-179; PLAN-199; PLAN-217"
+   },
+   {
+    "titulo": "Prompts proactivos y mapa de color por ruta no llegan al widget de los clientes",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx",
+      "linea": 34,
+      "fragmento": "<Field label=\"Prompts proactivos\" hint=\"Mensajes por ruta. Usa / como default visual general.\">"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx",
+      "linea": 41,
+      "fragmento": "<Field label=\"Mapa de color por ruta\" hint=\"Permite contextualizar el color del widget por pagina\">"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+      "linea": 22,
+      "fragmento": "if (proactivePrompts['default']?.length) return proactivePrompts['default']"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/config/getPublicConfig.ts",
+      "linea": 121,
+      "fragmento": "routeColorMap: (bot.routeColorMap as unknown as RouteColorMap) ?? {},"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+      "linea": 296,
+      "fragmento": "onClick={() => chatbot.sendMessage(qr.promptToSend)}"
+     }
+    ],
+    "impacto": "El widget embebido que se vende a los negocios (ChatbotEmbed) no lee proactivePrompts ni routeColorMap: sólo el compañero del sitio de develOP (LogicCompanion) muestra prompts proactivos y nadie usa el mapa de colores. Además el hint dice que '/' es el default, pero el tooltip busca la clave 'default'. Lo que develOP configura para un cliente no se ve.",
+    "propuesta": "Ocultar ambos editores para bots de clientes hasta cablearlos en el embed, o cablearlos (color por ruta y tooltip proactivo en ChatbotEmbed); corregir el hint y usar 'default' como clave del editor.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config-bot",
+     "h3.vis-widget-cliente",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "Registro de cambios C/P1 (color por ruta no llega al widget)"
+   },
+   {
+    "titulo": "El alta con chatbot no carga dominios: el bot queda 'activo' pero el widget no carga en el sitio del cliente",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step1Company.tsx",
+      "linea": 115,
+      "fragmento": "<label className=\"block text-sm text-zinc-400 mb-1\">URL del sitio web (opcional)</label>"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 134,
+      "fragmento": "siteUrl: parsed.websiteUrl,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 165,
+      "fragmento": "isActive: true,"
+     },
+     {
+      "ruta": "src/lib/security/validate-origin.ts",
+      "linea": 78,
+      "fragmento": "if (bot.allowedDomains.length === 0) {"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+      "linea": 350,
+      "fragmento": "? 'El cliente se creará y el bot quedará activo inmediatamente.'"
+     }
+    ],
+    "impacto": "El asistente pide la web del cliente pero no la agrega a allowedDomains; el bot nace activo con la lista vacía y validateOrigin lo bloquea en cualquier sitio que no sea develop.com.ar. La pantalla final promete 'activo inmediatamente' y el preflight tampoco revisa dominios. Bloqueante para entregar el primer cliente sin un paso manual que nadie indica.",
+    "propuesta": "Sembrar allowedDomains con el host normalizado de websiteUrl (y su www.) al crear; sumar un check de dominios al preflight; ajustar el texto final y enlazar a Instalación.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "h3.vis-widget-cliente",
+     "lib.security",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "El preflight de activación sólo se respeta en el cliente: toggle, bulk y alta activan sin chequeos",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/activation/ActivationModal.tsx",
+      "linea": 137,
+      "fragmento": "disabled={!canActivate || loading}"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbots/[botId]/actions.ts",
+      "linea": 44,
+      "fragmento": "data: { isActive: newActive },"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbots/bulk-actions.ts",
+      "linea": 80,
+      "fragmento": "data: { isActive: true },"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/preflightChecks.ts",
+      "linea": 170,
+      "fragmento": "export async function canActivate(checks: PreflightCheck[]): Promise<boolean> {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 165,
+      "fragmento": "isActive: true,"
+     }
+    ],
+    "impacto": "El modal deshabilita el botón con checks en rojo, pero toggleBotActiveAction no vuelve a correr el preflight, bulkActivateBotsAction activa en lote sin chequeos y el asistente crea el bot ya activo. Un bot sin KB o con bienvenida vacía puede quedar respondiendo en producción; canActivate no se usa del lado servidor.",
+    "propuesta": "Mover la decisión al servidor: toggleBotActiveAction y bulkActivateBotsAction corren runPreflightChecks y rechazan con 'fail'; el asistente crea el bot pausado o pasa por el mismo preflight.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.activar-bot-preflight",
+     "lib.chatbot.admin",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "verticalPack no se puede asignar desde el producto: todo bot nuevo queda en 'base'",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 1329,
+      "fragmento": "verticalPack String @default(\"base\")"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 625,
+      "fragmento": "const verticalPack = getVerticalPack(bot.verticalPack)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 188,
+      "fragmento": "industry: parsed.industry,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+      "linea": 19,
+      "fragmento": "const SaveBotConfigInputSchema = z.object({"
+     },
+     {
+      "ruta": "prisma/seeds/backfill-vertical-pack.ts",
+      "linea": 71,
+      "fragmento": "export const VERTICAL_PACK_BACKFILL_MAP: Readonly<Record<string, string>> = {"
+     }
+    ],
+    "impacto": "El pack decide scoring, intents y copy de tools, pero ni el asistente, ni createBot, ni el editor lo exponen o lo derivan de la industria (0 coincidencias en admin/onboarding). Una concesionaria nueva atiende con el pack 'base' salvo que alguien corra un script contra la base; ni el cliente ni develOP pueden cambiarlo desde el producto.",
+    "propuesta": "Derivar verticalPack de la industria al crear (concesionaria -> usados) y exponerlo en Avanzado con las claves del registry; dejar el script sólo para los 3 bots históricos.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "h3.adm-chatbots.editar-config-bot",
+     "lib.chatbot.verticals",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A6; PLAN-226"
+   },
+   {
+    "titulo": "Editor de config sin validación en el cliente: el error vuelve como JSON crudo de Zod",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx",
+      "linea": 65,
+      "fragmento": "label: '',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx",
+      "linea": 136,
+      "fragmento": "onChange({ ...value, [key]: [''] })"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+      "linea": 15,
+      "fragmento": "label: z.string().min(1).max(40),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+      "linea": 74,
+      "fragmento": "return { success: false, error: 'Invalid input: ' + parsed.error.message }"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+      "linea": 100,
+      "fragmento": "error: (error: Error) => `Error: ${error.message}`,"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step4Appearance.tsx",
+      "linea": 16,
+      "fragmento": "const optHexValid = (color: string | null) => !color || HEX_RE.test(color)"
+     }
+    ],
+    "impacto": "'Agregar respuesta' y 'Agregar ruta' crean filas vacías que el servidor rechaza, igual que un color tipeado a medias (el asistente sí lo valida, el editor no). El admin recibe un toast con el JSON de issues de Zod, sin campo marcado, y el modal de diff queda abierto. Viola 'validación en cliente y servidor con feedback visible'.",
+    "propuesta": "Validar en el cliente con el mismo schema antes de abrir el diff, marcar los campos inválidos y devolver desde el servidor un mensaje legible (como zodErrorToMessage del alta).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config-bot",
+     "lib.chatbot.admin"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Acciones gemelas por id y por slug divergieron: la que usa la UI devuelve err.message crudo",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveKnowledgeBase.ts",
+      "linea": 86,
+      "fragmento": "// PRIVACIDAD: sanitizado — el try cubre knowledgeBase.update con la KB"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts",
+      "linea": 70,
+      "fragmento": "const msg = err instanceof Error ? err.message : 'Unknown error'"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+      "linea": 139,
+      "fragmento": "const msg = err instanceof Error ? err.message : 'Unknown error'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbots/[botId]/tabs/KnowledgeTab.tsx",
+      "linea": 25,
+      "fragmento": "orgSlug={bot.organization.slug}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+      "linea": 79,
+      "fragmento": "const result = orgSlug"
+     }
+    ],
+    "impacto": "Las acciones por id sanitizan y loguean; las por slug (las únicas que alcanza la UI, porque ConfigTab y KnowledgeTab siempre pasan orgSlug) devuelven el mensaje crudo de Prisma —que según el propio comentario puede ecoar la KB o el email de notificaciones— y no dejan rastro. Hay dos schemas Zod copiados que ya pueden divergir y dos endpoints públicos para lo mismo.",
+    "propuesta": "Una sola action por recurso (resolver por slug o id dentro), con sanitizeErrorMessage y chatbotLog; borrar las ramas muertas del editor.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config-bot",
+     "h3.adm-chatbots.editar-kb",
+     "lib.chatbot.admin"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "[D1-c1] Mensajes internos de error devueltos al cliente"
+   },
+   {
+    "titulo": "Alta de cliente: en producción el admin ve un error genérico en vez del motivo",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 116,
+      "fragmento": "if (existingUser) throw new Error('El email ingresado ya está registrado en el sistema.')"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 104,
+      "fragmento": "if (!result.success) throw new Error(zodErrorToMessage(result.error))"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+      "linea": 66,
+      "fragmento": "if (existingUser) throw new Error('El email ingresado ya está registrado en el sistema.')"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+      "linea": 111,
+      "fragmento": "setError(err instanceof Error ? err.message : 'Error al crear el cliente.')"
+     },
+     {
+      "ruta": "node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js",
+      "linea": 2,
+      "fragmento": "An error occurred in the Server Components render. The specific message is omitted in production builds"
+     }
+    ],
+    "impacto": "Las acciones del alta lanzan con throw errores de negocio esperados; en un build de producción el mensaje llega reemplazado por uno genérico con digest. Con un email repetido o un dato inválido develOP ve 'An error occurred in the Server Components render…' y no sabe qué corregir; cada intento además cuenta como error.",
+    "propuesta": "Devolver { ok: false, error } para los casos esperados (email existente, validación) y reservar throw para lo inesperado; el paso 5 ya muestra el texto.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "h4.adm-clientes.alta-cliente-sin-bot",
+     "lib.chatbot.admin"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Alta con bot: la contraseña temporal sólo vuelve después del envío por Brevo",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 123,
+      "fragmento": "const created = await unsafeGlobalQuery("
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 238,
+      "fragmento": "const emailResult = await sendTransactionalEmail({"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 265,
+      "fragmento": "tempPassword,"
+     },
+     {
+      "ruta": "src/lib/email/brevo-service.ts",
+      "linea": 27,
+      "fragmento": "const result = await client.transactionalEmails.sendTransacEmail({"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+      "linea": 140,
+      "fragmento": "Password temporal — cópiala ahora, no se vuelve a mostrar"
+     }
+    ],
+    "impacto": "La transacción ya commiteó org, usuario y bot; recién después se espera a Brevo (sin timeout propio) y a dos auditorías. Si la función expira o Brevo cuelga, el admin recibe un error, el cliente existe con una contraseña que nadie conoce y reintentar el alta falla por email duplicado. Nueva aparición del patrón ya visto en createClientOnly.",
+    "propuesta": "Devolver las credenciales antes del email (enviarlo con after() o una cola) o acotar el envío con timeout; ofrecer 'reenviar credenciales' si falló.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "int.brevo"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "[D1-c3] Mutación en la base y después envío por Brevo dentro de la respuesta"
+   },
+   {
+    "titulo": "ActivityLog consulta cada 3 s aunque la pestaña esté oculta",
+    "prefijo": "PERF",
+    "severidad": "MEDIA",
+    "tipo": "perf",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/ActivityLog.tsx",
+      "linea": 103,
+      "fragmento": "const interval = setInterval(async () => {"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/ActivityLog.tsx",
+      "linea": 123,
+      "fragmento": "}, 3000)"
+     },
+     {
+      "ruta": "src/app/api/admin/chatbot/events/route.ts",
+      "linea": 8,
+      "fragmento": "const session = await auth()"
+     },
+     {
+      "ruta": "src/app/api/admin/chatbot/events/route.ts",
+      "linea": 17,
+      "fragmento": "const bot = await prisma.botConfig.findUnique({ where: { slug }, select: { id: true, organizationId: true } })"
+     }
+    ],
+    "impacto": "Cada pestaña abierta en Actividad (global o por bot) hace 20 invocaciones por minuto (28.800 por día) con auth y dos queries a Neon, aunque esté en segundo plano: mantiene la base despierta y consume cuota de invocaciones de Netlify. Una pestaña olvidada un fin de semana suma más de 80.000 llamadas. Además los 401 por sesión vencida se ignoran en silencio.",
+    "propuesta": "Pausar con document.visibilityState, backoff cuando no hay eventos y cortar ante 401 con aviso; o revalidar a demanda.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-actividad.stream-eventos",
+     "h3.adm-chatbots.actividad-por-bot",
+     "int.neon"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Reintento de sync CRM disparado sin esperar en una función serverless",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+      "linea": 73,
+      "fragmento": "void syncLeadToCrm({ leadId, trigger: 'manual' }).catch((err: unknown) => {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+      "linea": 79,
+      "fragmento": "return { ok: true as const }"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/integrations/RetrySyncButton.tsx",
+      "linea": 21,
+      "fragmento": "toast.success('Reintento disparado. En unos segundos se actualiza el historial.')"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts",
+      "linea": 6,
+      "fragmento": "* Si el proceso muere entre crear un CrmSyncAttempt PENDING y marcar SUCCESS/FAILED"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+      "linea": 500,
+      "fragmento": "void syncLeadToCrm({ leadId: result.id, trigger: 'auto' }).catch((err: unknown) => {"
+     }
+    ],
+    "impacto": "La action responde antes de que corra el sync; en Netlify la ejecución puede congelarse al devolver la respuesta y el POST al n8n del cliente no sale o queda a medias (el propio código asume procesos que mueren y marca PENDING viejos como FAILED a los 5 min). El admin ve 'Reintento disparado' y el lead sigue sin llegar al CRM; el fallo sólo va a console.error. El sync automático tras capturar un lead usa el mismo patrón.",
+    "propuesta": "Usar after() de next/server (o await con timeout corto) en el sync manual y el automático, registrar fallos en Sentry y refrescar el historial al terminar.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.historial-sync-crm",
+     "lib.chatbot.crm",
+     "int.n8n",
+     "modelo.CrmSyncAttempt"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Dominios permitidos sin normalizar ni tope visible del plan",
+    "prefijo": "UX",
+    "severidad": "MEDIA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+      "linea": 142,
+      "fragmento": "next[idx] = e.target.value"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts",
+      "linea": 56,
+      "fragmento": "allowedDomains: z.array(z.string().max(253)).max(50),"
+     },
+     {
+      "ruta": "src/lib/security/origin-matcher.ts",
+      "linea": 39,
+      "fragmento": "if (originHost === clean) return true"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/degradedResponse.ts",
+      "linea": 68,
+      "fragmento": "effective: botAllowedDomains.slice(0, planMaxDomains),"
+     },
+     {
+      "ruta": "src/lib/plan/fallback.ts",
+      "linea": 57,
+      "fragmento": "maxDomains: 1,"
+     }
+    ],
+    "impacto": "Un dominio con mayúscula, espacio final o ruta ('Cliente.com.ar ', 'cliente.com.ar/contacto') nunca matchea el host del Origin y el widget queda bloqueado sin aviso; las filas vacías se guardan y ocupan cupo. El editor deja cargar 50 dominios sin mostrar que el plan (1 en fallback) sólo habilita los primeros N: el resto queda degradado en silencio.",
+    "propuesta": "Normalizar en servidor (trim, minúsculas, sin esquema, ruta ni vacíos) y validar formato de host; mostrar 'X de N dominios del plan' y marcar los excedentes.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config-bot",
+     "lib.security",
+     "modelo.BotConfig"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-197"
+   },
+   {
+    "titulo": "/api/chatbot/[slug]/health es público y expone variables de entorno y errores internos",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/chatbot/[slug]/health/route.ts",
+      "linea": 12,
+      "fragmento": "const health = await checkChatbotHealth(slug)"
+     },
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 172,
+      "fragmento": "matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password'],"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/health/checkHealth.ts",
+      "linea": 35,
+      "fragmento": "dbCheck = { ok: false, error: error instanceof Error ? error.message : 'unknown' }"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/health/checkHealth.ts",
+      "linea": 74,
+      "fragmento": "botCheck = { ok: false, error: `Bot with slug \"${slug}\" not found` }"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/health/index.ts",
+      "linea": 2,
+      "fragmento": "// endpoint /smoke (GET público que quemaba una llamada real a Vertex por hit,"
+     }
+    ],
+    "impacto": "Sin sesión ni rate limit, cualquiera obtiene el listado de variables de entorno del chatbot con su estado presente/obligatoria, los mensajes de error internos de la base y del proveedor, y si un slug existe o está pausado; cada request despierta Neon. No quema tokens (eso era /smoke, ya borrado), pero es la misma clase de superficie.",
+    "propuesta": "Exigir SUPER_ADMIN o token de monitoreo, responder a anónimos sólo {ok} y aplicar rate limit.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-api-chatbot",
+     "lib.chatbot.health",
+     "lib.proxy",
+     "int.neon"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "D5-A2"
+   },
+   {
+    "titulo": "Campos del editor y del alta sin etiqueta asociada ni errores anunciados",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/Field.tsx",
+      "linea": 15,
+      "fragmento": "<label className=\"flex items-center gap-1 text-sm font-medium text-zinc-200\">"
+     },
+     {
+      "ruta": "src/components/ui/Field.tsx",
+      "linea": 32,
+      "fragmento": "htmlFor={fieldId}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/ColorPicker.tsx",
+      "linea": 27,
+      "fragmento": "type=\"color\""
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step1Company.tsx",
+      "linea": 74,
+      "fragmento": "<label className=\"block text-sm text-zinc-400 mb-1\">Nombre de la empresa</label>"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+      "linea": 312,
+      "fragmento": "<div className=\"rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200\">"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/AvatarUploader.tsx",
+      "linea": 96,
+      "fragmento": "{error && <p className=\"mt-1.5 text-xs text-red-400\">{error}</p>}"
+     }
+    ],
+    "impacto": "El editor usa un Field local que no vincula el label (sin htmlFor ni contexto) mientras el del kit sí; Inputs, Selects, ColorPicker y Slider de los 5 tabs quedan sin nombre accesible. En el alta los labels tampoco apuntan a sus inputs, y los errores (paso 5, inline y del uploader, que se reusa en el portal del cliente) no tienen role=alert. Con lector de pantalla no se puede completar la configuración.",
+    "propuesta": "Reemplazar config/Field y config/Input por los del kit (asocian label y describedby), envolver los inputs del alta en Field del kit y agregar role=alert/aria-live a los errores.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config-bot",
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "[D1-c1] Bloques de error sin role=alert/aria-live"
+   },
+   {
+    "titulo": "triggerTransition del sitio público usado en el portal admin",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+      "linea": 11,
+      "fragmento": "import { useTransitionContext } from '@/context/TransitionContext'"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+      "linea": 183,
+      "fragmento": "triggerTransition("
+     },
+     {
+      "ruta": "src/context/TransitionContext.tsx",
+      "linea": 118,
+      "fragmento": "router.push(target);"
+     }
+    ],
+    "impacto": "CLAUDE.md reserva triggerTransition para el sitio público (el Shutter no existe en portales); acá navega al bot recién creado con 300 ms de demora y un router.push sin comentario que lo justifique. Funciona, pero rompe la convención de navegación del portal y arrastra el estado de animación del sitio.",
+    "propuesta": "Usar <Link> a /admin/chatbots/[id] (o router.push con comentario si se quiere imperativo post-submit).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Modales propios sin semántica de diálogo y botones solo-ícono sin aria-label",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/activation/ActivationModal.tsx",
+      "linea": 71,
+      "fragmento": "<button type=\"button\" onClick={onClose} className=\"rounded-xl p-2 hover:bg-white/[0.05]\">"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/activation/ActivationModal.tsx",
+      "linea": 54,
+      "fragmento": "className=\"w-full max-w-xl overflow-hidden rounded-3xl border border-white/10 bg-zinc-950\""
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/kb/SaveConfirmModal.tsx",
+      "linea": 35,
+      "fragmento": "className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm\""
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx",
+      "linea": 188,
+      "fragmento": "<Send className=\"h-4 w-4\" strokeWidth={1.5} />"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx",
+      "linea": 99,
+      "fragmento": "<Trash2 className=\"h-4 w-4\" strokeWidth={1.5} />"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+      "linea": 158,
+      "fragmento": "<Trash2 size={13} strokeWidth={1.5} />"
+     }
+    ],
+    "impacto": "ActivationModal, BotConfigDiffModal, SaveConfirmModal y TestPromptSandbox no tienen role=dialog/aria-modal, Escape ni manejo de foco; 9 botones de cerrar, enviar, limpiar y borrar no tienen aria-label. SaveConfirmModal y el sandbox no van por portal y su z-50 queda debajo de la sidebar (z-110). ActivationModal no tiene max-h ni scroll: en pantallas bajas 'Activar bot' puede quedar fuera de vista.",
+    "propuesta": "Unificar en un modal accesible (role=dialog, aria-modal, foco inicial y Escape) y agregar aria-label a los botones solo-ícono. El Modal del kit tampoco tiene role=dialog ni Escape y es FROZEN: decisión para Valentino.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.activar-bot-preflight",
+     "h3.adm-chatbots.editar-kb",
+     "h3.adm-chatbots.probar-prompt",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Texto funcional en zinc-600 y zinc-500 por debajo de AA",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/ActivityLog.tsx",
+      "linea": 209,
+      "fragmento": "<div className=\"rounded-[28px] border border-white/10 bg-white/[0.02] py-16 text-center text-sm text-zinc-600\">"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/ActivityLog.tsx",
+      "linea": 194,
+      "fragmento": "<span className=\"hidden text-[11px] text-zinc-600 sm:inline\">"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step2BotIdentity.tsx",
+      "linea": 56,
+      "fragmento": "<p className=\"text-xs text-zinc-600 mt-1\">"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+      "linea": 144,
+      "fragmento": "<span className=\"ml-3 text-xs text-zinc-600\">{exposedCount} campos editables expuestos</span>"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/ColorPicker.tsx",
+      "linea": 51,
+      "fragmento": "<p className=\"mb-2 text-xs text-zinc-500\">Sugerencias</p>"
+     }
+    ],
+    "impacto": "Cuenta: luminancia de #52525b 0,0859, de #71717a 0,1673 y del fondo #080a0c 0,0029 -> zinc-600 ≈2,6:1 y zinc-500 ≈4,1:1, contra 4,5:1 de AA. Quedan bajo el umbral el estado vacío del stream, el aviso de pausa, el contador de caracteres y las ayudas; ColorPicker y el uploader se reusan en el portal del cliente.",
+    "propuesta": "Texto funcional en zinc-400 (≈7,7:1); 500/600 sólo decorativo. Revisar el token en el design system.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-actividad.stream-eventos",
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "lib.ui"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "[D1-c1] Texto funcional en text-zinc-600/700 sobre #080a0c"
+   },
+   {
+    "titulo": "El stream de actividad puede perder eventos entre consultas",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/ActivityLog.tsx",
+      "linea": 116,
+      "fragmento": "lastFetchRef.current = data.serverTime ?? new Date().toISOString()"
+     },
+     {
+      "ruta": "src/app/api/admin/chatbot/events/route.ts",
+      "linea": 21,
+      "fragmento": "? await listEventsSince(bot.organizationId, bot.id, new Date(since))"
+     },
+     {
+      "ruta": "src/app/api/admin/chatbot/events/route.ts",
+      "linea": 35,
+      "fragmento": "serverTime: new Date().toISOString(),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/queries.ts",
+      "linea": 54,
+      "fragmento": "where: { botConfigId, createdAt: { gt: since } },"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/queries.ts",
+      "linea": 56,
+      "fragmento": "take: limit,"
+     }
+    ],
+    "impacto": "El próximo 'since' es la hora del servidor tomada después de la query, no el createdAt del último evento: lo creado entre la query y ese instante, o lo que pase de 50 en una ráfaga de 3 s, no aparece nunca en vivo (sólo al recargar). Un 'since' inválido da un 500 sin manejar.",
+    "propuesta": "Usar como cursor el createdAt (e id) del último evento recibido, paginar hasta vaciar y validar 'since' con Zod.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-actividad.stream-eventos",
+     "lib.chatbot.admin",
+     "modelo.ChatbotEvent"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Gráficos de actividad y latencia mezclan todas las orgs, cortan en UTC y muestrean filas arbitrarias",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/getActivityChartData.ts",
+      "linea": 15,
+      "fragmento": "c.chatbotEvent.findMany({"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/getActivityChartData.ts",
+      "linea": 30,
+      "fragmento": "const key = new Date(event.createdAt).toLocaleDateString('es-AR', {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+      "linea": 82,
+      "fragmento": "take: 2000,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/getLatencyHistory.ts",
+      "linea": 25,
+      "fragmento": "return d.toLocaleString('es-AR', {"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbot/activity/page.tsx",
+      "linea": 34,
+      "fragmento": "slug=\"develop\""
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/health/LatencyChart.tsx",
+      "linea": 160,
+      "fragmento": "Datos reales"
+     }
+    ],
+    "impacto": "Actividad muestra el stream del bot develop junto a un gráfico de eventos de todas las organizaciones; Health rotula 'Velocidad del bot · Datos reales' sobre la latencia de todas las orgs. Los buckets usan la zona del servidor (UTC en Netlify), 3 horas corridos respecto de Argentina, y con más de 2000 respuestas en 24 h los percentiles salen de filas sin orden definido (MH.1 sin hacer).",
+    "propuesta": "Decidir el encuadre (bot develop o plataforma) y filtrar acorde; agrupar en la base por día/hora con America/Argentina/Buenos_Aires (helper dates-ar); ordenar por createdAt desc o calcular percentiles en SQL.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-actividad.grafico-semanal",
+     "h3.adm-health.latencia-p50-p95",
+     "lib.chatbot.admin"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A8"
+   },
+   {
+    "titulo": "El editor marca 'cambios sin guardar' al abrir bots con respuestas rápidas sin id",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+      "linea": 52,
+      "fragmento": "const [initialState, setInitialState] = useState<BotConfigEditorState>(() => normalizeInitial(initial))"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+      "linea": 53,
+      "fragmento": "const [state, setState] = useState<BotConfigEditorState>(() => normalizeInitial(initial))"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+      "linea": 288,
+      "fragmento": "id: typeof record.id === 'string' ? record.id : crypto.randomUUID(),"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+      "linea": 61,
+      "fragmento": "() => JSON.stringify(state) !== JSON.stringify(initialState),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
+      "linea": 48,
+      "fragmento": "return replies.map((reply) => ({"
+     }
+    ],
+    "impacto": "Dos normalizaciones independientes generan UUID distintos para cada respuesta rápida sin id (las que guarda el cliente desde su panel y las del seed del bot develop): la barra 'Tenés cambios sin guardar' aparece al abrir el editor y el diff muestra 'Respuestas rápidas' modificadas sin que nadie tocara nada.",
+    "propuesta": "Normalizar una sola vez y reusar el objeto para ambos estados, o derivar ids determinísticos; que updateBotAppearance preserve o genere ids.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config-bot",
+     "h3.cli-chatbot"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "El borrador del alta se guarda vacío y muestra 'onboarding sin terminar' sin haber empezado",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts",
+      "linea": 28,
+      "fragmento": "didRestore.current = true"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts",
+      "linea": 60,
+      "fragmento": "if (!didRestore.current) return"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/useOnboardingDraft.ts",
+      "linea": 70,
+      "fragmento": "localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx",
+      "linea": 115,
+      "fragmento": "{hasDraft && ("
+     }
+    ],
+    "impacto": "El efecto de restauración marca didRestore antes de que corra el de autoguardado en el mismo commit, así que abrir /admin/clients/new y quedarse un segundo guarda el estado inicial como borrador; 'Descartar' también lo vuelve a guardar. En la visita siguiente aparece el banner de onboarding sin terminar sobre un formulario vacío.",
+    "propuesta": "Guardar sólo si el estado difiere de INITIAL_STATE (o tras una edición del usuario) y no re-guardar tras descartar.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.borrador-alta"
+    ],
+    "requiere_verificacion_humana": true
+   },
+   {
+    "titulo": "Paso 3 del alta: la plantilla no cambia si después se cambia la industria",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx",
+      "linea": 10,
+      "fragmento": "if (!state.businessInfo) {"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx",
+      "linea": 23,
+      "fragmento": "}, [state.industry]) // Only run if industry changes or on mount (if empty)"
+     }
+    ],
+    "impacto": "Si se visita el paso 3 y se vuelve al 1 a corregir la industria, la KB y las respuestas rápidas siguen siendo de la industria anterior (sólo se aplica con businessInfo vacío) y nada lo avisa; el comentario promete lo contrario.",
+    "propuesta": "Al cambiar la industria con KB cargada, ofrecer reemplazar la plantilla con confirmación o marcar la diferencia.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.plantilla-kb-industria"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "'Probar conexión' del CRM prueba la URL guardada, no la que se está editando",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx",
+      "linea": 37,
+      "fragmento": "const canTest = hasIntegration && webhookUrl.length > 0"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/integrations/testCrmConnection.ts",
+      "linea": 51,
+      "fragmento": "const integration = await forOrg(organizationId).crmIntegration.findFirst()"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/integrations/testCrmConnection.ts",
+      "linea": 75,
+      "fragmento": "webhookUrl: integration.webhookUrl,"
+     }
+    ],
+    "impacto": "El botón se habilita con la URL del input pero la prueba usa la de la base: si develOP cambia la URL y prueba antes de guardar, ve 'Conexión OK' de la URL vieja.",
+    "propuesta": "Deshabilitar la prueba con cambios sin guardar o mandar la URL editada (validada) a testCrmConnection.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.integracion-crm",
+     "int.n8n"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "El selector de avatar monta todos los avatares 3D a la vez",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/avatar/AvatarPicker.tsx",
+      "linea": 84,
+      "fragmento": "{AVATAR_REGISTRY.map((entry) => ("
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/AvatarPicker.tsx",
+      "linea": 211,
+      "fragmento": "<AvatarRenderer"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
+      "linea": 940,
+      "fragmento": "dpr={[1, 2]}"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx",
+      "linea": 76,
+      "fragmento": "avatarStyle: 'legacy_neuro',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/tabs/AppearanceTab.tsx",
+      "linea": 40,
+      "fragmento": "<AvatarPicker"
+     }
+    ],
+    "impacto": "El tab Apariencia y el paso 4 renderizan cada avatar del registry con su propio Canvas, más los del preview, sin pausar los que no están en foco; el legacy usa dpr hasta 2 (CLAUDE.md fija 1,5). El registro de cambios ya anota el 'freeze del AvatarPicker'. En equipos modestos la pantalla se traba.",
+    "propuesta": "Miniaturas estáticas y Canvas sólo para el avatar con hover o seleccionado (frameloop='demand' para el resto); dpr [1, 1.5].",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config-bot",
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "lib.chatbot.avatar"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-184; PLAN-207"
+   },
+   {
+    "titulo": "El widget de develOP saluda con 'Protocolo de consultoría iniciado… ¿Cómo puedo asistirle?'",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 311,
+      "fragmento": "Sistema Listo"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/chat/ChatWindow.tsx",
+      "linea": 321,
+      "fragmento": "Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?"
+     }
+    ],
+    "impacto": "El estado vacío del chat del sitio de develOP usa jerga de sistema y 'usted', contra el voseo del resto del widget. B13.5 lo dio por inexistente; sigue en el código.",
+    "propuesta": "Reemplazar por un saludo en voseo o por el welcomeMessage del bot.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-widget-develop"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D5-A5"
+   },
+   {
+    "titulo": "Ciclos de dependencia de sólo tipos en plantillas de KB y detalle del bot",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts",
+      "linea": 3,
+      "fragmento": "export interface KBTemplate {"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts",
+      "linea": 14,
+      "fragmento": "import { legalTemplate } from './legal'"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/onboarding/kb-templates/concesionaria.ts",
+      "linea": 1,
+      "fragmento": "import type { KBTemplate } from './index'"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/chatbots/[botId]/tabs/ConfigTab.tsx",
+      "linea": 4,
+      "fragmento": "import type { BotWithDetails } from '../BotDetailClient'"
+     },
+     {
+      "ruta": ".dependency-cruiser.cjs",
+      "linea": 27,
+      "fragmento": "tsPreCompilationDeps: true,"
+     }
+    ],
+    "impacto": "depcruise sigue en 22 ciclos (10 de kb-templates, los del detalle del bot y los de lead-pipeline). Son de tipos, sin efecto en runtime, pero ensucian el reporte y traban extraer el módulo.",
+    "propuesta": "Mover KBTemplate y BotWithDetails/MappedEvent a sus propios types.ts.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.plantilla-kb-industria",
+     "h3.adm-chatbots"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "ARQ-01 (auditoría maestra)"
+   },
+   {
+    "titulo": "Higiene del editor: contador fijo, label faltante, industria no canónica y ramas muertas",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+      "linea": 318,
+      "fragmento": "return 28"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+      "linea": 47,
+      "fragmento": "industry: 'generic',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/config/BotConfigDiffModal.tsx",
+      "linea": 37,
+      "fragmento": "leadNotificationMode: 'Modo de notificación',"
+     },
+     {
+      "ruta": "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+      "linea": 72,
+      "fragmento": "if (onSave) {"
+     }
+    ],
+    "impacto": "'28 campos editables expuestos' es un número fijo (hoy son 29); el diff muestra 'allowedDomains' crudo porque falta en FIELD_LABELS; el default 'generic' no existe en el vocabulario canónico (industries.ts:11 'generico'); onSave y la rama sin orgSlug nunca se usan.",
+    "propuesta": "Borrar o calcular el contador, completar FIELD_LABELS, usar 'generico' y eliminar onSave y las ramas por id.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots.editar-config-bot"
+    ],
+    "requiere_verificacion_humana": false
+   },
+   {
+    "titulo": "Validación del alta y del sandbox inconsistente con el resto de las acciones",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 34,
+      "fragmento": "userEmail: z.string().email(),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 44,
+      "fragmento": "businessInfo: z.string().min(20),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 57,
+      "fragmento": "avatarImageUrl: z.string().nullable(),"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+      "linea": 28,
+      "fragmento": "clientAvatarImageUrl: avatarImageUrlSchema,"
+     },
+     {
+      "ruta": "src/app/api/admin/chatbot/test-prompt/route.ts",
+      "linea": 21,
+      "fragmento": "kbDraft: z.record(z.string(), z.string()),"
+     }
+    ],
+    "impacto": "El email no se normaliza (el login sí); el teléfono y las 7 secciones de KB no tienen máximo (saveKnowledgeBase sí: 10.000–50.000); el avatar del bot acepta cualquier string sin el schema de URL/data-URL ni el tope de 600 KB que la misma acción aplica al avatar del cliente; el teléfono vacío se guarda como '' y el paso 2 muestra '/500' sin limitar el textarea. Es entrada de SUPER_ADMIN, por eso BAJA.",
+    "propuesta": "Reusar avatarImageUrlSchema, los máximos de saveKnowledgeBase y la normalización de email del login en createClientWithBot/createClientOnly y en el sandbox.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.alta-cliente-con-bot",
+     "h3.adm-chatbots.probar-prompt",
+     "lib.chatbot.admin"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "[D1-c1] Alta de usuarios sin normalizar el email; [D1-c3] Texto libre sin .max() que termina en el prompt"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.editar-config-bot",
+    "nombre": "Editar la configuración del bot",
+    "descripcion": "SUPER_ADMIN edita identidad, apariencia, estilo, comportamiento y avanzado del bot, revisa el diff y guarda.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+     "src/modules/chatbot/components/admin/config/ConfigTabs.tsx",
+     "src/modules/chatbot/components/admin/config/BotConfigDiffModal.tsx",
+     "src/modules/chatbot/components/admin/config/tabs/IdentityTab.tsx",
+     "src/modules/chatbot/components/admin/config/tabs/AppearanceTab.tsx",
+     "src/modules/chatbot/components/admin/config/tabs/StyleTab.tsx",
+     "src/modules/chatbot/components/admin/config/tabs/BehaviorTab.tsx",
+     "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx",
+     "src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz: ConfigTab.tsx:54 -> BotConfigEditor.tsx:222 -> BotConfigDiffModal.tsx:148 -> BotConfigEditor.tsx:87-95 -> saveBotConfigByOrgSlug.ts:71-117 ($transaction) -> :119 invalidateBotCache -> :136 revalidatePath.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin saveBotConfigByOrgSlug.ts:71; org por slug del bot (:80-83), cross-org por diseño de admin."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Listas vacías muestran sólo 'Agregar…' (BehaviorTab.tsx:112-120); dominios vacíos con aviso (AdvancedTab.tsx:173-179)."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Toast con JSON de Zod o err.message crudo (saveBotConfigByOrgSlug.ts:74, :139; BotConfigEditor.tsx:100)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "toast.promise loading (BotConfigEditor.tsx:97-99), 'Guardando...' (BotConfigDiffModal.tsx:153), [botId]/loading.tsx."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod completo saveBotConfigByOrgSlug.ts:19-57 (dominios sin normalizar)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 lg:grid-cols-[...] (BotConfigEditor.tsx:135), tabs flex-wrap (ConfigTabs.tsx:23), barra fija ancho completo en mobile (BotConfigEditor.tsx:207)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Render -> [botId]/error.tsx -> SectionErrorBoundary captureException; fallos de guardado sólo toast, sin log (saveBotConfigByOrgSlug.ts:138-140)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Contador fijo '28' (BotConfigEditor.tsx:318); knobs sin efecto (AdvancedTab.tsx:48-85, BehaviorTab.tsx:34-46)."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna de develOP."
+     }
+    },
+    "entradas": [
+     "saveBotConfigByOrgSlug",
+     "saveBotConfig",
+     "sendTestNotification"
+    ]
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.editar-kb",
+    "nombre": "Editar la base de conocimiento",
+    "descripcion": "Editor markdown por sección con búsqueda, validación heurística, aviso de placeholders y diff antes de guardar.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/KnowledgeBaseEditor.tsx",
+     "src/modules/chatbot/components/admin/kb/MarkdownEditor.tsx",
+     "src/modules/chatbot/components/admin/kb/KBSearch.tsx",
+     "src/modules/chatbot/components/admin/kb/KBValidation.tsx",
+     "src/modules/chatbot/components/admin/kb/SaveConfirmModal.tsx",
+     "src/modules/chatbot/components/admin/kb/DiffViewer.tsx",
+     "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "KnowledgeTab.tsx:22-29 -> KnowledgeBaseEditor.tsx:186 -> SaveConfirmModal.tsx:87 -> KnowledgeBaseEditor.tsx:127-141 -> saveKnowledgeBaseByOrgSlug.ts:24-50 (forOrg(org.id).knowledgeBase.update :48).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin saveKnowledgeBaseByOrgSlug.ts:24; escritura scoped :48."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "KBValidation.tsx:11-18; MarkdownEditor.tsx:81 '*(vacio)*'; KBSearch.tsx:73-76."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "err.message crudo (saveKnowledgeBaseByOrgSlug.ts:70) en toast (KnowledgeBaseEditor.tsx:146)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "toast.promise (KnowledgeBaseEditor.tsx:143-145), 'Guardando...' (SaveConfirmModal.tsx:92)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod con máximos saveKnowledgeBaseByOrgSlug.ts:10-19."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 lg (KnowledgeBaseEditor.tsx:160); split sólo en lg (MarkdownEditor.tsx:65)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Boundary de [botId] captura render; fallos de guardado no se reportan."
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Placeholders sólo avisados visualmente (MarkdownEditor.tsx:48-63), no bloquean."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    },
+    "entradas": [
+     "saveKnowledgeBaseByOrgSlug",
+     "saveKnowledgeBase"
+    ]
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.probar-prompt",
+    "nombre": "Probar prompt con la KB en borrador",
+    "descripcion": "Chat de prueba contra el LLM con la KB sin guardar.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx",
+     "src/app/api/admin/chatbot/test-prompt/route.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "KnowledgeBaseEditor.tsx:178 -> TestPromptSandbox.tsx:33-83 -> test-prompt/route.ts:28-99. Hoy no responde con la credencial de Vertex vencida (burbuja vacía).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin route.ts:28; no toca la base."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "TestPromptSandbox.tsx:131-134."
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Burbuja vacía ante error del stream (:160); String(error) crudo (:87)."
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "'...' mientras llega (:160) e input deshabilitado (:179); sin spinner."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod sin max en kbDraft/botName (route.ts:19-25)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "max-w-2xl max-h-[85vh] flex-col (TestPromptSandbox.tsx:108)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (route.ts:106) y onError por defecto del SDK."
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Proveedor y modelo fijos (route.ts:42, :50), un solo turno (TestPromptSandbox.tsx:45-46), sin tools."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    },
+    "entradas": [
+     "POST /api/admin/chatbot/test-prompt"
+    ]
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.activar-bot-preflight",
+    "nombre": "Activar el bot con chequeos previos",
+    "descripcion": "Antes de activar corre checks de configuración y los muestra en un modal.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/activation/ActivationModal.tsx",
+     "src/modules/chatbot/server/admin/preflightChecks.ts",
+     "src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx",
+     "src/app/(protected)/admin/chatbots/[botId]/actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "BotDetailClient.tsx:227 -> :140 runPreflightChecks -> ActivationModal.tsx:82-84 -> :136 -> BotDetailClient.tsx:165 -> actions.ts:42-44 update isActive -> :69 invalidateBotCache.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "no",
+      "evidencia": "runPreflightChecks sin auth (preflightChecks.ts:13-25)."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Lista fija de checks."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "toast con String(error) (BotDetailClient.tsx:144); error.message de la action (actions.ts:96)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "'Activando...' (ActivationModal.tsx:141)."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod en toggle (actions.ts:36-39); botId del preflight sin validar."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Modal sin max-h ni scroll (ActivationModal.tsx:54)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Sólo render por boundary."
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Cuota legacy (preflightChecks.ts:151-157); sin chequeo de placeholders ni dominios."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    },
+    "entradas": [
+     "runPreflightChecks",
+     "canActivate"
+    ]
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.integracion-crm",
+    "nombre": "Configurar y probar el webhook n8n",
+    "descripcion": "develOP carga URL, header de auth cifrado y activa el sync de leads; puede probar la conexión.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/integrations/CrmIntegrationAdminCard.tsx",
+     "src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx",
+     "src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts",
+     "src/modules/chatbot/server/admin/integrations/testCrmConnection.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "IntegrationsTab.tsx:36 -> CrmIntegrationAdminCard.tsx:29-73 -> CrmConfigForm.tsx:39-66 -> saveCrmIntegration.ts:30-139 -> :151-168 audit + revalidatePath.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (saveCrmIntegration.ts:30, testCrmConnection.ts:22) y forOrg (:80, :51)."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Gate de plan (CrmIntegrationAdminCard.tsx:31-61); 'Sin secret configurado' (CrmConfigForm.tsx:135-137)."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "toast.error(result.error) (CrmConfigForm.tsx:63, :76)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Button loading (CrmConfigForm.tsx:194, :202)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod strict + validateWebhookUrl (saveCrmIntegration.ts:17-25, :60-63)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap (CrmConfigForm.tsx:133, :190)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Fallos manejados no se reportan."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "La configura develOP (CC.2)."
+     }
+    },
+    "entradas": [
+     "saveCrmIntegration",
+     "testCrmConnection"
+    ]
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.historial-sync-crm",
+    "nombre": "Historial de syncs y reintento",
+    "descripcion": "Lista los últimos intentos de sync al CRM y permite reintentar los fallidos.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/integrations/CrmSyncHistoryList.tsx",
+     "src/modules/chatbot/components/admin/integrations/CrmSyncBadge.tsx",
+     "src/modules/chatbot/components/admin/integrations/RetrySyncButton.tsx",
+     "src/modules/chatbot/server/admin/integrations/retryCrmSync.ts",
+     "src/modules/chatbot/server/admin/integrations/getCrmSyncHistory.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "CrmIntegrationAdminCard.tsx:72 getOrgSyncHistory -> CrmSyncHistoryList.tsx:39-79 -> RetrySyncButton.tsx:17-25 -> retryCrmSync.ts:24-79.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (retryCrmSync.ts:24, getCrmSyncHistory.ts:89) y forOrg."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "EmptyStateMuted (CrmSyncHistoryList.tsx:26-35)."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "toast.error (RetrySyncButton.tsx:23); 'No se pudo cargar el historial' (CrmIntegrationAdminCard.tsx:131-133)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "'Reintentando…' (RetrySyncButton.tsx:42)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod strict (retryCrmSync.ts:14-19)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "min-w-0 y truncate (CrmSyncHistoryList.tsx:44-66)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (retryCrmSync.ts:74)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Datos reales."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    },
+    "entradas": [
+     "retryCrmSync"
+    ]
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.email-prueba-notificacion",
+    "nombre": "Email de prueba de notificación de lead",
+    "descripcion": "Manda un email de prueba al destinatario de notificaciones configurado.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/BotConfigEditor.tsx",
+     "src/modules/chatbot/server/admin/sendTestNotification.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "BotConfigEditor.tsx:156-164 -> :112-131 -> sendTestNotification.ts:17-83 (Brevo).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin (sendTestNotification.ts:17)."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Botón deshabilitado sin email con tooltip (BotConfigEditor.tsx:148-159)."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Mensajes legibles (sendTestNotification.ts:76-81)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "toast.promise loading (BotConfigEditor.tsx:126-128)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "Zod (:11-14) y rate limit (:23-31)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Header flex-col sm:flex-row (BotConfigEditor.tsx:137)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "El fallo de envío sólo vuelve al toast y al audit."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "El lead de prueba es explícito."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    },
+    "entradas": [
+     "sendTestNotification"
+    ]
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.actividad-por-bot",
+    "nombre": "Actividad del bot en vivo (tab)",
+    "descripcion": "Stream de eventos del bot con filtros y metadata expandible.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/ActivityLog.tsx",
+     "src/modules/chatbot/components/admin/activity/ActivityDateFilter.tsx",
+     "src/modules/chatbot/components/admin/activity/activityFilters.ts",
+     "src/app/api/admin/chatbot/events/route.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "[botId]/page.tsx:67 listRecentEvents -> ActivityTab.tsx:12 -> ActivityLog.tsx:101-125 -> events/route.ts:8-36.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Ruta SUPER_ADMIN (events/route.ts:8-11); queries con forOrg (queries.ts:36-60)."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ActivityLog.tsx:208-211."
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Fallos de polling tragados (:120-122) y 401 silencioso (:117-118)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "[botId]/loading.tsx."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "since sin validar (events/route.ts:15, :21)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Filtros w-full en mobile (:149, :157); pre overflow-x-auto (:279)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Polling sin captura."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Eventos reales."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    },
+    "entradas": [
+     "GET /api/admin/chatbot/events"
+    ]
+   },
+   {
+    "herramienta": "h3.adm-actividad",
+    "id": "h3.adm-actividad.stream-eventos",
+    "nombre": "Activity Log del bot develOP",
+    "descripcion": "Stream global de eventos del bot 'develop' con polling.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/ActivityLog.tsx",
+     "src/app/(protected)/admin/chatbot/activity/page.tsx",
+     "src/app/api/admin/chatbot/events/route.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "activity/page.tsx:10-19 -> ActivityLog.tsx:33-45 -> polling :101-125 -> events/route.ts.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "La página no tiene auth propia y lee prisma confiando en admin/layout (activity/page.tsx:9-19); la ruta de polling sí exige SUPER_ADMIN."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "ActivityLog.tsx:208-211."
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "Polling silencioso (:120-122)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "admin/chatbot/activity/loading.tsx."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "since sin validar."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Barra de filtros flex-wrap (ActivityLog.tsx:148)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "admin/error.tsx captura render; polling no."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Datos reales."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-actividad",
+    "id": "h3.adm-actividad.grafico-semanal",
+    "nombre": "Gráfico de eventos por día",
+    "descripcion": "Área de eventos de los últimos 7 días.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/activity/ActivityChart.tsx",
+     "src/modules/chatbot/server/admin/getActivityChartData.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "activity/page.tsx:12 -> getActivityChartData.ts:12-37 -> ActivityChart.tsx:18-79.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Página sin auth propia; agrega todas las orgs (getActivityChartData.ts:12-19)."
+     },
+     "vacios": {
+      "cumple": "no",
+      "evidencia": "Sin estado vacío: con cero eventos muestra una línea plana."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "admin/error.tsx."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "activity/loading.tsx."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "ResponsiveContainer (ActivityChart.tsx:29)."
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "SectionErrorBoundary con captureException."
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Rotulado como del bot y con días en UTC."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-health",
+    "id": "h3.adm-health.latencia-p50-p95",
+    "nombre": "Latencia P50/P95 por hora",
+    "descripcion": "Gráfico de latencia de respuestas de las últimas 24 h con estado vacío/insuficiente.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/health/LatencyChart.tsx",
+     "src/modules/chatbot/server/admin/getLatencyHistory.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "health/page.tsx:11-14 -> getLatencyHistory.ts:63-143 -> LatencyChart.tsx:28-59.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Página sin auth propia; datos de todas las orgs (getLatencyHistory.ts:68-84)."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "EmptyState (LatencyChart.tsx:124-148)."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "admin/error.tsx."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "health/loading.tsx."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "ResponsiveContainer (LatencyChart.tsx:65)."
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "Boundary con captureException."
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "'Datos reales' sobre todas las orgs y muestra arbitraria (take 2000)."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.alta-cliente-con-bot",
+    "nombre": "Alta de cliente con chatbot",
+    "descripcion": "Asistente de 5 pasos que crea org, usuario admin, bot activo y KB, y muestra la contraseña temporal.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx",
+     "src/modules/chatbot/components/admin/onboarding/Step1Company.tsx",
+     "src/modules/chatbot/components/admin/onboarding/Step2BotIdentity.tsx",
+     "src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx",
+     "src/modules/chatbot/components/admin/onboarding/Step4Appearance.tsx",
+     "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+     "src/modules/chatbot/server/admin/createClientWithBot.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "clients/new/page.tsx:14 -> OnboardingWizard.tsx:87-160 -> Step5Review.tsx:66-86 -> createClientWithBot.ts:96-273 -> Step5Review.tsx:123-193.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin createClientWithBot.ts:96."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario de alta."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Mensaje genérico en producción (Step5Review.tsx:111); aviso de email no enviado (:174-178)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner 'Creando...' (Step5Review.tsx:331-338)."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod (:22-68) sin max en KB/teléfono, avatar del bot sin schema (:57), email sin normalizar (:34)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid-cols-1 lg (OnboardingWizard.tsx:125); preview oculto en mobile (:154)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Throw -> onRequestError; fallo de email sólo en audit."
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Plantillas con datos inventados y {{...}}; LLM y cuota fijos (Step5Review.tsx:300-306)."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna; el bot creado no carga sin cargar dominios a mano."
+     }
+    },
+    "entradas": [
+     "createClientWithBot"
+    ]
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.alta-cliente-sin-bot",
+    "nombre": "Alta de cliente sin chatbot",
+    "descripcion": "Variante del asistente que crea sólo org y usuario admin.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/onboarding/Step1Company.tsx",
+     "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+     "src/modules/chatbot/server/admin/createClientOnly.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Step1Company.tsx:58-69 -> Step5Review.tsx:87-108 -> createClientOnly.ts:48-175.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin createClientOnly.ts:48."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Formulario."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "Mensaje genérico en producción (throw :55, :66)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "Spinner (Step5Review.tsx:331-338)."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Zod (:19-29); email sin normalizar, teléfono sin max."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Layout de una columna."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Throw -> onRequestError; email fallido sólo en audit."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    },
+    "entradas": [
+     "createClientOnly"
+    ]
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.borrador-alta",
+    "nombre": "Borrador automático del alta",
+    "descripcion": "Guarda el estado del asistente en localStorage 7 días y ofrece continuarlo o descartarlo.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/onboarding/DraftBanner.tsx",
+     "src/modules/chatbot/components/admin/onboarding/OnboardingWizard.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "useOnboardingDraft.ts:26-56 restaura, :59-78 autoguarda; DraftBanner.tsx:12-42; OnboardingWizard.tsx:115-121.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Local al navegador del admin."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Sin colección."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "try/catch silencioso (useOnboardingDraft.ts:53-55, :72-74)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sincrónico."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "No va al servidor."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "DraftBanner flex con shrink-0 (DraftBanner.tsx:16-25)."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Local."
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "Guarda borradores vacíos y muestra el banner igual."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.avatar-cliente",
+    "nombre": "Avatar del cliente",
+    "descripcion": "Imagen comprimida en el navegador, emoji o iniciales para la organización; se reusa en el perfil del portal.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/client-avatar/ClientAvatarField.tsx",
+     "src/modules/chatbot/components/admin/client-avatar/ClientAvatar.tsx",
+     "src/modules/chatbot/components/admin/config/tabs/AvatarUploader.tsx",
+     "src/modules/chatbot/components/admin/config/EmojiPickerField.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "ClientAvatarField.tsx:24-83 -> AvatarUploader.tsx:19-66 (WebP 200 px) -> createClientWithBot.ts:28-30 / EditClientForm -> ClientAvatar.tsx:16-75.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Lo persisten acciones con requireSuperAdmin (createClientWithBot.ts:96)."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Fallback a ícono (ClientAvatar.tsx:64-75)."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "Mensajes de formato/tamaño (AvatarUploader.tsx:47-63); sin role=alert (:96)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "'Procesando…' (AvatarUploader.tsx:94)."
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "avatarImageUrlSchema (avatarImageUrlSchema.ts:12-24)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Flex con gap; panel de emoji clampado al viewport (EmojiPickerField.tsx:49-65)."
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "Errores del navegador no se reportan."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin datos fijos."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "El cliente también lo edita desde su perfil (ProfileForms.tsx:234)."
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.plantilla-kb-industria",
+    "nombre": "Plantilla de KB por industria",
+    "descripcion": "Prellena las 7 secciones de la KB y las respuestas rápidas según la industria elegida.",
+    "archivos": [
+     "src/modules/chatbot/components/admin/onboarding/Step3KnowledgeBase.tsx",
+     "src/modules/chatbot/components/admin/onboarding/ExpandableTextField.tsx",
+     "src/modules/chatbot/components/admin/onboarding/kb-templates/index.ts",
+     "src/modules/chatbot/components/admin/onboarding/kb-templates/generico.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Step3KnowledgeBase.tsx:9-23 getTemplate -> kb-templates/index.ts:25-40 -> createClientWithBot.ts:192-202; también createBot.ts:58, :93-102 y lib/onboarding/core.ts:7.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Contenido estático."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Fallback a generico (kb-templates/index.ts:39)."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Sin IO."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sincrónico."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Sólo largo mínimo (Step3KnowledgeBase.tsx:25-32; createClientWithBot.ts:44-50)."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Textareas full-width y modal de edición (ExpandableTextField.tsx:60-86)."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin IO."
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Afirmaciones inventadas y {{placeholders}} (generico.ts:28, restaurant.ts:33)."
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "Herramienta interna."
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-209",
+    "clave": "Bloquear activación de bot con {{placeholders}} sin completar",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "preflightChecks.ts:13-168 sin chequeo de placeholders; MarkdownEditor.tsx:48-63 sólo banda visual; git grep -nF '{{' origin/main -- src/modules/chatbot/server src/lib/onboarding src/modules/chatbot/shared -> vacío (control: 10 archivos de kb-templates con '{{').",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Además el asistente crea el bot activo (createClientWithBot.ts:165)."
+   },
+   {
+    "id": "PLAN-195",
+    "clave": "Cargar datos reales de Matsu en lugar del scaffolding",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "scripts/seed-matsu.ts:27-45 sigue con USER_NAME '(scaffolding)', BOT_NAME 'Aki' y el objeto SCAFFOLDING.",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Los datos reales pueden estar en la base (no verificable leyendo)."
+   },
+   {
+    "id": "PLAN-197",
+    "clave": "Mostrar dominios usados vs permitidos (X de N)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -n maxDomains -- src/app src/modules/chatbot/components -> sólo PlanAssignmentCard.tsx:112 (selector de plan); AdvancedTab.tsx:164-179 sin contador.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-199",
+    "clave": "BotConfig.llmModel editable en admin pero ignorado",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "AdvancedTab.tsx:48-54 sigue editable; handleChatRequest.ts:713 usa plan.llmModel.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-200",
+    "clave": "Pendientes de verificación de B7",
+    "estado_en_codigo": "parcial",
+    "evidencia": "El código existe (AppearanceTab.tsx:36-67, BotConfigPreview.tsx:162,186); la verificación humana no deja rastro en código.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-203",
+    "clave": "Ejecutar el dedupe de la KB de develOP",
+    "estado_en_codigo": "parcial",
+    "evidencia": "scripts/b9-4-dedupe-kb-develop.mjs está versionado; si corrió no se puede verificar leyendo.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-208",
+    "clave": "Topbar del editor de bot muestra 'Detalle'",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "admin-topbar.tsx:12-13 devuelve 'Detalle' para segmentos tipo cuid; :40-41 lo usa como título.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-184",
+    "clave": "Freeze del AvatarPicker con varios canvas 3D",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "AvatarPicker.tsx:84-93 y :211-217 montan todos los avatares; LegacyNeuroAvatar.tsx:940 dpr [1,2]; git grep IntersectionObserver en avatar/preview -> vacío.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-222",
+    "clave": "Vista admin read-only de CrmIntegration",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "CrmIntegrationAdminCard.tsx:63-137 es una vista admin editable (CC.2) con historial de 10 intentos y reintento, no read-only de 20.",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Superado por la decisión de que develOP configure el CRM."
+   },
+   {
+    "id": "PLAN-228",
+    "clave": "Hidratación reduced-motion en BotsListClient",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "BotsListClient.tsx:4 useReducedMotion de motion/react, :35, :159 initial={reduce ? false : 'hidden'}.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-231",
+    "clave": "Subidor de avatar del bot (storage + POST avatar-upload)",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "Reemplazado por base64 en DB comprimido en el navegador (AvatarUploader.tsx:6-39, avatarImageUrlSchema.ts:3-24); no existe /api/admin/chatbot/avatar-upload (ls-tree).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-224",
+    "clave": "Paginación de conversaciones y leads del chatbot",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "[botId]/page.tsx:67-70 listRecentEvents/listLeadsForBot/listConversationsForBot con 100 fijo, sin cursor.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-226",
+    "clave": "Backfill de verticalPack en bots reales",
+    "estado_en_codigo": "parcial",
+    "evidencia": "prisma/seeds/backfill-vertical-pack.ts:71-75 (develop->agencia, sanmiguel->usados, matsu->usados); ejecución no verificable; los caminos de alta no asignan pack.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-210",
+    "clave": "Quick replies de concesionaria del bot demo",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "kb-templates/concesionaria.ts:63-68 sigue con quick replies temáticos; scripts/_b13-2-fix-demo-bots.mjs sin cambios.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-211",
+    "clave": "Borrar bot bench-matsu de prod y scripts throwaway",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Siguen versionados scripts/_b14-2-cleanup-bench-prod.ts, _b14-2-*.mjs, _b14-analyze.mjs, _b14-dev.log y un JSON de corrida (ls-tree).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-217",
+    "clave": "BotConfig.llmModel editable sin efecto",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "AdvancedTab.tsx:48-85 (modelo, temperatura, tokens, cuota) vs handleChatRequest.ts:713, :952, :345.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-219",
+    "clave": "Endpoint demo-chat sin caller ni UI",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep demo-chat fuera de su carpeta -> sólo un comentario en test-prompt/route.ts:45; demo-chat/[slug]/route.ts:14,44 usa prisma directo.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-220",
+    "clave": "Insights sin dedup entre corridas + timeout del cron",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Hay guard anti-spam de PENDING (tests/integration/generate-insights-pending-guard.spec.ts) pero generateInsights.ts:118-125 crea sin dedup y netlify/functions/generate-insights-cron.ts:33 sigue en 20_000 ms.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-191",
+    "clave": "Flake e2e 07-admin-navigation en rutas del bot develop",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tests/e2e/07-admin-navigation.spec.ts:4-8 test.skip si la navegación no estabiliza; :38 sigue navegando la ruta deprecada /admin/clients/[slug]/chatbot.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "El self-skip vuelve verde un fallo real."
+   },
+   {
+    "id": "PLAN-179",
+    "clave": "C3.3 knobs que no mientan",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "handleChatRequest.ts:952 temperature fija 0.7, sin maxOutputTokens; AdvancedTab.tsx:56-85 sin rótulo legacy.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-204",
+    "clave": "Enum-izar campos visuales de BotConfig",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "prisma/schema.prisma:1293-1297 borderRadius/surfaceStyle/position/fontStyle/bubbleStyle siguen String.",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "schema.prisma es FROZEN."
+   },
+   {
+    "id": "PLAN-229",
+    "clave": "Combobox de industria y métricas ricas",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "IdentityTab.tsx:32-38 Select plano; LocationTypeahead sólo en admin/leads/_components; OverviewTab.tsx:119 sólo costo mensual total.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-207",
+    "clave": "Sin IntersectionObserver para pausar el Canvas 3D del preview",
+    "estado_en_codigo": "hecho",
+    "evidencia": "BotConfigPreview.tsx:162,186 montan AvatarRenderer sin IntersectionObserver (decisión aplicada).",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Contradice la regla de CLAUDE.md de IntersectionObserver en animaciones pesadas."
+   },
+   {
+    "id": "PLAN-178",
+    "clave": "La KB nunca se auto-actualiza",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git grep de knowledgeBase.update/create/upsert: sólo alta (core.ts:140, createBot.ts:93, createClientWithBot.ts:192), seeds y acciones SUPER_ADMIN (saveKnowledgeBase.ts:52, saveKnowledgeBaseByOrgSlug.ts:48); insights no escriben la KB.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-237",
+    "clave": "Ruta canónica /admin/chatbots",
+    "estado_en_codigo": "hecho",
+    "evidencia": "admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:15-38 hace permanentRedirect a /admin/chatbots/[id].",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-206",
+    "clave": "B13.0 Preview del editor de bot con avatar vivo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "BotConfigPreview.tsx:162,186 AvatarRenderer; BotConfigEditor.tsx:185-187; metadata técnica en AdvancedTab.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-190",
+    "clave": "PA-3/PA-4 bulk actions en batch",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "bulk-actions.ts:18-62 y :64-108 siguen en loop serial con logAdminAction por bot; logAdminActionsBatch no existe en main (sólo en origin/b0-isolation-motor-chatbot).",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "El registro lo da por hecho; el trabajo vive en una rama sin mergear."
+   },
+   {
+    "id": "PLAN-185",
+    "clave": "B1: eliminar bot, bulk y overview",
+    "estado_en_codigo": "hecho",
+    "evidencia": "[botId]/actions.ts:110-174 (SUPER_ADMIN + Zod + audit BOT_DELETED); bulk-actions.ts:163-175 (Zod BulkBotIdsSchema); BulkActionBar.tsx:9,180-202 ConfirmDialog.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-187",
+    "clave": "B3: convertedToOsLeadId, BOT_DELETED y badge persistente",
+    "estado_en_codigo": "hecho",
+    "evidencia": "schema.prisma:192 BOT_DELETED, :1510 convertedToOsLeadId; actions.ts:146; ConvertChatbotLeadButton.tsx:20.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-236",
+    "clave": "Admin v1.0",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Asistente (OnboardingWizard.tsx), /admin/chatbots/new (CreateBotForm), detalle con 8 tabs (BotDetailClient.tsx:91-100) y config de 5 tabs (ConfigTabs.tsx:6-12), KB con preview (MarkdownEditor.tsx:65-85), Instalación, dominios (AdvancedTab.tsx:126-180), bulk, alertas (detectBotIssues.ts:55-227).",
+    "sigue_teniendo_sentido": "si",
+    "nota": "'5 tabs' hoy son 8 en el detalle."
+   },
+   {
+    "id": "PLAN-227",
+    "clave": "Lote 1 chatbots admin",
+    "estado_en_codigo": "hecho",
+    "evidencia": "BulkActionBar.tsx:9,180 ConfirmDialog; deleteBotAction/bulkDeleteBotsAction con audit.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-230",
+    "clave": "Lote 2 chatbots admin (UI)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "KBValidation.tsx:13,69 glass; BehaviorTab.tsx:84-87 emoji en respuestas; BotConfigEditor.tsx:185 preview sticky; ActivityLog.tsx:224-242 metadata togglable.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-233",
+    "clave": "Transcript expandible de conversaciones",
+    "estado_en_codigo": "hecho",
+    "evidencia": "[botId]/transcript-action.ts:23 getConversationTranscriptAction; components/dashboards/ConversationsTable.tsx con expandable.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-235",
+    "clave": "Lote 2.1 (fecha AR en LeadsTable, toggle de card, header KB glass)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "components/dashboards/LeadsTable.tsx usa America/Argentina/Buenos_Aires; KnowledgeBaseEditor.tsx:166 header glass sticky.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-216",
+    "clave": "Test email e insights migrados a Brevo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "sendLeadNotification.ts:1,21 y sendInsightsNotification.ts:1,12 usan sendTransactionalEmail de brevo-service.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-221",
+    "clave": "CARRERAS commit 2: provider-close en rutas admin",
+    "estado_en_codigo": "hecho",
+    "evidencia": "test-prompt/route.ts:50-66 (wrapLanguageModel + createProviderStreamCloseMiddleware) y :100-110 (error genérico); demo-chat route.ts:7,72.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Los errores dentro del stream siguen sin manejo (ver hallazgo del sandbox)."
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D5-A1] onFinish: RB.3 quiere $transaction (mensaje, conversación, cuota); C3.4 quiere paralelizar los 3 writes",
+    "resultado": "parcial",
+    "evidencia": "Hoy los 3 writes van juntos y en serie en un único scope.$transaction (persistTurn.ts:412; chatMessage.create :434, conversation.update :446, incrementQuota :460) con retry acotado (reconcile.ts:30 PERSIST_TX_MAX_ATTEMPTS=2) y guard de idempotencia (persistTurn.ts:418-430). Si uno falla, rollback de los tres; agotado el retry, catch con Sentry.captureException (:552, :621) y se pierde el registro del turno (la respuesta ya salió). RB.3 está hecho; C3.4 no se aplicó y contradiría la transacción interactiva. Sin hallazgo nuevo en el lote."
+   },
+   {
+    "alerta": "[D5-A2] /smoke: GET público sin auth ni rate limit que quema tokens (RT-2)",
+    "resultado": "parcial",
+    "evidencia": "/smoke ya no existe: git ls-tree -r --name-only origin/main -- src/app | grep -i smoke -> vacío; commit 02a2f812 'deprecar el endpoint smoke publico'; health/index.ts:1-5 lo documenta. RT-2 cerrado. Queda el hermano GET /api/chatbot/[slug]/health público (route.ts:6-19; proxy.ts:172 no matchea /api) sin auth ni rate limit, que devuelve variables de entorno y errores internos.",
+    "hallazgo_titulo": "/api/chatbot/[slug]/health es público y expone variables de entorno y errores internos"
+   },
+   {
+    "alerta": "[D5-A3] Stream: verificar que el transform actual no puede colgar el stream ni pasar los 30 s",
+    "resultado": "parcial",
+    "evidencia": "createEmptyResponseFallbackTransform (reconcile.ts:484-535) no retiene chunks: encola todo en la misma invocación y no tiene flush, así que el cuelgue de 644b2b7 no puede volver por construcción. El techo de 30 s depende de watchdogs por inactividad (reconcile.ts:218 3000 ms, :267 12000 ms, :281 15000 ms para tools) y de presupuestos de hooks contra ROUTE_MAX_DURATION_MS (reconcile.ts:115, espejo manual del maxDuration de chat/route.ts:8). No hay reloj global sobre el stream: un proveedor que gotee un chunk cada <3 s, o la suma 12+15+12 s en 3 pasos, puede llegar al kill de la plataforma (HIPÓTESIS, requiere runtime). Fuera del lote; sin hallazgo."
+   },
+   {
+    "alerta": "[D5-A4] Vertex: 'key de Vertex expuesta en logs, pendiente de rotación'; credencial vencida como control positivo de E10",
+    "resultado": "parcial",
+    "evidencia": "No hay credenciales versionadas: git grep de marcadores de clave privada sólo encuentra placeholders comentados en .env.example:103,170 y patrones en docs (control: GOOGLE_VERTEX_CREDENTIALS_JSON aparece en .github/workflows/ci.yml, .env.example y docs). Lo de 'expuesta en logs' no se puede verificar leyendo; la rotación es operativa. Cómo se entera el sistema con la credencial vencida: el health da verde (checkHealth.ts:46-58, buildHealthVerdict.ts:120-125); el sandbox del admin muestra una burbuja vacía (test-prompt/route.ts:99, TestPromptSandbox.tsx:160); el visitante ve 'Se cortó la respuesta.' y 'Escribí de nuevo y seguimos.' (useChatbot.ts:133, DegradedBanner.tsx:25, PROBABLE). Vía de fuga posible (HIPÓTESIS): google.ts:82 hace JSON.parse del env y en Node 20+ el SyntaxError incluye un fragmento del texto.",
+    "hallazgo_titulo": "Health del chatbot en verde con la credencial de Vertex vencida"
+   },
+   {
+    "alerta": "[D5-A5] 'Protocolo de consultoría': B13.5 dice que no existía; BLOQUE VOZ lo encuentra en ChatWindow.tsx",
+    "resultado": "confirmada",
+    "evidencia": "El literal está en src/modules/chatbot/components/chat/ChatWindow.tsx:321 ('Protocolo de consultoría iniciado. ¿Cómo puedo asistirle hoy?') con 'Sistema Listo' en :311; B13.5 (bitácora:8905) se equivocó y BLOQUE VOZ (:16584) tenía razón.",
+    "hallazgo_titulo": "El widget de develOP saluda con 'Protocolo de consultoría iniciado… ¿Cómo puedo asistirle?'"
+   },
+   {
+    "alerta": "[D5-A6] EV.5 cerrado sin smokes; backfill de verticalPack cambia de bot según la fuente",
+    "resultado": "parcial",
+    "evidencia": "prisma/seeds/backfill-vertical-pack.ts:71-75 cubre los tres slugs de ambas fuentes (develop->agencia, sanmiguel->usados, matsu->usados): la discrepancia documental queda resuelta en código; si corrió en producción no se puede verificar leyendo. El cierre de EV.5 sin smokes es de proceso. En el producto no hay forma de asignar pack a bots nuevos (git grep verticalPack en admin/onboarding -> 0).",
+    "hallazgo_titulo": "verticalPack no se puede asignar desde el producto: todo bot nuevo queda en 'base'"
+   },
+   {
+    "alerta": "[D5-A7] Docstring 'GDPR-friendly' que el handoff declara falsa",
+    "resultado": "descartada",
+    "evidencia": "git grep -n -i gdpr origin/main -- src -> vacío; git log -S 'GDPR-friendly' muestra la remoción en 819b9e0e ('P2 unifica el hash de IP y aborta sin salt en prod'). Control positivo: hashIp sigue en src/modules/chatbot/server/safety/ipHash.ts:20 y 'GDPR' aparece en docs (2 archivos)."
+   },
+   {
+    "alerta": "[D5-A8] getLatencyHistory asignado al panel y al runtime (MH.1)",
+    "resultado": "confirmada",
+    "evidencia": "getLatencyHistory.ts:76-82 sigue con take: 2000 sin orderBy y agrega todas las orgs (:68-74 PENDIENTE-DECISIÓN). Su único consumidor es la página admin de health (health/page.tsx:3,13; LatencyChart.tsx y buildHealthVerdict.ts sólo importan el tipo), así que la doble asignación es irrelevante: MH.1 no se hizo.",
+    "hallazgo_titulo": "Gráficos de actividad y latencia mezclan todas las orgs, cortan en UTC y muestrean filas arbitrarias"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/modules/chatbot/components/admin/index.ts",
+    "senales": [
+     "Su único importador es src/modules/chatbot/index.ts:75-77 (re-export)",
+     "Ningún archivo importa KnowledgeBaseEditor/BotConfigEditor/ActivityLog/OnboardingWizard desde '@/modules/chatbot': el único import del barrel es dashboard/chatbot/page.tsx:9 (ChatbotUpsellLanding, ChatbotOverview)",
+     "ARQ-02 de la auditoría maestra: barrel cliente con 1 consumidor"
+    ],
+    "que_rompe": "Nada en runtime; hay que borrar también las 3 líneas de re-export de src/modules/chatbot/index.ts:75-77."
+   },
+   {
+    "archivo": "src/modules/chatbot/components/admin/config/Field.tsx",
+    "senales": [
+     "Duplica src/components/ui/Field.tsx sin asociar label y control (sin htmlFor ni FieldControlProvider)",
+     "Sólo lo usan los 5 tabs de config/tabs"
+    ],
+    "que_rompe": "Nada funcional si los tabs pasan al Field del kit; gana la asociación accesible."
+   },
+   {
+    "archivo": "src/modules/chatbot/components/admin/config/Input.tsx",
+    "senales": [
+     "Duplica src/components/ui/Input.tsx (mismos estilos) sin leer el contexto de Field",
+     "Usado sólo por AdvancedTab, BehaviorTab e IdentityTab"
+    ],
+    "que_rompe": "Nada funcional; cambian ids/aria a los del kit."
+   },
+   {
+    "archivo": "src/modules/chatbot/components/admin/config/Toggle.tsx",
+    "senales": [
+     "Fuera del lote listado pero en la misma carpeta",
+     "0 importadores: git grep \"Toggle['\\\"]\" sólo muestra el import del kit en CrmConfigForm.tsx:9 y el export de components/ui/index.ts:20"
+    ],
+    "que_rompe": "Nada."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Preflight sin sesión",
+    "entorno": "local (npm run dev) con un bot de prueba pausado",
+    "precondiciones": "Usuario SUPER_ADMIN de prueba",
+    "pasos": [
+     "Loguearse como SUPER_ADMIN y abrir /admin/chatbots/<botId> de un bot pausado",
+     "Abrir DevTools > Network y tocar 'Activar bot' (NO confirmar en el modal)",
+     "En la request POST con header Next-Action elegir 'Copy as cURL'",
+     "Ejecutar ese cURL en una terminal quitando el header Cookie"
+    ],
+    "esperado": "401, redirección o error sin datos",
+    "senal_falla": "Respuesta 200 con el array de checks (incluye 'Numero: +…' y la cuota)",
+    "escribe_db_o_email": false,
+    "hallazgos": "runPreflightChecks: server action exportada sin sesión ni rol"
+   },
+   {
+    "titulo": "Plantilla de KB sin editar",
+    "entorno": "local con base de prueba y credencial de Vertex válida, o deploy preview",
+    "precondiciones": "Puede faltar BREVO_API_KEY (el alta avisa que no mandó el email)",
+    "pasos": [
+     "Ir a /admin/clients/new, elegir 'Con chatbot' e industria 'Otro / Genérico'",
+     "Completar el paso 1 con datos de prueba y avanzar los pasos 2 a 4 sin tocar la KB",
+     "Crear el cliente",
+     "En el bot creado cargar el dominio de prueba en Avanzado si hace falta",
+     "Desde el widget preguntar '¿hacen envíos?' y '¿cuál es la dirección?'"
+    ],
+    "esperado": "El bot dice que no tiene esa información o deriva",
+    "senal_falla": "Responde 'realizamos envíos a todo el país' o muestra '{{DIRECCION_COMPLETA}}'",
+    "escribe_db_o_email": true,
+    "hallazgos": "Plantillas de KB con datos inventados y {{placeholders}} pasan el alta y el bot sale activo"
+   },
+   {
+    "titulo": "Health con la credencial vencida",
+    "entorno": "deploy actual (credencial de Vertex vencida)",
+    "pasos": [
+     "Entrar como SUPER_ADMIN a /admin/chatbot/health",
+     "Leer el veredicto y la sección 'LLM Provider'"
+    ],
+    "esperado": "Veredicto 'Problema' con el LLM marcado como caído",
+    "senal_falla": "'Todo OK' y 'LLM Provider' en verde",
+    "escribe_db_o_email": false,
+    "hallazgos": "Health del chatbot en verde con la credencial de Vertex vencida"
+   },
+   {
+    "titulo": "Sandbox con el proveedor caído",
+    "entorno": "deploy actual (credencial vencida)",
+    "pasos": [
+     "Abrir /admin/chatbots/<botId>?tab=knowledge",
+     "Tocar 'Probar prompt', escribir 'hola' y enviar"
+    ],
+    "esperado": "Un mensaje de error entendible",
+    "senal_falla": "Burbuja del asistente vacía, sin texto",
+    "escribe_db_o_email": false,
+    "hallazgos": "Sandbox 'Probar prompt': burbuja vacía si falla el proveedor"
+   },
+   {
+    "titulo": "Alta con email repetido en build de producción",
+    "entorno": "deploy preview (build de producción)",
+    "precondiciones": "Un usuario de prueba existente",
+    "pasos": [
+     "En /admin/clients/new elegir 'Sin chatbot'",
+     "Cargar el email del usuario existente y completar el resto",
+     "Crear el cliente"
+    ],
+    "esperado": "'El email ingresado ya está registrado en el sistema.'",
+    "senal_falla": "'An error occurred in the Server Components render…' u otro mensaje genérico",
+    "escribe_db_o_email": false,
+    "hallazgos": "Alta de cliente: en producción el admin ve un error genérico en vez del motivo"
+   },
+   {
+    "titulo": "Polling con la pestaña oculta",
+    "entorno": "local o deploy",
+    "pasos": [
+     "Abrir /admin/chatbot/activity con DevTools > Network filtrado por 'events'",
+     "Cambiar a otra pestaña 60 segundos",
+     "Volver y contar las requests"
+    ],
+    "esperado": "Sin requests mientras la pestaña estuvo oculta",
+    "senal_falla": "Unas 20 requests por minuto también en segundo plano",
+    "escribe_db_o_email": false,
+    "hallazgos": "ActivityLog consulta cada 3 s aunque la pestaña esté oculta"
+   },
+   {
+    "titulo": "Reintento de sync en Netlify",
+    "entorno": "deploy preview en Netlify con una org de plan Business",
+    "precondiciones": "Webhook de prueba (request bin) configurado y un sync FAILED en el historial",
+    "pasos": [
+     "En /admin/chatbots/<botId>?tab=integrations tocar 'Reintentar' en la fila FAILED",
+     "Esperar 1 minuto y recargar",
+     "Revisar el request bin"
+    ],
+    "esperado": "Un intento nuevo en el historial y un POST nuevo en el request bin",
+    "senal_falla": "Ningún POST nuevo, o intento PENDING que a los 5 min pasa a FAILED sin request",
+    "escribe_db_o_email": true,
+    "hallazgos": "Reintento de sync CRM disparado sin esperar en una función serverless"
+   },
+   {
+    "titulo": "Cambios fantasma en el editor",
+    "entorno": "local",
+    "pasos": [
+     "Abrir la config del bot develop del seed (o de un bot cuyas respuestas rápidas se guardaron desde el panel del cliente)",
+     "No tocar nada"
+    ],
+    "esperado": "Sin barra 'Tenés cambios sin guardar'",
+    "senal_falla": "Aparece la barra y el diff muestra 'Respuestas rápidas'",
+    "escribe_db_o_email": false,
+    "hallazgos": "El editor marca 'cambios sin guardar' al abrir bots con respuestas rápidas sin id"
+   },
+   {
+    "titulo": "Borrador vacío del alta",
+    "entorno": "local",
+    "pasos": [
+     "Abrir /admin/clients/new y esperar 2 segundos sin tocar nada",
+     "Ir a otra página del admin",
+     "Volver a /admin/clients/new"
+    ],
+    "esperado": "Sin banner",
+    "senal_falla": "Banner 'Tenés un onboarding sin terminar'",
+    "escribe_db_o_email": false,
+    "hallazgos": "El borrador del alta se guarda vacío"
+   },
+   {
+    "titulo": "Health público",
+    "entorno": "deploy o local",
+    "pasos": [
+     "curl -s https://<host>/api/chatbot/develop/health sin cookies",
+     "Repetir con un slug inventado"
+    ],
+    "esperado": "401/404 o un JSON mínimo {ok}",
+    "senal_falla": "JSON con nombres de variables de entorno, flags present/required y mensajes de error internos; respuestas distintas para slug existente e inexistente",
+    "escribe_db_o_email": false,
+    "hallazgos": "/api/chatbot/[slug]/health es público"
+   },
+   {
+    "titulo": "Alta con web: ¿carga el widget?",
+    "entorno": "deploy preview y un sitio de prueba propio",
+    "pasos": [
+     "Crear un cliente con chatbot cargando la URL del sitio de prueba en el paso 1",
+     "Sin tocar Avanzado, embeber el widget en ese sitio"
+    ],
+    "esperado": "El widget carga",
+    "senal_falla": "No carga (evento SECURITY.BLOCKED_ORIGIN / no_domains_configured)",
+    "escribe_db_o_email": true,
+    "hallazgos": "El alta con chatbot no carga dominios"
+   },
+   {
+    "titulo": "Dominio con mayúscula o espacio",
+    "entorno": "deploy preview y un sitio de prueba propio",
+    "pasos": [
+     "En Avanzado cargar el dominio del sitio con mayúscula inicial o espacio final y guardar",
+     "Embeber el widget en ese sitio"
+    ],
+    "esperado": "El widget carga",
+    "senal_falla": "Bloqueado por domain_not_allowed",
+    "escribe_db_o_email": true,
+    "hallazgos": "Dominios permitidos sin normalizar ni tope visible del plan"
+   },
+   {
+    "titulo": "AvatarPicker en un equipo modesto",
+    "entorno": "local, Chrome con Performance monitor",
+    "pasos": [
+     "Abrir el tab Apariencia del editor del bot (o el paso 4 del alta)",
+     "Mirar FPS y CPU durante 30 segundos y pasar el mouse por las opciones"
+    ],
+    "esperado": "Más de 50 fps y sin trabas",
+    "senal_falla": "Congelamientos o caída fuerte de FPS",
+    "escribe_db_o_email": false,
+    "hallazgos": "El selector de avatar monta todos los avatares 3D a la vez"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "runPreflightChecks no verifica sesión ni rol",
+    "comando": "git grep -n \"requireSuperAdmin\\|auth()\" origin/main -- src/modules/chatbot/server/admin/preflightChecks.ts  (vacío)",
+    "control_positivo": "El mismo patrón sobre src/modules/chatbot/server/admin/integrations/saveCrmIntegration.ts devuelve :30 requireSuperAdmin()"
+   },
+   {
+    "afirmacion": "El servidor no trata los {{placeholders}} de la KB (ni al guardar ni al armar el prompt)",
+    "comando": "git grep -nF \"{{\" origin/main -- src/modules/chatbot/server src/lib/onboarding src/modules/chatbot/shared  (vacío)",
+    "control_positivo": "git grep -cF \"{{\" origin/main -- src/modules/chatbot/components/admin/onboarding/kb-templates -> 10 archivos (6 a 15 por archivo)"
+   },
+   {
+    "afirmacion": "Ningún camino del producto asigna verticalPack",
+    "comando": "git grep -c verticalPack origin/main -- src/modules/chatbot/components/admin src/modules/chatbot/server/admin src/lib/onboarding \"src/app/(protected)/admin\"  (vacío)",
+    "control_positivo": "El mismo comando sobre src/modules/chatbot/server/chat/handleChatRequest.ts y prisma/schema.prisma devuelve 4 y 1"
+   },
+   {
+    "afirmacion": "Ningún componente del widget lee routeColorMap",
+    "comando": "git grep -n routeColorMap origin/main -- src/modules/chatbot/components/chat src/modules/chatbot/components/embed src/modules/chatbot/hooks src/modules/chatbot/components/LogicCompanion.tsx src/modules/chatbot/components/tooltip src/app/embed  (vacío)",
+    "control_positivo": "git grep -c proactivePrompts origin/main -- src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx -> 5; getPublicConfig.ts:121 sí expone routeColorMap"
+   },
+   {
+    "afirmacion": "El embed de clientes no usa prompts proactivos",
+    "comando": "git grep -n \"ProactiveTooltip\\|proactive\" origin/main -- src/modules/chatbot/components/embed src/app/embed  (vacío)",
+    "control_positivo": "git grep -ln ProactiveTooltip origin/main -- src -> LogicCompanion.tsx, tooltip/*, index.ts; ChatbotEmbed.tsx:296 sí usa quickReplies"
+   },
+   {
+    "afirmacion": "El endpoint /smoke ya no existe",
+    "comando": "git ls-tree -r --name-only origin/main -- src/app | grep -i smoke  (vacío)",
+    "control_positivo": "git ls-tree -r --name-only origin/main -- src/app/api/chatbot lista chat, config y health; git log muestra 02a2f812 'deprecar el endpoint smoke publico'"
+   },
+   {
+    "afirmacion": "No queda la docstring 'GDPR-friendly' en src",
+    "comando": "git grep -n -i gdpr origin/main -- src  (vacío)",
+    "control_positivo": "git grep -c -i gdpr origin/main -- docs -> 2 archivos; git log -S 'GDPR-friendly' origin/main -- src -> 819b9e0e"
+   },
+   {
+    "afirmacion": "El polling de ActivityLog no se pausa con la pestaña oculta",
+    "comando": "git grep -n \"visibilityState\\|visibilitychange\\|document.hidden\" origin/main -- src/modules/chatbot/components/admin  (vacío)",
+    "control_positivo": "El mismo patrón sobre src encuentra src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx"
+   },
+   {
+    "afirmacion": "AvatarPicker y BotConfigPreview no usan IntersectionObserver",
+    "comando": "git grep -n IntersectionObserver origin/main -- src/modules/chatbot/components/avatar src/modules/chatbot/components/preview  (vacío)",
+    "control_positivo": "git grep -ln IntersectionObserver origin/main -- src -> HeroArtifactLayer.tsx, Navbar.tsx, InfiniteReviews.tsx, entre otros"
+   },
+   {
+    "afirmacion": "No hay una clave de cuenta de servicio versionada",
+    "comando": "git grep -c -E \"BEGIN (RSA )?PRIVATE KEY|\\\"private_key\\\"\\s*:|\\\"type\\\"\\s*:\\s*\\\"service_account\\\"\" origin/main -- . ':!**/node_modules/**'  (sólo .env.example con 2 placeholders comentados y docs con listas de patrones)",
+    "control_positivo": "git grep -c GOOGLE_VERTEX_CREDENTIALS_JSON origin/main -- . -> .github/workflows/ci.yml, .env.example, docs/env-vars.md y otros"
+   },
+   {
+    "afirmacion": "logAdminActionsBatch no está en main",
+    "comando": "git grep -n logAdminActionsBatch origin/main -- .  (vacío)",
+    "control_positivo": "Existe en origin/b0-isolation-motor-chatbot:src/app/(protected)/admin/chatbots/bulk-actions.ts; logAdminAction sí está en src/lib/audit-log.ts"
+   },
+   {
+    "afirmacion": "El alta no crea Subscription (el cliente queda en PLAN_FALLBACK)",
+    "comando": "git grep -n -i subscription origin/main -- src/modules/chatbot/server/admin/createClientWithBot.ts src/modules/chatbot/server/admin/createClientOnly.ts  (vacío)",
+    "control_positivo": "src/lib/plan/get-plan-for-org.ts:40 y :74 leen prisma.subscription"
+   },
+   {
+    "afirmacion": "No hay indicador 'X de N dominios' en admin ni en el portal",
+    "comando": "git grep -n maxDomains origin/main -- src/app src/modules/chatbot/components  (sólo PlanAssignmentCard.tsx:112, el selector de plan)",
+    "control_positivo": "git grep -n maxDomains origin/main -- src/lib/plan -> fallback.ts:34,57; get-plan-for-org.ts:87,111"
+   },
+   {
+    "afirmacion": "El endpoint demo-chat no tiene llamadores",
+    "comando": "git grep -n demo-chat origin/main -- src | grep -v src/app/api/admin/chatbot/demo-chat/  (sólo un comentario en test-prompt/route.ts:45)",
+    "control_positivo": "git grep -n api/admin/chatbot/test-prompt origin/main -- src -> TestPromptSandbox.tsx:42"
+   },
+   {
+    "afirmacion": "Ningún camino usa waitUntil para trabajo en segundo plano",
+    "comando": "git grep -n waitUntil origin/main -- src  (vacío)",
+    "control_positivo": "git grep -n \"void syncLeadToCrm\" origin/main -- src -> retryCrmSync.ts:73 y captureLead.ts:500"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Función exportada de un archivo 'use server' importada por un client component sin auth()/requireSuperAdmin (endpoint público)",
+    "como_buscarlo": "Para cada archivo de git grep -l \"^'use server'\" origin/main -- src, listar exports y comprobar que la primera sentencia de cada uno verifique sesión/rol; cruzar con importadores 'use client'",
+    "donde_aparecio": "src/modules/chatbot/server/admin/preflightChecks.ts:13 (importada por BotDetailClient.tsx:16)"
+   },
+   {
+    "patron": "Errores de negocio esperados lanzados con throw en server actions cuyo consumidor muestra err.message (en producción llega un mensaje genérico)",
+    "como_buscarlo": "git grep -n \"throw new Error(\" en archivos 'use server' y cruzar con consumidores que hagan 'err instanceof Error ? err.message'",
+    "donde_aparecio": "createClientWithBot.ts:104,116 y createClientOnly.ts:55,66 -> Step5Review.tsx:111"
+   },
+   {
+    "patron": "Trabajo fire-and-forget (void promise.catch / promesa sin await) en server actions o handlers serverless sin after()/waitUntil",
+    "como_buscarlo": "git grep -n \"void [a-zA-Z]\\+(\" origin/main -- src | grep -v __tests__; y git grep -n \"\\.catch((err\" en actions sin await",
+    "donde_aparecio": "retryCrmSync.ts:73, captureLead.ts:500, [botId]/actions.ts:75-85 (email de bot activado)"
+   },
+   {
+    "patron": "Campos de BotConfig editables en admin que el runtime no consume (knobs que mienten)",
+    "como_buscarlo": "Para cada campo del schema de saveBotConfigByOrgSlug.ts:19-57 buscar consumidores fuera de components/admin y server/admin con git grep",
+    "donde_aparecio": "llmModel, temperature, maxOutputTokens, monthlyQuota (handleChatRequest.ts:713,952,345); routeColorMap y proactivePrompts en el embed"
+   },
+   {
+    "patron": "Polling con setInterval sin pausa por visibilidad, sin backoff y sin manejo de 401",
+    "como_buscarlo": "git grep -n \"setInterval(\" origin/main -- src/app src/modules src/components",
+    "donde_aparecio": "ActivityLog.tsx:103"
+   },
+   {
+    "patron": "Buckets de día/hora con toLocale*String sin timeZone en servidor (cortan en UTC)",
+    "como_buscarlo": "git grep -n \"toLocale\\(Date\\|Time\\)\\?String('es-AR'\" origin/main -- src | grep -v timeZone",
+    "donde_aparecio": "getActivityChartData.ts:25,30; getLatencyHistory.ts:25"
+   },
+   {
+    "patron": "findMany con take y sin orderBy (muestra arbitraria para métricas)",
+    "como_buscarlo": "git grep -n -A6 \"findMany({\" origin/main -- src | awk para bloques con take y sin orderBy",
+    "donde_aparecio": "getLatencyHistory.ts:76-83"
+   },
+   {
+    "patron": "Modales propios sin role=dialog/aria-modal/Escape/foco y botones solo-ícono sin aria-label (incluido el Modal del kit, FROZEN)",
+    "como_buscarlo": "git grep -n \"fixed inset-0\" origin/main -- src y verificar role=\\\"dialog\\\"; git grep -n -B2 \"<X className\\|<Trash2\\|<Send className\" para botones sin aria-label",
+    "donde_aparecio": "ActivationModal.tsx:47,71; BotConfigDiffModal.tsx:80,98; SaveConfirmModal.tsx:35,54; TestPromptSandbox.tsx:101,125,182; src/components/ui/Modal.tsx"
+   },
+   {
+    "patron": "Primitivas locales duplicadas del kit (Field/Input/Toggle) que pierden la asociación label-control",
+    "como_buscarlo": "git grep -n \"<label\" origin/main -- src | grep -v htmlFor; git ls-files | grep -E \"/(Field|Input|Toggle)\\.tsx$\" fuera de src/components/ui",
+    "donde_aparecio": "src/modules/chatbot/components/admin/config/Field.tsx:15, config/Input.tsx, config/Toggle.tsx; Step1Company.tsx:74"
+   },
+   {
+    "patron": "Errores dentro del stream del AI SDK descartados por toTextStreamResponse/textStream con el onError por defecto (console.error crudo, sin Sentry)",
+    "como_buscarlo": "git grep -n \"toTextStreamResponse\\|streamText(\" origin/main -- src y verificar que pasen onError",
+    "donde_aparecio": "src/app/api/admin/chatbot/test-prompt/route.ts:68-99; revisar demo-chat/[slug]/route.ts"
+   },
+   {
+    "patron": "Health checks que instancian el cliente sin probar la credencial (falso verde)",
+    "como_buscarlo": "git grep -n \"listModels()\\|getLLMProvider()\" origin/main -- src/modules/chatbot/server/health src/app/api",
+    "donde_aparecio": "checkHealth.ts:48-49"
+   },
+   {
+    "patron": "JSON.parse de secretos leídos de env: en Node 20+ el SyntaxError incluye un fragmento del texto y puede terminar en logs",
+    "como_buscarlo": "git grep -n \"JSON.parse(process.env\\|JSON.parse(cred\" origin/main -- src",
+    "donde_aparecio": "src/modules/chatbot/server/llm/providers/google.ts:82 (HIPÓTESIS)"
+   },
+   {
+    "patron": "dpr={[1, 2]} en Canvas de R3F (CLAUDE.md fija 1,5 como máximo)",
+    "como_buscarlo": "git grep -n \"dpr={\\[1, 2\\]}\" origin/main -- src",
+    "donde_aparecio": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx:940"
+   },
+   {
+    "patron": "Alta de tenant sin Subscription: corre en PLAN_FALLBACK mientras la UI muestra valores legacy de BotConfig",
+    "como_buscarlo": "git grep -n \"organization.create\" origin/main -- src y verificar si crean subscription",
+    "donde_aparecio": "createClientWithBot.ts:126, createClientOnly.ts:76; revisar src/lib/onboarding/core.ts"
+   },
+   {
+    "patron": "Página admin que lee la base sin auth propia (confía en admin/layout) — nuevas apariciones del patrón [D1-c2]",
+    "como_buscarlo": "git grep -L \"auth()\\|requireSuperAdmin\" en src/app/(protected)/admin/**/page.tsx que importen prisma o queries",
+    "donde_aparecio": "src/app/(protected)/admin/chatbot/activity/page.tsx:9-19, src/app/(protected)/admin/chatbot/health/page.tsx:10-14"
+   },
+   {
+    "patron": "Texto chico en zinc-500 sobre #080a0c ≈4,1:1 (no llega a AA); el patrón D1 sólo miraba zinc-600/700",
+    "como_buscarlo": "git grep -c \"text-zinc-500\" origin/main -- src y revisar texto funcional (estados vacíos, ayudas, contadores)",
+    "donde_aparecio": "ColorPicker.tsx:51, KBSearch.tsx:74, TestPromptSandbox.tsx:132, hints de los Field"
+   },
+   {
+    "patron": "Link en email con base de URL vacía si falta NEXT_PUBLIC_APP_URL (variante del patrón [D1-c3] de fallback)",
+    "como_buscarlo": "git grep -n \"NEXT_PUBLIC_APP_URL ?? ''\" origin/main -- src",
+    "donde_aparecio": "src/modules/chatbot/server/admin/sendTestNotification.ts:58"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:939",
+    "id_previo": "ARQ-01",
+    "estado": "abierto",
+    "evidencia": "La corrida de depcruise del padre (docs/auditoria-2026-10/_crudo/depcruise.json, bloque summary) sigue en 22 violaciones 'cycle': 10 de kb-templates (kb-templates/index.ts:14-23 importa los templates y cada uno hace import type de './index', p. ej. concesionaria.ts:1), las de BotDetailClient.tsx:18-24 con sus tabs (ConfigTab.tsx:4 import type de '../BotDetailClient') y las de lead-pipeline/ClientLeadsTable. Todas de tipos; .dependency-cruiser.cjs:27 tsPreCompilationDeps: true las cuenta. Mismo número y mismo patrón que en la auditoría maestra."
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "Plantillas de KB con datos inventados y {{placeholders}} pasan el alta y el bot sale activo",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "La cadena se confirma leyendo origin/main @ 57c421bc. Step3KnowledgeBase.tsx:9-22 precarga las 7 secciones con getTemplate(industry). En el alta, generico.ts trae afirmaciones inventadas sin {{}}: envíos a todo el país (:31), 30 días de cambio (:38), factura A y B (:40), además de {{DIRECCION_COMPLETA}} (:34). restaurant.ts:33 dice 'cocina aislada' para celíacos. El gate del paso 3 (Step3KnowledgeBase.tsx:25-32) y la validación Zod del servidor (createClientWithBot.ts:44-50) solo miden largo mínimo. createClientWithBot.ts:165 crea el bot con isActive: true y graba el texto tal cual en KnowledgeBase (:192-203). Step5Review.tsx:350 lo anuncia: 'el bot quedará activo inmediatamente'. El preflight (preflightChecks.ts:45-48, también solo largo) no participa del alta: solo corre al reactivar un bot inactivo (BotDetailClient.tsx:134-141). En el prompt, kbSection (helpers.ts:43-48) devuelve el texto recortado y nada más, y sections.ts:55 lo declara 'la ÚNICA fuente de verdad... Solo afirmás lo que esté literalmente acá'. Así el modelo tiende a afirmar las políticas de la plantilla. Ese último paso es comportamiento del LLM, inferido, pero el prompt lo empuja. Bajo la severidad de ALTA a MEDIA por cuatro razones. (1) El asistente es interno: solo lo usa develOP como SUPER_ADMIN (/admin/clients/new, requireSuperAdmin en createClientWithBot.ts:96). Nadie externo lo explota; hace falta que el operador no edite la plantilla, que está a la vista en textareas editables. (2) Hay una mitigación parcial: al enfocar un campo se abre el MarkdownEditor (ExpandableTextField.tsx:42-45 y :85), que muestra un aviso ámbar 'N placeholders sin completar' (MarkdownEditor.tsx:11 y :48-63). El editor de KB de después del alta usa el mismo componente (KnowledgeBaseEditor.tsx:205). (3) Para que un visitante lo vea, el widget tiene que estar en un origen permitido (validateOrigin en api/chatbot/[slug]/chat/route.ts:42) y hoy la credencial de Vertex está vencida. (4) Encaja en 'validación faltante sin explotación directa / con workaround'. Igual se sostiene como defecto de producto. Para las afirmaciones inventadas sin {{}} no hay ningún aviso ni chequeo, en cliente ni en servidor, y el aviso de placeholders desaparece cuando se completan, lo que da una falsa sensación de KB terminada. Para el primer cliente real queda como default inseguro: si develOP solo completa los {{}}, el bot afirma políticas que el negocio no autorizó, alérgenos incluidos. Corrección de redacción: el 'recargo del 10 %' sale de gimnasio.ts:42 (en restaurant.ts:44 es un descuento del 10 % en efectivo) y el 'cargo del 50 %' de medico.ts:41. Ninguno de los dos estaba citado.",
+    "evidencia_contra": [
+     "Solo SUPER_ADMIN usa el asistente: createClientWithBot.ts:96 requireSuperAdmin, ruta /admin/clients/new. No hay actor externo ni camino del cliente final para dispararlo.",
+     "ExpandableTextField.tsx:42-45 y :85 abre el MarkdownEditor al enfocar, y MarkdownEditor.tsx:48-63 avisa 'N placeholders sin completar' con la lista de {{...}}. Mitigación visible pero no bloqueante, y solo sirve para los {{}}.",
+     "Step5Review.tsx:202-206 pide 'Revisá todo antes de crear' y avisa en :350 que el bot queda activo. El operador tiene el contenido a la vista, pero el resumen de KB (:279-298) solo muestra la cantidad de caracteres.",
+     "El editor de KB de después del alta (KnowledgeBaseEditor.tsx:205) usa el mismo MarkdownEditor con el aviso de placeholders, así que el defecto se puede corregir después del alta.",
+     "Para que un visitante reciba respuestas hace falta el widget embebido en un origen que pase validateOrigin (api/chatbot/[slug]/chat/route.ts:42) y una credencial de Vertex que funcione (hoy vencida).",
+     "Redacción imprecisa del hallazgo: restaurant.ts:44 es un descuento del 10 % en efectivo, no un recargo. El recargo del 10 % está en gimnasio.ts:42 y el cargo del 50 % por cancelar en medico.ts:41, y ninguno de los dos estaba citado."
+    ]
+   }
+  ]
+ }
+}

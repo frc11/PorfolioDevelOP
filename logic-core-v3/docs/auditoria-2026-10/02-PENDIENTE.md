@@ -7,9 +7,9 @@
 | Área | Herramientas medidas | Funcionalidades | En L3 o más | Faltantes de L3 más comunes | FAL |
 |---|---:|---:|---:|---|---:|
 | h1 · Acceso | 5 / 5 | 15 | 0 | Sentry (11), autonomía (9), errores (8) | 3 |
-| h2 · Portal del cliente | 16 / 16 | 103 | 13 | Sentry (65), sin mocks ni TODO (54), errores (47) | 11 |
-| h3 · Chatbot centralizado | 0 / 8 | 0 | 0 | — | 0 |
-| h4 · Panel de admin | 3 / 13 | 6 | 0 | Sentry (5), autonomía (3), errores (3) | 1 |
+| h2 · Portal del cliente | 16 / 16 | 103 | 12 | Sentry (66), sin mocks ni TODO (55), errores (48) | 11 |
+| h3 · Chatbot centralizado | 8 / 8 | 109 | 3 | Sentry (64), errores (61), autonomía (50) | 6 |
+| h4 · Panel de admin | 4 / 13 | 15 | 0 | Sentry (11), errores (8), autonomía (6) | 2 |
 | h5 · Setter y LeadOS | 0 / 7 | 0 | 0 | — | 0 |
 | h6 · Entradas públicas que alimentan lo interno | 1 / 2 | 1 | 0 | permisos y tenant (1), Sentry (1) | 0 |
 
@@ -144,15 +144,15 @@
 
 ### h2.cli-resultados — Resultados
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 13 funcionalidades: 1×L1, 11×L2, 1×L3).
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 13 funcionalidades: 1×L1, 12×L2).
 - Criterios de L3 que faltan en alguna funcionalidad: vacíos, errores, Sentry, sin mocks ni TODO, autonomía, permisos y tenant, carga, validación en servidor.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
-| `h2.cli-resultados.analisis-mensual` Análisis mensual de conversaciones | L3 | — | analisis/page.tsx:31-60 (gate planAllows) → getMonthlyAnalysisForOrg (forOrg :53-56) → secciones con CalibratingBlock como vacío. |
+| `h2.cli-resultados.analisis-mensual` Analisis mensual del negocio | L2 | errores, Sentry, sin mocks ni TODO | analisis/page.tsx:32-33,60 -> getMonthlyAnalysisForOrg.ts:48-106 -> monthly-analysis.ts:63-209 |
 | `h2.cli-resultados.informe-mensual-pdf` Descargar el informe del mes en PDF | L2 | Sentry, sin mocks ni TODO | analisis/page.tsx:45 → DownloadMonthlyReportButton.tsx:18-35 → client-monthly/route.ts:24-56 → get-client-monthly-report-data.ts:20-76 → monthly-report-data.ts:73-97 → ClientMonthlyReportPdf.tsx:287-318. |
 | `h2.cli-resultados.informe-pdf` Descargar informe del mes | L2 | vacíos, Sentry, sin mocks ni TODO | DownloadMonthlyReportButton.tsx:18-41 → api/reports/client-monthly/route.ts:24-56 (org de sesión, gate de plan, renderToBuffer). |
-| `h2.cli-resultados.insights-ia` Insights automáticos | L2 | errores, Sentry | trafico/page.tsx:47-49 → results-insights.ts:34-42 (Anthropic, cache 24 h por org) → InsightsBlock.tsx:37-89; no corre sobre datos mock. |
+| `h2.cli-resultados.insights-ia` Insights de tráfico y SEO con IA | L2 | errores, Sentry | resultados/trafico/page.tsx:168 → getTrafficInsights (results-insights.ts:34-42) → generateTrafficInsights (:54-106) → parseInsights (:176-182) |
 | `h2.cli-resultados.oportunidades-seo` Oportunidades SEO con pedido al equipo | L2 | permisos y tenant, errores, Sentry, sin mocks ni TODO | seo/page.tsx:319-321 -> OportunidadesSEO.tsx:10-56 -> OportunidadSEO.tsx:83-97 -> messages.ts:114-140. |
 | `h2.cli-resultados.pagespeed` Velocidad del sitio (PageSpeed) | L2 | vacíos, errores, Sentry, autonomía | siteUrl lo carga el admin (updateClient.ts:95; createClientOnly.ts:84) → trafico/page.tsx:99-101 → PageSpeedSection (:125-136) → getPageSpeedReport (pagespeed.ts:26-35, caché 6 h) → PageSpeedCard. Requiere GOOGLE_PAGESPEED_API_KEY (pagespeed.ts:41-45). |
 | `h2.cli-resultados.reputacion-gbp` Reputación en Google | L2 | errores, Sentry, sin mocks ni TODO | reputacion/page.tsx:15-34 → getGBPMetrics(org) → GBPMetricsCard.tsx:37-178. |
@@ -361,7 +361,7 @@
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
-| `h2.cli-resenas.borrador-ia` Borrador de respuesta con IA | L2 | errores, validación en servidor, mobile, Sentry | ReviewItem.tsx:46-61 → _actions.ts:11-46 → review-reply-draft.ts:5-44 (Anthropic). |
+| `h2.cli-resenas.borrador-ia` Borrador de respuesta a reseñas con IA | L2 | errores, validación en servidor, Sentry | motor-resenas/_actions.ts:11-46 → generateReviewReplyDraft (review-reply-draft.ts:5-44) |
 | `h2.cli-resenas.estado-conectando` Estado 'conectando tu Google' | L3 | — | ConnectingState.tsx:13-46 via resolveMotorResenasView (motor-resenas-view.ts:38-42). |
 | `h2.cli-resenas.pedir-resenas-qr` Pedir resenas con QR y link | L2 | errores, autonomía | AskReviewSection.tsx:42-137 con placeId de la org (page.tsx:161). |
 | `h2.cli-resenas.publicar-respuesta` Publicar respuesta en Google | L2 | permisos y tenant, errores, validación en servidor, mobile, Sentry | ReviewItem.tsx:64-79 → _actions.ts:48-73 → google-business-profile.ts:275-305. |
@@ -425,18 +425,258 @@
 
 ## h3 · Chatbot centralizado
 
+### h3.cli-chatbot — Mi chatbot (cliente)
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 31 funcionalidades: 25×L2, 3×L1, 1×L?, 2×L3).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, vacíos, errores, Sentry, mobile, sin mocks ni TODO, autonomía, carga, validación en servidor.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h3.cli-chatbot.acciones-rapidas-de-lead` Acciones de un tap sobre el lead (Lo contacte / Vendido / No avanzo) | L2 | permisos y tenant, errores, Sentry, autonomía | LeadStatusActions.tsx:120-136 -> :92 updateLeadStatus -> updateLeadStatus.ts:18-47 -> :78 revalidatePath; metricas en home-metrics.ts:120-125. |
+| `h3.cli-chatbot.acciones-rapidas-lead` Acciones de un tap sobre el contacto | L2 | permisos y tenant, errores, Sentry | LeadStatusActions.tsx:78-115 -> updateLeadStatus.ts:17-94 (seal :40-46, revalidateTag :84-92). |
+| `h3.cli-chatbot.activacion-upsell` Landing de activación del chatbot | L1 | sin mocks ni TODO, autonomía | page.tsx:18-22 → ChatbotUpsellLanding con WhatsApp de relleno (ChatbotUpsellLanding.tsx:15,49,156) |
+| `h3.cli-chatbot.aviso-lead-email` Aviso de lead por email al dueño | L2 | errores, Sentry, sin mocks ni TODO | captureLead → notify.ts:87-177 → decide.ts:40-75 → templates.ts:123-187 (escapeHtml) → Brevo |
+| `h3.cli-chatbot.base-conocimiento` Lo que sabe tu chatbot (KB de solo lectura) | L2 | permisos y tenant, vacíos, autonomía | knowledge/page.tsx:10-21 -> ClientKnowledgeView.tsx:116-180. |
+| `h3.cli-chatbot.conocimiento-lectura` Información del bot (KB de solo lectura) | L2 | permisos y tenant, sin mocks ni TODO, autonomía | knowledge/page.tsx:10-21 → ClientKnowledgeView |
+| `h3.cli-chatbot.contacto-detalle` Detalle del contacto | L2 | permisos y tenant, errores, Sentry, autonomía | [id]/page.tsx:29-101 -> LeadDetail.tsx:150-542; transcript roto (LeadDetail.tsx:546) y guardado sin chequear resultado (:182-186). |
+| `h3.cli-chatbot.contactos-lista` Lista de contactos (pipeline y filtros) | L2 | permisos y tenant, errores | leads/page.tsx:35-59 -> ClientLeadsTable.tsx:90-374 -> LeadPipeline.tsx:29-80 / BusinessLeadCard.tsx:77-252; filtros via URL ClientLeadsTable.tsx:166-182. |
+| `h3.cli-chatbot.conversaciones` Conversaciones con transcript | L2 | permisos y tenant | conversations/page.tsx:9-23 -> multiTenantQueries.ts:174-197 -> ConversationsTable.tsx:48-180. |
+| `h3.cli-chatbot.conversaciones-transcript` Conversaciones con transcript | L2 | permisos y tenant, Sentry | conversations/page.tsx:9-23 → ConversationsTable → transcript-action.ts:31-56 |
+| `h3.cli-chatbot.detalle-de-lead` Ficha del contacto en lenguaje de dueno | L2 | permisos y tenant, errores, mobile | leads/[id]/page.tsx:29-34 -> :39-90 -> LeadDetail.tsx:161-169 (lead-detail-presentation.ts:28-87; lead-intent-labels.ts:44-57) -> :436 senales -> :467-470 vacio -> :182-186 guardar. |
+| `h3.cli-chatbot.elegir-avatar` El cliente elige el avatar de su bot | L2 | errores, mobile | dashboard/chatbot/settings/page.tsx:63 -> BotPersonalization.tsx:271-278 -> AvatarPicker.tsx:58-161 onChange -> updateBotAppearance.ts:32 CLIENT_AVATAR_STYLE_SCHEMA (persistencia en otro lote). |
+| `h3.cli-chatbot.email-insights` Email de insights nuevos | L2 | errores, mobile, Sentry, sin mocks ni TODO | src/app/api/cron/generate-insights/route.ts:61-66 -> sendInsightsNotification.ts:11-24 -> Brevo. |
+| `h3.cli-chatbot.estado-crm` Estado de la integracion CRM | L3 | — | CrmStatusIndicator.tsx:20-31 resolveOrgId + planAllows + forOrg crmIntegration; tres estados :33-138. |
+| `h3.cli-chatbot.estado-lead` Cambiar estado y notas de un lead | L2 | permisos y tenant, errores, validación en servidor, Sentry | LeadStatusActions.tsx:92 -> updateLeadStatus.ts:17-21 -> getClientSession.ts:6-25 -> forOrg findFirst :27-30 -> update :42-47 -> revalidatePath :78 |
+| `h3.cli-chatbot.export-csv` Exportar leads a CSV | L2 | permisos y tenant, vacíos, errores, Sentry | ExportLeadsButton.tsx:52 → export/route.ts:83-208 (csvEscape, audit) |
+| `h3.cli-chatbot.exportar-csv` Exportar contactos a CSV | L? | errores, carga | El boton arma la URL (ExportLeadsButton.tsx:44-64); la route (export/route.ts) es de otro lote y no se re-trazo. |
+| `h3.cli-chatbot.exportar-leads-csv` Exportar leads a CSV | L2 | permisos y tenant, vacíos, sin mocks ni TODO | export/route.ts:84 -> :156 -> :166 buildLeadsCsv.ts:132-208 -> csvEscape.ts:25-42. |
+| `h3.cli-chatbot.gestionar-insights` Aplicar o descartar insights del bot | L1 | permisos y tenant, vacíos, errores, carga, Sentry, autonomía | La action existe (manageInsight.ts:15-53) pero ninguna UI la llama (git grep actOnInsight: solo index.server.ts:73 e insights/index.ts:2). |
+| `h3.cli-chatbot.instalacion` Instalacion del snippet | L2 | permisos y tenant, errores, autonomía | buildEmbedSnippet platforms.ts:26-28 -> SnippetCopyBlock.tsx:28-33; ClientInstallView (otro lote) los consume. |
+| `h3.cli-chatbot.lead-detalle` Detalle de lead | L2 | permisos y tenant, mobile, sin mocks ni TODO | leads/[id]/page.tsx:26-102 → getLeadByIdForOrg + getConversationMessagesForOrg → LeadDetail |
+| `h3.cli-chatbot.leads-lista-filtros` Leads del bot (pipeline y filtros) | L2 | permisos y tenant | leads/page.tsx:36-125 → listLeadsForDashboard (multiTenantQueries.ts:75-122) → ClientLeadsTable |
+| `h3.cli-chatbot.leads-y-conversaciones` Listas de leads y conversaciones del cliente | L2 | errores, Sentry, autonomía | leads/page.tsx:36,56 -> listLeadsForDashboard multiTenantQueries.ts:75-122; conversations/page.tsx:9-12 -> listConversationsByOrgSlug :174-198 |
+| `h3.cli-chatbot.personalizacion` Personalizacion del bot | L2 | permisos y tenant, errores, Sentry, autonomía | settings/page.tsx:13-60 -> BotPersonalization.tsx:149-169 -> updateBotAppearance.ts:55-138. Varios campos no llegan al widget instalado. |
+| `h3.cli-chatbot.personalizar-apariencia` Personalizar apariencia del bot (cliente) | L2 | permisos y tenant, errores, Sentry | BotPersonalization.tsx:151 -> updateBotAppearance.ts:56-66 -> :77 -> :95-107 -> :109 -> :135-136. |
+| `h3.cli-chatbot.pestanas` Pestanas de Mi Chatbot | L3 | — | layout.tsx:57 -> ClientDashboardTabs.tsx:21-98 con Link y fades de overflow. |
+| `h3.cli-chatbot.reporte-semanal-email` Reporte semanal del chatbot por email | L2 | vacíos, errores, Sentry, sin mocks ni TODO, autonomía | netlify.toml:28-29 -> route.ts:7-14 -> sendWeeklyReports.ts:14-93 -> buildWeeklyReport.ts:26-139 -> Brevo :63-67. |
+| `h3.cli-chatbot.resumen` Resumen del chatbot del cliente | L2 | permisos y tenant, errores, Sentry, sin mocks ni TODO, autonomía | page.tsx:15-31 -> getUsageByOrgSlug/listLeadsByOrgSlug/listRecentHandoffsByOrgSlug (multiTenantQueries.ts:27-54, :208-258) -> ChatbotOverview.tsx:40-111 |
+| `h3.cli-chatbot.scoring-leads` Scoring, decay y explicacion del score | L2 | sin mocks ni TODO, autonomía | captureLead.ts:343-361 -> calculateLeadScore.ts:259-329 -> persistido :406-412; lectura getEffectiveScore :461-485. |
+| `h3.cli-chatbot.sync-crm` Enviar leads al CRM del cliente (n8n) | L2 | errores, validación en servidor, Sentry, autonomía | captureLead.ts:500 -> syncLeadToCrm.ts:41-133 -> postToN8n.ts:152-199 (fetch :87-92). |
+| `h3.cli-chatbot.upsell-activacion` Landing de activacion del chatbot | L1 | sin mocks ni TODO, autonomía | Maqueta: WhatsApp placeholder (ChatbotUpsellLanding.tsx:15) y precio que no coincide con el catalogo (:148-152 vs sync-plans.ts:70,102). |
+
+### [FAL-019] El cliente no recibe aviso de cuota (ni al 80% ni al agotarse): alert80Sent no se usa
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:1587` — «alert80Sent Boolean @default(false)»; `src/modules/chatbot/server/quota/upsellAlert.ts:68` — «await Promise.allSettled([ sendAgencyAlert({ type: 'LEAD_UPSELL', ...»; `src/modules/chatbot/server/quota/upsellAlert.ts:80` — «notifyTelegramOptional(»
+- Impacto: Al agotar la cuota solo se avisa a develOP (webhook de agencia + Telegram). El dueno del negocio no se entera de que sus visitantes reciben 'alcanzamos el limite de atencion automatica' hasta que mire el panel; no hay preaviso al 80% pese a la columna.
+- Propuesta: Email al leadNotificationEmail del cliente al 80% (usando alert80Sent con UPDATE condicional) y al degradar (degradedAt).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, lib.chatbot.quota, int.brevo, modelo.QuotaUsage
+
+### [FAL-020] Reporte semanal del chatbot sin opt-out, destinatario no deterministico y link con fallback a localhost
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/reports/sendWeeklyReports.ts:27` — «take: 1, (members where role ADMIN, sin orderBy)»; `src/modules/chatbot/server/reports/sendWeeklyReports.ts:57` — «const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'»; `src/lib/email/templates/executive-weekly.ts:289` — «Dejar de recibir este reporte (control: el executive report si tiene unsubscribe)»
+- Impacto: El cliente recibe dos mails semanales (este y el executive report); este no tiene baja ni registro de envio (un reintento del cron duplica), va al primer ADMIN que devuelva la base y el boton puede apuntar a localhost si falta la variable.
+- Propuesta: Unificar con el executive report o sumarle opt-out y WeeklyReportLog; orderBy determinista y leadNotificationEmail como destinatario; fallar si falta la URL.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, lib.chatbot.reports, int.brevo, int.cron.send-weekly-reports
+
+### h3.adm-chatbots — Chatbots (admin)
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 29 funcionalidades: 1×L3, 26×L2, 1×L1, 1×L?).
+- Criterios de L3 que faltan en alguna funcionalidad: errores, validación en servidor, mobile, Sentry, autonomía, sin mocks ni TODO, vacíos, permisos y tenant, carga.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h3.adm-chatbots.acciones-bulk` Acciones masivas sobre bots | L2 | errores, validación en servidor, mobile, Sentry, autonomía | BulkActionBar.tsx:57-107 → bulk-actions.ts:18-62, 64-108, 110-158, 163-233 con ConfirmDialog (BulkActionBar.tsx:180-211) |
+| `h3.adm-chatbots.activar-bot-preflight` Activar el bot con chequeos previos | L2 | permisos y tenant, errores, validación en servidor, mobile, Sentry, sin mocks ni TODO | BotDetailClient.tsx:227 -> :140 runPreflightChecks -> ActivationModal.tsx:82-84 -> :136 -> BotDetailClient.tsx:165 -> actions.ts:42-44 update isActive -> :69 invalidateBotCache. |
+| `h3.adm-chatbots.activar-pausar-eliminar` Activar, pausar y eliminar bot | L2 | permisos y tenant, errores, Sentry, sin mocks ni TODO | BotDetailClient.tsx:134-186 → runPreflightChecks / toggleBotActiveAction (actions.ts:25-99) / deleteBotAction (actions.ts:110-174) |
+| `h3.adm-chatbots.actividad-por-bot` Actividad del bot en vivo (tab) | L2 | errores, validación en servidor, Sentry | [botId]/page.tsx:67 listRecentEvents -> ActivityTab.tsx:12 -> ActivityLog.tsx:101-125 -> events/route.ts:8-36. |
+| `h3.adm-chatbots.alta-cliente-con-bot` Alta de cliente con bot (wizard) | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | Step5Review.tsx:71 -> createClientWithBot.ts:96-207 (tx) -> :229-243 email -> :261-273 respuesta |
+| `h3.adm-chatbots.config-llm-y-cuota` Ajustes LLM y cuota del bot | L1 | errores, mobile, Sentry, sin mocks ni TODO, autonomía | Se guardan (AdvancedTab.tsx:48-85 → saveBotConfig.ts:45-48,78) pero el runtime usa plan.llmModel, 0.7 fijo, sin maxOutputTokens y plan.quota (handleChatRequest.ts:713,952,345); DAILY_DIGEST no implementado (notify.ts:91-94) |
+| `h3.adm-chatbots.conversaciones-transcript` Conversaciones del bot con transcript | L2 | Sentry | ConversationsTab.tsx:12-24 → transcript-action.ts:23-64 → getConversationMessagesForOrg (multiTenantQueries.ts:161-172) |
+| `h3.adm-chatbots.crear-bot` Alta de chatbot (org existente o de cero) | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | CreateBotForm.tsx:70-85 → new/actions.ts:54-86 → createBot.ts:41-123 o core.ts:58-200 → router.push |
+| `h3.adm-chatbots.crear-bot-org-existente` Crear bot para una org existente | L2 | errores, Sentry, sin mocks ni TODO, autonomía | new/actions.ts:41-66 -> createBot.ts:41-123 (tx bot + KB :62-105, audit :107-120) |
+| `h3.adm-chatbots.detalle-overview` Overview del bot | L2 | vacíos, sin mocks ni TODO | [botId]/page.tsx:39-71 → OverviewTab.tsx:36-181 |
+| `h3.adm-chatbots.editar-config` Editar configuracion del bot | L2 | errores, Sentry, sin mocks ni TODO, autonomía | BotConfigEditor.tsx:80-81 -> saveBotConfig.ts:77-131 -> invalidateBotCache :133 -> audit :135-148 |
+| `h3.adm-chatbots.editar-config-bot` Editar la configuración del bot | L2 | errores, Sentry, sin mocks ni TODO | Camino feliz: ConfigTab.tsx:54 -> BotConfigEditor.tsx:222 -> BotConfigDiffModal.tsx:148 -> BotConfigEditor.tsx:87-95 -> saveBotConfigByOrgSlug.ts:71-117 ($transaction) -> :119 invalidateBotCache -> :136 revalidatePath. |
+| `h3.adm-chatbots.editar-kb` Editar base de conocimiento | L2 | errores, Sentry, autonomía | KnowledgeBaseEditor.tsx:112, :132-133 -> saveKnowledgeBase.ts:23-62 -> audit :64-82 |
+| `h3.adm-chatbots.elegir-avatar` El admin elige el avatar del bot | L2 | errores, mobile | AppearanceTab.tsx:40-45 y Step4Appearance.tsx:58-63 -> AvatarPicker -> AVATAR_STYLE_SCHEMA en saveBotConfig.ts:30, createClientWithBot.ts:56. |
+| `h3.adm-chatbots.email-prueba` Email de prueba de notificacion de leads | L2 | Sentry | BotConfigEditor.tsx:118 -> sendTestNotification.ts:16-83 |
+| `h3.adm-chatbots.email-prueba-notificacion` Email de prueba de notificacion de leads | L2 | Sentry, sin mocks ni TODO | sendTestNotification.ts:16-58 -> sendLeadNotification.ts:18-39 -> Brevo. |
+| `h3.adm-chatbots.generar-insights` Generar insights con IA | L2 | errores, validación en servidor | insights/generate/route.ts:24 y cron route.ts:43 -> generateInsights.ts:30-130. Hoy falla por Vertex vencido. |
+| `h3.adm-chatbots.historial-sync-crm` Historial de syncs y reintento | L2 | Sentry | CrmIntegrationAdminCard.tsx:72 getOrgSyncHistory -> CrmSyncHistoryList.tsx:39-79 -> RetrySyncButton.tsx:17-25 -> retryCrmSync.ts:24-79. |
+| `h3.adm-chatbots.instalacion` Instalación del widget (admin) | L2 | sin mocks ni TODO | InstallTab.tsx:24-131 buildEmbedSnippet + instrucciones |
+| `h3.adm-chatbots.integracion-crm` Integracion CRM por webhook (n8n) | L2 | Sentry, autonomía | CrmConfigForm.tsx:48 -> saveCrmIntegration.ts:29-182; :70 -> testCrmConnection.ts:21-118; RetrySyncButton.tsx:19 -> retryCrmSync.ts:23-79; CrmIntegrationAdminCard.tsx:72 -> getCrmSyncHistory.ts:85-127 |
+| `h3.adm-chatbots.integraciones-crm` Integración CRM (n8n) por org | L? | sin mocks ni TODO | IntegrationsTab.tsx:36-39 → CrmIntegrationAdminCard → saveCrmIntegration.ts:30 (requireSuperAdmin); el envío a n8n es de D7 y no se trazó |
+| `h3.adm-chatbots.kb-y-sandbox` Knowledge base y sandbox de prompt | L2 | errores, mobile, Sentry, sin mocks ni TODO | KnowledgeTab.tsx:21-30 → KnowledgeBaseEditor → saveKnowledgeBase.ts:24; TestPromptSandbox.tsx:42 → test-prompt/route.ts:27-111 |
+| `h3.adm-chatbots.leads-del-bot` Tabla de leads del bot (admin) | L2 | mobile | admin/chatbots/[botId]/tabs/LeadsTab.tsx -> LeadsTable.tsx:46-97. |
+| `h3.adm-chatbots.leads-y-conversion-crm` Leads del bot y conversión a Lead CRM | L2 | errores, mobile, Sentry | LeadsTab.tsx:12-44 → ConvertChatbotLeadButton.tsx:31-41 → convert-chatbot-lead.actions.ts:24-78 ($transaction, idempotencia por convertedToOsLeadId) |
+| `h3.adm-chatbots.listado-bots` Listado de bots y estadisticas globales | L2 | errores, Sentry | admin/chatbots/page.tsx:19 -> listAllBots.ts:4-34 + getGlobalBotsOverviewStats.ts:22-51; detalle [botId]/page.tsx:28-71 -> queries.ts:6-61 |
+| `h3.adm-chatbots.listado-filtros` Listado de bots con filtros | L3 | — | page.tsx:14-19 guard + listAllBots/getGlobalBotsOverviewStats → BotsListClient.tsx:37-52 filtros → :138-153 vacío → :162-171 cards |
+| `h3.adm-chatbots.preflight-activacion` Preflight y activacion del bot | L2 | permisos y tenant, validación en servidor, Sentry, autonomía | BotDetailClient.tsx:140 -> preflightChecks.ts:13-168 -> ActivationModal.tsx:30 |
+| `h3.adm-chatbots.probar-prompt` Probar prompt con la KB en borrador | L2 | errores, carga, validación en servidor, Sentry, sin mocks ni TODO | KnowledgeBaseEditor.tsx:178 -> TestPromptSandbox.tsx:33-83 -> test-prompt/route.ts:28-99. Hoy no responde con la credencial de Vertex vencida (burbuja vacía). |
+| `h3.adm-chatbots.vista-previa-config` Preview vivo de la configuracion | L2 | sin mocks ni TODO | BotPersonalization.tsx:347 y BotConfigEditor -> BotConfigPreview.tsx:65-244; no es espejo del embed (ChatbotEmbed no usa accent/tint). |
+
+### [FAL-017] El pack vertical (EV) no se puede asignar a un bot nuevo desde ningún lado
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `prisma/schema.prisma:1329` — «verticalPack String @default("base")»; `prisma/seeds/backfill-vertical-pack.ts:72` — «develop: 'agencia', sanmiguel: 'usados', matsu: 'usados',»; `src/modules/chatbot/server/chat/handleChatRequest.ts:625` — «const verticalPack = getVerticalPack(bot.verticalPack)»; `src/modules/chatbot/server/admin/createBot.ts:63` — «const newBot = await tx.botConfig.create({»; `src/lib/onboarding/core.ts:133` — «llmModel: 'gemini-2.5-flash', monthlyQuota: 1000, ... industry: resolvedIndustry,»; `src/modules/chatbot/server/admin/createClientWithBot.ts:159` — «const bot = await tx.botConfig.create({»; `prisma/seeds/backfill-vertical-pack.ts:71` — «export const VERTICAL_PACK_BACKFILL_MAP: Readonly<Record<string, string>> = { develop: 'agencia', sanmiguel: 'usados',»; `src/modules/chatbot/server/tools/captureLead.ts:340` — «// 'base' (distinta). REQUERIDO antes de produccion: backfillear los bots»; `src/modules/chatbot/server/admin/createClientWithBot.ts:188` — «industry: parsed.industry,»; `src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts:19` — «const SaveBotConfigInputSchema = z.object({»; `scripts/ev5-smoke.mjs:212` — «"# UPDATE chatbot_bot_config SET \"verticalPack\"='agencia' WHERE slug='develop';",»; `src/modules/chatbot/server/tools/captureLead.ts:343` — «const packScoring = getVerticalPack(ctx.verticalPack ?? 'base').scoring»
+- Impacto: Un concesionario nuevo vendido con el pack 'usados' corre con intents y scoring 'base' hasta que alguien edite la base a mano: el diferencial vertical no llega a clientes nuevos.
+- Propuesta: Agregar verticalPack (claves del registry) al alta y al tab Avanzado, con Zod contra el registry.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.adm-chatbots, lib.chatbot.verticals, modelo.BotConfig, h4.adm-clientes.alta-cliente-con-bot, h3.adm-chatbots.editar-config-bot, h3.adm-chatbots.editar-config, h3.vis-whatsapp, lib.chatbot.scoring
+
+### h3.adm-actividad — Actividad global de chatbots
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 5 funcionalidades: 5×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, vacíos, mobile, autonomía, errores, validación en servidor, Sentry, sin mocks ni TODO.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h3.adm-actividad.grafico-7-dias` Grafico de actividad de 7 dias | L2 | permisos y tenant, vacíos, errores, Sentry | activity/page.tsx:12 -> getActivityChartData.ts:3-38 |
+| `h3.adm-actividad.grafico-semanal` Gráfico de eventos por día | L2 | permisos y tenant, vacíos, sin mocks ni TODO | activity/page.tsx:12 -> getActivityChartData.ts:12-37 -> ActivityChart.tsx:18-79. |
+| `h3.adm-actividad.log-bot-develop` Activity log del bot de develOP | L2 | permisos y tenant, vacíos, mobile, autonomía | activity/page.tsx:10-19 → ActivityChart + ActivityLog (polling events/route.ts) |
+| `h3.adm-actividad.registro-eventos` Registro de eventos del chatbot | L2 | errores, Sentry, autonomía | logChatbotEvent persistentLogger.ts:87-148 (forOrg create :129); purga :154-163 via cron netlify.toml:31-32. |
+| `h3.adm-actividad.stream-eventos` Activity Log del bot develOP | L2 | permisos y tenant, errores, validación en servidor, Sentry | activity/page.tsx:10-19 -> ActivityLog.tsx:33-45 -> polling :101-125 -> events/route.ts. |
+
+### h3.adm-health — Health de chatbots
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 3 funcionalidades: 3×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, sin mocks ni TODO, errores, Sentry.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h3.adm-health.latencia` Latencia p50/p95 por hora | L2 | permisos y tenant, errores, Sentry | health/page.tsx:13 -> getLatencyHistory.ts:63-144 |
+| `h3.adm-health.latencia-p50-p95` Latencia P50/P95 por hora | L2 | permisos y tenant, sin mocks ni TODO | health/page.tsx:11-14 -> getLatencyHistory.ts:63-143 -> LatencyChart.tsx:28-59. |
+| `h3.adm-health.veredicto-salud` Veredicto de salud del bot | L2 | permisos y tenant, errores, sin mocks ni TODO | health/page.tsx:12-16 -> checkHealth.ts:21-98 -> buildHealthVerdict.ts:24-133. El veredicto no detecta un provider caído y valida la variable de credenciales equivocada. |
+
+### h3.vis-widget-cliente — Widget embebible en el sitio del cliente
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 7 funcionalidades: 6×L2, 1×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, Sentry, autonomía, errores, sin mocks ni TODO, vacíos, mobile.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h3.vis-widget-cliente.apariencia-de-marca` Colores de marca del cliente en el widget embebido | L1 | sin mocks ni TODO, autonomía | Solo ChatHeader (ChatHeader.tsx:67,83) y el avatar usan accentColor; el resto del embed es cyan fijo (ChatbotEmbed.tsx:269, :537; git grep accentColor/accentSecondary/chatSurfaceTint en ChatbotEmbed = 0). |
+| `h3.vis-widget-cliente.avatar-del-bot` Avatar animado del bot en cabecera y launcher | L2 | vacíos, errores, mobile, Sentry | ChatHeader.tsx:61-72 -> AvatarRenderer.tsx:51-101 -> registry.ts:96-104 -> HeavyAvatarsLazy.tsx:27-35 -> NeuroAvatar.tsx:45-64 / LegacyNeuroAvatarAdapter.tsx:31. |
+| `h3.vis-widget-cliente.chat-embebido` Chat embebido en el sitio del cliente | L2 | permisos y tenant, Sentry, sin mocks ni TODO | widget.js:115-131 -> embed/[slug]/page.tsx:25-44 -> ChatbotEmbed.tsx:27,119-133 -> chat/route.ts:40-110. |
+| `h3.vis-widget-cliente.conversar` Conversar con el bot desde el widget | L2 | permisos y tenant, vacíos, errores, Sentry, autonomía | Camino feliz por codigo: sendMessage useChatbot.ts:537-549 -> transport :269-305 -> route.ts:8 -> handleChatRequest (entrada) -> stream al SDK :356. Hoy no responde en produccion por la credencial de Vertex vencida (hecho conocido). |
+| `h3.vis-widget-cliente.embed-chat` Widget embebido en el sitio del cliente | L2 | permisos y tenant, Sentry, autonomía | widget.js:99-153 → embed/[slug]/page.tsx:25-44 → ChatbotEmbed → /api/chatbot/<slug>/chat |
+| `h3.vis-widget-cliente.estados-degradados` Banners de degradado en el widget embebido del cliente | L2 | errores, Sentry, autonomía | ChatbotEmbed.tsx:419 <DegradedBanner info={chatbot.degradedInfo}> con el mismo hook (useChatbot); ramas en DegradedBanner.tsx:41-215. |
+| `h3.vis-widget-cliente.tarjetas-derivacion` Tarjetas de derivacion (WhatsApp / que me contacten) | L2 | vacíos | ChatbotEmbed.tsx:398-409 -> renderToolCall.tsx:47-84 -> HandoffOptionsCard.tsx:22-69 / WhatsappHandoffCard.tsx:12-58. |
+
+### [FAL-018] El widget no avisa que la conversacion la procesa un proveedor de IA ni enlaza una politica de privacidad, y la app no tiene paginas legales
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/components/chat/ChatWindow.tsx:311` — «Sistema Listo»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:280` — «{config.welcomeMessage}»
+- Impacto: El bot captura nombre, telefono y email del visitante en el sitio del cliente y los manda a Vertex y a n8n, sin aviso ni link a una politica (Ley 25.326). git grep de vertex|n8n|privacidad|disclaimer en chat/, embed/ y LogicCompanion = 0 (control: 'PRIVACIDAD' aparece en api/chatbot/[slug]/chat/route.ts:75), y ls-tree de src/app no tiene rutas privac|legal|termin|terms|cookies (control: 86 page.tsx listados). Bloqueante para el primer cliente real.
+- Propuesta: Decision para Valentino (texto legal): aviso breve en el empty state y en el primer mensaje del widget ('Este chat usa IA de Google; ver politica') con link a una pagina de privacidad publicada en el sitio de develOP y configurable por cliente.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente, h3.vis-widget-develop, int.vertex
+
+### h3.vis-api-chatbot — API pública del chatbot
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 12 funcionalidades: 10×L2, 2×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h3.vis-api-chatbot.captura-lead` Captura de lead (capture_lead) | L2 | errores, Sentry, autonomía | captureLead.ts:212-233 -> :241-261 -> :358-361 -> :379-419 -> :521-550 (flujo trazado). |
+| `h3.vis-api-chatbot.chat-streaming` API de chat con streaming | L2 | permisos y tenant, errores, validación en servidor | chat/route.ts:35-111 → handleChatRequest.ts:99-1358 → persistTurn.ts:412-472 |
+| `h3.vis-api-chatbot.config-publica` Config pública del widget | L2 | errores, Sentry | handleConfigRequest.ts:11-25 -> getPublicConfig.ts:69-126 (select acotado :76-98, pausado :124). |
+| `h3.vis-api-chatbot.costo-por-turno` Costo estimado por turno | L2 | autonomía | persistTurn.ts:372-377 -> costs.ts:21-51 -> google.ts:99-106; acumulado persistTurn.ts:450,468. |
+| `h3.vis-api-chatbot.cuota-mensual` Cuota mensual de conversaciones | L2 | validación en servidor, Sentry, autonomía | handleChatRequest.ts:345 / :401 -> checker.ts:126-151; compensacion checker.ts:189-212; upsell upsellAlert.ts:46-91. |
+| `h3.vis-api-chatbot.derivacion-whatsapp` Derivacion a WhatsApp con contexto | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | showWhatsappHandoff.ts:172-185 -> :96-114 -> :127-147 -> panel multiTenantQueries.ts:208-240. |
+| `h3.vis-api-chatbot.gating-degradado` Respuesta degradada por cupo, dominio o tope de conversación | L2 | — | handleChatRequest.ts:309-341 (dominio), :345-395 (cupo), :400-446 (reserva atómica), :547-579 (tope de 40 mensajes) -> degradedResponse.ts:30-48. Con el bug de cupo para conversaciones existentes (:345). |
+| `h3.vis-api-chatbot.health-publico` Health público del bot | L1 | permisos y tenant, errores, validación en servidor, Sentry, sin mocks ni TODO | health/route.ts:6-20 → checkHealth.ts:21-99 (no prueba el proveedor, expone detalles) |
+| `h3.vis-api-chatbot.pedido-contacto` Pedido de contacto (confirm_contact_request) | L1 | errores, Sentry, autonomía | El lado visitante funciona (confirmContactRequest.ts:185-200), pero el registro handoff.callback (:112-124) no tiene lector: el camino no llega al cliente. |
+| `h3.vis-api-chatbot.prompt-sistema` Armado del system prompt | L2 | validación en servidor, sin mocks ni TODO, autonomía | handleChatRequest.ts:635-658 -> buildSystemPrompt.ts:33-47 -> sections.ts:20-223; extras :817-827. |
+| `h3.vis-api-chatbot.responder-turno` Responder un turno del visitante | L2 | errores, validación en servidor, sin mocks ni TODO | Camino feliz trazado: route.ts:42 -> :81 -> :97; handleChatRequest.ts:134-136, :155, :215-247, :612-616, :635, :937-1179; persistTurn.ts:412-472. Por código es L2; hoy no responde por la credencial de Vertex vencida (hecho conocido). |
+| `h3.vis-api-chatbot.respuesta-llm-streaming` Respuesta del bot en streaming | L2 | errores, validación en servidor, autonomía | Camino feliz: handleChatRequest.ts:713 -> resolveEffectiveModel.ts:37-51 -> google.ts:91-97 -> wrapLanguageModel handleChatRequest.ts:735-760 -> streamText :937 -> persistTurn.ts:372-473. Bloqueado operativamente hoy por la credencial de Vertex vencida. |
+
+### h3.vis-widget-develop — Widget de develOP en el sitio público
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 14 funcionalidades: 14×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: vacíos, Sentry, sin mocks ni TODO, carga, mobile, autonomía, errores, validación en servidor.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h3.vis-widget-develop.abrir-y-cerrar-chat` Abrir y cerrar el chat desde la burbuja | L2 | carga, mobile, Sentry, autonomía | Camino feliz trazado: app/layout.tsx:137 -> ChatWidgetMount.tsx:37-42 -> LogicCompanion.tsx:53, :95, :143-221 -> handleToggle :68-80 -> ChatWindow montado :146-173; cierre por chatbot.close :153. |
+| `h3.vis-widget-develop.carga-config-reintento` Carga de la config del widget con reintento | L2 | carga, Sentry | useChatbot.ts:239 -> configCache.ts:54-65 -> fetchConfigWithRetry :43-52; error LogicCompanion.tsx:103-120. |
+| `h3.vis-widget-develop.companion` Widget del sitio de develOP | L2 | vacíos, Sentry, sin mocks ni TODO | ChatWidgetMount.tsx:27-43 (prefetch :37-39, gate :41) → LogicCompanion → useChatbot → API de chat |
+| `h3.vis-widget-develop.contenido-bot-develop` Contenido del bot publico de develOP (seed y preguntas proactivas) | L2 | errores, sin mocks ni TODO | seed.ts:252-369 upsert org (:259-268), bot (:272-338) y KB (:342-365) via unsafeGlobalQuery con razon SEED; prompts fuente unica developProactivePrompts.ts:21-57 escritos por update-proactive-prompts.ts:22-32 |
+| `h3.vis-widget-develop.conversar-con-el-bot` Conversar con el bot en streaming | L2 | vacíos, Sentry, autonomía | Camino feliz trazado en codigo: ChatWindow.tsx:186-197 -> useChatbot.ts:537-549 -> transport :271-272 -> chat/route.ts:35-110 -> handleChatRequest.ts:136, :155, :215-247, :612, :937 -> persistTurn.ts:412-472. Hoy no responde en runtime por la credencial de Ver |
+| `h3.vis-widget-develop.conversar-en-streaming` Conversar con el bot de develOP con respuesta revelada en vivo | L2 | vacíos, errores, mobile, Sentry, sin mocks ni TODO, autonomía | Camino feliz en UI trazado: ChatWidgetMount.tsx:42 -> LogicCompanion.tsx:147-152 -> ChatWindow.tsx:540-546,185-198 -> useChatbot.ts:537,272 -> render ChatWindow.tsx:369-381 -> StreamingMarkdown.tsx:75-121. El tramo server queda en otro lote; en runtime hoy no  |
+| `h3.vis-widget-develop.estados-degradados` Banners de degradado y derivacion a WhatsApp en el widget de develOP | L2 | errores, Sentry, autonomía | useChatbot.ts:318-340/383-398/470-478 -> degradedInfo -> ChatWindow.tsx:280 -> DegradedBanner.tsx:41-98 (ambar) / :101-215 (verde con wa.me :106-109). |
+| `h3.vis-widget-develop.ir-a-una-seccion` Tarjeta del bot para ir a una seccion del sitio | L2 | errores, validación en servidor, autonomía | getTools.ts:121 (solo bot develop) -> renderToolCall.tsx:71-81 -> NavigateToPageCard.tsx:35-36 -> LogicCompanion.tsx:165 -> useChatbot.ts:583-586 window.location.href. |
+| `h3.vis-widget-develop.navegacion-sitio` Navegar a seccion del sitio de develOP | L2 | — | getTools.ts:121 gate por slug; navigateToPage.ts:25-43 z.enum de rutas cuyos anchors existen (OurServices.tsx id=servicios, Portfolio.tsx, About.tsx). |
+| `h3.vis-widget-develop.navegar-a-pagina` Tarjeta 'Llevame ahi' | L2 | — | renderToolCall.tsx:71-81 -> NavigateToPageCard.tsx:35-45; gate solo bot develop (navigate-to-page-gate.invariant.ts:41-53). |
+| `h3.vis-widget-develop.reintento-de-config` Reintento manual cuando /config no carga | L2 | carga, Sentry | LogicCompanion.tsx:103-120 -> ConfigLoadError.tsx:17-73 onRetry=chatbot.retryLoadConfig; mismo componente en ChatbotEmbed.tsx:189. |
+| `h3.vis-widget-develop.respuestas-rapidas` Chips de respuestas rapidas | L2 | — | ChatWindow.tsx:467-489 onClick -> onQuickReply(qr.promptToSend) = chatbot.sendMessage (LogicCompanion.tsx:154). QuickReplyChips.tsx es codigo muerto. |
+| `h3.vis-widget-develop.teaser-y-retomar` Burbuja proactiva y burbuja 'retomar' | L2 | mobile, autonomía | LogicCompanion.tsx:263-282 -> ProactiveTooltip.tsx:71-80 (trigger) -> :129-138 onAccept -> useChatbot.ts:551-572 acceptProactivePrompt -> transport :420-443 proactiveOpener -> handleChatRequest.ts:811-824 (opener validado al system prompt). |
+| `h3.vis-widget-develop.tooltip-proactivo` Teaser proactivo del widget de develOP | L2 | autonomía | LogicCompanion monta ProactiveTooltip; useTooltipTriggers.ts:33-87 -> ProactiveTooltip.tsx:71-94 -> onAccept :137. |
+
+### h3.vis-whatsapp — Canal WhatsApp (motor)
+
+- Madurez de la herramienta: **L0** (la de su funcionalidad más floja; 8 funcionalidades: 4×L1, 2×L2, 2×L0).
+- Criterios de L3 que faltan en alguna funcionalidad: Sentry, autonomía, errores, validación en servidor, permisos y tenant, sin mocks ni TODO.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h3.vis-whatsapp.alta-canal` Alta y rotacion del canal de WhatsApp de un negocio | L0 | autonomía | Las piezas existen (channel-credentials.ts:30-38; secret-box), pero no hay script, action ni pantalla: git grep 'wabaChannel.(create/upsert/createMany)' en src/scripts/prisma da 0 (control: tests/integration/motor-inbound.spec.ts:113). |
+| `h3.vis-whatsapp.envio-mensajes` Envio de mensajes (texto en ventana de 24 h y plantillas aprobadas) | L1 | permisos y tenant, errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | El servicio esta completo (sendMessage.ts:204-256 -> client.ts:252-290), pero no tiene llamadores en src ni scripts (solo tests/integration/motor-outbound.spec.ts:188) y tampoco hay forma de cargar la API key cifrada del canal. |
+| `h3.vis-whatsapp.estados-entrega` Estados de entrega de mensajes salientes | L1 | errores, Sentry, autonomía | El handler es correcto (handle-status.ts:37-60), pero en produccion no existe ninguna fila OUT: sendMotorMessage (sendMessage.ts:204) solo lo llaman los tests. |
+| `h3.vis-whatsapp.identidad-bsuid` Identidad BSUID-first del contacto y cambio de numero | L2 | errores, validación en servidor, Sentry | Camino feliz trazado: identity.ts:40-76 (bsuid, reconciled, created) y :106-140 (user_id_update), con los tests (b), (d), (e) e (i) de motor-inbound.spec.ts. Tiene un bug de mezcla de identidades por telefono (identity.ts:56-65). |
+| `h3.vis-whatsapp.recepcion-mensajes` Recepcion autenticada de mensajes entrantes | L2 | errores, Sentry, autonomía | Camino feliz trazado: route.ts:27 -> handle-request.ts:21-55 -> process.ts:136-157 -> handle-message.ts:24-58 (con un test de integracion en motor-inbound.spec.ts:214). No llega a L3: no hay forma de dar de alta un canal fuera de los tests (channel-credentials |
+| `h3.vis-whatsapp.respuesta-automatica` Respuesta automatica del bot a los mensajes entrantes | L0 | autonomía | No existe: route.ts:9-10 la difiere a B2. No hay llamador de sendMotorMessage (git grep en src y scripts: solo la definicion en sendMessage.ts:204) ni llamadas a LLM en el motor (git grep vertex/streamText/generateText: 0). |
+| `h3.vis-whatsapp.salud-canal` Salud del canal y alertas operativas | L1 | errores, Sentry, autonomía | Escribe estado y alertas (handle-health.ts:176, :219, :243, :115), pero nadie las lee ni hay transporte (schema.prisma:2216-2218; git grep motorAlert fuera del motor: 0). El dedupe pierde el escalado a baneado (handle-health.ts:106-113). |
+| `h3.vis-whatsapp.webhook-entrante` Webhook entrante de WhatsApp (motor) | L1 | Sentry, autonomía | route.ts:27-58 → handle-request.ts:21-56 → process.ts; sin respuesta (route.ts:9-10) ni alta de canales |
+
+### [FAL-021] El bot de WhatsApp no responde ni se puede dar de alta: nada consume los mensajes entrantes, sendMotorMessage no tiene llamadores y no hay alta de canal
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/api/motor/webhook/[channelToken]/route.ts:9` — «* Contrato de respuesta: 200 rápido y sin trabajo lento (nada de LLM — eso * es B2); 401 auth; 400 shape; 429 rate limit; 500 SOLO errores de»; `src/modules/motor/adapters/whatsapp/inbound/handle-message.ts:45` — «await tx.motorMessage.create({ conversationId: conversation.id, direction: 'IN',»; `src/modules/motor/services/sendMessage.ts:204` — «export async function sendMotorMessage(»; `src/modules/motor/domain/channel-credentials.ts:30` — «export function generateChannelWebhookCredentials(): ChannelWebhookCredentials {»; `src/modules/motor/adapters/whatsapp/inbound/handle-request.ts:53` — «const summary = await processInboundPayload(forOrg(channel.organizationId), channel, envelope.data)»; `src/modules/motor/README.md:63` — «número restringido/baneado); el transporte (email/WhatsApp) es B3.»; `src/modules/motor/adapters/whatsapp/inbound/resolve-channel.ts:27` — «client.wabaChannel.findUnique({»
+- Impacto: Bloquea al primer negocio cliente. Si le vendemos el bot de WhatsApp, sus clientes escriben, el mensaje se guarda y nadie contesta. El negocio tampoco puede ver esas conversaciones: ningun archivo fuera de src/modules/motor y src/lib/isolation lee las tablas motor_*. Ademas, no hay forma de dar de alta el canal sin escribir a mano en la base (no hay ninguna escritura de WabaChannel fuera de tests; ver S6-08).
+- Propuesta: Decision para Valentino: si el motor es producto vendible, planificar B2 (consumidor de los IN que genera la respuesta, con llamador de sendMotorMessage que derive la org del canal autenticado), el alta y rotacion del canal (script o pantalla admin, S6-08) y una vista del negocio sobre sus conversaciones. Si no lo es, dejar documentado en la oferta comercial que hoy lo vende BotZ (repo aparte).
+- Esfuerzo: L  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp, h3.vis-whatsapp.respuesta-automatica, h3.vis-whatsapp.alta-canal, modelo.MotorMessage, modelo.WabaChannel, int.360dialog, lib.motor
+
+### [FAL-022] Las alertas de salud del canal (numero baneado o restringido, plantilla rechazada) se guardan en MotorAlert y nadie las lee ni las envia
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/modules/motor/adapters/whatsapp/inbound/handle-health.ts:115` — «await scope.motorAlert.create({ wabaChannelId: channel.id, type: input.type,»; `prisma/schema.prisma:2216` — «// premortem de ban de Meta por calidad: enterarse ANTES del ban). Solo // REGISTRO consultable acá — el transporte (email/WhatsApp al equipo) es B3,»; `src/modules/motor/services/sendMessage.ts:113` — «if (channel === null || channel.apiKeyEncrypted === null || channel.apiKeyIv === null || channel.apiKeyTag === null) {»
+- Impacto: El objetivo de B1-S3 era enterarse antes del baneo de Meta, y con este codigo no pasa: la alerta CRITICAL de numero baneado queda en una tabla que ninguna pantalla, cron ni email lee. channelStatus=BANNED tampoco frena el envio (resolveTargets solo mira la API key). El primer negocio cliente podria quedar baneado sin que develOP se entere.
+- Propuesta: Cablear el transporte (B3): email o Telegram de agencia por las alertas CRITICAL/HIGH, reusando src/lib/alerts.ts, y mostrarlas en /admin/chatbot/health o en una vista del motor. Que sendMotorMessage rechace con un motivo tipado cuando channelStatus sea BANNED o RESTRICTED.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-whatsapp.salud-canal, modelo.MotorAlert, modelo.WabaChannel, h3.adm-health
+
 ## h4 · Panel de admin
 
 ### h4.adm-clientes — Clientes
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 3 funcionalidades: 3×L2).
-- Criterios de L3 que faltan en alguna funcionalidad: Sentry, autonomía, sin mocks ni TODO.
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 10 funcionalidades: 10×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: Sentry, autonomía, sin mocks ni TODO, errores, validación en servidor.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
+| `h4.adm-clientes.alta-cliente-con-bot` Alta de cliente con chatbot | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO | clients/new/page.tsx:14 -> OnboardingWizard.tsx:87-160 -> Step5Review.tsx:66-86 -> createClientWithBot.ts:96-273 -> Step5Review.tsx:123-193. |
+| `h4.adm-clientes.alta-cliente-sin-bot` Alta de cliente sin chatbot | L2 | errores, validación en servidor, Sentry | Step1Company.tsx:58-69 -> Step5Review.tsx:87-108 -> createClientOnly.ts:48-175. |
+| `h4.adm-clientes.alta-sin-bot` Alta de cliente sin chatbot | L2 | errores, Sentry, autonomía | Step5Review.tsx:87 -> createClientOnly.ts:48-111 -> :132-147 email -> :165-175 |
 | `h4.adm-clientes.archivar-cliente` Archivar y desarchivar cliente | L2 | Sentry, autonomía | ClientsListClient.tsx:161-171 -> archiveClient.ts:16-37 (requireSuperAdmin, Zod, update deletedAt) -> page.tsx:23/:34. Funciona como filtro, pero no suspende nada (ver hallazgo). |
+| `h4.adm-clientes.avatar-cliente` Avatar del cliente | L2 | Sentry | ClientAvatarField.tsx:24-83 -> AvatarUploader.tsx:19-66 (WebP 200 px) -> createClientWithBot.ts:28-30 / EditClientForm -> ClientAvatar.tsx:16-75. |
+| `h4.adm-clientes.borrador-alta` Borrador automático del alta | L2 | sin mocks ni TODO | useOnboardingDraft.ts:26-56 restaura, :59-78 autoguarda; DraftBanner.tsx:12-42; OnboardingWizard.tsx:115-121. |
+| `h4.adm-clientes.borrador-del-alta` Borrador persistente del alta de cliente | L2 | errores, Sentry | admin/clients/new/page.tsx:14 -> OnboardingWizard.tsx:98 -> useOnboardingDraft.ts:26-56 restore, :59-78 autosave, OnboardingWizard.tsx:140 clearDraft al crear. |
 | `h4.adm-clientes.eliminar-cliente` Eliminar cliente (hard-delete) | L2 | Sentry, autonomía | ClientsListClient.tsx:192-206 -> hardDeleteClient.ts:107-123 (resumen) -> ClientsListClient.tsx:222-243 -> hardDeleteClient.ts:125-145 (tx + delete) -> audit :166-178. |
 | `h4.adm-clientes.envio-manual-del-reporte` Enviar ahora el reporte ejecutivo | L2 | Sentry, sin mocks ni TODO | SendExecutiveReportButton.tsx:37 → route.ts:13-57 → send-manual.ts:33-153 → build.ts → Brevo → WeeklyReportLog. |
+| `h4.adm-clientes.plantilla-kb-industria` Plantilla de KB por industria | L2 | validación en servidor, sin mocks ni TODO | Step3KnowledgeBase.tsx:9-23 getTemplate -> kb-templates/index.ts:25-40 -> createClientWithBot.ts:192-202; también createBot.ts:58, :93-102 y lib/onboarding/core.ts:7. |
 
 ### h4.adm-proyectos — Proyectos
 
@@ -459,6 +699,27 @@
 |---|---|---|---|
 | `h4.adm-tickets.cambiar-estado` Cambiar estado del ticket | L2 | errores, Sentry | admin/tickets/_components/ticket-chat.tsx:9 → actions.ts:183-184 Zod → :187 requireSuperAdmin → :188-193 update + revalidate. |
 | `h4.adm-tickets.responder-y-avisar-por-email` Responder ticket como develOP y avisar al cliente | L2 | errores, Sentry, sin mocks ni TODO | actions.ts:124 (isAdmin) → :140-148 mensaje → :150-167 sendEmail por Resend (lib/email.ts:15-30); el mensaje se guarda, el email puede no salir sin registro. |
+
+### h4.adm-alertas — Alertas
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 2 funcionalidades: 1×L1, 1×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: errores, Sentry, autonomía, sin mocks ni TODO.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h4.adm-alertas.alerta-upsell-cuota` Alerta de upsell al agotar cuota | L2 | sin mocks ni TODO, autonomía | handleChatRequest.ts:374 -> upsellAlert.ts:52-58 (markDegradedIfFirst) -> :68-88. |
+| `h4.adm-alertas.detector-incidencias` Detector de incidencias de bots | L1 | errores, Sentry, autonomía | Funciona solo a mano: AlertSettingsClient.tsx:89 -> trigger-detector/route.ts:5-16 -> detectBotIssues.ts:285-297; sin scheduler (netlify.toml:25-32) y ciego a errores de stream |
+
+### [FAL-016] El detector de alertas de los bots (/api/cron/detect-bot-issues) no tiene ningún disparador programado
+- Dominio: D5  ·  Severidad: ALTA  ·  Tipo: faltante
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `netlify.toml:25` — «[functions."generate-insights-cron"] schedule = "0 9 * * *"»; `netlify.toml:31` — «[functions."cleanup-old-events-cron"]»; `vercel.json:4` — «"path": "/api/cron/os-follow-up",»; `src/app/api/cron/detect-bot-issues/route.ts:7` — «export async function GET(req: Request) { if (!isAuthorizedCronRequest(req)) {»; `src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx:89` — «const res = await fetch('/api/admin/alerts/trigger-detector', { method: 'POST' })»; `src/app/api/cron/detect-bot-issues/route.ts:13` — «const result = await runAlertDetector()»
+- Impacto: Bloqueante para el primer cliente real: las alertas de bot (LLM_PROVIDER_ERROR, QUOTA_EXHAUSTED, LATENCY_DEGRADED, LEAD_CAPTURE_FAILURE, CLIENT_NO_ACTIVITY) solo se generan si un SUPER_ADMIN aprieta el botón manual de Configuración → Alertas. Un bot caído o con el cupo agotado pasa días sin aviso. netlify.toml agenda solo generate-insights, weekly-reports y cleanup; vercel.json agenda otros tres crons que en Netlify no corren.
+- Propuesta: Agendar el detector con una función programada de Netlify (mismo patrón que cleanup-old-events-cron, p. ej. cada 15 min) o documentar el scheduler externo si existe; alinear netlify.toml y vercel.json.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-047]
+- Nodo(s): int.cron.detect-bot-issues, h4.adm-alertas, h3.adm-health, lib.chatbot.admin, modelo.BotAlert, h4.adm-alertas.detector-incidencias
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-067
 
 ### h4.adm-config — Configuración
 

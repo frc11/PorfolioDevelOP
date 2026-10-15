@@ -1040,6 +1040,920 @@
     "src/lib/reports/executive-weekly/build.ts:130-141,174-177 el mismo número entra al reporte semanal",
     "src/lib/ai/executive-brief.ts:278,334-360 y al prompt del brief y al snapshot"
    ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Visitante en el sitio del cliente → widget embebido → respuesta del LLM",
+   "pasos": [
+    "public/widget.js:113-131 crea el iframe develop.com.ar/embed/<slug> (next.config.ts:126-133 frame-ancestors *)",
+    "src/app/embed/[slug]/page.tsx:29-44 busca el bot por slug y monta ChatbotEmbed",
+    "ChatbotEmbed.tsx:66-89 handshake develop:init (acepta cualquier origin) → useChatbot.ts:272 POST /api/chatbot/<slug>/chat same-origin (Origin develop.com.ar)",
+    "chat/route.ts:42-70 validateOrigin (validate-origin.ts:69-75: develop.com.ar exento); si no pasa: ChatbotEvent SECURITY.BLOCKED_ORIGIN + 403",
+    "chat/route.ts:79-95 rate limit chatbotPerSession (origin + hash del primer X-Forwarded-For)",
+    "handleChatRequest.ts:133-141 Zod (requestSchema.ts:37-67) → :155-169 resolveBotBySlug (resolver.ts:18-44, cache 60 s por instancia)",
+    "handleChatRequest.ts:184-205 rate limit por sessionId → :215-247 plan + cuota optimista + getOrCreateConversation (resolver.ts:75-145)",
+    "handleChatRequest.ts:309-341 tope de dominios del plan → :345-395 cuota → :400-446 reserva atómica (checker.ts:126-151)",
+    "handleChatRequest.ts:547-579 tope duro de 40 mensajes → :606-617 persiste el USER → :635-658 system prompt (sections.ts:191-207, incluye currentPath)",
+    "handleChatRequest.ts:713 modelo del plan → :937-1179 streamText con tools del plan y spotlighting (:883-889)",
+    "onFinish → persistTurn.ts:412-472 $transaction (mensaje, conversación, QuotaUsage) → :533-551 ChatbotEvent chat.message_completed",
+    "handleChatRequest.ts:1186-1358 watchdog del borde → chat/route.ts:99-110 agrega CORS y devuelve el stream"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Lead capturado → avisos (dueño, develOP, sitio padre)",
+   "pasos": [
+    "Tool capture_lead (captureLead.ts:58-104 esquema; name z.string().min(2).max(100))",
+    "captureLead.ts:445-456 Telegram interno con nombre/email/teléfono (void, fire-and-forget)",
+    "notify.ts:87-177 notifyClientOfLead: DISABLED corta (:94), destinatario (:61-74), plan/leadScoring (:99-100), decisión pura (decide.ts:40-51)",
+    "notify.ts:109-133 cap 5/h y digest 1/h (presets.ts:65-69) → sendTransactionalEmail por Brevo (:142-150 / :171) → markNotified (:76-85)",
+    "ChatbotEmbed.tsx:93-107 postea el input del lead al padre (develop:lead-captured) → widget.js:177-182 CustomEvent develop:lead en el sitio host"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Cliente revisa y exporta sus leads",
+   "pasos": [
+    "proxy.ts:154 (ORG_MEMBER) → dashboard/chatbot/layout.tsx:25-57 getClientChatbotSession (getClientSession.ts:5-33)",
+    "leads/page.tsx:36-59 listLeadsForDashboard (multiTenantQueries.ts:75-122, forOrg) + plan",
+    "leads/page.tsx:72-113 decay del score en lectura sobre capturedAt",
+    "ClientLeadsTable.tsx:311 ExportLeadsButton → GET /api/dashboard/chatbot/leads/export (export/route.ts:83-208)",
+    "export/route.ts:105-113 misma consulta (tope 10.000) → :166-169 buildLeadsCsv/csvEscape → :173-192 logAdminAction LEADS_EXPORTED"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Cliente abre el transcript de una conversación",
+   "pasos": [
+    "conversations/page.tsx:9-21 listConversationsByOrgSlug (multiTenantQueries.ts:174-198)",
+    "ConversationsTable fetchTranscript → getClientConversationTranscriptAction (transcript-action.ts:31-56, Zod + org de la sesión)",
+    "getConversationMessagesForOrg (multiTenantQueries.ts:161-172, forOrg: conversación de otra org → [])"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Admin crea org + bot de cero",
+   "pasos": [
+    "CreateBotForm.tsx:70-85 → createBotAction (new/actions.ts:39-94): gate SUPER_ADMIN + Zod",
+    "onboardClientCore (core.ts:58-200): slug único (:25-34), email existente (:69-73), tx org + user + member + bot ACTIVO + KB de plantilla (:78-156)",
+    "core.ts:158-175 audit → :177-191 mail de bienvenida con la contraseña temporal → emailSent ignorado (new/actions.ts:69-86)",
+    "CreateBotForm.tsx:78-80 toast 'Chatbot creado' + router.push"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Admin activa, pausa o elimina un bot",
+   "pasos": [
+    "BotDetailClient.tsx:134-148 runPreflightChecks ('use server' sin auth, preflightChecks.ts:1-168) → ActivationModal",
+    "toggleBotActiveAction (actions.ts:25-99): Zod, update, audit, invalidateBotCache (solo la instancia actual, resolver.ts:47-49), mail fire-and-forget (:75-85)",
+    "deleteBotAction (actions.ts:110-174): ConfirmDialog (BotDetailClient.tsx:321-330) → delete en cascada → audit → redirect"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Admin exporta leads de varios bots",
+   "pasos": [
+    "BotsListClient.tsx:62-65 selección visible → BulkActionBar.tsx:91-107",
+    "exportLeadsBulkAction (bulk-actions.ts:110-158): sin Zod, findMany sin take, CSV armado a mano (:133-144) → Blob en el navegador"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Admin prueba un prompt en el sandbox de KB",
+   "pasos": [
+    "KnowledgeTab.tsx:21-30 → KnowledgeBaseEditor → TestPromptSandbox.tsx:42 fetch /api/admin/chatbot/test-prompt",
+    "test-prompt/route.ts:27-111: requireSuperAdmin, Zod, modelo fijo gemini-2.5-flash, sin tools ni spotlighting ni temperatura del bot (≠ producción)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Health del chatbot (admin y público)",
+   "pasos": [
+    "/admin/chatbot/health/page.tsx:11-16 checkChatbotHealth('develop') + getLatencyHistory(24) (global)",
+    "checkHealth.ts:21-99: env (envValidator.ts:83-111), SELECT 1, getLLMProvider()+listModels (sin llamada real), bot por slug",
+    "buildHealthVerdict.ts:24-133 → VerdictHero",
+    "Público: /api/chatbot/[slug]/health/route.ts:6-20 devuelve el mismo objeto completo, 200/503, sin auth ni rate limit"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Fallo del proveedor (control E10: credencial de Vertex vencida)",
+   "pasos": [
+    "handleChatRequest.ts:937 streamText → el doStream falla al autenticar (google.ts:71-89)",
+    "onError (handleChatRequest.ts:1046-1110): logPersistFailure a stderr (logger.ts:172-185) + Sentry stage=stream + compensación",
+    "compensateNewConversationReservation (checker.ts:189-213) borra la conversación (con el mensaje del visitante) y devuelve el cupo; evento chat.quota_compensated (warn)",
+    "Watchdog flush → onSilentClose (handleChatRequest.ts:1265-1277) → persistTurn sale por conversación descartada (persistTurn.ts:353-365) → el visitante ve buildEmptyFallbackMessage (reconcile.ts:407-411)",
+    "detectBotIssues.ts:85-98 no lo detecta (no hay evento ERROR) y además no tiene disparador; el health sigue en 'Todo OK'"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L1",
+   "nombre": "Webhook entrante de WhatsApp (motor)",
+   "pasos": [
+    "POST /api/motor/webhook/<token> (route.ts:27-47) rate limit por hash del token",
+    "handle-request.ts:22-42 canal por token (resolve-channel.ts:24-37) + Bearer secret (auth.ts:134-149) + canal activo",
+    "handle-request.ts:44-51 body ≤1 MB + Zod → processInboundPayload (process.ts) con forOrg → 200 sin respuesta al usuario final (sin LLM, B2 pendiente)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "nombre": "Widget de develOP: de la carga del sitio a la respuesta del bot",
+   "pasos": [
+    "app/layout.tsx:137 monta <ChatWidgetMount /> en el layout raiz, fuera de {children} y sin error boundary",
+    "ChatWidgetMount.tsx:37-39 prefetchBotConfig('develop') durante el intro; :12-15 import dinamico del barrel completo '@/modules/chatbot'; :41-42 monta LogicCompanion al revelarse el chrome",
+    "configCache.ts:33 GET /api/chatbot/develop/config con reintentos (chatRetryPolicy) y borrado del cache si falla (:58-61)",
+    "LogicCompanion.tsx:53 useChatbot -> useChatbot.ts:239-263 config/paused/error; LogicCompanion.tsx:95 null mientras carga; :103-121 ConfigLoadError con Reintentar",
+    "LogicCompanion.tsx:177-182 click en el launcher -> handleToggle :68-80 -> open; ChatWindow.tsx:186-197 submit -> useChatbot.ts:537-549 sendMessage",
+    "useChatbot.ts:271-414 transport POST /api/chatbot/develop/chat (reintenta 5xx, degrada 4xx); :415-453 body con ventana de 30 mensajes, sessionId de sessionStorage y currentPath del primer render",
+    "chat/route.ts:42 validateOrigin; :79-85 rate limit por origin+IP; :97 handleChatRequest",
+    "handleChatRequest.ts:136 zod; :155 resolveBotBySlug (unsafeGlobalQuery, cache 60 s); :184-188 rate limit por sessionId; :215-247 plan + cuota + conversacion en paralelo; :345 y :400 gating y reserva de cupo; :612 persiste el USER; :635 system prompt",
+    "handleChatRequest.ts:937-1179 streamText contra Vertex (gemini-2.5-flash) con transform de respuesta vacia y hooks onError/onAbort/onFinish; :1186-1358 watchdog del borde",
+    "persistTurn.ts:412-472 $transaction mensaje -> conversacion -> cupo; :533 chat.message_completed",
+    "useChatbot.ts:502-529 mapea partes; ChatWindow renderiza; renderToolCall.tsx:47-85 tarjetas (handoff, WhatsApp, navegar)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "nombre": "Credencial de Vertex vencida (E10): que pasa en cada capa",
+   "pasos": [
+    "handleChatRequest.ts:937 streamText: el doStream de Vertex falla al pedir el token -> parte de error dentro de un stream HTTP 200",
+    "handleChatRequest.ts:1046-1060 onError: logPersistFailure a stderr + Sentry.captureException sin flush; no se escribe ChatbotEvent",
+    "handleChatRequest.ts:1070-1109 + reconcile.ts:366-370: sin primer token se devuelve el cupo y se descarta la conversacion nueva (el dueno no la ve)",
+    "handleChatRequest.ts:1265-1277 onSilentClose: si la conversacion ya existia persiste un canned de derivacion y encola sus frames despues del error (probable)",
+    "node_modules/ai/dist/index.mjs:13787-13811 useChat deja de procesar en el chunk de error -> useChatbot.ts:470-482 banner 'Se corto la respuesta.' con el input habilitado",
+    "checkHealth.ts:46-58 el health solo instancia el provider -> /admin/chatbot/health y GET /api/chatbot/[slug]/health no lo detectan",
+    "dashboard/chatbot/layout.tsx:50-52 el dueno ve 'Activo · respondiendo a tus visitantes'"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "nombre": "Accion rapida sobre un lead y Deshacer",
+   "pasos": [
+    "dashboard/chatbot/leads/page.tsx:36 getClientChatbotSession -> ClientLeadsTable -> BusinessLeadCard.tsx:240 / LeadDetail.tsx:318 <LeadStatusActions>",
+    "LeadStatusActions.tsx:120 OWNER_ACTION_STATUS (lead-status-rules.ts:23-27) -> :87-89 cambio optimista -> :92 updateLeadStatus",
+    "updateLeadStatus.ts:18 getClientChatbotSession (getClientSession.ts:6-25) -> :21 zod -> :27-30 forOrg.chatbotLead.findFirst -> :32 leadBelongsToOrg (lead-status-rules.ts:66-72)",
+    "updateLeadStatus.ts:40 shouldSealFirstContact (lead-status-rules.ts:51-56) -> :42-47 update scoped con firstContactedAt solo si no habia",
+    "updateLeadStatus.ts:51-67 logAdminAction; :69-76 logChatbotEvent; :78 revalidatePath; :84-92 revalidateTag del badge",
+    "LeadStatusActions.tsx:95-100 error -> toast con res.error; :108-113 toast con Deshacer -> applyStatus(previous) -> mismo action, el sello queda",
+    "home-metrics.ts:120-125 -> home-metrics-logic.ts:69-79 velocidad y :117-127 embudo usan firstContactedAt; monthly-report-data.ts:95 reusa buildFunnel"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "nombre": "Detalle del lead en lenguaje de dueno",
+   "pasos": [
+    "dashboard/chatbot/leads/[id]/page.tsx:29-30 getClientChatbotSession / redirect('/dashboard'); :34 getLeadByIdForOrg (anti-IDOR); :39-40 plan -> showScoring",
+    "page.tsx:43-70 score efectivo con decay sobre capturedAt; :75-77 mensajes de la conversacion scoped; :82-90 origen y campana",
+    "LeadDetail.tsx:161-169 categoryLabel / channelLabel / collectInterestSignals / formatChatDuration (lead-detail-presentation.ts:28-87) e intentLabel (lead-intent-labels.ts:44-57)",
+    "LeadDetail.tsx:436 shouldShowInterestSignals (Pro+, no DQ, al menos una senal); :467-470 vacio 'Sin conversacion guardada'",
+    "LeadDetail.tsx:182-186 Guardar notas/estado -> updateLeadStatus con el resultado ignorado -> :526 'Guardado'"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "nombre": "Exportar contactos a CSV",
+   "pasos": [
+    "api/dashboard/chatbot/leads/export/route.ts:143-166 arma las filas; :156 intent: l.intent (enum de Prisma en mayuscula)",
+    "buildLeadsCsv.ts:82-84 labelIntent busca en INTENT_LABELS con claves en minuscula (:37-50) y cae al valor crudo"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L2",
+   "nombre": "Abuso anonimo del endpoint de chat (cuota)",
+   "pasos": [
+    "Script con Origin https://<n>.<dominio permitido del bot> (o https://develop.com.ar) -> validate-origin.ts:69-74 y :83-84 + origin-matcher.ts:39-40 lo aceptan",
+    "chat/route.ts:80 la clave del rate limit incluye el origin -> bucket nuevo por subdominio",
+    "handleChatRequest.ts:185 clave por sessionId del body -> bucket nuevo por sessionId",
+    "handleChatRequest.ts:215-247 conversacion nueva por sessionId -> :400-401 tryReserveConversation consume un cupo",
+    "handleChatRequest.ts:345-395 con la cuota agotada todos los pedidos del bot (tambien conversaciones en curso) reciben la respuesta degradada"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "nombre": "Guardar la configuración del bot (admin)",
+   "pasos": [
+    "UI: BotConfigEditor.tsx:220-227 'Revisar y guardar' abre BotConfigDiffModal (campos cambiados BotConfigDiffModal.tsx:64-66)",
+    "Confirmar: BotConfigDiffModal.tsx:146-149 -> BotConfigEditor.tsx:87-110 handleConfirmSave",
+    "Action: BotConfigEditor.tsx:79-80 -> saveBotConfigByOrgSlug.ts:71 requireSuperAdmin, :72 Zod",
+    "Lib/DB: saveBotConfigByOrgSlug.ts:80-83 org+bot por slug (unsafeGlobalQuery) -> :95-117 $transaction botConfig.update + organization.update",
+    "Post: :119 invalidateBotCache, :121-134 logAdminAction, :136 revalidatePath; UI: toast.promise BotConfigEditor.tsx:97-101"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "nombre": "Guardar la KB (admin)",
+   "pasos": [
+    "UI: KnowledgeBaseEditor.tsx:184-192 'Guardar cambios' -> SaveConfirmModal.tsx:26 secciones cambiadas + DiffViewer.tsx:19 diffWordsWithSpace",
+    "Confirmar: SaveConfirmModal.tsx:85-88 -> KnowledgeBaseEditor.tsx:127-141",
+    "Action: saveKnowledgeBaseByOrgSlug.ts:24 requireSuperAdmin, :25 Zod, :33-40 org+bot+KB por slug",
+    "DB: :48 forOrg(org.id).knowledgeBase.update -> :50 invalidateBotCache -> :52-65 audit -> :67 revalidatePath"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "nombre": "Probar prompt con la KB en borrador",
+   "pasos": [
+    "UI: KnowledgeBaseEditor.tsx:176-183 abre TestPromptSandbox; TestPromptSandbox.tsx:33-52 POST con el último mensaje y kbDraft (sin historial)",
+    "Route: test-prompt/route.ts:28 requireSuperAdmin, :31 Zod",
+    "LLM: :42 getLLMProvider('google'), :50 getModel('gemini-2.5-flash'), :51-66 provider-close, :68-97 streamText con buildSystemPrompt(kbDraft), sin tools",
+    "Respuesta: :99 toTextStreamResponse -> TestPromptSandbox.tsx:64-83 lee texto; errores dentro del stream se descartan (node_modules/ai/dist/index.mjs:8151-8162) y sólo van a console.error (:6826-6828)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "nombre": "Activar un bot pausado con preflight",
+   "pasos": [
+    "UI: BotDetailClient.tsx:227 'Activar bot' -> :134-147 handleToggleActive -> :140 runPreflightChecks(bot.id) (server action sin auth)",
+    "Lib: preflightChecks.ts:18-25 findUnique global por id -> :36-165 checks (KB >=20 chars, bienvenida, quick replies, WhatsApp, color, cuota legacy)",
+    "UI: ActivationModal.tsx:28-30 canActivate en el cliente -> :136 onConfirm -> BotDetailClient.tsx:163-174",
+    "Action/DB: [botId]/actions.ts:29-39 SUPER_ADMIN + Zod -> :42-56 botConfig.update isActive sin re-correr el preflight -> :69 invalidateBotCache -> :75-85 email de bot activado sin await"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "nombre": "Alta de cliente con bot (asistente)",
+   "pasos": [
+    "UI: clients/new/page.tsx:14 -> OnboardingWizard.tsx:87-98 (borrador en localStorage, useOnboardingDraft.ts:26-78)",
+    "Pasos 1-4: Step1Company.tsx:23-28 validación; Step2BotIdentity.tsx:9; Step3KnowledgeBase.tsx:9-23 prellena con getTemplate (kb-templates/index.ts:38-40) y :25-32 gate sólo por largo; Step4Appearance.tsx:24-28",
+    "Paso 5: Step5Review.tsx:66-86 -> createClientWithBot.ts:96 requireSuperAdmin, :99-104 Zod, :107-116 slug y email únicos, :118-119 contraseña temporal",
+    "DB: createClientWithBot.ts:123-207 $transaction organization + user + orgMember + botConfig (isActive true :165, sin allowedDomains ni verticalPack) + knowledgeBase",
+    "Post: :209-227 audit -> :229-243 email de bienvenida por Brevo (await) -> :245-259 audit -> :261-273 devuelve tempPassword -> Step5Review.tsx:123-193 credenciales y triggerTransition"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "nombre": "Configurar y probar la integración CRM (n8n)",
+   "pasos": [
+    "Server component: IntegrationsTab.tsx:36 -> CrmIntegrationAdminCard.tsx:29-31 plan; :63-73 forOrg crmIntegration + getOrgSyncHistory (requireSuperAdmin getCrmSyncHistory.ts:89)",
+    "Guardar: CrmConfigForm.tsx:39-66 -> saveCrmIntegration.ts:30-71 SUPER_ADMIN, Zod strict, org, plan, validateWebhookUrl, cifrado -> :128-139 upsertForScope -> :151-168 audit + revalidatePath",
+    "Probar: CrmConfigForm.tsx:68-79 -> testCrmConnection.ts:22-58 SUPER_ADMIN, plan, rate limit, integración guardada -> :74-87 testN8nConnection -> :89-105 audit"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "nombre": "Reintentar un sync CRM fallido",
+   "pasos": [
+    "UI: CrmSyncHistoryList.tsx:75-77 (fila FAILED) -> RetrySyncButton.tsx:17-25",
+    "Action: retryCrmSync.ts:24-51 SUPER_ADMIN, Zod, plan, rate limit -> :53-60 lead scoped -> :62-71 audit",
+    "Lib: :73-75 void syncLeadToCrm (sin esperar) -> :79 devuelve ok; UI toast 'Reintento disparado' (RetrySyncButton.tsx:21)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "nombre": "Stream de actividad en vivo",
+   "pasos": [
+    "Página: admin/chatbot/activity/page.tsx:10-19 bot 'develop' + listRecentEvents(...,250) (queries.ts:36-45 forOrg); sin auth propia",
+    "UI: ActivityLog.tsx:101-125 setInterval 3 s -> GET /api/admin/chatbot/events?slug&since",
+    "Route: events/route.ts:8-11 SUPER_ADMIN -> :17 bot por slug -> :20-22 listEventsSince (queries.ts:47-60 gt since, take 50) -> :35 serverTime",
+    "UI: ActivityLog.tsx:110-118 merge (máx 300) y since=serverTime; filtros client-side activityFilters.ts:91-106"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L3",
+   "nombre": "Health del chatbot y latencia",
+   "pasos": [
+    "Página: admin/chatbot/health/page.tsx:11-14 checkChatbotHealth('develop') + getLatencyHistory(24); sin auth propia",
+    "Lib: checkHealth.ts:25 env, :28-37 SELECT 1, :46-58 instancia el proveedor y cuenta modelos (no autentica contra Vertex), :60-82 bot",
+    "Lib: getLatencyHistory.ts:73-84 eventos chat.message_completed de todas las orgs (take 2000 sin orderBy) -> :86-143 P50/P95 por hora en zona del servidor",
+    "Veredicto: buildHealthVerdict.ts:24-132 -> UI LatencyChart.tsx:28-59 (EmptyState :124-148)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "nombre": "Visitante del sitio develOP conversa con el bot (widget on-site)",
+   "pasos": [
+    "src/app/layout.tsx:137 monta <ChatWidgetMount/> en el layout raiz (toda ruta publica)",
+    "src/components/layout/ChatWidgetMount.tsx:10,42 slug fijo 'develop' -> <LogicCompanion slug='develop'/> (fuera de lote)",
+    "LogicCompanion.tsx:95 return null mientras carga /config; :103-120 ConfigLoadError si agoto reintentos; :147-168 monta <ChatWindow> con onSendMessage=chatbot.sendMessage",
+    "ChatWindow.tsx:161-163 foco al textarea; :540-546 Enter -> form.requestSubmit(); :185-198 handleFormSubmit -> onSendMessage(input)",
+    "useChatbot.ts:537 sendMessage -> transport DefaultChatTransport api `/api/chatbot/${slug}/chat` (useChatbot.ts:272) [FRENO: servidor fuera de lote, entrada handleChatRequest.ts; onError con Sentry en :1046-1057, respuesta toUIMessageStreamResponse en :1186]",
+    "ChatWindow.tsx:143 showThinking (isStreaming && !isTyping) -> indicador 'pensando' :409-462 con ThinkingAvatar (ThinkingAvatar.tsx:30-43)",
+    "ChatWindow.tsx:369-381 ultimo mensaje del asistente -> StreamingMarkdown(streaming) ; StreamingMarkdown.tsx:75-121 loop rAF revela caracteres; :143 revealSafeMarkdown(prefijo) (revealSafeMarkdown.ts:65-76); :97 onTypingStart / :109 onTypingDone",
+    "ChatHeader.tsx:88 'Escribiendo…' mientras isTyping; ChatWindow.tsx:172-177 re-foco al terminar si el usuario seguia en el input"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "nombre": "Degradado y errores visibles al visitante (develOP y embed del cliente)",
+   "pasos": [
+    "useChatbot.ts:318-340 /chat responde JSON mode:'degraded' -> reason quota_exhausted|domain_overflow|conversation_limit con whatsappNumber del server",
+    "useChatbot.ts:383-398 4xx -> rate_limited|chat_unavailable con whatsappNumber null; useChatbot.ts:284-291 5xx/red agotados -> connection_failed (null); useChatbot.ts:470-478 frame de error en stream -> stream_interrupted (null)",
+    "useChatbot.ts:248-256 /config con paused -> bot_paused (datos de WhatsApp del config)",
+    "useChatbot.ts:623-624 inputLockedByDegrade = degradado no incluido en NON_LOCKING_DEGRADES (useChatbot.ts:139-144)",
+    "ChatWindow.tsx:280 <DegradedBanner info>; :115 inputLocked; :570 textarea disabled; :467 quick replies ocultos",
+    "DegradedBanner.tsx:41-98 variante ambar (sin CTA de WhatsApp) para connection_failed/rate_limited/chat_unavailable/stream_interrupted; :101-215 variante verde con wa.me si hay numero, o texto 'Volve a probar mas tarde' si no",
+    "Embed del cliente: public/widget.js:125-127 iframe /embed/<slug> -> src/app/embed/[slug]/page.tsx:40 <ChatbotEmbed> -> ChatbotEmbed.tsx:419 <DegradedBanner> (resto del embed fuera de lote)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "nombre": "Cabecera y avatar del widget (develOP y embed)",
+   "pasos": [
+    "ChatWindow.tsx:251-260 y ChatbotEmbed.tsx:211 montan <ChatHeader config ...>",
+    "ChatHeader.tsx:61-72 <AvatarRenderer style=config.avatarStyle size=getAvatarRenderSize(...)>",
+    "AvatarRenderer.tsx:51-85 escotillas 'image' (img con data-URI/URL) y 'emoji'; :87-89 getAvatarOrDefault(style) (registry.ts:96-104, default 'neuro' registry.ts:11)",
+    "registry.ts:33-79 neuro/legacy_neuro -> HeavyAvatarsLazy.tsx:27-35 next/dynamic ssr:false -> NeuroAvatar.tsx:45-64 <Canvas> (ParticleSphere, CentralCore, CoreHalo) o LegacyNeuroAvatarAdapter.tsx:31 -> LegacyNeuroAvatar.tsx:936-1018 <Canvas dpr=[1,2]>",
+    "Livianos: MonogramAvatar.tsx:24-124, PulseAvatar.tsx:18-91, GeometricAvatar.tsx:22-96 (SVG + motion, animaciones infinitas)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "nombre": "Cliente y admin eligen avatar del bot",
+   "pasos": [
+    "Cliente: src/app/(protected)/dashboard/chatbot/settings/page.tsx:63 <BotPersonalization> -> BotPersonalization.tsx:271-278 <AvatarPicker escapeHatches=['image','emoji']>",
+    "Admin: admin/chatbots/[botId]/tabs/ConfigTab.tsx:54 -> BotConfigEditor.tsx:174 -> AppearanceTab.tsx:40-45 <AvatarPicker includeEscapeHatches>; alta: admin/clients/new/page.tsx:14 -> Step4Appearance.tsx:58-63",
+    "AvatarPicker.tsx:84-95 monta el componente REAL de cada entrada del registry (incluye los 2 canvas 3D) + escotillas :97-158; onChange(id)",
+    "Validacion server: CLIENT_AVATAR_STYLE_SCHEMA (avatarStyleSchema.ts:48-52) en updateBotAppearance.ts:32 y saveClientSettings.ts:25; AVATAR_STYLE_SCHEMA (avatarStyleSchema.ts:38-42) en saveBotConfig.ts:30, saveBotConfigByOrgSlug.ts:28, createClientWithBot.ts:56 [FRENO: actions fuera de lote]"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L4",
+   "nombre": "Borrador del alta de cliente (admin)",
+   "pasos": [
+    "src/app/(protected)/admin/clients/new/page.tsx:14 <OnboardingWizard/>",
+    "OnboardingWizard.tsx:98 useOnboardingDraft(INITIAL_STATE)",
+    "useOnboardingDraft.ts:26-56 restaura de localStorage['develop:onboarding:draft'] si version==1 y <7 dias; merge sobre initialState",
+    "useOnboardingDraft.ts:59-78 autosave con debounce 1 s de {step,state} (incluye userEmail/userPhone/whatsappNumber/KB, onboarding/types.ts:30-52)",
+    "OnboardingWizard.tsx:115-119 banner de borrador (discardDraft); :140 Step5Review onCreated=clearDraft -> useOnboardingDraft.ts:80-84 removeItem"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "nombre": "Resumen del chatbot del cliente (Overview)",
+   "pasos": [
+    "src/app/(protected)/dashboard/chatbot/page.tsx:15-18 resolveOrgId + checkClientHasChatbot (clientHasChatbot.ts:5-7 exige isActive:true)",
+    "page.tsx:20-25 sin bot activo o sin getClientChatbotSession -> ChatbotUpsellLanding",
+    "page.tsx:28-32 getUsageByOrgSlug + listLeadsByOrgSlug(orgSlug, 5) + listRecentHandoffsByOrgSlug(orgSlug, 10)",
+    "multiTenantQueries.ts:33-36 forOrg(...).chatbotLead.findMany sin filtro de mes ni de DQ, take 5",
+    "ChatbotOverview.tsx:40-45 toBusinessMetrics con capturedLeads=recentLeads.length, leadValueUSD 50, successRate 0.97",
+    "business-metrics.ts:19,21 valor = leads*50; tiempo de respuesta = default 1500 ms",
+    "ChatbotOverview.tsx:61-113 render de hero y 4 stat cards; :116-218 leads recientes y derivaciones"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "nombre": "Cambio de estado de un tap sobre un contacto",
+   "pasos": [
+    "BusinessLeadCard.tsx:240-245 o LeadDetail.tsx:318 montan LeadStatusActions",
+    "LeadStatusActions.tsx:133-137 onClick -> applyStatus (optimista :86-89)",
+    "LeadStatusActions.tsx:92 updateLeadStatus({leadId, status})",
+    "updateLeadStatus.ts:18 getClientChatbotSession -> :21 zod parse -> :27-34 forOrg findFirst -> :42-47 update (sella firstContactedAt :40)",
+    "updateLeadStatus.ts:51-76 logAdminAction + logChatbotEvent; :78-92 revalidatePath + revalidateTag hot-leads-count",
+    "LeadStatusActions.tsx:95-113 revierte en error o toast con Deshacer"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "nombre": "Guardar estado y notas desde el detalle del contacto",
+   "pasos": [
+    "leads/[id]/page.tsx:29-35 getClientChatbotSession + getLeadByIdForOrg (notFound si es de otra org)",
+    "LeadDetail.tsx:497-520 Select de estado + textarea de notas (maxLength 2000)",
+    "LeadDetail.tsx:182-186 handleSave -> await updateLeadStatus(...) sin mirar res.ok -> setSavedAt",
+    "updateLeadStatus.ts:17-94 (ver flujo anterior)",
+    "LeadDetail.tsx:525-527 muestra 'Guardado' siempre"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "nombre": "Transcript de la conversacion origen en el detalle del contacto",
+   "pasos": [
+    "leads/[id]/page.tsx:75-77 getConversationMessagesForOrg(conversationId, orgId, 50)",
+    "multiTenantQueries.ts:166-170 select role (enum ChatMessageRole USER/ASSISTANT, schema.prisma:152-156)",
+    "LeadDetail.tsx:480 ConversationThread",
+    "LeadDetail.tsx:546 filtro m.role === 'user' || 'assistant' -> lista vacia -> :548-552 mensaje 'mensajes tecnicos'"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "nombre": "Personalizacion del bot por el cliente",
+   "pasos": [
+    "settings/page.tsx:14-49 auth + resolveOrgId + prisma.botConfig.findUnique cacheado (unstable_cache, tag chatbot-config:orgId)",
+    "BotPersonalization.tsx:134-170 estado local + dirty-state :147 + handleSave",
+    "updateBotAppearance.ts:56 auth, :61 resolveOrgId, :66 zod strict, :75-107 forOrg botConfig.update, :109 invalidateBotCache, :111 audit, :135-136 revalidatePath",
+    "Widget del cliente: public/widget.js:28 posicion por data-position y :64 boton #06b6d4 fijo; ChatbotEmbed.tsx:298-301,339-353,534-537 colores cyan fijos -> la personalizacion no llega"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "nombre": "Chat del visitante en el sitio del cliente (widget + embed)",
+   "pasos": [
+    "public/widget.js:21-28 BASE_URL develop.com.ar, data-bot, data-theme, data-position",
+    "public/widget.js:115-131 crea iframe BASE_URL/embed/<slug>?theme=",
+    "src/app/embed/[slug]/page.tsx:29-43 findUnique por slug (404 solo si no existe) -> ChatbotEmbed",
+    "ChatbotEmbed.tsx:27 useChatbot({slug, currentPath:'/', attribution}); :65-91 handshake develop:init (acepta cualquier origen)",
+    "ChatbotEmbed.tsx:119-133 send -> useChatbot.sendMessage (useChatbot.ts:537-546)",
+    "src/app/api/chatbot/[slug]/chat/route.ts:40-42 validateOrigin: Origin develop.com.ar siempre permitido (validate-origin.ts:70-76) -> rate limit :79-85 -> handleChatRequest (otro lote; plan cap isOriginWithinPlanCap handleChatRequest.ts:309 tambien deja pasar develop.com.ar degradedResponse.ts:97-103)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "nombre": "Lista de contactos con filtros, pipeline y polling",
+   "pasos": [
+    "leads/page.tsx:35-59 getClientChatbotSession + parseStatus/parseRange + listLeadsForDashboard(orgId, filters, 200) + countDqLeadsForOrg + getPlanForOrg",
+    "ClientLeadsTable.tsx:166-182 updateParams -> router.replace con status/range/view",
+    "ClientLeadsTable.tsx:138-164 router.refresh cada 30 s, pausado con la pestana oculta",
+    "ClientLeadsTable.tsx:333-334 LeadPipeline (plan con scoring) o :336-368 grilla plana",
+    "LeadPipeline.tsx:31 groupByClassification (classes.ts:31-39) -> LeadPipelineColumn (max 2 cards) + LeadColumnOverview portaleado"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "nombre": "Exportar contactos a CSV",
+   "pasos": [
+    "ClientLeadsTable.tsx:311-317 ExportLeadsButton con filtros activos",
+    "ExportLeadsButton.tsx:44-64 arma /api/dashboard/chatbot/leads/export?status&range&view y dispara <a download>",
+    "ExportLeadsButton.tsx:66-70 toast de exito sin saber el resultado",
+    "src/app/api/dashboard/chatbot/leads/export/route.ts (otro lote): EXPORT_LIMIT 10_000 :48, text/csv :203"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "nombre": "Conversaciones del cliente con transcript expandible",
+   "pasos": [
+    "conversations/page.tsx:9-12 getClientChatbotSession + listConversationsByOrgSlug(slug, 100)",
+    "multiTenantQueries.ts:180-187 conversation.findMany con include y sin select (todas las columnas, incluido ipHash/userAgent)",
+    "conversations/page.tsx:17-22 ConversationsTable expandable + fetchTranscript=getClientConversationTranscriptAction (otro lote)",
+    "ConversationsTable.tsx:59-73 toggle -> fetchTranscript; :183-246 TranscriptDetail normaliza rol a mayuscula"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L5",
+   "nombre": "Instalacion del snippet",
+   "pasos": [
+    "install/ClientInstallView.tsx (otro lote) -> buildEmbedSnippet(slug) platforms.ts:26-28 con data-theme dark fijo y sin data-position",
+    "SnippetCopyBlock.tsx:28-33 navigator.clipboard.writeText sin await ni catch + toast.success",
+    "PlatformInstructions.tsx:11-125 instrucciones por plataforma"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Visitante conversa con el bot de un cliente (widget)",
+   "pasos": [
+    "useChatbot.sendMessage limpia degradados reactivos y marca pendingSubmit (useChatbot.ts:537-549)",
+    "prepareSendMessagesRequest arma body con ventana trimHistory(30), sessionId de sessionStorage 'chatbot:sessionId', currentPath, opener proactivo y UTM first-touch (useChatbot.ts:415-454; :24-35)",
+    "fetch wrapper: POST /api/chatbot/[slug]/chat (useChatbot.ts:272, :305) -> route.ts:8 maxDuration 30, rate limit por sesion route.ts:81 -> handleChatRequest (entrada fuera del lote; se frena aca)",
+    "200 stream -> SDK (useChatbot.ts:356); 200 JSON mode:'degraded' -> quota/domain/conversation_limit con WhatsApp (:316-351)",
+    "4xx -> rate_limited o chat_unavailable sin WhatsApp (:372-399); 5xx/red -> reintentos 2 s y 4 s, 3 intentos (:404-408; chatRetryPolicy.ts:24,27) -> connection_failed sin WhatsApp (:410-412, :284-296)",
+    "error dentro del stream -> onError -> stream_interrupted 'Se corto la respuesta.' sin WhatsApp (:470-482)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Carga de config del widget y bot pausado",
+   "pasos": [
+    "Efecto de carga prefetchBotConfig(slug) (useChatbot.ts:230-239; shared/configCache fuera del lote) -> GET /api/chatbot/[slug]/config (entrada fuera del lote)",
+    "data.paused -> degradado bot_paused con WhatsApp del config (useChatbot.ts:248-256)",
+    "Reintentos agotados -> configError y retryLoadConfig manual (useChatbot.ts:186-196, :243, :259-263)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "E10: credencial de Vertex vencida (que ve el visitante, que ve el cliente, como se entera el sistema)",
+   "pasos": [
+    "Visitante envia mensaje: useChatbot.ts:537-549 -> POST /api/chatbot/[slug]/chat (route.ts:8)",
+    "GoogleProvider solo valida presencia de env vars al construir (google.ts:53-66); la credencial se usa recien en la llamada (google.ts:71-96): la falla aparece dentro del stream (PROBABLE)",
+    "Servidor: onError del stream -> logPersistFailure a stderr + Sentry.captureException (handleChatRequest.ts:1046-1060), compensa el cupo si no hubo primer chunk (:1070-1080); no escribe chatbot_events (logger.ts:172-186)",
+    "Visitante: 'Se corto la respuesta.' con input habilitado y sin WhatsApp (useChatbot.ts:470-482, :133)",
+    "Cliente: ve conversaciones sin respuesta (multiTenantQueries.ts:174-198) y el resumen sigue diciendo 'esta atendiendo consultas las 24 horas' y 'Responde en ~1.5s' (ChatbotOverview.tsx:63, :109-110)",
+    "Sistema: detectBotIssues cuenta solo filas de chatbot_events (detectBotIssues.ts:85-98, :162-166) -> no ve la falla; y el detector no tiene scheduler (netlify.toml:25-32). Unico canal: Sentry, si el DSN esta configurado"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Alta de cliente con bot desde el wizard admin",
+   "pasos": [
+    "Step5Review.tsx:71 createClientWithBot({...state})",
+    "requireSuperAdmin (createClientWithBot.ts:96) -> normaliza url/whatsapp y Zod (:99-105)",
+    "findUniqueSlug contra Organization (:80-93, :107-108) -> unicidad de email (:110-116)",
+    "tx global TENANT-MGMT: Organization, User ORG_MEMBER con passwordResetRequired, OrgMember ADMIN, BotConfig isActive true con slug = slug de org, KnowledgeBase (:123-207)",
+    "logAdminAction CLIENT_CREATED (:209-227) -> email de bienvenida por Brevo con tempPassword (:229-243) -> logAdminAction EMAIL_SENT (:245-259)",
+    "Respuesta con tempPassword (:261-273) -> UI la muestra (Step5Review.tsx:76-85); errores por throw -> Step5Review.tsx:110-112"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Crear bot para una org existente",
+   "pasos": [
+    "admin/chatbots/new/actions.ts:41-47 createBotAction (auth SUPER_ADMIN) -> zod :15-36",
+    "createBot.ts:41 -> existencia de org (:43-47) -> un bot por org (:49-51)",
+    "slug unico desde el nombre del bot (createBot.ts:12-27, :57)",
+    "tx scoped: BotConfig isActive false + KB desde getTemplate(industria) con {{PLACEHOLDERS}} (createBot.ts:58, :62-105)",
+    "logAdminAction BOT_CREATED (:107-120)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Activar un bot (preflight)",
+   "pasos": [
+    "BotDetailClient.tsx:136-145 handleToggleActive -> runPreflightChecks(bot.id) (server action sin auth)",
+    "preflightChecks.ts:18-25 lectura global del bot + KB + org; checks de KB por largo >= 20 (:38-81), bienvenida (:83-98), quick replies (:100-116), WhatsApp (:118-133), color (:135-149), cuota (:151-165)",
+    "ActivationModal decide por fails (ActivationModal.tsx:30) -> action de activacion (admin/chatbots/[botId]/actions.ts:42, fuera del lote) -> invalidateBotCache (:69)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Editar configuracion del bot (admin)",
+   "pasos": [
+    "BotConfigEditor.tsx:80-81 saveBotConfigByOrgSlug o saveBotConfig",
+    "requireSuperAdmin + Zod (saveBotConfig.ts:78-82)",
+    "tx global BotConfig + Organization.leadNotification* (saveBotConfig.ts:105-131)",
+    "invalidateBotCache(after.slug) (:133) -> Map en memoria por instancia con TTL 60 s (resolver.ts:11-12, :47)",
+    "Runtime: modelo de plan.llmModel (handleChatRequest.ts:713), temperature 0.7 fija (:952), sin maxOutputTokens; routeColorMap viaja en publicConfig (getPublicConfig.ts:121) sin consumidor en el widget"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Editar la base de conocimiento (admin)",
+   "pasos": [
+    "KnowledgeBaseEditor.tsx:112 validateKB en cliente (validateKB.ts:8-77, solo largos y 3 contradicciones por regex)",
+    "KnowledgeBaseEditor.tsx:132-133 saveKnowledgeBaseByOrgSlug o saveKnowledgeBase",
+    "requireSuperAdmin + Zod con topes (saveKnowledgeBase.ts:10-28) -> resolver org del bot (:32-39) -> forOrg.knowledgeBase.update (:44-60)",
+    "invalidateBotCache (:62) -> audit KB_UPDATED (:64-82) -> el prompt la toma (prompts/sections.ts, fuera del lote)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "El cliente cambia el estado de un lead",
+   "pasos": [
+    "LeadStatusActions.tsx:92 o LeadDetail.tsx:184 updateLeadStatus",
+    "getClientChatbotSession: auth() + orgMember.findFirst sin orderBy (getClientSession.ts:5-34)",
+    "Zod .parse (updateLeadStatus.ts:21) -> forOrg findFirst del lead (:27-30) -> sello de primer contacto (:40) -> update (:42-47)",
+    "logAdminAction LEAD_STATUS_CHANGED (:51-67) + logChatbotEvent (:69-76) -> revalidatePath (:78) y revalidateTag del badge (:84-92)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Resumen 'Mi Chatbot' del cliente",
+   "pasos": [
+    "dashboard/chatbot/page.tsx:15 resolveOrgId -> :18 checkClientHasChatbot (clientHasChatbot.ts:4-10, exige isActive) -> si no, ChatbotUpsellLanding (:20-22)",
+    "page.tsx:24 getClientChatbotSession (org por OrgMember del usuario, no por resolveOrgId)",
+    "page.tsx:28-31 getUsageByOrgSlug (multiTenantQueries.ts:242-258, mes UTC), listLeadsByOrgSlug(slug, 5) (:27-54, sin excluir DQ), listRecentHandoffsByOrgSlug (:208-240, solo handoff.whatsapp)",
+    "ChatbotOverview.tsx:40-45 toBusinessMetrics con leadValueUSD 50 y sin latencia real (business-metrics.ts:9-23) -> tarjetas (:69-111)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Analisis mensual del negocio (resultados)",
+   "pasos": [
+    "dashboard/resultados/analisis/page.tsx:32-33 resolveOrgId -> :60 getMonthlyAnalysisForOrg",
+    "getMonthlyAnalysisForOrg.ts:53-56 bot de la org via forOrg; sin bot -> EMPTY",
+    "Promise.all: insights PENDING/APPLIED take 20 (:61-75), QuotaUsage ultimos 6 registros (:76-82), groupBy categoria 30 dias (:83-90)",
+    "monthly-analysis.ts: buildConversationSeries (:63-85), summarizeCategories con muestra minima 10 (:131-157), rankInsights (:193-209)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Detector de incidencias de bots",
+   "pasos": [
+    "Disparo: GET /api/cron/detect-bot-issues con CRON_SECRET (route.ts:7-20) sin scheduler en netlify.toml:25-32 ni vercel.json; o POST /api/admin/alerts/trigger-detector (route.ts:5-16) desde AlertSettingsClient.tsx:89",
+    "runAlertDetector (detectBotIssues.ts:285-297) -> detectBotIssues: todos los bots global (:28-36) y hasta 8 consultas secuenciales por bot activo (:38-234)",
+    "persistAndNotifyIssues: dedup por PENDING 24 h (:246-255) -> BotAlert (:257-264) -> email Brevo a DEVELOP_ALERTS_EMAIL (:299-323) -> Telegram en HIGH/CRITICAL (:272-279)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Integracion CRM (admin)",
+   "pasos": [
+    "CrmConfigForm.tsx:48 saveCrmIntegration -> requireSuperAdmin, plan, validateWebhookUrl, cifrado del secret, upsertForScope, audit (saveCrmIntegration.ts:29-182)",
+    "CrmConfigForm.tsx:70 testCrmConnection -> rate limit -> testN8nConnection con payload de prueba (testCrmConnection.ts:21-118)",
+    "RetrySyncButton.tsx:19 retryCrmSync -> rate limit -> lead en la org -> void syncLeadToCrm (retryCrmSync.ts:23-79)",
+    "CrmIntegrationAdminCard.tsx:72 getOrgSyncHistory keyset scoped (getCrmSyncHistory.ts:85-127)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L6",
+   "nombre": "Paneles admin de actividad y salud",
+   "pasos": [
+    "admin/chatbot/activity/page.tsx:12 getActivityChartData: eventos 7 dias de todas las orgs (getActivityChartData.ts:12-19) agrupados por dia sin timeZone (:22-35); :19 listRecentEvents del bot develop take 250 (queries.ts:36-45)",
+    "admin/chatbot/health/page.tsx:13 getLatencyHistory(24): chat.message_completed de todas las orgs take 2000 sin orden (getLatencyHistory.ts:73-84) -> buckets por hora sin timeZone (:24-41) -> p50/p95 (:110-133)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "nombre": "Turno de chat del visitante (camino feliz)",
+   "pasos": [
+    "Widget arma el body: src/modules/chatbot/hooks/useChatbot.ts:432-446 (trimHistory de los mensajes con texto completo, sessionId, currentPath)",
+    "POST /api/chatbot/[slug]/chat: src/app/api/chatbot/[slug]/chat/route.ts:42 validateOrigin (src/lib/security/validate-origin.ts:61-87) y :79-85 rate limit por origin+ipHash",
+    "route.ts:97 -> handleChatRequest.ts:134-136 parse zod (requestSchema.ts:37-67)",
+    "handleChatRequest.ts:155 resolveBotBySlug (resolver.ts:18-44, unsafeGlobalQuery por slug + cache en memoria 60 s) y :163-164 forOrg(orgId)",
+    "handleChatRequest.ts:182-188 rate limit slug+sessionId",
+    "handleChatRequest.ts:215-247 Promise.all getPlanForOrg / checkQuota / getOrCreateConversation (resolver.ts:75-145, adopción P2002 :115-144)",
+    "Gates: :309 cap de dominios del plan (degradedResponse.ts:84-111), :345 cupo optimista, :400-401 reserva atómica (solo nueva), :547 tope de 40 mensajes",
+    "handleChatRequest.ts:606-617 dedup de la cola USER (dedup.ts:53-63) y persist del mensaje USER",
+    "handleChatRequest.ts:625-626 detectIntent (detectIntent.ts:42-51), :635-658 buildSystemPrompt, :675-702 getTools por plan",
+    "handleChatRequest.ts:713-761 modelo efectivo + middleware provider-close; :883-889 spotlighting del input user",
+    "handleChatRequest.ts:937-1179 streamText (stepCountIs(3), transform de respuesta vacía reconcile.ts:484-535)",
+    "handleChatRequest.ts:1186-1358 watchdog del borde (streamWatchdog.ts:260-478) envuelve el body",
+    "onFinish handleChatRequest.ts:1155-1177 -> persistTurn.ts:405-472 $transaction (ChatMessage ASSISTANT -> Conversation -> QuotaUsage) -> :533-551 ChatbotEvent chat.message_completed"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "nombre": "Falla del proveedor LLM (Vertex vencido) — control E10",
+   "pasos": [
+    "streamText llama a Vertex y falla: onError handleChatRequest.ts:1046-1060 -> logPersistFailure a stderr + Sentry.captureException (sin ChatbotEvent)",
+    "Si la conversación es nueva y no llegó ningún token: compensación handleChatRequest.ts:1070-1080 -> compensateNewConversationReservation borra la conversación y devuelve el cupo (handleChatRequest.ts:483-490)",
+    "El SDK cierra sin chunk 'finish' -> el transform no inyecta (reconcile.ts:512-528) -> flush del watchdog -> onSilentClose handleChatRequest.ts:1265-1276",
+    "persistTurn: conversación descartada -> return temprano persistTurn.ts:353-365 (no queda nada); conversación existente -> tx + chat.message_completed persistTurn.ts:533-551 con la disculpa canned",
+    "Widget recibe el part de error -> useChatbot.ts:470-480 banner 'stream_interrupted' con whatsappNumber null (fuera del lote)",
+    "Admin: /admin/chatbot/health -> checkHealth.ts:47-54 solo instancia el provider -> ok:true; buildHealthVerdict.ts:61-67 no marca crítico",
+    "Detector: detectBotIssues.ts:85-100 (lote D5-L6) busca ChatbotEvent ERROR tipo llm/provider/unhandled -> el onError no deja ninguno"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "nombre": "Config pública del widget",
+   "pasos": [
+    "GET /api/chatbot/[slug]/config (route en lote D5-L1)",
+    "handleConfigRequest.ts:11-25 -> getPublicConfig.ts:69-100 unsafeGlobalQuery por slug con select acotado",
+    "getPublicConfig.ts:124 bot pausado -> paused con CTA WhatsApp; handleConfigRequest.ts:14-17 404 si no existe; :19-24 Cache-Control public 60 s + swr 300"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "nombre": "Sync de lead al CRM del cliente (n8n)",
+   "pasos": [
+    "Config: saveCrmIntegration.ts:60 validateWebhookUrl (validateWebhookUrl.ts:44-96) — lote D5-L6",
+    "Captura: src/modules/chatbot/server/tools/captureLead.ts:500 void syncLeadToCrm(...) (fire-and-forget)",
+    "syncLeadToCrm.ts:41-57 lead->org (unsafeGlobalQuery justificado) -> :68-72 gate de plan -> :75 integración scoped -> :85-90 attempt PENDING",
+    "syncLeadToCrm.ts:94 buildLeadPayload (buildLeadPayload.ts:78-115) -> :102 postToN8nWithRetry (postToN8n.ts:152-199; fetch :87-92; 3 intentos, 10 s c/u)",
+    "syncLeadToCrm.ts:121-133 tx: attempt SUCCESS/FAILED + lastSync/lastError de la integración",
+    "Lectura: getEffectiveSyncStatus.ts:25-37 PENDING de más de 5 min se muestra FAILED",
+    "Probar conexión: testCrmConnection.ts:74-115 (lote D5-L6) devuelve result.errorMessage al cliente"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "nombre": "Export CSV de leads del cliente",
+   "pasos": [
+    "GET /api/dashboard/chatbot/leads/export route.ts:84 getClientChatbotSession (lote D5-L1)",
+    "route.ts:156 pasa intent del enum (MAYÚSCULA) sin traducir",
+    "route.ts:166 -> buildLeadsCsv.ts:132-208 (labelIntent :82-85 cae al valor crudo) -> csvEscape.ts:25-42 por celda"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "nombre": "Personalizar apariencia del bot (cliente)",
+   "pasos": [
+    "BotPersonalization.tsx:151 (lote D5-L5) -> updateBotAppearance.ts:55",
+    "updateBotAppearance.ts:56-59 auth -> :61-64 resolveOrgId -> :66-73 zod strict",
+    "updateBotAppearance.ts:75-81 forOrg(orgId).botConfig.findFirst -> :95-107 update scoped",
+    "updateBotAppearance.ts:109 invalidateBotCache (solo instancia local) -> :111-133 logAdminAction -> :135-136 revalidatePath"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "nombre": "Insights del chatbot",
+   "pasos": [
+    "netlify/functions/generate-insights-cron.ts:62 (diario 0 9 * * *) -> src/app/api/cron/generate-insights/route.ts:36-43 (salta bots con >=5 PENDING)",
+    "Admin manual: src/app/api/admin/chatbot/insights/generate/route.ts:7-24 (SUPER_ADMIN)",
+    "generateInsights.ts:30-47 carga hasta 200 conversaciones con todos sus mensajes -> :58-67 resumen de 50 -> :102-108 generateObject Gemini -> :116-128 crea ChatbotInsight PENDING",
+    "Lectura cliente: getMonthlyAnalysisForOrg.ts:61-62 (PENDING/APPLIED) en /dashboard/resultados/analisis",
+    "actOnInsight (manageInsight.ts:15-53) sin consumidores: no hay transición de estado"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L7",
+   "nombre": "Health del bot",
+   "pasos": [
+    "/admin/chatbot/health/page.tsx:12-16 -> checkHealth.ts:21-98 + getLatencyHistory -> buildHealthVerdict.ts:24-133",
+    "Público: src/app/api/chatbot/[slug]/health/route.ts:6-19 -> checkChatbotHealth(slug) completo como JSON, sin auth (proxy.ts:172 no cubre /api)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "nombre": "Visitante envia mensaje y recibe respuesta en streaming (camino feliz del chat)",
+   "pasos": [
+    "Widget recorta historial a 30 mensajes: src/modules/chatbot/hooks/useChatbot.ts:432 (trimHistory de shared/historyPolicy.ts:72-104)",
+    "POST /api/chatbot/[slug]/chat: src/app/api/chatbot/[slug]/chat/route.ts:35; validateOrigin :42 (src/lib/security/validate-origin.ts:29-87); rate limit por origin+ipHash :79-95",
+    "handleChatRequest: schema Zod src/modules/chatbot/server/chat/requestSchema.ts:37-67 (handleChatRequest.ts:136); bot por slug :155; rate limit por sessionId :184-188",
+    "Plan + cuota optimista + conversacion en paralelo: handleChatRequest.ts:215-247 (checkQuota en quota/checker.ts:32-50); gate de cuota :345; reserva atomica tryReserveConversation :401 -> quota/checker.ts:126-151 -> forOrg().quotaUsage.reserveConversation",
+    "Hard-cap 40 mensajes: handleChatRequest.ts:547; persiste mensaje USER :606-617",
+    "Intent por pack vertical: handleChatRequest.ts:625-626 (verticals/registry.ts:39-48); system prompt: handleChatRequest.ts:635-658 -> prompts/buildSystemPrompt.ts:33-47 -> prompts/sections.ts:20-223; secciones extra de intent/opener :817-827",
+    "Tools por plan: handleChatRequest.ts:675-702 -> tools/getTools.ts:109-126 (navigate_to_page solo bot develop :121)",
+    "Modelo efectivo: handleChatRequest.ts:713 -> llm/providerMapper.ts:14-28 -> llm/resolveEffectiveModel.ts:37-65 -> llm/factory.ts:20-47 -> llm/providers/google.ts:91-97 (createVertex :71-89)",
+    "Cierre del stream del provider: handleChatRequest.ts:735-760 -> llm/providerStreamClose.ts:92-224 (idle 1s / inicial 12s, reconcile.ts:236,252)",
+    "streamText con spotlighting <vmsg_nonce>: handleChatRequest.ts:877-889, 937-953",
+    "onFinish -> persistTurn: costo calculateCost persistTurn.ts:372-377 -> pricing/costs.ts:21-51; $transaction mensaje+conversacion+cupo persistTurn.ts:405-473 -> incrementQuota quota/checker.ts:70-93; validateAssistantOutput persistTurn.ts:279 -> safety/validateOutput.ts:78-92; evento chat.message_completed persistTurn.ts:537 -> logging/persistentLogger.ts:87-148"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "nombre": "capture_lead: el modelo registra un lead con canales verificados y scoring",
+   "pasos": [
+    "Tool construida con el pack del bot: tools/captureLead.ts:616-627 (schema :57-97)",
+    "Idempotencia por conversacion: captureLead.ts:212-233 (forOrg(ctx.organizationId).chatbotLead.findFirst)",
+    "Pertenencia de canales: lee mensajes USER persistidos captureLead.ts:241-248 (el USER del turno ya esta en DB por handleChatRequest.ts:612); clasifica phone/email :253-261 (validateArgentinePhone.ts:52-80, z.email)",
+    "Sin canal usable -> re-ask + evento tool.lead_reask: captureLead.ts:283-314",
+    "Scoring con el pack: captureLead.ts:343-361 -> scoring/calculateLeadScore.ts:259-329; snapshot :365",
+    "Transaccion lead + conversation.leadCaptured: captureLead.ts:379-419",
+    "Post-efectos sin await: notifyClient (Telegram develOP + email al cliente via lib/client-notifications) captureLead.ts:422-493; syncLeadToCrm (n8n) :500",
+    "Evento tool.lead_captured: captureLead.ts:521-550 -> persistentLogger.ts:87-148",
+    "Carrera P2002 adoptada: captureLead.ts:569-595"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "nombre": "show_whatsapp_handoff: derivacion a WhatsApp con contexto para el panel",
+   "pasos": [
+    "Tool: tools/showWhatsappHandoff.ts:172-185 (schema :42-67)",
+    "Estado de lead: showWhatsappHandoff.ts:96-114",
+    "Evento handoff.whatsapp con metadata rica: showWhatsappHandoff.ts:127-147 -> persistentLogger.ts:87-148",
+    "Telegram si no hubo lead: showWhatsappHandoff.ts:152-167 -> src/lib/notifications/telegram.ts:116-118 (Markdown)",
+    "Lectura en panel: src/modules/chatbot/server/admin/multiTenantQueries.ts:208-240 (solo visitorName y reason)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "nombre": "confirm_contact_request: el visitante pide que lo contacten",
+   "pasos": [
+    "Tool server-side para forzar el step final: tools/confirmContactRequest.ts:185-200",
+    "Idempotencia: confirmContactRequest.ts:101-111 (chatbotEvent.findFirst type handoff.callback)",
+    "Registro: confirmContactRequest.ts:112-124 -> persistentLogger.ts:87-148",
+    "Lectura: ninguna (git grep 'handoff.callback' fuera de tools/ = 0); purga a 30 dias por cleanupOldEvents persistentLogger.ts:154-163"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "nombre": "Cuota agotada: degradacion y alerta de upsell",
+   "pasos": [
+    "Gate optimista: handleChatRequest.ts:345-396 / reserva fallida :401-440",
+    "triggerUpsellAlertIfFirst: quota/upsellAlert.ts:46-91 -> markDegradedIfFirst src/lib/isolation/registry.ts:671-684",
+    "Envios: sendAgencyAlert (webhook de develOP) + Telegram develOP: upsellAlert.ts:68-88 (link relativo handleChatRequest.ts:383)",
+    "Respuesta degradada al visitante: handleChatRequest.ts:385-395 (degradedResponse)",
+    "Cliente: sin notificacion (alert80Sent sin uso)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "nombre": "Falla del LLM (control positivo E10: credencial de Vertex vencida)",
+   "pasos": [
+    "getModel no hace red: llm/providers/google.ts:71-97 (createVertex con credentials JSON)",
+    "streamText -> doStream falla al autenticar -> onError: handleChatRequest.ts:1046-1060 (stderr chat.stream_error + Sentry.captureException, sin chatbotEvent)",
+    "Compensacion de cupo sin primer token: handleChatRequest.ts:1070-1080 -> quota/checker.ts:189-212 (borra la Conversation nueva y devuelve el cupo)",
+    "Visitante: estado stream_interrupted en el widget (src/modules/chatbot/hooks/useChatbot.ts:97-98)",
+    "Deteccion interna: detectBotIssues.ts:85-93 busca chatbotEvent ERROR con 'llm'/'provider'/'unhandled' -> no existe para este camino; health llmProvider ok sin llamar a Vertex (health/checkHealth.ts:47-54)",
+    "Cliente: sin eventos; reporte semanal con 0 conversaciones dice 'Verifica que el script este instalado' (reports/buildWeeklyReport.ts:180-182)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "nombre": "Reporte semanal del chatbot por email",
+   "pasos": [
+    "Cron Netlify: netlify.toml:28-29 -> netlify/functions/send-weekly-reports-cron.ts",
+    "GET /api/cron/send-weekly-reports con CRON_SECRET: src/app/api/cron/send-weekly-reports/route.ts:7-14",
+    "Barrido global: reports/sendWeeklyReports.ts:16-33 (unsafeGlobalQuery con razon; ADMIN take:1 sin orderBy :24-28)",
+    "Datos por bot scoped: reports/buildWeeklyReport.ts:26-139 (forOrg)",
+    "Plantilla: src/lib/email/templates/weekly-report.ts:25; envio Brevo sendWeeklyReports.ts:63-67; evento REPORT.WEEKLY_SENT :71-79"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L8",
+   "nombre": "Purga de eventos del chatbot",
+   "pasos": [
+    "netlify.toml:31-32 -> netlify/functions/cleanup-old-events-cron.ts:21",
+    "src/app/api/cron/cleanup-old-events/route.ts:14,22 (30 dias)",
+    "logging/persistentLogger.ts:154-163 (unsafeGlobalQuery PLATFORM-MAINTENANCE)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "nombre": "Mensaje entrante de WhatsApp (360dialog -> DB)",
+   "pasos": [
+    "360dialog POST /api/motor/webhook/<token> -> route.ts:27",
+    "Rate limit por hash del token -> route.ts:32-47 -> lib/rate-limit/limiter.ts:44 (UPSERT rate_limit)",
+    "handleInboundWebhookRequest -> handle-request.ts:21",
+    "Resolucion pre-tenant del canal -> resolve-channel.ts:25-37 (unsafeGlobalQuery 'TENANT-RESOLUTION', findUnique por channelToken)",
+    "Auth Bearer -> handle-request.ts:30 -> auth.ts:47-62 -> channel-credentials.ts:41-46 (timingSafeEqual sobre SHA-256)",
+    "Canal INACTIVE -> 401 en handle-request.ts:39-42; body con techo -> handle-request.ts:59-72; zod del envelope -> payload.ts:134",
+    "processInboundPayload(forOrg(org)) -> handle-request.ts:53 -> process.ts:52-73 (object whatsapp_business_account, recorrido secuencial de entry/changes)",
+    "classifyChange -> payload.ts:172-177 -> applyMessagesEvent -> process.ts:136-157 (cross-check phone_number_id en :142)",
+    "handleInboundMessage -> handle-message.ts:24: contactRefForMessage en payload.ts:228-236; pre-check del wamid en handle-message.ts:35-39",
+    "$transaction scoped -> handle-message.ts:42-53: resolveInboundIdentity (identity.ts:40-76) -> upsertOpenConversation (handle-message.ts:67-81) -> motorMessage.create IN/RECEIVED (handle-message.ts:45-52)",
+    "P2002 sobre providerMessageId -> 'duplicate' (handle-message.ts:54-56 -> prisma-errors.ts:10-19); 200 {ok:true} en handle-request.ts:55",
+    "FIN: nada consume la fila IN; no hay respuesta automatica (route.ts:9-10 'nada de LLM — eso es B2')"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "nombre": "Status de entrega de un mensaje OUT",
+   "pasos": [
+    "route.ts:27 -> handle-request.ts:21-53 (igual que arriba)",
+    "process.ts:158-165 recorre value.statuses",
+    "handleStatusUpdate -> handle-status.ts:37-60: busca el OUT por providerMessageId en el scope de la org (:41-44); 'unknown-message' si no existe (:45)",
+    "FAILED es terminal (:46, :48-51, detalle truncado en :62-72); progresion monotona SENT<DELIVERED<READ (:53-58)",
+    "Solo aplica a filas OUT; en produccion no se crea ninguna porque sendMotorMessage no tiene llamadores (sendMessage.ts:204)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "nombre": "Eventos de salud del canal (plantillas, tier, estado del numero)",
+   "pasos": [
+    "route.ts:27 -> handle-request.ts:53 -> process.ts:109-132",
+    "message_template_status_update -> handle-health.ts:126-194: mapeo en :45-50; plantilla por providerTemplateId o name+language (:143-162); update de estado (:176); alerta si REJECTED (:178-192)",
+    "phone_number_quality_update -> handle-health.ts:201-223: solo el tier, con whitelist en :54-62",
+    "account_update -> handle-health.ts:226-255: whitelist en :68-75; wabaChannel.update channelStatus (:243); alerta si RESTRICTED/BANNED (:245-253)",
+    "createAlertIfFresh -> handle-health.ts:100-123: dedupe por (canal, tipo) en 24 h y despues motorAlert.create",
+    "FIN: MotorAlert no tiene lectores ni transporte (schema.prisma:2216-2218, transporte en B3)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "nombre": "Cambio de numero (user_id_update)",
+   "pasos": [
+    "route.ts:27 -> handle-request.ts:53 -> process.ts:95-107 (descarta si phone_number_id es ajeno, :96-101)",
+    "applyUserIdUpdate -> identity.ts:106-140, sin transaccion: busca la identidad vieja (:110-116), pre-check de conflicto (:117-124), update externalId + waId null (:130), P2002 como respaldo (:131-137)",
+    "recordTransition -> identity.ts:142-155 -> contactIdentityTransition.create (parentCheck del registry.ts:245-251)"
+   ]
+  },
+  {
+   "ciclo": "D5-c1",
+   "lote": "D5-L9",
+   "nombre": "Envio de salida (solo lo ejercitan los tests)",
+   "pasos": [
+    "Llamador: ninguno en src/ ni scripts/; solo tests/integration/motor-outbound.spec.ts:188",
+    "sendMotorMessage -> sendMessage.ts:204-256: forOrg(input.orgId) en :208",
+    "Pre-check de idempotencia (:213-218) -> resolveTargets (:105-131: conversacion, canal con API key y destinatario waId o BSUID)",
+    "checkSendable (:134-151): texto libre solo con la ventana abierta (window.ts:32-39); plantilla solo si esta APPROVED",
+    "Decrypt de la API key con secret-box (:232-237) -> reserveOutbound PENDING (:158-183)",
+    "sendViaProvider -> client.ts:252-290: POST /messages con D360-API-KEY, timeout de 10 s y reintentos [1 s, 3 s] ante red, timeout o 5xx",
+    "Update a SENT con el wamid o a FAILED con el error redactado (sendMessage.ts:247-255)"
+   ]
   }
  ]
 }

@@ -7,7 +7,7 @@
 ## Resumen
 
 - Ítems: **1351** — por tipo: decision 212 · hecho-declarado 443 · idea 56 · pendiente 556 · promesa 6 · bloque 78.
-- Estado en código: hecho 119 · parcial 42 · no empezado 77 · abandonado 3 · contradicho 3 · por cruzar 1107.
+- Estado en código: hecho 265 · parcial 106 · no empezado 222 · abandonado 8 · contradicho 11 · por cruzar 739.
 - ZONA-FRANCO: 361 ítems.
 - TODO/FIXME en el código de `origin/main`: 70 (`_crudo/todos-codigo.json`).
 
@@ -1474,40 +1474,40 @@
 - Nodo(s): h3.adm-actividad
 - Qué es: getActivityChartData trae 7 días sin take ni índice. getLatencyHistory hace take:2000 sin orderBy. Corregir al tocar esas vistas.
 - Referencias: getActivityChartData · getLatencyHistory · ver Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:23 (MH.1 también incluye getLatencyHistory)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — getActivityChartData.ts:15-18 sin take; getLatencyHistory.ts:76-83 take 2000 sin orderBy (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-174] Lane Actividad
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:84` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-19
 - Nodo(s): h3.adm-actividad
 - Qué es: Seed, fix del casing del nivel, presets de fecha, 'Cargar más' en el cliente (take 250). Se editó ActivityLog.tsx compartido con la pestaña por bot.
 - Referencias: 90b3c95 · 3ae17ab · 2b418d2 · 0f48ba7 · 8fa175a · 1d6753f +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ActivityLog.tsx:113 y :300 'Cargar mas' sobre un pool de 250. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-175] Actividad: take 250 fijo
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:110` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-19
 - Nodo(s): h3.adm-actividad
 - Qué es: Una paginación real en el server requiere sprint propio (toca queries.ts).
 - Referencias: queries.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — admin/chatbot/activity/page.tsx:19 listRecentEvents(..., 250); queries.ts:36-45 sin cursor (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-176] Inteligencia por tenant
 - Fuente: `_insumos/drive/Olme/Ideas de nuevas features.md:28` · tipo: idea · estado declarado: pendiente · fecha: 2026-06-20
 - Nodo(s): h3.adm-actividad
 - Qué es: Pasar Actividad, Health y Alertas de mono-bot (slug='develop' hardcodeado) a por-tenant. Hacen falta 3 migraciones aditivas, ya diseñadas pero no hechas, más un backfill. Quedó archivado como decisión de producto.
 - Referencias: src/app/(protected)/admin/chatbot/activity/page.tsx · src/app/(protected)/admin/chatbot/health/page.tsx · ChatbotEvent.organizationId · BotAlert.organizationId · ChatbotEvent.latencyMs · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:47 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — activity/page.tsx:11 y health/page.tsx:12 con slug 'develop'; ChatbotEvent y BotAlert sin organizationId ni latencyMs (schema.prisma:1599-1625) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-177] P1 filtro por level en activity
 - Fuente: `docs/sprints/alpha-1-reaudit.md:230` · tipo: pendiente · estado declarado: pendiente (Alpha.3) · fecha: 2026-05-17
 - Nodo(s): h3.adm-actividad
 - Qué es: Sin filtro info/warn/error.
 - Referencias: tambien en :143, :253
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — components/admin/activity/activityFilters.ts:13, :21, :36 (ACTIVITY_LEVEL_OPTIONS). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: no
 
 ### h3.adm-chatbots — Chatbots (admin)
 
@@ -1516,429 +1516,429 @@
 - Nodo(s): h3.adm-chatbots
 - Qué es: Invariante de E1: toda sugerencia del LLM pasa por una cola de aprobación humana.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:19
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep de knowledgeBase.update/create/upsert: sólo alta (core.ts:140, createBot.ts:93, createClientWithBot.ts:192), seeds y acciones SUPER_ADMIN (saveKnowledgeBase.ts:52, saveKnowledgeBaseByOrgSlug.ts:48); insights no escriben la KB. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-179] C3.3: knobs que no mientan
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:71` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.adm-chatbots
 - Qué es: Honrar temperature y maxOutputTokens, o sacarlos del form del admin. monthlyQuota se rotula como legacy.
 - Referencias: monthlyQuota · V-1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — handleChatRequest.ts:952 temperature fija 0.7, sin maxOutputTokens; AdvancedTab.tsx:56-85 sin rótulo legacy. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-180] Nivel en MAYÚSCULA desde la página del bot
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:111` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-19
 - Nodo(s): h3.adm-chatbots
 - Qué es: chatbots/[botId]/page.tsx:75 manda el nivel en mayúscula. Está mitigado en el componente, pero la fuente sigue sucia.
 - Referencias: src/app/(protected)/admin/chatbots/[botId]/page.tsx:75
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — [botId]/page.tsx:80 level: (e.level ?? 'info') as MappedEvent['level'] sin toLowerCase (activity/page.tsx:38 sí lo baja) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-181] Panel de configuración del bot: bugs, UX y emoji picker
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:9` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-12
 - Nodo(s): h3.adm-chatbots
 - Qué es: Arregla el casing de enums DB↔form, portalea los modales, deja un solo toggle de activo en el header, convierte Test endpoint en modal con curl, endurece Test email y deja la preview sticky. Suma el emoji picker (lazy, solo admin).
 - Referencias: BotConfigEditor.tsx · saveBotConfig.ts · saveBotConfigByOrgSlug.ts · ConfigTab.tsx · TestEndpointModal · sendTestNotification.ts +5
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Casing saveBotConfig.ts:39,44,66-75; sendTestNotification.ts:23-31 rate limit y :79 mensaje 'skipped'; TestEndpointModal en BotDetailClient.tsx; EmojiPickerField.tsx (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-182] Auditoría de datos Industria/Tono
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:114` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-12
 - Nodo(s): h3.adm-chatbots
 - Qué es: El Select de tono se recortó a los 3 tonos realmente mapeados. Industria pasa a usar el vocabulario canónico INDUSTRIES_LABELS, con un hint honesto. Update puntual de datos en sanmiguel y develop.
 - Referencias: formatTone · INDUSTRIES_LABELS · seed.ts · tambien en Olme/Chatbot_ registro de cambios.md:44
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — IdentityTab.tsx:15-17 tres tonos; INDUSTRIES_LABELS en onboarding/industries.ts; el server sigue aceptando tone e industry como texto libre (saveBotConfig.ts:23-24) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-183] Roadmap de datos del bot: tonos e industria
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:118` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-12
 - Nodo(s): h3.adm-chatbots
 - Qué es: Extender formatTone con los 4 tonos que faltan. Decidir si editar Industria re-seedea la KB (con confirmación) o pasa a solo lectura. Sumar 'agencia' al vocabulario canónico y a su template de KB.
 - Referencias: formatTone · INDUSTRIES_LABELS · tambien en Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:121 · tambien en Olme/Chatbot_ registro de cambios.md:109
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — formatTone sigue con 3 tonos (prompts/helpers.ts:10-21); git grep -i agencia en components/admin/onboarding/industries.ts -> 0 (control: 'concesionaria' 1 hit). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-184] Freeze del AvatarPicker con varios canvas 3D
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:161` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-12
 - Nodo(s): h3.adm-chatbots
 - Qué es: Optimizar el montaje simultáneo de varios canvas 3D.
 - Referencias: AvatarPicker
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — AvatarPicker.tsx:84-93 y :211-217 montan todos los avatares; LegacyNeuroAvatar.tsx:940 dpr [1,2]; git grep IntersectionObserver en avatar/preview -> vacío. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-185] B1: eliminar bot, bulk y overview
 - Fuente: `_insumos/drive/Olme/Chatbot_ registro de cambios.md:58` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-17
 - Nodo(s): h3.adm-chatbots
 - Qué es: deleteBotAction y bulkDeleteBotsAction con Zod y solo SUPER_ADMIN, confirmación in-app y overview en grilla responsive.
 - Referencias: f369600 · e36f14c · b386b6c · dedcc8a · ae7a89a
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — [botId]/actions.ts:110-174 (SUPER_ADMIN + Zod + audit BOT_DELETED); bulk-actions.ts:163-175 (Zod BulkBotIdsSchema); BulkActionBar.tsx:9,180-202 ConfirmDialog. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-186] B2: polish, conversión a OsLead y transcript
 - Fuente: `_insumos/drive/Olme/Chatbot_ registro de cambios.md:68` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-17
 - Nodo(s): h3.adm-chatbots
 - Qué es: convertChatbotLeadToOsLead (requireSuperAdmin, Zod, $transaction, idempotente por email). Transcript expandible en Conversaciones. Polish visual varios.
 - Referencias: d6d4d7b · 9655a42 · 5cf8163 · eb99ccc · 5bede50 · 18c6d53 +6
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — admin/chatbots/_actions/convert-chatbot-lead.actions.ts:17 convertChatbotLeadToOsLead. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-187] B3: convertedToOsLeadId, BOT_DELETED y badge persistente
 - Fuente: `_insumos/drive/Olme/Chatbot_ registro de cambios.md:85` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-17
 - Nodo(s): h3.adm-chatbots
 - Qué es: Migración aditiva con migrate deploy. El audit BOT_DELETED se puede filtrar. El badge 'Ya convertido' persiste por ID, también para leads sin email.
 - Referencias: 50a3d77 · c3dc192 · 7a80128 · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:36 · tambien en Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:17
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schema.prisma:192 BOT_DELETED, :1510 convertedToOsLeadId; actions.ts:146; ConvertChatbotLeadButton.tsx:20. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-188] B4: avatar del bot en base64 en DB
 - Fuente: `_insumos/drive/Olme/Chatbot_ registro de cambios.md:93` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-17
 - Nodo(s): h3.adm-chatbots
 - Qué es: Compresión en el cliente (≤200×200 WebP) a data URL. Se quitó @vercel/blob y se revirtió el intento con Blob. Resuelve el pendiente de subir imagen de avatar.
 - Referencias: 3792ab8 · e53fbbe (revertido) · avatarImageUrlSchema · tambien (pendiente previo) en Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:154
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — avatarImageUrlSchema.ts:10-23 acepta data:image/(png|jpeg|webp) con tope de 600k caracteres; @vercel/blob ausente (git grep en package.json y src -> 0; control: 'resend' en package.json:166). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-189] PA-2: anti-inyección en los CSV del admin
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:30` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-13
 - Nodo(s): h3.adm-chatbots
 - Qué es: Nuevo helper csv-escape: anti-fórmula, quoting RFC 4180, BOM y CRLF. Cableado en los dos generadores de CSV del admin. Verificado abriendo los exports en Excel.
 - Referencias: src/lib/csv/csv-escape.ts · admin/chatbots/bulk-actions.ts · src/lib/bulk-actions.ts · npm run test:pa2 · scripts/dev/qa-seed-leads-dirty.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — Commit eb3b0d0e solo en origin/b0-isolation-motor-chatbot (merge-base --is-ancestor → no está en main); src/lib/csv no existe; bulk-actions.ts:133-144 sin escape (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-190] PA-3/PA-4: bulk actions más robustos
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:43` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-13
 - Nodo(s): h3.adm-chatbots
 - Qué es: Los fallos reportan su causa. Pausar y activar van en batch (findMany + updateMany + logAdminActionsBatch). El borrado en bulk queda serial a propósito, por la trazabilidad de la auditoría.
 - Referencias: logAdminActionsBatch · tambien en Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:47
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — bulk-actions.ts:18-62 y :64-108 siguen en loop serial con logAdminAction por bot; logAdminActionsBatch no existe en main (sólo en origin/b0-isolation-motor-chatbot). (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-191] Flake e2e 07-admin-navigation en rutas del bot develop
 - Fuente: `docs/bitacora-beta-2.md:173` · tipo: pendiente · estado declarado: sin estado (flake) · fecha: 2026-06-27
 - Nodo(s): h3.adm-chatbots
 - Qué es: gotoAdminRoute hace self-skip cuando page.goto no estabiliza en 30 s sobre /admin/clients/develop/chatbot/* con next start frío.
 - Referencias: tests/e2e/07-admin-navigation.spec.ts · también en docs/bitacora-beta-2.md:200 · también en docs/bitacora-beta-2.md:290
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/e2e/07-admin-navigation.spec.ts:4-8 test.skip si la navegación no estabiliza; :38 sigue navegando la ruta deprecada /admin/clients/[slug]/chatbot. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-192] B1.5 — invalidateBotCache cableado en 8 callers
 - Fuente: `docs/bitacora-roadmap.md:695` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.adm-chatbots
 - Qué es: Los 5 updates de BotConfig y los 3 de KnowledgeBase invalidan el cache de resolveBotBySlug después del commit.
 - Referencias: src/app/(protected)/admin/chatbots/[botId]/actions.ts · src/app/(protected)/admin/chatbots/bulk-actions.ts · src/modules/chatbot/server/admin/saveBotConfig.ts · src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts · src/modules/chatbot/server/admin/saveKnowledgeBase.ts · src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — 10 callers (admin/chatbots/[botId]/actions.ts:69,162; bulk-actions.ts:37,83,199; saveBotConfig.ts:133; saveBotConfigByOrgSlug.ts:119; saveKnowledgeBase.ts:62; saveKnowledgeBaseByOrgSlug.ts:50; updateBotAppearance.ts:109) pero lib/bulk-actions.ts:23 bulkPauseBots hace updateMany sin invalidar, y el cache es un Map por instancia (resolver.ts:11-12) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-193] Mantener la invalidación del cache en nuevos callers
 - Fuente: `docs/bitacora-roadmap.md:741` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.adm-chatbots
 - Qué es: No hay lint que obligue a llamar invalidateBotCache tras updates de BotConfig/KnowledgeBase; si el slug se vuelve editable hay que invalidar también el slug viejo.
 - Referencias: src/modules/chatbot/server/conversation/resolver.ts · tambien en docs/bitacora-roadmap.md:756 · tambien en docs/bitacora-roadmap.md:781
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — invalidateBotCache llamado en saveBotConfig.ts:133, saveBotConfigByOrgSlug.ts:119, saveKnowledgeBase.ts:62, saveKnowledgeBaseByOrgSlug.ts:50, admin/chatbots/[botId]/actions.ts:69/:162, bulk-actions.ts:37/:83/:199, updateBotAppearance.ts:109; falta en src/lib/bulk-actions.ts:23 (bulkPauseBots updateMany), mitigado porque validateOrigin lee isActive en vivo (validate-origin.ts:67). Sin lint; la invalidación es solo de la instancia local (resolver.ts:11, :47-49). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-194] Sin límite de longitud por campo de la KnowledgeBase
 - Fuente: `docs/bitacora-roadmap.md:1055` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.adm-chatbots
 - Qué es: Un cliente puede cargar una KB enorme y degradar TTFB y costo por mensaje sin aviso.
 - Referencias: src/modules/chatbot/server/prompts/helpers.ts · tambien en docs/bitacora-roadmap.md:1071
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — saveKnowledgeBase.ts:12-18 y saveKnowledgeBaseByOrgSlug.ts:12-18 con .max por campo (total 220k caracteres, ~55k tokens por request); sin aviso de costo/TTFB (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-195] Cargar datos reales de Matsu (B2) en lugar del scaffolding
 - Fuente: `docs/bitacora-roadmap.md:1104` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.adm-chatbots
 - Qué es: La KB de Matsu tiene valores inventados (marca, ciudad, dirección 'de scaffolding') y el nombre de bot Aki es provisorio; cambiar el objeto SCAFFOLDING, re-correr el seed y el baseline.
 - Referencias: scripts/seed-matsu.ts · tambien en docs/bitacora-roadmap.md:1181 · tambien en docs/bitacora-roadmap.md:1210 · tambien en docs/bitacora-roadmap.md:1211 · tambien en docs/bitacora-roadmap.md:1222 · tambien en docs/bitacora-roadmap.md:1227
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — scripts/seed-matsu.ts:27-45 sigue con USER_NAME '(scaffolding)', BOT_NAME 'Aki' y el objeto SCAFFOLDING. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-196] Matsu sin allowedDomains ni embed configurados
 - Fuente: `docs/bitacora-roadmap.md:1106` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.adm-chatbots
 - Qué es: El shell no configuró dominios ni embed (funciona en dev porque validateOrigin permite localhost); el plan se asignó luego en B4.3 solo en dev.
 - Referencias: scripts/seed-matsu.ts · tambien en docs/bitacora-roadmap.md:2402
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -E 'allowedDomains|embed' en scripts/seed-matsu*.ts = 0 (control: allowedDomains en scripts/ev4-smoke.mjs). El estado real en la base no se puede ver desde el codigo. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-197] Mostrar dominios usados vs permitidos (X de N)
 - Fuente: `docs/bitacora-roadmap.md:2295` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h3.adm-chatbots
 - Qué es: Tras un downgrade los dominios sobrantes quedan bloqueados sin contexto para el cliente; mostrarlo en admin y en el dashboard del cliente.
 - Referencias: tambien en docs/bitacora-roadmap.md:2308
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n maxDomains -- src/app src/modules/chatbot/components -> sólo PlanAssignmentCard.tsx:112 (selector de plan); AdvancedTab.tsx:164-179 sin contador. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-198] BotConfig.monthlyQuota obsoleto
 - Fuente: `docs/bitacora-roadmap.md:2297` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h3.adm-chatbots
 - Qué es: El cap lo da plan.quota; BotDetailClient todavía lee el campo legacy; deprecación pendiente.
 - Referencias: src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — OverviewTab.tsx:44-46,98 sigue usando bot.monthlyQuota; AdvancedTab.tsx:77-85 lo edita; el runtime usa plan.quota (handleChatRequest.ts:345) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-199] BotConfig.llmModel editable en admin pero ignorado
 - Fuente: `docs/bitacora-roadmap.md:2298` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h3.adm-chatbots
 - Qué es: En runtime manda plan.llmModel; deuda de UX: indicar el override del plan o impedir editar el campo.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — AdvancedTab.tsx:48-54 sigue editable; handleChatRequest.ts:713 usa plan.llmModel. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-200] Pendientes de verificación de B7
 - Fuente: `docs/bitacora-roadmap.md:5927` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h3.adm-chatbots
 - Qué es: AppearanceTab del admin, estados listening/speaking en vivo, flujo elegir-guardar-recargar y mobile de rutas protegidas.
 - Referencias: tambien en docs/bitacora-roadmap.md:5928 · tambien en docs/bitacora-roadmap.md:5929 · tambien en docs/bitacora-roadmap.md:5930 · tambien en docs/bitacora-roadmap.md:5944
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — El código existe (AppearanceTab.tsx:36-67, BotConfigPreview.tsx:162,186); la verificación humana no deja rastro en código. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-201] B9.1 — Eliminada la vista deprecada /admin/clients/[clientId]/chatbot
 - Fuente: `docs/bitacora-roadmap.md:5948` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h3.adm-chatbots
 - Qué es: ConversationsTab migrado a /admin/chatbots/[botId], hrefs reapuntados, carpeta deprecada borrada y reemplazada por un catch-all con permanentRedirect a la vista canónica; ClientChatbotTabs eliminado.
 - Referencias: src/app/(protected)/admin/chatbots/[botId]/tabs/ConversationsTab.tsx · src/app/(protected)/admin/chatbots/[botId]/tabs.ts · src/app/(protected)/admin/chatbots/[botId]/page.tsx · src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx · src/app/(protected)/admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx · src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx +7
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:38 permanentRedirect; ClientChatbotTabs sin rastro (git grep vacío) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-202] B9.2 — Labels de conteo de conversaciones clarificados
 - Fuente: `docs/bitacora-roadmap.md:6067` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h3.adm-chatbots
 - Qué es: Las tres cifras (total, mes en curso, lista de 100) eran métricas válidas con labels ambiguos; se agregaron calificadores, footer 'Mostrando N de M' y listConversationsByOrgSlug devuelve {items, total}.
 - Referencias: src/app/(protected)/admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx · src/components/admin/managers/ChatbotManager.tsx · src/modules/chatbot/lib/business-metrics.ts · src/modules/chatbot/components/dashboard/ChatbotOverview.tsx · src/modules/chatbot/components/dashboards/ConversationsTable.tsx · src/modules/chatbot/server/admin/multiTenantQueries.ts +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — multiTenantQueries.ts:174-198 {items,total}; ConversationsTable.tsx:176 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-203] Ejecutar el dedupe de la KB de develOP
 - Fuente: `docs/bitacora-roadmap.md:6269` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h3.adm-chatbots
 - Qué es: Correr scripts/b9-4-dedupe-kb-develop.mjs en dry-run y luego --apply (Franco); businessInfo tiene una línea repetida 6 veces.
 - Referencias: scripts/b9-4-dedupe-kb-develop.mjs · tambien en docs/bitacora-roadmap.md:6284 · tambien en docs/bitacora-roadmap.md:6299 · tambien en docs/bitacora-roadmap.md:6315
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — scripts/b9-4-dedupe-kb-develop.mjs está versionado; si corrió no se puede verificar leyendo. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-204] Enum-izar campos visuales de BotConfig
 - Fuente: `docs/bitacora-roadmap.md:6976` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-25
 - Nodo(s): h3.adm-chatbots
 - Qué es: borderRadius, surfaceStyle, position, fontStyle, bubbleStyle y tone; pasada cosmética posterior.
 - Referencias: prisma/schema.prisma
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — prisma/schema.prisma:1293-1297 borderRadius/surfaceStyle/position/fontStyle/bubbleStyle siguen String. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-205] B13.3 — Pulir copy y contenido del bot demo
 - Fuente: `docs/bitacora-roadmap.md:8457` · tipo: bloque · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h3.adm-chatbots
 - Qué es: Seed del chatbot y {{PLACEHOLDERS}} sin reemplazar del bot demo 'CHATBOT'.
 - Referencias: src/modules/chatbot/prisma/seed.ts · tambien en docs/bitacora-roadmap.md:8564
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — seed.ts sin {{ }} (git grep -nE '\{\{' origin/main -- src/modules/chatbot/prisma vacio; control: kb-templates/concesionaria.ts tiene 6 lineas con {{); pero createBot.ts:58 y lib/onboarding/core.ts:65 siguen sembrando KB con placeholders (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-206] B13.0 — Preview del editor de bot con avatar vivo
 - Fuente: `docs/bitacora-roadmap.md:8515` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
 - Nodo(s): h3.adm-chatbots
 - Qué es: BotConfigPreview reescrito: monta el AvatarRenderer real con vista Flotando/Abierto y estados Idle/Pensando/Hablando, espejo del state del editor y sin metadata técnica (modelo/temperatura/cuota siguen en AdvancedTab).
 - Referencias: src/modules/chatbot/components/admin/config/BotConfigPreview.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — BotConfigPreview.tsx:162,186 AvatarRenderer; BotConfigEditor.tsx:185-187; metadata técnica en AdvancedTab. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-207] Sin IntersectionObserver para pausar el Canvas 3D del preview
 - Fuente: `docs/bitacora-roadmap.md:8562` · tipo: decision · estado declarado: hecho · fecha: 2026-05-26
 - Nodo(s): h3.adm-chatbots
 - Qué es: Se confía en la degradación de B7 (dpr [1,1.5], antialias off); revisar en su propio sprint si cae el FPS en mobile.
 - Referencias: src/modules/chatbot/components/admin/config/BotConfigPreview.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — BotConfigPreview.tsx:162,186 montan AvatarRenderer sin IntersectionObserver (decisión aplicada). (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-208] Topbar del editor de bot muestra 'Detalle'
 - Fuente: `docs/bitacora-roadmap.md:8572` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h3.adm-chatbots
 - Qué es: Pasar el contexto del recurso (nombre del bot) al AdminTopbar.
 - Referencias: src/app/(protected)/admin/_components/admin-topbar.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — admin-topbar.tsx:12-13 devuelve 'Detalle' para segmentos tipo cuid; :40-41 lo usa como título. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-209] Bloquear activación de bot con {{placeholders}} sin completar
 - Fuente: `docs/bitacora-roadmap.md:8636` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h3.adm-chatbots
 - Qué es: La banda ámbar del editor KB es solo estética; bloquear la activación del bot con placeholders sin reemplazar queda en roadmap.
 - Referencias: src/modules/chatbot/components/admin/kb/MarkdownEditor.tsx · también en fuente:8664
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — preflightChecks.ts:13-168 sin chequeo de placeholders; MarkdownEditor.tsx:48-63 sólo banda visual; git grep -nF '{{' origin/main -- src/modules/chatbot/server src/lib/onboarding src/modules/chatbot/shared -> vacío (control: 10 archivos de kb-templates con '{{'). (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-210] Quick replies de concesionaria del bot demo
 - Fuente: `docs/bitacora-roadmap.md:8678` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-05-26
 - Nodo(s): h3.adm-chatbots
 - Qué es: Se dejaron los quick replies temáticos del bot demo; cambiarlos a genéricos queda a decisión de Franco.
 - Referencias: scripts/_b13-2-fix-demo-bots.mjs
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — kb-templates/concesionaria.ts:63-68 sigue con quick replies temáticos; scripts/_b13-2-fix-demo-bots.mjs sin cambios. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-211] Borrar bot bench-matsu de prod y scripts throwaway
 - Fuente: `docs/bitacora-roadmap.md:9713` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.adm-chatbots
 - Qué es: Correr _b14-2-cleanup-bench-prod.ts --confirm y eliminar scripts _b14-*.mjs post-v1.0.
 - Referencias: también en fuente:9714
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Siguen versionados scripts/_b14-2-cleanup-bench-prod.ts, _b14-2-*.mjs, _b14-analyze.mjs, _b14-dev.log y un JSON de corrida (ls-tree). (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-212] CC.2 integración CRM movida al admin
 - Fuente: `docs/bitacora-roadmap.md:9881` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.adm-chatbots
 - Qué es: Tab Integraciones en el bot admin con actions requireSuperAdmin; cliente ve solo CrmStatusIndicator.
 - Referencias: src/app/(protected)/admin/chatbots/[botId]/tabs/IntegrationsTab.tsx · src/modules/chatbot/server/admin/integrations/ · src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — IntegrationsTab.tsx:36-39; saveCrmIntegration.ts:30 requireSuperAdmin; CrmStatusIndicator.tsx:21 solo lectura (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-213] Cambio prefetch={false} sin commitear en BotDetailClient
 - Fuente: `docs/bitacora-roadmap.md:10386` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-30
 - Nodo(s): h3.adm-chatbots
 - Qué es: Cambio funcional pendiente de Franco que B15 no tocó ni commiteó.
 - Referencias: src/app/(protected)/admin/chatbots/[botId]/BotDetailClient.tsx · también en fuente:10419
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n 'prefetch={false}' origin/main -- src → vacío; BotDetailClient.tsx ya no usa Link (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-214] Migrar mapas de intent del admin y CSV al mapa compartido
 - Fuente: `docs/bitacora-roadmap.md:11383` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-30
 - Nodo(s): h3.adm-chatbots
 - Qué es: LeadsTable admin, ficha-accordion de leados y buildLeadsCsv tienen el mismo patrón.
 - Referencias: src/modules/chatbot/components/dashboards/LeadsTable.tsx · src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Panel migrado (BusinessLeadCard.tsx:10, LeadDetail.tsx:42, BusinessHero.tsx:15 usan lead-intent-labels); siguen propios buildLeadsCsv.ts:37-50 (keys en minúscula) y LeadsTable.tsx:28. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-215] D4 guard anti-spam del cron de insights
 - Fuente: `docs/bitacora-roadmap.md:12143` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.adm-chatbots
 - Qué es: pendingCount real con getInsightsCountForBot (antes hardcodeado a 0).
 - Referencias: src/app/api/cron/generate-insights/route.ts · tests/integration/generate-insights-pending-guard.spec.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — cron/generate-insights/route.ts:36-38 getInsightsCountForBot (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-216] D3' Test email e insights migrados a Brevo
 - Fuente: `docs/bitacora-roadmap.md:12185` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.adm-chatbots
 - Qué es: sendLeadNotification e sendInsightsNotification por Brevo; fix org.name.
 - Referencias: cierra pendiente fuente:11883
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — sendLeadNotification.ts:1,21 y sendInsightsNotification.ts:1,12 usan sendTransactionalEmail de brevo-service. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-217] BotConfig.llmModel editable sin efecto
 - Fuente: `docs/bitacora-roadmap.md:13257` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-07-07
 - Nodo(s): h3.adm-chatbots
 - Qué es: El modelo efectivo sale del plan; los campos del admin siguen editables.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — AdvancedTab.tsx:48-85 (modelo, temperatura, tokens, cuota) vs handleChatRequest.ts:713, :952, :345. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-218] COST-2b demo-chat resuelve provider sin cast
 - Fuente: `docs/bitacora-roadmap.md:13743` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-11
 - Nodo(s): h3.adm-chatbots
 - Qué es: normalizeLlmProvider + resolveEffectiveModel en el endpoint de preview.
 - Referencias: src/app/api/demo-chat/[slug]/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — admin/chatbot/demo-chat/[slug]/route.ts:57 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-219] Endpoint demo-chat sin caller ni UI
 - Fuente: `docs/bitacora-roadmap.md:13794` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-07-11
 - Nodo(s): h3.adm-chatbots
 - Qué es: Código muerto tras requireSuperAdmin; además usa prisma crudo fuera de isolation.
 - Referencias: también en fuente:17059
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep demo-chat fuera de su carpeta -> sólo un comentario en test-prompt/route.ts:45; demo-chat/[slug]/route.ts:14,44 usa prisma directo. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-220] Insights sin dedup entre corridas + timeout del cron
 - Fuente: `docs/bitacora-roadmap.md:16510` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.adm-chatbots
 - Qué es: Insights se duplican entre corridas y el cron tiene timeout de 20s.
 - Referencias: también en fuente:16679
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Hay guard anti-spam de PENDING (tests/integration/generate-insights-pending-guard.spec.ts) pero generateInsights.ts:118-125 crea sin dedup y netlify/functions/generate-insights-cron.ts:33 sigue en 20_000 ms. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-221] CARRERAS commit 2: provider-close en rutas admin
 - Fuente: `docs/bitacora-roadmap.md:17035` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-12
 - Nodo(s): h3.adm-chatbots
 - Qué es: demo-chat y test-prompt con middleware de cierre; test-prompt ya no devuelve el error crudo.
 - Referencias: cierra deuda fuente:15608
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — test-prompt/route.ts:50-66 (wrapLanguageModel + createProviderStreamCloseMiddleware) y :100-110 (error genérico); demo-chat route.ts:7,72. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-222] Vista admin read-only de CrmIntegration
 - Fuente: `docs/roadmap-pendientes.md:24` · tipo: pendiente · estado declarado: pendiente (postergado) · fecha: 2026-05-24
 - Nodo(s): h3.adm-chatbots
 - Qué es: Sección por org con estado, últimos errores y últimas 20 entradas del historial; sin edición.
 - Referencias: /admin/clients/[clientId]/chatbot/
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — CrmIntegrationAdminCard.tsx:63-137 es una vista admin editable (CC.2) con historial de 10 intentos y reintento, no read-only de 20. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-223] Alpha.0 cleanup
 - Fuente: `docs/sprints/alpha-0-cleanup.md:4` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.adm-chatbots
 - Qué es: Borrado legacy /admin/os y /os, requireSuperAdmin en 6 actions y /api/admin/chatbot/events, 6 páginas /admin/clients/[orgSlug]/chatbot, StatCard unificado, sonner, React.cache en auth.
 - Referencias: tambien en :11, :15, :25, :30
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ls-tree de src/app sin rutas /os/ (control: 34 page.tsx en admin); api/admin/chatbot/events/route.ts:9 exige SUPER_ADMIN. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-224] P1 paginación de conversaciones y leads del chatbot
 - Fuente: `docs/sprints/alpha-1-reaudit.md:226` · tipo: pendiente · estado declarado: pendiente (Alpha.3) · fecha: 2026-05-17
 - Nodo(s): h3.adm-chatbots
 - Qué es: limit: 100 hardcodeado; cursor pagination y búsqueda por nombre/email.
 - Referencias: tambien en :234, :250-:252
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — [botId]/page.tsx:67-70 listRecentEvents/listLeadsForBot/listConversationsForBot con 100 fijo, sin cursor. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-225] P1 'as any' en config del bot
 - Fuente: `docs/sprints/alpha-1-reaudit.md:229` · tipo: pendiente · estado declarado: pendiente (Alpha.4) · fecha: 2026-05-17
 - Nodo(s): h3.adm-chatbots
 - Qué es: data.bot as any en /admin/clients/[slug]/chatbot/config.
 - Referencias: tambien en :105, :256
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — La ruta ahora es admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx; git grep 'as any' en admin/clients y admin/chatbots = 0. Persisten otros: ClientSettingsForm.tsx:26,36,37 y LegacyNeuroAvatar.tsx:601. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-226] Backfill de verticalPack en bots reales
 - Fuente: `docs/sprints/q1-1-harness.md:103` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-05
 - Nodo(s): h3.adm-chatbots
 - Qué es: develop -> agencia, matsu -> usados; gate abierto.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — prisma/seeds/backfill-vertical-pack.ts:71-75 (develop->agencia, sanmiguel->usados, matsu->usados); ejecución no verificable; los caminos de alta no asignan pack. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-227] Lote 1 chatbots admin
 - Fuente: `raiz:lane-LOG.md:16` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.adm-chatbots
 - Qué es: ConfirmDialog en bulk, eliminar bot individual y bulk con auditoría, selects con ancho y labels, overview de 12 celdas, fixes de review.
 - Referencias: f369600 · e36f14c · b386b6c · dedcc8a · ae7a89a
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — BulkActionBar.tsx:9,180 ConfirmDialog; deleteBotAction/bulkDeleteBotsAction con audit. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-228] Hidratación reduced-motion en BotsListClient
 - Fuente: `raiz:lane-LOG.md:76` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.adm-chatbots
 - Qué es: initial={reduce ? false : 'hidden'} puede desajustar; aplicar useHydratedReducedMotion.
 - Referencias: tambien en :83
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — BotsListClient.tsx:4 useReducedMotion de motion/react, :35, :159 initial={reduce ? false : 'hidden'}. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-229] Combobox de industria y métricas ricas
 - Fuente: `raiz:lane-LOG.md:81` · tipo: idea · estado declarado: idea
 - Nodo(s): h3.adm-chatbots
 - Qué es: Generalizar LocationTypeahead y label map de industria; costo por conversación y series de uso (queries nuevas).
 - Referencias: tambien en :82
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — IdentityTab.tsx:32-38 Select plano; LocationTypeahead sólo en admin/leads/_components; OverviewTab.tsx:119 sólo costo mensual total. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-230] Lote 2 chatbots admin (UI)
 - Fuente: `raiz:lane-LOG.md:103` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.adm-chatbots
 - Qué es: Checkbox custom, KBValidation glass, emoji picker en respuestas rápidas, preview sticky, metadata de ActivityLog togglable.
 - Referencias: 5cf8163 · eb99ccc · 5bede50 · 18c6d53 · 14ffbf1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — KBValidation.tsx:13,69 glass; BehaviorTab.tsx:84-87 emoji en respuestas; BotConfigEditor.tsx:185 preview sticky; ActivityLog.tsx:224-242 metadata togglable. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-231] Subidor de avatar del bot
 - Fuente: `raiz:lane-LOG.md:118` · tipo: pendiente · estado declarado: parcial
 - Nodo(s): h3.adm-chatbots
 - Qué es: Solo se mejoró el campo URL; falta storage (dependencia nueva a aprobar) y POST /api/admin/chatbot/avatar-upload.
 - Referencias: 29cd541 · tambien en :140
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — Reemplazado por base64 en DB comprimido en el navegador (AvatarUploader.tsx:6-39, avatarImageUrlSchema.ts:3-24); no existe /api/admin/chatbot/avatar-upload (ls-tree). (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-232] Convertir lead del bot a OsLead
 - Fuente: `raiz:lane-LOG.md:124` · tipo: hecho-declarado · estado declarado: hecho · **ZONA-FRANCO**
@@ -1953,8 +1953,8 @@
 - Nodo(s): h3.adm-chatbots
 - Qué es: ConversationsTable expandible y getConversationTranscriptAction; quita el any de estimatedCostUsd.
 - Referencias: 9655a42 · db3414c
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — [botId]/transcript-action.ts:23 getConversationTranscriptAction; components/dashboards/ConversationsTable.tsx con expandable. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-234] 'Ya convertido' persistente
 - Fuente: `raiz:lane-LOG.md:141` · tipo: pendiente · estado declarado: pendiente de coordinación · **ZONA-FRANCO**
@@ -1968,23 +1968,23 @@
 - Nodo(s): h3.adm-chatbots
 - Qué es: Fecha de LeadsTable con timeZone AR (también dashboard cliente), click en card togglea selección, header de KB glass sticky.
 - Referencias: 60bb425 · dabc45b · 1864d96
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — components/dashboards/LeadsTable.tsx usa America/Argentina/Buenos_Aires; KnowledgeBaseEditor.tsx:166 header glass sticky. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-236] Admin v1.0
 - Fuente: `STATUS.md:32` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-21
 - Nodo(s): h3.adm-chatbots
 - Qué es: Wizard de cliente, /admin/chatbots (+/new, bot con 5 tabs, KB con preview, Instalar, dominios), bulk ops, audit log, alertas 9 tipos con email/Telegram, reenvío de credenciales.
 - Referencias: tests 06-*, 10, 16-*, 18-*, 30
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Asistente (OnboardingWizard.tsx), /admin/chatbots/new (CreateBotForm), detalle con 8 tabs (BotDetailClient.tsx:91-100) y config de 5 tabs (ConfigTabs.tsx:6-12), KB con preview (MarkdownEditor.tsx:65-85), Instalación, dominios (AdvancedTab.tsx:126-180), bulk, alertas (detectBotIssues.ts:55-227). (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-237] Ruta canónica /admin/chatbots
 - Fuente: `STATUS.md:216` · tipo: decision · estado declarado: decidido · fecha: 2026-05-21
 - Nodo(s): h3.adm-chatbots
 - Qué es: /admin/clients/[id]/chatbot/* queda deprecada.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — admin/clients/[clientId]/chatbot/[[...tab]]/page.tsx:15-38 hace permanentRedirect a /admin/chatbots/[id]. (D5-c1, lector D5-L3)
+- ¿Sigue teniendo sentido?: si
 
 ### h3.adm-health — Health de chatbots
 
@@ -1993,47 +1993,47 @@
 - Nodo(s): h3.adm-health
 - Qué es: Seed de latencia, hover (en el chart sin scale) y fix del formatter del tooltip P50/P95.
 - Referencias: c1dfbc9 · 5590e6d · 558813c · 624d1b6 · health/LatencyChart.tsx · scripts/dev/seed-latency.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — components/admin/health/LatencyChart.tsx; scripts/dev/seed-latency.ts. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-239] getLatencyHistory: ventana y buckets desalineados
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md:80` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-19
 - Nodo(s): h3.adm-health
 - Qué es: Queda ~1h de borde afuera del conteo. Deuda BAJA: por decisión no se arregla, mini-lote futuro si se prioriza.
 - Referencias: getLatencyHistory.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — getLatencyHistory.ts:66 since = ahora-24h vs buckets desde la hora redondeada de hace 23 h (:35-38); eventos fuera de bucket se descartan (:101-105) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-240] B1.6 — Health Score real + veredicto humano
 - Fuente: `docs/bitacora-roadmap.md:792` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.adm-health
 - Qué es: getLatencyHistory sin mocks (estados ok/insufficient/empty), buildHealthVerdict con veredicto Todo OK/Atención/Problema, LatencyChart con empty state honesto y VerdictHero en /admin/chatbot/health.
 - Referencias: src/modules/chatbot/server/admin/getLatencyHistory.ts · src/modules/chatbot/server/health/buildHealthVerdict.ts · src/modules/chatbot/server/health/index.ts · src/modules/chatbot/components/admin/health/LatencyChart.tsx · src/app/(protected)/admin/chatbot/health/page.tsx · pendiente originado en docs/bitacora-roadmap.md:481 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — getLatencyHistory.ts (sin mocks), buildHealthVerdict.ts:24-133, health/page.tsx:26-30; el veredicto no detecta el proveedor caído (checkHealth.ts:46-58) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-241] Health: tasa de error/5xx y alertas push
 - Fuente: `docs/bitacora-roadmap.md:923` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-22
 - Nodo(s): h3.adm-health
 - Qué es: No construidas en B1.6; B1.7 si se pide la tasa de error; alertas Sentry/email al pasar a 'Problema' en otro sprint.
 - Referencias: tambien en docs/bitacora-roadmap.md:924
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — buildHealthVerdict.ts:20-22 solo latencia y DB; git grep alert|error_rate|5xx|stream_error en server/health -> solo el comentario de index.ts:4. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-242] Monitorear el costo multi-step (timings.step_count) en el health
 - Fuente: `docs/bitacora-roadmap.md:1963` · tipo: promesa · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.adm-health
 - Qué es: 'Lo voy a flag en el dashboard de health cuando llegue B4'; los flujos de captura gastan ~2x tokens en el turno de captura.
 - Referencias: src/modules/chatbot/server/chat/handleChatRequest.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — step_count se persiste (persistTurn.ts:205) pero buildHealthVerdict.ts:24-133 no lo lee; git grep step_count solo da handleChatRequest/persistTurn/reconcile. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-243] Monitor automático del camino LLM
 - Fuente: `docs/bitacora-roadmap.md:17096` · tipo: idea · estado declarado: sin estado · fecha: 2026-08-12
 - Nodo(s): h3.adm-health
 - Qué es: Si hace falta alerting, construirlo autenticado y con provider-close, nunca un GET público.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — No existe monitor; /smoke borrado (server/health/index.ts:1-5, commit 02a2f812); el health solo instancia el provider (checkHealth.ts:46-58). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 ### h3.cli-chatbot — Mi chatbot (cliente)
 
@@ -2042,504 +2042,504 @@
 - Nodo(s): h3.cli-chatbot
 - Qué es: Muestra en lenguaje simple el % de visitas atendidas, las conversaciones en modo degradado y el uptime. Espera a que cierre MH.4.
 - Referencias: MH.4 · tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:26
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -i 'salud del bot|botHealth' en src -> 0; solo existe /admin/chatbot/health (page.tsx:10-16); el dueno ve 'Activo · respondiendo a tus visitantes' por isActive (dashboard/chatbot/layout.tsx:50-52). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-245] UTM: '¿De dónde vienen mis leads?' (P4 del panel)
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:17` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.cli-chatbot
 - Qué es: Usa utmSource, utmMedium, utmCampaign y firstContactedAt, que nacen en EV.2, más la captura de UTM.1. Esperar su cierre.
 - Referencias: EV.2 · UTM.1 · utmSource · firstContactedAt
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — utmSource solo se usa en el detalle de un lead (dashboard/chatbot/leads/[id]/page.tsx:83); sin panel agregado. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-246] E1: superficie de gaps de KB y aprobación (panel)
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:19` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.cli-chatbot
 - Qué es: Pantalla 'el bot no supo responder esto', flujo de aprobación de propuestas de KB y aplicación a la KB. La KB nunca se auto-actualiza.
 - Referencias: E1.1 · ver Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:88 (C2.1, ciclo D2)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — schema.prisma: el unico modelo que matchea gap|proposal|unanswer|insight es ChatbotInsight (:1554); git grep 'KbProposal\|knowledgeGap\|unanswered' en src sin superficie de panel. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-247] firstContactedAt y decay del scoring
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:20` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.cli-chatbot
 - Qué es: El panel escribe firstContactedAt cuando el dueño marca contacto. El scoring va a usar lastStatusChangeAt ?? capturedAt; coordinar el campo.
 - Referencias: firstContactedAt · lastStatusChangeAt · tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:47
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — El panel sella firstContactedAt (updateLeadStatus.ts:40-46; lead-status-rules.ts:51-56); el decay sigue usando capturedAt (leads/[id]/page.tsx:57), no lastStatusChangeAt; el comentario EV.2 del schema (primer mensaje del visitante) quedo contradicho. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-248] Render genérico de señales para verticales no-autos
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:25` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.cli-chatbot
 - Qué es: Tarea del panel cuando llegue el primer cliente de otro vertical. Las señales legacy se mantienen por dual-write.
 - Referencias: signals Json
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n "\.signals\b" origin/main -- logic-core-v3/src/modules/chatbot/components -> 0; las señales v2 solo viajan en CSV y payload (buildLeadsCsv.ts:170, buildLeadPayload.ts:113). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-249] Dual-write de las señales legacy sin fecha de salida
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:35` · tipo: decision · estado declarado: hecho · fecha: 2026-07-06
 - Nodo(s): h3.cli-chatbot
 - Qué es: Las señales legacy se siguen escribiendo porque las ve el cliente en el panel.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:25
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — captureLead.ts:363-365 snapshot + columnas legacy; calculateLeadScore.ts:332-336. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-250] Derivación al panel: consultas sin responder y memoria
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:88` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.cli-chatbot
 - Qué es: Pantalla del dueño para C2.1 y C2.3. Ciclo D2: el cliente propone una mejora de KB y develOP la aprueba.
 - Referencias: tambien en Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:64 · ver Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:19
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Mismo grep que PLAN-246; ClientKnowledgeView es solo lectura y los cambios van por Mensajes. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-251] Mi Chatbot: fix de Decimal, loadings y activación sin bot
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:9` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.cli-chatbot
 - Qué es: Number(usage.costUsd) por unstable_cache. Loadings a ancho completo. Sin bot se muestra ChatbotUpsellLanding en lugar de redirigir. Hover.
 - Referencias: getUsageByOrgSlug · ChatbotUpsellLanding · tambien en Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:30
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dashboard/chatbot/page.tsx:43 Number(usage.costUsd); :21 y :25 ChatbotUpsellLanding. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-252] Config acotada del cliente (BotPersonalization)
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:15` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.cli-chatbot
 - Qué es: Color secundario y tinte, imagen de avatar en base64, emoji por quick-reply y dirty-state. Sin schema.
 - Referencias: BotPersonalization · accentSecondary · chatSurfaceTint · avatarImageUrl
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — UI y guardado: BotPersonalization.tsx:225-245, :292-301, :428-431, :147; el embed de clientes no aplica accentSecondary ni chatSurfaceTint (sin referencias en ChatbotEmbed.tsx; control ChatWindow.tsx:48,117). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-253] Leads en pipeline y conversaciones expandibles
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:38` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.cli-chatbot
 - Qué es: Columnas Calientes, Tibios y Fríos. Fix del filtro de fecha. Transcript inline con una action scopeada por org (anti-IDOR) y 'Conversación origen'.
 - Referencias: dashboard/lead-pipeline/ · getClientConversationTranscriptAction · tambien en Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:50
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — components/dashboard/lead-pipeline/{LeadPipeline,LeadPipelineColumn,LeadColumnOverview,classes}; dashboard/chatbot/conversations/transcript-action.ts:31 getClientConversationTranscriptAction. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-254] Config completa del bot para el cliente
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:87` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.cli-chatbot
 - Qué es: Nombre, tono, prompts y color por ruta, y unificar el editor con el admin. Requiere decisiones de producto.
 - Referencias: tambien en Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:23
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — El cliente solo edita apariencia, saludo y quick replies (updateBotAppearance.ts:24-43); sin nombre, tono, prompts ni colores por ruta. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-255] Uploader de avatar con storage externo
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:89` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.cli-chatbot
 - Qué es: Hoy la imagen va en base64 inline. Queda pendiente una decisión de infra.
 - Referencias: contradice Olme/Chatbot_ registro de cambios.md:97
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — BotPersonalization.tsx:298 AvatarUploader -> data URL; updateBotAppearance.ts:39,102 avatarImageUrlSchema guarda base64 en BotConfig. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-256] e2e 15-client-personalization falla de forma intermitente
 - Fuente: `docs/bitacora-beta-2.md:256` · tipo: pendiente · estado declarado: sin estado (flake) · fecha: 2026-06-27
 - Nodo(s): h3.cli-chatbot
 - Qué es: 'Guardar cambios' y 'cambiar welcome message' en /dashboard/chatbot/settings no completan (strict-mode locator); se atribuye a drift de la Neon dev compartida.
 - Referencias: tests/e2e/15-client-personalization.spec.ts · también en docs/bitacora-beta-2.md:290 · también en docs/bitacora-beta-2.md:430
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/e2e/15-client-personalization.spec.ts existe; la intermitencia no es verificable por lectura. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-257] Mostrar en el dashboard el contexto nuevo del handoff
 - Fuente: `docs/bitacora-roadmap.md:1648` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-22
 - Nodo(s): h3.cli-chatbot
 - Qué es: multiTenantQueries y ChatbotOverview solo leen visitorName/reason; intent, topicSummary y purchaseSignals quedan disponibles en la metadata del evento.
 - Referencias: src/modules/chatbot/server/admin/multiTenantQueries.ts:104-112 · src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:181
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — HandoffEvent solo visitorName/reason (multiTenantQueries.ts:200-206, :233-237); ChatbotOverview.tsx:198-203. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-258] Un lead DQ es DQ siempre
 - Fuente: `docs/bitacora-roadmap.md:3712` · tipo: decision · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.cli-chatbot
 - Qué es: No se enfría con el decay, no se rescata con el tiempo ni se puede des-descartar a mano desde el detalle.
 - Referencias: src/modules/chatbot/server/scoring/calculateLeadScore.ts · tambien en docs/bitacora-roadmap.md:3798 · tambien en docs/bitacora-roadmap.md:4324
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — getEffectiveScore calculateLeadScore.ts:461-474 devuelve el snapshot DQ sin decay (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-259] B5.5 — Vista de leads priorizada por score efectivo
 - Fuente: `docs/bitacora-roadmap.md:3822` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.cli-chatbot
 - Qué es: Orden por effectiveScore en memoria, filtro de fecha con TZ Argentina, empty states diferenciados (sin leads, solo DQ, filtros vacíos), limpieza de jerga y guard defensivo en applyTimeDecay.
 - Referencias: src/app/(protected)/dashboard/chatbot/leads/page.tsx · src/app/api/dashboard/leads/recent/route.ts · src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx · src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx · src/modules/chatbot/server/scoring/calculateLeadScore.ts · pendiente originado en docs/bitacora-roadmap.md:3805
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ClientLeadsTable.tsx:238-261 empty states diferenciados, :322-332 filtro vacio, :187-189 withinDateRange TZ AR. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-260] Verificación visual pendiente de las pantallas de leads, CRM y export (B5.5-B5.9)
 - Fuente: `docs/bitacora-roadmap.md:3897` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h3.cli-chatbot
 - Qué es: Se cerraron por code review y DOM; la captura headless estaba bloqueada (preloader y luego timeouts); MS-6 deja agendada una pasada de visual-qa.
 - Referencias: tambien en docs/bitacora-roadmap.md:3908 · tambien en docs/bitacora-roadmap.md:4022 · tambien en docs/bitacora-roadmap.md:4126 · tambien en docs/bitacora-roadmap.md:4346 · tambien en docs/bitacora-roadmap.md:4438 · tambien en docs/bitacora-roadmap.md:4617 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — No verificable por codigo; no hay artefacto en el repo. Casos manuales propuestos en este lote. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-261] B5.6 — Detalle de lead en ruta dedicada
 - Fuente: `docs/bitacora-roadmap.md:3912` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.cli-chatbot
 - Qué es: Reemplaza el modal por /dashboard/chatbot/leads/[id] con getLeadByIdForOrg y getConversationMessagesForOrg (filtro relacional, notFound si es de otra org); LeadDetail con contacto, 'por qué', conversación, WhatsApp pre-armado y seguimiento.
 - Referencias: src/modules/chatbot/server/admin/multiTenantQueries.ts · src/modules/chatbot/index.server.ts · src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx · src/modules/chatbot/components/dashboard/LeadDetail.tsx · src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx · src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — leads/[id]/page.tsx:29-35 notFound anti-IDOR; LeadDetail completo, pero la conversacion no se ve (LeadDetail.tsx:546). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-262] B5.7 — Aviso de leads calientes (badge, dot y ring)
 - Fuente: `docs/bitacora-roadmap.md:4027` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.cli-chatbot
 - Qué es: countHotNewLeadsForOrg con unstable_cache 30s y tag hot-leads-count; badge en el sidebar, dot en la tab Leads y ring en cards hot+NEW; polling pausado con la pestaña oculta.
 - Referencias: src/modules/chatbot/server/admin/multiTenantQueries.ts · src/modules/chatbot/index.server.ts · src/app/(protected)/dashboard/layout.tsx · src/app/(protected)/dashboard/chatbot/layout.tsx · src/components/dashboard/DashboardLayoutClient.tsx · src/components/dashboard/SidebarNav.tsx +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — BusinessLeadCard.tsx:204-209 ring; ClientDashboardTabs.tsx:67,77-85 dot; chatbot/layout.tsx:15-16 cache 30 s tag hot-leads-count; ClientLeadsTable.tsx:153-156 polling pausado. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-263] Push real / web push para leads calientes
 - Fuente: `docs/bitacora-roadmap.md:4101` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-23
 - Nodo(s): h3.cli-chatbot
 - Qué es: Fuera de scope; roadmap B6+ cuando haya tracción y el cliente lo pida.
 - Referencias: tambien en docs/bitacora-roadmap.md:4127 · tambien en docs/bitacora-roadmap.md:4397 · tambien en docs/bitacora-roadmap.md:4439
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i 'PushManager\|web-push\|pushSubscription' origin/main -- src package.json -> vacio (control: visibilitychange en ClientLeadsTable.tsx:159). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-264] B5.5 (iteración 2) — Filtros DB-side + toggle Descartados
 - Fuente: `docs/bitacora-roadmap.md:4131` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: listLeadsForDashboard filtra en Prisma con los índices de B5.1, filtros en la URL (status, range, view), toggle 'Descartados (N)', badge protagonista, polling con router.refresh(), fix de <a> anidado; helper src/lib/tz-ar.ts.
 - Referencias: src/lib/tz-ar.ts · src/modules/chatbot/server/admin/multiTenantQueries.ts · src/modules/chatbot/index.server.ts · src/app/(protected)/dashboard/chatbot/leads/page.tsx · src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx · src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — leads/page.tsx:40-56 filtros en DB; ClientLeadsTable.tsx:166-182 URL, :220-236 toggle, :141-143 router.refresh. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-265] Paginación + materialización del score efectivo
 - Fuente: `docs/bitacora-roadmap.md:4161` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: El orden por score efectivo es en memoria; a miles de leads por org no escala.
 - Referencias: tambien en docs/bitacora-roadmap.md:4223 · tambien en docs/bitacora-roadmap.md:4243
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — multiTenantQueries.ts:101-114 take 200 y orden por score efectivo en memoria (comentario :103-106) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-266] /api/dashboard/leads/recent queda sin consumidor de UI
 - Fuente: `docs/bitacora-roadmap.md:4181` · tipo: decision · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: La vista pasó a router.refresh(); el endpoint se mantiene porque lo usa un test e2e y queda como API disponible.
 - Referencias: src/app/api/dashboard/leads/recent/route.ts · tambien en docs/bitacora-roadmap.md:4225
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Sin consumidores en src; tests/e2e/40-lead-capture-e2e.spec.ts:50 lo usa (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-267] B5.6 (iteración 2) — Detalle de lead para casos DQ
 - Fuente: `docs/bitacora-roadmap.md:4247` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Hero gris 'Descartado', sección 'Por qué fue descartado', sin acciones comerciales y 'Notas' sin select de estado para leads DQ.
 - Referencias: src/modules/chatbot/components/dashboard/LeadDetail.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — LeadDetail.tsx:223-233 hero Descartado, :372-385 por que, :302 sin acciones, :491-509 'Notas' sin select. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-268] Botón 'Reportar mal clasificado'
 - Fuente: `docs/bitacora-roadmap.md:4325` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: No hay feedback al motor (heurístico puro); evaluarlo en B6+.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -i 'mal clasificado|misclassif' en src -> 0 (control: 'classification' en LeadDetail.tsx). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-269] B5.7 (iteración 2) — revalidateTag del badge + chip 'Nuevo'
 - Fuente: `docs/bitacora-roadmap.md:4350` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: captureLead invalida el tag hot-leads-count al entrar un hot; updateLeadStatus lo invalida al cruzar la frontera hot+NEW; chip cyan 'Nuevo' durante 6s para leads recién llegados en el polling.
 - Referencias: src/modules/chatbot/server/tools/captureLead.ts · src/modules/chatbot/server/admin/updateLeadStatus.ts · src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx · src/modules/chatbot/components/dashboard/BusinessLeadCard.tsx · pendiente originado en docs/bitacora-roadmap.md:4064
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — captureLead.ts:436-438 revalidateTag hot-leads-count; updateLeadStatus.ts:84-92; ClientLeadsTable.tsx:109-133 + BusinessLeadCard.tsx:106-117 chip 6 s. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-270] B5.8 — Integración CRM vía webhook n8n (DB-primero)
 - Fuente: `docs/bitacora-roadmap.md:4443` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Modelos CrmIntegration y CrmSyncAttempt, hook fire-and-forget tras el commit del lead, 3 intentos con backoff, anti-SSRF, secret opcional AES-256-GCM con CRM_SECRET_KEY, audit de cambios, PENDING zombie resuelto en lectura y card en /dashboard/chatbot/settings gateada por crmEnabled.
 - Referencias: prisma/migrations/20260524210709_b58_crm_integration · src/modules/chatbot/server/crm/validateWebhookUrl.ts · src/modules/chatbot/server/crm/encryptSecret.ts · src/modules/chatbot/server/crm/buildLeadPayload.ts · src/modules/chatbot/server/crm/postToN8n.ts · src/modules/chatbot/server/crm/syncLeadToCrm.ts +15
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — crm/index.ts:14-49; syncLeadToCrm.ts:34-158; encryptSecret.ts:65-98; getEffectiveSyncStatus.ts:25-37. Con deudas: fire-and-forget y SSRF por redirect/DNS. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-271] Protección contra DNS rebinding en el webhook CRM
 - Fuente: `docs/bitacora-roadmap.md:4483` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: validateWebhookUrl rechaza IPs privadas literales pero no dominios que resuelven a IP privada; resolver la IP justo antes del POST.
 - Referencias: src/modules/chatbot/server/crm/validateWebhookUrl.ts · tambien en docs/bitacora-roadmap.md:4533 · tambien en docs/bitacora-roadmap.md:4619
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i "dns\.\|lookup(\|redirect" origin/main -- logic-core-v3/src/modules/chatbot/server/crm -> 0; control: postToN8n.ts:91 'signal: controller.signal'. Deuda declarada en validateWebhookUrl.ts:11-13. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-272] Cron diario para syncs CRM FAILED
 - Fuente: `docs/bitacora-roadmap.md:4531` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Se eligió retry in-flight + reintento manual; un cron que barra los FAILED viejos queda para cuando haya volumen.
 - Referencias: tambien en docs/bitacora-roadmap.md:4618
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git ls-tree -r --name-only origin/main -- src/app/api/cron sin ruta crm (control: lista detect-bot-issues, generate-insights) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-273] Aviso legal en la UI sobre envío de PII a terceros (webhook CRM)
 - Fuente: `docs/bitacora-roadmap.md:4536` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Nota para el dueño al configurar el endpoint: va a enviar datos personales de sus clientes a un sistema propio.
 - Referencias: tambien en docs/bitacora-roadmap.md:4621
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep sin aviso en components/admin/integrations ni CrmStatusIndicator (ver ausencias) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-274] B5.9 — Exportar leads a CSV
 - Fuente: `docs/bitacora-roadmap.md:4625` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: GET /api/dashboard/chatbot/leads/export con auth y filtro por org, respeta los filtros activos, nunca mezcla DQ, anti CSV-injection celda por celda, BOM UTF-8, audit LEADS_EXPORTED y tope de 10.000; botón ExportLeadsButton.
 - Referencias: src/modules/chatbot/server/leads/csv/csvEscape.ts · src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts · src/modules/chatbot/server/leads/csv/index.ts · src/app/api/dashboard/chatbot/leads/export/route.ts · src/modules/chatbot/components/dashboard/ExportLeadsButton.tsx · src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ExportLeadsButton.tsx:40-75; export/route.ts:48 EXPORT_LIMIT 10_000, :203 text/csv. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-275] Streaming/paginación del export CSV si una org supera 10k leads
 - Fuente: `docs/bitacora-roadmap.md:4699` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Hoy hay un tope EXPORT_LIMIT = 10.000; streaming con ReadableStream queda en roadmap-pendientes.
 - Referencias: src/app/api/dashboard/chatbot/leads/export/route.ts · tambien en docs/bitacora-roadmap.md:4787
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — export/route.ts:48 EXPORT_LIMIT = 10_000; respuesta armada en memoria (:200-207) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-276] B8.5 — Vista de instalación compartida (snippet + guías)
 - Fuente: `docs/bitacora-roadmap.md:5836` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h3.cli-chatbot
 - Qué es: Módulo installation/ con buildEmbedSnippet como única fuente del snippet, INSTALL_PLATFORMS y PlatformInstructions; ClientInstallView e InstallTab refactorizados; warning de dominios faltantes también para el cliente.
 - Referencias: src/modules/chatbot/components/installation/platforms.ts · src/modules/chatbot/components/installation/SnippetCopyBlock.tsx · src/modules/chatbot/components/installation/PlatformInstructions.tsx · src/modules/chatbot/components/installation/index.ts · src/app/(protected)/dashboard/chatbot/install/ClientInstallView.tsx · src/app/(protected)/admin/chatbots/[botId]/tabs/InstallTab.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — buildEmbedSnippet unica fuente platforms.ts:26-28; consumido por ClientInstallView e InstallTab (git grep -l buildEmbedSnippet). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-277] Exponer data-theme y data-position en el snippet
 - Fuente: `docs/bitacora-roadmap.md:5888` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-25
 - Nodo(s): h3.cli-chatbot
 - Qué es: El snippet generado hardcodea data-theme dark aunque widget.js soporta light y bottom-left.
 - Referencias: src/modules/chatbot/components/installation/platforms.ts · public/widget.js
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — platforms.ts:27 data-theme dark fijo y sin data-position; widget.js:27-28 los soporta; ChatbotEmbed.tsx:21 ignora theme. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-278] B7 — Visual-qa retroactivo de avatares (verificado parcial)
 - Fuente: `docs/bitacora-roadmap.md:5909` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h3.cli-chatbot
 - Qué es: Los 5 avatares del registry rinden en /dashboard/chatbot/settings, el monograma usa iniciales reales y /embed/develop (desktop y mobile) muestra el avatar persistido; las implementaciones B7.x no tienen entrada en este rango.
 - Referencias: AvatarPicker · src/modules/chatbot/components/avatar/AvatarRenderer.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — registry.ts:35-73 cinco entradas (neuro, legacy_neuro, monograma, onda, geometrico); la verificacion visual es humana. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-279] Layout de /dashboard/chatbot/settings comprimido a la izquierda
 - Fuente: `docs/bitacora-roadmap.md:5935` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h3.cli-chatbot
 - Qué es: A 1280px el contenido ocupa ~40% y el resto queda en blanco; es de la página, no del picker.
 - Referencias: src/app/(protected)/dashboard/chatbot/settings/page.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — BotPersonalization.tsx:173 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-280] Reactivar 'Insights AI' real en el dashboard del chatbot
 - Fuente: `docs/bitacora-roadmap.md:6194` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h3.cli-chatbot
 - Qué es: Conectar a getPendingInsightsByOrgSlug con disclaimer de IA; la card placeholder se removió.
 - Referencias: docs/roadmap-pendientes.md · src/modules/chatbot/components/dashboard/ChatbotOverview.tsx · tambien en docs/bitacora-roadmap.md:6185
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Placeholder removido de ChatbotOverview (sin 'insight' en components/dashboard). Insights reales se muestran en /dashboard/resultados/analisis (analisis/page.tsx:60,73 via getMonthlyAnalysisForOrg.ts:61-62 PENDING+APPLIED). getPendingInsightsByOrgSlug sin consumidores (git grep -ln en src: solo index.server.ts e insights/index.ts). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-281] Sync automática KB ↔ Sanity
 - Fuente: `docs/bitacora-roadmap.md:9779` · tipo: idea · estado declarado: sin estado
 - Nodo(s): h3.cli-chatbot
 - Qué es: La edición de KB la hace develOP; sincronización vía Sanity queda como proyecto futuro.
 - Referencias: también en fuente:10040 · también en fuente:10121
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i 'sanity' origin/main -- src/modules/chatbot -> vacio (control: el mismo grep sobre src encuentra archivos del setter). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-282] CC.3 KB del cliente solo lectura
 - Fuente: `docs/bitacora-roadmap.md:10036` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.cli-chatbot
 - Qué es: ClientKnowledgeView sin editables; se borró saveClientKnowledgeBase (escritura desde sesión cliente).
 - Referencias: src/modules/chatbot/components/dashboard/ClientKnowledgeView.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ClientKnowledgeView.tsx:76-103 sin inputs; saveClientKnowledgeBase solo aparece en un comentario (modules/chatbot/index.ts:90). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-283] Flujo dedicado de solicitud de cambio de KB
 - Fuente: `docs/bitacora-roadmap.md:10122` · tipo: idea · estado declarado: sin estado
 - Nodo(s): h3.cli-chatbot
 - Qué es: Hoy el cliente pide cambios por Mensajes; un flujo con tracking sería sprint propio.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ClientKnowledgeView.tsx:157 linkea a Mensajes con ?context=knowledge, que no existe en MESSAGE_CONTEXTS (message-context.ts:2-50,56): ni siquiera prellena. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-284] CC.4 preview vivo compartido admin/cliente
 - Fuente: `docs/bitacora-roadmap.md:10133` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.cli-chatbot
 - Qué es: BotConfigPreview movido a components/preview y usado por ambos lados.
 - Referencias: src/modules/chatbot/components/preview/BotConfigPreview.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — preview/BotConfigPreview.tsx usado por BotConfigEditor, OnboardingWizard y BotPersonalization.tsx:27,347. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-285] Emoji picker en quick replies del cliente
 - Fuente: `docs/bitacora-roadmap.md:10229` · tipo: idea · estado declarado: sin estado
 - Nodo(s): h3.cli-chatbot
 - Qué es: El cliente solo edita texto; al editar pierde los emojis del admin.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — BotPersonalization.tsx:23 EmojiPickerField y :63 emoji por quick reply; server lo acepta (updateBotAppearance.ts:19-22). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-286] P0.3 gate de presentación de priorización de leads
 - Fuente: `docs/bitacora-roadmap.md:11040` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-29
 - Nodo(s): h3.cli-chatbot
 - Qué es: planAllows(plan,'leadScoring') en 4 superficies; Starter ve teaser.
 - Referencias: src/lib/plan/plan-allows.ts · src/lib/plan/lead-scoring-gate.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — leads/[id]/page.tsx:39-40 planAllows leadScoring; ClientLeadsTable.tsx:306 teaser; LeadDetail.tsx:255-256; chatbot/layout.tsx:42; src/lib/plan/lead-scoring-gate.invariant.ts existe. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-287] Verificación visual del gate de leads Starter vs Business
 - Fuente: `docs/bitacora-roadmap.md:11112` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-30
 - Nodo(s): h3.cli-chatbot
 - Qué es: No montable con el seed; chequear chips/teaser/CSV con leads reales.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — El gate existe en código (export/route.ts:95 planAllows leadScoring; buildLeadsCsv.ts:137, :158); la verificación visual es humana. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-288] P1.B acciones de un tap sobre el lead
 - Fuente: `docs/bitacora-roadmap.md:11115` · tipo: hecho-declarado · estado declarado: hecho (checkpoint visual humano) · fecha: 2026-06-30
 - Nodo(s): h3.cli-chatbot
 - Qué es: Lo contacté/Vendido/No avanzó con deshacer y sellado de firstContactedAt.
 - Referencias: src/modules/chatbot/lead-status-rules.ts · src/modules/chatbot/components/dashboard/LeadStatusActions.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — LeadStatusActions.tsx:43-65 acciones, :103-113 deshacer; updateLeadStatus.ts:40-46 sello de firstContactedAt. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-289] P1.D vista de leads unificada
 - Fuente: `docs/bitacora-roadmap.md:11225` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30
 - Nodo(s): h3.cli-chatbot
 - Qué es: Redirect 308 /dashboard/leads y detalle enriquecido (origen, canal, señales Pro+).
 - Referencias: src/lib/dashboard/lead-origin.ts · src/modules/chatbot/lead-detail-presentation.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — next.config.ts:139-145 redirect permanente /dashboard/leads -> /dashboard/chatbot/leads; LeadDetail.tsx:161-169 usa lead-detail-presentation; leads/[id]/page.tsx:82-90 origen y campana. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-290] P1-fix correctivos visuales + labels de intent
 - Fuente: `docs/bitacora-roadmap.md:11339` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30
 - Nodo(s): h3.cli-chatbot
 - Qué es: Card entera clickeable, detalle full-width y mapa compartido de intents.
 - Referencias: src/modules/chatbot/lead-intent-labels.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — lead-intent-labels.ts:15-57 mapa unico usado por BusinessHero.tsx:15, BusinessLeadCard.tsx:10 y LeadDetail.tsx:42; card clickeable BusinessLeadCard.tsx:212-213; pero buildLeadsCsv.ts:37-50 conserva un mapa propio en minuscula (CLEAN-R1). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-291] P1-fix2 hovers del detalle de lead
 - Fuente: `docs/bitacora-roadmap.md:11433` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30
 - Nodo(s): h3.cli-chatbot
 - Qué es: adminHoverCls en 6 cards del LeadDetail.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — LeadDetail.tsx usa adminHoverCls 9 veces (git grep -c) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-292] Botón 'Exportar CSV' en el dashboard
 - Fuente: `docs/bitacora-roadmap.md:11591` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-30
 - Nodo(s): h3.cli-chatbot
 - Qué es: La route de export existe; falta la UI del botón.
 - Referencias: src/app/api/dashboard/chatbot/leads/export/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ExportLeadsButton.tsx:52; ClientLeadsTable.tsx:311 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-293] P2.A aviso de lead al cliente por email
 - Fuente: `docs/bitacora-roadmap.md:11846` · tipo: hecho-declarado · estado declarado: hecho (checkpoint runtime pendiente)
 - Nodo(s): h3.cli-chatbot
 - Qué es: Email 'nuevo lead' a todos y 'lead caliente' Pro+ por Brevo, con cap y digest.
 - Referencias: src/lib/client-notifications/notify.ts · src/modules/chatbot/server/tools/captureLead.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — notify.ts:87-177 llamado desde captureLead.ts:7 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-294] handoff.callback no aparece en 'Derivaciones recientes'
 - Fuente: `docs/bitacora-roadmap.md:15478` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.cli-chatbot
 - Qué es: listRecentHandoffsByOrgSlug filtra solo handoff.whatsapp; requiere agregar type al shape (chat Panel).
 - Referencias: src/modules/chatbot/server/admin/multiTenantQueries.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — multiTenantQueries.ts:218 filtra type 'handoff.whatsapp'; el callback existe como 'handoff.callback' (confirmContactRequest.ts:85) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-295] E1: insights del bot para el dueño
 - Fuente: `docs/bitacora-roadmap.md:15704` · tipo: bloque · estado declarado: pendiente (superficie bloqueante)
 - Nodo(s): h3.cli-chatbot
 - Qué es: Buque insignia del roadmap Plano B: el motor existe y corre solo; falta superficie para el dueño (insights quedan en PENDING).
 - Referencias: también en fuente:15779 · también en fuente:16506
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — resultados/analisis/page.tsx:36,60,73 DiscoveriesSection con insights PENDING+APPLIED (getMonthlyAnalysisForOrg.ts:61-62), gateado por planAllows 'insight'. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-296] S7-09 ipHash llega al browser del cliente
 - Fuente: `docs/bitacora-roadmap.md:16871` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-11
 - Nodo(s): h3.cli-chatbot
 - Qué es: findMany sin select en el dashboard de conversaciones manda Conversation.ipHash vía RSC.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — multiTenantQueries.ts:180-187 findMany con include sin select -> conversations/page.tsx:17-22 -> ConversationsTable ('use client'). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-297] Cron de retry de CrmSyncAttempt FAILED
 - Fuente: `docs/roadmap-pendientes.md:10` · tipo: pendiente · estado declarado: pendiente (postergado) · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Barrer FAILED cada 24h y reintentar syncLeadToCrm; hoy in-flight + botón Reintentar.
 - Referencias: B5.8 · syncLeadToCrm
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i 'crmSyncAttempt' origin/main -- src/app/api/cron -> vacio (control: git ls-tree lista 9 archivos en src/app/api/cron). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-298] Protección DNS rebinding en webhook n8n
 - Fuente: `docs/roadmap-pendientes.md:16` · tipo: pendiente · estado declarado: pendiente (carril seguridad Franco) · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Resolver la IP antes del POST en postToN8n.singlePost y revalidar contra la blacklist (RE-16).
 - Referencias: validateWebhookUrl · RE-16 · tambien en :175
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n 'dns\|lookup(' origin/main -- src/modules/chatbot/server/crm src/lib/security -> vacio (control: postToN8n.ts:67 singlePost, :87 fetch). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-299] Nota legal de PII en CrmConfigForm
 - Fuente: `docs/roadmap-pendientes.md:31` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Aviso de envío de datos personales a terceros al activar el sync; antes del plan Business comercial.
 - Referencias: CrmConfigForm
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i 'personal\|privacidad\|terceros\|PII' origin/main -- src/modules/chatbot/components/admin/integrations/CrmConfigForm.tsx -> vacio (control: el archivo existe). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-300] Header Idempotency-Key a n8n
 - Fuente: `docs/roadmap-pendientes.md:38` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Mandar Idempotency-Key: leadId para dedupe downstream.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i 'idempotency-key' origin/main -- src -> vacio (control: postToN8n.ts:76 arma headers). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-301] Export CSV de leads por streaming (>10k)
 - Fuente: `docs/roadmap-pendientes.md:48` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Hoy carga hasta 10k en memoria y trunca en silencio; streaming con cursor.
 - Referencias: /api/dashboard/chatbot/leads/export
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — export/route.ts:48 const EXPORT_LIMIT = 10_000. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-302] Export .xlsx y plantillas por CRM
 - Fuente: `docs/roadmap-pendientes.md:55` · tipo: idea · estado declarado: postergado · fecha: 2026-05-24
 - Nodo(s): h3.cli-chatbot
 - Qué es: Excel nativo con formato y CSV por CRM destino; solo si un cliente lo pide.
 - Referencias: tambien en :61
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i 'xlsx\|exceljs' origin/main -- src package.json -> vacio (control: text/csv en export/route.ts:203). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-303] Insights AI reales en ChatbotOverview
 - Fuente: `docs/roadmap-pendientes.md:78` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h3.cli-chatbot
 - Qué es: Se removió el card placeholder; falta renderizar insights reales.
 - Referencias: src/modules/chatbot/components/dashboard/ChatbotOverview.tsx · src/modules/chatbot/server/insights/
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Igual que PLAN-280: ChatbotOverview.tsx no renderiza insights; existen en resultados/analisis/page.tsx:73. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-304] Alpha.0.5 fixes post test manual
 - Fuente: `docs/sprints/alpha-0-5-cleanup.md:6` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-17
 - Nodo(s): h3.cli-chatbot
 - Qué es: Cache en auth/resolveOrgId/isAdminPreview, botones en ChatbotManager, Activity Log 24h, 'Mi Chatbot' en sidebar, ChatbotUpsellLanding, checkClientHasChatbot.
 - Referencias: src/modules/chatbot/server/admin/clientHasChatbot.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — clientHasChatbot.ts:4-10 con cache; filtra isActive (:6), lo que causa la landing de venta con bot pausado (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-305] Más atribución por campaña
 - Fuente: `docs/sprints/p4-1-render-utm.md:111` · tipo: idea · estado declarado: fuera de scope
 - Nodo(s): h3.cli-chatbot
 - Qué es: utmMedium, filtro de leads por campaña, tendencias multi-período, export por campaña y backfill.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Filtros del cliente solo status/range/view (ClientLeadsTable.tsx:166-182); utm solo como campaignLabel en leads/[id]/page.tsx:90. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-306] Roles en minúscula en LeadDetail
 - Fuente: `raiz:lane-LOG.md:146` · tipo: pendiente · estado declarado: pendiente (preexistente)
 - Nodo(s): h3.cli-chatbot
 - Qué es: Filtra 'user'/'assistant' contra enum en mayúsculas; el transcript cae al fallback.
 - Referencias: LeadDetail.tsx:470
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — LeadDetail.tsx:546 sigue filtrando 'user'/'assistant'; enum USER/ASSISTANT schema.prisma:152-156. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-307] Portal cliente v1.0
 - Fuente: `STATUS.md:49` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-21
 - Nodo(s): h3.cli-chatbot
 - Qué es: Credenciales temporales con cambio forzado, dashboard en formato negocio, leads con polling 30s, email por lead, personalización limitada, snippet, reporte semanal sin opt-in.
 - Referencias: tambien en :221
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Lo del lote: polling 30 s ClientLeadsTable.tsx:146, personalizacion limitada BotPersonalization.tsx, snippet platforms.ts:26-28. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 ### h3.vis-api-chatbot — API pública del chatbot
 
@@ -2548,1359 +2548,1359 @@
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Hoja con ritual completo. Dual-write de señales. EV.2 migra UTM y firstContactedAt. Compuertas humanas en EV.3 (expectativas inmutables) y EV.4 (transcripts).
 - Referencias: BLOQUE-EV · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:78 · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:85 · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:65
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — verticals/packs/{base,usados,agencia}.ts; dual-write de senales (captureLead.ts:364-366, :404); migracion 20260629195726_ev2_vertical_pack_signals_utm; compuertas EV.3/EV.4 sin cumplir (transcripts de usados con 404) y bots nuevos sin pack (onboarding/core.ts:128-136; createClientWithBot.ts:159-185). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-309] UTM.1: captura viva de UTM
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#2` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Captura de UTM en el runtime. El panel renderiza después de EV.2.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:17
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — useChatbot.ts:37-59, :205-220, :448-451; requestSchema.ts:57,64; resolver.ts:56,60 (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-310] E1: loop de gaps de KB (la feature estrella)
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#4` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Detecta, agrupa y sugiere mejoras a la KB con aprobación humana. Según el research es la única feature casi única del producto.
 - Referencias: E1.1 · E1.2 · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:38 · ver Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:61 (C2.1)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Se generan insights KB_GAP (generateInsights.ts:9, :116-128) pero la aprobación humana no está cableada (actOnInsight sin consumidores, manageInsight.ts:15). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-311] R1: cálculo de ROI en el runtime
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#5` · tipo: bloque · estado declarado: bloqueado · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: calculatePotentialValue. Exige MH cerrado; hay que integrarlo a la hoja.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep calculatePotentialValue → vacío (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-312] E0: identidad persistente y cierre/timeout de conversación
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#8` · tipo: bloque · estado declarado: bloqueado · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Van juntos (endedAt muerto, cuota en isNew). Plano de Fase 3: refinar contra el repo. Bloqueado por la política de retención.
 - Referencias: endedAt · isNew · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:40 · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:84
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Conversation.endedAt no se escribe en el modulo (git grep endedAt en src/modules/chatbot -> 0; control: aparece en project.actions.ts:582); identidad = sessionId en sessionStorage (useChatbot.ts:24-35). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-313] E2: memoria y refinamiento del historial
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#9` · tipo: bloque · estado declarado: bloqueado · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Define qué historial se reenvía; el truncado mínimo va en RB.2. E2.3 bloqueado por la frontera conversación/cuota.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:46 · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:52
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Truncado minimo hecho (historyPolicy.ts:31,61; useChatbot.ts:432-440); memoria entre conversaciones no existe (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-314] E3: inventario y catálogo
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#10` · tipo: bloque · estado declarado: bloqueado · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Bloqueado por la fuente de inventario previa a Sanity (manual, CSV o panel). E3.1 con ultracode.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:53
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i "inventario\|inventory" origin/main -- logic-core-v3/src/modules/chatbot -> 0 (control: packs agencia/base/usados en git ls-tree). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-315] E4: vertical salud
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#11` · tipo: bloque · estado declarado: bloqueado · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Bloqueado por el análisis de compliance de datos sensibles. E4.1 con ultracode.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:54
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — verticals/packs: agencia.ts, base.ts, usados.ts (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-316] Microsprints E5-E6 (carril rápido)
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:25` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: MS-E6.2 (timeout, primera cuota de la descomposición del handler) y MS-E6.3 (hashes de IP y privacidad).
 - Referencias: MICROSPRINTS-E5-E6-hoja-de-corrida.md · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:58 · tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:46
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — MS-E6.2 costuras A/B/C hechas (requestSchema.ts:1-8, toolSuspension.ts, persistTurn.ts:21-24) pero el handler sigue en 1412 lineas; MS-E6.3: salt obligatorio en prod y docstring honesta (ipHash.ts:3-27). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-317] Secuencia de verticales: usados, salud, inmobiliarias
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:33` · tipo: decision · estado declarado: hecho · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: El motor ya es de autos de facto. Decisión estresada; no reabrir.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — verticals/packs/ tiene agencia.ts, base.ts y usados.ts; faltan salud e inmobiliarias (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-318] Packs verticales en código, no en DB
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:34` · tipo: decision · estado declarado: hecho · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Un vertical nuevo es un PR. Hacerlo con DB y UI sería sobreingeniería.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — server/verticals/packs/agencia.ts, base.ts, usados.ts y registry.ts. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-319] Política de retención de datos del visitante
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:51` · tipo: decision · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Decisión abierta y la más urgente. Bloquea E0 y E2.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Solo chatbot_events a 30 días (cleanup-old-events/route.ts:14); Conversation/ChatMessage/ChatbotLead sin retención (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-320] Frontera conversación/cuota con memoria
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:52` · tipo: decision · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Abierta: ¿retomar una conversación cuenta como cuota nueva? Bloquea E2.3.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — La cuota se reserva por conversacion nueva = sessionId nuevo (handleChatRequest.ts:400-401; useChatbot.ts:24-35, sessionStorage por pestana): decision abierta. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-321] Fuente de inventario previa a Sanity
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:53` · tipo: decision · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Abierta: manual, CSV o panel. Bloquea E3.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -nliE 'inventory|inventario|catalogo' en server de chatbot y motor: solo comentarios de 'catalogo de tools' (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-322] Vertical salud y compliance
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:54` · tipo: decision · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Abierta: activar el vertical salud y analizar el manejo de datos sensibles. Bloquea E4.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git ls-tree de verticals/packs -> agencia.ts, base.ts, usados.ts (sin salud). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-323] Hashes de IP y promesa de privacidad
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:58` · tipo: decision · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Abierta. La docstring 'GDPR-friendly' hoy es falsa. Microsprint MS-E6.3 definido.
 - Referencias: MS-E6.3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ipHash.ts:20-33 aborta sin salt en prod; sin 'GDPR' en src (commit 819b9e0e) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-324] Descartados: no volver a proponer
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:63` · tipo: decision · estado declarado: descartado · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Fine-tuning por cliente, auto-aprendizaje de KB, verificador de 2ª pasada, RAG con embeddings, multi-idioma, Instagram DM, digest saliente por WhatsApp y jobs para quemar cuota.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:62
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — git grep -i 'embedding|fine-tun|pgvector' en src/modules/chatbot y schema -> 0; Instagram no esta en el runtime (solo como etiqueta en lead-detail-presentation.ts:63). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-325] Carril de seguridad aparte (Opus)
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:64` · tipo: decision · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: /health info-disclosure y pentest van a un barrido aparte. En los bloques C también va ahí /smoke (P-4).
 - Referencias: /health · /smoke · tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:52 · tambien en Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:21 · tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:29
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — /smoke eliminado; /api/chatbot/[slug]/health/route.ts sigue (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-326] T0.1: gate a /smoke
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:13` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Exigir CRON_SECRET o sesión SUPER_ADMIN, más rate limit. Hoy es el único punto público que gasta LLM sin control.
 - Referencias: /smoke · A4.2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — El endpoint se borró (health/index.ts:1-5); git ls-tree de src/app/api | grep -i smoke -> 0 (control: 1 ruta health). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-327] MH.2: conversación después del gate y cuota justa
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:24` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: No contar las Conversation en modo degradado. Compensar el cupo cuando el stream muere sin respuesta. Es la pieza sensible; se hace con Opus max.
 - Referencias: A1.5 · A1.4 · ver Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:73 (C3.5)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — handleChatRequest.ts:274-301 discardNewConversation; :467-534 compensación; reconcile.ts:363-383 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-328] MH.3: contadores consistentes
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:25` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: messageCount real en lugar de +2 fijo. generateInsightsForBot liviano (take:50 con select y count).
 - Referencias: generateInsightsForBot · messageCount · A1.9c · A2.1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — persistTurn.ts:447 messageCount { increment: 2 } fijo aunque el USER se haya deduplicado; generateInsights.ts:30-42 trae 200 conversaciones con todos sus mensajes y recorta a 50 en memoria. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-329] MH.4: servicio 'Salud del bot'
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:26` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Expone por org y período el % de visitas atendidas, las conversaciones degradadas y el uptime. El render es del panel.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:11
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -nliE 'salud del bot|getBotHealth|uptime' en src/modules/chatbot y src/lib sin servicio por org (control: checkChatbotHealth en server/health/checkHealth.ts) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-330] RB.1: carreras P2002 tratadas como éxito
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:36` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: En getOrCreateConversation, volver a leer en lugar de devolver 500. En capture_lead, devolver alreadyCaptured:true.
 - Referencias: getOrCreateConversation · capture_lead · A1.2 · A1.6
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — resolver.ts:115-144 adopta la fila; captureLead.ts:230 alreadyCaptured:true. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-331] RB.2: techo de historial en el server
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:37` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Truncar a los últimos N turnos en lugar de devolver 400 en el mensaje 51. Se hace con Opus max.
 - Referencias: A1.1 · A4.4 · ver Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:44 (C0.2)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — requestSchema.ts:45-54 trimHistory a 30; HARD_CAP 40 con respuesta degradada (handleChatRequest.ts:547-579) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-332] RB.3: cierre sin huecos
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:38` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: onFinish transaccional ($transaction sobre mensaje, conversación y cuota) y un mensaje fijo de derivación cuando el modelo responde vacío.
 - Referencias: onFinish · A1.3 · A1.7 · ver Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:72 (C3.4)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — persistTurn.ts:379-472 $transaction mensaje -> conversacion -> cupo con retry deduplicado; derivacion fija ante respuesta vacia (reconcile.ts:407-411, :484-534). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-333] Unique compuesto (botConfigId, sessionId)
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:45` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Va en el microsprint de sessionId ya definido; es el arreglo de fondo de lo que RB.1 solo tapa.
 - Referencias: A1.2 · ver Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:70 (C3.2)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — schema.prisma:1375 sessionId @unique (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-334] Descomponer handleChatRequest (871 líneas)
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:46` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Pipeline por etapas, sin big-bang. La primera parte la paga MS-E6.2.
 - Referencias: handleChatRequest · A5.2 · ver Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:74 (C3.6)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Tres costuras extraídas (persistTurn.ts, toolSuspension.ts, requestSchema/degradedResponse/hookOps) pero el handler sigue en 1412 líneas. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-335] Decay del scoring sobre actividad real
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:47` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Usar lastStatusChangeAt ?? capturedAt. Carril de scoring post-EV; coordina con el panel.
 - Referencias: A1.8 · tambien en Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:20
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — leads/page.tsx:87, leads/[id]/page.tsx:57, export/route.ts:126 usan capturedAt; lastStatusChangeAt existe (schema.prisma:1503) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-336] Constantes de event-types y LEAD_INTENTS unificado
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:49` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Microsprint suelto para cuando se toque esa zona.
 - Referencias: LEAD_INTENTS · A5.5 · A5.6
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — captureLead.ts:36 LEAD_INTENTS y showWhatsappHandoff.ts:30 HANDOFF_INTENTS siguen separados; los tipos de evento son literales ('chat.message_completed') en handleChatRequest, persistTurn y getLatencyHistory; git grep EVENT_TYPES|ChatbotEventType -> 0. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-337] D-C1: orden de C2
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:12` · tipo: decision · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Detección de consultas sin responder, luego catálogo, luego memoria. Se puede reordenar.
 - Referencias: tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:23
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Deteccion de consultas sin responder via insights KB_GAP (monthly-analysis.ts:178); catalogo y memoria no (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-338] D-C2: cap de ~40 turnos
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:13` · tipo: decision · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Se cumple con degradación digna a WhatsApp y se renuncia al 'ilimitado literal'.
 - Referencias: tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:24
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — El tope es de 40 MENSAJES, unos 20 turnos (historyPolicy.ts:52-61; handleChatRequest.ts:547). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-339] D-C4: failover a Anthropic descartado
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:15` · tipo: decision · estado declarado: descartado
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Doble mantenimiento para un equipo de 2; la degradación a WhatsApp ya cubre el caso.
 - Referencias: tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:26
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — anthropic.ts:18 stub ProviderNotImplementedError; resolveEffectiveModel.ts:37-63 degrada a Google (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-340] Secuencia de los bloques C
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:36` · tipo: decision · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: C0 → C1 → C2 ‖ C3. C3.2 va antes de C2.3; el resto de C3 se hace dejando mejor lo que se toca.
 - Referencias: tambien en Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:79 · tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:34
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — C0 (historyPolicy.ts; getTools.ts:82 C0.1) y C1.2 hechos; C3.1 parcial; C3.4 no aplicado (persistTurn secuencial dentro de la tx) y C3.6 contradicho (eventos await-eados). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-341] C0.1: navigate_to_page fuera de PRO/BUSINESS
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:43` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Sacar la tool del seed, o restringirla a develOP, hasta que exista allowedNavigationPaths. Evita 404 en el dominio del cliente.
 - Referencias: plan.tools · BotConfig.allowedNavigationPaths · C-4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — getTools.ts:82 TOOLS_RESTRICTED_TO_AGENCY_BOT = ['navigate_to_page'] (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-342] C0.2: que la conversación no muera muda
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:44` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: El widget envía ~30 mensajes y el server recorta con slice(-N) en lugar de rechazar más de 50. El soft-cap de 15 degrada a WhatsApp. Verificar con una conversación real de más de 30 turnos.
 - Referencias: C-1 · ver Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:37 (RB.2)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Recorte en vez de 400 (requestSchema.ts:45-54) y gate de 40 mensajes con derivación (handleChatRequest.ts:547-579); sigue muriendo en 400 si una respuesta del bot supera 4000 caracteres (requestSchema.ts:49). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-343] C0.3: un único modelo efectivo
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:45` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: plan.llmModel también va a calculateCost. getModel cae a gemini-2.5-flash con un WARN en lugar de lanzar error. Verificar que el costo registrado no sea 0.
 - Referencias: calculateCost · getModel · plan.llmModel · C-5/V-2/D-4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — persistTurn.ts:372-377 usa effectiveModel; degradacion con WARN resolveEffectiveModel.ts:52-63 + handleChatRequest.ts:767-785 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-344] C1.1: nonce estable por conversación
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:52` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: vmsg pasa a HMAC(conversationId, secret) para tener un prefijo cacheable (~75% de descuento en input). Toca el spotlighting.
 - Referencias: vmsg · P-3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — handleChatRequest.ts:883 randomUUID por request (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-345] C1.2: ventana de historial y caps realistas
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:53` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Reusa la ventana de C0.2. Baja los caps del schema (≤4000 chars, ≤30 items).
 - Referencias: P-2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — historyPolicy.ts:31 ventana 30, :50 4000 caracteres; :39 MAX_MESSAGES_SHAPE 50 queda como validacion de forma. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-346] C1.3: cap duro de turnos
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:54` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: A los ~40 turnos responde degradedResponse con CTA a WhatsApp, usando messageCount.
 - Referencias: degradedResponse · messageCount
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — historyPolicy.ts:61 HARD_CAP_MESSAGES=40; handleChatRequest.ts:547; degradado conversation_limit useChatbot.ts:327-328 (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-347] C1.4: medir el efecto en tokens
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:55` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Comparar tokensIn y cachedContentTokenCount antes y después. No es opcional.
 - Referencias: providerMetadata
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i "cachedContentTokenCount\|cachedInputTokens\|cacheReadTokens" origin/main -- logic-core-v3/src -> solo fixture onf1-reconcile.invariant.ts:263 (control: inputTokens 3 hits en handleChatRequest.ts). Además el nonce por request (handleChatRequest.ts:883) reescribe el historial. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-348] C2.1: detectar consultas sin responder
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:61` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: El bot marca lo que no supo contestar. Alimenta el ciclo D2 de KB. Fue prometido en la propuesta de Matsu.
 - Referencias: ver Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md:19 (E1)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Solo retrospectivo via insights KB_GAP (generateInsights.ts:80; schema.prisma:227); sin marca por turno (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-349] C2.3: memoria del visitante
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:63` · tipo: bloque · estado declarado: bloqueado
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Reconoce a quien ya habló y retoma la conversación. Depende de que C3.2 esté cerrado.
 - Referencias: tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:36
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep sin rastro en server (ver ausencias) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-350] C3.1: corte del proveedor a mitad del stream
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:69` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: onError en streamText: persistir el evento, no contar el turno y evaluar liberar cupo si falla antes del primer token.
 - Referencias: streamText · C-3/V-4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — onError compensa el cupo si no hubo primer token (handleChatRequest.ts:1070-1109) y reporta a stderr + Sentry (:1052-1060), pero no persiste un ChatbotEvent y el borde puede persistir un canned que el visitante no ve (:1265-1277). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-351] C3.2: sessionId compuesto
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:70` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Migración aditiva @@unique([botConfigId, sessionId]) y el widget separa la key por slug. Cierra el 500 con dos bots en el mismo origin.
 - Referencias: C-2/T-1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — useChatbot.ts:27 clave 'chatbot:sessionId' sin slug; schema.prisma:1375 (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-352] C3.4: menos round-trips a la DB
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:72` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Consolidar el doble rate-limit, que validateOrigin reuse el bot cacheado, paralelizar los writes de onFinish y fusionar getPlanForOrg.
 - Referencias: validateOrigin · getPlanForOrg · P-1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Doble rate limit sigue (route.ts:81 y handleChatRequest.ts:184); validateOrigin hace su propia query (validate-origin.ts:61); los writes de onFinish van en tx secuencial (persistTurn.ts:412-472), lo que contradice paralelizarlos. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-353] C3.5: conversaciones huérfanas
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:73` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Crear la Conversation después de los gates, o aceptar las filas y contar solo las que tienen mensajes. Decidir y documentar.
 - Referencias: C-7
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — discardNewConversation handleChatRequest.ts:261-279; compensacion checker.ts:189-212 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-354] C3.6: deuda del handler
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:74` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Extraer persistTurn(), hacer logChatbotEvent realmente fire-and-forget y renombrar checkQuota a readQuotaUsage. Se aplica al tocar el handler.
 - Referencias: persistTurn · checkQuota · D-1/D-2/D-3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — persistTurn extraído (persistTurn.ts); logChatbotEvent sigue con await (handleChatRequest.ts:322,359); checkQuota sin renombrar (checker.ts:32) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-355] Endpoints públicos sin rate-limit y guard del primer mensaje
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:159` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-12
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: 3 endpoints públicos sin rate-limit. Falta un guard en el server que exija que el primer mensaje sea del usuario (defensa en profundidad).
 - Referencias: tambien en Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:160 · tambien en Olme/Chatbot_ registro de cambios.md:110
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — chat/route.ts:81-85 y handleChatRequest.ts:184-188 tienen rate limit (esquivable rotando Origin/sessionId); config/route.ts y health/route.ts no (git grep checkRateLimit -> 0); el user-led solo se fuerza al recortar (historyPolicy.ts:76, :99-101): un array de 30 o menos que empieza en assistant pasa. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-356] Sistema de leads consolidado
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:172` · tipo: idea · estado declarado: pendiente · fecha: 2026-06-12
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Dedup por dispositivo (deviceId anónimo con captureLead), temperatura = la máxima alcanzada más la recurrencia, y que 'nueva conversación' no borre el lead. Requiere diagnosticar antes el modelo Lead.
 - Referencias: captureLead · deviceId
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep deviceId en src y schema -> 0; identidad por sessionId de sessionStorage (useChatbot.ts:27-31). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-357] B1.3 — Instrumentación de latencia del bot por etapa
 - Fuente: `docs/bitacora-roadmap.md:385` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: mark() por etapa y TTFB de Vertex vía onChunk; metadata.timings y alias metadata.latencyMs en chat.message_completed. Veredicto: ~85% del tiempo es Vertex.
 - Referencias: src/modules/chatbot/server/chat/handleChatRequest.ts · scripts/_b13-latency-test.mjs · scripts/_b13-latency-analyze.mjs
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — mark() handleChatRequest.ts:122-128; TTFB en onChunk :1030-1035; timings y latencyMs en chat.message_completed persistTurn.ts:541-549. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-358] Palancas para optimizar Vertex
 - Fuente: `docs/bitacora-roadmap.md:494` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Por ROI: gemini-2.5-flash-lite, recortar el system prompt, prompt caching, paralelizar el post-persist y cache Redis de resolveBotBySlug; no aplicar sin decisión explícita.
 - Referencias: google.ts:10-41 · src/modules/chatbot/server/prompts/buildSystemPrompt.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Planes en gemini-2.5-flash (sync-plans.ts:73,89,105); sin cachedContent ni thinkingBudget (git grep thinkingBudget en src/modules/chatbot/server/chat = 0) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-359] Medir latencia del bot contra prod (Netlify + Neon main)
 - Fuente: `docs/bitacora-roadmap.md:531` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Las cifras son de dev; falta una corrida contra la URL deployada (B13_BASE_URL) para el delta dev-prod; decisión de Franco.
 - Referencias: scripts/_b13-latency-test.mjs · tambien en docs/bitacora-roadmap.md:536 · tambien en docs/bitacora-roadmap.md:660
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — scripts/_b13-latency-test.mjs existe; la corrida en prod no es verificable desde el repo (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-360] B1.4 — Verificación de las 4 optimizaciones R2
 - Fuente: `docs/bitacora-roadmap.md:539` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Rate-limit por sessionId, sin findFirst duplicado, Promise.all pre-LLM y cache in-memory de resolveBotBySlug confirmados y medidos; detectó invalidateBotCache sin callers.
 - Referencias: src/modules/chatbot/server/chat/handleChatRequest.ts:123 · src/app/api/chatbot/[slug]/chat/route.ts:77 · src/modules/chatbot/server/conversation/resolver.ts:10-99
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Rate limit por sessionId handleChatRequest.ts:184-188; Promise.all pre-LLM :215-247; getOrCreateConversation devuelve isNew (resolver.ts:65-68); cache resolver.ts:10-44; invalidateBotCache ya tiene callers. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-361] Optimizaciones de Vertex se evalúan con N>=3 corridas
 - Fuente: `docs/bitacora-roadmap.md:623` · tipo: decision · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Vertex es no determinista entre corridas (TTFB p50 entre 2.3s y 5.8s); toda medición debe repetirse espaciada en el día.
 - Referencias: tambien en docs/bitacora-roadmap.md:685 · tambien en docs/bitacora-roadmap.md:692
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Regla de proceso sin huella en codigo; el tooling existe (scripts/regression/diag-timings.ts) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-362] No migrar el cache del bot a Redis/Upstash todavía
 - Fuente: `docs/bitacora-roadmap.md:629` · tipo: decision · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Re-evaluar si el tráfico supera ~10 req/min, entra un segundo cliente al chatbot o Netlify escala a varias instancias; el caveat de cache por instancia sin invalidación cruzada sigue abierto (aplica también a getPlanForOrg).
 - Referencias: src/modules/chatbot/server/conversation/resolver.ts · src/lib/plan/get-plan-for-org.ts · tambien en docs/bitacora-roadmap.md:643 · tambien en docs/bitacora-roadmap.md:782 · tambien en docs/bitacora-roadmap.md:2299
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Cache en memoria por instancia con TTL 60 s (resolver.ts:10-44); el caveat sin invalidación cruzada sigue (resolver.ts:47-49). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-363] Documentar el caveat del cache in-memory del bot
 - Fuente: `docs/bitacora-roadmap.md:642` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Dejar documentado en CLAUDE.md o en un README del módulo chatbot que el cache es por instancia.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — modules/chatbot/README.md:41 solo menciona cache HTTP; caches por instancia en resolver.ts:10-12 y get-plan-for-org.ts:21-22 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-364] B3.1 — Mapa del system prompt (sin cambios de código)
 - Fuente: `docs/bitacora-roadmap.md:957` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: 9 secciones más un bloque #10 de intent inyectado en handleChatRequest; ~4.500 tokens para develOP; redundancias R1-R7 con ~750-970 tokens recuperables.
 - Referencias: src/modules/chatbot/server/prompts/buildSystemPrompt.ts · src/modules/chatbot/server/prompts/sections.ts · src/modules/chatbot/server/chat/handleChatRequest.ts:276-278
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — buildSystemPrompt.ts:33-47 (9 secciones) + bloque de intent/opener handleChatRequest.ts:817-827 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-365] navigate_to_page con 8 rutas hardcodeadas
 - Fuente: `docs/bitacora-roadmap.md:1032` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: TODO en el archivo: las rutas deberían venir de BotConfig.allowedNavigationPaths (Phase 1.5).
 - Referencias: src/modules/chatbot/server/tools/navigateToPage.ts:37-51 · tambien en docs/bitacora-roadmap.md:1072
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Rutas fijas navigateToPage.ts:25-34; contencion C0.1 getTools.ts:82-123; allowedNavigationPaths no existe (git grep -c allowedNavigationPaths origin/main -- prisma/schema.prisma = 0; control allowedDomains = 1) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-366] Decidir si el bloque #10 (intent guidance) se centraliza en buildSystemPrompt
 - Fuente: `docs/bitacora-roadmap.md:1070` · tipo: decision · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Hoy se appendea en handleChatRequest fuera del builder; decisión arquitectural abierta, B3.3 lo dejó intacto.
 - Referencias: src/modules/chatbot/server/chat/handleChatRequest.ts:276-278 · src/modules/chatbot/server/intent/detectIntent.ts · tambien en docs/bitacora-roadmap.md:1085 · tambien en docs/bitacora-roadmap.md:1347
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Sigue apendeado fuera del builder: handleChatRequest.ts:817-827. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-367] B3.2 — Shell de Matsu + batería de regresión + baseline
 - Fuente: `docs/bitacora-roadmap.md:1091` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Seed idempotente de Matsu (org, usuario ORG_MEMBER, bot Aki, KB concesionaria con scaffolding), batería scripts/regression con 8 casos y purga por prefijo regression-test-, baseline capturado.
 - Referencias: rama feat/b3.2-matsu-baseline · scripts/seed-matsu.ts · scripts/regression/cases.ts · scripts/regression/run-baseline.ts · scripts/regression/purge.ts · docs/regression/baseline-2026-05-22T22-00-07-164Z.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — scripts/seed-matsu.ts:24-33; scripts/regression/{cases,run-baseline,purge}.ts; docs/regression/baseline-2026-05-22T22-00-07-164Z.md. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-368] Loreteo: el bot copia frases literales de los ejemplos del prompt (H4)
 - Fuente: `docs/bitacora-roadmap.md:1179` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Persiste tras B3.3 y B3.5 (cambia de frase); la nota 'variá las palabras' no alcanza con Gemini 2.5 Flash; erradicarlo requiere A/B sin ejemplos concretos.
 - Referencias: src/modules/chatbot/server/prompts/sections.ts · tambien en docs/bitacora-roadmap.md:1221 · tambien en docs/bitacora-roadmap.md:1335 · tambien en docs/bitacora-roadmap.md:1368 · tambien en docs/bitacora-roadmap.md:1377 · tambien en docs/bitacora-roadmap.md:1514
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Nota anti-loreteo sections.ts:115-116; los ejemplos literales siguen en sections.ts:138-140 y :156 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-369] Lectura comercial de los baselines por Franco
 - Fuente: `docs/bitacora-roadmap.md:1218` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Leer con ojo comercial los transcripts de cada baseline (B3.2, B3.3, B3.6, MS-1) y marcar respuestas mal vendidas o robóticas.
 - Referencias: docs/regression/baseline-2026-05-22T22-00-07-164Z.md · tambien en docs/bitacora-roadmap.md:1229 · tambien en docs/bitacora-roadmap.md:1374 · tambien en docs/bitacora-roadmap.md:1384 · tambien en docs/bitacora-roadmap.md:1680 · tambien en docs/bitacora-roadmap.md:1954 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Tarea humana sin huella en codigo; no verificable por lectura (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-370] La batería de regresión es gate de merge del bot
 - Fuente: `docs/bitacora-roadmap.md:1223` · tipo: decision · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Antes de mergear cambios al bot se corre la batería y se compara con el baseline; si un caso degrada (precio inventado, jailbreak, lead no capturado) no se mergea. Desde MS-4: smoke durante el sprint y full antes de cerrarlo.
 - Referencias: scripts/regression/run-baseline.ts · tambien en docs/bitacora-roadmap.md:3664
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — scripts/regression/run-baseline.ts existe; .github/workflows/ci.yml no la corre (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-371] B3.3 — Poda del prompt (-19% tokens) + refuerzos
 - Fuente: `docs/bitacora-roadmap.md:1233` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Aplicadas las redundancias R1-R7, regla maestra anti-alucinación, subbloque off-topic y nota anti-loreteo; batería 8/8 sin error técnico.
 - Referencias: src/modules/chatbot/server/prompts/sections.ts · docs/regression/baseline-2026-05-22T22-19-20-185Z.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Off-topic sections.ts:111-113, anti-loreteo :115-116, regla maestra :132-142 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-372] Reglas anti-alucinación irreductibles en la Sección 6
 - Fuente: `docs/bitacora-roadmap.md:1268` · tipo: decision · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Regla maestra + no inventar rol + no contradecir la KB + no prometer acciones imposibles + lenguaje no absoluto; se mantienen aunque el cliente deje forbiddenStatements vacío.
 - Referencias: src/modules/chatbot/server/prompts/sections.ts · decisión pedida en docs/bitacora-roadmap.md:1084
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — sections.ts:132-148 (regla maestra, rol, KB, acciones, lenguaje) independientes de forbiddenStatements :122-126 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-373] Reforzar la 'pregunta de cierre' (Sección 2) debilitada por la poda
 - Fuente: `docs/bitacora-roadmap.md:1334` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: El caso financiacion perdió la pregunta abierta de cierre; reforzar la línea en la Sección 2 (+20 chars).
 - Referencias: src/modules/chatbot/server/prompts/sections.ts · tambien en docs/bitacora-roadmap.md:1375
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — sections.ts:43 'Cerrás casi siempre con una pregunta abierta que invite a profundizar.' (introducida en a3180600) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-374] B3.5 — capture_lead persiste email y teléfono juntos
 - Fuente: `docs/bitacora-roadmap.md:1388` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Schema de la tool con phone?/email? y refine 'al menos uno'; el handler persiste ambos canales y loguea channels[]; caso de regresión lead-capture-both-channels.
 - Referencias: src/modules/chatbot/server/tools/captureLead.ts · src/modules/chatbot/server/prompts/sections.ts · scripts/regression/cases.ts · docs/regression/baseline-2026-05-22T22-38-03-073Z.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — phone/email opcionales captureLead.ts:66-71; ambos al create :385-386; el refine 'al menos uno' se reemplazo por el chequeo en execute :99-102, :283-314 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-375] B3.6 — Handoff WhatsApp proactivo con payload rico
 - Fuente: `docs/bitacora-roadmap.md:1523` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: show_whatsapp_handoff con intent enum, topicSummary, purchaseSignals y visitorContact; metadata rica en el evento y Telegram solo si no hubo capture_lead previo; triggers comerciales en la description y la Sección 4.
 - Referencias: src/modules/chatbot/server/tools/showWhatsappHandoff.ts · src/modules/chatbot/server/prompts/sections.ts · scripts/regression/cases.ts · docs/regression/baseline-2026-05-22T22-49-06-262Z.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — showWhatsappHandoff.ts:42-67 (intent, topicSummary, purchaseSignals, visitorContact); Telegram solo sin lead :152 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-376] Máximo 1 handoff por conversación: se controla desde el prompt
 - Fuente: `docs/bitacora-roadmap.md:1667` · tipo: decision · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: No hay enforce duro en el handler; si el visitante vuelve a pedirlo el modelo puede repetir la card.
 - Referencias: src/modules/chatbot/server/tools/showWhatsappHandoff.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — sections.ts:85 y SHOW_WHATSAPP_HANDOFF_DESCRIPTION showWhatsappHandoff.ts:85; sin enforce en el handler :116-170 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-377] Decidir el volumen de Telegrams por handoff directo
 - Fuente: `docs/bitacora-roadmap.md:1672` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Opciones: desactivar el push de handoff o limitarlo a intents purchase_ready/schedule_visit (~3 líneas en el handler).
 - Referencias: src/modules/chatbot/server/tools/showWhatsappHandoff.ts · tambien en docs/bitacora-roadmap.md:1681
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — showWhatsappHandoff.ts:152-167 manda Telegram para cualquier intent si no hubo lead (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-378] Regla 'sin signos de exclamación': ¿absoluta o con excepción en señales de compra?
 - Fuente: `docs/bitacora-roadmap.md:1674` · tipo: decision · estado declarado: pendiente · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Decisión de producto abierta; si es estricta hay que endurecer la Sección 5.
 - Referencias: src/modules/chatbot/server/prompts/sections.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — Absoluta en sections.ts:99, pero el ejemplo de la tool dice '¡Listo Juan!' (offerHandoffOptions.ts:16) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-379] MS-1 — Multi-step: capture_lead con texto + encadenado de offer_handoff_options
 - Fuente: `docs/bitacora-roadmap.md:1819` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: stopWhen: stepCountIs(3) en streamText; toolCalls y usage agregados desde steps[] (cost-correctness); timings.step_count. Resuelve H2 y H3; show_whatsapp_handoff sin texto previo se acepta como UX.
 - Referencias: src/modules/chatbot/server/chat/handleChatRequest.ts · scripts/regression/cases.ts · docs/regression/baseline-2026-05-22T23-18-15-111Z.md · pendiente originado en docs/bitacora-roadmap.md:1175 · pendiente originado en docs/bitacora-roadmap.md:1177 · pendiente originado en docs/bitacora-roadmap.md:1219 +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — handleChatRequest.ts:953 stopWhen: stepCountIs(3); toolCalls y usage agregados desde steps :1161-1176; persistTurn.ts:205 step_count. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-380] Respuesta determinística post-capture_lead para ahorrar ~1s
 - Fuente: `docs/bitacora-roadmap.md:1961` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-22
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Alternativa al step extra de Vertex (texto fijo en el toolResult); fallback de bajar a stepCountIs(2) si Vertex se vuelve lento.
 - Referencias: tambien en docs/bitacora-roadmap.md:1967
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — handleChatRequest.ts:953 stopWhen stepCountIs(3) sigue; capture_lead devuelve su resultado al modelo (captureLead.ts:552). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-381] B4.2 — Server gating de las 7 dimensiones del plan
 - Fuente: `docs/bitacora-roadmap.md:2146` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: getPlanForOrg con cache 60s (nunca null), tryReserveConversation con UPDATE condicional atómico, planAllows, filtro de tools por plan, modelo LLM del plan, cap defensivo de dominios y respuesta degradada JSON sin llamar a Vertex.
 - Referencias: src/lib/plan/fallback.ts · src/lib/plan/get-plan-for-org.ts · src/lib/plan/plan-allows.ts · src/lib/plan/index.ts · src/lib/security/origin-matcher.ts · src/modules/chatbot/server/quota/checker.ts +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — get-plan-for-org.ts:68-125, checker.ts:126-151, handleChatRequest.ts:309-341, :675-702, :713; el tope de dominios no aplica al widget oficial (degradedResponse.ts:97-103) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-382] Criterio PASS de lead-capture-chain según el plan
 - Fuente: `docs/bitacora-roadmap.md:2294` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Con Starter el modelo deriva por WhatsApp (no tiene offer_handoff_options); el caso debería aceptar ambas rutas.
 - Referencias: scripts/regression/cases.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — scripts/regression/cases.ts:199-209 sigue exigiendo expectedTools ['capture_lead','offer_handoff_options'] sin aceptar la ruta por WhatsApp. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-383] B4.5 — Modo degradado sin Gemini + alerta upsell + soft-cap
 - Fuente: `docs/bitacora-roadmap.md:2638` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: degradedResponse con reason y datos de WhatsApp sin tocar Vertex, triggerUpsellAlertIfFirst atómico vía QuotaUsage.degradedAt (1 alerta por bot y mes), soft-cap de 15 turnos en el prompt, casos quota-exhausted y long-session-soft-cap con setup/teardown en la batería.
 - Referencias: src/modules/chatbot/server/quota/upsellAlert.ts · src/modules/chatbot/server/quota/index.ts · src/modules/chatbot/server/prompts/types.ts · src/modules/chatbot/server/prompts/sections.ts · src/modules/chatbot/server/chat/handleChatRequest.ts · scripts/regression/cases.ts +5
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — upsellAlert.ts:46-91 (degradedAt atomico via registry.ts:671-684); handleChatRequest.ts:345-396; sections.ts:189-211 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-384] Soft-cap como sugerencia del prompt, no corte del server
 - Fuente: `docs/bitacora-roadmap.md:2692` · tipo: decision · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Desde 15 turnos del visitante el prompt sugiere derivar al humano; el modelo decide entre texto o show_whatsapp_handoff.
 - Referencias: src/modules/chatbot/server/prompts/sections.ts · tambien en docs/bitacora-roadmap.md:2776
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — sections.ts:189-211 (SOFT_CAP_THRESHOLD=15) + hard-cap handleChatRequest.ts:547 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-385] Test de carga del atomic reserve de cuota
 - Fuente: `docs/bitacora-roadmap.md:2789` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Simular ~5000 conversaciones concurrentes contra un bot Business; no bloqueante.
 - Referencias: src/modules/chatbot/server/quota/checker.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — scripts/load-test/chatbot-baseline.ts solo mide latencia (CONCURRENT=3); git grep reserveConversation en scripts = 0 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-386] B5.1 — Señales estructuradas en capture_lead
 - Fuente: `docs/bitacora-roadmap.md:3196` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Migración aditiva b51 (category, 4 flags booleanos, providedPhone/Email, channel, score, classification, scoreSignals e índices); capture_lead con LEAD_INTENTS/LEAD_CATEGORIES y regla anti-inflado; providedPhone/Email derivados del input.
 - Referencias: prisma/migrations/20260523183030_b51_add_lead_signals_and_scoring/migration.sql · prisma/schema.prisma · src/modules/chatbot/server/tools/captureLead.ts · scripts/regression/cases.ts · scripts/regression/run-baseline.ts · docs/regression/baseline-2026-05-23T18-33-48-648Z.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — captureLead.ts:36-52, :79-95; providedPhone/Email derivados :328-329 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-387] intent queda String en DB con vocabulario unificado vía Zod
 - Fuente: `docs/bitacora-roadmap.md:3207` · tipo: decision · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Para no romper rows legacy (quote/info/demo); luego B11.4 lo convirtió en enum con la unión de valores nuevos y legacy.
 - Referencias: src/modules/chatbot/server/tools/captureLead.ts · tambien en docs/bitacora-roadmap.md:3324 · tambien en docs/bitacora-roadmap.md:6852
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — LEAD_INTENTS captureLead.ts:36-43; toUpperCase a ChatbotLeadIntent :371 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-388] ChatbotLead.channel reservado sin uso
 - Fuente: `docs/bitacora-roadmap.md:3243` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Campo agregado en B5.1 para canales futuros; queda null en todos los leads.
 - Referencias: prisma/schema.prisma · tambien en docs/bitacora-roadmap.md:3328 · tambien en docs/bitacora-roadmap.md:3339
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Campo channel String? en ChatbotLead (schema); captureLead.ts:381-414 no lo setea (git grep -nE '^\s+channel:' en captureLead.ts vacio); buildLeadPayload.ts:107 lo reenvia null (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-389] Mostrar señales y score del lead en el Telegram de capture_lead
 - Fuente: `docs/bitacora-roadmap.md:3320` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Microsprint (<30 min) a la espera del OK de Franco; tocar notifyClient().
 - Referencias: src/modules/chatbot/server/tools/captureLead.ts · tambien en docs/bitacora-roadmap.md:3335 · tambien en docs/bitacora-roadmap.md:3523
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — captureLead.ts:445-452 arma el mensaje sin score ni classification (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-390] B5.3 — DQ activo sobre category distinta de sales (sin entrada propia)
 - Fuente: `docs/bitacora-roadmap.md:3348` · tipo: bloque · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Planeado tras B5.2; no tiene entrada en la bitácora pero B5.4 lo da por hecho (dqFilter.ts, penalties, DQ_CATEGORY_LABELS, scripts/_b53-test-scoring.ts).
 - Referencias: dqFilter.ts · scripts/_b53-test-scoring.ts · tambien en docs/bitacora-roadmap.md:3532 · tambien en docs/bitacora-roadmap.md:3776 · tambien en docs/bitacora-roadmap.md:3790
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dqFilter.ts:21-25; calculateLeadScore.ts:192-196, :263-278; scripts/_b53-test-scoring.ts presente (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-391] B5.2 — Motor de scoring heurístico server-side
 - Fuente: `docs/bitacora-roadmap.md:3353` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: calculateLeadScore puro: cita 40, financiación 25, usado 20, modelo 10, teléfono 5; hot >=70, warm >=40; score, classification y scoreSignals persistidos en el create del lead, sin LLM; test unit 22/22.
 - Referencias: src/modules/chatbot/server/scoring/calculateLeadScore.ts · src/modules/chatbot/server/scoring/index.ts · src/modules/chatbot/server/tools/captureLead.ts · scripts/_b52-test-scoring.ts · scripts/regression/run-baseline.ts · docs/regression/baseline-2026-05-23T19-42-43-822Z.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — calculateLeadScore.ts:259-329; persistido captureLead.ts:406-412 (hoy lee la tabla del pack, EV.3) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-392] recalculateLeadScore para re-puntuar leads que vuelven
 - Fuente: `docs/bitacora-roadmap.md:3516` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Hoy el score se calcula solo al capturar; si un lead vuelve con nuevas señales no se recalcula.
 - Referencias: tambien en docs/bitacora-roadmap.md:3520
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep recalculateLeadScore en src -> 0 (control: getEffectiveScore en scoring/calculateLeadScore.ts). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-393] MS-4 — Batería usable: smoke set + retry de 'terminated'
 - Fuente: `docs/bitacora-roadmap.md:3537` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Flag --smoke con 4 casos críticos (smoke: true en cases.ts), DIRECT_URL opcional en el runner, retry único ante 'terminated' sin enmascarar asserts, diag-timings promovido a tooling; long-session-soft-cap se mantiene en 16 turnos.
 - Referencias: scripts/regression/cases.ts · scripts/regression/run-baseline.ts · scripts/regression/diag-timings.ts · docs/regression/smoke-2026-05-23T21-19-30-029Z.md · docs/regression/baseline-2026-05-23T21-20-32-446Z.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — scripts/regression/cases.ts:78,116 smoke:true y :295 long-session-soft-cap; run-baseline.ts:27; diag-timings.ts (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-394] MS-5 — Paralelización de la batería + recorte de sleeps + rate-limit
 - Fuente: `docs/bitacora-roadmap.md:3665` · tipo: bloque · estado declarado: bloqueado · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Bloqueado hasta que DIRECT_URL baje los 'terminated'; paralelizar sin eso empeora el pool.
 - Referencias: tambien en docs/bitacora-roadmap.md:3539 · tambien en docs/bitacora-roadmap.md:3649 · tambien en docs/bitacora-roadmap.md:3677
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — scripts/regression/run-baseline.ts:229, :352, :384 sleeps secuenciales (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-395] B5.4 — Decay temporal, combos y explicabilidad del score
 - Fuente: `docs/bitacora-roadmap.md:3681` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: DECAY_CURVE escalonada (1.00 a 0.30) aplicada en lectura sobre capturedAt, combos tradeIn+financing (+10) y modelo+cita (+5), getEffectiveScore y getScoreExplanation, labels en lenguaje PyME; 50+ asserts.
 - Referencias: src/modules/chatbot/server/scoring/calculateLeadScore.ts · src/modules/chatbot/server/scoring/index.ts · scripts/_b54-test-scoring.ts · scripts/_b53-test-scoring.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — DECAY_CURVE :361-374, getEffectiveScore :461-485, getScoreExplanation :517-528, combos en packs (usados.ts:43-56) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-396] ChatbotLead.lastUserMessageAt si se habilita re-engagement
 - Fuente: `docs/bitacora-roadmap.md:3807` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: El decay usa capturedAt como última actividad; si el bot vuelve a hablar con leads capturados (B7+) hace falta otra referencia.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep lastUserMessageAt en src y schema -> 0 (control: lastMessageAt aparece 3 veces en schema.prisma). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-397] Calibrar la curva de decay con datos reales
 - Fuente: `docs/bitacora-roadmap.md:3808` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Heurística inicial; recalibrar con 200+ leads en producción midiendo conversión por tramo de edad.
 - Referencias: src/modules/chatbot/server/scoring/calculateLeadScore.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — DECAY_CURVE heuristica sin cambios calculateLeadScore.ts:361-374 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-398] B11.4 — 5 campos string a enum del módulo chatbot
 - Fuente: `docs/bitacora-roadmap.md:6833` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Enums ChatMessageRole, ChatbotLeadIntent (nuevos + legacy), ChatbotEventLevel, BotIntensityLevel y LlmProvider; migración en dos fases con backfill a mayúsculas sin pérdida; 21 call-sites en 12 archivos.
 - Referencias: prisma/migrations/20260525190000_b11_4a_create_enum_types/migration.sql · prisma/migrations/20260525190100_b11_4b_promote_columns_to_enum/migration.sql · src/modules/chatbot/server/logging/persistentLogger.ts · src/modules/chatbot/server/admin/saveBotConfig.ts · src/modules/chatbot/server/admin/saveBotConfigByOrgSlug.ts · src/modules/chatbot/server/tools/captureLead.ts +14
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma/migrations/20260525190000_b11_4a_create_enum_types y 20260525190100_b11_4b_promote_columns_to_enum; schema.prisma:152-184 enums; saveBotConfig.ts:39,44 transform a mayusculas (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-399] SEC-LLM-01/02/03: prompt injection y PII hacia Vertex
 - Fuente: `docs/bitacora-roadmap.md:8140` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Endurecer el prompt contra injection y anonimizar la PII enviada al LLM.
 - Referencias: docs/auditoria-seguridad-2026-05.md · tambien en docs/bitacora-roadmap.md:7963 · tambien en docs/bitacora-roadmap.md:8319
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Spotlighting handleChatRequest.ts:877-889, :941-950; pero currentPath crudo (sections.ts:200) y 'assistant' del cliente sin envolver (:946-947). Sin anonimización: git grep -n -i "anonymi\|anonimi\|redact" en server/chat y server/prompts -> 0 (control: wrapUntrusted en handleChatRequest.ts:884). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-400] Consolidar el doble rate-limit del chat
 - Fuente: `docs/bitacora-roadmap.md:9439` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: chatbotPerSession (route) y chatbotPerBotSession (handler) corren en serie; decidir clave única.
 - Referencias: src/app/api/chatbot/[slug]/chat/route.ts · también en fuente:16670
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — chat/route.ts:80-85 y handleChatRequest.ts:184-188 siguen en serie; presets.ts:28-33 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-401] Rate-limit en endpoints públicos config/health
 - Fuente: `docs/bitacora-roadmap.md:9440` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: config, health y smoke sin rate-limit (smoke luego deprecado en 17070); defensa en profundidad.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep checkRateLimit en config/route.ts y health/route.ts vacio; control chat/route.ts:81 (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-402] EV.4 intents desde pack vertical
 - Fuente: `docs/bitacora-roadmap.md:10806` · tipo: hecho-declarado · estado declarado: hecho (smoke gated) · fecha: 2026-06-30
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Pack agencia con intents verbatim y usados con 7 intents de concesionaria; detectIntent puro.
 - Referencias: src/modules/chatbot/server/verticals/packs/agencia.ts · src/modules/chatbot/server/verticals/packs/usados.ts · scripts/ev4-smoke.mjs
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — agencia.ts:29-80; usados.ts:87-200 (7 intents); handleChatRequest.ts:625-626 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-403] Smoke y 7 transcripts de EV.4
 - Fuente: `docs/bitacora-roadmap.md:10843` · tipo: pendiente · estado declarado: bloqueado · fecha: 2026-06-30
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: No corridos: server caído y bots con verticalPack 'base'.
 - Referencias: docs/ev4-transcripts/README.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — docs/ev4-transcripts/agencia-1..3.md tienen respuestas del bot; los 4 usados-*.md registran 'HTTP 404 — Bot not found or inactive' en cada turno; el README sigue diciendo PENDIENTE. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-404] Compuerta: EV.5 tras revisión de transcripts por Franco
 - Fuente: `docs/bitacora-roadmap.md:10858` · tipo: decision · estado declarado: pendiente · fecha: 2026-06-30
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: EV.5 no debía arrancar hasta que Franco leyera los transcripts y avalara el vocabulario de intents usados.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — EV.5 esta en codigo (api/dashboard/chatbot/leads/export/route.ts:143-162; verticals/__tests__/ev5.superset.invariant.ts) sin huella de la compuerta (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-405] EV.3 scoring desde pack con paridad 208/208
 - Fuente: `docs/bitacora-roadmap.md:10862` · tipo: hecho-declarado · estado declarado: hecho (gate de despliegue abierto) · fecha: 2026-06-29
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: calculateLeadScore lee el pack; dual-write de ChatbotLead.signals.
 - Referencias: src/modules/chatbot/server/scoring/calculateLeadScore.ts · src/modules/chatbot/server/tools/captureLead.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — calculateLeadScore.ts:259-262; dual-write captureLead.ts:365, :405; backfill prisma/seeds/backfill-vertical-pack.ts:71-75 (ejecucion en prod no verificable) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-406] Backfill de BotConfig.verticalPack
 - Fuente: `docs/bitacora-roadmap.md:10918` · tipo: pendiente · estado declarado: pendiente (script listo en D.1) · fecha: 2026-06-29
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: develop→agencia, sanmiguel/matsu→usados antes de prod; D.1 creó el script pero la corrida es manual de Valentino.
 - Referencias: prisma/seeds/backfill-vertical-pack.ts · también en fuente:10847 · también en fuente:10928 · también en fuente:11541 · también en fuente:15616
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Script listo: prisma/seeds/backfill-vertical-pack.ts:72-74 (develop->agencia, sanmiguel y matsu->usados); default 'base' (schema.prisma:1329). Si corrió en la base no se ve por código. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-407] EV.1 contrato VerticalPack + registry + pack base
 - Fuente: `docs/bitacora-roadmap.md:10932` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-28
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Módulo verticals/ sin cambio de runtime.
 - Referencias: src/modules/chatbot/server/verticals/types.ts · src/modules/chatbot/server/verticals/registry.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — verticals/types.ts:142-155; registry.ts:26-53; packs/base.ts (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-408] providedEmail ausente de LeadSignals
 - Fuente: `docs/bitacora-roadmap.md:10990` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-28
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: El motor no puntúa providedEmail; EV.2 debía añadirlo.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — calculateLeadScore.ts:68-74 LeadSignals sigue sin providedEmail, pero el scoring por pack lo recibe (captureLead.ts:349-356) y el pack base lo puntua (verticals/packs/base.ts:38); usados no. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-409] Override de descripciones de tools con sesgo automotriz
 - Fuente: `docs/bitacora-roadmap.md:10991` · tipo: idea · estado declarado: sin estado · fecha: 2026-06-28
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: CAPTURE_LEAD_DESCRIPTION y handoff mencionan test drive; agregar override por pack; pack 'concesionaria' futuro.
 - Referencias: también en fuente:10993
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — captureLead.ts:73,84 y showWhatsappHandoff.ts:32,76 mencionan test drive; sin override por pack en verticals (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-410] EV.5 tool copy por pack + payload n8n v2 + CSV
 - Fuente: `docs/bitacora-roadmap.md:11465` · tipo: hecho-declarado · estado declarado: hecho (sin commitear al cierre) · fecha: 2026-06-30
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Copy de tools desde el pack, payload superset v2 y columnas de pack/señales en el CSV.
 - Referencias: src/modules/chatbot/server/crm/buildLeadPayload.ts · src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — verticals/types.ts:111/:153 toolCopy; captureLead.ts:104; buildLeadPayload.ts:18, :45-51, :109-113; buildLeadsCsv.ts:147-148, :169-170. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-411] Smoke de EV.5 (agencia y usados)
 - Fuente: `docs/bitacora-roadmap.md:11536` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-30
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Franco corre el smoke agencia y lee transcripts; el de usados requiere bot sanmiguel inexistente en DB.
 - Referencias: scripts/ev5-smoke.mjs · también en fuente:11589
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — scripts/ev5-smoke.mjs existe; la corrida y la lectura de transcripts no son verificables en codigo (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-412] Cierre del bloque EV
 - Fuente: `docs/bitacora-roadmap.md:11564` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Motor comercial vertical del chatbot (EV.1-EV.5).
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Registry + packs + columnas EV.5 en export (export/route.ts:143-163); no hay forma de asignar el pack a bots nuevos (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-413] UTM.1 atribución first-touch
 - Fuente: `docs/bitacora-roadmap.md:12672` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-04
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: UTM en Conversation (migración aditiva) heredados por el lead; widget.js manda referrer.
 - Referencias: utm1_add_conversation_utm_fields · src/modules/chatbot/shared/attribution.ts · public/widget.js · docs/sprints/utm-1-captura.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — widget.js:138 referrer; schema.prisma:1384 utmSource; requestSchema.ts:57-66 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-414] C3.2 sessionId único compuesto por bot
 - Fuente: `docs/bitacora-roadmap.md:12755` · tipo: pendiente · estado declarado: pendiente (gated Franco + DB reconciliada) · fecha: 2026-07-04
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Conversation.sessionId @unique global; @@unique([botConfigId, sessionId]) + create atómico y clave de idempotencia por turno requieren migración.
 - Referencias: también en fuente:13150 · también en fuente:14093 · también en fuente:16922 · también en fuente:17001
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — schema.prisma:1375 sessionId @unique global; useChatbot.ts:27 clave global; resolver.ts:132-137 relanza P2002 cross-bot (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-415] Q1.1 corredor de conversaciones doradas
 - Fuente: `docs/bitacora-roadmap.md:12843` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: 36 escenarios contra bots QA reales con captura; faltan corridas en vivo de usados/agencia.
 - Referencias: src/modules/chatbot/evals/ · docs/sprints/q1-1-harness.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/modules/chatbot/evals/scenarios/{agencia,base,usados}.json con 12 escenarios cada uno; runner.ts (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-416] Q1.2 evaluación con asserts duros + juez LLM
 - Fuente: `docs/bitacora-roadmap.md:12904` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: evals:score con asserts determinísticos y juez Opus para tono.
 - Referencias: src/modules/chatbot/evals/scoring/ · docs/sprints/q1-2-scoring.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — evals/scoring/{hard-asserts,judge,evaluate}.ts; package.json:86 evals:score. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-417] Correr el juez de evals con ANTHROPIC_API_KEY
 - Fuente: `docs/bitacora-roadmap.md:12951` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Sin la key el juez perceptual se omite.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — evals/scoring/evaluate.ts:47,66 omite el juez sin key; la corrida no es verificable en codigo (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-418] mustNotClaim semántico y ajuste de expectedIntent
 - Fuente: `docs/bitacora-roadmap.md:12959` · tipo: idea · estado declarado: sin estado · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: mustNotClaim es substring; decidir si se ajustan escenarios o patrones del pack por fails de intent.
 - Referencias: también en fuente:12961
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Sigue por substring (evals/__tests__/q1-2.invariant.ts:201). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-419] Q1.1-fix timeout de readback del harness
 - Fuente: `docs/bitacora-roadmap.md:12967` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Timeout 10s y continue en vez de abortar el escenario.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/modules/chatbot/evals/capture.ts:51 ASSISTANT_MESSAGE_POLL_TIMEOUT_MS = 10_000 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-420] INFRA.1 rastro off-Neon de fallas de persistencia
 - Fuente: `docs/bitacora-roadmap.md:13021` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: logPersistFailure a stderr con .code/.cause y onError en streamText.
 - Referencias: src/modules/chatbot/server/logging/logger.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — logger.ts:172-186 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-421] console.error en texto plano en captureLead
 - Fuente: `docs/bitacora-roadmap.md:13083` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: notifyClient y syncLeadToCrm loguean sin estructura; follow-up barato.
 - Referencias: src/modules/chatbot/server/tools/captureLead.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — captureLead.ts:440, :456, :487, :501 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-422] COST-1 modelo/provider efectivo unificado
 - Fuente: `docs/bitacora-roadmap.md:13155` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-07
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: resolveEffectiveModel para ejecución y costo; WARN chat.cost_model_unknown.
 - Referencias: src/modules/chatbot/server/llm/resolveEffectiveModel.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — resolveEffectiveModel.ts:37-65; handleChatRequest.ts:713, :767-785 (chat.cost_model_unknown); persistTurn.ts:372-377 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-423] Verificar costos reales en prod
 - Fuente: `docs/bitacora-roadmap.md:13249` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-07
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: SELECT comparativo de costo vs modelo del plan y volumen de chat.cost_model_unknown.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Operativo (SELECT en prod, no verificable por codigo); el codigo emite chat.cost_model_unknown (handleChatRequest.ts:767-785) y calcula costo con el modelo efectivo (persistTurn.ts:372-377). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-424] CO-9 unificar el default de modelo (×7)
 - Fuente: `docs/bitacora-roadmap.md:13259` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-07
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Default de modelo repetido en 7 lugares; no tocado.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — 'gemini-2.5-flash' literal en 13 sitios no-test: createBot.ts:88, createClientWithBot.ts:185, seed.ts:236, onboarding/core.ts:133, plan/fallback.ts:51, resolveEffectiveModel.ts:21, BotConfigEditor.tsx:43, AdvancedTab.tsx:12, test-prompt/route.ts:50, generateInsights.ts:100, executive-brief.ts:19, sync-plans.ts:73,89,105 (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-425] C0.2 conversación larga sin muerte muda
 - Fuente: `docs/bitacora-roadmap.md:13387` · tipo: hecho-declarado · estado declarado: hecho (verificación humana pendiente) · fecha: 2026-07-10
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: historyPolicy compartida, recorte server, ventana del widget y hard-cap con degradación a WhatsApp.
 - Referencias: src/modules/chatbot/shared/historyPolicy.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — historyPolicy.ts:31-104; requestSchema.ts:46-55; handleChatRequest.ts:547; useChatbot.ts:432 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-426] E2 historial autoritativo desde ChatMessage
 - Fuente: `docs/bitacora-roadmap.md:13491` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-10
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: El server sigue confiando en la ventana del cliente; también corregiría el drift de messageCount de turnos mudos.
 - Referencias: también en fuente:16503
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — handleChatRequest.ts:941-950 arma los mensajes del modelo desde body.messages (incluye assistant del cliente); messageCount +2 fijo (persistTurn.ts:447). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-427] COST-2 breakdown de costo sin $0 silencioso
 - Fuente: `docs/bitacora-roadmap.md:13630` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-11
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: costs.ts conserva el total autoritativo y la clave del Record se deriva de .id.
 - Referencias: src/modules/chatbot/server/pricing/costs.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — costs.ts:31-41; Record derivado de id google.ts:45-47, anthropic.ts:58-60, openai.ts:52-54 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-428] getModel real de Anthropic/OpenAI
 - Fuente: `docs/bitacora-roadmap.md:13673` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-11
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Hoy son stubs; al implementarlos deben validar contra la misma tabla de precios.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — providers/anthropic.ts:18 y openai.ts:12 lanzan ProviderNotImplementedError; resolveEffectiveModel.ts:52-63 degrada a Google (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-429] Re-verificar archivos agrupados por COST-1
 - Fuente: `docs/bitacora-roadmap.md:13799` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-11
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: test-prompt, generateInsights, health/smokeTest y executive-brief no se re-verificaron tras la nota falsa.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — smokeTest borrado (health/index.ts:1-5); generateInsights no calcula costo (generateInsights.ts:102-108); calculateCost solo en persistTurn.ts:372. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-430] ONF-1 reconcile transaccional del onFinish
 - Fuente: `docs/bitacora-roadmap.md:13953` · tipo: hecho-declarado · estado declarado: hecho (no verificado bajo carga) · fecha: 2026-07-14
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Writes del turno en $transaction, compensación de cupo y fallback de respuesta vacía.
 - Referencias: src/modules/chatbot/server/chat/reconcile.ts · 644b2b7
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — $transaction persistTurn.ts:412-472; compensación handleChatRequest.ts:467-534; fallback de respuesta vacía reconcile.ts:484-535. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-431] Test de carga y review completo de ONF-1
 - Fuente: `docs/bitacora-roadmap.md:14126` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-14
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Carga concurrente en el último cupo, re-verificar aislamiento y corte a 10s; el review adversarial quedó incompleto.
 - Referencias: tests/integration/chatbot-isolation.spec.ts · también en fuente:14071
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/integration/chatbot-isolation.spec.ts existe; no hay test de concurrencia del chatbot (git grep -il 'concurren|ultimo cupo' en tests -> solo tests/setter/06 y 12). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-432] DEADLINE-ONFINISH techo de tiempo en onFinish
 - Fuente: `docs/bitacora-roadmap.md:14238` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: withDeadline y presupuesto por fase; telemetría chat.onfinish_phases.
 - Referencias: src/modules/chatbot/server/chat/withDeadline.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — withDeadline.ts:82-134; computeHookBudgetMs reconcile.ts:137-145; chat.onfinish_phases persistTurn.ts:646-676. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-433] Cupo y costo de turnos abandonados o abortados
 - Fuente: `docs/bitacora-roadmap.md:14334` · tipo: decision · estado declarado: pendiente (decisión Valentino/Franco)
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: El cupo queda cobrado y los turnos por abort registran tokens/costo 0; compensar es decisión comercial pendiente.
 - Referencias: también en fuente:14584
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Compensacion del cupo si no hubo primer chunk (handleChatRequest.ts:1070-1080, :1119); con entrega parcial se cobra; decision comercial pendiente (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-434] STREAM-TIMEOUT fase 1 (chunkMs)
 - Fuente: `docs/bitacora-roadmap.md:14370` · tipo: hecho-declarado · estado declarado: hecho (revertido después)
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: timeout chunkMs 5000 en streamText; luego removido en MUDEZ.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — reconcile.ts:147-172 documenta la remocion de chunkMs (bloque MUDEZ); handleChatRequest.ts:954-963 streamText sin timeout. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-435] Promesas detached de captureLead
 - Fuente: `docs/bitacora-roadmap.md:14395` · tipo: pendiente · estado declarado: aceptado sin outbox (17138)
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: notifyClient y syncLeadToCrm corren carrera contra el freeze de la lambda (captureLead.ts:467,474).
 - Referencias: también en fuente:15605 · también en fuente:15791 · también en fuente:17138
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — captureLead.ts:493 void notifyClient(), :500 void syncLeadToCrm; sin after()/waitUntil en el repo; mismo patron en retryCrmSync.ts:73 (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-436] STREAM-TIMEOUT fase 2 (stepMs + persistTurn)
 - Fuente: `docs/bitacora-roadmap.md:14470` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: persistTurn idempotente invocable desde onFinish u onAbort; stepMs luego removido.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — persistTurn.ts:177-186 guard turnPersisted; invocado desde onAbort, onFinish y el watchdog (handleChatRequest.ts:1142, :1162, :1211); stepMs removido (reconcile.ts:283-300). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-437] WATCHDOG cierre del stream desde el borde
 - Fuente: `docs/bitacora-roadmap.md:14609` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: streamWatchdog.ts cierra el body tras silencio y persiste el turno.
 - Referencias: src/modules/chatbot/server/chat/streamWatchdog.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — streamWatchdog.ts:260-478 cableado en handleChatRequest.ts:1187-1358. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-438] WATCHDOG-2 dos ventanas + suspensión durante tools
 - Fuente: `docs/bitacora-roadmap.md:14735` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Ventana inicial larga, corta entre chunks y suspensión por contador de tools.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — handleChatRequest.ts:852, :964-970 (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-439] WATCHDOG-3 ventana por step
 - Fuente: `docs/bitacora-roadmap.md:14861` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: beginStep() rearma la ventana inicial en cada step.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — handleChatRequest.ts:987-989 beginStep() (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-440] Peor caso de tool colgado + step 2 lento supera 30s
 - Fuente: `docs/bitacora-roadmap.md:14929` · tipo: pendiente · estado declarado: sin estado
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Revisar STREAM_WATCHDOG_TOOL_MAX_MS si aparece en producción.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — reconcile.ts:267 (12 s) y :281 (15 s) + beginStep por step (handleChatRequest.ts:987-989) sin deadline absoluto contra chat/route.ts:8 maxDuration 30; cuenta ~45 s. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-441] PROVIDER-CLOSE middleware que cierra el stream del provider
 - Fuente: `docs/bitacora-roadmap.md:14967` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: providerStreamClose.ts; el watchdog del borde pasa a red de seguridad.
 - Referencias: src/modules/chatbot/server/llm/providerStreamClose.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — providerStreamClose.ts:92-224; handleChatRequest.ts:735-760 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-442] DEADLOCK-FINISH-STEP
 - Fuente: `docs/bitacora-roadmap.md:15113` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: El transform de fallback retenía finish-step y trababa el pipeline; ahora decide en el chunk finish.
 - Referencias: src/modules/chatbot/server/chat/reconcile.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — El transform encola cada chunk en la misma invocación, sin flush, y decide en 'finish' (reconcile.ts:503-533). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-443] WATCHDOG-4 ventana decidida por contenido
 - Fuente: `docs/bitacora-roadmap.md:15235` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: markContent() desde onChunk; el frame start ya no colapsa la ventana inicial.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — handleChatRequest.ts:1027 watchdogRef.current?.markContent() (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-444] CONTACT-PATH tool confirm_contact_request
 - Fuente: `docs/bitacora-roadmap.md:15344` · tipo: hecho-declarado · estado declarado: hecho (requiere paso manual en prod)
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Tool server-side que fuerza el step final en 'que me contacten' y registra handoff.callback.
 - Referencias: src/modules/chatbot/server/tools/confirmContactRequest.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — confirmContactRequest.ts:185-200; getTools.ts:21; sync-plans.ts:41-64; prisma/seeds/add-contact-tool.ts para prod (no verificable) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-445] C0.1 navigate_to_page solo en el bot de develOP
 - Fuente: `docs/bitacora-roadmap.md:15489` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Gate por bot en getTools() para cortar fuga de tráfico de clientes hacia develOP.
 - Referencias: src/modules/chatbot/server/tools/getTools.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — getTools.ts:82-123 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-446] BotConfig.allowedNavigationPaths
 - Fuente: `docs/bitacora-roadmap.md:15597` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Fix real de C0.1 (rutas de navegación por bot); requiere migración.
 - Referencias: src/modules/chatbot/server/tools/navigateToPage.ts · también en fuente:15491 · también en fuente:15795
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -c allowedNavigationPaths origin/main -- prisma/schema.prisma = 0 (control allowedDomains = 1) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-447] D.1 script de backfill de verticalPack
 - Fuente: `docs/bitacora-roadmap.md:15616` · tipo: hecho-declarado · estado declarado: hecho (corrida manual pendiente)
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Script quirúrgico idempotente con dry-run; el agente no lo corrió.
 - Referencias: prisma/seeds/backfill-vertical-pack.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma/seeds/backfill-vertical-pack.ts:72-74 (develop, sanmiguel, matsu) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-448] Detectar en runtime cuando el bot admite no saber
 - Fuente: `docs/bitacora-roadmap.md:15781` · tipo: idea · estado declarado: sin estado
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Extensión natural de E1 distinta del batch retrospectivo.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Sin detector en server/chat; 'admite no saber' solo aparece como ejemplo de prompt en src/modules/chatbot/prisma/seed.ts:149. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-449] H.3 PROBE-STREAM: ruido apagado
 - Fuente: `docs/bitacora-roadmap.md:16020` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Emisores del camino sano borrados y dos logs promovidos a telemetría permanente.
 - Referencias: src/modules/chatbot/server/chat/chunkTally.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — chunkTally.ts:4-10 separado; probe gated por env (streamProbe.ts:88-92); telemetría permanente provider.stream_chunks y watchdog_settled (handleChatRequest.ts:746-758, :1329-1339). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-450] MS-E6.2 descomposición de handleChatRequest
 - Fuente: `docs/bitacora-roadmap.md:16133` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: 2148→1297 líneas en tres costuras sin cambio de comportamiento.
 - Referencias: src/modules/chatbot/server/chat/persistTurn.ts · src/modules/chatbot/server/chat/toolSuspension.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Costuras extraídas: requestSchema.ts, degradedResponse.ts, hookOps.ts, toolSuspension.ts, persistTurn.ts. El archivo volvió a crecer a 1412 líneas (no 1297). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-451] La orquestación del chat no tiene tests
 - Fuente: `docs/bitacora-roadmap.md:16149` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Ningún test invoca handleChatRequest; oportunidad de testear toolSuspension y persistTurn aislados.
 - Referencias: también en fuente:16296 · también en fuente:16512
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Ningún test llama handleChatRequest( ni createPersistTurn( (ver ausencias) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-452] e2e 40-lead-capture-e2e.spec.ts no confiable
 - Fuente: `docs/bitacora-roadmap.md:16170` · tipo: pendiente · estado declarado: sin estado
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: actionTimeout corta antes del stream y dos test.skip enmascaran fallas.
 - Referencias: tests/e2e/40-lead-capture-e2e.spec.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/e2e/40-lead-capture-e2e.spec.ts:31 y :42 siguen con test.skip condicional. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-453] 4 bugs menores anotados en MS-E6.2
 - Fuente: `docs/bitacora-roadmap.md:16284` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Log llm_request_start con par solicitado, comentario stale, condición v3 duplicada y quota_reserve_ms sin mark().
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — handleChatRequest.ts:447 quota_reserve_ms sin mark(); :787-793 chat.llm_request_start loguea bot.llmProvider/plan.llmModel (par solicitado) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-454] BLOQUE MUDEZ
 - Fuente: `docs/bitacora-roadmap.md:16314` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: 4 commits: se quitó chunkMs, red con texto canned, persistencia del texto visto y ventana de providerStreamClose.
 - Referencias: test:mudez
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — reconcile.ts §1.c (chunkMs removido); handleChatRequest.ts:1192-1277 red canned; package.json:78 test:mudez (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-455] Turno canned: cobrar y persistir
 - Fuente: `docs/bitacora-roadmap.md:16378` · tipo: decision · estado declarado: hecho
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Se persiste el canned con source watchdog_canned y se cobra el cupo; el orden persist→abort no debe reordenarse.
 - Referencias: también en fuente:16455
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — handleChatRequest.ts:1210-1257 persistTurn(watchdog_canned) antes de runAbortController.abort(), con el comentario 'NO REORDENAR'. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-456] BLOQUE PRIVACIDAD
 - Fuente: `docs/bitacora-roadmap.md:16711` · tipo: hecho-declarado · estado declarado: hecho (push y verificación post-deploy pendientes) · fecha: 2026-08-10
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Allowlist en logs de consola, hash de IP con salt obligatorio y redacción de PrismaClientValidationError.
 - Referencias: docs/privacidad-afirmaciones-cliente.md · cierra deuda fuente:15483, 15602, 15603
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — hashIp aborta en prod sin salt (safety/ipHash.ts:21-24); envValidator.ts:60-66 la declara obligatoria en prod. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-457] Telegram interno con PII de visitantes
 - Fuente: `docs/bitacora-roadmap.md:16866` · tipo: decision · estado declarado: pendiente (decisión de Franco) · fecha: 2026-08-11
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Decidir antes del primer cliente: declararlo en contrato o mandar solo un identificador.
 - Referencias: también en fuente:16897
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — captureLead.ts:445-452 manda nombre, email y teléfono para todos los bots (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-458] Limpiar ipHash históricos con salt público
 - Fuente: `docs/bitacora-roadmap.md:16869` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-11
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Operación de datos sobre Conversation.ipHash generados con el salt hardcodeado.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — No hay script (git grep -il ipHash en scripts -> 0; control: 10 scripts con 'purge'); hashIp ya aborta sin salt en prod (ipHash.ts:21-27). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-459] Sinks de log con datos crudos
 - Fuente: `docs/bitacora-roadmap.md:16876` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-11
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: chat.bad_request arrastra un snippet del body y lib/alerts.ts:145 loguea el Error crudo.
 - Referencias: src/lib/alerts.ts · también en fuente:16878
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — lib/alerts.ts:145 sigue logueando el Error crudo; chat.bad_request loguea msg (handleChatRequest.ts:139) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-460] BLOQUE CARRERAS: concurrencia del request
 - Fuente: `docs/bitacora-roadmap.md:16903` · tipo: bloque · estado declarado: en curso · fecha: 2026-08-12
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: P2002 perdedor-adopta, gate botBusy, provider-close en admin, deprecación de /smoke y trabajo detached.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — P2002 adopta (resolver.ts:115-144); /smoke borrado (health/index.ts:1-5); provider-close en admin (api/admin/chatbot/demo-chat/[slug]/route.ts:72, test-prompt/route.ts:55); botBusy en ChatWindow.tsx:86-90; flush con techo (handleChatRequest.ts:1393-1400). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-461] CARRERAS commit 1: P2002 perdedor-adopta
 - Fuente: `docs/bitacora-roadmap.md:16916` · tipo: hecho-declarado · estado declarado: hecho (sin revisión adversarial) · fecha: 2026-08-12
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: getOrCreateConversation y captureLead adoptan la fila ganadora; invariante test:p2002.
 - Referencias: resolver.ts · src/modules/chatbot/server/tools/captureLead.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — resolver.ts:115-144; captureLead.ts:230 alreadyCaptured:true; package.json:82 test:p2002. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-462] Revisión adversarial del commit 1 de CARRERAS
 - Fuente: `docs/bitacora-roadmap.md:16986` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-12
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Los agentes murieron por cuota; el diff queda sin revisar por terceros.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Tarea de proceso: no hay artefacto de revision en el repo (no verificable por codigo) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-463] CARRERAS commit 3: deprecación de /smoke
 - Fuente: `docs/bitacora-roadmap.md:17070` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-12
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Borrado el GET público que quemaba Vertex por hit (smoke/route.ts y smokeTest.ts).
 - Referencias: tests/e2e/04-health.spec.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git ls-tree de src/app/api/chatbot sin smoke; health/index.ts:1-4 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-464] CARRERAS commit 4: detached
 - Fuente: `docs/bitacora-roadmap.md:17125` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-12
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Se awaitea el evento BLOCKED_ORIGIN y Sentry.flush antes del 500.
 - Referencias: src/app/api/chatbot/[slug]/chat/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — chat/route.ts:55-63 await; handleChatRequest.ts:1400 Sentry.flush(2000) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-465] Aceptar trabajo detached sin outbox por ahora
 - Fuente: `docs/bitacora-roadmap.md:17138` · tipo: decision · estado declarado: hecho · fecha: 2026-08-12
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Brevo/Telegram sin configurar y ningún tenant con CRM; el lead nunca se pierde, solo la notificación.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — captureLead.ts:493,500 y retryCrmSync.ts:73 siguen detached (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-466] Outbox transaccional para trabajo post-turno
 - Fuente: `docs/bitacora-roadmap.md:17155` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-12
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Tabla escrita en la misma transacción + cron con reintentos; requiere migración, sprint propio.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -i outbox origin/main -- src prisma/schema.prisma = 0; control: syncLeadToCrm en captureLead.ts:500 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-467] COST-1: verificar costo real en prod y cobertura
 - Fuente: `docs/roadmap-pendientes.md:119` · tipo: pendiente · estado declarado: implementado, verificación pendiente · fecha: 2026-07-10
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: SELECT de costos en PROD, volumen de chat.cost_model_unknown, otros call-sites de getModel y hueco registry vs pricing.
 - Referencias: resolveEffectiveModel.ts · pricing/costs.ts · tambien en :125
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Runtime alineado persistTurn.ts:372-377; demo-chat usa bot.llmModel (demo-chat/[slug]/route.ts:57); generateInsights.ts:99-100 y executive-brief.ts:298-299 sin calculateCost (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-468] C3.6 logChatbotEvent fire-and-forget
 - Fuente: `docs/roadmap-pendientes.md:156` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-10
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Hoy se await-ea en el hot path; saldar al tocar el cluster onFinish.
 - Referencias: C3.6
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — persistTurn.ts:533-551 y :609-618 lo awaitean con techo (EVENT_LOG_DEADLINE_MS 700 ms, reconcile.ts:103); handleChatRequest.ts:322, :359, :414, :559 await directo; chat/route.ts:50-54 explica que sin await el freeze de la lambda pierde el write. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-469] Carril de seguridad de Franco
 - Fuente: `docs/roadmap-pendientes.md:175` · tipo: pendiente · estado declarado: pendiente (carril Franco) · fecha: 2026-07
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: RT-2 /smoke sin auth quema Gemini, RE-13 /health expone internals, RE-7 atribución spoofeable, RT-13 sessionId adivinable, A.4 secret en history.
 - Referencias: docs/consolidacion-planoA-runtime.md · RT-2 · RE-13 · RE-7 · RT-13 · A.4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — RT-2 cerrado: /smoke no existe (src/app/api/chatbot solo chat, config, health); RE-13: health/route.ts sigue; RT-13: sessionId UUID en cliente (useChatbot.ts:29) pero el server acepta cualquier string (requestSchema.ts:55) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-470] Decisiones abiertas que gatean bloques
 - Fuente: `docs/roadmap-pendientes.md:176` · tipo: decision · estado declarado: abierta · fecha: 2026-07
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: T0.1 gate de /smoke; firma real de prod gatea INFRA.3+RB.3+MH.2; fork de historial gatea C0.2.
 - Referencias: T0.1 · C0.2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — T0.1 resuelto borrando /smoke (health/index.ts:1-5); C0.2 implementado (requestSchema.ts:45-54); INFRA.3 sigue sin cablear (reconcile.ts:537-551). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-471] INFRA.1 rastro off-Neon
 - Fuente: `docs/sprints/infra-1-observabilidad.md:3` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: logPersistFailure/extractDbErrorInfo, onError en streamText y eventos chat.persist_failed, chat.unhandled_failed, chat.stream_error.
 - Referencias: src/modules/chatbot/server/logging/logger.ts · npm run test:infra1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — logPersistFailure/extractDbErrorInfo logger.ts:123-186; onError handleChatRequest.ts:1046-1060; chat.unhandled_failed :1363 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-472] console.error de captureLead a log estructurado
 - Fuente: `docs/sprints/infra-1-observabilidad.md:75` · tipo: pendiente · estado declarado: diferido · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: notifyClient y syncLeadToCrm siguen en texto plano.
 - Referencias: captureLead.ts L466-468, L478-480
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — captureLead.ts:486, :501 siguen con console.error (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-473] Lint preexistente del runtime del chatbot
 - Fuente: `docs/sprints/infra-1-observabilidad.md:76` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: toolResults sin usar en onFinish, react-hooks/refs en ChatbotEmbed, set-state-in-effect en useChatbot.
 - Referencias: docs/sprints/infra-2-cold-start-retry.md:119 · docs/sprints/utm-1-captura.md:211
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — onFinish ya no desestructura toolResults (handleChatRequest.ts:1155); siguen react-hooks/refs en ChatbotEmbed.tsx:317 y set-state-in-effect en useChatbot.ts:496 (baseline eslint del padre). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-474] INFRA.3 causa raíz de conexión
 - Fuente: `docs/sprints/infra-2-cold-start-retry.md:14` · tipo: bloque · estado declarado: bloqueado (firma real de prod + Sentry DSN) · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: lib/prisma.ts, pooler, DIRECT_URL, connection_limit y retry server-side en onFinish; ~11-14% de turnos perdidos bajo carga.
 - Referencias: tambien en :131, :137 · docs/sprints/infra-1-observabilidad.md:70 · docs/sprints/q1-1-harness.md:179 · docs/roadmap-pendientes.md:176
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — INFRA3_CONNECTION_RETRY definido sin uso (reconcile.ts:537-551; git grep: 1 solo archivo). (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-475] Race write-write residual del user message
 - Fuente: `docs/sprints/infra-2-cold-start-retry.md:134` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Cerrarlo requiere @@unique y migración.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ChatMessage solo con @@index([conversationId, createdAt]) (schema.prisma:1433) (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-476] Q1.1 corredor de conversaciones doradas
 - Fuente: `docs/sprints/q1-1-harness.md:3` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: 36 escenarios (12 x 3 packs) contra Gemini real con 3 bots QA; fix de readback 30->10 s. Batería completa a verificar por Valentino.
 - Referencias: src/modules/chatbot/evals/ · npm run evals · tambien en :89, :109
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/modules/chatbot/evals/runner.ts; package.json:83-85 evals, evals:seed, evals:purge. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-477] Q1.2 evaluación de la batería
 - Fuente: `docs/sprints/q1-2-scoring.md:3` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Asserts duros (captura, handoff, mustNotClaim, intent) y juez Opus configurable por EVALS_JUDGE_MODEL.
 - Referencias: src/modules/chatbot/evals/scoring/ · npm run evals:score
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/modules/chatbot/evals/scoring/ (evaluate.ts, hard-asserts.ts, judge.ts, rubric.ts) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-478] Juez LLM en vivo
 - Fuente: `docs/sprints/q1-2-scoring.md:89` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-05
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Requiere ANTHROPIC_API_KEY en .env.local y revisar los veredictos de tono.
 - Referencias: tambien en :82
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — El juez existe y se omite sin ANTHROPIC_API_KEY (evals/scoring/evaluate.ts:21, :47); la corrida depende del entorno. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-479] Conversation.sessionId único global
 - Fuente: `docs/sprints/utm-1-captura.md:236` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-04
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: No es @@unique([botConfigId, sessionId]); riesgo de colisión cross-bot.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — schema.prisma:1375 sessionId String @unique; resolver.ts:132-137 relanza P2002 cross-bot (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-480] Runtime del bot sin verificar
 - Fuente: `STATUS.md:67` · tipo: pendiente · estado declarado: no verificado · fecha: 2026-05-21
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: E2E con bot real skipped; P50/P95/success rate pendientes de medición en prod.
 - Referencias: tambien en :82
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/e2e/02-chat-flow.spec.ts:8 y 40-lead-capture-e2e.spec.ts:31,42 con test.skip condicionales (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-481] Features del chatbot pospuestas a Beta
 - Fuente: `STATUS.md:193` · tipo: pendiente · estado declarado: pospuesto a Beta · fecha: 2026-05-21
 - Nodo(s): h3.vis-api-chatbot
 - Qué es: Cards ricos, KB híbrida con review queue, lead scoring 0-100, memoria del visitante y sugerencias proactivas al dueño.
 - Referencias: tambien en :194-:197
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — STATUS.md:192-197 las da por pospuestas, pero el scoring con clasificacion existe (calculateLeadScore.ts:68-86; ChatbotLead.score/classification) y hay sugerencias al dueno (insights/generateInsights.ts:24); cards ricos, KB con review queue y memoria por cookies no existen (identidad en sessionStorage, useChatbot.ts:24-35). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h3.vis-whatsapp — Canal WhatsApp (motor)
 
@@ -3908,16 +3908,16 @@
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:37` · tipo: decision · estado declarado: descartado · fecha: 2026-07-06
 - Nodo(s): h3.vis-whatsapp
 - Qué es: Se aceptan bases pasivas, no abstracciones. Se reabre con el primer vertical facturando o con claridad regulatoria.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — La decision se respeta en el codigo. El motor tiene solo bases pasivas (inbound y servicio de salida sin llamadores, sendMessage.ts:204). No hay acople chatbot-motor: git grep -n 'modules/chatbot' origin/main -- src/modules/motor/adapters src/modules/motor/domain src/modules/motor/services solo encuentra un comentario (client.ts:16); control positivo: git grep -n 'motor/domain/identity' -- src/modules/motor da 2 hits. La unica importacion de modules/motor fuera del modulo es la route (route.ts:18). El barrel chatbot/public-api 'se creará en B2' (src/modules/motor/README.md:17-18). (D5-c1, lector D5-L9)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-483] Clasificador P2002 duplicado en el motor WhatsApp
 - Fuente: `docs/bitacora-roadmap.md:16992` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-12
 - Nodo(s): h3.vis-whatsapp
 - Qué es: motor/domain/prisma-errors.ts duplica el guard; migrar al de la frontera de aislamiento.
 - Referencias: src/modules/motor/domain/prisma-errors.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/modules/motor/domain/prisma-errors.ts:10 sigue existiendo y se usa en handle-message.ts:18, identity.ts:24 y sendMessage.ts:24. El guard de la frontera esta en src/lib/isolation/scoped-model.ts:60-62 y su comentario :56-58 anota la consolidacion como deuda. Comando: MSYS_NO_PATHCONV=1 git grep -n isUniqueViolation origin/main -- src. (D5-c1, lector D5-L9)
+- ¿Sigue teniendo sentido?: si
 
 ### h3.vis-widget-cliente — Widget embebible en el sitio del cliente
 
@@ -3926,347 +3926,347 @@
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Contenido no detallado en estos docs. El research quirúrgico de M1 se ofreció y nunca se corrió.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:72
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep MediaRecorder|getUserMedia|audio/webm en modules/chatbot = 0 (control: AudioContext en useChatbotSounds.ts). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-485] EST: estética por vertical
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:23#7` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Nuevo prerrequisito EST.0: extraer el shell de chat duplicado entre on-site y embed. Los valores dependen de una decisión estética abierta.
 - Referencias: tambien en Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:44 · tambien en Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:55
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Shell sin extraer: ChatWindow.tsx (694 lineas) y ChatbotEmbed.tsx (559) siguen separados. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-486] Dirección estética por vertical
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:55` · tipo: decision · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Abierta: paletas y avatares por vertical. Bloquea los valores de EST, que por ahora usa placeholders.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Sin paletas ni avatares por vertical en components/; los colores salen solo del BotConfig. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-487] C2.2: catálogo visual en el chat
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md:62` · tipo: bloque · estado declarado: pendiente
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Autos con foto y precio dentro de la conversación. Antes hay que relevar de dónde sale el catálogo. Prometido a Matsu.
 - Referencias: tambien en Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md:35 · ver Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md:53 (E3)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tool-cards solo tiene HandoffOptionsCard, NavigateToPageCard, WhatsappHandoffCard (git ls-files); git grep catalog|ProductCard en tool-cards = 0. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-488] Widget: colores, avatar 3D y modo offline
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:84` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-12
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Cablea chatSurfaceTint, accentColor y accentSecondary al widget real. Saca el EffectComposer del avatar R3F, que ahora usa glow simulado y dispose. En modo offline solo queda la tarjeta de WhatsApp.
 - Referencias: ChatWindow.tsx · LogicCompanion.tsx · NeuroAvatar.tsx · ParticleSphere.tsx · PublicBotConfig · tambien en Olme/Chatbot_ registro de cambios.md:32 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — ChatWindow cablea chatSurfaceTint/accent/accentSecondary (ChatWindow.tsx:47-58, 116-119, 235-237); EffectComposer fuera (NeuroAvatar.tsx:18-20; git grep EffectComposer en modules/chatbot solo ese comentario, control: Hero.tsx); dispose en CoreHalo.tsx:69; offline solo WhatsApp (ChatWindow.tsx:285, :467). El embed del cliente no lee esos colores. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-489] Cyan hardcodeado en el widget
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:93` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-12
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: El botón enviar, Sparkles del estado vacío y thinkPulse ignoran el accent. Candidato a un sprint que cablee todo el widget de una vez.
 - Referencias: ChatWindow.tsx · tambien en Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:166 · tambien en Olme/Chatbot_ registro de cambios.md:107 · ver Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:55-59 (resolución parcial declarada)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Hecho en ChatWindow (boton enviar :643-655, Sparkles :296-300; thinkPulse ausente: git grep 0, control chatbotCaretBlink presente). El widget del cliente sigue cyan: ChatbotEmbed.tsx:269, :340-351, :437, :537. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-490] QuickReplyChips.tsx muerto
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:165` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-12
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Duplica styling y no está montado: montarlo o borrarlo.
 - Referencias: QuickReplyChips.tsx · tambien en Olme/Chatbot_ registro de cambios.md:108
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — QuickReplyChips.tsx sigue existiendo y solo lo exportan chat/index.ts:6 y modules/chatbot/index.ts:43 (git grep -w QuickReplyChips fuera de components/chat = solo el barrel). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-491] Accent del widget en los 3 puntos
 - Fuente: `_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md:55` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Siguen el accent del tenant, con cyan como fallback. Sparkles con strokeWidth 1.5. thinkPulse borrado.
 - Referencias: ChatWindow.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — ChatWindow: Sparkles con strokeWidth 1.5 y accent (ChatWindow.tsx:296-300), boton con accent (:650), thinkPulse borrado (git grep 0). ChatbotEmbed.tsx:269 y :537 siguen en cyan. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-492] Color de acento por ruta en el widget (P1 Chatbots)
 - Fuente: `_insumos/drive/Olme/Ideas de nuevas features.md:34` · tipo: idea · estado declarado: pendiente · fecha: 2026-06-20
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: routeColorMap está en el schema y en publicConfig, pero no llega al widget en runtime. Falta crear resolveAccentColor y cablearlo.
 - Referencias: resolveAccentColor · hooks/useChatbot.ts · ChatWindow.tsx · LogicCompanion.tsx · routeColorMap · tambien en Olme/Chatbot_ registro de cambios.md:106 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep resolveAccentColor = 0; routeColorMap llega a getPublicConfig.ts:121 y publicConfig.ts:50 (control) pero ningun archivo de hooks/, chat/, embed/ ni LogicCompanion lo lee. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-493] B3.7 — 'Pensando' en el mismo frame del Enter
 - Fuente: `docs/bitacora-roadmap.md:1684` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-22
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Flag local pendingSubmit en useChatbot combinado con el status del SDK para isStreaming y avatarState; la verificación visual en /embed/matsu quedó para Franco.
 - Referencias: src/modules/chatbot/hooks/useChatbot.ts · tambien en docs/bitacora-roadmap.md:1807 · tambien en docs/bitacora-roadmap.md:1815
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — useChatbot.ts:490-500, :531-535, :545 (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-494] Test automático de percepción del widget (Playwright)
 - Fuente: `docs/bitacora-roadmap.md:1803` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-22
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Medir el delay entre keydown Enter y la aparición del indicador 'Pensando'; requiere infraestructura nueva.
 - Referencias: tambien en docs/bitacora-roadmap.md:1816
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/e2e/02-chat-flow.spec.ts:17 solo presiona Enter; ninguna medicion keydown -> 'pensando' (git grep pensando|thinking en tests/e2e = 0). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-495] MS-2 — Widget degradado: derivación a WhatsApp en /embed
 - Fuente: `docs/bitacora-roadmap.md:3009` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-23
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: useChatbot guarda el payload degradado completo (DegradedInfo); DegradedBanner reescrito con CTA wa.me y montado en ChatbotEmbed; input bloqueado; fix de los dots fantasma y keys del AnimatePresence.
 - Referencias: src/modules/chatbot/hooks/useChatbot.ts · src/modules/chatbot/components/chat/DegradedBanner.tsx · src/modules/chatbot/components/embed/ChatbotEmbed.tsx · pendiente originado en docs/bitacora-roadmap.md:2777 · pendiente originado en docs/bitacora-roadmap.md:2787
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — DegradedBanner.tsx:101-109 arma wa.me, :170-202 CTA; montado en ChatbotEmbed.tsx:419; DegradedInfo en useChatbot.ts:112-118. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-496] B8.1 — Aislamiento CSS del bubble, tooltips, avatar cortado y z-index
 - Fuente: `docs/bitacora-roadmap.md:5451` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: all: initial en .dvlp-bubble/.dvlp-iframe (sin Shadow DOM), tokens CHATBOT_Z_INDEX, Canvas de NeuroAvatar con dimensiones, cola de 1 en ProactiveTooltip, ChatWindow usa ChatHeader con AvatarRenderer; el escape QA de validate-origin cubre requests sin Origin.
 - Referencias: src/modules/chatbot/shared/zIndex.ts · src/modules/chatbot/components/avatar/NeuroAvatar.tsx · src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx · src/modules/chatbot/components/LogicCompanion.tsx · src/modules/chatbot/components/chat/ChatWindow.tsx · public/widget.js +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — CHATBOT_Z_INDEX en ChatWindow.tsx:11,212,226; ChatHeader con AvatarRenderer (ChatHeader.tsx:61-72) usado en ChatWindow.tsx:251; Canvas con dimensiones NeuroAvatar.tsx:41,46; public/widget.js:61 'all:initial;'. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-497] Probar el aislamiento CSS del widget embebido en un sitio real hostil
 - Fuente: `docs/bitacora-roadmap.md:5539` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Diferido a Franco; si all: initial no alcanza, evaluar Shadow DOM en sprint dedicado.
 - Referencias: public/widget.js · tambien en docs/bitacora-roadmap.md:5480 · tambien en docs/bitacora-roadmap.md:5555
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — public/widget.js:55-57 comentario '🔴 Pending' (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-498] B8.2 — Sonidos Web Audio, mute persistente y entrada del bubble
 - Fuente: `docs/bitacora-roadmap.md:5557` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Hook useChatbotSounds (AudioContext lazy, chimes generados, sin assets), toggle mute persistido en localStorage, animación de entrada del bubble con useReducedMotion; aplicado en LogicCompanion y ChatbotEmbed.
 - Referencias: src/modules/chatbot/hooks/useChatbotSounds.ts · src/modules/chatbot/components/chat/ChatHeader.tsx · src/modules/chatbot/components/chat/ChatWindow.tsx · src/modules/chatbot/components/LogicCompanion.tsx · src/modules/chatbot/components/embed/ChatbotEmbed.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Toggle de mute en ChatHeader.tsx:91-104; useChatbotSounds.ts:67 lee localStorage; AudioContext presente. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-499] Unificar ChatWindow y ChatbotEmbed
 - Fuente: `docs/bitacora-roadmap.md:5620` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Dos UIs paralelas del chat; ChatbotEmbed sigue con header inline propio; toda feature de UI se aplica en dos lugares.
 - Referencias: src/modules/chatbot/components/chat/ChatWindow.tsx · src/modules/chatbot/components/embed/ChatbotEmbed.tsx · tambien en docs/bitacora-roadmap.md:5636
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Comparten ChatHeader/DegradedBanner/ConfigLoadError (ChatbotEmbed.tsx:10-12, :211, :419, :189) pero cada uno mantiene su lista e input (ChatbotEmbed.tsx:493 onKeyDown propio) y StreamingMarkdown solo lo usa ChatWindow (git grep StreamingMarkdown -> ChatWindow.tsx). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-500] B8.3 — Degradación elegante del widget (pausado, provider_error, cuota)
 - Fuente: `docs/bitacora-roadmap.md:5650` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: El config devuelve paused en vez de 404 si el bot está inactivo; 5xx o error de red en /chat se vuelve provider_error en el cliente; ChatWindow usa DegradedBanner y bloquea el input; el degradado reactivo se limpia al cerrar.
 - Referencias: src/modules/chatbot/shared/publicConfig.ts · src/modules/chatbot/server/config/getPublicConfig.ts · src/modules/chatbot/hooks/useChatbot.ts · src/modules/chatbot/components/chat/ChatWindow.tsx · src/modules/chatbot/components/LogicCompanion.tsx · pendiente originado en docs/bitacora-roadmap.md:3071 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Pausado -> bot_paused (useChatbot.ts:248-256) + banner y bloqueo (ChatWindow.tsx:115, :280, :570). '5xx -> provider_error' ya no existe: DegradedReason (useChatbot.ts:102-110) no lo tiene; INFRA.2 lo reemplazo por connection_failed sin WhatsApp (useChatbot.ts:86, :284-291). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-501] Sin kill switch dedicado: 5xx/red de /chat se muestra como provider_error
 - Fuente: `docs/bitacora-roadmap.md:5673` · tipo: decision · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Cubre Vertex caído, timeout o infra rota con la misma tarjeta de WhatsApp.
 - Referencias: src/modules/chatbot/hooks/useChatbot.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — useChatbot.ts:81-86 provider_error reemplazado; connection_failed (:284-291) y stream_interrupted (:470-482) sin WhatsApp (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-502] Telemetría del estado degradado del widget
 - Fuente: `docs/bitacora-roadmap.md:5723` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-25
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Emitir un postMessage al host cuando monta el banner para medir cuántos visitantes lo ven.
 - Referencias: src/modules/chatbot/components/embed/ChatbotEmbed.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — notifyParent solo 'lead-captured' :103, 'navigate' :115, 'message-sent' :128, 'close' :216; git grep -n 'degraded' origin/main -- public/widget.js -> vacio. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-503] Exponer companyName en el config para el prefill de provider_error
 - Fuente: `docs/bitacora-roadmap.md:5724` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-25
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Hoy provider_error usa un prefill genérico porque companyName solo viene en paused.
 - Referencias: src/modules/chatbot/shared/publicConfig.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — publicConfig.ts:28-62 solo trae companyName dentro de PausedInfo (:15); useChatbot.ts:290 pone companyName null (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-504] B8.4 — Responsive mobile del widget embebido
 - Fuente: `docs/bitacora-roadmap.md:5738` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: 100dvh en el embed y 72dvh en el sheet, safe-area-inset en el bubble, atributos mobile del textarea, viewport-fit cover + interactiveWidget resizes-content y /embed/[slug] ya no hace notFound si el bot está pausado.
 - Referencias: src/modules/chatbot/components/embed/ChatbotEmbed.tsx · src/modules/chatbot/components/chat/ChatWindow.tsx · src/modules/chatbot/components/LogicCompanion.tsx · public/widget.js · src/app/embed/[slug]/page.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — widget.js:86-94; embed/[slug]/page.tsx:13-18 y :34-37 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-505] Verificar teclado virtual y safe-area en teléfonos reales
 - Fuente: `docs/bitacora-roadmap.md:5820` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: No emulable en preview headless; Franco confirma en iOS Safari y Android Chrome.
 - Referencias: tambien en docs/bitacora-roadmap.md:5821
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Sin evidencia de verificacion. Codigo: ChatWindow.tsx:245 maxHeight 72dvh; :585 textarea 13px; src/app/layout.tsx sin export viewport (git grep = 0; control: embed/[slug]/page.tsx:13). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-506] legacy_neuro ignora el size (siempre 224px)
 - Fuente: `docs/bitacora-roadmap.md:8570` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Componente tratado como frozen; homogeneizar vía LegacyNeuroAvatarAdapter en sprint propio (afecta también al widget real).
 - Referencias: LegacyNeuroAvatarAdapter · tambien en docs/bitacora-roadmap.md:8526
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — LegacyNeuroAvatarAdapter.tsx:31 fija width/height=size y el module.css :12-15 fuerza al wrapper legacy a 100%. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-507] B13.4 header ChatbotEmbed unificado + avatar respeta size
 - Fuente: `docs/bitacora-roadmap.md:8694` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: El embed usa ChatHeader; LegacyNeuroAvatarAdapter escala el avatar legacy al size pedido. Sin microinteracciones nuevas.
 - Referencias: src/modules/chatbot/components/embed/ChatbotEmbed.tsx · src/modules/chatbot/components/avatar/LegacyNeuroAvatarAdapter.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ChatbotEmbed.tsx:211 <ChatHeader>; LegacyNeuroAvatarAdapter.tsx:31 caja de size + LegacyNeuroAvatarAdapter.module.css:12-15. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-508] Disclaimers PII (Vertex AI + n8n) en el widget
 - Fuente: `docs/bitacora-roadmap.md:8871` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: SEC-PII-02/03: aviso de procesamiento por Vertex y n8n en el primer mensaje; derivado a sprint de compliance.
 - Referencias: también en fuente:8923
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -i -E 'vertex|n8n|privacidad|privacy|disclaimer|datos personales' en components/chat, components/embed y LogicCompanion = 0 (control: 'PRIVACIDAD' en api/chatbot/[slug]/chat/route.ts:75). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-509] ChatbotEmbed hardcodea currentPath '/'
 - Fuente: `docs/bitacora-roadmap.md:12753` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-04
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: El embed nunca conoce el path real del sitio del cliente.
 - Referencias: src/modules/chatbot/components/embed/ChatbotEmbed.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ChatbotEmbed.tsx:27 currentPath: '/'. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-510] INFRA.2 idempotencia + retry del widget
 - Fuente: `docs/bitacora-roadmap.md:13090` · tipo: hecho-declarado · estado declarado: hecho (verificación humana pendiente) · fecha: 2026-07-06
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Dedup del mensaje de usuario y retry acotado para el cold-start de Neon.
 - Referencias: src/modules/chatbot/server/chat/dedup.ts · docs/sprints/infra-2-cold-start-retry.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dedup.ts:53-63 usado en handleChatRequest.ts:606-617; reintentos del widget chatRetryPolicy.ts:24-27. La verificación humana sigue pendiente. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-511] RE-2 widget no muere si /config falla
 - Fuente: `docs/bitacora-roadmap.md:13276` · tipo: hecho-declarado · estado declarado: hecho (verificación humana pendiente) · fecha: 2026-07-10
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: configCache con retry sin envenenamiento y ConfigLoadError con reintento.
 - Referencias: src/modules/chatbot/shared/configCache.ts · src/modules/chatbot/components/chat/ConfigLoadError.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ConfigLoadError.tsx:17-73 usado en LogicCompanion.tsx:118 y ChatbotEmbed.tsx:189; existe src/modules/chatbot/shared/configCache.ts (git ls-files). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-512] Errores ESLint preexistentes en el widget
 - Fuente: `docs/bitacora-roadmap.md:13349` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-10
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: react-hooks/refs en ChatbotEmbed y set-state-in-effect en useChatbot (parte de los ~80 de la auditoría CLEAN).
 - Referencias: también en fuente:13135 · también en fuente:16656 · también en fuente:17023
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Baseline _crudo/eslint.json: ChatbotEmbed.tsx:317 react-hooks/refs; useChatbot.ts:496 y useChatbotSounds.ts:68 set-state-in-effect; tambien LegacyNeuroAvatar.tsx:523/525/532/601/603. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-513] WATCHDOG-2 fase 2 cursor de tipeo inline
 - Fuente: `docs/bitacora-roadmap.md:14826` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: El caret queda a la derecha de la última palabra (ajustado a <p> en PROVIDER-CLOSE fase 2).
 - Referencias: StreamingMarkdown.tsx · también en fuente:15089
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — StreamingMarkdown.tsx:166-168 '[&>p:nth-last-child(2)]:inline' y caret :172-186. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-514] BLOQUE VOZ
 - Fuente: `docs/bitacora-roadmap.md:16526` · tipo: hecho-declarado · estado declarado: hecho (verificación humana pendiente)
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Conector neutral junto a tarjetas y widget con banners rate_limited, chat_unavailable y stream_interrupted.
 - Referencias: src/modules/chatbot/components/chat/DegradedBanner.tsx · src/modules/chatbot/hooks/useChatbot.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — DegradedBanner.tsx:14-26, :41-98; useChatbot.ts:383-398, :470-478. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-515] CARRERAS R3: botBusy en HandoffOptionsCard
 - Fuente: `docs/bitacora-roadmap.md:17004` · tipo: hecho-declarado · estado declarado: hecho (verificación visual pendiente) · fecha: 2026-08-12
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Botones de la card deshabilitados con el turno en vuelo para evitar el doble mensaje.
 - Referencias: HandoffOptionsCard.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — HandoffOptionsCard.tsx:44,56 disabled; renderToolCall.tsx:45,57; ChatbotEmbed.tsx:408 isStreaming. (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-516] UTM perdido en /embed abierto top-level
 - Fuente: `docs/roadmap-pendientes.md:107` · tipo: pendiente · estado declarado: pendiente (no urgente) · fecha: 2026-07-04
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Sin handshake develop:init la sesión va sin atribución; fallback a location.search en ChatbotEmbed.
 - Referencias: ChatbotEmbed.tsx:64-84 · useChatbot.ts:123-135 · docs/sprints/utm-1-captura.md:243
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ChatbotEmbed.tsx:26-27 attribution queda undefined sin handshake; :64-91 sin fallback. git grep -n 'location.search' origin/main -- src/modules/chatbot/components/embed src/modules/chatbot/hooks -> vacio (control: aparece en src/app/contact/page.tsx). (D5-c1, lector D5-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-517] Sin tests del camino de atribución del cliente
 - Fuente: `docs/roadmap-pendientes.md:111` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-04
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Ningún test cubre handshake -> parseAttribution -> firstTouchRef -> body.
 - Referencias: scripts/utm1-smoke.mjs
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — parseAttribution cubierto por src/modules/chatbot/server/chat/__tests__/utm-attribution.invariant.ts (punto 6). Handshake/firstTouchRef sin tests: git grep firstTouchRef|handshake en tests/ y __tests__ = 0 (control: firstTouchRef en useChatbot.ts). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-518] RE-2: verificación con Neon dormida
 - Fuente: `docs/roadmap-pendientes.md:136` · tipo: pendiente · estado declarado: implementado, verificación pendiente · fecha: 2026-07-10
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Visual-qa del error/reintento de carga del widget y grabación de cold-start real.
 - Referencias: RE-2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Sin registro de verificacion en el repo; la implementacion existe (ConfigLoadError.tsx:17-73). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-519] Sin microcopy durante retry de /config
 - Fuente: `docs/roadmap-pendientes.md:142` · tipo: decision · estado declarado: decidido (diferido) · fecha: 2026-07-10
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Spinner solo; 'Conectando…' queda para el POST /chat. Revisar con la grabación en mano.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — LogicCompanion.tsx:95 return null mientras carga; ChatbotEmbed.tsx:148 spinner sin texto. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-520] INFRA.2 dedup y retry del widget
 - Fuente: `docs/sprints/infra-2-cold-start-retry.md:3` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-06
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: shouldSkipUserPersist (cola huérfana 90s) y retry de 3 intentos con backoff 2s/4s, 'Conectando…' y connection_failed.
 - Referencias: server/chat/dedup.ts · shared/chatRetryPolicy.ts · hooks/useChatbot.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dedup.ts:32,53; chatRetryPolicy.ts:24,27; useChatbot.ts:299-413 (Conectando y connection_failed) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-521] Política de reintento INFRA.2
 - Fuente: `docs/sprints/infra-2-cold-start-retry.md:41` · tipo: decision · estado declarado: decidido · fecha: 2026-07-06
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Dedup por cola sin responder; connection_failed reemplaza el handoff a WhatsApp ante 5xx pre-stream; sin timeout de cliente en v1.
 - Referencias: tambien en :46, :51, :102
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — useChatbot.ts:269-300 retry acotado y connection_failed con input habilitado (NON_LOCKING_DEGRADES :139-144); sin timeout de cliente. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-522] Verificar retry simulando 5xx
 - Fuente: `docs/sprints/infra-2-cold-start-retry.md:124` · tipo: pendiente · estado declarado: verificación humana pendiente · fecha: 2026-07-06
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Ver 'Conectando…', recuperación sin duplicados y copy 'probá de nuevo' en :3000.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Sin evidencia de la prueba; 'Conectando…' existe (ChatHeader.tsx:88) y el retry en useChatbot.ts:269-300. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-523] UTM.1 captura first-touch
 - Fuente: `docs/sprints/utm-1-captura.md:3` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-04
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Migración aditiva de UTM en Conversation, attribution.ts, resolver create-only, Zod sanitizado, captureLead copia UTMs, firstTouch en sessionStorage, referrer en widget.js.
 - Referencias: prisma/migrations/20260704224423_utm1_add_conversation_utm_fields · src/modules/chatbot/shared/attribution.ts · test:utm1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — attribution.ts:29-72; requestSchema.ts:23-27, 57-67; captureLead.ts:400-402 (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-524] ChatbotEmbed hardcodea currentPath '/'
 - Fuente: `docs/sprints/utm-1-captura.md:233` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-04
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Bug preexistente del iframe embebido.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ChatbotEmbed.tsx:27 useChatbot({ slug, currentPath: '/', attribution }). (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-525] Color por ruta en el widget
 - Fuente: `raiz:lane-LOG.md:115` · tipo: pendiente · estado declarado: pendiente (fuera de lane)
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Admin y API guardan routeColorMap pero el widget siempre pinta accentColor; falta resolveAccentColor.
 - Referencias: tambien en :135-:139
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Igual que PLAN-492: git grep resolveAccentColor = 0; el widget no lee routeColorMap. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-526] Widget para visitantes
 - Fuente: `STATUS.md:60` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-21
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: Script ~5KB, captura por tool calling, handoff a WhatsApp y whitelist de dominios.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — public/widget.js pesa 7530 bytes (git show | wc -c), no ~5KB; handoff WhatsappHandoffCard en tool-cards; iframe en widget.js:125-127. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-527] Arquitectura del widget
 - Fuente: `STATUS.md:217` · tipo: decision · estado declarado: decidido · fecha: 2026-05-21
 - Nodo(s): h3.vis-widget-cliente
 - Qué es: iframe + script vanilla, CORS dinámico, allowedDomains por bot y validación de origin server-side.
 - Referencias: tambien en :218, :219
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — public/widget.js:125-127 iframe a /embed/<slug>; validate-origin en src/lib/security/validate-origin.ts. (D5-c1, lector D5-L4)
+- ¿Sigue teniendo sentido?: si
 
 ### h3.vis-widget-develop — Widget de develOP en el sitio público
 
@@ -4275,119 +4275,119 @@
 - Nodo(s): h3.vis-widget-develop
 - Qué es: HeavyAvatarsLazy.tsx con dynamic ssr:false y barrels con NeuroAvatarLazy; −237 kB gz en rutas públicas sin canvas.
 - Referencias: HeavyAvatarsLazy.tsx · components/avatar/index.ts · modules/chatbot/index.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — HeavyAvatarsLazy.tsx:27-32 dynamic; modules/chatbot/index.ts:30-34 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-529] Diferir el widget de chat entero
 - Fuente: `docs/bitacora-beta-3.md:3663` · tipo: idea · estado declarado: sin estado · fecha: 2026-08-10
 - Nodo(s): h3.vis-widget-develop
 - Qué es: ~202 kB gz restantes; requiere decisión de producto (teaser a los 3 s, first-touch); three sigue en landings y home desktop.
 - Referencias: ChatWidgetMount · también en fuente:3671
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ChatWidgetMount.tsx:12-15 importa el barrel completo al revelarse el chrome; prefetch de config durante el intro (:37-39). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-530] Launcher del chat en opacity 0 con animación perpetua
 - Fuente: `docs/bitacora-rediseno.md:154` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-07-30
 - Nodo(s): h3.vis-widget-develop
 - Qué es: En modo normal el launcher queda con chatbotLauncherReveal corriendo y una transición de Framer encima; no se tocó.
 - Referencias: src/modules/chatbot/components/LogicCompanion.tsx:199 · también en docs/bitacora-rediseno.md:493
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — LogicCompanion.tsx:201-204 aplica una animacion one-shot (`chatbotLauncherReveal ${CHROME_REVEAL_DURATION_MS}ms ... both`, sin infinite) y :286-297 keyframe opacidad 0->1; git diff a2acc395..origin/main no toco esas lineas desde la nota (d63d8aa6, 2026-07-30). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-531] B0.8 Anclas rotas del chatbot y del menú mobile
 - Fuente: `docs/bitacora-rediseno.md:1340` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-31
 - Nodo(s): h3.vis-widget-develop
 - Qué es: VALID_PATHS de navigateToPage corregido (/#portfolio, /process-automation#calculadora) e ids agregados (#hero, #faq, #proceso) en las landings.
 - Referencias: navigateToPage.ts (VALID_PATHS) · src/components/layout/Navbar.tsx (getNavItems, PROCESO_ANCHOR_BY_ROUTE, HASH_TO_LABEL)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — navigateToPage.ts:31-32 '/#portfolio' y '/process-automation#calculadora' (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-532] El widget de develOP navega por recarga completa
 - Fuente: `docs/bitacora-rediseno.md:1409` · tipo: pendiente · estado declarado: relevado, no aplicado (se eligió dejarlo) · fecha: 2026-07-31
 - Nodo(s): h3.vis-widget-develop
 - Qué es: useChatbot.ts:487 usa window.location.href porque ChatWidgetMount está fuera del TransitionProvider (frozen); en carga fría no aterriza en anclas del home.
 - Referencias: useChatbot.ts:487 · src/app/layout.tsx:112 · ChatbotEmbed.tsx:401 · LogicCompanion.tsx:162 · también en docs/bitacora-rediseno.md:3726
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — useChatbot.ts:584-585 window.location.href = path (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-533] Launcher del chatbot se superpone a contenido a 390px
 - Fuente: `docs/bitacora-rediseno.md:1459` · tipo: pendiente · estado declarado: parcial ('ya fichado') · fecha: 2026-07-31
 - Nodo(s): h3.vis-widget-develop
 - Qué es: Cubría el botón del menú mobile (resuelto al mover la nav arriba en B2-S2) y luego pisa contenido y el microcopy del hero; z-index de widget embebible.
 - Referencias: LogicCompanion.tsx · también en docs/bitacora-rediseno.md:1468 · también en docs/bitacora-rediseno.md:1639 · también en docs/bitacora-rediseno.md:1765 · también en docs/bitacora-rediseno.md:3166 · también en docs/bitacora-rediseno.md:3389 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — LogicCompanion.tsx:127-136 solo safe-area, sin ajuste por ancho; zIndex.ts:19-21 valores ~int32; ProactiveTooltip.tsx:119 maxWidth min(190px, 38vw). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-534] Presupuesto mobile: el avatar R3F del widget de chat baja three.js
 - Fuente: `docs/bitacora-rediseno.md:1588` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-07-31
 - Nodo(s): h3.vis-widget-develop
 - Qué es: A 390px entran unos 700 KB de three/r3f por el avatar del widget montado en todas las rutas públicas; es el próximo blanco si el peso mobile es objetivo.
 - Referencias: también en docs/bitacora-rediseno.md:1862
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Avatares pesados con dynamic import: components/avatar/HeavyAvatarsLazy.tsx:12, :27, :32; se siguen bajando si el bot usa un avatar 3D. (D5-c1, lector D5-L7)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-535] Los ids servicios y caracteristicas no se renombran
 - Fuente: `docs/bitacora-rediseno.md:2988` · tipo: decision · estado declarado: vigente · fecha: 2026-08-05
 - Nodo(s): h3.vis-widget-develop
 - Qué es: Los consumen Navbar (MAIN_NAV_ITEMS/HASH_TO_LABEL), la tool navigate_to_page del chatbot (VALID_PATHS) y TransitionContext frozen (líneas 28 y 41).
 - Referencias: src/context/TransitionContext.tsx:28 · src/context/TransitionContext.tsx:41 · navigateToPage.ts · Navbar.tsx · también en docs/bitacora-rediseno.md:3070
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — navigateToPage.ts:33 '/#servicios'; TransitionContext.tsx:28,41; ids presentes en OurServices.tsx y WhyDevelOP.tsx/Nosotros.tsx (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-536] NeuroAvatar: lazy load y cold start del launcher 3D
 - Fuente: `docs/bitacora-roadmap.md:325` · tipo: idea · estado declarado: sin estado · fecha: 2026-05-22
 - Nodo(s): h3.vis-widget-develop
 - Qué es: dynamic() de NeuroAvatar descartado en B1.2 (solo pesa en el chat/dashboard); el cold start del launcher 3D quedó para un sprint aparte.
 - Referencias: src/modules/chatbot/components/avatar/NeuroAvatar.tsx · src/modules/chatbot/components/LogicCompanion.tsx · tambien en docs/bitacora-roadmap.md:377 · tambien en docs/bitacora-roadmap.md:1808
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — HeavyAvatarsLazy.tsx:27-35 dynamic(ssr:false) con placeholder para neuro y legacy_neuro; index.ts:30-33 reexporta NeuroAvatarLazy. El cold start solo aplica si un bot elige avatar 3D; develop usa 'image' (HeavyAvatarsLazy.tsx:12-14). (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-537] Recuperar el look del header del chat del sitio
 - Fuente: `docs/bitacora-roadmap.md:5504` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.vis-widget-develop
 - Qué es: ChatHeader quedó más sobrio que el header inline reemplazado (sin línea decorativa ni dots 'pensando'); opcional en sprint posterior.
 - Referencias: src/modules/chatbot/components/chat/ChatHeader.tsx · tambien en docs/bitacora-roadmap.md:5541
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ChatHeader.tsx:88 muestra 'Conectando…/Escribiendo…/En linea'; :64 el 'pensando' vive inline; sin linea decorativa. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-538] THREE.WebGLRenderer Context Lost con varios Canvas
 - Fuente: `docs/bitacora-roadmap.md:5534` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-24
 - Nodo(s): h3.vis-widget-develop
 - Qué es: Aparece al montar/desmontar el bubble y el header del panel; sin pantalla negra; sprint de ciclo de vida de R3F si se ataca.
 - Referencias: tambien en docs/bitacora-roadmap.md:5716 · tambien en docs/bitacora-roadmap.md:5814
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep forceContextLoss|lose_context|webglcontextlost en src/modules/chatbot y src/components vacio (control: <Canvas en avatar/LegacyNeuroAvatar.tsx) (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-539] Decidir tamaño del avatar de Lucia en el launcher
 - Fuente: `docs/bitacora-roadmap.md:8801` · tipo: pendiente · estado declarado: pendiente (decisión de Franco) · fecha: 2026-05-26
 - Nodo(s): h3.vis-widget-develop
 - Qué es: Tras el fix del adapter el avatar legacy_neuro del LogicCompanion se ve más chico; opciones: cambiar avatar, subir size o revertir.
 - Referencias: también en fuente:8918
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — registry.ts:48-56 legacy_neuro conserva fillScale 1.3, pero el bot develop usa avatarStyle 'image' (HeavyAvatarsLazy.tsx:12-14) y LogicCompanion.tsx:141 resuelve 56 px para avatares livianos. (D5-c1, lector D5-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-540] FIX-ORIGIN config same-origin en prod
 - Fuente: `docs/bitacora-roadmap.md:14132` · tipo: hecho-declarado · estado declarado: hecho (verificación en prod pendiente)
 - Nodo(s): h3.vis-widget-develop
 - Qué es: El widget propio ya no recibe 403 por falta de header Origin.
 - Referencias: src/app/api/chatbot/[slug]/config/same-origin.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — config/route.ts:51-59; same-origin.ts:45-73 (D5-c1, lector D5-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-541] Sprint de copy del widget
 - Fuente: `docs/bitacora-roadmap.md:16582` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h3.vis-widget-develop
 - Qué es: Empty-state 'Sistema Listo / Protocolo de consultoría' sin voseo (ChatWindow.tsx) y 'WhatsApp no configurado.' visible al visitante.
 - Referencias: ChatWindow.tsx · WhatsappHandoffCard.tsx · también en fuente:16668
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ChatWindow.tsx:311,321 'Sistema Listo / Protocolo de consultoria'; WhatsappHandoffCard.tsx:20 'WhatsApp no configurado.' (D5-c1, lector D5-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-542] TODOs: chatbot en ai-implementations y datos de Organization
 - Fuente: `docs/sprints/alpha-pre-cierre-RESUMEN.md:65` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-17
 - Nodo(s): h3.vis-widget-develop
 - Qué es: Reintegrar el chatbot en /ai-implementations; agregar contactEmail y rubro a Organization en onboarding.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/app/ai-implementations/page.tsx:217 'TODO S16: Reintegrar chatbot nuevo'; contactEmail solo en AgencySettings (schema.prisma:825), no en Organization (:332) (D5-c1, lector D5-L8)
+- ¿Sigue teniendo sentido?: decidir
 
 ## h4 · Panel de admin
 
@@ -10997,7 +10997,7 @@
 - 10803 declara este archivo 'histórico' (la beta de LeadOS sigue en bitacora-beta.md), pero recibe entradas del chatbot y el panel hasta 2026-08-12.
 - Diagnósticos que se contradicen en serie: STREAM-TIMEOUT F1/F2, WATCHDOG y PROVIDER-CLOSE culpan a Gemini por no cerrar el stream. DEADLOCK-FINISH-STEP (15120-15130) prueba que Gemini estaba sano y que el culpable era el transform propio de ONF-1 (commit 644b2b7, 2026-07-14). Además, DEADLINE-ONFINISH aparece como 'ONF-2' en 14393 y 14660.
 - Contradicción con la regla 'cero any': D3' (12213) llama 'excepción sancionada' al any de generate-insights/route.ts:58, y H.2 (15907) lo quita.
-- Repo público: B14.3 (9452-9456) y PRIVACIDAD (16772) apoyan decisiones en que el repo es público. El usuario indica que pasa a privado (DEC-34/R15 cerrados), así que esas restricciones quedan como contexto histórico.
+- Repo público: B14.3 (9452-9456) y PRIVACIDAD (16772) apoyan decisiones en que el repo es público. El usuario indicó que pasaba a privado, pero sigue público (verificado con gh el 2026-10-13 y el 2026-10-14; DEC-54): esas restricciones siguen vigentes.
 - Sentry: B14.5 (9630) planea activarlo, pero INFRA.1 (13036) y PRIVACIDAD (16738) confirman que a 2026-08 no hay DSN en Netlify (inactivo en prod).
 - Varias entradas no tienen fecha en el encabezado: quedaron con '' o con una fecha inferida de evidencia interna (ONF-1 = 2026-07-14 por 15167; UTM.1 por el smoke del 2026-07-04).
 - El encabezado de B13.2 está antes de la línea 8601 (rango del otro agente); de esa sección solo extraje sus flags pendientes (8636-8684).
