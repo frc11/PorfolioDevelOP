@@ -1,0 +1,1460 @@
+{
+ "generado": {
+  "ref": "origin/main",
+  "sha": "57c421bc872105cb270350f5f2f7a827d1925ef8"
+ },
+ "nota": "Inventario de variables de entorno por servicio (E10). Solo nombres y ruta:línea; nunca valores. Base de la tabla de credenciales de D7.",
+ "por_servicio": {
+  "Anthropic": [
+   "ANTHROPIC_API_KEY"
+  ],
+  "Auth.js (secretos propios)": [
+   "AUTH_SECRET",
+   "NEXTAUTH_SECRET",
+   "NEXTAUTH_URL"
+  ],
+  "Brevo": [
+   "BREVO_API_KEY",
+   "BREVO_FROM_EMAIL",
+   "BREVO_FROM_NAME"
+  ],
+  "Cron y QA": [
+   "CRON_SECRET",
+   "E2E_DIST_DIR",
+   "QA_ALLOW_LOCALHOST"
+  ],
+  "GA4 / Search Console": [
+   "GOOGLE_SERVICE_ACCOUNT_KEY"
+  ],
+  "Google Business Profile": [
+   "GOOGLE_BUSINESS_PROFILE_CLIENT_ID",
+   "GOOGLE_BUSINESS_PROFILE_CLIENT_SECRET",
+   "GOOGLE_BUSINESS_PROFILE_REDIRECT_URI"
+  ],
+  "Google OAuth (login)": [
+   "AUTH_GOOGLE_ID",
+   "AUTH_GOOGLE_SECRET"
+  ],
+  "Google PageSpeed": [
+   "GOOGLE_PAGESPEED_API_KEY"
+  ],
+  "Meta / WhatsApp (360dialog)": [
+   "MOTOR_CHANNEL_SECRET_KEY",
+   "MOTOR_D360_BASE_URL",
+   "NEXT_PUBLIC_WHATSAPP_NUMBER"
+  ],
+  "n8n": [
+   "N8N_API_KEY",
+   "N8N_API_URL",
+   "N8N_CONTACT_WEBHOOK_URL",
+   "NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL"
+  ],
+  "Neon / Postgres": [
+   "DATABASE_URL"
+  ],
+  "Netlify / Vercel": [
+   "NETLIFY",
+   "URL",
+   "VERCEL_ENV"
+  ],
+  "Otros (configuración)": [
+   "ALLOW_PROD_SEED",
+   "B13_BASE_URL",
+   "B14_BASE_URL",
+   "B14_ORIGIN",
+   "B14_SLUG",
+   "B32_BASE_URL",
+   "B7_SMOKE_EMAIL",
+   "BARRIDO_OUT",
+   "BASE_URL",
+   "BOT_SLUG",
+   "CAPTURAS_BASE_URL",
+   "CAPTURAS_OUT",
+   "CARTERA_BASE_URL",
+   "CARTERA_BUSCAR",
+   "CARTERA_EMAIL",
+   "CARTERA_OUT",
+   "CARTERA_SHOTS",
+   "CENSO_BASE_URL",
+   "CENSO_OUT",
+   "CENSO_PLIEGUE",
+   "CHATBOT_LLM_PROVIDER",
+   "CHATBOT_STREAM_PROBE",
+   "CI",
+   "CONCURRENT",
+   "CORRIDA_BASE_URL",
+   "CORRIDA_SHOTS",
+   "DEVELOP_ALERTS_EMAIL",
+   "DIRECT_URL",
+   "DRY_RUN",
+   "EV4_AGENCIA_SLUG",
+   "EV4_BASE_URL",
+   "EV4_ORIGIN",
+   "EV4_USADOS_SLUG",
+   "EV5_AGENCIA_SLUG",
+   "EV5_BASE_URL",
+   "EV5_ORIGIN",
+   "EVALS_BASE_URL",
+   "EVALS_JUDGE_MODEL",
+   "EVALS_ORIGIN",
+   "FRANJA_BASE_URL",
+   "FRANJA_OUT",
+   "FRANJA_SHOTS",
+   "GALERIA_PORT",
+   "MEDIR_BASE_URL",
+   "MEDIR_OUT",
+   "MEDIR_SHOTS",
+   "NEXT_PUBLIC_APP_URL",
+   "NEXT_PUBLIC_BUILD_TIME",
+   "NEXT_RUNTIME",
+   "NODE_ENV",
+   "P19_SHOTS",
+   "PANEL_BASE_URL",
+   "PANEL_EMAIL",
+   "PANEL_OUT",
+   "PANEL_SHOTS",
+   "SETTER_EXTERNAL_SERVER",
+   "SETTER_PORT",
+   "TOTAL",
+   "UTM1_BASE_URL",
+   "UTM1_ORIGIN",
+   "UTM1_SLUG"
+  ],
+  "Resend": [
+   "RESEND_API_KEY"
+  ],
+  "Secretos propios (firma y cifrado)": [
+   "CHATBOT_IP_HASH_SALT",
+   "CRM_SECRET_KEY",
+   "EMAIL_UNSUBSCRIBE_SECRET",
+   "IMPERSONATION_SECRET",
+   "OAUTH_STATE_SECRET",
+   "ONBOARDING_SECRET_KEY"
+  ],
+  "Sentry": [
+   "NEXT_PUBLIC_SENTRY_DSN",
+   "SENTRY_DSN"
+  ],
+  "Telegram": [
+   "TELEGRAM_BOT_TOKEN",
+   "TELEGRAM_CHAT_ID"
+  ],
+  "Tiendanube": [
+   "TIENDANUBE_CLIENT_ID",
+   "TIENDANUBE_CLIENT_SECRET"
+  ],
+  "Vertex AI (Google Cloud)": [
+   "CHATBOT_GCP_LOCATION",
+   "CHATBOT_GCP_PROJECT_ID",
+   "GOOGLE_APPLICATION_CREDENTIALS",
+   "GOOGLE_VERTEX_CREDENTIALS_JSON"
+  ]
+ },
+ "variables": [
+  {
+   "variable": "ANTHROPIC_API_KEY",
+   "servicio": "Anthropic",
+   "lecturas": [
+    "src/lib/ai/results-insights.ts:163",
+    "src/lib/ai/results-insights.ts:173",
+    "src/lib/ai/review-reply-draft.ts:3",
+    "src/modules/chatbot/evals/scoring/judge.ts:24",
+    "src/modules/chatbot/evals/scoring/judge.ts:33"
+   ],
+   "lecturas_total": 5,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:119"
+  },
+  {
+   "variable": "AUTH_SECRET",
+   "servicio": "Auth.js (secretos propios)",
+   "lecturas": [
+    "scripts/qa-corridas/_p21-corrida.ts:39",
+    "scripts/qa-corridas/_p23/capturas.ts:39",
+    "scripts/qa-corridas/_p23/censo-ubicaciones.ts:120",
+    "scripts/qa-corridas/_verify-b61.ts:113",
+    "scripts/qa-corridas/_verify-home-aviso.ts:32",
+    "scripts/qa-corridas/_verify-scroll-gap.ts:37",
+    "scripts/qa-corridas/capturar-franja.ts:127",
+    "scripts/qa-corridas/corrida-1-import-csv.ts:74",
+    "scripts/qa-corridas/medir-cartera.ts:466",
+    "scripts/qa-corridas/medir-panel-setter.ts:231",
+    "scripts/qa-corridas/medir-pliegue-manual.ts:578",
+    "scripts/qa-corridas/p19-capturas.ts:28"
+   ],
+   "lecturas_total": 17,
+   "lecturas_en_tests": 2,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:55"
+  },
+  {
+   "variable": "NEXTAUTH_SECRET",
+   "servicio": "Auth.js (secretos propios)",
+   "lecturas": [
+    "src/lib/impersonation.ts:18"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:77"
+  },
+  {
+   "variable": "NEXTAUTH_URL",
+   "servicio": "Auth.js (secretos propios)",
+   "lecturas": [
+    "src/app/forgot-password/actions.ts:87",
+    "src/lib/actions/invitations.ts:109",
+    "src/lib/actions/settings.ts:191",
+    "src/lib/alerts.ts:50"
+   ],
+   "lecturas_total": 4,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:73"
+  },
+  {
+   "variable": "BREVO_API_KEY",
+   "servicio": "Brevo",
+   "lecturas": [
+    "scripts/check-env.js:119",
+    "src/lib/email/brevo-service.ts:4",
+    "src/lib/email/brevo-service.ts:20",
+    "src/lib/integrations/brevo.ts:4",
+    "src/lib/integrations/brevo.ts:112"
+   ],
+   "lecturas_total": 5,
+   "lecturas_en_tests": 2,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:142"
+  },
+  {
+   "variable": "BREVO_FROM_EMAIL",
+   "servicio": "Brevo",
+   "lecturas": [
+    "src/lib/email/brevo-service.ts:33",
+    "src/lib/integrations/brevo.ts:124"
+   ],
+   "lecturas_total": 2,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:146"
+  },
+  {
+   "variable": "BREVO_FROM_NAME",
+   "servicio": "Brevo",
+   "lecturas": [
+    "src/lib/email/brevo-service.ts:32"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:150"
+  },
+  {
+   "variable": "CRON_SECRET",
+   "servicio": "Cron y QA",
+   "lecturas": [
+    "netlify/functions/cleanup-old-events-cron.ts:8",
+    "netlify/functions/generate-insights-cron.ts:46",
+    "netlify/functions/send-weekly-reports-cron.ts:65",
+    "scripts/check-env.js:145",
+    "src/app/api/cron/alerts/route.ts:5",
+    "src/app/api/cron/os-follow-up/route.ts:154",
+    "src/app/api/cron/regenerate-briefs/route.ts:19",
+    "src/app/api/cron/send-executive-reports/route.ts:18",
+    "src/lib/cron/cron-secret.ts:11",
+    "src/lib/cron/cron-secret.ts:41"
+   ],
+   "lecturas_total": 10,
+   "lecturas_en_tests": 7,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:223"
+  },
+  {
+   "variable": "E2E_DIST_DIR",
+   "servicio": "Cron y QA",
+   "lecturas": [
+    "next.config.ts:24"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "QA_ALLOW_LOCALHOST",
+   "servicio": "Cron y QA",
+   "lecturas": [
+    "src/app/api/chatbot/[slug]/config/same-origin.ts:26",
+    "src/app/api/qa/login/route.ts:50",
+    "src/lib/security/validate-origin.ts:49"
+   ],
+   "lecturas_total": 3,
+   "lecturas_en_tests": 3,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:69"
+  },
+  {
+   "variable": "GOOGLE_SERVICE_ACCOUNT_KEY",
+   "servicio": "GA4 / Search Console",
+   "lecturas": [
+    "src/lib/actions/settings.ts:279",
+    "src/lib/analytics.ts:95",
+    "src/lib/searchconsole.ts:102"
+   ],
+   "lecturas_total": 3,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:170"
+  },
+  {
+   "variable": "GOOGLE_BUSINESS_PROFILE_CLIENT_ID",
+   "servicio": "Google Business Profile",
+   "lecturas": [
+    "src/lib/integrations/google-business-profile.ts:31"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:178"
+  },
+  {
+   "variable": "GOOGLE_BUSINESS_PROFILE_CLIENT_SECRET",
+   "servicio": "Google Business Profile",
+   "lecturas": [
+    "src/lib/integrations/google-business-profile.ts:32"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:179"
+  },
+  {
+   "variable": "GOOGLE_BUSINESS_PROFILE_REDIRECT_URI",
+   "servicio": "Google Business Profile",
+   "lecturas": [
+    "src/lib/integrations/google-business-profile.ts:33"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:180"
+  },
+  {
+   "variable": "AUTH_GOOGLE_ID",
+   "servicio": "Google OAuth (login)",
+   "lecturas": [
+    "src/auth.ts:122"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "AUTH_GOOGLE_SECRET",
+   "servicio": "Google OAuth (login)",
+   "lecturas": [
+    "src/auth.ts:122"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "GOOGLE_PAGESPEED_API_KEY",
+   "servicio": "Google PageSpeed",
+   "lecturas": [
+    "src/lib/integrations/pagespeed.ts:41"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:174"
+  },
+  {
+   "variable": "MOTOR_CHANNEL_SECRET_KEY",
+   "servicio": "Meta / WhatsApp (360dialog)",
+   "lecturas": [
+    "src/modules/motor/services/sendMessage.ts:210"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:256"
+  },
+  {
+   "variable": "MOTOR_D360_BASE_URL",
+   "servicio": "Meta / WhatsApp (360dialog)",
+   "lecturas": [
+    "src/modules/motor/adapters/whatsapp/outbound/client.ts:258"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:261"
+  },
+  {
+   "variable": "NEXT_PUBLIC_WHATSAPP_NUMBER",
+   "servicio": "Meta / WhatsApp (360dialog)",
+   "lecturas": [
+    "src/components/sections/home/Footer.tsx:8",
+    "src/components/sections/portal-demo-cta/PortalDemoCTA.tsx:235",
+    "src/lib/whatsapp.ts:42",
+    "src/modules/chatbot/prisma/seed.ts:231"
+   ],
+   "lecturas_total": 4,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:274"
+  },
+  {
+   "variable": "N8N_API_KEY",
+   "servicio": "n8n",
+   "lecturas": [
+    "src/lib/actions/settings.ts:244",
+    "src/lib/n8n.ts:184",
+    "src/lib/n8n.ts:265"
+   ],
+   "lecturas_total": 3,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:197"
+  },
+  {
+   "variable": "N8N_API_URL",
+   "servicio": "n8n",
+   "lecturas": [
+    "src/lib/actions/settings.ts:243",
+    "src/lib/n8n.ts:183",
+    "src/lib/n8n.ts:264"
+   ],
+   "lecturas_total": 3,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:196"
+  },
+  {
+   "variable": "N8N_CONTACT_WEBHOOK_URL",
+   "servicio": "n8n",
+   "lecturas": [
+    "src/lib/n8n.ts:19"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:200"
+  },
+  {
+   "variable": "NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL",
+   "servicio": "n8n",
+   "lecturas": [
+    "src/components/sections/home/Footer.tsx:81"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:204"
+  },
+  {
+   "variable": "DATABASE_URL",
+   "servicio": "Neon / Postgres",
+   "lecturas": [
+    "prisma/seed-guard.ts:51",
+    "scripts/_b14-2-cleanup-bench-prod.ts:41",
+    "scripts/_b14-2-seed-bench-prod.ts:65",
+    "scripts/_db-cleanup-execute.mjs:28",
+    "scripts/_db-cleanup-inspect.mjs:24",
+    "scripts/admin-1a-backfill-caliente.ts:42",
+    "scripts/b1-verify-setter-ownership.ts:22",
+    "scripts/b2-verify-dossier.ts:33",
+    "scripts/b3-qa-assign-leads.ts:22",
+    "scripts/b4-qa-construccion.ts:26",
+    "scripts/b5-qa-review-queue.ts:33",
+    "scripts/b6-qa-outreach.ts:28"
+   ],
+   "lecturas_total": 35,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:25"
+  },
+  {
+   "variable": "NETLIFY",
+   "servicio": "Netlify / Vercel",
+   "lecturas": [
+    "src/app/api/qa/login/route.ts:65"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "URL",
+   "servicio": "Netlify / Vercel",
+   "lecturas": [
+    "netlify/functions/cleanup-old-events-cron.ts:7",
+    "netlify/functions/generate-insights-cron.ts:45",
+    "netlify/functions/send-weekly-reports-cron.ts:64"
+   ],
+   "lecturas_total": 3,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "VERCEL_ENV",
+   "servicio": "Netlify / Vercel",
+   "lecturas": [
+    "src/app/api/qa/login/route.ts:68"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "ALLOW_PROD_SEED",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "prisma/seed-guard.ts:43"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "B13_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/_b13-latency-test.mjs:12"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "B14_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/_b14-2-prod-bot-latency.mjs:21",
+    "scripts/_b14-2-prod-coldstart.mjs:25",
+    "scripts/_b14-2-prod-pages-ttfb.mjs:17",
+    "scripts/_b14-4-smoke-prod.mjs:19"
+   ],
+   "lecturas_total": 4,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "B14_ORIGIN",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/_b14-2-prod-bot-latency.mjs:23",
+    "scripts/_b14-4-smoke-prod.mjs:21"
+   ],
+   "lecturas_total": 2,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "B14_SLUG",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/_b14-2-prod-bot-latency.mjs:22",
+    "scripts/_b14-2-prod-coldstart.mjs:26",
+    "scripts/_b14-4-smoke-prod.mjs:20"
+   ],
+   "lecturas_total": 3,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "B32_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/regression/run-baseline.ts:83"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "B7_SMOKE_EMAIL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/b7-smoke-calcom.ts:76"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "BARRIDO_OUT",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/barrido-derivacion.ts:458"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/load-test/chatbot-baseline.ts:5"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "BOT_SLUG",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/load-test/chatbot-baseline.ts:6"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CAPTURAS_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/_p23/capturas.ts:21"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CAPTURAS_OUT",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/_p23/capturas.ts:22"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CARTERA_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-cartera.ts:44"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CARTERA_BUSCAR",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-cartera.ts:455"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CARTERA_EMAIL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-cartera.ts:48"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CARTERA_OUT",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-cartera.ts:46"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CARTERA_SHOTS",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-cartera.ts:47"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CENSO_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/_p23/censo-ubicaciones.ts:29"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CENSO_OUT",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/_p23/censo-ubicaciones.ts:31"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CENSO_PLIEGUE",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/_p23/censo-ubicaciones.ts:34"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CHATBOT_LLM_PROVIDER",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/check-env.js:126",
+    "src/modules/chatbot/server/llm/factory.ts:22"
+   ],
+   "lecturas_total": 2,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:91"
+  },
+  {
+   "variable": "CHATBOT_STREAM_PROBE",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "src/modules/chatbot/server/chat/streamProbe.ts:88"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "CI",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "next.config.ts:257",
+    "playwright.config.ts:6",
+    "playwright.config.ts:7",
+    "playwright.config.ts:9",
+    "playwright.config.ts:31",
+    "playwright.galeria.config.ts:54",
+    "playwright.helpers-probe.config.ts:30",
+    "playwright.integration.config.ts:43",
+    "playwright.leados.config.ts:30",
+    "playwright.qa-persona.config.ts:20",
+    "playwright.qa-persona.config.ts:46",
+    "playwright.qa-walkthrough.config.ts:20"
+   ],
+   "lecturas_total": 14,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "CONCURRENT",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/load-test/chatbot-baseline.ts:7"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CORRIDA_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/_p21-corrida.ts:23"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "CORRIDA_SHOTS",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/_p21-corrida.ts:25"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "DEVELOP_ALERTS_EMAIL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "src/modules/chatbot/server/admin/detectBotIssues.ts:300"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:155"
+  },
+  {
+   "variable": "DIRECT_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/regression/diag-timings.ts:17",
+    "scripts/regression/run-baseline.ts:42"
+   ],
+   "lecturas_total": 2,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "DRY_RUN",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "prisma/seeds/backfill-vertical-pack.ts:127"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "EV4_AGENCIA_SLUG",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/ev4-smoke.mjs:33"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "EV4_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/ev4-smoke.mjs:31"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "EV4_ORIGIN",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/ev4-smoke.mjs:32"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "EV4_USADOS_SLUG",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/ev4-smoke.mjs:34"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "EV5_AGENCIA_SLUG",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/ev5-smoke.mjs:32"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "EV5_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/ev5-smoke.mjs:30"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "EV5_ORIGIN",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/ev5-smoke.mjs:31"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "EVALS_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "src/modules/chatbot/evals/shared.ts:44"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "EVALS_JUDGE_MODEL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "src/modules/chatbot/evals/scoring/judge.ts:29"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "EVALS_ORIGIN",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "src/modules/chatbot/evals/shared.ts:45"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "FRANJA_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/capturar-franja.ts:27"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "FRANJA_OUT",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/capturar-franja.ts:29"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "FRANJA_SHOTS",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/capturar-franja.ts:30"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "GALERIA_PORT",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "playwright.galeria.config.ts:38"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "MEDIR_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-pliegue-manual.ts:43",
+    "scripts/qa-corridas/p19-capturas.ts:21"
+   ],
+   "lecturas_total": 2,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "MEDIR_OUT",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-pliegue-manual.ts:45"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "MEDIR_SHOTS",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-pliegue-manual.ts:46"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "NEXT_PUBLIC_APP_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "src/actions/agency-actions.ts:75",
+    "src/app/(protected)/admin/chatbots/[botId]/actions.ts:74",
+    "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:141",
+    "src/app/(protected)/dashboard/referidos/page.tsx:35",
+    "src/app/api/admin/users/[userId]/resend-credentials/route.ts:76",
+    "src/app/api/cron/generate-insights/route.ts:66",
+    "src/app/forgot-password/actions.ts:87",
+    "src/lib/alerts.ts:50",
+    "src/lib/client-notifications/notify.ts:135",
+    "src/lib/email/notify-message.ts:45",
+    "src/lib/email/unsubscribe-token.ts:58",
+    "src/lib/email/unsubscribe-token.ts:118"
+   ],
+   "lecturas_total": 22,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:270"
+  },
+  {
+   "variable": "NEXT_PUBLIC_BUILD_TIME",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "src/app/api/version/route.ts:6"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:297"
+  },
+  {
+   "variable": "NEXT_RUNTIME",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "instrumentation.ts:2",
+    "instrumentation.ts:5",
+    "src/instrumentation.ts:5",
+    "src/instrumentation.ts:32"
+   ],
+   "lecturas_total": 4,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "NODE_ENV",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "prisma/seed-guard.ts:61",
+    "scripts/check-env.js:137",
+    "sentry.edge.config.ts:9",
+    "sentry.server.config.ts:12",
+    "src/app/api/chatbot/[slug]/config/same-origin.ts:26",
+    "src/app/api/dev/email-preview/executive-weekly/route.ts:107",
+    "src/app/api/version/route.ts:7",
+    "src/instrumentation-client.ts:6",
+    "src/instrumentation-client.ts:12",
+    "src/instrumentation.ts:8",
+    "src/instrumentation.ts:10",
+    "src/instrumentation.ts:35"
+   ],
+   "lecturas_total": 26,
+   "lecturas_en_tests": 1,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "P19_SHOTS",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/p19-capturas.ts:22"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "PANEL_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-panel-setter.ts:41"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "PANEL_EMAIL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-panel-setter.ts:46"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "PANEL_OUT",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-panel-setter.ts:43"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "PANEL_SHOTS",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/qa-corridas/medir-panel-setter.ts:44"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "SETTER_EXTERNAL_SERVER",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "playwright.galeria.config.ts:49",
+    "playwright.qa-persona.config.ts:15",
+    "playwright.qa-walkthrough.config.ts:15",
+    "playwright.setter.config.ts:44"
+   ],
+   "lecturas_total": 4,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "SETTER_PORT",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "playwright.galeria.config.ts:47",
+    "playwright.qa-persona.config.ts:13",
+    "playwright.qa-walkthrough.config.ts:13",
+    "playwright.setter.config.ts:33",
+    "scripts/qa-corridas/corrida-1-import-csv.ts:24"
+   ],
+   "lecturas_total": 5,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "TOTAL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/load-test/chatbot-baseline.ts:8"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "UTM1_BASE_URL",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/utm1-smoke.mjs:45"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "UTM1_ORIGIN",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/utm1-smoke.mjs:46"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "UTM1_SLUG",
+   "servicio": "Otros (configuración)",
+   "lecturas": [
+    "scripts/utm1-smoke.mjs:47"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": true,
+   "en_env_example": null
+  },
+  {
+   "variable": "RESEND_API_KEY",
+   "servicio": "Resend",
+   "lecturas": [
+    "scripts/check-env.js:118",
+    "src/lib/email.ts:4",
+    "src/lib/email.ts:4",
+    "src/lib/email/notify-message.ts:13",
+    "src/lib/email/notify-message.ts:18"
+   ],
+   "lecturas_total": 5,
+   "lecturas_en_tests": 1,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:134"
+  },
+  {
+   "variable": "CHATBOT_IP_HASH_SALT",
+   "servicio": "Secretos propios (firma y cifrado)",
+   "lecturas": [
+    "scripts/check-env.js:140",
+    "src/modules/chatbot/server/safety/ipHash.ts:21"
+   ],
+   "lecturas_total": 2,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:124"
+  },
+  {
+   "variable": "CRM_SECRET_KEY",
+   "servicio": "Secretos propios (firma y cifrado)",
+   "lecturas": [
+    "scripts/b58-smoke.ts:131",
+    "scripts/b58-smoke.ts:159",
+    "scripts/b58-smoke.ts:160",
+    "scripts/b58-smoke.ts:169",
+    "scripts/b58-smoke.ts:172",
+    "scripts/b58-smoke.ts:180",
+    "src/modules/chatbot/server/crm/encryptSecret.ts:26"
+   ],
+   "lecturas_total": 7,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:234"
+  },
+  {
+   "variable": "EMAIL_UNSUBSCRIBE_SECRET",
+   "servicio": "Secretos propios (firma y cifrado)",
+   "lecturas": [
+    "src/lib/email/unsubscribe-token.ts:8"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:162"
+  },
+  {
+   "variable": "IMPERSONATION_SECRET",
+   "servicio": "Secretos propios (firma y cifrado)",
+   "lecturas": [
+    "src/lib/impersonation.ts:16"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:82"
+  },
+  {
+   "variable": "OAUTH_STATE_SECRET",
+   "servicio": "Secretos propios (firma y cifrado)",
+   "lecturas": [
+    "src/lib/security/oauth-state.ts:28"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "ONBOARDING_SECRET_KEY",
+   "servicio": "Secretos propios (firma y cifrado)",
+   "lecturas": [
+    "src/lib/crypto/credential-cipher.ts:35"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:245"
+  },
+  {
+   "variable": "NEXT_PUBLIC_SENTRY_DSN",
+   "servicio": "Sentry",
+   "lecturas": [
+    "src/instrumentation-client.ts:5",
+    "src/instrumentation.ts:7",
+    "src/instrumentation.ts:34"
+   ],
+   "lecturas_total": 3,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:293"
+  },
+  {
+   "variable": "SENTRY_DSN",
+   "servicio": "Sentry",
+   "lecturas": [
+    "sentry.edge.config.ts:6",
+    "sentry.server.config.ts:9"
+   ],
+   "lecturas_total": 2,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": null
+  },
+  {
+   "variable": "TELEGRAM_BOT_TOKEN",
+   "servicio": "Telegram",
+   "lecturas": [
+    "src/lib/notifications/telegram.ts:54"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 1,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:212"
+  },
+  {
+   "variable": "TELEGRAM_CHAT_ID",
+   "servicio": "Telegram",
+   "lecturas": [
+    "src/lib/notifications/telegram.ts:55"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 1,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:213"
+  },
+  {
+   "variable": "TIENDANUBE_CLIENT_ID",
+   "servicio": "Tiendanube",
+   "lecturas": [
+    "src/lib/integrations/tiendanube.ts:21",
+    "src/lib/integrations/tiendanube.ts:33"
+   ],
+   "lecturas_total": 2,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:187"
+  },
+  {
+   "variable": "TIENDANUBE_CLIENT_SECRET",
+   "servicio": "Tiendanube",
+   "lecturas": [
+    "src/lib/integrations/tiendanube.ts:34"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:188"
+  },
+  {
+   "variable": "CHATBOT_GCP_LOCATION",
+   "servicio": "Vertex AI (Google Cloud)",
+   "lecturas": [
+    "src/modules/chatbot/server/llm/providers/google.ts:77"
+   ],
+   "lecturas_total": 1,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:109"
+  },
+  {
+   "variable": "CHATBOT_GCP_PROJECT_ID",
+   "servicio": "Vertex AI (Google Cloud)",
+   "lecturas": [
+    "src/modules/chatbot/server/llm/providers/google.ts:56",
+    "src/modules/chatbot/server/llm/providers/google.ts:76"
+   ],
+   "lecturas_total": 2,
+   "lecturas_en_tests": 1,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:106"
+  },
+  {
+   "variable": "GOOGLE_APPLICATION_CREDENTIALS",
+   "servicio": "Vertex AI (Google Cloud)",
+   "lecturas": [
+    "scripts/check-env.js:128",
+    "src/modules/chatbot/server/llm/providers/google.ts:54"
+   ],
+   "lecturas_total": 2,
+   "lecturas_en_tests": 1,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:99"
+  },
+  {
+   "variable": "GOOGLE_VERTEX_CREDENTIALS_JSON",
+   "servicio": "Vertex AI (Google Cloud)",
+   "lecturas": [
+    "scripts/check-env.js:129",
+    "src/modules/chatbot/server/llm/providers/google.ts:55",
+    "src/modules/chatbot/server/llm/providers/google.ts:73"
+   ],
+   "lecturas_total": 3,
+   "lecturas_en_tests": 0,
+   "solo_scripts": false,
+   "en_env_example": ".env.example:103"
+  }
+ ],
+ "documentadas_sin_lectura": [
+  "DIRECT_DATABASE_URL",
+  "SEED_ADMIN_PASSWORD",
+  "SEED_CLIENT_PASSWORD",
+  "SEED_CLIENT_B_PASSWORD",
+  "SEED_SETTER_PASSWORD",
+  "CHATBOT_GOOGLE_API_KEY",
+  "RESEND_FROM_EMAIL",
+  "SENTRY_AUTH_TOKEN",
+  "SENTRY_ORG",
+  "SENTRY_PROJECT"
+ ]
+}

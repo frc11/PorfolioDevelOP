@@ -67,6 +67,9 @@ const patronesPrevios = (() => {
 // D6: las sentencias DML que drift.mjs no reconoce y hay que leer a mano (DEC-08)
 const dml = DOM === 'D6' ? (leer('drift.json', { sentencias_no_reconocidas: [] }).sentencias_no_reconocidas ?? []).map((s) => s.donde) : []
 const textoDml = dml.length ? `\nDRIFT (scripts/auditoria/drift.mjs sobre origin/main): 0 diferencias entre schema.prisma y las 86 migraciones (63 tablas, 62 enums, 136 indices, 80 FKs). Estas ${dml.length} sentencias DML no se pueden reproducir por script: leelas a mano y reporta si alguna pierde, mezcla o corrompe datos entre tenants:\n- ${dml.join('\n- ')}` : ''
+// D7 (E10): inventario de credenciales por servicio de env-inventario.mjs, para que el lector arme la tabla sin re-buscar
+const credenciales = DOM === 'D7' ? leer('credenciales-env.json', null) : null
+const textoCredenciales = credenciales ? `\nINVENTARIO DE CREDENCIALES Y VARIABLES (scripts/auditoria/env-inventario.mjs sobre origin/main; solo nombres, nunca valores). Es la columna «donde se lee» de la tabla E10: completa por servicio que se cae si vence, si el sistema se entera (Sentry, alerta, fallback, mensaje util) y como se renueva; la credencial de Vertex vencida es el control positivo:\n${Object.entries(credenciales.por_servicio).filter(([s]) => !s.startsWith('Otros')).map(([s, vs]) => `- ${s}: ${vs.map((v) => credenciales.variables.find((x) => x.variable === v)).filter((x) => !x.solo_scripts).map((x) => `${x.variable} (${x.lecturas.filter((r) => !r.startsWith('scripts/')).slice(0, 3).join(', ') || 'solo scripts'})`).join('; ')}`).join('\n')}\n- Documentadas en .env.example sin lectura directa en el codigo: ${credenciales.documentadas_sin_lectura.join(', ')}` : ''
 const textoPatrones = patronesPrevios.length ? `\nPATRONES DEFECTUOSOS QUE YA APARECIERON EN OTROS DOMINIOS (buscalos en tu lote; cada aparicion es un hallazgo con su propia evidencia, o se suma al hallazgo del mismo patron si es la misma causa raiz):\n- ${patronesPrevios.join('\n- ')}` : ''
 
 // clave «fuente:línea[#sub]» → PLAN-NNN
@@ -211,7 +214,7 @@ const salida = {
   foco: FOCO[DOM],
   ...(ACOTADO ? { acotado: true, flujos_cerrados: flujosCerrados.join('\n') } : {}),
   ...(HIGIENE ? { higiene: true } : {}),
-  contexto: `${alertas.length ? `ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas, empezando el campo 'alerta' con su id entre corchetes; si se confirma, tambien va como hallazgo):\n- ${alertas.join('\n- ')}` : ''}${textoDml}${textoPatrones}`,
+  contexto: `${alertas.length ? `ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas, empezando el campo 'alerta' con su id entre corchetes; si se confirma, tambien va como hallazgo):\n- ${alertas.join('\n- ')}` : ''}${textoDml}${textoCredenciales}${textoPatrones}`,
   lotes: info.filter((x) => lotes.includes(x.l)).map((x) => {
     const prev = previas.filter((p) => (p.archivos_citados ?? []).some((c) => x.set.has(c.replace(/:\d+(-\d+)?$/, '').replace(/^logic-core-v3\//, ''))))
     const plan = asignados.get(x.l.id).sort((a, b) => Number(b.cita) - Number(a.cita) || (ORDEN_TIPO[a.p.tipo] ?? 9) - (ORDEN_TIPO[b.p.tipo] ?? 9))
