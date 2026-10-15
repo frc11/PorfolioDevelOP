@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import { CURVAS, type NombreDeCurva } from '../../motion/curvas'
+import type { FaseDeLaSalida } from '../../pie3d/salidas'
 import { entornoDeLaEscena } from '../entorno'
 import { FLOOR_Y, ORBIT_TARGET_Y, PROBE_EXTRUDE, PROBE_SVG_SCALE } from '../probeScene'
 import { CAIDA_AL_HUECO, anguloEnElReloj, aperturaDelHueco, arranqueDeLaCaida, caidaIntegrada, poseDeLaCaida, sombraDeLaCaida } from './caidaAlHueco'
@@ -322,26 +323,27 @@ const REBOBINA: DecisionDelGesto = { retiene: true, rebobina: true }
 const SIGUE: DecisionDelGesto = { retiene: true, rebobina: false }
 const SALE: DecisionDelGesto = { retiene: true, rebobina: false, sale: true }
 
-/** [PULIDO 27] Y4 a · el pie en el gesto: si está entero a la vista, si se está yendo (todavía no se fue entero) y si ya se fue. */
+/** [PULIDO 27] Y4 a · el pie en el gesto: [PULIDO 28] AA7 · si hay algo de él a la vista y la fase de su salida (`pie3d/salidas.ts`). */
 export interface PieEnElGesto {
   readonly aLaVista: boolean
-  readonly saliendo: boolean
-  readonly seFue?: boolean
+  readonly fase: FaseDeLaSalida
 }
-const SIN_PIE: PieEnElGesto = { aLaVista: false, saliendo: false }
+const SIN_PIE: PieEnElGesto = { aLaVista: false, fase: 'presente' }
 
 /**
  * [NOCTURNO FINAL] A1 · sólo al fondo y hacia arriba. Un gesto que EMPIEZA (`nuevo`) mientras corre (o ya terminó) pide el
  * rebobinado y se retiene; los eventos que lo siguen (`retenido`: el gesto en curso se retuvo; `duraS`: cuánto lleva) se
  * retienen hasta `topeDelGestoS`, y después sólo su cola (`enLaCola`: la inercia que se apaga). Un gesto nuevo
- * rebobinando o parada no se retiene: la página sube normal. [PULIDO 27] Y4 a · salvo con el pie entero a la vista (`pie`): parada,
- * el gesto nuevo pide la salida del pie y se retiene, y todo lo que suba se retiene mientras el pie se va.
+ * rebobinando o parada no se retiene: la página sube normal. [PULIDO 27] Y4 a · salvo con el pie a la vista (`pie`). [PULIDO 28] AA7 ·
+ * con el pie a la vista, DETERMINÍSTICO: todo evento hacia arriba al fondo se retiene, no sólo el que empieza un gesto ni sólo hasta
+ * su tope (la rueda lenta, la rápida, el trackpad y el teclado dan lo mismo): corriendo con algo hecho, rebobina; rebobinando, sigue;
+ * quieto en cero (parado, esperando o recién arrancado), pide la salida; saliendo, sigue; ido, suelta.
  */
 export function decidirElGesto(r: RelojDelFinal, alFondo: boolean, sentido: -1 | 1, nuevo: boolean, retenido: boolean, duraS: number, enLaCola: boolean, pie: PieEnElGesto = SIN_PIE): DecisionDelGesto {
   if (!alFondo || sentido > 0) return NADA
-  if (pie.saliendo) return SIGUE
-  // Ido el pie, el scroll se suelta ya (también lo que queda del gesto que lo sacó).
-  if (pie.seFue === true) return NADA
+  // Saliendo, sigue; ido el pie, el scroll se suelta ya (también lo que queda del gesto que lo sacó).
+  if (pie.fase !== 'presente') return pie.fase === 'saliendo' ? SIGUE : NADA
+  if (pie.aLaVista) return r.fin > 0 && r.fase === 'corre' ? REBOBINA : r.fin > 0 && r.fase === 'rebobina' ? SIGUE : SALE
   if (nuevo) return r.fase === 'corre' && r.fin > 0 ? REBOBINA : r.fase === 'parada' && pie.aLaVista ? SALE : NADA
   return retenido && (duraS < RELOJ_DEL_FINAL.topeDelGestoS || enLaCola) ? SIGUE : NADA
 }

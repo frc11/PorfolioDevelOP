@@ -91,6 +91,9 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       pozos.current = null
       s.montado = false
       s.listo = false
+      // [PULIDO 28] AA7 · sin el pie de volumen no hay pie a la vista (la salida vuelve a la de siempre).
+      SALIDA_EN_VIVO.aLaVista = false
+      SALIDA_EN_VIVO.fase = 'presente'
       for (const a of s.armadas) soltar(a)
       s.armadas = []
       s.estudio = null

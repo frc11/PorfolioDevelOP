@@ -106,6 +106,17 @@ export function avanceDelPie(mostrado: number, pedido: number, asentar: boolean,
   return acotar(p)
 }
 
+/**
+ * [PULIDO 28] AA7 · un cuadro de la SALIDA (`pie3d/salidas.ts`): lo mostrado baja por los tramos de las piezas en `salidaS` (cada pieza,
+ * su llegada al revés: primero lo que llegó último) y, pasado el primero, a cero de una (debajo no hay nada que ver: antes la salida
+ * recorría también ese tramo vacío y a las piezas les tocaba menos de la mitad del tiempo).
+ */
+export function salidaDelPie(mostrado: number, dt: number, salidaS: number): number {
+  const desde = TRAMOS_DEL_PIE[0].desde
+  const p = acotar(mostrado) - (Math.max(0, dt) * (TRAMOS_DEL_PIE[TRAMOS_DEL_PIE.length - 1].hasta - desde)) / salidaS
+  return p <= desde ? 0 : p
+}
+
 /** Cuánto va de su tramo (0 a 1) con lo mostrado `p`. */
 export function progresoDelTramo(t: TramoDelPie, p: number): number {
   return acotar((p - t.desde) / (t.hasta - t.desde))

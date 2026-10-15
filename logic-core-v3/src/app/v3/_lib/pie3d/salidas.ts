@@ -5,16 +5,27 @@
  *      pieza. Ahora, con el final rebobinado (parado) y el pie entero, el primer gesto hacia arriba no sube la página: el final lo retiene
  *      (como retiene el del rebobinado), el pie corre la salida de cada pieza (su llegada al revés, en `LIBRE_DEL_PIE_S`) y recién al
  *      terminar suelta el scroll. Hasta que la persona vuelva a bajar o la página suba fuera del pie, el pie queda ido.
+ *      [PULIDO 28] AA7 · UNA MÁQUINA DE ESTADOS (`fase`): presente → saliendo → ida → presente. La de PULIDO 27 dependía de que el
+ *      gesto EMPEZARA con el final parado: desde el final entero el primer evento lo rebobinaba, el resto del mismo gesto se retenía
+ *      sólo hasta el tope del gesto (0,8 s) y la página subía a mitad del rebobinado, sin salida (medido en el sitio con la rueda lenta,
+ *      la rápida, el trackpad y el teclado: ninguna salía); y la salida recorría lo mostrado entero en medio segundo, con las piezas en
+ *      menos de la mitad de eso (va rapidísimo). Ahora, con el pie a la vista, TODO evento hacia arriba al fondo se retiene: corriendo,
+ *      rebobina; quieto en cero, pide la salida; saliendo, sigue; ida, suelta. La salida recorre las piezas en `salidaS`, en el orden
+ *      inverso de sus llegadas (`salidaDelPie` en `coreografia.ts`).
  *   b) UN VIAJE DESDE EL PIE ACOSTADO (los enlaces del recorrido): todo desaparecía de golpe. Ahora las piezas se hunden en sus huecos y
  *      el piso se cierra (`hundeMs`) y recién ahí empieza el viaje, que dura eso menos: el mismo presupuesto del click a la llegada.
  */
-export const SALIDAS_DEL_PIE = { hundeMs: 400, hundeHasta: 0.6, cierraDesde: 0.4, hundeDeMas: 0.2, sinViajeMs: 1500 } as const
+export const SALIDAS_DEL_PIE = { hundeMs: 400, hundeHasta: 0.6, cierraDesde: 0.4, hundeDeMas: 0.2, sinViajeMs: 1500, salidaS: 0.8 } as const
+
+/** [PULIDO 28] AA7 · a) presente (a la vista o llegando con el scroll), saliendo (un gesto hacia arriba al fondo) e ida (el scroll se soltó). */
+export type FaseDeLaSalida = 'presente' | 'saliendo' | 'ida'
 
 export const SALIDA_EN_VIVO = {
-  /** a) el pie se está yendo (o ya se fue) por un gesto hacia arriba. */
-  saliendo: false,
-  /** a) ya se fue entero: el scroll se suelta. */
-  seFue: false,
+  /** a) [PULIDO 28] AA7 · la fase de la salida y si hay algo del pie a la vista (lo escribe el pie de volumen; sin él, nunca). */
+  fase: 'presente' as FaseDeLaSalida,
+  aLaVista: false,
+  /** a) [PULIDO 28] AA7 · ida, el scroll más arriba al que llegó la página (px): si vuelve a bajar (también sin un gesto: la barra), el pie vuelve. */
+  idaHasta: Number.POSITIVE_INFINITY,
   /** b) el pie está acostado en el piso con su DOM (lo escribe el pie de volumen). */
   acostado: false,
   /** b) desde cuándo se hunde para un viaje (ms de `performance.now`; sin hundirse, −∞) y si ya arrancó su viaje. */
@@ -54,16 +65,30 @@ export function pasoDelHundimiento(ahora: number, enViaje: boolean): number {
   return Math.min(1, Math.max(0, (ahora - S.hundeDesde) / SALIDAS_DEL_PIE.hundeMs))
 }
 
+/** a) [PULIDO 28] AA7 · un gesto pide la salida: sólo desde presente (saliendo o ida, nada). */
+export function pedirLaSalida(): void {
+  if (SALIDA_EN_VIVO.fase === 'presente') SALIDA_EN_VIVO.fase = 'saliendo'
+}
+
+/** a) Un gesto hacia abajo trae el pie de vuelta (con su llegada, por el scroll). */
+export function volverElPie(): void {
+  SALIDA_EN_VIVO.fase = 'presente'
+}
+
 /**
- * a) Un cuadro de la salida (con lo mostrado del pie y lo que pide el scroll): se fue entera cuando no queda nada a la vista; y se olvida
- * cuando la página subió hasta antes del primer tramo (`desde`: ahí el pie no se ve igual).
+ * a) Un cuadro de la salida (con lo mostrado del pie, lo que pide el scroll y el scroll, px): saliendo, se fue cuando no queda nada a la
+ * vista (ida: el scroll se suelta); ida, vuelve a presente cuando la página subió por encima del pie entero (no pide nada: antes volvía en
+ * el primer tramo y el pie se asomaba un instante mientras la página subía) o cuando volvió a bajar. Y si queda algo a la vista.
  */
-export function seFueElPie(mostrado: number, pedido: number, desde: number): void {
+export function pasoDeLaSalida(mostrado: number, pedido: number, scroll: number): void {
   const S = SALIDA_EN_VIVO
-  if (mostrado <= 1e-3) S.seFue = true
-  if (S.seFue && pedido < desde) {
-    S.saliendo = false
-    S.seFue = false
+  S.aLaVista = mostrado > 1e-3
+  if (S.fase === 'saliendo' && mostrado <= 1e-3) {
+    S.fase = 'ida'
+    S.idaHasta = scroll
+  } else if (S.fase === 'ida') {
+    S.idaHasta = Math.min(S.idaHasta, scroll)
+    if (pedido <= 1e-3 || scroll > S.idaHasta + 2) S.fase = 'presente'
   }
 }
 

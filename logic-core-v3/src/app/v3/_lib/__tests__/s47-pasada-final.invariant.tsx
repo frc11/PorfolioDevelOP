@@ -378,7 +378,8 @@ let trasElViaje = 1
 for (let t = 0; t < LIBRE_DEL_PIE_S + 0.05; t += DTP) trasElViaje = avanceDelPie(trasElViaje, 0, false, DTP, true)
 afirmar(trasElViaje === 0 && LIBRE_DEL_PIE_S === 0.5, '  en un viaje del menú se desarma rápido (de punta a punta en medio segundo), y llega con sus tramos al terminar')
 const armadasFuente = sinComentarios(leer('_lib/escena/pie3d/armadas.ts'))
-afirmar(/const pedido = enViaje \? 0 : \(PROGRESO_DEL_PIE\.valor\?\.get\(\) \?\? 1\)/.test(armadasFuente) && /c\.mostrado = avanceDelPie\(c\.mostrado, pedido, !enViaje && ahora - c\.cuando > ASIENTO\.quietoMs, dt, enViaje\)/.test(armadasFuente), '  la escena lo avanza cada cuadro con el progreso de la última pantalla (sin pie anotado, todo llegado) y el asiento de F2 (180 ms quieto, sin viaje)')
+// [PULIDO 28] AA7 · salvo saliendo (la salida del pie, en su tiempo: `salidaDelPie`).
+afirmar(/const pedido = enViaje \? 0 : \(PROGRESO_DEL_PIE\.valor\?\.get\(\) \?\? 1\)/.test(armadasFuente) && /c\.mostrado = SALIDA_EN_VIVO\.fase === 'saliendo' \? salidaDelPie\(c\.mostrado, dt, SALIDAS_DEL_PIE\.salidaS\) : avanceDelPie\(c\.mostrado, pedido, !enViaje && ahora - c\.cuando > ASIENTO\.quietoMs, dt, enViaje\)/.test(armadasFuente), '  la escena lo avanza cada cuadro con el progreso de la última pantalla (sin pie anotado, todo llegado) y el asiento de F2 (180 ms quieto, sin viaje)')
 
 // Los gestos de cada columna, en el espacio de la pieza (px; y hacia arriba; la cara en z = 0, el cuerpo hacia atrás).
 const CAJA = { ancho: 240, alto: 40, espesor: 22 } as const

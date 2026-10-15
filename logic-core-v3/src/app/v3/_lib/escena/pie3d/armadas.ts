@@ -6,7 +6,7 @@ import datos500 from '../../../_fuentes/chivo-500-pie.json'
 import datos600 from '../../../_fuentes/chivo-600-pie.json'
 import { firmaDeLaForma, medirLaPieza, type MedidaDeLaPieza } from '../../pie3d/medida'
 import { HUNDIDOS, PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, cuantoSeHunde, type PiezaDelPie } from '../../pie3d/registro'
-import { SALIDA_EN_VIVO, seFueElPie } from '../../pie3d/salidas'
+import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, pasoDeLaSalida } from '../../pie3d/salidas'
 import { ASIENTO } from '../../titulos3d/repeticiones'
 import { KEY_INTENSITY } from '../probeLighting'
 import { EN_VIVO, scrollDelPie } from '../final/recorridoDelFinal'
@@ -20,7 +20,7 @@ import { capaPropia, seguirLaPieza } from './domQueSigue'
 import { encimaDeLaPieza } from './encimaDelPie'
 import { mojar } from './derretido'
 import { luzAcostada, relieveAcostado } from './acostado'
-import { TRAMOS_DEL_PIE, apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
+import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, salidaDelPie, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
 import { acostadaDeLaCaida, aplicarLaCaida, armarLaCaida, domDeLaCaida, domSigueEnLaCaida, sombrasDeLaCaida, type CaidaDelPie } from './caida'
@@ -235,11 +235,12 @@ function avanzarLaCoreografia(c: EstadoDelPie['coreografia'], dt: number): void 
     c.y = scrollY
     c.cuando = ahora
   }
-  // [PULIDO 27] Y4 a · saliendo (un gesto hacia arriba con el final parado), desarmado como en un viaje (`pie3d/salidas.ts`).
-  const enViaje = viajeEnCurso() !== null || SALIDA_EN_VIVO.saliendo
+  // [PULIDO 27] Y4 a · saliendo (un gesto hacia arriba al fondo), desarmado; [PULIDO 28] AA7 · en `salidaS` por las piezas (`salidaDelPie`),
+  // e ido, quieto en cero hasta que vuelva (`pie3d/salidas.ts`).
+  const enViaje = viajeEnCurso() !== null || SALIDA_EN_VIVO.fase !== 'presente'
   const pedido = enViaje ? 0 : (PROGRESO_DEL_PIE.valor?.get() ?? 1)
-  c.mostrado = avanceDelPie(c.mostrado, pedido, !enViaje && ahora - c.cuando > ASIENTO.quietoMs, dt, enViaje)
-  if (SALIDA_EN_VIVO.saliendo) seFueElPie(c.mostrado, PROGRESO_DEL_PIE.valor?.get() ?? 1, TRAMOS_DEL_PIE[0].desde)
+  c.mostrado = SALIDA_EN_VIVO.fase === 'saliendo' ? salidaDelPie(c.mostrado, dt, SALIDAS_DEL_PIE.salidaS) : avanceDelPie(c.mostrado, pedido, !enViaje && ahora - c.cuando > ASIENTO.quietoMs, dt, enViaje)
+  pasoDeLaSalida(c.mostrado, PROGRESO_DEL_PIE.valor?.get() ?? 1, scrollY)
 }
 
 /** La pieza en su tramo: su pose, cuánto se ve (y sus letras, el titular) y si su DOM ya recibe clics ([PULIDO 20] R1 · y el final: `final`). */
