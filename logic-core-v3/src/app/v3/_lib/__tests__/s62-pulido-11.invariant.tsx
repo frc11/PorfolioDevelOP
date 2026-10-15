@@ -41,7 +41,7 @@ import { DESCANSO_ANTES_DE_SALIR_PX, ENTRADA_EN_CUADRO_PX } from '../../_seccion
 import { opacidadDeLaHuidaAngosta, type AngostoDelCartel } from '../../_secciones/trabajos/angosto'
 import { DISTANCIA_DEL_VUELO, poseDeLaHuida } from '../../_secciones/trabajos/tunel'
 import { DESLIZAMIENTO_EN_LA_LISTA, LISTA_DEL_CTA, deslizadoEnLaLista, progresoEnLaLista, tocableEnLaLista } from '../escena/ctaDelFinal/transformacion'
-import { HUNDIMIENTO_DEL_PIE, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
+import { DERRETIDO_DEL_CAMBIO, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { transicionDelVolteo, type TransicionDelVolteo } from '../formularios/volteo'
 import { RESULTADO } from '../formularios/gracias'
 import { ENCAJE } from '../../_componentes/formularios/EncajeDelLogo'
@@ -239,13 +239,13 @@ const enLaPose = (pose: Pose, t: number, entrante: boolean, p: THREE.Vector3): T
 const MUESTRAS_B1 = Array.from({ length: 81 }, (_, k) => k / 80)
 // El eje: sus dos puntas (en el medio del alto y del espesor).
 const EJE_B1 = [new THREE.Vector3(0, -CAJA_B1.alto / 2, -ESPESOR_B1 / 2), new THREE.Vector3(CAJA_B1.ancho, -CAJA_B1.alto / 2, -ESPESOR_B1 / 2)]
-// [PULIDO 22] T2 c · en el pie se hunden (no voltean): las dos bajan y suben por el MISMO hueco: en todo el tiempo su eje sólo se mueve
-// hacia atrás de la cara (x e y quietos).
+// [PULIDO 22] T2 c · en el pie se hundían por el mismo hueco. [PULIDO 27] Y1 c · el sentido cambió por pedido: se DERRITEN en su lugar y la
+// nueva nace del mismo charco: en todo el tiempo las dos quedan quietas en el mismo lugar (la deformación es del sombreador).
 const compartenElEje = (pose: Pose): boolean => MUESTRAS_B1.every((t) => [false, true].every((entrante) => EJE_B1.every((p) => {
   const q = enLaPose(pose, t, entrante, p)
-  return Math.abs(q.x - p.x) < 1e-6 && Math.abs(q.y - p.y) < 1e-6 && q.z <= p.z + 1e-6
+  return q.distanceTo(p) < 1e-6
 })))
-afirmar(compartenElEje(poseDeLaTransformacion), 'B1 · la que estaba y la nueva bajan y suben por el mismo hueco (el mismo lugar) en todo el hundimiento')
+afirmar(compartenElEje(poseDeLaTransformacion), 'B1 · la que estaba y la nueva se derriten y nacen en el mismo lugar (quietas) en todo el cambio')
 const conSalto: Pose = (q, t, e, c, d, esp, m) => {
   const r = poseDeLaTransformacion(q, t, e, c, d, esp, m)
   if (e) m.premultiply(new THREE.Matrix4().makeTranslation(0, -63, 0))
@@ -253,19 +253,18 @@ const conSalto: Pose = (q, t, e, c, d, esp, m) => {
 }
 controlPositivo('B1 · el detector VE el salto de antes (la nueva corrida 63 px, la columna recentrada)', conSalto, compartenElEje)
 
-// Se cambian EN EL FONDO ([PULIDO 22] T2 c; antes de canto, a 90°): la que estaba se deja de ver y la nueva aparece justo cuando las dos
-// están en lo más hondo (de cara: la normal no gira): a la mitad del tiempo.
+// Se cambian EN EL CHARCO ([PULIDO 27] Y1 c; antes en el fondo del hueco y antes de canto): la que estaba se deja de ver y la nueva aparece
+// justo cuando las dos están derretidas enteras (de cara: la normal no gira): a la mitad del tiempo.
 const normalZ = (t: number, entrante: boolean): number => {
   const m = new THREE.Matrix4()
   poseDeLaTransformacion(false, t, entrante, CAJA_B1, { ...CAJA_B1, dx: 0, dy: 0 }, ESPESOR_B1, m)
   return new THREE.Vector3(0, 0, 1).transformDirection(m).z
 }
 const seVeDe = (t: number, entrante: boolean): boolean => poseDeLaTransformacion(false, t, entrante, CAJA_B1, { ...CAJA_B1, dx: 0, dy: 0 }, ESPESOR_B1, new THREE.Matrix4()).visible
-const hondoEn = (t: number, entrante: boolean): number => enLaPose(poseDeLaTransformacion, t, entrante, new THREE.Vector3(0, 0, 0)).z
-const HONDO_B1 = ESPESOR_B1 * HUNDIMIENTO_DEL_PIE.espesores
-const deCanto = (c: number): boolean => normalZ(c - 1e-6, false) > 0.999 && normalZ(c, true) > 0.999 && hondoEn(c - 1e-6, false) < -HONDO_B1 * 0.999 && hondoEn(c, true) < -HONDO_B1 * 0.999 && seVeDe(c - 1e-6, false) && !seVeDe(c, false) && !seVeDe(c - 1e-6, true) && seVeDe(c, true)
-afirmar(deCanto(0.5), '  las dos se cambian en el fondo: una deja de verse en el mismo instante en que la otra aparece, las dos en lo más hondo y de cara')
-controlPositivo('  el detector VE un cambio a destiempo (a los 0,4 del tiempo, todavía no en el fondo)', 0.4, deCanto)
+const derriteEn = (t: number, entrante: boolean): number => poseDeLaTransformacion(false, t, entrante, CAJA_B1, { ...CAJA_B1, dx: 0, dy: 0 }, ESPESOR_B1, new THREE.Matrix4()).derrite
+const deCanto = (c: number): boolean => normalZ(c - 1e-6, false) > 0.999 && normalZ(c, true) > 0.999 && derriteEn(c - 1e-6, false) > 0.999 && derriteEn(c, true) > 0.999 && seVeDe(c - 1e-6, false) && !seVeDe(c, false) && !seVeDe(c - 1e-6, true) && seVeDe(c, true)
+afirmar(deCanto(DERRETIDO_DEL_CAMBIO.mitad), '  las dos se cambian en el charco: una deja de verse en el mismo instante en que la otra aparece, las dos derretidas enteras y de cara')
+controlPositivo('  el detector VE un cambio a destiempo (a los 0,4 del tiempo, la que estaba todavía no se derritió entera)', 0.4, deCanto)
 
 // El DOM (abajo de 1025 y el panel de Contacto), la misma curva: el origen en el medio; la que estaba sale a 90° y la nueva entra
 // desde −90°.
@@ -288,10 +287,11 @@ controlPositivo('  el detector VE el volteo con la bisagra arriba (el columpio d
 const PIE_R = leer('_secciones/cierre/FormularioDelPie.tsx')
 const ARMADAS_R = leer('_lib/escena/pie3d/armadas.ts')
 const TARJETA_R = leer('_componentes/formularios/TarjetaDeResultado.tsx')
+// [PULIDO 27] Y1 c · el respaldo espera lo que dura el cambio en 3D (el derretido, `duracionDelCambioDelPie`), ya no el volteo.
 const revisionBien = (pie: string, a: string, t: string, html: string): boolean =>
   a.includes('const cortado = vieja !== undefined && !transforma && vieja.transformacion !== null') && a.includes('if (cortado) avisarQueTermino(a)') &&
   a.includes('new CustomEvent(VOLTEO_TERMINADO, { detail: a.estado })') && !a.includes('new CustomEvent(VOLTEO_TERMINADO))') &&
-  pie.includes("if (!(e instanceof CustomEvent) || e.detail !== estadoALaVista) return") && pie.includes("el.style.opacity = '0'") && pie.includes('(duracionDelVolteo(reducido) + RESPALDO_DEL_VOLTEO_S) * 1000') && /useLayoutEffect\(\(\) => \{\s*const el = placa\.current/.test(pie) &&
+  pie.includes("if (!(e instanceof CustomEvent) || e.detail !== estadoALaVista) return") && pie.includes("el.style.opacity = '0'") && pie.includes('(duracionDelCambioDelPie(reducido) + RESPALDO_DEL_VOLTEO_S) * 1000') && /useLayoutEffect\(\(\) => \{\s*const el = placa\.current/.test(pie) &&
   t.includes('raiz.current.contains(document.activeElement)) reintentar.current?.focus') &&
   /data-tarjeta="resultado"[^>]*style="height:300px"/.test(html) && !html.includes('min-height:300px')
 const conAlto = renderToStaticMarkup(

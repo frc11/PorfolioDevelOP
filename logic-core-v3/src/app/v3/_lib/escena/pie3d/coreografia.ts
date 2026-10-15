@@ -257,8 +257,11 @@ export interface UniformesDelPie {
   readonly uEncimaDelPie: { value: number }
   /** [PULIDO 27] Y1 b · el hover de Enviar (0 a 1): cuánto avanzó el relleno de la tecla desde la izquierda. */
   readonly uBarridoDelPie: { value: number }
+  /** [PULIDO 27] Y1 c · cuánto se derritió (0 sólida, 1 en el charco: `derretido.ts`) y su caja (ancho, alto y espesor, px). */
+  readonly uDerriteDelPie: { value: number }
+  readonly uCajaDelPie: { value: THREE.Vector3 }
 }
 
 export function uniformesDelPie(): UniformesDelPie {
-  return { uLetrasDelPie: { value: -1 }, uCuerpoDelPie: { value: 0 }, uApareceDelPie: { value: 1 }, uQuietoDelPie: { value: 0 }, uSinRotuloDelPie: { value: 0 }, uEncimaDelPie: { value: 0 }, uBarridoDelPie: { value: 0 } }
+  return { uLetrasDelPie: { value: -1 }, uCuerpoDelPie: { value: 0 }, uApareceDelPie: { value: 1 }, uQuietoDelPie: { value: 0 }, uSinRotuloDelPie: { value: 0 }, uEncimaDelPie: { value: 0 }, uBarridoDelPie: { value: 0 }, uDerriteDelPie: { value: 0 }, uCajaDelPie: { value: new THREE.Vector3(1, 1, 1) } }
 }

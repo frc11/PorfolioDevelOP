@@ -7,6 +7,8 @@ import type { CajaDelPie, LetraDelPie, MedidaDeLaPieza, PesoDelPie, RenglonArchi
 import { TRACKING_DEL_CTA, avancesDe, type FuenteConKerning } from '../ctaDelFinal/fuentesDelCta'
 import type { FormaDeLaPieza } from '../../pie3d/registro'
 import { INK_COLOR } from '../probeScene'
+import { DERRETIDO } from './derretido'
+import { teselar } from './teselado'
 
 /**
  * [RETOQUE DEL PIE] P2 · LA GEOMETRÍA DE LAS PIEZAS DEL PIE — en px CSS (la escena la escala al mundo), con el origen en
@@ -314,11 +316,12 @@ export function armarLaPieza(forma: FormaDeLaPieza, m: MedidaDeLaPieza, fuentes:
   for (const p of m.pozos) contorno.holes.push(rectanguloRedondeado(new THREE.Path(), p, p.radio))
   const placa = pintar(solido(contorno, v.formulario, v.bisel), COLORES_DEL_PIE.negro)
   const fondos = m.pozos.map((p) => pintar(solido(rectanguloRedondeado(new THREE.Shape(), { x: p.x - 2, y: p.y - 2, ancho: p.ancho + 4, alto: p.alto + 4 }, p.radio + 2), 1, 0, -v.pozo), COLORES_DEL_PIE.pozo))
-  const fija = sinLetra(unir([placa, ...fondos, ...relieveDe(m, fuentes, false, 0)]))
+  // [PULIDO 27] Y1 c · teselada: se derrite en el sombreador (`derretido.ts`).
+  const fija = teselar(sinLetra(unir([placa, ...fondos, ...relieveDe(m, fuentes, false, 0)])), DERRETIDO.lado)
   if (m.tecla === null) return { fija, hundible: null, espesor: v.formulario }
   // La tecla: sale `tecla` px de la cara (y entra 4 en la placa, para que hundida no deje luz); su texto, en su cara.
   const tecla = pintar(solido(rectanguloRedondeado(new THREE.Shape(), m.tecla, m.tecla.radio > 0 ? m.tecla.radio : v.radio), v.tecla + 4, v.bisel, v.tecla), COLORES_DEL_PIE.negro)
-  return { fija, hundible: aLoAnchoDeLaTecla(unir([sinLetra(tecla), ...relieveDe(m, fuentes, true, v.tecla).map(deRotulo)]), m.tecla), espesor: v.formulario }
+  return { fija, hundible: teselar(aLoAnchoDeLaTecla(unir([sinLetra(tecla), ...relieveDe(m, fuentes, true, v.tecla).map(deRotulo)]), m.tecla), DERRETIDO.lado), espesor: v.formulario }
 }
 
 /** La caja de lo que se ve de una pieza (px, y hacia abajo, relativa a su caja): para el texto suelto, sus letras. */

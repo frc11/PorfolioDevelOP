@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-import { duracionDelVolteo } from '../../formularios/volteo'
+import { duracionDelCambioDelPie } from '../../formularios/volteo'
 
 /**
  * [PULIDO 9] H2 · LA PLACA DEL FORMULARIO SE TRANSFORMA (en la tarjeta del resultado y de vuelta) — pura: la pose de las dos
@@ -14,14 +14,15 @@ import { duracionDelVolteo } from '../../formularios/volteo'
  * la entrante aparece, quietas. Las poses van en px de la pieza (origen arriba a la izquierda, y hacia arriba, la cara en z = 0 y el dorso en
  * −espesor).
  *
- * [PULIDO 22] T2 c · EN EL PIE, SE HUNDE: en vez del volteo, la placa se hunde por su hueco (hacia atrás de su cara: en el piso,
- * acostada) `espesores` espesores y se disuelve al llegar al fondo; la otra sale del mismo hueco (la misma caja, en el mismo lugar).
- * Se cambian en el fondo, a la mitad del tiempo. De vuelta al formulario, lo mismo. El DOM de abajo de 1025 y el panel de Contacto
- * siguen con el volteo (`formularios/volteo.ts`).
+ * [PULIDO 22] T2 c · en el pie se hundía por su hueco y se disolvía (una mancha gris borrosa). [PULIDO 27] Y1 c · SE DERRITE: la placa
+ * se queda en su lugar y se derrite en el piso (la deformación es del sombreador: `derretido.ts`, con `derrite` de 0 a 1 en la primera
+ * mitad); en la segunda, la otra (la misma caja, en el mismo lugar) nace del mismo charco: `derrite` de 1 a 0. Se cambian en la mitad,
+ * las dos derretidas enteras (el charco hundido en el piso). De vuelta al formulario, lo mismo. El DOM de abajo de 1025 y el panel de
+ * Contacto siguen con el volteo (`formularios/volteo.ts`).
  */
-export const HUNDIMIENTO_DEL_PIE = { espesores: 4, fundido: 0.14 } as const
+export const DERRETIDO_DEL_CAMBIO = { mitad: 0.5 } as const
 export function duracionDeLaTransformacion(quieto: boolean): number {
-  return duracionDelVolteo(quieto)
+  return duracionDelCambioDelPie(quieto)
 }
 
 const suave = (x: number): number => {
@@ -40,26 +41,24 @@ interface Desde extends Medidas {
   readonly dy: number
 }
 
-/** Si la placa se ve y cuánto (el disuelto de la llegada: 1 entera). */
+/** Si la placa se ve, cuánto (el disuelto de la llegada: 1 entera) y [PULIDO 27] Y1 c · cuánto se derritió (0 sólida, 1 en el charco). */
 export interface VistaDeLaTransformacion {
   readonly visible: boolean
   readonly aparece: number
+  readonly derrite: number
 }
-
-const BAJA = new THREE.Matrix4()
 
 /**
  * La pose en `t` (0 a 1) de la placa saliente (`entrante` falso: con sus medidas, `desde`) o de la entrante (con las suyas,
- * `caja`), escrita en `m`. Devuelve si se ve y cuánto.
+ * `caja`), escrita en `m`. Devuelve si se ve, cuánto y cuánto se derritió.
  */
 export function poseDeLaTransformacion(quieto: boolean, t: number, entrante: boolean, caja: Medidas, desde: Desde, espesor: number, m: THREE.Matrix4): VistaDeLaTransformacion {
   // La saliente, en su lugar (va en el grupo de la entrante).
   if (entrante) m.identity()
   else m.makeTranslation(desde.dx, -desde.dy, 0)
-  if (quieto) return { visible: entrante ? t > 0 : t < 1, aparece: entrante ? suave(t) : 1 - suave(t) }
-  const H = HUNDIMIENTO_DEL_PIE
-  const hondo = espesor * H.espesores
-  m.multiply(BAJA.makeTranslation(0, 0, entrante ? -hondo * (1 - suave((t - 0.5) * 2)) : -hondo * suave(t * 2)))
-  const aparece = entrante ? suave((t - 0.5) / H.fundido) : 1 - suave((t - 0.5 + H.fundido) / H.fundido)
-  return { visible: entrante ? t >= 0.5 : t < 0.5, aparece }
+  if (quieto) return { visible: entrante ? t > 0 : t < 1, aparece: entrante ? suave(t) : 1 - suave(t), derrite: 0 }
+  const mitad = DERRETIDO_DEL_CAMBIO.mitad
+  const u = Math.min(1, Math.max(0, t))
+  const derrite = entrante ? 1 - Math.max(0, (u - mitad) / (1 - mitad)) : Math.min(1, u / mitad)
+  return { visible: entrante ? t >= mitad : t < mitad, aparece: 1, derrite }
 }

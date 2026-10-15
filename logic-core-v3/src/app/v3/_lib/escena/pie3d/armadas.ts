@@ -17,6 +17,7 @@ import { cubicBezierEase } from '../bezier'
 import { colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { capaPropia, seguirLaPieza } from './domQueSigue'
 import { encimaDeLaPieza } from './encimaDelPie'
+import { mojar } from './derretido'
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
@@ -332,6 +333,7 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
   const { fija, hundible, espesor, origen } = armarLaPieza(pieza.forma, medida, FUENTES)
   const uniformes = uniformesDelPie()
   uniformes.uCuerpoDelPie.value = medida.letras.reduce((m, l) => Math.max(m, l.cuerpo), 0)
+  uniformes.uCajaDelPie.value.set(medida.caja.ancho, medida.caja.alto, espesor)
   const material = materialDelPie(uniformes)
   material.envMap = estudio
   const grupo = new THREE.Group()
@@ -432,6 +434,9 @@ function transformar(a: Armada, x: TransformacionEnCurso, quieto: boolean, dt: n
   const sale = poseDeLaTransformacion(quieto, x.t, false, caja, desde, a.espesor, x.saliente.viaje.matrix)
   x.saliente.viaje.visible = sale.visible
   x.saliente.uniformes.uApareceDelPie.value = sale.aparece
+  // [PULIDO 27] Y1 c · la que estaba se derrite y la nueva nace del charco (`derretido.ts`).
+  mojar(a.material, a.uniformes, x.t < 1 ? entra.derrite : 0)
+  mojar(x.saliente.material, x.saliente.uniformes, sale.derrite)
   x.saliente.material.envMapIntensity = a.material.envMapIntensity
   x.saliente.viaje.updateMatrixWorld(true)
   if (x.t < 1) return

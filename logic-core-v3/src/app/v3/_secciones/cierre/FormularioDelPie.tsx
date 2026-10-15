@@ -12,7 +12,7 @@ import { useAltoGuardado } from '../../_lib/formularios/altoGuardado'
 import { TEXTOS_DE_ENVIO, enviarAlServidor, type ResultadoDelEnvio } from '../../_lib/formularios/enviar'
 import { ANUNCIO_DE_EXITO } from '../../_lib/formularios/gracias'
 import { anotarElPedido, recuperarAlMontar, useRecordar, useRespuestaEnViaje } from '../../_lib/formularios/memoriaDelFormulario'
-import { VOLTEO_TERMINADO, duracionDelVolteo, transicionDelVolteo } from '../../_lib/formularios/volteo'
+import { VOLTEO_TERMINADO, duracionDelCambioDelPie, transicionDelVolteo } from '../../_lib/formularios/volteo'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { MAXIMOS, validarElPie, type CampoDelPie, type DatosDelPie, type ErroresDelPie } from '../../_lib/formularios/validar'
 import { useModoDelPie, usePiezaDelPie, usePieListo } from '../../_lib/pie3d/registro'
@@ -129,7 +129,8 @@ export function FormularioDelPie(): React.JSX.Element {
         el.style.opacity = ''
         setSeVe(true)
       },
-      (duracionDelVolteo(reducido) + RESPALDO_DEL_VOLTEO_S) * 1000,
+      // [PULIDO 27] Y1 c · en 3D el cambio es el derretido (más largo que el volteo).
+      (duracionDelCambioDelPie(reducido) + RESPALDO_DEL_VOLTEO_S) * 1000,
     )
     const termino = (e: Event): void => {
       if (!(e instanceof CustomEvent) || e.detail !== estadoALaVista) return
