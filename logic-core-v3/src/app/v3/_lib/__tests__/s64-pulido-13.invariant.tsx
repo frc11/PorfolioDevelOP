@@ -211,7 +211,8 @@ controlPositivo('K4 a · el detector VE la cámara de antes (subía con el logo 
 const CUADRO_FINAL = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const alRebobinar = (queda: (fin: number, desde: number) => number, orbita: (fin: number) => number, c: string): boolean =>
   queda(FIN_DEL_GOLPE, 1) === 0 && queda(1, 1) === 1 && queda(0.9, 1) > 0 && orbita(FIN_DEL_GOLPE) === 0 && orbita(1) === 1 &&
-  c.includes('quietoRebobinado(alRebobinar, quedaDelQuieto(fin, s.reloj.rebobinado.desde), EN_VIVO)') && c.includes('ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * orbita, s.orbita.v * orbita)') &&
+  // [PULIDO 28] AA3 · por `quietoEnElViaje.ts`: fuera de un viaje, estas mismas (en un viaje, a lo largo del viaje: s72).
+  c.includes('quietoRebobinado(alRebobinar, quedaDelQuietoAhora(s.reloj.fase, fin, s.reloj.rebobinado.desde), EN_VIVO)') && c.includes('const orbita = orbitaDelFinalAhora(s.reloj.fase, fin)') && c.includes('ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * orbita, s.orbita.v * orbita)') &&
   // [PULIDO 14] L2 a · la cámara viva deja el paralaje con el acercamiento y sube con `alturaDeLaCaida` (de frente desde los 20°: s65).
   c.includes('haciaElAzimutSinElMouse(state.camera, CAMARA_SIN_EL_MOUSE, acercamiento(fin, tamano))') && c.includes('const sube = alturaDeLaCaida(fin, tamano, elevacion)')
 afirmar(alRebobinar(quedaDelQuieto, orbitaDelFinal, CUADRO_FINAL), '  y al rebobinar: el giro del quieto y la órbita se van del todo antes de que el logo se levante; la cámara viva, sin el paralaje del recorrido mientras sube')

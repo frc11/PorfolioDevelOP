@@ -50,6 +50,8 @@ type VentanaDelBanco = Window & { __finalDelBanco?: () => { fin: number; fase: s
 // [PULIDO 13] K4 · para el banco: la cámara viva del último cuadro (dónde está y hacia dónde mira).
 const CAMARA_DEL_BANCO = { camara: null as THREE.Camera | null }
 const ADELANTE = new THREE.Vector3()
+/** [PULIDO 28] AA3 · y su arriba (el banco mide el alabeo de la cámara). */
+const ARRIBA = new THREE.Vector3()
 
 /** El espesor del logo (u): la extrusión y sus dos biseles, en la escala del SVG (el mismo que publica `ProbeLogo`). */
 const ESPESOR_DEL_LOGO = (PROBE_EXTRUDE.depth + 2 * PROBE_EXTRUDE.bevelThickness) * PROBE_SVG_SCALE
@@ -113,7 +115,7 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
   useEffect(() => {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
-    ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, fase: m.current?.reloj.fase ?? 'sin final', pieEntero: EN_VIVO.pieEntero, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [], apertura: FINAL_EN_EL_PISO.uApertura.value, encuadre: ENCUADRE_EN_VIVO.valor, teclado: m.current === null ? null : { ...m.current.teclado, alFondo: m.current.alFondo, ultimo: m.current.gestos.ultimo, ahora: performance.now() / 1000 }, vista: CAMARA_DEL_BANCO.camara === null ? [] : [...CAMARA_DEL_BANCO.camara.position.toArray(), ...ADELANTE.set(0, 0, -1).applyQuaternion(CAMARA_DEL_BANCO.camara.quaternion).toArray()], poseE: [...CAMARA_SIN_EL_MOUSE.position.toArray(), ...CAMARA_SIN_EL_MOUSE.quaternion.toArray()] })
+    ventana.__finalDelBanco = () => ({ fin: EN_VIVO.fin, fase: m.current?.reloj.fase ?? 'sin final', pieEntero: EN_VIVO.pieEntero, camara: EN_VIVO.camara, giro: EN_VIVO.giro, aleja: EN_VIVO.aleja, golpes: m.current?.golpes ?? 0, logo: logoGroupRef.current ? [...logoGroupRef.current.position.toArray(), logoGroupRef.current.rotation.x] : [], apertura: FINAL_EN_EL_PISO.uApertura.value, encuadre: ENCUADRE_EN_VIVO.valor, teclado: m.current === null ? null : { ...m.current.teclado, alFondo: m.current.alFondo, ultimo: m.current.gestos.ultimo, ahora: performance.now() / 1000 }, vista: CAMARA_DEL_BANCO.camara === null ? [] : [...CAMARA_DEL_BANCO.camara.position.toArray(), ...ADELANTE.set(0, 0, -1).applyQuaternion(CAMARA_DEL_BANCO.camara.quaternion).toArray(), ...ARRIBA.set(0, 1, 0).applyQuaternion(CAMARA_DEL_BANCO.camara.quaternion).toArray()], poseE: [...CAMARA_SIN_EL_MOUSE.position.toArray(), ...CAMARA_SIN_EL_MOUSE.quaternion.toArray()] })
     // [PULIDO 2] 4 · la luz de abajo apagada y prendida (su costo, por diferencia) y [PULIDO 3] A1 su energía y su expansión.
     const conLuz = ventana as Window & { __luzDelBanco?: { apagar: (apagada: boolean) => void; energia: () => unknown } }
     conLuz.__luzDelBanco = {

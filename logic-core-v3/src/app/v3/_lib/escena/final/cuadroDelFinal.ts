@@ -17,6 +17,7 @@ import { crearElPozo } from './hueco'
 import { SOMBRA_EN_EL_FINAL } from '../sombra/delLogo'
 import { apagarElRastro, pasoDelRastro, rastroQuieto, type EstadoDelRastro } from './rastro'
 import { ENCUADRE_EN_VIVO } from './encuadreDelPie'
+import { orbitaDelFinalAhora, quedaDelQuietoAhora } from './quietoEnElViaje'
 import { escribiendoEnUnCampo, pasoDelTeclado, sinTeclado, tecladoQuieto, type EstadoDelTeclado } from './teclado'
 import { fueraDeSuLugar, sinElRig } from './caidaAlHueco'
 import {
@@ -40,8 +41,6 @@ import {
   haciaElAzimutSinElMouse,
   poder,
   poseDelLogo,
-  orbitaDelFinal,
-  quedaDelQuieto,
   quietoRebobinado,
   relojDelQuieto,
   relojQuieto,
@@ -313,7 +312,7 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
       alRebobinar.aleja = EN_VIVO.aleja
     }
     // [PULIDO 13] K4 · con el mismo reloj (es `fin`), pero hasta el golpe: el logo se levanta ya sin el giro.
-    quietoRebobinado(alRebobinar, quedaDelQuieto(fin, s.reloj.rebobinado.desde), EN_VIVO)
+    quietoRebobinado(alRebobinar, quedaDelQuietoAhora(s.reloj.fase, fin, s.reloj.rebobinado.desde), EN_VIVO)
     s.quietoS = 0
   } else {
     if (alRebobinar.de !== null) {
@@ -432,7 +431,7 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // o viaja; entera en el quieto; al centro con el mouse fuera de la ventana: `orbitaDelMouse.ts`), con la subida: al soltar el final no salta.
   pasoDeLaOrbita(s.orbita, s.conMouse && !ORBITA_EN_VIVO.fuera ? ORBITA_EN_VIVO : null, fin >= 0.999 && s.reloj.fase === 'corre', dt)
   // [PULIDO 13] K4 · sólo con el logo acostado (al rebobinar se va antes de que se levante).
-  const orbita = orbitaDelFinal(fin)
+  const orbita = orbitaDelFinalAhora(s.reloj.fase, fin)
   ponerLaOrbita(state.camera, EN_VIVO.blanco, s.orbita.h * orbita, s.orbita.v * orbita)
   // [PULIDO 3] A1 · la sala se oscurece gradual con la expansión de la energía. [PULIDO 3B] B0 · lo que se veía del piso (donde
   // nacían las chispas) se fue con ellas.

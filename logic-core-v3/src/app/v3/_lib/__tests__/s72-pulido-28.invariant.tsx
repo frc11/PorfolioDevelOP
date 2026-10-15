@@ -4,11 +4,16 @@
  *   AA7 · la salida del pie, determinística: una máquina de estados (presente → saliendo → ida); con la rueda lenta, la rápida, el trackpad
  *         y el teclado, desde el final entero y desde el rebobinado, la página no sube hasta que el pie se fue entero, la salida corre en
  *         su tiempo y después el scroll se suelta.
+ *   AA3 · al tocar el navbar desde el pie, el giro del quieto y la órbita del mouse vuelven a lo largo del viaje entero (antes, con el
+ *         rebobinado comprimido hasta el golpe: media vuelta en un tercio de segundo con la cámara arriba, toda la escena giraba).
  */
 import { empiezaUnGesto, type GestoDeScroll } from '../gestosDelScroll'
 import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, pasoDeLaSalida, pedirLaSalida, type FaseDeLaSalida } from '../pie3d/salidas'
 import { RELOJ_DEL_FINAL, decidirElGesto, pasoDelReloj, relojQuieto, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { avanceDelPie, salidaDelPie } from '../escena/pie3d/coreografia'
+import { FIN_DEL_GOLPE, quedaDelQuieto } from '../escena/final/recorridoDelFinal'
+import { quedaEnElViaje } from '../escena/final/quietoEnElViaje'
+import { readFileSync } from 'node:fs'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const DT = 1 / 60
@@ -105,5 +110,35 @@ const DE_PULIDO_27: Decide = (r, alFondo, sentido, nuevo, retenido, duraS, enLaC
 }
 controlPositivo('  el detector VE la salida de PULIDO 27 (desde el final entero la página subía a mitad del rebobinado, sin salida)', corridas(DE_PULIDO_27), salidaBien)
 controlPositivo('  y una salida del mismo largo que un viaje (medio segundo)', Object.fromEntries(Object.entries(LAS_CORRIDAS).map(([k, x]) => [k, { ...x, salidaS: 0.5 }])), salidaBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('AA3 · Desde el pie al navbar: el giro del quieto vuelve a lo largo del viaje, sin girar la escena de golpe')
+
+/**
+ * El giro de un quieto de media vuelta en un viaje del menú de 1,6 s, cuadro a cuadro: lo más que gira en un cuadro y cuánto queda al
+ * llegar. `queda`: cuánto queda a los `t` s (con el `fin` del rebobinado comprimido del viaje).
+ */
+const VIAJE_S = 1.6
+const MEDIA_VUELTA = 180
+function giroEnElViaje(queda: (t: number, fin: number) => number): { readonly maximoPorCuadro: number; readonly alLlegar: number } {
+  const r: RelojDelFinal = { ...relojQuieto(), fase: 'corre', fin: 1 }
+  let antes = MEDIA_VUELTA
+  let maximo = 0
+  for (let t = DT; t <= VIAJE_S + 1e-9; t += DT) {
+    pasoDelReloj(r, { alFondo: true, pieEntero: true, rebobinar: false, haciaAbajo: false, sinGestoS: 0, viajeS: VIAJE_S, enElViajeS: t }, DT)
+    const giro = MEDIA_VUELTA * queda(t, r.fin)
+    maximo = Math.max(maximo, Math.abs(giro - antes))
+    antes = giro
+  }
+  return { maximoPorCuadro: maximo, alLlegar: antes }
+}
+const AHORA = giroEnElViaje((t) => quedaEnElViaje(t, VIAJE_S))
+const CUADRO_DEL_FINAL = readFileSync('src/app/v3/_lib/escena/final/cuadroDelFinal.ts', 'utf8')
+const giroBien = (g: { readonly maximoPorCuadro: number; readonly alLlegar: number }, c: string): boolean =>
+  g.maximoPorCuadro <= 4 && Math.abs(g.alLlegar) < 1e-6 && c.includes('quietoRebobinado(alRebobinar, quedaDelQuietoAhora(s.reloj.fase, fin, s.reloj.rebobinado.desde), EN_VIVO)') && c.includes('const orbita = orbitaDelFinalAhora(s.reloj.fase, fin)')
+afirmar(giroBien(AHORA, CUADRO_DEL_FINAL), `  media vuelta de quieto en un viaje de ${String(VIAJE_S)} s: a lo sumo ${AHORA.maximoPorCuadro.toFixed(2)}° por cuadro y en cero al llegar (la órbita del mouse, igual)`)
+const ANTES = giroEnElViaje((_t, fin) => quedaDelQuieto(fin, 1))
+controlPositivo(`  el detector VE el de antes (hasta el golpe, ${String(FIN_DEL_GOLPE.toFixed(2))} del fin: ${ANTES.maximoPorCuadro.toFixed(1)}° en un cuadro)`, ANTES, (g: typeof ANTES) => giroBien(g, CUADRO_DEL_FINAL))
+controlPositivo('  y un cuadro que no lo cablea', CUADRO_DEL_FINAL.replace('const orbita = orbitaDelFinalAhora(s.reloj.fase, fin)', 'const orbita = orbitaDelFinal(fin)'), (c: string) => giroBien(AHORA, c))
 
 cerrar('s72-pulido-28')
